@@ -34,26 +34,12 @@ enum NotebookMode {
 }
 
 
-
-/**
- * An enum which describes which interface property has changed.
- */
-export
-enum NotebookProperty {
-  DefaultMimetype,
-  DirtyIndicator,
-  Trusted,
-  Mode,
-  SelectedCell,
-}
-
-
 /**
  * The arguments object emitted with the `stateChanged` signal.
  */
 export
 interface INotebookChangedArgs<T> {
-  which: NotebookProperty,
+  name: string,
   oldValue: T;
   newValue: T;
 }
