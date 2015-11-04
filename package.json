@@ -1,0 +1,57 @@
+{
+  "name": "jupyter-js-notebook",
+  "version": "0.1.0",
+  "description": "Notebook widget for Jupyter",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "dependencies": {
+    "phosphor-widget": "^0.9.13"
+  },
+  "devDependencies": {
+    "expect.js": "^0.3.1",
+    "glob-copy": "^0.1.0",
+    "istanbul": "^0.3.18",
+    "karma": "^0.13.9",
+    "karma-browserify": "^4.3.0",
+    "karma-chrome-launcher": "^0.2.0",
+    "karma-firefox-launcher": "^0.1.6",
+    "karma-ie-launcher": "^0.2.0",
+    "karma-mocha": "^0.2.0",
+    "karma-mocha-reporter": "^1.1.1",
+    "mocha": "^2.2.5",
+    "rimraf": "^2.4.2",
+    "typedoc": "^0.3.11",
+    "typescript": "^1.6.2"
+  },
+  "scripts": {
+    "clean": "rimraf docs && rimraf lib && rimraf test/build",
+    "build:src": "tsc --project src && node scripts/copycss.js",
+    "build:test": "tsc --project test",
+    "build": "npm run build:src && npm run build:test",
+    "docs": "typedoc --options scripts/tdoptions.json",
+    "postinstall": "npm dedupe",
+    "prepublish": "npm run build",
+    "test": "mocha test/build/index.js",
+    "test:debug": "pkill node; node-debug _mocha test/build/index.js",
+    "test:integration": "cd test && python run_test.py",
+    "test:coverage": "istanbul cover _mocha -- test/build/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyter/jupyter-js-notebook"
+  },
+  "keywords": [
+    "jupyter",
+    "notebook"
+  ],
+  "files": [
+    "lib/*.js",
+    "lib/*.d.ts"
+  ],
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyter/jupyter-js-notebook/issues"
+  },
+  "homepage": "https://github.com/jupyter/jupyter-js-notebook"
+}
