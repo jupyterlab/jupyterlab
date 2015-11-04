@@ -3,8 +3,8 @@
 'use-strict';
 
 import {
-  ICell, ICodeCellViewModel, IMarkdownCellViewModel, IRawCellViewModel
-} from 'jupyter-js-cell';
+  ICellViewModel, ICodeCellViewModel, IMarkdownCellViewModel, IRawCellViewModel
+} from 'jupyter-js-cells';
 
 import {
   IObservableList
@@ -104,7 +104,7 @@ interface INotebookViewModel {
    * #### Notes
    * This is a read-only property.
    */
-  cells: IObservableList<ICell>;
+  cells: IObservableList<ICellViewModel>;
 
   /**
    * The currently selected cell.
@@ -112,7 +112,7 @@ interface INotebookViewModel {
    * #### Notes
    * Changing this property will deselect the previous cell.
    */
-  selectedCell: ICell;
+  selectedCell: ICellViewModel;
 
   /**
    * A factory for creating a new code cell.
@@ -126,7 +126,7 @@ interface INotebookViewModel {
    * If the source argument does not give an input mimetype, the code cell
    * defaults to the notebook [[defaultMimetype]].
    */
-  createCodeCell(source?: ICell): ICodeCellViewModel;
+  createCodeCell(source?: ICellViewModel): ICodeCellViewModel;
 
   /**
    * A factory for creating a new markdown cell.
@@ -136,7 +136,7 @@ interface INotebookViewModel {
    * @returns A new markdown cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  createMarkdownCell(source?: ICell): IMarkdownCellViewModel;
+  createMarkdownCell(source?: ICellViewModel): IMarkdownCellViewModel;
 
   /**
    * A factory for creating a new raw cell.
@@ -146,5 +146,5 @@ interface INotebookViewModel {
    * @returns A new raw cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  createRawCell(source?: ICell): IRawCellViewModel;
+  createRawCell(source?: ICellViewModel): IRawCellViewModel;
 }
