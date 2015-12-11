@@ -5,7 +5,10 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
+    "jupyter-js-cells": "../jupyter-js-cells",
     "phosphor-observablelist": "^0.9.2",
+    "phosphor-properties": "^2.0.0",
+    "phosphor-signaling": "^1.2.0",
     "phosphor-widget": "^0.9.13"
   },
   "devDependencies": {
@@ -25,7 +28,10 @@
     "typescript": "^1.6.2"
   },
   "scripts": {
-    "clean": "rimraf docs && rimraf lib && rimraf test/build",
+    "clean:lib": "rimraf lib",
+    "clean:example": "rimraf example/*.js example/*.map",
+    "clean:test": "rimraf test/build && rimraf test/coverage",
+    "clean": "npm run clean:lib && npm run clean:example && npm run clean:test",
     "build:src": "tsc --project src && node scripts/copycss.js",
     "build:test": "tsc --project test",
     "build": "npm run build:src && npm run build:test",
