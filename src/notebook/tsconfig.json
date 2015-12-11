@@ -9,6 +9,7 @@
     "outDir": "../lib"
   },
   "files": [
-    "index.ts"
+    "index.ts",
+    "../typings/es6/es6-promise.d.ts"
   ]
 }
