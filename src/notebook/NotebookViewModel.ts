@@ -6,7 +6,7 @@ import {
 } from 'jupyter-js-cells';
 
 import {
-  IObservableList
+  IObservableList, ObservableList
 } from 'phosphor-observablelist';
 
 import {
@@ -20,6 +20,27 @@ import {
 import {
   IChangedArgs, Property
 } from 'phosphor-properties';
+
+import {
+  InputAreaViewModel, TextEditorViewModel
+} from 'jupyter-js-input-area';
+
+import {
+  OutputAreaViewModel,
+  DisplayDataViewModel, ExecuteResultViewModel,
+  ExecuteErrorViewModel, StreamViewModel,
+  StreamName
+} from 'jupyter-js-output-area';
+
+import {
+  NBData, MarkdownCell, CodeCell, 
+  isMarkdownCell, isCodeCell,
+  DisplayData, isDisplayData, 
+  ExecuteResult, isExecuteResult,
+  Stream, isStream,
+  JupyterError, isJupyterError
+} from './nbformat';
+
 
 import './index.css';
 
@@ -157,18 +178,80 @@ class NotebookViewModel implements INotebookViewModel {
 
 
   defaultMimetype: string;
-  mode: NotebookMode;
-  cells: IObservableList<ICellViewModel>;
+  mode: NotebookMode = NotebookMode.Command;
+  cells: IObservableList<ICellViewModel> = new ObservableList<ICellViewModel>();
   selectedCell: ICellViewModel;
   
   createCodeCell(source?: ICellViewModel): ICodeCellViewModel {
     let cell = new CodeCellViewModel();
-    cell.input = new InputAreaModel();
-    cell.input.textEditor = new TextEdit 
-    return newCell;
+    return cell;
     
   }
   createMarkdownCell(source?: ICellViewModel): IMarkdownCellViewModel {
-    
+    let cell  = new MarkdownCellViewModel();
+    return cell;
   }
+}
+
+export
+function makeModels(data: NBData): NotebookViewModel {
+  // Construct the entire model hierarchy explicitly  
+  let nb = new NotebookViewModel();
+  nb.defaultMimetype = 'text/x-python';
+  
+  // iterate through the cell data, creating cell models
+  data.content.cells.forEach((c) => {
+    let input = new InputAreaViewModel();
+    input.textEditor = new TextEditorViewModel();
+    input.textEditor.text = c.source;
+    
+    if (isMarkdownCell(c)) {
+      let cell = new MarkdownCellViewModel();
+      cell.input = input;
+      cell.rendered = true;
+      nb.cells.add(cell);
+    } else if (isCodeCell(c)) {
+      let cell = new CodeCellViewModel();
+      cell.input = input;
+      let outputArea = new OutputAreaViewModel();
+      cell.output = outputArea;
+      for (let i=0; i<c.outputs.length; i++) {
+        let out = c.outputs[i];
+        if (isDisplayData(out)) {
+          let outmodel = new DisplayDataViewModel();
+          outmodel.data = out.data;
+          outmodel.metadata = out.metadata;
+          outputArea.add(outmodel);
+        } else if (isStream(out)) {
+          let outmodel = new StreamViewModel();
+          switch (out.name) {
+          case 'stdout':
+            outmodel.name = StreamName.StdOut;
+            break;
+          case 'stderr':
+            outmodel.name = StreamName.StdErr;
+            break;
+          default:
+            console.error('Unrecognized stream name: %s', out.name);
+          }
+          outmodel.text = out.text;
+          outputArea.add(outmodel);          
+        } else if (isJupyterError(out)) {
+          let outmodel = new ExecuteErrorViewModel();
+          outmodel.ename = out.ename;
+          outmodel.evalue = out.evalue;
+          outmodel.traceback = out.traceback.join('\n');
+          outputArea.add(outmodel);
+        } else if (isExecuteResult(out)) {
+          let outmodel = new ExecuteResultViewModel();
+          outmodel.data = out.data;
+          outmodel.executionCount = out.execution_count;
+          outmodel.metadata = out.metadata;
+          outputArea.add(outmodel);
+        }
+      }
+      nb.cells.add(cell);
+    }
+  });
+  return nb;
 }

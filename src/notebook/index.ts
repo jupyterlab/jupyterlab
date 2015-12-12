@@ -3,3 +3,4 @@
 'use-strict';
 
 export * from './NotebookViewModel';
+export * from './NotebookWidget';
