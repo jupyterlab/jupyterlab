@@ -6,7 +6,7 @@ import {
 } from 'jupyter-js-cells';
 
 import {
-  IObservableList, ObservableList
+  IObservableList, ObservableList, ListChangeType
 } from 'phosphor-observablelist';
 
 import {
@@ -114,7 +114,7 @@ interface INotebookViewModel {
    * #### Notes
    * Changing this property will deselect the previous cell.
    */
-  selectedCell: ICellViewModel;
+  selectedCellIndex: number;
 
   /**
    * A factory for creating a new code cell.
@@ -158,12 +158,61 @@ interface INotebookViewModel {
 export
 class NotebookViewModel implements INotebookViewModel {
 
+  constructor() {
+    this.cells.changed.connect((sender, args) => {
+      // hook up listeners for cell requestSignal emitters
+      switch(args.type) {
+      case ListChangeType.Add:
+        (args.newValue as ICellViewModel).requestSelection.connect((sender, args) => {
+          this.selectedCellIndex = this.cells.indexOf(sender);
+        })
+      case ListChangeType.Replace:
+        (args.newValue as ICellViewModel[]).map((m) => {
+          m.requestSelection.connect((sender, args) => {
+            this.selectedCellIndex = this.cells.indexOf(sender);
+          })
+        })
+      //TODO: wire up other list events
+      }
+    })
+  }
   /**
    * A signal emitted when the state of the model changes.
    *
    * **See also:** [[stateChanged]]
    */
   static stateChangedSignal = new Signal<INotebookViewModel, IChangedArgs<any>>();
+
+/**
+* A property descriptor which holds the default mimetype for new code cells.
+*
+* **See also:** [[defaultMimeType]]
+*/
+static defaultMimetype = new Property<NotebookViewModel, string>({
+    name: 'defaultMimetype',
+    notify: NotebookViewModel.stateChangedSignal,
+});
+
+/**
+* A property descriptor which holds the mode of the notebook.
+*
+* **See also:** [[mode]]
+*/
+static modeProperty = new Property<NotebookViewModel, NotebookMode>({
+    name: 'mode',
+    notify: NotebookViewModel.stateChangedSignal,
+});
+
+
+/**
+* A property descriptor for the selected cell index.
+*
+* **See also:** [[selectedCellIndex]]
+*/
+static selectedCellIndexProperty = new Property<NotebookViewModel, number>({
+    name: 'selectedCellIndex',
+    notify: NotebookViewModel.stateChangedSignal,
+});
 
 
   /**
@@ -176,16 +225,83 @@ class NotebookViewModel implements INotebookViewModel {
     return NotebookViewModel.stateChangedSignal.bind(this);
   }
 
+  /**
+   * Get the default mimetype for cells new code cells.
+   *
+   * #### Notes
+   * This is a pure delegate to the [[defaultMimetype]].
+   */
+  get defaultMimetype() {
+    return NotebookViewModel.defaultMimetype.get(this);
+  }
 
-  defaultMimetype: string;
-  mode: NotebookMode = NotebookMode.Command;
+  /**
+   * Set the default mimetype for cells new code cells.
+   *
+   * #### Notes
+   * This is a pure delegate to the [[defaultMimetype]].
+   */
+  set defaultMimetype(value: string) {
+    NotebookViewModel.defaultMimetype.set(this, value);
+  }
+
+  /**
+   * Get the mode of the notebook.
+   *
+   * #### Notes
+   * This is a pure delegate to the [[modeProperty]].
+   */
+  get mode() {
+    return NotebookViewModel.modeProperty.get(this);
+  }
+
+  /**
+   * Set the mode of the notebook.
+   *
+   * #### Notes
+   * This is a pure delegate to the [[modeProperty]].
+   */
+  set mode(value: NotebookMode) {
+    NotebookViewModel.modeProperty.set(this, value);
+  }
+
+  /**
+   * Get the selected cell index.
+   *
+   * #### Notes
+   * This is a pure delegate to the [[selectedCellIndexProperty]].
+   */
+  get selectedCellIndex() {
+    return NotebookViewModel.selectedCellIndexProperty.get(this);
+  }
+
+  /**
+   * Set the selected cell index.
+   *
+   * #### Notes
+   * This is a pure delegate to the [[selectedCellIndexProperty]].
+   */
+  set selectedCellIndex(value: number) {
+    NotebookViewModel.selectedCellIndexProperty.set(this, value);
+  }
+  
+  selectNextCell() {
+    if (this.selectedCellIndex < this.cells.length - 1) {
+      this.selectedCellIndex += 1;
+    }
+  }
+
+  selectPreviousCell() {
+    if (this.selectedCellIndex > 0) {
+      this.selectedCellIndex -= 1;
+    }
+  }
+  
   cells: IObservableList<ICellViewModel> = new ObservableList<ICellViewModel>();
-  selectedCell: ICellViewModel;
   
   createCodeCell(source?: ICellViewModel): ICodeCellViewModel {
     let cell = new CodeCellViewModel();
     return cell;
-    
   }
   createMarkdownCell(source?: ICellViewModel): IMarkdownCellViewModel {
     let cell  = new MarkdownCellViewModel();
@@ -253,5 +369,8 @@ function makeModels(data: NBData): NotebookViewModel {
       nb.cells.add(cell);
     }
   });
+  if (nb.cells.length) {
+    nb.selectedCellIndex = 0;
+  }
   return nb;
 }

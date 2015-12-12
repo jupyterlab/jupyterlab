@@ -28,6 +28,8 @@ import {
     OutputAreaWidget, IOutputAreaViewModel
 } from 'jupyter-js-output-area';
 
+import './index.css';
+
 /**
  * A widget for a notebook.
  */
@@ -59,7 +61,7 @@ class NotebookWidget extends Panel {
       }
       return w;
     })
-
+    this.updateSelectedCell(model.selectedCellIndex);
     model.stateChanged.connect(this.modelStateChanged, this);
     model.cells.changed.connect(this.cellsChanged, this);
   }
@@ -70,11 +72,26 @@ class NotebookWidget extends Panel {
     console.log(args);
   }
 
+  updateSelectedCell(newIndex: number, oldIndex?: number) {
+    if (oldIndex !== void 0) {
+      this.children.get(oldIndex).removeClass('jp-selected-cell');    
+    }
+    let newCell = this.children.get(newIndex);
+    newCell.addClass('jp-selected-cell');
+    // scroll so the selected cell is in the view
+    // TODO: replicate scrollIntoViewIfNeeded()
+    (newCell.node as any).scrollIntoView();
+  }
+
   /**
    * Change handler for model updates.
    */
   protected modelStateChanged(sender: INotebookViewModel, args: IChangedArgs<any>) {
     switch(args.name) {
+    case 'defaultMimetype': break;
+    case 'mode': break;
+    case 'selectedCellIndex':
+      this.updateSelectedCell(args.newValue, args.oldValue)
     }
   }
 
