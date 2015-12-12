@@ -6,3 +6,4 @@ npm-debug.log
 test/build
 lib
 docs
+example/index.js
