@@ -50,9 +50,11 @@ class NotebookWidget extends Panel {
       switch(c.type) {
       case CellType.Code:
         w = new CodeCellWidget(c as CodeCellViewModel);
+        w.addClass('jp-nbCell');
         break;
       case CellType.Markdown:
         w = new MarkdownCellWidget(c as MarkdownCellViewModel);
+        w.addClass('jp-nbCell');
         break;
       default:
         // if there are any issues, just return a blank placeholder
@@ -62,6 +64,27 @@ class NotebookWidget extends Panel {
       return w;
     })
     this.updateSelectedCell(model.selectedCellIndex);
+    
+    // bind events that can select the cell
+    // see https://github.com/jupyter/notebook/blob/203ccd3d4496cc22e6a1c5e6ece9f5a7d791472a/notebook/static/notebook/js/cell.js#L178
+    this.node.addEventListener('click', (ev: MouseEvent) => {
+      // figure out which cell is selected by the click
+      let node: HTMLElement = ev.target as HTMLElement;
+      // Trace up the DOM hierarchy to find the root cell node
+      // then find the corresponding child and select it
+      while (node && node !== this.node) {
+        if (node.classList.contains('jp-nbCell')) {
+          let children = this.children;
+          for (let i=0; i<children.length; i++) {
+            if (children.get(i).node === node) {
+              this._model.selectedCellIndex = i;
+            }
+          }
+          break;
+        }
+        node = node.parentElement;
+      }
+    })
     model.stateChanged.connect(this.modelStateChanged, this);
     model.cells.changed.connect(this.cellsChanged, this);
   }

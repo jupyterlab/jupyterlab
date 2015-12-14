@@ -157,25 +157,6 @@ interface INotebookViewModel {
  */
 export
 class NotebookViewModel implements INotebookViewModel {
-
-  constructor() {
-    this.cells.changed.connect((sender, args) => {
-      // hook up listeners for cell requestSignal emitters
-      switch(args.type) {
-      case ListChangeType.Add:
-        (args.newValue as ICellViewModel).requestSelection.connect((sender, args) => {
-          this.selectedCellIndex = this.cells.indexOf(sender);
-        })
-      case ListChangeType.Replace:
-        (args.newValue as ICellViewModel[]).map((m) => {
-          m.requestSelection.connect((sender, args) => {
-            this.selectedCellIndex = this.cells.indexOf(sender);
-          })
-        })
-      //TODO: wire up other list events
-      }
-    })
-  }
   /**
    * A signal emitted when the state of the model changes.
    *
