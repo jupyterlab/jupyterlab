@@ -68,7 +68,6 @@ class NotebookWidget extends Panel {
     // bind events that can select the cell
     // see https://github.com/jupyter/notebook/blob/203ccd3d4496cc22e6a1c5e6ece9f5a7d791472a/notebook/static/notebook/js/cell.js#L178
     this.node.addEventListener('click', (ev: MouseEvent) => {
-      // figure out which cell is selected by the click
       let node: HTMLElement = ev.target as HTMLElement;
       // Trace up the DOM hierarchy to find the root cell node
       // then find the corresponding child and select it
