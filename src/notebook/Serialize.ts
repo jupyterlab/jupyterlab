@@ -19,7 +19,7 @@ import {
   IOutputAreaViewModel, OutputAreaViewModel,
   DisplayDataViewModel, ExecuteResultViewModel,
   ExecuteErrorViewModel, StreamViewModel,
-  StreamName, OutputType
+  StreamName, OutputType, OutputViewModel
 } from 'jupyter-js-output-area';
 
 import {
@@ -28,7 +28,7 @@ import {
   DisplayData, isDisplayData, 
   ExecuteResult, isExecuteResult,
   Stream, isStream,
-  JupyterError, isJupyterError
+  JupyterError, isJupyterError, Output
 } from './nbformat';
 
 export
@@ -54,39 +54,7 @@ function makeModels(data: NBData): NotebookViewModel {
       let outputArea = new OutputAreaViewModel();
       cell.output = outputArea;
       for (let i=0; i<c.outputs.length; i++) {
-        let out = c.outputs[i];
-        if (isDisplayData(out)) {
-          let outmodel = new DisplayDataViewModel();
-          outmodel.data = out.data;
-          outmodel.metadata = out.metadata;
-          outputArea.add(outmodel);
-        } else if (isStream(out)) {
-          let outmodel = new StreamViewModel();
-          switch (out.name) {
-          case 'stdout':
-            outmodel.name = StreamName.StdOut;
-            break;
-          case 'stderr':
-            outmodel.name = StreamName.StdErr;
-            break;
-          default:
-            console.error('Unrecognized stream name: %s', out.name);
-          }
-          outmodel.text = out.text;
-          outputArea.add(outmodel);          
-        } else if (isJupyterError(out)) {
-          let outmodel = new ExecuteErrorViewModel();
-          outmodel.ename = out.ename;
-          outmodel.evalue = out.evalue;
-          outmodel.traceback = out.traceback.join('\n');
-          outputArea.add(outmodel);
-        } else if (isExecuteResult(out)) {
-          let outmodel = new ExecuteResultViewModel();
-          outmodel.data = out.data;
-          outmodel.executionCount = out.execution_count;
-          outmodel.metadata = out.metadata;
-          outputArea.add(outmodel);
-        }
+        outputArea.add(buildOutputViewModel(c.outputs[i]));
       }
       nb.cells.add(cell);
     }
@@ -95,6 +63,40 @@ function makeModels(data: NBData): NotebookViewModel {
     nb.selectedCellIndex = 0;
   }
   return nb;
+}
+
+export
+function buildOutputViewModel(out: Output): OutputViewModel {
+  let outmodel: OutputViewModel;
+  if (isDisplayData(out)) {
+    let outmodel = new DisplayDataViewModel();
+    outmodel.data = out.data;
+    outmodel.metadata = out.metadata;
+  } else if (isStream(out)) {
+    let outmodel = new StreamViewModel();
+    switch (out.name) {
+    case 'stdout':
+      outmodel.name = StreamName.StdOut;
+      break;
+    case 'stderr':
+      outmodel.name = StreamName.StdErr;
+      break;
+    default:
+      console.error('Unrecognized stream name: %s', out.name);
+    }
+    outmodel.text = out.text;
+  } else if (isJupyterError(out)) {
+    let outmodel = new ExecuteErrorViewModel();
+    outmodel.ename = out.ename;
+    outmodel.evalue = out.evalue;
+    outmodel.traceback = out.traceback.join('\n');
+  } else if (isExecuteResult(out)) {
+    let outmodel = new ExecuteResultViewModel();
+    outmodel.data = out.data;
+    outmodel.executionCount = out.execution_count;
+    outmodel.metadata = out.metadata;
+  }
+  return outmodel;
 }
 
 /**
