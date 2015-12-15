@@ -4,3 +4,4 @@
 
 export * from './NotebookViewModel';
 export * from './NotebookWidget';
+export * from './Serialize';

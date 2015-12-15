@@ -3,6 +3,26 @@
 'use strict';
 
 import {
+  NotebookViewModel, INotebookViewModel
+} from './NotebookViewModel';
+
+import {
+  ICellViewModel,
+  CodeCellViewModel, MarkdownCellViewModel
+} from 'jupyter-js-cells';
+
+import {
+  InputAreaViewModel, TextEditorViewModel
+} from 'jupyter-js-input-area';
+
+import {
+  IOutputAreaViewModel, OutputAreaViewModel,
+  DisplayDataViewModel, ExecuteResultViewModel,
+  ExecuteErrorViewModel, StreamViewModel,
+  StreamName, OutputType
+} from 'jupyter-js-output-area';
+
+import {
   NBData, MarkdownCell, CodeCell, 
   isMarkdownCell, isCodeCell,
   DisplayData, isDisplayData, 
