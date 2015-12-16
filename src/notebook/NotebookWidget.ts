@@ -21,7 +21,7 @@ import {
 import {
   ICellViewModel, CellType,
     CodeCellWidget, MarkdownCellWidget,
-    CodeCellViewModel, MarkdownCellViewModel
+    CodeCellViewModel, MarkdownCellViewModel, isMarkdownCell
 } from 'jupyter-js-cells';
 
 import {
@@ -67,25 +67,45 @@ class NotebookWidget extends Panel {
     // bind events that can select the cell
     // see https://github.com/jupyter/notebook/blob/203ccd3d4496cc22e6a1c5e6ece9f5a7d791472a/notebook/static/notebook/js/cell.js#L178
     this.node.addEventListener('click', (ev: MouseEvent) => {
-      let node: HTMLElement = ev.target as HTMLElement;
-      // Trace up the DOM hierarchy to find the root cell node
-      // then find the corresponding child and select it
-      while (node && node !== this.node) {
-        if (node.classList.contains('jp-nbCell')) {
-          for (let i=0; i<this.childCount(); i++) {
-            if (this.childAt(i).node === node) {
-              this._model.selectedCellIndex = i;
-            }
-          }
-          break;
-        }
-        node = node.parentElement;
+      this._model.selectedCellIndex = this.findCell(ev.target as HTMLElement);
+    })
+    this.node.addEventListener('dblclick', (ev: MouseEvent) => {
+      let i = this.findCell(ev.target as HTMLElement);
+      if (i === void 0) {
+        return;
+      }
+      let cell = this._model.cells.get(i);
+      if (isMarkdownCell(cell) && cell.rendered) {
+        cell.rendered = false;
       }
     })
     model.stateChanged.connect(this.modelStateChanged, this);
     model.cells.changed.connect(this.cellsChanged, this);
   }
 
+
+  /**
+   * Find the cell index containing the target html element.
+   * 
+   * #### Notes
+   * Returns -1 if the cell is not found.
+   */
+  findCell(node: HTMLElement): number {
+    // Trace up the DOM hierarchy to find the root cell node
+    // then find the corresponding child and select it
+    while (node && node !== this.node) {
+      if (node.classList.contains('jp-nbCell')) {
+        for (let i=0; i<this.childCount(); i++) {
+          if (this.childAt(i).node === node) {
+            return i;
+          }
+        }
+        break;
+      }
+      node = node.parentElement;
+    }
+    return void 0;
+  }
 
   protected cellsChanged(sender: IObservableList<ICellViewModel>, 
                          args: IListChangedArgs<ICellViewModel>) {
@@ -96,11 +116,13 @@ class NotebookWidget extends Panel {
     if (oldIndex !== void 0) {
       this.childAt(oldIndex).removeClass('jp-selected-cell');
     }
-    let newCell = this.childAt(newIndex);
-    newCell.addClass('jp-selected-cell');
-    // scroll so the selected cell is in the view
-    // TODO: replicate scrollIntoViewIfNeeded()
-    (newCell.node as any).scrollIntoView();
+    if (newIndex !== void 0) {
+      let newCell = this.childAt(newIndex);
+      newCell.addClass('jp-selected-cell');
+      // scroll so the selected cell is in the view
+      // TODO: replicate scrollIntoViewIfNeeded()
+      (newCell.node as any).scrollIntoView();
+    }
   }
 
   /**
