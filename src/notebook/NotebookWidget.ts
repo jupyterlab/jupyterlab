@@ -44,8 +44,7 @@ class NotebookWidget extends Panel {
     this.addClass('jp-Notebook');
     this._model = model;
 
-    follow<ICellViewModel, Widget>(model.cells, this.children, 
-                                   (c: ICellViewModel) => {
+    follow<ICellViewModel>(model.cells, this, (c: ICellViewModel) => {
       let w: Widget;
       switch(c.type) {
       case CellType.Code:
@@ -73,9 +72,8 @@ class NotebookWidget extends Panel {
       // then find the corresponding child and select it
       while (node && node !== this.node) {
         if (node.classList.contains('jp-nbCell')) {
-          let children = this.children;
-          for (let i=0; i<children.length; i++) {
-            if (children.get(i).node === node) {
+          for (let i=0; i<this.childCount(); i++) {
+            if (this.childAt(i).node === node) {
               this._model.selectedCellIndex = i;
             }
           }
@@ -96,9 +94,9 @@ class NotebookWidget extends Panel {
 
   updateSelectedCell(newIndex: number, oldIndex?: number) {
     if (oldIndex !== void 0) {
-      this.children.get(oldIndex).removeClass('jp-selected-cell');    
+      this.childAt(oldIndex).removeClass('jp-selected-cell');
     }
-    let newCell = this.children.get(newIndex);
+    let newCell = this.childAt(newIndex);
     newCell.addClass('jp-selected-cell');
     // scroll so the selected cell is in the view
     // TODO: replicate scrollIntoViewIfNeeded()
@@ -121,40 +119,41 @@ class NotebookWidget extends Panel {
 }
 
 
-function follow<T,U>(source: IObservableList<T>, 
-                                   sink: IObservableList<U>, 
-                                   factory: (arg: T)=> U) {
-  // Hook up a listener to the source list
-  // make corresponding changes to the sink list
-  // invoke the add function when you need a new item for sink
-  
-  // Initialize sink list
-  sink.clear();
-  for (let i=0; i<source.length; i++) {
-    sink.add(factory(source.get(i)))
+function follow<T>(source: IObservableList<T>, 
+                     sink: Panel, 
+                     factory: (arg: T)=> Widget) {
+
+  for (let i = sink.childCount()-1; i>=0; i--) {
+    sink.childAt(i).dispose();
   }
-  
+  for (let i=0; i<source.length; i++) {
+    sink.addChild(factory(source.get(i)))
+  }  
   source.changed.connect((sender, args) => {
     switch(args.type) {
     case ListChangeType.Add:
-      // TODO: type should probably be insert, not add, to be consistent with the functions
-      // TODO: Too bad we *always* have to cast newValue and oldValue
-      sink.insert(args.newIndex, factory(args.newValue as T))
+      sink.insertChild(args.newIndex, factory(args.newValue as T))
       break;
     case ListChangeType.Move:
-      sink.move(args.oldIndex, args.newIndex);
+      sink.insertChild(args.newIndex, sink.childAt(args.oldIndex));
       break;
     case ListChangeType.Remove:
-      sink.removeAt(args.oldIndex);
+      sink.childAt(args.oldIndex).dispose();
       break;
     case ListChangeType.Replace:
-      sink.replace(args.oldIndex, (args.oldValue as T[]).length, 
-                   (args.newValue as T[]).map(factory));
+      for (let i = (args.oldValue as T[]).length; i>0; i--) {
+        sink.childAt(args.oldIndex).dispose();
+      }
+      for (let i = (args.newValue as T[]).length; i>0; i--) {
+        sink.insertChild(args.newIndex, factory((args.newValue as T[])[i]))
+      }
       break;
     case ListChangeType.Set:
-      sink.set(args.newIndex, factory(args.newValue as T))
+      sink.childAt(args.newIndex).dispose();
+      sink.insertChild(args.newIndex, factory(args.newValue as T))
       break;
     }
   });
+
   
 }

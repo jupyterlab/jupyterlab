@@ -67,11 +67,11 @@ function makeModels(data: NBData): NotebookViewModel {
 
 export
 function buildOutputViewModel(out: Output): OutputViewModel {
-  let outmodel: OutputViewModel;
   if (isDisplayData(out)) {
     let outmodel = new DisplayDataViewModel();
     outmodel.data = out.data;
     outmodel.metadata = out.metadata;
+    return outmodel;
   } else if (isStream(out)) {
     let outmodel = new StreamViewModel();
     switch (out.name) {
@@ -85,68 +85,18 @@ function buildOutputViewModel(out: Output): OutputViewModel {
       console.error('Unrecognized stream name: %s', out.name);
     }
     outmodel.text = out.text;
+    return outmodel;
   } else if (isJupyterError(out)) {
     let outmodel = new ExecuteErrorViewModel();
     outmodel.ename = out.ename;
     outmodel.evalue = out.evalue;
     outmodel.traceback = out.traceback.join('\n');
+    return outmodel;
   } else if (isExecuteResult(out)) {
     let outmodel = new ExecuteResultViewModel();
     outmodel.data = out.data;
     outmodel.executionCount = out.execution_count;
     outmodel.metadata = out.metadata;
+    return outmodel;
   }
-  return outmodel;
 }
-
-/**
-  * A function to update an output area viewmodel to reflect a stream of messages 
-  */
-export
-function consumeMessage(msg: any, outputArea: IOutputAreaViewModel): void {
-    let output: any = {};
-    let content = msg.content;
-    switch (msg.header.msg_type) {
-    case 'clear_output':
-      outputArea.clear(content.wait)
-      break;
-    case 'stream':
-      output.outputType = OutputType.Stream;
-      output.text = content.text;
-      switch(content.name) {
-      case "stderr":
-        output.name = StreamName.StdErr;
-        break;
-      case "stdout":
-        output.name = StreamName.StdOut;
-        break;
-      default:
-        throw new Error(`Unrecognized stream type ${content.name}`);
-      }
-      outputArea.add(output);
-      break;
-    case 'display_data':
-      output.outputType = OutputType.DisplayData;
-      output.data = content.data;
-      output.metadata = content.metadata;
-      outputArea.add(output);
-      break;
-    case 'execute_result':
-      output.outputType = OutputType.ExecuteResult;
-      output.data = content.data;
-      output.metadata = content.metadata;
-      output.execution_count = content.execution_count;
-      outputArea.add(output);
-      break;
-    case 'error':
-      output.outputType = OutputType.Error;
-      output.ename = content.ename;
-      output.evalue = content.evalue;
-      output.traceback = content.traceback.join('\n');
-      outputArea.add(output);
-      break;
-    default:
-      console.error('Unhandled message', msg);
-    }
-}
-

@@ -49,7 +49,7 @@ function main(): void {
     let nbModel = makeModels(data);
     let nbWidget = new NotebookWidget(nbModel);
     keymap.add(bindings(nbModel));
-    Widget.attach(nbWidget, document.body);    
+    nbWidget.attach(document.body);
   });
 }
 
