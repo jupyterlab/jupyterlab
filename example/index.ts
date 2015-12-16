@@ -22,9 +22,11 @@ function bindings(nbModel: NotebookViewModel) {
       selector: '.jp-InputAreaWidget .CodeMirror',
       sequence: ["Shift Enter"],
       handler: () => {
-        let cell = nbModel.cells.get(nbModel.selectedCellIndex);
-        if (isMarkdownCell(cell) && !cell.rendered) {
-          cell.rendered = true;
+        if (nbModel.selectedCellIndex !== void 0) {
+          let cell = nbModel.cells.get(nbModel.selectedCellIndex);
+          if (isMarkdownCell(cell) && !cell.rendered) {
+            cell.rendered = true;
+          }
         }
         console.log('shift-enter');
       }
