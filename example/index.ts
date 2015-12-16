@@ -8,6 +8,9 @@ import {
   NotebookViewModel, NotebookWidget, makeModels
 } from '../lib/index';
 
+import {
+  isMarkdownCell
+} from 'jupyter-js-cells';
 
 import {
   IKeyBinding, KeymapManager, keystrokeForKeydownEvent
@@ -18,7 +21,13 @@ function bindings(nbModel: NotebookViewModel) {
   let bindings: IKeyBinding[] = [{
       selector: '.jp-InputAreaWidget .CodeMirror',
       sequence: ["Shift Enter"],
-      handler: () => {console.log('shift-enter');}
+      handler: () => {
+        let cell = nbModel.cells.get(nbModel.selectedCellIndex);
+        if (isMarkdownCell(cell) && !cell.rendered) {
+          cell.rendered = true;
+        }
+        console.log('shift-enter');
+      }
   },
   {
     selector: '*',
