@@ -28,6 +28,10 @@ import {
     OutputAreaWidget, IOutputAreaViewModel
 } from 'jupyter-js-output-area';
 
+import {
+  DisposableDelegate, IDisposable
+} from 'phosphor-disposable';
+
 import './index.css';
 
 /**
@@ -44,7 +48,7 @@ class NotebookWidget extends Panel {
     this.addClass('jp-Notebook');
     this._model = model;
 
-    follow<ICellViewModel>(model.cells, this, (c: ICellViewModel) => {
+    this._listdispose = follow<ICellViewModel>(model.cells, this, (c: ICellViewModel) => {
       let w: Widget;
       switch(c.type) {
       case CellType.Code:
@@ -137,7 +141,12 @@ class NotebookWidget extends Panel {
     }
   }
 
+  dispose() {
+    this._listdispose.dispose();
+    super.dispose();
+  }
   private _model: INotebookViewModel;
+  private _listdispose: IDisposable;
 }
 
 
@@ -150,8 +159,8 @@ function follow<T>(source: IObservableList<T>,
   }
   for (let i=0; i<source.length; i++) {
     sink.addChild(factory(source.get(i)))
-  }  
-  source.changed.connect((sender, args) => {
+  }
+  function callback(sender: ObservableList<T>, args: IListChangedArgs<T>) {
     switch(args.type) {
     case ListChangeType.Add:
       sink.insertChild(args.newIndex, factory(args.newValue as T))
@@ -175,7 +184,10 @@ function follow<T>(source: IObservableList<T>,
       sink.insertChild(args.newIndex, factory(args.newValue as T))
       break;
     }
-  });
-
+  }
+  source.changed.connect(callback);
+  return new DisposableDelegate(() => {
+    source.changed.disconnect(callback);
+  })
   
 }

@@ -8,6 +8,7 @@
     "jupyter-js-cells": "../jupyter-js-cells",
     "jupyter-js-input-area": "file:../jupyter-js-input-area",
     "jupyter-js-output-area": "file:../jupyter-js-output-area",
+    "phosphor-disposable": "^1.0.5",
     "phosphor-keymap": "^0.3.0",
     "phosphor-observablelist": "^1.0.0-beta",
     "phosphor-properties": "^2.0.0",
