@@ -18,8 +18,11 @@ import {
 } from 'phosphor-keymap';
 
 import {
-  Contents, IContentsModel
+  Contents, IContentsModel, startNewSession
 } from 'jupyter-js-services';
+
+let SERVER_URL='http://localhost:8890';
+let NOTEBOOK = 'test.ipynb';
 
 function bindings(nbModel: NotebookViewModel) {
   let bindings: IKeyBinding[] = [{
@@ -59,16 +62,11 @@ function main(): void {
   document.addEventListener('keydown', event => {
     keymap.processKeydownEvent(event);
   });
-
-  System.import('example/data/data.json').then((data: any) => {
-    let nbModel = makeModels(data);
-    let nbWidget = new NotebookWidget(nbModel);
-    keymap.add(bindings(nbModel));
-    //nbWidget.attach(document.body);
-  });
+  // TODO: check out static example from the history
+  // and make that a separate example.
   
-  let contents = new Contents('http://localhost:8890');
-  contents.get('test.ipynb', {}).then((data) => {
+  let contents = new Contents(SERVER_URL);
+  contents.get(NOTEBOOK, {}).then((data) => {
     let nbdata: NBData = makedata(data);
     let nbModel = makeModels(nbdata);
     let nbWidget = new NotebookWidget(nbModel);

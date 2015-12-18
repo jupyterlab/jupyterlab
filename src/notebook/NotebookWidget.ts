@@ -81,6 +81,7 @@ class NotebookWidget extends Panel {
       let cell = this._model.cells.get(i);
       if (isMarkdownCell(cell) && cell.rendered) {
         cell.rendered = false;
+        // TODO: focus the cell editor
       }
     })
     model.stateChanged.connect(this.modelStateChanged, this);
@@ -152,7 +153,7 @@ class NotebookWidget extends Panel {
 
 function follow<T>(source: IObservableList<T>, 
                      sink: Panel, 
-                     factory: (arg: T)=> Widget) {
+                     factory: (arg: T)=> Widget): IDisposable {
 
   for (let i = sink.childCount()-1; i>=0; i--) {
     sink.childAt(i).dispose();
