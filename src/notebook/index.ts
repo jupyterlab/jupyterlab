@@ -5,3 +5,4 @@
 export * from './NotebookViewModel';
 export * from './NotebookWidget';
 export * from './Serialize';
+export * from './nbformat';

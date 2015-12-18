@@ -5,7 +5,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  NotebookViewModel, NotebookWidget, makeModels
+  NotebookViewModel, NotebookWidget, makeModels,
+  NBData
 } from '../lib/index';
 
 import {
@@ -16,6 +17,9 @@ import {
   IKeyBinding, KeymapManager, keystrokeForKeydownEvent
 } from 'phosphor-keymap';
 
+import {
+  Contents, IContentsModel
+} from 'jupyter-js-services';
 
 function bindings(nbModel: NotebookViewModel) {
   let bindings: IKeyBinding[] = [{
@@ -60,8 +64,25 @@ function main(): void {
     let nbModel = makeModels(data);
     let nbWidget = new NotebookWidget(nbModel);
     keymap.add(bindings(nbModel));
-    nbWidget.attach(document.body);
+    //nbWidget.attach(document.body);
   });
+  
+  let contents = new Contents('http://localhost:8890');
+  contents.get('test.ipynb', {}).then((data) => {
+    let nbdata: NBData = makedata(data);
+    let nbModel = makeModels(nbdata);
+    let nbWidget = new NotebookWidget(nbModel);
+    keymap.add(bindings(nbModel));
+    nbWidget.attach(document.body);
+  })
+}
+
+function makedata(a: IContentsModel): NBData {
+  return {
+    content: a.content,
+    name: a.name,
+    path: a.path
+  }
 }
 
 main();
