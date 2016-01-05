@@ -9,10 +9,4 @@ npm test
 npm run test:coverage
 export PATH="$HOME/miniconda/bin:$PATH"
 
-cd example
-npm install
-npm run clean
-npm dedupe
-npm run build
-
 npm run docs
