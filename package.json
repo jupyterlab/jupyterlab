@@ -28,10 +28,9 @@
     "webpack": "^1.12.9"
   },
   "scripts": {
-    "clean": "rimraf docs && rimraf lib && rimraf test/build",
+    "clean": "rimraf docs && rimraf lib",
     "build:src": "tsc --project src && node scripts/copycss.js",
-    "build:test": "tsc --project test",
-    "build": "npm run build:src && npm run build:test",
+    "build": "npm run build:src",
     "docs": "typedoc --options scripts/tdoptions.json",
     "postinstall": "npm dedupe",
     "prepublish": "npm run build",
