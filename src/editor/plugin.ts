@@ -64,7 +64,7 @@ class EditorFactory implements IEditorFactory {
    * Create a new editor factory instance.
    */
   static create(): IEditorFactory {
-    return new IEditorFactory();
+    return new EditorFactory();
   }
 
   /**
@@ -91,7 +91,7 @@ class Editor extends CodeMirrorWidget {
   /**
    * Set the text on the editor.
    */
-  set text(value: sring) {
+  set text(value: string) {
     this.editor.getDoc().setValue(value);
   }
 
@@ -99,12 +99,10 @@ class Editor extends CodeMirrorWidget {
    * Set the editor mode by name.  This will lode the mode file
    * as needed.
    */
-  setModeByName(mode: string): Promise<void> {
+  setModeByName(mode: string): void {
     let info = CodeMirror.findModeByName(mode);
     if (info) {
-      return this.loadCodeMirrorMode(info.mode, info.mime);
-    } else {
-      return new Promise().resolve();
+      this.loadCodeMirrorMode(info.mode, info.mime);
     }
   }
 
@@ -112,12 +110,10 @@ class Editor extends CodeMirrorWidget {
    * Set the editor mode by file name.  This will lode the mode file
    * as needed.
    */
-  setModeByFileName(filename: string): Promise<void> {
+  setModeByFileName(filename: string): void {
     let info = CodeMirror.findModeByFileName(filename);
     if (info) {
-      return this.loadCodeMirrorMode(info.mode, info.mime);
-    } else {
-      return new Promise().resolve();
+      this.loadCodeMirrorMode(info.mode, info.mime);
     }
   }
 
@@ -125,12 +121,10 @@ class Editor extends CodeMirrorWidget {
    * Set the editor mode by mime type.  This will lode the mode file
    * as needed.
    */
-  setModeByMIMEType(mime: string): Promise<void> {
-    let info = CodeMirror.findModeByMIME(filename);
+  setModeByMIMEType(mime: string): void {
+    let info = CodeMirror.findModeByMIME(mime);
     if (info) {
-      return this.loadCodeMirrorMode(info.mode, info.mime);
-    } else {
-      return new Promise().resolve();
+      this.loadCodeMirrorMode(info.mode, info.mime);
     }
   }
 
@@ -140,15 +134,13 @@ class Editor extends CodeMirrorWidget {
    * #### Notes
    * This assumes WebPack as the module loader.
    */
-  protected loadCodeMirrorMode(mode: string, mime: string): Promise<void> {
+  protected loadCodeMirrorMode(mode: string, mime: string): void {
     if (CodeMirror.modes.hasOwnProperty(mode)) {
       this.editor.setOption('mode', mime);
-      return new Promise().resolve();
     } else {
       // Load the full codemirror mode bundle.
-      return require([`codemirror/mode/${mode}/${mode}.js`], () => {
+      require([`codemirror/mode/${mode}/${mode}.js`], () => {
         this.editor.setOption('mode', mime);
-        return;
       });
     }
   }

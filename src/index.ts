@@ -3,5 +3,6 @@
 'use strict';
 
 export * from './editor/index';
+export * from './filebrowser/index';
 export * from './services/index';
 export * from './terminal/index';

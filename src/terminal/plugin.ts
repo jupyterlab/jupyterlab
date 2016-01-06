@@ -45,7 +45,7 @@ class TerminalFactory implements ITerminalFactory {
    * Create a new editor factory instance.
    */
   static create(): ITerminalFactory {
-    return new ITerminalFactory();
+    return new TerminalFactory();
   }
 
   /**
