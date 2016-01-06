@@ -21,6 +21,8 @@ import {
   IEditor, IEditorFactory
 } from './index';
 
+import './plugin.css';
+
 
 /**
  * Bundle common modes.

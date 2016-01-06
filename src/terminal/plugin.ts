@@ -14,6 +14,8 @@ import {
   ITerminalFactory
 } from './index';
 
+import './plugin.css';
+
 
 /**
  * Register the plugin contributions.

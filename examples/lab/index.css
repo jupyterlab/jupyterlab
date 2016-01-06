@@ -2,9 +2,90 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-.jp-CodeMirrorWidget {
-  min-width: 50px;
-  min-height: 50px;
+
+.p-MenuBar {
+  padding-left: 5px;
+  background: #FEFEFE;
+  color: rgba(0, 0, 0, 0.87);
+  border-bottom: 1px solid #DDDDDD;
+  font: 13px Helvetica, Arial, sans-serif;
+}
+
+
+.p-MenuBar-menu {
+  transform: translateY(-1px);
+}
+
+
+.p-MenuBar-item {
+  padding: 4px 8px;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+}
+
+
+.p-MenuBar-item.p-mod-active {
+  background: #E5E5E5;
+}
+
+
+.p-MenuBar-item.p-mod-disabled {
+  color: rgba(0, 0, 0, 0.26);
+}
+
+
+.p-MenuBar-item.p-mod-separator-type {
+  margin: 2px;
+  padding: 0;
+  border: none;
+  border-left: 1px solid #DDDDDD;
+}
+
+
+.p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
+  z-index: 1000000;
+  background: white;
+  border-left: 1px solid #C0C0C0;
+  border-right: 1px solid #C0C0C0;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+.p-Menu {
+  background: white;
+  color: rgba(0, 0, 0, 0.87);
   border: 1px solid #C0C0C0;
-  z-index: 0;
+  font: 12px Helvetica, Arial, sans-serif;
+  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+.p-Menu-item.p-mod-active {
+  background: #E5E5E5;
+}
+
+
+.p-Menu-item.p-mod-disabled {
+  color: rgba(0, 0, 0, 0.26);
+}
+
+
+.p-Menu-item.p-mod-separator-type > span::after {
+  border-top: 1px solid #DDDDDD;
+}
+
+
+.p-Menu-item-icon::before,
+.p-Menu-item-submenu::before {
+  font-family: FontAwesome;
+}
+
+
+.p-Menu-item.p-mod-check-type.p-mod-checked > .p-Menu-item-icon::before {
+  content: '\f00c';
+}
+
+
+.p-Menu-item.p-mod-submenu-type > .p-Menu-item-submenu::before {
+  content: '\f0da';
 }

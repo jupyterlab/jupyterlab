@@ -1,0 +1,191 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-FileBrowser {
+  background-color: #F5F5F5;
+  color: #757575;
+  font: 13px Helvetica, Arial, sans-serif;
+  height: 500px;
+}
+
+
+.jp-BreadCrumbs-item {
+  margin-right: 5px;
+  padding-bottom: 8px;
+  border: 1px solid transparent;
+}
+
+
+.jp-FileButtons {
+  border-bottom: 1px solid #757575;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-bottom: 8px;
+}
+
+
+.jp-FileButtons-icon {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.jp-FileButtons-item {
+  background-color: #FAFAFA;
+  font-size: 16px;
+  border: 1px solid #757575;
+  height: 30px;
+  border-radius: 3px;
+  margin-right: 3px;
+  max-width: 100px;
+}
+
+
+.jp-DirListing-item {
+  padding: 4px 8px;
+  border: 1px solid transparent;
+}
+
+
+.jp-DirListing-itemFile {
+  min-width: 200px;
+}
+
+
+.jp-DirListing-itemFileIcon {
+  width: 21px;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+
+.jp-DirListing-itemFileText {
+  position: absolute;
+  left: 21px;
+  right: 21px;
+  padding-left: 2px;
+}
+
+
+.jp-DirListing-itemModified {
+  padding-right: 5px;
+  width: 70px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+
+.jp-FileButtons-item.jp-mod-selected {
+  background-color: #2196F3;
+  color: #F5F5F5;
+}
+
+
+.jp-DirListing-item.jp-mod-drop-target {
+  border: 1px solid #757575;
+}
+
+
+.jp-BreadCrumbs-item.jp-mod-drop-target {
+  border: 1px solid #757575;
+}
+
+
+.jp-DirListing-item.jp-mod-selected {
+  background-color: #2196F3;
+  color: #F5F5F5;
+}
+
+
+.jp-DirListing-item.jp-mod-selected.jp-mod-cut {
+  background-color: #F1C40F;
+  color: #F5F5F5;
+}
+
+
+.jp-DirListing-itemFileIcon {
+  font-family: FontAwesome;
+}
+
+
+.jp-DirListing-folderIcon:before {
+  content: "\f114";
+}
+
+
+.jp-DirListing-fileIcon:before {
+  content: "\f016";
+}
+
+
+.jp-DirListing-nbIcon:before {
+  content: "\f02d";
+}
+
+
+.jp-DirListing-nbIcon.jp-mod-running:before {
+  color: #27AE60;
+}
+
+
+.jp-EditorWidget {
+  height: 400px;
+}
+
+
+.p-SplitPanel {
+  height: 400px;
+}
+
+
+.p-Dialog {
+  padding-left: 3px;
+  background: rgba(245, 245, 245, .6);
+}
+
+
+.p-Dialog-content {
+  background-color: #F5F5F5;
+  min-width: 50%;
+  border: 1px solid #757575;
+  border-radius: 5px;
+}
+
+
+.p-Dialog-header {
+  padding: 5px;
+  border-bottom: 1px solid #757575;
+}
+
+
+.p-Dialog-body {
+  padding: 5px;
+}
+
+
+.p-Dialog-footer {
+  padding: 5px;
+}
+
+
+.p-Dialog-button {
+  margin-left: 5px;
+  padding: 5px;
+  border: 1px solid #757575;
+  font-size: 16px;
+  background-color: #FAFAFA;
+  line-height: 20px;
+  border-radius: 3px;
+  max-width: 100px;
+}
+
+.p-Dialog-close {
+  line-height: 21px;
+}
+
+
+.p-Dialog-close:before {
+  content: '\f00d';
+  font-family: FontAwesome;
+}
