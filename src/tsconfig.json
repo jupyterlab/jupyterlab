@@ -14,6 +14,7 @@
     "../typings/codemirror/codemirror.d.ts",
     "index.ts",
     "editor/index.ts",
+    "editor/codemirror-ipython.ts",
     "editor/plugin.ts",
     "filebrowser/index.ts",
     "filebrowser/plugin.ts",

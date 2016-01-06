@@ -39,6 +39,12 @@ function register(container: Container): void {
 }
 
 
+export
+function resolve(container: Container): Promise<void> {
+  return container.resolve(FileBrowserProvider).then(() => { return; });
+}
+
+
 /**
  * An implementation of the IFileBrowser provider.
  */
@@ -74,6 +80,7 @@ class FileBrowserProvider implements IFileBrowser {
         newEditor.setModeByFileName(change.newValue.name);
         newEditor.text = change.newValue.content;
         newEditor.title.text = change.newValue.name;
+        this._shell.addToMainArea(newEditor);
       }
     });
   }

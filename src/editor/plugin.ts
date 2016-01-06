@@ -32,7 +32,7 @@ import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/julia/julia';
 import 'codemirror/mode/python/python';
 import 'codemirror/mode/r/r';
-import 'codemirror/markdown/markdown';
+import 'codemirror/mode/markdown/markdown';
 import './codemirror-ipython';
 
 
