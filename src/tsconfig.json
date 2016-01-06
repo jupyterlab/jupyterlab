@@ -9,6 +9,12 @@
     "outDir": "../lib"
   },
   "files": [
-    "index.ts"
+    "../typings/es6-promise.d.ts",
+    "../typings/requirejs/requirejs.d.ts",
+    "../typings/codemirror/codemirror.d.ts",
+    "index.ts",
+    "editor/index.ts",
+    "services/index.ts",
+    "terminal/index.ts"
   ]
 }

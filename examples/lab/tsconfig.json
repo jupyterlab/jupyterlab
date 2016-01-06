@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "declaration": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "module": "commonjs",
+    "target": "ES5"
+  },
+  "files": [
+    "../typings/codemirror/codemirror.d.ts",
+    "../typings/requirejs/requirejs.d.ts",
+    "index.ts"
+  ]
+}

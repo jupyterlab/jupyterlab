@@ -5,6 +5,13 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
+    "jupyter-js-filebrowser": "^0.2.8",
+    "jupyter-js-services": "^0.3.0-alpha",
+    "jupyter-js-terminal": "^0.1.3",
+    "jupyter-js-utils": "^0.1.0",
+    "phosphide": "0.0.6",
+    "phosphor-codemirror": "0.0.1",
+    "phosphor-di": "^0.9.0"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
@@ -51,9 +58,12 @@
     "lab"
   ],
   "files": [
-    "lib/*.js",
+    "lib/*.css",
     "lib/*.d.ts",
-    "lib/*.css"
+    "lib/*.js",
+    "lib/**/*.css",
+    "lib/**/*.d.ts",
+    "lib/**/*.js"
   ],
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
