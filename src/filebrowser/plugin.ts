@@ -19,7 +19,7 @@ import {
 } from './index';
 
 import {
-  IServicesFactory
+  IEditorFactory, IServicesFactory
 } from '../index';
 
 import './plugin.css';
@@ -39,6 +39,12 @@ function register(container: Container): void {
 }
 
 
+export
+function resolve(container: Container): Promise<void> {
+  return container.resolve(FileBrowserProvider).then(() => { return; });
+}
+
+
 /**
  * An implementation of the IFileBrowser provider.
  */
@@ -47,26 +53,36 @@ class FileBrowserProvider implements IFileBrowser {
   /**
    * The dependencies required by the application shell.
    */
-  static requires: Token<any>[] = [IAppShell, IServicesFactory];
+  static requires: Token<any>[] = [IAppShell, IServicesFactory, IEditorFactory];
 
   /**
    * Create a new application shell instance.
    */
-  static create(shell: IAppShell, services: IServicesFactory): IServicesFactory {
-    return new IServicesFactory(shell, services);
+  static create(shell: IAppShell, services: IServicesFactory, editor: IEditorFactory): IFileBrowser {
+    return new FileBrowserProvider(shell, services, editor);
   }
 
   /**
    * Construct a new filebrowser provider instance.
    */
-  constructor(shell: IAppShell, services: IServicesFactory) {
+  constructor(shell: IAppShell, services: IServicesFactory, editor: IEditorFactory) {
     this._shell = shell;
+    this._editor = editor;
     let contents = services.createContentsManager();
     let sessions = services.createNotebookSessionManager();
     let model = new FileBrowserModel('', contents, sessions);
     this._browser = new FileBrowser(model);
     this._browser.title.text = 'File Browser';
     this._shell.addToLeftArea(this._browser, { rank: 10 });
+    model.changed.connect((instance, change) => {
+      if (change.name === 'open' && change.newValue.type === 'file') {
+        let newEditor = editor.createEditor();
+        newEditor.setModeByFileName(change.newValue.name);
+        newEditor.text = change.newValue.content;
+        newEditor.title.text = change.newValue.name;
+        this._shell.addToMainArea(newEditor);
+      }
+    });
   }
 
   /**
@@ -80,6 +96,7 @@ class FileBrowserProvider implements IFileBrowser {
   }
 
   private _shell: IAppShell = null;
+  private _editor: IEditorFactory = null;
   private _browser: FileBrowser = null;
 
 }

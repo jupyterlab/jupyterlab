@@ -30,19 +30,19 @@ interface IEditor extends CodeMirrorWidget {
    * Set the editor mode by name.  This will lode the mode file
    * as needed.
    */
-  setModeByName(mode: string): Promise<void>;
+  setModeByName(mode: string): void;
 
   /**
    * Set the editor mode by file name.  This will lode the mode file
    * as needed.
    */
-  setModeByFileName(filename: string): Promise<void>;
+  setModeByFileName(filename: string): void;
 
   /**
    * Set the editor mode by mime type.  This will lode the mode file
    * as needed.
    */
-  setModeByMIMEType(mime: string): Promise<void>;
+  setModeByMIMEType(mime: string): void;
 }
 
 

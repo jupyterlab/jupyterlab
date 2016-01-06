@@ -45,7 +45,7 @@ class ServicesFactory implements IServicesFactory {
    * Create a new application shell instance.
    */
   static create(): IServicesFactory {
-    return new IServicesFactory();
+    return new ServicesFactory();
   }
 
   /**
@@ -60,14 +60,16 @@ class ServicesFactory implements IServicesFactory {
    * Create a new kernel manager instance.
    */
   createKernelManager(): IKernelManager {
-    return new KernelManager(this._baseUrl, this._ajaxSettings);
+    let options = { baseUrl: this._baseUrl, ajaxSettings: this._ajaxSettings };
+    return new KernelManager(options);
   }
 
   /**
    * Create a new session manager instance.
    */
   createNotebookSessionManager(): INotebookSessionManager {
-    return new NotebookSessionManager(this._baseUrl, this._ajaxSettings);
+    let options = { baseUrl: this._baseUrl, ajaxSettings: this._ajaxSettings };
+    return new NotebookSessionManager(options);
   }
 
   /**

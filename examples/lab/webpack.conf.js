@@ -1,12 +1,15 @@
 
 module.exports = {
-  entry: './example/index.ts',
+  entry: './example/index.js',
   output: {
     path: './example/build',
     filename: 'bundle.js'
   },
   resolve: {
     extensions: ['', '.ts', '.js']
+  },
+  node: {
+    fs: "empty"
   },
   module: {
     loaders: [

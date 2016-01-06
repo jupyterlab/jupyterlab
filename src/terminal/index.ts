@@ -29,4 +29,4 @@ interface ITerminalFactory {
  * The dependency token for the `ITerminalFactory` interface.
  */
 export
-const ITerminalFactory = new Token<TerminalWidget>('jupyter-js-plugins.ITerminalFactory');
+const ITerminalFactory = new Token<ITerminalFactory>('jupyter-js-plugins.ITerminalFactory');

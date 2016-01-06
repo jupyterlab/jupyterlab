@@ -14,8 +14,13 @@
     "../typings/codemirror/codemirror.d.ts",
     "index.ts",
     "editor/index.ts",
+    "editor/codemirror-ipython.ts",
+    "editor/plugin.ts",
     "filebrowser/index.ts",
+    "filebrowser/plugin.ts",
     "services/index.ts",
-    "terminal/index.ts"
+    "services/plugin.ts",
+    "terminal/index.ts",
+    "terminal/plugin.ts"
   ]
 }
