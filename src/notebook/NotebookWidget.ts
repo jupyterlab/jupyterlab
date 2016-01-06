@@ -11,8 +11,12 @@ import {
 } from 'phosphor-observablelist';
 
 import {
-  Widget, Panel
+  Widget
 } from 'phosphor-widget';
+
+import {
+  Panel
+} from 'phosphor-panel';
 
 import {
   NotebookViewModel, INotebookViewModel
