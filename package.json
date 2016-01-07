@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
+    "codemirror": "^5.10.0",
     "jupyter-js-filebrowser": "^0.2.8",
     "jupyter-js-services": "^0.3.0-alpha",
     "jupyter-js-terminal": "^0.1.3",
@@ -37,7 +38,7 @@
   "scripts": {
     "clean:example": "rimraf example/build",
     "clean": "rimraf docs/api && rimraf lib && rimraf test/coverage",
-    "build:example": "webpack --config example/webpack.conf.js",
+    "build:example": "webpack --config example/webpack.conf.js --bail",
     "build": "tsc --project src && node scripts/copycss.js",
     "docs": "typedoc --options scripts/tdoptions.json",
     "postinstall": "npm dedupe",
