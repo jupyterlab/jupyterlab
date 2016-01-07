@@ -16,7 +16,7 @@ import {
  * A factory for creating a Jupyter editor.
  */
 export
-interface ITerminalFactory {
+interface ITerminalProvider {
 
   /**
    * Create a new Terminal instance.
@@ -26,7 +26,7 @@ interface ITerminalFactory {
 
 
 /**
- * The dependency token for the `ITerminalFactory` interface.
+ * The dependency token for the `ITerminalProvider` interface.
  */
 export
-const ITerminalFactory = new Token<ITerminalFactory>('jupyter-js-plugins.ITerminalFactory');
+const ITerminalProvider = new Token<ITerminalProvider>('jupyter-js-plugins.ITerminalProvider');

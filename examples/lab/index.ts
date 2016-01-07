@@ -1,26 +1,22 @@
-/*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, PhosphorJS Contributors
-|
-| Distributed under the terms of the BSD 3-Clause License.
-|
-| The full license is in the file LICENSE, distributed with this software.
-|----------------------------------------------------------------------------*/
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import {
-  EditorModel, CodeMirrorWidget
-} from '../lib/index';
+var phosphide = require('phosphide');
+var di = require('phosphor-di');
 
 
-function main(): void {
-  var model = new EditorModel();
-  var view = new CodeMirrorWidget(model);
-
-  view.attach(document.getElementById('main'));
-  model.filename = 'test.js'
-  view.update();
-
-  window.onresize = () => view.update();
+function main() {
+   phosphide.loadPlugins(new di.Container(), [
+    require('phosphide/lib/appshell/plugin'),
+    require('../lib/terminal/plugin'),
+    require('../lib/editor/plugin'),
+    require('../lib/filebrowser/plugin'),
+    require('../lib/services/plugin'),
+    require('./plugin')
+  ]).then(function() {
+    console.log('loading finished');
+  });
 }
 
 window.onload = main;

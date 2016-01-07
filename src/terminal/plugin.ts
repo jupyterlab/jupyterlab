@@ -11,7 +11,7 @@ import {
 } from 'phosphor-di';
 
 import {
-  ITerminalFactory
+  ITerminalProvider
 } from './index';
 
 import './plugin.css';
@@ -27,14 +27,14 @@ import './plugin.css';
  */
 export
 function register(container: Container): void {
-  container.register(ITerminalFactory, TerminalFactory);
+  container.register(ITerminalProvider, TerminalProvider);
 }
 
 
 /**
- * An implementation of an ITerminalFactory.
+ * An implementation of an ITerminalProvider.
  */
-class TerminalFactory implements ITerminalFactory {
+class TerminalProvider implements ITerminalProvider {
 
   /**
    * The dependencies required by the editor factory.
@@ -44,8 +44,8 @@ class TerminalFactory implements ITerminalFactory {
   /**
    * Create a new editor factory instance.
    */
-  static create(): ITerminalFactory {
-    return new TerminalFactory();
+  static create(): ITerminalProvider {
+    return new TerminalProvider();
   }
 
   /**

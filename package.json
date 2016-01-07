@@ -35,9 +35,8 @@
     "webpack": "^1.12.9"
   },
   "scripts": {
-    "clean:example": "rimraf example/bundle.js",
-    "clean:test": "rimraf test/build && rimraf test/coverage",
-    "clean": "rimraf docs/api && rimraf lib && npm run clean:test",
+    "clean:example": "rimraf example/build",
+    "clean": "rimraf docs/api && rimraf lib && rimraf test/coverage",
     "build:example": "webpack --config example/webpack.conf.js",
     "build": "tsc --project src && node scripts/copycss.js",
     "docs": "typedoc --options scripts/tdoptions.json",
