@@ -15,7 +15,7 @@ import {
  * A singleton FileBrowser provider.
  */
 export
-interface IFileBrowser {
+interface IFileBrowserHandler {
   fileBrowser: FileBrowser;
 }
 
@@ -24,4 +24,4 @@ interface IFileBrowser {
  * The dependency token for the `IFileBrowser` interface.
  */
 export
-const IFileBrowser = new Token<IFileBrowser>('jupyter-js-plugins.IFileBrowser');
+const IFileBrowserHandler = new Token<IFileBrowserHandler>('jupyter-js-plugins.IFileBrowserHandler');

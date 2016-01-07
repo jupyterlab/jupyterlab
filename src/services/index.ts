@@ -13,10 +13,10 @@ import {
 
 
 /**
- * A factory for creating Jupyter service managers.
+ * A provider for creating Jupyter service managers.
  */
 export
-interface IServicesFactory {
+interface IServicesProvider {
 
   /**
    * Create a new kernel manager instance.
@@ -39,4 +39,4 @@ interface IServicesFactory {
  * The dependency token for the `IServicesFactory` interface.
  */
 export
-const IServicesFactory = new Token<IServicesFactory>('jupyter-js-plugins.IServicesFactory');
+const IServicesProvider = new Token<IServicesProvider>('jupyter-js-plugins.IServicesProvider');

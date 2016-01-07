@@ -16,7 +16,7 @@ import {
 } from 'phosphor-di';
 
 import {
-  IServicesFactory
+  IServicesProvider
 } from './index';
 
 
@@ -30,26 +30,29 @@ import {
  */
 export
 function register(container: Container): void {
-  container.register(IServicesFactory, ServicesFactory);
+  container.register(IServicesProvider, ServicesProvider);
 }
 
 
-class ServicesFactory implements IServicesFactory {
+/**
+ * An implementation of a services provider.
+ */
+class ServicesProvider implements IServicesProvider {
 
   /**
-   * The dependencies required by the application shell.
+   * The dependencies required by the services provider.
    */
   static requires: Token<any>[] = [];
 
   /**
-   * Create a new application shell instance.
+   * Create a new services provider instance.
    */
-  static create(): IServicesFactory {
-    return new ServicesFactory();
+  static create(): IServicesProvider {
+    return new ServicesProvider();
   }
 
   /**
-   * Construct a new services factory.
+   * Construct a new services provider.
    */
   constructor() {
     this._baseUrl = getConfigOption('baseUrl');

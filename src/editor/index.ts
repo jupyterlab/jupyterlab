@@ -14,53 +14,49 @@ import {
 } from 'phosphor-di';
 
 
-
 /**
- * The interface for a jupyter editor widget.
+ * A handler for creating and manipulating Jupyter editors.
  */
 export
-interface IEditor extends CodeMirrorWidget {
+interface IEditorHandler {
 
   /**
-   * A convenience property to get/set the text on the editor.
+   * Create a new IEditor instance.
    */
-  text: string;
+  createEditor(options?: CodeMirror.EditorConfiguration): CodeMirrorWidget;
 
   /**
    * Set the editor mode by name.  This will lode the mode file
    * as needed.
    */
-  setModeByName(mode: string): void;
+  setModeByName(widget: CodeMirrorWidget, mode: string): void;
 
   /**
    * Set the editor mode by file name.  This will lode the mode file
    * as needed.
    */
-  setModeByFileName(filename: string): void;
+  setModeByFileName(widget: CodeMirrorWidget, filename: string): void;
 
   /**
    * Set the editor mode by mime type.  This will lode the mode file
    * as needed.
    */
-  setModeByMIMEType(mime: string): void;
-}
-
-
-/**
- * A factory for creating a Jupyter editor.
- */
-export
-interface IEditorFactory {
+  setModeByMIMEType(widget: CodeMirrorWidget, mime: string): void;
 
   /**
-   * Create a new IEditor instance.
+   * A convenience method to get the text from the editor.
    */
-  createEditor(options?: CodeMirror.EditorConfiguration): IEditor;
+  getText(widget: CodeMirrorWidget, text: string): string;
+
+  /**
+   * A convenience method to set the text on the editor.
+   */
+  setText(widget: CodeMirrorWidget, text: string): void;
 }
 
 
 /**
- * The dependency token for the `IEditorFactory` interface.
+ * The dependency token for the `IEditorHandler` interface.
  */
 export
-const IEditorFactory = new Token<IEditorFactory>('jupyter-js-plugins.IEditorFactory');
+const IEditorHandler = new Token<IEditorHandler>('jupyter-js-plugins.IEditorHandler');

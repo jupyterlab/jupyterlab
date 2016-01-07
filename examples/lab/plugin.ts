@@ -11,7 +11,7 @@ import {
 } from 'phosphor-di';
 
 import {
-  ITerminalFactory
+  ITerminalProvider
 } from '../lib';
 
 
@@ -37,19 +37,19 @@ class DefaultHandler {
   /**
    * The dependencies required by the default plugin.
    */
-  static requires: Token<any>[] = [IAppShell, ITerminalFactory];
+  static requires: Token<any>[] = [IAppShell, ITerminalProvider];
 
   /**
    * Create a default plugin instance..
    */
-  static create(shell: IAppShell, term: ITerminalFactory): DefaultHandler {
+  static create(shell: IAppShell, term: ITerminalProvider): DefaultHandler {
     return new DefaultHandler(shell, term);
   }
 
   /**
    * Construct a new default plugin.
    */
-  constructor(shell: IAppShell, term: ITerminalFactory) {
+  constructor(shell: IAppShell, term: ITerminalProvider) {
     this._shell = shell;
     this._term = term;
   }
@@ -62,6 +62,6 @@ class DefaultHandler {
     this._shell.addToMainArea(term);
   }
 
-  private _term: ITerminalFactory = null;
+  private _term: ITerminalProvider = null;
   private _shell: IAppShell = null;
 }

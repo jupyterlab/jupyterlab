@@ -15,11 +15,11 @@ import {
 } from 'phosphor-di';
 
 import {
-  IFileBrowser
+  IFileBrowserHandler
 } from './index';
 
 import {
-  IEditorFactory, IServicesFactory
+  IEditorHandler, IServicesProvider
 } from '../index';
 
 import './plugin.css';
@@ -35,37 +35,40 @@ import './plugin.css';
  */
 export
 function register(container: Container): void {
-  container.register(IFileBrowser, FileBrowserProvider);
-}
-
-
-export
-function resolve(container: Container): Promise<void> {
-  return container.resolve(FileBrowserProvider).then(() => { return; });
+  container.register(IFileBrowserHandler, FileBrowserHandler);
 }
 
 
 /**
- * An implementation of the IFileBrowser provider.
+ * Resolve the default file provider.
  */
-class FileBrowserProvider implements IFileBrowser {
+export
+function resolve(container: Container): Promise<void> {
+  return container.resolve(FileBrowserHandler).then(() => { return; });
+}
+
+
+/**
+ * An implementation of the FileBrowserHandler provider.
+ */
+class FileBrowserHandler implements IFileBrowserHandler {
 
   /**
    * The dependencies required by the application shell.
    */
-  static requires: Token<any>[] = [IAppShell, IServicesFactory, IEditorFactory];
+  static requires: Token<any>[] = [IAppShell, IServicesProvider, IEditorHandler];
 
   /**
    * Create a new application shell instance.
    */
-  static create(shell: IAppShell, services: IServicesFactory, editor: IEditorFactory): IFileBrowser {
-    return new FileBrowserProvider(shell, services, editor);
+  static create(shell: IAppShell, services: IServicesProvider, editor: IEditorHandler): IFileBrowserHandler {
+    return new FileBrowserHandler(shell, services, editor);
   }
 
   /**
    * Construct a new filebrowser provider instance.
    */
-  constructor(shell: IAppShell, services: IServicesFactory, editor: IEditorFactory) {
+  constructor(shell: IAppShell, services: IServicesProvider, editor: IEditorHandler) {
     this._shell = shell;
     this._editor = editor;
     let contents = services.createContentsManager();
@@ -77,8 +80,8 @@ class FileBrowserProvider implements IFileBrowser {
     model.changed.connect((instance, change) => {
       if (change.name === 'open' && change.newValue.type === 'file') {
         let newEditor = editor.createEditor();
-        newEditor.setModeByFileName(change.newValue.name);
-        newEditor.text = change.newValue.content;
+        editor.setModeByFileName(newEditor, change.newValue.name);
+        editor.setText(newEditor, change.newValue.content);
         newEditor.title.text = change.newValue.name;
         this._shell.addToMainArea(newEditor);
       }
@@ -96,7 +99,7 @@ class FileBrowserProvider implements IFileBrowser {
   }
 
   private _shell: IAppShell = null;
-  private _editor: IEditorFactory = null;
+  private _editor: IEditorHandler = null;
   private _browser: FileBrowser = null;
 
 }
