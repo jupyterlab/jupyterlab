@@ -22,7 +22,7 @@ import {
 } from 'phosphor-properties';
 
 import {
-  InputAreaViewModel, TextEditorViewModel
+  InputAreaViewModel
 } from 'jupyter-js-input-area';
 
 import {

@@ -12,8 +12,12 @@ import {
 } from 'jupyter-js-cells';
 
 import {
-  InputAreaViewModel, TextEditorViewModel
+  InputAreaViewModel
 } from 'jupyter-js-input-area';
+
+import {
+  EditorModel
+} from 'jupyter-js-editor';
 
 import {
   IOutputAreaViewModel, OutputAreaViewModel,
@@ -40,7 +44,7 @@ function makeModels(data: NBData): NotebookViewModel {
   // iterate through the cell data, creating cell models
   data.content.cells.forEach((c) => {
     let input = new InputAreaViewModel();
-    input.textEditor = new TextEditorViewModel();
+    input.textEditor = new EditorModel();
     input.textEditor.text = c.source;
     
     if (isMarkdownCell(c)) {

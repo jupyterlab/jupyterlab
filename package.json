@@ -7,6 +7,7 @@
   "dependencies": {
     "jupyter-js-cells": "../jupyter-js-cells",
     "jupyter-js-input-area": "file:../jupyter-js-input-area",
+    "jupyter-js-editor": "file:../jupyter-js-editor",
     "jupyter-js-output-area": "file:../jupyter-js-output-area",
     "jupyter-js-services": "^0.2.2",
     "phosphor-disposable": "^1.0.5",
