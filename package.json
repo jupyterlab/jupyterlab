@@ -38,7 +38,7 @@
   "scripts": {
     "clean:example": "rimraf example/build",
     "clean": "rimraf docs/api && rimraf lib && rimraf test/coverage",
-    "build:example": "webpack --config example/webpack.conf.js --bail",
+    "build:example": "webpack --config example/webpack.conf.js",
     "build": "tsc --project src && node scripts/copycss.js",
     "docs": "typedoc --options scripts/tdoptions.json",
     "postinstall": "npm dedupe",

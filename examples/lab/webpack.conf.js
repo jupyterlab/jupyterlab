@@ -11,6 +11,7 @@ module.exports = {
   node: {
     fs: "empty"
   },
+  bail: true,
   module: {
     loaders: [
       { test: /\.ts$/, loader: 'ts-loader' },
