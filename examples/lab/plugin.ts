@@ -30,27 +30,33 @@ function resolve(container: Container): void {
 
 
 /**
- * An implemenation of an IEditorFactory.
+ * The default plugin for the example.
  */
 class DefaultHandler {
 
   /**
-   * The dependencies required by the editor factory.
+   * The dependencies required by the default plugin.
    */
   static requires: Token<any>[] = [IAppShell, ITerminalFactory];
 
   /**
-   * Create a new editor factory instance.
+   * Create a default plugin instance..
    */
   static create(shell: IAppShell, term: ITerminalFactory): DefaultHandler {
     return new DefaultHandler(shell, term);
   }
 
+  /**
+   * Construct a new default plugin.
+   */
   constructor(shell: IAppShell, term: ITerminalFactory) {
     this._shell = shell;
     this._term = term;
   }
 
+  /**
+   * Create a terminal and add it to the main shell area.
+   */
   run() {
     let term = this._term.createTerminal();
     this._shell.addToMainArea(term);
