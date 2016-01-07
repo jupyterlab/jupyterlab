@@ -15,7 +15,7 @@ import {
 } from 'phosphor-di';
 
 import {
-  IFileBrowserHandler
+  IFileBrowserProvider
 } from './index';
 
 import {
@@ -35,7 +35,7 @@ import './plugin.css';
  */
 export
 function register(container: Container): void {
-  container.register(IFileBrowserHandler, FileBrowserHandler);
+  container.register(IFileBrowserProvider, FileBrowserProvider);
 }
 
 
@@ -44,14 +44,14 @@ function register(container: Container): void {
  */
 export
 function resolve(container: Container): Promise<void> {
-  return container.resolve(FileBrowserHandler).then(() => { return; });
+  return container.resolve(FileBrowserProvider).then(() => { return; });
 }
 
 
 /**
- * An implementation of the FileBrowserHandler provider.
+ * An implementation of the FileBrowserProvider provider.
  */
-class FileBrowserHandler implements IFileBrowserHandler {
+class FileBrowserProvider implements IFileBrowserProvider {
 
   /**
    * The dependencies required by the application shell.
@@ -61,8 +61,8 @@ class FileBrowserHandler implements IFileBrowserHandler {
   /**
    * Create a new application shell instance.
    */
-  static create(shell: IAppShell, services: IServicesProvider, editor: IEditorHandler): IFileBrowserHandler {
-    return new FileBrowserHandler(shell, services, editor);
+  static create(shell: IAppShell, services: IServicesProvider, editor: IEditorHandler): IFileBrowserProvider {
+    return new FileBrowserProvider(shell, services, editor);
   }
 
   /**
