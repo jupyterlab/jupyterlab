@@ -7,6 +7,7 @@ env:
   - GROUP=
   global:
   - GH_REF: github.com/jupyter/jupyter-js-plugins.git
+  - secure: UwfNcdwPGuWRY6A0kjeEC0Py7OEuSOO14aSypr779D1jabGkXLVPtmXQzy3kRQuMRVse/OVC88wNzYDnTEikwrWHOguANlYyTjJCmeG+YVWjpDN6OzAWYJ/RCacPyY7+mkQKizzKBfgJy39AXMRTp17kYePVo4yTfvkQpaZfFVQqVhL1v6Qz4rI3IG5DlCJFn6le9uhv5tJan+a2iQQBNHNAyrFoTujGz/PVDmuQ/EUF/RuC3OYGOBfkZgsiOeB9eFHSa5sweFnn+57a1Y0YOJM7TqpOwDzWrEbNnev08I5YTH2RJ1hMhLXOUmHAI8vW42IxMWo6B/b6n0/0x2lCbQTNKl6So4esu+G2di5VsSMvyXkVH7ahJRmR/iHAhb7vBR0eJ90vKp2xcVRsWFEKy/MNXECAPnqqPLsCFb8My3ecxDpNiSnTrB54at5OoR5cD7q5ZGDQ7wU+tePVWXZHiiL9j+OcqyjrvcMEp1sbRGriOwhzkJsFW4/SJ1yrcmX/PnMiZBTbxuxjYMaO5+pr49mKCs220keukN0MxiK/1WHQMiNxY7bePA6JPk1SMWyan64D9O6KmoelaIYO6vOWV8ndpQfBez2D1db4VCArJBJqHC1BRWS6/akkFMbsV6YXBi94rsfNAEx2m0d6X++cioqnuw2t3PvK2Bxnxc6TMrU=
 install:
 - bash ./scripts/travis_install.sh
 script:
