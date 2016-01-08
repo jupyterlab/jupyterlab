@@ -16,7 +16,7 @@ Package Install
 ```bash
 npm install --save jupyter-js-plugins
 conda install jupyter
-pip install -U --pre notebook  # requires the 4.1rc version of the notebook
+pip install -U notebook  # requires the 4.1 version of the notebook
 ```
 
 
@@ -26,12 +26,15 @@ Source Build
 **Prerequisites**
 - [git](http://git-scm.com/)
 - [node 0.12+](http://nodejs.org/)
+- [python](https://www.continuum.io/downloads)
 
 ```bash
 git clone https://github.com/jupyter/jupyter-js-plugins.git
 cd jupyter-js-plugins
 npm install
 npm run build
+conda install jupyter
+pip install -U notebook  # requires the 4.1 version of the notebook
 ```
 
 **Rebuild**
