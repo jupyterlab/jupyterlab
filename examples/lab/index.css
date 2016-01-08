@@ -9,13 +9,17 @@ body {
   overflow: hidden;
 }
 
-
 .p-AppShell.p-Widget {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+}
+
+
+.p-CommandPalette {
+  font-family: "Helvetica Neue", Helvetica;
 }
 
 
@@ -257,6 +261,83 @@ body {
 
 #p-main-split-panel > .p-SplitPanel-handle {
   background: #C0C0C0;
+}
+
+
+.editor-CodeMirrorWidget {
+  border: 1px solid #C0C0C0;
+  min-width: 100px;
+  min-height: 100px;
+}
+
+
+.p-CommandPalette {
+  background: #white;
+  min-width: 150px;
+  min-height: 50px;
+  padding: 4px 4px 0px 4px;
+}
+
+
+.p-CommandPalette .p-header {
+  color: #757575;
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 12px;
+}
+
+
+.p-CommandPalette .p-header hr {
+  height: 1px;
+  border-width: 0;
+  background-color: #e0e0e0;
+}
+
+
+.p-CommandPalette .p-search {
+  margin-bottom: 4px;
+}
+
+
+.p-CommandPalette .p-search .p-input-wrapper {
+  border: 1px solid #e0e0e0;
+  padding: 4px;
+}
+
+
+.p-CommandPalette .p-search input {
+  width: 100%;
+  border: none;
+  outline: none;
+}
+
+
+.p-CommandPalette .p-command {
+  color: #757575;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 3px 0px;
+}
+
+
+.p-CommandPalette .p-command .p-description {
+  color: #9e9e9e;
+  font-weight: 400;
+  font-size: 10px;
+}
+
+
+.p-CommandPalette .p-command .p-shortcut {
+  margin-right: 15px;
+}
+
+
+.p-CommandPalette .p-command:focus,
+.p-CommandPalette .p-command:focus .p-description,
+.p-CommandPalette .p-command:focus .p-shortcut {
+  outline: 0;
+  background: #2196f3;
+  color: #fff;
 }
 
 
