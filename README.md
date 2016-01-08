@@ -11,9 +11,12 @@ Package Install
 
 **Prerequisites**
 - [node](http://nodejs.org/)
+- [python](https://www.continuum.io/downloads)
 
 ```bash
 npm install --save jupyter-js-plugins
+conda install jupyter
+pip install -U --pre notebook  # requires the 4.1rc version of the notebook
 ```
 
 
