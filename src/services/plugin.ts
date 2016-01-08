@@ -55,33 +55,45 @@ class ServicesProvider implements IServicesProvider {
    * Construct a new services provider.
    */
   constructor() {
-    this._baseUrl = getConfigOption('baseUrl');
-    this._ajaxSettings = getConfigOption('ajaxSettings');
+    let baseUrl = getConfigOption('baseUrl');
+    let ajaxSettings = getConfigOption('ajaxSettings');
+    let options = { baseUrl, ajaxSettings };
+    this._kernelManager = new KernelManager(options);
+    this._sessionManager = new NotebookSessionManager(options);
+    this._contentsManager = new ContentsManager(baseUrl, ajaxSettings);
   }
 
   /**
-   * Create a new kernel manager instance.
+   * Get kernel manager instance.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  createKernelManager(): IKernelManager {
-    let options = { baseUrl: this._baseUrl, ajaxSettings: this._ajaxSettings };
-    return new KernelManager(options);
+  get kernelManager(): IKernelManager {
+    return this._kernelManager;
   }
 
   /**
-   * Create a new session manager instance.
+   * Get the session manager instance.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  createNotebookSessionManager(): INotebookSessionManager {
-    let options = { baseUrl: this._baseUrl, ajaxSettings: this._ajaxSettings };
-    return new NotebookSessionManager(options);
+  get notebookSessionManager(): INotebookSessionManager {
+    return this._sessionManager;
   }
 
   /**
-   * Create a new contents manager instance.
+   * Get the contents manager instance.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  createContentsManager(): IContentsManager {
-    return new ContentsManager(this._baseUrl, this._ajaxSettings);
+  get contentsManager(): IContentsManager {
+    return this._contentsManager;
   }
 
-  private _baseUrl = '';
-  private _ajaxSettings: any = null;
+  private _kernelManager: IKernelManager = null;
+  private _sessionManager: INotebookSessionManager = null;
+  private _contentsManager: IContentsManager = null;
 }

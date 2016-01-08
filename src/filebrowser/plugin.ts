@@ -40,15 +40,6 @@ function register(container: Container): void {
 
 
 /**
- * Resolve the default file provider.
- */
-export
-function resolve(container: Container): Promise<void> {
-  return container.resolve(FileBrowserProvider).then(() => { return; });
-}
-
-
-/**
  * An implementation of the FileBrowserProvider provider.
  */
 class FileBrowserProvider implements IFileBrowserProvider {
@@ -71,21 +62,7 @@ class FileBrowserProvider implements IFileBrowserProvider {
   constructor(shell: IAppShell, services: IServicesProvider, editor: IEditorHandler) {
     this._shell = shell;
     this._editor = editor;
-    let contents = services.createContentsManager();
-    let sessions = services.createNotebookSessionManager();
-    let model = new FileBrowserModel('', contents, sessions);
-    this._browser = new FileBrowser(model);
-    this._browser.title.text = 'File Browser';
-    this._shell.addToLeftArea(this._browser, { rank: 10 });
-    model.changed.connect((instance, change) => {
-      if (change.name === 'open' && change.newValue.type === 'file') {
-        let newEditor = editor.createEditor();
-        editor.setModeByFileName(newEditor, change.newValue.name);
-        editor.setText(newEditor, change.newValue.content);
-        newEditor.title.text = change.newValue.name;
-        this._shell.addToMainArea(newEditor);
-      }
-    });
+    this._services = services;
   }
 
   /**
@@ -95,11 +72,18 @@ class FileBrowserProvider implements IFileBrowserProvider {
    * This is a read-only property.
    */
   get fileBrowser(): FileBrowser {
+    if (this._browser === null) {
+      let contents = this._services.contentsManager;
+      let sessions = this._services.notebookSessionManager;
+      let model = new FileBrowserModel('', contents, sessions);
+      this._browser = new FileBrowser(model);
+      this._browser.title.text = 'Files';
+    }
     return this._browser;
   }
 
   private _shell: IAppShell = null;
   private _editor: IEditorHandler = null;
   private _browser: FileBrowser = null;
-
+  private _services: IServicesProvider;
 }

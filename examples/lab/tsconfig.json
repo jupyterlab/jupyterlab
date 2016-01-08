@@ -11,6 +11,7 @@
     "../typings/es6-promise.d.ts",
     "../typings/codemirror/codemirror.d.ts",
     "../typings/requirejs/requirejs.d.ts",
-    "index.ts"
+    "index.ts",
+    "plugin.ts"
   ]
 }

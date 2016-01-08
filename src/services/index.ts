@@ -19,19 +19,19 @@ export
 interface IServicesProvider {
 
   /**
-   * Create a new kernel manager instance.
+   * Get the kernel manager instance.
    */
-  createKernelManager(): IKernelManager;
+  kernelManager: IKernelManager;
 
   /**
-   * Create a new session manager instance.
+   * Get the session manager instance.
    */
-  createNotebookSessionManager(): INotebookSessionManager;
+  notebookSessionManager: INotebookSessionManager;
 
   /**
-   * Create a new contents manager instance.
+   * Get the contents manager instance.
    */
-  createContentsManager(): IContentsManager;
+  contentsManager: IContentsManager;
 }
 
 
