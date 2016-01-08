@@ -78,6 +78,15 @@ class FileBrowserProvider implements IFileBrowserProvider {
       let model = new FileBrowserModel('', contents, sessions);
       this._browser = new FileBrowser(model);
       this._browser.title.text = 'Files';
+      model.changed.connect((instance, change) => {
+      if (change.name === 'open' && change.newValue.type === 'file') {
+        let newEditor = this._editor.createEditor();
+        this._editor.setModeByFileName(newEditor, change.newValue.name);
+        this._editor.setText(newEditor, change.newValue.content);
+        newEditor.title.text = change.newValue.name;
+        this._shell.addToMainArea(newEditor);
+      }
+    });
     }
     return this._browser;
   }

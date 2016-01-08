@@ -69,25 +69,47 @@ class DefaultHandler {
    * Create a terminal and add it to the main shell area.
    */
   run() {
-    let commandItem = {
+    let termCommandItem = {
       id: 'jupyter-plugins:new-terminal',
       command: new DelegateCommand(() => {
         let term = this._term.createTerminal();
         this._shell.addToMainArea(term);
       })
     }
-    this._registry.add([commandItem]);
-    let paletteItem = {
+    let newFileCommandItem = {
+      id: 'jupyter-plugins:new-text-file',
+      command: new DelegateCommand(() => {
+        console.log('New Text File');
+      })
+    }
+    let newNotebookCommandItem = {
+      id: 'jupyter-plugins:new-notebook',
+      command: new DelegateCommand(() => {
+        console.log('New Notebook');
+      })
+    }
+    this._registry.add([termCommandItem, newFileCommandItem,
+                        newNotebookCommandItem]);
+    let openPaletteItems = [{
       id: 'jupyter-plugins:new-terminal',
       title: 'New Terminal',
       caption: ''
-    }
+    }, {
+      id: 'jupyter-plugins:new-text-file',
+      title: 'New Text File',
+      caption: ''
+    }, {
+      id: 'jupyter-plugins:new-notebook',
+      title: 'New Notebook',
+      caption: ''
+    }]
     let section = {
       text: 'Open...',
-      items: [paletteItem]
+      items: openPaletteItems
     }
     this._palette.add([section]);
     this._shell.addToLeftArea(this._browser, { rank: 10 });
+
   }
 
   private _term: ITerminalProvider = null;
