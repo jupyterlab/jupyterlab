@@ -81,6 +81,8 @@ class DefaultHandler {
       id: 'jupyter-plugins:new-terminal',
       command: new DelegateCommand(() => {
         let term = this._term.createTerminal();
+        term.color = 'black';
+        term.background = 'white';
         this._shell.addToMainArea(term);
       })
     }
@@ -123,7 +125,10 @@ class DefaultHandler {
     }
     this._palette.add([section]);
     this._shell.addToLeftArea(this._browser, { rank: 10 });
-    this._shell.addToMainArea(this._term.createTerminal());
+    let term = this._term.createTerminal();
+    term.color = 'black';
+    term.background = 'white';
+    this._shell.addToMainArea(term);
 
   }
 

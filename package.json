@@ -40,7 +40,7 @@
     "clean:example": "rimraf example/build",
     "clean": "rimraf docs/api && rimraf lib && rimraf test/coverage",
     "build:example": "tsc --project example/src && webpack --config example/webpack.conf.js",
-    "build:src": "tsc --project src",
+    "build:src": "tsc --project src && node scripts/copycss.js",
     "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
     "build": "npm run build:src && npm run build:test",
     "docs": "typedoc --options scripts/tdoptions.json",
