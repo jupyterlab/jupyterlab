@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
     "declaration": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
     "module": "commonjs",
-    "target": "ES5"
+    "target": "ES5",
+    "outDir": "../build"
   },
   "files": [
-    "../typings/es6-promise.d.ts",
-    "../typings/codemirror/codemirror.d.ts",
-    "../typings/requirejs/requirejs.d.ts",
+    "../../typings/es6-promise.d.ts",
+    "../../typings/codemirror/codemirror.d.ts",
+    "../../typings/requirejs/requirejs.d.ts",
     "index.ts",
     "plugin.ts"
   ]

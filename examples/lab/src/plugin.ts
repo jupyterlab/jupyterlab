@@ -3,16 +3,16 @@
 'use strict';
 
 import {
-  CodeMirrorWidget
-} from 'jupyter-js-editor';
-
-import {
   FileBrowser
 } from 'jupyter-js-filebrowser';
 
 import {
   IAppShell, ICommandPalette, ICommandRegistry
 } from 'phosphide';
+
+import {
+  CodeMirrorWidget
+} from 'phosphor-codemirror';
 
 import {
   ICommand, DelegateCommand
@@ -28,7 +28,7 @@ import {
 
 import {
   ITerminalProvider, IFileBrowserProvider
-} from '../lib';
+} from '../../lib';
 
 
 /**

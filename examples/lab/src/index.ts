@@ -11,10 +11,10 @@ function main() {
     require('phosphide/lib/appshell/plugin'),
     require('phosphide/lib/commandregistry/plugin'),
     require('phosphide/lib/commandpalette/plugin'),
-    require('../lib/terminal/plugin'),
-    require('../lib/editor/plugin'),
-    require('../lib/filebrowser/plugin'),
-    require('../lib/services/plugin'),
+    require('../../lib/terminal/plugin'),
+    require('../../lib/editor/plugin'),
+    require('../../lib/filebrowser/plugin'),
+    require('../../lib/services/plugin'),
     require('./plugin')
   ]).then(function() {
     console.log('loading finished');
