@@ -92,23 +92,24 @@ class DefaultHandler {
                         newNotebookCommandItem]);
     let openPaletteItems = [{
       id: 'jupyter-plugins:new-terminal',
-      title: 'New Terminal',
+      title: 'Terminal',
       caption: ''
     }, {
       id: 'jupyter-plugins:new-text-file',
-      title: 'New Text File',
+      title: 'Text File',
       caption: ''
     }, {
       id: 'jupyter-plugins:new-notebook',
-      title: 'New Notebook',
+      title: 'Notebook',
       caption: ''
     }]
     let section = {
-      text: 'Open...',
+      text: 'New...',
       items: openPaletteItems
     }
     this._palette.add([section]);
     this._shell.addToLeftArea(this._browser, { rank: 10 });
+    this._shell.addToMainArea(this._term.createTerminal());
 
   }
 
