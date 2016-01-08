@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  CodeMirrorWidget
+} from 'jupyter-js-editor';
+
+import {
   FileBrowser
 } from 'jupyter-js-filebrowser';
 
@@ -17,6 +21,10 @@ import {
 import {
   Container, Token
 } from 'phosphor-di';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 import {
   ITerminalProvider, IFileBrowserProvider
@@ -79,13 +87,19 @@ class DefaultHandler {
     let newFileCommandItem = {
       id: 'jupyter-plugins:new-text-file',
       command: new DelegateCommand(() => {
-        console.log('New Text File');
+        // TODO
+        let editor = new CodeMirrorWidget();
+        editor.title.text = 'untitled.txt'
+        this._shell.addToMainArea(editor);
       })
     }
     let newNotebookCommandItem = {
       id: 'jupyter-plugins:new-notebook',
       command: new DelegateCommand(() => {
-        console.log('New Notebook');
+        let widget = new Widget();
+        widget.title.text = 'Untitled'
+        widget.node.innerHTML = '<h1>New Notebook</h1>';
+        this._shell.addToMainArea(widget);
       })
     }
     this._registry.add([termCommandItem, newFileCommandItem,
