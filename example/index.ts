@@ -18,9 +18,10 @@ import {
 } from 'phosphor-keymap';
 
 import {
-  Contents, IContentsModel, startNewSession
+  ContentsManager, IContentsModel, startNewSession
 } from 'jupyter-js-services';
 
+// jupyter notebook --NotebookApp.allow_origin=* --port 8890
 let SERVER_URL='http://localhost:8890';
 let NOTEBOOK = 'test.ipynb';
 
@@ -65,7 +66,7 @@ function main(): void {
   // TODO: check out static example from the history
   // and make that a separate example.
   
-  let contents = new Contents(SERVER_URL);
+  let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then((data) => {
     let nbdata: NBData = makedata(data);
     let nbModel = makeModels(nbdata);
