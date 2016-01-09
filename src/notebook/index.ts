@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 'use-strict';
 
-export * from './NotebookViewModel';
-export * from './NotebookWidget';
-export * from './Serialize';
+export * from './model';
+export * from './widget';
+export * from './serialize';
 export * from './nbformat';

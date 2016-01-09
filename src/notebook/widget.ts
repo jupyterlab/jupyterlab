@@ -19,17 +19,17 @@ import {
 } from 'phosphor-panel';
 
 import {
-  NotebookViewModel, INotebookViewModel
-} from './NotebookViewModel';
+  NotebookModel, INotebookModel
+} from './model';
 
 import {
-  ICellViewModel, CellType,
+  ICellModel, CellType,
     CodeCellWidget, MarkdownCellWidget,
-    CodeCellViewModel, MarkdownCellViewModel, isMarkdownCell
+    CodeCellModel, MarkdownCellModel, isMarkdownCell
 } from 'jupyter-js-cells';
 
 import {
-    OutputAreaWidget, IOutputAreaViewModel
+    OutputAreaWidget, IOutputAreaModel
 } from 'jupyter-js-output-area';
 
 import {
@@ -47,20 +47,20 @@ class NotebookWidget extends Panel {
   /**
    * Construct a code cell widget.
    */
-  constructor(model: INotebookViewModel) {
+  constructor(model: INotebookModel) {
     super();
     this.addClass('jp-Notebook');
     this._model = model;
 
-    this._listdispose = follow<ICellViewModel>(model.cells, this, (c: ICellViewModel) => {
+    this._listdispose = follow<ICellModel>(model.cells, this, (c: ICellModel) => {
       let w: Widget;
       switch(c.type) {
       case CellType.Code:
-        w = new CodeCellWidget(c as CodeCellViewModel);
+        w = new CodeCellWidget(c as CodeCellModel);
         w.addClass('jp-nbCell');
         break;
       case CellType.Markdown:
-        w = new MarkdownCellWidget(c as MarkdownCellViewModel);
+        w = new MarkdownCellWidget(c as MarkdownCellModel);
         w.addClass('jp-nbCell');
         break;
       default:
@@ -116,8 +116,8 @@ class NotebookWidget extends Panel {
     return void 0;
   }
 
-  protected cellsChanged(sender: IObservableList<ICellViewModel>, 
-                         args: IListChangedArgs<ICellViewModel>) {
+  protected cellsChanged(sender: IObservableList<ICellModel>, 
+                         args: IListChangedArgs<ICellModel>) {
     console.log(args);
   }
 
@@ -137,7 +137,7 @@ class NotebookWidget extends Panel {
   /**
    * Change handler for model updates.
    */
-  protected modelStateChanged(sender: INotebookViewModel, args: IChangedArgs<any>) {
+  protected modelStateChanged(sender: INotebookModel, args: IChangedArgs<any>) {
     switch(args.name) {
     case 'defaultMimetype': break;
     case 'mode': break;
@@ -150,7 +150,7 @@ class NotebookWidget extends Panel {
     this._listdispose.dispose();
     super.dispose();
   }
-  private _model: INotebookViewModel;
+  private _model: INotebookModel;
   private _listdispose: IDisposable;
 }
 

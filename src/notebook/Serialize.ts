@@ -3,16 +3,16 @@
 'use strict';
 
 import {
-  NotebookViewModel, INotebookViewModel
-} from './NotebookViewModel';
+  NotebookModel, INotebookModel
+} from './model';
 
 import {
-  ICellViewModel,
-  CodeCellViewModel, MarkdownCellViewModel
+  ICellModel,
+  CodeCellModel, MarkdownCellModel
 } from 'jupyter-js-cells';
 
 import {
-  InputAreaViewModel
+  InputAreaModel
 } from 'jupyter-js-input-area';
 
 import {
@@ -20,10 +20,10 @@ import {
 } from 'jupyter-js-editor';
 
 import {
-  IOutputAreaViewModel, OutputAreaViewModel,
-  DisplayDataViewModel, ExecuteResultViewModel,
-  ExecuteErrorViewModel, StreamViewModel,
-  StreamName, OutputType, OutputViewModel
+  IOutputAreaModel, OutputAreaModel,
+  DisplayDataModel, ExecuteResultModel,
+  ExecuteErrorModel, StreamModel,
+  StreamName, OutputType, OutputModel
 } from 'jupyter-js-output-area';
 
 import {
@@ -36,29 +36,29 @@ import {
 } from './nbformat';
 
 export
-function makeModels(data: NBData): NotebookViewModel {
+function makeModels(data: NBData): NotebookModel {
   // Construct the entire model hierarchy explicitly  
-  let nb = new NotebookViewModel();
+  let nb = new NotebookModel();
   nb.defaultMimetype = 'text/x-python';
   
   // iterate through the cell data, creating cell models
   data.content.cells.forEach((c) => {
-    let input = new InputAreaViewModel();
+    let input = new InputAreaModel();
     input.textEditor = new EditorModel();
     input.textEditor.text = c.source;
     
     if (isMarkdownCell(c)) {
-      let cell = new MarkdownCellViewModel();
+      let cell = new MarkdownCellModel();
       cell.input = input;
       cell.rendered = true;
       nb.cells.add(cell);
     } else if (isCodeCell(c)) {
-      let cell = new CodeCellViewModel();
+      let cell = new CodeCellModel();
       cell.input = input;
-      let outputArea = new OutputAreaViewModel();
+      let outputArea = new OutputAreaModel();
       cell.output = outputArea;
       for (let i=0; i<c.outputs.length; i++) {
-        outputArea.add(buildOutputViewModel(c.outputs[i]));
+        outputArea.add(buildOutputModel(c.outputs[i]));
       }
       nb.cells.add(cell);
     }
@@ -70,14 +70,14 @@ function makeModels(data: NBData): NotebookViewModel {
 }
 
 export
-function buildOutputViewModel(out: Output): OutputViewModel {
+function buildOutputModel(out: Output): OutputModel {
   if (isDisplayData(out)) {
-    let outmodel = new DisplayDataViewModel();
+    let outmodel = new DisplayDataModel();
     outmodel.data = out.data;
     outmodel.metadata = out.metadata;
     return outmodel;
   } else if (isStream(out)) {
-    let outmodel = new StreamViewModel();
+    let outmodel = new StreamModel();
     switch (out.name) {
     case 'stdout':
       outmodel.name = StreamName.StdOut;
@@ -91,13 +91,13 @@ function buildOutputViewModel(out: Output): OutputViewModel {
     outmodel.text = out.text;
     return outmodel;
   } else if (isJupyterError(out)) {
-    let outmodel = new ExecuteErrorViewModel();
+    let outmodel = new ExecuteErrorModel();
     outmodel.ename = out.ename;
     outmodel.evalue = out.evalue;
     outmodel.traceback = out.traceback.join('\n');
     return outmodel;
   } else if (isExecuteResult(out)) {
-    let outmodel = new ExecuteResultViewModel();
+    let outmodel = new ExecuteResultModel();
     outmodel.data = out.data;
     outmodel.executionCount = out.execution_count;
     outmodel.metadata = out.metadata;

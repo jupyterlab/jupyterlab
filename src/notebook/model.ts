@@ -1,8 +1,8 @@
 import {
-  ICellViewModel, 
-  ICodeCellViewModel, CodeCellViewModel,
-  IMarkdownCellViewModel, MarkdownCellViewModel,
-  IRawCellViewModel
+  ICellModel, 
+  ICodeCellModel, CodeCellModel,
+  IMarkdownCellModel, MarkdownCellModel,
+  IRawCellModel
 } from 'jupyter-js-cells';
 
 import {
@@ -22,13 +22,13 @@ import {
 } from 'phosphor-properties';
 
 import {
-  InputAreaViewModel
+  InputAreaModel
 } from 'jupyter-js-input-area';
 
 import {
-  OutputAreaViewModel,
-  DisplayDataViewModel, ExecuteResultViewModel,
-  ExecuteErrorViewModel, StreamViewModel,
+  OutputAreaModel,
+  DisplayDataModel, ExecuteResultModel,
+  ExecuteErrorModel, StreamModel,
   StreamName
 } from 'jupyter-js-output-area';
 
@@ -56,11 +56,11 @@ enum NotebookMode {
  * The definition of a model object for a notebook widget.
  */
 export 
-interface INotebookViewModel {
+interface INotebookModel {
   /**
    * A signal emitted when state of the notebook changes.
    */
-  stateChanged: ISignal<INotebookViewModel, IChangedArgs<any>>;
+  stateChanged: ISignal<INotebookModel, IChangedArgs<any>>;
 
   /**
    * The default mime type for new code cells in the notebook.
@@ -97,7 +97,7 @@ interface INotebookViewModel {
    * #### Notes
    * This is a read-only property.
    */
-  cells: IObservableList<ICellViewModel>;
+  cells: IObservableList<ICellModel>;
 
   /**
    * The currently selected cell.
@@ -119,7 +119,7 @@ interface INotebookViewModel {
    * If the source argument does not give an input mimetype, the code cell
    * defaults to the notebook [[defaultMimetype]].
    */
-  createCodeCell(source?: ICellViewModel): ICodeCellViewModel;
+  createCodeCell(source?: ICellModel): ICodeCellModel;
 
   /**
    * A factory for creating a new Markdown cell.
@@ -129,7 +129,7 @@ interface INotebookViewModel {
    * @returns A new markdown cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  createMarkdownCell(source?: ICellViewModel): IMarkdownCellViewModel;
+  createMarkdownCell(source?: ICellModel): IMarkdownCellModel;
 
   /**
    * A factory for creating a new raw cell.
@@ -139,30 +139,30 @@ interface INotebookViewModel {
    * @returns A new raw cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  //createRawCell(source?: ICellViewModel): IRawCellViewModel;
+  //createRawCell(source?: ICellModel): IRawCellModel;
 }
 
 
 /**
- * An implementation of a notebook viewmodel.
+ * An implementation of a notebook Model.
  */
 export
-class NotebookViewModel implements INotebookViewModel {
+class NotebookModel implements INotebookModel {
   /**
    * A signal emitted when the state of the model changes.
    *
    * **See also:** [[stateChanged]]
    */
-  static stateChangedSignal = new Signal<INotebookViewModel, IChangedArgs<any>>();
+  static stateChangedSignal = new Signal<INotebookModel, IChangedArgs<any>>();
 
 /**
 * A property descriptor which holds the default mimetype for new code cells.
 *
 * **See also:** [[defaultMimeType]]
 */
-static defaultMimetype = new Property<NotebookViewModel, string>({
+static defaultMimetype = new Property<NotebookModel, string>({
     name: 'defaultMimetype',
-    notify: NotebookViewModel.stateChangedSignal,
+    notify: NotebookModel.stateChangedSignal,
 });
 
 /**
@@ -170,9 +170,9 @@ static defaultMimetype = new Property<NotebookViewModel, string>({
 *
 * **See also:** [[mode]]
 */
-static modeProperty = new Property<NotebookViewModel, NotebookMode>({
+static modeProperty = new Property<NotebookModel, NotebookMode>({
     name: 'mode',
-    notify: NotebookViewModel.stateChangedSignal,
+    notify: NotebookModel.stateChangedSignal,
 });
 
 
@@ -181,9 +181,9 @@ static modeProperty = new Property<NotebookViewModel, NotebookMode>({
 *
 * **See also:** [[selectedCellIndex]]
 */
-static selectedCellIndexProperty = new Property<NotebookViewModel, number>({
+static selectedCellIndexProperty = new Property<NotebookModel, number>({
     name: 'selectedCellIndex',
-    notify: NotebookViewModel.stateChangedSignal,
+    notify: NotebookModel.stateChangedSignal,
 });
 
 
@@ -193,8 +193,8 @@ static selectedCellIndexProperty = new Property<NotebookViewModel, number>({
    * #### Notes
    * This is a pure delegate to the [[stateChangedSignal]].
    */
-  get stateChanged(): ISignal<INotebookViewModel, IChangedArgs<any>> {
-    return NotebookViewModel.stateChangedSignal.bind(this);
+  get stateChanged(): ISignal<INotebookModel, IChangedArgs<any>> {
+    return NotebookModel.stateChangedSignal.bind(this);
   }
 
   /**
@@ -204,7 +204,7 @@ static selectedCellIndexProperty = new Property<NotebookViewModel, number>({
    * This is a pure delegate to the [[defaultMimetype]].
    */
   get defaultMimetype() {
-    return NotebookViewModel.defaultMimetype.get(this);
+    return NotebookModel.defaultMimetype.get(this);
   }
 
   /**
@@ -214,7 +214,7 @@ static selectedCellIndexProperty = new Property<NotebookViewModel, number>({
    * This is a pure delegate to the [[defaultMimetype]].
    */
   set defaultMimetype(value: string) {
-    NotebookViewModel.defaultMimetype.set(this, value);
+    NotebookModel.defaultMimetype.set(this, value);
   }
 
   /**
@@ -224,7 +224,7 @@ static selectedCellIndexProperty = new Property<NotebookViewModel, number>({
    * This is a pure delegate to the [[modeProperty]].
    */
   get mode() {
-    return NotebookViewModel.modeProperty.get(this);
+    return NotebookModel.modeProperty.get(this);
   }
 
   /**
@@ -234,7 +234,7 @@ static selectedCellIndexProperty = new Property<NotebookViewModel, number>({
    * This is a pure delegate to the [[modeProperty]].
    */
   set mode(value: NotebookMode) {
-    NotebookViewModel.modeProperty.set(this, value);
+    NotebookModel.modeProperty.set(this, value);
   }
 
   /**
@@ -244,7 +244,7 @@ static selectedCellIndexProperty = new Property<NotebookViewModel, number>({
    * This is a pure delegate to the [[selectedCellIndexProperty]].
    */
   get selectedCellIndex() {
-    return NotebookViewModel.selectedCellIndexProperty.get(this);
+    return NotebookModel.selectedCellIndexProperty.get(this);
   }
 
   /**
@@ -254,7 +254,7 @@ static selectedCellIndexProperty = new Property<NotebookViewModel, number>({
    * This is a pure delegate to the [[selectedCellIndexProperty]].
    */
   set selectedCellIndex(value: number) {
-    NotebookViewModel.selectedCellIndexProperty.set(this, value);
+    NotebookModel.selectedCellIndexProperty.set(this, value);
   }
   
   selectNextCell() {
@@ -269,14 +269,14 @@ static selectedCellIndexProperty = new Property<NotebookViewModel, number>({
     }
   }
   
-  cells: IObservableList<ICellViewModel> = new ObservableList<ICellViewModel>();
+  cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();
   
-  createCodeCell(source?: ICellViewModel): ICodeCellViewModel {
-    let cell = new CodeCellViewModel();
+  createCodeCell(source?: ICellModel): ICodeCellModel {
+    let cell = new CodeCellModel();
     return cell;
   }
-  createMarkdownCell(source?: ICellViewModel): IMarkdownCellViewModel {
-    let cell  = new MarkdownCellViewModel();
+  createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
+    let cell  = new MarkdownCellModel();
     return cell;
   }
 }
