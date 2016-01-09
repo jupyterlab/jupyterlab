@@ -155,36 +155,36 @@ class NotebookModel implements INotebookModel {
    */
   static stateChangedSignal = new Signal<INotebookModel, IChangedArgs<any>>();
 
-/**
-* A property descriptor which holds the default mimetype for new code cells.
-*
-* **See also:** [[defaultMimeType]]
-*/
-static defaultMimetype = new Property<NotebookModel, string>({
-    name: 'defaultMimetype',
-    notify: NotebookModel.stateChangedSignal,
-});
-
-/**
-* A property descriptor which holds the mode of the notebook.
-*
-* **See also:** [[mode]]
-*/
-static modeProperty = new Property<NotebookModel, NotebookMode>({
-    name: 'mode',
-    notify: NotebookModel.stateChangedSignal,
-});
-
-
-/**
-* A property descriptor for the selected cell index.
-*
-* **See also:** [[selectedCellIndex]]
-*/
-static selectedCellIndexProperty = new Property<NotebookModel, number>({
-    name: 'selectedCellIndex',
-    notify: NotebookModel.stateChangedSignal,
-});
+  /**
+  * A property descriptor which holds the default mimetype for new code cells.
+  *
+  * **See also:** [[defaultMimeType]]
+  */
+  static defaultMimetype = new Property<NotebookModel, string>({
+      name: 'defaultMimetype',
+      notify: NotebookModel.stateChangedSignal,
+  });
+  
+  /**
+  * A property descriptor which holds the mode of the notebook.
+  *
+  * **See also:** [[mode]]
+  */
+  static modeProperty = new Property<NotebookModel, NotebookMode>({
+      name: 'mode',
+      notify: NotebookModel.stateChangedSignal,
+  });
+  
+  
+  /**
+  * A property descriptor for the selected cell index.
+  *
+  * **See also:** [[selectedCellIndex]]
+  */
+  static selectedCellIndexProperty = new Property<NotebookModel, number>({
+      name: 'selectedCellIndex',
+      notify: NotebookModel.stateChangedSignal,
+  });
 
 
   /**
@@ -257,27 +257,40 @@ static selectedCellIndexProperty = new Property<NotebookModel, number>({
     NotebookModel.selectedCellIndexProperty.set(this, value);
   }
   
+  /**
+   * Select the next cell in the notebook.
+   */
   selectNextCell() {
     if (this.selectedCellIndex < this.cells.length - 1) {
       this.selectedCellIndex += 1;
     }
   }
 
+  /**
+   * Select the previous cell in the notebook.
+   */
   selectPreviousCell() {
     if (this.selectedCellIndex > 0) {
       this.selectedCellIndex -= 1;
     }
   }
   
-  cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();
-  
+  /**
+   * Create a code cell model.
+   */
   createCodeCell(source?: ICellModel): ICodeCellModel {
     let cell = new CodeCellModel();
     return cell;
   }
+
+  /**
+   * Create a markdown cell model.
+   */
   createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
     let cell  = new MarkdownCellModel();
     return cell;
   }
+
+  cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();  
 }
 

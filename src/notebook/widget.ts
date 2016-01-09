@@ -116,11 +116,17 @@ class NotebookWidget extends Panel {
     return void 0;
   }
 
+  /**
+   * Handle a change cells event.
+   */
   protected cellsChanged(sender: IObservableList<ICellModel>, 
                          args: IListChangedArgs<ICellModel>) {
     console.log(args);
   }
 
+  /**
+   * Handle a selection change event.
+   */
   updateSelectedCell(newIndex: number, oldIndex?: number) {
     if (oldIndex !== void 0) {
       this.childAt(oldIndex).removeClass('jp-selected-cell');
@@ -146,6 +152,9 @@ class NotebookWidget extends Panel {
     }
   }
 
+  /**
+   * Dispose this model.
+   */
   dispose() {
     this._listdispose.dispose();
     super.dispose();
@@ -154,8 +163,13 @@ class NotebookWidget extends Panel {
   private _listdispose: IDisposable;
 }
 
-
-function follow<T>(source: IObservableList<T>, 
+/**
+ * Make a panel mirror changes to an observable list.
+ * 
+ * @param source - The observable list.
+ * @param sink - The Panel.
+ * @param factory - A function which takes an item from the list and constructs a widget.
+ */function follow<T>(source: IObservableList<T>, 
                      sink: Panel, 
                      factory: (arg: T)=> Widget): IDisposable {
 

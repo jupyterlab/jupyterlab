@@ -35,6 +35,9 @@ import {
   JupyterError, isJupyterError, Output
 } from './nbformat';
 
+/**
+ * Build a complete notebook model from the notebook data.
+ */
 export
 function makeModels(data: NBData): NotebookModel {
   // Construct the entire model hierarchy explicitly  
@@ -69,6 +72,9 @@ function makeModels(data: NBData): NotebookModel {
   return nb;
 }
 
+/**
+ * Build an output model from output message data.
+ */
 export
 function buildOutputModel(out: Output): OutputModel {
   if (isDisplayData(out)) {
