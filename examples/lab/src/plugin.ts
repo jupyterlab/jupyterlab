@@ -27,7 +27,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ITerminalProvider, IFileBrowserProvider
+  ITerminalProvider, IFileBrowserProvider, IServicesProvider
 } from '../../lib';
 
 
@@ -53,24 +53,27 @@ class DefaultHandler {
   /**
    * The dependencies required by the default plugin.
    */
-  static requires: Token<any>[] = [IAppShell, ITerminalProvider, ICommandPalette, ICommandRegistry, IFileBrowserProvider];
+  static requires: Token<any>[] = [IAppShell, ITerminalProvider, ICommandPalette, ICommandRegistry, IFileBrowserProvider, IServicesProvider];
 
   /**
    * Create a default plugin instance..
    */
-  static create(shell: IAppShell, term: ITerminalProvider, palette: ICommandPalette, registry: ICommandRegistry, browser: IFileBrowserProvider): DefaultHandler {
-    return new DefaultHandler(shell, term, palette, registry, browser);
+  static create(shell: IAppShell, term: ITerminalProvider, palette: ICommandPalette, registry: ICommandRegistry, browser: IFileBrowserProvider,
+    services: IServicesProvider): DefaultHandler {
+    return new DefaultHandler(shell, term, palette, registry, browser, services);
   }
 
   /**
    * Construct a new default plugin.
    */
-  constructor(shell: IAppShell, term: ITerminalProvider, palette: ICommandPalette, registry: ICommandRegistry, browser: IFileBrowserProvider) {
+  constructor(shell: IAppShell, term: ITerminalProvider, palette: ICommandPalette, registry: ICommandRegistry, browser: IFileBrowserProvider,
+    services: IServicesProvider) {
     this._shell = shell;
     this._term = term;
     this._palette = palette;
     this._registry = registry;
     this._browser = browser.fileBrowser;
+    this._services = services;
   }
 
   /**
@@ -124,17 +127,26 @@ class DefaultHandler {
       items: openPaletteItems
     }
     this._palette.add([section]);
-    this._shell.addToLeftArea(this._browser, { rank: 10 });
+
     let term = this._term.createTerminal();
     term.color = 'black';
     term.background = 'white';
     this._shell.addToMainArea(term);
 
+    // Start a default session.
+    let contents = this._services.contentsManager;
+    contents.newUntitled('', { type: 'notebook' }).then(content => {
+      let sessions = this._services.notebookSessionManager;
+      sessions.startNew({ notebookPath: content.path }).then(() => {
+        this._shell.addToLeftArea(this._browser, { rank: 10 });
+      });
+    });
   }
 
   private _term: ITerminalProvider = null;
   private _shell: IAppShell = null;
   private _palette: ICommandPalette = null;
   private _registry: ICommandRegistry = null;
-  private _browser: FileBrowser;
+  private _browser: FileBrowser = null;
+  private _services: IServicesProvider = null;
 }
