@@ -343,7 +343,7 @@ body {
 
 .p-MenuBar {
   padding-left: 5px;
-  background: #FEFEFE;
+  background: #FAFAFA;
   color: rgba(0, 0, 0, 0.87);
   border-bottom: 1px solid #DDDDDD;
   font: 13px Helvetica, Arial, sans-serif;
@@ -372,7 +372,7 @@ body {
 }
 
 
-.p-MenuBar-item.p-mod-separator-type {
+.p-MenuBar-item.p-type-separator {
   margin: 2px;
   padding: 0;
   border: none;
@@ -381,7 +381,7 @@ body {
 
 
 .p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
-  z-index: 1000000;
+  z-index: 10001;
   background: white;
   border-left: 1px solid #C0C0C0;
   border-right: 1px solid #C0C0C0;
@@ -390,6 +390,8 @@ body {
 
 
 .p-Menu {
+  z-index: 10000;
+  padding: 3px 0px;
   background: white;
   color: rgba(0, 0, 0, 0.87);
   border: 1px solid #C0C0C0;
@@ -408,22 +410,54 @@ body {
 }
 
 
-.p-Menu-item.p-mod-separator-type > span::after {
+.p-Menu-itemIcon {
+  width: 21px;
+  padding: 4px 2px;
+}
+
+
+.p-Menu-itemText {
+  padding: 4px 35px 4px 2px;
+}
+
+
+.p-Menu-itemShortcut {
+  padding: 4px 0px;
+}
+
+
+.p-Menu-itemSubmenuIcon {
+  width: 16px;
+  padding: 4px 0px;
+}
+
+
+.p-Menu-item.p-type-separator > span {
+  padding: 0;
+  height: 9px;
+}
+
+
+.p-Menu-item.p-type-separator > span::after {
+  content: '';
+  display: block;
+  position: relative;
+  top: 4px;
   border-top: 1px solid #DDDDDD;
 }
 
 
-.p-Menu-item-icon::before,
-.p-Menu-item-submenu::before {
+.p-Menu-itemIcon::before,
+.p-Menu-itemSubmenuIcon::before {
   font-family: FontAwesome;
 }
 
 
-.p-Menu-item.p-mod-check-type.p-mod-checked > .p-Menu-item-icon::before {
+.p-Menu-item.p-type-check.p-mod-checked > .p-Menu-itemIcon::before {
   content: '\f00c';
 }
 
 
-.p-Menu-item.p-mod-submenu-type > .p-Menu-item-submenu::before {
+.p-Menu-item.p-type-submenu > .p-Menu-itemSubmenuIcon::before {
   content: '\f0da';
 }

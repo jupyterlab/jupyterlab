@@ -5,11 +5,11 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
-    "outDir": "build"
+    "outDir": "../build"
   },
   "files": [
-    "../typings/expect.js/expect.js.d.ts",
-    "../typings/mocha/mocha.d.ts",
-    "src/index.ts"
+    "../../typings/expect.js/expect.js.d.ts",
+    "../../typings/mocha/mocha.d.ts",
+    "index.ts"
   ]
 }

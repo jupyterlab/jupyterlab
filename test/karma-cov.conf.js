@@ -6,27 +6,7 @@ module.exports = function (config) {
     browsers: ['Firefox'],
     frameworks: ['mocha'],
     reporters: ['mocha', 'coverage'],
-    preprocessors: { 'test/src/*.ts': ['webpack'] },
-    files: ['test/src/*.ts'],
-    webpack: {
-      resolve: {
-        extensions: ['', '.ts', '.js']
-      },
-      module: {
-        loaders: [
-          { test: /\.ts$/, loader: 'ts-loader' },
-          { test: /\.css$/, loader: 'style-loader!css-loader' },
-        ],
-        preLoaders: [
-          // instrument only testing sources with Istanbul
-          {
-            test: /\.js$/,
-            include: path.resolve('lib/'),
-            loader: 'istanbul-instrumenter'
-          }
-        ]
-      }
-    },
+    files: ['test/build/coverage.js'],
     coverageReporter: {
       reporters : [
         { 'type': 'text' },
