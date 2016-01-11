@@ -1,12 +1,22 @@
 {
   "name": "jupyter-js-notebook",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Notebook widget for Jupyter",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "phosphor-observablelist": "^0.9.2",
-    "phosphor-widget": "^0.9.13"
+    "jupyter-js-cells": "^0.2.0",
+    "jupyter-js-input-area": "^0.0.3",
+    "jupyter-js-editor": "^0.1.9",
+    "jupyter-js-services": "^0.3.0-alpha",
+    "jupyter-js-output-area": "^0.3.0",
+    "phosphor-disposable": "^1.0.5",
+    "phosphor-keymap": "^0.3.0",
+    "phosphor-observablelist": "^1.0.0-beta",
+    "phosphor-properties": "^2.0.0",
+    "phosphor-signaling": "^1.2.0",
+    "phosphor-widget": "^1.0.0-rc.0",
+    "phosphor-panel": "^1.0.0-rc.1"
   },
   "devDependencies": {
     "expect.js": "^0.3.1",
@@ -21,14 +31,19 @@
     "karma-mocha-reporter": "^1.1.1",
     "mocha": "^2.2.5",
     "rimraf": "^2.4.2",
+    "steal": "^0.12.7",
     "typedoc": "^0.3.11",
     "typescript": "^1.6.2"
   },
   "scripts": {
-    "clean": "rimraf docs && rimraf lib && rimraf test/build",
+    "clean:lib": "rimraf lib",
+    "clean:example": "rimraf example/*.js example/*.map",
+    "clean:test": "rimraf test/build && rimraf test/coverage",
+    "clean": "npm run clean:lib && npm run clean:example && npm run clean:test",
     "build:src": "tsc --project src && node scripts/copycss.js",
     "build:test": "tsc --project test",
-    "build": "npm run build:src && npm run build:test",
+    "build:example": "tsc --project example",
+    "build": "npm run build:src && npm run build:example && npm run build:test",
     "docs": "typedoc --options scripts/tdoptions.json",
     "postinstall": "npm dedupe",
     "prepublish": "npm run build",
@@ -49,6 +64,11 @@
     "lib/*.js",
     "lib/*.d.ts"
   ],
+  "system": {
+    "npmIgnore": [
+      "devDependencies"
+    ]
+  },
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
   "bugs": {

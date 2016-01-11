@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
-    "declaration": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
-    "outDir": "../lib"
+    "sourceMap": false
   },
-  "files": [
-    "index.ts",
-    "../typings/es6/es6-promise.d.ts"
+
+    "files": [
+      "../typings/es6/es6-promise.d.ts",
+      "../typings/es6/systemjs.d.ts",
+    "index.ts"
   ]
 }
