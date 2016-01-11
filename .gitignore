@@ -1,9 +1,24 @@
 *.suo
 *.user
 .DS_Store
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Dependency directory
+# https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
 node_modules
-npm-debug.log
+
+# Built/transpiled fun
+docs/
+lib/
+*.map
+example/build
 test/build
-lib
-docs
-example/index.js
+test/coverage

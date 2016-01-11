@@ -6,51 +6,55 @@
   "typings": "lib/index.d.ts",
   "dependencies": {
     "jupyter-js-cells": "^0.2.0",
-    "jupyter-js-input-area": "^0.0.3",
     "jupyter-js-editor": "^0.1.9",
-    "jupyter-js-services": "^0.3.0-alpha",
+    "jupyter-js-input-area": "^0.0.3",
     "jupyter-js-output-area": "^0.3.0",
+    "jupyter-js-services": "^0.3.0-alpha",
+    "jupyter-js-utils": "^0.2.2",
     "phosphor-disposable": "^1.0.5",
     "phosphor-keymap": "^0.3.0",
     "phosphor-observablelist": "^1.0.0-beta",
+    "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
-    "phosphor-widget": "^1.0.0-rc.0",
-    "phosphor-panel": "^1.0.0-rc.1"
+    "phosphor-widget": "^1.0.0-rc.0"
   },
   "devDependencies": {
+    "css-loader": "^0.23.1",
     "expect.js": "^0.3.1",
-    "glob-copy": "^0.1.0",
-    "istanbul": "^0.3.18",
+    "fs-extra": "^0.26.3",
+    "istanbul-instrumenter-loader": "^0.1.3",
+    "json-loader": "^0.5.4",
     "karma": "^0.13.9",
-    "karma-browserify": "^4.3.0",
     "karma-chrome-launcher": "^0.2.0",
+    "karma-coverage": "^0.5.3",
     "karma-firefox-launcher": "^0.1.6",
     "karma-ie-launcher": "^0.2.0",
     "karma-mocha": "^0.2.0",
     "karma-mocha-reporter": "^1.1.1",
     "mocha": "^2.2.5",
     "rimraf": "^2.4.2",
-    "steal": "^0.12.7",
+    "style-loader": "^0.13.0",
     "typedoc": "^0.3.11",
-    "typescript": "^1.6.2"
+    "typescript": "^1.6.2",
+    "webpack": "^1.12.9"
   },
   "scripts": {
-    "clean:lib": "rimraf lib",
-    "clean:example": "rimraf example/*.js example/*.map",
-    "clean:test": "rimraf test/build && rimraf test/coverage",
-    "clean": "npm run clean:lib && npm run clean:example && npm run clean:test",
+    "clean": "rimraf docs && rimraf lib && rimraf test/build",
+    "clean:example": "rimraf example/build",
+    "build:example": "tsc --project example/src && webpack --config example/webpack.conf.js",
     "build:src": "tsc --project src && node scripts/copycss.js",
-    "build:test": "tsc --project test",
-    "build:example": "tsc --project example",
-    "build": "npm run build:src && npm run build:example && npm run build:test",
+    "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
+    "build": "npm run build:src && npm run build:test",
     "docs": "typedoc --options scripts/tdoptions.json",
     "postinstall": "npm dedupe",
     "prepublish": "npm run build",
-    "test": "mocha test/build/index.js",
-    "test:debug": "pkill node; node-debug _mocha test/build/index.js",
-    "test:integration": "cd test && python run_test.py",
-    "test:coverage": "istanbul cover _mocha -- test/build/index.js"
+    "test:chrome": "karma start --browsers=Chrome test/karma.conf.js",
+    "test:coverage": "webpack --config test/webpack-cov.conf.js && karma start test/karma-cov.conf.js",
+    "test:firefox": "karma start --browsers=Firefox test/karma.conf.js",
+    "test:ie": "karma start --browsers=IE test/karma.conf.js",
+    "test:debug": "karma start --browsers=Chrome --singleRun=false --debug=true test/karma.conf.js",
+    "test": "npm run test:firefox"
   },
   "repository": {
     "type": "git",
@@ -64,11 +68,6 @@
     "lib/*.js",
     "lib/*.d.ts"
   ],
-  "system": {
-    "npmIgnore": [
-      "devDependencies"
-    ]
-  },
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
   "bugs": {

@@ -1,16 +1,17 @@
 language: node_js
 node_js:
-  - '0.12'
+- '0.12'
 sudo: false
-env: 
+env:
   matrix:
-    - GROUP=
+  - GROUP=
   global:
-    - GH_REF: github.com/jupyter/jupyter-js-notebook.git
-    - secure: "uTWpSYaQm9Iaieuw+Ym6Pw+OWTGLiH+gBI4T1YoE0M/6shP3Zec0X0MpOaHEYGXYHd+6uQgldQ7LTB7FZFV4H5jYgcIzhIN8P5lKfqxhROVIUdaZU93c2z2Zxyb+jipDEaYTHvAq138Dhlo8LZ/ESHMnZQDJ2eP0YzWcgIM4L60AutuGsEQZWf0Oz3UnSmk0Ccq7hUnYcBlM4+slfEbIKLiHYpATjgVLeDMSNkKMwiZ1/0rGP9uISaRfucYci5oZ5I9mCQ/RjxcwzRFDFLECt4ee6ygx6Odb0JFYC/OBi2ajsoULzV18/7IjAzMBtKx0RBD9AkaObitY1oOikGg0ZDSHtNqVJNT+CnBICCXhS95iCYffPCPEEs4v52l70PF77p9zsw3hpD4w8RpVQwSL+EdiVCxr5K9sXK2FaARCyUOpiklKFfz9hq90v/ehfk72agr8MLMTKJGoazHZ1rKFimAa4cDkIZys9bSKc4X5LGI9kJRF1bM2mb+G168Cwpyu4gWnCceDPENIKQ7fXPojTvwkAUhblG/eJcn2SUR/ULOYxWJw/AhM+CGf1/LyuGXzc0uZ+ZxrPI/Lvp8JkHLLUjNn6dgR7j3r0Ghu1ly4BMHpt5DgQP/N/f5V9Sw3sXUSZvg06UffDAcnxZUYCrQgGpm9lDPkJvk+5/dfuHmQoy8="
+  - GHREPO=github.com/jupyter/jupyter-js-cells.git
+  - secure: FWNQI+bgxYGPIPJeGK8kgaUcAUAqV/4rOodyKiIRueuiGg8oH1KbiR1zZH10TvzO16pFphaeuwD9anRTshq587wD40UeciXilr2DUrm9idxo0Aze0nTDBIakxOh1OMrvpooYq6n1FBGgMnIukbY9xy0FjizFl/5gGDSYhyT1K+y/C90YUMUKQt27MpB+TZBrJT6R2ulV/uBMTT2XiSkVOYv5WVdz3vFiEUrtJyC6fsADngvUgTMG/aE3zBRBULQa4R0S9rGXdlfzq8hnburjJkqlHDytFbYR0/RduZXt2bTQE+bblKuC9pPrYi20yyzJS1dqF7yksqIGBOyZMBfWyThU6Wn2hVPwRYt+Q2sT+XcpT4M86DJyKu48BBjumIlOML+/vcW547zcQQkvTc5fGeNGqR5LDsnG8ZWvwX/qsikVah09tp8KwPBM/876AMs1Zn4chRSWIzSgIPBI2jxOBBoHaNo5TIAyA+aLZfKnXAexKjtiKzpPnca2s4CbLBMDZDAWNUwEvNOlGpcqjT+EhuT6e8Wt0cZReIfPVp+CnAKyFkXWixDyDWeUQzMapUSyzlF4XPNJij9Gr6BP/eRqzX2FWOsVsdj5roYIWAt4B2k+YoUwcxcvjGMr+pnizzA/l7t/i7uevhXclfHrYZYuuBeoy16BW/6nisV+XS1JVGE=
+  - secure: jFCmedawvi7eIjq0ONpUJa4KHG+TO6TkCgxvRcVL16vhSEQts7gtvGIqmcbrUGc+wwBy6BE17xw8ijDZrKh3eFO1MPUEVuDGJgJwY1SpBuS4la5FYomKql1J+gy3CddHmcF6cI/NsTw+UlDQsx7c3TUOce+Vp4e2nxXDKA5/q+hhu4zkg/TZSXevaU/LXBjkyYF2kuFib/av7lmOdA/iqd62/D+w9UM8aXTPR/75o82BRIXz+CJXzUTZtLVvFlnmqcqlXMdnVWVNke0y6w3J7x8j/xSXbc++lrfC0/EoiNKRwIMCXqntrYSeG68rgmGjpyFIXcts2/aisa/oYTkG6hzv5Y34G/iBS9iadIon1byajT7Rm/pEjIFwW4mFsrIQEdBlU1NWbEG8UKVd4QVrbSEI1RDC6RAJDTJPMFzKVZIXeaRhn6GupXjr7Tz+8rXFonsMo4zaGDzTU8PvQpAPNW2gbLz0QXVr71YUbXnsV0IbifVML4aWG+4EPpdApKh/+UJVoPe9lCxIbdzIRY9IlN7E++OOAO3rRz6fZfP8AAODyWJyYa0Hofia/l8rYhlA/swoFqJnSyBUSy7a/LXDM4Z3MEyMtPCzILf7GK42lffR28uI94lFHr2MXQ6aIgueV8M2F+BUfGGQhZlfokSJDlsn28bSCun0izaR6f53W6A=
 install:
-  - bash ./scripts/travis_install.sh
+- bash scripts/travis_install.sh
 script:
-  - bash ./scripts/travis_script.sh
+- bash scripts/travis_script.sh
 after_success:
-  - bash ./scripts/travis_after_success.sh
+- bash scripts/travis_after_success.sh
