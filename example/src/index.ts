@@ -22,12 +22,12 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  getConfigData
+  getConfigOption
 } from 'jupyter-js-utils';
 
 
 // jupyter notebook --NotebookApp.allow_origin=* --port 8890
-let SERVER_URL=getConfigData('baseUrl');
+let SERVER_URL=getConfigOption('baseUrl');
 let NOTEBOOK = 'test.ipynb';
 
 function bindings(nbModel: NotebookModel) {
