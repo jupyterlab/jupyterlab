@@ -1,16 +1,16 @@
 language: node_js
 node_js:
-  - '0.12'
+- '0.12'
 sudo: false
-env: 
+env:
   matrix:
-    - GROUP=
+  - GROUP=
   global:
-    - GH_REF: github.com/jupyter/jupyter-js-notebook.git
-    - secure: "uTWpSYaQm9Iaieuw+Ym6Pw+OWTGLiH+gBI4T1YoE0M/6shP3Zec0X0MpOaHEYGXYHd+6uQgldQ7LTB7FZFV4H5jYgcIzhIN8P5lKfqxhROVIUdaZU93c2z2Zxyb+jipDEaYTHvAq138Dhlo8LZ/ESHMnZQDJ2eP0YzWcgIM4L60AutuGsEQZWf0Oz3UnSmk0Ccq7hUnYcBlM4+slfEbIKLiHYpATjgVLeDMSNkKMwiZ1/0rGP9uISaRfucYci5oZ5I9mCQ/RjxcwzRFDFLECt4ee6ygx6Odb0JFYC/OBi2ajsoULzV18/7IjAzMBtKx0RBD9AkaObitY1oOikGg0ZDSHtNqVJNT+CnBICCXhS95iCYffPCPEEs4v52l70PF77p9zsw3hpD4w8RpVQwSL+EdiVCxr5K9sXK2FaARCyUOpiklKFfz9hq90v/ehfk72agr8MLMTKJGoazHZ1rKFimAa4cDkIZys9bSKc4X5LGI9kJRF1bM2mb+G168Cwpyu4gWnCceDPENIKQ7fXPojTvwkAUhblG/eJcn2SUR/ULOYxWJw/AhM+CGf1/LyuGXzc0uZ+ZxrPI/Lvp8JkHLLUjNn6dgR7j3r0Ghu1ly4BMHpt5DgQP/N/f5V9Sw3sXUSZvg06UffDAcnxZUYCrQgGpm9lDPkJvk+5/dfuHmQoy8="
+  - GHREPO=github.com/jupyter/jupyter-js-notebook.git
+  - secure: JYpFCn17MIkjRNx5o8i6nc+pmAaehlHK983yTUZu7nAPaoDynr7rgTGsOzH9zRR4faN03eovOo1IhTe7ZWiBr/ICTk2FxCMaE8NbCrc96X4dFgol2WrCIiEAMr471t4L0ge+DuwGd5I9fgTkQX7xn/HKcoMVCiGDMTCU+7RrJWdt5beisGhBeRpi8sfk0g4WoYE/qixLQowmBIHEvlqm6JhgNI2yHeatufaVPM8UgJP7k4Og+gmNgDYKrbu6bee16UJEq5oKa3ARluh8oYbRFo/ngeT9d+maIKNKH39r6WvKmyPt3K8ZaDFcnxRPcZ9ReEz0Irsgh9NPSqOiaNoIcW+A9ZoTzTdOsOhiHgcST/6OoD4CABeCqCS+2mjP6LeDr0Oa6hIAoPbF3aRW9SNcibo/nc9WknCpCErjInNoNIynJ4lSbsfw6MOJvHNJaR9YybZDUnE7eU8M00CeD34GumTdE6RtinbqeLNH6pXkD7YD1kgzb5IkYToFE//YMzMA9Javtq121WM0Zeet6Z1AAo5/54eTt1vxlzEGi00Pk41d1a2rrdJ6qGjseOLB/1/knEHVw9ZOcSeS8FGAAb8yfnnZbidqfasntJ8t/7PXbw4r03FKAQZ5AqrAS0qthbgt9C4Ya/eh1lJd2m50IgWKTItBR/UzT+u0HNlu0Zv5q/w=
 install:
-  - bash ./scripts/travis_install.sh
+- bash scripts/travis_install.sh
 script:
-  - bash ./scripts/travis_script.sh
+- bash scripts/travis_script.sh
 after_success:
-  - bash ./scripts/travis_after_success.sh
+- bash scripts/travis_after_success.sh

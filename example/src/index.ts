@@ -7,7 +7,7 @@ import {
 import {
   NotebookModel, NotebookWidget, makeModels,
   NBData
-} from '../lib/index';
+} from '../../lib/index';
 
 import {
   isMarkdownCell
@@ -21,8 +21,13 @@ import {
   ContentsManager, IContentsModel, startNewSession
 } from 'jupyter-js-services';
 
+import {
+  getConfigOption
+} from 'jupyter-js-utils';
+
+
 // jupyter notebook --NotebookApp.allow_origin=* --port 8890
-let SERVER_URL='http://localhost:8890';
+let SERVER_URL=getConfigOption('baseUrl');
 let NOTEBOOK = 'test.ipynb';
 
 function bindings(nbModel: NotebookModel) {
@@ -49,9 +54,9 @@ function bindings(nbModel: NotebookModel) {
     sequence: ["ArrowUp"],
     handler: () => {nbModel.selectPreviousCell()}
   },
-  
-  
-  
+
+
+
   ];
   return bindings;
 }
@@ -65,7 +70,7 @@ function main(): void {
   });
   // TODO: check out static example from the history
   // and make that a separate example.
-  
+
   let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then((data) => {
     let nbdata: NBData = makedata(data);
@@ -73,7 +78,7 @@ function main(): void {
     let nbWidget = new NotebookWidget(nbModel);
     keymap.add(bindings(nbModel));
     nbWidget.attach(document.body);
-    
+
     // start session
     /*
     startNewSession({
@@ -85,20 +90,20 @@ function main(): void {
       // when shift-enter is pressed, the notebook widget emits a signal saying 'execute this'
       // along with the cell's Model
 
-        
+
       // when we get a session, we hook up a handler to the signal
       // with a function that will:
       //   - add the cell to the 'pending execution' notebook Model list.
       //   - clear the cell's output area right away?
       //   - execute the cell's text, take the cell out of 'pending execution' and put it in 'executing'
       //   - hook up an iopub handler to the kernel future returned that will modify the cell's output area Model
-      //   - when the kernel future is done, ask the notebook to 
-      
-      // should the 'cell executing' index be a notebook-level property, or a cell-level property?  Probably notebook-level     
+      //   - when the kernel future is done, ask the notebook to
+
+      // should the 'cell executing' index be a notebook-level property, or a cell-level property?  Probably notebook-level
     })
     */
   })
-  
+
 /**
  * TODO
  * 1. Make cells executable
@@ -107,7 +112,7 @@ function main(): void {
  *     - [ ] get text from cell
  *     - [ ] form execute_request message
  *     - [ ] set up reply handler which modifies the cell's output area
- */  
+ */
 }
 
 function makedata(a: IContentsModel): NBData {
