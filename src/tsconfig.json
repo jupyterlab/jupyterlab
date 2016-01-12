@@ -18,6 +18,8 @@
     "editor/plugin.ts",
     "filebrowser/index.ts",
     "filebrowser/plugin.ts",
+    "fileopener/index.ts",
+    "fileopener/plugin.ts",
     "services/index.ts",
     "services/plugin.ts",
     "terminal/index.ts",
