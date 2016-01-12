@@ -7,7 +7,7 @@
   "dependencies": {
     "codemirror": "^5.10.0",
     "jupyter-js-filebrowser": "^0.3.0",
-    "jupyter-js-services": "^0.3.0-alpha",
+    "jupyter-js-services": "^0.3.0",
     "jupyter-js-terminal": "^0.1.9",
     "jupyter-js-utils": "^0.2.4",
     "phosphide": "^0.0.8",
