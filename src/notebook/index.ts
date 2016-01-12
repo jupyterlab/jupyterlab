@@ -21,7 +21,7 @@ interface INotebookProvider {
   /**
    * Create a new Notebook instance.
    */
-  createNotebook(): NotebookWidget;
+  createNotebook(path: string): Promise<NotebookWidget>;
 }
 
 

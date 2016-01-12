@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  NotebookWidget
+  NotebookWidget, NotebookModel, makeModels, NBData
 } from 'jupyter-js-notebook';
 
 import {
@@ -13,6 +13,15 @@ import {
 import {
   INotebookProvider
 } from './index';
+
+import {
+  IContentsModel
+} from 'jupyter-js-services';
+
+
+import {
+  IServicesProvider
+} from '../index';
 
 import './plugin.css';
 
@@ -30,7 +39,6 @@ function register(container: Container): void {
   container.register(INotebookProvider, NotebookProvider);
 }
 
-
 /**
  * An implementation of an INotebookProvider.
  */
@@ -39,20 +47,37 @@ class NotebookProvider implements INotebookProvider {
   /**
    * The dependencies required by the notebook factory.
    */
-  static requires: Token<any>[] = [];
+  static requires: Token<any>[] = [IServicesProvider];
 
   /**
    * Create a new notebook factory instance.
    */
-  static create(): INotebookProvider {
-    return new NotebookProvider();
+  static create(services: IServicesProvider): INotebookProvider {
+    return new NotebookProvider(services);
+  }
+
+  constructor(services: IServicesProvider) {
+      this._services = services;
   }
 
   /**
-   * Create a new Terminal instance.
+   * Create a new Notebook instance.
    */
-  createNotebook(): NotebookWidget {
-    // TODO: make this create a sample notebook with sample data
-    return new NotebookWidget();
+  createNotebook(path: string): Promise<NotebookWidget> {
+    return this._services.contentsManager.get(path, {}).then((data) => {
+      let nbdata: NBData = makedata(data);
+      let nbModel = makeModels(nbdata);
+      return new NotebookWidget(nbModel);
+   })
+  }
+  
+  private _services: IServicesProvider;
+}
+
+function makedata(a: IContentsModel): NBData {
+  return {
+    content: a.content,
+    name: a.name,
+    path: a.path
   }
 }

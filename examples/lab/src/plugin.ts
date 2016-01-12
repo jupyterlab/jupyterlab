@@ -80,6 +80,7 @@ class DefaultHandler {
   /**
    * Construct a new default plugin.
    */
+<<<<<<< d42f834d98c73755769ddad046348959faed2b9d
 <<<<<<< 4243cfb95b3b892f880811814c2a2241d062a0f6
   constructor(shell: IAppShell, term: ITerminalProvider, palette: ICommandPalette, registry: ICommandRegistry, browser: IFileBrowserProvider,
     services: IServicesProvider, opener: IFileOpener) {
@@ -87,6 +88,9 @@ class DefaultHandler {
   constructor(shell: IAppShell, term: ITerminalProvider, palette: ICommandPalette, registry: ICommandRegistry, notebook: INotebookProvider, browser: IFileBrowserProvider,
     services: IServicesProvider) {
 >>>>>>> Initial work to incorporate a notebook widget.
+=======
+  constructor(shell: IAppShell, term: ITerminalProvider, palette: ICommandPalette, registry: ICommandRegistry,  browser: IFileBrowserProvider, notebook: INotebookProvider, services: IServicesProvider) {
+>>>>>>> Work-in-progress for a notebook widget
     this._shell = shell;
     this._term = term;
     this._palette = palette;
@@ -119,15 +123,17 @@ class DefaultHandler {
         this._shell.addToMainArea(editor);
       })
     }
-    let newNotebookCommandItem = {
+/*    let newNotebookCommandItem = {
       id: 'jupyter-plugins:new-notebook',
       command: new DelegateCommand(() => {
-        let notebook = this._notebook.createNotebook();
-        this._shell.addToMainArea(notebook);
+        this._notebook.createNotebook('test.ipynb').then(notebook => {
+          this._shell.addToMainArea(notebook);
+        });
       })
     }
+    */
     this._registry.add([termCommandItem, newFileCommandItem,
-                        newNotebookCommandItem]);
+                        ]);
     let openPaletteItems = [{
       id: 'jupyter-plugins:new-terminal',
       title: 'Terminal',
@@ -155,13 +161,20 @@ class DefaultHandler {
     */
 
     // Start a default session.
-    let contents = this._services.contentsManager;
+    this._shell.addToLeftArea(this._browser, { rank: 10 });
+/*    let contents = this._services.contentsManager;
     contents.newUntitled('', { type: 'notebook' }).then(content => {
       let sessions = this._services.notebookSessionManager;
       sessions.startNew({ notebookPath: content.path }).then(() => {
         this._shell.addToLeftArea(this._browser, { rank: 10 });
       });
     });
+*/
+    let nbpath = 'test.ipynb'
+    this._notebook.createNotebook(nbpath).then(nb => {
+      nb.title.text = nbpath;
+      this._shell.addToMainArea(nb);
+    })    
   }
 
   private _term: ITerminalProvider = null;

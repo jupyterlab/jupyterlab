@@ -18,6 +18,8 @@
     "filehandler/plugin.ts",
     "fileopener/index.ts",
     "fileopener/plugin.ts",
+    "notebook/index.ts",
+    "notebook/plugin.ts",
     "services/index.ts",
     "services/plugin.ts",
     "terminal/index.ts",
