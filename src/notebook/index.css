@@ -7,3 +7,6 @@
     border: 2px solid red;
 }
 
+.jp-Notebook {
+    overflow: auto;
+}
