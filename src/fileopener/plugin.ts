@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  FileBrowser, FileHandler
+  FileBrowserWidget, FileHandler
 } from 'jupyter-js-filebrowser';
 
 import {
@@ -104,7 +104,7 @@ class FileOpener implements IFileOpener {
     this._handlers.push(handler);
   }
 
-  private _openRequested(browser: FileBrowser, path: string) {
+  private _openRequested(browser: FileBrowserWidget, path: string) {
 
   }
 

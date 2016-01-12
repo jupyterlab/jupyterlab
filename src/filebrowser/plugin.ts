@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  FileBrowser, FileBrowserModel
+  FileBrowserWidget, FileBrowserModel
 } from 'jupyter-js-filebrowser';
 
 import {
@@ -71,28 +71,19 @@ class FileBrowserProvider implements IFileBrowserProvider {
    * #### Notes
    * This is a read-only property.
    */
-  get fileBrowser(): FileBrowser {
+  get fileBrowser(): FileBrowserWidget {
     if (this._browser === null) {
       let contents = this._services.contentsManager;
       let sessions = this._services.notebookSessionManager;
-      let model = new FileBrowserModel('', contents, sessions);
-      this._browser = new FileBrowser(model);
+      let model = new FileBrowserModel(contents, sessions);
+      this._browser = new FileBrowserWidget(model);
       this._browser.title.text = 'Files';
-      model.changed.connect((instance, change) => {
-      if (change.name === 'open' && change.newValue.type === 'file') {
-        let newEditor = this._editor.createEditor();
-        this._editor.setModeByFileName(newEditor, change.newValue.name);
-        this._editor.setText(newEditor, change.newValue.content);
-        newEditor.title.text = change.newValue.name;
-        this._shell.addToMainArea(newEditor);
-      }
-    });
     }
     return this._browser;
   }
 
   private _shell: IAppShell = null;
   private _editor: IEditorHandler = null;
-  private _browser: FileBrowser = null;
+  private _browser: FileBrowserWidget = null;
   private _services: IServicesProvider;
 }

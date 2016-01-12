@@ -7,7 +7,7 @@ import {
 } from 'phosphor-di';
 
 import {
-  FileBrowser
+  FileBrowserWidget
 } from 'jupyter-js-filebrowser';
 
 
@@ -16,7 +16,7 @@ import {
  */
 export
 interface IFileBrowserProvider {
-  fileBrowser: FileBrowser;
+  fileBrowser: FileBrowserWidget;
 }
 
 
