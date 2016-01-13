@@ -12,7 +12,8 @@ function main() {
     require('phosphide/lib/commandregistry/plugin'),
     require('phosphide/lib/commandpalette/plugin'),
     require('../../lib/terminal/plugin'),
-    require('../../lib/editor/plugin'),
+    require('../../lib/fileopener/plugin'),
+    require('../../lib/filehandler/plugin'),
     require('../../lib/filebrowser/plugin'),
     require('../../lib/services/plugin'),
     require('./plugin')
