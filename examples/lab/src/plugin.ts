@@ -171,10 +171,14 @@ class DefaultHandler {
     });
 */
     let nbpath = 'test.ipynb'
+    
+    let sessions = this._services.notebookSessionManager;
+    let sessionPromise = sessions.startNew({notebookPath: nbpath});
     this._notebook.createNotebook(nbpath).then(nb => {
       nb.title.text = nbpath;
       this._shell.addToMainArea(nb);
-    })    
+    })
+    
   }
 
   private _term: ITerminalProvider = null;
