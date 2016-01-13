@@ -6,4 +6,3 @@ export * from './filebrowser/index';
 export * from './fileopener/index';
 export * from './services/index';
 export * from './terminal/index';
-export * from './notebook/index';

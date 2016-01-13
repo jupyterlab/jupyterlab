@@ -40,8 +40,11 @@ export
 interface IFileOpener {
   /**
    * Register a file opener.
+   * 
+   * @param handler - The file handler to register.
+   * @param isDefault (default to false) - whether the handler is the default handler
    */
-  register(handler: IFileHandler, isDefault: boolean): void;
+  register(handler: IFileHandler, isDefault?: boolean): void;
 }
 
 

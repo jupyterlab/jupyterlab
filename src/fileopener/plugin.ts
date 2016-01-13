@@ -69,7 +69,7 @@ class FileOpener implements IFileOpener {
   /**
    * Register a file handler.
    */
-  register(handler: IFileHandler, isDefault: boolean) {
+  register(handler: IFileHandler, isDefault: boolean = false) {
     this._handlers.push(handler);
     isDefaultProperty.set(handler, isDefault);
   }

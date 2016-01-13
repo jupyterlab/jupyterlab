@@ -3,28 +3,30 @@
 'use strict';
 
 import {
-  NotebookWidget, NotebookModel, makeModels, NBData
+  NotebookWidget, makeModels, NBData
 } from 'jupyter-js-notebook';
 
 import {
-  Container, Token
+  Container
 } from 'phosphor-di';
 
 import {
-  INotebookProvider
-} from './index';
-
-import {
-  IContentsModel
+  IContentsModel, IContentsManager
 } from 'jupyter-js-services';
 
-
 import {
-  IServicesProvider
+  IServicesProvider, IFileOpener
 } from '../index';
 
-import './plugin.css';
+import {
+  AbstractFileHandler
+} from 'jupyter-js-filebrowser';
 
+import {
+  Widget
+} from 'phosphor-widget';
+
+import './plugin.css';
 
 /**
  * Register the plugin contributions.
@@ -35,43 +37,44 @@ import './plugin.css';
  * This is called automatically when the plugin is loaded.
  */
 export
-function register(container: Container): void {
-  container.register(INotebookProvider, NotebookProvider);
+function resolve(container: Container) {
+  Promise.all([container.resolve(IServicesProvider),
+               container.resolve(IFileOpener)]).then(([services, opener]) => {
+    opener.register(new NotebookFileHandler(services.contentsManager))
+  });
 }
 
+
 /**
- * An implementation of an INotebookProvider.
+ * An implementation of a file handler.
  */
-class NotebookProvider implements INotebookProvider {
+export
+class NotebookFileHandler extends AbstractFileHandler {
 
   /**
-   * The dependencies required by the notebook factory.
+   * Get the list of file extensions supported by the handler.
    */
-  static requires: Token<any>[] = [IServicesProvider];
-
-  /**
-   * Create a new notebook factory instance.
-   */
-  static create(services: IServicesProvider): INotebookProvider {
-    return new NotebookProvider(services);
-  }
-
-  constructor(services: IServicesProvider) {
-      this._services = services;
-  }
-
-  /**
-   * Create a new Notebook instance.
-   */
-  createNotebook(path: string): Promise<NotebookWidget> {
-    return this._services.contentsManager.get(path, {}).then((data) => {
-      let nbdata: NBData = makedata(data);
-      let nbModel = makeModels(nbdata);
-      return new NotebookWidget(nbModel);
-   })
+  get fileExtensions(): string[] {
+    return ['.ipynb']
   }
   
-  private _services: IServicesProvider;
+  /**
+   * Get file contents given a path.
+   */
+  protected getContents(manager: IContentsManager, path: string): Promise<IContentsModel> {
+    return manager.get(path, { type: 'notebook' });
+  }
+
+  /**
+   * Create the widget from an `IContentsModel`.
+   */
+  protected createWidget(contents: IContentsModel): Widget {
+      let nbdata: NBData = makedata(contents);
+      let nbModel = makeModels(nbdata);
+      let widget = new NotebookWidget(nbModel);
+      widget.title.text = contents.name;
+      return widget;
+  }
 }
 
 function makedata(a: IContentsModel): NBData {

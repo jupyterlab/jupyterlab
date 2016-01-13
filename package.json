@@ -33,8 +33,8 @@
     "mocha": "^2.2.5",
     "rimraf": "^2.4.2",
     "style-loader": "^0.13.0",
-    "typedoc": "^0.3.11",
-    "typescript": "^1.6.2",
+    "typedoc": "^0.3.12",
+    "typescript": "^1.7.5",
     "webpack": "^1.12.9"
   },
   "scripts": {
