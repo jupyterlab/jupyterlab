@@ -11,70 +11,28 @@ import {
 } from 'phosphor-di';
 
 import {
+  Property
+} from 'phosphor-properties';
+
+import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  IServicesProvider, IFileBrowserProvider
+  IFileBrowserProvider
 } from '../index';
 
 import {
-  IFileHandler, IFileOpener
+  IFileOpener, IFileHandler
 } from './index';
 
 
 /**
  * Register the plugin contributions.
- *
- * @param container - The di container for type registration.
- *
- * #### Notes
- * This is called automatically when the plugin is loaded.
  */
 export
 function register(container: Container): void {
-  container.register(IFileHandler, DefaultFileHandler);
   container.register(IFileOpener, FileOpener);
-}
-
-
-/**
- * An implementation of an IFileHandler.
- */
-class DefaultFileHandler implements IFileHandler {
-
-  /**
-   * The dependencies required by the file handler.
-   */
-  static requires: Token<any>[] = [IServicesProvider];
-
-  /**
-   * Create a new file handler instance.
-   */
-  static create(services: IServicesProvider): IFileHandler {
-    return new DefaultFileHandler(services);
-  }
-
-  /**
-   * Construct a new DefaultFileHandler.
-   */
-  constructor(services: IServicesProvider) {
-    this._handler = new FileHandler(services.contentsManager);
-  }
-
-  get fileRegexes(): string[] {
-    return this._handler.fileRegexes;
-  }
-
-  open(path: string): Promise<Widget> {
-    return this._handler.open(path);
-  }
-
-  close(widget: Widget): boolean {
-    return this._handler.close(widget);
-  }
-
-  private _handler: FileHandler = null;
 }
 
 
@@ -95,18 +53,70 @@ class FileOpener implements IFileOpener {
     return new FileOpener(browserProvider);
   }
 
+  /**
+   * Construct a new file opener.
+   */
   constructor(browserProvider: IFileBrowserProvider) {
     browserProvider.fileBrowser.openRequested.connect(this._openRequested,
       this);
   }
 
-  register(handler: IFileHandler) {
+  /**
+   * Register a file handler.
+   */
+  register(handler: IFileHandler, isDefault: boolean) {
     this._handlers.push(handler);
+    isDefaultProperty.set(handler, isDefault);
   }
 
-  private _openRequested(browser: FileBrowserWidget, path: string) {
+  /**
+   * Handle an `openRequested` signal by invoking the appropriate handler.
+   */
+  private _openRequested(browser: FileBrowserWidget, path: string): void {
+    if (this._handlers.length === 0) {
+      return;
+    }
+    let ext = '.' + path.split('.').pop();
+    let handlers: IFileHandler[] = [];
+    // Look for matching file extensions.
+    for (let h of this._handlers) {
+      if (h.fileExtensions.indexOf(ext) !== -1) handlers.push(h);
+    }
+    // If there was only one match, use it.
+    if (handlers.length === 1) {
+      handlers[0].open(path);
+      return;
 
+    // If there were no matches, look for default handler(s).
+    } else if (handlers.length === 0) {
+      for (let h of this._handlers) {
+        if (isDefaultProperty.get(h)) handlers.push(h);
+      }
+    }
+
+    // If there we no matches, do nothing.
+    if (handlers.length == 0) {
+      console.warn('Could not open file ')
+
+    // If there was one handler, use it.
+    } else if (handlers.length === 1) {
+      handlers[0].open(path);
+    } else {
+      // There are more than one possible handlers.
+      // TODO: Ask the user to choose one.
+      handlers[0].open(path);
+    }
   }
 
   private _handlers: IFileHandler[] = [];
 }
+
+
+/**
+ * An attached property for whether a file handler is a default.
+ */
+const
+isDefaultProperty = new Property<IFileHandler, boolean>({
+  name: 'isDefault',
+  value: false,
+});

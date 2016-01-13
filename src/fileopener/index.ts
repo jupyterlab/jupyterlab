@@ -17,9 +17,9 @@ import {
 export
 interface IFileHandler {
   /**
-   * A list of regexes for matching file names.
+   * he list of file extensions supported by the handler.
    */
-  fileRegexes: string[];
+  fileExtensions: string[];
 
   /**
    * Open the file and return a populated widget.
@@ -41,15 +41,8 @@ interface IFileOpener {
   /**
    * Register a file opener.
    */
-  register(handler: IFileHandler): void;
+  register(handler: IFileHandler, isDefault: boolean): void;
 }
-
-
-/**
- * The dependency token for the `IFileHandler` interface.
- */
-export
-const IFileHandler = new Token<IFileHandler>('jupyter-js-plugins.IFileHandler');
 
 
 /**
