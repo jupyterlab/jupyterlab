@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  FileBrowser
+  FileBrowserWidget
 } from 'jupyter-js-filebrowser';
 
 import {
@@ -27,7 +27,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ITerminalProvider, IFileBrowserProvider, IServicesProvider
+  ITerminalProvider, IFileBrowserProvider, IServicesProvider, IFileOpener
 } from '../../lib';
 
 
@@ -53,27 +53,29 @@ class DefaultHandler {
   /**
    * The dependencies required by the default plugin.
    */
-  static requires: Token<any>[] = [IAppShell, ITerminalProvider, ICommandPalette, ICommandRegistry, IFileBrowserProvider, IServicesProvider];
+  static requires: Token<any>[] = [IAppShell, ITerminalProvider, ICommandPalette, ICommandRegistry, IFileBrowserProvider, IServicesProvider, IFileOpener];
 
   /**
    * Create a default plugin instance..
    */
   static create(shell: IAppShell, term: ITerminalProvider, palette: ICommandPalette, registry: ICommandRegistry, browser: IFileBrowserProvider,
-    services: IServicesProvider): DefaultHandler {
-    return new DefaultHandler(shell, term, palette, registry, browser, services);
+    services: IServicesProvider, opener: IFileOpener): DefaultHandler {
+    return new DefaultHandler(shell, term, palette, registry, browser,
+      services, opener);
   }
 
   /**
    * Construct a new default plugin.
    */
   constructor(shell: IAppShell, term: ITerminalProvider, palette: ICommandPalette, registry: ICommandRegistry, browser: IFileBrowserProvider,
-    services: IServicesProvider) {
+    services: IServicesProvider, opener: IFileOpener) {
     this._shell = shell;
     this._term = term;
     this._palette = palette;
     this._registry = registry;
     this._browser = browser.fileBrowser;
     this._services = services;
+    this._opener = opener;
   }
 
   /**
@@ -128,10 +130,12 @@ class DefaultHandler {
     }
     this._palette.add([section]);
 
+    /*
     let term = this._term.createTerminal();
     term.color = 'black';
     term.background = 'white';
     this._shell.addToMainArea(term);
+    */
 
     // Start a default session.
     let contents = this._services.contentsManager;
@@ -147,6 +151,7 @@ class DefaultHandler {
   private _shell: IAppShell = null;
   private _palette: ICommandPalette = null;
   private _registry: ICommandRegistry = null;
-  private _browser: FileBrowser = null;
+  private _browser: FileBrowserWidget = null;
   private _services: IServicesProvider = null;
+  private _opener: IFileOpener = null;
 }

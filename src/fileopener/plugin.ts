@@ -7,6 +7,10 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
+  IAppShell
+} from 'phosphide';
+
+import {
   Container, Token
 } from 'phosphor-di';
 
@@ -44,21 +48,22 @@ class FileOpener implements IFileOpener {
   /**
    * The dependencies required by the file opener.
    */
-  static requires: Token<any>[] = [IFileBrowserProvider];
+  static requires: Token<any>[] = [IAppShell, IFileBrowserProvider];
 
   /**
    * Create a new file opener instance.
    */
-  static create(browserProvider: IFileBrowserProvider): IFileOpener {
-    return new FileOpener(browserProvider);
+  static create(appShell: IAppShell, browserProvider: IFileBrowserProvider): IFileOpener {
+    return new FileOpener(appShell, browserProvider);
   }
 
   /**
    * Construct a new file opener.
    */
-  constructor(browserProvider: IFileBrowserProvider) {
+  constructor(appShell: IAppShell, browserProvider: IFileBrowserProvider) {
     browserProvider.fileBrowser.openRequested.connect(this._openRequested,
       this);
+    this._appShell = appShell;
   }
 
   /**
@@ -84,7 +89,7 @@ class FileOpener implements IFileOpener {
     }
     // If there was only one match, use it.
     if (handlers.length === 1) {
-      handlers[0].open(path);
+      this._open(handlers[0], path);
       return;
 
     // If there were no matches, look for default handler(s).
@@ -100,15 +105,22 @@ class FileOpener implements IFileOpener {
 
     // If there was one handler, use it.
     } else if (handlers.length === 1) {
-      handlers[0].open(path);
+      this._open(handlers[0], path);
     } else {
       // There are more than one possible handlers.
       // TODO: Ask the user to choose one.
-      handlers[0].open(path);
+      this._open(handlers[0], path);
     }
   }
 
+  private _open(handler: IFileHandler, path: string): void {
+    handler.open(path).then(widget => {
+      this._appShell.addToMainArea(widget);
+    });
+  }
+
   private _handlers: IFileHandler[] = [];
+  private _appShell: IAppShell = null;
 }
 
 

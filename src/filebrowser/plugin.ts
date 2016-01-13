@@ -19,7 +19,7 @@ import {
 } from './index';
 
 import {
-  IEditorHandler, IServicesProvider
+  IServicesProvider
 } from '../index';
 
 import './plugin.css';
@@ -47,22 +47,24 @@ class FileBrowserProvider implements IFileBrowserProvider {
   /**
    * The dependencies required by the application shell.
    */
-  static requires: Token<any>[] = [IAppShell, IServicesProvider, IEditorHandler];
+  static requires: Token<any>[] = [IServicesProvider];
 
   /**
    * Create a new application shell instance.
    */
-  static create(shell: IAppShell, services: IServicesProvider, editor: IEditorHandler): IFileBrowserProvider {
-    return new FileBrowserProvider(shell, services, editor);
+  static create(services: IServicesProvider): IFileBrowserProvider {
+    return new FileBrowserProvider(services);
   }
 
   /**
    * Construct a new filebrowser provider instance.
    */
-  constructor(shell: IAppShell, services: IServicesProvider, editor: IEditorHandler) {
-    this._shell = shell;
-    this._editor = editor;
-    this._services = services;
+  constructor(services: IServicesProvider) {
+    let contents = services.contentsManager;
+    let sessions = services.notebookSessionManager;
+    let model = new FileBrowserModel(contents, sessions);
+    this._browser = new FileBrowserWidget(model);
+    this._browser.title.text = 'Files';
   }
 
   /**
@@ -72,18 +74,8 @@ class FileBrowserProvider implements IFileBrowserProvider {
    * This is a read-only property.
    */
   get fileBrowser(): FileBrowserWidget {
-    if (this._browser === null) {
-      let contents = this._services.contentsManager;
-      let sessions = this._services.notebookSessionManager;
-      let model = new FileBrowserModel(contents, sessions);
-      this._browser = new FileBrowserWidget(model);
-      this._browser.title.text = 'Files';
-    }
     return this._browser;
   }
 
-  private _shell: IAppShell = null;
-  private _editor: IEditorHandler = null;
   private _browser: FileBrowserWidget = null;
-  private _services: IServicesProvider;
 }
