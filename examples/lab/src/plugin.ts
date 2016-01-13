@@ -94,19 +94,17 @@ class DefaultHandler {
     let newFileCommandItem = {
       id: 'jupyter-plugins:new-text-file',
       command: new DelegateCommand(() => {
-        // TODO
-        let editor = new CodeMirrorWidget();
-        editor.title.text = 'untitled.txt'
-        this._shell.addToMainArea(editor);
+        this._browser.newUntitled('file', '.txt').then(
+          contents => this._opener.open(contents.path)
+        );
       })
     }
     let newNotebookCommandItem = {
       id: 'jupyter-plugins:new-notebook',
       command: new DelegateCommand(() => {
-        let widget = new Widget();
-        widget.title.text = 'Untitled'
-        widget.node.innerHTML = '<h1>New Notebook</h1>';
-        this._shell.addToMainArea(widget);
+        this._browser.newUntitled('notebook').then(
+          contents => this._opener.open(contents.path)
+        );
       })
     }
     this._registry.add([termCommandItem, newFileCommandItem,
