@@ -10,3 +10,18 @@
 .jp-Notebook {
     overflow: auto;
 }
+
+.jp-InputAreaWidget .CodeMirror {
+  height: auto;
+  background-color: #f7f7f7;
+  border: 1px solid #cfcfcf;
+}
+
+.jp-Cell {
+  padding: 0.5em;
+  margin: 0.5em;
+}
+
+.jp-MarkdownCell {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
