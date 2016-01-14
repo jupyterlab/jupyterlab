@@ -39,6 +39,11 @@ interface IFileHandler {
 export
 interface IFileOpener {
   /**
+   * Open the file and add the widget to the application shell.
+   */
+  open(path: string): Promise<void>;
+
+  /**
    * Register a file opener.
    */
   register(handler: IFileHandler, isDefault: boolean): void;

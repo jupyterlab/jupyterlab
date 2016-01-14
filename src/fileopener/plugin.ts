@@ -75,9 +75,9 @@ class FileOpener implements IFileOpener {
   }
 
   /**
-   * Handle an `openRequested` signal by invoking the appropriate handler.
+   * Open a file and add it to the application shell.
    */
-  private _openRequested(browser: FileBrowserWidget, path: string): void {
+  open(path: string): Promise<void> {
     if (this._handlers.length === 0) {
       return;
     }
@@ -89,8 +89,7 @@ class FileOpener implements IFileOpener {
     }
     // If there was only one match, use it.
     if (handlers.length === 1) {
-      this._open(handlers[0], path);
-      return;
+      return this._open(handlers[0], path);
 
     // If there were no matches, look for default handler(s).
     } else if (handlers.length === 0) {
@@ -101,20 +100,30 @@ class FileOpener implements IFileOpener {
 
     // If there we no matches, do nothing.
     if (handlers.length == 0) {
-      console.warn('Could not open file ')
+      return Promise.reject(new Error(`Could not open file '${path}'`));
 
     // If there was one handler, use it.
     } else if (handlers.length === 1) {
-      this._open(handlers[0], path);
+      return this._open(handlers[0], path);
     } else {
       // There are more than one possible handlers.
       // TODO: Ask the user to choose one.
-      this._open(handlers[0], path);
+      return this._open(handlers[0], path);
     }
   }
 
-  private _open(handler: IFileHandler, path: string): void {
-    handler.open(path).then(widget => {
+  /**
+   * Handle an `openRequested` signal by invoking the appropriate handler.
+   */
+  private _openRequested(browser: FileBrowserWidget, path: string): void {
+    this.open(path);
+  }
+
+  /**
+   * Open a file and add it to the application shell.
+   */
+  private _open(handler: IFileHandler, path: string): Promise<void> {
+    return handler.open(path).then(widget => {
       this._appShell.addToMainArea(widget);
     });
   }
