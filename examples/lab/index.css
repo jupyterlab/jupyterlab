@@ -23,6 +23,55 @@ body {
 }
 
 
+.jp-Dialog {
+  padding-left: 3px;
+  background: rgba(245, 245, 245, .6);
+}
+
+
+.jp-Dialog-content {
+  background-color: #F5F5F5;
+  min-width: 50%;
+  border: 1px solid #757575;
+  border-radius: 5px;
+  padding-bottom: 10px;
+}
+
+
+.jp-Dialog-header {
+  padding: 5px;
+}
+
+
+.jp-Dialog-body {
+  padding: 5px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+
+.jp-Dialog-footer {
+  padding: 20px;
+}
+
+
+.jp-Dialog-button {
+  padding: 5px;
+  border: 1px solid #757575;
+  font-size: 16px;
+  background-color: #FAFAFA;
+  line-height: 20px;
+  border-radius: 3px;
+  max-width: 100px;
+  margin-left: 5px;
+}
+
+
+.jp-Dialog-close {
+  line-height: 21px;
+}
+
+
 .p-SideBar {
   min-width: 36px;
   max-width: 36px;
@@ -101,34 +150,6 @@ body {
 #p-right-stack {
   padding: 5px;
   background: white;
-}
-
-
-.red-content {
-  background: #E74C3C;
-  border: 1px solid black;
-  min-width: 100px;
-}
-
-
-.yellow-content {
-  background: #F1C40F;
-  border: 1px solid black;
-  min-width: 100px;
-}
-
-
-.green-content {
-  background: #27AE60;
-  border: 1px solid black;
-  min-width: 100px;
-}
-
-
-.blue-content {
-  background: #3498DB;
-  border: 1px solid black;
-  min-width: 100px;
 }
 
 
