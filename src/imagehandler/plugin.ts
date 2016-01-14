@@ -19,7 +19,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IServicesProvider, IFileBrowserProvider, IFileOpener, IFileHandler
+  IServicesProvider, IFileOpener, IFileHandler
 } from '../index';
 
 

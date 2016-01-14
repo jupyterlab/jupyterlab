@@ -12,16 +12,14 @@ import {
 
 
 /**
- * A singleton FileBrowser provider.
+ * A singleton FileBrowserWidget provider.
  */
 export
-interface IFileBrowserProvider {
-  fileBrowser: FileBrowserWidget;
-}
+interface IFileBrowserWidget extends FileBrowserWidget { }
 
 
 /**
- * The dependency token for the `IFileBrowserHandler` interface.
+ * The dependency token for the `IFileBrowserWidget` interface.
  */
 export
-const IFileBrowserProvider = new Token<IFileBrowserProvider>('jupyter-js-plugins.IFileBrowserProvider');
+const IFileBrowserWidget = new Token<IFileBrowserWidget>('jupyter-js-plugins.IFileBrowserWidget');
