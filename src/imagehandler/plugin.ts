@@ -70,7 +70,7 @@ class ImageHandlerPlugin {
     this._opener.register(this._handler);
   }
 
-  private _handler: ImageHandlerPlugin = null;
+  private _handler: ImageHandler = null;
   private _services: IServicesProvider = null;
   private _opener: IFileOpener = null;
 }
