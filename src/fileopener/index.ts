@@ -54,6 +54,8 @@ interface IFileOpener {
 
   /**
    * Register a file opener.
+   * 
+   * @param handler - The file handler to register.
    */
   register(handler: IFileHandler): void;
 
