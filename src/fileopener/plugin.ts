@@ -103,6 +103,12 @@ class FileOpenerProvider {
       items: paletteItems
     }
     this._palette.add([section]);
+
+    FileBrowserWidget.widgetFactory = () => {
+      let model = this._browser.model;
+      let item = model.items[model.selected[0]];
+      return this._opener.open(item.path)
+    }
   }
 
   private _appShell: IAppShell = null;
