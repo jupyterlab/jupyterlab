@@ -6,7 +6,6 @@
   background-color: #F5F5F5;
   color: #757575;
   font: 13px Helvetica, Arial, sans-serif;
-  height: 500px;
   min-width: 300px;
 }
 
@@ -19,10 +18,9 @@
 
 
 .jp-FileButtons {
-  border-bottom: 1px solid #757575;
   padding-left: 4px;
   padding-right: 4px;
-  padding-bottom: 8px;
+  padding-bottom: 4px;
 }
 
 
@@ -40,6 +38,25 @@
   border-radius: 3px;
   margin-right: 3px;
   max-width: 100px;
+}
+
+
+.jp-DirListing-header {
+  min-width: 300px;
+  border-bottom: 1px solid #757575;
+}
+
+
+.jp-DirListing-headerFile {
+  flex-basis: 200px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+
+.jp-DirListing-headerModified {
+  flex-basis: 95px;
+  padding-right: 5px;
 }
 
 
@@ -71,7 +88,7 @@
 
 .jp-DirListing-itemModified {
   padding-right: 5px;
-  width: 70px;
+  width: 95px;
   padding-top: 4px;
   padding-bottom: 4px;
 }
@@ -127,66 +144,4 @@
 
 .jp-DirListing-nbIcon.jp-mod-running:before {
   color: #27AE60;
-}
-
-
-.jp-EditorWidget {
-  height: 400px;
-}
-
-
-.p-SplitPanel {
-  height: 400px;
-}
-
-
-.p-Dialog {
-  padding-left: 3px;
-  background: rgba(245, 245, 245, .6);
-}
-
-
-.p-Dialog-content {
-  background-color: #F5F5F5;
-  min-width: 50%;
-  border: 1px solid #757575;
-  border-radius: 5px;
-}
-
-
-.p-Dialog-header {
-  padding: 5px;
-  border-bottom: 1px solid #757575;
-}
-
-
-.p-Dialog-body {
-  padding: 5px;
-}
-
-
-.p-Dialog-footer {
-  padding: 5px;
-}
-
-
-.p-Dialog-button {
-  margin-left: 5px;
-  padding: 5px;
-  border: 1px solid #757575;
-  font-size: 16px;
-  background-color: #FAFAFA;
-  line-height: 20px;
-  border-radius: 3px;
-  max-width: 100px;
-}
-
-.p-Dialog-close {
-  line-height: 21px;
-}
-
-
-.p-Dialog-close:before {
-  content: '\f00d';
-  font-family: FontAwesome;
 }

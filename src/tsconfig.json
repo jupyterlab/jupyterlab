@@ -18,6 +18,7 @@
     "filehandler/plugin.ts",
     "fileopener/index.ts",
     "fileopener/plugin.ts",
+    "imagehandler/plugin.ts",
     "notebook/plugin.ts",
     "services/index.ts",
     "services/plugin.ts",
