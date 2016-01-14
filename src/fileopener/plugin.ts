@@ -154,6 +154,7 @@ class FileOpener implements IFileOpener {
     if (this._defaultHandler !== null) {
       throw Error('Default handler already registered');
     }
+    this._handlers.push(handler);
     this._defaultHandler = handler;
   }
 
@@ -161,7 +162,7 @@ class FileOpener implements IFileOpener {
    * Open a file and add it to the application shell.
    */
   open(path: string): Widget {
-    if (this._handlers.length === 0 && this._defaultHandler === null) {
+    if (this._handlers.length === 0) {
       return;
     }
     let ext = '.' + path.split('.').pop();
