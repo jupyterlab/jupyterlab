@@ -7,51 +7,66 @@ import {
 } from 'jupyter-js-terminal';
 
 import {
+  DelegateCommand
+} from 'phosphor-command';
+
+import {
   Container, Token
 } from 'phosphor-di';
 
 import {
-  ITerminalProvider
-} from './index';
+  IAppShell, ICommandPalette, ICommandRegistry
+} from 'phosphide';
 
 import './plugin.css';
 
 
-/**
- * Register the plugin contributions.
- *
- * @param container - The di container for type registration.
- *
- * #### Notes
- * This is called automatically when the plugin is loaded.
- */
 export
-function register(container: Container): void {
-  container.register(ITerminalProvider, TerminalProvider);
+function resolve(container: Container): Promise<void> {
+  return container.resolve(TerminalPlugin).then(() => {});
 }
 
 
-/**
- * An implementation of an ITerminalProvider.
- */
-class TerminalProvider implements ITerminalProvider {
+class TerminalPlugin {
 
   /**
    * The dependencies required by the editor factory.
    */
-  static requires: Token<any>[] = [];
+  static requires: Token<any>[] = [IAppShell, ICommandPalette, ICommandRegistry];
 
   /**
-   * Create a new editor factory instance.
+   * Create a new terminal plugin instance.
    */
-  static create(): ITerminalProvider {
-    return new TerminalProvider();
+  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry): TerminalPlugin {
+    return new TerminalPlugin(shell, palette, registry);
   }
 
   /**
-   * Create a new Terminal instance.
+   * Construct a terminal plugin.
    */
-  createTerminal(options?: ITerminalOptions): TerminalWidget {
-    return new TerminalWidget(options);
+  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) {
+    let termCommandItem = {
+      // Move this to the terminal.
+      id: 'jupyter-plugins:new-terminal',
+      command: new DelegateCommand(() => {
+        let term = new TerminalWidget();
+        term.color = 'black';
+        term.background = 'white';
+        term.title.closable = true;
+        shell.addToMainArea(term);
+      })
+    }
+    registry.add([termCommandItem]);
+    let paletteItem = {
+      id: 'jupyter-plugins:new-terminal',
+      title: 'Terminal',
+      caption: ''
+    };
+    let section = {
+      text: 'New...',
+      items: [paletteItem]
+    }
+    palette.add([section]);
   }
+
 }

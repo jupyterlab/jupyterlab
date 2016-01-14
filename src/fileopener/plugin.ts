@@ -7,8 +7,12 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
-  IAppShell
+  IAppShell, ICommandPalette, ICommandRegistry
 } from 'phosphide';
+
+import {
+  DelegateCommand
+} from 'phosphor-command';
 
 import {
   Container, Token
@@ -35,8 +39,78 @@ import {
  * Register the plugin contributions.
  */
 export
+function resolve(container: Container): Promise<void> {
+  return container.resolve(FileOpenerProvider).then(provider => provider.run());
+}
+
+export
 function register(container: Container): void {
   container.register(IFileOpener, FileOpener);
+}
+
+
+class FileOpenerProvider {
+  /**
+   * The dependencies required by the file opener.
+   */
+  static requires: Token<any>[] = [IAppShell, IFileOpener, IFileBrowserProvider, ICommandPalette, ICommandRegistry];
+
+  static create(appShell: IAppShell, opener: IFileOpener, browserProvider: IFileBrowserProvider, palette: ICommandPalette, registry: ICommandRegistry): FileOpenerProvider {
+    return new FileOpenerProvider(appShell, opener, browserProvider, palette, registry);
+  }
+
+  /**
+   * Construct a new file opener.
+   */
+  constructor(appShell: IAppShell, opener: IFileOpener, browserProvider: IFileBrowserProvider, palette: ICommandPalette, registry: ICommandRegistry) {
+    this._browser = browserProvider.fileBrowser;
+    this._registry = registry;
+    this._palette = palette;
+    this._appShell = appShell;
+    this._opener = opener;
+  }
+
+
+  run() {
+    let newFileCommandItem = {
+      id: 'jupyter-plugins:new-text-file',
+      command: new DelegateCommand(() => {
+        this._browser.newUntitled('file', '.txt').then(
+          contents => this._opener.open(contents.path)
+        );
+      })
+    }
+    let newNotebookCommandItem = {
+      id: 'jupyter-plugins:new-notebook',
+      command: new DelegateCommand(() => {
+        this._browser.newUntitled('notebook').then(
+          contents => this._opener.open(contents.path)
+        );
+      })
+    }
+    this._registry.add([newFileCommandItem, newNotebookCommandItem]);
+    let paletteItems = [{
+      id: 'jupyter-plugins:new-text-file',
+      title: 'Text File',
+      caption: ''
+    }, {
+      id: 'jupyter-plugins:new-notebook',
+      title: 'Notebook',
+      caption: ''
+    }];
+    let section = {
+      text: 'New...',
+      items: paletteItems
+    }
+    this._palette.add([section]);
+  }
+
+  private _appShell: IAppShell = null;
+  private _defaultHandler: IFileHandler = null;
+  private _browser: FileBrowserWidget = null;
+  private _registry: ICommandRegistry = null;
+  private _palette: ICommandPalette = null;
+  private _opener: IFileOpener = null;
 }
 
 
@@ -61,24 +135,33 @@ class FileOpener implements IFileOpener {
    * Construct a new file opener.
    */
   constructor(appShell: IAppShell, browserProvider: IFileBrowserProvider) {
+    this._appShell = appShell;
     browserProvider.fileBrowser.openRequested.connect(this._openRequested,
       this);
-    this._appShell = appShell;
   }
 
   /**
    * Register a file handler.
    */
-  register(handler: IFileHandler, isDefault: boolean) {
+  register(handler: IFileHandler): void {
     this._handlers.push(handler);
-    isDefaultProperty.set(handler, isDefault);
+  }
+
+  /**
+   * Register a default file handler.
+   */
+  registerDefault(handler: IFileHandler): void {
+    if (this._defaultHandler !== null) {
+      throw Error('Default handler already registered');
+    }
+    this._defaultHandler = handler;
   }
 
   /**
    * Open a file and add it to the application shell.
    */
-  open(path: string): Promise<void> {
-    if (this._handlers.length === 0) {
+  open(path: string): Widget {
+    if (this._handlers.length === 0 && this._defaultHandler === null) {
       return;
     }
     let ext = '.' + path.split('.').pop();
@@ -92,19 +175,18 @@ class FileOpener implements IFileOpener {
       return this._open(handlers[0], path);
 
     // If there were no matches, look for default handler(s).
-    } else if (handlers.length === 0) {
-      for (let h of this._handlers) {
-        if (isDefaultProperty.get(h)) handlers.push(h);
-      }
+    } else if (handlers.length === 0 && this._defaultHandler !== null) {
+       return this._open(this._defaultHandler, path);
     }
 
     // If there we no matches, do nothing.
     if (handlers.length == 0) {
-      return Promise.reject(new Error(`Could not open file '${path}'`));
+      throw new Error(`Could not open file '${path}'`);
 
     // If there was one handler, use it.
     } else if (handlers.length === 1) {
       return this._open(handlers[0], path);
+
     } else {
       // There are more than one possible handlers.
       // TODO: Ask the user to choose one.
@@ -122,22 +204,13 @@ class FileOpener implements IFileOpener {
   /**
    * Open a file and add it to the application shell.
    */
-  private _open(handler: IFileHandler, path: string): Promise<void> {
-    return handler.open(path).then(widget => {
-      this._appShell.addToMainArea(widget);
-    });
+  private _open(handler: IFileHandler, path: string): Widget {
+    var widget = handler.open(path);
+    this._appShell.addToMainArea(widget);
+    return widget;
   }
 
   private _handlers: IFileHandler[] = [];
   private _appShell: IAppShell = null;
+  private _defaultHandler: IFileHandler = null;
 }
-
-
-/**
- * An attached property for whether a file handler is a default.
- */
-const
-isDefaultProperty = new Property<IFileHandler, boolean>({
-  name: 'isDefault',
-  value: false,
-});
