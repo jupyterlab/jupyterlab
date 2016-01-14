@@ -15,7 +15,8 @@
     "phosphor-codemirror": "^0.0.1",
     "phosphor-command": "^0.5.0",
     "phosphor-di": "^0.9.0",
-    "phosphor-properties": "^2.0.0"
+    "phosphor-properties": "^2.0.0",
+    "phosphor-tabs": "^1.0.0-rc.2"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
@@ -31,7 +32,6 @@
     "karma-mocha": "^0.2.0",
     "karma-mocha-reporter": "^1.1.1",
     "mocha": "^2.2.5",
-    "phosphor-tabs": "^1.0.0-rc.2",
     "rimraf": "^2.4.2",
     "style-loader": "^0.13.0",
     "typedoc": "^0.3.12",
