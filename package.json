@@ -31,6 +31,7 @@
     "karma-mocha": "^0.2.0",
     "karma-mocha-reporter": "^1.1.1",
     "mocha": "^2.2.5",
+    "phosphor-tabs": "^1.0.0-rc.2",
     "rimraf": "^2.4.2",
     "style-loader": "^0.13.0",
     "typedoc": "^0.3.12",
