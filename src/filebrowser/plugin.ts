@@ -42,7 +42,6 @@ const fileBrowserFactory: IFactory<IFileBrowserWidget> = {
     let contents = provider.contentsManager;
     let sessions = provider.notebookSessionManager;
     let model = new FileBrowserModel(contents, sessions);
-    let browser = new FileBrowserWidget(model);
-    return browser;
+    return new FileBrowserWidget(model);
   }
 }
