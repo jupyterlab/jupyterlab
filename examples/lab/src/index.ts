@@ -15,6 +15,7 @@ function main() {
     require('../../lib/fileopener/plugin'),
     require('../../lib/filehandler/plugin'),
     require('../../lib/filebrowser/plugin'),
+    require('../../lib/imagehandler/plugin'),
     require('../../lib/services/plugin'),
     require('./plugin')
   ]).then(function() {
