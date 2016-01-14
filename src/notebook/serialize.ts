@@ -39,11 +39,9 @@ import {
  * Build a complete notebook model from the notebook data.
  */
 export
-function makeModels(data: NBData): NotebookModel {
-  // Construct the entire model hierarchy explicitly  
-  let nb = new NotebookModel();
-  nb.defaultMimetype = 'text/x-python';
-  
+function populateNotebookModel(nb: INotebookModel, data: NBData): void {
+  nb.cells.clear();
+
   // iterate through the cell data, creating cell models
   data.content.cells.forEach((c) => {
     let input = new InputAreaModel();
@@ -66,10 +64,11 @@ function makeModels(data: NBData): NotebookModel {
       nb.cells.add(cell);
     }
   });
+
+  nb.defaultMimetype = 'text/x-python';
   if (nb.cells.length) {
     nb.selectedCellIndex = 0;
   }
-  return nb;
 }
 
 /**

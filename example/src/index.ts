@@ -5,8 +5,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  NotebookModel, NotebookWidget, makeModels,
-  NBData
+  NotebookModel, NotebookWidget,
+  NBData, populateNotebookModel
 } from '../../lib/index';
 
 import {
@@ -74,7 +74,8 @@ function main(): void {
   let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then((data) => {
     let nbdata: NBData = makedata(data);
-    let nbModel = makeModels(nbdata);
+    let nbModel = new NotebookModel();
+    populateNotebookModel(nbModel, nbdata);
     let nbWidget = new NotebookWidget(nbModel);
     keymap.add(bindings(nbModel));
     nbWidget.attach(document.body);
