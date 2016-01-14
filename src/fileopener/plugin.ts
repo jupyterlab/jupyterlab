@@ -171,25 +171,21 @@ class FileOpener implements IFileOpener {
     for (let h of this._handlers) {
       if (h.fileExtensions.indexOf(ext) !== -1) handlers.push(h);
     }
+
     // If there was only one match, use it.
     if (handlers.length === 1) {
       return this._open(handlers[0], path);
 
-    // If there were no matches, look for default handler(s).
-    } else if (handlers.length === 0 && this._defaultHandler !== null) {
-       return this._open(this._defaultHandler, path);
-    }
+    // If there were no matches, use default handler.
+    } else if (handlers.length === 0) {
+      if (this._defaultHandler !== null) {
+        return this._open(this._defaultHandler, path);
+      } else {
+        throw new Error(`Could not open file '${path}'`);
+      }
 
-    // If there we no matches, do nothing.
-    if (handlers.length == 0) {
-      throw new Error(`Could not open file '${path}'`);
-
-    // If there was one handler, use it.
-    } else if (handlers.length === 1) {
-      return this._open(handlers[0], path);
-
+    // There are more than one possible handlers.
     } else {
-      // There are more than one possible handlers.
       // TODO: Ask the user to choose one.
       return this._open(handlers[0], path);
     }
