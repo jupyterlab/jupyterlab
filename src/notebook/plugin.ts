@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  NotebookWidget, makeModels, NBData
+  NotebookWidget, NotebookModel, NBData, populateNotebookModel
 } from 'jupyter-js-notebook';
 
 import {
@@ -61,19 +61,25 @@ class NotebookFileHandler extends AbstractFileHandler {
   /**
    * Get file contents given a path.
    */
-  protected getContents(manager: IContentsManager, path: string): Promise<IContentsModel> {
-    return manager.get(path, { type: 'notebook' });
+  protected getContents(path: string): Promise<IContentsModel> {
+    return this.manager.get(path, { type: 'notebook' });
   }
 
   /**
    * Create the widget from an `IContentsModel`.
    */
-  protected createWidget(contents: IContentsModel): Widget {
-      let nbdata: NBData = makedata(contents);
-      let nbModel = makeModels(nbdata);
-      let widget = new NotebookWidget(nbModel);
-      widget.title.text = contents.name;
-      return widget;
+  protected createWidget(path: string): Widget {
+    let model = new NotebookModel();
+    let widget = new NotebookWidget(model);
+    widget.title.text = path.split('/').pop();
+    return widget;
+  }
+
+  
+  protected populateWidget(widget: NotebookWidget, model: IContentsModel): Promise<void> {
+    let nbdata: NBData = makedata(model);
+    populateNotebookModel(widget.model, nbdata);
+    return Promise.resolve();
   }
 }
 
