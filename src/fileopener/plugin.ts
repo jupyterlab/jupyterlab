@@ -107,7 +107,7 @@ class FileOpenerProvider {
     FileBrowserWidget.widgetFactory = () => {
       let model = this._browser.model;
       let item = model.items[model.selected[0]];
-      return this._opener.open(item.path)
+      return this._opener.open(item.path);
     }
   }
 
