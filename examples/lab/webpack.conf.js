@@ -7,7 +7,8 @@ module.exports = {
   },
   node: {
     fs: "empty"
-  }, debug: true,
+  },
+  debug: true,
   bail: true,
   module: {
     loaders: [

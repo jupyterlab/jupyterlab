@@ -40,7 +40,7 @@
   "scripts": {
     "clean": "rimraf docs && rimraf lib && rimraf test/build",
     "clean:example": "rimraf example/build",
-    "build:example": "tsc --project example/src && webpack -d --config example/webpack.conf.js",
+    "build:example": "tsc --project example/src && webpack --config example/webpack.conf.js",
     "build:src": "tsc --project src && node scripts/copycss.js",
     "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
     "build": "npm run build:src && npm run build:test",
