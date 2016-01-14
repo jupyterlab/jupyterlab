@@ -95,18 +95,17 @@ class DefaultHandler {
     let newFileCommandItem = {
       id: 'jupyter-plugins:new-text-file',
       command: new DelegateCommand(() => {
-        // TODO
-        let editor = new CodeMirrorWidget();
-        editor.title.text = 'untitled.txt'
-        this._shell.addToMainArea(editor);
+        this._browser.newUntitled('file', '.txt').then(
+          contents => this._opener.open(contents.path)
+        );
       })
     }
 /*    let newNotebookCommandItem = {
       id: 'jupyter-plugins:new-notebook',
       command: new DelegateCommand(() => {
-        this._notebook.createNotebook('test.ipynb').then(notebook => {
-          this._shell.addToMainArea(notebook);
-        });
+        this._browser.newUntitled('notebook').then(
+          contents => this._opener.open(contents.path)
+        );
       })
     }
     */

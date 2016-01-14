@@ -29,14 +29,14 @@ import {
  */
 export
 function resolve(container: Container): Promise<void> {
-  return container.resolve(DefaultFileHandler).then(handler => handler.run());
+  return container.resolve(FileHandlerPlugin).then(plugin => plugin.run());
 }
 
 
 /**
- * An implementation of an IFileHandler.
+ * A plugin that provides the default file handler to the IFileOpener.
  */
-class DefaultFileHandler {
+class FileHandlerPlugin {
 
   /**
    * The dependencies required by the file handler.
@@ -44,20 +44,23 @@ class DefaultFileHandler {
   static requires: Token<any>[] = [IServicesProvider, IFileOpener];
 
   /**
-   * Create a new file handler instance.
+   * Create a new file handler plugin instance.
    */
-  static create(services: IServicesProvider, opener: IFileOpener): DefaultFileHandler {
-    return new DefaultFileHandler(services, opener);
+  static create(services: IServicesProvider, opener: IFileOpener): FileHandlerPlugin {
+    return new FileHandlerPlugin(services, opener);
   }
 
   /**
-   * Construct a new DefaultFileHandler.
+   * Construct a new FileHandlerPlugin.
    */
   constructor(services: IServicesProvider, opener: IFileOpener) {
     this._services = services;
     this._opener = opener;
   }
 
+  /**
+   * Initialize the plugin.
+   */
   run(): void {
     this._handler = new FileHandler(this._services.contentsManager);
     this._opener.register(this._handler, true);
