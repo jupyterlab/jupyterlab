@@ -63,7 +63,7 @@ class FileHandlerPlugin {
    */
   run(): void {
     this._handler = new FileHandler(this._services.contentsManager);
-    this._opener.register(this._handler, true);
+    this._opener.registerDefault(this._handler);
   }
 
   private _handler: IFileHandler = null;

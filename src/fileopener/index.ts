@@ -3,12 +3,16 @@
 'use strict';
 
 import {
-  Widget
-} from 'phosphor-widget';
-
-import {
   Token
 } from 'phosphor-di';
+
+import {
+  ISignal
+} from 'phosphor-signaling';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 
 /**
@@ -17,7 +21,12 @@ import {
 export
 interface IFileHandler {
   /**
-   * The list of file extensions supported by the handler.
+   * A signal emitted when the widget is finished populating.
+   */
+  finished: ISignal<IFileHandler, string>;
+
+  /**
+   * he list of file extensions supported by the handler.
    */
   fileExtensions: string[];
 
@@ -41,7 +50,7 @@ interface IFileOpener {
   /**
    * Open the file and add the widget to the application shell.
    */
-  open(path: string): void;
+  open(path: string): Widget;
 
   /**
    * Register a file opener.
@@ -49,7 +58,12 @@ interface IFileOpener {
    * @param handler - The file handler to register.
    * @param isDefault (default to false) - whether the handler is the default handler
    */
-  register(handler: IFileHandler, isDefault?: boolean): void;
+  register(handler: IFileHandler): void;
+
+  /**
+   * Register a default file opener.
+   */
+  registerDefault(handler: IFileHandler): void;
 }
 
 
