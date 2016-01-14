@@ -4,7 +4,7 @@
  */
  
 .jp-selected-cell {
-    border: 2px solid red;
+    border: 1px solid #ababab;
 }
 
 .jp-Notebook {
