@@ -159,6 +159,15 @@ class NotebookWidget extends Panel {
     this._listdispose.dispose();
     super.dispose();
   }
+  
+  /**
+   * Get the model for the widget
+   */
+  
+  get model(): INotebookModel {
+    return this._model;
+  }
+  
   private _model: INotebookModel;
   private _listdispose: IDisposable;
 }
