@@ -77,7 +77,7 @@ class FileOpener implements IFileOpener {
   /**
    * Open a file and add it to the application shell.
    */
-  open(path: string): Promise<void> {
+  open(path: string): void {
     if (this._handlers.length === 0) {
       return;
     }
@@ -100,7 +100,7 @@ class FileOpener implements IFileOpener {
 
     // If there we no matches, do nothing.
     if (handlers.length == 0) {
-      return Promise.reject(new Error(`Could not open file '${path}'`));
+      throw new Error(`Could not open file '${path}'`);
 
     // If there was one handler, use it.
     } else if (handlers.length === 1) {
@@ -122,10 +122,9 @@ class FileOpener implements IFileOpener {
   /**
    * Open a file and add it to the application shell.
    */
-  private _open(handler: IFileHandler, path: string): Promise<void> {
-    return handler.open(path).then(widget => {
-      this._appShell.addToMainArea(widget);
-    });
+  private _open(handler: IFileHandler, path: string): void {
+    let widget = handler.open(path);
+    this._appShell.addToMainArea(widget);    
   }
 
   private _handlers: IFileHandler[] = [];

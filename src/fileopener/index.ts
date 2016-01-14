@@ -17,14 +17,14 @@ import {
 export
 interface IFileHandler {
   /**
-   * he list of file extensions supported by the handler.
+   * The list of file extensions supported by the handler.
    */
   fileExtensions: string[];
 
   /**
    * Open the file and return a populated widget.
    */
-  open(path: string): Promise<Widget>;
+  open(path: string): Widget;
 
   /**
    * Close the file widget.
@@ -41,7 +41,7 @@ interface IFileOpener {
   /**
    * Open the file and add the widget to the application shell.
    */
-  open(path: string): Promise<void>;
+  open(path: string): void;
 
   /**
    * Register a file opener.

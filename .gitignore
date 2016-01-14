@@ -8,3 +8,5 @@ test/coverage
 lib/
 example/build
 docs
+
+.ipynb_checkpoints
