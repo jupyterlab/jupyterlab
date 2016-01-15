@@ -213,7 +213,9 @@ class FileOpener implements IFileOpener {
    */
   private _open(handler: IFileHandler, path: string): Widget {
     var widget = handler.open(path);
-    this._appShell.addToMainArea(widget);
+    if (!widget.isAttached) {
+      this._appShell.addToMainArea(widget);
+    }
     let parent = widget.parent;
     while (parent && !(parent instanceof TabPanel)) {
       parent = parent.parent
