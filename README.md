@@ -48,6 +48,19 @@ npm test
 ```
 
 
+Build Example
+-------------
+
+Follow the source build instructions first.
+
+```bash
+npm run build:example
+```
+
+Change to `example` directory and navigate to `index.html`.
+
+
+
 Build Docs
 ----------
 
@@ -77,10 +90,8 @@ Bundle for the Browser
 
 Follow the package install instructions first.
 
-```bash
-npm install --save-dev browserify
-browserify myapp.js -o mybundle.js
-```
+Any bundler that understands how to `require()` files with `.js` and `.css`
+extensions can be used with this package.
 
 
 Usage Examples
