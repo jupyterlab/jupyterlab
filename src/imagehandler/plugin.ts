@@ -49,7 +49,7 @@ class ImageHandler extends AbstractFileHandler {
    * Get the list of file extensions explicitly supported by the handler.
    */
   get fileExtensions(): string[] {
-    return ['.png', '.gif', '.jpeg', '.jpg']
+    return ['.png', '.gif', '.jpeg', '.jpg', '.svg']
   }
 
   /**
@@ -79,6 +79,7 @@ class ImageHandler extends AbstractFileHandler {
   protected populateWidget(widget: Widget, model: IContentsModel): Promise<void> {
     let ext = model.path.split('.').pop();
     let uri = `data:image/${ext};base64,${model.content}`;
+    if (ext === 'svg') uri = `data:image/svg+xml;utf-8,${model.content}`;
     var img = new Image();
     var canvas = widget.node.firstChild as HTMLCanvasElement;
     img.addEventListener('load', () => {
