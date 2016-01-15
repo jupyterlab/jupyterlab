@@ -212,7 +212,7 @@ class FileOpener implements IFileOpener {
    * Open a file and add it to the application shell and give it focus.
    */
   private _open(handler: IFileHandler, path: string): Widget {
-    var widget = handler.open(path);
+    let widget = handler.open(path);
     if (!widget.isAttached) {
       this._appShell.addToMainArea(widget);
     }
