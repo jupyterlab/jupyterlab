@@ -30,7 +30,10 @@ import {
  */
 export
 function register(container: Container): void {
-  container.register(IServicesProvider, ServicesProvider);
+  container.register(IServicesProvider, {
+    requires: [],
+    create: () => { return new ServicesProvider() }
+  });
 }
 
 
@@ -38,18 +41,6 @@ function register(container: Container): void {
  * An implementation of a services provider.
  */
 class ServicesProvider implements IServicesProvider {
-
-  /**
-   * The dependencies required by the services provider.
-   */
-  static requires: Token<any>[] = [];
-
-  /**
-   * Create a new services provider instance.
-   */
-  static create(): IServicesProvider {
-    return new ServicesProvider();
-  }
 
   /**
    * Construct a new services provider.
