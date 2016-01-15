@@ -7,7 +7,7 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
-  Container, Lifetime, Token
+  Container, Token
 } from 'phosphor-di';
 
 import {
@@ -32,9 +32,8 @@ import './plugin.css';
 export
 function register(container: Container): void {
   container.register(IFileBrowserWidget, {
-    lifetime: Lifetime.Singleton,
     requires: [IServicesProvider],
-    create: (provider: IServicesProvider): IFileBrowserWidget => {
+    create: (provider) => {
       let contents = provider.contentsManager;
       let sessions = provider.notebookSessionManager;
       let model = new FileBrowserModel(contents, sessions);

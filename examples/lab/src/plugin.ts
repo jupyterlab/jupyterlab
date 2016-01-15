@@ -44,6 +44,7 @@ function resolve(container: Container): void {
   container.resolve({
     requires: [IAppShell, ICommandPalette, IFileBrowserWidget],
     create: (shell, palette, browser) => {
+      browser.title.text = 'Files';
       shell.addToLeftArea(browser, { rank: 40 });
     }
   });
