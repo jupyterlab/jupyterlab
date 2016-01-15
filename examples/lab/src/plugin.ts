@@ -44,6 +44,10 @@ function resolve(container: Container): void {
   container.resolve({
     requires: [IAppShell, ICommandPalette, IFileBrowserWidget],
     create: (shell, palette, browser) => {
+      palette.title.text = 'Commands';
+      shell.addToLeftArea(palette, { rank: 40 });
+      shell.attach(document.body);
+      window.addEventListener('resize', () => { shell.update(); });
       browser.title.text = 'Files';
       shell.addToLeftArea(browser, { rank: 40 });
     }
