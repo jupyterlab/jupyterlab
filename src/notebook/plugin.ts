@@ -37,10 +37,13 @@ import './plugin.css';
  * This is called automatically when the plugin is loaded.
  */
 export
-function resolve(container: Container) {
-  Promise.all([container.resolve(IServicesProvider),
-               container.resolve(IFileOpener)]).then(([services, opener]) => {
-    opener.register(new NotebookFileHandler(services.contentsManager))
+function resolve(container: Container): void {
+  container.resolve({
+    requires: [IServicesProvider, IFileOpener],
+    create: (services, opener) => {
+      let handler = new NotebookFileHandler(services.contentsManager);
+      opener.register(handler);
+    }
   });
 }
 
@@ -57,7 +60,7 @@ class NotebookFileHandler extends AbstractFileHandler {
   get fileExtensions(): string[] {
     return ['.ipynb']
   }
-  
+
   /**
    * Get file contents given a path.
    */
@@ -75,7 +78,7 @@ class NotebookFileHandler extends AbstractFileHandler {
     return widget;
   }
 
-  
+
   protected populateWidget(widget: NotebookWidget, model: IContentsModel): Promise<void> {
     let nbdata: NBData = makedata(model);
     populateNotebookModel(widget.model, nbdata);

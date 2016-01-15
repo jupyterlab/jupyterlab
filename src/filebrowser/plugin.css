@@ -5,7 +5,7 @@
 .jp-FileBrowser {
   background-color: #F5F5F5;
   color: #757575;
-  font: 13px Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Neue", Helvetica;
   min-width: 300px;
 }
 

@@ -15,6 +15,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
+  font-size: 13px;
 }
 
 
@@ -300,7 +301,7 @@ body {
 }
 
 
-.p-CommandPalette .p-header {
+.p-CommandPalette-header {
   color: #757575;
   font-size: 11px;
   font-weight: 500;
@@ -308,55 +309,61 @@ body {
 }
 
 
-.p-CommandPalette .p-header hr {
+.p-CommandPalette-header hr {
   height: 1px;
   border-width: 0;
   background-color: #e0e0e0;
 }
 
 
-.p-CommandPalette .p-search {
+.p-CommandPalette-search {
   margin-bottom: 4px;
 }
 
 
-.p-CommandPalette .p-search .p-input-wrapper {
+.p-CommandPalette-inputWrapper {
   border: 1px solid #e0e0e0;
   padding: 4px;
 }
 
 
-.p-CommandPalette .p-search input {
+.p-CommandPalette-search input {
   width: 100%;
   border: none;
   outline: none;
 }
 
 
-.p-CommandPalette .p-command {
+.p-CommandPalette-command {
   color: #757575;
+  cursor: pointer;
   font-weight: 500;
   font-size: 13px;
-  padding: 3px 0px;
+  padding: 3px 0 3px 2px;
 }
 
+.p-CommandPalette-command.p-mod-disabled {
+  color: #d5d5d5;
+  cursor: not-allowed;
+}
 
-.p-CommandPalette .p-command .p-description {
+.p-CommandPalette-description {
   color: #9e9e9e;
   font-weight: 400;
   font-size: 10px;
 }
 
+.p-CommandPalette-command.p-mod-disabled .p-CommandPalette-description {
+  color: #d5d5d5;
+}
 
-.p-CommandPalette .p-command .p-shortcut {
+.p-CommandPalette-shortcut {
   margin-right: 15px;
 }
 
-
-.p-CommandPalette .p-command:focus,
-.p-CommandPalette .p-command:focus .p-description,
-.p-CommandPalette .p-command:focus .p-shortcut {
-  outline: 0;
+.p-CommandPalette-command.p-mod-focus,
+.p-CommandPalette-command.p-mod-focus .p-CommandPalette-description,
+.p-CommandPalette-command.p-mod-focus .p-CommandPalette-shortcut {
   background: #2196f3;
   color: #fff;
 }
