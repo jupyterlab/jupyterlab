@@ -22,8 +22,8 @@ import './plugin.css';
 
 
 export
-function resolve(container: Container): Promise<void> {
-  return container.resolve({
+function resolve(container: Container): void {
+  container.resolve({
     requires: [IAppShell, ICommandPalette, ICommandRegistry],
     create: (shell, palette, registry) => {
       let termCommandItem = {
