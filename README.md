@@ -34,7 +34,6 @@ cd jupyter-js-plugins
 npm install
 npm run build
 conda install jupyter
-pip install -U notebook  # requires the 4.1 version of the notebook
 ```
 
 **Rebuild**
@@ -75,6 +74,15 @@ Earlier versions may also work, but come with no guarantees.
 - IE 11+
 - Firefox 32+
 - Chrome 38+
+
+
+Bundle for the Browser
+----------------------
+
+Follow the package install instructions first.
+
+Any bundler that understands how to `require()` files with `.js` and `.css`
+extensions can be used with this package.
 
 
 Usage Examples
