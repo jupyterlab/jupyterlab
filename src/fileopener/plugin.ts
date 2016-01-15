@@ -23,6 +23,10 @@ import {
 } from 'phosphor-properties';
 
 import {
+  TabPanel
+} from 'phosphor-tabs';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -205,11 +209,23 @@ class FileOpener implements IFileOpener {
   }
 
   /**
-   * Open a file and add it to the application shell.
+   * Open a file and add it to the application shell and give it focus.
    */
   private _open(handler: IFileHandler, path: string): Widget {
-    var widget = handler.open(path);
-    this._appShell.addToMainArea(widget);
+    let widget = handler.open(path);
+    if (!widget.isAttached) {
+      this._appShell.addToMainArea(widget);
+    }
+    let parent = widget.parent;
+    while (parent) {
+      if (parent instanceof TabPanel) {
+        if ((parent as TabPanel).childIndex(widget) !== -1) {
+          (parent as TabPanel).currentWidget = widget;
+          return widget;
+        }
+      }
+      parent = parent.parent;
+    }
     return widget;
   }
 
