@@ -27,7 +27,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IFileBrowserProvider
+  IFileBrowserWidget
 } from '../index';
 
 import {
@@ -53,17 +53,17 @@ class FileOpenerProvider {
   /**
    * The dependencies required by the file opener.
    */
-  static requires: Token<any>[] = [IAppShell, IFileOpener, IFileBrowserProvider, ICommandPalette, ICommandRegistry];
+  static requires: Token<any>[] = [IAppShell, IFileOpener, IFileBrowserWidget, ICommandPalette, ICommandRegistry];
 
-  static create(appShell: IAppShell, opener: IFileOpener, browserProvider: IFileBrowserProvider, palette: ICommandPalette, registry: ICommandRegistry): FileOpenerProvider {
+  static create(appShell: IAppShell, opener: IFileOpener, browserProvider: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry): FileOpenerProvider {
     return new FileOpenerProvider(appShell, opener, browserProvider, palette, registry);
   }
 
   /**
    * Construct a new file opener.
    */
-  constructor(appShell: IAppShell, opener: IFileOpener, browserProvider: IFileBrowserProvider, palette: ICommandPalette, registry: ICommandRegistry) {
-    this._browser = browserProvider.fileBrowser;
+  constructor(appShell: IAppShell, opener: IFileOpener, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry) {
+    this._browser = browser;
     this._registry = registry;
     this._palette = palette;
     this._appShell = appShell;
@@ -128,21 +128,21 @@ class FileOpener implements IFileOpener {
   /**
    * The dependencies required by the file opener.
    */
-  static requires: Token<any>[] = [IAppShell, IFileBrowserProvider];
+  static requires: Token<any>[] = [IAppShell, IFileBrowserWidget];
 
   /**
    * Create a new file opener instance.
    */
-  static create(appShell: IAppShell, browserProvider: IFileBrowserProvider): IFileOpener {
+  static create(appShell: IAppShell, browserProvider: IFileBrowserWidget): IFileOpener {
     return new FileOpener(appShell, browserProvider);
   }
 
   /**
    * Construct a new file opener.
    */
-  constructor(appShell: IAppShell, browserProvider: IFileBrowserProvider) {
+  constructor(appShell: IAppShell, browser: IFileBrowserWidget) {
     this._appShell = appShell;
-    browserProvider.fileBrowser.openRequested.connect(this._openRequested,
+    browser.openRequested.connect(this._openRequested,
       this);
   }
 

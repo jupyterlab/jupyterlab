@@ -27,7 +27,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IFileBrowserProvider
+  IFileBrowserWidget
 } from '../../lib';
 
 
@@ -53,25 +53,26 @@ class DefaultHandler {
   /**
    * The dependencies required by the default plugin.
    */
-  static requires: Token<any>[] = [IAppShell, ICommandPalette, IFileBrowserProvider];
+  static requires: Token<any>[] = [IAppShell, ICommandPalette, IFileBrowserWidget];
 
   /**
    * Create a default plugin instance..
    */
-  static create(shell: IAppShell, palette: ICommandPalette, browserProvider: IFileBrowserProvider): DefaultHandler {
-    return new DefaultHandler(shell, palette, browserProvider);
+  static create(shell: IAppShell, palette: ICommandPalette, browser: IFileBrowserWidget): DefaultHandler {
+    return new DefaultHandler(shell, palette, browser);
   }
 
   /**
    * Construct a new default plugin.
    */
-  constructor(shell: IAppShell, palette: ICommandPalette, browserProvider: IFileBrowserProvider) {
+  constructor(shell: IAppShell, palette: ICommandPalette, browser: IFileBrowserWidget) {
     this._shell = shell;
     this._palette = palette;
-    this._browser = browserProvider.fileBrowser;
+    this._browser = browser;
   }
 
   run() {
+    this._browser.title.text = 'Files';
     this._shell.addToLeftArea(this._browser, { rank: 40 });
   }
 

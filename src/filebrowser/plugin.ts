@@ -7,15 +7,11 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
-  IAppShell
-} from 'phosphide';
-
-import {
-  Container, Token
+  Container, Lifetime, Token
 } from 'phosphor-di';
 
 import {
-  IFileBrowserProvider
+  IFileBrowserWidget
 } from './index';
 
 import {
@@ -35,47 +31,14 @@ import './plugin.css';
  */
 export
 function register(container: Container): void {
-  container.register(IFileBrowserProvider, FileBrowserProvider);
-}
-
-
-/**
- * An implementation of the FileBrowserProvider provider.
- */
-class FileBrowserProvider implements IFileBrowserProvider {
-
-  /**
-   * The dependencies required by the application shell.
-   */
-  static requires: Token<any>[] = [IServicesProvider];
-
-  /**
-   * Create a new application shell instance.
-   */
-  static create(services: IServicesProvider): IFileBrowserProvider {
-    return new FileBrowserProvider(services);
-  }
-
-  /**
-   * Construct a new filebrowser provider instance.
-   */
-  constructor(services: IServicesProvider) {
-    let contents = services.contentsManager;
-    let sessions = services.notebookSessionManager;
-    let model = new FileBrowserModel(contents, sessions);
-    this._browser = new FileBrowserWidget(model);
-    this._browser.title.text = 'Files';
-  }
-
-  /**
-   * Get the filebrowser instance.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get fileBrowser(): FileBrowserWidget {
-    return this._browser;
-  }
-
-  private _browser: FileBrowserWidget = null;
+  container.register(IFileBrowserWidget, {
+    lifetime: Lifetime.Singleton,
+    requires: [IServicesProvider],
+    create: (provider: IServicesProvider): IFileBrowserWidget => {
+      let contents = provider.contentsManager;
+      let sessions = provider.notebookSessionManager;
+      let model = new FileBrowserModel(contents, sessions);
+      return new FileBrowserWidget(model);
+    }
+  });
 }
