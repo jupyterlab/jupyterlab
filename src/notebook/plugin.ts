@@ -38,10 +38,10 @@ import './plugin.css';
  */
 export
 function resolve(container: Container) {
-  Promise.all([container.resolve(IServicesProvider),
+  return Promise.all([container.resolve(IServicesProvider),
                container.resolve(IFileOpener)]).then(([services, opener]) => {
-    opener.register(new NotebookFileHandler(services.contentsManager))
-  });
+    opener.registerDefault(new NotebookFileHandler(services.contentsManager))
+  }).then(() => {});
 }
 
 
@@ -57,7 +57,7 @@ class NotebookFileHandler extends AbstractFileHandler {
   get fileExtensions(): string[] {
     return ['.ipynb']
   }
-  
+
   /**
    * Get file contents given a path.
    */
@@ -75,7 +75,7 @@ class NotebookFileHandler extends AbstractFileHandler {
     return widget;
   }
 
-  
+
   protected populateWidget(widget: NotebookWidget, model: IContentsModel): Promise<void> {
     let nbdata: NBData = makedata(model);
     populateNotebookModel(widget.model, nbdata);

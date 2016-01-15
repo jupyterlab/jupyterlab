@@ -32,47 +32,11 @@ import {
  * This is called automatically when the plugin is loaded.
  */
 export
-function resolve(container: Container): Promise<void> {
-  return container.resolve(ImageHandlerPlugin).then(plugin => plugin.run());
-}
-
-
-/**
- * A plugin that provides the default file handler to the IFileOpener.
- */
-class ImageHandlerPlugin {
-
-  /**
-   * The dependencies required by the file handler.
-   */
-  static requires: Token<any>[] = [IServicesProvider, IFileOpener];
-
-  /**
-   * Create a new file handler plugin instance.
-   */
-  static create(services: IServicesProvider, opener: IFileOpener): ImageHandlerPlugin {
-    return new ImageHandlerPlugin(services, opener);
-  }
-
-  /**
-   * Construct a new FileHandlerPlugin.
-   */
-  constructor(services: IServicesProvider, opener: IFileOpener) {
-    this._services = services;
-    this._opener = opener;
-  }
-
-  /**
-   * Initialize the plugin.
-   */
-  run(): void {
-    this._handler = new ImageHandler(this._services.contentsManager);
-    this._opener.register(this._handler);
-  }
-
-  private _handler: ImageHandler = null;
-  private _services: IServicesProvider = null;
-  private _opener: IFileOpener = null;
+function resolve(container: Container) {
+  return Promise.all([container.resolve(IServicesProvider),
+               container.resolve(IFileOpener)]).then(([services, opener]) => {
+    opener.registerDefault(new ImageHandler(services.contentsManager))
+  }).then(() => {});
 }
 
 
