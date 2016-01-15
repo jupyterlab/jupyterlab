@@ -49,7 +49,8 @@ class ImageHandler extends AbstractFileHandler {
    * Get the list of file extensions explicitly supported by the handler.
    */
   get fileExtensions(): string[] {
-    return ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp']
+    return ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico', '.xbm',
+            '.tiff', '.tif']
   }
 
   /**
