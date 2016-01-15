@@ -41,42 +41,10 @@ import {
  */
 export
 function resolve(container: Container): void {
-  container.resolve(DefaultHandler).then(handler => { handler.run(); });
-}
-
-
-/**
- * The default plugin for the example.
- */
-class DefaultHandler {
-
-  /**
-   * The dependencies required by the default plugin.
-   */
-  static requires: Token<any>[] = [IAppShell, ICommandPalette, IFileBrowserWidget];
-
-  /**
-   * Create a default plugin instance..
-   */
-  static create(shell: IAppShell, palette: ICommandPalette, browser: IFileBrowserWidget): DefaultHandler {
-    return new DefaultHandler(shell, palette, browser);
-  }
-
-  /**
-   * Construct a new default plugin.
-   */
-  constructor(shell: IAppShell, palette: ICommandPalette, browser: IFileBrowserWidget) {
-    this._shell = shell;
-    this._palette = palette;
-    this._browser = browser;
-  }
-
-  run() {
-    this._browser.title.text = 'Files';
-    this._shell.addToLeftArea(this._browser, { rank: 40 });
-  }
-
-  private _shell: IAppShell = null;
-  private _palette: ICommandPalette = null;
-  private _browser: FileBrowserWidget = null;
+  container.resolve({
+    requires: [IAppShell, ICommandPalette, IFileBrowserWidget],
+    create: (shell, palette, browser) => {
+      shell.addToLeftArea(browser, { rank: 40 });
+    }
+  });
 }

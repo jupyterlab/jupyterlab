@@ -32,11 +32,14 @@ import {
  * This is called automatically when the plugin is loaded.
  */
 export
-function resolve(container: Container) {
-  return Promise.all([container.resolve(IServicesProvider),
-               container.resolve(IFileOpener)]).then(([services, opener]) => {
-    opener.registerDefault(new ImageHandler(services.contentsManager))
-  }).then(() => {});
+function resolve(container: Container): Promise<void> {
+  return container.resolve({
+    requires: [IServicesProvider, IFileOpener],
+    create: (services, opener) => {
+      let handler = new ImageHandler(services.contentsManager);
+      opener.register(handler);
+    }
+  });
 }
 
 

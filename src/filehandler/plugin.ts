@@ -29,8 +29,11 @@ import {
  */
 export
 function resolve(container: Container): Promise<void> {
-  return Promise.all([container.resolve(IServicesProvider),
-               container.resolve(IFileOpener)]).then(([services, opener]) => {
-    opener.registerDefault(new FileHandler(services.contentsManager))
-  }).then(() => {});
+  return container.resolve({
+    requires: [IServicesProvider, IFileOpener],
+    create: (services, opener) => {
+      let handler = new FileHandler(services.contentsManager);
+      opener.registerDefault(handler);
+    }
+  });
 }
