@@ -16,7 +16,6 @@ Package Install
 ```bash
 npm install --save jupyter-js-plugins
 conda install jupyter
-pip install -U notebook  # requires the 4.1 version of the notebook
 ```
 
 
