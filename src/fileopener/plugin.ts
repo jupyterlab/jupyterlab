@@ -209,7 +209,7 @@ class FileOpener implements IFileOpener {
   }
 
   /**
-   * Open a file and add it to the application shell.
+   * Open a file and add it to the application shell and give it focus.
    */
   private _open(handler: IFileHandler, path: string): Widget {
     var widget = handler.open(path);
@@ -217,10 +217,15 @@ class FileOpener implements IFileOpener {
       this._appShell.addToMainArea(widget);
     }
     let parent = widget.parent;
-    while (parent && !(parent instanceof TabPanel)) {
-      parent = parent.parent
+    while (parent) {
+      if (parent instanceof TabPanel) {
+        if ((parent as TabPanel).childIndex(widget) !== -1) {
+          (parent as TabPanel).currentWidget = widget;
+          return widget;
+        }
+      }
+      parent = parent.parent;
     }
-    if (parent) (parent as TabPanel).currentWidget = widget;
     return widget;
   }
 
