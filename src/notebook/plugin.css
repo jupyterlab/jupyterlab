@@ -7,6 +7,10 @@
   min-height: 50px;
 }
 
+.jp-NotebookContainer {
+  overflow: auto;
+}
+
 .jp-NotebookWidget-body {
   padding: 0.5em;
   font-size: 11px;

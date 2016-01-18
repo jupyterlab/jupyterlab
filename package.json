@@ -6,6 +6,7 @@
   "typings": "lib/index.d.ts",
   "dependencies": {
     "codemirror": "^5.10.0",
+    "jupyter-js-cells": "^0.2.5",
     "jupyter-js-filebrowser": "^0.4.1",
     "jupyter-js-notebook": "^0.3.0",
     "jupyter-js-services": "^0.3.3",
