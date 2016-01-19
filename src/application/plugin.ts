@@ -1,11 +1,3 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-'use strict';
-
-import {
-  FileBrowserWidget
-} from 'jupyter-js-filebrowser';
-
 import {
   IAppShell, ICommandPalette, ICommandRegistry
 } from 'phosphide';
@@ -24,8 +16,9 @@ import {
 
 import {
   IFileBrowserWidget
-} from '../../lib';
+} from '../index';
 
+import './plugin.css';
 
 /**
  * Register the plugin contributions.
