@@ -32,7 +32,7 @@ export
 function register(container: Container): void {
   container.register(IServicesProvider, {
     requires: [],
-    create: () => { return new ServicesProvider() }
+    create: () => { return new ServicesProvider(); }
   });
 }
 

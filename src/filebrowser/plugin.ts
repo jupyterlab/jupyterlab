@@ -33,7 +33,7 @@ export
 function register(container: Container): void {
   container.register(IFileBrowserWidget, {
     requires: [IServicesProvider],
-    create: (provider) => {
+    create: (provider: IServicesProvider) => {
       let contents = provider.contentsManager;
       let sessions = provider.notebookSessionManager;
       let model = new FileBrowserModel(contents, sessions);

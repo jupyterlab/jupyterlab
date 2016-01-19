@@ -7,10 +7,6 @@ import {
 } from 'jupyter-js-terminal';
 
 import {
-  DelegateCommand
-} from 'phosphor-command';
-
-import {
   Container, Token
 } from 'phosphor-di';
 
@@ -25,21 +21,16 @@ export
 function resolve(container: Container): Promise<void> {
   return container.resolve({
     requires: [IAppShell, ICommandPalette, ICommandRegistry],
-    create: (shell, palette, registry) => {
-      let termCommandItem = {
-        // Move this to the terminal.
-        id: 'jupyter-plugins:new-terminal',
-        command: new DelegateCommand(() => {
-          let term = new TerminalWidget();
-          term.color = 'black';
-          term.background = 'white';
-          term.title.closable = true;
-          shell.addToMainArea(term);
-        })
-      }
-      registry.add([termCommandItem]);
+    create: (shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) => {
+      registry.add('jupyter-plugins:new:terminal', () => {
+        let term = new TerminalWidget();
+        term.color = 'black';
+        term.background = 'white';
+        term.title.closable = true;
+        shell.addToMainArea(term);
+      });
       let paletteItem = {
-        id: 'jupyter-plugins:new-terminal',
+        id: 'jupyter-plugins:new:terminal',
         title: 'Terminal',
         caption: ''
       };

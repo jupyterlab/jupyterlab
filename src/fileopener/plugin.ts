@@ -15,10 +15,6 @@ import {
 } from 'phosphide';
 
 import {
-  DelegateCommand
-} from 'phosphor-command';
-
-import {
   Container, Token
 } from 'phosphor-di';
 
@@ -84,6 +80,63 @@ function resolve(container: Container): Promise<void> {
         items: paletteItems
       }
       palette.add([section]);
+  return container.resolve(FileOpenerProvider).then(provider => provider.run());
+}
+
+export
+function register(container: Container): void {
+  container.register(IFileOpener, FileOpener);
+}
+
+
+class FileOpenerProvider {
+  /**
+   * The dependencies required by the file opener.
+   */
+  static requires: Token<any>[] = [IAppShell, IFileOpener, IFileBrowserWidget, ICommandPalette, ICommandRegistry];
+
+  static create(appShell: IAppShell, opener: IFileOpener, browserProvider: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry): FileOpenerProvider {
+    return new FileOpenerProvider(appShell, opener, browserProvider, palette, registry);
+  }
+
+  /**
+   * Construct a new file opener.
+   */
+  constructor(appShell: IAppShell, opener: IFileOpener, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry) {
+    this._browser = browser;
+    this._registry = registry;
+    this._palette = palette;
+    this._appShell = appShell;
+    this._opener = opener;
+  }
+
+
+  run() {
+    this._registry.add('jupyter-plugins:new:textfile', () => {
+      this._browser.newUntitled('file', '.txt').then(
+          contents => this._opener.open(contents.path)
+      );
+    });
+
+    this._registry.add('jupyter-plugins:new:notebook', () => {
+      this._browser.newUntitled('notebook').then(
+          contents => this._opener.open(contents.path)
+      );
+    });
+    let paletteItems = [{
+      id: 'jupyter-plugins:new:text-file',
+      title: 'Text File',
+      caption: ''
+    }, {
+      id: 'jupyter-plugins:new:notebook',
+      title: 'Notebook',
+      caption: ''
+    }];
+    let section = {
+      text: 'New...',
+      items: paletteItems
+    }
+    this._palette.add([section]);
 
       FileBrowserWidget.widgetFactory = () => {
         let model = browser.model;
@@ -104,7 +157,6 @@ function register(container: Container): void {
     }
   });
 }
-
 
 
 /**
