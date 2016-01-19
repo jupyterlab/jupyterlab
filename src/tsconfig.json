@@ -13,6 +13,7 @@
     "../typings/requirejs/requirejs.d.ts",
     "../typings/codemirror/codemirror.d.ts",
     "index.ts",
+    "application/plugin.ts",
     "filebrowser/index.ts",
     "filebrowser/plugin.ts",
     "filehandler/plugin.ts",
