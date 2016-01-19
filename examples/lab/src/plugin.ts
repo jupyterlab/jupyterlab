@@ -40,8 +40,8 @@ import {
  * This is called automatically when the plugin is loaded.
  */
 export
-function resolve(container: Container): void {
-  container.resolve({
+function resolve(container: Container): Promise<void> {
+  return container.resolve({
     requires: [IAppShell, ICommandPalette, IFileBrowserWidget],
     create: (shell, palette, browser) => {
       palette.title.text = 'Commands';

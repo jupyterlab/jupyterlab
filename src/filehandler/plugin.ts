@@ -28,12 +28,13 @@ import {
  * This is called automatically when the plugin is loaded.
  */
 export
-function resolve(container: Container): void {
-  container.resolve({
+function resolve(container: Container): Promise<IFileHandler> {
+  return container.resolve({
     requires: [IServicesProvider, IFileOpener],
     create: (services, opener) => {
       let handler = new FileHandler(services.contentsManager);
       opener.registerDefault(handler);
+      return handler;
     }
   });
 }

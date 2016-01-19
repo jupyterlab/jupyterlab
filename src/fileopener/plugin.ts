@@ -7,6 +7,10 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
+  IContentsModel
+} from 'jupyter-js-services';
+
+import {
   IAppShell, ICommandPalette, ICommandRegistry
 } from 'phosphide';
 
@@ -44,102 +48,69 @@ import {
  */
 export
 function resolve(container: Container): Promise<void> {
-  return container.resolve(FileOpenerProvider).then(provider => provider.run());
+  return container.resolve({
+    requires: [IAppShell, IFileOpener, IFileBrowserWidget, ICommandPalette, ICommandRegistry],
+    create: (appShell, opener, browser, palette, registry) => {
+      let newFileCommandItem = {
+        id: 'jupyter-plugins:new-text-file',
+        command: new DelegateCommand(() => {
+           browser.newUntitled('file', '.txt').then((contents: IContentsModel) => {
+              opener.open(contents.path);
+              browser.refresh();
+            });
+          })
+      }
+      let newNotebookCommandItem = {
+        id: 'jupyter-plugins:new-notebook',
+        command: new DelegateCommand(() => {
+          browser.newUntitled('notebook').then((contents: IContentsModel) => {
+            opener.open(contents.path);
+            browser.refresh();
+          });
+        })
+      }
+      registry.add([newFileCommandItem, newNotebookCommandItem]);
+      let paletteItems = [{
+        id: 'jupyter-plugins:new-text-file',
+        title: 'Text File',
+        caption: ''
+      }, {
+        id: 'jupyter-plugins:new-notebook',
+        title: 'Notebook',
+        caption: ''
+      }];
+      let section = {
+        text: 'New...',
+        items: paletteItems
+      }
+      palette.add([section]);
+
+      FileBrowserWidget.widgetFactory = () => {
+        let model = browser.model;
+        let item = model.items[model.selected[0]];
+        return opener.open(item.path);
+      }
+    }
+  });
 }
+
 
 export
 function register(container: Container): void {
-  container.register(IFileOpener, FileOpener);
+  container.register(IFileOpener, {
+    requires: [IAppShell, IFileBrowserWidget],
+    create: (shell, browser) => {
+      return new FileOpener(shell, browser);
+    }
+  });
 }
 
-
-class FileOpenerProvider {
-  /**
-   * The dependencies required by the file opener.
-   */
-  static requires: Token<any>[] = [IAppShell, IFileOpener, IFileBrowserWidget, ICommandPalette, ICommandRegistry];
-
-  static create(appShell: IAppShell, opener: IFileOpener, browserProvider: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry): FileOpenerProvider {
-    return new FileOpenerProvider(appShell, opener, browserProvider, palette, registry);
-  }
-
-  /**
-   * Construct a new file opener.
-   */
-  constructor(appShell: IAppShell, opener: IFileOpener, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry) {
-    this._browser = browser;
-    this._registry = registry;
-    this._palette = palette;
-    this._appShell = appShell;
-    this._opener = opener;
-  }
-
-
-  run() {
-    let newFileCommandItem = {
-      id: 'jupyter-plugins:new-text-file',
-      command: new DelegateCommand(() => {
-        this._browser.newUntitled('file', '.txt').then(
-          contents => this._opener.open(contents.path)
-        );
-      })
-    }
-    let newNotebookCommandItem = {
-      id: 'jupyter-plugins:new-notebook',
-      command: new DelegateCommand(() => {
-        this._browser.newUntitled('notebook').then(
-          contents => this._opener.open(contents.path)
-        );
-      })
-    }
-    this._registry.add([newFileCommandItem, newNotebookCommandItem]);
-    let paletteItems = [{
-      id: 'jupyter-plugins:new-text-file',
-      title: 'Text File',
-      caption: ''
-    }, {
-      id: 'jupyter-plugins:new-notebook',
-      title: 'Notebook',
-      caption: ''
-    }];
-    let section = {
-      text: 'New...',
-      items: paletteItems
-    }
-    this._palette.add([section]);
-
-    FileBrowserWidget.widgetFactory = () => {
-      let model = this._browser.model;
-      let item = model.items[model.selected[0]];
-      return this._opener.open(item.path);
-    }
-  }
-
-  private _appShell: IAppShell = null;
-  private _defaultHandler: IFileHandler = null;
-  private _browser: FileBrowserWidget = null;
-  private _registry: ICommandRegistry = null;
-  private _palette: ICommandPalette = null;
-  private _opener: IFileOpener = null;
-}
 
 
 /**
  * An implementation on an IFileOpener.
  */
 class FileOpener implements IFileOpener {
-
-  /**
-   * The dependencies required by the file opener.
-   */
-  static requires: Token<any>[] = [IAppShell, IFileBrowserWidget];
-
-  /**
-   * Create a new file opener instance.
-   */
-  static create(appShell: IAppShell, browserProvider: IFileBrowserWidget): IFileOpener {
-    return new FileOpener(appShell, browserProvider);
-  }
 
   /**
    * Construct a new file opener.

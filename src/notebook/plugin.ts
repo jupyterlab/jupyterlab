@@ -15,7 +15,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IServicesProvider, IFileOpener
+  IServicesProvider, IFileOpener, IFileHandler
 } from '../index';
 
 import {
@@ -37,12 +37,13 @@ import './plugin.css';
  * This is called automatically when the plugin is loaded.
  */
 export
-function resolve(container: Container): void {
-  container.resolve({
+function resolve(container: Container): Promise<IFileHandler> {
+  return container.resolve({
     requires: [IServicesProvider, IFileOpener],
     create: (services, opener) => {
       let handler = new NotebookFileHandler(services.contentsManager);
       opener.register(handler);
+      return handler;
     }
   });
 }
