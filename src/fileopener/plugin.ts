@@ -69,10 +69,8 @@ function resolve(container: Container): Promise<void> {
       }
       palette.add([section]);
 
-      FileBrowserWidget.widgetFactory = () => {
-        let model = browser.model;
-        let item = model.items[model.selected[0]];
-        return opener.open(item.path);
+      browser.widgetFactory = path => {
+        return opener.open(path);
       }
     }
   });
