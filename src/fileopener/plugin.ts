@@ -45,7 +45,7 @@ function resolve(container: Container): Promise<void> {
     create: (appShell: IAppShell, opener: IFileOpener, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry): void => {
       registry.add('jupyter-plugins:new:text-file', () => {
         browser.newUntitled('file', '.txt').then(
-          contents => this._opener.open(contents.path)
+          contents => opener.open(contents.path)
         );
       });
 
@@ -170,15 +170,13 @@ class FileOpener implements IFileOpener {
     if (!widget.isAttached) {
       this._appShell.addToMainArea(widget);
     }
-    let parent = widget.parent;
-    while (parent) {
-      if (parent instanceof TabPanel) {
-        if ((parent as TabPanel).childIndex(widget) !== -1) {
-          (parent as TabPanel).currentWidget = widget;
-          return widget;
-        }
-      }
-      parent = parent.parent;
+    let stack = widget.parent;
+    if (!stack) {
+      return;
+    }
+    let tabs = stack.parent;
+    if (tabs instanceof TabPanel) {
+      tabs.currentWidget = widget;
     }
     return widget;
   }

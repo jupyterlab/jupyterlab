@@ -7,12 +7,16 @@ import {
 } from 'jupyter-js-terminal';
 
 import {
+  IAppShell, ICommandPalette, ICommandRegistry
+} from 'phosphide';
+
+import {
   Container, Token
 } from 'phosphor-di';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry
-} from 'phosphide';
+  TabPanel
+} from 'phosphor-tabs';
 
 import './plugin.css';
 
@@ -28,6 +32,14 @@ function resolve(container: Container): Promise<void> {
         term.background = 'white';
         term.title.closable = true;
         shell.addToMainArea(term);
+        let stack = term.parent;
+        if (!stack) {
+          return;
+        }
+        let tabs = stack.parent;
+        if (tabs instanceof TabPanel) {
+          tabs.currentWidget = term;
+        }
       });
       let paletteItem = {
         id: 'jupyter-plugins:new:terminal',
