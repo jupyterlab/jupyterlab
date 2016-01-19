@@ -31,7 +31,7 @@ export
 function resolve(container: Container): Promise<IFileHandler> {
   return container.resolve({
     requires: [IServicesProvider, IFileOpener],
-    create: (services, opener) => {
+    create: (services: IServicesProvider, opener: IFileOpener) => {
       let handler = new FileHandler(services.contentsManager);
       opener.registerDefault(handler);
       return handler;

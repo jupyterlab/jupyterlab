@@ -7,16 +7,8 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
-  IContentsModel
-} from 'jupyter-js-services';
-
-import {
   IAppShell, ICommandPalette, ICommandRegistry
 } from 'phosphide';
-
-import {
-  DelegateCommand
-} from 'phosphor-command';
 
 import {
   Container, Token
@@ -50,32 +42,24 @@ export
 function resolve(container: Container): Promise<void> {
   return container.resolve({
     requires: [IAppShell, IFileOpener, IFileBrowserWidget, ICommandPalette, ICommandRegistry],
-    create: (appShell, opener, browser, palette, registry) => {
-      let newFileCommandItem = {
-        id: 'jupyter-plugins:new-text-file',
-        command: new DelegateCommand(() => {
-           browser.newUntitled('file', '.txt').then((contents: IContentsModel) => {
-              opener.open(contents.path);
-              browser.refresh();
-            });
-          })
-      }
-      let newNotebookCommandItem = {
-        id: 'jupyter-plugins:new-notebook',
-        command: new DelegateCommand(() => {
-          browser.newUntitled('notebook').then((contents: IContentsModel) => {
-            opener.open(contents.path);
-            browser.refresh();
-          });
-        })
-      }
-      registry.add([newFileCommandItem, newNotebookCommandItem]);
+    create: (appShell: IAppShell, opener: IFileOpener, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry): void => {
+      registry.add('jupyter-plugins:new:text-file', () => {
+        browser.newUntitled('file', '.txt').then(
+          contents => opener.open(contents.path)
+        );
+      });
+
+      registry.add('jupyter-plugins:new:notebook', () => {
+        browser.newUntitled('notebook').then(
+          contents => opener.open(contents.path)
+        );
+      });
       let paletteItems = [{
-        id: 'jupyter-plugins:new-text-file',
+        id: 'jupyter-plugins:new:text-file',
         title: 'Text File',
         caption: ''
       }, {
-        id: 'jupyter-plugins:new-notebook',
+        id: 'jupyter-plugins:new:notebook',
         title: 'Notebook',
         caption: ''
       }];
@@ -99,12 +83,11 @@ export
 function register(container: Container): void {
   container.register(IFileOpener, {
     requires: [IAppShell, IFileBrowserWidget],
-    create: (shell, browser) => {
-      return new FileOpener(shell, browser);
+    create: (appShell, browserProvider): IFileOpener => {
+      return new FileOpener(appShell, browserProvider);
     }
   });
 }
-
 
 
 /**
@@ -187,15 +170,13 @@ class FileOpener implements IFileOpener {
     if (!widget.isAttached) {
       this._appShell.addToMainArea(widget);
     }
-    let parent = widget.parent;
-    while (parent) {
-      if (parent instanceof TabPanel) {
-        if ((parent as TabPanel).childIndex(widget) !== -1) {
-          (parent as TabPanel).currentWidget = widget;
-          return widget;
-        }
-      }
-      parent = parent.parent;
+    let stack = widget.parent;
+    if (!stack) {
+      return;
+    }
+    let tabs = stack.parent;
+    if (tabs instanceof TabPanel) {
+      tabs.currentWidget = widget;
     }
     return widget;
   }
