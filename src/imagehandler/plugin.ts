@@ -67,8 +67,8 @@ class ImageHandler extends AbstractFileHandler {
   protected createWidget(path: string): Widget {
     let ext = path.split('.').pop();
     var widget = new Widget();
-    let canvas = document.createElement('canvas');
-    widget.node.appendChild(canvas);
+    let image = document.createElement('img');
+    widget.node.appendChild(image);
     widget.node.style.overflowX = 'auto';
     widget.node.style.overflowY = 'auto';
     widget.title.text = path.split('/').pop();
@@ -79,17 +79,15 @@ class ImageHandler extends AbstractFileHandler {
    * Populate a widget from `IContentsModel`.
    */
   protected populateWidget(widget: Widget, model: IContentsModel): Promise<void> {
-    let ext = model.path.split('.').pop();
-    let uri = `data:${model.mimetype};${model.format},${model.content}`;
-    var img = new Image();
-    var canvas = widget.node.firstChild as HTMLCanvasElement;
-    img.addEventListener('load', () => {
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      let context = canvas.getContext('2d')
-      context.drawImage(img, 0, 0);
+    return new Promise<void>((resolve, reject) => {
+      let img = widget.node.firstChild as HTMLImageElement;
+      img.addEventListener('load', () => {
+        resolve(void 0);
+      });
+      img.addEventListener('error', error => {
+        reject(error);
+      });
+      img.src = `data:${model.mimetype};${model.format},${model.content}`;;
     });
-    img.src = uri;
-    return Promise.resolve(void 0);
   }
 }
