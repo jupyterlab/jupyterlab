@@ -66,7 +66,7 @@ class SessionStoreMapping {
   public services: IServicesProvider;
 }
 
-function messageToModel(msg: IKernelMessage) {  
+function messageToModel(msg: IKernelMessage) {
   let m: Output = msg.content;
   let type = msg.header.msg_type;
   if (type === 'execute_result') {
@@ -81,7 +81,11 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
   let cell = model.cells.get(model.selectedCellIndex);
   if (isCodeCell(cell)) {
     let exRequest = {
-      code: cell.input.textEditor.text
+      code: cell.input.textEditor.text,
+      silent: false,
+      store_history: true,
+      stop_on_error: true,
+      allow_stdin: true
     };
     let output = cell.output;
     console.log(`executing`, exRequest)
@@ -96,7 +100,7 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
       }
     });
     ex.onReply = (msg => {console.log('a', msg)});
-    ex.onDone = (msg => {console.log('b', msg)});    
+    ex.onDone = (msg => {console.log('b', msg)});
   }
 }
 
@@ -105,12 +109,12 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
  */
 export
 class NotebookFileHandler extends AbstractFileHandler {
-  
+
   constructor(contents: IContentsManager, session: INotebookSessionManager) {
     super(contents);
     this.session = session;
   }
-  
+
   /**
    * Get the list of file extensions supported by the handler.
    */
@@ -157,7 +161,7 @@ class NotebookFileHandler extends AbstractFileHandler {
     populateNotebookModel(nbWidget.model, nbData);
     return Promise.resolve();
   }
-  
+
   session: INotebookSessionManager;
 }
 
