@@ -21,7 +21,7 @@ import {
 } from 'phosphor-panel';
 
 import {
-  IServicesProvider, IFileOpener
+  IServicesProvider, IFileOpener, IFileHandler
 } from '../index';
 
 import {
@@ -48,12 +48,13 @@ import './plugin.css';
  * This is called automatically when the plugin is loaded.
  */
 export
-function resolve(container: Container): void {
-  container.resolve({
+function resolve(container: Container): Promise<IFileHandler> {
+  return container.resolve({
     requires: [IServicesProvider, IFileOpener],
     create: (services: IServicesProvider, opener: IFileOpener) => {
       let handler = new NotebookFileHandler(services.contentsManager, services.notebookSessionManager);
       opener.register(handler);
+      return handler;
     }
   });
 }

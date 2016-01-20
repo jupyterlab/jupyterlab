@@ -11,10 +11,6 @@ import {
 } from 'phosphide';
 
 import {
-  DelegateCommand
-} from 'phosphor-command';
-
-import {
   Container, Token
 } from 'phosphor-di';
 
@@ -44,83 +40,51 @@ import {
  */
 export
 function resolve(container: Container): Promise<void> {
-  return container.resolve(FileOpenerProvider).then(provider => provider.run());
+  return container.resolve({
+    requires: [IAppShell, IFileOpener, IFileBrowserWidget, ICommandPalette, ICommandRegistry],
+    create: (appShell: IAppShell, opener: IFileOpener, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry): void => {
+      registry.add('jupyter-plugins:new:text-file', () => {
+        browser.newUntitled('file', '.txt').then(
+          contents => opener.open(contents.path)
+        );
+      });
+
+      registry.add('jupyter-plugins:new:notebook', () => {
+        browser.newUntitled('notebook').then(
+          contents => opener.open(contents.path)
+        );
+      });
+      let paletteItems = [{
+        id: 'jupyter-plugins:new:text-file',
+        title: 'Text File',
+        caption: ''
+      }, {
+        id: 'jupyter-plugins:new:notebook',
+        title: 'Notebook',
+        caption: ''
+      }];
+      let section = {
+        text: 'New...',
+        items: paletteItems
+      }
+      palette.add([section]);
+
+      browser.widgetFactory = path => {
+        return opener.open(path);
+      }
+    }
+  });
 }
+
 
 export
 function register(container: Container): void {
-  container.register(IFileOpener, FileOpener);
-}
-
-
-class FileOpenerProvider {
-  /**
-   * The dependencies required by the file opener.
-   */
-  static requires: Token<any>[] = [IAppShell, IFileOpener, IFileBrowserWidget, ICommandPalette, ICommandRegistry];
-
-  static create(appShell: IAppShell, opener: IFileOpener, browserProvider: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry): FileOpenerProvider {
-    return new FileOpenerProvider(appShell, opener, browserProvider, palette, registry);
-  }
-
-  /**
-   * Construct a new file opener.
-   */
-  constructor(appShell: IAppShell, opener: IFileOpener, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry) {
-    this._browser = browser;
-    this._registry = registry;
-    this._palette = palette;
-    this._appShell = appShell;
-    this._opener = opener;
-  }
-
-
-  run() {
-    let newFileCommandItem = {
-      id: 'jupyter-plugins:new-text-file',
-      command: new DelegateCommand(() => {
-        this._browser.newUntitled('file', '.txt').then(
-          contents => this._opener.open(contents.path)
-        );
-      })
+  container.register(IFileOpener, {
+    requires: [IAppShell, IFileBrowserWidget],
+    create: (appShell, browserProvider): IFileOpener => {
+      return new FileOpener(appShell, browserProvider);
     }
-    let newNotebookCommandItem = {
-      id: 'jupyter-plugins:new-notebook',
-      command: new DelegateCommand(() => {
-        this._browser.newUntitled('notebook').then(
-          contents => this._opener.open(contents.path)
-        );
-      })
-    }
-    this._registry.add([newFileCommandItem, newNotebookCommandItem]);
-    let paletteItems = [{
-      id: 'jupyter-plugins:new-text-file',
-      title: 'Text File',
-      caption: ''
-    }, {
-      id: 'jupyter-plugins:new-notebook',
-      title: 'Notebook',
-      caption: ''
-    }];
-    let section = {
-      text: 'New...',
-      items: paletteItems
-    }
-    this._palette.add([section]);
-
-    FileBrowserWidget.widgetFactory = () => {
-      let model = this._browser.model;
-      let item = model.items[model.selected[0]];
-      return this._opener.open(item.path);
-    }
-  }
-
-  private _appShell: IAppShell = null;
-  private _defaultHandler: IFileHandler = null;
-  private _browser: FileBrowserWidget = null;
-  private _registry: ICommandRegistry = null;
-  private _palette: ICommandPalette = null;
-  private _opener: IFileOpener = null;
+  });
 }
 
 
@@ -128,18 +92,6 @@ class FileOpenerProvider {
  * An implementation on an IFileOpener.
  */
 class FileOpener implements IFileOpener {
-
-  /**
-   * The dependencies required by the file opener.
-   */
-  static requires: Token<any>[] = [IAppShell, IFileBrowserWidget];
-
-  /**
-   * Create a new file opener instance.
-   */
-  static create(appShell: IAppShell, browserProvider: IFileBrowserWidget): IFileOpener {
-    return new FileOpener(appShell, browserProvider);
-  }
 
   /**
    * Construct a new file opener.
@@ -216,15 +168,13 @@ class FileOpener implements IFileOpener {
     if (!widget.isAttached) {
       this._appShell.addToMainArea(widget);
     }
-    let parent = widget.parent;
-    while (parent) {
-      if (parent instanceof TabPanel) {
-        if ((parent as TabPanel).childIndex(widget) !== -1) {
-          (parent as TabPanel).currentWidget = widget;
-          return widget;
-        }
-      }
-      parent = parent.parent;
+    let stack = widget.parent;
+    if (!stack) {
+      return;
+    }
+    let tabs = stack.parent;
+    if (tabs instanceof TabPanel) {
+      tabs.currentWidget = widget;
     }
     return widget;
   }

@@ -1,11 +1,3 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-'use strict';
-
-import {
-  FileBrowserWidget
-} from 'jupyter-js-filebrowser';
-
 import {
   IAppShell, ICommandPalette, ICommandRegistry
 } from 'phosphide';
@@ -13,10 +5,6 @@ import {
 import {
   CodeMirrorWidget
 } from 'phosphor-codemirror';
-
-import {
-  ICommand, DelegateCommand
-} from 'phosphor-command';
 
 import {
   Container, Token
@@ -28,8 +16,9 @@ import {
 
 import {
   IFileBrowserWidget
-} from '../../lib';
+} from '../index';
 
+import './plugin.css';
 
 /**
  * Register the plugin contributions.
@@ -40,10 +29,10 @@ import {
  * This is called automatically when the plugin is loaded.
  */
 export
-function resolve(container: Container): void {
-  container.resolve({
+function resolve(container: Container): Promise<void> {
+  return container.resolve({
     requires: [IAppShell, ICommandPalette, IFileBrowserWidget],
-    create: (shell, palette, browser) => {
+    create: (shell: IAppShell, palette: ICommandPalette, browser: IFileBrowserWidget) => {
       palette.title.text = 'Commands';
       shell.addToLeftArea(palette, { rank: 40 });
       shell.attach(document.body);
