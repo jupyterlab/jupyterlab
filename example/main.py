@@ -55,7 +55,8 @@ def main(argv):
             if not line:
                 continue
             print(line)
-    thread = threading.Thread(target=print_thread, daemon=True)
+    thread = threading.Thread(target=print_thread)
+    thread.setDaemon(True)
     thread.start()
 
     handlers = [
