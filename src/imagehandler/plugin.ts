@@ -76,9 +76,9 @@ class ImageHandler extends AbstractFileHandler {
   }
 
  /**
-   * Populate a widget from `IContentsModel`.
-   */
-  protected populateWidget(widget: Widget, model: IContentsModel): Promise<void> {
+  * Populate a widget from `IContentsModel`.
+  */
+  protected setState(widget: Widget, model: IContentsModel): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       let img = widget.node.firstChild as HTMLImageElement;
       img.addEventListener('load', () => {
@@ -89,5 +89,12 @@ class ImageHandler extends AbstractFileHandler {
       });
       img.src = `data:${model.mimetype};${model.format},${model.content}`;;
     });
+  }
+
+  /**
+   * Get the state of the Widget, returns `undefined`.
+   */
+  protected getState(widget: Widget): Promise<IContentsModel> {
+    return Promise.resolve(void 0);
   }
 }
