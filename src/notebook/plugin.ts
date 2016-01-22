@@ -37,6 +37,10 @@ import {
   CodeCellModel, ICellModel, isCodeCell, BaseCellModel
 } from 'jupyter-js-cells';
 
+import {
+  WidgetManager
+} from './widgetmanager';
+
 import './plugin.css';
 
 /**
@@ -135,7 +139,8 @@ class NotebookFileHandler extends AbstractFileHandler {
    */
   protected createWidget(path: string): Widget {
     let model = new NotebookModel();
-    let panel = new Panel()
+    let panel = new Panel();
+
     let button = new Widget();
     let b = document.createElement('button');
     b.appendChild(document.createTextNode('Execute Current Cell'))
@@ -143,10 +148,37 @@ class NotebookFileHandler extends AbstractFileHandler {
       b.addEventListener('click', ev=> {
         executeSelectedCell(model, s);
       })
+      s.kernel.commOpened.connect((kernel, msg) => {
+        // TODO: cast msg to be a comm open message.
+        let content = msg.content;
+        if (content.target_name !== 'jupyter.widget') {
+          return;
+        }
+        let comm = kernel.connectToComm('jupyter.widget', content.comm_id);
+        console.log('comm message', msg);
+        
+        
+        comm.onMsg = (msg) => {
+          // TODO: create a widget and hand it the comm
+          // render the widget to the widget display area
+          console.log('comm widget message', msg);
+        }
+        comm.onClose = (msg) => {
+          console.log('comm widget close', msg);
+        }
+      })
     })
     button.node.appendChild(b);
+
+    let widgetarea = new Widget();
+    var manager = new WidgetManager(widgetarea.node);
+    
+    
+
     panel.addChild(button);
+    panel.addChild(widgetarea)
     panel.addChild(new NotebookWidget(model));
+
     panel.title.text = path.split('/').pop();
     panel.addClass('jp-NotebookContainer')
     return panel;
@@ -158,7 +190,7 @@ class NotebookFileHandler extends AbstractFileHandler {
    */
   protected populateWidget(widget: Widget, model: IContentsModel): Promise<void> {
     let nbData: NBData = makedata(model);
-    let nbWidget: NotebookWidget = ((widget as Panel).childAt(1)) as NotebookWidget;
+    let nbWidget: NotebookWidget = ((widget as Panel).childAt(2)) as NotebookWidget;
     populateNotebookModel(nbWidget.model, nbData);
     return Promise.resolve();
   }
@@ -173,3 +205,11 @@ function makedata(a: IContentsModel): NBData {
     path: a.path
   }
 }
+
+/**
+ * Widgets:
+ *   - write my own manager that inserts the widget element in a widget in the output area
+ *   - maybe have a single widget panel at the top of the notebook for starters.
+ *   - register with the comm manager of the kernel
+ *   - 
+ */
