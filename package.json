@@ -11,6 +11,7 @@
     "jupyter-js-output-area": "^0.3.1",
     "jupyter-js-services": "^0.4.2",
     "jupyter-js-utils": "^0.2.11",
+    "phosphor-command": "^0.7.0",
     "phosphor-disposable": "^1.0.5",
     "phosphor-keymap": "^0.5.0",
     "phosphor-observablelist": "^1.0.0-beta",
