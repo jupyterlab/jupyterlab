@@ -11,7 +11,7 @@
     "jupyter-js-services": "^0.4.1",
     "jupyter-js-terminal": "^0.1.12",
     "jupyter-js-utils": "^0.2.7",
-    "phosphide": "^0.2.0",
+    "phosphide": "^0.3.0",
     "phosphor-codemirror": "^0.0.1",
     "phosphor-command": "^0.6.0",
     "phosphor-di": "^0.9.0",
