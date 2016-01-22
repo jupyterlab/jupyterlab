@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "jupyter-js-cells": "^0.2.5",
+    "jupyter-js-cells": "^0.2.6",
     "jupyter-js-editor": "^0.1.10",
     "jupyter-js-input-area": "^0.0.6",
     "jupyter-js-output-area": "^0.3.1",
