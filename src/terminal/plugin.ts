@@ -31,7 +31,7 @@ function resolve(container: Container): Promise<void> {
     requires: [IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager],
     create: (shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager) => {
 
-      let newTerminalId = 'jupyter-plugins:new:terminal';
+      let newTerminalId = 'terminal:new';
       let newTerminalCommand = new SimpleCommand({
         handler: () => {
           let term = new TerminalWidget();

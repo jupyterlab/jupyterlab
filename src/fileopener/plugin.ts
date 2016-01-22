@@ -50,7 +50,7 @@ function resolve(container: Container): Promise<void> {
 
       // Create a command to add a new empty text file.
       // This requires an id and an instance of a command object.
-      let newTextFileId = 'jupyter-plugins:new:text-file';
+      let newTextFileId = 'file-operations:new-text-file';
       let newTextFileCommand = new SimpleCommand({
         handler: () => {
           browser.newUntitled('file', '.txt').then(
@@ -82,7 +82,7 @@ function resolve(container: Container): Promise<void> {
       ]);
 
       // Add the command for a new notebook.
-      let newNotebookId = 'jupyter-plugins:new:notebook';
+      let newNotebookId = 'file-operations:new-notebook';
       let newNotebookCommand = new SimpleCommand({
         handler: () => {
           browser.newUntitled('notebook').then(
