@@ -7,8 +7,12 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry
+  IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
 } from 'phosphide';
+
+import {
+  SimpleCommand
+} from 'phosphor-command';
 
 import {
   Container, Token
@@ -41,33 +45,71 @@ import {
 export
 function resolve(container: Container): Promise<void> {
   return container.resolve({
-    requires: [IAppShell, IFileOpener, IFileBrowserWidget, ICommandPalette, ICommandRegistry],
-    create: (appShell: IAppShell, opener: IFileOpener, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry): void => {
-      registry.add('jupyter-plugins:new:text-file', () => {
-        browser.newUntitled('file', '.txt').then(
-          contents => opener.open(contents.path)
-        );
+    requires: [IAppShell, IFileOpener, IFileBrowserWidget, ICommandPalette, ICommandRegistry, IShortcutManager],
+    create: (appShell: IAppShell, opener: IFileOpener, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager): void => {
+
+      // Create a command to add a new empty text file.
+      // This requires an id and an instance of a command object.
+      let newTextFileId = 'file-operations:new-text-file';
+      let newTextFileCommand = new SimpleCommand({
+        handler: () => {
+          browser.newUntitled('file', '.txt').then(
+            contents => opener.open(contents.path)
+          );
+        }
       });
 
-      registry.add('jupyter-plugins:new:notebook', () => {
-        browser.newUntitled('notebook').then(
-          contents => opener.open(contents.path)
-        );
+      // Add the command to the command registry, shortcut manager
+      // and command palette plugins.
+      registry.add([
+        {
+          id: newTextFileId,
+          command: newTextFileCommand
+        }
+      ]);
+      shortcuts.add([
+        {
+          sequence: ['Ctrl O'],
+          selector: '*',
+          command: newTextFileId
+        }
+      ]);
+      palette.add([
+        {
+          id: newTextFileId,
+          args: void 0
+        }
+      ]);
+
+      // Add the command for a new notebook.
+      let newNotebookId = 'file-operations:new-notebook';
+      let newNotebookCommand = new SimpleCommand({
+        handler: () => {
+          browser.newUntitled('notebook').then(
+            contents => opener.open(contents.path)
+          );
+        }
       });
-      let paletteItems = [{
-        id: 'jupyter-plugins:new:text-file',
-        title: 'Text File',
-        caption: ''
-      }, {
-        id: 'jupyter-plugins:new:notebook',
-        title: 'Notebook',
-        caption: ''
-      }];
-      let section = {
-        text: 'New...',
-        items: paletteItems
-      }
-      palette.add([section]);
+
+      registry.add([
+        {
+          id: newNotebookId,
+          command: newNotebookCommand
+        }
+      ]);
+      shortcuts.add([
+        {
+          sequence: ['Ctrl Shift N'],
+          selector: '*',
+          command: newNotebookId
+        }
+      ]);
+      palette.add([
+        {
+          id: newNotebookId,
+          args: void 0
+        }
+      ]);
 
       browser.widgetFactory = path => {
         return opener.open(path);

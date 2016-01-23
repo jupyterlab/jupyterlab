@@ -11,6 +11,7 @@ function main() {
     require('phosphide/lib/appshell/plugin'),
     require('phosphide/lib/commandregistry/plugin'),
     require('phosphide/lib/commandpalette/plugin'),
+    require('phosphide/lib/shortcutmanager/plugin'),
     require('../lib/terminal/plugin'),
     require('../lib/fileopener/plugin'),
     require('../lib/filehandler/plugin'),

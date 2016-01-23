@@ -184,15 +184,18 @@ class NotebookFileHandler extends AbstractFileHandler {
     return panel;
   }
 
-
   /**
    * Populate the notebook widget with the contents of the notebook.
    */
-  protected populateWidget(widget: Widget, model: IContentsModel): Promise<void> {
+  protected setState(widget: Widget, model: IContentsModel): Promise<void> {
     let nbData: NBData = makedata(model);
     let nbWidget: NotebookWidget = ((widget as Panel).childAt(2)) as NotebookWidget;
     populateNotebookModel(nbWidget.model, nbData);
     return Promise.resolve();
+  }
+
+  protected getState(widget: Widget): Promise<IContentsModel> {
+    return Promise.resolve(void 0);
   }
 
   session: INotebookSessionManager;
