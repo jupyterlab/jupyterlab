@@ -8,7 +8,7 @@
     "codemirror": "^5.10.0",
     "jupyter-js-cells": "^0.2.5",
     "jupyter-js-filebrowser": "^0.4.7",
-    "jupyter-js-notebook": "^0.3.2",
+    "jupyter-js-notebook": "^0.3.7",
     "jupyter-js-services": "^0.4.1",
     "jupyter-js-terminal": "^0.1.12",
     "jupyter-js-utils": "^0.2.7",
