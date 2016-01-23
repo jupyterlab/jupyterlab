@@ -25,6 +25,10 @@ import {
   getConfigOption
 } from 'jupyter-js-utils';
 
+import {
+  SimpleCommand
+} from 'phosphor-command';
+
 
 // jupyter notebook --NotebookApp.allow_origin=* --port 8890
 let SERVER_URL=getConfigOption('baseUrl');
@@ -34,25 +38,34 @@ function bindings(nbModel: NotebookModel) {
   let bindings: IKeyBinding[] = [{
       selector: '.jp-InputAreaWidget .CodeMirror',
       sequence: ["Shift Enter"],
-      handler: () => {
+      command: new SimpleCommand({
+        handler: args => {
         if (nbModel.selectedCellIndex !== void 0) {
           let cell = nbModel.cells.get(nbModel.selectedCellIndex);
           if (isMarkdownCell(cell) && !cell.rendered) {
             cell.rendered = true;
           }
+        }          
         }
-        console.log('shift-enter');
-      }
+      })
   },
   {
     selector: '*',
     sequence: ["ArrowDown"],
-    handler: () => {nbModel.selectNextCell()}
+    command: new SimpleCommand({
+        handler: args => {
+          nbModel.selectNextCell()
+        }
+    })
   },
   {
     selector: '*',
     sequence: ["ArrowUp"],
-    handler: () => {nbModel.selectPreviousCell()}
+    command: new SimpleCommand({
+        handler: args => {
+          nbModel.selectPreviousCell()
+        }
+    })
   },
 
 
