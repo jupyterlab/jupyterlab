@@ -33,7 +33,7 @@
 .jp-FileButtons-item {
   background-color: #FAFAFA;
   font-size: 16px;
-  border: 1px solid #757575;
+  border: 1px solid rgb(212,212,212);
   height: 30px;
   border-radius: 3px;
   margin-right: 3px;
