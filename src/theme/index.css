@@ -1,0 +1,493 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+body {
+  margin: 0;
+  padding: 0;
+  background: #EFEFEF;
+  overflow: hidden;
+}
+
+.p-AppShell.p-Widget {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 13px;
+}
+
+
+.jp-Dialog {
+  padding-left: 3px;
+  background: rgba(245, 245, 245, .6);
+}
+
+
+.jp-Dialog-content {
+  background-color: #F5F5F5;
+  min-width: 50%;
+  border: 1px solid #757575;
+  border-radius: 5px;
+  padding-bottom: 10px;
+}
+
+
+.jp-Dialog-header {
+  padding: 5px;
+}
+
+
+.jp-Dialog-body {
+  padding: 5px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+
+.jp-Dialog-footer {
+  padding: 20px;
+}
+
+
+.jp-Dialog-button {
+  padding: 5px;
+  border: 1px solid #757575;
+  font-size: 16px;
+  background-color: #FAFAFA;
+  line-height: 20px;
+  border-radius: 3px;
+  max-width: 100px;
+  margin-left: 5px;
+}
+
+
+.jp-Dialog-close {
+  line-height: 21px;
+}
+
+
+.p-SideBar {
+  min-width: 36px;
+  max-width: 36px;
+  font-size: 13px;
+  font-family: Helvetica, Arial;
+  background: #F7F7F7;
+}
+
+
+.p-SideBar.p-Widget {
+  overflow: visible;
+}
+
+
+.p-SideBar.p-mod-left {
+  border-right: 1px solid #C0C0C0;
+}
+
+
+.p-SideBar.p-mod-right {
+  border-left: 1px solid #C0C0C0;
+}
+
+
+.p-SideBar-content {
+  height: 35px;
+  transform-origin: 0 0 0;
+}
+
+
+.p-SideBar.p-mod-left > .p-SideBar-content {
+  flex-direction: row-reverse;
+  transform: rotate(-90deg) translateX(-100%);
+}
+
+
+.p-SideBar.p-mod-right > .p-SideBar-content {
+  flex-direction: row;
+  transform: rotate(90deg) translateY(-100%);
+}
+
+
+.p-SideBar-button {
+  padding: 0 18px;
+  line-height: 35px;
+}
+
+
+.p-SideBar-button:hover:not(.p-mod-current) {
+  background: white;
+}
+
+
+.p-SideBar-button.p-mod-current {
+  background: white;
+  min-height: 36px;
+}
+
+
+.p-SideBar.p-mod-left .p-SideBar-button {
+  border-left: 1px solid #C0C0C0;
+}
+
+
+.p-SideBar.p-mod-right .p-SideBar-button {
+  border-right: 1px solid #C0C0C0;
+}
+
+
+#p-left-stack {
+  padding: 5px;
+  background: #EEEEEE;
+}
+
+
+#p-right-stack {
+  padding: 5px;
+  background: #EEEEEE;
+}
+
+
+#p-main-dock-panel {
+  padding: 8px;
+}
+
+
+.p-Widget.p-DockSplitPanel {
+  overflow: visible;
+}
+
+.p-DockTabPanel {
+  border-left: 1px solid #C0C0C0;
+  border-right: 1px solid #C0C0C0;
+  border-bottom: 1px solid #B0B0B0;
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+
+.p-DockTabPanel > .p-StackedPanel {
+  padding: 8px;
+  background: white;
+}
+
+
+.p-DockPanel-overlay {
+  background: rgba(64, 151, 234, 0.1);
+  border: 1px dashed #4097EA;
+}
+
+
+.p-DockPanel-overlay.p-mod-root-top,
+.p-DockPanel-overlay.p-mod-root-left,
+.p-DockPanel-overlay.p-mod-root-right,
+.p-DockPanel-overlay.p-mod-root-bottom,
+.p-DockPanel-overlay.p-mod-root-center {
+  border-width: 2px;
+}
+
+
+.p-TabBar {
+  min-height: 24px;
+  max-height: 24px;
+  background: #F7F7F7;
+}
+
+
+/* the child selectors just increase specificity :-( */
+
+.p-TabBar > .p-TabBar-header {
+  flex: 0 0 1px;
+  background: #D0D0D0;
+}
+
+
+.p-TabBar > .p-TabBar-footer {
+  flex: 0 0 1px;
+  background: #C0C0C0;
+}
+
+
+.p-TabBar .p-TabBar-content {
+  min-width: 0;
+  max-height: 22px;
+}
+
+
+.p-TabBar-tab {
+  flex-basis: 125px;
+  min-height: 23px;
+  max-height: 23px;
+  min-width: 35px;
+  margin-left: -1px;
+  border-top: 1px solid #C0C0C0;
+  border-left: 1px solid #C0C0C0;
+  border-right: 1px solid #C0C0C0;
+  padding: 0px 10px;
+  background: #EBEBEB;
+  font: 12px Helvetica, Arial, sans-serif;
+  transform: translateY(-1px);
+}
+
+
+.p-TabBar-tab:last-child {
+  margin-right: -1px;
+}
+
+
+.p-TabBar-tab.p-mod-current {
+  border-top: 1px solid #4097EA;
+  background: white;
+  min-height: 24px;
+  max-height: 24px;
+}
+
+
+.p-TabBar-tab:hover:not(.p-mod-current) {
+  background: #F0F0F0;
+}
+
+
+.p-TabBar-tabIcon,
+.p-TabBar-tabText,
+.p-TabBar-tabCloseIcon {
+  line-height: 22px;
+}
+
+
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
+  margin-left: 4px;
+}
+
+
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
+  content: '\f00d';
+  font-family: FontAwesome;
+}
+
+
+.p-TabBar-tab.p-mod-drag-image {
+  min-height: 24px;
+  min-width: 125px;
+  border: none;
+  border-top: 1px solid #4097EA;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  transform: translateX(-40%) translateY(-58%);
+}
+
+
+#p-main-split-panel > .p-SplitPanel-handle {
+  background: #C0C0C0;
+}
+
+
+.editor-CodeMirrorWidget {
+  border: 1px solid #C0C0C0;
+  min-width: 100px;
+  min-height: 100px;
+}
+
+
+.p-CommandPalette {
+  background: #EEEEEE;
+  font-family: "Helvetica Neue", Helvetica;
+  min-width: 250px;
+  min-height: 50px;
+  padding: 4px 4px 0px 4px;
+}
+
+
+.p-CommandPalette-header {
+  color: #757575;
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 12px;
+}
+
+
+.p-CommandPalette-header hr {
+  height: 1px;
+  border-width: 0;
+  background-color: #E0E0E0;
+}
+
+
+.p-CommandPalette-search {
+  margin-bottom: 4px;
+}
+
+
+.p-CommandPalette-inputWrapper {
+  padding: 4px 0;
+}
+
+
+.p-CommandPalette-search input {
+  border: 1px solid #E0E0E0;
+  border-radius: 5px;
+  height: 20px;
+  outline: none;
+  width: 100%;
+}
+
+
+.p-CommandPalette-command {
+  color: #757575;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 3px 0 3px 2px;
+}
+
+.p-CommandPalette-title {
+  padding-right: 5px;
+}
+
+.p-CommandPalette-command.p-mod-disabled,
+.p-CommandPalette-command.p-mod-disabled .p-CommandPalette-caption {
+  color: #D5D5D5;
+  cursor: not-allowed;
+}
+
+.p-CommandPalette-caption {
+  color: #9E9E9E;
+  font-weight: 400;
+  font-size: 10px;
+  padding-right: 5px;
+}
+
+.p-CommandPalette-shortcut {
+  padding-right: 5px;
+}
+
+.p-CommandPalette-shortcut:empty {
+  padding-right: 0;
+}
+
+.p-CommandPalette-command.p-mod-active,
+.p-CommandPalette-command.p-mod-active .p-CommandPalette-caption,
+.p-CommandPalette-command.p-mod-active .p-CommandPalette-shortcut {
+  background: #2196F3;
+  color: #FFFFFF;
+}
+
+
+.p-MenuBar {
+  padding-left: 5px;
+  background: #FAFAFA;
+  color: rgba(0, 0, 0, 0.87);
+  border-bottom: 1px solid #DDDDDD;
+  font: 13px Helvetica, Arial, sans-serif;
+}
+
+
+.p-MenuBar-menu {
+  transform: translateY(-1px);
+}
+
+
+.p-MenuBar-item {
+  padding: 4px 8px;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+}
+
+
+.p-MenuBar-item.p-mod-active {
+  background: #E5E5E5;
+}
+
+
+.p-MenuBar-item.p-mod-disabled {
+  color: rgba(0, 0, 0, 0.26);
+}
+
+
+.p-MenuBar-item.p-type-separator {
+  margin: 2px;
+  padding: 0;
+  border: none;
+  border-left: 1px solid #DDDDDD;
+}
+
+
+.p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
+  z-index: 10001;
+  background: white;
+  border-left: 1px solid #C0C0C0;
+  border-right: 1px solid #C0C0C0;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+.p-Menu {
+  z-index: 10000;
+  padding: 3px 0px;
+  background: white;
+  color: rgba(0, 0, 0, 0.87);
+  border: 1px solid #C0C0C0;
+  font: 12px Helvetica, Arial, sans-serif;
+  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+.p-Menu-item.p-mod-active {
+  background: #E5E5E5;
+}
+
+
+.p-Menu-item.p-mod-disabled {
+  color: rgba(0, 0, 0, 0.26);
+}
+
+
+.p-Menu-itemIcon {
+  width: 21px;
+  padding: 4px 2px;
+}
+
+
+.p-Menu-itemText {
+  padding: 4px 35px 4px 2px;
+}
+
+
+.p-Menu-itemShortcut {
+  padding: 4px 0px;
+}
+
+
+.p-Menu-itemSubmenuIcon {
+  width: 16px;
+  padding: 4px 0px;
+}
+
+
+.p-Menu-item.p-type-separator > span {
+  padding: 0;
+  height: 9px;
+}
+
+
+.p-Menu-item.p-type-separator > span::after {
+  content: '';
+  display: block;
+  position: relative;
+  top: 4px;
+  border-top: 1px solid #DDDDDD;
+}
+
+
+.p-Menu-itemIcon::before,
+.p-Menu-itemSubmenuIcon::before {
+  font-family: FontAwesome;
+}
+
+
+.p-Menu-item.p-type-check.p-mod-checked > .p-Menu-itemIcon::before {
+  content: '\f00c';
+}
+
+
+.p-Menu-item.p-type-submenu > .p-Menu-itemSubmenuIcon::before {
+  content: '\f0da';
+}
