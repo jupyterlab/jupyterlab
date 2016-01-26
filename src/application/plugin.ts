@@ -18,8 +18,6 @@ import {
   IFileBrowserWidget
 } from '../index';
 
-import './plugin.css';
-
 /**
  * Register the plugin contributions.
  *
