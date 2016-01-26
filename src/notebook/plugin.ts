@@ -144,6 +144,12 @@ class NotebookFileHandler extends AbstractFileHandler {
     let button = new Widget();
     let b = document.createElement('button');
     b.appendChild(document.createTextNode('Execute Current Cell'))
+    button.node.appendChild(b);
+
+    
+    let widgetarea = new Widget();
+    let manager = new WidgetManager(widgetarea.node);    
+    
     this.session.startNew({notebookPath: path}).then(s => {
       b.addEventListener('click', ev=> {
         executeSelectedCell(model, s);
@@ -157,10 +163,12 @@ class NotebookFileHandler extends AbstractFileHandler {
         let comm = kernel.connectToComm('jupyter.widget', content.comm_id);
         console.log('comm message', msg);
         
+        let modelPromise = manager.handle_comm_open(comm, msg);
         
+
         comm.onMsg = (msg) => {
-          // TODO: create a widget and hand it the comm
-          // render the widget to the widget display area
+          manager.handle_comm_open(comm, msg)
+          // create the widget model and (if needed) the view
           console.log('comm widget message', msg);
         }
         comm.onClose = (msg) => {
@@ -168,10 +176,7 @@ class NotebookFileHandler extends AbstractFileHandler {
         }
       })
     })
-    button.node.appendChild(b);
 
-    let widgetarea = new Widget();
-    var manager = new WidgetManager(widgetarea.node);
     
     
 
