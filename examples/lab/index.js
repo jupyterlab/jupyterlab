@@ -11,14 +11,15 @@ function main() {
     require('phosphide/lib/appshell/plugin'),
     require('phosphide/lib/commandregistry/plugin'),
     require('phosphide/lib/commandpalette/plugin'),
-    require('../../lib/terminal/plugin'),
-    require('../../lib/fileopener/plugin'),
-    require('../../lib/filehandler/plugin'),
-    require('../../lib/filebrowser/plugin'),
-    require('../../lib/imagehandler/plugin'),
-    require('../../lib/notebook/plugin'),
-    require('../../lib/services/plugin'),
-    require('./plugin')
+    require('phosphide/lib/shortcutmanager/plugin'),
+    require('../lib/terminal/plugin'),
+    require('../lib/fileopener/plugin'),
+    require('../lib/filehandler/plugin'),
+    require('../lib/filebrowser/plugin'),
+    require('../lib/imagehandler/plugin'),
+    require('../lib/notebook/plugin'),
+    require('../lib/services/plugin'),
+    require('../lib/application/plugin')
   ]).then(function() {
     console.log('loading finished');
   });

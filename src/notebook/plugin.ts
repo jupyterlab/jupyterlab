@@ -80,10 +80,14 @@ class NotebookFileHandler extends AbstractFileHandler {
   }
 
 
-  protected populateWidget(widget: NotebookWidget, model: IContentsModel): Promise<void> {
+  protected setState(widget: NotebookWidget, model: IContentsModel): Promise<void> {
     let nbdata: NBData = makedata(model);
     populateNotebookModel(widget.model, nbdata);
     return Promise.resolve();
+  }
+
+  protected getState(widget: NotebookWidget): Promise<IContentsModel> {
+    return Promise.resolve(void 0);
   }
 }
 

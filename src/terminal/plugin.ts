@@ -7,8 +7,12 @@ import {
 } from 'jupyter-js-terminal';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry
+  IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
 } from 'phosphide';
+
+import {
+  SimpleCommand
+} from 'phosphor-command';
 
 import {
   Container, Token
@@ -24,33 +28,50 @@ import './plugin.css';
 export
 function resolve(container: Container): Promise<void> {
   return container.resolve({
-    requires: [IAppShell, ICommandPalette, ICommandRegistry],
-    create: (shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) => {
-      registry.add('jupyter-plugins:new:terminal', () => {
-        let term = new TerminalWidget();
-        term.color = 'black';
-        term.background = 'white';
-        term.title.closable = true;
-        shell.addToMainArea(term);
-        let stack = term.parent;
-        if (!stack) {
-          return;
-        }
-        let tabs = stack.parent;
-        if (tabs instanceof TabPanel) {
-          tabs.currentWidget = term;
+    requires: [IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager],
+    create: (shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager) => {
+
+      let newTerminalId = 'terminal:new';
+      let newTerminalCommand = new SimpleCommand({
+        category: 'Terminal',
+        text: 'New Terminal',
+        caption: 'Start a new terminal session',
+        handler: () => {
+          let term = new TerminalWidget();
+          term.color = 'black';
+          term.background = 'white';
+          term.title.closable = true;
+          shell.addToMainArea(term);
+          let stack = term.parent;
+          if (!stack) {
+            return;
+          }
+          let tabs = stack.parent;
+          if (tabs instanceof TabPanel) {
+            tabs.currentWidget = term;
+          }
         }
       });
-      let paletteItem = {
-        id: 'jupyter-plugins:new:terminal',
-        title: 'Terminal',
-        caption: ''
-      };
-      let section = {
-        text: 'New...',
-        items: [paletteItem]
-      }
-      palette.add([section]);
+
+      registry.add([
+        {
+          id: newTerminalId,
+          command: newTerminalCommand
+        }
+      ]);
+      shortcuts.add([
+        {
+          sequence: ['Ctrl T'],
+          selector: '*',
+          command: newTerminalId
+        }
+      ]);
+      palette.add([
+        {
+          id: newTerminalId,
+          args: void 0
+        }
+      ]);
     }
   });
 }
