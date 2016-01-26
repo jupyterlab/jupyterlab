@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-    ManagerBase, Comm//, shims
+    ManagerBase, shims
 } from 'jupyter-js-widgets';
 
 //require('jupyter-js-widgets/static/components/bootstrap/css/bootstrap.css')
@@ -36,7 +36,7 @@ class WidgetManager extends ManagerBase {
         // Convert jupyter-js-services comm to old comm
         // so that widget models use it compatibly
         
-        let oldComm = new Comm(comm);
+        let oldComm = new shims.services.Comm(comm);
         return super.handle_comm_open(oldComm, msg);        
     };
 
