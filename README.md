@@ -15,7 +15,7 @@ Package Install
 
 ```bash
 npm install --save jupyter-js-plugins
-conda install jupyter
+conda install notebook  # notebook 4.1+ required
 ```
 
 
@@ -32,7 +32,7 @@ git clone https://github.com/jupyter/jupyter-js-plugins.git
 cd jupyter-js-plugins
 npm install
 npm run build
-conda install jupyter
+conda install notebook  # notebook 4.1+ required
 ```
 
 **Rebuild**
