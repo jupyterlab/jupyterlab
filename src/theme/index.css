@@ -5,7 +5,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: #EFEFEF;
+  background: #FFFFFF;
   overflow: hidden;
 }
 
@@ -122,7 +122,7 @@ body {
 
 
 .p-SideBar-button.p-mod-current {
-  background: white;
+  background: #F5F5F5;
   min-height: 36px;
 }
 
@@ -139,13 +139,13 @@ body {
 
 #p-left-stack {
   padding: 5px;
-  background: #EEEEEE;
+  background: #F5F5F5;
 }
 
 
 #p-right-stack {
   padding: 5px;
-  background: #EEEEEE;
+  background: #F5F5F5;
 }
 
 
@@ -289,7 +289,7 @@ body {
 
 
 .p-CommandPalette {
-  background: #EEEEEE;
+  background: #F5F5F5;
   font-family: "Helvetica Neue", Helvetica;
   min-width: 250px;
   min-height: 50px;
