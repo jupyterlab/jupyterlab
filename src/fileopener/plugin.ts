@@ -52,6 +52,8 @@ function resolve(container: Container): Promise<void> {
       // This requires an id and an instance of a command object.
       let newTextFileId = 'file-operations:new-text-file';
       let newTextFileCommand = new SimpleCommand({
+        category: 'File Operations',
+        text: 'New Text File',
         handler: () => {
           browser.newUntitled('file', '.txt').then(
             contents => opener.open(contents.path)
@@ -84,6 +86,8 @@ function resolve(container: Container): Promise<void> {
       // Add the command for a new notebook.
       let newNotebookId = 'file-operations:new-notebook';
       let newNotebookCommand = new SimpleCommand({
+        category: 'File Operations',
+        text: 'New Notebook',
         handler: () => {
           browser.newUntitled('notebook').then(
             contents => opener.open(contents.path)

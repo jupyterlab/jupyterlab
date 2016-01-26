@@ -33,6 +33,8 @@ function resolve(container: Container): Promise<void> {
 
       let newTerminalId = 'terminal:new';
       let newTerminalCommand = new SimpleCommand({
+        category: 'Terminal',
+        text: 'New Terminal',
         handler: () => {
           let term = new TerminalWidget();
           term.color = 'black';
