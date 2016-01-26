@@ -35,6 +35,7 @@ function resolve(container: Container): Promise<void> {
       let newTerminalCommand = new SimpleCommand({
         category: 'Terminal',
         text: 'New Terminal',
+        caption: 'Start a new terminal session',
         handler: () => {
           let term = new TerminalWidget();
           term.color = 'black';

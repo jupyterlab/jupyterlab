@@ -54,6 +54,7 @@ function resolve(container: Container): Promise<void> {
       let newTextFileCommand = new SimpleCommand({
         category: 'File Operations',
         text: 'New Text File',
+        caption: 'Create a new text file',
         handler: () => {
           browser.newUntitled('file', '.txt').then(
             contents => opener.open(contents.path)
@@ -88,6 +89,7 @@ function resolve(container: Container): Promise<void> {
       let newNotebookCommand = new SimpleCommand({
         category: 'File Operations',
         text: 'New Notebook',
+        caption: 'Create a new Jupyter Notebook',
         handler: () => {
           browser.newUntitled('notebook').then(
             contents => opener.open(contents.path)
