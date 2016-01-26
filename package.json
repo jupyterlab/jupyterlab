@@ -18,7 +18,8 @@
     "phosphor-command": "^0.6.0",
     "phosphor-di": "^0.9.0",
     "phosphor-properties": "^2.0.0",
-    "phosphor-tabs": "^1.0.0-rc.2"
+    "phosphor-tabs": "^1.0.0-rc.2",
+    "phosphor-widget": "^1.0.0-rc.0"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
