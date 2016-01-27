@@ -97,7 +97,6 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
     let ex = session.kernel.execute(exRequest);
     output.clear(false);
     ex.onIOPub = (msg => {
-      // TODO: not getting an execute_result message
       let model = messageToModel(msg);
       console.log('iopub', msg);
       if (model !== void 0) {
@@ -155,7 +154,6 @@ class NotebookFileHandler extends AbstractFileHandler {
         executeSelectedCell(model, s);
       })
       s.kernel.commOpened.connect((kernel, msg) => {
-        // TODO: cast msg to be a comm open message.
         let content = msg.content;
         if (content.target_name !== 'jupyter.widget') {
           return;
