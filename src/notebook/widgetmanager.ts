@@ -8,7 +8,7 @@ import {
 
 //require('jupyter-js-widgets/static/components/bootstrap/css/bootstrap.css')
 require('jquery-ui/themes/smoothness/jquery-ui.min.css')
-require("jupyter-js-widgets/static/widgets/css/widgets.min.css");
+require("jupyter-js-widgets/css/widgets.min.css");
 
 export
 class WidgetManager extends ManagerBase {
