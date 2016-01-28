@@ -7,7 +7,7 @@ import {
 } from 'jupyter-js-widgets';
 
 //require('jupyter-js-widgets/static/components/bootstrap/css/bootstrap.css')
-require('jupyter-js-widgets/node_modules/jquery-ui/themes/smoothness/jquery-ui.min.css')
+require('jquery-ui/themes/smoothness/jquery-ui.min.css')
 require("jupyter-js-widgets/static/widgets/css/widgets.min.css");
 
 export
