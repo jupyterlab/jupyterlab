@@ -41,8 +41,6 @@ import {
   WidgetManager
 } from './widgetmanager';
 
-import './plugin.css';
-
 
 /**
  * Register the plugin contributions.
