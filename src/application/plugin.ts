@@ -31,8 +31,8 @@ function resolve(container: Container): Promise<void> {
   return container.resolve({
     requires: [IAppShell, ICommandPalette, IFileBrowserWidget],
     create: (shell: IAppShell, palette: ICommandPalette, browser: IFileBrowserWidget) => {
-      palette.title.text = 'Commands';
-      shell.addToLeftArea(palette, { rank: 40 });
+      palette.widget.title.text = 'Commands';
+      shell.addToLeftArea(palette.widget, { rank: 40 });
       shell.attach(document.body);
       window.addEventListener('resize', () => { shell.update(); });
       browser.title.text = 'Files';
