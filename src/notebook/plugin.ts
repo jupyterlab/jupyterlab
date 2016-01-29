@@ -7,6 +7,14 @@ import {
 } from 'jupyter-js-notebook';
 
 import {
+  ICommandRegistry, IShortcutManager
+} from 'phosphide';
+
+import {
+  SimpleCommand
+} from 'phosphor-command';
+
+import {
   Container
 } from 'phosphor-di';
 
@@ -42,6 +50,18 @@ import {
 } from './widgetmanager';
 
 
+let executeCellCommandId = 'notebook:execute-selected-cell';
+let executeCommand = new SimpleCommand({
+  category: 'Notebook Operations',
+  text: 'Execute current cell',
+  caption: 'Execute the current cell',
+  handler: (args) => {
+    executeSelectedCell(args.model, args.session);
+  }
+})
+
+let notebookContainerClass = 'jp-NotebookContainer';
+
 /**
  * Register the plugin contributions.
  *
@@ -53,14 +73,21 @@ import {
 export
 function resolve(container: Container): Promise<IFileHandler> {
   return container.resolve({
-    requires: [IServicesProvider, IFileOpener],
-    create: (services: IServicesProvider, opener: IFileOpener) => {
-      let handler = new NotebookFileHandler(services.contentsManager, services.notebookSessionManager);
+    requires: [IServicesProvider, IFileOpener, ICommandRegistry, IShortcutManager],
+    create: (services: IServicesProvider, opener: IFileOpener,
+             registry: ICommandRegistry, shortcuts: IShortcutManager) => {
+      let handler = new NotebookFileHandler(services.contentsManager, services.notebookSessionManager, shortcuts);
       opener.register(handler);
+      registry.add([{
+        id: executeCellCommandId,
+        command: executeCommand
+      }])
       return handler;
     }
   });
 }
+
+
 
 
 export
@@ -117,9 +144,11 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
 export
 class NotebookFileHandler extends AbstractFileHandler {
 
-  constructor(contents: IContentsManager, session: INotebookSessionManager) {
+  constructor(contents: IContentsManager, session: INotebookSessionManager,
+  shortcuts: IShortcutManager) {
     super(contents);
     this.session = session;
+    this.shortcuts = shortcuts;
   }
 
   /**
@@ -143,19 +172,26 @@ class NotebookFileHandler extends AbstractFileHandler {
     let model = new NotebookModel();
     let panel = new Panel();
 
-    let button = new Widget();
-    let b = document.createElement('button');
-    b.appendChild(document.createTextNode('Execute Current Cell'))
-    button.node.appendChild(b);
-
-
     let widgetarea = new Widget();
     let manager = new WidgetManager(widgetarea.node);
 
+    let notebookId = this.notebookId;
+    this.notebookId += 1;
+
     this.session.startNew({notebookPath: contents.path}).then(s => {
-      b.addEventListener('click', ev=> {
-        executeSelectedCell(model, s);
-      })
+      // TODO: it's probably better to make *one* shortcut that executes whatever
+      // the current notebook's selected cell is, rather than registering a
+      // a new shortcut for every open notebook.  To do this, we need the application
+      // state (or somewhere) to include the 'current document'
+      // this is better because it makes one shortcut, and it also is better because
+      // then it is easy for the command to be invoked via the menu, palette, plugin, etc.
+      this.shortcuts.add([{
+        sequence: ['Shift Enter'],
+        selector: `.${notebookContainerClass}.notebook-id-${notebookId}`,
+        command: executeCellCommandId,
+        args: {model: model, session: s}
+      }])
+
       s.kernel.commOpened.connect((kernel, msg) => {
         let content = msg.content;
         if (content.target_name !== 'jupyter.widget') {
@@ -178,15 +214,11 @@ class NotebookFileHandler extends AbstractFileHandler {
       })
     })
 
-
-
-
-    panel.addChild(button);
     panel.addChild(widgetarea)
     panel.addChild(new NotebookWidget(model));
-
     panel.title.text = contents.name;
-    panel.addClass('jp-NotebookContainer')
+    panel.addClass(notebookContainerClass);
+    panel.addClass(`notebook-id-${notebookId}`);
     return panel;
   }
 
@@ -195,7 +227,7 @@ class NotebookFileHandler extends AbstractFileHandler {
    */
   protected setState(widget: Widget, model: IContentsModel): Promise<void> {
     let nbData: NBData = makedata(model);
-    let nbWidget: NotebookWidget = ((widget as Panel).childAt(2)) as NotebookWidget;
+    let nbWidget: NotebookWidget = ((widget as Panel).childAt(1)) as NotebookWidget;
     populateNotebookModel(nbWidget.model, nbData);
     return Promise.resolve();
   }
@@ -205,6 +237,8 @@ class NotebookFileHandler extends AbstractFileHandler {
   }
 
   session: INotebookSessionManager;
+  shortcuts: IShortcutManager;
+  notebookId: number = 0;
 }
 
 
