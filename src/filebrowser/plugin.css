@@ -5,15 +5,18 @@
 .jp-FileBrowser {
   background-color: #F5F5F5;
   color: #757575;
-  font-family: "Helvetica Neue", Helvetica;
-  min-width: 300px;
+  font: 13px Helvetica, Arial, sans-serif;
+  height: 500px;
 }
 
 
 .jp-BreadCrumbs-item {
-  margin-right: 5px;
-  padding-bottom: 8px;
+  margin-left: 4px;
+  margin-right: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
   border: 1px solid transparent;
+  cursor: pointer;
 }
 
 
@@ -33,7 +36,7 @@
 .jp-FileButtons-item {
   background-color: #FAFAFA;
   font-size: 16px;
-  border: 1px solid rgb(212,212,212);
+  border: 1px solid #757575;
   height: 30px;
   border-radius: 3px;
   margin-right: 3px;
@@ -41,28 +44,112 @@
 }
 
 
+.jp-FileButtons-item:focus {
+  outline: 0;
+}
+
+
+.jp-FileButtons-item:hover {
+  background-color: #EEEEEE;
+}
+
+
+.jp-FileButtons-drop {
+  margin-left: -0.5em;
+  color: #757575;
+}
+
+
+.jp-DirListing:focus {
+  outline: 0;
+}
+
+
 .jp-DirListing-header {
-  min-width: 300px;
+  background-color: #FAFAFA;
+  border-top: 1px solid #757575;
   border-bottom: 1px solid #757575;
 }
 
 
-.jp-DirListing-headerFile {
-  flex-basis: 200px;
+.jp-DirListing-headerText {
+  padding-left: 4px;
+  padding-right: 4px;
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
 
-.jp-DirListing-headerModified {
-  flex-basis: 95px;
+.jp-DirListing-headerText {
+  margin-right: auto;
+}
+
+
+.jp-DirListing-headerIcon {
+  margin-left: -0.5em;
+}
+
+
+
+.jp-DirListing-headerIcon {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+
+.jp-DirListing-headerItem:hover {
+  cursor: pointer;
+}
+
+
+.jp-DirListing-headerItem.jp-mod-selected {
+  font-weight: bold;
+}
+
+
+.jp-DirListing-headerFile {
+  flex-basis: 200px;
   padding-right: 5px;
+  border-right: 1px solid #757575;
+}
+
+
+.jp-DirListing-headerItem:focus {
+  outline: 0;
+}
+
+
+.jp-DirListing-headerTime {
+  flex-basis: 120px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+
+.jp-DirListing-headerItem.jp-mod-selected > .jp-DirListing-headerIcon:before {
+  content: "\f0d8";
+}
+
+
+.jp-DirListing-headerItem.jp-mod-selected.jp-mod-descending > .jp-DirListing-headerIcon:before {
+  content: "\f0d7";
 }
 
 
 .jp-DirListing-item {
   padding: 4px 8px;
   border: 1px solid transparent;
+}
+
+
+.jp-DirListing-item:hover {
+  background-color: #EEEEEE;
+  cursor: pointer;
+}
+
+
+.jp-DirListing-item.jp-mod-selected:hover {
+  background-color: #2196F3;
 }
 
 
@@ -87,10 +174,18 @@
 
 
 .jp-DirListing-itemModified {
+  width: 120px;
+  min-width: 120px;
   padding-right: 5px;
-  width: 95px;
+  padding-left: 5px;
   padding-top: 4px;
   padding-bottom: 4px;
+}
+
+
+.jp-FileButtons-item {
+  color: #757575;
+  cursor: pointer;
 }
 
 
