@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  IContentsModel
+} from 'jupyter-js-services';
+
+import {
   Token
 } from 'phosphor-di';
 
@@ -23,7 +27,7 @@ interface IFileHandler {
   /**
    * A signal emitted when the widget is finished populating.
    */
-  finished: ISignal<IFileHandler, string>;
+  finished: ISignal<IFileHandler, IContentsModel>;
 
   /**
    * he list of file extensions supported by the handler.
@@ -33,7 +37,7 @@ interface IFileHandler {
   /**
    * Open the file and return a populated widget.
    */
-  open(path: string): Widget;
+  open(model: IContentsModel): Widget;
 
   /**
    * Close the file widget.
@@ -50,11 +54,11 @@ interface IFileOpener {
   /**
    * Open the file and add the widget to the application shell.
    */
-  open(path: string): Widget;
+  open(model: IContentsModel): Widget;
 
   /**
    * Register a file opener.
-   * 
+   *
    * @param handler - The file handler to register.
    */
   register(handler: IFileHandler): void;

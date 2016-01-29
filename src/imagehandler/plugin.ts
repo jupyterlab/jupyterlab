@@ -57,21 +57,21 @@ class ImageHandler extends AbstractFileHandler {
   /**
    * Get file contents given a path.
    */
-  protected getContents(path: string): Promise<IContentsModel> {
-    return this.manager.get(path, { type: 'file' });
+  protected getContents(model: IContentsModel): Promise<IContentsModel> {
+    return this.manager.get(model.path, { type: 'file' });
   }
 
   /**
    * Create the widget from an `IContentsModel`.
    */
-  protected createWidget(path: string): Widget {
-    let ext = path.split('.').pop();
+  protected createWidget(model: IContentsModel): Widget {
+    let ext = model.path.split('.').pop();
     var widget = new Widget();
     let image = document.createElement('img');
     widget.node.appendChild(image);
     widget.node.style.overflowX = 'auto';
     widget.node.style.overflowY = 'auto';
-    widget.title.text = path.split('/').pop();
+    widget.title.text = model.name;
     return widget;
   }
 

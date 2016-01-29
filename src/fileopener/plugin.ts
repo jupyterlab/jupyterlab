@@ -7,6 +7,10 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
+  IContentsModel
+} from 'jupyter-js-services';
+
+import {
   IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
 } from 'phosphide';
 
@@ -57,7 +61,7 @@ function resolve(container: Container): Promise<void> {
         caption: 'Create a new text file',
         handler: () => {
           browser.newUntitled('file', '.txt').then(
-            contents => opener.open(contents.path)
+            contents => opener.open(contents)
           );
         }
       });
@@ -92,7 +96,7 @@ function resolve(container: Container): Promise<void> {
         caption: 'Create a new Jupyter Notebook',
         handler: () => {
           browser.newUntitled('notebook').then(
-            contents => opener.open(contents.path)
+            contents => opener.open(contents)
           );
         }
       });
@@ -117,8 +121,8 @@ function resolve(container: Container): Promise<void> {
         }
       ]);
 
-      browser.widgetFactory = path => {
-        return opener.open(path);
+      browser.widgetFactory = model => {
+        return opener.open(model);
       }
     }
   });
@@ -171,10 +175,11 @@ class FileOpener implements IFileOpener {
   /**
    * Open a file and add it to the application shell.
    */
-  open(path: string): Widget {
+  open(model: IContentsModel): Widget {
     if (this._handlers.length === 0) {
       return;
     }
+    let path = model.path;
     let ext = '.' + path.split('.').pop();
     let handlers: IFileHandler[] = [];
     // Look for matching file extensions.
@@ -184,12 +189,12 @@ class FileOpener implements IFileOpener {
 
     // If there was only one match, use it.
     if (handlers.length === 1) {
-      return this._open(handlers[0], path);
+      return this._open(handlers[0], model);
 
     // If there were no matches, use default handler.
     } else if (handlers.length === 0) {
       if (this._defaultHandler !== null) {
-        return this._open(this._defaultHandler, path);
+        return this._open(this._defaultHandler, model);
       } else {
         throw new Error(`Could not open file '${path}'`);
       }
@@ -197,22 +202,22 @@ class FileOpener implements IFileOpener {
     // There are more than one possible handlers.
     } else {
       // TODO: Ask the user to choose one.
-      return this._open(handlers[0], path);
+      return this._open(handlers[0], model);
     }
   }
 
   /**
    * Handle an `openRequested` signal by invoking the appropriate handler.
    */
-  private _openRequested(browser: FileBrowserWidget, path: string): void {
-    this.open(path);
+  private _openRequested(browser: FileBrowserWidget, model: IContentsModel): void {
+    this.open(model);
   }
 
   /**
    * Open a file and add it to the application shell and give it focus.
    */
-  private _open(handler: IFileHandler, path: string): Widget {
-    let widget = handler.open(path);
+  private _open(handler: IFileHandler, model: IContentsModel): Widget {
+    let widget = handler.open(model);
     if (!widget.isAttached) {
       this._appShell.addToMainArea(widget);
     }

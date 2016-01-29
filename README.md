@@ -96,6 +96,8 @@ Follow the package install instructions first.
 Any bundler that understands how to `require()` files with `.js` and `.css`
 extensions can be used with this package.
 
+The following alias is required: `requirejs: 'requirejs/require'`.
+
 
 Usage Examples
 --------------
