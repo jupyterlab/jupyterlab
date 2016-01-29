@@ -22,8 +22,6 @@ import {
   TabPanel
 } from 'phosphor-tabs';
 
-import './plugin.css';
-
 
 export
 function resolve(container: Container): Promise<void> {

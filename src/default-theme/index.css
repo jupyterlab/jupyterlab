@@ -2,6 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+@import './filebrowser.css';
+@import './notebook.css';
+@import './terminal.css';
+
 body {
   margin: 0;
   padding: 0;
