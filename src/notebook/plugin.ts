@@ -42,7 +42,7 @@ import {
 
 
 import {
-  CodeCellModel, ICellModel, isCodeCell, BaseCellModel
+  CodeCellModel, ICellModel, isCodeCell, isMarkdownCell, BaseCellModel
 } from 'jupyter-js-cells';
 
 import {
@@ -59,6 +59,17 @@ let executeCommand = new SimpleCommand({
     executeSelectedCell(args.model, args.session);
   }
 })
+
+let renderCellCommandId = 'notebook:render-selected-cell';
+let renderCommand = new SimpleCommand({
+  category: 'Notebook Operations',
+  text: 'Render current markdown cell',
+  caption: 'Render the current markdown cell',
+  handler: (args) => {
+    renderSelectedCell(args.model);
+  }
+})
+
 
 let notebookContainerClass = 'jp-NotebookContainer';
 
@@ -81,6 +92,9 @@ function resolve(container: Container): Promise<IFileHandler> {
       registry.add([{
         id: executeCellCommandId,
         command: executeCommand
+      }, {
+        id: renderCellCommandId,
+        command: renderCommand
       }])
       return handler;
     }
@@ -137,6 +151,12 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
   }
 }
 
+function renderSelectedCell(model: NotebookModel)  {
+  let cell = model.cells.get(model.selectedCellIndex);
+  if (isMarkdownCell(cell)) {
+    cell.rendered = true;
+  }
+}
 
 /**
  * An implementation of a file handler.
@@ -181,15 +201,21 @@ class NotebookFileHandler extends AbstractFileHandler {
     this.session.startNew({notebookPath: contents.path}).then(s => {
       // TODO: it's probably better to make *one* shortcut that executes whatever
       // the current notebook's selected cell is, rather than registering a
-      // a new shortcut for every open notebook.  To do this, we need the application
-      // state (or somewhere) to include the 'current document'
-      // this is better because it makes one shortcut, and it also is better because
-      // then it is easy for the command to be invoked via the menu, palette, plugin, etc.
+      // a new shortcut for every open notebook.  
+      // One way to do this is to have the active notebook have a 
+      // specific `.jp-active-document` class, for example. Then the keyboard shortcut
+      // selects on that. The application state would also have a handle on this active
+      // document (model or widget), and so we could execute the current active cell.
       this.shortcuts.add([{
         sequence: ['Shift Enter'],
-        selector: `.${notebookContainerClass}.notebook-id-${notebookId}`,
+        selector: `.${notebookContainerClass}.notebook-id-${notebookId} .jp-CodeCell`,
         command: executeCellCommandId,
         args: {model: model, session: s}
+      }, {
+        sequence: ['Shift Enter'],
+        selector: `.${notebookContainerClass}.notebook-id-${notebookId} .jp-MarkdownCell`,
+        command: renderCellCommandId,
+        args: {model: model}
       }])
 
       s.kernel.commOpened.connect((kernel, msg) => {
