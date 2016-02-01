@@ -71,6 +71,27 @@ let renderCommand = new SimpleCommand({
 })
 
 
+let selectNextCellCommandId = 'notebook:select-next-cell';
+let selectNextCell = new SimpleCommand({
+  category: 'Notebook Operations',
+  text: 'Select next cell',
+  caption: 'Select next cell',
+  handler: (args) => {
+    args.model.selectNextCell();
+  }
+})
+
+let selectPreviousCellCommandId = 'notebook:select-previous-cell';
+let selectPreviousCell = new SimpleCommand({
+  category: 'Notebook Operations',
+  text: 'Select previous cell',
+  caption: 'Select previous cell',
+  handler: (args) => {
+    args.model.selectPreviousCell();
+  }
+})
+
+
 let notebookContainerClass = 'jp-NotebookContainer';
 
 /**
@@ -95,6 +116,12 @@ function resolve(container: Container): Promise<IFileHandler> {
       }, {
         id: renderCellCommandId,
         command: renderCommand
+      }, {
+        id: selectNextCellCommandId,
+        command: selectNextCell
+      }, {
+        id: selectPreviousCellCommandId,
+        command: selectPreviousCell
       }])
       return handler;
     }
@@ -206,15 +233,26 @@ class NotebookFileHandler extends AbstractFileHandler {
       // specific `.jp-active-document` class, for example. Then the keyboard shortcut
       // selects on that. The application state would also have a handle on this active
       // document (model or widget), and so we could execute the current active cell.
+      let prefix = `.${notebookContainerClass}.notebook-id-${n22otebookId}`
       this.shortcuts.add([{
         sequence: ['Shift Enter'],
-        selector: `.${notebookContainerClass}.notebook-id-${notebookId} .jp-CodeCell`,
+        selector: `${prefix} .jp-CodeCell`,
         command: executeCellCommandId,
         args: {model: model, session: s}
       }, {
         sequence: ['Shift Enter'],
-        selector: `.${notebookContainerClass}.notebook-id-${notebookId} .jp-MarkdownCell`,
+        selector: `${prefix} .jp-MarkdownCell`,
         command: renderCellCommandId,
+        args: {model: model}
+      }, {
+        sequence: ['ArrowDown'],
+        selector: `${prefix} .jp-Cell`,
+        command: selectNextCellCommandId,
+        args: {model: model}
+      }, {
+        sequence: ['ArrowUp'],
+        selector: `${prefix} .jp-Cell`,
+        command: selectPreviousCellCommandId,
         args: {model: model}
       }])
 
