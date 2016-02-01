@@ -14,6 +14,9 @@ import {
   IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
 } from 'phosphide';
 
+import * as arrays
+ from 'phosphor-arrays';
+
 import {
   SimpleCommand
 } from 'phosphor-command';
@@ -41,6 +44,13 @@ import {
 import {
   IFileOpener, IFileHandler
 } from './index';
+
+
+/**
+ * The class name added to focues widgets.
+ */
+export
+const FOCUS_CLASS = 'jp-mod-focus';
 
 
 /**
@@ -152,6 +162,17 @@ class FileOpener implements IFileOpener {
     this._appShell = appShell;
     browser.openRequested.connect(this._openRequested,
       this);
+    document.addEventListener('focus', this._onFocus.bind(this), true);
+  }
+
+  /**
+   * Get the most recently focused widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get currentWidget(): Widget {
+    return this._currentWidget;
   }
 
   /**
@@ -232,7 +253,28 @@ class FileOpener implements IFileOpener {
     return widget;
   }
 
+  /**
+   * Handle a focus event on the document.
+   */
+  private _onFocus(event: Event) {
+    let widget: Widget;
+    for (let h of this._handlers) {
+      // If the widget belongs to the handler, update the focused widget.
+      widget = arrays.find(h.widgets,
+        w => { return w.node.contains(event.target as HTMLElement); });
+      if (widget === this._currentWidget) {
+        return;
+      } else if (widget) {
+        if (this._currentWidget) this._currentWidget.removeClass(FOCUS_CLASS);
+        this._currentWidget = widget;
+        widget.addClass(FOCUS_CLASS);
+        return;
+      }
+    }
+  }
+
   private _handlers: IFileHandler[] = [];
   private _appShell: IAppShell = null;
   private _defaultHandler: IFileHandler = null;
+  private _currentWidget: Widget = null;
 }
