@@ -257,10 +257,9 @@ class FileOpener implements IFileOpener {
    * Handle a focus event on the document.
    */
   private _onFocus(event: Event) {
-    let widget: Widget;
     for (let h of this._handlers) {
       // If the widget belongs to the handler, update the focused widget.
-      widget = arrays.find(h.widgets,
+      let widget = arrays.find(h.widgets,
         w => { return w.node.contains(event.target as HTMLElement); });
       if (widget === this._currentWidget) {
         return;
