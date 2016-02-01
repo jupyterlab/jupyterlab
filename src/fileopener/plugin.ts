@@ -47,7 +47,7 @@ import {
 
 
 /**
- * The class name added to focues widgets.
+ * The class name added to focused widgets.
  */
 export
 const FOCUS_CLASS = 'jp-mod-focus';
