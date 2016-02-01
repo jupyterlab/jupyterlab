@@ -30,9 +30,19 @@ interface IFileHandler {
   finished: ISignal<IFileHandler, IContentsModel>;
 
   /**
-   * he list of file extensions supported by the handler.
+   * The list of file extensions supported by the handler.
    */
   fileExtensions: string[];
+
+  /**
+   * The list of mime types explicitly supported by the handler.
+   */
+  mimeTypes: string[];
+
+  /**
+   * The current set of widgets managed by the handler.
+   */
+  widgets: Widget[];
 
   /**
    * Open the file and return a populated widget.

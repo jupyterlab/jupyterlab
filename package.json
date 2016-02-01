@@ -1,6 +1,6 @@
 {
   "name": "jupyter-js-plugins",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Plugins for JupyterLab",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -9,7 +9,7 @@
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5",
     "jupyter-js-cells": "^0.2.5",
-    "jupyter-js-filebrowser": "^0.6.1",
+    "jupyter-js-filebrowser": "^0.7.1",
     "jupyter-js-notebook": "^0.3.7",
     "jupyter-js-services": "^0.4.2",
     "jupyter-js-terminal": "^0.1.12",

@@ -233,7 +233,7 @@ class NotebookFileHandler extends AbstractFileHandler {
       // specific `.jp-active-document` class, for example. Then the keyboard shortcut
       // selects on that. The application state would also have a handle on this active
       // document (model or widget), and so we could execute the current active cell.
-      let prefix = `.${notebookContainerClass}.notebook-id-${n22otebookId}`
+      let prefix = `.${notebookContainerClass}.notebook-id-${notebookId}`
       this.shortcuts.add([{
         sequence: ['Shift Enter'],
         selector: `${prefix} .jp-CodeCell`,
