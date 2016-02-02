@@ -20,11 +20,11 @@ import {
 
 import {
     InputAreaWidget, IInputAreaModel
-} from 'jupyter-js-input-area';
+} from '../input-area';
 
 import {
     OutputAreaWidget, IOutputAreaModel
-} from 'jupyter-js-output-area';
+} from '../output-area';
 
 import * as marked from 'marked';
 

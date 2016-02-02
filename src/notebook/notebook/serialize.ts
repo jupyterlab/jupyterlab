@@ -9,11 +9,11 @@ import {
 import {
   ICellModel,
   CodeCellModel, MarkdownCellModel
-} from 'jupyter-js-cells';
+} from '../cells';
 
 import {
   InputAreaModel
-} from 'jupyter-js-input-area';
+} from '../input-area';
 
 import {
   EditorModel
@@ -24,7 +24,7 @@ import {
   DisplayDataModel, ExecuteResultModel,
   ExecuteErrorModel, StreamModel,
   StreamName, OutputType, OutputModel
-} from 'jupyter-js-output-area';
+} from '../output-area';
 
 import {
   NBData, MarkdownCell, CodeCell, 

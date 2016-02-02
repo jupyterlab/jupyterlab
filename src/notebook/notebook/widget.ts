@@ -26,11 +26,11 @@ import {
   ICellModel, CellType,
     CodeCellWidget, MarkdownCellWidget,
     CodeCellModel, MarkdownCellModel, isMarkdownCell
-} from 'jupyter-js-cells';
+} from '../cells';
 
 import {
     OutputAreaWidget, IOutputAreaModel
-} from 'jupyter-js-output-area';
+} from '../output-area';
 
 import {
   DisposableDelegate, IDisposable
