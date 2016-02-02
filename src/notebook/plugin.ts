@@ -3,8 +3,22 @@
 'use strict';
 
 import {
+  CodeCellModel, ICellModel, isCodeCell, isMarkdownCell, BaseCellModel
+} from 'jupyter-js-cells';
+
+import {
+  AbstractFileHandler
+} from 'jupyter-js-filebrowser';
+
+import {
   NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output
 } from 'jupyter-js-notebook';
+
+import {
+  IContentsModel, IContentsManager,
+  NotebookSessionManager, INotebookSessionManager,
+  INotebookSession, IKernelMessage
+} from 'jupyter-js-services';
 
 import {
   ICommandRegistry, IShortcutManager
@@ -19,31 +33,16 @@ import {
 } from 'phosphor-di';
 
 import {
-  IContentsModel, IContentsManager,
-  NotebookSessionManager, INotebookSessionManager,
-  INotebookSession, IKernelMessage
-} from 'jupyter-js-services';
-
-import {
   Panel
 } from 'phosphor-panel';
-
-import {
-  IServicesProvider, IFileOpener, IFileHandler
-} from '../index';
-
-import {
-  AbstractFileHandler
-} from 'jupyter-js-filebrowser';
 
 import {
   Widget
 } from 'phosphor-widget';
 
-
 import {
-  CodeCellModel, ICellModel, isCodeCell, isMarkdownCell, BaseCellModel
-} from 'jupyter-js-cells';
+  IServicesProvider, IDocumentManager, IFileHandler
+} from '../index';
 
 import {
   WidgetManager
@@ -103,13 +102,13 @@ let notebookContainerClass = 'jp-NotebookContainer';
  * This is called automatically when the plugin is loaded.
  */
 export
-function resolve(container: Container): Promise<IFileHandler> {
+function resolve(container: Container): Promise<AbstractFileHandler> {
   return container.resolve({
-    requires: [IServicesProvider, IFileOpener, ICommandRegistry, IShortcutManager],
-    create: (services: IServicesProvider, opener: IFileOpener,
+    requires: [IServicesProvider, IDocumentManager, ICommandRegistry, IShortcutManager],
+    create: (services: IServicesProvider, manager: IDocumentManager,
              registry: ICommandRegistry, shortcuts: IShortcutManager) => {
       let handler = new NotebookFileHandler(services.contentsManager, services.notebookSessionManager, shortcuts);
-      opener.register(handler);
+      manager.register(handler);
       registry.add([{
         id: executeCellCommandId,
         command: executeCommand
