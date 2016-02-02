@@ -73,7 +73,10 @@
   "files": [
     "lib/*.js",
     "lib/*.d.ts",
-    "lib/*.css"
+    "lib/*.css",
+    "lib/**/*.css",
+    "lib/**/*.d.ts",
+    "lib/**/*.js"
   ],
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
