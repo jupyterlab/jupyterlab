@@ -7,7 +7,11 @@
   "out": "docs",
   "src": [
     "src/index.ts",
-    "typings/marked/marked.d.ts",
-    "typings/es6/es6-promise.d.ts"
+    "typings/codemirror.d.ts",
+    "typings/diff-match-patch.d.ts",
+    "typings/es6-promise.d.ts",
+    "typings/marked.d.ts",
+    "typings/systemjs.d.ts",
+    "typings/transformime.d.ts"
   ]
 }

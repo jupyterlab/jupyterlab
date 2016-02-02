@@ -9,8 +9,8 @@
   },
 
     "files": [
-      "../../typings/es6/es6-promise.d.ts",
-      "../../typings/es6/systemjs.d.ts",
+      "../../typings/es6-promise.d.ts",
+      "../../typings/systemjs.d.ts",
     "index.ts"
   ]
 }

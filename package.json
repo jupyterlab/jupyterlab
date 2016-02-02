@@ -5,16 +5,21 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
+    "codemirror": "^5.11.0",
+    "diff-match-patch": "^1.0.0",
     "jupyter-js-cells": "^0.2.6",
     "jupyter-js-editor": "^0.1.10",
     "jupyter-js-input-area": "^0.0.6",
     "jupyter-js-output-area": "^0.3.1",
+    "marked": "^0.3.5",
     "phosphor-disposable": "^1.0.5",
     "phosphor-observablelist": "^1.0.0-beta",
     "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
-    "phosphor-widget": "^1.0.0-rc.1"
+    "phosphor-widget": "^1.0.0-rc.1",
+    "transformime": "^2.1.1",
+    "transformime-jupyter-transformers": "^0.2.0"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
