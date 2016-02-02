@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-export * from './model';
-export * from './widget';
-export * from './serialize';
-export * from './nbformat';
+export * from './cells/index';
+export * from './input-area/index';
+export * from './notebook/index';
+export * from './output-area/index';

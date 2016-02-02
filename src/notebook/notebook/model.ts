@@ -33,9 +33,6 @@ import {
 } from 'jupyter-js-output-area';
 
 
-import './index.css';
-
-
 /**
  * The interactivity modes for a notebook.
  */

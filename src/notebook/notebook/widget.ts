@@ -36,8 +36,6 @@ import {
   DisposableDelegate, IDisposable
 } from 'phosphor-disposable';
 
-import './index.css';
-
 /**
  * A widget for a notebook.
  */
