@@ -13,7 +13,7 @@ function main() {
     require('phosphide/lib/commandpalette/plugin'),
     require('phosphide/lib/shortcutmanager/plugin'),
     require('../lib/terminal/plugin'),
-    require('../lib/fileopener/plugin'),
+    require('../lib/documentmanager/plugin'),
     require('../lib/filehandler/plugin'),
     require('../lib/filebrowser/plugin'),
     require('../lib/imagehandler/plugin'),
