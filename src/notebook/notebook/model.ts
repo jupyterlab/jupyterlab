@@ -3,7 +3,7 @@ import {
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
   IRawCellModel
-} from 'jupyter-js-cells';
+} from '../cells';
 
 import {
   IObservableList, ObservableList, ListChangeType
@@ -23,14 +23,14 @@ import {
 
 import {
   InputAreaModel
-} from 'jupyter-js-input-area';
+} from '../input-area';
 
 import {
   OutputAreaModel,
   DisplayDataModel, ExecuteResultModel,
   ExecuteErrorModel, StreamModel,
   StreamName
-} from 'jupyter-js-output-area';
+} from '../output-area';
 
 
 /**

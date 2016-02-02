@@ -5,10 +5,10 @@
 
 import {
   IInputAreaModel
-} from 'jupyter-js-input-area';
+} from '../input-area';
 import {
   IOutputAreaModel
-} from 'jupyter-js-output-area';
+} from '../output-area';
 
 import {
   IObservableList

@@ -6,12 +6,9 @@ import {
 
 import {
   NotebookModel, NotebookWidget,
-  NBData, populateNotebookModel
-} from '../../lib/index';
-
-import {
+  NBData, populateNotebookModel,
   isMarkdownCell
-} from 'jupyter-js-cells';
+} from '../../lib/index';
 
 import {
   IKeyBinding, KeymapManager, keystrokeForKeydownEvent
