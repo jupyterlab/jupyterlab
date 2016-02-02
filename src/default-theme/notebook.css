@@ -2,16 +2,17 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-.jp-NotebookWidget {
+.p-Widget .jp-NotebookWidget {
   min-width: 50px;
   min-height: 50px;
 }
 
-.jp-NotebookContainer {
+.p-Widget .jp-NotebookContainer {
   overflow: auto;
 }
 
-.jp-NotebookWidget-body {
+.p-Widget .jp-NotebookWidget-body {
   padding: 0.5em;
   font-size: 11px;
 }
+
