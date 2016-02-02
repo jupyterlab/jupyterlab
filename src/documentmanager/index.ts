@@ -57,31 +57,31 @@ interface IFileHandler {
 
 
 /**
- * An interface for a file opener.
+ * An interface for a document manager.
  */
 export
-interface IFileOpener {
+interface IDocumentManager {
   /**
    * Open the file and add the widget to the application shell.
    */
   open(model: IContentsModel): Widget;
 
   /**
-   * Register a file opener.
+   * Register a file handler.
    *
    * @param handler - The file handler to register.
    */
   register(handler: IFileHandler): void;
 
   /**
-   * Register a default file opener.
+   * Register a default file handler.
    */
   registerDefault(handler: IFileHandler): void;
 }
 
 
 /**
- * The dependency token for the `IFileOpener` interface.
+ * The dependency token for the `IDocumentManager` interface.
  */
 export
-const IFileOpener = new Token<IFileOpener>('jupyter-js-plugins.IFileOpener');
+const IDocumentManager = new Token<IDocumentManager>('jupyter-js-plugins.IDocumentManager');

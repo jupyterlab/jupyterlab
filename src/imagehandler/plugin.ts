@@ -19,7 +19,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IServicesProvider, IFileOpener, IFileHandler
+  IServicesProvider, IDocumentManager, IFileHandler
 } from '../index';
 
 
@@ -34,10 +34,10 @@ import {
 export
 function resolve(container: Container): Promise<IFileHandler> {
   return container.resolve({
-    requires: [IServicesProvider, IFileOpener],
-    create: (services: IServicesProvider, opener: IFileOpener) => {
+    requires: [IServicesProvider, IDocumentManager],
+    create: (services: IServicesProvider, manager: IDocumentManager) => {
       let handler = new ImageHandler(services.contentsManager);
-      opener.register(handler);
+      manager.register(handler);
       return handler;
     }
   });

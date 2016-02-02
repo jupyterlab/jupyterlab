@@ -42,7 +42,7 @@ import {
 } from '../index';
 
 import {
-  IFileOpener, IFileHandler
+  IDocumentManager, IFileHandler
 } from './index';
 
 
@@ -59,8 +59,8 @@ const FOCUS_CLASS = 'jp-mod-focus';
 export
 function resolve(container: Container): Promise<void> {
   return container.resolve({
-    requires: [IAppShell, IFileOpener, IFileBrowserWidget, ICommandPalette, ICommandRegistry, IShortcutManager],
-    create: (appShell: IAppShell, opener: IFileOpener, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager): void => {
+    requires: [IAppShell, IDocumentManager, IFileBrowserWidget, ICommandPalette, ICommandRegistry, IShortcutManager],
+    create: (appShell: IAppShell, manager: IDocumentManager, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager): void => {
 
       // Create a command to add a new empty text file.
       // This requires an id and an instance of a command object.
@@ -71,7 +71,7 @@ function resolve(container: Container): Promise<void> {
         caption: 'Create a new text file',
         handler: () => {
           browser.newUntitled('file', '.txt').then(
-            contents => opener.open(contents)
+            contents => manager.open(contents)
           );
         }
       });
@@ -106,7 +106,7 @@ function resolve(container: Container): Promise<void> {
         caption: 'Create a new Jupyter Notebook',
         handler: () => {
           browser.newUntitled('notebook').then(
-            contents => opener.open(contents)
+            contents => manager.open(contents)
           );
         }
       });
@@ -132,7 +132,7 @@ function resolve(container: Container): Promise<void> {
       ]);
 
       browser.widgetFactory = model => {
-        return opener.open(model);
+        return manager.open(model);
       }
     }
   });
@@ -141,22 +141,22 @@ function resolve(container: Container): Promise<void> {
 
 export
 function register(container: Container): void {
-  container.register(IFileOpener, {
+  container.register(IDocumentManager, {
     requires: [IAppShell, IFileBrowserWidget],
-    create: (appShell, browserProvider): IFileOpener => {
-      return new FileOpener(appShell, browserProvider);
+    create: (appShell, browserProvider): IDocumentManager => {
+      return new DocumentManager(appShell, browserProvider);
     }
   });
 }
 
 
 /**
- * An implementation on an IFileOpener.
+ * An implementation on an IDocumentManager.
  */
-class FileOpener implements IFileOpener {
+class DocumentManager implements IDocumentManager {
 
   /**
-   * Construct a new file opener.
+   * Construct a new document manager.
    */
   constructor(appShell: IAppShell, browser: IFileBrowserWidget) {
     this._appShell = appShell;

@@ -3,12 +3,16 @@
 'use strict';
 
 import {
-  NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output
-} from 'jupyter-js-notebook';
+  CodeCellModel, ICellModel, isCodeCell, BaseCellModel
+} from 'jupyter-js-cells';
 
 import {
-  Container
-} from 'phosphor-di';
+  AbstractFileHandler
+} from 'jupyter-js-filebrowser';
+
+import {
+  NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output
+} from 'jupyter-js-notebook';
 
 import {
   IContentsModel, IContentsManager,
@@ -17,25 +21,20 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  Container
+} from 'phosphor-di';
+
+import {
   Panel
 } from 'phosphor-panel';
-
-import {
-  IServicesProvider, IFileOpener, IFileHandler
-} from '../index';
-
-import {
-  AbstractFileHandler
-} from 'jupyter-js-filebrowser';
 
 import {
   Widget
 } from 'phosphor-widget';
 
-
 import {
-  CodeCellModel, ICellModel, isCodeCell, BaseCellModel
-} from 'jupyter-js-cells';
+  IServicesProvider, IDocumentManager, IFileHandler
+} from '../index';
 
 import {
   WidgetManager
@@ -53,10 +52,10 @@ import {
 export
 function resolve(container: Container): Promise<IFileHandler> {
   return container.resolve({
-    requires: [IServicesProvider, IFileOpener],
-    create: (services: IServicesProvider, opener: IFileOpener) => {
+    requires: [IServicesProvider, IDocumentManager],
+    create: (services: IServicesProvider, manager: IDocumentManager) => {
       let handler = new NotebookFileHandler(services.contentsManager, services.notebookSessionManager);
-      opener.register(handler);
+      manager.register(handler);
       return handler;
     }
   });

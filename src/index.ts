@@ -3,6 +3,6 @@
 'use strict';
 
 export * from './filebrowser/index';
-export * from './fileopener/index';
+export * from './documentmanager/index';
 export * from './services/index';
 export * from './terminal/index';
