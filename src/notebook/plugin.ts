@@ -41,7 +41,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IServicesProvider, IDocumentManager, IFileHandler
+  IServicesProvider, IDocumentManager
 } from '../index';
 
 import {
