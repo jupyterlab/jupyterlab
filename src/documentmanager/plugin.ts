@@ -159,7 +159,7 @@ function resolve(container: Container): Promise<void> {
       shortcuts.add([
         {
           sequence: ['Accel S'],
-          selector: '*',
+          selector: '.' + DOCUMENT_CLASS,
           command: saveDocumentId
         }
       ]);
@@ -191,7 +191,7 @@ function resolve(container: Container): Promise<void> {
       shortcuts.add([
         {
           sequence: ['Accel R'],
-          selector: '*',
+          selector: '.' + DOCUMENT_CLASS,
           command: revertDocumentId
         }
       ]);
@@ -223,7 +223,7 @@ function resolve(container: Container): Promise<void> {
       shortcuts.add([
         {
           sequence: ['Ctrl Q'],
-          selector: '*',
+          selector: '.' + DOCUMENT_CLASS,
           command: closeDocumentId
         }
       ]);
@@ -255,7 +255,7 @@ function resolve(container: Container): Promise<void> {
       shortcuts.add([
         {
           sequence: ['Ctrl Shift Q'],
-          selector: '*',
+          selector: '.' + DOCUMENT_CLASS,
           command: closeAllId
         }
       ]);
