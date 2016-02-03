@@ -383,6 +383,8 @@ class DocumentManager implements IDocumentManager {
    */
   close(): void {
     if (this._currentHandler) this._currentHandler.close(this._currentWidget);
+    this._currentWidget = null;
+    this._currentHandler = null;
   }
 
   /**
@@ -394,6 +396,8 @@ class DocumentManager implements IDocumentManager {
         w.close();
       }
     }
+    this._currentWidget = null;
+    this._currentHandler = null;
   }
 
   /**
