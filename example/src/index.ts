@@ -7,8 +7,11 @@ import {
 import {
   NotebookModel, NotebookWidget,
   NBData, populateNotebookModel,
-  isMarkdownCellModel
 } from '../../lib/index';
+
+import {
+  isMarkdownCellModel
+} from '../../lib/cells'
 
 import {
   IKeyBinding, KeymapManager, keystrokeForKeydownEvent
