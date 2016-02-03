@@ -7,10 +7,12 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
-  NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output,
-  CodeCellModel, ICellModel, isCodeCell, isMarkdownCell, BaseCellModel,
-  ICodeCellModel, IMarkdownCellModel, IRawCellModel
+  NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output
 } from 'jupyter-js-notebook';
+
+import {
+  isCodeCellModel, isMarkdownCellModel
+} from 'jupyter-js-notebook/lib/cells';
 
 import {
   IContentsModel, IContentsManager,
@@ -151,7 +153,7 @@ function messageToModel(msg: IKernelMessage) {
 
 function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
   let cell = model.cells.get(model.selectedCellIndex);
-  if (isCodeCell(cell)) {
+  if (isCodeCellModel(cell)) {
     let exRequest = {
       code: cell.input.textEditor.text,
       silent: false,
@@ -177,7 +179,7 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
 
 function renderSelectedCell(model: NotebookModel)  {
   let cell = model.cells.get(model.selectedCellIndex);
-  if (isMarkdownCell(cell)) {
+  if (isMarkdownCellModel(cell)) {
     cell.rendered = true;
   }
 }

@@ -9,7 +9,7 @@
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5",
     "jupyter-js-filebrowser": "^0.7.1",
-    "jupyter-js-notebook": "^0.4.2",
+    "jupyter-js-notebook": "^0.5.0",
     "jupyter-js-services": "^0.4.2",
     "jupyter-js-terminal": "^0.1.12",
     "jupyter-js-utils": "^0.2.17",
