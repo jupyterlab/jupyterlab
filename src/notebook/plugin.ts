@@ -255,16 +255,10 @@ class NotebookFileHandler extends AbstractFileHandler {
         args: {model: model}
       }])
 
-      s.kernel.commOpened.connect((kernel, msg) => {
-        let content = msg.content;
-        if (content.target_name !== 'jupyter.widget') {
-          return;
-        }
-        let comm = kernel.connectToComm('jupyter.widget', content.comm_id);
+      s.kernel.registerCommTarget('jupyter.widget', (comm, msg) => {
         console.log('comm message', msg);
 
         let modelPromise = manager.handle_comm_open(comm, msg);
-
 
         comm.onMsg = (msg) => {
           manager.handle_comm_open(comm, msg)
