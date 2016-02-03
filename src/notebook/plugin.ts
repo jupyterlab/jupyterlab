@@ -3,15 +3,13 @@
 'use strict';
 
 import {
-  CodeCellModel, ICellModel, isCodeCell, isMarkdownCell, BaseCellModel
-} from 'jupyter-js-cells';
-
-import {
   AbstractFileHandler
 } from 'jupyter-js-filebrowser';
 
 import {
-  NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output
+  NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output,
+  CodeCellModel, ICellModel, isCodeCell, isMarkdownCell, BaseCellModel,
+  ICodeCellModel, IMarkdownCellModel, IRawCellModel
 } from 'jupyter-js-notebook';
 
 import {
