@@ -261,7 +261,7 @@ function resolve(container: Container): Promise<void> {
       ]);
       palette.add([
         {
-          id: saveDocumentId,
+          id: closeDocumentId,
           args: void 0
         }
       ]);
@@ -433,7 +433,7 @@ class DocumentManager implements IDocumentManager {
     for (let h of this._handlers) {
       // If the widget belongs to the handler, update the focused widget.
       let widget = arrays.find(h.widgets,
-        w => { return w.node.contains(event.target as HTMLElement); });
+        w => { return w.isVisible && w.node.contains(event.target as HTMLElement); });
       if (widget === this._currentWidget) {
         return;
       } else if (widget) {
