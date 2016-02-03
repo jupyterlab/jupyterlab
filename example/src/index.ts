@@ -7,7 +7,7 @@ import {
 import {
   NotebookModel, NotebookWidget,
   NBData, populateNotebookModel,
-  isMarkdownCell
+  isMarkdownCellModel
 } from '../../lib/index';
 
 import {
@@ -39,10 +39,10 @@ function bindings(nbModel: NotebookModel) {
         handler: args => {
         if (nbModel.selectedCellIndex !== void 0) {
           let cell = nbModel.cells.get(nbModel.selectedCellIndex);
-          if (isMarkdownCell(cell) && !cell.rendered) {
+          if (isMarkdownCellModel(cell) && !cell.rendered) {
             cell.rendered = true;
           }
-        }          
+        }
         }
       })
   },
