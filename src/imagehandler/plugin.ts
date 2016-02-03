@@ -19,7 +19,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IServicesProvider, IDocumentManager, IFileHandler
+  IServicesProvider, IDocumentManager
 } from '../index';
 
 
@@ -32,7 +32,7 @@ import {
  * This is called automatically when the plugin is loaded.
  */
 export
-function resolve(container: Container): Promise<IFileHandler> {
+function resolve(container: Container): Promise<AbstractFileHandler> {
   return container.resolve({
     requires: [IServicesProvider, IDocumentManager],
     create: (services: IServicesProvider, manager: IDocumentManager) => {

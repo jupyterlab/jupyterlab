@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  FileBrowserWidget, FileHandler
+  FileBrowserWidget, AbstractFileHandler
 } from 'jupyter-js-filebrowser';
 
 import {
@@ -42,7 +42,7 @@ import {
 } from '../index';
 
 import {
-  IDocumentManager, IFileHandler
+  IDocumentManager
 } from './index';
 
 
@@ -108,6 +108,54 @@ function resolve(container: Container): Promise<void> {
           browser.newUntitled('notebook').then(
             contents => manager.open(contents)
           );
+        }
+      });
+
+      // Add the command for saving a document.
+      let saveDocumentId = 'file-operations:save';
+      let saveDocumentCommand = new SimpleCommand({
+        category: 'File Operations',
+        text: 'Save Document',
+        caption: 'Save the current document',
+        handler: () => {
+          manager.save();
+          return true;
+        }
+      });
+
+      // Add the command for reverting a document.
+      let revertDocumentId = 'file-operations:revert';
+      let revertDocumentCommand = new SimpleCommand({
+        category: 'File Operations',
+        text: 'Revert Document',
+        caption: 'Revert the current document',
+        handler: () => {
+          manager.revert();
+          return true;
+        }
+      });
+
+      // Add the command for closing a document.
+      let closeDocumentId = 'file-operations:close';
+      let closeDocumentCommand = new SimpleCommand({
+        category: 'File Operations',
+        text: 'Close Document',
+        caption: 'Close the current document',
+        handler: () => {
+          manager.close();
+          return true;
+        }
+      });
+
+      // Add the command for closing all documents.
+      let closeAllId = 'file-operations:close-all';
+      let closeAllCommand = new SimpleCommand({
+        category: 'File Operations',
+        text: 'Close All',
+        caption: 'Close all open documents',
+        handler: () => {
+          manager.closeAll();
+          return true;
         }
       });
 
@@ -178,14 +226,14 @@ class DocumentManager implements IDocumentManager {
   /**
    * Register a file handler.
    */
-  register(handler: IFileHandler): void {
+  register(handler: AbstractFileHandler): void {
     this._handlers.push(handler);
   }
 
   /**
    * Register a default file handler.
    */
-  registerDefault(handler: IFileHandler): void {
+  registerDefault(handler: AbstractFileHandler): void {
     if (this._defaultHandler !== null) {
       throw Error('Default handler already registered');
     }
@@ -202,7 +250,7 @@ class DocumentManager implements IDocumentManager {
     }
     let path = model.path;
     let ext = '.' + path.split('.').pop();
-    let handlers: IFileHandler[] = [];
+    let handlers: AbstractFileHandler[] = [];
     // Look for matching file extensions.
     for (let h of this._handlers) {
       if (h.fileExtensions.indexOf(ext) !== -1) handlers.push(h);
@@ -228,6 +276,38 @@ class DocumentManager implements IDocumentManager {
   }
 
   /**
+   * Save the current document.
+   */
+  save(): void {
+    if (this._currentHandler) this._currentHandler.save(this._currentWidget);
+  }
+
+  /**
+   * Revert the current document.
+   */
+  revert(): void {
+    if (this._currentHandler) this._currentHandler.revert(this._currentWidget);
+  }
+
+  /**
+   * Close the current document.
+   */
+  close(): void {
+    if (this._currentHandler) this._currentHandler.close(this._currentWidget);
+  }
+
+  /**
+   * Close all documents.
+   */
+  closeAll(): void {
+    for (let h of this._handlers) {
+      for (let w of h.widgets) {
+        w.close();
+      }
+    }
+  }
+
+  /**
    * Handle an `openRequested` signal by invoking the appropriate handler.
    */
   private _openRequested(browser: FileBrowserWidget, model: IContentsModel): void {
@@ -237,7 +317,7 @@ class DocumentManager implements IDocumentManager {
   /**
    * Open a file and add it to the application shell and give it focus.
    */
-  private _open(handler: IFileHandler, model: IContentsModel): Widget {
+  private _open(handler: AbstractFileHandler, model: IContentsModel): Widget {
     let widget = handler.open(model);
     if (!widget.isAttached) {
       this._appShell.addToMainArea(widget);
@@ -266,14 +346,16 @@ class DocumentManager implements IDocumentManager {
       } else if (widget) {
         if (this._currentWidget) this._currentWidget.removeClass(FOCUS_CLASS);
         this._currentWidget = widget;
+        this._currentHandler = h;
         widget.addClass(FOCUS_CLASS);
         return;
       }
     }
   }
 
-  private _handlers: IFileHandler[] = [];
+  private _handlers: AbstractFileHandler[] = [];
   private _appShell: IAppShell = null;
-  private _defaultHandler: IFileHandler = null;
+  private _defaultHandler: AbstractFileHandler = null;
   private _currentWidget: Widget = null;
+  private _currentHandler: AbstractFileHandler = null;
 }

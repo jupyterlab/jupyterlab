@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  AbstractFileHandler
+} from 'jupyter-js-filebrowser';
+
+import {
   IContentsModel
 } from 'jupyter-js-services';
 
@@ -20,43 +24,6 @@ import {
 
 
 /**
- * An interface for a file handler
- */
-export
-interface IFileHandler {
-  /**
-   * A signal emitted when the widget is finished populating.
-   */
-  finished: ISignal<IFileHandler, IContentsModel>;
-
-  /**
-   * The list of file extensions supported by the handler.
-   */
-  fileExtensions: string[];
-
-  /**
-   * The list of mime types explicitly supported by the handler.
-   */
-  mimeTypes: string[];
-
-  /**
-   * The current set of widgets managed by the handler.
-   */
-  widgets: Widget[];
-
-  /**
-   * Open the file and return a populated widget.
-   */
-  open(model: IContentsModel): Widget;
-
-  /**
-   * Close the file widget.
-   */
-  close(widget: Widget): boolean;
-}
-
-
-/**
  * An interface for a document manager.
  */
 export
@@ -67,16 +34,36 @@ interface IDocumentManager {
   open(model: IContentsModel): Widget;
 
   /**
+   * Save the current document.
+   */
+  save(): void;
+
+  /**
+   * Revert the current document.
+   */
+  revert(): void;
+
+  /**
+   * Close the current document.
+   */
+  close(): void;
+
+  /**
+   * Close all documents.
+   */
+  closeAll(): void;
+
+  /**
    * Register a file handler.
    *
    * @param handler - The file handler to register.
    */
-  register(handler: IFileHandler): void;
+  register(handler: AbstractFileHandler): void;
 
   /**
    * Register a default file handler.
    */
-  registerDefault(handler: IFileHandler): void;
+  registerDefault(handler: AbstractFileHandler): void;
 }
 
 
