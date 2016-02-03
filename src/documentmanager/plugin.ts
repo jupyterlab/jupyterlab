@@ -47,6 +47,13 @@ import {
 
 
 /**
+ * The class name added to document widgets.
+ */
+export
+const DOCUMENT_CLASS = 'jp-Document';
+
+
+/**
  * The class name added to focused widgets.
  */
 export
@@ -111,54 +118,6 @@ function resolve(container: Container): Promise<void> {
         }
       });
 
-      // Add the command for saving a document.
-      let saveDocumentId = 'file-operations:save';
-      let saveDocumentCommand = new SimpleCommand({
-        category: 'File Operations',
-        text: 'Save Document',
-        caption: 'Save the current document',
-        handler: () => {
-          manager.save();
-          return true;
-        }
-      });
-
-      // Add the command for reverting a document.
-      let revertDocumentId = 'file-operations:revert';
-      let revertDocumentCommand = new SimpleCommand({
-        category: 'File Operations',
-        text: 'Revert Document',
-        caption: 'Revert the current document',
-        handler: () => {
-          manager.revert();
-          return true;
-        }
-      });
-
-      // Add the command for closing a document.
-      let closeDocumentId = 'file-operations:close';
-      let closeDocumentCommand = new SimpleCommand({
-        category: 'File Operations',
-        text: 'Close Document',
-        caption: 'Close the current document',
-        handler: () => {
-          manager.close();
-          return true;
-        }
-      });
-
-      // Add the command for closing all documents.
-      let closeAllId = 'file-operations:close-all';
-      let closeAllCommand = new SimpleCommand({
-        category: 'File Operations',
-        text: 'Close All',
-        caption: 'Close all open documents',
-        handler: () => {
-          manager.closeAll();
-          return true;
-        }
-      });
-
       registry.add([
         {
           id: newNotebookId,
@@ -175,6 +134,134 @@ function resolve(container: Container): Promise<void> {
       palette.add([
         {
           id: newNotebookId,
+          args: void 0
+        }
+      ]);
+
+      // Add the command for saving a document.
+      let saveDocumentId = 'file-operations:save';
+      let saveDocumentCommand = new SimpleCommand({
+        category: 'File Operations',
+        text: 'Save Document',
+        caption: 'Save the current document',
+        handler: () => {
+          manager.save();
+          return true;
+        }
+      });
+
+      registry.add([
+        {
+          id: saveDocumentId,
+          command: saveDocumentCommand
+        }
+      ]);
+      shortcuts.add([
+        {
+          sequence: ['Accel S'],
+          selector: '*',
+          command: saveDocumentId
+        }
+      ]);
+      palette.add([
+        {
+          id: saveDocumentId,
+          args: void 0
+        }
+      ]);
+
+      // Add the command for reverting a document.
+      let revertDocumentId = 'file-operations:revert';
+      let revertDocumentCommand = new SimpleCommand({
+        category: 'File Operations',
+        text: 'Revert Document',
+        caption: 'Revert the current document',
+        handler: () => {
+          manager.revert();
+          return true;
+        }
+      });
+
+      registry.add([
+        {
+          id: revertDocumentId,
+          command: revertDocumentCommand
+        }
+      ]);
+      shortcuts.add([
+        {
+          sequence: ['Accel R'],
+          selector: '*',
+          command: revertDocumentId
+        }
+      ]);
+      palette.add([
+        {
+          id: revertDocumentId,
+          args: void 0
+        }
+      ]);
+
+      // Add the command for closing a document.
+      let closeDocumentId = 'file-operations:close';
+      let closeDocumentCommand = new SimpleCommand({
+        category: 'File Operations',
+        text: 'Close Document',
+        caption: 'Close the current document',
+        handler: () => {
+          manager.close();
+          return true;
+        }
+      });
+
+      registry.add([
+        {
+          id: closeDocumentId,
+          command: closeDocumentCommand
+        }
+      ]);
+      shortcuts.add([
+        {
+          sequence: ['Ctrl Q'],
+          selector: '*',
+          command: closeDocumentId
+        }
+      ]);
+      palette.add([
+        {
+          id: closeDocumentId,
+          args: void 0
+        }
+      ]);
+
+      // Add the command for closing all documents.
+      let closeAllId = 'file-operations:close-all';
+      let closeAllCommand = new SimpleCommand({
+        category: 'File Operations',
+        text: 'Close All',
+        caption: 'Close all open documents',
+        handler: () => {
+          manager.closeAll();
+          return true;
+        }
+      });
+
+      registry.add([
+        {
+          id: closeAllId,
+          command: closeAllCommand
+        }
+      ]);
+      shortcuts.add([
+        {
+          sequence: ['Ctrl Shift Q'],
+          selector: '*',
+          command: closeAllId
+        }
+      ]);
+      palette.add([
+        {
+          id: saveDocumentId,
           args: void 0
         }
       ]);
@@ -255,15 +342,15 @@ class DocumentManager implements IDocumentManager {
     for (let h of this._handlers) {
       if (h.fileExtensions.indexOf(ext) !== -1) handlers.push(h);
     }
-
+    let widget: Widget;
     // If there was only one match, use it.
     if (handlers.length === 1) {
-      return this._open(handlers[0], model);
+      widget = this._open(handlers[0], model);
 
     // If there were no matches, use default handler.
     } else if (handlers.length === 0) {
       if (this._defaultHandler !== null) {
-        return this._open(this._defaultHandler, model);
+        widget = this._open(this._defaultHandler, model);
       } else {
         throw new Error(`Could not open file '${path}'`);
       }
@@ -271,8 +358,10 @@ class DocumentManager implements IDocumentManager {
     // There are more than one possible handlers.
     } else {
       // TODO: Ask the user to choose one.
-      return this._open(handlers[0], model);
+      widget = this._open(handlers[0], model);
     }
+    widget.addClass(DOCUMENT_CLASS);
+    return widget;
   }
 
   /**
