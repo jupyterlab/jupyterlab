@@ -25,7 +25,7 @@ import {
 import {
   ICellModel, CellType,
     CodeCellWidget, MarkdownCellWidget,
-    CodeCellModel, MarkdownCellModel, isMarkdownCell
+    CodeCellModel, MarkdownCellModel, isMarkdownCellModel
 } from '../cells';
 
 import {
@@ -69,7 +69,7 @@ class NotebookWidget extends Panel {
       return w;
     })
     this.updateSelectedCell(model.selectedCellIndex);
-    
+
     // bind events that can select the cell
     // see https://github.com/jupyter/notebook/blob/203ccd3d4496cc22e6a1c5e6ece9f5a7d791472a/notebook/static/notebook/js/cell.js#L178
     this.node.addEventListener('click', (ev: MouseEvent) => {
@@ -81,7 +81,7 @@ class NotebookWidget extends Panel {
         return;
       }
       let cell = this._model.cells.get(i);
-      if (isMarkdownCell(cell) && cell.rendered) {
+      if (isMarkdownCellModel(cell) && cell.rendered) {
         cell.rendered = false;
         // TODO: focus the cell editor
       }
@@ -93,7 +93,7 @@ class NotebookWidget extends Panel {
 
   /**
    * Find the cell index containing the target html element.
-   * 
+   *
    * #### Notes
    * Returns -1 if the cell is not found.
    */
@@ -117,7 +117,7 @@ class NotebookWidget extends Panel {
   /**
    * Handle a change cells event.
    */
-  protected cellsChanged(sender: IObservableList<ICellModel>, 
+  protected cellsChanged(sender: IObservableList<ICellModel>,
                          args: IListChangedArgs<ICellModel>) {
     console.log(args);
   }
@@ -157,27 +157,27 @@ class NotebookWidget extends Panel {
     this._listdispose.dispose();
     super.dispose();
   }
-  
+
   /**
    * Get the model for the widget
    */
-  
+
   get model(): INotebookModel {
     return this._model;
   }
-  
+
   private _model: INotebookModel;
   private _listdispose: IDisposable;
 }
 
 /**
  * Make a panel mirror changes to an observable list.
- * 
+ *
  * @param source - The observable list.
  * @param sink - The Panel.
  * @param factory - A function which takes an item from the list and constructs a widget.
- */function follow<T>(source: IObservableList<T>, 
-                     sink: Panel, 
+ */function follow<T>(source: IObservableList<T>,
+                     sink: Panel,
                      factory: (arg: T)=> Widget): IDisposable {
 
   for (let i = sink.childCount()-1; i>=0; i--) {
@@ -215,5 +215,5 @@ class NotebookWidget extends Panel {
   return new DisposableDelegate(() => {
     source.changed.disconnect(callback);
   })
-  
+
 }

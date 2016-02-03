@@ -1,18 +1,12 @@
 // Notebook format interfaces
 
+import {
+    MimeBundle
+} from '../output-area';
+
 // In the notebook format *disk* representation, this would be string | string[]
 export type multilineString = string;
 
-export
-interface MimeBundle {
-    // values are always multilineString if we pretend that the application/json key doesn't exist
-    // in fact, the in-memory representation always is a string
-    [key: string]: multilineString;
-
-    // we fudge the standard a bit here by not telling Typescript about the application/json
-    // key, which will be a Javascript object if it exists.  If we want to tell, then uncomment below:
-    //"application/json": {};
-}
 
 export
 interface BaseOutput {

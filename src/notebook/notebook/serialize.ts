@@ -27,9 +27,9 @@ import {
 } from '../output-area';
 
 import {
-  NBData, MarkdownCell, CodeCell, 
+  NBData, MarkdownCell, CodeCell,
   isMarkdownCell, isCodeCell,
-  DisplayData, isDisplayData, 
+  DisplayData, isDisplayData,
   ExecuteResult, isExecuteResult,
   Stream, isStream,
   JupyterError, isJupyterError, Output
@@ -47,7 +47,7 @@ function populateNotebookModel(nb: INotebookModel, data: NBData): void {
     let input = new InputAreaModel();
     input.textEditor = new EditorModel();
     input.textEditor.text = c.source;
-    
+
     if (isMarkdownCell(c)) {
       let cell = new MarkdownCellModel();
       cell.input = input;
