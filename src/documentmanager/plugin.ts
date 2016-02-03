@@ -261,7 +261,7 @@ function resolve(container: Container): Promise<void> {
       ]);
       palette.add([
         {
-          id: closeDocumentId,
+          id: closeAllId,
           args: void 0
         }
       ]);
