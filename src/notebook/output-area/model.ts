@@ -80,7 +80,7 @@ class DisplayDataModel extends OutputBaseModel {
   * Metadata about the output.
   */
   metadata: any;
-  
+
   /**
    * Output type
    */
@@ -122,7 +122,7 @@ enum StreamName {
 /**
 * An output model for stream data.
 */
-export 
+export
 class StreamModel extends OutputBaseModel {
   /**
   * The type of stream.
@@ -163,12 +163,12 @@ class ExecuteErrorModel extends OutputBaseModel {
 
   /**
   * The traceback for the error.
-  * 
+  *
   * #### Notes
   * This is an array of strings that has been concatenated to a single string.
   */
   traceback: string;
-  
+
   /**
    * Output type
    */
@@ -179,9 +179,9 @@ class ExecuteErrorModel extends OutputBaseModel {
 /**
 * An output model that is one of the valid output types.
 */
-export 
+export
 type OutputModel = (
-  ExecuteResultModel | DisplayDataModel | StreamModel | 
+  ExecuteResultModel | DisplayDataModel | StreamModel |
   ExecuteErrorModel
 );
 
@@ -189,7 +189,7 @@ type OutputModel = (
 /**
 * The model for an output area.
 */
-export 
+export
 interface IOutputAreaModel {
 
   /**
@@ -218,7 +218,7 @@ interface IOutputAreaModel {
   outputs: ObservableList<OutputModel>;
 
   /**
-  * A convenience method to add an output to the end of the outputs list, 
+  * A convenience method to add an output to the end of the outputs list,
   * combining outputs if necessary.
   */
   add(output: OutputModel): void;
@@ -240,9 +240,9 @@ class OutputAreaModel implements IOutputAreaModel {
    * A signal emitted when the state of the model changes.
    *
    * #### Notes
-   * This will not trigger on changes to the output list. For output change handlers, 
-   * listen to [[outputs]] events directly.  
-   * 
+   * This will not trigger on changes to the output list. For output change handlers,
+   * listen to [[outputs]] events directly.
+   *
    * **See also:** [[stateChanged]]
    */
   static stateChangedSignal = new Signal<OutputAreaModel, IChangedArgs<any>>();
@@ -281,9 +281,9 @@ class OutputAreaModel implements IOutputAreaModel {
    * A signal emitted when the state of the model changes.
    *
    * #### Notes
-   * This will not trigger on changes to the output list. For output change handlers, 
+   * This will not trigger on changes to the output list. For output change handlers,
    * listen to [[outputs]] events directly.
-   * 
+   *
    * This is a pure delegate to the [[stateChangedSignal]].
    */
   get stateChanged() {
@@ -349,9 +349,9 @@ class OutputAreaModel implements IOutputAreaModel {
   set prompt(value: string) {
     OutputAreaModel.promptProperty.set(this, value);
   }
-  
+
   /**
-   * Add an output, which may be combined with previous output 
+   * Add an output, which may be combined with previous output
    * (e.g. for streams).
    */
   add(output: OutputModel) {
@@ -360,14 +360,14 @@ class OutputAreaModel implements IOutputAreaModel {
       this.clear();
       this._clearNext = false;
     }
-    
+
     // Consolidate outputs if they are stream outputs of the same kind
     let lastOutput = this.outputs.get(-1);
     if (isStreamModel(output)
         && lastOutput && isStreamModel(lastOutput)
         && output.name === lastOutput.name) {
-      // In order to get a list change event, we add the previous 
-      // text to the current item and replace the previous item. 
+      // In order to get a list change event, we add the previous
+      // text to the current item and replace the previous item.
       // This also replaces the metadata of the last item.
       output.text = lastOutput.text + output.text;
       this.outputs.set(-1, output);
@@ -378,7 +378,7 @@ class OutputAreaModel implements IOutputAreaModel {
 
   /**
   * Clear all of the output.
-  * 
+  *
   * @param wait Delay clearing the output until the next message is added.
   */
   clear(wait: boolean = false) {
@@ -390,7 +390,7 @@ class OutputAreaModel implements IOutputAreaModel {
   }
 
   outputs = new ObservableList<OutputModel>();
-  
+
   /**
    * Whether to clear on the next message add.
    */

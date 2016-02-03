@@ -198,7 +198,7 @@ class BaseCellModel implements IBaseCellModel {
   get input() {
     return BaseCellModel.inputProperty.get(this);
   }
-  
+
   /**
    * Set the input area model.
    *
@@ -224,7 +224,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
 
   /**
   * A property descriptor holding the output area model.
-  * 
+  *
   * TODO: Do we need this execute signal?
   * **See also:** [[output]]
   */
@@ -240,10 +240,10 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    * #### Notes
    * This is a pure delegate to the [[outputProperty]].
    */
-  get output() { 
-      return CodeCellModel.outputProperty.get(this); 
+  get output() {
+      return CodeCellModel.outputProperty.get(this);
   }
-  
+
   /**
    * Set the output area model.
    *
@@ -253,7 +253,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   set output(value: IOutputAreaModel) {
       CodeCellModel.outputProperty.set(this, value);
   }
-  
+
   type: CellType = CellType.Code;
 }
 
@@ -293,15 +293,15 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
   set rendered(value: boolean) {
     MarkdownCellModel.renderedProperty.set(this, value);
   }
-  
+
   type: CellType = CellType.Markdown;
 }
 
 /**
-  * A type guard for testing if a cell is a markdown cell.
+  * A type guard for testing if a cell model is a markdown cell.
   */
 export
-function isMarkdownCell(m: ICellModel): m is IMarkdownCellModel {
+function isMarkdownCellModel(m: ICellModel): m is IMarkdownCellModel {
   return (m.type === CellType.Markdown);
 }
 
@@ -309,7 +309,7 @@ function isMarkdownCell(m: ICellModel): m is IMarkdownCellModel {
   * A type guard for testing if a cell is a code cell.
   */
 export
-function isCodeCell(m: ICellModel): m is ICodeCellModel {
+function isCodeCellModel(m: ICellModel): m is ICodeCellModel {
   return (m.type === CellType.Code);
 }
 
@@ -317,6 +317,6 @@ function isCodeCell(m: ICellModel): m is ICodeCellModel {
   * A type guard for testing if a cell is a raw cell.
   */
 export
-function isRawCell(m: ICellModel): m is IRawCellModel {
+function isRawCellModel(m: ICellModel): m is IRawCellModel {
   return (m.type === CellType.Raw);
 }
