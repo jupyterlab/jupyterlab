@@ -41,7 +41,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IServicesProvider, IDocumentManager, IFileHandler
+  IServicesProvider, IDocumentManager
 } from '../index';
 
 import {
@@ -227,8 +227,8 @@ class NotebookFileHandler extends AbstractFileHandler {
     this.session.startNew({notebookPath: contents.path}).then(s => {
       // TODO: it's probably better to make *one* shortcut that executes whatever
       // the current notebook's selected cell is, rather than registering a
-      // a new shortcut for every open notebook.  
-      // One way to do this is to have the active notebook have a 
+      // a new shortcut for every open notebook.
+      // One way to do this is to have the active notebook have a
       // specific `.jp-active-document` class, for example. Then the keyboard shortcut
       // selects on that. The application state would also have a handle on this active
       // document (model or widget), and so we could execute the current active cell.
@@ -255,16 +255,10 @@ class NotebookFileHandler extends AbstractFileHandler {
         args: {model: model}
       }])
 
-      s.kernel.commOpened.connect((kernel, msg) => {
-        let content = msg.content;
-        if (content.target_name !== 'jupyter.widget') {
-          return;
-        }
-        let comm = kernel.connectToComm('jupyter.widget', content.comm_id);
+      s.kernel.registerCommTarget('jupyter.widget', (comm, msg) => {
         console.log('comm message', msg);
 
         let modelPromise = manager.handle_comm_open(comm, msg);
-
 
         comm.onMsg = (msg) => {
           manager.handle_comm_open(comm, msg)

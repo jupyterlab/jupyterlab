@@ -23,6 +23,11 @@ body {
 }
 
 
+.jp-Document {
+  outline: none;
+}
+
+
 .jp-Dialog {
   padding-left: 3px;
   background: rgba(245, 245, 245, .6);
