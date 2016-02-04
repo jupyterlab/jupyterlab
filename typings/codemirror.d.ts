@@ -18,8 +18,10 @@ declare module CodeMirror {
     interface modespec {
       name: string;
       mode: string;
+      mime: string;
     }
     function findModeByName(name: string): modespec;
+    function findModeByFileName(name: string): modespec;
     function findModeByMIME(mime: string): modespec;
 
     var modes: {
@@ -809,8 +811,8 @@ declare module CodeMirror {
         /** Optional lint configuration to be used in conjunction with CodeMirror's linter addon. */
         lint?: boolean | LintOptions;
 
-	/** Optional value to be used in conduction with CodeMirror’s placeholder add-on. */
-	placeholder?: string;
+    /** Optional value to be used in conduction with CodeMirror’s placeholder add-on. */
+    placeholder?: string;
     }
 
     interface TextMarkerOptions {

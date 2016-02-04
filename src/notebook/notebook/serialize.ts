@@ -17,7 +17,7 @@ import {
 
 import {
   EditorModel
-} from 'jupyter-js-editor';
+} from '../editor';
 
 import {
   IOutputAreaModel, OutputAreaModel,
