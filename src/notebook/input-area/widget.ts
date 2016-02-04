@@ -23,12 +23,13 @@ import {
 } from 'phosphor-panel';
 
 import {
+  CodeMirrorWidget, IEditorModel
+} from '../editor';
+
+import {
   IInputAreaModel
 } from './model';
 
-import {
-  CodeMirrorWidget, IEditorModel
-} from 'jupyter-js-editor';
 
 /**
  * An input area widget, which hosts an editor widget.

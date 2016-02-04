@@ -12,7 +12,7 @@ import {
 
 import {
   IEditorModel, EditorModel
-} from 'jupyter-js-editor';
+} from '../editor';
 
 /**
  * The model for an input area.

@@ -11,6 +11,7 @@
     "typings/diff-match-patch.d.ts",
     "typings/es6-promise.d.ts",
     "typings/marked.d.ts",
+    "typings/requirejs.d.ts",
     "typings/systemjs.d.ts",
     "typings/transformime.d.ts"
   ]
