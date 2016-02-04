@@ -4,7 +4,7 @@
 
 import {
   AbstractFileHandler
-} from 'jupyter-js-filebrowser';
+} from 'jupyter-js-docmanager';
 
 import {
   NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output

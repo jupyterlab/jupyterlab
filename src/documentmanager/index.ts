@@ -3,8 +3,8 @@
 'use strict';
 
 import {
-  AbstractFileHandler
-} from 'jupyter-js-filebrowser';
+  DocumentManager
+} from 'jupyter-js-docmanager';
 
 import {
   IContentsModel
@@ -27,43 +27,7 @@ import {
  * An interface for a document manager.
  */
 export
-interface IDocumentManager {
-  /**
-   * Open the file and add the widget to the application shell.
-   */
-  open(model: IContentsModel): Widget;
-
-  /**
-   * Save the current document.
-   */
-  save(): void;
-
-  /**
-   * Revert the current document.
-   */
-  revert(): void;
-
-  /**
-   * Close the current document.
-   */
-  close(): void;
-
-  /**
-   * Close all documents.
-   */
-  closeAll(): void;
-
-  /**
-   * Register a file handler.
-   *
-   * @param handler - The file handler to register.
-   */
-  register(handler: AbstractFileHandler): void;
-
-  /**
-   * Register a default file handler.
-   */
-  registerDefault(handler: AbstractFileHandler): void;
+interface IDocumentManager extends DocumentManager {
 }
 
 

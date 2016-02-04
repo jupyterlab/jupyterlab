@@ -3,8 +3,8 @@
 'use strict';
 
 import {
-  AbstractFileHandler, FileBrowserWidget, FileHandler
-} from 'jupyter-js-filebrowser';
+  AbstractFileHandler
+} from 'jupyter-js-docmanager';
 
 import {
   IContentsModel
