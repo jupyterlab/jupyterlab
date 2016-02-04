@@ -67,7 +67,7 @@ class ImageHandler extends AbstractFileHandler {
   protected createWidget(model: IContentsModel): Widget {
     let ext = model.path.split('.').pop();
     var widget = new Widget();
-    widget.node.tabIndex = 1;
+    widget.node.tabIndex = 0;
     let image = document.createElement('img');
     widget.node.appendChild(image);
     widget.node.style.overflowX = 'auto';

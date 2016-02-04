@@ -52,7 +52,6 @@ import {
 export
 const DOCUMENT_CLASS = 'jp-Document';
 
-
 /**
  * The class name added to focused widgets.
  */
@@ -159,7 +158,7 @@ function resolve(container: Container): Promise<void> {
       shortcuts.add([
         {
           sequence: ['Accel S'],
-          selector: '.' + DOCUMENT_CLASS,
+          selector: `.${DOCUMENT_CLASS}.${FOCUS_CLASS}`,
           command: saveDocumentId
         }
       ]);
@@ -191,7 +190,7 @@ function resolve(container: Container): Promise<void> {
       shortcuts.add([
         {
           sequence: ['Accel R'],
-          selector: '.' + DOCUMENT_CLASS,
+          selector: `.${DOCUMENT_CLASS}.${FOCUS_CLASS}`,
           command: revertDocumentId
         }
       ]);
@@ -223,7 +222,7 @@ function resolve(container: Container): Promise<void> {
       shortcuts.add([
         {
           sequence: ['Ctrl Q'],
-          selector: '.' + DOCUMENT_CLASS,
+          selector: `.${DOCUMENT_CLASS}.${FOCUS_CLASS}`,
           command: closeDocumentId
         }
       ]);
@@ -255,7 +254,7 @@ function resolve(container: Container): Promise<void> {
       shortcuts.add([
         {
           sequence: ['Ctrl Shift Q'],
-          selector: '.' + DOCUMENT_CLASS,
+          selector: `.${DOCUMENT_CLASS}`,
           command: closeAllId
         }
       ]);
