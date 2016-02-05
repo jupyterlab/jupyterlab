@@ -3,7 +3,11 @@
 'use strict';
 
 import {
-  FileBrowserWidget, AbstractFileHandler
+  AbstractFileHandler, DocumentManager
+} from 'jupyter-js-docmanager';
+
+import {
+  FileBrowserWidget
 } from 'jupyter-js-filebrowser';
 
 import {
@@ -277,177 +281,25 @@ export
 function register(container: Container): void {
   container.register(IDocumentManager, {
     requires: [IAppShell, IFileBrowserWidget],
-    create: (appShell, browserProvider): IDocumentManager => {
-      return new DocumentManager(appShell, browserProvider);
+    create: (appShell: IAppShell, browser: IFileBrowserWidget): IDocumentManager => {
+      let manager = new DocumentManager();
+      browser.openRequested.connect((browser, model) => {
+        manager.open(model);
+      });
+      manager.openRequested.connect((manager, widget) => {
+        if (!widget.isAttached) {
+          appShell.addToMainArea(widget);
+        }
+        let stack = widget.parent;
+        if (!stack) {
+          return;
+        }
+        let tabs = stack.parent;
+        if (tabs instanceof TabPanel) {
+          tabs.currentWidget = widget;
+        }
+      });
+      return manager;
     }
   });
-}
-
-
-/**
- * An implementation on an IDocumentManager.
- */
-class DocumentManager implements IDocumentManager {
-
-  /**
-   * Construct a new document manager.
-   */
-  constructor(appShell: IAppShell, browser: IFileBrowserWidget) {
-    this._appShell = appShell;
-    browser.openRequested.connect(this._openRequested,
-      this);
-    document.addEventListener('focus', this._onFocus.bind(this), true);
-  }
-
-  /**
-   * Get the most recently focused widget.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get currentWidget(): Widget {
-    return this._currentWidget;
-  }
-
-  /**
-   * Register a file handler.
-   */
-  register(handler: AbstractFileHandler): void {
-    this._handlers.push(handler);
-  }
-
-  /**
-   * Register a default file handler.
-   */
-  registerDefault(handler: AbstractFileHandler): void {
-    if (this._defaultHandler !== null) {
-      throw Error('Default handler already registered');
-    }
-    this._handlers.push(handler);
-    this._defaultHandler = handler;
-  }
-
-  /**
-   * Open a file and add it to the application shell.
-   */
-  open(model: IContentsModel): Widget {
-    if (this._handlers.length === 0) {
-      return;
-    }
-    let path = model.path;
-    let ext = '.' + path.split('.').pop();
-    let handlers: AbstractFileHandler[] = [];
-    // Look for matching file extensions.
-    for (let h of this._handlers) {
-      if (h.fileExtensions.indexOf(ext) !== -1) handlers.push(h);
-    }
-    let widget: Widget;
-    // If there was only one match, use it.
-    if (handlers.length === 1) {
-      widget = this._open(handlers[0], model);
-
-    // If there were no matches, use default handler.
-    } else if (handlers.length === 0) {
-      if (this._defaultHandler !== null) {
-        widget = this._open(this._defaultHandler, model);
-      } else {
-        throw new Error(`Could not open file '${path}'`);
-      }
-
-    // There are more than one possible handlers.
-    } else {
-      // TODO: Ask the user to choose one.
-      widget = this._open(handlers[0], model);
-    }
-    widget.addClass(DOCUMENT_CLASS);
-    return widget;
-  }
-
-  /**
-   * Save the current document.
-   */
-  save(): void {
-    if (this._currentHandler) this._currentHandler.save(this._currentWidget);
-  }
-
-  /**
-   * Revert the current document.
-   */
-  revert(): void {
-    if (this._currentHandler) this._currentHandler.revert(this._currentWidget);
-  }
-
-  /**
-   * Close the current document.
-   */
-  close(): void {
-    if (this._currentHandler) this._currentHandler.close(this._currentWidget);
-    this._currentWidget = null;
-    this._currentHandler = null;
-  }
-
-  /**
-   * Close all documents.
-   */
-  closeAll(): void {
-    for (let h of this._handlers) {
-      for (let w of h.widgets) {
-        w.close();
-      }
-    }
-    this._currentWidget = null;
-    this._currentHandler = null;
-  }
-
-  /**
-   * Handle an `openRequested` signal by invoking the appropriate handler.
-   */
-  private _openRequested(browser: FileBrowserWidget, model: IContentsModel): void {
-    this.open(model);
-  }
-
-  /**
-   * Open a file and add it to the application shell and give it focus.
-   */
-  private _open(handler: AbstractFileHandler, model: IContentsModel): Widget {
-    let widget = handler.open(model);
-    if (!widget.isAttached) {
-      this._appShell.addToMainArea(widget);
-    }
-    let stack = widget.parent;
-    if (!stack) {
-      return;
-    }
-    let tabs = stack.parent;
-    if (tabs instanceof TabPanel) {
-      tabs.currentWidget = widget;
-    }
-    return widget;
-  }
-
-  /**
-   * Handle a focus event on the document.
-   */
-  private _onFocus(event: Event) {
-    for (let h of this._handlers) {
-      // If the widget belongs to the handler, update the focused widget.
-      let widget = arrays.find(h.widgets,
-        w => { return w.isVisible && w.node.contains(event.target as HTMLElement); });
-      if (widget === this._currentWidget) {
-        return;
-      } else if (widget) {
-        if (this._currentWidget) this._currentWidget.removeClass(FOCUS_CLASS);
-        this._currentWidget = widget;
-        this._currentHandler = h;
-        widget.addClass(FOCUS_CLASS);
-        return;
-      }
-    }
-  }
-
-  private _handlers: AbstractFileHandler[] = [];
-  private _appShell: IAppShell = null;
-  private _defaultHandler: AbstractFileHandler = null;
-  private _currentWidget: Widget = null;
-  private _currentHandler: AbstractFileHandler = null;
 }
