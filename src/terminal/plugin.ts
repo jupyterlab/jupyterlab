@@ -11,10 +11,6 @@ import {
 } from 'phosphide';
 
 import {
-  SimpleCommand
-} from 'phosphor-command';
-
-import {
   Container, Token
 } from 'phosphor-di';
 
@@ -30,44 +26,42 @@ function resolve(container: Container): Promise<void> {
     create: (shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager) => {
 
       let newTerminalId = 'terminal:new';
-      let newTerminalCommand = new SimpleCommand({
-        category: 'Terminal',
-        text: 'New Terminal',
-        caption: 'Start a new terminal session',
-        handler: () => {
-          let term = new TerminalWidget();
-          term.color = 'black';
-          term.background = 'white';
-          term.title.closable = true;
-          shell.addToMainArea(term);
-          let stack = term.parent;
-          if (!stack) {
-            return;
-          }
-          let tabs = stack.parent;
-          if (tabs instanceof TabPanel) {
-            tabs.currentWidget = term;
-          }
-        }
-      });
 
       registry.add([
         {
           id: newTerminalId,
-          command: newTerminalCommand
+          handler: () => {
+            let term = new TerminalWidget();
+            term.color = 'black';
+            term.background = 'white';
+            term.title.closable = true;
+            shell.addToMainArea(term);
+            let stack = term.parent;
+            if (!stack) {
+              return;
+            }
+            let tabs = stack.parent;
+            if (tabs instanceof TabPanel) {
+              tabs.currentWidget = term;
+            }
+          }
         }
       ]);
       shortcuts.add([
         {
           sequence: ['Ctrl T'],
           selector: '*',
-          command: newTerminalId
+          command: newTerminalId,
+          args: void 0
         }
       ]);
       palette.add([
         {
           id: newTerminalId,
-          args: void 0
+          args: void 0,
+          category: 'Terminal',
+          text: 'New Terminal',
+          caption: 'Start a new terminal session'
         }
       ]);
     }

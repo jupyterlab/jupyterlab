@@ -21,12 +21,8 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  ICommandRegistry, IShortcutManager
+  ICommandRegistry, IShortcutManager, ICommandPalette
 } from 'phosphide';
-
-import {
-  SimpleCommand
-} from 'phosphor-command';
 
 import {
   Container
@@ -50,46 +46,9 @@ import {
 
 
 let executeCellCommandId = 'notebook:execute-selected-cell';
-let executeCommand = new SimpleCommand({
-  category: 'Notebook Operations',
-  text: 'Execute current cell',
-  caption: 'Execute the current cell',
-  handler: (args) => {
-    executeSelectedCell(args.model, args.session);
-  }
-})
-
 let renderCellCommandId = 'notebook:render-selected-cell';
-let renderCommand = new SimpleCommand({
-  category: 'Notebook Operations',
-  text: 'Render current markdown cell',
-  caption: 'Render the current markdown cell',
-  handler: (args) => {
-    renderSelectedCell(args.model);
-  }
-})
-
-
 let selectNextCellCommandId = 'notebook:select-next-cell';
-let selectNextCell = new SimpleCommand({
-  category: 'Notebook Operations',
-  text: 'Select next cell',
-  caption: 'Select next cell',
-  handler: (args) => {
-    args.model.selectNextCell();
-  }
-})
-
 let selectPreviousCellCommandId = 'notebook:select-previous-cell';
-let selectPreviousCell = new SimpleCommand({
-  category: 'Notebook Operations',
-  text: 'Select previous cell',
-  caption: 'Select previous cell',
-  handler: (args) => {
-    args.model.selectPreviousCell();
-  }
-})
-
 
 let notebookContainerClass = 'jp-NotebookContainer';
 
@@ -104,24 +63,39 @@ let notebookContainerClass = 'jp-NotebookContainer';
 export
 function resolve(container: Container): Promise<AbstractFileHandler> {
   return container.resolve({
-    requires: [IServicesProvider, IDocumentManager, ICommandRegistry, IShortcutManager],
+    requires: [IServicesProvider, IDocumentManager, ICommandRegistry, IShortcutManager, ICommandPalette],
     create: (services: IServicesProvider, manager: IDocumentManager,
-             registry: ICommandRegistry, shortcuts: IShortcutManager) => {
-      let handler = new NotebookFileHandler(services.contentsManager, services.notebookSessionManager, shortcuts);
+             registry: ICommandRegistry, shortcuts: IShortcutManager,
+             palette: ICommandPalette) => {
+      let handler = new NotebookFileHandler(
+        services.contentsManager,
+        services.notebookSessionManager,
+        shortcuts,
+        palette
+      );
       manager.register(handler);
       registry.add([{
         id: executeCellCommandId,
-        command: executeCommand
+        handler: (args) => {
+          executeSelectedCell(args.model, args.session);
+        }
       }, {
         id: renderCellCommandId,
-        command: renderCommand
+        handler: (args) => {
+          renderSelectedCell(args.model);
+        }
       }, {
         id: selectNextCellCommandId,
-        command: selectNextCell
+        handler: (args) => {
+          args.model.selectNextCell();
+        }
       }, {
         id: selectPreviousCellCommandId,
-        command: selectPreviousCell
-      }])
+        handler: (args) => {
+          args.model.selectPreviousCell();
+        }
+      }]);
+
       return handler;
     }
   });
@@ -191,10 +165,11 @@ export
 class NotebookFileHandler extends AbstractFileHandler {
 
   constructor(contents: IContentsManager, session: INotebookSessionManager,
-  shortcuts: IShortcutManager) {
+  shortcuts: IShortcutManager, palette: ICommandPalette) {
     super(contents);
     this.session = session;
     this.shortcuts = shortcuts;
+    this.palette = palette;
   }
 
   /**
@@ -253,7 +228,33 @@ class NotebookFileHandler extends AbstractFileHandler {
         selector: `${prefix} .jp-Cell`,
         command: selectPreviousCellCommandId,
         args: {model: model}
-      }])
+      }]);
+
+      this.palette.add([{
+        id: executeCellCommandId,
+        args: {model: model, session: s},
+        category: 'Notebook Operations',
+        text: 'Execute current cell',
+        caption: 'Execute the current cell'
+      }, {
+        id: renderCellCommandId,
+        args: {model: model},
+        category: 'Notebook Operations',
+        text: 'Render current markdown cell',
+        caption: 'Render the current markdown cell'
+      }, {
+        id: selectNextCellCommandId,
+        args: {model: model},
+        category: 'Notebook Operations',
+        text: 'Select next cell',
+        caption: 'Select next cell'
+      }, {
+        id: selectPreviousCellCommandId,
+        args: {model: model},
+        category: 'Notebook Operations',
+        text: 'Select previous cell',
+        caption: 'Select previous cell'
+      }]);
 
       s.kernel.registerCommTarget('jupyter.widget', (comm, msg) => {
         console.log('comm message', msg);
@@ -293,6 +294,7 @@ class NotebookFileHandler extends AbstractFileHandler {
     return Promise.resolve(void 0);
   }
 
+  palette: ICommandPalette;
   session: INotebookSessionManager;
   shortcuts: IShortcutManager;
   notebookId: number = 0;

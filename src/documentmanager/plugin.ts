@@ -22,10 +22,6 @@ import * as arrays
  from 'phosphor-arrays';
 
 import {
-  SimpleCommand
-} from 'phosphor-command';
-
-import {
   Container, Token
 } from 'phosphor-di';
 
@@ -75,197 +71,185 @@ function resolve(container: Container): Promise<void> {
       // Create a command to add a new empty text file.
       // This requires an id and an instance of a command object.
       let newTextFileId = 'file-operations:new-text-file';
-      let newTextFileCommand = new SimpleCommand({
-        category: 'File Operations',
-        text: 'New Text File',
-        caption: 'Create a new text file',
-        handler: () => {
-          browser.newUntitled('file', '.txt').then(
-            contents => manager.open(contents)
-          );
-        }
-      });
 
       // Add the command to the command registry, shortcut manager
       // and command palette plugins.
       registry.add([
         {
           id: newTextFileId,
-          command: newTextFileCommand
+          handler: () => {
+            browser.newUntitled('file', '.txt').then(
+              contents => manager.open(contents)
+            );
+          }
         }
       ]);
       shortcuts.add([
         {
           sequence: ['Ctrl O'],
           selector: '*',
-          command: newTextFileId
+          command: newTextFileId,
+          args: void 0
         }
       ]);
       palette.add([
         {
           id: newTextFileId,
-          args: void 0
+          args: void 0,
+          category: 'File Operations',
+          text: 'New Text File',
+          caption: 'Create a new text file'
         }
       ]);
 
       // Add the command for a new notebook.
       let newNotebookId = 'file-operations:new-notebook';
-      let newNotebookCommand = new SimpleCommand({
-        category: 'File Operations',
-        text: 'New Notebook',
-        caption: 'Create a new Jupyter Notebook',
-        handler: () => {
-          browser.newUntitled('notebook').then(
-            contents => manager.open(contents)
-          );
-        }
-      });
 
       registry.add([
         {
           id: newNotebookId,
-          command: newNotebookCommand
+          handler: () => {
+            browser.newUntitled('notebook').then(
+              contents => manager.open(contents)
+            );
+          }
         }
       ]);
       shortcuts.add([
         {
           sequence: ['Ctrl Shift N'],
           selector: '*',
-          command: newNotebookId
+          command: newNotebookId,
+          args: void 0
         }
       ]);
       palette.add([
         {
           id: newNotebookId,
-          args: void 0
+          args: void 0,
+          category: 'File Operations',
+          text: 'New Notebook',
+          caption: 'Create a new Jupyter Notebook'
         }
       ]);
 
       // Add the command for saving a document.
       let saveDocumentId = 'file-operations:save';
-      let saveDocumentCommand = new SimpleCommand({
-        category: 'File Operations',
-        text: 'Save Document',
-        caption: 'Save the current document',
-        handler: () => {
-          manager.save();
-          return true;
-        }
-      });
 
       registry.add([
         {
           id: saveDocumentId,
-          command: saveDocumentCommand
+          handler: () => {
+            manager.save();
+            return true;
+          }
         }
       ]);
       shortcuts.add([
         {
           sequence: ['Accel S'],
           selector: `.${DOCUMENT_CLASS}.${FOCUS_CLASS}`,
-          command: saveDocumentId
+          command: saveDocumentId,
+          args: void 0
         }
       ]);
       palette.add([
         {
           id: saveDocumentId,
-          args: void 0
+          args: void 0,
+          category: 'File Operations',
+          text: 'Save Document',
+          caption: 'Save the current document'
         }
       ]);
 
       // Add the command for reverting a document.
       let revertDocumentId = 'file-operations:revert';
-      let revertDocumentCommand = new SimpleCommand({
-        category: 'File Operations',
-        text: 'Revert Document',
-        caption: 'Revert the current document',
-        handler: () => {
-          manager.revert();
-          return true;
-        }
-      });
 
       registry.add([
         {
           id: revertDocumentId,
-          command: revertDocumentCommand
+          handler: () => {
+            manager.revert();
+            return true;
+          }
         }
       ]);
       shortcuts.add([
         {
           sequence: ['Accel R'],
           selector: `.${DOCUMENT_CLASS}.${FOCUS_CLASS}`,
-          command: revertDocumentId
+          command: revertDocumentId,
+          args: void 0
         }
       ]);
       palette.add([
         {
           id: revertDocumentId,
-          args: void 0
+          args: void 0,
+          category: 'File Operations',
+          text: 'Revert Document',
+          caption: 'Revert the current document'
         }
       ]);
 
       // Add the command for closing a document.
       let closeDocumentId = 'file-operations:close';
-      let closeDocumentCommand = new SimpleCommand({
-        category: 'File Operations',
-        text: 'Close Document',
-        caption: 'Close the current document',
-        handler: () => {
-          manager.close();
-          return true;
-        }
-      });
 
       registry.add([
         {
           id: closeDocumentId,
-          command: closeDocumentCommand
+          handler: () => {
+            manager.close();
+            return true;
+          }
         }
       ]);
       shortcuts.add([
         {
           sequence: ['Ctrl Q'],
           selector: `.${DOCUMENT_CLASS}.${FOCUS_CLASS}`,
-          command: closeDocumentId
+          command: closeDocumentId,
+          args: void 0
         }
       ]);
       palette.add([
         {
           id: closeDocumentId,
-          args: void 0
+          args: void 0,
+          category: 'File Operations',
+          text: 'Close Document',
+          caption: 'Close the current document'
         }
       ]);
 
       // Add the command for closing all documents.
       let closeAllId = 'file-operations:close-all';
-      let closeAllCommand = new SimpleCommand({
-        category: 'File Operations',
-        text: 'Close All',
-        caption: 'Close all open documents',
-        handler: () => {
-          manager.closeAll();
-          return true;
-        }
-      });
 
       registry.add([
         {
           id: closeAllId,
-          command: closeAllCommand
+          handler: () => {
+            manager.closeAll();
+            return true;
+          }
         }
       ]);
       shortcuts.add([
         {
           sequence: ['Ctrl Shift Q'],
           selector: `.${DOCUMENT_CLASS}`,
-          command: closeAllId
+          command: closeAllId,
+          args: void 0
         }
       ]);
       palette.add([
         {
           id: closeAllId,
-          args: void 0
+          args: void 0,
+          category: 'File Operations',
+          text: 'Close All',
+          caption: 'Close all open documents'
         }
       ]);
 
