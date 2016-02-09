@@ -7,11 +7,11 @@ import {
 import {
   NotebookModel, NotebookWidget,
   NBData, populateNotebookModel,
-} from '../../lib/index';
+} from 'jupyter-js-notebook';
 
 import {
   isMarkdownCellModel
-} from '../../lib/cells'
+} from 'jupyter-js-notebook/lib/cells'
 
 import {
   IKeyBinding, KeymapManager, keystrokeForKeydownEvent
@@ -25,54 +25,47 @@ import {
   getConfigOption
 } from 'jupyter-js-utils';
 
-import {
-  SimpleCommand
-} from 'phosphor-command';
-
 
 // jupyter notebook --NotebookApp.allow_origin=* --port 8890
 let SERVER_URL=getConfigOption('baseUrl');
 let NOTEBOOK = 'test.ipynb';
 
 function bindings(nbModel: NotebookModel) {
-  let bindings: IKeyBinding[] = [{
-      selector: '.jp-InputAreaWidget .CodeMirror',
-      sequence: ["Shift Enter"],
-      command: new SimpleCommand({
-        handler: args => {
-        if (nbModel.selectedCellIndex !== void 0) {
-          let cell = nbModel.cells.get(nbModel.selectedCellIndex);
-          if (isMarkdownCellModel(cell) && !cell.rendered) {
-            cell.rendered = true;
-          }
+  let bindings: IKeyBinding[] = [
+  {
+    selector: '.jp-InputAreaWidget .CodeMirror',
+    sequence: ["Shift Enter"],
+    handler: () => {
+      if (nbModel.selectedCellIndex !== void 0) {
+        let cell = nbModel.cells.get(nbModel.selectedCellIndex);
+        if (isMarkdownCellModel(cell) && !cell.rendered) {
+          cell.rendered = true;
         }
-        }
-      })
+      }
+      return true;
+    }
   },
   {
     selector: '*',
     sequence: ["ArrowDown"],
-    command: new SimpleCommand({
-        handler: args => {
-          nbModel.selectNextCell()
-        }
-    })
+    handler: () => {
+      nbModel.selectNextCell();
+      return true;
+    }
   },
   {
     selector: '*',
     sequence: ["ArrowUp"],
-    command: new SimpleCommand({
-        handler: args => {
-          nbModel.selectPreviousCell()
-        }
-    })
+    handler: () => {
+      nbModel.selectPreviousCell();
+      return true;
+    }
   },
-
-
-
   ];
   return bindings;
 }
+
+
 function main(): void {
   // Initialize the keymap manager with the bindings.
   var keymap = new KeymapManager();

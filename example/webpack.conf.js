@@ -1,8 +1,8 @@
 
 module.exports = {
-  entry: './example/build/index.js',
+  entry: './build/index.js',
   output: {
-    path: './example/build',
+    path: './build',
     filename: 'bundle.js'
   },
   module: {
@@ -10,11 +10,5 @@ module.exports = {
       { test: /\.css$/, loader: 'style-loader!css-loader' },
       { test: /\.json$/, loader: 'json-loader' },
     ]
-  },
-  resolve: {
-    alias: {
-      'requirejs': 'requirejs/require'
-    }
   }
-
 }

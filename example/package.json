@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "jupyter-js-notebook-example",
+  "dependencies": {
+    "jupyter-js-notebook": "file:..",
+    "jupyter-js-services": "^0.5.0",
+    "jupyter-js-utils": "^0.3.1",
+    "phosphor-keymap": "^0.7.0"
+  },
+  "scripts": {
+    "postinstall": "npm dedupe"
+  }
+}
