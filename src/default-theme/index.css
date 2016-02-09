@@ -305,24 +305,27 @@ body {
   padding: 4px 4px 0px 4px;
 }
 
+.p-CommandPalette mark {
+  background-color: inherit;
+  color: black;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
 
 .p-CommandPalette-header {
+  padding: 5px 0;
+  margin: 0 0 5px 0;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+
+.p-CommandPalette-headerText {
   color: #757575;
   font-size: 11px;
   font-weight: 500;
-  margin-top: 12px;
-}
-
-
-.p-CommandPalette-header hr {
-  height: 1px;
-  border-width: 0;
-  background-color: #E0E0E0;
-}
-
-
-.p-CommandPalette-search {
-  margin-bottom: 4px;
+  text-transform: capitalize;
+  margin-left: 4px;
 }
 
 
@@ -331,7 +334,12 @@ body {
 }
 
 
-.p-CommandPalette-search input {
+.p-CommandPalette-search {
+  margin-bottom: 4px;
+}
+
+
+.p-CommandPalette-input {
   border: 1px solid #E0E0E0;
   border-radius: 5px;
   height: 20px;
@@ -340,41 +348,37 @@ body {
 }
 
 
-.p-CommandPalette-command {
+.p-CommandPalette-item {
   color: #757575;
   font-weight: 500;
   font-size: 13px;
-  padding: 3px 0 3px 2px;
+  padding: 3px 0 3px 4px;
 }
 
-.p-CommandPalette-title {
+
+.p-CommandPalette-itemCaption {
   padding-right: 5px;
 }
 
-.p-CommandPalette-command.p-mod-disabled,
-.p-CommandPalette-command.p-mod-disabled .p-CommandPalette-caption {
-  color: #D5D5D5;
-  cursor: not-allowed;
-}
 
-.p-CommandPalette-caption {
+.p-CommandPalette-itemCaption {
   color: #9E9E9E;
   font-weight: 400;
   font-size: 10px;
   padding-right: 5px;
 }
 
-.p-CommandPalette-shortcut {
+.p-CommandPalette-itemShortcut {
   padding-right: 5px;
 }
 
-.p-CommandPalette-shortcut:empty {
+.p-CommandPalette-itemShortcut:empty {
   padding-right: 0;
 }
 
-.p-CommandPalette-command.p-mod-active,
-.p-CommandPalette-command.p-mod-active .p-CommandPalette-caption,
-.p-CommandPalette-command.p-mod-active .p-CommandPalette-shortcut {
+.p-CommandPalette-header.p-mod-active, .p-CommandPalette-item.p-mod-active,
+.p-CommandPalette-header.p-mod-active .p-CommandPalette-headerText,
+.p-CommandPalette-item.p-mod-active .p-CommandPalette-itemCaption {
   background: #2196F3;
   color: #FFFFFF;
 }
