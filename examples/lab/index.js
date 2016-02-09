@@ -12,14 +12,14 @@ function main() {
     require('phosphide/lib/commandregistry/plugin'),
     require('phosphide/lib/commandpalette/plugin'),
     require('phosphide/lib/shortcutmanager/plugin'),
-    require('../lib/terminal/plugin'),
-    require('../lib/documentmanager/plugin'),
-    require('../lib/filehandler/plugin'),
-    require('../lib/filebrowser/plugin'),
-    require('../lib/imagehandler/plugin'),
-    require('../lib/notebook/plugin'),
-    require('../lib/services/plugin'),
-    require('../lib/application/plugin')
+    require('jupyter-js-plugins/lib/terminal/plugin'),
+    require('jupyter-js-plugins/lib/documentmanager/plugin'),
+    require('jupyter-js-plugins/lib/filehandler/plugin'),
+    require('jupyter-js-plugins/lib/filebrowser/plugin'),
+    require('jupyter-js-plugins/lib/imagehandler/plugin'),
+    require('jupyter-js-plugins/lib/notebook/plugin'),
+    require('jupyter-js-plugins/lib/services/plugin'),
+    require('jupyter-js-plugins/lib/application/plugin')
   ]).then(function() {
     console.log('loading finished');
   });

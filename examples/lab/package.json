@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "name": "jupyter-js-plugins-example",
+  "dependencies": {
+    "jupyter-js-plugins": "file:..",
+    "phosphide": "^0.5.1",
+    "phosphor-di": "^0.9.0"
+  },
+  "scripts": {
+    "postinstall": "npm dedupe"
+  }
+}
