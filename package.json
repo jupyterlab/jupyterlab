@@ -19,6 +19,7 @@
     "phosphor-codemirror": "^0.0.1",
     "phosphor-commandpalette": "^0.1.0",
     "phosphor-di": "^0.9.0",
+    "phosphor-menus": "^1.0.0-rc.1",
     "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-tabs": "^1.0.0-rc.2",
@@ -49,7 +50,7 @@
   "scripts": {
     "clean": "rimraf docs && rimraf lib && rimraf test/build",
     "clean:example": "rimraf example/build",
-    "build:example": "node scripts/copythemecss.js && cd example && rimraf node_modules/jupyter-js-notebook && npm install && webpack --config webpack.conf.js",
+    "build:example": "node scripts/copythemecss.js && cd example && rimraf node_modules/jupyter-js-plugins && npm install && webpack --config webpack.conf.js",
     "build:src": "tsc --project src && node scripts/copycss.js",
     "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
     "build": "npm run build:src && npm run build:test",
