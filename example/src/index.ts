@@ -1,10 +1,6 @@
 'use-strict';
 
 import {
-  Widget
-} from 'phosphor-widget';
-
-import {
   NotebookModel, NotebookWidget,
   NBData, populateNotebookModel,
 } from 'jupyter-js-notebook';
@@ -14,16 +10,20 @@ import {
 } from 'jupyter-js-notebook/lib/cells'
 
 import {
-  IKeyBinding, KeymapManager, keystrokeForKeydownEvent
-} from 'phosphor-keymap';
-
-import {
   ContentsManager, IContentsModel, startNewSession
 } from 'jupyter-js-services';
 
 import {
   getConfigOption
 } from 'jupyter-js-utils';
+
+import {
+  IKeyBinding, KeymapManager, keystrokeForKeydownEvent
+} from 'phosphor-keymap';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 
 // jupyter notebook --NotebookApp.allow_origin=* --port 8890
