@@ -1,21 +1,13 @@
 'use-strict';
 
 import {
-  Widget
-} from 'phosphor-widget';
-
-import {
   NotebookModel, NotebookWidget,
   NBData, populateNotebookModel,
-} from '../../lib/index';
+} from 'jupyter-js-notebook';
 
 import {
   isMarkdownCellModel
-} from '../../lib/cells'
-
-import {
-  IKeyBinding, KeymapManager, keystrokeForKeydownEvent
-} from 'phosphor-keymap';
+} from 'jupyter-js-notebook/lib/cells'
 
 import {
   ContentsManager, IContentsModel, startNewSession
@@ -26,8 +18,12 @@ import {
 } from 'jupyter-js-utils';
 
 import {
-  SimpleCommand
-} from 'phosphor-command';
+  IKeyBinding, KeymapManager, keystrokeForKeydownEvent
+} from 'phosphor-keymap';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 
 // jupyter notebook --NotebookApp.allow_origin=* --port 8890
@@ -35,44 +31,41 @@ let SERVER_URL=getConfigOption('baseUrl');
 let NOTEBOOK = 'test.ipynb';
 
 function bindings(nbModel: NotebookModel) {
-  let bindings: IKeyBinding[] = [{
-      selector: '.jp-InputAreaWidget .CodeMirror',
-      sequence: ["Shift Enter"],
-      command: new SimpleCommand({
-        handler: args => {
-        if (nbModel.selectedCellIndex !== void 0) {
-          let cell = nbModel.cells.get(nbModel.selectedCellIndex);
-          if (isMarkdownCellModel(cell) && !cell.rendered) {
-            cell.rendered = true;
-          }
+  let bindings: IKeyBinding[] = [
+  {
+    selector: '.jp-InputAreaWidget .CodeMirror',
+    sequence: ["Shift Enter"],
+    handler: () => {
+      if (nbModel.selectedCellIndex !== void 0) {
+        let cell = nbModel.cells.get(nbModel.selectedCellIndex);
+        if (isMarkdownCellModel(cell) && !cell.rendered) {
+          cell.rendered = true;
         }
-        }
-      })
+      }
+      return true;
+    }
   },
   {
     selector: '*',
     sequence: ["ArrowDown"],
-    command: new SimpleCommand({
-        handler: args => {
-          nbModel.selectNextCell()
-        }
-    })
+    handler: () => {
+      nbModel.selectNextCell();
+      return true;
+    }
   },
   {
     selector: '*',
     sequence: ["ArrowUp"],
-    command: new SimpleCommand({
-        handler: args => {
-          nbModel.selectPreviousCell()
-        }
-    })
+    handler: () => {
+      nbModel.selectPreviousCell();
+      return true;
+    }
   },
-
-
-
   ];
   return bindings;
 }
+
+
 function main(): void {
   // Initialize the keymap manager with the bindings.
   var keymap = new KeymapManager();
