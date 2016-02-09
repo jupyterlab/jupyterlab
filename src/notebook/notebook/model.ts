@@ -1,5 +1,5 @@
 import {
-  ICellModel, 
+  ICellModel,
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
   IRawCellModel
@@ -52,7 +52,7 @@ enum NotebookMode {
 /**
  * The definition of a model object for a notebook widget.
  */
-export 
+export
 interface INotebookModel {
   /**
    * A signal emitted when state of the notebook changes.
@@ -104,6 +104,15 @@ interface INotebookModel {
    */
   selectedCellIndex: number;
 
+  /**
+   * Select the next cell in the notebook.
+   */
+  selectNextCell(): void;
+
+  /**
+   * Select the previous cell in the notebook.
+   */
+  selectPreviousCell(): void;
   /**
    * A factory for creating a new code cell.
    *
@@ -161,7 +170,7 @@ class NotebookModel implements INotebookModel {
       name: 'defaultMimetype',
       notify: NotebookModel.stateChangedSignal,
   });
-  
+
   /**
   * A property descriptor which holds the mode of the notebook.
   *
@@ -171,8 +180,8 @@ class NotebookModel implements INotebookModel {
       name: 'mode',
       notify: NotebookModel.stateChangedSignal,
   });
-  
-  
+
+
   /**
   * A property descriptor for the selected cell index.
   *
@@ -253,7 +262,7 @@ class NotebookModel implements INotebookModel {
   set selectedCellIndex(value: number) {
     NotebookModel.selectedCellIndexProperty.set(this, value);
   }
-  
+
   /**
    * Select the next cell in the notebook.
    */
@@ -271,7 +280,7 @@ class NotebookModel implements INotebookModel {
       this.selectedCellIndex -= 1;
     }
   }
-  
+
   /**
    * Create a code cell model.
    */
@@ -288,6 +297,6 @@ class NotebookModel implements INotebookModel {
     return cell;
   }
 
-  cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();  
+  cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();
 }
 
