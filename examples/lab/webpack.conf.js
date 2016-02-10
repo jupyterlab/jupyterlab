@@ -1,4 +1,6 @@
 
+var ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin");
+
 module.exports = {
   entry: './index.js',
   output: {
@@ -28,5 +30,11 @@ module.exports = {
       "base/js/namespace": "base/js/namespace",
       "notebook/js/outputarea": "notebook/js/outputarea",
       "services/kernels/comm": "services/kernels/comm"
-  }
+  },
+  plugins: [
+    new ContextReplacementPlugin(
+      /codemirror\/mode.*$/,
+      /codemirror\/mode.*\.js$/
+    )
+  ]
 }
