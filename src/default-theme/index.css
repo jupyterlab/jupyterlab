@@ -29,6 +29,11 @@ body {
 }
 
 
+.p-TabBar-tab.jp-mod-dirty .p-TabBar-tabText:after {
+  content: '*';
+}
+
+
 .jp-Dialog {
   padding-left: 3px;
   background: rgba(245, 245, 245, .6);
