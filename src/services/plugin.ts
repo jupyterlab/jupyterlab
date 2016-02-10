@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  getConfigOption
+  getBaseUrl, getConfigOption
 } from 'jupyter-js-utils';
 
 import {
@@ -46,7 +46,7 @@ class ServicesProvider implements IServicesProvider {
    * Construct a new services provider.
    */
   constructor() {
-    let baseUrl = getConfigOption('baseUrl');
+    let baseUrl = getBaseUrl();
     let ajaxSettings = getConfigOption('ajaxSettings');
     let options = { baseUrl, ajaxSettings };
     this._kernelManager = new KernelManager(options);
