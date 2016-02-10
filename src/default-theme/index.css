@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+@import './commandpalette.css';
 @import './filebrowser.css';
 @import './notebook.css';
 @import './terminal.css';
@@ -294,93 +295,6 @@ body {
   border: 1px solid #C0C0C0;
   min-width: 100px;
   min-height: 100px;
-}
-
-
-.p-CommandPalette {
-  background: #F5F5F5;
-  font-family: "Helvetica Neue", Helvetica;
-  min-width: 250px;
-  min-height: 50px;
-  padding: 4px 4px 0px 4px;
-}
-
-.p-CommandPalette mark {
-  background-color: inherit;
-  color: black;
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-
-.p-CommandPalette-header {
-  padding: 5px 0;
-  margin: 0 0 5px 0;
-  border-bottom: 1px solid #E0E0E0;
-}
-
-
-.p-CommandPalette-headerText {
-  color: #757575;
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: capitalize;
-  margin-left: 4px;
-}
-
-
-.p-CommandPalette-inputWrapper {
-  padding: 4px 0;
-}
-
-
-.p-CommandPalette-search {
-  margin-bottom: 4px;
-}
-
-
-.p-CommandPalette-input {
-  border: 1px solid #E0E0E0;
-  border-radius: 5px;
-  height: 20px;
-  outline: none;
-  width: 100%;
-}
-
-
-.p-CommandPalette-item {
-  color: #757575;
-  font-weight: 500;
-  font-size: 13px;
-  padding: 3px 0 3px 4px;
-}
-
-
-.p-CommandPalette-itemCaption {
-  padding-right: 5px;
-}
-
-
-.p-CommandPalette-itemCaption {
-  color: #9E9E9E;
-  font-weight: 400;
-  font-size: 10px;
-  padding-right: 5px;
-}
-
-.p-CommandPalette-itemShortcut {
-  padding-right: 5px;
-}
-
-.p-CommandPalette-itemShortcut:empty {
-  padding-right: 0;
-}
-
-.p-CommandPalette-header.p-mod-active, .p-CommandPalette-item.p-mod-active,
-.p-CommandPalette-header.p-mod-active .p-CommandPalette-headerText,
-.p-CommandPalette-item.p-mod-active .p-CommandPalette-itemCaption {
-  background: #2196F3;
-  color: #FFFFFF;
 }
 
 
