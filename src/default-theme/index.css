@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+@import './commandpalette.css';
 @import './filebrowser.css';
 @import './notebook.css';
 @import './terminal.css';
@@ -294,89 +295,6 @@ body {
   border: 1px solid #C0C0C0;
   min-width: 100px;
   min-height: 100px;
-}
-
-
-.p-CommandPalette {
-  background: #F5F5F5;
-  font-family: "Helvetica Neue", Helvetica;
-  min-width: 250px;
-  min-height: 50px;
-  padding: 4px 4px 0px 4px;
-}
-
-
-.p-CommandPalette-header {
-  color: #757575;
-  font-size: 11px;
-  font-weight: 500;
-  margin-top: 12px;
-}
-
-
-.p-CommandPalette-header hr {
-  height: 1px;
-  border-width: 0;
-  background-color: #E0E0E0;
-}
-
-
-.p-CommandPalette-search {
-  margin-bottom: 4px;
-}
-
-
-.p-CommandPalette-inputWrapper {
-  padding: 4px 0;
-}
-
-
-.p-CommandPalette-search input {
-  border: 1px solid #E0E0E0;
-  border-radius: 5px;
-  height: 20px;
-  outline: none;
-  width: 100%;
-}
-
-
-.p-CommandPalette-command {
-  color: #757575;
-  font-weight: 500;
-  font-size: 13px;
-  padding: 3px 0 3px 2px;
-}
-
-.p-CommandPalette-title {
-  padding-right: 5px;
-}
-
-.p-CommandPalette-command.p-mod-disabled,
-.p-CommandPalette-command.p-mod-disabled .p-CommandPalette-caption {
-  color: #D5D5D5;
-  cursor: not-allowed;
-}
-
-.p-CommandPalette-caption {
-  color: #9E9E9E;
-  font-weight: 400;
-  font-size: 10px;
-  padding-right: 5px;
-}
-
-.p-CommandPalette-shortcut {
-  padding-right: 5px;
-}
-
-.p-CommandPalette-shortcut:empty {
-  padding-right: 0;
-}
-
-.p-CommandPalette-command.p-mod-active,
-.p-CommandPalette-command.p-mod-active .p-CommandPalette-caption,
-.p-CommandPalette-command.p-mod-active .p-CommandPalette-shortcut {
-  background: #2196F3;
-  color: #FFFFFF;
 }
 
 
