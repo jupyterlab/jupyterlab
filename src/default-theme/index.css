@@ -100,12 +100,12 @@ body {
 
 
 .p-SideBar.p-mod-left {
-  border-right: 1px solid #C0C0C0;
+  border-right: 1px solid #BDBDBD;
 }
 
 
 .p-SideBar.p-mod-right {
-  border-left: 1px solid #C0C0C0;
+  border-left: 1px solid #BDBDBD;
 }
 
 
@@ -145,12 +145,12 @@ body {
 
 
 .p-SideBar.p-mod-left .p-SideBar-button {
-  border-left: 1px solid #C0C0C0;
+  border-left: 1px solid #BDBDBD;
 }
 
 
 .p-SideBar.p-mod-right .p-SideBar-button {
-  border-right: 1px solid #C0C0C0;
+  border-right: 1px solid #BDBDBD;
 }
 
 
@@ -162,6 +162,7 @@ body {
 .p-Widget.p-DockSplitPanel {
   overflow: visible;
 }
+
 
 .p-DockTabPanel {
   border-left: 1px solid #C0C0C0;
@@ -282,14 +283,7 @@ body {
 
 
 #p-main-split-panel > .p-SplitPanel-handle {
-  background: #C0C0C0;
-}
-
-
-.editor-CodeMirrorWidget {
-  border: 1px solid #C0C0C0;
-  min-width: 100px;
-  min-height: 100px;
+  background: #BDBDBD;
 }
 
 
