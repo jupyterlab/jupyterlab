@@ -44,7 +44,7 @@ function register(container: Container): void {
       let menu = createMenu(widget);
 
       // Add a context menu to the dir listing.
-      let node = widget.node.getElementsByClassName('jp-DirListing-container')[0];
+      let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
       node.addEventListener('contextmenu', (event: MouseEvent) => {
         event.preventDefault();
         let x = event.clientX;
