@@ -223,7 +223,7 @@ function register(container: Container): void {
         manager.open(model);
       });
       manager.openRequested.connect((manager, widget) => {
-        if (!widget.id) widget.id = `document-manager=${++id}`;
+        if (!widget.id) widget.id = `document-manager-${++id}`;
         if (!widget.isAttached) appShell.addToMainArea(widget);
         let stack = widget.parent;
         if (!stack) {
