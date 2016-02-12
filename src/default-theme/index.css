@@ -89,7 +89,8 @@ body {
   max-width: 36px;
   font-size: 13px;
   font-family: Helvetica, Arial;
-  background: #F7F7F7;
+  color: #757575;
+  background-color: #EEEEEE;
 }
 
 
@@ -133,13 +134,13 @@ body {
 
 
 .p-SideBar-button:hover:not(.p-mod-current) {
-  background: white;
+  background-color: #FAFAFA;
 }
 
 
 .p-SideBar-button.p-mod-current {
-  background: #F5F5F5;
-  min-height: 36px;
+  color: #F27624;
+  background-color: #FAFAFA;
 }
 
 
