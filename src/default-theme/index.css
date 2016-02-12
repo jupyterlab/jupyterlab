@@ -10,9 +10,10 @@
 body {
   margin: 0;
   padding: 0;
-  background: #FFFFFF;
+  background-color: #E0E0E0;
   overflow: hidden;
 }
+
 
 .p-AppShell.p-Widget {
   position: absolute;
