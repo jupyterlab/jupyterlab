@@ -10,7 +10,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #E0E0E0;
+  background: #E0E0E0;
   overflow: hidden;
 }
 
@@ -42,7 +42,7 @@ body {
 
 
 .jp-Dialog-content {
-  background-color: #F5F5F5;
+  background: #F5F5F5;
   min-width: 50%;
   border: 1px solid #757575;
   border-radius: 5px;
@@ -71,7 +71,7 @@ body {
   padding: 5px;
   border: 1px solid #757575;
   font-size: 16px;
-  background-color: #FAFAFA;
+  background: #FAFAFA;
   line-height: 20px;
   border-radius: 3px;
   max-width: 100px;
@@ -90,7 +90,7 @@ body {
   font-size: 13px;
   font-family: Helvetica, Arial;
   color: #757575;
-  background-color: #EEEEEE;
+  background: #EEEEEE;
 }
 
 
@@ -134,13 +134,13 @@ body {
 
 
 .p-SideBar-button:hover:not(.p-mod-current) {
-  background-color: #FAFAFA;
+  background: #FAFAFA;
 }
 
 
 .p-SideBar-button.p-mod-current {
   color: #F27624;
-  background-color: #FAFAFA;
+  background: #FAFAFA;
 }
 
 
