@@ -3,29 +3,37 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-FileBrowser {
+  min-width: 300px;
   color: #757575;
-  background-color: #F5F5F5;
+  background: #FAFAFA;
   font: 13px Helvetica, Arial, sans-serif;
-  min-width: 350px;
+}
+
+
+.jp-BreadCrumbs {
+  margin: 8px;
+  margin-bottom: 0px;
 }
 
 
 .jp-BreadCrumbs-item {
   margin: 0px 4px;
-  padding: 4px 0px;
-  border: 1px solid transparent;
   cursor: pointer;
 }
 
 
-.jp-BreadCrumbs-item.jp-mod-drop-target {
-  border: 1px solid #757575;
+.jp-BreadCrumbs-item:first-child {
+  margin-left: 0px;
+}
+
+
+.jp-BreadCrumbs-item.jp-mod-dropTarget {
+  background: #FEDBC4;
 }
 
 
 .jp-FileButtons {
-  margin-bottom: 8px;
-  padding: 0px 4px;
+  margin: 8px;
 }
 
 
@@ -34,7 +42,7 @@
   max-width: 100px;
   padding: 4px 6px;
   color: #757575;
-  background-color: #FFFFFF;
+  background: #FFFFFF;
   border: 1px solid #E0E0E0;
   font-size: 16px;
   outline: 0;
@@ -47,7 +55,7 @@
 
 
 .jp-FileButtons-button:hover {
-  background-color: #F5F5F5;
+  background: #F5F5F5;
   border-color: #D0D0D0;
   z-index: 1; /* raise overlapping border */
 }
@@ -55,7 +63,7 @@
 
 .jp-FileButtons-button:active,
 .jp-FileButtons-button.jp-id-create.jp-mod-active {
-  background-color: #EEEEEE;
+  background: #EEEEEE;
   border-color: #BDBDBD;
   z-index: 1; /* raise overlapping border */
 }
@@ -85,6 +93,7 @@
 
 
 .jp-DirListing-header {
+  margin-bottom: 4px;
   border-top: 1px solid #E0E0E0;
   border-bottom: 1px solid #E0E0E0;
 }
@@ -97,7 +106,8 @@
 
 
 .jp-DirListing-headerItem:hover {
-  background-color: #EEEEEE;
+  background: #EEEEEE;
+  border-radius: 2px;
 }
 
 
@@ -131,6 +141,12 @@
 }
 
 
+/* increate sepcificity to override bundled default */
+.jp-DirListing > .jp-DirListing-content {
+  padding: 0px 8px;
+}
+
+
 .jp-DirListing-item {
   padding: 4px;
 }
@@ -138,18 +154,18 @@
 
 .jp-DirListing-item.jp-mod-selected {
   color: white;
-  background-color: #F27624;
+  background: #F27624;
   border-radius: 2px;
 }
 
 
 .jp-DirListing-item.jp-mod-dropTarget {
-  background-color: #FEDBC4;
+  background: #FEDBC4;
 }
 
 
 .jp-DirListing-item:hover:not(.jp-mod-selected) {
-  background-color: #EEEEEE;
+  background: #EEEEEE;
 }
 
 
@@ -180,7 +196,7 @@
 
 /** TODO
 .jp-DirListing-item.jp-mod-selected.jp-mod-cut {
-  background-color: #F1C40F;
+  background: #F1C40F;
   color: #F5F5F5;
 }
 **/
