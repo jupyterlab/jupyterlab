@@ -39,12 +39,6 @@ const SHORTCUTS: IShortcutItem[] = [
     sequence: ['Accel S']
   },
   {
-    command: 'file-operations:revert',
-    args: void 0,
-    selector: '.jp-Document.jp-mod-focus',
-    sequence: ['Accel R']
-  },
-  {
     command: 'file-operations:close',
     args: void 0,
     selector: '.jp-Document.jp-mod-focus',
