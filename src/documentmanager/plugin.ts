@@ -15,7 +15,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
+  IAppShell, ICommandPalette, ICommandRegistry
 } from 'phosphide';
 
 import * as arrays
@@ -65,15 +65,14 @@ const FOCUS_CLASS = 'jp-mod-focus';
 export
 function resolve(container: Container): Promise<void> {
   return container.resolve({
-    requires: [IAppShell, IDocumentManager, IFileBrowserWidget, ICommandPalette, ICommandRegistry, IShortcutManager],
-    create: (appShell: IAppShell, manager: IDocumentManager, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager): void => {
+    requires: [IAppShell, IDocumentManager, IFileBrowserWidget, ICommandPalette, ICommandRegistry],
+    create: (appShell: IAppShell, manager: IDocumentManager, browser: IFileBrowserWidget, palette: ICommandPalette, registry: ICommandRegistry): void => {
 
       // Create a command to add a new empty text file.
       // This requires an id and an instance of a command object.
       let newTextFileId = 'file-operations:new-text-file';
 
-      // Add the command to the command registry, shortcut manager
-      // and command palette plugins.
+      // Add the command to the command registry and command palette plugins.
       registry.add([
         {
           id: newTextFileId,
@@ -82,14 +81,6 @@ function resolve(container: Container): Promise<void> {
               contents => manager.open(contents)
             );
           }
-        }
-      ]);
-      shortcuts.add([
-        {
-          sequence: ['Ctrl O'],
-          selector: '*',
-          command: newTextFileId,
-          args: void 0
         }
       ]);
       palette.add([
@@ -115,14 +106,6 @@ function resolve(container: Container): Promise<void> {
           }
         }
       ]);
-      shortcuts.add([
-        {
-          sequence: ['Ctrl Shift N'],
-          selector: '*',
-          command: newNotebookId,
-          args: void 0
-        }
-      ]);
       palette.add([
         {
           id: newNotebookId,
@@ -143,14 +126,6 @@ function resolve(container: Container): Promise<void> {
             manager.save();
             return true;
           }
-        }
-      ]);
-      shortcuts.add([
-        {
-          sequence: ['Accel S'],
-          selector: `.${DOCUMENT_CLASS}.${FOCUS_CLASS}`,
-          command: saveDocumentId,
-          args: void 0
         }
       ]);
       palette.add([
@@ -175,14 +150,6 @@ function resolve(container: Container): Promise<void> {
           }
         }
       ]);
-      shortcuts.add([
-        {
-          sequence: ['Accel R'],
-          selector: `.${DOCUMENT_CLASS}.${FOCUS_CLASS}`,
-          command: revertDocumentId,
-          args: void 0
-        }
-      ]);
       palette.add([
         {
           id: revertDocumentId,
@@ -205,14 +172,6 @@ function resolve(container: Container): Promise<void> {
           }
         }
       ]);
-      shortcuts.add([
-        {
-          sequence: ['Ctrl Q'],
-          selector: `.${DOCUMENT_CLASS}.${FOCUS_CLASS}`,
-          command: closeDocumentId,
-          args: void 0
-        }
-      ]);
       palette.add([
         {
           id: closeDocumentId,
@@ -233,14 +192,6 @@ function resolve(container: Container): Promise<void> {
             manager.closeAll();
             return true;
           }
-        }
-      ]);
-      shortcuts.add([
-        {
-          sequence: ['Ctrl Shift Q'],
-          selector: `.${DOCUMENT_CLASS}`,
-          command: closeAllId,
-          args: void 0
         }
       ]);
       palette.add([
@@ -267,13 +218,13 @@ function register(container: Container): void {
     requires: [IAppShell, IFileBrowserWidget],
     create: (appShell: IAppShell, browser: IFileBrowserWidget): IDocumentManager => {
       let manager = new DocumentManager();
+      let id = 0;
       browser.openRequested.connect((browser, model) => {
         manager.open(model);
       });
       manager.openRequested.connect((manager, widget) => {
-        if (!widget.isAttached) {
-          appShell.addToMainArea(widget);
-        }
+        if (!widget.id) widget.id = `document-manager=${++id}`;
+        if (!widget.isAttached) appShell.addToMainArea(widget);
         let stack = widget.parent;
         if (!stack) {
           return;
