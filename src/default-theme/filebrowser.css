@@ -3,201 +3,18 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-FileBrowser {
-  background-color: #F5F5F5;
   color: #757575;
+  background-color: #F5F5F5;
   font: 13px Helvetica, Arial, sans-serif;
-  height: 500px;
   min-width: 350px;
 }
 
 
 .jp-BreadCrumbs-item {
-  margin-left: 4px;
-  margin-right: 4px;
-  padding-top: 4px;
-  padding-bottom: 4px;
+  margin: 0px 4px;
+  padding: 4px 0px;
   border: 1px solid transparent;
   cursor: pointer;
-}
-
-
-.jp-FileButtons {
-  padding-left: 4px;
-  padding-right: 4px;
-  padding-bottom: 4px;
-}
-
-
-.jp-FileButtons-icon {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-
-.jp-FileButtons-item {
-  background-color: #FAFAFA;
-  font-size: 16px;
-  border: 1px solid #757575;
-  height: 30px;
-  border-radius: 3px;
-  margin-right: 3px;
-  max-width: 100px;
-}
-
-
-.jp-FileButtons-item:focus {
-  outline: 0;
-}
-
-
-.jp-FileButtons-item:hover {
-  background-color: #EEEEEE;
-}
-
-
-.jp-FileButtons-drop {
-  margin-left: -0.5em;
-  color: #757575;
-}
-
-
-.jp-DirListing:focus {
-  outline: 0;
-}
-
-
-.jp-DirListing-header {
-  background-color: #FAFAFA;
-  border-top: 1px solid #757575;
-  border-bottom: 1px solid #757575;
-}
-
-
-.jp-DirListing-headerText {
-  padding-left: 4px;
-  padding-right: 4px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-
-.jp-DirListing-headerText {
-  margin-right: auto;
-}
-
-
-.jp-DirListing-headerIcon {
-  margin-left: -0.5em;
-}
-
-
-
-.jp-DirListing-headerIcon {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-
-.jp-DirListing-headerItem:hover {
-  cursor: pointer;
-}
-
-
-.jp-DirListing-headerItem.jp-mod-selected {
-  font-weight: bold;
-}
-
-
-.jp-DirListing-headerFile {
-  flex-basis: 200px;
-  padding-right: 5px;
-  border-right: 1px solid #757575;
-}
-
-
-.jp-DirListing-headerItem:focus {
-  outline: 0;
-}
-
-
-.jp-DirListing-headerTime {
-  flex-basis: 120px;
-  padding-right: 5px;
-  padding-left: 5px;
-}
-
-
-.jp-DirListing-headerItem.jp-mod-selected > .jp-DirListing-headerIcon:before {
-  content: "\f0d8";
-}
-
-
-.jp-DirListing-headerItem.jp-mod-selected.jp-mod-descending > .jp-DirListing-headerIcon:before {
-  content: "\f0d7";
-}
-
-
-.jp-DirListing-item {
-  padding: 4px 8px;
-  border: 1px solid transparent;
-}
-
-
-.jp-DirListing-item:hover {
-  background-color: #EEEEEE;
-  cursor: pointer;
-}
-
-
-.jp-DirListing-item.jp-mod-selected:hover {
-  background-color: #2196F3;
-}
-
-
-.jp-DirListing-itemFile {
-  min-width: 200px;
-}
-
-
-.jp-DirListing-itemFileIcon {
-  width: 21px;
-  padding-left: 2px;
-  padding-right: 2px;
-}
-
-
-.jp-DirListing-itemFileText {
-  position: absolute;
-  left: 21px;
-  right: 21px;
-  padding-left: 2px;
-}
-
-
-.jp-DirListing-itemModified {
-  width: 120px;
-  min-width: 120px;
-  padding-right: 5px;
-  padding-left: 5px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-
-.jp-FileButtons-item {
-  color: #757575;
-  cursor: pointer;
-}
-
-
-.jp-FileButtons-item.jp-mod-selected {
-  background-color: #2196F3;
-  color: #F5F5F5;
-}
-
-
-.jp-DirListing-item.jp-mod-drop-target {
-  border: 1px solid #757575;
 }
 
 
@@ -206,38 +23,184 @@
 }
 
 
+.jp-FileButtons {
+  margin-bottom: 8px;
+  padding: 0px 4px;
+}
+
+
+.jp-FileButtons-button {
+  flex: 1 1 auto;
+  max-width: 100px;
+  padding: 4px 6px;
+  color: #757575;
+  background-color: #FFFFFF;
+  border: 1px solid #E0E0E0;
+  font-size: 16px;
+  outline: 0;
+}
+
+
+.jp-FileButtons-button::-moz-focus-inner {
+  border: 0;
+}
+
+
+.jp-FileButtons-button:hover {
+  background-color: #F5F5F5;
+  border-color: #D0D0D0;
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-FileButtons-button:active,
+.jp-FileButtons-button.jp-id-create.jp-mod-active {
+  background-color: #EEEEEE;
+  border-color: #BDBDBD;
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-FileButtons-button.jp-id-create {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+
+.jp-FileButtons-button.jp-id-upload {
+  margin-left: -1px; /* overlap borders */
+}
+
+
+.jp-FileButtons-button.jp-id-refresh {
+  margin-left: -1px; /* overlap borders */
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+
+.jp-DirListing {
+  outline: 0;
+}
+
+
+.jp-DirListing-header {
+  border-top: 1px solid #E0E0E0;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+
+.jp-DirListing-headerItem {
+  padding: 4px 6px;
+  font-weight: 500;
+}
+
+
+.jp-DirListing-headerItem:hover {
+  background-color: #EEEEEE;
+}
+
+
+.jp-DirListing-headerItem.jp-id-name {
+  flex: 1 0 84px;
+}
+
+
+.jp-DirListing-headerItem.jp-id-modified {
+  flex: 0 0 112px;
+  border-left: 1px solid #E0E0E0;
+}
+
+
+.jp-DirListing-headerItem.jp-mod-selected {
+  font-weight: 600;
+}
+
+
+.jp-DirListing-headerItem.jp-mod-selected .jp-DirListing-headerItemIcon:before {
+  font-family: FontAwesome;
+  content: "\f0d8";
+  float: right;
+}
+
+
+.jp-DirListing-headerItem.jp-mod-selected.jp-mod-descending .jp-DirListing-headerItemIcon:before {
+  font-family: FontAwesome;
+  content: "\f0d7";
+  float: right;
+}
+
+
+.jp-DirListing-item {
+  padding: 4px;
+}
+
+
 .jp-DirListing-item.jp-mod-selected {
-  background-color: #2196F3;
-  color: #F5F5F5;
+  color: white;
+  background-color: #F27624;
+  border-radius: 2px;
 }
 
 
-.jp-DirListing-item.jp-mod-selected.jp-mod-cut {
-  background-color: #F1C40F;
-  color: #F5F5F5;
+.jp-DirListing-item.jp-mod-dropTarget {
+  background-color: #FEDBC4;
 }
 
 
-.jp-DirListing-itemFileIcon {
+.jp-DirListing-item:hover:not(.jp-mod-selected) {
+  background-color: #EEEEEE;
+}
+
+
+.jp-DirListing-itemIcon {
+  flex: 0 0 20px;
   font-family: FontAwesome;
 }
 
 
-.jp-DirListing-folderIcon:before {
+.jp-DirListing-itemText {
+  flex: 1 0 64px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.jp-DirListing-itemModified {
+  flex: 0 0 108px;
+  text-align: right;
+}
+
+
+.jp-DirListing-editor {
+  flex: 1 0 64px;
+}
+
+
+/** TODO
+.jp-DirListing-item.jp-mod-selected.jp-mod-cut {
+  background-color: #F1C40F;
+  color: #F5F5F5;
+}
+**/
+
+
+.jp-DirListing-item.jp-type-folder .jp-DirListing-itemIcon:before {
   content: "\f114";
 }
 
 
-.jp-DirListing-fileIcon:before {
+.jp-DirListing-item.jp-type-file .jp-DirListing-itemIcon:before {
   content: "\f016";
 }
 
 
-.jp-DirListing-nbIcon:before {
+.jp-DirListing-item.jp-type-notebook .jp-DirListing-itemIcon:before {
   content: "\f02d";
 }
 
 
-.jp-DirListing-nbIcon.jp-mod-running:before {
+.jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon {
   color: #27AE60;
 }
