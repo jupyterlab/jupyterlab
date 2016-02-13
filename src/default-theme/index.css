@@ -10,9 +10,10 @@
 body {
   margin: 0;
   padding: 0;
-  background: #FFFFFF;
+  background: #E0E0E0;
   overflow: hidden;
 }
+
 
 .p-AppShell.p-Widget {
   position: absolute;
@@ -25,12 +26,9 @@ body {
 
 
 .jp-Document {
+  min-width: 120px;
+  min-height: 120px;
   outline: none;
-}
-
-
-.p-TabBar-tab.jp-mod-dirty .p-TabBar-tabText:after {
-  content: '*';
 }
 
 
@@ -41,7 +39,7 @@ body {
 
 
 .jp-Dialog-content {
-  background-color: #F5F5F5;
+  background: #F5F5F5;
   min-width: 50%;
   border: 1px solid #757575;
   border-radius: 5px;
@@ -70,7 +68,7 @@ body {
   padding: 5px;
   border: 1px solid #757575;
   font-size: 16px;
-  background-color: #FAFAFA;
+  background: #FAFAFA;
   line-height: 20px;
   border-radius: 3px;
   max-width: 100px;
@@ -88,7 +86,8 @@ body {
   max-width: 36px;
   font-size: 13px;
   font-family: Helvetica, Arial;
-  background: #F7F7F7;
+  color: #757575;
+  background: #EEEEEE;
 }
 
 
@@ -98,12 +97,12 @@ body {
 
 
 .p-SideBar.p-mod-left {
-  border-right: 1px solid #C0C0C0;
+  border-right: 1px solid #BDBDBD;
 }
 
 
 .p-SideBar.p-mod-right {
-  border-left: 1px solid #C0C0C0;
+  border-left: 1px solid #BDBDBD;
 }
 
 
@@ -132,35 +131,23 @@ body {
 
 
 .p-SideBar-button:hover:not(.p-mod-current) {
-  background: white;
+  background: #FAFAFA;
 }
 
 
 .p-SideBar-button.p-mod-current {
-  background: #F5F5F5;
-  min-height: 36px;
+  color: #F27624;
+  background: #FAFAFA;
 }
 
 
 .p-SideBar.p-mod-left .p-SideBar-button {
-  border-left: 1px solid #C0C0C0;
+  border-left: 1px solid #BDBDBD;
 }
 
 
 .p-SideBar.p-mod-right .p-SideBar-button {
-  border-right: 1px solid #C0C0C0;
-}
-
-
-#p-left-stack {
-  padding: 5px;
-  background: #F5F5F5;
-}
-
-
-#p-right-stack {
-  padding: 5px;
-  background: #F5F5F5;
+  border-right: 1px solid #BDBDBD;
 }
 
 
@@ -169,27 +156,20 @@ body {
 }
 
 
-.p-Widget.p-DockSplitPanel {
-  overflow: visible;
-}
-
 .p-DockTabPanel {
-  border-left: 1px solid #C0C0C0;
-  border-right: 1px solid #C0C0C0;
-  border-bottom: 1px solid #B0B0B0;
-  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #BDBDBD;
+  border-top: none;
 }
 
 
 .p-DockTabPanel > .p-StackedPanel {
-  padding: 8px;
   background: white;
 }
 
 
 .p-DockPanel-overlay {
-  background: rgba(64, 151, 234, 0.1);
-  border: 1px dashed #4097EA;
+  background: rgba(242, 118, 36, 0.1);
+  border: 1px dashed #F27624;
 }
 
 
@@ -203,44 +183,46 @@ body {
 
 
 .p-TabBar {
-  min-height: 24px;
-  max-height: 24px;
-  background: #F7F7F7;
+  min-height: 28px;
+  max-height: 28px;
+  color: #757575;
+  background: #F5F5F5;
+  font: 12px Helvetica, Arial, sans-serif;
 }
 
 
-/* the child selectors just increase specificity :-( */
-
+/* increase specificity to override default */
 .p-TabBar > .p-TabBar-header {
   flex: 0 0 1px;
-  background: #D0D0D0;
+  background: #BDBDBD;
 }
 
 
-.p-TabBar > .p-TabBar-footer {
-  flex: 0 0 1px;
-  background: #C0C0C0;
-}
-
-
-.p-TabBar .p-TabBar-content {
+.p-TabBar-content {
   min-width: 0;
   max-height: 22px;
 }
 
 
+/* increase specificity to override default */
+.p-TabBar > .p-TabBar-footer {
+  flex: 0 0 3px;
+  background: #FAFAFA;
+  border-top: 1px solid #BDBDBD;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+
 .p-TabBar-tab {
-  flex-basis: 125px;
+  flex-basis: 124px;
   min-height: 23px;
   max-height: 23px;
   min-width: 35px;
   margin-left: -1px;
-  border-top: 1px solid #C0C0C0;
-  border-left: 1px solid #C0C0C0;
-  border-right: 1px solid #C0C0C0;
   padding: 0px 10px;
-  background: #EBEBEB;
-  font: 12px Helvetica, Arial, sans-serif;
+  background: #EEEEEE;
+  border: 1px solid #BDBDBD;
+  border-bottom: none;
   transform: translateY(-1px);
 }
 
@@ -251,15 +233,15 @@ body {
 
 
 .p-TabBar-tab.p-mod-current {
-  border-top: 1px solid #4097EA;
-  background: white;
   min-height: 24px;
   max-height: 24px;
+  background: #FAFAFA;
+  border-top: 1px solid #F27624;
 }
 
 
 .p-TabBar-tab:hover:not(.p-mod-current) {
-  background: #F0F0F0;
+  background: #FAFAFA;
 }
 
 
@@ -276,30 +258,32 @@ body {
 
 
 .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
-  content: '\f00d';
   font-family: FontAwesome;
+  content: '\f00d'; /* close */
+}
+
+
+.p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon:before {
+  font-family: FontAwesome;
+  content: '\f069'; /* asterisk */
 }
 
 
 .p-TabBar-tab.p-mod-drag-image {
   min-height: 24px;
-  min-width: 125px;
-  border: none;
-  border-top: 1px solid #4097EA;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  min-width: 124px;
+  color: #757575;
+  background: white;
+  border: 1px solid #BDBDBD;
+  border-top: 1px solid #F27624;
+  font: 12px Helvetica, Arial, sans-serif;
+  box-shadow: 1px 1px 2px rgba(0, 0, 1, 0.1);
   transform: translateX(-40%) translateY(-58%);
 }
 
 
 #p-main-split-panel > .p-SplitPanel-handle {
-  background: #C0C0C0;
-}
-
-
-.editor-CodeMirrorWidget {
-  border: 1px solid #C0C0C0;
-  min-width: 100px;
-  min-height: 100px;
+  background: #BDBDBD;
 }
 
 

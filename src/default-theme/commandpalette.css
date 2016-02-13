@@ -3,34 +3,12 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .p-CommandPalette {
-  background: #F5F5F5;
-  font-family: "Helvetica Neue", Helvetica;
-  min-width: 250px;
-  min-height: 50px;
-  padding: 4px 4px 0px 4px;
-}
-
-.p-CommandPalette mark {
-  background-color: inherit;
-  color: black;
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-
-.p-CommandPalette-header {
-  border-bottom: 1px solid #E0E0E0;
+  min-width: 300px;
+  padding: 8px;
+  padding-bottom: 0px;
   color: #757575;
-  font-size: 11px;
-  font-weight: 500;
-  margin: 0 0 5px 4px;
-  padding: 5px 0;
-  text-transform: capitalize;
-}
-
-
-.p-CommandPalette-inputWrapper {
-  padding: 4px 0;
+  background: #FAFAFA;
+  font-family: "Helvetica Neue", Helvetica;
 }
 
 
@@ -39,52 +17,67 @@
 }
 
 
-.p-CommandPalette-input {
+.p-CommandPalette-inputWrapper {
+  padding: 4px 6px;
+  background: white;
   border: 1px solid #E0E0E0;
-  border-radius: 5px;
-  height: 20px;
-  outline: none;
+  border-radius: 4px;
+}
+
+
+.p-CommandPalette-input {
   width: 100%;
+  outline: none;
+  border: none;
+}
+
+
+.p-CommandPalette-header {
+  margin: 4px 0px;
+  padding: 4px 0px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: capitalize;
+  border-bottom: 1px solid #E0E0E0;
 }
 
 
 .p-CommandPalette-command {
-  color: #757575;
-  font-weight: 500;
+  padding: 4px;
   font-size: 13px;
-  padding: 3px 0 3px 4px;
+  font-weight: 500;
+}
+
+
+.p-CommandPalette-commandCaption {
+  font-size: 10px;
+  font-weight: 400;
+  color: #9E9E9E;
 }
 
 
 .p-CommandPalette-header:hover:not(.p-mod-active),
 .p-CommandPalette-command:hover:not(.p-mod-active) {
   background: #EEEEEE;
+  border-radius: 2px;
 }
 
 
-.p-CommandPalette-commandCaption {
-  padding-right: 5px;
+.p-CommandPalette-header.p-mod-active,
+.p-CommandPalette-command.p-mod-active {
+  color: white;
+  background: #F27624;
+  border-radius: 2px;
 }
 
 
-.p-CommandPalette-commandCaption {
-  color: #9E9E9E;
-  font-weight: 400;
-  font-size: 10px;
-  padding-right: 5px;
-}
-
-.p-CommandPalette-commandShortcut {
-  padding-right: 5px;
-}
-
-.p-CommandPalette-commandShortcut:empty {
-  padding-right: 0;
-}
-
-.p-CommandPalette-header.p-mod-active, .p-CommandPalette-command.p-mod-active,
-.p-CommandPalette-header.p-mod-active .p-CommandPalette-header,
 .p-CommandPalette-command.p-mod-active .p-CommandPalette-commandCaption {
-  background: #2196F3;
-  color: #FFFFFF;
+  color: inherit;
+}
+
+
+.p-CommandPalette mark {
+  color: #424242;
+  font-weight: bold;
+  background: inherit;
 }
