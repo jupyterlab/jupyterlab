@@ -141,7 +141,7 @@
 }
 
 
-/* increate specificity to override bundled default */
+/* increase specificity to override bundled default */
 .jp-DirListing > .jp-DirListing-content {
   padding: 0px 8px;
 }
