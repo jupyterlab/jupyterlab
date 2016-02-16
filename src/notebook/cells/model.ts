@@ -19,7 +19,7 @@ import {
 } from 'phosphor-properties';
 
 import {
-  ISignal, Signal, clearSignalData
+  ISignal, Signal
 } from 'phosphor-signaling';
 
 import {
