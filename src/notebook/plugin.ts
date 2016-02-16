@@ -325,8 +325,18 @@ class NotebookFileHandler extends AbstractFileHandler {
       name: model.name,
       path: model.path
     }
+    if (nbData.content.cells.length == 0) {
+      nbData.content.cells.push({
+        cell_type: 'code',
+        source: '',
+        outputs: [],
+        execution_count: 1,
+        metadata: { collapsed: true }
+      });
+    }
     let nbWidget: NotebookWidget = ((widget as Panel).childAt(1)) as NotebookWidget;
     populateNotebookModel(nbWidget.model, nbData);
+
     return Promise.resolve();
   }
 
