@@ -6,7 +6,7 @@ import {
 } from '../cells';
 
 import {
-  IObservableList, ObservableList, ListChangeType
+  IObservableList, ObservableList, ListChangeType, IListChangedArgs
 } from 'phosphor-observablelist';
 
 import {
@@ -68,12 +68,9 @@ interface INotebookModel {
   defaultMimetype: string;
 
   /**
-   * Whether the current notebook state is persisted.
-   *
-   * #### Notes
-   * A dirty notebook has unpersisted changes.
+   * The dirty state of the notebook.
    */
-  //dirtyIndicator: boolean;
+  dirty: boolean;
 
   /**
    * Whether the notebook can be trusted.
@@ -113,6 +110,7 @@ interface INotebookModel {
    * Select the previous cell in the notebook.
    */
   selectPreviousCell(): void;
+
   /**
    * A factory for creating a new code cell.
    *
@@ -154,44 +152,13 @@ interface INotebookModel {
  */
 export
 class NotebookModel implements INotebookModel {
+
   /**
-   * A signal emitted when the state of the model changes.
-   *
-   * **See also:** [[stateChanged]]
+   * Construct a new notebook model.
    */
-  static stateChangedSignal = new Signal<INotebookModel, IChangedArgs<any>>();
-
-  /**
-  * A property descriptor which holds the default mimetype for new code cells.
-  *
-  * **See also:** [[defaultMimeType]]
-  */
-  static defaultMimetype = new Property<NotebookModel, string>({
-      name: 'defaultMimetype',
-      notify: NotebookModel.stateChangedSignal,
-  });
-
-  /**
-  * A property descriptor which holds the mode of the notebook.
-  *
-  * **See also:** [[mode]]
-  */
-  static modeProperty = new Property<NotebookModel, NotebookMode>({
-      name: 'mode',
-      notify: NotebookModel.stateChangedSignal,
-  });
-
-
-  /**
-  * A property descriptor for the selected cell index.
-  *
-  * **See also:** [[selectedCellIndex]]
-  */
-  static selectedCellIndexProperty = new Property<NotebookModel, number>({
-      name: 'selectedCellIndex',
-      notify: NotebookModel.stateChangedSignal,
-  });
-
+  constructor() {
+    this.cells.changed.connect(this._onCellsChanged, this);
+  }
 
   /**
    * A signal emitted when the state of the model changes.
@@ -200,7 +167,17 @@ class NotebookModel implements INotebookModel {
    * This is a pure delegate to the [[stateChangedSignal]].
    */
   get stateChanged(): ISignal<INotebookModel, IChangedArgs<any>> {
-    return NotebookModel.stateChangedSignal.bind(this);
+    return NotebookModelPrivate.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * Get the observable list of notebook cells.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get cells(): IObservableList<ICellModel> {
+    return this._cells;
   }
 
   /**
@@ -210,7 +187,7 @@ class NotebookModel implements INotebookModel {
    * This is a pure delegate to the [[defaultMimetype]].
    */
   get defaultMimetype() {
-    return NotebookModel.defaultMimetype.get(this);
+    return NotebookModelPrivate.defaultMimetype.get(this);
   }
 
   /**
@@ -220,7 +197,7 @@ class NotebookModel implements INotebookModel {
    * This is a pure delegate to the [[defaultMimetype]].
    */
   set defaultMimetype(value: string) {
-    NotebookModel.defaultMimetype.set(this, value);
+    NotebookModelPrivate.defaultMimetype.set(this, value);
   }
 
   /**
@@ -230,7 +207,7 @@ class NotebookModel implements INotebookModel {
    * This is a pure delegate to the [[modeProperty]].
    */
   get mode() {
-    return NotebookModel.modeProperty.get(this);
+    return NotebookModelPrivate.modeProperty.get(this);
   }
 
   /**
@@ -240,7 +217,7 @@ class NotebookModel implements INotebookModel {
    * This is a pure delegate to the [[modeProperty]].
    */
   set mode(value: NotebookMode) {
-    NotebookModel.modeProperty.set(this, value);
+    NotebookModelPrivate.modeProperty.set(this, value);
   }
 
   /**
@@ -250,7 +227,7 @@ class NotebookModel implements INotebookModel {
    * This is a pure delegate to the [[selectedCellIndexProperty]].
    */
   get selectedCellIndex() {
-    return NotebookModel.selectedCellIndexProperty.get(this);
+    return NotebookModelPrivate.selectedCellIndexProperty.get(this);
   }
 
   /**
@@ -260,7 +237,29 @@ class NotebookModel implements INotebookModel {
    * This is a pure delegate to the [[selectedCellIndexProperty]].
    */
   set selectedCellIndex(value: number) {
-    NotebookModel.selectedCellIndexProperty.set(this, value);
+    NotebookModelPrivate.selectedCellIndexProperty.set(this, value);
+  }
+
+  /**
+   * Get the dirty state of the notebook.
+   */
+  get dirty(): boolean {
+    return NotebookModelPrivate.dirtyProperty.get(this);
+  }
+
+  /**
+   * Set the dirty state of the notebook.
+   */
+  set dirty(value: boolean) {
+    // Clear the dirty state of all cells if the notebook dirty state
+    // is cleared.
+    if (!value) {
+      for (let i = 0; i < this._cells.length; i++) {
+        let cell = this._cells.get(i);
+        cell.dirty = value;
+      }
+    }
+    NotebookModelPrivate.dirtyProperty.set(this, value);
   }
 
   /**
@@ -297,6 +296,73 @@ class NotebookModel implements INotebookModel {
     return cell;
   }
 
-  cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();
+  /**
+   * Handle a change in the cells list.
+   */
+  private _onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
+    if (change.type === ListChangeType.Add) {
+      let cell = change.newValue as ICellModel;
+      cell.stateChanged.connect(this._onCellStateChanged, this);
+    }
+  }
+
+  /**
+   * Handle a change to a cell state.
+   */
+  private _onCellStateChanged(cell: ICellModel, change: IChangedArgs<ICellModel>): void {
+    if (change.name === 'dirty' && change.newValue) {
+      this.dirty = true;
+    }
+  }
+
+  private _cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();
 }
 
+
+/**
+ * A private namespace for notebook model data.
+ */
+namespace NotebookModelPrivate {
+
+  /**
+   * A signal emitted when the state of the model changes.
+   */
+  export
+  const stateChangedSignal = new Signal<INotebookModel, IChangedArgs<any>>();
+
+  /**
+  * A property descriptor which holds the default mimetype for new code cells.
+  */
+  export
+  const defaultMimetype = new Property<NotebookModel, string>({
+    name: 'defaultMimetype',
+    notify: stateChangedSignal,
+  });
+
+  /**
+  * A property descriptor which holds the mode of the notebook.
+  */
+  export
+  const modeProperty = new Property<NotebookModel, NotebookMode>({
+    name: 'mode',
+    notify: stateChangedSignal,
+  });
+
+  /**
+  * A property descriptor for the selected cell index.
+  */
+  export
+  const selectedCellIndexProperty = new Property<NotebookModel, number>({
+    name: 'selectedCellIndex',
+    notify: stateChangedSignal,
+  });
+
+ /**
+  * A property descriptor for the dirty state
+  */
+  export
+  const dirtyProperty = new Property<NotebookModel, boolean>({
+    name: 'dirty',
+    notify: stateChangedSignal,
+  });
+}

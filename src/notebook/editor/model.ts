@@ -53,6 +53,11 @@ interface IEditorOptions {
    * The number of spaces to insert for each tab.
    */
   tabSize?: number;
+
+  /**
+   * Whether the contents of the editor are dirty.
+   */
+  dirty?: boolean;
 }
 
 
@@ -77,6 +82,20 @@ class EditorModel  {
    */
   get stateChanged(): ISignal<EditorModel, IChangedArgs<any>> {
     return EditorModelPrivate.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * Get the dirty state for the editor.
+   */
+  get dirty(): boolean {
+    return EditorModelPrivate.dirtyProperty.get(this);
+  }
+
+  /**
+   * Set the dirty state for the editor.
+   */
+  set dirty(value: boolean) {
+    EditorModelPrivate.dirtyProperty.set(this, value);
   }
 
   /**
@@ -197,7 +216,7 @@ namespace EditorModelPrivate {
   const mimetypeProperty = new Property<EditorModel, string>({
     name: 'mimetype',
     value: '',
-    notify: EditorModelPrivate.stateChangedSignal
+    notify: stateChangedSignal
   });
 
   /**
@@ -207,7 +226,7 @@ namespace EditorModelPrivate {
   const filenameProperty = new Property<EditorModel, string>({
     name: 'filename',
     value: '',
-    notify: EditorModelPrivate.stateChangedSignal
+    notify: stateChangedSignal
   });
 
   /**
@@ -216,7 +235,7 @@ namespace EditorModelPrivate {
   export
   const fixedHeightProperty = new Property<EditorModel, boolean>({
     name: 'fixedHeight',
-    notify: EditorModelPrivate.stateChangedSignal,
+    notify: stateChangedSignal,
     value: false,
   });
 
@@ -227,7 +246,7 @@ namespace EditorModelPrivate {
   const lineNumbersProperty = new Property<EditorModel, boolean>({
     name: 'lineNumbers',
     value: true,
-    notify: EditorModelPrivate.stateChangedSignal
+    notify: stateChangedSignal
   });
 
   /**
@@ -237,7 +256,7 @@ namespace EditorModelPrivate {
   const readOnlyProperty = new Property<EditorModel, boolean>({
     name: 'readOnly',
     value: false,
-    notify: EditorModelPrivate.stateChangedSignal
+    notify: stateChangedSignal
   });
 
   /**
@@ -247,7 +266,7 @@ namespace EditorModelPrivate {
   const textProperty = new Property<EditorModel, string>({
     name: 'text',
     value: '',
-    notify: EditorModelPrivate.stateChangedSignal
+    notify: stateChangedSignal
   });
 
   /**
@@ -257,7 +276,17 @@ namespace EditorModelPrivate {
   const tabSizeProperty = new Property<EditorModel, number>({
     name: 'tabSize',
     value: 4,
-    notify: EditorModelPrivate.stateChangedSignal
+    notify: stateChangedSignal
+  });
+
+  /**
+   * The property descriptor for the editor dirty state.
+   */
+  export
+  const dirtyProperty = new Property<EditorModel, boolean>({
+    name: 'dirty',
+    value: false,
+    notify: stateChangedSignal
   });
 
   /**

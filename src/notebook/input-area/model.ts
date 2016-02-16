@@ -14,6 +14,7 @@ import {
   IEditorModel, EditorModel
 } from '../editor';
 
+
 /**
  * The model for an input area.
  */
@@ -32,7 +33,7 @@ interface IInputAreaModel {
 
   /**
    * Whether the input area should be collapsed (hidden) or expanded.
-   * 
+   *
    * // TODO: this should probably be a property on the cell, not the input area.
    */
   collapsed: boolean;
@@ -46,8 +47,12 @@ interface IInputAreaModel {
    * The execution count.
    */
   executionCount: number;
-}
 
+  /**
+   * The dirty state of the input cell.
+   */
+  dirty: boolean;
+}
 
 
 /**
@@ -55,22 +60,123 @@ interface IInputAreaModel {
  */
 export
 class InputAreaModel implements IInputAreaModel {
+  /**
+   * A signal emitted when the state of the model changes.
+   */
+  get stateChanged() {
+    return InputAreaModelPrivate.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * Get whether the input area should be collapsed or displayed.
+   */
+  get collapsed() {
+    return InputAreaModelPrivate.collapsedProperty.get(this);
+  }
+
+  /**
+   * Set whether the input area should be collapsed or displayed.
+   */
+  set collapsed(value: boolean) {
+    InputAreaModelPrivate.collapsedProperty.set(this, value);
+  }
+
+  /**
+   * Get the prompt number.
+   */
+  get promptNumber() {
+    return InputAreaModelPrivate.promptNumberProperty.get(this);
+  }
+
+  /**
+   * Set the prompt number.
+   */
+  set promptNumber(value: number) {
+    InputAreaModelPrivate.promptNumberProperty.set(this, value);
+  }
+
+  /**
+   * Get the execution count of the input area.
+   */
+  get executionCount() {
+    return InputAreaModelPrivate.executionCountProperty.get(this);
+  }
+
+  /**
+   * Set the execution count of the input area.
+   */
+  set executionCount(value: number) {
+    InputAreaModelPrivate.executionCountProperty.set(this, value);
+  }
+
+  /**
+   * Get the text editor Model.
+   */
+  get textEditor(): EditorModel {
+    return InputAreaModelPrivate.textEditorProperty.get(this);
+  }
+
+  /**
+   * Set the text editor Model.
+   */
+  set textEditor(value: EditorModel) {
+    InputAreaModelPrivate.textEditorProperty.set(this, value);
+    value.stateChanged.connect(this._textEditorChanged, this);
+  }
+
+  /**
+   * Get the dirty state.
+   *
+   * #### Notest
+   * This is a pure delegate to the dirty state of the [textEditor].
+   */
+  get dirty(): boolean {
+    return this.textEditor.dirty;
+  }
+
+  /**
+   * Set the dirty state.
+   *
+   * #### Notest
+   * This is a pure delegate to the dirty state of the [textEditor].
+   */
+  set dirty(value: boolean) {
+    this.textEditor.dirty = value;
+  }
+
+  /**
+   * Re-emit changes to the text editor dirty state.
+   */
+  private _textEditorChanged(editor: EditorModel, args: IChangedArgs<any>): void {
+    if (editor === this.textEditor && args.name === 'dirty') {
+      this.stateChanged.emit(args);
+    }
+  }
+}
+
+
+/**
+ * The namespace for the `InputAreaModel` class private data.
+ */
+namespace InputAreaModelPrivate {
 
   /**
    * A signal emitted when the state of the model changes.
    *
    * **See also:** [[stateChanged]]
    */
-  static stateChangedSignal = new Signal<InputAreaModel, IChangedArgs<any>>();
+  export
+  const stateChangedSignal = new Signal<InputAreaModel, IChangedArgs<any>>();
 
   /**
   * A property descriptor which determines whether the input area is collapsed or displayed.
   *
   * **See also:** [[collapsed]]
   */
-  static collapsedProperty = new Property<InputAreaModel, boolean>({
+  export
+  const collapsedProperty = new Property<InputAreaModel, boolean>({
     name: 'collapsed',
-    notify: InputAreaModel.stateChangedSignal,
+    notify: stateChangedSignal,
   });
 
   /**
@@ -78,9 +184,10 @@ class InputAreaModel implements IInputAreaModel {
   *
   * **See also:** [[promptNumber]]
   */
-  static promptNumberProperty = new Property<InputAreaModel, number>({
+  export
+  const promptNumberProperty = new Property<InputAreaModel, number>({
     name: 'promptNumber',
-    notify: InputAreaModel.stateChangedSignal,
+    notify: stateChangedSignal,
   });
 
   /**
@@ -88,9 +195,10 @@ class InputAreaModel implements IInputAreaModel {
   *
   * **See also:** [[executionCount]]
   */
-  static executionCountProperty = new Property<InputAreaModel, number>({
+  export
+  const executionCountProperty = new Property<InputAreaModel, number>({
     name: 'executionCount',
-    notify: InputAreaModel.stateChangedSignal,
+    notify: stateChangedSignal,
   });
 
   /**
@@ -98,98 +206,9 @@ class InputAreaModel implements IInputAreaModel {
   *
   * **See also:** [[textEditor]]
   */
-  static textEditorProperty = new Property<InputAreaModel, EditorModel>({
+  export
+  const textEditorProperty = new Property<InputAreaModel, EditorModel>({
     name: 'textEditor',
-    notify: InputAreaModel.stateChangedSignal,
+    notify: stateChangedSignal,
   });
-
-  /**
-   * A signal emitted when the state of the model changes.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[stateChangedSignal]].
-   */
-  get stateChanged() {
-    return InputAreaModel.stateChangedSignal.bind(this);
-  }
-
-  /**
-   * Get whether the input area should be collapsed or displayed.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[collapsedProperty]].
-   */
-  get collapsed() {
-    return InputAreaModel.collapsedProperty.get(this);
-  }
-
-  /**
-   * Set whether the input area should be collapsed or displayed.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[collapsedProperty]].
-   */
-  set collapsed(value: boolean) {
-    InputAreaModel.collapsedProperty.set(this, value);
-  }
-
-  /**
-   * Get the prompt number.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[promptNumberProperty]].
-   */
-  get promptNumber() {
-    return InputAreaModel.promptNumberProperty.get(this);
-  }
-
-  /**
-   * Set the prompt number.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[promptNumberProperty]].
-   */
-  set promptNumber(value: number) {
-    InputAreaModel.promptNumberProperty.set(this, value);
-  }
-
-  /**
-   * Get the execution count of the input area.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[executionCountProperty]].
-   */
-  get executionCount() {
-    return InputAreaModel.executionCountProperty.get(this);
-  }
-
-  /**
-   * Set the execution count of the input area.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[executionCountProperty]].
-   */
-  set executionCount(value: number) {
-    InputAreaModel.executionCountProperty.set(this, value);
-  }
-
-  /**
-   * Get the text editor Model.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[textEditorProperty]].
-   */
-  get textEditor() {
-    return InputAreaModel.textEditorProperty.get(this);
-  }
-  
-  /**
-   * Set the text editor Model.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[textEditorProperty]].
-   */
-  set textEditor(value: EditorModel) {
-    InputAreaModel.textEditorProperty.set(this, value);
-  }
 }
