@@ -7,7 +7,7 @@ import {
 } from 'jupyter-js-docmanager';
 
 import {
-  NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output
+  NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output, INotebookModel
 } from 'jupyter-js-notebook';
 
 import {
@@ -21,7 +21,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  ICommandRegistry, IShortcutManager, ICommandPalette
+  ICommandRegistry, ICommandPalette
 } from 'phosphide';
 
 import {
@@ -31,6 +31,10 @@ import {
 import {
   Panel
 } from 'phosphor-panel';
+
+import {
+  Property
+} from 'phosphor-properties';
 
 import {
   Widget
@@ -52,6 +56,7 @@ let selectPreviousCellCommandId = 'notebook:select-previous-cell';
 
 let notebookContainerClass = 'jp-NotebookContainer';
 
+
 /**
  * Register the plugin contributions.
  *
@@ -63,56 +68,62 @@ let notebookContainerClass = 'jp-NotebookContainer';
 export
 function resolve(container: Container): Promise<AbstractFileHandler> {
   return container.resolve({
-    requires: [IServicesProvider, IDocumentManager, ICommandRegistry, IShortcutManager, ICommandPalette],
+    requires: [IServicesProvider, IDocumentManager, ICommandRegistry, ICommandPalette],
     create: (services: IServicesProvider, manager: IDocumentManager,
-             registry: ICommandRegistry, shortcuts: IShortcutManager,
+             registry: ICommandRegistry,
              palette: ICommandPalette) => {
       let handler = new NotebookFileHandler(
         services.contentsManager,
-        services.notebookSessionManager,
-        shortcuts,
-        palette
+        services.notebookSessionManager
       );
       manager.register(handler);
       registry.add([{
         id: executeCellCommandId,
-        handler: (args) => {
-          executeSelectedCell(args.model, args.session);
-        }
+        handler: () => handler.executeSelectedCell()
       }, {
         id: renderCellCommandId,
-        handler: (args) => {
-          renderSelectedCell(args.model);
-        }
+        handler: () => handler.renderSelectedCell()
       }, {
         id: selectNextCellCommandId,
-        handler: (args) => {
-          args.model.selectNextCell();
-        }
+        handler: () => handler.selectNextCell()
       }, {
         id: selectPreviousCellCommandId,
-        handler: (args) => {
-          args.model.selectPreviousCell();
-        }
+        handler: () => handler.selectPreviousCell()
       }]);
-
+      palette.add([{
+        id: executeCellCommandId,
+        category: 'Notebook Operations',
+        args: void 0,
+        text: 'Execute current cell',
+        caption: 'Execute the current cell'
+      }, {
+        id: renderCellCommandId,
+        category: 'Notebook Operations',
+        args: void 0,
+        text: 'Render current markdown cell',
+        caption: 'Render the current markdown cell'
+      }, {
+        id: selectNextCellCommandId,
+        category: 'Notebook Operations',
+        args: void 0,
+        text: 'Select next cell',
+        caption: 'Select next cell'
+      }, {
+        id: selectPreviousCellCommandId,
+        category: 'Notebook Operations',
+        args: void 0,
+        text: 'Select previous cell',
+        caption: 'Select previous cell'
+      }]);
       return handler;
     }
   });
 }
 
 
-
-
-export
-class SessionStoreMapping {
-  constructor(services: IServicesProvider) {
-    this.services = services;
-  }
-  public services: IServicesProvider;
-}
-
-
+/**
+ * Convert a kernel message to an output model.
+ */
 function messageToModel(msg: IKernelMessage) {
   let m: Output = msg.content;
   let type = msg.header.msg_type;
@@ -125,6 +136,9 @@ function messageToModel(msg: IKernelMessage) {
 }
 
 
+/**
+ * Execute the selected cell in a notebook.
+ */
 function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
   let cell = model.cells.get(model.selectedCellIndex);
   if (isCodeCellModel(cell)) {
@@ -151,6 +165,10 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
   }
 }
 
+
+/**
+ * Render the selected cell in a notebook.
+ */
 function renderSelectedCell(model: NotebookModel)  {
   let cell = model.cells.get(model.selectedCellIndex);
   if (isMarkdownCellModel(cell)) {
@@ -158,18 +176,83 @@ function renderSelectedCell(model: NotebookModel)  {
   }
 }
 
+
+/**
+ * A container which manages a notebook and widgets.
+ */
+class NotebookContainer extends Panel {
+
+  /**
+   * Construct a new NotebookContainer.
+   */
+  constructor() {
+    super();
+    this._model = new NotebookModel();
+    let widgetarea = new Widget();
+    this._manager = new WidgetManager(widgetarea.node);
+    let widget = new NotebookWidget(this._model);
+
+    this.addChild(widgetarea);
+    this.addChild(widget);
+  }
+
+  /**
+   * Get the notebook model used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get model(): NotebookModel {
+    return this._model;
+  }
+
+  /**
+   * Get the notebook session used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get session(): INotebookSession {
+    return this._session;
+  }
+
+  /**
+   * Set the session and set up widget handling.
+   */
+  setSession(value: INotebookSession) {
+    this._session = value;
+
+    this._session.kernel.registerCommTarget('jupyter.widget', (comm, msg) => {
+      console.log('comm message', msg);
+
+      let modelPromise = this._manager.handle_comm_open(comm, msg);
+
+      comm.onMsg = (msg) => {
+        this._manager.handle_comm_open(comm, msg)
+        // create the widget model and (if needed) the view
+        console.log('comm widget message', msg);
+      }
+      comm.onClose = (msg) => {
+        console.log('comm widget close', msg);
+      }
+    });
+  }
+
+  private _manager: WidgetManager = null;
+  private _model: INotebookModel = null;
+  private _session: INotebookSession = null;
+}
+
+
 /**
  * An implementation of a file handler.
  */
 export
 class NotebookFileHandler extends AbstractFileHandler {
 
-  constructor(contents: IContentsManager, session: INotebookSessionManager,
-  shortcuts: IShortcutManager, palette: ICommandPalette) {
+  constructor(contents: IContentsManager, session: INotebookSessionManager) {
     super(contents);
     this.session = session;
-    this.shortcuts = shortcuts;
-    this.palette = palette;
   }
 
   /**
@@ -177,6 +260,50 @@ class NotebookFileHandler extends AbstractFileHandler {
    */
   get fileExtensions(): string[] {
     return ['.ipynb']
+  }
+
+  /**
+   * Execute the selected cell on the active widget.
+   */
+  executeSelectedCell(): void {
+    let w = this.activeWidget as NotebookContainer;
+    if (w) {
+      executeSelectedCell(w.model, w.session);
+      return;
+    }
+  }
+
+  /**
+   * Render the selected cell on the active widget.
+   */
+  renderSelectedCell(): void {
+    let w = this.activeWidget as NotebookContainer;
+    if (w) {
+      renderSelectedCell(w.model);
+      return;
+    }
+  }
+
+  /**
+   * Select the next cell on the active widget.
+   */
+  selectNextCell(): void {
+    let w = this.activeWidget as NotebookContainer;
+    if (w) {
+      w.model.selectNextCell();
+      return;
+    }
+  }
+
+  /**
+   * Select the previous cell on the active widget.
+   */
+  selectPreviousCell(): void {
+    let w = this.activeWidget as NotebookContainer;
+    if (w) {
+      w.model.selectPreviousCell();
+      return;
+    }
   }
 
   /**
@@ -190,93 +317,14 @@ class NotebookFileHandler extends AbstractFileHandler {
    * Create the widget from an `IContentsModel`.
    */
   protected createWidget(contents: IContentsModel): Widget {
-    let model = new NotebookModel();
-    let panel = new Panel();
-
-    let widgetarea = new Widget();
-    let manager = new WidgetManager(widgetarea.node);
-
-    let notebookId = this.notebookId;
-    this.notebookId += 1;
-
-    this.session.startNew({notebookPath: contents.path}).then(s => {
-      // TODO: it's probably better to make *one* shortcut that executes whatever
-      // the current notebook's selected cell is, rather than registering a
-      // a new shortcut for every open notebook.
-      // One way to do this is to have the active notebook have a
-      // specific `.jp-active-document` class, for example. Then the keyboard shortcut
-      // selects on that. The application state would also have a handle on this active
-      // document (model or widget), and so we could execute the current active cell.
-      let prefix = `.${notebookContainerClass}.notebook-id-${notebookId}`
-      this.shortcuts.add([{
-        sequence: ['Shift Enter'],
-        selector: `${prefix} .jp-CodeCell`,
-        command: executeCellCommandId,
-        args: {model: model, session: s}
-      }, {
-        sequence: ['Shift Enter'],
-        selector: `${prefix} .jp-MarkdownCell`,
-        command: renderCellCommandId,
-        args: {model: model}
-      }, {
-        sequence: ['ArrowDown'],
-        selector: `${prefix} .jp-Cell`,
-        command: selectNextCellCommandId,
-        args: {model: model}
-      }, {
-        sequence: ['ArrowUp'],
-        selector: `${prefix} .jp-Cell`,
-        command: selectPreviousCellCommandId,
-        args: {model: model}
-      }]);
-
-      this.palette.add([{
-        id: executeCellCommandId,
-        args: {model: model, session: s},
-        category: 'Notebook Operations',
-        text: 'Execute current cell',
-        caption: 'Execute the current cell'
-      }, {
-        id: renderCellCommandId,
-        args: {model: model},
-        category: 'Notebook Operations',
-        text: 'Render current markdown cell',
-        caption: 'Render the current markdown cell'
-      }, {
-        id: selectNextCellCommandId,
-        args: {model: model},
-        category: 'Notebook Operations',
-        text: 'Select next cell',
-        caption: 'Select next cell'
-      }, {
-        id: selectPreviousCellCommandId,
-        args: {model: model},
-        category: 'Notebook Operations',
-        text: 'Select previous cell',
-        caption: 'Select previous cell'
-      }]);
-
-      s.kernel.registerCommTarget('jupyter.widget', (comm, msg) => {
-        console.log('comm message', msg);
-
-        let modelPromise = manager.handle_comm_open(comm, msg);
-
-        comm.onMsg = (msg) => {
-          manager.handle_comm_open(comm, msg)
-          // create the widget model and (if needed) the view
-          console.log('comm widget message', msg);
-        }
-        comm.onClose = (msg) => {
-          console.log('comm widget close', msg);
-        }
-      })
-    })
-
-    panel.addChild(widgetarea)
-    panel.addChild(new NotebookWidget(model));
+    let panel = new NotebookContainer();
     panel.title.text = contents.name;
     panel.addClass(notebookContainerClass);
-    panel.addClass(`notebook-id-${notebookId}`);
+
+    this.session.startNew({notebookPath: contents.path}).then(s => {
+      panel.setSession(s);
+    })
+
     return panel;
   }
 
@@ -284,27 +332,22 @@ class NotebookFileHandler extends AbstractFileHandler {
    * Populate the notebook widget with the contents of the notebook.
    */
   protected setState(widget: Widget, model: IContentsModel): Promise<void> {
-    let nbData: NBData = makedata(model);
+    let nbData: NBData = {
+      content: model.content,
+      name: model.name,
+      path: model.path
+    }
     let nbWidget: NotebookWidget = ((widget as Panel).childAt(1)) as NotebookWidget;
     populateNotebookModel(nbWidget.model, nbData);
     return Promise.resolve();
   }
 
+  /**
+   * Get the current state of the notebook.
+   */
   protected getState(widget: Widget, model: IContentsModel): Promise<IContentsModel> {
     return Promise.resolve(void 0);
   }
 
-  palette: ICommandPalette;
   session: INotebookSessionManager;
-  shortcuts: IShortcutManager;
-  notebookId: number = 0;
-}
-
-
-function makedata(a: IContentsModel): NBData {
-  return {
-    content: a.content,
-    name: a.name,
-    path: a.path
-  }
 }
