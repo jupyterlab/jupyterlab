@@ -95,7 +95,7 @@ class ImageHandler extends AbstractFileHandler {
   /**
    * Get the state of the Widget, returns `undefined`.
    */
-  protected getState(widget: Widget): Promise<IContentsModel> {
+  protected getState(widget: Widget, model: IContentsModel): Promise<IContentsModel> {
     return Promise.resolve(void 0);
   }
 }

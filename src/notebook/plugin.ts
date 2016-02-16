@@ -290,7 +290,7 @@ class NotebookFileHandler extends AbstractFileHandler {
     return Promise.resolve();
   }
 
-  protected getState(widget: Widget): Promise<IContentsModel> {
+  protected getState(widget: Widget, model: IContentsModel): Promise<IContentsModel> {
     return Promise.resolve(void 0);
   }
 

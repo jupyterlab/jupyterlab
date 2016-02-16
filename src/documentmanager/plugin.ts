@@ -220,9 +220,7 @@ function register(container: Container): void {
       let manager = new DocumentManager();
       let id = 0;
       browser.openRequested.connect((browser, model) => {
-        manager.open(model);
-      });
-      manager.openRequested.connect((manager, widget) => {
+        let widget = manager.open(model);
         if (!widget.id) widget.id = `document-manager-${++id}`;
         if (!widget.isAttached) appShell.addToMainArea(widget);
         let stack = widget.parent;
