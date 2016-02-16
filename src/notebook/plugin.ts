@@ -267,10 +267,7 @@ class NotebookFileHandler extends AbstractFileHandler {
    */
   executeSelectedCell(): void {
     let w = this.activeWidget as NotebookContainer;
-    if (w) {
-      executeSelectedCell(w.model, w.session);
-      return;
-    }
+    if (w) executeSelectedCell(w.model, w.session);
   }
 
   /**
@@ -278,10 +275,7 @@ class NotebookFileHandler extends AbstractFileHandler {
    */
   renderSelectedCell(): void {
     let w = this.activeWidget as NotebookContainer;
-    if (w) {
-      renderSelectedCell(w.model);
-      return;
-    }
+    if (w) renderSelectedCell(w.model);
   }
 
   /**
@@ -289,10 +283,7 @@ class NotebookFileHandler extends AbstractFileHandler {
    */
   selectNextCell(): void {
     let w = this.activeWidget as NotebookContainer;
-    if (w) {
-      w.model.selectNextCell();
-      return;
-    }
+    if (w) w.model.selectNextCell();
   }
 
   /**
@@ -300,10 +291,7 @@ class NotebookFileHandler extends AbstractFileHandler {
    */
   selectPreviousCell(): void {
     let w = this.activeWidget as NotebookContainer;
-    if (w) {
-      w.model.selectPreviousCell();
-      return;
-    }
+    if (w) w.model.selectPreviousCell();
   }
 
   /**
