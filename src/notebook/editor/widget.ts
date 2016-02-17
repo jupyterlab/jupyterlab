@@ -55,7 +55,12 @@ interface IEditorModel {
   /**
    * A signal emitted when the editor model state changes.
    */
-  stateChanged: ISignal<IEditorModel, IChangedArgs<any>>
+  stateChanged: ISignal<IEditorModel, IChangedArgs<any>>;
+
+  /**
+   * A signal emitted when the editor model is selected.
+   */
+  selected: ISignal<IEditorModel, void>;
 
   /**
    * The text in the text editor.
@@ -103,6 +108,11 @@ interface IEditorModel {
    * Whether the contents of the editor are dirty.
    */
   dirty: boolean;
+
+  /**
+   * Select the editor model.
+   */
+  select(): void;
 }
 
 
@@ -132,6 +142,7 @@ class CodeMirrorWidget extends Widget {
     this.addClass(FILE_BROWSER_CLASS);
     this._editor = CodeMirror(this.node);
     this.model = model;
+    this.model.selected.connect(() => this._editor.focus());
     this._editor.on('change', () => {
       this.model.dirty = true;
     });
