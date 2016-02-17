@@ -1,6 +1,6 @@
 {
   "name": "jupyter-js-notebook",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Notebook widget for Jupyter",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -15,7 +15,7 @@
     "phosphor-signaling": "^1.2.0",
     "phosphor-widget": "^1.0.0-rc.1",
     "transformime": "^2.1.1",
-    "transformime-jupyter-transformers": "^0.2.0"
+    "transformime-jupyter-transformers": "^0.3.0"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
