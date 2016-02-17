@@ -33,7 +33,7 @@ import {
 } from 'phosphor-panel';
 
 import {
-  Property
+  IChangedArgs, Property
 } from 'phosphor-properties';
 
 import {
@@ -55,6 +55,12 @@ let selectNextCellCommandId = 'notebook:select-next-cell';
 let selectPreviousCellCommandId = 'notebook:select-previous-cell';
 
 let notebookContainerClass = 'jp-NotebookContainer';
+
+
+/**
+ * The class name added to a dirty documents.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
 
 
 /**
@@ -139,7 +145,7 @@ function messageToModel(msg: IKernelMessage) {
 /**
  * Execute the selected cell in a notebook.
  */
-function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
+function executeSelectedCell(model: INotebookModel, session: INotebookSession)  {
   let cell = model.cells.get(model.selectedCellIndex);
   if (isCodeCellModel(cell)) {
     let exRequest = {
@@ -160,6 +166,7 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
         output.add(model)
       }
     });
+    model.selectNextCell();
     ex.onReply = (msg => {console.log('a', msg)});
     ex.onDone = (msg => {console.log('b', msg)});
   }
@@ -169,7 +176,7 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
 /**
  * Render the selected cell in a notebook.
  */
-function renderSelectedCell(model: NotebookModel)  {
+function renderSelectedCell(model: INotebookModel)  {
   let cell = model.cells.get(model.selectedCellIndex);
   if (isMarkdownCellModel(cell)) {
     cell.rendered = true;
@@ -188,6 +195,7 @@ class NotebookContainer extends Panel {
   constructor() {
     super();
     this._model = new NotebookModel();
+    this._model.stateChanged.connect(this._onModelChanged, this);
     let widgetarea = new Widget();
     this._manager = new WidgetManager(widgetarea.node);
     let widget = new NotebookWidget(this._model);
@@ -202,7 +210,7 @@ class NotebookContainer extends Panel {
    * #### Notes
    * This is a read-only property.
    */
-  get model(): NotebookModel {
+  get model(): INotebookModel {
     return this._model;
   }
 
@@ -236,6 +244,16 @@ class NotebookContainer extends Panel {
         console.log('comm widget close', msg);
       }
     });
+  }
+
+  private _onModelChanged(model: INotebookModel, args: IChangedArgs<INotebookModel>): void {
+    if (args.name == 'dirty') {
+      if (args.newValue) {
+        this.addClass(DIRTY_CLASS);
+      } else {
+        this.removeClass(DIRTY_CLASS);
+      }
+    }
   }
 
   private _manager: WidgetManager = null;

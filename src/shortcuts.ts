@@ -50,7 +50,7 @@ const SHORTCUTS: IShortcutItem[] = [
   },
   {
     command: 'notebook:render-selected-cell',
-    selector: '.jp-MarkdownCel',
+    selector: '.jp-MarkdownCell',
     sequence: ['Shift Enter']
   }
 
