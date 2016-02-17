@@ -139,7 +139,7 @@ function messageToModel(msg: IKernelMessage) {
 /**
  * Execute the selected cell in a notebook.
  */
-function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
+function executeSelectedCell(model: INotebookModel, session: INotebookSession)  {
   let cell = model.cells.get(model.selectedCellIndex);
   if (isCodeCellModel(cell)) {
     let exRequest = {
@@ -169,7 +169,7 @@ function executeSelectedCell(model: NotebookModel, session: INotebookSession)  {
 /**
  * Render the selected cell in a notebook.
  */
-function renderSelectedCell(model: NotebookModel)  {
+function renderSelectedCell(model: INotebookModel)  {
   let cell = model.cells.get(model.selectedCellIndex);
   if (isMarkdownCellModel(cell)) {
     cell.rendered = true;
@@ -202,7 +202,7 @@ class NotebookContainer extends Panel {
    * #### Notes
    * This is a read-only property.
    */
-  get model(): NotebookModel {
+  get model(): INotebookModel {
     return this._model;
   }
 
