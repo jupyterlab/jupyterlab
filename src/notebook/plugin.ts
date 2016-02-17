@@ -247,7 +247,7 @@ class NotebookContainer extends Panel {
   }
 
   private _onModelChanged(model: INotebookModel, args: IChangedArgs<INotebookModel>): void {
-    if (args.name == 'dirty') {
+    if (args.name === 'dirty') {
       if (args.newValue) {
         this.addClass(DIRTY_CLASS);
       } else {
