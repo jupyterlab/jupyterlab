@@ -27,7 +27,7 @@
 }
 
 
-.jp-Cell.jp-mod-selected {
+.jp-Cell.jp-selected-cell {
   border-color: #ababab;
   border-left-width: 0px;
   padding-left: 6px;

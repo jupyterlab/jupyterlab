@@ -166,6 +166,10 @@ function executeSelectedCell(model: INotebookModel, session: INotebookSession)  
         output.add(model)
       }
     });
+    if (model.selectedCellIndex === model.cells.length - 1) {
+      let cell = model.createCodeCell();
+      model.cells.add(cell);
+    }
     model.selectNextCell();
     ex.onReply = (msg => {console.log('a', msg)});
     ex.onDone = (msg => {console.log('b', msg)});
@@ -343,17 +347,13 @@ class NotebookFileHandler extends AbstractFileHandler {
       name: model.name,
       path: model.path
     }
-    if (nbData.content.cells.length == 0) {
-      nbData.content.cells.push({
-        cell_type: 'code',
-        source: '',
-        outputs: [],
-        execution_count: 1,
-        metadata: { collapsed: true }
-      });
-    }
     let nbWidget: NotebookWidget = ((widget as Panel).childAt(1)) as NotebookWidget;
     populateNotebookModel(nbWidget.model, nbData);
+    if (nbWidget.model.cells.length === 0) {
+      let cell = nbWidget.model.createCodeCell();
+      nbWidget.model.cells.add(cell);
+    }
+    nbWidget.model.selectedCellIndex = 0;
 
     return Promise.resolve();
   }
