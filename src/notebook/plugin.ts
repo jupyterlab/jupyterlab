@@ -33,7 +33,7 @@ import {
 } from 'phosphor-panel';
 
 import {
-  Property
+  IChangedArgs, Property
 } from 'phosphor-properties';
 
 import {
@@ -55,6 +55,12 @@ let selectNextCellCommandId = 'notebook:select-next-cell';
 let selectPreviousCellCommandId = 'notebook:select-previous-cell';
 
 let notebookContainerClass = 'jp-NotebookContainer';
+
+
+/**
+ * The class name added to a dirty documents.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
 
 
 /**
@@ -160,6 +166,7 @@ function executeSelectedCell(model: INotebookModel, session: INotebookSession)  
         output.add(model)
       }
     });
+    model.selectNextCell();
     ex.onReply = (msg => {console.log('a', msg)});
     ex.onDone = (msg => {console.log('b', msg)});
   }
@@ -188,6 +195,7 @@ class NotebookContainer extends Panel {
   constructor() {
     super();
     this._model = new NotebookModel();
+    this._model.stateChanged.connect(this._onModelChanged, this);
     let widgetarea = new Widget();
     this._manager = new WidgetManager(widgetarea.node);
     let widget = new NotebookWidget(this._model);
@@ -236,6 +244,16 @@ class NotebookContainer extends Panel {
         console.log('comm widget close', msg);
       }
     });
+  }
+
+  private _onModelChanged(model: INotebookModel, args: IChangedArgs<INotebookModel>): void {
+    if (args.name === 'dirty') {
+      if (args.newValue) {
+        this.addClass(DIRTY_CLASS);
+      } else {
+        this.removeClass(DIRTY_CLASS);
+      }
+    }
   }
 
   private _manager: WidgetManager = null;

@@ -2,17 +2,41 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-.p-Widget .jp-NotebookWidget {
+.p-Widget.jp-NotebookWidget {
   min-width: 50px;
   min-height: 50px;
 }
 
-.p-Widget .jp-NotebookContainer {
+
+.p-Widget.jp-NotebookContainer {
   overflow: auto;
 }
 
-.p-Widget .jp-NotebookWidget-body {
+
+.p-Widget.jp-NotebookWidget-body {
   padding: 0.5em;
   font-size: 11px;
 }
 
+
+.jp-InputAreaWidget > .jp-CodeMirrorWidget {
+  border: 1px solid #cfcfcf;
+  border-radius: 2px;
+  background: #f7f7f7;
+  line-height: 1.21429em;
+}
+
+
+.jp-Cell.jp-mod-selected {
+  border-color: #ababab;
+  border-left-width: 0px;
+  padding-left: 6px;
+  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
+}
+
+
+.jp-Cell {
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
