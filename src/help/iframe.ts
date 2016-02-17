@@ -6,12 +6,8 @@ import {
   Widget
 } from 'phosphor-widget';
 
-import './iframe.css';
-
 
 const IFRAME_CLASS = 'jp-IFrame'
-
-const FRAME_CLASS = 'jp-IFrame-iframe';
 
 
 export
@@ -22,7 +18,8 @@ class IFrame extends Widget {
   static createNode(): HTMLElement {
     let node = document.createElement('div');
     let iframe = document.createElement('iframe');
-    iframe.className = FRAME_CLASS;
+    iframe.style.height = '100%';
+    iframe.style.width = '100%';
     node.appendChild(iframe);
     return node;
   }
