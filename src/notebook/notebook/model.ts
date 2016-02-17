@@ -166,9 +166,6 @@ class NotebookModel implements INotebookModel {
 
   /**
    * A signal emitted when the state of the model changes.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[stateChangedSignal]].
    */
   get stateChanged(): ISignal<INotebookModel, IChangedArgs<any>> {
     return NotebookModelPrivate.stateChangedSignal.bind(this);
@@ -186,9 +183,6 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Get the default mimetype for cells new code cells.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[defaultMimetype]].
    */
   get defaultMimetype() {
     return NotebookModelPrivate.defaultMimetype.get(this);
@@ -196,9 +190,6 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Set the default mimetype for cells new code cells.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[defaultMimetype]].
    */
   set defaultMimetype(value: string) {
     NotebookModelPrivate.defaultMimetype.set(this, value);
@@ -206,9 +197,6 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Get the mode of the notebook.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[modeProperty]].
    */
   get mode() {
     return NotebookModelPrivate.modeProperty.get(this);
@@ -216,9 +204,6 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Set the mode of the notebook.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[modeProperty]].
    */
   set mode(value: NotebookMode) {
     NotebookModelPrivate.modeProperty.set(this, value);
@@ -226,9 +211,6 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Get the selected cell index.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[selectedCellIndexProperty]].
    */
   get selectedCellIndex() {
     return NotebookModelPrivate.selectedCellIndexProperty.get(this);
@@ -236,14 +218,11 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Set the selected cell index.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[selectedCellIndexProperty]].
    */
   set selectedCellIndex(value: number) {
     NotebookModelPrivate.selectedCellIndexProperty.set(this, value);
     let cell = this.cells.get(value);
-    if (cell) cell.input.textEditor.select();
+    if (cell) cell.select();
   }
 
   /**
