@@ -17,6 +17,7 @@ function main() {
     require('jupyter-js-plugins/lib/filehandler/plugin'),
     require('jupyter-js-plugins/lib/filebrowser/plugin'),
     require('jupyter-js-plugins/lib/imagehandler/plugin'),
+    require('jupyter-js-plugins/lib/help/plugin'),
     require('jupyter-js-plugins/lib/notebook/plugin'),
     require('jupyter-js-plugins/lib/services/plugin'),
     require('jupyter-js-plugins/lib/application/plugin')

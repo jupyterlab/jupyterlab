@@ -21,6 +21,7 @@
     "documentmanager/index.ts",
     "documentmanager/plugin.ts",
     "imagehandler/plugin.ts",
+    "help/plugin.ts",
     "notebook/plugin.ts",
     "notebook/widgetmanager.ts",
     "services/index.ts",

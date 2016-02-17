@@ -1,0 +1,21 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-Help {
+  min-width: 650px;
+}
+
+body.p-mod-override-cursor .jp-Help {
+  position: relative;
+}
+
+body.p-mod-override-cursor .jp-Help:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+}
