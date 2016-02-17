@@ -142,7 +142,9 @@ class CodeMirrorWidget extends Widget {
     this.addClass(FILE_BROWSER_CLASS);
     this._editor = CodeMirror(this.node);
     this.model = model;
-    this.model.selected.connect(() => this._editor.focus());
+    this.model.selected.connect(() => {
+      if (!this.model.readOnly) this._editor.focus();
+    });
     this._editor.on('change', () => {
       this.model.dirty = true;
     });

@@ -83,7 +83,7 @@ class NotebookWidget extends Panel {
       let cell = this._model.cells.get(i);
       if (isMarkdownCellModel(cell) && cell.rendered) {
         cell.rendered = false;
-        // TODO: focus the cell editor
+        cell.input.textEditor.select();
       }
     })
     model.stateChanged.connect(this.modelStateChanged, this);
@@ -132,9 +132,7 @@ class NotebookWidget extends Panel {
     if (newIndex !== void 0) {
       let newCell = this.childAt(newIndex);
       newCell.addClass('jp-selected-cell');
-      // scroll so the selected cell is in the view
-      // TODO: replicate scrollIntoViewIfNeeded()
-      (newCell.node as any).scrollIntoView();
+      scrollIfNeeded(this.node, newCell.node);
     }
   }
 
@@ -176,7 +174,8 @@ class NotebookWidget extends Panel {
  * @param source - The observable list.
  * @param sink - The Panel.
  * @param factory - A function which takes an item from the list and constructs a widget.
- */function follow<T>(source: IObservableList<T>,
+ */
+ function follow<T>(source: IObservableList<T>,
                      sink: Panel,
                      factory: (arg: T)=> Widget): IDisposable {
 
@@ -216,4 +215,23 @@ class NotebookWidget extends Panel {
     source.changed.disconnect(callback);
   })
 
+}
+
+
+/**
+ * Scroll an element into view if needed.
+ *
+ * @param area - The scroll area element.
+ *
+ * @param elem - The element of interest.
+ */
+export
+function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
+  let ar = area.getBoundingClientRect();
+  let er = elem.getBoundingClientRect();
+  if (er.top < ar.top) {
+    area.scrollTop -= ar.top - er.top;
+  } else if (er.bottom > ar.bottom) {
+    area.scrollTop += er.bottom - ar.bottom;
+  }
 }
