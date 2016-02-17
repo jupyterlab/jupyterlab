@@ -80,6 +80,11 @@ interface IBaseCellModel {
   stateChanged: ISignal<IBaseCellModel, IChangedArgs<any>>;
 
   /**
+   * A signal emitted when the cell is selected.
+   */
+  selected: ISignal<IBaseCellModel, void>;
+
+  /**
    * Get namespaced metadata about the cell.
    */
   //getMetadata(namespace: string) : IObservableMap<string, ISerializable>;
@@ -93,6 +98,11 @@ interface IBaseCellModel {
    * The dirty state of the cell.
    */
   dirty: boolean;
+
+  /**
+   * Select the cell model.
+   */
+  select(): void;
 
   /**
    * Whether a cell is deletable.
@@ -169,30 +179,17 @@ class BaseCellModel implements IBaseCellModel {
 
   /**
    * A signal emitted when the state of the model changes.
-   *
-   * **See also:** [[stateChanged]]
-   */
-  static stateChangedSignal = new Signal<IBaseCellModel, IChangedArgs<any>>();
-
-  /**
-   * A signal emitted when the state of the model changes.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[stateChangedSignal]].
    */
   get stateChanged(): ISignal<IBaseCellModel, IChangedArgs<any>> {
-    return BaseCellModel.stateChangedSignal.bind(this);
+    return Private.stateChangedSignal.bind(this);
   }
 
   /**
-   * A property descriptor for the input area model.
-   *
-   * **See also:** [[input]]
+   * A signal emitted when the cell is selected.
    */
-  static inputProperty = new Property<IBaseCellModel, IInputAreaModel>({
-    name: 'input',
-    notify: BaseCellModel.stateChangedSignal,
-  });
+  get selected(): ISignal<IBaseCellModel, void> {
+    return Private.selectedSignal.bind(this);
+  }
 
   /**
    * Get the input area model.
@@ -201,7 +198,7 @@ class BaseCellModel implements IBaseCellModel {
    * This is a pure delegate to the [[inputProperty]].
    */
   get input() {
-    return BaseCellModel.inputProperty.get(this);
+    return Private.inputProperty.get(this);
   }
 
   /**
@@ -211,7 +208,7 @@ class BaseCellModel implements IBaseCellModel {
    * This is a pure delegate to the [[inputProperty]].
    */
   set input(value: IInputAreaModel) {
-    BaseCellModel.inputProperty.set(this, value);
+    Private.inputProperty.set(this, value);
     value.stateChanged.connect(this._inputChanged, this);
   }
 
@@ -236,6 +233,14 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
+   * Select the cell model.
+   */
+  select(): void {
+    this.selected.emit(void 0);
+    this.input.textEditor.select();
+  }
+
+  /**
    * The type of cell.
    */
   type: CellType;
@@ -256,37 +261,18 @@ class BaseCellModel implements IBaseCellModel {
  */
 export
 class CodeCellModel extends BaseCellModel implements ICodeCellModel {
-
-  /**
-  * A property descriptor holding the output area model.
-  *
-  * TODO: Do we need this execute signal?
-  * **See also:** [[output]]
-  */
-  static outputProperty = new Property<CodeCellModel, IOutputAreaModel>({
-      name: 'output',
-      notify: CodeCellModel.stateChangedSignal,
-  });
-
-
   /**
    * Get the output area model.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[outputProperty]].
    */
   get output() {
-      return CodeCellModel.outputProperty.get(this);
+    return Private.outputProperty.get(this);
   }
 
   /**
    * Set the output area model.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[outputProperty]].
    */
   set output(value: IOutputAreaModel) {
-      CodeCellModel.outputProperty.set(this, value);
+    Private.outputProperty.set(this, value);
   }
 
   type: CellType = CellType.Code;
@@ -300,33 +286,25 @@ export
 class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
 
   /**
-   * A property descriptor which determines whether the input area should be rendered.
-   *
-   * **See also:** [[rendered]]
-   */
-  static renderedProperty = new Property<MarkdownCellModel, boolean>({
-    name: 'rendered',
-    notify: MarkdownCellModel.stateChangedSignal,
-  });
-
-  /**
    * Get whether we should display a rendered representation.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[renderedProperty]].
    */
   get rendered() {
-    return MarkdownCellModel.renderedProperty.get(this);
+    return Private.renderedProperty.get(this);
   }
 
   /**
    * Get whether we should display a rendered representation.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[renderedProperty]].
    */
   set rendered(value: boolean) {
-    MarkdownCellModel.renderedProperty.set(this, value);
+    Private.renderedProperty.set(this, value);
+  }
+
+  /**
+   * Select the cell model.
+   */
+  select(): void {
+    this.selected.emit(void 0);
+    if (!this.rendered) this.input.textEditor.select();
   }
 
   type: CellType = CellType.Markdown;
@@ -354,4 +332,53 @@ function isCodeCellModel(m: ICellModel): m is ICodeCellModel {
 export
 function isRawCellModel(m: ICellModel): m is IRawCellModel {
   return (m.type === CellType.Raw);
+}
+
+
+/**
+ * A namespace for cell private data.
+ */
+namespace Private {
+
+  /**
+   * A signal emitted when the state of the model changes.
+   */
+  export
+  const stateChangedSignal = new Signal<IBaseCellModel, IChangedArgs<any>>();
+
+  /**
+   * A signal emitted when a cell model is selected.
+   */
+  export
+  const selectedSignal = new Signal<IBaseCellModel, void>();
+
+  /**
+   * A property descriptor for the input area model.
+   */
+  export
+  const inputProperty = new Property<IBaseCellModel, IInputAreaModel>({
+    name: 'input',
+    notify: stateChangedSignal,
+  });
+
+ /**
+  * A property descriptor holding the output area model.
+  *
+  * TODO: Do we need this execute signal?
+  */
+  export
+  const outputProperty = new Property<CodeCellModel, IOutputAreaModel>({
+      name: 'output',
+      notify: stateChangedSignal,
+  });
+
+  /**
+   * A property descriptor which determines whether the input area should be rendered.
+   */
+  export
+  const renderedProperty = new Property<MarkdownCellModel, boolean>({
+    name: 'rendered',
+    notify: stateChangedSignal,
+  });
+
 }

@@ -39,9 +39,9 @@ abstract class CellWidget extends Widget {
     this.node.tabIndex = -1;
     this.layout = new PanelLayout();
   }
-  
+
   protected _model: ICellModel;
-  
+
 }
 
 
@@ -75,7 +75,7 @@ class CodeCellWidget extends CellWidget {
     this.input = new InputAreaWidget(input);
     (this.layout as PanelLayout).insertChild(0, this.input);
   }
-  
+
   /**
    * Update the output area, creating a new output area
    * widget and detaching the old one.
@@ -108,11 +108,11 @@ class CodeCellWidget extends CellWidget {
 
 /**
  * A widget for a Markdown cell.
- * 
+ *
  * #### Notes
  * Things get complicated if we want the rendered text to update
- * any time the text changes, the text editor model changes, 
- * or the input area model changes.  We don't support automatically 
+ * any time the text changes, the text editor model changes,
+ * or the input area model changes.  We don't support automatically
  * updating the rendered text in all of these cases.
  */
 export
@@ -141,9 +141,9 @@ class MarkdownCellWidget extends CellWidget {
 
   /**
    * Process the input and display the rendered Markdown.
-   * 
+   *
    * #### Notes
-   * This will remove the input widget.  
+   * This will remove the input widget.
    * Call [[editInput]] to restore the editor.
    */
   renderInput() {
@@ -151,12 +151,12 @@ class MarkdownCellWidget extends CellWidget {
     this.input.parent = null;
     (this.layout as PanelLayout).addChild(this.rendered);
   }
-  
+
   /**
    * Edit the Markdown source.
-   * 
+   *
    * #### Notes
-   * This will remove the rendered widget.  
+   * This will remove the rendered widget.
    * Call [[renderInput]] to render the source.
    */
   editInput() {
@@ -177,7 +177,7 @@ class MarkdownCellWidget extends CellWidget {
       this.editInput();
     }
   }
-  
+
   /**
    * Update the input area, creating a new input area
    * widget and detaching the old one.
@@ -201,6 +201,15 @@ class MarkdownCellWidget extends CellWidget {
     case 'rendered':
       this.updateRendered(args.newValue);
       break;
+    }
+  }
+
+  /**
+   * A selection handler for the model.
+   */
+  private _onModelSelected() {
+    if (this._model.rendered) {
+      this.node.focus();
     }
   }
 
