@@ -90,6 +90,11 @@ interface IBaseCellModel {
   input: IInputAreaModel;
 
   /**
+   * The dirty state of the cell.
+   */
+  dirty: boolean;
+
+  /**
    * Whether a cell is deletable.
    */
   //deleteable: boolean;
@@ -207,12 +212,42 @@ class BaseCellModel implements IBaseCellModel {
    */
   set input(value: IInputAreaModel) {
     BaseCellModel.inputProperty.set(this, value);
+    value.stateChanged.connect(this._inputChanged, this);
+  }
+
+  /**
+   * Get the dirty state of the cell.
+   *
+   * #### Notes
+   * This is a pure delegate to the dirty state of the [input].
+   */
+  get dirty(): boolean {
+    return this.input.dirty;
+  }
+
+  /**
+   * Set the dirty state of the cell.
+   *
+   * #### Notes
+   * This is a pure delegate to the dirty state of the [input].
+   */
+  set dirty(value: boolean) {
+    this.input.dirty = value;
   }
 
   /**
    * The type of cell.
    */
   type: CellType;
+
+  /**
+   * Re-emit changes to the input dirty state.
+   */
+  private _inputChanged(input: IInputAreaModel, args: IChangedArgs<any>): void {
+    if (input === this.input && args.name === 'dirty') {
+      this.stateChanged.emit(args);
+    }
+  }
 }
 
 

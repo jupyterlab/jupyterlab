@@ -98,6 +98,11 @@ interface IEditorModel {
    * The number of spaces to insert for each tab.
    */
   tabSize: number;
+
+  /**
+   * Whether the contents of the editor are dirty.
+   */
+  dirty: boolean;
 }
 
 
@@ -127,6 +132,9 @@ class CodeMirrorWidget extends Widget {
     this.addClass(FILE_BROWSER_CLASS);
     this._editor = CodeMirror(this.node);
     this.model = model;
+    this._editor.on('change', () => {
+      this.model.dirty = true;
+    });
   }
 
   /**
