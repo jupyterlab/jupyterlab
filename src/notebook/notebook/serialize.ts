@@ -45,7 +45,7 @@ function populateNotebookModel(nb: INotebookModel, data: NBData): void {
   // iterate through the cell data, creating cell models
   data.content.cells.forEach((c) => {
     let input = new InputAreaModel();
-    input.textEditor = new EditorModel();
+    input.textEditor = new EditorModel({ lineNumbers: false });
     input.textEditor.text = c.source;
 
     if (isMarkdownCell(c)) {
