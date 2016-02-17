@@ -75,10 +75,14 @@ class EditorModel  {
   }
 
   /**
+   * A signal emitted when the editor is selected.
+   */
+  get selected(): ISignal<EditorModel, void> {
+    return EditorModelPrivate.selectedSignal.bind(this);
+  }
+
+  /**
    * A signal emitted when the editor model state changes.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[stateChangedSignal]].
    */
   get stateChanged(): ISignal<EditorModel, IChangedArgs<any>> {
     return EditorModelPrivate.stateChangedSignal.bind(this);
@@ -195,6 +199,13 @@ class EditorModel  {
   set text(value: string) {
     EditorModelPrivate.textProperty.set(this, value);
   }
+
+  /**
+   * Select the editor model.
+   */
+  select(): void {
+    this.selected.emit(void 0);
+  }
 }
 
 
@@ -208,6 +219,12 @@ namespace EditorModelPrivate {
    */
   export
   const stateChangedSignal = new Signal<EditorModel, IChangedArgs<any>>();
+
+  /**
+   * A signal emitted when the editor is selected.
+   */
+  export
+  const selectedSignal = new Signal<EditorModel, void>();
 
   /**
    * The property descriptor for the editor mimetype.
