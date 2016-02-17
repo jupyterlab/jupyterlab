@@ -294,6 +294,8 @@ class NotebookModel implements INotebookModel {
     input.textEditor = new EditorModel({ lineNumbers: false });
     let cell = new CodeCellModel();
     cell.input = input;
+    let outputArea = new OutputAreaModel();
+    cell.output = outputArea;
     return cell;
   }
 
