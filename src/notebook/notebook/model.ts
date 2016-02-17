@@ -22,6 +22,10 @@ import {
 } from 'phosphor-properties';
 
 import {
+  EditorModel
+} from '../editor';
+
+import {
   InputAreaModel
 } from '../input-area';
 
@@ -286,7 +290,10 @@ class NotebookModel implements INotebookModel {
    * Create a code cell model.
    */
   createCodeCell(source?: ICellModel): ICodeCellModel {
+    let input = new InputAreaModel();
+    input.textEditor = new EditorModel({ lineNumbers: false });
     let cell = new CodeCellModel();
+    cell.input = input;
     return cell;
   }
 
@@ -294,7 +301,10 @@ class NotebookModel implements INotebookModel {
    * Create a markdown cell model.
    */
   createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
+    let input = new InputAreaModel();
+    input.textEditor = new EditorModel({ lineNumbers: false });
     let cell  = new MarkdownCellModel();
+    cell.input = input;
     return cell;
   }
 
