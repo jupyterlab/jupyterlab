@@ -7,9 +7,15 @@ import {
 } from 'phosphor-widget';
 
 
-const IFRAME_CLASS = 'jp-IFrame'
+/**
+ * The class name added to an IFrame widget. 
+ */
+const IFRAME_CLASS = 'jp-IFrame';
 
 
+/**
+ * A phosphor widget which wraps an IFrame.
+ */
 export
 class IFrame extends Widget {
   /**
