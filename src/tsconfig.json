@@ -14,19 +14,15 @@
     "../typings/codemirror/codemirror.d.ts",
     "../typings/widgets.d.ts",
     "index.ts",
-    "application/plugin.ts",
-    "filebrowser/index.ts",
     "filebrowser/plugin.ts",
     "filehandler/plugin.ts",
-    "documentmanager/index.ts",
     "documentmanager/plugin.ts",
     "imagehandler/plugin.ts",
     "help/plugin.ts",
     "notebook/plugin.ts",
     "notebook/widgetmanager.ts",
-    "services/index.ts",
     "services/plugin.ts",
-    "terminal/index.ts",
+    "shortcuts/plugin.ts",
     "terminal/plugin.ts"
   ]
 }

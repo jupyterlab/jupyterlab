@@ -11,36 +11,12 @@ import {
   ContentsManager, KernelManager, NotebookSessionManager
 } from 'jupyter-js-services';
 
-import {
-  Container, Token
-} from 'phosphor-di';
-
-import {
-  IServicesProvider
-} from './index';
-
-
-/**
- * Register the plugin contributions.
- *
- * @param container - The di container for type registration.
- *
- * #### Notes
- * This is called automatically when the plugin is loaded.
- */
-export
-function register(container: Container): void {
-  container.register(IServicesProvider, {
-    requires: [],
-    create: () => { return new ServicesProvider(); }
-  });
-}
-
 
 /**
  * An implementation of a services provider.
  */
-class ServicesProvider implements IServicesProvider {
+export
+class JupyterServices {
 
   /**
    * Construct a new services provider.
@@ -88,3 +64,16 @@ class ServicesProvider implements IServicesProvider {
   private _sessionManager: INotebookSessionManager = null;
   private _contentsManager: IContentsManager = null;
 }
+
+
+/**
+ * The default services provider.
+ */
+export
+const servicesProvider = {
+  id: 'jupyter.services.services',
+  provides: JupyterServices,
+  resolve: () => {
+    return new JupyterServices();
+  },
+};

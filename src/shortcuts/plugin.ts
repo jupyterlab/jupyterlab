@@ -3,11 +3,14 @@
 'use strict';
 
 import {
-  IShortcutItem
-} from 'phosphide';
+  Application
+} from 'phosphide/lib/core/application';
 
-export
-const SHORTCUTS: IShortcutItem[] = [
+
+/**
+ * The list of default application shortcuts.
+ */
+const SHORTCUTS = [
   {
     command: 'command-palette:activate',
     selector: '*',
@@ -55,3 +58,18 @@ const SHORTCUTS: IShortcutItem[] = [
   }
 
 ];
+
+
+/**
+ * The default shortcuts extension. 
+ */
+export
+const shortcutsExtension = {
+  id: 'jupyter.extensions.shortcuts',
+  activate: (app: Application): Promise<void> => {
+    app.shortcuts.add(SHORTCUTS);
+    return Promise.resolve(void 0);
+  }
+};
+
+
