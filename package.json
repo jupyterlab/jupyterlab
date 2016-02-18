@@ -1,6 +1,6 @@
 {
   "name": "jupyter-js-plugins",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Plugins for JupyterLab",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
