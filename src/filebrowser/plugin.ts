@@ -7,54 +7,61 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
-  Container, Token
-} from 'phosphor-di';
+  Application
+} from 'phosphide/lib/core/application';
 
 import {
   Menu, MenuBar, MenuItem
 } from 'phosphor-menus';
 
 import {
-  IFileBrowserWidget
-} from './index';
-
-import {
-  IServicesProvider
-} from '../index';
+  ServicesProvider
+} from '../services/plugin';
 
 
 /**
- * Register the plugin contributions.
- *
- * @param container - The di container for type registration.
- *
- * #### Notes
- * This is called automatically when the plugin is loaded.
+ * The default file browser provider.
  */
 export
-function register(container: Container): void {
-  container.register(IFileBrowserWidget, {
-    requires: [IServicesProvider],
-    create: (provider: IServicesProvider) => {
-      let contents = provider.contentsManager;
-      let sessions = provider.notebookSessionManager;
-      let model = new FileBrowserModel(contents, sessions);
-      let widget = new FileBrowserWidget(model);
+const fileBrowserProvider = {
+  id: 'jupyter.services.fileBrowser',
+  provides: FileBrowserWidget,
+  requires: [ServicesProvider],
+  resolve: (provider: ServicesProvider) => {
+    let contents = provider.contentsManager;
+    let sessions = provider.notebookSessionManager;
+    let model = new FileBrowserModel(contents, sessions);
+    return new FileBrowserWidget(model);
+  },
+};
 
-      let menu = createMenu(widget);
 
-      // Add a context menu to the dir listing.
-      let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
-      node.addEventListener('contextmenu', (event: MouseEvent) => {
-        event.preventDefault();
-        let x = event.clientX;
-        let y = event.clientY;
-        menu.popup(x, y);
-      });
+/**
+ * The default file browser extension. 
+ */
+export
+const fileBrowserExtension = {
+  id: 'jupyter.extensions.fileBrowser',
+  requires: [FileBrowserWidget],
+  activate: activateFileBrowser
+};
 
-      return widget;
-    }
+
+/**
+ * Activate the file browser.
+ */
+function activateFileBrowser(app: Application, widget: FileBrowserWidget): Promise<void> {
+  let menu = createMenu(widget);
+
+  // Add a context menu to the dir listing.
+  let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
+  node.addEventListener('contextmenu', (event: MouseEvent) => {
+    event.preventDefault();
+    let x = event.clientX;
+    let y = event.clientY;
+    menu.popup(x, y);
   });
+  return Promise.resolve(void 0);
 }
 
 

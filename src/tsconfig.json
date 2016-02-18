@@ -15,7 +15,6 @@
     "../typings/widgets.d.ts",
     "index.ts",
     "application/plugin.ts",
-    "filebrowser/index.ts",
     "filebrowser/plugin.ts",
     "filehandler/plugin.ts",
     "documentmanager/plugin.ts",
@@ -23,7 +22,6 @@
     "help/plugin.ts",
     "notebook/plugin.ts",
     "notebook/widgetmanager.ts",
-    "services/index.ts",
     "services/plugin.ts",
     "terminal/index.ts",
     "terminal/plugin.ts"
