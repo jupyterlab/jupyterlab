@@ -1,26 +1,105 @@
-.jp-Cell {
-	border: 1px solid gray;
+.p-Widget.jp-NotebookWidget {
+  min-width: 50px;
+  min-height: 50px;
 }
 
-.jp-selected-cell {
-    border: 1px solid #ababab;
+
+.p-Widget.jp-NotebookContainer {
+  overflow: auto;
 }
 
-.jp-Notebook {
-    overflow: auto;
-}
 
-.jp-InputAreaWidget .CodeMirror {
-  height: auto;
-  background-color: #f7f7f7;
-  border: 1px solid #cfcfcf;
-}
-
-.jp-Cell {
+.p-Widget.jp-NotebookWidget-body {
   padding: 0.5em;
-  margin: 0.5em;
+  font-size: 11px;
 }
+
+
+.jp-InputAreaWidget > .jp-CodeMirrorWidget {
+  border: 1px solid #cfcfcf;
+  border-radius: 2px;
+  background: #f7f7f7;
+  line-height: 1.21429em;
+}
+
+
+.jp-MarkdownCell {
+  outline: 0;
+}
+
+
+.jp-OutputArea pre {
+  background: #ffffff;
+  border: none;
+}
+
+
+.jp-Cell.jp-selected-cell {
+  border-color: #66BB6A;
+  border-left-width: 1px;
+  padding-left: 10px;
+  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
+}
+
+
+.jp-Cell {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+}
+
 
 .jp-MarkdownCell {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+
+.CodeMirror.cm-s-default {
+  line-height: 1.21429em;
+  /* Changed from 1em to our global default */
+  font-size: 14px;
+  height: auto;
+  /* Changed to auto to autogrow */
+  background: none;
+  /* Changed from white to allow our bg to show through */
+}
+
+
+.CodeMirror-scroll {
+  /*  The CodeMirror docs are a bit fuzzy on if overflow-y should be hidden or visible.*/
+  /*  We have found that if it is visible, vertical scrollbars appear with font size changes.*/
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
+
+.CodeMirror-lines {
+  /* In CM2, this used to be 0.4em, but in CM3 it went to 4px. We need the em value because */
+  /* we have set a different line-height and want this to scale with that. */
+  padding: 0.4em;
+}
+
+
+.CodeMirror-linenumber {
+  padding: 0 8px 0 4px;
+}
+
+
+
+.CodeMirror-gutters {
+  border-bottom-left-radius: 2px;
+  border-top-left-radius: 2px;
+}
+
+
+.CodeMirror pre {
+  /* In CM3 this went to 4px from 0 in CM2. We need the 0 value because of how we size */
+  /* .CodeMirror-lines */
+  padding: 0;
+  border: 0;
+  border-radius: 0;
 }

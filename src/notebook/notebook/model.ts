@@ -1,25 +1,30 @@
+
 import {
-  ICellModel,
-  ICodeCellModel, CodeCellModel,
-  IMarkdownCellModel, MarkdownCellModel,
-  IRawCellModel
-} from '../cells';
+  INotebookSession
+} from 'jupyter-js-services';
 
 import {
   IObservableList, ObservableList, ListChangeType, IListChangedArgs
 } from 'phosphor-observablelist';
 
 import {
-  Widget
-} from 'phosphor-widget';
+  IChangedArgs, Property
+} from 'phosphor-properties';
 
 import {
   ISignal, Signal
 } from 'phosphor-signaling';
 
 import {
-  IChangedArgs, Property
-} from 'phosphor-properties';
+  Widget
+} from 'phosphor-widget';
+
+import {
+  ICellModel,
+  ICodeCellModel, CodeCellModel,
+  IMarkdownCellModel, MarkdownCellModel,
+  IRawCellModel, isCodeCellModel, isMarkdownCellModel
+} from '../cells';
 
 import {
   EditorModel
@@ -35,6 +40,10 @@ import {
   ExecuteErrorModel, StreamModel,
   StreamName
 } from '../output-area';
+
+import {
+  messageToModel
+} from './serialize';
 
 
 /**
@@ -98,6 +107,11 @@ interface INotebookModel {
   cells: IObservableList<ICellModel>;
 
   /**
+   * The optional notebook session associated with the model. 
+   */
+  session?: INotebookSession;
+
+  /**
    * The currently selected cell.
    *
    * #### Notes
@@ -148,6 +162,11 @@ interface INotebookModel {
    *   new cell will be intialized with the data from the source.
    */
   //createRawCell(source?: ICellModel): IRawCellModel;
+
+  /**
+   * Run the selected cell, taking the appropriate action.
+   */
+  runSelectedCell(): void;
 }
 
 
@@ -207,6 +226,20 @@ class NotebookModel implements INotebookModel {
    */
   set mode(value: NotebookMode) {
     NotebookModelPrivate.modeProperty.set(this, value);
+  }
+
+  /**
+   * Get the session for the notebook.
+   */
+  get session() {
+    return NotebookModelPrivate.sessionProperty.get(this);
+  }
+
+  /**
+   * Set the session for the notebook.
+   */
+  set session(value: INotebookSession) {
+    NotebookModelPrivate.sessionProperty.set(this, value);
   }
 
   /**
@@ -290,6 +323,52 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Run the selected cell, taking the appropriate action.
+   */
+  runSelectedCell(): void {
+    let cell = this.cells.get(this.selectedCellIndex);
+    if (!cell) {
+      return;
+    }
+    if (isMarkdownCellModel(cell)) {
+      cell.rendered = true;
+    } else if (isCodeCellModel(cell)) {
+      this.executeCell(cell as CodeCellModel);
+    }
+    if (this.selectedCellIndex === this.cells.length - 1) {
+      let cell = this.createCodeCell();
+      this.cells.add(cell);
+    }
+    this.selectNextCell();
+  }
+
+  /**
+   * Execute the given cell. 
+   */
+  protected executeCell(cell: CodeCellModel): void {
+    let session = this.session;
+    if (!session) {
+      return;
+    }
+    let exRequest = {
+      code: cell.input.textEditor.text,
+      silent: false,
+      store_history: true,
+      stop_on_error: true,
+      allow_stdin: true
+    };
+    let output = cell.output;
+    let ex = this.session.kernel.execute(exRequest);
+    output.clear(false);
+    ex.onIOPub = (msg => {
+      let model = messageToModel(msg);
+      if (model !== void 0) {
+        output.add(model)
+      }
+    });
+  }
+
+  /**
    * Handle a change in the cells list.
    */
   private _onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
@@ -338,6 +417,15 @@ namespace NotebookModelPrivate {
   export
   const modeProperty = new Property<NotebookModel, NotebookMode>({
     name: 'mode',
+    notify: stateChangedSignal,
+  });
+
+  /**
+  * A property descriptor which holds the session of the notebook.
+  */
+  export
+  const sessionProperty = new Property<NotebookModel, INotebookSession>({
+    name: 'session',
     notify: stateChangedSignal,
   });
 
