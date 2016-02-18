@@ -1,11 +1,26 @@
 // Notebook format interfaces
+// https://nbformat.readthedocs.org/en/latest/format_description.html
 
 import {
     MimeBundle
 } from '../output-area';
 
+
 // In the notebook format *disk* representation, this would be string | string[]
 export type multilineString = string;
+
+
+/**
+ * The major version of the notebook format.
+ */
+export 
+const MAJOR_VERSION = 4;
+
+/**
+ * The minor version of the notebook format.
+ */
+export 
+const MINOR_VERSION = 0;
 
 
 export
@@ -96,6 +111,8 @@ export
 interface CodeCell extends BaseCell {
     cell_type: string; /*"code"*/
     metadata: {
+        name?: string;
+        tags?: string[];
         collapsed?: boolean;
         scrolled?: boolean | string;
     }
