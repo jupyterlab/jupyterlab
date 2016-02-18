@@ -16,7 +16,7 @@ body {
 }
 
 
-.p-AppShell.p-Widget {
+.p-ApplicationShell.p-Widget {
   position: absolute;
   top: 0;
   left: 0;
