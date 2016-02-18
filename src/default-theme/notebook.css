@@ -32,6 +32,12 @@
 }
 
 
+.jp-OutputArea pre {
+  background: #ffffff;
+  border: none;
+}
+
+
 .jp-Cell.jp-selected-cell {
   border-color: #66BB6A;
   border-left-width: 1px;
