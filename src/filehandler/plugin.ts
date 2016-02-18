@@ -7,25 +7,28 @@ import {
 } from 'jupyter-js-docmanager';
 
 import {
+  Application
+} from 'phosphide/lib/core/application';
+
+import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  ServicesProvider
+  JupyterServices
 } from '../services/plugin';
 
 
 /**
- * The default file handler provider.
+ * The default file handler extension.
  */
 export
-const fileHandlerProvider = {
-  id: 'jupyter.services.fileHandler',
-  provides: FileHandler,
-  requires: [DocumentManager, ServicesProvider],
-  resolve: (manager: DocumentManager, services: ServicesProvider) => {
+const fileHandlerExtension = {
+  id: 'jupyter.extensions.fileHandler',
+  requires: [DocumentManager, JupyterServices],
+  activate: (app: Application, manager: DocumentManager, services: JupyterServices) => {
     let handler = new FileHandler(services.contentsManager);
     manager.registerDefault(handler);
-    return handler;
+    return Promise.resolve(void 0);
   },
 };

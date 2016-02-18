@@ -11,26 +11,29 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  Application
+} from 'phosphide/lib/core/application';
+
+import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  ServicesProvider
+  JupyterServices
 } from '../services/plugin';
 
 
 /**
- * The image file handler provider.
+ * The image file handler extension.
  */
 export
-const imageHandlerProvider = {
+const imageHandlerExtension = {
   id: 'jupyter.services.imageHandler',
-  provides: ImageHandler,
-  requires: [DocumentManager, ServicesProvider],
-  resolve: (manager: DocumentManager, services: ServicesProvider) => {
+  requires: [DocumentManager, JupyterServices],
+  activate: (app: Application, manager: DocumentManager, services: JupyterServices) => {
     let handler = new ImageHandler(services.contentsManager);
     manager.register(handler);
-    return handler;
+    return Promise.resolve(void 0);
   },
 };
 

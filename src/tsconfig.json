@@ -14,7 +14,6 @@
     "../typings/codemirror/codemirror.d.ts",
     "../typings/widgets.d.ts",
     "index.ts",
-    "application/plugin.ts",
     "filebrowser/plugin.ts",
     "filehandler/plugin.ts",
     "documentmanager/plugin.ts",
@@ -23,7 +22,7 @@
     "notebook/plugin.ts",
     "notebook/widgetmanager.ts",
     "services/plugin.ts",
-    "terminal/index.ts",
+    "shortcuts/plugin.ts",
     "terminal/plugin.ts"
   ]
 }

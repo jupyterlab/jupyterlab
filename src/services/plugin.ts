@@ -18,9 +18,9 @@ import {
 export
 const servicesProvider = {
   id: 'jupyter.services.services',
-  provides: ServicesProvider,
+  provides: JupyterServices,
   resolve: () => {
-    return new ServicesProvider();
+    return new JupyterServices();
   },
 };
 
@@ -30,7 +30,7 @@ const servicesProvider = {
  * An implementation of a services provider.
  */
 export
-class ServicesProvider {
+class JupyterServices {
 
   /**
    * Construct a new services provider.

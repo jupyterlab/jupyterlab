@@ -21,16 +21,12 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  Application
+} from 'phosphide/lib/core/application';
+
+import {
   Panel
 } from 'phosphor-panel';
-
-import {
-  ABCCommandRegistry
-} from 'phosphide/lib/core/services/commandregistry';
-
-import {
-  ABCPaletteRegistry
-} from 'phosphide/lib/core/services/palletteregistry';
 
 import {
   IChangedArgs, Property
@@ -41,7 +37,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ServicesProvider
+  JupyterServices
 } from '../services/plugin';
 
 import {
@@ -67,53 +63,58 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * The notebook file handler provider.
  */
 export
-const fileHandlerProvider = {
-  id: 'jupyter.services.notebookHandler',
-  provides: NotebookFileHandler,
-  requires: [DocumentManager, ServicesProvider, ABCCommandRegistry, ABCPaletteRegistry],
-  resolve: (manager: DocumentManager, services: ServicesProvider, commands: ABCCommandRegistry, palette: ABCPaletteRegistry) => {
-    let handler = new NotebookFileHandler(
-      services.contentsManager,
-      services.notebookSessionManager
-    );
-    manager.register(handler);
-    commands.add([{
-      id: executeCellCommandId,
-      handler: () => handler.executeSelectedCell()
-    }, {
-      id: renderCellCommandId,
-      handler: () => handler.renderSelectedCell()
-    }, {
-      id: selectNextCellCommandId,
-      handler: () => handler.selectNextCell()
-    }, {
-      id: selectPreviousCellCommandId,
-      handler: () => handler.selectPreviousCell()
-    }]);
-    palette.add([{
-      command: executeCellCommandId,
-      category: 'Notebook Operations',
-      text: 'Execute current cell',
-      caption: 'Execute the current cell'
-    }, {
-      command: renderCellCommandId,
-      category: 'Notebook Operations',
-      text: 'Render current markdown cell',
-      caption: 'Render the current markdown cell'
-    }, {
-      command: selectNextCellCommandId,
-      category: 'Notebook Operations',
-      text: 'Select next cell',
-      caption: 'Select next cell'
-    }, {
-      command: selectPreviousCellCommandId,
-      category: 'Notebook Operations',
-      text: 'Select previous cell',
-      caption: 'Select previous cell'
-    }]);
-    return handler;
-  },
-};
+const fileHandlerExtension = {
+  id: 'jupyter.extensions.notebookHandler',
+  requires: [DocumentManager, JupyterServices],
+  activate: activateNotebookHandler
+}
+
+
+/**
+ * Activate the notebook handler extension.
+ */
+function activateNotebookHandler(app: Application, manager: DocumentManager, services: JupyterServices): Promise<void> {
+  let handler = new NotebookFileHandler(
+    services.contentsManager,
+    services.notebookSessionManager
+  );
+  manager.register(handler);
+  app.commands.add([{
+    id: executeCellCommandId,
+    handler: () => handler.executeSelectedCell()
+  }, {
+    id: renderCellCommandId,
+    handler: () => handler.renderSelectedCell()
+  }, {
+    id: selectNextCellCommandId,
+    handler: () => handler.selectNextCell()
+  }, {
+    id: selectPreviousCellCommandId,
+    handler: () => handler.selectPreviousCell()
+  }]);
+  app.palette.add([{
+    command: executeCellCommandId,
+    category: 'Notebook Operations',
+    text: 'Execute current cell',
+    caption: 'Execute the current cell'
+  }, {
+    command: renderCellCommandId,
+    category: 'Notebook Operations',
+    text: 'Render current markdown cell',
+    caption: 'Render the current markdown cell'
+  }, {
+    command: selectNextCellCommandId,
+    category: 'Notebook Operations',
+    text: 'Select next cell',
+    caption: 'Select next cell'
+  }, {
+    command: selectPreviousCellCommandId,
+    category: 'Notebook Operations',
+    text: 'Select previous cell',
+    caption: 'Select previous cell'
+  }]);
+  return Promise.resolve(void 0);
+}
 
 
 /**
