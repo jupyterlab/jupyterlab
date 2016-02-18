@@ -28,7 +28,7 @@ import {
  */
 export
 const imageHandlerExtension = {
-  id: 'jupyter.services.imageHandler',
+  id: 'jupyter.extensions.imageHandler',
   requires: [DocumentManager, JupyterServices],
   activate: (app: Application, manager: DocumentManager, services: JupyterServices) => {
     let handler = new ImageHandler(services.contentsManager);
