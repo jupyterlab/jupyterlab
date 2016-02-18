@@ -45,8 +45,7 @@ import {
 } from './widgetmanager';
 
 
-let executeCellCommandId = 'notebook:execute-selected-cell';
-let renderCellCommandId = 'notebook:render-selected-cell';
+let runCellCommandId = 'notebook:run-selected-cell';
 let selectNextCellCommandId = 'notebook:select-next-cell';
 let selectPreviousCellCommandId = 'notebook:select-previous-cell';
 
@@ -80,11 +79,8 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
   );
   manager.register(handler);
   app.commands.add([{
-    id: executeCellCommandId,
-    handler: () => handler.executeSelectedCell()
-  }, {
-    id: renderCellCommandId,
-    handler: () => handler.renderSelectedCell()
+    id: runCellCommandId,
+    handler: () => handler.runSelectedCell()
   }, {
     id: selectNextCellCommandId,
     handler: () => handler.selectNextCell()
@@ -93,15 +89,10 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
     handler: () => handler.selectPreviousCell()
   }]);
   app.palette.add([{
-    command: executeCellCommandId,
+    command: runCellCommandId,
     category: 'Notebook Operations',
-    text: 'Execute current cell',
-    caption: 'Execute the current cell'
-  }, {
-    command: renderCellCommandId,
-    category: 'Notebook Operations',
-    text: 'Render current markdown cell',
-    caption: 'Render the current markdown cell'
+    text: 'Run current cell',
+    caption: 'Run the current cell'
   }, {
     command: selectNextCellCommandId,
     category: 'Notebook Operations',
@@ -114,72 +105,6 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
     caption: 'Select previous cell'
   }]);
   return Promise.resolve(void 0);
-}
-
-
-/**
- * Convert a kernel message to an output model.
- */
-function messageToModel(msg: IKernelMessage) {
-  let m: Output = msg.content;
-  let type = msg.header.msg_type;
-  if (type === 'execute_result') {
-    m.output_type = 'display_data';
-  } else {
-    m.output_type = type;
-  }
-  return buildOutputModel(m);
-}
-
-
-/**
- * Execute the selected cell in a notebook.
- */
-function executeSelectedCell(model: INotebookModel, session: INotebookSession)  {
-  let cell = model.cells.get(model.selectedCellIndex);
-  if (isCodeCellModel(cell)) {
-    let exRequest = {
-      code: cell.input.textEditor.text,
-      silent: false,
-      store_history: true,
-      stop_on_error: true,
-      allow_stdin: true
-    };
-    let output = cell.output;
-    console.log(`executing`, exRequest)
-    let ex = session.kernel.execute(exRequest);
-    output.clear(false);
-    ex.onIOPub = (msg => {
-      let model = messageToModel(msg);
-      console.log('iopub', msg);
-      if (model !== void 0) {
-        output.add(model)
-      }
-    });
-    if (model.selectedCellIndex === model.cells.length - 1) {
-      let cell = model.createCodeCell();
-      model.cells.add(cell);
-    }
-    model.selectNextCell();
-    ex.onReply = (msg => {console.log('a', msg)});
-    ex.onDone = (msg => {console.log('b', msg)});
-  }
-}
-
-
-/**
- * Render the selected cell in a notebook.
- */
-function renderSelectedCell(model: INotebookModel)  {
-  let cell = model.cells.get(model.selectedCellIndex);
-  if (isMarkdownCellModel(cell)) {
-    cell.rendered = true;
-  }
-  if (model.selectedCellIndex === model.cells.length - 1) {
-    let cell = model.createCodeCell();
-    model.cells.add(cell);
-  }
-  model.selectNextCell();
 }
 
 
@@ -228,6 +153,7 @@ class NotebookContainer extends Panel {
    */
   setSession(value: INotebookSession) {
     this._session = value;
+    this._model.session = value;
 
     let commHandler = (comm: IComm, msg: IKernelMessage) => {
       console.log('comm message', msg);
@@ -283,19 +209,11 @@ class NotebookFileHandler extends AbstractFileHandler {
   }
 
   /**
-   * Execute the selected cell on the active widget.
+   * Run the selected cell on the active widget.
    */
-  executeSelectedCell(): void {
+  runSelectedCell(): void {
     let w = this.activeWidget as NotebookContainer;
-    if (w) executeSelectedCell(w.model, w.session);
-  }
-
-  /**
-   * Render the selected cell on the active widget.
-   */
-  renderSelectedCell(): void {
-    let w = this.activeWidget as NotebookContainer;
-    if (w) renderSelectedCell(w.model);
+    if (w) w.model.runSelectedCell();
   }
 
   /**
