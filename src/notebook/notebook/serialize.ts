@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  IKernelMessage
+} from 'jupyter-js-services';
+
+import {
   NotebookModel, INotebookModel
 } from './model';
 
@@ -108,4 +112,20 @@ function buildOutputModel(out: Output): OutputModel {
     outmodel.metadata = out.metadata;
     return outmodel;
   }
+}
+
+
+/**
+ * Convert a kernel message to an output model.
+ */
+export
+function messageToModel(msg: IKernelMessage) {
+  let m: Output = msg.content;
+  let type = msg.header.msg_type;
+  if (type === 'execute_result') {
+    m.output_type = 'display_data';
+  } else {
+    m.output_type = type;
+  }
+  return buildOutputModel(m);
 }
