@@ -2,24 +2,20 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-.p-Widget.jp-NotebookWidget {
-  min-width: 50px;
-  min-height: 50px;
-}
 
-
+/* Increased specificity in case phosphor css is loaded later. */
 .p-Widget.jp-NotebookContainer {
   overflow: auto;
 }
 
 
-.p-Widget.jp-NotebookWidget-body {
-  padding: 0.5em;
-  font-size: 11px;
+.p-Widget.jp-Notebook {  
+  min-width: 50px;
+  min-height: 50px;
 }
 
 
-.jp-InputAreaWidget > .jp-CodeMirrorWidget {
+.jp-InputArea > .jp-CodeMirror {
   border: 1px solid #cfcfcf;
   border-radius: 2px;
   background: #f7f7f7;
@@ -38,7 +34,7 @@
 }
 
 
-.jp-Cell.jp-selected-cell {
+.jp-Cell.jp-mod-selected {
   border-color: #66BB6A;
   border-left-width: 1px;
   padding-left: 10px;
@@ -56,3 +52,7 @@
   border-color: transparent;
 }
 
+
+.jp-MarkdownCell {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
