@@ -137,6 +137,7 @@ class MarkdownCellWidget extends CellWidget {
       this.editInput();
     }
     model.stateChanged.connect(this.modelStateChanged, this);
+    model.selected.connect(this._onModelSelected, this);
   }
 
   /**
