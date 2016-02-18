@@ -13,18 +13,18 @@
 }
 
 
-.jp-MarkdownCell {
+.jp-MarkdownCellWidget {
   outline: 0;
 }
 
 
-.jp-OutputArea pre {
+.jp-OutputAreaWidget pre {
   background: #ffffff;
   border: none;
 }
 
 
-.jp-Cell.jp-selected-cell {
+.jp-CellWidget.jp-mod-selected {
   border-color: #66BB6A;
   border-left-width: 1px;
   padding-left: 10px;
@@ -32,7 +32,7 @@
 }
 
 
-.jp-Cell {
+.jp-CellWidget {
   padding-top: 10px;
   padding-bottom: 10px;
   padding-left: 10px;
@@ -43,7 +43,7 @@
 }
 
 
-.jp-MarkdownCell {
+.jp-MarkdownCellWidget {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 

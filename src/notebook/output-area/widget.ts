@@ -84,7 +84,7 @@ class OutputAreaWidget extends Panel {
    */
   constructor(model: IOutputAreaModel) {
     super();
-    this.addClass('jp-OutputArea');
+    this.addClass('jp-OutputAreaWidget');
     this._model = model;
     model.stateChanged.connect(this.modelStateChanged, this);
     this._listdispose = follow<OutputModel>(model.outputs, this, (out) => {

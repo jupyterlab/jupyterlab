@@ -35,6 +35,7 @@ export
 abstract class CellWidget extends Widget {
   constructor() {
     super();
+    this.addClass('jp-CellWidget');
     // we make the cell focusable by setting the tabIndex
     this.node.tabIndex = -1;
     this.layout = new PanelLayout();
@@ -56,8 +57,7 @@ class CodeCellWidget extends CellWidget {
    */
   constructor(model: ICodeCellModel) {
     super();
-    this.addClass('jp-Cell');
-    this.addClass('jp-CodeCell');
+    this.addClass('jp-CodeCellWidget');
     this._model = model;
     this.input = new InputAreaWidget(model.input);
     this.output = new OutputAreaWidget(model.output);
@@ -123,8 +123,7 @@ class MarkdownCellWidget extends CellWidget {
    */
   constructor(model: IMarkdownCellModel) {
     super();
-    this.addClass('jp-Cell');
-    this.addClass('jp-MarkdownCell');
+    this.addClass('jp-MarkdownCellWidget');
 
     this._model = model;
     // Insist on the Github-flavored markdown mode

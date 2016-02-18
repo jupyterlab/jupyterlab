@@ -32,7 +32,7 @@ import {
 /**
  * The class name added to CodeMirrorWidget instances.
  */
-const FILE_BROWSER_CLASS = 'jp-CodeMirrorWidget';
+const CODEMIRROR_CLASS = 'jp-CodeMirrorWidget';
 
 
 /**
@@ -139,7 +139,7 @@ class CodeMirrorWidget extends Widget {
    */
   constructor(model: IEditorModel) {
     super();
-    this.addClass(FILE_BROWSER_CLASS);
+    this.addClass(CODEMIRROR_CLASS);
     this._editor = CodeMirror(this.node);
     this.model = model;
     this.model.selected.connect(() => {

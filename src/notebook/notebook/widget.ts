@@ -36,6 +36,23 @@ import {
   DisposableDelegate, IDisposable
 } from 'phosphor-disposable';
 
+
+/**
+ * The class name added to notebook widgets.
+ */
+const NB_CLASS = 'jp-NotebookWidget';
+
+/**
+ * The class name added to notebook widget cells.
+ */
+const NB_CELL_CLASS = 'jp-NotebookWidget-cell';
+
+/**
+ * The class name added to notebook selected cells.
+ */
+const NB_SELECTED_CLASS = 'jp-mod-selected';
+
+
 /**
  * A widget for a notebook.
  */
@@ -47,7 +64,7 @@ class NotebookWidget extends Panel {
    */
   constructor(model: INotebookModel) {
     super();
-    this.addClass('jp-Notebook');
+    this.addClass(NB_CLASS);
     this._model = model;
 
     this._listdispose = follow<ICellModel>(model.cells, this, (c: ICellModel) => {
@@ -55,17 +72,16 @@ class NotebookWidget extends Panel {
       switch(c.type) {
       case CellType.Code:
         w = new CodeCellWidget(c as CodeCellModel);
-        w.addClass('jp-nbCell');
         break;
       case CellType.Markdown:
         w = new MarkdownCellWidget(c as MarkdownCellModel);
-        w.addClass('jp-nbCell');
         break;
       default:
         // if there are any issues, just return a blank placeholder
         // widget so the lists stay in sync
         w = new Widget();
       }
+      w.addClass(NB_CELL_CLASS);
       return w;
     })
     this.updateSelectedCell(model.selectedCellIndex);
@@ -101,7 +117,7 @@ class NotebookWidget extends Panel {
     // Trace up the DOM hierarchy to find the root cell node
     // then find the corresponding child and select it
     while (node && node !== this.node) {
-      if (node.classList.contains('jp-nbCell')) {
+      if (node.classList.contains(NB_CELL_CLASS)) {
         for (let i=0; i<this.childCount(); i++) {
           if (this.childAt(i).node === node) {
             return i;
@@ -127,11 +143,11 @@ class NotebookWidget extends Panel {
    */
   updateSelectedCell(newIndex: number, oldIndex?: number) {
     if (oldIndex !== void 0) {
-      this.childAt(oldIndex).removeClass('jp-selected-cell');
+      this.childAt(oldIndex).removeClass(NB_SELECTED_CLASS);
     }
     if (newIndex !== void 0) {
       let newCell = this.childAt(newIndex);
-      newCell.addClass('jp-selected-cell');
+      newCell.addClass(NB_SELECTED_CLASS);
       scrollIfNeeded(this.node, newCell.node);
     }
   }

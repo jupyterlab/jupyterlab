@@ -32,7 +32,7 @@ let NOTEBOOK = 'test.ipynb';
 
 function bindings(nbModel: NotebookModel) {
   let bindings: IKeyBinding[] = [{
-    selector: '.jp-nbCell',
+    selector: '.jp-NotebookWidget-cell',
     sequence: ["Shift Enter"],
     handler: () => {
       nbModel.runSelectedCell();
