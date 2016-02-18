@@ -3,8 +3,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-Help {
-  min-width: 650px;
+  min-width: 480px;
 }
+
+
+.jp-Help > iframe {
+  border: none;
+}
+
 
 /*
 When drag events occur, `p-mod-override-cursor` is added to the body.
