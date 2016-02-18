@@ -16,7 +16,7 @@ import {
 
 
 /**
- * The class name added to the help widget. 
+ * The class name added to the help widget.
  */
 const HELP_CLASS = 'jp-Help';
 
@@ -50,7 +50,7 @@ const COMMANDS = [
 
 
 /**
- * The help handler extension. 
+ * The help handler extension.
  */
 export
 const helpHandlerExtension = {
@@ -67,27 +67,35 @@ const helpHandlerExtension = {
  * returns A promise that resolves when the extension is activated.
  */
 function activateHelpHandler(app: Application): Promise<void> {
-  let iframe = new IFrame();
-  iframe.addClass(HELP_CLASS);
-  iframe.title.text = 'Help';
-  iframe.id = 'help-doc';
+  let widget = new IFrame();
+  widget.addClass(HELP_CLASS);
+  widget.title.text = 'Help';
+  widget.id = 'help-doc';
 
-  // Add commands to the command registry.
-  let helpRegistryItems = COMMANDS.map(command => {
+  let helpCommandItems = COMMANDS.map(command => {
     return {
       id: command.id,
       handler: () => {
-        if (!iframe.isAttached) {
-          app.shell.addToRightArea(iframe, { rank: 40 });
-        }
-        app.shell.activateRight(iframe.id);
-        iframe.loadURL(command.url);
+        attachHelp();
+        showHelp();
+        widget.loadURL(command.url);
       }
     };
   });
-  app.commands.add(helpRegistryItems);
 
-  // Add the commands registered above to the command palette.
+  app.commands.add(helpCommandItems);
+
+  app.commands.add([
+    {
+      id: 'help-doc:activate',
+      handler: showHelp
+    },
+    {
+      id: 'help-doc:hide',
+      handler: hideHelp
+    }
+  ]);
+
   let helpPaletteItems = COMMANDS.map(command => {
     return {
       command: command.id,
@@ -96,7 +104,20 @@ function activateHelpHandler(app: Application): Promise<void> {
       category: 'Help'
     };
   });
+
   app.palette.add(helpPaletteItems);
 
   return Promise.resolve(void 0);
+
+  function attachHelp(): void {
+    if (!widget.isAttached) app.shell.addToRightArea(widget);
+  }
+
+  function showHelp(): void {
+    app.shell.activateRight(widget.id);
+  }
+
+  function hideHelp(): void {
+    if (!widget.isHidden) app.shell.collapseRight();
+  }
 }

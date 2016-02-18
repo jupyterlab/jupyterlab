@@ -32,7 +32,7 @@ import {
 
 
 /**
- * The default file browser extension. 
+ * The default file browser extension.
  */
 export
 const fileBrowserExtension = {
@@ -201,6 +201,17 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
     }
   ]);
 
+  app.commands.add([
+    {
+      id: 'file-browser:activate',
+      handler: showBrowser
+    },
+    {
+      id: 'file-browser:hide',
+      handler: hideBrowser
+    }
+  ]);
+
   widget.widgetFactory = model => {
     return manager.open(model);
   }
@@ -212,6 +223,14 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
   widget.id = 'file-browser';
   app.shell.addToLeftArea(widget, { rank: 40 });
   return Promise.resolve(void 0);
+
+  function showBrowser(): void {
+    app.shell.activateLeft(widget.id);
+  }
+
+  function hideBrowser(): void {
+    if (!widget.isHidden) app.shell.collapseLeft();
+  }
 }
 
 
