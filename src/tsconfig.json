@@ -18,7 +18,6 @@
     "filebrowser/index.ts",
     "filebrowser/plugin.ts",
     "filehandler/plugin.ts",
-    "documentmanager/index.ts",
     "documentmanager/plugin.ts",
     "imagehandler/plugin.ts",
     "help/plugin.ts",
