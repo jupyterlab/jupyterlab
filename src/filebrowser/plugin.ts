@@ -11,6 +11,10 @@ import {
 } from 'jupyter-js-filebrowser';
 
 import {
+  IContentsModel
+} from 'jupyter-js-services';
+
+import {
   Application
 } from 'phosphide/lib/core/application';
 
@@ -57,6 +61,20 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
     menu.popup(x, y);
   });
 
+  let onOpenRequested = (model: IContentsModel) => {
+    let widget = manager.open(model);
+    if (!widget.id) widget.id = `document-manager-${++id}`;
+    if (!widget.isAttached) app.shell.addToMainArea(widget);
+    let stack = widget.parent;
+    if (!stack) {
+      return;
+    }
+    let tabs = stack.parent;
+    if (tabs instanceof TabPanel) {
+      tabs.currentWidget = widget;
+    }
+  }
+
   // Create a command to add a new empty text file.
   // This requires an id and an instance of a command object.
   let newTextFileId = 'file-operations:new-text-file';
@@ -67,7 +85,7 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
       id: newTextFileId,
       handler: () => {
         widget.newUntitled('file', '.txt').then(
-          contents => manager.open(contents)
+          contents => onOpenRequested(contents)
         );
       }
     }
@@ -89,7 +107,7 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
       id: newNotebookId,
       handler: () => {
         widget.newUntitled('notebook').then(
-          contents => manager.open(contents)
+          contents => onOpenRequested(contents)
         );
       }
     }
@@ -188,19 +206,7 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
   }
 
   let id = 0;
-  widget.openRequested.connect((browser, model) => {
-    let widget = manager.open(model);
-    if (!widget.id) widget.id = `document-manager-${++id}`;
-    if (!widget.isAttached) app.shell.addToMainArea(widget);
-    let stack = widget.parent;
-    if (!stack) {
-      return;
-    }
-    let tabs = stack.parent;
-    if (tabs instanceof TabPanel) {
-      tabs.currentWidget = widget;
-    }
-  });
+  widget.openRequested.connect((browser, model) => onOpenRequested(model));
 
   widget.title.text = 'Files';
   widget.id = 'file-browser';
