@@ -3,8 +3,7 @@
   "name": "jupyter-js-plugins-example",
   "dependencies": {
     "jupyter-js-plugins": "file:..",
-    "phosphide": "^0.8.0",
-    "phosphor-di": "^0.9.0"
+    "phosphide": "^0.9.0"
   },
   "scripts": {
     "build": "cd .. && npm run build:example",
