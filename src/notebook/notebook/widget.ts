@@ -40,12 +40,12 @@ import {
 /**
  * The class name added to notebook widgets.
  */
-const NB_CLASS = 'jp-NotebookWidget';
+const NB_CLASS = 'jp-Notebook';
 
 /**
  * The class name added to notebook widget cells.
  */
-const NB_CELL_CLASS = 'jp-NotebookWidget-cell';
+const NB_CELL_CLASS = 'jp-Notebook-cell';
 
 /**
  * The class name added to notebook selected cells.

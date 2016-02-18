@@ -32,7 +32,7 @@ import {
 /**
  * The class name added to CodeMirrorWidget instances.
  */
-const CODEMIRROR_CLASS = 'jp-CodeMirrorWidget';
+const CODEMIRROR_CLASS = 'jp-CodeMirror';
 
 
 /**
