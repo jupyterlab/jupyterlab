@@ -1,17 +1,7 @@
-.p-Widget.jp-NotebookWidget {
+/* Increased specificity in case phosphor css is loaded later. */
+.p-Widget.jp-NotebookWidget {  
   min-width: 50px;
   min-height: 50px;
-}
-
-
-.p-Widget.jp-NotebookContainer {
-  overflow: auto;
-}
-
-
-.p-Widget.jp-NotebookWidget-body {
-  padding: 0.5em;
-  font-size: 11px;
 }
 
 
