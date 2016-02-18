@@ -142,12 +142,6 @@ class CodeMirrorWidget extends Widget {
     this.addClass(CODEMIRROR_CLASS);
     this._editor = CodeMirror(this.node);
     this.model = model;
-    this.model.selected.connect(() => {
-      if (!this.model.readOnly) this._editor.focus();
-    });
-    this._editor.on('change', () => {
-      this.model.dirty = true;
-    });
   }
 
   /**
@@ -169,6 +163,9 @@ class CodeMirrorWidget extends Widget {
     }
     if (this._model !== null) {
       this._model.stateChanged.disconnect(this.onModelStateChanged, this);
+      this._model.selected.connect(() => {
+          if (!this.model.readOnly) this._editor.focus();
+      });
     }
     this._model = value;
     this.updateMimetype(value.mimetype);
@@ -180,6 +177,11 @@ class CodeMirrorWidget extends Widget {
     this.updateText(value.text);
     this._editor.on('change', (instance, change) => {
       this._model.text = this._editor.getDoc().getValue();
+      if (!this._initialized) {
+        this._initialized = true;
+      } else {
+        this._model.dirty = true;
+      }
     });
     value.stateChanged.connect(this.onModelStateChanged, this);
   }
@@ -398,4 +400,5 @@ class CodeMirrorWidget extends Widget {
   private _editor: CodeMirror.Editor = null;
   private _model: IEditorModel = null;
   private _dirty = false;
+  private _initialized = false;
 }
