@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  AbstractFileHandler
+  AbstractFileHandler, DocumentManager
 } from 'jupyter-js-docmanager';
 
 import {
@@ -11,40 +11,31 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  Container, Token
-} from 'phosphor-di';
-
-import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  IServicesProvider, IDocumentManager
-} from '../index';
+  ServicesProvider
+} from '../services/plugin';
 
 
 /**
- * Register the plugin contributions.
- *
- * @param container - The di container for type registration.
- *
- * #### Notes
- * This is called automatically when the plugin is loaded.
+ * The image file handler provider.
  */
 export
-function resolve(container: Container): Promise<AbstractFileHandler> {
-  return container.resolve({
-    requires: [IServicesProvider, IDocumentManager],
-    create: (services: IServicesProvider, manager: IDocumentManager) => {
-      let handler = new ImageHandler(services.contentsManager);
-      manager.register(handler);
-      return handler;
-    }
-  });
-}
+const imageHandlerProvider = {
+  id: 'jupyter.services.imageHandler',
+  provides: ImageHandler,
+  requires: [DocumentManager, ServicesProvider],
+  resolve: (manager: DocumentManager, services: ServicesProvider) => {
+    let handler = new ImageHandler(services.contentsManager);
+    manager.register(handler);
+    return handler;
+  },
+};
 
 
-
+export
 class ImageHandler extends AbstractFileHandler {
   /**
    * Get the list of file extensions explicitly supported by the handler.

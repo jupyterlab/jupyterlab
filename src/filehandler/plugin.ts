@@ -3,38 +3,29 @@
 'use strict';
 
 import {
-  FileHandler, AbstractFileHandler
+  FileHandler, AbstractFileHandler, DocumentManager
 } from 'jupyter-js-docmanager';
-
-import {
-  Container, Token
-} from 'phosphor-di';
 
 import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  IServicesProvider, IDocumentManager
-} from '../index';
+  ServicesProvider
+} from '../services/plugin';
 
 
 /**
- * Register the plugin contributions.
- *
- * @param container - The di container for type registration.
- *
- * #### Notes
- * This is called automatically when the plugin is loaded.
+ * The default file handler provider.
  */
 export
-function resolve(container: Container): Promise<AbstractFileHandler> {
-  return container.resolve({
-    requires: [IServicesProvider, IDocumentManager],
-    create: (services: IServicesProvider, manager: IDocumentManager) => {
-      let handler = new FileHandler(services.contentsManager);
-      manager.registerDefault(handler);
-      return handler;
-    }
-  });
-}
+const fileHandlerProvider = {
+  id: 'jupyter.services.fileHandler',
+  provides: FileHandler,
+  requires: [DocumentManager, ServicesProvider],
+  resolve: (manager: DocumentManager, services: ServicesProvider) => {
+    let handler = new FileHandler(services.contentsManager);
+    manager.registerDefault(handler);
+    return handler;
+  },
+};

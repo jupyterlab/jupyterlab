@@ -29,6 +29,7 @@ const servicesProvider = {
 /**
  * An implementation of a services provider.
  */
+export
 class ServicesProvider {
 
   /**
