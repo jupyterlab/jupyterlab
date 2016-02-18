@@ -27,16 +27,6 @@
 }
 
 
-.jp-Cell.jp-selected-cell {
-  border-color: #ababab;
-  border-left-width: 0px;
-  padding-left: 6px;
-  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
-}
-
-
-.jp-Cell {
-  padding-top: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
+.jp-MarkdownCell {
+  outline: 0;
 }

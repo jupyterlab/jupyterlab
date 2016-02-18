@@ -185,6 +185,11 @@ function renderSelectedCell(model: INotebookModel)  {
   if (isMarkdownCellModel(cell)) {
     cell.rendered = true;
   }
+  if (model.selectedCellIndex === model.cells.length - 1) {
+    let cell = model.createCodeCell();
+    model.cells.add(cell);
+  }
+  model.selectNextCell();
 }
 
 
@@ -234,7 +239,7 @@ class NotebookContainer extends Panel {
   setSession(value: INotebookSession) {
     this._session = value;
 
-    this._session.kernel.registerCommTarget('jupyter.widget', (comm, msg) => {
+    this._session.kernel.registerCommTarget('ipython.widget', (comm, msg) => {
       console.log('comm message', msg);
 
       let modelPromise = this._manager.handle_comm_open(comm, msg);
