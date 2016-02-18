@@ -17,7 +17,7 @@ import {
 import {
   IContentsModel, IContentsManager,
   NotebookSessionManager, INotebookSessionManager,
-  INotebookSession, IKernelMessage
+  INotebookSession, IKernelMessage, IComm
 } from 'jupyter-js-services';
 
 import {
@@ -185,6 +185,11 @@ function renderSelectedCell(model: INotebookModel)  {
   if (isMarkdownCellModel(cell)) {
     cell.rendered = true;
   }
+  if (model.selectedCellIndex === model.cells.length - 1) {
+    let cell = model.createCodeCell();
+    model.cells.add(cell);
+  }
+  model.selectNextCell();
 }
 
 
@@ -234,7 +239,7 @@ class NotebookContainer extends Panel {
   setSession(value: INotebookSession) {
     this._session = value;
 
-    this._session.kernel.registerCommTarget('jupyter.widget', (comm, msg) => {
+    let commHandler = (comm: IComm, msg: IKernelMessage) => {
       console.log('comm message', msg);
 
       let modelPromise = this._manager.handle_comm_open(comm, msg);
@@ -247,7 +252,10 @@ class NotebookContainer extends Panel {
       comm.onClose = (msg) => {
         console.log('comm widget close', msg);
       }
-    });
+    };
+
+    this._session.kernel.registerCommTarget('ipython.widget', commHandler);
+    this._session.kernel.registerCommTarget('jupyter.widget', commHandler);
   }
 
   private _onModelChanged(model: INotebookModel, args: IChangedArgs<INotebookModel>): void {
