@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  AbstractFileHandler
+  AbstractFileHandler, DocumentManager
 } from 'jupyter-js-docmanager';
 
 import {
@@ -21,16 +21,16 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  ICommandRegistry, ICommandPalette
-} from 'phosphide';
-
-import {
-  Container
-} from 'phosphor-di';
-
-import {
   Panel
 } from 'phosphor-panel';
+
+import {
+  ABCCommandRegistry
+} from 'phosphide/lib/core/services/commandregistry';
+
+import {
+  ABCPaletteRegistry
+} from 'phosphide/lib/core/services/palletteregistry';
 
 import {
   IChangedArgs, Property
@@ -41,8 +41,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IServicesProvider, IDocumentManager
-} from '../index';
+  ServicesProvider
+} from '../services/plugin';
 
 import {
   WidgetManager
@@ -64,67 +64,56 @@ const DIRTY_CLASS = 'jp-mod-dirty';
 
 
 /**
- * Register the plugin contributions.
- *
- * @param container - The di container for type registration.
- *
- * #### Notes
- * This is called automatically when the plugin is loaded.
+ * The notebook file handler provider.
  */
 export
-function resolve(container: Container): Promise<AbstractFileHandler> {
-  return container.resolve({
-    requires: [IServicesProvider, IDocumentManager, ICommandRegistry, ICommandPalette],
-    create: (services: IServicesProvider, manager: IDocumentManager,
-             registry: ICommandRegistry,
-             palette: ICommandPalette) => {
-      let handler = new NotebookFileHandler(
-        services.contentsManager,
-        services.notebookSessionManager
-      );
-      manager.register(handler);
-      registry.add([{
-        id: executeCellCommandId,
-        handler: () => handler.executeSelectedCell()
-      }, {
-        id: renderCellCommandId,
-        handler: () => handler.renderSelectedCell()
-      }, {
-        id: selectNextCellCommandId,
-        handler: () => handler.selectNextCell()
-      }, {
-        id: selectPreviousCellCommandId,
-        handler: () => handler.selectPreviousCell()
-      }]);
-      palette.add([{
-        id: executeCellCommandId,
-        category: 'Notebook Operations',
-        args: void 0,
-        text: 'Execute current cell',
-        caption: 'Execute the current cell'
-      }, {
-        id: renderCellCommandId,
-        category: 'Notebook Operations',
-        args: void 0,
-        text: 'Render current markdown cell',
-        caption: 'Render the current markdown cell'
-      }, {
-        id: selectNextCellCommandId,
-        category: 'Notebook Operations',
-        args: void 0,
-        text: 'Select next cell',
-        caption: 'Select next cell'
-      }, {
-        id: selectPreviousCellCommandId,
-        category: 'Notebook Operations',
-        args: void 0,
-        text: 'Select previous cell',
-        caption: 'Select previous cell'
-      }]);
-      return handler;
-    }
-  });
-}
+const fileHandlerProvider = {
+  id: 'jupyter.services.notebookHandler',
+  provides: NotebookFileHandler,
+  requires: [DocumentManager, ServicesProvider, ABCCommandRegistry, ABCPaletteRegistry],
+  resolve: (manager: DocumentManager, services: ServicesProvider, commands: ABCCommandRegistry, palette: ABCPaletteRegistry) => {
+    let handler = new NotebookFileHandler(
+      services.contentsManager,
+      services.notebookSessionManager
+    );
+    manager.register(handler);
+    commands.add([{
+      id: executeCellCommandId,
+      handler: () => handler.executeSelectedCell()
+    }, {
+      id: renderCellCommandId,
+      handler: () => handler.renderSelectedCell()
+    }, {
+      id: selectNextCellCommandId,
+      handler: () => handler.selectNextCell()
+    }, {
+      id: selectPreviousCellCommandId,
+      handler: () => handler.selectPreviousCell()
+    }]);
+    palette.add([{
+      command: executeCellCommandId,
+      category: 'Notebook Operations',
+      text: 'Execute current cell',
+      caption: 'Execute the current cell'
+    }, {
+      command: renderCellCommandId,
+      category: 'Notebook Operations',
+      text: 'Render current markdown cell',
+      caption: 'Render the current markdown cell'
+    }, {
+      command: selectNextCellCommandId,
+      category: 'Notebook Operations',
+      text: 'Select next cell',
+      caption: 'Select next cell'
+    }, {
+      command: selectPreviousCellCommandId,
+      category: 'Notebook Operations',
+      text: 'Select previous cell',
+      caption: 'Select previous cell'
+    }]);
+    return handler;
+  },
+};
 
 
 /**
