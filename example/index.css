@@ -58,8 +58,6 @@
 }
 
 
-
-
 .CodeMirror.cm-s-default {
   line-height: 1.21429em;
   /* Changed from 1em to our global default */
@@ -105,4 +103,3 @@
   border: 0;
   border-radius: 0;
 }
-

@@ -343,7 +343,7 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Execute the current cell. 
+   * Execute the given cell. 
    */
   protected executeCell(cell: CodeCellModel): void {
     let session = this.session;
