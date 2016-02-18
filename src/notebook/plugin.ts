@@ -63,7 +63,7 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * The notebook file handler provider.
  */
 export
-const fileHandlerExtension = {
+const notebookHandlerExtension = {
   id: 'jupyter.extensions.notebookHandler',
   requires: [DocumentManager, JupyterServices],
   activate: activateNotebookHandler

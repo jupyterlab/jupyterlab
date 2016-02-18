@@ -13,20 +13,6 @@ import {
 
 
 /**
- * The default services provider.
- */
-export
-const servicesProvider = {
-  id: 'jupyter.services.services',
-  provides: JupyterServices,
-  resolve: () => {
-    return new JupyterServices();
-  },
-};
-
-
-
-/**
  * An implementation of a services provider.
  */
 export
@@ -78,3 +64,16 @@ class JupyterServices {
   private _sessionManager: INotebookSessionManager = null;
   private _contentsManager: IContentsManager = null;
 }
+
+
+/**
+ * The default services provider.
+ */
+export
+const servicesProvider = {
+  id: 'jupyter.services.services',
+  provides: JupyterServices,
+  resolve: () => {
+    return new JupyterServices();
+  },
+};
