@@ -1,11 +1,11 @@
 /* Increased specificity in case phosphor css is loaded later. */
-.p-Widget.jp-NotebookWidget {  
+.p-Widget.jp-Notebook {  
   min-width: 50px;
   min-height: 50px;
 }
 
 
-.jp-InputAreaWidget > .jp-CodeMirrorWidget {
+.jp-InputArea > .jp-CodeMirror {
   border: 1px solid #cfcfcf;
   border-radius: 2px;
   background: #f7f7f7;
@@ -24,7 +24,7 @@
 }
 
 
-.jp-Cell.jp-selected-cell {
+.jp-Cell.jp-mod-selected {
   border-color: #66BB6A;
   border-left-width: 1px;
   padding-left: 10px;

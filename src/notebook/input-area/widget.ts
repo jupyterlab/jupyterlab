@@ -42,7 +42,7 @@ class InputAreaWidget extends Widget {
    */
   constructor(model: IInputAreaModel) {
     super();
-    this.addClass('jp-InputAreaWidget');
+    this.addClass('jp-InputArea');
     this._model = model;
     this.layout = new PanelLayout();
     this.updateTextEditor(model.textEditor);
