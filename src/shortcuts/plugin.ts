@@ -57,13 +57,8 @@ const SHORTCUTS = [
     sequence: ['Ctrl Shift Q']
   },
   {
-    command: 'notebook:execute-selected-cell',
-    selector: '.jp-CodeCell',
-    sequence: ['Shift Enter']
-  },
-  {
-    command: 'notebook:render-selected-cell',
-    selector: '.jp-MarkdownCell',
+    command: 'notebook:run-selected-cell',
+    selector: '.jp-nbCell',
     sequence: ['Shift Enter']
   },
   {
