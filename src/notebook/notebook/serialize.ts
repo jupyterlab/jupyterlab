@@ -140,10 +140,12 @@ function messageToModel(msg: IKernelMessage) {
  */
 export
 function getNotebookContent(nb: NotebookModel): NotebookContent {
-  let cells = getNotebookCells(nb);
-  let metadata = nb.metadata;
-  return { cells, metadata, nbformat: MAJOR_VERSION, 
-                   nbformat_minor: MINOR_VERSION };
+  return {
+    cells: getNotebookCells(nb),
+    metadata: nb.metadata, 
+    nbformat: MAJOR_VERSION, 
+    nbformat_minor: MINOR_VERSION 
+  };
 }
 
 
