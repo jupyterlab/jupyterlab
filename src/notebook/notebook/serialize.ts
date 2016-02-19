@@ -139,17 +139,11 @@ function messageToModel(msg: IKernelMessage) {
  * Get the current notebook content.
  */
 export
-function getNotebookContent(nb: NotebookModel): Promise<NotebookContent> {
-  if (!nb.session) {
-    Promise.reject('No notebook session');
-  }
+function getNotebookContent(nb: NotebookModel): NotebookContent {
   let cells = getNotebookCells(nb);
-  return nb.session.kernel.kernelInfo().then(info => {
-    let name = nb.session.kernel.name;
-    let metadata = nb.metadata;
-    return { cells, metadata, nbformat: MAJOR_VERSION, 
-                     nbformat_minor: MINOR_VERSION };
-  });
+  let metadata = nb.metadata;
+  return { cells, metadata, nbformat: MAJOR_VERSION, 
+                   nbformat_minor: MINOR_VERSION };
 }
 
 

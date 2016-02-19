@@ -69,11 +69,10 @@ function main(): void {
       baseUrl: SERVER_URL
     }).then(session => {
       nbModel.session = session;
-      getNotebookContent(nbModel).then(content => {
-        contents.save(NOTEBOOK, {
-          type: 'notebook',
-          content
-        });
+      let content = getNotebookContent(nbModel);
+      contents.save(NOTEBOOK, {
+        type: 'notebook',
+        content
       });
     });
   });
