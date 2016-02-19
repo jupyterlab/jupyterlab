@@ -133,6 +133,7 @@ interface IBaseCellModel {
 export
 interface ICodeCellModel extends IBaseCellModel {
   output: IOutputAreaModel;
+  executionCount: number;
 }
 
 
@@ -264,7 +265,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   /**
    * Get the output area model.
    */
-  get output() {
+  get output(): IOutputAreaModel {
     return Private.outputProperty.get(this);
   }
 
@@ -273,6 +274,20 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    */
   set output(value: IOutputAreaModel) {
     Private.outputProperty.set(this, value);
+  }
+
+  /**
+   * Get the execution count.
+   */
+  get executionCount(): number {
+    return Private.executionCountProperty.get(this);
+  }
+
+  /**
+   * Set the execution count.
+   */
+  set executionCount(value: number) {
+    Private.executionCountProperty.set(this, value);
   }
 
   type: CellType = CellType.Code;
@@ -381,4 +396,13 @@ namespace Private {
     notify: stateChangedSignal,
   });
 
+  /**
+   * A property descriptor for the execution count of a code cell.
+   */
+  export
+  const executionCountProperty = new Property<CodeCellModel, number>({
+    name: 'executionCount',
+    value: null,
+    notify: stateChangedSignal,
+  });
 }

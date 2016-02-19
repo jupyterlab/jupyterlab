@@ -2,7 +2,7 @@
 
 import {
   NotebookModel, NotebookWidget,
-  NBData, populateNotebookModel,
+  NBData, populateNotebookModel, saveNotebook
 } from 'jupyter-js-notebook';
 
 import {
@@ -74,6 +74,7 @@ function main(): void {
       baseUrl: SERVER_URL
     }).then(session => {
       nbModel.session = session;
+      saveNotebook(nbModel, contents);
     });
   });
 }
