@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  IContentsModel, IKernelMessage, IContentsManager
+  IKernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -31,11 +31,11 @@ import {
 } from '../output-area';
 
 import {
-  NBData, MarkdownCell, CodeCell,
+  MarkdownCell, CodeCell,
   isMarkdownCell, isCodeCell,
   DisplayData, isDisplayData,
   ExecuteResult, isExecuteResult,
-  Stream, isStream, Cell,
+  Stream, isStream, Cell, NotebookContent,
   JupyterError, isJupyterError, Output, BaseOutput,
   MAJOR_VERSION, MINOR_VERSION
 } from './nbformat';
@@ -45,11 +45,11 @@ import {
  * Build a complete notebook model from the notebook data.
  */
 export
-function populateNotebookModel(nb: INotebookModel, data: NBData): void {
+function populateNotebookModel(nb: INotebookModel, data: NotebookContent): void {
   nb.cells.clear();
 
   // iterate through the cell data, creating cell models
-  data.content.cells.forEach((c) => {
+  data.cells.forEach((c) => {
     let input = new InputAreaModel();
     input.textEditor = new EditorModel({ lineNumbers: false });
     input.textEditor.text = c.source;
@@ -75,7 +75,9 @@ function populateNotebookModel(nb: INotebookModel, data: NBData): void {
   if (nb.cells.length) {
     nb.selectedCellIndex = 0;
   }
+  nb.metadata = data.metadata;
 }
+
 
 /**
  * Build an output model from output message data.
@@ -134,26 +136,19 @@ function messageToModel(msg: IKernelMessage) {
 
 
 /**
- * Save the current notebook state to disk.
+ * Get the current notebook content.
  */
 export
-function saveNotebook(nb: NotebookModel, contents: IContentsManager): Promise<IContentsModel> {
+function getNotebookContent(nb: NotebookModel): Promise<NotebookContent> {
   if (!nb.session) {
     Promise.reject('No notebook session');
   }
-  let cells = getNotebookData(nb);
+  let cells = getNotebookCells(nb);
   return nb.session.kernel.kernelInfo().then(info => {
     let name = nb.session.kernel.name;
-    // TODO: Get the display name.
-    let metadata = { kernelspec: { name, display_name: name },
-                     language_info: info.language_info
-                   };
-    let notebook = { cells, metadata, nbformat: MAJOR_VERSION, 
+    let metadata = nb.metadata;
+    return { cells, metadata, nbformat: MAJOR_VERSION, 
                      nbformat_minor: MINOR_VERSION };
-    return contents.save(nb.session.notebookPath, {
-      type: 'notebook',
-      content: notebook
-    });
   });
 }
 
@@ -161,8 +156,7 @@ function saveNotebook(nb: NotebookModel, contents: IContentsManager): Promise<IC
 /**
  * Get the cell data for a given notebook.
  */
-export
-function getNotebookData(nb: NotebookModel): Cell[] {
+function getNotebookCells(nb: NotebookModel): Cell[] {
   let cells: Cell[] = [];
   for (let i = 0; i < nb.cells.length; i++) {
     let cell = nb.cells.get(i);

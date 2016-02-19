@@ -42,6 +42,10 @@ import {
 } from '../output-area';
 
 import {
+  NotebookMetadata
+} from './nbformat';
+
+import {
   messageToModel
 } from './serialize';
 
@@ -167,6 +171,11 @@ interface INotebookModel {
    * Run the selected cell, taking the appropriate action.
    */
   runSelectedCell(): void;
+
+  /**
+   * The metadata associated with the notebook.
+   */
+  metadata: NotebookMetadata;
 }
 
 
@@ -203,7 +212,7 @@ class NotebookModel implements INotebookModel {
   /**
    * Get the default mimetype for cells new code cells.
    */
-  get defaultMimetype() {
+  get defaultMimetype(): string {
     return NotebookModelPrivate.defaultMimetype.get(this);
   }
 
@@ -217,7 +226,7 @@ class NotebookModel implements INotebookModel {
   /**
    * Get the mode of the notebook.
    */
-  get mode() {
+  get mode(): NotebookMode {
     return NotebookModelPrivate.modeProperty.get(this);
   }
 
@@ -231,7 +240,7 @@ class NotebookModel implements INotebookModel {
   /**
    * Get the session for the notebook.
    */
-  get session() {
+  get session(): INotebookSession {
     return NotebookModelPrivate.sessionProperty.get(this);
   }
 
@@ -243,9 +252,23 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Get the metadata for the notebook.
+   */
+  get metadata(): NotebookMetadata {
+    return NotebookModelPrivate.metadataProperty.get(this);
+  }
+
+  /**
+   * Set the metadata for the notebook.
+   */
+  set metadata(value: NotebookMetadata) {
+    NotebookModelPrivate.metadataProperty.set(this, value);
+  }
+
+  /**
    * Get the selected cell index.
    */
-  get selectedCellIndex() {
+  get selectedCellIndex(): number {
     return NotebookModelPrivate.selectedCellIndexProperty.get(this);
   }
 
@@ -420,12 +443,21 @@ namespace NotebookModelPrivate {
     notify: stateChangedSignal,
   });
 
-  /**
+ /**
   * A property descriptor which holds the session of the notebook.
   */
   export
   const sessionProperty = new Property<NotebookModel, INotebookSession>({
     name: 'session',
+    notify: stateChangedSignal,
+  });
+
+ /**
+  * A property descriptor which holds the metadata of the notebook.
+  */
+  export
+  const metadataProperty = new Property<NotebookModel, NotebookMetadata>({
+    name: 'metadata',
     notify: stateChangedSignal,
   });
 

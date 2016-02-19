@@ -2,7 +2,7 @@
 
 import {
   NotebookModel, NotebookWidget,
-  NBData, populateNotebookModel, saveNotebook
+  NotebookContent, populateNotebookModel, getNotebookContent
 } from 'jupyter-js-notebook';
 
 import {
@@ -56,13 +56,8 @@ function main(): void {
 
   let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then(data => {
-    let nbdata = {
-      content: data.content,
-      name: data.name,
-      path: data.path
-    }
     let nbModel = new NotebookModel();
-    populateNotebookModel(nbModel, nbdata);
+    populateNotebookModel(nbModel, data.content as NotebookContent);
     let nbWidget = new NotebookWidget(nbModel);
     keymap.add(bindings(nbModel));
     nbWidget.attach(document.body);
@@ -70,11 +65,16 @@ function main(): void {
     // start session
     startNewSession({
       notebookPath: NOTEBOOK,
-      kernelName: nbdata.content.metadata.kernelspec.name,
+      kernelName: data.content.metadata.kernelspec.name,
       baseUrl: SERVER_URL
     }).then(session => {
       nbModel.session = session;
-      saveNotebook(nbModel, contents);
+      getNotebookContent(nbModel).then(content => {
+        contents.save(NOTEBOOK, {
+          type: 'notebook',
+          content
+        });
+      });
     });
   });
 }
