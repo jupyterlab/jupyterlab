@@ -144,6 +144,7 @@ function saveNotebook(nb: NotebookModel, contents: IContentsManager): Promise<IC
   let cells = getNotebookData(nb);
   return nb.session.kernel.kernelInfo().then(info => {
     let name = nb.session.kernel.name;
+    // TODO: Get the display name.
     let metadata = { kernelspec: { name, display_name: name },
                      language_info: info.language_info
                    };

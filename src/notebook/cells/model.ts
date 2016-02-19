@@ -402,6 +402,7 @@ namespace Private {
   export
   const executionCountProperty = new Property<CodeCellModel, number>({
     name: 'executionCount',
+    value: null,
     notify: stateChangedSignal,
   });
 }
