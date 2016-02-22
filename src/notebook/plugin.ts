@@ -7,7 +7,7 @@ import {
 } from 'jupyter-js-docmanager';
 
 import {
-  NotebookWidget, NotebookModel, NBData, populateNotebookModel, buildOutputModel, Output, INotebookModel
+  NotebookWidget, NotebookModel, populateNotebookModel, buildOutputModel, Output, INotebookModel, getNotebookContent
 } from 'jupyter-js-notebook';
 
 import {
@@ -15,7 +15,7 @@ import {
 } from 'jupyter-js-notebook/lib/cells';
 
 import {
-  IContentsModel, IContentsManager,
+  IContentsModel, IContentsManager, IContentsOpts,
   NotebookSessionManager, INotebookSessionManager,
   INotebookSession, IKernelMessage, IComm
 } from 'jupyter-js-services';
@@ -23,10 +23,6 @@ import {
 import {
   Application
 } from 'phosphide/lib/core/application';
-
-import {
-  Panel
-} from 'phosphor-panel';
 
 import {
   IChangedArgs, Property
@@ -50,12 +46,6 @@ let selectNextCellCommandId = 'notebook:select-next-cell';
 let selectPreviousCellCommandId = 'notebook:select-previous-cell';
 
 let notebookContainerClass = 'jp-NotebookContainer';
-
-
-/**
- * The class name added to a dirty documents.
- */
-const DIRTY_CLASS = 'jp-mod-dirty';
 
 
 /**
@@ -194,7 +184,7 @@ class NotebookContainer extends Panel {
  * An implementation of a file handler.
  */
 export
-class NotebookFileHandler extends AbstractFileHandler {
+class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
 
   constructor(contents: IContentsManager, session: INotebookSessionManager) {
     super(contents);
@@ -212,7 +202,7 @@ class NotebookFileHandler extends AbstractFileHandler {
    * Run the selected cell on the active widget.
    */
   runSelectedCell(): void {
-    let w = this.activeWidget as NotebookContainer;
+    let w = this.activeWidget;
     if (w) w.model.runSelectedCell();
   }
 
@@ -220,7 +210,7 @@ class NotebookFileHandler extends AbstractFileHandler {
    * Select the next cell on the active widget.
    */
   selectNextCell(): void {
-    let w = this.activeWidget as NotebookContainer;
+    let w = this.activeWidget;
     if (w) w.model.selectNextCell();
   }
 
@@ -228,57 +218,73 @@ class NotebookFileHandler extends AbstractFileHandler {
    * Select the previous cell on the active widget.
    */
   selectPreviousCell(): void {
-    let w = this.activeWidget as NotebookContainer;
+    let w = this.activeWidget;
     if (w) w.model.selectPreviousCell();
   }
 
   /**
-   * Get file contents given a contents model.
+   * Get options use to fetch the model contents from disk.
    */
-  protected getContents(model: IContentsModel): Promise<IContentsModel> {
-    return this.manager.get(model.path, { type: 'notebook' });
+  protected getFetchOptions(model: IContentsModel): IContentsOpts {
+    return { type: 'notebook' };
+  }
+
+  /**
+   * Get the options used to save the widget content.
+   */
+  protected getSaveOptions(widget: NotebookWidget, model: IContentsModel): Promise<IContentsOpts> {
+      let content = getNotebookContent(widget.model);
+      return Promise.resolve({ type: 'notebook', content });
   }
 
   /**
    * Create the widget from an `IContentsModel`.
    */
-  protected createWidget(contents: IContentsModel): Widget {
-    let panel = new NotebookContainer();
-    panel.title.text = contents.name;
-    panel.addClass(notebookContainerClass);
+  protected createWidget(contents: IContentsModel): NotebookWidget {
+    let model = new NotebookModel();
+    let widget = new NotebookWidget(model);
+    widget.title.text = contents.name;
+    model.stateChanged.connect(this._onModelChanged, this);
 
     this.session.startNew({notebookPath: contents.path}).then(s => {
-      panel.setSession(s);
-    })
+      model.session = s;
+    });
 
-    return panel;
+    return widget;
   }
 
   /**
    * Populate the notebook widget with the contents of the notebook.
    */
-  protected setState(widget: Widget, model: IContentsModel): Promise<void> {
-    let nbData: NBData = {
-      content: model.content,
-      name: model.name,
-      path: model.path
+  protected populateWidget(widget: NotebookWidget, model: IContentsModel): Promise<IContentsModel> {
+    populateNotebookModel(widget.model, model.content);
+    if (widget.model.cells.length === 0) {
+      let cell = widget.model.createCodeCell();
+      widget.model.cells.add(cell);
     }
-    let nbWidget: NotebookWidget = ((widget as Panel).childAt(1)) as NotebookWidget;
-    populateNotebookModel(nbWidget.model, nbData);
-    if (nbWidget.model.cells.length === 0) {
-      let cell = nbWidget.model.createCodeCell();
-      nbWidget.model.cells.add(cell);
-    }
-    nbWidget.model.selectedCellIndex = 0;
+    widget.model.selectedCellIndex = 0;
 
-    return Promise.resolve();
+    return Promise.resolve(model);
   }
 
   /**
-   * Get the current state of the notebook.
+   * Handle changes to the model state of a widget.
    */
-  protected getState(widget: Widget, model: IContentsModel): Promise<IContentsModel> {
-    return Promise.resolve(void 0);
+  private _onModelChanged(model: INotebookModel, args: IChangedArgs<INotebookModel>): void {
+    if (args.name !== 'dirty') {
+      return;
+    }
+    for (let i = 0; i < this.widgetCount(); i++) {
+      let widget = this.widgetAt(i);
+      if (widget.model === model) {
+        if (args.newValue) {
+          this.setDirty(widget);
+        } else {
+          this.clearDirty(widget);
+        }
+        return;
+      }
+    }
   }
 
   session: INotebookSessionManager;
