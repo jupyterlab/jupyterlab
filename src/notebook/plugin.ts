@@ -40,6 +40,10 @@ import {
   JupyterServices
 } from '../services/plugin';
 
+import {    
+   WidgetManager    
+} from './widgetmanager';
+
 
 let runCellCommandId = 'notebook:run-selected-cell';
 let selectNextCellCommandId = 'notebook:select-next-cell';
@@ -117,6 +121,7 @@ class NotebookContainer extends Panel {
     this._model = new NotebookModel();
     this._model.stateChanged.connect(this._onModelChanged, this);
     let widgetarea = new Widget();
+    this._manager = new WidgetManager(widgetarea.node);
     let widget = new NotebookWidget(this._model);
 
     this.addChild(widgetarea);
@@ -149,6 +154,24 @@ class NotebookContainer extends Panel {
   setSession(value: INotebookSession) {
     this._session = value;
     this._model.session = value;
+
+    let commHandler = (comm: IComm, msg: IKernelMessage) => {    
+      console.log('comm message', msg);    
+    
+      let modelPromise = this._manager.handle_comm_open(comm, msg);    
+    
+      comm.onMsg = (msg) => {    
+        this._manager.handle_comm_open(comm, msg)    
+        // create the widget model and (if needed) the view    
+        console.log('comm widget message', msg);    
+      }    
+      comm.onClose = (msg) => {    
+        console.log('comm widget close', msg);    
+      }    
+    };    
+    
+    this._session.kernel.registerCommTarget('ipython.widget', commHandler)      
+    this._session.kernel.registerCommTarget('jupyter.widget', commHandler);
   }
 
   private _onModelChanged(model: INotebookModel, args: IChangedArgs<INotebookModel>): void {
@@ -163,6 +186,7 @@ class NotebookContainer extends Panel {
 
   private _model: INotebookModel = null;
   private _session: INotebookSession = null;
+  private _manager: WidgetManager = null;
 }
 
 
