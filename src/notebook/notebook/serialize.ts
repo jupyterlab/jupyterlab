@@ -7,7 +7,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  NotebookModel, INotebookModel
+  INotebookModel
 } from './model';
 
 import {
@@ -139,7 +139,7 @@ function messageToModel(msg: IKernelMessage) {
  * Get the current notebook content.
  */
 export
-function getNotebookContent(nb: NotebookModel): NotebookContent {
+function getNotebookContent(nb: INotebookModel): NotebookContent {
   return {
     cells: getNotebookCells(nb),
     metadata: nb.metadata, 
@@ -152,7 +152,7 @@ function getNotebookContent(nb: NotebookModel): NotebookContent {
 /**
  * Get the cell data for a given notebook.
  */
-function getNotebookCells(nb: NotebookModel): Cell[] {
+function getNotebookCells(nb: INotebookModel): Cell[] {
   let cells: Cell[] = [];
   for (let i = 0; i < nb.cells.length; i++) {
     let cell = nb.cells.get(i);
