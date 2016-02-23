@@ -19,7 +19,7 @@ import {
  * When a registered shortcut sequence is fired, the shortcut manager checks
  * the node that fired the event and each of its ancestors until a node matches
  * one or more registered selectors. The *first* matching selector in the
- * chain of ancestors will invoke the shortcut handler and the travelsal will
+ * chain of ancestors will invoke the shortcut handler and the traversal will
  * end at that point. If a node matches more than one selector, the handler for
  * whichever selector is more *specific* fires.
  * @see https://www.w3.org/TR/css3-selectors/#specificity
