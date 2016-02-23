@@ -14,12 +14,19 @@
     "phosphor-widget": "^1.0.0-rc.1"
   },
   "scripts": {
-    "build": "rm -rf node_modules/jupyter-js-ui && npm install && tsc --project src && webpack --config webpack.conf.js",
-    "postinstall": "npm dedupe"
+    "build": "tsc --project src && webpack --config webpack.conf.js",
+    "postinstall": "npm dedupe",
+    "update": "rimraf node_modules/jupyter-js-ui && npm install",
+    "watch:src": "watch 'npm run build' src --wait 5",
+    "watch:lib": "watch 'npm run update && npm run build' ../../lib --wait 10",
+    "watch": "concurrently 'npm run watch:lib' 'npm run watch:src'"
   },
   "devDependencies": {
+    "concurrently": "^2.0.0",
     "css-loader": "^0.23.1",
+    "rimraf": "^2.5.2",
     "style-loader": "^0.13.0",
+    "watch": "^0.17.1",
     "webpack": "^1.12.14"
   }
 }

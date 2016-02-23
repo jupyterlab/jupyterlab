@@ -178,7 +178,7 @@ function main(): void {
       icon: 'fa fa-stop-circle-o',
       handler: () => { fbWidget.shutdownKernels(); }
     }),
-  ])
+  ]);
 
   // Start a default session.
   contentsManager.newUntitled('', { type: 'notebook' }).then(contents => {
