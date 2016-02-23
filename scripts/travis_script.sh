@@ -2,13 +2,14 @@
 set -e
 export DISPLAY=:99.0
 sh -e /etc/init.d/xvfb start || true
+export PATH="$HOME/miniconda/bin:$PATH"
 
 npm run clean
 npm run build
 npm run build:examples
-exit 0
 
-npm test
+npm run test
 npm run test:coverage
-export PATH="$HOME/miniconda/bin:$PATH"
+
+exit 0
 npm run docs
