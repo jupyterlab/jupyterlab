@@ -6,13 +6,16 @@
   "typings": "lib/index.d.ts",
   "dependencies": {
     "jupyter-js-services": "^0.5.4",
+    "jupyter-js-utils": "^0.3.3",
     "moment": "^2.11.2",
     "phosphor-arrays": "^1.0.6",
     "phosphor-codemirror": "0.0.1",
     "phosphor-domutil": "^1.2.0",
     "phosphor-dragdrop": "^0.9.0",
     "phosphor-menus": "^1.0.0-rc.1",
+    "phosphor-messaging": "^1.0.6",
     "phosphor-panel": "^1.0.0-rc.1",
+    "phosphor-properties": "^2.0.0",
     "phosphor-widget": "^1.0.0-rc.1",
     "term.js": "0.0.7"
   },
@@ -37,6 +40,9 @@
     "typescript": "^1.7.5",
     "url-loader": "^0.5.7",
     "webpack": "^1.12.11"
+  },
+  "peerDependencies": {
+    "phosphor-widget": "^1.0.0-rc.1"
   },
   "scripts": {
     "clean": "rimraf lib",
