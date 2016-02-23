@@ -93,7 +93,11 @@ function activateHelpHandler(app: Application): Promise<void> {
     {
       id: 'help-doc:hide',
       handler: hideHelp
-    }
+    },
+    {
+      id: 'help-doc:toggle',
+      handler: toggleHelp
+    },
   ]);
 
   let helpPaletteItems = COMMANDS.map(command => {
@@ -119,5 +123,13 @@ function activateHelpHandler(app: Application): Promise<void> {
 
   function hideHelp(): void {
     if (!widget.isHidden) app.shell.collapseRight();
+  }
+
+  function toggleHelp(): void {
+    if (widget.isHidden) {
+      showHelp();
+    } else {
+      hideHelp();
+    }
   }
 }

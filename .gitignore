@@ -7,6 +7,8 @@ test/build
 test/coverage
 lib/
 example/build
+example/untitled*
+example/Untitled*
 docs
 
 .ipynb_checkpoints
