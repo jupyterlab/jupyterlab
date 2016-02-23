@@ -1,7 +1,7 @@
 Jupyter JS UI
 =============
 
-JavaScript UI Componenets for Jupyter.
+JavaScript UI Components for Jupyter.
 
 [API Docs](http://jupyter.github.io/jupyter-js-ui/)
 
