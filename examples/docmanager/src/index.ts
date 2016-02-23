@@ -11,12 +11,12 @@ import {
 } from 'phosphor-keymap';
 
 import {
-  FileHandler, DocumentManager
-} from 'jupyter-js-docmanager';
-
-import {
   ContentsManager
 } from 'jupyter-js-services';
+
+import {
+  FileHandler, DocumentManager
+} from 'jupyter-js-ui/lib/docmanager';
 
 import {
   getBaseUrl
