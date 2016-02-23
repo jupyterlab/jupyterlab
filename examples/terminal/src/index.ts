@@ -14,6 +14,9 @@ import {
   TerminalWidget
 } from 'jupyter-js-ui/lib/terminal';
 
+import 'jupyter-js-ui/lib/index.css';
+import 'jupyter-js-ui/lib/theme.css';
+
 
 function main(): void {
   let term1 = new TerminalWidget({ background: 'black',

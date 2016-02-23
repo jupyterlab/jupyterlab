@@ -22,6 +22,9 @@ import {
   getBaseUrl
 } from 'jupyter-js-utils';
 
+import 'jupyter-js-ui/lib/index.css';
+import 'jupyter-js-ui/lib/theme.css';
+
 
 function main(): void {
   let dock = new DockPanel();
