@@ -1,0 +1,12 @@
+*.suo
+*.user
+.DS_Store
+node_modules
+npm-debug.log
+test/build
+test/coverage
+lib/
+example/build
+docs
+
+.ipynb_checkpoints

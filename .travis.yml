@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+- '0.12'
+sudo: false
+env:
+  matrix:
+  - GROUP=
+  global:
+  - GH_REF: github.com/jupyter/jupyter-js-ui.git
+install:
+- bash ./scripts/travis_install.sh
+script:
+- bash ./scripts/travis_script.sh
+after_success:
+- bash ./scripts/travis_after_success.sh
