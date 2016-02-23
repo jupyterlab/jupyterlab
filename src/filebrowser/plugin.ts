@@ -84,9 +84,8 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
     {
       id: newTextFileId,
       handler: () => {
-        widget.newUntitled('file', '.txt').then(
-          contents => onOpenRequested(contents)
-        );
+        widget.newUntitled('file', '.txt')
+          .then(contents => onOpenRequested(contents));
       }
     }
   ]);
@@ -106,9 +105,8 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
     {
       id: newNotebookId,
       handler: () => {
-        widget.newUntitled('notebook').then(
-          contents => onOpenRequested(contents)
-        );
+        widget.newUntitled('notebook')
+          .then(contents => onOpenRequested(contents));
       }
     }
   ]);
@@ -209,6 +207,10 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
     {
       id: 'file-browser:hide',
       handler: hideBrowser
+    },
+    {
+      id: 'file-browser:toggle',
+      handler: toggleBrowser
     }
   ]);
 
@@ -230,6 +232,14 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
 
   function hideBrowser(): void {
     if (!widget.isHidden) app.shell.collapseLeft();
+  }
+
+  function toggleBrowser(): void {
+    if (widget.isHidden) {
+      showBrowser();
+    } else {
+      hideBrowser();
+    }
   }
 }
 
