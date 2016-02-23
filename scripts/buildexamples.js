@@ -7,17 +7,6 @@ dirs = fs.readdirSync('examples');
 for (var i = 0; i < dirs.length; i++) {
   console.log('Building: ' + dirs[i] + '...');
   process.chdir('examples/' + dirs[i]);
-
-  childProcess.exec('npm run update && npm run build', function (error, stdout, stderr) {
-    if (error) {
-      console.log(error.stack);
-      console.log('Error code: ' + error.code);
-      console.log('Signal received: ' + error.signal);
-      console.log('Child Process STDERR: ' + stderr);
-      process.exit(1);
-     }
-     console.log('Child Process STDOUT: ' + stdout);
-  });
-
+  childProcess.execSync('npm run update && npm run build', { stdio: [0, 1, 2] });
   process.chdir('../..');
 }
