@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES5",
+    "outDir": "../lib"
+  },
+  "files": [
+    "clipboard/index.ts",
+    "dialog/index.ts",
+    "docmanager/index.ts",
+    "filebrowser/index.ts",
+    "terminal/index.ts",
+    "typings/es6-promise.d.ts",
+    "typings/requirejs/requirejs.d.ts",
+    "typings/codemirror/codemirror.d.ts",
+    "typings/moment/moment.d.ts",
+    "typings/term.js/term.js.d.ts",
+    "typings/widgets.d.ts"
+  ]
+}

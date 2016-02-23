@@ -7,10 +7,6 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  showDialog
-} from 'jupyter-js-domutils';
-
-import {
   DropAction, IDragEvent
 } from 'phosphor-dragdrop';
 
@@ -25,6 +21,10 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  showDialog
+} from '../dialog';
 
 import {
   FileBrowserModel

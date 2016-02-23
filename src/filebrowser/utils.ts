@@ -3,16 +3,16 @@
 'use strict';
 
 import {
-  okButton, showDialog
-} from 'jupyter-js-domutils';
-
-import {
   hitTest
 } from 'phosphor-domutil';
 
 import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  okButton, showDialog
+} from '../dialog';
 
 
 /**

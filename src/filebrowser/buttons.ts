@@ -7,16 +7,16 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  showDialog
-} from 'jupyter-js-domutils';
-
-import {
   Menu, MenuItem
 } from 'phosphor-menus';
 
 import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  showDialog
+} from '../dialog';
 
 import {
   FileBrowserModel
