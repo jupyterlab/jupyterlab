@@ -3,10 +3,6 @@
 'use strict';
 
 import {
-  showDialog
-} from 'jupyter-js-domutils';
-
-import {
   IContentsModel
 } from 'jupyter-js-services';
 
@@ -31,6 +27,10 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  showDialog
+} from '../dialog';
 
 import {
   FileBrowserModel
