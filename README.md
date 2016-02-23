@@ -52,17 +52,17 @@ npm test
 ```
 
 
-Build Example
--------------
+Build Examples
+--------------
 
 Follow the source build instructions first.
 Requires a Python install with the Jupyter notebook.
 
 ```bash
-npm run build:example
+npm run build:examples
 ```
 
-Change to `example` directory and run `python main.py`.
+Change to appropriate `examples` directory and run `python main.py`.
 
 
 Build Docs

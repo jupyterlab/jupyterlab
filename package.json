@@ -39,12 +39,18 @@
     "typedoc": "^0.3.12",
     "typescript": "^1.7.5",
     "url-loader": "^0.5.7",
+    "watch": "^0.17.1",
     "webpack": "^1.12.11"
   },
   "scripts": {
     "clean": "rimraf lib",
+    "clean:examples": "node scripts/cleanexamples.js",
+    "build:example": "cd examples/$EXAMPLE && npm run update && npm run build",
+    "build:examples": "node scripts/buildexamples.js",
     "build": "tsc --project src && node scripts/copycss.js",
-    "postinstall": "npm dedupe"
+    "postinstall": "npm dedupe",
+    "watch:example": "watch 'npm run build && npm run build:example' src --wait 10",
+    "watch": "watch 'npm run build' src"
   },
   "repository": {
     "type": "git",

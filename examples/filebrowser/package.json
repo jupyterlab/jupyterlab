@@ -1,0 +1,32 @@
+{
+  "private": true,
+  "name": "filebrowser-example",
+  "dependencies": {
+    "jupyter-js-ui": "file:../..",
+    "jupyter-js-services": "^0.5.1",
+    "jupyter-js-utils": "^0.3.1",
+    "phosphor-arrays": "^1.0.6",
+    "phosphor-codemirror": "0.0.1",
+    "phosphor-dockpanel": "^0.9.6",
+    "phosphor-keymap": "^0.7.1",
+    "phosphor-menus": "^1.0.0-rc.1",
+    "phosphor-splitpanel": "^1.0.0-rc.1",
+    "phosphor-widget": "^1.0.0-rc.1"
+  },
+  "scripts": {
+    "build": "tsc --project src && webpack --config webpack.conf.js",
+    "clean": "rimraf build && rimraf node_modules",
+    "postinstall": "npm dedupe",
+    "update": "rimraf node_modules/jupyter-js-ui && npm install",
+    "watch:src": "watch 'npm run build' src --wait 5",
+    "watch": "concurrently 'npm run watch:src' 'python main.py'"
+  },
+  "devDependencies": {
+    "concurrently": "^2.0.0",
+    "css-loader": "^0.23.1",
+    "rimraf": "^2.5.2",
+    "style-loader": "^0.13.0",
+    "watch": "^0.17.1",
+    "webpack": "^1.12.14"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES5",
+    "outDir": "../build"
+  },
+  "files": [
+    "../../../src/typings/codemirror/codemirror.d.ts",
+    "../../../src/typings/es6-promise.d.ts",
+    "index.ts"
+  ]
+}
