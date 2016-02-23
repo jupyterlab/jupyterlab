@@ -5,6 +5,7 @@ var fs = require('fs');
 dirs = fs.readdirSync('examples');
 
 for (var i = 0; i < dirs.length; i++) {
+  console.log('Building: ' + dirs[i] + '...');
   process.chdir('examples/' + dirs[i]);
 
   childProcess.exec('npm run update && npm run build', function (error, stdout, stderr) {
