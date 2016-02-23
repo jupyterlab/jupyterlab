@@ -40,7 +40,7 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "build": "tsc --project src"
+    "build": "tsc --project src && node scripts/copycss.js"
   },
   "repository": {
     "type": "git",

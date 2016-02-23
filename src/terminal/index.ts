@@ -18,8 +18,6 @@ import {
   Terminal, ITerminalConfig
 } from 'term.js';
 
-import './index.css';
-
 
 /**
  * The class name added to a terminal widget.

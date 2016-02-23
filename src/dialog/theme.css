@@ -1,0 +1,52 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-Dialog {
+  padding-left: 3px;
+  background: rgba(245, 245, 245, .6);
+}
+
+
+.jp-Dialog-content {
+  background: #F5F5F5;
+  min-width: 50%;
+  border: 1px solid #757575;
+  border-radius: 5px;
+  padding-bottom: 10px;
+}
+
+
+.jp-Dialog-header {
+  padding: 5px;
+}
+
+
+.jp-Dialog-body {
+  padding: 5px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+
+.jp-Dialog-footer {
+  padding: 20px;
+}
+
+
+.jp-Dialog-button {
+  padding: 5px;
+  border: 1px solid #757575;
+  font-size: 16px;
+  background: #FAFAFA;
+  line-height: 20px;
+  border-radius: 3px;
+  max-width: 100px;
+  margin-left: 5px;
+}
+
+
+.jp-Dialog-close {
+  line-height: 21px;
+}
