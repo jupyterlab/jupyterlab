@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.'use strict';
-
-import './dialog.css';
-
+// Distributed under the terms of the Modified BSD License.
+'use strict';
 
 /**
  * The class name added to dialog instances.

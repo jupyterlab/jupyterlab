@@ -4,5 +4,3 @@
 
 export * from './model';
 export * from './browser';
-
-import './index.css';
