@@ -25,6 +25,10 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
+  Panel
+} from 'phosphor-panel';
+
+import {
   IChangedArgs, Property
 } from 'phosphor-properties';
 
@@ -109,7 +113,6 @@ class NotebookContainer extends Panel {
   constructor() {
     super();
     this._model = new NotebookModel();
-    this._model.stateChanged.connect(this._onModelChanged, this);
     let widgetarea = new Widget();
     this._manager = new WidgetManager(widgetarea.node);
     let widget = new NotebookWidget(this._model);
@@ -164,16 +167,6 @@ class NotebookContainer extends Panel {
     this._session.kernel.registerCommTarget('jupyter.widget', commHandler);
   }
 
-  private _onModelChanged(model: INotebookModel, args: IChangedArgs<INotebookModel>): void {
-    if (args.name === 'dirty') {
-      if (args.newValue) {
-        this.addClass(DIRTY_CLASS);
-      } else {
-        this.removeClass(DIRTY_CLASS);
-      }
-    }
-  }
-
   private _model: INotebookModel = null;
   private _session: INotebookSession = null;
   private _manager: WidgetManager = null;
@@ -183,8 +176,7 @@ class NotebookContainer extends Panel {
 /**
  * An implementation of a file handler.
  */
-export
-class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
+class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
 
   constructor(contents: IContentsManager, session: INotebookSessionManager) {
     super(contents);
@@ -232,7 +224,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
   /**
    * Get the options used to save the widget content.
    */
-  protected getSaveOptions(widget: NotebookWidget, model: IContentsModel): Promise<IContentsOpts> {
+  protected getSaveOptions(widget: NotebookContainer, model: IContentsModel): Promise<IContentsOpts> {
       let content = getNotebookContent(widget.model);
       return Promise.resolve({ type: 'notebook', content });
   }
@@ -240,23 +232,22 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
   /**
    * Create the widget from an `IContentsModel`.
    */
-  protected createWidget(contents: IContentsModel): NotebookWidget {
-    let model = new NotebookModel();
-    let widget = new NotebookWidget(model);
-    widget.title.text = contents.name;
-    model.stateChanged.connect(this._onModelChanged, this);
+  protected createWidget(contents: IContentsModel): NotebookContainer {
+    let panel = new NotebookContainer();
+    panel.title.text = contents.name;
+    panel.addClass(notebookContainerClass);
 
     this.session.startNew({notebookPath: contents.path}).then(s => {
-      model.session = s;
+      panel.setSession(s);
     });
 
-    return widget;
+    return panel;
   }
 
   /**
    * Populate the notebook widget with the contents of the notebook.
    */
-  protected populateWidget(widget: NotebookWidget, model: IContentsModel): Promise<IContentsModel> {
+  protected populateWidget(widget: NotebookContainer, model: IContentsModel): Promise<IContentsModel> {
     populateNotebookModel(widget.model, model.content);
     if (widget.model.cells.length === 0) {
       let cell = widget.model.createCodeCell();
