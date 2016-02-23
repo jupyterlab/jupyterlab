@@ -2,8 +2,9 @@
   "private": true,
   "name": "filebrowser-example",
   "dependencies": {
-    "jupyter-js-ui": "file:../..",
+    "codemirror": "^5.12.0",
     "jupyter-js-services": "^0.5.1",
+    "jupyter-js-ui": "file:../..",
     "jupyter-js-utils": "^0.3.1",
     "phosphor-arrays": "^1.0.6",
     "phosphor-codemirror": "0.0.1",
