@@ -217,7 +217,7 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
   }
 
   let id = 0;
-  widget.openRequested.connect((browser, model) => onOpenRequested(model));
+  model.openRequested.connect((bModel, model) => onOpenRequested(model));
 
   widget.title.text = 'Files';
   widget.id = 'file-browser';

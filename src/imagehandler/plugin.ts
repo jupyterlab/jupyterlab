@@ -7,7 +7,7 @@ import {
 } from 'jupyter-js-docmanager';
 
 import {
-  IContentsModel
+  IContentsModel, IContentsOpts
 } from 'jupyter-js-services';
 
 import {
@@ -39,7 +39,7 @@ const imageHandlerExtension = {
 
 
 export
-class ImageHandler extends AbstractFileHandler {
+class ImageHandler extends AbstractFileHandler<Widget> {
   /**
    * Get the list of file extensions explicitly supported by the handler.
    */
@@ -49,10 +49,17 @@ class ImageHandler extends AbstractFileHandler {
   }
 
   /**
-   * Get file contents given a path.
+   * Get the options used to save the widget content.
    */
-  protected getContents(model: IContentsModel): Promise<IContentsModel> {
-    return this.manager.get(model.path, { type: 'file' });
+  protected getFetchOptions(model: IContentsModel): IContentsOpts {
+    return { type: 'file' };
+  }
+
+  /**
+   * Get the options used to save the widget content.
+   */
+  protected getSaveOptions(widget: Widget, model: IContentsModel): Promise<IContentsModel> {
+    return Promise.resolve(model);
   }
 
   /**
@@ -73,8 +80,8 @@ class ImageHandler extends AbstractFileHandler {
  /**
   * Populate a widget from `IContentsModel`.
   */
-  protected setState(widget: Widget, model: IContentsModel): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  protected populateWidget(widget: Widget, model: IContentsModel): Promise<IContentsModel> {
+    return new Promise<IContentsModel>((resolve, reject) => {
       let img = widget.node.firstChild as HTMLImageElement;
       img.addEventListener('load', () => {
         resolve(void 0);
@@ -82,14 +89,8 @@ class ImageHandler extends AbstractFileHandler {
       img.addEventListener('error', error => {
         reject(error);
       });
-      img.src = `data:${model.mimetype};${model.format},${model.content}`;;
+      img.src = `data:${model.mimetype};${model.format},${model.content}`;
+      return model;
     });
-  }
-
-  /**
-   * Get the state of the Widget, returns `undefined`.
-   */
-  protected getState(widget: Widget, model: IContentsModel): Promise<IContentsModel> {
-    return Promise.resolve(void 0);
   }
 }
