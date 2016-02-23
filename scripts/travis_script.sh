@@ -11,5 +11,4 @@ npm run build:examples
 npm run test
 npm run test:coverage
 
-exit 0
 npm run docs
