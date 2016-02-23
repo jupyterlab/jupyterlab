@@ -42,6 +42,8 @@
     "webpack": "^1.12.11"
   },
   "peerDependencies": {
+    "jupyter-js-services": "^0.5.4",
+    "jupyter-js-utils": "^0.3.3",
     "phosphor-arrays": "^1.0.6",
     "phosphor-codemirror": "0.0.1",
     "phosphor-domutil": "^1.2.0",
