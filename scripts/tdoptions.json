@@ -6,9 +6,15 @@
   "mode": "file",
   "out": "docs",
   "src": [
-    "src/index.ts",
-    "typings/codemirror/codemirror.d.ts",
-    "typings/es6-promise.d.ts",
-    "typings/moment/moment.d.ts"
+    "src/clipboard/index.ts",
+    "src/dialog/index.ts",
+    "src/docmanager/index.ts",
+    "src/filebrowser/index.ts",
+    "src/terminal/index.ts",
+    "src/typings/codemirror/codemirror.d.ts",
+    "src/typings/es6-promise.d.ts",
+    "src/typings/moment/moment.d.ts",
+    "src/typings/require/require.d.ts",
+    "src/typings/term.js/term.js.d.ts"
   ]
 }
