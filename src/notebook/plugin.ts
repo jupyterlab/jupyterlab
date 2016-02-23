@@ -215,6 +215,28 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   }
 
   /**
+   * Set the dirty state of a widget (defaults to current active widget).
+   */
+  setDirty(widget?: NotebookContainer): void {
+    super.setDirty(widget);
+    widget = this.resolveWidget(widget);
+    if (widget) {
+      widget.model.dirty = true;
+    }
+  }
+
+  /**
+   * Clear the dirty state of a widget (defaults to current active widget).
+   */
+  clearDirty(widget?: NotebookContainer): void {
+    super.clearDirty(widget);
+    widget = this.resolveWidget(widget);
+    if (widget) {
+      widget.model.dirty = false;
+    }
+  }
+
+  /**
    * Get options use to fetch the model contents from disk.
    */
   protected getFetchOptions(model: IContentsModel): IContentsOpts {
@@ -234,6 +256,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
    */
   protected createWidget(contents: IContentsModel): NotebookContainer {
     let panel = new NotebookContainer();
+    panel.model.stateChanged.connect(this._onModelChanged, this);
     panel.title.text = contents.name;
     panel.addClass(notebookContainerClass);
 
