@@ -65,7 +65,8 @@ def main(argv):
     ]
 
     app = tornado.web.Application(handlers, static_path='build',
-                                  template_path='.')
+                                  template_path='.',
+                                  compiled_template_cache=False)
 
     app.listen(PORT, 'localhost')
     loop = tornado.ioloop.IOLoop.instance()

@@ -7,15 +7,5 @@
     "moduleResolution": "node",
     "target": "ES5",
     "outDir": "../lib"
-  },
-  "files": [
-    "index.ts",
-    "../typings/codemirror.d.ts",
-    "../typings/diff-match-patch.d.ts",
-    "../typings/es6-promise.d.ts",
-    "../typings/marked.d.ts",
-    "../typings/requirejs.d.ts",
-    "../typings/systemjs.d.ts",
-    "../typings/transformime.d.ts"
-  ]
+  }
 }

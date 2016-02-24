@@ -1,4 +1,9 @@
-'use-strict';
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2015, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+'use strict';
 
 import {
   NotebookModel, NotebookWidget,
@@ -25,10 +30,13 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import 'jupyter-js-notebook/lib/index.css';
+import 'jupyter-js-notebook/lib/theme.css';
 
-// jupyter notebook --NotebookApp.allow_origin=* --port 8890
+
 let SERVER_URL = getBaseUrl();
 let NOTEBOOK = 'test.ipynb';
+
 
 function bindings(nbModel: NotebookModel) {
   let bindings: IKeyBinding[] = [{
@@ -78,4 +86,4 @@ function main(): void {
   });
 }
 
-main();
+window.onload = main;
