@@ -7,8 +7,7 @@
     "jupyter-js-ui": "file:../..",
     "jupyter-js-utils": "^0.3.1",
     "phosphor-dockpanel": "^0.9.6",
-    "phosphor-keymap": "^0.7.0",
-    "tsconfig-cli": "^0.1.1"
+    "phosphor-keymap": "^0.7.0"
   },
   "scripts": {
     "build": "tsconfig -u src/tsconfig.json && tsc --project src && webpack --config webpack.conf.js",
