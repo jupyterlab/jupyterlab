@@ -9,4 +9,4 @@ npm test
 npm run test:coverage
 export PATH="$HOME/miniconda/bin:$PATH"
 npm run build:example
-npm run docs
+#npm run docs
