@@ -27,7 +27,7 @@ import {
   IOutputAreaModel, OutputAreaModel,
   DisplayDataModel, ExecuteResultModel,
   ExecuteErrorModel, StreamModel,
-  StreamName, OutputType, OutputModel
+  StreamType, OutputType, OutputModel
 } from '../output-area';
 
 import {
@@ -89,27 +89,21 @@ function buildOutputModel(out: Output): OutputModel {
     outmodel.data = out.data;
     outmodel.metadata = out.metadata;
     return outmodel;
-  } else if (isStream(out)) {
+  } 
+  if (isStream(out)) {
     let outmodel = new StreamModel();
-    switch (out.name) {
-    case 'stdout':
-      outmodel.name = StreamName.StdOut;
-      break;
-    case 'stderr':
-      outmodel.name = StreamName.StdErr;
-      break;
-    default:
-      console.error('Unrecognized stream name: %s', out.name);
-    }
+    outmodel.name = out.name as StreamType;
     outmodel.text = out.text;
     return outmodel;
-  } else if (isJupyterError(out)) {
+  } 
+  if (isJupyterError(out)) {
     let outmodel = new ExecuteErrorModel();
     outmodel.ename = out.ename;
     outmodel.evalue = out.evalue;
     outmodel.traceback = out.traceback.join('\n');
     return outmodel;
-  } else if (isExecuteResult(out)) {
+  }
+  if (isExecuteResult(out)) {
     let outmodel = new ExecuteResultModel();
     outmodel.data = out.data;
     outmodel.executionCount = out.execution_count;
@@ -125,12 +119,7 @@ function buildOutputModel(out: Output): OutputModel {
 export
 function messageToModel(msg: IKernelMessage) {
   let m: Output = msg.content;
-  let type = msg.header.msg_type;
-  if (type === 'execute_result') {
-    m.output_type = 'display_data';
-  } else {
-    m.output_type = type;
-  }
+  let type = msg.header.msg_type as OutputType;
   return buildOutputModel(m);
 }
 
@@ -198,10 +187,9 @@ function getOutputData(cell: CodeCellModel): Output[] {
         metadata: output.metadata
       });
     } else if (output instanceof StreamModel) {
-      let name = output.name === StreamName.StdOut ? 'stdout' : 'stderr';
       outputs.push({
         output_type: 'stream',
-        name: name,
+        name: output.name,
         text: output.text
       });
     } else if (output instanceof DisplayDataModel) {

@@ -24,44 +24,33 @@ export interface MimeBundle {
 }
 
 
+/**
+ * The valid output type strings.
+ */
 export
-enum OutputType {
-  /**
-   * The "execute_result" message type from the message spec.
-   */
-  ExecuteResult,
-
-  /**
-   * The "display_data" message type from the message spec.
-   */
-  DisplayData,
-
-  /**
-   * The "stream" message type from the message spec.
-   */
-  Stream,
-
-  /**
-   * The "error" message type from the message spec.
-   */
-  Error
-}
+type OutputType = "execute_result" | "display_data" | "stream" | "error";
 
 
 /**
-* The base interface for an output model.
-*/
+ * The valid stream type strings.
+ */
+export 
+type StreamType = "stdout" | "stderr";
+
+
+/**
+ * The base interface for an output model.
+ */
 export
 class OutputBaseModel {
-
   /**
-  * A signal emitted when state of the output changes.
-  */
+   * A signal emitted when state of the output changes.
+   */
   stateChanged: ISignal<OutputBaseModel, IChangedArgs<any>>;
 
   /**
-  * The output type.
-  */
+   * The output type.
+   */
   outputType: OutputType;
 }
 
@@ -72,19 +61,19 @@ class OutputBaseModel {
 export
 class DisplayDataModel extends OutputBaseModel {
   /**
-  * The raw data for the output.
-  */
+   * The output type.
+   */
+  outputType: OutputType = "display_data";
+
+  /**
+   * The raw data for the output.
+   */
   data: MimeBundle;
 
   /**
-  * Metadata about the output.
-  */
-  metadata: any;
-
-  /**
-   * Output type
+   * Metadata about the output.
    */
-  outputType: OutputType = OutputType.DisplayData;
+  metadata: any;
 }
 
 
@@ -92,31 +81,28 @@ class DisplayDataModel extends OutputBaseModel {
 * An output model for an execute result.
 */
 export
-class ExecuteResultModel extends DisplayDataModel {
+class ExecuteResultModel extends OutputBaseModel {
   /**
-  * The current execution count.
-  */
+   * The output type.
+   */
+  outputType: OutputType = "execute_result";
+
+  /**
+   * The raw data for the output.
+   */
+  data: MimeBundle;
+
+  /**
+   * Metadata about the output.
+   */
+  metadata: any;
+
+  /**
+   * The current execution count.
+   */
   executionCount: number; // this is also a property on the cell?
-
-  /**
-   * Output type
-   */
-  outputType: OutputType = OutputType.ExecuteResult;
 }
 
-
-export
-enum StreamName {
-  /**
-   * The "stdout" stream name from the message spec.
-   */
-  StdOut,
-
-  /**
-   * The "stderr" stream name from the message spec.
-   */
-  StdErr
-}
 
 
 /**
@@ -125,24 +111,24 @@ enum StreamName {
 export
 class StreamModel extends OutputBaseModel {
   /**
+   * The output type.
+   */
+  outputType: OutputType = "stream";
+
+  /**
   * The type of stream.
   */
-  name: StreamName;
+  name: StreamType;
 
   /**
   * The text from the stream.
   */
   text: string;
-
-  /**
-   * Output type
-   */
-  outputType: OutputType = OutputType.Stream;
 }
 
 
 function isStreamModel(model: OutputBaseModel): model is StreamModel {
-  return model.outputType === OutputType.Stream;
+  return model.outputType === "stream";
 }
 
 
@@ -151,6 +137,11 @@ function isStreamModel(model: OutputBaseModel): model is StreamModel {
 */
 export
 class ExecuteErrorModel extends OutputBaseModel {
+  /**
+   * The output type.
+   */
+  outputType: OutputType = "error";
+
   /**
   * The name of the error.
   */
@@ -168,11 +159,6 @@ class ExecuteErrorModel extends OutputBaseModel {
   * This is an array of strings that has been concatenated to a single string.
   */
   traceback: string;
-
-  /**
-   * Output type
-   */
-  outputType: OutputType = OutputType.Error;
 }
 
 

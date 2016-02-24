@@ -102,16 +102,16 @@ class OutputAreaWidget extends Panel {
   renderItem(output: OutputModel): Promise<HTMLElement> {
     let bundle: MimeBundle;
     switch(output.outputType) {
-    case OutputType.ExecuteResult:
+    case "execute_result":
       bundle = (output as ExecuteResultModel).data;
       break;
-    case OutputType.DisplayData:
+    case "display_data":
       bundle = (output as DisplayDataModel).data;
       break;
-    case OutputType.Stream:
+    case "stream":
       bundle = {'jupyter/console-text': (output as StreamModel).text};
       break;
-    case OutputType.Error:
+    case "error":
       let out: ExecuteErrorModel = output as ExecuteErrorModel;
       bundle = {'jupyter/console-text': out.traceback || `${out.ename}: ${out.evalue}`};
       break;

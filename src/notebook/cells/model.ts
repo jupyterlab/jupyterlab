@@ -26,26 +26,12 @@ import {
   Widget
 } from 'phosphor-widget';
 
+
 /**
- * An enum which describes the type of cell.
+ * A type which describes the type of cell.
  */
 export
-enum CellType {
-  /**
-   * The cell contains code input.
-   */
-  Code,
-
-  /**
-   * The cell contains markdown.
-   */
-  Markdown,
-
-  /**
-   * The cell contains raw text.
-   */
-  Raw
-}
+type CellType = "code" | "markdown" | "raw";
 
 
 /**
@@ -142,7 +128,6 @@ interface ICodeCellModel extends IBaseCellModel {
  */
 export
 interface IRawCellModel extends IBaseCellModel {
-
   /**
    * The raw cell format.
    */
@@ -290,7 +275,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     Private.executionCountProperty.set(this, value);
   }
 
-  type: CellType = CellType.Code;
+  type: CellType = "code";
 }
 
 
@@ -322,7 +307,7 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
     if (!this.rendered) this.input.textEditor.select();
   }
 
-  type: CellType = CellType.Markdown;
+  type: CellType = "markdown";
 }
 
 /**
@@ -330,7 +315,7 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
   */
 export
 function isMarkdownCellModel(m: ICellModel): m is IMarkdownCellModel {
-  return (m.type === CellType.Markdown);
+  return (m.type === "markdown");
 }
 
 /**
@@ -338,7 +323,7 @@ function isMarkdownCellModel(m: ICellModel): m is IMarkdownCellModel {
   */
 export
 function isCodeCellModel(m: ICellModel): m is ICodeCellModel {
-  return (m.type === CellType.Code);
+  return (m.type === "code");
 }
 
 /**
@@ -346,7 +331,7 @@ function isCodeCellModel(m: ICellModel): m is ICodeCellModel {
   */
 export
 function isRawCellModel(m: ICellModel): m is IRawCellModel {
-  return (m.type === CellType.Raw);
+  return (m.type === "raw");
 }
 
 

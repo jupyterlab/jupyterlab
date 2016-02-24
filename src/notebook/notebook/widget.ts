@@ -70,10 +70,10 @@ class NotebookWidget extends Panel {
     this._listdispose = follow<ICellModel>(model.cells, this, (c: ICellModel) => {
       let w: Widget;
       switch(c.type) {
-      case CellType.Code:
+      case "code":
         w = new CodeCellWidget(c as CodeCellModel);
         break;
-      case CellType.Markdown:
+      case "markdown":
         w = new MarkdownCellWidget(c as MarkdownCellModel);
         break;
       default:

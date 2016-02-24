@@ -3,8 +3,12 @@
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
 import {
-  MimeBundle
+  MimeBundle, OutputType
 } from '../output-area';
+
+import {
+  CellType
+} from '../cells';
 
 
 // In the notebook format *disk* representation, this would be string | string[]
@@ -26,34 +30,34 @@ const MINOR_VERSION = 0;
 
 export
 interface BaseOutput {
-  output_type: string;
-}
-
-export
-interface ExecuteResult extends BaseOutput {
-  output_type: string; // "execute_result"
-  execution_count: number;
-  data:  MimeBundle;
-  metadata: {};
+  output_type: OutputType;
 }
 
 export
 interface DisplayData extends BaseOutput {
-  output_type: string; // "display_data"
+  output_type: "display_data";
+  data: MimeBundle;
+  metadata: {};
+}
+
+export
+interface ExecuteResult extends BaseOutput {
+  output_type: "execute_result";
+  execution_count: number;
   data: MimeBundle;
   metadata: {};
 }
 
 export
 interface Stream extends BaseOutput {
-  output_type: string; // "stream"
+  output_type: "stream";
   name: string;
   text: multilineString;
 }
 
 export
 interface JupyterError extends BaseOutput {
-  output_type: string; // "error"
+  output_type: "error";
   ename: string;
   evalue: string;
   traceback: string[];
@@ -87,7 +91,7 @@ type Cell = BaseCell | RawCell | MarkdownCell | CodeCell;
 
 export
 interface BaseCell {
-  cell_type: string;
+  cell_type: CellType;
   source: multilineString;
   metadata: {
     name?: string;
@@ -97,7 +101,7 @@ interface BaseCell {
 
 export
 interface RawCell extends BaseCell {
-  cell_type: string; /*"raw"*/
+  cell_type: "raw";
   metadata: {
     format?: string;
   }
@@ -105,12 +109,12 @@ interface RawCell extends BaseCell {
 
 export
 interface MarkdownCell extends BaseCell {
-  cell_type: string; /*"markdown"*/
+  cell_type: "markdown";
 }
 
 export
 interface CodeCell extends BaseCell {
-  cell_type: string; /*"code"*/
+  cell_type: "code";
   metadata: {
     name?: string;
     tags?: string[];
