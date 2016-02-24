@@ -15,7 +15,7 @@
     "phosphor-widget": "^1.0.0-rc.1"
   },
   "scripts": {
-    "build": "tsc --project src && webpack --config webpack.conf.js",
+    "build": "tsconfig -u src/tsconfig.json && tsc --project src && webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules",
     "postinstall": "npm dedupe",
     "update": "rimraf node_modules/jupyter-js-ui && npm install",
@@ -27,6 +27,7 @@
     "css-loader": "^0.23.1",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.0",
+    "tsconfig-cli": "^0.1.1",
     "watch": "^0.17.1",
     "webpack": "^1.12.14"
   }
