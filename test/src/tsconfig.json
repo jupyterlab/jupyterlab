@@ -8,8 +8,8 @@
     "outDir": "../build"
   },
   "files": [
-    "../../typings/expect.js/expect.js.d.ts",
-    "../../typings/mocha/mocha.d.ts",
+    "../../src/typings/expect.js/expect.js.d.ts",
+    "../../src/typings/mocha/mocha.d.ts",
     "index.ts"
   ]
 }
