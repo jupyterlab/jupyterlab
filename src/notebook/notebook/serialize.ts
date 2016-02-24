@@ -47,31 +47,25 @@ import {
 export
 function populateNotebookModel(nb: INotebookModel, data: NotebookContent): void {
   nb.cells.clear();
+  nb.defaultMimetype = 'text/x-python';
 
-  // iterate through the cell data, creating cell models
+  // Iterate through the cell data, creating cell models.
   data.cells.forEach((c) => {
-    let input = new InputAreaModel();
-    input.textEditor = new EditorModel({ lineNumbers: false });
-    input.textEditor.text = c.source;
-
     if (isMarkdownCell(c)) {
-      let cell = new MarkdownCellModel();
-      cell.input = input;
+      let cell = nb.createMarkdownCell();
+      cell.input.textEditor.text = c.source;
       cell.rendered = true;
       nb.cells.add(cell);
     } else if (isCodeCell(c)) {
-      let cell = new CodeCellModel();
-      cell.input = input;
-      let outputArea = new OutputAreaModel();
-      cell.output = outputArea;
-      for (let i=0; i<c.outputs.length; i++) {
-        outputArea.add(buildOutputModel(c.outputs[i]));
+      let cell = nb.createCodeCell();
+      cell.input.textEditor.text = c.source;
+      for (let i = 0; i < c.outputs.length; i++) {
+        cell.output.add(buildOutputModel(c.outputs[i]));
       }
       nb.cells.add(cell);
     }
   });
-
-  nb.defaultMimetype = 'text/x-python';
+  
   if (nb.cells.length) {
     nb.selectedCellIndex = 0;
   }

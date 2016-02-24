@@ -89,9 +89,14 @@ class NotebookWidget extends Panel {
     // bind events that can select the cell
     // see https://github.com/jupyter/notebook/blob/203ccd3d4496cc22e6a1c5e6ece9f5a7d791472a/notebook/static/notebook/js/cell.js#L178
     this.node.addEventListener('click', (ev: MouseEvent) => {
-      this._model.selectedCellIndex = this.findCell(ev.target as HTMLElement);
+      if (!this._model.readOnly) {
+        this._model.selectedCellIndex = this.findCell(ev.target as HTMLElement);
+      }
     })
     this.node.addEventListener('dblclick', (ev: MouseEvent) => {
+      if (this._model.readOnly) {
+        return;
+      }
       let i = this.findCell(ev.target as HTMLElement);
       if (i === void 0) {
         return;

@@ -53,17 +53,8 @@ import {
  * The interactivity modes for a notebook.
  */
 export
-enum NotebookMode {
-  /**
-   * Command mode is used for navigation and manipulation.
-   */
-  Command,
+type NotebookMode = "command" | "edit";
 
-  /**
-   * Edit mode is used for text and code editing.
-   */
-  Edit
-}
 
 /**
  * The definition of a model object for a notebook widget.
@@ -87,6 +78,11 @@ interface INotebookModel {
    * The dirty state of the notebook.
    */
   dirty: boolean;
+
+  /**
+   * Whether the notebook is read-only.
+   */
+  readOnly: boolean;
 
   /**
    * Whether the notebook can be trusted.
@@ -237,6 +233,25 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Get the read-only status of the notebook.
+   */
+  get readOnly(): boolean {
+    return NotebookModelPrivate.readOnlyProperty.get(this);
+  }
+
+  /**
+   * Set the read-only status of the notebook.
+   */
+  set readOnly(value: boolean) {
+    NotebookModelPrivate.readOnlyProperty.set(this, value);
+    let cells = this._cells;
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.get(i);
+      cell.input.textEditor.readOnly = value;
+    }
+  }
+
+  /**
    * Get the session for the notebook.
    */
   get session(): INotebookSession {
@@ -325,11 +340,15 @@ class NotebookModel implements INotebookModel {
    */
   createCodeCell(source?: ICellModel): ICodeCellModel {
     let input = new InputAreaModel();
-    input.textEditor = new EditorModel({ lineNumbers: false });
+    input.textEditor = new EditorModel({
+      lineNumbers: false,
+      mimetype: this.defaultMimetype
+    });
     let cell = new CodeCellModel();
     cell.input = input;
     let outputArea = new OutputAreaModel();
     cell.output = outputArea;
+    cell.input.textEditor.readOnly = this.readOnly;
     return cell;
   }
 
@@ -341,6 +360,7 @@ class NotebookModel implements INotebookModel {
     input.textEditor = new EditorModel({ lineNumbers: false });
     let cell  = new MarkdownCellModel();
     cell.input = input;
+    cell.input.textEditor.readOnly = this.readOnly;
     return cell;
   }
 
@@ -348,6 +368,9 @@ class NotebookModel implements INotebookModel {
    * Run the selected cell, taking the appropriate action.
    */
   runSelectedCell(): void {
+    if (this.readOnly) {
+      return;
+    }
     let cell = this.cells.get(this.selectedCellIndex);
     if (!cell) {
       return;
@@ -368,6 +391,9 @@ class NotebookModel implements INotebookModel {
    * Execute the given cell. 
    */
   protected executeCell(cell: CodeCellModel): void {
+    if (this.readOnly) {
+      return;
+    }
     let session = this.session;
     if (!session) {
       return;
@@ -439,6 +465,15 @@ namespace NotebookModelPrivate {
   export
   const modeProperty = new Property<NotebookModel, NotebookMode>({
     name: 'mode',
+    notify: stateChangedSignal,
+  });
+
+  /**
+  * A property descriptor which holds the read only status of the notebook.
+  */
+  export
+  const readOnlyProperty = new Property<NotebookModel, boolean>({
+    name: 'readOnly',
     notify: stateChangedSignal,
   });
 
