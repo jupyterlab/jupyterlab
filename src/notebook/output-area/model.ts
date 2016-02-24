@@ -43,7 +43,6 @@ type StreamType = "stdout" | "stderr";
  */
 export
 class OutputBaseModel {
-
   /**
    * A signal emitted when state of the output changes.
    */
@@ -61,6 +60,14 @@ class OutputBaseModel {
 */
 export
 class DisplayDataModel extends OutputBaseModel {
+  /**
+   * Construct a new display data model.
+   */
+  constructor() {
+    super();
+    this.outputType = 'display_data';
+  }
+
   /**
    * The raw data for the output.
    */
@@ -83,6 +90,14 @@ class DisplayDataModel extends OutputBaseModel {
 */
 export
 class ExecuteResultModel extends OutputBaseModel {
+  /**
+   * Construct a new execute result model.
+   */
+  constructor() {
+    super();
+    this.outputType = 'execute_result';
+  }
+
   /**
    * The raw data for the output.
    */
@@ -112,6 +127,15 @@ class ExecuteResultModel extends OutputBaseModel {
 export
 class StreamModel extends OutputBaseModel {
   /**
+   * Construct a new stream model.
+   */
+  constructor() {
+    super();
+    this.outputType = 'stream';
+  }
+
+
+  /**
   * The type of stream.
   */
   name: StreamType;
@@ -138,6 +162,14 @@ function isStreamModel(model: OutputBaseModel): model is StreamModel {
 */
 export
 class ExecuteErrorModel extends OutputBaseModel {
+  /**
+   * Construct a new execute error model.
+   */
+  constructor() {
+    super();
+    this.outputType = 'error';
+  }
+
   /**
   * The name of the error.
   */

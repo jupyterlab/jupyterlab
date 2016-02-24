@@ -120,11 +120,6 @@ export
 function messageToModel(msg: IKernelMessage) {
   let m: Output = msg.content;
   let type = msg.header.msg_type as OutputType;
-  if (type === 'execute_result') {
-    m.output_type = 'display_data';
-  } else {
-    m.output_type = type;
-  }
   return buildOutputModel(m);
 }
 
