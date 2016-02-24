@@ -89,7 +89,8 @@ function buildOutputModel(out: Output): OutputModel {
     outmodel.data = out.data;
     outmodel.metadata = out.metadata;
     return outmodel;
-  } else if (isStream(out)) {
+  } 
+  if (isStream(out)) {
     let outmodel = new StreamModel();
     switch (out.name) {
     case 'stdout':
@@ -103,13 +104,15 @@ function buildOutputModel(out: Output): OutputModel {
     }
     outmodel.text = out.text;
     return outmodel;
-  } else if (isJupyterError(out)) {
+  } 
+  if (isJupyterError(out)) {
     let outmodel = new ExecuteErrorModel();
     outmodel.ename = out.ename;
     outmodel.evalue = out.evalue;
     outmodel.traceback = out.traceback.join('\n');
     return outmodel;
-  } else if (isExecuteResult(out)) {
+  }
+  if (isExecuteResult(out)) {
     let outmodel = new ExecuteResultModel();
     outmodel.data = out.data;
     outmodel.executionCount = out.execution_count;
