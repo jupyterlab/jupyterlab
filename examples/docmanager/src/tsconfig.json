@@ -1,15 +1,24 @@
 {
-  "compilerOptions": {
-    "noImplicitAny": true,
-    "noEmitOnError": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "ES5",
-    "outDir": "../build"
-  },
-  "files": [
-    "../../../src/typings/es6-promise.d.ts",
-    "../../../src/typings/codemirror/codemirror.d.ts",
-    "index.ts"
-  ]
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "noEmitOnError": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "target": "ES5",
+        "outDir": "../build"
+    },
+    "filesGlob": [
+        "../../../src/typings/**/*.d.ts",
+        "index.ts"
+    ],
+    "files": [
+        "../../../src/typings/codemirror/codemirror.d.ts",
+        "../../../src/typings/es6-promise/es6-promise.d.ts",
+        "../../../src/typings/expect.js/expect.js.d.ts",
+        "../../../src/typings/mocha/mocha.d.ts",
+        "../../../src/typings/moment/moment.d.ts",
+        "../../../src/typings/require/require.d.ts",
+        "../../../src/typings/term.js/term.js.d.ts",
+        "index.ts"
+    ]
 }
