@@ -4,7 +4,7 @@
 
 var phosphide = require('phosphide/lib/core/application');
 
-require('./build/index.css');
+require('jupyter-js-plugins/lib/default-theme/index.css');
 
 
 var app = new phosphide.Application({
