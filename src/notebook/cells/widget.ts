@@ -127,7 +127,7 @@ class MarkdownCellWidget extends CellWidget {
 
     this._model = model;
     // Insist on the Github-flavored markdown mode
-    model.input.textEditor.mimetype = 'text/x-gfm';
+    model.input.textEditor.mimetype = 'text/x-ipythongfm';
     this.input = new InputAreaWidget(model.input);
     this.rendered = new Widget();
     if (model.rendered) {

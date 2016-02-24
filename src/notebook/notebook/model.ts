@@ -456,6 +456,7 @@ namespace NotebookModelPrivate {
   export
   const defaultMimetype = new Property<NotebookModel, string>({
     name: 'defaultMimetype',
+    value: "text/x-ipython",
     notify: stateChangedSignal,
   });
 

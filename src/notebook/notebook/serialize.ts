@@ -47,7 +47,6 @@ import {
 export
 function populateNotebookModel(nb: INotebookModel, data: NotebookContent): void {
   nb.cells.clear();
-  nb.defaultMimetype = 'text/x-python';
 
   // Iterate through the cell data, creating cell models.
   data.cells.forEach((c) => {
