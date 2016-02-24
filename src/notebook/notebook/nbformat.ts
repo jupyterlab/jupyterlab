@@ -6,6 +6,10 @@ import {
   MimeBundle, OutputType
 } from '../output-area';
 
+import {
+  CellType
+} from '../cells';
+
 
 // In the notebook format *disk* representation, this would be string | string[]
 export type multilineString = string;
@@ -87,7 +91,7 @@ type Cell = BaseCell | RawCell | MarkdownCell | CodeCell;
 
 export
 interface BaseCell {
-  cell_type: string;
+  cell_type: CellType;
   source: multilineString;
   metadata: {
     name?: string;
@@ -97,7 +101,7 @@ interface BaseCell {
 
 export
 interface RawCell extends BaseCell {
-  cell_type: string; /*"raw"*/
+  cell_type: "raw";
   metadata: {
     format?: string;
   }
@@ -105,12 +109,12 @@ interface RawCell extends BaseCell {
 
 export
 interface MarkdownCell extends BaseCell {
-  cell_type: string; /*"markdown"*/
+  cell_type: "markdown";
 }
 
 export
 interface CodeCell extends BaseCell {
-  cell_type: string; /*"code"*/
+  cell_type: "code";
   metadata: {
     name?: string;
     tags?: string[];

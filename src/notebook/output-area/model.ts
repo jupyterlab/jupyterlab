@@ -61,12 +61,9 @@ class OutputBaseModel {
 export
 class DisplayDataModel extends OutputBaseModel {
   /**
-   * Construct a new display data model.
+   * The output type.
    */
-  constructor() {
-    super();
-    this.outputType = 'display_data';
-  }
+  outputType: OutputType = "display_data";
 
   /**
    * The raw data for the output.
@@ -77,11 +74,6 @@ class DisplayDataModel extends OutputBaseModel {
    * Metadata about the output.
    */
   metadata: any;
-
-  /**
-   * The output type.
-   */
-  outputType: "display_data";
 }
 
 
@@ -91,12 +83,9 @@ class DisplayDataModel extends OutputBaseModel {
 export
 class ExecuteResultModel extends OutputBaseModel {
   /**
-   * Construct a new execute result model.
+   * The output type.
    */
-  constructor() {
-    super();
-    this.outputType = 'execute_result';
-  }
+  outputType: OutputType = "execute_result";
 
   /**
    * The raw data for the output.
@@ -112,11 +101,6 @@ class ExecuteResultModel extends OutputBaseModel {
    * The current execution count.
    */
   executionCount: number; // this is also a property on the cell?
-
-  /**
-   * The output type.
-   */
-  outputType: "execute_result";
 }
 
 
@@ -127,13 +111,9 @@ class ExecuteResultModel extends OutputBaseModel {
 export
 class StreamModel extends OutputBaseModel {
   /**
-   * Construct a new stream model.
+   * The output type.
    */
-  constructor() {
-    super();
-    this.outputType = 'stream';
-  }
-
+  outputType: OutputType = "stream";
 
   /**
   * The type of stream.
@@ -144,11 +124,6 @@ class StreamModel extends OutputBaseModel {
   * The text from the stream.
   */
   text: string;
-
-  /**
-   * The output type.
-   */
-  outputType: "stream";
 }
 
 
@@ -163,12 +138,9 @@ function isStreamModel(model: OutputBaseModel): model is StreamModel {
 export
 class ExecuteErrorModel extends OutputBaseModel {
   /**
-   * Construct a new execute error model.
+   * The output type.
    */
-  constructor() {
-    super();
-    this.outputType = 'error';
-  }
+  outputType: OutputType = "error";
 
   /**
   * The name of the error.
@@ -187,11 +159,6 @@ class ExecuteErrorModel extends OutputBaseModel {
   * This is an array of strings that has been concatenated to a single string.
   */
   traceback: string;
-
-  /**
-   * The output type.
-   */
-  outputType: "error";
 }
 
 
