@@ -8,14 +8,12 @@
         "outDir": "../build"
     },
     "filesGlob": [
-        "../../../src/typings/*.d.ts",
         "../../../src/typings/**/*.d.ts",
         "index.ts"
     ],
     "files": [
-        "../../../src/typings/es6-promise.d.ts",
-        "../../../src/typings/widgets.d.ts",
         "../../../src/typings/codemirror/codemirror.d.ts",
+        "../../../src/typings/es6-promise/es6-promise.d.ts",
         "../../../src/typings/expect.js/expect.js.d.ts",
         "../../../src/typings/mocha/mocha.d.ts",
         "../../../src/typings/moment/moment.d.ts",
