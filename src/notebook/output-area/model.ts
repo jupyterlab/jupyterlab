@@ -157,9 +157,9 @@ class ExecuteErrorModel extends OutputBaseModel {
   traceback: string;
 
   /**
-   * Output type
+   * The output type.
    */
-  outputType: OutputType = "error";
+  outputType: "error";
 }
 
 
