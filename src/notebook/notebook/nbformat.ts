@@ -3,7 +3,7 @@
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
 import {
-  MimeBundle
+  MimeBundle, OutputType
 } from '../output-area';
 
 
@@ -22,10 +22,6 @@ const MAJOR_VERSION = 4;
  */
 export 
 const MINOR_VERSION = 0;
-
-
-export
-type OutputType = "execute_result" | "display_data" | "stream" | "error";
 
 
 export
