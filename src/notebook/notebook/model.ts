@@ -37,8 +37,7 @@ import {
 import {
   OutputAreaModel,
   DisplayDataModel, ExecuteResultModel,
-  ExecuteErrorModel, StreamModel,
-  StreamName
+  ExecuteErrorModel, StreamModel
 } from '../output-area';
 
 import {

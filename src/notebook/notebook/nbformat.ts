@@ -25,35 +25,39 @@ const MINOR_VERSION = 0;
 
 
 export
-interface BaseOutput {
-  output_type: string;
-}
+type OutputType = "execute_result" | "display_data" | "stream" | "error";
+
 
 export
-interface ExecuteResult extends BaseOutput {
-  output_type: string; // "execute_result"
-  execution_count: number;
-  data:  MimeBundle;
-  metadata: {};
+interface BaseOutput {
+  output_type: OutputType;
 }
 
 export
 interface DisplayData extends BaseOutput {
-  output_type: string; // "display_data"
+  output_type: "display_data";
+  data: MimeBundle;
+  metadata: {};
+}
+
+export
+interface ExecuteResult extends BaseOutput {
+  output_type: "execute_result";
+  execution_count: number;
   data: MimeBundle;
   metadata: {};
 }
 
 export
 interface Stream extends BaseOutput {
-  output_type: string; // "stream"
+  output_type: "stream";
   name: string;
   text: multilineString;
 }
 
 export
 interface JupyterError extends BaseOutput {
-  output_type: string; // "error"
+  output_type: "error";
   ename: string;
   evalue: string;
   traceback: string[];

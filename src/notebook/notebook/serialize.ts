@@ -27,7 +27,7 @@ import {
   IOutputAreaModel, OutputAreaModel,
   DisplayDataModel, ExecuteResultModel,
   ExecuteErrorModel, StreamModel,
-  StreamName, OutputType, OutputModel
+  StreamType, OutputType, OutputModel
 } from '../output-area';
 
 import {
@@ -92,16 +92,7 @@ function buildOutputModel(out: Output): OutputModel {
   } 
   if (isStream(out)) {
     let outmodel = new StreamModel();
-    switch (out.name) {
-    case 'stdout':
-      outmodel.name = StreamName.StdOut;
-      break;
-    case 'stderr':
-      outmodel.name = StreamName.StdErr;
-      break;
-    default:
-      console.error('Unrecognized stream name: %s', out.name);
-    }
+    outmodel.name = out.name as StreamType;
     outmodel.text = out.text;
     return outmodel;
   } 
@@ -128,7 +119,7 @@ function buildOutputModel(out: Output): OutputModel {
 export
 function messageToModel(msg: IKernelMessage) {
   let m: Output = msg.content;
-  let type = msg.header.msg_type;
+  let type = msg.header.msg_type as OutputType;
   if (type === 'execute_result') {
     m.output_type = 'display_data';
   } else {
@@ -201,10 +192,9 @@ function getOutputData(cell: CodeCellModel): Output[] {
         metadata: output.metadata
       });
     } else if (output instanceof StreamModel) {
-      let name = output.name === StreamName.StdOut ? 'stdout' : 'stderr';
       outputs.push({
         output_type: 'stream',
-        name: name,
+        name: output.name,
         text: output.text
       });
     } else if (output instanceof DisplayDataModel) {
