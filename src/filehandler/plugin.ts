@@ -4,7 +4,7 @@
 
 import {
   FileHandler, AbstractFileHandler, DocumentManager
-} from 'jupyter-js-docmanager';
+} from 'jupyter-js-ui/lib/docmanager';
 
 import {
   Application
