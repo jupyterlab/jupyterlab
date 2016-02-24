@@ -3,12 +3,12 @@
 'use strict';
 
 import {
-  AbstractFileHandler, DocumentManager
-} from 'jupyter-js-docmanager';
-
-import {
   IContentsModel, IContentsOpts
 } from 'jupyter-js-services';
+
+import {
+  AbstractFileHandler, DocumentManager
+} from 'jupyter-js-ui/lib/docmanager';
 
 import {
   Application

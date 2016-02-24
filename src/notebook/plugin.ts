@@ -3,10 +3,6 @@
 'use strict';
 
 import {
-  AbstractFileHandler, DocumentManager
-} from 'jupyter-js-docmanager';
-
-import {
   NotebookWidget, NotebookModel, populateNotebookModel, buildOutputModel, Output, INotebookModel, getNotebookContent
 } from 'jupyter-js-notebook';
 
@@ -19,6 +15,10 @@ import {
   NotebookSessionManager, INotebookSessionManager,
   INotebookSession, IKernelMessage, IComm
 } from 'jupyter-js-services';
+
+import {
+  AbstractFileHandler, DocumentManager
+} from 'jupyter-js-ui/lib/docmanager';
 
 import {
   Application

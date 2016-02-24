@@ -4,7 +4,7 @@
 
 import {
   TerminalWidget, ITerminalOptions
-} from 'jupyter-js-terminal';
+} from 'jupyter-js-ui/lib/terminal';
 
 import {
   Application
