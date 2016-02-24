@@ -1,7 +1,6 @@
-// IPython mode is just a slightly altered Python Mode with `?` beeing a extra
-// single operator. Here we define `ipython` mode in the require `python`
-// callback to auto-load python mode, which is more likely not the best things
-// to do, but at least the simple one for now.
+// IPython mode is just a slightly altered Python Mode with `?` being an
+// operator. Here we define `ipython` mode in the require `python`
+// callback to auto-load python mode.
 "use strict";
 
 import * as CodeMirror
