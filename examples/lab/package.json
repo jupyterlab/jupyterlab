@@ -2,6 +2,7 @@
   "private": true,
   "name": "jupyter-js-plugins-example",
   "dependencies": {
+    "jupyter-js-notebook": "^0.9.1",
     "jupyter-js-plugins": "file:..",
     "phosphide": "^0.9.0"
   },
@@ -9,7 +10,7 @@
     "build": "webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules",
     "postinstall": "npm dedupe",
-    "update": "rimraf node_modules/jupyter-js-ui && npm install",
+    "update": "rimraf node_modules/jupyter-js-plugins && npm install",
     "watch:src": "watch 'npm run build' src --wait 5",
     "watch": "concurrently 'npm run watch:src' 'python main.py'"
   },

@@ -34,6 +34,11 @@ body {
 }
 
 
+.jp-NotebookContainer {
+  overflow-y: auto;
+}
+
+
 .jp-FileBrowser {
   min-width: 300px;
 }
