@@ -16,14 +16,6 @@ import {
 } from '../cells';
 
 import {
-  InputAreaModel
-} from '../input-area';
-
-import {
-  EditorModel
-} from '../editor';
-
-import {
   IOutputAreaModel, OutputAreaModel,
   DisplayDataModel, ExecuteResultModel,
   ExecuteErrorModel, StreamModel,
