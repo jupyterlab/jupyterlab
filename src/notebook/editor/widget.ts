@@ -95,9 +95,9 @@ interface IEditorModel {
   lineNumbers: boolean;
 
   /**
-   * A flag to determine whether to allow editing.
+   * A property to determine whether to allow editing.
    */
-  readOnly: boolean;
+  readOnly: boolean | "nocursor";
 
   /**
    * The number of spaces to insert for each tab.
@@ -175,13 +175,9 @@ class CodeMirrorWidget extends Widget {
     this.updateLineNumbers(value.lineNumbers);
     this.updateFixedHeight(value.fixedHeight);
     this.updateText(value.text);
-    this._editor.on('change', (instance, change) => {
-      this._model.text = this._editor.getDoc().getValue();
-      if (!this._initialized) {
-        this._initialized = true;
-      } else {
-        this._model.dirty = true;
-      }
+    CodeMirror.on(this._editor.getDoc() , 'change', (instance, change) => {
+      this._model.text = instance.getValue();
+      this._model.dirty = true;
     });
     value.stateChanged.connect(this.onModelStateChanged, this);
   }
@@ -257,7 +253,7 @@ class CodeMirrorWidget extends Widget {
   /**
    * Update the read only property of the editor.
    */
-  protected updateReadOnly(readOnly: boolean): void {
+  protected updateReadOnly(readOnly: boolean | "nocursor"): void {
     this._editor.setOption('readOnly', readOnly);
   }
 
@@ -400,5 +396,4 @@ class CodeMirrorWidget extends Widget {
   private _editor: CodeMirror.Editor = null;
   private _model: IEditorModel = null;
   private _dirty = false;
-  private _initialized = false;
 }

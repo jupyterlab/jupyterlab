@@ -247,7 +247,11 @@ class NotebookModel implements INotebookModel {
     let cells = this._cells;
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
-      cell.input.textEditor.readOnly = value;
+      if (value) {
+        cell.input.textEditor.readOnly = true;
+      } else {
+        cell.input.textEditor.readOnly = 'nocursor';
+      }
     }
   }
 
@@ -348,7 +352,11 @@ class NotebookModel implements INotebookModel {
     cell.input = input;
     let outputArea = new OutputAreaModel();
     cell.output = outputArea;
-    cell.input.textEditor.readOnly = this.readOnly;
+    if (this.readOnly) {
+      cell.input.textEditor.readOnly = 'nocursor';
+    } else {
+      cell.input.textEditor.readOnly = false;
+    }
     return cell;
   }
 
@@ -360,7 +368,11 @@ class NotebookModel implements INotebookModel {
     input.textEditor = new EditorModel({ lineNumbers: false });
     let cell  = new MarkdownCellModel();
     cell.input = input;
-    cell.input.textEditor.readOnly = this.readOnly;
+    if (this.readOnly) {
+      cell.input.textEditor.readOnly = 'nocursor';
+    } else {
+      cell.input.textEditor.readOnly = false;
+    }
     return cell;
   }
 

@@ -159,19 +159,14 @@ class InputAreaModel implements IInputAreaModel {
  * The namespace for the `InputAreaModel` class private data.
  */
 namespace InputAreaModelPrivate {
-
   /**
    * A signal emitted when the state of the model changes.
-   *
-   * **See also:** [[stateChanged]]
    */
   export
   const stateChangedSignal = new Signal<InputAreaModel, IChangedArgs<any>>();
 
   /**
   * A property descriptor which determines whether the input area is collapsed or displayed.
-  *
-  * **See also:** [[collapsed]]
   */
   export
   const collapsedProperty = new Property<InputAreaModel, boolean>({
@@ -181,8 +176,6 @@ namespace InputAreaModelPrivate {
 
   /**
   * A property descriptor containing the prompt number.
-  *
-  * **See also:** [[promptNumber]]
   */
   export
   const promptNumberProperty = new Property<InputAreaModel, number>({
@@ -192,8 +185,6 @@ namespace InputAreaModelPrivate {
 
   /**
   * A property descriptor containing the execution count of the input area.
-  *
-  * **See also:** [[executionCount]]
   */
   export
   const executionCountProperty = new Property<InputAreaModel, number>({
@@ -203,8 +194,6 @@ namespace InputAreaModelPrivate {
 
   /**
   * A property descriptor containing the text editor Model.
-  *
-  * **See also:** [[textEditor]]
   */
   export
   const textEditorProperty = new Property<InputAreaModel, EditorModel>({
