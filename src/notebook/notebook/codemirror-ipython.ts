@@ -1,6 +1,5 @@
-// IPython mode is just a slightly altered Python Mode with `?` being an
-// operator. Here we define `ipython` mode in the require `python`
-// callback to auto-load python mode.
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 "use strict";
 
 import * as CodeMirror
@@ -8,6 +7,12 @@ import * as CodeMirror
 
 import 'codemirror/mode/python/python';
 
+
+/**
+ * Define an IPython codemirror mode.
+ *
+ * It is a slightly altered Python Mode with a `?` operator.
+ */
 CodeMirror.defineMode("ipython", (config: CodeMirror.EditorConfiguration, modeOptions?: any) => {
     let pythonConf: any = {};
     for (var prop in modeOptions) {
@@ -23,6 +28,6 @@ CodeMirror.defineMode("ipython", (config: CodeMirror.EditorConfiguration, modeOp
       pythonConf.identifiers = new RegExp("^[_A-Za-z][_A-Za-z0-9]*");
     }
     return CodeMirror.getMode(config, pythonConf);
-}, 'python');
+});
 
 CodeMirror.defineMIME("text/x-ipython", "ipython");
