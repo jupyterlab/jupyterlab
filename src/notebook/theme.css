@@ -2,6 +2,7 @@
 .p-Widget.jp-Notebook {  
   min-width: 50px;
   min-height: 50px;
+  overflow-y: auto;
 }
 
 
