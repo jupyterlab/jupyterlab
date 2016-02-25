@@ -47,7 +47,7 @@ interface IEditorOptions {
   /**
    * A property to determine whether to allow editing.
    */
-  readOnly?: boolean | "nocursor";
+  readOnly?: boolean;
 
   /**
    * The number of spaces to insert for each tab.
@@ -161,14 +161,14 @@ class EditorModel  {
   /**
    * Get the readOnly property for the editor model.
    */
-  get readOnly(): boolean | "nocursor" {
+  get readOnly(): boolean {
     return EditorModelPrivate.readOnlyProperty.get(this);
   }
 
   /**
    * Set the readOnly property for the editor model.
    */
-  set readOnly(value: boolean | "nocursor") {
+  set readOnly(value: boolean) {
     EditorModelPrivate.readOnlyProperty.set(this, value);
   }
 
@@ -262,7 +262,7 @@ namespace EditorModelPrivate {
   export
   const lineNumbersProperty = new Property<EditorModel, boolean>({
     name: 'lineNumbers',
-    value: true,
+    value: false,
     notify: stateChangedSignal
   });
 
@@ -270,7 +270,7 @@ namespace EditorModelPrivate {
    * The property descriptor for the editor readOnly property.
    */
   export
-  const readOnlyProperty = new Property<EditorModel, boolean | "nocursor">({
+  const readOnlyProperty = new Property<EditorModel, boolean>({
     name: 'readOnly',
     value: false,
     notify: stateChangedSignal

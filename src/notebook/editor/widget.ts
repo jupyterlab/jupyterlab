@@ -34,12 +34,10 @@ import {
  */
 const CODEMIRROR_CLASS = 'jp-CodeMirror';
 
-
 /**
  * The class name added to a fixed height editor.
  */
 const FIXED_HEIGHT_CLASS = 'jp-mod-fixedHeight';
-
 
 /**
  * Initialize diff match patch.
@@ -97,7 +95,7 @@ interface IEditorModel {
   /**
    * A property to determine whether to allow editing.
    */
-  readOnly: boolean | "nocursor";
+  readOnly: boolean;
 
   /**
    * The number of spaces to insert for each tab.
@@ -253,8 +251,12 @@ class CodeMirrorWidget extends Widget {
   /**
    * Update the read only property of the editor.
    */
-  protected updateReadOnly(readOnly: boolean | "nocursor"): void {
-    this._editor.setOption('readOnly', readOnly);
+  protected updateReadOnly(readOnly: boolean): void {
+    if (readOnly) {
+      this._editor.setOption('readOnly', 'nocursor');
+    } else {
+      this._editor.setOption('readOnly', false);
+    }
   }
 
   /**

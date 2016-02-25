@@ -29,10 +29,6 @@ import {
 } from '../cells';
 
 import {
-    OutputAreaWidget, IOutputAreaModel
-} from '../output-area';
-
-import {
   DisposableDelegate, IDisposable
 } from 'phosphor-disposable';
 

@@ -112,7 +112,7 @@ function buildOutputModel(out: Output): OutputModel {
 export
 function messageToModel(msg: IKernelMessage) {
   let m: Output = msg.content;
-  let type = msg.header.msg_type as OutputType;
+  m.output_type = msg.header.msg_type as OutputType;
   return buildOutputModel(m);
 }
 
