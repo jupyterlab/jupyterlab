@@ -5,6 +5,7 @@
     "jupyter-js-notebook": "file:..",
     "jupyter-js-services": "^0.5.0",
     "jupyter-js-utils": "^0.3.1",
+    "phosphor-boxpanel": "^1.0.0-rc.0",
     "phosphor-keymap": "^0.7.0",
     "phosphor-widget": "^1.0.0-rc.1"
   },

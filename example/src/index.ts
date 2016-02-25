@@ -27,8 +27,8 @@ import {
 } from 'phosphor-keymap';
 
 import {
-  Widget
-} from 'phosphor-widget';
+  BoxPanel
+} from 'phosphor-boxpanel';
 
 import 'jupyter-js-notebook/lib/index.css';
 import 'jupyter-js-notebook/lib/theme.css';
@@ -67,8 +67,14 @@ function main(): void {
     let nbModel = new NotebookModel();
     populateNotebookModel(nbModel, data.content as NotebookContent);
     let nbWidget = new NotebookWidget(nbModel);
+    nbWidget.title.text = NOTEBOOK;
+
     keymap.add(bindings(nbModel));
-    nbWidget.attach(document.body);
+
+    let box = new BoxPanel();
+    box.id = 'main';
+    box.attach(document.body);
+    box.addChild(nbWidget);
 
     // start session
     startNewSession({
