@@ -65,7 +65,6 @@ function main(): void {
   let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then(data => {
     let nbModel = new NotebookModel();
-    nbModel.readOnly = true;
     populateNotebookModel(nbModel, data.content as NotebookContent);
     let nbWidget = new NotebookWidget(nbModel);
     nbWidget.title.text = NOTEBOOK;
