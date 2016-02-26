@@ -27,20 +27,6 @@ import {
 } from '../cells';
 
 import {
-  EditorModel
-} from '../editor';
-
-import {
-  InputAreaModel
-} from '../input-area';
-
-import {
-  OutputAreaModel,
-  DisplayDataModel, ExecuteResultModel,
-  ExecuteErrorModel, StreamModel
-} from '../output-area';
-
-import {
   NotebookMetadata
 } from './nbformat';
 
@@ -246,8 +232,7 @@ class NotebookModel implements INotebookModel {
     NotebookModelPrivate.readOnlyProperty.set(this, value);
     let cells = this._cells;
     for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i);
-      cell.input.textEditor.readOnly = value;
+      cells.get(i).readOnly = value;
     }
   }
 
@@ -339,29 +324,20 @@ class NotebookModel implements INotebookModel {
    * Create a code cell model.
    */
   createCodeCell(source?: ICellModel): ICodeCellModel {
-    let input = new InputAreaModel();
-    input.textEditor = new EditorModel({
-      lineNumbers: false,
-      mimetype: this.defaultMimetype
+    return new CodeCellModel({ 
+      mimetype: this.defaultMimetype,
+      readOnly: this.readOnly
     });
-    let cell = new CodeCellModel();
-    cell.input = input;
-    let outputArea = new OutputAreaModel();
-    cell.output = outputArea;
-    cell.input.textEditor.readOnly = this.readOnly;
-    return cell;
   }
 
   /**
    * Create a markdown cell model.
    */
   createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
-    let input = new InputAreaModel();
-    input.textEditor = new EditorModel({ lineNumbers: false });
-    let cell  = new MarkdownCellModel();
-    cell.input = input;
-    cell.input.textEditor.readOnly = this.readOnly;
-    return cell;
+    return new MarkdownCellModel({ 
+      mimetype: 'text/x-ipythongfm',
+      readOnly: this.readOnly
+    });
   }
 
   /**

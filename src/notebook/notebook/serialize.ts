@@ -16,14 +16,6 @@ import {
 } from '../cells';
 
 import {
-  InputAreaModel
-} from '../input-area';
-
-import {
-  EditorModel
-} from '../editor';
-
-import {
   IOutputAreaModel, OutputAreaModel,
   DisplayDataModel, ExecuteResultModel,
   ExecuteErrorModel, StreamModel,
@@ -112,7 +104,7 @@ function buildOutputModel(out: Output): OutputModel {
 export
 function messageToModel(msg: IKernelMessage) {
   let m: Output = msg.content;
-  let type = msg.header.msg_type as OutputType;
+  m.output_type = msg.header.msg_type as OutputType;
   return buildOutputModel(m);
 }
 

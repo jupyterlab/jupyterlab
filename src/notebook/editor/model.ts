@@ -45,7 +45,7 @@ interface IEditorOptions {
   lineNumbers?: boolean;
 
   /**
-   * A flag to determine whether to allow editing.
+   * A property to determine whether to allow editing.
    */
   readOnly?: boolean;
 
@@ -159,14 +159,14 @@ class EditorModel  {
   }
 
   /**
-   * Get the readOnly flag for the editor model.
+   * Get the readOnly property for the editor model.
    */
   get readOnly(): boolean {
     return EditorModelPrivate.readOnlyProperty.get(this);
   }
 
   /**
-   * Set the readOnly flag for the editor model.
+   * Set the readOnly property for the editor model.
    */
   set readOnly(value: boolean) {
     EditorModelPrivate.readOnlyProperty.set(this, value);
@@ -262,12 +262,12 @@ namespace EditorModelPrivate {
   export
   const lineNumbersProperty = new Property<EditorModel, boolean>({
     name: 'lineNumbers',
-    value: true,
+    value: false,
     notify: stateChangedSignal
   });
 
   /**
-   * The property descriptor for the editor readOnly flag.
+   * The property descriptor for the editor readOnly property.
    */
   export
   const readOnlyProperty = new Property<EditorModel, boolean>({

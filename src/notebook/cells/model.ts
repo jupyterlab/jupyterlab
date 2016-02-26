@@ -2,12 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-
 import {
-  IInputAreaModel
+  IInputAreaModel, IInputAreaOptions, InputAreaModel
 } from '../input-area';
 import {
-  IOutputAreaModel
+  IOutputAreaModel, OutputAreaModel
 } from '../output-area';
 
 import {
@@ -45,6 +44,14 @@ interface ISerializable {
 
 
 /**
+ * The options for creating a cell.
+ */
+export
+interface ICellOptions extends IInputAreaOptions {
+}
+
+
+/**
  * The definition of a model object for a base cell.
  */
 export
@@ -77,6 +84,9 @@ interface IBaseCellModel {
 
   /**
    * The input area of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   input: IInputAreaModel;
 
@@ -84,6 +94,11 @@ interface IBaseCellModel {
    * The dirty state of the cell.
    */
   dirty: boolean;
+
+  /**
+   * Whether the cell is read only.
+   */
+  readOnly: boolean;
 
   /**
    * Select the cell model.
@@ -162,6 +177,14 @@ type ICellModel =  (
  */
 export
 class BaseCellModel implements IBaseCellModel {
+  /**
+   * Construct a new base cell model.
+   */
+  constructor(options?: ICellOptions) {
+    let input = new InputAreaModel(options);
+    Private.inputProperty.set(this, input);
+    input.stateChanged.connect(this._inputChanged, this);
+  }
 
   /**
    * A signal emitted when the state of the model changes.
@@ -179,30 +202,16 @@ class BaseCellModel implements IBaseCellModel {
 
   /**
    * Get the input area model.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[inputProperty]].
    */
-  get input() {
+  get input(): IInputAreaModel {
     return Private.inputProperty.get(this);
-  }
-
-  /**
-   * Set the input area model.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[inputProperty]].
-   */
-  set input(value: IInputAreaModel) {
-    Private.inputProperty.set(this, value);
-    value.stateChanged.connect(this._inputChanged, this);
   }
 
   /**
    * Get the dirty state of the cell.
    *
    * #### Notes
-   * This is a pure delegate to the dirty state of the [input].
+   * This is a delegate to the dirty state of the [input].
    */
   get dirty(): boolean {
     return this.input.dirty;
@@ -212,10 +221,30 @@ class BaseCellModel implements IBaseCellModel {
    * Set the dirty state of the cell.
    *
    * #### Notes
-   * This is a pure delegate to the dirty state of the [input].
+   * This is a delegate to the dirty state of the [input].
    */
   set dirty(value: boolean) {
     this.input.dirty = value;
+  }
+
+  /**
+   * Get the read only state of the cell.
+   *
+   * #### Notes
+   * This is a delegate to the read only state of the [input].
+   */
+  get readOnly(): boolean {
+    return this.input.readOnly;
+  }
+
+  /**
+   * Set the read only state of the cell.
+   *
+   * #### Notes
+   * This is a delegate to the read only state of the [input].
+   */
+  set readOnly(value: boolean) {
+    this.input.readOnly = value;
   }
 
   /**
@@ -235,7 +264,7 @@ class BaseCellModel implements IBaseCellModel {
    * Re-emit changes to the input dirty state.
    */
   private _inputChanged(input: IInputAreaModel, args: IChangedArgs<any>): void {
-    if (input === this.input && args.name === 'dirty') {
+    if (args.name === 'dirty' || args.name === 'readOnly') {
       this.stateChanged.emit(args);
     }
   }
@@ -248,17 +277,18 @@ class BaseCellModel implements IBaseCellModel {
 export
 class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   /**
+   * Construct a new code cell model.
+   */
+  constructor(options?: ICellOptions) {
+    super(options);
+    Private.outputProperty.set(this, new OutputAreaModel());
+  }
+
+  /**
    * Get the output area model.
    */
   get output(): IOutputAreaModel {
     return Private.outputProperty.get(this);
-  }
-
-  /**
-   * Set the output area model.
-   */
-  set output(value: IOutputAreaModel) {
-    Private.outputProperty.set(this, value);
   }
 
   /**
@@ -284,7 +314,6 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
  */
 export
 class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
-
   /**
    * Get whether we should display a rendered representation.
    */
@@ -309,6 +338,7 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
 
   type: CellType = "markdown";
 }
+
 
 /**
   * A type guard for testing if a cell model is a markdown cell.
@@ -363,8 +393,6 @@ namespace Private {
 
  /**
   * A property descriptor holding the output area model.
-  *
-  * TODO: Do we need this execute signal?
   */
   export
   const outputProperty = new Property<CodeCellModel, IOutputAreaModel>({

@@ -11,7 +11,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  IEditorModel, EditorModel
+  IEditorModel, IEditorOptions, EditorModel
 } from '../editor';
 
 
@@ -52,7 +52,19 @@ interface IInputAreaModel {
    * The dirty state of the input cell.
    */
   dirty: boolean;
+
+  /**
+   * The read only state of the input cell.
+   */
+  readOnly: boolean;
 }
+
+
+/**
+ * The options for creating an input area.
+ */
+export
+interface IInputAreaOptions extends IEditorOptions {}
 
 
 /**
@@ -60,6 +72,15 @@ interface IInputAreaModel {
  */
 export
 class InputAreaModel implements IInputAreaModel {
+  /**
+   * Construct a new input area model.
+   */
+  constructor(options?: IInputAreaOptions) {
+    let editor = new EditorModel(options);
+    InputAreaModelPrivate.textEditorProperty.set(this, editor);
+    editor.stateChanged.connect(this._textEditorChanged, this);
+  }
+
   /**
    * A signal emitted when the state of the model changes.
    */
@@ -111,17 +132,12 @@ class InputAreaModel implements IInputAreaModel {
 
   /**
    * Get the text editor Model.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   get textEditor(): EditorModel {
     return InputAreaModelPrivate.textEditorProperty.get(this);
-  }
-
-  /**
-   * Set the text editor Model.
-   */
-  set textEditor(value: EditorModel) {
-    InputAreaModelPrivate.textEditorProperty.set(this, value);
-    value.stateChanged.connect(this._textEditorChanged, this);
   }
 
   /**
@@ -145,6 +161,20 @@ class InputAreaModel implements IInputAreaModel {
   }
 
   /**
+   * Get the read only state.
+   */
+  get readOnly(): boolean {
+    return this.textEditor.readOnly;
+  }
+
+  /**
+   * Set the read only state.
+   */
+  set readOnly(value: boolean) {
+    this.textEditor.readOnly = value;
+  }
+
+  /**
    * Re-emit changes to the text editor dirty state.
    */
   private _textEditorChanged(editor: EditorModel, args: IChangedArgs<any>): void {
@@ -159,19 +189,14 @@ class InputAreaModel implements IInputAreaModel {
  * The namespace for the `InputAreaModel` class private data.
  */
 namespace InputAreaModelPrivate {
-
   /**
    * A signal emitted when the state of the model changes.
-   *
-   * **See also:** [[stateChanged]]
    */
   export
   const stateChangedSignal = new Signal<InputAreaModel, IChangedArgs<any>>();
 
   /**
   * A property descriptor which determines whether the input area is collapsed or displayed.
-  *
-  * **See also:** [[collapsed]]
   */
   export
   const collapsedProperty = new Property<InputAreaModel, boolean>({
@@ -181,8 +206,6 @@ namespace InputAreaModelPrivate {
 
   /**
   * A property descriptor containing the prompt number.
-  *
-  * **See also:** [[promptNumber]]
   */
   export
   const promptNumberProperty = new Property<InputAreaModel, number>({
@@ -192,8 +215,6 @@ namespace InputAreaModelPrivate {
 
   /**
   * A property descriptor containing the execution count of the input area.
-  *
-  * **See also:** [[executionCount]]
   */
   export
   const executionCountProperty = new Property<InputAreaModel, number>({
@@ -203,8 +224,6 @@ namespace InputAreaModelPrivate {
 
   /**
   * A property descriptor containing the text editor Model.
-  *
-  * **See also:** [[textEditor]]
   */
   export
   const textEditorProperty = new Property<InputAreaModel, EditorModel>({
