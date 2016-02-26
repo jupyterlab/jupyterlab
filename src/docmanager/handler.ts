@@ -430,7 +430,6 @@ class FileHandler extends AbstractFileHandler<CodeMirrorWidget> {
     let widget = new CodeMirrorWidget();
     CodeMirror.on(widget.editor.getDoc(), 'change', () => {
       this.setDirty(widget);
-      console.log('changed')
     });
     return widget;
   }
