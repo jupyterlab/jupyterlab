@@ -30,6 +30,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  showDialog
+} from '../dialog';
+
+import {
   JupyterCodeMirrorWidget as CodeMirrorWidget
 } from './widget';
 
@@ -235,16 +239,10 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     if (!widget) {
       return Promise.resolve(false);
     }
-    if (widget.hasClass(DIRTY_CLASS)) {
-      // TODO: implement a dialog here.
-      console.log('CLOSING DIRTY FILE');
+    if (this.isDirty(widget)) {
+      return this._maybeClose(widget);
     }
-    widget.dispose();
-    let index = this._widgets.indexOf(widget);
-    this._widgets.splice(index, 1);
-    if (widget === this.activeWidget) {
-      this._activeWidget = null;
-    }
+    this._close(widget);
     return Promise.resolve(true);
   }
 
@@ -330,20 +328,6 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Get the model for a given widget.
-   */
-  private _getModel(widget: T): IContentsModel {
-    return Private.modelProperty.get(widget);
-  }
-
-  /**
-   * Set the model for a widget.
-   */
-  private _setModel(widget: T, model: IContentsModel) {
-    Private.modelProperty.set(widget, model);
-  }
-
-  /**
    * Resolve a given widget.
    */
   protected resolveWidget(widget: T): T {
@@ -359,6 +343,48 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    */
   protected findWidgetByModel(model: IContentsModel): T {
     return arrays.find(this._widgets, widget => this._getModel(widget).path === model.path);
+  }
+
+  /**
+   * Get the model for a given widget.
+   */
+  private _getModel(widget: T): IContentsModel {
+    return Private.modelProperty.get(widget);
+  }
+
+  /**
+   * Set the model for a widget.
+   */
+  private _setModel(widget: T, model: IContentsModel) {
+    Private.modelProperty.set(widget, model);
+  }
+
+  /**
+   * Ask the user whether to close an unsaved file.
+   */
+  private _maybeClose(widget: T): Promise<boolean> {
+    return showDialog({
+      title: 'Close without saving?',
+      body: `File "${widget.title.text}" has unsaved changes, close without saving?`
+    }).then(value => {
+      if (value.text === 'OK') {
+        this._close(widget);
+        return true;
+      }
+      return false;
+    });
+  }
+
+  /**
+   * Actually close the file.
+   */
+  private _close(widget: T): void {
+    widget.dispose();
+    let index = this._widgets.indexOf(widget);
+    this._widgets.splice(index, 1);
+    if (widget === this.activeWidget) {
+      this._activeWidget = null;
+    }
   }
 
   /**
@@ -402,7 +428,10 @@ class FileHandler extends AbstractFileHandler<CodeMirrorWidget> {
    */
   protected createWidget(model: IContentsModel): CodeMirrorWidget {
     let widget = new CodeMirrorWidget();
-    widget.editor.on('change', () => this.setDirty(widget));
+    CodeMirror.on(widget.editor.getDoc(), 'change', () => {
+      this.setDirty(widget);
+      console.log('changed')
+    });
     return widget;
   }
 
