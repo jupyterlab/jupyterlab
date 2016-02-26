@@ -19,9 +19,23 @@
 }
 
 
-.jp-OutputArea pre {
+.jp-OutputArea {
   background: #ffffff;
+}
+
+
+.jp-OutputArea-Output {
+  padding: 4px;
+}
+
+
+.jp-OutputArea pre {
   border: none;
+}
+
+
+.jp-OutputArea-Stderr {
+  background: #fdd;
 }
 
 
@@ -41,6 +55,7 @@
   border-width: 1px;
   border-style: solid;
   border-color: transparent;
+  background: ;
 }
 
 
