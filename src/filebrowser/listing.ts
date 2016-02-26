@@ -1145,7 +1145,7 @@ class DirListing extends Widget {
   private _doRename(): Promise<string> {
     let listing = utils.findElement(this.node, CONTENT_CLASS);
     let items = this._model.sortedItems;
-    let name = this._model.getSelected()[0];
+    let name = this._softSelection || this._model.getSelected()[0];
     let index = arrays.findIndex(items, (value, index) => value.name === name);
     let row = this._items[index];
     let text = utils.findElement(row, ITEM_TEXT_CLASS);
