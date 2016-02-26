@@ -172,6 +172,8 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
       let model = this._getModel(w);
       if (model.path === oldPath) {
         model.path = newPath;
+        let parts = newPath.split('/');
+        model.name = parts[parts.length - 1];
         w.title.text = this.getTitleText(model);
         return true;
       }
