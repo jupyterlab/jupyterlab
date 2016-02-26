@@ -724,6 +724,11 @@ class DirListing extends Widget {
       return;
     }
 
+    // Bail if editing.
+    if (this._editNode.contains(target)) {
+      return;
+    }
+
     let content = this.contentNode;
     if (content.contains(target)) {
       this._handleFileSelect(event);
@@ -742,6 +747,10 @@ class DirListing extends Widget {
    * Handle the `'mousedown'` event for the widget.
    */
   private _evtMousedown(event: MouseEvent): void {
+    // Bail if clicking within the edit node
+    if (event.target === this._editNode) {
+      return;
+    }
 
     // Blur the edit node if necessary.
     if (this._editNode.parentNode) {
