@@ -89,9 +89,7 @@ class OutputAreaWidget extends Panel {
     model.stateChanged.connect(this.modelStateChanged, this);
     this._listdispose = follow<OutputModel>(model.outputs, this, (out) => {
       let w = new Widget();
-      this.renderItem(out).then((out) => {
-        w.node.appendChild(out);
-      });
+      this.renderItem(w, out);
       return w;
     });
   }
@@ -99,28 +97,38 @@ class OutputAreaWidget extends Panel {
   /**
    * Render an item using the transformime library.
    */
-  renderItem(output: OutputModel): Promise<HTMLElement> {
+  renderItem(widget: Widget, output: OutputModel): Promise<void> {
     let bundle: MimeBundle;
+    widget.addClass('jp-OutputArea-Output');
     switch(output.outputType) {
     case "execute_result":
       bundle = (output as ExecuteResultModel).data;
+      widget.addClass('jp-OutputArea-ExecuteResult');
       break;
     case "display_data":
       bundle = (output as DisplayDataModel).data;
+      widget.addClass('jp-OutputArea-DisplayData');
       break;
     case "stream":
       bundle = {'jupyter/console-text': (output as StreamModel).text};
+      if ((output as StreamModel).name == 'stdout') {
+        widget.addClass('jp-OutputArea-Stdout');
+      } else {
+        widget.addClass('jp-OutputArea-Stderr');
+      }
       break;
     case "error":
       let out: ExecuteErrorModel = output as ExecuteErrorModel;
       bundle = {'jupyter/console-text': out.traceback || `${out.ename}: ${out.evalue}`};
+      widget.addClass('jp-OutputArea-Error');
       break;
     default:
       console.error(`Unrecognized output type: ${output.outputType}`);
       bundle = {};
     }
-    return (transform.transform(bundle, document)
-            .then((result) => {return result.el}));
+    return (transform.transform(bundle, document).then(result => {
+      widget.node.appendChild(result.el);
+    }));
   }
 
   /**
