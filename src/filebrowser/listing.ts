@@ -1148,15 +1148,10 @@ class DirListing extends Widget {
     let name = this._model.getSelected()[0];
     let index = arrays.findIndex(items, (value, index) => value.name === name);
     let row = this._items[index];
-    let fileCell = utils.findElement(row, FILE_TYPE_CLASS);
     let text = utils.findElement(row, ITEM_TEXT_CLASS);
     let original = text.textContent;
 
-    if (!fileCell) {
-      return;
-    }
-
-    return Private.doRename(fileCell as HTMLElement, text, this._editNode).then(changed => {
+    return Private.doRename(row, text, this._editNode).then(changed => {
       if (!changed) {
         return original;
       }
