@@ -90,6 +90,18 @@ class DocumentManager {
   }
 
   /**
+   * Rename a file.
+   */
+  rename(oldPath: string, newPath: string): boolean {
+    for (let h of this._handlers) {
+      if (h.rename(oldPath, newPath)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Save the active document.
    *
    * returns A promise that resolves to the contents of the widget.
