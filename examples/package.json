@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "name": "jupyter-js-ui-example",
+  "dependencies": {
+    "jupyter-js-ui": "file:..",
+    "phosphor-dockpanel": "^0.9.6",
+    "phosphor-keymap": "^0.7.1",
+    "phosphor-splitpanel": "^1.0.0-rc.1"
+  },
+  "scripts": {
+    "build": "cd .. && npm run build:examples",
+    "clean": "rimraf node_modules",
+    "postinstall": "npm dedupe",
+    "update": "rimraf node_modules/jupyter-js-ui && npm install"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2"
+  }
+}

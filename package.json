@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
+    "codemirror": "^5.12.0",
     "jupyter-js-services": "^0.5.4",
     "jupyter-js-utils": "^0.3.3",
     "moment": "^2.11.2",
@@ -20,6 +21,7 @@
     "term.js": "0.0.7"
   },
   "devDependencies": {
+    "concurrently": "^2.0.0",
     "css-loader": "^0.23.1",
     "expect.js": "^0.3.1",
     "file-loader": "^0.8.5",
@@ -46,7 +48,6 @@
   "scripts": {
     "clean": "rimraf docs && rimraf lib && rimraf test/build",
     "clean:examples": "node scripts/cleanexamples.js",
-    "build:example": "cd examples/$EXAMPLE && npm run update && npm run build",
     "build:examples": "node scripts/buildexamples.js",
     "build:src": "tsc --project src && node scripts/copycss.js",
     "build:test": "tsconfig -u test/src/tsconfig.json && tsc --project test/src && webpack --config test/webpack.conf.js",
@@ -60,7 +61,7 @@
     "test:ie": "karma start --browsers=IE test/karma.conf.js",
     "test:debug": "karma start --browsers=Chrome --singleRun=false --debug=true test/karma.conf.js",
     "test": "npm run test:firefox",
-    "watch:example": "watch 'npm run build && npm run build:example' src --wait 10",
+    "watch:examples": "watch 'npm run build && npm run build:examples' src --wait 10",
     "watch": "watch 'npm run build' src"
   },
   "repository": {
