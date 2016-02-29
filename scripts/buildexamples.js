@@ -20,10 +20,7 @@ for (var i = 0; i < dirs.length; i++) {
   console.log('Building: ' + dirs[i] + '...');
   cmd = 'tsconfig -u examples/' + dirs[i] + '/src/tsconfig.json';
   childProcess.execSync(cmd, { stdio: [0, 1, 2] });
-  cmd = 'tsc --project examples/' + dirs[i] + '/src';
-  childProcess.execSync(cmd, { stdio: [0, 1, 2] });
   process.chdir('examples/' + dirs[i]);
-  cmd = 'webpack --config webpack.conf.js';
-  childProcess.execSync(cmd, { stdio: [0, 1, 2] });
+  childProcess.execSync('npm run build', { stdio: [0, 1, 2] });
   process.chdir('../..');
 }
