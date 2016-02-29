@@ -265,11 +265,14 @@ namespace Private {
   }
 
   /**
-   * Create a new untitled file.
+   * Create a new source file.
    */
   export
   function createNewFile(widget: FileButtons): void {
-    widget.model.newUntitled('file').then(contents => {
+    createFile(widget, 'file').then(contents => {
+      if (contents === void 0) {
+        return;
+      }
       widget.model.refresh().then(() => widget.model.open(contents.name));
     }).catch(error => {
       utils.showErrorMessage(widget, 'New File Error', error);
@@ -277,11 +280,14 @@ namespace Private {
   }
 
   /**
-   * Create a new untitled folder.
+   * Create a new folder.
    */
   export
   function createNewFolder(widget: FileButtons): void {
-    widget.model.newUntitled('directory').then(contents => {
+    createFile(widget, 'directory').then(contents => {
+      if (contents === void 0) {
+        return;
+      }
       widget.model.refresh();
     }).catch(error => {
       utils.showErrorMessage(widget, 'New Folder Error', error);
@@ -289,17 +295,77 @@ namespace Private {
   }
 
   /**
-   * Create a new untitled notebook.
+   * Create a new  notebook.
    */
   export
   function createNewNotebook(widget: FileButtons, spec: IKernelSpecId): void {
-    widget.model.newUntitled('notebook').then(contents => {
+    createFile(widget, 'notebook').then(contents => {
       let started = widget.model.startSession(contents.path, spec.name);
       return started.then(() => contents);
     }).then(contents => {
+      if (contents === void 0) {
+        return;
+      }
       widget.model.refresh().then(() => widget.model.open(contents.name));
     }).catch(error => {
       utils.showErrorMessage(widget, 'New Notebook Error', error);
+    });
+  }
+
+  /**
+   * Create a new file, prompting the user for a name.
+   */
+  function createFile(widget: FileButtons, type: string): Promise<IContentsModel> {
+    return widget.model.newUntitled(type).then(contents => {
+      return doRename(widget, contents);
+    });
+  }
+
+  /**
+   * Rename a file or directory.
+   */
+  function doRename(widget: FileButtons, contents: IContentsModel): Promise<IContentsModel> {
+    var edit = document.createElement('input');
+    edit.value = contents.name;
+    let index = edit.value.lastIndexOf('.');
+    if (index === -1) {
+      edit.setSelectionRange(0, edit.value.length);
+    } else {
+      edit.setSelectionRange(0, index);
+    }
+    return showDialog({
+      title: `Create a new ${contents.type}`,
+      body: edit,
+      host: widget.node.parentElement
+    }).then(value => {
+      if (value.text === 'OK') {
+        return widget.model.rename(contents.path, edit.value);
+      } else {
+        return widget.model.delete(contents.path).then(() => void 0);
+      }
+    }).catch(error => {
+      if (error.statusText === 'Conflict') {
+        return handleExisting(widget, edit.value, contents);
+      } 
+      return utils.showErrorMessage(widget, 'File creation error', error).then(
+        () => { return void 0 });
+    });
+  }
+
+  /**
+   * Handle an existing file name.
+   */
+  function handleExisting(widget: FileButtons, name: string, contents: IContentsModel): Promise<IContentsModel> {
+    return showDialog({
+      title: 'File already exists',
+      body: `File "${name}" already exists, try again?`,
+      host: widget.node.parentElement
+    }).then(value => {
+      if (value.text === 'OK') {
+        return doRename(widget, contents);
+      } else {
+        return widget.model.delete(contents.path).then(() => void 0);
+      }
     });
   }
 
