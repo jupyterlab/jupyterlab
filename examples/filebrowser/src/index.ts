@@ -84,6 +84,10 @@ function main(): void {
     dock.insertTabAfter(editor);
   });
 
+  fbModel.fileChanged.connect((fbModel, args) => {
+    docManager.rename(args.oldValue, args.newValue);
+  });
+
   let keymapManager = new KeymapManager();
   keymapManager.add([{
     sequence: ['Enter'],
