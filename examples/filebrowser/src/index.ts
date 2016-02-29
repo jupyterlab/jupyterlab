@@ -113,20 +113,6 @@ function main(): void {
       docManager.save();
       return true;
     }
-  }, {
-    sequence: ['Accel R'],
-    selector: '.jp-CodeMirrorWidget',
-    handler: () => {
-      docManager.revert();
-      return true;
-    }
-  }, {
-    sequence: ['Ctrl W'],
-    selector: '.jp-CodeMirrorWidget',
-    handler: () => {
-      docManager.close();
-      return true;
-    }
   }]);
 
   window.addEventListener('keydown', (event) => {
@@ -179,6 +165,10 @@ function main(): void {
       text: 'Download',
       icon: 'fa fa-download',
       handler: () => { fbWidget.download(); }
+    }),
+    new MenuItem({
+      text: 'Revert',
+      handler: () => { docManager.revert(); }
     }),
     new MenuItem({
       text: 'Shutdown Kernel',
