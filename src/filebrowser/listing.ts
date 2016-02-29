@@ -413,22 +413,33 @@ class DirListing extends Widget {
    * Delete the currently selected item(s).
    */
   delete(): Promise<void> {
-    let promises: Promise<void>[] = [];
-    let items = this._model.sortedItems;
+    let names: string[] = [];
     if (this._softSelection) {
-      promises.push(this._model.delete(this._softSelection));
+      names.push(this._softSelection);
     } else {
+      let items = this._model.sortedItems;
       for (let item of items) {
         if (this._model.isSelected(item.name)) {
-          promises.push(this._model.delete(item.name));
+          names.push(item.name);
         }
       }
     }
-
-    return Promise.all(promises).then(
-      () => this._model.refresh(),
-      error => utils.showErrorMessage(this, 'Delete file', error)
-    );
+    let message = `Permanantly delete these ${names.length} files?`;
+    if (names.length === 1) {
+      message = `Permanently delete file "${names[0]}"?`;
+    }
+    if (names.length) {
+      return showDialog({
+        title: 'Delete file?',
+        body: message,
+        host: this.node.parentElement
+      }).then(result => {
+        if (result.text === 'OK') {
+          return this._delete(names);
+        }
+      });
+    }
+    return Promise.resolve(void 0);
   }
 
   /**
@@ -1146,6 +1157,20 @@ class DirListing extends Widget {
       }
     }
     this.update();
+  }
+
+  /**
+   * Delete the files with the given names.
+   */
+  private _delete(names: string[]): Promise<void> {
+    let promises: Promise<void>[] = [];
+    for (let name of names) {
+      promises.push(this._model.delete(name));
+    }
+    return Promise.all(promises).then(
+      () => this._model.refresh(),
+      error => utils.showErrorMessage(this, 'Delete file', error)
+    );
   }
 
   /**

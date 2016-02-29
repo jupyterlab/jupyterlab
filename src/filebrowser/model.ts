@@ -269,7 +269,14 @@ class FileBrowserModel implements IDisposable {
     let normalizePath = Private.normalizePath;
     fromFile = normalizePath(this._model.path, fromFile);
     toDir = normalizePath(this._model.path, toDir);
-    return this._contentsManager.copy(fromFile, toDir);
+    return this._contentsManager.copy(fromFile, toDir).then(contents => {
+      this.fileChanged.emit({
+        name: 'file',
+        oldValue: void 0,
+        newValue: contents.path
+      });
+      return contents;
+    });
   }
 
   /**
@@ -328,7 +335,14 @@ class FileBrowserModel implements IDisposable {
     }
     return this._contentsManager.newUntitled(this._model.path,
       { type: type, ext: ext }
-    );
+    ).then(contents => {
+      this.fileChanged.emit({
+        name: 'file',
+        oldValue: void 0,
+        newValue: contents.path
+      });
+      return contents;
+    });
   }
 
   /**
@@ -480,7 +494,14 @@ class FileBrowserModel implements IDisposable {
           name: name,
           content: Private.getContent(reader)
         }
-        resolve(this._contentsManager.save(path, model));
+        this._contentsManager.save(path, model).then(contents => {
+          this.fileChanged.emit({
+            name: 'file',
+            oldValue: void 0,
+            newValue: contents.path
+          });
+          resolve(contents);
+        });
       }
 
       reader.onerror = (event: Event) => {
