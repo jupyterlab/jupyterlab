@@ -10,7 +10,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  FileHandler
+  FileHandler, DocumentManager
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
@@ -61,19 +61,26 @@ function main(): void {
 
   let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
   let fbWidget = new FileBrowserWidget(fbModel)
-  fbWidget.widgetFactory = model => {
-    return handler.open(model);
-  };
-  let handler = new FileHandler(contentsManager);
+
+  let fileHandler = new FileHandler(contentsManager);
+  let docManager = new DocumentManager();
+  docManager.registerDefault(fileHandler);
 
   let panel = new SplitPanel();
+  panel.id = 'main';
   panel.addChild(fbWidget);
+  SplitPanel.setStretch(fbWidget, 0);
   let dock = new DockPanel();
   panel.addChild(dock);
+  SplitPanel.setStretch(dock, 1);
   dock.spacing = 8;
 
+  fbWidget.widgetFactory = model => {
+    return docManager.open(model);
+  };
+
   fbModel.openRequested.connect((fbModel, model) => {
-    let editor = handler.open(model);
+    let editor = docManager.open(model);
     dock.insertTabAfter(editor);
   });
 
@@ -103,21 +110,21 @@ function main(): void {
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      handler.save();
+      docManager.save();
       return true;
     }
   }, {
     sequence: ['Accel R'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      handler.revert();
+      docManager.revert();
       return true;
     }
   }, {
     sequence: ['Ctrl W'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      handler.close();
+      docManager.close();
       return true;
     }
   }]);
@@ -180,13 +187,6 @@ function main(): void {
     }),
   ]);
 
-  // Start a default session.
-  contentsManager.newUntitled('', { type: 'notebook' }).then(contents => {
-    sessionsManager.startNew({ notebookPath: contents.path }).then(() => {
-      panel.attach(document.body);
-    });
-  });
-
   // Add a context menu to the dir listing.
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
   node.addEventListener('contextmenu', (event: MouseEvent) => {
@@ -195,6 +195,8 @@ function main(): void {
     let y = event.clientY;
     contextMenu.popup(x, y);
   });
+
+  panel.attach(document.body);
 
   window.onresize = () => panel.update();
 }
