@@ -295,7 +295,7 @@ namespace Private {
   }
 
   /**
-   * Create a new  notebook.
+   * Create a new notebook.
    */
   export
   function createNewNotebook(widget: FileButtons, spec: IKernelSpecId): void {
