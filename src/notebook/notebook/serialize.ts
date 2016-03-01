@@ -21,7 +21,7 @@ import {
   IDisplayData, isDisplayData,
   IExecuteResult, isExecuteResult,
   IStream, isStream, ICell, INotebookContent,
-  IError, isError, IOutput, IOutputType,
+  IError, isError, IOutput, OutputType,
   MAJOR_VERSION, MINOR_VERSION
 } from './nbformat';
 
@@ -35,14 +35,18 @@ function populateNotebookModel(nb: INotebookModel, data: INotebookContent): void
 
   // Iterate through the cell data, creating cell models.
   data.cells.forEach((c) => {
+    let source = c.source as string;
+    if (Array.isArray(c.source)) {
+      source = (c.source as string[]).join('\n');
+    }
     if (isMarkdownCell(c)) {
       let cell = nb.createMarkdownCell();
-      cell.input.textEditor.text = c.source;
+      cell.input.textEditor.text = source;
       cell.rendered = true;
       nb.cells.add(cell);
     } else if (isCodeCell(c)) {
       let cell = nb.createCodeCell();
-      cell.input.textEditor.text = c.source;
+      cell.input.textEditor.text = source;
       for (let i = 0; i < c.outputs.length; i++) {
         cell.output.add(c.outputs[i]);
       }
@@ -63,7 +67,7 @@ function populateNotebookModel(nb: INotebookModel, data: INotebookContent): void
 export
 function messageToModel(msg: IKernelMessage) {
   let m: IOutput = msg.content;
-  m.output_type = msg.header.msg_type as IOutputType;
+  m.output_type = msg.header.msg_type as OutputType;
   return m
 }
 

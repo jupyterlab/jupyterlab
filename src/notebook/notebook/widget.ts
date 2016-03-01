@@ -23,9 +23,9 @@ import {
 } from './model';
 
 import {
-  ICellModel, CellType,
-    CodeCellWidget, MarkdownCellWidget,
-    CodeCellModel, MarkdownCellModel, isMarkdownCellModel
+  ICellModel,
+  CodeCellWidget, MarkdownCellWidget,
+  CodeCellModel, MarkdownCellModel, isMarkdownCellModel
 } from '../cells';
 
 import {
