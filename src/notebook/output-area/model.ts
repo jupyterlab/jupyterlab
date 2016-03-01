@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  ObservableList
+} from 'phosphor-observablelist';
+
+import {
   IChangedArgs, Property
 } from 'phosphor-properties';
 
@@ -11,17 +15,13 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  ObservableList
-} from 'phosphor-observablelist';
-
-import {
   IOutput, IStream, isStream, IExecuteResult, IDisplayData, IError
 } from '../notebook/nbformat';
 
 
 /**
-* The model for an output area.
-*/
+ * The model for an output area.
+ */
 export
 interface IOutputAreaModel {
   /**
@@ -58,7 +58,7 @@ interface IOutputAreaModel {
 
 
 /**
- * An implementation of an input area model.
+ * An implementation of an output area model.
  */
 export
 class OutputAreaModel implements IOutputAreaModel {
@@ -102,13 +102,13 @@ class OutputAreaModel implements IOutputAreaModel {
    * (e.g. for streams).
    */
   add(output: IOutput) {
-    // if we received a delayed clear message, then clear now
+    // If we received a delayed clear message, then clear now.
     if (this._clearNext) {
       this.clear();
       this._clearNext = false;
     }
 
-    // Consolidate outputs if they are stream outputs of the same kind
+    // Consolidate outputs if they are stream outputs of the same kind.
     let lastOutput = this.outputs.get(-1) as IStream;
     if (isStream(output)
         && lastOutput && isStream(lastOutput)
@@ -128,10 +128,10 @@ class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
-  * Clear all of the output.
-  *
-  * @param wait Delay clearing the output until the next message is added.
-  */
+   * Clear all of the output.
+   *
+   * @param wait Delay clearing the output until the next message is added.
+   */
   clear(wait: boolean = false) {
     if(wait) {
       this._clearNext = true;
@@ -141,13 +141,10 @@ class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
-   * The actual outputs.
+   * Execution, display, or stream outputs.
    */
   outputs = new ObservableList<IOutput>();
 
-  /**
-   * Whether to clear on the next message add.
-   */
   private _clearNext = false;
 }
 
@@ -163,8 +160,7 @@ namespace Private {
   const stateChangedSignal = new Signal<OutputAreaModel, IChangedArgs<any>>();
 
   /**
-   * A property descriptor which determines whether the output has a maximum 
-   * fixed height.
+   * The property descriptor for whether the output has a fixed maximum height.
    */
   export
   const fixedHeightProperty = new Property<OutputAreaModel, boolean>({
@@ -173,8 +169,7 @@ namespace Private {
   });
 
   /**
-   * A property descriptor which determines whether the output area is 
-   * collapsed or displayed.
+   * The property descriptor for whether the output is collapsed.
    */
   export
   const collapsedProperty = new Property<OutputAreaModel, boolean>({
