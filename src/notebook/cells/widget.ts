@@ -2,6 +2,17 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
+import * as marked 
+  from 'marked';
+
+import {
+  Message
+} from 'phosphor-messaging';
+
+import {
+  PanelLayout
+} from 'phosphor-panel';
+
 import {
   IChangedArgs
 } from 'phosphor-properties';
@@ -11,38 +22,115 @@ import {
 } from 'phosphor-widget';
 
 import {
-  Panel, PanelLayout
-} from 'phosphor-panel';
-
-import {
-    ICodeCellModel, IMarkdownCellModel, ICellModel
-} from './model';
-
-import {
-    InputAreaWidget, IInputAreaModel
+  InputAreaWidget, IInputAreaModel
 } from '../input-area';
 
 import {
-    OutputAreaWidget, IOutputAreaModel
+  OutputAreaWidget, IOutputAreaModel
 } from '../output-area';
 
-import * as marked from 'marked';
+import {
+  ICodeCellModel, IMarkdownCellModel, ICellModel, IRawCellModel
+} from './model';
+
+
+/**
+ * The class name added to cell widgets.
+ */
+const CELL_CLASS = 'jp-Cell';
+
+/**
+ * The class name added to selected widgets.
+ */
+const SELECTED_CLASS = 'jp-mod-selected';
+
+/**
+ * The class name added to marked widgets.
+ */
+const MARKED_CLASS = 'jp-mod-marked';
+
+/**
+ * The class name added to code cells.
+ */
+const CODE_CELL_CLASS = 'jp-CodeCell';
+
+/**
+ * The class name added to markdown cells.
+ */
+const MARKDOWN_CELL_CLASS = 'jp-MarkdownCell';
+
+/**
+ * The class name added to raw cells.
+ */
+const RAW_CELL_CLASS = 'jp-RawCell';
+
 
 /**
  * A base cell widget.
  */
 export
-abstract class CellWidget extends Widget {
-  constructor() {
+class BaseCellWidget extends Widget {
+  /**
+   * Construct a new base cell widget.
+   */
+  constructor(model: ICellModel) {
     super();
-    this.addClass('jp-Cell');
-    // we make the cell focusable by setting the tabIndex
+    this.addClass(CELL_CLASS);
+    // Make the cell focusable by setting the tabIndex.
     this.node.tabIndex = -1;
     this.layout = new PanelLayout();
+    this._model = model;
+    this._input = new InputAreaWidget(model.input);
+    (this.layout as PanelLayout).addChild(this.input);
+    model.stateChanged.connect(this.modelStateChanged, this);
   }
 
-  protected _model: ICellModel;
+  /**
+   * Get the model used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get model(): ICellModel {
+    return this._model;
+  }
 
+  /**
+   * Get the input widget used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get input(): InputAreaWidget {
+    return this._input;
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(message: Message): void {
+    super.onUpdateRequest(message);
+    if (this.model.selected) {
+      this.addClass(SELECTED_CLASS);
+    } else {
+      this.removeClass(SELECTED_CLASS);
+    }
+    if (this.model.marked) {
+      this.addClass(MARKED_CLASS);
+    } else {
+      this.removeClass(MARKED_CLASS);
+    }
+  }
+
+  /**
+   * Handle changes to the model state.
+   */
+  protected modelStateChanged(sender: ICellModel, args: IChangedArgs<any>) {
+    this.update();
+  }
+
+  private _input: InputAreaWidget;
+  private _model: ICellModel;
 }
 
 
@@ -50,59 +138,28 @@ abstract class CellWidget extends Widget {
  * A widget for a code cell.
  */
 export
-class CodeCellWidget extends CellWidget {
-
+class CodeCellWidget extends BaseCellWidget {
   /**
    * Construct a code cell widget.
    */
   constructor(model: ICodeCellModel) {
-    super();
-    this.addClass('jp-CodeCell');
-    this._model = model;
-    this.input = new InputAreaWidget(model.input);
-    this.output = new OutputAreaWidget(model.output);
-    (this.layout as PanelLayout).addChild(this.input);
+    super(model);
+    this.addClass(CODE_CELL_CLASS);
+    this._output = new OutputAreaWidget(model.output);
     (this.layout as PanelLayout).addChild(this.output);
-    model.stateChanged.connect(this.modelStateChanged, this);
   }
 
   /**
-   * Update the input area, creating a new input area
-   * widget and detaching the old one.
+   * Get the output widget used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  protected updateInputArea(input: IInputAreaModel) {
-    this.input.dispose(); // removes from children
-    this.input = new InputAreaWidget(input);
-    (this.layout as PanelLayout).insertChild(0, this.input);
+  get output(): OutputAreaWidget {
+    return this._output;
   }
 
-  /**
-   * Update the output area, creating a new output area
-   * widget and detaching the old one.
-   */
-  protected updateOutputArea(output: IOutputAreaModel) {
-    this.output.dispose();
-    this.output = new OutputAreaWidget(output);
-    (this.layout as PanelLayout).insertChild(1, this.output);
-  }
-
-  /**
-   * Change handler for model updates.
-   */
-  protected modelStateChanged(sender: ICodeCellModel, args: IChangedArgs<any>) {
-    switch(args.name) {
-    case 'input':
-      this.updateInputArea(args.newValue);
-      break;
-    case 'output':
-      this.updateOutputArea(args.newValue);
-      break;
-    }
-  }
-
-  protected input: InputAreaWidget;
-  protected output: OutputAreaWidget;
-  protected _model: ICodeCellModel;
+  private _output: OutputAreaWidget;
 }
 
 
@@ -116,104 +173,82 @@ class CodeCellWidget extends CellWidget {
  * updating the rendered text in all of these cases.
  */
 export
-class MarkdownCellWidget extends CellWidget {
-
+class MarkdownCellWidget extends BaseCellWidget {
   /**
    * Construct a Markdown cell widget.
    */
   constructor(model: IMarkdownCellModel) {
-    super();
-    this.addClass('jp-MarkdownCell');
-
-    this._model = model;
-    // Insist on the Github-flavored markdown mode
+    super(model);
+    this.addClass(MARKDOWN_CELL_CLASS);
+    // Insist on the Github-flavored markdown mode.
     model.input.textEditor.mimetype = 'text/x-ipythongfm';
-    this.input = new InputAreaWidget(model.input);
     this.rendered = new Widget();
+    this.update();
+  }
+
+  /**
+   * Get the rendering widget used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get rendered(): Widget {
+    return this._rendered;
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(message: Message): void {
+    super.onUpdateRequest(message);
+    if (!this._dirty) {
+      return;
+    }
+    let model = this.model as IMarkdownCellModel;
     if (model.rendered) {
-      this.renderInput();
+      this.rendered.node.innerHTML = marked(model.input.textEditor.text);
+      this.input.parent = null;
+      (this.layout as PanelLayout).addChild(this.rendered);
     } else {
-      this.editInput();
+      this.rendered.parent = null;
+      (this.layout as PanelLayout).addChild(this.input);
     }
-    model.stateChanged.connect(this.modelStateChanged, this);
-    model.selected.connect(this._onModelSelected, this);
-  }
-
-  /**
-   * Process the input and display the rendered Markdown.
-   *
-   * #### Notes
-   * This will remove the input widget.
-   * Call [[editInput]] to restore the editor.
-   */
-  renderInput() {
-    this.rendered.node.innerHTML = marked(this._model.input.textEditor.text);
-    this.input.parent = null;
-    (this.layout as PanelLayout).addChild(this.rendered);
-  }
-
-  /**
-   * Edit the Markdown source.
-   *
-   * #### Notes
-   * This will remove the rendered widget.
-   * Call [[renderInput]] to render the source.
-   */
-  editInput() {
-    this.rendered.parent = null;
-    (this.layout as PanelLayout).addChild(this.input);
-  }
-
-  /**
-   * Update the input area, creating a new input area
-   * widget and detaching the old one.
-   */
-  protected updateInputArea(input: IInputAreaModel) {
-    this.input.dispose();
-    this.input = new InputAreaWidget(input);
-    if (this._model.rendered) {
-      this.renderInput();
-    } else {
-      this.editInput();
-    }
-  }
-
-  /**
-   * Update the input area, creating a new input area
-   * widget and detaching the old one.
-   */
-  protected updateRendered(rendered: boolean) {
-    if (rendered) {
-      this.renderInput();
-    } else {
-      this.editInput();
-    }
+    this._dirty = false;
   }
 
   /**
    * Change handler for model updates.
    */
-  protected modelStateChanged(sender: IMarkdownCellModel, args: IChangedArgs<any>) {
+  protected modelStateChanged(sender: ICellModel, args: IChangedArgs<any>) {
+    super.modelStateChanged(sender, args);
     switch(args.name) {
-    case 'input':
-      this.updateInputArea(args.newValue);
-      break;
     case 'rendered':
-      this.updateRendered(args.newValue);
+      this._dirty = true;
+      this.update();
+      break;
+    case 'selected':
+      if (args.newValue && (this.model as IMarkdownCellModel).rendered) {
+        this.node.focus();
+      }
       break;
     }
   }
 
-  /**
-   * A selection handler for the model.
-   */
-  private _onModelSelected() {
-    if (this._model.rendered) {
-      this.node.focus();
-    }
-  }
+  private _rendered: Widget;
+  private _dirty: boolean;
+}
 
-  protected input: InputAreaWidget;
-  protected rendered: Widget;
-  protected _model: IMarkdownCellModel;
+
+/**
+ * A widget for a raw cell.
+ */
+export
+class RawCellWidget extends BaseCellWidget {
+  /**
+   * Construct a raw cell widget.
+   */
+  constructor(model: IRawCellModel) {
+    super(model);
+    this.addClass(RAW_CELL_CLASS);
+  }
 }
