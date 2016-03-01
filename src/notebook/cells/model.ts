@@ -26,7 +26,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  CellType
+  CellType, ICell, ICodeCell, IRawCell, IMarkdownCell
 } from '../notebook/nbformat';
 
 
@@ -52,17 +52,21 @@ interface ICellOptions extends IInputAreaOptions {
  * The definition of a model object for a base cell.
  */
 export
-interface IBaseCellModel {
-
+interface IBaseCellModel extends ISerializable {
   /**
    * The type of cell.
    */
   type: CellType;
 
   /**
-   * Tags applied to the cell.
+   * The cell's name. If present, must be a non-empty string.
    */
-  tags?: IObservableList<string>;
+  name?: string;
+
+  /**
+   * The cell's tags. Tags must be unique, and must not contain commas.
+   */
+  tags?: string[];
 
   /**
    * A signal emitted when state of the cell changes.
@@ -103,6 +107,16 @@ interface IBaseCellModel {
   select(): void;
 
   /**
+   * Serialize the cell model.
+   */
+  toJSON(): ICell;
+
+  /**
+   * Populate from a JSON cell model.
+   */
+  fromJSON(data: ICell): void;
+
+  /**
    * Whether a cell is deletable.
    */
   //deleteable: boolean;
@@ -130,8 +144,25 @@ interface IBaseCellModel {
  */
 export
 interface ICodeCellModel extends IBaseCellModel {
+  /**
+   * Execution, display, or stream outputs.
+   */
   output: IOutputAreaModel;
+
+  /**
+   * The code cell's prompt number. Will be null if the cell has not been run.
+   */
   executionCount: number;
+
+  /**
+   * Whether the cell is collapsed/expanded.
+   */
+  collapsed?: boolean;
+
+  /**
+   * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
+   */
+  scrolled?: boolean | 'auto';
 }
 
 
@@ -141,7 +172,7 @@ interface ICodeCellModel extends IBaseCellModel {
 export
 interface IRawCellModel extends IBaseCellModel {
   /**
-   * The raw cell format.
+   * Raw cell metadata format for nbconvert.
    */
   format?: string;
 }
@@ -245,11 +276,66 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
+   * Get the name of the cell.
+   */
+  get name(): string {
+    return Private.nameProperty.get(this);
+  }
+
+  /**
+   * Set the name of the cell.
+   */
+  set name(value: string) {
+    Private.nameProperty.set(this, value);
+  }
+
+  /**
+   * Get the tags for the cell.
+   */
+  get tags(): string[] {
+    return Private.tagsProperty.get(this);
+  }
+
+  /**
+   * Set the tags for the cell.
+   */
+  set tags(value: string[]) {
+    Private.tagsProperty.set(this, value);
+  }
+
+  /**
    * Select the cell model.
    */
   select(): void {
     this.selected.emit(void 0);
     this.input.textEditor.select();
+  }
+
+  /**
+   * Serialize the cell model.
+   */
+  toJSON(): ICell {
+    return {
+      source: this.input.textEditor.text,
+      cell_type: this.type,
+      metadata: {
+        tags: this.tags,
+        name: this.name
+      }
+    }
+  }
+
+  /**
+   * Populate from a JSON cell model.
+   */
+  fromJSON(data: ICell): void {
+    let source = data.source as string;
+    if (Array.isArray(data.source)) {
+      source = (data.source as string[]).join('\n');
+    }
+    this.input.textEditor.text = source;
+    this.tags = data.metadata.tags;
+    this.name = data.metadata.name;
   }
 
   /**
@@ -302,6 +388,60 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     Private.executionCountProperty.set(this, value);
   }
 
+  /**
+   * Get whether the cell is collapsed/expanded.
+   */
+  get collapsed(): boolean {
+    return Private.collapsedProperty.get(this);
+  }
+
+  /**
+   * Set whether the cell is collapsed/expanded.
+   */
+  set collapsed(value: boolean) {
+    Private.collapsedProperty.set(this, value);
+  }
+
+  /**
+   * Get whether the cell's output is scrolled, unscrolled, or autoscrolled.
+   */
+  get scrolled(): boolean | 'auto' {
+    return Private.scrolledProperty.get(this);
+  }
+
+  /**
+   * Set whether the cell's output is scrolled, unscrolled, or autoscrolled.
+   */
+  set scrolled(value: boolean | 'auto') {
+    Private.scrolledProperty.set(this, value);
+  }
+
+  /**
+   * Serialize the cell model.
+   */
+  toJSON(): ICodeCell {
+    let value = super.toJSON() as ICodeCell;
+    value.metadata.scrolled = this.scrolled;
+    value.metadata.collapsed = this.collapsed;
+    value.outputs = [];
+    for (let i = 0; i < this.output.outputs.length; i++) {
+      value.outputs.push(this.output.outputs.get(i));
+    }
+    value.execution_count = this.executionCount;
+    return value;
+  }
+
+  /**
+   * Populate from a JSON cell model.
+   */
+  fromJSON(data: ICodeCell): void {
+    super.fromJSON(data);
+    this.collapsed = data.metadata.collapsed;
+    this.scrolled = data.metadata.scrolled;
+    this.executionCount = data.execution_count;
+    this.output.add.apply(null, data.outputs);
+  }
+
   type: CellType = "code";
 }
 
@@ -326,11 +466,59 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
   }
 
   /**
+   * Populate from a JSON cell model.
+   */
+  fromJSON(data: IMarkdownCell): void {
+    super.fromJSON(data);
+    this.rendered = true;
+  }
+
+  /**
    * Select the cell model.
    */
   select(): void {
     this.selected.emit(void 0);
     if (!this.rendered) this.input.textEditor.select();
+  }
+
+  type: CellType = "markdown";
+}
+
+
+/**
+ * An implementation of a Raw cell Model.
+ */
+export
+class RawCellModel extends BaseCellModel implements IRawCellModel {
+  /**
+   * Get the raw cell metadata format for nbconvert.
+   */
+  get format(): string {
+    return Private.formatProperty.get(this);
+  }
+
+  /**
+   * Get the raw cell metadata format for nbconvert.
+   */
+  set format(value: string) {
+    Private.formatProperty.set(this, value);
+  }
+
+  /**
+   * Serialize the cell model.
+   */
+  toJSON(): IRawCell {
+    let value = super.toJSON() as IRawCell;
+    value.metadata.format = this.format;
+    return value;
+  }
+
+  /**
+   * Populate from a JSON cell model.
+   */
+  fromJSON(data: IRawCell): void {
+    super.fromJSON(data);
+    this.format = data.metadata.format;
   }
 
   type: CellType = "markdown";
@@ -388,20 +576,40 @@ namespace Private {
     notify: stateChangedSignal,
   });
 
+  /**
+   * A property descriptor for the name of a cell.
+   */
+  export
+  const nameProperty = new Property<IBaseCellModel, string>({
+    name: 'name',
+    value: null,
+    notify: stateChangedSignal,
+  });
+
+  /**
+   * A property descriptor for the tags of a cell.
+   */
+  export
+  const tagsProperty = new Property<IBaseCellModel, string[]>({
+    name: 'tags',
+    value: null,
+    notify: stateChangedSignal,
+  });
+
  /**
-  * A property descriptor holding the output area model.
+  * A property descriptor holding the format of a raw cell.
   */
   export
-  const outputProperty = new Property<CodeCellModel, IOutputAreaModel>({
-      name: 'output',
-      notify: stateChangedSignal,
+  const formatProperty = new Property<IRawCellModel, string>({
+    name: 'format',
+    notify: stateChangedSignal,
   });
 
   /**
    * A property descriptor which determines whether the input area should be rendered.
    */
   export
-  const renderedProperty = new Property<MarkdownCellModel, boolean>({
+  const renderedProperty = new Property<IMarkdownCellModel, boolean>({
     name: 'rendered',
     notify: stateChangedSignal,
   });
@@ -410,9 +618,36 @@ namespace Private {
    * A property descriptor for the execution count of a code cell.
    */
   export
-  const executionCountProperty = new Property<CodeCellModel, number>({
+  const executionCountProperty = new Property<ICodeCellModel, number>({
     name: 'executionCount',
     value: null,
+    notify: stateChangedSignal,
+  });
+
+ /**
+  * A property descriptor holding the outputs of a code cell.
+  */
+  export
+  const outputProperty = new Property<ICodeCellModel, IOutputAreaModel>({
+    name: 'output',
+    notify: stateChangedSignal,
+  });
+
+ /**
+  * A property descriptor for the collapsed state of a code cell.
+  */
+  export
+  const collapsedProperty = new Property<ICodeCellModel, boolean>({
+    name: 'collapsed',
+    notify: stateChangedSignal,
+  });
+
+ /**
+  * A property descriptor for the scrolled state of a code cell.
+  */
+  export
+  const scrolledProperty = new Property<ICodeCellModel, boolean | 'auto'>({
+    name: 'scrolled',
     notify: stateChangedSignal,
   });
 }

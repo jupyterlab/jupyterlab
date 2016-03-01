@@ -71,6 +71,23 @@ type CellType = 'code' | 'markdown' | 'raw';
 
 
 /**
+ * Cell-level metadata.
+ */
+export
+interface IBaseCellMetadata {
+  /**
+   * The cell's name. If present, must be a non-empty string.
+   */
+  name?: string;
+
+  /**
+   * The cell's tags. Tags must be unique, and must not contain commas.
+   */
+  tags?: string[];
+}
+
+
+/**
  * The base cell interface.
  */
 export
@@ -88,17 +105,19 @@ interface IBaseCell {
   /**
    * Cell-level metadata.
    */
-  metadata: {
-    /**
-     * The cell's name. If present, must be a non-empty string.
-     */
-    name?: string;
+  metadata: ICellMetadata;
+}
 
-    /**
-     * The cell's tags. Tags must be unique, and must not contain commas.
-     */
-    tags?: string[];
-  }
+
+/**
+ * Metadata for the raw cell.
+ */
+export 
+interface IRawCellMetadata extends IBaseCellMetadata {
+  /**
+   * Raw cell metadata format for nbconvert.
+   */
+  format?: string;
 }
 
 
@@ -115,22 +134,7 @@ interface IRawCell extends IBaseCell {
   /**
    * Cell-level metadata.
    */
-  metadata: {
-    /**
-     * The cell's name. If present, must be a non-empty string.
-     */
-    name?: string;
-
-    /**
-     * The cell's tags. Tags must be unique, and must not contain commas.
-     */
-    tags?: string[];
-
-    /**
-     * Raw cell metadata format for nbconvert.
-     */
-    format?: string;
-  }
+  metadata: IRawCellMetadata;
 }
 
 
@@ -147,6 +151,23 @@ interface IMarkdownCell extends IBaseCell {
 
 
 /**
+ * Metadata for a code cell.
+ */
+export
+interface ICodeCellMetadata extends IBaseCellMetadata {
+  /**
+   * Whether the cell is collapsed/expanded.
+   */
+  collapsed?: boolean;
+
+  /**
+   * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
+   */
+  scrolled?: boolean | 'auto';
+}
+
+
+/**
  * A code cell.
  */
 export
@@ -159,27 +180,7 @@ interface ICodeCell extends IBaseCell {
   /**
    * Cell-level metadata.
    */
-  metadata: {
-    /**
-     * The cell's name. If present, must be a non-empty string.
-     */
-    name?: string;
-
-    /**
-     * The cell's tags. Tags must be unique, and must not contain commas.
-     */
-    tags?: string[];
-
-    /**
-     * Whether the cell is collapsed/expanded.
-     */
-    collapsed?: boolean;
-
-    /**
-     * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
-     */
-    scrolled?: boolean | 'auto';
-  }
+  metadata: ICodeCellMetadata;
 
   /**
    * Execution, display, or stream outputs.
@@ -198,6 +199,13 @@ interface ICodeCell extends IBaseCell {
  */
 export
 type ICell = IBaseCell | IRawCell | IMarkdownCell | ICodeCell;
+
+
+/**
+ * A union metadata type.
+ */
+export
+type ICellMetadata = IBaseCellMetadata | IRawCellMetadata | ICodeCellMetadata;
 
 
 /**
@@ -355,7 +363,7 @@ type IOutput = IExecuteResult | IDisplayData | IStream | IError;
  */
 export
 function isExecuteResult(d: IBaseOutput): d is IExecuteResult {
-  return d.output_type === "execute_result";
+  return d.output_type === 'execute_result';
 }
 
 
@@ -364,7 +372,7 @@ function isExecuteResult(d: IBaseOutput): d is IExecuteResult {
  */
 export
 function isDisplayData(d: IBaseOutput): d is IDisplayData {
-  return d.output_type === "display_data";
+  return d.output_type === 'display_data';
 }
 
 
@@ -373,7 +381,7 @@ function isDisplayData(d: IBaseOutput): d is IDisplayData {
  */
 export
 function isStream(d: IBaseOutput): d is IStream {
-  return d.output_type === "stream";
+  return d.output_type === 'stream';
 }
 
 
@@ -382,5 +390,5 @@ function isStream(d: IBaseOutput): d is IStream {
  */
 export
 function isError(d: IBaseOutput): d is IError {
-  return d.output_type === "error";
+  return d.output_type === 'error';
 }

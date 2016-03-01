@@ -23,16 +23,19 @@ import {
   ICellModel,
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
-  IRawCellModel, isCodeCellModel, isMarkdownCellModel
+  IRawCellModel, isCodeCellModel, isMarkdownCellModel,
+  RawCellModel
 } from '../cells';
 
 import {
-  INotebookMetadata
+  IMarkdownCell, ICodeCell,
+  isMarkdownCell, isCodeCell,
+  IDisplayData, isDisplayData,
+  IExecuteResult, isExecuteResult, isRawCell,
+  IStream, isStream, ICell, INotebookContent, INotebookMetadata,
+  IError, isError, IOutput, OutputType,
+  MAJOR_VERSION, MINOR_VERSION
 } from './nbformat';
-
-import {
-  messageToModel
-} from './serialize';
 
 
 /**
@@ -146,12 +149,22 @@ interface INotebookModel {
    * @returns A new raw cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  //createRawCell(source?: ICellModel): IRawCellModel;
+  createRawCell(source?: ICellModel): IRawCellModel;
 
   /**
    * Run the selected cell, taking the appropriate action.
    */
   runSelectedCell(): void;
+
+  /**
+   * Populate from a JSON notebook model.
+   */
+  fromJSON(data: INotebookContent): void;
+
+  /**
+   * Create a JSON notebook model.
+   */
+  toJSON(): INotebookContent;
 
   /**
    * The metadata associated with the notebook.
@@ -341,6 +354,13 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Create a raw cell model.
+   */
+  createRawCell(source?: ICellModel): IRawCellModel {
+    return new RawCellModel();
+  }
+
+  /**
    * Run the selected cell, taking the appropriate action.
    */
   runSelectedCell(): void {
@@ -361,6 +381,49 @@ class NotebookModel implements INotebookModel {
       this.cells.add(cell);
     }
     this.selectNextCell();
+  }
+
+  /**
+   * Populate from a JSON notebook model.
+   */
+  fromJSON(data: INotebookContent): void {
+    this.cells.clear();
+
+    // Iterate through the cell data, creating cell models.
+    data.cells.forEach((c) => {
+      let cell: ICellModel;
+      if (isMarkdownCell(c)) {
+        cell = this.createMarkdownCell();
+      } else if (isCodeCell(c)) {
+        let cell = this.createCodeCell();
+      } else if (isRawCell(c)) {
+        cell = this.createRawCell();
+      }
+      cell.fromJSON(c);
+      this.cells.add(cell);
+    });
+    
+    if (this.cells.length) {
+      this.selectedCellIndex = 0;
+    }
+    this.metadata = data.metadata;
+  }
+
+  /**
+   * Create a JSON notebook model.
+   */
+  toJSON(): INotebookContent {
+    let cells: ICell[] = [];
+    for (let i = 0; i < this.cells.length; i++) {
+      let cell = this.cells.get(i);
+      cells.push(cell.toJSON());
+    }
+    return {
+      cells: cells,
+      metadata: this.metadata, 
+      nbformat: MAJOR_VERSION, 
+      nbformat_minor: MINOR_VERSION 
+    };
   }
 
   /**
@@ -385,8 +448,9 @@ class NotebookModel implements INotebookModel {
     let ex = this.session.kernel.execute(exRequest);
     output.clear(false);
     ex.onIOPub = (msg => {
-      let model = messageToModel(msg);
+      let model = msg.content;
       if (model !== void 0) {
+        model.output_type = msg.header.msg_type as OutputType;
         output.add(model)
       }
     });
