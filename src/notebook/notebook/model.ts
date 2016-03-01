@@ -27,7 +27,7 @@ import {
 } from '../cells';
 
 import {
-  NotebookMetadata
+  INotebookMetadata
 } from './nbformat';
 
 import {
@@ -156,7 +156,7 @@ interface INotebookModel {
   /**
    * The metadata associated with the notebook.
    */
-  metadata: NotebookMetadata;
+  metadata: INotebookMetadata;
 }
 
 
@@ -253,14 +253,14 @@ class NotebookModel implements INotebookModel {
   /**
    * Get the metadata for the notebook.
    */
-  get metadata(): NotebookMetadata {
+  get metadata(): INotebookMetadata {
     return NotebookModelPrivate.metadataProperty.get(this);
   }
 
   /**
    * Set the metadata for the notebook.
    */
-  set metadata(value: NotebookMetadata) {
+  set metadata(value: INotebookMetadata) {
     NotebookModelPrivate.metadataProperty.set(this, value);
   }
 
@@ -467,7 +467,7 @@ namespace NotebookModelPrivate {
   * A property descriptor which holds the metadata of the notebook.
   */
   export
-  const metadataProperty = new Property<NotebookModel, NotebookMetadata>({
+  const metadataProperty = new Property<NotebookModel, INotebookMetadata>({
     name: 'metadata',
     notify: stateChangedSignal,
   });

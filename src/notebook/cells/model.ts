@@ -25,12 +25,9 @@ import {
   Widget
 } from 'phosphor-widget';
 
-
-/**
- * A type which describes the type of cell.
- */
-export
-type CellType = "code" | "markdown" | "raw";
+import {
+  CellType
+} from '../notebook/nbformat';
 
 
 /**

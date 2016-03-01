@@ -14,162 +14,9 @@ import {
   ObservableList
 } from 'phosphor-observablelist';
 
-
-/**
-* A Mime bundle of data.
-*/
-export interface MimeBundle {
-  [key: string]: string;
-  'application/json'?: any;
-}
-
-
-/**
- * The valid output type strings.
- */
-export
-type OutputType = "execute_result" | "display_data" | "stream" | "error";
-
-
-/**
- * The valid stream type strings.
- */
-export 
-type StreamType = "stdout" | "stderr";
-
-
-/**
- * The base interface for an output model.
- */
-export
-class OutputBaseModel {
-  /**
-   * A signal emitted when state of the output changes.
-   */
-  stateChanged: ISignal<OutputBaseModel, IChangedArgs<any>>;
-
-  /**
-   * The output type.
-   */
-  outputType: OutputType;
-}
-
-
-/**
-* An output model for display data.
-*/
-export
-class DisplayDataModel extends OutputBaseModel {
-  /**
-   * The output type.
-   */
-  outputType: OutputType = "display_data";
-
-  /**
-   * The raw data for the output.
-   */
-  data: MimeBundle;
-
-  /**
-   * Metadata about the output.
-   */
-  metadata: any;
-}
-
-
-/**
-* An output model for an execute result.
-*/
-export
-class ExecuteResultModel extends OutputBaseModel {
-  /**
-   * The output type.
-   */
-  outputType: OutputType = "execute_result";
-
-  /**
-   * The raw data for the output.
-   */
-  data: MimeBundle;
-
-  /**
-   * Metadata about the output.
-   */
-  metadata: any;
-
-  /**
-   * The current execution count.
-   */
-  executionCount: number; // this is also a property on the cell?
-}
-
-
-
-/**
-* An output model for stream data.
-*/
-export
-class StreamModel extends OutputBaseModel {
-  /**
-   * The output type.
-   */
-  outputType: OutputType = "stream";
-
-  /**
-  * The type of stream.
-  */
-  name: StreamType;
-
-  /**
-  * The text from the stream.
-  */
-  text: string;
-}
-
-
-function isStreamModel(model: OutputBaseModel): model is StreamModel {
-  return model.outputType === "stream";
-}
-
-
-/**
-* An output model for an execute error.
-*/
-export
-class ExecuteErrorModel extends OutputBaseModel {
-  /**
-   * The output type.
-   */
-  outputType: OutputType = "error";
-
-  /**
-  * The name of the error.
-  */
-  ename: string;
-
-  /**
-  * The value of the error.
-  */
-  evalue: string;
-
-  /**
-  * The traceback for the error.
-  *
-  * #### Notes
-  * This is an array of strings that has been concatenated to a single string.
-  */
-  traceback: string;
-}
-
-
-/**
-* An output model that is one of the valid output types.
-*/
-export
-type OutputModel = (
-  ExecuteResultModel | DisplayDataModel | StreamModel |
-  ExecuteErrorModel
-);
+import {
+  IOutput, IStream, isStream, IExecuteResult, IDisplayData, IError
+} from '../notebook/nbformat';
 
 
 /**
@@ -177,41 +24,35 @@ type OutputModel = (
 */
 export
 interface IOutputAreaModel {
-
   /**
-  * A signal emitted when state of the output area changes.
-  */
+   * A signal emitted when state of the output area changes.
+   */
   stateChanged: ISignal<IOutputAreaModel, IChangedArgs<any>>;
 
   /**
-  * Whether the output is collapsed.
-  */
+   * Whether the output is collapsed.
+   */
   collapsed: boolean;
 
   /**
-  * Whether the output has a fixed maximum height.
-  */
+   * Whether the output has a fixed maximum height.
+   */
   fixedHeight: boolean;
 
   /**
-  * The output prompt.
-  */
-  prompt: string;
+   * The actual outputs.
+   */
+  outputs: ObservableList<IOutput>;
 
   /**
-  * The actual outputs.
-  */
-  outputs: ObservableList<OutputModel>;
+   * A convenience method to add an output to the end of the outputs list,
+   * combining outputs if necessary.
+   */
+  add(output: IOutput): void;
 
   /**
-  * A convenience method to add an output to the end of the outputs list,
-  * combining outputs if necessary.
-  */
-  add(output: OutputModel): void;
-
-  /**
-  * Clear all of the output.
-  */
+   * Clear all of the output.
+   */
   clear(wait: boolean): void;
 }
 
@@ -221,126 +62,46 @@ interface IOutputAreaModel {
  */
 export
 class OutputAreaModel implements IOutputAreaModel {
-
   /**
    * A signal emitted when the state of the model changes.
-   *
-   * #### Notes
-   * This will not trigger on changes to the output list. For output change handlers,
-   * listen to [[outputs]] events directly.
-   *
-   * **See also:** [[stateChanged]]
-   */
-  static stateChangedSignal = new Signal<OutputAreaModel, IChangedArgs<any>>();
-
-  /**
-  * A property descriptor which determines whether the output has a maximum fixed height.
-  *
-  * **See also:** [[fixedHeight]]
-  */
-  static fixedHeightProperty = new Property<OutputAreaModel, boolean>({
-    name: 'fixedHeight',
-    notify: OutputAreaModel.stateChangedSignal,
-  });
-
-  /**
-  * A property descriptor which determines whether the input area is collapsed or displayed.
-  *
-  * **See also:** [[collapsed]]
-  */
-  static collapsedProperty = new Property<OutputAreaModel, boolean>({
-    name: 'collapsed',
-    notify: OutputAreaModel.stateChangedSignal,
-  });
-
-  /**
-  * A property descriptor containing the prompt.
-  *
-  * **See also:** [[prompt]]
-  */
-  static promptProperty = new Property<OutputAreaModel, string>({
-    name: 'prompt',
-    notify: OutputAreaModel.stateChangedSignal,
-  });
-
-  /**
-   * A signal emitted when the state of the model changes.
-   *
-   * #### Notes
-   * This will not trigger on changes to the output list. For output change handlers,
-   * listen to [[outputs]] events directly.
-   *
-   * This is a pure delegate to the [[stateChangedSignal]].
    */
   get stateChanged() {
-    return OutputAreaModel.stateChangedSignal.bind(this);
+    return Private.stateChangedSignal.bind(this);
   }
 
   /**
    * Get whether the output has a maximum fixed height.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[fixedHeightProperty]].
    */
   get fixedHeight() {
-    return OutputAreaModel.fixedHeightProperty.get(this);
+    return Private.fixedHeightProperty.get(this);
   }
 
   /**
    * Set whether the output has a maximum fixed height.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[fixedHeightProperty]].
    */
   set fixedHeight(value: boolean) {
-    OutputAreaModel.fixedHeightProperty.set(this, value);
+    Private.fixedHeightProperty.set(this, value);
   }
 
   /**
    * Get whether the input area should be collapsed or displayed.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[collapsedProperty]].
    */
   get collapsed() {
-    return OutputAreaModel.collapsedProperty.get(this);
+    return Private.collapsedProperty.get(this);
   }
 
   /**
    * Set whether the input area should be collapsed or displayed.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[collapsedProperty]].
    */
   set collapsed(value: boolean) {
-    OutputAreaModel.collapsedProperty.set(this, value);
-  }
-
-  /**
-   * Get the prompt.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[promptProperty]].
-   */
-  get prompt() {
-    return OutputAreaModel.promptProperty.get(this);
-  }
-
-  /**
-   * Set the prompt.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[promptProperty]].
-   */
-  set prompt(value: string) {
-    OutputAreaModel.promptProperty.set(this, value);
+    Private.collapsedProperty.set(this, value);
   }
 
   /**
    * Add an output, which may be combined with previous output
    * (e.g. for streams).
    */
-  add(output: OutputModel) {
+  add(output: IOutput) {
     // if we received a delayed clear message, then clear now
     if (this._clearNext) {
       this.clear();
@@ -348,14 +109,18 @@ class OutputAreaModel implements IOutputAreaModel {
     }
 
     // Consolidate outputs if they are stream outputs of the same kind
-    let lastOutput = this.outputs.get(-1);
-    if (isStreamModel(output)
-        && lastOutput && isStreamModel(lastOutput)
+    let lastOutput = this.outputs.get(-1) as IStream;
+    if (isStream(output)
+        && lastOutput && isStream(lastOutput)
         && output.name === lastOutput.name) {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
       // This also replaces the metadata of the last item.
-      output.text = lastOutput.text + output.text;
+      let text = output.text as string;
+      if (Array.isArray(output.text)) {
+        text = (output.text as string[]).join('\n');
+      }
+      output.text = lastOutput.text as string + text;
       this.outputs.set(-1, output);
     } else {
       this.outputs.add(output);
@@ -375,10 +140,45 @@ class OutputAreaModel implements IOutputAreaModel {
     }
   }
 
-  outputs = new ObservableList<OutputModel>();
+  /**
+   * The actual outputs.
+   */
+  outputs = new ObservableList<IOutput>();
 
   /**
    * Whether to clear on the next message add.
    */
   private _clearNext = false;
+}
+
+
+/**
+ * A private namespace for output area model data.
+ */
+namespace Private {
+  /**
+   * A signal emitted when the state of the model changes.
+   */
+  export
+  const stateChangedSignal = new Signal<OutputAreaModel, IChangedArgs<any>>();
+
+  /**
+   * A property descriptor which determines whether the output has a maximum 
+   * fixed height.
+   */
+  export
+  const fixedHeightProperty = new Property<OutputAreaModel, boolean>({
+    name: 'fixedHeight',
+    notify: stateChangedSignal,
+  });
+
+  /**
+   * A property descriptor which determines whether the output area is 
+   * collapsed or displayed.
+   */
+  export
+  const collapsedProperty = new Property<OutputAreaModel, boolean>({
+    name: 'collapsed',
+    notify: stateChangedSignal,
+  });
 }
