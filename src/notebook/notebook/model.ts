@@ -289,8 +289,10 @@ class NotebookModel implements INotebookModel {
    */
   set selectedCellIndex(value: number) {
     NotebookModelPrivate.selectedCellIndexProperty.set(this, value);
-    let cell = this.cells.get(value);
-    if (cell) cell.select();
+    let cells = this.cells;
+    for (let i = 0; i < cells.length; i++) {
+      cells.get(i).selected = value === i;
+    }
   }
 
   /**

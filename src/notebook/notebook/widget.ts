@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  DisposableDelegate, IDisposable
+} from 'phosphor-disposable';
+
+import {
   IChangedArgs
 } from 'phosphor-properties';
 
@@ -25,12 +29,9 @@ import {
 import {
   ICellModel,
   CodeCellWidget, MarkdownCellWidget,
-  CodeCellModel, MarkdownCellModel, isMarkdownCellModel
+  CodeCellModel, MarkdownCellModel, isMarkdownCellModel,
+  RawCellModel, RawCellWidget
 } from '../cells';
-
-import {
-  DisposableDelegate, IDisposable
-} from 'phosphor-disposable';
 
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
@@ -57,9 +58,8 @@ const NB_SELECTED_CLASS = 'jp-mod-selected';
  */
 export
 class NotebookWidget extends Panel {
-
   /**
-   * Construct a code cell widget.
+   * Construct a notebook widget.
    */
   constructor(model: INotebookModel) {
     super();
@@ -69,11 +69,14 @@ class NotebookWidget extends Panel {
     this._listdispose = follow<ICellModel>(model.cells, this, (c: ICellModel) => {
       let w: Widget;
       switch(c.type) {
-      case "code":
+      case 'code':
         w = new CodeCellWidget(c as CodeCellModel);
         break;
-      case "markdown":
+      case 'markdown':
         w = new MarkdownCellWidget(c as MarkdownCellModel);
+        break;
+      case 'raw':
+        w = new RawCellWidget(c as RawCellModel);
         break;
       default:
         // if there are any issues, just return a blank placeholder
@@ -85,8 +88,8 @@ class NotebookWidget extends Panel {
     })
     this.updateSelectedCell(model.selectedCellIndex);
 
-    // bind events that can select the cell
-    // see https://github.com/jupyter/notebook/blob/203ccd3d4496cc22e6a1c5e6ece9f5a7d791472a/notebook/static/notebook/js/cell.js#L178
+    // Bind events that can select the cell.
+    // See https://github.com/jupyter/notebook/blob/203ccd3d4496cc22e6a1c5e6ece9f5a7d791472a/notebook/static/notebook/js/cell.js#L178
     this.node.addEventListener('click', (ev: MouseEvent) => {
       if (!this._model.readOnly) {
         this._model.selectedCellIndex = this.findCell(ev.target as HTMLElement);
@@ -110,7 +113,6 @@ class NotebookWidget extends Panel {
     model.cells.changed.connect(this.cellsChanged, this);
   }
 
-
   /**
    * Find the cell index containing the target html element.
    *
@@ -131,7 +133,7 @@ class NotebookWidget extends Panel {
       }
       node = node.parentElement;
     }
-    return void 0;
+    return -1;
   }
 
   /**
@@ -169,7 +171,7 @@ class NotebookWidget extends Panel {
   }
 
   /**
-   * Dispose this model.
+   * Dispose of the resources held by the widget.
    */
   dispose() {
     this._listdispose.dispose();
@@ -179,7 +181,6 @@ class NotebookWidget extends Panel {
   /**
    * Get the model for the widget
    */
-
   get model(): INotebookModel {
     return this._model;
   }
@@ -188,6 +189,7 @@ class NotebookWidget extends Panel {
   private _listdispose: IDisposable;
 }
 
+
 /**
  * Make a panel mirror changes to an observable list.
  *
@@ -195,15 +197,12 @@ class NotebookWidget extends Panel {
  * @param sink - The Panel.
  * @param factory - A function which takes an item from the list and constructs a widget.
  */
- function follow<T>(source: IObservableList<T>,
-                     sink: Panel,
-                     factory: (arg: T)=> Widget): IDisposable {
-
+ function follow<T>(source: IObservableList<T>, sink: Panel, factory: (arg: T)=> Widget): IDisposable {
   for (let i = sink.childCount()-1; i>=0; i--) {
     sink.childAt(i).dispose();
   }
   for (let i=0; i<source.length; i++) {
-    sink.addChild(factory(source.get(i)))
+    sink.addChild(factory(source.get(i)));
   }
   function callback(sender: ObservableList<T>, args: IListChangedArgs<T>) {
     switch(args.type) {
@@ -233,8 +232,7 @@ class NotebookWidget extends Panel {
   source.changed.connect(callback);
   return new DisposableDelegate(() => {
     source.changed.disconnect(callback);
-  })
-
+  });
 }
 
 

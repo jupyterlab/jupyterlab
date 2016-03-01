@@ -3,13 +3,6 @@
 'use strict';
 
 import {
-  IInputAreaModel, IInputAreaOptions, InputAreaModel
-} from '../input-area';
-import {
-  IOutputAreaModel, OutputAreaModel
-} from '../output-area';
-
-import {
   IObservableList
 } from 'phosphor-observablelist';
 
@@ -26,8 +19,16 @@ import {
 } from 'phosphor-widget';
 
 import {
+  IInputAreaModel, IInputAreaOptions, InputAreaModel
+} from '../input-area';
+
+import {
   CellType, ICell, ICodeCell, IRawCell, IMarkdownCell
 } from '../notebook/nbformat';
+
+import {
+  IOutputAreaModel, OutputAreaModel
+} from '../output-area';
 
 
 /**
@@ -74,14 +75,9 @@ interface IBaseCellModel extends ISerializable {
   stateChanged: ISignal<IBaseCellModel, IChangedArgs<any>>;
 
   /**
-   * A signal emitted when the cell is selected.
+   * Whether the cell is selected.
    */
-  selected: ISignal<IBaseCellModel, void>;
-
-  /**
-   * Get namespaced metadata about the cell.
-   */
-  //getMetadata(namespace: string) : IObservableMap<string, ISerializable>;
+  selected: boolean;
 
   /**
    * The input area of the cell.
@@ -102,9 +98,9 @@ interface IBaseCellModel extends ISerializable {
   readOnly: boolean;
 
   /**
-   * Select the cell model.
+   * Whether the cell is marked for applying commands.
    */
-  select(): void;
+  marked: boolean;
 
   /**
    * Serialize the cell model.
@@ -115,27 +111,6 @@ interface IBaseCellModel extends ISerializable {
    * Populate from a JSON cell model.
    */
   fromJSON(data: ICell): void;
-
-  /**
-   * Whether a cell is deletable.
-   */
-  //deleteable: boolean;
-
-  /**
-   * Whether a cell is mergable.
-   */
-  //mergeable: boolean;
-
-  /**
-   * Whether a cell is splittable.
-   */
-  //splittable: boolean;
-
-  /**
-   * Whether the cell is marked for applying commands
-   */
-  //marked: boolean;
-
 }
 
 
@@ -184,7 +159,7 @@ interface IRawCellModel extends IBaseCellModel {
 export
 interface IMarkdownCellModel extends IBaseCellModel {
   /**
-   * Whether a cell is rendered.
+   * Whether the cell is rendered.
    */
   rendered: boolean;
 }
@@ -222,10 +197,31 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * A signal emitted when the cell is selected.
+   * Get whether the cell is selected.
    */
-  get selected(): ISignal<IBaseCellModel, void> {
-    return Private.selectedSignal.bind(this);
+  get selected(): boolean {
+    return Private.selectedProperty.get(this);
+  }
+
+  /**
+   * Set whether the cell is selected.
+   */
+  set selected(value: boolean) {
+    Private.selectedProperty.set(this, value);
+  }
+
+  /**
+   * Get whether the cell is marked.
+   */
+  get marked(): boolean {
+    return Private.markedProperty.get(this);
+  }
+
+  /**
+   * Set whether the cell is marked.
+   */
+  set marked(value: boolean) {
+    Private.markedProperty.set(this, value);
   }
 
   /**
@@ -301,14 +297,6 @@ class BaseCellModel implements IBaseCellModel {
    */
   set tags(value: string[]) {
     Private.tagsProperty.set(this, value);
-  }
-
-  /**
-   * Select the cell model.
-   */
-  select(): void {
-    this.selected.emit(void 0);
-    this.input.textEditor.select();
   }
 
   /**
@@ -473,14 +461,6 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
     this.rendered = true;
   }
 
-  /**
-   * Select the cell model.
-   */
-  select(): void {
-    this.selected.emit(void 0);
-    if (!this.rendered) this.input.textEditor.select();
-  }
-
   type: CellType = "markdown";
 }
 
@@ -562,10 +542,22 @@ namespace Private {
   const stateChangedSignal = new Signal<IBaseCellModel, IChangedArgs<any>>();
 
   /**
-   * A signal emitted when a cell model is selected.
+   * A property descriptor for the selected state of the cell.
    */
   export
-  const selectedSignal = new Signal<IBaseCellModel, void>();
+  const selectedProperty = new Property<IBaseCellModel, boolean>({
+    name: 'selected',
+    notify: stateChangedSignal,
+  });
+
+  /**
+   * A property descriptor for the marked state of the cell.
+   */
+  export
+  const markedProperty = new Property<IBaseCellModel, boolean>({
+    name: 'marked',
+    notify: stateChangedSignal,
+  });
 
   /**
    * A property descriptor for the input area model.
