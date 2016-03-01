@@ -3,8 +3,16 @@
 'use strict';
 
 import {
+  DisposableDelegate, IDisposable
+} from 'phosphor-disposable';
+
+import {
   IListChangedArgs, ListChangeType, ObservableList, IObservableList
 } from 'phosphor-observablelist';
+
+import {
+  Panel
+} from 'phosphor-panel';
 
 import {
   IChangedArgs
@@ -19,33 +27,28 @@ import {
 } from 'phosphor-widget';
 
 import {
-  Panel
-} from 'phosphor-panel';
+  Transformime,
+  TextTransformer,
+  ImageTransformer,
+  HTMLTransformer
+} from 'transformime';
 
 import {
-    Transformime,
-    TextTransformer,
-    ImageTransformer,
-    HTMLTransformer
-} from "transformime";
+  consoleTextTransform,
+  markdownTransform,
+  LaTeXTransform,
+  PDFTransform,
+  SVGTransform,
+  ScriptTransform
+} from 'transformime-jupyter-transformers';
 
 import {
-    consoleTextTransform,
-    markdownTransform,
-    LaTeXTransform,
-    PDFTransform,
-    SVGTransform,
-    ScriptTransform
-} from "transformime-jupyter-transformers";
+  IOutput, IExecuteResult, IDisplayData, IStream, IError, MimeBundle
+} from '../notebook/nbformat';
 
 import {
-  IOutputAreaModel, OutputModel, ExecuteResultModel, OutputType,
-  ExecuteErrorModel, StreamModel, DisplayDataModel, MimeBundle
+  IOutputAreaModel
 } from './model';
-
-import {
-  DisposableDelegate, IDisposable
-} from 'phosphor-disposable';
 
 
 /**
@@ -56,15 +59,15 @@ import {
  * important than earlier ones.
  */
 let transformers = [
-    TextTransformer,
-    PDFTransform,
-    ImageTransformer,
-    SVGTransform,
-    consoleTextTransform,
-    LaTeXTransform,
-    markdownTransform,
-    HTMLTransformer,
-    ScriptTransform
+  TextTransformer,
+  PDFTransform,
+  ImageTransformer,
+  SVGTransform,
+  consoleTextTransform,
+  LaTeXTransform,
+  markdownTransform,
+  HTMLTransformer,
+  ScriptTransform
 ];
 
 /**
@@ -87,7 +90,7 @@ class OutputAreaWidget extends Panel {
     this.addClass('jp-OutputArea');
     this._model = model;
     model.stateChanged.connect(this.modelStateChanged, this);
-    this._listdispose = follow<OutputModel>(model.outputs, this, (out) => {
+    this._listdispose = follow<IOutput>(model.outputs, this, (out) => {
       let w = new Widget();
       this.renderItem(w, out);
       return w;
@@ -97,33 +100,34 @@ class OutputAreaWidget extends Panel {
   /**
    * Render an item using the transformime library.
    */
-  renderItem(widget: Widget, output: OutputModel): Promise<void> {
+  renderItem(widget: Widget, output: IOutput): Promise<void> {
     let bundle: MimeBundle;
     widget.addClass('jp-OutputArea-Output');
-    switch(output.outputType) {
+    switch(output.output_type) {
     case "execute_result":
-      bundle = (output as ExecuteResultModel).data;
+      bundle = (output as IExecuteResult).data;
       widget.addClass('jp-OutputArea-ExecuteResult');
       break;
     case "display_data":
-      bundle = (output as DisplayDataModel).data;
+      bundle = (output as IDisplayData).data;
       widget.addClass('jp-OutputArea-DisplayData');
       break;
     case "stream":
-      bundle = {'jupyter/console-text': (output as StreamModel).text};
-      if ((output as StreamModel).name == 'stdout') {
+      bundle = {'jupyter/console-text': (output as IStream).text};
+      if ((output as IStream).name == 'stdout') {
         widget.addClass('jp-OutputArea-Stdout');
       } else {
         widget.addClass('jp-OutputArea-Stderr');
       }
       break;
     case "error":
-      let out: ExecuteErrorModel = output as ExecuteErrorModel;
-      bundle = {'jupyter/console-text': out.traceback || `${out.ename}: ${out.evalue}`};
+      let out: IError = output as IError;
+      let traceback = out.traceback.join('\n');
+      bundle = {'jupyter/console-text': traceback || `${out.ename}: ${out.evalue}`};
       widget.addClass('jp-OutputArea-Error');
       break;
     default:
-      console.error(`Unrecognized output type: ${output.outputType}`);
+      console.error(`Unrecognized output type: ${output.output_type}`);
       bundle = {};
     }
     return (transform.transform(bundle, document).then(result => {
