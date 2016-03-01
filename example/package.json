@@ -3,27 +3,19 @@
   "name": "jupyter-js-notebook-example",
   "dependencies": {
     "jupyter-js-notebook": "file:..",
-    "jupyter-js-services": "^0.5.0",
     "jupyter-js-utils": "^0.3.1",
     "phosphor-boxpanel": "^1.0.0-rc.0",
-    "phosphor-keymap": "^0.7.0",
-    "phosphor-widget": "^1.0.0-rc.1"
+    "phosphor-keymap": "^0.7.0"
   },
   "scripts": {
     "build": "tsconfig -u src/tsconfig.json && tsc --project src && webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules",
     "postinstall": "npm dedupe",
-    "update": "rimraf node_modules/jupyter-js-notebook && npm install",
-    "watch:src": "watch 'npm run build' src --wait 5",
-    "watch": "concurrently 'npm run watch:src' 'python main.py'"
+    "update": "rimraf node_modules/jupyter-js-notebook && npm install"
   },
   "devDependencies": {
     "concurrently": "^2.0.0",
-    "css-loader": "^0.23.1",
     "rimraf": "^2.5.2",
-    "style-loader": "^0.13.0",
-    "tsconfig-cli": "^0.1.1",
-    "watch": "^0.17.1",
-    "webpack": "^1.12.14"
+    "tsconfig-cli": "^0.1.1"
   }
 }

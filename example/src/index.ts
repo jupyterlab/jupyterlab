@@ -7,7 +7,7 @@
 
 import {
   NotebookModel, NotebookWidget,
-  NotebookContent, populateNotebookModel, getNotebookContent
+  INotebookContent, populateNotebookModel, getNotebookContent
 } from 'jupyter-js-notebook';
 
 import {
@@ -65,7 +65,7 @@ function main(): void {
   let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then(data => {
     let nbModel = new NotebookModel();
-    populateNotebookModel(nbModel, data.content as NotebookContent);
+    populateNotebookModel(nbModel, data.content as INotebookContent);
     let nbWidget = new NotebookWidget(nbModel);
     nbWidget.title.text = NOTEBOOK;
 
