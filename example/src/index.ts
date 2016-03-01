@@ -6,8 +6,7 @@
 'use strict';
 
 import {
-  NotebookModel, NotebookWidget,
-  INotebookContent, populateNotebookModel, getNotebookContent
+  NotebookModel, NotebookWidget, INotebookContent
 } from 'jupyter-js-notebook';
 
 import {
@@ -41,7 +40,7 @@ let NOTEBOOK = 'test.ipynb';
 function bindings(nbModel: NotebookModel) {
   let bindings: IKeyBinding[] = [{
     selector: '.jp-Notebook-cell',
-    sequence: ["Shift Enter"],
+    sequence: ['Shift Enter'],
     handler: () => {
       nbModel.runSelectedCell();
       return true;
@@ -65,7 +64,7 @@ function main(): void {
   let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then(data => {
     let nbModel = new NotebookModel();
-    populateNotebookModel(nbModel, data.content as INotebookContent);
+    nbModel.fromJSON(data.content as INotebookContent);
     let nbWidget = new NotebookWidget(nbModel);
     nbWidget.title.text = NOTEBOOK;
 
@@ -83,7 +82,7 @@ function main(): void {
       baseUrl: SERVER_URL
     }).then(session => {
       nbModel.session = session;
-      let content = getNotebookContent(nbModel);
+      let content = nbModel.toJSON();
       contents.save(NOTEBOOK, {
         type: 'notebook',
         content

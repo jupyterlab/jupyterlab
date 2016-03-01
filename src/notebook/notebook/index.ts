@@ -4,5 +4,4 @@
 
 export * from './model';
 export * from './widget';
-export * from './serialize';
 export * from './nbformat';
