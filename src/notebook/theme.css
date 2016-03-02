@@ -64,7 +64,7 @@
 }
 
 
-.jp-InputArea.CodeMirror.cm-s-default {
+.jp-CodeMirror > .CodeMirror.cm-s-default {
   line-height: 1.21429em;
   /* Changed from 1em to our global default */
   font-size: 14px;
@@ -75,7 +75,7 @@
 }
 
 
-.jp-InputArea.CodeMirror-scroll {
+.jp-CodeMirror > .CodeMirror-scroll {
   /*  The CodeMirror docs are a bit fuzzy on if overflow-y should be hidden or visible.*/
   /*  We have found that if it is visible, vertical scrollbars appear with font size changes.*/
   overflow-y: hidden;
@@ -83,26 +83,26 @@
 }
 
 
-.jp-InputArea.CodeMirror-lines {
+.jp-CodeMirror > .CodeMirror-lines {
   /* In CM2, this used to be 0.4em, but in CM3 it went to 4px. We need the em value because */
   /* we have set a different line-height and want this to scale with that. */
   padding: 0.4em;
 }
 
 
-.jp-InputArea.CodeMirror-linenumber {
+.jp-CodeMirror > .CodeMirror-linenumber {
   padding: 0 8px 0 4px;
 }
 
 
 
-.jp-InputArea.CodeMirror-gutters {
+.jp-CodeMirror > .CodeMirror-gutters {
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
 }
 
 
-.jp-InputArea.CodeMirror pre {
+.jp-CodeMirror > .CodeMirror pre {
   /* In CM3 this went to 4px from 0 in CM2. We need the 0 value because of how we size */
   /* .CodeMirror-lines */
   padding: 0;
