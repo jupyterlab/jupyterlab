@@ -7,6 +7,10 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  Message
+} from 'phosphor-messaging';
+
+import {
   IChangedArgs
 } from 'phosphor-properties';
 
@@ -52,6 +56,11 @@ const NB_CELL_CLASS = 'jp-Notebook-cell';
  */
 const NB_SELECTED_CLASS = 'jp-mod-selected';
 
+/**
+ * The class name added for command mode.
+ */
+const COMMAND_CLASS = 'jp-mod-commandMode';
+
 
 /**
  * A widget for a notebook.
@@ -66,40 +75,13 @@ class NotebookWidget extends Widget {
     this.addClass(NB_CLASS);
     this._model = model;
     this.layout = new PanelLayout();
-
-    this.updateSelectedCell(model.selectedCellIndex);
-
-    // Bind events that can select the cell.
-    // See https://github.com/jupyter/notebook/blob/203ccd3d4496cc22e6a1c5e6ece9f5a7d791472a/notebook/static/notebook/js/cell.js#L178
-    this.node.addEventListener('click', evt => {
-      if (!this._model.readOnly) {
-        let index = this.findCell(evt.target as HTMLElement);
-        this._model.selectedCellIndex = index;
-      }
-    });
-
-    this.node.addEventListener('dblclick', evt => {
-      if (this._model.readOnly) {
-        return;
-      }
-      let i = this.findCell(evt.target as HTMLElement);
-      if (i === void 0) {
-        return;
-      }
-      let cell = this._model.cells.get(i);
-      if (isMarkdownCellModel(cell) && cell.rendered) {
-        cell.rendered = false;
-        cell.input.textEditor.select();
-      }
-    });
-
-    model.stateChanged.connect(this.onModelChanged, this);
-    model.cells.changed.connect(this.onCellsChanged, this);
-
     let layout = this.layout as PanelLayout;
     for (let i = 0; i < model.cells.length; i++) {
       layout.addChild(this.createCell(model.cells.get(i)));
     }
+    this.updateSelectedCell(this.model.selectedCellIndex);
+    model.stateChanged.connect(this.onModelChanged, this);
+    model.cells.changed.connect(this.onCellsChanged, this);
   }
 
   /**
@@ -120,6 +102,43 @@ class NotebookWidget extends Widget {
     this._model.cells.changed.disconnect(this.onCellsChanged);
     this._model = null;
     super.dispose();
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'click':
+      this._evtClick(event as MouseEvent);
+      break;
+    case 'dblclick':
+      this._evtDblClick(event as MouseEvent);
+      break;
+    }
+  }
+
+  /**
+   * Handle `after_attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('click', this);
+    this.node.addEventListener('dblclick', this);
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('click', this);
+    this.node.removeEventListener('dblclick', this)
   }
 
   /**
@@ -153,8 +172,8 @@ class NotebookWidget extends Widget {
    * Returns -1 if the cell is not found.
    */
   protected findCell(node: HTMLElement): number {
-    // Trace up the DOM hierarchy to find the root cell node
-    // then find the corresponding child and select it.
+    // Trace up the DOM hierarchy to find the root cell node.
+    // Then find the corresponding child and select it.
     let layout = this.layout as PanelLayout;
     while (node && node !== this.node) {
       if (node.classList.contains(NB_CELL_CLASS)) {
@@ -190,9 +209,12 @@ class NotebookWidget extends Widget {
    */
   protected onModelChanged(sender: INotebookModel, args: IChangedArgs<any>) {
     switch(args.name) {
-    case 'defaultMimetype': 
-      break;
     case 'mode': 
+      if (args.newValue as string === 'command') {
+        this.addClass(COMMAND_CLASS);
+      } else {
+        this.removeClass(COMMAND_CLASS);
+      }
       break;
     case 'selectedCellIndex':
       this.updateSelectedCell(args.newValue, args.oldValue);
@@ -226,7 +248,7 @@ class NotebookWidget extends Widget {
         widget.dispose();
       }
       let newValues = args.newValue as ICellModel[];
-      for (let i = (args.newValue as ICellModel[]).length; i > 0; i--) {
+      for (let i = 0; i < newValues.length; i++) {
         layout.addChild(factory(newValues[i]));
       }
       break;
@@ -236,6 +258,34 @@ class NotebookWidget extends Widget {
       widget.dispose();
       layout.insertChild(args.newIndex, factory(args.newValue as ICellModel));
       break;
+    }
+  }
+
+  /**
+   * Handle `click` events for the widget.
+   */
+  private _evtClick(event: MouseEvent): void {
+   if (!this._model.readOnly) {
+      let index = this.findCell(event.target as HTMLElement);
+      this._model.selectedCellIndex = index;
+    }
+  }
+
+  /**
+   * Handle `dblclick` events for the widget.
+   */
+  private _evtDblClick(event: MouseEvent): void {
+    if (this._model.readOnly) {
+      return;
+    }
+    let i = this.findCell(event.target as HTMLElement);
+    if (i === void 0) {
+      return;
+    }
+    let cell = this._model.cells.get(i);
+    if (isMarkdownCellModel(cell) && cell.rendered) {
+      cell.rendered = false;
+      cell.input.textEditor.select();
     }
   }
 
