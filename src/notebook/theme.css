@@ -31,7 +31,7 @@
   border: 1px solid #cfcfcf;
   border-radius: 2px;
   background: #f7f7f7;
-  line-height: 1.21429em;
+  line-height: 1.2em;
   padding: 4px;
 }
 
@@ -54,6 +54,27 @@
 .jp-OutputArea-output {
   padding: 4px;
   margin-left: 90px;
+  display: flex;
+  flex-direction: row;
+}
+
+
+.jp-OutputArea-output.jp-OutputArea-executeResult {
+  margin-left: 0px;
+  padding-left: 0px;
+  flex: 1 1 auto;
+}
+
+
+.jp-OutputArea-prompt {
+  color: #D84315;
+  font-family: monospace;
+  padding: 0.4em;
+  text-align: right;
+  line-height: 20px;
+  font-size: 14px;
+  flex: 0 0 90px;
+  box-sizing: border-box;
 }
 
 
@@ -121,7 +142,6 @@
 .jp-CodeMirror > .CodeMirror-linenumber {
   padding: 0 8px 0 4px;
 }
-
 
 
 .jp-CodeMirror > .CodeMirror-gutters {

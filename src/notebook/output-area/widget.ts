@@ -101,6 +101,11 @@ const FIXED_HEIGHT_CLASS = 'jp-mod-fixedHeight';
 const COLLAPSED_CLASS = 'jp-mod-collapsed';
 
 /**
+ * The class name added to output area prompts.
+ */
+const PROMPT_CLASS = 'jp-OutputArea-prompt';
+
+/**
  * A list of transformers used to render outputs
  * 
  * #### Notes
@@ -178,6 +183,11 @@ class OutputAreaWidget extends Widget {
     case "execute_result":
       bundle = (output as IExecuteResult).data;
       widget.addClass(EXECUTE_CLASS);
+      let prompt = document.createElement('div');
+      prompt.className = PROMPT_CLASS;
+      let count = (output as IExecuteResult).execution_count;
+      prompt.textContent = `Out[${count}]:`;
+      widget.node.appendChild(prompt);
       break;
     case "display_data":
       bundle = (output as IDisplayData).data;
