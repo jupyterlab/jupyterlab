@@ -1,6 +1,6 @@
 
 import {
-  INotebookSession
+  INotebookSession, IExecuteReply
 } from 'jupyter-js-services';
 
 import {
@@ -471,6 +471,7 @@ class NotebookModel implements INotebookModel {
     if (!session) {
       return;
     }
+    cell.input.prompt = 'In[*]:';
     let exRequest = {
       code: cell.input.textEditor.text,
       silent: false,
@@ -487,6 +488,9 @@ class NotebookModel implements INotebookModel {
         model.output_type = msg.header.msg_type as OutputType;
         output.add(model)
       }
+    });
+    ex.onReply = (msg => {
+      cell.executionCount = (msg.content as IExecuteReply).execution_count;
     });
   }
 

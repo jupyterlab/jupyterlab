@@ -1,3 +1,8 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 /* Increased specificity in case phosphor css is loaded later. */
 .p-Widget.jp-Notebook {  
   min-width: 50px;
@@ -5,17 +10,39 @@
   overflow-y: auto;
 }
 
+.jp-InputArea-prompt {
+  flex-basis: 90px;
+  color: #303F9F;
+  font-family: monospace;
+  padding: 0.4em;
+  text-align: right;
+  line-height: 20px;
+  font-size: 14px;
+}
 
-.jp-InputArea > .jp-CodeMirror {
+
+.jp-InputArea-editor {
+  height: auto;
+  min-height: 2em;
+}
+
+
+.jp-InputArea-editor.jp-CodeMirror {
   border: 1px solid #cfcfcf;
   border-radius: 2px;
   background: #f7f7f7;
   line-height: 1.21429em;
+  padding: 4px;
 }
 
 
 .jp-MarkdownCell {
   outline: 0;
+}
+
+
+.jp-MarkdownCell.jp-mod-rendered {
+  margin-left: 90px;
 }
 
 
@@ -26,6 +53,7 @@
 
 .jp-OutputArea-output {
   padding: 4px;
+  margin-left: 90px;
 }
 
 
@@ -64,7 +92,7 @@
 }
 
 
-.jp-CodeMirror > .CodeMirror.cm-s-default {
+.jp-CodeMirror > .CodeMirror {
   line-height: 1.21429em;
   /* Changed from 1em to our global default */
   font-size: 14px;

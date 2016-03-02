@@ -20,7 +20,6 @@ import {
  */
 export
 interface IInputAreaModel {
-
   /**
    * A signal emitted when state of the input area changes.
    */
@@ -33,20 +32,13 @@ interface IInputAreaModel {
 
   /**
    * Whether the input area should be collapsed (hidden) or expanded.
-   *
-   * // TODO: this should probably be a property on the cell, not the input area.
    */
   collapsed: boolean;
 
   /**
-   * The prompt number to display for the input area.
+   * The prompt text to display for the input area.
    */
-  promptNumber: number;
-
-  /**
-   * The execution count.
-   */
-  executionCount: number;
+  prompt: string;
 
   /**
    * The dirty state of the input cell.
@@ -64,7 +56,7 @@ interface IInputAreaModel {
  * The options for creating an input area.
  */
 export
-interface IInputAreaOptions extends IEditorOptions {}
+interface IInputAreaOptions extends IEditorOptions { }
 
 
 /**
@@ -76,9 +68,8 @@ class InputAreaModel implements IInputAreaModel {
    * Construct a new input area model.
    */
   constructor(options?: IInputAreaOptions) {
-    let editor = new EditorModel(options);
-    InputAreaModelPrivate.textEditorProperty.set(this, editor);
-    editor.stateChanged.connect(this._textEditorChanged, this);
+    this._editor = new EditorModel(options);
+    this._editor.stateChanged.connect(this.onEditorChanged, this);
   }
 
   /**
@@ -103,31 +94,17 @@ class InputAreaModel implements IInputAreaModel {
   }
 
   /**
-   * Get the prompt number.
+   * Get the prompt text.
    */
-  get promptNumber() {
-    return InputAreaModelPrivate.promptNumberProperty.get(this);
+  get prompt() {
+    return InputAreaModelPrivate.promptProperty.get(this);
   }
 
   /**
-   * Set the prompt number.
+   * Set the prompt text.
    */
-  set promptNumber(value: number) {
-    InputAreaModelPrivate.promptNumberProperty.set(this, value);
-  }
-
-  /**
-   * Get the execution count of the input area.
-   */
-  get executionCount() {
-    return InputAreaModelPrivate.executionCountProperty.get(this);
-  }
-
-  /**
-   * Set the execution count of the input area.
-   */
-  set executionCount(value: number) {
-    InputAreaModelPrivate.executionCountProperty.set(this, value);
+  set prompt(value: string) {
+    InputAreaModelPrivate.promptProperty.set(this, value);
   }
 
   /**
@@ -137,14 +114,14 @@ class InputAreaModel implements IInputAreaModel {
    * This is a read-only property.
    */
   get textEditor(): EditorModel {
-    return InputAreaModelPrivate.textEditorProperty.get(this);
+    return this._editor;
   }
 
   /**
    * Get the dirty state.
    *
    * #### Notest
-   * This is a pure delegate to the dirty state of the [textEditor].
+   * This is a delegate to the dirty state of the [textEditor].
    */
   get dirty(): boolean {
     return this.textEditor.dirty;
@@ -154,7 +131,7 @@ class InputAreaModel implements IInputAreaModel {
    * Set the dirty state.
    *
    * #### Notest
-   * This is a pure delegate to the dirty state of the [textEditor].
+   * This is a delegate to the dirty state of the [textEditor].
    */
   set dirty(value: boolean) {
     this.textEditor.dirty = value;
@@ -175,13 +152,16 @@ class InputAreaModel implements IInputAreaModel {
   }
 
   /**
-   * Re-emit changes to the text editor dirty state.
+   * Handle changes to the editor state.
    */
-  private _textEditorChanged(editor: EditorModel, args: IChangedArgs<any>): void {
-    if (editor === this.textEditor && args.name === 'dirty') {
+  protected onEditorChanged(editor: EditorModel, args: IChangedArgs<any>): void {
+    if (args.name === 'dirty') {
+      // Re-emit dirty state changes from the editor.
       this.stateChanged.emit(args);
     }
   }
+
+  private _editor: EditorModel = null;
 }
 
 
@@ -205,29 +185,11 @@ namespace InputAreaModelPrivate {
   });
 
   /**
-  * A property descriptor containing the prompt number.
+  * A property descriptor containing the prompt.
   */
   export
-  const promptNumberProperty = new Property<InputAreaModel, number>({
-    name: 'promptNumber',
-    notify: stateChangedSignal,
-  });
-
-  /**
-  * A property descriptor containing the execution count of the input area.
-  */
-  export
-  const executionCountProperty = new Property<InputAreaModel, number>({
-    name: 'executionCount',
-    notify: stateChangedSignal,
-  });
-
-  /**
-  * A property descriptor containing the text editor Model.
-  */
-  export
-  const textEditorProperty = new Property<InputAreaModel, EditorModel>({
-    name: 'textEditor',
+  const promptProperty = new Property<InputAreaModel, string>({
+    name: 'prompt',
     notify: stateChangedSignal,
   });
 }

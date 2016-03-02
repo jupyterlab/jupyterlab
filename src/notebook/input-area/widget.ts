@@ -32,51 +32,123 @@ import {
 
 
 /**
+ * The class name added to input area widgets.
+ */
+const INPUT_CLASS = 'jp-InputArea';
+
+/**
+ * The class name added to the prompt area of the input area.
+ */
+const PROMPT_CLASS = 'jp-InputArea-prompt';
+
+/**
+ * The class name added to the editor area of the input area.
+ */
+const EDITOR_CLASS = 'jp-InputArea-editor';
+
+/**
+ * The class name added to the input area when collapsed.
+ */
+const COLLAPSED_CLASS = 'jp-mod-collapsed';
+
+/**
+ * The class name added to to the input area when dirty.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
+
+/**
+ * The class name added to to the input area when readonly.
+ */
+const READONLY_CLASS = 'jp-mod-readOnly';
+
+
+/**
  * An input area widget, which hosts an editor widget.
  */
 export
 class InputAreaWidget extends Widget {
-
   /**
    * Construct an input area widget.
    */
   constructor(model: IInputAreaModel) {
     super();
-    this.addClass('jp-InputArea');
+    this.addClass(INPUT_CLASS);
     this._model = model;
     this.layout = new PanelLayout();
-    this.updateTextEditor(model.textEditor);
-    model.stateChanged.connect(this._modelUpdate, this);
+    this._prompt = new Widget();
+    this._prompt.addClass(PROMPT_CLASS);
+    this._prompt.node.textContent = model.prompt;
+    this._editor = new CodeMirrorWidget(model.textEditor);
+    this._editor.addClass(EDITOR_CLASS);
+    let layout = this.layout as PanelLayout;
+    layout.addChild(this._prompt);
+    layout.addChild(this._editor);
+    model.stateChanged.connect(this.onModelUpdated, this);
   }
 
   /**
-   * Update the text editor model, creating a new text editor
-   * widget and detaching the old one.
+   * Get the model used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  updateTextEditor(editor: IEditorModel) {
-    let layout = this.layout as PanelLayout;
-    if (layout.childCount() > 0) {
-      layout.childAt(0).dispose();
-    }
-    layout.addChild(new CodeMirrorWidget(editor));
+  get model(): IInputAreaModel {
+    return this._model;
+  }
+
+  /**
+   * Get the editor widget used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get editor(): CodeMirrorWidget {
+    return this._editor;
+  }
+
+  /**
+   * Get the prompt widget for the input area.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get prompt(): Widget {
+    return this._prompt;
   }
 
   /**
    * Change handler for model updates.
    */
-  private _modelUpdate(sender: IInputAreaModel, args: IChangedArgs<any>) {
+  protected onModelUpdated(sender: IInputAreaModel, args: IChangedArgs<any>) {
     switch(args.name) {
-    case 'textEditor':
-      this.updateTextEditor(args.newValue);
-      break;
     case 'collapsed':
+      if (args.newValue) {
+        this.addClass(COLLAPSED_CLASS);
+      } else {
+        this.removeClass(COLLAPSED_CLASS);
+      }
       break;
-    case 'promptNumber':
+    case 'dirty':
+      if (args.newValue) {
+        this.addClass(DIRTY_CLASS);
+      } else {
+        this.removeClass(DIRTY_CLASS);
+      }
       break;
-    case 'executionCount':
+    case 'readOnly':
+      if (args.newValue) {
+        this.addClass(READONLY_CLASS);
+      } else {
+        this.removeClass(READONLY_CLASS);
+      }
+      break;
+    case 'prompt':
+      this.prompt.node.textContent = args.newValue;
       break;
     }
   }
 
-  private _model: IInputAreaModel;
+  private _model: IInputAreaModel = null;
+  private _editor: CodeMirrorWidget = null;
+  private _prompt: Widget = null;
 }

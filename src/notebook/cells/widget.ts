@@ -64,6 +64,11 @@ const MARKDOWN_CELL_CLASS = 'jp-MarkdownCell';
  */
 const RAW_CELL_CLASS = 'jp-RawCell';
 
+/**
+ * The class name added to a rendered markdown cell.
+ */
+const RENDERED_CLASS = 'jp-mod-rendered';
+
 
 /**
  * A base cell widget.
@@ -209,9 +214,11 @@ class MarkdownCellWidget extends BaseCellWidget {
       this.rendered.node.innerHTML = marked(model.input.textEditor.text);
       this.input.parent = null;
       (this.layout as PanelLayout).addChild(this.rendered);
+      this.addClass(RENDERED_CLASS);
     } else {
       this.rendered.parent = null;
       (this.layout as PanelLayout).addChild(this.input);
+      this.removeClass(RENDERED_CLASS);
     }
     this._dirty = false;
   }
