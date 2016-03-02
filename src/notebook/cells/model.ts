@@ -353,6 +353,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   constructor(options?: ICellOptions) {
     super(options);
     Private.outputProperty.set(this, new OutputAreaModel());
+    this.input.prompt = 'In[ ]:';
   }
 
   /**
@@ -374,6 +375,11 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    */
   set executionCount(value: number) {
     Private.executionCountProperty.set(this, value);
+    if (value !== void 0 && value !== null) {
+      this.input.prompt = `In[${value}]:`;
+    } else {
+      this.input.prompt = 'In[ ]:';
+    }
   }
 
   /**

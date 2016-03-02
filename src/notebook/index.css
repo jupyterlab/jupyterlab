@@ -3,4 +3,17 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+.jp-InputArea {
+  display: flex;
+  flex-direction: row;
+}
 
+
+.jp-InputArea-prompt {
+  flex: 0 0 auto;
+}
+
+
+.jp-InputArea-editor {
+  flex: 1 1 auto;
+}
