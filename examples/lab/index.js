@@ -16,7 +16,8 @@ var app = new phosphide.Application({
     require('jupyter-js-plugins/lib/imagehandler/plugin').imageHandlerExtension,
     require('jupyter-js-plugins/lib/help/plugin').helpHandlerExtension,
     require('jupyter-js-plugins/lib/notebook/plugin').notebookHandlerExtension,
-    require('jupyter-js-plugins/lib/shortcuts/plugin').shortcutsExtension
+    require('jupyter-js-plugins/lib/shortcuts/plugin').shortcutsExtension,
+    require('jupyter-js-plugins/lib/about/plugin').aboutExtension,
   ],
   providers: [
     require('jupyter-js-plugins/lib/documentmanager/plugin').documentManagerProvider,
