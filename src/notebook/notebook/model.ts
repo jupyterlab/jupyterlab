@@ -341,7 +341,7 @@ class NotebookModel implements INotebookModel {
   createCodeCell(source?: ICellModel): ICodeCellModel {
     let mimetype = this.defaultMimetype;
     if (source) {
-      mimetype = source.input.textEditor.mimetype || mimetype;
+      mimetype = source.input.textEditor.mimetype;
     }
     let cell = new CodeCellModel({ 
       mimetype: mimetype,
