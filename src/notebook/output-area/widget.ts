@@ -228,7 +228,7 @@ class OutputAreaWidget extends Widget {
       break;
     case ListChangeType.Replace:
       for (let i = layout.childCount(); i > 0; i--) {
-        widget = layout.childAt(i);
+        widget = layout.childAt(i - 1);
         layout.removeChild(widget);
         widget.dispose();
       }

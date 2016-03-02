@@ -427,7 +427,9 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     this.collapsed = data.metadata.collapsed;
     this.scrolled = data.metadata.scrolled;
     this.executionCount = data.execution_count;
-    this.output.add.apply(null, data.outputs);
+    for (let i = 0; i < data.outputs.length; i++) {
+      this.output.add(data.outputs[i]);
+    }
   }
 
   type: CellType = "code";

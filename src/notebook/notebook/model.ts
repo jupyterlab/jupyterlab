@@ -397,7 +397,7 @@ class NotebookModel implements INotebookModel {
       if (isMarkdownCell(c)) {
         cell = this.createMarkdownCell();
       } else if (isCodeCell(c)) {
-        let cell = this.createCodeCell();
+        cell = this.createCodeCell();
       } else if (isRawCell(c)) {
         cell = this.createRawCell();
       }
