@@ -503,7 +503,7 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
     this.format = data.metadata.format;
   }
 
-  type: CellType = "markdown";
+  type: CellType = "raw";
 }
 
 
