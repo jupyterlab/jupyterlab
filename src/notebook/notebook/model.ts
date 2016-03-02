@@ -339,27 +339,53 @@ class NotebookModel implements INotebookModel {
    * Create a code cell model.
    */
   createCodeCell(source?: ICellModel): ICodeCellModel {
-    return new CodeCellModel({ 
-      mimetype: this.defaultMimetype,
+    let mimetype = this.defaultMimetype;
+    if (source) {
+      mimetype = source.input.textEditor.mimetype || mimetype;
+    }
+    let cell = new CodeCellModel({ 
+      mimetype: mimetype,
       readOnly: this.readOnly
     });
+    if (source) {
+      cell.input.textEditor.text = source.input.textEditor.text;
+      cell.dirty = source.dirty;
+      cell.tags = source.tags;
+      cell.collapsed = (source as ICodeCellModel).collapsed || false;
+      cell.scrolled = (source as ICodeCellModel).scrolled || false;
+    }
+    return cell;
   }
 
   /**
    * Create a markdown cell model.
    */
   createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
-    return new MarkdownCellModel({ 
+    let cell = new MarkdownCellModel({ 
       mimetype: 'text/x-ipythongfm',
       readOnly: this.readOnly
     });
+    if (source) {
+      cell.input.textEditor.text = source.input.textEditor.text;
+      cell.dirty = source.dirty;
+      cell.tags = source.tags;
+      cell.rendered = (source as IMarkdownCellModel).rendered || false;
+    }
+    return cell;
   }
 
   /**
    * Create a raw cell model.
    */
   createRawCell(source?: ICellModel): IRawCellModel {
-    return new RawCellModel();
+    let cell = new RawCellModel();
+    if (source) {
+      cell.input.textEditor.text = source.input.textEditor.text;
+      cell.dirty = source.dirty;
+      cell.tags = source.tags;
+      cell.format = (source as IRawCellModel).format;
+    }
+    return cell;
   }
 
   /**
