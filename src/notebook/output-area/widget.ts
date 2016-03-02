@@ -212,20 +212,25 @@ class OutputAreaWidget extends Widget {
    */
   protected outputsChanged(sender: ObservableList<IOutput>, args: IListChangedArgs<IOutput>) {
     let layout = this.layout as PanelLayout;
+    let widget: Widget;
     switch(args.type) {
     case ListChangeType.Add:
       let value = args.newValue as IOutput;
       layout.insertChild(args.newIndex, this.createOutput(value));
       break;
     case ListChangeType.Move:
-      layout.insertChild(args.newIndex, layout.childAt(args.newIndex));
+      layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
       break;
     case ListChangeType.Remove:
-      layout.removeChild(layout.childAt(args.oldIndex));
+      widget = layout.childAt(args.oldIndex);
+      layout.removeChild(widget);
+      widget.dispose();
       break;
     case ListChangeType.Replace:
-      for (let i = 0; i < layout.childCount(); i++) {
-        layout.removeChild(layout.childAt(0));
+      for (let i = layout.childCount(); i > 0; i--) {
+        widget = layout.childAt(i);
+        layout.removeChild(widget);
+        widget.dispose();
       }
       let newValue = args.newValue as IOutput[];
       for (let i = newValue.length; i > 0; i--) {
@@ -233,8 +238,10 @@ class OutputAreaWidget extends Widget {
       }
       break;
     case ListChangeType.Set:
-      layout.removeChild(layout.childAt(args.oldIndex));
-      let widget = this.createOutput(args.newValue as IOutput);
+      widget = layout.childAt(args.newIndex);
+      layout.removeChild(widget);
+      widget.dispose();
+      widget = this.createOutput(args.newValue as IOutput);
       layout.insertChild(args.newIndex, widget);
       break;
     }
