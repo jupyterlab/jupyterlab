@@ -24,7 +24,7 @@ import {
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
   IRawCellModel, isCodeCellModel, isMarkdownCellModel,
-  RawCellModel
+  RawCellModel, isRawCellModel
 } from '../cells';
 
 import {
@@ -351,8 +351,10 @@ class NotebookModel implements INotebookModel {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
       cell.tags = source.tags;
-      cell.collapsed = (source as ICodeCellModel).collapsed || false;
-      cell.scrolled = (source as ICodeCellModel).scrolled || false;
+      if (isCodeCellModel(source)) {
+        cell.collapsed = source.collapsed;
+        cell.scrolled = source.scrolled;
+      }
     }
     return cell;
   }
@@ -369,7 +371,9 @@ class NotebookModel implements INotebookModel {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
       cell.tags = source.tags;
-      cell.rendered = (source as IMarkdownCellModel).rendered || false;
+      if (isMarkdownCellModel(source)) {
+        cell.rendered = source.rendered;
+      }
     }
     return cell;
   }
@@ -383,7 +387,9 @@ class NotebookModel implements INotebookModel {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
       cell.tags = source.tags;
-      cell.format = (source as IRawCellModel).format;
+      if (isRawCellModel(source)) {
+        cell.format = (source as IRawCellModel).format;
+      }
     }
     return cell;
   }
