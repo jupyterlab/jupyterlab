@@ -182,7 +182,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     this.addClass(MARKDOWN_CELL_CLASS);
     // Insist on the Github-flavored markdown mode.
     model.input.textEditor.mimetype = 'text/x-ipythongfm';
-    this.rendered = new Widget();
+    this._rendered = new Widget();
     this.update();
   }
 
@@ -235,7 +235,7 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   private _rendered: Widget;
-  private _dirty: boolean;
+  private _dirty = true;
 }
 
 
