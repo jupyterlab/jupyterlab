@@ -20,6 +20,18 @@ import {
 } from 'phosphor-widget';
 
 import {
+  EditorModel, IEditorModel, IEditorOptions
+} from '../editor';
+
+import {
+  InputAreaModel, IInputAreaModel
+} from '../input-area';
+
+import {
+  OutputAreaModel, IOutputAreaModel
+} from '../output-area';
+
+import {
   ICellModel,
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
@@ -155,16 +167,6 @@ interface INotebookModel {
    * Run the selected cell, taking the appropriate action.
    */
   runSelectedCell(): void;
-
-  /**
-   * Populate from a JSON notebook model.
-   */
-  fromJSON(data: INotebookContent): void;
-
-  /**
-   * Create a JSON notebook model.
-   */
-  toJSON(): INotebookContent;
 
   /**
    * The metadata associated with the notebook.
@@ -343,10 +345,13 @@ class NotebookModel implements INotebookModel {
     if (source) {
       mimetype = source.input.textEditor.mimetype;
     }
-    let cell = new CodeCellModel({ 
-      mimetype: mimetype,
+    let editor = this.createEditor({
+      mimetype,
       readOnly: this.readOnly
     });
+    let input = this.createInput(editor);
+    let output = this.createOutput();
+    let cell = new CodeCellModel(input, output);
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
@@ -363,10 +368,12 @@ class NotebookModel implements INotebookModel {
    * Create a markdown cell model.
    */
   createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
-    let cell = new MarkdownCellModel({ 
+    let editor = this.createEditor({ 
       mimetype: 'text/x-ipythongfm',
       readOnly: this.readOnly
     });
+    let input = this.createInput(editor);
+    let cell = new MarkdownCellModel(input);
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
@@ -382,7 +389,11 @@ class NotebookModel implements INotebookModel {
    * Create a raw cell model.
    */
   createRawCell(source?: ICellModel): IRawCellModel {
-    let cell = new RawCellModel();
+    let editor = this.createEditor({
+      readOnly: this.readOnly
+    });
+    let input = this.createInput(editor);
+    let cell = new RawCellModel(input);
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
@@ -418,46 +429,25 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Populate from a JSON notebook model.
+   * Create an editor.
+   *
    */
-  fromJSON(data: INotebookContent): void {
-    this.cells.clear();
-
-    // Iterate through the cell data, creating cell models.
-    data.cells.forEach((c) => {
-      let cell: ICellModel;
-      if (isMarkdownCell(c)) {
-        cell = this.createMarkdownCell();
-      } else if (isCodeCell(c)) {
-        cell = this.createCodeCell();
-      } else if (isRawCell(c)) {
-        cell = this.createRawCell();
-      }
-      cell.fromJSON(c);
-      this.cells.add(cell);
-    });
-    
-    if (this.cells.length) {
-      this.selectedCellIndex = 0;
-    }
-    this.metadata = data.metadata;
+  protected createEditor(options?: IEditorOptions): IEditorModel {
+    return new EditorModel(options);
   }
 
   /**
-   * Create a JSON notebook model.
+   * Create an input area.
    */
-  toJSON(): INotebookContent {
-    let cells: ICell[] = [];
-    for (let i = 0; i < this.cells.length; i++) {
-      let cell = this.cells.get(i);
-      cells.push(cell.toJSON());
-    }
-    return {
-      cells: cells,
-      metadata: this.metadata, 
-      nbformat: MAJOR_VERSION, 
-      nbformat_minor: MINOR_VERSION 
-    };
+  protected createInput(editor: IEditorModel) : IInputAreaModel {
+    return new InputAreaModel(editor);
+  }
+
+  /**
+   * Create an output area.
+   */
+  protected createOutput(): IOutputAreaModel {
+    return new OutputAreaModel();
   }
 
   /**
@@ -521,7 +511,6 @@ class NotebookModel implements INotebookModel {
  * A private namespace for notebook model data.
  */
 namespace NotebookModelPrivate {
-
   /**
    * A signal emitted when the state of the model changes.
    */

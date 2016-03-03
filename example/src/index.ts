@@ -6,7 +6,8 @@
 'use strict';
 
 import {
-  NotebookModel, NotebookWidget, INotebookContent
+  NotebookModel, NotebookWidget, INotebookContent,
+  serialize, deserialize
 } from 'jupyter-js-notebook';
 
 import {
@@ -31,7 +32,7 @@ import {
 
 import 'jupyter-js-notebook/lib/index.css';
 import 'jupyter-js-notebook/lib/theme.css';
-
+import ''
 
 let SERVER_URL = getBaseUrl();
 let NOTEBOOK = 'test.ipynb';
@@ -64,7 +65,7 @@ function main(): void {
   let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then(data => {
     let nbModel = new NotebookModel();
-    nbModel.fromJSON(data.content as INotebookContent);
+    deserialize(data.content, nbModel);
     let nbWidget = new NotebookWidget(nbModel);
     nbWidget.title.text = NOTEBOOK;
 
@@ -82,7 +83,7 @@ function main(): void {
       baseUrl: SERVER_URL
     }).then(session => {
       nbModel.session = session;
-      let content = nbModel.toJSON();
+      let content = serialize(nbModel);
       contents.save(NOTEBOOK, {
         type: 'notebook',
         content

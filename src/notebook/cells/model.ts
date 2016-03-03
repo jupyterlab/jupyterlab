@@ -19,7 +19,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IInputAreaModel, IInputAreaOptions, InputAreaModel
+  IInputAreaModel
 } from '../input-area';
 
 import {
@@ -27,33 +27,15 @@ import {
 } from '../notebook/nbformat';
 
 import {
-  IOutputAreaModel, OutputAreaModel
+  IOutputAreaModel
 } from '../output-area';
-
-
-/**
- * An object which is serializable.
- */
-export
-interface ISerializable {
-  toJSON(): any;
-  fromJSON(data: any): void;
-}
-
-
-/**
- * The options for creating a cell.
- */
-export
-interface ICellOptions extends IInputAreaOptions {
-}
 
 
 /**
  * The definition of a model object for a base cell.
  */
 export
-interface IBaseCellModel extends ISerializable {
+interface IBaseCellModel {
   /**
    * The type of cell.
    */
@@ -101,16 +83,6 @@ interface IBaseCellModel extends ISerializable {
    * Whether the cell is marked for applying commands.
    */
   marked: boolean;
-
-  /**
-   * Serialize the cell model.
-   */
-  toJSON(): ICell;
-
-  /**
-   * Populate from a JSON cell model.
-   */
-  fromJSON(data: ICell): void;
 }
 
 
@@ -183,9 +155,8 @@ class BaseCellModel implements IBaseCellModel {
   /**
    * Construct a new base cell model.
    */
-  constructor(options?: ICellOptions) {
-    let input = new InputAreaModel(options);
-    Private.inputProperty.set(this, input);
+  constructor(input: IInputAreaModel) {
+    this._input = input;
     input.stateChanged.connect(this._inputChanged, this);
   }
 
@@ -228,7 +199,7 @@ class BaseCellModel implements IBaseCellModel {
    * Get the input area model.
    */
   get input(): IInputAreaModel {
-    return Private.inputProperty.get(this);
+    return this._input;
   }
 
   /**
@@ -300,33 +271,6 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * Serialize the cell model.
-   */
-  toJSON(): ICell {
-    return {
-      source: this.input.textEditor.text,
-      cell_type: this.type,
-      metadata: {
-        tags: this.tags,
-        name: this.name
-      }
-    }
-  }
-
-  /**
-   * Populate from a JSON cell model.
-   */
-  fromJSON(data: ICell): void {
-    let source = data.source as string;
-    if (Array.isArray(data.source)) {
-      source = (data.source as string[]).join('\n');
-    }
-    this.input.textEditor.text = source;
-    this.tags = data.metadata.tags;
-    this.name = data.metadata.name;
-  }
-
-  /**
    * The type of cell.
    */
   type: CellType;
@@ -339,6 +283,8 @@ class BaseCellModel implements IBaseCellModel {
       this.stateChanged.emit(args);
     }
   }
+
+  private _input: IInputAreaModel = null;
 }
 
 
@@ -350,9 +296,9 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   /**
    * Construct a new code cell model.
    */
-  constructor(options?: ICellOptions) {
-    super(options);
-    Private.outputProperty.set(this, new OutputAreaModel());
+  constructor(input: IInputAreaModel, output: IOutputAreaModel) {
+    super(input);
+    this._output = output;
     this.input.prompt = 'In[ ]:';
   }
 
@@ -360,7 +306,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    * Get the output area model.
    */
   get output(): IOutputAreaModel {
-    return Private.outputProperty.get(this);
+    return this._output;
   }
 
   /**
@@ -410,35 +356,9 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     Private.scrolledProperty.set(this, value);
   }
 
-  /**
-   * Serialize the cell model.
-   */
-  toJSON(): ICodeCell {
-    let value = super.toJSON() as ICodeCell;
-    value.metadata.scrolled = this.scrolled;
-    value.metadata.collapsed = this.collapsed;
-    value.outputs = [];
-    for (let i = 0; i < this.output.outputs.length; i++) {
-      value.outputs.push(this.output.outputs.get(i));
-    }
-    value.execution_count = this.executionCount;
-    return value;
-  }
-
-  /**
-   * Populate from a JSON cell model.
-   */
-  fromJSON(data: ICodeCell): void {
-    super.fromJSON(data);
-    this.collapsed = data.metadata.collapsed;
-    this.scrolled = data.metadata.scrolled;
-    this.executionCount = data.execution_count;
-    for (let i = 0; i < data.outputs.length; i++) {
-      this.output.add(data.outputs[i]);
-    }
-  }
-
   type: CellType = "code";
+
+  private _output: IOutputAreaModel = null;
 }
 
 
@@ -459,14 +379,6 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
    */
   set rendered(value: boolean) {
     Private.renderedProperty.set(this, value);
-  }
-
-  /**
-   * Populate from a JSON cell model.
-   */
-  fromJSON(data: IMarkdownCell): void {
-    super.fromJSON(data);
-    this.rendered = true;
   }
 
   type: CellType = "markdown";
@@ -490,23 +402,6 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
    */
   set format(value: string) {
     Private.formatProperty.set(this, value);
-  }
-
-  /**
-   * Serialize the cell model.
-   */
-  toJSON(): IRawCell {
-    let value = super.toJSON() as IRawCell;
-    value.metadata.format = this.format;
-    return value;
-  }
-
-  /**
-   * Populate from a JSON cell model.
-   */
-  fromJSON(data: IRawCell): void {
-    super.fromJSON(data);
-    this.format = data.metadata.format;
   }
 
   type: CellType = "raw";
@@ -542,7 +437,6 @@ function isRawCellModel(m: ICellModel): m is IRawCellModel {
  * A namespace for cell private data.
  */
 namespace Private {
-
   /**
    * A signal emitted when the state of the model changes.
    */
@@ -564,15 +458,6 @@ namespace Private {
   export
   const markedProperty = new Property<IBaseCellModel, boolean>({
     name: 'marked',
-    notify: stateChangedSignal,
-  });
-
-  /**
-   * A property descriptor for the input area model.
-   */
-  export
-  const inputProperty = new Property<IBaseCellModel, IInputAreaModel>({
-    name: 'input',
     notify: stateChangedSignal,
   });
 
@@ -611,6 +496,7 @@ namespace Private {
   export
   const renderedProperty = new Property<IMarkdownCellModel, boolean>({
     name: 'rendered',
+    value: true,
     notify: stateChangedSignal,
   });
 
@@ -621,15 +507,6 @@ namespace Private {
   const executionCountProperty = new Property<ICodeCellModel, number>({
     name: 'executionCount',
     value: null,
-    notify: stateChangedSignal,
-  });
-
- /**
-  * A property descriptor holding the outputs of a code cell.
-  */
-  export
-  const outputProperty = new Property<ICodeCellModel, IOutputAreaModel>({
-    name: 'output',
     notify: stateChangedSignal,
   });
 

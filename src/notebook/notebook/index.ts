@@ -3,5 +3,6 @@
 'use strict';
 
 export * from './model';
-export * from './widget';
 export * from './nbformat';
+export * from './serialize';
+export * from './widget';

@@ -11,7 +11,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  IEditorModel, IEditorOptions, EditorModel
+  IEditorModel
 } from '../editor';
 
 
@@ -53,13 +53,6 @@ interface IInputAreaModel {
 
 
 /**
- * The options for creating an input area.
- */
-export
-interface IInputAreaOptions extends IEditorOptions { }
-
-
-/**
  * An implementation of an input area model.
  */
 export
@@ -67,9 +60,9 @@ class InputAreaModel implements IInputAreaModel {
   /**
    * Construct a new input area model.
    */
-  constructor(options?: IInputAreaOptions) {
-    this._editor = new EditorModel(options);
-    this._editor.stateChanged.connect(this.onEditorChanged, this);
+  constructor(editor: IEditorModel) {
+    this._editor = editor;
+    editor.stateChanged.connect(this.onEditorChanged, this);
   }
 
   /**
@@ -113,7 +106,7 @@ class InputAreaModel implements IInputAreaModel {
    * #### Notes
    * This is a read-only property.
    */
-  get textEditor(): EditorModel {
+  get textEditor(): IEditorModel {
     return this._editor;
   }
 
@@ -154,14 +147,14 @@ class InputAreaModel implements IInputAreaModel {
   /**
    * Handle changes to the editor state.
    */
-  protected onEditorChanged(editor: EditorModel, args: IChangedArgs<any>): void {
+  protected onEditorChanged(editor: IEditorModel, args: IChangedArgs<any>): void {
     if (args.name === 'dirty') {
       // Re-emit dirty state changes from the editor.
       this.stateChanged.emit(args);
     }
   }
 
-  private _editor: EditorModel = null;
+  private _editor: IEditorModel = null;
 }
 
 
