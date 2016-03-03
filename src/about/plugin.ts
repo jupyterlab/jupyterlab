@@ -25,15 +25,15 @@ const aboutExtension = {
     widget.node.innerHTML = `
 <h1>Welcome to the JupyterLab alpha preview</h1>
 
-<p>This is an alpha-level preview of the JupyterLab environment.  Here is a brief description of some of the things you'll find in this demo.</p>
+<p>This demo gives an alpha-level preview of the JupyterLab environment.  Here is a brief description of some of the things you'll find in this demo.</p>
 
 <h2>File Browser</h2>
 
-<p>The file browser is toggled by clicking on the "Files" tab on the left. Navigate into directories by double-clicking, and use the breadcrumbs at the top to navigate out. Create a new file/directory by clicking the plus icon at the top. Click the middle icon to upload files,and click the last icon to reload the file listing. Drag and drop files to move them to subdirectories. Click on a selected file to rename it. Sort the list by clicking on a column header. Open a file by double-clicking it or dragging it into the main area. Opening an image displays the image. Opening a code file opens a code editor. Opening a notebook opens a very preliminary proof-of-concept <strong>non-executable</strong> view of the notebook.</p>
+<p>Clicking the "Files" tab, located on the left, will toggle the file browser. Navigate into directories by double-clicking, and use the breadcrumbs at the top to navigate out. Create a new file/directory by clicking the plus icon at the top. Click the middle icon to upload files,and click the last icon to reload the file listing. Drag and drop files to move them to subdirectories. Click on a selected file to rename it. Sort the list by clicking on a column header. Open a file by double-clicking it or dragging it into the main area. Opening an image displays the image. Opening a code file opens a code editor. Opening a notebook opens a very preliminary proof-of-concept <strong>non-executable</strong> view of the notebook.</p>
 
 <h2>Command Palette</h2>
 
-<p>The command palette is toggled by clicking on the "Commands" tab on the left. Execute a command by clicking, or navigating with your arrow keys and pressing Enter. Filter commands by typing in the text box at the top of the palette. The palette is organized into categories, and you can filter on a single category by clicking on the category header or by typing the header surrounded by colons in the search input (e.g., <code>:file:</code>).</p>
+<p>Clicking the "Commands" tab, located on the left, will toggle the command palette. Execute a command by clicking, or navigating with your arrow keys and pressing Enter. Filter commands by typing in the text box at the top of the palette. The palette is organized into categories, and you can filter on a single category by clicking on the category header or by typing the header surrounded by colons in the search input (e.g., <code>:file:</code>).</p>
 
 <p>You can try these things out from the command palette:</p>
 
@@ -50,7 +50,7 @@ const aboutExtension = {
 
 <h2>Notebook</h2>
 
-<p>Opening a notebook will open a very preliminary proof-of-concept notebook view. <strong>You will not be able to execute cells yet.</strong> We are currently working on bringing the notebook up to speed.</p>
+<p>Opening a notebook will open a preliminary proof-of-concept notebook view. <strong>Currently, the cells are static and not executable.</strong>  Future JupyterLab demos will add dynamic cells and code execution.</p>
 `;
     app.shell.addToMainArea(widget);
   }
