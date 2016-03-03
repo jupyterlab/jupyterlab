@@ -8,6 +8,7 @@
 @import url('~jupyter-js-ui/lib/theme.css');
 @import './commandpalette.css';
 @import './help.css';
+@import './about.css';
 
 body {
   margin: 0;
