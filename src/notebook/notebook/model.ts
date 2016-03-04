@@ -20,6 +20,18 @@ import {
 } from 'phosphor-widget';
 
 import {
+  EditorModel, IEditorModel, IEditorOptions
+} from '../editor';
+
+import {
+  InputAreaModel, IInputAreaModel
+} from '../input-area';
+
+import {
+  OutputAreaModel, IOutputAreaModel
+} from '../output-area';
+
+import {
   ICellModel,
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
@@ -101,21 +113,8 @@ interface INotebookModel {
 
   /**
    * The currently selected cell.
-   *
-   * #### Notes
-   * Changing this property will deselect the previous cell.
    */
   selectedCellIndex: number;
-
-  /**
-   * Select the next cell in the notebook.
-   */
-  selectNextCell(): void;
-
-  /**
-   * Select the previous cell in the notebook.
-   */
-  selectPreviousCell(): void;
 
   /**
    * A factory for creating a new code cell.
@@ -157,16 +156,6 @@ interface INotebookModel {
   runSelectedCell(): void;
 
   /**
-   * Populate from a JSON notebook model.
-   */
-  fromJSON(data: INotebookContent): void;
-
-  /**
-   * Create a JSON notebook model.
-   */
-  toJSON(): INotebookContent;
-
-  /**
    * The metadata associated with the notebook.
    */
   metadata: INotebookMetadata;
@@ -178,6 +167,26 @@ interface INotebookModel {
  */
 export
 class NotebookModel implements INotebookModel {
+  /**
+   * Create an editor model.
+   */
+  static createEditor(options?: IEditorOptions): IEditorModel {
+    return new EditorModel(options);
+  }
+
+  /**
+   * Create an input area model.
+   */
+  static createInput(editor: IEditorModel) : IInputAreaModel {
+    return new InputAreaModel(editor);
+  }
+
+  /**
+   * Create an output area model.
+   */
+  static createOutputArea(): IOutputAreaModel {
+    return new OutputAreaModel();
+  }
 
   /**
    * Construct a new notebook model.
@@ -318,24 +327,6 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Select the next cell in the notebook.
-   */
-  selectNextCell() {
-    if (this.selectedCellIndex < this.cells.length - 1) {
-      this.selectedCellIndex += 1;
-    }
-  }
-
-  /**
-   * Select the previous cell in the notebook.
-   */
-  selectPreviousCell() {
-    if (this.selectedCellIndex > 0) {
-      this.selectedCellIndex -= 1;
-    }
-  }
-
-  /**
    * Create a code cell model.
    */
   createCodeCell(source?: ICellModel): ICodeCellModel {
@@ -343,10 +334,14 @@ class NotebookModel implements INotebookModel {
     if (source) {
       mimetype = source.input.textEditor.mimetype;
     }
-    let cell = new CodeCellModel({ 
-      mimetype: mimetype,
+    let constructor = this.constructor as typeof NotebookModel;
+    let editor = constructor.createEditor({
+      mimetype,
       readOnly: this.readOnly
     });
+    let input = constructor.createInput(editor);
+    let output = constructor.createOutputArea();
+    let cell = new CodeCellModel(input, output);
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
@@ -363,10 +358,13 @@ class NotebookModel implements INotebookModel {
    * Create a markdown cell model.
    */
   createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
-    let cell = new MarkdownCellModel({ 
+    let constructor = this.constructor as typeof NotebookModel;
+    let editor = constructor.createEditor({ 
       mimetype: 'text/x-ipythongfm',
       readOnly: this.readOnly
     });
+    let input = constructor.createInput(editor);
+    let cell = new MarkdownCellModel(input);
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
@@ -382,7 +380,12 @@ class NotebookModel implements INotebookModel {
    * Create a raw cell model.
    */
   createRawCell(source?: ICellModel): IRawCellModel {
-    let cell = new RawCellModel();
+    let constructor = this.constructor as typeof NotebookModel;
+    let editor = constructor.createEditor({
+      readOnly: this.readOnly
+    });
+    let input = constructor.createInput(editor);
+    let cell = new RawCellModel(input);
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
@@ -414,50 +417,7 @@ class NotebookModel implements INotebookModel {
       let cell = this.createCodeCell();
       this.cells.add(cell);
     }
-    this.selectNextCell();
-  }
-
-  /**
-   * Populate from a JSON notebook model.
-   */
-  fromJSON(data: INotebookContent): void {
-    this.cells.clear();
-
-    // Iterate through the cell data, creating cell models.
-    data.cells.forEach((c) => {
-      let cell: ICellModel;
-      if (isMarkdownCell(c)) {
-        cell = this.createMarkdownCell();
-      } else if (isCodeCell(c)) {
-        cell = this.createCodeCell();
-      } else if (isRawCell(c)) {
-        cell = this.createRawCell();
-      }
-      cell.fromJSON(c);
-      this.cells.add(cell);
-    });
-    
-    if (this.cells.length) {
-      this.selectedCellIndex = 0;
-    }
-    this.metadata = data.metadata;
-  }
-
-  /**
-   * Create a JSON notebook model.
-   */
-  toJSON(): INotebookContent {
-    let cells: ICell[] = [];
-    for (let i = 0; i < this.cells.length; i++) {
-      let cell = this.cells.get(i);
-      cells.push(cell.toJSON());
-    }
-    return {
-      cells: cells,
-      metadata: this.metadata, 
-      nbformat: MAJOR_VERSION, 
-      nbformat_minor: MINOR_VERSION 
-    };
+    this.selectedCellIndex += 1;
   }
 
   /**
@@ -521,7 +481,6 @@ class NotebookModel implements INotebookModel {
  * A private namespace for notebook model data.
  */
 namespace NotebookModelPrivate {
-
   /**
    * A signal emitted when the state of the model changes.
    */
