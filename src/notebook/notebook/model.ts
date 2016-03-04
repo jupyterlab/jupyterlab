@@ -180,6 +180,26 @@ interface INotebookModel {
  */
 export
 class NotebookModel implements INotebookModel {
+  /**
+   * Create an editor model.
+   */
+  static createEditor(options?: IEditorOptions): IEditorModel {
+    return new EditorModel(options);
+  }
+
+  /**
+   * Create an input area model.
+   */
+  static createInput(editor: IEditorModel) : IInputAreaModel {
+    return new InputAreaModel(editor);
+  }
+
+  /**
+   * Create an output area model.
+   */
+  static createOutput(): IOutputAreaModel {
+    return new OutputAreaModel();
+  }
 
   /**
    * Construct a new notebook model.
@@ -345,12 +365,13 @@ class NotebookModel implements INotebookModel {
     if (source) {
       mimetype = source.input.textEditor.mimetype;
     }
-    let editor = this.createEditor({
+    let constructor = this.constructor as typeof NotebookModel;
+    let editor = constructor.createEditor({
       mimetype,
       readOnly: this.readOnly
     });
-    let input = this.createInput(editor);
-    let output = this.createOutput();
+    let input = constructor.createInput(editor);
+    let output = constructor.createOutput();
     let cell = new CodeCellModel(input, output);
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
@@ -368,11 +389,12 @@ class NotebookModel implements INotebookModel {
    * Create a markdown cell model.
    */
   createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
-    let editor = this.createEditor({ 
+    let constructor = this.constructor as typeof NotebookModel;
+    let editor = constructor.createEditor({ 
       mimetype: 'text/x-ipythongfm',
       readOnly: this.readOnly
     });
-    let input = this.createInput(editor);
+    let input = constructor.createInput(editor);
     let cell = new MarkdownCellModel(input);
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
@@ -389,10 +411,11 @@ class NotebookModel implements INotebookModel {
    * Create a raw cell model.
    */
   createRawCell(source?: ICellModel): IRawCellModel {
-    let editor = this.createEditor({
+    let constructor = this.constructor as typeof NotebookModel;
+    let editor = constructor.createEditor({
       readOnly: this.readOnly
     });
-    let input = this.createInput(editor);
+    let input = constructor.createInput(editor);
     let cell = new RawCellModel(input);
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
@@ -426,28 +449,6 @@ class NotebookModel implements INotebookModel {
       this.cells.add(cell);
     }
     this.selectNextCell();
-  }
-
-  /**
-   * Create an editor.
-   *
-   */
-  protected createEditor(options?: IEditorOptions): IEditorModel {
-    return new EditorModel(options);
-  }
-
-  /**
-   * Create an input area.
-   */
-  protected createInput(editor: IEditorModel) : IInputAreaModel {
-    return new InputAreaModel(editor);
-  }
-
-  /**
-   * Create an output area.
-   */
-  protected createOutput(): IOutputAreaModel {
-    return new OutputAreaModel();
   }
 
   /**

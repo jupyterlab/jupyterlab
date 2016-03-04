@@ -32,7 +32,7 @@ import {
 
 import 'jupyter-js-notebook/lib/index.css';
 import 'jupyter-js-notebook/lib/theme.css';
-import ''
+
 
 let SERVER_URL = getBaseUrl();
 let NOTEBOOK = 'test.ipynb';
