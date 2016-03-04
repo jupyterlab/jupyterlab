@@ -18,10 +18,6 @@ import {
 } from 'phosphor-properties';
 
 import {
-  StackedLayout
-} from 'phosphor-stackedpanel';
-
-import {
   Widget
 } from 'phosphor-widget';
 
@@ -82,6 +78,11 @@ const RENDERED_CLASS = 'jp-mod-rendered';
  */
 const FOCUSED_CLASS = 'jp-mod-focused';
 
+/**
+ * The text applied to an empty markdown cell.
+ */
+const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $'
+
 
 /**
  * A base cell widget.
@@ -98,6 +99,8 @@ class BaseCellWidget extends Widget {
     this.node.tabIndex = -1;
     this._model = model;
     this._input = new InputAreaWidget(model.input);
+    this.layout = new PanelLayout();
+    (this.layout as PanelLayout).addChild(this._input);
     model.stateChanged.connect(this.onModelChanged, this);
   }
 
@@ -167,9 +170,7 @@ class CodeCellWidget extends BaseCellWidget {
     super(model);
     this.addClass(CODE_CELL_CLASS);
     this._output = new OutputAreaWidget(model.output);
-    this.layout = new PanelLayout();
-    (this.layout as PanelLayout).addChild(this.input);
-    (this.layout as PanelLayout).addChild(this.output);
+    (this.layout as PanelLayout).addChild(this._output);
   }
 
   /**
@@ -206,9 +207,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     // Insist on the Github-flavored markdown mode.
     model.input.textEditor.mimetype = 'text/x-ipythongfm';
     this._rendered = new Widget();
-    this.layout = new StackedLayout();
-    (this.layout as StackedLayout).addChild(this.input);
-    (this.layout as StackedLayout).addChild(this._rendered);
+    (this.layout as PanelLayout).addChild(this._rendered);
     this.update();
   }
 
@@ -229,15 +228,18 @@ class MarkdownCellWidget extends BaseCellWidget {
     let model = this.model as IMarkdownCellModel;
     if (model.rendered) {
       if (this._dirty) {
-        let data = removeMath(model.input.textEditor.text);
+        let text = model.input.textEditor.text || DEFAULT_MARKDOWN_TEXT;
+        let data = removeMath(text);
         let html = marked(data['text']);
         this.rendered.node.innerHTML = replaceMath(html, data['math']);
         typeset(this.rendered.node);
       }
-      (this.layout as StackedLayout).insertChild(1, this._rendered);
+      this._rendered.show();
+      this.input.hide();
       this.addClass(RENDERED_CLASS);
     } else {
-      (this.layout as StackedLayout).insertChild(1, this.input);
+      this._rendered.hide();
+      this.input.show();
       this.removeClass(RENDERED_CLASS);
     }
     this._dirty = false;
@@ -273,7 +275,5 @@ class RawCellWidget extends BaseCellWidget {
   constructor(model: IRawCellModel) {
     super(model);
     this.addClass(RAW_CELL_CLASS);
-    this.layout = new PanelLayout();
-    (this.layout as PanelLayout).addChild(this.input);
   }
 }

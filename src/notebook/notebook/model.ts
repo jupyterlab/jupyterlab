@@ -424,6 +424,7 @@ class NotebookModel implements INotebookModel {
     if (this.selectedCellIndex === this.cells.length - 1) {
       let cell = this.createCodeCell();
       this.cells.add(cell);
+      cell.focused = true;
     }
     this.selectedCellIndex += 1;
   }
@@ -478,6 +479,16 @@ class NotebookModel implements INotebookModel {
   private _onCellStateChanged(cell: ICellModel, change: IChangedArgs<ICellModel>): void {
     if (change.name === 'dirty' && change.newValue) {
       this.dirty = true;
+    }
+    if (change.name === 'focused') {
+      if (change.newValue) {
+        let cells = this.cells;
+        for (let i = 0; i < cells.length; i++) {
+          if (cells.get(i) === cell) {
+            this.selectedCellIndex = i;
+          }
+        }
+      }
     }
   }
 

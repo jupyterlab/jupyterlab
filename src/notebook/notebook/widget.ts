@@ -131,7 +131,9 @@ class NotebookWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     if (this.model.mode === 'command') {
       this.addClass(COMMAND_CLASS);
-      this.node.focus();
+      let layout = this.layout as PanelLayout;
+      let cell = layout.childAt(this.model.selectedCellIndex);
+      cell.node.focus();
     } else {
       this.removeClass(COMMAND_CLASS);
     }

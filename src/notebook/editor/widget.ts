@@ -141,9 +141,15 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     this.updateLineNumbers(model.lineNumbers);
     this.updateFixedHeight(model.fixedHeight);
     this.updateText(model.text);
-    CodeMirror.on(this._editor.getDoc() , 'change', (instance, change) => {
+    CodeMirror.on(this._editor.getDoc(), 'change', (instance, change) => {
       this._model.text = instance.getValue();
       this._model.dirty = true;
+    });
+    this._editor.on('focus', () => {
+      this._model.focused = true;
+    });
+    this._editor.on('blur', () => {
+      this._model.focused = false;
     });
     model.stateChanged.connect(this.onModelStateChanged, this);
   }
