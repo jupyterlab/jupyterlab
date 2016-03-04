@@ -320,7 +320,7 @@ class BaseCellModel implements IBaseCellModel {
    */
   private onEditorChanged(editor: IEditorModel, args: IChangedArgs<any>): void {
     // Re-emit changes to the focused state of the editor.
-    if (args.name == 'focused') {
+    if (args.name === 'focused') {
       this.stateChanged.emit(args);
     }
   }

@@ -424,9 +424,10 @@ class NotebookModel implements INotebookModel {
     if (this.selectedCellIndex === this.cells.length - 1) {
       let cell = this.createCodeCell();
       this.cells.add(cell);
-      cell.focused = true;
+      cell.focused = true;  // This already sets the new index.
+    } else {
+      this.selectedCellIndex += 1;
     }
-    this.selectedCellIndex += 1;
   }
 
   /**
