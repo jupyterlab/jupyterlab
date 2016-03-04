@@ -56,11 +56,6 @@ interface IEditorModel {
   stateChanged: ISignal<IEditorModel, IChangedArgs<any>>;
 
   /**
-   * A signal emitted when the editor model is selected.
-   */
-  selected: ISignal<IEditorModel, void>;
-
-  /**
    * The text in the text editor.
    */
   text: string;
@@ -106,11 +101,6 @@ interface IEditorModel {
    * Whether the contents of the editor are dirty.
    */
   dirty: boolean;
-
-  /**
-   * Select the editor model.
-   */
-  select(): void;
 }
 
 
@@ -123,6 +113,11 @@ interface IEditorWidget extends Widget {
    * The model for the editor widget.
    */
   model: IEditorModel;
+
+  /**
+   * Give focus to the editor.
+   */
+  focus(): void; 
 }
 
 
@@ -130,7 +125,7 @@ interface IEditorWidget extends Widget {
  * A widget which hosts a CodeMirror editor.
  */
 export
-class CodeMirrorWidget extends Widget {
+class CodeMirrorWidget extends Widget implements IEditorWidget {
 
   /**
    * Construct a CodeMirror widget.
@@ -139,45 +134,36 @@ class CodeMirrorWidget extends Widget {
     super();
     this.addClass(CODEMIRROR_CLASS);
     this._editor = CodeMirror(this.node);
-    this.model = model;
+    this._model = model;
+    this.updateMimetype(model.mimetype);
+    this.updateFilename(model.filename);
+    this.updateReadOnly(model.readOnly);
+    this.updateTabSize(model.tabSize);
+    this.updateLineNumbers(model.lineNumbers);
+    this.updateFixedHeight(model.fixedHeight);
+    this.updateText(model.text);
+    CodeMirror.on(this._editor.getDoc() , 'change', (instance, change) => {
+      this._model.text = instance.getValue();
+      this._model.dirty = true;
+    });
+    model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /**
    * Get the editor model.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   get model(): IEditorModel {
     return this._model;
   }
 
   /**
-   * Set the editor model.
-   *
-   * #### Notes
-   * This is a no-op if the value is `null` or the existing model.
+   * Give focus to the editor.
    */
-  set model(value: IEditorModel) {
-    if (value === null || value === this._model) {
-      return;
-    }
-    if (this._model !== null) {
-      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
-      this._model.selected.connect(() => {
-          if (!this.model.readOnly) this._editor.focus();
-      });
-    }
-    this._model = value;
-    this.updateMimetype(value.mimetype);
-    this.updateFilename(value.filename);
-    this.updateReadOnly(value.readOnly);
-    this.updateTabSize(value.tabSize);
-    this.updateLineNumbers(value.lineNumbers);
-    this.updateFixedHeight(value.fixedHeight);
-    this.updateText(value.text);
-    CodeMirror.on(this._editor.getDoc() , 'change', (instance, change) => {
-      this._model.text = instance.getValue();
-      this._model.dirty = true;
-    });
-    value.stateChanged.connect(this.onModelStateChanged, this);
+  focus(): void {
+    this._editor.focus();
   }
 
   /**

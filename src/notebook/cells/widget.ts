@@ -18,6 +18,10 @@ import {
 } from 'phosphor-properties';
 
 import {
+  StackedLayout
+} from 'phosphor-stackedpanel';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -73,6 +77,11 @@ const RAW_CELL_CLASS = 'jp-RawCell';
  */
 const RENDERED_CLASS = 'jp-mod-rendered';
 
+/**
+ * The class name added to a fucused cell.
+ */
+const FOCUSED_CLASS = 'jp-mod-focused';
+
 
 /**
  * A base cell widget.
@@ -87,11 +96,9 @@ class BaseCellWidget extends Widget {
     this.addClass(CELL_CLASS);
     // Make the cell focusable by setting the tabIndex.
     this.node.tabIndex = -1;
-    this.layout = new PanelLayout();
     this._model = model;
     this._input = new InputAreaWidget(model.input);
-    (this.layout as PanelLayout).addChild(this.input);
-    model.stateChanged.connect(this.modelStateChanged, this);
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -129,13 +136,21 @@ class BaseCellWidget extends Widget {
     } else {
       this.removeClass(MARKED_CLASS);
     }
+    if (this.model.focused) {
+      this.addClass(FOCUSED_CLASS);
+    } else {
+      this.removeClass(FOCUSED_CLASS);
+    }
   }
 
   /**
    * Handle changes to the model state.
    */
-  protected modelStateChanged(sender: ICellModel, args: IChangedArgs<any>) {
+  protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
     this.update();
+    if (args.name == 'focused' && args.newValue) {
+      this.input.editor.focus();
+    }
   }
 
   private _input: InputAreaWidget;
@@ -155,6 +170,8 @@ class CodeCellWidget extends BaseCellWidget {
     super(model);
     this.addClass(CODE_CELL_CLASS);
     this._output = new OutputAreaWidget(model.output);
+    this.layout = new PanelLayout();
+    (this.layout as PanelLayout).addChild(this.input);
     (this.layout as PanelLayout).addChild(this.output);
   }
 
@@ -192,6 +209,9 @@ class MarkdownCellWidget extends BaseCellWidget {
     // Insist on the Github-flavored markdown mode.
     model.input.textEditor.mimetype = 'text/x-ipythongfm';
     this._rendered = new Widget();
+    this.layout = new StackedLayout();
+    (this.layout as StackedLayout).addChild(this.input);
+    (this.layout as StackedLayout).addChild(this._rendered);
     this.update();
   }
 
@@ -209,41 +229,33 @@ class MarkdownCellWidget extends BaseCellWidget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(message: Message): void {
-    super.onUpdateRequest(message);
-    if (!this._dirty) {
-      return;
-    }
     let model = this.model as IMarkdownCellModel;
     if (model.rendered) {
-      let data = removeMath(model.input.textEditor.text);
-      let html = marked(data['text']);
-      this.rendered.node.innerHTML = replaceMath(html, data['math']);
-      typeset(this.rendered.node);
-      this.input.parent = null;
-      (this.layout as PanelLayout).addChild(this.rendered);
+      if (this._dirty) {
+        let data = removeMath(model.input.textEditor.text);
+        let html = marked(data['text']);
+        this.rendered.node.innerHTML = replaceMath(html, data['math']);
+        typeset(this.rendered.node);
+      }
+      (this.layout as StackedLayout).insertChild(1, this._rendered);
       this.addClass(RENDERED_CLASS);
     } else {
-      this.rendered.parent = null;
-      (this.layout as PanelLayout).addChild(this.input);
+      (this.layout as StackedLayout).insertChild(1, this.input);
       this.removeClass(RENDERED_CLASS);
     }
     this._dirty = false;
+    super.onUpdateRequest(message);
   }
 
   /**
    * Change handler for model updates.
    */
-  protected modelStateChanged(sender: ICellModel, args: IChangedArgs<any>) {
-    super.modelStateChanged(sender, args);
+  protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
+    super.onModelChanged(sender, args);
     switch(args.name) {
     case 'rendered':
       this._dirty = true;
       this.update();
-      break;
-    case 'selected':
-      if (args.newValue && (this.model as IMarkdownCellModel).rendered) {
-        this.node.focus();
-      }
       break;
     }
   }
@@ -264,5 +276,7 @@ class RawCellWidget extends BaseCellWidget {
   constructor(model: IRawCellModel) {
     super(model);
     this.addClass(RAW_CELL_CLASS);
+    this.layout = new PanelLayout();
+    (this.layout as PanelLayout).addChild(this.input);
   }
 }

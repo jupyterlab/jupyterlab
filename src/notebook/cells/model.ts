@@ -62,6 +62,11 @@ interface IBaseCellModel {
   selected: boolean;
 
   /**
+   * Whether the cell is focused for editing.
+   */
+  focused: boolean;
+
+  /**
    * The input area of the cell.
    *
    * #### Notes
@@ -179,6 +184,20 @@ class BaseCellModel implements IBaseCellModel {
    */
   set selected(value: boolean) {
     Private.selectedProperty.set(this, value);
+  }
+
+  /**
+   * Get whether the cell is focused for editing.
+   */
+  get focused(): boolean {
+    return Private.focusedProperty.get(this);
+  }
+
+  /**
+   * Get whether the cell is focused for editing.
+   */
+  set focused(value: boolean) {
+    Private.focusedProperty.set(this, value);
   }
 
   /**
@@ -449,6 +468,15 @@ namespace Private {
   export
   const selectedProperty = new Property<IBaseCellModel, boolean>({
     name: 'selected',
+    notify: stateChangedSignal,
+  });
+
+  /**
+   * A property descriptor for the focused state of the cell.
+   */
+  export
+  const focusedProperty = new Property<IBaseCellModel, boolean>({
+    name: 'focused',
     notify: stateChangedSignal,
   });
 

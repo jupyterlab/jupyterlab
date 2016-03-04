@@ -54,7 +54,7 @@ import {
  * The interactivity modes for a notebook.
  */
 export
-type NotebookMode = "command" | "edit";
+type NotebookMode = 'command' | 'edit';
 
 
 /**
@@ -300,7 +300,13 @@ class NotebookModel implements INotebookModel {
     NotebookModelPrivate.selectedCellIndexProperty.set(this, value);
     let cells = this.cells;
     for (let i = 0; i < cells.length; i++) {
-      cells.get(i).selected = value === i;
+      let cell = cells.get(i);
+      cell.selected = value === i;
+      if (value === i) {
+        if (!cell.readOnly && !(this.mode === 'command')) {
+          cell.focused = true;
+        }
+      }
     }
   }
 
