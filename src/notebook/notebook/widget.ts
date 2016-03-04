@@ -126,6 +126,18 @@ class NotebookWidget extends Widget {
   }
 
   /**
+   * Handle `update_request` messages for the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    if (this.model.mode === 'command') {
+      this.addClass(COMMAND_CLASS);
+      this.node.focus();
+    } else {
+      this.removeClass(COMMAND_CLASS);
+    }
+  }
+
+  /**
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
@@ -210,11 +222,7 @@ class NotebookWidget extends Widget {
   protected onModelChanged(sender: INotebookModel, args: IChangedArgs<any>) {
     switch(args.name) {
     case 'mode': 
-      if (args.newValue as string === 'command') {
-        this.addClass(COMMAND_CLASS);
-      } else {
-        this.removeClass(COMMAND_CLASS);
-      }
+      this.update();
       break;
     case 'selectedCellIndex':
       this.updateSelectedCell(args.newValue, args.oldValue);
@@ -271,10 +279,8 @@ class NotebookWidget extends Widget {
       if (i === -1) {
         return;
       }
-      let cell = model.cells.get(i);
-      // Unless this is a rendered markdown cell, switch to 
-      // edit mode.
-      if (!(isMarkdownCellModel(cell) && cell.rendered)) {
+      let cell = this.model.cells.get(i);
+      if (cell.focused) {
         model.mode = 'edit';
       }
       model.selectedCellIndex = i;

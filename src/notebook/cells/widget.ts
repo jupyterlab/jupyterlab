@@ -148,9 +148,6 @@ class BaseCellWidget extends Widget {
    */
   protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
     this.update();
-    if (args.name == 'focused' && args.newValue) {
-      this.input.editor.focus();
-    }
   }
 
   private _input: InputAreaWidget;

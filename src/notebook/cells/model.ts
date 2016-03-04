@@ -19,6 +19,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  IEditorModel
+} from '../editor';
+
+import {
   IInputAreaModel
 } from '../input-area';
 
@@ -162,7 +166,8 @@ class BaseCellModel implements IBaseCellModel {
    */
   constructor(input: IInputAreaModel) {
     this._input = input;
-    input.stateChanged.connect(this._inputChanged, this);
+    input.stateChanged.connect(this.onInputChanged, this);
+    input.textEditor.stateChanged.connect(this.onEditorChanged, this);
   }
 
   /**
@@ -188,16 +193,22 @@ class BaseCellModel implements IBaseCellModel {
 
   /**
    * Get whether the cell is focused for editing.
+   *
+   * #### Notes
+   * This is a delegate to the focused state of the input's editor.
    */
   get focused(): boolean {
-    return Private.focusedProperty.get(this);
+    return this.input.textEditor.focused;
   }
 
   /**
    * Get whether the cell is focused for editing.
+   *
+   * #### Notes
+   * This is a delegate to the focused state of the input's editor.
    */
   set focused(value: boolean) {
-    Private.focusedProperty.set(this, value);
+    this.input.textEditor.focused = value;
   }
 
   /**
@@ -295,10 +306,21 @@ class BaseCellModel implements IBaseCellModel {
   type: CellType;
 
   /**
-   * Re-emit changes to the input dirty state.
+   * Handle changes to the input model.
    */
-  private _inputChanged(input: IInputAreaModel, args: IChangedArgs<any>): void {
-    if (args.name === 'dirty' || args.name === 'readOnly') {
+  private onInputChanged(input: IInputAreaModel, args: IChangedArgs<any>): void {
+    // Re-emit changes to input dirty and readOnly states.
+    if (args.name === 'dirty' || args.name === 'readOnly' || args.name ) {
+      this.stateChanged.emit(args);
+    }
+  }
+
+  /**
+   * Handle changes to the editor model.
+   */
+  private onEditorChanged(editor: IEditorModel, args: IChangedArgs<any>): void {
+    // Re-emit changes to the focused state of the editor.
+    if (args.name == 'focused') {
       this.stateChanged.emit(args);
     }
   }
@@ -468,15 +490,6 @@ namespace Private {
   export
   const selectedProperty = new Property<IBaseCellModel, boolean>({
     name: 'selected',
-    notify: stateChangedSignal,
-  });
-
-  /**
-   * A property descriptor for the focused state of the cell.
-   */
-  export
-  const focusedProperty = new Property<IBaseCellModel, boolean>({
-    name: 'focused',
     notify: stateChangedSignal,
   });
 

@@ -302,10 +302,12 @@ class NotebookModel implements INotebookModel {
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
       cell.selected = value === i;
-      if (value === i) {
-        if (!cell.readOnly && !(this.mode === 'command')) {
-          cell.focused = true;
-        }
+      if (cell.selected) {
+        if (cell.focused) {
+          this.mode = 'edit';
+        } else {
+          this.mode = 'command';
+        }       
       }
     }
   }

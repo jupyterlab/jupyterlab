@@ -74,6 +74,11 @@ interface IEditorModel {
   filename: string;
 
   /**
+   * Whether the editor is focused.
+   */
+  focused: boolean;
+
+  /**
    * Whether the text editor has a fixed maximum height.
    *
    * #### Notes
@@ -113,11 +118,6 @@ interface IEditorWidget extends Widget {
    * The model for the editor widget.
    */
   model: IEditorModel;
-
-  /**
-   * Give focus to the editor.
-   */
-  focus(): void; 
 }
 
 
@@ -126,7 +126,6 @@ interface IEditorWidget extends Widget {
  */
 export
 class CodeMirrorWidget extends Widget implements IEditorWidget {
-
   /**
    * Construct a CodeMirror widget.
    */
@@ -160,13 +159,6 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
   }
 
   /**
-   * Give focus to the editor.
-   */
-  focus(): void {
-    this._editor.focus();
-  }
-
-  /**
    * Update whether the editor has a fixed maximum height.
    */
   protected updateFixedHeight(fixedHeight: boolean): void {
@@ -175,11 +167,6 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
 
   /**
    * Update the text in the widget.
-   *
-   * #### Notes
-   * This function attempts to restore the cursor to the correct
-   * place by using the bitap algorithm to find the corresponding
-   * position of the cursor in the new text.
    */
   protected updateText(text: string): void {
     if (!this.isAttached || !this.isVisible) {
@@ -292,7 +279,6 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
         let fragment = oldText.substr(oldCursor, 10);
         cursor = diffMatchPatch.match_main(text, fragment, oldCursor);
       }
-
       doc.setValue(text);
       doc.setCursor(doc.posFromIndex(cursor));
     }
@@ -324,6 +310,10 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     case 'tabSize':
       this.updateTabSize(args.newValue as number);
       break;
+    case 'focused':
+      if (args.newValue) {
+        this._editor.focus();
+      }
     }
   }
 
