@@ -184,7 +184,7 @@ class NotebookModel implements INotebookModel {
   /**
    * Create an output area model.
    */
-  static createOutput(): IOutputAreaModel {
+  static createOutputArea(): IOutputAreaModel {
     return new OutputAreaModel();
   }
 
@@ -340,7 +340,7 @@ class NotebookModel implements INotebookModel {
       readOnly: this.readOnly
     });
     let input = constructor.createInput(editor);
-    let output = constructor.createOutput();
+    let output = constructor.createOutputArea();
     let cell = new CodeCellModel(input, output);
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
