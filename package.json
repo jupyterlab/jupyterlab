@@ -15,8 +15,8 @@
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
     "phosphor-widget": "^1.0.0-rc.1",
-    "transformime": "^2.1.1",
-    "transformime-jupyter-transformers": "^0.3.0"
+    "transformime": "^2.1.2",
+    "transformime-jupyter-transformers": "^0.4.0"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
