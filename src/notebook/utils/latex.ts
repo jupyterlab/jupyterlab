@@ -173,12 +173,7 @@ function init() {
     // Center justify equations in code and markdown cells. Elsewhere
     // we use CSS to left justify single line equations in code cells.
     displayAlign: 'center',
-    'HTML-CSS': {
-       availableFonts: [],
-       imageFont: null,
-       preferredFont: null,
-       webFont: 'STIX-Web',
-       styles: {'.MathJax_Display': {'margin': 0}},
+    CommonHTML: {
        linebreaks: { automatic: true }
      }
   });
