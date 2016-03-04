@@ -2,9 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 "use strict";
 
-import * as katex
-  from 'katex';
-
 
 // Some magic for deferring mathematical expressions to MathJax
 // by hiding them from the Markdown parser.
@@ -19,41 +16,17 @@ const inline = "$"; // the inline math delimiter
 // needed for searching for math in the text input.
 const MATHSPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[\\{}$]|[{}]|(?:\n\s*)+|@@\d+@@)/i;
 
-
-//  The math is in blocks i through j, so
-//    collect it into one block and clear the others.
-//  Replace &, <, and > by named entities.
-//  For IE, put <br> at the ends of comments since IE removes \n.
-//  Clear the current math positions and store the index of the
-//    math, then push the math string onto the storage array.
-//  The preProcess function is called on all blocks if it has been passed in
-function processMath(i: number, j: number, preProcess: (input: string) => string, math: string[], blocks: string[]): string[] {
-  var block = blocks.slice(i, j + 1).join("").replace(/&/g, "&amp;") // use HTML entity for &
-  .replace(/</g, "&lt;") // use HTML entity for <
-  .replace(/>/g, "&gt;") // use HTML entity for >
-  ;
-  if (navigator && navigator.appName == 'Microsoft Internet Explorer') {
-    block = block.replace(/(%[^\n]*)\n/g, "$1<br/>\n");
-  }
-  while (j > i) {
-    blocks[j] = "";
-    j--;
-  }
-  blocks[i] = "@@" + math.length + "@@"; // replace the current block text with a unique tag to find later
-  if (preProcess){
-    block = preProcess(block);
-  }
-  math.push(block);
-  return blocks;
-};
+// A module-level initialization flag.
+let initialized = false;
 
 
-//  Break up the text into its component parts and search
-//    through them for math delimiters, braces, linebreaks, etc.
-//  Math delimiters must match and braces must balance.
-//  Don't allow math to pass through a double linebreak
-//    (which will be a paragraph).
-//
+/**
+ *  Break up the text into its component parts and search
+ *    through them for math delimiters, braces, linebreaks, etc.
+ *  Math delimiters must match and braces must balance.
+ *  Don't allow math to pass through a double linebreak
+ *    (which will be a paragraph).
+ */
 export
 function removeMath(text: string): { text: string, math: string[] } {
   let math: string[] = []; // stores math strings for later
@@ -63,7 +36,10 @@ function removeMath(text: string): { text: string, math: string[] } {
   let braces: number;
   let deTilde: (text: string) => string;
 
-  MathJax.Hub.Configured();
+  if (!initialized) {
+    init();
+    initialized = true;
+  }
 
   // Except for extreme edge cases, this should catch precisely those pieces of the markdown
   // source that will later be turned into code spans. While MathJax will not TeXify code spans,
@@ -153,12 +129,90 @@ function removeMath(text: string): { text: string, math: string[] } {
   return { text: deTilde(blocks.join("")), math };
 };
 
-//
-//  Put back the math strings that were saved,
-//    and clear the math array (no need to keep it around).
-//
+
+/**
+ * Put back the math strings that were saved,
+ * and clear the math array (no need to keep it around).
+ */
 export
 function replaceMath(text: string, math: string[]): string {
   text = text.replace(/@@(\d+)@@/g, (match, n) => math[n]);
   return text;
+};
+
+
+/**
+ * Typeset the math in a node.
+ */
+export
+function typeset(node: HTMLElement): void {
+  if (!initialized) {
+    init();
+    initialized = true;
+  }
+  if ((window as any).MathJax) {
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, node]);
+  }
+}
+
+
+/**
+ * Initialize latex handling.
+ */
+function init() {
+  if (!(window as any).MathJax) {
+    return;
+  }
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    // Center justify equations in code and markdown cells. Elsewhere
+    // we use CSS to left justify single line equations in code cells.
+    displayAlign: 'center',
+    "HTML-CSS": {
+       availableFonts: [],
+       imageFont: null,
+       preferredFont: null,
+       webFont: 'STIX-Web',
+       styles: {'.MathJax_Display': {"margin": 0}},
+       linebreaks: { automatic: true }
+     }
+  });
+  MathJax.Hub.Configured();
+}
+
+
+/**
+ * Process math blocks.
+ *
+ * The math is in blocks i through j, so
+ *   collect it into one block and clear the others.
+ *  Replace &, <, and > by named entities.
+ *  For IE, put <br> at the ends of comments since IE removes \n.
+ *  Clear the current math positions and store the index of the
+ *   math, then push the math string onto the storage array.
+ *  The preProcess function is called on all blocks if it has been passed in
+ */
+function processMath(i: number, j: number, preProcess: (input: string) => string, math: string[], blocks: string[]): string[] {
+  var block = blocks.slice(i, j + 1).join("").replace(/&/g, "&amp;") // use HTML entity for &
+  .replace(/</g, "&lt;") // use HTML entity for <
+  .replace(/>/g, "&gt;") // use HTML entity for >
+  ;
+  if (navigator && navigator.appName == 'Microsoft Internet Explorer') {
+    block = block.replace(/(%[^\n]*)\n/g, "$1<br/>\n");
+  }
+  while (j > i) {
+    blocks[j] = "";
+    j--;
+  }
+  blocks[i] = "@@" + math.length + "@@"; // replace the current block text with a unique tag to find later
+  if (preProcess){
+    block = preProcess(block);
+  }
+  math.push(block);
+  return blocks;
 };
