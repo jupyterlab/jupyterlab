@@ -54,13 +54,13 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
       cell = model.createRawCell();
     }
     deserializeCell(c, cell);
-    this.cells.add(cell);
+    model.cells.add(cell);
   });
   
-  if (this.cells.length) {
-    this.selectedCellIndex = 0;
+  if (model.cells.length) {
+    model.selectedCellIndex = 0;
   }
-  this.metadata = data.metadata;
+  model.metadata = data.metadata;
 }
 
 
