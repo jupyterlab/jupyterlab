@@ -1,6 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-"use strict";
+'use strict';
 
 
 // Some magic for deferring mathematical expressions to MathJax
@@ -10,7 +10,7 @@
 // Other minor modifications are also due to StackExchange and are used with
 // permission.
 
-const inline = "$"; // the inline math delimiter
+const inline = '$'; // the inline math delimiter
 
 // MATHSPLIT contains the pattern for math delimiters and special symbols
 // needed for searching for math in the text input.
@@ -48,7 +48,7 @@ function removeMath(text: string): { text: string, math: string[] } {
   //     `$foo` and `$bar` are varibales.  -->  <code>$foo ` and `$bar</code> are variables.
   let hasCodeSpans = /`/.test(text);
   if (hasCodeSpans) {
-    text = text.replace(/~/g, "~T").replace(/(^|[^\\])(`+)([^\n]*?[^`\n])\2(?!`)/gm, (wholematch) => wholematch.replace(/\$/g, "~D"));
+    text = text.replace(/~/g, '~T').replace(/(^|[^\\])(`+)([^\n]*?[^`\n])\2(?!`)/gm, (wholematch) => wholematch.replace(/\$/g, '~D'));
     deTilde = (text: string) => {
       return text.replace(/~([TD])/g, 
         (wholematch, character) => (character === 'T') ? '~' : '$');
@@ -57,16 +57,16 @@ function removeMath(text: string): { text: string, math: string[] } {
     deTilde = (text: string) => { return text; };
   }
 
-  let blocks = text.replace(/\r\n?/g, "\n").split(MATHSPLIT);
+  let blocks = text.replace(/\r\n?/g, '\n').split(MATHSPLIT);
 
   for (let i = 1, m = blocks.length; i < m; i += 2) {
     let block = blocks[i];
-    if (block.charAt(0) === "@") {
+    if (block.charAt(0) === '@') {
       //
       //  Things that look like our math markers will get
       //  stored and then retrieved along with the math.
       //
-      blocks[i] = "@@" + math.length + "@@";
+      blocks[i] = '@@' + math.length + '@@';
       math.push(block);
     }
     else if (start) {
@@ -96,10 +96,10 @@ function removeMath(text: string): { text: string, math: string[] } {
         last = null;
         braces = 0;
       }
-      else if (block === "{") {
+      else if (block === '{') {
         braces++;
       }
-      else if (block === "}" && braces) {
+      else if (block === '}' && braces) {
         braces--;
       }
     }
@@ -108,14 +108,14 @@ function removeMath(text: string): { text: string, math: string[] } {
       //  Look for math start delimiters and when
       //    found, set up the end delimiter.
       //
-      if (block === inline || block === "$$") {
+      if (block === inline || block === '$$') {
         start = i;
         end = block;
         braces = 0;
       }
-      else if (block.substr(1, 5) === "begin") {
+      else if (block.substr(1, 5) === 'begin') {
         start = i;
-        end = "\\end" + block.substr(6);
+        end = '\\end' + block.substr(6);
         braces = 0;
       }
     }
@@ -126,7 +126,7 @@ function removeMath(text: string): { text: string, math: string[] } {
     end = null;
     last = null;
   }
-  return { text: deTilde(blocks.join("")), math };
+  return { text: deTilde(blocks.join('')), math };
 };
 
 
@@ -151,7 +151,7 @@ function typeset(node: HTMLElement): void {
     initialized = true;
   }
   if ((window as any).MathJax) {
-    MathJax.Hub.Queue(["Typeset", MathJax.Hub, node]);
+    MathJax.Hub.Queue(['Typeset', MathJax.Hub, node]);
   }
 }
 
@@ -165,20 +165,20 @@ function init() {
   }
   MathJax.Hub.Config({
     tex2jax: {
-      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      inlineMath: [ ['$','$'], ['\\(','\\)'] ],
+      displayMath: [ ['$$','$$'], ['\\[','\\]'] ],
       processEscapes: true,
       processEnvironments: true
     },
     // Center justify equations in code and markdown cells. Elsewhere
     // we use CSS to left justify single line equations in code cells.
     displayAlign: 'center',
-    "HTML-CSS": {
+    'HTML-CSS': {
        availableFonts: [],
        imageFont: null,
        preferredFont: null,
        webFont: 'STIX-Web',
-       styles: {'.MathJax_Display': {"margin": 0}},
+       styles: {'.MathJax_Display': {'margin': 0}},
        linebreaks: { automatic: true }
      }
   });
@@ -198,18 +198,18 @@ function init() {
  *  The preProcess function is called on all blocks if it has been passed in
  */
 function processMath(i: number, j: number, preProcess: (input: string) => string, math: string[], blocks: string[]): string[] {
-  var block = blocks.slice(i, j + 1).join("").replace(/&/g, "&amp;") // use HTML entity for &
-  .replace(/</g, "&lt;") // use HTML entity for <
-  .replace(/>/g, "&gt;") // use HTML entity for >
+  var block = blocks.slice(i, j + 1).join('').replace(/&/g, '&amp;') // use HTML entity for &
+  .replace(/</g, '&lt;') // use HTML entity for <
+  .replace(/>/g, '&gt;') // use HTML entity for >
   ;
   if (navigator && navigator.appName == 'Microsoft Internet Explorer') {
-    block = block.replace(/(%[^\n]*)\n/g, "$1<br/>\n");
+    block = block.replace(/(%[^\n]*)\n/g, '$1<br/>\n');
   }
   while (j > i) {
-    blocks[j] = "";
+    blocks[j] = '';
     j--;
   }
-  blocks[i] = "@@" + math.length + "@@"; // replace the current block text with a unique tag to find later
+  blocks[i] = '@@' + math.length + '@@'; // replace the current block text with a unique tag to find later
   if (preProcess){
     block = preProcess(block);
   }
