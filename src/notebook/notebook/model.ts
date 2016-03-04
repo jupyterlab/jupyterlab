@@ -113,21 +113,8 @@ interface INotebookModel {
 
   /**
    * The currently selected cell.
-   *
-   * #### Notes
-   * Changing this property will deselect the previous cell.
    */
   selectedCellIndex: number;
-
-  /**
-   * Select the next cell in the notebook.
-   */
-  selectNextCell(): void;
-
-  /**
-   * Select the previous cell in the notebook.
-   */
-  selectPreviousCell(): void;
 
   /**
    * A factory for creating a new code cell.
@@ -340,24 +327,6 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Select the next cell in the notebook.
-   */
-  selectNextCell() {
-    if (this.selectedCellIndex < this.cells.length - 1) {
-      this.selectedCellIndex += 1;
-    }
-  }
-
-  /**
-   * Select the previous cell in the notebook.
-   */
-  selectPreviousCell() {
-    if (this.selectedCellIndex > 0) {
-      this.selectedCellIndex -= 1;
-    }
-  }
-
-  /**
    * Create a code cell model.
    */
   createCodeCell(source?: ICellModel): ICodeCellModel {
@@ -448,7 +417,7 @@ class NotebookModel implements INotebookModel {
       let cell = this.createCodeCell();
       this.cells.add(cell);
     }
-    this.selectNextCell();
+    this.selectedCellIndex += 1;
   }
 
   /**
