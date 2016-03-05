@@ -186,7 +186,7 @@ class OutputAreaWidget extends Widget {
       let prompt = document.createElement('div');
       prompt.className = PROMPT_CLASS;
       let count = (output as IExecuteResult).execution_count;
-      prompt.textContent = `Out[${count === null ? '\u00A0' : count}]:`;
+      prompt.textContent = `Out [${count === null ? ' ' : count}]:`;
       widget.node.appendChild(prompt);
       break;
     case "display_data":

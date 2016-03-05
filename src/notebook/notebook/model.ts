@@ -437,11 +437,16 @@ class NotebookModel implements INotebookModel {
     if (this.readOnly) {
       return;
     }
+    let text = cell.input.textEditor.text.trim();
+    if (!text) {
+      cell.input.prompt = 'In [ ]:';
+      return;
+    }
     let session = this.session;
     if (!session) {
       return;
     }
-    cell.input.prompt = 'In[*]:';
+    cell.input.prompt = 'In [*]:';
     let exRequest = {
       code: cell.input.textEditor.text,
       silent: false,
