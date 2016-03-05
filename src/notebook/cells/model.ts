@@ -310,7 +310,7 @@ class BaseCellModel implements IBaseCellModel {
    */
   protected onInputChanged(input: IInputAreaModel, args: IChangedArgs<any>): void {
     // Re-emit changes to input dirty and readOnly states.
-    if (args.name === 'dirty' || args.name === 'readOnly' || args.name ) {
+    if (args.name === 'dirty' || args.name === 'readOnly') {
       this.stateChanged.emit(args);
     }
   }
