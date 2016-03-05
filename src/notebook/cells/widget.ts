@@ -64,6 +64,11 @@ const CODE_CELL_CLASS = 'jp-CodeCell';
 const MARKDOWN_CELL_CLASS = 'jp-MarkdownCell';
 
 /**
+ * The class name added to the markdown cell renderer widget.
+ */
+const RENDERER_CLASS = 'jp-MarkdownCell-renderer';
+
+/**
  * The class name added to raw cells.
  */
 const RAW_CELL_CLASS = 'jp-RawCell';
@@ -207,6 +212,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     // Insist on the Github-flavored markdown mode.
     model.input.textEditor.mimetype = 'text/x-ipythongfm';
     this._rendered = new Widget();
+    this._rendered.addClass(RENDERER_CLASS);
     (this.layout as PanelLayout).addChild(this._rendered);
     this.update();
   }

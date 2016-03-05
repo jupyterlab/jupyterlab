@@ -43,7 +43,12 @@
 
 
 .jp-MarkdownCell.jp-mod-rendered {
-  padding-left: 90px;
+  padding-left: 100px;
+}
+
+
+.jp-MarkdownCell-renderer {
+  padding-left: 4px;
 }
 
 
