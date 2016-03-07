@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  NotebookWidget, NotebookModel, populateNotebookModel, buildOutputModel, Output, INotebookModel, getNotebookContent
+  NotebookWidget, NotebookModel, serialize, INotebookModel, deserialize
 } from 'jupyter-js-notebook';
 
 import {
@@ -75,28 +75,12 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
   app.commands.add([{
     id: runCellCommandId,
     handler: () => handler.runSelectedCell()
-  }, {
-    id: selectNextCellCommandId,
-    handler: () => handler.selectNextCell()
-  }, {
-    id: selectPreviousCellCommandId,
-    handler: () => handler.selectPreviousCell()
   }]);
   app.palette.add([{
     command: runCellCommandId,
     category: 'Notebook Operations',
     text: 'Run current cell',
     caption: 'Run the current cell'
-  }, {
-    command: selectNextCellCommandId,
-    category: 'Notebook Operations',
-    text: 'Select next cell',
-    caption: 'Select next cell'
-  }, {
-    command: selectPreviousCellCommandId,
-    category: 'Notebook Operations',
-    text: 'Select previous cell',
-    caption: 'Select previous cell'
   }]);
   return Promise.resolve(void 0);
 }
@@ -199,22 +183,6 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   }
 
   /**
-   * Select the next cell on the active widget.
-   */
-  selectNextCell(): void {
-    let w = this.activeWidget;
-    if (w) w.model.selectNextCell();
-  }
-
-  /**
-   * Select the previous cell on the active widget.
-   */
-  selectPreviousCell(): void {
-    let w = this.activeWidget;
-    if (w) w.model.selectPreviousCell();
-  }
-
-  /**
    * Set the dirty state of a widget (defaults to current active widget).
    */
   setDirty(widget?: NotebookContainer): void {
@@ -247,7 +215,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
    * Get the options used to save the widget content.
    */
   protected getSaveOptions(widget: NotebookContainer, model: IContentsModel): Promise<IContentsOpts> {
-      let content = getNotebookContent(widget.model);
+      let content = serialize(widget.model);
       return Promise.resolve({ type: 'notebook', content });
   }
 
@@ -271,13 +239,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
    * Populate the notebook widget with the contents of the notebook.
    */
   protected populateWidget(widget: NotebookContainer, model: IContentsModel): Promise<IContentsModel> {
-    populateNotebookModel(widget.model, model.content);
-    if (widget.model.cells.length === 0) {
-      let cell = widget.model.createCodeCell();
-      widget.model.cells.add(cell);
-    }
-    widget.model.selectedCellIndex = 0;
-
+    deserialize(model.content, widget.model);
     return Promise.resolve(model);
   }
 
