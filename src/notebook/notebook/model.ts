@@ -36,7 +36,7 @@ import {
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
   IRawCellModel, isCodeCellModel, isMarkdownCellModel,
-  RawCellModel, isRawCellModel
+  RawCellModel, isRawCellModel, CellMode
 } from '../cells';
 
 import {
@@ -48,13 +48,6 @@ import {
   IError, isError, IOutput, OutputType,
   MAJOR_VERSION, MINOR_VERSION
 } from './nbformat';
-
-
-/**
- * The interactivity modes for a notebook.
- */
-export
-type NotebookMode = 'command' | 'edit';
 
 
 /**
@@ -92,11 +85,6 @@ interface INotebookModel {
    * An untrusted notebook should sanitize HTML output.
    */
   //trusted: boolean;
-
-  /**
-   * The current interactivity mode of the notebook.
-   */
-  mode: NotebookMode;
 
   /**
    * The list of cells in the notebook.
@@ -227,20 +215,6 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Get the mode of the notebook.
-   */
-  get mode(): NotebookMode {
-    return NotebookModelPrivate.modeProperty.get(this);
-  }
-
-  /**
-   * Set the mode of the notebook.
-   */
-  set mode(value: NotebookMode) {
-    NotebookModelPrivate.modeProperty.set(this, value);
-  }
-
-  /**
    * Get the read-only status of the notebook.
    */
   get readOnly(): boolean {
@@ -302,13 +276,6 @@ class NotebookModel implements INotebookModel {
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
       cell.selected = value === i;
-      if (cell.selected) {
-        if (cell.focused) {
-          this.mode = 'edit';
-        } else {
-          this.mode = 'command';
-        }       
-      }
     }
   }
 
@@ -424,7 +391,7 @@ class NotebookModel implements INotebookModel {
     if (this.selectedCellIndex === this.cells.length - 1) {
       let cell = this.createCodeCell();
       this.cells.add(cell);
-      cell.focused = true;  // This already sets the new index.
+      cell.mode = 'edit';  // This already sets the new index.
     } else {
       this.selectedCellIndex += 1;
     }
@@ -482,12 +449,12 @@ class NotebookModel implements INotebookModel {
   /**
    * Handle a change to a cell state.
    */
-  private _onCellStateChanged(cell: ICellModel, change: IChangedArgs<ICellModel>): void {
+  private _onCellStateChanged(cell: ICellModel, change: IChangedArgs<any>): void {
     if (change.name === 'dirty' && change.newValue) {
       this.dirty = true;
     }
-    if (change.name === 'focused') {
-      if (change.newValue) {
+    if (change.name === 'mode') {
+      if (change.newValue === 'edit') {
         let cells = this.cells;
         for (let i = 0; i < cells.length; i++) {
           if (cells.get(i) === cell) {
@@ -519,15 +486,6 @@ namespace NotebookModelPrivate {
   const defaultMimetype = new Property<NotebookModel, string>({
     name: 'defaultMimetype',
     value: "text/x-ipython",
-    notify: stateChangedSignal,
-  });
-
-  /**
-  * A property descriptor which holds the mode of the notebook.
-  */
-  export
-  const modeProperty = new Property<NotebookModel, NotebookMode>({
-    name: 'mode',
     notify: stateChangedSignal,
   });
 

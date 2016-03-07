@@ -36,6 +36,13 @@ import {
 
 
 /**
+ * The interactivity modes for a cell.
+ */
+export
+type CellMode = 'command' | 'edit';
+
+
+/**
  * The definition of a model object for a base cell.
  */
 export
@@ -66,9 +73,9 @@ interface IBaseCellModel {
   selected: boolean;
 
   /**
-   * Whether the cell is focused for editing.
+   * The mode of the cell.
    */
-  focused: boolean;
+  mode: CellMode;
 
   /**
    * The input area of the cell.
@@ -192,23 +199,27 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * Get whether the cell is focused for editing.
+   * Get mode of the cell.
    *
    * #### Notes
    * This is a delegate to the focused state of the input's editor.
    */
-  get focused(): boolean {
-    return this.input.textEditor.focused;
+  get mode(): CellMode {
+    if (this.input.textEditor.focused) {
+      return 'edit';
+    } else {
+      return 'command';
+    }
   }
 
   /**
-   * Set whether the cell is focused for editing.
+   * Set mode of the cell.
    *
    * #### Notes
    * This is a delegate to the focused state of the input's editor.
    */
-  set focused(value: boolean) {
-    this.input.textEditor.focused = value;
+  set mode(value: CellMode) {
+    this.input.textEditor.focused = value === 'edit';
   }
 
   /**
@@ -319,9 +330,21 @@ class BaseCellModel implements IBaseCellModel {
    * Handle changes to the editor model.
    */
   private onEditorChanged(editor: IEditorModel, args: IChangedArgs<any>): void {
-    // Re-emit changes to the focused state of the editor.
+    // Handle changes to the focused state of the editor.
     if (args.name === 'focused') {
-      this.stateChanged.emit(args);
+      if (args.newValue) {
+        this.stateChanged.emit({
+          name: 'mode',
+          newValue: 'edit',
+          oldValue: 'command'
+        });
+      } else {
+        this.stateChanged.emit({
+          name: 'mode',
+          newValue: 'command',
+          oldValue: 'edit'
+        });
+      }
     }
   }
 
@@ -340,7 +363,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   constructor(input: IInputAreaModel, output: IOutputAreaModel) {
     super(input);
     this._output = output;
-    this.input.prompt = 'In[\u00A0]:';
+    this.input.prompt = 'In [ ]:';
   }
 
   /**

@@ -79,9 +79,14 @@ const RAW_CELL_CLASS = 'jp-RawCell';
 const RENDERED_CLASS = 'jp-mod-rendered';
 
 /**
- * The class name added to a focused cell.
+ * The class name added to a cell in edit mode.
  */
-const FOCUSED_CLASS = 'jp-mod-focused';
+const EDIT_CLASS = 'jp-mod-editMode';
+
+/**
+ * The class name added to a cell in command mode.
+ */
+const COMMAND_CLASS = 'jp-mod-commandMode';
 
 /**
  * The text applied to an empty markdown cell.
@@ -144,10 +149,12 @@ class BaseCellWidget extends Widget {
     } else {
       this.removeClass(MARKED_CLASS);
     }
-    if (this.model.focused) {
-      this.addClass(FOCUSED_CLASS);
+    if (this.model.mode === 'edit') {
+      this.addClass(EDIT_CLASS);
+      this.removeClass(COMMAND_CLASS);
     } else {
-      this.removeClass(FOCUSED_CLASS);
+      this.addClass(COMMAND_CLASS)
+      this.removeClass(EDIT_CLASS);
     }
   }
 
