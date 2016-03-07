@@ -72,10 +72,13 @@ serializeCell(cell: ICellModel): ICell {
   let output: ICell = {
     source: cell.input.textEditor.text,
     cell_type: cell.type,
-    metadata: {
-      tags: cell.tags,
-      name: cell.name
-    }
+    metadata: { }
+  }
+  if (cell.tags) {
+    output.metadata.tags = cell.tags;
+  }
+  if (cell.name) {
+    output.metadata.name = cell.name;
   }
   if (isRawCellModel(cell)) {
     (output as IRawCell).metadata.format = (cell as IRawCellModel).format;
