@@ -10,6 +10,10 @@ import {
   ISignal, Signal
 } from 'phosphor-signaling';
 
+import {
+  IEditorModel
+} from './widget';
+
 
 /**
  * Interface that must be implemented to set defaults on an EditorModel.
@@ -65,20 +69,12 @@ interface IEditorOptions {
  * An implementation of an editor model.
  */
 export
-class EditorModel  {
-
+class EditorModel implements IEditorModel {
   /**
    * Construct an Editor Model.
    */
   constructor(options?: IEditorOptions) {
     if (options) EditorModelPrivate.initFrom(this, options);
-  }
-
-  /**
-   * A signal emitted when the editor is selected.
-   */
-  get selected(): ISignal<EditorModel, void> {
-    return EditorModelPrivate.selectedSignal.bind(this);
   }
 
   /**
@@ -171,6 +167,19 @@ class EditorModel  {
   set readOnly(value: boolean) {
     EditorModelPrivate.readOnlyProperty.set(this, value);
   }
+  /**
+   * Get whether the editor is focused for editing.
+   */
+  get focused(): boolean {
+    return EditorModelPrivate.focusedProperty.get(this);
+  }
+
+  /**
+   * Set whether the editor is focused for editing.
+   */
+  set focused(value: boolean) {
+    EditorModelPrivate.focusedProperty.set(this, value);
+  }
 
   /**
    * Get the tabSize number for the editor model.
@@ -199,13 +208,6 @@ class EditorModel  {
   set text(value: string) {
     EditorModelPrivate.textProperty.set(this, value);
   }
-
-  /**
-   * Select the editor model.
-   */
-  select(): void {
-    this.selected.emit(void 0);
-  }
 }
 
 
@@ -219,12 +221,6 @@ namespace EditorModelPrivate {
    */
   export
   const stateChangedSignal = new Signal<EditorModel, IChangedArgs<any>>();
-
-  /**
-   * A signal emitted when the editor is selected.
-   */
-  export
-  const selectedSignal = new Signal<EditorModel, void>();
 
   /**
    * The property descriptor for the editor mimetype.
@@ -272,6 +268,16 @@ namespace EditorModelPrivate {
   export
   const readOnlyProperty = new Property<EditorModel, boolean>({
     name: 'readOnly',
+    value: false,
+    notify: stateChangedSignal
+  });
+
+  /**
+   * The property descriptor for the editor focused property.
+   */
+  export
+  const focusedProperty = new Property<EditorModel, boolean>({
+    name: 'focused',
     value: false,
     notify: stateChangedSignal
   });

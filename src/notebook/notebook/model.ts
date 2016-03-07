@@ -54,7 +54,7 @@ import {
  * The interactivity modes for a notebook.
  */
 export
-type NotebookMode = "command" | "edit";
+type NotebookMode = 'command' | 'edit';
 
 
 /**
@@ -300,7 +300,15 @@ class NotebookModel implements INotebookModel {
     NotebookModelPrivate.selectedCellIndexProperty.set(this, value);
     let cells = this.cells;
     for (let i = 0; i < cells.length; i++) {
-      cells.get(i).selected = value === i;
+      let cell = cells.get(i);
+      cell.selected = value === i;
+      if (cell.selected) {
+        if (cell.focused) {
+          this.mode = 'edit';
+        } else {
+          this.mode = 'command';
+        }       
+      }
     }
   }
 
@@ -416,8 +424,10 @@ class NotebookModel implements INotebookModel {
     if (this.selectedCellIndex === this.cells.length - 1) {
       let cell = this.createCodeCell();
       this.cells.add(cell);
+      cell.focused = true;  // This already sets the new index.
+    } else {
+      this.selectedCellIndex += 1;
     }
-    this.selectedCellIndex += 1;
   }
 
   /**
@@ -427,11 +437,16 @@ class NotebookModel implements INotebookModel {
     if (this.readOnly) {
       return;
     }
+    let text = cell.input.textEditor.text.trim();
+    if (!text) {
+      cell.input.prompt = 'In [ ]:';
+      return;
+    }
     let session = this.session;
     if (!session) {
       return;
     }
-    cell.input.prompt = 'In[*]:';
+    cell.input.prompt = 'In [*]:';
     let exRequest = {
       code: cell.input.textEditor.text,
       silent: false,
@@ -470,6 +485,16 @@ class NotebookModel implements INotebookModel {
   private _onCellStateChanged(cell: ICellModel, change: IChangedArgs<ICellModel>): void {
     if (change.name === 'dirty' && change.newValue) {
       this.dirty = true;
+    }
+    if (change.name === 'focused') {
+      if (change.newValue) {
+        let cells = this.cells;
+        for (let i = 0; i < cells.length; i++) {
+          if (cells.get(i) === cell) {
+            this.selectedCellIndex = i;
+          }
+        }
+      }
     }
   }
 

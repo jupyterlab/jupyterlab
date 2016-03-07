@@ -56,11 +56,6 @@ interface IEditorModel {
   stateChanged: ISignal<IEditorModel, IChangedArgs<any>>;
 
   /**
-   * A signal emitted when the editor model is selected.
-   */
-  selected: ISignal<IEditorModel, void>;
-
-  /**
    * The text in the text editor.
    */
   text: string;
@@ -77,6 +72,11 @@ interface IEditorModel {
    * The filename of the editor.
    */
   filename: string;
+
+  /**
+   * Whether the editor is focused.
+   */
+  focused: boolean;
 
   /**
    * Whether the text editor has a fixed maximum height.
@@ -106,11 +106,6 @@ interface IEditorModel {
    * Whether the contents of the editor are dirty.
    */
   dirty: boolean;
-
-  /**
-   * Select the editor model.
-   */
-  select(): void;
 }
 
 
@@ -130,8 +125,7 @@ interface IEditorWidget extends Widget {
  * A widget which hosts a CodeMirror editor.
  */
 export
-class CodeMirrorWidget extends Widget {
-
+class CodeMirrorWidget extends Widget implements IEditorWidget {
   /**
    * Construct a CodeMirror widget.
    */
@@ -139,45 +133,35 @@ class CodeMirrorWidget extends Widget {
     super();
     this.addClass(CODEMIRROR_CLASS);
     this._editor = CodeMirror(this.node);
-    this.model = model;
+    this._model = model;
+    this.updateMimetype(model.mimetype);
+    this.updateFilename(model.filename);
+    this.updateReadOnly(model.readOnly);
+    this.updateTabSize(model.tabSize);
+    this.updateLineNumbers(model.lineNumbers);
+    this.updateFixedHeight(model.fixedHeight);
+    this.updateText(model.text);
+    CodeMirror.on(this._editor.getDoc(), 'change', (instance, change) => {
+      this._model.text = instance.getValue();
+      this._model.dirty = true;
+    });
+    this._editor.on('focus', () => {
+      this._model.focused = true;
+    });
+    this._editor.on('blur', () => {
+      this._model.focused = false;
+    });
+    model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /**
    * Get the editor model.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   get model(): IEditorModel {
     return this._model;
-  }
-
-  /**
-   * Set the editor model.
-   *
-   * #### Notes
-   * This is a no-op if the value is `null` or the existing model.
-   */
-  set model(value: IEditorModel) {
-    if (value === null || value === this._model) {
-      return;
-    }
-    if (this._model !== null) {
-      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
-      this._model.selected.connect(() => {
-          if (!this.model.readOnly) this._editor.focus();
-      });
-    }
-    this._model = value;
-    this.updateMimetype(value.mimetype);
-    this.updateFilename(value.filename);
-    this.updateReadOnly(value.readOnly);
-    this.updateTabSize(value.tabSize);
-    this.updateLineNumbers(value.lineNumbers);
-    this.updateFixedHeight(value.fixedHeight);
-    this.updateText(value.text);
-    CodeMirror.on(this._editor.getDoc() , 'change', (instance, change) => {
-      this._model.text = instance.getValue();
-      this._model.dirty = true;
-    });
-    value.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /**
@@ -189,11 +173,6 @@ class CodeMirrorWidget extends Widget {
 
   /**
    * Update the text in the widget.
-   *
-   * #### Notes
-   * This function attempts to restore the cursor to the correct
-   * place by using the bitap algorithm to find the corresponding
-   * position of the cursor in the new text.
    */
   protected updateText(text: string): void {
     if (!this.isAttached || !this.isVisible) {
@@ -306,7 +285,6 @@ class CodeMirrorWidget extends Widget {
         let fragment = oldText.substr(oldCursor, 10);
         cursor = diffMatchPatch.match_main(text, fragment, oldCursor);
       }
-
       doc.setValue(text);
       doc.setCursor(doc.posFromIndex(cursor));
     }
@@ -338,6 +316,10 @@ class CodeMirrorWidget extends Widget {
     case 'tabSize':
       this.updateTabSize(args.newValue as number);
       break;
+    case 'focused':
+      if (args.newValue) {
+        this._editor.focus();
+      }
     }
   }
 

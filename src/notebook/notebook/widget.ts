@@ -126,6 +126,20 @@ class NotebookWidget extends Widget {
   }
 
   /**
+   * Handle `update_request` messages for the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    if (this.model.mode === 'command') {
+      this.addClass(COMMAND_CLASS);
+      let layout = this.layout as PanelLayout;
+      let cell = layout.childAt(this.model.selectedCellIndex);
+      cell.node.focus();
+    } else {
+      this.removeClass(COMMAND_CLASS);
+    }
+  }
+
+  /**
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
@@ -210,11 +224,7 @@ class NotebookWidget extends Widget {
   protected onModelChanged(sender: INotebookModel, args: IChangedArgs<any>) {
     switch(args.name) {
     case 'mode': 
-      if (args.newValue as string === 'command') {
-        this.addClass(COMMAND_CLASS);
-      } else {
-        this.removeClass(COMMAND_CLASS);
-      }
+      this.update();
       break;
     case 'selectedCellIndex':
       this.updateSelectedCell(args.newValue, args.oldValue);
@@ -265,9 +275,17 @@ class NotebookWidget extends Widget {
    * Handle `click` events for the widget.
    */
   private _evtClick(event: MouseEvent): void {
-   if (!this._model.readOnly) {
-      let index = this.findCell(event.target as HTMLElement);
-      this._model.selectedCellIndex = index;
+    let model = this.model;
+    if (!model.readOnly) {
+      let i = this.findCell(event.target as HTMLElement);
+      if (i === -1) {
+        return;
+      }
+      let cell = this.model.cells.get(i);
+      if (cell.focused) {
+        model.mode = 'edit';
+      }
+      model.selectedCellIndex = i;
     }
   }
 
@@ -275,17 +293,19 @@ class NotebookWidget extends Widget {
    * Handle `dblclick` events for the widget.
    */
   private _evtDblClick(event: MouseEvent): void {
-    if (this._model.readOnly) {
+    let model = this._model;
+    if (model.readOnly) {
       return;
     }
     let i = this.findCell(event.target as HTMLElement);
-    if (i === void 0) {
+    if (i === -1) {
       return;
     }
-    let cell = this._model.cells.get(i);
+    let cell = model.cells.get(i);
     if (isMarkdownCellModel(cell) && cell.rendered) {
+      model.mode = 'edit';
       cell.rendered = false;
-      cell.input.textEditor.select();
+      cell.focused = true;
     }
   }
 

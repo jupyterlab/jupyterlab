@@ -64,6 +64,11 @@ const CODE_CELL_CLASS = 'jp-CodeCell';
 const MARKDOWN_CELL_CLASS = 'jp-MarkdownCell';
 
 /**
+ * The class name added to the markdown cell renderer widget.
+ */
+const RENDERER_CLASS = 'jp-MarkdownCell-renderer';
+
+/**
  * The class name added to raw cells.
  */
 const RAW_CELL_CLASS = 'jp-RawCell';
@@ -72,6 +77,16 @@ const RAW_CELL_CLASS = 'jp-RawCell';
  * The class name added to a rendered markdown cell.
  */
 const RENDERED_CLASS = 'jp-mod-rendered';
+
+/**
+ * The class name added to a focused cell.
+ */
+const FOCUSED_CLASS = 'jp-mod-focused';
+
+/**
+ * The text applied to an empty markdown cell.
+ */
+const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $'
 
 
 /**
@@ -87,11 +102,11 @@ class BaseCellWidget extends Widget {
     this.addClass(CELL_CLASS);
     // Make the cell focusable by setting the tabIndex.
     this.node.tabIndex = -1;
-    this.layout = new PanelLayout();
     this._model = model;
     this._input = new InputAreaWidget(model.input);
-    (this.layout as PanelLayout).addChild(this.input);
-    model.stateChanged.connect(this.modelStateChanged, this);
+    this.layout = new PanelLayout();
+    (this.layout as PanelLayout).addChild(this._input);
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -129,12 +144,17 @@ class BaseCellWidget extends Widget {
     } else {
       this.removeClass(MARKED_CLASS);
     }
+    if (this.model.focused) {
+      this.addClass(FOCUSED_CLASS);
+    } else {
+      this.removeClass(FOCUSED_CLASS);
+    }
   }
 
   /**
    * Handle changes to the model state.
    */
-  protected modelStateChanged(sender: ICellModel, args: IChangedArgs<any>) {
+  protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
     this.update();
   }
 
@@ -155,7 +175,7 @@ class CodeCellWidget extends BaseCellWidget {
     super(model);
     this.addClass(CODE_CELL_CLASS);
     this._output = new OutputAreaWidget(model.output);
-    (this.layout as PanelLayout).addChild(this.output);
+    (this.layout as PanelLayout).addChild(this._output);
   }
 
   /**
@@ -192,6 +212,8 @@ class MarkdownCellWidget extends BaseCellWidget {
     // Insist on the Github-flavored markdown mode.
     model.input.textEditor.mimetype = 'text/x-ipythongfm';
     this._rendered = new Widget();
+    this._rendered.addClass(RENDERER_CLASS);
+    (this.layout as PanelLayout).addChild(this._rendered);
     this.update();
   }
 
@@ -209,41 +231,36 @@ class MarkdownCellWidget extends BaseCellWidget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(message: Message): void {
-    super.onUpdateRequest(message);
-    if (!this._dirty) {
-      return;
-    }
     let model = this.model as IMarkdownCellModel;
     if (model.rendered) {
-      let data = removeMath(model.input.textEditor.text);
-      let html = marked(data['text']);
-      this.rendered.node.innerHTML = replaceMath(html, data['math']);
-      typeset(this.rendered.node);
-      this.input.parent = null;
-      (this.layout as PanelLayout).addChild(this.rendered);
+      if (this._dirty) {
+        let text = model.input.textEditor.text || DEFAULT_MARKDOWN_TEXT;
+        let data = removeMath(text);
+        let html = marked(data['text']);
+        this.rendered.node.innerHTML = replaceMath(html, data['math']);
+        typeset(this.rendered.node);
+      }
+      this._rendered.show();
+      this.input.hide();
       this.addClass(RENDERED_CLASS);
     } else {
-      this.rendered.parent = null;
-      (this.layout as PanelLayout).addChild(this.input);
+      this._rendered.hide();
+      this.input.show();
       this.removeClass(RENDERED_CLASS);
     }
     this._dirty = false;
+    super.onUpdateRequest(message);
   }
 
   /**
    * Change handler for model updates.
    */
-  protected modelStateChanged(sender: ICellModel, args: IChangedArgs<any>) {
-    super.modelStateChanged(sender, args);
+  protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
+    super.onModelChanged(sender, args);
     switch(args.name) {
     case 'rendered':
       this._dirty = true;
       this.update();
-      break;
-    case 'selected':
-      if (args.newValue && (this.model as IMarkdownCellModel).rendered) {
-        this.node.focus();
-      }
       break;
     }
   }

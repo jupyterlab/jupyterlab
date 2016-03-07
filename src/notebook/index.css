@@ -10,10 +10,12 @@
 
 
 .jp-InputArea-prompt {
-  flex: 0 0 auto;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 
 .jp-InputArea-editor {
-  flex: 1 1 auto;
+  flex-grow: 1;
+  flex-shrink: 1;
 }

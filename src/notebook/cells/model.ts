@@ -19,6 +19,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  IEditorModel
+} from '../editor';
+
+import {
   IInputAreaModel
 } from '../input-area';
 
@@ -60,6 +64,11 @@ interface IBaseCellModel {
    * Whether the cell is selected.
    */
   selected: boolean;
+
+  /**
+   * Whether the cell is focused for editing.
+   */
+  focused: boolean;
 
   /**
    * The input area of the cell.
@@ -157,7 +166,8 @@ class BaseCellModel implements IBaseCellModel {
    */
   constructor(input: IInputAreaModel) {
     this._input = input;
-    input.stateChanged.connect(this._inputChanged, this);
+    input.stateChanged.connect(this.onInputChanged, this);
+    input.textEditor.stateChanged.connect(this.onEditorChanged, this);
   }
 
   /**
@@ -179,6 +189,26 @@ class BaseCellModel implements IBaseCellModel {
    */
   set selected(value: boolean) {
     Private.selectedProperty.set(this, value);
+  }
+
+  /**
+   * Get whether the cell is focused for editing.
+   *
+   * #### Notes
+   * This is a delegate to the focused state of the input's editor.
+   */
+  get focused(): boolean {
+    return this.input.textEditor.focused;
+  }
+
+  /**
+   * Set whether the cell is focused for editing.
+   *
+   * #### Notes
+   * This is a delegate to the focused state of the input's editor.
+   */
+  set focused(value: boolean) {
+    this.input.textEditor.focused = value;
   }
 
   /**
@@ -276,10 +306,21 @@ class BaseCellModel implements IBaseCellModel {
   type: CellType;
 
   /**
-   * Re-emit changes to the input dirty state.
+   * Handle changes to the input model.
    */
-  private _inputChanged(input: IInputAreaModel, args: IChangedArgs<any>): void {
+  protected onInputChanged(input: IInputAreaModel, args: IChangedArgs<any>): void {
+    // Re-emit changes to input dirty and readOnly states.
     if (args.name === 'dirty' || args.name === 'readOnly') {
+      this.stateChanged.emit(args);
+    }
+  }
+
+  /**
+   * Handle changes to the editor model.
+   */
+  private onEditorChanged(editor: IEditorModel, args: IChangedArgs<any>): void {
+    // Re-emit changes to the focused state of the editor.
+    if (args.name === 'focused') {
       this.stateChanged.emit(args);
     }
   }
@@ -299,7 +340,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   constructor(input: IInputAreaModel, output: IOutputAreaModel) {
     super(input);
     this._output = output;
-    this.input.prompt = 'In[ ]:';
+    this.input.prompt = 'In[\u00A0]:';
   }
 
   /**
@@ -321,11 +362,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    */
   set executionCount(value: number) {
     Private.executionCountProperty.set(this, value);
-    if (value !== void 0 && value !== null) {
-      this.input.prompt = `In[${value}]:`;
-    } else {
-      this.input.prompt = 'In[ ]:';
-    }
+    this.input.prompt = `In [${value === null ? ' ' : value}]:`;
   }
 
   /**
