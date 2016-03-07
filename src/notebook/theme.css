@@ -8,6 +8,10 @@
   min-width: 50px;
   min-height: 50px;
   overflow-y: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 
@@ -57,30 +61,33 @@
 }
 
 
-.jp-OutputArea-output {
-  padding: 4px;
+.jp-OutputArea > .jp-OutputArea-output {
   margin-left: 90px;
   display: flex;
   flex-direction: row;
 }
 
 
-.jp-OutputArea-output.jp-OutputArea-executeResult {
+.jp-OutputArea > .jp-OutputArea-output.jp-OutputArea-executeResult {
   margin-left: 0px;
-  padding-left: 0px;
   flex: 1 1 auto;
 }
 
 
-.jp-OutputArea-prompt {
+.jp-OutputArea-output.jp-OutputArea-executeResult > .jp-OutputArea-prompt {
   color: #D84315;
   font-family: monospace;
-  padding: 0.4em;
   text-align: right;
   line-height: 20px;
+  padding: 0.4em;
   font-size: 14px;
   flex: 0 0 90px;
   box-sizing: border-box;
+}
+
+
+.jp-OutputArea-output > .jp-OutputArea-result {
+  padding: 4px;
 }
 
 
@@ -89,7 +96,7 @@
 }
 
 
-.jp-OutputArea-stderr {
+.jp-OutputArea > .jp-OutputArea-output.jp-OutputArea-stderr {
   background: #fdd;
 }
 

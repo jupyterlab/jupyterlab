@@ -106,6 +106,12 @@ const COLLAPSED_CLASS = 'jp-mod-collapsed';
 const PROMPT_CLASS = 'jp-OutputArea-prompt';
 
 /**
+ * The class name added to output area results.
+ */
+const RESULT_CLASS = 'jp-OutputArea-result';
+
+
+/**
  * A list of transformers used to render outputs
  * 
  * #### Notes
@@ -213,6 +219,7 @@ class OutputAreaWidget extends Widget {
     }
     transform.transform(bundle, document).then(result => {
       widget.node.appendChild(result.el);
+      result.el.classList.add(RESULT_CLASS);
     });
     return widget;
   }
