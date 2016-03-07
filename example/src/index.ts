@@ -84,6 +84,8 @@ function main(): void {
     box.attach(document.body);
     box.addChild(nbWidget);
 
+    window.onresize = () => { box.update(); };
+
     // start session
     startNewSession({
       notebookPath: NOTEBOOK,
