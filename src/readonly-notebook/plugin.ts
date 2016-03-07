@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  NotebookWidget, NotebookModel, populateNotebookModel, buildOutputModel, Output, INotebookModel, getNotebookContent
+  NotebookWidget, NotebookModel, serialize, deserialize, INotebookModel
 } from 'jupyter-js-notebook';
 
 import {
@@ -78,7 +78,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
    * Get the options used to save the widget content.
    */
   protected getSaveOptions(widget: NotebookWidget, model: IContentsModel): Promise<IContentsOpts> {
-      let content = getNotebookContent(widget.model);
+      let content = serialize(widget.model);
       return Promise.resolve({ type: 'notebook', content });
   }
 
@@ -95,7 +95,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
    * Populate the notebook widget with the contents of the notebook.
    */
   protected populateWidget(widget: NotebookWidget, model: IContentsModel): Promise<IContentsModel> {
-    populateNotebookModel(widget.model, model.content);
+    deserialize(model.content, widget.model);
     if (widget.model.cells.length === 0) {
       let cell = widget.model.createCodeCell();
       widget.model.cells.add(cell);
