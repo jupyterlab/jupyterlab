@@ -38,19 +38,6 @@ let SERVER_URL = getBaseUrl();
 let NOTEBOOK = 'test.ipynb';
 
 
-function bindings(nbModel: NotebookModel) {
-  let bindings: IKeyBinding[] = [{
-    selector: '.jp-Notebook-cell',
-    sequence: ['Shift Enter'],
-    handler: () => {
-      nbModel.runSelectedCell();
-      return true;
-    }
-  }];
-  return bindings;
-}
-
-
 function main(): void {
   // Initialize the keymap manager with the bindings.
   var keymap = new KeymapManager();
@@ -69,7 +56,28 @@ function main(): void {
     let nbWidget = new NotebookWidget(nbModel);
     nbWidget.title.text = NOTEBOOK;
 
-    keymap.add(bindings(nbModel));
+    let bindings = [
+    {
+      selector: '.jp-Notebook-cell',
+      sequence: ['Shift Enter'],
+      handler: () => {
+        nbModel.runSelectedCell();
+        return true;
+      }
+    },
+    {
+      selector: '.jp-Notebook-cell',
+      sequence: ['Accel S'],
+      handler: () => {
+        let content = serialize(nbModel);
+        contents.save(NOTEBOOK, {
+          type: 'notebook',
+          content
+        });
+        return true;
+      }
+    }];
+    keymap.add(bindings);
 
     let box = new BoxPanel();
     box.id = 'main';

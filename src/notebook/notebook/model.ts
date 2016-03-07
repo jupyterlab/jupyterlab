@@ -453,13 +453,11 @@ class NotebookModel implements INotebookModel {
     if (change.name === 'dirty' && change.newValue) {
       this.dirty = true;
     }
-    if (change.name === 'mode') {
-      if (change.newValue === 'edit') {
-        let cells = this.cells;
-        for (let i = 0; i < cells.length; i++) {
-          if (cells.get(i) === cell) {
-            this.selectedCellIndex = i;
-          }
+    if (change.name === 'mode' && change.newValue === 'edit') {
+      let cells = this.cells;
+      for (let i = 0; i < cells.length; i++) {
+        if (cells.get(i) === cell) {
+          this.selectedCellIndex = i;
         }
       }
     }
