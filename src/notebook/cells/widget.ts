@@ -79,7 +79,7 @@ const RAW_CELL_CLASS = 'jp-RawCell';
 const RENDERED_CLASS = 'jp-mod-rendered';
 
 /**
- * The class name added to a fucused cell.
+ * The class name added to a focused cell.
  */
 const FOCUSED_CLASS = 'jp-mod-focused';
 

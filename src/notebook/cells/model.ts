@@ -202,7 +202,7 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * Get whether the cell is focused for editing.
+   * Set whether the cell is focused for editing.
    *
    * #### Notes
    * This is a delegate to the focused state of the input's editor.
