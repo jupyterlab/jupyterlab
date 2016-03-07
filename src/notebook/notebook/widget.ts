@@ -56,11 +56,6 @@ const NB_CELL_CLASS = 'jp-Notebook-cell';
  */
 const NB_SELECTED_CLASS = 'jp-mod-selected';
 
-/**
- * The class name added for command mode.
- */
-const COMMAND_CLASS = 'jp-mod-commandMode';
-
 
 /**
  * A widget for a notebook.
@@ -122,20 +117,6 @@ class NotebookWidget extends Widget {
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
-    }
-  }
-
-  /**
-   * Handle `update_request` messages for the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    if (this.model.mode === 'command') {
-      this.addClass(COMMAND_CLASS);
-      let layout = this.layout as PanelLayout;
-      let cell = layout.childAt(this.model.selectedCellIndex);
-      cell.node.focus();
-    } else {
-      this.removeClass(COMMAND_CLASS);
     }
   }
 
@@ -281,10 +262,6 @@ class NotebookWidget extends Widget {
       if (i === -1) {
         return;
       }
-      let cell = this.model.cells.get(i);
-      if (cell.focused) {
-        model.mode = 'edit';
-      }
       model.selectedCellIndex = i;
     }
   }
@@ -303,9 +280,8 @@ class NotebookWidget extends Widget {
     }
     let cell = model.cells.get(i);
     if (isMarkdownCellModel(cell) && cell.rendered) {
-      model.mode = 'edit';
       cell.rendered = false;
-      cell.focused = true;
+      cell.mode = 'edit';
     }
   }
 
