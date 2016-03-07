@@ -123,7 +123,14 @@ class OutputAreaModel implements IOutputAreaModel {
       output.text = lastOutput.text as string + text;
       this.outputs.set(-1, output);
     } else {
-      this.outputs.add(output);
+      switch(output.output_type) {
+      case 'stream':
+      case 'execute_result':
+      case 'display_data':
+      case 'error':
+        this.outputs.add(output);
+        break;
+      }
     }
   }
 
