@@ -418,6 +418,9 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Save the notebook state.
+   *
+   * The default action is to emit a `saveRequested` signal
+   * and defer the save action.
    */
   save(): void {
     this.saveRequested.emit(void 0);
