@@ -149,6 +149,11 @@ interface INotebookModel {
   runSelectedCell(): void;
 
   /**
+   * Save the notebook state.
+   */
+  save(): void;
+
+  /**
    * The metadata associated with the notebook.
    */
   metadata: INotebookMetadata;
@@ -409,6 +414,13 @@ class NotebookModel implements INotebookModel {
     } else {
       this.selectedCellIndex += 1;
     }
+  }
+
+  /**
+   * Save the notebook state.
+   */
+  save(): void {
+    this.saveRequested.emit(void 0);
   }
 
   /**

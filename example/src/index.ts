@@ -69,7 +69,7 @@ function main(): void {
       selector: '.jp-Notebook-cell',
       sequence: ['Accel S'],
       handler: () => {
-        nbModel.saveRequested.emit(void 0);
+        nbModel.save();
         return true;
       }
     }, 

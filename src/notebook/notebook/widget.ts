@@ -530,7 +530,7 @@ class NotebookToolbar extends Widget {
     let index: number;
     switch(selected) {
     case TOOLBAR_SAVE:
-      this.model.saveRequested.emit(void 0);
+      this.model.save();
       break;
     case TOOLBAR_INSERT:
       let cell = this.model.createCodeCell();
