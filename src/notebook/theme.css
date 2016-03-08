@@ -132,64 +132,75 @@
 }
 
 
-
-
 .jp-NBToolbar {
     display: flex;
     flex-direction: row;
     background-color: #F8F8F8;
-    border: 1px solid #E0E0E0;
-    margin: 4px;
+    border-top: 1px solid #E0E0E0;
+    border-bottom: 1px solid #E0E0E0;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
-.jp-NBToolbar-item {
+
+.jp-NBToolbar > .jp-NBToolbar-item {
     flex: 0 0 auto;
     padding-left: 8px;
     padding-right: 8px;
     font-size: 13px;
+    font-family: "Helvetica Neue";
+    color: #767676;
 }
 
 
 .jp-NBToolbar-item.jp-NBToolbar-button,
 .jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
     font-family: FontAwesome;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    border: 1px solid #E0E0E0;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-right: 1px solid #E0E0E0;
     color: #616161;
     text-align: center;
     display: inline-block;
 }
 
 
-.jp-NBToolbar-button.jp-mod-pressed {
-    background-color: #E0E0E0;
+.jp-NBToolbar-item.jp-NBToolbar-cellType {
+    vertical-align: middle;
+    flex-basis: 100px;
+    /* We do not use a border here because the browser styles it
+       with rounded borders */
+    border: none;
+    border-radius: 0;
+    outline: none;
 }
 
 
-.jp-NBToolbar-button::hover {
+.jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
+  border-right: none;
+}
+
+
+.jp-NBToolbar-button.jp-mod-pressed {
+    background-color: #E0E0E0;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+
+.jp-NBToolbar-button:hover {
     background-color: #EEEEEE;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
 }
 
 
 .jp-NBToolbar-item.jp-NBToolbar-kernelName {
-    font-family: "Helvetica Neue";
     text-align: right;
     color: #767676;
     flex-grow: 1;
     flex-shrink: 1;
     padding-top: 2px;
     padding-bottom: 2px;
-}
-
-
-.jp-NBToolbar-item.jp-NBToolbar-cellType {
-    vertical-align: middle;
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-    outline: none;
+    border-left: 1px solid #E0E0E0;
 }
 
 
