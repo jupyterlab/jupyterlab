@@ -506,12 +506,6 @@ namespace NotebookModelPrivate {
   const stateChangedSignal = new Signal<INotebookModel, IChangedArgs<any>>();
 
   /**
-   * A signal emitted when the state of the model changes.
-   */
-  export
-  const saveRequestedSignal = new Signal<INotebookModel, void>();
-
-  /**
   * A property descriptor which holds the default mimetype for new code cells.
   */
   export
