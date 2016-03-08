@@ -248,7 +248,8 @@ class NotebookWidget extends Widget {
       if (node.classList.contains(NB_CELL_CLASS)) {
         for (let i = 0; i < layout.childCount(); i++) {
           if (layout.childAt(i).node === node) {
-            return i;
+            // Subtract one to account for the toolbar.
+            return i - 1;
           }
         }
         break;
@@ -356,7 +357,7 @@ class NotebookToolbar extends Widget {
         el = document.createElement('select');
         for (let t of ['Code', 'Markdown', 'Raw']) {
           let option = document.createElement('option');
-          option.value = t;
+          option.value = t.toLowerCase();
           option.textContent = t;
           el.appendChild(option);
         }
@@ -382,6 +383,13 @@ class NotebookToolbar extends Widget {
     this.addClass(NB_TOOLBAR);
     this._model = model;
     this.kernelNameNode.textContent = model.metadata.kernelspec.display_name;
+    if (model.cells.length) {
+      let cell = model.cells.get(model.selectedCellIndex);
+      this.cellTypeNode.value = cell.type;
+    }
+    this.cellTypeNode.addEventListener('change', event => {
+      this.onCellTypeChanged();
+    });
     model.stateChanged.connect(this.onModelChanged, this);
   }
 
@@ -401,6 +409,14 @@ class NotebookToolbar extends Widget {
   get kernelNameNode(): HTMLElement {
     let node = this.node.getElementsByClassName(TOOLBAR_KERNEL)[0];
     return node as HTMLElement;
+  }
+
+  /**
+   * Get the cell selector node.
+   */
+  get cellTypeNode(): HTMLSelectElement {
+    let node = this.node.getElementsByClassName(TOOLBAR_CELL)[0];
+    return node as HTMLSelectElement;
   }
 
   /**
@@ -464,7 +480,34 @@ class NotebookToolbar extends Widget {
     case 'metadata':
       let name = this.model.metadata.kernelspec.display_name;
       this.kernelNameNode.textContent = name;
+      break;
+    case 'selectedCellIndex':
+      let cell = this.model.cells.get(this.model.selectedCellIndex);
+      this.cellTypeNode.value = cell.type;
+      break;
     }
+  }
+
+  /**
+   * Handle a change in cell type.
+   */
+  protected onCellTypeChanged(): void {
+    let cell = this.model.cells.get(this.model.selectedCellIndex);
+    let newCell: ICellModel;
+    switch(this.cellTypeNode.value) {
+    case 'code':
+      newCell = this.model.createCodeCell(cell);
+      break;
+    case 'markdown':
+      newCell = this.model.createMarkdownCell(cell);
+      break;
+    default:
+      newCell = this.model.createRawCell(cell);
+      break;
+    }
+    let index = this.model.selectedCellIndex
+    this.model.cells.remove(cell);
+    this.model.cells.insert(index, newCell);
   }
 
   /**
