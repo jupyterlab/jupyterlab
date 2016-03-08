@@ -164,8 +164,11 @@
 
 
 .jp-NBToolbar-item.jp-NBToolbar-cellType {
+    font-family: "Helvetica Neue";
     vertical-align: middle;
     flex-basis: 100px;
+    /* We do not use a border here because the browser styles it
+       with rounded borders */
     border: none;
     border-radius: 0;
     outline: none;
