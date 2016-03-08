@@ -268,9 +268,11 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Set the selected cell index.
+   * Set the selected cell index.  The value will be clamped.
    */
   set selectedCellIndex(value: number) {
+    value = Math.max(value, 0);
+    value = Math.min(value, this.cells.length - 1);
     NotebookModelPrivate.selectedCellIndexProperty.set(this, value);
     let cells = this.cells;
     for (let i = 0; i < cells.length; i++) {
