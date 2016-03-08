@@ -69,7 +69,7 @@ interface INotebookModel {
   defaultMimetype: string;
 
   /**
-   * The dirty state of the notebook.
+   * Whether the notebook has unsaved changes.
    */
   dirty: boolean;
 
@@ -282,14 +282,14 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Get the dirty state of the notebook.
+   * Get whether the notebook has unsaved changes.
    */
   get dirty(): boolean {
     return NotebookModelPrivate.dirtyProperty.get(this);
   }
 
   /**
-   * Set the dirty state of the notebook.
+   * Set whether the notebook has unsaved changes.
    */
   set dirty(value: boolean) {
     // Clear the dirty state of all cells if the notebook dirty state

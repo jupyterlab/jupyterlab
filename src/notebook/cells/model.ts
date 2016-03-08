@@ -86,7 +86,7 @@ interface IBaseCellModel {
   input: IInputAreaModel;
 
   /**
-   * The dirty state of the cell.
+   * Whether the cell has unsaved changes.
    */
   dirty: boolean;
 
