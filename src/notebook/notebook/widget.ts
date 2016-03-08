@@ -174,6 +174,42 @@ class NotebookWidget extends Widget {
   }
 
   /**
+   * Insert a cell above the current cell.
+   */
+  insert(): void {
+    this._toolbar.insert();
+  }
+
+  /**
+   * Copy the current cell(s) to the clipboard.
+   */
+  copy(): void {
+    this._toolbar.copy();
+  }
+
+  /**
+   * Cut the current cell(s).
+   */
+  cut(): void {
+    this._toolbar.cut();
+  }
+
+  /**
+   * Paste cells from the clipboard.
+   */
+  paste(): void {
+    this._toolbar.paste();
+  }
+
+
+  /**
+   * Change the current cell type.
+   */
+  changeCellType(value: string): void {
+    this._toolbar.changeCellType(value);
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -388,7 +424,7 @@ class NotebookToolbar extends Widget {
       this.cellTypeNode.value = cell.type;
     }
     this.cellTypeNode.addEventListener('change', event => {
-      this.onCellTypeChanged();
+      this.changeCellType(this.cellTypeNode.value);
     });
     model.stateChanged.connect(this.onModelChanged, this);
   }
@@ -417,6 +453,99 @@ class NotebookToolbar extends Widget {
   get cellTypeNode(): HTMLSelectElement {
     let node = this.node.getElementsByClassName(TOOLBAR_CELL)[0];
     return node as HTMLSelectElement;
+  }
+
+  /**
+   * Insert a cell above the current cell.
+   */
+  insert(): void {
+    let cell = this.model.createCodeCell();
+    this.model.cells.insert(this.model.selectedCellIndex, cell);
+  }
+
+  /**
+   * Copy the current cell(s) to the clipboard.
+   */
+  copy(): void {
+    this._isCut = false;
+    this._clipBoard = [];
+    for (let i = 0; i < this.model.cells.length; i++) {
+      let cell = this.model.cells.get(i);
+      if (cell.selected || cell.marked) {
+        this._clipBoard.push(i);
+      }
+    }
+  }
+
+  /**
+   * Cut the current cell(s).
+   */
+  cut(): void {
+    this.copy();
+    this._isCut = true;
+  }
+
+  /**
+   * Paste cells from the clipboard.
+   */
+  paste(): void {
+    if (this._clipBoard.length === 0) {
+      return;
+    }
+    let index = this.model.selectedCellIndex;
+    let current: ICellModel[] = [];
+    for (let index of this._clipBoard) {
+      current.push(this.model.cells.get(index));
+    }
+    // Insert the new cell(s) at the current index.
+    for (let cell of current) {
+      let newCell: ICellModel;
+      switch(cell.type) {
+      case 'code':
+        newCell = this.model.createCodeCell(cell);
+        break;
+      case 'markdown':
+        newCell = this.model.createMarkdownCell(cell);
+        break;
+      default:
+        newCell = this.model.createRawCell(cell);
+        break;
+      }
+      this.model.cells.insert(index, newCell);
+    }
+    // Remove the previous cell(s) if cutting.
+    if (this._isCut) {
+      for (let cell of current) {
+        this.model.cells.remove(cell);
+      }
+    }
+    this.model.selectedCellIndex = index;
+    this._clipBoard = [];
+    this._isCut = false;
+  }
+
+  /**
+   * Change the current cell type.
+   */
+  changeCellType(value: string): void {
+    let model = this.model;
+    let cell = model.cells.get(model.selectedCellIndex);
+    let newCell: ICellModel;
+    switch(value) {
+    case 'code':
+      newCell = model.createCodeCell(cell);
+      break;
+    case 'markdown':
+      newCell = model.createMarkdownCell(cell);
+      (newCell as MarkdownCellModel).rendered = false;
+      break;
+    default:
+      newCell = model.createRawCell(cell);
+      break;
+    }
+    let index = model.selectedCellIndex
+    model.cells.remove(cell);
+    model.cells.insert(index, newCell);
   }
 
   /**
@@ -489,29 +618,6 @@ class NotebookToolbar extends Widget {
   }
 
   /**
-   * Handle a change in cell type.
-   */
-  protected onCellTypeChanged(): void {
-    let cell = this.model.cells.get(this.model.selectedCellIndex);
-    let newCell: ICellModel;
-    switch(this.cellTypeNode.value) {
-    case 'code':
-      newCell = this.model.createCodeCell(cell);
-      break;
-    case 'markdown':
-      newCell = this.model.createMarkdownCell(cell);
-      (newCell as MarkdownCellModel).rendered = false;
-      break;
-    default:
-      newCell = this.model.createRawCell(cell);
-      break;
-    }
-    let index = this.model.selectedCellIndex
-    this.model.cells.remove(cell);
-    this.model.cells.insert(index, newCell);
-  }
-
-  /**
    * Handle `click` events for the widget.
    */
   private _evtClick(event: MouseEvent): void {
@@ -533,17 +639,16 @@ class NotebookToolbar extends Widget {
       this.model.save();
       break;
     case TOOLBAR_INSERT:
-      let cell = this.model.createCodeCell();
-      this.model.cells.insert(this.model.selectedCellIndex, cell);
+      this.insert();
       break;
     case TOOLBAR_CUT:
-      console.log('Cut');
+      this.cut();
       break;
     case TOOLBAR_COPY:
-      console.log('Copy');
+      this.copy();
       break;
     case TOOLBAR_PASTE:
-      console.log('Paste');
+      this.paste();
       break;
     case TOOLBAR_RUN:
       this.model.runSelectedCell();
@@ -558,23 +663,32 @@ class NotebookToolbar extends Widget {
   }
 
   private _model: INotebookModel = null;
+  private _isCut = false;
+  private _clipBoard: number[] = [];
 }
 
 
 /**
- * Scroll an element into view if needed.
- *
- * @param area - The scroll area element.
- *
- * @param elem - The element of interest.
+ * A namespace for Notebook widget private data.
  */
-export
-function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
-  let ar = area.getBoundingClientRect();
-  let er = elem.getBoundingClientRect();
-  if (er.top < ar.top) {
-    area.scrollTop -= ar.top - er.top;
-  } else if (er.bottom > ar.bottom) {
-    area.scrollTop += er.bottom - ar.bottom;
+namespace Private {
+  /**
+   * Scroll an element into view if needed.
+   *
+   * @param area - The scroll area element.
+   *
+   * @param elem - The element of interest.
+   */
+  export
+  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
+    let ar = area.getBoundingClientRect();
+    let er = elem.getBoundingClientRect();
+    if (er.top < ar.top) {
+      area.scrollTop -= ar.top - er.top;
+    } else if (er.bottom > ar.bottom) {
+      area.scrollTop += er.bottom - ar.bottom;
+    }
   }
 }
+
+
