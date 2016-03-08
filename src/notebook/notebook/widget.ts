@@ -51,11 +51,6 @@ const NB_CLASS = 'jp-Notebook';
  */
 const NB_CELL_CLASS = 'jp-Notebook-cell';
 
-/**
- * The class name added to notebook selected cells.
- */
-const NB_SELECTED_CLASS = 'jp-mod-selected';
-
 
 /**
  * A widget for a notebook.
@@ -74,8 +69,6 @@ class NotebookWidget extends Widget {
     for (let i = 0; i < model.cells.length; i++) {
       layout.addChild(this.createCell(model.cells.get(i)));
     }
-    this.updateSelectedCell(this.model.selectedCellIndex);
-    model.stateChanged.connect(this.onModelChanged, this);
     model.cells.changed.connect(this.onCellsChanged, this);
   }
 
@@ -93,7 +86,6 @@ class NotebookWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose() {
-    this._model.stateChanged.disconnect(this.onModelChanged);
     this._model.cells.changed.disconnect(this.onCellsChanged);
     this._model = null;
     super.dispose();
@@ -182,35 +174,6 @@ class NotebookWidget extends Widget {
       node = node.parentElement;
     }
     return -1;
-  }
-
-  /**
-   * Handle a selected index change.
-   */
-  protected updateSelectedCell(newIndex: number, oldIndex?: number) {
-    let layout = this.layout as PanelLayout;
-    if (oldIndex !== void 0) {
-      layout.childAt(oldIndex).removeClass(NB_SELECTED_CLASS);
-    }
-    if (newIndex !== void 0) {
-      let newCell = layout.childAt(newIndex);
-      newCell.addClass(NB_SELECTED_CLASS);
-      scrollIfNeeded(this.node, newCell.node);
-    }
-  }
-
-  /**
-   * Change handler for model updates.
-   */
-  protected onModelChanged(sender: INotebookModel, args: IChangedArgs<any>) {
-    switch(args.name) {
-    case 'mode': 
-      this.update();
-      break;
-    case 'selectedCellIndex':
-      this.updateSelectedCell(args.newValue, args.oldValue);
-      break;
-    }
   }
 
   /**

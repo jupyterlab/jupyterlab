@@ -440,9 +440,15 @@ class NotebookModel implements INotebookModel {
    * Handle a change in the cells list.
    */
   private _onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
-    if (change.type === ListChangeType.Add) {
+    switch(change.type) {
+    case ListChangeType.Add:
       let cell = change.newValue as ICellModel;
       cell.stateChanged.connect(this._onCellStateChanged, this);
+      this.selectedCellIndex = change.newIndex;
+      break;
+    case ListChangeType.Remove:
+      this.selectedCellIndex = Math.min(change.oldIndex, this.cells.length - 1);
+      break;
     }
   }
 
@@ -453,7 +459,7 @@ class NotebookModel implements INotebookModel {
     if (change.name === 'dirty' && change.newValue) {
       this.dirty = true;
     }
-    if (change.name === 'mode' && change.newValue === 'edit') {
+    if (change.name === 'mode') {
       let cells = this.cells;
       for (let i = 0; i < cells.length; i++) {
         if (cells.get(i) === cell) {

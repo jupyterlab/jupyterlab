@@ -76,6 +76,23 @@ function main(): void {
         });
         return true;
       }
+    }, 
+    {
+      selector: '.jp-Cell.jp-mod-commandMode',
+      sequence: ['D', 'D'],
+      handler: () => {
+        nbModel.cells.removeAt(nbModel.selectedCellIndex);
+        return true;
+      }
+    },
+    {
+      selector: '.jp-Cell.jp-mod-commandMode',
+      sequence: ['A'],
+      handler: () => {
+        let cell = nbModel.createCodeCell();
+        nbModel.cells.insert(nbModel.selectedCellIndex, cell);
+        return true;
+      }
     }];
     keymap.add(bindings);
 
