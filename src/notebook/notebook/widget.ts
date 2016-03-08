@@ -642,10 +642,10 @@ class NotebookToolbar extends Widget {
       this.insert();
       break;
     case TOOLBAR_CUT:
-      this.copy();
+      this.cut();
       break;
     case TOOLBAR_COPY:
-      this.cut();
+      this.copy();
       break;
     case TOOLBAR_PASTE:
       this.paste();
