@@ -1,6 +1,6 @@
 
 import {
-  INotebookSession, IExecuteReply
+  INotebookSession, IExecuteReply, IContentsManager
 } from 'jupyter-js-services';
 
 import {
@@ -48,6 +48,10 @@ import {
   IError, isError, IOutput, OutputType,
   MAJOR_VERSION, MINOR_VERSION
 } from './nbformat';
+
+import {
+  serialize
+} from './serialize';
 
 
 /**
@@ -144,6 +148,11 @@ interface INotebookModel {
   runSelectedCell(): void;
 
   /**
+   * Save the notebook state.
+   */
+  save(): Promise<void>;
+
+  /**
    * The metadata associated with the notebook.
    */
   metadata: INotebookMetadata;
@@ -179,7 +188,8 @@ class NotebookModel implements INotebookModel {
   /**
    * Construct a new notebook model.
    */
-  constructor() {
+  constructor(manager: IContentsManager) {
+    this._manager = manager;
     this.cells.changed.connect(this._onCellsChanged, this);
   }
 
@@ -400,6 +410,18 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Save the notebook and clear the dirty state of the model.
+   */
+  save(): Promise<void> {
+    let content = serialize(this);
+    let name = this.session.notebookPath;
+    return this._manager.save(name, {
+      type: 'notebook',
+      content
+    }).then(() => { this.dirty = false });
+  }
+
+  /**
    * Execute the given cell. 
    */
   protected executeCell(cell: CodeCellModel): void {
@@ -472,6 +494,7 @@ class NotebookModel implements INotebookModel {
   }
 
   private _cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();
+  private _manager: IContentsManager = null;
 }
 
 

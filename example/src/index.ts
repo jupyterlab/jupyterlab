@@ -51,7 +51,7 @@ function main(): void {
 
   let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then(data => {
-    let nbModel = new NotebookModel();
+    let nbModel = new NotebookModel(contents);
     deserialize(data.content, nbModel);
     let nbWidget = new NotebookWidget(nbModel);
     nbWidget.title.text = NOTEBOOK;
@@ -69,11 +69,7 @@ function main(): void {
       selector: '.jp-Notebook-cell',
       sequence: ['Accel S'],
       handler: () => {
-        let content = serialize(nbModel);
-        contents.save(NOTEBOOK, {
-          type: 'notebook',
-          content
-        });
+        nbModel.save();
         return true;
       }
     }, 
