@@ -51,13 +51,7 @@ function main(): void {
 
   let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then(data => {
-    let nbModel = new NotebookModel(model => {
-      let content = serialize(model);
-      return contents.save(NOTEBOOK, {
-        type: 'notebook',
-        content
-      }).then(() => { return void 0; });
-    });
+    let nbModel = new NotebookModel(contents);
     deserialize(data.content, nbModel);
     let nbWidget = new NotebookWidget(nbModel);
     nbWidget.title.text = NOTEBOOK;

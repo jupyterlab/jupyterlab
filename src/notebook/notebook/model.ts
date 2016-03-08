@@ -1,6 +1,6 @@
 
 import {
-  INotebookSession, IExecuteReply
+  INotebookSession, IExecuteReply, IContentsManager
 } from 'jupyter-js-services';
 
 import {
@@ -48,6 +48,10 @@ import {
   IError, isError, IOutput, OutputType,
   MAJOR_VERSION, MINOR_VERSION
 } from './nbformat';
+
+import {
+  serialize
+} from './serialize';
 
 
 /**
@@ -183,12 +187,9 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Construct a new notebook model.
-   *
-   * @param saveCallback - A function which returns a promise that
-   *   is resolved when the notebook state is saved.
    */
-  constructor(saveCallback: (model: INotebookModel) => Promise<void>) {
-    this._saveCallback = saveCallback;
+  constructor(manager: IContentsManager) {
+    this._manager = manager;
     this.cells.changed.connect(this._onCellsChanged, this);
   }
 
@@ -412,10 +413,12 @@ class NotebookModel implements INotebookModel {
    * Save the notebook and clear the dirty state of the model.
    */
   save(): Promise<void> {
-    let cb = this._saveCallback;
-    return cb(this).then(() => {
-      this.dirty = false;
-    });
+    let content = serialize(this);
+    let name = this.session.notebookPath;
+    return this._manager.save(name, {
+      type: 'notebook',
+      content
+    }).then(() => { this.dirty = false });
   }
 
   /**
@@ -491,7 +494,7 @@ class NotebookModel implements INotebookModel {
   }
 
   private _cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();
-  private _saveCallback: (model: INotebookModel) => Promise<void> = null;
+  private _manager: IContentsManager = null;
 }
 
 
