@@ -426,12 +426,12 @@ class NotebookToolbar extends Widget {
       }
       break;
     case 'mouseup':
+    case 'mouseout':
       let nodes = this.node.childNodes;
       for (let i = 0; i < nodes.length; i++) {
         node = nodes[i] as HTMLElement;
         node.classList.remove(TOOLBAR_PRESSED);
       }
-      (event.target as HTMLElement).classList.add(TOOLBAR_PRESSED);
       break;
     }
   }
@@ -443,6 +443,7 @@ class NotebookToolbar extends Widget {
     this.node.addEventListener('click', this);
     this.node.addEventListener('mousedown', this);
     this.node.addEventListener('mouseup', this);
+    this.node.addEventListener('mouseout', this);
   }
 
   /**
@@ -452,6 +453,7 @@ class NotebookToolbar extends Widget {
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('mousedown', this);
     this.node.removeEventListener('mouseup', this);
+    this.node.addEventListener('mouseout', this);
   }
 
   /**
