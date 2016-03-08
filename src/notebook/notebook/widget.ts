@@ -538,12 +538,15 @@ class NotebookToolbar extends Widget {
       break;
     case TOOLBAR_CUT:
       console.log('Cut');
+      this._isCut = true;
+      this._buildClipboard();
       break;
     case TOOLBAR_COPY:
-      console.log('Copy');
+      this._isCut = false;
+      this._buildClipboard();
       break;
     case TOOLBAR_PASTE:
-      console.log('Paste');
+
       break;
     case TOOLBAR_RUN:
       this.model.runSelectedCell();
@@ -557,7 +560,19 @@ class NotebookToolbar extends Widget {
     }
   }
 
+  private _buildClipboard(): void {
+    this._clipBoard = [];
+    for (let i = 0; i < this.model.cells.length; i++) {
+      let cell = this.model.cells.get(i);
+      if (cell.selected || cell.marked) {
+        this._clipBoard.push(i);
+      }
+    }
+  }
+
   private _model: INotebookModel = null;
+  private _isCut = false;
+  private _clipBoard: number[] = [];
 }
 
 
