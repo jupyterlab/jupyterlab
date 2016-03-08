@@ -103,7 +103,7 @@ interface IEditorModel {
   tabSize: number;
 
   /**
-   * Whether the contents of the editor are dirty.
+   * Whether the editor has unsaved changes.
    */
   dirty: boolean;
 }
@@ -178,7 +178,7 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
    */
   protected updateText(text: string): void {
     if (!this.isAttached || !this.isVisible) {
-      this._dirty = true;
+      this._needsUpdate = true;
       return;
     }
     this.update();
@@ -244,7 +244,7 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
    * Handle afterAttach messages.
    */
   protected onAfterAttach(msg: Message): void {
-    if (this._dirty) this.update();
+    if (this._needsUpdate) this.update();
     this._editor.refresh();
   }
 
@@ -252,7 +252,7 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    if (this._dirty) this.update();
+    if (this._needsUpdate) this.update();
     this._editor.refresh();
   }
 
@@ -271,7 +271,7 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
    * A message handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-    this._dirty = false;
+    this._needsUpdate = false;
     let doc = this._editor.getDoc();
     let oldText = doc.getValue();
     let text = this._model.text;
@@ -381,5 +381,5 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
 
   private _editor: CodeMirror.Editor = null;
   private _model: IEditorModel = null;
-  private _dirty = false;
+  private _needsUpdate = false;
 }
