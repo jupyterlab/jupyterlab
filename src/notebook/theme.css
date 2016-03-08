@@ -143,11 +143,13 @@
 }
 
 
-.jp-NBToolbar-item {
+.jp-NBToolbar > .jp-NBToolbar-item {
     flex: 0 0 auto;
     padding-left: 8px;
     padding-right: 8px;
     font-size: 13px;
+    font-family: "Helvetica Neue";
+    color: #767676;
 }
 
 
@@ -164,7 +166,6 @@
 
 
 .jp-NBToolbar-item.jp-NBToolbar-cellType {
-    font-family: "Helvetica Neue";
     vertical-align: middle;
     flex-basis: 100px;
     /* We do not use a border here because the browser styles it
@@ -193,7 +194,6 @@
 
 
 .jp-NBToolbar-item.jp-NBToolbar-kernelName {
-    font-family: "Helvetica Neue";
     text-align: right;
     color: #767676;
     flex-grow: 1;
