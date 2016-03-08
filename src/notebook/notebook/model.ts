@@ -61,6 +61,11 @@ interface INotebookModel {
   stateChanged: ISignal<INotebookModel, IChangedArgs<any>>;
 
   /**
+   * A signal emitted when a save is requested.
+   */
+  saveRequested: ISignal<INotebookModel, void>;
+
+  /**
    * The default mime type for new code cells in the notebook.
    *
    * #### Notes
@@ -188,6 +193,13 @@ class NotebookModel implements INotebookModel {
    */
   get stateChanged(): ISignal<INotebookModel, IChangedArgs<any>> {
     return NotebookModelPrivate.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a save is requested.
+   */
+  get saveRequested(): ISignal<INotebookModel, void> {
+    return NotebookModelPrivate.saveRequestedSignal.bind(this);
   }
 
   /**
@@ -484,6 +496,12 @@ namespace NotebookModelPrivate {
    */
   export
   const stateChangedSignal = new Signal<INotebookModel, IChangedArgs<any>>();
+
+  /**
+   * A signal emitted when the state of the model changes.
+   */
+  export
+  const saveRequestedSignal = new Signal<INotebookModel, void>();
 
   /**
   * A property descriptor which holds the default mimetype for new code cells.

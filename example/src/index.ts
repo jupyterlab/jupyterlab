@@ -69,11 +69,7 @@ function main(): void {
       selector: '.jp-Notebook-cell',
       sequence: ['Accel S'],
       handler: () => {
-        let content = serialize(nbModel);
-        contents.save(NOTEBOOK, {
-          type: 'notebook',
-          content
-        });
+        nbModel.saveRequested.emit(void 0);
         return true;
       }
     }, 
@@ -100,6 +96,14 @@ function main(): void {
     box.id = 'main';
     box.attach(document.body);
     box.addChild(nbWidget);
+
+    nbModel.saveRequested.connect(() => {
+      let content = serialize(nbModel);
+      contents.save(NOTEBOOK, {
+        type: 'notebook',
+        content
+      }).then(() => { nbModel.dirty = false; });
+    });
 
     window.onresize = () => { box.update(); };
 
