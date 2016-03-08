@@ -165,6 +165,13 @@ class BaseCellWidget extends Widget {
     this.update();
   }
 
+  /**
+   * Handle `after-attach` messages to the cell.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.update();
+  }
+
   private _input: InputAreaWidget;
   private _model: ICellModel;
 }
