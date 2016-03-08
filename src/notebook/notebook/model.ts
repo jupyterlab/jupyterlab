@@ -61,11 +61,6 @@ interface INotebookModel {
   stateChanged: ISignal<INotebookModel, IChangedArgs<any>>;
 
   /**
-   * A signal emitted when a save is requested.
-   */
-  saveRequested: ISignal<INotebookModel, void>;
-
-  /**
    * The default mime type for new code cells in the notebook.
    *
    * #### Notes
@@ -151,7 +146,7 @@ interface INotebookModel {
   /**
    * Save the notebook state.
    */
-  save(): void;
+  save(): Promise<void>;
 
   /**
    * The metadata associated with the notebook.
@@ -188,8 +183,12 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Construct a new notebook model.
+   *
+   * @param saveCallback - A function which returns a promise that
+   *   is resolved when the notebook state is saved.
    */
-  constructor() {
+  constructor(saveCallback: (model: INotebookModel) => Promise<void>) {
+    this._saveCallback = saveCallback;
     this.cells.changed.connect(this._onCellsChanged, this);
   }
 
@@ -198,13 +197,6 @@ class NotebookModel implements INotebookModel {
    */
   get stateChanged(): ISignal<INotebookModel, IChangedArgs<any>> {
     return NotebookModelPrivate.stateChangedSignal.bind(this);
-  }
-
-  /**
-   * A signal emitted when a save is requested.
-   */
-  get saveRequested(): ISignal<INotebookModel, void> {
-    return NotebookModelPrivate.saveRequestedSignal.bind(this);
   }
 
   /**
@@ -417,13 +409,13 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Save the notebook state.
-   *
-   * The default action is to emit a `saveRequested` signal
-   * and defer the save action.
+   * Save the notebook and clear the dirty state of the model.
    */
-  save(): void {
-    this.saveRequested.emit(void 0);
+  save(): Promise<void> {
+    let cb = this._saveCallback;
+    return cb(this).then(() => {
+      this.dirty = false;
+    });
   }
 
   /**
@@ -499,6 +491,7 @@ class NotebookModel implements INotebookModel {
   }
 
   private _cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();
+  private _saveCallback: (model: INotebookModel) => Promise<void> = null;
 }
 
 

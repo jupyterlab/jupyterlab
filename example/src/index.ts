@@ -51,7 +51,13 @@ function main(): void {
 
   let contents = new ContentsManager(SERVER_URL);
   contents.get(NOTEBOOK, {}).then(data => {
-    let nbModel = new NotebookModel();
+    let nbModel = new NotebookModel(model => {
+      let content = serialize(model);
+      return contents.save(NOTEBOOK, {
+        type: 'notebook',
+        content
+      }).then(() => { return void 0; });
+    });
     deserialize(data.content, nbModel);
     let nbWidget = new NotebookWidget(nbModel);
     nbWidget.title.text = NOTEBOOK;
@@ -96,14 +102,6 @@ function main(): void {
     box.id = 'main';
     box.attach(document.body);
     box.addChild(nbWidget);
-
-    nbModel.saveRequested.connect(() => {
-      let content = serialize(nbModel);
-      contents.save(NOTEBOOK, {
-        type: 'notebook',
-        content
-      }).then(() => { nbModel.dirty = false; });
-    });
 
     window.onresize = () => { box.update(); };
 
