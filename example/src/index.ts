@@ -85,8 +85,7 @@ function main(): void {
       selector: '.jp-Cell.jp-mod-commandMode',
       sequence: ['A'],
       handler: () => {
-        let cell = nbModel.createCodeCell();
-        nbModel.cells.insert(nbModel.selectedCellIndex, cell);
+        nbWidget.insert();
         return true;
       }
     }];
