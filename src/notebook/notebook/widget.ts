@@ -500,6 +500,7 @@ class NotebookToolbar extends Widget {
       break;
     case 'markdown':
       newCell = this.model.createMarkdownCell(cell);
+      (newCell as MarkdownCellModel).rendered = false;
       break;
     default:
       newCell = this.model.createRawCell(cell);
