@@ -254,8 +254,6 @@
 }
 
 
-
-
 .jp-CodeMirror > .CodeMirror {
   line-height: 1.21429em;
   /* Changed from 1em to our global default */
