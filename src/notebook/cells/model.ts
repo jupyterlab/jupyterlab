@@ -181,21 +181,21 @@ class BaseCellModel implements IBaseCellModel {
    * A signal emitted when the state of the model changes.
    */
   get stateChanged(): ISignal<IBaseCellModel, IChangedArgs<any>> {
-    return Private.stateChangedSignal.bind(this);
+    return CellModelPrivate.stateChangedSignal.bind(this);
   }
 
   /**
    * Get whether the cell is the active cell in the notebook.
    */
   get active(): boolean {
-    return Private.activeProperty.get(this);
+    return CellModelPrivate.activeProperty.get(this);
   }
 
   /**
    * Set whether the cell is the active cell in the notebook.
    */
   set active(value: boolean) {
-    Private.activeProperty.set(this, value);
+    CellModelPrivate.activeProperty.set(this, value);
   }
 
   /**
@@ -226,14 +226,14 @@ class BaseCellModel implements IBaseCellModel {
    * Get whether the cell is selected for applying commands.
    */
   get selected(): boolean {
-    return Private.selectedProperty.get(this);
+    return CellModelPrivate.selectedProperty.get(this);
   }
 
   /**
    * Set whether the cell is selected for applying commands.
    */
   set selected(value: boolean) {
-    Private.selectedProperty.set(this, value);
+    CellModelPrivate.selectedProperty.set(this, value);
   }
 
   /**
@@ -287,28 +287,28 @@ class BaseCellModel implements IBaseCellModel {
    * Get the name of the cell.
    */
   get name(): string {
-    return Private.nameProperty.get(this);
+    return CellModelPrivate.nameProperty.get(this);
   }
 
   /**
    * Set the name of the cell.
    */
   set name(value: string) {
-    Private.nameProperty.set(this, value);
+    CellModelPrivate.nameProperty.set(this, value);
   }
 
   /**
    * Get the tags for the cell.
    */
   get tags(): string[] {
-    return Private.tagsProperty.get(this);
+    return CellModelPrivate.tagsProperty.get(this);
   }
 
   /**
    * Set the tags for the cell.
    */
   set tags(value: string[]) {
-    Private.tagsProperty.set(this, value);
+    CellModelPrivate.tagsProperty.set(this, value);
   }
 
   /**
@@ -377,14 +377,14 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    * Get the execution count.
    */
   get executionCount(): number {
-    return Private.executionCountProperty.get(this);
+    return CellModelPrivate.executionCountProperty.get(this);
   }
 
   /**
    * Set the execution count.
    */
   set executionCount(value: number) {
-    Private.executionCountProperty.set(this, value);
+    CellModelPrivate.executionCountProperty.set(this, value);
     this.input.prompt = `In [${value === null ? ' ' : value}]:`;
   }
 
@@ -392,28 +392,28 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    * Get whether the cell is collapsed/expanded.
    */
   get collapsed(): boolean {
-    return Private.collapsedProperty.get(this);
+    return CellModelPrivate.collapsedProperty.get(this);
   }
 
   /**
    * Set whether the cell is collapsed/expanded.
    */
   set collapsed(value: boolean) {
-    Private.collapsedProperty.set(this, value);
+    CellModelPrivate.collapsedProperty.set(this, value);
   }
 
   /**
    * Get whether the cell's output is scrolled, unscrolled, or autoscrolled.
    */
   get scrolled(): boolean | 'auto' {
-    return Private.scrolledProperty.get(this);
+    return CellModelPrivate.scrolledProperty.get(this);
   }
 
   /**
    * Set whether the cell's output is scrolled, unscrolled, or autoscrolled.
    */
   set scrolled(value: boolean | 'auto') {
-    Private.scrolledProperty.set(this, value);
+    CellModelPrivate.scrolledProperty.set(this, value);
   }
 
   type: CellType = "code";
@@ -431,14 +431,14 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
    * Get whether we should display a rendered representation.
    */
   get rendered() {
-    return Private.renderedProperty.get(this);
+    return CellModelPrivate.renderedProperty.get(this);
   }
 
   /**
    * Set whether we should display a rendered representation.
    */
   set rendered(value: boolean) {
-    Private.renderedProperty.set(this, value);
+    CellModelPrivate.renderedProperty.set(this, value);
   }
 
   type: CellType = "markdown";
@@ -454,14 +454,14 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
    * Get the raw cell metadata format for nbconvert.
    */
   get format(): string {
-    return Private.formatProperty.get(this);
+    return CellModelPrivate.formatProperty.get(this);
   }
 
   /**
    * Set the raw cell metadata format for nbconvert.
    */
   set format(value: string) {
-    Private.formatProperty.set(this, value);
+    CellModelPrivate.formatProperty.set(this, value);
   }
 
   type: CellType = "raw";
@@ -496,7 +496,7 @@ function isRawCellModel(m: ICellModel): m is IRawCellModel {
 /**
  * A namespace for cell private data.
  */
-namespace Private {
+namespace CellModelPrivate {
   /**
    * A signal emitted when the state of the model changes.
    */
