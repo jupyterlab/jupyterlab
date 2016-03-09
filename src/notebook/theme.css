@@ -7,10 +7,13 @@
 .p-Widget.jp-Notebook {  
   min-width: 50px;
   min-height: 50px;
+}
+
+
+.p-Widget.jp-Notebook-Container {  
   overflow-y: auto;
   padding-left: 10px;
   padding-right: 10px;
-  padding-top: 20px;
   padding-bottom: 20px;
 }
 
@@ -139,7 +142,7 @@
     border-top: 1px solid #E0E0E0;
     border-bottom: 1px solid #E0E0E0;
     margin-top: 4px;
-    margin-bottom: 4px;
+    margin-bottom: 20px;
 }
 
 
