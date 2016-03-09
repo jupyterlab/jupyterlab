@@ -32,6 +32,8 @@ import {
 
 import 'jupyter-js-notebook/lib/index.css';
 import 'jupyter-js-notebook/lib/theme.css';
+import 'jupyter-js-ui/lib/dialog/index.css';
+import 'jupyter-js-ui/lib/dialog/theme.css';
 
 
 let SERVER_URL = getBaseUrl();

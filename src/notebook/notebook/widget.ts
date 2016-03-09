@@ -7,6 +7,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  showDialog
+} from 'jupyter-js-ui/lib/dialog';
+
+import {
   DisposableDelegate, IDisposable
 } from 'phosphor-disposable';
 
@@ -230,8 +234,15 @@ class NotebookWidget extends Widget {
   /**
    * Interrupt the kernel.
    */
-  interrupt(): void {
-    this._toolbar.interrupt();
+  interrupt(): Promise<void> {
+    return this._toolbar.interrupt();
+  }
+
+  /**
+   * Restart the kernel.
+   */
+  restart(): Promise<void> {
+    return this._toolbar.restart();
   }
 
   /**
@@ -629,8 +640,23 @@ class NotebookToolbar extends Widget {
   /**
    * Interrupt the kernel.
    */
-  interrupt(): void {
-    this.model.session.kernel.interrupt();
+  interrupt(): Promise<void> {
+    return this.model.session.kernel.interrupt();
+  }
+
+  /**
+   * Restart the kernel.
+   */
+  restart(): Promise<void> {
+    return showDialog({
+      title: 'Restart Kernel?',
+      body: 'Do you want to restart the current kernel? All variables will be lost.',
+      host: this.parent.node
+    }).then(result => {
+      if (result.text === 'OK') {
+        return this.model.session.kernel.restart();
+      }
+    });
   }
 
   /**
@@ -764,7 +790,7 @@ class NotebookToolbar extends Widget {
       this.interrupt();
       break;
     case TOOLBAR_RESTART:
-      console.log('Restart');
+      this.restart();
       break;
     }
   }
