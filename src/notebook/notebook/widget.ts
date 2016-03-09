@@ -603,7 +603,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected) {
+      if (cell.selected || cell.active) {
         this._copied.push(i);
       }
     }
@@ -618,7 +618,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected) {
+      if (cell.selected || cell.active) {
         model.cells.remove(cell);
         this._cut.push(cell);
       }
@@ -671,7 +671,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (!cell.selected) {
+      if (!cell.selected && !cell.active) {
         continue;
       }
       let newCell: ICellModel;
@@ -701,7 +701,7 @@ class NotebookToolbar extends Widget {
     let selected: ICellModel[] = []
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
-      if (cell.selected) {
+      if (cell.selected || cell.active) {
         selected.push(cell);
       }
     }

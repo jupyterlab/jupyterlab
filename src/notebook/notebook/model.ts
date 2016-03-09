@@ -292,7 +292,6 @@ class NotebookModel implements INotebookModel {
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
       cell.active = value === i;
-      if (value === i) cell.selected = true;
     }
   }
 
