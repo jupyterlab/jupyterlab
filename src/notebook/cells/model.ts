@@ -41,6 +41,11 @@ import {
 export
 type CellMode = 'command' | 'edit';
 
+/**
+ * The scrolled setting of a cell.
+ */
+export
+type ScrollSetting = boolean | 'auto';
 
 /**
  * The definition of a model object for a base cell.
@@ -125,7 +130,7 @@ interface ICodeCellModel extends IBaseCellModel {
   /**
    * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
    */
-  scrolled?: boolean | 'auto';
+  scrolled?: ScrollSetting;
 }
 
 
@@ -360,10 +365,10 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   /**
    * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
    */
-  get scrolled(): boolean | 'auto' {
+  get scrolled(): ScrollSetting {
     return CellModelPrivate.scrolledProperty.get(this);
   }
-  set scrolled(value: boolean | 'auto') {
+  set scrolled(value: ScrollSetting) {
     CellModelPrivate.scrolledProperty.set(this, value);
   }
 
@@ -526,7 +531,7 @@ namespace CellModelPrivate {
   * A property descriptor for the scrolled state of a code cell.
   */
   export
-  const scrolledProperty = new Property<ICodeCellModel, boolean | 'auto'>({
+  const scrolledProperty = new Property<ICodeCellModel, ScrollSetting>({
     name: 'scrolled',
     notify: stateChangedSignal,
   });
