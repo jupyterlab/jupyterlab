@@ -58,7 +58,7 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
   });
   
   if (model.cells.length) {
-    model.selectedCellIndex = 0;
+    model.activeCellIndex = 0;
   }
   model.metadata = data.metadata;
 }

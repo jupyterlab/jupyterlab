@@ -202,7 +202,7 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Paste cells from the clipboard.
+   * Paste cell(s) from the clipboard.
    */
   paste(): void {
     this._toolbar.paste();
@@ -210,10 +210,17 @@ class NotebookWidget extends Widget {
 
 
   /**
-   * Change the current cell type.
+   * Change the current cell type(s).
    */
   changeCellType(value: string): void {
     this._toolbar.changeCellType(value);
+  }
+
+  /**
+   * Run the selected cell(s).
+   */
+  run(): void {
+    this._toolbar.run();
   }
 
   /**
@@ -352,7 +359,7 @@ class NotebookWidget extends Widget {
       if (i === -1) {
         return;
       }
-      model.selectedCellIndex = i;
+      model.activeCellIndex = i;
     }
   }
 
@@ -427,7 +434,7 @@ class NotebookToolbar extends Widget {
     this._model = model;
     this.kernelNameNode.textContent = model.metadata.kernelspec.display_name;
     if (model.cells.length) {
-      let cell = model.cells.get(model.selectedCellIndex);
+      let cell = model.cells.get(model.activeCellIndex);
       this.cellTypeNode.value = cell.type;
     }
     this.cellTypeNode.addEventListener('change', event => {
@@ -468,7 +475,7 @@ class NotebookToolbar extends Widget {
    */
   insertAbove(): void {
     let cell = this.model.createCodeCell();
-    this.model.cells.insert(this.model.selectedCellIndex, cell);
+    this.model.cells.insert(this.model.activeCellIndex, cell);
   }
 
   /**
@@ -476,7 +483,7 @@ class NotebookToolbar extends Widget {
    */
   insertBelow(): void {
     let cell = this.model.createCodeCell();
-    this.model.cells.insert(this.model.selectedCellIndex + 1, cell);
+    this.model.cells.insert(this.model.activeCellIndex + 1, cell);
   }
 
   /**
@@ -488,7 +495,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected || cell.marked) {
+      if (cell.selected) {
         this._copied.push(i);
       }
     }
@@ -503,7 +510,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected || cell.marked) {
+      if (cell.selected) {
         model.cells.remove(cell);
         this._cut.push(cell);
       }
@@ -511,13 +518,13 @@ class NotebookToolbar extends Widget {
   }
 
   /**
-   * Paste cells from the clipboard.
+   * Paste cell(s) from the clipboard.
    */
   paste(): void {
     let model = this.model;
     let cut = this._cut;
     let copied = this._copied;
-    let index = model.selectedCellIndex + 1;
+    let index = model.activeCellIndex + 1;
     if (copied.length > 0) {
       let existing: ICellModel[] = [];
       for (let index of copied) {
@@ -550,27 +557,50 @@ class NotebookToolbar extends Widget {
   }
 
   /**
-   * Change the current cell type.
+   * Change the current cell type(s).
    */
   changeCellType(value: string): void {
     let model = this.model;
-    let cell = model.cells.get(model.selectedCellIndex);
-    let newCell: ICellModel;
-    switch(value) {
-    case 'code':
-      newCell = model.createCodeCell(cell);
-      break;
-    case 'markdown':
-      newCell = model.createMarkdownCell(cell);
-      (newCell as MarkdownCellModel).rendered = false;
-      break;
-    default:
-      newCell = model.createRawCell(cell);
-      break;
+    for (let i = 0; i < model.cells.length; i++) {
+      let cell = model.cells.get(i);
+      if (!cell.selected) {
+        continue;
+      }
+      let newCell: ICellModel;
+      switch(value) {
+      case 'code':
+        newCell = model.createCodeCell(cell);
+        break;
+      case 'markdown':
+        newCell = model.createMarkdownCell(cell);
+        (newCell as MarkdownCellModel).rendered = false;
+        break;
+      default:
+        newCell = model.createRawCell(cell);
+        break;
+      }
+      model.cells.remove(cell);
+      model.cells.insert(i, newCell);
     }
-    let index = model.selectedCellIndex
-    model.cells.remove(cell);
-    model.cells.insert(index, newCell);
+  }
+
+  /**
+   * Run the selected cell(s).
+   */
+  run(): void {
+    let model = this.model;
+    let cells = model.cells;
+    let selected: ICellModel[] = []
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.get(i);
+      if (cell.selected) {
+        selected.push(cell);
+      }
+    }
+    for (let cell of selected) {
+       model.activeCellIndex = cells.indexOf(cell);
+       model.runActiveCell();
+    }
   }
 
   /**
@@ -635,8 +665,8 @@ class NotebookToolbar extends Widget {
       let name = this.model.metadata.kernelspec.display_name;
       this.kernelNameNode.textContent = name;
       break;
-    case 'selectedCellIndex':
-      let cell = this.model.cells.get(this.model.selectedCellIndex);
+    case 'activeCellIndex':
+      let cell = this.model.cells.get(this.model.activeCellIndex);
       this.cellTypeNode.value = cell.type;
       break;
     }
@@ -676,7 +706,7 @@ class NotebookToolbar extends Widget {
       this.paste();
       break;
     case TOOLBAR_RUN:
-      this.model.runSelectedCell();
+      this.run();
       break;
     case TOOLBAR_INTERRUPT:
       console.log('Interrupt');

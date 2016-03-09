@@ -44,14 +44,14 @@ import {
 const CELL_CLASS = 'jp-Cell';
 
 /**
+ * The class name added to active widgets.
+ */
+const ACTIVE_CLASS = 'jp-mod-active';
+
+/**
  * The class name added to selected widgets.
  */
 const SELECTED_CLASS = 'jp-mod-selected';
-
-/**
- * The class name added to marked widgets.
- */
-const MARKED_CLASS = 'jp-mod-marked';
 
 /**
  * The class name added to code cells.
@@ -139,15 +139,15 @@ class BaseCellWidget extends Widget {
    */
   protected onUpdateRequest(message: Message): void {
     super.onUpdateRequest(message);
+    if (this.model.active) {
+      this.addClass(ACTIVE_CLASS);
+    } else {
+      this.removeClass(ACTIVE_CLASS);
+    }
     if (this.model.selected) {
       this.addClass(SELECTED_CLASS);
     } else {
       this.removeClass(SELECTED_CLASS);
-    }
-    if (this.model.marked) {
-      this.addClass(MARKED_CLASS);
-    } else {
-      this.removeClass(MARKED_CLASS);
     }
     if (this.model.mode === 'edit') {
       this.addClass(EDIT_CLASS);

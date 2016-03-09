@@ -61,7 +61,7 @@ function main(): void {
       selector: '.jp-Notebook-cell',
       sequence: ['Shift Enter'],
       handler: () => {
-        nbModel.runSelectedCell();
+        nbModel.runActiveCell();
         return true;
       }
     },
