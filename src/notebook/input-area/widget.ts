@@ -23,7 +23,7 @@ import {
 } from 'phosphor-panel';
 
 import {
-  CodeMirrorWidget, IEditorModel
+  CodeMirrorWidget, IEditorModel, IEditorWidget
 } from '../editor';
 
 import {
@@ -68,6 +68,13 @@ const READONLY_CLASS = 'jp-mod-readOnly';
 export
 class InputAreaWidget extends Widget {
   /**
+   * Create a new editor widget.
+   */
+  static createEditor(model: IEditorModel): IEditorWidget {
+    return new CodeMirrorWidget(model);
+  }
+
+  /**
    * Construct an input area widget.
    */
   constructor(model: IInputAreaModel) {
@@ -78,7 +85,8 @@ class InputAreaWidget extends Widget {
     this._prompt = new Widget();
     this._prompt.addClass(PROMPT_CLASS);
     this._prompt.node.textContent = model.prompt;
-    this._editor = new CodeMirrorWidget(model.textEditor);
+    let constructor = this.constructor as typeof InputAreaWidget;
+    this._editor = constructor.createEditor(model.textEditor);
     this._editor.addClass(EDITOR_CLASS);
     let layout = this.layout as PanelLayout;
     layout.addChild(this._prompt);
@@ -102,7 +110,7 @@ class InputAreaWidget extends Widget {
    * #### Notes
    * This is a read-only property.
    */
-  get editor(): CodeMirrorWidget {
+  get editor(): IEditorWidget {
     return this._editor;
   }
 
@@ -149,6 +157,6 @@ class InputAreaWidget extends Widget {
   }
 
   private _model: IInputAreaModel = null;
-  private _editor: CodeMirrorWidget = null;
+  private _editor: IEditorWidget = null;
   private _prompt: Widget = null;
 }
