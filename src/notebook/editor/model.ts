@@ -248,8 +248,8 @@ namespace EditorModelPrivate {
   export
   const fixedHeightProperty = new Property<EditorModel, boolean>({
     name: 'fixedHeight',
-    notify: stateChangedSignal,
     value: false,
+    notify: stateChangedSignal,
   });
 
   /**
