@@ -104,9 +104,9 @@ interface INotebookModel {
   session?: INotebookSession;
 
   /**
-   * The currently selected cell.
+   * The index of the active cell.
    */
-  selectedCellIndex: number;
+  activeCellIndex: number;
 
   /**
    * A factory for creating a new code cell.
@@ -143,9 +143,9 @@ interface INotebookModel {
   createRawCell(source?: ICellModel): IRawCellModel;
 
   /**
-   * Run the selected cell, taking the appropriate action.
+   * Run the active cell, taking the appropriate action.
    */
-  runSelectedCell(): void;
+  runActiveCell(): void;
 
   /**
    * Save the notebook state.
@@ -271,23 +271,26 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Get the selected cell index.
+   * Get the index of the active cell.
    */
-  get selectedCellIndex(): number {
-    return NotebookModelPrivate.selectedCellIndexProperty.get(this);
+  get activeCellIndex(): number {
+    return NotebookModelPrivate.activeCellIndexProperty.get(this);
   }
 
   /**
-   * Set the selected cell index.  The value will be clamped.
+   * Set the index of the active cell.  
+   *
+   * #### Notes
+   * The value will be clamped.  All other cells will be marked as inactive.
    */
-  set selectedCellIndex(value: number) {
+  set activeCellIndex(value: number) {
     value = Math.max(value, 0);
     value = Math.min(value, this.cells.length - 1);
-    NotebookModelPrivate.selectedCellIndexProperty.set(this, value);
+    NotebookModelPrivate.activeCellIndexProperty.set(this, value);
     let cells = this.cells;
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
-      cell.selected = value === i;
+      cell.active = value === i;
     }
   }
 
@@ -389,13 +392,13 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Run the selected cell, taking the appropriate action.
+   * Run the active cell, taking the appropriate action.
    */
-  runSelectedCell(): void {
+  runActiveCell(): void {
     if (this.readOnly) {
       return;
     }
-    let cell = this.cells.get(this.selectedCellIndex);
+    let cell = this.cells.get(this.activeCellIndex);
     if (!cell) {
       return;
     }
@@ -404,12 +407,12 @@ class NotebookModel implements INotebookModel {
     } else if (isCodeCellModel(cell)) {
       this.executeCell(cell as CodeCellModel);
     }
-    if (this.selectedCellIndex === this.cells.length - 1) {
+    if (this.activeCellIndex === this.cells.length - 1) {
       let cell = this.createCodeCell();
       this.cells.add(cell);
       cell.mode = 'edit';  // This already sets the new index.
     } else {
-      this.selectedCellIndex += 1;
+      this.activeCellIndex += 1;
     }
   }
 
@@ -472,10 +475,10 @@ class NotebookModel implements INotebookModel {
     case ListChangeType.Add:
       let cell = change.newValue as ICellModel;
       cell.stateChanged.connect(this._onCellStateChanged, this);
-      this.selectedCellIndex = change.newIndex;
+      this.activeCellIndex = change.newIndex;
       break;
     case ListChangeType.Remove:
-      this.selectedCellIndex = Math.min(change.oldIndex, this.cells.length - 1);
+      this.activeCellIndex = Math.min(change.oldIndex, this.cells.length - 1);
       break;
     }
   }
@@ -491,7 +494,7 @@ class NotebookModel implements INotebookModel {
       let cells = this.cells;
       for (let i = 0; i < cells.length; i++) {
         if (cells.get(i) === cell) {
-          this.selectedCellIndex = i;
+          this.activeCellIndex = i;
         }
       }
     }
@@ -550,11 +553,11 @@ namespace NotebookModelPrivate {
   });
 
   /**
-  * A property descriptor for the selected cell index.
+  * A property descriptor for the active cell index.
   */
   export
-  const selectedCellIndexProperty = new Property<NotebookModel, number>({
-    name: 'selectedCellIndex',
+  const activeCellIndexProperty = new Property<NotebookModel, number>({
+    name: 'activeCellIndex',
     notify: stateChangedSignal,
   });
 

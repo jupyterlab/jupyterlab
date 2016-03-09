@@ -68,9 +68,9 @@ interface IBaseCellModel {
   stateChanged: ISignal<IBaseCellModel, IChangedArgs<any>>;
 
   /**
-   * Whether the cell is selected.
+   * Whether the cell is the active cell in the notebook.
    */
-  selected: boolean;
+  active: boolean;
 
   /**
    * The mode of the cell.
@@ -96,9 +96,9 @@ interface IBaseCellModel {
   readOnly: boolean;
 
   /**
-   * Whether the cell is marked for applying commands.
+   * Whether the cell is selected for applying commands.
    */
-  marked: boolean;
+  selected: boolean;
 }
 
 
@@ -185,17 +185,17 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * Get whether the cell is selected.
+   * Get whether the cell is the active cell in the notebook.
    */
-  get selected(): boolean {
-    return Private.selectedProperty.get(this);
+  get active(): boolean {
+    return Private.activeProperty.get(this);
   }
 
   /**
-   * Set whether the cell is selected.
+   * Set whether the cell is the active cell in the notebook.
    */
-  set selected(value: boolean) {
-    Private.selectedProperty.set(this, value);
+  set active(value: boolean) {
+    Private.activeProperty.set(this, value);
   }
 
   /**
@@ -223,17 +223,17 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * Get whether the cell is marked.
+   * Get wether the cell is selected for applying commands.
    */
-  get marked(): boolean {
-    return Private.markedProperty.get(this);
+  get selected(): boolean {
+    return Private.selectedProperty.get(this);
   }
 
   /**
-   * Set whether the cell is marked.
+   * Set wether the cell is selected for applying commands.
    */
-  set marked(value: boolean) {
-    Private.markedProperty.set(this, value);
+  set selected(value: boolean) {
+    Private.selectedProperty.set(this, value);
   }
 
   /**
@@ -513,11 +513,11 @@ namespace Private {
   });
 
   /**
-   * A property descriptor for the marked state of the cell.
+   * A property descriptor for the active state of the cell.
    */
   export
-  const markedProperty = new Property<IBaseCellModel, boolean>({
-    name: 'marked',
+  const activeProperty = new Property<IBaseCellModel, boolean>({
+    name: 'active',
     notify: stateChangedSignal,
   });
 
