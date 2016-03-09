@@ -336,6 +336,10 @@ class NotebookModel implements INotebookModel {
       if (isCodeCellModel(source)) {
         cell.collapsed = source.collapsed;
         cell.scrolled = source.scrolled;
+        for (let i = 0; i < source.output.outputs.length; i++) {
+          let output = source.output.outputs.get(i);
+          cell.output.outputs.add(output);
+        }
       }
     }
     return cell;
