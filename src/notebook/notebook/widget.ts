@@ -174,10 +174,17 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Insert a cell above the current cell.
+   * Insert a new code cell above the current cell.
    */
-  insert(): void {
-    this._toolbar.insert();
+  insertAbove(): void {
+    this._toolbar.insertAbove();
+  }
+
+  /**
+   * Insert a new code cell below the current cell.
+   */
+  insertBelow(): void {
+    this._toolbar.insertBelow();
   }
 
   /**
@@ -455,10 +462,19 @@ class NotebookToolbar extends Widget {
     return node as HTMLSelectElement;
   }
 
+
   /**
-   * Insert a cell below the current cell.
+   * Insert a new code cell above the current cell.
    */
-  insert(): void {
+  insertAbove(): void {
+    let cell = this.model.createCodeCell();
+    this.model.cells.insert(this.model.selectedCellIndex, cell);
+  }
+
+  /**
+   * Insert a node code cell below the current cell.
+   */
+  insertBelow(): void {
     let cell = this.model.createCodeCell();
     this.model.cells.insert(this.model.selectedCellIndex + 1, cell);
   }
@@ -469,8 +485,9 @@ class NotebookToolbar extends Widget {
   copy(): void {
     this._copied = [];
     this._cut = [];
-    for (let i = 0; i < this.model.cells.length; i++) {
-      let cell = this.model.cells.get(i);
+    let model = this.model;
+    for (let i = 0; i < model.cells.length; i++) {
+      let cell = model.cells.get(i);
       if (cell.selected || cell.marked) {
         this._copied.push(i);
       }
@@ -483,10 +500,11 @@ class NotebookToolbar extends Widget {
   cut(): void {
     this._copied = [];
     this._cut = [];
-    for (let i = 0; i < this.model.cells.length; i++) {
-      let cell = this.model.cells.get(i);
+    let model = this.model;
+    for (let i = 0; i < model.cells.length; i++) {
+      let cell = model.cells.get(i);
       if (cell.selected || cell.marked) {
-        this.model.cells.remove(cell);
+        model.cells.remove(cell);
         this._cut.push(cell);
       }
     }
@@ -496,32 +514,35 @@ class NotebookToolbar extends Widget {
    * Paste cells from the clipboard.
    */
   paste(): void {
-    let index = this.model.selectedCellIndex + 1;
-    if (this._copied.length > 0) {
+    let model = this.model;
+    let cut = this._cut;
+    let copied = this._copied;
+    let index = model.selectedCellIndex + 1;
+    if (copied.length > 0) {
       let existing: ICellModel[] = [];
-      for (let index of this._copied) {
-        existing.push(this.model.cells.get(index));
+      for (let index of copied) {
+        existing.push(model.cells.get(index));
       }
       // Insert the copied cell(s).
       for (let cell of existing) {
         let newCell: ICellModel;
         switch(cell.type) {
         case 'code':
-          newCell = this.model.createCodeCell(cell);
+          newCell = model.createCodeCell(cell);
           break;
         case 'markdown':
-          newCell = this.model.createMarkdownCell(cell);
+          newCell = model.createMarkdownCell(cell);
           break;
         default:
-          newCell = this.model.createRawCell(cell);
+          newCell = model.createRawCell(cell);
           break;
         }
-        this.model.cells.insert(index, newCell);
+        model.cells.insert(index, newCell);
       }
     } else {
       // Insert the curt cell(s).
-      for (let cell of this._cut) {
-        this.model.cells.insert(index, cell);
+      for (let cell of cut) {
+        model.cells.insert(index, cell);
       }
     }
     this._copied = [];
@@ -643,7 +664,7 @@ class NotebookToolbar extends Widget {
       this.model.save();
       break;
     case TOOLBAR_INSERT:
-      this.insert();
+      this.insertBelow();
       break;
     case TOOLBAR_CUT:
       this.cut();
