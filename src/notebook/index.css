@@ -3,6 +3,22 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+.p-Widget.jp-Notebook {  
+  display: flex;
+  flex-direction: column;
+}
+
+
+.p-Widget.jp-NBToolbar {  
+  flex: 0 0 auto;
+}
+
+
+.p-Widget.jp-Notebook-Container {  
+  flex: 1 1 auto;
+}
+
+
 .jp-InputArea {
   display: flex;
   flex-direction: row;

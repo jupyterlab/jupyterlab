@@ -55,6 +55,16 @@ import './codemirror-ipythongfm';
 const NB_CLASS = 'jp-Notebook';
 
 /**
+ * The class name added to notebook container widget.
+ */
+const NB_CONTAINER = 'jp-Notebook-Container';
+
+/**
+ * The class name added to notebook cell widget.
+ */
+const NB_CELLS = 'jp-Notebook-Cells';
+
+/**
  * The class name added to notebook widget cells.
  */
 const NB_CELL_CLASS = 'jp-Notebook-cell';
@@ -155,11 +165,13 @@ class NotebookWidget extends Widget {
     this.layout = new PanelLayout();
     let layout = this.layout as PanelLayout;
     this._toolbar = new NotebookToolbar(model);
+    let container = new Widget();
+    container.addClass(NB_CONTAINER);
+    container.layout = new PanelLayout();
+    this._notebook = new NotebookCells(model);
+    (container.layout as PanelLayout).addChild(this._notebook);
     layout.addChild(this._toolbar);
-    for (let i = 0; i < model.cells.length; i++) {
-      layout.addChild(this.createCell(model.cells.get(i)));
-    }
-    model.cells.changed.connect(this.onCellsChanged, this);
+    layout.addChild(container);
   }
 
   /**
@@ -176,7 +188,6 @@ class NotebookWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose() {
-    this._model.cells.changed.disconnect(this.onCellsChanged);
     this._model = null;
     super.dispose();
   }
@@ -243,6 +254,50 @@ class NotebookWidget extends Widget {
    */
   restart(): Promise<void> {
     return this._toolbar.restart();
+  }
+
+  private _model: INotebookModel = null;
+  private _toolbar: NotebookToolbar = null;
+  private _notebook: NotebookCells = null;
+}
+
+
+/**
+ * A widget holding the notebook cells.
+ */
+class NotebookCells extends Widget {
+  /**
+   * Construct a notebook cells widget.
+   */
+  constructor(model: INotebookModel) {
+    super();
+    this.addClass(NB_CELLS);
+    this._model = model;
+    this.layout = new PanelLayout();
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < model.cells.length; i++) {
+      layout.addChild(this.createCell(model.cells.get(i)));
+    }
+    model.cells.changed.connect(this.onCellsChanged, this);
+  }
+
+  /**
+   * Get the model for the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get model(): INotebookModel {
+    return this._model;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose() {
+    this._model.cells.changed.disconnect(this.onCellsChanged);
+    this._model = null;
+    super.dispose();
   }
 
   /**
@@ -320,8 +375,7 @@ class NotebookWidget extends Widget {
       if (node.classList.contains(NB_CELL_CLASS)) {
         for (let i = 0; i < layout.childCount(); i++) {
           if (layout.childAt(i).node === node) {
-            // Subtract one to account for the toolbar.
-            return i - 1;
+            return i;
           }
         }
         break;
@@ -338,22 +392,21 @@ class NotebookWidget extends Widget {
     let layout = this.layout as PanelLayout;
     let factory = this.createCell;
     let widget: Widget;
-    // Note: We add 1 to indices to account for the toolbar.
     switch(args.type) {
     case ListChangeType.Add:
-      layout.insertChild(args.newIndex + 1, factory(args.newValue as ICellModel));
+      layout.insertChild(args.newIndex, factory(args.newValue as ICellModel));
       break;
     case ListChangeType.Move:
-      layout.insertChild(args.newIndex + 1, layout.childAt(args.oldIndex));
+      layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
       break;
     case ListChangeType.Remove:
-      widget = layout.childAt(args.oldIndex + 1);
+      widget = layout.childAt(args.oldIndex);
       layout.removeChild(widget);
       widget.dispose();
       break;
     case ListChangeType.Replace:
       for (let i = (args.oldValue as ICellModel[]).length; i > 0; i--) {
-        widget = layout.childAt(i + 1);
+        widget = layout.childAt(i);
         layout.removeChild(widget);
         widget.dispose();
       }
@@ -363,10 +416,10 @@ class NotebookWidget extends Widget {
       }
       break;
     case ListChangeType.Set:
-      widget = layout.childAt(args.newIndex + 1);
+      widget = layout.childAt(args.newIndex);
       layout.removeChild(widget);
       widget.dispose();
-      layout.insertChild(args.newIndex + 1, factory(args.newValue as ICellModel));
+      layout.insertChild(args.newIndex, factory(args.newValue as ICellModel));
       break;
     }
   }
@@ -405,7 +458,6 @@ class NotebookWidget extends Widget {
   }
 
   private _model: INotebookModel = null;
-  private _toolbar: NotebookToolbar = null;
 }
 
 
@@ -502,6 +554,14 @@ class NotebookToolbar extends Widget {
   get kernelIndicatorNode(): HTMLElement {
     let node = this.node.getElementsByClassName(TOOLBAR_INDICATOR)[0];
     return node as HTMLElement;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose() {
+    this._model = null;
+    super.dispose();
   }
 
   /**
@@ -823,5 +883,3 @@ namespace Private {
     }
   }
 }
-
-
