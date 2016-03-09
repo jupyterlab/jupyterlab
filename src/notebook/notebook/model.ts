@@ -259,8 +259,7 @@ class NotebookModel implements INotebookModel {
    *
    * #### Notes
    * The value will be clamped.  When setting this, all other cells 
-   * will be marked as inactive. The active cell will also be marked 
-   * as selected.
+   * will be marked as inactive.
    */
   get activeCellIndex(): number {
     return NotebookModelPrivate.activeCellIndexProperty.get(this);
