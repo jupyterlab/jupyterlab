@@ -282,6 +282,7 @@ class NotebookModel implements INotebookModel {
    *
    * #### Notes
    * The value will be clamped.  All other cells will be marked as inactive.
+   * The active cell will also be marked as selected.
    */
   set activeCellIndex(value: number) {
     value = Math.max(value, 0);
@@ -291,6 +292,7 @@ class NotebookModel implements INotebookModel {
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
       cell.active = value === i;
+      if (value === i) cell.selected = true;
     }
   }
 

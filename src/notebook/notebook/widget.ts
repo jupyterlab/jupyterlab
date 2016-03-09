@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  KernelStatus
+} from 'jupyter-js-services';
+
+import {
   DisposableDelegate, IDisposable
 } from 'phosphor-disposable';
 
@@ -224,6 +228,13 @@ class NotebookWidget extends Widget {
   }
 
   /**
+   * Interrupt the kernel.
+   */
+  interrupt(): void {
+    this._toolbar.interrupt();
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -440,6 +451,11 @@ class NotebookToolbar extends Widget {
     this.cellTypeNode.addEventListener('change', event => {
       this.changeCellType(this.cellTypeNode.value);
     });
+    if (model.session) {
+      this.handleSession();
+    } else {
+      this.kernelIndicatorNode.classList.add(TOOLBAR_BUSY);
+    }
     model.stateChanged.connect(this.onModelChanged, this);
   }
 
@@ -469,6 +485,13 @@ class NotebookToolbar extends Widget {
     return node as HTMLSelectElement;
   }
 
+  /**
+   * Get the kernel status indicator node.
+   */
+  get kernelIndicatorNode(): HTMLElement {
+    let node = this.node.getElementsByClassName(TOOLBAR_INDICATOR)[0];
+    return node as HTMLElement;
+  }
 
   /**
    * Insert a new code cell above the current cell.
@@ -604,6 +627,13 @@ class NotebookToolbar extends Widget {
   }
 
   /**
+   * Interrupt the kernel.
+   */
+  interrupt(): void {
+    this.model.session.kernel.interrupt();
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -669,6 +699,28 @@ class NotebookToolbar extends Widget {
       let cell = this.model.cells.get(this.model.activeCellIndex);
       this.cellTypeNode.value = cell.type;
       break;
+    case 'session':
+      this.handleSession();
+      break;
+    }
+  }
+
+  /**
+   * Handle a change to the session.
+   */
+  protected handleSession(): void {
+    let node = this.kernelIndicatorNode;
+    this.model.session.kernel.statusChanged.connect((sender, status) => {
+      if (status === KernelStatus.Idle) {
+        node.classList.remove(TOOLBAR_BUSY);
+      } else {
+        node.classList.add(TOOLBAR_BUSY);
+      }
+    });
+    if (this.model.session.status === KernelStatus.Idle) {
+      node.classList.remove(TOOLBAR_BUSY);
+    } else {
+      node.classList.add(TOOLBAR_BUSY);
     }
   }
 
@@ -709,7 +761,7 @@ class NotebookToolbar extends Widget {
       this.run();
       break;
     case TOOLBAR_INTERRUPT:
-      console.log('Interrupt');
+      this.interrupt();
       break;
     case TOOLBAR_RESTART:
       console.log('Restart');
