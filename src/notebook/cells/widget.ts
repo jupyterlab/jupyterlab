@@ -103,7 +103,7 @@ class BaseCellWidget extends Widget {
    * Create a new input widget.
    */
   static createInput(model: IInputAreaModel): InputAreaWidget {
-    return InputAreaWidget(model);
+    return new InputAreaWidget(model);
   }
 
   /**
