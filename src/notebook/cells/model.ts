@@ -223,14 +223,14 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * Get wether the cell is selected for applying commands.
+   * Get whether the cell is selected for applying commands.
    */
   get selected(): boolean {
     return Private.selectedProperty.get(this);
   }
 
   /**
-   * Set wether the cell is selected for applying commands.
+   * Set whether the cell is selected for applying commands.
    */
   set selected(value: boolean) {
     Private.selectedProperty.set(this, value);
@@ -435,7 +435,7 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
   }
 
   /**
-   * Get whether we should display a rendered representation.
+   * Set whether we should display a rendered representation.
    */
   set rendered(value: boolean) {
     Private.renderedProperty.set(this, value);
@@ -458,7 +458,7 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
   }
 
   /**
-   * Get the raw cell metadata format for nbconvert.
+   * Set the raw cell metadata format for nbconvert.
    */
   set format(value: string) {
     Private.formatProperty.set(this, value);
