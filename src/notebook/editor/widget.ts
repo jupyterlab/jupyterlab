@@ -28,6 +28,10 @@ import {
   ResizeMessage, Widget
 } from 'phosphor-widget';
 
+import {
+  IEditorModel
+} from './model';
+
 
 /**
  * The class name added to CodeMirrorWidget instances.
@@ -44,71 +48,6 @@ const FIXED_HEIGHT_CLASS = 'jp-mod-fixedHeight';
  */
 let diffMatchPatch = new dmp.diff_match_patch();
 
-
-/**
- * An interface required for implementing the editor model
- */
-export
-interface IEditorModel {
-  /**
-   * A signal emitted when the editor model state changes.
-   */
-  stateChanged: ISignal<IEditorModel, IChangedArgs<any>>;
-
-  /**
-   * The text in the text editor.
-   */
-  text: string;
-
-  /**
-   * The mimetype of the text.
-   *
-   * #### Notes
-   * The mimetype is used to set the syntax highlighting, for example.
-   */
-  mimetype: string;
-
-  /**
-   * The filename of the editor.
-   */
-  filename: string;
-
-  /**
-   * Whether the editor is focused.
-   */
-  focused: boolean;
-
-  /**
-   * Whether the text editor has a fixed maximum height.
-   *
-   * #### Notes
-   * If true, the editor has a fixed maximum height.  If false, the editor
-   * resizes to fit the content.
-   */
-  fixedHeight: boolean;
-
-  /**
-   * A flag to determine whether to show line numbers.
-   */
-  lineNumbers: boolean;
-
-  /**
-   * A property to determine whether to allow editing.
-   */
-  readOnly: boolean;
-
-  /**
-   * The number of spaces to insert for each tab.
-   */
-  tabSize: number;
-
-  /**
-   * Whether the editor has unsaved changes.
-   */
-  dirty: boolean;
-}
-
-
 /**
  * The interface for an editor widget.
  */
@@ -119,7 +58,6 @@ interface IEditorWidget extends Widget {
    */
   model: IEditorModel;
 }
-
 
 /**
  * A widget which hosts a CodeMirror editor.
