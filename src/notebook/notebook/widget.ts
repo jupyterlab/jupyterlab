@@ -228,6 +228,13 @@ class NotebookWidget extends Widget {
   }
 
   /**
+   * Interrupt the kernel.
+   */
+  interrupt(): void {
+    this._toolbar.interrupt();
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -623,8 +630,7 @@ class NotebookToolbar extends Widget {
    * Interrupt the kernel.
    */
   interrupt(): void {
-    let kernel = this.model.session.kernel;
-    kernel.interrupt();
+    this.model.session.kernel.interrupt();
   }
 
   /**
