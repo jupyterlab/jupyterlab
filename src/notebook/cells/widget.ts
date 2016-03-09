@@ -100,6 +100,13 @@ const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $'
 export
 class BaseCellWidget extends Widget {
   /**
+   * Create a new input widget.
+   */
+  static createInput(model: IInputAreaModel): InputAreaWidget {
+    return new InputAreaWidget(model);
+  }
+
+  /**
    * Construct a new base cell widget.
    */
   constructor(model: ICellModel) {
@@ -108,7 +115,8 @@ class BaseCellWidget extends Widget {
     // Make the cell focusable by setting the tabIndex.
     this.node.tabIndex = -1;
     this._model = model;
-    this._input = new InputAreaWidget(model.input);
+    let constructor = this.constructor as typeof BaseCellWidget;
+    this._input = constructor.createInput(model.input);
     this.layout = new PanelLayout();
     (this.layout as PanelLayout).addChild(this._input);
     model.stateChanged.connect(this.onModelChanged, this);
@@ -182,13 +190,22 @@ class BaseCellWidget extends Widget {
  */
 export
 class CodeCellWidget extends BaseCellWidget {
+
+  /**
+   * Create an output area widget.
+   */
+  static createOutput(model: IOutputAreaModel): OutputAreaWidget {
+    return new OutputAreaWidget(model);
+  }
+
   /**
    * Construct a code cell widget.
    */
   constructor(model: ICodeCellModel) {
     super(model);
     this.addClass(CODE_CELL_CLASS);
-    this._output = new OutputAreaWidget(model.output);
+    let constructor = this.constructor as typeof CodeCellWidget;
+    this._output = constructor.createOutput(model.output);
     (this.layout as PanelLayout).addChild(this._output);
   }
 
