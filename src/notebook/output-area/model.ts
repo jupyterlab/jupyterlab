@@ -70,29 +70,21 @@ class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
-   * Get whether the output has a maximum fixed height.
+   * Whether the output has a maximum fixed height.
    */
   get fixedHeight() {
     return Private.fixedHeightProperty.get(this);
   }
-
-  /**
-   * Set whether the output has a maximum fixed height.
-   */
   set fixedHeight(value: boolean) {
     Private.fixedHeightProperty.set(this, value);
   }
 
   /**
-   * Get whether the input area should be collapsed or displayed.
+   * Whether the input area should be collapsed or displayed.
    */
   get collapsed() {
     return Private.collapsedProperty.get(this);
   }
-
-  /**
-   * Set whether the input area should be collapsed or displayed.
-   */
   set collapsed(value: boolean) {
     Private.collapsedProperty.set(this, value);
   }

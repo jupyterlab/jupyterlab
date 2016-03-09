@@ -145,126 +145,91 @@ class EditorModel implements IEditorModel {
   }
 
   /**
-   * Get the dirty state for the editor.
+   * The dirty state for the editor.
    */
   get dirty(): boolean {
     return EditorModelPrivate.dirtyProperty.get(this);
   }
-
-  /**
-   * Set the dirty state for the editor.
-   */
   set dirty(value: boolean) {
     EditorModelPrivate.dirtyProperty.set(this, value);
   }
 
   /**
-   * Get the mode for the editor filename.
+   * The mode for the editor filename.
    */
   get filename(): string {
     return EditorModelPrivate.filenameProperty.get(this);
   }
-
-  /**
-   * Set the text for the editor filename.
-   */
   set filename(value: string) {
     EditorModelPrivate.filenameProperty.set(this, value);
   }
 
   /**
-   * Get whether the editor height should be constrained.
+   * Whether the editor height should be constrained.
    */
   get fixedHeight() {
     return EditorModelPrivate.fixedHeightProperty.get(this);
   }
-
-  /**
-   * Set whether the editor height should be constrained.
-   */
   set fixedHeight(value: boolean) {
     EditorModelPrivate.fixedHeightProperty.set(this, value);
   }
 
   /**
-   * Get the mode for the editor mimetype.
+   * The mode for the editor mimetype.
    */
   get mimetype(): string {
     return EditorModelPrivate.mimetypeProperty.get(this);
   }
-
-  /**
-   * Set the text for the editor mimetype.
-   */
   set mimetype(value: string) {
     EditorModelPrivate.mimetypeProperty.set(this, value);
   }
 
   /**
-   * Get the lineNumbers flag for the editor model.
+   * The lineNumbers flag for the editor model.
    */
   get lineNumbers(): boolean {
     return EditorModelPrivate.lineNumbersProperty.get(this);
   }
-
-  /**
-   * Set the lineNumbers flag for the editor model.
-   */
   set lineNumbers(value: boolean) {
     EditorModelPrivate.lineNumbersProperty.set(this, value);
   }
 
   /**
-   * Get the readOnly property for the editor model.
+   * The readOnly property for the editor model.
    */
   get readOnly(): boolean {
     return EditorModelPrivate.readOnlyProperty.get(this);
   }
-
-  /**
-   * Set the readOnly property for the editor model.
-   */
   set readOnly(value: boolean) {
     EditorModelPrivate.readOnlyProperty.set(this, value);
   }
+
   /**
-   * Get whether the editor is focused for editing.
+   * Whether the editor is focused for editing.
    */
   get focused(): boolean {
     return EditorModelPrivate.focusedProperty.get(this);
   }
-
-  /**
-   * Set whether the editor is focused for editing.
-   */
   set focused(value: boolean) {
     EditorModelPrivate.focusedProperty.set(this, value);
   }
 
   /**
-   * Get the tabSize number for the editor model.
+   * The tabSize number for the editor model.
    */
   get tabSize(): number {
     return EditorModelPrivate.tabSizeProperty.get(this);
   }
-
-  /**
-   * Set the tabSize number for the editor model.
-   */
   set tabSize(value: number) {
     EditorModelPrivate.tabSizeProperty.set(this, value);
   }
 
   /**
-   * Get the text of the editor model.
+   * The text of the editor model.
    */
   get text(): string {
     return EditorModelPrivate.textProperty.get(this);
   }
-
-  /**
-   * Set the text on the editor model.
-   */
   set text(value: string) {
     EditorModelPrivate.textProperty.set(this, value);
   }

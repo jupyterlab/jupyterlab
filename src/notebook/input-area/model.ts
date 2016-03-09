@@ -73,29 +73,21 @@ class InputAreaModel implements IInputAreaModel {
   }
 
   /**
-   * Get whether the input area should be collapsed or displayed.
+   * Whether the input area should be collapsed or displayed.
    */
   get collapsed() {
     return InputAreaModelPrivate.collapsedProperty.get(this);
   }
-
-  /**
-   * Set whether the input area should be collapsed or displayed.
-   */
   set collapsed(value: boolean) {
     InputAreaModelPrivate.collapsedProperty.set(this, value);
   }
 
   /**
-   * Get the prompt text.
+   * The prompt text.
    */
   get prompt() {
     return InputAreaModelPrivate.promptProperty.get(this);
   }
-
-  /**
-   * Set the prompt text.
-   */
   set prompt(value: string) {
     InputAreaModelPrivate.promptProperty.set(this, value);
   }
@@ -111,7 +103,7 @@ class InputAreaModel implements IInputAreaModel {
   }
 
   /**
-   * Get the dirty state.
+   * The dirty state.
    *
    * #### Notest
    * This is a delegate to the dirty state of the [textEditor].
@@ -119,27 +111,16 @@ class InputAreaModel implements IInputAreaModel {
   get dirty(): boolean {
     return this.textEditor.dirty;
   }
-
-  /**
-   * Set the dirty state.
-   *
-   * #### Notest
-   * This is a delegate to the dirty state of the [textEditor].
-   */
   set dirty(value: boolean) {
     this.textEditor.dirty = value;
   }
 
   /**
-   * Get the read only state.
+   * The read only state.
    */
   get readOnly(): boolean {
     return this.textEditor.readOnly;
   }
-
-  /**
-   * Set the read only state.
-   */
   set readOnly(value: boolean) {
     this.textEditor.readOnly = value;
   }

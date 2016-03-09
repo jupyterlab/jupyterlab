@@ -185,21 +185,17 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * Get whether the cell is the active cell in the notebook.
+   * Whether the cell is the active cell in the notebook.
    */
   get active(): boolean {
     return CellModelPrivate.activeProperty.get(this);
   }
-
-  /**
-   * Set whether the cell is the active cell in the notebook.
-   */
   set active(value: boolean) {
     CellModelPrivate.activeProperty.set(this, value);
   }
 
   /**
-   * Get mode of the cell.
+   * The mode of the cell.
    *
    * #### Notes
    * This is a delegate to the focused state of the input's editor.
@@ -211,27 +207,16 @@ class BaseCellModel implements IBaseCellModel {
       return 'command';
     }
   }
-
-  /**
-   * Set mode of the cell.
-   *
-   * #### Notes
-   * This is a delegate to the focused state of the input's editor.
-   */
   set mode(value: CellMode) {
     this.input.textEditor.focused = value === 'edit';
   }
 
   /**
-   * Get whether the cell is selected for applying commands.
+   * Whether the cell is selected for applying commands.
    */
   get selected(): boolean {
     return CellModelPrivate.selectedProperty.get(this);
   }
-
-  /**
-   * Set whether the cell is selected for applying commands.
-   */
   set selected(value: boolean) {
     CellModelPrivate.selectedProperty.set(this, value);
   }
@@ -244,7 +229,7 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * Get the dirty state of the cell.
+   * The dirty state of the cell.
    *
    * #### Notes
    * This is a delegate to the dirty state of the [input].
@@ -252,19 +237,12 @@ class BaseCellModel implements IBaseCellModel {
   get dirty(): boolean {
     return this.input.dirty;
   }
-
-  /**
-   * Set the dirty state of the cell.
-   *
-   * #### Notes
-   * This is a delegate to the dirty state of the [input].
-   */
   set dirty(value: boolean) {
     this.input.dirty = value;
   }
 
   /**
-   * Get the read only state of the cell.
+   * The read only state of the cell.
    *
    * #### Notes
    * This is a delegate to the read only state of the [input].
@@ -272,41 +250,26 @@ class BaseCellModel implements IBaseCellModel {
   get readOnly(): boolean {
     return this.input.readOnly;
   }
-
-  /**
-   * Set the read only state of the cell.
-   *
-   * #### Notes
-   * This is a delegate to the read only state of the [input].
-   */
   set readOnly(value: boolean) {
     this.input.readOnly = value;
   }
 
   /**
-   * Get the name of the cell.
+   * The name of the cell.
    */
   get name(): string {
     return CellModelPrivate.nameProperty.get(this);
   }
-
-  /**
-   * Set the name of the cell.
-   */
   set name(value: string) {
     CellModelPrivate.nameProperty.set(this, value);
   }
 
   /**
-   * Get the tags for the cell.
+   * The tags for the cell.
    */
   get tags(): string[] {
     return CellModelPrivate.tagsProperty.get(this);
   }
-
-  /**
-   * Set the tags for the cell.
-   */
   set tags(value: string[]) {
     CellModelPrivate.tagsProperty.set(this, value);
   }
@@ -374,44 +337,32 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   }
 
   /**
-   * Get the execution count.
+   * The execution count.
    */
   get executionCount(): number {
     return CellModelPrivate.executionCountProperty.get(this);
   }
-
-  /**
-   * Set the execution count.
-   */
   set executionCount(value: number) {
     CellModelPrivate.executionCountProperty.set(this, value);
     this.input.prompt = `In [${value === null ? ' ' : value}]:`;
   }
 
   /**
-   * Get whether the cell is collapsed/expanded.
+   * Whether the cell is collapsed/expanded.
    */
   get collapsed(): boolean {
     return CellModelPrivate.collapsedProperty.get(this);
   }
-
-  /**
-   * Set whether the cell is collapsed/expanded.
-   */
   set collapsed(value: boolean) {
     CellModelPrivate.collapsedProperty.set(this, value);
   }
 
   /**
-   * Get whether the cell's output is scrolled, unscrolled, or autoscrolled.
+   * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
    */
   get scrolled(): boolean | 'auto' {
     return CellModelPrivate.scrolledProperty.get(this);
   }
-
-  /**
-   * Set whether the cell's output is scrolled, unscrolled, or autoscrolled.
-   */
   set scrolled(value: boolean | 'auto') {
     CellModelPrivate.scrolledProperty.set(this, value);
   }
@@ -428,15 +379,11 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
 export
 class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
   /**
-   * Get whether we should display a rendered representation.
+   * Whether we should display a rendered representation.
    */
   get rendered() {
     return CellModelPrivate.renderedProperty.get(this);
   }
-
-  /**
-   * Set whether we should display a rendered representation.
-   */
   set rendered(value: boolean) {
     CellModelPrivate.renderedProperty.set(this, value);
   }
@@ -451,15 +398,11 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
 export
 class RawCellModel extends BaseCellModel implements IRawCellModel {
   /**
-   * Get the raw cell metadata format for nbconvert.
+   * The raw cell metadata format for nbconvert.
    */
   get format(): string {
     return CellModelPrivate.formatProperty.get(this);
   }
-
-  /**
-   * Set the raw cell metadata format for nbconvert.
-   */
   set format(value: string) {
     CellModelPrivate.formatProperty.set(this, value);
   }
