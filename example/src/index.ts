@@ -77,7 +77,7 @@ function main(): void {
       selector: '.jp-Cell.jp-mod-commandMode',
       sequence: ['D', 'D'],
       handler: () => {
-        nbModel.cells.removeAt(nbModel.selectedCellIndex);
+        nbWidget.cut();
         return true;
       }
     },
@@ -85,7 +85,15 @@ function main(): void {
       selector: '.jp-Cell.jp-mod-commandMode',
       sequence: ['A'],
       handler: () => {
-        nbWidget.insert();
+        nbWidget.insertAbove();
+        return true;
+      }
+    },
+    {
+      selector: '.jp-Cell.jp-mod-commandMode',
+      sequence: ['B'],
+      handler: () => {
+        nbWidget.insertBelow();
         return true;
       }
     }];

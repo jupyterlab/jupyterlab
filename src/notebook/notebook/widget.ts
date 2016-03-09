@@ -174,10 +174,17 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Insert a cell above the current cell.
+   * Insert a new code cell above the current cell.
    */
-  insert(): void {
-    this._toolbar.insert();
+  insertAbove(): void {
+    this._toolbar.insertAbove();
+  }
+
+  /**
+   * Insert a new code cell below the current cell.
+   */
+  insertBelow(): void {
+    this._toolbar.insertBelow();
   }
 
   /**
@@ -455,24 +462,34 @@ class NotebookToolbar extends Widget {
     return node as HTMLSelectElement;
   }
 
+
   /**
-   * Insert a cell above the current cell.
+   * Insert a new code cell above the current cell.
    */
-  insert(): void {
+  insertAbove(): void {
     let cell = this.model.createCodeCell();
     this.model.cells.insert(this.model.selectedCellIndex, cell);
+  }
+
+  /**
+   * Insert a node code cell below the current cell.
+   */
+  insertBelow(): void {
+    let cell = this.model.createCodeCell();
+    this.model.cells.insert(this.model.selectedCellIndex + 1, cell);
   }
 
   /**
    * Copy the current cell(s) to the clipboard.
    */
   copy(): void {
-    this._isCut = false;
-    this._clipBoard = [];
-    for (let i = 0; i < this.model.cells.length; i++) {
-      let cell = this.model.cells.get(i);
+    this._copied = [];
+    this._cut = [];
+    let model = this.model;
+    for (let i = 0; i < model.cells.length; i++) {
+      let cell = model.cells.get(i);
       if (cell.selected || cell.marked) {
-        this._clipBoard.push(i);
+        this._copied.push(i);
       }
     }
   }
@@ -481,47 +498,55 @@ class NotebookToolbar extends Widget {
    * Cut the current cell(s).
    */
   cut(): void {
-    this.copy();
-    this._isCut = true;
+    this._copied = [];
+    this._cut = [];
+    let model = this.model;
+    for (let i = 0; i < model.cells.length; i++) {
+      let cell = model.cells.get(i);
+      if (cell.selected || cell.marked) {
+        model.cells.remove(cell);
+        this._cut.push(cell);
+      }
+    }
   }
 
   /**
    * Paste cells from the clipboard.
    */
   paste(): void {
-    if (this._clipBoard.length === 0) {
-      return;
-    }
-    let index = this.model.selectedCellIndex;
-    let current: ICellModel[] = [];
-    for (let index of this._clipBoard) {
-      current.push(this.model.cells.get(index));
-    }
-    // Insert the new cell(s) at the current index.
-    for (let cell of current) {
-      let newCell: ICellModel;
-      switch(cell.type) {
-      case 'code':
-        newCell = this.model.createCodeCell(cell);
-        break;
-      case 'markdown':
-        newCell = this.model.createMarkdownCell(cell);
-        break;
-      default:
-        newCell = this.model.createRawCell(cell);
-        break;
+    let model = this.model;
+    let cut = this._cut;
+    let copied = this._copied;
+    let index = model.selectedCellIndex + 1;
+    if (copied.length > 0) {
+      let existing: ICellModel[] = [];
+      for (let index of copied) {
+        existing.push(model.cells.get(index));
       }
-      this.model.cells.insert(index, newCell);
-    }
-    // Remove the previous cell(s) if cutting.
-    if (this._isCut) {
-      for (let cell of current) {
-        this.model.cells.remove(cell);
+      // Insert the copied cell(s).
+      for (let cell of existing) {
+        let newCell: ICellModel;
+        switch(cell.type) {
+        case 'code':
+          newCell = model.createCodeCell(cell);
+          break;
+        case 'markdown':
+          newCell = model.createMarkdownCell(cell);
+          break;
+        default:
+          newCell = model.createRawCell(cell);
+          break;
+        }
+        model.cells.insert(index, newCell);
+      }
+    } else {
+      // Insert the curt cell(s).
+      for (let cell of cut) {
+        model.cells.insert(index, cell);
       }
     }
-    this.model.selectedCellIndex = index;
-    this._clipBoard = [];
-    this._isCut = false;
+    this._copied = [];
+    this._cut = [];
   }
 
   /**
@@ -639,7 +664,7 @@ class NotebookToolbar extends Widget {
       this.model.save();
       break;
     case TOOLBAR_INSERT:
-      this.insert();
+      this.insertBelow();
       break;
     case TOOLBAR_CUT:
       this.cut();
@@ -663,8 +688,8 @@ class NotebookToolbar extends Widget {
   }
 
   private _model: INotebookModel = null;
-  private _isCut = false;
-  private _clipBoard: number[] = [];
+  private _copied: number[] = [];
+  private _cut: ICellModel[] = [];
 }
 
 
