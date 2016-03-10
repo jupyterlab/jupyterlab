@@ -211,29 +211,21 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Get the default mimetype for cells new code cells.
+   * The default mimetype for cells new code cells.
    */
   get defaultMimetype(): string {
     return NotebookModelPrivate.defaultMimetype.get(this);
   }
-
-  /**
-   * Set the default mimetype for cells new code cells.
-   */
   set defaultMimetype(value: string) {
     NotebookModelPrivate.defaultMimetype.set(this, value);
   }
 
   /**
-   * Get the read-only status of the notebook.
+   * The read-only status of the notebook.
    */
   get readOnly(): boolean {
     return NotebookModelPrivate.readOnlyProperty.get(this);
   }
-
-  /**
-   * Set the read-only status of the notebook.
-   */
   set readOnly(value: boolean) {
     NotebookModelPrivate.readOnlyProperty.set(this, value);
     let cells = this._cells;
@@ -243,47 +235,35 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Get the session for the notebook.
+   * The session for the notebook.
    */
   get session(): INotebookSession {
     return NotebookModelPrivate.sessionProperty.get(this);
   }
-
-  /**
-   * Set the session for the notebook.
-   */
   set session(value: INotebookSession) {
     NotebookModelPrivate.sessionProperty.set(this, value);
   }
 
   /**
-   * Get the metadata for the notebook.
+   * The metadata for the notebook.
    */
   get metadata(): INotebookMetadata {
     return NotebookModelPrivate.metadataProperty.get(this);
   }
-
-  /**
-   * Set the metadata for the notebook.
-   */
   set metadata(value: INotebookMetadata) {
     NotebookModelPrivate.metadataProperty.set(this, value);
   }
 
   /**
-   * Get the index of the active cell.
+   * The index of the active cell.
+   *
+   * #### Notes
+   * The value will be clamped.  When setting this, all other cells 
+   * will be marked as inactive.
    */
   get activeCellIndex(): number {
     return NotebookModelPrivate.activeCellIndexProperty.get(this);
   }
-
-  /**
-   * Set the index of the active cell.  
-   *
-   * #### Notes
-   * The value will be clamped.  All other cells will be marked as inactive.
-   * The active cell will also be marked as selected.
-   */
   set activeCellIndex(value: number) {
     value = Math.max(value, 0);
     value = Math.min(value, this.cells.length - 1);
@@ -296,15 +276,11 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Get whether the notebook has unsaved changes.
+   * Whether the notebook has unsaved changes.
    */
   get dirty(): boolean {
     return NotebookModelPrivate.dirtyProperty.get(this);
   }
-
-  /**
-   * Set whether the notebook has unsaved changes.
-   */
   set dirty(value: boolean) {
     // Clear the dirty state of all cells if the notebook dirty state
     // is cleared.
