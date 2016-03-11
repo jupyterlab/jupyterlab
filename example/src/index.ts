@@ -52,12 +52,19 @@ function main(): void {
   // and make that a separate example.
 
   let contents = new ContentsManager(SERVER_URL);
-  contents.get(NOTEBOOK, {}).then(data => {
-    let nbModel = new NotebookModel(contents);
-    deserialize(data.content, nbModel);
-    let nbWidget = new NotebookWidget(nbModel);
-    nbWidget.title.text = NOTEBOOK;
+  let nbModel = new NotebookModel(contents);
+  let nbWidget = new NotebookWidget(nbModel);
+  nbWidget.title.text = NOTEBOOK;
 
+  let box = new BoxPanel();
+  box.id = 'main';
+  box.attach(document.body);
+  box.addChild(nbWidget);
+
+  window.onresize = () => { box.update(); };
+
+  contents.get(NOTEBOOK, {}).then(data => {
+    deserialize(data.content, nbModel);
     let bindings = [
     {
       selector: '.jp-Notebook-cell',
@@ -100,13 +107,6 @@ function main(): void {
       }
     }];
     keymap.add(bindings);
-
-    let box = new BoxPanel();
-    box.id = 'main';
-    box.attach(document.body);
-    box.addChild(nbWidget);
-
-    window.onresize = () => { box.update(); };
 
     // start session
     startNewSession({
