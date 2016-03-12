@@ -395,14 +395,22 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Save the notebook and clear the dirty state of the model.
+   *
+   * #### Notes
+   * Also updates the metadata if there is a current session.
    */
   save(): Promise<void> {
-    let content = serialize(this);
-    let name = this.session.notebookPath;
-    return this._manager.save(name, {
-      type: 'notebook',
-      content
-    }).then(() => { this.dirty = false });
+    if (!this.session || this.session.isDisposed) {
+      return this._save();
+    }
+    return this.session.kernel.getKernelSpec().then(spec => {
+      this.metadata.kernelspec.display_name = spec.display_name;
+      this.metadata.kernelspec.name = this.session.kernel.name;
+      return this.session.kernel.kernelInfo();
+    }).then(info => {
+      this.metadata.language_info = info.language_info;
+      return this._save();
+    });
   }
 
   /**
@@ -442,6 +450,16 @@ class NotebookModel implements INotebookModel {
     ex.onReply = (msg => {
       cell.executionCount = (msg.content as IExecuteReply).execution_count;
     });
+  }
+
+  /**
+   * Save the notebook contents to disk.
+   */
+  private _save(): Promise<void> {
+    let content = serialize(this);
+    let name = this.session.notebookPath;
+    return this._manager.save(name, { type: 'notebook', content })
+    .then(() => { this.dirty = false });
   }
 
   /**

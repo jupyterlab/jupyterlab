@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  KernelStatus
+  INotebookSession, IKernel, KernelStatus
 } from 'jupyter-js-services';
 
 import {
@@ -35,15 +35,19 @@ import {
 } from 'phosphor-panel';
 
 import {
-  NotebookModel, INotebookModel
-} from './model';
-
-import {
   ICellModel,
   CodeCellWidget, MarkdownCellWidget,
   CodeCellModel, MarkdownCellModel, isMarkdownCellModel,
   RawCellModel, RawCellWidget
 } from '../cells';
+
+import {
+  NotebookModel, INotebookModel
+} from './model';
+
+import {
+  INotebookMetadata
+} from './nbformat';
 
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
@@ -520,7 +524,11 @@ class NotebookToolbar extends Widget {
     super();
     this.addClass(NB_TOOLBAR);
     this._model = model;
-    this.kernelNameNode.textContent = model.metadata.kernelspec.display_name;
+    if (model.metadata && model.metadata.kernelspec) {
+      this.kernelNameNode.textContent = model.metadata.kernelspec.display_name;
+    } else {
+      this.kernelNameNode.textContent = 'No Kernel!';
+    }
     if (model.cells.length) {
       let cell = model.cells.get(model.activeCellIndex);
       this.cellTypeNode.value = cell.type;
@@ -810,18 +818,30 @@ class NotebookToolbar extends Widget {
    */
   protected handleSession(): void {
     let node = this.kernelIndicatorNode;
-    this.model.session.kernel.statusChanged.connect((sender, status) => {
+    let session = this.model.session;
+    session.statusChanged.connect((sender, status) => {
       if (status === KernelStatus.Idle) {
         node.classList.remove(TOOLBAR_BUSY);
       } else {
         node.classList.add(TOOLBAR_BUSY);
       }
     });
-    if (this.model.session.status === KernelStatus.Idle) {
+    if (session.status === KernelStatus.Idle) {
       node.classList.remove(TOOLBAR_BUSY);
     } else {
       node.classList.add(TOOLBAR_BUSY);
     }
+    session.kernelChanged.connect(this.handleKernel, this);
+    this.handleKernel(session, session.kernel);
+  }
+
+  /**
+   * Handle a change to the kernel.
+   */
+  protected handleKernel(session: INotebookSession, kernel: IKernel): void {
+    kernel.getKernelSpec().then(spec => {
+      this.kernelNameNode.textContent = spec.display_name;
+    });
   }
 
   /**
