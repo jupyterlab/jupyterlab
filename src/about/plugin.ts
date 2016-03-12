@@ -50,7 +50,7 @@ const aboutExtension = {
 
 <h2>Notebook</h2>
 
-<p>Opening a notebook will open a preliminary proof-of-concept notebook view. <strong>Currently, the cells are static and not executable.</strong>  Future JupyterLab demos will add dynamic cells and code execution.</p>
+<p>Opening a notebook will open a minimally featured notebook. Code execution, Markdown rendering, and basic cell toolbar actions are supported.  Future versions will add more features from the existing Jupyter notebook.</p>
 `;
     app.shell.addToMainArea(widget);
   }

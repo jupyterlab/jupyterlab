@@ -74,7 +74,7 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
   manager.register(handler);
   app.commands.add([{
     id: runCellCommandId,
-    handler: () => handler.runSelectedCell()
+    handler: () => handler.runActiveCell()
   }]);
   app.palette.add([{
     command: runCellCommandId,
@@ -94,9 +94,9 @@ class NotebookContainer extends Panel {
   /**
    * Construct a new NotebookContainer.
    */
-  constructor() {
+  constructor(manager: IContentsManager) {
     super();
-    this._model = new NotebookModel();
+    this._model = new NotebookModel(manager);
     let widgetarea = new Widget();
     this._manager = new WidgetManager(widgetarea.node);
     let widget = new NotebookWidget(this._model);
@@ -177,9 +177,9 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Run the selected cell on the active widget.
    */
-  runSelectedCell(): void {
+  runActiveCell(): void {
     let w = this.activeWidget;
-    if (w) w.model.runSelectedCell();
+    if (w) w.model.runActiveCell();
   }
 
   /**
@@ -223,7 +223,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
    * Create the widget from an `IContentsModel`.
    */
   protected createWidget(contents: IContentsModel): NotebookContainer {
-    let panel = new NotebookContainer();
+    let panel = new NotebookContainer(this.manager);
     panel.model.stateChanged.connect(this._onModelChanged, this);
     panel.title.text = contents.name;
     panel.addClass(notebookContainerClass);
