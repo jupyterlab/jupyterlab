@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  IKernelSpecIds
+  IKernelSpecIds, IKernel
 } from 'jupyter-js-services';
 
 import {
@@ -23,7 +23,7 @@ import {
  * Present a dialog asking the user to select a kernel.
  */
 export 
-function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSpecIds): Promise<void> {
+function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSpecIds): Promise<IKernel> {
   let selector = document.createElement('select');
   let options: HTMLOptionElement[] = [];
   for (let name in specs.kernelspecs) {
@@ -53,26 +53,6 @@ function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSp
         return model.session.changeKernel(selector.value);
       }
     }
-  }).then(kernel => {
-    return kernel.kernelInfo();
-  }).then(info => {
-    let mime = info.language_info.mimetype;
-    if (!mime) {
-      let mode = info.language_info.codemirror_mode;
-      if (mode) {
-        let info = CodeMirror.findModeByName(mode as string);
-        mime = info.mime;
-      }
-    }
-    if (mime) {
-      model.defaultMimetype = mime;
-      let cells = model.cells;
-      for (let i = 0; i < cells.length; i++) {
-        let cell = cells.get(i);
-        if (isCodeCellModel(cell)) {
-          cell.input.textEditor.mimetype = mime;
-        }
-      }
-    }
+    return model.session.kernel;
   });
 }
