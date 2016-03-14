@@ -31,6 +31,9 @@ interface IOutputAreaModel {
 
   /**
    * Whether the output is trusted.
+   *
+   *
+   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   trusted: boolean;
 
@@ -76,6 +79,8 @@ class OutputAreaModel implements IOutputAreaModel {
 
   /**
    * Whether the output is trusted.
+   *
+   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   get trusted(): boolean {
     return Private.trustedProperty.get(this);
