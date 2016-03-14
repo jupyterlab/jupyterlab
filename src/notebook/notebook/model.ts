@@ -646,15 +646,20 @@ namespace NotebookModelPrivate {
       return session.kernel.kernelInfo();
     }).then(info => {
       metadata.language_info = info.language_info;
-      let mime = info.language_info.mimetype;
-      if (!mime) {
-        let mode = info.language_info.codemirror_mode;
+      // We need to use codemirror mode first.
+      let mode = metadata.language_info.codemirror_mode;
+      let mime = '';
+      if (mode) {
         if (typeof mode === 'string') {
-          let info = CodeMirror.findModeByName(mode as string);
-          mime = info.mime;
-        } else if ((mode as CodeMirror.modespec).mime) {
-          mime = (mode as CodeMirror.modespec).mime;
+          mode = CodeMirror.findModeByName(mode as string);
+        } else if (mode.mime) {
+          // Do nothing.
+        } else if (mode.name) {
+          mode = CodeMirror.findModeByName(mode.name);
         }
+        mime = mode.mime;
+      } else {
+        mime = info.language_info.mimetype;
       }
       if (mime) {
         model.defaultMimetype = mime;
