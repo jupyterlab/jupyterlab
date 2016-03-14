@@ -53,9 +53,6 @@ import {
   INotebookMetadata
 } from './nbformat';
 
-import './codemirror-ipython';
-import './codemirror-ipythongfm';
-
 
 /**
  * The class name added to notebook widgets.
