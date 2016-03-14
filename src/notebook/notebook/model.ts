@@ -88,7 +88,7 @@ interface INotebookModel {
    * #### Notes
    * An untrusted notebook should sanitize HTML output.
    */
-  //trusted: boolean;
+  trusted: boolean;
 
   /**
    * The list of cells in the notebook.
@@ -294,6 +294,22 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Whether the notebook is trusted.
+   */
+  get trusted(): boolean {
+    return NotebookModelPrivate.trustedProperty.get(this);
+  }
+  set trusted(value: boolean) {
+    let cells = this._cells;
+    // Set the trusted state of all cells.
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.get(i);
+      cell.trusted = value;
+    }
+    NotebookModelPrivate.trustedProperty.set(this, value);
+  }
+
+  /**
    * Create a code cell model.
    */
   createCodeCell(source?: ICellModel): ICodeCellModel {
@@ -309,6 +325,7 @@ class NotebookModel implements INotebookModel {
     let input = constructor.createInput(editor);
     let output = constructor.createOutputArea();
     let cell = new CodeCellModel(input, output);
+    cell.trusted = this.trusted;
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
@@ -336,6 +353,7 @@ class NotebookModel implements INotebookModel {
     });
     let input = constructor.createInput(editor);
     let cell = new MarkdownCellModel(input);
+    cell.trusted = this.trusted;
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
@@ -357,6 +375,7 @@ class NotebookModel implements INotebookModel {
     });
     let input = constructor.createInput(editor);
     let cell = new RawCellModel(input);
+    cell.trusted = this.trusted;
     if (source) {
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
@@ -564,4 +583,15 @@ namespace NotebookModelPrivate {
     name: 'dirty',
     notify: stateChangedSignal,
   });
+
+ /**
+  * A property descriptor for the trusted state
+  */
+  export
+  const trustedProperty = new Property<NotebookModel, boolean>({
+    name: 'trusted',
+    notify: stateChangedSignal,
+  });
+
+
 }

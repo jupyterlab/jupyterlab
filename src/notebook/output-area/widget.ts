@@ -47,6 +47,10 @@ import {
 } from 'transformime-jupyter-transformers';
 
 import {
+  sanitize
+} from 'sanitizer';
+
+import {
   IOutput, IExecuteResult, IDisplayData, IStream, IError, MimeBundle
 } from '../notebook/nbformat';
 
@@ -129,6 +133,17 @@ const transformers = [
   HTMLTransformer,
   ScriptTransform
 ];
+
+/**
+ * A list of outputs considered safe.
+ */
+const safeOutputs = ['text/plain', 'text/latex', 'image/png', 'image/jpeg', 
+                     'jupyter/console-text'];
+
+/**
+ * A list of outputs that are sanitizable.
+ */
+const sanitizable = ['text/svg', 'text/html'];
 
 /**
  * The global transformime transformer.
@@ -217,6 +232,33 @@ class OutputAreaWidget extends Widget {
       console.error(`Unrecognized output type: ${output.output_type}`);
       bundle = {};
     }
+
+    // Sanitize outputs as needed.
+    if (!this.model.trusted) {
+      let keys = Object.keys(bundle);
+      for (let key of keys) {
+        if (safeOutputs.indexOf(key) !== -1) {
+          continue;
+        } else if (sanitizable.indexOf(key) !== -1) {
+          let out = bundle[key];
+          if (typeof out === 'string') {
+            bundle[key] = sanitize(out as string);
+          } else {
+            bundle[key] = [];
+            let outs = out as string[];
+            for (let out of outs) {
+              (bundle[key] as string[]).push(sanitize(out));
+            }
+          }
+        } else {
+          // Don't display if we don't know how to sanitize it.
+          console.log("Ignoring untrusted " + key + " output.");
+          delete bundle[key];
+          continue;
+        }
+      }
+    }
+   
     transform.transform(bundle, document).then(result => {
       widget.node.appendChild(result.el);
       result.el.classList.add(RESULT_CLASS);

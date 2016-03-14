@@ -96,6 +96,11 @@ interface IBaseCellModel {
   dirty: boolean;
 
   /**
+   * Whether the cell is trusted.
+   */
+  trusted: boolean;
+
+  /**
    * Whether the cell is read only.
    */
   readOnly: boolean;
@@ -259,6 +264,17 @@ class BaseCellModel implements IBaseCellModel {
     this.input.readOnly = value;
   }
 
+
+  /**
+   * The trusted state of the cell.
+   */
+  get trusted(): boolean {
+    return CellModelPrivate.trustedProperty.get(this);
+  }
+  set trusted(value: boolean) {
+    CellModelPrivate.trustedProperty.set(this, value);
+  }
+
   /**
    * The name of the cell.
    */
@@ -339,6 +355,14 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    */
   get output(): IOutputAreaModel {
     return this._output;
+  }
+
+  /**
+   * Set the trusted state of the model.
+   */
+  set trusted(value: boolean) {
+    CellModelPrivate.trustedProperty.set(this, value);
+    this.output.trusted = value;
   }
 
   /**
@@ -486,6 +510,15 @@ namespace CellModelPrivate {
   const tagsProperty = new Property<IBaseCellModel, string[]>({
     name: 'tags',
     value: null,
+    notify: stateChangedSignal,
+  });
+
+ /**
+  * A property descriptor for the trusted state of a cell.
+  */
+  export
+  const trustedProperty = new Property<IBaseCellModel, boolean>({
+    name: 'trusted',
     notify: stateChangedSignal,
   });
 
