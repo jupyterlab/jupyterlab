@@ -97,6 +97,8 @@ interface IBaseCellModel {
 
   /**
    * Whether the cell is trusted.
+   *
+   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   trusted: boolean;
 
@@ -267,6 +269,8 @@ class BaseCellModel implements IBaseCellModel {
 
   /**
    * The trusted state of the cell.
+   *
+   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   get trusted(): boolean {
     return CellModelPrivate.trustedProperty.get(this);
@@ -359,6 +363,8 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
 
   /**
    * Set the trusted state of the model.
+   *
+   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   set trusted(value: boolean) {
     CellModelPrivate.trustedProperty.set(this, value);
