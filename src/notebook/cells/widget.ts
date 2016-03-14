@@ -271,10 +271,9 @@ class MarkdownCellWidget extends BaseCellWidget {
       if (this._dirty) {
         let text = model.input.textEditor.text || DEFAULT_MARKDOWN_TEXT;
         let data = removeMath(text);
-        if (!this.model.trusted) {
-          data['text'] = sanitize(data['text']);
-        }
-        let html = marked(data['text']);
+        // Always sanitize markdown output.
+        let sanitized = sanitize(data['text']);
+        let html = marked(sanitized);
         this.rendered.node.innerHTML = replaceMath(html, data['math']);
         typeset(this.rendered.node);
       }

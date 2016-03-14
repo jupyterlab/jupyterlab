@@ -76,6 +76,11 @@ type CellType = 'code' | 'markdown' | 'raw';
 export
 interface IBaseCellMetadata {
   /**
+   * Whether the cell is trusted.
+   */
+  trusted: boolean;
+
+  /**
    * The cell's name. If present, must be a non-empty string.
    */
   name?: string;

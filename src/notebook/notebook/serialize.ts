@@ -72,7 +72,7 @@ serializeCell(cell: ICellModel): ICell {
   let output: ICell = {
     source: cell.input.textEditor.text,
     cell_type: cell.type,
-    metadata: { }
+    metadata: { trusted: cell.trusted }
   }
   if (cell.tags) {
     output.metadata.tags = cell.tags;
@@ -107,6 +107,7 @@ function deserializeCell(data: ICell, model: ICellModel): void {
   model.input.textEditor.text = source;
   model.tags = data.metadata.tags;
   model.name = data.metadata.name;
+  model.trusted = data.metadata.trusted;
 
   if (isCodeCellModel(model)) {
     let value = data as ICodeCell;
