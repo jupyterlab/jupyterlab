@@ -629,6 +629,8 @@ namespace NotebookModelPrivate {
    */
   function sessionChanged(model: NotebookModel, session: INotebookSession): void {
     model.session.kernelChanged.connect(() => { kernelChanged(model); });
+    // Update the kernel data now.
+    kernelChanged(model);
   }
 
   /**
