@@ -1,7 +1,11 @@
 
 import {
-  INotebookSession, IExecuteReply
+  INotebookSession, IExecuteReply,  IContentsManager, IKernel
 } from 'jupyter-js-services';
+
+import {
+  copy
+} from 'jupyter-js-utils';
 
 import {
   IDisposable
@@ -572,6 +576,7 @@ namespace NotebookModelPrivate {
   export
   const sessionProperty = new Property<NotebookModel, INotebookSession>({
     name: 'session',
+    changed: sessionChanged,
     notify: stateChangedSignal,
   });
 
@@ -618,4 +623,50 @@ namespace NotebookModelPrivate {
   const selectedProperty = new Property<ICellModel, boolean>({
     name: 'selected'
   });
+
+  /*
+   * Handle a change to the model session.
+   */
+  function sessionChanged(model: NotebookModel, session: INotebookSession): void {
+    model.session.kernelChanged.connect(() => { kernelChanged(model); });
+  }
+
+  /**
+   * Handle a change to the model kernel.  
+   */
+  function kernelChanged(model: INotebookModel): void {
+    let session = model.session;
+    let kernel = session.kernel;
+    let metadata = copy(model.metadata || {}) as INotebookMetadata;
+    kernel.getKernelSpec().then(spec => {
+      metadata.kernelspec.display_name = spec.display_name;
+      metadata.kernelspec.name = session.kernel.name;
+      return session.kernel.kernelInfo();
+    }).then(info => {
+      metadata.language_info = info.language_info;
+      let mime = info.language_info.mimetype;
+      if (!mime) {
+        let mode = info.language_info.codemirror_mode;
+        if (typeof mode === 'string') {
+          let info = CodeMirror.findModeByName(mode as string);
+          mime = info.mime;
+        } else if ((mode as CodeMirror.modespec).mime) {
+          mime = (mode as CodeMirror.modespec).mime;
+        }
+      }
+      if (mime) {
+        model.defaultMimetype = mime;
+        let cells = model.cells;
+        for (let i = 0; i < cells.length; i++) {
+          let cell = cells.get(i);
+          if (isCodeCellModel(cell)) {
+            cell.input.textEditor.mimetype = mime;
+          }
+        }
+      }
+      // Trigger a change to the notebook metadata.
+      model.metadata = metadata;
+    });
+  }
+
 }

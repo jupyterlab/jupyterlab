@@ -2,8 +2,8 @@
 module.exports = {
   entry: './build/index.js',
   output: {
-    path: './build',
-    filename: 'bundle.js'
+    filename: './build/bundle.js',
+    chunkFilename: "./build/[id].bundle.js"
   },
   debug: true,
   module: {
