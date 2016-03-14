@@ -32,7 +32,6 @@ interface IOutputAreaModel {
   /**
    * Whether the output is trusted.
    *
-   *
    * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   trusted: boolean;
