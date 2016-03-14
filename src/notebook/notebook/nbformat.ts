@@ -77,6 +77,8 @@ export
 interface IBaseCellMetadata {
   /**
    * Whether the cell is trusted.
+   *
+   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   trusted: boolean;
 
