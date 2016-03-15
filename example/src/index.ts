@@ -97,7 +97,7 @@ function main(): void {
     category: 'Notebook',
     text: 'Trust Notebook',
     handler: () => { 
-      trustNotebook(nbWidget.node, nbModel);
+      trustNotebook(nbModel, nbWidget.node);
     }
   },
   {

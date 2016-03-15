@@ -20,9 +20,18 @@ const TRUST_MESSAGE = '<p>A trusted Jupyter notebook may execute hidden maliciou
 
 /**
  * Trust the notebook after prompting the user.
+ *
+ * @param model - The notebook model.
+ *
+ * @param host - The host node for the confirmation dialog (defaults to body).
+ *
+ * @returns a promise that resolves when the transaction is finished.
+ *
+ * #### Notes
+ * No dialog will be presented if the notebook is already trusted.
  */
 export 
-function trustNotebook(host: HTMLElement, model: INotebookModel): Promise<void> {
+function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void> {
   // Do nothing if already trusted.
   let cells = model.cells;
   let trusted = true;
@@ -35,7 +44,7 @@ function trustNotebook(host: HTMLElement, model: INotebookModel): Promise<void> 
     return Promise.resolve(void 0);
   }
   return showDialog({
-    host,
+    host: host || document.body,
     body: TRUST_MESSAGE,
     title: 'Trust this notebook?'
   }).then(result => {
