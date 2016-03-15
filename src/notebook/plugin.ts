@@ -45,12 +45,38 @@ import {
 } from './widgetmanager';
 
 
-let runCellCommandId = 'notebook:run-selected-cell';
-let selectNextCellCommandId = 'notebook:select-next-cell';
-let selectPreviousCellCommandId = 'notebook:select-previous-cell';
+/**
+ * The map of command ids used by the notebook.
+ */
+const cmdIds = {
+  interrupt: 'notebook:interrupt-kernel',
+  restart: 'notebook:restart-kernel',
+  run: 'notebook-cells:run',
+  toCode: 'notebook-cells:to-code',
+  toMarkdown: 'notebook-cells:to-markdown',
+  toRaw: 'notebook-cells:to-raw',
+  cut: 'notebook-cells:cut',
+  copy: 'notebook-cells:copy',
+  paste: 'notebook-cells:paste',
+  insertAbove: 'notebook-cells:insert-above',
+  insertBelow: 'notebook-cells:insert-below',
+  selectPrevious: 'notebook-cells:select-previous',
+  selectNext: 'notebook-cells:select-next',
+}
 
-let notebookContainerClass = 'jp-NotebookContainer';
-let widgetClass = 'jp-NotebookContainer-widget';
+
+/**
+ * The class name added to the top level notebook container.
+ */
+
+let NB_CONTAINER_CLASS = 'jp-NotebookContainer';
+
+
+/**
+ * The class name added to the widget area.
+ */
+let WIDGET_CLASS = 'jp-NotebookContainer-widget';
+
 
 /**
  * The notebook file handler provider.
@@ -72,16 +98,164 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
     services.notebookSessionManager
   );
   manager.register(handler);
-  app.commands.add([{
-    id: runCellCommandId,
-    handler: () => handler.runActiveCell()
-  }]);
-  app.palette.add([{
-    command: runCellCommandId,
+  app.commands.add([
+  {
+    id: cmdIds['run'],  
+    handler: () => { 
+      let widget = handler.currentWidget;
+      if (widget) widget.run(); 
+    }
+  },
+  {
+    id: cmdIds['restart'],
+    handler: () => { 
+      let widget = handler.currentWidget;
+      if (widget) widget.restart(); 
+    }
+  },
+  {
+    id: cmdIds['interrupt'],
+    handler: () => { 
+      let widget = handler.currentWidget;
+      if (widget) widget.interrupt(); 
+    }
+  },
+  {
+    id: cmdIds['toCode'],
+    handler: () => { 
+      let widget = handler.currentWidget;
+      if (widget) widget.changeCellType('code'); }
+  },
+  {
+    id: cmdIds['toMarkdown'],
+    handler: () => { 
+      let widget = handler.currentWidget;
+      if (widget) widget.changeCellType('markdown'); }
+  },
+  {
+    id: cmdIds['toRaw'],
+    handler: () => { 
+      let widget = handler.currentWidget;
+      if (widget) widget.changeCellType('raw'); 
+    }
+  },
+  {
+    id: cmdIds['cut'],
+    handler: () => { 
+      let widget = handler.currentWidget;
+      if (widget) widget.cut();
+    }
+  },
+  {
+    id: cmdIds['copy'],
+    handler: () => {
+      let widget = handler.currentWidget;
+      if (widget) widget.copy(); 
+    }
+  },
+  {
+    id: cmdIds['paste'],
+    handler: () => { 
+      let widget = handler.currentWidget;
+      if (widget) widget.paste(); 
+    }
+  },
+  {
+    id: cmdIds['insertAbove'],
+    handler: () => { 
+      let widget = handler.currentWidget;
+      if (widget) widget.insertAbove(); 
+    }
+  },
+  {
+    id: cmdIds['insertBelow'],
+    handler: () => { 
+      let widget = handler.currentWidget;
+      if (widget) widget.insertBelow(); 
+    }
+  },
+  {
+    id: cmdIds['selectPrevious'],
+    handler: () => { 
+      let model = handler.currentModel;
+      if (model) model.activeCellIndex -= 1; 
+    }
+  },
+  {
+    id: cmdIds['selectNext'],
+    handler: () => { 
+      let model = handler.currentModel;
+      if (model) model.activeCellIndex += 1; 
+    }
+  },
+  ]);
+  app.palette.add([
+  {
+    command: cmdIds['run'],
+    category: 'Notebook Cell Operations',
+    text: 'Run selected',
+  },
+  {
+    command: cmdIds['interrupt'],
     category: 'Notebook Operations',
-    text: 'Run current cell',
-    caption: 'Run the current cell'
-  }]);
+    text: 'Interrupt Kernel',
+  },
+  {
+    command: cmdIds['restart'],
+    category: 'Notebook Operations',
+    text: 'Restart Kernel',
+  },
+  {
+    command: cmdIds['toCode'],
+    category: 'Notebook Cell Operations',
+    text: 'Covert to Code',
+  },
+  {
+    command: cmdIds['toMarkdown'],
+    category: 'Notebook Cell Operations',
+    text: 'Covert to Markdown',
+  },
+  {
+    command: cmdIds['toRaw'],
+    category: 'Notebook Cell Operations',
+    text: 'Covert to Raw',
+  },
+  {
+    command: cmdIds['cut'],
+    category: 'Notebook Cell Operations',
+    text: 'Cut selected',
+  },
+  {
+    command: cmdIds['copy'],
+    category: 'Notebook Cell Operations',
+    text: 'Copy selected',
+  },
+  {
+    command: cmdIds['paste'],
+    category: 'Notebook Cell Operations',
+    text: 'Paste cell(s)',
+  },
+  {
+    command: cmdIds['insertAbove'],
+    category: 'Notebook Cell Operations',
+    text: 'Insert cell above',
+  },
+  {
+    command: cmdIds['insertBelow'],
+    category: 'Notebook Cell Operations',
+    text: 'Insert cell below',
+  },
+  {
+    command: cmdIds['selectPrevious'],
+    category: 'Notebook Cell Operations',
+    text: 'Select previous cell',
+  },
+  {
+    command: cmdIds['selectNext'],
+    category: 'Notebook Cell Operations',
+    text: 'Select next cell',
+  },
+  ]);
   return Promise.resolve(void 0);
 }
 
@@ -98,12 +272,12 @@ class NotebookContainer extends Panel {
     super();
     this._model = new NotebookModel(manager);
     let widgetarea = new Widget();
-    widgetarea.addClass(widgetClass);
+    widgetarea.addClass(WIDGET_CLASS);
     this._manager = new WidgetManager(widgetarea.node);
-    let widget = new NotebookWidget(this._model);
+    this._widget = new NotebookWidget(this._model);
 
     this.addChild(widgetarea);
-    this.addChild(widget);
+    this.addChild(this._widget);
   }
 
   /**
@@ -114,6 +288,16 @@ class NotebookContainer extends Panel {
    */
   get model(): INotebookModel {
     return this._model;
+  }
+
+  /**
+   * Get the notebook widget used by the container.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get widget(): NotebookWidget {
+    return this._widget;
   }
 
   /**
@@ -155,6 +339,7 @@ class NotebookContainer extends Panel {
   private _model: INotebookModel = null;
   private _session: INotebookSession = null;
   private _manager: WidgetManager = null;
+  private _widget: NotebookWidget = null;
 }
 
 
@@ -176,11 +361,19 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   }
 
   /**
-   * Run the selected cell on the active widget.
+   * Get the notebook widget for the current container widget.
    */
-  runActiveCell(): void {
+  get currentWidget(): NotebookWidget {
     let w = this.activeWidget;
-    if (w) w.model.runActiveCell();
+    if (w) return w.widget;
+  }
+
+  /**
+   * Get the notebook model for the current container widget.
+   */
+  get currentModel(): INotebookModel {
+    let w = this.activeWidget;
+    if (w) return w.model;
   }
 
   /**
@@ -227,7 +420,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
     let panel = new NotebookContainer(this.manager);
     panel.model.stateChanged.connect(this._onModelChanged, this);
     panel.title.text = contents.name;
-    panel.addClass(notebookContainerClass);
+    panel.addClass(NB_CONTAINER_CLASS);
 
     this.session.startNew({notebookPath: contents.path}).then(s => {
       panel.setSession(s);

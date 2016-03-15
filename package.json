@@ -8,7 +8,7 @@
     "codemirror": "^5.10.0",
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5",
-    "jupyter-js-notebook": "^0.12.1",
+    "jupyter-js-notebook": "^0.13.2",
     "jupyter-js-services": "^0.6.1",
     "jupyter-js-ui": "^0.2.0",
     "jupyter-js-utils": "^0.3.0",
