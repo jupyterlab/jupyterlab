@@ -78,6 +78,10 @@ interface IBaseCellMetadata {
   /**
    * Whether the cell is trusted.
    *
+   * #### Notes
+   * This is not strictly part of the nbformat spec, but it is added by
+   * the contents manager.
+   *
    * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   trusted: boolean;
