@@ -23,12 +23,16 @@ import {
 } from 'jupyter-js-utils';
 
 import {
+  CommandPalette, StandardPaletteModel
+} from 'phosphor-commandpalette';
+
+import {
   IKeyBinding, KeymapManager, keystrokeForKeydownEvent
 } from 'phosphor-keymap';
 
 import {
-  BoxPanel
-} from 'phosphor-boxpanel';
+  SplitPanel
+} from 'phosphor-splitpanel';
 
 import 'jupyter-js-notebook/lib/index.css';
 import 'jupyter-js-notebook/lib/theme.css';
@@ -56,57 +60,74 @@ function main(): void {
   let nbWidget = new NotebookWidget(nbModel);
   nbWidget.title.text = NOTEBOOK;
 
-  let box = new BoxPanel();
-  box.id = 'main';
-  box.attach(document.body);
-  box.addChild(nbWidget);
+  let pModel = new StandardPaletteModel();
+  let palette = new CommandPalette(); 
+  palette.model = pModel;
 
-  window.onresize = () => { box.update(); };
+  let panel = new SplitPanel();
+  panel.id = 'main';
+  panel.orientation = SplitPanel.Horizontal;
+  SplitPanel.setStretch(palette, 1);
+  SplitPanel.setStretch(nbWidget, 2);
+  panel.attach(document.body);
+  panel.addChild(palette);
+  panel.addChild(nbWidget);
+  window.onresize = () => { panel.update(); };
+
+  let items = [
+  {
+    category: 'Notebook',
+    text: 'Run Cell',
+    handler: () => { nbModel.runActiveCell(); }
+  }
+  ]
+  pModel.addItems(items);
+
+  let bindings = [
+  {
+    selector: '.jp-Notebook-cell',
+    sequence: ['Shift Enter'],
+    handler: () => {
+      nbModel.runActiveCell();
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Notebook-cell',
+    sequence: ['Accel S'],
+    handler: () => {
+      nbModel.save();
+      return true;
+    }
+  }, 
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['D', 'D'],
+    handler: () => {
+      nbWidget.cut();
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['A'],
+    handler: () => {
+      nbWidget.insertAbove();
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['B'],
+    handler: () => {
+      nbWidget.insertBelow();
+      return true;
+    }
+  }];
+  keymap.add(bindings);
 
   contents.get(NOTEBOOK, {}).then(data => {
     deserialize(data.content, nbModel);
-    let bindings = [
-    {
-      selector: '.jp-Notebook-cell',
-      sequence: ['Shift Enter'],
-      handler: () => {
-        nbModel.runActiveCell();
-        return true;
-      }
-    },
-    {
-      selector: '.jp-Notebook-cell',
-      sequence: ['Accel S'],
-      handler: () => {
-        nbModel.save();
-        return true;
-      }
-    }, 
-    {
-      selector: '.jp-Cell.jp-mod-commandMode',
-      sequence: ['D', 'D'],
-      handler: () => {
-        nbWidget.cut();
-        return true;
-      }
-    },
-    {
-      selector: '.jp-Cell.jp-mod-commandMode',
-      sequence: ['A'],
-      handler: () => {
-        nbWidget.insertAbove();
-        return true;
-      }
-    },
-    {
-      selector: '.jp-Cell.jp-mod-commandMode',
-      sequence: ['B'],
-      handler: () => {
-        nbWidget.insertBelow();
-        return true;
-      }
-    }];
-    keymap.add(bindings);
 
     // start session
     startNewSession({
