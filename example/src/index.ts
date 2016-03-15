@@ -141,6 +141,18 @@ function main(): void {
     shortcut: 'R',
     handler: () => { nbWidget.changeCellType('raw') ; }
   },
+  {
+    category: 'Notebook Cell',
+    text: 'Select Previous',
+    shortcut: 'ArrowUp',
+    handler: () => { nbModel.activeCellIndex -= 1; }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Select Next',
+    shortcut: 'ArrowDown',
+    handler: () => { nbModel.activeCellIndex += 1; }
+  },
   ]
   pModel.addItems(items);
 
@@ -232,7 +244,40 @@ function main(): void {
       nbWidget.insertBelow();
       return true;
     }
-  }];
+  },
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['J'],
+    handler: () => {
+      nbModel.activeCellIndex += 1;
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['ArrowDown'],
+    handler: () => {
+      nbModel.activeCellIndex += 1;
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['K'],
+    handler: () => {
+      nbModel.activeCellIndex -= 1;
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['ArrowUp'],
+    handler: () => {
+      nbModel.activeCellIndex -= 1;
+      return true;
+    }
+  }
+  ];
   keymap.add(bindings);
 
   contents.get(NOTEBOOK, {}).then(data => {
