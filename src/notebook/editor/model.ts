@@ -71,11 +71,6 @@ interface IEditorModel extends IDisposable {
    * The number of spaces to insert for each tab.
    */
   tabSize: number;
-
-  /**
-   * Whether the editor has unsaved changes.
-   */
-  dirty: boolean;
 }
 
 
@@ -121,11 +116,6 @@ interface IEditorOptions {
    * The number of spaces to insert for each tab.
    */
   tabSize?: number;
-
-  /**
-   * Whether the contents of the editor are dirty.
-   */
-  dirty?: boolean;
 }
 
 
@@ -146,16 +136,6 @@ class EditorModel implements IEditorModel {
    */
   get stateChanged(): ISignal<EditorModel, IChangedArgs<any>> {
     return EditorModelPrivate.stateChangedSignal.bind(this);
-  }
-
-  /**
-   * The dirty state for the editor.
-   */
-  get dirty(): boolean {
-    return EditorModelPrivate.dirtyProperty.get(this);
-  }
-  set dirty(value: boolean) {
-    EditorModelPrivate.dirtyProperty.set(this, value);
   }
 
   /**
@@ -351,16 +331,6 @@ namespace EditorModelPrivate {
   const tabSizeProperty = new Property<EditorModel, number>({
     name: 'tabSize',
     value: 4,
-    notify: stateChangedSignal
-  });
-
-  /**
-   * The property descriptor for the editor dirty state.
-   */
-  export
-  const dirtyProperty = new Property<EditorModel, boolean>({
-    name: 'dirty',
-    value: false,
     notify: stateChangedSignal
   });
 
