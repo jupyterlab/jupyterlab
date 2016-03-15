@@ -308,13 +308,6 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * Replace and render content.
-   */
-  protected replace(newIndex: number, newValue: IOutput[]): void {
-    
-  }
-
-  /**
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
