@@ -303,7 +303,8 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Handle a change cells event.
+   * Handle a change cells event.  This function must be on this class
+   * because it uses the static [createCell] method.
    */
   protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
     let layout = this._notebook.layout as PanelLayout;
@@ -360,6 +361,7 @@ class NotebookCells extends Widget {
     this.addClass(NB_CELLS);
     this._model = model;
     this.layout = new PanelLayout();
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -439,6 +441,17 @@ class NotebookCells extends Widget {
       node = node.parentElement;
     }
     return -1;
+  }
+
+  /**
+   * Handle changes to the model.
+   */
+  protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
+    if (args.name === 'activeCellIndex') {
+      let layout = this.layout as PanelLayout;
+      let child = layout.childAt(args.newValue);
+      Private.scrollIfNeeded(this.parent.node, child.node);
+    }
   }
 
   /**
@@ -910,10 +923,10 @@ namespace Private {
   function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
     let ar = area.getBoundingClientRect();
     let er = elem.getBoundingClientRect();
-    if (er.top < ar.top) {
-      area.scrollTop -= ar.top - er.top;
-    } else if (er.bottom > ar.bottom) {
-      area.scrollTop += er.bottom - ar.bottom;
+    if (er.top < ar.top - 10) {
+      area.scrollTop -= ar.top - er.top + 10;
+    } else if (er.bottom > ar.bottom + 10) {
+      area.scrollTop += er.bottom - ar.bottom + 10;
     }
   }
 }
