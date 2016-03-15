@@ -36,8 +36,19 @@ body {
 
 
 .jp-NotebookContainer {
-  overflow-y: auto;
+  display: flex;
 }
+
+
+.jp-NotebookContainer-widget {
+  flex: 0 0 auto;
+}
+
+
+.jp-Notebook {
+  flex: 1 1 auto;
+}
+
 
 
 .jp-FileBrowser {
