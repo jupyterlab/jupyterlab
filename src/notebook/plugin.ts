@@ -50,7 +50,7 @@ let selectNextCellCommandId = 'notebook:select-next-cell';
 let selectPreviousCellCommandId = 'notebook:select-previous-cell';
 
 let notebookContainerClass = 'jp-NotebookContainer';
-
+let widgetClass = 'jp-NotebookContainer-widget';
 
 /**
  * The notebook file handler provider.
@@ -98,6 +98,7 @@ class NotebookContainer extends Panel {
     super();
     this._model = new NotebookModel(manager);
     let widgetarea = new Widget();
+    widgetarea.addClass(widgetClass);
     this._manager = new WidgetManager(widgetarea.node);
     let widget = new NotebookWidget(this._model);
 
