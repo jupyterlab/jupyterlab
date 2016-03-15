@@ -7,7 +7,7 @@
 
 import {
   NotebookModel, NotebookWidget, INotebookContent,
-  serialize, deserialize
+  serialize, deserialize, trustNotebook
 } from 'jupyter-js-notebook';
 
 import {
@@ -92,6 +92,13 @@ function main(): void {
     text: 'Restart Kernel',
     shortcut: '0 0',
     handler: () => { nbWidget.restart() ; }
+  },
+  {
+    category: 'Notebook',
+    text: 'Trust Notebook',
+    handler: () => { 
+      trustNotebook(nbWidget.node, nbModel);
+    }
   },
   {
     category: 'Notebook Cell',
