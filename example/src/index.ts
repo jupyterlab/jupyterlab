@@ -23,7 +23,7 @@ import {
 } from 'jupyter-js-utils';
 
 import {
-  CommandPalette, StandardPaletteModel
+  CommandPalette, StandardPaletteModel, IStandardPaletteItemOptions
 } from 'phosphor-commandpalette';
 
 import {
@@ -74,12 +74,43 @@ function main(): void {
   panel.addChild(nbWidget);
   window.onresize = () => { panel.update(); };
 
-  let items = [
+  let items: IStandardPaletteItemOptions[] = [
+  {
+    category: 'Notebook Cell',
+    text: 'Run',
+    shortcut: 'Shift Enter',
+    handler: () => { nbModel.runActiveCell(); }
+  },
   {
     category: 'Notebook',
-    text: 'Run Cell',
-    handler: () => { nbModel.runActiveCell(); }
-  }
+    text: 'Save',
+    shortcut: 'Accel S',
+    handler: () => { nbModel.save() ; }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Cut',
+    shortcut: 'X',
+    handler: () => { nbWidget.cut() ; }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Paste',
+    shortcut: 'V',
+    handler: () => { nbWidget.paste() ; }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Insert Above',
+    shortcut: 'A',
+    handler: () => { nbWidget.insertAbove() ; }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Insert Below',
+    shortcut: 'B',
+    handler: () => { nbWidget.insertBelow() ; }
+  },
   ]
   pModel.addItems(items);
 
@@ -102,9 +133,17 @@ function main(): void {
   }, 
   {
     selector: '.jp-Cell.jp-mod-commandMode',
-    sequence: ['D', 'D'],
+    sequence: ['X'],
     handler: () => {
       nbWidget.cut();
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['V'],
+    handler: () => {
+      nbWidget.paste();
       return true;
     }
   },
