@@ -286,14 +286,15 @@ class OutputAreaWidget extends Widget {
       widget.dispose();
       break;
     case ListChangeType.Replace:
-      for (let i = layout.childCount(); i > 0; i--) {
-        widget = layout.childAt(i - 1);
+      let oldValues = args.oldValue as IOutput[];
+      for (let i = args.oldIndex; i < oldValues.length; i++) {
+        widget = layout.childAt(args.oldIndex);
         layout.removeChild(widget);
         widget.dispose();
       }
-      let newValue = args.newValue as IOutput[];
-      for (let i = newValue.length; i > 0; i--) {
-        layout.insertChild(args.newIndex, this.createOutput(newValue[i]));
+      let newValues = args.newValue as IOutput[];
+      for (let i = newValues.length; i < 0; i--) {
+        layout.insertChild(args.newIndex, this.createOutput(newValues[i]));
       }
       break;
     case ListChangeType.Set:
@@ -304,6 +305,13 @@ class OutputAreaWidget extends Widget {
       layout.insertChild(args.newIndex, widget);
       break;
     }
+  }
+
+  /**
+   * Replace and render content.
+   */
+  protected replace(newIndex: number, newValue: IOutput[]): void {
+    
   }
 
   /**
@@ -334,6 +342,15 @@ class OutputAreaWidget extends Widget {
     case 'fixedHeight':
       this.update();
       break;
+    case 'trusted':
+      let layout = this.layout as PanelLayout;
+      for (let i = 0; i < layout.childCount(); i++) {
+        layout.removeChild(layout.childAt(0));
+      }
+      let outputs = this.model.outputs;
+      for (let i = 0; i < outputs.length; i++) {
+        layout.insertChild(0, this.createOutput(outputs.get(i)));
+      }
     }
   }
   

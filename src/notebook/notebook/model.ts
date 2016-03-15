@@ -377,11 +377,13 @@ class NotebookModel implements INotebookModel {
     if (!cell) {
       return;
     }
-    cell.trusted = true;
     if (isMarkdownCellModel(cell)) {
+      cell.trusted = true;
       cell.rendered = true;
     } else if (isCodeCellModel(cell)) {
       this.executeCell(cell as CodeCellModel);
+    } else {
+      cell.trusted = true;
     }
     if (this.activeCellIndex === this.cells.length - 1) {
       let cell = this.createCodeCell();
@@ -439,6 +441,7 @@ class NotebookModel implements INotebookModel {
     let output = cell.output;
     let ex = this.session.kernel.execute(exRequest);
     output.clear(false);
+    cell.trusted = true;
     ex.onIOPub = (msg => {
       let model = msg.content;
       if (model !== void 0) {
