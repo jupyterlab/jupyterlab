@@ -107,6 +107,12 @@ function main(): void {
   },
   {
     category: 'Notebook Cell',
+    text: 'Copy',
+    shortcut: 'C',
+    handler: () => { nbWidget.copy() ; }
+  },
+  {
+    category: 'Notebook Cell',
     text: 'Paste',
     shortcut: 'V',
     handler: () => { nbWidget.paste() ; }
@@ -218,6 +224,14 @@ function main(): void {
     sequence: ['X'],
     handler: () => {
       nbWidget.cut();
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['C'],
+    handler: () => {
+      nbWidget.copy();
       return true;
     }
   },
