@@ -200,6 +200,7 @@ class OutputAreaWidget extends Widget {
     let widget = new Widget();
     widget.addClass(OUTPUT_CLASS);
     let bundle: MimeBundle;
+    this._sanitized = false;
     switch(output.output_type) {
     case "execute_result":
       bundle = (output as IExecuteResult).data;
@@ -243,14 +244,17 @@ class OutputAreaWidget extends Widget {
           let out = bundle[key];
           if (typeof out === 'string') {
             bundle[key] = sanitize(out as string);
+            this._sanitized = true;
           } else {
             bundle[key] = [];
             let outs = out as string[];
             for (let out of outs) {
               (bundle[key] as string[]).push(sanitize(out));
             }
+            this._sanitized = true;
           }
         } else {
+          this._sanitized = true;
           // Don't display if we don't know how to sanitize it.
           console.log("Ignoring untrusted " + key + " output.");
           delete bundle[key];
@@ -336,16 +340,20 @@ class OutputAreaWidget extends Widget {
       this.update();
       break;
     case 'trusted':
-      let layout = this.layout as PanelLayout;
-      for (let i = 0; i < layout.childCount(); i++) {
-        layout.removeChild(layout.childAt(0));
-      }
-      let outputs = this.model.outputs;
-      for (let i = 0; i < outputs.length; i++) {
-        layout.insertChild(0, this.createOutput(outputs.get(i)));
+      // Re-render only if necessary.
+      if ((this._sanitized && args.newValue) || (!args.newValue)) {
+        let layout = this.layout as PanelLayout;
+        for (let i = 0; i < layout.childCount(); i++) {
+          layout.removeChild(layout.childAt(0));
+        }
+        let outputs = this.model.outputs;
+        for (let i = 0; i < outputs.length; i++) {
+          layout.insertChild(0, this.createOutput(outputs.get(i)));
+        }
       }
     }
   }
   
+  private _sanitized = false;
   private _model: IOutputAreaModel;
 }
