@@ -252,6 +252,9 @@ class EditorModel implements IEditorModel {
    * Dispose of the resources held by the model.
    */
   dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
     clearSignalData(this);
     this._isDisposed = true;
   }

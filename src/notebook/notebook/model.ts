@@ -304,6 +304,9 @@ class NotebookModel implements INotebookModel {
    * Dispose of the resources held by the model.
    */
   dispose(): void {
+    if (this._cells === null) {
+      return;
+    }
     let cells = this._cells;
     clearSignalData(this);
     for (let i = 0; i < cells.length; i++) {
