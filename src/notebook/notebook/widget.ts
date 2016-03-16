@@ -726,7 +726,7 @@ class NotebookToolbar extends Widget {
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
       if (cell.selected || cell.active) {
-        this._copied.push(cell);
+        this._copied.push(this.cloneCell(cell));
       }
     }
   }
@@ -741,8 +741,8 @@ class NotebookToolbar extends Widget {
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
       if (cell.selected || cell.active) {
+        this._cut.push(this.cloneCell(cell));
         model.cells.remove(cell);
-        this._cut.push(cell);
       }
     }
   }
@@ -758,7 +758,7 @@ class NotebookToolbar extends Widget {
     if (copied.length > 0) {
       // Insert copies of the original cells in reverse order.
       for (let cell of copied.reverse()) {
-        model.cells.insert(index, this.cloneCell(cell));
+        model.cells.insert(index, cell);
       }
     } else {
       // Insert the cut cell(s) in reverse order.
