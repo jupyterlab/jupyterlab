@@ -316,6 +316,48 @@ class NotebookWidget extends Widget {
   }
 
   /**
+   * Merge selected cells.
+   */
+  merge(): void {
+    let toMerge: string[] = [];
+    let toDelete: ICellModel[] = [];
+    let activeCell: ICellModel;
+    let model = this.model;
+    for (let i = 0; i < model.cells.length; i++) {
+      let cell = model.cells.get(i);
+      if (cell.selected || cell.active) {
+        toMerge.push(cell.input.textEditor.text);
+      }
+      if (cell.active) {
+        activeCell = cell;
+      } else {
+        toDelete.push(cell);
+      }
+    }
+    // Make sure there are cells to merge.
+    if (toMerge.length < 2 || !activeCell) {
+      return;
+    }
+    // For rendered markdown cells, unrender, set the text, then rerender.
+    let rendered = (activeCell as MarkdownCellModel).rendered;
+    if (rendered) {
+      (activeCell as MarkdownCellModel).rendered = false;
+    }
+    // For all cells types, set the merged text.
+    activeCell.input.textEditor.text = toMerge.join('\n\n');
+    if (rendered) {
+      (activeCell as MarkdownCellModel).rendered = true;
+    }
+    // Remove the other cells and add them to the delete stack.
+    for (let cell of toDelete) {
+      model.cells.remove(cell);
+    }
+    this._undeleteStack.push(toDelete);
+    // Make sure the previous cell is still active.
+    model.activeCellIndex = model.cells.indexOf(activeCell);
+  }
+
+  /**
    * Change the selected cell type(s).
    */
   changeCellType(value: string): void {
