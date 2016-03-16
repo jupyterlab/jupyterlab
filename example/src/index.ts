@@ -150,6 +150,12 @@ function main(): void {
   },
   {
     category: 'Notebook Cell',
+    text: 'Merge Selected',
+    shortcut: 'Shift M',
+    handler: () => { nbWidget.merge() ; }
+  },
+  {
+    category: 'Notebook Cell',
     text: 'To Code Type',
     shortcut: 'Y',
     handler: () => { nbWidget.changeCellType('code') ; }
@@ -275,6 +281,14 @@ function main(): void {
     sequence: ['Z'],
     handler: () => {
       nbWidget.undelete();
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['Shift M'],
+    handler: () => {
+      nbWidget.merge();
       return true;
     }
   },
