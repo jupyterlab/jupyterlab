@@ -124,6 +124,16 @@ class InputAreaWidget extends Widget {
     return this._prompt;
   }
 
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose() {
+    this._model.dispose();
+    this._model = null;
+    super.dispose();
+  }
+
   /**
    * Change handler for model updates.
    */

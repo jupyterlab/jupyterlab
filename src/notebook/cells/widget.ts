@@ -147,6 +147,15 @@ class BaseCellWidget extends Widget {
   }
 
   /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose() {
+    this._model.dispose();
+    this._model = null;
+    super.dispose();
+  }
+
+  /**
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(message: Message): void {
@@ -184,8 +193,8 @@ class BaseCellWidget extends Widget {
     this.update();
   }
 
-  private _input: InputAreaWidget;
-  private _model: ICellModel;
+  private _input: InputAreaWidget = null;
+  private _model: ICellModel = null;
 }
 
 
@@ -223,7 +232,7 @@ class CodeCellWidget extends BaseCellWidget {
     return this._output;
   }
 
-  private _output: OutputAreaWidget;
+  private _output: OutputAreaWidget = null;
 }
 
 
@@ -302,7 +311,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     }
   }
 
-  private _rendered: Widget;
+  private _rendered: Widget = null;
   private _dirty = true;
 }
 

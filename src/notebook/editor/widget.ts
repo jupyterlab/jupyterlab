@@ -105,6 +105,16 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
   }
 
   /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose() {
+    this._editor = null;
+    this._model.dispose();
+    this._model = null;
+    super.dispose();
+  }
+
+  /**
    * Update whether the editor has a fixed maximum height.
    */
   protected updateFixedHeight(fixedHeight: boolean): void {

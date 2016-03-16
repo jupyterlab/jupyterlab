@@ -238,7 +238,7 @@ class NotebookWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose() {
-    this._model.cells.changed.disconnect(this.onCellsChanged);
+    this._model.dispose();
     this._model = null;
     super.dispose();
   }
@@ -266,8 +266,8 @@ class NotebookWidget extends Widget {
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
       if (cell.selected || cell.active) {
+        undelete.push(this._toolbar.cloneCell(cell));
         model.cells.remove(cell);
-        undelete.push(cell);
       }
     }
     if (undelete.length) {
@@ -338,18 +338,16 @@ class NotebookWidget extends Widget {
     if (toMerge.length < 2 || !activeCell) {
       return;
     }
-    // For rendered markdown cells, unrender, set the text, then rerender.
-    let rendered = (activeCell as MarkdownCellModel).rendered;
-    if (rendered) {
+    // For rendered markdown cells, unrender before setting the text.
+    if ((activeCell as MarkdownCellModel).rendered) {
       (activeCell as MarkdownCellModel).rendered = false;
     }
     // For all cells types, set the merged text.
     activeCell.input.textEditor.text = toMerge.join('\n\n');
-    if (rendered) {
-      (activeCell as MarkdownCellModel).rendered = true;
-    }
     // Remove the other cells and add them to the delete stack.
+    let copies: ICellModel[] = [];
     for (let cell of toDelete) {
+      copies.push(this._toolbar.cloneCell(cell));
       model.cells.remove(cell);
     }
     this._undeleteStack.push(toDelete);
@@ -463,6 +461,7 @@ class NotebookCells extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose() {
+    this._model.dispose();
     this._model = null;
     super.dispose();
   }
@@ -688,6 +687,20 @@ class NotebookToolbar extends Widget {
   }
 
   /**
+   * Clone a cell model.
+   */
+  cloneCell(cell: ICellModel): ICellModel {
+    switch(cell.type) {
+    case 'code':
+      return this.model.createCodeCell(cell);
+    case 'markdown':
+      return this.model.createMarkdownCell(cell);
+    default:
+      return this.model.createRawCell(cell);
+    }
+  }
+
+  /**
    * Insert a new code cell above the current cell.
    */
   insertAbove(): void {
@@ -745,19 +758,7 @@ class NotebookToolbar extends Widget {
     if (copied.length > 0) {
       // Insert copies of the original cells in reverse order.
       for (let cell of copied.reverse()) {
-        let newCell: ICellModel;
-        switch(cell.type) {
-        case 'code':
-          newCell = model.createCodeCell(cell);
-          break;
-        case 'markdown':
-          newCell = model.createMarkdownCell(cell);
-          break;
-        default:
-          newCell = model.createRawCell(cell);
-          break;
-        }
-        model.cells.insert(index, newCell);
+        model.cells.insert(index, this.cloneCell(cell));
       }
     } else {
       // Insert the cut cell(s) in reverse order.
