@@ -52,11 +52,6 @@ const EDITOR_CLASS = 'jp-InputArea-editor';
 const COLLAPSED_CLASS = 'jp-mod-collapsed';
 
 /**
- * The class name added to to the input area when dirty.
- */
-const DIRTY_CLASS = 'jp-mod-dirty';
-
-/**
  * The class name added to to the input area when readonly.
  */
 const READONLY_CLASS = 'jp-mod-readOnly';
@@ -144,13 +139,6 @@ class InputAreaWidget extends Widget {
         this.addClass(COLLAPSED_CLASS);
       } else {
         this.removeClass(COLLAPSED_CLASS);
-      }
-      break;
-    case 'dirty':
-      if (args.newValue) {
-        this.addClass(DIRTY_CLASS);
-      } else {
-        this.removeClass(DIRTY_CLASS);
       }
       break;
     case 'readOnly':

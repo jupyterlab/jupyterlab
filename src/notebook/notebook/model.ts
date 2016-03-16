@@ -279,14 +279,6 @@ class NotebookModel implements INotebookModel {
     return NotebookModelPrivate.dirtyProperty.get(this);
   }
   set dirty(value: boolean) {
-    // Clear the dirty state of all cells if the notebook dirty state
-    // is cleared.
-    if (!value) {
-      for (let i = 0; i < this._cells.length; i++) {
-        let cell = this._cells.get(i);
-        cell.dirty = value;
-      }
-    }
     NotebookModelPrivate.dirtyProperty.set(this, value);
   }
 
@@ -338,7 +330,6 @@ class NotebookModel implements INotebookModel {
     if (source) {
       cell.trusted = source.trusted;
       cell.input.textEditor.text = source.input.textEditor.text;
-      cell.dirty = source.dirty;
       cell.tags = source.tags;
       if (isCodeCellModel(source)) {
         cell.collapsed = source.collapsed;
@@ -349,6 +340,7 @@ class NotebookModel implements INotebookModel {
         }
       }
     }
+    cell.input.textEditor.stateChanged.connect(this.onEditorChanged, this);
     return cell;
   }
 
@@ -367,12 +359,12 @@ class NotebookModel implements INotebookModel {
     if (source) {
       cell.trusted = source.trusted;
       cell.input.textEditor.text = source.input.textEditor.text;
-      cell.dirty = source.dirty;
       cell.tags = source.tags;
       if (isMarkdownCellModel(source)) {
         cell.rendered = source.rendered;
       }
     }
+    cell.input.textEditor.stateChanged.connect(this.onEditorChanged, this);
     return cell;
   }
 
@@ -390,12 +382,12 @@ class NotebookModel implements INotebookModel {
     if (source) {
       cell.trusted = source.trusted;
       cell.input.textEditor.text = source.input.textEditor.text;
-      cell.dirty = source.dirty;
       cell.tags = source.tags;
       if (isRawCellModel(source)) {
         cell.format = (source as IRawCellModel).format;
       }
     }
+    cell.input.textEditor.stateChanged.connect(this.onEditorChanged, this);
     return cell;
   }
 
@@ -488,6 +480,15 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Handle changes to cell editors.
+   */
+  protected onEditorChanged(editor: IEditorModel, args: IChangedArgs<any>): void {
+    if (args.name === 'text') {
+      this.dirty = true;
+    }
+  }
+
+  /**
    * Save the notebook contents to disk.
    */
   private _save(): Promise<void> {
@@ -524,9 +525,6 @@ class NotebookModel implements INotebookModel {
    * Handle a change to a cell state.
    */
   private _onCellStateChanged(cell: ICellModel, change: IChangedArgs<any>): void {
-    if (change.name === 'dirty' && change.newValue) {
-      this.dirty = true;
-    }
     if (change.name === 'mode') {
       let cells = this.cells;
       for (let i = 0; i < cells.length; i++) {

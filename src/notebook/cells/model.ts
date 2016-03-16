@@ -95,11 +95,6 @@ interface IBaseCellModel extends IDisposable {
   input: IInputAreaModel;
 
   /**
-   * Whether the cell has unsaved changes.
-   */
-  dirty: boolean;
-
-  /**
    * Whether the cell is trusted.
    *
    * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
@@ -189,7 +184,6 @@ class BaseCellModel implements IBaseCellModel {
    */
   constructor(input: IInputAreaModel) {
     this._input = input;
-    input.stateChanged.connect(this.onInputChanged, this);
     input.textEditor.stateChanged.connect(this.onEditorChanged, this);
   }
 
@@ -242,19 +236,6 @@ class BaseCellModel implements IBaseCellModel {
    */
   get input(): IInputAreaModel {
     return this._input;
-  }
-
-  /**
-   * The dirty state of the cell.
-   *
-   * #### Notes
-   * This is a delegate to the dirty state of the [input].
-   */
-  get dirty(): boolean {
-    return this.input.dirty;
-  }
-  set dirty(value: boolean) {
-    this.input.dirty = value;
   }
 
   /**
@@ -330,16 +311,6 @@ class BaseCellModel implements IBaseCellModel {
    * The type of cell.
    */
   type: CellType;
-
-  /**
-   * Handle changes to the input model.
-   */
-  protected onInputChanged(input: IInputAreaModel, args: IChangedArgs<any>): void {
-    // Re-emit changes to input dirty and readOnly states.
-    if (args.name === 'dirty' || args.name === 'readOnly') {
-      this.stateChanged.emit(args);
-    }
-  }
 
   /**
    * Handle changes to the editor model.

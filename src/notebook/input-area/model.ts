@@ -45,11 +45,6 @@ interface IInputAreaModel extends IDisposable {
   prompt: string;
 
   /**
-   * The dirty state of the input cell.
-   */
-  dirty: boolean;
-
-  /**
    * The read only state of the input cell.
    */
   readOnly: boolean;
@@ -103,19 +98,6 @@ class InputAreaModel implements IInputAreaModel {
    */
   get textEditor(): IEditorModel {
     return this._editor;
-  }
-
-  /**
-   * The dirty state.
-   *
-   * #### Notest
-   * This is a delegate to the dirty state of the [textEditor].
-   */
-  get dirty(): boolean {
-    return this.textEditor.dirty;
-  }
-  set dirty(value: boolean) {
-    this.textEditor.dirty = value;
   }
 
   /**

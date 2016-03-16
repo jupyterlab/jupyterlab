@@ -82,7 +82,6 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     CodeMirror.on(this._editor.getDoc(), 'change', (instance, change) => {
       if (change.origin !== 'setValue') {
         this._model.text = instance.getValue();
-        this._model.dirty = true;
       }
     });
     this._editor.on('focus', () => {
