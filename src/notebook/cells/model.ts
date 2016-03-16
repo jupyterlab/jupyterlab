@@ -317,7 +317,8 @@ class BaseCellModel implements IBaseCellModel {
    * Dispose of the resources held by the model.
    */
   dispose(): void {
-    if (this._input === null) {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
       return;
     }
     clearSignalData(this);

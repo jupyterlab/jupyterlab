@@ -142,6 +142,10 @@ class InputAreaModel implements IInputAreaModel {
    * Dispose of the resources held by the model.
    */
   dispose(): void {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
     clearSignalData(this);
     this._editor.dispose();
     this._editor = null;

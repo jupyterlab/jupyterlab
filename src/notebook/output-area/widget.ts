@@ -187,6 +187,10 @@ class OutputAreaWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose() {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
     this._model.dispose();
     this._model = null;
     super.dispose();

@@ -461,6 +461,10 @@ class NotebookCells extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose() {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }    
     this._model.dispose();
     this._model = null;
     super.dispose();
@@ -676,14 +680,6 @@ class NotebookToolbar extends Widget {
   get kernelIndicatorNode(): HTMLElement {
     let node = this.node.getElementsByClassName(TOOLBAR_INDICATOR)[0];
     return node as HTMLElement;
-  }
-
-  /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose() {
-    this._model = null;
-    super.dispose();
   }
 
   /**

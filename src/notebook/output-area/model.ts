@@ -143,7 +143,8 @@ class OutputAreaModel implements IOutputAreaModel {
    * Dispose of the resources held by the model.
    */
   dispose(): void {
-    if (this._outputs === null) {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
       return;
     }
     clearSignalData(this);
