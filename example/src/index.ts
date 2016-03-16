@@ -102,19 +102,19 @@ function main(): void {
   },
   {
     category: 'Notebook Cell',
-    text: 'Run',
+    text: 'Run Selected',
     shortcut: 'Shift Enter',
     handler: () => { nbModel.runActiveCell(); }
   },
   {
     category: 'Notebook Cell',
-    text: 'Cut',
+    text: 'Cut Selected',
     shortcut: 'X',
     handler: () => { nbWidget.cut() ; }
   },
   {
     category: 'Notebook Cell',
-    text: 'Copy',
+    text: 'Copy Selected',
     shortcut: 'C',
     handler: () => { nbWidget.copy() ; }
   },
@@ -123,6 +123,18 @@ function main(): void {
     text: 'Paste',
     shortcut: 'V',
     handler: () => { nbWidget.paste() ; }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Delete Selected',
+    shortcut: 'D D',
+    handler: () => { nbWidget.delete() ; }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Undo Cell Deletion',
+    shortcut: 'Z',
+    handler: () => { nbWidget.undelete() ; }
   },
   {
     category: 'Notebook Cell',
@@ -247,6 +259,22 @@ function main(): void {
     sequence: ['V'],
     handler: () => {
       nbWidget.paste();
+      return true;
+    }
+  },
+   {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['D', 'D'],
+    handler: () => {
+      nbWidget.delete();
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Cell.jp-mod-commandMode',
+    sequence: ['Z'],
+    handler: () => {
+      nbWidget.undelete();
       return true;
     }
   },
