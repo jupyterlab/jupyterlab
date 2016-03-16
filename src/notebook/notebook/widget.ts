@@ -324,14 +324,15 @@ class NotebookWidget extends Widget {
       widget.dispose();
       break;
     case ListChangeType.Replace:
-      for (let i = (args.oldValue as ICellModel[]).length; i > 0; i--) {
-        widget = layout.childAt(i);
+      let oldValues = args.oldValue as ICellModel[];
+      for (let i = args.oldIndex; i < oldValues.length; i++) {
+        widget = layout.childAt(args.oldIndex);
         layout.removeChild(widget);
         widget.dispose();
       }
       let newValues = args.newValue as ICellModel[];
-      for (let i = 0; i < newValues.length; i++) {
-        layout.addChild(factory(newValues[i]));
+      for (let i = newValues.length; i < 0; i--) {
+        layout.insertChild(args.newIndex, factory(newValues[i]));
       }
       break;
     case ListChangeType.Set:

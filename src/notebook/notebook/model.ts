@@ -83,14 +83,6 @@ interface INotebookModel {
   readOnly: boolean;
 
   /**
-   * Whether the notebook can be trusted.
-   *
-   * #### Notes
-   * An untrusted notebook should sanitize HTML output.
-   */
-  //trusted: boolean;
-
-  /**
    * The list of cells in the notebook.
    *
    * #### Notes
@@ -309,7 +301,9 @@ class NotebookModel implements INotebookModel {
     let input = constructor.createInput(editor);
     let output = constructor.createOutputArea();
     let cell = new CodeCellModel(input, output);
+    cell.trusted = true;
     if (source) {
+      cell.trusted = source.trusted;
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
       cell.tags = source.tags;
@@ -336,7 +330,9 @@ class NotebookModel implements INotebookModel {
     });
     let input = constructor.createInput(editor);
     let cell = new MarkdownCellModel(input);
+    cell.trusted = true;
     if (source) {
+      cell.trusted = source.trusted;
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
       cell.tags = source.tags;
@@ -357,7 +353,9 @@ class NotebookModel implements INotebookModel {
     });
     let input = constructor.createInput(editor);
     let cell = new RawCellModel(input);
+    cell.trusted = true;
     if (source) {
+      cell.trusted = source.trusted;
       cell.input.textEditor.text = source.input.textEditor.text;
       cell.dirty = source.dirty;
       cell.tags = source.tags;
@@ -380,9 +378,12 @@ class NotebookModel implements INotebookModel {
       return;
     }
     if (isMarkdownCellModel(cell)) {
+      cell.trusted = true;
       cell.rendered = true;
     } else if (isCodeCellModel(cell)) {
       this.executeCell(cell as CodeCellModel);
+    } else {
+      cell.trusted = true;
     }
     if (this.activeCellIndex === this.cells.length - 1) {
       let cell = this.createCodeCell();
@@ -440,6 +441,7 @@ class NotebookModel implements INotebookModel {
     let output = cell.output;
     let ex = this.session.kernel.execute(exRequest);
     output.clear(false);
+    cell.trusted = true;
     ex.onIOPub = (msg => {
       let model = msg.content;
       if (model !== void 0) {

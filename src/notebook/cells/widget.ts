@@ -34,6 +34,10 @@ import {
 } from '../utils/latex';
 
 import {
+  sanitize
+} from 'sanitizer';
+
+import {
   ICodeCellModel, IMarkdownCellModel, ICellModel, IRawCellModel
 } from './model';
 
@@ -268,6 +272,8 @@ class MarkdownCellWidget extends BaseCellWidget {
         let text = model.input.textEditor.text || DEFAULT_MARKDOWN_TEXT;
         let data = removeMath(text);
         let html = marked(data['text']);
+        // Always sanitize markdown output.
+        html = sanitize(html);
         this.rendered.node.innerHTML = replaceMath(html, data['math']);
         typeset(this.rendered.node);
       }

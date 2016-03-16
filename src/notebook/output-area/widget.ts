@@ -47,6 +47,10 @@ import {
 } from 'transformime-jupyter-transformers';
 
 import {
+  sanitize
+} from 'sanitizer';
+
+import {
   IOutput, IExecuteResult, IDisplayData, IStream, IError, MimeBundle
 } from '../notebook/nbformat';
 
@@ -129,6 +133,17 @@ const transformers = [
   HTMLTransformer,
   ScriptTransform
 ];
+
+/**
+ * A list of outputs considered safe.
+ */
+const safeOutputs = ['text/plain', 'text/latex', 'image/png', 'image/jpeg', 
+                     'jupyter/console-text'];
+
+/**
+ * A list of outputs that are sanitizable.
+ */
+const sanitizable = ['text/svg', 'text/html'];
 
 /**
  * The global transformime transformer.
@@ -217,6 +232,33 @@ class OutputAreaWidget extends Widget {
       console.error(`Unrecognized output type: ${output.output_type}`);
       bundle = {};
     }
+
+    // Sanitize outputs as needed.
+    if (!this.model.trusted) {
+      let keys = Object.keys(bundle);
+      for (let key of keys) {
+        if (safeOutputs.indexOf(key) !== -1) {
+          continue;
+        } else if (sanitizable.indexOf(key) !== -1) {
+          let out = bundle[key];
+          if (typeof out === 'string') {
+            bundle[key] = sanitize(out as string);
+          } else {
+            bundle[key] = [];
+            let outs = out as string[];
+            for (let out of outs) {
+              (bundle[key] as string[]).push(sanitize(out));
+            }
+          }
+        } else {
+          // Don't display if we don't know how to sanitize it.
+          console.log("Ignoring untrusted " + key + " output.");
+          delete bundle[key];
+          continue;
+        }
+      }
+    }
+   
     transform.transform(bundle, document).then(result => {
       widget.node.appendChild(result.el);
       result.el.classList.add(RESULT_CLASS);
@@ -244,14 +286,15 @@ class OutputAreaWidget extends Widget {
       widget.dispose();
       break;
     case ListChangeType.Replace:
-      for (let i = layout.childCount(); i > 0; i--) {
-        widget = layout.childAt(i - 1);
+      let oldValues = args.oldValue as IOutput[];
+      for (let i = args.oldIndex; i < oldValues.length; i++) {
+        widget = layout.childAt(args.oldIndex);
         layout.removeChild(widget);
         widget.dispose();
       }
-      let newValue = args.newValue as IOutput[];
-      for (let i = newValue.length; i > 0; i--) {
-        layout.insertChild(args.newIndex, this.createOutput(newValue[i]));
+      let newValues = args.newValue as IOutput[];
+      for (let i = newValues.length; i < 0; i--) {
+        layout.insertChild(args.newIndex, this.createOutput(newValues[i]));
       }
       break;
     case ListChangeType.Set:
@@ -292,6 +335,15 @@ class OutputAreaWidget extends Widget {
     case 'fixedHeight':
       this.update();
       break;
+    case 'trusted':
+      let layout = this.layout as PanelLayout;
+      for (let i = 0; i < layout.childCount(); i++) {
+        layout.removeChild(layout.childAt(0));
+      }
+      let outputs = this.model.outputs;
+      for (let i = 0; i < outputs.length; i++) {
+        layout.insertChild(0, this.createOutput(outputs.get(i)));
+      }
     }
   }
   

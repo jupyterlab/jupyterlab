@@ -20,6 +20,7 @@
         "../../src/typings/mathjax/mathjax.d.ts",
         "../../src/typings/mocha/mocha.d.ts",
         "../../src/typings/require/require.d.ts",
+        "../../src/typings/sanitizer/sanitizer.d.ts",
         "../../src/typings/transformime/transformime.d.ts",
         "index.ts"
     ]

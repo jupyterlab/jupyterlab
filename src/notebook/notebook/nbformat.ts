@@ -76,6 +76,17 @@ type CellType = 'code' | 'markdown' | 'raw';
 export
 interface IBaseCellMetadata {
   /**
+   * Whether the cell is trusted.
+   *
+   * #### Notes
+   * This is not strictly part of the nbformat spec, but it is added by
+   * the contents manager.
+   *
+   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
+   */
+  trusted: boolean;
+
+  /**
    * The cell's name. If present, must be a non-empty string.
    */
   name?: string;

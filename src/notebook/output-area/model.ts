@@ -30,6 +30,13 @@ interface IOutputAreaModel {
   stateChanged: ISignal<IOutputAreaModel, IChangedArgs<any>>;
 
   /**
+   * Whether the output is trusted.
+   *
+   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
+   */
+  trusted: boolean;
+
+  /**
    * Whether the output is collapsed.
    */
   collapsed: boolean;
@@ -70,9 +77,21 @@ class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
+   * Whether the output is trusted.
+   *
+   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
+   */
+  get trusted(): boolean {
+    return Private.trustedProperty.get(this);
+  }
+  set trusted(value: boolean) {
+    Private.trustedProperty.set(this, value);
+  }
+
+  /**
    * Whether the output has a maximum fixed height.
    */
-  get fixedHeight() {
+  get fixedHeight(): boolean {
     return Private.fixedHeightProperty.get(this);
   }
   set fixedHeight(value: boolean) {
@@ -82,7 +101,7 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * Whether the input area should be collapsed or displayed.
    */
-  get collapsed() {
+  get collapsed(): boolean {
     return Private.collapsedProperty.get(this);
   }
   set collapsed(value: boolean) {
@@ -157,6 +176,15 @@ namespace Private {
    */
   export
   const stateChangedSignal = new Signal<OutputAreaModel, IChangedArgs<any>>();
+
+  /**
+   * The property descriptor for whether the output is trusted.
+   */
+  export
+  const trustedProperty = new Property<OutputAreaModel, boolean>({
+    name: 'trusted',
+    notify: stateChangedSignal,
+  });
 
   /**
    * The property descriptor for whether the output has a fixed maximum height.
