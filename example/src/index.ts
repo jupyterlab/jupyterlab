@@ -187,7 +187,7 @@ function main(): void {
     }
   }, 
   {
-    selector: '.jp-Notebook-cell',
+    selector: '.jp-Cell.jp-mod-commandMode',
     sequence: ['I', 'I'],
     handler: () => {
       nbWidget.interrupt();
@@ -195,7 +195,7 @@ function main(): void {
     }
   }, 
   {
-    selector: '.jp-Notebook-cell',
+    selector: '.jp-Cell.jp-mod-commandMode',
     sequence: ['0', '0'],
     handler: () => {
       nbWidget.restart();
