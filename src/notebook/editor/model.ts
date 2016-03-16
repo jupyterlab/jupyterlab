@@ -3,11 +3,15 @@
 'use strict';
 
 import {
+  IDisposable
+} from 'phosphor-disposable';
+
+import {
   IChangedArgs, Property
 } from 'phosphor-properties';
 
 import {
-  ISignal, Signal
+  ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
 
@@ -15,7 +19,7 @@ import {
  * An interface required for implementing the editor model
  */
 export
-interface IEditorModel {
+interface IEditorModel extends IDisposable {
   /**
    * A signal emitted when the editor model state changes.
    */
@@ -233,6 +237,29 @@ class EditorModel implements IEditorModel {
   set text(value: string) {
     EditorModelPrivate.textProperty.set(this, value);
   }
+
+  /**
+   * Get whether the model is disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /** 
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    clearSignalData(this);
+    this._isDisposed = true;
+  }
+
+  private _isDisposed = false;
 }
 
 

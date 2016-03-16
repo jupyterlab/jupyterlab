@@ -3,11 +3,15 @@
 'use strict';
 
 import {
+  IDisposable
+} from 'phosphor-disposable';
+
+import {
   IChangedArgs, Property
 } from 'phosphor-properties';
 
 import {
-  ISignal, Signal
+  ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
 import {
@@ -19,7 +23,7 @@ import {
  * The model for an input area.
  */
 export
-interface IInputAreaModel {
+interface IInputAreaModel extends IDisposable {
   /**
    * A signal emitted when state of the input area changes.
    */
@@ -62,7 +66,6 @@ class InputAreaModel implements IInputAreaModel {
    */
   constructor(editor: IEditorModel) {
     this._editor = editor;
-    editor.stateChanged.connect(this.onEditorChanged, this);
   }
 
   /**
@@ -126,13 +129,26 @@ class InputAreaModel implements IInputAreaModel {
   }
 
   /**
-   * Handle changes to the editor state.
+   * Get whether the model is disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  protected onEditorChanged(editor: IEditorModel, args: IChangedArgs<any>): void {
-    if (args.name === 'dirty') {
-      // Re-emit dirty state changes from the editor.
-      this.stateChanged.emit(args);
+  get isDisposed(): boolean {
+    return this._editor === null;
+  }
+
+  /** 
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
     }
+    clearSignalData(this);
+    this._editor.dispose();
+    this._editor = null;
   }
 
   private _editor: IEditorModel = null;

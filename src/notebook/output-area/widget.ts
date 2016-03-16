@@ -187,8 +187,11 @@ class OutputAreaWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose() {
-    this._model.stateChanged.disconnect(this.modelStateChanged);
-    this._model.outputs.changed.disconnect(this.outputsChanged);
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    this._model.dispose();
     this._model = null;
     super.dispose();
   }
@@ -355,5 +358,5 @@ class OutputAreaWidget extends Widget {
   }
   
   private _sanitized = false;
-  private _model: IOutputAreaModel;
+  private _model: IOutputAreaModel = null;
 }

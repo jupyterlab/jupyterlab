@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  IDisposable
+} from 'phosphor-disposable';
+
+import {
   ObservableList
 } from 'phosphor-observablelist';
 
@@ -11,7 +15,7 @@ import {
 } from 'phosphor-properties';
 
 import {
-  ISignal, Signal
+  ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
 import {
@@ -23,7 +27,7 @@ import {
  * The model for an output area.
  */
 export
-interface IOutputAreaModel {
+interface IOutputAreaModel extends IDisposable {
   /**
    * A signal emitted when state of the output area changes.
    */
@@ -70,10 +74,27 @@ interface IOutputAreaModel {
 export
 class OutputAreaModel implements IOutputAreaModel {
   /**
+   * Construct a new output area model.
+   */
+  constructor() {
+    this._outputs = new ObservableList<IOutput>();
+  }
+
+  /**
    * A signal emitted when the state of the model changes.
    */
   get stateChanged() {
     return Private.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * Get the model execution, display, or stream outputs.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get outputs(): ObservableList<IOutput> {
+    return this._outputs;
   }
 
   /**
@@ -106,6 +127,29 @@ class OutputAreaModel implements IOutputAreaModel {
   }
   set collapsed(value: boolean) {
     Private.collapsedProperty.set(this, value);
+  }
+
+  /**
+   * Get whether the model is disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get isDisposed(): boolean {
+    return this._outputs === null;
+  }
+
+  /** 
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    clearSignalData(this);
+    this._outputs.clear();
+    this._outputs = null;
   }
 
   /**
@@ -158,11 +202,7 @@ class OutputAreaModel implements IOutputAreaModel {
     }
   }
 
-  /**
-   * Execution, display, or stream outputs.
-   */
-  outputs = new ObservableList<IOutput>();
-
+  private _outputs: ObservableList<IOutput> = null;
   private _clearNext = false;
 }
 

@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  IDisposable
+} from 'phosphor-disposable';
+
+import {
   IObservableList
 } from 'phosphor-observablelist';
 
@@ -11,7 +15,7 @@ import {
 } from 'phosphor-properties';
 
 import {
-  ISignal, Signal
+  ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
 import {
@@ -51,7 +55,7 @@ type ScrollSetting = boolean | 'auto';
  * The definition of a model object for a base cell.
  */
 export
-interface IBaseCellModel {
+interface IBaseCellModel extends IDisposable {
   /**
    * The type of cell.
    */
@@ -300,6 +304,29 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
+   * Get whether the model is disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get isDisposed(): boolean {
+    return this._input === null;
+  }
+
+  /** 
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    clearSignalData(this);
+    this._input.dispose();
+    this._input = null;
+  }
+
+  /**
    * The type of cell.
    */
   type: CellType;
@@ -400,6 +427,14 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   }
   set scrolled(value: ScrollSetting) {
     CellModelPrivate.scrolledProperty.set(this, value);
+  }
+
+  /** 
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    this._output = null;
+    super.dispose();
   }
 
   type: CellType = "code";

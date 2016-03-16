@@ -4,6 +4,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  IDisposable
+} from 'phosphor-disposable';
+
+import {
   IObservableList, ObservableList, ListChangeType, IListChangedArgs
 } from 'phosphor-observablelist';
 
@@ -12,7 +16,7 @@ import {
 } from 'phosphor-properties';
 
 import {
-  ISignal, Signal
+  ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
 import {
@@ -58,7 +62,7 @@ import {
  * The definition of a model object for a notebook widget.
  */
 export
-interface INotebookModel {
+interface INotebookModel extends IDisposable {
   /**
    * A signal emitted when state of the notebook changes.
    */
@@ -182,7 +186,8 @@ class NotebookModel implements INotebookModel {
    */
   constructor(manager: IContentsManager) {
     this._manager = manager;
-    this.cells.changed.connect(this._onCellsChanged, this);
+    this._cells = new ObservableList<ICellModel>();
+    this._cells.changed.connect(this._onCellsChanged, this);
   }
 
   /**
@@ -283,6 +288,34 @@ class NotebookModel implements INotebookModel {
       }
     }
     NotebookModelPrivate.dirtyProperty.set(this, value);
+  }
+
+  /**
+   * Get whether the model is disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get isDisposed(): boolean {
+    return this._cells === null;
+  }
+
+  /** 
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    let cells = this._cells;
+    clearSignalData(this);
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.get(i);
+      cell.dispose();
+    }
+    cells.clear();
+    this._cells = null;
   }
 
   /**
@@ -475,7 +508,14 @@ class NotebookModel implements INotebookModel {
       this.activeCellIndex = change.newIndex;
       break;
     case ListChangeType.Remove:
+      (change.oldValue as ICellModel).dispose();
       this.activeCellIndex = Math.min(change.oldIndex, this.cells.length - 1);
+      break;
+    case ListChangeType.Replace:
+      let oldValues = change.oldValue as ICellModel[];
+      for (let cell of oldValues) {
+        cell.dispose();
+      }
       break;
     }
   }
@@ -497,7 +537,7 @@ class NotebookModel implements INotebookModel {
     }
   }
 
-  private _cells: IObservableList<ICellModel> = new ObservableList<ICellModel>();
+  private _cells: IObservableList<ICellModel> = null;
   private _manager: IContentsManager = null;
 }
 
