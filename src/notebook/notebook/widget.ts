@@ -153,6 +153,11 @@ const TOOLBAR_PRESSED = 'jp-mod-pressed';
  */
 const TOOLBAR_BUSY = 'jp-mod-busy';
 
+/**
+ * The maximum size of the delete stack.
+ */
+const DELETE_STACK_SIZE = 10;
+
 
 /**
  * A widget for a notebook.
@@ -253,14 +258,51 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Copy the current cell(s) to the clipboard.
+   * Delete selected cell(s), putting them on the undelete stack.
+   */
+  delete(): void {
+    let undelete: ICellModel[] = [];
+    let model = this.model;
+    for (let i = 0; i < model.cells.length; i++) {
+      let cell = model.cells.get(i);
+      if (cell.selected || cell.active) {
+        model.cells.remove(cell);
+        undelete.push(cell);
+      }
+    }
+    if (undelete.length) {
+      this._undeleteStack.push(undelete);
+    }
+    if (this._undeleteStack.length > DELETE_STACK_SIZE) {
+      this._undeleteStack.shift();
+    }   
+  }
+
+  /**
+   * Undelete the cell(s) at the top of the undelete stack.
+   */
+  undelete(): void {
+    let model = this.model;
+    let index = model.activeCellIndex + 1;
+    if (this._undeleteStack.length === 0) {
+      return;
+    }
+    let undelete = this._undeleteStack.pop();
+    // Insert the undeleted cells in reverse order.
+    for (let cell of undelete.reverse()) {
+      model.cells.insert(index, cell);
+    }
+  }
+
+  /**
+   * Copy the selected cell(s) to the clipboard.
    */
   copy(): void {
     this._toolbar.copy();
   }
 
   /**
-   * Cut the current cell(s).
+   * Cut the selected cell(s).
    */
   cut(): void {
     this._toolbar.cut();
@@ -273,9 +315,8 @@ class NotebookWidget extends Widget {
     this._toolbar.paste();
   }
 
-
   /**
-   * Change the current cell type(s).
+   * Change the selected cell type(s).
    */
   changeCellType(value: string): void {
     this._toolbar.changeCellType(value);
@@ -344,6 +385,7 @@ class NotebookWidget extends Widget {
     }
   }
 
+  private _undeleteStack: ICellModel[][] = [];
   private _model: INotebookModel = null;
   private _toolbar: NotebookToolbar = null;
   private _notebook: NotebookCells = null;
@@ -451,6 +493,9 @@ class NotebookCells extends Widget {
     if (args.name === 'activeCellIndex') {
       let layout = this.layout as PanelLayout;
       let child = layout.childAt(args.newValue);
+      if (!child) {
+        return;
+      }
       Private.scrollIfNeeded(this.parent.node, child.node);
     }
   }
@@ -617,7 +662,7 @@ class NotebookToolbar extends Widget {
   }
 
   /**
-   * Copy the current cell(s) to the clipboard.
+   * Copy the selected cell(s) to the clipboard.
    */
   copy(): void {
     this._copied = [];
@@ -626,13 +671,13 @@ class NotebookToolbar extends Widget {
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
       if (cell.selected || cell.active) {
-        this._copied.push(i);
+        this._copied.push(cell);
       }
     }
   }
 
   /**
-   * Cut the current cell(s).
+   * Cut the selected cell(s).
    */
   cut(): void {
     this._copied = [];
@@ -656,12 +701,8 @@ class NotebookToolbar extends Widget {
     let copied = this._copied;
     let index = model.activeCellIndex + 1;
     if (copied.length > 0) {
-      let existing: ICellModel[] = [];
-      for (let index of copied) {
-        existing.push(model.cells.get(index));
-      }
-      // Insert the copied cell(s).
-      for (let cell of existing) {
+      // Insert copies of the original cells in reverse order.
+      for (let cell of copied.reverse()) {
         let newCell: ICellModel;
         switch(cell.type) {
         case 'code':
@@ -677,8 +718,8 @@ class NotebookToolbar extends Widget {
         model.cells.insert(index, newCell);
       }
     } else {
-      // Insert the curt cell(s).
-      for (let cell of cut) {
+      // Insert the cut cell(s) in reverse order.
+      for (let cell of cut.reverse()) {
         model.cells.insert(index, cell);
       }
     }
@@ -687,7 +728,7 @@ class NotebookToolbar extends Widget {
   }
 
   /**
-   * Change the current cell type(s).
+   * Change the selected cell type(s).
    */
   changeCellType(value: string): void {
     let model = this.model;
@@ -904,7 +945,7 @@ class NotebookToolbar extends Widget {
   }
 
   private _model: INotebookModel = null;
-  private _copied: number[] = [];
+  private _copied: ICellModel[] = [];
   private _cut: ICellModel[] = [];
 }
 
