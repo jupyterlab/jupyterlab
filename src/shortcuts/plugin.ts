@@ -88,12 +88,12 @@ const SHORTCUTS = [
   },
   {
     command: 'notebook:interrupt-kernel',
-    selector: '.jp-Notebook-cell',
+    selector: '.jp-Cell.jp-mod-commandMode',
     sequence: ['I', 'I']
   }, 
   {
     command: 'notebook:restart-kernel',
-    selector: '.jp-Notebook-cell',
+    selector: '.jp-Cell.jp-mod-commandMode',
     sequence: ['0', '0'],
   }, 
   {
