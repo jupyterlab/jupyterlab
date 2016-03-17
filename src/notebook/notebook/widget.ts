@@ -154,12 +154,12 @@ const TOOLBAR_PRESSED = 'jp-mod-pressed';
 const TOOLBAR_BUSY = 'jp-mod-busy';
 
 /**
- * The class name added to a cell in edit mode.
+ * The class name added to a notebook in edit mode.
  */
 const EDIT_CLASS = 'jp-mod-editMode';
 
 /**
- * The class name added to a cell in command mode.
+ * The class name added to a notebook in command mode.
  */
 const COMMAND_CLASS = 'jp-mod-commandMode';
 
@@ -212,6 +212,7 @@ class NotebookWidget extends Widget {
     super();
     this.addClass(NB_CLASS);
     this._model = model;
+    this.node.tabIndex = -1;  // Allow the widget to take focus.
     let constructor = this.constructor as typeof NotebookWidget;
 
     this.layout = new PanelLayout();
@@ -395,48 +396,6 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Handle DOM events for the widget.
-   */
-  handleEvent(event: Event) {
-    switch (event.type) {
-    case 'blur':
-      this.model.mode = 'command';
-      break;
-    case 'focus':
-      this.model.mode = 'edit';
-      // Activate the appropriate cell.
-      let layout = this._notebook.layout as PanelLayout;
-      for (let i = 0; i < layout.childCount(); i++) {
-        let widget = layout.childAt(i) as BaseCellWidget;
-        if (widget.node.contains(event.target as HTMLElement)) {
-          this.model.activeCellIndex = i;
-          break;
-        }
-      }
-      break;
-    }
-  }
-
-  /**
-   * Initialize a cell widget.
-   */
-  protected initCell(cell: BaseCellWidget): void {
-    cell.input.editor.node.addEventListener('focus', this, true);
-    cell.input.editor.node.addEventListener('blur', this, true);
-  }
-
-  /**
-   * Dispose of a cell widget.
-   */
-  protected disposeCell(cell: BaseCellWidget): void {
-    cell.input.editor.node.removeEventListener('focus', this, true);
-    cell.input.editor.node.removeEventListener('blur', this, true);
-    let layout = this.layout as PanelLayout;
-    layout.removeChild(cell);
-    cell.dispose();
-  }
-
-  /**
    * Handle a change cells event.  This function must be on this class
    * because it uses the static [createCell] method.
    */
@@ -449,34 +408,34 @@ class NotebookWidget extends Widget {
     case ListChangeType.Add:
       widget = factory(args.newValue as ICellModel);
       layout.insertChild(args.newIndex, widget);
-      this.initCell(widget);
       break;
     case ListChangeType.Move:
       layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
       break;
     case ListChangeType.Remove:
       widget = layout.childAt(args.oldIndex) as BaseCellWidget;
-      this.disposeCell(widget);
+      layout.removeChild(widget);
+      widget.dispose();
       break;
     case ListChangeType.Replace:
       let oldValues = args.oldValue as ICellModel[];
       for (let i = args.oldIndex; i < oldValues.length; i++) {
         widget = layout.childAt(args.oldIndex) as BaseCellWidget;
-        this.disposeCell(widget);
+        layout.removeChild(widget);
+        widget.dispose();
       }
       let newValues = args.newValue as ICellModel[];
       for (let i = newValues.length; i < 0; i--) {
         widget = factory(newValues[i])
         layout.insertChild(args.newIndex, widget);
-        this.initCell(widget);
       }
       break;
     case ListChangeType.Set:
       widget = layout.childAt(args.newIndex) as BaseCellWidget;
-      this.disposeCell(widget);
+      layout.removeChild(widget);
+      widget.dispose();
       widget = factory(args.newValue as ICellModel);
       layout.insertChild(args.newIndex, widget);
-      this.initCell(widget);
       break;
     }
     this.update();
@@ -493,17 +452,14 @@ class NotebookWidget extends Widget {
     let layout = this._notebook.layout as PanelLayout;
     let cell = cells.get(model.activeCellIndex);
     let widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
-    if (!widget) {
-      return;
-    }
+    if (widget) widget.input.editor.focus();
     if (mode === 'edit') {
-      widget.addClass(EDIT_CLASS);
-      widget.removeClass(COMMAND_CLASS);
-      widget.input.editor.focus();
+      this.addClass(EDIT_CLASS);
+      this.removeClass(COMMAND_CLASS);
     } else {
-      widget.addClass(COMMAND_CLASS);
-      widget.removeClass(EDIT_CLASS);
-      widget.node.focus();
+      this.addClass(COMMAND_CLASS);
+      this.removeClass(EDIT_CLASS);
+      this.node.focus();
     }
   }
 
@@ -577,12 +533,19 @@ class NotebookCells extends Widget {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
+    
     switch (event.type) {
     case 'click':
       this._evtClick(event as MouseEvent);
       break;
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
+      break;
+    case 'blur':
+      this._evtBlur(event);
+      break;
+    case 'focus':
+      this._evtFocus(event);
       break;
     }
   }
@@ -593,6 +556,8 @@ class NotebookCells extends Widget {
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
     this.node.addEventListener('dblclick', this);
+    this.node.addEventListener('focus', this, true);
+    this.node.addEventListener('blur', this, true);
   }
 
   /**
@@ -601,6 +566,8 @@ class NotebookCells extends Widget {
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('dblclick', this);
+    this.node.removeEventListener('focus', this, true);
+    this.node.removeEventListener('blur', this, true);
   }
 
   /**
@@ -671,6 +638,33 @@ class NotebookCells extends Widget {
     if (isMarkdownCellModel(cell) && cell.rendered) {
       cell.rendered = false;
       model.mode = 'edit';
+    }
+  }
+
+  /**
+   * Handle `blur` events for the widget.
+   */
+  private _evtBlur(event: Event): void {
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount(); i++) {
+      let editor = (layout.childAt(i) as BaseCellWidget).input.editor;
+      if (editor.node.contains(event.target as HTMLElement)) {
+        this.model.mode = 'command';
+      }
+    }
+  }
+
+  /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocus(event: Event): void {
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount(); i++) {
+      let editor = (layout.childAt(i) as BaseCellWidget).input.editor;
+      if (editor.node.contains(event.target as HTMLElement)) {
+        this.model.mode = 'edit';
+        this.model.activeCellIndex = i;
+      }
     }
   }
 

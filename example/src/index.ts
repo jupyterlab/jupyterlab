@@ -189,7 +189,7 @@ function main(): void {
 
   let bindings = [
   {
-    selector: '.jp-Notebook-cell',
+    selector: '.jp-Notebook',
     sequence: ['Shift Enter'],
     handler: () => {
       nbModel.runActiveCell();
@@ -197,7 +197,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Notebook-cell',
+    selector: '.jp-Notebook',
     sequence: ['Accel S'],
     handler: () => {
       nbModel.save();
@@ -205,7 +205,7 @@ function main(): void {
     }
   }, 
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['I', 'I'],
     handler: () => {
       nbWidget.interrupt();
@@ -213,7 +213,7 @@ function main(): void {
     }
   }, 
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['0', '0'],
     handler: () => {
       nbWidget.restart();
@@ -221,7 +221,7 @@ function main(): void {
     }
   }, 
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Y'],
     handler: () => {
       nbWidget.changeCellType('code');
@@ -229,7 +229,7 @@ function main(): void {
     }
   }, 
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['M'],
     handler: () => {
       nbWidget.changeCellType('markdown');
@@ -237,7 +237,7 @@ function main(): void {
     }
   }, 
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['R'],
     handler: () => {
       nbWidget.changeCellType('raw');
@@ -245,7 +245,7 @@ function main(): void {
     }
   }, 
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['X'],
     handler: () => {
       nbWidget.cut();
@@ -253,7 +253,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['C'],
     handler: () => {
       nbWidget.copy();
@@ -261,7 +261,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['V'],
     handler: () => {
       nbWidget.paste();
@@ -269,7 +269,7 @@ function main(): void {
     }
   },
    {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['D', 'D'],
     handler: () => {
       nbWidget.delete();
@@ -277,7 +277,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Z'],
     handler: () => {
       nbWidget.undelete();
@@ -285,7 +285,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Shift M'],
     handler: () => {
       nbWidget.merge();
@@ -293,7 +293,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['A'],
     handler: () => {
       nbWidget.insertAbove();
@@ -301,7 +301,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['B'],
     handler: () => {
       nbWidget.insertBelow();
@@ -309,7 +309,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['J'],
     handler: () => {
       nbModel.activeCellIndex += 1;
@@ -317,7 +317,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['ArrowDown'],
     handler: () => {
       nbModel.activeCellIndex += 1;
@@ -325,7 +325,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['K'],
     handler: () => {
       nbModel.activeCellIndex -= 1;
@@ -333,7 +333,7 @@ function main(): void {
     }
   },
   {
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['ArrowUp'],
     handler: () => {
       nbModel.activeCellIndex -= 1;
@@ -353,11 +353,6 @@ function main(): void {
       baseUrl: SERVER_URL
     }).then(session => {
       nbModel.session = session;
-      let content = serialize(nbModel);
-      contents.save(NOTEBOOK, {
-        type: 'notebook',
-        content
-      });
     });
   });
 }

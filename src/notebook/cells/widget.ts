@@ -106,8 +106,6 @@ class BaseCellWidget extends Widget {
   constructor(model: ICellModel) {
     super();
     this.addClass(CELL_CLASS);
-    // Make the cell focusable by setting the tabIndex.
-    this.node.tabIndex = -1;
     this._model = model;
     let constructor = this.constructor as typeof BaseCellWidget;
     this._input = constructor.createInput(model.input);
