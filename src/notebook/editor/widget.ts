@@ -57,7 +57,13 @@ interface IEditorWidget extends Widget {
    * The model for the editor widget.
    */
   model: IEditorModel;
+
+  /**
+   * Focus the editor.
+   */
+  focus(): void;
 }
+
 
 /**
  * A widget which hosts a CodeMirror editor.
@@ -84,12 +90,6 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
         this._model.text = instance.getValue();
       }
     });
-    this._editor.on('focus', () => {
-      this._model.focused = true;
-    });
-    this._editor.on('blur', () => {
-      this._model.focused = false;
-    });
     model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
@@ -101,6 +101,13 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
    */
   get model(): IEditorModel {
     return this._model;
+  }
+
+  /**
+   * Focus the editor.
+   */
+  focus(): void {
+    this._editor.focus();
   }
 
   /**
@@ -265,10 +272,6 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     case 'tabSize':
       this.updateTabSize(args.newValue as number);
       break;
-    case 'focused':
-      if (args.newValue) {
-        this._editor.focus();
-      }
     }
   }
 

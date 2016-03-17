@@ -83,16 +83,6 @@ const RAW_CELL_CLASS = 'jp-RawCell';
 const RENDERED_CLASS = 'jp-mod-rendered';
 
 /**
- * The class name added to a cell in edit mode.
- */
-const EDIT_CLASS = 'jp-mod-editMode';
-
-/**
- * The class name added to a cell in command mode.
- */
-const COMMAND_CLASS = 'jp-mod-commandMode';
-
-/**
  * The text applied to an empty markdown cell.
  */
 const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $'
@@ -173,13 +163,6 @@ class BaseCellWidget extends Widget {
       this.addClass(SELECTED_CLASS);
     } else {
       this.removeClass(SELECTED_CLASS);
-    }
-    if (this.model.mode === 'edit') {
-      this.addClass(EDIT_CLASS);
-      this.removeClass(COMMAND_CLASS);
-    } else {
-      this.addClass(COMMAND_CLASS)
-      this.removeClass(EDIT_CLASS);
     }
   }
 

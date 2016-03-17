@@ -40,7 +40,7 @@ import {
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
   IRawCellModel, isCodeCellModel, isMarkdownCellModel,
-  RawCellModel, isRawCellModel, CellMode
+  RawCellModel, isRawCellModel
 } from '../cells';
 
 import {
@@ -56,6 +56,13 @@ import {
 import {
   serialize
 } from './serialize';
+
+
+/**
+ * The interactivity modes for the notebook.
+ */
+export
+type NotebookMode = 'command' | 'edit';
 
 
 /**
@@ -75,6 +82,11 @@ interface INotebookModel extends IDisposable {
    * This can be considered the default language of the notebook.
    */
   defaultMimetype: string;
+
+  /**
+   * The interactivity mode of the notebook.
+   */
+  mode: NotebookMode;
 
   /**
    * Whether the notebook has unsaved changes.
@@ -273,6 +285,16 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * The mode of the notebook.
+   */
+  get mode(): NotebookMode {
+    return NotebookModelPrivate.modeProperty.get(this);
+  }
+  set mode(value: NotebookMode) {
+    NotebookModelPrivate.modeProperty.set(this, value);
+  }
+
+  /**
    * Whether the notebook has unsaved changes.
    */
   get dirty(): boolean {
@@ -413,7 +435,7 @@ class NotebookModel implements INotebookModel {
     if (this.activeCellIndex === this.cells.length - 1) {
       let cell = this.createCodeCell();
       this.cells.add(cell);
-      cell.mode = 'edit';  // This already sets the new index.
+      this.mode = 'edit';  // This already sets the new index.
     } else {
       this.activeCellIndex += 1;
     }
@@ -597,7 +619,16 @@ namespace NotebookModelPrivate {
   });
 
  /**
-  * A property descriptor for the dirty state
+  * A property descriptor for the notebook mode.
+  */
+  export
+  const modeProperty = new Property<NotebookModel, NotebookMode>({
+    name: 'mode',
+    notify: stateChangedSignal,
+  });
+
+ /**
+  * A property descriptor for the dirty state of the notebook.
   */
   export
   const dirtyProperty = new Property<NotebookModel, boolean>({
