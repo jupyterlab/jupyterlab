@@ -407,9 +407,10 @@ class NotebookWidget extends Widget {
       // Activate the appropriate cell.
       let layout = this._notebook.layout as PanelLayout;
       for (let i = 0; i < layout.childCount(); i++) {
-        let widget = layout.childAt(i);
+        let widget = layout.childAt(i) as BaseCellWidget;
         if (widget.node.contains(event.target as HTMLElement)) {
           this.model.activeCellIndex = i;
+          widget.input.editor.focus();
           break;
         }
       }
