@@ -45,16 +45,6 @@ import {
 export
 type ScrollSetting = boolean | 'auto';
 
-/**
- * The class name added to a cell in edit mode.
- */
-const EDIT_CLASS = 'jp-mod-editMode';
-
-/**
- * The class name added to a cell in command mode.
- */
-const COMMAND_CLASS = 'jp-mod-commandMode';
-
 
 /**
  * The definition of a model object for a base cell.
