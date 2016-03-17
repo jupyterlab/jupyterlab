@@ -346,10 +346,15 @@ function main(): void {
   contents.get(NOTEBOOK, {}).then(data => {
     deserialize(data.content, nbModel);
 
+    let name = 'python';
+    if (nbModel.metadata && nbModel.metadata.kernelspec) {
+      name = nbModel.metadata.kernelspec.name;
+    }
+
     // start session
     startNewSession({
       notebookPath: NOTEBOOK,
-      kernelName: data.content.metadata.kernelspec.name,
+      kernelName: name,
       baseUrl: SERVER_URL
     }).then(session => {
       nbModel.session = session;

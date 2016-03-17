@@ -894,8 +894,10 @@ class NotebookToolbar extends Widget {
   protected onModelChanged(sender: INotebookModel, args: IChangedArgs<any>): void {
     switch(args.name) {
     case 'metadata':
-      let name = this.model.metadata.kernelspec.display_name;
-      this.kernelNameNode.textContent = name;
+      if (this.model.metadata && this.model.metadata.kernelspec) {
+        let name = this.model.metadata.kernelspec.display_name;
+        this.kernelNameNode.textContent = name;
+      }
       break;
     case 'activeCellIndex':
       let cell = this.model.cells.get(this.model.activeCellIndex);
