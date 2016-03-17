@@ -235,6 +235,16 @@ class NotebookWidget extends Widget {
   }
 
   /**
+   * Get the toolbar used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get toolbar(): NotebookToolbar {
+    return this._toolbar;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
