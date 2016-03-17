@@ -410,7 +410,6 @@ class NotebookWidget extends Widget {
         let widget = layout.childAt(i) as BaseCellWidget;
         if (widget.node.contains(event.target as HTMLElement)) {
           this.model.activeCellIndex = i;
-          widget.input.editor.focus();
           break;
         }
       }
@@ -492,16 +491,19 @@ class NotebookWidget extends Widget {
     let cells = this.model.cells;
     let mode = model.mode;
     let layout = this._notebook.layout as PanelLayout;
-    for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i);
-      let widget = layout.childAt(i);
-      if (mode === 'edit') {
-        widget.addClass(EDIT_CLASS);
-        widget.removeClass(COMMAND_CLASS);
-      } else {
-        widget.addClass(COMMAND_CLASS);
-        widget.removeClass(EDIT_CLASS);
-      }
+    let cell = cells.get(model.activeCellIndex);
+    let widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
+    if (!widget) {
+      return;
+    }
+    if (mode === 'edit') {
+      widget.addClass(EDIT_CLASS);
+      widget.removeClass(COMMAND_CLASS);
+      widget.input.editor.focus();
+    } else {
+      widget.addClass(COMMAND_CLASS);
+      widget.removeClass(EDIT_CLASS);
+      widget.node.focus();
     }
   }
 
@@ -511,6 +513,9 @@ class NotebookWidget extends Widget {
   protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'mode':
+      this.update();
+      break;
+    case 'activeCellIndex':
       this.update();
       break;
     }
