@@ -325,7 +325,7 @@ class TerminalWidget extends Widget {
     }
     let node = this._dummyTerm;
     this._term.element.appendChild(node);
-    this._row_height = node.offsetHeight;
+    this._row_height = node.offsetHeight / 24;
     this._col_width = node.offsetWidth / 80;
     this._term.element.removeChild(node);
     this._dirty = false;
@@ -338,7 +338,7 @@ class TerminalWidget extends Widget {
    * Resize the terminal based on the computed geometry.
    */
   private _resizeTerminal() {
-    var rows = Math.max(2, Math.round(this._height / this._row_height) - 1);
+    var rows = Math.max(2, Math.round(this._height / this._row_height) - 2);
     var cols = Math.max(3, Math.round(this._width / this._col_width) - 1);
     this._term.resize(cols, rows);
   }
@@ -384,12 +384,22 @@ function getConfig(options: ITerminalOptions): ITerminalConfig {
  */
 function createDummyTerm(): HTMLElement {
   let node = document.createElement('div');
-  node.innerHTML = (
+  // Create 24 rows X 80 cols.
+  let rows: string[] = [];
+  for (let i = 0; i < 24; i++) {
+    rows.push(String(i));
+  }
+  let rowspan = document.createElement('span');
+  rowspan.innerHTML = rows.join('<br>');
+  let colspan = document.createElement('span');
+  colspan.textContent = (
     '01234567890123456789' +
     '01234567890123456789' +
     '01234567890123456789' +
     '01234567890123456789'
   );
+  node.appendChild(rowspan);
+  node.appendChild(colspan);
   node.style.visibility = 'hidden';
   node.style.position = 'absolute';
   node.style.height = 'auto';

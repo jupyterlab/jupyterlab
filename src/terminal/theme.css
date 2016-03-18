@@ -3,8 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-TerminalWidget {
-  min-width: 50px;
-  min-height: 50px;
+  min-width: 200px;
+  min-height: 200px;
 }
 
 .jp-TerminalWidget-body {
