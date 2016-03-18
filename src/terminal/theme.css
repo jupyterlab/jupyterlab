@@ -10,4 +10,6 @@
 .jp-TerminalWidget-body {
   padding: 0.5em;
   font-size: 11px;
+  user-select: text;
+  -webkit-user-select: text;
 }

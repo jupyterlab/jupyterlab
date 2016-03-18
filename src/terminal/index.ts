@@ -29,6 +29,15 @@ const TERMINAL_CLASS = 'jp-TerminalWidget';
  */
 const TERMINAL_BODY_CLASS = 'jp-TerminalWidget-body';
 
+/**
+ * The number of rows to use in the dummy terminal.
+ */
+const DUMMY_ROWS = 24;
+
+/**
+ * The number of cols to use in the dummy terminal.
+ */
+const DUMMY_COLS = 80;
 
 /**
  * Options for the terminal widget.
@@ -109,33 +118,14 @@ class TerminalWidget extends Widget {
 
     Terminal.brokenBold = true;
 
-    this._term = new Terminal(getConfig(options));
-    this._term.open(this.node);
-    this._term.element.classList.add(TERMINAL_BODY_CLASS)
-
     this._dummyTerm = createDummyTerm();
-    this.fontSize = options.fontSize || 11;
-    this.background = options.background || 'white';
-    this.color = options.color || 'black';
 
-    this._term.on('data', (data: string) => {
-      this._ws.send(JSON.stringify(['stdin', data]));
-    });
-
-    this._term.on('title', (title: string) => {
-        this.title.text = title;
-    });
+    this._ws.onopen = (event: MessageEvent) => {
+      this._createTerm(options);
+    }
 
     this._ws.onmessage = (event: MessageEvent) => {
-      var json_msg = JSON.parse(event.data);
-      switch (json_msg[0]) {
-      case 'stdout':
-        this._term.write(json_msg[1]);
-        break;
-      case 'disconnect':
-        this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
-        break;
-      }
+      this._handleWSMessage(event);
     };
 
     this._sheet = document.createElement('style');
@@ -316,6 +306,44 @@ class TerminalWidget extends Widget {
   }
 
   /**
+   * Create the terminal object.
+   */
+  private _createTerm(options: ITerminalOptions): void {
+    this._term = new Terminal(getConfig(options));
+    this._term.open(this.node);
+    this._term.element.classList.add(TERMINAL_BODY_CLASS)
+
+    this.fontSize = options.fontSize || 11;
+    this.background = options.background || 'white';
+    this.color = options.color || 'black';
+
+    this._term.on('data', (data: string) => {
+      this._ws.send(JSON.stringify(['stdin', data]));
+    });
+
+    this._term.on('title', (title: string) => {
+        this.title.text = title;
+    });   
+
+    this._resizeTerminal();
+  }
+
+  /**
+   * Handle a message from the terminal websocket.
+   */
+  private _handleWSMessage(event: MessageEvent): void {
+    let json_msg = JSON.parse(event.data);
+    switch (json_msg[0]) {
+    case 'stdout':
+      this._term.write(json_msg[1]);
+      break;
+    case 'disconnect':
+      this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
+      break;
+    }
+  }
+
+  /**
    * Use the dummy terminal to measure the row and column sizes.
    */
   private _snapTermSizing(): void {
@@ -325,8 +353,8 @@ class TerminalWidget extends Widget {
     }
     let node = this._dummyTerm;
     this._term.element.appendChild(node);
-    this._row_height = node.offsetHeight / 24;
-    this._col_width = node.offsetWidth / 80;
+    this._row_height = node.offsetHeight / DUMMY_ROWS;
+    this._col_width = node.offsetWidth / DUMMY_COLS;
     this._term.element.removeChild(node);
     this._dirty = false;
     if (this._width !== -1) {
@@ -338,9 +366,14 @@ class TerminalWidget extends Widget {
    * Resize the terminal based on the computed geometry.
    */
   private _resizeTerminal() {
+    if (this._term === null) {
+      return;
+    }
     var rows = Math.max(2, Math.round(this._height / this._row_height) - 2);
     var cols = Math.max(3, Math.round(this._width / this._col_width) - 1);
     this._term.resize(cols, rows);
+    this._ws.send(JSON.stringify(["set_size", rows, cols,
+                                  this._height, this._width]));
   }
 
   private _term: Terminal = null;
@@ -375,6 +408,7 @@ function getConfig(options: ITerminalOptions): ITerminalConfig {
   if (options.scrollback !== void 0) {
     config.scrollback = options.scrollback;
   }
+  config.screenKeys = false;
   return config;
 }
 
@@ -384,20 +418,10 @@ function getConfig(options: ITerminalOptions): ITerminalConfig {
  */
 function createDummyTerm(): HTMLElement {
   let node = document.createElement('div');
-  // Create 24 rows X 80 cols.
-  let rows: string[] = [];
-  for (let i = 0; i < 24; i++) {
-    rows.push(String(i));
-  }
   let rowspan = document.createElement('span');
-  rowspan.innerHTML = rows.join('<br>');
+  rowspan.innerHTML = Array(DUMMY_ROWS + 1).join('a<br>');
   let colspan = document.createElement('span');
-  colspan.textContent = (
-    '01234567890123456789' +
-    '01234567890123456789' +
-    '01234567890123456789' +
-    '01234567890123456789'
-  );
+  colspan.textContent = Array(DUMMY_COLS + 1).join('a');
   node.appendChild(rowspan);
   node.appendChild(colspan);
   node.style.visibility = 'hidden';
