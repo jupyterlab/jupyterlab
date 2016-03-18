@@ -34,6 +34,11 @@ import {
 
 
 /**
+ * The class name added to Editor widget instances.
+ */
+const EDITOR_CLASS = 'jp-Editor';
+
+/**
  * The class name added to CodeMirrorWidget instances.
  */
 const CODEMIRROR_CLASS = 'jp-CodeMirror';
@@ -75,6 +80,7 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
    */
   constructor(model: IEditorModel) {
     super();
+    this.addClass(EDITOR_CLASS);
     this.addClass(CODEMIRROR_CLASS);
     this._editor = CodeMirror(this.node);
     this._model = model;

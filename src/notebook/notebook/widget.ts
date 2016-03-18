@@ -164,6 +164,12 @@ const EDIT_CLASS = 'jp-mod-editMode';
 const COMMAND_CLASS = 'jp-mod-commandMode';
 
 /**
+ * The class name added to Editor widget instances.
+ * Keep in sync with `editor/widget.ts`.
+ */
+const EDITOR_CLASS = 'jp-Editor';
+
+/**
  * The maximum size of the delete stack.
  */
 const DELETE_STACK_SIZE = 10;
@@ -651,12 +657,14 @@ class NotebookCells extends Widget {
    */
   private _evtBlur(event: Event): void {
     let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.childCount(); i++) {
-      let editor = (layout.childAt(i) as BaseCellWidget).input.editor;
-      if (editor.node.contains(event.target as HTMLElement)) {
+    let node = event.target as HTMLElement;
+    // Trace up the DOM hierarchy looking for an editor node.
+    while (node && node !== this.node) {
+      if (node.classList.contains(EDITOR_CLASS)) {
         this.model.mode = 'command';
-        return;
+        break;
       }
+      node = node.parentElement;
     }
   }
 
@@ -665,13 +673,17 @@ class NotebookCells extends Widget {
    */
   private _evtFocus(event: Event): void {
     let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.childCount(); i++) {
-      let editor = (layout.childAt(i) as BaseCellWidget).input.editor;
-      if (editor.node.contains(event.target as HTMLElement)) {
+    let node = event.target as HTMLElement;
+    let found = false;
+    // Trace up the DOM hierarchy to looking for an editor node.
+    // Then find the corresponding child and activate it.
+    while (node && node !== this.node) {
+      if (node.classList.contains(EDITOR_CLASS)) {
         this.model.mode = 'edit';
-        this.model.activeCellIndex = i;
-        return;
+        this.model.activeCellIndex = this.findCell(node);
+        break;
       }
+      node = node.parentElement;
     }
   }
 
