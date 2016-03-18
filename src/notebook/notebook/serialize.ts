@@ -42,10 +42,10 @@ function serialize(nb: INotebookModel): INotebookContent {
 export
 function deserialize(data: INotebookContent, model: INotebookModel): void {
   model.cells.clear();
+  let cell: ICellModel;
 
   // Iterate through the cell data, creating cell models.
   data.cells.forEach(c => {
-    let cell: ICellModel;
     if (isMarkdownCell(c)) {
       cell = model.createMarkdownCell();
     } else if (isCodeCell(c)) {
@@ -57,9 +57,11 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
     model.cells.add(cell);
   });
   
-  if (model.cells.length) {
-    model.activeCellIndex = 0;
+  if (!model.cells.length) {
+    cell = model.createCodeCell();
+    model.cells.add(cell);
   }
+  model.activeCellIndex = 0;
   model.metadata = data.metadata;
 }
 
