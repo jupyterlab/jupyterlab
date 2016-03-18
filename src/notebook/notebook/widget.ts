@@ -655,6 +655,7 @@ class NotebookCells extends Widget {
       let editor = (layout.childAt(i) as BaseCellWidget).input.editor;
       if (editor.node.contains(event.target as HTMLElement)) {
         this.model.mode = 'command';
+        return;
       }
     }
   }
@@ -669,6 +670,7 @@ class NotebookCells extends Widget {
       if (editor.node.contains(event.target as HTMLElement)) {
         this.model.mode = 'edit';
         this.model.activeCellIndex = i;
+        return;
       }
     }
   }
