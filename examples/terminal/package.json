@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "name": "example",
+  "scripts": {
+    "build": "tsc --project src && webpack --config webpack.conf.js"
+  }
+}
