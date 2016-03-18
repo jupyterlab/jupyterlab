@@ -447,18 +447,15 @@ class NotebookWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     // Set the appropriate classes on the cells.
     let model = this.model;
-    let cells = this.model.cells;
-    let mode = model.mode;
     let layout = this._notebook.layout as PanelLayout;
-    let cell = cells.get(model.activeCellIndex);
     let widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
-    if (widget) widget.input.editor.focus();
-    if (mode === 'edit') {
+    if (model.mode === 'edit') {
       this.addClass(EDIT_CLASS);
       this.removeClass(COMMAND_CLASS);
       if (widget) {
         widget.addClass(EDIT_CLASS);
         widget.removeClass(COMMAND_CLASS);
+        widget.input.editor.focus();
       }
     } else {
       this.addClass(COMMAND_CLASS);
