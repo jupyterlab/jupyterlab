@@ -105,14 +105,14 @@
 }
 
 
-.jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-active {
+.jp-Cell.jp-mod-active.jp-mod-commandMode {
   border-color: #ABABAB;
   border-left-width: 1px;
   background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
 }
 
 
-.jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active {
+.jp-Cell.jp-mod-active.jp-mod-editMode {
   border-color: #66BB6A;
   border-left-width: 1px;
   background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);  

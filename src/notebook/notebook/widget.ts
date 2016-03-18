@@ -456,10 +456,18 @@ class NotebookWidget extends Widget {
     if (mode === 'edit') {
       this.addClass(EDIT_CLASS);
       this.removeClass(COMMAND_CLASS);
+      if (widget) {
+        widget.addClass(EDIT_CLASS);
+        widget.removeClass(COMMAND_CLASS);
+      }
     } else {
       this.addClass(COMMAND_CLASS);
       this.removeClass(EDIT_CLASS);
       this.node.focus();
+      if (widget) {
+        widget.addClass(COMMAND_CLASS);
+        widget.removeClass(EDIT_CLASS);
+      }
     }
   }
 
