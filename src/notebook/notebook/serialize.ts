@@ -69,8 +69,8 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
 /**
  * Serialize a cell model.
  */
-function
-serializeCell(cell: ICellModel): ICell {
+export
+function serializeCell(cell: ICellModel): ICell {
   let output: ICell = {
     source: cell.input.textEditor.text,
     cell_type: cell.type,
@@ -101,6 +101,7 @@ serializeCell(cell: ICellModel): ICell {
 /**
  * Deserialize cell data.
  */
+export 
 function deserializeCell(data: ICell, model: ICellModel): void {
   let source = data.source as string;
   if (Array.isArray(data.source)) {
