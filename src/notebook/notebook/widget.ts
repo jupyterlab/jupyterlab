@@ -301,7 +301,7 @@ class NotebookWidget extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (model.isSelected(cell)) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         undelete.push(this._toolbar.cloneCell(cell));
         model.cells.remove(cell);
       }
@@ -361,7 +361,7 @@ class NotebookWidget extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (model.isSelected(cell)) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         toMerge.push(cell.input.textEditor.text);
       }
       if (i == model.activeCellIndex) {
@@ -499,7 +499,7 @@ class NotebookWidget extends Widget {
       if (i !== model.activeCellIndex) {
         widget.removeClass(ACTIVE_CLASS);
       }
-      if (model.isSelected(cell)) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         widget.addClass(SELECTED_CLASS);
       } else {
         widget.removeClass(SELECTED_CLASS);
@@ -577,7 +577,6 @@ class NotebookCells extends Widget {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
-    
     switch (event.type) {
     case 'click':
       this._evtClick(event as MouseEvent);
@@ -863,7 +862,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (model.isSelected(cell)) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         this._copied.push(this.cloneCell(cell));
       }
     }
@@ -878,7 +877,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (model.isSelected(cell)) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         this._cut.push(this.cloneCell(cell));
         model.cells.remove(cell);
       }
@@ -915,7 +914,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (model.isSelected(cell)) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         continue;
       }
       let newCell: ICellModel;
@@ -945,7 +944,7 @@ class NotebookToolbar extends Widget {
     let selected: ICellModel[] = []
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
-      if (model.isSelected(cell)) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         selected.push(cell);
       }
     }

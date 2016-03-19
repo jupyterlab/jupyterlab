@@ -291,8 +291,6 @@ class NotebookModel implements INotebookModel {
   set activeCellIndex(value: number) {
     value = Math.max(value, 0);
     value = Math.min(value, this.cells.length - 1);
-    let cell = this.cells.get(value);
-    if (cell) this.select(cell);
     NotebookModelPrivate.activeCellIndexProperty.set(this, value);
   }
 
