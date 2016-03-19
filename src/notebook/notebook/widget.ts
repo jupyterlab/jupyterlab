@@ -164,10 +164,9 @@ const EDIT_CLASS = 'jp-mod-editMode';
 const COMMAND_CLASS = 'jp-mod-commandMode';
 
 /**
- * The class name added to Editor widget instances.
- * Keep in sync with `editor/widget.ts`.
+ * The class name added to notebook editor instances.
  */
-const EDITOR_CLASS = 'jp-Editor';
+const NB_EDITOR_CLASS = 'jp-Notebook-editor';
 
 /**
  * The maximum size of the delete stack.
@@ -201,6 +200,7 @@ class NotebookWidget extends Widget {
       widget = new BaseCellWidget(cell);
     }
     widget.addClass(NB_CELL_CLASS);
+    widget.input.editor.addClass(NB_EDITOR_CLASS);
     return widget;
   }
 
@@ -660,7 +660,7 @@ class NotebookCells extends Widget {
     let node = event.target as HTMLElement;
     // Trace up the DOM hierarchy looking for an editor node.
     while (node && node !== this.node) {
-      if (node.classList.contains(EDITOR_CLASS)) {
+      if (node.classList.contains(NB_EDITOR_CLASS)) {
         this.model.mode = 'command';
         break;
       }
@@ -678,7 +678,7 @@ class NotebookCells extends Widget {
     // Trace up the DOM hierarchy to looking for an editor node.
     // Then find the corresponding child and activate it.
     while (node && node !== this.node) {
-      if (node.classList.contains(EDITOR_CLASS)) {
+      if (node.classList.contains(NB_EDITOR_CLASS)) {
         this.model.mode = 'edit';
         this.model.activeCellIndex = this.findCell(node);
         break;
