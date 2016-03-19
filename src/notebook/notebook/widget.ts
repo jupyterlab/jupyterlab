@@ -190,7 +190,7 @@ const DELETE_STACK_SIZE = 10;
 
 
 /**
- * A widget for a notebook.
+ * A basic widget for a notebook.
  */
 export
 class NotebookWidget extends Widget {
@@ -218,41 +218,27 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Create a new toolbar for the notebook.
-   */
-  static createToolbar(manager: NotebookManager): NotebookToolbar {
-    return new NotebookToolbar(manager);
-  }
-
-  /**
    * Construct a notebook widget.
    */
-  constructor(manager: NotebookManager) {
+  constructor(model: INotebookModel) {
     super();
-    this.addClass(NB_CLASS);
-    let model = this._model = manager.model;
-    this.node.tabIndex = -1;  // Allow the widget to take focus.
+    this._model = model;
     let constructor = this.constructor as typeof NotebookWidget;
-
     this.layout = new PanelLayout();
     let layout = this.layout as PanelLayout;
-    this._toolbar = constructor.createToolbar(manager);
-    layout.addChild(this._toolbar);
-
     let container = new Widget();
     container.addClass(NB_CONTAINER);
     container.layout = new PanelLayout();
-    this._notebook = new NotebookCells(model);
-    (container.layout as PanelLayout).addChild(this._notebook);
+    this._cells = new NotebookCells(model);
+    (container.layout as PanelLayout).addChild(this._cells);
     layout.addChild(container);
 
-    let cellsLayout = this._notebook.layout as PanelLayout;
+    let cellsLayout = this._cells.layout as PanelLayout;
     let factory = constructor.createCell;
     for (let i = 0; i < model.cells.length; i++) {
       cellsLayout.addChild(factory(model.cells.get(i)));
     }
     model.cells.changed.connect(this.onCellsChanged, this);
-    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -266,13 +252,13 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Get the toolbar used by the widget.
+   * The notebook cells widget used by the widget.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get toolbar(): NotebookToolbar {
-    return this._toolbar;
+  get cells(): NotebookCells {
+    return this._cells;
   }
 
   /**
@@ -289,7 +275,7 @@ class NotebookWidget extends Widget {
    * because it uses the static [createCell] method.
    */
   protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
-    let layout = this._notebook.layout as PanelLayout;
+    let layout = this._cells.layout as PanelLayout;
     let constructor = this.constructor as typeof NotebookWidget;
     let factory = constructor.createCell;
     let widget: BaseCellWidget;
@@ -337,14 +323,89 @@ class NotebookWidget extends Widget {
   }
 
   private _model: INotebookModel = null;
+  private _cells: NotebookCells = null;
+}
+
+
+/**
+ * A notebook widget which supports interactivity with and a toolbar.
+ */
+export
+class ActiveNotebook extends NotebookWidget {
+  /**
+   * Create a new toolbar for the notebook.
+   */
+  static createToolbar(manager: NotebookManager): NotebookToolbar {
+    return new NotebookToolbar(manager);
+  }
+
+  /**
+   * Construct a notebook widget.
+   */
+  constructor(manager: NotebookManager) {
+    super(manager.model);
+    this.addClass(NB_CLASS);
+    this.node.tabIndex = -1;  // Allow the widget to take focus.
+    let constructor = this.constructor as typeof ActiveNotebook;
+    this._toolbar = constructor.createToolbar(manager);
+    let layout = this.layout as PanelLayout;
+    layout.insertChild(0, this._toolbar);
+    manager.model.stateChanged.connect(this.onModelChanged, this);
+  }
+
+  /**
+   * Get the toolbar used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get toolbar(): NotebookToolbar {
+    return this._toolbar;
+  }
+
+  /**
+   * Handle `update-request` messages sent to the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    // Set the appropriate classes on the cells.
+    let model = this.model;
+    let layout = this.cells.layout as PanelLayout;
+    let widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
+    if (model.mode === 'edit') {
+      this.addClass(EDIT_CLASS);
+      this.removeClass(COMMAND_CLASS);
+      if (widget) {
+        widget.input.editor.focus();
+      }
+    } else {
+      this.addClass(COMMAND_CLASS);
+      this.removeClass(EDIT_CLASS);
+      this.node.focus();
+    }
+  }
+
+  /**
+   * Handle changes to the notebook model.
+   */
+  protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'mode':
+      this.update();
+      break;
+    case 'activeCellIndex':
+      this.update();
+      break;
+    }
+  }
+
   private _toolbar: NotebookToolbar = null;
-  private _notebook: NotebookCells = null;
 }
 
 
 /**
  * A widget holding the notebook cells.
  */
+export
 class NotebookCells extends Widget {
   /**
    * Construct a notebook cells widget.
