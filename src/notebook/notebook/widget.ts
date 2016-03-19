@@ -199,8 +199,6 @@ class NotebookWidget extends Widget {
       // widget so the lists stay in sync.
       widget = new BaseCellWidget(cell);
     }
-    widget.addClass(NB_CELL_CLASS);
-    widget.input.editor.addClass(NB_EDITOR_CLASS);
     return widget;
   }
 
@@ -413,6 +411,8 @@ class NotebookWidget extends Widget {
     switch(args.type) {
     case ListChangeType.Add:
       widget = factory(args.newValue as ICellModel);
+      widget.addClass(NB_CELL_CLASS);
+      widget.input.editor.addClass(NB_EDITOR_CLASS);
       layout.insertChild(args.newIndex, widget);
       break;
     case ListChangeType.Move:
@@ -432,7 +432,9 @@ class NotebookWidget extends Widget {
       }
       let newValues = args.newValue as ICellModel[];
       for (let i = newValues.length; i < 0; i--) {
-        widget = factory(newValues[i])
+        widget = factory(newValues[i]);
+        widget.addClass(NB_CELL_CLASS);
+        widget.input.editor.addClass(NB_EDITOR_CLASS);
         layout.insertChild(args.newIndex, widget);
       }
       break;
@@ -442,6 +444,8 @@ class NotebookWidget extends Widget {
       widget.dispose();
       widget = factory(args.newValue as ICellModel);
       layout.insertChild(args.newIndex, widget);
+      widget.addClass(NB_CELL_CLASS);
+      widget.input.editor.addClass(NB_EDITOR_CLASS);
       break;
     }
     this.update();
@@ -459,18 +463,12 @@ class NotebookWidget extends Widget {
       this.addClass(EDIT_CLASS);
       this.removeClass(COMMAND_CLASS);
       if (widget) {
-        widget.addClass(EDIT_CLASS);
-        widget.removeClass(COMMAND_CLASS);
         widget.input.editor.focus();
       }
     } else {
       this.addClass(COMMAND_CLASS);
       this.removeClass(EDIT_CLASS);
       this.node.focus();
-      if (widget) {
-        widget.addClass(COMMAND_CLASS);
-        widget.removeClass(EDIT_CLASS);
-      }
     }
   }
 
