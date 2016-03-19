@@ -1,6 +1,6 @@
 
 import {
-  INotebookSession, IExecuteReply, IContentsManager
+  INotebookSession, IExecuteReply
 } from 'jupyter-js-services';
 
 import {
@@ -52,10 +52,6 @@ import {
   IError, isError, IOutput, OutputType,
   MAJOR_VERSION, MINOR_VERSION
 } from './nbformat';
-
-import {
-  serialize
-} from './serialize';
 
 
 /**
@@ -171,11 +167,6 @@ interface INotebookModel extends IDisposable {
   runActiveCell(): void;
 
   /**
-   * Save the notebook state.
-   */
-  save(): Promise<void>;
-
-  /**
    * The metadata associated with the notebook.
    */
   metadata: INotebookMetadata;
@@ -211,8 +202,7 @@ class NotebookModel implements INotebookModel {
   /**
    * Construct a new notebook model.
    */
-  constructor(manager: IContentsManager) {
-    this._manager = manager;
+  constructor() {
     this._cells = new ObservableList<ICellModel>();
     this._cells.changed.connect(this._onCellsChanged, this);
   }
@@ -473,26 +463,6 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Save the notebook and clear the dirty state of the model.
-   *
-   * #### Notes
-   * Also updates the metadata if there is a current session.
-   */
-  save(): Promise<void> {
-    if (!this.session || this.session.isDisposed) {
-      return this._save();
-    }
-    return this.session.kernel.getKernelSpec().then(spec => {
-      this.metadata.kernelspec.display_name = spec.display_name;
-      this.metadata.kernelspec.name = this.session.kernel.name;
-      return this.session.kernel.kernelInfo();
-    }).then(info => {
-      this.metadata.language_info = info.language_info;
-      return this._save();
-    });
-  }
-
-  /**
    * Execute the given cell. 
    */
   protected executeCell(cell: CodeCellModel): void {
@@ -542,16 +512,6 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Save the notebook contents to disk.
-   */
-  private _save(): Promise<void> {
-    let content = serialize(this);
-    let name = this.session.notebookPath;
-    return this._manager.save(name, { type: 'notebook', content })
-    .then(() => { this.dirty = false });
-  }
-
-  /**
    * Handle a change in the cells list.
    */
   private _onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
@@ -574,7 +534,6 @@ class NotebookModel implements INotebookModel {
   }
 
   private _cells: IObservableList<ICellModel> = null;
-  private _manager: IContentsManager = null;
 }
 
 

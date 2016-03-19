@@ -42,6 +42,10 @@ import {
 } from '../cells';
 
 import {
+  NotebookManager
+} from './manager';
+
+import {
   NotebookModel, INotebookModel
 } from './model';
 
@@ -168,6 +172,7 @@ const COMMAND_CLASS = 'jp-mod-commandMode';
  */
 const NB_EDITOR_CLASS = 'jp-Notebook-editor';
 
+<<<<<<< HEAD
 /**
  * The class name added to the active cell.
  */
@@ -215,23 +220,23 @@ class NotebookWidget extends Widget {
   /**
    * Create a new toolbar for the notebook.
    */
-  static createToolbar(model: INotebookModel): NotebookToolbar {
-    return new NotebookToolbar(model);
+  static createToolbar(manager: NotebookManager): NotebookToolbar {
+    return new NotebookToolbar(manager);
   }
 
   /**
    * Construct a notebook widget.
    */
-  constructor(model: INotebookModel) {
+  constructor(manager: NotebookManager) {
     super();
     this.addClass(NB_CLASS);
-    this._model = model;
+    let model = this._model = manager.model;
     this.node.tabIndex = -1;  // Allow the widget to take focus.
     let constructor = this.constructor as typeof NotebookWidget;
 
     this.layout = new PanelLayout();
     let layout = this.layout as PanelLayout;
-    this._toolbar = constructor.createToolbar(model);
+    this._toolbar = constructor.createToolbar(manager);
     layout.addChild(this._toolbar);
 
     let container = new Widget();
@@ -277,146 +282,6 @@ class NotebookWidget extends Widget {
     this._model.dispose();
     this._model = null;
     super.dispose();
-  }
-
-  /**
-   * Insert a new code cell above the current cell.
-   */
-  insertAbove(): void {
-    this._toolbar.insertAbove();
-  }
-
-  /**
-   * Insert a new code cell below the current cell.
-   */
-  insertBelow(): void {
-    this._toolbar.insertBelow();
-  }
-
-  /**
-   * Delete selected cell(s), putting them on the undelete stack.
-   */
-  delete(): void {
-    let undelete: ICellModel[] = [];
-    let model = this.model;
-    for (let i = 0; i < model.cells.length; i++) {
-      let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
-        undelete.push(this._toolbar.cloneCell(cell));
-        model.cells.remove(cell);
-      }
-    }
-    if (undelete.length) {
-      this._undeleteStack.push(undelete);
-    }
-    if (this._undeleteStack.length > DELETE_STACK_SIZE) {
-      this._undeleteStack.shift();
-    }   
-  }
-
-  /**
-   * Undelete the cell(s) at the top of the undelete stack.
-   */
-  undelete(): void {
-    let model = this.model;
-    let index = model.activeCellIndex + 1;
-    if (this._undeleteStack.length === 0) {
-      return;
-    }
-    let undelete = this._undeleteStack.pop();
-    // Insert the undeleted cells in reverse order.
-    for (let cell of undelete.reverse()) {
-      model.cells.insert(index, cell);
-    }
-  }
-
-  /**
-   * Copy the selected cell(s) to the clipboard.
-   */
-  copy(): void {
-    this._toolbar.copy();
-  }
-
-  /**
-   * Cut the selected cell(s).
-   */
-  cut(): void {
-    this._toolbar.cut();
-  }
-
-  /**
-   * Paste cell(s) from the clipboard.
-   */
-  paste(): void {
-    this._toolbar.paste();
-  }
-
-  /**
-   * Merge selected cells.
-   */
-  merge(): void {
-    let toMerge: string[] = [];
-    let toDelete: ICellModel[] = [];
-    let activeCell: ICellModel;
-    let model = this.model;
-    for (let i = 0; i < model.cells.length; i++) {
-      let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
-        toMerge.push(cell.input.textEditor.text);
-      }
-      if (i == model.activeCellIndex) {
-        activeCell = cell;
-      } else {
-        toDelete.push(cell);
-      }
-    }
-    // Make sure there are cells to merge.
-    if (toMerge.length < 2 || !activeCell) {
-      return;
-    }
-    // For rendered markdown cells, unrender before setting the text.
-    if ((activeCell as MarkdownCellModel).rendered) {
-      (activeCell as MarkdownCellModel).rendered = false;
-    }
-    // For all cells types, set the merged text.
-    activeCell.input.textEditor.text = toMerge.join('\n\n');
-    // Remove the other cells and add them to the delete stack.
-    let copies: ICellModel[] = [];
-    for (let cell of toDelete) {
-      copies.push(this._toolbar.cloneCell(cell));
-      model.cells.remove(cell);
-    }
-    this._undeleteStack.push(toDelete);
-    // Make sure the previous cell is still active.
-    model.activeCellIndex = model.cells.indexOf(activeCell);
-  }
-
-  /**
-   * Change the selected cell type(s).
-   */
-  changeCellType(value: string): void {
-    this._toolbar.changeCellType(value);
-  }
-
-  /**
-   * Run the selected cell(s).
-   */
-  run(): void {
-    this._toolbar.run();
-  }
-
-  /**
-   * Interrupt the kernel.
-   */
-  interrupt(): Promise<void> {
-    return this._toolbar.interrupt();
-  }
-
-  /**
-   * Restart the kernel.
-   */
-  restart(): Promise<void> {
-    return this._toolbar.restart();
   }
 
   /**
@@ -471,57 +336,6 @@ class NotebookWidget extends Widget {
     this.update();
   }
 
-  /**
-   * Handle `update-request` messages sent to the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    // Set the appropriate classes on the cells.
-    let model = this.model;
-    let layout = this._notebook.layout as PanelLayout;
-    let widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
-    if (model.mode === 'edit') {
-      this.addClass(EDIT_CLASS);
-      this.removeClass(COMMAND_CLASS);
-      if (widget) {
-        widget.input.editor.focus();
-      }
-    } else {
-      this.addClass(COMMAND_CLASS);
-      this.removeClass(EDIT_CLASS);
-      this.node.focus();
-    }
-    if (widget) {
-      widget.addClass(ACTIVE_CLASS);
-    }
-    for (let i = 0; i < layout.childCount(); i++) {
-      let cell = model.cells.get(i);
-      widget = layout.childAt(i) as BaseCellWidget;
-      if (i !== model.activeCellIndex) {
-        widget.removeClass(ACTIVE_CLASS);
-      }
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
-        widget.addClass(SELECTED_CLASS);
-      } else {
-        widget.removeClass(SELECTED_CLASS);
-      }
-    }
-  }
-
-  /**
-   * Handle changes to the notebook model.
-   */
-  protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'mode':
-      this.update();
-      break;
-    case 'activeCellIndex':
-      this.update();
-      break;
-    }
-  }
-
-  private _undeleteStack: ICellModel[][] = [];
   private _model: INotebookModel = null;
   private _toolbar: NotebookToolbar = null;
   private _notebook: NotebookCells = null;
@@ -765,10 +579,11 @@ class NotebookToolbar extends Widget {
   /**
    * Construct a new toolbar widget.
    */
-  constructor(model: INotebookModel) {
+  constructor(manager: NotebookManager) {
     super();
     this.addClass(NB_TOOLBAR);
-    this._model = model;
+    this._manager = manager;
+    let model = this._model = manager.model;
     if (model.metadata && model.metadata.kernelspec) {
       this.kernelNameNode.textContent = model.metadata.kernelspec.display_name;
     } else {
@@ -779,7 +594,7 @@ class NotebookToolbar extends Widget {
       this.cellTypeNode.value = cell.type;
     }
     this.cellTypeNode.addEventListener('change', event => {
-      this.changeCellType(this.cellTypeNode.value);
+      manager.changeCellType(this.cellTypeNode.value);
     });
     if (model.session) {
       this.handleSession();
@@ -823,158 +638,20 @@ class NotebookToolbar extends Widget {
     return node as HTMLElement;
   }
 
-  /**
-   * Clone a cell model.
+  /*
+   * Restart the kernel with a confirmation dialog.
    */
-  cloneCell(cell: ICellModel): ICellModel {
-    switch(cell.type) {
-    case 'code':
-      return this.model.createCodeCell(cell);
-    case 'markdown':
-      return this.model.createMarkdownCell(cell);
-    default:
-      return this.model.createRawCell(cell);
-    }
-  }
-
-  /**
-   * Insert a new code cell above the current cell.
-   */
-  insertAbove(): void {
-    let cell = this.model.createCodeCell();
-    this.model.cells.insert(this.model.activeCellIndex, cell);
-  }
-
-  /**
-   * Insert a node code cell below the current cell.
-   */
-  insertBelow(): void {
-    let cell = this.model.createCodeCell();
-    this.model.cells.insert(this.model.activeCellIndex + 1, cell);
-  }
-
-  /**
-   * Copy the selected cell(s) to the clipboard.
-   */
-  copy(): void {
-    this._copied = [];
-    this._cut = [];
-    let model = this.model;
-    for (let i = 0; i < model.cells.length; i++) {
-      let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
-        this._copied.push(this.cloneCell(cell));
-      }
-    }
-  }
-
-  /**
-   * Cut the selected cell(s).
-   */
-  cut(): void {
-    this._copied = [];
-    this._cut = [];
-    let model = this.model;
-    for (let i = 0; i < model.cells.length; i++) {
-      let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
-        this._cut.push(this.cloneCell(cell));
-        model.cells.remove(cell);
-      }
-    }
-  }
-
-  /**
-   * Paste cell(s) from the clipboard.
-   */
-  paste(): void {
-    let model = this.model;
-    let cut = this._cut;
-    let copied = this._copied;
-    let index = model.activeCellIndex + 1;
-    if (copied.length > 0) {
-      // Insert copies of the original cells in reverse order.
-      for (let cell of copied.reverse()) {
-        model.cells.insert(index, cell);
-      }
-    } else {
-      // Insert the cut cell(s) in reverse order.
-      for (let cell of cut.reverse()) {
-        model.cells.insert(index, cell);
-      }
-    }
-    this._copied = [];
-    this._cut = [];
-  }
-
-  /**
-   * Change the selected cell type(s).
-   */
-  changeCellType(value: string): void {
-    let model = this.model;
-    for (let i = 0; i < model.cells.length; i++) {
-      let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
-        continue;
-      }
-      let newCell: ICellModel;
-      switch(value) {
-      case 'code':
-        newCell = model.createCodeCell(cell);
-        break;
-      case 'markdown':
-        newCell = model.createMarkdownCell(cell);
-        (newCell as MarkdownCellModel).rendered = false;
-        break;
-      default:
-        newCell = model.createRawCell(cell);
-        break;
-      }
-      model.cells.remove(cell);
-      model.cells.insert(i, newCell);
-    }
-  }
-
-  /**
-   * Run the selected cell(s).
-   */
-  run(): void {
-    let model = this.model;
-    let cells = model.cells;
-    let selected: ICellModel[] = []
-    for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
-        selected.push(cell);
-      }
-    }
-    for (let cell of selected) {
-       model.activeCellIndex = cells.indexOf(cell);
-       model.runActiveCell();
-    }
-  }
-
-  /**
-   * Interrupt the kernel.
-   */
-  interrupt(): Promise<void> {
-    return this.model.session.kernel.interrupt();
-  }
-
-  /**
-   * Restart the kernel.
-   */
-  restart(): Promise<void> {
+   restart(): Promise<void> {
     return showDialog({
       title: 'Restart Kernel?',
       body: 'Do you want to restart the current kernel? All variables will be lost.',
       host: this.parent.node
     }).then(result => {
       if (result.text === 'OK') {
-        return this.model.session.kernel.restart();
+        return this._manager.restart();
       }
     });
-  }
+   }
 
   /**
    * Handle the DOM events for the widget.
@@ -1098,27 +775,28 @@ class NotebookToolbar extends Widget {
       }
     }
     let index: number;
-    switch(selected) {
+    let manager = this._manager;
+    switch (selected) {
     case TOOLBAR_SAVE:
-      this.model.save();
+      manager.save();
       break;
     case TOOLBAR_INSERT:
-      this.insertBelow();
+      manager.insertBelow();
       break;
     case TOOLBAR_CUT:
-      this.cut();
+      manager.cut();
       break;
     case TOOLBAR_COPY:
-      this.copy();
+      manager.copy();
       break;
     case TOOLBAR_PASTE:
-      this.paste();
+      manager.paste();
       break;
     case TOOLBAR_RUN:
-      this.run();
+      manager.run();
       break;
     case TOOLBAR_INTERRUPT:
-      this.interrupt();
+      manager.interrupt();
       break;
     case TOOLBAR_RESTART:
       this.restart();
@@ -1126,9 +804,8 @@ class NotebookToolbar extends Widget {
     }
   }
 
+  private _manager: NotebookManager = null;
   private _model: INotebookModel = null;
-  private _copied: ICellModel[] = [];
-  private _cut: ICellModel[] = [];
 }
 
 
