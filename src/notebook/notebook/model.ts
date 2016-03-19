@@ -117,6 +117,21 @@ interface INotebookModel extends IDisposable {
   activeCellIndex: number;
 
   /**
+   * Select a cell.
+   */
+  select(cell: ICellModel): void;
+
+  /**
+   * Deselect a cell.
+   */
+  deselect(cell: ICellModel): void;
+
+  /**
+   * Weheter a cell is selected.
+   */
+  isSelected(cell: ICellModel): boolean;
+
+  /**
    * A factory for creating a new code cell.
    *
    * @param source - The cell to use for the original source data.
@@ -277,11 +292,6 @@ class NotebookModel implements INotebookModel {
     value = Math.max(value, 0);
     value = Math.min(value, this.cells.length - 1);
     NotebookModelPrivate.activeCellIndexProperty.set(this, value);
-    let cells = this.cells;
-    for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i);
-      cell.active = value === i;
-    }
   }
 
   /**
@@ -330,6 +340,27 @@ class NotebookModel implements INotebookModel {
     }
     cells.clear();
     this._cells = null;
+  }
+
+  /**
+   * Select a cell.
+   */
+  select(cell: ICellModel): void {
+    NotebookModelPrivate.selectedProperty.set(cell, true);
+  }
+
+  /**
+   * Deselect a cell.
+   */
+  deselect(cell: ICellModel): void {
+    NotebookModelPrivate.selectedProperty.set(cell, false);
+  }
+
+  /**
+   * Weheter a cell is selected.
+   */
+  isSelected(cell: ICellModel): boolean {
+    return NotebookModelPrivate.selectedProperty.get(cell);
   }
 
   /**
@@ -436,10 +467,9 @@ class NotebookModel implements INotebookModel {
     if (this.activeCellIndex === this.cells.length - 1) {
       let cell = this.createCodeCell();
       this.cells.add(cell);
-      this.mode = 'edit';  // This already sets the new index.
-    } else {
-      this.activeCellIndex += 1;
+      this.mode = 'edit';
     }
+    this.activeCellIndex += 1;
   }
 
   /**
@@ -528,7 +558,6 @@ class NotebookModel implements INotebookModel {
     switch(change.type) {
     case ListChangeType.Add:
       let cell = change.newValue as ICellModel;
-      cell.stateChanged.connect(this._onCellStateChanged, this);
       this.activeCellIndex = change.newIndex;
       break;
     case ListChangeType.Remove:
@@ -541,20 +570,6 @@ class NotebookModel implements INotebookModel {
         cell.dispose();
       }
       break;
-    }
-  }
-
-  /**
-   * Handle a change to a cell state.
-   */
-  private _onCellStateChanged(cell: ICellModel, change: IChangedArgs<any>): void {
-    if (change.name === 'mode') {
-      let cells = this.cells;
-      for (let i = 0; i < cells.length; i++) {
-        if (cells.get(i) === cell) {
-          this.activeCellIndex = i;
-        }
-      }
     }
   }
 
@@ -635,5 +650,13 @@ namespace NotebookModelPrivate {
   const dirtyProperty = new Property<NotebookModel, boolean>({
     name: 'dirty',
     notify: stateChangedSignal,
+  });
+
+  /**
+   * An attached property for the selected state of a cell.
+   */
+  export
+  const selectedProperty = new Property<ICellModel, boolean>({
+    name: 'selected'
   });
 }
