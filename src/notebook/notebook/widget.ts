@@ -169,6 +169,16 @@ const COMMAND_CLASS = 'jp-mod-commandMode';
 const NB_EDITOR_CLASS = 'jp-Notebook-editor';
 
 /**
+ * The class name added to the active cell.
+ */
+const ACTIVE_CLASS = 'jp-mod-active';
+
+/**
+ * The class name added to selected cells.
+ */
+const SELECTED_CLASS = 'jp-mod-selected';
+
+/**
  * The maximum size of the delete stack.
  */
 const DELETE_STACK_SIZE = 10;
@@ -291,7 +301,7 @@ class NotebookWidget extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected || cell.active) {
+      if (model.isSelected(cell)) {
         undelete.push(this._toolbar.cloneCell(cell));
         model.cells.remove(cell);
       }
@@ -351,10 +361,10 @@ class NotebookWidget extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected || cell.active) {
+      if (model.isSelected(cell)) {
         toMerge.push(cell.input.textEditor.text);
       }
-      if (cell.active) {
+      if (i == model.activeCellIndex) {
         activeCell = cell;
       } else {
         toDelete.push(cell);
@@ -479,6 +489,21 @@ class NotebookWidget extends Widget {
       this.addClass(COMMAND_CLASS);
       this.removeClass(EDIT_CLASS);
       this.node.focus();
+    }
+    if (widget) {
+      widget.addClass(ACTIVE_CLASS);
+    }
+    for (let i = 0; i < layout.childCount(); i++) {
+      let cell = model.cells.get(i);
+      widget = layout.childAt(i) as BaseCellWidget;
+      if (i !== model.activeCellIndex) {
+        widget.removeClass(ACTIVE_CLASS);
+      }
+      if (model.isSelected(cell)) {
+        widget.addClass(SELECTED_CLASS);
+      } else {
+        widget.removeClass(SELECTED_CLASS);
+      }
     }
   }
 
@@ -838,7 +863,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected || cell.active) {
+      if (model.isSelected(cell)) {
         this._copied.push(this.cloneCell(cell));
       }
     }
@@ -853,7 +878,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected || cell.active) {
+      if (model.isSelected(cell)) {
         this._cut.push(this.cloneCell(cell));
         model.cells.remove(cell);
       }
@@ -890,7 +915,7 @@ class NotebookToolbar extends Widget {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (!cell.selected && !cell.active) {
+      if (model.isSelected(cell)) {
         continue;
       }
       let newCell: ICellModel;
@@ -920,7 +945,7 @@ class NotebookToolbar extends Widget {
     let selected: ICellModel[] = []
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
-      if (cell.selected || cell.active) {
+      if (model.isSelected(cell)) {
         selected.push(cell);
       }
     }
@@ -1008,16 +1033,16 @@ class NotebookToolbar extends Widget {
   /**
    * Handle changes to the model.
    */
-  protected onModelChanged(sender: INotebookModel, args: IChangedArgs<any>): void {
+  protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
     switch(args.name) {
     case 'metadata':
-      if (this.model.metadata && this.model.metadata.kernelspec) {
-        let name = this.model.metadata.kernelspec.display_name;
+      if (model.metadata && model.metadata.kernelspec) {
+        let name = model.metadata.kernelspec.display_name;
         this.kernelNameNode.textContent = name;
       }
       break;
     case 'activeCellIndex':
-      let cell = this.model.cells.get(this.model.activeCellIndex);
+      let cell = model.cells.get(model.activeCellIndex);
       this.cellTypeNode.value = cell.type;
       break;
     case 'session':

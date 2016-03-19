@@ -72,11 +72,6 @@ interface IBaseCellModel extends IDisposable {
   stateChanged: ISignal<IBaseCellModel, IChangedArgs<any>>;
 
   /**
-   * Whether the cell is the active cell in the notebook.
-   */
-  active: boolean;
-
-  /**
    * The input area of the cell.
    *
    * #### Notes
@@ -95,11 +90,6 @@ interface IBaseCellModel extends IDisposable {
    * Whether the cell is read only.
    */
   readOnly: boolean;
-
-  /**
-   * Whether the cell is selected for applying commands.
-   */
-  selected: boolean;
 }
 
 
@@ -181,26 +171,6 @@ class BaseCellModel implements IBaseCellModel {
    */
   get stateChanged(): ISignal<IBaseCellModel, IChangedArgs<any>> {
     return CellModelPrivate.stateChangedSignal.bind(this);
-  }
-
-  /**
-   * Whether the cell is the active cell in the notebook.
-   */
-  get active(): boolean {
-    return CellModelPrivate.activeProperty.get(this);
-  }
-  set active(value: boolean) {
-    CellModelPrivate.activeProperty.set(this, value);
-  }
-
-  /**
-   * Whether the cell is selected for applying commands.
-   */
-  get selected(): boolean {
-    return CellModelPrivate.selectedProperty.get(this);
-  }
-  set selected(value: boolean) {
-    CellModelPrivate.selectedProperty.set(this, value);
   }
 
   /**
@@ -435,24 +405,6 @@ namespace CellModelPrivate {
    */
   export
   const stateChangedSignal = new Signal<IBaseCellModel, IChangedArgs<any>>();
-
-  /**
-   * A property descriptor for the selected state of the cell.
-   */
-  export
-  const selectedProperty = new Property<IBaseCellModel, boolean>({
-    name: 'selected',
-    notify: stateChangedSignal,
-  });
-
-  /**
-   * A property descriptor for the active state of the cell.
-   */
-  export
-  const activeProperty = new Property<IBaseCellModel, boolean>({
-    name: 'active',
-    notify: stateChangedSignal,
-  });
 
   /**
    * A property descriptor for the name of a cell.

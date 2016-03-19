@@ -48,16 +48,6 @@ import {
 const CELL_CLASS = 'jp-Cell';
 
 /**
- * The class name added to active widgets.
- */
-const ACTIVE_CLASS = 'jp-mod-active';
-
-/**
- * The class name added to selected widgets.
- */
-const SELECTED_CLASS = 'jp-mod-selected';
-
-/**
  * The class name added to code cells.
  */
 const CODE_CELL_CLASS = 'jp-CodeCell';
@@ -111,7 +101,6 @@ class BaseCellWidget extends Widget {
     this._input = constructor.createInput(model.input);
     this.layout = new PanelLayout();
     (this.layout as PanelLayout).addChild(this._input);
-    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -145,37 +134,6 @@ class BaseCellWidget extends Widget {
     this._model.dispose();
     this._model = null;
     super.dispose();
-  }
-
-  /**
-   * Handle `update_request` messages.
-   */
-  protected onUpdateRequest(message: Message): void {
-    super.onUpdateRequest(message);
-    if (this.model.active) {
-      this.addClass(ACTIVE_CLASS);
-    } else {
-      this.removeClass(ACTIVE_CLASS);
-    }
-    if (this.model.selected) {
-      this.addClass(SELECTED_CLASS);
-    } else {
-      this.removeClass(SELECTED_CLASS);
-    }
-  }
-
-  /**
-   * Handle changes to the model state.
-   */
-  protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
-    this.update();
-  }
-
-  /**
-   * Handle `after-attach` messages to the cell.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.update();
   }
 
   private _input: InputAreaWidget = null;
@@ -243,7 +201,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     this._rendered = new Widget();
     this._rendered.addClass(RENDERER_CLASS);
     (this.layout as PanelLayout).addChild(this._rendered);
-    this.update();
+    this.model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -287,7 +245,6 @@ class MarkdownCellWidget extends BaseCellWidget {
    * Change handler for model updates.
    */
   protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
-    super.onModelChanged(sender, args);
     switch(args.name) {
     case 'rendered':
       this._dirty = true;
