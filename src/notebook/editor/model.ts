@@ -44,11 +44,6 @@ interface IEditorModel extends IDisposable {
   filename: string;
 
   /**
-   * Whether the editor is focused.
-   */
-  focused: boolean;
-
-  /**
    * Whether the text editor has a fixed maximum height.
    *
    * #### Notes
@@ -189,16 +184,6 @@ class EditorModel implements IEditorModel {
   }
 
   /**
-   * Whether the editor is focused for editing.
-   */
-  get focused(): boolean {
-    return EditorModelPrivate.focusedProperty.get(this);
-  }
-  set focused(value: boolean) {
-    EditorModelPrivate.focusedProperty.set(this, value);
-  }
-
-  /**
    * The tabSize number for the editor model.
    */
   get tabSize(): number {
@@ -300,16 +285,6 @@ namespace EditorModelPrivate {
   export
   const readOnlyProperty = new Property<EditorModel, boolean>({
     name: 'readOnly',
-    value: false,
-    notify: stateChangedSignal
-  });
-
-  /**
-   * The property descriptor for the editor focused property.
-   */
-  export
-  const focusedProperty = new Property<EditorModel, boolean>({
-    name: 'focused',
     value: false,
     notify: stateChangedSignal
   });

@@ -35,7 +35,7 @@ import {
 } from 'phosphor-panel';
 
 import {
-  ICellModel,
+  ICellModel, BaseCellWidget,
   CodeCellWidget, MarkdownCellWidget,
   CodeCellModel, MarkdownCellModel, isMarkdownCellModel,
   RawCellModel, RawCellWidget
@@ -154,6 +154,21 @@ const TOOLBAR_PRESSED = 'jp-mod-pressed';
 const TOOLBAR_BUSY = 'jp-mod-busy';
 
 /**
+ * The class name added to a notebook in edit mode.
+ */
+const EDIT_CLASS = 'jp-mod-editMode';
+
+/**
+ * The class name added to a notebook in command mode.
+ */
+const COMMAND_CLASS = 'jp-mod-commandMode';
+
+/**
+ * The class name added to notebook editor instances.
+ */
+const NB_EDITOR_CLASS = 'jp-Notebook-editor';
+
+/**
  * The maximum size of the delete stack.
  */
 const DELETE_STACK_SIZE = 10;
@@ -167,8 +182,8 @@ class NotebookWidget extends Widget {
   /**
    * Create a new cell widget given a cell model.
    */
-  static createCell(cell: ICellModel): Widget {
-    let widget: Widget;
+  static createCell(cell: ICellModel): BaseCellWidget {
+    let widget: BaseCellWidget;
     switch(cell.type) {
     case 'code':
       widget = new CodeCellWidget(cell as CodeCellModel);
@@ -182,9 +197,8 @@ class NotebookWidget extends Widget {
     default:
       // If there are any issues, just return a blank placeholder
       // widget so the lists stay in sync.
-      widget = new Widget();
+      widget = new BaseCellWidget(cell);
     }
-    widget.addClass(NB_CELL_CLASS);
     return widget;
   }
 
@@ -202,6 +216,7 @@ class NotebookWidget extends Widget {
     super();
     this.addClass(NB_CLASS);
     this._model = model;
+    this.node.tabIndex = -1;  // Allow the widget to take focus.
     let constructor = this.constructor as typeof NotebookWidget;
 
     this.layout = new PanelLayout();
@@ -222,6 +237,7 @@ class NotebookWidget extends Widget {
       cellsLayout.addChild(factory(model.cells.get(i)));
     }
     model.cells.changed.connect(this.onCellsChanged, this);
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -401,36 +417,81 @@ class NotebookWidget extends Widget {
     let layout = this._notebook.layout as PanelLayout;
     let constructor = this.constructor as typeof NotebookWidget;
     let factory = constructor.createCell;
-    let widget: Widget;
+    let widget: BaseCellWidget;
     switch(args.type) {
     case ListChangeType.Add:
-      layout.insertChild(args.newIndex, factory(args.newValue as ICellModel));
+      widget = factory(args.newValue as ICellModel);
+      widget.addClass(NB_CELL_CLASS);
+      widget.input.editor.addClass(NB_EDITOR_CLASS);
+      layout.insertChild(args.newIndex, widget);
       break;
     case ListChangeType.Move:
       layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
       break;
     case ListChangeType.Remove:
-      widget = layout.childAt(args.oldIndex);
+      widget = layout.childAt(args.oldIndex) as BaseCellWidget;
       layout.removeChild(widget);
       widget.dispose();
       break;
     case ListChangeType.Replace:
       let oldValues = args.oldValue as ICellModel[];
       for (let i = args.oldIndex; i < oldValues.length; i++) {
-        widget = layout.childAt(args.oldIndex);
+        widget = layout.childAt(args.oldIndex) as BaseCellWidget;
         layout.removeChild(widget);
         widget.dispose();
       }
       let newValues = args.newValue as ICellModel[];
       for (let i = newValues.length; i < 0; i--) {
-        layout.insertChild(args.newIndex, factory(newValues[i]));
+        widget = factory(newValues[i]);
+        widget.addClass(NB_CELL_CLASS);
+        widget.input.editor.addClass(NB_EDITOR_CLASS);
+        layout.insertChild(args.newIndex, widget);
       }
       break;
     case ListChangeType.Set:
-      widget = layout.childAt(args.newIndex);
+      widget = layout.childAt(args.newIndex) as BaseCellWidget;
       layout.removeChild(widget);
       widget.dispose();
-      layout.insertChild(args.newIndex, factory(args.newValue as ICellModel));
+      widget = factory(args.newValue as ICellModel);
+      layout.insertChild(args.newIndex, widget);
+      widget.addClass(NB_CELL_CLASS);
+      widget.input.editor.addClass(NB_EDITOR_CLASS);
+      break;
+    }
+    this.update();
+  }
+
+  /**
+   * Handle `update-request` messages sent to the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    // Set the appropriate classes on the cells.
+    let model = this.model;
+    let layout = this._notebook.layout as PanelLayout;
+    let widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
+    if (model.mode === 'edit') {
+      this.addClass(EDIT_CLASS);
+      this.removeClass(COMMAND_CLASS);
+      if (widget) {
+        widget.input.editor.focus();
+      }
+    } else {
+      this.addClass(COMMAND_CLASS);
+      this.removeClass(EDIT_CLASS);
+      this.node.focus();
+    }
+  }
+
+  /**
+   * Handle changes to the notebook model.
+   */
+  protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'mode':
+      this.update();
+      break;
+    case 'activeCellIndex':
+      this.update();
       break;
     }
   }
@@ -491,12 +552,19 @@ class NotebookCells extends Widget {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
+    
     switch (event.type) {
     case 'click':
       this._evtClick(event as MouseEvent);
       break;
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
+      break;
+    case 'blur':
+      this._evtBlur(event);
+      break;
+    case 'focus':
+      this._evtFocus(event);
       break;
     }
   }
@@ -507,6 +575,8 @@ class NotebookCells extends Widget {
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
     this.node.addEventListener('dblclick', this);
+    this.node.addEventListener('focus', this, true);
+    this.node.addEventListener('blur', this, true);
   }
 
   /**
@@ -515,6 +585,8 @@ class NotebookCells extends Widget {
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('dblclick', this);
+    this.node.removeEventListener('focus', this, true);
+    this.node.removeEventListener('blur', this, true);
   }
 
   /**
@@ -584,7 +656,42 @@ class NotebookCells extends Widget {
     let cell = model.cells.get(i);
     if (isMarkdownCellModel(cell) && cell.rendered) {
       cell.rendered = false;
-      cell.mode = 'edit';
+      model.mode = 'edit';
+    }
+  }
+
+  /**
+   * Handle `blur` events for the widget.
+   */
+  private _evtBlur(event: Event): void {
+    let layout = this.layout as PanelLayout;
+    let node = event.target as HTMLElement;
+    // Trace up the DOM hierarchy looking for an editor node.
+    while (node && node !== this.node) {
+      if (node.classList.contains(NB_EDITOR_CLASS)) {
+        this.model.mode = 'command';
+        break;
+      }
+      node = node.parentElement;
+    }
+  }
+
+  /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocus(event: Event): void {
+    let layout = this.layout as PanelLayout;
+    let node = event.target as HTMLElement;
+    let found = false;
+    // Trace up the DOM hierarchy to looking for an editor node.
+    // Then find the corresponding child and activate it.
+    while (node && node !== this.node) {
+      if (node.classList.contains(NB_EDITOR_CLASS)) {
+        this.model.mode = 'edit';
+        this.model.activeCellIndex = this.findCell(node);
+        break;
+      }
+      node = node.parentElement;
     }
   }
 

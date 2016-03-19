@@ -119,7 +119,6 @@ class InputAreaWidget extends Widget {
     return this._prompt;
   }
 
-
   /**
    * Dispose of the resources held by the widget.
    */

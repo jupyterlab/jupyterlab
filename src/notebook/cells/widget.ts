@@ -83,16 +83,6 @@ const RAW_CELL_CLASS = 'jp-RawCell';
 const RENDERED_CLASS = 'jp-mod-rendered';
 
 /**
- * The class name added to a cell in edit mode.
- */
-const EDIT_CLASS = 'jp-mod-editMode';
-
-/**
- * The class name added to a cell in command mode.
- */
-const COMMAND_CLASS = 'jp-mod-commandMode';
-
-/**
  * The text applied to an empty markdown cell.
  */
 const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $'
@@ -116,8 +106,6 @@ class BaseCellWidget extends Widget {
   constructor(model: ICellModel) {
     super();
     this.addClass(CELL_CLASS);
-    // Make the cell focusable by setting the tabIndex.
-    this.node.tabIndex = -1;
     this._model = model;
     let constructor = this.constructor as typeof BaseCellWidget;
     this._input = constructor.createInput(model.input);
@@ -173,13 +161,6 @@ class BaseCellWidget extends Widget {
       this.addClass(SELECTED_CLASS);
     } else {
       this.removeClass(SELECTED_CLASS);
-    }
-    if (this.model.mode === 'edit') {
-      this.addClass(EDIT_CLASS);
-      this.removeClass(COMMAND_CLASS);
-    } else {
-      this.addClass(COMMAND_CLASS)
-      this.removeClass(EDIT_CLASS);
     }
   }
 
