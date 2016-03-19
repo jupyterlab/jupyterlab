@@ -172,7 +172,6 @@ const COMMAND_CLASS = 'jp-mod-commandMode';
  */
 const NB_EDITOR_CLASS = 'jp-Notebook-editor';
 
-<<<<<<< HEAD
 /**
  * The class name added to the active cell.
  */
@@ -381,6 +380,21 @@ class ActiveNotebook extends NotebookWidget {
       this.addClass(COMMAND_CLASS);
       this.removeClass(EDIT_CLASS);
       this.node.focus();
+    }
+    if (widget) {
+      widget.addClass(ACTIVE_CLASS);
+    }
+    for (let i = 0; i < layout.childCount(); i++) {
+      let cell = model.cells.get(i);
+      widget = layout.childAt(i) as BaseCellWidget;
+      if (i !== model.activeCellIndex) {
+        widget.removeClass(ACTIVE_CLASS);
+      }
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
+        widget.addClass(SELECTED_CLASS);
+      } else {
+        widget.removeClass(SELECTED_CLASS);
+      }
     }
   }
 

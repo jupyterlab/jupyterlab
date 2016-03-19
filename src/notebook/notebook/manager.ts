@@ -56,7 +56,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected || cell.active) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         undelete.push(this.cloneCell(cell));
         model.cells.remove(cell);
       }
@@ -95,10 +95,10 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected || cell.active) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         toMerge.push(cell.input.textEditor.text);
       }
-      if (cell.active) {
+      if (i == model.activeCellIndex) {
         activeCell = cell;
       } else {
         toDelete.push(cell);
@@ -150,7 +150,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected || cell.active) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         this._copied.push(this.cloneCell(cell));
       }
     }
@@ -165,7 +165,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (cell.selected || cell.active) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         this._cut.push(this.cloneCell(cell));
         model.cells.remove(cell);
       }
@@ -202,7 +202,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (!cell.selected && !cell.active) {
+      if (i !== model.activeCellIndex && !model.isSelected(cell)) {
         continue;
       }
       let newCell: ICellModel;
@@ -232,7 +232,7 @@ class NotebookManager {
     let selected: ICellModel[] = []
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
-      if (cell.selected || cell.active) {
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
         selected.push(cell);
       }
     }
