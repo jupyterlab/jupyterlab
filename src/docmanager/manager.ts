@@ -35,11 +35,20 @@ export
 class DocumentManager {
 
   /**
+   * A signal emitted when the document manager has finished loading the
+   * contents of the widget.
+   */
+  get finished(): ISignal<DocumentManager, IContentsModel> {
+    return Private.finishedSignal.bind(this);
+  }
+
+  /**
    * Register a file handler.
    */
   register(handler: AbstractFileHandler<Widget>): void {
     this._handlers.push(handler);
     handler.activated.connect(this._onActivated, this);
+    handler.finished.connect(this._onFinished, this);
   }
 
   /**
@@ -165,7 +174,27 @@ class DocumentManager {
     }
   }
 
+  /**
+   * A handler for finished signals.
+   */
+  private _onFinished(handler: AbstractFileHandler<Widget>, model: IContentsModel) {
+    this.finished.emit(model);
+  }
+
   private _handlers: AbstractFileHandler<Widget>[] = [];
   private _defaultHandler: AbstractFileHandler<Widget> = null;
   private _activeHandler: AbstractFileHandler<Widget> = null;
+}
+
+
+
+/** 
+ * A private namespace for DocumentManager data.
+ */
+namespace Private {
+  /**
+   * A signal emitted when a file handler has finished populating a widget.
+   */
+  export
+  const finishedSignal = new Signal<DocumentManager, IContentsModel>();
 }
