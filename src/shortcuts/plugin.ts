@@ -87,16 +87,6 @@ const SHORTCUTS = [
     sequence: ['Escape']
   },
   {
-    command: 'notebook:interrupt-kernel',
-    selector: '.jp-Cell.jp-mod-commandMode',
-    sequence: ['I', 'I']
-  }, 
-  {
-    command: 'notebook:restart-kernel',
-    selector: '.jp-Cell.jp-mod-commandMode',
-    sequence: ['0', '0'],
-  }, 
-  {
     command: 'notebook-cells:run',
     selector: '.jp-Notebook-cell',
     sequence: ['Shift Enter']
