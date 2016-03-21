@@ -151,6 +151,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
       this._widgets.push(widget);
       installMessageFilter(widget, this);
     }
+    this._activeWidget = widget;
 
     // Fetch the contents and populate the widget asynchronously.
     let opts = this.getFetchOptions(model);
