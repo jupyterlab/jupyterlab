@@ -17,12 +17,17 @@ import {
 export
 const aboutExtension = {
   id: 'jupyter.extensions.about',
-  activate: (app: Application) => {
-    let widget = new Widget();
-    widget.id = 'about-jupyterlab';
-    widget.title.text = 'About';
-    widget.title.closable = false;
-    widget.node.innerHTML = `
+  activate: activateAbout
+}
+
+
+function activateAbout(app: Application): void {
+  let widget = new Widget();
+  let commandId = 'about-jupyterlab:show'
+  widget.id = 'about-jupyterlab';
+  widget.title.text = 'About';
+  widget.title.closable = true;
+  widget.node.innerHTML = `
 <h1>Welcome to the JupyterLab alpha preview</h1>
 
 <p>This demo gives an alpha-level preview of the JupyterLab environment.  Here is a brief description of some of the things you'll find in this demo.</p>
@@ -53,5 +58,18 @@ const aboutExtension = {
 <p>Opening a notebook will open a minimally featured notebook. Code execution, Markdown rendering, and basic cell toolbar actions are supported.  Future versions will add more features from the existing Jupyter notebook.</p>
 `;
     app.shell.addToMainArea(widget);
-  }
+
+    app.commands.add([{
+      id: commandId,
+      handler: () => {
+        if (!widget.isAttached) app.shell.addToMainArea(widget);
+        app.shell.activateMain(widget.id);
+      }
+    }]);
+
+    app.palette.add([{
+      command: commandId,
+      text: 'About JupyterLab',
+      category: 'Help'
+    }]);
 }
