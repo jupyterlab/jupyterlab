@@ -233,6 +233,7 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
   widget.title.text = 'Files';
   widget.id = 'file-browser';
   app.shell.addToLeftArea(widget, { rank: 40 });
+  showBrowser();
   return Promise.resolve(void 0);
 
   function showBrowser(): void {
