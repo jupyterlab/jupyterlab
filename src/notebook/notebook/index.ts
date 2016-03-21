@@ -4,6 +4,7 @@
 
 export * from './model';
 export * from './nbformat';
+export * from './manager';
 export * from './serialize';
 export * from './trust';
 export * from './widget';

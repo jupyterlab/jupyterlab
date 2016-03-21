@@ -6,7 +6,7 @@
 'use strict';
 
 import {
-  NotebookModel, NotebookWidget, INotebookContent,
+  NotebookModel, ActiveNotebook, INotebookContent, NotebookManager,
   serialize, deserialize, trustNotebook
 } from 'jupyter-js-notebook';
 
@@ -56,8 +56,9 @@ function main(): void {
   // and make that a separate example.
 
   let contents = new ContentsManager(SERVER_URL);
-  let nbModel = new NotebookModel(contents);
-  let nbWidget = new NotebookWidget(nbModel);
+  let nbModel = new NotebookModel();
+  let nbManager = new NotebookManager(nbModel, contents);
+  let nbWidget = new ActiveNotebook(nbManager);
   nbWidget.title.text = NOTEBOOK;
 
   let pModel = new StandardPaletteModel();
@@ -79,19 +80,19 @@ function main(): void {
     category: 'Notebook',
     text: 'Save',
     shortcut: 'Accel S',
-    handler: () => { nbModel.save() ; }
+    handler: () => { nbManager.save() ; }
   },
   {
     category: 'Notebook',
     text: 'Interrupt Kernel',
     shortcut: 'I I',
-    handler: () => { nbWidget.interrupt() ; }
+    handler: () => { nbManager.interrupt() ; }
   },
   {
     category: 'Notebook',
     text: 'Restart Kernel',
     shortcut: '0 0',
-    handler: () => { nbWidget.restart() ; }
+    handler: () => { nbManager.restart() ; }
   },
   {
     category: 'Notebook',
@@ -104,73 +105,73 @@ function main(): void {
     category: 'Notebook Cell',
     text: 'Run Selected',
     shortcut: 'Shift Enter',
-    handler: () => { nbModel.runActiveCell(); }
+    handler: () => { nbManager.run(); }
   },
   {
     category: 'Notebook Cell',
     text: 'Cut Selected',
     shortcut: 'X',
-    handler: () => { nbWidget.cut() ; }
+    handler: () => { nbManager.cut() ; }
   },
   {
     category: 'Notebook Cell',
     text: 'Copy Selected',
     shortcut: 'C',
-    handler: () => { nbWidget.copy() ; }
+    handler: () => { nbManager.copy() ; }
   },
   {
     category: 'Notebook Cell',
     text: 'Paste',
     shortcut: 'V',
-    handler: () => { nbWidget.paste() ; }
+    handler: () => { nbManager.paste() ; }
   },
   {
     category: 'Notebook Cell',
     text: 'Delete Selected',
     shortcut: 'D D',
-    handler: () => { nbWidget.delete() ; }
+    handler: () => { nbManager.delete() ; }
   },
   {
     category: 'Notebook Cell',
     text: 'Undo Cell Deletion',
     shortcut: 'Z',
-    handler: () => { nbWidget.undelete() ; }
+    handler: () => { nbManager.undelete() ; }
   },
   {
     category: 'Notebook Cell',
     text: 'Insert Above',
     shortcut: 'A',
-    handler: () => { nbWidget.insertAbove() ; }
+    handler: () => { nbManager.insertAbove() ; }
   },
   {
     category: 'Notebook Cell',
     text: 'Insert Below',
     shortcut: 'B',
-    handler: () => { nbWidget.insertBelow() ; }
+    handler: () => { nbManager.insertBelow() ; }
   },
   {
     category: 'Notebook Cell',
     text: 'Merge Selected',
     shortcut: 'Shift M',
-    handler: () => { nbWidget.merge() ; }
+    handler: () => { nbManager.merge() ; }
   },
   {
     category: 'Notebook Cell',
     text: 'To Code Type',
     shortcut: 'Y',
-    handler: () => { nbWidget.changeCellType('code') ; }
+    handler: () => { nbManager.changeCellType('code') ; }
   },
   {
     category: 'Notebook Cell',
     text: 'To Markdown Type',
     shortcut: 'M',
-    handler: () => { nbWidget.changeCellType('markdown') ; }
+    handler: () => { nbManager.changeCellType('markdown') ; }
   },
   {
     category: 'Notebook Cell',
     text: 'To Raw Type',
     shortcut: 'R',
-    handler: () => { nbWidget.changeCellType('raw') ; }
+    handler: () => { nbManager.changeCellType('raw') ; }
   },
   {
     category: 'Notebook Cell',
@@ -192,7 +193,7 @@ function main(): void {
     selector: '.jp-Notebook',
     sequence: ['Shift Enter'],
     handler: () => {
-      nbModel.runActiveCell();
+      nbManager.run();
       return true;
     }
   },
@@ -200,7 +201,7 @@ function main(): void {
     selector: '.jp-Notebook',
     sequence: ['Accel S'],
     handler: () => {
-      nbModel.save();
+      nbManager.save();
       return true;
     }
   }, 
@@ -208,7 +209,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['I', 'I'],
     handler: () => {
-      nbWidget.interrupt();
+      nbManager.interrupt();
       return true;
     }
   }, 
@@ -216,7 +217,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['0', '0'],
     handler: () => {
-      nbWidget.restart();
+      nbManager.restart();
       return true;
     }
   }, 
@@ -224,7 +225,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Y'],
     handler: () => {
-      nbWidget.changeCellType('code');
+      nbManager.changeCellType('code');
       return true;
     }
   }, 
@@ -232,7 +233,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['M'],
     handler: () => {
-      nbWidget.changeCellType('markdown');
+      nbManager.changeCellType('markdown');
       return true;
     }
   }, 
@@ -240,7 +241,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['R'],
     handler: () => {
-      nbWidget.changeCellType('raw');
+      nbManager.changeCellType('raw');
       return true;
     }
   }, 
@@ -248,7 +249,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['X'],
     handler: () => {
-      nbWidget.cut();
+      nbManager.cut();
       return true;
     }
   },
@@ -256,7 +257,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['C'],
     handler: () => {
-      nbWidget.copy();
+      nbManager.copy();
       return true;
     }
   },
@@ -264,7 +265,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['V'],
     handler: () => {
-      nbWidget.paste();
+      nbManager.paste();
       return true;
     }
   },
@@ -272,7 +273,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['D', 'D'],
     handler: () => {
-      nbWidget.delete();
+      nbManager.delete();
       return true;
     }
   },
@@ -280,7 +281,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Z'],
     handler: () => {
-      nbWidget.undelete();
+      nbManager.undelete();
       return true;
     }
   },
@@ -288,7 +289,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Shift M'],
     handler: () => {
-      nbWidget.merge();
+      nbManager.merge();
       return true;
     }
   },
@@ -296,7 +297,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['A'],
     handler: () => {
-      nbWidget.insertAbove();
+      nbManager.insertAbove();
       return true;
     }
   },
@@ -304,7 +305,7 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['B'],
     handler: () => {
-      nbWidget.insertBelow();
+      nbManager.insertBelow();
       return true;
     }
   },
