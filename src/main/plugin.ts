@@ -20,7 +20,7 @@ const mainExtension = {
   activate: (app: Application) => {
     window.onbeforeunload = event => {
       let msg = 'Are you sure you want to exit JupyterLab?'
-      msg += '\nAny unsaved changes will be lost';
+      msg += '\nAny unsaved changes will be lost.';
       return msg;
     }
   }
