@@ -60,14 +60,14 @@ import {
 const NB_CLASS = 'jp-Notebook';
 
 /**
- * The class name added to notebook container widget.
+ * The class name added to notebook container widgets.
  */
-const NB_CONTAINER = 'jp-Notebook-Container';
+const NB_CONTAINER = 'jp-Notebook-container';
 
 /**
- * The class name added to notebook cell widget.
+ * The class name added to notebook panes.
  */
-const NB_CELLS = 'jp-Notebook-Cells';
+const NB_PANE = 'jp-Notebook-pane';
 
 /**
  * The class name added to notebook widget cells.
@@ -75,7 +75,7 @@ const NB_CELLS = 'jp-Notebook-Cells';
 const NB_CELL_CLASS = 'jp-Notebook-cell';
 
 /**
- * The class name added to the notebook toolbar.
+ * The class name added to notebook toolbars.
  */
 const NB_TOOLBAR = 'jp-NBToolbar';
 
@@ -186,7 +186,70 @@ const DELETE_STACK_SIZE = 10;
 
 
 /**
- * A basic widget for a notebook.
+ * A widget which contains a toolbar and a notebook.
+ */
+export
+class NotebookPane extends Widget {
+  /**
+   * Create a new toolbar for the pane.
+   */
+  static createToolbar(manager: NotebookManager): NotebookToolbar {
+    return new NotebookToolbar(manager);
+  }
+
+  /**
+   * Create a new notebook for the pane.
+   */
+  static createNotebook(model: INotebookModel): NotebookWidget {
+    return new NotebookWidget(model);
+  }
+
+  /**
+   * Construct a notebook pane widget.
+   */
+  constructor(manager: NotebookManager) {
+    super();
+    this.addClass(NB_PANE);
+    let constructor = this.constructor as typeof NotebookPane;
+    this._toolbar = constructor.createToolbar(manager);
+    this.layout = new PanelLayout();
+    let layout = this.layout as PanelLayout;
+    layout.insertChild(0, this._toolbar);
+    let container = new Widget();
+    container.addClass(NB_CONTAINER);
+    container.layout = new PanelLayout();
+    this._notebook = constructor.createNotebook(manager.model);
+    (container.layout as PanelLayout).addChild(this._notebook);
+    layout.addChild(container);
+  }
+
+  /**
+   * Get the toolbar used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get toolbar(): NotebookToolbar {
+    return this._toolbar;
+  }
+
+  /**
+   * Get the notebook used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get notebook(): NotebookWidget {
+    return this._notebook
+  }
+
+  private _toolbar: NotebookToolbar = null;
+  private _notebook: NotebookWidget = null;
+}
+
+
+/**
+ * A widget holding the notebook cells.
  */
 export
 class NotebookWidget extends Widget {
@@ -218,214 +281,17 @@ class NotebookWidget extends Widget {
    */
   constructor(model: INotebookModel) {
     super();
+    this.node.tabIndex = -1;  // Allow the widget to take focus.
+    this.addClass(NB_CLASS);
     this._model = model;
-    let constructor = this.constructor as typeof NotebookWidget;
     this.layout = new PanelLayout();
-    let layout = this.layout as PanelLayout;
-    let container = new Widget();
-    container.addClass(NB_CONTAINER);
-    container.layout = new PanelLayout();
-    this._cells = new NotebookCells(model);
-    (container.layout as PanelLayout).addChild(this._cells);
-    layout.addChild(container);
-
-    let cellsLayout = this._cells.layout as PanelLayout;
+    let constructor = this.constructor as typeof NotebookWidget;
+    let cellsLayout = this.layout as PanelLayout;
     let factory = constructor.createCell;
     for (let i = 0; i < model.cells.length; i++) {
       cellsLayout.addChild(factory(model.cells.get(i)));
     }
     model.cells.changed.connect(this.onCellsChanged, this);
-  }
-
-  /**
-   * Get the model for the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get model(): INotebookModel {
-    return this._model;
-  }
-
-  /**
-   * The notebook cells widget used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get cells(): NotebookCells {
-    return this._cells;
-  }
-
-  /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose() {
-    this._model.dispose();
-    this._model = null;
-    super.dispose();
-  }
-
-  /**
-   * Handle a change cells event.  This function must be on this class
-   * because it uses the static [createCell] method.
-   */
-  protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
-    let layout = this._cells.layout as PanelLayout;
-    let constructor = this.constructor as typeof NotebookWidget;
-    let factory = constructor.createCell;
-    let widget: BaseCellWidget;
-    switch(args.type) {
-    case ListChangeType.Add:
-      widget = factory(args.newValue as ICellModel);
-      widget.addClass(NB_CELL_CLASS);
-      widget.input.editor.addClass(NB_EDITOR_CLASS);
-      layout.insertChild(args.newIndex, widget);
-      break;
-    case ListChangeType.Move:
-      layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
-      break;
-    case ListChangeType.Remove:
-      widget = layout.childAt(args.oldIndex) as BaseCellWidget;
-      layout.removeChild(widget);
-      widget.dispose();
-      break;
-    case ListChangeType.Replace:
-      let oldValues = args.oldValue as ICellModel[];
-      for (let i = args.oldIndex; i < oldValues.length; i++) {
-        widget = layout.childAt(args.oldIndex) as BaseCellWidget;
-        layout.removeChild(widget);
-        widget.dispose();
-      }
-      let newValues = args.newValue as ICellModel[];
-      for (let i = newValues.length; i < 0; i--) {
-        widget = factory(newValues[i]);
-        widget.addClass(NB_CELL_CLASS);
-        widget.input.editor.addClass(NB_EDITOR_CLASS);
-        layout.insertChild(args.newIndex, widget);
-      }
-      break;
-    case ListChangeType.Set:
-      widget = layout.childAt(args.newIndex) as BaseCellWidget;
-      layout.removeChild(widget);
-      widget.dispose();
-      widget = factory(args.newValue as ICellModel);
-      layout.insertChild(args.newIndex, widget);
-      widget.addClass(NB_CELL_CLASS);
-      widget.input.editor.addClass(NB_EDITOR_CLASS);
-      break;
-    }
-    this.update();
-  }
-
-  private _model: INotebookModel = null;
-  private _cells: NotebookCells = null;
-}
-
-
-/**
- * A notebook widget which supports interactivity with and a toolbar.
- */
-export
-class ActiveNotebook extends NotebookWidget {
-  /**
-   * Create a new toolbar for the notebook.
-   */
-  static createToolbar(manager: NotebookManager): NotebookToolbar {
-    return new NotebookToolbar(manager);
-  }
-
-  /**
-   * Construct a notebook widget.
-   */
-  constructor(manager: NotebookManager) {
-    super(manager.model);
-    this.addClass(NB_CLASS);
-    this.node.tabIndex = -1;  // Allow the widget to take focus.
-    let constructor = this.constructor as typeof ActiveNotebook;
-    this._toolbar = constructor.createToolbar(manager);
-    let layout = this.layout as PanelLayout;
-    layout.insertChild(0, this._toolbar);
-    manager.model.stateChanged.connect(this.onModelChanged, this);
-  }
-
-  /**
-   * Get the toolbar used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get toolbar(): NotebookToolbar {
-    return this._toolbar;
-  }
-
-  /**
-   * Handle `update-request` messages sent to the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    // Set the appropriate classes on the cells.
-    let model = this.model;
-    let layout = this.cells.layout as PanelLayout;
-    let widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
-    if (model.mode === 'edit') {
-      this.addClass(EDIT_CLASS);
-      this.removeClass(COMMAND_CLASS);
-      if (widget) {
-        widget.input.editor.focus();
-      }
-    } else {
-      this.addClass(COMMAND_CLASS);
-      this.removeClass(EDIT_CLASS);
-      this.node.focus();
-    }
-    if (widget) {
-      widget.addClass(ACTIVE_CLASS);
-    }
-    for (let i = 0; i < layout.childCount(); i++) {
-      let cell = model.cells.get(i);
-      widget = layout.childAt(i) as BaseCellWidget;
-      if (i !== model.activeCellIndex) {
-        widget.removeClass(ACTIVE_CLASS);
-      }
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
-        widget.addClass(SELECTED_CLASS);
-      } else {
-        widget.removeClass(SELECTED_CLASS);
-      }
-    }
-  }
-
-  /**
-   * Handle changes to the notebook model.
-   */
-  protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'mode':
-      this.update();
-      break;
-    case 'activeCellIndex':
-      this.update();
-      break;
-    }
-  }
-
-  private _toolbar: NotebookToolbar = null;
-}
-
-
-/**
- * A widget holding the notebook cells.
- */
-export
-class NotebookCells extends Widget {
-  /**
-   * Construct a notebook cells widget.
-   */
-  constructor(model: INotebookModel) {
-    super();
-    this.addClass(NB_CELLS);
-    this._model = model;
-    this.layout = new PanelLayout();
     model.stateChanged.connect(this.onModelChanged, this);
   }
 
@@ -524,17 +390,109 @@ class NotebookCells extends Widget {
   }
 
   /**
-   * Handle changes to the model.
+   * Handle `update-request` messages sent to the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    // Set the appropriate classes on the cells.
+    let model = this.model;
+    let layout = this.layout as PanelLayout;
+    let widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
+    if (model.mode === 'edit') {
+      this.addClass(EDIT_CLASS);
+      this.removeClass(COMMAND_CLASS);
+      if (widget) {
+        widget.input.editor.focus();
+      }
+    } else {
+      this.addClass(COMMAND_CLASS);
+      this.removeClass(EDIT_CLASS);
+      this.node.focus();
+    }
+    if (widget) {
+      widget.addClass(ACTIVE_CLASS);
+    }
+    for (let i = 0; i < layout.childCount(); i++) {
+      let cell = model.cells.get(i);
+      widget = layout.childAt(i) as BaseCellWidget;
+      if (i !== model.activeCellIndex) {
+        widget.removeClass(ACTIVE_CLASS);
+      }
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
+        widget.addClass(SELECTED_CLASS);
+      } else {
+        widget.removeClass(SELECTED_CLASS);
+      }
+    }
+  }
+
+  /**
+   * Handle changes to the notebook model.
    */
   protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
-    if (args.name === 'activeCellIndex') {
+    switch (args.name) {
+    case 'mode':
+      this.update();
+      break;
+    case 'activeCellIndex':
       let layout = this.layout as PanelLayout;
       let child = layout.childAt(args.newValue);
       if (!child) {
         return;
       }
       Private.scrollIfNeeded(this.parent.node, child.node);
+      this.update();
     }
+  }
+
+  /**
+   * Handle a change cells event. 
+   */
+  protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
+    let layout = this.layout as PanelLayout;
+    let constructor = this.constructor as typeof NotebookWidget;
+    let factory = constructor.createCell;
+    let widget: BaseCellWidget;
+    switch(args.type) {
+    case ListChangeType.Add:
+      widget = factory(args.newValue as ICellModel);
+      widget.addClass(NB_CELL_CLASS);
+      widget.input.editor.addClass(NB_EDITOR_CLASS);
+      layout.insertChild(args.newIndex, widget);
+      break;
+    case ListChangeType.Move:
+      layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
+      break;
+    case ListChangeType.Remove:
+      widget = layout.childAt(args.oldIndex) as BaseCellWidget;
+      layout.removeChild(widget);
+      widget.dispose();
+      break;
+    case ListChangeType.Replace:
+      let oldValues = args.oldValue as ICellModel[];
+      for (let i = args.oldIndex; i < oldValues.length; i++) {
+        widget = layout.childAt(args.oldIndex) as BaseCellWidget;
+        layout.removeChild(widget);
+        widget.dispose();
+      }
+      let newValues = args.newValue as ICellModel[];
+      for (let i = newValues.length; i < 0; i--) {
+        widget = factory(newValues[i]);
+        widget.addClass(NB_CELL_CLASS);
+        widget.input.editor.addClass(NB_EDITOR_CLASS);
+        layout.insertChild(args.newIndex, widget);
+      }
+      break;
+    case ListChangeType.Set:
+      widget = layout.childAt(args.newIndex) as BaseCellWidget;
+      layout.removeChild(widget);
+      widget.dispose();
+      widget = factory(args.newValue as ICellModel);
+      layout.insertChild(args.newIndex, widget);
+      widget.addClass(NB_CELL_CLASS);
+      widget.input.editor.addClass(NB_EDITOR_CLASS);
+      break;
+    }
+    this.update();
   }
 
   /**
