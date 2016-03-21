@@ -391,7 +391,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
    * The user is prompted to close the kernel if it is active
    */
   close(widget?: NotebookContainer): Promise<boolean> {
-    if (!widget.session || widget.session.status !== KernelStatus.Dead) {
+    if (!widget.session || widget.session.status === KernelStatus.Dead) {
       return super.close(widget);
     }
     return showDialog({
