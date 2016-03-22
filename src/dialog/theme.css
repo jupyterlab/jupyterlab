@@ -4,49 +4,82 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-Dialog {
-  padding-left: 3px;
-  background: rgba(245, 245, 245, .6);
+  box-shadow: 2px;
+  background: rgba(0, 0, 0, .25);
+  color: #757575;
 }
 
 
 .jp-Dialog-content {
-  background: #F5F5F5;
-  min-width: 50%;
+  background: #FAFAFA;
+  padding-left: 24px;
+  padding-right: 24px;
   border: 1px solid #757575;
-  border-radius: 5px;
-  padding-bottom: 10px;
 }
 
 
 .jp-Dialog-header {
-  padding: 5px;
+  padding: 24px;
+  padding-bottom: 12px;
+  font: 18px Helvetica-Neue Medium, Arial, sans-serif;
+  color: #616161;
 }
 
 
 .jp-Dialog-body {
-  padding: 5px;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  background: #FAFAFA;
+}
+
+
+.jp-Dialog-bodyContent {
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  outline: none;
 }
 
 
 .jp-Dialog-footer {
-  padding: 20px;
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
 
 
 .jp-Dialog-button {
-  padding: 5px;
-  border: 1px solid #757575;
-  font-size: 16px;
-  background: #FAFAFA;
-  line-height: 20px;
-  border-radius: 3px;
-  max-width: 100px;
-  margin-left: 5px;
+  font: 15px Helvetica-Neue Medium, Arial, sans-serif;
+  border: none;
+  min-width: 120px;
+  max-width: 120px;
+  text-transform: uppercase;
+  line-height: 38px;
+  border-radius: 2px;
+  margin-right: 12px;
+  outline: none;
 }
 
 
-.jp-Dialog-close {
-  line-height: 21px;
+.jp-Dialog-okButton {
+  background: #F27624;
+  color: white;
+}
+
+
+.jp-Dialog-cancelButton {
+  background: #9E9E9E;
+  color: white;
+}
+
+
+.jp-Dialog-inputWrapper {
+  padding: 4px 6px;
+  background: white;
+  border: 1px solid #E0E0E0;
+}
+
+
+.jp-Dialog-input {
+  font: 13px Helvetica-Neue Regular, Arial, sans-serif;
+  color: #757575;
+  width: 100%;
+  outline: none;
+  border: none;
 }

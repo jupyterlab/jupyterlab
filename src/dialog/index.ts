@@ -23,14 +23,14 @@ const HEADER_CLASS = 'jp-Dialog-header';
 const TITLE_CLASS = 'jp-Dialog-title';
 
 /**
- * The class name added to dialog close icon node.
- */
-const CLOSE_ICON_CLASS = 'jp-Dialog-close';
-
-/**
  * The class name added to dialog body node.
  */
 const BODY_CLASS = 'jp-Dialog-body';
+
+/**
+ * The class name added to a dialog body content node.
+ */
+const BODY_CONTENT_CLASS = 'jp-Dialog-bodyContent';
 
 /**
  * The class name added to a dialog content node.
@@ -53,7 +53,7 @@ const BUTTON_ICON_CLASS = 'jp-Dialog-buttonIcon';
 const BUTTON_TEXT_CLASS = 'jp-Dialog-buttonText';
 
 /*
- * The class name added to dialog OK buttons.
+ * The class name added to dialog Confirm buttons.
  */
 const OK_BUTTON_CLASS = 'jp-Dialog-okButton';
 
@@ -61,6 +61,16 @@ const OK_BUTTON_CLASS = 'jp-Dialog-okButton';
  * The class name added to dialog Cancel buttons.
  */
 const CANCEL_BUTTON_CLASS = 'jp-Dialog-cancelButton';
+
+/**
+ * The class name added to input field wrappers.
+ */
+const INPUT_WRAPPER_CLASS = 'jp-Dialog-inputWrapper';
+
+/**
+ * The class name added to input fields.
+ */
+const INPUT_CLASS = 'jp-Dialog-input';
 
 
 /**
@@ -96,7 +106,7 @@ interface IButtonItem {
 
 
 /**
- * A default "OK" button.
+ * A default confirmation button.
  */
 export
 const okButton: IButtonItem = {
@@ -106,12 +116,27 @@ const okButton: IButtonItem = {
 
 
 /**
- * A default "Cancel" button.
+ * A default cancel button.
  */
 export
 const cancelButton: IButtonItem = {
-  text: 'Cancel',
+  text: 'CANCEL',
   className: CANCEL_BUTTON_CLASS
+}
+
+
+/**
+ * Create a styled input node.
+ */
+export
+function createStyledInput(text: string): HTMLElement {
+  let wrapper = document.createElement('div');
+  wrapper.className = INPUT_WRAPPER_CLASS;
+  let input = document.createElement('input');
+  wrapper.appendChild(input);
+  input.value = text || '';
+  input.className = INPUT_CLASS;
+  return wrapper;
 }
 
 
@@ -141,6 +166,11 @@ interface IDialogOptions {
    *   [[cancelButton]]).
    */
   buttons?: IButtonItem[];
+
+  /**
+   * The confirmation text for the button (defaults to 'OK').
+   */
+  okText?: string;
 }
 
 
@@ -154,7 +184,8 @@ interface IDialogOptions {
 export
 function showDialog(options: IDialogOptions): Promise<IButtonItem>{
   let host = options.host || document.body;
-  let buttons = options.buttons || [okButton, cancelButton];
+  okButton.text = options.okText ? options.okText : 'OK';
+  let buttons = options.buttons || [cancelButton, okButton];
   let buttonNodes = buttons.map(createButton);
   let dialog = createDialog(options, buttonNodes);
   host.appendChild(dialog);
@@ -182,11 +213,6 @@ function showDialog(options: IDialogOptions): Promise<IButtonItem>{
       evt.preventDefault();
       evt.stopPropagation();
     });
-    let close = dialog.getElementsByClassName(CLOSE_ICON_CLASS)[0];
-    close.addEventListener('click', () => {
-      host.removeChild(dialog);
-      resolve(null);
-    });
   });
 }
 
@@ -202,30 +228,29 @@ function createDialog(options: IDialogOptions, buttonNodes: HTMLElement[]): HTML
   let body = document.createElement('div');
   let footer = document.createElement('div');
   let title = document.createElement('span');
-  let close = document.createElement('span');
   node.className = DIALOG_CLASS;
   content.className = CONTENT_CLASS;
   header.className = HEADER_CLASS;
   body.className = BODY_CLASS;
   footer.className = FOOTER_CLASS;
   title.className = TITLE_CLASS;
-  close.className = CLOSE_ICON_CLASS;
   node.appendChild(content);
   content.appendChild(header);
   content.appendChild(body);
   content.appendChild(footer);
   header.appendChild(title);
-  header.appendChild(close);
 
   // Populate the nodes.
   title.textContent = options.title || '';
+  let child: HTMLElement;
   if (options.body && typeof options.body === 'string') {
-    let span = document.createElement('span');
-    span.innerHTML = options.body as string;
-    body.appendChild(span);
+    child = document.createElement('span');
+    child.innerHTML = options.body as string;
   } else if (options.body) {
-    body.appendChild(options.body as HTMLElement);
+    child = options.body as HTMLElement;
   }
+  child.classList.add(BODY_CONTENT_CLASS);
+  body.appendChild(child);
   buttonNodes.map(buttonNode => { footer.appendChild(buttonNode); });
   return node;
 }

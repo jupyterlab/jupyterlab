@@ -247,10 +247,11 @@ class BreadCrumbs extends Widget {
           let options = {
             title: 'Overwrite file?',
             host: this.parent.node,
-            body: `"${newPath}" already exists, overwrite?`
+            body: `"${newPath}" already exists, overwrite?`,
+            okText: 'OVERWRITE'
           }
           return showDialog(options).then(button => {
-            if (button.text === 'OK') {
+            if (button.text === 'OVERWRITE') {
               return this._model.delete(newPath).then(() => {
                 return this._model.rename(name, newPath).then(() => {
                   return this._model.refresh();

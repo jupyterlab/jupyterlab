@@ -15,7 +15,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  showDialog
+  showDialog, createStyledInput
 } from '../dialog';
 
 import {
@@ -325,27 +325,23 @@ namespace Private {
    * Rename a file or directory.
    */
   function doRename(widget: FileButtons, contents: IContentsModel): Promise<IContentsModel> {
-    var edit = document.createElement('input');
-    edit.value = contents.name;
-    let index = edit.value.lastIndexOf('.');
-    if (index === -1) {
-      edit.setSelectionRange(0, edit.value.length);
-    } else {
-      edit.setSelectionRange(0, index);
-    }
+    let edit = createStyledInput(contents.name);
     return showDialog({
       title: `Create a new ${contents.type}`,
       body: edit,
-      host: widget.node.parentElement
+      host: widget.node.parentElement,
+      okText: 'CREATE'
     }).then(value => {
-      if (value.text === 'OK') {
-        return widget.model.rename(contents.path, edit.value);
+      let text = (edit.firstChild as HTMLInputElement).value;
+      if (value.text === 'CREATE') {
+        return widget.model.rename(contents.path, text);
       } else {
         return widget.model.delete(contents.path).then(() => void 0);
       }
     }).catch(error => {
+      let text = (edit.firstChild as HTMLInputElement).value;
       if (error.statusText === 'Conflict') {
-        return handleExisting(widget, edit.value, contents);
+        return handleExisting(widget, text, contents);
       } 
       return utils.showErrorMessage(widget, 'File creation error', error).then(
         () => { return void 0 });
@@ -359,7 +355,7 @@ namespace Private {
     return showDialog({
       title: 'File already exists',
       body: `File "${name}" already exists, try again?`,
-      host: widget.node.parentElement
+      host: widget.node.parentElement,
     }).then(value => {
       if (value.text === 'OK') {
         return doRename(widget, contents);

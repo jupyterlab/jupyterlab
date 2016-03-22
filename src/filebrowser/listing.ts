@@ -432,9 +432,10 @@ class DirListing extends Widget {
       return showDialog({
         title: 'Delete file?',
         body: message,
-        host: this.node.parentElement
+        host: this.node.parentElement,
+        okText: 'DELETE'
       }).then(result => {
-        if (result.text === 'OK') {
+        if (result.text === 'DELETE') {
           return this._delete(names);
         }
       });
@@ -984,10 +985,11 @@ class DirListing extends Widget {
           let options = {
             title: 'Overwrite file?',
             host: this.parent.node,
-            body: `"${newPath}" already exists, overwrite?`
+            body: `"${newPath}" already exists, overwrite?`,
+            okText: 'OVERWRITE'
           }
           return showDialog(options).then(button => {
-            if (button.text === 'OK') {
+            if (button.text === 'OVERWRITE') {
               return this._model.delete(newPath).then(() => {
                 return this._model.rename(name, newPath);
               });
@@ -1199,10 +1201,11 @@ class DirListing extends Widget {
           let options = {
             title: 'Overwrite file?',
             host: this.parent.node,
-            body: `"${newPath}" already exists, overwrite?`
+            body: `"${newPath}" already exists, overwrite?`,
+            okText: 'OVERWRITE'
           }
           return showDialog(options).then(button => {
-            if (button.text === 'OK') {
+            if (button.text === 'OVERWRITE') {
               return this._model.delete(newPath).then(() => {
                 return this._model.rename(original, newPath).then(() => {
                   this._model.refresh();
