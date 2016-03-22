@@ -12,7 +12,8 @@
 .jp-Dialog-content {
   background: #FAFAFA;
   padding: 24px;
-  width: 290px;
+  width: 300px;
+  box-sizing: border-box;
   box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.5);
 }
 

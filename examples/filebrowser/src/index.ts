@@ -18,7 +18,7 @@ import {
 } from 'jupyter-js-ui/lib/filebrowser';
 
 import {
-  showDialog
+  showDialog, okButton
 } from 'jupyter-js-ui/lib/dialog';
 
 import {
@@ -186,6 +186,17 @@ function main(): void {
     new MenuItem({
       text: 'DropDown Demo',
       handler: () => { dropdownDemo(); }
+    }),
+    new MenuItem({
+      text: 'Info Demo',
+      handler: () => {
+        let msg = 'The quick brown fox jumped over the lazy dog'
+        showDialog({
+          title: 'Cool Title',
+          body: msg,
+          buttons: [okButton]
+        });
+      }
     })
   ]);
 
