@@ -329,11 +329,10 @@ namespace Private {
     return showDialog({
       title: `Create a new ${contents.type}`,
       body: edit,
-      host: widget.node.parentElement,
-      okText: 'CREATE'
+      host: widget.node.parentElement
     }).then(value => {
       let text = (edit.firstChild as HTMLInputElement).value;
-      if (value.text === 'CREATE') {
+      if (value.text === 'OK') {
         return widget.model.rename(contents.path, text);
       } else {
         return widget.model.delete(contents.path).then(() => void 0);
