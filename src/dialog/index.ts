@@ -189,7 +189,9 @@ function showDialog(options: IDialogOptions): Promise<IButtonItem>{
   let buttonNodes = buttons.map(createButton);
   let dialog = createDialog(options, buttonNodes);
   host.appendChild(dialog);
-  buttonNodes[0].focus();
+  // Focus the ok button if given.
+  let index = buttons.indexOf(okButton);
+  if (index !== -1) buttonNodes[index].focus();
 
   return new Promise<IButtonItem>((resolve, reject) => {
     buttonNodes.map(node => {

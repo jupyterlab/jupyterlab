@@ -375,9 +375,10 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     return showDialog({
       title: 'Close without saving?',
       body: `File "${widget.title.text}" has unsaved changes, close without saving?`,
-      host: widget.node
+      host: widget.node,
+      okText: 'CLOSE'
     }).then(value => {
-      if (value.text === 'OK') {
+      if (value.text === 'CLOSE') {
         this._close(widget);
         return true;
       }
