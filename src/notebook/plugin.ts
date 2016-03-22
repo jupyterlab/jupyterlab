@@ -13,8 +13,12 @@ import {
 import {
   IContentsModel, IContentsManager, IContentsOpts,
   NotebookSessionManager, INotebookSessionManager,
-  INotebookSession, IKernelMessage, IComm
+  INotebookSession, IKernelMessage, IComm, KernelStatus
 } from 'jupyter-js-services';
+
+import {
+  showDialog
+} from 'jupyter-js-ui/lib/dialog';
 
 import {
   AbstractFileHandler, DocumentManager
@@ -374,6 +378,33 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   get currentModel(): INotebookModel {
     let w = this.activeWidget;
     if (w) return w.model;
+  }
+
+  /**
+   * Close a widget.
+   *
+   * @param widget - The widget to close (defaults to current active widget).
+   *
+   * returns A boolean indicating whether the widget was closed.
+   *
+   * #### Notes
+   * The user is prompted to close the kernel if it is active
+   */
+  close(widget?: NotebookContainer): Promise<boolean> {
+    if (!widget.session || widget.session.status === KernelStatus.Dead) {
+      return super.close(widget);
+    }
+    return showDialog({
+      title: 'Shutdown kernel?',
+      body: `Shutdown "${widget.session.kernel.name}" kernel?`,
+      host: widget.node
+    }).then(result => {
+      if (result.text === 'OK') {
+        return widget.session.shutdown()
+      }
+    }).then(() => {
+      return super.close(widget);
+    });
   }
 
   /**
