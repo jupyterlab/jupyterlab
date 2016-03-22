@@ -107,10 +107,7 @@ function serializeCell(cell: ICellModel): ICell {
  */
 export
 function deserializeCell(data: ICell, model: ICellModel): void {
-  let source = data.source as string;
-  if (Array.isArray(data.source)) {
-    source = (data.source as string[]).join('\n');
-  }
+  let source: string = data.source;
   model.input.textEditor.text = source;
   model.tags = data.metadata.tags;
   model.name = data.metadata.name;
