@@ -35,11 +35,6 @@ body {
 }
 
 
-.jp-NotebookContainer {
-  display: flex;
-}
-
-
 .jp-NotebookContainer-widget {
   flex: 0 0 auto;
 }
