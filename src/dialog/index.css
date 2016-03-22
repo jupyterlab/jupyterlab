@@ -22,13 +22,16 @@
 .jp-Dialog-content {
   margin-left: auto;
   margin-right: auto;
-  text-align: center;
-  vertical-align: middle;
 }
 
 
 .jp-Dialog-header {
-  flex: 0 0 auto;
+
+}
+
+
+.jp-Dialog-footer {
+
 }
 
 

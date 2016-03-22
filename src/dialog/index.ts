@@ -63,14 +63,24 @@ const OK_BUTTON_CLASS = 'jp-Dialog-okButton';
 const CANCEL_BUTTON_CLASS = 'jp-Dialog-cancelButton';
 
 /**
- * The class name added to input field wrappers.
+ * The class name added to dialog input field wrappers.
  */
 const INPUT_WRAPPER_CLASS = 'jp-Dialog-inputWrapper';
 
 /**
- * The class name added to input fields.
+ * The class name added to dialog input fields.
  */
 const INPUT_CLASS = 'jp-Dialog-input';
+
+/**
+ * The class name added to dialog select wrappers.
+ */
+const SELECT_WRAPPER_CLASS = 'jp-Dialog-selectWrapper';
+
+/**
+ * The class anem added to dialog select nodes.
+ */
+const SELECT_CLASS = 'jp-Dialog-select';
 
 
 /**
@@ -126,21 +136,6 @@ const cancelButton: IButtonItem = {
 
 
 /**
- * Create a styled input node.
- */
-export
-function createStyledInput(text: string): HTMLElement {
-  let wrapper = document.createElement('div');
-  wrapper.className = INPUT_WRAPPER_CLASS;
-  let input = document.createElement('input');
-  wrapper.appendChild(input);
-  input.value = text || '';
-  input.className = INPUT_CLASS;
-  return wrapper;
-}
-
-
-/**
  * The options used to create a dialog.
  */
 export
@@ -151,8 +146,12 @@ interface IDialogOptions {
   title?: string;
 
   /**
-   * The main body element for the dialog or a message to display,
-   * which is wrapped in a <p> tag.
+   * The main body element for the dialog or a message to display.
+   *
+   * #### Notes
+   * If a `string` is provided, it will be used as the `HTMLContent` of
+   * a `<span>`.  If an `<input>` or `<select>` element is provided, 
+   * they will be styled.
    */
   body?: HTMLElement | string;
 
@@ -250,6 +249,14 @@ function createDialog(options: IDialogOptions, buttonNodes: HTMLElement[]): HTML
     child.innerHTML = options.body as string;
   } else if (options.body) {
     child = options.body as HTMLElement;
+    switch (child.tagName) {
+    case 'INPUT':
+      child = wrapInput(child as HTMLInputElement);
+      break;
+    case 'SELECT':
+      child = wrapSelect(child as HTMLSelectElement);
+      break;
+    }
   }
   child.classList.add(BODY_CONTENT_CLASS);
   body.appendChild(child);
@@ -274,4 +281,28 @@ function createButton(item: IButtonItem): HTMLElement {
   button.appendChild(icon);
   button.appendChild(text);
   return button;
+}
+
+
+/**
+ * Wrap and style an input node.
+ */
+function wrapInput(input: HTMLInputElement): HTMLElement {
+  let wrapper = document.createElement('div');
+  wrapper.className = INPUT_WRAPPER_CLASS;
+  wrapper.appendChild(input);
+  input.classList.add(INPUT_CLASS);
+  return wrapper;
+}
+
+
+/**
+ * Wrap and style a select node.
+ */
+function wrapSelect(select: HTMLSelectElement): HTMLElement {
+  let wrapper = document.createElement('div');
+  wrapper.className = SELECT_WRAPPER_CLASS;
+  wrapper.appendChild(select);
+  select.classList.add(SELECT_CLASS);
+  return wrapper;
 }

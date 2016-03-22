@@ -15,7 +15,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  showDialog, createStyledInput
+  showDialog
 } from '../dialog';
 
 import {
@@ -325,22 +325,22 @@ namespace Private {
    * Rename a file or directory.
    */
   function doRename(widget: FileButtons, contents: IContentsModel): Promise<IContentsModel> {
-    let edit = createStyledInput(contents.name);
+    let edit = document.createElement('input');
+    edit.value = contents.name;
     return showDialog({
       title: `Create a new ${contents.type}`,
       body: edit,
-      host: widget.node.parentElement
+      host: widget.node.parentElement,
+      okText: 'CREATE'
     }).then(value => {
-      let text = (edit.firstChild as HTMLInputElement).value;
-      if (value.text === 'OK') {
-        return widget.model.rename(contents.path, text);
+      if (value.text === 'CREATE') {
+        return widget.model.rename(contents.path, edit.value);
       } else {
         return widget.model.delete(contents.path).then(() => void 0);
       }
     }).catch(error => {
-      let text = (edit.firstChild as HTMLInputElement).value;
       if (error.statusText === 'Conflict') {
-        return handleExisting(widget, text, contents);
+        return handleExisting(widget, edit.value, contents);
       } 
       return utils.showErrorMessage(widget, 'File creation error', error).then(
         () => { return void 0 });

@@ -4,22 +4,19 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-Dialog {
-  box-shadow: 2px;
-  background: rgba(0, 0, 0, .25);
+  background: rgba(0,0,0,0.25);
   color: #757575;
 }
 
 
 .jp-Dialog-content {
   background: #FAFAFA;
-  padding-left: 24px;
-  padding-right: 24px;
-  border: 1px solid #757575;
+  padding: 24px;
+  box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.5);
 }
 
 
 .jp-Dialog-header {
-  padding: 24px;
   padding-bottom: 12px;
   font: 18px Helvetica-Neue Medium, Arial, sans-serif;
   color: #616161;
@@ -40,7 +37,6 @@
 
 .jp-Dialog-footer {
   margin-top: 24px;
-  margin-bottom: 24px;
 }
 
 
@@ -52,8 +48,8 @@
   text-transform: uppercase;
   line-height: 38px;
   border-radius: 2px;
-  margin-right: 12px;
   outline: none;
+  padding: 0px;
 }
 
 
@@ -65,20 +61,45 @@
 
 .jp-Dialog-cancelButton {
   background: #9E9E9E;
+  margin-right: 12px;
   color: white;
 }
 
 
 .jp-Dialog-inputWrapper {
-  padding: 4px 6px;
+  padding: 7px;
   background: white;
-  border: 1px solid #E0E0E0;
+  width: 252px;
+  box-sizing: border-box;
+  border: 1px solid #BDBDBD;
+  border-radius: 2px;
 }
 
 
 .jp-Dialog-input {
-  font: 13px Helvetica-Neue Regular, Arial, sans-serif;
-  color: #757575;
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  color: #676767;
+  width: 100%;
+  outline: none;
+  border: none;
+}
+
+
+.jp-Dialog-selectWrapper {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background: white;
+  width: 252px;
+  box-sizing: border-box;
+  border: 1px solid #BDBDBD;
+  border-radius: 2px;
+}
+
+
+.jp-Dialog-select {
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  background: white;
+  color: #676767;
   width: 100%;
   outline: none;
   border: none;
