@@ -140,6 +140,16 @@ function main(): void {
   },
   {
     category: 'Notebook Cell',
+    text: 'To Edit Mode',
+    handler: () => { nbModel.mode = 'edit'; }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'To Command Mode',
+    handler: () => { nbModel.mode = 'command'; }
+  },
+  {
+    category: 'Notebook Cell',
     text: 'Cut Selected',
     shortcut: 'X',
     handler: () => { nbManager.cut() ; }
@@ -253,6 +263,22 @@ function main(): void {
       return true;
     }
   }, 
+  {
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Enter'],
+    handler: () => { 
+      nbModel.mode = 'edit'; 
+      return true;
+    }
+  },
+  {
+    selector: '.jp-Notebook.jp-mod-editMode',
+    sequence: ['Escape'],
+    handler: () => { 
+      nbModel.mode = 'command'; 
+      return true;
+    }
+  },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Y'],
