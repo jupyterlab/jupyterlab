@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  INotebookSession, IKernel, KernelStatus
+  KernelStatus
 } from 'jupyter-js-services';
 
 import {
@@ -52,9 +52,6 @@ import {
 import {
   INotebookMetadata
 } from './nbformat';
-
-import './codemirror-ipython';
-import './codemirror-ipythongfm';
 
 
 /**
@@ -820,17 +817,6 @@ class NotebookToolbar extends Widget {
     } else {
       node.classList.add(TOOLBAR_BUSY);
     }
-    session.kernelChanged.connect(this.handleKernel, this);
-    this.handleKernel(session, session.kernel);
-  }
-
-  /**
-   * Handle a change to the kernel.
-   */
-  protected handleKernel(session: INotebookSession, kernel: IKernel): void {
-    kernel.getKernelSpec().then(spec => {
-      this.kernelNameNode.textContent = spec.display_name;
-    });
   }
 
   /**

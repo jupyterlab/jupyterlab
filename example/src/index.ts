@@ -7,7 +7,7 @@
 
 import {
   NotebookModel, ActiveNotebook, INotebookContent, NotebookManager,
-  serialize, deserialize, trustNotebook
+  serialize, deserialize, selectKernel, trustNotebook
 } from 'jupyter-js-notebook';
 
 import {
@@ -15,7 +15,8 @@ import {
 } from 'jupyter-js-notebook/lib/cells'
 
 import {
-  ContentsManager, IContentsModel, startNewSession
+  ContentsManager, IContentsModel, IKernelSpecIds, startNewSession, 
+  getKernelSpecs
 } from 'jupyter-js-services';
 
 import {
@@ -33,6 +34,10 @@ import {
 import {
   SplitPanel
 } from 'phosphor-splitpanel';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 import 'jupyter-js-notebook/lib/index.css';
 import 'jupyter-js-notebook/lib/theme.css';
@@ -75,12 +80,28 @@ function main(): void {
   panel.addChild(nbWidget);
   window.onresize = () => { panel.update(); };
 
+  let kernelspecs: IKernelSpecIds;
+  getKernelSpecs({}).then(specs => {
+    kernelspecs = specs;
+  });
+
+    
   let items: IStandardPaletteItemOptions[] = [
   {
     category: 'Notebook',
     text: 'Save',
     shortcut: 'Accel S',
     handler: () => { nbManager.save() ; }
+  },
+  {
+    category: 'Notebook',
+    text: 'Change Kernel',
+    handler: () => { 
+      if (!kernelspecs) {
+        return;
+      }
+      selectKernel(nbWidget.node, nbModel, kernelspecs);
+    }
   },
   {
     category: 'Notebook',
@@ -187,6 +208,7 @@ function main(): void {
   },
   ]
   pModel.addItems(items);
+
 
   let bindings = [
   {

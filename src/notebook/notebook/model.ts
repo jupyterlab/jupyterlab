@@ -1,7 +1,17 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+'use strict';
+
+import * as CodeMirror
+  from 'codemirror';
 
 import {
-  INotebookSession, IExecuteReply
+  INotebookSession, IExecuteReply,  IContentsManager, IKernel
 } from 'jupyter-js-services';
+
+import {
+  copy
+} from 'jupyter-js-utils';
 
 import {
   IDisposable
@@ -60,6 +70,8 @@ import {
 export
 type NotebookMode = 'command' | 'edit';
 
+import './codemirror-ipython';
+import './codemirror-ipythongfm';
 
 /**
  * The definition of a model object for a notebook widget.
@@ -572,6 +584,7 @@ namespace NotebookModelPrivate {
   export
   const sessionProperty = new Property<NotebookModel, INotebookSession>({
     name: 'session',
+    changed: sessionChanged,
     notify: stateChangedSignal,
   });
 
@@ -618,4 +631,65 @@ namespace NotebookModelPrivate {
   const selectedProperty = new Property<ICellModel, boolean>({
     name: 'selected'
   });
+
+  /*
+   * Handle a change to the model session.
+   */
+  function sessionChanged(model: NotebookModel, session: INotebookSession): void {
+    model.session.kernelChanged.connect(() => { kernelChanged(model); });
+    // Update the kernel data now.
+    kernelChanged(model);
+  }
+
+  /**
+   * Handle a change to the model kernel.  
+   */
+  function kernelChanged(model: INotebookModel): void {
+    let session = model.session;
+    let kernel = session.kernel;
+    let metadata = copy(model.metadata || {}) as INotebookMetadata;
+    kernel.getKernelSpec().then(spec => {
+      metadata.kernelspec.display_name = spec.display_name;
+      metadata.kernelspec.name = session.kernel.name;
+      return session.kernel.kernelInfo();
+    }).then(info => {
+      metadata.language_info = info.language_info;
+      // Use the codemirror mode if given since some kernels rely on it.
+      let mode = metadata.language_info.codemirror_mode;
+      let mime = '';
+      if (mode) {
+        if (typeof mode === 'string') {
+          if (CodeMirror.modes.hasOwnProperty(mode)) {
+            mode = CodeMirror.modes[mode];
+          } else {
+            mode = CodeMirror.findModeByName(mode as string);
+          }
+        } else if (mode.mime) {
+          // Do nothing.
+        } else if (mode.name) {
+          if (CodeMirror.modes.hasOwnProperty(mode.name)) {
+            mode = CodeMirror.modes[mode.name];
+          } else {
+            mode = CodeMirror.findModeByName(mode as string);
+          }
+        }
+        if (mode) mime = mode.mime;
+      } else {
+        mime = info.language_info.mimetype;
+      }
+      if (mime) {
+        model.defaultMimetype = mime;
+        let cells = model.cells;
+        for (let i = 0; i < cells.length; i++) {
+          let cell = cells.get(i);
+          if (isCodeCellModel(cell)) {
+            cell.input.textEditor.mimetype = mime;
+          }
+        }
+      }
+      // Trigger a change to the notebook metadata.
+      model.metadata = metadata;
+    });
+  }
+
 }

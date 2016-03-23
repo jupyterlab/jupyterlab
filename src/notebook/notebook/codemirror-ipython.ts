@@ -22,11 +22,7 @@ CodeMirror.defineMode('ipython', (config: CodeMirror.EditorConfiguration, modeOp
     }
     pythonConf.name = 'python';
     pythonConf.singleOperators = new RegExp('^[\\+\\-\\*/%&|\\^~<>!\\?]');
-    if (pythonConf.version === 3) {
-        pythonConf.identifiers = new RegExp('^[_A-Za-z\u00A1-\uFFFF][_A-Za-z0-9\u00A1-\uFFFF]*');
-    } else if (pythonConf.version === 2) {
-      pythonConf.identifiers = new RegExp('^[_A-Za-z][_A-Za-z0-9]*');
-    }
+    pythonConf.identifiers = new RegExp('^[_A-Za-z\u00A1-\uFFFF][_A-Za-z0-9\u00A1-\uFFFF]*');
     return CodeMirror.getMode(config, pythonConf);
 });
 
