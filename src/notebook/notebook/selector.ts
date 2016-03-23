@@ -11,10 +11,6 @@ import {
 } from 'jupyter-js-ui/lib/dialog';
 
 import {
-  isCodeCellModel
-} from '../cells';
-
-import {
   INotebookModel
 } from './model';
 
@@ -22,7 +18,7 @@ import {
 /**
  * Present a dialog asking the user to select a kernel.
  */
-export 
+export
 function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSpecIds): Promise<IKernel> {
   let selector = document.createElement('select');
   let options: HTMLOptionElement[] = [];

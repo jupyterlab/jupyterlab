@@ -3,13 +3,13 @@
 'use strict';
 
 import {
-  ICellModel, IRawCellModel, IMarkdownCellModel, ICodeCellModel,
-  isRawCellModel, isCodeCellModel, isMarkdownCellModel
+  ICellModel, IRawCellModel,
+  isRawCellModel, isCodeCellModel
 } from '../cells';
 
 import {
   INotebookContent, ICell, MAJOR_VERSION, MINOR_VERSION,
-  IRawCell, ICodeCell, IMarkdownCell, isRawCell, isMarkdownCell,
+  IRawCell, ICodeCell, isRawCell, isMarkdownCell,
   isCodeCell
 } from './nbformat';
 
@@ -21,7 +21,7 @@ import {
 /**
  * Serialize a notebook model.
  */
-export 
+export
 function serialize(nb: INotebookModel): INotebookContent {
   let cells: ICell[] = [];
   for (let i = 0; i < nb.cells.length; i++) {
@@ -30,9 +30,9 @@ function serialize(nb: INotebookModel): INotebookContent {
   }
   return {
     cells: cells,
-    metadata: nb.metadata, 
-    nbformat: MAJOR_VERSION, 
-    nbformat_minor: MINOR_VERSION 
+    metadata: nb.metadata,
+    nbformat: MAJOR_VERSION,
+    nbformat_minor: MINOR_VERSION
   };
 }
 
@@ -56,7 +56,7 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
     deserializeCell(c, cell);
     model.cells.add(cell);
   });
-  
+
   if (!model.cells.length) {
     cell = model.createCodeCell();
     model.cells.add(cell);
@@ -75,7 +75,7 @@ function serializeCell(cell: ICellModel): ICell {
     source: cell.input.textEditor.text,
     cell_type: cell.type,
     metadata: { trusted: cell.trusted }
-  }
+  };
   if (cell.tags) {
     output.metadata.tags = cell.tags;
   }
@@ -101,7 +101,7 @@ function serializeCell(cell: ICellModel): ICell {
 /**
  * Deserialize cell data.
  */
-export 
+export
 function deserializeCell(data: ICell, model: ICellModel): void {
   let source = data.source as string;
   if (Array.isArray(data.source)) {
@@ -123,4 +123,4 @@ function deserializeCell(data: ICell, model: ICellModel): void {
   } else if (isRawCellModel(model)) {
     (model as IRawCellModel).format = (data as IRawCell).metadata.format;;
   }
-} 
+}

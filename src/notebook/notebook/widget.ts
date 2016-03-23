@@ -11,10 +11,6 @@ import {
 } from 'jupyter-js-ui/lib/dialog';
 
 import {
-  DisposableDelegate, IDisposable
-} from 'phosphor-disposable';
-
-import {
   Message
 } from 'phosphor-messaging';
 
@@ -23,7 +19,7 @@ import {
 } from 'phosphor-properties';
 
 import {
-  IObservableList, ObservableList, IListChangedArgs, ListChangeType
+  IObservableList, IListChangedArgs, ListChangeType
 } from 'phosphor-observablelist';
 
 import {
@@ -46,12 +42,8 @@ import {
 } from './manager';
 
 import {
-  NotebookModel, INotebookModel
+  INotebookModel
 } from './model';
-
-import {
-  INotebookMetadata
-} from './nbformat';
 
 
 /**
@@ -179,11 +171,6 @@ const ACTIVE_CLASS = 'jp-mod-active';
  */
 const SELECTED_CLASS = 'jp-mod-selected';
 
-/**
- * The maximum size of the delete stack.
- */
-const DELETE_STACK_SIZE = 10;
-
 
 /**
  * A widget which contains a toolbar and a notebook.
@@ -240,7 +227,7 @@ class NotebookPane extends Widget {
    * This is a read-only property.
    */
   get notebook(): NotebookWidget {
-    return this._notebook
+    return this._notebook;
   }
 
   private _toolbar: NotebookToolbar = null;
@@ -312,7 +299,7 @@ class NotebookWidget extends Widget {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
-    }    
+    }
     this._model.dispose();
     this._model = null;
     super.dispose();
@@ -445,7 +432,7 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Handle a change cells event. 
+   * Handle a change cells event.
    */
   protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
     let layout = this.layout as PanelLayout;
@@ -532,7 +519,6 @@ class NotebookWidget extends Widget {
    * Handle `blur` events for the widget.
    */
   private _evtBlur(event: Event): void {
-    let layout = this.layout as PanelLayout;
     let node = event.target as HTMLElement;
     // Trace up the DOM hierarchy looking for an editor node.
     while (node && node !== this.node) {
@@ -548,9 +534,7 @@ class NotebookWidget extends Widget {
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: Event): void {
-    let layout = this.layout as PanelLayout;
     let node = event.target as HTMLElement;
-    let found = false;
     // Trace up the DOM hierarchy to looking for an editor node.
     // Then find the corresponding child and activate it.
     while (node && node !== this.node) {
@@ -580,7 +564,7 @@ class NotebookToolbar extends Widget {
     let names = [TOOLBAR_SAVE, TOOLBAR_INSERT, TOOLBAR_CUT,
                  TOOLBAR_COPY, TOOLBAR_PASTE,
                  TOOLBAR_RUN, TOOLBAR_INTERRUPT,
-                 TOOLBAR_RESTART, TOOLBAR_CELL, 
+                 TOOLBAR_RESTART, TOOLBAR_CELL,
                  TOOLBAR_KERNEL, TOOLBAR_INDICATOR];
     for (let name of names) {
       let el: HTMLElement;
@@ -784,7 +768,7 @@ class NotebookToolbar extends Widget {
     let  names = [TOOLBAR_SAVE, TOOLBAR_INSERT, TOOLBAR_CUT,
                   TOOLBAR_COPY, TOOLBAR_PASTE,
                   TOOLBAR_RUN, TOOLBAR_INTERRUPT,
-                  TOOLBAR_RESTART, TOOLBAR_CELL, 
+                  TOOLBAR_RESTART, TOOLBAR_CELL,
                   TOOLBAR_KERNEL, TOOLBAR_INDICATOR];
     let selected = '';
     for (let name of names) {
@@ -793,7 +777,6 @@ class NotebookToolbar extends Widget {
         break;
       }
     }
-    let index: number;
     let manager = this._manager;
     switch (selected) {
     case TOOLBAR_SAVE:

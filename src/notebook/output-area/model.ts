@@ -19,7 +19,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  IOutput, IStream, isStream, IExecuteResult, IDisplayData, IError
+  IOutput, IStream, isStream
 } from '../notebook/nbformat';
 
 
@@ -139,7 +139,7 @@ class OutputAreaModel implements IOutputAreaModel {
     return this._outputs === null;
   }
 
-  /** 
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {

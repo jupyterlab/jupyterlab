@@ -5,13 +5,13 @@
 /**
  * The major version of the notebook format.
  */
-export 
+export
 const MAJOR_VERSION = 4;
 
 /**
  * The minor version of the notebook format.
  */
-export 
+export
 const MINOR_VERSION = 0;
 
 
@@ -50,7 +50,7 @@ interface INotebookContent {
 /**
  * A type alias for a multiline string.
  */
-export 
+export
 type multilineString = string | string[];
 
 
@@ -123,7 +123,7 @@ interface IBaseCell {
 /**
  * Metadata for the raw cell.
  */
-export 
+export
 interface IRawCellMetadata extends IBaseCellMetadata {
   /**
    * Raw cell metadata format for nbconvert.
@@ -248,7 +248,7 @@ function isRawCell(d: IBaseCell): d is IRawCell {
 /**
  * The valid output types.
  */
-export 
+export
 type OutputType = 'execute_result' | 'display_data' | 'stream' | 'error';
 
 
@@ -335,7 +335,7 @@ interface IStream extends IBaseOutput {
 }
 
 
-/** 
+/**
  * Output of an error that occurred during code cell execution.
  */
 export

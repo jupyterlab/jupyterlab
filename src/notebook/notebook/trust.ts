@@ -15,7 +15,7 @@ import {
 
 
 // The message to display to the user when prompting to trust the notebook.
-const TRUST_MESSAGE = '<p>A trusted Jupyter notebook may execute hidden malicious code when you open it.<br>Selecting trust will re-render this notebook in a trusted state.<br>For more information, see the <a href="http://ipython.org/ipython-doc/2/notebook/security.html">Jupyter security documentation</a>.</p>'
+const TRUST_MESSAGE = '<p>A trusted Jupyter notebook may execute hidden malicious code when you open it.<br>Selecting trust will re-render this notebook in a trusted state.<br>For more information, see the <a href="http://ipython.org/ipython-doc/2/notebook/security.html">Jupyter security documentation</a>.</p>';
 
 
 /**
@@ -30,7 +30,7 @@ const TRUST_MESSAGE = '<p>A trusted Jupyter notebook may execute hidden maliciou
  * #### Notes
  * No dialog will be presented if the notebook is already trusted.
  */
-export 
+export
 function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void> {
   // Do nothing if already trusted.
   let cells = model.cells;
