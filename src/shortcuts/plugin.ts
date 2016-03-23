@@ -87,59 +87,69 @@ const SHORTCUTS = [
     sequence: ['Escape']
   },
   {
-    command: 'notebook-cells:run',
+    command: 'notebook-cells:runAndAdvance',
     selector: '.jp-Notebook-cell',
     sequence: ['Shift Enter']
   },
   {
     command: 'notebook-cells:to-code',
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Y']
   }, 
   {
     command: 'notebook-cells:to-markdown',
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['M']
   }, 
   {
     command: 'notebook-cells:to-raw',
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['R']
   }, 
   {
     command: 'notebook-cells:cut',
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['X']
   },
   {
     command: 'notebook-cells:copy',
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['C']
   },
   {
     command: 'notebook-cells:paste',
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['V']
   },
   {
     command: 'notebook-cells:insert-above',
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['A']
   },
   {
     command: 'notebook-cells:insert-below',
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['B']
   },
   {
     command: 'notebook-cells:select-previous',
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['ArrowUp']
   },
   {
     command: 'notebook-cells:select-next',
-    selector: '.jp-Cell.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['ArrowDown']
+  },
+  {
+    command: 'notebook-cells:editMode',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Enter']
+  },
+  {
+    command: 'notebook-cells:commandMode',
+    selector: '.jp-Notebook.jp-mod-editMode',
+    sequence: ['Escape']
   }
 ];
 

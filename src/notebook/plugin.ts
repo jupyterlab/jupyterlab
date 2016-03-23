@@ -3,7 +3,8 @@
 'use strict';
 
 import {
-  NotebookWidget, NotebookModel, serialize, INotebookModel, deserialize
+  NotebookPane, NotebookModel, serialize, INotebookModel, deserialize,
+  NotebookManager
 } from 'jupyter-js-notebook';
 
 import {
@@ -52,6 +53,8 @@ const cmdIds = {
   interrupt: 'notebook:interrupt-kernel',
   restart: 'notebook:restart-kernel',
   run: 'notebook-cells:run',
+  runAndAdvance: 'notebook-cells:runAndAdvance',
+  runAndInsert: 'notebook-cells:runAndInsert',
   toCode: 'notebook-cells:to-code',
   toMarkdown: 'notebook-cells:to-markdown',
   toRaw: 'notebook-cells:to-raw',
@@ -62,6 +65,8 @@ const cmdIds = {
   insertBelow: 'notebook-cells:insert-below',
   selectPrevious: 'notebook-cells:select-previous',
   selectNext: 'notebook-cells:select-next',
+  editMode: 'notebook-cells:editMode',
+  commandMode: 'notebook-cells:commandMode'
 }
 
 
@@ -100,78 +105,92 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
   manager.register(handler);
   app.commands.add([
   {
+    id: cmdIds['runAndAdvance'],
+    handler: () => {
+      let manager = handler.currentManager;
+      if (manager) manager.runAndAdvance();
+    }
+  },
+  {
     id: cmdIds['run'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.run();
+      let manager = handler.currentManager;
+      if (manager) manager.run();
+    }
+  },
+  {
+    id: cmdIds['runAndInsert'],
+    handler: () => {
+      let manager = handler.currentManager;
+      if (manager) manager.runAndInsert();
     }
   },
   {
     id: cmdIds['restart'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.restart();
+      let manager = handler.currentManager;
+      if (manager) manager.restart();
     }
   },
   {
     id: cmdIds['interrupt'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.interrupt();
+      let manager = handler.currentManager;
+      if (manager) manager.interrupt();
     }
   },
   {
     id: cmdIds['toCode'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.changeCellType('code'); }
+      let manager = handler.currentManager;
+      if (manager) manager.changeCellType('code'); }
   },
   {
     id: cmdIds['toMarkdown'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.changeCellType('markdown'); }
+      let manager = handler.currentManager;
+      if (manager) manager.changeCellType('markdown'); }
   },
   {
     id: cmdIds['toRaw'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.changeCellType('raw');
+      let manager = handler.currentManager;
+      if (manager) manager.changeCellType('raw');
     }
   },
   {
     id: cmdIds['cut'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.cut();
+      let manager = handler.currentManager;
+      if (manager) manager.cut();
     }
   },
   {
     id: cmdIds['copy'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.copy();
+      let manager = handler.currentManager;
+      if (manager) manager.copy();
     }
   },
   {
     id: cmdIds['paste'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.paste();
+      let manager = handler.currentManager;
+      if (manager) manager.paste();
     }
   },
   {
     id: cmdIds['insertAbove'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.insertAbove();
+      let manager = handler.currentManager;
+      if (manager) manager.insertAbove();
     }
   },
   {
     id: cmdIds['insertBelow'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.insertBelow();
+      let manager = handler.currentManager;
+      if (manager) manager.insertBelow();
     }
   },
   {
@@ -188,12 +207,36 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
       if (model) model.activeCellIndex += 1;
     }
   },
+  {
+    id: cmdIds['commandMode'],
+    handler: () => {
+      let model = handler.currentModel;
+      if (model) model.mode = 'command';
+    }
+  },
+  {
+    id: cmdIds['editMode'],
+    handler: () => {
+      let model = handler.currentModel;
+      if (model) model.mode = 'edit';
+    }
+  },
   ]);
   app.palette.add([
   {
     command: cmdIds['run'],
     category: 'Notebook Cell Operations',
     text: 'Run selected',
+  },
+  {
+    command: cmdIds['runAndAdvance'],
+    category: 'Notebook Cell Operations',
+    text: 'Run and Advance',
+  },
+  {
+    command: cmdIds['runAndInsert'],
+    category: 'Notebook Cell Operations',
+    text: 'Run and Insert',
   },
   {
     command: cmdIds['interrupt'],
@@ -255,6 +298,16 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
     category: 'Notebook Cell Operations',
     text: 'Select next cell',
   },
+  {
+    command: cmdIds['editMode'],
+    category: 'Notebook Cell Operations',
+    text: 'To Edit Mode',
+  },
+  {
+    command: cmdIds['commandMode'],
+    category: 'Notebook Cell Operations',
+    text: 'To Command Mode',
+  },
   ]);
   return Promise.resolve(void 0);
 }
@@ -270,11 +323,12 @@ class NotebookContainer extends Panel {
    */
   constructor(manager: IContentsManager) {
     super();
-    this._model = new NotebookModel(manager);
+    this._model = new NotebookModel();
+    this._nbManager = new NotebookManager(this._model, manager);
     let widgetArea = new Panel();
     widgetArea.addClass(WIDGET_CLASS);
-    this._manager = new WidgetManager(widgetArea);
-    this._widget = new NotebookWidget(this._model);
+    this._widgetManager = new WidgetManager(widgetArea);
+    this._widget = new NotebookPane(this._nbManager);
 
     this.addChild(widgetArea);
     this.addChild(this._widget);
@@ -296,8 +350,18 @@ class NotebookContainer extends Panel {
    * #### Notes
    * This is a read-only property.
    */
-  get widget(): NotebookWidget {
+  get widget(): NotebookPane {
     return this._widget;
+  }
+
+  /**
+   * Get the notebook manager used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get manager(): NotebookManager {
+    return this._nbManager;
   }
 
   /**
@@ -316,14 +380,15 @@ class NotebookContainer extends Panel {
   setSession(value: INotebookSession) {
     this._session = value;
     this._model.session = value;
+    let manager = this._widgetManager;
 
     let commHandler = (comm: IComm, msg: IKernelMessage) => {
       console.log('comm message', msg);
 
-      let modelPromise = this._manager.handle_comm_open(comm, msg);
+      let modelPromise = manager.handle_comm_open(comm, msg);
 
       comm.onMsg = (msg) => {
-        this._manager.handle_comm_open(comm, msg)
+        manager.handle_comm_open(comm, msg)
         // create the widget model and (if needed) the view
         console.log('comm widget message', msg);
       }
@@ -338,8 +403,9 @@ class NotebookContainer extends Panel {
 
   private _model: INotebookModel = null;
   private _session: INotebookSession = null;
-  private _manager: WidgetManager = null;
-  private _widget: NotebookWidget = null;
+  private _widgetManager: WidgetManager = null;
+  private _nbManager: NotebookManager = null;
+  private _widget: NotebookPane = null;
 }
 
 
@@ -363,7 +429,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Get the notebook widget for the current container widget.
    */
-  get currentWidget(): NotebookWidget {
+  get currentWidget(): NotebookPane {
     let w = this.activeWidget;
     if (w) return w.widget;
   }
@@ -374,6 +440,14 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   get currentModel(): INotebookModel {
     let w = this.activeWidget;
     if (w) return w.model;
+  }
+
+  /**
+   * Get the notebook model for the current container widget.
+   */
+  get currentManager(): NotebookManager {
+    let w = this.activeWidget;
+    if (w) return w.manager;
   }
 
   /**
