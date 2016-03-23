@@ -29,12 +29,7 @@ class WidgetManager extends ManagerBase {
 
   display_view(msg: any, view: Backbone.View<any>, options: any): Promise<Backbone.View<any>> {
     return Promise.resolve(view).then(view => {
-      let wrapper = new BackboneViewWrapper(view);
-      this._panel.addChild(wrapper);
-      view.on('remove', () => {
-        wrapper.dispose();
-        console.log('View removed', view);
-      });
+      this._panel.addChild(new BackboneViewWrapper(view));
       return view;
     });
   }

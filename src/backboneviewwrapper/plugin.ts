@@ -27,10 +27,11 @@ class BackboneViewWrapper extends Widget {
    */
   constructor(view: Backbone.View<any>) {
     super();
+    view.on('remove', () => {
+      this.dispose();
+      console.log('View removed', view);
+    });
     this.addClass(BACKBONEVIEWWRAPPER_CLASS);
-    this._view = view;
-    this.node.appendChild(this._view.el);
+    this.node.appendChild(view.el);
   }
-
-  private _view: Backbone.View<any>;
 }
