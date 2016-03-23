@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
+    "backbone": "^1.2.0",
     "codemirror": "^5.12.0",
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5",

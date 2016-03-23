@@ -37,15 +37,11 @@ import {
 } from 'phosphor-properties';
 
 import {
-  Widget
-} from 'phosphor-widget';
-
-import {
   JupyterServices
 } from '../services/plugin';
 
-import {    
-   WidgetManager    
+import {
+   WidgetManager
 } from './widgetmanager';
 
 
@@ -104,48 +100,48 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
   manager.register(handler);
   app.commands.add([
   {
-    id: cmdIds['run'],  
-    handler: () => { 
+    id: cmdIds['run'],
+    handler: () => {
       let widget = handler.currentWidget;
-      if (widget) widget.run(); 
+      if (widget) widget.run();
     }
   },
   {
     id: cmdIds['restart'],
-    handler: () => { 
+    handler: () => {
       let widget = handler.currentWidget;
-      if (widget) widget.restart(); 
+      if (widget) widget.restart();
     }
   },
   {
     id: cmdIds['interrupt'],
-    handler: () => { 
+    handler: () => {
       let widget = handler.currentWidget;
-      if (widget) widget.interrupt(); 
+      if (widget) widget.interrupt();
     }
   },
   {
     id: cmdIds['toCode'],
-    handler: () => { 
+    handler: () => {
       let widget = handler.currentWidget;
       if (widget) widget.changeCellType('code'); }
   },
   {
     id: cmdIds['toMarkdown'],
-    handler: () => { 
+    handler: () => {
       let widget = handler.currentWidget;
       if (widget) widget.changeCellType('markdown'); }
   },
   {
     id: cmdIds['toRaw'],
-    handler: () => { 
+    handler: () => {
       let widget = handler.currentWidget;
-      if (widget) widget.changeCellType('raw'); 
+      if (widget) widget.changeCellType('raw');
     }
   },
   {
     id: cmdIds['cut'],
-    handler: () => { 
+    handler: () => {
       let widget = handler.currentWidget;
       if (widget) widget.cut();
     }
@@ -154,42 +150,42 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
     id: cmdIds['copy'],
     handler: () => {
       let widget = handler.currentWidget;
-      if (widget) widget.copy(); 
+      if (widget) widget.copy();
     }
   },
   {
     id: cmdIds['paste'],
-    handler: () => { 
+    handler: () => {
       let widget = handler.currentWidget;
-      if (widget) widget.paste(); 
+      if (widget) widget.paste();
     }
   },
   {
     id: cmdIds['insertAbove'],
-    handler: () => { 
+    handler: () => {
       let widget = handler.currentWidget;
-      if (widget) widget.insertAbove(); 
+      if (widget) widget.insertAbove();
     }
   },
   {
     id: cmdIds['insertBelow'],
-    handler: () => { 
+    handler: () => {
       let widget = handler.currentWidget;
-      if (widget) widget.insertBelow(); 
+      if (widget) widget.insertBelow();
     }
   },
   {
     id: cmdIds['selectPrevious'],
-    handler: () => { 
+    handler: () => {
       let model = handler.currentModel;
-      if (model) model.activeCellIndex -= 1; 
+      if (model) model.activeCellIndex -= 1;
     }
   },
   {
     id: cmdIds['selectNext'],
-    handler: () => { 
+    handler: () => {
       let model = handler.currentModel;
-      if (model) model.activeCellIndex += 1; 
+      if (model) model.activeCellIndex += 1;
     }
   },
   ]);
@@ -275,12 +271,12 @@ class NotebookContainer extends Panel {
   constructor(manager: IContentsManager) {
     super();
     this._model = new NotebookModel(manager);
-    let widgetarea = new Widget();
-    widgetarea.addClass(WIDGET_CLASS);
-    this._manager = new WidgetManager(widgetarea.node);
+    let widgetArea = new Panel();
+    widgetArea.addClass(WIDGET_CLASS);
+    this._manager = new WidgetManager(widgetArea);
     this._widget = new NotebookWidget(this._model);
 
-    this.addChild(widgetarea);
+    this.addChild(widgetArea);
     this.addChild(this._widget);
   }
 
@@ -321,22 +317,22 @@ class NotebookContainer extends Panel {
     this._session = value;
     this._model.session = value;
 
-    let commHandler = (comm: IComm, msg: IKernelMessage) => {    
-      console.log('comm message', msg);    
-    
-      let modelPromise = this._manager.handle_comm_open(comm, msg);    
-    
-      comm.onMsg = (msg) => {    
-        this._manager.handle_comm_open(comm, msg)    
-        // create the widget model and (if needed) the view    
-        console.log('comm widget message', msg);    
-      }    
-      comm.onClose = (msg) => {    
-        console.log('comm widget close', msg);    
-      }    
-    };    
-    
-    this._session.kernel.registerCommTarget('ipython.widget', commHandler)      
+    let commHandler = (comm: IComm, msg: IKernelMessage) => {
+      console.log('comm message', msg);
+
+      let modelPromise = this._manager.handle_comm_open(comm, msg);
+
+      comm.onMsg = (msg) => {
+        this._manager.handle_comm_open(comm, msg)
+        // create the widget model and (if needed) the view
+        console.log('comm widget message', msg);
+      }
+      comm.onClose = (msg) => {
+        console.log('comm widget close', msg);
+      }
+    };
+
+    this._session.kernel.registerCommTarget('ipython.widget', commHandler)
     this._session.kernel.registerCommTarget('jupyter.widget', commHandler);
   }
 
