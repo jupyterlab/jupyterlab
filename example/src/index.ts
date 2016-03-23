@@ -15,7 +15,7 @@ import {
 } from 'jupyter-js-notebook/lib/cells'
 
 import {
-  ContentsManager, IContentsModel, IKernelSpecIds, startNewSession, 
+  ContentsManager, IContentsModel, IKernelSpecIds, startNewSession,
   getKernelSpecs
 } from 'jupyter-js-services';
 
@@ -67,7 +67,7 @@ function main(): void {
   nbWidget.title.text = NOTEBOOK;
 
   let pModel = new StandardPaletteModel();
-  let palette = new CommandPalette(); 
+  let palette = new CommandPalette();
   palette.model = pModel;
 
   let panel = new SplitPanel();
@@ -85,7 +85,6 @@ function main(): void {
     kernelspecs = specs;
   });
 
-    
   let items: IStandardPaletteItemOptions[] = [
   {
     category: 'Notebook',
@@ -96,7 +95,7 @@ function main(): void {
   {
     category: 'Notebook',
     text: 'Change Kernel',
-    handler: () => { 
+    handler: () => {
       if (!kernelspecs) {
         return;
       }
@@ -118,7 +117,7 @@ function main(): void {
   {
     category: 'Notebook',
     text: 'Trust Notebook',
-    handler: () => { 
+    handler: () => {
       trustNotebook(nbModel, nbWidget.node);
     }
   },
@@ -246,7 +245,7 @@ function main(): void {
       nbManager.save();
       return true;
     }
-  }, 
+  },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['I', 'I'],
@@ -254,7 +253,7 @@ function main(): void {
       nbManager.interrupt();
       return true;
     }
-  }, 
+  },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['0', '0'],
@@ -262,20 +261,20 @@ function main(): void {
       nbManager.restart();
       return true;
     }
-  }, 
+  },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Enter'],
-    handler: () => { 
-      nbModel.mode = 'edit'; 
+    handler: () => {
+      nbModel.mode = 'edit';
       return true;
     }
   },
   {
     selector: '.jp-Notebook.jp-mod-editMode',
     sequence: ['Escape'],
-    handler: () => { 
-      nbModel.mode = 'command'; 
+    handler: () => {
+      nbModel.mode = 'command';
       return true;
     }
   },
@@ -286,7 +285,7 @@ function main(): void {
       nbManager.changeCellType('code');
       return true;
     }
-  }, 
+  },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['M'],
@@ -294,7 +293,7 @@ function main(): void {
       nbManager.changeCellType('markdown');
       return true;
     }
-  }, 
+  },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['R'],
@@ -302,7 +301,7 @@ function main(): void {
       nbManager.changeCellType('raw');
       return true;
     }
-  }, 
+  },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['X'],
@@ -327,7 +326,7 @@ function main(): void {
       return true;
     }
   },
-   {
+  {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['D', 'D'],
     handler: () => {
