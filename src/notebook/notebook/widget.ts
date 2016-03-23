@@ -812,7 +812,7 @@ class NotebookToolbar extends Widget {
       manager.paste();
       break;
     case TOOLBAR_RUN:
-      manager.run();
+      manager.runAndAdvance();
       break;
     case TOOLBAR_INTERRUPT:
       manager.interrupt();

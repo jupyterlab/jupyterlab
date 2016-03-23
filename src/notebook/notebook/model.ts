@@ -466,12 +466,6 @@ class NotebookModel implements INotebookModel {
     } else {
       cell.trusted = true;
     }
-    if (this.activeCellIndex === this.cells.length - 1) {
-      let cell = this.createCodeCell();
-      this.cells.add(cell);
-      this.mode = 'edit';
-    }
-    this.activeCellIndex += 1;
   }
 
   /**
