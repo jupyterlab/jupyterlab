@@ -459,6 +459,7 @@ class NotebookModel implements INotebookModel {
     }
     this.mode = 'command';
     if (isMarkdownCellModel(cell)) {
+      cell.rendered = false;
       cell.trusted = true;
       cell.rendered = true;
     } else if (isCodeCellModel(cell)) {
