@@ -3,8 +3,8 @@
 'use strict';
 
 import {
-  NotebookPane, NotebookModel, serialize, INotebookModel, deserialize,
-  NotebookManager
+  NotebookWidget, NotebookModel, serialize, INotebookModel, deserialize,
+  NotebookManager, NotebookToolbar
 } from 'jupyter-js-notebook';
 
 import {
@@ -30,12 +30,16 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  Panel
+  Panel, PanelLayout
 } from 'phosphor-panel';
 
 import {
   IChangedArgs, Property
 } from 'phosphor-properties';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 import {
   JupyterServices
@@ -71,16 +75,20 @@ const cmdIds = {
 
 
 /**
- * The class name added to the top level notebook container.
+ * The class name added to notebook container widgets.
  */
+const NB_CONTAINER = 'jp-Notebook-container';
 
-let NB_CONTAINER_CLASS = 'jp-NotebookContainer';
+/**
+ * The class name added to notebook panes.
+ */
+const NB_PANE = 'jp-Notebook-pane';
 
 
 /**
  * The class name added to the widget area.
  */
-let WIDGET_CLASS = 'jp-NotebookContainer-widget';
+let WIDGET_CLASS = 'jp-NotebookPane-widget';
 
 
 /**
@@ -316,22 +324,29 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
 /**
  * A container which manages a notebook and widgets.
  */
-class NotebookContainer extends Panel {
+class NotebookPane extends Panel {
 
   /**
-   * Construct a new NotebookContainer.
+   * Construct a new NotebookPane.
    */
   constructor(manager: IContentsManager) {
     super();
+    this.addClass(NB_PANE);
     this._model = new NotebookModel();
     this._nbManager = new NotebookManager(this._model, manager);
     let widgetArea = new Panel();
     widgetArea.addClass(WIDGET_CLASS);
     this._widgetManager = new WidgetManager(widgetArea);
-    this._widget = new NotebookPane(this._nbManager);
+    this._notebook = new NotebookWidget(this._model);
 
     this.addChild(widgetArea);
-    this.addChild(this._widget);
+    this.addChild(new NotebookToolbar(this._nbManager));
+
+    let container = new Widget();
+    container.addClass(NB_CONTAINER);
+    container.layout = new PanelLayout();
+    (container.layout as PanelLayout).addChild(this._notebook);
+    this.addChild(container);
   }
 
   /**
@@ -350,8 +365,8 @@ class NotebookContainer extends Panel {
    * #### Notes
    * This is a read-only property.
    */
-  get widget(): NotebookPane {
-    return this._widget;
+  get widget(): NotebookWidget {
+    return this._notebook;
   }
 
   /**
@@ -405,14 +420,14 @@ class NotebookContainer extends Panel {
   private _session: INotebookSession = null;
   private _widgetManager: WidgetManager = null;
   private _nbManager: NotebookManager = null;
-  private _widget: NotebookPane = null;
+  private _notebook: NotebookWidget = null;
 }
 
 
 /**
  * An implementation of a file handler.
  */
-class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
+class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
 
   constructor(contents: IContentsManager, session: INotebookSessionManager) {
     super(contents);
@@ -429,7 +444,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Get the notebook widget for the current container widget.
    */
-  get currentWidget(): NotebookPane {
+  get currentWidget(): NotebookWidget {
     let w = this.activeWidget;
     if (w) return w.widget;
   }
@@ -460,7 +475,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
    * #### Notes
    * The user is prompted to close the kernel if it is active
    */
-  close(widget?: NotebookContainer): Promise<boolean> {
+  close(widget?: NotebookPane): Promise<boolean> {
     if (!widget.session || widget.session.status === KernelStatus.Dead) {
       return super.close(widget);
     }
@@ -480,7 +495,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Set the dirty state of a widget (defaults to current active widget).
    */
-  setDirty(widget?: NotebookContainer): void {
+  setDirty(widget?: NotebookPane): void {
     super.setDirty(widget);
     widget = this.resolveWidget(widget);
     if (widget) {
@@ -491,7 +506,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Clear the dirty state of a widget (defaults to current active widget).
    */
-  clearDirty(widget?: NotebookContainer): void {
+  clearDirty(widget?: NotebookPane): void {
     super.clearDirty(widget);
     widget = this.resolveWidget(widget);
     if (widget) {
@@ -509,7 +524,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Get the options used to save the widget content.
    */
-  protected getSaveOptions(widget: NotebookContainer, model: IContentsModel): Promise<IContentsOpts> {
+  protected getSaveOptions(widget: NotebookPane, model: IContentsModel): Promise<IContentsOpts> {
       let content = serialize(widget.model);
       return Promise.resolve({ type: 'notebook', content });
   }
@@ -517,11 +532,10 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Create the widget from an `IContentsModel`.
    */
-  protected createWidget(contents: IContentsModel): NotebookContainer {
-    let panel = new NotebookContainer(this.manager);
+  protected createWidget(contents: IContentsModel): NotebookPane {
+    let panel = new NotebookPane(this.manager);
     panel.model.stateChanged.connect(this._onModelChanged, this);
     panel.title.text = contents.name;
-    panel.addClass(NB_CONTAINER_CLASS);
 
     this.session.startNew({notebookPath: contents.path}).then(s => {
       panel.setSession(s);
@@ -533,7 +547,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Populate the notebook widget with the contents of the notebook.
    */
-  protected populateWidget(widget: NotebookContainer, model: IContentsModel): Promise<IContentsModel> {
+  protected populateWidget(widget: NotebookPane, model: IContentsModel): Promise<IContentsModel> {
     deserialize(model.content, widget.model);
     return Promise.resolve(model);
   }
