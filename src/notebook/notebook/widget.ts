@@ -27,7 +27,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  PanelLayout
+  PanelLayout, Panel
 } from 'phosphor-panel';
 
 import {
@@ -57,9 +57,9 @@ const NB_CLASS = 'jp-Notebook';
 const NB_CONTAINER = 'jp-Notebook-container';
 
 /**
- * The class name added to notebook panes.
+ * The class name added to notebook panels.
  */
-const NB_PANE = 'jp-Notebook-pane';
+const NB_PANEL = 'jp-Notebook-panel';
 
 /**
  * The class name added to notebook widget cells.
@@ -173,10 +173,10 @@ const SELECTED_CLASS = 'jp-mod-selected';
 
 
 /**
- * A widget which contains a toolbar and a notebook.
+ * A panel which contains a toolbar and a notebook.
  */
 export
-class NotebookPane extends Widget {
+class NotebookPanel extends Panel {
   /**
    * Create a new toolbar for the pane.
    */
@@ -192,22 +192,20 @@ class NotebookPane extends Widget {
   }
 
   /**
-   * Construct a notebook pane widget.
+   * Construct a notebook panel.
    */
   constructor(manager: NotebookManager) {
     super();
-    this.addClass(NB_PANE);
-    let constructor = this.constructor as typeof NotebookPane;
+    this.addClass(NB_PANEL);
+    this._manager = manager;
+    let constructor = this.constructor as typeof NotebookPanel;
     this._toolbar = constructor.createToolbar(manager);
-    this.layout = new PanelLayout();
-    let layout = this.layout as PanelLayout;
-    layout.insertChild(0, this._toolbar);
-    let container = new Widget();
+    this.addChild(this._toolbar);
+    let container = new Panel();
     container.addClass(NB_CONTAINER);
-    container.layout = new PanelLayout();
     this._notebook = constructor.createNotebook(manager.model);
-    (container.layout as PanelLayout).addChild(this._notebook);
-    layout.addChild(container);
+    container.addChild(this._notebook);
+    this.addChild(container);
   }
 
   /**
@@ -230,8 +228,26 @@ class NotebookPane extends Widget {
     return this._notebook;
   }
 
+  /**
+   * Get the manager used by the widget.
+   */
+  get manager(): NotebookManager {
+    return this._manager;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    this._toolbar = null;
+    this._notebook = null;
+    this._manager = null;
+    super.dispose();
+  }
+
   private _toolbar: NotebookToolbar = null;
   private _notebook: NotebookWidget = null;
+  private _manager: NotebookManager = null;
 }
 
 
