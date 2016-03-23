@@ -243,6 +243,35 @@ class NotebookManager {
   }
 
   /**
+   * Run the selected cell(s) and advance to the next cell.
+   *
+   * #### Notes
+   * If the last cell is run, a new code cell will be created in 
+   * edit mode and selected.
+   */
+  runAndAdvance(): void {
+    this.run();
+    let model = this.model;
+    if (model.activeCellIndex === model.cells.length - 1) {
+      let cell = model.createCodeCell();
+      model.cells.add(cell);
+      model.mode = 'edit';
+    }
+    model.activeCellIndex += 1;
+  }
+
+  /**
+   * Run the selected cell(s) and insert a new code cell below in edit mode.
+   */
+  runAndInsert(): void {
+    this.run();
+    let model = this.model;
+    let cell = model.createCodeCell();
+    model.cells.insert(model.activeCellIndex, cell);
+    model.mode = 'edit';
+  }
+
+  /**
    * Interrupt the kernel.
    */
   interrupt(): Promise<void> {

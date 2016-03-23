@@ -124,9 +124,19 @@ function main(): void {
   },
   {
     category: 'Notebook Cell',
-    text: 'Run Selected',
+    text: 'Run and Advance',
     shortcut: 'Shift Enter',
+    handler: () => { nbManager.runAndAdvance(); }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Run Selected',
     handler: () => { nbManager.run(); }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Run and Insert Below',
+    handler: () => { nbManager.runAndInsert(); }
   },
   {
     category: 'Notebook Cell',
@@ -215,7 +225,7 @@ function main(): void {
     selector: '.jp-Notebook',
     sequence: ['Shift Enter'],
     handler: () => {
-      nbManager.run();
+      nbManager.runAndAdvance();
       return true;
     }
   },
