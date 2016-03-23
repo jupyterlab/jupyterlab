@@ -3,7 +3,7 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-.p-Widget.jp-Notebook {  
+.p-Widget.jp-Notebook-pane {  
   display: flex;
   flex-direction: column;
 }
@@ -14,7 +14,7 @@
 }
 
 
-.p-Widget.jp-Notebook-Container {  
+.p-Widget.jp-Notebook-container {  
   flex: 1 1 auto;
 }
 

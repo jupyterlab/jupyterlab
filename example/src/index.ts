@@ -6,7 +6,7 @@
 'use strict';
 
 import {
-  NotebookModel, ActiveNotebook, INotebookContent, NotebookManager,
+  NotebookModel, NotebookPane, INotebookContent, NotebookManager,
   serialize, deserialize, selectKernel, trustNotebook
 } from 'jupyter-js-notebook';
 
@@ -63,7 +63,7 @@ function main(): void {
   let contents = new ContentsManager(SERVER_URL);
   let nbModel = new NotebookModel();
   let nbManager = new NotebookManager(nbModel, contents);
-  let nbWidget = new ActiveNotebook(nbManager);
+  let nbWidget = new NotebookPane(nbManager);
   nbWidget.title.text = NOTEBOOK;
 
   let pModel = new StandardPaletteModel();
