@@ -9,6 +9,8 @@ lib/
 example/build
 example/untitled*
 example/Untitled*
+example/*.png
+example/*.gif
 docs
 
 .ipynb_checkpoints
