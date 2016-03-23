@@ -252,8 +252,15 @@ class FileBrowserModel implements IDisposable {
    */
   refresh(): Promise<void> {
     // Refresh the list of kernelspecs and our directory listing.
-    this._getKernelSpecs();
-    return this.cd('.');
+    return this._getKernelSpecs().then(() => {
+      return this.cd('.');
+    }).catch(error => {
+      console.error(error);
+      let msg = 'Unable to refresh the directory listing due to ';
+      msg += 'lost server connection.';
+      error.message = msg;
+      throw error;
+    });
   }
 
   /**
@@ -547,8 +554,8 @@ class FileBrowserModel implements IDisposable {
   /**
    * Load the list of kernel specs.
    */
-  private _getKernelSpecs(): void {
-    this._sessionManager.getSpecs().then(specs => {
+  private _getKernelSpecs(): Promise<void> {
+    return this._sessionManager.getSpecs().then(specs => {
       let kernelSpecs: IKernelSpecId[] = [];
       for (let key in specs.kernelspecs) {
         kernelSpecs.push(specs.kernelspecs[key]);
@@ -557,7 +564,7 @@ class FileBrowserModel implements IDisposable {
         return a.spec.display_name.localeCompare(b.spec.display_name);
       });
       this._kernelSpecs = kernelSpecs;
-    }, error => console.error(error));
+    });
   }
 
   private _max_upload_size_mb = 15;

@@ -228,12 +228,8 @@ class FileBrowserWidget extends Widget {
    * Refresh the current directory.
    */
   refresh(): Promise<void> {
-    return this._model.refresh().catch(
-      error => { 
-        let msg = 'Unable to refresh the directory listing due to ';
-        msg += 'lost server connection.';
-        error.message = error.message || msg;
-        showErrorMessage(this, 'Server Connection Lost', error);
+    return this._model.refresh().catch(error => { 
+      showErrorMessage(this, 'Server Connection Error', error);
     });
   }
 

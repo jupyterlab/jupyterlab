@@ -170,7 +170,9 @@ class FileButtons extends Widget {
    */
   private _onRefreshButtonClicked = (event: MouseEvent) => {
     if (event.button !== 0) return;
-    this._model.refresh();
+    this._model.refresh().catch(error => {
+      utils.showErrorMessage(this, 'Server Connection Error', error);
+    });
   };
 
   /**
