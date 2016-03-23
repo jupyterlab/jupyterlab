@@ -6,16 +6,12 @@
 'use strict';
 
 import {
-  NotebookModel, NotebookPane, INotebookContent, NotebookManager,
-  serialize, deserialize, selectKernel, trustNotebook
+  NotebookModel, NotebookPane, NotebookManager,
+  deserialize, selectKernel, trustNotebook
 } from 'jupyter-js-notebook';
 
 import {
-  isMarkdownCellModel
-} from 'jupyter-js-notebook/lib/cells'
-
-import {
-  ContentsManager, IContentsModel, IKernelSpecIds, startNewSession,
+  ContentsManager, IKernelSpecIds, startNewSession,
   getKernelSpecs
 } from 'jupyter-js-services';
 
@@ -28,16 +24,12 @@ import {
 } from 'phosphor-commandpalette';
 
 import {
-  IKeyBinding, KeymapManager, keystrokeForKeydownEvent
+  KeymapManager
 } from 'phosphor-keymap';
 
 import {
   SplitPanel
 } from 'phosphor-splitpanel';
-
-import {
-  Widget
-} from 'phosphor-widget';
 
 import 'jupyter-js-notebook/lib/index.css';
 import 'jupyter-js-notebook/lib/theme.css';
@@ -225,9 +217,8 @@ function main(): void {
     shortcut: 'ArrowDown',
     handler: () => { nbModel.activeCellIndex += 1; }
   },
-  ]
+  ];
   pModel.addItems(items);
-
 
   let bindings = [
   {
