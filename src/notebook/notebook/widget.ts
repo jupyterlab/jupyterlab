@@ -176,7 +176,7 @@ const SELECTED_CLASS = 'jp-mod-selected';
  * A panel which contains a toolbar and a notebook.
  */
 export
-class NotebookPanel extends Panel {
+class NotebookPanel extends Widget {
   /**
    * Create a new toolbar for the pane.
    */
@@ -200,12 +200,14 @@ class NotebookPanel extends Panel {
     this._manager = manager;
     let constructor = this.constructor as typeof NotebookPanel;
     this._toolbar = constructor.createToolbar(manager);
-    this.addChild(this._toolbar);
+    this.layout = new PanelLayout();
+    let layout = this.layout as PanelLayout;
+    layout.addChild(this._toolbar);
     let container = new Panel();
     container.addClass(NB_CONTAINER);
     this._notebook = constructor.createNotebook(manager.model);
     container.addChild(this._notebook);
-    this.addChild(container);
+    layout.addChild(container);
   }
 
   /**
