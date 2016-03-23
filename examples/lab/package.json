@@ -2,7 +2,6 @@
   "private": true,
   "name": "jupyter-js-plugins-example",
   "dependencies": {
-    "jupyter-js-notebook": "^0.13.5",
     "jupyter-js-plugins": "file:.."
   },
   "scripts": {
