@@ -66,7 +66,7 @@ class NotebookManager {
     }
     if (this._undeleteStack.length > DELETE_STACK_SIZE) {
       this._undeleteStack.shift();
-    }   
+    }
   }
 
   /**
@@ -246,7 +246,7 @@ class NotebookManager {
    * Run the selected cell(s) and advance to the next cell.
    *
    * #### Notes
-   * If the last cell is run, a new code cell will be created in 
+   * If the last cell is run, a new code cell will be created in
    * edit mode and selected.
    */
   runAndAdvance(): void {

@@ -117,7 +117,7 @@ const RESULT_CLASS = 'jp-OutputArea-result';
 
 /**
  * A list of transformers used to render outputs
- * 
+ *
  * #### Notes
  * The transformers are in ascending priority--later transforms are more
  * important than earlier ones.
@@ -137,7 +137,7 @@ const transformers = [
 /**
  * A list of outputs considered safe.
  */
-const safeOutputs = ['text/plain', 'text/latex', 'image/png', 'image/jpeg', 
+const safeOutputs = ['text/plain', 'text/latex', 'image/png', 'image/jpeg',
                      'jupyter/console-text'];
 
 /**
@@ -265,7 +265,7 @@ class OutputAreaWidget extends Widget {
         }
       }
     }
-   
+
     transform.transform(bundle, document).then(result => {
       widget.node.appendChild(result.el);
       result.el.classList.add(RESULT_CLASS);
@@ -334,7 +334,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Change handler for model state changes.
    */
-  protected modelStateChanged(sender: IOutputAreaModel,args: IChangedArgs<any>) {
+  protected modelStateChanged(sender: IOutputAreaModel, args: IChangedArgs<any>) {
     switch (args.name) {
     case 'collapsed':
       this.update();
@@ -356,7 +356,7 @@ class OutputAreaWidget extends Widget {
       }
     }
   }
-  
+
   private _sanitized = false;
   private _model: IOutputAreaModel = null;
 }
