@@ -533,7 +533,7 @@ class FileBrowserModel implements IDisposable {
         let index = paths.indexOf(sessionId.notebook.path);
         if (index !== -1) {
           promises.push(this._sessionManager.connectTo(sessionId.id).then(session => {
-            if (session.status === KernelStatus.Idle || session.status === KernelStatus.Idle) {
+            if (session.status !== KernelStatus.Dead) {
               this._sessionIds.push(sessionId);
               return void 0;
             }
