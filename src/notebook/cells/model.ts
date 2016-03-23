@@ -7,10 +7,6 @@ import {
 } from 'phosphor-disposable';
 
 import {
-  IObservableList
-} from 'phosphor-observablelist';
-
-import {
   IChangedArgs, Property
 } from 'phosphor-properties';
 
@@ -19,19 +15,11 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  Widget
-} from 'phosphor-widget';
-
-import {
-  IEditorModel
-} from '../editor';
-
-import {
   IInputAreaModel
 } from '../input-area';
 
 import {
-  CellType, ICell, ICodeCell, IRawCell, IMarkdownCell
+  CellType
 } from '../notebook/nbformat';
 
 import {
@@ -235,7 +223,7 @@ class BaseCellModel implements IBaseCellModel {
     return this._input === null;
   }
 
-  /** 
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
@@ -319,7 +307,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     CellModelPrivate.scrolledProperty.set(this, value);
   }
 
-  /** 
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
@@ -327,7 +315,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     super.dispose();
   }
 
-  type: CellType = "code";
+  type: CellType = 'code';
 
   private _output: IOutputAreaModel = null;
 }
@@ -348,7 +336,7 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
     CellModelPrivate.renderedProperty.set(this, value);
   }
 
-  type: CellType = "markdown";
+  type: CellType = 'markdown';
 }
 
 
@@ -367,7 +355,7 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
     CellModelPrivate.formatProperty.set(this, value);
   }
 
-  type: CellType = "raw";
+  type: CellType = 'raw';
 }
 
 
@@ -376,7 +364,7 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
   */
 export
 function isMarkdownCellModel(m: ICellModel): m is IMarkdownCellModel {
-  return (m.type === "markdown");
+  return (m.type === 'markdown');
 }
 
 /**
@@ -384,7 +372,7 @@ function isMarkdownCellModel(m: ICellModel): m is IMarkdownCellModel {
   */
 export
 function isCodeCellModel(m: ICellModel): m is ICodeCellModel {
-  return (m.type === "code");
+  return (m.type === 'code');
 }
 
 /**
@@ -392,7 +380,7 @@ function isCodeCellModel(m: ICellModel): m is ICodeCellModel {
   */
 export
 function isRawCellModel(m: ICellModel): m is IRawCellModel {
-  return (m.type === "raw");
+  return (m.type === 'raw');
 }
 
 

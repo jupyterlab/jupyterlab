@@ -21,10 +21,6 @@ import {
 } from 'phosphor-properties';
 
 import {
-  ISignal, Signal
-} from 'phosphor-signaling';
-
-import {
   ResizeMessage, Widget
 } from 'phosphor-widget';
 

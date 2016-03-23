@@ -3,11 +3,7 @@
 'use strict';
 
 import {
-  DisposableDelegate, IDisposable
-} from 'phosphor-disposable';
-
-import {
-  IListChangedArgs, ListChangeType, ObservableList, IObservableList
+  IListChangedArgs, ListChangeType, ObservableList
 } from 'phosphor-observablelist';
 
 import {
@@ -23,11 +19,7 @@ import {
 } from 'phosphor-properties';
 
 import {
-  ISignal, Signal
-} from 'phosphor-signaling';
-
-import {
-  ResizeMessage, Widget
+  Widget
 } from 'phosphor-widget';
 
 import {
@@ -205,7 +197,7 @@ class OutputAreaWidget extends Widget {
     let bundle: MimeBundle;
     this._sanitized = false;
     switch(output.output_type) {
-    case "execute_result":
+    case 'execute_result':
       bundle = (output as IExecuteResult).data;
       widget.addClass(EXECUTE_CLASS);
       let prompt = document.createElement('div');
@@ -214,11 +206,11 @@ class OutputAreaWidget extends Widget {
       prompt.textContent = `Out [${count === null ? ' ' : count}]:`;
       widget.node.appendChild(prompt);
       break;
-    case "display_data":
+    case 'display_data':
       bundle = (output as IDisplayData).data;
       widget.addClass(DISPLAY_CLASS);
       break;
-    case "stream":
+    case 'stream':
       bundle = {'jupyter/console-text': (output as IStream).text};
       if ((output as IStream).name == 'stdout') {
         widget.addClass(STDOUT_CLASS);
@@ -226,7 +218,7 @@ class OutputAreaWidget extends Widget {
         widget.addClass(STDERR_CLASS);
       }
       break;
-    case "error":
+    case 'error':
       let out: IError = output as IError;
       let traceback = out.traceback.join('\n');
       bundle = {'jupyter/console-text': traceback || `${out.ename}: ${out.evalue}`};
@@ -259,7 +251,7 @@ class OutputAreaWidget extends Widget {
         } else {
           this._sanitized = true;
           // Don't display if we don't know how to sanitize it.
-          console.log("Ignoring untrusted " + key + " output.");
+          console.log('Ignoring untrusted ' + key + ' output.');
           delete bundle[key];
           continue;
         }

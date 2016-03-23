@@ -229,7 +229,7 @@ class NotebookManager {
   run(): void {
     let model = this.model;
     let cells = model.cells;
-    let selected: ICellModel[] = []
+    let selected: ICellModel[] = [];
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
       if (i === model.activeCellIndex || model.isSelected(cell)) {
@@ -328,7 +328,7 @@ class NotebookManager {
     let content = serialize(model);
     let name = model.session.notebookPath;
     return this._manager.save(name, { type: 'notebook', content })
-    .then(() => { model.dirty = false });
+    .then(() => { model.dirty = false; });
   }
 
   private _manager: IContentsManager = null;

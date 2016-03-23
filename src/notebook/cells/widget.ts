@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import * as marked 
+import * as marked
   from 'marked';
 
 import {
@@ -75,7 +75,7 @@ const RENDERED_CLASS = 'jp-mod-rendered';
 /**
  * The text applied to an empty markdown cell.
  */
-const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $'
+const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 
 
 /**

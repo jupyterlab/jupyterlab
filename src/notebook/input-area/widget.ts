@@ -3,19 +3,11 @@
 'use strict';
 
 import {
-  Message
-} from 'phosphor-messaging';
-
-import {
   IChangedArgs
 } from 'phosphor-properties';
 
 import {
-  ISignal, Signal
-} from 'phosphor-signaling';
-
-import {
-  ResizeMessage, Widget
+  Widget
 } from 'phosphor-widget';
 
 import {
