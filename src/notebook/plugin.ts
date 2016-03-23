@@ -3,7 +3,8 @@
 'use strict';
 
 import {
-  NotebookWidget, NotebookModel, serialize, INotebookModel, deserialize
+  NotebookWidget, NotebookModel, serialize, INotebookModel, deserialize,
+  NotebookManager, NotebookToolbar
 } from 'jupyter-js-notebook';
 
 import {
@@ -29,12 +30,16 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  Panel
+  Panel, PanelLayout
 } from 'phosphor-panel';
 
 import {
   IChangedArgs, Property
 } from 'phosphor-properties';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 import {
   JupyterServices
@@ -52,6 +57,8 @@ const cmdIds = {
   interrupt: 'notebook:interrupt-kernel',
   restart: 'notebook:restart-kernel',
   run: 'notebook-cells:run',
+  runAndAdvance: 'notebook-cells:runAndAdvance',
+  runAndInsert: 'notebook-cells:runAndInsert',
   toCode: 'notebook-cells:to-code',
   toMarkdown: 'notebook-cells:to-markdown',
   toRaw: 'notebook-cells:to-raw',
@@ -62,20 +69,26 @@ const cmdIds = {
   insertBelow: 'notebook-cells:insert-below',
   selectPrevious: 'notebook-cells:select-previous',
   selectNext: 'notebook-cells:select-next',
+  editMode: 'notebook-cells:editMode',
+  commandMode: 'notebook-cells:commandMode'
 }
 
 
 /**
- * The class name added to the top level notebook container.
+ * The class name added to notebook container widgets.
  */
+const NB_CONTAINER = 'jp-Notebook-container';
 
-let NB_CONTAINER_CLASS = 'jp-NotebookContainer';
+/**
+ * The class name added to notebook panes.
+ */
+const NB_PANE = 'jp-Notebook-pane';
 
 
 /**
  * The class name added to the widget area.
  */
-let WIDGET_CLASS = 'jp-NotebookContainer-widget';
+let WIDGET_CLASS = 'jp-NotebookPane-widget';
 
 
 /**
@@ -100,78 +113,92 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
   manager.register(handler);
   app.commands.add([
   {
+    id: cmdIds['runAndAdvance'],
+    handler: () => {
+      let manager = handler.currentManager;
+      if (manager) manager.runAndAdvance();
+    }
+  },
+  {
     id: cmdIds['run'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.run();
+      let manager = handler.currentManager;
+      if (manager) manager.run();
+    }
+  },
+  {
+    id: cmdIds['runAndInsert'],
+    handler: () => {
+      let manager = handler.currentManager;
+      if (manager) manager.runAndInsert();
     }
   },
   {
     id: cmdIds['restart'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.restart();
+      let manager = handler.currentManager;
+      if (manager) manager.restart();
     }
   },
   {
     id: cmdIds['interrupt'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.interrupt();
+      let manager = handler.currentManager;
+      if (manager) manager.interrupt();
     }
   },
   {
     id: cmdIds['toCode'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.changeCellType('code'); }
+      let manager = handler.currentManager;
+      if (manager) manager.changeCellType('code'); }
   },
   {
     id: cmdIds['toMarkdown'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.changeCellType('markdown'); }
+      let manager = handler.currentManager;
+      if (manager) manager.changeCellType('markdown'); }
   },
   {
     id: cmdIds['toRaw'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.changeCellType('raw');
+      let manager = handler.currentManager;
+      if (manager) manager.changeCellType('raw');
     }
   },
   {
     id: cmdIds['cut'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.cut();
+      let manager = handler.currentManager;
+      if (manager) manager.cut();
     }
   },
   {
     id: cmdIds['copy'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.copy();
+      let manager = handler.currentManager;
+      if (manager) manager.copy();
     }
   },
   {
     id: cmdIds['paste'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.paste();
+      let manager = handler.currentManager;
+      if (manager) manager.paste();
     }
   },
   {
     id: cmdIds['insertAbove'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.insertAbove();
+      let manager = handler.currentManager;
+      if (manager) manager.insertAbove();
     }
   },
   {
     id: cmdIds['insertBelow'],
     handler: () => {
-      let widget = handler.currentWidget;
-      if (widget) widget.insertBelow();
+      let manager = handler.currentManager;
+      if (manager) manager.insertBelow();
     }
   },
   {
@@ -188,12 +215,36 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
       if (model) model.activeCellIndex += 1;
     }
   },
+  {
+    id: cmdIds['commandMode'],
+    handler: () => {
+      let model = handler.currentModel;
+      if (model) model.mode = 'command';
+    }
+  },
+  {
+    id: cmdIds['editMode'],
+    handler: () => {
+      let model = handler.currentModel;
+      if (model) model.mode = 'edit';
+    }
+  },
   ]);
   app.palette.add([
   {
     command: cmdIds['run'],
     category: 'Notebook Cell Operations',
     text: 'Run selected',
+  },
+  {
+    command: cmdIds['runAndAdvance'],
+    category: 'Notebook Cell Operations',
+    text: 'Run and Advance',
+  },
+  {
+    command: cmdIds['runAndInsert'],
+    category: 'Notebook Cell Operations',
+    text: 'Run and Insert',
   },
   {
     command: cmdIds['interrupt'],
@@ -255,6 +306,16 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
     category: 'Notebook Cell Operations',
     text: 'Select next cell',
   },
+  {
+    command: cmdIds['editMode'],
+    category: 'Notebook Cell Operations',
+    text: 'To Edit Mode',
+  },
+  {
+    command: cmdIds['commandMode'],
+    category: 'Notebook Cell Operations',
+    text: 'To Command Mode',
+  },
   ]);
   return Promise.resolve(void 0);
 }
@@ -263,21 +324,29 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
 /**
  * A container which manages a notebook and widgets.
  */
-class NotebookContainer extends Panel {
+class NotebookPane extends Panel {
 
   /**
-   * Construct a new NotebookContainer.
+   * Construct a new NotebookPane.
    */
   constructor(manager: IContentsManager) {
     super();
-    this._model = new NotebookModel(manager);
+    this.addClass(NB_PANE);
+    this._model = new NotebookModel();
+    this._nbManager = new NotebookManager(this._model, manager);
     let widgetArea = new Panel();
     widgetArea.addClass(WIDGET_CLASS);
-    this._manager = new WidgetManager(widgetArea);
-    this._widget = new NotebookWidget(this._model);
+    this._widgetManager = new WidgetManager(widgetArea);
+    this._notebook = new NotebookWidget(this._model);
 
     this.addChild(widgetArea);
-    this.addChild(this._widget);
+    this.addChild(new NotebookToolbar(this._nbManager));
+
+    let container = new Widget();
+    container.addClass(NB_CONTAINER);
+    container.layout = new PanelLayout();
+    (container.layout as PanelLayout).addChild(this._notebook);
+    this.addChild(container);
   }
 
   /**
@@ -297,7 +366,17 @@ class NotebookContainer extends Panel {
    * This is a read-only property.
    */
   get widget(): NotebookWidget {
-    return this._widget;
+    return this._notebook;
+  }
+
+  /**
+   * Get the notebook manager used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get manager(): NotebookManager {
+    return this._nbManager;
   }
 
   /**
@@ -316,14 +395,15 @@ class NotebookContainer extends Panel {
   setSession(value: INotebookSession) {
     this._session = value;
     this._model.session = value;
+    let manager = this._widgetManager;
 
     let commHandler = (comm: IComm, msg: IKernelMessage) => {
       console.log('comm message', msg);
 
-      let modelPromise = this._manager.handle_comm_open(comm, msg);
+      let modelPromise = manager.handle_comm_open(comm, msg);
 
       comm.onMsg = (msg) => {
-        this._manager.handle_comm_open(comm, msg)
+        manager.handle_comm_open(comm, msg)
         // create the widget model and (if needed) the view
         console.log('comm widget message', msg);
       }
@@ -338,15 +418,16 @@ class NotebookContainer extends Panel {
 
   private _model: INotebookModel = null;
   private _session: INotebookSession = null;
-  private _manager: WidgetManager = null;
-  private _widget: NotebookWidget = null;
+  private _widgetManager: WidgetManager = null;
+  private _nbManager: NotebookManager = null;
+  private _notebook: NotebookWidget = null;
 }
 
 
 /**
  * An implementation of a file handler.
  */
-class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
+class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
 
   constructor(contents: IContentsManager, session: INotebookSessionManager) {
     super(contents);
@@ -377,6 +458,14 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   }
 
   /**
+   * Get the notebook model for the current container widget.
+   */
+  get currentManager(): NotebookManager {
+    let w = this.activeWidget;
+    if (w) return w.manager;
+  }
+
+  /**
    * Close a widget.
    *
    * @param widget - The widget to close (defaults to current active widget).
@@ -386,7 +475,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
    * #### Notes
    * The user is prompted to close the kernel if it is active
    */
-  close(widget?: NotebookContainer): Promise<boolean> {
+  close(widget?: NotebookPane): Promise<boolean> {
     if (!widget.session || widget.session.status === KernelStatus.Dead) {
       return super.close(widget);
     }
@@ -406,7 +495,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Set the dirty state of a widget (defaults to current active widget).
    */
-  setDirty(widget?: NotebookContainer): void {
+  setDirty(widget?: NotebookPane): void {
     super.setDirty(widget);
     widget = this.resolveWidget(widget);
     if (widget) {
@@ -417,7 +506,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Clear the dirty state of a widget (defaults to current active widget).
    */
-  clearDirty(widget?: NotebookContainer): void {
+  clearDirty(widget?: NotebookPane): void {
     super.clearDirty(widget);
     widget = this.resolveWidget(widget);
     if (widget) {
@@ -435,7 +524,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Get the options used to save the widget content.
    */
-  protected getSaveOptions(widget: NotebookContainer, model: IContentsModel): Promise<IContentsOpts> {
+  protected getSaveOptions(widget: NotebookPane, model: IContentsModel): Promise<IContentsOpts> {
       let content = serialize(widget.model);
       return Promise.resolve({ type: 'notebook', content });
   }
@@ -443,11 +532,10 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Create the widget from an `IContentsModel`.
    */
-  protected createWidget(contents: IContentsModel): NotebookContainer {
-    let panel = new NotebookContainer(this.manager);
+  protected createWidget(contents: IContentsModel): NotebookPane {
+    let panel = new NotebookPane(this.manager);
     panel.model.stateChanged.connect(this._onModelChanged, this);
     panel.title.text = contents.name;
-    panel.addClass(NB_CONTAINER_CLASS);
 
     this.session.startNew({notebookPath: contents.path}).then(s => {
       panel.setSession(s);
@@ -459,7 +547,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookContainer> {
   /**
    * Populate the notebook widget with the contents of the notebook.
    */
-  protected populateWidget(widget: NotebookContainer, model: IContentsModel): Promise<IContentsModel> {
+  protected populateWidget(widget: NotebookPane, model: IContentsModel): Promise<IContentsModel> {
     deserialize(model.content, widget.model);
     return Promise.resolve(model);
   }
