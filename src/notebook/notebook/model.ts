@@ -475,6 +475,7 @@ class NotebookModel implements INotebookModel {
     if (this.readOnly) {
       return;
     }
+    this.dirty = true;
     let text = cell.input.textEditor.text.trim();
     if (!text) {
       cell.input.prompt = 'In [ ]:';
@@ -537,6 +538,7 @@ class NotebookModel implements INotebookModel {
       }
       break;
     }
+    this.dirty = true;
   }
 
   private _cells: IObservableList<ICellModel> = null;
