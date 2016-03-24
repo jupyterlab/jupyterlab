@@ -1,7 +1,7 @@
 Jupyter JS Notebook
 ===================
 
-Notebook widget for Jupyter.
+Notebook widget for JupyterLab.
 
 [API Docs](http://jupyter.github.io/jupyter-js-notebook/)
 
