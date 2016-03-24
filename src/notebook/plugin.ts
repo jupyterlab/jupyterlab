@@ -4,13 +4,13 @@
 
 import {
   NotebookWidget, NotebookModel, serialize, INotebookModel, deserialize,
-  NotebookManager, NotebookToolbar
+  NotebookManager, NotebookToolbar, selectKernel
 } from 'jupyter-js-notebook';
 
 import {
   IContentsModel, IContentsManager, IContentsOpts,
   INotebookSessionManager, INotebookSession,
-  IKernelMessage, IComm, KernelStatus
+  IKernelMessage, IComm, KernelStatus, getKernelSpecs
 } from 'jupyter-js-services';
 
 import {
@@ -52,6 +52,7 @@ import {
 const cmdIds = {
   interrupt: 'notebook:interrupt-kernel',
   restart: 'notebook:restart-kernel',
+  switchKernel: 'notebook:switch-kernel',
   run: 'notebook-cells:run',
   runAndAdvance: 'notebook-cells:runAndAdvance',
   runAndInsert: 'notebook-cells:runAndInsert',
@@ -76,9 +77,9 @@ const cmdIds = {
 const NB_CONTAINER = 'jp-Notebook-container';
 
 /**
- * The class name added to notebook panes.
+ * The class name added to notebook panels.
  */
-const NB_PANE = 'jp-Notebook-pane';
+const NB_PANE = 'jp-Notebook-panel';
 
 
 /**
@@ -313,6 +314,27 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
     text: 'To Command Mode'
   }
   ]);
+
+  getKernelSpecs({}).then(specs => {
+    app.commands.add([
+    {
+      id: cmdIds['switchKernel'],
+      handler: () => {
+        let widget = handler.currentWidget;
+        if (widget) {
+          let model = handler.currentModel;
+          selectKernel(widget.parent.node, model, specs);
+        }
+      }
+    }]);
+    app.palette.add([
+    {
+      command: cmdIds['switchKernel'],
+      category: 'Notebook Operations',
+      text: 'Switch Kernel'
+    }]);
+  });
+
   return Promise.resolve(void 0);
 }
 
