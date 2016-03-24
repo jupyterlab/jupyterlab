@@ -263,7 +263,7 @@ class NotebookWidget extends Widget {
    */
   static createCell(cell: ICellModel): BaseCellWidget {
     let widget: BaseCellWidget;
-    switch(cell.type) {
+    switch (cell.type) {
     case 'code':
       widget = new CodeCellWidget(cell as CodeCellModel);
       break;
@@ -457,7 +457,7 @@ class NotebookWidget extends Widget {
     let constructor = this.constructor as typeof NotebookWidget;
     let factory = constructor.createCell;
     let widget: BaseCellWidget;
-    switch(args.type) {
+    switch (args.type) {
     case ListChangeType.Add:
       widget = factory(args.newValue as ICellModel);
       widget.addClass(NB_CELL_CLASS);
@@ -742,7 +742,7 @@ class NotebookToolbar extends Widget {
    * Handle changes to the model.
    */
   protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
-    switch(args.name) {
+    switch (args.name) {
     case 'metadata':
       if (model.metadata && model.metadata.kernelspec) {
         let name = model.metadata.kernelspec.display_name;

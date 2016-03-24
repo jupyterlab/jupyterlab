@@ -6,7 +6,7 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
-  INotebookSession, IExecuteReply,  IContentsManager, IKernel
+  INotebookSession, IExecuteReply
 } from 'jupyter-js-services';
 
 import {
@@ -30,10 +30,6 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  Widget
-} from 'phosphor-widget';
-
-import {
   EditorModel, IEditorModel, IEditorOptions
 } from '../editor';
 
@@ -54,13 +50,7 @@ import {
 } from '../cells';
 
 import {
-  IMarkdownCell, ICodeCell,
-  isMarkdownCell, isCodeCell,
-  IDisplayData, isDisplayData,
-  IExecuteResult, isExecuteResult, isRawCell,
-  IStream, isStream, ICell, INotebookContent, INotebookMetadata,
-  IError, isError, IOutput, OutputType,
-  MAJOR_VERSION, MINOR_VERSION
+  INotebookMetadata, OutputType
 } from './nbformat';
 
 
@@ -115,7 +105,7 @@ interface INotebookModel extends IDisposable {
   cells: IObservableList<ICellModel>;
 
   /**
-   * The optional notebook session associated with the model. 
+   * The optional notebook session associated with the model.
    */
   session?: INotebookSession;
 
@@ -284,7 +274,7 @@ class NotebookModel implements INotebookModel {
    * The index of the active cell.
    *
    * #### Notes
-   * The value will be clamped.  When setting this, all other cells 
+   * The value will be clamped.  When setting this, all other cells
    * will be marked as inactive.
    */
   get activeCellIndex(): number {
@@ -326,7 +316,7 @@ class NotebookModel implements INotebookModel {
     return this._cells === null;
   }
 
-  /** 
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
@@ -390,8 +380,8 @@ class NotebookModel implements INotebookModel {
         cell.collapsed = source.collapsed;
         cell.scrolled = source.scrolled;
         for (let i = 0; i < source.output.outputs.length; i++) {
-          let output = source.output.outputs.get(i);
-          cell.output.outputs.add(output);
+          let sourceOutput = source.output.outputs.get(i);
+          cell.output.outputs.add(sourceOutput);
         }
       }
     }
@@ -404,7 +394,7 @@ class NotebookModel implements INotebookModel {
    */
   createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
     let constructor = this.constructor as typeof NotebookModel;
-    let editor = constructor.createEditor({ 
+    let editor = constructor.createEditor({
       mimetype: 'text/x-ipythongfm',
       readOnly: this.readOnly
     });
@@ -470,7 +460,7 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Execute the given cell. 
+   * Execute the given cell.
    */
   protected executeCell(cell: CodeCellModel): void {
     if (this.readOnly) {
@@ -502,7 +492,7 @@ class NotebookModel implements INotebookModel {
       let model = msg.content;
       if (model !== void 0) {
         model.output_type = msg.header.msg_type as OutputType;
-        output.add(model)
+        output.add(model);
       }
     });
     ex.onReply = (msg => {
@@ -523,9 +513,8 @@ class NotebookModel implements INotebookModel {
    * Handle a change in the cells list.
    */
   private _onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
-    switch(change.type) {
+    switch (change.type) {
     case ListChangeType.Add:
-      let cell = change.newValue as ICellModel;
       this.activeCellIndex = change.newIndex;
       break;
     case ListChangeType.Remove:
@@ -562,8 +551,8 @@ namespace NotebookModelPrivate {
   export
   const defaultMimetype = new Property<NotebookModel, string>({
     name: 'defaultMimetype',
-    value: "text/x-ipython",
-    notify: stateChangedSignal,
+    value: 'text/x-ipython',
+    notify: stateChangedSignal
   });
 
   /**
@@ -572,7 +561,7 @@ namespace NotebookModelPrivate {
   export
   const readOnlyProperty = new Property<NotebookModel, boolean>({
     name: 'readOnly',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
  /**
@@ -582,7 +571,7 @@ namespace NotebookModelPrivate {
   const sessionProperty = new Property<NotebookModel, INotebookSession>({
     name: 'session',
     changed: sessionChanged,
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
  /**
@@ -591,7 +580,7 @@ namespace NotebookModelPrivate {
   export
   const metadataProperty = new Property<NotebookModel, INotebookMetadata>({
     name: 'metadata',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
   /**
@@ -600,7 +589,7 @@ namespace NotebookModelPrivate {
   export
   const activeCellIndexProperty = new Property<NotebookModel, number>({
     name: 'activeCellIndex',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
  /**
@@ -610,7 +599,7 @@ namespace NotebookModelPrivate {
   const modeProperty = new Property<NotebookModel, NotebookMode>({
     name: 'mode',
     changed: modeChanged,
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
  /**
@@ -619,7 +608,7 @@ namespace NotebookModelPrivate {
   export
   const dirtyProperty = new Property<NotebookModel, boolean>({
     name: 'dirty',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
   /**
@@ -655,7 +644,7 @@ namespace NotebookModelPrivate {
   }
 
   /**
-   * Handle a change to the model kernel.  
+   * Handle a change to the model kernel.
    */
   function kernelChanged(model: INotebookModel): void {
     let session = model.session;

@@ -121,6 +121,6 @@ function deserializeCell(data: ICell, model: ICellModel): void {
       model.output.add(value.outputs[i]);
     }
   } else if (isRawCellModel(model)) {
-    (model as IRawCellModel).format = (data as IRawCell).metadata.format;;
+    (model as IRawCellModel).format = (data as IRawCell).metadata.format;
   }
 }

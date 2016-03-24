@@ -124,7 +124,7 @@ class InputAreaWidget extends Widget {
    * Change handler for model updates.
    */
   protected onModelUpdated(sender: IInputAreaModel, args: IChangedArgs<any>) {
-    switch(args.name) {
+    switch (args.name) {
     case 'collapsed':
       if (args.newValue) {
         this.addClass(COLLAPSED_CLASS);

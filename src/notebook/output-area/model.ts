@@ -178,7 +178,7 @@ class OutputAreaModel implements IOutputAreaModel {
       output.text = lastOutput.text as string + text;
       this.outputs.set(-1, output);
     } else {
-      switch(output.output_type) {
+      switch (output.output_type) {
       case 'stream':
       case 'execute_result':
       case 'display_data':
@@ -195,7 +195,7 @@ class OutputAreaModel implements IOutputAreaModel {
    * @param wait Delay clearing the output until the next message is added.
    */
   clear(wait: boolean = false) {
-    if(wait) {
+    if (wait) {
       this._clearNext = true;
     } else {
       this.outputs.clear();
@@ -223,7 +223,7 @@ namespace Private {
   export
   const trustedProperty = new Property<OutputAreaModel, boolean>({
     name: 'trusted',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
   /**
@@ -232,7 +232,7 @@ namespace Private {
   export
   const fixedHeightProperty = new Property<OutputAreaModel, boolean>({
     name: 'fixedHeight',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
   /**
@@ -241,6 +241,6 @@ namespace Private {
   export
   const collapsedProperty = new Property<OutputAreaModel, boolean>({
     name: 'collapsed',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 }

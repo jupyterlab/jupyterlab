@@ -19,7 +19,7 @@
     "phosphor-widget": "^1.0.0-rc.1",
     "sanitizer": "^0.1.3",
     "transformime": "^2.1.2",
-    "transformime-jupyter-transformers": "^0.4.0"
+    "transformime-jupyter-transformers": "^0.4.1"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",

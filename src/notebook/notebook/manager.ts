@@ -98,7 +98,7 @@ class NotebookManager {
       if (i === model.activeCellIndex || model.isSelected(cell)) {
         toMerge.push(cell.input.textEditor.text);
       }
-      if (i == model.activeCellIndex) {
+      if (i === model.activeCellIndex) {
         activeCell = cell;
       } else {
         toDelete.push(cell);
@@ -206,7 +206,7 @@ class NotebookManager {
         continue;
       }
       let newCell: ICellModel;
-      switch(value) {
+      switch (value) {
       case 'code':
         newCell = model.createCodeCell(cell);
         break;
@@ -310,7 +310,7 @@ class NotebookManager {
    * Clone a cell model.
    */
   protected cloneCell(cell: ICellModel): ICellModel {
-    switch(cell.type) {
+    switch (cell.type) {
     case 'code':
       return this.model.createCodeCell(cell);
     case 'markdown':

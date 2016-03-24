@@ -252,7 +252,7 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
    * Change handler for model updates.
    */
   protected onModelStateChanged(sender: IEditorModel, args: IChangedArgs<any>) {
-    switch(args.name) {
+    switch (args.name) {
     case 'fixedHeight':
       this.updateFixedHeight(args.newValue as boolean);
       break;
@@ -291,7 +291,7 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     } else {
       // We statically require common modes so that the bundler
       // picks them up automatically.
-      switch(mode) {
+      switch (mode) {
       case 'python':
         require('codemirror/mode/python/python');
         editor.setOption('mode', mimetype);

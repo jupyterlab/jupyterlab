@@ -213,7 +213,7 @@ class EditorModel implements IEditorModel {
     return this._isDisposed;
   }
 
-  /** 
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
@@ -266,7 +266,7 @@ namespace EditorModelPrivate {
   const fixedHeightProperty = new Property<EditorModel, boolean>({
     name: 'fixedHeight',
     value: false,
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
   /**

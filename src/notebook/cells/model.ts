@@ -401,7 +401,7 @@ namespace CellModelPrivate {
   const nameProperty = new Property<IBaseCellModel, string>({
     name: 'name',
     value: null,
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
   /**
@@ -411,7 +411,7 @@ namespace CellModelPrivate {
   const tagsProperty = new Property<IBaseCellModel, string[]>({
     name: 'tags',
     value: null,
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
  /**
@@ -420,7 +420,7 @@ namespace CellModelPrivate {
   export
   const trustedProperty = new Property<IBaseCellModel, boolean>({
     name: 'trusted',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
  /**
@@ -429,7 +429,7 @@ namespace CellModelPrivate {
   export
   const formatProperty = new Property<IRawCellModel, string>({
     name: 'format',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
   /**
@@ -439,7 +439,7 @@ namespace CellModelPrivate {
   const renderedProperty = new Property<IMarkdownCellModel, boolean>({
     name: 'rendered',
     value: true,
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
   /**
@@ -449,7 +449,7 @@ namespace CellModelPrivate {
   const executionCountProperty = new Property<ICodeCellModel, number>({
     name: 'executionCount',
     value: null,
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
  /**
@@ -458,7 +458,7 @@ namespace CellModelPrivate {
   export
   const collapsedProperty = new Property<ICodeCellModel, boolean>({
     name: 'collapsed',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
  /**
@@ -467,6 +467,6 @@ namespace CellModelPrivate {
   export
   const scrolledProperty = new Property<ICodeCellModel, ScrollSetting>({
     name: 'scrolled',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 }
