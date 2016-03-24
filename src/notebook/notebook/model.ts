@@ -63,6 +63,21 @@ type NotebookMode = 'command' | 'edit';
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
 
+
+/**
+ * The default notebook metadata.
+ */
+const DEFAULT_METADATA = {
+  kernelspec: {
+    name: 'unknown',
+    display_name: 'No Kernel!'
+  },
+  language_info: {
+    name: 'unknown'
+  }
+}
+
+
 /**
  * The definition of a model object for a notebook widget.
  */
@@ -580,6 +595,7 @@ namespace NotebookModelPrivate {
   export
   const metadataProperty = new Property<NotebookModel, INotebookMetadata>({
     name: 'metadata',
+    value: DEFAULT_METADATA,
     notify: stateChangedSignal
   });
 

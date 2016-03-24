@@ -45,24 +45,28 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
   let cell: ICellModel;
 
   // Iterate through the cell data, creating cell models.
-  data.cells.forEach(c => {
-    if (isMarkdownCell(c)) {
-      cell = model.createMarkdownCell();
-    } else if (isCodeCell(c)) {
-      cell = model.createCodeCell();
-    } else if (isRawCell(c)) {
-      cell = model.createRawCell();
-    }
-    deserializeCell(c, cell);
-    model.cells.add(cell);
-  });
+  if (data && data.cells) {
+    data.cells.forEach(c => {
+      if (isMarkdownCell(c)) {
+        cell = model.createMarkdownCell();
+      } else if (isCodeCell(c)) {
+        cell = model.createCodeCell();
+      } else if (isRawCell(c)) {
+        cell = model.createRawCell();
+      }
+      deserializeCell(c, cell);
+      model.cells.add(cell);
+    });
+  }
 
   if (!model.cells.length) {
     cell = model.createCodeCell();
     model.cells.add(cell);
   }
   model.activeCellIndex = 0;
-  model.metadata = data.metadata;
+  if (data && data.metadata) {
+    model.metadata = data.metadata;
+  }
 }
 
 
