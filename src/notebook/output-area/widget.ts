@@ -130,7 +130,7 @@ const transformers = [
  * A list of outputs considered safe.
  */
 const safeOutputs = ['text/plain', 'text/latex', 'image/png', 'image/jpeg',
-                     'jupyter/console-text'];
+                     'application/vnd.jupyter.console-text'];
 
 /**
  * A list of outputs that are sanitizable.
@@ -211,7 +211,7 @@ class OutputAreaWidget extends Widget {
       widget.addClass(DISPLAY_CLASS);
       break;
     case 'stream':
-      bundle = {'jupyter/console-text': (output as IStream).text};
+      bundle = {'application/vnd.jupyter.console-text': (output as IStream).text};
       if ((output as IStream).name === 'stdout') {
         widget.addClass(STDOUT_CLASS);
       } else {
@@ -221,7 +221,7 @@ class OutputAreaWidget extends Widget {
     case 'error':
       let out: IError = output as IError;
       let traceback = out.traceback.join('\n');
-      bundle = {'jupyter/console-text': traceback || `${out.ename}: ${out.evalue}`};
+      bundle = {'application/vnd.jupyter.console-text': traceback || `${out.ename}: ${out.evalue}`};
       widget.addClass(ERROR_CLASS);
       break;
     default:
