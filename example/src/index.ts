@@ -392,7 +392,8 @@ function main(): void {
   ];
   keymap.add(bindings);
 
-  contents.get(NOTEBOOK, {}).then(data => {
+  //contents.get(NOTEBOOK, {}).then(data => {
+  contents.newUntitled('', { type: 'notebook' }).then(data => {
     deserialize(data.content, nbModel);
 
     let name = 'python';
@@ -407,9 +408,6 @@ function main(): void {
       baseUrl: SERVER_URL
     }).then(session => {
       nbModel.session = session;
-      setTimeout(() => {
-        session.shutdown();
-      }, 5000);
     });
   });
 }

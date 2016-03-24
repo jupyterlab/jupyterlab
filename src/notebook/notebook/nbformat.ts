@@ -14,7 +14,6 @@ const MAJOR_VERSION = 4;
 export
 const MINOR_VERSION = 0;
 
-
 /**
  * The notebook metadata.
  */
