@@ -4,12 +4,13 @@
 
 import {
   NotebookWidget, NotebookModel, serialize, INotebookModel, deserialize,
-  NotebookManager, NotebookToolbar, selectKernel
+  NotebookManager, NotebookToolbar, selectKernel, INotebookContent,
+  findKernel
 } from 'jupyter-js-notebook';
 
 import {
   IContentsModel, IContentsManager, IContentsOpts,
-  INotebookSessionManager, INotebookSession,
+  INotebookSessionManager, INotebookSession, IKernelSpecIds,
   IKernelMessage, IComm, KernelStatus, getKernelSpecs
 } from 'jupyter-js-services';
 
@@ -449,7 +450,8 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
 
   constructor(contents: IContentsManager, session: INotebookSessionManager) {
     super(contents);
-    this.session = session;
+    this._session = session;
+    this._kernelSpecs = getKernelSpecs({});
   }
 
   /**
@@ -554,11 +556,6 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
     let panel = new NotebookPane(this.manager);
     panel.model.stateChanged.connect(this._onModelChanged, this);
     panel.title.text = contents.name;
-
-    this.session.startNew({notebookPath: contents.path}).then(s => {
-      panel.setSession(s);
-    });
-
     return panel;
   }
 
@@ -567,7 +564,16 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
    */
   protected populateWidget(widget: NotebookPane, model: IContentsModel): Promise<IContentsModel> {
     deserialize(model.content, widget.model);
-    return Promise.resolve(model);
+    return this._kernelSpecs.then(specs => {
+      let name = findKernel(widget.model, specs);
+      return this._session.startNew({ 
+        kernelName: name, 
+        notebookPath: model.path
+      });
+    }).then(session => {
+      widget.setSession(session);
+      return model;
+    });
   }
 
   /**
@@ -590,5 +596,6 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
     }
   }
 
-  session: INotebookSessionManager;
+  private _session: INotebookSessionManager = null;
+  private _kernelSpecs: Promise<IKernelSpecIds> = null;
 }
