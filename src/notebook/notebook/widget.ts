@@ -771,6 +771,35 @@ class NotebookToolbar extends Widget {
       } else {
         node.classList.add(TOOLBAR_BUSY);
       }
+      switch (status) {
+      case KernelStatus.Idle:
+        node.title = 'Kernel Idle';
+        break;
+      case KernelStatus.Busy:
+        node.title = 'Kernel Busy';
+        break;
+      case KernelStatus.Dead:
+        node.title = 'Kernel Died';
+        this.kernelNameNode.textContent = 'No Kernel!';
+        break;
+      case KernelStatus.Reconnecting:
+        node.title = 'Kernel Reconnecting';
+        break;
+      case KernelStatus.Restarting:
+        node.title = 'Kernel Restarting';
+        break;
+      case KernelStatus.Starting:
+        node.title = 'Kernel Starting';
+        break;
+      case KernelStatus.Unknown:
+        node.title = 'Kernel Status Unknown';
+        break;
+      }
+    });
+    session.sessionDied.connect(() => {
+      node.classList.add(TOOLBAR_BUSY);
+      node.title = 'Kernel Died';
+      this.kernelNameNode.textContent = 'No Kernel!';
     });
     if (session.status === KernelStatus.Idle) {
       node.classList.remove(TOOLBAR_BUSY);
