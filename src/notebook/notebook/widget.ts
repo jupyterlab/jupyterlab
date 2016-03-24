@@ -11,6 +11,10 @@ import {
 } from 'jupyter-js-ui/lib/dialog';
 
 import {
+  RenderMime
+} from 'jupyter-js-ui/lib/rendermime';
+
+import {
   Message
 } from 'phosphor-messaging';
 
@@ -176,7 +180,7 @@ const SELECTED_CLASS = 'jp-mod-selected';
  * A panel which contains a toolbar and a notebook.
  */
 export
-class NotebookPanel extends Widget {
+class NotebookPanel extends Panel {
   /**
    * Create a new toolbar for the pane.
    */
@@ -187,14 +191,14 @@ class NotebookPanel extends Widget {
   /**
    * Create a new notebook for the pane.
    */
-  static createNotebook(model: INotebookModel): NotebookWidget {
-    return new NotebookWidget(model);
+  static createNotebook(model: INotebookModel, rendermime: RenderMime<Widget>): NotebookWidget {
+    return new NotebookWidget(model, rendermime);
   }
 
   /**
    * Construct a notebook panel.
    */
-  constructor(manager: NotebookManager) {
+  constructor(manager: NotebookManager, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(NB_PANEL);
     this._manager = manager;
@@ -205,7 +209,7 @@ class NotebookPanel extends Widget {
     layout.addChild(this._toolbar);
     let container = new Panel();
     container.addClass(NB_CONTAINER);
-    this._notebook = constructor.createNotebook(manager.model);
+    this._notebook = constructor.createNotebook(manager.model, rendermime);
     container.addChild(this._notebook);
     layout.addChild(container);
   }
@@ -261,14 +265,14 @@ class NotebookWidget extends Widget {
   /**
    * Create a new cell widget given a cell model.
    */
-  static createCell(cell: ICellModel): BaseCellWidget {
+  static createCell(cell: ICellModel, rendermime: RenderMime<Widget>): BaseCellWidget {
     let widget: BaseCellWidget;
     switch (cell.type) {
     case 'code':
-      widget = new CodeCellWidget(cell as CodeCellModel);
+      widget = new CodeCellWidget(cell as CodeCellModel, rendermime);
       break;
     case 'markdown':
-      widget = new MarkdownCellWidget(cell as MarkdownCellModel);
+      widget = new MarkdownCellWidget(cell as MarkdownCellModel, rendermime);
       break;
     case 'raw':
       widget = new RawCellWidget(cell as RawCellModel);
@@ -284,17 +288,18 @@ class NotebookWidget extends Widget {
   /**
    * Construct a notebook widget.
    */
-  constructor(model: INotebookModel) {
+  constructor(model: INotebookModel, rendermime: RenderMime<Widget>) {
     super();
     this.node.tabIndex = -1;  // Allow the widget to take focus.
     this.addClass(NB_CLASS);
     this._model = model;
+    this._rendermime = rendermime;
     this.layout = new PanelLayout();
     let constructor = this.constructor as typeof NotebookWidget;
     let cellsLayout = this.layout as PanelLayout;
     let factory = constructor.createCell;
     for (let i = 0; i < model.cells.length; i++) {
-      cellsLayout.addChild(factory(model.cells.get(i)));
+      cellsLayout.addChild(factory(model.cells.get(i), rendermime));
     }
     model.cells.changed.connect(this.onCellsChanged, this);
     model.stateChanged.connect(this.onModelChanged, this);
@@ -459,7 +464,7 @@ class NotebookWidget extends Widget {
     let widget: BaseCellWidget;
     switch (args.type) {
     case ListChangeType.Add:
-      widget = factory(args.newValue as ICellModel);
+      widget = factory(args.newValue as ICellModel, this._rendermime);
       widget.addClass(NB_CELL_CLASS);
       widget.input.editor.addClass(NB_EDITOR_CLASS);
       layout.insertChild(args.newIndex, widget);
@@ -481,7 +486,7 @@ class NotebookWidget extends Widget {
       }
       let newValues = args.newValue as ICellModel[];
       for (let i = newValues.length; i < 0; i--) {
-        widget = factory(newValues[i]);
+        widget = factory(newValues[i], this._rendermime);
         widget.addClass(NB_CELL_CLASS);
         widget.input.editor.addClass(NB_EDITOR_CLASS);
         layout.insertChild(args.newIndex, widget);
@@ -491,7 +496,7 @@ class NotebookWidget extends Widget {
       widget = layout.childAt(args.newIndex) as BaseCellWidget;
       layout.removeChild(widget);
       widget.dispose();
-      widget = factory(args.newValue as ICellModel);
+      widget = factory(args.newValue as ICellModel, this._rendermime);
       layout.insertChild(args.newIndex, widget);
       widget.addClass(NB_CELL_CLASS);
       widget.input.editor.addClass(NB_EDITOR_CLASS);
@@ -566,6 +571,7 @@ class NotebookWidget extends Widget {
   }
 
   private _model: INotebookModel = null;
+  private _rendermime: RenderMime<Widget> = null;
 }
 
 

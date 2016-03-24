@@ -6,6 +6,10 @@ import * as marked
   from 'marked';
 
 import {
+  RenderMime
+} from 'jupyter-js-ui/lib/rendermime';
+
+import {
   Message
 } from 'phosphor-messaging';
 
@@ -150,18 +154,19 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Create an output area widget.
    */
-  static createOutput(model: IOutputAreaModel): OutputAreaWidget {
-    return new OutputAreaWidget(model);
+  static createOutput(model: IOutputAreaModel, rendermime: RenderMime<Widget>): OutputAreaWidget {
+    return new OutputAreaWidget(model, rendermime);
   }
 
   /**
    * Construct a code cell widget.
    */
-  constructor(model: ICodeCellModel) {
+  constructor(model: ICodeCellModel, rendermime: RenderMime<Widget>) {
     super(model);
+    this._rendermime = rendermime;
     this.addClass(CODE_CELL_CLASS);
     let constructor = this.constructor as typeof CodeCellWidget;
-    this._output = constructor.createOutput(model.output);
+    this._output = constructor.createOutput(model.output, rendermime);
     (this.layout as PanelLayout).addChild(this._output);
   }
 
@@ -176,6 +181,7 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   private _output: OutputAreaWidget = null;
+  private _rendermime: RenderMime<Widget> = null;
 }
 
 
@@ -193,8 +199,9 @@ class MarkdownCellWidget extends BaseCellWidget {
   /**
    * Construct a Markdown cell widget.
    */
-  constructor(model: IMarkdownCellModel) {
+  constructor(model: IMarkdownCellModel, rendermime: RenderMime<Widget>) {
     super(model);
+    this._rendermime = rendermime;
     this.addClass(MARKDOWN_CELL_CLASS);
     // Insist on the Github-flavored markdown mode.
     model.input.textEditor.mimetype = 'text/x-ipythongfm';
@@ -260,6 +267,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     }
   }
 
+  private _rendermime: RenderMime<Widget> = null;
   private _rendered: Widget = null;
   private _dirty = true;
 }
