@@ -407,6 +407,9 @@ function main(): void {
       baseUrl: SERVER_URL
     }).then(session => {
       nbModel.session = session;
+      setTimeout(() => {
+        session.shutdown();
+      }, 5000);
     });
   });
 }
