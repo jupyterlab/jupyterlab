@@ -52,3 +52,40 @@ function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSp
     return model.session.kernel;
   });
 }
+
+
+/**
+ * Get the appropriate kernel name given a notebook model.
+ */
+export
+function findKernel(model: INotebookModel, specs: IKernelSpecIds): string {
+  let name = model.metadata.kernelspec.name;
+  if (name === 'unknown') {
+    return specs.default;
+  }
+  // Look for an exact match.
+  for (let kernelName in specs.kernelspecs) {
+    if (kernelName === name) {
+      return name;
+    }
+  }
+  // Next try to match the language name.
+  let language = model.metadata.language_info.name;
+  if (language === 'unknown') {
+    return specs.default;
+  }
+  for (let kernelName in specs.kernelspecs) {
+    let kernelLanguage = specs.kernelspecs[name].spec.language;
+    if (language === kernelLanguage) {
+      console.log("No exact match found for " + name +
+                  ", using kernel " + kernelName + " that matches " +
+                  "language=" + language);
+      return kernelName;
+    }
+  }
+  // Finally, use the default kernel.
+  console.log(`No matching kernel found for ${name}, ` +
+              `using default kernel ${specs.default}`);
+  return specs.default;
+}
+
