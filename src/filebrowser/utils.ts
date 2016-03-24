@@ -57,8 +57,9 @@ function showErrorMessage(host: Widget, title: string, error: Error): Promise<vo
   let options = {
     title: title,
     host: node,
-    body: error.message,
-    buttons: [okButton]
+    body: error.message || `File ${title}`,
+    buttons: [okButton],
+    okText: 'DISMISS'
   }
   return showDialog(options).then(() => {});
 }

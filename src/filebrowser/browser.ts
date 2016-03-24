@@ -228,9 +228,9 @@ class FileBrowserWidget extends Widget {
    * Refresh the current directory.
    */
   refresh(): Promise<void> {
-    return this._model.refresh().catch(
-      error => showErrorMessage(this, 'Refresh Error', error)
-    );
+    return this._model.refresh().catch(error => { 
+      showErrorMessage(this, 'Server Connection Error', error);
+    });
   }
 
   /**

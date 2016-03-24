@@ -22,40 +22,21 @@
 .jp-Dialog-content {
   margin-left: auto;
   margin-right: auto;
-  text-align: center;
-  vertical-align: middle;
-}
-
-
-.jp-Dialog-footer {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 0;
-}
-
-
-.jp-Dialog-button {
-  flex: 1 1 auto;
 }
 
 
 .jp-Dialog-header {
-  display: flex;
-  flex-direction: row;
+
 }
 
+
+.jp-Dialog-footer {
+
+}
+
+
 .jp-Dialog-title {
-  flex: 1 1 auto;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-
-
-.jp-Dialog-close {
-  flex: 0 0 auto;
-}
-

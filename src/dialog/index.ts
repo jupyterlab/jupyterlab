@@ -23,14 +23,14 @@ const HEADER_CLASS = 'jp-Dialog-header';
 const TITLE_CLASS = 'jp-Dialog-title';
 
 /**
- * The class name added to dialog close icon node.
- */
-const CLOSE_ICON_CLASS = 'jp-Dialog-close';
-
-/**
  * The class name added to dialog body node.
  */
 const BODY_CLASS = 'jp-Dialog-body';
+
+/**
+ * The class name added to a dialog body content node.
+ */
+const BODY_CONTENT_CLASS = 'jp-Dialog-bodyContent';
 
 /**
  * The class name added to a dialog content node.
@@ -53,7 +53,7 @@ const BUTTON_ICON_CLASS = 'jp-Dialog-buttonIcon';
 const BUTTON_TEXT_CLASS = 'jp-Dialog-buttonText';
 
 /*
- * The class name added to dialog OK buttons.
+ * The class name added to dialog Confirm buttons.
  */
 const OK_BUTTON_CLASS = 'jp-Dialog-okButton';
 
@@ -61,6 +61,26 @@ const OK_BUTTON_CLASS = 'jp-Dialog-okButton';
  * The class name added to dialog Cancel buttons.
  */
 const CANCEL_BUTTON_CLASS = 'jp-Dialog-cancelButton';
+
+/**
+ * The class name added to dialog input field wrappers.
+ */
+const INPUT_WRAPPER_CLASS = 'jp-Dialog-inputWrapper';
+
+/**
+ * The class name added to dialog input fields.
+ */
+const INPUT_CLASS = 'jp-Dialog-input';
+
+/**
+ * The class name added to dialog select wrappers.
+ */
+const SELECT_WRAPPER_CLASS = 'jp-Dialog-selectWrapper';
+
+/**
+ * The class anem added to dialog select nodes.
+ */
+const SELECT_CLASS = 'jp-Dialog-select';
 
 
 /**
@@ -96,7 +116,7 @@ interface IButtonItem {
 
 
 /**
- * A default "OK" button.
+ * A default confirmation button.
  */
 export
 const okButton: IButtonItem = {
@@ -106,11 +126,11 @@ const okButton: IButtonItem = {
 
 
 /**
- * A default "Cancel" button.
+ * A default cancel button.
  */
 export
 const cancelButton: IButtonItem = {
-  text: 'Cancel',
+  text: 'CANCEL',
   className: CANCEL_BUTTON_CLASS
 }
 
@@ -126,8 +146,12 @@ interface IDialogOptions {
   title?: string;
 
   /**
-   * The main body element for the dialog or a message to display,
-   * which is wrapped in a <p> tag.
+   * The main body element for the dialog or a message to display.
+   *
+   * #### Notes
+   * If a `string` is provided, it will be used as the `HTMLContent` of
+   * a `<span>`.  If an `<input>` or `<select>` element is provided, 
+   * they will be styled.
    */
   body?: HTMLElement | string;
 
@@ -141,6 +165,11 @@ interface IDialogOptions {
    *   [[cancelButton]]).
    */
   buttons?: IButtonItem[];
+
+  /**
+   * The confirmation text for the button (defaults to 'OK').
+   */
+  okText?: string;
 }
 
 
@@ -154,11 +183,14 @@ interface IDialogOptions {
 export
 function showDialog(options: IDialogOptions): Promise<IButtonItem>{
   let host = options.host || document.body;
-  let buttons = options.buttons || [okButton, cancelButton];
+  okButton.text = options.okText ? options.okText : 'OK';
+  let buttons = options.buttons || [cancelButton, okButton];
   let buttonNodes = buttons.map(createButton);
   let dialog = createDialog(options, buttonNodes);
   host.appendChild(dialog);
-  buttonNodes[0].focus();
+  // Focus the ok button if given.
+  let index = buttons.indexOf(okButton);
+  if (index !== -1) buttonNodes[index].focus();
 
   return new Promise<IButtonItem>((resolve, reject) => {
     buttonNodes.map(node => {
@@ -182,11 +214,6 @@ function showDialog(options: IDialogOptions): Promise<IButtonItem>{
       evt.preventDefault();
       evt.stopPropagation();
     });
-    let close = dialog.getElementsByClassName(CLOSE_ICON_CLASS)[0];
-    close.addEventListener('click', () => {
-      host.removeChild(dialog);
-      resolve(null);
-    });
   });
 }
 
@@ -202,30 +229,37 @@ function createDialog(options: IDialogOptions, buttonNodes: HTMLElement[]): HTML
   let body = document.createElement('div');
   let footer = document.createElement('div');
   let title = document.createElement('span');
-  let close = document.createElement('span');
   node.className = DIALOG_CLASS;
   content.className = CONTENT_CLASS;
   header.className = HEADER_CLASS;
   body.className = BODY_CLASS;
   footer.className = FOOTER_CLASS;
   title.className = TITLE_CLASS;
-  close.className = CLOSE_ICON_CLASS;
   node.appendChild(content);
   content.appendChild(header);
   content.appendChild(body);
   content.appendChild(footer);
   header.appendChild(title);
-  header.appendChild(close);
 
   // Populate the nodes.
   title.textContent = options.title || '';
+  let child: HTMLElement;
   if (options.body && typeof options.body === 'string') {
-    let span = document.createElement('span');
-    span.innerHTML = options.body as string;
-    body.appendChild(span);
+    child = document.createElement('span');
+    child.innerHTML = options.body as string;
   } else if (options.body) {
-    body.appendChild(options.body as HTMLElement);
+    child = options.body as HTMLElement;
+    switch (child.tagName) {
+    case 'INPUT':
+      child = wrapInput(child as HTMLInputElement);
+      break;
+    case 'SELECT':
+      child = wrapSelect(child as HTMLSelectElement);
+      break;
+    }
   }
+  child.classList.add(BODY_CONTENT_CLASS);
+  body.appendChild(child);
   buttonNodes.map(buttonNode => { footer.appendChild(buttonNode); });
   return node;
 }
@@ -247,4 +281,28 @@ function createButton(item: IButtonItem): HTMLElement {
   button.appendChild(icon);
   button.appendChild(text);
   return button;
+}
+
+
+/**
+ * Wrap and style an input node.
+ */
+function wrapInput(input: HTMLInputElement): HTMLElement {
+  let wrapper = document.createElement('div');
+  wrapper.className = INPUT_WRAPPER_CLASS;
+  wrapper.appendChild(input);
+  input.classList.add(INPUT_CLASS);
+  return wrapper;
+}
+
+
+/**
+ * Wrap and style a select node.
+ */
+function wrapSelect(select: HTMLSelectElement): HTMLElement {
+  let wrapper = document.createElement('div');
+  wrapper.className = SELECT_WRAPPER_CLASS;
+  wrapper.appendChild(select);
+  select.classList.add(SELECT_CLASS);
+  return wrapper;
 }

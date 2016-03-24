@@ -4,49 +4,105 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-Dialog {
-  padding-left: 3px;
-  background: rgba(245, 245, 245, .6);
+  background: rgba(0,0,0,0.25);
+  color: #757575;
 }
 
 
 .jp-Dialog-content {
-  background: #F5F5F5;
-  min-width: 50%;
-  border: 1px solid #757575;
-  border-radius: 5px;
-  padding-bottom: 10px;
+  background: #FAFAFA;
+  padding: 24px;
+  width: 300px;
+  box-sizing: border-box;
+  box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.5);
 }
 
 
 .jp-Dialog-header {
-  padding: 5px;
+  padding-bottom: 12px;
+  font: 18px Helvetica-Neue Medium, Arial, sans-serif;
+  color: #616161;
 }
 
 
 .jp-Dialog-body {
-  padding: 5px;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  background: #FAFAFA;
+}
+
+
+.jp-Dialog-bodyContent {
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  outline: none;
 }
 
 
 .jp-Dialog-footer {
-  padding: 20px;
+  margin-top: 24px;
 }
 
 
 .jp-Dialog-button {
-  padding: 5px;
-  border: 1px solid #757575;
-  font-size: 16px;
-  background: #FAFAFA;
-  line-height: 20px;
-  border-radius: 3px;
-  max-width: 100px;
-  margin-left: 5px;
+  font: 15px Helvetica-Neue Medium, Arial, sans-serif;
+  border: none;
+  min-width: 120px;
+  max-width: 120px;
+  text-transform: uppercase;
+  line-height: 38px;
+  border-radius: 2px;
+  outline: none;
+  padding: 0px;
 }
 
 
-.jp-Dialog-close {
-  line-height: 21px;
+.jp-Dialog-okButton {
+  background: #F27624;
+  color: white;
+}
+
+
+.jp-Dialog-cancelButton {
+  background: #9E9E9E;
+  margin-right: 12px;
+  color: white;
+}
+
+
+.jp-Dialog-inputWrapper {
+  padding: 7px;
+  background: white;
+  width: 252px;
+  box-sizing: border-box;
+  border: 1px solid #BDBDBD;
+  border-radius: 2px;
+}
+
+
+.jp-Dialog-input {
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  color: #676767;
+  width: 100%;
+  outline: none;
+  border: none;
+}
+
+
+.jp-Dialog-selectWrapper {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background: white;
+  width: 252px;
+  box-sizing: border-box;
+  border: 1px solid #BDBDBD;
+  border-radius: 2px;
+}
+
+
+.jp-Dialog-select {
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  background: white;
+  color: #676767;
+  width: 100%;
+  outline: none;
+  border: none;
 }

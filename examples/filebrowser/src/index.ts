@@ -18,6 +18,10 @@ import {
 } from 'jupyter-js-ui/lib/filebrowser';
 
 import {
+  showDialog, okButton
+} from 'jupyter-js-ui/lib/dialog';
+
+import {
   getConfigOption
 } from 'jupyter-js-utils';
 
@@ -179,6 +183,21 @@ function main(): void {
       icon: 'fa fa-stop-circle-o',
       handler: () => { fbWidget.shutdownKernels(); }
     }),
+    new MenuItem({
+      text: 'DropDown Demo',
+      handler: () => { dropdownDemo(); }
+    }),
+    new MenuItem({
+      text: 'Info Demo',
+      handler: () => {
+        let msg = 'The quick brown fox jumped over the lazy dog'
+        showDialog({
+          title: 'Cool Title',
+          body: msg,
+          buttons: [okButton]
+        });
+      }
+    })
   ]);
 
   // Add a context menu to the dir listing.
@@ -193,6 +212,26 @@ function main(): void {
   panel.attach(document.body);
 
   window.onresize = () => panel.update();
+}
+
+
+/**
+ * Create a non-functional drop down demo.
+ */
+function dropdownDemo(): void {
+  let selector = document.createElement('select');
+  let option0 = document.createElement('option');
+  option0.value = 'python';
+  option0.text = 'Python 3';
+  selector.appendChild(option0);
+  let option1 = document.createElement('option');
+  option1.value = 'julia';
+  option1.text = 'Julia';
+  selector.appendChild(option1);
+  showDialog({
+    title: 'Select Kernel',
+    body: selector,
+  });
 }
 
 
