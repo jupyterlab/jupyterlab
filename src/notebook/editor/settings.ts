@@ -11,7 +11,7 @@
  * The interface for providing custom language settings.
  */
 export
-interface LanguageSettings {
+interface ILanguageSettings {
   /**
    * The human readable name for this language.
    */

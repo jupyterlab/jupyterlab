@@ -196,7 +196,7 @@ class OutputAreaWidget extends Widget {
     widget.addClass(OUTPUT_CLASS);
     let bundle: MimeBundle;
     this._sanitized = false;
-    switch(output.output_type) {
+    switch (output.output_type) {
     case 'execute_result':
       bundle = (output as IExecuteResult).data;
       widget.addClass(EXECUTE_CLASS);
@@ -212,7 +212,7 @@ class OutputAreaWidget extends Widget {
       break;
     case 'stream':
       bundle = {'jupyter/console-text': (output as IStream).text};
-      if ((output as IStream).name == 'stdout') {
+      if ((output as IStream).name === 'stdout') {
         widget.addClass(STDOUT_CLASS);
       } else {
         widget.addClass(STDERR_CLASS);
@@ -271,7 +271,7 @@ class OutputAreaWidget extends Widget {
   protected outputsChanged(sender: ObservableList<IOutput>, args: IListChangedArgs<IOutput>) {
     let layout = this.layout as PanelLayout;
     let widget: Widget;
-    switch(args.type) {
+    switch (args.type) {
     case ListChangeType.Add:
       let value = args.newValue as IOutput;
       layout.insertChild(args.newIndex, this.createOutput(value));

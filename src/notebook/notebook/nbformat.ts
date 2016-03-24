@@ -40,7 +40,7 @@ interface INotebookMetadata {
  */
 export
 interface INotebookContent {
-  metadata: INotebookMetadata
+  metadata: INotebookMetadata;
   nbformat_minor: number;
   nbformat: number;
   cells: ICell[];

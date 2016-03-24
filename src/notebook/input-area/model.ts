@@ -120,7 +120,7 @@ class InputAreaModel implements IInputAreaModel {
     return this._editor === null;
   }
 
-  /** 
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
@@ -153,7 +153,7 @@ namespace InputAreaModelPrivate {
   export
   const collapsedProperty = new Property<InputAreaModel, boolean>({
     name: 'collapsed',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 
   /**
@@ -162,6 +162,6 @@ namespace InputAreaModelPrivate {
   export
   const promptProperty = new Property<InputAreaModel, string>({
     name: 'prompt',
-    notify: stateChangedSignal,
+    notify: stateChangedSignal
   });
 }

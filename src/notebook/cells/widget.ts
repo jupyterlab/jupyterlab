@@ -245,7 +245,7 @@ class MarkdownCellWidget extends BaseCellWidget {
    * Change handler for model updates.
    */
   protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
-    switch(args.name) {
+    switch (args.name) {
     case 'rendered':
       this._dirty = true;
       this.update();
