@@ -11,7 +11,7 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  PanelLayout
+  Panel, PanelLayout
 } from 'phosphor-panel';
 
 import {
@@ -192,7 +192,7 @@ class OutputAreaWidget extends Widget {
    * Create an output node from an output model.
    */
   protected createOutput(output: IOutput): Widget {
-    let widget = new Widget();
+    let widget = new Panel();
     widget.addClass(OUTPUT_CLASS);
     let bundle: MimeBundle;
     this._sanitized = false;
@@ -200,11 +200,11 @@ class OutputAreaWidget extends Widget {
     case 'execute_result':
       bundle = (output as IExecuteResult).data;
       widget.addClass(EXECUTE_CLASS);
-      let prompt = document.createElement('div');
-      prompt.className = PROMPT_CLASS;
+      let prompt = new Widget();
+      prompt.addClass(PROMPT_CLASS);
       let count = (output as IExecuteResult).execution_count;
-      prompt.textContent = `Out [${count === null ? ' ' : count}]:`;
-      widget.node.appendChild(prompt);
+      prompt.node.textContent = `Out [${count === null ? ' ' : count}]:`;
+      widget.addChild(prompt);
       break;
     case 'display_data':
       bundle = (output as IDisplayData).data;
