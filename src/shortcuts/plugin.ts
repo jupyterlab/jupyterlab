@@ -95,17 +95,17 @@ const SHORTCUTS = [
     command: 'notebook-cells:to-code',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Y']
-  }, 
+  },
   {
     command: 'notebook-cells:to-markdown',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['M']
-  }, 
+  },
   {
     command: 'notebook-cells:to-raw',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['R']
-  }, 
+  },
   {
     command: 'notebook-cells:cut',
     selector: '.jp-Notebook.jp-mod-commandMode',
@@ -165,5 +165,3 @@ const shortcutsExtension = {
     return Promise.resolve(void 0);
   }
 };
-
-

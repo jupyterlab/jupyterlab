@@ -3,16 +3,12 @@
 'use strict';
 
 import {
-  FileHandler, AbstractFileHandler, DocumentManager
+  FileHandler, DocumentManager
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
   Application
 } from 'phosphide/lib/core/application';
-
-import {
-  Widget
-} from 'phosphor-widget';
 
 import {
   JupyterServices
@@ -30,5 +26,5 @@ const fileHandlerExtension = {
     let handler = new FileHandler(services.contentsManager);
     manager.registerDefault(handler);
     return Promise.resolve(void 0);
-  },
+  }
 };

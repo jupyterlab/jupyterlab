@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  TerminalWidget, ITerminalOptions
+  TerminalWidget
 } from 'jupyter-js-ui/lib/terminal';
 
 import {
@@ -16,7 +16,7 @@ import {
 
 
 /**
- * The default terminal extension. 
+ * The default terminal extension.
  */
 export
 const terminalExtension = {

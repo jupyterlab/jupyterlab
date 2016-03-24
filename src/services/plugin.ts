@@ -75,5 +75,5 @@ const servicesProvider = {
   provides: JupyterServices,
   resolve: () => {
     return new JupyterServices();
-  },
+  }
 };

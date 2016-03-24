@@ -23,7 +23,7 @@ import {
 } from 'phosphor-properties';
 
 import {
-  Menu, MenuBar, MenuItem
+  Menu, MenuItem
 } from 'phosphor-menus';
 
 import {
@@ -78,11 +78,11 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
     if (tabs instanceof TabPanel) {
       tabs.currentWidget = widget;
     }
-  }
+  };
 
   let onFileChanged = (args: IChangedArgs<string>) => {
     manager.rename(args.oldValue, args.newValue);
-  }
+  };
 
   model.openRequested.connect((bModel, model) => onOpenRequested(model));
   model.fileChanged.connect((mModel, args) => onFileChanged(args));
@@ -228,7 +228,7 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
 
   widget.widgetFactory = model => {
     return manager.open(model);
-  }
+  };
 
   widget.title.text = 'Files';
   widget.id = 'file-browser';
@@ -309,6 +309,6 @@ function createMenu(fbWidget: FileBrowserWidget):  Menu {
       text: 'Shutdown Kernel',
       icon: 'fa fa-stop-circle-o',
       handler: () => { fbWidget.shutdownKernels(); }
-    }),
+    })
   ]);
 }

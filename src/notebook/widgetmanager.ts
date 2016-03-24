@@ -23,7 +23,7 @@ import 'jupyter-js-widgets/css/widgets.min.css';
 export
 class WidgetManager extends ManagerBase {
   constructor(panel: Panel) {
-    super()
+    super();
     this._panel = panel;
   }
 

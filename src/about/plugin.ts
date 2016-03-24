@@ -18,12 +18,12 @@ export
 const aboutExtension = {
   id: 'jupyter.extensions.about',
   activate: activateAbout
-}
+};
 
 
 function activateAbout(app: Application): void {
   let widget = new Widget();
-  let commandId = 'about-jupyterlab:show'
+  let commandId = 'about-jupyterlab:show';
   widget.id = 'about-jupyterlab';
   widget.title.text = 'About';
   widget.title.closable = true;

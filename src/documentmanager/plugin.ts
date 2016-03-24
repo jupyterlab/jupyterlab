@@ -3,31 +3,8 @@
 'use strict';
 
 import {
-  IContentsModel
-} from 'jupyter-js-services';
-
-import {
-  AbstractFileHandler, DocumentManager
+  DocumentManager
 } from 'jupyter-js-ui/lib/docmanager';
-
-import {
-  FileBrowserWidget
-} from 'jupyter-js-ui/lib/filebrowser';
-
-import {
-  Application
-} from 'phosphide/lib/core/application';
-
-import * as arrays
- from 'phosphor-arrays';
-
-import {
-  Property
-} from 'phosphor-properties';
-
-import {
-  Widget
-} from 'phosphor-widget';
 
 
 /**
@@ -52,5 +29,5 @@ const documentManagerProvider = {
   provides: DocumentManager,
   resolve: () => {
     return new DocumentManager();
-  },
+  }
 };

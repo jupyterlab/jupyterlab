@@ -3,12 +3,8 @@
 'use strict';
 
 import {
-  NotebookWidget, NotebookModel, serialize, deserialize, INotebookModel
+  NotebookWidget, NotebookModel, serialize, deserialize
 } from 'jupyter-js-notebook';
-
-import {
-  isCodeCellModel, isMarkdownCellModel
-} from 'jupyter-js-notebook/lib/cells';
 
 import {
   IContentsModel, IContentsManager, IContentsOpts
@@ -36,7 +32,7 @@ const notebookHandlerExtension = {
   id: 'jupyter.extensions.notebookHandler',
   requires: [DocumentManager, JupyterServices],
   activate: activateNotebookHandler
-}
+};
 
 
 /**
@@ -64,7 +60,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
    * Get the list of file extensions supported by the handler.
    */
   get fileExtensions(): string[] {
-    return ['.ipynb']
+    return ['.ipynb'];
   }
 
   /**
