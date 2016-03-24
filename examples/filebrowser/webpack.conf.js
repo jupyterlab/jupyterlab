@@ -15,12 +15,7 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
+      { test: /\.html$/, loader: "file?name=[name].[ext]" }
     ]
-  },
-  plugins: [
-    new ContextReplacementPlugin(
-      /codemirror\/mode.*$/,
-      /codemirror\/mode.*\.js$/
-    )
-  ]
+  }
 }

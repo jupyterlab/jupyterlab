@@ -1056,9 +1056,18 @@ declare module CodeMirror {
      * id will be the id for the defined mode. Typically, you should use this second argument to defineMode as your module scope function
      * (modes should not leak anything into the global scope!), i.e. write your whole mode inside this function.
      */
-    function defineMode(id: string, modefactory: ModeFactory<any>, baseMode?: string): void;
+    function defineMode(id: string, modefactory: ModeFactory<any>): void;
+    function defineMode(id: string, modefactory: ModeFactory<any>, base: any): void;
 
-    function defineMIME(mime: string, modeSpec: string | modespec): void;
+    /**
+     * Define a mimetype.
+     */
+    function defineMIME(mimetype: string, mode: any): void;
+
+    /**
+     * A mode that encompasses many mode types.
+     */
+    function multiplexingMode<T>(...modes: any[]): Mode<T>;
 
     /**
      * The first argument is a configuration object as passed to the mode constructor function, and the second argument
