@@ -77,9 +77,9 @@ const cmdIds = {
 const NB_CONTAINER = 'jp-Notebook-container';
 
 /**
- * The class name added to notebook panes.
+ * The class name added to notebook panels.
  */
-const NB_PANE = 'jp-Notebook-pane';
+const NB_PANE = 'jp-Notebook-panel';
 
 
 /**
