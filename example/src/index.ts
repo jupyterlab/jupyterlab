@@ -86,7 +86,7 @@ function main(): void {
   },
   {
     category: 'Notebook',
-    text: 'Change Kernel',
+    text: 'Switch Kernel',
     handler: () => {
       if (!kernelspecs) {
         return;
