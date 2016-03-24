@@ -6,10 +6,6 @@ import {
   Application
 } from 'phosphide/lib/core/application';
 
-import {
-  Widget
-} from 'phosphor-widget';
-
 
 /**
  * The main extension.
@@ -19,9 +15,9 @@ const mainExtension = {
   id: 'jupyter.extensions.main',
   activate: (app: Application) => {
     window.onbeforeunload = event => {
-      let msg = 'Are you sure you want to exit JupyterLab?'
+      let msg = 'Are you sure you want to exit JupyterLab?';
       msg += '\nAny unsaved changes will be lost.';
       return msg;
-    }
+    };
   }
-}
+};

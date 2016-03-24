@@ -8,13 +8,9 @@ import {
 } from 'jupyter-js-notebook';
 
 import {
-  isCodeCellModel, isMarkdownCellModel
-} from 'jupyter-js-notebook/lib/cells';
-
-import {
   IContentsModel, IContentsManager, IContentsOpts,
-  NotebookSessionManager, INotebookSessionManager,
-  INotebookSession, IKernelMessage, IComm, KernelStatus
+  INotebookSessionManager, INotebookSession,
+  IKernelMessage, IComm, KernelStatus
 } from 'jupyter-js-services';
 
 import {
@@ -34,7 +30,7 @@ import {
 } from 'phosphor-panel';
 
 import {
-  IChangedArgs, Property
+  IChangedArgs
 } from 'phosphor-properties';
 
 import {
@@ -71,7 +67,7 @@ const cmdIds = {
   selectNext: 'notebook-cells:select-next',
   editMode: 'notebook-cells:editMode',
   commandMode: 'notebook-cells:commandMode'
-}
+};
 
 
 /**
@@ -99,7 +95,7 @@ const notebookHandlerExtension = {
   id: 'jupyter.extensions.notebookHandler',
   requires: [DocumentManager, JupyterServices],
   activate: activateNotebookHandler
-}
+};
 
 
 /**
@@ -228,94 +224,94 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
       let model = handler.currentModel;
       if (model) model.mode = 'edit';
     }
-  },
+  }
   ]);
   app.palette.add([
   {
     command: cmdIds['run'],
     category: 'Notebook Cell Operations',
-    text: 'Run selected',
+    text: 'Run selected'
   },
   {
     command: cmdIds['runAndAdvance'],
     category: 'Notebook Cell Operations',
-    text: 'Run and Advance',
+    text: 'Run and Advance'
   },
   {
     command: cmdIds['runAndInsert'],
     category: 'Notebook Cell Operations',
-    text: 'Run and Insert',
+    text: 'Run and Insert'
   },
   {
     command: cmdIds['interrupt'],
     category: 'Notebook Operations',
-    text: 'Interrupt Kernel',
+    text: 'Interrupt Kernel'
   },
   {
     command: cmdIds['restart'],
     category: 'Notebook Operations',
-    text: 'Restart Kernel',
+    text: 'Restart Kernel'
   },
   {
     command: cmdIds['toCode'],
     category: 'Notebook Cell Operations',
-    text: 'Covert to Code',
+    text: 'Covert to Code'
   },
   {
     command: cmdIds['toMarkdown'],
     category: 'Notebook Cell Operations',
-    text: 'Covert to Markdown',
+    text: 'Covert to Markdown'
   },
   {
     command: cmdIds['toRaw'],
     category: 'Notebook Cell Operations',
-    text: 'Covert to Raw',
+    text: 'Covert to Raw'
   },
   {
     command: cmdIds['cut'],
     category: 'Notebook Cell Operations',
-    text: 'Cut selected',
+    text: 'Cut selected'
   },
   {
     command: cmdIds['copy'],
     category: 'Notebook Cell Operations',
-    text: 'Copy selected',
+    text: 'Copy selected'
   },
   {
     command: cmdIds['paste'],
     category: 'Notebook Cell Operations',
-    text: 'Paste cell(s)',
+    text: 'Paste cell(s)'
   },
   {
     command: cmdIds['insertAbove'],
     category: 'Notebook Cell Operations',
-    text: 'Insert cell above',
+    text: 'Insert cell above'
   },
   {
     command: cmdIds['insertBelow'],
     category: 'Notebook Cell Operations',
-    text: 'Insert cell below',
+    text: 'Insert cell below'
   },
   {
     command: cmdIds['selectPrevious'],
     category: 'Notebook Cell Operations',
-    text: 'Select previous cell',
+    text: 'Select previous cell'
   },
   {
     command: cmdIds['selectNext'],
     category: 'Notebook Cell Operations',
-    text: 'Select next cell',
+    text: 'Select next cell'
   },
   {
     command: cmdIds['editMode'],
     category: 'Notebook Cell Operations',
-    text: 'To Edit Mode',
+    text: 'To Edit Mode'
   },
   {
     command: cmdIds['commandMode'],
     category: 'Notebook Cell Operations',
-    text: 'To Command Mode',
-  },
+    text: 'To Command Mode'
+  }
   ]);
   return Promise.resolve(void 0);
 }
@@ -400,19 +396,19 @@ class NotebookPane extends Panel {
     let commHandler = (comm: IComm, msg: IKernelMessage) => {
       console.log('comm message', msg);
 
-      let modelPromise = manager.handle_comm_open(comm, msg);
+      manager.handle_comm_open(comm, msg);
 
-      comm.onMsg = (msg) => {
-        manager.handle_comm_open(comm, msg)
+      comm.onMsg = (message) => {
+        manager.handle_comm_open(comm, message);
         // create the widget model and (if needed) the view
-        console.log('comm widget message', msg);
-      }
-      comm.onClose = (msg) => {
-        console.log('comm widget close', msg);
-      }
+        console.log('comm widget message', message);
+      };
+      comm.onClose = (message) => {
+        console.log('comm widget close', message);
+      };
     };
 
-    this._session.kernel.registerCommTarget('ipython.widget', commHandler)
+    this._session.kernel.registerCommTarget('ipython.widget', commHandler);
     this._session.kernel.registerCommTarget('jupyter.widget', commHandler);
   }
 
@@ -438,7 +434,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
    * Get the list of file extensions supported by the handler.
    */
   get fileExtensions(): string[] {
-    return ['.ipynb']
+    return ['.ipynb'];
   }
 
   /**
@@ -485,7 +481,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
       host: widget.node
     }).then(result => {
       if (result.text === 'OK') {
-        return widget.session.shutdown()
+        return widget.session.shutdown();
       }
     }).then(() => {
       return super.close(widget);

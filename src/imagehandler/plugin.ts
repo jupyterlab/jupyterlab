@@ -34,7 +34,7 @@ const imageHandlerExtension = {
     let handler = new ImageHandler(services.contentsManager);
     manager.register(handler);
     return Promise.resolve(void 0);
-  },
+  }
 };
 
 
@@ -45,7 +45,7 @@ class ImageHandler extends AbstractFileHandler<Widget> {
    */
   get fileExtensions(): string[] {
     return ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico', '.xbm',
-            '.tiff', '.tif']
+            '.tiff', '.tif'];
   }
 
   /**
@@ -66,7 +66,6 @@ class ImageHandler extends AbstractFileHandler<Widget> {
    * Create the widget from an `IContentsModel`.
    */
   protected createWidget(model: IContentsModel): Widget {
-    let ext = model.path.split('.').pop();
     var widget = new Widget();
     widget.node.tabIndex = 0;
     let image = document.createElement('img');

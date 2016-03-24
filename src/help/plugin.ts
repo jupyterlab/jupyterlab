@@ -7,10 +7,6 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  Widget
-} from 'phosphor-widget';
-
-import {
   IFrame
 } from './iframe';
 
@@ -97,7 +93,7 @@ function activateHelpHandler(app: Application): Promise<void> {
     {
       id: 'help-doc:toggle',
       handler: toggleHelp
-    },
+    }
   ]);
 
   let helpPaletteItems = COMMANDS.map(command => {
