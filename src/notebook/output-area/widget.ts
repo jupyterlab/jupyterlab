@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  RenderMime
+} from 'jupyter-js-ui/lib/rendermime';
+
+import {
   IListChangedArgs, ListChangeType, ObservableList
 } from 'phosphor-observablelist';
 
@@ -21,22 +25,6 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
-
-import {
-  Transformime,
-  TextTransformer,
-  ImageTransformer,
-  HTMLTransformer
-} from 'transformime';
-
-import {
-  consoleTextTransform,
-  markdownTransform,
-  LaTeXTransform,
-  PDFTransform,
-  SVGTransform,
-  ScriptTransform
-} from 'transformime-jupyter-transformers';
 
 import {
   sanitize
@@ -108,25 +96,6 @@ const RESULT_CLASS = 'jp-OutputArea-result';
 
 
 /**
- * A list of transformers used to render outputs
- *
- * #### Notes
- * The transformers are in ascending priority--later transforms are more
- * important than earlier ones.
- */
-const transformers = [
-  TextTransformer,
-  PDFTransform,
-  ImageTransformer,
-  SVGTransform,
-  consoleTextTransform,
-  LaTeXTransform,
-  markdownTransform,
-  HTMLTransformer,
-  ScriptTransform
-];
-
-/**
  * A list of outputs considered safe.
  */
 const safeOutputs = ['text/plain', 'text/latex', 'image/png', 'image/jpeg',
@@ -137,11 +106,6 @@ const safeOutputs = ['text/plain', 'text/latex', 'image/png', 'image/jpeg',
  */
 const sanitizable = ['text/svg', 'text/html'];
 
-/**
- * The global transformime transformer.
- */
-const transform = new Transformime(transformers);
-
 
 /**
  * An output area widget.
@@ -151,10 +115,11 @@ class OutputAreaWidget extends Widget {
   /**
    * Construct an output area widget.
    */
-  constructor(model: IOutputAreaModel) {
+  constructor(model: IOutputAreaModel, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(OUTPUT_AREA_CLASS);
     this._model = model;
+    this._rendermime = rendermime;
     this.layout = new PanelLayout();
     model.stateChanged.connect(this.modelStateChanged, this);
     let outputs = model.outputs;
@@ -251,10 +216,16 @@ class OutputAreaWidget extends Widget {
       }
     }
 
-    transform.transform(bundle, document).then(result => {
-      widget.node.appendChild(result.el);
-      result.el.classList.add(RESULT_CLASS);
-    });
+    if (bundle) {
+      let child = this._rendermime.render(bundle);
+      if (child) {
+        child.addClass(RESULT_CLASS);
+        widget.addChild(child);
+      } else {
+        console.log("Did not find renderer for output mimebundle.")
+        console.log(bundle);
+      }
+    }
     return widget;
   }
 
@@ -344,4 +315,5 @@ class OutputAreaWidget extends Widget {
 
   private _sanitized = false;
   private _model: IOutputAreaModel = null;
+  private _rendermime: RenderMime<Widget> = null;
 }
