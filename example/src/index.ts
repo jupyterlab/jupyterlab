@@ -392,8 +392,7 @@ function main(): void {
   ];
   keymap.add(bindings);
 
-  //contents.get(NOTEBOOK, {}).then(data => {
-  contents.newUntitled('', { type: 'notebook' }).then(data => {
+  contents.get(NOTEBOOK, {}).then(data => {
     deserialize(data.content, nbModel);
 
     let name = 'python';
