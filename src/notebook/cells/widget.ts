@@ -242,6 +242,13 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   /**
+   * Handle `after-attach` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.update();
+  }
+
+  /**
    * Change handler for model updates.
    */
   protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
