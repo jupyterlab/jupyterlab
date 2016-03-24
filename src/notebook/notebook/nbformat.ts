@@ -48,9 +48,12 @@ interface INotebookContent {
 
 /**
  * A type alias for a multiline string.
+ *
+ * #### Notes
+ * On disk, this could be a string[] too.
  */
-export
-type multilineString = string | string[];
+export 
+type multilineString = string;
 
 
 /**

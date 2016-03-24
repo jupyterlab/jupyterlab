@@ -238,14 +238,7 @@ class OutputAreaWidget extends Widget {
         } else if (sanitizable.indexOf(key) !== -1) {
           let out = bundle[key];
           if (typeof out === 'string') {
-            bundle[key] = sanitize(out as string);
-            this._sanitized = true;
-          } else {
-            bundle[key] = [];
-            let outs = out as string[];
-            for (let out of outs) {
-              (bundle[key] as string[]).push(sanitize(out));
-            }
+            bundle[key] = sanitize(out);
             this._sanitized = true;
           }
         } else {

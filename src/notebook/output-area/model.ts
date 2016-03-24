@@ -171,10 +171,7 @@ class OutputAreaModel implements IOutputAreaModel {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
       // This also replaces the metadata of the last item.
-      let text = output.text as string;
-      if (Array.isArray(output.text)) {
-        text = (output.text as string[]).join('\n');
-      }
+      let text: string = output.text;
       output.text = lastOutput.text as string + text;
       this.outputs.set(-1, output);
     } else {
