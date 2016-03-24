@@ -30,16 +30,16 @@ import {
 } from 'phosphor-widget';
 
 import {
+  loadModeByFileName
+} from '../codemirror';
+
+import {
   showDialog
 } from '../dialog';
 
 import {
   JupyterCodeMirrorWidget as CodeMirrorWidget
 } from './widget';
-
-import {
-  loadModeByFileName
-} from './utils';
 
 
 /**
