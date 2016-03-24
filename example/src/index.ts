@@ -6,7 +6,7 @@
 'use strict';
 
 import {
-  NotebookModel, NotebookPane, NotebookManager,
+  NotebookModel, NotebookPanel, NotebookManager,
   deserialize, selectKernel, trustNotebook
 } from 'jupyter-js-notebook';
 
@@ -55,7 +55,7 @@ function main(): void {
   let contents = new ContentsManager(SERVER_URL);
   let nbModel = new NotebookModel();
   let nbManager = new NotebookManager(nbModel, contents);
-  let nbWidget = new NotebookPane(nbManager);
+  let nbWidget = new NotebookPanel(nbManager);
   nbWidget.title.text = NOTEBOOK;
 
   let pModel = new StandardPaletteModel();
@@ -86,7 +86,7 @@ function main(): void {
   },
   {
     category: 'Notebook',
-    text: 'Change Kernel',
+    text: 'Switch Kernel',
     handler: () => {
       if (!kernelspecs) {
         return;
