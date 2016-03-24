@@ -5,14 +5,15 @@
 import * as CodeMirror
   from 'codemirror';
 
-// Bundle common modes
-import 'codemirror/mode/python/python';
+import './codemirror-ipython';
+import './codemirror-ipythongfm';
+
+// Bundle other common modes
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/julia/julia';
 import 'codemirror/mode/r/r';
 import 'codemirror/mode/markdown/markdown';
-import 'codemirror/mode/gfm/gfm';
 
 
 /**
