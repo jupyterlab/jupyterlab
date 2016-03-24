@@ -609,6 +609,7 @@ namespace NotebookModelPrivate {
   export
   const modeProperty = new Property<NotebookModel, NotebookMode>({
     name: 'mode',
+    changed: modeChanged,
     notify: stateChangedSignal,
   });
 
@@ -629,10 +630,25 @@ namespace NotebookModelPrivate {
     name: 'selected'
   });
 
+  /**
+   * Handle a change in mode.
+   */
+  function modeChanged(model: INotebookModel, mode: NotebookMode): void {
+    let cells = model.cells;
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.get(i);
+      if (i === model.activeCellIndex || model.isSelected(cell)) {
+        if (isMarkdownCellModel(cell)) {
+          cell.rendered = mode === 'edit';
+        }
+      }
+    }
+  }
+
   /*
    * Handle a change to the model session.
    */
-  function sessionChanged(model: NotebookModel, session: INotebookSession): void {
+  function sessionChanged(model: INotebookModel, session: INotebookSession): void {
     model.session.kernelChanged.connect(() => { kernelChanged(model); });
     // Update the kernel data now.
     kernelChanged(model);
