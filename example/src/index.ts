@@ -7,7 +7,7 @@
 
 import {
   NotebookModel, NotebookPanel, NotebookManager,
-  deserialize, selectKernel, trustNotebook
+  deserialize, selectKernel, trustNotebook, findKernel
 } from 'jupyter-js-notebook';
 
 import {
@@ -73,9 +73,6 @@ function main(): void {
   window.onresize = () => { panel.update(); };
 
   let kernelspecs: IKernelSpecIds;
-  getKernelSpecs({}).then(specs => {
-    kernelspecs = specs;
-  });
 
   let items: IStandardPaletteItemOptions[] = [
   {
@@ -394,19 +391,16 @@ function main(): void {
 
   contents.get(NOTEBOOK, {}).then(data => {
     deserialize(data.content, nbModel);
-
-    let name = 'python';
-    if (nbModel.metadata && nbModel.metadata.kernelspec) {
-      name = nbModel.metadata.kernelspec.name;
-    }
-
-    // start session
-    startNewSession({
-      notebookPath: NOTEBOOK,
-      kernelName: name,
-      baseUrl: SERVER_URL
-    }).then(session => {
-      nbModel.session = session;
+    getKernelSpecs({}).then(specs => {
+      kernelspecs = specs;
+      // start session
+      startNewSession({
+        notebookPath: NOTEBOOK,
+        kernelName: findKernel(nbModel, specs),
+        baseUrl: SERVER_URL
+      }).then(session => {
+        nbModel.session = session;
+      });
     });
   });
 }
