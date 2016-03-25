@@ -2,7 +2,8 @@
   "private": true,
   "name": "jupyter-js-plugins-example",
   "dependencies": {
-    "jupyter-js-plugins": "file:.."
+    "jupyter-js-plugins": "file:..",
+    "jupyter-js-ui": "^0.5.1"
   },
   "scripts": {
     "build": "webpack --config webpack.conf.js",
