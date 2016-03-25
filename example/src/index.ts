@@ -40,6 +40,10 @@ import {
   SplitPanel
 } from 'phosphor-splitpanel';
 
+import {
+  Widget
+} from 'phosphor-widget';
+
 import 'jupyter-js-notebook/lib/index.css';
 import 'jupyter-js-notebook/lib/theme.css';
 import 'jupyter-js-ui/lib/dialog/index.css';
@@ -64,25 +68,25 @@ function main(): void {
   let contents = new ContentsManager(SERVER_URL);
   let nbModel = new NotebookModel();
   let nbManager = new NotebookManager(nbModel, contents);
+  let rendermime = new RenderMime<Widget>();
+  const transformers = [
+    new JavascriptRenderer(),
+    new HTMLRenderer(),
+    new ImageRenderer(),
+    new SVGRenderer(),
+    new LatexRenderer(),
+    new ConsoleTextRenderer(),
+    new TextRenderer()
+  ];
 
-  let imgRenderer = new ImageRenderer();
-  let jsRenderer = new JavascriptRenderer();
-  let renderer = new RenderMime({
-    'text/javascript': jsRenderer,
-    'application/javascript': jsRenderer,
-    'text/html': new HTMLRenderer(),
-    'text/latex': new LatexRenderer(),
-    'image/png': imgRenderer,
-    'image/jpeg': imgRenderer,
-    'image/gif': imgRenderer,
-    'image/svg+xml': new SVGRenderer(),
-    'text/plain': new TextRenderer(),
-    'application/vnd.jupyter.console-text': new ConsoleTextRenderer(),
+  for (let t of transformers) {
+    for (let m of t.mimetypes) {
+      rendermime.order.push(m);
+      rendermime.renderers[m] = t;
+    }
+  }
 
-  }, ['text/javascript', 'application/javascript', 'text/html', 'text/latex', 
-      'image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'text/plain',
-      'application/vnd.jupyter.console-text']);
-  let nbWidget = new NotebookPanel(nbManager, renderer);
+  let nbWidget = new NotebookPanel(nbManager, rendermime);
   nbWidget.title.text = NOTEBOOK;
 
   let pModel = new StandardPaletteModel();
