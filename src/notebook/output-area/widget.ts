@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  RenderMime
+} from 'jupyter-js-ui/lib/rendermime';
+
+import {
   IListChangedArgs, ListChangeType, ObservableList
 } from 'phosphor-observablelist';
 
@@ -11,7 +15,7 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  PanelLayout
+  Panel, PanelLayout
 } from 'phosphor-panel';
 
 import {
@@ -21,22 +25,6 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
-
-import {
-  Transformime,
-  TextTransformer,
-  ImageTransformer,
-  HTMLTransformer
-} from 'transformime';
-
-import {
-  consoleTextTransform,
-  markdownTransform,
-  LaTeXTransform,
-  PDFTransform,
-  SVGTransform,
-  ScriptTransform
-} from 'transformime-jupyter-transformers';
 
 import {
   sanitize
@@ -108,39 +96,15 @@ const RESULT_CLASS = 'jp-OutputArea-result';
 
 
 /**
- * A list of transformers used to render outputs
- *
- * #### Notes
- * The transformers are in ascending priority--later transforms are more
- * important than earlier ones.
- */
-const transformers = [
-  TextTransformer,
-  PDFTransform,
-  ImageTransformer,
-  SVGTransform,
-  consoleTextTransform,
-  LaTeXTransform,
-  markdownTransform,
-  HTMLTransformer,
-  ScriptTransform
-];
-
-/**
  * A list of outputs considered safe.
  */
 const safeOutputs = ['text/plain', 'text/latex', 'image/png', 'image/jpeg',
-                     'jupyter/console-text'];
+                     'application/vnd.jupyter.console-text'];
 
 /**
  * A list of outputs that are sanitizable.
  */
 const sanitizable = ['text/svg', 'text/html'];
-
-/**
- * The global transformime transformer.
- */
-const transform = new Transformime(transformers);
 
 
 /**
@@ -151,10 +115,11 @@ class OutputAreaWidget extends Widget {
   /**
    * Construct an output area widget.
    */
-  constructor(model: IOutputAreaModel) {
+  constructor(model: IOutputAreaModel, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(OUTPUT_AREA_CLASS);
     this._model = model;
+    this._rendermime = rendermime;
     this.layout = new PanelLayout();
     model.stateChanged.connect(this.modelStateChanged, this);
     let outputs = model.outputs;
@@ -192,7 +157,7 @@ class OutputAreaWidget extends Widget {
    * Create an output node from an output model.
    */
   protected createOutput(output: IOutput): Widget {
-    let widget = new Widget();
+    let widget = new Panel();
     widget.addClass(OUTPUT_CLASS);
     let bundle: MimeBundle;
     this._sanitized = false;
@@ -200,18 +165,18 @@ class OutputAreaWidget extends Widget {
     case 'execute_result':
       bundle = (output as IExecuteResult).data;
       widget.addClass(EXECUTE_CLASS);
-      let prompt = document.createElement('div');
-      prompt.className = PROMPT_CLASS;
+      let prompt = new Widget();
+      prompt.addClass(PROMPT_CLASS);
       let count = (output as IExecuteResult).execution_count;
-      prompt.textContent = `Out [${count === null ? ' ' : count}]:`;
-      widget.node.appendChild(prompt);
+      prompt.node.textContent = `Out [${count === null ? ' ' : count}]:`;
+      widget.addChild(prompt);
       break;
     case 'display_data':
       bundle = (output as IDisplayData).data;
       widget.addClass(DISPLAY_CLASS);
       break;
     case 'stream':
-      bundle = {'jupyter/console-text': (output as IStream).text};
+      bundle = {'application/vnd.jupyter.console-text': (output as IStream).text};
       if ((output as IStream).name === 'stdout') {
         widget.addClass(STDOUT_CLASS);
       } else {
@@ -221,7 +186,7 @@ class OutputAreaWidget extends Widget {
     case 'error':
       let out: IError = output as IError;
       let traceback = out.traceback.join('\n');
-      bundle = {'jupyter/console-text': traceback || `${out.ename}: ${out.evalue}`};
+      bundle = {'application/vnd.jupyter.console-text': traceback || `${out.ename}: ${out.evalue}`};
       widget.addClass(ERROR_CLASS);
       break;
     default:
@@ -251,10 +216,16 @@ class OutputAreaWidget extends Widget {
       }
     }
 
-    transform.transform(bundle, document).then(result => {
-      widget.node.appendChild(result.el);
-      result.el.classList.add(RESULT_CLASS);
-    });
+    if (bundle) {
+      let child = this._rendermime.render(bundle);
+      if (child) {
+        child.addClass(RESULT_CLASS);
+        widget.addChild(child);
+      } else {
+        console.log("Did not find renderer for output mimebundle.")
+        console.log(bundle);
+      }
+    }
     return widget;
   }
 
@@ -344,4 +315,5 @@ class OutputAreaWidget extends Widget {
 
   private _sanitized = false;
   private _model: IOutputAreaModel = null;
+  private _rendermime: RenderMime<Widget> = null;
 }

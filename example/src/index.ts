@@ -16,6 +16,15 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  RenderMime
+} from 'jupyter-js-ui/lib/rendermime';
+
+import {
+  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
+  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer
+} from 'jupyter-js-ui/lib/renderers';
+
+import {
   getBaseUrl
 } from 'jupyter-js-utils';
 
@@ -30,6 +39,10 @@ import {
 import {
   SplitPanel
 } from 'phosphor-splitpanel';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 import 'jupyter-js-notebook/lib/index.css';
 import 'jupyter-js-notebook/lib/theme.css';
@@ -55,7 +68,25 @@ function main(): void {
   let contents = new ContentsManager(SERVER_URL);
   let nbModel = new NotebookModel();
   let nbManager = new NotebookManager(nbModel, contents);
-  let nbWidget = new NotebookPanel(nbManager);
+  let rendermime = new RenderMime<Widget>();
+  const transformers = [
+    new JavascriptRenderer(),
+    new HTMLRenderer(),
+    new ImageRenderer(),
+    new SVGRenderer(),
+    new LatexRenderer(),
+    new ConsoleTextRenderer(),
+    new TextRenderer()
+  ];
+
+  for (let t of transformers) {
+    for (let m of t.mimetypes) {
+      rendermime.order.push(m);
+      rendermime.renderers[m] = t;
+    }
+  }
+
+  let nbWidget = new NotebookPanel(nbManager, rendermime);
   nbWidget.title.text = NOTEBOOK;
 
   let pModel = new StandardPaletteModel();
