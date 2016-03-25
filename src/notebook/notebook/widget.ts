@@ -204,14 +204,12 @@ class NotebookPanel extends Panel {
     this._manager = manager;
     let constructor = this.constructor as typeof NotebookPanel;
     this._toolbar = constructor.createToolbar(manager);
-    this.layout = new PanelLayout();
-    let layout = this.layout as PanelLayout;
-    layout.addChild(this._toolbar);
+    this.addChild(this._toolbar);
     let container = new Panel();
     container.addClass(NB_CONTAINER);
     this._notebook = constructor.createNotebook(manager.model, rendermime);
     container.addChild(this._notebook);
-    layout.addChild(container);
+    this.addChild(container);
   }
 
   /**

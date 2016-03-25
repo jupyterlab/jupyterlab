@@ -16,6 +16,15 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  RenderMime
+} from 'jupyter-js-ui/lib/rendermime';
+
+import {
+  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
+  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer
+} from 'jupyter-js-ui/lib/renderers';
+
+import {
   getBaseUrl
 } from 'jupyter-js-utils';
 
@@ -55,7 +64,25 @@ function main(): void {
   let contents = new ContentsManager(SERVER_URL);
   let nbModel = new NotebookModel();
   let nbManager = new NotebookManager(nbModel, contents);
-  let nbWidget = new NotebookPanel(nbManager);
+
+  let imgRenderer = new ImageRenderer();
+  let jsRenderer = new JavascriptRenderer();
+  let renderer = new RenderMime({
+    'text/javascript': jsRenderer,
+    'application/javascript': jsRenderer,
+    'text/html': new HTMLRenderer(),
+    'text/latex': new LatexRenderer(),
+    'image/png': imgRenderer,
+    'image/jpeg': imgRenderer,
+    'image/gif': imgRenderer,
+    'image/svg+xml': new SVGRenderer(),
+    'text/plain': new TextRenderer(),
+    'application/vnd.jupyter.console-text': new ConsoleTextRenderer(),
+
+  }, ['text/javascript', 'application/javascript', 'text/html', 'text/latex', 
+      'image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'text/plain',
+      'application/vnd.jupyter.console-text']);
+  let nbWidget = new NotebookPanel(nbManager, renderer);
   nbWidget.title.text = NOTEBOOK;
 
   let pModel = new StandardPaletteModel();
