@@ -48,8 +48,11 @@ class RenderMime<T> {
    * @param order - a list of mimetypes in order of precedence (earliest one has precedence).
    */
   constructor(renderers: MimeMap<IRenderer<T>> = {}, order: string[] = []) {
-    this._renderers = renderers;
-    this._order = order;
+    this._renderers = {};
+    for (let i in renderers) {
+      this._renderers[i] = renderers[i];
+    }
+    this._order = order.slice();
   }
 
   /**
@@ -77,6 +80,13 @@ class RenderMime<T> {
     }
   }
   
+  /**
+   * Clone the rendermime instance with shallow copies of data.
+   */
+  clone(): RenderMime<T> {
+    return new RenderMime<T>(this.renderers, this.order);
+  }
+
   /**
    * Get the renderer map.
    */
