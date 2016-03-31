@@ -13,14 +13,18 @@
     ],
     "files": [
         "../../src/typings/ansi-to-html/ansi-to-html.d.ts",
+        "../../src/typings/backbone/backbone-global.d.ts",
+        "../../src/typings/backbone/backbone.d.ts",
         "../../src/typings/codemirror/codemirror.d.ts",
         "../../src/typings/es6-promise/es6-promise.d.ts",
         "../../src/typings/expect.js/expect.js.d.ts",
+        "../../src/typings/jquery/jquery.d.ts",
         "../../src/typings/mathjax/mathjax.d.ts",
         "../../src/typings/mocha/mocha.d.ts",
         "../../src/typings/moment/moment.d.ts",
         "../../src/typings/require/require.d.ts",
         "../../src/typings/term.js/term.js.d.ts",
+        "../../src/typings/underscore/underscore.d.ts",
         "index.ts"
     ]
 }
