@@ -72,7 +72,7 @@ const DEFAULT_METADATA = {
   language_info: {
     name: 'unknown'
   }
-}
+};
 
 
 /**
