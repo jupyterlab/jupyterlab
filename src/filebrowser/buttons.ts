@@ -343,9 +343,9 @@ namespace Private {
     }).catch(error => {
       if (error.statusText === 'Conflict') {
         return handleExisting(widget, edit.value, contents);
-      } 
+      }
       return utils.showErrorMessage(widget, 'File creation error', error).then(
-        () => { return void 0 });
+        () => { return void 0; });
     });
   }
 
@@ -356,7 +356,7 @@ namespace Private {
     return showDialog({
       title: 'File already exists',
       body: `File "${name}" already exists, try again?`,
-      host: widget.node.parentElement,
+      host: widget.node.parentElement
     }).then(value => {
       if (value.text === 'OK') {
         return doRename(widget, contents);

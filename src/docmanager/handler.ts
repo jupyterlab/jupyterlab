@@ -13,8 +13,7 @@ import * as arrays
   from 'phosphor-arrays';
 
 import {
-  IMessageFilter, IMessageHandler, Message, installMessageFilter,
-  removeMessageFilter
+  IMessageFilter, IMessageHandler, Message, installMessageFilter
 } from 'phosphor-messaging';
 
 import {
@@ -26,7 +25,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  Widget, Title
+  Widget
 } from 'phosphor-widget';
 
 import {
@@ -66,14 +65,14 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    * Get the list of file extensions explicitly supported by the handler.
    */
   get fileExtensions(): string[] {
-    return []
+    return [];
   }
 
   /**
    * Get the list of mime types explicitly supported by the handler.
    */
   get mimeTypes(): string[] {
-    return []
+    return [];
   }
 
   /**
@@ -291,7 +290,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    */
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
     let widget = this.resolveWidget(handler as T);
-    if (msg.type == 'close-request' && widget) {
+    if (msg.type === 'close-request' && widget) {
       this.close(widget);
       return true;
     }
@@ -409,7 +408,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
       this._activeWidget = widget;
       if (!prev) this.activated.emit(void 0);
     }
-  }
+  };
 
   private _activeWidget: T = null;
   private _manager: IContentsManager = null;
@@ -455,7 +454,7 @@ class FileHandler extends AbstractFileHandler<CodeMirrorWidget> {
 
 }
 
-/** 
+/**
  * A private namespace for AbstractFileHandler data.
  */
 namespace Private {

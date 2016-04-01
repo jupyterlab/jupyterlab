@@ -13,10 +13,6 @@ import * as arrays
   from 'phosphor-arrays';
 
 import {
-  IDisposable
-} from 'phosphor-disposable';
-
-import {
   Drag, DropAction, DropActions, IDragEvent, MimeData
 } from 'phosphor-dragdrop';
 
@@ -278,7 +274,7 @@ class DirListing extends Widget {
     if (model.last_modified) {
       let time = moment(model.last_modified).fromNow();
       modText = time === 'a few seconds ago' ? 'seconds ago' : time;
-      modTitle = moment(model.last_modified).format("YYYY-MM-DD HH:mm");
+      modTitle = moment(model.last_modified).format('YYYY-MM-DD HH:mm');
     }
 
     node.className = `${ITEM_CLASS} ${type}`;
@@ -571,7 +567,7 @@ class DirListing extends Widget {
       break;
     case 'click':
       this._evtClick(event as MouseEvent);
-      break
+      break;
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
@@ -776,13 +772,13 @@ class DirListing extends Widget {
     }
 
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
-    if (index == -1) {
+    if (index === -1) {
       return;
     }
     this._softSelection = '';
     let items = this._model.sortedItems;
     let selected = this._model.getSelected();
-    if (selected.indexOf(items[index].name) == -1) {
+    if (selected.indexOf(items[index].name) === -1) {
       this._softSelection = items[index].name;
     }
 
@@ -975,8 +971,8 @@ class DirListing extends Widget {
       if (this._softSelection !== item.name) {
         continue;
       }
-      var name = item.name;
-      var newPath = path + name;
+      let name = item.name;
+      let newPath = path + name;
       promises.push(this._model.rename(name, newPath).catch(error => {
         if (error.xhr) {
           error.message = `${error.xhr.statusText} ${error.xhr.status}`;
@@ -987,7 +983,7 @@ class DirListing extends Widget {
             host: this.parent.node,
             body: `"${newPath}" already exists, overwrite?`,
             okText: 'OVERWRITE'
-          }
+          };
           return showDialog(options).then(button => {
             if (button.text === 'OVERWRITE') {
               return this._model.delete(newPath).then(() => {
@@ -1027,7 +1023,7 @@ class DirListing extends Widget {
     dragImage.removeChild(dragImage.lastChild);
     if (selectedNames.length > 1) {
       let text = utils.findElement(dragImage, ITEM_TEXT_CLASS);
-      text.textContent = '(' + selectedNames.length + ')'
+      text.textContent = '(' + selectedNames.length + ')';
     }
 
     // Set up the drag event.
@@ -1058,7 +1054,6 @@ class DirListing extends Widget {
   private _handleFileSelect(event: MouseEvent): void {
     // Fetch common variables.
     let items = this._model.sortedItems;
-    let nodes = this._items;
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
 
     clearTimeout(this._selectTimer);
@@ -1147,15 +1142,11 @@ class DirListing extends Widget {
    * Copy the selected items, and optionally cut as well.
    */
   private _copy(): void {
-    this._clipboard = []
+    this._clipboard = [];
     for (var item of this._getSelectedItems()) {
-      let row = arrays.find(this._items, row => {
-        let text = utils.findElement(row, ITEM_TEXT_CLASS);
-        return text.textContent === item.name;
-      });
       if (item.type !== 'directory') {
         // Store the absolute path of the item.
-        this._clipboard.push('/' + item.path)
+        this._clipboard.push('/' + item.path);
       }
     }
     this.update();
@@ -1179,7 +1170,6 @@ class DirListing extends Widget {
    * Allow the user to rename item on a given row.
    */
   private _doRename(): Promise<string> {
-    let listing = utils.findElement(this.node, CONTENT_CLASS);
     let items = this._model.sortedItems;
     let name = this._softSelection || this._model.getSelected()[0];
     let index = arrays.findIndex(items, (value, index) => value.name === name);
@@ -1203,7 +1193,7 @@ class DirListing extends Widget {
             host: this.parent.node,
             body: `"${newPath}" already exists, overwrite?`,
             okText: 'OVERWRITE'
-          }
+          };
           return showDialog(options).then(button => {
             if (button.text === 'OVERWRITE') {
               return this._model.delete(newPath).then(() => {
@@ -1300,7 +1290,7 @@ namespace Private {
         }
         if (changed) text.textContent = edit.value;
         resolve(changed);
-      }
+      };
       edit.onkeydown = (event: KeyboardEvent) => {
         switch (event.keyCode) {
         case 13:  // Enter
@@ -1315,7 +1305,7 @@ namespace Private {
           edit.blur();
           break;
         }
-      }
+      };
     });
   }
 

@@ -3,20 +3,12 @@
 'use strict';
 
 import {
-  IContentsModel
-} from 'jupyter-js-services';
-
-import {
   DropAction, IDragEvent
 } from 'phosphor-dragdrop';
 
 import {
   Message
 } from 'phosphor-messaging';
-
-import {
-  IChangedArgs
-} from 'phosphor-properties';
 
 import {
   Widget
@@ -227,7 +219,7 @@ class BreadCrumbs extends Widget {
 
     // Get the path based on the target node.
     let index = this._crumbs.indexOf(target);
-    if (index == -1) return;
+    if (index === -1) return;
     var path = BREAD_CRUMB_PATHS[index];
 
     // Move all of the items.
@@ -249,7 +241,7 @@ class BreadCrumbs extends Widget {
             host: this.parent.node,
             body: `"${newPath}" already exists, overwrite?`,
             okText: 'OVERWRITE'
-          }
+          };
           return showDialog(options).then(button => {
             if (button.text === 'OVERWRITE') {
               return this._model.delete(newPath).then(() => {
@@ -307,7 +299,7 @@ namespace Private {
       node.appendChild(separators[0]);
       node.appendChild(breadcrumbs[Crumb.Ellipsis]);
       let grandParent = parts.slice(0, parts.length - 2).join('/');
-      breadcrumbs[Crumb.Ellipsis].title = grandParent
+      breadcrumbs[Crumb.Ellipsis].title = grandParent;
     }
 
     if (path) {

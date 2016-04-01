@@ -157,7 +157,7 @@ class SVGRenderer implements IRenderer<Widget> {
     w.node.innerHTML = data;
     let svgElement = w.node.getElementsByTagName('svg')[0];
     if (!svgElement) {
-      throw new Error("SVGRender: Error: Failed to create <svg> element");
+      throw new Error('SVGRender: Error: Failed to create <svg> element');
     }
     return w;
   }

@@ -60,7 +60,7 @@ function showErrorMessage(host: Widget, title: string, error: Error): Promise<vo
     body: error.message || `File ${title}`,
     buttons: [okButton],
     okText: 'DISMISS'
-  }
+  };
   return showDialog(options).then(() => {});
 }
 
