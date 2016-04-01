@@ -971,8 +971,8 @@ class DirListing extends Widget {
       if (this._softSelection !== item.name) {
         continue;
       }
-      let name = item.name;
-      let newPath = path + name;
+      var name = item.name;
+      var newPath = path + name;
       promises.push(this._model.rename(name, newPath).catch(error => {
         if (error.xhr) {
           error.message = `${error.xhr.statusText} ${error.xhr.status}`;
