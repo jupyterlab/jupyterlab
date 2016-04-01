@@ -52,7 +52,7 @@ interface INotebookContent {
  * #### Notes
  * On disk, this could be a string[] too.
  */
-export 
+export
 type multilineString = string;
 
 

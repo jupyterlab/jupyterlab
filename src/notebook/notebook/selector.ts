@@ -77,9 +77,9 @@ function findKernel(model: INotebookModel, specs: IKernelSpecIds): string {
   for (let kernelName in specs.kernelspecs) {
     let kernelLanguage = specs.kernelspecs[name].spec.language;
     if (language === kernelLanguage) {
-      console.log("No exact match found for " + name +
-                  ", using kernel " + kernelName + " that matches " +
-                  "language=" + language);
+      console.log('No exact match found for ' + name +
+                  ', using kernel ' + kernelName + ' that matches ' +
+                  'language=' + language);
       return kernelName;
     }
   }
@@ -88,4 +88,3 @@ function findKernel(model: INotebookModel, specs: IKernelSpecIds): string {
               `using default kernel ${specs.default}`);
   return specs.default;
 }
-

@@ -222,7 +222,7 @@ class OutputAreaWidget extends Widget {
         child.addClass(RESULT_CLASS);
         widget.addChild(child);
       } else {
-        console.log("Did not find renderer for output mimebundle.")
+        console.log('Did not find renderer for output mimebundle.');
         console.log(bundle);
       }
     }
