@@ -50,7 +50,7 @@ function removeMath(text: string): { text: string, math: string[] } {
   if (hasCodeSpans) {
     text = text.replace(/~/g, '~T').replace(/(^|[^\\])(`+)([^\n]*?[^`\n])\2(?!`)/gm, (wholematch) => wholematch.replace(/\$/g, '~D'));
     deTilde = (text: string) => {
-      return text.replace(/~([TD])/g, 
+      return text.replace(/~([TD])/g,
         (wholematch, character) => (character === 'T') ? '~' : '$');
     };
   } else {
@@ -165,8 +165,8 @@ function init() {
   }
   MathJax.Hub.Config({
     tex2jax: {
-      inlineMath: [ ['$','$'], ['\\(','\\)'] ],
-      displayMath: [ ['$$','$$'], ['\\[','\\]'] ],
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      displayMath: [ ['$$', '$$'], ['\\[', '\\]'] ],
       processEscapes: true,
       processEnvironments: true
     },
@@ -193,11 +193,11 @@ function init() {
  *  The preProcess function is called on all blocks if it has been passed in
  */
 function processMath(i: number, j: number, preProcess: (input: string) => string, math: string[], blocks: string[]): string[] {
-  var block = blocks.slice(i, j + 1).join('').replace(/&/g, '&amp;') // use HTML entity for &
+  let block = blocks.slice(i, j + 1).join('').replace(/&/g, '&amp;') // use HTML entity for &
   .replace(/</g, '&lt;') // use HTML entity for <
   .replace(/>/g, '&gt;') // use HTML entity for >
   ;
-  if (navigator && navigator.appName == 'Microsoft Internet Explorer') {
+  if (navigator && navigator.appName === 'Microsoft Internet Explorer') {
     block = block.replace(/(%[^\n]*)\n/g, '$1<br/>\n');
   }
   while (j > i) {

@@ -122,7 +122,7 @@ class TerminalWidget extends Widget {
 
     this._ws.onopen = (event: MessageEvent) => {
       this._createTerm(options);
-    }
+    };
 
     this._ws.onmessage = (event: MessageEvent) => {
       this._handleWSMessage(event);
@@ -152,7 +152,7 @@ class TerminalWidget extends Widget {
    * Get the background color of the terminal.
    */
   get background(): string {
-    return this._background
+    return this._background;
   }
 
   /**
@@ -293,8 +293,8 @@ class TerminalWidget extends Widget {
     // Set the fg and bg colors of the terminal and cursor.
     this._term.element.style.backgroundColor = this.background;
     this._term.element.style.color = this.color;
-    this._sheet.innerHTML = (".terminal-cursor {background:" + this.color +
-                             ";color:" + this.background + ";}");
+    this._sheet.innerHTML = ('.terminal-cursor {background:' + this.color +
+                             ';color:' + this.background + ';}');
   }
 
   /**
@@ -311,7 +311,7 @@ class TerminalWidget extends Widget {
   private _createTerm(options: ITerminalOptions): void {
     this._term = new Terminal(getConfig(options));
     this._term.open(this.node);
-    this._term.element.classList.add(TERMINAL_BODY_CLASS)
+    this._term.element.classList.add(TERMINAL_BODY_CLASS);
 
     this.fontSize = options.fontSize || 11;
     this.background = options.background || 'white';
@@ -323,7 +323,7 @@ class TerminalWidget extends Widget {
 
     this._term.on('title', (title: string) => {
         this.title.text = title;
-    });   
+    });
 
     this._resizeTerminal();
   }
@@ -369,10 +369,10 @@ class TerminalWidget extends Widget {
     if (this._term === null) {
       return;
     }
-    var rows = Math.max(2, Math.round(this._height / this._row_height) - 2);
-    var cols = Math.max(3, Math.round(this._width / this._col_width) - 1);
+    let rows = Math.max(2, Math.round(this._height / this._row_height) - 2);
+    let cols = Math.max(3, Math.round(this._width / this._col_width) - 1);
     this._term.resize(cols, rows);
-    this._ws.send(JSON.stringify(["set_size", rows, cols,
+    this._ws.send(JSON.stringify(['set_size', rows, cols,
                                   this._height, this._width]));
   }
 
@@ -386,7 +386,7 @@ class TerminalWidget extends Widget {
   private _dirty = false;
   private _width = -1;
   private _height = -1;
-  private _background = ''
+  private _background = '';
   private _color = '';
 }
 

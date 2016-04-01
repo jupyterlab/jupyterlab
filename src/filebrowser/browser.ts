@@ -78,7 +78,7 @@ class FileBrowserWidget extends Widget {
     super();
     this.addClass(FILE_BROWSER_CLASS);
     this._model = model;
-    this._model.refreshed.connect(this._handleRefresh, this)
+    this._model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs(model);
     this._buttons = new FileButtons(model);
     this._listing = new DirListing(model);
@@ -228,7 +228,7 @@ class FileBrowserWidget extends Widget {
    * Refresh the current directory.
    */
   refresh(): Promise<void> {
-    return this._model.refresh().catch(error => { 
+    return this._model.refresh().catch(error => {
       showErrorMessage(this, 'Server Connection Error', error);
     });
   }

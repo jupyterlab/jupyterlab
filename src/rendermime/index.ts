@@ -66,7 +66,7 @@ class RenderMime<T> {
         return this.renderers[mimetype].render(mimetype, bundle[mimetype]);
     }
   }
-  
+
   /**
    * Find the preferred mimetype in a mimebundle.
    *
@@ -79,7 +79,7 @@ class RenderMime<T> {
       }
     }
   }
-  
+
   /**
    * Clone the rendermime instance with shallow copies of data.
    */
@@ -93,7 +93,7 @@ class RenderMime<T> {
   get renderers() {
       return this._renderers;
   }
-  
+
   /**
    * Get the ordered list of mimetypes.
    *
@@ -104,7 +104,7 @@ class RenderMime<T> {
   get order() {
       return this._order;
   }
-  
+
   private _renderers: MimeMap<IRenderer<T>>;
   private _order: string[];
 }

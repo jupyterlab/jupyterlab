@@ -4,7 +4,7 @@
 
 import {
   IContentsManager, IContentsModel, IContentsOpts, INotebookSessionManager,
-  INotebookSession, ISessionId, KernelStatus, getKernelSpecs, IKernelSpecId
+  INotebookSession, ISessionId, KernelStatus, IKernelSpecId
 } from 'jupyter-js-services';
 
 import * as arrays
@@ -21,9 +21,6 @@ import {
 import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
-
-import * as utils
-  from './utils';
 
 
 /**
@@ -223,7 +220,6 @@ class FileBrowserModel implements IDisposable {
     if (path !== '') {
       path = Private.normalizePath(this._model.path, path);
     }
-    let changed = false;
     let previous = this._selection;
     if (path !== this.path) {
       previous = Object.create(null);
@@ -389,7 +385,7 @@ class FileBrowserModel implements IDisposable {
         newValue: newPath
       });
       return contents;
-    })
+    });
   }
 
   /**
@@ -409,7 +405,7 @@ class FileBrowserModel implements IDisposable {
     // Skip large files with a warning.
     if (file.size > this._max_upload_size_mb * 1024 * 1024) {
       let msg = `Cannot upload file (>${this._max_upload_size_mb} MB) `;
-      msg += `"${file.name}"`
+      msg += `"${file.name}"`;
       console.warn(msg);
       return Promise.reject(new Error(msg));
     }
@@ -478,7 +474,7 @@ class FileBrowserModel implements IDisposable {
    */
   private _upload(file: File): Promise<IContentsModel> {
     // Gather the file model parameters.
-    let path = this._model.path
+    let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
     let name = file.name;
     let isNotebook = file.name.indexOf('.ipynb') !== -1;
@@ -500,7 +496,7 @@ class FileBrowserModel implements IDisposable {
           format: format,
           name: name,
           content: Private.getContent(reader)
-        }
+        };
         this._contentsManager.save(path, model).then(contents => {
           this.fileChanged.emit({
             name: 'file',
@@ -509,11 +505,11 @@ class FileBrowserModel implements IDisposable {
           });
           resolve(contents);
         });
-      }
+      };
 
       reader.onerror = (event: Event) => {
         reject(Error(`Failed to upload "${file.name}":` + event));
-      }
+      };
     });
 
   }
@@ -642,7 +638,7 @@ namespace Private {
     // Root path.
     if (path.indexOf('/') === 0) {
       path = path.slice(1, path.length);
-      root = ''
+      root = '';
     // Current directory.
     } else if (path.indexOf('./') === 0) {
       path = path.slice(2, path.length);

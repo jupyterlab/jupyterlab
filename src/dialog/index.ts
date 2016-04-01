@@ -122,7 +122,7 @@ export
 const okButton: IButtonItem = {
   text: 'OK',
   className: OK_BUTTON_CLASS
-}
+};
 
 
 /**
@@ -132,7 +132,7 @@ export
 const cancelButton: IButtonItem = {
   text: 'CANCEL',
   className: CANCEL_BUTTON_CLASS
-}
+};
 
 
 /**
@@ -150,7 +150,7 @@ interface IDialogOptions {
    *
    * #### Notes
    * If a `string` is provided, it will be used as the `HTMLContent` of
-   * a `<span>`.  If an `<input>` or `<select>` element is provided, 
+   * a `<span>`.  If an `<input>` or `<select>` element is provided,
    * they will be styled.
    */
   body?: HTMLElement | string;
