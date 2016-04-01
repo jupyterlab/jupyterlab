@@ -1,9 +1,7 @@
 Jupyter JS Notebook
 ===================
 
-Notebook widget for JupyterLab.
-
-[API Docs](http://jupyter.github.io/jupyter-js-notebook/)
+Notebook models and widgets for JupyterLab.
 
 
 Package Install
@@ -79,19 +77,9 @@ Supported Runtimes
 The runtime versions which are currently *known to work* are listed below.
 Earlier versions may also work, but come with no guarantees.
 
-- Node 0.12.7+
 - IE 11+
 - Firefox 32+
 - Chrome 38+
-
-
-Bundle for the Browser
-----------------------
-
-Follow the package install instructions first.
-
-Any bundler that understands how to `require()` files with `.js` and `.css`
-extensions can be used with this package.
 
 
 Usage Examples
