@@ -6,9 +6,11 @@
   "typings": "lib/index.d.ts",
   "dependencies": {
     "ansi-to-html": "^0.4.1",
+    "backbone": "^1.2.0",
     "codemirror": "^5.12.0",
     "jupyter-js-services": "^0.6.4",
     "jupyter-js-utils": "^0.3.3",
+    "jupyter-js-widgets": "0.0.17",
     "moment": "^2.11.2",
     "phosphor-arrays": "^1.0.6",
     "phosphor-codemirror": "0.0.1",
