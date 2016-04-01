@@ -1,9 +1,9 @@
 Jupyter JS Plugins
 ==================
 
-Plugins for JupyterLab.
+Plugins for JupyterLab.  The default set of [phosphide](https://github.com/phosphorjs/phosphide) 
+plugins used to create [JupyterLab](jupyter_plugins.png). 
 
-[API Docs](http://jupyter.github.io/jupyter-js-plugins/)
 
 
 Package Install
@@ -86,15 +86,6 @@ Earlier versions may also work, but come with no guarantees.
 - IE 11+
 - Firefox 32+
 - Chrome 38+
-
-
-Bundle for the Browser
-----------------------
-
-Follow the package install instructions first.
-
-Any bundler that understands how to `require()` files with `.js` and `.css`
-extensions can be used with this package.
 
 
 Usage Examples
