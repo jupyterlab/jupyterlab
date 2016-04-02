@@ -52,13 +52,11 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  */
 export
 abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
-
   /**
    * Construct a new source file handler.
    */
   constructor(manager: IContentsManager) {
     this._manager = manager;
-    document.addEventListener('focus', this._onFocus, true);
   }
 
   /**
@@ -86,36 +84,11 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Get the active widget.
-   *
-   * #### Notes
-   * This is a read-only property.  It will be `null` if there is no
-   * active widget.
-   */
-  get activeWidget(): T {
-    return this._activeWidget;
-  }
-
-  /**
    * A signal emitted when the file handler has finished loading the
    * contents of the widget.
    */
-  get finished(): ISignal<AbstractFileHandler<T>, IContentsModel> {
+  get finished(): ISignal<AbstractFileHandler<T>, T> {
     return Private.finishedSignal.bind(this);
-  }
-
-  /**
-   * A signal emitted when the file handler is activated.
-   */
-  get activated(): ISignal<AbstractFileHandler<T>, void> {
-    return Private.activatedSignal.bind(this);
-  }
-
-  /**
-   * Deactivate the handler.
-   */
-  deactivate(): void {
-    this._activeWidget = null;
   }
 
   /**
@@ -139,6 +112,11 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
+   * Create a new file given a directory and a host node for the dialog.
+   */
+  abstract createNew(path: string, type: string, host: HTMLElement): Promise<T>;
+
+  /**
    * Open a contents model and return a widget.
    */
   open(model: IContentsModel): T {
@@ -150,7 +128,6 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
       this._widgets.push(widget);
       installMessageFilter(widget, this);
     }
-    this._activeWidget = widget;
 
     // Fetch the contents and populate the widget asynchronously.
     let opts = this.getFetchOptions(model);
@@ -159,7 +136,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
       return this.populateWidget(widget, contents);
     }).then(() => {
       this.clearDirty(widget);
-      this.finished.emit(model);
+      this.finished.emit(widget);
     });
     return widget;
   }
@@ -196,8 +173,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    * #### Notes
    * This clears the dirty state of the widget after a successful save.
    */
-  save(widget?: T): Promise<IContentsModel> {
-    widget = this.resolveWidget(widget);
+  save(widget: T): Promise<IContentsModel> {
     if (!widget) {
       return Promise.resolve(void 0);
     }
@@ -220,8 +196,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    * #### Notes
    * This clears the dirty state of the widget after a successful revert.
    */
-  revert(widget?: T): Promise<IContentsModel> {
-    widget = this.resolveWidget(widget);
+  revert(widget: T): Promise<IContentsModel> {
     if (!widget) {
       return Promise.resolve(void 0);
     }
@@ -242,8 +217,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    *
    * returns A boolean indicating whether the widget was closed.
    */
-  close(widget?: T): Promise<boolean> {
-    widget = this.resolveWidget(widget);
+  close(widget: T): Promise<boolean> {
     if (!widget) {
       return Promise.resolve(false);
     }
@@ -261,35 +235,34 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     for (let w of this._widgets) {
       w.close();
     }
-    this._activeWidget = null;
   }
 
   /**
    * Get whether a widget is dirty (defaults to current active widget).
    */
-  isDirty(widget?: T): boolean {
-    return Private.dirtyProperty.get(this.resolveWidget(widget));
+  isDirty(widget: T): boolean {
+    return Private.dirtyProperty.get(widget);
   }
 
   /**
    * Set the dirty state of a widget (defaults to current active widget).
    */
-  setDirty(widget?: T): void {
-    Private.dirtyProperty.set(this.resolveWidget(widget), true);
+  setDirty(widget: T): void {
+    Private.dirtyProperty.set(widget, true);
   }
 
   /**
    * Clear the dirty state of a widget (defaults to current active widget).
    */
-  clearDirty(widget?: T): void {
-    Private.dirtyProperty.set(this.resolveWidget(widget), false);
+  clearDirty(widget: T): void {
+    Private.dirtyProperty.set(widget, false);
   }
 
   /**
    * Filter messages on the widget.
    */
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
-    let widget = this.resolveWidget(handler as T);
+    let widget = handler as T;
     if (msg.type === 'close-request' && widget) {
       this.close(widget);
       return true;
@@ -333,17 +306,6 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    */
   protected getTitleText(model: IContentsModel): string {
     return model.name;
-  }
-
-  /**
-   * Resolve a given widget.
-   */
-  protected resolveWidget(widget: T): T {
-    widget = widget || this.activeWidget;
-    if (this._widgets.indexOf(widget) === -1) {
-      return;
-    }
-    return widget;
   }
 
   /**
@@ -391,26 +353,8 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     widget.dispose();
     let index = this._widgets.indexOf(widget);
     this._widgets.splice(index, 1);
-    if (widget === this.activeWidget) {
-      this._activeWidget = null;
-    }
   }
 
-  /**
-   * Handle a focus events.
-   */
-  private _onFocus = (event: Event) => {
-    let target = event.target as HTMLElement;
-    let prev = this.activeWidget;
-    let widget = arrays.find(this._widgets,
-      w => w.isVisible && w.node.contains(target));
-    if (widget) {
-      this._activeWidget = widget;
-      if (!prev) this.activated.emit(void 0);
-    }
-  };
-
-  private _activeWidget: T = null;
   private _manager: IContentsManager = null;
   private _widgets: T[] = [];
 }
@@ -421,6 +365,14 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
  */
 export
 class FileHandler extends AbstractFileHandler<CodeMirrorWidget> {
+
+  /**
+   * Create a new file or directory.
+   */
+  createNew(path: string, name: string, host: HTMLElement): Promise<CodeMirrorWidget> {
+    return Promise.resolve(void 0);
+  }
+
   /**
    * Get the options used to save the widget content.
    */
@@ -451,8 +403,103 @@ class FileHandler extends AbstractFileHandler<CodeMirrorWidget> {
     loadModeByFileName(widget.editor, model.name);
     return Promise.resolve(model);
   }
-
 }
+
+
+/**
+ * A registry of file handlers.
+ */
+export
+class FileHandlerRegistry {
+  /**
+   * Get the default handler.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get default(): AbstractFileHandler<Widget> {
+    return this._default;
+  }
+
+  /**
+   * Register a file handler.
+   */
+  add(handler: AbstractFileHandler<Widget>): void {
+    this._handlers.push(handler);
+  }
+
+  /**
+   * Register a default file handler.
+   */
+  addDefault(handler: AbstractFileHandler<Widget>): void {
+    if (this._default) {
+      throw Error('Default handler already registered');
+    }
+    this.add(handler);
+    this._default = handler;
+  }
+
+  /**
+   * Add a creation type.
+   */
+  addCreator(name: string, handler: AbstractFileHandler<Widget>): void {
+    this._creators[name] = handler;
+  }
+  
+  /**
+   * Get a list of creator names.
+   */
+  listCreators(): string[] {
+    return Object.keys(this._creators);
+  }
+
+  /**
+   * Find a creator by name.
+   */
+  findByCreator(name: string): AbstractFileHandler<Widget> {
+    return this._creators[name];
+  }
+
+  /**
+   * Get the appropriate handler for an IContentsModel
+   */
+  findbyModel(model: IContentsModel): AbstractFileHandler<Widget>  {
+    if (model.type === 'directory') {
+      throw new Error('Cannot open directories, use `cd()`');
+    } 
+    if (this._handlers.length === 0) {
+      return;
+    }
+    let path = model.path;
+    let ext = '.' + path.split('.').pop();
+    let handlers: AbstractFileHandler<Widget>[] = [];
+    // Look for matching file extensions.
+    for (let h of this._handlers) {
+      if (h.fileExtensions.indexOf(ext) !== -1) handlers.push(h);
+    }
+    // If there was only one match, use it.
+    if (handlers.length === 1) {
+      return handlers[0];
+    }
+
+    // If there were no matches, use default handler.
+    if (handlers.length === 0) {
+      if (this._default) {
+        return this._default;
+      }
+      throw new Error(`Could not open file '${path}'`);
+    }
+
+    // There are more than one possible handlers.
+    // TODO: Ask the user to choose one.
+    return handlers[0];
+  }
+
+  private _handlers: AbstractFileHandler<Widget>[] = [];
+  private _default: AbstractFileHandler<Widget> = null;
+  private _creators: { [key: string]: AbstractFileHandler<Widget>} = Object.create(null);
+}
+
 
 /**
  * A private namespace for AbstractFileHandler data.
@@ -493,5 +540,49 @@ namespace Private {
    * A signal emitted when a file handler has finished populating a widget.
    */
   export
-  const finishedSignal = new Signal<AbstractFileHandler<Widget>, IContentsModel>();
+  const finishedSignal = new Signal<AbstractFileHandler<Widget>, Widget>();
 }
+
+
+// /**
+//  * Rename a file or directory.
+//  */
+// function doRename(widget: Widget, contents: IContentsModel): Promise<IContentsModel> {
+//   let edit = document.createElement('input');
+//   edit.value = contents.name;
+//   return showDialog({
+//     title: `Create a new ${contents.type}`,
+//     body: edit,
+//     host: widget.node.parentElement,
+//     okText: 'CREATE'
+//   }).then(value => {
+//     if (value.text === 'CREATE') {
+//       return widget.model.rename(contents.path, edit.value);
+//     } else {
+//       return widget.model.delete(contents.path).then(() => void 0);
+//     }
+//   }).catch(error => {
+//     if (error.statusText === 'Conflict') {
+//       return handleExisting(widget, edit.value, contents);
+//     }
+//     return utils.showErrorMessage(widget, 'File creation error', error).then(
+//       () => { return void 0; });
+//   });
+// }
+
+// /**
+//  * Handle an existing file name.
+//  */
+// function handleExisting(widget: Widget, name: string, contents: IContentsModel): Promise<IContentsModel> {
+//   return showDialog({
+//     title: 'File already exists',
+//     body: `File "${name}" already exists, try again?`,
+//     host: widget.node.parentElement
+//   }).then(value => {
+//     if (value.text === 'OK') {
+//       return doRename(widget, contents);
+//     } else {
+//       return widget.model.delete(contents.path).then(() => void 0);
+//     }
+//   });
+// }

@@ -51,13 +51,6 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get the file open requested signal.
-   */
-  get openRequested(): ISignal<FileBrowserModel, IContentsModel> {
-    return Private.openRequestedSignal.bind(this);
-  }
-
-  /**
    * Get the file path changed signal.
    */
   get fileChanged(): ISignal<FileBrowserModel, IChangedArgs<string>> {
@@ -349,22 +342,6 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Open a file in the current by name.
-   */
-  open(name: string): Promise<void> {
-    let item = arrays.find(this.sortedItems, value => value.name === name);
-    if (!item) {
-      return Promise.reject(new Error(`No file named: '${name}'`));
-    }
-    if (item.type === 'directory') {
-      return this.cd(name);
-    } else {
-      this.openRequested.emit(item);
-      return Promise.resolve(void 0);
-    }
-  }
-
-  /**
    * Rename a file or directory.
    *
    * @param path - The path to the original file.
@@ -585,12 +562,6 @@ namespace Private {
    */
   export
   const refreshedSignal = new Signal<FileBrowserModel, void>();
-
-  /**
-   * A signal emitted when a file open is requested.
-   */
-  export
-  const openRequestedSignal = new Signal<FileBrowserModel, IContentsModel>();
 
   /**
    * A signal emitted when the a file changes path.

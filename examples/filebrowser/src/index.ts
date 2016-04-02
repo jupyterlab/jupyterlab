@@ -10,8 +10,8 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  FileHandler, DocumentManager
-} from 'jupyter-js-ui/lib/docmanager';
+  FileHandler, FileHandlerRegistry
+} from 'jupyter-js-ui/lib/filehandler';
 
 import {
   FileBrowserWidget, FileBrowserModel
@@ -64,11 +64,13 @@ function main(): void {
   let sessionsManager = new NotebookSessionManager({ baseUrl: baseUrl });
 
   let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
-  let fbWidget = new FileBrowserWidget(fbModel)
-
+  let registry = new FileHandlerRegistry();
   let fileHandler = new FileHandler(contentsManager);
-  let docManager = new DocumentManager();
-  docManager.registerDefault(fileHandler);
+  registry.addDefault(fileHandler);
+  registry.addCreator('New File', fileHandler);
+  registry.addCreator('New Directory', fileHandler);
+  let fbWidget = new FileBrowserWidget(fbModel, registry);
+
 
   let panel = new SplitPanel();
   panel.id = 'main';
@@ -79,17 +81,24 @@ function main(): void {
   SplitPanel.setStretch(dock, 1);
   dock.spacing = 8;
 
-  fbWidget.widgetFactory = model => {
-    return docManager.open(model);
-  };
 
-  fbModel.openRequested.connect((fbModel, model) => {
-    let editor = docManager.open(model);
-    dock.insertTabAfter(editor);
+  fileHandler.finished.connect((handler, widget) => {
+    dock.insertTabAfter(widget);
   });
 
   fbModel.fileChanged.connect((fbModel, args) => {
-    docManager.rename(args.oldValue, args.newValue);
+    fileHandler.rename(args.oldValue, args.newValue);
+  });
+
+  let activeWidget: Widget;
+  document.addEventListener('focus', event => {
+    for (let i = 0; i < fileHandler.widgetCount(); i++) {
+      let widget = fileHandler.widgetAt(i);
+      if (widget.node.contains(event.target as HTMLElement)) {
+        activeWidget = widget;
+        break;
+      }
+    }
   });
 
   let keymapManager = new KeymapManager();
@@ -118,7 +127,7 @@ function main(): void {
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      docManager.save();
+      fileHandler.save(activeWidget as any);
       return true;
     }
   }]);
@@ -176,7 +185,7 @@ function main(): void {
     }),
     new MenuItem({
       text: 'Revert',
-      handler: () => { docManager.revert(); }
+      handler: () => { fileHandler.revert(activeWidget as any); }
     }),
     new MenuItem({
       text: 'Shutdown Kernel',

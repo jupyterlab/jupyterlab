@@ -6,6 +6,9 @@ import {
   IContentsModel
 } from 'jupyter-js-services';
 
+import * as arrays
+  from 'phosphor-arrays';
+
 import {
   Message
 } from 'phosphor-messaging';
@@ -17,6 +20,10 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  FileHandlerRegistry
+} from '../filehandler';
 
 import {
   FileButtons
@@ -74,14 +81,14 @@ class FileBrowserWidget extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel) {
+  constructor(model: FileBrowserModel, registry: FileHandlerRegistry) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
     this._model = model;
     this._model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs(model);
-    this._buttons = new FileButtons(model);
-    this._listing = new DirListing(model);
+    this._buttons = new FileButtons(model, registry);
+    this._listing = new DirListing(model, registry);
 
     this._crumbs.addClass(CRUMBS_CLASS);
     this._buttons.addClass(BUTTON_CLASS);
@@ -96,17 +103,6 @@ class FileBrowserWidget extends Widget {
   }
 
   /**
-   * Dispose of the resources held by the file browser.
-   */
-  dispose() {
-    this._model = null;
-    this._crumbs = null;
-    this._buttons = null;
-    this._listing = null;
-    super.dispose();
-  }
-
-  /**
    * Get the model used by the file browser.
    *
    * #### Notes
@@ -116,18 +112,16 @@ class FileBrowserWidget extends Widget {
     return this._model;
   }
 
-  /**
-   * Get the widget factory for the widget.
-   */
-  get widgetFactory(): (model: IContentsModel) => Widget {
-    return this._listing.widgetFactory;
-  }
 
   /**
-   * Set the widget factory for the widget.
+   * Dispose of the resources held by the file browser.
    */
-  set widgetFactory(factory: (model: IContentsModel) => Widget) {
-    this._listing.widgetFactory = factory;
+  dispose() {
+    this._model = null;
+    this._crumbs = null;
+    this._buttons = null;
+    this._listing = null;
+    super.dispose();
   }
 
   /**
@@ -141,7 +135,6 @@ class FileBrowserWidget extends Widget {
    * Open the currently selected item(s).
    *
    * Changes to the first directory encountered.
-   * Emits [[openRequested]] signals for files.
    */
   open(): void {
     let foundDir = false;
@@ -152,13 +145,24 @@ class FileBrowserWidget extends Widget {
       }
       if (item.type === 'directory' && !foundDir) {
         foundDir = true;
-        this._model.open(item.name).catch(error =>
+        this._model.cd(item.name).catch(error =>
           showErrorMessage(this, 'Open directory', error)
         );
       } else {
-        this.model.open(item.name);
+        this._open(item);
       }
     }
+  }
+
+  /**
+   * Open a file in the current directory by name.
+   */
+  private _open(item: IContentsModel): void {
+    let handler = this._registry.findbyModel(item);
+    if (!handler) {
+      return;
+    }
+    handler.open(item);
   }
 
   /**
@@ -276,4 +280,5 @@ class FileBrowserWidget extends Widget {
   private _buttons: FileButtons = null;
   private _listing: DirListing = null;
   private _timeoutId = -1;
+  private _registry: FileHandlerRegistry = null;
 }
