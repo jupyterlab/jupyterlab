@@ -50,7 +50,7 @@ import {
 } from '../cells';
 
 import {
-  INotebookMetadata, OutputType
+  INotebookMetadata, OutputType, IKernelspecMetadata, ILanguageInfoMetadata
 } from './nbformat';
 
 
@@ -62,17 +62,41 @@ type NotebookMode = 'command' | 'edit';
 
 
 /**
- * The default notebook metadata.
+ * The default notebook kernelspec metadata.
  */
-const DEFAULT_METADATA = {
-  kernelspec: {
-    name: 'unknown',
-    display_name: 'No Kernel!'
-  },
-  language_info: {
-    name: 'unknown'
-  }
-};
+const DEFAULT_KERNELSPEC = {
+  name: 'unknown',
+  display_name: 'No Kernel!'
+}
+
+/**
+ * The default notebook languageinfo metadata.
+ */
+const DEFAULT_LANG_INFO = {
+  name: 'unknown'
+}
+
+
+/**
+ * A class used to interact with user level notebook metadata.
+ */
+export
+interface INotebookMetadataCursor {
+  /**
+   * The metadata namespace.
+   */
+  name: string;
+
+  /**
+   * Get the value of the metadata.
+   */
+  getValue(): any;
+
+  /**
+   * Set the value of the metdata.
+   */
+  setValue(value: any): void;
+}
 
 
 /**
@@ -107,6 +131,21 @@ interface INotebookModel extends IDisposable {
    * Whether the notebook is read-only.
    */
   readOnly: boolean;
+
+  /**
+   * The kernelspec metadata associated with the notebook.
+   */
+  kernelspec: IKernelspecMetadata;
+
+  /**
+   * The language info metadata associated with the notebook.
+   */
+  languageInfo: ILanguageInfoMetadata;
+
+  /**
+   * The original nbformat associated with the notebook.
+   */
+  origNbformat: number;
 
   /**
    * The list of cells in the notebook.
@@ -181,9 +220,22 @@ interface INotebookModel extends IDisposable {
   runActiveCell(): void;
 
   /**
-   * The metadata associated with the notebook.
+   * Get a metadata cursor for the notebook.
+   *
+   * #### Notes
+   * Metadata associated with the nbformat spec are set directly
+   * on the model.  This method is used to interact with a namespaced
+   * set of metadata on the notebook.
    */
-  metadata: INotebookMetadata;
+  getMetadata(namespace: string): INotebookMetadataCursor;
+
+  /**
+   * List the metadata namespace keys for the notebook.
+   *
+   * #### Notes
+   * Metadata associated with the nbformat are not included.
+   */
+   listMetadata(): string[];
 }
 
 
@@ -229,6 +281,16 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * A signal emitted when a user metadata state changes.
+   * 
+   * #### Notes
+   * The signal argument is the namespace of the metadata that changed.
+   */
+  get metadataChanged(): ISignal<INotebookModel, string> {
+    return NotebookModelPrivate.metadataChangedSignal.bind(this);
+  }
+
+  /**
    * Get the observable list of notebook cells.
    *
    * #### Notes
@@ -242,44 +304,119 @@ class NotebookModel implements INotebookModel {
    * The default mimetype for cells new code cells.
    */
   get defaultMimetype(): string {
-    return NotebookModelPrivate.defaultMimetype.get(this);
+    return this._defaultMimetype;
   }
   set defaultMimetype(value: string) {
-    NotebookModelPrivate.defaultMimetype.set(this, value);
+    let prev = this._defaultMimetype;
+    if (prev === value) {
+      return;
+    }
+    this._defaultMimetype = value;
+    this.stateChanged.emit({
+      name: 'defaultMimetype',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
    * The read-only status of the notebook.
    */
   get readOnly(): boolean {
-    return NotebookModelPrivate.readOnlyProperty.get(this);
+    return this._readOnly;
   }
   set readOnly(value: boolean) {
-    NotebookModelPrivate.readOnlyProperty.set(this, value);
+    let prev = this._readOnly;
+    if (prev === value) {
+      return;
+    }
+    this._readOnly = value;
     let cells = this._cells;
     for (let i = 0; i < cells.length; i++) {
       cells.get(i).readOnly = value;
     }
+    this.stateChanged.emit({
+      name: 'readOnly',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
    * The session for the notebook.
    */
   get session(): INotebookSession {
-    return NotebookModelPrivate.sessionProperty.get(this);
+    return this._session;
   }
   set session(value: INotebookSession) {
-    NotebookModelPrivate.sessionProperty.set(this, value);
+    let prev = this._session;
+    if (prev === value) {
+      return;
+    }
+    this._session = value;
+    NotebookModelPrivate.sessionChanged(this, value);
+    this.stateChanged.emit({
+      name: 'session',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
-   * The metadata for the notebook.
+   * The kernelspec metadata for the notebook.
    */
-  get metadata(): INotebookMetadata {
-    return NotebookModelPrivate.metadataProperty.get(this);
+  get kernelspec(): IKernelspecMetadata {
+    return this._kernelspec;
   }
-  set metadata(value: INotebookMetadata) {
-    NotebookModelPrivate.metadataProperty.set(this, value);
+  set kernelspec(value: IKernelspecMetadata) {
+    let prev = this._kernelspec;
+    if (prev === value) {
+      return;
+    }
+    this._kernelspec = value;
+    this.stateChanged.emit({
+      name: 'kernelspec',
+      oldValue: prev,
+      newValue: value
+    });
+  }
+
+  /**
+   * The language info metadata for the notebook.
+   */
+  get languageInfo(): ILanguageInfoMetadata {
+    return this._langInfo;
+  }
+  set languageInfo(value: ILanguageInfoMetadata) {
+    let prev = this._langInfo;
+    if (prev === value) {
+      return;
+    }
+    this._langInfo = value;
+    this.stateChanged.emit({
+      name: 'languageInfo',
+      oldValue: prev,
+      newValue: value
+    });
+  }
+
+  /**
+   * The original nbformat version for the notebook.
+   */
+  get origNbformat(): number {
+    return this._origNbformat;
+  }
+  set origNbformat(value: number) {
+    let prev = this._origNbformat;
+    if (prev === value) {
+      return;
+    }
+    this._origNbformat = value;
+    this.stateChanged.emit({
+      name: 'origNbformat',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
@@ -290,32 +427,60 @@ class NotebookModel implements INotebookModel {
    * will be marked as inactive.
    */
   get activeCellIndex(): number {
-    return NotebookModelPrivate.activeCellIndexProperty.get(this);
+    return this._activeCellIndex;
   }
   set activeCellIndex(value: number) {
+    let prev = this._activeCellIndex;
+    if (prev === value) {
+      return;
+    }
     value = Math.max(value, 0);
     value = Math.min(value, this.cells.length - 1);
-    NotebookModelPrivate.activeCellIndexProperty.set(this, value);
+    this._activeCellIndex = value;
+    this.stateChanged.emit({
+      name: 'activeCellIndex',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
    * The mode of the notebook.
    */
   get mode(): NotebookMode {
-    return NotebookModelPrivate.modeProperty.get(this);
+    return this._mode;
   }
   set mode(value: NotebookMode) {
-    NotebookModelPrivate.modeProperty.set(this, value);
+    let prev = this._mode;
+    if (prev === value) {
+      return;
+    }
+    this._mode = value;
+    NotebookModelPrivate.modeChanged(this, value);
+    this.stateChanged.emit({
+      name: 'mode',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
    * Whether the notebook has unsaved changes.
    */
   get dirty(): boolean {
-    return NotebookModelPrivate.dirtyProperty.get(this);
+    return this._dirty;
   }
   set dirty(value: boolean) {
-    NotebookModelPrivate.dirtyProperty.set(this, value);
+    let prev = this._dirty;
+    if (prev === value) {
+      return;
+    }
+    this._dirty = value;
+    this.stateChanged.emit({
+      name: 'dirty',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
@@ -472,6 +637,32 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Get a metadata cursor for the notebook.
+   *
+   * #### Notes
+   * Metadata associated with the nbformat spec are set directly
+   * on the model.  This method is used to interact with a namespaced
+   * set of metadata on the notebook.
+   */
+  getMetadata(name: string): INotebookMetadataCursor {
+    return new NotebookMetadataCursor(
+      name, 
+      this._metadata[name],
+      this._cursorCallback
+    );
+  }
+
+  /**
+   * List the metadata namespace keys for the notebook.
+   *
+   * #### Notes
+   * Metadata associated with the nbformat are not included.
+   */
+  listMetadata(): string[] {
+    return Object.keys(this._metadata);
+  }
+
+  /**
    * Execute the given cell.
    */
   protected executeCell(cell: CodeCellModel): void {
@@ -485,7 +676,8 @@ class NotebookModel implements INotebookModel {
       return;
     }
     let session = this.session;
-    if (!session) {
+    if (!session || !session.kernel) {
+      cell.input.prompt = 'In [ ]:';
       return;
     }
     cell.input.prompt = 'In [*]:';
@@ -543,7 +735,25 @@ class NotebookModel implements INotebookModel {
     this.dirty = true;
   }
 
+  /**
+   * The singleton callback for cursor change events.
+   */
+  private _cursorCallback(name: string, value: string): void {
+    this._metadata[name] = value;
+    this.metadataChanged.emit(name);
+  }
+
   private _cells: IObservableList<ICellModel> = null;
+  private _metadata: { [key: string]: string } = Object.create(null);
+  private _defaultMimetype = 'text/x-ipython';
+  private _readOnly = false;
+  private _session: INotebookSession = null;
+  private _kernelspec: IKernelspecMetadata = DEFAULT_KERNELSPEC;
+  private _langInfo: ILanguageInfoMetadata = DEFAULT_LANG_INFO;
+  private _origNbformat: number = null;
+  private _activeCellIndex = -1;
+  private _mode: NotebookMode = 'command';
+  private _dirty = false;
 }
 
 
@@ -558,71 +768,10 @@ namespace NotebookModelPrivate {
   const stateChangedSignal = new Signal<INotebookModel, IChangedArgs<any>>();
 
   /**
-  * A property descriptor which holds the default mimetype for new code cells.
-  */
+   * A signal emitted when a user metadata state changes.
+   */
   export
-  const defaultMimetype = new Property<NotebookModel, string>({
-    name: 'defaultMimetype',
-    value: 'text/x-ipython',
-    notify: stateChangedSignal
-  });
-
-  /**
-  * A property descriptor which holds the read only status of the notebook.
-  */
-  export
-  const readOnlyProperty = new Property<NotebookModel, boolean>({
-    name: 'readOnly',
-    notify: stateChangedSignal
-  });
-
- /**
-  * A property descriptor which holds the session of the notebook.
-  */
-  export
-  const sessionProperty = new Property<NotebookModel, INotebookSession>({
-    name: 'session',
-    changed: sessionChanged,
-    notify: stateChangedSignal
-  });
-
- /**
-  * A property descriptor which holds the metadata of the notebook.
-  */
-  export
-  const metadataProperty = new Property<NotebookModel, INotebookMetadata>({
-    name: 'metadata',
-    value: DEFAULT_METADATA,
-    notify: stateChangedSignal
-  });
-
-  /**
-  * A property descriptor for the active cell index.
-  */
-  export
-  const activeCellIndexProperty = new Property<NotebookModel, number>({
-    name: 'activeCellIndex',
-    notify: stateChangedSignal
-  });
-
- /**
-  * A property descriptor for the notebook mode.
-  */
-  export
-  const modeProperty = new Property<NotebookModel, NotebookMode>({
-    name: 'mode',
-    changed: modeChanged,
-    notify: stateChangedSignal
-  });
-
- /**
-  * A property descriptor for the dirty state of the notebook.
-  */
-  export
-  const dirtyProperty = new Property<NotebookModel, boolean>({
-    name: 'dirty',
-    notify: stateChangedSignal
-  });
+  const metadataChangedSignal = new Signal<INotebookModel, string>();
 
   /**
    * An attached property for the selected state of a cell.
@@ -635,6 +784,7 @@ namespace NotebookModelPrivate {
   /**
    * Handle a change in mode.
    */
+  export
   function modeChanged(model: INotebookModel, mode: NotebookMode): void {
     let cells = model.cells;
     for (let i = 0; i < cells.length; i++) {
@@ -650,6 +800,7 @@ namespace NotebookModelPrivate {
   /*
    * Handle a change to the model session.
    */
+  export
   function sessionChanged(model: INotebookModel, session: INotebookSession): void {
     model.session.kernelChanged.connect(() => { kernelChanged(model); });
     // Update the kernel data now.
@@ -662,33 +813,36 @@ namespace NotebookModelPrivate {
   function kernelChanged(model: INotebookModel): void {
     let session = model.session;
     let kernel = session.kernel;
-    let metadata = copy(model.metadata || {}) as INotebookMetadata;
     kernel.getKernelSpec().then(spec => {
-      metadata.kernelspec.display_name = spec.display_name;
-      metadata.kernelspec.name = session.kernel.name;
+      let kernelspec = model.kernelspec;
+      kernelspec.display_name = spec.display_name;
+      kernelspec.name = session.kernel.name;
+      // Trigger a change to the notebook metadata.
+      model.kernelspec = kernelspec;
       return session.kernel.kernelInfo();
     }).then(info => {
-      metadata.language_info = info.language_info;
+      let languageInfo = info.language_info;
       // Use the codemirror mode if given since some kernels rely on it.
-      let mode = metadata.language_info.codemirror_mode;
+      let mode = languageInfo.codemirror_mode;
       let mime = '';
       if (mode) {
         if (typeof mode === 'string') {
-          if (CodeMirror.modes.hasOwnProperty(mode)) {
-            mode = CodeMirror.modes[mode];
+          if (CodeMirror.modes.hasOwnProperty(mode as string)) {
+            mode = CodeMirror.modes[mode as string];
           } else {
             mode = CodeMirror.findModeByName(mode as string);
           }
-        } else if (mode.mime) {
+        } else if ((mode as CodeMirror.modespec).mime) {
           // Do nothing.
-        } else if (mode.name) {
-          if (CodeMirror.modes.hasOwnProperty(mode.name)) {
-            mode = CodeMirror.modes[mode.name];
+        } else if ((mode as CodeMirror.modespec).name) {
+          let name = (mode as CodeMirror.modespec).name
+          if (CodeMirror.modes.hasOwnProperty(name)) {
+            mode = CodeMirror.modes[name];
           } else {
             mode = CodeMirror.findModeByName(mode as string);
           }
         }
-        if (mode) mime = mode.mime;
+        if (mode) mime = (mode as CodeMirror.modespec).mime;
       } else {
         mime = info.language_info.mimetype;
       }
@@ -703,8 +857,64 @@ namespace NotebookModelPrivate {
         }
       }
       // Trigger a change to the notebook metadata.
-      model.metadata = metadata;
+      model.languageInfo = languageInfo;
     });
   }
 
+}
+
+
+/**
+ * An implementation of a notebook metadata cursor.
+ */
+class NotebookMetadataCursor implements INotebookMetadataCursor {
+
+  /**
+   * Construct a new notebook metadata cursor.
+   *
+   * @param name - the metadata namespace key.
+   *
+   * @param value - this initial value of the namespace.
+   *
+   * @param cb - a change callback.
+   */
+  constructor(name: string, value: string, cb: (name: string, value: string) => void) {
+    this._name = name;
+    this._value = value || 'null';
+    this._cb = cb;
+  }
+
+  /**
+   * Get the namespace key of the metadata.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return this._name;
+  }
+
+  /**
+   * Get the value of the namespace data.
+   */
+  getValue(): any {
+    return JSON.parse(this._value);
+  }
+
+  /**
+   * Set the value of the namespace data.
+   */
+  setValue(value: string): any {
+    let prev = this._value;
+    if (prev === value) {
+      return;
+    }
+    this._value = JSON.stringify(value);
+    let cb = this._cb;
+    cb(this._name, this._value);
+  }
+
+  private _value = 'null';
+  private _name = '';
+  private _cb: (name: string, value: string) => void = null;
 }

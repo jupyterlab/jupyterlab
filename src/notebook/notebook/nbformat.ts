@@ -14,22 +14,36 @@ const MAJOR_VERSION = 4;
 export
 const MINOR_VERSION = 0;
 
+
+/**
+ * The kernelspec metadata.
+ */
+export 
+interface IKernelspecMetadata {
+  name: string;
+  display_name: string;
+}
+
+
+/**
+ * The language info metatda
+ */
+export
+interface ILanguageInfoMetadata {
+  name: string;
+  codemirror_mode?: any;
+  file_extension?: string;
+  mimetype?: string;
+  pygments_lexer?: string;
+}
+
 /**
  * The notebook metadata.
  */
 export
 interface INotebookMetadata {
-  kernelspec: {
-    name: string;
-    display_name: string;
-  };
-  language_info: {
-    name: string;
-    codemirror_mode?: any;
-    file_extension?: string;
-    mimetype?: string;
-    pygments_lexer?: string
-  };
+  kernelspec: IKernelspecMetadata;
+  language_info: ILanguageInfoMetadata;
   orig_nbformat?: number;
 }
 

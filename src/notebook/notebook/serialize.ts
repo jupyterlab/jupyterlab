@@ -30,7 +30,11 @@ function serialize(nb: INotebookModel): INotebookContent {
   }
   return {
     cells: cells,
-    metadata: nb.metadata,
+    metadata: {
+      kernelspec: nb.kernelspec,
+      language_info: nb.languageInfo,
+      orig_nbformat: nb.origNbformat
+    },
     nbformat: MAJOR_VERSION,
     nbformat_minor: MINOR_VERSION
   };
@@ -65,7 +69,10 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
   }
   model.activeCellIndex = 0;
   if (data && data.metadata) {
-    model.metadata = data.metadata;
+    let metadata = data.metadata;
+    if (metadata.kernelspec) model.kernelspec = metadata.kernelspec;
+    if (metadata.language_info) model.languageInfo = metadata.language_info;
+    if (metadata.orig_nbformat) model.origNbformat = metadata.orig_nbformat;
   }
 }
 

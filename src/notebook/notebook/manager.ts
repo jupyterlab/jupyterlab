@@ -287,23 +287,13 @@ class NotebookManager {
 
   /**
    * Save the notebook and clear the dirty state of the model.
-   *
-   * #### Notes
-   * Also updates the metadata if there is a current session.
    */
   save(): Promise<void> {
     let model = this.model;
-    if (!model.session || model.session.isDisposed) {
-      return this._save();
-    }
-    return model.session.kernel.getKernelSpec().then(spec => {
-      model.metadata.kernelspec.display_name = spec.display_name;
-      model.metadata.kernelspec.name = model.session.kernel.name;
-      return model.session.kernel.kernelInfo();
-    }).then(info => {
-      model.metadata.language_info = info.language_info;
-      return this._save();
-    });
+    let content = serialize(model);
+    let name = model.session.notebookPath;
+    return this._manager.save(name, { type: 'notebook', content })
+    .then(() => { model.dirty = false; });
   }
 
   /**
@@ -318,17 +308,6 @@ class NotebookManager {
     default:
       return this.model.createRawCell(cell);
     }
-  }
-
-  /**
-   * Save the notebook contents to disk.
-   */
-  private _save(): Promise<void> {
-    let model = this.model;
-    let content = serialize(model);
-    let name = model.session.notebookPath;
-    return this._manager.save(name, { type: 'notebook', content })
-    .then(() => { model.dirty = false; });
   }
 
   private _manager: IContentsManager = null;
