@@ -256,12 +256,37 @@ function createDialog(options: IDialogOptions, buttonNodes: HTMLElement[]): HTML
     case 'SELECT':
       child = wrapSelect(child as HTMLSelectElement);
       break;
+    default:
+      child = styleElements(child);
+      break;
     }
   }
   child.classList.add(BODY_CONTENT_CLASS);
   body.appendChild(child);
   buttonNodes.map(buttonNode => { footer.appendChild(buttonNode); });
   return node;
+}
+
+
+/**
+ * Style the child elements of a parent element.
+ */
+function styleElements(element: HTMLElement): HTMLElement {
+  for (let i = 0; i < element.children.length; i++) {
+    let child = element.children[i];
+    let next = child.nextSibling;
+    switch (child.tagName) {
+    case 'INPUT':
+      child = wrapInput(child as HTMLInputElement);
+      element.insertBefore(child, next);
+      break;
+    case 'SELECT':
+      child = wrapSelect(child as HTMLSelectElement);
+      element.insertBefore(child, next);
+      break;
+    }
+  }
+  return element;
 }
 
 
