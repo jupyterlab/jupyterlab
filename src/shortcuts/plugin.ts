@@ -88,7 +88,7 @@ const SHORTCUTS = [
   },
   {
     command: 'notebook-cells:runAndAdvance',
-    selector: '.jp-Notebook-cell',
+    selector: '.jp-Notebook',
     sequence: ['Shift Enter']
   },
   {
