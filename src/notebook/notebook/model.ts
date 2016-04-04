@@ -50,7 +50,7 @@ import {
 } from '../cells';
 
 import {
-  INotebookMetadata, OutputType, IKernelspecMetadata, ILanguageInfoMetadata
+  OutputType, IKernelspecMetadata, ILanguageInfoMetadata
 } from './nbformat';
 
 
@@ -645,6 +645,11 @@ class NotebookModel implements INotebookModel {
    * set of metadata on the notebook.
    */
   getMetadata(name: string): INotebookMetadataCursor {
+    let invalid = ['kernelspec', 'languageInfo', 'origNbformat'];
+    if (invalid.indexOf(name) !== -1) {
+      let key = invalid[invalid.indexOf(name)];
+      throw Error(`Use model attribute for ${key} directly`);
+    }
     return new NotebookMetadataCursor(
       name,
       this._metadata[name],

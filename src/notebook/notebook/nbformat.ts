@@ -18,7 +18,7 @@ const MINOR_VERSION = 0;
 /**
  * The kernelspec metadata.
  */
-export 
+export
 interface IKernelspecMetadata {
   name: string;
   display_name: string;
@@ -37,23 +37,13 @@ interface ILanguageInfoMetadata {
   pygments_lexer?: string;
 }
 
-/**
- * The notebook metadata.
- */
-export
-interface INotebookMetadata {
-  kernelspec: IKernelspecMetadata;
-  language_info: ILanguageInfoMetadata;
-  orig_nbformat?: number;
-}
-
 
 /**
  * The notebook content.
  */
 export
 interface INotebookContent {
-  metadata: INotebookMetadata;
+  metadata: any;
   nbformat_minor: number;
   nbformat: number;
   cells: ICell[];
