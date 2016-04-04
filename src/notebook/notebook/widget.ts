@@ -126,6 +126,11 @@ const TOOLBAR_INTERRUPT = 'jp-NBToolbar-interrupt';
 const TOOLBAR_RESTART = 'jp-NBToolbar-restart';
 
 /**
+ * The class name added to toolbar cell type dropdown wrapper.
+ */
+const TOOLBAR_CELL_WRAP = 'jp-NBToolbar-cellWrapper';
+
+/**
  * The class name added to toolbar cell type dropdown.
  */
 const TOOLBAR_CELL = 'jp-NBToolbar-cellType';
@@ -586,24 +591,27 @@ class NotebookToolbar extends Widget {
     let names = [TOOLBAR_SAVE, TOOLBAR_INSERT, TOOLBAR_CUT,
                  TOOLBAR_COPY, TOOLBAR_PASTE,
                  TOOLBAR_RUN, TOOLBAR_INTERRUPT,
-                 TOOLBAR_RESTART, TOOLBAR_CELL,
+                 TOOLBAR_RESTART, TOOLBAR_CELL_WRAP,
                  TOOLBAR_KERNEL, TOOLBAR_INDICATOR];
     for (let name of names) {
       let el: HTMLElement;
-      if (name === TOOLBAR_CELL) {
-        el = document.createElement('select');
+      if (name === TOOLBAR_CELL_WRAP) {
+        el = document.createElement('div');
+        let select = document.createElement('select');
         for (let t of ['Code', 'Markdown', 'Raw']) {
           let option = document.createElement('option');
           option.value = t.toLowerCase();
           option.textContent = t;
-          el.appendChild(option);
+          select.appendChild(option);
         }
+        select.className = `${TOOLBAR_CELL} ${TOOLBAR_ITEM}`;
+        el.appendChild(select);
       } else {
         el = document.createElement('span');
       }
       el.className = name;
       el.classList.add(TOOLBAR_ITEM);
-      let nonButtons = [TOOLBAR_CELL, TOOLBAR_KERNEL, TOOLBAR_INDICATOR];
+      let nonButtons = [TOOLBAR_CELL_WRAP, TOOLBAR_KERNEL, TOOLBAR_INDICATOR];
       if (nonButtons.indexOf(name) === -1) {
         el.classList.add(TOOLBAR_BUTTON);
       }

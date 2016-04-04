@@ -151,6 +151,7 @@
     flex: 0 0 auto;
     padding-left: 8px;
     padding-right: 8px;
+    vertical-align: middle;
     font-size: 13px;
     font-family: "Helvetica Neue";
     color: #767676;
@@ -160,23 +161,35 @@
 .jp-NBToolbar-item.jp-NBToolbar-button,
 .jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
     font-family: FontAwesome;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    border-right: 1px solid #E0E0E0;
+    padding-top: 5px;
+    padding-bottom: 6px;
     color: #616161;
     text-align: center;
     display: inline-block;
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-cellType {
-    vertical-align: middle;
+.jp-NBToolbar-item.jp-NBToolbar-cellWrapper {
+    border-left: 1px solid #E0E0E0;
+    border-right: 1px solid #E0E0E0;
     flex-basis: 100px;
-    /* We do not use a border here because the browser styles it
-       with rounded borders */
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+
+.jp-NBToolbar-cellType.jp-NBToolbar-item {
+    font-size: 13px;
+    font-family: "Helvetica Neue";
+    color: #767676;
+}
+
+
+.jp-NBToolbar-cellWrapper .jp-NBToolbar-cellType {
     border: none;
     border-radius: 0;
     outline: none;
+    width: 100%;
 }
 
 
@@ -202,9 +215,8 @@
     color: #767676;
     flex-grow: 1;
     flex-shrink: 1;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    border-left: 1px solid #E0E0E0;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 
