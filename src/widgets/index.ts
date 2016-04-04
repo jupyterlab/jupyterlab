@@ -24,7 +24,7 @@ import {
 } from '../backboneviewwrapper';
 
 import {
-  IRenderer, RenderMime
+  IRenderer
 } from '../rendermime';
 
 import 'jquery-ui/themes/smoothness/jquery-ui.min.css';
@@ -77,7 +77,7 @@ class WidgetRenderer implements IRenderer<Widget> {
     });
     return w;
   }
-  
+
   public mimetypes = ['application/vnd.jupyter.widget'];
   private _manager: WidgetManager;
 }
