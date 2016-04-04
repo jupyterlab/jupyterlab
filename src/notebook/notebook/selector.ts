@@ -32,10 +32,8 @@ function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSp
   for (let option of options) {
     selector.appendChild(option);
   }
-  if (model.session) {
-    selector.value = model.session.kernel.name;
-  } else if (model.metadata && model.metadata.kernelspec) {
-    selector.value = model.metadata.kernelspec.name;
+  if (model.kernelspec.name !== 'unknown') {
+    selector.value = model.kernelspec.name;
   } else {
     selector.value = specs.kernelspecs[specs.default].spec.display_name;
   }
@@ -45,9 +43,7 @@ function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSp
     body: selector
   }).then(result => {
     if (result.text === 'OK') {
-      if (model.session.kernel.name !== selector.value) {
-        return model.session.changeKernel(selector.value);
-      }
+      return model.session.changeKernel({ name: selector.value });
     }
     return model.session.kernel;
   });
@@ -59,7 +55,7 @@ function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSp
  */
 export
 function findKernel(model: INotebookModel, specs: IKernelSpecIds): string {
-  let name = model.metadata.kernelspec.name;
+  let name = model.kernelspec.name;
   if (name === 'unknown') {
     return specs.default;
   }
@@ -70,7 +66,7 @@ function findKernel(model: INotebookModel, specs: IKernelSpecIds): string {
     }
   }
   // Next try to match the language name.
-  let language = model.metadata.language_info.name;
+  let language = model.languageInfo.name;
   if (language === 'unknown') {
     return specs.default;
   }

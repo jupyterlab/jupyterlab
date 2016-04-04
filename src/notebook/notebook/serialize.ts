@@ -28,9 +28,18 @@ function serialize(nb: INotebookModel): INotebookContent {
     let cell = nb.cells.get(i);
     cells.push(serializeCell(cell));
   }
+  let metadata: any = {
+    kernelspec: nb.kernelspec,
+    language_info: nb.languageInfo,
+    orig_nbformat: nb.origNbformat
+  }
+  for (let key of nb.listMetadata()) {
+    let cursor = nb.getMetadata(key);
+    metadata[key] = cursor.getValue();
+  }
   return {
     cells: cells,
-    metadata: nb.metadata,
+    metadata: metadata,
     nbformat: MAJOR_VERSION,
     nbformat_minor: MINOR_VERSION
   };
@@ -64,8 +73,25 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
     model.cells.add(cell);
   }
   model.activeCellIndex = 0;
+
   if (data && data.metadata) {
-    model.metadata = data.metadata;
+    let metadata = data.metadata;
+    for (let key of data.metadata) {
+      switch(key) {
+      case 'kernelspec':
+        model.kernelspec = metadata.kernelspec;
+        break;
+      case 'language_info':
+        model.languageInfo = metadata.language_info;
+        break;
+      case 'orig_nbformat':
+        model.origNbformat = metadata.origNbformat;
+        break;
+      default:
+        let cursor = model.getMetadata(key);
+        cursor.setValue(metadata[key]);
+      }
+    }
   }
 }
 

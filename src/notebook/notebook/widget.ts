@@ -628,8 +628,8 @@ class NotebookToolbar extends Widget {
     this.addClass(NB_TOOLBAR);
     this._manager = manager;
     let model = this._model = manager.model;
-    if (model.metadata && model.metadata.kernelspec) {
-      this.kernelNameNode.textContent = model.metadata.kernelspec.display_name;
+    if (model.kernelspec) {
+      this.kernelNameNode.textContent = model.kernelspec.display_name;
     } else {
       this.kernelNameNode.textContent = 'No Kernel!';
     }
@@ -755,9 +755,9 @@ class NotebookToolbar extends Widget {
    */
   protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
     switch (args.name) {
-    case 'metadata':
-      if (model.metadata && model.metadata.kernelspec) {
-        let name = model.metadata.kernelspec.display_name;
+    case 'kernelspec':
+      if (model.kernelspec) {
+        let name = model.kernelspec.display_name || 'No kernel!';
         this.kernelNameNode.textContent = name;
       }
       break;

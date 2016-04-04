@@ -14,23 +14,27 @@ const MAJOR_VERSION = 4;
 export
 const MINOR_VERSION = 0;
 
+
 /**
- * The notebook metadata.
+ * The kernelspec metadata.
  */
 export
-interface INotebookMetadata {
-  kernelspec: {
-    name: string;
-    display_name: string;
-  };
-  language_info: {
-    name: string;
-    codemirror_mode?: any;
-    file_extension?: string;
-    mimetype?: string;
-    pygments_lexer?: string
-  };
-  orig_nbformat?: number;
+interface IKernelspecMetadata {
+  name: string;
+  display_name: string;
+}
+
+
+/**
+ * The language info metatda
+ */
+export
+interface ILanguageInfoMetadata {
+  name: string;
+  codemirror_mode?: any;
+  file_extension?: string;
+  mimetype?: string;
+  pygments_lexer?: string;
 }
 
 
@@ -39,7 +43,7 @@ interface INotebookMetadata {
  */
 export
 interface INotebookContent {
-  metadata: INotebookMetadata;
+  metadata: any;
   nbformat_minor: number;
   nbformat: number;
   cells: ICell[];
