@@ -6,9 +6,6 @@ import {
   IContentsModel
 } from 'jupyter-js-services';
 
-import * as arrays
- from 'phosphor-arrays';
-
 import {
   ISignal, Signal
 } from 'phosphor-signaling';
@@ -188,7 +185,7 @@ class DocumentManager {
 
 
 
-/** 
+/**
  * A private namespace for DocumentManager data.
  */
 namespace Private {
