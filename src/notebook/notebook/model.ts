@@ -10,7 +10,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  copy
+  copy, shallowEquals
 } from 'jupyter-js-utils';
 
 import {
@@ -389,7 +389,7 @@ class NotebookModel implements INotebookModel {
   }
   set languageInfo(value: ILanguageInfoMetadata) {
     let prev = this._langInfo;
-    if (prev === value) {
+    if (shallowEquals(prev, value)) {
       return;
     }
     this._langInfo = Object.freeze(value);
@@ -408,7 +408,7 @@ class NotebookModel implements INotebookModel {
   }
   set origNbformat(value: number) {
     let prev = this._origNbformat;
-    if (prev === value) {
+    if (shallowEquals(prev, value)) {
       return;
     }
     this._origNbformat = value;
