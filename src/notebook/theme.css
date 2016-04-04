@@ -161,8 +161,8 @@
 .jp-NBToolbar-item.jp-NBToolbar-button,
 .jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
     font-family: FontAwesome;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-top: 5px;
+    padding-bottom: 6px;
     color: #616161;
     text-align: center;
     display: inline-block;
