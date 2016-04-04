@@ -43,7 +43,7 @@ function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSp
     body: selector
   }).then(result => {
     if (result.text === 'OK') {
-      return model.session.changeKernel(selector.value);
+      return model.session.changeKernel({ name: selector.value });
     }
     return model.session.kernel;
   });

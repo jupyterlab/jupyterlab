@@ -282,7 +282,7 @@ class NotebookModel implements INotebookModel {
 
   /**
    * A signal emitted when a user metadata state changes.
-   * 
+   *
    * #### Notes
    * The signal argument is the namespace of the metadata that changed.
    */
@@ -373,7 +373,7 @@ class NotebookModel implements INotebookModel {
     if (prev === value) {
       return;
     }
-    this._kernelspec = value;
+    this._kernelspec = Object.freeze(value);
     this.stateChanged.emit({
       name: 'kernelspec',
       oldValue: prev,
@@ -392,7 +392,7 @@ class NotebookModel implements INotebookModel {
     if (prev === value) {
       return;
     }
-    this._langInfo = value;
+    this._langInfo = Object.freeze(value);
     this.stateChanged.emit({
       name: 'languageInfo',
       oldValue: prev,
@@ -646,7 +646,7 @@ class NotebookModel implements INotebookModel {
    */
   getMetadata(name: string): INotebookMetadataCursor {
     return new NotebookMetadataCursor(
-      name, 
+      name,
       this._metadata[name],
       this._cursorCallback
     );
@@ -814,7 +814,7 @@ namespace NotebookModelPrivate {
     let session = model.session;
     let kernel = session.kernel;
     kernel.getKernelSpec().then(spec => {
-      let kernelspec = model.kernelspec;
+      let kernelspec = copy(model.kernelspec);
       kernelspec.display_name = spec.display_name;
       kernelspec.name = session.kernel.name;
       // Trigger a change to the notebook metadata.
