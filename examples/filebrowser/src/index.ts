@@ -184,8 +184,8 @@ function main(): void {
       handler: () => { fbWidget.shutdownKernels(); }
     }),
     new MenuItem({
-      text: 'DropDown Demo',
-      handler: () => { dropdownDemo(); }
+      text: 'Dialog Demo',
+      handler: () => { dialogDemo(); }
     }),
     new MenuItem({
       text: 'Info Demo',
@@ -216,9 +216,12 @@ function main(): void {
 
 
 /**
- * Create a non-functional drop down demo.
+ * Create a non-functional dialog demo.
  */
-function dropdownDemo(): void {
+function dialogDemo(): void {
+  let body = document.createElement('div');
+  let input = document.createElement('input');
+  input.value = 'Untitled.ipynb'
   let selector = document.createElement('select');
   let option0 = document.createElement('option');
   option0.value = 'python';
@@ -228,9 +231,11 @@ function dropdownDemo(): void {
   option1.value = 'julia';
   option1.text = 'Julia';
   selector.appendChild(option1);
+  body.appendChild(input);
+  body.appendChild(selector);
   showDialog({
-    title: 'Select Kernel',
-    body: selector,
+    title: 'Create new notebook',
+    body,
   });
 }
 
