@@ -23,7 +23,6 @@ import {
 } from '../services/plugin';
 
 
-
 /**
  * The notebook file handler provider.
  */

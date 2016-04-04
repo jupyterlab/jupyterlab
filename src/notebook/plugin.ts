@@ -4,7 +4,7 @@
 
 import {
   NotebookWidget, NotebookModel, serialize, INotebookModel, deserialize,
-  NotebookManager, NotebookToolbar, selectKernel, INotebookContent,
+  NotebookManager, NotebookToolbar, selectKernel,
   findKernel
 } from 'jupyter-js-notebook';
 
@@ -566,8 +566,8 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
     deserialize(model.content, widget.model);
     return this._kernelSpecs.then(specs => {
       let name = findKernel(widget.model, specs);
-      return this._session.startNew({ 
-        kernelName: name, 
+      return this._session.startNew({
+        kernelName: name,
         notebookPath: model.path
       });
     }).then(session => {
