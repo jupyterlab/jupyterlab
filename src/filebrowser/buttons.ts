@@ -290,7 +290,7 @@ namespace Private {
     let creators = registry.listCreators();
     creators = creators.sort((a, b) => a.localeCompare(b));
     let items: MenuItem[] = [];
-    for (let name of creators) {
+    for (var name of creators) {
       items.push(new MenuItem({
         text: name,
         handler: () => {
