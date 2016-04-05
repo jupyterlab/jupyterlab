@@ -46,7 +46,7 @@ import {
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
   IRawCellModel, isCodeCellModel, isMarkdownCellModel,
-  RawCellModel, isRawCellModel
+  RawCellModel, isRawCellModel, MetadataCursor, IMetadataCursor
 } from '../cells';
 
 import {
@@ -74,28 +74,6 @@ const DEFAULT_KERNELSPEC = {
  */
 const DEFAULT_LANG_INFO = {
   name: 'unknown'
-}
-
-
-/**
- * A class used to interact with user level notebook metadata.
- */
-export
-interface INotebookMetadataCursor {
-  /**
-   * The metadata namespace.
-   */
-  name: string;
-
-  /**
-   * Get the value of the metadata.
-   */
-  getValue(): any;
-
-  /**
-   * Set the value of the metdata.
-   */
-  setValue(value: any): void;
 }
 
 
@@ -227,7 +205,7 @@ interface INotebookModel extends IDisposable {
    * on the model.  This method is used to interact with a namespaced
    * set of metadata on the notebook.
    */
-  getMetadata(namespace: string): INotebookMetadataCursor;
+  getMetadata(namespace: string): IMetadataCursor;
 
   /**
    * List the metadata namespace keys for the notebook.
@@ -366,14 +344,14 @@ class NotebookModel implements INotebookModel {
    * The kernelspec metadata for the notebook.
    */
   get kernelspec(): IKernelspecMetadata {
-    return this._kernelspec;
+    return JSON.parse(this._kernelspec);
   }
   set kernelspec(value: IKernelspecMetadata) {
-    let prev = this._kernelspec;
+    let prev = JSON.parse(this._kernelspec);
     if (prev === value) {
       return;
     }
-    this._kernelspec = Object.freeze(value);
+    this._kernelspec = JSON.stringify(value);
     this.stateChanged.emit({
       name: 'kernelspec',
       oldValue: prev,
@@ -385,14 +363,14 @@ class NotebookModel implements INotebookModel {
    * The language info metadata for the notebook.
    */
   get languageInfo(): ILanguageInfoMetadata {
-    return this._langInfo;
+    return JSON.parse(this._langInfo);
   }
   set languageInfo(value: ILanguageInfoMetadata) {
-    let prev = this._langInfo;
+    let prev = JSON.parse(this._langInfo);
     if (shallowEquals(prev, value)) {
       return;
     }
-    this._langInfo = Object.freeze(value);
+    this._langInfo = JSON.stringify(value);
     this.stateChanged.emit({
       name: 'languageInfo',
       oldValue: prev,
@@ -644,13 +622,13 @@ class NotebookModel implements INotebookModel {
    * on the model.  This method is used to interact with a namespaced
    * set of metadata on the notebook.
    */
-  getMetadata(name: string): INotebookMetadataCursor {
+  getMetadata(name: string): IMetadataCursor {
     let invalid = ['kernelspec', 'languageInfo', 'origNbformat'];
     if (invalid.indexOf(name) !== -1) {
       let key = invalid[invalid.indexOf(name)];
       throw Error(`Use model attribute for ${key} directly`);
     }
-    return new NotebookMetadataCursor(
+    return new MetadataCursor(
       name,
       this._metadata[name],
       this._cursorCallback
@@ -753,8 +731,8 @@ class NotebookModel implements INotebookModel {
   private _defaultMimetype = 'text/x-ipython';
   private _readOnly = false;
   private _session: INotebookSession = null;
-  private _kernelspec: IKernelspecMetadata = DEFAULT_KERNELSPEC;
-  private _langInfo: ILanguageInfoMetadata = DEFAULT_LANG_INFO;
+  private _kernelspec = JSON.stringify(DEFAULT_KERNELSPEC);
+  private _langInfo = JSON.stringify(DEFAULT_LANG_INFO);
   private _origNbformat: number = null;
   private _activeCellIndex = -1;
   private _mode: NotebookMode = 'command';
@@ -866,60 +844,4 @@ namespace NotebookModelPrivate {
     });
   }
 
-}
-
-
-/**
- * An implementation of a notebook metadata cursor.
- */
-class NotebookMetadataCursor implements INotebookMetadataCursor {
-
-  /**
-   * Construct a new notebook metadata cursor.
-   *
-   * @param name - the metadata namespace key.
-   *
-   * @param value - this initial value of the namespace.
-   *
-   * @param cb - a change callback.
-   */
-  constructor(name: string, value: string, cb: (name: string, value: string) => void) {
-    this._name = name;
-    this._value = value || 'null';
-    this._cb = cb;
-  }
-
-  /**
-   * Get the namespace key of the metadata.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get name(): string {
-    return this._name;
-  }
-
-  /**
-   * Get the value of the namespace data.
-   */
-  getValue(): any {
-    return JSON.parse(this._value);
-  }
-
-  /**
-   * Set the value of the namespace data.
-   */
-  setValue(value: string): any {
-    let prev = this._value;
-    if (prev === value) {
-      return;
-    }
-    this._value = JSON.stringify(value);
-    let cb = this._cb;
-    cb(this._name, this._value);
-  }
-
-  private _value = 'null';
-  private _name = '';
-  private _cb: (name: string, value: string) => void = null;
 }

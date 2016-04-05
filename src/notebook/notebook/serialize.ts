@@ -10,7 +10,7 @@ import {
 import {
   INotebookContent, ICell, MAJOR_VERSION, MINOR_VERSION,
   IRawCell, ICodeCell, isRawCell, isMarkdownCell,
-  isCodeCell
+  isCodeCell, INotebookMetadata
 } from './nbformat';
 
 import {
@@ -28,14 +28,14 @@ function serialize(nb: INotebookModel): INotebookContent {
     let cell = nb.cells.get(i);
     cells.push(serializeCell(cell));
   }
-  let metadata: any = {
+  let metadata: INotebookMetadata = {
     kernelspec: nb.kernelspec,
     language_info: nb.languageInfo,
     orig_nbformat: nb.origNbformat
   }
   for (let key of nb.listMetadata()) {
     let cursor = nb.getMetadata(key);
-    metadata[key] = cursor.getValue();
+    (metadata as any)[key] = cursor.getValue();
   }
   return {
     cells: cells,
@@ -76,7 +76,7 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
 
   if (data && data.metadata) {
     let metadata = data.metadata;
-    for (let key of data.metadata) {
+    for (let key of Object.keys(data.metadata)) {
       switch(key) {
       case 'kernelspec':
         model.kernelspec = metadata.kernelspec;
@@ -85,11 +85,11 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
         model.languageInfo = metadata.language_info;
         break;
       case 'orig_nbformat':
-        model.origNbformat = metadata.origNbformat;
+        model.origNbformat = metadata.orig_nbformat;
         break;
       default:
         let cursor = model.getMetadata(key);
-        cursor.setValue(metadata[key]);
+        cursor.setValue((metadata as any)[key]);
       }
     }
   }
@@ -124,6 +124,10 @@ function serializeCell(cell: ICellModel): ICell {
     }
     out.execution_count = cell.executionCount;
   }
+  for (let key of cell.listMetadata()) {
+    let cursor = cell.getMetadata(key);
+    (output.metadata as any)[key] = cursor.getValue();
+  }
   return output;
 }
 
@@ -149,5 +153,14 @@ function deserializeCell(data: ICell, model: ICellModel): void {
     }
   } else if (isRawCellModel(model)) {
     (model as IRawCellModel).format = (data as IRawCell).metadata.format;
+  }
+  let metadata = data.metadata;
+  let blacklist = ['tags', 'name', 'trusted', 'collapsed', 'scrolled',
+                   'execution_count', 'format'];
+  for (let key of Object.keys(metadata)) {
+    if (blacklist.indexOf(key) === -1) {
+      let cursor = model.getMetadata(key);
+      cursor.setValue((metadata as any)[key]);
+    }
   }
 }
