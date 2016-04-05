@@ -43,7 +43,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    *
    * @param manager - The contents manager used to save/load files.
    *
-   * @param cb - The function called when a widget is finished loading.
+   * @param cb - The function called when a widget is created.
    */
   constructor(manager: IContentsManager, cb: (widget: T) => void) {
     this._manager = manager;
@@ -103,9 +103,9 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
       return this.populateWidget(widget, contents);
     }).then(contents => {
       this.clearDirty(widget);
-      let cb = this._cb;
-      if (cb) cb(widget);
     });
+    let cb = this._cb;
+    if (cb) cb(widget);
     return widget;
   }
 
