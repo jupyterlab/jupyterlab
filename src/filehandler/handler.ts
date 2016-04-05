@@ -2,15 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import * as CodeMirror
-  from 'codemirror';
-
 import {
   IContentsModel, IContentsManager, IContentsOpts
 } from 'jupyter-js-services';
-
-import * as arrays
-  from 'phosphor-arrays';
 
 import {
   IMessageFilter, IMessageHandler, Message, installMessageFilter
@@ -29,16 +23,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  loadModeByFileName
-} from '../codemirror';
-
-import {
   showDialog
 } from '../dialog';
-
-import {
-  JupyterCodeMirrorWidget as CodeMirrorWidget
-} from './widget';
 
 
 /**
@@ -54,9 +40,14 @@ export
 abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   /**
    * Construct a new source file handler.
+   *
+   * @param manager - The contents manager used to save/load files.
+   *
+   * @param cb - The function called when a widget is finished loading.
    */
-  constructor(manager: IContentsManager) {
+  constructor(manager: IContentsManager, cb: (widget: T) => void) {
     this._manager = manager;
+    this._cb = cb;
   }
 
   /**
@@ -75,52 +66,28 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
 
   /**
    * Get the contents manager used by the handler.
-   *
-   * #### Notes
-   * This is a read-only property
    */
   get manager(): IContentsManager {
     return this._manager;
   }
 
   /**
-   * A signal emitted when the file handler has finished loading the
-   * contents of the widget.
+   * Find a widget given a path.
    */
-  get finished(): ISignal<AbstractFileHandler<T>, T> {
-    return Private.finishedSignal.bind(this);
+  findByPath(path: string): T {
+    for (let w of this._widgets) {
+      let model = this._getModel(w);
+      if (model.path === path) {
+        return w;
+      }
+    }
   }
-
-  /**
-   * Get the number of widgets managed by the handler.
-   *
-   * @returns The number of widgets managed by the handler.
-   */
-  widgetCount(): number {
-    return this._widgets.length;
-  }
-
-  /**
-   * Get the widget at the specified index.
-   *
-   * @param index - The index of the widget of interest.
-   *
-   * @returns The widget at the specified index, or `undefined`.
-   */
-  widgetAt(index: number): T {
-    return this._widgets[index];
-  }
-
-  /**
-   * Create a new file given a directory and a host node for the dialog.
-   */
-  abstract createNew(path: string, type: string, host: HTMLElement): Promise<T>;
 
   /**
    * Open a contents model and return a widget.
    */
   open(model: IContentsModel): T {
-    let widget = this.findWidgetByModel(model);
+    let widget = this.findByPath(model.path);
     if (!widget) {
       widget = this.createWidget(model);
       widget.title.closable = true;
@@ -134,9 +101,10 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     this.manager.get(model.path, opts).then(contents => {
       widget.title.text = this.getTitleText(model);
       return this.populateWidget(widget, contents);
-    }).then(() => {
+    }).then(contents => {
       this.clearDirty(widget);
-      this.finished.emit(widget);
+      let cb = this._cb;
+      if (cb) cb(widget);
     });
     return widget;
   }
@@ -145,22 +113,21 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    * Rename a file.
    */
   rename(oldPath: string, newPath: string): boolean {
-    for (let w of this._widgets) {
-      let model = this._getModel(w);
-      if (model.path === oldPath) {
-        if (newPath === void 0) {
-          this.clearDirty(w);
-          w.close();
-          return;
-        }
-        model.path = newPath;
-        let parts = newPath.split('/');
-        model.name = parts[parts.length - 1];
-        w.title.text = this.getTitleText(model);
-        return true;
-      }
+    let widget = this.findByPath(oldPath);
+    if (widget === void 0) {
+      return false;
     }
-    return false;
+    if (newPath === void 0) {
+      this.clearDirty(widget);
+      widget.close();
+      return true;
+    }
+    let model = this._getModel(widget);
+    model.path = newPath;
+    let parts = newPath.split('/');
+    model.name = parts[parts.length - 1];
+    widget.title.text = this.getTitleText(model);
+    return true;
   }
 
   /**
@@ -309,13 +276,6 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Find a widget given a model.
-   */
-  protected findWidgetByModel(model: IContentsModel): T {
-    return arrays.find(this._widgets, widget => this._getModel(widget).path === model.path);
-  }
-
-  /**
    * Get the model for a given widget.
    */
   private _getModel(widget: T): IContentsModel {
@@ -357,147 +317,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
 
   private _manager: IContentsManager = null;
   private _widgets: T[] = [];
-}
-
-
-/**
- * An implementation of a file handler.
- */
-export
-class FileHandler extends AbstractFileHandler<CodeMirrorWidget> {
-
-  /**
-   * Create a new file or directory.
-   */
-  createNew(path: string, name: string, host: HTMLElement): Promise<CodeMirrorWidget> {
-    return Promise.resolve(void 0);
-  }
-
-  /**
-   * Get the options used to save the widget content.
-   */
-  protected getSaveOptions(widget: CodeMirrorWidget, model: IContentsModel): Promise<IContentsOpts> {
-    let name = model.path.split('/').pop();
-    name = name.split('.')[0];
-    let content = (widget as CodeMirrorWidget).editor.getDoc().getValue();
-    return Promise.resolve({ path: model.path, content, name,
-                             type: 'file', format: 'text' });
-  }
-
-  /**
-   * Create the widget from an `IContentsModel`.
-   */
-  protected createWidget(model: IContentsModel): CodeMirrorWidget {
-    let widget = new CodeMirrorWidget();
-    CodeMirror.on(widget.editor.getDoc(), 'change', () => {
-      this.setDirty(widget);
-    });
-    return widget;
-  }
-
-  /**
-   * Populate a widget from an `IContentsModel`.
-   */
-  protected populateWidget(widget: CodeMirrorWidget, model: IContentsModel): Promise<IContentsModel> {
-    widget.editor.getDoc().setValue(model.content);
-    loadModeByFileName(widget.editor, model.name);
-    return Promise.resolve(model);
-  }
-}
-
-
-/**
- * A registry of file handlers.
- */
-export
-class FileHandlerRegistry {
-  /**
-   * Get the default handler.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get default(): AbstractFileHandler<Widget> {
-    return this._default;
-  }
-
-  /**
-   * Register a file handler.
-   */
-  add(handler: AbstractFileHandler<Widget>): void {
-    this._handlers.push(handler);
-  }
-
-  /**
-   * Register a default file handler.
-   */
-  addDefault(handler: AbstractFileHandler<Widget>): void {
-    if (this._default) {
-      throw Error('Default handler already registered');
-    }
-    this.add(handler);
-    this._default = handler;
-  }
-
-  /**
-   * Add a creation type.
-   */
-  addCreator(name: string, handler: AbstractFileHandler<Widget>): void {
-    this._creators[name] = handler;
-  }
-  
-  /**
-   * Get a list of creator names.
-   */
-  listCreators(): string[] {
-    return Object.keys(this._creators);
-  }
-
-  /**
-   * Find a creator by name.
-   */
-  findByCreator(name: string): AbstractFileHandler<Widget> {
-    return this._creators[name];
-  }
-
-  /**
-   * Get the appropriate handler for an IContentsModel
-   */
-  findbyModel(model: IContentsModel): AbstractFileHandler<Widget>  {
-    if (model.type === 'directory') {
-      throw new Error('Cannot open directories, use `cd()`');
-    } 
-    if (this._handlers.length === 0) {
-      return;
-    }
-    let path = model.path;
-    let ext = '.' + path.split('.').pop();
-    let handlers: AbstractFileHandler<Widget>[] = [];
-    // Look for matching file extensions.
-    for (let h of this._handlers) {
-      if (h.fileExtensions.indexOf(ext) !== -1) handlers.push(h);
-    }
-    // If there was only one match, use it.
-    if (handlers.length === 1) {
-      return handlers[0];
-    }
-
-    // If there were no matches, use default handler.
-    if (handlers.length === 0) {
-      if (this._default) {
-        return this._default;
-      }
-      throw new Error(`Could not open file '${path}'`);
-    }
-
-    // There are more than one possible handlers.
-    // TODO: Ask the user to choose one.
-    return handlers[0];
-  }
-
-  private _handlers: AbstractFileHandler<Widget>[] = [];
-  private _default: AbstractFileHandler<Widget> = null;
-  private _creators: { [key: string]: AbstractFileHandler<Widget>} = Object.create(null);
+  private _cb: (widget: T) => void  = null;
 }
 
 
@@ -529,60 +349,4 @@ namespace Private {
       }
     }
   });
-
-  /**
-   * A signal emitted when a file handler is activated.
-   */
-  export
-  const activatedSignal = new Signal<AbstractFileHandler<Widget>, void>();
-
-  /**
-   * A signal emitted when a file handler has finished populating a widget.
-   */
-  export
-  const finishedSignal = new Signal<AbstractFileHandler<Widget>, Widget>();
 }
-
-
-// /**
-//  * Rename a file or directory.
-//  */
-// function doRename(widget: Widget, contents: IContentsModel): Promise<IContentsModel> {
-//   let edit = document.createElement('input');
-//   edit.value = contents.name;
-//   return showDialog({
-//     title: `Create a new ${contents.type}`,
-//     body: edit,
-//     host: widget.node.parentElement,
-//     okText: 'CREATE'
-//   }).then(value => {
-//     if (value.text === 'CREATE') {
-//       return widget.model.rename(contents.path, edit.value);
-//     } else {
-//       return widget.model.delete(contents.path).then(() => void 0);
-//     }
-//   }).catch(error => {
-//     if (error.statusText === 'Conflict') {
-//       return handleExisting(widget, edit.value, contents);
-//     }
-//     return utils.showErrorMessage(widget, 'File creation error', error).then(
-//       () => { return void 0; });
-//   });
-// }
-
-// /**
-//  * Handle an existing file name.
-//  */
-// function handleExisting(widget: Widget, name: string, contents: IContentsModel): Promise<IContentsModel> {
-//   return showDialog({
-//     title: 'File already exists',
-//     body: `File "${name}" already exists, try again?`,
-//     host: widget.node.parentElement
-//   }).then(value => {
-//     if (value.text === 'OK') {
-//       return doRename(widget, contents);
-//     } else {
-//       return widget.model.delete(contents.path).then(() => void 0);
-//     }
-//   });
-// }

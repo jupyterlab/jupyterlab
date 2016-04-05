@@ -14,7 +14,7 @@ import {
 } from 'jupyter-js-ui/lib/filehandler';
 
 import {
-  FileBrowserWidget, FileBrowserModel
+  FileBrowserWidget, FileBrowserModel, FileCreator
 } from 'jupyter-js-ui/lib/filebrowser';
 
 import {
@@ -65,12 +65,19 @@ function main(): void {
 
   let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
   let registry = new FileHandlerRegistry();
-  let fileHandler = new FileHandler(contentsManager);
+  let fileHandler = new FileHandler(contentsManager, widget => {
+    dock.insertTabAfter(widget);
+    widgets.push(widget);
+  });
   registry.addDefault(fileHandler);
-  registry.addCreator('New File', fileHandler);
-  registry.addCreator('New Directory', fileHandler);
+
   let fbWidget = new FileBrowserWidget(fbModel, registry);
 
+  let dirCreator = new FileCreator(fbModel, 'directory', fbWidget.node);
+  let fileCreator = new FileCreator(fbModel, 'file', fbWidget.node);
+  registry.addCreator(
+    'New Directory', dirCreator.createNew.bind(dirCreator));
+  registry.addCreator('New File', fileCreator.createNew.bind(fileCreator));
 
   let panel = new SplitPanel();
   panel.id = 'main';
@@ -81,19 +88,12 @@ function main(): void {
   SplitPanel.setStretch(dock, 1);
   dock.spacing = 8;
 
-
-  fileHandler.finished.connect((handler, widget) => {
-    dock.insertTabAfter(widget);
-  });
-
-  fbModel.fileChanged.connect((fbModel, args) => {
-    fileHandler.rename(args.oldValue, args.newValue);
-  });
-
+  let widgets: Widget[] = [];
   let activeWidget: Widget;
+
   document.addEventListener('focus', event => {
-    for (let i = 0; i < fileHandler.widgetCount(); i++) {
-      let widget = fileHandler.widgetAt(i);
+    for (let i = 0; i < widgets.length; i++) {
+      let widget = widgets[i];
       if (widget.node.contains(event.target as HTMLElement)) {
         activeWidget = widget;
         break;
@@ -185,7 +185,7 @@ function main(): void {
     }),
     new MenuItem({
       text: 'Revert',
-      handler: () => { fileHandler.revert(activeWidget as any); }
+      handler: () => { fbWidget.revert(); }
     }),
     new MenuItem({
       text: 'Shutdown Kernel',

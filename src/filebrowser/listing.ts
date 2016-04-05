@@ -874,8 +874,7 @@ class DirListing extends Widget {
     }
 
     let item = this._model.sortedItems[i];
-    let handler = this._registry.findbyModel(item);
-    if (handler) handler.open(item);
+    this._registry.open(item);
   }
 
 
@@ -1026,10 +1025,9 @@ class DirListing extends Widget {
     });
     this._drag.mimeData.setData(utils.CONTENTS_MIME, null);
     if (item && item.type !== 'directory') {
-      let handler = this._registry.findbyModel(item);
-      if (handler) {
+      if (this._registry.canOpen(item)) {
         this._drag.mimeData.setData(FACTORY_MIME, () => {
-          handler.open(item);
+          this._registry.open(item);
         });
       }
     }

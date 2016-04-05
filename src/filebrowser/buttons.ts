@@ -287,15 +287,20 @@ namespace Private {
   export
   function createDropdownMenu(widget: FileButtons): Menu {
     let registry = widget.registry;
-    let creators = registry.listCreators().sort((a, b) => a.localeCompare(b));
-    let items: MenuItem[];
+    let creators = registry.listCreators();
+    creators = creators.sort((a, b) => a.localeCompare(b));
+    let items: MenuItem[] = [];
     for (let name of creators) {
       items.push(new MenuItem({
         text: name,
-        handler: () => { 
-          let creator = registry.findByCreator(name);
-          creator.createNew(widget.model.path, name, widget.parent.node
-          ).then(() => {
+        handler: () => {
+          registry.createNew(name).then(contents => {
+            if (contents === void 0) {
+              return;
+            }
+            if (contents.type !== 'directory') {
+              registry.open(contents);
+            }
             widget.model.refresh();
           });
         }

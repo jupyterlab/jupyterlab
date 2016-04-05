@@ -90,6 +90,10 @@ class FileBrowserWidget extends Widget {
     this._buttons = new FileButtons(model, registry);
     this._listing = new DirListing(model, registry);
 
+    model.fileChanged.connect((fbModel, args) => {
+      registry.rename(args.oldValue, args.newValue);
+    });
+
     this._crumbs.addClass(CRUMBS_CLASS);
     this._buttons.addClass(BUTTON_CLASS);
     this._listing.addClass(LISTING_CLASS);
@@ -149,20 +153,54 @@ class FileBrowserWidget extends Widget {
           showErrorMessage(this, 'Open directory', error)
         );
       } else {
-        this._open(item);
+        this._registry.open(item);
       }
     }
   }
 
   /**
-   * Open a file in the current directory by name.
+   * Revert the currently selected item(s).
    */
-  private _open(item: IContentsModel): void {
-    let handler = this._registry.findbyModel(item);
-    if (!handler) {
-      return;
+  revert(): void {
+    let items = this._model.sortedItems;
+    for (let item of items) {
+      if (!this._model.isSelected(item.name)) {
+        continue;
+      }
+      if (item.type !== 'directory') {
+        this._registry.revert(item);
+      }
     }
-    handler.open(item);
+  }
+
+  /**
+   * Save the currently selected item(s).
+   */
+  save(): void {
+    let items = this._model.sortedItems;
+    for (let item of items) {
+      if (!this._model.isSelected(item.name)) {
+        continue;
+      }
+      if (item.type !== 'directory') {
+        this._registry.save(item);
+      }
+    }
+  }
+
+  /**
+   * Close the currently selected item(s).
+   */
+  close(): void {
+    let items = this._model.sortedItems;
+    for (let item of items) {
+      if (!this._model.isSelected(item.name)) {
+        continue;
+      }
+      if (item.type !== 'directory') {
+        this._registry.close(item);
+      }
+    }
   }
 
   /**
