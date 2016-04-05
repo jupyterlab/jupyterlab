@@ -92,6 +92,16 @@ const SHORTCUTS = [
     sequence: ['Shift Enter']
   },
   {
+    command: 'notebook:interrupt-kernel',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['I', 'I']
+  },
+  {
+    command: 'notebook:restart-kernel',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['0', '0']
+  },
+  {
     command: 'notebook-cells:to-code',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Y']
