@@ -376,6 +376,18 @@ class NotebookWidget extends Widget {
     this.node.removeEventListener('dblclick', this);
     this.node.removeEventListener('focus', this, true);
     this.node.removeEventListener('blur', this, true);
+    let session = this.model.session;
+    if (session && session.status !== KernelStatus.Dead) {
+      showDialog({
+        title: 'Shutdown kernel?',
+        body: `Shutdown "${session.kernel.name}" kernel?`,
+        host: this.node
+      }).then(result => {
+        if (result.text === 'OK') {
+          session.shutdown();
+        }
+      });
+    }
   }
 
   /**
