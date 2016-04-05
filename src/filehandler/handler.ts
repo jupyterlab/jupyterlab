@@ -238,14 +238,6 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Perform an action before actually closing the widget.
-   *
-   * #### Notes
-   * The default implementation is a no-op.
-   */
-  protected beforeClose(widget: T): Promise<void> {}
-
-  /**
    * Get options use to fetch the model contents from disk.
    *
    * #### Notes
@@ -317,12 +309,10 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   /**
    * Actually close the file.
    */
-  private _close(widget: T): Promise<void> {
-    return Promis.resolve(this.beforeClose(widget)).then(() => {
-      widget.dispose();
-      let index = this._widgets.indexOf(widget);
-      this._widgets.splice(index, 1);
-    });
+  private _close(widget: T): void {
+    widget.dispose();
+    let index = this._widgets.indexOf(widget);
+    this._widgets.splice(index, 1);
   }
 
   private _manager: IContentsManager = null;
