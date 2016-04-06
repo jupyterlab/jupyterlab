@@ -432,7 +432,7 @@ class NotebookModel implements INotebookModel {
     this._mode = newValue;
     NotebookModelPrivate.modeChanged(this, newValue);
     // Edit mode deselects all cells.
-    if (value === 'edit') {
+    if (newValue === 'edit') {
       for (let i = 0; i < this.cells.length; i++) {
         let cell = this.cells.get(i);
         this.deselect(cell);
