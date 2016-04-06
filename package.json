@@ -41,7 +41,6 @@
     "mocha": "^2.3.4",
     "rimraf": "^2.5.0",
     "style-loader": "^0.13.0",
-    "tsconfig-cli": "^0.1.1",
     "typedoc": "^0.3.12",
     "typescript": "^1.7.5",
     "url-loader": "^0.5.7",
