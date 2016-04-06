@@ -39,11 +39,22 @@ interface ILanguageInfoMetadata {
 
 
 /**
+ * The default metadata for the notebook.
+ */
+export
+interface INotebookMetadata {
+  kernelspec: IKernelspecMetadata;
+  language_info: ILanguageInfoMetadata;
+  orig_nbformat: number;
+}
+
+
+/**
  * The notebook content.
  */
 export
 interface INotebookContent {
-  metadata: any;
+  metadata: INotebookMetadata;
   nbformat_minor: number;
   nbformat: number;
   cells: ICell[];

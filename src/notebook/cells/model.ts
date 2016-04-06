@@ -3,11 +3,15 @@
 'use strict';
 
 import {
+  shallowEquals
+} from 'jupyter-js-utils';
+
+import {
   IDisposable
 } from 'phosphor-disposable';
 
 import {
-  IChangedArgs, Property
+  IChangedArgs
 } from 'phosphor-properties';
 
 import {
@@ -60,6 +64,11 @@ interface IBaseCellModel extends IDisposable {
   stateChanged: ISignal<IBaseCellModel, IChangedArgs<any>>;
 
   /**
+   * A signal emitted when a user metadata state changes.
+   */
+  metadataChanged: ISignal<IBaseCellModel, string>;
+
+  /**
    * The input area of the cell.
    *
    * #### Notes
@@ -78,6 +87,24 @@ interface IBaseCellModel extends IDisposable {
    * Whether the cell is read only.
    */
   readOnly: boolean;
+
+  /**
+   * Get a metadata cursor for the cell.
+   *
+   * #### Notes
+   * Metadata associated with the nbformat spec are set directly
+   * on the model.  This method is used to interact with a namespaced
+   * set of metadata on the cell.
+   */
+  getMetadata(name: string): IMetadataCursor;
+
+  /**
+   * List the metadata namespace keys for the notebook.
+   *
+   * #### Notes
+   * Metadata associated with the nbformat are not included.
+   */
+  listMetadata(): string[];
 }
 
 
@@ -162,6 +189,16 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
+   * A signal emitted when a user metadata state changes.
+   *
+   * #### Notes
+   * The signal argument is the namespace of the metadata that changed.
+   */
+  get metadataChanged(): ISignal<IBaseCellModel, string> {
+    return CellModelPrivate.metadataChangedSignal.bind(this);
+  }
+
+  /**
    * Get the input area model.
    */
   get input(): IInputAreaModel {
@@ -187,30 +224,58 @@ class BaseCellModel implements IBaseCellModel {
    * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   get trusted(): boolean {
-    return CellModelPrivate.trustedProperty.get(this);
+    return this._trusted;
   }
   set trusted(value: boolean) {
-    CellModelPrivate.trustedProperty.set(this, value);
+    if (value === this._trusted) {
+      return;
+    }
+    let prev = this._trusted;
+    this._trusted = value;
+    this.onTrustChanged(value);
+    this.stateChanged.emit({
+      name: 'trusted',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
    * The name of the cell.
    */
   get name(): string {
-    return CellModelPrivate.nameProperty.get(this);
+    return this._name;
   }
   set name(value: string) {
-    CellModelPrivate.nameProperty.set(this, value);
+    if (value === this._name) {
+      return;
+    }
+    let prev = this._name;
+    this._name = value;
+    this.stateChanged.emit({
+      name: 'name',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
    * The tags for the cell.
    */
   get tags(): string[] {
-    return CellModelPrivate.tagsProperty.get(this);
+    return JSON.parse(this._tags);
   }
   set tags(value: string[]) {
-    CellModelPrivate.tagsProperty.set(this, value);
+    let prev = JSON.parse(this._tags);
+    if (shallowEquals(prev, value)) {
+      return;
+    }
+    this._tags = JSON.stringify(value);
+    this.stateChanged.emit({
+      name: 'tags',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
@@ -237,11 +302,65 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
+   * Get a metadata cursor for the cell.
+   *
+   * #### Notes
+   * Metadata associated with the nbformat spec are set directly
+   * on the model.  This method is used to interact with a namespaced
+   * set of metadata on the cell.
+   */
+  getMetadata(name: string): IMetadataCursor {
+    let blacklist = ['tags', 'name', 'trusted', 'collapsed', 'scrolled',
+                     'execution_count', 'format'];
+    if (blacklist.indexOf(name) !== -1) {
+      let key = blacklist[blacklist.indexOf(name)];
+      throw Error(`Use model attribute for ${key} directly`);
+    }
+    return new MetadataCursor(
+      name,
+      this._metadata[name],
+      this._cursorCallback
+    );
+  }
+
+  /**
+   * List the metadata namespace keys for the notebook.
+   *
+   * #### Notes
+   * Metadata associated with the nbformat are not included.
+   */
+  listMetadata(): string[] {
+    return Object.keys(this._metadata);
+  }
+
+  /**
+   * Handle changes to cell trust.
+   *
+   * #### Notes
+   * The default implementation is a no-op.
+   */
+  protected onTrustChanged(value: boolean): void {
+
+  }
+
+  /**
+   * The singleton callback for cursor change events.
+   */
+  private _cursorCallback(name: string, value: string): void {
+    this._metadata[name] = value;
+    this.metadataChanged.emit(name);
+  }
+
+  /**
    * The type of cell.
    */
   type: CellType;
 
   private _input: IInputAreaModel = null;
+  private _tags = '';
+  private _name = '';
+  private _trusted = false;
+  private _metadata: { [key: string]: string } = Object.create(null);
 }
 
 
@@ -267,12 +386,11 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   }
 
   /**
-   * Set the trusted state of the model.
+   * Handle changes to cell trust.
    *
    * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
-  set trusted(value: boolean) {
-    CellModelPrivate.trustedProperty.set(this, value);
+  protected onTrustChanged(value: boolean): void {
     this.output.trusted = value;
   }
 
@@ -280,31 +398,58 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    * The execution count.
    */
   get executionCount(): number {
-    return CellModelPrivate.executionCountProperty.get(this);
+    return this._executionCount;
   }
   set executionCount(value: number) {
-    CellModelPrivate.executionCountProperty.set(this, value);
+    if (this._executionCount === value) {
+      return;
+    }
+    let prev = this._executionCount;
+    this._executionCount = value;
     this.input.prompt = `In [${value === null ? ' ' : value}]:`;
+    this.stateChanged.emit({
+      name: 'executionCount',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
    * Whether the cell is collapsed/expanded.
    */
   get collapsed(): boolean {
-    return CellModelPrivate.collapsedProperty.get(this);
+    return this._collapsed;
   }
   set collapsed(value: boolean) {
-    CellModelPrivate.collapsedProperty.set(this, value);
+    if (this._collapsed === value) {
+      return;
+    }
+    let prev = this._collapsed;
+    this._collapsed = value;
+    this.stateChanged.emit({
+      name: 'collapsed',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
    * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
    */
   get scrolled(): ScrollSetting {
-    return CellModelPrivate.scrolledProperty.get(this);
+    return this._scrolled;
   }
   set scrolled(value: ScrollSetting) {
-    CellModelPrivate.scrolledProperty.set(this, value);
+    if (this._scrolled === value) {
+      return;
+    }
+    let prev = this._scrolled;
+    this._scrolled = value;
+    this.stateChanged.emit({
+      name: 'scrolled',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   /**
@@ -318,6 +463,9 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   type: CellType = 'code';
 
   private _output: IOutputAreaModel = null;
+  private _scrolled: ScrollSetting = false;
+  private _collapsed = false;
+  private _executionCount = -1;
 }
 
 
@@ -330,13 +478,23 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
    * Whether we should display a rendered representation.
    */
   get rendered() {
-    return CellModelPrivate.renderedProperty.get(this);
+    return this._rendered;
   }
   set rendered(value: boolean) {
-    CellModelPrivate.renderedProperty.set(this, value);
+    if (this._rendered === value) {
+      return;
+    }
+    let prev = this._rendered;
+    this._rendered = value;
+    this.stateChanged.emit({
+      name: 'rendered',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   type: CellType = 'markdown';
+  private _rendered = true;
 }
 
 
@@ -349,13 +507,23 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
    * The raw cell metadata format for nbconvert.
    */
   get format(): string {
-    return CellModelPrivate.formatProperty.get(this);
+    return this._format;
   }
   set format(value: string) {
-    CellModelPrivate.formatProperty.set(this, value);
+    if (this._format === value) {
+      return;
+    }
+    let prev = this._format;
+    this._format = value;
+    this.stateChanged.emit({
+      name: 'format',
+      oldValue: prev,
+      newValue: value
+    });
   }
 
   type: CellType = 'raw';
+  private _format = '';
 }
 
 
@@ -395,78 +563,88 @@ namespace CellModelPrivate {
   const stateChangedSignal = new Signal<IBaseCellModel, IChangedArgs<any>>();
 
   /**
-   * A property descriptor for the name of a cell.
+   * A signal emitted when a user metadata state changes.
    */
   export
-  const nameProperty = new Property<IBaseCellModel, string>({
-    name: 'name',
-    value: null,
-    notify: stateChangedSignal
-  });
+  const metadataChangedSignal = new Signal<IBaseCellModel, string>();
+}
+
+
+
+/**
+ * A class used to interact with user level metadata.
+ */
+export
+interface IMetadataCursor {
+  /**
+   * The metadata namespace.
+   */
+  name: string;
 
   /**
-   * A property descriptor for the tags of a cell.
+   * Get the value of the metadata.
    */
-  export
-  const tagsProperty = new Property<IBaseCellModel, string[]>({
-    name: 'tags',
-    value: null,
-    notify: stateChangedSignal
-  });
-
- /**
-  * A property descriptor for the trusted state of a cell.
-  */
-  export
-  const trustedProperty = new Property<IBaseCellModel, boolean>({
-    name: 'trusted',
-    notify: stateChangedSignal
-  });
-
- /**
-  * A property descriptor holding the format of a raw cell.
-  */
-  export
-  const formatProperty = new Property<IRawCellModel, string>({
-    name: 'format',
-    notify: stateChangedSignal
-  });
+  getValue(): any;
 
   /**
-   * A property descriptor which determines whether the input area should be rendered.
+   * Set the value of the metdata.
    */
-  export
-  const renderedProperty = new Property<IMarkdownCellModel, boolean>({
-    name: 'rendered',
-    value: true,
-    notify: stateChangedSignal
-  });
+  setValue(value: any): void;
+}
+
+
+/**
+ * An implementation of a metadata cursor.
+ */
+export
+class MetadataCursor implements IMetadataCursor {
 
   /**
-   * A property descriptor for the execution count of a code cell.
+   * Construct a new metadata cursor.
+   *
+   * @param name - the metadata namespace key.
+   *
+   * @param value - this initial value of the namespace.
+   *
+   * @param cb - a change callback.
    */
-  export
-  const executionCountProperty = new Property<ICodeCellModel, number>({
-    name: 'executionCount',
-    value: null,
-    notify: stateChangedSignal
-  });
+  constructor(name: string, value: string, cb: (name: string, value: string) => void) {
+    this._name = name;
+    this._value = value || 'null';
+    this._cb = cb;
+  }
 
- /**
-  * A property descriptor for the collapsed state of a code cell.
-  */
-  export
-  const collapsedProperty = new Property<ICodeCellModel, boolean>({
-    name: 'collapsed',
-    notify: stateChangedSignal
-  });
+  /**
+   * Get the namespace key of the metadata.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return this._name;
+  }
 
- /**
-  * A property descriptor for the scrolled state of a code cell.
-  */
-  export
-  const scrolledProperty = new Property<ICodeCellModel, ScrollSetting>({
-    name: 'scrolled',
-    notify: stateChangedSignal
-  });
+  /**
+   * Get the value of the namespace data.
+   */
+  getValue(): any {
+    return JSON.parse(this._value);
+  }
+
+  /**
+   * Set the value of the namespace data.
+   */
+  setValue(value: string): any {
+    let prev = this._value;
+    if (prev === value) {
+      return;
+    }
+    this._value = JSON.stringify(value);
+    let cb = this._cb;
+    cb(this._name, this._value);
+  }
+
+  private _value = 'null';
+  private _name = '';
+  private _cb: (name: string, value: string) => void = null;
 }
