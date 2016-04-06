@@ -52,7 +52,7 @@
     "clean:examples": "node scripts/cleanexamples.js",
     "build:examples": "node scripts/buildexamples.js",
     "build:src": "tsc --project src && node scripts/copycss.js",
-    "build:test": "tsconfig -u test/src/tsconfig.json && tsc --project test/src && webpack --config test/webpack.conf.js",
+    "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
     "build": "npm run build:src && npm run build:test",
     "docs": "typedoc --options scripts/tdoptions.json",
     "prepublish": "npm run build",
