@@ -18,8 +18,6 @@ for (var i = 0; i < dirs.length; i++) {
     continue;
   }
   console.log('Building: ' + dirs[i] + '...');
-  cmd = 'tsconfig -u examples/' + dirs[i] + '/src/tsconfig.json';
-  childProcess.execSync(cmd, { stdio: [0, 1, 2] });
   process.chdir('examples/' + dirs[i]);
   childProcess.execSync('npm run build', { stdio: [0, 1, 2] });
   process.chdir('../..');
