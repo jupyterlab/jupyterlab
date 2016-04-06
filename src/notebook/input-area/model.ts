@@ -7,7 +7,7 @@ import {
 } from 'phosphor-disposable';
 
 import {
-  IChangedArgs, Property
+  IChangedArgs
 } from 'phosphor-properties';
 
 import {
@@ -43,11 +43,6 @@ interface IInputAreaModel extends IDisposable {
    * The prompt text to display for the input area.
    */
   prompt: string;
-
-  /**
-   * The read only state of the input cell.
-   */
-  readOnly: boolean;
 }
 
 
@@ -74,20 +69,32 @@ class InputAreaModel implements IInputAreaModel {
    * Whether the input area should be collapsed or displayed.
    */
   get collapsed() {
-    return InputAreaModelPrivate.collapsedProperty.get(this);
+    return this._collapsed;
   }
-  set collapsed(value: boolean) {
-    InputAreaModelPrivate.collapsedProperty.set(this, value);
+  set collapsed(newValue: boolean) {
+    if (newValue === this._collapsed) {
+      return;
+    }
+    let oldValue = this._collapsed;
+    let name = 'collapsed';
+    this._collapsed = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
    * The prompt text.
    */
   get prompt() {
-    return InputAreaModelPrivate.promptProperty.get(this);
+    return this._prompt;
   }
-  set prompt(value: string) {
-    InputAreaModelPrivate.promptProperty.set(this, value);
+  set prompt(newValue: string) {
+    if (newValue === this._prompt) {
+      return;
+    }
+    let oldValue = this._prompt;
+    let name = 'prompt';
+    this._prompt = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -98,16 +105,6 @@ class InputAreaModel implements IInputAreaModel {
    */
   get textEditor(): IEditorModel {
     return this._editor;
-  }
-
-  /**
-   * The read only state.
-   */
-  get readOnly(): boolean {
-    return this.textEditor.readOnly;
-  }
-  set readOnly(value: boolean) {
-    this.textEditor.readOnly = value;
   }
 
   /**
@@ -134,6 +131,8 @@ class InputAreaModel implements IInputAreaModel {
   }
 
   private _editor: IEditorModel = null;
+  private _collapsed = false;
+  private _prompt = '';
 }
 
 
@@ -146,22 +145,4 @@ namespace InputAreaModelPrivate {
    */
   export
   const stateChangedSignal = new Signal<InputAreaModel, IChangedArgs<any>>();
-
-  /**
-  * A property descriptor which determines whether the input area is collapsed or displayed.
-  */
-  export
-  const collapsedProperty = new Property<InputAreaModel, boolean>({
-    name: 'collapsed',
-    notify: stateChangedSignal
-  });
-
-  /**
-  * A property descriptor containing the prompt.
-  */
-  export
-  const promptProperty = new Property<InputAreaModel, string>({
-    name: 'prompt',
-    notify: stateChangedSignal
-  });
 }

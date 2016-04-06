@@ -84,11 +84,6 @@ interface IBaseCellModel extends IDisposable {
   trusted: boolean;
 
   /**
-   * Whether the cell is read only.
-   */
-  readOnly: boolean;
-
-  /**
    * Get a metadata cursor for the cell.
    *
    * #### Notes
@@ -206,19 +201,6 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * The read only state of the cell.
-   *
-   * #### Notes
-   * This is a delegate to the read only state of the [input].
-   */
-  get readOnly(): boolean {
-    return this.input.readOnly;
-  }
-  set readOnly(value: boolean) {
-    this.input.readOnly = value;
-  }
-
-  /**
    * The trusted state of the cell.
    *
    * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
@@ -226,18 +208,15 @@ class BaseCellModel implements IBaseCellModel {
   get trusted(): boolean {
     return this._trusted;
   }
-  set trusted(value: boolean) {
-    if (value === this._trusted) {
+  set trusted(newValue: boolean) {
+    if (newValue === this._trusted) {
       return;
     }
-    let prev = this._trusted;
-    this._trusted = value;
-    this.onTrustChanged(value);
-    this.stateChanged.emit({
-      name: 'trusted',
-      oldValue: prev,
-      newValue: value
-    });
+    let oldValue = this._trusted;
+    this._trusted = newValue;
+    this.onTrustChanged(newValue);
+    let name = 'trusted';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -246,17 +225,14 @@ class BaseCellModel implements IBaseCellModel {
   get name(): string {
     return this._name;
   }
-  set name(value: string) {
-    if (value === this._name) {
+  set name(newValue: string) {
+    if (newValue === this._name) {
       return;
     }
-    let prev = this._name;
-    this._name = value;
-    this.stateChanged.emit({
-      name: 'name',
-      oldValue: prev,
-      newValue: value
-    });
+    let oldValue = this._name;
+    this._name = newValue;
+    let name = 'name';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -265,17 +241,14 @@ class BaseCellModel implements IBaseCellModel {
   get tags(): string[] {
     return JSON.parse(this._tags);
   }
-  set tags(value: string[]) {
-    let prev = JSON.parse(this._tags);
-    if (shallowEquals(prev, value)) {
+  set tags(newValue: string[]) {
+    let oldValue = JSON.parse(this._tags);
+    if (shallowEquals(oldValue, newValue)) {
       return;
     }
-    this._tags = JSON.stringify(value);
-    this.stateChanged.emit({
-      name: 'tags',
-      oldValue: prev,
-      newValue: value
-    });
+    this._tags = JSON.stringify(newValue);
+    let name = 'tags';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -360,6 +333,7 @@ class BaseCellModel implements IBaseCellModel {
   private _tags = '';
   private _name = '';
   private _trusted = false;
+  private _readOnly = false;
   private _metadata: { [key: string]: string } = Object.create(null);
 }
 
