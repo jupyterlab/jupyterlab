@@ -306,6 +306,7 @@ class NotebookWidget extends Widget {
     }
     model.cells.changed.connect(this.onCellsChanged, this);
     model.stateChanged.connect(this.onModelChanged, this);
+    model.selectionChanged.connect(this.onSelectionChanged, this);
   }
 
   /**
@@ -442,7 +443,7 @@ class NotebookWidget extends Widget {
       if (i !== model.activeCellIndex) {
         widget.removeClass(ACTIVE_CLASS);
       }
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         widget.addClass(SELECTED_CLASS);
       } else {
         widget.removeClass(SELECTED_CLASS);
@@ -517,6 +518,13 @@ class NotebookWidget extends Widget {
       widget.input.editor.addClass(NB_EDITOR_CLASS);
       break;
     }
+    this.update();
+  }
+
+  /**
+   * Handle a change in the model selection.
+   */
+  protected onSelectionChanged(model: INotebookModel): void {
     this.update();
   }
 

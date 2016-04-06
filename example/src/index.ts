@@ -211,6 +211,18 @@ function main(): void {
   },
   {
     category: 'Notebook Cell',
+    text: 'Extend Selection Above',
+    shortcut: 'Accel J',
+    handler: () => { nbManager.extendSelectionAbove() ; }
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Extend Selection Below',
+    shortcut: 'Accel K',
+    handler: () => { nbManager.extendSelectionBelow() ; }
+  },
+  {
+    category: 'Notebook Cell',
     text: 'Merge Selected',
     shortcut: 'Shift M',
     handler: () => { nbManager.merge() ; }
@@ -252,170 +264,117 @@ function main(): void {
   {
     selector: '.jp-Notebook',
     sequence: ['Shift Enter'],
-    handler: () => {
-      nbManager.runAndAdvance();
-      return true;
-    }
+    handler: () => { nbManager.runAndAdvance(); }
   },
   {
     selector: '.jp-Notebook',
     sequence: ['Accel S'],
-    handler: () => {
-      nbManager.save();
-      return true;
-    }
+    handler: () => { nbManager.save(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['I', 'I'],
-    handler: () => {
-      nbManager.interrupt();
-      return true;
-    }
+    handler: () => { nbManager.interrupt(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['0', '0'],
-    handler: () => {
-      nbManager.restart();
-      return true;
-    }
+    handler: () => { nbManager.restart(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Enter'],
-    handler: () => {
-      nbModel.mode = 'edit';
-      return true;
-    }
+    handler: () => { nbModel.mode = 'edit'; }
   },
   {
     selector: '.jp-Notebook.jp-mod-editMode',
     sequence: ['Escape'],
-    handler: () => {
-      nbModel.mode = 'command';
-      return true;
-    }
+    handler: () => { nbModel.mode = 'command'; }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Y'],
-    handler: () => {
-      nbManager.changeCellType('code');
-      return true;
-    }
+    handler: () => { nbManager.changeCellType('code'); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['M'],
-    handler: () => {
-      nbManager.changeCellType('markdown');
-      return true;
-    }
+    handler: () => { nbManager.changeCellType('markdown'); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['R'],
-    handler: () => {
-      nbManager.changeCellType('raw');
-      return true;
-    }
+    handler: () => { nbManager.changeCellType('raw'); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['X'],
-    handler: () => {
-      nbManager.cut();
-      return true;
-    }
+    handler: () => { nbManager.cut(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['C'],
-    handler: () => {
-      nbManager.copy();
-      return true;
-    }
+    handler: () => { nbManager.copy(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['V'],
-    handler: () => {
-      nbManager.paste();
-      return true;
-    }
+    handler: () => { nbManager.paste(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['D', 'D'],
-    handler: () => {
-      nbManager.delete();
-      return true;
-    }
+    handler: () => { nbManager.delete(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Z'],
-    handler: () => {
-      nbManager.undelete();
-      return true;
-    }
+    handler: () => { nbManager.undelete(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Shift M'],
-    handler: () => {
-      nbManager.merge();
-      return true;
-    }
+    handler: () => { nbManager.merge(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['A'],
-    handler: () => {
-      nbManager.insertAbove();
-      return true;
-    }
+    handler: () => { nbManager.insertAbove(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['B'],
-    handler: () => {
-      nbManager.insertBelow();
-      return true;
-    }
+    handler: () => { nbManager.insertBelow(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['J'],
-    handler: () => {
-      nbModel.activeCellIndex += 1;
-      return true;
-    }
+    handler: () => { nbModel.activeCellIndex += 1; }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['ArrowDown'],
-    handler: () => {
-      nbModel.activeCellIndex += 1;
-      return true;
-    }
+    handler: () => { nbModel.activeCellIndex += 1; }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['K'],
-    handler: () => {
-      nbModel.activeCellIndex -= 1;
-      return true;
-    }
+    handler: () => { nbModel.activeCellIndex -= 1; }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['ArrowUp'],
-    handler: () => {
-      nbModel.activeCellIndex -= 1;
-      return true;
-    }
+    handler: () => { nbModel.activeCellIndex -= 1; }
+  },
+  {
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Shift K'],
+    handler: () => { nbManager.extendSelectionAbove(); }
+  },
+  {
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Shift J'],
+    handler: () => { nbManager.extendSelectionBelow(); }
   }
   ];
   keymap.add(bindings);

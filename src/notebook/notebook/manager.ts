@@ -67,6 +67,7 @@ class NotebookManager {
     if (this._undeleteStack.length > DELETE_STACK_SIZE) {
       this._undeleteStack.shift();
     }
+    this.deselectCells();
   }
 
   /**
@@ -83,6 +84,7 @@ class NotebookManager {
     for (let cell of undelete.reverse()) {
       model.cells.insert(index, cell);
     }
+    this.deselectCells();
   }
 
   /**
@@ -104,6 +106,7 @@ class NotebookManager {
         toDelete.push(cell);
       }
     }
+    this.deselectCells();
     // Make sure there are cells to merge.
     if (toMerge.length < 2 || !activeCell) {
       return;
@@ -131,6 +134,7 @@ class NotebookManager {
   insertAbove(): void {
     let cell = this.model.createCodeCell();
     this.model.cells.insert(this.model.activeCellIndex, cell);
+    this.deselectCells();
   }
 
   /**
@@ -139,6 +143,7 @@ class NotebookManager {
   insertBelow(): void {
     let cell = this.model.createCodeCell();
     this.model.cells.insert(this.model.activeCellIndex + 1, cell);
+    this.deselectCells();
   }
 
   /**
@@ -154,6 +159,7 @@ class NotebookManager {
         this._copied.push(this.cloneCell(cell));
       }
     }
+    this.deselectCells();
   }
 
   /**
@@ -170,6 +176,7 @@ class NotebookManager {
         model.cells.remove(cell);
       }
     }
+    this.deselectCells();
   }
 
   /**
@@ -193,6 +200,7 @@ class NotebookManager {
     }
     this._copied = [];
     this._cut = [];
+    this.deselectCells();
   }
 
   /**
@@ -221,6 +229,7 @@ class NotebookManager {
       model.cells.remove(cell);
       model.cells.insert(i, newCell);
     }
+    this.deselectCells();
   }
 
   /**
@@ -240,6 +249,7 @@ class NotebookManager {
        model.activeCellIndex = cells.indexOf(cell);
        model.runActiveCell();
     }
+    this.deselectCells();
   }
 
   /**
@@ -258,6 +268,7 @@ class NotebookManager {
       model.mode = 'edit';
     }
     model.activeCellIndex += 1;
+    this.deselectCells();
   }
 
   /**
@@ -269,6 +280,7 @@ class NotebookManager {
     let cell = model.createCodeCell();
     model.cells.insert(model.activeCellIndex, cell);
     model.mode = 'edit';
+    this.deselectCells();
   }
 
   /**
@@ -294,6 +306,49 @@ class NotebookManager {
     let name = model.session.notebookPath;
     return this._manager.save(name, { type: 'notebook', content })
     .then(() => { model.dirty = false; });
+  }
+
+  /**
+   * Extend the selection to the previous cell.
+   */
+  extendSelectionAbove(): void {
+    // Do not wrap around.
+    if (this.model.activeCellIndex === 0) {
+      return;
+    }
+    let cell = this.model.cells.get(this.model.activeCellIndex);
+    this.model.select(cell);
+    this.model.activeCellIndex -= 1;
+    cell = this.model.cells.get(this.model.activeCellIndex);
+    this.model.select(cell);
+  }
+
+  /**
+   * Extend the selection to the next cell.
+   */
+  extendSelectionBelow(): void {
+    // Do not wrap around.
+    if (this.model.activeCellIndex === this.model.cells.length - 1) {
+      return;
+    }
+    let cell = this.model.cells.get(this.model.activeCellIndex);
+    this.model.select(cell);
+    this.model.activeCellIndex += 1;
+    cell = this.model.cells.get(this.model.activeCellIndex);
+    this.model.select(cell);
+  }
+
+  /**
+   * Deselect all of the cells.
+   */
+  protected deselectCells(): void {
+    let cells = this.model.cells;
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.get(i);
+      if (this.model.isSelected(cell)) {
+        this.model.deselect(cell);
+      }
+    }
   }
 
   /**

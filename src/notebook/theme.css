@@ -112,6 +112,16 @@
 }
 
 
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-selected.jp-mod-active {
+  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 7px, #E3F2FD 7px, #E3F2FD 100%);
+}
+
+
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-selected {
+  background: #E3F2FD;
+}
+
+
 .jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
   border-color: #66BB6A;
   border-left-width: 1px;
