@@ -309,28 +309,50 @@ class NotebookManager {
   }
 
   /**
-   * Extend the selection to the previous cell.
+   * Select the next cell.
    */
-  extendSelectionAbove(): void {
-    // Do not wrap around.
+  selectNext(): void {
+    if (this.model.activeCellIndex === this.model.cells.length - 1) {
+      return;
+    }
+    this.model.activeCellIndex += 1;
+    this.deselectCells();
+  }
+
+  /**
+   * Select the previous cell.
+   */
+  selectPrev(): void {
     if (this.model.activeCellIndex === 0) {
       return;
     }
-    let current = this.model.cells.get(this.model.activeCellIndex);
-    this.model.select(current);
     this.model.activeCellIndex -= 1;
-    let prev = this.model.cells.get(this.model.activeCellIndex);
-    if (this.model.isSelected(prev)) {
-      this.model.deselect(current);
-      let count = 0;
-      for (let i = 0; i < this.model.cells.length; i++) {
-        let cell = this.model.cells.get(i);
-        if (this.model.isSelected(cell)) {
-          count++;
+    this.deselectCells();
+  }
+
+  /**
+   * Extend the selection to the previous cell.
+   */
+  extendSelectionAbove(): void {
+    let model = this.model;
+    let cells = model.cells;
+    // Do not wrap around.
+    if (model.activeCellIndex === 0) {
+      return;
+    }
+    let current = cells.get(model.activeCellIndex);
+    model.select(current);
+    model.activeCellIndex -= 1;
+    let prev = cells.get(model.activeCellIndex);
+    if (model.isSelected(prev)) {
+      model.deselect(current);
+      if (model.activeCellIndex >= 1) {
+        let prevPrev = cells.get(model.activeCellIndex - 1);
+        if (!model.isSelected(prevPrev)) {
+          model.deselect(prev);
         }
-      }
-      if (count === 1) {
-        this.model.deselect(prev);
+      } else {
+        model.deselect(prev);
       }
     } else {
       this.model.select(prev);
@@ -341,25 +363,25 @@ class NotebookManager {
    * Extend the selection to the next cell.
    */
   extendSelectionBelow(): void {
+    let model = this.model;
+    let cells = model.cells;
     // Do not wrap around.
-    if (this.model.activeCellIndex === this.model.cells.length - 1) {
+    if (model.activeCellIndex === cells.length - 1) {
       return;
     }
-    let current = this.model.cells.get(this.model.activeCellIndex);
-    this.model.select(current);
-    this.model.activeCellIndex += 1;
-    let next = this.model.cells.get(this.model.activeCellIndex);
-    if (this.model.isSelected(next)) {
-      this.model.deselect(current);
-      let count = 0;
-      for (let i = 0; i < this.model.cells.length; i++) {
-        let cell = this.model.cells.get(i);
-        if (this.model.isSelected(cell)) {
-          count++;
+    let current = cells.get(model.activeCellIndex);
+    model.select(current);
+    model.activeCellIndex += 1;
+    let next = cells.get(model.activeCellIndex);
+    if (model.isSelected(next)) {
+      model.deselect(current);
+      if (model.activeCellIndex < cells.length - 1) {
+        let nextNext = cells.get(model.activeCellIndex + 1);
+        if (!model.isSelected(nextNext)) {
+          model.deselect(next);
         }
-      }
-      if (count === 1) {
-        this.model.deselect(next);
+      } else {
+        model.deselect(next);
       }
     } else {
       this.model.select(next);

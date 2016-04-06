@@ -249,13 +249,13 @@ function main(): void {
     category: 'Notebook Cell',
     text: 'Select Previous',
     shortcut: 'ArrowUp',
-    handler: () => { nbModel.activeCellIndex -= 1; }
+    handler: () => { nbManager.selectPrev(); }
   },
   {
     category: 'Notebook Cell',
     text: 'Select Next',
     shortcut: 'ArrowDown',
-    handler: () => { nbModel.activeCellIndex += 1; }
+    handler: () => { nbManager.selectNext(); }
   },
   ];
   pModel.addItems(items);
@@ -349,22 +349,22 @@ function main(): void {
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['J'],
-    handler: () => { nbModel.activeCellIndex += 1; }
+    handler: () => { nbManager.selectNext(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['ArrowDown'],
-    handler: () => { nbModel.activeCellIndex += 1; }
+    handler: () => { nbManager.selectNext(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['K'],
-    handler: () => { nbModel.activeCellIndex -= 1; }
+    handler: () => { nbManager.selectPrev(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['ArrowUp'],
-    handler: () => { nbModel.activeCellIndex -= 1; }
+    handler: () => { nbManager.selectPrev(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
