@@ -316,11 +316,25 @@ class NotebookManager {
     if (this.model.activeCellIndex === 0) {
       return;
     }
-    let cell = this.model.cells.get(this.model.activeCellIndex);
-    this.model.select(cell);
+    let current = this.model.cells.get(this.model.activeCellIndex);
+    this.model.select(current);
     this.model.activeCellIndex -= 1;
-    cell = this.model.cells.get(this.model.activeCellIndex);
-    this.model.select(cell);
+    let prev = this.model.cells.get(this.model.activeCellIndex);
+    if (this.model.isSelected(prev)) {
+      this.model.deselect(current);
+      let count = 0;
+      for (let i = 0; i < this.model.cells.length; i++) {
+        let cell = this.model.cells.get(i);
+        if (this.model.isSelected(cell)) {
+          count++;
+        }
+      }
+      if (count === 1) {
+        this.model.deselect(prev);
+      }
+    } else {
+      this.model.select(prev);
+    }
   }
 
   /**
@@ -331,11 +345,25 @@ class NotebookManager {
     if (this.model.activeCellIndex === this.model.cells.length - 1) {
       return;
     }
-    let cell = this.model.cells.get(this.model.activeCellIndex);
-    this.model.select(cell);
+    let current = this.model.cells.get(this.model.activeCellIndex);
+    this.model.select(current);
     this.model.activeCellIndex += 1;
-    cell = this.model.cells.get(this.model.activeCellIndex);
-    this.model.select(cell);
+    let next = this.model.cells.get(this.model.activeCellIndex);
+    if (this.model.isSelected(next)) {
+      this.model.deselect(current);
+      let count = 0;
+      for (let i = 0; i < this.model.cells.length; i++) {
+        let cell = this.model.cells.get(i);
+        if (this.model.isSelected(cell)) {
+          count++;
+        }
+      }
+      if (count === 1) {
+        this.model.deselect(next);
+      }
+    } else {
+      this.model.select(next);
+    }
   }
 
   /**
