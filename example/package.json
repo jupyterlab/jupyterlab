@@ -10,14 +10,13 @@
     "phosphor-widget": "^1.0.0-rc.1"
   },
   "scripts": {
-    "build": "tsconfig -u src/tsconfig.json && tsc --project src && webpack --config webpack.conf.js",
+    "build": "tsc --project src && webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules",
     "postinstall": "npm dedupe",
     "update": "rimraf node_modules/jupyter-js-notebook && npm install"
   },
   "devDependencies": {
     "concurrently": "^2.0.0",
-    "rimraf": "^2.5.2",
-    "tsconfig-cli": "^0.1.1"
+    "rimraf": "^2.5.2"
   }
 }
