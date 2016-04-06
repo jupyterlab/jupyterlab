@@ -284,17 +284,14 @@ class NotebookModel implements INotebookModel {
   get defaultMimetype(): string {
     return this._defaultMimetype;
   }
-  set defaultMimetype(value: string) {
-    let prev = this._defaultMimetype;
-    if (prev === value) {
+  set defaultMimetype(newValue: string) {
+    if (newValue === this._defaultMimetype) {
       return;
     }
-    this._defaultMimetype = value;
-    this.stateChanged.emit({
-      name: 'defaultMimetype',
-      oldValue: prev,
-      newValue: value
-    });
+    let oldValue = this._defaultMimetype;
+    this._defaultMimetype = newValue;
+    let name = 'defaultMimetype';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -303,21 +300,18 @@ class NotebookModel implements INotebookModel {
   get readOnly(): boolean {
     return this._readOnly;
   }
-  set readOnly(value: boolean) {
-    let prev = this._readOnly;
-    if (prev === value) {
+  set readOnly(newValue: boolean) {
+    if (newValue === this._readOnly) {
       return;
     }
-    this._readOnly = value;
+    let oldValue = this._readOnly;
+    this._readOnly = newValue;
     let cells = this._cells;
     for (let i = 0; i < cells.length; i++) {
-      cells.get(i).readOnly = value;
+      cells.get(i).input.textEditor.readOnly = newValue;
     }
-    this.stateChanged.emit({
-      name: 'readOnly',
-      oldValue: prev,
-      newValue: value
-    });
+    let name = 'readOnly';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -326,18 +320,15 @@ class NotebookModel implements INotebookModel {
   get session(): INotebookSession {
     return this._session;
   }
-  set session(value: INotebookSession) {
-    let prev = this._session;
-    if (prev === value) {
+  set session(newValue: INotebookSession) {
+    if (newValue === this._session) {
       return;
     }
-    this._session = value;
-    NotebookModelPrivate.sessionChanged(this, value);
-    this.stateChanged.emit({
-      name: 'session',
-      oldValue: prev,
-      newValue: value
-    });
+    let oldValue = this._session;
+    this._session = newValue;
+    NotebookModelPrivate.sessionChanged(this, newValue);
+    let name = 'session';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -346,17 +337,14 @@ class NotebookModel implements INotebookModel {
   get kernelspec(): IKernelspecMetadata {
     return JSON.parse(this._kernelspec);
   }
-  set kernelspec(value: IKernelspecMetadata) {
-    let prev = JSON.parse(this._kernelspec);
-    if (prev === value) {
+  set kernelspec(newValue: IKernelspecMetadata) {
+    let oldValue = JSON.parse(this._kernelspec);
+    if (shallowEquals(oldValue, newValue)) {
       return;
     }
-    this._kernelspec = JSON.stringify(value);
-    this.stateChanged.emit({
-      name: 'kernelspec',
-      oldValue: prev,
-      newValue: value
-    });
+    this._kernelspec = JSON.stringify(newValue);
+    let name = 'kernelspec';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -365,17 +353,14 @@ class NotebookModel implements INotebookModel {
   get languageInfo(): ILanguageInfoMetadata {
     return JSON.parse(this._langInfo);
   }
-  set languageInfo(value: ILanguageInfoMetadata) {
-    let prev = JSON.parse(this._langInfo);
-    if (shallowEquals(prev, value)) {
+  set languageInfo(newValue: ILanguageInfoMetadata) {
+    let oldValue = JSON.parse(this._langInfo);
+    if (shallowEquals(oldValue, newValue)) {
       return;
     }
-    this._langInfo = JSON.stringify(value);
-    this.stateChanged.emit({
-      name: 'languageInfo',
-      oldValue: prev,
-      newValue: value
-    });
+    this._langInfo = JSON.stringify(newValue);
+    let name = 'languageInfo';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -384,17 +369,14 @@ class NotebookModel implements INotebookModel {
   get origNbformat(): number {
     return this._origNbformat;
   }
-  set origNbformat(value: number) {
-    let prev = this._origNbformat;
-    if (shallowEquals(prev, value)) {
+  set origNbformat(newValue: number) {
+    if (newValue === this._origNbformat) {
       return;
     }
-    this._origNbformat = value;
-    this.stateChanged.emit({
-      name: 'origNbformat',
-      oldValue: prev,
-      newValue: value
-    });
+    let oldValue = this._origNbformat;
+    this._origNbformat = newValue;
+    let name = 'origNbformat';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -407,19 +389,16 @@ class NotebookModel implements INotebookModel {
   get activeCellIndex(): number {
     return this._activeCellIndex;
   }
-  set activeCellIndex(value: number) {
-    let prev = this._activeCellIndex;
-    if (prev === value) {
+  set activeCellIndex(newValue: number) {
+    newValue = Math.max(newValue, 0);
+    newValue = Math.min(newValue, this.cells.length - 1);
+    if (newValue === this._activeCellIndex) {
       return;
     }
-    value = Math.max(value, 0);
-    value = Math.min(value, this.cells.length - 1);
-    this._activeCellIndex = value;
-    this.stateChanged.emit({
-      name: 'activeCellIndex',
-      oldValue: prev,
-      newValue: value
-    });
+    let oldValue = this._activeCellIndex;
+    this._activeCellIndex = newValue;
+    let name = 'activeCellIndex';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -428,18 +407,15 @@ class NotebookModel implements INotebookModel {
   get mode(): NotebookMode {
     return this._mode;
   }
-  set mode(value: NotebookMode) {
-    let prev = this._mode;
-    if (prev === value) {
+  set mode(newValue: NotebookMode) {
+    if (newValue === this._mode) {
       return;
     }
-    this._mode = value;
-    NotebookModelPrivate.modeChanged(this, value);
-    this.stateChanged.emit({
-      name: 'mode',
-      oldValue: prev,
-      newValue: value
-    });
+    let oldValue = this._mode;
+    this._mode = newValue;
+    NotebookModelPrivate.modeChanged(this, newValue);
+    let name = 'mode';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -448,17 +424,14 @@ class NotebookModel implements INotebookModel {
   get dirty(): boolean {
     return this._dirty;
   }
-  set dirty(value: boolean) {
-    let prev = this._dirty;
-    if (prev === value) {
+  set dirty(newValue: boolean) {
+    if (newValue === this._dirty) {
       return;
     }
-    this._dirty = value;
-    this.stateChanged.emit({
-      name: 'dirty',
-      oldValue: prev,
-      newValue: value
-    });
+    let oldValue = this._dirty;
+    this._dirty = newValue;
+    let name = 'dirty';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**

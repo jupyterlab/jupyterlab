@@ -7,7 +7,7 @@ import {
 } from 'phosphor-disposable';
 
 import {
-  IChangedArgs, Property
+  IChangedArgs
 } from 'phosphor-properties';
 
 import {
@@ -137,70 +137,112 @@ class EditorModel implements IEditorModel {
    * The mode for the editor filename.
    */
   get filename(): string {
-    return EditorModelPrivate.filenameProperty.get(this);
+    return this._filename;
   }
-  set filename(value: string) {
-    EditorModelPrivate.filenameProperty.set(this, value);
+  set filename(newValue: string) {
+    if (newValue === this._filename) {
+      return;
+    }
+    let oldValue = this._fixedHeight;
+    let name = 'filename';
+    this._filename = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
    * Whether the editor height should be constrained.
    */
   get fixedHeight() {
-    return EditorModelPrivate.fixedHeightProperty.get(this);
+    return this._fixedHeight;
   }
-  set fixedHeight(value: boolean) {
-    EditorModelPrivate.fixedHeightProperty.set(this, value);
+  set fixedHeight(newValue: boolean) {
+    if (newValue === this._fixedHeight) {
+      return;
+    }
+    let oldValue = this._fixedHeight;
+    let name = 'fixedHeight';
+    this._fixedHeight = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
    * The mode for the editor mimetype.
    */
   get mimetype(): string {
-    return EditorModelPrivate.mimetypeProperty.get(this);
+    return this._mimetype;
   }
-  set mimetype(value: string) {
-    EditorModelPrivate.mimetypeProperty.set(this, value);
+  set mimetype(newValue: string) {
+    if (newValue === this._mimetype) {
+      return;
+    }
+    let oldValue = this._mimetype;
+    let name = 'mimetype';
+    this._mimetype = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
    * The lineNumbers flag for the editor model.
    */
   get lineNumbers(): boolean {
-    return EditorModelPrivate.lineNumbersProperty.get(this);
+    return this._lineNumbers;
   }
-  set lineNumbers(value: boolean) {
-    EditorModelPrivate.lineNumbersProperty.set(this, value);
+  set lineNumbers(newValue: boolean) {
+    if (newValue === this._lineNumbers) {
+      return;
+    }
+    let oldValue = this._lineNumbers;
+    let name = 'lineNumbers';
+    this._lineNumbers = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
    * The readOnly property for the editor model.
    */
   get readOnly(): boolean {
-    return EditorModelPrivate.readOnlyProperty.get(this);
+    return this._readOnly;
   }
-  set readOnly(value: boolean) {
-    EditorModelPrivate.readOnlyProperty.set(this, value);
+  set readOnly(newValue: boolean) {
+    if (newValue === this._readOnly) {
+      return;
+    }
+    let oldValue = this._readOnly;
+    let name = 'readOnly';
+    this._readOnly = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
    * The tabSize number for the editor model.
    */
   get tabSize(): number {
-    return EditorModelPrivate.tabSizeProperty.get(this);
+    return this._tabSize;
   }
-  set tabSize(value: number) {
-    EditorModelPrivate.tabSizeProperty.set(this, value);
+  set tabSize(newValue: number) {
+    if (newValue === this._tabSize) {
+      return;
+    }
+    let oldValue = this._tabSize;
+    let name = 'tabSize';
+    this._tabSize = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
    * The text of the editor model.
    */
   get text(): string {
-    return EditorModelPrivate.textProperty.get(this);
+    return this._text;
   }
-  set text(value: string) {
-    EditorModelPrivate.textProperty.set(this, value);
+  set text(newValue: string) {
+    if (newValue === this._text) {
+      return;
+    }
+    let oldValue = this._text;
+    let name = 'text';
+    this._text = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -225,6 +267,13 @@ class EditorModel implements IEditorModel {
   }
 
   private _isDisposed = false;
+  private _filename = '';
+  private _mimetype = '';
+  private _fixedHeight = false;
+  private _lineNumbers = false;
+  private _readOnly = false;
+  private _text = '';
+  private _tabSize = 4;
 }
 
 
@@ -238,76 +287,6 @@ namespace EditorModelPrivate {
    */
   export
   const stateChangedSignal = new Signal<EditorModel, IChangedArgs<any>>();
-
-  /**
-   * The property descriptor for the editor mimetype.
-   */
-  export
-  const mimetypeProperty = new Property<EditorModel, string>({
-    name: 'mimetype',
-    value: '',
-    notify: stateChangedSignal
-  });
-
-  /**
-   * The property descriptor for the editor filename.
-   */
-  export
-  const filenameProperty = new Property<EditorModel, string>({
-    name: 'filename',
-    value: '',
-    notify: stateChangedSignal
-  });
-
-  /**
-  * A property descriptor which determines whether the editor height should be constrained.
-  */
-  export
-  const fixedHeightProperty = new Property<EditorModel, boolean>({
-    name: 'fixedHeight',
-    value: false,
-    notify: stateChangedSignal
-  });
-
-  /**
-   * The property descriptor for the editor lineNumbers flag.
-   */
-  export
-  const lineNumbersProperty = new Property<EditorModel, boolean>({
-    name: 'lineNumbers',
-    value: false,
-    notify: stateChangedSignal
-  });
-
-  /**
-   * The property descriptor for the editor readOnly property.
-   */
-  export
-  const readOnlyProperty = new Property<EditorModel, boolean>({
-    name: 'readOnly',
-    value: false,
-    notify: stateChangedSignal
-  });
-
-  /**
-   * The property descriptor for the editor text.
-   */
-  export
-  const textProperty = new Property<EditorModel, string>({
-    name: 'text',
-    value: '',
-    notify: stateChangedSignal
-  });
-
-  /**
-   * The property descriptor for the editor tabSize number.
-   */
-  export
-  const tabSizeProperty = new Property<EditorModel, number>({
-    name: 'tabSize',
-    value: 4,
-    notify: stateChangedSignal
-  });
 
   /**
    * Initialize an editor view model from an options object.

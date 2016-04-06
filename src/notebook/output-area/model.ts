@@ -11,7 +11,7 @@ import {
 } from 'phosphor-observablelist';
 
 import {
-  IChangedArgs, Property
+  IChangedArgs
 } from 'phosphor-properties';
 
 import {
@@ -103,30 +103,48 @@ class OutputAreaModel implements IOutputAreaModel {
    * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   get trusted(): boolean {
-    return Private.trustedProperty.get(this);
+    return this._trusted;
   }
-  set trusted(value: boolean) {
-    Private.trustedProperty.set(this, value);
+  set trusted(newValue: boolean) {
+    if (newValue === this._trusted) {
+      return;
+    }
+    let oldValue = this._trusted;
+    let name = 'trusted';
+    this._trusted = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
    * Whether the output has a maximum fixed height.
    */
   get fixedHeight(): boolean {
-    return Private.fixedHeightProperty.get(this);
+    return this._fixedHeight;
   }
-  set fixedHeight(value: boolean) {
-    Private.fixedHeightProperty.set(this, value);
+  set fixedHeight(newValue: boolean) {
+    if (newValue === this._fixedHeight) {
+      return;
+    }
+    let oldValue = this._fixedHeight;
+    let name = 'fixedHeight';
+    this._fixedHeight = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
-   * Whether the input area should be collapsed or displayed.
+   * Whether the output should be collapsed or displayed.
    */
   get collapsed(): boolean {
-    return Private.collapsedProperty.get(this);
+    return this._collapsed;
   }
-  set collapsed(value: boolean) {
-    Private.collapsedProperty.set(this, value);
+  set collapsed(newValue: boolean) {
+    if (newValue === this._collapsed) {
+      return;
+    }
+    let oldValue = this._collapsed;
+    let name = 'collapsed';
+    this._collapsed = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -201,6 +219,9 @@ class OutputAreaModel implements IOutputAreaModel {
 
   private _outputs: ObservableList<IOutput> = null;
   private _clearNext = false;
+  private _trusted = false;
+  private _fixedHeight = false;
+  private _collapsed = false;
 }
 
 
@@ -213,31 +234,4 @@ namespace Private {
    */
   export
   const stateChangedSignal = new Signal<OutputAreaModel, IChangedArgs<any>>();
-
-  /**
-   * The property descriptor for whether the output is trusted.
-   */
-  export
-  const trustedProperty = new Property<OutputAreaModel, boolean>({
-    name: 'trusted',
-    notify: stateChangedSignal
-  });
-
-  /**
-   * The property descriptor for whether the output has a fixed maximum height.
-   */
-  export
-  const fixedHeightProperty = new Property<OutputAreaModel, boolean>({
-    name: 'fixedHeight',
-    notify: stateChangedSignal
-  });
-
-  /**
-   * The property descriptor for whether the output is collapsed.
-   */
-  export
-  const collapsedProperty = new Property<OutputAreaModel, boolean>({
-    name: 'collapsed',
-    notify: stateChangedSignal
-  });
 }
