@@ -400,8 +400,7 @@ class NotebookModel implements INotebookModel {
    * The index of the active cell.
    *
    * #### Notes
-   * The value will be clamped.  When setting this, all other cells
-   * will be marked as inactive.
+   * The value will be clamped.  The active cell is considered to be selected.
    */
   get activeCellIndex(): number {
     return this._activeCellIndex;
@@ -496,6 +495,9 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Deselect a cell.
+   *
+   * #### Notes
+   * This has no effect on the "active" cell.
    */
   deselect(cell: ICellModel): void {
     NotebookModelPrivate.selectedProperty.set(cell, false);
@@ -503,10 +505,11 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Weheter a cell is selected.
+   * Whether a cell is selected.
    */
   isSelected(cell: ICellModel): boolean {
-    return NotebookModelPrivate.selectedProperty.get(cell);
+    return (NotebookModelPrivate.selectedProperty.get(cell) ||
+            this.cells.indexOf(cell) === this.activeCellIndex);
   }
 
   /**

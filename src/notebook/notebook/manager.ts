@@ -56,7 +56,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         undelete.push(this.cloneCell(cell));
         model.cells.remove(cell);
       }
@@ -97,7 +97,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         toMerge.push(cell.input.textEditor.text);
       }
       if (i === model.activeCellIndex) {
@@ -155,7 +155,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         this._copied.push(this.cloneCell(cell));
       }
     }
@@ -171,7 +171,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         this._cut.push(this.cloneCell(cell));
         model.cells.remove(cell);
       }
@@ -210,7 +210,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (i !== model.activeCellIndex && !model.isSelected(cell)) {
+      if (!model.isSelected(cell)) {
         continue;
       }
       let newCell: ICellModel;
@@ -241,15 +241,14 @@ class NotebookManager {
     let selected: ICellModel[] = [];
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         selected.push(cell);
       }
     }
     for (let cell of selected) {
-       model.activeCellIndex = cells.indexOf(cell);
-       model.runActiveCell();
+      model.activeCellIndex = cells.indexOf(cell);
+      model.runActiveCell();
     }
-    this.deselectCells();
   }
 
   /**
@@ -309,9 +308,9 @@ class NotebookManager {
   }
 
   /**
-   * Select the next cell.
+   * Select the cell below the active cell.
    */
-  selectNext(): void {
+  selectBelow(): void {
     if (this.model.activeCellIndex === this.model.cells.length - 1) {
       return;
     }
@@ -320,9 +319,9 @@ class NotebookManager {
   }
 
   /**
-   * Select the previous cell.
+   * Select the above the active cell.
    */
-  selectPrev(): void {
+  selectAbove(): void {
     if (this.model.activeCellIndex === 0) {
       return;
     }
@@ -331,7 +330,7 @@ class NotebookManager {
   }
 
   /**
-   * Extend the selection to the previous cell.
+   * Extend the selection to the cell above.
    */
   extendSelectionAbove(): void {
     let model = this.model;
@@ -341,9 +340,7 @@ class NotebookManager {
       return;
     }
     let current = cells.get(model.activeCellIndex);
-    model.select(current);
-    model.activeCellIndex -= 1;
-    let prev = cells.get(model.activeCellIndex);
+    let prev = cells.get(model.activeCellIndex - 1);
     if (model.isSelected(prev)) {
       model.deselect(current);
       if (model.activeCellIndex >= 1) {
@@ -355,12 +352,13 @@ class NotebookManager {
         model.deselect(prev);
       }
     } else {
-      this.model.select(prev);
+      model.select(current);
     }
+    model.activeCellIndex -= 1;
   }
 
   /**
-   * Extend the selection to the next cell.
+   * Extend the selection to the cell below.
    */
   extendSelectionBelow(): void {
     let model = this.model;
@@ -370,9 +368,7 @@ class NotebookManager {
       return;
     }
     let current = cells.get(model.activeCellIndex);
-    model.select(current);
-    model.activeCellIndex += 1;
-    let next = cells.get(model.activeCellIndex);
+    let next = cells.get(model.activeCellIndex + 1);
     if (model.isSelected(next)) {
       model.deselect(current);
       if (model.activeCellIndex < cells.length - 1) {
@@ -384,8 +380,9 @@ class NotebookManager {
         model.deselect(next);
       }
     } else {
-      this.model.select(next);
+      model.select(current);
     }
+    model.activeCellIndex += 1;
   }
 
   /**

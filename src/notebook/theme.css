@@ -105,14 +105,14 @@
 }
 
 
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active {
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
   border-color: #ABABAB;
   border-left-width: 1px;
   background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
 }
 
 
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-selected.jp-mod-active {
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-otherSelected.jp-mod-active {
   background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 7px, #E3F2FD 7px, #E3F2FD 100%);
 }
 
