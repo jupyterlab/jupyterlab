@@ -67,6 +67,8 @@ const cmdIds = {
   insertBelow: 'notebook-cells:insert-below',
   selectPrevious: 'notebook-cells:select-previous',
   selectNext: 'notebook-cells:select-next',
+  toggleLinenumbers: 'notebook-cells:toggle-linenumbers',
+  toggleAllLinenumbers: 'notebook:toggle-allLinenumbers',
   editMode: 'notebook-cells:editMode',
   commandMode: 'notebook-cells:commandMode'
 };
@@ -214,6 +216,31 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
     }
   },
   {
+    id: cmdIds['toggleLinenumbers'],
+    handler: () => {
+      let model = handler.currentModel;
+      if (model) {
+        let cell = model.cells.get(model.activeCellIndex);
+        let lineNumbers = cell.input.textEditor.lineNumbers;
+        cell.input.textEditor.lineNumbers = !lineNumbers;
+      }
+    }
+  },
+  {
+    id: cmdIds['toggleAllLinenumbers'],
+    handler: () => {
+      let model = handler.currentModel;
+      if (model) {
+        let cell = model.cells.get(model.activeCellIndex);
+        let lineNumbers = cell.input.textEditor.lineNumbers;
+        for (let i = 0; i < model.cells.length; i++) {
+          cell = model.cells.get(i);
+          cell.input.textEditor.lineNumbers = !lineNumbers;
+        }
+      }
+    }
+  },
+  {
     id: cmdIds['commandMode'],
     handler: () => {
       let model = handler.currentModel;
@@ -303,6 +330,16 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
     command: cmdIds['selectNext'],
     category: 'Notebook Cell Operations',
     text: 'Select next cell'
+  },
+  {
+    command: cmdIds['toggleLinenumbers'],
+    category: 'Notebook Cell Operations',
+    text: 'Toggle line numbers'
+  },
+  {
+    command: cmdIds['toggleAllLinenumbers'],
+    category: 'Notebook Operations',
+    text: 'Toggle all line numbers'
   },
   {
     command: cmdIds['editMode'],
