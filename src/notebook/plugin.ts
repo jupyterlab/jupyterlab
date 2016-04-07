@@ -222,7 +222,12 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
       if (model) {
         let cell = model.cells.get(model.activeCellIndex);
         let lineNumbers = cell.input.textEditor.lineNumbers;
-        cell.input.textEditor.lineNumbers = !lineNumbers;
+        for (let i = 0; i < model.cells.length; i++) {
+          cell = model.cells.get(i);
+          if (model.isSelected(cell) || i === model.activeCellIndex) {
+            cell.input.textEditor.lineNumbers = !lineNumbers;
+          }
+        }
       }
     }
   },
