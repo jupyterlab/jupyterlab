@@ -330,8 +330,8 @@ class BaseCellModel implements IBaseCellModel {
   type: CellType;
 
   private _input: IInputAreaModel = null;
-  private _tags = '';
-  private _name = '';
+  private _tags = '[]';
+  private _name = 'null';
   private _trusted = false;
   private _readOnly = false;
   private _metadata: { [key: string]: string } = Object.create(null);
@@ -497,7 +497,7 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
   }
 
   type: CellType = 'raw';
-  private _format = '';
+  private _format = 'null';
 }
 
 
