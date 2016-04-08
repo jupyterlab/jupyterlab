@@ -134,7 +134,7 @@ class EditorModel implements IEditorModel {
   }
 
   /**
-   * The mode for the editor filename.
+   * The editor filename.
    */
   get filename(): string {
     return this._filename;
@@ -143,7 +143,7 @@ class EditorModel implements IEditorModel {
     if (newValue === this._filename) {
       return;
     }
-    let oldValue = this._fixedHeight;
+    let oldValue = this._filename;
     let name = 'filename';
     this._filename = newValue;
     this.stateChanged.emit({ name, oldValue, newValue });
