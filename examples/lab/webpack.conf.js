@@ -10,6 +10,7 @@ module.exports = {
     fs: "empty"
   },
   debug: true,
+  devtool: 'source-map',
   bail: true,
   module: {
     loaders: [
