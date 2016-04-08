@@ -83,7 +83,6 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
   protected createWidget(contents: IContentsModel): NotebookWidget {
     let model = new NotebookModel();
     model.readOnly = true;
-    return new NotebookWidget(model);
   }
 
   /**

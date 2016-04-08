@@ -390,7 +390,6 @@ class NotebookPane extends Panel {
   /**
    * Construct a new NotebookPane.
    */
-  constructor(manager: IContentsManager) {
     super();
     this.addClass(NB_PANE);
     this._model = new NotebookModel();
@@ -398,7 +397,6 @@ class NotebookPane extends Panel {
     let widgetArea = new Panel();
     widgetArea.addClass(WIDGET_CLASS);
     this._widgetManager = new WidgetManager(widgetArea);
-    this._notebook = new NotebookWidget(this._model);
 
     this.addChild(widgetArea);
     this.addChild(new NotebookToolbar(this._nbManager));
@@ -595,7 +593,6 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
    * Create the widget from an `IContentsModel`.
    */
   protected createWidget(contents: IContentsModel): NotebookPane {
-    let panel = new NotebookPane(this.manager);
     panel.model.stateChanged.connect(this._onModelChanged, this);
     panel.title.text = contents.name;
     return panel;
@@ -606,11 +603,16 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
    */
   protected populateWidget(widget: NotebookPane, model: IContentsModel): Promise<IContentsModel> {
     deserialize(model.content, widget.model);
-    return this._kernelSpecs.then(specs => {
-      let name = findKernel(widget.model, specs);
-      return this._session.startNew({
-        kernelName: name,
-        notebookPath: model.path
+    return this._session.findByPath(model.path).then(sessionId => {
+      if (sessionId !== void 0) {
+        return this._session.connectTo(sessionId.id);
+      }
+      return this._kernelSpecs.then(specs => {
+        let name = findKernel(widget.model, specs);
+        return this._session.startNew({
+          kernelName: name,
+          notebookPath: model.path
+        });
       });
     }).then(session => {
       widget.setSession(session);
