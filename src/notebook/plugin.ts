@@ -15,6 +15,15 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  RenderMime
+} from 'jupyter-js-ui/lib/rendermime';
+
+import {
+  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
+  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer
+} from 'jupyter-js-ui/lib/renderers';
+
+import {
   showDialog
 } from 'jupyter-js-ui/lib/dialog';
 
@@ -390,7 +399,7 @@ class NotebookPane extends Panel {
   /**
    * Construct a new NotebookPane.
    */
-  constructor(manager: IContentsManager) {
+  constructor(manager: IContentsManager, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(NB_PANE);
     this._model = new NotebookModel();
@@ -398,7 +407,7 @@ class NotebookPane extends Panel {
     let widgetArea = new Panel();
     widgetArea.addClass(WIDGET_CLASS);
     this._widgetManager = new WidgetManager(widgetArea);
-    this._notebook = new NotebookWidget(this._model);
+    this._notebook = new NotebookWidget(this._model, rendermime);
 
     this.addChild(widgetArea);
     this.addChild(new NotebookToolbar(this._nbManager));
@@ -494,6 +503,24 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
     super(contents);
     this._session = session;
     this._kernelSpecs = getKernelSpecs({});
+    let rendermime = new RenderMime<Widget>();
+    const transformers = [
+      new JavascriptRenderer(),
+      new HTMLRenderer(),
+      new ImageRenderer(),
+      new SVGRenderer(),
+      new LatexRenderer(),
+      new ConsoleTextRenderer(),
+      new TextRenderer()
+    ];
+
+    for (let t of transformers) {
+      for (let m of t.mimetypes) {
+        rendermime.order.push(m);
+        rendermime.renderers[m] = t;
+      }
+    }
+    this._rendermime = rendermime;
   }
 
   /**
@@ -595,7 +622,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
    * Create the widget from an `IContentsModel`.
    */
   protected createWidget(contents: IContentsModel): NotebookPane {
-    let panel = new NotebookPane(this.manager);
+    let panel = new NotebookPane(this.manager, this._rendermime);
     panel.model.stateChanged.connect(this._onModelChanged, this);
     panel.title.text = contents.name;
     return panel;
@@ -606,15 +633,31 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
    */
   protected populateWidget(widget: NotebookPane, model: IContentsModel): Promise<IContentsModel> {
     deserialize(model.content, widget.model);
-    return this._kernelSpecs.then(specs => {
-      let name = findKernel(widget.model, specs);
-      return this._session.startNew({
-        kernelName: name,
-        notebookPath: model.path
+    return this._findSession(model).then(session => {
+      if (session !== void 0) {
+        return session;
+      }
+      return this._kernelSpecs.then(specs => {
+        let name = findKernel(widget.model, specs);
+        return this._session.startNew({
+          kernelName: name,
+          notebookPath: model.path
+        });
       });
     }).then(session => {
       widget.setSession(session);
       return model;
+    });
+  }
+
+  /**
+   * Find a running session given a contents model.
+   */
+  private _findSession(model: IContentsModel): Promise<INotebookSession> {
+    return this._session.findByPath(model.path).then(sessionId => {
+      return this._session.connectTo(sessionId.id);
+    }).catch(() => {
+      return void 0;
     });
   }
 
@@ -640,4 +683,5 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
 
   private _session: INotebookSessionManager = null;
   private _kernelSpecs: Promise<IKernelSpecIds> = null;
+  private _rendermime: RenderMime<Widget> = null;
 }
