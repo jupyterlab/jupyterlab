@@ -633,9 +633,9 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
    */
   protected populateWidget(widget: NotebookPane, model: IContentsModel): Promise<IContentsModel> {
     deserialize(model.content, widget.model);
-    return this._session.findByPath(model.path).then(sessionId => {
-      if (sessionId !== void 0) {
-        return this._session.connectTo(sessionId.id);
+    return this._findSession(model).then(session => {
+      if (session !== void 0) {
+        return session;
       }
       return this._kernelSpecs.then(specs => {
         let name = findKernel(widget.model, specs);
@@ -647,6 +647,17 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPane> {
     }).then(session => {
       widget.setSession(session);
       return model;
+    });
+  }
+
+  /**
+   * Find a running session given a contents model.
+   */
+  private _findSession(model: IContentsModel): Promise<INotebookSession> {
+    return this._session.findByPath(model.path).then(sessionId => {
+      return this._session.connectTo(sessionId.id);
+    }).catch(() => {
+      return void 0;
     });
   }
 
