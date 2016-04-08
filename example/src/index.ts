@@ -96,8 +96,9 @@ function main(): void {
   let panel = new SplitPanel();
   panel.id = 'main';
   panel.orientation = SplitPanel.Horizontal;
-  SplitPanel.setStretch(palette, 1);
-  SplitPanel.setStretch(nbWidget, 2);
+  panel.spacing = 0;
+  SplitPanel.setStretch(palette, 0);
+  SplitPanel.setStretch(nbWidget, 1);
   panel.attach(document.body);
   panel.addChild(palette);
   panel.addChild(nbWidget);
