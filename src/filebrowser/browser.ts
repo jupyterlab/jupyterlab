@@ -89,6 +89,7 @@ class FileBrowserWidget extends Widget {
     this._crumbs = new BreadCrumbs(model);
     this._buttons = new FileButtons(model, registry);
     this._listing = new DirListing(model, registry);
+    this._registry = registry;
 
     model.fileChanged.connect((fbModel, args) => {
       registry.rename(args.oldValue, args.newValue);
@@ -125,6 +126,7 @@ class FileBrowserWidget extends Widget {
     this._crumbs = null;
     this._buttons = null;
     this._listing = null;
+    this._registry = null;
     super.dispose();
   }
 
