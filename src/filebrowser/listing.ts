@@ -874,7 +874,13 @@ class DirListing extends Widget {
     }
 
     let item = this._model.sortedItems[i];
-    this._registry.open(item);
+    if (item.type === 'directory') {
+      this._model.cd(item.name).catch(error =>
+        showErrorMessage(this, 'Open directory', error)
+      );
+    } else {
+      this._registry.open(item);
+    }
   }
 
 
