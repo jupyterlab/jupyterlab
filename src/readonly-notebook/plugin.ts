@@ -15,8 +15,21 @@ import {
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
+  RenderMime
+} from 'jupyter-js-ui/lib/rendermime';
+
+import {
+  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
+  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer
+} from 'jupyter-js-ui/lib/renderers';
+
+import {
   Application
 } from 'phosphide/lib/core/application';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 import {
   JupyterServices
@@ -53,6 +66,24 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
 
   constructor(contents: IContentsManager) {
     super(contents);
+    let rendermime = new RenderMime<Widget>();
+    const transformers = [
+      new JavascriptRenderer(),
+      new HTMLRenderer(),
+      new ImageRenderer(),
+      new SVGRenderer(),
+      new LatexRenderer(),
+      new ConsoleTextRenderer(),
+      new TextRenderer()
+    ];
+
+    for (let t of transformers) {
+      for (let m of t.mimetypes) {
+        rendermime.order.push(m);
+        rendermime.renderers[m] = t;
+      }
+    }
+    this._rendermime = rendermime;
   }
 
   /**
@@ -83,6 +114,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
   protected createWidget(contents: IContentsModel): NotebookWidget {
     let model = new NotebookModel();
     model.readOnly = true;
+    return new NotebookWidget(model, this._rendermime);
   }
 
   /**
@@ -97,4 +129,6 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
 
     return Promise.resolve(model);
   }
+
+  private _rendermime: RenderMime<Widget> = null;
 }
