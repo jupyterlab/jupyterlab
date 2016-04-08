@@ -9,6 +9,7 @@ module.exports = {
     fs: "empty"
   },
   bail: true,
+  devtool: 'source-map',
   module: {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
