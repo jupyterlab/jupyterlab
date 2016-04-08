@@ -603,8 +603,8 @@ class NotebookModel implements INotebookModel {
     }
     return new MetadataCursor(
       name,
-      this._metadata[name],
-      this._cursorCallback
+      this._metadata,
+      this._cursorCallback.bind(this)
     );
   }
 
@@ -694,8 +694,7 @@ class NotebookModel implements INotebookModel {
   /**
    * The singleton callback for cursor change events.
    */
-  private _cursorCallback(name: string, value: string): void {
-    this._metadata[name] = value;
+  private _cursorCallback(name: string): void {
     this.metadataChanged.emit(name);
   }
 
