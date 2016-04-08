@@ -291,8 +291,8 @@ class BaseCellModel implements IBaseCellModel {
     }
     return new MetadataCursor(
       name,
-      this._metadata[name],
-      this._cursorCallback
+      this._metadata,
+      this._cursorCallback.bind(this)
     );
   }
 
@@ -319,8 +319,7 @@ class BaseCellModel implements IBaseCellModel {
   /**
    * The singleton callback for cursor change events.
    */
-  private _cursorCallback(name: string, value: string): void {
-    this._metadata[name] = value;
+  private _cursorCallback(name: string): void {
     this.metadataChanged.emit(name);
   }
 
@@ -331,7 +330,7 @@ class BaseCellModel implements IBaseCellModel {
 
   private _input: IInputAreaModel = null;
   private _tags = '[]';
-  private _name = 'null';
+  private _name: string = null;
   private _trusted = false;
   private _readOnly = false;
   private _metadata: { [key: string]: string } = Object.create(null);
@@ -357,15 +356,6 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    */
   get output(): IOutputAreaModel {
     return this._output;
-  }
-
-  /**
-   * Handle changes to cell trust.
-   *
-   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
-   */
-  protected onTrustChanged(value: boolean): void {
-    this.output.trusted = value;
   }
 
   /**
@@ -430,8 +420,21 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
    * Dispose of the resources held by the model.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._output.dispose();
     this._output = null;
     super.dispose();
+  }
+
+  /**
+   * Handle changes to cell trust.
+   *
+   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
+   */
+  protected onTrustChanged(value: boolean): void {
+    this.output.trusted = value;
   }
 
   type: CellType = 'code';
@@ -439,7 +442,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   private _output: IOutputAreaModel = null;
   private _scrolled: ScrollSetting = false;
   private _collapsed = false;
-  private _executionCount = -1;
+  private _executionCount: number = null;
 }
 
 
@@ -497,7 +500,7 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
   }
 
   type: CellType = 'raw';
-  private _format = 'null';
+  private _format: string = null;
 }
 
 
@@ -582,9 +585,9 @@ class MetadataCursor implements IMetadataCursor {
    *
    * @param cb - a change callback.
    */
-  constructor(name: string, value: string, cb: (name: string, value: string) => void) {
+  constructor(name: string, metadata: { [key: string]: string }, cb: (name: string) => void) {
     this._name = name;
-    this._value = value || 'null';
+    this._metadata = metadata;
     this._cb = cb;
   }
 
@@ -602,23 +605,23 @@ class MetadataCursor implements IMetadataCursor {
    * Get the value of the namespace data.
    */
   getValue(): any {
-    return JSON.parse(this._value);
+    return JSON.parse(this._metadata[this._name] || 'null');
   }
 
   /**
    * Set the value of the namespace data.
    */
-  setValue(value: string): any {
-    let prev = this._value;
+  setValue(value: any): any {
+    let prev = this._metadata[this._name];
     if (prev === value) {
       return;
     }
-    this._value = JSON.stringify(value);
+    this._metadata[this._name] = JSON.stringify(value);
     let cb = this._cb;
-    cb(this._name, this._value);
+    cb(this._name);
   }
 
-  private _value = 'null';
   private _name = '';
-  private _cb: (name: string, value: string) => void = null;
+  private _cb: (name: string) => void = null;
+  private _metadata: { [key: string]: string } = null;
 }
