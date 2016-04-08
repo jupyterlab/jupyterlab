@@ -40,7 +40,7 @@ import * as utils
   from './utils';
 
 import {
-  SELECTED_CLASS
+  SELECTED_CLASS, showErrorMessage
 } from './utils';
 
 
