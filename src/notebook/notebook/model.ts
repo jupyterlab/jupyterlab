@@ -255,7 +255,7 @@ class NotebookModel implements INotebookModel {
    */
   constructor() {
     this._cells = new ObservableList<ICellModel>();
-    this._cells.changed.connect(this._onCellsChanged, this);
+    this._cells.changed.connect(this.onCellsChanged, this);
   }
 
   /**
@@ -705,7 +705,7 @@ class NotebookModel implements INotebookModel {
   /**
    * Handle a change in the cells list.
    */
-  private _onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
+  protected onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
     switch (change.type) {
     case ListChangeType.Add:
       this.activeCellIndex = change.newIndex;

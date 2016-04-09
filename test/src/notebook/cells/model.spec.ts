@@ -72,7 +72,7 @@ describe('jupyter-js-notebook', () => {
 
     describe('#metadataChanged', () => {
 
-      it ('should be emitted when metadata changes', () => {
+      it('should be emitted when metadata changes', () => {
         let editor = new EditorModel();
         let input = new InputAreaModel(editor);
         let model = new BaseCellModel(input);
@@ -84,6 +84,10 @@ describe('jupyter-js-notebook', () => {
         let foo = model.getMetadata('foo');
         foo.setValue(1);
         expect(called).to.be(true);
+      });
+
+      it('should throw an error on blacklisted names', () => {
+        throw new Error('implement me');
       });
 
     });
