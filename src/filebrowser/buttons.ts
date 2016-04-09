@@ -19,6 +19,10 @@ import {
 } from '../dialog';
 
 import {
+  FileHandlerRegistry
+} from '../filehandler';
+
+import {
   FileBrowserModel
 } from './model';
 
@@ -82,7 +86,7 @@ class FileButtons extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel) {
+  constructor(model: FileBrowserModel, registry: FileHandlerRegistry) {
     super();
     this.addClass(FILE_BUTTONS_CLASS);
     this._model = model;
@@ -96,6 +100,8 @@ class FileButtons extends Widget {
     node.appendChild(this._buttons.create);
     node.appendChild(this._buttons.upload);
     node.appendChild(this._buttons.refresh);
+
+    this._registry = registry;
   }
 
   /**
@@ -105,6 +111,7 @@ class FileButtons extends Widget {
     this._model = null;
     this._buttons = null;
     this._input = null;
+    this._registry = null;
     super.dispose();
   }
 
@@ -116,6 +123,13 @@ class FileButtons extends Widget {
    */
   get model(): FileBrowserModel {
     return this._model;
+  }
+
+  /**
+   * Get the file handler registry used by the widget.
+   */
+  get registry(): FileHandlerRegistry {
+    return this._registry;
   }
 
   /**
@@ -186,6 +200,7 @@ class FileButtons extends Widget {
   private _model: FileBrowserModel;
   private _buttons = Private.createButtons();
   private _input = Private.createUploadInput();
+  private _registry: FileHandlerRegistry = null
 }
 
 
@@ -267,133 +282,31 @@ namespace Private {
   }
 
   /**
-   * Create a new source file.
-   */
-  export
-  function createNewFile(widget: FileButtons): void {
-    createFile(widget, 'file').then(contents => {
-      if (contents === void 0) {
-        return;
-      }
-      widget.model.refresh().then(() => widget.model.open(contents.name));
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'New File Error', error);
-    });
-  }
-
-  /**
-   * Create a new folder.
-   */
-  export
-  function createNewFolder(widget: FileButtons): void {
-    createFile(widget, 'directory').then(contents => {
-      if (contents === void 0) {
-        return;
-      }
-      widget.model.refresh();
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'New Folder Error', error);
-    });
-  }
-
-  /**
-   * Create a new notebook.
-   */
-  export
-  function createNewNotebook(widget: FileButtons, spec: IKernelSpecId): void {
-    createFile(widget, 'notebook').then(contents => {
-      let started = widget.model.startSession(contents.path, spec.name);
-      return started.then(() => contents);
-    }).then(contents => {
-      if (contents === void 0) {
-        return;
-      }
-      widget.model.refresh().then(() => widget.model.open(contents.name));
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'New Notebook Error', error);
-    });
-  }
-
-  /**
-   * Create a new file, prompting the user for a name.
-   */
-  function createFile(widget: FileButtons, type: string): Promise<IContentsModel> {
-    return widget.model.newUntitled(type).then(contents => {
-      return doRename(widget, contents);
-    });
-  }
-
-  /**
-   * Rename a file or directory.
-   */
-  function doRename(widget: FileButtons, contents: IContentsModel): Promise<IContentsModel> {
-    let edit = document.createElement('input');
-    edit.value = contents.name;
-    return showDialog({
-      title: `Create a new ${contents.type}`,
-      body: edit,
-      host: widget.node.parentElement,
-      okText: 'CREATE'
-    }).then(value => {
-      if (value.text === 'CREATE') {
-        return widget.model.rename(contents.path, edit.value);
-      } else {
-        return widget.model.delete(contents.path).then(() => void 0);
-      }
-    }).catch(error => {
-      if (error.statusText === 'Conflict') {
-        return handleExisting(widget, edit.value, contents);
-      }
-      return utils.showErrorMessage(widget, 'File creation error', error).then(
-        () => { return void 0; });
-    });
-  }
-
-  /**
-   * Handle an existing file name.
-   */
-  function handleExisting(widget: FileButtons, name: string, contents: IContentsModel): Promise<IContentsModel> {
-    return showDialog({
-      title: 'File already exists',
-      body: `File "${name}" already exists, try again?`,
-      host: widget.node.parentElement
-    }).then(value => {
-      if (value.text === 'OK') {
-        return doRename(widget, contents);
-      } else {
-        return widget.model.delete(contents.path).then(() => void 0);
-      }
-    });
-  }
-
-  /**
    * Create a new dropdown menu for the create new button.
    */
   export
   function createDropdownMenu(widget: FileButtons): Menu {
-    let items = [
-      new MenuItem({
-        text: 'Text File',
-        handler: () => { createNewFile(widget); }
-      }),
-      new MenuItem({
-        text: 'Folder',
-        handler: () => { createNewFolder(widget); }
-      }),
-      new MenuItem({
-        type: MenuItem.Separator
-      })
-    ];
-    // TODO the kernels below are suffixed with "Notebook" as a
-    // temporary measure until we can update the Menu widget to
-    // show text in a separator for a "Notebooks" group.
-    let extra = widget.model.kernelSpecs.map(spec => {
-      return new MenuItem({
-        text: `${spec.spec.display_name} Notebook`,
-        handler: () => { createNewNotebook(widget, spec); }
-      });
-    });
-    return new Menu(items.concat(extra));
+    let registry = widget.registry;
+    let creators = registry.listCreators();
+    creators = creators.sort((a, b) => a.localeCompare(b));
+    let items: MenuItem[] = [];
+    for (var name of creators) {
+      items.push(new MenuItem({
+        text: name,
+        handler: () => {
+          registry.createNew(name).then(contents => {
+            if (contents === void 0) {
+              return;
+            }
+            if (contents.type !== 'directory') {
+              registry.open(contents);
+            }
+            widget.model.refresh();
+          });
+        }
+      }));
+    }
+    return new Menu(items);
   }
 
   /**

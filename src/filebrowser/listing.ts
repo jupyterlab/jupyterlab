@@ -29,6 +29,10 @@ import {
 } from '../dialog';
 
 import {
+  FileHandlerRegistry
+} from '../filehandler';
+
+import {
   FileBrowserModel
 } from './model';
 
@@ -36,7 +40,7 @@ import * as utils
   from './utils';
 
 import {
-  SELECTED_CLASS
+  SELECTED_CLASS, showErrorMessage
 } from './utils';
 
 
@@ -288,7 +292,7 @@ class DirListing extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel) {
+  constructor(model: FileBrowserModel, registry: FileHandlerRegistry) {
     super();
     this.addClass(DIR_LISTING_CLASS);
     this._model = model;
@@ -296,6 +300,7 @@ class DirListing extends Widget {
     this._model.selectionChanged.connect(this._onSelectionChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
+    this._registry = registry;
   }
 
   /**
@@ -307,21 +312,8 @@ class DirListing extends Widget {
     this._editNode = null;
     this._drag = null;
     this._dragData = null;
+    this._registry = null;
     super.dispose();
-  }
-
-  /**
-   * Get the widget factory for the widget.
-   */
-  get widgetFactory(): (model: IContentsModel) => Widget {
-    return this._widgetFactory;
-  }
-
-  /**
-   * Set the widget factory for the widget.
-   */
-  set widgetFactory(factory: (model: IContentsModel) => Widget) {
-    this._widgetFactory = factory;
   }
 
   /**
@@ -882,9 +874,13 @@ class DirListing extends Widget {
     }
 
     let item = this._model.sortedItems[i];
-    this._model.open(item.name).catch(error =>
-        utils.showErrorMessage(this, 'File Open Error', error)
-    );
+    if (item.type === 'directory') {
+      this._model.cd(item.name).catch(error =>
+        showErrorMessage(this, 'Open directory', error)
+      );
+    } else {
+      this._registry.open(item);
+    }
   }
 
 
@@ -1034,10 +1030,12 @@ class DirListing extends Widget {
       proposedAction: DropAction.Move
     });
     this._drag.mimeData.setData(utils.CONTENTS_MIME, null);
-    if (this._widgetFactory && item && item.type !== 'directory') {
-      this._drag.mimeData.setData(FACTORY_MIME, () => {
-        return this._widgetFactory(item);
-      });
+    if (item && item.type !== 'directory') {
+      if (this._registry.canOpen(item)) {
+        this._drag.mimeData.setData(FACTORY_MIME, () => {
+          this._registry.open(item);
+        });
+      }
     }
 
     // Start the drag and remove the mousemove listener.
@@ -1255,8 +1253,8 @@ class DirListing extends Widget {
   private _isCut = false;
   private _prevPath = '';
   private _clipboard: string[] = [];
-  private _widgetFactory: (model: IContentsModel) => Widget = null;
   private _softSelection = '';
+  private _registry: FileHandlerRegistry = null;
 }
 
 

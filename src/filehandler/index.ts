@@ -3,4 +3,5 @@
 'use strict';
 
 export * from './handler';
-export * from './manager';
+export * from './default';
+export * from './registry';
