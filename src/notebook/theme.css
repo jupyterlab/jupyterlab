@@ -4,14 +4,15 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 /* Increased specificity in case phosphor css is loaded later. */
-.p-Widget.jp-Notebook {  
+.p-Widget.jp-Notebook {
+  margin-top: 20px;
   min-width: 50px;
   min-height: 50px;
   outline: none;
 }
 
 
-.p-Widget.jp-Notebook-container {  
+.p-Widget.jp-Notebook-container {
   overflow-y: auto;
   padding-left: 10px;
   padding-right: 10px;
@@ -125,7 +126,7 @@
 .jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
   border-color: #66BB6A;
   border-left-width: 1px;
-  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);  
+  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
 }
 
 
@@ -152,8 +153,6 @@
     background-color: #F8F8F8;
     border-top: 1px solid #E0E0E0;
     border-bottom: 1px solid #E0E0E0;
-    margin-top: 4px;
-    margin-bottom: 20px;
 }
 
 
