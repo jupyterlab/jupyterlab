@@ -88,6 +88,16 @@ interface INotebookModel extends IDisposable {
   stateChanged: ISignal<INotebookModel, IChangedArgs<any>>;
 
   /**
+   * A signal emitted when a user metadata state changes.
+   */
+  metadataChanged: ISignal<INotebookModel, string>;
+
+  /**
+   * A signal emitted when the selection changes.
+   */
+  selectionChanged: ISignal<INotebookModel, void>;
+
+  /**
    * The default mime type for new code cells in the notebook.
    *
    * #### Notes
@@ -154,7 +164,7 @@ interface INotebookModel extends IDisposable {
   deselect(cell: ICellModel): void;
 
   /**
-   * Weheter a cell is selected.
+   * Whether a cell is selected.
    */
   isSelected(cell: ICellModel): boolean;
 
@@ -266,6 +276,13 @@ class NotebookModel implements INotebookModel {
    */
   get metadataChanged(): ISignal<INotebookModel, string> {
     return NotebookModelPrivate.metadataChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when the selection changes.
+   */
+  get selectionChanged(): ISignal<INotebookModel, void> {
+    return NotebookModelPrivate.selectionChangedSignal.bind(this);
   }
 
   /**
@@ -383,8 +400,7 @@ class NotebookModel implements INotebookModel {
    * The index of the active cell.
    *
    * #### Notes
-   * The value will be clamped.  When setting this, all other cells
-   * will be marked as inactive.
+   * The value will be clamped.  The active cell is considered to be selected.
    */
   get activeCellIndex(): number {
     return this._activeCellIndex;
@@ -414,6 +430,13 @@ class NotebookModel implements INotebookModel {
     let oldValue = this._mode;
     this._mode = newValue;
     NotebookModelPrivate.modeChanged(this, newValue);
+    // Edit mode deselects all cells.
+    if (newValue === 'edit') {
+      for (let i = 0; i < this.cells.length; i++) {
+        let cell = this.cells.get(i);
+        this.deselect(cell);
+      }
+    }
     let name = 'mode';
     this.stateChanged.emit({ name, oldValue, newValue });
   }
@@ -467,20 +490,26 @@ class NotebookModel implements INotebookModel {
    */
   select(cell: ICellModel): void {
     NotebookModelPrivate.selectedProperty.set(cell, true);
+    this.selectionChanged.emit(void 0);
   }
 
   /**
    * Deselect a cell.
+   *
+   * #### Notes
+   * This has no effect on the "active" cell.
    */
   deselect(cell: ICellModel): void {
     NotebookModelPrivate.selectedProperty.set(cell, false);
+    this.selectionChanged.emit(void 0);
   }
 
   /**
-   * Weheter a cell is selected.
+   * Whether a cell is selected.
    */
   isSelected(cell: ICellModel): boolean {
-    return NotebookModelPrivate.selectedProperty.get(cell);
+    return (NotebookModelPrivate.selectedProperty.get(cell) ||
+            this.cells.indexOf(cell) === this.activeCellIndex);
   }
 
   /**
@@ -627,13 +656,12 @@ class NotebookModel implements INotebookModel {
     }
     this.dirty = true;
     let text = cell.input.textEditor.text.trim();
+    cell.executionCount = null;
     if (!text) {
-      cell.input.prompt = 'In [ ]:';
       return;
     }
     let session = this.session;
     if (!session || !session.kernel) {
-      cell.input.prompt = 'In [ ]:';
       return;
     }
     cell.input.prompt = 'In [*]:';
@@ -729,6 +757,12 @@ namespace NotebookModelPrivate {
   const metadataChangedSignal = new Signal<INotebookModel, string>();
 
   /**
+   * A signal emitted when a the selection state changes.
+   */
+  export
+  const selectionChangedSignal = new Signal<INotebookModel, void>();
+
+  /**
    * An attached property for the selected state of a cell.
    */
   export
@@ -746,7 +780,7 @@ namespace NotebookModelPrivate {
       let cell = cells.get(i);
       if (i === model.activeCellIndex || model.isSelected(cell)) {
         if (isMarkdownCellModel(cell)) {
-          cell.rendered = mode === 'edit';
+          cell.rendered = mode !== 'edit';
         }
       }
     }

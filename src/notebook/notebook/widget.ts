@@ -180,6 +180,11 @@ const ACTIVE_CLASS = 'jp-mod-active';
  */
 const SELECTED_CLASS = 'jp-mod-selected';
 
+/**
+ * The class name added to an active cell when there are other selected cells.
+ */
+const OTHER_SELECTED_CLASS = 'jp-mod-multiSelected';
+
 
 /**
  * A panel which contains a toolbar and a notebook.
@@ -306,6 +311,7 @@ class NotebookWidget extends Widget {
     }
     model.cells.changed.connect(this.onCellsChanged, this);
     model.stateChanged.connect(this.onModelChanged, this);
+    model.selectionChanged.connect(this.onSelectionChanged, this);
   }
 
   /**
@@ -436,17 +442,24 @@ class NotebookWidget extends Widget {
     if (widget) {
       widget.addClass(ACTIVE_CLASS);
     }
+    let count = 0;
     for (let i = 0; i < layout.childCount(); i++) {
       let cell = model.cells.get(i);
       widget = layout.childAt(i) as BaseCellWidget;
       if (i !== model.activeCellIndex) {
         widget.removeClass(ACTIVE_CLASS);
       }
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      widget.removeClass(OTHER_SELECTED_CLASS);
+      if (model.isSelected(cell)) {
         widget.addClass(SELECTED_CLASS);
+        count++;
       } else {
         widget.removeClass(SELECTED_CLASS);
       }
+    }
+    if (count > 1) {
+      widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
+      widget.addClass(OTHER_SELECTED_CLASS);
     }
   }
 
@@ -517,6 +530,13 @@ class NotebookWidget extends Widget {
       widget.input.editor.addClass(NB_EDITOR_CLASS);
       break;
     }
+    this.update();
+  }
+
+  /**
+   * Handle a change in the model selection.
+   */
+  protected onSelectionChanged(model: INotebookModel): void {
     this.update();
   }
 

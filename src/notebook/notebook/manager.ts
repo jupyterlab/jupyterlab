@@ -56,7 +56,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         undelete.push(this.cloneCell(cell));
         model.cells.remove(cell);
       }
@@ -67,6 +67,7 @@ class NotebookManager {
     if (this._undeleteStack.length > DELETE_STACK_SIZE) {
       this._undeleteStack.shift();
     }
+    this.deselectCells();
   }
 
   /**
@@ -83,6 +84,7 @@ class NotebookManager {
     for (let cell of undelete.reverse()) {
       model.cells.insert(index, cell);
     }
+    this.deselectCells();
   }
 
   /**
@@ -95,7 +97,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         toMerge.push(cell.input.textEditor.text);
       }
       if (i === model.activeCellIndex) {
@@ -104,6 +106,7 @@ class NotebookManager {
         toDelete.push(cell);
       }
     }
+    this.deselectCells();
     // Make sure there are cells to merge.
     if (toMerge.length < 2 || !activeCell) {
       return;
@@ -131,6 +134,7 @@ class NotebookManager {
   insertAbove(): void {
     let cell = this.model.createCodeCell();
     this.model.cells.insert(this.model.activeCellIndex, cell);
+    this.deselectCells();
   }
 
   /**
@@ -139,6 +143,7 @@ class NotebookManager {
   insertBelow(): void {
     let cell = this.model.createCodeCell();
     this.model.cells.insert(this.model.activeCellIndex + 1, cell);
+    this.deselectCells();
   }
 
   /**
@@ -150,10 +155,11 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         this._copied.push(this.cloneCell(cell));
       }
     }
+    this.deselectCells();
   }
 
   /**
@@ -165,11 +171,12 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         this._cut.push(this.cloneCell(cell));
         model.cells.remove(cell);
       }
     }
+    this.deselectCells();
   }
 
   /**
@@ -193,6 +200,7 @@ class NotebookManager {
     }
     this._copied = [];
     this._cut = [];
+    this.deselectCells();
   }
 
   /**
@@ -202,7 +210,7 @@ class NotebookManager {
     let model = this.model;
     for (let i = 0; i < model.cells.length; i++) {
       let cell = model.cells.get(i);
-      if (i !== model.activeCellIndex && !model.isSelected(cell)) {
+      if (!model.isSelected(cell)) {
         continue;
       }
       let newCell: ICellModel;
@@ -221,6 +229,7 @@ class NotebookManager {
       model.cells.remove(cell);
       model.cells.insert(i, newCell);
     }
+    this.deselectCells();
   }
 
   /**
@@ -232,13 +241,13 @@ class NotebookManager {
     let selected: ICellModel[] = [];
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
+      if (model.isSelected(cell)) {
         selected.push(cell);
       }
     }
     for (let cell of selected) {
-       model.activeCellIndex = cells.indexOf(cell);
-       model.runActiveCell();
+      model.activeCellIndex = cells.indexOf(cell);
+      model.runActiveCell();
     }
   }
 
@@ -258,6 +267,7 @@ class NotebookManager {
       model.mode = 'edit';
     }
     model.activeCellIndex += 1;
+    this.deselectCells();
   }
 
   /**
@@ -269,6 +279,7 @@ class NotebookManager {
     let cell = model.createCodeCell();
     model.cells.insert(model.activeCellIndex, cell);
     model.mode = 'edit';
+    this.deselectCells();
   }
 
   /**
@@ -294,6 +305,97 @@ class NotebookManager {
     let name = model.session.notebookPath;
     return this._manager.save(name, { type: 'notebook', content })
     .then(() => { model.dirty = false; });
+  }
+
+  /**
+   * Select the cell below the active cell.
+   */
+  selectBelow(): void {
+    if (this.model.activeCellIndex === this.model.cells.length - 1) {
+      return;
+    }
+    this.model.activeCellIndex += 1;
+    this.deselectCells();
+  }
+
+  /**
+   * Select the above the active cell.
+   */
+  selectAbove(): void {
+    if (this.model.activeCellIndex === 0) {
+      return;
+    }
+    this.model.activeCellIndex -= 1;
+    this.deselectCells();
+  }
+
+  /**
+   * Extend the selection to the cell above.
+   */
+  extendSelectionAbove(): void {
+    let model = this.model;
+    let cells = model.cells;
+    // Do not wrap around.
+    if (model.activeCellIndex === 0) {
+      return;
+    }
+    let current = cells.get(model.activeCellIndex);
+    let prev = cells.get(model.activeCellIndex - 1);
+    if (model.isSelected(prev)) {
+      model.deselect(current);
+      if (model.activeCellIndex >= 1) {
+        let prevPrev = cells.get(model.activeCellIndex - 1);
+        if (!model.isSelected(prevPrev)) {
+          model.deselect(prev);
+        }
+      } else {
+        model.deselect(prev);
+      }
+    } else {
+      model.select(current);
+    }
+    model.activeCellIndex -= 1;
+  }
+
+  /**
+   * Extend the selection to the cell below.
+   */
+  extendSelectionBelow(): void {
+    let model = this.model;
+    let cells = model.cells;
+    // Do not wrap around.
+    if (model.activeCellIndex === cells.length - 1) {
+      return;
+    }
+    let current = cells.get(model.activeCellIndex);
+    let next = cells.get(model.activeCellIndex + 1);
+    if (model.isSelected(next)) {
+      model.deselect(current);
+      if (model.activeCellIndex < cells.length - 1) {
+        let nextNext = cells.get(model.activeCellIndex + 1);
+        if (!model.isSelected(nextNext)) {
+          model.deselect(next);
+        }
+      } else {
+        model.deselect(next);
+      }
+    } else {
+      model.select(current);
+    }
+    model.activeCellIndex += 1;
+  }
+
+  /**
+   * Deselect all of the cells.
+   */
+  protected deselectCells(): void {
+    let cells = this.model.cells;
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.get(i);
+      if (this.model.isSelected(cell)) {
+        this.model.deselect(cell);
+      }
+    }
   }
 
   /**
