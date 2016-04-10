@@ -87,7 +87,14 @@ describe('jupyter-js-notebook', () => {
       });
 
       it('should throw an error on blacklisted names', () => {
-        throw new Error('implement me');
+        let editor = new EditorModel();
+        let input = new InputAreaModel(editor);
+        let model = new BaseCellModel(input);
+        let blacklist = ['tags', 'name', 'trusted', 'collapsed', 'scrolled',
+                     'execution_count', 'format'];
+        for (let key of blacklist) {
+          expect(() => { model.getMetadata(key); }).to.throwError();
+        }
       });
 
     });

@@ -27,6 +27,7 @@ import {
 /**
  * Implementation of a kernel future.
  */
+export
 class KernelFutureHandler extends DisposableDelegate implements IKernelFuture {
 
   /**
@@ -206,11 +207,14 @@ class KernelFutureHandler extends DisposableDelegate implements IKernelFuture {
 /**
  * A mock kernel object that only handles execution requests.
  */
+export
 class MockKernel implements IKernel {
 
-  constructor(options: IKernelId) {
+  constructor(options?: IKernelId) {
+    options = options || {};
     this._id = options.id || '';
     this._name = options.name || 'python';
+    this._status = KernelStatus.Idle;
   }
 
   /**
@@ -412,11 +416,12 @@ class MockKernel implements IKernel {
 /**
  * A mock notebook session object that uses a mock kernel.
  */
+export
 class MockSession implements INotebookSession {
 
-  constructor(path: string, kernel: MockKernel) {
+  constructor(path: string, kernel?: MockKernel) {
     this._notebookPath = path;
-    this._kernel = kernel;
+    this._kernel = kernel || new MockKernel();
     this._kernel.statusChanged.connect(this.onKernelStatus, this);
     this._kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
   }

@@ -37,6 +37,10 @@ import {
   NotebookModel
 } from '../../../lib/notebook/model';
 
+import {
+  MockSession
+} from './mock';
+
 
 
 /**
@@ -176,14 +180,15 @@ describe('jupyter-js-notebook', () => {
       it('should emit a stateChanged signal when changed', () => {
         let model = new NotebookModel();
         let called = false;
+        let session = new MockSession('test.ipynb');
         model.stateChanged.connect((nb, change) => {
           expect(change.name).to.be('session');
           expect(change.oldValue).to.be(null);
-          expect(change.newValue).to.be('text/python');
+          expect(change.newValue).to.be(session);
           called = true;
         });
-        throw new Error('implement me');
-        //expect(called).to.be(false);
+        model.session = session;
+        expect(called).to.be(true);
       });
 
     });
@@ -391,7 +396,11 @@ describe('jupyter-js-notebook', () => {
       });
 
       it('should throw an error on blacklisted names', () => {
-        throw new Error('implement me');
+        let model = new NotebookModel();
+        let invalid = ['kernelspec', 'languageInfo', 'origNbformat'];
+        for (let key of invalid) {
+          expect(() => { model.getMetadata(key); }).to.throwError();
+        }
       });
 
     });
@@ -621,14 +630,19 @@ describe('jupyter-js-notebook', () => {
         cell.input.textEditor.text = 'a = 1';
         cell.input.prompt = '';
         model.cells.add(cell);
-        model.activeCellIndex = 0;
         model.runActiveCell();
         expect(cell.input.prompt).to.be('In [ ]:');
         expect(model.methods.indexOf('executeCell')).to.not.be(-1);
       });
 
       it('should set the prompt to busy when executing', () => {
-        throw new Error('implement me');
+        let model = new MyNotebookModel();
+        let cell = model.createCodeCell();
+        model.cells.add(cell);
+        model.session = new MockSession('test.ipynb');
+        cell.input.textEditor.text = 'a = 1';
+        model.runActiveCell();
+        expect(cell.input.prompt).to.be('In [*]:');
       });
 
     });
