@@ -10,16 +10,16 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  CodeMirrorWidget
-} from 'phosphor-codemirror';
-
-import {
   Message
 } from 'phosphor-messaging';
 
 import {
   loadModeByFileName
 } from '../codemirror';
+
+import {
+  CodeMirrorWidget
+} from '../codemirror/widget';
 
 import {
   showDialog

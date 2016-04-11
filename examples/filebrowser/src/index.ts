@@ -22,15 +22,15 @@ import {
 } from 'jupyter-js-ui/lib/dialog';
 
 import {
+  CodeMirrorWidget
+} from 'jupyter-js-ui/lib/codemirror/widget';
+
+import {
   getConfigOption
 } from 'jupyter-js-utils';
 
 import * as arrays
  from 'phosphor-arrays';
-
-import {
-  CodeMirrorWidget
-} from 'phosphor-codemirror';
 
 import {
   DockPanel

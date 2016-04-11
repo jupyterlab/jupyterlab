@@ -4,7 +4,7 @@
 
 import {
   CodeMirrorWidget
-} from 'phosphor-codemirror';
+} from '../codemirror/widget';
 
 import {
   Message
