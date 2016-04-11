@@ -411,6 +411,7 @@ describe('jupyter-js-notebook', () => {
         let model = new NotebookModel();
         let cell = model.createMarkdownCell();
         model.cells.add(cell);
+        model.cells.add(model.createCodeCell())
         expect(model.isSelected(cell)).to.be(false);
         model.select(cell);
         expect(model.isSelected(cell)).to.be(true);
@@ -424,11 +425,21 @@ describe('jupyter-js-notebook', () => {
         let model = new NotebookModel();
         let cell = model.createCodeCell();
         model.cells.add(cell);
+        model.cells.add(model.createCodeCell());
         model.select(cell);
         expect(model.isSelected(cell)).to.be(true);
         model.deselect(cell);
         expect(model.isSelected(cell)).to.be(false);
       });
+
+      it('should have no effect on the active cell', () => {
+        let model = new NotebookModel();
+        let cell = model.createCodeCell();
+        model.cells.add(cell);
+        model.deselect(cell);
+        expect(model.isSelected(cell)).to.be(true);
+      });
+
     });
 
     describe('#isSelected()', () => {
@@ -437,9 +448,9 @@ describe('jupyter-js-notebook', () => {
         let model = new NotebookModel();
         let cell = model.createCodeCell();
         model.cells.add(cell);
-        expect(model.isSelected(cell)).to.be(false);
-        model.select(cell);
         expect(model.isSelected(cell)).to.be(true);
+        model.cells.add(model.createMarkdownCell());
+        expect(model.isSelected(cell)).to.be(false);
       });
 
     });
@@ -618,7 +629,6 @@ describe('jupyter-js-notebook', () => {
         let cell = model.createCodeCell();
         cell.input.prompt = '';
         model.cells.add(cell);
-        model.activeCellIndex = 0;
         model.runActiveCell();
         expect(cell.input.prompt).to.be('In [ ]:');
         expect(model.methods.indexOf('executeCell')).to.not.be(-1);

@@ -662,6 +662,7 @@ class NotebookModel implements INotebookModel {
     this.dirty = true;
     let text = cell.input.textEditor.text.trim();
     cell.executionCount = null;
+    cell.input.prompt = 'In [ ]:';
     if (!text) {
       return;
     }
