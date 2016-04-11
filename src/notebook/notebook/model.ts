@@ -2,9 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import * as CodeMirror
-  from 'codemirror';
-
 import {
   INotebookSession, IExecuteReply
 } from 'jupyter-js-services';
@@ -31,15 +28,15 @@ import {
 
 import {
   EditorModel, IEditorModel, IEditorOptions
-} from '../editor';
+} from '../editor/model';
 
 import {
   InputAreaModel, IInputAreaModel
-} from '../input-area';
+} from '../input-area/model';
 
 import {
   OutputAreaModel, IOutputAreaModel
-} from '../output-area';
+} from '../output-area/model';
 
 import {
   ICellModel,
@@ -47,7 +44,7 @@ import {
   IMarkdownCellModel, MarkdownCellModel,
   IRawCellModel, isCodeCellModel, isMarkdownCellModel,
   RawCellModel, isRawCellModel, MetadataCursor, IMetadataCursor
-} from '../cells';
+} from '../cells/model';
 
 import {
   OutputType, IKernelspecMetadata, ILanguageInfoMetadata
@@ -258,7 +255,7 @@ class NotebookModel implements INotebookModel {
    */
   constructor() {
     this._cells = new ObservableList<ICellModel>();
-    this._cells.changed.connect(this._onCellsChanged, this);
+    this._cells.changed.connect(this.onCellsChanged, this);
   }
 
   /**
@@ -419,6 +416,10 @@ class NotebookModel implements INotebookModel {
 
   /**
    * The mode of the notebook.
+   *
+   * #### Notes
+   * Selected markdown cells are rendered if mode is set to 'command'
+   * and unrendered if mode is set to 'edit'.
    */
   get mode(): NotebookMode {
     return this._mode;
@@ -595,6 +596,11 @@ class NotebookModel implements INotebookModel {
 
   /**
    * Run the active cell, taking the appropriate action.
+   *
+   * #### Notes
+   * If the notebook is read-only or has no active cell, this is a no-op.
+   * Markdown cells are rendered and code cells are executed.
+   * All cells are marked as trusted.
    */
   runActiveCell(): void {
     if (this.readOnly) {
@@ -604,7 +610,6 @@ class NotebookModel implements INotebookModel {
     if (!cell) {
       return;
     }
-    this.mode = 'command';
     if (isMarkdownCellModel(cell)) {
       cell.rendered = false;
       cell.trusted = true;
@@ -657,6 +662,7 @@ class NotebookModel implements INotebookModel {
     this.dirty = true;
     let text = cell.input.textEditor.text.trim();
     cell.executionCount = null;
+    cell.input.prompt = 'In [ ]:';
     if (!text) {
       return;
     }
@@ -700,7 +706,7 @@ class NotebookModel implements INotebookModel {
   /**
    * Handle a change in the cells list.
    */
-  private _onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
+  protected onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
     switch (change.type) {
     case ListChangeType.Add:
       this.activeCellIndex = change.newIndex;
@@ -734,7 +740,7 @@ class NotebookModel implements INotebookModel {
   private _kernelspec = JSON.stringify(DEFAULT_KERNELSPEC);
   private _langInfo = JSON.stringify(DEFAULT_LANG_INFO);
   private _origNbformat: number = null;
-  private _activeCellIndex = -1;
+  private _activeCellIndex: number = null;
   private _mode: NotebookMode = 'command';
   private _dirty = false;
 }
@@ -767,7 +773,8 @@ namespace NotebookModelPrivate {
    */
   export
   const selectedProperty = new Property<ICellModel, boolean>({
-    name: 'selected'
+    name: 'selected',
+    value: false
   });
 
   /**

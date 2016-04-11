@@ -72,7 +72,7 @@ describe('jupyter-js-notebook', () => {
 
     describe('#metadataChanged', () => {
 
-      it ('should be emitted when metadata changes', () => {
+      it('should be emitted when metadata changes', () => {
         let editor = new EditorModel();
         let input = new InputAreaModel(editor);
         let model = new BaseCellModel(input);
@@ -84,6 +84,17 @@ describe('jupyter-js-notebook', () => {
         let foo = model.getMetadata('foo');
         foo.setValue(1);
         expect(called).to.be(true);
+      });
+
+      it('should throw an error on blacklisted names', () => {
+        let editor = new EditorModel();
+        let input = new InputAreaModel(editor);
+        let model = new BaseCellModel(input);
+        let blacklist = ['tags', 'name', 'trusted', 'collapsed', 'scrolled',
+                     'execution_count', 'format'];
+        for (let key of blacklist) {
+          expect(() => { model.getMetadata(key); }).to.throwError();
+        }
       });
 
     });
