@@ -3,5 +3,6 @@
 'use strict';
 
 export * from './handler';
+export * from './creator';
 export * from './default';
 export * from './registry';

@@ -3,40 +3,36 @@
 'use strict';
 
 import {
-  IContentsModel
+  IContentsModel, IContentsManager
 } from 'jupyter-js-services';
 
 import {
   showDialog
 } from '../dialog';
 
-import {
-  FileBrowserModel
-} from './model';
-
 
 /**
- * A class that creates files for a file browser.
+ * A class that creates files for a file registry.
  */
 export
 class FileCreator {
   /**
    * Construct a new file creator.
    */
-  constructor(model: FileBrowserModel, type: string, host?: HTMLElement) {
-    this._model = model;
+  constructor(manager: IContentsManager, type: string, host?: HTMLElement) {
+    this._manager = manager;
     this._host = host || document.body;
     this._type = type;
   }
 
   /**
-   * Get the file browser model used by the creator.
+   * Get the contents manager used by the creator.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get model(): FileBrowserModel {
-    return this._model;
+  get manager(): IContentsManager {
+    return this._manager;
   }
 
   /**
@@ -50,10 +46,10 @@ class FileCreator {
   }
 
   /**
-   * Create a new file object.
+   * Create a new file object in the given directory.
    */
-  createNew(): Promise<IContentsModel> {
-    return this._createUntitled().then(contents => {
+  createNew(path: string): Promise<IContentsModel> {
+    return this._createUntitled(path).then(contents => {
       return this.doRename(contents);
     });
   }
@@ -64,6 +60,7 @@ class FileCreator {
   protected doRename(contents: IContentsModel): Promise<IContentsModel> {
     let edit = document.createElement('input');
     edit.value = contents.name;
+    let dname = contents.path.slice(0, -contents.name.length);
     return showDialog({
       title: `Create a new ${contents.type}`,
       body: edit,
@@ -71,9 +68,9 @@ class FileCreator {
       okText: 'CREATE'
     }).then(value => {
       if (value.text === 'CREATE') {
-        return this.model.rename(contents.path, edit.value);
+        return this._manager.rename(contents.path, `${dname}/${edit.value}`);
       } else {
-        return this.model.delete(contents.path).then(() => void 0);
+        return this._manager.delete(contents.path).then(() => void 0);
       }
     }).catch(error => {
       if (error.statusText === 'Conflict') {
@@ -108,7 +105,7 @@ class FileCreator {
       if (value.text === 'OK') {
         return this.doRename(contents);
       } else {
-        return this._model.delete(contents.path).then(() => void 0);
+        return this._manager.delete(contents.path).then(() => void 0);
       }
     });
   }
@@ -116,11 +113,14 @@ class FileCreator {
   /**
    * Create a new untitled file on the current path.
    */
-  private _createUntitled(): Promise<IContentsModel> {
-    return this.model.newUntitled(this._type);
+  private _createUntitled(path: string): Promise<IContentsModel> {
+    let ext = this._type === 'file' ? '.txt' : '';
+    return this._manager.newUntitled(path, {
+      type: this._type, ext
+    });
   }
 
-  private _model: FileBrowserModel = null;
+  private _manager: IContentsManager = null;
   private _host: HTMLElement = null;
   private _type = 'file';
 }

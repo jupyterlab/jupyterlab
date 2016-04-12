@@ -41,7 +41,7 @@ class FileHandlerRegistry {
   /**
    * Add a file creator.
    */
-  addCreator(name: string, handler: () => Promise<IContentsModel>): void {
+  addCreator(name: string, handler: (path: string) => Promise<IContentsModel>): void {
     this._creators[name] = handler;
   }
 
@@ -55,10 +55,10 @@ class FileHandlerRegistry {
   /**
    * Create a new file.
    */
-  createNew(name: string): Promise<IContentsModel> {
+  createNew(name: string, path: string): Promise<IContentsModel> {
     let creator = this._creators[name];
     if (creator) {
-      return creator();
+      return creator(path);
     }
     return Promise.reject(new Error(`No handler named ${name}`));
   }
@@ -164,5 +164,5 @@ class FileHandlerRegistry {
 
   private _handlers: AbstractFileHandler<Widget>[] = [];
   private _default: AbstractFileHandler<Widget> = null;
-  private _creators: { [key: string]: () => Promise<IContentsModel> } = Object.create(null);
+  private _creators: { [key: string]: (path: string) => Promise<IContentsModel> } = Object.create(null);
 }
