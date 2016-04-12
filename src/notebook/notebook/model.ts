@@ -48,7 +48,8 @@ import {
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
   IRawCellModel, isCodeCellModel, isMarkdownCellModel,
-  RawCellModel, isRawCellModel, MetadataCursor, IMetadataCursor
+  RawCellModel, isRawCellModel, MetadataCursor, IMetadataCursor,
+  executeCodeCell
 } from '../cells/model';
 
 import {
@@ -622,7 +623,7 @@ class NotebookModel implements INotebookModel {
         cell.clear();
         return;
       }
-      cell.execute(session.kernel);
+      executeCodeCell(cell, session.kernel);
     } else if (isMarkdownCellModel(cell)) {
       cell.rendered = false;
       cell.rendered = true;

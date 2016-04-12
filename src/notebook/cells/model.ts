@@ -133,11 +133,6 @@ interface ICodeCellModel extends IBaseCellModel {
   scrolled?: ScrollSetting;
 
   /**
-   * Execute the code cell using the given kernel.
-   */
-  execute(kernel: IKernel): IKernelFuture;
-
-  /**
    * Clear the cell state.
    */
   clear(): void;
@@ -443,39 +438,6 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   }
 
   /**
-   * Execute the code cell using the given kernel.
-   */
-  execute(kernel: IKernel): IKernelFuture {
-    let input = this.input;
-    let output = this.output;
-    let text = input.textEditor.text.trim();
-    this.clear();
-    if (text.length === 0) {
-      return;
-    }
-    input.prompt = 'In [*]:';
-    let exRequest = {
-      code: text,
-      silent: false,
-      store_history: true,
-      stop_on_error: true,
-      allow_stdin: true
-    };
-    let future = kernel.execute(exRequest);
-    future.onIOPub = (msg => {
-      let model = msg.content;
-      if (model !== void 0) {
-        model.output_type = msg.header.msg_type as OutputType;
-        output.add(model);
-      }
-    });
-    future.onReply = (msg => {
-      this.executionCount = (msg.content as IExecuteReply).execution_count;
-    });
-    return future;
-  }
-
-  /**
    * Clear the cell state.
    */
   clear(): void {
@@ -557,6 +519,41 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
 
   type: CellType = 'raw';
   private _format: string = null;
+}
+
+
+/**
+ * Execute the code cell using the given kernel.
+ */
+export
+function executeCodeCell(cell: ICodeCellModel, kernel: IKernel): IKernelFuture {
+  let input = cell.input;
+  let output = cell.output;
+  let text = input.textEditor.text.trim();
+  cell.clear();
+  if (text.length === 0) {
+    return;
+  }
+  input.prompt = 'In [*]:';
+  let exRequest = {
+    code: text,
+    silent: false,
+    store_history: true,
+    stop_on_error: true,
+    allow_stdin: true
+  };
+  let future = kernel.execute(exRequest);
+  future.onIOPub = (msg => {
+    let model = msg.content;
+    if (model !== void 0) {
+      model.output_type = msg.header.msg_type as OutputType;
+      output.add(model);
+    }
+  });
+  future.onReply = (msg => {
+    cell.executionCount = (msg.content as IExecuteReply).execution_count;
+  });
+  return future;
 }
 
 
