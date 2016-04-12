@@ -23,6 +23,7 @@ class FileCreator {
     this._manager = manager;
     this._host = host || document.body;
     this._type = type;
+    this._displayType = type.charAt(0).toUpperCase() + type.slice(1);
   }
 
   /**
@@ -68,9 +69,9 @@ class FileCreator {
       okText: 'CREATE'
     }).then(value => {
       if (value.text === 'CREATE') {
-        return this._manager.rename(contents.path, `${dname}/${edit.value}`);
+        return this.manager.rename(contents.path, `${dname}/${edit.value}`);
       } else {
-        return this._manager.delete(contents.path).then(() => void 0);
+        return this.manager.delete(contents.path).then(() => void 0);
       }
     }).catch(error => {
       if (error.statusText === 'Conflict') {
@@ -84,9 +85,9 @@ class FileCreator {
   /**
    * Show an error message.
    */
-  private showErrorMessage(error: Error): Promise<IContentsModel> {
+  protected showErrorMessage(error: Error): Promise<IContentsModel> {
     return showDialog({
-      title: 'File Creation Error',
+      title: `${this._displayType} Creation Error`,
       body: error.message,
       host: this.host,
       okText: 'DISMISS'
@@ -98,14 +99,14 @@ class FileCreator {
    */
   protected handleExisting(name: string, contents: IContentsModel): Promise<IContentsModel> {
     return showDialog({
-      title: 'File already exists',
-      body: `File "${name}" already exists, try again?`,
+      title: `${this._displayType} already exists`,
+      body: `${this._displayType} "${name}" already exists, try again?`,
       host: this._host
     }).then(value => {
       if (value.text === 'OK') {
         return this.doRename(contents);
       } else {
-        return this._manager.delete(contents.path).then(() => void 0);
+        return this.manager.delete(contents.path).then(() => void 0);
       }
     });
   }
@@ -123,4 +124,5 @@ class FileCreator {
   private _manager: IContentsManager = null;
   private _host: HTMLElement = null;
   private _type = 'file';
+  private _displayType = '';
 }
