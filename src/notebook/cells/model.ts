@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  IKernel, IKernelFuture, IExecuteReply
+} from 'jupyter-js-services';
+
+import {
   shallowEquals
 } from 'jupyter-js-utils';
 
@@ -23,7 +27,7 @@ import {
 } from '../input-area';
 
 import {
-  CellType
+  CellType, OutputType
 } from '../notebook/nbformat';
 
 import {
@@ -127,6 +131,16 @@ interface ICodeCellModel extends IBaseCellModel {
    * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
    */
   scrolled?: ScrollSetting;
+
+  /**
+   * Execute the code cell using the given kernel.
+   */
+  execute(kernel: IKernel): IKernelFuture;
+
+  /**
+   * Clear the cell state.
+   */
+  clear(): void;
 }
 
 
@@ -426,6 +440,48 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     this._output.dispose();
     this._output = null;
     super.dispose();
+  }
+
+  /**
+   * Execute the code cell using the given kernel.
+   */
+  execute(kernel: IKernel): IKernelFuture {
+    let input = this.input;
+    let output = this.output;
+    let text = input.textEditor.text.trim();
+    this.clear();
+    if (text.length === 0) {
+      return;
+    }
+    input.prompt = 'In [*]:';
+    let exRequest = {
+      code: text,
+      silent: false,
+      store_history: true,
+      stop_on_error: true,
+      allow_stdin: true
+    };
+    let future = kernel.execute(exRequest);
+    future.onIOPub = (msg => {
+      let model = msg.content;
+      if (model !== void 0) {
+        model.output_type = msg.header.msg_type as OutputType;
+        output.add(model);
+      }
+    });
+    future.onReply = (msg => {
+      this.executionCount = (msg.content as IExecuteReply).execution_count;
+    });
+    return future;
+  }
+
+  /**
+   * Clear the cell state.
+   */
+  clear(): void {
+    this.output.clear(false);
+    this.executionCount = null;
+    this.input.prompt = 'In [ ]:';
   }
 
   /**
