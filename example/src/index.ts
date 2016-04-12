@@ -120,7 +120,12 @@ function main(): void {
       if (!kernelspecs) {
         return;
       }
-      selectKernel(nbWidget.node, nbModel, kernelspecs);
+      selectKernel(nbWidget.node, nbModel.kernelspec.name, kernelspecs)
+        .then(name => {
+          if (name) {
+            nbModel.session.changeKernel({name});
+          }
+        });
     }
   },
   {
@@ -383,11 +388,13 @@ function main(): void {
   contents.get(NOTEBOOK, {}).then(data => {
     deserialize(data.content, nbModel);
     getKernelSpecs({}).then(specs => {
+      let kernelName = nbModel.kernelspec.name;
+      let language = nbModel.languageInfo.name;
       kernelspecs = specs;
       // start session
       startNewSession({
         notebookPath: NOTEBOOK,
-        kernelName: findKernel(nbModel, specs),
+        kernelName: findKernel(kernelName, language, specs),
         baseUrl: SERVER_URL
       }).then(session => {
         nbModel.session = session;

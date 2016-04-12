@@ -2,6 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
+import * as CodeMirror
+  from 'codemirror';
+
+import 'codemirror/mode/meta';
+
 import {
   INotebookSession, IExecuteReply
 } from 'jupyter-js-services';
