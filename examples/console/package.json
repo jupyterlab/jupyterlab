@@ -1,13 +1,6 @@
 {
   "private": true,
   "name": "jupyter-js-notebook-example",
-  "dependencies": {
-    "jupyter-js-notebook": "file:..",
-    "phosphor-commandpalette": "^0.2.0",
-    "phosphor-keymap": "^0.8.0",
-    "phosphor-splitpanel": "^1.0.0-rc.1",
-    "phosphor-widget": "^1.0.0-rc.1"
-  },
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules",

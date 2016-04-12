@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "jupyter-js-notebook-example",
+  "scripts": {
+    "build": "tsc --project src && webpack --config webpack.conf.js",
+    "clean": "rimraf build && rimraf node_modules",
+    "postinstall": "npm dedupe",
+    "update": "rimraf node_modules/jupyter-js-notebook && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^2.0.0"
+  }
+}
