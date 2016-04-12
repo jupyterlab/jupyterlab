@@ -17,6 +17,16 @@ import {
 export
 class FileCreator {
   /**
+   * Create the dialog for the file creator.
+   */
+  static createDialog(): HTMLElement {
+    let node = document.createElement('div');
+    let input = document.createElement('input');
+    node.appendChild(input);
+    return node;
+  }
+
+  /**
    * Construct a new file creator.
    */
   constructor(manager: IContentsManager, type: string, host?: HTMLElement) {
@@ -24,6 +34,8 @@ class FileCreator {
     this._host = host || document.body;
     this._type = type;
     this._displayType = type.charAt(0).toUpperCase() + type.slice(1);
+    let constructor = this.constructor as typeof FileCreator;
+    this._body = constructor.createDialog();
   }
 
   /**
@@ -47,6 +59,20 @@ class FileCreator {
   }
 
   /**
+   * The input node with the file name.
+   */
+  get fileNode(): HTMLInputElement {
+    return this._body.getElementsByTagName('input')[0];
+  }
+
+  /**
+   * The dialog body.
+   */
+  get body(): HTMLElement {
+    return this._body;
+  }
+
+  /**
    * Create a new file object in the given directory.
    */
   createNew(path: string): Promise<IContentsModel> {
@@ -59,12 +85,12 @@ class FileCreator {
    * Rename a file or directory.
    */
   protected doRename(contents: IContentsModel): Promise<IContentsModel> {
-    let edit = document.createElement('input');
+    let edit = this.fileNode;
     edit.value = contents.name;
     let dname = contents.path.slice(0, -contents.name.length);
     return showDialog({
-      title: `Create a new ${contents.type}`,
-      body: edit,
+      title: `Create a New ${this._displayType}`,
+      body: this.body,
       host: this.host,
       okText: 'CREATE'
     }).then(value => {
@@ -125,4 +151,5 @@ class FileCreator {
   private _host: HTMLElement = null;
   private _type = 'file';
   private _displayType = '';
+  private _body: HTMLElement = null;
 }
