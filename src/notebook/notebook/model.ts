@@ -611,7 +611,6 @@ class NotebookModel implements INotebookModel {
     if (this.readOnly) {
       return;
     }
-    debugger;
     let cell = this.cells.get(this.activeCellIndex);
     if (!cell) {
       return;
