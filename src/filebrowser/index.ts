@@ -3,5 +3,4 @@
 'use strict';
 
 export * from './browser';
-export * from './creator';
 export * from './model';

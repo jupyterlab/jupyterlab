@@ -290,23 +290,32 @@ namespace Private {
     let creators = registry.listCreators();
     creators = creators.sort((a, b) => a.localeCompare(b));
     let items: MenuItem[] = [];
-    for (var name of creators) {
-      items.push(new MenuItem({
-        text: name,
-        handler: () => {
-          registry.createNew(name).then(contents => {
-            if (contents === void 0) {
-              return;
-            }
-            if (contents.type !== 'directory') {
-              registry.open(contents);
-            }
-            widget.model.refresh();
-          });
-        }
-      }));
+    for (var text of creators) {
+      items.push(createItem(text, widget));
     }
     return new Menu(items);
+  }
+
+  /**
+   * Create a menu item in the dropdown menu.
+   */
+  function createItem(text: string, widget: FileButtons): MenuItem {
+    let registry = widget.registry;
+    let model = widget.model;
+    return new MenuItem({
+      text,
+      handler: () => {
+        registry.createNew(text, model.path).then(contents => {
+          if (contents === void 0) {
+            return;
+          }
+          if (contents.type !== 'directory') {
+            registry.open(contents);
+          }
+          model.refresh();
+        });
+      }
+    });
   }
 
   /**

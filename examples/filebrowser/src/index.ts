@@ -10,11 +10,11 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  FileHandler, FileHandlerRegistry
+  FileHandler, FileHandlerRegistry, FileCreator
 } from 'jupyter-js-ui/lib/filehandler';
 
 import {
-  FileBrowserWidget, FileBrowserModel, FileCreator
+  FileBrowserWidget, FileBrowserModel
 } from 'jupyter-js-ui/lib/filebrowser';
 
 import {
@@ -73,8 +73,8 @@ function main(): void {
 
   let fbWidget = new FileBrowserWidget(fbModel, registry);
 
-  let dirCreator = new FileCreator(fbModel, 'directory', fbWidget.node);
-  let fileCreator = new FileCreator(fbModel, 'file', fbWidget.node);
+  let dirCreator = new FileCreator(contentsManager, 'directory', fbWidget.node);
+  let fileCreator = new FileCreator(contentsManager, 'file', fbWidget.node);
   registry.addCreator(
     'New Directory', dirCreator.createNew.bind(dirCreator));
   registry.addCreator('New File', fileCreator.createNew.bind(fileCreator));
