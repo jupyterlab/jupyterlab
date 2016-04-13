@@ -57,11 +57,12 @@ let NOTEBOOK = 'test.ipynb';
 function main(): void {
   // Initialize the keymap manager with the bindings.
   var keymap = new KeymapManager();
+  let useCapture = true;
 
   // Setup the keydown listener for the document.
   document.addEventListener('keydown', event => {
     keymap.processKeydownEvent(event);
-  });
+  }, useCapture);
   // TODO: check out static example from the history
   // and make that a separate example.
 

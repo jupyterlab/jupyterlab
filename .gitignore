@@ -19,6 +19,6 @@ node_modules
 docs/
 lib/
 *.map
-example/build
+examples/*/build
 test/build
 test/coverage
