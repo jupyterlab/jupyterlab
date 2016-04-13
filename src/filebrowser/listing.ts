@@ -1031,11 +1031,9 @@ class DirListing extends Widget {
     });
     this._drag.mimeData.setData(utils.CONTENTS_MIME, null);
     if (item && item.type !== 'directory') {
-      if (this._registry.canOpen(item)) {
-        this._drag.mimeData.setData(FACTORY_MIME, () => {
-          this._registry.open(item);
-        });
-      }
+      this._drag.mimeData.setData(FACTORY_MIME, () => {
+        this._registry.open(item);
+      });
     }
 
     // Start the drag and remove the mousemove listener.

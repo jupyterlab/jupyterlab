@@ -170,7 +170,7 @@ class FileBrowserWidget extends Widget {
         continue;
       }
       if (item.type !== 'directory') {
-        this._registry.revert(item);
+        this._registry.revert(item.path);
       }
     }
   }
@@ -185,7 +185,7 @@ class FileBrowserWidget extends Widget {
         continue;
       }
       if (item.type !== 'directory') {
-        this._registry.save(item);
+        this._registry.save(item.path);
       }
     }
   }
@@ -200,7 +200,7 @@ class FileBrowserWidget extends Widget {
         continue;
       }
       if (item.type !== 'directory') {
-        this._registry.close(item);
+        this._registry.close(item.path);
       }
     }
   }
