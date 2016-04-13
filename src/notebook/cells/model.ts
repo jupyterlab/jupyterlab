@@ -443,7 +443,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   clear(): void {
     this.output.clear(false);
     this.executionCount = null;
-    this.input.prompt = 'In [ ]:';
+    this.input.clear();
   }
 
   /**
