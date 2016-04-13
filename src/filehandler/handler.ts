@@ -227,7 +227,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Set the dirty state of a widget (defaults to current active widget).
+   * Set the dirty state of a file.
    */
   setDirty(path: string): void {
     let widget = this.findWidget(path);
@@ -235,7 +235,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Clear the dirty state of a widget (defaults to current active widget).
+   * Clear the dirty state of a file.
    */
   clearDirty(path: string): void {
     let widget = this.findWidget(path);

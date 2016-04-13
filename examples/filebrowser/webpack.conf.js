@@ -1,11 +1,11 @@
 
-var ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin");
 
 module.exports = {
   entry: './build/index.js',
   output: {
-    path: './build',
-    filename: 'bundle.js'
+    path: __dirname + "/build",
+    filename: "bundle.js",
+    publicPath: "./build/"
   },
   node: {
     fs: "empty"

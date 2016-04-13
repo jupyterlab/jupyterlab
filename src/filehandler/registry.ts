@@ -73,10 +73,10 @@ class FileHandlerRegistry {
   /**
    * Create a new file.
    */
-  createNew(name: string, path: string): Promise<IContentsModel> {
+  createNew(name: string, path: string, host?: HTMLElement): Promise<IContentsModel> {
     let creator = this._creators[name];
     if (creator) {
-      return creator(path).then(model => {
+      return creator(path, host).then(model => {
         this.created.emit(model);
         return model;
       });
@@ -211,7 +211,7 @@ class FileHandlerRegistry {
 
   private _handlers: AbstractFileHandler<Widget>[] = [];
   private _default: AbstractFileHandler<Widget> = null;
-  private _creators: { [key: string]: (path: string) => Promise<IContentsModel> } = Object.create(null);
+  private _creators: { [key: string]: (path: string, host?: HTMLElement) => Promise<IContentsModel> } = Object.create(null);
 }
 
 

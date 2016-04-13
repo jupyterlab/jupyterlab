@@ -71,8 +71,8 @@ function main(): void {
 
   let fbWidget = new FileBrowserWidget(fbModel, registry);
 
-  let dirCreator = new FileCreator(contentsManager, 'directory', fbWidget.node);
-  let fileCreator = new FileCreator(contentsManager, 'file', fbWidget.node);
+  let dirCreator = new FileCreator(contentsManager, 'directory');
+  let fileCreator = new FileCreator(contentsManager, 'file');
   registry.addCreator(
     'New Directory', dirCreator.createNew.bind(dirCreator));
   registry.addCreator('New File', fileCreator.createNew.bind(fileCreator));
