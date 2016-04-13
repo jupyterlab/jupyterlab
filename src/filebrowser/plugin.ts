@@ -73,6 +73,45 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     registry.rename(args.oldValue, args.newValue);
   });
 
+
+  // Add the command for a new items.
+  let newTextFileId = 'file-operations:new-text-file';
+  let newNotebookId = 'file-operations:new-notebook';
+
+  app.commands.add([
+    {
+      id: newNotebookId,
+      handler: () => {
+        registry.createNew('notebook', model.path, widget.node).then(contents => {
+          registry.open(contents);
+        });
+      }
+    },
+    {
+      id: newTextFileId,
+      handler: () => {
+        registry.createNew('file', model.path, widget.node).then(contents => {
+          registry.open(contents);
+        });
+      }
+    }
+  ]);
+
+  app.palette.add([
+    {
+      command: newNotebookId,
+      category: 'File Operations',
+      text: 'New Notebook',
+      caption: 'Create a new Jupyter Notebook'
+    },
+    {
+      command: newTextFileId,
+      category: 'File Operations',
+      text: 'New Text File',
+      caption: 'Create a new text file'
+    }
+  ]);
+
   app.commands.add([
     {
       id: 'file-browser:activate',
