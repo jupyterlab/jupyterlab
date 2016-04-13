@@ -28,16 +28,16 @@ import {
 } from 'phosphor-widget';
 
 import {
+  findKernel
+} from '../kernel-selector';
+
+import {
   NotebookManager
 } from './manager';
 
 import {
   INotebookModel, NotebookModel
 } from './model';
-
-import {
-  findKernel
-} from './selector';
 
 import {
   deserialize, serialize
@@ -146,7 +146,9 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPanel> {
         return session;
       }
       return this._kernelSpecs.then(specs => {
-        let name = findKernel(widget.model, specs);
+        let kernelName = widget.model.kernelspec.name;
+        let langName = widget.model.languageInfo.name;
+        let name = findKernel(kernelName, langName, specs);
         return this._session.startNew({
           kernelName: name,
           notebookPath: model.path
