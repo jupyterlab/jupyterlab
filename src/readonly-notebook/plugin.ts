@@ -11,8 +11,8 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  AbstractFileHandler, DocumentManager
-} from 'jupyter-js-ui/lib/docmanager';
+  AbstractFileHandler, FileHandlerRegistry
+} from 'jupyter-js-ui/lib/filehandler';
 
 import {
   RenderMime
@@ -42,7 +42,7 @@ import {
 export
 const notebookHandlerExtension = {
   id: 'jupyter.extensions.notebookHandler',
-  requires: [DocumentManager, JupyterServices],
+  requires: [FileHandlerRegistry, JupyterServices, RenderMime],
   activate: activateNotebookHandler
 };
 
@@ -50,11 +50,12 @@ const notebookHandlerExtension = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: Application, manager: DocumentManager, services: JupyterServices): Promise<void> {
+function activateNotebookHandler(app: Application, registry: FileHandlerRegistry, services: JupyterServices, rendermime: RenderMime<Widget>): Promise<void> {
   let handler = new NotebookFileHandler(
-    services.contentsManager
+    services.contentsManager,
+    rendermime
   );
-  manager.register(handler);
+  registry.addHandler(handler);
   return Promise.resolve(void 0);
 }
 
@@ -64,25 +65,8 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
  */
 class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
 
-  constructor(contents: IContentsManager) {
+  constructor(contents: IContentsManager, rendermime: RenderMime<Widget>) {
     super(contents);
-    let rendermime = new RenderMime<Widget>();
-    const transformers = [
-      new JavascriptRenderer(),
-      new HTMLRenderer(),
-      new ImageRenderer(),
-      new SVGRenderer(),
-      new LatexRenderer(),
-      new ConsoleTextRenderer(),
-      new TextRenderer()
-    ];
-
-    for (let t of transformers) {
-      for (let m of t.mimetypes) {
-        rendermime.order.push(m);
-        rendermime.renderers[m] = t;
-      }
-    }
     this._rendermime = rendermime;
   }
 

@@ -73,6 +73,19 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     registry.rename(args.oldValue, args.newValue);
   });
 
+  let id = 0;
+  registry.opened.connect((r, widget) => {
+    if (!widget.id) widget.id = `document-manager-${++id}`;
+    if (!widget.isAttached) app.shell.addToMainArea(widget);
+    let stack = widget.parent;
+    if (!stack) {
+      return;
+    }
+    let tabs = stack.parent;
+    if (tabs instanceof TabPanel) {
+      tabs.currentWidget = widget;
+    }
+  });
 
   // Add the command for a new items.
   let newTextFileId = 'file-operations:new-text-file';
@@ -94,6 +107,112 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
           registry.open(contents);
         });
       }
+    }
+  ]);
+
+
+  // Temporary file object focus follower.
+  let activeWidget: Widget;
+  let widgets: Widget[] = [];
+  document.body.addEventListener('focus', event => {
+    for (let widget of widgets) {
+      let target = event.target as HTMLElement;
+      if (widget.isAttached && widget.isVisible) {
+        if (widget.node.contains(target)) {
+          activeWidget = widget;
+          return;
+        }
+      }
+    }
+  });
+
+  // Add opened files to the widget list temporarily.
+  registry.opened.connect((r, widget) => {
+    activeWidget = widget;
+    widgets.push(widget);
+  });
+
+
+  // Add the command for saving a document.
+  let saveDocumentId = 'file-operations:save';
+
+  app.commands.add([
+    {
+      id: saveDocumentId,
+      handler: () => {
+        let model = registry.findModel(activeWidget);
+        if (model) registry.save(model.path);
+      }
+    }
+  ]);
+  app.palette.add([
+    {
+      command: saveDocumentId,
+      category: 'File Operations',
+      text: 'Save Document',
+      caption: 'Save the current document'
+    }
+  ]);
+
+  // Add the command for reverting a document.
+  let revertDocumentId = 'file-operations:revert';
+
+  app.commands.add([
+    {
+      id: revertDocumentId,
+      handler: () => {
+        let model = registry.findModel(activeWidget);
+        if (model) registry.revert(model.path);
+      }
+    }
+  ]);
+  app.palette.add([
+    {
+      command: revertDocumentId,
+      category: 'File Operations',
+      text: 'Revert Document',
+      caption: 'Revert the current document'
+    }
+  ]);
+
+  // Add the command for closing a document.
+  let closeDocumentId = 'file-operations:close';
+
+  app.commands.add([
+    {
+      id: closeDocumentId,
+      handler: () => {
+        let model = registry.findModel(activeWidget);
+        if (model) registry.close(model.path);
+      }
+    }
+  ]);
+  app.palette.add([
+    {
+      command: closeDocumentId,
+      category: 'File Operations',
+      text: 'Close Document',
+      caption: 'Close the current document'
+    }
+  ]);
+
+  // Add the command for closing all documents.
+  let closeAllId = 'file-operations:close-all';
+
+  app.commands.add([
+    {
+      id: closeAllId,
+      handler: () => {
+        registry.closeAll();
+      }
+    }
+  ]);
+  app.palette.add([
+    {
+      command: closeAllId,
+      category: 'File Operations',
+      text: 'Close All',
+      caption: 'Close all open documents'
     }
   ]);
 

@@ -5,7 +5,7 @@
 import {
   NotebookWidget, NotebookModel, serialize, INotebookModel, deserialize,
   NotebookManager, NotebookToolbar, selectKernel,
-  findKernel, NotebookFileHandler, NotebookCreator
+  findKernel, NotebookFileHandler, NotebookCreator, NotebookPanel
 } from 'jupyter-js-notebook';
 
 import {
@@ -123,115 +123,137 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
   registry.addHandler(handler);
 
   let creator = new NotebookCreator(handler);
+  registry.addCreator('New Notebook', creator.createNew.bind(creator));
+
+  // Temporary notebook focus follower.
+  let activeWidget: NotebookPanel;
+  let widgets: NotebookPanel[] = [];
+  document.body.addEventListener('focus', event => {
+    for (let widget of widgets) {
+      let target = event.target as HTMLElement;
+      if (widget.isAttached && widget.isVisible) {
+        if (widget.node.contains(target)) {
+          activeWidget = widget;
+          return;
+        }
+      }
+    }
+  });
+
+  // Add opened notebooks to the widget list temporarily
+  handler.opened.connect((h, widget) => {
+    activeWidget = widget;
+    widgets.push(widget);
+  });
 
   app.commands.add([
   {
     id: cmdIds['runAndAdvance'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.runAndAdvance();
     }
   },
   {
     id: cmdIds['run'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.run();
     }
   },
   {
     id: cmdIds['runAndInsert'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.runAndInsert();
     }
   },
   {
     id: cmdIds['restart'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.restart();
     }
   },
   {
     id: cmdIds['interrupt'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.interrupt();
     }
   },
   {
     id: cmdIds['toCode'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.changeCellType('code'); }
   },
   {
     id: cmdIds['toMarkdown'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.changeCellType('markdown'); }
   },
   {
     id: cmdIds['toRaw'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.changeCellType('raw');
     }
   },
   {
     id: cmdIds['cut'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.cut();
     }
   },
   {
     id: cmdIds['copy'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.copy();
     }
   },
   {
     id: cmdIds['paste'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.paste();
     }
   },
   {
     id: cmdIds['insertAbove'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.insertAbove();
     }
   },
   {
     id: cmdIds['insertBelow'],
     handler: () => {
-      let manager = handler.currentManager;
+      let manager = activeWidget.manager;
       if (manager) manager.insertBelow();
     }
   },
   {
     id: cmdIds['selectPrevious'],
     handler: () => {
-      let model = handler.currentModel;
+      let model = activeWidget.model;
       if (model) model.activeCellIndex -= 1;
     }
   },
   {
     id: cmdIds['selectNext'],
     handler: () => {
-      let model = handler.currentModel;
+      let model = activeWidget.model;;
       if (model) model.activeCellIndex += 1;
     }
   },
   {
     id: cmdIds['toggleLinenumbers'],
     handler: () => {
-      let model = handler.currentModel;
+      let model = activeWidget.model;
       if (model) {
         let cell = model.cells.get(model.activeCellIndex);
         let lineNumbers = cell.input.textEditor.lineNumbers;
@@ -247,7 +269,7 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
   {
     id: cmdIds['toggleAllLinenumbers'],
     handler: () => {
-      let model = handler.currentModel;
+      let model = activeWidget.model;
       if (model) {
         let cell = model.cells.get(model.activeCellIndex);
         let lineNumbers = cell.input.textEditor.lineNumbers;
@@ -261,14 +283,14 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
   {
     id: cmdIds['commandMode'],
     handler: () => {
-      let model = handler.currentModel;
+      let model = activeWidget.model;
       if (model) model.mode = 'command';
     }
   },
   {
     id: cmdIds['editMode'],
     handler: () => {
-      let model = handler.currentModel;
+      let model = activeWidget.model;
       if (model) model.mode = 'edit';
     }
   }
@@ -376,11 +398,8 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
     {
       id: cmdIds['switchKernel'],
       handler: () => {
-        let widget = handler.currentWidget;
-        if (widget) {
-          let model = handler.currentModel;
-          selectKernel(widget.parent.node, model, specs);
-        }
+        let model = activeWidget.model;
+        if (model) selectKernel(activeWidget.parent.node, model, specs);
       }
     }]);
     app.palette.add([
