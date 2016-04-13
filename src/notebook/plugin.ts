@@ -399,7 +399,8 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
       id: cmdIds['switchKernel'],
       handler: () => {
         let model = activeWidget.model;
-        if (model) selectKernel(activeWidget.parent.node, model, specs);
+        let name = model.kernelspec.name;
+        if (model) selectKernel(activeWidget.parent.node, name, specs);
       }
     }]);
     app.palette.add([
