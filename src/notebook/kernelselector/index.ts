@@ -10,16 +10,12 @@ import {
   showDialog
 } from 'jupyter-js-ui/lib/dialog';
 
-import {
-  INotebookModel
-} from './model';
-
 
 /**
  * Present a dialog asking the user to select a kernel.
  */
 export
-function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSpecIds): Promise<IKernel> {
+function selectKernel(host: HTMLElement, kernelName: string, specs: IKernelSpecIds): Promise<string> {
   let selector = document.createElement('select');
   let options: HTMLOptionElement[] = [];
   for (let name in specs.kernelspecs) {
@@ -32,8 +28,8 @@ function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSp
   for (let option of options) {
     selector.appendChild(option);
   }
-  if (model.kernelspec.name !== 'unknown') {
-    selector.value = model.kernelspec.name;
+  if (kernelName !== 'unknown') {
+    selector.value = kernelName;
   } else {
     selector.value = specs.kernelspecs[specs.default].spec.display_name;
   }
@@ -43,9 +39,9 @@ function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSp
     body: selector
   }).then(result => {
     if (result.text === 'OK') {
-      return model.session.changeKernel({ name: selector.value });
+      return selector.value;
     }
-    return model.session.kernel;
+    return null;
   });
 }
 
@@ -54,33 +50,31 @@ function selectKernel(host: HTMLElement, model: INotebookModel, specs: IKernelSp
  * Get the appropriate kernel name given a notebook model.
  */
 export
-function findKernel(model: INotebookModel, specs: IKernelSpecIds): string {
-  let name = model.kernelspec.name;
-  if (name === 'unknown') {
+function findKernel(kernelName: string, language: string, specs: IKernelSpecIds): string {
+  if (kernelName === 'unknown') {
     return specs.default;
   }
   // Look for an exact match.
-  for (let kernelName in specs.kernelspecs) {
-    if (kernelName === name) {
-      return name;
-    }
-  }
-  // Next try to match the language name.
-  let language = model.languageInfo.name;
-  if (language === 'unknown') {
-    return specs.default;
-  }
-  for (let kernelName in specs.kernelspecs) {
-    let kernelLanguage = specs.kernelspecs[name].spec.language;
-    if (language === kernelLanguage) {
-      console.log('No exact match found for ' + name +
-                  ', using kernel ' + kernelName + ' that matches ' +
-                  'language=' + language);
+  for (let specName in specs.kernelspecs) {
+    if (specName === kernelName) {
       return kernelName;
     }
   }
+  // Next try to match the language name.
+  if (language === 'unknown') {
+    return specs.default;
+  }
+  for (let specName in specs.kernelspecs) {
+    let kernelLanguage = specs.kernelspecs[name].spec.language;
+    if (language === kernelLanguage) {
+      console.log('No exact match found for ' + name +
+                  ', using kernel ' + specName + ' that matches ' +
+                  'language=' + language);
+      return specName;
+    }
+  }
   // Finally, use the default kernel.
-  console.log(`No matching kernel found for ${name}, ` +
+  console.log(`No matching kernel found for ${kernelName}, ` +
               `using default kernel ${specs.default}`);
   return specs.default;
 }
