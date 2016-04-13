@@ -302,10 +302,11 @@ namespace Private {
   function createItem(text: string, widget: FileButtons): MenuItem {
     let registry = widget.registry;
     let model = widget.model;
+    let host = widget.parent.node;
     return new MenuItem({
       text,
       handler: () => {
-        registry.createNew(text, model.path).then(contents => {
+        registry.createNew(text, model.path, host).then(contents => {
           if (contents === void 0) {
             return;
           }

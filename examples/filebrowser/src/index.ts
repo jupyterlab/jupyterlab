@@ -65,19 +65,23 @@ function main(): void {
 
   let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
   let registry = new FileHandlerRegistry();
-  let fileHandler = new FileHandler(contentsManager, widget => {
-    dock.insertTabAfter(widget);
-    widgets.push(widget);
-  });
-  registry.addDefault(fileHandler);
+  let fileHandler = new FileHandler(contentsManager);
+
+  registry.addDefaultHandler(fileHandler);
 
   let fbWidget = new FileBrowserWidget(fbModel, registry);
 
-  let dirCreator = new FileCreator(contentsManager, 'directory', fbWidget.node);
-  let fileCreator = new FileCreator(contentsManager, 'file', fbWidget.node);
+  let dirCreator = new FileCreator(contentsManager, 'directory');
+  let fileCreator = new FileCreator(contentsManager, 'file');
   registry.addCreator(
     'New Directory', dirCreator.createNew.bind(dirCreator));
   registry.addCreator('New File', fileCreator.createNew.bind(fileCreator));
+
+  let widgets: CodeMirrorWidget[] = [];
+  registry.opened.connect((r, widget) => {
+    dock.insertTabAfter(widget);
+    widgets.push(widget as CodeMirrorWidget);
+  });
 
   let panel = new SplitPanel();
   panel.id = 'main';
@@ -88,8 +92,7 @@ function main(): void {
   SplitPanel.setStretch(dock, 1);
   dock.spacing = 8;
 
-  let widgets: Widget[] = [];
-  let activeWidget: Widget;
+  let activeWidget: CodeMirrorWidget;
 
   document.addEventListener('focus', event => {
     for (let i = 0; i < widgets.length; i++) {
@@ -127,7 +130,8 @@ function main(): void {
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      fileHandler.save(activeWidget as any);
+      let path = fileHandler.findModel(activeWidget).path;
+      fileHandler.save(path);
       return true;
     }
   }]);

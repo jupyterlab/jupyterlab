@@ -29,9 +29,8 @@ class FileCreator {
   /**
    * Construct a new file creator.
    */
-  constructor(manager: IContentsManager, type: string, host?: HTMLElement) {
+  constructor(manager: IContentsManager, type: string) {
     this._manager = manager;
-    this._host = host || document.body;
     this._type = type;
     this._displayType = type.charAt(0).toUpperCase() + type.slice(1);
     let constructor = this.constructor as typeof FileCreator;
@@ -75,7 +74,8 @@ class FileCreator {
   /**
    * Create a new file object in the given directory.
    */
-  createNew(path: string): Promise<IContentsModel> {
+  createNew(path: string, host?: HTMLElement): Promise<IContentsModel> {
+    this._host = host || document.body;
     return this._createUntitled(path).then(contents => {
       return this.doRename(contents);
     });
@@ -91,7 +91,7 @@ class FileCreator {
     return showDialog({
       title: `Create a New ${this._displayType}`,
       body: this.body,
-      host: this.host,
+      host: this._host,
       okText: 'CREATE'
     }).then(value => {
       if (value.text === 'CREATE') {

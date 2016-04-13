@@ -7,6 +7,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -21,20 +25,34 @@ import {
 export
 class FileHandlerRegistry {
   /**
+   * A signal emitted when a file is opened.
+   */
+  get opened(): ISignal<FileHandlerRegistry, Widget> {
+    return Private.openedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a file is created.
+   */
+  get created(): ISignal<FileHandlerRegistry, IContentsModel> {
+    return Private.createdSignal.bind(this);
+  }
+
+  /**
    * Register a file handler.
    */
-  add(handler: AbstractFileHandler<Widget>): void {
+  addHandler(handler: AbstractFileHandler<Widget>): void {
     this._handlers.push(handler);
   }
 
   /**
    * Register a default file handler.
    */
-  addDefault(handler: AbstractFileHandler<Widget>): void {
+  addDefaultHandler(handler: AbstractFileHandler<Widget>): void {
     if (this._default) {
       throw Error('Default handler already registered');
     }
-    this.add(handler);
+    this.addHandler(handler);
     this._default = handler;
   }
 
@@ -55,20 +73,15 @@ class FileHandlerRegistry {
   /**
    * Create a new file.
    */
-  createNew(name: string, path: string): Promise<IContentsModel> {
+  createNew(name: string, path: string, host?: HTMLElement): Promise<IContentsModel> {
     let creator = this._creators[name];
     if (creator) {
-      return creator(path);
+      return creator(path, host).then(model => {
+        this.created.emit(model);
+        return model;
+      });
     }
     return Promise.reject(new Error(`No handler named ${name}`));
-  }
-
-  /**
-   * Test whether a model can be opened.
-   */
-  canOpen(model: IContentsModel): boolean {
-    let handler = this.findHandler(model);
-    return handler !== void 0;
   }
 
   /**
@@ -79,7 +92,8 @@ class FileHandlerRegistry {
     if (handler === void 0) {
       return;
     }
-    handler.open(model);
+    let widget = handler.open(model);
+    this.opened.emit(widget);
   }
 
   /**
@@ -87,7 +101,7 @@ class FileHandlerRegistry {
    */
   rename(oldPath: string, newPath: string): boolean {
     for (let h of this._handlers) {
-      if (h.findByPath(oldPath)) {
+      if (h.findWidget(oldPath)) {
         return h.rename(oldPath, newPath);
       }
     }
@@ -97,11 +111,11 @@ class FileHandlerRegistry {
   /**
    * Save a file.
    */
-  save(model: IContentsModel): Promise<IContentsModel> {
+  save(path: string): Promise<IContentsModel> {
     for (let h of this._handlers) {
-      let w = h.findByPath(model.path);
+      let w = h.findWidget(path);
       if (w !== void 0) {
-        return h.save(w);
+        return h.save(path);
       }
     }
   }
@@ -109,11 +123,11 @@ class FileHandlerRegistry {
   /**
    * Revert a file.
    */
-  revert(model: IContentsModel): Promise<IContentsModel> {
+  revert(path: string): Promise<IContentsModel> {
     for (let h of this._handlers) {
-      let w = h.findByPath(model.path);
+      let w = h.findWidget(path);
       if (w !== void 0) {
-        return h.revert(w);
+        return h.revert(path);
       }
     }
   }
@@ -121,11 +135,44 @@ class FileHandlerRegistry {
   /**
    * Close a file.
    */
-  close(model: IContentsModel): Promise<boolean> {
+  close(path: string): Promise<boolean> {
     for (let h of this._handlers) {
-      let w = h.findByPath(model.path);
+      let w = h.findWidget(path);
       if (w !== void 0) {
-        return h.close(w);
+        return h.close(path);
+      }
+    }
+  }
+
+  /**
+   * Close all files.
+   */
+  closeAll(): void {
+    for (let h of this._handlers) {
+      h.closeAll();
+    }
+  }
+
+  /**
+   * Find the model for a given widget.
+   */
+  findModel(widget: Widget): IContentsModel {
+    for (let h of this._handlers) {
+      let model = h.findModel(widget);
+      if (model) {
+        return model;
+      }
+    }
+  }
+
+  /**
+   * Find the widget for a given file.
+   */
+  findWidget(path: string): Widget {
+    for (let h of this._handlers) {
+      let w = h.findWidget(path);
+      if (w !== void 0) {
+        return w;
       }
     }
   }
@@ -164,5 +211,23 @@ class FileHandlerRegistry {
 
   private _handlers: AbstractFileHandler<Widget>[] = [];
   private _default: AbstractFileHandler<Widget> = null;
-  private _creators: { [key: string]: (path: string) => Promise<IContentsModel> } = Object.create(null);
+  private _creators: { [key: string]: (path: string, host?: HTMLElement) => Promise<IContentsModel> } = Object.create(null);
+}
+
+
+/**
+ * A private namespace for FileHandlerRegistry data.
+ */
+namespace Private {
+  /**
+   * A signal emitted when a file is opened.
+   */
+  export
+  const openedSignal = new Signal<FileHandlerRegistry, Widget>();
+
+  /**
+   * A signal emitted when a file is created.
+   */
+  export
+  const createdSignal = new Signal<FileHandlerRegistry, IContentsModel>();
 }

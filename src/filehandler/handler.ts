@@ -42,12 +42,16 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    * Construct a new source file handler.
    *
    * @param manager - The contents manager used to save/load files.
-   *
-   * @param cb - The function called when a widget is created.
    */
-  constructor(manager: IContentsManager, cb: (widget: T) => void) {
+  constructor(manager: IContentsManager) {
     this._manager = manager;
-    this._cb = cb;
+  }
+
+  /**
+   * A signal emitted when a file opens.
+   */
+  get opened(): ISignal<AbstractFileHandler<T>, T> {
+    return Private.openedSignal.bind(this);
   }
 
   /**
@@ -74,7 +78,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   /**
    * Find a widget given a path.
    */
-  findByPath(path: string): T {
+  findWidget(path: string): T {
     for (let w of this._widgets) {
       let model = this._getModel(w);
       if (model.path === path) {
@@ -84,10 +88,18 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
+   * Find a model given a widget.  The model itself will have a
+   * null `content` field.
+   */
+  findModel(widget: T): IContentsModel {
+    return Private.modelProperty.get(widget);
+  }
+
+  /**
    * Open a contents model and return a widget.
    */
   open(model: IContentsModel): T {
-    let widget = this.findByPath(model.path);
+    let widget = this.findWidget(model.path);
     if (!widget) {
       widget = this.createWidget(model);
       widget.title.closable = true;
@@ -102,10 +114,9 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
       widget.title.text = this.getTitleText(model);
       return this.populateWidget(widget, contents);
     }).then(contents => {
-      this.clearDirty(widget);
+      this.clearDirty(model.path);
     });
-    let cb = this._cb;
-    if (cb) cb(widget);
+    this.opened.emit(widget);
     return widget;
   }
 
@@ -113,12 +124,12 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    * Rename a file.
    */
   rename(oldPath: string, newPath: string): boolean {
-    let widget = this.findByPath(oldPath);
+    let widget = this.findWidget(oldPath);
     if (widget === void 0) {
       return false;
     }
     if (newPath === void 0) {
-      this.clearDirty(widget);
+      this.clearDirty(oldPath);
       widget.close();
       return true;
     }
@@ -131,16 +142,17 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Save widget contents.
+   * Save contents.
    *
-   * @param widget - The widget to save (defaults to current active widget).
+   * @param path - The path of the file to save.
    *
-   * returns A promise that resolves to the contents of the widget.
+   * returns A promise that resolves to the contents of the path.
    *
    * #### Notes
-   * This clears the dirty state of the widget after a successful save.
+   * This clears the dirty state of the file after a successful save.
    */
-  save(widget: T): Promise<IContentsModel> {
+  save(path: string): Promise<IContentsModel> {
+    let widget = this.findWidget(path);
     if (!widget) {
       return Promise.resolve(void 0);
     }
@@ -148,22 +160,23 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     return this.getSaveOptions(widget, model).then(opts => {
       return this.manager.save(model.path, opts);
     }).then(contents => {
-      this.clearDirty(widget);
+      this.clearDirty(path);
       return contents;
     });
   }
 
   /**
-   * Revert widget contents.
+   * Revert contents.
    *
-   * @param widget - The widget to revert (defaults to current active widget).
+   * @param path - The path of the file to revert.
    *
-   * returns A promise that resolves to the new contents of the widget.
+   * returns A promise that resolves to the new contents of the path.
    *
    * #### Notes
-   * This clears the dirty state of the widget after a successful revert.
+   * This clears the dirty state of the file after a successful revert.
    */
-  revert(widget: T): Promise<IContentsModel> {
+  revert(path: string): Promise<IContentsModel> {
+    let widget = this.findWidget(path);
     if (!widget) {
       return Promise.resolve(void 0);
     }
@@ -172,23 +185,24 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     return this.manager.get(model.path, opts).then(contents => {
       return this.populateWidget(widget, contents);
     }).then(contents => {
-      this.clearDirty(widget);
+      this.clearDirty(path);
       return contents;
     });
   }
 
   /**
-   * Close a widget.
+   * Close a file.
    *
-   * @param widget - The widget to close (defaults to current active widget).
+   * @param path - The path of the file to close.
    *
-   * returns A boolean indicating whether the widget was closed.
+   * returns A boolean indicating whether the file was closed.
    */
-  close(widget: T): Promise<boolean> {
+  close(path: string): Promise<boolean> {
+    let widget = this.findWidget(path);
     if (!widget) {
       return Promise.resolve(false);
     }
-    if (this.isDirty(widget)) {
+    if (this.isDirty(path)) {
       return this._maybeClose(widget);
     }
     this._close(widget);
@@ -196,7 +210,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Close all widgets.
+   * Close all files.
    */
   closeAll(): void {
     for (let w of this._widgets) {
@@ -205,23 +219,26 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Get whether a widget is dirty (defaults to current active widget).
+   * Get whether a file is dirty.
    */
-  isDirty(widget: T): boolean {
+  isDirty(path: string): boolean {
+    let widget = this.findWidget(path);
     return Private.dirtyProperty.get(widget);
   }
 
   /**
-   * Set the dirty state of a widget (defaults to current active widget).
+   * Set the dirty state of a file.
    */
-  setDirty(widget: T): void {
+  setDirty(path: string): void {
+    let widget = this.findWidget(path);
     Private.dirtyProperty.set(widget, true);
   }
 
   /**
-   * Clear the dirty state of a widget (defaults to current active widget).
+   * Clear the dirty state of a file.
    */
-  clearDirty(widget: T): void {
+  clearDirty(path: string): void {
+    let widget = this.findWidget(path);
     Private.dirtyProperty.set(widget, false);
   }
 
@@ -231,7 +248,8 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
     let widget = handler as T;
     if (msg.type === 'close-request' && widget) {
-      this.close(widget);
+      let path = this.findModel(widget).path;
+      this.close(path);
       return true;
     }
     return false;
@@ -310,6 +328,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    * Actually close the file.
    */
   private _close(widget: T): void {
+    let model = Private.modelProperty.get(widget);
     widget.dispose();
     let index = this._widgets.indexOf(widget);
     this._widgets.splice(index, 1);
@@ -325,6 +344,12 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
  * A private namespace for AbstractFileHandler data.
  */
 namespace Private {
+  /**
+   * A signal emitted when a model is opened.
+   */
+  export
+  const openedSignal = new Signal<AbstractFileHandler<Widget>, Widget>();
+
   /**
    * An attached property with the widget model.
    */
