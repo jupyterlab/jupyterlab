@@ -3,5 +3,5 @@
 'use strict';
 
 export * from './console/index';
-export * from './kernelselector/index';
+export * from './kernel-selector/index';
 export * from './notebook/index';
