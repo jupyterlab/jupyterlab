@@ -51,7 +51,7 @@ import 'jupyter-js-ui/lib/dialog/theme.css';
 
 
 let SERVER_URL = getBaseUrl();
-let NOTEBOOK = 'Console';
+let NOTEBOOK = 'test.ipynb';
 
 
 function main(): void {
