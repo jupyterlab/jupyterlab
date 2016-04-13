@@ -7,12 +7,12 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  DocumentManager
-} from 'jupyter-js-ui/lib/docmanager';
-
-import {
   FileBrowserWidget, FileBrowserModel
 } from 'jupyter-js-ui/lib/filebrowser';
+
+import {
+  FileHandlerRegistry
+} from 'jupyter-js-ui/lib/filehandler';
 
 import {
   Application
@@ -31,6 +31,10 @@ import {
 } from 'phosphor-tabs';
 
 import {
+  Widget
+} from 'phosphor-widget';
+
+import {
   JupyterServices
 } from '../services/plugin';
 
@@ -41,7 +45,7 @@ import {
 export
 const fileBrowserExtension = {
   id: 'jupyter.extensions.fileBrowser',
-  requires: [DocumentManager, JupyterServices],
+  requires: [JupyterServices, FileHandlerRegistry],
   activate: activateFileBrowser
 };
 
@@ -49,11 +53,11 @@ const fileBrowserExtension = {
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: Application, manager: DocumentManager, provider: JupyterServices): Promise<void> {
+function activateFileBrowser(app: Application, provider: JupyterServices, registry: FileHandlerRegistry): Promise<void> {
   let contents = provider.contentsManager;
   let sessions = provider.notebookSessionManager;
   let model = new FileBrowserModel(contents, sessions);
-  let widget = new FileBrowserWidget(model);
+  let widget = new FileBrowserWidget(model, registry);
   let menu = createMenu(widget);
 
   // Add a context menu to the dir listing.
@@ -65,151 +69,9 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
     menu.popup(x, y);
   });
 
-  let id = 0;
-  let onOpenRequested = (model: IContentsModel) => {
-    let widget = manager.open(model);
-    if (!widget.id) widget.id = `document-manager-${++id}`;
-    if (!widget.isAttached) app.shell.addToMainArea(widget);
-    let stack = widget.parent;
-    if (!stack) {
-      return;
-    }
-    let tabs = stack.parent;
-    if (tabs instanceof TabPanel) {
-      tabs.currentWidget = widget;
-    }
-  };
-
-  let onFileChanged = (args: IChangedArgs<string>) => {
-    manager.rename(args.oldValue, args.newValue);
-  };
-
-  model.openRequested.connect((bModel, model) => onOpenRequested(model));
-  model.fileChanged.connect((mModel, args) => onFileChanged(args));
-
-  // Create a command to add a new empty text file.
-  // This requires an id and an instance of a command object.
-  let newTextFileId = 'file-operations:new-text-file';
-
-  // Add the command to the command registry and command palette plugins.
-  app.commands.add([
-    {
-      id: newTextFileId,
-      handler: () => {
-        widget.newUntitled('file', '.txt')
-          .then(contents => onOpenRequested(contents));
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: newTextFileId,
-      category: 'File Operations',
-      text: 'New Text File',
-      caption: 'Create a new text file'
-    }
-  ]);
-
-  // Add the command for a new notebook.
-  let newNotebookId = 'file-operations:new-notebook';
-
-  app.commands.add([
-    {
-      id: newNotebookId,
-      handler: () => {
-        widget.newUntitled('notebook')
-          .then(contents => onOpenRequested(contents));
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: newNotebookId,
-      category: 'File Operations',
-      text: 'New Notebook',
-      caption: 'Create a new Jupyter Notebook'
-    }
-  ]);
-
-  // Add the command for saving a document.
-  let saveDocumentId = 'file-operations:save';
-
-  app.commands.add([
-    {
-      id: saveDocumentId,
-      handler: () => {
-        manager.save();
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: saveDocumentId,
-      category: 'File Operations',
-      text: 'Save Document',
-      caption: 'Save the current document'
-    }
-  ]);
-
-  // Add the command for reverting a document.
-  let revertDocumentId = 'file-operations:revert';
-
-  app.commands.add([
-    {
-      id: revertDocumentId,
-      handler: () => {
-        manager.revert();
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: revertDocumentId,
-      category: 'File Operations',
-      text: 'Revert Document',
-      caption: 'Revert the current document'
-    }
-  ]);
-
-  // Add the command for closing a document.
-  let closeDocumentId = 'file-operations:close';
-
-  app.commands.add([
-    {
-      id: closeDocumentId,
-      handler: () => {
-        manager.close();
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: closeDocumentId,
-      category: 'File Operations',
-      text: 'Close Document',
-      caption: 'Close the current document'
-    }
-  ]);
-
-  // Add the command for closing all documents.
-  let closeAllId = 'file-operations:close-all';
-
-  app.commands.add([
-    {
-      id: closeAllId,
-      handler: () => {
-        manager.closeAll();
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: closeAllId,
-      category: 'File Operations',
-      text: 'Close All',
-      caption: 'Close all open documents'
-    }
-  ]);
+  model.fileChanged.connect((mModel, args) => (args: IChangedArgs<string>) => {
+    registry.rename(args.oldValue, args.newValue);
+  });
 
   app.commands.add([
     {
@@ -225,10 +87,6 @@ function activateFileBrowser(app: Application, manager: DocumentManager, provide
       handler: toggleBrowser
     }
   ]);
-
-  widget.widgetFactory = model => {
-    return manager.open(model);
-  };
 
   widget.title.text = 'Files';
   widget.id = 'file-browser';

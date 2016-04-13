@@ -120,6 +120,28 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
     services.notebookSessionManager
   );
   manager.register(handler);
+
+  // Add the command for a new notebook.
+  let newNotebookId = 'file-operations:new-notebook';
+
+  app.commands.add([
+    {
+      id: newNotebookId,
+      handler: () => {
+        widget.newUntitled('notebook')
+          .then(contents => onOpenRequested(contents));
+      }
+    }
+  ]);
+  app.palette.add([
+    {
+      command: newNotebookId,
+      category: 'File Operations',
+      text: 'New Notebook',
+      caption: 'Create a new Jupyter Notebook'
+    }
+  ]);
+
   app.commands.add([
   {
     id: cmdIds['runAndAdvance'],
