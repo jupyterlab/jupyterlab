@@ -2,7 +2,6 @@
   "private": true,
   "name": "jupyter-js-notebook-examples",
   "dependencies": {
-    "es6-promise": "^3.1.2",
     "jupyter-js-notebook": "file:..",
     "phosphor-commandpalette": "^0.2.0",
     "phosphor-keymap": "^0.8.0",
