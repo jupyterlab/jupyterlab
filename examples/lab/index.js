@@ -4,6 +4,8 @@
 
 var phosphide = require('phosphide/lib/core/application');
 
+require('es6-promise');  // Polyfill for IE11
+
 require('jupyter-js-plugins/lib/default-theme/index.css');
 
 
