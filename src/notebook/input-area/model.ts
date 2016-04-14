@@ -43,11 +43,6 @@ interface IInputAreaModel extends IDisposable {
    * The prompt text to display for the input area.
    */
   prompt: string;
-
-  /**
-   * Clear the input area.
-   */
-  clear(): void;
 }
 
 
@@ -133,13 +128,6 @@ class InputAreaModel implements IInputAreaModel {
     clearSignalData(this);
     this._editor.dispose();
     this._editor = null;
-  }
-
-  /**
-   * Clear the input area.
-   */
-  clear(): void {
-    this._prompt = 'In [ ]:';
   }
 
   private _editor: IEditorModel = null;
