@@ -51,7 +51,7 @@ import 'jupyter-js-ui/lib/dialog/theme.css';
 
 
 let SERVER_URL = getBaseUrl();
-let NOTEBOOK = 'test.ipynb';
+let TITLE = 'Console';
 
 
 function main(): void {
@@ -83,7 +83,7 @@ function main(): void {
   }
 
   let consoleWidget = new ConsolePanel();
-  consoleWidget.title.text = NOTEBOOK;
+  consoleWidget.title.text = TITLE;
 
   let pModel = new StandardPaletteModel();
   let palette = new CommandPalette();
@@ -108,19 +108,15 @@ function main(): void {
   let bindings: IKeyBinding[] = [];
   keymap.add(bindings);
 
-  contents.get(NOTEBOOK, {}).then(data => {
-    // deserialize(data.content, nbModel);
-    getKernelSpecs({}).then(specs => {
-      kernelspecs = specs;
-      // start session
-      // startNewSession({
-      //   notebookPath: NOTEBOOK,
-      //   kernelName: findKernel(nbModel, specs),
-      //   baseUrl: SERVER_URL
-      // }).then(session => {
-      //   nbModel.session = session;
-      // });
-    });
+  getKernelSpecs({}).then(specs => {
+    kernelspecs = specs;
+    // start session
+    // startNewSession({
+    //   kernelName: findKernel(nbModel, specs),
+    //   baseUrl: SERVER_URL
+    // }).then(session => {
+    //   nbModel.session = session;
+    // });
   });
 }
 
