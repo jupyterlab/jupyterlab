@@ -15,6 +15,7 @@
     "update": "rimraf node_modules/jupyter-js-notebook && npm install"
   },
   "devDependencies": {
+    "es6-promise": "^3.1.2",
     "rimraf": "^2.5.2"
   }
 }

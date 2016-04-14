@@ -44,6 +44,8 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import 'es6-promise';  // Polyfill for IE11
+
 import 'jupyter-js-notebook/lib/index.css';
 import 'jupyter-js-notebook/lib/theme.css';
 import 'jupyter-js-ui/lib/dialog/index.css';
