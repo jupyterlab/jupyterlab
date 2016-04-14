@@ -224,6 +224,10 @@ class TerminalWidget extends Widget {
    * Dispose of the resources held by the terminal widget.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._ws.close();
     this._term.destroy();
     this._sheet = null;
     this._ws = null;
@@ -265,6 +269,14 @@ class TerminalWidget extends Widget {
     if (this._dirty) {
       this._snapTermSizing();
     }
+  }
+
+  /**
+   * Dispose of the terminal when closing.
+   */
+  protected onCloseRequest(msg: Message): void {
+    super.onCloseRequest(msg);
+    this.dispose();
   }
 
   /**

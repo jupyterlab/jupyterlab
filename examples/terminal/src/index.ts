@@ -24,6 +24,8 @@ function main(): void {
   let term2 = new TerminalWidget({ background: 'white',
                                   color: 'black'});
 
+  term1.title.closable = true;
+  term2.title.closable = true;
   let dock = new DockPanel();
   dock.insertTabBefore(term1);
   dock.insertTabBefore(term2);
