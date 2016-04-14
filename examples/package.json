@@ -2,6 +2,7 @@
   "private": true,
   "name": "jupyter-js-ui-example",
   "dependencies": {
+    "es6-promise": "^3.1.2",
     "jupyter-js-ui": "file:..",
     "phosphor-dockpanel": "^0.9.6",
     "phosphor-keymap": "^0.7.1",
@@ -14,7 +15,6 @@
     "update": "rimraf node_modules/jupyter-js-ui && npm install"
   },
   "devDependencies": {
-    "es6-promise": "^3.1.2",
     "rimraf": "^2.5.2"
   }
 }
