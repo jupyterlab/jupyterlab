@@ -6,8 +6,7 @@
 'use strict';
 
 import {
-  deserialize, selectKernel, trustNotebook, findKernel,
-  ConsolePanel, ConsoleWidget
+  ConsolePanel, ConsoleWidget, ConsoleModel
 } from 'jupyter-js-notebook';
 
 import {
@@ -82,7 +81,8 @@ function main(): void {
     }
   }
 
-  let consoleWidget = new ConsolePanel();
+  let consoleModel = new ConsoleModel();
+  let consoleWidget = new ConsolePanel(consoleModel, rendermime);
   consoleWidget.title.text = TITLE;
 
   let pModel = new StandardPaletteModel();

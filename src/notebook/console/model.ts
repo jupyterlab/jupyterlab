@@ -2,19 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import * as CodeMirror
-  from 'codemirror';
-
-import 'codemirror/mode/meta';
-
-import {
-
-} from 'jupyter-js-services';
-
-import {
-  copy, shallowEquals
-} from 'jupyter-js-utils';
-
 import {
   IDisposable
 } from 'phosphor-disposable';

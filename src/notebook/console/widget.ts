@@ -33,6 +33,9 @@ import {
   RawCellModel, RawCellWidget
 } from '../cells';
 
+import {
+  IConsoleModel
+} from './model';
 
 /**
  * A panel which contains a toolbar and a console.
@@ -40,17 +43,17 @@ import {
 export
 class ConsolePanel extends Panel {
 
-  static createConsole(): ConsoleWidget {
-    return new ConsoleWidget();
+  static createConsole(model: IConsoleModel, rendermime: RenderMime<Widget>): ConsoleWidget {
+    return new ConsoleWidget(model, rendermime);
   }
 
   /**
-   * Construct a notebook panel.
+   * Construct a console panel.
    */
-  constructor() {
+  constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
     super();
     let constructor = this.constructor as typeof ConsolePanel;
-    this._console = constructor.createConsole();
+    this._console = constructor.createConsole(model, rendermime);
     this.addChild(this._console);
   }
 
@@ -95,10 +98,12 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Construct a notebook widget.
+   * Construct a console widget.
    */
-  constructor() {
+  constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
     super();
+    this._model = model;
+    this._rendermime = rendermime;
   }
 
   /**
@@ -142,6 +147,9 @@ class ConsoleWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
   }
+
+  private _model: IConsoleModel;
+  private _rendermime: RenderMime<Widget> = null;
 }
 
 
