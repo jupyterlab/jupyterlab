@@ -2,6 +2,7 @@
   "private": true,
   "name": "jupyter-js-notebook-examples",
   "dependencies": {
+    "es6-promise": "^3.1.2",
     "jupyter-js-notebook": "file:..",
     "phosphor-commandpalette": "^0.2.0",
     "phosphor-keymap": "^0.8.0",
@@ -15,7 +16,6 @@
     "update": "rimraf node_modules/jupyter-js-notebook && npm install"
   },
   "devDependencies": {
-    "es6-promise": "^3.1.2",
     "rimraf": "^2.5.2"
   }
 }
