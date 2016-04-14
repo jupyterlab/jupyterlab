@@ -298,17 +298,17 @@ function activateNotebookHandler(app: Application, manager: DocumentManager, ser
   {
     command: cmdIds['toCode'],
     category: 'Notebook Cell Operations',
-    text: 'Covert to Code'
+    text: 'Convert to Code'
   },
   {
     command: cmdIds['toMarkdown'],
     category: 'Notebook Cell Operations',
-    text: 'Covert to Markdown'
+    text: 'Convert to Markdown'
   },
   {
     command: cmdIds['toRaw'],
     category: 'Notebook Cell Operations',
-    text: 'Covert to Raw'
+    text: 'Convert to Raw'
   },
   {
     command: cmdIds['cut'],
