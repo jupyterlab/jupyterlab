@@ -224,6 +224,10 @@ class TerminalWidget extends Widget {
    * Dispose of the resources held by the terminal widget.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._ws.close();
     this._term.destroy();
     this._sheet = null;
     this._ws = null;
@@ -268,6 +272,14 @@ class TerminalWidget extends Widget {
   }
 
   /**
+   * Dispose of the terminal when closing.
+   */
+  protected onCloseRequest(msg: Message): void {
+    super.onCloseRequest(msg);
+    this.dispose();
+  }
+
+  /**
    * On resize, use the computed row and column sizes to resize the terminal.
    */
   protected onResize(msg: ResizeMessage): void {
@@ -291,6 +303,8 @@ class TerminalWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Set the fg and bg colors of the terminal and cursor.
+    this.node.style.backgroundColor = this.background;
+    this.node.style.color = this.color;
     this._term.element.style.backgroundColor = this.background;
     this._term.element.style.color = this.color;
     this._sheet.innerHTML = ('.terminal-cursor {background:' + this.color +
@@ -324,7 +338,6 @@ class TerminalWidget extends Widget {
     this._term.on('title', (title: string) => {
         this.title.text = title;
     });
-
     this._resizeTerminal();
   }
 
@@ -351,10 +364,13 @@ class TerminalWidget extends Widget {
       this._dirty = true;
       return;
     }
+    let style = window.getComputedStyle(this.node);
+    this._widthOffset = parseInt(style.paddingLeft) + parseInt(style.paddingRight);
+    this._heightOffset = parseInt(style.paddingTop) + parseInt(style.paddingBottom);
     let node = this._dummyTerm;
     this._term.element.appendChild(node);
-    this._row_height = node.offsetHeight / DUMMY_ROWS;
-    this._col_width = node.offsetWidth / DUMMY_COLS;
+    this._rowHeight = node.offsetHeight / DUMMY_ROWS;
+    this._colWidth = node.offsetWidth / DUMMY_COLS;
     this._term.element.removeChild(node);
     this._dirty = false;
     if (this._width !== -1) {
@@ -369,23 +385,27 @@ class TerminalWidget extends Widget {
     if (this._term === null) {
       return;
     }
-    let rows = Math.max(2, Math.round(this._height / this._row_height) - 2);
-    let cols = Math.max(3, Math.round(this._width / this._col_width) - 1);
+    let height = this._height - this._heightOffset;
+    let width = this._width - this._widthOffset;
+    let rows = Math.floor(height / this._rowHeight) - 1;
+    let cols = Math.floor(width / this._colWidth) - 1;
     this._term.resize(cols, rows);
     this._ws.send(JSON.stringify(['set_size', rows, cols,
-                                  this._height, this._width]));
+                                this._height, this._width]));
   }
 
   private _term: Terminal = null;
   private _ws: WebSocket = null;
-  private _row_height = -1;
-  private _col_width = -1;
+  private _rowHeight = -1;
+  private _colWidth = -1;
   private _sheet: HTMLElement = null;
   private _dummyTerm: HTMLElement = null;
   private _fontSize = -1;
   private _dirty = false;
   private _width = -1;
   private _height = -1;
+  private _heightOffset = 0;
+  private _widthOffset = 0;
   private _background = '';
   private _color = '';
 }
@@ -419,7 +439,7 @@ function getConfig(options: ITerminalOptions): ITerminalConfig {
 function createDummyTerm(): HTMLElement {
   let node = document.createElement('div');
   let rowspan = document.createElement('span');
-  rowspan.innerHTML = Array(DUMMY_ROWS + 1).join('a<br>');
+  rowspan.innerHTML = Array(DUMMY_ROWS).join('a<br>');
   let colspan = document.createElement('span');
   colspan.textContent = Array(DUMMY_COLS + 1).join('a');
   node.appendChild(rowspan);
