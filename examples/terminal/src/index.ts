@@ -9,10 +9,11 @@ import {
   DockPanel
 } from 'phosphor-dockpanel';
 
-
 import {
   TerminalWidget
 } from 'jupyter-js-ui/lib/terminal';
+
+import 'es6-promise';  // Polyfill for IE11
 
 import 'jupyter-js-ui/lib/index.css';
 import 'jupyter-js-ui/lib/theme.css';
