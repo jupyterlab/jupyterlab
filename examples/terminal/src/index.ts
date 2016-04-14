@@ -9,7 +9,6 @@ import {
   DockPanel
 } from 'phosphor-dockpanel';
 
-
 import {
   TerminalWidget
 } from 'jupyter-js-ui/lib/terminal';

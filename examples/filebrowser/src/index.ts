@@ -52,7 +52,6 @@ import {
   Widget
 } from 'phosphor-widget';
 
-
 import 'jupyter-js-ui/lib/index.css';
 import 'jupyter-js-ui/lib/theme.css';
 
