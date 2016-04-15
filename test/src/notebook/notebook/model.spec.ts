@@ -614,7 +614,7 @@ describe('jupyter-js-notebook', () => {
         cell.input.prompt = '';
         model.cells.add(cell);
         model.runActiveCell();
-        expect(cell.input.prompt).to.be('In [ ]:');
+        expect(cell.input.prompt).to.be(' ');
       });
 
     });

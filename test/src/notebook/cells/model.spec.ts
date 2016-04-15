@@ -522,7 +522,7 @@ describe('jupyter-js-notebook', () => {
       let kernel = new MockKernel();
       model.input.prompt = '';
       executeCodeCell(model, kernel);
-      expect(model.input.prompt).to.be('In [ ]:');
+      expect(model.input.prompt).to.be(' ');
     });
 
     it('should set the prompt to busy when executing', () => {
@@ -533,7 +533,7 @@ describe('jupyter-js-notebook', () => {
       model.input.textEditor.text = 'a = 1';
       let kernel = new MockKernel();
       executeCodeCell(model, kernel);
-      expect(model.input.prompt).to.be('In [*]:');
+      expect(model.input.prompt).to.be('*');
     });
 
   });
