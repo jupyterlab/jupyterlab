@@ -141,6 +141,18 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit the signal when there is no change', () => {
+        let editor = new EditorModel();
+        let input = new InputAreaModel(editor);
+        let model = new BaseCellModel(input);
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.trusted = false;
+        expect(called).to.be(false);
+      });
+
     });
 
     describe('#name', () => {
@@ -167,6 +179,18 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit the signal when there is no change', () => {
+        let editor = new EditorModel();
+        let input = new InputAreaModel(editor);
+        let model = new BaseCellModel(input);
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.name = null;
+        expect(called).to.be(false);
+      });
+
     });
 
     describe('#tags', () => {
@@ -191,6 +215,18 @@ describe('jupyter-js-notebook', () => {
         });
         model.tags = ['foo'];
         expect(called).to.be(true);
+      });
+
+      it('should not emit the signal when there is no change', () => {
+        let editor = new EditorModel();
+        let input = new InputAreaModel(editor);
+        let model = new BaseCellModel(input);
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.tags = [];
+        expect(called).to.be(false);
       });
 
       it('should return a read-only copy', () => {
@@ -349,6 +385,19 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit the signal when there is no change', () => {
+        let editor = new EditorModel();
+        let input = new InputAreaModel(editor);
+        let output = new OutputAreaModel();
+        let model = new CodeCellModel(input, output);
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.executionCount = null;
+        expect(called).to.be(false);
+      });
+
     });
 
     describe('#collapsed', () => {
@@ -375,6 +424,19 @@ describe('jupyter-js-notebook', () => {
         });
         model.collapsed = true;
         expect(called).to.be(true);
+      });
+
+      it('should not emit the signal when there is no change', () => {
+        let editor = new EditorModel();
+        let input = new InputAreaModel(editor);
+        let output = new OutputAreaModel();
+        let model = new CodeCellModel(input, output);
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.collapsed = false;
+        expect(called).to.be(false);
       });
 
     });
@@ -413,6 +475,19 @@ describe('jupyter-js-notebook', () => {
         });
         model.scrolled = true;
         expect(called).to.be(true);
+      });
+
+      it('should not emit the signal when there is no change', () => {
+        let editor = new EditorModel();
+        let input = new InputAreaModel(editor);
+        let output = new OutputAreaModel();
+        let model = new CodeCellModel(input, output);
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.scrolled = false;
+        expect(called).to.be(false);
       });
 
     });
@@ -473,6 +548,18 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit the signal when there is no change', () => {
+        let editor = new EditorModel();
+        let input = new InputAreaModel(editor);
+        let model = new MarkdownCellModel(input);
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.rendered = true;
+        expect(called).to.be(false);
+      });
+
     });
 
   });
@@ -502,6 +589,18 @@ describe('jupyter-js-notebook', () => {
         });
         model.format = 'foo';
         expect(called).to.be(true);
+      });
+
+      it('should not emit the signal when there is no change', () => {
+        let editor = new EditorModel();
+        let input = new InputAreaModel(editor);
+        let model = new RawCellModel(input);
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.format = null;
+        expect(called).to.be(false);
       });
 
     });
@@ -599,6 +698,18 @@ describe('jupyter-js-notebook', () => {
           called = true;
         });
         cursor.setValue('bar');
+        expect(called).to.be(true);
+      });
+
+
+      it('should not trigger if the value does not change', () => {
+        let called = false;
+        let cursor = new MetadataCursor('foo', { foo: 'bar'}, name => {
+          expect(name).to.be('foo');
+          called = true;
+        });
+        cursor.setValue('bar');
+        expect(called).to.be(false);
       });
 
     });

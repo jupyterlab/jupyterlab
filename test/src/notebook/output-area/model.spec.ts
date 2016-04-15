@@ -81,13 +81,23 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit the signal when there is no change', () => {
+        let model = new OutputAreaModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.trusted = false;
+        expect(called).to.be(false);
+      });
+
     });
 
     describe('#fixedHeight', () => {
 
       it('should default to false', () => {
         let model = new OutputAreaModel();
-        expect(model.trusted).to.be(false);
+        expect(model.fixedHeight).to.be(false);
       });
 
       it('should emit a stateChanged signal when changed', () => {
@@ -103,13 +113,23 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit the signal when there is no change', () => {
+        let model = new OutputAreaModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.fixedHeight = false;
+        expect(called).to.be(false);
+      });
+
     });
 
     describe('#collapsed', () => {
 
       it('should default to false', () => {
         let model = new OutputAreaModel();
-        expect(model.trusted).to.be(false);
+        expect(model.collapsed).to.be(false);
       });
 
       it('should emit a stateChanged signal when changed', () => {
@@ -123,6 +143,16 @@ describe('jupyter-js-notebook', () => {
         });
         model.collapsed = true;
         expect(called).to.be(true);
+      });
+
+      it('should not emit the signal when there is no change', () => {
+        let model = new OutputAreaModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.collapsed = false;
+        expect(called).to.be(false);
       });
 
     });
@@ -168,6 +198,30 @@ describe('jupyter-js-notebook', () => {
         let model = new OutputAreaModel();
         model.add(output);
         expect(model.outputs.length).to.be(1);
+      });
+
+      it('should consolidate consecutive stream outputs of the same kind', () => {
+        let output: IStream = {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'foo\nbar'
+        }
+        let model = new OutputAreaModel();
+        model.add(output);
+        output = {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'fizz\buzz'
+        }
+        model.add(output);
+        expect(model.outputs.length).to.be(1);
+        output  = {
+          output_type: 'stream',
+          name: 'stderr',
+          text: 'oh no!'
+        }
+        model.add(output);
+        expect(model.outputs.length).to.be(2);
       });
 
     });
