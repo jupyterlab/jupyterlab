@@ -357,7 +357,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   constructor(input: IInputAreaModel, output: IOutputAreaModel) {
     super(input);
     this._output = output;
-    this.input.prompt = 'In [ ]:';
+    this.input.prompt = ' ';
   }
 
   /**
@@ -379,7 +379,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     }
     let prev = this._executionCount;
     this._executionCount = value;
-    this.input.prompt = `In [${value === null ? ' ' : value}]:`;
+    this.input.prompt = `${value === null ? ' ' : value}`;
     this.stateChanged.emit({
       name: 'executionCount',
       oldValue: prev,
@@ -443,7 +443,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   clear(): void {
     this.output.clear(false);
     this.executionCount = null;
-    this.input.prompt = 'In [ ]:';
+    this.input.prompt = ' ';
   }
 
   /**
@@ -534,26 +534,39 @@ function executeCodeCell(cell: ICodeCellModel, kernel: IKernel): IKernelFuture {
   if (text.length === 0) {
     return;
   }
-  input.prompt = 'In [*]:';
+  input.prompt = '*';
+  executeCode(text, kernel, output).then(reply => {
+    cell.executionCount = reply.execution_count;
+  });
+}
+
+
+/**
+ * Execute code and send outputs to an output area.
+ */
+export
+function executeCode(code: string, kernel: IKernel, outputArea: IOutputAreaModel): Promise<IExecuteReply> {
   let exRequest = {
-    code: text,
+    code,
     silent: false,
     store_history: true,
     stop_on_error: true,
     allow_stdin: true
   };
-  let future = kernel.execute(exRequest);
-  future.onIOPub = (msg => {
-    let model = msg.content;
-    if (model !== void 0) {
-      model.output_type = msg.header.msg_type as OutputType;
-      output.add(model);
-    }
+  outputArea.clear(false);
+  return new Promise<IExecuteReply>((resolve, reject) => {
+    let future = kernel.execute(exRequest);
+    future.onIOPub = (msg => {
+      let model = msg.content;
+      if (model !== void 0) {
+        model.output_type = msg.header.msg_type as OutputType;
+        outputArea.add(model);
+      }
+    });
+    future.onReply = (msg => {
+      resolve(msg.content as IExecuteReply);
+    });
   });
-  future.onReply = (msg => {
-    cell.executionCount = (msg.content as IExecuteReply).execution_count;
-  });
-  return future;
 }
 
 
