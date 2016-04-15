@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  IKernel, IKernelFuture, IExecuteReply
+} from 'jupyter-js-services';
+
+import {
   shallowEquals
 } from 'jupyter-js-utils';
 
@@ -23,7 +27,7 @@ import {
 } from '../input-area';
 
 import {
-  CellType
+  CellType, OutputType
 } from '../notebook/nbformat';
 
 import {
@@ -127,6 +131,11 @@ interface ICodeCellModel extends IBaseCellModel {
    * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
    */
   scrolled?: ScrollSetting;
+
+  /**
+   * Clear the cell state.
+   */
+  clear(): void;
 }
 
 
@@ -348,7 +357,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   constructor(input: IInputAreaModel, output: IOutputAreaModel) {
     super(input);
     this._output = output;
-    this.input.prompt = 'In [ ]:';
+    this.input.prompt = '';
   }
 
   /**
@@ -370,7 +379,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     }
     let prev = this._executionCount;
     this._executionCount = value;
-    this.input.prompt = `In [${value === null ? ' ' : value}]:`;
+    this.input.prompt = `${value === null ? '' : value}`;
     this.stateChanged.emit({
       name: 'executionCount',
       oldValue: prev,
@@ -426,6 +435,15 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     this._output.dispose();
     this._output = null;
     super.dispose();
+  }
+
+  /**
+   * Clear the cell state.
+   */
+  clear(): void {
+    this.output.clear(false);
+    this.executionCount = null;
+    this.input.prompt = '';
   }
 
   /**
@@ -501,6 +519,54 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
 
   type: CellType = 'raw';
   private _format: string = null;
+}
+
+
+/**
+ * Execute the code cell using the given kernel.
+ */
+export
+function executeCodeCell(cell: ICodeCellModel, kernel: IKernel): IKernelFuture {
+  let input = cell.input;
+  let output = cell.output;
+  let text = input.textEditor.text.trim();
+  cell.clear();
+  if (text.length === 0) {
+    return;
+  }
+  input.prompt = '*';
+  executeCode(text, kernel, output).then(reply => {
+    cell.executionCount = reply.execution_count;
+  });
+}
+
+
+/**
+ * Execute code and send outputs to an output area.
+ */
+export
+function executeCode(code: string, kernel: IKernel, outputArea: IOutputAreaModel): Promise<IExecuteReply> {
+  let exRequest = {
+    code,
+    silent: false,
+    store_history: true,
+    stop_on_error: true,
+    allow_stdin: true
+  };
+  outputArea.clear(false);
+  return new Promise<IExecuteReply>((resolve, reject) => {
+    let future = kernel.execute(exRequest);
+    future.onIOPub = (msg => {
+      let model = msg.content;
+      if (model !== void 0) {
+        model.output_type = msg.header.msg_type as OutputType;
+        outputArea.add(model);
+      }
+    });
+    future.onReply = (msg => {
+      resolve(msg.content as IExecuteReply);
+    });
+  });
 }
 
 

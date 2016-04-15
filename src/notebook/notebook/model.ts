@@ -48,7 +48,8 @@ import {
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
   IRawCellModel, isCodeCellModel, isMarkdownCellModel,
-  RawCellModel, isRawCellModel, MetadataCursor, IMetadataCursor
+  RawCellModel, isRawCellModel, MetadataCursor, IMetadataCursor,
+  executeCodeCell
 } from '../cells/model';
 
 import {
@@ -615,14 +616,16 @@ class NotebookModel implements INotebookModel {
     if (!cell) {
       return;
     }
-    if (isMarkdownCellModel(cell)) {
-      cell.rendered = false;
-      cell.trusted = true;
+    cell.trusted = true;
+    if (isCodeCellModel(cell)) {
+      let session = this.session;
+      if (!session || !session.kernel) {
+        cell.clear();
+        return;
+      }
+      executeCodeCell(cell, session.kernel);
+    } else if (isMarkdownCellModel(cell) && cell.rendered === false) {
       cell.rendered = true;
-    } else if (isCodeCellModel(cell)) {
-      this.executeCell(cell as CodeCellModel);
-    } else {
-      cell.trusted = true;
     }
   }
 
@@ -655,48 +658,6 @@ class NotebookModel implements INotebookModel {
    */
   listMetadata(): string[] {
     return Object.keys(this._metadata);
-  }
-
-  /**
-   * Execute the given cell.
-   */
-  protected executeCell(cell: CodeCellModel): void {
-    if (this.readOnly) {
-      return;
-    }
-    this.dirty = true;
-    let text = cell.input.textEditor.text.trim();
-    cell.executionCount = null;
-    cell.input.prompt = 'In [ ]:';
-    if (!text) {
-      return;
-    }
-    let session = this.session;
-    if (!session || !session.kernel) {
-      return;
-    }
-    cell.input.prompt = 'In [*]:';
-    let exRequest = {
-      code: cell.input.textEditor.text,
-      silent: false,
-      store_history: true,
-      stop_on_error: true,
-      allow_stdin: true
-    };
-    let output = cell.output;
-    let ex = this.session.kernel.execute(exRequest);
-    output.clear(false);
-    cell.trusted = true;
-    ex.onIOPub = (msg => {
-      let model = msg.content;
-      if (model !== void 0) {
-        model.output_type = msg.header.msg_type as OutputType;
-        output.add(model);
-      }
-    });
-    ex.onReply = (msg => {
-      cell.executionCount = (msg.content as IExecuteReply).execution_count;
-    });
   }
 
   /**

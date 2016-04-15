@@ -58,11 +58,6 @@ class MyNotebookModel extends NotebookModel {
     super.onCellsChanged(list, change);
     this.methods.push('onCellsChanged');
   }
-
-  protected executeCell(cell: CodeCellModel): void {
-    super.executeCell(cell);
-    this.methods.push('executeCell');
-  }
 }
 
 
@@ -599,7 +594,6 @@ describe('jupyter-js-notebook', () => {
         let model = new NotebookModel();
         let cell = model.createCodeCell();
         cell.trusted = false;
-        model.cells.add(cell);
         model.runActiveCell();
         expect(cell.trusted).to.be(false);
       });
@@ -613,27 +607,6 @@ describe('jupyter-js-notebook', () => {
         expect(cell.rendered).to.be(true);
       });
 
-      it('should call executeCell on a code cell', () => {
-        let model = new MyNotebookModel();
-        model.cells.add(model.createCodeCell());
-        model.runActiveCell();
-        expect(model.methods.indexOf('executeCell')).to.not.be(-1);
-      });
-
-    });
-
-    describe('#executeCell()', () => {
-
-      it('should clear the prompt on a code cell if there is no text', () => {
-        let model = new MyNotebookModel();
-        let cell = model.createCodeCell();
-        cell.input.prompt = '';
-        model.cells.add(cell);
-        model.runActiveCell();
-        expect(cell.input.prompt).to.be('In [ ]:');
-        expect(model.methods.indexOf('executeCell')).to.not.be(-1);
-      });
-
       it('should clear the prompt on a code cell if there is no session', () => {
         let model = new MyNotebookModel();
         let cell = model.createCodeCell();
@@ -641,18 +614,7 @@ describe('jupyter-js-notebook', () => {
         cell.input.prompt = '';
         model.cells.add(cell);
         model.runActiveCell();
-        expect(cell.input.prompt).to.be('In [ ]:');
-        expect(model.methods.indexOf('executeCell')).to.not.be(-1);
-      });
-
-      it('should set the prompt to busy when executing', () => {
-        let model = new MyNotebookModel();
-        let cell = model.createCodeCell();
-        model.cells.add(cell);
-        model.session = new MockSession('test.ipynb');
-        cell.input.textEditor.text = 'a = 1';
-        model.runActiveCell();
-        expect(cell.input.prompt).to.be('In [*]:');
+        expect(cell.input.prompt).to.be('');
       });
 
     });

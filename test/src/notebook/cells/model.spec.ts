@@ -18,9 +18,13 @@ import {
 
 import {
   BaseCellModel, CodeCellModel, MarkdownCellModel, MetadataCursor,
-  RawCellModel, isMarkdownCellModel, isRawCellModel, isCodeCellModel
+  RawCellModel, isMarkdownCellModel, isRawCellModel, isCodeCellModel,
+  executeCodeCell
 } from '../../../lib/cells/model';
 
+import {
+  MockKernel
+} from '../notebook/mock';
 
 
 /**
@@ -603,6 +607,32 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(false);
       });
 
+    });
+
+  });
+
+  describe('executeCodeCell()', () => {
+
+    it('should clear the prompt on a code cell if there is no text', () => {
+      let editor = new EditorModel();
+      let input = new InputAreaModel(editor);
+      let output = new OutputAreaModel();
+      let model = new CodeCellModel(input, output);
+      let kernel = new MockKernel();
+      model.input.prompt = '';
+      executeCodeCell(model, kernel);
+      expect(model.input.prompt).to.be('');
+    });
+
+    it('should set the prompt to busy when executing', () => {
+      let editor = new EditorModel();
+      let input = new InputAreaModel(editor);
+      let output = new OutputAreaModel();
+      let model = new CodeCellModel(input, output);
+      model.input.textEditor.text = 'a = 1';
+      let kernel = new MockKernel();
+      executeCodeCell(model, kernel);
+      expect(model.input.prompt).to.be('*');
     });
 
   });
