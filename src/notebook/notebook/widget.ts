@@ -250,6 +250,16 @@ class NotebookPanel extends Panel {
   }
 
   /**
+   * Get the model used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get model(): INotebookModel {
+    return this._manager.model;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {

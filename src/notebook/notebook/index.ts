@@ -6,5 +6,6 @@ export * from './model';
 export * from './nbformat';
 export * from './manager';
 export * from './serialize';
+export * from './handler';
 export * from './trust';
 export * from './widget';
