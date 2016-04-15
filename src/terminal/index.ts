@@ -20,7 +20,7 @@ import {
 
 import {
   Terminal, ITerminalConfig
-} from 'term.js';
+} from 'xterm';
 
 
 /**

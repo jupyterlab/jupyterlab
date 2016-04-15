@@ -2,7 +2,7 @@
 // Project: https://github.com/chjj/term.js
 // Definitions by: Steven Silvester <https://github.com/blink1073>
 
-declare module 'term.js' {
+declare module 'xterm' {
 
   /**
    * A terminal configuration.
