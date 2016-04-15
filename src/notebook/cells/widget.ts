@@ -2,9 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import * as marked
-  from 'marked';
-
 import {
   RenderMime
 } from 'jupyter-js-ui/lib/rendermime';
@@ -30,12 +27,12 @@ import {
 } from '../input-area';
 
 import {
-  OutputAreaWidget, IOutputAreaModel
-} from '../output-area';
+  MimeBundle
+} from '../notebook/nbformat';
 
 import {
-  removeMath, replaceMath, typeset
-} from '../utils/latex';
+  OutputAreaWidget, IOutputAreaModel
+} from '../output-area';
 
 import {
   sanitize
@@ -229,12 +226,12 @@ class MarkdownCellWidget extends BaseCellWidget {
     if (model.rendered) {
       if (this._dirty) {
         let text = model.input.textEditor.text || DEFAULT_MARKDOWN_TEXT;
-        let data = removeMath(text);
-        let html = marked(data['text']);
-        // Always sanitize markdown output.
-        html = sanitize(html);
-        this.rendered.node.innerHTML = replaceMath(html, data['math']);
-        typeset(this.rendered.node);
+        text = sanitize(text);
+        let bundle: MimeBundle = { 'application/vnd.jupyter.markdown': text };
+        this._rendered.dispose();
+        this._rendered = this._rendermime.render(bundle);
+        this._rendered.addClass(RENDERER_CLASS);
+        (this.layout as PanelLayout).addChild(this._rendered);
       }
       this._rendered.show();
       this.input.hide();
