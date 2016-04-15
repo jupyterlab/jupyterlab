@@ -357,7 +357,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   constructor(input: IInputAreaModel, output: IOutputAreaModel) {
     super(input);
     this._output = output;
-    this.input.prompt = ' ';
+    this.input.prompt = '';
   }
 
   /**
@@ -379,7 +379,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     }
     let prev = this._executionCount;
     this._executionCount = value;
-    this.input.prompt = `${value === null ? ' ' : value}`;
+    this.input.prompt = `${value === null ? '' : value}`;
     this.stateChanged.emit({
       name: 'executionCount',
       oldValue: prev,
@@ -443,7 +443,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   clear(): void {
     this.output.clear(false);
     this.executionCount = null;
-    this.input.prompt = ' ';
+    this.input.prompt = '';
   }
 
   /**
