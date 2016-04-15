@@ -161,6 +161,7 @@ class ConsoleModel implements IConsoleModel {
    */
   constructor() {
     this._cells = new ObservableList<ICellModel>();
+    this._cells.add(this.createCodeCell());
     this._cells.changed.connect(this.onCellsChanged, this);
   }
 

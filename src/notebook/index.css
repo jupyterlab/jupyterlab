@@ -3,18 +3,18 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-.jp-Notebook-panel {  
+.jp-Notebook-panel {
   display: flex;
   flex-direction: column;
 }
 
 
-.p-Widget.jp-NBToolbar {  
+.p-Widget.jp-NBToolbar {
   flex: 0 0 auto;
 }
 
 
-.p-Widget.jp-Notebook-container {  
+.p-Widget.jp-Notebook-container {
   flex: 1 1 auto;
 }
 
@@ -34,4 +34,14 @@
 .jp-InputArea-editor {
   flex-grow: 1;
   flex-shrink: 1;
+}
+
+.jp-Console-panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.p-Widget.jp-Console {
+  overflow: auto;
 }

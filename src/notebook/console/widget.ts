@@ -37,6 +37,17 @@ import {
   IConsoleModel
 } from './model';
 
+
+/**
+ * The class name added to console widgets.
+ */
+const CONSOLE_CLASS = 'jp-Console';
+
+/**
+ * The class name added to console panels.
+ */
+const CONSOLE_PANEL = 'jp-Console-panel';
+
 /**
  * A panel which contains a toolbar and a console.
  */
@@ -52,6 +63,7 @@ class ConsolePanel extends Panel {
    */
   constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
     super();
+    this.addClass(CONSOLE_PANEL);
     let constructor = this.constructor as typeof ConsolePanel;
     this._console = constructor.createConsole(model, rendermime);
     this.addChild(this._console);
@@ -102,8 +114,17 @@ class ConsoleWidget extends Widget {
    */
   constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
     super();
+    this.addClass(CONSOLE_CLASS);
     this._model = model;
     this._rendermime = rendermime;
+    this.layout = new PanelLayout();
+    let constructor = this.constructor as typeof ConsoleWidget;
+    let cellsLayout = this.layout as PanelLayout;
+    let factory = constructor.createCell;
+    for (let i = 0; i < model.cells.length; i++) {
+      cellsLayout.addChild(factory(model.cells.get(i), rendermime));
+    }
+    model.cells.changed.connect(this.onCellsChanged, this);
   }
 
   /**
@@ -146,6 +167,24 @@ class ConsoleWidget extends Widget {
    * Handle `update-request` messages sent to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
+  }
+
+  /**
+   * Handle a change cells event.
+   */
+  protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
+    let layout = this.layout as PanelLayout;
+    let constructor = this.constructor as typeof ConsoleWidget;
+    let factory = constructor.createCell;
+    let widget: BaseCellWidget;
+    switch (args.type) {
+    case ListChangeType.Add:
+      widget = factory(args.newValue as ICellModel, this._rendermime);
+      // widget.addClass(NB_CELL_CLASS);
+      // widget.input.editor.addClass(NB_EDITOR_CLASS);
+      layout.insertChild(args.newIndex, widget);
+      break;    }
+    this.update();
   }
 
   private _model: IConsoleModel;
