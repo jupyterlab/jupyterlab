@@ -1,6 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as marked
+  from 'marked';
+
 import {
   IRenderer
 } from '../rendermime';
@@ -17,7 +20,7 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  typeset
+  typeset, removeMath, replaceMath
 } from './latex';
 
 
@@ -69,6 +72,7 @@ class LatexWidget extends Widget {
 export
 class HTMLRenderer implements IRenderer<Widget> {
   mimetypes = ['text/html'];
+
   render(mimetype: string, data: string): Widget {
     return new HTMLWidget(data);
   }
@@ -81,6 +85,7 @@ class HTMLRenderer implements IRenderer<Widget> {
 export
 class ImageRenderer implements IRenderer<Widget> {
   mimetypes = ['image/png', 'image/jpeg', 'image/gif'];
+
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
     let img = document.createElement('img');
@@ -97,6 +102,7 @@ class ImageRenderer implements IRenderer<Widget> {
 export
 class TextRenderer implements IRenderer<Widget> {
   mimetypes = ['text/plain'];
+
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
     w.node.textContent = data;
@@ -135,6 +141,7 @@ class ConsoleTextRenderer implements IRenderer<Widget> {
 export
 class JavascriptRenderer implements IRenderer<Widget> {
   mimetypes = ['text/javascript', 'application/javascript'];
+
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
     let s = document.createElement('script');
@@ -152,6 +159,7 @@ class JavascriptRenderer implements IRenderer<Widget> {
 export
 class SVGRenderer implements IRenderer<Widget> {
   mimetypes = ['image/svg+xml'];
+
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
     w.node.innerHTML = data;
@@ -170,7 +178,23 @@ class SVGRenderer implements IRenderer<Widget> {
 export
 class LatexRenderer implements IRenderer<Widget> {
   mimetypes = ['text/latex'];
+
   render(mimetype: string, data: string): Widget {
     return new LatexWidget(data);
+  }
+}
+
+
+/**
+ * A renderer for Jupyter Markdown data.
+ */
+export
+class MarkdownRenderer implements IRenderer<Widget> {
+  mimetypes = ['application/vnd.jupyter.markdown'];
+
+  render(mimetype: string, text: string): Widget {
+    let data = removeMath(text);
+    let html = marked(data['text']);
+    return new HTMLWidget(replaceMath(html, data['math']));
   }
 }
