@@ -151,7 +151,7 @@ describe('jupyter-js-notebook', () => {
 
     });
 
-    describe('#mimetype', () => {
+    describe('#lineNumbers', () => {
 
       it('should default to false', () => {
         let model = new EditorModel();
@@ -278,7 +278,5 @@ describe('jupyter-js-notebook', () => {
     });
 
   });
-
-
 
 });
