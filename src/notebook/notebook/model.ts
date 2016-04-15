@@ -624,8 +624,7 @@ class NotebookModel implements INotebookModel {
         return;
       }
       executeCodeCell(cell, session.kernel);
-    } else if (isMarkdownCellModel(cell)) {
-      cell.rendered = false;
+    } else if (isMarkdownCellModel(cell) && cell.rendered === false) {
       cell.rendered = true;
     }
   }
