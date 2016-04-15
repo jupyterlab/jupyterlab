@@ -75,6 +75,16 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit the signal when there is no change', () => {
+        let model = new EditorModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.filename = '';
+        expect(called).to.be(false);
+      });
+
     });
 
     describe('#fixedHeight', () => {
@@ -95,6 +105,16 @@ describe('jupyter-js-notebook', () => {
         });
         model.fixedHeight = true;
         expect(called).to.be(true);
+      });
+
+      it('should not emit the signal when there is no change', () => {
+        let model = new EditorModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.fixedHeight = false;
+        expect(called).to.be(false);
       });
 
     });
@@ -119,9 +139,19 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit the signal when there is no change', () => {
+        let model = new EditorModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.mimetype = '';
+        expect(called).to.be(false);
+      });
+
     });
 
-    describe('#mimetype', () => {
+    describe('#lineNumbers', () => {
 
       it('should default to false', () => {
         let model = new EditorModel();
@@ -139,6 +169,16 @@ describe('jupyter-js-notebook', () => {
         });
         model.lineNumbers = true;
         expect(called).to.be(true);
+      });
+
+      it('should not emit the signal when there is no change', () => {
+        let model = new EditorModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.lineNumbers = false;
+        expect(called).to.be(false);
       });
 
     });
@@ -163,6 +203,16 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit the signal when there is no change', () => {
+        let model = new EditorModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.tabSize = 4;
+        expect(called).to.be(false);
+      });
+
     });
 
     describe('#text', () => {
@@ -183,6 +233,16 @@ describe('jupyter-js-notebook', () => {
         });
         model.text = 'foo';
         expect(called).to.be(true);
+      });
+
+      it('should not emit the signal when there is no change', () => {
+        let model = new EditorModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.text = '';
+        expect(called).to.be(false);
       });
 
     });
@@ -218,7 +278,5 @@ describe('jupyter-js-notebook', () => {
     });
 
   });
-
-
 
 });

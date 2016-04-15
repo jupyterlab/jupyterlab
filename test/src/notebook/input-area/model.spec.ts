@@ -67,6 +67,17 @@ describe('jupyter-js-notebook', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit the signal when there is no change', () => {
+        let editor = new EditorModel();
+        let model = new InputAreaModel(editor);
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.collapsed = false;
+        expect(called).to.be(false);
+      });
+
     });
 
     describe('#prompt', () => {
@@ -89,6 +100,17 @@ describe('jupyter-js-notebook', () => {
         });
         model.prompt = 'foo';
         expect(called).to.be(true);
+      });
+
+      it('should not emit the signal when there is no change', () => {
+        let editor = new EditorModel();
+        let model = new InputAreaModel(editor);
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.prompt = '';
+        expect(called).to.be(false);
       });
 
     });
