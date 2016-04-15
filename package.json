@@ -11,6 +11,7 @@
     "jupyter-js-services": "^0.8.0",
     "jupyter-js-utils": "^0.4.0",
     "jupyter-js-widgets": "0.0.17",
+    "marked": "^0.3.5",
     "moment": "^2.11.2",
     "phosphor-arrays": "^1.0.6",
     "phosphor-domutil": "^1.2.0",
