@@ -8,7 +8,7 @@ import {
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer
+  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer, MarkdownRenderer
 } from 'jupyter-js-ui/lib/renderers';
 
 import {
@@ -27,6 +27,7 @@ const renderMimeProvider = {
     let rendermime = new RenderMime<Widget>();
     const transformers = [
       new JavascriptRenderer(),
+      new MarkdownRenderer(),
       new HTMLRenderer(),
       new ImageRenderer(),
       new SVGRenderer(),
