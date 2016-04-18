@@ -18,9 +18,7 @@ import {
   ResizeMessage, Widget
 } from 'phosphor-widget';
 
-import {
-  Terminal, ITerminalConfig
-} from 'xterm';
+import * as Terminal from 'xterm';
 
 
 /**
@@ -42,6 +40,41 @@ const DUMMY_ROWS = 24;
  * The number of cols to use in the dummy terminal.
  */
 const DUMMY_COLS = 80;
+
+
+/**
+ * A terminal configuration.
+ */
+export
+interface ITerminalConfig {
+  colors?: string[];
+
+  convertEol?: boolean;
+
+  termName?: string;
+
+  rows?: number;
+
+  cols?: number;
+
+  cursorBlink?: boolean;
+
+  visualBell?: boolean;
+
+  popOnBell?: boolean;
+
+  scrollback?: number;
+
+  screenKeys?: boolean;
+
+  useStyle?: boolean;
+
+  useEvents?: boolean;
+
+  useFocus?: boolean;
+
+  useMouse?: boolean;
+}
 
 /**
  * Options for the terminal widget.
@@ -119,8 +152,6 @@ class TerminalWidget extends Widget {
 
     // Set the default title.
     this.title.text = 'Terminal ' + TerminalWidget.nterms;
-
-    Terminal.brokenBold = true;
 
     this._dummyTerm = createDummyTerm();
 
