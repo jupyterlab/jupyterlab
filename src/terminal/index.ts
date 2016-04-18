@@ -7,6 +7,10 @@ import {
 } from 'jupyter-js-utils';
 
 import {
+  IBoxSizing, boxSizing
+} from 'phosphor-domutil';
+
+import {
   Message, sendMessage
 } from 'phosphor-messaging';
 
@@ -364,9 +368,6 @@ class TerminalWidget extends Widget {
       this._dirty = true;
       return;
     }
-    let style = window.getComputedStyle(this.node);
-    this._widthOffset = parseInt(style.paddingLeft) + parseInt(style.paddingRight);
-    this._heightOffset = parseInt(style.paddingTop) + parseInt(style.paddingBottom);
     let node = this._dummyTerm;
     this._term.element.appendChild(node);
     this._rowHeight = node.offsetHeight / DUMMY_ROWS;
@@ -385,8 +386,9 @@ class TerminalWidget extends Widget {
     if (this._term === null) {
       return;
     }
-    let height = this._height - this._heightOffset;
-    let width = this._width - this._widthOffset;
+    let box = this._box || boxSizing(this.node);
+    let height = this._height - box.verticalSum;
+    let width = this._width - box.horizontalSum;
     let rows = Math.floor(height / this._rowHeight) - 1;
     let cols = Math.floor(width / this._colWidth) - 1;
     this._term.resize(cols, rows);
@@ -404,10 +406,9 @@ class TerminalWidget extends Widget {
   private _dirty = false;
   private _width = -1;
   private _height = -1;
-  private _heightOffset = 0;
-  private _widthOffset = 0;
   private _background = '';
   private _color = '';
+  private _box: IBoxSizing = null;
 }
 
 

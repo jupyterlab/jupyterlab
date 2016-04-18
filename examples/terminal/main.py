@@ -13,12 +13,13 @@ PORT = 8765
 
 class MainPageHandler(tornado.web.RequestHandler):
 
-    def initialize(self, ws_url):
+    def initialize(self, ws_url, base_url):
+        self.base_url = base_url
         self.ws_url = ws_url
 
     def get(self):
         return self.render("index.html", static=self.static_url,
-                           ws_url=self.ws_url)
+                           ws_url=self.ws_url, base_url=self.base_url)
 
 
 def main(argv):
@@ -59,8 +60,9 @@ def main(argv):
     thread.setDaemon(True)
     thread.start()
 
+    base_url = 'http' + host
     handlers = [
-        (r"/", MainPageHandler, {'ws_url': ws_url}),
+        (r"/", MainPageHandler, {'ws_url': ws_url, 'base_url': base_url}),
         (r'/(.*)', tornado.web.StaticFileHandler,
          {'path': '.'}),
     ]
