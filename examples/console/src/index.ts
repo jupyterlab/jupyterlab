@@ -20,7 +20,7 @@ import {
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer
+  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer, MarkdownRenderer
 } from 'jupyter-js-ui/lib/renderers';
 
 import {
@@ -71,7 +71,8 @@ function main(): void {
     new SVGRenderer(),
     new LatexRenderer(),
     new ConsoleTextRenderer(),
-    new TextRenderer()
+    new TextRenderer(),
+    new MarkdownRenderer()
   ];
 
   for (let t of transformers) {

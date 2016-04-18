@@ -118,14 +118,7 @@ class ConsoleWidget extends Widget {
     this._model = model;
     this._rendermime = rendermime;
     this.layout = new PanelLayout();
-    let constructor = this.constructor as typeof ConsoleWidget;
-    let cellsLayout = this.layout as PanelLayout;
-    let factory = constructor.createCell;
-    for (let i = 0; i < model.cells.length; i++) {
-      cellsLayout.addChild(factory(model.cells.get(i), rendermime));
-    }
-    let last = cellsLayout.childCount() - 1;
-    this._prompt = cellsLayout.childAt(last) as CodeCellWidget;
+    this._initHeader();
     model.cells.changed.connect(this.onCellsChanged, this);
   }
 
@@ -191,6 +184,21 @@ class ConsoleWidget extends Widget {
     this.update();
   }
 
+  private _initHeader(): void {
+    let constructor = this.constructor as typeof ConsoleWidget;
+    let cellsLayout = this.layout as PanelLayout;
+    let factory = constructor.createCell;
+    for (let i = 0; i < this._model.cells.length; i++) {
+      cellsLayout.addChild(factory(this._model.cells.get(i), this._rendermime));
+    }
+    let last = cellsLayout.childCount() - 1;
+    this._banner = cellsLayout.childAt(0) as MarkdownCellWidget;
+    this._banner.model.input.textEditor.text = 'loading...';
+    (this._banner.model as MarkdownCellModel).rendered = true;
+    this._prompt = cellsLayout.childAt(last) as CodeCellWidget;
+  }
+
+  private _banner: MarkdownCellWidget = null;
   private _model: IConsoleModel;
   private _prompt: CodeCellWidget = null;
   private _rendermime: RenderMime<Widget> = null;
