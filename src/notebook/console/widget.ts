@@ -124,6 +124,8 @@ class ConsoleWidget extends Widget {
     for (let i = 0; i < model.cells.length; i++) {
       cellsLayout.addChild(factory(model.cells.get(i), rendermime));
     }
+    let last = cellsLayout.childCount() - 1;
+    this._prompt = cellsLayout.childAt(last) as CodeCellWidget;
     model.cells.changed.connect(this.onCellsChanged, this);
   }
 
@@ -155,6 +157,7 @@ class ConsoleWidget extends Widget {
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
+    this._prompt.input.editor.focus();
   }
 
   /**
@@ -183,11 +186,13 @@ class ConsoleWidget extends Widget {
       // widget.addClass(NB_CELL_CLASS);
       // widget.input.editor.addClass(NB_EDITOR_CLASS);
       layout.insertChild(args.newIndex, widget);
-      break;    }
+      break;
+    }
     this.update();
   }
 
   private _model: IConsoleModel;
+  private _prompt: CodeCellWidget = null;
   private _rendermime: RenderMime<Widget> = null;
 }
 
