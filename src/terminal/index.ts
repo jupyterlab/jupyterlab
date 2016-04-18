@@ -237,6 +237,7 @@ class TerminalWidget extends Widget {
     this._ws = null;
     this._term = null;
     this._dummyTerm = null;
+    this._box = null;
     super.dispose();
   }
 
