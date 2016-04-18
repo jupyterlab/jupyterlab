@@ -247,10 +247,12 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    */
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
     let widget = handler as T;
-    if (msg.type === 'close-request' && widget) {
-      let path = this.findModel(widget).path;
-      this.close(path);
-      return true;
+    if (msg.type === 'close-request') {
+      let model = this.findModel(widget);
+      if (model) {
+        this.close(model.path);
+        return true;
+      }
     }
     return false;
   }
@@ -294,16 +296,26 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
+   * Perform an action before closing the widget.
+   *
+   * #### Notes
+   * The default implementation is a no-op.
+   */
+  protected beforeClose(widget: T): Promise<void> {
+    return Promise.resolve(void 0);
+  }
+
+  /**
    * Get the model for a given widget.
    */
-  private _getModel(widget: T): IContentsModel {
+  protected _getModel(widget: T): IContentsModel {
     return Private.modelProperty.get(widget);
   }
 
   /**
    * Set the model for a widget.
    */
-  private _setModel(widget: T, model: IContentsModel) {
+  protected _setModel(widget: T, model: IContentsModel) {
     Private.modelProperty.set(widget, model);
   }
 
@@ -328,10 +340,13 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    * Actually close the file.
    */
   private _close(widget: T): void {
-    let model = Private.modelProperty.get(widget);
-    widget.dispose();
-    let index = this._widgets.indexOf(widget);
-    this._widgets.splice(index, 1);
+    this.beforeClose(widget).then(() => {
+      let model = Private.modelProperty.get(widget);
+      let index = this._widgets.indexOf(widget);
+      this._widgets.splice(index, 1);
+      Private.modelProperty.set(widget, null);
+      widget.close();
+    });
   }
 
   private _manager: IContentsManager = null;
