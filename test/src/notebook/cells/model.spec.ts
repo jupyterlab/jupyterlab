@@ -631,7 +631,7 @@ describe('jupyter-js-notebook', () => {
       let model = new CodeCellModel(input, output);
       model.input.textEditor.text = 'a = 1';
       let kernel = new MockKernel();
-      executeCodeCell(model, kernel)
+      executeCodeCell(model, kernel);
       expect(model.input.prompt).to.be('*');
     });
 
