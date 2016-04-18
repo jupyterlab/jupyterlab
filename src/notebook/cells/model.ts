@@ -526,7 +526,7 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
  * Execute the code cell using the given kernel.
  */
 export
-function executeCodeCell(cell: ICodeCellModel, kernel: IKernel): IKernelFuture {
+function executeCodeCell(cell: ICodeCellModel, kernel: IKernel): Promise<void> {
   let input = cell.input;
   let output = cell.output;
   let text = input.textEditor.text.trim();
@@ -535,7 +535,7 @@ function executeCodeCell(cell: ICodeCellModel, kernel: IKernel): IKernelFuture {
     return;
   }
   input.prompt = '*';
-  executeCode(text, kernel, output).then(reply => {
+  return executeCode(text, kernel, output).then(reply => {
     cell.executionCount = reply.execution_count;
   });
 }
