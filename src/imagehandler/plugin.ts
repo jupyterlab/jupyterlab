@@ -7,8 +7,8 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  AbstractFileHandler, DocumentManager
-} from 'jupyter-js-ui/lib/docmanager';
+  AbstractFileHandler, FileHandlerRegistry
+} from 'jupyter-js-ui/lib/filehandler';
 
 import {
   Application
@@ -29,10 +29,10 @@ import {
 export
 const imageHandlerExtension = {
   id: 'jupyter.extensions.imageHandler',
-  requires: [DocumentManager, JupyterServices],
-  activate: (app: Application, manager: DocumentManager, services: JupyterServices) => {
+  requires: [FileHandlerRegistry, JupyterServices],
+  activate: (app: Application, registry: FileHandlerRegistry, services: JupyterServices) => {
     let handler = new ImageHandler(services.contentsManager);
-    manager.register(handler);
+    registry.addHandler(handler);
     return Promise.resolve(void 0);
   }
 };

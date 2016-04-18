@@ -24,8 +24,9 @@ var app = new phosphide.Application({
     require('jupyter-js-plugins/lib/main/plugin').mainExtension,
   ],
   providers: [
-    require('jupyter-js-plugins/lib/documentmanager/plugin').documentManagerProvider,
-    require('jupyter-js-plugins/lib/services/plugin').servicesProvider
+    require('jupyter-js-plugins/lib/filehandler/plugin').fileHandlerProvider,
+    require('jupyter-js-plugins/lib/services/plugin').servicesProvider,
+    require('jupyter-js-plugins/lib/rendermime/plugin').renderMimeProvider
   ]
 });
 

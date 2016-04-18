@@ -3,8 +3,8 @@
 'use strict';
 
 import {
-  FileHandler, DocumentManager
-} from 'jupyter-js-ui/lib/docmanager';
+  FileHandlerRegistry, FileHandler, FileCreator
+} from 'jupyter-js-ui/lib/filehandler';
 
 import {
   Application
@@ -16,15 +16,41 @@ import {
 
 
 /**
+ * The default document manager provider.
+ */
+export
+const fileHandlerProvider = {
+  id: 'jupyter.services.fileHandlerRegistry',
+  provides: FileHandlerRegistry,
+  resolve: () => {
+    return new FileHandlerRegistry();
+  }
+};
+
+
+/**
  * The default file handler extension.
  */
 export
 const fileHandlerExtension = {
   id: 'jupyter.extensions.fileHandler',
-  requires: [DocumentManager, JupyterServices],
-  activate: (app: Application, manager: DocumentManager, services: JupyterServices) => {
-    let handler = new FileHandler(services.contentsManager);
-    manager.registerDefault(handler);
-    return Promise.resolve(void 0);
-  }
+  requires: [FileHandlerRegistry, JupyterServices],
+  activate: activateFileHandler
+};
+
+
+function activateFileHandler(app: Application, registry: FileHandlerRegistry, services: JupyterServices): Promise<void> {
+  let contents = services.contentsManager;
+  let activeId = '';
+  let id = 0;
+  let fileHandler = new FileHandler(contents);
+  let dirCreator = new FileCreator(contents, 'directory');
+  let fileCreator = new FileCreator(contents, 'file');
+
+  registry.addDefaultHandler(fileHandler);
+  registry.addCreator(
+    'New Directory', dirCreator.createNew.bind(dirCreator));
+  registry.addCreator('New File', fileCreator.createNew.bind(fileCreator));
+
+  return Promise.resolve(void 0);
 };
