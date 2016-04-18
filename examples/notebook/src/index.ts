@@ -6,12 +6,12 @@
 'use strict';
 
 import {
-  NotebookModel, NotebookPanel, NotebookManager,
-  deserialize, selectKernel, trustNotebook, findKernel
+  NotebookModel, NotebookPanel, NotebookManager, INotebookModel,
+  deserialize, selectKernel, trustNotebook, findKernel, NotebookFileHandler
 } from 'jupyter-js-notebook';
 
 import {
-  ContentsManager, IKernelSpecIds, startNewSession,
+  ContentsManager, IKernelSpecIds, NotebookSessionManager,
   getKernelSpecs
 } from 'jupyter-js-services';
 
@@ -50,7 +50,6 @@ import 'jupyter-js-ui/lib/dialog/index.css';
 import 'jupyter-js-ui/lib/dialog/theme.css';
 
 
-let SERVER_URL = getBaseUrl();
 let NOTEBOOK = 'test.ipynb';
 
 
@@ -66,9 +65,8 @@ function main(): void {
   // TODO: check out static example from the history
   // and make that a separate example.
 
-  let contents = new ContentsManager(SERVER_URL);
-  let nbModel = new NotebookModel();
-  let nbManager = new NotebookManager(nbModel, contents);
+  let contents = new ContentsManager();
+  let sessions = new NotebookSessionManager();
   let rendermime = new RenderMime<Widget>();
   const transformers = [
     new JavascriptRenderer(),
@@ -88,23 +86,34 @@ function main(): void {
     }
   }
 
-  let nbWidget = new NotebookPanel(nbManager, rendermime);
-  nbWidget.title.text = NOTEBOOK;
+  let nbWidget: NotebookPanel;
+  let nbModel: INotebookModel;
+  let nbManager: NotebookManager;
+  let handler = new NotebookFileHandler(contents, sessions, rendermime);
+  contents.get(NOTEBOOK).then(model => {
+    nbWidget = handler.open(model);
+    nbModel = nbWidget.model;
+    nbManager = nbWidget.manager;
+
+    let panel = new SplitPanel();
+    panel.id = 'main';
+    panel.orientation = SplitPanel.Horizontal;
+    panel.spacing = 0;
+    SplitPanel.setStretch(palette, 0);
+    SplitPanel.setStretch(nbWidget, 1);
+    panel.attach(document.body);
+    panel.addChild(palette);
+    panel.addChild(nbWidget);
+    window.onresize = () => { panel.update(); };
+
+    setTimeout(() => {
+      nbWidget.close();
+    }, 1000);
+  });
 
   let pModel = new StandardPaletteModel();
   let palette = new CommandPalette();
   palette.model = pModel;
-
-  let panel = new SplitPanel();
-  panel.id = 'main';
-  panel.orientation = SplitPanel.Horizontal;
-  panel.spacing = 0;
-  SplitPanel.setStretch(palette, 0);
-  SplitPanel.setStretch(nbWidget, 1);
-  panel.attach(document.body);
-  panel.addChild(palette);
-  panel.addChild(nbWidget);
-  window.onresize = () => { panel.update(); };
 
   let kernelspecs: IKernelSpecIds;
 
@@ -386,23 +395,6 @@ function main(): void {
   }
   ];
   keymap.add(bindings);
-
-  contents.get(NOTEBOOK, {}).then(data => {
-    deserialize(data.content, nbModel);
-    getKernelSpecs({}).then(specs => {
-      let kernelName = nbModel.kernelspec.name;
-      let language = nbModel.languageInfo.name;
-      kernelspecs = specs;
-      // start session
-      startNewSession({
-        notebookPath: NOTEBOOK,
-        kernelName: findKernel(kernelName, language, specs),
-        baseUrl: SERVER_URL
-      }).then(session => {
-        nbModel.session = session;
-      });
-    });
-  });
 }
 
 window.onload = main;

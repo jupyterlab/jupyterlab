@@ -101,6 +101,28 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPanel> {
   }
 
   /**
+   * Perform an action before closing the widget.
+   *
+   * #### Notes
+   * The default implementation is a no-op.
+   */
+  protected beforeClose(widget: NotebookPanel): Promise<void> {
+    let session = widget.model.session;
+    if (session && session.status !== KernelStatus.Dead) {
+      return showDialog({
+        title: 'Shutdown kernel?',
+        body: `Shutdown "${session.kernel.name}" kernel?`,
+        host: widget.node
+      }).then(result => {
+        if (result.text === 'OK') {
+          return session.shutdown();
+        }
+      }).then(() => { return void 0; });
+    }
+    return Promise.resolve(void 0);
+  }
+
+  /**
    * Get options use to fetch the model contents from disk.
    */
   protected getFetchOptions(model: IContentsModel): IContentsOpts {
