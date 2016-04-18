@@ -391,6 +391,7 @@ class TerminalWidget extends Widget {
     this._term.resize(cols, rows);
     this._ws.send(JSON.stringify(['set_size', rows, cols,
                                 height, width]));
+    this._dirty = false;
   }
 
   private _term: Terminal = null;
