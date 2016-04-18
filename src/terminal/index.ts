@@ -287,10 +287,6 @@ class TerminalWidget extends Widget {
    * On resize, use the computed row and column sizes to resize the terminal.
    */
   protected onResize(msg: ResizeMessage): void {
-    if (!this.isAttached || !this.isVisible) {
-      this._dirty = true;
-      return;
-    }
     this._resizeTerminal(msg.width, msg.height);
   }
 
@@ -356,7 +352,7 @@ class TerminalWidget extends Widget {
    * Use the dummy terminal to measure the row and column sizes.
    */
   private _snapTermSizing(): void {
-    if (!this.isAttached || !this.isVisible) {
+    if (!this.isVisible) {
       this._dirty = true;
       return;
     }
@@ -367,7 +363,6 @@ class TerminalWidget extends Widget {
     this._rowHeight = offsetHeight / DUMMY_ROWS;
     this._colWidth = offsetWidth / DUMMY_COLS;
     this._term.element.removeChild(node);
-    this._dirty = false;
     this._resizeTerminal(offsetWidth, offsetHeight);
   }
 
@@ -377,19 +372,16 @@ class TerminalWidget extends Widget {
    * The parent offset dimensions should be `-1` if unknown.
    */
   private _resizeTerminal(offsetWidth: number, offsetHeight: number) {
-    if (this._term === null) {
-      return;
-    }
-    if (!this.isVisible) {
+    if (this._rowHeight === -1 || !this.isVisible) {
       this._dirty = true;
       return;
     }
     // Measure the parent if the offset dimensions are unknown.
     if (offsetWidth < 0) {
-      offsetWidth = this.parent.node.offsetWidth;
+      offsetWidth = this.node.offsetWidth;
     }
     if (offsetHeight < 0) {
-      offsetHeight = this.parent.node.offsetHeight;
+      offsetHeight = this.node.offsetHeight;
     }
     let box = this._box ||  (this._box = boxSizing(this.node));
     let height = offsetHeight - box.verticalSum;
