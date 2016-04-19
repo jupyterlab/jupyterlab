@@ -499,6 +499,14 @@ class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
 export
 class RawCellModel extends BaseCellModel implements IRawCellModel {
   /**
+   * Construct a new raw cell model.
+   */
+  constructor(input: IInputAreaModel) {
+    super(input);
+    input.textEditor.mimetype = 'text/plain';
+  }
+
+  /**
    * The raw cell metadata format for nbconvert.
    */
   get format(): string {
