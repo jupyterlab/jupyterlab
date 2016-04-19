@@ -384,7 +384,7 @@ class TerminalWidget extends Widget {
     if (offsetHeight < 0) {
       offsetHeight = this.node.offsetHeight;
     }
-    let box = this._box ||  (this._box = boxSizing(this.node));
+    let box = this._box || (this._box = boxSizing(this.node));
     let height = offsetHeight - box.verticalSum;
     let width = offsetWidth - box.horizontalSum;
     let rows = Math.floor(height / this._rowHeight) - 1;
