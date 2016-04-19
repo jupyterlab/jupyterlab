@@ -6,8 +6,7 @@ plugins used to create [JupyterLab](https://github.com/jupyter/notebook/tree/mas
 
 [API Docs](http://jupyter.github.io/jupyter-js-plugins/)
 
-![JupyterLab Demo](jupyter-plugins-demo.gif)
-
+<img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
 
 Package Install
 ---------------
