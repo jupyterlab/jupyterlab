@@ -132,7 +132,7 @@ class InputAreaModel implements IInputAreaModel {
 
   private _editor: IEditorModel = null;
   private _collapsed = false;
-  private _prompt = '';
+  private _prompt: string = null;
 }
 
 

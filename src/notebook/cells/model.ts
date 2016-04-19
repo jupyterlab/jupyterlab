@@ -379,7 +379,7 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     }
     let prev = this._executionCount;
     this._executionCount = value;
-    this.input.prompt = `${value === null ? '' : value}`;
+    this.input.prompt = `${value || ''}`;
     this.stateChanged.emit({
       name: 'executionCount',
       oldValue: prev,
