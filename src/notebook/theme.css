@@ -50,6 +50,15 @@
   border-color: transparent;
 }
 
+.jp-Console .jp-InputArea-prompt {
+  flex-basis: 70px;
+  text-align: left;
+}
+
+.jp-Console .jp-Console-banner .jp-InputArea-prompt {
+  display: none;
+}
+
 
 .jp-MarkdownCell {
   outline: 0;

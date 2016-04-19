@@ -49,6 +49,11 @@ const CONSOLE_CLASS = 'jp-Console';
 const CONSOLE_PANEL = 'jp-Console-panel';
 
 /**
+ * The class name added to the console banner.
+ */
+const BANNER_CLASS = 'jp-Console-banner';
+
+/**
  * A panel which contains a toolbar and a console.
  */
 export
@@ -205,6 +210,7 @@ class ConsoleWidget extends Widget {
     }
     let last = cellsLayout.childCount() - 1;
     this._banner = cellsLayout.childAt(0) as RawCellWidget;
+    this._banner.addClass(BANNER_CLASS);
     this._prompt = cellsLayout.childAt(last) as CodeCellWidget;
     this._updateBanner();
   }
