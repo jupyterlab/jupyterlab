@@ -71,8 +71,10 @@ class InputAreaWidget extends Widget {
     this.layout = new PanelLayout();
     this._prompt = new Widget();
     this._prompt.addClass(PROMPT_CLASS);
-    let prompt = model.prompt || ' ';
-    this._prompt.node.textContent = `In [${prompt}]:`;
+    let prompt = model.prompt;
+    if (prompt !== null) {
+      this.prompt.node.textContent = `In [${prompt || ' '}]:`;
+    }
     let constructor = this.constructor as typeof InputAreaWidget;
     this._editor = constructor.createEditor(model.textEditor);
     this._editor.addClass(EDITOR_CLASS);
@@ -141,8 +143,11 @@ class InputAreaWidget extends Widget {
       }
       break;
     case 'prompt':
-      let prompt = args.newValue || ' ';
-      this.prompt.node.textContent = `In [${prompt}]:`;
+      if (args.newValue === null) {
+        this.prompt.node.textContent = '';
+      } else {
+        this.prompt.node.textContent = `In [${args.newValue || ' '}]:`;
+      }
       break;
     }
   }
