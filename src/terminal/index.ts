@@ -359,12 +359,10 @@ class TerminalWidget extends Widget {
     }
     let node = this._dummyTerm;
     this._term.element.appendChild(node);
-    let offsetWidth = node.offsetWidth;
-    let offsetHeight = node.offsetHeight
-    this._rowHeight = offsetHeight / DUMMY_ROWS;
-    this._colWidth = offsetWidth / DUMMY_COLS;
+    this._rowHeight = node.offsetWidth / DUMMY_ROWS;
+    this._colWidth = node.offsetHeight / DUMMY_COLS;
     this._term.element.removeChild(node);
-    this._resizeTerminal(offsetWidth, offsetHeight);
+    this._resizeTerminal(-1, -1);
   }
 
   /**
@@ -377,7 +375,6 @@ class TerminalWidget extends Widget {
       this._dirty = true;
       return;
     }
-    // Measure the parent if the offset dimensions are unknown.
     if (offsetWidth < 0) {
       offsetWidth = this.node.offsetWidth;
     }
