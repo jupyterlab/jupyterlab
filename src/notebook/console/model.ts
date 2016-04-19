@@ -92,6 +92,11 @@ interface IConsoleModel extends IDisposable {
   cells: IObservableList<ICellModel>;
 
   /**
+   * The banner that appears at the top of a console session.
+   */
+  banner: string;
+
+  /**
    * A factory for creating a new code cell.
    *
    * @param source - The cell to use for the original source data.
@@ -160,9 +165,12 @@ class ConsoleModel implements IConsoleModel {
    * Construct a new console model.
    */
   constructor() {
+    let banner = this.createRawCell();
+    let prompt = this.createCodeCell();
+    banner.input.textEditor.readOnly = true;
     this._cells = new ObservableList<ICellModel>();
-    this._cells.add(this.createMarkdownCell());
-    this._cells.add(this.createCodeCell());
+    this._cells.add(banner);
+    this._cells.add(prompt);
     this._cells.changed.connect(this.onCellsChanged, this);
   }
 
@@ -198,6 +206,22 @@ class ConsoleModel implements IConsoleModel {
    */
   get cells(): IObservableList<ICellModel> {
     return this._cells;
+  }
+
+  /**
+   * The banner that appears at the top of a console session.
+   */
+  get banner(): string {
+    return this._banner;
+  }
+  set banner(newValue: string) {
+    if (newValue === this._banner) {
+      return;
+    }
+    let oldValue = this._banner;
+    this._banner = newValue;
+    let name = 'banner';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -353,6 +377,7 @@ class ConsoleModel implements IConsoleModel {
     }
   }
 
+  private _banner: string = 'loading...';
   private _cells: IObservableList<ICellModel> = null;
   private _metadata: { [key: string]: string } = Object.create(null);
   private _defaultMimetype = 'text/x-ipython';

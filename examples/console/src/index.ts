@@ -6,7 +6,7 @@
 'use strict';
 
 import {
-  ConsolePanel, ConsoleWidget, ConsoleModel
+  ConsolePanel, ConsoleWidget, ConsoleModel, findKernel
 } from 'jupyter-js-notebook';
 
 import {
@@ -111,13 +111,20 @@ function main(): void {
 
   getKernelSpecs({}).then(specs => {
     kernelspecs = specs;
-    // start session
-    // startNewSession({
-    //   kernelName: findKernel(nbModel, specs),
-    //   baseUrl: SERVER_URL
-    // }).then(session => {
-    //   nbModel.session = session;
-    // });
+    let kernelName = specs.default;
+    let language = specs.default;
+    console.log('specs', specs);
+    return startNewSession({
+      notebookPath: 'fake_path',
+      kernelName: findKernel(kernelName, language, specs),
+      baseUrl: SERVER_URL
+    });
+  }).then(session => {
+    console.log('session', session);
+    return session.kernel.kernelInfo();
+  }).then(info => {
+    console.log('info', info);
+    consoleModel.banner = info.banner;
   });
 }
 
