@@ -82,10 +82,10 @@ describe('jupyter-js-notebook', () => {
 
     describe('#prompt', () => {
 
-      it('should default to an empty string', () => {
+      it('should default to `null`', () => {
         let editor = new EditorModel();
         let model = new InputAreaModel(editor);
-        expect(model.prompt).to.be('');
+        expect(model.prompt).to.be(null);
       });
 
       it('should emit a stateChanged signal when changed', () => {
@@ -94,7 +94,7 @@ describe('jupyter-js-notebook', () => {
         let called = false;
         model.stateChanged.connect((editor, change) => {
           expect(change.name).to.be('prompt');
-          expect(change.oldValue).to.be('');
+          expect(change.oldValue).to.be(null);
           expect(change.newValue).to.be('foo');
           called = true;
         });
@@ -109,7 +109,7 @@ describe('jupyter-js-notebook', () => {
         model.stateChanged.connect((editor, change) => {
           called = true;
         });
-        model.prompt = '';
+        model.prompt = null;
         expect(called).to.be(false);
       });
 
