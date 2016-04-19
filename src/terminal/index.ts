@@ -7,6 +7,10 @@ import {
 } from 'jupyter-js-utils';
 
 import {
+  IBoxSizing, boxSizing
+} from 'phosphor-domutil';
+
+import {
   Message, sendMessage
 } from 'phosphor-messaging';
 
@@ -233,6 +237,7 @@ class TerminalWidget extends Widget {
     this._ws = null;
     this._term = null;
     this._dummyTerm = null;
+    this._box = null;
     super.dispose();
   }
 
@@ -283,19 +288,7 @@ class TerminalWidget extends Widget {
    * On resize, use the computed row and column sizes to resize the terminal.
    */
   protected onResize(msg: ResizeMessage): void {
-    if (!this.isAttached || !this.isVisible) {
-      return;
-    }
-    let width = msg.width;
-    let height = msg.height;
-    if (width < 0 || height < 0) {
-      let rect = this.node.getBoundingClientRect();
-      if (width < 0) width = rect.width;
-      if (height < 0) height = rect.height;
-    }
-    this._width = width;
-    this._height = height;
-    this._resizeTerminal();
+    this._resizeTerminal(msg.width, msg.height);
   }
 
   /**
@@ -338,7 +331,7 @@ class TerminalWidget extends Widget {
     this._term.on('title', (title: string) => {
         this.title.text = title;
     });
-    this._resizeTerminal();
+    this._resizeTerminal(-1, -1);
   }
 
   /**
@@ -360,54 +353,59 @@ class TerminalWidget extends Widget {
    * Use the dummy terminal to measure the row and column sizes.
    */
   private _snapTermSizing(): void {
-    if (!this.isAttached || !this.isVisible) {
+    if (!this.isVisible) {
       this._dirty = true;
       return;
     }
-    let style = window.getComputedStyle(this.node);
-    this._widthOffset = parseInt(style.paddingLeft) + parseInt(style.paddingRight);
-    this._heightOffset = parseInt(style.paddingTop) + parseInt(style.paddingBottom);
     let node = this._dummyTerm;
     this._term.element.appendChild(node);
-    this._rowHeight = node.offsetHeight / DUMMY_ROWS;
-    this._colWidth = node.offsetWidth / DUMMY_COLS;
+    let offsetWidth = node.offsetWidth;
+    let offsetHeight = node.offsetHeight
+    this._rowHeight = offsetHeight / DUMMY_ROWS;
+    this._colWidth = offsetWidth / DUMMY_COLS;
     this._term.element.removeChild(node);
-    this._dirty = false;
-    if (this._width !== -1) {
-      this._resizeTerminal();
-    }
+    this._resizeTerminal(offsetWidth, offsetHeight);
   }
 
   /**
    * Resize the terminal based on the computed geometry.
+   *
+   * The parent offset dimensions should be `-1` if unknown.
    */
-  private _resizeTerminal() {
-    if (this._term === null) {
+  private _resizeTerminal(offsetWidth: number, offsetHeight: number) {
+    if (this._rowHeight === -1 || !this.isVisible) {
+      this._dirty = true;
       return;
     }
-    let height = this._height - this._heightOffset;
-    let width = this._width - this._widthOffset;
+    // Measure the parent if the offset dimensions are unknown.
+    if (offsetWidth < 0) {
+      offsetWidth = this.node.offsetWidth;
+    }
+    if (offsetHeight < 0) {
+      offsetHeight = this.node.offsetHeight;
+    }
+    let box = this._box || (this._box = boxSizing(this.node));
+    let height = offsetHeight - box.verticalSum;
+    let width = offsetWidth - box.horizontalSum;
     let rows = Math.floor(height / this._rowHeight) - 1;
     let cols = Math.floor(width / this._colWidth) - 1;
     this._term.resize(cols, rows);
     this._ws.send(JSON.stringify(['set_size', rows, cols,
-                                this._height, this._width]));
+                                height, width]));
+    this._dirty = false;
   }
 
   private _term: Terminal = null;
   private _ws: WebSocket = null;
-  private _rowHeight = -1;
-  private _colWidth = -1;
   private _sheet: HTMLElement = null;
   private _dummyTerm: HTMLElement = null;
   private _fontSize = -1;
   private _dirty = false;
-  private _width = -1;
-  private _height = -1;
-  private _heightOffset = 0;
-  private _widthOffset = 0;
+  private _rowHeight = -1;
+  private _colWidth = -1;
   private _background = '';
   private _color = '';
+  private _box: IBoxSizing = null;
 }
 
 
