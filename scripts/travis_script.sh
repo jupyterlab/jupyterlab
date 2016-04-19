@@ -7,4 +7,4 @@ npm run build
 npm test
 npm run test:coverage
 npm run build:examples
-#npm run docs
+npm run docs
