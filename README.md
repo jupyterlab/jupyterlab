@@ -3,6 +3,7 @@ Jupyter JS Notebook
 
 Notebook models and widgets for JupyterLab.
 
+[API Docs](http://jupyter.github.io/jupyter-js-notebook/)
 
 Package Install
 ---------------
