@@ -359,8 +359,8 @@ class TerminalWidget extends Widget {
     }
     let node = this._dummyTerm;
     this._term.element.appendChild(node);
-    this._rowHeight = node.offsetWidth / DUMMY_ROWS;
-    this._colWidth = node.offsetHeight / DUMMY_COLS;
+    this._rowHeight = node.offsetHeight / DUMMY_ROWS;
+    this._colWidth = node.offsetWidth / DUMMY_COLS;
     this._term.element.removeChild(node);
     this._resizeTerminal(-1, -1);
   }
