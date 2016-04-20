@@ -16,5 +16,5 @@
 }
 
 
-@import url('~xterm/src/theme');
+@import '~xterm/src/xterm.css';
 

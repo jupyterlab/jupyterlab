@@ -21,7 +21,6 @@
     "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-widget": "^1.0.0-rc.1",
-    "term.js": "0.0.7",
     "xterm": "^0.32.0"
   },
   "devDependencies": {
