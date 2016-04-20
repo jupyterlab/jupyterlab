@@ -209,6 +209,10 @@ export
 class MarkdownRenderer implements IRenderer<Widget> {
   mimetypes = ['application/vnd.jupyter.markdown'];
 
+  constructor() {
+    marked.setOptions({ gfm: true,  tables: true });
+  }
+
   render(mimetype: string, text: string): Widget {
     let data = removeMath(text);
     let html = marked(data['text']);
