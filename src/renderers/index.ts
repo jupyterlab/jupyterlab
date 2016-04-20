@@ -8,8 +8,9 @@ import {
   IRenderer
 } from '../rendermime';
 
-import * as Convert
-  from 'ansi-to-html';
+import {
+  escape_for_html, ansi_to_html
+} from 'ansi_up';
 
 import {
   Widget
@@ -31,7 +32,8 @@ export
 class HTMLWidget extends Widget {
   constructor(html: string) {
     super();
-    this.node.innerHTML = html;
+    let range = document.createRange();
+    this.node.appendChild(range.createContextualFragment(html));
   }
 
   /**
@@ -105,7 +107,9 @@ class TextRenderer implements IRenderer<Widget> {
 
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
-    w.node.textContent = data;
+    let pre = document.createElement('pre')
+    pre.textContent = data;
+    w.node.appendChild(pre);
     return w;
   }
 }
@@ -118,20 +122,14 @@ export
 class ConsoleTextRenderer implements IRenderer<Widget> {
   mimetypes = ['application/vnd.jupyter.console-text'];
 
-  constructor() {
-    this._converter = new Convert({
-      escapeXML: true,
-      newline: true
-    });
-  }
-
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
-    w.node.innerHTML = this._converter.toHtml(data);
+    let el = document.createElement('pre');
+    let esc = escape_for_html(data);
+    el.innerHTML = ansi_to_html(esc, {use_classes: true});
+    w.node.appendChild(el);
     return w;
   }
-
-  private _converter: Convert = null;
 }
 
 
@@ -173,6 +171,25 @@ class SVGRenderer implements IRenderer<Widget> {
 
 
 /**
+ * A renderer for PDF data.
+ */
+export
+class PDFRenderer implements IRenderer<Widget> {
+  mimetypes = ['application/pdf'];
+
+  render(mimetype: string, data: string): Widget {
+    let w = new Widget();
+    let a = document.createElement('a');
+    a.target = '_blank';
+    a.textContent = "View PDF";
+    a.href = 'data:application/pdf;base64,' + data;
+    w.node.appendChild(a);
+    return w;
+  }
+}
+
+
+/**
  * A renderer for LateX data.
  */
 export
@@ -190,7 +207,7 @@ class LatexRenderer implements IRenderer<Widget> {
  */
 export
 class MarkdownRenderer implements IRenderer<Widget> {
-  mimetypes = ['application/vnd.jupyter.markdown'];
+  mimetypes = ['text/markdown'];
 
   render(mimetype: string, text: string): Widget {
     let data = removeMath(text);
