@@ -1,6 +1,6 @@
 {
   "name": "jupyter-js-ui",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "JavaScript UI Components for Jupyter",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
