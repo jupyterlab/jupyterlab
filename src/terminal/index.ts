@@ -43,40 +43,6 @@ const DUMMY_COLS = 80;
 
 
 /**
- * A terminal configuration.
- */
-export
-interface ITerminalConfig {
-  colors?: string[];
-
-  convertEol?: boolean;
-
-  termName?: string;
-
-  rows?: number;
-
-  cols?: number;
-
-  cursorBlink?: boolean;
-
-  visualBell?: boolean;
-
-  popOnBell?: boolean;
-
-  scrollback?: number;
-
-  screenKeys?: boolean;
-
-  useStyle?: boolean;
-
-  useEvents?: boolean;
-
-  useFocus?: boolean;
-
-  useMouse?: boolean;
-}
-
-/**
  * Options for the terminal widget.
  */
 export
@@ -327,12 +293,13 @@ class TerminalWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Set the fg and bg colors of the terminal and cursor.
+    // Make the input area invisible.
     this.node.style.backgroundColor = this.background;
     this.node.style.color = this.color;
     this._term.element.style.backgroundColor = this.background;
     this._term.element.style.color = this.color;
     this._sheet.innerHTML = ('.terminal-cursor {background:' + this.color +
-                             ';color:' + this.background + ';}');
+                             ';color:' + this.background + ';} .xterm-helper-textarea { display: none; }');
   }
 
   /**
@@ -444,6 +411,8 @@ function getConfig(options: ITerminalOptions): ITerminalConfig {
   let config: ITerminalConfig = {};
   if (options.cursorBlink !== void 0) {
     config.cursorBlink = options.cursorBlink;
+  } else {
+    config.cursorBlink = true;
   }
   if (options.visualBell !== void 0) {
     config.visualBell = options.visualBell;
@@ -454,7 +423,6 @@ function getConfig(options: ITerminalOptions): ITerminalConfig {
   if (options.scrollback !== void 0) {
     config.scrollback = options.scrollback;
   }
-  config.screenKeys = false;
   return config;
 }
 

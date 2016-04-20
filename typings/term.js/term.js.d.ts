@@ -48,13 +48,13 @@
 interface ITerminalConfig {
   colors?: string[];
 
+  theme?: string;
+
   convertEol?: boolean;
 
   termName?: string;
 
-  rows?: number;
-
-  cols?: number;
+  geometry?: number[];
 
   cursorBlink?: boolean;
 
@@ -64,15 +64,9 @@ interface ITerminalConfig {
 
   scrollback?: number;
 
-  screenKeys?: boolean;
+  debug?: boolean;
 
-  useStyle?: boolean;
-
-  useEvents?: boolean;
-
-  useFocus?: boolean;
-
-  useMouse?: boolean;
+  cancelEvents?: boolean;
 }
 
 
@@ -80,7 +74,5 @@ declare var Xterm: TerminalConstructor;
 
 
 declare module 'xterm' {
-
-
   export = Xterm;
 }

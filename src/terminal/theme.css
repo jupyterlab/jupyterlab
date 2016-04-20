@@ -10,6 +10,11 @@
 
 
 .jp-TerminalWidget-body {
+  outline: none;
   user-select: text;
   -webkit-user-select: text;
 }
+
+
+@import url('~xterm/src/theme');
+
