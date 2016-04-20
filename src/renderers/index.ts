@@ -31,7 +31,8 @@ export
 class HTMLWidget extends Widget {
   constructor(html: string) {
     super();
-    this.node.innerHTML = html;
+    let range = document.createRange();
+    this.node.appendChild(range.createContextualFragment(html));
   }
 
   /**
@@ -41,7 +42,7 @@ class HTMLWidget extends Widget {
    * If the node is visible, it is typeset.
    */
   onAfterAttach(msg: Message) {
-    typeset(this.node);
+    typeset(this.node.firstChild as HTMLElement);
   }
 }
 
