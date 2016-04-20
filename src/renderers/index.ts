@@ -106,7 +106,9 @@ class TextRenderer implements IRenderer<Widget> {
 
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
-    w.node.textContent = data;
+    let pre = document.createElement('pre')
+    pre.textContent = data;
+    w.node.appendChild(pre);
     return w;
   }
 }
