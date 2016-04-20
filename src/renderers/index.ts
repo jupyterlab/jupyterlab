@@ -207,7 +207,7 @@ class LatexRenderer implements IRenderer<Widget> {
  */
 export
 class MarkdownRenderer implements IRenderer<Widget> {
-  mimetypes = ['application/vnd.jupyter.markdown'];
+  mimetypes = ['text/markdown'];
 
   constructor() {
     marked.setOptions({ gfm: true,  tables: true });
