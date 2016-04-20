@@ -43,7 +43,7 @@ class HTMLWidget extends Widget {
    * If the node is visible, it is typeset.
    */
   onAfterAttach(msg: Message) {
-    typeset(this.node.firstChild as HTMLElement);
+    typeset(this.node);
   }
 }
 
@@ -126,7 +126,7 @@ class ConsoleTextRenderer implements IRenderer<Widget> {
     let w = new Widget();
     let el = document.createElement('pre');
     let esc = escape_for_html(data);
-    el.innerHTML = ansi_to_html(esc);
+    el.innerHTML = ansi_to_html(esc, {use_classes: true});
     w.node.appendChild(el);
     return w;
   }
@@ -144,7 +144,7 @@ class JavascriptRenderer implements IRenderer<Widget> {
     let w = new Widget();
     let s = document.createElement('script');
     s.type = mimetype;
-    s.appendChild(document.createTextNode(data));
+    s.textContent = data;
     w.node.appendChild(s);
     return w;
   }
