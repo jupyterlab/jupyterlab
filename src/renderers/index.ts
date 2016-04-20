@@ -8,8 +8,9 @@ import {
   IRenderer
 } from '../rendermime';
 
-import * as Convert
-  from 'ansi-to-html';
+import {
+  escape_for_html, ansi_to_html
+} from 'ansi_up';
 
 import {
   Widget
@@ -121,20 +122,14 @@ export
 class ConsoleTextRenderer implements IRenderer<Widget> {
   mimetypes = ['application/vnd.jupyter.console-text'];
 
-  constructor() {
-    this._converter = new Convert({
-      escapeXML: true,
-      newline: true
-    });
-  }
-
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
-    w.node.innerHTML = this._converter.toHtml(data);
+    let el = document.createElement('pre');
+    let esc = escape_for_html(data);
+    el.innerHTML = ansi_to_html(esc);
+    w.node.appendChild(el);
     return w;
   }
-
-  private _converter: Convert = null;
 }
 
 
@@ -149,7 +144,7 @@ class JavascriptRenderer implements IRenderer<Widget> {
     let w = new Widget();
     let s = document.createElement('script');
     s.type = mimetype;
-    s.textContent = data;
+    s.appendChild(document.createTextNode(data));
     w.node.appendChild(s);
     return w;
   }
@@ -170,6 +165,25 @@ class SVGRenderer implements IRenderer<Widget> {
     if (!svgElement) {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
     }
+    return w;
+  }
+}
+
+
+/**
+ * A renderer for PDF data.
+ */
+export
+class PDFRenderer implements IRenderer<Widget> {
+  mimetypes = ['application/pdf'];
+
+  render(mimetype: string, data: string): Widget {
+    let w = new Widget();
+    let a = document.createElement('a');
+    a.target = '_blank';
+    a.textContent = "View PDF";
+    a.href = 'data:application/pdf;base64,' + data;
+    w.node.appendChild(a);
     return w;
   }
 }
