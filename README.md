@@ -17,7 +17,7 @@ Package Install
 
 ```bash
 npm install --save jupyter-js-plugins
-conda install notebook  # notebook 4.1+ required
+conda install notebook  # notebook 4.2+ required
 ```
 
 
@@ -34,7 +34,7 @@ git clone https://github.com/jupyter/jupyter-js-plugins.git
 cd jupyter-js-plugins
 npm install
 npm run build
-conda install notebook  # notebook 4.1+ required
+conda install notebook  # notebook 4.2+ required
 ```
 
 **Rebuild**
@@ -88,6 +88,17 @@ Earlier versions may also work, but come with no guarantees.
 - IE 11+
 - Firefox 32+
 - Chrome 38+
+
+Note: "requirejs" must be included in a global context for Comm targets.
+
+
+Bundle for the Browser
+----------------------
+
+Follow the package install instructions first.
+
+Any bundler that understands how to `require()` files with `.js` and `.css`
+extensions can be used with this package.
 
 
 Usage Examples
