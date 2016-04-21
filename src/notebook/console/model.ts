@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  INotebookSession
+} from 'jupyter-js-services';
+
+import {
   IDisposable
 } from 'phosphor-disposable';
 
@@ -31,7 +35,7 @@ import {
 } from '../output-area/model';
 
 import {
-  ICellModel,
+  executeCodeCell, ICellModel,
   ICodeCellModel, CodeCellModel,
   IMarkdownCellModel, MarkdownCellModel,
   IRawCellModel, isCodeCellModel, isMarkdownCellModel,
@@ -76,12 +80,9 @@ interface IConsoleModel extends IDisposable {
   selectionChanged: ISignal<IConsoleModel, void>;
 
   /**
-   * The default mime type for new code cells in the console.
-   *
-   * #### Notes
-   * This can be considered the default language of the console.
+   * The banner that appears at the top of a console session.
    */
-  defaultMimetype: string;
+  banner: string;
 
   /**
    * The list of cells in the console.
@@ -92,9 +93,22 @@ interface IConsoleModel extends IDisposable {
   cells: IObservableList<ICellModel>;
 
   /**
-   * The banner that appears at the top of a console session.
+   * The default mime type for new code cells in the console.
+   *
+   * #### Notes
+   * This can be considered the default language of the console.
    */
-  banner: string;
+  defaultMimetype: string;
+
+  /**
+   * The optional notebook session associated with the model.
+   */
+  session?: INotebookSession;
+
+  /**
+   * Run the current contents of the console prompt.
+   */
+  run(): void;
 
   /**
    * A factory for creating a new code cell.
@@ -241,6 +255,23 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
+   * The session for the console.
+   */
+  get session(): INotebookSession {
+    return this._session;
+  }
+  set session(newValue: INotebookSession) {
+    if (newValue === this._session) {
+      return;
+    }
+    let oldValue = this._session;
+    this._session = newValue;
+    ConsoleModelPrivate.sessionChanged(this, newValue);
+    let name = 'session';
+    this.stateChanged.emit({ name, oldValue, newValue });
+  }
+
+  /**
    * Get whether the model is disposed.
    *
    * #### Notes
@@ -339,6 +370,19 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
+   * Run the current contents of the console prompt.
+   */
+  run(): void {
+    let prompt = this._cells.get(this._cells.length - 1) as ICodeCellModel;
+    prompt.trusted = true;
+    let session = this.session;
+    if (!session || !session.kernel) {
+      return;
+    }
+    executeCodeCell(prompt, session.kernel);
+  }
+
+  /**
    * Execute the given cell.
    */
   protected executeCell(cell: CodeCellModel): void {
@@ -377,10 +421,11 @@ class ConsoleModel implements IConsoleModel {
     }
   }
 
-  private _banner: string = 'loading...';
+  private _banner: string = '...';
   private _cells: IObservableList<ICellModel> = null;
-  private _metadata: { [key: string]: string } = Object.create(null);
   private _defaultMimetype = 'text/x-ipython';
+  private _metadata: { [key: string]: string } = Object.create(null);
+  private _session: INotebookSession = null;
 }
 
 
@@ -419,7 +464,22 @@ namespace ConsoleModelPrivate {
    * Handle a change to the model kernel.
    */
   function kernelChanged(model: IConsoleModel): void {
-    // not implemented
+    let session = model.session;
+    let kernel = session.kernel;
+    session.kernel.kernelInfo().then(info => {
+      console.log('info', info);
+      model.banner = info.banner;
+    });
+  }
+
+  /*
+   * Handle a change to the model session.
+   */
+  export
+  function sessionChanged(model: IConsoleModel, session: INotebookSession): void {
+    model.session.kernelChanged.connect(() => { kernelChanged(model); });
+    // Update the kernel data now.
+    kernelChanged(model);
   }
 
 }

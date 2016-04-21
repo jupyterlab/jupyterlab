@@ -103,7 +103,14 @@ function main(): void {
 
   let kernelspecs: IKernelSpecIds;
 
-  let items: IStandardPaletteItemOptions[] = [];
+  let items: IStandardPaletteItemOptions[] = [
+    {
+      category: 'Console',
+      text: 'Execute Current',
+      shortcut: 'Shift Enter',
+      handler: () => { consoleModel.run(); }
+    }
+  ];
   pModel.addItems(items);
 
   let bindings: IKeyBinding[] = [];
@@ -119,13 +126,7 @@ function main(): void {
       kernelName: findKernel(kernelName, language, specs),
       baseUrl: SERVER_URL
     });
-  }).then(session => {
-    console.log('session', session);
-    return session.kernel.kernelInfo();
-  }).then(info => {
-    console.log('info', info);
-    consoleModel.banner = info.banner;
-  });
+  }).then(session => consoleModel.session = session);
 }
 
 window.onload = main;
