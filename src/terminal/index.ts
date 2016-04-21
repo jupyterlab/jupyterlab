@@ -299,7 +299,7 @@ class TerminalWidget extends Widget {
     this._term.element.style.backgroundColor = this.background;
     this._term.element.style.color = this.color;
     this._sheet.innerHTML = ('.terminal-cursor {background:' + this.color +
-                             ';color:' + this.background + ';} .xterm-helper-textarea { display: none; }');
+                             ';color:' + this.background + ';}');
   }
 
   /**
