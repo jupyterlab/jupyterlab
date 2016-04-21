@@ -308,14 +308,14 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   /**
    * Get the model for a given widget.
    */
-  protected _getModel(widget: T): IContentsModel {
+  private _getModel(widget: T): IContentsModel {
     return Private.modelProperty.get(widget);
   }
 
   /**
    * Set the model for a widget.
    */
-  protected _setModel(widget: T, model: IContentsModel) {
+  private _setModel(widget: T, model: IContentsModel) {
     Private.modelProperty.set(widget, model);
   }
 
