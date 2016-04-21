@@ -879,7 +879,7 @@ class DirListing extends Widget {
         showErrorMessage(this, 'Open directory', error)
       );
     } else {
-      this._registry.open(item);
+      this._registry.open(item.path);
     }
   }
 
@@ -1032,7 +1032,7 @@ class DirListing extends Widget {
     this._drag.mimeData.setData(utils.CONTENTS_MIME, null);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
-        this._registry.open(item);
+        this._registry.open(item.path);
       });
     }
 

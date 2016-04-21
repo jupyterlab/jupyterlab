@@ -129,7 +129,7 @@ function main(): void {
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      let path = fileHandler.findModel(activeWidget).path;
+      let path = fileHandler.findPath(activeWidget);
       fileHandler.save(path);
       return true;
     }
