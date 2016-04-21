@@ -33,6 +33,25 @@ import {
   RawCellModel, RawCellWidget
 } from '../cells';
 
+import {
+  IConsoleModel
+} from './model';
+
+
+/**
+ * The class name added to console widgets.
+ */
+const CONSOLE_CLASS = 'jp-Console';
+
+/**
+ * The class name added to console panels.
+ */
+const CONSOLE_PANEL = 'jp-Console-panel';
+
+/**
+ * The class name added to the console banner.
+ */
+const BANNER_CLASS = 'jp-Console-banner';
 
 /**
  * A panel which contains a toolbar and a console.
@@ -40,17 +59,18 @@ import {
 export
 class ConsolePanel extends Panel {
 
-  static createConsole(): ConsoleWidget {
-    return new ConsoleWidget();
+  static createConsole(model: IConsoleModel, rendermime: RenderMime<Widget>): ConsoleWidget {
+    return new ConsoleWidget(model, rendermime);
   }
 
   /**
-   * Construct a notebook panel.
+   * Construct a console panel.
    */
-  constructor() {
+  constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
     super();
+    this.addClass(CONSOLE_PANEL);
     let constructor = this.constructor as typeof ConsolePanel;
-    this._console = constructor.createConsole();
+    this._console = constructor.createConsole(model, rendermime);
     this.addChild(this._console);
   }
 
@@ -95,10 +115,17 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Construct a notebook widget.
+   * Construct a console widget.
    */
-  constructor() {
+  constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
     super();
+    this.addClass(CONSOLE_CLASS);
+    this._model = model;
+    this._rendermime = rendermime;
+    this.layout = new PanelLayout();
+    this._initHeader();
+    model.cells.changed.connect(this.onCellsChanged, this);
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -129,6 +156,7 @@ class ConsoleWidget extends Widget {
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
+    this._prompt.input.editor.focus();
   }
 
   /**
@@ -142,6 +170,64 @@ class ConsoleWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
   }
+
+  /**
+   * Handle a change cells event.
+   */
+  protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
+    let layout = this.layout as PanelLayout;
+    let constructor = this.constructor as typeof ConsoleWidget;
+    let factory = constructor.createCell;
+    let widget: BaseCellWidget;
+    switch (args.type) {
+    case ListChangeType.Add:
+      widget = factory(args.newValue as ICellModel, this._rendermime);
+      // widget.addClass(NB_CELL_CLASS);
+      // widget.input.editor.addClass(NB_EDITOR_CLASS);
+      layout.insertChild(args.newIndex, widget);
+      break;
+    }
+    this.update();
+  }
+
+  /**
+   * Handle changes to the notebook model.
+   */
+  protected onModelChanged(model: IConsoleModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'banner':
+      this._updateBanner();
+      break;
+    }
+  }
+
+  private _initHeader(): void {
+    let constructor = this.constructor as typeof ConsoleWidget;
+    let cellsLayout = this.layout as PanelLayout;
+    let factory = constructor.createCell;
+    for (let i = 0; i < this._model.cells.length; i++) {
+      cellsLayout.addChild(factory(this._model.cells.get(i), this._rendermime));
+    }
+    let last = cellsLayout.childCount() - 1;
+    this._banner = cellsLayout.childAt(0) as RawCellWidget;
+    this._banner.addClass(BANNER_CLASS);
+    this._prompt = cellsLayout.childAt(last) as CodeCellWidget;
+    this._updateBanner();
+  }
+
+  /**
+   * Update the console banner.
+   */
+  private _updateBanner(): void {
+    let model = this._model;
+    let bannerModel = (this._banner.model as RawCellModel);
+    bannerModel.input.textEditor.text = model.banner;
+  }
+
+  private _banner: RawCellWidget = null;
+  private _model: IConsoleModel;
+  private _prompt: CodeCellWidget = null;
+  private _rendermime: RenderMime<Widget> = null;
 }
 
 

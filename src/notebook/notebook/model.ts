@@ -8,7 +8,7 @@ import * as CodeMirror
 import 'codemirror/mode/meta';
 
 import {
-  INotebookSession, IExecuteReply
+  INotebookSession
 } from 'jupyter-js-services';
 
 import {

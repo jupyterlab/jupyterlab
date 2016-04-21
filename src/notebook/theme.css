@@ -45,6 +45,20 @@
   padding: 4px;
 }
 
+.jp-Console .jp-InputArea-editor.jp-CodeMirror {
+  background: transparent;
+  border-color: transparent;
+}
+
+.jp-Console .jp-InputArea-prompt {
+  flex-basis: 70px;
+  text-align: left;
+}
+
+.jp-Console .jp-Console-banner .jp-InputArea-prompt {
+  display: none;
+}
+
 
 .jp-MarkdownCell {
   outline: 0;

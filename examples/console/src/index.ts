@@ -6,8 +6,7 @@
 'use strict';
 
 import {
-  deserialize, selectKernel, trustNotebook, findKernel,
-  ConsolePanel, ConsoleWidget
+  ConsolePanel, ConsoleWidget, ConsoleModel, findKernel
 } from 'jupyter-js-notebook';
 
 import {
@@ -21,7 +20,7 @@ import {
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer
+  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer, MarkdownRenderer
 } from 'jupyter-js-ui/lib/renderers';
 
 import {
@@ -51,7 +50,7 @@ import 'jupyter-js-ui/lib/dialog/theme.css';
 
 
 let SERVER_URL = getBaseUrl();
-let NOTEBOOK = 'test.ipynb';
+let TITLE = 'Console';
 
 
 function main(): void {
@@ -72,7 +71,8 @@ function main(): void {
     new SVGRenderer(),
     new LatexRenderer(),
     new ConsoleTextRenderer(),
-    new TextRenderer()
+    new TextRenderer(),
+    new MarkdownRenderer()
   ];
 
   for (let t of transformers) {
@@ -82,8 +82,9 @@ function main(): void {
     }
   }
 
-  let consoleWidget = new ConsolePanel();
-  consoleWidget.title.text = NOTEBOOK;
+  let consoleModel = new ConsoleModel();
+  let consoleWidget = new ConsolePanel(consoleModel, rendermime);
+  consoleWidget.title.text = TITLE;
 
   let pModel = new StandardPaletteModel();
   let palette = new CommandPalette();
@@ -102,26 +103,30 @@ function main(): void {
 
   let kernelspecs: IKernelSpecIds;
 
-  let items: IStandardPaletteItemOptions[] = [];
+  let items: IStandardPaletteItemOptions[] = [
+    {
+      category: 'Console',
+      text: 'Execute Current',
+      shortcut: 'Shift Enter',
+      handler: () => { consoleModel.run(); }
+    }
+  ];
   pModel.addItems(items);
 
   let bindings: IKeyBinding[] = [];
   keymap.add(bindings);
 
-  contents.get(NOTEBOOK, {}).then(data => {
-    // deserialize(data.content, nbModel);
-    getKernelSpecs({}).then(specs => {
-      kernelspecs = specs;
-      // start session
-      // startNewSession({
-      //   notebookPath: NOTEBOOK,
-      //   kernelName: findKernel(nbModel, specs),
-      //   baseUrl: SERVER_URL
-      // }).then(session => {
-      //   nbModel.session = session;
-      // });
+  getKernelSpecs({}).then(specs => {
+    kernelspecs = specs;
+    let kernelName = specs.default;
+    let language = specs.default;
+    console.log('specs', specs);
+    return startNewSession({
+      notebookPath: 'fake_path',
+      kernelName: findKernel(kernelName, language, specs),
+      baseUrl: SERVER_URL
     });
-  });
+  }).then(session => consoleModel.session = session);
 }
 
 window.onload = main;
