@@ -86,7 +86,8 @@ Earlier versions may also work, but come with no guarantees.
 - Firefox 32+
 - Chrome 38+
 
-Note: "requirejs" must be included in a global context for Comm targets.
+Note: "requirejs" must be included in a global context (usually as a
+`<script>` tag) for Comm targets.
 
 
 Bundle for the Browser
