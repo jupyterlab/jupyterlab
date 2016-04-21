@@ -43,22 +43,22 @@ class FileHandler extends AbstractFileHandler<CodeMirrorWidget> {
   /**
    * Get the options used to save the widget content.
    */
-  protected getSaveOptions(widget: CodeMirrorWidget, model: IContentsModel): Promise<IContentsOpts> {
-    let name = model.path.split('/').pop();
+  protected getSaveOptions(widget: CodeMirrorWidget, path: string): Promise<IContentsOpts> {
+    let name = path.split('/').pop();
     name = name.split('.')[0];
     let content = widget.editor.getDoc().getValue();
-    return Promise.resolve({ path: model.path, content, name,
+    return Promise.resolve({ path, content, name,
                              type: 'file', format: 'text' });
   }
 
   /**
-   * Create the widget from an `IContentsModel`.
+   * Create the widget from a path.
    */
-  protected createWidget(model: IContentsModel): CodeMirrorWidget {
+  protected createWidget(path: string): CodeMirrorWidget {
     let widget = new CodeMirrorWidget();
     widget.addClass(EDITOR_CLASS);
     CodeMirror.on(widget.editor.getDoc(), 'change', () => {
-      this.setDirty(model.path);
+      this.setDirty(path);
     });
     return widget;
   }

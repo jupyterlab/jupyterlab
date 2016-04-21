@@ -311,7 +311,7 @@ namespace Private {
             return;
           }
           if (contents.type !== 'directory') {
-            registry.open(contents);
+            registry.open(contents.path);
           }
           model.refresh();
         });

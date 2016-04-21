@@ -85,14 +85,14 @@ class FileHandlerRegistry {
   }
 
   /**
-   * Open a contents model by name.
+   * Open a contents model by path.
    */
-  open(model: IContentsModel): Widget {
-    let handler = this.findHandler(model);
+  open(path: string): Widget {
+    let handler = this.findHandler(path);
     if (handler === void 0) {
       return;
     }
-    let widget = handler.open(model);
+    let widget = handler.open(path);
     this.opened.emit(widget);
   }
 
@@ -154,13 +154,13 @@ class FileHandlerRegistry {
   }
 
   /**
-   * Find the model for a given widget.
+   * Find the path for a given widget.
    */
-  findModel(widget: Widget): IContentsModel {
+  findPath(widget: Widget): string {
     for (let h of this._handlers) {
-      let model = h.findModel(widget);
-      if (model) {
-        return model;
+      let path = h.findPath(widget);
+      if (path) {
+        return path;
       }
     }
   }
@@ -178,13 +178,12 @@ class FileHandlerRegistry {
   }
 
   /**
-   * Find the appropriate handler given a model.
+   * Find the appropriate handler given a path.
    */
-  protected findHandler(model: IContentsModel): AbstractFileHandler<Widget> {
-    if (model.type === 'directory' || this._handlers.length === 0) {
+  protected findHandler(path: string): AbstractFileHandler<Widget> {
+    if (this._handlers.length === 0) {
       return;
     }
-    let path = model.path;
     let ext = '.' + path.split('.').pop();
     let handlers: AbstractFileHandler<Widget>[] = [];
     // Look for matching file extensions.
