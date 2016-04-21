@@ -106,10 +106,6 @@ function main(): void {
   panel.addChild(nbWidget);
   window.onresize = () => { panel.update(); };
 
-  setTimeout(() => {
-    nbWidget.close();
-  }, 1000);
-
   let kernelspecs: IKernelSpecIds;
 
   let items: IStandardPaletteItemOptions[] = [
