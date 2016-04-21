@@ -15,7 +15,7 @@ Package Install
 
 ```bash
 npm install --save jupyter-js-ui
-conda install notebook  # notebook 4.1+ required
+conda install notebook  # notebook 4.2+ required
 ```
 
 
@@ -32,7 +32,7 @@ git clone https://github.com/jupyter/jupyter-js-ui.git
 cd jupyter-js-ui
 npm install
 npm run build
-conda install notebook  # notebook 4.1+ required
+conda install notebook  # notebook 4.2+ required
 ```
 
 **Rebuild**
@@ -86,6 +86,9 @@ Earlier versions may also work, but come with no guarantees.
 - IE 11+
 - Firefox 32+
 - Chrome 38+
+
+Note: "requirejs" must be included in a global context (usually as a
+`<script>` tag) for Comm targets.
 
 
 Bundle for the Browser
