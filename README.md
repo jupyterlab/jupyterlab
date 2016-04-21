@@ -10,9 +10,11 @@ Package Install
 
 **Prerequisites**
 - [node](http://nodejs.org/)
+- [python](https://www.continuum.io/downloads)
 
 ```bash
 npm install --save jupyter-js-notebook
+conda install notebook  # notebook 4.2+ required
 ```
 
 
@@ -22,12 +24,14 @@ Source Build
 **Prerequisites**
 - [git](http://git-scm.com/)
 - [node 0.12+](http://nodejs.org/)
+- [python](https://www.continuum.io/downloads)
 
 ```bash
 git clone https://github.com/jupyter/jupyter-js-notebook.git
 cd jupyter-js-notebook
 npm install
 npm run build
+conda install notebook  # notebook 4.2+ required
 ```
 
 **Rebuild**
@@ -81,6 +85,18 @@ Earlier versions may also work, but come with no guarantees.
 - IE 11+
 - Firefox 32+
 - Chrome 38+
+
+Note: "requirejs" must be included in a global context (usually as a
+`<script>` tag) for Comm targets.
+
+
+Bundle for the Browser
+----------------------
+
+Follow the package install instructions first.
+
+Any bundler that understands how to `require()` files with `.js` and `.css`
+extensions can be used with this package.
 
 
 Usage Examples
