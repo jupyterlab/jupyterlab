@@ -86,34 +86,29 @@ function main(): void {
     }
   }
 
-  let nbWidget: NotebookPanel;
-  let nbModel: INotebookModel;
-  let nbManager: NotebookManager;
   let handler = new NotebookFileHandler(contents, sessions, rendermime);
-  contents.get(NOTEBOOK).then(model => {
-    nbWidget = handler.open(model);
-    nbModel = nbWidget.model;
-    nbManager = nbWidget.manager;
-
-    let panel = new SplitPanel();
-    panel.id = 'main';
-    panel.orientation = SplitPanel.Horizontal;
-    panel.spacing = 0;
-    SplitPanel.setStretch(palette, 0);
-    SplitPanel.setStretch(nbWidget, 1);
-    panel.attach(document.body);
-    panel.addChild(palette);
-    panel.addChild(nbWidget);
-    window.onresize = () => { panel.update(); };
-
-    setTimeout(() => {
-      nbWidget.close();
-    }, 1000);
-  });
+  let nbWidget = handler.open(NOTEBOOK);
+  let nbModel = nbWidget.model;
+  let nbManager = nbWidget.manager;
 
   let pModel = new StandardPaletteModel();
   let palette = new CommandPalette();
   palette.model = pModel;
+
+  let panel = new SplitPanel();
+  panel.id = 'main';
+  panel.orientation = SplitPanel.Horizontal;
+  panel.spacing = 0;
+  SplitPanel.setStretch(palette, 0);
+  SplitPanel.setStretch(nbWidget, 1);
+  panel.attach(document.body);
+  panel.addChild(palette);
+  panel.addChild(nbWidget);
+  window.onresize = () => { panel.update(); };
+
+  setTimeout(() => {
+    nbWidget.close();
+  }, 1000);
 
   let kernelspecs: IKernelSpecIds;
 

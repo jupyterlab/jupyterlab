@@ -12,7 +12,7 @@ import {
   IKernelFuture, IKernelId, IKernelInfo, IKernelManager, IKernelMessage,
   IKernelMessageHeader, IKernelMessageOptions, IKernelOptions, IKernelSpecIds,
   KernelStatus, IKernelIOPubCommOpenMessage, IKernelSpec, createKernelMessage,
-  INotebookSession, ISessionOptions
+  INotebookSession, ISessionOptions, IHistoryRequest, IHistoryReply
 } from 'jupyter-js-services';
 
 import {
@@ -336,6 +336,14 @@ class MockKernel implements IKernel {
   complete(contents: ICompleteRequest): Promise<ICompleteReply> {
     return Promise.resolve(void 0);
   }
+
+  /**
+   * Send a `history_request` message.
+   */
+  history(contents: IHistoryRequest): Promise<IHistoryReply> {
+    return Promise.resolve(void 0);
+  }
+
 
   /**
    * Send an `inspect_request` message.

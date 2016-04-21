@@ -125,22 +125,22 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPanel> {
   /**
    * Get options use to fetch the model contents from disk.
    */
-  protected getFetchOptions(model: IContentsModel): IContentsOpts {
+  protected getFetchOptions(path: string): IContentsOpts {
     return { type: 'notebook' };
   }
 
   /**
    * Get the options used to save the widget content.
    */
-  protected getSaveOptions(widget: NotebookPanel, model: IContentsModel): Promise<IContentsOpts> {
+  protected getSaveOptions(widget: NotebookPanel, path: string): Promise<IContentsOpts> {
       let content = serialize(widget.model);
       return Promise.resolve({ type: 'notebook', content });
   }
 
   /**
-   * Create the widget from an `IContentsModel`.
+   * Create the widget from a path.
    */
-  protected createWidget(contents: IContentsModel): NotebookPanel {
+  protected createWidget(path: string): NotebookPanel {
     let model = new NotebookModel();
     let manager = new NotebookManager(model, this.manager);
     let panel = new NotebookPanel(manager, this._rendermime);
@@ -149,12 +149,12 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPanel> {
         return;
       }
       if (args.newValue) {
-        this.setDirty(contents.path);
+        this.setDirty(path);
       } else {
-        this.clearDirty(contents.path);
+        this.clearDirty(path);
       }
     });
-    panel.title.text = contents.name;
+    panel.title.text = path.split('/').pop();
     return panel;
   }
 
@@ -163,7 +163,7 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPanel> {
    */
   protected populateWidget(widget: NotebookPanel, model: IContentsModel): Promise<IContentsModel> {
     deserialize(model.content, widget.model);
-    return this._findSession(model).then(session => {
+    return this._findSession(model.path).then(session => {
       if (session !== void 0) {
         return session;
       }
@@ -185,8 +185,8 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookPanel> {
   /**
    * Find a running session given a contents model.
    */
-  private _findSession(model: IContentsModel): Promise<INotebookSession> {
-    return this._session.findByPath(model.path).then(sessionId => {
+  private _findSession(path: string): Promise<INotebookSession> {
+    return this._session.findByPath(path).then(sessionId => {
       return this._session.connectTo(sessionId.id);
     }).catch(() => {
       return void 0;
