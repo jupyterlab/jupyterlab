@@ -227,7 +227,7 @@ class MarkdownCellWidget extends BaseCellWidget {
       if (this._dirty) {
         let text = model.input.textEditor.text || DEFAULT_MARKDOWN_TEXT;
         text = sanitize(text);
-        let bundle: MimeBundle = { 'application/vnd.jupyter.markdown': text };
+        let bundle: MimeBundle = { 'text/markdown': text };
         this._rendered.dispose();
         this._rendered = this._rendermime.render(bundle);
         this._rendered.addClass(RENDERER_CLASS);
