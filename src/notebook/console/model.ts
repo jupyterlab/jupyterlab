@@ -237,7 +237,7 @@ class ConsoleModel implements IConsoleModel {
     if (newValue === this._bannerText) {
       return;
     }
-    let oldValue = this._banner;
+    let oldValue = this._bannerText;
     this._bannerText = newValue;
     if (this._banner !== null) {
       this._banner.input.textEditor.text = newValue;
