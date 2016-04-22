@@ -114,6 +114,15 @@ class ConsoleWidget extends Widget {
     return widget;
   }
 
+  /*
+   * The last cell in a console is always a `CodeCellWidget` prompt.
+   */
+  get prompt(): CodeCellWidget {
+    let layout = (this.layout as PanelLayout);
+    let last = layout.childCount() - 1;
+    return last > -1 ? layout.childAt(last) as CodeCellWidget : null;
+  }
+
   /**
    * Construct a console widget.
    */
@@ -125,7 +134,6 @@ class ConsoleWidget extends Widget {
     this.layout = new PanelLayout();
     this._initHeader();
     model.cells.changed.connect(this.onCellsChanged, this);
-    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -156,7 +164,8 @@ class ConsoleWidget extends Widget {
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
-    this._prompt.input.editor.focus();
+    let prompt = this.prompt;
+    if (prompt) prompt.input.editor.focus();
   }
 
   /**
@@ -190,43 +199,18 @@ class ConsoleWidget extends Widget {
     this.update();
   }
 
-  /**
-   * Handle changes to the notebook model.
-   */
-  protected onModelChanged(model: IConsoleModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'banner':
-      this._updateBanner();
-      break;
-    }
-  }
-
   private _initHeader(): void {
     let constructor = this.constructor as typeof ConsoleWidget;
     let cellsLayout = this.layout as PanelLayout;
     let factory = constructor.createCell;
     for (let i = 0; i < this._model.cells.length; i++) {
-      cellsLayout.addChild(factory(this._model.cells.get(i), this._rendermime));
+      let cell = factory(this._model.cells.get(i), this._rendermime)
+      if (i === 0) cell.addClass(BANNER_CLASS);
+      cellsLayout.addChild(cell);
     }
-    let last = cellsLayout.childCount() - 1;
-    this._banner = cellsLayout.childAt(0) as RawCellWidget;
-    this._banner.addClass(BANNER_CLASS);
-    this._prompt = cellsLayout.childAt(last) as CodeCellWidget;
-    this._updateBanner();
   }
 
-  /**
-   * Update the console banner.
-   */
-  private _updateBanner(): void {
-    let model = this._model;
-    let bannerModel = (this._banner.model as RawCellModel);
-    bannerModel.input.textEditor.text = model.banner;
-  }
-
-  private _banner: RawCellWidget = null;
   private _model: IConsoleModel;
-  private _prompt: CodeCellWidget = null;
   private _rendermime: RenderMime<Widget> = null;
 }
 

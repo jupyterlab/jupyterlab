@@ -113,7 +113,13 @@ function main(): void {
   ];
   pModel.addItems(items);
 
-  let bindings: IKeyBinding[] = [];
+  let bindings = [
+    {
+      selector: '.jp-Console',
+      sequence: ['Shift Enter'],
+      handler: () => { consoleModel.run(); }
+    }
+  ]
   keymap.add(bindings);
 
   getKernelSpecs({}).then(specs => {
