@@ -119,9 +119,9 @@ class TerminalWidget extends Widget {
     // Set the default title.
     this.title.text = 'Terminal ' + TerminalWidget.nterms;
 
-    this._dummyTerm = createDummyTerm();
-
     Terminal.brokenBold = true;
+
+    this._dummyTerm = createDummyTerm();
 
     this._ws.onopen = (event: MessageEvent) => {
       this._createTerm(options);
