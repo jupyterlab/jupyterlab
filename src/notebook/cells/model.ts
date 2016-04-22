@@ -540,7 +540,7 @@ function executeCodeCell(cell: ICodeCellModel, kernel: IKernel): Promise<void> {
   let text = input.textEditor.text.trim();
   cell.clear();
   if (text.length === 0) {
-    return;
+    return Promise.reject(void 0);
   }
   input.prompt = '*';
   return executeCode(text, kernel, output).then(reply => {

@@ -382,12 +382,15 @@ class ConsoleModel implements IConsoleModel {
    */
   run(): void {
     let prompt = this._cells.get(this._cells.length - 1) as ICodeCellModel;
-    prompt.trusted = true;
     let session = this.session;
     if (!session || !session.kernel) {
       return;
     }
-    executeCodeCell(prompt, session.kernel);
+    prompt.trusted = true;
+    prompt.input.textEditor.readOnly = true;
+    let newPrompt = () => { this._cells.add(this.createCodeCell()); };
+    // Whether the code cell executes or not, create a new prompt.
+    executeCodeCell(prompt, session.kernel).then(newPrompt, newPrompt);
   }
 
   /**
