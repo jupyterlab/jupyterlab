@@ -8,3 +8,4 @@ import './output-area/model.spec';
 import './editor/model.spec';
 import './notebook/model.spec';
 import './notebook/nbformat.spec';
+import './notebook/serialize.spec';
