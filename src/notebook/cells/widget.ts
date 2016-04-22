@@ -229,7 +229,7 @@ class MarkdownCellWidget extends BaseCellWidget {
         text = sanitize(text);
         let bundle: MimeBundle = { 'text/markdown': text };
         this._rendered.dispose();
-        this._rendered = this._rendermime.render(bundle);
+        this._rendered = this._rendermime.render(bundle) || new Widget();
         this._rendered.addClass(RENDERER_CLASS);
         (this.layout as PanelLayout).addChild(this._rendered);
       }
