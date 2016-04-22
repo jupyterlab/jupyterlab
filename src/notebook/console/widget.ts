@@ -134,7 +134,6 @@ class ConsoleWidget extends Widget {
     this.layout = new PanelLayout();
     this._initHeader();
     model.cells.changed.connect(this.onCellsChanged, this);
-    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -198,13 +197,6 @@ class ConsoleWidget extends Widget {
       break;
     }
     this.update();
-  }
-
-  /**
-   * Handle changes to the notebook model.
-   */
-  protected onModelChanged(model: IConsoleModel, args: IChangedArgs<any>): void {
-    console.log('model changed', args);
   }
 
   private _initHeader(): void {
