@@ -325,6 +325,12 @@
 }
 
 
+.jp-Console .jp-Cell {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+
 .jp-Console .jp-InputArea-editor.jp-CodeMirror {
   background: transparent;
   border-color: transparent;
@@ -341,6 +347,7 @@
   flex-basis: auto;
   text-align: left;
 }
+
 
 .jp-Console .jp-OutputArea pre {
   border: none;

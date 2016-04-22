@@ -191,9 +191,10 @@ class ConsoleWidget extends Widget {
     switch (args.type) {
     case ListChangeType.Add:
       widget = factory(args.newValue as ICellModel, this._rendermime);
-      // widget.addClass(NB_CELL_CLASS);
-      // widget.input.editor.addClass(NB_EDITOR_CLASS);
       layout.insertChild(args.newIndex, widget);
+      let prompt = this.prompt;
+      Private.scrollIfNeeded(this.parent.node, prompt.node);
+      prompt.input.editor.focus();
       break;
     }
     this.update();
