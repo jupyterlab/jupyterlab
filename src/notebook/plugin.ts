@@ -400,7 +400,11 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
       handler: () => {
         let model = activeWidget.model;
         let name = model.kernelspec.name;
-        if (model) selectKernel(activeWidget.parent.node, name, specs);
+        if (model) {
+          selectKernel(activeWidget.parent.node, name, specs).then(newName => {
+            if (newName) model.session.changeKernel({name: newName});
+          });
+        }
       }
     }]);
     app.palette.add([
