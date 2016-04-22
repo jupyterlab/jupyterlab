@@ -179,7 +179,7 @@ class ConsoleModel implements IConsoleModel {
    * Construct a new console model.
    */
   constructor() {
-    this._banner = this.createRawCell() as RawCellModel;
+    this._banner = this.createRawCell();
     this._banner.input.textEditor.readOnly = true;
     this._banner.input.textEditor.text = this._bannerText;
 
@@ -240,7 +240,7 @@ class ConsoleModel implements IConsoleModel {
     let oldValue = this._banner;
     this._bannerText = newValue;
     if (this._banner !== null) {
-      (this._banner as RawCellModel).input.textEditor.text = newValue;
+      this._banner.input.textEditor.text = newValue;
     }
     let name = 'banner';
     this.stateChanged.emit({ name, oldValue, newValue });
@@ -429,7 +429,7 @@ class ConsoleModel implements IConsoleModel {
     }
   }
 
-  private _banner: RawCellModel = null;
+  private _banner: IRawCellModel = null;
   private _bannerText: string = '...';
   private _cells: IObservableList<ICellModel> = null;
   private _defaultMimetype = 'text/x-ipython';
