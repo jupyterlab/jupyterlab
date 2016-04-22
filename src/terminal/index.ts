@@ -121,6 +121,8 @@ class TerminalWidget extends Widget {
 
     this._dummyTerm = createDummyTerm();
 
+    Terminal.brokenBold = true;
+
     this._ws.onopen = (event: MessageEvent) => {
       this._createTerm(options);
     };
@@ -293,7 +295,6 @@ class TerminalWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Set the fg and bg colors of the terminal and cursor.
-    // Make the input area invisible.
     this.node.style.backgroundColor = this.background;
     this.node.style.color = this.color;
     this._term.element.style.backgroundColor = this.background;

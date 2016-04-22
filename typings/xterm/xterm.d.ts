@@ -40,6 +40,7 @@
   interface TerminalConstructor {
     new (options?: ITerminalConfig): Terminal;
     (options?: ITerminalConfig): Terminal;
+    brokenBold: boolean;
   }
 
 /**
