@@ -179,12 +179,17 @@ class ConsoleModel implements IConsoleModel {
    * Construct a new console model.
    */
   constructor() {
-    let banner = this.createRawCell();
-    let prompt = this.createCodeCell();
-    banner.input.textEditor.readOnly = true;
+    this._banner = this.createRawCell() as RawCellModel;
+    this._banner.input.textEditor.readOnly = true;
+    this._banner.input.textEditor.text = this._bannerText;
+
     this._cells = new ObservableList<ICellModel>();
-    this._cells.add(banner);
-    this._cells.add(prompt);
+
+    // The first cell in a console is always the banner.
+    this._cells.add(this._banner);
+    // The last cell in a console is always the prompt.
+    this._cells.add(this.createCodeCell());
+
     this._cells.changed.connect(this.onCellsChanged, this);
   }
 
@@ -226,14 +231,17 @@ class ConsoleModel implements IConsoleModel {
    * The banner that appears at the top of a console session.
    */
   get banner(): string {
-    return this._banner;
+    return this._bannerText;
   }
   set banner(newValue: string) {
-    if (newValue === this._banner) {
+    if (newValue === this._bannerText) {
       return;
     }
     let oldValue = this._banner;
-    this._banner = newValue;
+    this._bannerText = newValue;
+    if (this._banner !== null) {
+      (this._banner as RawCellModel).input.textEditor.text = newValue;
+    }
     let name = 'banner';
     this.stateChanged.emit({ name, oldValue, newValue });
   }
@@ -421,7 +429,8 @@ class ConsoleModel implements IConsoleModel {
     }
   }
 
-  private _banner: string = '...';
+  private _banner: RawCellModel = null;
+  private _bannerText: string = '...';
   private _cells: IObservableList<ICellModel> = null;
   private _defaultMimetype = 'text/x-ipython';
   private _metadata: { [key: string]: string } = Object.create(null);

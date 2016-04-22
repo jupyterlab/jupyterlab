@@ -194,11 +194,7 @@ class ConsoleWidget extends Widget {
    * Handle changes to the notebook model.
    */
   protected onModelChanged(model: IConsoleModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'banner':
-      this._updateBanner();
-      break;
-    }
+    console.log('model changed', args);
   }
 
   private _initHeader(): void {
@@ -209,22 +205,11 @@ class ConsoleWidget extends Widget {
       cellsLayout.addChild(factory(this._model.cells.get(i), this._rendermime));
     }
     let last = cellsLayout.childCount() - 1;
-    this._banner = cellsLayout.childAt(0) as RawCellWidget;
-    this._banner.addClass(BANNER_CLASS);
+    let banner = cellsLayout.childAt(0) as RawCellWidget;
+    banner.addClass(BANNER_CLASS);
     this._prompt = cellsLayout.childAt(last) as CodeCellWidget;
-    this._updateBanner();
   }
 
-  /**
-   * Update the console banner.
-   */
-  private _updateBanner(): void {
-    let model = this._model;
-    let bannerModel = (this._banner.model as RawCellModel);
-    bannerModel.input.textEditor.text = model.banner;
-  }
-
-  private _banner: RawCellWidget = null;
   private _model: IConsoleModel;
   private _prompt: CodeCellWidget = null;
   private _rendermime: RenderMime<Widget> = null;
