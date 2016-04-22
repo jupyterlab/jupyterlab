@@ -114,6 +114,15 @@ class ConsoleWidget extends Widget {
     return widget;
   }
 
+  /*
+   * The last cell in a console is always a `CodeCellWidget` prompt.
+   */
+  get prompt(): CodeCellWidget {
+    let layout = (this.layout as PanelLayout);
+    let last = layout.childCount() - 1;
+    return last > -1 ? layout.childAt(last) as CodeCellWidget : null;
+  }
+
   /**
    * Construct a console widget.
    */
@@ -156,7 +165,8 @@ class ConsoleWidget extends Widget {
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
-    this._prompt.input.editor.focus();
+    let prompt = this.prompt;
+    if (prompt) prompt.input.editor.focus();
   }
 
   /**
@@ -202,16 +212,13 @@ class ConsoleWidget extends Widget {
     let cellsLayout = this.layout as PanelLayout;
     let factory = constructor.createCell;
     for (let i = 0; i < this._model.cells.length; i++) {
-      cellsLayout.addChild(factory(this._model.cells.get(i), this._rendermime));
+      let cell = factory(this._model.cells.get(i), this._rendermime)
+      if (i === 0) cell.addClass(BANNER_CLASS);
+      cellsLayout.addChild(cell);
     }
-    let last = cellsLayout.childCount() - 1;
-    let banner = cellsLayout.childAt(0) as RawCellWidget;
-    banner.addClass(BANNER_CLASS);
-    this._prompt = cellsLayout.childAt(last) as CodeCellWidget;
   }
 
   private _model: IConsoleModel;
-  private _prompt: CodeCellWidget = null;
   private _rendermime: RenderMime<Widget> = null;
 }
 
