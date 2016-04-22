@@ -96,7 +96,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
       id: newNotebookId,
       handler: () => {
         registry.createNew('notebook', model.path, widget.node).then(contents => {
-          registry.open(contents);
+          registry.open(contents.path);
         });
       }
     },
@@ -104,7 +104,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
       id: newTextFileId,
       handler: () => {
         registry.createNew('file', model.path, widget.node).then(contents => {
-          registry.open(contents);
+          registry.open(contents.path);
         });
       }
     }
@@ -140,8 +140,8 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: saveDocumentId,
       handler: () => {
-        let model = registry.findModel(activeWidget);
-        if (model) registry.save(model.path);
+        let path = registry.findPath(activeWidget);
+        if (path) registry.save(path);
       }
     }
   ]);
@@ -161,8 +161,8 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: revertDocumentId,
       handler: () => {
-        let model = registry.findModel(activeWidget);
-        if (model) registry.revert(model.path);
+        let path = registry.findPath(activeWidget);
+        if (path) registry.revert(path);
       }
     }
   ]);
@@ -182,8 +182,8 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: closeDocumentId,
       handler: () => {
-        let model = registry.findModel(activeWidget);
-        if (model) registry.close(model.path);
+        let path = registry.findPath(activeWidget);
+        if (path) registry.close(path);
       }
     }
   ]);

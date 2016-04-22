@@ -80,22 +80,22 @@ class NotebookFileHandler extends AbstractFileHandler<NotebookWidget> {
   /**
    * Get options use to fetch the model contents from disk.
    */
-  protected getFetchOptions(model: IContentsModel): IContentsOpts {
+  protected getFetchOptions(path: string): IContentsOpts {
     return { type: 'notebook' };
   }
 
   /**
    * Get the options used to save the widget content.
    */
-  protected getSaveOptions(widget: NotebookWidget, model: IContentsModel): Promise<IContentsOpts> {
+  protected getSaveOptions(widget: NotebookWidget, path: string): Promise<IContentsOpts> {
       let content = serialize(widget.model);
       return Promise.resolve({ type: 'notebook', content });
   }
 
   /**
-   * Create the widget from an `IContentsModel`.
+   * Create the widget from a path.
    */
-  protected createWidget(contents: IContentsModel): NotebookWidget {
+  protected createWidget(path: string): NotebookWidget {
     let model = new NotebookModel();
     model.readOnly = true;
     return new NotebookWidget(model, this._rendermime);
