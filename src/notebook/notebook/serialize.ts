@@ -5,7 +5,7 @@
 import {
   ICellModel, IRawCellModel,
   isRawCellModel, isCodeCellModel
-} from '../cells';
+} from '../cells/model';
 
 import {
   INotebookContent, ICell, MAJOR_VERSION, MINOR_VERSION,
@@ -93,6 +93,8 @@ function deserialize(data: INotebookContent, model: INotebookModel): void {
       }
     }
   }
+  model.dirty = false;
+  model.mode = 'command';
 }
 
 
