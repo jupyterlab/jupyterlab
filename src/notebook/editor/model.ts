@@ -15,6 +15,20 @@ import {
 } from 'phosphor-signaling';
 
 
+export
+enum EdgeFlag {
+  /**
+   * The bottom edge of the editor.
+   */
+  Bottom = 0x1,
+
+  /**
+   * The top edge of the editor.
+   */
+  Top = 0x2
+}
+
+
 /**
  * An interface required for implementing the editor model
  */
@@ -24,6 +38,11 @@ interface IEditorModel extends IDisposable {
    * A signal emitted when the editor model state changes.
    */
   stateChanged: ISignal<IEditorModel, IChangedArgs<any>>;
+
+  /**
+   * A signal emitted when eight the top or bottom edge is requested.
+   */
+  edgeRequested: ISignal<IEditorModel, EdgeFlag>;
 
   /**
    * The text in the text editor.
@@ -131,6 +150,13 @@ class EditorModel implements IEditorModel {
    */
   get stateChanged(): ISignal<EditorModel, IChangedArgs<any>> {
     return EditorModelPrivate.stateChangedSignal.bind(this);
+  }
+
+ /**
+   * A signal emitted when eight the top or bottom edge is requested.
+   */
+  get edgeRequested(): ISignal<EditorModel, EdgeFlag> {
+    return EditorModelPrivate.edgeRequestedSignal.bind(this);
   }
 
   /**
@@ -287,6 +313,12 @@ namespace EditorModelPrivate {
    */
   export
   const stateChangedSignal = new Signal<EditorModel, IChangedArgs<any>>();
+
+  /**
+   * A signal emitted when eight the top or bottom edge is requested.
+   */
+  export
+  const edgeRequestedSignal = new Signal<EditorModel, EdgeFlag>();
 
   /**
    * Initialize an editor view model from an options object.
