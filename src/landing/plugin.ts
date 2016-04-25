@@ -53,7 +53,7 @@ function activateLanding(app: Application): void {
   for (let name of ['Notebook', 'Terminal', 'Text Editor']) {
     let column = document.createElement('div');
     body.appendChild(column);
-    column.className = 'jp-Landing-column'
+    column.className = 'jp-Landing-column';
 
     let img = document.createElement('span');
     let imgName = name.replace(' ', '');
