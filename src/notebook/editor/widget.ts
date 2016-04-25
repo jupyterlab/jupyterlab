@@ -29,7 +29,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IEditorModel
+  IEditorModel, EdgeFlag
 } from './model';
 
 
@@ -47,6 +47,16 @@ const CODEMIRROR_CLASS = 'jp-CodeMirror';
  * The class name added to a fixed height editor.
  */
 const FIXED_HEIGHT_CLASS = 'jp-mod-fixedHeight';
+
+/**
+ * The key code for the up arrow key.
+ */
+const UP_ARROW = 38;
+
+/**
+ * The key code for the down arrow key.
+ */
+const DOWN_ARROW = 40;
 
 /**
  * Initialize diff match patch.
@@ -82,7 +92,8 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     super();
     this.addClass(EDITOR_CLASS);
     this.addClass(CODEMIRROR_CLASS);
-    this._editor = CodeMirror(this.node);
+    let editor = CodeMirror(this.node);
+    this._editor = editor;
     this._model = model;
     this.updateMimetype(model.mimetype);
     this.updateFilename(model.filename);
@@ -94,6 +105,22 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     CodeMirror.on(this._editor.getDoc(), 'change', (instance, change) => {
       if (change.origin !== 'setValue') {
         this._model.text = instance.getValue();
+      }
+    });
+    CodeMirror.on(editor, 'keydown', (instance: any, event: KeyboardEvent) => {
+      let doc = editor.getDoc();
+      let cursor = doc.getCursor();
+      let line = cursor.line;
+      let ch = cursor.ch;
+      if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
+        this._model.edgeRequested.emit(EdgeFlag.Top);
+        return
+      }
+      let lastLine = doc.lastLine();
+      let lastCh = doc.getLineHandle(lastLine).text.length;
+      if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
+        this._model.edgeRequested.emit(EdgeFlag.Bottom);
+        return
       }
     });
     model.stateChanged.connect(this.onModelStateChanged, this);
