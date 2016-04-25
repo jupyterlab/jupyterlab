@@ -21,12 +21,11 @@
 
 
 .jp-Landing-dialog {
-  padding-top: 20px;
   padding-bottom: 20px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 16px;
   color: #757575;
-  background: white;
+   background: #FAFAFA;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -35,7 +34,8 @@
   justify-content: center;
   flex-direction: column;
   border: 1px solid #BDBDBD;
-  border-radius: 1px;
+  border-radius: 2px;
+  box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.5);
 }
 
 
@@ -44,6 +44,7 @@
   margin-left: auto;
   margin-right: auto;
   width: 100%;
+  background: white;
   background-image: url(images/jupyterlab.svg);
   background-size: 193px 40px;
   background-repeat: no-repeat;
@@ -53,11 +54,17 @@
 }
 
 
-.jp-Landing-header {
+.jp-Landing-title {
   padding-top: 20px;
+  background: white;
   width: 100%;
+}
+
+
+.jp-Landing-header {
+  
+  padding-top: 20px;
   padding-bottom: 8px;
-  background: #FAFAFA;
 }
 
 
@@ -66,7 +73,6 @@
   flex-direction: row;
   padding-left: 20px;
   padding-right: 20px;
-  background: #FAFAFA;
 }
 
 
