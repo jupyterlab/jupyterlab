@@ -40,7 +40,7 @@ interface IEditorModel extends IDisposable {
   stateChanged: ISignal<IEditorModel, IChangedArgs<any>>;
 
   /**
-   * A signal emitted when eight the top or bottom edge is requested.
+   * A signal emitted when either the top or bottom edge is requested.
    */
   edgeRequested: ISignal<IEditorModel, EdgeFlag>;
 
@@ -153,7 +153,7 @@ class EditorModel implements IEditorModel {
   }
 
  /**
-   * A signal emitted when eight the top or bottom edge is requested.
+   * A signal emitted when either the top or bottom edge is requested.
    */
   get edgeRequested(): ISignal<EditorModel, EdgeFlag> {
     return EditorModelPrivate.edgeRequestedSignal.bind(this);
@@ -315,7 +315,7 @@ namespace EditorModelPrivate {
   const stateChangedSignal = new Signal<EditorModel, IChangedArgs<any>>();
 
   /**
-   * A signal emitted when eight the top or bottom edge is requested.
+   * A signal emitted when either the top or bottom edge is requested.
    */
   export
   const edgeRequestedSignal = new Signal<EditorModel, EdgeFlag>();
