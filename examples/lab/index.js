@@ -9,7 +9,6 @@ require('es6-promise').polyfill();
 
 require('jupyter-js-plugins/lib/default-theme/index.css');
 
-
 var app = new phosphide.Application({
   extensions: [
     require('phosphide/lib/extensions/commandpalette').commandPaletteExtension,
@@ -21,6 +20,7 @@ var app = new phosphide.Application({
     require('jupyter-js-plugins/lib/notebook/plugin').notebookHandlerExtension,
     require('jupyter-js-plugins/lib/shortcuts/plugin').shortcutsExtension,
     require('jupyter-js-plugins/lib/about/plugin').aboutExtension,
+    require('jupyter-js-plugins/lib/landing/plugin').landingExtension,
     require('jupyter-js-plugins/lib/main/plugin').mainExtension,
   ],
   providers: [

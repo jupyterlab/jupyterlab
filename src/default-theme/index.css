@@ -9,6 +9,8 @@
 @import './commandpalette.css';
 @import './help.css';
 @import './about.css';
+@import '../landing/index.css';
+
 
 body {
   margin: 0;

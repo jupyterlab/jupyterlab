@@ -3,11 +3,12 @@
 <head>
   <title>Jupyter Plugins Demo</title>
   <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="index.css" rel="stylesheet">
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full,Safe&amp;delayStartupUntil=configured"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.js"></script>
-  <script id='jupyter-config-data' type="application/json">{ "baseUrl": "{{base_url}}", "wsUrl": "{{ws_url}}" }</script>
-  <script src="build/bundle.js" main="index"></script>
 </head>
 <body>
+  <script id='jupyter-config-data' type="application/json">{ "baseUrl": "{{base_url}}", "wsUrl": "{{ws_url}}" }</script>
+  <script src="build/bundle.js" main="index"></script>
 </body>
 </html>
