@@ -47,7 +47,7 @@ class RenderMime<T> {
    * @param renderers - a map of mimetypes to renderers.
    * @param order - a list of mimetypes in order of precedence (earliest one has precedence).
    */
-  constructor(renderers: MimeMap<IRenderer<T>> = {}, order: string[] = []) {
+  constructor(renderers: MimeMap<IRenderer<T>>, order: string[]) {
     this._renderers = {};
     for (let i in renderers) {
       this._renderers[i] = renderers[i];
@@ -63,7 +63,7 @@ class RenderMime<T> {
   render(bundle: MimeMap<string>): T {
     let mimetype = this.preferredMimetype(bundle);
     if (mimetype) {
-        return this.renderers[mimetype].render(mimetype, bundle[mimetype]);
+        return this._renderers[mimetype].render(mimetype, bundle[mimetype]);
     }
   }
 
@@ -84,14 +84,41 @@ class RenderMime<T> {
    * Clone the rendermime instance with shallow copies of data.
    */
   clone(): RenderMime<T> {
-    return new RenderMime<T>(this.renderers, this.order);
+    return new RenderMime<T>(this._renderers, this.order);
   }
 
   /**
-   * Get the renderer map.
+   * Get a renderer by mimetype.
    */
-  get renderers() {
-      return this._renderers;
+  getRenderer(mimetype: string) {
+    return this._renderers[mimetype];
+  }
+
+  /**
+   * Add a renderer by mimetype.
+   *
+   * @param mimetype - The mimetype of the renderer.
+   * @param renderer - The renderer instance.
+   * @param index - The optional order index.
+   */
+  addRenderer(mimetype: string, renderer: IRenderer<T>, index = -1): void {
+    this._renderers[mimetype] = renderer;
+    if (index !== -1) {
+      this._order.splice(index, 0, mimetype);
+    } else {
+      this._order.push(mimetype);
+    }
+  }
+
+  /**
+   * Remove a renderer by mimetype.
+   */
+  removeRenderer(mimetype: string): void {
+    delete this._renderers[mimetype];
+    let index = this._order.indexOf(mimetype);
+    if (index !== -1) {
+      this._order.splice(index, 1);
+    }
   }
 
   /**
@@ -102,7 +129,14 @@ class RenderMime<T> {
    * mimetype is used.
    */
   get order() {
-      return this._order;
+    return this._order.slice();
+  }
+
+  /**
+   * Set the ordered list of mimetypes.
+   */
+  set order(value: string[]) {
+    this._order = value.slice();
   }
 
   private _renderers: MimeMap<IRenderer<T>>;

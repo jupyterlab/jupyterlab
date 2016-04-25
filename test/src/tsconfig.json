@@ -6,9 +6,5 @@
         "moduleResolution": "node",
         "target": "ES5",
         "outDir": "../build"
-    },
-    "files": [
-        "index.ts",
-        "typings.d.ts"
-    ]
+    }
 }

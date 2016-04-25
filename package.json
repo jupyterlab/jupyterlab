@@ -39,6 +39,7 @@
     "karma-mocha": "^0.2.1",
     "karma-mocha-reporter": "^1.1.5",
     "mocha": "^2.3.4",
+    "raw-loader": "^0.5.1",
     "rimraf": "^2.5.0",
     "style-loader": "^0.13.0",
     "typedoc": "^0.3.12",
