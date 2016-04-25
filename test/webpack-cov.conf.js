@@ -9,6 +9,7 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
+      { test: /\.md$/, loader: 'raw-loader'}
     ],
     preLoaders: [
       // instrument only testing sources with Istanbul
