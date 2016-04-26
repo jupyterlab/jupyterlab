@@ -9,7 +9,7 @@ import {
 } from '../../../lib/dialog';
 
 import {
-  triggerMouseEvent, triggerKeyEvent
+  triggerMouseEvent, triggerKeyEvent, acceptDialog
 } from '../utils';
 
 
@@ -50,10 +50,10 @@ describe('jupyter-ui', () => {
       body.appendChild(input);
       body.appendChild(select);
       showDialog({ body }).then(result => {
-        expect(result).to.be(null);
+        expect(result.text).to.be('OK');
         done();
       });
-      triggerKeyEvent(document.body, 'keydown', { keyCode: 27 });
+      acceptDialog();
     });
 
     it('should resolve with the clicked button result', (done) => {
@@ -66,7 +66,7 @@ describe('jupyter-ui', () => {
         done();
       });
       let node = document.body.getElementsByClassName('bar')[0];
-      triggerMouseEvent(node as HTMLElement, 'click');
+      (node as HTMLElement).click();
     });
 
     it('should ignore context menu events', (done) => {

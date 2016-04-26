@@ -25,3 +25,10 @@ function triggerKeyEvent(node: HTMLElement, eventType: string, options: any = {}
   }
   node.dispatchEvent(event);
 }
+
+
+export
+function acceptDialog(host: HTMLElement = document.body): void {
+  let node = host.getElementsByClassName('jp-Dialog-okButton')[0];
+  (node as HTMLElement).click();
+}
