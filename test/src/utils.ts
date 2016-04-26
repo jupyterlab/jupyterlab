@@ -5,26 +5,18 @@
 
 export
 function triggerMouseEvent(node: HTMLElement, eventType: string, options: any = {}) {
-  let event = document.createEvent('MouseEvent');
-  event.initMouseEvent(
-    eventType, true, true, window, 0, 0, 0,
-    options.clientX || 0, options.clientY || 0,
-    options.ctrlKey || false, options.altKey || false,
-    options.shiftKey || false, options.metaKey || false,
-    options.button || 0, options.relatedTarget || null
-  );
-  node.dispatchEvent(event);
+  let evt = new MouseEvent(eventType, options);
+  node.dispatchEvent(evt);
 }
 
 export
 function triggerKeyEvent(node: HTMLElement, eventType: string, options: any = {}) {
-  // cannot use KeyboardEvent in Chrome because it sets keyCode = 0
-  let event = document.createEvent('Event');
-  event.initEvent(eventType, true, true);
-  for (let prop in options) {
-    (<any>event)[prop] = options[prop];
+  let evt = new KeyboardEvent(eventType, options);
+  // Work around bug in Chrome that zeros out the keyCode.
+  if ('keyCode' in options) {
+    Object.defineProperty(evt, 'keyCode', { value: options['keyCode'] });
   }
-  node.dispatchEvent(event);
+  node.dispatchEvent(evt);
 }
 
 

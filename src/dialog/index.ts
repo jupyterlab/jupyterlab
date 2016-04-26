@@ -196,6 +196,7 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem>{
       });
     });
     dialog.addEventListener('keydown', evt => {
+      console.log('***keydown', evt.keyCode);
       // Check for escape key
       if (evt.keyCode === 27) {
         host.removeChild(dialog);
