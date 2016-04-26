@@ -123,22 +123,6 @@ describe('jupyter-ui', () => {
 
     });
 
-    describe('#manager', () => {
-
-      it('should be the contents manager used by the handler', () => {
-        let manager = new MockContentsManager();
-        let handler = new FileHandler(manager);
-        expect(handler.manager).to.be(manager);
-      });
-
-      it('should be read only', () => {
-        let manager = new MockContentsManager();
-        let handler = new FileHandler(manager);
-        expect(() => { handler.manager = null; }).to.throwError();
-      });
-
-    });
-
     describe('#findWidget()', () => {
 
       it('should find a widget given a path', () => {

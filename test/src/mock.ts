@@ -22,12 +22,17 @@ class MockContentsManager implements IContentsManager {
     });
   }
 
-  newUntitled(path: string, options: IContentsOpts): Promise<IContentsModel> {
+  newUntitled(path: string, options?: IContentsOpts): Promise<IContentsModel> {
+    options = options || {};
+    let ext = options.ext || '';
+    let name = options.name || `untitled${ext}`;
     return Promise.resolve({
-      name: 'untitled',
-      path: `${path}/untitled`,
-      type: 'file',
-      content: this.DEFAULT_TEXT
+      name,
+      path: `${path}/${name}`,
+      format: options.format || 'text',
+      type: options.type || 'file',
+      ext,
+      content: options.content || this.DEFAULT_TEXT
     });
   }
 
