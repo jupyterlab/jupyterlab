@@ -29,7 +29,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IEditorModel, EdgeLocation
+  IEditorModel
 } from './model';
 
 
