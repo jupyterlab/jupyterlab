@@ -4,7 +4,7 @@ module.exports = {
   entry: './build/index.js',
   output: {
     path: __dirname + "/build",
-    filename: "bundle.js",
+    filename: "coverage.js",
     publicPath: "./build/"
   },
   bail: true,
@@ -18,7 +18,7 @@ module.exports = {
       // instrument only testing sources with Istanbul
       {
         test: /\.js$/,
-        include: path.resolve('lib/'),
+        include: path.resolve('../lib/'),
         loader: 'istanbul-instrumenter'
       }
     ]
