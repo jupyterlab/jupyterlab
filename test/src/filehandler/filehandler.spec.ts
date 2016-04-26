@@ -10,6 +10,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  sendMessage
+} from 'phosphor-messaging';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -17,82 +21,9 @@ import {
   AbstractFileHandler
 } from '../../../lib/filehandler/handler';
 
-
-
-class MockContentsManager implements IContentsManager {
-
-  get(path: string, options?: IContentsOpts): Promise<IContentsModel> {
-    return Promise.resolve({
-      name: path.split('/').pop(),
-      path: path,
-      type: 'file',
-      content: 'bar'
-    });
-  }
-
-  newUntitled(path: string, options: IContentsOpts): Promise<IContentsModel> {
-    return Promise.resolve({
-      name: 'untitled',
-      path: `${path}/untitled`,
-      type: 'file',
-      content: 'bar'
-    });
-  }
-
-  delete(path: string): Promise<void> {
-    return Promise.resolve(void 0);
-  }
-
-  rename(path: string, newPath: string): Promise<IContentsModel> {
-    return Promise.resolve({
-      name: newPath.split('/').pop(),
-      path: newPath,
-      type: 'file',
-      content: 'bar'
-    });
-  }
-
-  save(path: string, model: IContentsModel): Promise<IContentsModel> {
-    return Promise.resolve(model);
-  }
-
-  copy(path: string, toDir: string): Promise<IContentsModel> {
-    let name = path.split('/').pop();
-    return Promise.resolve({
-      name,
-      path: `${toDir}/${name}`,
-      type: 'file',
-      content: 'bar'
-    });
-  }
-
-  listContents(path: string): Promise<IContentsModel> {
-    return Promise.resolve({
-      name: path.split('/').pop(),
-      path,
-      type: 'dirty',
-      content: []
-    });
-  }
-
-  createCheckpoint(path: string): Promise<ICheckpointModel> {
-    return Promise.resolve(void 0);
-  }
-
-  listCheckpoints(path: string): Promise<ICheckpointModel[]> {
-    return Promise.resolve(void 0);
-  }
-
-  restoreCheckpoint(path: string, checkpointID: string): Promise<void> {
-    return Promise.resolve(void 0);
-  }
-
-  deleteCheckpoint(path: string, checkpointID: string): Promise<void> {
-    return Promise.resolve(void 0);
-  }
-
-  ajaxSettings: IAjaxSettings = {};
-}
+import {
+  MockContentsManager
+} from '../mock';
 
 
 class FileHandler extends AbstractFileHandler<Widget> {
@@ -318,7 +249,7 @@ describe('jupyter-ui', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
         let widget = handler.open('foo.txt');
-        handler.setDirty('foo.txt');
+        handler.setDirty('foo.txt', true);
         handler.save('foo.txt').then(contents => {
           expect(handler.isDirty('foo.txt')).to.be(false);
           done();
@@ -343,7 +274,7 @@ describe('jupyter-ui', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
         let widget = handler.open('foo.txt');
-        handler.setDirty('foo.txt');
+        handler.setDirty('foo.txt', true);
         handler.revert('foo.txt').then(contents => {
           expect(handler.isDirty('foo.txt')).to.be(false);
           done();
@@ -379,7 +310,180 @@ describe('jupyter-ui', () => {
         // TODO
       });
 
-      it('should call beforeClose', (done) => {
+    });
+
+    describe('#closeAll()', () => {
+
+      it('should class all files', (done) => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        let widget1 = handler.open('bar.txt');
+        widget0.attach(document.body);
+        handler.closeAll().then(() => {
+          expect(widget0.isAttached).to.be(false);
+          expect(handler.findWidget('bar.txt')).to.be(void 0);
+          done();
+        });
+      });
+
+    });
+
+    describe('#isDirty()', () => {
+
+      it('should default to false', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        expect(handler.isDirty('foo.txt')).to.be(false);
+      });
+
+      it('should return `undefined` if the path is invalid', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        expect(handler.isDirty('bar.txt')).to.be(void 0);
+      });
+
+    });
+
+    describe('#setDirty()', () => {
+
+      it('should set the dirty state of a file', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        handler.setDirty('foo.txt', true);
+        expect(handler.isDirty('foo.txt')).to.be(true);
+        handler.setDirty('foo.txt', false);
+        expect(handler.isDirty('foo.txt')).to.be(false);
+      });
+
+      it('should affect the className of the title', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget = handler.open('foo.txt');
+        expect(widget.title.className.indexOf('jp-mod-dirty')).to.be(-1);
+        handler.setDirty('foo.txt', true);
+        expect(widget.title.className.indexOf('jp-mod-dirty')).to.not.be(-1);
+      });
+
+      it('should be a no-op for an invalid path', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        handler.setDirty('bar.txt', true);
+      });
+
+    });
+
+    describe('#filterMessage()', () => {
+
+      it('should filter close messages for contained widgets', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget = handler.open('foo.txt');
+        let value = handler.filterMessage(widget, Widget.MsgCloseRequest);
+        expect(value).to.be(true);
+        value = handler.filterMessage(widget, Widget.MsgUpdateRequest);
+        expect(value).to.be(false);
+      });
+
+    });
+
+    describe('#getFetchOptions()', () => {
+
+      it('should get the options use to fetch contents from disk', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        expect(handler.methods.indexOf('getFetchOptions')).to.not.be(-1);
+      });
+
+      it('should be called during a revert', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        handler.methods = [];
+        handler.revert('foo.txt');
+        expect(handler.methods.indexOf('getFetchOptions')).to.not.be(-1);
+      });
+
+    });
+
+    describe('#getSaveOptions()', () => {
+
+      it('should get the options used to save the widget', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        handler.save('foo.txt');
+        expect(handler.methods.indexOf('getSaveOptions')).to.not.be(-1);
+      });
+
+    });
+
+    describe('#createWidget()', () => {
+
+      it('should be used to create the initial widget given a path', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        expect(handler.methods.indexOf('createWidget')).to.not.be(-1);
+      });
+
+    });
+
+    describe('#populateWidget()', () => {
+
+      it('should be called to populate a widget while opening', (done) => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        handler.finished.connect(() => {
+          expect(handler.methods.indexOf('populateWidget')).to.not.be(-1);
+          done();
+        });
+      });
+
+      it('should be called when reverting', (done) => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        let called = false;
+        handler.finished.connect(() => {
+          handler.methods = [];
+          handler.revert('foo.txt').then(() => {
+            expect(handler.methods.indexOf('populateWidget')).to.not.be(-1);
+            done();
+          });
+        });
+      });
+
+    });
+
+    describe('#getTitleText()', () => {
+
+      it('should set the appropriate title text based on a path', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        expect(handler.methods.indexOf('getTitleText')).to.not.be(-1);
+      });
+
+      it('should be called when renaming', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget0 = handler.open('foo.txt');
+        handler.methods = [];
+        handler.rename('foo.txt', 'bar.txt');
+        expect(handler.methods.indexOf('getTitleText')).to.not.be(-1);
+      });
+    });
+
+    describe('#beforeClose()', () => {
+
+      it('should call before closing', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
         let widget = handler.open('foo.txt');

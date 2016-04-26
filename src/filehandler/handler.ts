@@ -55,7 +55,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * A signal emitted when a file finishes populating.
+   * A signal emitted when a file finishes opening.
    */
   get finished(): ISignal<AbstractFileHandler<T>, T> {
     return Private.finishedSignal.bind(this);
@@ -113,7 +113,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     this.manager.get(path, opts).then(contents => {
       return this.populateWidget(widget, contents);
     }).then(contents => {
-      this.clearDirty(path);
+      this.setDirty(path, false);
       this.finished.emit(widget);
     });
     this.opened.emit(widget);
@@ -129,7 +129,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
       return false;
     }
     if (newPath === void 0) {
-      this.clearDirty(oldPath);
+      this.setDirty(oldPath, false);
       widget.close();
       return true;
     }
@@ -158,7 +158,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     return this.getSaveOptions(widget, model).then(opts => {
       return this.manager.save(path, opts);
     }).then(contents => {
-      this.clearDirty(path);
+      this.setDirty(path, false);
       return contents;
     });
   }
@@ -182,7 +182,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     return this.manager.get(path, opts).then(contents => {
       return this.populateWidget(widget, contents);
     }).then(contents => {
-      this.clearDirty(path);
+      this.setDirty(path, false);
       return contents;
     });
   }
@@ -208,10 +208,13 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   /**
    * Close all files.
    */
-  closeAll(): void {
+  closeAll(): Promise<void> {
+    let promises: Promise<boolean>[] = [];
     for (let w of this._widgets) {
-      w.close();
+      let path = this.findPath(w);
+      promises.push(this.close(path));
     }
+    return Promise.all(promises).then(() => { return void 0; });
   }
 
   /**
@@ -219,23 +222,17 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    */
   isDirty(path: string): boolean {
     let widget = this.findWidget(path);
-    return Private.dirtyProperty.get(widget);
+    if (widget) {
+      return Private.dirtyProperty.get(widget);
+    }
   }
 
   /**
    * Set the dirty state of a file.
    */
-  setDirty(path: string): void {
+  setDirty(path: string, value: boolean): void {
     let widget = this.findWidget(path);
-    Private.dirtyProperty.set(widget, true);
-  }
-
-  /**
-   * Clear the dirty state of a file.
-   */
-  clearDirty(path: string): void {
-    let widget = this.findWidget(path);
-    Private.dirtyProperty.set(widget, false);
+    if (widget) Private.dirtyProperty.set(widget, value);
   }
 
   /**
@@ -369,8 +366,7 @@ namespace Private {
    */
   export
   const pathProperty = new Property<Widget, string>({
-    name: 'path',
-    value: null
+    name: 'path'
   });
 
   /**
