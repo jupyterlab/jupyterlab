@@ -22,7 +22,10 @@ describe('jupyter-ui', () => {
         expect(result).to.be(null);
         done();
       });
-      triggerKeyEvent(document.body, 'keydown', { keyCode: 27 });
+      Promise.resolve().then(() => {
+        let node = document.body.getElementsByClassName('jp-Dialog')[0];
+        triggerKeyEvent(node as HTMLElement, 'keydown', { keyCode: 27 });
+      });
     });
 
     it('should accept dialog options', (done) => {
@@ -35,12 +38,14 @@ describe('jupyter-ui', () => {
         buttons: [okButton],
         okText: 'Yep'
       }
-      showDialog().then(result => {
+      showDialog(options).then(result => {
         expect(result).to.be(null);
-        expect(node.firstChild).to.be(void 0);
         done();
       });
-      triggerKeyEvent(document.body, 'keydown', { keyCode: 27 });
+      Promise.resolve().then(() => {
+        let target = document.body.getElementsByClassName('jp-Dialog')[0];
+        triggerKeyEvent(target as HTMLElement, 'keydown', { keyCode: 27 });
+      });
     });
 
     it('should accept an html body', (done) => {
@@ -49,8 +54,8 @@ describe('jupyter-ui', () => {
       let select = document.createElement('select');
       body.appendChild(input);
       body.appendChild(select);
-      showDialog({ body }).then(result => {
-        expect(result.text).to.be('OK');
+      showDialog({ body, okText: 'CONFIRM' }).then(result => {
+        expect(result.text).to.be('CONFIRM');
         done();
       });
       acceptDialog();
@@ -65,8 +70,10 @@ describe('jupyter-ui', () => {
         expect(result.text).to.be('foo');
         done();
       });
-      let node = document.body.getElementsByClassName('bar')[0];
-      (node as HTMLElement).click();
+      Promise.resolve().then(() => {
+        let node = document.body.getElementsByClassName('bar')[0];
+        (node as HTMLElement).click();
+      });
     });
 
     it('should ignore context menu events', (done) => {
@@ -75,8 +82,11 @@ describe('jupyter-ui', () => {
         expect(result).to.be(null);
         done();
       });
-      triggerMouseEvent(body as HTMLElement, 'contextmenu');
-      triggerKeyEvent(document.body, 'keydown', { keyCode: 27 });
+      Promise.resolve().then(() => {
+        let node = document.body.getElementsByClassName('jp-Dialog')[0];
+        triggerMouseEvent(node as HTMLElement, 'contextmenu');
+        triggerKeyEvent(node as HTMLElement, 'keydown', { keyCode: 27 });
+      });
     });
 
   });

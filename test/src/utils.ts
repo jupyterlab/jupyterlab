@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
+
 export
 function triggerMouseEvent(node: HTMLElement, eventType: string, options: any = {}) {
   let event = document.createEvent('MouseEvent');
@@ -28,7 +29,9 @@ function triggerKeyEvent(node: HTMLElement, eventType: string, options: any = {}
 
 
 export
-function acceptDialog(host: HTMLElement = document.body): void {
-  let node = host.getElementsByClassName('jp-Dialog-okButton')[0];
-  (node as HTMLElement).click();
+function acceptDialog(host: HTMLElement = document.body): Promise<void> {
+  return Promise.resolve().then(() => {
+    let node = host.getElementsByClassName('jp-Dialog-okButton')[0];
+    (node as HTMLElement).click();
+  });
 }
