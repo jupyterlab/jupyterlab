@@ -55,6 +55,13 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
+   * A signal emitted when a file finishes opening.
+   */
+  get finished(): ISignal<AbstractFileHandler<T>, T> {
+    return Private.finishedSignal.bind(this);
+  }
+
+  /**
    * Get the list of file extensions explicitly supported by the handler.
    */
   get fileExtensions(): string[] {
@@ -81,8 +88,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Find a path given a widget.  The model itself will have a
-   * null `content` field.
+   * Find a path given a widget.
    */
   findPath(widget: T): string {
     return Private.pathProperty.get(widget);
@@ -96,6 +102,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     if (!widget) {
       widget = this.createWidget(path);
       widget.title.closable = true;
+      widget.title.text = this.getTitleText(path);
       this._setPath(widget, path);
       this._widgets.push(widget);
       installMessageFilter(widget, this);
@@ -104,10 +111,10 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     // Fetch the contents and populate the widget asynchronously.
     let opts = this.getFetchOptions(path);
     this.manager.get(path, opts).then(contents => {
-      widget.title.text = this.getTitleText(path);
       return this.populateWidget(widget, contents);
     }).then(contents => {
-      this.clearDirty(path);
+      this.setDirty(path, false);
+      this.finished.emit(widget);
     });
     this.opened.emit(widget);
     return widget;
@@ -122,7 +129,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
       return false;
     }
     if (newPath === void 0) {
-      this.clearDirty(oldPath);
+      this.setDirty(oldPath, false);
       widget.close();
       return true;
     }
@@ -151,7 +158,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     return this.getSaveOptions(widget, model).then(opts => {
       return this.manager.save(path, opts);
     }).then(contents => {
-      this.clearDirty(path);
+      this.setDirty(path, false);
       return contents;
     });
   }
@@ -175,7 +182,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     return this.manager.get(path, opts).then(contents => {
       return this.populateWidget(widget, contents);
     }).then(contents => {
-      this.clearDirty(path);
+      this.setDirty(path, false);
       return contents;
     });
   }
@@ -195,17 +202,19 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
     if (this.isDirty(path)) {
       return this._maybeClose(widget);
     }
-    this._close(widget);
-    return Promise.resolve(true);
+    return this._close(widget);
   }
 
   /**
    * Close all files.
    */
-  closeAll(): void {
+  closeAll(): Promise<void> {
+    let promises: Promise<boolean>[] = [];
     for (let w of this._widgets) {
-      w.close();
+      let path = this.findPath(w);
+      promises.push(this.close(path));
     }
+    return Promise.all(promises).then(() => { return void 0; });
   }
 
   /**
@@ -213,23 +222,17 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    */
   isDirty(path: string): boolean {
     let widget = this.findWidget(path);
-    return Private.dirtyProperty.get(widget);
+    if (widget) {
+      return Private.dirtyProperty.get(widget);
+    }
   }
 
   /**
    * Set the dirty state of a file.
    */
-  setDirty(path: string): void {
+  setDirty(path: string, value: boolean): void {
     let widget = this.findWidget(path);
-    Private.dirtyProperty.set(widget, true);
-  }
-
-  /**
-   * Clear the dirty state of a file.
-   */
-  clearDirty(path: string): void {
-    let widget = this.findWidget(path);
-    Private.dirtyProperty.set(widget, false);
+    if (widget) Private.dirtyProperty.set(widget, value);
   }
 
   /**
@@ -325,13 +328,14 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   /**
    * Actually close the file.
    */
-  private _close(widget: T): void {
-    this.beforeClose(widget).then(() => {
+  private _close(widget: T): Promise<boolean> {
+    return this.beforeClose(widget).then(() => {
       let model = Private.pathProperty.get(widget);
       let index = this._widgets.indexOf(widget);
       this._widgets.splice(index, 1);
-      Private.pathProperty.set(widget, null);
+      Private.pathProperty.set(widget, void 0);
       widget.close();
+      return true;
     });
   }
 
@@ -346,18 +350,23 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
  */
 namespace Private {
   /**
-   * A signal emitted when a model is opened.
+   * A signal emitted when a path is opened.
    */
   export
   const openedSignal = new Signal<AbstractFileHandler<Widget>, Widget>();
+
+  /**
+   * A signal emitted when a model is populated.
+   */
+  export
+  const finishedSignal = new Signal<AbstractFileHandler<Widget>, Widget>();
 
   /**
    * An attached property with the widget path.
    */
   export
   const pathProperty = new Property<Widget, string>({
-    name: 'path',
-    value: null
+    name: 'path'
   });
 
   /**
