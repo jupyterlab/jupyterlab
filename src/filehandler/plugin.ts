@@ -52,5 +52,14 @@ function activateFileHandler(app: Application, registry: FileHandlerRegistry, se
     'New Directory', dirCreator.createNew.bind(dirCreator));
   registry.addCreator('New File', fileCreator.createNew.bind(fileCreator));
 
+  app.commands.add([
+  {
+    id: 'text-file:create-new',
+    handler: () => {
+      fileCreator.createNew('').then(contents => {
+        registry.open(contents.path);
+      });
+    }
+  }]);
   return Promise.resolve(void 0);
 };

@@ -27,7 +27,7 @@ const terminalExtension = {
 
 function activateTerminal(app: Application): Promise<void> {
 
-  let newTerminalId = 'terminal:new';
+  let newTerminalId = 'terminal:create-new';
 
   app.commands.add([{
     id: newTerminalId,

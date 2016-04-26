@@ -17,8 +17,8 @@ module.exports = {
       { test: /\.css$/, loader: 'style-loader!css-loader' },
       { test: /\.json$/, loader: 'json-loader' },
       { test: /\.html$/, loader: 'file' },
-      // jquery-ui loads some images
-      { test: /\.(jpg|png|gif)$/, loader: "file" }
+      // Handle image
+      { test: /\.(jpg|png|gif|svg)$/, loader: "file" },
     ]
   }
 }

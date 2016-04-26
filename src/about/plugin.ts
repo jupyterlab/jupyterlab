@@ -57,7 +57,6 @@ function activateAbout(app: Application): void {
 
 <p>Opening a notebook will open a minimally featured notebook. Code execution, Markdown rendering, and basic cell toolbar actions are supported.  Future versions will add more features from the existing Jupyter notebook.</p>
 `;
-    app.shell.addToMainArea(widget);
 
     app.commands.add([{
       id: commandId,

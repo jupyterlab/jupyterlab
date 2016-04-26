@@ -79,7 +79,8 @@ const cmdIds = {
   toggleLinenumbers: 'notebook-cells:toggle-linenumbers',
   toggleAllLinenumbers: 'notebook:toggle-allLinenumbers',
   editMode: 'notebook-cells:editMode',
-  commandMode: 'notebook-cells:commandMode'
+  commandMode: 'notebook-cells:commandMode',
+  newNotebook: 'notebook:create-new'
 };
 
 
@@ -293,7 +294,15 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
       let model = activeWidget.model;
       if (model) model.mode = 'edit';
     }
-  }
+  },
+  {
+    id: cmdIds['newNotebook'],
+    handler: () => {
+      creator.createNew('').then(contents => {
+        registry.open(contents.path);
+      });
+    }
+  },
   ]);
   app.palette.add([
   {

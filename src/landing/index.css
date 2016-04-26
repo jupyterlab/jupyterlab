@@ -1,0 +1,123 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-Landing {
+  background: rgba(0,0,0,0.25);
+  color: #757575;
+  position: absolute;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  top: 0px;
+  left: 0px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+.jp-Landing-dialog {
+  padding-bottom: 20px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  color: #757575;
+   background: #FAFAFA;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 1px solid #BDBDBD;
+  border-radius: 2px;
+  box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.5);
+}
+
+
+.jp-Landing-logo {
+  flex: 0 0 40px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  background: white;
+  background-image: url(images/jupyterlab.svg);
+  background-size: 193px 40px;
+  background-repeat: no-repeat;
+  background-position: center top;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #BDBDBD;
+}
+
+
+.jp-Landing-title {
+  padding-top: 20px;
+  background: white;
+  width: 100%;
+}
+
+
+.jp-Landing-header {
+  
+  padding-top: 20px;
+  padding-bottom: 8px;
+}
+
+
+.jp-Landing-body {
+  display: flex;
+  flex-direction: row;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+
+.jp-Landing-column {
+  padding-left: 20px;
+  padding-right: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.jp-Landing-image {
+  flex: 0 0 auto;
+  min-height: 72px;
+  max-height: 72px;
+  min-width: 56px;
+  max-width: 56px;
+  background-size: 56px 72px;
+  background-repeat: no-repeat;
+
+}
+
+
+.jp-Landing-image:hover {
+  cursor: pointer;
+}
+
+
+.jp-Landing-text {
+  flex: 0 0 auto;
+  font-size: 12px;
+  padding-top: 8px;
+}
+
+
+.jp-Landing-imageNotebook {
+  background-image: url(images/notebook.svg);
+}
+
+
+.jp-Landing-imageTerminal {
+  background-image: url(images/terminal.svg);
+}
+
+
+.jp-Landing-imageTextEditor {
+  background-image: url(images/texteditor.svg);
+}
