@@ -69,13 +69,6 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Get the contents manager used by the handler.
-   */
-  get manager(): IContentsManager {
-    return this._manager;
-  }
-
-  /**
    * Find a widget given a path.
    */
   findWidget(path: string): T {
@@ -248,6 +241,13 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
       }
     }
     return false;
+  }
+
+  /**
+   * Get the contents manager used by the handler.
+   */
+  protected get manager(): IContentsManager {
+    return this._manager;
   }
 
   /**
