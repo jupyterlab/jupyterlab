@@ -251,7 +251,7 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Get options use to fetch the model contents from disk.
+   * Get options used to fetch the model contents from disk.
    */
   protected getFetchOptions(path: string): IContentsOpts {
     return { type: 'file', format: 'text' };
