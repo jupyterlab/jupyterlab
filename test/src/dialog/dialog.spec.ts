@@ -61,10 +61,29 @@ describe('jupyter-ui', () => {
       acceptDialog();
     });
 
+    it('should accept an input body', (done) => {
+      let body = document.createElement('input');
+      showDialog({ body }).then(result => {
+        expect(result.text).to.be('OK');
+        done();
+      });
+      acceptDialog();
+    });
+
+    it('should accept a select body', (done) => {
+      let body = document.createElement('select');
+      showDialog({ body }).then(result => {
+        expect(result.text).to.be('OK');
+        done();
+      });
+      acceptDialog();
+    });
+
     it('should resolve with the clicked button result', (done) => {
       let button = {
         text: 'foo',
-        className: 'bar'
+        className: 'bar',
+        icon: 'baz'
       }
       showDialog({ buttons: [button] }).then(result => {
         expect(result.text).to.be('foo');
