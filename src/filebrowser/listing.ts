@@ -1054,6 +1054,8 @@ class DirListing extends Widget {
 
     clearTimeout(this._selectTimer);
 
+    if (index == -1) return;
+
     let name = items[index].name;
     let selected = this._model.getSelected();
 
