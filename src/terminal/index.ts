@@ -18,9 +18,7 @@ import {
   ResizeMessage, Widget
 } from 'phosphor-widget';
 
-import {
-  Terminal, ITerminalConfig
-} from 'term.js';
+import * as Terminal from 'xterm';
 
 
 /**
@@ -42,6 +40,7 @@ const DUMMY_ROWS = 24;
  * The number of cols to use in the dummy terminal.
  */
 const DUMMY_COLS = 80;
+
 
 /**
  * Options for the terminal widget.
@@ -274,6 +273,7 @@ class TerminalWidget extends Widget {
     if (this._dirty) {
       this._snapTermSizing();
     }
+    this._term.focus();
   }
 
   /**
@@ -300,8 +300,8 @@ class TerminalWidget extends Widget {
     this.node.style.color = this.color;
     this._term.element.style.backgroundColor = this.background;
     this._term.element.style.color = this.color;
-    this._sheet.innerHTML = ('.terminal-cursor {background:' + this.color +
-                             ';color:' + this.background + ';}');
+    this._sheet.innerHTML = (`#${this.node.id} .terminal-cursor {background:
+                             ${this.color};color:${this.background};}`);
   }
 
   /**
@@ -413,6 +413,8 @@ function getConfig(options: ITerminalOptions): ITerminalConfig {
   let config: ITerminalConfig = {};
   if (options.cursorBlink !== void 0) {
     config.cursorBlink = options.cursorBlink;
+  } else {
+    config.cursorBlink = true;
   }
   if (options.visualBell !== void 0) {
     config.visualBell = options.visualBell;
@@ -423,7 +425,6 @@ function getConfig(options: ITerminalOptions): ITerminalConfig {
   if (options.scrollback !== void 0) {
     config.scrollback = options.scrollback;
   }
-  config.screenKeys = false;
   return config;
 }
 

@@ -6,5 +6,5 @@
 /// <reference path="../typings/ansi_up/ansi_up.d.ts"/>
 /// <reference path="../typings/require/require.d.ts"/>
 /// <reference path="../typings/jupyter-js-widgets/jupyter-js-widgets.d.ts"/>
-/// <reference path="../typings/term.js/term.js.d.ts"/>
+/// <reference path="../typings/xterm/xterm.d.ts"/>
 /// <reference path="../typings/marked/marked.d.ts"/>
