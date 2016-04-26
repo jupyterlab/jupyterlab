@@ -157,7 +157,7 @@ interface IDialogOptions {
   buttons?: IButtonItem[];
 
   /**
-   * The confirmation text for the button (defaults to 'OK').
+   * The confirmation text for the OK button (defaults to 'OK').
    */
   okText?: string;
 }
@@ -174,6 +174,8 @@ export
 function showDialog(options?: IDialogOptions): Promise<IButtonItem>{
   options = options || {};
   let host = options.host || document.body;
+  options.host = host;
+  options.body = options.body || '';
   okButton.text = options.okText ? options.okText : 'OK';
   let buttons = options.buttons || [cancelButton, okButton];
   let buttonNodes = buttons.map(createButton);
@@ -199,11 +201,11 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem>{
         host.removeChild(dialog);
         resolve(null);
       }
-    });
+    }, true);
     dialog.addEventListener('contextmenu', evt => {
       evt.preventDefault();
       evt.stopPropagation();
-    });
+    }, true);
   });
 }
 
@@ -234,7 +236,7 @@ function createDialog(options: IDialogOptions, buttonNodes: HTMLElement[]): HTML
   // Populate the nodes.
   title.textContent = options.title || '';
   let child: HTMLElement;
-  if (options.body && typeof options.body === 'string') {
+  if (typeof options.body === 'string') {
     child = document.createElement('span');
     child.innerHTML = options.body as string;
   } else if (options.body) {
