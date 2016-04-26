@@ -102,16 +102,6 @@ interface IButtonItem {
    * The extra class name to associate with the button.
    */
   className?: string;
-
-  /**
-   * The handler for the button.
-   */
-  handler?: (args: any) => void;
-
-  /**
-   * The arguments to pass to the handler.
-   */
-  args?: any;
 }
 
 
@@ -199,7 +189,6 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem>{
         if (node.contains(evt.target as HTMLElement)) {
           host.removeChild(dialog);
           let button = buttons[buttonNodes.indexOf(node)];
-          if (button.handler) button.handler(button.args);
           resolve(button);
         }
       });
