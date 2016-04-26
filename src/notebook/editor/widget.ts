@@ -29,7 +29,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IEditorModel, EdgeFlag
+  IEditorModel
 } from './model';
 
 
@@ -113,13 +113,13 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
       let line = cursor.line;
       let ch = cursor.ch;
       if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
-        this._model.edgeRequested.emit(EdgeFlag.Top);
+        this._model.edgeRequested.emit('top');
         return
       }
       let lastLine = doc.lastLine();
       let lastCh = doc.getLineHandle(lastLine).text.length;
       if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
-        this._model.edgeRequested.emit(EdgeFlag.Bottom);
+        this._model.edgeRequested.emit('bottom');
         return
       }
     });
