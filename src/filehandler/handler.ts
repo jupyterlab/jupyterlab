@@ -69,13 +69,6 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Get the contents manager used by the handler.
-   */
-  get manager(): IContentsManager {
-    return this._manager;
-  }
-
-  /**
    * Find a widget given a path.
    */
   findWidget(path: string): T {
@@ -251,7 +244,14 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
   }
 
   /**
-   * Get options use to fetch the model contents from disk.
+   * Get the contents manager used by the handler.
+   */
+  protected get manager(): IContentsManager {
+    return this._manager;
+  }
+
+  /**
+   * Get options used to fetch the model contents from disk.
    */
   protected getFetchOptions(path: string): IContentsOpts {
     return { type: 'file', format: 'text' };
