@@ -106,7 +106,7 @@ function main(): void {
   let items: IStandardPaletteItemOptions[] = [
     {
       category: 'Console',
-      text: 'Execute Current',
+      text: 'Execute Prompt',
       shortcut: 'Shift Enter',
       handler: () => { consoleModel.run(); }
     }

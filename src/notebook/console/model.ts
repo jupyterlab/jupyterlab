@@ -101,7 +101,7 @@ interface IConsoleModel extends IDisposable {
   defaultMimetype: string;
 
   /**
-   * The optional notebook session associated with the model.
+   * The optional notebook session associated with the console model.
    */
   session?: INotebookSession;
 
@@ -118,24 +118,11 @@ interface IConsoleModel extends IDisposable {
   createPrompt(): ICodeCellModel;
 
   /**
-   * A factory for creating a new Markdown cell.
-   *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new markdown cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createMarkdownCell(source?: ICellModel): IMarkdownCellModel;
-
-  /**
    * A factory for creating a new raw cell.
    *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new raw cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
+   * @returns A new raw cell.
    */
-  createRawCell(source?: ICellModel): IRawCellModel;
+  createRawCell(): IRawCellModel;
 }
 
 
@@ -209,7 +196,7 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
-   * Get the observable list of notebook cells.
+   * Get the observable list of console cells.
    *
    * #### Notes
    * This is a read-only property.
@@ -326,42 +313,14 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
-   * Create a markdown cell model.
-   */
-  createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
-    let constructor = this.constructor as typeof ConsoleModel;
-    let editor = constructor.createEditor({ mimetype: 'text/x-ipythongfm' });
-    let input = constructor.createInput(editor);
-    let cell = new MarkdownCellModel(input);
-    cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isMarkdownCellModel(source)) {
-        cell.rendered = source.rendered;
-      }
-    }
-    return cell;
-  }
-
-  /**
    * Create a raw cell model.
    */
-  createRawCell(source?: ICellModel): IRawCellModel {
+  createRawCell(): IRawCellModel {
     let constructor = this.constructor as typeof ConsoleModel;
     let editor = constructor.createEditor();
     let input = constructor.createInput(editor);
     let cell = new RawCellModel(input);
     cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isRawCellModel(source)) {
-        cell.format = (source as IRawCellModel).format;
-      }
-    }
     return cell;
   }
 
@@ -416,7 +375,7 @@ class ConsoleModel implements IConsoleModel {
 
 
 /**
- * A private namespace for notebook model data.
+ * A private namespace for console model data.
  */
 namespace ConsoleModelPrivate {
   /**
