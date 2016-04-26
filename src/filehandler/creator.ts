@@ -29,12 +29,23 @@ class FileCreator {
   /**
    * Construct a new file creator.
    */
-  constructor(manager: IContentsManager, type: string) {
+  constructor(manager: IContentsManager, displayName = 'File') {
     this._manager = manager;
-    this._type = type;
-    this._displayType = type.charAt(0).toUpperCase() + type.slice(1);
+    this._displayName = displayName;
     let constructor = this.constructor as typeof FileCreator;
     this._body = constructor.createDialog();
+  }
+
+  /**
+   * Create a new file object in the given directory.
+   */
+  createNew(path: string, host?: HTMLElement): Promise<IContentsModel> {
+    this.host = host || this._host;
+    return this.createUntitled(path).then(contents => {
+      return this.doRename(contents);
+    }).catch(error => {
+      return this.showErrorMessage(error);
+    });
   }
 
   /**
@@ -43,7 +54,7 @@ class FileCreator {
    * #### Notes
    * This is a read-only property.
    */
-  get manager(): IContentsManager {
+  protected get manager(): IContentsManager {
     return this._manager;
   }
 
@@ -53,32 +64,41 @@ class FileCreator {
    * #### Notes
    * This is a read-only property.
    */
-  get host(): HTMLElement {
+  protected get host(): HTMLElement {
     return this._host;
+  }
+  protected set host(value: HTMLElement) {
+    this._host = value;
   }
 
   /**
    * The input node with the file name.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  get fileNode(): HTMLInputElement {
-    return this._body.getElementsByTagName('input')[0];
+  protected get fileNode(): HTMLInputElement {
+    return this.body.getElementsByTagName('input')[0];
   }
 
   /**
    * The dialog body.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  get body(): HTMLElement {
+  protected get body(): HTMLElement {
     return this._body;
   }
 
   /**
-   * Create a new file object in the given directory.
+   * The dialog display name.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  createNew(path: string, host?: HTMLElement): Promise<IContentsModel> {
-    this._host = host || document.body;
-    return this._createUntitled(path).then(contents => {
-      return this.doRename(contents);
-    });
+  protected get displayName(): string {
+    return this._displayName;
   }
 
   /**
@@ -89,7 +109,7 @@ class FileCreator {
     edit.value = contents.name;
     let dname = contents.path.slice(0, -contents.name.length);
     return showDialog({
-      title: `Create a New ${this._displayType}`,
+      title: `Create a New ${this._displayName}`,
       body: this.body,
       host: this._host,
       okText: 'CREATE'
@@ -113,7 +133,7 @@ class FileCreator {
    */
   protected showErrorMessage(error: Error): Promise<IContentsModel> {
     return showDialog({
-      title: `${this._displayType} Creation Error`,
+      title: `${this.displayName} Creation Error`,
       body: error.message,
       host: this.host,
       okText: 'DISMISS'
@@ -125,9 +145,9 @@ class FileCreator {
    */
   protected handleExisting(name: string, contents: IContentsModel): Promise<IContentsModel> {
     return showDialog({
-      title: `${this._displayType} already exists`,
-      body: `${this._displayType} "${name}" already exists, try again?`,
-      host: this._host
+      title: `${this.displayName} already exists`,
+      body: `${this.displayName} "${name}" already exists, try again?`,
+      host: this.host
     }).then(value => {
       if (value.text === 'OK') {
         return this.doRename(contents);
@@ -140,16 +160,37 @@ class FileCreator {
   /**
    * Create a new untitled file on the current path.
    */
-  private _createUntitled(path: string): Promise<IContentsModel> {
-    let ext = this._type === 'file' ? '.txt' : '';
-    return this._manager.newUntitled(path, {
-      type: this._type, ext
+  protected createUntitled(path: string): Promise<IContentsModel> {
+    return this.manager.newUntitled(path, {
+      type: 'file', ext: '.txt'
     });
   }
 
   private _manager: IContentsManager = null;
-  private _host: HTMLElement = null;
-  private _type = 'file';
-  private _displayType = '';
+  private _host: HTMLElement = document.body;
+  private _displayName = '';
   private _body: HTMLElement = null;
+}
+
+
+
+/**
+ * A file creator which creates directories.
+ */
+export
+class DirectoryCreator extends FileCreator {
+  /**
+   * Construct a new directory creator.
+   */
+  constructor(manager: IContentsManager, displayName = 'Directory') {
+    super(manager, displayName);
+  }
+
+  /**
+   * Create a new untitled directory on the given path.
+   */
+  protected createUntitled(path: string): Promise<IContentsModel> {
+    return this.manager.newUntitled(path, { type: 'directory' });
+  }
+
 }
