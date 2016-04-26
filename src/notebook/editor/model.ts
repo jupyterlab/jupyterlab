@@ -15,18 +15,11 @@ import {
 } from 'phosphor-signaling';
 
 
+/**
+ * The location of requested edges.
+ */
 export
-enum EdgeFlag {
-  /**
-   * The bottom edge of the editor.
-   */
-  Bottom = 0x1,
-
-  /**
-   * The top edge of the editor.
-   */
-  Top = 0x2
-}
+type EdgeLocation = 'top' | 'bottom';
 
 
 /**
@@ -42,7 +35,7 @@ interface IEditorModel extends IDisposable {
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
-  edgeRequested: ISignal<IEditorModel, EdgeFlag>;
+  edgeRequested: ISignal<IEditorModel, EdgeLocation>;
 
   /**
    * The text in the text editor.
@@ -155,7 +148,7 @@ class EditorModel implements IEditorModel {
  /**
    * A signal emitted when either the top or bottom edge is requested.
    */
-  get edgeRequested(): ISignal<EditorModel, EdgeFlag> {
+  get edgeRequested(): ISignal<EditorModel, EdgeLocation> {
     return EditorModelPrivate.edgeRequestedSignal.bind(this);
   }
 
@@ -318,7 +311,7 @@ namespace EditorModelPrivate {
    * A signal emitted when either the top or bottom edge is requested.
    */
   export
-  const edgeRequestedSignal = new Signal<EditorModel, EdgeFlag>();
+  const edgeRequestedSignal = new Signal<EditorModel, EdgeLocation>();
 
   /**
    * Initialize an editor view model from an options object.
