@@ -80,7 +80,6 @@ describe('jupyter-ui', () => {
         let manager = new MockContentsManager();
         let creator = new MyFileCreator(manager);
         creator.createUntitled('foo/').then(contents => {
-          console.log('***', contents.type, contents.name);
           expect(contents.type).to.be('file');
           expect(contents.name.indexOf('.txt')).to.not.be(-1);
           done();
