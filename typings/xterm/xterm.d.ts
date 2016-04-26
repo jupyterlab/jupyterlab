@@ -35,6 +35,7 @@
 
     destroy(): void;
 
+    focus(): void;
   }
 
   interface TerminalConstructor {

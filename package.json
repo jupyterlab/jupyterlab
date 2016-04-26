@@ -21,7 +21,7 @@
     "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-widget": "^1.0.0-rc.1",
-    "xterm": "^0.32.0"
+    "xterm": "^0.33.0"
   },
   "devDependencies": {
     "concurrently": "^2.0.0",

@@ -273,6 +273,7 @@ class TerminalWidget extends Widget {
     if (this._dirty) {
       this._snapTermSizing();
     }
+    this._term.focus();
   }
 
   /**
@@ -299,8 +300,8 @@ class TerminalWidget extends Widget {
     this.node.style.color = this.color;
     this._term.element.style.backgroundColor = this.background;
     this._term.element.style.color = this.color;
-    this._sheet.innerHTML = ('.terminal-cursor {background:' + this.color +
-                             ';color:' + this.background + ';}');
+    this._sheet.innerHTML = (`#${this.node.id} .terminal-cursor {background:
+                             ${this.color};color:${this.background};}`);
   }
 
   /**
