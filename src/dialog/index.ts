@@ -181,7 +181,8 @@ interface IDialogOptions {
  * @returns The button item that was selected.
  */
 export
-function showDialog(options: IDialogOptions): Promise<IButtonItem>{
+function showDialog(options?: IDialogOptions): Promise<IButtonItem>{
+  options = options || {};
   let host = options.host || document.body;
   okButton.text = options.okText ? options.okText : 'OK';
   let buttons = options.buttons || [cancelButton, okButton];
