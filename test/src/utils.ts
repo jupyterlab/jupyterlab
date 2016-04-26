@@ -9,6 +9,7 @@ function triggerMouseEvent(node: HTMLElement, eventType: string, options: any = 
   node.dispatchEvent(evt);
 }
 
+
 export
 function triggerKeyEvent(node: HTMLElement, eventType: string, options: any = {}) {
   let evt = new KeyboardEvent(eventType, options);
