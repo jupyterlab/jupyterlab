@@ -4,8 +4,6 @@
 
 import expect = require('expect.js');
 
-import simulateEvent = require('simulate-event');
-
 import {
   showDialog, okButton
 } from '../../../lib/dialog';
