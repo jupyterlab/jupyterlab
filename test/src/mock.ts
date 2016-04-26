@@ -11,12 +11,14 @@ import {
 export
 class MockContentsManager implements IContentsManager {
 
+  DEFAULT_TEXT = 'the quick brown fox jumped over the lazy dog';
+
   get(path: string, options?: IContentsOpts): Promise<IContentsModel> {
     return Promise.resolve({
       name: path.split('/').pop(),
       path: path,
       type: 'file',
-      content: 'bar'
+      content: this.DEFAULT_TEXT
     });
   }
 
@@ -25,7 +27,7 @@ class MockContentsManager implements IContentsManager {
       name: 'untitled',
       path: `${path}/untitled`,
       type: 'file',
-      content: 'bar'
+      content: this.DEFAULT_TEXT
     });
   }
 
@@ -38,7 +40,7 @@ class MockContentsManager implements IContentsManager {
       name: newPath.split('/').pop(),
       path: newPath,
       type: 'file',
-      content: 'bar'
+      content: this.DEFAULT_TEXT
     });
   }
 
@@ -52,7 +54,7 @@ class MockContentsManager implements IContentsManager {
       name,
       path: `${toDir}/${name}`,
       type: 'file',
-      content: 'bar'
+      content: this.DEFAULT_TEXT
     });
   }
 

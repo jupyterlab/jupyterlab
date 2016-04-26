@@ -3,5 +3,6 @@
 'use strict';
 
 import './filehandler/filehandler.spec';
+import './filehandler/default.spec';
 import './renderers/renderers.spec';
 import './rendermime/rendermime.spec';

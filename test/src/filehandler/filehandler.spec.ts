@@ -265,7 +265,7 @@ describe('jupyter-ui', () => {
         let handler = new FileHandler(manager);
         let widget = handler.open('foo.txt');
         handler.revert('foo.txt').then(contents => {
-          expect(contents.content).to.be('bar');
+          expect(contents.content).to.be(manager.DEFAULT_TEXT);
           done();
         });
       });
