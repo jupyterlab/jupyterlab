@@ -23,7 +23,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  EditorModel, IEditorModel, IEditorOptions
+  EditorModel, IEditorModel, IEditorOptions, EdgeLocation
 } from '../editor/model';
 
 import {
@@ -111,21 +111,11 @@ interface IConsoleModel extends IDisposable {
   run(): void;
 
   /**
-   * A factory for creating a new code cell.
+   * A factory for creating a new console prompt cell.
    *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new code cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   *
-   * #### Notes
-   * If the source argument does not give an input mimetype, the code cell
-   * defaults to the console [[defaultMimetype]].
-   *
-   * In a console, the only situation where the source parameter is passed in
-   * is when the user navigates the command history with the up and down keys.
+   * @returns A new console prompt (code) cell.
    */
-  createCodeCell(source?: ICellModel): ICodeCellModel;
+  createPrompt(): ICodeCellModel;
 
   /**
    * A factory for creating a new Markdown cell.
@@ -182,13 +172,14 @@ class ConsoleModel implements IConsoleModel {
     this._banner = this.createRawCell();
     this._banner.input.textEditor.readOnly = true;
     this._banner.input.textEditor.text = this._bannerText;
-
+    this._prompt = this.createPrompt();
     this._cells = new ObservableList<ICellModel>();
 
     // The first cell in a console is always the banner.
     this._cells.add(this._banner);
+
     // The last cell in a console is always the prompt.
-    this._cells.add(this.createCodeCell());
+    this._cells.add(this._prompt);
 
     this._cells.changed.connect(this.onCellsChanged, this);
   }
@@ -308,32 +299,29 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
-   * Create a code cell model.
+   * Create a console prompt (code) cell model.
    */
-  createCodeCell(source?: ICellModel): ICodeCellModel {
-    let mimetype = this.defaultMimetype;
-    if (source && isCodeCellModel(source)) {
-      mimetype = source.input.textEditor.mimetype;
+  createPrompt(): ICodeCellModel {
+    if (this._prompt) {
+      clearSignalData(this._prompt.input.textEditor);
     }
+    let mimetype = this.defaultMimetype;
     let constructor = this.constructor as typeof ConsoleModel;
     let editor = constructor.createEditor({ mimetype });
     let input = constructor.createInput(editor);
     let output = constructor.createOutputArea();
     let cell = new CodeCellModel(input, output);
-    cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isCodeCellModel(source)) {
-        cell.collapsed = source.collapsed;
-        cell.scrolled = source.scrolled;
-        for (let i = 0; i < source.output.outputs.length; i++) {
-          let sourceOutput = source.output.outputs.get(i);
-          cell.output.outputs.add(sourceOutput);
-        }
+    input.textEditor.edgeRequested.connect((sender: any, args: EdgeLocation) => {
+      switch (args) {
+        case 'top':
+          console.log('go back in history');
+          break;
+        case 'bottom':
+          console.log('go forward in history');
+          break;
       }
-    }
+    });
+    cell.trusted = true;
     return cell;
   }
 
@@ -388,27 +376,12 @@ class ConsoleModel implements IConsoleModel {
     }
     prompt.trusted = true;
     prompt.input.textEditor.readOnly = true;
-    let newPrompt = () => { this._cells.add(this.createCodeCell()); };
+    let newPrompt = () => {
+      this._prompt = this.createPrompt()
+      this._cells.add(this._prompt);
+    };
     // Whether the code cell executes or not, create a new prompt.
     executeCodeCell(prompt, session.kernel).then(newPrompt, newPrompt);
-  }
-
-  /**
-   * Execute the given cell.
-   */
-  protected executeCell(cell: CodeCellModel): void {
-    let text = cell.input.textEditor.text.trim();
-    cell.executionCount = null;
-    cell.input.prompt = 'In [ ]:';
-    if (!text) {
-      return;
-    }
-    // TODO: If kernel does not exist, bail.
-    cell.input.prompt = 'In [*]:';
-    let output = cell.output;
-    output.clear(false);
-    cell.trusted = true;
-    // TODO: Execute code.
   }
 
   /**
@@ -435,6 +408,7 @@ class ConsoleModel implements IConsoleModel {
   private _banner: IRawCellModel = null;
   private _bannerText: string = '...';
   private _cells: IObservableList<ICellModel> = null;
+  private _prompt: ICodeCellModel = null;
   private _defaultMimetype = 'text/x-ipython';
   private _metadata: { [key: string]: string } = Object.create(null);
   private _session: INotebookSession = null;
