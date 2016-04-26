@@ -1052,6 +1052,8 @@ class DirListing extends Widget {
     let items = this._model.sortedItems;
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
 
+    if (index == -1) return;
+
     clearTimeout(this._selectTimer);
 
     let name = items[index].name;
