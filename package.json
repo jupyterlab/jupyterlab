@@ -49,7 +49,7 @@
     "webpack": "^1.12.11"
   },
   "scripts": {
-    "clean": "rimraf docs && rimraf lib && rimraf test/build",
+    "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
     "clean:examples": "node scripts/cleanexamples.js",
     "build:examples": "node scripts/buildexamples.js",
     "build:src": "tsc --project src && node scripts/copycss.js",
