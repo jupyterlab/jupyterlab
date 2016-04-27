@@ -84,10 +84,11 @@ describe('jupyter-ui', () => {
 
     describe('#createNew', () => {
 
-      it('should do nothing if the dialog is dismissed', (done) => {
+      it('should delete the temp file if the dialog is dismissed', (done) => {
         let manager = new MockContentsManager();
         let creator = new FileCreator(manager);
         creator.createNew('foo').then(contents => {
+          expect(manager.methods.indexOf('delete')).to.not.be(-1);
           expect(contents).to.be(void 0);
           done();
         });
@@ -119,6 +120,7 @@ describe('jupyter-ui', () => {
         let creator = new MyFileCreator(manager);
         creator.createNew('foo').then(contents => {
           expect(contents.name).to.be('bar.txt');
+          expect(manager.methods.indexOf('rename')).to.not.be(-1);
           done();
         });
         waitForDialog().then(() => {
@@ -126,6 +128,49 @@ describe('jupyter-ui', () => {
           node.value = 'bar.txt';
           acceptDialog();
         });
+      });
+
+    });
+
+    describe('#showErrorMessage', () => {
+
+      it('should pop up a dialog', (done) => {
+        let manager = new MockContentsManager();
+        let creator = new MyFileCreator(manager);
+        creator.showErrorMessage(new Error('text')).then(() => {
+          done();
+        });
+        acceptDialog();
+      });
+
+    });
+
+    describe('#handleExisting()', () => {
+
+      it('should trigger a rename if accepted', (done) => {
+        let manager = new MockContentsManager();
+        let creator = new MyFileCreator(manager);
+        manager.newUntitled('file').then(contents => {
+          return creator.handleExisting('foo', contents);
+        }).then(() => {
+          expect(creator.methods.indexOf('doRename')).to.not.be(-1);
+          done();
+        });
+        acceptDialog().then(() => {
+          acceptDialog();
+        });
+      });
+
+      it('should delete the file if dismissed', (done) => {
+        let manager = new MockContentsManager();
+        let creator = new MyFileCreator(manager);
+        manager.newUntitled('file').then(contents => {
+          return creator.handleExisting('foo', contents);
+        }).then(() => {
+          expect(manager.methods.indexOf('delete')).to.not.be(-1);
+          done();
+        });
+        dismissDialog();
       });
 
     });
@@ -138,6 +183,7 @@ describe('jupyter-ui', () => {
         creator.createUntitled('foo/').then(contents => {
           expect(contents.type).to.be('file');
           expect(contents.name.indexOf('.txt')).to.not.be(-1);
+          expect(manager.methods.indexOf('newUntitled')).to.not.be(-1);
           done();
         });
       });
@@ -171,6 +217,7 @@ describe('jupyter-ui', () => {
         let creator = new MyDirectoryCreator(manager);
         creator.createUntitled('foo/').then(contents => {
           expect(contents.type).to.be('directory');
+          expect(manager.methods.indexOf('newUntitled')).to.not.be(-1);
           done();
         });
       });

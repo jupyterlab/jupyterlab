@@ -114,10 +114,7 @@ class FileCreator {
       host: this._host,
       okText: 'CREATE'
     }).then(value => {
-      if (value === null) {
-        return this.manager.delete(contents.path).then(() => void 0);
-      }
-      if (value.text === 'CREATE') {
+      if (value && value.text === 'CREATE') {
         if (edit.value === contents.name) {
           return contents;
         }
@@ -154,7 +151,7 @@ class FileCreator {
       body: `${this.displayName} "${name}" already exists, try again?`,
       host: this.host
     }).then(value => {
-      if (value.text === 'OK') {
+      if (value && value.text === 'OK') {
         return this.doRename(contents);
       } else {
         return this.manager.delete(contents.path).then(() => void 0);
