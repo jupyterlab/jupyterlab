@@ -45,7 +45,7 @@ function removeMath(text: string): { text: string, math: string[] } {
   // source that will later be turned into code spans. While MathJax will not TeXify code spans,
   // we still have to consider them at this point; the following issue has happened several times:
   //
-  //     `$foo` and `$bar` are varibales.  -->  <code>$foo ` and `$bar</code> are variables.
+  //     `$foo` and `$bar` are variables.  -->  <code>$foo ` and `$bar</code> are variables.
   let hasCodeSpans = /`/.test(text);
   if (hasCodeSpans) {
     text = text.replace(/~/g, '~T').replace(/(^|[^\\])(`+)([^\n]*?[^`\n])\2(?!`)/gm, (wholematch) => wholematch.replace(/\$/g, '~D'));

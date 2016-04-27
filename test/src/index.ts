@@ -9,3 +9,4 @@ import './filehandler/filehandler.spec';
 import './filehandler/registry.spec';
 import './renderers/renderers.spec';
 import './rendermime/rendermime.spec';
+import './renderers/latex.spec';
