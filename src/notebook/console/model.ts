@@ -105,6 +105,11 @@ interface IConsoleModel extends IDisposable {
   defaultMimetype: string;
 
   /**
+   * The console history manager instance.
+   */
+  history: IConsoleHistory;
+
+  /**
    * The optional notebook session associated with the console model.
    */
   session?: INotebookSession;
@@ -201,16 +206,6 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
-   * Get the observable list of console cells.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get cells(): IObservableList<ICellModel> {
-    return this._cells;
-  }
-
-  /**
    * The banner that appears at the top of a console session.
    */
   get banner(): string {
@@ -230,6 +225,16 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
+   * Get the observable list of console cells.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get cells(): IObservableList<ICellModel> {
+    return this._cells;
+  }
+
+  /**
    * The default mimetype for cells new code cells.
    */
   get defaultMimetype(): string {
@@ -243,6 +248,16 @@ class ConsoleModel implements IConsoleModel {
     this._defaultMimetype = newValue;
     let name = 'defaultMimetype';
     this.stateChanged.emit({ name, oldValue, newValue });
+  }
+
+  /**
+   * Get the console history manager instance.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get history(): IConsoleHistory {
+    return this._history;
   }
 
   /**
@@ -303,7 +318,7 @@ class ConsoleModel implements IConsoleModel {
     let input = constructor.createInput(editor);
     let output = constructor.createOutputArea();
     let cell = new CodeCellModel(input, output);
-    // input.textEditor.edgeRequested.connect();
+    input.textEditor.edgeRequested.connect(this._onEdgeRequested, this);
     cell.trusted = true;
     return cell;
   }
@@ -363,10 +378,16 @@ class ConsoleModel implements IConsoleModel {
   private _onEdgeRequested(sender: any, args: EdgeLocation): void {
     switch (args) {
     case 'top':
-      console.log('go back in history');
+      this._history.back().then(value => {
+        if (!value) return;
+        this._prompt.input.textEditor.text = value;
+      });
       break;
     case 'bottom':
-      console.log('go forward in history');
+      this._history.forward().then(value => {
+        if (!value) return;
+        this._prompt.input.textEditor.text = value;
+      });
       break;
     }
   }
@@ -419,8 +440,9 @@ namespace ConsoleModelPrivate {
   function kernelChanged(model: IConsoleModel): void {
     let session = model.session;
     let kernel = session.kernel;
+    // Update the console history manager kernel.
+    model.history.kernel = kernel;
     session.kernel.kernelInfo().then(info => {
-      console.log('info', info);
       model.banner = info.banner;
     });
   }

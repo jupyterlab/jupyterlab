@@ -11,7 +11,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  IKernel
+  IKernel, IHistoryRequest, IHistoryReply
 } from 'jupyter-js-services';
 
 import {
@@ -74,14 +74,25 @@ class ConsoleHistory implements IConsoleHistory {
     if (newValue === this._kernel) {
       return;
     }
+    let contents = ConsoleHistoryPrivate.initialRequest;
     this._kernel = newValue;
+    this._kernel.history(contents).then((value: IHistoryReply) => {
+      this._history = [];
+      for (let i = value.history.length - 1; i > -1; i--) {
+        // History entries have the shape:
+        // [session: number, line: number, input: string]
+        this._history.push(value.history[i][2])
+      }
+      this.resetCursor();
+    });
+
   }
 
   /**
    * Construct a new console history object.
    */
   constructor(kernel: IKernel) {
-    // Listen to the command history events of the model.
+    if (kernel) this.kernel = kernel;
   }
 
   /**
@@ -90,7 +101,9 @@ class ConsoleHistory implements IConsoleHistory {
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
   back(): Promise<string> {
-    return Promise.resolve(void 0);
+    let content = this._history[--this._cursor];
+    this._cursor = Math.max(0, this._cursor);
+    return Promise.resolve(content);
   }
 
   /**
@@ -109,17 +122,29 @@ class ConsoleHistory implements IConsoleHistory {
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
   forward(): Promise<string> {
-    return Promise.resolve(void 0);
+    let content = this._history[++this._cursor];
+    this._cursor = Math.min(this._history.length, this._cursor);
+    return Promise.resolve(content);
   }
 
   /**
    * Reset the history navigation cursor back to the bottom.
    */
   resetCursor(): void {
-    this._cursor = 0;
+    this._cursor =  this._history.length;
   }
 
   private _cursor = 0;
-  private _data: string[] = void 0;
+  private _history: string[] = [];
   private _kernel: IKernel = null;
+}
+
+namespace ConsoleHistoryPrivate {
+  export
+  const initialRequest: IHistoryRequest = {
+    output: false,
+    raw: true,
+    hist_access_type: 'tail',
+    n: 50
+  };
 }
