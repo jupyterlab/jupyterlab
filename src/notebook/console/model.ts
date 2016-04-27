@@ -23,6 +23,10 @@ import {
 } from 'phosphor-signaling';
 
 import {
+  IConsoleHistory, ConsoleHistory
+} from './history';
+
+import {
   EditorModel, IEditorModel, IEditorOptions, EdgeLocation
 } from '../editor/model';
 
@@ -159,8 +163,9 @@ class ConsoleModel implements IConsoleModel {
     this._banner = this.createRawCell();
     this._banner.input.textEditor.readOnly = true;
     this._banner.input.textEditor.text = this._bannerText;
-    this._prompt = this.createPrompt();
     this._cells = new ObservableList<ICellModel>();
+    this._history = new ConsoleHistory(this._session && this._session.kernel);
+    this._prompt = this.createPrompt();
 
     // The first cell in a console is always the banner.
     this._cells.add(this._banner);
@@ -298,16 +303,7 @@ class ConsoleModel implements IConsoleModel {
     let input = constructor.createInput(editor);
     let output = constructor.createOutputArea();
     let cell = new CodeCellModel(input, output);
-    input.textEditor.edgeRequested.connect((sender: any, args: EdgeLocation) => {
-      switch (args) {
-        case 'top':
-          console.log('go back in history');
-          break;
-        case 'bottom':
-          console.log('go forward in history');
-          break;
-      }
-    });
+    // input.textEditor.edgeRequested.connect();
     cell.trusted = true;
     return cell;
   }
@@ -364,12 +360,24 @@ class ConsoleModel implements IConsoleModel {
     }
   }
 
+  private _onEdgeRequested(sender: any, args: EdgeLocation): void {
+    switch (args) {
+    case 'top':
+      console.log('go back in history');
+      break;
+    case 'bottom':
+      console.log('go forward in history');
+      break;
+    }
+  }
+
   private _banner: IRawCellModel = null;
   private _bannerText: string = '...';
   private _cells: IObservableList<ICellModel> = null;
-  private _prompt: ICodeCellModel = null;
   private _defaultMimetype = 'text/x-ipython';
+  private _history: IConsoleHistory = null;
   private _metadata: { [key: string]: string } = Object.create(null);
+  private _prompt: ICodeCellModel = null;
   private _session: INotebookSession = null;
 }
 
