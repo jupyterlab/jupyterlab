@@ -25,6 +25,10 @@ import {
   MockContentsManager
 } from '../mock';
 
+import {
+  acceptDialog
+} from '../utils';
+
 
 class FileHandler extends AbstractFileHandler<Widget> {
 
@@ -290,8 +294,16 @@ describe('jupyter-ui', () => {
         });
       });
 
-      it('should prompt the user if the file is dirty', () => {
-        // TODO
+      it('should prompt the user if the file is dirty', (done) => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        handler.open('foo.txt');
+        handler.setDirty('foo.txt', true);
+        handler.close('foo.txt').then(result => {
+          expect(result).to.be(true);
+          done();
+        });
+        acceptDialog();
       });
 
     });

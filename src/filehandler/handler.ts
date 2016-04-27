@@ -312,10 +312,11 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    * Ask the user whether to close an unsaved file.
    */
   private _maybeClose(widget: T): Promise<boolean> {
+    let host = widget.isAttached ? widget.node : document.body;
     return showDialog({
       title: 'Close without saving?',
       body: `File "${widget.title.text}" has unsaved changes, close without saving?`,
-      host: widget.node
+      host
     }).then(value => {
       if (value.text === 'OK') {
         this._close(widget);

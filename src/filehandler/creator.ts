@@ -114,7 +114,13 @@ class FileCreator {
       host: this._host,
       okText: 'CREATE'
     }).then(value => {
+      if (value === null) {
+        return this.manager.delete(contents.path).then(() => void 0);
+      }
       if (value.text === 'CREATE') {
+        if (edit.value === contents.name) {
+          return contents;
+        }
         return this.manager.rename(contents.path, `${dname}/${edit.value}`);
       } else {
         return this.manager.delete(contents.path).then(() => void 0);
@@ -124,8 +130,7 @@ class FileCreator {
         return this.handleExisting(edit.value, contents);
       }
       return this.showErrorMessage(error);
-    }
-    );
+    });
   }
 
   /**

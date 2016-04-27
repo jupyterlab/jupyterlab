@@ -16,10 +16,18 @@ import {
   MockContentsManager
 } from '../mock';
 
+import {
+  acceptDialog, dismissDialog, waitForDialog
+} from '../utils';
+
 
 class MyFileCreator extends FileCreator {
 
   methods: string[] = [];
+
+  getFileNode(): HTMLInputElement {
+    return this.fileNode;
+  }
 
   doRename(contents: IContentsModel): Promise<IContentsModel> {
     this.methods.push('doRename');
@@ -70,6 +78,54 @@ describe('jupyter-ui', () => {
         let manager = new MockContentsManager();
         let creator = new FileCreator(manager);
         expect(creator instanceof FileCreator).to.be(true);
+      });
+
+    });
+
+    describe('#createNew', () => {
+
+      it('should do nothing if the dialog is dismissed', (done) => {
+        let manager = new MockContentsManager();
+        let creator = new FileCreator(manager);
+        creator.createNew('foo').then(contents => {
+          expect(contents).to.be(void 0);
+          done();
+        });
+        dismissDialog();
+      });
+
+      it('should create the untitled file if dialog is accepted', (done) => {
+        let manager = new MockContentsManager();
+        let creator = new FileCreator(manager);
+        creator.createNew('foo').then(contents => {
+          expect(contents.content).to.be(manager.DEFAULT_TEXT);
+          done();
+        });
+        acceptDialog();
+      });
+
+      it('should create the untitled file if dialog is accepted', (done) => {
+        let manager = new MockContentsManager();
+        let creator = new FileCreator(manager);
+        creator.createNew('foo').then(contents => {
+          expect(contents.content).to.be(manager.DEFAULT_TEXT);
+          done();
+        });
+        acceptDialog();
+      });
+
+      it('should support an accepted rename', (done) => {
+        let manager = new MockContentsManager();
+        let creator = new MyFileCreator(manager);
+        creator.createNew('foo').then(contents => {
+          expect(contents.name).to.be('bar.txt');
+          done();
+        });
+        waitForDialog().then(() => {
+          let node = creator.getFileNode();
+          node.value = 'bar.txt';
+          acceptDialog();
+        });
       });
 
     });
