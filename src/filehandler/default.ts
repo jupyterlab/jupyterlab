@@ -45,7 +45,6 @@ class FileHandler extends AbstractFileHandler<CodeMirrorWidget> {
    */
   protected getSaveOptions(widget: CodeMirrorWidget, path: string): Promise<IContentsOpts> {
     let name = path.split('/').pop();
-    name = name.split('.')[0];
     let content = widget.editor.getDoc().getValue();
     return Promise.resolve({ path, content, name,
                              type: 'file', format: 'text' });

@@ -32,6 +32,13 @@ class FileHandlerRegistry {
   }
 
   /**
+   * A signal emitted when a file has finished opening.
+   */
+  get finished(): ISignal<FileHandlerRegistry, Widget> {
+    return Private.finishedSignal.bind(this);
+  }
+
+  /**
    * A signal emitted when a file is created.
    */
   get created(): ISignal<FileHandlerRegistry, IContentsModel> {
@@ -43,6 +50,9 @@ class FileHandlerRegistry {
    */
   addHandler(handler: AbstractFileHandler<Widget>): void {
     this._handlers.push(handler);
+    handler.finished.connect((handler, widget) => {
+      this.finished.emit(widget);
+    });
   }
 
   /**
@@ -85,7 +95,7 @@ class FileHandlerRegistry {
   }
 
   /**
-   * Open a contents model by path.
+   * Open a file by path.
    */
   open(path: string): Widget {
     let handler = this.findHandler(path);
@@ -94,12 +104,13 @@ class FileHandlerRegistry {
     }
     let widget = handler.open(path);
     this.opened.emit(widget);
+    return widget;
   }
 
   /**
    * Rename a file.
    */
-  rename(oldPath: string, newPath: string): boolean {
+  rename(oldPath: string, newPath?: string): boolean {
     for (let h of this._handlers) {
       if (h.findWidget(oldPath)) {
         return h.rename(oldPath, newPath);
@@ -118,6 +129,8 @@ class FileHandlerRegistry {
         return h.save(path);
       }
     }
+    let msg = `No open widget for path '${path}'`;
+    return Promise.reject(new Error(msg));
   }
 
   /**
@@ -130,6 +143,8 @@ class FileHandlerRegistry {
         return h.revert(path);
       }
     }
+    let msg = `No open widget for path '${path}'`;
+    return Promise.reject(new Error(msg));
   }
 
   /**
@@ -142,15 +157,19 @@ class FileHandlerRegistry {
         return h.close(path);
       }
     }
+    let msg = `No open widget for path '${path}'`;
+    return Promise.reject(new Error(msg));
   }
 
   /**
    * Close all files.
    */
-  closeAll(): void {
+  closeAll(): Promise<void> {
+    let promises: Promise<void>[] = [];
     for (let h of this._handlers) {
-      h.closeAll();
+      promises.push(h.closeAll());
     }
+    return Promise.all(promises).then(() => { return void 0; });
   }
 
   /**
@@ -200,7 +219,7 @@ class FileHandlerRegistry {
       if (this._default) {
         return this._default;
       }
-      throw new Error(`Could not open file '${path}'`);
+      return;
     }
 
     // There are more than one possible handlers.
@@ -223,6 +242,12 @@ namespace Private {
    */
   export
   const openedSignal = new Signal<FileHandlerRegistry, Widget>();
+
+  /**
+   * A signal emitted when a file is finished opening.
+   */
+  export
+  const finishedSignal = new Signal<FileHandlerRegistry, Widget>();
 
   /**
    * A signal emitted when a file is created.

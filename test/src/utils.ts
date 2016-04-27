@@ -30,7 +30,7 @@ function waitForDialog(host: HTMLElement = document.body): Promise<void> {
         resolve(void 0);
         return;
       }
-      setTimeout(refresh, 100);
+      setTimeout(refresh, 10);
     }
     refresh();
   });
