@@ -114,7 +114,10 @@ class FileCreator {
       host: this._host,
       okText: 'CREATE'
     }).then(value => {
-      if (value.text === 'CREATE') {
+      if (value && value.text === 'CREATE') {
+        if (edit.value === contents.name) {
+          return contents;
+        }
         return this.manager.rename(contents.path, `${dname}/${edit.value}`);
       } else {
         return this.manager.delete(contents.path).then(() => void 0);
@@ -124,8 +127,7 @@ class FileCreator {
         return this.handleExisting(edit.value, contents);
       }
       return this.showErrorMessage(error);
-    }
-    );
+    });
   }
 
   /**
@@ -149,7 +151,7 @@ class FileCreator {
       body: `${this.displayName} "${name}" already exists, try again?`,
       host: this.host
     }).then(value => {
-      if (value.text === 'OK') {
+      if (value && value.text === 'OK') {
         return this.doRename(contents);
       } else {
         return this.manager.delete(contents.path).then(() => void 0);

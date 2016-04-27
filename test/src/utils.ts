@@ -22,9 +22,36 @@ function triggerKeyEvent(node: HTMLElement, eventType: string, options: any = {}
 
 
 export
+function waitForDialog(host: HTMLElement = document.body): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    let refresh = () => {
+      let node = host.getElementsByClassName('jp-Dialog')[0];
+      if (node) {
+        resolve(void 0);
+        return;
+      }
+      setTimeout(refresh, 100);
+    }
+    refresh();
+  });
+}
+
+
+export
 function acceptDialog(host: HTMLElement = document.body): Promise<void> {
-  return Promise.resolve().then(() => {
+  return waitForDialog().then(() => {
     let node = host.getElementsByClassName('jp-Dialog-okButton')[0];
-    (node as HTMLElement).click();
+    if (node) (node as HTMLElement).click();
+  });
+}
+
+
+export
+function dismissDialog(host: HTMLElement = document.body): Promise<void> {
+  return waitForDialog().then(() => {
+    let node = host.getElementsByClassName('jp-Dialog')[0];
+    if (node) {
+      triggerKeyEvent(node as HTMLElement, 'keydown', { keyCode: 27 });
+    }
   });
 }

@@ -115,8 +115,11 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
 
   /**
    * Rename a file.
+   *
+   * #### Notes
+   * The file action itself must take place elsewhere.
    */
-  rename(oldPath: string, newPath: string): boolean {
+  rename(oldPath: string, newPath?: string): boolean {
     let widget = this.findWidget(oldPath);
     if (widget === void 0) {
       return false;
@@ -312,12 +315,13 @@ abstract class AbstractFileHandler<T extends Widget> implements IMessageFilter {
    * Ask the user whether to close an unsaved file.
    */
   private _maybeClose(widget: T): Promise<boolean> {
+    let host = widget.isAttached ? widget.node : document.body;
     return showDialog({
       title: 'Close without saving?',
       body: `File "${widget.title.text}" has unsaved changes, close without saving?`,
-      host: widget.node
+      host
     }).then(value => {
-      if (value.text === 'OK') {
+      if (value && value.text === 'OK') {
         this._close(widget);
         return true;
       }

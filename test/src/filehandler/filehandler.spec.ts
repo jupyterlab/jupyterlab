@@ -25,6 +25,10 @@ import {
   MockContentsManager
 } from '../mock';
 
+import {
+  acceptDialog, dismissDialog
+} from '../utils';
+
 
 class FileHandler extends AbstractFileHandler<Widget> {
 
@@ -203,7 +207,8 @@ describe('jupyter-ui', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
         let widget = handler.open('foo.txt');
-        handler.rename('foo.txt', 'bar.txt');
+        let result = handler.rename('foo.txt', 'bar.txt');
+        expect(result).to.be(true);
         expect(handler.findWidget('bar.txt')).to.be(widget);
       });
 
@@ -213,6 +218,22 @@ describe('jupyter-ui', () => {
         let widget = handler.open('foo.txt');
         handler.rename('foo.txt', 'bar.txt');
         expect(widget.title.text).to.be('bar.txt');
+      });
+
+      it('shoud be a no-op if the file is not found', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let result = handler.rename('foo.txt', 'bar.txt');
+        expect(result).to.be(false);
+      });
+
+      it('should close the widget if the new path is undefined', () => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        let widget = handler.open('foo.txt');
+        let result = handler.rename('foo.txt');
+        expect(result).to.be(true);
+        expect(handler.methods.indexOf('beforeClose')).to.not.be(-1);
       });
 
     });
@@ -236,6 +257,15 @@ describe('jupyter-ui', () => {
         handler.setDirty('foo.txt', true);
         handler.save('foo.txt').then(contents => {
           expect(handler.isDirty('foo.txt')).to.be(false);
+          done();
+        });
+      });
+
+      it('should be a no-op if the file is not found', (done) => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        handler.save('foo.txt').then(contents => {
+          expect(contents).to.be(void 0);
           done();
         });
       });
@@ -265,6 +295,15 @@ describe('jupyter-ui', () => {
         });
       });
 
+      it('should be a no-op if the file is not found', (done) => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        handler.revert('foo.txt').then(contents => {
+          expect(contents).to.be(void 0);
+          done();
+        });
+      });
+
     });
 
     describe('#close()', () => {
@@ -290,8 +329,28 @@ describe('jupyter-ui', () => {
         });
       });
 
-      it('should prompt the user if the file is dirty', () => {
-        // TODO
+      it('should prompt the user if the file is dirty', (done) => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        handler.open('foo.txt');
+        handler.setDirty('foo.txt', true);
+        handler.close('foo.txt').then(result => {
+          expect(result).to.be(true);
+          done();
+        });
+        acceptDialog();
+      });
+
+      it('should not close if the user dismisses the dialog', (done) => {
+        let manager = new MockContentsManager();
+        let handler = new FileHandler(manager);
+        handler.open('foo.txt');
+        handler.setDirty('foo.txt', true);
+        handler.close('foo.txt').then(result => {
+          expect(result).to.be(false);
+          done();
+        });
+        dismissDialog();
       });
 
     });
