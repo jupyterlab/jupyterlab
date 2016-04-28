@@ -315,14 +315,18 @@ class ConsoleModel implements IConsoleModel {
       // Stop listening to the previous prompt.
       clearSignalData(this._prompt.input.textEditor);
     }
+
     let mimetype = this.defaultMimetype;
     let constructor = this.constructor as typeof ConsoleModel;
     let editor = constructor.createEditor({ mimetype });
     let input = constructor.createInput(editor);
     let output = constructor.createOutputArea();
     let cell = new CodeCellModel(input, output);
-    input.textEditor.edgeRequested.connect(this._onEdgeRequested, this);
     cell.trusted = true;
+
+    // Connect each new prompt with console history.
+    input.textEditor.edgeRequested.connect(this._onEdgeRequested, this);
+
     return cell;
   }
 
