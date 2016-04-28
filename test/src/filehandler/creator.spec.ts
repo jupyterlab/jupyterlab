@@ -5,16 +5,16 @@
 import expect = require('expect.js');
 
 import {
+  MockContentsManager
+} from 'jupyter-js-services/lib/mockcontents';
+
+import {
   IContentsModel, IContentsManager, ContentsManager
 } from 'jupyter-js-services';
 
 import {
   FileCreator, DirectoryCreator
 } from '../../../lib/filehandler/creator';
-
-import {
-  MockContentsManager
-} from '../mock';
 
 import {
   acceptDialog, dismissDialog, waitForDialog
