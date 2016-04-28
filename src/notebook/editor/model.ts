@@ -78,6 +78,11 @@ interface IEditorModel extends IDisposable {
    * The number of spaces to insert for each tab.
    */
   tabSize: number;
+
+  /**
+   * The cursor position.
+   */
+  cursorPosition: number;
 }
 
 
@@ -217,6 +222,22 @@ class EditorModel implements IEditorModel {
   }
 
   /**
+   * The cursor position for the editor model.
+   */
+  get cursorPosition(): number {
+    return this._cursorPosition;
+  }
+  set cursorPosition(newValue: number) {
+    if (newValue === this._cursorPosition) {
+      return;
+    }
+    let oldValue = this._cursorPosition;
+    let name = 'cursorPosition';
+    this._cursorPosition = newValue;
+    this.stateChanged.emit({ name, oldValue, newValue });
+  }
+
+  /**
    * The readOnly property for the editor model.
    */
   get readOnly(): boolean {
@@ -293,6 +314,7 @@ class EditorModel implements IEditorModel {
   private _readOnly = false;
   private _text = '';
   private _tabSize = 4;
+  private _cursorPosition = -1;
 }
 
 

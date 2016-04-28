@@ -237,6 +237,12 @@ function main(): void {
   },
   {
     category: 'Notebook Cell',
+    text: 'Split Cell',
+    shortcut: 'Control Shift Minus',
+    handler: () => { nbManager.split() ; }
+  },
+  {
+    category: 'Notebook Cell',
     text: 'To Code Type',
     shortcut: 'Y',
     handler: () => { nbManager.changeCellType('code') ; }
@@ -343,6 +349,11 @@ function main(): void {
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Shift M'],
     handler: () => { nbManager.merge(); }
+  },
+  {
+    selector: '.jp-Notebook.jp-mod-editMode',
+    sequence: ['Ctrl Shift -'],
+    handler: () => { nbManager.split(); }
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',

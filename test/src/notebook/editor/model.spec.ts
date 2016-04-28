@@ -183,6 +183,38 @@ describe('jupyter-js-notebook', () => {
 
     });
 
+    describe('#cursorPosition', () => {
+
+      it('should default to -1', () => {
+        let model = new EditorModel();
+        expect(model.cursorPosition).to.be(-1);
+      });
+
+      it('should emit a stateChanged signal when changed', () => {
+        let model = new EditorModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          expect(change.name).to.be('cursorPosition');
+          expect(change.oldValue).to.be(-1);
+          expect(change.newValue).to.be(1);
+          called = true;
+        });
+        model.cursorPosition = 1;
+        expect(called).to.be(true);
+      });
+
+      it('should not emit the signal when there is no change', () => {
+        let model = new EditorModel();
+        let called = false;
+        model.stateChanged.connect((editor, change) => {
+          called = true;
+        });
+        model.cursorPosition = -1;
+        expect(called).to.be(false);
+      });
+
+    });
+
     describe('#tabSize', () => {
 
       it('should default to `4`', () => {
