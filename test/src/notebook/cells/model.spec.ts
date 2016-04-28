@@ -5,6 +5,10 @@
 import expect = require('expect.js');
 
 import {
+  MockKernel
+} from 'jupyter-js-services/lib/mockkernel';
+
+import {
   EditorModel
 } from '../../../lib/editor/model';
 
@@ -21,10 +25,6 @@ import {
   RawCellModel, isMarkdownCellModel, isRawCellModel, isCodeCellModel,
   executeCodeCell
 } from '../../../lib/cells/model';
-
-import {
-  MockKernel
-} from '../notebook/mock';
 
 
 /**
