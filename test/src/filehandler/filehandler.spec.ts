@@ -10,6 +10,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  MockContentsManager
+} from 'jupyter-js-services/lib/mockcontents';
+
+import {
   sendMessage
 } from 'phosphor-messaging';
 
@@ -20,10 +24,6 @@ import {
 import {
   AbstractFileHandler
 } from '../../../lib/filehandler/handler';
-
-import {
-  MockContentsManager
-} from '../mock';
 
 import {
   acceptDialog, dismissDialog

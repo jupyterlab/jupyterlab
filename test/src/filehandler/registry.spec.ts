@@ -10,6 +10,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  MockContentsManager
+} from 'jupyter-js-services/lib/mockcontents';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -32,10 +36,6 @@ import {
 import {
   FileHandlerRegistry
 } from '../../../lib/filehandler/registry';
-
-import {
-  MockContentsManager
-} from '../mock';
 
 import {
   acceptDialog, dismissDialog

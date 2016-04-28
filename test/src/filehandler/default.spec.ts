@@ -10,16 +10,16 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  MockContentsManager
+} from 'jupyter-js-services/lib/mockcontents';
+
+import {
   CodeMirrorWidget
 } from '../../../lib/codemirror/widget';
 
 import {
   FileHandler
 } from '../../../lib/filehandler/default';
-
-import {
-  MockContentsManager
-} from '../mock';
 
 
 class MyFileHandler extends FileHandler {
