@@ -102,11 +102,8 @@ class NotebookManager {
     }
     // Strip leading whitespace off the the new text
     let newText = orig.slice(position);
-    console.log('setting the text');
     newCell.input.textEditor.text = newText.replace(/^\s+/g,'');
-    console.log('setting the cursor position');
     newCell.input.textEditor.cursorPosition = 0;
-    console.log('inserting the cell');
     this.model.cells.insert(this.model.activeCellIndex + 1, newCell);
     this.model.mode = 'edit';
   }

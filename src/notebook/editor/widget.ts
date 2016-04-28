@@ -330,6 +330,7 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
       break;
     case 'cursorPosition':
       this.updateCursorPosition(args.newValue as number);
+      break;
     }
   }
 
