@@ -286,12 +286,13 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     let doc = this._editor.getDoc();
     let oldText = doc.getValue();
     let text = this._model.text;
-    let cursor = 0;
+    let cursor = this._model.cursorPosition;
     if (oldText && oldText !== text) {
       // TODO: do something smart with all the selections
       let oldCursor = doc.indexFromPos(doc.getCursor());
-      if (oldCursor === oldText.length) {
-        // if the cursor was at the end, keep it at the end
+      if (oldCursor === oldText.length || cursor >= text.length) {
+        // If the cursor was at the end or greater than the length
+        // of the new value, keep it at the end.
         cursor = text.length;
       } else {
         let fragment = oldText.substr(oldCursor, 10);

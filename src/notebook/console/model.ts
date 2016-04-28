@@ -23,7 +23,11 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  EditorModel, IEditorModel, IEditorOptions
+  IConsoleHistory, ConsoleHistory
+} from './history';
+
+import {
+  EditorModel, IEditorModel, IEditorOptions, EdgeLocation
 } from '../editor/model';
 
 import {
@@ -101,7 +105,12 @@ interface IConsoleModel extends IDisposable {
   defaultMimetype: string;
 
   /**
-   * The optional notebook session associated with the model.
+   * The console history manager instance.
+   */
+  history: IConsoleHistory;
+
+  /**
+   * The optional notebook session associated with the console model.
    */
   session?: INotebookSession;
 
@@ -111,41 +120,18 @@ interface IConsoleModel extends IDisposable {
   run(): void;
 
   /**
-   * A factory for creating a new code cell.
+   * A factory for creating a new console prompt cell.
    *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new code cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   *
-   * #### Notes
-   * If the source argument does not give an input mimetype, the code cell
-   * defaults to the console [[defaultMimetype]].
-   *
-   * In a console, the only situation where the source parameter is passed in
-   * is when the user navigates the command history with the up and down keys.
+   * @returns A new console prompt (code) cell.
    */
-  createCodeCell(source?: ICellModel): ICodeCellModel;
-
-  /**
-   * A factory for creating a new Markdown cell.
-   *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new markdown cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createMarkdownCell(source?: ICellModel): IMarkdownCellModel;
+  createPrompt(): ICodeCellModel;
 
   /**
    * A factory for creating a new raw cell.
    *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new raw cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
+   * @returns A new raw cell.
    */
-  createRawCell(source?: ICellModel): IRawCellModel;
+  createRawCell(): IRawCellModel;
 }
 
 
@@ -182,13 +168,15 @@ class ConsoleModel implements IConsoleModel {
     this._banner = this.createRawCell();
     this._banner.input.textEditor.readOnly = true;
     this._banner.input.textEditor.text = this._bannerText;
-
     this._cells = new ObservableList<ICellModel>();
+    this._history = new ConsoleHistory(this._session && this._session.kernel);
+    this._prompt = this.createPrompt();
 
     // The first cell in a console is always the banner.
     this._cells.add(this._banner);
+
     // The last cell in a console is always the prompt.
-    this._cells.add(this.createCodeCell());
+    this._cells.add(this._prompt);
 
     this._cells.changed.connect(this.onCellsChanged, this);
   }
@@ -218,16 +206,6 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
-   * Get the observable list of notebook cells.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get cells(): IObservableList<ICellModel> {
-    return this._cells;
-  }
-
-  /**
    * The banner that appears at the top of a console session.
    */
   get banner(): string {
@@ -247,6 +225,16 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
+   * Get the observable list of console cells.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get cells(): IObservableList<ICellModel> {
+    return this._cells;
+  }
+
+  /**
    * The default mimetype for cells new code cells.
    */
   get defaultMimetype(): string {
@@ -260,6 +248,16 @@ class ConsoleModel implements IConsoleModel {
     this._defaultMimetype = newValue;
     let name = 'defaultMimetype';
     this.stateChanged.emit({ name, oldValue, newValue });
+  }
+
+  /**
+   * Get the console history manager instance.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get history(): IConsoleHistory {
+    return this._history;
   }
 
   /**
@@ -308,72 +306,39 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
-   * Create a code cell model.
+   * Create a console prompt (code) cell model.
    */
-  createCodeCell(source?: ICellModel): ICodeCellModel {
-    let mimetype = this.defaultMimetype;
-    if (source && isCodeCellModel(source)) {
-      mimetype = source.input.textEditor.mimetype;
+  createPrompt(): ICodeCellModel {
+    if (this._prompt) {
+      // Record the previous prompt's text in history.
+      this._history.push(this._prompt.input.textEditor.text);
+      // Stop listening to the previous prompt.
+      clearSignalData(this._prompt.input.textEditor);
     }
+
+    let mimetype = this.defaultMimetype;
     let constructor = this.constructor as typeof ConsoleModel;
     let editor = constructor.createEditor({ mimetype });
     let input = constructor.createInput(editor);
     let output = constructor.createOutputArea();
     let cell = new CodeCellModel(input, output);
     cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isCodeCellModel(source)) {
-        cell.collapsed = source.collapsed;
-        cell.scrolled = source.scrolled;
-        for (let i = 0; i < source.output.outputs.length; i++) {
-          let sourceOutput = source.output.outputs.get(i);
-          cell.output.outputs.add(sourceOutput);
-        }
-      }
-    }
-    return cell;
-  }
 
-  /**
-   * Create a markdown cell model.
-   */
-  createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
-    let constructor = this.constructor as typeof ConsoleModel;
-    let editor = constructor.createEditor({ mimetype: 'text/x-ipythongfm' });
-    let input = constructor.createInput(editor);
-    let cell = new MarkdownCellModel(input);
-    cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isMarkdownCellModel(source)) {
-        cell.rendered = source.rendered;
-      }
-    }
+    // Connect each new prompt with console history.
+    input.textEditor.edgeRequested.connect(this._onEdgeRequested, this);
+
     return cell;
   }
 
   /**
    * Create a raw cell model.
    */
-  createRawCell(source?: ICellModel): IRawCellModel {
+  createRawCell(): IRawCellModel {
     let constructor = this.constructor as typeof ConsoleModel;
     let editor = constructor.createEditor();
     let input = constructor.createInput(editor);
     let cell = new RawCellModel(input);
     cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isRawCellModel(source)) {
-        cell.format = (source as IRawCellModel).format;
-      }
-    }
     return cell;
   }
 
@@ -388,27 +353,12 @@ class ConsoleModel implements IConsoleModel {
     }
     prompt.trusted = true;
     prompt.input.textEditor.readOnly = true;
-    let newPrompt = () => { this._cells.add(this.createCodeCell()); };
+    let newPrompt = () => {
+      this._prompt = this.createPrompt()
+      this._cells.add(this._prompt);
+    };
     // Whether the code cell executes or not, create a new prompt.
     executeCodeCell(prompt, session.kernel).then(newPrompt, newPrompt);
-  }
-
-  /**
-   * Execute the given cell.
-   */
-  protected executeCell(cell: CodeCellModel): void {
-    let text = cell.input.textEditor.text.trim();
-    cell.executionCount = null;
-    cell.input.prompt = 'In [ ]:';
-    if (!text) {
-      return;
-    }
-    // TODO: If kernel does not exist, bail.
-    cell.input.prompt = 'In [*]:';
-    let output = cell.output;
-    output.clear(false);
-    cell.trusted = true;
-    // TODO: Execute code.
   }
 
   /**
@@ -432,17 +382,39 @@ class ConsoleModel implements IConsoleModel {
     }
   }
 
+  private _onEdgeRequested(sender: any, args: EdgeLocation): void {
+    switch (args) {
+    case 'top':
+      this._history.back().then(value => {
+        if (!value) return;
+        this._prompt.input.textEditor.text = value;
+        this._prompt.input.textEditor.cursorPosition = 0;
+      });
+      break;
+    case 'bottom':
+      this._history.forward().then(value => {
+        // If at the bottom end of history, then clear the prompt.
+        let text = value || '';
+        this._prompt.input.textEditor.text = text;
+        this._prompt.input.textEditor.cursorPosition = text.length;
+      });
+      break;
+    }
+  }
+
   private _banner: IRawCellModel = null;
   private _bannerText: string = '...';
   private _cells: IObservableList<ICellModel> = null;
   private _defaultMimetype = 'text/x-ipython';
+  private _history: IConsoleHistory = null;
   private _metadata: { [key: string]: string } = Object.create(null);
+  private _prompt: ICodeCellModel = null;
   private _session: INotebookSession = null;
 }
 
 
 /**
- * A private namespace for notebook model data.
+ * A private namespace for console model data.
  */
 namespace ConsoleModelPrivate {
   /**
@@ -478,8 +450,9 @@ namespace ConsoleModelPrivate {
   function kernelChanged(model: IConsoleModel): void {
     let session = model.session;
     let kernel = session.kernel;
+    // Update the console history manager kernel.
+    model.history.kernel = kernel;
     session.kernel.kernelInfo().then(info => {
-      console.log('info', info);
       model.banner = info.banner;
     });
   }
