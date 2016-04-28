@@ -87,10 +87,16 @@ class ConsoleHistory implements IConsoleHistory {
     this._kernel = newValue;
     this._kernel.history(contents).then((value: IHistoryReply) => {
       this._history = [];
-      for (let i = value.history.length - 1; i > -1; i--) {
+      let last = '';
+      let current = '';
+      for (let i = 0; i < value.history.length; i++) {
         // History entries have the shape:
         // [session: number, line: number, input: string]
-        this._history.push(value.history[i][2])
+        // Contiguous duplicates are stripped out of the API response.
+        current = value.history[i][2];
+        if (current !== last) {
+          this._history.push(last = current);
+        }
       }
       this._resetCursor();
     });
@@ -173,6 +179,6 @@ namespace ConsoleHistoryPrivate {
     output: false,
     raw: true,
     hist_access_type: 'tail',
-    n: 50
+    n: 500
   };
 }

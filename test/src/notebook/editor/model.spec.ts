@@ -185,9 +185,9 @@ describe('jupyter-js-notebook', () => {
 
     describe('#cursorPosition', () => {
 
-      it('should default to -1', () => {
+      it('should default to 0', () => {
         let model = new EditorModel();
-        expect(model.cursorPosition).to.be(-1);
+        expect(model.cursorPosition).to.be(0);
       });
 
       it('should emit a stateChanged signal when changed', () => {
@@ -195,7 +195,7 @@ describe('jupyter-js-notebook', () => {
         let called = false;
         model.stateChanged.connect((editor, change) => {
           expect(change.name).to.be('cursorPosition');
-          expect(change.oldValue).to.be(-1);
+          expect(change.oldValue).to.be(0);
           expect(change.newValue).to.be(1);
           called = true;
         });
@@ -209,7 +209,7 @@ describe('jupyter-js-notebook', () => {
         model.stateChanged.connect((editor, change) => {
           called = true;
         });
-        model.cursorPosition = -1;
+        model.cursorPosition = 0;
         expect(called).to.be(false);
       });
 

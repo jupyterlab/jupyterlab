@@ -314,7 +314,7 @@ class EditorModel implements IEditorModel {
   private _readOnly = false;
   private _text = '';
   private _tabSize = 4;
-  private _cursorPosition = -1;
+  private _cursorPosition = 0;
 }
 
 

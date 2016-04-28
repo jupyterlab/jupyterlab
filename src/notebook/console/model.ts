@@ -388,12 +388,15 @@ class ConsoleModel implements IConsoleModel {
       this._history.back().then(value => {
         if (!value) return;
         this._prompt.input.textEditor.text = value;
+        this._prompt.input.textEditor.cursorPosition = 0;
       });
       break;
     case 'bottom':
       this._history.forward().then(value => {
         // If at the bottom end of history, then clear the prompt.
-        this._prompt.input.textEditor.text = value || '';
+        let text = value || '';
+        this._prompt.input.textEditor.text = text;
+        this._prompt.input.textEditor.cursorPosition = text.length;
       });
       break;
     }
