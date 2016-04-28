@@ -127,7 +127,6 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     CodeMirror.on(doc, 'cursorActivity', instance => {
       let position = doc.getCursor();
       model.cursorPosition = doc.indexFromPos(position);
-      console.log('setting model position', position);
     });
     model.stateChanged.connect(this.onModelStateChanged, this);
   }
@@ -250,7 +249,6 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
   protected updateCursorPosition(position: number): void {
     let doc = this._editor.getDoc();
     doc.setCursor(doc.posFromIndex(position));
-    console.log('got model position', position);
   }
 
   /**
