@@ -7,7 +7,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  ICellModel, MarkdownCellModel
+  ICellModel, MarkdownCellModel, isCodeCellModel
 } from '../cells';
 
 import {
@@ -85,6 +85,30 @@ class NotebookManager {
       model.cells.insert(index, cell);
     }
     this.deselectCells();
+  }
+
+  /**
+   * Split the active cell into two cells.
+   */
+  split(): void {
+    this.deselectCells();
+    let cell = this.model.cells.get(this.model.activeCellIndex);
+    let position = cell.input.textEditor.cursorPosition;
+    let newCell = this.cloneCell(cell);
+    let orig = cell.input.textEditor.text;
+    cell.input.textEditor.text = orig.slice(0, position);
+    if (isCodeCellModel(cell)) {
+      cell.clear();
+    }
+    // Strip leading whitespace off the the new text
+    let newText = orig.slice(position);
+    console.log('setting the text');
+    newCell.input.textEditor.text = newText.replace(/^\s+/g,'');
+    console.log('setting the cursor position');
+    newCell.input.textEditor.cursorPosition = 0;
+    console.log('inserting the cell');
+    this.model.cells.insert(this.model.activeCellIndex + 1, newCell);
+    this.model.mode = 'edit';
   }
 
   /**

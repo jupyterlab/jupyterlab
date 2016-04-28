@@ -102,26 +102,32 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     this.updateLineNumbers(model.lineNumbers);
     this.updateFixedHeight(model.fixedHeight);
     this.updateText(model.text);
-    CodeMirror.on(this._editor.getDoc(), 'change', (instance, change) => {
+    this.updateCursorPosition(model.cursorPosition);
+    let doc = editor.getDoc();
+    CodeMirror.on(doc, 'change', (instance, change) => {
       if (change.origin !== 'setValue') {
         this._model.text = instance.getValue();
       }
     });
-    CodeMirror.on(editor, 'keydown', (instance: any, event: KeyboardEvent) => {
-      let doc = editor.getDoc();
+    CodeMirror.on(editor, 'keydown', (instance: any, evt: KeyboardEvent) => {
       let cursor = doc.getCursor();
       let line = cursor.line;
       let ch = cursor.ch;
-      if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
+      if (line === 0 && ch === 0 && evt.keyCode === UP_ARROW) {
         this._model.edgeRequested.emit('top');
         return
       }
       let lastLine = doc.lastLine();
       let lastCh = doc.getLineHandle(lastLine).text.length;
-      if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
+      if (line === lastLine && ch === lastCh && evt.keyCode === DOWN_ARROW) {
         this._model.edgeRequested.emit('bottom');
         return
       }
+    });
+    CodeMirror.on(doc, 'cursorActivity', instance => {
+      let position = doc.getCursor();
+      model.cursorPosition = doc.indexFromPos(position);
+      console.log('setting model position', position);
     });
     model.stateChanged.connect(this.onModelStateChanged, this);
   }
@@ -134,6 +140,17 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
    */
   get model(): IEditorModel {
     return this._model;
+  }
+
+  /**
+   * Get the coordinates of the current cursor relative to the top-left
+   * corner of the page.
+   */
+  getCursorCoords(): { left: number; bottom: number } {
+    let doc = this._editor.getDoc();
+    let position = doc.getCursor();
+    let { left, top, bottom } = this._editor.cursorCoords(position, 'page');
+    return { left, bottom };
   }
 
   /**
@@ -228,6 +245,15 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
   }
 
   /**
+   * Update the cursor position of the editor.
+   */
+  protected updateCursorPosition(position: number): void {
+    let doc = this._editor.getDoc();
+    doc.setCursor(doc.posFromIndex(position));
+    console.log('got model position', position);
+  }
+
+  /**
    * Handle afterAttach messages.
    */
   protected onAfterAttach(msg: Message): void {
@@ -262,11 +288,10 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     let doc = this._editor.getDoc();
     let oldText = doc.getValue();
     let text = this._model.text;
-    if (oldText !== text) {
+    let cursor = 0;
+    if (oldText && oldText !== text) {
       // TODO: do something smart with all the selections
-
       let oldCursor = doc.indexFromPos(doc.getCursor());
-      let cursor = 0;
       if (oldCursor === oldText.length) {
         // if the cursor was at the end, keep it at the end
         cursor = text.length;
@@ -274,9 +299,9 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
         let fragment = oldText.substr(oldCursor, 10);
         cursor = diffMatchPatch.match_main(text, fragment, oldCursor);
       }
-      doc.setValue(text);
-      doc.setCursor(doc.posFromIndex(cursor));
     }
+    doc.setValue(text);
+    doc.setCursor(doc.posFromIndex(cursor));
   }
 
   /**
@@ -305,6 +330,8 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     case 'tabSize':
       this.updateTabSize(args.newValue as number);
       break;
+    case 'cursorPosition':
+      this.updateCursorPosition(args.newValue as number);
     }
   }
 
