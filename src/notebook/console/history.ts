@@ -70,7 +70,7 @@ class ConsoleHistory implements IConsoleHistory {
    * This is a read-only property.
    */
   get isDisposed(): boolean {
-    return false;
+    return this._history === null;
   }
 
   /**
@@ -107,6 +107,7 @@ class ConsoleHistory implements IConsoleHistory {
    * Construct a new console history object.
    */
   constructor(kernel: IKernel) {
+    this._history = [];
     if (kernel) this.kernel = kernel;
   }
 
@@ -129,6 +130,8 @@ class ConsoleHistory implements IConsoleHistory {
       return;
     }
     clearSignalData(this);
+    this._history.length = 0;
+    this._history = null;
   }
 
   /**
@@ -169,7 +172,7 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   private _cursor = 0;
-  private _history: string[] = [];
+  private _history: string[] = null;
   private _kernel: IKernel = null;
 }
 
