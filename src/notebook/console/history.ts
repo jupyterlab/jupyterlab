@@ -44,9 +44,18 @@ interface IConsoleHistory extends IDisposable {
   forward(): Promise<string>;
 
   /**
-   * Reset the history navigation cursor back to the bottom.
+   * Add a new item to the bottom of history.
+   *
+   * @param item The item being added to the bottom of history.
+   *
+   * #### Notes
+   * If the item being added is undefined or empty, it is ignored. If the item
+   * being added is the same as the last item in history, it is ignored as well
+   * so that the console's history will consist of no contiguous repetitions.
+   * This behavior varies from some shells, but the Jupyter Qt Console is
+   * implemented this way.
    */
-  resetCursor(): void;
+  push(item: string): void;
 }
 
 /**
@@ -83,7 +92,7 @@ class ConsoleHistory implements IConsoleHistory {
         // [session: number, line: number, input: string]
         this._history.push(value.history[i][2])
       }
-      this.resetCursor();
+      this._resetCursor();
     });
 
   }
@@ -128,9 +137,28 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   /**
+   * Add a new item to the bottom of history.
+   *
+   * @param item The item being added to the bottom of history.
+   *
+   * #### Notes
+   * If the item being added is undefined or empty, it is ignored. If the item
+   * being added is the same as the last item in history, it is ignored as well
+   * so that the console's history will consist of no contiguous repetitions.
+   * This behavior varies from some shells, but the Jupyter Qt Console is
+   * implemented this way.
+   */
+  push(item: string): void {
+    if (item && item !== this._history[this._history.length - 1]) {
+      this._history.push(item);
+    }
+    this._resetCursor();
+  }
+
+  /**
    * Reset the history navigation cursor back to the bottom.
    */
-  resetCursor(): void {
+  private _resetCursor(): void {
     this._cursor =  this._history.length;
   }
 

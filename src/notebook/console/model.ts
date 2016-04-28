@@ -310,6 +310,9 @@ class ConsoleModel implements IConsoleModel {
    */
   createPrompt(): ICodeCellModel {
     if (this._prompt) {
+      // Record the previous prompt's text in history.
+      this._history.push(this._prompt.input.textEditor.text);
+      // Stop listening to the previous prompt.
       clearSignalData(this._prompt.input.textEditor);
     }
     let mimetype = this.defaultMimetype;
@@ -385,8 +388,8 @@ class ConsoleModel implements IConsoleModel {
       break;
     case 'bottom':
       this._history.forward().then(value => {
-        if (!value) return;
-        this._prompt.input.textEditor.text = value;
+        // If at the bottom end of history, then clear the prompt.
+        this._prompt.input.textEditor.text = value || '';
       });
       break;
     }
