@@ -38,9 +38,12 @@ import {
 } from '../../../lib/notebook/model';
 
 import {
-  MockSession, MockKernel
-} from './mock';
+  MockSession
+} from 'jupyter-js-services/lib/mocksession';
 
+import {
+  MockKernel
+} from 'jupyter-js-services/lib/mockkernel';
 
 
 /**
