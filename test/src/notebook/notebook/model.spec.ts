@@ -38,7 +38,7 @@ import {
 } from '../../../lib/notebook/model';
 
 import {
-  MockSession
+  MockSession, MockKernel
 } from './mock';
 
 
@@ -615,6 +615,33 @@ describe('jupyter-js-notebook', () => {
         model.cells.add(cell);
         model.runActiveCell();
         expect(cell.input.prompt).to.be('');
+      });
+
+      it('should execute on a code cell when there is a session', (done) => {
+        let model = new MyNotebookModel();
+        model.session = new MockSession('test.ipynb');
+        let cell = model.createCodeCell();
+        cell.input.textEditor.text = 'a = 1';
+        model.cells.add(cell);
+        let called = false;
+        model.session.statusChanged.connect(() => {
+          if (called) {
+            return;
+          }
+          called = true;
+          model.runActiveCell();
+          let kernel = model.session.kernel as MockKernel;
+          kernel.sendShellReply({
+            execution_count: 1,
+            data: {},
+            metadata: {}
+          });
+        });
+        cell.input.stateChanged.connect(() => {
+          if (cell.input.prompt === '1') {
+            done();
+          }
+        });
       });
 
     });

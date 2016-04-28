@@ -16,6 +16,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  KernelFutureHandler
+} from 'jupyter-js-services/lib/kernelfuture';
+
+import {
   DisposableDelegate, IDisposable
 } from 'phosphor-disposable';
 
@@ -25,196 +29,24 @@ import {
 
 
 /**
- * Implementation of a kernel future.
- */
-export
-class KernelFutureHandler extends DisposableDelegate implements IKernelFuture {
-
-  /**
-   * Construct a new KernelFutureHandler.
-   */
-  constructor(cb: () => void, msg: IKernelMessage, expectShell: boolean, disposeOnDone: boolean) {
-    super(cb);
-    this._msg = msg;
-    if (!expectShell) {
-      this._setFlag(KernelPrivate.KernelFutureFlag.GotReply);
-    }
-    this._disposeOnDone = disposeOnDone;
-  }
-
-  /**
-   * Get the original outgoing message.
-   */
-  get msg(): IKernelMessage {
-    return this._msg;
-  }
-
-  /**
-   * Check for message done state.
-   */
-  get isDone(): boolean {
-    return this._testFlag(KernelPrivate.KernelFutureFlag.IsDone);
-  }
-
-  /**
-   * Get the reply handler.
-   */
-  get onReply(): (msg: IKernelMessage) => void {
-    return this._reply;
-  }
-
-  /**
-   * Set the reply handler.
-   */
-  set onReply(cb: (msg: IKernelMessage) => void) {
-    this._reply = cb;
-  }
-
-  /**
-   * Get the iopub handler.
-   */
-  get onIOPub(): (msg: IKernelMessage) => void {
-    return this._iopub;
-  }
-
-  /**
-   * Set the iopub handler.
-   */
-  set onIOPub(cb: (msg: IKernelMessage) => void) {
-    this._iopub = cb;
-  }
-
-  /**
-   * Get the done handler.
-   */
-  get onDone(): (msg: IKernelMessage) => void  {
-    return this._done;
-  }
-
-  /**
-   * Set the done handler.
-   */
-  set onDone(cb: (msg: IKernelMessage) => void) {
-    this._done = cb;
-  }
-
-  /**
-   * Get the stdin handler.
-   */
-  get onStdin(): (msg: IKernelMessage) => void {
-    return this._stdin;
-  }
-
-  /**
-   * Set the stdin handler.
-   */
-  set onStdin(cb: (msg: IKernelMessage) => void) {
-    this._stdin = cb;
-  }
-
-  /**
-   * Dispose and unregister the future.
-   */
-  dispose(): void {
-    this._stdin = null;
-    this._iopub = null;
-    this._reply = null;
-    this._done = null;
-    this._msg = null;
-    super.dispose();
-  }
-
-  /**
-   * Handle an incoming kernel message.
-   */
-  handleMsg(msg: IKernelMessage): void {
-    switch (msg.channel) {
-    case 'shell':
-      this._handleReply(msg);
-      break;
-    case 'stdin':
-      this._handleStdin(msg);
-      break;
-    case 'iopub':
-      this._handleIOPub(msg);
-      break;
-    }
-  }
-
-  private _handleReply(msg: IKernelMessage): void {
-    let reply = this._reply;
-    if (reply) reply(msg);
-    this._setFlag(KernelPrivate.KernelFutureFlag.GotReply);
-    if (this._testFlag(KernelPrivate.KernelFutureFlag.GotIdle)) {
-      this._handleDone(msg);
-    }
-  }
-
-  private _handleStdin(msg: IKernelMessage): void {
-    let stdin = this._stdin;
-    if (stdin) stdin(msg);
-  }
-
-  private _handleIOPub(msg: IKernelMessage): void {
-    let iopub = this._iopub;
-    if (iopub) iopub(msg);
-    if (msg.header.msg_type === 'status' &&
-        msg.content.execution_state === 'idle') {
-      this._setFlag(KernelPrivate.KernelFutureFlag.GotIdle);
-      if (this._testFlag(KernelPrivate.KernelFutureFlag.GotReply)) {
-        this._handleDone(msg);
-      }
-    }
-  }
-
-  private _handleDone(msg: IKernelMessage): void {
-    if (this.isDone) {
-      return;
-    }
-    this._setFlag(KernelPrivate.KernelFutureFlag.IsDone);
-    let done = this._done;
-    if (done) done(msg);
-    this._done = null;
-    if (this._disposeOnDone) {
-      this.dispose();
-    }
-  }
-
-  /**
-   * Test whether the given future flag is set.
-   */
-  private _testFlag(flag: KernelPrivate.KernelFutureFlag): boolean {
-    return (this._status & flag) !== 0;
-  }
-
-  /**
-   * Set the given future flag.
-   */
-  private _setFlag(flag: KernelPrivate.KernelFutureFlag): void {
-    this._status |= flag;
-  }
-
-  private _msg: IKernelMessage = null;
-  private _status = 0;
-  private _stdin: (msg: IKernelMessage) => void = null;
-  private _iopub: (msg: IKernelMessage) => void = null;
-  private _reply: (msg: IKernelMessage) => void = null;
-  private _done: (msg: IKernelMessage) => void = null;
-  private _disposeOnDone = true;
-}
-
-
-/**
  * A mock kernel object that only handles execution requests.
+ * It only keeps one kernel future at a time.
  */
 export
 class MockKernel implements IKernel {
 
+  id: string;
+  name: string;
+  username = '';
+  clientId = '';
+
   constructor(options?: IKernelId) {
     options = options || {};
-    this._id = options.id || '';
-    this._name = options.name || 'python';
-    this._status = KernelStatus.Idle;
+    this.id = options.id || '';
+    this.name = options.name || 'python';
+    Promise.resolve().then(() => {
+      this._changeStatus(KernelStatus.Idle);
+    });
   }
 
   /**
@@ -232,51 +64,11 @@ class MockKernel implements IKernel {
   }
 
   /**
-   * The id of the server-side kernel.
-   */
-  get id(): string {
-    return this._id;
-  }
-
-  /**
-   * The name of the server-side kernel.
-   */
-  get name(): string {
-    return this._name;
-  }
-
-  /**
-   * The client username.
-   */
-   get username(): string {
-     return '';
-   }
-
-  /**
-   * The client unique id.
-   */
-  get clientId(): string {
-    return '';
-  }
-
-  /**
    * The current status of the kernel.
    */
   get status(): KernelStatus {
     return this._status;
   }
-
-  /**
-   * Get a copy of the default ajax settings for the kernel.
-   */
-  get ajaxSettings(): IAjaxSettings {
-    return {};
-  }
-
-  /**
-   * Set the default ajax settings for the kernel.
-   */
-  set ajaxSettings(value: IAjaxSettings) { }
 
   /**
    * Test whether the kernel has been disposed.
@@ -298,28 +90,67 @@ class MockKernel implements IKernel {
   /**
    * Send a shell message to the kernel.
    */
-  sendShellMessage(msg: IKernelMessage, expectReply=false, disposeOnDone=true): KernelFutureHandler {
-    return new KernelFutureHandler(() => {}, msg, expectReply, disposeOnDone);
+  sendShellMessage(msg: IKernelMessage, expectReply=false, disposeOnDone=true): IKernelFuture {
+    let future = new KernelFutureHandler(() => {}, msg, expectReply, disposeOnDone);
+    this._future = future;
+    return future;
+  }
+
+  /**
+   * Send a message to the kernel.
+   */
+  sendServerMessage(msgType: string, channel: string, contents: any): void {
+    let future = this._future;
+    if (!future) {
+      return;
+    }
+    let options = {
+      msgType,
+      channel,
+      username: this.username,
+      session: this.clientId
+    }
+    let msg = createKernelMessage(options, contents);
+    future.handleMsg(msg);
+  }
+
+  /**
+   * Send a shell reply message to the kernel.
+   */
+  sendShellReply(contents: any): void {
+    let future = this._future;
+    if (!future) {
+      return;
+    }
+    let msgType = future.msg.header.msg_type.replace('_request', '_reply');
+    this.sendServerMessage(msgType, 'shell', contents);
   }
 
   /**
    * Interrupt a kernel.
    */
   interrupt(): Promise<void> {
-    return Promise.resolve(void 0);
+    return Promise.resolve().then(() => {
+      this._changeStatus(KernelStatus.Idle);
+    });
   }
 
   /**
    * Restart a kernel.
    */
   restart(): Promise<void> {
-    return Promise.resolve(void 0);
+    this._changeStatus(KernelStatus.Restarting);
+    return Promise.resolve().then(() => {
+      this._changeStatus(KernelStatus.Idle);
+    });
   }
 
   /**
    * Shutdown a kernel.
    */
   shutdown(): Promise<void> {
+    this._changeStatus(KernelStatus.Dead);
+    this.dispose();
     return Promise.resolve(void 0);
   }
 
@@ -327,21 +158,21 @@ class MockKernel implements IKernel {
    * Send a `kernel_info_request` message.
    */
   kernelInfo(): Promise<IKernelInfo> {
-    return Promise.resolve(void 0);
+    return this._sendKernelMessage('kernel_info_request', 'shell', {});
   }
 
   /**
    * Send a `complete_request` message.
    */
   complete(contents: ICompleteRequest): Promise<ICompleteReply> {
-    return Promise.resolve(void 0);
+    return this._sendKernelMessage('complete_request', 'shell', contents);
   }
 
   /**
    * Send a `history_request` message.
    */
   history(contents: IHistoryRequest): Promise<IHistoryReply> {
-    return Promise.resolve(void 0);
+    return this._sendKernelMessage('history', 'shell', contents);
   }
 
 
@@ -349,7 +180,7 @@ class MockKernel implements IKernel {
    * Send an `inspect_request` message.
    */
   inspect(contents: IInspectRequest): Promise<IInspectReply> {
-    return Promise.resolve(void 0);
+    return this._sendKernelMessage('inspect_request', 'shell', contents);
   }
 
   /**
@@ -378,14 +209,14 @@ class MockKernel implements IKernel {
    * Send an `is_complete_request` message.
    */
   isComplete(contents: IIsCompleteRequest): Promise<IIsCompleteReply> {
-    return Promise.resolve(void 0);
+    return this._sendKernelMessage('is_complete_request', 'shell', contents);
   }
 
   /**
    * Send a `comm_info_request` message.
    */
   commInfo(contents: ICommInfoRequest): Promise<ICommInfoReply> {
-    return Promise.resolve(void 0);
+    return this._sendKernelMessage('comm_info_request', 'shell', contents);
   }
 
   /**
@@ -414,10 +245,38 @@ class MockKernel implements IKernel {
     return Promise.resolve(void 0);
   }
 
-  private _id = '';
-  private _name = '';
+  private _sendKernelMessage(msgType: string, channel: string, contents: any): Promise<any> {
+    let options: IKernelMessageOptions = {
+      msgType,
+      channel,
+      username: this.username,
+      session: this.clientId
+    };
+    let msg = createKernelMessage(options, contents);
+    let future: IKernelFuture;
+    try {
+      future = this.sendShellMessage(msg, true);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    return new Promise<IKernelInfo>((resolve, reject) => {
+      future.onReply = (msg: IKernelMessage) => {
+        resolve(msg.content);
+      };
+    });
+  }
+
+  private _changeStatus(status: KernelStatus): void {
+    if (this._status === status) {
+      return;
+    }
+    this._status = status;
+    this.statusChanged.emit(status);
+  }
+
   private _status = KernelStatus.Unknown;
   private _isDisposed = false;
+  private _future: KernelFutureHandler = null;
 }
 
 
@@ -427,8 +286,12 @@ class MockKernel implements IKernel {
 export
 class MockSession implements INotebookSession {
 
-  constructor(path: string, kernel?: MockKernel) {
-    this._notebookPath = path;
+  id: string;
+  notebookPath: string;
+  ajaxSettings: IAjaxSettings = {};
+
+  constructor(path: string, kernel?: IKernel) {
+    this.notebookPath = path;
     this._kernel = kernel || new MockKernel();
     this._kernel.statusChanged.connect(this.onKernelStatus, this);
     this._kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
@@ -463,27 +326,10 @@ class MockSession implements INotebookSession {
   }
 
   /**
-   * Get the session id.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get id(): string {
-    return this._id;
-  }
-
-  /**
    * Get the session kernel object.
    */
-  get kernel() : IKernel {
+  get kernel(): IKernel {
     return this._kernel;
-  }
-
-  /**
-   * Get the notebook path.
-   */
-  get notebookPath(): string {
-    return this._notebookPath;
   }
 
   /**
@@ -492,18 +338,6 @@ class MockSession implements INotebookSession {
   get status(): KernelStatus {
     return this._kernel.status;
   }
-
-  /**
-   * Get a copy of the default ajax settings for the session.
-   */
-  get ajaxSettings(): IAjaxSettings {
-    return {};
-  }
-
-  /**
-   * Set the default ajax settings for the session.
-   */
-  set ajaxSettings(value: IAjaxSettings) { }
 
   /**
    * Test whether the session has been disposed.
@@ -526,7 +360,7 @@ class MockSession implements INotebookSession {
    * Rename or move a notebook.
    */
   renameNotebook(path: string): Promise<void> {
-    this._notebookPath = path;
+    this.notebookPath = path;
     return Promise.resolve(void 0);
   }
 
@@ -565,8 +399,6 @@ class MockSession implements INotebookSession {
   }
 
   private _isDisposed = false;
-  private _id = '';
-  private _notebookPath = '';
   private _kernel: IKernel = null;
 }
 
@@ -613,15 +445,4 @@ namespace KernelPrivate {
    */
   export
   const unhandledMessageSignal = new Signal<IKernel, IKernelMessage>();
-
-  /**
-   * Bit flags for the kernel future state.
-   */
-  export
-  enum KernelFutureFlag {
-    GotReply = 0x1,
-    GotIdle = 0x2,
-    IsDone = 0x4,
-    DisposeOnDone = 0x8,
-  }
 }
