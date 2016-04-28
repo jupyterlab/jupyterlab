@@ -91,6 +91,7 @@ describe('jupyter-ui', () => {
           expect(widget instanceof Widget).to.be(true);
           called = true;
         });
+        manager.createFile('foo.txt');
         handler.open('foo.txt');
         expect(called).to.be(true);
       });
@@ -106,6 +107,7 @@ describe('jupyter-ui', () => {
           expect(widget instanceof Widget).to.be(true);
           done();
         });
+        manager.createFile('foo.txt');
         handler.open('foo.txt');
       });
 
@@ -132,6 +134,7 @@ describe('jupyter-ui', () => {
       it('should find a widget given a path', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         expect(handler.findWidget('foo.txt')).to.be(widget);
       });
@@ -139,6 +142,7 @@ describe('jupyter-ui', () => {
       it('should return `undefined` if the path is invalid', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         expect(handler.findWidget('bar.txt')).to.be(void 0);
       });
@@ -150,6 +154,7 @@ describe('jupyter-ui', () => {
       it('should find a path given a widget', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         expect(handler.findPath(widget)).to.be('foo.txt');
       });
@@ -157,6 +162,7 @@ describe('jupyter-ui', () => {
       it('should return `undefined` if the widget is invalid', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         handler.close('foo.txt').then(() => {
           expect(handler.findPath(widget)).to.be(void 0);
@@ -171,6 +177,7 @@ describe('jupyter-ui', () => {
       it('should open a file by path and return a widget', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         expect(widget instanceof Widget).to.be(true);
       });
@@ -178,6 +185,7 @@ describe('jupyter-ui', () => {
       it('should return an existing widget if it is already open', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         expect(handler.open('foo.txt')).to.be(widget);
       });
@@ -185,6 +193,7 @@ describe('jupyter-ui', () => {
       it('should clear the dirty state when finished', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         handler.finished.connect(() => {
           expect(handler.isDirty('foo.txt')).to.be(false);
@@ -195,6 +204,7 @@ describe('jupyter-ui', () => {
       it('should set the title', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         expect(widget.title.text).to.be('foo.txt');
       });
@@ -206,6 +216,7 @@ describe('jupyter-ui', () => {
       it('should rename the file', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         let result = handler.rename('foo.txt', 'bar.txt');
         expect(result).to.be(true);
@@ -215,6 +226,7 @@ describe('jupyter-ui', () => {
       it('should update the title', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         handler.rename('foo.txt', 'bar.txt');
         expect(widget.title.text).to.be('bar.txt');
@@ -230,6 +242,7 @@ describe('jupyter-ui', () => {
       it('should close the widget if the new path is undefined', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         let result = handler.rename('foo.txt');
         expect(result).to.be(true);
@@ -243,6 +256,7 @@ describe('jupyter-ui', () => {
       it('should resolve to the file contents', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         handler.save('foo.txt').then(contents => {
           expect(contents.content).to.be('baz');
@@ -253,6 +267,7 @@ describe('jupyter-ui', () => {
       it('should clear the dirty flag', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         handler.setDirty('foo.txt', true);
         handler.save('foo.txt').then(contents => {
@@ -277,6 +292,7 @@ describe('jupyter-ui', () => {
       it('should resolve to the original file contents', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         handler.revert('foo.txt').then(contents => {
           expect(contents.content).to.be(manager.DEFAULT_TEXT);
@@ -287,6 +303,7 @@ describe('jupyter-ui', () => {
       it('should clear the dirty flag', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         handler.setDirty('foo.txt', true);
         handler.revert('foo.txt').then(contents => {
@@ -311,6 +328,7 @@ describe('jupyter-ui', () => {
       it('should close a file by path', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         widget.attach(document.body);
         handler.close('foo.txt').then(result => {
@@ -332,6 +350,7 @@ describe('jupyter-ui', () => {
       it('should prompt the user if the file is dirty', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         handler.open('foo.txt');
         handler.setDirty('foo.txt', true);
         handler.close('foo.txt').then(result => {
@@ -344,6 +363,7 @@ describe('jupyter-ui', () => {
       it('should not close if the user dismisses the dialog', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         handler.open('foo.txt');
         handler.setDirty('foo.txt', true);
         handler.close('foo.txt').then(result => {
@@ -360,6 +380,8 @@ describe('jupyter-ui', () => {
       it('should class all files', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
+        manager.createFile('bar.txt');
         let widget0 = handler.open('foo.txt');
         let widget1 = handler.open('bar.txt');
         widget0.attach(document.body);
@@ -377,6 +399,7 @@ describe('jupyter-ui', () => {
       it('should default to false', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         expect(handler.isDirty('foo.txt')).to.be(false);
       });
@@ -384,6 +407,7 @@ describe('jupyter-ui', () => {
       it('should return `undefined` if the path is invalid', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         expect(handler.isDirty('bar.txt')).to.be(void 0);
       });
@@ -395,6 +419,7 @@ describe('jupyter-ui', () => {
       it('should set the dirty state of a file', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         handler.setDirty('foo.txt', true);
         expect(handler.isDirty('foo.txt')).to.be(true);
@@ -405,6 +430,7 @@ describe('jupyter-ui', () => {
       it('should affect the className of the title', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         expect(widget.title.className.indexOf('jp-mod-dirty')).to.be(-1);
         handler.setDirty('foo.txt', true);
@@ -414,6 +440,7 @@ describe('jupyter-ui', () => {
       it('should be a no-op for an invalid path', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         handler.setDirty('bar.txt', true);
       });
@@ -425,6 +452,7 @@ describe('jupyter-ui', () => {
       it('should filter close messages for contained widgets', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         let value = handler.filterMessage(widget, Widget.MsgCloseRequest);
         expect(value).to.be(true);
@@ -439,6 +467,7 @@ describe('jupyter-ui', () => {
       it('should get the options use to fetch contents from disk', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         expect(handler.methods.indexOf('getFetchOptions')).to.not.be(-1);
       });
@@ -446,6 +475,7 @@ describe('jupyter-ui', () => {
       it('should be called during a revert', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         handler.methods = [];
         handler.revert('foo.txt');
@@ -459,6 +489,7 @@ describe('jupyter-ui', () => {
       it('should get the options used to save the widget', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         handler.save('foo.txt');
         expect(handler.methods.indexOf('getSaveOptions')).to.not.be(-1);
@@ -471,6 +502,7 @@ describe('jupyter-ui', () => {
       it('should be used to create the initial widget given a path', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         expect(handler.methods.indexOf('createWidget')).to.not.be(-1);
       });
@@ -482,6 +514,7 @@ describe('jupyter-ui', () => {
       it('should be called to populate a widget while opening', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         handler.finished.connect(() => {
           expect(handler.methods.indexOf('populateWidget')).to.not.be(-1);
@@ -492,6 +525,7 @@ describe('jupyter-ui', () => {
       it('should be called when reverting', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         let called = false;
         handler.finished.connect(() => {
@@ -510,6 +544,7 @@ describe('jupyter-ui', () => {
       it('should set the appropriate title text based on a path', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         expect(handler.methods.indexOf('getTitleText')).to.not.be(-1);
       });
@@ -517,6 +552,7 @@ describe('jupyter-ui', () => {
       it('should be called when renaming', () => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget0 = handler.open('foo.txt');
         handler.methods = [];
         handler.rename('foo.txt', 'bar.txt');
@@ -529,6 +565,7 @@ describe('jupyter-ui', () => {
       it('should call before closing', (done) => {
         let manager = new MockContentsManager();
         let handler = new FileHandler(manager);
+        manager.createFile('foo.txt');
         let widget = handler.open('foo.txt');
         widget.attach(document.body);
         handler.close('foo.txt').then(result => {

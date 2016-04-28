@@ -85,6 +85,7 @@ describe('jupyter-ui', () => {
       it('should load text and the appropriate codemirror mode', (done) => {
         let manager = new MockContentsManager();
         let handler = new MyFileHandler(manager);
+        manager.createFile('foo.ts');
         let widget = handler.open('foo.ts');
         handler.finished.connect(() => {
           expect(handler.methods.indexOf('populateWidget')).to.not.be(-1);
@@ -104,6 +105,7 @@ describe('jupyter-ui', () => {
       it('should save as a text file', () => {
         let manager = new MockContentsManager();
         let handler = new MyFileHandler(manager);
+        manager.createFile('foo.ts');
         let widget = handler.open('foo.ts');
         widget.editor.getDoc().setValue('test test');
         handler.save('foo.ts').then(contents => {

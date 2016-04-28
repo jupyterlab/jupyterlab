@@ -89,6 +89,7 @@ describe('jupyter-ui', () => {
           expect(widget instanceof Widget).to.be(true);
           called = true;
         });
+        manager.createFile('foo.txt');
         registry.open('foo.txt');
         expect(called).to.be(true);
       });
@@ -106,6 +107,7 @@ describe('jupyter-ui', () => {
           expect(widget instanceof Widget).to.be(true);
           done();
         });
+        manager.createFile('foo.txt');
         registry.open('foo.txt');
       });
 
@@ -135,6 +137,7 @@ describe('jupyter-ui', () => {
         let handler = new FileHandler(manager);
         let registry = new MyRegistry();
         registry.addHandler(handler);
+        manager.createFile('foo.txt');
         let value = registry.open('foo.txt');
         expect(value).to.be(void 0);
       });
@@ -144,6 +147,7 @@ describe('jupyter-ui', () => {
         let handler = new MyHandler(manager);
         let registry = new MyRegistry();
         registry.addHandler(handler);
+        manager.createFile('foo.txt');
         let value = registry.open('foo.txt');
         expect(value instanceof Widget).to.be(true);
       });
@@ -157,6 +161,7 @@ describe('jupyter-ui', () => {
         let handler = new FileHandler(manager);
         let registry = new MyRegistry();
         registry.addDefaultHandler(handler);
+        manager.createFile('foo.txt');
         let value = registry.open('foo.txt');
         expect(value instanceof Widget).to.be(true);
       });
@@ -168,6 +173,7 @@ describe('jupyter-ui', () => {
         let main = new FileHandler(manager);
         registry.addDefaultHandler(main);
         registry.addHandler(handler);
+        manager.createFile('foo.txt');
         let value = registry.open('foo.txt');
         expect(handler.methods.indexOf('open')).to.not.be(-1);
       });
@@ -258,6 +264,7 @@ describe('jupyter-ui', () => {
         registry.opened.connect(() => {
           called = true;
         });
+        manager.createFile('foo.txt');
         let value = registry.open('foo.txt');
         expect(value instanceof Widget).to.be(true);
         registry.finished.connect((r, w) => {
@@ -271,6 +278,7 @@ describe('jupyter-ui', () => {
         let manager = new MockContentsManager();
         let handler = new MyHandler(manager);
         let registry = new MyRegistry();
+        manager.createFile('foo.txt');
         let value = registry.open('foo.txt');
         expect(value).to.be(void 0);
       });
@@ -284,6 +292,7 @@ describe('jupyter-ui', () => {
         let handler = new MyHandler(manager);
         let registry = new MyRegistry();
         registry.addDefaultHandler(handler);
+        manager.createFile('foo.txt');
         let widget = registry.open('foo.txt');
         let response = registry.rename('foo.txt', 'bar.txt');
         expect(widget.title.text).to.be('bar.txt');
@@ -307,6 +316,7 @@ describe('jupyter-ui', () => {
         let handler = new MyHandler(manager);
         let registry = new MyRegistry();
         registry.addDefaultHandler(handler);
+        manager.createFile('foo.txt');
         registry.open('foo.txt');
         registry.save('foo.txt').then(contents => {
           expect(contents.name).to.be('foo.txt')
@@ -332,6 +342,7 @@ describe('jupyter-ui', () => {
         let handler = new MyHandler(manager);
         let registry = new MyRegistry();
         registry.addDefaultHandler(handler);
+        manager.createFile('foo.txt');
         registry.open('foo.txt');
         registry.revert('foo.txt').then(contents => {
           expect(contents.name).to.be('foo.txt');
@@ -358,6 +369,7 @@ describe('jupyter-ui', () => {
         let handler = new MyHandler(manager);
         let registry = new MyRegistry();
         registry.addDefaultHandler(handler);
+        manager.createFile('foo.txt');
         registry.open('foo.txt');
         registry.close('foo.txt').then(value => {
           expect(value).to.be(true);
@@ -385,6 +397,8 @@ describe('jupyter-ui', () => {
         let main = new FileHandler(manager);
         registry.addDefaultHandler(main);
         registry.addHandler(handler);
+        manager.createFile('foo.txt');
+        manager.createFile('foo.md');
         let widget0 = registry.open('foo.txt');
         let widget1 = registry.open('foo.md');
         registry.closeAll().then(() => {
@@ -403,6 +417,7 @@ describe('jupyter-ui', () => {
         let handler = new MyHandler(manager);
         let registry = new MyRegistry();
         registry.addDefaultHandler(handler);
+        manager.createFile('foo.txt');
         let widget = registry.open('foo.txt');
         expect(registry.findPath(widget)).to.be('foo.txt');
       });
@@ -422,6 +437,7 @@ describe('jupyter-ui', () => {
         let handler = new MyHandler(manager);
         let registry = new MyRegistry();
         registry.addDefaultHandler(handler);
+        manager.createFile('foo.txt');
         let widget = registry.open('foo.txt');
         expect(registry.findWidget('foo.txt')).to.be(widget);
       });
@@ -440,6 +456,7 @@ describe('jupyter-ui', () => {
         let handler = new MyHandler(manager);
         let registry = new MyRegistry();
         registry.addHandler(handler);
+        manager.createFile('foo.txt');
         registry.open('foo.txt');
         expect(registry.methods.indexOf('findHandler')).to.not.be(-1);
         expect(registry.handlers.indexOf(handler)).to.not.be(-1);
@@ -452,6 +469,7 @@ describe('jupyter-ui', () => {
         let registry = new MyRegistry();
         registry.addHandler(handler);
         registry.addDefaultHandler(main);
+        manager.createFile('foo.md');
         registry.open('foo.md');
         expect(registry.methods.indexOf('findHandler')).to.not.be(-1);
         expect(registry.handlers.indexOf(main)).to.not.be(-1);
@@ -464,6 +482,7 @@ describe('jupyter-ui', () => {
         let registry = new MyRegistry();
         registry.addHandler(handler);
         registry.addDefaultHandler(handler);
+        manager.createFile('foo.txt');
         registry.open('foo.txt');
         expect(registry.methods.indexOf('findHandler')).to.not.be(-1);
         expect(registry.handlers.indexOf(handler)).to.not.be(-1);
