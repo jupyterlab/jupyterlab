@@ -698,6 +698,7 @@ class NotebookModel implements INotebookModel {
       cell = change.newValue as ICellModel;
       cell.input.textEditor.edgeRequested.connect(this.onEdgeRequested, this);
       cell.input.textEditor.stateChanged.connect(this.onEditorChanged, this);
+      this.mode = 'edit';
       break;
     case ListChangeType.Remove:
       (change.oldValue as ICellModel).dispose();

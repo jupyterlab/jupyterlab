@@ -284,8 +284,9 @@ class NotebookManager {
     if (model.activeCellIndex === model.cells.length - 1) {
       let cell = model.createCodeCell();
       model.cells.add(cell);
+    } else {
+      model.activeCellIndex++;
     }
-    model.activeCellIndex += 1;
     this.deselectCells();
   }
 
@@ -296,7 +297,7 @@ class NotebookManager {
     this.run();
     let model = this.model;
     let cell = model.createCodeCell();
-    model.cells.insert(model.activeCellIndex, cell);
+    model.cells.insert(model.activeCellIndex + 1, cell);
     this.deselectCells();
   }
 
