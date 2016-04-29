@@ -418,7 +418,7 @@ class NotebookModel implements INotebookModel {
     this._activeCellIndex = newValue;
     let newCell = this.cells.get(newValue);
     if (newCell && isMarkdownCellModel(newCell)) {
-      if (this.mode == 'edit') {
+      if (this.mode === 'edit') {
         newCell.rendered = false;
       }
     }
@@ -775,7 +775,9 @@ namespace NotebookModelPrivate {
       let cell = cells.get(i);
       if (i === model.activeCellIndex || model.isSelected(cell)) {
         if (isMarkdownCellModel(cell)) {
-          cell.rendered = mode !== 'edit';
+          if (mode === 'edit') {
+            cell.rendered = false;
+          }
         }
       }
     }

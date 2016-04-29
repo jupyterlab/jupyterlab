@@ -563,7 +563,6 @@ class NotebookWidget extends Widget {
     let child = (this.layout as PanelLayout).childAt(i);
     let node = (child as MarkdownCellWidget).rendered.node;
     if (node.contains(event.target as HTMLElement)) {
-      cell.rendered = false;
       model.mode = 'edit';
     }
   }
