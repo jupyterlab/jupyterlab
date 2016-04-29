@@ -105,7 +105,6 @@ class NotebookManager {
     newCell.input.textEditor.text = newText.replace(/^\s+/g,'');
     newCell.input.textEditor.cursorPosition = 0;
     this.model.cells.insert(this.model.activeCellIndex + 1, newCell);
-    this.model.mode = 'edit';
   }
 
   /**
@@ -285,7 +284,6 @@ class NotebookManager {
     if (model.activeCellIndex === model.cells.length - 1) {
       let cell = model.createCodeCell();
       model.cells.add(cell);
-      model.mode = 'edit';
     }
     model.activeCellIndex += 1;
     this.deselectCells();
@@ -299,7 +297,6 @@ class NotebookManager {
     let model = this.model;
     let cell = model.createCodeCell();
     model.cells.insert(model.activeCellIndex, cell);
-    model.mode = 'edit';
     this.deselectCells();
   }
 
