@@ -548,6 +548,10 @@ class NotebookWidget extends Widget {
       if (i === -1) {
         return;
       }
+      let cell = model.cells.get(i);
+      if (cell && isMarkdownCellModel(cell)) {
+        model.mode = cell.rendered ? 'command': 'edit';
+      }
       model.activeCellIndex = i;
     }
   }
