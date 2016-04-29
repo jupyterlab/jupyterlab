@@ -595,8 +595,8 @@ class NotebookWidget extends Widget {
     // Then find the corresponding child and activate it.
     while (node && node !== this.node) {
       if (node.classList.contains(NB_EDITOR_CLASS)) {
-        this.model.mode = 'edit';
         this.model.activeCellIndex = this.findCell(node);
+        this.model.mode = 'edit';
         break;
       }
       node = node.parentElement;
