@@ -418,7 +418,9 @@ class NotebookModel implements INotebookModel {
     this._activeCellIndex = newValue;
     let newCell = this.cells.get(newValue);
     if (newCell && isMarkdownCellModel(newCell)) {
-      newCell.rendered = this.mode == 'command';
+      if (this.mode == 'edit') {
+        newCell.rendered = false;
+      }
     }
     let name = 'activeCellIndex';
     this.stateChanged.emit({ name, oldValue, newValue });
@@ -628,6 +630,7 @@ class NotebookModel implements INotebookModel {
     } else if (isMarkdownCellModel(cell) && cell.rendered === false) {
       cell.rendered = true;
     }
+    this.mode = 'command';
   }
 
   /**

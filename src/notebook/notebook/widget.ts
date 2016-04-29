@@ -38,7 +38,7 @@ import {
   ICellModel, BaseCellWidget,
   CodeCellWidget, MarkdownCellWidget,
   CodeCellModel, MarkdownCellModel, isMarkdownCellModel,
-  RawCellModel, RawCellWidget
+  RawCellModel, RawCellWidget, IMarkdownCellModel
 } from '../cells';
 
 import {
@@ -365,12 +365,6 @@ class NotebookWidget extends Widget {
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
-    case 'blur':
-      this._evtBlur(event);
-      break;
-    case 'focus':
-      this._evtFocus(event);
-      break;
     }
   }
 
@@ -380,8 +374,6 @@ class NotebookWidget extends Widget {
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
     this.node.addEventListener('dblclick', this);
-    this.node.addEventListener('focus', this, true);
-    this.node.addEventListener('blur', this, true);
   }
 
   /**
@@ -390,8 +382,6 @@ class NotebookWidget extends Widget {
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('dblclick', this);
-    this.node.removeEventListener('focus', this, true);
-    this.node.removeEventListener('blur', this, true);
   }
 
   /**
@@ -543,24 +533,6 @@ class NotebookWidget extends Widget {
    */
   private _evtClick(event: MouseEvent): void {
     let model = this.model;
-    if (!model.readOnly) {
-      let i = this.findCell(event.target as HTMLElement);
-      if (i === -1) {
-        return;
-      }
-      let cell = model.cells.get(i);
-      if (cell && isMarkdownCellModel(cell)) {
-        model.mode = cell.rendered ? 'command': 'edit';
-      }
-      model.activeCellIndex = i;
-    }
-  }
-
-  /**
-   * Handle `dblclick` events for the widget.
-   */
-  private _evtDblClick(event: MouseEvent): void {
-    let model = this._model;
     if (model.readOnly) {
       return;
     }
@@ -568,42 +540,31 @@ class NotebookWidget extends Widget {
     if (i === -1) {
       return;
     }
-    let cell = model.cells.get(i);
-    if (isMarkdownCellModel(cell) && cell.rendered) {
+    model.activeCellIndex = i;
+    model.mode = document.activeElement === this.node ? 'command' : 'edit';
+  }
+
+  /**
+   * Handle `dblclick` events for the widget.
+   */
+  private _evtDblClick(event: MouseEvent): void {
+    let model = this.model;
+    if (model.readOnly) {
+      return;
+    }
+    let i = this.findCell(event.target as HTMLElement);
+    if (i === -1) {
+      return;
+    }
+    let cell = model.cells.get(i) as IMarkdownCellModel;
+    if (!isMarkdownCellModel(cell) || !cell.rendered) {
+      return;
+    }
+    let child = (this.layout as PanelLayout).childAt(i);
+    let node = (child as MarkdownCellWidget).rendered.node;
+    if (node.contains(event.target as HTMLElement)) {
       cell.rendered = false;
       model.mode = 'edit';
-    }
-  }
-
-  /**
-   * Handle `blur` events for the widget.
-   */
-  private _evtBlur(event: Event): void {
-    let node = event.target as HTMLElement;
-    // Trace up the DOM hierarchy looking for an editor node.
-    while (node && node !== this.node) {
-      if (node.classList.contains(NB_EDITOR_CLASS)) {
-        this.model.mode = 'command';
-        break;
-      }
-      node = node.parentElement;
-    }
-  }
-
-  /**
-   * Handle `focus` events for the widget.
-   */
-  private _evtFocus(event: Event): void {
-    let node = event.target as HTMLElement;
-    // Trace up the DOM hierarchy to looking for an editor node.
-    // Then find the corresponding child and activate it.
-    while (node && node !== this.node) {
-      if (node.classList.contains(NB_EDITOR_CLASS)) {
-        this.model.activeCellIndex = this.findCell(node);
-        this.model.mode = 'edit';
-        break;
-      }
-      node = node.parentElement;
     }
   }
 

@@ -219,6 +219,13 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   /**
+   * Handle `after-attach` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.update();
+  }
+
+  /**
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(message: Message): void {
@@ -239,17 +246,11 @@ class MarkdownCellWidget extends BaseCellWidget {
     } else {
       this._rendered.hide();
       this.input.show();
+      this.input.editor.focus();
       this.removeClass(RENDERED_CLASS);
     }
     this._dirty = false;
     super.onUpdateRequest(message);
-  }
-
-  /**
-   * Handle `after-attach` messages.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.update();
   }
 
   /**
