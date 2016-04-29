@@ -289,6 +289,21 @@ describe('jupyter-js-notebook', () => {
         expect(model.activeCellIndex).to.be(1);
       });
 
+
+      it('should unrender a markdown cell if in edit mode', () => {
+        let model = new NotebookModel();
+        let cell0 = model.createMarkdownCell();
+        let cell1 = model.createMarkdownCell();
+        model.cells.add(cell0);
+        model.cells.add(cell1);
+        model.mode = 'edit';
+        debugger;
+        expect(cell0.rendered).to.be(true);
+        expect(cell1.rendered).to.be(false);
+        model.activeCellIndex = 0;
+        expect(cell0.rendered).to.be(false);
+      });
+
     });
 
     describe('#mode', () => {
@@ -309,19 +324,6 @@ describe('jupyter-js-notebook', () => {
         });
         model.mode = 'edit';
         expect(called).to.be(true);
-      });
-
-      it('should set the rendered status of active markdown cells', () => {
-        let model = new NotebookModel();
-        let cell0 = model.createMarkdownCell();
-        let cell1 = model.createMarkdownCell();
-        model.cells.add(cell0);
-        model.cells.add(cell1)
-        model.activeCellIndex = 0;
-        expect(cell0.rendered).to.be(true);
-        model.mode = 'edit';
-        expect(cell0.rendered).to.be(false);
-        expect(cell1.rendered).to.be(true);
       });
 
     });

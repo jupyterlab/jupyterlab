@@ -416,6 +416,12 @@ class NotebookModel implements INotebookModel {
     }
     let oldValue = this._activeCellIndex;
     this._activeCellIndex = newValue;
+    let newCell = this.cells.get(newValue);
+    if (newCell && isMarkdownCellModel(newCell)) {
+      if (this.mode === 'edit') {
+        newCell.rendered = false;
+      }
+    }
     let name = 'activeCellIndex';
     this.stateChanged.emit({ name, oldValue, newValue });
   }
@@ -624,6 +630,7 @@ class NotebookModel implements INotebookModel {
     } else if (isMarkdownCellModel(cell) && cell.rendered === false) {
       cell.rendered = true;
     }
+    this.mode = 'command';
   }
 
   /**
@@ -673,13 +680,9 @@ class NotebookModel implements INotebookModel {
     switch (args) {
     case 'top':
       this.activeCellIndex--;
-      this.mode = 'command';
-      this.mode = 'edit';
       break;
     case 'bottom':
       this.activeCellIndex++;
-      this.mode = 'command';
-      this.mode = 'edit';
       break;
     }
   }
@@ -772,7 +775,9 @@ namespace NotebookModelPrivate {
       let cell = cells.get(i);
       if (i === model.activeCellIndex || model.isSelected(cell)) {
         if (isMarkdownCellModel(cell)) {
-          cell.rendered = mode !== 'edit';
+          if (mode === 'edit') {
+            cell.rendered = false;
+          }
         }
       }
     }

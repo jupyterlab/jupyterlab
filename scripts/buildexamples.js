@@ -17,8 +17,10 @@ for (var i = 0; i < dirs.length; i++) {
   if (dirs[i].indexOf('node_modules') !== -1) {
     continue;
   }
-  console.log('Building: ' + dirs[i] + '...');
+  console.log('\n***********\nBuilding: ' + dirs[i] + '...');
   process.chdir('examples/' + dirs[i]);
   childProcess.execSync('npm run build', { stdio: 'inherit' });
   process.chdir('../..');
+
 }
+console.log('\n********\nDone!');
