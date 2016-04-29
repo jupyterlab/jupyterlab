@@ -32,7 +32,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  EditorModel, IEditorModel, IEditorOptions
+  EditorModel, IEditorModel, IEditorOptions, EdgeLocation
 } from '../editor/model';
 
 import {
@@ -549,7 +549,6 @@ class NotebookModel implements INotebookModel {
         }
       }
     }
-    cell.input.textEditor.stateChanged.connect(this.onEditorChanged, this);
     return cell;
   }
 
@@ -573,7 +572,6 @@ class NotebookModel implements INotebookModel {
         cell.rendered = source.rendered;
       }
     }
-    cell.input.textEditor.stateChanged.connect(this.onEditorChanged, this);
     return cell;
   }
 
@@ -596,7 +594,6 @@ class NotebookModel implements INotebookModel {
         cell.format = (source as IRawCellModel).format;
       }
     }
-    cell.input.textEditor.stateChanged.connect(this.onEditorChanged, this);
     return cell;
   }
 
@@ -670,12 +667,34 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Handle an edge request from a text editor.
+   */
+  protected onEdgeRequested(sender: IEditorModel, args: EdgeLocation): void {
+    switch (args) {
+    case 'top':
+      this.activeCellIndex--;
+      this.mode = 'command';
+      this.mode = 'edit';
+      break;
+    case 'bottom':
+      this.activeCellIndex++;
+      this.mode = 'command';
+      this.mode = 'edit';
+      break;
+    }
+  }
+
+  /**
    * Handle a change in the cells list.
    */
   protected onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
+    let cell: ICellModel;
     switch (change.type) {
     case ListChangeType.Add:
       this.activeCellIndex = change.newIndex;
+      cell = change.newValue as ICellModel;
+      cell.input.textEditor.edgeRequested.connect(this.onEdgeRequested, this);
+      cell.input.textEditor.stateChanged.connect(this.onEditorChanged, this);
       break;
     case ListChangeType.Remove:
       (change.oldValue as ICellModel).dispose();
@@ -683,7 +702,7 @@ class NotebookModel implements INotebookModel {
       break;
     case ListChangeType.Replace:
       let oldValues = change.oldValue as ICellModel[];
-      for (let cell of oldValues) {
+      for (cell of oldValues) {
         cell.dispose();
       }
       break;
