@@ -3,7 +3,8 @@
 'use strict';
 
 import {
-  IContentsModel, IKernelId, IKernelSpecId, IContentsOpts, IKernel
+  IContentsModel, IKernelId, IKernelSpecId, IContentsOpts, IKernel,
+  INotebookSession
 } from 'jupyter-js-services';
 
 import {
@@ -34,14 +35,14 @@ export interface IDocumentModel {
   deserialize(value: string): void;
 
   /**
-   * The preferred kernel name for the the document.
+   * The default kernel name for the the document.
    */
-  preferredKernelName: string;
+  defaultKernelName: string;
 
   /**
-   * The preferred kernel language for the document.
+   * The default kernel language for the document.
    */
-  preferredKernelLanguage: string;
+  defaultKernelLanguage: string;
 }
 
 
@@ -378,6 +379,8 @@ class DocumentManager {
     // Hand back container widget synchronously
     return void 0;
   }
+
+  private _data: { [key: string]: Private.IDocumentData } = Object.create(null);
 }
 
 
@@ -390,4 +393,16 @@ namespace Private {
    */
   export
   const openedSignal = new Signal<DocumentManager, Widget>();
+
+  /**
+   * Data associated with a document.
+   */
+  export
+  interface IDocumentData {
+    model: IDocumentModel;
+    session: INotebookSession;
+    context: IDocumentContext;
+    widgets: Widget[];
+  }
+
 }
