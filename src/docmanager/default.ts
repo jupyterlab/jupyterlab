@@ -194,7 +194,7 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
    * Get the preferred widget title given a path.
    */
-  getWidgetTitle(path: string): string {
+  getWidgetTitle(path: string, widget: EditorWidget): string {
     return path.split('/').pop();
   }
 }
