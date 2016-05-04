@@ -123,7 +123,7 @@ class ActiveNotebook {
    * #### Notes
    * This is a read-only property.
    */
-  get ActiveNotebook(): NotebookPanel {
+  get activeNotebook(): NotebookPanel {
     return Private.activeWidget;
   }
 }
