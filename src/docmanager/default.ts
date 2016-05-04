@@ -171,7 +171,7 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
    * This is a read-only property.
    */
   get displayName(): string {
-    return 'Edit';
+    return 'Editor';
   }
 
   /**
