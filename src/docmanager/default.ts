@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  IKernelSpecId
+  IKernelSpecId, IContentsOpts
 } from 'jupyter-js-services';
 
 import {
@@ -31,9 +31,8 @@ class DocumentModel implements IDocumentModel {
   /**
    * Construct a new document model.
    */
-  constructor(path: string, kernelSpecs: IKernelSpecId[]) {
-    // Use the path and the kernel specs to set the default
-    // kernel and language.
+  constructor(path: string) {
+    // Use the path to set the default kernel and language.
   }
 
   /**
@@ -90,10 +89,30 @@ class DocumentModel implements IDocumentModel {
 export
 class ModelFactory {
   /**
+   * The name of the model factory.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return 'file';
+  }
+
+  /**
+   * The contents options used to fetch/save files.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get contentsOptions(): IContentsOpts {
+    return { type: 'file' };
+  }
+
+  /**
    * Create a new model.
    */
-   createNew(path: string, kernelSpecs: IKernelSpecId[]): IDocumentModel {
-     return new DocumentModel(path, kernelSpecs);
+   createNew(path: string): IDocumentModel {
+     return new DocumentModel(path);
    }
 }
 
@@ -133,24 +152,40 @@ class EditorWidget extends CodeMirrorWidget {
 export
 class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
+   * The file type the widget can view.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get fileType(): string {
+    return 'file';
+  }
+
+  /**
+   * The name of the widget to display in dialogs.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get displayName(): string {
+    return 'Edit';
+  }
+
+  /**
+   * The registered name of the model type used to create the widgets.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get modelName(): string {
+    return 'file';
+  }
+
+  /**
    * Create a new widget given a document model and a context.
    */
   createNew(model: IDocumentModel, context: IDocumentContext): EditorWidget {
     return new EditorWidget(model, context);
-  }
-
-  /**
-   * Get the default kernel name given a path and a list of specs.
-   */
-  getDefaultKernel(path: string, specs: IKernelSpecId[]): string {
-    return 'default';
-  }
-
-  /**
-   * Get the preferred kernel names given a path and a list of specs.
-   */
-  getPreferredKernels(path: string, specs: IKernelSpecId[]): string[] {
-    return ['default'];
   }
 
   /**

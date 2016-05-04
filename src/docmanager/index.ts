@@ -61,18 +61,18 @@ export interface IDocumentModel {
 
 
 /**
- * A session info object for running sessions.
+ * A session info object for a running session.
  */
 export interface ISessionInfo {
   /**
    * The list of file paths associated with the running sessions.
    */
-  paths: string[];
+  path: string;
 
   /**
-   * The list of kernel specs associated with the running sessions.
+   * The kernel instance associated with the session.
    */
-  specs: IKernelSpecId[];
+  kernel: IKernel;
 }
 
 
@@ -129,7 +129,7 @@ export interface IDocumentContext {
   /**
    * Get the list of running sessions.
    */
-  listRunningSessions(): Promise<ISessionInfo>;
+  listSessions(): Promise<ISessionInfo[]>;
 
   /**
    * Add a sibling widget to the document manager.
@@ -137,6 +137,10 @@ export interface IDocumentContext {
    * @param widget - The widget to add to the document manager.
    *
    * @returns A disposable used to remove the sibling if desired.
+   *
+   * #### Notes
+   * It is assumed that the widget has the same model and context
+   * as the original widget.
    */
   addSibling(widget: Widget): IDisposable;
 }
@@ -148,19 +152,33 @@ export interface IDocumentContext {
 export
 interface IWidgetFactory<T extends Widget> {
   /**
+   * The file type the widget can view.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  fileType: string;
+
+  /**
+   * The name of the widget to display in dialogs.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  displayName: string;
+
+  /**
+   * The registered name of the model type used to create the widgets.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  modelName: string;
+
+  /**
    * Create a new widget given a document model and a context.
    */
   createNew(model: IDocumentModel, context: IDocumentContext): T;
-
-  /**
-   * Get the default kernel name given a path and a list of specs.
-   */
-  getDefaultKernel(path: string, specs: IKernelSpecId[]): string;
-
-  /**
-   * Get the preferred kernel names given a path and a list of specs.
-   */
-  getPreferredKernels(path: string, specs: IKernelSpecId[]): string[];
 
   /**
    * Get the preferred widget title given a path.
@@ -170,63 +188,30 @@ interface IWidgetFactory<T extends Widget> {
 
 
 /**
- * The options uses to register a widget factory.
- */
-export
-interface IWidgetFactoryOptions {
-  /**
-   * The type of file the widget can view.
-   */
-  fileType: string;
-
-  /**
-   * The name of the widget to display in dialogs.
-   */
-  displayedName: string;
-
-  /**
-   The object used to create new widgets.
-   */
-  widgetFactory: IWidgetFactory<Widget>;
-
-  /**
-   * The registered name of the model type used to create the widgets.
-   */
-  modelName: string;
-}
-
-
-/**
  * The interface for a model factory.
  */
 export
 interface IModelFactory {
   /**
-   * Create a new model.
-   */
-  createNew(path: string, kernelSpecs: IKernelSpecId[]): IDocumentModel;
-}
-
-
-/**
- * The options used to register a model factory.
- */
-export
-interface IModelFactoryOptions {
-  /**
    * The name of the model factory.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   name: string;
 
   /**
    * The contents options used to fetch/save files.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   contentsOptions: IContentsOpts;
 
   /**
-   * The model factory used to create models.
+   * Create a new model.
    */
-  factory: IModelFactory;
+  createNew(path: string): IDocumentModel;
 }
 
 
@@ -235,17 +220,6 @@ interface IModelFactoryOptions {
  */
 export
 class DocumentManager {
-
-  /**
-   * Construct a new document manager.
-   */
-  constructor() {
-    this._fileTypes['File'] = {
-      extensions: [],
-      canCreate: true
-    }
-  }
-
   /**
    * A signal emitted when a file is opened.
    */
@@ -256,66 +230,56 @@ class DocumentManager {
   /**
    * Register a widget factory with the document manager.
    *
-   * @params options - The options used to register the factory.
+   * @params factory - An instance of a widget factory.
    *
    * @returns A disposable used to unregister the factory.
    */
-  registerWidgetFactory(options: IWidgetFactoryOptions): IDisposable {
+  registerWidgetFactory(factory: IWidgetFactory): IDisposable {
     return void 0;
   }
 
   /**
    * Register the default widget factory of a given file type.
    *
-   * @params options - The options used to register the factory.
+   * @params factory - An instance of a widget factory.
    *
    * @returns A disposable used to unregister the factory.
    */
-  registerDefaultWidgetFactory(options: IWidgetFactoryOptions): IDisposable {
+  registerDefaultWidgetFactory(factory: IWidgetFactory): IDisposable {
     return void 0;
   }
 
   /**
    * Register a model factory.
    *
-   * @param options - The options used to register the factory.
+   * @param factory - An instance of a model factory.
    *
    * @returns A disposable used to unregister the factory.
    */
-  registerModelFactory(options: IModelFactoryOptions): IDisposable {
+  registerModelFactory(factory: IModelFactory): IDisposable {
     return void 0;
   }
 
   /**
-   * Register a file type.
+   * Register a file type and associated extensions.
    *
-   * @param fileType - the name of the file type.
+   * @param name - The name of the file type.
    *
-   * @param extensions - a list of file extensions to associate with the type.
+   * @param extensions - The list of file extensions associated with the type.
    *
-   * @param canCreate - whether a file type can be used by [createNew].
-   *
-   * @returns A disposable which can be used to unregister the file type.
-   *
-   * #### Notes
-   * The default fileType is 'File', will be used when no matching extensions
-   * are found and can be used to create new files.
+   * @returns A disposable used to unregister the file type.
    */
-  registerFileType(fileType: string, extensions: string[], canCreate=false): IDisposable {
-    this._fileTypes[fileType] = {
-      extensions,
-      canCreate
-    }
-    return void 0;
+  registerFileType(name: string, extensions: string[]): IDisposable {
+    return this._fileTypes[name] = extensions;
   }
 
   /**
-   * List of the registered file types.
+   * Get the list of registered file types.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get fileTypes(): string[] {
+  fileTypes(): string[] {
     return Object.keys(this._fileTypes);
   }
 
@@ -379,12 +343,14 @@ class DocumentManager {
    *
    * @param path - The directory in which to create the file.
    *
+   * @param kernel - The desired kernel name or id to use.
+   *
    * @returns A Promise that resolves with the created widget.
    *
    * #### Notes
   * Emits an [opened] signal when the widget is populated.
    */
-  createNew(fileType: string, path: string): Promise<Widget> {
+  createNew(fileType: string, path: string, kernel?: IKernelId): Promise<Widget> {
     return void 0;
   }
 
@@ -478,7 +444,7 @@ class DocumentManager {
   }
 
   private _data: { [key: string]: Private.IDocumentData } = Object.create(null);
-  private _fileTypes: { [key: string ]: Private.IFileType} = Object.create(null);
+  private _fileTypes: { [key: string ]: string[] } = Object.create(null);
 }
 
 
@@ -501,14 +467,5 @@ namespace Private {
     session: INotebookSession;
     context: IDocumentContext;
     widgets: Widget[];
-  }
-
-  /**
-   * A file type registry entry.
-   */
-  export
-  interface IFileType {
-    extensions: string[];
-    canCreate: boolean;
   }
 }
