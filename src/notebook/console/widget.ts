@@ -37,6 +37,10 @@ import {
   IConsoleModel
 } from './model';
 
+import {
+  ConsoleTooltip
+} from './tooltip';
+
 
 /**
  * The class name added to console widgets.
@@ -144,6 +148,8 @@ class ConsoleWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
+    this._model.dispose()
+    this._model = null;
     super.dispose();
   }
 
