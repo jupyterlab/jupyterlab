@@ -22,8 +22,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  FileHandlerRegistry
-} from '../filehandler';
+  DocumentManager
+} from '../docmanager';
 
 import {
   FileButtons
@@ -81,18 +81,22 @@ class FileBrowserWidget extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, registry: FileHandlerRegistry) {
+  constructor(model: FileBrowserModel, manager: DocumentManager) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
     this._model = model;
     this._model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs(model);
-    this._buttons = new FileButtons(model, registry);
-    this._listing = new DirListing(model, registry);
-    this._registry = registry;
+    this._buttons = new FileButtons(model, manager);
+    this._listing = new DirListing(model, manager);
+    this._manager = manager;
 
     model.fileChanged.connect((fbModel, args) => {
-      registry.rename(args.oldValue, args.newValue);
+      if (args.newValue) {
+        manager.renameFile(args.oldValue, args.newValue);
+      } else {
+        manager.deleteFile(args.oldValue);
+      }
     });
 
     this._crumbs.addClass(CRUMBS_CLASS);
@@ -126,7 +130,7 @@ class FileBrowserWidget extends Widget {
     this._crumbs = null;
     this._buttons = null;
     this._listing = null;
-    this._registry = null;
+    this._manager = null;
     super.dispose();
   }
 
@@ -155,7 +159,7 @@ class FileBrowserWidget extends Widget {
           showErrorMessage(this, 'Open directory', error)
         );
       } else {
-        this._registry.open(item.path);
+        this._manager.open(item.path);
       }
     }
   }
@@ -170,7 +174,7 @@ class FileBrowserWidget extends Widget {
         continue;
       }
       if (item.type !== 'directory') {
-        this._registry.revert(item.path);
+        this._manager.revertFile(item.path);
       }
     }
   }
@@ -185,7 +189,7 @@ class FileBrowserWidget extends Widget {
         continue;
       }
       if (item.type !== 'directory') {
-        this._registry.save(item.path);
+        this._manager.saveFile(item.path);
       }
     }
   }
@@ -200,7 +204,7 @@ class FileBrowserWidget extends Widget {
         continue;
       }
       if (item.type !== 'directory') {
-        this._registry.close(item.path);
+        this._manager.closeFile(item.path);
       }
     }
   }
@@ -320,5 +324,5 @@ class FileBrowserWidget extends Widget {
   private _buttons: FileButtons = null;
   private _listing: DirListing = null;
   private _timeoutId = -1;
-  private _registry: FileHandlerRegistry = null;
+  private _manager: DocumentManager = null;
 }

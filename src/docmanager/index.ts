@@ -43,7 +43,7 @@ export interface IDocumentModel {
   deserialize(value: any): void;
 
   /**
-   * The default kernel name for the the document.
+   * The default kernel name for the document.
    *
    * #### Notes
    * This is a read-only property.
@@ -91,6 +91,11 @@ export interface IDocumentContext {
   pathChanged: ISignal<IDocumentContext, string>;
 
   /**
+   * A signal emitted when the model is saved or reverted.
+   */
+  dirtyCleared: ISignal<IDocumentContext, void>;
+
+  /**
    * The current kernel associated with the document.
    *
    * #### Notes
@@ -112,7 +117,7 @@ export interface IDocumentContext {
   changeKernel(options: IKernelId): Promise<IKernel>;
 
   /**
-   * Save the the document contents to disk.
+   * Save the document contents to disk.
    */
   save(): Promise<void>;
 
@@ -230,6 +235,17 @@ interface IModelFactoryOptions {
  */
 export
 class DocumentManager {
+
+  /**
+   * Construct a new document manager.
+   */
+  constructor() {
+    this._fileTypes['File'] = {
+      extensions: [],
+      canCreate: true
+    }
+  }
+
   /**
    * A signal emitted when a file is opened.
    */
@@ -268,6 +284,39 @@ class DocumentManager {
    */
   registerModelFactory(options: IModelFactoryOptions): IDisposable {
     return void 0;
+  }
+
+  /**
+   * Register a file type.
+   *
+   * @param fileType - the name of the file type.
+   *
+   * @param extensions - a list of file extensions to associate with the type.
+   *
+   * @param canCreate - whether a file type can be used by [createNew].
+   *
+   * @returns A disposable which can be used to unregister the file type.
+   *
+   * #### Notes
+   * The default fileType is 'File', will be used when no matching extensions
+   * are found and can be used to create new files.
+   */
+  registerFileType(fileType: string, extensions: string[], canCreate=false): IDisposable {
+    this._fileTypes[fileType] = {
+      extensions,
+      canCreate
+    }
+    return void 0;
+  }
+
+  /**
+   * List of the registered file types.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get fileTypes(): string[] {
+    return Object.keys(this._fileTypes);
   }
 
   /**
@@ -328,17 +377,21 @@ class DocumentManager {
    *
    * @param fileType - The type of file to create.
    *
+   * @param path - The directory in which to create the file.
+   *
    * @returns A Promise that resolves with the created widget.
    *
    * #### Notes
   * Emits an [opened] signal when the widget is populated.
    */
-  createNew(fileType: string): Promise<Widget> {
+  createNew(fileType: string, path: string): Promise<Widget> {
     return void 0;
   }
 
   /**
    * Create a new file with a dialog asking for options.
+   *
+   * @param path - The directory in which to create the file.
    *
    * @param host - The host node used to display the dialog.
    *
@@ -347,7 +400,7 @@ class DocumentManager {
    * #### Notes
    * Emits an [opened] signal when the widget is populated.
    */
-  createNewAdvanced(host=document.body): Promise<Widget> {
+  createNewAdvanced(path: string, host=document.body): Promise<Widget> {
     // Create dialog
 
     // -------------------------------------------
@@ -390,9 +443,23 @@ class DocumentManager {
   }
 
   /**
+   * Save the document contents to disk.
+   */
+  saveFile(path: string): Promise<void> {
+    return void 0;
+  }
+
+  /**
+   * Revert the document contents to disk contents.
+   */
+  revertFile(path: string): Promise<void> {
+    return void 0;
+  }
+
+  /**
    * Close the widgets associated with a given path.
    */
-  close(path: string): void {
+  closeFile(path: string): void {
 
   }
 
@@ -411,6 +478,7 @@ class DocumentManager {
   }
 
   private _data: { [key: string]: Private.IDocumentData } = Object.create(null);
+  private _fileTypes: { [key: string ]: Private.IFileType} = Object.create(null);
 }
 
 
@@ -435,4 +503,12 @@ namespace Private {
     widgets: Widget[];
   }
 
+  /**
+   * A file type registry entry.
+   */
+  export
+  interface IFileType {
+    extensions: string[];
+    canCreate: boolean;
+  }
 }

@@ -10,12 +10,12 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  FileHandler, FileHandlerRegistry, FileCreator, DirectoryCreator
-} from 'jupyter-js-ui/lib/filehandler';
-
-import {
   FileBrowserWidget, FileBrowserModel
 } from 'jupyter-js-ui/lib/filebrowser';
+
+import {
+  DocumentManager
+} from 'jupyter-js-ui/lib/docmanager';
 
 import {
   showDialog, okButton
@@ -63,21 +63,12 @@ function main(): void {
   let sessionsManager = new NotebookSessionManager({ baseUrl: baseUrl });
 
   let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
-  let registry = new FileHandlerRegistry();
-  let fileHandler = new FileHandler(contentsManager);
+  let docManager = new DocumentManager();
 
-  registry.addDefaultHandler(fileHandler);
-
-  let fbWidget = new FileBrowserWidget(fbModel, registry);
-
-  let dirCreator = new DirectoryCreator(contentsManager);
-  let fileCreator = new FileCreator(contentsManager);
-  registry.addCreator(
-    'New Directory', dirCreator.createNew.bind(dirCreator));
-  registry.addCreator('New File', fileCreator.createNew.bind(fileCreator));
+  let fbWidget = new FileBrowserWidget(fbModel, docManager);
 
   let widgets: CodeMirrorWidget[] = [];
-  registry.opened.connect((r, widget) => {
+  docManager.opened.connect((r, widget) => {
     dock.insertTabAfter(widget);
     widgets.push(widget as CodeMirrorWidget);
   });
@@ -129,8 +120,9 @@ function main(): void {
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      let path = fileHandler.findPath(activeWidget);
-      fileHandler.save(path);
+      // TODO
+      //let path = fileHandler.findPath(activeWidget);
+      //fileHandler.save(path);
       return true;
     }
   }]);

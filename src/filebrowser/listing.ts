@@ -29,8 +29,8 @@ import {
 } from '../dialog';
 
 import {
-  FileHandlerRegistry
-} from '../filehandler';
+  DocumentManager
+} from '../docmanager';
 
 import {
   FileBrowserModel
@@ -292,7 +292,7 @@ class DirListing extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, registry: FileHandlerRegistry) {
+  constructor(model: FileBrowserModel, manager: DocumentManager) {
     super();
     this.addClass(DIR_LISTING_CLASS);
     this._model = model;
@@ -300,7 +300,7 @@ class DirListing extends Widget {
     this._model.selectionChanged.connect(this._onSelectionChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
-    this._registry = registry;
+    this._manager = manager;
   }
 
   /**
@@ -312,7 +312,7 @@ class DirListing extends Widget {
     this._editNode = null;
     this._drag = null;
     this._dragData = null;
-    this._registry = null;
+    this._manager = null;
     super.dispose();
   }
 
@@ -879,7 +879,7 @@ class DirListing extends Widget {
         showErrorMessage(this, 'Open directory', error)
       );
     } else {
-      this._registry.open(item.path);
+      this._manager.open(item.path);
     }
   }
 
@@ -1032,7 +1032,7 @@ class DirListing extends Widget {
     this._drag.mimeData.setData(utils.CONTENTS_MIME, null);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
-        this._registry.open(item.path);
+        this._manager.open(item.path);
       });
     }
 
@@ -1254,7 +1254,7 @@ class DirListing extends Widget {
   private _prevPath = '';
   private _clipboard: string[] = [];
   private _softSelection = '';
-  private _registry: FileHandlerRegistry = null;
+  private _manager: DocumentManager = null;
 }
 
 

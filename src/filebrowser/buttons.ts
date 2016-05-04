@@ -19,8 +19,8 @@ import {
 } from '../dialog';
 
 import {
-  FileHandlerRegistry
-} from '../filehandler';
+  DocumentManager
+} from '../docmanager';
 
 import {
   FileBrowserModel
@@ -86,7 +86,7 @@ class FileButtons extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, registry: FileHandlerRegistry) {
+  constructor(model: FileBrowserModel, manager: DocumentManager) {
     super();
     this.addClass(FILE_BUTTONS_CLASS);
     this._model = model;
@@ -101,7 +101,7 @@ class FileButtons extends Widget {
     node.appendChild(this._buttons.upload);
     node.appendChild(this._buttons.refresh);
 
-    this._registry = registry;
+    this._manager = manager;
   }
 
   /**
@@ -111,7 +111,7 @@ class FileButtons extends Widget {
     this._model = null;
     this._buttons = null;
     this._input = null;
-    this._registry = null;
+    this._manager = null;
     super.dispose();
   }
 
@@ -126,10 +126,10 @@ class FileButtons extends Widget {
   }
 
   /**
-   * Get the file handler registry used by the widget.
+   * Get the document manager used by the widget.
    */
-  get registry(): FileHandlerRegistry {
-    return this._registry;
+  get manager(): DocumentManager {
+    return this._manager;
   }
 
   /**
@@ -200,7 +200,7 @@ class FileButtons extends Widget {
   private _model: FileBrowserModel;
   private _buttons = Private.createButtons();
   private _input = Private.createUploadInput();
-  private _registry: FileHandlerRegistry = null
+  private _manager: DocumentManager = null
 }
 
 
@@ -286,8 +286,8 @@ namespace Private {
    */
   export
   function createDropdownMenu(widget: FileButtons): Menu {
-    let registry = widget.registry;
-    let creators = registry.listCreators();
+    let manager = widget.manager;
+    let creators = manager.fileTypes;
     creators = creators.sort((a, b) => a.localeCompare(b));
     let items: MenuItem[] = [];
     for (var text of creators) {
@@ -300,19 +300,12 @@ namespace Private {
    * Create a menu item in the dropdown menu.
    */
   function createItem(text: string, widget: FileButtons): MenuItem {
-    let registry = widget.registry;
+    let manager = widget.manager;
     let model = widget.model;
-    let host = widget.parent.node;
     return new MenuItem({
       text,
       handler: () => {
-        registry.createNew(text, model.path, host).then(contents => {
-          if (contents === void 0) {
-            return;
-          }
-          if (contents.type !== 'directory') {
-            registry.open(contents.path);
-          }
+        manager.createNew(text, model.path).then(() => {
           model.refresh();
         });
       }
