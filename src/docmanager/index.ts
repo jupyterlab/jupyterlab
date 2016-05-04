@@ -118,14 +118,14 @@ interface IWidgetFactory<T extends Widget> {
   createNew(model: IDocumentModel, context: IDocumentContext): T;
 
   /**
-   * Get the default kernel name given a list of specs.
+   * Get the default kernel name given a path and a list of specs.
    */
-  getDefaultKernel(specs: IKernelSpecId[]): string;
+  getDefaultKernel(path: string, specs: IKernelSpecId[]): string;
 
   /**
-   * Get the preferred kernel names given a list of specs.
+   * Get the preferred kernel names given a path and a list of specs.
    */
-  getPreferredKernel(specs: IKernelSpecId[]): string[];
+  getPreferredKernels(path: string, specs: IKernelSpecId[]): string[];
 
   /**
    * Get the preferred widget title given a path.
@@ -169,7 +169,7 @@ interface IModelFactory {
   /**
    * Create a new model.
    */
-   createNew(): IDocumentModel;
+   createNew(path: string, kernelSpecs: IKernelSpecId[]): IDocumentModel;
 }
 
 
