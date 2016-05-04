@@ -105,7 +105,7 @@ class ModelFactory {
    * This is a read-only property.
    */
   get contentsOptions(): IContentsOpts {
-    return { type: 'file' };
+    return { type: 'file', format: 'text' };
   }
 
   /**
