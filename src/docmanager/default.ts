@@ -7,6 +7,14 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
+  loadModeByFileName
+} from '../codemirror';
+
+import {
   CodeMirrorWidget
 } from '../codemirror/widget';
 
@@ -20,10 +28,19 @@ import {
  */
 export
 class DocumentModel implements IDocumentModel {
-
+  /**
+   * Construct a new document model.
+   */
   constructor(path: string, kernelSpecs: IKernelSpecId[]) {
     // Use the path and the kernel specs to set the default
     // kernel and language.
+  }
+
+  /**
+   * A signal emitted when the document content changes.
+   */
+  get contentChanged(): ISignal<IDocumentModel, string> {
+    return Private.contentChangedSignal.bind(this);
   }
 
   /**
@@ -38,6 +55,7 @@ class DocumentModel implements IDocumentModel {
    */
   deserialize(value: string): void {
     this._text = value;
+    this.contentChanged.emit(value);
   }
 
   /**
@@ -94,6 +112,14 @@ class EditorWidget extends CodeMirrorWidget {
     super();
     this._model = model;
     this._context = context;
+    this.editor.getDoc().setValue(model.serialize());
+    loadModeByFileName(this.editor, context.path);
+    this._context.pathChanged.connect((c, path) => {
+      loadModeByFileName(this.editor, path);
+    });
+    model.contentChanged.connect((m, text) => {
+      this.editor.getDoc().setValue(text);
+    });
   }
 
   private _model: IDocumentModel = null;
@@ -135,3 +161,15 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
   }
 }
 
+
+/**
+ * A private namespace for data.
+ */
+namespace Private {
+  /**
+   * A signal emitted when a document content changes.
+   */
+  export
+  const contentChangedSignal = new Signal<IDocumentModel, string>();
+
+}

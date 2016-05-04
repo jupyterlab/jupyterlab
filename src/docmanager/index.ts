@@ -25,22 +25,36 @@ import {
  */
 export interface IDocumentModel {
   /**
+   * A signal emitted when the document content changes.
+   */
+  contentChanged: ISignal<IDocumentModel, any>;
+
+  /**
    * Serialize the model.  It should return a JSON object or a string.
    */
   serialize(): any;
 
   /**
    * Deserialize the model from a string or a JSON object.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
    */
   deserialize(value: any): void;
 
   /**
    * The default kernel name for the the document.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   defaultKernelName: string;
 
   /**
    * The default kernel language for the document.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   defaultKernelLanguage: string;
 }
@@ -72,9 +86,25 @@ export interface IDocumentContext {
   kernelChanged: ISignal<IDocumentContext, IKernel>;
 
   /**
+   * A signal emitted when the path changes.
+   */
+  pathChanged: ISignal<IDocumentContext, string>;
+
+  /**
    * The current kernel associated with the document.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   kernel: IKernel;
+
+  /**
+   * The current path associated with the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  path: string;
 
   /**
    * Change the current kernel associated with the document.
@@ -169,7 +199,7 @@ interface IModelFactory {
   /**
    * Create a new model.
    */
-   createNew(path: string, kernelSpecs: IKernelSpecId[]): IDocumentModel;
+  createNew(path: string, kernelSpecs: IKernelSpecId[]): IDocumentModel;
 }
 
 
