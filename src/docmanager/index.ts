@@ -19,7 +19,6 @@ import {
 } from 'phosphor-widget';
 
 
-
 /**
  * The interface for a document model.
  */
@@ -50,7 +49,14 @@ export interface IDocumentModel {
  * A session info object for running sessions.
  */
 export interface ISessionInfo {
-  filePaths: string[];
+  /**
+   * The list of file paths associated with the running sessions.
+   */
+  paths: string[];
+
+  /**
+   * The list of kernel specs associated with the running sessions.
+   */
   specs: IKernelSpecId[];
 }
 
@@ -350,6 +356,20 @@ class DocumentManager {
   deleteFile(path: string): void {
     // Look up kernel (if exists) and if this session is the only session using the kernel, ask user if they want to shut down the kernel.
     // dispose everything in the path->(model, session, context, [list,of,widgets]) mapping for the path (disposing a session should not shut down the kernel - needs change in notebook server)
+  }
+
+  /**
+   * Close the widgets associated with a given path.
+   */
+  close(path: string): void {
+
+  }
+
+  /**
+   * Close all of the open documents.
+   */
+  closeAll(): void {
+
   }
 
   private _createWidget(model: IDocumentModel, context: IDocumentContext): Widget {
