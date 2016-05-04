@@ -40,6 +40,10 @@ import {
 } from 'phosphor-panel';
 
 import {
+  ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
   IChangedArgs
 } from 'phosphor-properties';
 
@@ -118,6 +122,13 @@ const notebookHandlerExtension = {
 export
 class ActiveNotebook {
   /**
+   * A signal emitted when the active notebook changes.
+   */
+  get activeNotebookChanged(): ISignal<ActiveNotebook, NotebookPanel> {
+    return Private.activeNotebookChangedSignal.bind(this);
+  }
+
+  /**
    * Get the current active notebook.
    *
    * #### Notes
@@ -167,7 +178,7 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
         }
       }
     }
-  });
+  }, true);
 
   // Add opened notebooks to the widget list temporarily
   handler.opened.connect((h, widget) => {
@@ -465,4 +476,7 @@ namespace Private {
 
   export
   var widgets: NotebookPanel[] = [];
+
+  export
+  const activeNotebookChangedSignal = new Signal<ActiveNotebook, NotebookPanel>();
 }
