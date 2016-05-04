@@ -25,14 +25,14 @@ import {
  */
 export interface IDocumentModel {
   /**
-   * Serialize the model.
+   * Serialize the model.  It should return a JSON object or a string.
    */
-  serialize(): string;
+  serialize(): any;
 
   /**
-   * Deserialize the model from a string.
+   * Deserialize the model from a string or a JSON object.
    */
-  deserialize(value: string): void;
+  deserialize(value: any): void;
 
   /**
    * The default kernel name for the the document.
@@ -94,7 +94,7 @@ export interface IDocumentContext {
   /**
    * Get the list of running sessions.
    */
-  listRunningSessions(): ISessionInfo;
+  listRunningSessions(): Promise<ISessionInfo>;
 
   /**
    * Add a sibling widget to the document manager.
