@@ -152,12 +152,12 @@ export interface IDocumentContext {
 export
 interface IWidgetFactory<T extends Widget> {
   /**
-   * The file type the widget can view.
+   * The file extensions the widget can view.
    *
    * #### Notes
    * This is a read-only property.
    */
-  fileType: string;
+  fileExtensions: string[];
 
   /**
    * The name of the widget to display in dialogs.
@@ -181,9 +181,9 @@ interface IWidgetFactory<T extends Widget> {
   createNew(model: IDocumentModel, context: IDocumentContext): T;
 
   /**
-   * Get the preferred widget title given a path.
+   * Get the preferred widget title given a path and widget instance.
    */
-  getWidgetTitle(path: string): string;
+  getWidgetTitle(path: string, widget: T): string;
 }
 
 
@@ -234,7 +234,7 @@ class DocumentManager {
    *
    * @returns A disposable used to unregister the factory.
    */
-  registerWidgetFactory(factory: IWidgetFactory): IDisposable {
+  registerWidgetFactory(factory: IWidgetFactory<Widget>): IDisposable {
     return void 0;
   }
 
@@ -242,10 +242,15 @@ class DocumentManager {
    * Register the default widget factory of a given file type.
    *
    * @params factory - An instance of a widget factory.
+   * @params fileExtensions - an optional list of file extensions default for
    *
    * @returns A disposable used to unregister the factory.
+   *
+   * #### Notes
+   * If no file extensions are specified, the widget factory is registered
+   * as the global default for all files.
    */
-  registerDefaultWidgetFactory(factory: IWidgetFactory): IDisposable {
+  registerDefaultWidgetFactory(factory: IWidgetFactory<Widget>, fileExtensions?: string[]): IDisposable {
     return void 0;
   }
 
@@ -258,29 +263,6 @@ class DocumentManager {
    */
   registerModelFactory(factory: IModelFactory): IDisposable {
     return void 0;
-  }
-
-  /**
-   * Register a file type and associated extensions.
-   *
-   * @param name - The name of the file type.
-   *
-   * @param extensions - The list of file extensions associated with the type.
-   *
-   * @returns A disposable used to unregister the file type.
-   */
-  registerFileType(name: string, extensions: string[]): IDisposable {
-    return this._fileTypes[name] = extensions;
-  }
-
-  /**
-   * Get the list of registered file types.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  fileTypes(): string[] {
-    return Object.keys(this._fileTypes);
   }
 
   /**

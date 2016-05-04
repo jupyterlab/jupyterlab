@@ -152,13 +152,16 @@ class EditorWidget extends CodeMirrorWidget {
 export
 class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
-   * The file type the widget can view.
+   * The file extensions the widget can view.
    *
    * #### Notes
    * This is a read-only property.
+   *
+   * This widget factory can view all files, so we don't have
+   * a specific file extension.
    */
-  get fileType(): string {
-    return 'file';
+  get fileExtensions(): string[] {
+    return [];
   }
 
   /**
