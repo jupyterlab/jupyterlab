@@ -23,7 +23,34 @@ type EdgeLocation = 'top' | 'bottom';
 
 
 /**
- * An interface required for implementing the editor model
+ * An interface describing editor keydown events.
+ */
+export
+interface IEditorKeydown {
+  /**
+   * The character number of the editor cursor within a line.
+   */
+  ch: number;
+
+  /**
+   * The native keyboard event.
+   */
+  event: KeyboardEvent;
+
+  /**
+   * The line number of the editor cursor.
+   */
+  line: number;
+
+  /**
+   * The coordinate position of the cursor.
+   */
+  coords: { left: number; right: number; top: number; bottom: number; }
+}
+
+
+/**
+ * An interface required for implementing the editor model.
  */
 export
 interface IEditorModel extends IDisposable {
@@ -36,6 +63,11 @@ interface IEditorModel extends IDisposable {
    * A signal emitted when either the top or bottom edge is requested.
    */
   edgeRequested: ISignal<IEditorModel, EdgeLocation>;
+
+  /**
+   * A signal emitted when a keydown event occurs in the editor.
+   */
+  keydown: ISignal<IEditorModel, IEditorKeydown>;
 
   /**
    * The text in the text editor.
@@ -155,6 +187,13 @@ class EditorModel implements IEditorModel {
    */
   get edgeRequested(): ISignal<EditorModel, EdgeLocation> {
     return EditorModelPrivate.edgeRequestedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a keydown event occurs in the editor.
+   */
+  get keydown(): ISignal<IEditorModel, IEditorKeydown> {
+    return EditorModelPrivate.keydownSignal.bind(this);
   }
 
   /**
@@ -334,6 +373,12 @@ namespace EditorModelPrivate {
    */
   export
   const edgeRequestedSignal = new Signal<EditorModel, EdgeLocation>();
+
+  /**
+   * A signal emitted when a keydown event occurs in the editor.
+   */
+  export
+  const keydownSignal = new Signal<EditorModel, IEditorKeydown>();
 
   /**
    * Initialize an editor view model from an options object.

@@ -27,7 +27,7 @@ import {
 } from './history';
 
 import {
-  EditorModel, IEditorModel, IEditorOptions, EdgeLocation
+  EditorModel, IEditorKeydown, IEditorModel, IEditorOptions, EdgeLocation
 } from '../editor/model';
 
 import {
@@ -326,6 +326,8 @@ class ConsoleModel implements IConsoleModel {
 
     // Connect each new prompt with console history.
     input.textEditor.edgeRequested.connect(this._onEdgeRequested, this);
+    // Broadcast keydown events for each new prompt.
+    input.textEditor.keydown.connect(this._onKeydown, this);
 
     return cell;
   }
@@ -400,6 +402,10 @@ class ConsoleModel implements IConsoleModel {
       });
       break;
     }
+  }
+
+  private _onKeydown(sender: any, args: IEditorKeydown): void {
+    console.log('onKeydown args', args);
   }
 
   private _banner: IRawCellModel = null;

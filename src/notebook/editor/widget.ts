@@ -29,7 +29,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IEditorModel
+  IEditorModel, IEditorKeydown
 } from './model';
 
 
@@ -113,10 +113,15 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
       let cursor = doc.getCursor();
       let line = cursor.line;
       let ch = cursor.ch;
+      let coords = editor.charCoords({line, ch}, 'page');
+
+      this._model.keydown.emit({ ch, line, coords, event: evt });
+
       if (line === 0 && ch === 0 && evt.keyCode === UP_ARROW) {
         this._model.edgeRequested.emit('top');
         return
       }
+
       let lastLine = doc.lastLine();
       let lastCh = doc.getLineHandle(lastLine).text.length;
       if (line === lastLine && ch === lastCh && evt.keyCode === DOWN_ARROW) {
