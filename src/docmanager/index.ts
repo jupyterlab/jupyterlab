@@ -254,7 +254,7 @@ class DocumentManager {
     if (!defaultExtensions) {
       return;
     }
-    for (let ext in defaultExtensions) {
+    for (let ext of defaultExtensions) {
       if (ext === '.*') {
         this._defaultWidgetFactory = factory.displayName;
       } else {
