@@ -51,11 +51,6 @@ const CONTENT_CLASS = 'jp-FileButtons-buttonContent';
 const ICON_CLASS = 'jp-FileButtons-buttonIcon';
 
 /**
- * The class name added to a dropdown icon.
- */
-const DROPDOWN_CLASS = 'jp-FileButtons-dropdownIcon';
-
-/**
  * The class name added to the create button.
  */
 const CREATE_CLASS = 'jp-id-create';
@@ -140,42 +135,16 @@ class FileButtons extends Widget {
     if (event.button !== 0) {
       return;
     }
-
-    // Do nothing if the create button is already active.
-    let button = this._buttons.create;
-    if (button.classList.contains(ACTIVE_CLASS)) {
-      return;
-    }
-
-    // Create a new dropdown menu and snap the button geometry.
-    let dropdown = Private.createDropdownMenu(this);
-    let rect = button.getBoundingClientRect();
-
-    // Mark the button as active.
-    button.classList.add(ACTIVE_CLASS);
-
-    // Setup the `closed` signal handler. The menu is disposed on an
-    // animation frame to allow a mouse press event which closed the
-    // menu to run its course. This keeps the button from re-opening.
-    dropdown.closed.connect(() => {
-      requestAnimationFrame(() => { dropdown.dispose(); });
-    });
-
-    // Setup the `disposed` signal handler. This restores the button
-    // to the non-active state and allows a new menu to be opened.
-    dropdown.disposed.connect(() => {
-      button.classList.remove(ACTIVE_CLASS);
-    });
-
-    // Popup the menu aligned with the bottom of the create button.
-    dropdown.popup(rect.left, rect.bottom, false, true);
+    this._manager.createNew(this._model.path, this.parent.node);
   };
 
   /**
    * The 'click' handler for the upload button.
    */
   private _onUploadButtonClicked = (event: MouseEvent) => {
-    if (event.button !== 0) return;
+    if (event.button !== 0) {
+      return;
+    }
     this._input.click();
   };
 
@@ -234,7 +203,6 @@ namespace Private {
     let createIcon = document.createElement('span');
     let uploadIcon = document.createElement('span');
     let refreshIcon = document.createElement('span');
-    let dropdownIcon = document.createElement('span');
 
     create.type = 'button';
     upload.type = 'button';
@@ -256,10 +224,8 @@ namespace Private {
     createIcon.className = ICON_CLASS + ' fa fa-plus';
     uploadIcon.className = ICON_CLASS + ' fa fa-upload';
     refreshIcon.className = ICON_CLASS + ' fa fa-refresh';
-    dropdownIcon.className = DROPDOWN_CLASS + ' fa fa-caret-down';
 
     createContent.appendChild(createIcon);
-    createContent.appendChild(dropdownIcon);
     uploadContent.appendChild(uploadIcon);
     refreshContent.appendChild(refreshIcon);
 
@@ -279,37 +245,6 @@ namespace Private {
     input.type = 'file';
     input.multiple = true;
     return input;
-  }
-
-  /**
-   * Create a new dropdown menu for the create new button.
-   */
-  export
-  function createDropdownMenu(widget: FileButtons): Menu {
-    let manager = widget.manager;
-    let creators = manager.fileTypes;
-    creators = creators.sort((a, b) => a.localeCompare(b));
-    let items: MenuItem[] = [];
-    for (var text of creators) {
-      items.push(createItem(text, widget));
-    }
-    return new Menu(items);
-  }
-
-  /**
-   * Create a menu item in the dropdown menu.
-   */
-  function createItem(text: string, widget: FileButtons): MenuItem {
-    let manager = widget.manager;
-    let model = widget.model;
-    return new MenuItem({
-      text,
-      handler: () => {
-        manager.createNew(text, model.path).then(() => {
-          model.refresh();
-        });
-      }
-    });
   }
 
   /**
