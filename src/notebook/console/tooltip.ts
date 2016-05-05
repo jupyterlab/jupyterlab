@@ -34,7 +34,21 @@ class ConsoleTooltip extends Widget {
   }
 
   /**
-   * The current kernel supplying navigation history.
+   * The dimenions of the tooltip.
+   */
+  get rect(): ClientRect {
+    return this._rect;
+  }
+  set rect(newValue: ClientRect) {
+    if (Private.matchClientRects(this._rect, newValue)) {
+      return;
+    }
+    this._rect = newValue;
+    Private.setBoundingClientRect(this.node, this._rect);
+  }
+
+  /**
+   * The text of the tooltip.
    */
   get text(): string {
     return this._text;
@@ -50,9 +64,11 @@ class ConsoleTooltip extends Widget {
   /**
    * Construct a console tooltip widget.
    */
-  constructor() {
+  constructor(text: string, rect: ClientRect) {
     super();
     this.addClass(TOOLTIP_CLASS);
+    this.text = text;
+    this.rect = rect;
   }
 
   /**
@@ -118,4 +134,48 @@ class ConsoleTooltip extends Widget {
   }
 
   private _text = '';
+  private _rect: ClientRect = null;
+}
+
+
+/**
+ * A namespace for ConsoleTooltip widget private data.
+ */
+namespace Private {
+  /**
+   * Compare two client rectangles.
+   *
+   * @param rectA - The first client rectangle.
+   *
+   * @param rectB - The second client rectangle.
+   *
+   * @returns `true` if the two rectangles have the same dimensions.
+   */
+  export
+  function matchClientRects(rectA: ClientRect, rectB: ClientRect): boolean {
+    return (rectA.top === rectB.top &&
+            rectA.bottom === rectB.bottom &&
+            rectA.left === rectB.left &&
+            rectA.right === rectB.right &&
+            rectA.width === rectB.width &&
+            rectA.height === rectB.height);
+  }
+  /**
+   * Set the dimensions of an element.
+   *
+   * @param elem - The element of interest.
+   *
+   * @param rect - The dimensions of the element.
+   */
+  export
+  function setBoundingClientRect(elem: HTMLElement, rect: ClientRect): void {
+    elem.style.top = rect.top + 'px';
+    elem.style.bottom = rect.bottom + 'px';
+
+    elem.style.left = rect.left + 'px';
+    elem.style.right = rect.right + 'px';
+
+    elem.style.width = rect.width + 'px';
+    elem.style.height = rect.height + 'px';
+  }
 }

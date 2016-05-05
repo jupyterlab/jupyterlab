@@ -118,6 +118,27 @@ class ConsoleWidget extends Widget {
     return widget;
   }
 
+  /**
+   * Create a new tooltip widget.
+   *
+   * @param x The x position of the current cursor.
+   *
+   * @param y The y position of the current cursor.
+   *
+   * @param text The text of the tooltip.
+   */
+  static createTooltip(x: number, y: number, text = '...'): ConsoleTooltip {
+    let rect: ClientRect = {
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      width: 0,
+      height: 0
+    };
+    return new ConsoleTooltip(text, rect);
+  }
+
   /*
    * The last cell in a console is always a `CodeCellWidget` prompt.
    */
@@ -148,8 +169,17 @@ class ConsoleWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
+
     this._model.dispose()
     this._model = null;
+
+    // Because tooltips are attached to the document body and are not children
+    // of the console, they must be disposed manually.
+    if (this._tooltip) {
+      this._tooltip.dispose();
+      this._tooltip = null;
+    }
+
     super.dispose();
   }
 
@@ -217,8 +247,9 @@ class ConsoleWidget extends Widget {
     }
   }
 
-  private _model: IConsoleModel;
+  private _model: IConsoleModel = null;
   private _rendermime: RenderMime<Widget> = null;
+  private _tooltip: ConsoleTooltip = null;
 }
 
 
