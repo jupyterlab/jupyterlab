@@ -105,7 +105,7 @@ class ModelFactory {
    * This is a read-only property.
    */
   get contentsOptions(): IContentsOpts {
-    return { type: 'file' };
+    return { type: 'file', format: 'text' };
   }
 
   /**
@@ -152,13 +152,16 @@ class EditorWidget extends CodeMirrorWidget {
 export
 class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
-   * The file type the widget can view.
+   * The file extensions the widget can view.
    *
    * #### Notes
    * This is a read-only property.
+   *
+   * This widget factory can view all files, so we don't have
+   * a specific file extension.
    */
-  get fileType(): string {
-    return 'file';
+  get fileExtensions(): string[] {
+    return [];
   }
 
   /**
@@ -168,7 +171,7 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
    * This is a read-only property.
    */
   get displayName(): string {
-    return 'Edit';
+    return 'Editor';
   }
 
   /**
@@ -191,7 +194,7 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
    * Get the preferred widget title given a path.
    */
-  getWidgetTitle(path: string): string {
+  getWidgetTitle(path: string, widget: EditorWidget): string {
     return path.split('/').pop();
   }
 }
