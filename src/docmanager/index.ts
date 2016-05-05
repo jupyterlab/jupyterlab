@@ -232,25 +232,16 @@ class DocumentManager {
    *
    * @params factory - An instance of a widget factory.
    *
-   * @returns A disposable used to unregister the factory.
-   */
-  registerWidgetFactory(factory: IWidgetFactory<Widget>): IDisposable {
-    return void 0;
-  }
-
-  /**
-   * Register the default widget factory of a given file type.
-   *
-   * @params factory - An instance of a widget factory.
-   * @params fileExtensions - an optional list of file extensions default for
+   * @params defaultExtensions - An optional list of file extensions for which
+   *   the factory should be the default.
    *
    * @returns A disposable used to unregister the factory.
    *
    * #### Notes
-   * If no file extensions are specified, the widget factory is registered
-   * as the global default for all files.
+   * By specifying `'.*'` as one of the `defaultExtensions`, the factory will
+   * register as the global default.
    */
-  registerDefaultWidgetFactory(factory: IWidgetFactory<Widget>, fileExtensions?: string[]): IDisposable {
+  registerWidgetFactory(factory: IWidgetFactory<Widget>, defaultExtensions?: string[]): IDisposable {
     return void 0;
   }
 
@@ -319,24 +310,6 @@ class DocumentManager {
   }
 
   /**
-   * Create a new file of the given type using the default options.
-   *
-   * @param fileType - The type of file to create.
-   *
-   * @param path - The directory in which to create the file.
-   *
-   * @param kernel - The desired kernel name or id to use.
-   *
-   * @returns A Promise that resolves with the created widget.
-   *
-   * #### Notes
-  * Emits an [opened] signal when the widget is populated.
-   */
-  createNew(fileType: string, path: string, kernel?: IKernelId): Promise<Widget> {
-    return void 0;
-  }
-
-  /**
    * Create a new file with a dialog asking for options.
    *
    * @param path - The directory in which to create the file.
@@ -348,7 +321,7 @@ class DocumentManager {
    * #### Notes
    * Emits an [opened] signal when the widget is populated.
    */
-  createNewAdvanced(path: string, host=document.body): Promise<Widget> {
+  createNew(path: string, host=document.body): Promise<Widget> {
     // Create dialog
 
     // -------------------------------------------
