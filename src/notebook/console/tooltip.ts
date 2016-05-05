@@ -75,10 +75,12 @@ class ConsoleTooltip extends Widget {
 
   /**
    * Handle `after_attach` messages for the widget.
+   *
+   * #### Notes
+   * Captures document events in the capture phase to dismiss the tooltip.
    */
   protected onAfterAttach(msg: Message): void {
-    // Capture document-level mousedown events in the capture phase in order
-    // to dismiss the tooltip when necessary.
+    document.addEventListener('keydown', this, true);
     document.addEventListener('mousedown', this, true);
   }
 
@@ -86,16 +88,32 @@ class ConsoleTooltip extends Widget {
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('keydown', this);
     this.node.removeEventListener('mousedown', this);
   }
 
+  /**
+   * Handle keydown events for the widget.
+   *
+   * #### Notes
+   * Disposes the tooltip if a keydown happens anywhere on the document.
+   */
+  private _evtKeydown(event: KeyboardEvent) {
+    this.dispose();
+  }
+
+  /**
+   * Handle mousedown events for the widget.
+   *
+   * #### Notes
+   * Disposes the tooltip if a mousedown happens anywhere outside the tooltip.
+   */
   private _evtMousedown(event: MouseEvent) {
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
       if (target === this.node) return;
       target = target.parentElement;
     }
-    // Dispose the tooltip if a mousedown happens anywhere outside the tooltip.
     this.dispose();
   }
 
