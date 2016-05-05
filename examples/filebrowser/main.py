@@ -9,6 +9,11 @@ import threading
 
 import tornado.web
 
+# Install the pyzmq ioloop. This has to be done before anything else from
+# tornado is imported.
+from zmq.eventloop import ioloop
+ioloop.install()
+
 PORT = 8765
 
 
@@ -70,6 +75,13 @@ def main(argv):
 
     app.listen(PORT, 'localhost')
     loop = tornado.ioloop.IOLoop.instance()
+
+    if sys.platform.startswith('win'):
+        # add no-op to wake every 5s
+        # to handle signals that may be ignored by the inner loop
+        pc = ioloop.PeriodicCallback(lambda: None, 5000)
+        pc.start()
+
     print('Browse to http://localhost:%s' % PORT)
     try:
         loop.start()
