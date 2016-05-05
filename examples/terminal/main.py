@@ -84,7 +84,7 @@ def main(argv):
         pc = ioloop.PeriodicCallback(lambda: None, 5000)
         pc.start()
 
-    loop = tornado.ioloop.IOLoop.instance()
+    loop = ioloop.IOLoop.current()
     print('Browse to http://localhost:%s' % PORT)
     try:
         loop.start()

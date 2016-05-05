@@ -74,7 +74,6 @@ def main(argv):
                                   compiled_template_cache=False)
 
     app.listen(PORT, 'localhost')
-    loop = tornado.ioloop.IOLoop.instance()
 
     if sys.platform.startswith('win'):
         # add no-op to wake every 5s
@@ -82,6 +81,7 @@ def main(argv):
         pc = ioloop.PeriodicCallback(lambda: None, 5000)
         pc.start()
 
+    loop = ioloop.IOLoop.current()
     print('Browse to http://localhost:%s' % PORT)
     try:
         loop.start()
