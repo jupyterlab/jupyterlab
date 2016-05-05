@@ -155,7 +155,8 @@ interface IWidgetFactory<T extends Widget> {
    * The file extensions the widget can view.
    *
    * #### Notes
-   * This is a read-only property.
+   * This is a read-only property.  Use `'.*'` to denote all file extensions
+   * or give the actual extension (e.g. `'.txt'`).
    */
   fileExtensions: string[];
 
@@ -184,6 +185,11 @@ interface IWidgetFactory<T extends Widget> {
    * Get the preferred widget title given a path and widget instance.
    */
   getWidgetTitle(path: string, widget: T): string;
+
+  /**
+   * Get the kernel preferences.
+   */
+  getKernelPreferences(path: string, specs: IKernelSpecId[]): IKernelPreferences;
 }
 
 
@@ -209,9 +215,48 @@ interface IModelFactory {
   contentsOptions: IContentsOpts;
 
   /**
-   * Create a new model.
+   * Create a new model for a given path.
    */
-  createNew(path: string): IDocumentModel;
+  createNew(path: string, kernelSpec?: IKernelSpecId): IDocumentModel;
+}
+
+
+/**
+ * The options used to get kernel preferences.
+ */
+export
+interface IKernelPreferenceOptions {
+  /**
+   * The filename used to filter by extension.
+   */
+  filename: string;
+
+  /**
+   * The widget name used to do the filtering.
+   */
+  widgetName: string;
+
+  /**
+   * The list of available kernel specs.
+   */
+  specs: IKernelSpecId[];
+}
+
+
+/**
+ * An interface for preferred kernels.
+ */
+export
+interface IKernelPreferences {
+  /**
+   * The preferred default kernel.
+   */
+  defaultKernel: string;
+
+  /**
+   * The list of preferred kernel names.
+   */
+  preferredNames: string[];
 }
 
 
@@ -246,6 +291,7 @@ class DocumentManager {
    * as the global default, this factory will override the existing default.
    */
   registerWidgetFactory(factory: IWidgetFactory<Widget>, defaultExtensions?: string[]): IDisposable {
+    // TODO: make sure defaultExtensions is a subset of the factory extensions
     if (factory.displayName in this._widgetFactories) {
       console.warn(`widgetFactory "${factory.displayName}" already registered, ignoring.`);
       return;
@@ -300,6 +346,23 @@ class DocumentManager {
   }
 
   /**
+   * Get the list of registered widget factory display names.
+   *
+   * @param filename - An optional filename to filter the results.
+   */
+  listWidgetFactories(filename?: string): string[] {
+    // TODO: filter by name.
+    return Object.keys(this._widgetFactories);
+  }
+
+  /**
+   * Get the kernel preferences.
+   */
+  getKernelPreferences(options: IKernelPreferenceOptions): IKernelPreferences {
+    return void 0;
+  }
+
+  /**
    * Open a file and return the widget used to display the contents.
    *
    * @param fileName - The path to the file to open.
@@ -325,62 +388,17 @@ class DocumentManager {
   }
 
   /**
-   * Open a file using a dialog to ask the user for options.
+   * Create a new file of the given name.
    *
-   * @param fileName - The path to the file to open.
+   * @param filename: The desired name for the new file.
    *
-   * @param kernel - The desired kernel name or id to use.
+   * @param widgetName: The name of the widgetFactory to use.
    *
-   * @param host - The host node used to display the dialog.
+   * @param kernel: The desired kernel name or id.
    *
-   * @returns The widget used to view the file.
-   *
-    * #### Notes
-   * Emits an [opened] signal when the widget is populated.
+   * @returns A promise that resolves with the path to the created file.
    */
-  openWith(fileName: string, kernel?: IKernelId, host=document.body): Promise<Widget> {
-    // -------------------------------------------
-    //   (readonly) Name: 2016-05-01-104521.ipynb
-
-    //     Widget: Dropdown of registered widget factories for the file type
-    //     Kernelspec: default (which means the widget or the server decides what to do with it). Also list running sessions.
-
-    //                                   | OPEN |
-    // --------------------------------------------
-
-    // Call open(filename, widgetName, kernel)
-    return void 0;
-  }
-
-  /**
-   * Create a new file with a dialog asking for options.
-   *
-   * @param path - The directory in which to create the file.
-   *
-   * @param host - The host node used to display the dialog.
-   *
-   * @returns A Promise that resolves with the created widget.
-   *
-   * #### Notes
-   * Emits an [opened] signal when the widget is populated.
-   */
-  createNew(path: string, host=document.body): Promise<Widget> {
-    // Create dialog
-
-    // -------------------------------------------
-    //   Name: 2016-05-01-104521.ipynb
-    //     | Python file | Text file | Jupyter Notebook | More v |
-
-    //   Advanced v
-    //     Widget: Dropdown of registered widget factories for the file type
-    //     Kernelspec: default (which means the widget or the server decides what to do with it). Also list running sessions.
-
-    //                                   | CREATE |
-    // --------------------------------------------
-    // GET rest api call to see if filename already exists. If filename conflict, then pop up a rename/overwrite dialog. We could also do this live as the user types the filename and show an error indicator or a list of matching filenames.
-    // call modelFactory createNew static function (which is passed the kernel name and language). Get model back synchronously.
-    // Save the blank model to disk (async).
-    // Call _createWidget and return container widget
+  createNew(filename: string, widgetName='default', kernel?: IKernelId): Promise<string> {
     return void 0;
   }
 

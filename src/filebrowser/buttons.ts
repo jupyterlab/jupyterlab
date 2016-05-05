@@ -135,7 +135,8 @@ class FileButtons extends Widget {
     if (event.button !== 0) {
       return;
     }
-    this._manager.createNew(this._model.path, this.parent.node);
+    // TODO
+    //this._manager.createNew(this._model.path, this.parent.node);
   };
 
   /**

@@ -19,20 +19,21 @@ import {
 } from '../codemirror/widget';
 
 import {
-  IDocumentModel, IWidgetFactory, IModelFactory, IDocumentContext
+  IDocumentModel, IWidgetFactory, IModelFactory, IDocumentContext,
+  IKernelPreferences
 } from './index';
 
 
 /**
- * The default implementation a document model.
+ * The default implementation of a document model.
  */
 export
 class DocumentModel implements IDocumentModel {
   /**
    * Construct a new document model.
    */
-  constructor(path: string) {
-    // Use the path to set the default kernel and language.
+  constructor(path: string, spec?: IKernelSpecId) {
+    // TODO: Set the default language and kernel name.
   }
 
   /**
@@ -53,6 +54,9 @@ class DocumentModel implements IDocumentModel {
    * Deserialize the model from a string.
    */
   deserialize(value: string): void {
+    if (this._text === value) {
+      return;
+    }
     this._text = value;
     this.contentChanged.emit(value);
   }
@@ -111,9 +115,9 @@ class ModelFactory {
   /**
    * Create a new model.
    */
-   createNew(path: string): IDocumentModel {
-     return new DocumentModel(path);
-   }
+  createNew(path: string, kernelSpec?: IKernelSpecId): IDocumentModel {
+    return new DocumentModel(path, kernelSpec);
+  }
 }
 
 
@@ -131,13 +135,20 @@ class EditorWidget extends CodeMirrorWidget {
     super();
     this._model = model;
     this._context = context;
-    this.editor.getDoc().setValue(model.serialize());
-    loadModeByFileName(this.editor, context.path);
+    let editor = this.editor;
+    let doc = editor.getDoc();
+    doc.setValue(model.serialize());
+    loadModeByFileName(editor, context.path);
     this._context.pathChanged.connect((c, path) => {
-      loadModeByFileName(this.editor, path);
+      loadModeByFileName(editor, path);
     });
     model.contentChanged.connect((m, text) => {
-      this.editor.getDoc().setValue(text);
+      doc.setValue(text);
+    });
+    CodeMirror.on(doc, 'change', (instance, change) => {
+      if (change.origin !== 'setValue') {
+        model.deserialize(instance.getValue());
+      }
     });
   }
 
@@ -196,6 +207,17 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
    */
   getWidgetTitle(path: string, widget: EditorWidget): string {
     return path.split('/').pop();
+  }
+
+  /**
+   * Get the kernel preferences.
+   */
+  getKernelPreferences(path: string, specs: IKernelSpecId[]): IKernelPreferences {
+    // TODO: get the preferred names based on the path.
+    return {
+      defaultKernel: 'none',
+      preferredNames: []
+    }
   }
 }
 
