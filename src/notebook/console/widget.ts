@@ -130,11 +130,12 @@ class ConsoleWidget extends Widget {
   static createTooltip(x: number, y: number, text = '...'): ConsoleTooltip {
     let rect: ClientRect = {
       top: 0,
-      bottom: 0,
       left: 0,
-      right: 0,
       width: 0,
-      height: 0
+      height: 0,
+      // `bottom` and `right` are ignored.
+      bottom: null,
+      right: null
     };
     return new ConsoleTooltip(text, rect);
   }

@@ -35,6 +35,10 @@ class ConsoleTooltip extends Widget {
 
   /**
    * The dimenions of the tooltip.
+   *
+   * #### Notes
+   * `bottom` and `right` values are ignored as it is sufficient to provide
+   * `top`, `left`, `width`, and `height` values.
    */
   get rect(): ClientRect {
     return this._rect;
@@ -150,12 +154,14 @@ namespace Private {
    * @param rectB - The second client rectangle.
    *
    * @returns `true` if the two rectangles have the same dimensions.
+   *
+   * #### Notes
+   * `bottom` and `right` values are ignored as it is sufficient to provide
+   * `top`, `left`, `width`, and `height` values.
    */
   export
   function matchClientRects(rectA: ClientRect, rectB: ClientRect): boolean {
     return (rectA.top === rectB.top &&
-            rectA.bottom === rectB.bottom &&
-            rectA.left === rectB.left &&
             rectA.right === rectB.right &&
             rectA.width === rectB.width &&
             rectA.height === rectB.height);
@@ -166,15 +172,15 @@ namespace Private {
    * @param elem - The element of interest.
    *
    * @param rect - The dimensions of the element.
+   *
+   * #### Notes
+   * `bottom` and `right` values are ignored as it is sufficient to provide
+   * `top`, `left`, `width`, and `height` values.
    */
   export
   function setBoundingClientRect(elem: HTMLElement, rect: ClientRect): void {
     elem.style.top = rect.top + 'px';
-    elem.style.bottom = rect.bottom + 'px';
-
     elem.style.left = rect.left + 'px';
-    elem.style.right = rect.right + 'px';
-
     elem.style.width = rect.width + 'px';
     elem.style.height = rect.height + 'px';
   }
