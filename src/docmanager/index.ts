@@ -240,9 +240,40 @@ class DocumentManager {
    * #### Notes
    * By specifying `'.*'` as one of the `defaultExtensions`, the factory will
    * register as the global default.
+   * If a factory with the given `displayName` is already registered, the
+   * factory will be ignored and a warning will be printed to the console.
+   * If a factory is already registered as a default for a given extension or
+   * as the global default, this factory will override the existing default.
    */
   registerWidgetFactory(factory: IWidgetFactory<Widget>, defaultExtensions?: string[]): IDisposable {
-    return void 0;
+    if (factory.displayName in this._widgetFactories) {
+      console.warn(`widgetFactory "${factory.displayName}" already registered, ignoring.`);
+      return;
+    }
+    this._widgetFactories[factory.displayName] = factory;
+    if (!defaultExtensions) {
+      return;
+    }
+    for (let ext in defaultExtensions) {
+      if (ext === '.*') {
+        this._defaultWidgetFactory = factory.displayName;
+      } else {
+        this._defaultWidgetFactories[ext] = factory.displayName;
+      }
+    }
+    var displayName = factory.displayName;
+    return new DisposableDelegate(() => {
+      delete this._widgetFactories[displayName];
+      if (this._defaultWidgetFactory === displayName) {
+        this._defaultWidgetFactory = '';
+      }
+      for (let ext of Object.keys(this._defaultWidgetFactories)) {
+        let name = this._defaultWidgetFactories[ext];
+        if (name === displayName) {
+          delete this._defaultWidgetFactories[name];
+        }
+      }
+    });
   }
 
   /**
@@ -251,9 +282,21 @@ class DocumentManager {
    * @param factory - An instance of a model factory.
    *
    * @returns A disposable used to unregister the factory.
+   *
+   * #### Notes
+   * If a factory with the given `name` is already registered, the
+   * factory will be ignored and a warning will be printed to the console.
    */
   registerModelFactory(factory: IModelFactory): IDisposable {
-    return void 0;
+    if (factory.name in this._modelFactories) {
+      console.warn(`modelFactory "${factory.name}" already registered, ignoring.`);
+      return;
+    }
+    this._modelFactories[factory.name] = factory;
+    var name = factory.name;
+    return new DisposableDelegate(() => {
+      delete this._modelFactories[name];
+    });
   }
 
   /**
@@ -399,7 +442,10 @@ class DocumentManager {
   }
 
   private _data: { [key: string]: Private.IDocumentData } = Object.create(null);
-  private _fileTypes: { [key: string ]: string[] } = Object.create(null);
+  private _modelFactories: { [key: string]: IModelFactory } = Object.create(null);
+  private _widgetFactories: { [key: string]: IWidgetFactory<Widget> } = Object.create(null);
+  private _defaultWidgetFactory = '';
+  private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
 }
 
 
