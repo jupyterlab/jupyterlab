@@ -9,6 +9,8 @@ import threading
 
 import tornado.web
 
+# Install the pyzmq ioloop. This has to be done before anything else from
+# tornado is imported.
 from zmq.eventloop import ioloop
 ioloop.install()
 
@@ -66,7 +68,7 @@ def main(argv):
     thread.start()
 
     handlers = [
-        (r"/", MainPageHandler, {'base_url': base_url, 'ws_url': ws_url }),
+        (r"/", MainPageHandler, {'base_url': base_url, 'ws_url': ws_url}),
         (r'/(.*)', tornado.web.StaticFileHandler, {'path': '.'}),
     ]
 
@@ -75,15 +77,15 @@ def main(argv):
                                   compiled_template_cache=False)
 
     app.listen(PORT, 'localhost')
-    loop = tornado.ioloop.IOLoop.instance()
-    print('Browse to http://localhost:%s' % PORT)
-    
+
     if sys.platform.startswith('win'):
-            # add no-op to wake every 5s
-            # to handle signals that may be ignored by the inner loop
-            pc = ioloop.PeriodicCallback(lambda : None, 5000)
-            pc.start()
-    
+        # add no-op to wake every 5s
+        # to handle signals that may be ignored by the inner loop
+        pc = ioloop.PeriodicCallback(lambda: None, 5000)
+        pc.start()
+
+    loop = ioloop.IOLoop.current()
+    print('Browse to http://localhost:%s' % PORT)
     try:
         loop.start()
     except KeyboardInterrupt:
