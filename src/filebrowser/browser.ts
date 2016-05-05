@@ -159,7 +159,8 @@ class FileBrowserWidget extends Widget {
           showErrorMessage(this, 'Open directory', error)
         );
       } else {
-        this._manager.open(item.path);
+        // TODO
+        //this._manager.open(item.path);
       }
     }
   }

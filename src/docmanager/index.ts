@@ -4,12 +4,16 @@
 
 import {
   IContentsModel, IKernelId, IKernelSpecId, IContentsOpts, IKernel,
-  INotebookSession
+  INotebookSession, IContentsManager, INotebookSessionManager
 } from 'jupyter-js-services';
 
 import {
   IDisposable, DisposableDelegate
 } from 'phosphor-disposable';
+
+import {
+  PanelLayout
+} from 'phosphor-panel';
 
 import {
   ISignal, Signal
@@ -18,6 +22,23 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
+
+
+/**
+ * An interface for a preferred kernel.
+ */
+export
+interface IKernelPreference {
+  /**
+   * The name of the preferred kernel.
+   */
+  name: string;
+
+  /**
+   * The language of the preferred kernel.
+   */
+  language: string;
+}
 
 
 /**
@@ -43,20 +64,9 @@ export interface IDocumentModel {
   deserialize(value: any): void;
 
   /**
-   * The default kernel name for the document.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * The kernel preference for the document.
    */
-  defaultKernelName: string;
-
-  /**
-   * The default kernel language for the document.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  defaultKernelLanguage: string;
+  kernelPreference: IKernelPreference;
 }
 
 
@@ -177,7 +187,7 @@ interface IWidgetFactory<T extends Widget> {
   modelName: string;
 
   /**
-   * Create a new widget given a document model and a context.
+   * Create a new widget.
    */
   createNew(model: IDocumentModel, context: IDocumentContext): T;
 
@@ -187,9 +197,9 @@ interface IWidgetFactory<T extends Widget> {
   getWidgetTitle(path: string, widget: T): string;
 
   /**
-   * Get the kernel preferences.
+   * Get the preferred kernel info list given a model preference.
    */
-  getKernelPreferences(path: string, specs: IKernelSpecId[]): IKernelPreferences;
+  getKernelPreferences(modelPreference: IKernelPreference): IKernelPreference[];
 }
 
 
@@ -216,47 +226,39 @@ interface IModelFactory {
 
   /**
    * Create a new model for a given path.
+   *
+   * @param kernelPreference - An optional kernel preference.
+   *
+   * @returns A new document model.
    */
-  createNew(path: string, kernelSpec?: IKernelSpecId): IDocumentModel;
+  createNew(kernelPreference?: IKernelPreference): IDocumentModel;
+
+  /**
+   * Get the preferred kernel info given a path and specs
+   */
+  getKernelPreference(path: string, specs: IKernelSpecId[]): IKernelPreference;
 }
 
 
 /**
- * The options used to get kernel preferences.
+ * The options for opening or creating a new document.
  */
 export
-interface IKernelPreferenceOptions {
+interface IDocumentOptions {
   /**
-   * The filename used to filter by extension.
+   * The path to the file to open/create.
    */
   filename: string;
 
   /**
-   * The widget name used to do the filtering.
-   */
-  widgetName: string;
-
-  /**
-   * The list of available kernel specs.
+   * The existing kernel specs.
    */
   specs: IKernelSpecId[];
-}
-
-
-/**
- * An interface for preferred kernels.
- */
-export
-interface IKernelPreferences {
-  /**
-   * The preferred default kernel.
-   */
-  defaultKernel: string;
 
   /**
-   * The list of preferred kernel names.
+   * An option widget name to override the default.
    */
-  preferredNames: string[];
+  widgetName?: string;
 }
 
 
@@ -265,11 +267,13 @@ interface IKernelPreferences {
  */
 export
 class DocumentManager {
+
   /**
-   * A signal emitted when a file is opened.
+   * Construct a new document manager.
    */
-  get opened(): ISignal<DocumentManager, Widget> {
-    return Private.openedSignal.bind(this);
+  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager) {
+    this._contentsManager = contentsManager;
+    this._sessionManager = sessionManager;
   }
 
   /**
@@ -358,48 +362,79 @@ class DocumentManager {
   /**
    * Get the kernel preferences.
    */
-  getKernelPreferences(options: IKernelPreferenceOptions): IKernelPreferences {
-    return void 0;
+  getKernelPreferences(filename: string, widgetName: string, specs: IKernelSpecId[]): IKernelPreference[] {
+    let widgetFactory = this._widgetFactories[widgetName];
+    let modelFactory = this._modelFactories[widgetFactory.modelName];
+    let modelPref = modelFactory.getKernelPreference(filename, specs);
+    return widgetFactory.getKernelPreferences(modelPref);
   }
 
   /**
    * Open a file and return the widget used to display the contents.
    *
-   * @param fileName - The path to the file to open.
+   * @param options - The options used to open the widget.
    *
-   * @param widgetName - The registered widget name to use to display the file.
-   *
-   * @param kernel - The desired kernel name or id to use.
-   *
-   * @returns The widget used to view the file.
-   *
-   * #### Notes
-   * Emits an [opened] signal when the widget is populated.
+   * @param kernel - An optional kernel name/id to override the default.
    */
-  open(fileName: string, widgetName='default', kernel?: IKernelId): Widget {
-    // Find out from the widgetFactory what modelFactory to should use.
-    // Looks up the contents options to use for the modelFactory.
+  open(options: IDocumentOptions, kernel?: IKernelId): Widget {
+    // Find out from the widgetFactory what modelFactory to use.
+    let wFactory = this._getWidgetFactory(options.widgetName || 'default');
+    if (!wFactory) {
+      return void 0;
+    }
+    let mFactory = this._modelFactories[wFactory.modelName];
+    if (!mFactory) {
+      return void 0;
+    }
+    // Look up the contents options to use for the modelFactory.
+    let cManager = this._contentsManager;
+    let widget = new Widget();
+    widget.layout = new PanelLayout();
+    let filename = options.filename;
     // Fetch the content.
-    // Call the modelFactory with the content synchronously get a model.
-    // The model exposes the default kernel/language.
-    // Document manager creates a execution/contents context.
-    // Call _createWidget and return container widget.
-    return void 0;
+    cManager.get(filename, mFactory.contentsOptions).then(contents => {
+      // Call the modelFactory with the content synchronously get a model.
+      let pref = mFactory.getKernelPreference(filename, options.specs);
+      let model = mFactory.createNew(pref);
+      model.deserialize(contents.content);
+      // Create a new execution/contents context.
+      // TODO
+      let context: IDocumentContext = void 0;
+      // If a kernel was given, start the kernel on the context.
+      // TODO
+      // Create the child widget using the factory.
+      let child = wFactory.createNew(model, context);
+      // Add the child widget to the parent widget and emit opened.
+      (widget.layout as PanelLayout).addChild(child);
+    });
+    return widget;
   }
 
   /**
    * Create a new file of the given name.
    *
-   * @param filename: The desired name for the new file.
-   *
-   * @param widgetName: The name of the widgetFactory to use.
-   *
-   * @param kernel: The desired kernel name or id.
+   * @param options - The options used to create the file.
    *
    * @returns A promise that resolves with the path to the created file.
    */
-  createNew(filename: string, widgetName='default', kernel?: IKernelId): Promise<string> {
-    return void 0;
+  createNew(options: IDocumentOptions): Promise<string> {
+    let wFactory = this._getWidgetFactory(options.widgetName || 'default');
+    if (!wFactory) {
+      return void 0;
+    }
+    let mFactory = this._modelFactories[wFactory.modelName];
+    if (!mFactory) {
+      return void 0;
+    }
+    let filename = options.filename;
+    let pref = mFactory.getKernelPreference(filename, options.specs);
+    let model = mFactory.createNew(pref);
+    let opts = mFactory.contentsOptions;
+    opts.content = model.serialize();
+    let cManager = this._contentsManager;
+    return cManager.save(filename, opts).then(content => {
+      return content.path;
+    });
   }
 
   /**
@@ -452,11 +487,17 @@ class DocumentManager {
 
   }
 
-  private _createWidget(model: IDocumentModel, context: IDocumentContext): Widget {
-    // Call widget with new model and a context and optional kernel to hook up to. Async returned widget is added to the container widget. The widget factory is responsible for starting a kernel if it wants one.
-    // store path->(model, session, context, [list,of,widgets])
-    // Hand back container widget synchronously
-    return void 0;
+  /**
+   * Get the appropriate widget factory by name.
+   */
+  private _getWidgetFactory(widgetName: string): IWidgetFactory<Widget> {
+    let factory: IWidgetFactory<Widget>;
+    if (widgetName === 'default') {
+      factory = this._widgetFactories[this._defaultWidgetFactory];
+    } else {
+      factory = this._widgetFactories[widgetName];
+    }
+    return factory;
   }
 
   private _data: { [key: string]: Private.IDocumentData } = Object.create(null);
@@ -464,6 +505,8 @@ class DocumentManager {
   private _widgetFactories: { [key: string]: IWidgetFactory<Widget> } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
+  private _contentsManager: IContentsManager = null;
+  private _sessionManager: INotebookSessionManager = null;
 }
 
 

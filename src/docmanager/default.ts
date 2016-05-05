@@ -20,7 +20,7 @@ import {
 
 import {
   IDocumentModel, IWidgetFactory, IModelFactory, IDocumentContext,
-  IKernelPreferences
+  IKernelPreference
 } from './index';
 
 
@@ -32,8 +32,8 @@ class DocumentModel implements IDocumentModel {
   /**
    * Construct a new document model.
    */
-  constructor(path: string, spec?: IKernelSpecId) {
-    // TODO: Set the default language and kernel name.
+  constructor(kernelPreference: IKernelPreference) {
+    this._kernelPreference = kernelPreference;
   }
 
   /**
@@ -41,6 +41,16 @@ class DocumentModel implements IDocumentModel {
    */
   get contentChanged(): ISignal<IDocumentModel, string> {
     return Private.contentChangedSignal.bind(this);
+  }
+
+  /**
+   * The kernel preference for the document.
+   */
+  get kernelPreference(): IKernelPreference {
+    return this._kernelPreference;
+  }
+  set kernelPreference(value: IKernelPreference) {
+    this._kernelPreference = value;
   }
 
   /**
@@ -61,29 +71,8 @@ class DocumentModel implements IDocumentModel {
     this.contentChanged.emit(value);
   }
 
-  /**
-   * The default kernel name for the the document.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get defaultKernelName(): string {
-    return this._defaultName;
-  }
-
-  /**
-   * The default kernel language for the document.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get defaultKernelLanguage(): string {
-    return this._defaultLanguage;
-  }
-
   private _text = '';
-  private _defaultName = '';
-  private _defaultLanguage = '';
+  private _kernelPreference: IKernelPreference = null;
 }
 
 
@@ -115,8 +104,17 @@ class ModelFactory {
   /**
    * Create a new model.
    */
-  createNew(path: string, kernelSpec?: IKernelSpecId): IDocumentModel {
-    return new DocumentModel(path, kernelSpec);
+  createNew(kernelPreference?: IKernelPreference): IDocumentModel {
+    kernelPreference = kernelPreference || { name: 'default', language: 'default' };
+    return new DocumentModel(kernelPreference);
+  }
+
+  /**
+   * Get the preferred kernel info given a path and specs.
+   */
+  getKernelPreference(path: string, specs: IKernelSpecId[]): IKernelPreference {
+    // TODO
+    return { name: 'none', language: 'none'};
   }
 }
 
@@ -210,14 +208,10 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
   }
 
   /**
-   * Get the kernel preferences.
+   * Get the preferred kernel info given a model preference.
    */
-  getKernelPreferences(path: string, specs: IKernelSpecId[]): IKernelPreferences {
-    // TODO: get the preferred names based on the path.
-    return {
-      defaultKernel: 'none',
-      preferredNames: []
-    }
+  getKernelPreferences(modelPreference: IKernelPreference): IKernelPreference[] {
+    return [{ name: 'none', language: 'none' }, modelPreference];
   }
 }
 
