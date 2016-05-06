@@ -4,7 +4,8 @@
 
 import {
   IContentsModel, IKernelId, IKernelSpecId, IContentsOpts, IKernel,
-  INotebookSession, IContentsManager, INotebookSessionManager
+  INotebookSession, IContentsManager, INotebookSessionManager,
+  IKernelSpecIds
 } from 'jupyter-js-services';
 
 import {
@@ -108,6 +109,11 @@ export interface IDocumentContext {
    * This is a read-only property.
    */
   path: string;
+
+  /**
+   * Get the current kernelspec information.
+   */
+  getKernelSpecs(): IKernelSpecIds;
 
   /**
    * Change the current kernel associated with the document.
