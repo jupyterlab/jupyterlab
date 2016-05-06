@@ -25,23 +25,6 @@ import {
 
 
 /**
- * An interface for kernel preferences.
- */
-export
-interface IKernelPreference {
-  /**
-   * The name of the primary kernel.
-   */
-  primary: string;
-
-  /**
-   * The names of the other kernels.
-   */
-  others: string[];
-}
-
-
-/**
  * The interface for a document model.
  */
 export interface IDocumentModel {
@@ -64,9 +47,14 @@ export interface IDocumentModel {
   deserialize(value: any): void;
 
   /**
-   * The kernel preference for the document.
+   * The default kernel name of the document.
    */
-  kernelPreference: IKernelPreference;
+  defaultKernelName: string;
+
+  /**
+   * The default kernel language of the document.
+   */
+  defaultKernelLanguage: string;
 }
 
 
@@ -187,19 +175,25 @@ interface IWidgetFactory<T extends Widget> {
   modelName: string;
 
   /**
+   * Whether the widgets prefer having a kernel started.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  preferKernel: boolean;
+
+  /**
+   * Whether the widgets can start a kernel when opened.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  canStartKernel: boolean;
+
+  /**
    * Create a new widget.
    */
   createNew(model: IDocumentModel, context: IDocumentContext, kernel: IKernelId): T;
-
-  /**
-   * Get the preferred widget title given a path and widget instance.
-   */
-  getWidgetTitle(path: string, widget: T): string;
-
-  /**
-   * Get the preferred kernel info list given a model preference.
-   */
-  getKernelPreference(modelPreference: IKernelPreference): IKernelPreference;
 }
 
 
@@ -227,38 +221,38 @@ interface IModelFactory {
   /**
    * Create a new model for a given path.
    *
-   * @param kernelPreference - An optional kernel preference.
+   * @param languagePreference - An optional kernel language preference.
    *
    * @returns A new document model.
    */
-  createNew(kernelPreference?: IKernelPreference): IDocumentModel;
+  createNew(languagePreference?: string): IDocumentModel;
 
   /**
-   * Get the preferred kernel info given a path and specs
+   * Get the preferred kernel language given a path.
    */
-  getKernelPreference(path: string, specs: IKernelSpecId[]): IKernelPreference;
+  preferredLanguage(path: string): string;
 }
 
 
 /**
- * The options for opening or creating a new document.
+ * A kernel preference for a given file path and widget.
  */
 export
-interface IDocumentOptions {
+interface IKernelPreference {
   /**
-   * The path to the file to open/create.
+   * The preferred kernel language.
    */
-  filename: string;
+  language: string;
 
   /**
-   * The existing kernel specs.
+   * Whether to prefer having a kernel started when opening.
    */
-  specs: IKernelSpecId[];
+  preferKernel: boolean;
 
   /**
-   * An option widget name to override the default.
+   * Whether a kernel when can be started when opening.
    */
-  widgetName?: string;
+  canStartKernel: boolean;
 }
 
 
@@ -352,61 +346,48 @@ class DocumentManager {
   /**
    * Get the list of registered widget factory display names.
    *
-   * @param filename - An optional filename to filter the results.
+   * @param path - An optional file path to filter the results.
    */
-  listWidgetFactories(filename?: string): string[] {
-    // TODO: filter by name.
+  listWidgetFactories(path?: string): string[] {
+    // TODO: filter by name and make sure the model factory exists.
     return Object.keys(this._widgetFactories);
   }
 
   /**
    * Get the kernel preference.
    */
-  getKernelPreference(filename: string, widgetName: string, specs: IKernelSpecId[]): IKernelPreference {
+  getKernelPreference(path: string, widgetName: string): IKernelPreference {
     let widgetFactory = this._widgetFactories[widgetName];
     let modelFactory = this._modelFactories[widgetFactory.modelName];
-    let modelPref = modelFactory.getKernelPreference(filename, specs);
-    return widgetFactory.getKernelPreference(modelPref);
+    let language = modelFactory.preferredLanguage(path);
+    return {
+      language,
+      preferKernel: widgetFactory.preferKernel.
+      canStartKernel: widgetFactory.canStartKernel
+    }
   }
 
   /**
    * Open a file and return the widget used to display the contents.
    *
-   * @param options - The options used to open the widget.
+   * @param path - The file path to open.
+   *
+   * @param widgetName - The name of the widget factory to use.
    *
    * @param kernel - An optional kernel name/id to override the default.
    */
-  open(options: IDocumentOptions, kernel?: IKernelId): Widget {
-    // Find out from the widgetFactory what modelFactory to use.
-    let wFactory = this._getWidgetFactory(options.widgetName || 'default');
-    if (!wFactory) {
-      return void 0;
-    }
-    let mFactory = this._modelFactories[wFactory.modelName];
-    if (!mFactory) {
-      return void 0;
-    }
-    // Look up the contents options to use for the modelFactory.
-    let cManager = this._contentsManager;
+  open(path: string, widgetName='default', kernel?: IKernelId): Widget {
     let widget = new Widget();
-    widget.layout = new PanelLayout();
-    let filename = options.filename;
-    // Fetch the content.
-    cManager.get(filename, mFactory.contentsOptions).then(contents => {
-      // Call the modelFactory with the content synchronously get a model.
-      let pref = mFactory.getKernelPreference(filename, options.specs);
-      let model = mFactory.createNew(pref);
+    let manager = this._contentsManager;
+    let mFactory = this._getModelFactory(widgetName);
+    if (!mFactory) {
+      return;
+    }
+    let lang = mFactory.preferredLanguage(path);
+    let model = mFactory.createNew(lang);
+    manager.get(path, mFactory.contentsOptions).then(contents => {
       model.deserialize(contents.content);
-      // Create a new execution/contents context.
-      // TODO
-      let context: IDocumentContext = void 0;
-      // Use the passed in kernel info or the preferred kernel.
-      pref = wFactory.getKernelPreference(pref);
-      kernel = kernel || { name: pref.primary };
-      // Create the child widget using the factory.
-      let child = wFactory.createNew(model, context, kernel);
-      // Add the child widget to the parent widget and emit opened.
-      (widget.layout as PanelLayout).addChild(child);
+      this._createWidget(model, widgetName, widget, kernel);
     });
     return widget;
   }
@@ -414,28 +395,27 @@ class DocumentManager {
   /**
    * Create a new file of the given name.
    *
-   * @param options - The options used to create the file.
+   * @param path - The file path to use.
    *
-   * @returns A promise that resolves with the path to the created file.
+   * @param widgetName - The name of the widget factory to use.
+   *
+   * @param kernel - An optional kernel name/id to override the default.
    */
-  createNew(options: IDocumentOptions): Promise<string> {
-    let wFactory = this._getWidgetFactory(options.widgetName || 'default');
-    if (!wFactory) {
-      return void 0;
-    }
-    let mFactory = this._modelFactories[wFactory.modelName];
+  createNew(path: string, widgetName='default', kernel?: IKernelId): Widget {
+    let widget = new Widget();
+    let manager = this._contentsManager;
+    let mFactory = this._getModelFactory(widgetName);
     if (!mFactory) {
-      return void 0;
+      return;
     }
-    let filename = options.filename;
-    let pref = mFactory.getKernelPreference(filename, options.specs);
-    let model = mFactory.createNew(pref);
+    let lang = mFactory.preferredLanguage(path);
+    let model = mFactory.createNew(lang);
     let opts = mFactory.contentsOptions;
     opts.content = model.serialize();
-    let cManager = this._contentsManager;
-    return cManager.save(filename, opts).then(content => {
-      return content.path;
+    manager.save(path, opts).then(content => {
+      this._createWidget(model, widgetName, widget, kernel);
     });
+    return widget;
   }
 
   /**
@@ -489,6 +469,23 @@ class DocumentManager {
   }
 
   /**
+   * Create a context and a widget.
+   */
+  private _createWidget(model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
+    let wFactory = this._getWidgetFactory(widgetName);
+    parent.layout = new PanelLayout();
+    // TODO: Create a new execution/contents context.
+    let context: IDocumentContext = void 0;
+    if (!kernel) {
+      // TODO: get the desired kernel name
+    }
+    // Create the child widget using the factory.
+    let child = wFactory.createNew(model, context, kernel);
+    // Add the child widget to the parent widget and emit opened.
+    (widget.layout as PanelLayout).addChild(child);
+  }
+
+  /**
    * Get the appropriate widget factory by name.
    */
   private _getWidgetFactory(widgetName: string): IWidgetFactory<Widget> {
@@ -499,6 +496,17 @@ class DocumentManager {
       factory = this._widgetFactories[widgetName];
     }
     return factory;
+  }
+
+  /**
+   * Get the appropriate model factory given a widget factory.
+   */
+  private _getModelFactory(widgetName: string): IModelFactory {
+    let wFactory = this._getWidgetFactory(widgetName);
+    if (!wFactory) {
+      return;
+    }
+    return this._modelFactories[wFactory.modelName];
   }
 
   private _data: { [key: string]: Private.IDocumentData } = Object.create(null);
