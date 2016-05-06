@@ -105,7 +105,7 @@ class ModelFactory {
    * Create a new model.
    */
   createNew(kernelPreference?: IKernelPreference): IDocumentModel {
-    kernelPreference = kernelPreference || { name: 'default', language: 'default' };
+    kernelPreference = kernelPreference || { primary: 'default', others: [] };
     return new DocumentModel(kernelPreference);
   }
 
@@ -211,7 +211,7 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
    * Get the preferred kernel info given a model preference.
    */
   getKernelPreferences(modelPreference: IKernelPreference): IKernelPreference {
-    let others [modelPreference.primary].concat(modelPreference.others);
+    let others = [modelPreference.primary].concat(modelPreference.others);
     return { primary: 'none', others };
   }
 }
