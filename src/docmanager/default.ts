@@ -114,7 +114,7 @@ class ModelFactory {
    */
   getKernelPreference(path: string, specs: IKernelSpecId[]): IKernelPreference {
     // TODO
-    return { name: 'none', language: 'none'};
+    return { primary: 'none', others: [] };
   }
 }
 
@@ -210,8 +210,9 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
    * Get the preferred kernel info given a model preference.
    */
-  getKernelPreferences(modelPreference: IKernelPreference): IKernelPreference[] {
-    return [{ name: 'none', language: 'none' }, modelPreference];
+  getKernelPreferences(modelPreference: IKernelPreference): IKernelPreference {
+    let others [modelPreference.primary].concat(modelPreference.others);
+    return { primary: 'none', others };
   }
 }
 

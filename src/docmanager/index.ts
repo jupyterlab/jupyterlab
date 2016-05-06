@@ -25,19 +25,19 @@ import {
 
 
 /**
- * An interface for a preferred kernel.
+ * An interface for kernel preferences.
  */
 export
 interface IKernelPreference {
   /**
-   * The name of the preferred kernel.
+   * The name of the primary kernel.
    */
-  name: string;
+  primary: string;
 
   /**
-   * The language of the preferred kernel.
+   * The names of the other kernels.
    */
-  language: string;
+  others: string[];
 }
 
 
@@ -199,7 +199,7 @@ interface IWidgetFactory<T extends Widget> {
   /**
    * Get the preferred kernel info list given a model preference.
    */
-  getKernelPreferences(modelPreference: IKernelPreference): IKernelPreference[];
+  getKernelPreferences(modelPreference: IKernelPreference): IKernelPreference;
 }
 
 
@@ -360,9 +360,9 @@ class DocumentManager {
   }
 
   /**
-   * Get the kernel preferences.
+   * Get the kernel preference.
    */
-  getKernelPreferences(filename: string, widgetName: string, specs: IKernelSpecId[]): IKernelPreference[] {
+  getKernelPreference(filename: string, widgetName: string, specs: IKernelSpecId[]): IKernelPreference {
     let widgetFactory = this._widgetFactories[widgetName];
     let modelFactory = this._modelFactories[widgetFactory.modelName];
     let modelPref = modelFactory.getKernelPreference(filename, specs);
