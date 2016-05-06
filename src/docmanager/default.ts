@@ -32,8 +32,8 @@ class DocumentModel implements IDocumentModel {
   /**
    * Construct a new document model.
    */
-  constructor(kernelPreference: IKernelPreference) {
-    this._kernelPreference = kernelPreference;
+  constructor(languagePreference: string) {
+    this._defaultLang = languagePreference;
   }
 
   /**
@@ -44,13 +44,23 @@ class DocumentModel implements IDocumentModel {
   }
 
   /**
-   * The kernel preference for the document.
+   * The default kernel name of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  get kernelPreference(): IKernelPreference {
-    return this._kernelPreference;
+  get defaultKernelName(): string {
+    return '';
   }
-  set kernelPreference(value: IKernelPreference) {
-    this._kernelPreference = value;
+
+  /**
+   * The default kernel language of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get defaultKernelLanguage(): string {
+    return this._defaultLang;
   }
 
   /**
@@ -72,7 +82,7 @@ class DocumentModel implements IDocumentModel {
   }
 
   private _text = '';
-  private _kernelPreference: IKernelPreference = null;
+  private _defaultLang = '';
 }
 
 
@@ -82,39 +92,22 @@ class DocumentModel implements IDocumentModel {
 export
 class ModelFactory {
   /**
-   * The name of the model factory.
+   * Create a new model for a given path.
    *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get name(): string {
-    return 'file';
-  }
-
-  /**
-   * The contents options used to fetch/save files.
+   * @param languagePreference - An optional kernel language preference.
    *
-   * #### Notes
-   * This is a read-only property.
+   * @returns A new document model.
    */
-  get contentsOptions(): IContentsOpts {
-    return { type: 'file', format: 'text' };
+  createNew(languagePreference?: string): IDocumentModel {
+    return new DocumentModel(languagePreference);
   }
 
   /**
-   * Create a new model.
+   * Get the preferred kernel language given a path.
    */
-  createNew(kernelPreference?: IKernelPreference): IDocumentModel {
-    kernelPreference = kernelPreference || { primary: 'default', others: [] };
-    return new DocumentModel(kernelPreference);
-  }
-
-  /**
-   * Get the preferred kernel info given a path and specs.
-   */
-  getKernelPreference(path: string, specs: IKernelSpecId[]): IKernelPreference {
-    // TODO
-    return { primary: 'none', others: [] };
+  preferredLanguage(path: string): string {
+    // TODO: use a mapping of extension to language.
+    return '';
   }
 }
 
@@ -161,39 +154,6 @@ class EditorWidget extends CodeMirrorWidget {
 export
 class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
-   * The file extensions the widget can view.
-   *
-   * #### Notes
-   * This is a read-only property.
-   *
-   * This widget factory can view all files, so we don't have
-   * a specific file extension.
-   */
-  get fileExtensions(): string[] {
-    return [];
-  }
-
-  /**
-   * The name of the widget to display in dialogs.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get displayName(): string {
-    return 'Editor';
-  }
-
-  /**
-   * The registered name of the model type used to create the widgets.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get modelName(): string {
-    return 'file';
-  }
-
-  /**
    * Create a new widget given a document model and a context.
    */
   createNew(model: IDocumentModel, context: IDocumentContext, kernel: IKernelId): EditorWidget {
@@ -207,14 +167,6 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
    */
   getWidgetTitle(path: string, widget: EditorWidget): string {
     return path.split('/').pop();
-  }
-
-  /**
-   * Get the preferred kernel info given a model preference.
-   */
-  getKernelPreference(modelPreference: IKernelPreference): IKernelPreference {
-    let others = [modelPreference.primary].concat(modelPreference.others);
-    return { primary: 'none', others };
   }
 }
 

@@ -49,11 +49,17 @@ export interface IDocumentModel {
 
   /**
    * The default kernel name of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   defaultKernelName: string;
 
   /**
    * The default kernel language of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   defaultKernelLanguage: string;
 }
@@ -150,51 +156,57 @@ export interface IDocumentContext {
 }
 
 
+
 /**
- * The interface for a widget factory.
+ * The options used to register a widget factory.
  */
 export
-interface IWidgetFactory<T extends Widget> {
+interface IWidgetFactoryOptions {
+  /**
+   * The factory object.
+   */
+  factory: IWidgetFactory<Widget>;
+
   /**
    * The file extensions the widget can view.
    *
    * #### Notes
-   * This is a read-only property.  Use `'.*'` to denote all file extensions
+   * Use `'.*'` to denote all file extensions
    * or give the actual extension (e.g. `'.txt'`).
    */
   fileExtensions: string[];
 
   /**
    * The name of the widget to display in dialogs.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   displayName: string;
 
   /**
    * The registered name of the model type used to create the widgets.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   modelName: string;
 
   /**
    * Whether the widgets prefer having a kernel started.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   preferKernel: boolean;
 
   /**
    * Whether the widgets can start a kernel when opened.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   canStartKernel: boolean;
+}
+
+
+/**
+ * The interface for a widget factory.
+ */
+export
+interface IWidgetFactory<T extends Widget> {
+  /**
+   * Get the preferred widget title given a path and a widget.
+   */
+  getWidgetTitle(path: string, widget: Widget): string;
 
   /**
    * Create a new widget.
@@ -204,26 +216,32 @@ interface IWidgetFactory<T extends Widget> {
 
 
 /**
- * The interface for a model factory.
+ * The options used to register a model factory.
  */
 export
-interface IModelFactory {
+interface IModelFactoryOptions {
+  /**
+   * The model factory object.
+   */
+  factory: IModelFactory;
+
   /**
    * The name of the model factory.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   name: string;
 
   /**
    * The contents options used to fetch/save files.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   contentsOptions: IContentsOpts;
+}
 
+
+/**
+ * The interface for a model factory.
+ */
+export
+interface IModelFactory {
   /**
    * Create a new model for a given path.
    *
@@ -279,57 +297,31 @@ class DocumentManager {
   /**
    * Register a widget factory with the document manager.
    *
-   * @params factory - An instance of a widget factory.
+   * @param options - The options used to register the factory.
    *
-   * @params defaultExtensions - An optional list of file extensions for which
-   *   the factory should be the default.
+   * @param defaultExtensions - The file extensions for which the factory is
+   *   the default.
    *
    * @returns A disposable used to unregister the factory.
    *
    * #### Notes
-   * By specifying `'.*'` as one of the `defaultExtensions`, the factory will
-   * register as the global default.
    * If a factory with the given `displayName` is already registered, the
    * factory will be ignored and a warning will be printed to the console.
+   * If `'.*'` is given as adefault extension, the factory will be registered
+   * as the global default.
    * If a factory is already registered as a default for a given extension or
    * as the global default, this factory will override the existing default.
    */
-  registerWidgetFactory(factory: IWidgetFactory<Widget>, defaultExtensions?: string[]): IDisposable {
+  registerWidgetFactory(options: IWidgetFactoryOptions, defaultExtensions?:string[]): IDisposable {
     // TODO: make sure defaultExtensions is a subset of the factory extensions
-    if (factory.displayName in this._widgetFactories) {
-      console.warn(`widgetFactory "${factory.displayName}" already registered, ignoring.`);
-      return;
-    }
-    this._widgetFactories[factory.displayName] = factory;
-    if (!defaultExtensions) {
-      return;
-    }
-    for (let ext of defaultExtensions) {
-      if (ext === '.*') {
-        this._defaultWidgetFactory = factory.displayName;
-      } else {
-        this._defaultWidgetFactories[ext] = factory.displayName;
-      }
-    }
-    var displayName = factory.displayName;
-    return new DisposableDelegate(() => {
-      delete this._widgetFactories[displayName];
-      if (this._defaultWidgetFactory === displayName) {
-        this._defaultWidgetFactory = '';
-      }
-      for (let ext of Object.keys(this._defaultWidgetFactories)) {
-        let name = this._defaultWidgetFactories[ext];
-        if (name === displayName) {
-          delete this._defaultWidgetFactories[name];
-        }
-      }
-    });
+    // TODO
+    return void 0;
   }
 
   /**
    * Register a model factory.
    *
-   * @param factory - An instance of a model factory.
+   * @param options - The options used to register the factory.
    *
    * @returns A disposable used to unregister the factory.
    *
@@ -337,16 +329,9 @@ class DocumentManager {
    * If a factory with the given `name` is already registered, the
    * factory will be ignored and a warning will be printed to the console.
    */
-  registerModelFactory(factory: IModelFactory): IDisposable {
-    if (factory.name in this._modelFactories) {
-      console.warn(`modelFactory "${factory.name}" already registered, ignoring.`);
-      return;
-    }
-    this._modelFactories[factory.name] = factory;
-    var name = factory.name;
-    return new DisposableDelegate(() => {
-      delete this._modelFactories[name];
-    });
+  registerModelFactory(options: IModelFactoryOptions): IDisposable {
+    // TODO
+    return void 0;
   }
 
   /**
@@ -356,20 +341,20 @@ class DocumentManager {
    */
   listWidgetFactories(path?: string): string[] {
     // TODO: filter by name and make sure the model factory exists.
-    return Object.keys(this._widgetFactories);
+    return void 0;
   }
 
   /**
    * Get the kernel preference.
    */
   getKernelPreference(path: string, widgetName: string): IKernelPreference {
-    let widgetFactory = this._widgetFactories[widgetName];
-    let modelFactory = this._modelFactories[widgetFactory.modelName];
-    let language = modelFactory.preferredLanguage(path);
+    let widgetFactoryEx = this._getWidgetFactoryEx(widgetName);
+    let modelFactoryEx = this._getModelFactoryEx(widgetName);
+    let language = modelFactoryEx.factory.preferredLanguage(path);
     return {
       language,
-      preferKernel: widgetFactory.preferKernel.
-      canStartKernel: widgetFactory.canStartKernel
+      preferKernel: widgetFactoryEx.preferKernel,
+      canStartKernel: widgetFactoryEx.canStartKernel
     }
   }
 
@@ -385,13 +370,13 @@ class DocumentManager {
   open(path: string, widgetName='default', kernel?: IKernelId): Widget {
     let widget = new Widget();
     let manager = this._contentsManager;
-    let mFactory = this._getModelFactory(widgetName);
-    if (!mFactory) {
+    let mFactoryEx = this._getModelFactoryEx(widgetName);
+    if (!mFactoryEx) {
       return;
     }
-    let lang = mFactory.preferredLanguage(path);
-    let model = mFactory.createNew(lang);
-    manager.get(path, mFactory.contentsOptions).then(contents => {
+    let lang = mFactoryEx.factory.preferredLanguage(path);
+    let model = mFactoryEx.factory.createNew(lang);
+    manager.get(path, mFactoryEx.contentsOptions).then(contents => {
       model.deserialize(contents.content);
       this._createWidget(model, widgetName, widget, kernel);
     });
@@ -410,13 +395,13 @@ class DocumentManager {
   createNew(path: string, widgetName='default', kernel?: IKernelId): Widget {
     let widget = new Widget();
     let manager = this._contentsManager;
-    let mFactory = this._getModelFactory(widgetName);
-    if (!mFactory) {
+    let mFactoryEx = this._getModelFactoryEx(widgetName);
+    if (!mFactoryEx) {
       return;
     }
-    let lang = mFactory.preferredLanguage(path);
-    let model = mFactory.createNew(lang);
-    let opts = mFactory.contentsOptions;
+    let lang = mFactoryEx.factory.preferredLanguage(path);
+    let model = mFactoryEx.factory.createNew(lang);
+    let opts = mFactoryEx.contentsOptions;
     opts.content = model.serialize();
     manager.save(path, opts).then(content => {
       this._createWidget(model, widgetName, widget, kernel);
@@ -478,7 +463,7 @@ class DocumentManager {
    * Create a context and a widget.
    */
   private _createWidget(model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
-    let wFactory = this._getWidgetFactory(widgetName);
+    let wFactoryEx = this._getWidgetFactoryEx(widgetName);
     parent.layout = new PanelLayout();
     // TODO: Create a new execution/contents context.
     let context: IDocumentContext = void 0;
@@ -486,38 +471,38 @@ class DocumentManager {
       // TODO: get the desired kernel name
     }
     // Create the child widget using the factory.
-    let child = wFactory.createNew(model, context, kernel);
+    let child = wFactoryEx.factory.createNew(model, context, kernel);
     // Add the child widget to the parent widget and emit opened.
-    (widget.layout as PanelLayout).addChild(child);
+    (parent.layout as PanelLayout).addChild(child);
   }
 
   /**
    * Get the appropriate widget factory by name.
    */
-  private _getWidgetFactory(widgetName: string): IWidgetFactory<Widget> {
-    let factory: IWidgetFactory<Widget>;
+  private _getWidgetFactoryEx(widgetName: string): IWidgetFactoryOptions {
+    let options: IWidgetFactoryOptions;
     if (widgetName === 'default') {
-      factory = this._widgetFactories[this._defaultWidgetFactory];
+      options = this._widgetFactories[this._defaultWidgetFactory];
     } else {
-      factory = this._widgetFactories[widgetName];
+      options = this._widgetFactories[widgetName];
     }
-    return factory;
+    return options;
   }
 
   /**
    * Get the appropriate model factory given a widget factory.
    */
-  private _getModelFactory(widgetName: string): IModelFactory {
-    let wFactory = this._getWidgetFactory(widgetName);
-    if (!wFactory) {
+  private _getModelFactoryEx(widgetName: string): IModelFactoryOptions {
+    let wFactoryEx = this._getWidgetFactoryEx(widgetName);
+    if (!wFactoryEx) {
       return;
     }
-    return this._modelFactories[wFactory.modelName];
+    return this._modelFactories[wFactoryEx.modelName];
   }
 
   private _data: { [key: string]: Private.IDocumentData } = Object.create(null);
-  private _modelFactories: { [key: string]: IModelFactory } = Object.create(null);
-  private _widgetFactories: { [key: string]: IWidgetFactory<Widget> } = Object.create(null);
+  private _modelFactories: { [key: string]: IModelFactoryOptions } = Object.create(null);
+  private _widgetFactories: { [key: string]: IWidgetFactoryOptions } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _contentsManager: IContentsManager = null;
