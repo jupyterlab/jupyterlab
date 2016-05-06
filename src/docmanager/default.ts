@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  IKernelSpecId, IContentsOpts
+  IKernelSpecId, IContentsOpts, IKernelId
 } from 'jupyter-js-services';
 
 import {
@@ -196,7 +196,9 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
    * Create a new widget given a document model and a context.
    */
-  createNew(model: IDocumentModel, context: IDocumentContext): EditorWidget {
+  createNew(model: IDocumentModel, context: IDocumentContext, kernel: IKernelId): EditorWidget {
+    // TODO: if a kernel id or a name other than 'none' or 'default'
+    // was given, start that kernel
     return new EditorWidget(model, context);
   }
 
@@ -210,7 +212,7 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
    * Get the preferred kernel info given a model preference.
    */
-  getKernelPreferences(modelPreference: IKernelPreference): IKernelPreference {
+  getKernelPreference(modelPreference: IKernelPreference): IKernelPreference {
     let others = [modelPreference.primary].concat(modelPreference.others);
     return { primary: 'none', others };
   }

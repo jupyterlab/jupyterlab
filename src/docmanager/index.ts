@@ -189,7 +189,7 @@ interface IWidgetFactory<T extends Widget> {
   /**
    * Create a new widget.
    */
-  createNew(model: IDocumentModel, context: IDocumentContext): T;
+  createNew(model: IDocumentModel, context: IDocumentContext, kernel: IKernelId): T;
 
   /**
    * Get the preferred widget title given a path and widget instance.
@@ -199,7 +199,7 @@ interface IWidgetFactory<T extends Widget> {
   /**
    * Get the preferred kernel info list given a model preference.
    */
-  getKernelPreferences(modelPreference: IKernelPreference): IKernelPreference;
+  getKernelPreference(modelPreference: IKernelPreference): IKernelPreference;
 }
 
 
@@ -366,7 +366,7 @@ class DocumentManager {
     let widgetFactory = this._widgetFactories[widgetName];
     let modelFactory = this._modelFactories[widgetFactory.modelName];
     let modelPref = modelFactory.getKernelPreference(filename, specs);
-    return widgetFactory.getKernelPreferences(modelPref);
+    return widgetFactory.getKernelPreference(modelPref);
   }
 
   /**
@@ -400,10 +400,11 @@ class DocumentManager {
       // Create a new execution/contents context.
       // TODO
       let context: IDocumentContext = void 0;
-      // If a kernel was given, start the kernel on the context.
-      // TODO
+      // Use the passed in kernel info or the preferred kernel.
+      pref = wFactory.getKernelPreference(pref);
+      kernel = kernel || { name: pref.primary };
       // Create the child widget using the factory.
-      let child = wFactory.createNew(model, context);
+      let child = wFactory.createNew(model, context, kernel);
       // Add the child widget to the parent widget and emit opened.
       (widget.layout as PanelLayout).addChild(child);
     });
