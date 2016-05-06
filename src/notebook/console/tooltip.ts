@@ -34,6 +34,16 @@ class ConsoleTooltip extends Widget {
   }
 
   /**
+   * Construct a console tooltip widget.
+   */
+  constructor(text: string, rect: ClientRect) {
+    super();
+    this.addClass(TOOLTIP_CLASS);
+    this.text = text;
+    this.rect = rect;
+  }
+
+  /**
    * The dimenions of the tooltip.
    *
    * #### Notes
@@ -66,16 +76,6 @@ class ConsoleTooltip extends Widget {
   }
 
   /**
-   * Construct a console tooltip widget.
-   */
-  constructor(text: string, rect: ClientRect) {
-    super();
-    this.addClass(TOOLTIP_CLASS);
-    this.text = text;
-    this.rect = rect;
-  }
-
-  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -87,6 +87,9 @@ class ConsoleTooltip extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
+    case 'keydown':
+      this._evtKeydown(event as KeyboardEvent);
+      break;
     case 'mousedown':
       this._evtMousedown(event as MouseEvent);
       break;
