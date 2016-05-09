@@ -431,6 +431,7 @@ class DocumentManager {
    * @param kernel - An optional kernel name/id to override the default.
    */
   open(path: string, widgetName='default', kernel?: IKernelId): Widget {
+    // TODO: if the context already exists, use it.
     let widget = new Widget();
     let manager = this._contentsManager;
     let mFactoryEx: Private.IModelFactoryEx;
@@ -533,14 +534,11 @@ class DocumentManager {
   /**
    * Create a context and a widget.
    */
-  private _createWidget(model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
+  private _createWidget(path: string, model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
     parent.layout = new PanelLayout();
     // TODO: Create a new execution/contents context.
-    let context: IDocumentContext = void 0;
-    if (!kernel) {
-      // TODO: get the desired kernel name.
-    }
+    let context = this._createContext(path, model);
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
     // Mirror the parent title based on the child.
@@ -551,6 +549,11 @@ class DocumentManager {
     });
     // Add the child widget to the parent widget and emit opened.
     (parent.layout as PanelLayout).addChild(child);
+  }
+
+  private _createContext(path: string, model: IDocumentModel): {
+    this._data[path] = model;
+    this._contexts[path] = new Context(path, model);
   }
 
   /**
@@ -584,6 +587,7 @@ class DocumentManager {
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
+  private _contexts: { [key: string]: IDocumentContext } = Object.create(null);
 }
 
 
