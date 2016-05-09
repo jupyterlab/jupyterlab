@@ -26,6 +26,10 @@ import {
   FileBrowserModel
 } from './model';
 
+import {
+  IWidgetOpener
+} from './browser';
+
 import * as utils
   from './utils';
 
@@ -81,7 +85,7 @@ class FileButtons extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, manager: DocumentManager) {
+  constructor(model: FileBrowserModel, manager: DocumentManager, opener: IWidgetOpener) {
     super();
     this.addClass(FILE_BUTTONS_CLASS);
     this._model = model;
@@ -97,6 +101,7 @@ class FileButtons extends Widget {
     node.appendChild(this._buttons.refresh);
 
     this._manager = manager;
+    this._opener = opener;
   }
 
   /**
@@ -107,6 +112,7 @@ class FileButtons extends Widget {
     this._buttons = null;
     this._input = null;
     this._manager = null;
+    this._opener = null;
     super.dispose();
   }
 
@@ -170,7 +176,8 @@ class FileButtons extends Widget {
   private _model: FileBrowserModel;
   private _buttons = Private.createButtons();
   private _input = Private.createUploadInput();
-  private _manager: DocumentManager = null
+  private _manager: DocumentManager = null;
+  private _opener: IWidgetOpener = null;
 }
 
 

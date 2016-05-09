@@ -36,6 +36,10 @@ import {
   FileBrowserModel
 } from './model';
 
+import {
+  IWidgetOpener
+} from './browser';
+
 import * as utils
   from './utils';
 
@@ -292,7 +296,7 @@ class DirListing extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, manager: DocumentManager) {
+  constructor(model: FileBrowserModel, manager: DocumentManager, opener: IWidgetOpener) {
     super();
     this.addClass(DIR_LISTING_CLASS);
     this._model = model;
@@ -301,6 +305,7 @@ class DirListing extends Widget {
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = manager;
+    this._opener = opener;
   }
 
   /**
@@ -313,6 +318,7 @@ class DirListing extends Widget {
     this._drag = null;
     this._dragData = null;
     this._manager = null;
+    this._opener = null;
     super.dispose();
   }
 
@@ -879,8 +885,8 @@ class DirListing extends Widget {
         showErrorMessage(this, 'Open directory', error)
       );
     } else {
-      // TODO
-      //this._manager.open(item.path);
+      let widget = this._manager.open(item.path);
+      this._opener.open(widget);
     }
   }
 
@@ -1033,8 +1039,7 @@ class DirListing extends Widget {
     this._drag.mimeData.setData(utils.CONTENTS_MIME, null);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
-        // TODO
-        //this._manager.open(item.path);
+        return this._manager.open(item.path);
       });
     }
 
@@ -1257,6 +1262,7 @@ class DirListing extends Widget {
   private _clipboard: string[] = [];
   private _softSelection = '';
   private _manager: DocumentManager = null;
+  private _opener: IWidgetOpener = null;
 }
 
 

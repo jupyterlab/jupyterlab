@@ -362,6 +362,9 @@ class DocumentManager {
    * Get the list of registered widget factory display names.
    *
    * @param path - An optional file path to filter the results.
+   *
+   * #### Notes
+   * The first item in the list is considered the default.
    */
   listWidgetFactories(path?: string): string[] {
     let ext = '.' + path.split('.').pop();
@@ -536,7 +539,7 @@ class DocumentManager {
     // TODO: Create a new execution/contents context.
     let context: IDocumentContext = void 0;
     if (!kernel) {
-      // TODO: get the desired kernel name
+      // TODO: get the desired kernel name.
     }
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
