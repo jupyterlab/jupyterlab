@@ -307,9 +307,32 @@ class DocumentManager {
    * as the global default, this factory will override the existing default.
    */
   registerWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions): IDisposable {
-    // TODO: make sure defaultExtensions is a subset of the factory extensions
-    // TODO
-    return void 0;
+    let name = options.displayName;
+    let exOpt = options as Private.IWidgetFactoryEx;
+    exOpt.factory = factory;
+    this._widgetFactories[name] = exOpt;
+    if (options.defaultFor) {
+      for (let option of options.defaultFor) {
+        if (option === '.*') {
+          this._defaultWidgetFactory = name;
+        }
+        if (option in options.fileExtensions) {
+          this._defaultWidgetFactories[option] = name;
+        }
+      }
+    }
+    return new DisposableDelegate(() => {
+      delete this._widgetFactories[name];
+      if (this._defaultWidgetFactory === name) {
+        this._defaultWidgetFactory = '';
+      }
+      for (let opt of Object.keys(this._defaultWidgetFactories)) {
+        let n = this._defaultWidgetFactories[opt];
+        if (n === name) {
+          delete this._defaultWidgetFactories[opt];
+        }
+      }
+    });
   }
 
   /**
@@ -326,8 +349,13 @@ class DocumentManager {
    * factory will be ignored and a warning will be printed to the console.
    */
   registerModelFactory(factory: IModelFactory, options: IModelFactoryOptions): IDisposable {
-    // TODO
-    return void 0;
+    let exOpt = options as Private.IModelFactoryEx;
+    let name = options.name;
+    exOpt.factory = factory;
+    this._modelFactories[name] = exOpt;
+    return new DisposableDelegate(() => {
+      delete this._modelFactories[name];
+    });
   }
 
   /**
@@ -336,8 +364,44 @@ class DocumentManager {
    * @param path - An optional file path to filter the results.
    */
   listWidgetFactories(path?: string): string[] {
-    // TODO: filter by name and make sure the model factory exists.
-    return void 0;
+    let ext = '.' + path.split('.').pop();
+    let factories: string[] = [];
+    let options: Private.IWidgetFactoryEx;
+    let name = '';
+    // If an extension was given, filter by extension.
+    // Make sure the modelFactory is registered.
+    if (ext.length > 1) {
+      if (ext in this._defaultWidgetFactories) {
+        name = this._defaultWidgetFactories[ext];
+        options = this._widgetFactories[name];
+        if (options.modelName in this._modelFactories) {
+          factories.push(name);
+        }
+      }
+    }
+    // Add the default widget if it was not already added.
+    if (name !== this._defaultWidgetFactory && this._defaultWidgetFactory) {
+      name = this._defaultWidgetFactory;
+      options = this._widgetFactories[name];
+      if (options.modelName in this._modelFactories) {
+        factories.push(name);
+      }
+    }
+    // Add the rest of the valid widgetFactories that can open the path.
+    for (name in this._widgetFactories) {
+      if (factories.indexOf(name) !== -1) {
+        continue;
+      }
+      options = this._widgetFactories[name];
+      if (!(options.modelName in this._modelFactories)) {
+        continue;
+      }
+      let exts = options.fileExtensions;
+      if ((ext in exts) || ('.*' in exts)) {
+        factories.push(name);
+      }
+    }
+    return factories;
   }
 
   /**
@@ -366,9 +430,12 @@ class DocumentManager {
   open(path: string, widgetName='default', kernel?: IKernelId): Widget {
     let widget = new Widget();
     let manager = this._contentsManager;
-    let mFactoryEx = this._getModelFactoryEx(widgetName);
-    if (!mFactoryEx) {
-      return;
+    let mFactoryEx: Private.IModelFactoryEx;
+    if (widgetName !== 'default') {
+      mFactoryEx = this._getModelFactoryEx(widgetName);
+    } else {
+      widgetName = this.listWidgetFactories(path)[0];
+      mFactoryEx = this._getModelFactoryEx(widgetName);
     }
     let lang = mFactoryEx.factory.preferredLanguage(path);
     let model = mFactoryEx.factory.createNew(lang);
@@ -391,7 +458,13 @@ class DocumentManager {
   createNew(path: string, widgetName='default', kernel?: IKernelId): Widget {
     let widget = new Widget();
     let manager = this._contentsManager;
-    let mFactoryEx = this._getModelFactoryEx(widgetName);
+    let mFactoryEx: Private.IModelFactoryEx;
+    if (widgetName !== 'default') {
+      mFactoryEx = this._getModelFactoryEx(widgetName);
+    } else {
+      widgetName = this.listWidgetFactories(path)[0];
+      mFactoryEx = this._getModelFactoryEx(widgetName);
+    }
     if (!mFactoryEx) {
       return;
     }
@@ -469,9 +542,9 @@ class DocumentManager {
     let child = wFactoryEx.factory.createNew(model, context, kernel);
     // Mirror the parent title based on the child.
     child.title.changed.connect(() => {
-      parent.title.text = child.title.text;
-      parent.title.icon = child.title.icon;
-      parent.title.className = child.title.className;
+      child.parent.title.text = child.title.text;
+      child.parent.title.icon = child.title.icon;
+      child.parent.title.className = child.title.className;
     });
     // Add the child widget to the parent widget and emit opened.
     (parent.layout as PanelLayout).addChild(child);
