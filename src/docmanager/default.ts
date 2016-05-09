@@ -25,6 +25,12 @@ import {
 
 
 /**
+ * The class name added to a dirty widget.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
+
+
+/**
  * The default implementation of a document model.
  */
 export
@@ -112,7 +118,6 @@ class ModelFactory {
 }
 
 
-
 /**
  * A document widget for codemirrors.
  */
@@ -129,9 +134,14 @@ class EditorWidget extends CodeMirrorWidget {
     let editor = this.editor;
     let doc = editor.getDoc();
     doc.setValue(model.serialize());
+    this._updateTitle();
     loadModeByFileName(editor, context.path);
+    this._context.dirtyCleared.connect(() => {
+      this.dirty = false;
+    });
     this._context.pathChanged.connect((c, path) => {
       loadModeByFileName(editor, path);
+      this._updateTitle();
     });
     model.contentChanged.connect((m, text) => {
       doc.setValue(text);
@@ -139,12 +149,36 @@ class EditorWidget extends CodeMirrorWidget {
     CodeMirror.on(doc, 'change', (instance, change) => {
       if (change.origin !== 'setValue') {
         model.deserialize(instance.getValue());
+        this.dirty = true;
       }
     });
   }
 
+  /**
+   * The dirty state of the widget.
+   */
+  get dirty(): boolean {
+    return this._dirty;
+  }
+  set dirty(value: boolean) {
+    this._dirty = value;
+    if (value) {
+      this.title.className += ` ${DIRTY_CLASS}`;
+    } else {
+      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+    }
+  }
+
+  /**
+   * Update the title based on the path.
+   */
+  private _updateTitle(): void {
+    this.title.text = this._context.path.split('/').pop();
+  }
+
   private _model: IDocumentModel = null;
   private _context: IDocumentContext = null;
+  private _dirty = false;
 }
 
 
@@ -160,13 +194,6 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
     // TODO: if a kernel id or a name other than 'none' or 'default'
     // was given, start that kernel
     return new EditorWidget(model, context);
-  }
-
-  /**
-   * Get the preferred widget title given a path.
-   */
-  getWidgetTitle(path: string, widget: EditorWidget): string {
-    return path.split('/').pop();
   }
 }
 

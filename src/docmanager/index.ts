@@ -210,11 +210,6 @@ interface IWidgetFactoryOptions {
 export
 interface IWidgetFactory<T extends Widget> {
   /**
-   * Get the preferred widget title given a path and a widget.
-   */
-  getWidgetTitle(path: string, widget: Widget): string;
-
-  /**
    * Create a new widget.
    */
   createNew(model: IDocumentModel, context: IDocumentContext, kernel: IKernelId): T;
@@ -419,7 +414,6 @@ class DocumentManager {
    */
   renameFile(oldPath: string, newPath: string): void {
     // update all sessions
-    // updates all container widget titles by calling getWidgetTitle on the facotries.
   }
 
   /**
@@ -473,6 +467,12 @@ class DocumentManager {
     }
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
+    // Mirror the parent title based on the child.
+    child.title.changed.connect(() => {
+      parent.title.text = child.title.text;
+      parent.title.icon = child.title.icon;
+      parent.title.className = child.title.className;
+    });
     // Add the child widget to the parent widget and emit opened.
     (parent.layout as PanelLayout).addChild(child);
   }
