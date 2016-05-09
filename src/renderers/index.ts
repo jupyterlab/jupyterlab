@@ -32,8 +32,14 @@ export
 class HTMLWidget extends Widget {
   constructor(html: string) {
     super();
-    let range = document.createRange();
-    this.node.appendChild(range.createContextualFragment(html));
+    try {
+      var range = document.createRange();
+      this.node.appendChild(range.createContextualFragment(html));
+    } catch (error) {
+      console.warn('Environment does not support Range ' +
+                   'createContextualFragment, falling back on innerHTML');
+      this.node.innerHTML = html;
+    }
   }
 
   /**
