@@ -162,10 +162,6 @@ export interface IDocumentContext {
  */
 export
 interface IWidgetFactoryOptions {
-  /**
-   * The factory object.
-   */
-  factory: IWidgetFactory<Widget>;
 
   /**
    * The file extensions the widget can view.
@@ -220,11 +216,6 @@ interface IWidgetFactory<T extends Widget> {
  */
 export
 interface IModelFactoryOptions {
-  /**
-   * The model factory object.
-   */
-  factory: IModelFactory;
-
   /**
    * The name of the model factory.
    */
@@ -312,7 +303,7 @@ class DocumentManager {
    * If a factory is already registered as a default for a given extension or
    * as the global default, this factory will override the existing default.
    */
-  registerWidgetFactory(options: IWidgetFactoryOptions, defaultExtensions?:string[]): IDisposable {
+  registerWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions, defaultExtensions?:string[]): IDisposable {
     // TODO: make sure defaultExtensions is a subset of the factory extensions
     // TODO
     return void 0;
@@ -329,7 +320,7 @@ class DocumentManager {
    * If a factory with the given `name` is already registered, the
    * factory will be ignored and a warning will be printed to the console.
    */
-  registerModelFactory(options: IModelFactoryOptions): IDisposable {
+  registerModelFactory(factory: IModelFactory, options: IModelFactoryOptions): IDisposable {
     // TODO
     return void 0;
   }
@@ -479,8 +470,8 @@ class DocumentManager {
   /**
    * Get the appropriate widget factory by name.
    */
-  private _getWidgetFactoryEx(widgetName: string): IWidgetFactoryOptions {
-    let options: IWidgetFactoryOptions;
+  private _getWidgetFactoryEx(widgetName: string): Private.IWidgetFactoryEx {
+    let options: Private.IWidgetFactoryEx;
     if (widgetName === 'default') {
       options = this._widgetFactories[this._defaultWidgetFactory];
     } else {
@@ -492,7 +483,7 @@ class DocumentManager {
   /**
    * Get the appropriate model factory given a widget factory.
    */
-  private _getModelFactoryEx(widgetName: string): IModelFactoryOptions {
+  private _getModelFactoryEx(widgetName: string): Private.IModelFactoryEx {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
     if (!wFactoryEx) {
       return;
@@ -501,8 +492,8 @@ class DocumentManager {
   }
 
   private _data: { [key: string]: Private.IDocumentData } = Object.create(null);
-  private _modelFactories: { [key: string]: IModelFactoryOptions } = Object.create(null);
-  private _widgetFactories: { [key: string]: IWidgetFactoryOptions } = Object.create(null);
+  private _modelFactories: { [key: string]: Private.IModelFactoryEx } = Object.create(null);
+  private _widgetFactories: { [key: string]: Private.IWidgetFactoryEx } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _contentsManager: IContentsManager = null;
@@ -529,5 +520,15 @@ namespace Private {
     session: INotebookSession;
     context: IDocumentContext;
     widgets: Widget[];
+  }
+
+  export
+  interface IModelFactoryEx extends IModelFactoryOptions {
+    factory: IModelFactory;
+  }
+
+  export
+  interface IWidgetFactoryEx extends IWidgetFactoryOptions {
+    factory: IWidgetFactory<Widget>;
   }
 }
