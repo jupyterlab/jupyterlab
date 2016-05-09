@@ -28,7 +28,8 @@ import {
 /**
  * The interface for a document model.
  */
-export interface IDocumentModel {
+export
+interface IDocumentModel {
   /**
    * A signal emitted when the document content changes.
    */
@@ -68,7 +69,8 @@ export interface IDocumentModel {
 /**
  * A session info object for a running session.
  */
-export interface ISessionInfo {
+export
+interface ISessionInfo {
   /**
    * The list of file paths associated with the running sessions.
    */
@@ -183,14 +185,22 @@ interface IWidgetFactoryOptions {
   modelName: string;
 
   /**
+   * The file extensions for which the factory should be the default.
+   * #### Notes
+   * Use `'.*'` to denote all file extensions
+   * or give the actual extension (e.g. `'.txt'`).
+   */
+  defaultFor?: string[];
+
+  /**
    * Whether the widgets prefer having a kernel started.
    */
-  preferKernel: boolean;
+  preferKernel?: boolean;
 
   /**
    * Whether the widgets can start a kernel when opened.
    */
-  canStartKernel: boolean;
+  canStartKernel?: boolean;
 }
 
 
@@ -276,7 +286,6 @@ interface IKernelPreference {
  */
 export
 class DocumentManager {
-
   /**
    * Construct a new document manager.
    */
@@ -288,10 +297,9 @@ class DocumentManager {
   /**
    * Register a widget factory with the document manager.
    *
-   * @param options - The options used to register the factory.
+   * @param factory - The factory instance.
    *
-   * @param defaultExtensions - The file extensions for which the factory is
-   *   the default.
+   * @param options - The options used to register the factory.
    *
    * @returns A disposable used to unregister the factory.
    *
@@ -303,7 +311,7 @@ class DocumentManager {
    * If a factory is already registered as a default for a given extension or
    * as the global default, this factory will override the existing default.
    */
-  registerWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions, defaultExtensions?:string[]): IDisposable {
+  registerWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions): IDisposable {
     // TODO: make sure defaultExtensions is a subset of the factory extensions
     // TODO
     return void 0;
@@ -311,6 +319,8 @@ class DocumentManager {
 
   /**
    * Register a model factory.
+   *
+   * @param factory - The factory instance.
    *
    * @param options - The options used to register the factory.
    *
