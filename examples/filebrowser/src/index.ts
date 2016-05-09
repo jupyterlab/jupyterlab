@@ -18,6 +18,10 @@ import {
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
+  ModelFactory, WidgetFactory
+} from 'jupyter-js-ui/lib/docmanager/default';
+
+import {
   showDialog, okButton
 } from 'jupyter-js-ui/lib/dialog';
 
@@ -63,15 +67,30 @@ function main(): void {
   let sessionsManager = new NotebookSessionManager({ baseUrl: baseUrl });
 
   let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
-  let docManager = new DocumentManager();
-
-  let fbWidget = new FileBrowserWidget(fbModel, docManager);
-
-  let widgets: CodeMirrorWidget[] = [];
-  docManager.opened.connect((r, widget) => {
-    dock.insertTabAfter(widget);
-    widgets.push(widget as CodeMirrorWidget);
+  let docManager = new DocumentManager(contentsManager, sessionsManager);
+  let mFactory = new ModelFactory();
+  let wFactory = new WidgetFactory();
+  docManager.registerModelFactory(mFactory, {
+    name: 'default',
+    contentsOptions: { format: 'text', type: 'file' }
   });
+  docManager.registerWidgetFactory(wFactory, {
+    displayName: 'Editor',
+    modelName: 'default',
+    fileExtensions: ['.*'],
+    defaultFor: ['.*'],
+    preferKernel: false,
+    canStartKernel: true
+  });
+  let widgets: CodeMirrorWidget[] = [];
+
+  let opener = {
+    open: (widget: Widget) => {
+      dock.insertTabAfter(widget);
+      widgets.push(widget as CodeMirrorWidget);
+    }
+  };
+  let fbWidget = new FileBrowserWidget(fbModel, docManager, opener);
 
   let panel = new SplitPanel();
   panel.id = 'main';
