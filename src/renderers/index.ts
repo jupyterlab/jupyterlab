@@ -100,34 +100,17 @@ class ImageRenderer implements IRenderer<Widget> {
 
 
 /**
- * A renderer for raw `textContent` data.
+ * A renderer for plain text and Jupyter console text data.
  */
 export
 class TextRenderer implements IRenderer<Widget> {
-  mimetypes = ['text/plain'];
-
-  render(mimetype: string, data: string): Widget {
-    let w = new Widget();
-    let pre = document.createElement('pre')
-    pre.textContent = data;
-    w.node.appendChild(pre);
-    return w;
-  }
-}
-
-
-/**
- * A renderer for Jupyter console text data.
- */
-export
-class ConsoleTextRenderer implements IRenderer<Widget> {
-  mimetypes = ['application/vnd.jupyter.console-text'];
+  mimetypes = ['text/plain', 'application/vnd.jupyter.console-text'];
 
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
     let el = document.createElement('pre');
     let esc = escape_for_html(data);
-    el.innerHTML = ansi_to_html(esc, {use_classes: true});
+    el.innerHTML = ansi_to_html(esc);
     w.node.appendChild(el);
     return w;
   }

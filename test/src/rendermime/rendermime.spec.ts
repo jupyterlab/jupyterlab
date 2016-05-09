@@ -9,7 +9,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ConsoleTextRenderer, LatexRenderer, PDFRenderer, JavascriptRenderer,
+  LatexRenderer, PDFRenderer, JavascriptRenderer,
   SVGRenderer, MarkdownRenderer, TextRenderer, HTMLRenderer, ImageRenderer
 } from '../../../lib/renderers';
 
@@ -25,7 +25,6 @@ const TRANSFORMERS = [
   new ImageRenderer(),
   new SVGRenderer(),
   new LatexRenderer(),
-  new ConsoleTextRenderer(),
   new TextRenderer()
 ];
 
