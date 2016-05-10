@@ -16,6 +16,10 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  Property
+} from 'phosphor-properties';
+
+import {
   ISignal, Signal
 } from 'phosphor-signaling';
 
@@ -39,9 +43,9 @@ class Context implements IDocumentContext {
   /**
    * Construct a new document context.
    */
-  constructor(uuid: string, manager: ContextManager) {
+  constructor(manager: ContextManager) {
     this._manager = manager;
-    this._uuid = uuid;
+    this._id = uuid();
   }
 
   /**
@@ -66,10 +70,20 @@ class Context implements IDocumentContext {
   }
 
   /**
+   * The unique id of the context.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get id(): string {
+    return this._id;
+  }
+
+  /**
    * The current kernel associated with the document.
    */
   getKernel(): IKernel {
-    return this._manager.getKernel(this._uuid);
+    return this._manager.getKernel(this._id);
   }
 
   /**
@@ -79,7 +93,7 @@ class Context implements IDocumentContext {
    * This is a read-only property.
    */
   getPath(): string {
-    return this._manager.getPath(this._uuid);
+    return this._manager.getPath(this._id);
   }
 
   /**
@@ -93,21 +107,21 @@ class Context implements IDocumentContext {
    * Change the current kernel associated with the document.
    */
   changeKernel(options: IKernelId): Promise<IKernel> {
-    return this._manager.changeKernel(this._uuid, options);
+    return this._manager.changeKernel(this._id, options);
   }
 
   /**
    * Save the document contents to disk.
    */
   save(): Promise<void> {
-    return this._manager.save(this._uuid);
+    return this._manager.save(this._id);
   }
 
   /**
    * Revert the document contents to disk contents.
    */
   revert(): Promise<void> {
-    return this._manager.revert(this._uuid);
+    return this._manager.revert(this._id);
   }
 
   /**
@@ -129,10 +143,10 @@ class Context implements IDocumentContext {
    * as the original widget.
    */
   addSibling(widget: Widget): IDisposable {
-    return this._manager.addSibling(this._uuid, widget);
+    return this._manager.addSibling(this._id, widget);
   }
 
-  private _uuid = '';
+  private _id = '';
   private _manager: ContextManager = null;
 }
 
@@ -181,43 +195,57 @@ class ContextManager {
    * Create a new context.
    */
   createNew(path: string, model: IDocumentModel): IDocumentContext {
-    let uid = uuid();
-    let context = new Context(uid, this);
-    this._paths[uid] = path;
-    this._contexts[uid] = context;
-    this._models[uid] = model;
+    let context = new Context(this);
+    let id = context.id;
+    this._paths[id] = path;
+    this._contexts[id] = context;
+    this._models[id] = model;
     return context;
+  }
+
+  /**
+   * Get a context by id.
+   */
+  getContext(id: string): IDocumentContext {
+    return this._contexts[id];
+  }
+
+  /**
+   * Get the model associated with a context.
+   */
+  getModel(id: string): IDocumentModel {
+    return this._models[id];
   }
 
   /**
    * Get the current kernel associated with a document.
    */
-  getKernel(uuid: string): IKernel {
-    let session = this._sessions[uuid];
+  getKernel(id: string): IKernel {
+    let session = this._sessions[id];
     return session ? session.kernel : null;
   }
 
   /**
    * Get the current path associated with a document.
    */
-  getPath(uuid: string): string {
-    return this._paths[uuid];
+  getPath(id: string): string {
+    return this._paths[id];
   }
 
   /**
    * Change the current kernel associated with the document.
    */
-  changeKernel(uuid: string, options: IKernelId): Promise<IKernel> {
-    let session = this._sessions[uuid];
-    let context = this._contexts[uuid];
+  changeKernel(id: string, options: IKernelId): Promise<IKernel> {
+    let session = this._sessions[id];
+    let context = this._contexts[id];
     if (!session) {
-      let path = this._paths[uuid];
+      let path = this._paths[id];
       let sOptions = {
         notebook: { path },
         kernel: { options }
       }
       return this._sessionManager.startNew(sOptions).then(session => {
-        this._sessions[uuid] = session;
+        this._sessions[id] = session;
         context.kernelChanged.emit(session.kernel);
         return session.kernel;
       });

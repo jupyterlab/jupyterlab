@@ -21,12 +21,20 @@ import {
 } from 'phosphor-panel';
 
 import {
+  Property
+} from 'phosphor-properties';
+
+import {
   ISignal, Signal
 } from 'phosphor-signaling';
 
 import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  showDialog
+} from '../dialog';
 
 import {
   IWidgetOpener
@@ -67,6 +75,10 @@ interface IDocumentModel {
 
   /**
    * The dirty state of the model.
+   *
+   * #### Notes
+   * This should be cleared when the document is loaded from
+   * or saved to disk.
    */
   dirty: boolean;
 
@@ -109,6 +121,14 @@ interface ISessionInfo {
  * The document context object.
  */
 export interface IDocumentContext {
+  /**
+   * The unique id of the context.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  id: string;
+
   /**
    * A signal emitted when the kernel changes.
    */
@@ -465,9 +485,11 @@ class DocumentManager {
     let model = mFactoryEx.factory.createNew(lang);
     manager.get(path, mFactoryEx.contentsOptions).then(contents => {
       model.deserialize(contents.content);
+      model.dirty = false;
       this._createWidget(path, model, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
+    Private.factoryProperty.set(widget, widgetName);
     return widget;
   }
 
@@ -501,6 +523,7 @@ class DocumentManager {
       this._createWidget(path, model, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
+    Private.factoryProperty.set(widget, widgetName);
     return widget;
   }
 
@@ -509,9 +532,37 @@ class DocumentManager {
    */
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
     let widget = handler as Widget;
-    // TODO: look up the model for the widget and see if it is dirty
-    // Call the `beforeClose` on the appropriate widget factory.
+    let child = (widget.layout as PanelLayout).childAt(0);
     if (msg.type === 'close-request') {
+      if (this._closeGuard) {
+        this._closeGuard = false;
+        return false;
+      }
+      let id = Private.contextProperty.get(widget);
+      let model = this._contextManager.getModel(id);
+      let context = this._contextManager.getContext(id);
+      let factoryName = Private.factoryProperty.get(widget);
+      let factory = this._widgetFactories[factoryName].factory;
+      if (!model.dirty) {
+        factory.beforeClose(model, context, child).then(result => {
+          if (result) {
+            this._closeGuard = true;
+            widget.close();
+          }
+        });
+      } else {
+        this._maybeClose(widget).then(result => {
+          if (!result) {
+            return;
+          }
+          factory.beforeClose(model, context, child).then(result => {
+            if (result) {
+              this._closeGuard = true;
+              widget.close();
+            }
+          });
+        });
+      }
       return true;
     }
     return false;
@@ -573,6 +624,7 @@ class DocumentManager {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
     parent.layout = new PanelLayout();
     let context = this._contextManager.createNew(path, model);
+    Private.contextProperty.set(parent, context.id);
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
     parent.title.closable = true;
@@ -587,6 +639,23 @@ class DocumentManager {
     });
     // Add the child widget to the parent widget and emit opened.
     (parent.layout as PanelLayout).addChild(child);
+  }
+
+  /**
+   * Ask the user whether to close an unsaved file.
+   */
+  private _maybeClose(widget: Widget): Promise<boolean> {
+    let host = widget.isAttached ? widget.node : document.body;
+    return showDialog({
+      title: 'Close without saving?',
+      body: `File "${widget.title.text}" has unsaved changes, close without saving?`,
+      host
+    }).then(value => {
+      if (value && value.text === 'OK') {
+        return true;
+      }
+      return false;
+    });
   }
 
   /**
@@ -643,4 +712,14 @@ namespace Private {
   interface IWidgetFactoryEx extends IWidgetFactoryOptions {
     factory: IWidgetFactory<Widget>;
   }
+
+  export
+  const factoryProperty = new Property<Widget, string>({
+    name: 'factory'
+  });
+
+  export
+  const contextProperty = new Property<Widget, string>({
+    name: 'context'
+  });
 }

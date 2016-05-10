@@ -184,7 +184,8 @@ class EditorWidget extends CodeMirrorWidget {
       this._updateTitle();
     });
     model.contentChanged.connect((m, text) => {
-      doc.setValue(text);
+      let old = doc.getValue();
+      if (old !== text) doc.setValue(text);
     });
     CodeMirror.on(doc, 'change', (instance, change) => {
       if (change.origin !== 'setValue') {
