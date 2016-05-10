@@ -14,6 +14,10 @@ import {
 } from 'phosphor-signaling';
 
 import {
+  Widget
+} from 'phosphor-widget';
+
+import {
   loadModeByFileName
 } from '../codemirror';
 
@@ -58,6 +62,27 @@ class DocumentModel implements IDocumentModel {
   }
 
   /**
+   * A signal emitted when the document dirty state changes.
+   */
+  get dirtyChanged(): ISignal<IDocumentModel, boolean> {
+    return Private.dirtyChangedSignal.bind(this);
+  }
+
+  /**
+   * The dirty state of the document.
+   */
+  get dirty(): boolean {
+    return this._dirty;
+  }
+  set dirty(value: boolean) {
+    if (value === this._dirty) {
+      return;
+    }
+    this._dirty = value;
+    this.dirtyChanged.emit(value);
+  }
+
+  /**
    * The default kernel name of the document.
    *
    * #### Notes
@@ -93,10 +118,12 @@ class DocumentModel implements IDocumentModel {
     }
     this._text = value;
     this.contentChanged.emit(value);
+    this.dirty = true;
   }
 
   private _text = '';
   private _defaultLang = '';
+  private _dirty = false;
 }
 
 
@@ -145,8 +172,12 @@ class EditorWidget extends CodeMirrorWidget {
     doc.setValue(model.serialize());
     this._updateTitle();
     loadModeByFileName(editor, context.getPath());
-    this._context.dirtyCleared.connect(() => {
-      this.dirty = false;
+    this._model.dirtyChanged.connect((m, value) => {
+      if (value) {
+        this.title.className += ` ${DIRTY_CLASS}`;
+      } else {
+        this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+      }
     });
     this._context.pathChanged.connect((c, path) => {
       loadModeByFileName(editor, path);
@@ -158,24 +189,8 @@ class EditorWidget extends CodeMirrorWidget {
     CodeMirror.on(doc, 'change', (instance, change) => {
       if (change.origin !== 'setValue') {
         model.deserialize(instance.getValue());
-        this.dirty = true;
       }
     });
-  }
-
-  /**
-   * The dirty state of the widget.
-   */
-  get dirty(): boolean {
-    return this._dirty;
-  }
-  set dirty(value: boolean) {
-    this._dirty = value;
-    if (value) {
-      this.title.className += ` ${DIRTY_CLASS}`;
-    } else {
-      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
-    }
   }
 
   /**
@@ -187,7 +202,6 @@ class EditorWidget extends CodeMirrorWidget {
 
   private _model: IDocumentModel = null;
   private _context: IDocumentContext = null;
-  private _dirty = false;
 }
 
 
@@ -204,6 +218,17 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
     // was given, start that kernel
     return new EditorWidget(model, context);
   }
+
+  /**
+   * Take an action on a widget before closing it.
+   *
+   * @returns A promise that resolves to true if the document should close
+   *   and false otherwise.
+   */
+  beforeClose(model: IDocumentModel, context: IDocumentContext, widget: Widget): Promise<boolean> {
+    // TODO: handle live kernels here.
+    return Promise.resolve(true);
+  }
 }
 
 
@@ -217,4 +242,9 @@ namespace Private {
   export
   const contentChangedSignal = new Signal<IDocumentModel, string>();
 
+  /**
+   * A signal emitted when a document dirty state changes.
+   */
+  export
+  const dirtyChangedSignal = new Signal<IDocumentModel, boolean>();
 }

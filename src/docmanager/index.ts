@@ -13,6 +13,10 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  IMessageFilter, IMessageHandler, Message, installMessageFilter
+} from 'phosphor-messaging';
+
+import {
   PanelLayout
 } from 'phosphor-panel';
 
@@ -44,6 +48,11 @@ interface IDocumentModel {
   contentChanged: ISignal<IDocumentModel, any>;
 
   /**
+   * A signal emitted when the model dirty state changes.
+   */
+  dirtyChanged: ISignal<IDocumentModel, boolean>;
+
+  /**
    * Serialize the model.  It should return a JSON object or a string.
    */
   serialize(): any;
@@ -55,6 +64,11 @@ interface IDocumentModel {
    * Should emit a [contentChanged] signal.
    */
   deserialize(value: any): void;
+
+  /**
+   * The dirty state of the model.
+   */
+  dirty: boolean;
 
   /**
    * The default kernel name of the document.
@@ -104,11 +118,6 @@ export interface IDocumentContext {
    * A signal emitted when the path changes.
    */
   pathChanged: ISignal<IDocumentContext, string>;
-
-  /**
-   * A signal emitted when the model is saved or reverted.
-   */
-  dirtyCleared: ISignal<IDocumentContext, void>;
 
   /**
    * Get the current kernel associated with the document.
@@ -215,6 +224,14 @@ interface IWidgetFactory<T extends Widget> {
    * Create a new widget.
    */
   createNew(model: IDocumentModel, context: IDocumentContext, kernel: IKernelId): T;
+
+  /**
+   * Take an action on a widget before closing it.
+   *
+   * @returns A promise that resolves to true if the document should close
+   *   and false otherwise.
+   */
+  beforeClose(model: IDocumentModel, context: IDocumentContext, widget: Widget): Promise<boolean>;
 }
 
 
@@ -450,6 +467,7 @@ class DocumentManager {
       model.deserialize(contents.content);
       this._createWidget(path, model, widgetName, widget, kernel);
     });
+    installMessageFilter(widget, this);
     return widget;
   }
 
@@ -482,7 +500,21 @@ class DocumentManager {
     manager.save(path, opts).then(content => {
       this._createWidget(path, model, widgetName, widget, kernel);
     });
+    installMessageFilter(widget, this);
     return widget;
+  }
+
+  /**
+   * Filter messages on the widget.
+   */
+  filterMessage(handler: IMessageHandler, msg: Message): boolean {
+    let widget = handler as Widget;
+    // TODO: look up the model for the widget and see if it is dirty
+    // Call the `beforeClose` on the appropriate widget factory.
+    if (msg.type === 'close-request') {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -588,6 +620,7 @@ class DocumentManager {
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
   private _contextManager: ContextManager = null;
+  private _closeGuard = false;
 }
 
 
