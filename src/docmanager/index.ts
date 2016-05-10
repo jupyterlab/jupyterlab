@@ -309,7 +309,15 @@ class DocumentManager {
   constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, opener: IWidgetOpener) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
-    this._contextManager = new ContextManager(contentsManager, sessionManager, opener);
+    this._contextManager = new ContextManager(contentsManager, sessionManager, (id: string, widget: Widget) => {
+      let parent = new Widget();
+      this._attachChild(parent, widget);
+      Private.contextProperty.set(widget, id);
+      opener.open(parent);
+      return new DisposableDelegate(() => {
+        parent.dispose();
+      });
+    });
   }
 
   /**
@@ -466,10 +474,11 @@ class DocumentManager {
     }
     let lang = mFactoryEx.factory.preferredLanguage(path);
     let model = mFactoryEx.factory.createNew(lang);
-    manager.get(path, mFactoryEx.contentsOptions).then(contents => {
+    let opts = mFactoryEx.contentsOptions;
+    manager.get(path, opts).then(contents => {
       model.deserialize(contents.content);
       model.dirty = false;
-      this._createWidget(path, model, widgetName, widget, kernel);
+      this._createWidget(path, opts, model, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
     Private.factoryProperty.set(widget, widgetName);
@@ -503,7 +512,7 @@ class DocumentManager {
     let opts = mFactoryEx.contentsOptions;
     opts.content = model.serialize();
     manager.save(path, opts).then(content => {
-      this._createWidget(path, model, widgetName, widget, kernel);
+      this._createWidget(path, opts, model, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
     Private.factoryProperty.set(widget, widgetName);
@@ -533,6 +542,7 @@ class DocumentManager {
       let model = this._contextManager.getModel(id);
       let context = this._contextManager.getContext(id);
       let factoryName = Private.factoryProperty.get(widget);
+      factoryName = factoryName || this._defaultWidgetFactory;
       let factory = this._widgetFactories[factoryName].factory;
       if (!model.dirty) {
         factory.beforeClose(model, context, child).then(result => {
@@ -584,14 +594,18 @@ class DocumentManager {
    * Save the document contents to disk.
    */
   saveFile(path: string): Promise<void> {
-    return this._contextManager.save(path);
+    // TODO: find the appropriate context.
+    //return this._contextManager.save(id);
+    return void 0;
   }
 
   /**
    * Revert the document contents to disk contents.
    */
   revertFile(path: string): Promise<void> {
-    return this._contextManager.revert(path);
+    // TODO: find the appropriate context.
+    //return this._contextManager.revert(id);
+    return void 0;
   }
 
   /**
@@ -611,13 +625,20 @@ class DocumentManager {
   /**
    * Create a context and a widget.
    */
-  private _createWidget(path: string, model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
+  private _createWidget(path: string, options: IContentsOpts, model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
-    parent.layout = new PanelLayout();
-    let context = this._contextManager.createNew(path, model);
+    let context = this._contextManager.createNew(path, model, options);
     Private.contextProperty.set(parent, context.id);
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
+    this._attachChild(parent, child);
+  }
+
+  /**
+   * Attach a child widget to a parent container.
+   */
+  private _attachChild(parent: Widget, child: Widget) {
+    parent.layout = new PanelLayout();
     parent.title.closable = true;
     parent.title.text = child.title.text;
     parent.title.icon = child.title.icon;
@@ -628,7 +649,7 @@ class DocumentManager {
       child.parent.title.icon = child.title.icon;
       child.parent.title.className = child.title.className;
     });
-    // Add the child widget to the parent widget and emit opened.
+    // Add the child widget to the parent widget.
     (parent.layout as PanelLayout).addChild(child);
   }
 

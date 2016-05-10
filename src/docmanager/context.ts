@@ -4,12 +4,12 @@
 
 import {
   IKernelId, IKernel, IKernelSpecIds, IContentsManager,
-  INotebookSessionManager, INotebookSession, ISessionId
+  INotebookSessionManager, INotebookSession, ISessionId,
+  IContentsOpts, ISessionOptions
 } from 'jupyter-js-services';
 
-import {
-  uuid
-} from 'jupyter-js-utils';
+import * as utils
+  from 'jupyter-js-utils';
 
 import {
   IDisposable, DisposableDelegate
@@ -45,7 +45,7 @@ class Context implements IDocumentContext {
    */
   constructor(manager: ContextManager) {
     this._manager = manager;
-    this._id = uuid();
+    this._id = utils.uuid();
   }
 
   /**
@@ -186,7 +186,7 @@ class ContextManager {
   /**
    * Construct a new context manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, opener: IWidgetOpener) {
+  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, opener: (id: string, widget: Widget) => IDisposable) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
     this._opener = opener;
@@ -199,12 +199,13 @@ class ContextManager {
   /**
    * Create a new context.
    */
-  createNew(path: string, model: IDocumentModel): IDocumentContext {
+  createNew(path: string, model: IDocumentModel, options: IContentsOpts): IDocumentContext {
     let context = new Context(this);
     let id = context.id;
     this._paths[id] = path;
     this._contexts[id] = context;
     this._models[id] = model;
+    this._options[id] = options;
     return context;
   }
 
@@ -242,37 +243,34 @@ class ContextManager {
    */
   changeKernel(id: string, options: IKernelId): Promise<IKernel> {
     let session = this._sessions[id];
-    let context = this._contexts[id];
     if (!session) {
       let path = this._paths[id];
       let sOptions = {
         notebook: { path },
         kernel: { options }
       }
-      return this._sessionManager.startNew(sOptions).then(session => {
-        this._sessions[id] = session;
-        context.kernelChanged.emit(session.kernel);
-        return session.kernel;
-      });
+      return this._startSession(id, sOptions);
     } else {
-      return session.changeKernel(options).then(kernel => {
-        context.kernelChanged.emit(kernel);
-        return kernel;
-      });
+      return session.changeKernel(options);
     }
   }
 
   /**
    * Update the path of an open document.
    *
-   * @param oldPath - The previous path.
+   * @param id - The id of the context.
    *
    * @param newPath - The new path.
    */
-  rename(oldPath: string, newPath: string): Promise<void> {
-    // Find all contexts for that path
-    // Update the existing sessions
-    return void 0;
+  rename(id: string, newPath: string): Promise<void> {
+    let session = this._sessions[id];
+    if (session) {
+      return session.renameNotebook(newPath);
+    }
+    let context = this._contexts[id];
+    this._paths[id] = newPath;
+    context.pathChanged.emit(newPath);
+    return Promise.resolve(void 0);
   }
 
   /**
@@ -285,16 +283,27 @@ class ContextManager {
   /**
    * Save the document contents to disk.
    */
-  save(path: string): Promise<void> {
-    // This is a problem, because *which* one do we save?
-    return void 0;
+  save(id: string): Promise<void> {
+    let opts = utils.copy(this._options[id]);
+    let path = this._paths[id];
+    let model = this._models[id];
+    opts.content = model.serialize();
+    return this._contentsManager.save(path, opts).then(() => {
+      model.dirty = false;
+    });
   }
 
   /**
    * Revert the contents of a path.
    */
-  revert(path: string): Promise<void> {
-    return void 0;
+  revert(id: string): Promise<void> {
+    let opts = utils.copy(this._options[id]);
+    let path = this._paths[id];
+    let model = this._models[id];
+    return this._contentsManager.get(path, opts).then(contents => {
+      model.deserialize(contents.content);
+      model.dirty = false;
+    });
   }
 
   /**
@@ -307,13 +316,28 @@ class ContextManager {
   /**
    * Add a sibling widget to the document manager.
    */
-  addSibling(path: string, widget: Widget): IDisposable {
-   // TODO: Add the widget to the list of siblings
-   // This needs to go back to the document manager to set the
-   // context and factory properties.
-   this._opener.open(widget);
-   // TODO: return a disposable
-   return void 0;
+  addSibling(id: string, widget: Widget): IDisposable {
+    let opener = this._opener;
+    return opener(id, widget);
+  }
+
+  /**
+   * Start a session and set up its signals.
+   */
+  private _startSession(id: string, options: ISessionOptions): Promise<IKernel> {
+    let context = this._contexts[id];
+    return this._sessionManager.startNew(options).then(session => {
+      this._sessions[id] = session;
+      context.kernelChanged.emit(session.kernel);
+      session.notebookPathChanged.connect((s, path) => {
+        this._paths[id] = path;
+        context.pathChanged.emit(path);
+      });
+      session.kernelChanged.connect((s, kernel) => {
+        context.kernelChanged.emit(kernel);
+      });
+      return session.kernel;
+    });
   }
 
   private _contentsManager: IContentsManager = null;
@@ -322,6 +346,7 @@ class ContextManager {
   private _contexts: { [key: string]: IDocumentContext } = Object.create(null);
   private _models: { [key: string]: IDocumentModel } = Object.create(null);
   private _sessions: { [key: string]: INotebookSession } = Object.create(null);
-  private _opener: IWidgetOpener = null;
+  private _opener: (id: string, widget: Widget) => IDisposable = null;
+  private _options: { [key: string]: IContentsOpts } = Object.create(null);
   private _paths: { [key: string]: string } = Object.create(null);
 }
