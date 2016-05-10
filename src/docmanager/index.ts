@@ -5,7 +5,7 @@
 import {
   IContentsModel, IKernelId, IKernelSpecId, IContentsOpts, IKernel,
   INotebookSession, IContentsManager, INotebookSessionManager,
-  IKernelSpecIds
+  IKernelSpecIds, ISessionId
 } from 'jupyter-js-services';
 
 import {
@@ -101,23 +101,6 @@ interface IDocumentModel {
 
 
 /**
- * A session info object for a running session.
- */
-export
-interface ISessionInfo {
-  /**
-   * The list of file paths associated with the running sessions.
-   */
-  path: string;
-
-  /**
-   * The kernel instance associated with the session.
-   */
-  kernel: IKernel;
-}
-
-
-/**
  * The document context object.
  */
 export interface IDocumentContext {
@@ -172,7 +155,7 @@ export interface IDocumentContext {
   /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISessionInfo[]>;
+  listSessions(): Promise<ISessionId[]>;
 
   /**
    * Add a sibling widget to the document manager.

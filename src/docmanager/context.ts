@@ -4,7 +4,7 @@
 
 import {
   IKernelId, IKernel, IKernelSpecIds, IContentsManager,
-  INotebookSessionManager, INotebookSession
+  INotebookSessionManager, INotebookSession, ISessionId
 } from 'jupyter-js-services';
 
 import {
@@ -32,7 +32,7 @@ import {
 } from '../filebrowser/browser';
 
 import {
-  IDocumentContext, IDocumentModel, ISessionInfo
+  IDocumentContext, IDocumentModel
 } from './index';
 
 
@@ -127,7 +127,7 @@ class Context implements IDocumentContext {
   /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISessionInfo[]> {
+  listSessions(): Promise<ISessionId[]> {
     return this._manager.listSessions();
   }
 
@@ -178,7 +178,9 @@ namespace Private {
 }
 
 
-
+/**
+ * An object which manages the active contexts.
+ */
 export
 class ContextManager {
   /**
@@ -188,7 +190,10 @@ class ContextManager {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
     this._opener = opener;
-    // TODO: fetch the kernelspecids.
+    // Fetch and store the kernelspecids.
+    sessionManager.getSpecs().then(specs => {
+      this._kernelspecids = specs;
+    });
   }
 
   /**
@@ -295,10 +300,8 @@ class ContextManager {
   /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISessionInfo[]> {
-    // TODO filter the running session info.
-    //return this._sessionManager.listRunning();
-    return void 0;
+  listSessions(): Promise<ISessionId[]> {
+    return this._sessionManager.listRunning();
   }
 
   /**
@@ -306,6 +309,8 @@ class ContextManager {
    */
   addSibling(path: string, widget: Widget): IDisposable {
    // TODO: Add the widget to the list of siblings
+   // This needs to go back to the document manager to set the
+   // context and factory properties.
    this._opener.open(widget);
    // TODO: return a disposable
    return void 0;
