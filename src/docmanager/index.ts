@@ -543,6 +543,10 @@ class DocumentManager {
     let context = this._contextManager.createNew(path, model);
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
+    parent.title.closable = true;
+    parent.title.text = child.title.text;
+    parent.title.icon = child.title.icon;
+    parent.title.className = child.title.className;
     // Mirror the parent title based on the child.
     child.title.changed.connect(() => {
       child.parent.title.text = child.title.text;

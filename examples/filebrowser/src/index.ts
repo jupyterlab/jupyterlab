@@ -66,8 +66,17 @@ function main(): void {
   let contentsManager = new ContentsManager(baseUrl);
   let sessionsManager = new NotebookSessionManager({ baseUrl: baseUrl });
 
+  let widgets: CodeMirrorWidget[] = [];
+
+  let opener = {
+    open: (widget: Widget) => {
+      dock.insertTabAfter(widget);
+      widgets.push(widget as CodeMirrorWidget);
+    }
+  };
+
   let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
-  let docManager = new DocumentManager(contentsManager, sessionsManager);
+  let docManager = new DocumentManager(contentsManager, sessionsManager, opener);
   let mFactory = new ModelFactory();
   let wFactory = new WidgetFactory();
   docManager.registerModelFactory(mFactory, {
@@ -82,14 +91,6 @@ function main(): void {
     preferKernel: false,
     canStartKernel: true
   });
-  let widgets: CodeMirrorWidget[] = [];
-
-  let opener = {
-    open: (widget: Widget) => {
-      dock.insertTabAfter(widget);
-      widgets.push(widget as CodeMirrorWidget);
-    }
-  };
   let fbWidget = new FileBrowserWidget(fbModel, docManager, opener);
 
   let panel = new SplitPanel();

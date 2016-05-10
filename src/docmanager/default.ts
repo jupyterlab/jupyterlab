@@ -2,6 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
+import * as CodeMirror
+  from 'codemirror';
+
 import {
   IKernelSpecId, IContentsOpts, IKernelId
 } from 'jupyter-js-services';
