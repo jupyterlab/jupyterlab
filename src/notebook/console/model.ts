@@ -423,7 +423,7 @@ class ConsoleModel implements IConsoleModel {
 
   private _onKeydown(sender: any, args: IEditorKeydown): void {
     let { top, left } = args.coords;
-    let text = 'def foo(self, bar, kw=False):';
+    let text = `tooltip popover:\n\ttop: ${top}\n\tleft: ${left}`;
     this.tooltip = { top, left, text };
   }
 

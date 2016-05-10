@@ -119,10 +119,12 @@ class ConsoleTooltip extends Widget {
    * Handle keydown events for the widget.
    *
    * #### Notes
-   * Disposes the tooltip if a keydown happens anywhere on the document.
+   * Hides the tooltip if a keydown happens anywhere on the document.
+   * Instead of calling dispose, keydown events hide the tooltip because they
+   * very frequently will necessitate an update of the tooltip's text.
    */
   private _evtKeydown(event: KeyboardEvent) {
-    this.dispose();
+    this.hide();
   }
 
   /**
@@ -171,6 +173,7 @@ namespace Private {
     // If one item is null or undefined, items don't match.
     if (!r1 || !r2) return false;
     return (r1.top === r2.top &&
+            r1.left === r2.left &&
             r1.right === r2.right &&
             r1.width === r2.width &&
             r1.height === r2.height);

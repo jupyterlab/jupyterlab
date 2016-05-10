@@ -249,13 +249,15 @@ class ConsoleWidget extends Widget {
     case 'tooltip':
       let { top, left, text } = args.newValue;
       let rect = { top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT };
-      if (this._tooltip) {
+      if (!this._tooltip) {
+        this._tooltip = constructor.createTooltip(top, left, text);
+        this._tooltip.attach(document.body);
+      } else {
         this._tooltip.rect = rect as ClientRect;
         this._tooltip.text = text;
-      } else {
-        this._tooltip = constructor.createTooltip(top, left, text);
+        if (this._tooltip.isHidden) this._tooltip.show();
       }
-      break;
+      return;
     }
   }
 
