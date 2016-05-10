@@ -32,6 +32,11 @@ import {
  */
 const DIRTY_CLASS = 'jp-mod-dirty';
 
+/**
+ * The class name added to a jupyter code mirror widget.
+ */
+const EDITOR_CLASS = 'jp-CodeMirrorWidget';
+
 
 /**
  * The default implementation of a document model.
@@ -132,6 +137,7 @@ class EditorWidget extends CodeMirrorWidget {
    */
   constructor(model: IDocumentModel, context: IDocumentContext) {
     super();
+    this.addClass(EDITOR_CLASS);
     this._model = model;
     this._context = context;
     let editor = this.editor;
