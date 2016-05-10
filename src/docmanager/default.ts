@@ -135,7 +135,7 @@ class EditorWidget extends CodeMirrorWidget {
     let doc = editor.getDoc();
     doc.setValue(model.serialize());
     this._updateTitle();
-    loadModeByFileName(editor, context.path);
+    loadModeByFileName(editor, context.getPath());
     this._context.dirtyCleared.connect(() => {
       this.dirty = false;
     });
@@ -173,7 +173,7 @@ class EditorWidget extends CodeMirrorWidget {
    * Update the title based on the path.
    */
   private _updateTitle(): void {
-    this.title.text = this._context.path.split('/').pop();
+    this.title.text = this._context.getPath().split('/').pop();
   }
 
   private _model: IDocumentModel = null;

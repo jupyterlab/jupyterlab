@@ -24,6 +24,14 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import {
+  IWidgetOpener
+} from '../filebrowser/browser';
+
+import {
+  ContextManager
+} from './context';
+
 
 /**
  * The interface for a document model.
@@ -103,20 +111,14 @@ export interface IDocumentContext {
   dirtyCleared: ISignal<IDocumentContext, void>;
 
   /**
-   * The current kernel associated with the document.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * Get the current kernel associated with the document.
    */
-  kernel: IKernel;
+  getKernel(): IKernel;
 
   /**
-   * The current path associated with the document.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * Get the current path associated with the document.
    */
-  path: string;
+  getPath(): string;
 
   /**
    * Get the current kernelspec information.
@@ -284,9 +286,10 @@ class DocumentManager {
   /**
    * Construct a new document manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager) {
+  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, opener: IWidgetOpener) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
+    this._contextManager = new ContextManager(contentsManager, sessionManager, opener);
   }
 
   /**
@@ -445,7 +448,7 @@ class DocumentManager {
     let model = mFactoryEx.factory.createNew(lang);
     manager.get(path, mFactoryEx.contentsOptions).then(contents => {
       model.deserialize(contents.content);
-      this._createWidget(model, widgetName, widget, kernel);
+      this._createWidget(path, model, widgetName, widget, kernel);
     });
     return widget;
   }
@@ -477,7 +480,7 @@ class DocumentManager {
     let opts = mFactoryEx.contentsOptions;
     opts.content = model.serialize();
     manager.save(path, opts).then(content => {
-      this._createWidget(model, widgetName, widget, kernel);
+      this._createWidget(path, model, widgetName, widget, kernel);
     });
     return widget;
   }
@@ -489,8 +492,8 @@ class DocumentManager {
    *
    * @param newPath - The new path.
    */
-  renameFile(oldPath: string, newPath: string): void {
-    // update all sessions
+  renameFile(oldPath: string, newPath: string): Promise<void> {
+    return this._contextManager.rename(oldPath, newPath);
   }
 
   /**
@@ -507,14 +510,14 @@ class DocumentManager {
    * Save the document contents to disk.
    */
   saveFile(path: string): Promise<void> {
-    return void 0;
+    return this._contextManager.save(path);
   }
 
   /**
    * Revert the document contents to disk contents.
    */
   revertFile(path: string): Promise<void> {
-    return void 0;
+    return this._contextManager.revert(path);
   }
 
   /**
@@ -537,8 +540,7 @@ class DocumentManager {
   private _createWidget(path: string, model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
     parent.layout = new PanelLayout();
-    // TODO: Create a new execution/contents context.
-    let context = this._createContext(path, model);
+    let context = this._contextManager.createNew(path, model);
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
     // Mirror the parent title based on the child.
@@ -549,11 +551,6 @@ class DocumentManager {
     });
     // Add the child widget to the parent widget and emit opened.
     (parent.layout as PanelLayout).addChild(child);
-  }
-
-  private _createContext(path: string, model: IDocumentModel): {
-    this._data[path] = model;
-    this._contexts[path] = new Context(path, model);
   }
 
   /**
@@ -580,14 +577,13 @@ class DocumentManager {
     return this._modelFactories[wFactoryEx.modelName];
   }
 
-  private _data: { [key: string]: Private.IDocumentData } = Object.create(null);
   private _modelFactories: { [key: string]: Private.IModelFactoryEx } = Object.create(null);
   private _widgetFactories: { [key: string]: Private.IWidgetFactoryEx } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
-  private _contexts: { [key: string]: IDocumentContext } = Object.create(null);
+  private _contextManager: ContextManager = null;
 }
 
 
@@ -600,17 +596,6 @@ namespace Private {
    */
   export
   const openedSignal = new Signal<DocumentManager, Widget>();
-
-  /**
-   * Data associated with a document.
-   */
-  export
-  interface IDocumentData {
-    model: IDocumentModel;
-    session: INotebookSession;
-    context: IDocumentContext;
-    widgets: Widget[];
-  }
 
   export
   interface IModelFactoryEx extends IModelFactoryOptions {
