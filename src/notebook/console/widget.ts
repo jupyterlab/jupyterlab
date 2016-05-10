@@ -34,7 +34,7 @@ import {
 } from '../cells';
 
 import {
-  IConsoleModel
+  IConsoleModel, ITooltipModel
 } from './model';
 
 import {
@@ -56,6 +56,16 @@ const CONSOLE_PANEL = 'jp-Console-panel';
  * The class name added to the console banner.
  */
 const BANNER_CLASS = 'jp-Console-banner';
+
+/**
+ * The width of tooltips.
+ */
+const TOOLTIP_WIDTH = 250;
+
+/**
+ * The height of tooltips.
+ */
+const TOOLTIP_HEIGHT = 175;
 
 /**
  * A panel which contains a toolbar and a console.
@@ -127,17 +137,9 @@ class ConsoleWidget extends Widget {
    *
    * @param text The text of the tooltip.
    */
-  static createTooltip(x: number, y: number, text = '...'): ConsoleTooltip {
-    let rect: ClientRect = {
-      top: 0,
-      left: 0,
-      width: 0,
-      height: 0,
-      // `bottom` and `right` are ignored.
-      bottom: null,
-      right: null
-    };
-    return new ConsoleTooltip(text, rect);
+  static createTooltip(top: number, left: number, text = '...'): ConsoleTooltip {
+    let rect = { top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT };
+    return new ConsoleTooltip(text, rect as ClientRect);
   }
 
   /*
@@ -160,6 +162,7 @@ class ConsoleWidget extends Widget {
     this.layout = new PanelLayout();
     this._initHeader();
     model.cells.changed.connect(this.onCellsChanged, this);
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -235,6 +238,25 @@ class ConsoleWidget extends Widget {
       break;
     }
     this.update();
+  }
+
+  /**
+   * Handle a model state change event.
+   */
+  protected onModelChanged(sender: IConsoleModel, args: IChangedArgs<ITooltipModel>) {
+    let constructor = this.constructor as typeof ConsoleWidget;
+    switch (args.name) {
+    case 'tooltip':
+      let { top, left, text } = args.newValue;
+      let rect = { top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT };
+      if (this._tooltip) {
+        this._tooltip.rect = rect as ClientRect;
+        this._tooltip.text = text;
+      } else {
+        this._tooltip = constructor.createTooltip(top, left, text);
+      }
+      break;
+    }
   }
 
   private _initHeader(): void {

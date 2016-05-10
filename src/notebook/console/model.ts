@@ -63,6 +63,14 @@ const DEFAULT_LANG_INFO = {
 }
 
 
+export
+interface ITooltipModel {
+  top: number;
+  left: number;
+  text: string;
+}
+
+
 /**
  * The definition of a model object for a console widget.
  */
@@ -77,11 +85,6 @@ interface IConsoleModel extends IDisposable {
    * A signal emitted when a user metadata state changes.
    */
   metadataChanged: ISignal<IConsoleModel, string>;
-
-  /**
-   * A signal emitted when the selection changes.
-   */
-  selectionChanged: ISignal<IConsoleModel, void>;
 
   /**
    * The banner that appears at the top of a console session.
@@ -103,6 +106,11 @@ interface IConsoleModel extends IDisposable {
    * This can be considered the default language of the console.
    */
   defaultMimetype: string;
+
+  /**
+   * The dimensions and contents of a console widget tooltip.
+   */
+  tooltip: ITooltipModel;
 
   /**
    * The console history manager instance.
@@ -185,7 +193,7 @@ class ConsoleModel implements IConsoleModel {
    * A signal emitted when the state of the model changes.
    */
   get stateChanged(): ISignal<IConsoleModel, IChangedArgs<any>> {
-    return ConsoleModelPrivate.stateChangedSignal.bind(this);
+    return Private.stateChangedSignal.bind(this);
   }
 
   /**
@@ -195,14 +203,7 @@ class ConsoleModel implements IConsoleModel {
    * The signal argument is the namespace of the metadata that changed.
    */
   get metadataChanged(): ISignal<IConsoleModel, string> {
-    return ConsoleModelPrivate.metadataChangedSignal.bind(this);
-  }
-
-  /**
-   * A signal emitted when the selection changes.
-   */
-  get selectionChanged(): ISignal<IConsoleModel, void> {
-    return ConsoleModelPrivate.selectionChangedSignal.bind(this);
+    return Private.metadataChangedSignal.bind(this);
   }
 
   /**
@@ -251,6 +252,22 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
+   * The dimensions and contents of a console widget tooltip.
+   */
+  get tooltip(): ITooltipModel {
+    return this._tooltip;
+  }
+  set tooltip(newValue: ITooltipModel) {
+    if (Private.matchTooltips(this._tooltip, newValue)) {
+      return;
+    }
+    let oldValue = this._tooltip;
+    this._tooltip = newValue;
+    let name = 'tooltip';
+    this.stateChanged.emit({ name, oldValue, newValue });
+  }
+
+  /**
    * Get the console history manager instance.
    *
    * #### Notes
@@ -272,7 +289,7 @@ class ConsoleModel implements IConsoleModel {
     }
     let oldValue = this._session;
     this._session = newValue;
-    ConsoleModelPrivate.sessionChanged(this, newValue);
+    Private.sessionChanged(this, newValue);
     let name = 'session';
     this.stateChanged.emit({ name, oldValue, newValue });
   }
@@ -405,7 +422,9 @@ class ConsoleModel implements IConsoleModel {
   }
 
   private _onKeydown(sender: any, args: IEditorKeydown): void {
-    console.log('onKeydown args', args);
+    let { top, left } = args.coords;
+    let text = 'def foo(self, bar, kw=False):';
+    this.tooltip = { top, left, text };
   }
 
   private _banner: IRawCellModel = null;
@@ -415,6 +434,7 @@ class ConsoleModel implements IConsoleModel {
   private _history: IConsoleHistory = null;
   private _metadata: { [key: string]: string } = Object.create(null);
   private _prompt: ICodeCellModel = null;
+  private _tooltip: ITooltipModel = null;
   private _session: INotebookSession = null;
 }
 
@@ -422,7 +442,7 @@ class ConsoleModel implements IConsoleModel {
 /**
  * A private namespace for console model data.
  */
-namespace ConsoleModelPrivate {
+namespace Private {
   /**
    * A signal emitted when the state of the model changes.
    */
@@ -436,19 +456,22 @@ namespace ConsoleModelPrivate {
   const metadataChangedSignal = new Signal<IConsoleModel, string>();
 
   /**
-   * A signal emitted when a the selection state changes.
+   * Check if two tooltip models are equal.
+   *
+   * @param t1 - The first tooltip model.
+   *
+   * @param t2 - The second tooltip model.
+   *
+   * @returns `true` if the tooltips are equal.
    */
   export
-  const selectionChangedSignal = new Signal<IConsoleModel, void>();
-
-  /**
-   * An attached property for the selected state of a cell.
-   */
-  export
-  const selectedProperty = new Property<ICellModel, boolean>({
-    name: 'selected',
-    value: false
-  });
+  function matchTooltips(t1: ITooltipModel, t2: ITooltipModel): boolean {
+    // Check identity in case both items are null or undefined.
+    if (t1 === t2 || !t1 && !t2) return true;
+    // If one item is null or undefined, items don't match.
+    if (!t1 || !t2) return false;
+    return t1.left === t2.left && t1.top === t2.top && t1.text === t2.text;
+  }
 
   /**
    * Handle a change to the model kernel.
