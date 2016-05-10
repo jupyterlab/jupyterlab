@@ -40,6 +40,10 @@ import {
 } from 'phosphor-panel';
 
 import {
+  ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
   IChangedArgs
 } from 'phosphor-properties';
 
@@ -113,6 +117,43 @@ const notebookHandlerExtension = {
 
 
 /**
+ * An interface exposing the current active notebook.
+ */
+export
+class ActiveNotebook {
+  /**
+   * A signal emitted when the active notebook changes.
+   */
+  get activeNotebookChanged(): ISignal<ActiveNotebook, NotebookPanel> {
+    return Private.activeNotebookChangedSignal.bind(this);
+  }
+
+  /**
+   * Get the current active notebook.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get activeNotebook(): NotebookPanel {
+    return Private.activeWidget;
+  }
+}
+
+
+/**
+ * A service tracking the active notebook widget.
+ */
+export
+const activeNotebookProvider = {
+  id: 'jupyter.services.activeNotebook',
+  provides: ActiveNotebook,
+  resolve: () => {
+    return new ActiveNotebook();
+  }
+}
+
+
+/**
  * Activate the notebook handler extension.
  */
 function activateNotebookHandler(app: Application, registry: FileHandlerRegistry, services: JupyterServices, rendermime: RenderMime<Widget>): Promise<void> {
@@ -127,134 +168,132 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
   registry.addCreator('New Notebook', creator.createNew.bind(creator));
 
   // Temporary notebook focus follower.
-  let activeWidget: NotebookPanel;
-  let widgets: NotebookPanel[] = [];
   document.body.addEventListener('focus', event => {
-    for (let widget of widgets) {
+    for (let widget of Private.widgets) {
       let target = event.target as HTMLElement;
       if (widget.isAttached && widget.isVisible) {
         if (widget.node.contains(target)) {
-          activeWidget = widget;
+          Private.activeWidget = widget;
           return;
         }
       }
     }
-  });
+  }, true);
 
   // Add opened notebooks to the widget list temporarily
   handler.opened.connect((h, widget) => {
-    activeWidget = widget;
-    widgets.push(widget);
+    Private.activeWidget = widget;
+    Private.widgets.push(widget);
   });
 
   app.commands.add([
   {
     id: cmdIds['runAndAdvance'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.runAndAdvance();
     }
   },
   {
     id: cmdIds['run'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.run();
     }
   },
   {
     id: cmdIds['runAndInsert'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.runAndInsert();
     }
   },
   {
     id: cmdIds['restart'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.restart();
     }
   },
   {
     id: cmdIds['interrupt'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.interrupt();
     }
   },
   {
     id: cmdIds['toCode'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.changeCellType('code'); }
   },
   {
     id: cmdIds['toMarkdown'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.changeCellType('markdown'); }
   },
   {
     id: cmdIds['toRaw'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.changeCellType('raw');
     }
   },
   {
     id: cmdIds['cut'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.cut();
     }
   },
   {
     id: cmdIds['copy'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.copy();
     }
   },
   {
     id: cmdIds['paste'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.paste();
     }
   },
   {
     id: cmdIds['insertAbove'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.insertAbove();
     }
   },
   {
     id: cmdIds['insertBelow'],
     handler: () => {
-      let manager = activeWidget.manager;
+      let manager = Private.activeWidget.manager;
       if (manager) manager.insertBelow();
     }
   },
   {
     id: cmdIds['selectPrevious'],
     handler: () => {
-      let model = activeWidget.model;
+      let model = Private.activeWidget.model;
       if (model) model.activeCellIndex -= 1;
     }
   },
   {
     id: cmdIds['selectNext'],
     handler: () => {
-      let model = activeWidget.model;;
+      let model = Private.activeWidget.model;;
       if (model) model.activeCellIndex += 1;
     }
   },
   {
     id: cmdIds['toggleLinenumbers'],
     handler: () => {
-      let model = activeWidget.model;
+      let model = Private.activeWidget.model;
       if (model) {
         let cell = model.cells.get(model.activeCellIndex);
         let lineNumbers = cell.input.textEditor.lineNumbers;
@@ -270,7 +309,7 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
   {
     id: cmdIds['toggleAllLinenumbers'],
     handler: () => {
-      let model = activeWidget.model;
+      let model = Private.activeWidget.model;
       if (model) {
         let cell = model.cells.get(model.activeCellIndex);
         let lineNumbers = cell.input.textEditor.lineNumbers;
@@ -284,14 +323,14 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
   {
     id: cmdIds['commandMode'],
     handler: () => {
-      let model = activeWidget.model;
+      let model = Private.activeWidget.model;
       if (model) model.mode = 'command';
     }
   },
   {
     id: cmdIds['editMode'],
     handler: () => {
-      let model = activeWidget.model;
+      let model = Private.activeWidget.model;
       if (model) model.mode = 'edit';
     }
   },
@@ -407,10 +446,10 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
     {
       id: cmdIds['switchKernel'],
       handler: () => {
-        let model = activeWidget.model;
+        let model = Private.activeWidget.model;
         let name = model.kernelspec.name;
         if (model) {
-          selectKernel(activeWidget.parent.node, name, specs).then(newName => {
+          selectKernel(Private.activeWidget.parent.node, name, specs).then(newName => {
             if (newName) model.session.changeKernel({name: newName});
           });
         }
@@ -425,4 +464,19 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
   });
 
   return Promise.resolve(void 0);
+}
+
+
+/**
+ * A namespace for notebook plugin private data.
+ */
+namespace Private {
+  export
+  var activeWidget: NotebookPanel = null;
+
+  export
+  var widgets: NotebookPanel[] = [];
+
+  export
+  const activeNotebookChangedSignal = new Signal<ActiveNotebook, NotebookPanel>();
 }
