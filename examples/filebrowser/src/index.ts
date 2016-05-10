@@ -67,11 +67,13 @@ function main(): void {
   let sessionsManager = new NotebookSessionManager({ baseUrl: baseUrl });
 
   let widgets: CodeMirrorWidget[] = [];
+  let activeWidget: CodeMirrorWidget;
 
   let opener = {
-    open: (widget: Widget) => {
+    open: (widget: CodeMirrorWidget) => {
       dock.insertTabAfter(widget);
-      widgets.push(widget as CodeMirrorWidget);
+      widgets.push(widget);
+      activeWidget = widget;
     }
   };
 
@@ -102,8 +104,6 @@ function main(): void {
   SplitPanel.setStretch(dock, 1);
   dock.spacing = 8;
 
-  let activeWidget: CodeMirrorWidget;
-
   document.addEventListener('focus', event => {
     for (let i = 0; i < widgets.length; i++) {
       let widget = widgets[i];
@@ -120,30 +120,25 @@ function main(): void {
     selector: '.jp-DirListing',
     handler: () => {
       fbWidget.open();
-      return true;
     }
   }, {
     sequence: ['Ctrl N'], // Add emacs keybinding for select next.
     selector: '.jp-DirListing',
     handler: () => {
       fbWidget.selectNext();
-      return true;
     }
   }, {
     sequence: ['Ctrl P'], // Add emacs keybinding for select previous.
     selector: '.jp-DirListing',
     handler: () => {
       fbWidget.selectPrevious();
-      return true;
     }
   }, {
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      // TODO
-      //let path = fileHandler.findPath(activeWidget);
-      //fileHandler.save(path);
-      return true;
+      let path = docManager.findPath(activeWidget);
+      docManager.saveFile(path);
     }
   }]);
 
@@ -197,6 +192,11 @@ function main(): void {
       text: 'Download',
       icon: 'fa fa-download',
       handler: () => { fbWidget.download(); }
+    }),
+    new MenuItem({
+      text: 'Save',
+      icon: 'fa fa-save',
+      handler: () => { fbWidget.save(); }
     }),
     new MenuItem({
       text: 'Revert',

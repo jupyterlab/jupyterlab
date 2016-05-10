@@ -528,6 +528,14 @@ class DocumentManager {
   }
 
   /**
+   * Find the path given a widget.
+   */
+  findPath(widget: Widget): string {
+    let id = Private.contextProperty.get(widget);
+    return this._contextManager.getPath(id);
+  }
+
+  /**
    * Filter messages on the widget.
    */
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
