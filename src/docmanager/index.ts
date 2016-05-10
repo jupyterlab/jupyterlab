@@ -481,7 +481,7 @@ class DocumentManager {
       this._createWidget(path, opts, model, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
-    Private.factoryProperty.set(widget, widgetName);
+    Private.widgetFactoryProperty.set(widget, widgetName);
     return widget;
   }
 
@@ -577,7 +577,9 @@ class DocumentManager {
    * @param newPath - The new path.
    */
   renameFile(oldPath: string, newPath: string): Promise<void> {
-    return this._contextManager.rename(oldPath, newPath);
+    // TODO: find the appropriate context.
+    //return this._contextManager.rename(id, newPath);
+    return void 0;
   }
 
   /**

@@ -350,3 +350,11 @@ class ContextManager {
   private _options: { [key: string]: IContentsOpts } = Object.create(null);
   private _paths: { [key: string]: string } = Object.create(null);
 }
+
+
+//
+// It looks like context is tied to modelName and path
+// If that is the case, what does it mean to save by path?
+// Do we base it on the most recently opened, the most recently
+// focused?
+// Maybe we cannot save by path but only save by widget.
