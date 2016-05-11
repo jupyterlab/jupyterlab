@@ -83,6 +83,11 @@ interface IDocumentModel {
   dirty: boolean;
 
   /**
+   * The read-only state of the model.
+   */
+  readOnly: boolean;
+
+  /**
    * The default kernel name of the document.
    *
    * #### Notes
@@ -178,18 +183,31 @@ export interface IDocumentContext {
  */
 export
 interface IWidgetFactoryOptions {
+
+  /**
+   * The file extensions the widget can view.
+   *
+   * #### Notes
+   * Use `'.*'` to denote all file extensions
+   * or give the actual extension (e.g. `'.txt'`).
+   */
+  fileExtensions: string[];
+
   /**
    * The name of the widget to display in dialogs.
    */
   displayName: string;
 
   /**
-   * The registered names of the model types that can be used to create the widgets.
+   * The registered name of the model type used to create the widgets.
    */
-  modelNames: string[];
+  modelName: string;
 
   /**
-   * The model names for which the factory should be the default.
+   * The file extensions for which the factory should be the default.
+   * #### Notes
+   * Use `'.*'` to denote all file extensions
+   * or give the actual extension (e.g. `'.txt'`).
    */
   defaultFor?: string[];
 
@@ -234,23 +252,6 @@ interface IModelFactoryOptions {
    * The name of the model factory.
    */
   name: string;
-
-  /**
-   * The file extensions the models can handle.
-   *
-   * #### Notes
-   * Use `'.*'` to denote all file extensions
-   * or give the actual extension (e.g. `'.txt'`).
-   */
-  fileExtensions: string[];
-
-  /**
-   * The file extensions for which the factory should be the default.
-   * #### Notes
-   * Use `'.*'` to denote all file extensions
-   * or give the actual extension (e.g. `'.txt'`).
-   */
-  defaultFor?: string[];
 
   /**
    * The contents options used to fetch/save files.
@@ -346,8 +347,32 @@ class DocumentManager {
    * as the global default, this factory will override the existing default.
    */
   registerWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions): IDisposable {
-    // TODO
-    return void 0;
+    let name = options.displayName;
+    let exOpt = options as Private.IWidgetFactoryEx;
+    exOpt.factory = factory;
+    this._widgetFactories[name] = exOpt;
+    if (options.defaultFor) {
+      for (let option of options.defaultFor) {
+        if (option === '.*') {
+          this._defaultWidgetFactory = name;
+        }
+        if (option in options.fileExtensions) {
+          this._defaultWidgetFactories[option] = name;
+        }
+      }
+    }
+    return new DisposableDelegate(() => {
+      delete this._widgetFactories[name];
+      if (this._defaultWidgetFactory === name) {
+        this._defaultWidgetFactory = '';
+      }
+      for (let opt of Object.keys(this._defaultWidgetFactories)) {
+        let n = this._defaultWidgetFactories[opt];
+        if (n === name) {
+          delete this._defaultWidgetFactories[opt];
+        }
+      }
+    });
   }
 
   /**
@@ -364,8 +389,13 @@ class DocumentManager {
    * factory will be ignored and a warning will be printed to the console.
    */
   registerModelFactory(factory: IModelFactory, options: IModelFactoryOptions): IDisposable {
-    // TODO
-    return void 0;
+    let exOpt = options as Private.IModelFactoryEx;
+    let name = options.name;
+    exOpt.factory = factory;
+    this._modelFactories[name] = exOpt;
+    return new DisposableDelegate(() => {
+      delete this._modelFactories[name];
+    });
   }
 
   /**
@@ -377,17 +407,60 @@ class DocumentManager {
    * The first item in the list is considered the default.
    */
   listWidgetFactories(path?: string): string[] {
-    // TODO
-    return void 0;
+    let ext = '.' + path.split('.').pop();
+    let factories: string[] = [];
+    let options: Private.IWidgetFactoryEx;
+    let name = '';
+    // If an extension was given, filter by extension.
+    // Make sure the modelFactory is registered.
+    if (ext.length > 1) {
+      if (ext in this._defaultWidgetFactories) {
+        name = this._defaultWidgetFactories[ext];
+        options = this._widgetFactories[name];
+        if (options.modelName in this._modelFactories) {
+          factories.push(name);
+        }
+      }
+    }
+    // Add the default widget if it was not already added.
+    if (name !== this._defaultWidgetFactory && this._defaultWidgetFactory) {
+      name = this._defaultWidgetFactory;
+      options = this._widgetFactories[name];
+      if (options.modelName in this._modelFactories) {
+        factories.push(name);
+      }
+    }
+    // Add the rest of the valid widgetFactories that can open the path.
+    for (name in this._widgetFactories) {
+      if (factories.indexOf(name) !== -1) {
+        continue;
+      }
+      options = this._widgetFactories[name];
+      if (!(options.modelName in this._modelFactories)) {
+        continue;
+      }
+      let exts = options.fileExtensions;
+      if ((ext in exts) || ('.*' in exts)) {
+        factories.push(name);
+      }
+    }
+    return factories;
   }
 
   /**
    * Get the kernel preference.
    */
   getKernelPreference(path: string, widgetName: string): IKernelPreference {
-    // TODO
-    return void 0;
+    let widgetFactoryEx = this._getWidgetFactoryEx(widgetName);
+    let modelFactoryEx = this._getModelFactoryEx(widgetName);
+    let language = modelFactoryEx.factory.preferredLanguage(path);
+    return {
+      language,
+      preferKernel: widgetFactoryEx.preferKernel,
+      canStartKernel: widgetFactoryEx.canStartKernel
+    }
   }
+
 
   /**
    * Open a file and return the widget used to display the contents.

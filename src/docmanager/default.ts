@@ -83,6 +83,19 @@ class DocumentModel implements IDocumentModel {
   }
 
   /**
+   * The read only state of the document.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
+  }
+  set readOnly(value: boolean) {
+    if (value === this._readOnly) {
+      return;
+    }
+    this._readOnly = value;
+  }
+
+  /**
    * The default kernel name of the document.
    *
    * #### Notes
@@ -124,6 +137,7 @@ class DocumentModel implements IDocumentModel {
   private _text = '';
   private _defaultLang = '';
   private _dirty = false;
+  private _readOnly = false;
 }
 
 
