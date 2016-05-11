@@ -148,6 +148,17 @@ class DocumentModel implements IDocumentModel {
     this.dirty = true;
   }
 
+  /**
+   * Clone the model.
+   */
+  clone(): IDocumentModel {
+    let model = new DocumentModel(this._defaultLang);
+    model.deserialize(this._text);
+    model.dirty = this.dirty;
+    model.readOnly = this.readOnly;
+    return model;
+  }
+
   private _text = '';
   private _defaultLang = '';
   private _dirty = false;

@@ -74,6 +74,11 @@ interface IDocumentModel extends IDisposable {
   deserialize(value: any): void;
 
   /**
+   * Clone the model.
+   */
+  clone(): IDocumentModel;
+
+  /**
    * The dirty state of the model.
    *
    * #### Notes
@@ -586,15 +591,16 @@ class DocumentManager implements IDisposable {
 
   /**
    * Save a widget to a different file name.
+   *
+   * #### Notes
+   * It is assumed that all other widgets associated with this path
+   * have been closed and that the path is either not in conflict
+   * or the user has chosen to overwrite the file.
    */
-  saveAs(widget: Widget): Promise<void> {
+  saveAs(widget: Widget, path: string): Promise<void> {
     let id = Private.contextProperty.get(widget);
-    // TODO: Bring up a dialog to get the new path.
-    let path = '';
     return this._contextManager.rename(id, path).then(() => {
-      let model = this._contextManager.getModel(id);
-      model.readOnly = false;
-      return this._contextManager.save(path);
+      return this._contextManager.save(id);
     });
   }
 
@@ -711,7 +717,7 @@ class DocumentManager implements IDisposable {
     let id = this._contextManager.getIdForPath(path);
     let context: IDocumentContext;
     if (id) {
-      context = this._contextManager.getContext(id);
+      context = this._contextManager.clone(id);
     } else {
       context = this._contextManager.createNew(path, model, options);
     }

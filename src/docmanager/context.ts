@@ -71,12 +71,12 @@ class Context implements IDocumentContext {
 
   /**
    * The unique id of the context.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get id(): string {
     return this._id;
+  }
+  set id(value: string) {
+    this._id = value;
   }
 
   /**
@@ -258,6 +258,25 @@ class ContextManager implements IDisposable {
   }
 
   /**
+   * Clone an existing context.
+   */
+  clone(id: string): IDocumentContext {
+    let context = new Context(this);
+    let model = this._models[id];
+    let path = this._paths[id];
+    let options = this._options[id];
+    let session = this._sessions[id];
+    id = context.id;
+    this._models[id] = model.clone();
+    this._paths[id] = path;
+    this._options[id] = options;
+    if (session) {
+      this.changeKernel(id, { id: session.kernel.id });
+    }
+    return context;
+  }
+
+  /**
    * Find a context by path.
    */
   getIdForPath(path: string): string {
@@ -362,6 +381,9 @@ class ContextManager implements IDisposable {
     let opts = utils.copy(this._options[id]);
     let path = this._paths[id];
     let model = this._models[id];
+    if (model.readOnly) {
+      return Promise.reject(new Error('Read only'));
+    }
     opts.content = model.serialize();
     return this._contentsManager.save(path, opts).then(() => {
       model.dirty = false;
