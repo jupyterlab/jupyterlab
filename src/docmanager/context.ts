@@ -258,7 +258,6 @@ class ContextManager implements IDisposable {
     return context;
   }
 
-
   /**
    * Get a context for a given path and model name.
    */

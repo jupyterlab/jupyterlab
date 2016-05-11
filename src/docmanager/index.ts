@@ -324,7 +324,7 @@ class DocumentManager implements IDisposable {
       this._widgets[id].push(parent);
       opener.open(parent);
       return new DisposableDelegate(() => {
-        parent.dispose();
+        parent.close();
       });
     });
   }
@@ -526,6 +526,12 @@ class DocumentManager implements IDisposable {
     let model: IDocumentModel;
     let id = this._contextManager.findContext(path, mFactoryEx.name);
     if (id) {
+      // See if we already have a widget open for this path and widgetName.
+      for (let widget of this._widgets[id]) {
+        if (Private.factoryProperty.get(widget) === widgetName) {
+          return widget;
+        }
+      }
       model = this._contextManager.getModel(id);
     } else {
       model = mFactoryEx.factory.createNew(lang);
@@ -817,8 +823,7 @@ class DocumentManager implements IDisposable {
     if (!wFactoryEx) {
       return;
     }
-    // TODO
-    return void 0;
+    return this._modelFactories[wFactoryEx.modelName];
   }
 
   private _modelFactories: { [key: string]: Private.IModelFactoryEx } = Object.create(null);
