@@ -544,6 +544,20 @@ class DocumentManager {
   }
 
   /**
+   * Save a widget to a different file name.
+   */
+  saveAs(widget: Widget): Promise<void> {
+    let id = Private.contextProperty.get(widget);
+    // TODO: Bring up a dialog to get the new path.
+    let path = '';
+    return this._contextManager.rename(id, path).then(() => {
+      let model = this._contextManager.getModel(id);
+      model.readOnly = false;
+      return this._contextManager.save(path);
+    });
+  }
+
+  /**
    * Filter messages on the widget.
    */
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
