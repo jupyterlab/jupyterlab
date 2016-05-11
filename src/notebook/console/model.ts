@@ -62,11 +62,19 @@ const DEFAULT_LANG_INFO = {
   name: 'unknown'
 }
 
-
+/**
+ * The definition of a model object for a console tooltip widget.
+ */
 export
 interface ITooltipModel {
-  top: number;
-  left: number;
+  /**
+   * The text completion request that triggered a tooltip.
+   */
+  request: ITextCompletion;
+
+  /**
+   * The text of the tooltip.
+   */
   text: string;
 }
 
@@ -410,9 +418,10 @@ class ConsoleModel implements IConsoleModel {
       this.tooltip = null;
       return;
     }
+
     let { top, left } = args.coords;
     let text = `tooltip popover:\n\ttop: ${top}\n\tleft: ${left}`;
-    this.tooltip = { top, left, text };
+    this.tooltip = { text, request: args };
   }
 
   /**
@@ -467,6 +476,32 @@ namespace Private {
   const metadataChangedSignal = new Signal<IConsoleModel, string>();
 
   /**
+   * Check if two text completion requests are equal.
+   *
+   * @param t1 - The first text completion request.
+   *
+   * @param t1 - The second text completion request.
+   *
+   * @returns `true` if the text completion requests are equal.
+   */
+  function matchCompletions(t1: ITextCompletion, t2: ITextCompletion): boolean {
+    // Check identity in case both items are null or undefined.
+    if (t1 === t2 || !t1 && !t2) return true;
+    // If one item is null or undefined, items don't match.
+    if (!t1 || !t2) return false;
+    return t1.ch === t2.ch &&
+           t1.chHeight === t2.chHeight &&
+           t1.chWidth === t2.chWidth &&
+           t1.line === t2.line &&
+           t1.oldValue === t2.oldValue &&
+           t1.newValue === t2.newValue &&
+           t1.coords.left === t2.coords.left &&
+           t1.coords.right === t2.coords.right &&
+           t1.coords.top === t2.coords.top &&
+           t1.coords.bottom === t2.coords.bottom;
+  }
+
+  /**
    * Check if two tooltip models are equal.
    *
    * @param t1 - The first tooltip model.
@@ -481,7 +516,7 @@ namespace Private {
     if (t1 === t2 || !t1 && !t2) return true;
     // If one item is null or undefined, items don't match.
     if (!t1 || !t2) return false;
-    return t1.left === t2.left && t1.top === t2.top && t1.text === t2.text;
+    return matchCompletions(t1.request, t2.request) && t1.text === t2.text;
   }
 
   /**

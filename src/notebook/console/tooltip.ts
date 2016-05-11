@@ -62,6 +62,16 @@ class ConsoleTooltip extends Widget {
   }
 
   /**
+   * The semantic parent of the tooltip, its reference widget.
+   */
+  get reference(): Widget {
+    return this._reference;
+  }
+  set reference(widget: Widget) {
+    this._reference = widget;
+  }
+
+  /**
    * The text of the tooltip.
    */
   get text(): string {
@@ -119,12 +129,17 @@ class ConsoleTooltip extends Widget {
    * Handle keydown events for the widget.
    *
    * #### Notes
-   * Hides the tooltip if a keydown happens anywhere on the document.
-   * Instead of calling dispose, keydown events hide the tooltip because they
-   * very frequently will necessitate an update of the tooltip's text.
+   * Disposes the tooltip if a keydown happens anywhere on the document outside
+   * of either the tooltip or its parent.
    */
   private _evtKeydown(event: KeyboardEvent) {
-    this.hide();
+    let target = event.target as HTMLElement;
+    while (target !== document.documentElement) {
+      if (target === this.node) return;
+      if (this._reference && target === this._reference.node) return;
+      target = target.parentElement;
+    }
+    this.dispose();
   }
 
   /**
@@ -142,8 +157,9 @@ class ConsoleTooltip extends Widget {
     this.dispose();
   }
 
-  private _text = '';
   private _rect: ClientRect = null;
+  private _reference: Widget = null;
+  private _text = '';
 }
 
 

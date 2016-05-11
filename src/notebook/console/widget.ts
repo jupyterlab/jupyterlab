@@ -247,19 +247,28 @@ class ConsoleWidget extends Widget {
     let constructor = this.constructor as typeof ConsoleWidget;
     switch (args.name) {
     case 'tooltip':
-      if (!args.newValue && this._tooltip) {
-        this._tooltip.dispose();
-        this._tooltip = null;
+      let model = args.newValue;
+
+      if (!model) {
+        if (this._tooltip) {
+          this._tooltip.dispose();
+          this._tooltip = null;
+        }
         return;
       }
-      let { top, left, text } = args.newValue;
-      let rect = { top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT };
+
+      let {top, left} = model.request.coords;
+      top += model.request.chHeight;
+      left -= model.request.chWidth;
+      let rect = {top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT};
+
       if (!this._tooltip) {
-        this._tooltip = constructor.createTooltip(top, left, text);
+        this._tooltip = constructor.createTooltip(top, left, model.text);
+        this._tooltip.reference = this;
         this._tooltip.attach(document.body);
       } else {
         this._tooltip.rect = rect as ClientRect;
-        this._tooltip.text = text;
+        this._tooltip.text = model.text;
         if (this._tooltip.isHidden) this._tooltip.show();
       }
       return;

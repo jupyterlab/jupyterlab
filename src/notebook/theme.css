@@ -359,3 +359,13 @@
 .jp-Console .jp-Console-banner .jp-InputArea-prompt {
   display: none;
 }
+
+
+.jp-ConsoleTooltip {
+  background: #FFFFCA;
+  border: 1px solid black;
+}
+
+.jp-ConsoleTooltip pre {
+  margin: 0;
+}

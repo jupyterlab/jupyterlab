@@ -116,8 +116,12 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
       let cursor = doc.getCursor();
       let line = cursor.line;
       let ch = cursor.ch;
+      let chHeight = editor.defaultTextHeight();
+      let chWidth = editor.defaultCharWidth();
       let coords = editor.charCoords({line, ch}, 'page');
-      model.completionRequested.emit({line, ch, coords, oldValue, newValue});
+      model.completionRequested.emit({
+        line, ch, chHeight, chWidth, coords, oldValue, newValue
+      });
     });
     CodeMirror.on(editor, 'keydown', (instance: any, event: KeyboardEvent) => {
       let cursor = doc.getCursor();

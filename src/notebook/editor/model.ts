@@ -23,7 +23,7 @@ type EdgeLocation = 'top' | 'bottom';
 
 
 /**
- * An interface describing editor text completion events.
+ * An interface describing editor text completion requests.
  */
 export
 interface ITextCompletion {
@@ -31,6 +31,16 @@ interface ITextCompletion {
    * The character number of the editor cursor within a line.
    */
   ch: number;
+
+  /**
+   * The height of a character in the editor.
+   */
+  chHeight: number;
+
+  /**
+   * The width of a character in the editor.
+   */
+  chWidth: number;
 
   /**
    * The line number of the editor cursor.
