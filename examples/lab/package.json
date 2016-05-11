@@ -3,7 +3,8 @@
   "name": "jupyter-js-plugins-example",
   "dependencies": {
     "es6-promise": "^3.1.2",
-    "jupyter-js-plugins": "file:.."
+    "jupyter-js-plugins": "file:..",
+    "phosphide": "^0.9.4"
   },
   "scripts": {
     "build": "webpack --config webpack.conf.js",
