@@ -258,33 +258,16 @@ class ContextManager implements IDisposable {
   }
 
   /**
-   * Clone an existing context.
-   */
-  clone(id: string): IDocumentContext {
-    let context = new Context(this);
-    let model = this._models[id];
-    let path = this._paths[id];
-    let options = this._options[id];
-    let session = this._sessions[id];
-    id = context.id;
-    this._models[id] = model.clone();
-    this._paths[id] = path;
-    this._options[id] = options;
-    if (session) {
-      this.changeKernel(id, { id: session.kernel.id });
-    }
-    return context;
-  }
-
-  /**
    * Find a context by path.
    */
-  getIdForPath(path: string): string {
+  getIdsForPath(path: string): string[] {
+    let ids: string[] = [];
     for (let id in this._paths) {
       if (this._paths[id] === path) {
-        return id;
+        ids.push(id);
       }
     }
+    return ids;
   }
 
   /**

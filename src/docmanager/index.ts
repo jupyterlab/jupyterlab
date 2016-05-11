@@ -518,7 +518,7 @@ class DocumentManager implements IDisposable {
    * @param kernel - An optional kernel name/id to override the default.
    */
   open(path: string, widgetName='default', kernel?: IKernelId): Widget {
-    let id = this._contextManager.getIdForPath(path);
+    let ids = this._contextManager.getIdsForPath(path);
     let widget = new Widget();
     let manager = this._contentsManager;
     let mFactoryEx: Private.IModelFactoryEx;
@@ -530,12 +530,8 @@ class DocumentManager implements IDisposable {
     }
     let lang = mFactoryEx.factory.preferredLanguage(path);
     let model: IDocumentModel;
-    if (!id) {
-      model = mFactoryEx.factory.createNew(lang);
-    } else {
-      // TODO: if the model name differs, handle conflict resolution.
-      model = this._contextManager.getModel(id);
-    }
+    // TODO: decide whether to use an existing model here.
+    model = mFactoryEx.factory.createNew(lang);
     let opts = mFactoryEx.contentsOptions;
     manager.get(path, opts).then(contents => {
       model.deserialize(contents.content);
@@ -593,7 +589,7 @@ class DocumentManager implements IDisposable {
    * Save a widget to a different file name.
    *
    * #### Notes
-   * It is assumed that all other widgets associated with this path
+   * It is assumed that all other widgets associated with the new path
    * have been closed and that the path is either not in conflict
    * or the user has chosen to overwrite the file.
    */
@@ -645,11 +641,10 @@ class DocumentManager implements IDisposable {
    * @param newPath - The new path.
    */
   renameFile(oldPath: string, newPath: string): Promise<void> {
-    let id = this._contextManager.getIdForPath(oldPath);
-    if (!id) {
-      return;
+    let ids = this._contextManager.getIdsForPath(oldPath);
+    for (let id in ids) {
+      return this._contextManager.rename(id, newPath);
     }
-    return this._contextManager.rename(id, newPath);
   }
 
   /**
@@ -658,32 +653,28 @@ class DocumentManager implements IDisposable {
    * @param path - The path of the file to delete.
    */
   deleteFile(path: string): void {
-    let id = this._contextManager.getIdForPath(path);
-    let widgets: Widget[] = this._widgets[id] || [];
-    for (let w of widgets) {
-      this._cleanupWidget(w);
+    let ids = this._contextManager.getIdsForPath(path);
+    for (let id of ids) {
+      let widgets: Widget[] = this._widgets[id] || [];
+      for (let w of widgets) {
+        this._cleanupWidget(w);
+      }
     }
   }
 
   /**
    * Save the document contents to disk.
    */
-  saveFile(path: string): Promise<void> {
-    let id = this._contextManager.getIdForPath(path);
-    if (!id) {
-      return;
-    }
+  save(widget: Widget): Promise<void> {
+    let id = Private.contextProperty.get(widget);
     return this._contextManager.save(id);
   }
 
   /**
    * Revert the document contents to disk contents.
    */
-  revertFile(path: string): Promise<void> {
-    let id = this._contextManager.getIdForPath(path);
-    if (!id) {
-      return;
-    }
+  revert(widget: Widget): Promise<void> {
+    let id = Private.contextProperty.get(widget);
     return this._contextManager.revert(id);
   }
 
@@ -691,10 +682,12 @@ class DocumentManager implements IDisposable {
    * Close the widgets associated with a given path.
    */
   closeFile(path: string): void {
-    let id = this._contextManager.getIdForPath(path);
-    let widgets: Widget[] = this._widgets[id] || [];
-    for (let w of widgets) {
-      w.close();
+    let ids = this._contextManager.getIdsForPath(path);
+    for (let id of ids) {
+      let widgets: Widget[] = this._widgets[id] || [];
+      for (let w of widgets) {
+        w.close();
+      }
     }
   }
 
@@ -714,13 +707,10 @@ class DocumentManager implements IDisposable {
    */
   private _createWidget(path: string, options: IContentsOpts, model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
-    let id = this._contextManager.getIdForPath(path);
+    let ids = this._contextManager.getIdsForPath(path);
     let context: IDocumentContext;
-    if (id) {
-      context = this._contextManager.clone(id);
-    } else {
-      context = this._contextManager.createNew(path, model, options);
-    }
+    // TODO: decide whether to use an existing context here.
+    context = this._contextManager.createNew(path, model, options);
     Private.contextProperty.set(parent, context.id);
     if (!(context.id in this._widgets)) {
       this._widgets[context.id] = [];

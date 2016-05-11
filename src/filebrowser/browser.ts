@@ -177,51 +177,6 @@ class FileBrowserWidget extends Widget {
   }
 
   /**
-   * Revert the currently selected item(s).
-   */
-  revert(): void {
-    let items = this._model.sortedItems;
-    for (let item of items) {
-      if (!this._model.isSelected(item.name)) {
-        continue;
-      }
-      if (item.type !== 'directory') {
-        this._manager.revertFile(item.path);
-      }
-    }
-  }
-
-  /**
-   * Save the currently selected item(s).
-   */
-  save(): void {
-    let items = this._model.sortedItems;
-    for (let item of items) {
-      if (!this._model.isSelected(item.name)) {
-        continue;
-      }
-      if (item.type !== 'directory') {
-        this._manager.saveFile(item.path);
-      }
-    }
-  }
-
-  /**
-   * Close the currently selected item(s).
-   */
-  close(): void {
-    let items = this._model.sortedItems;
-    for (let item of items) {
-      if (!this._model.isSelected(item.name)) {
-        continue;
-      }
-      if (item.type !== 'directory') {
-        this._manager.closeFile(item.path);
-      }
-    }
-  }
-
-  /**
    * Create a new untitled file or directory in the current directory.
    */
   newUntitled(type: string, ext?: string): Promise<IContentsModel> {
