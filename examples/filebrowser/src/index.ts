@@ -71,8 +71,11 @@ function main(): void {
 
   let opener = {
     open: (widget: CodeMirrorWidget) => {
-      dock.insertTabAfter(widget);
-      widgets.push(widget);
+      if (widgets.indexOf(widget) === -1) {
+        dock.insertTabAfter(widget);
+        widgets.push(widget);
+      }
+      dock.selectWidget(widget);
       activeWidget = widget;
     }
   };
@@ -137,8 +140,7 @@ function main(): void {
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      let path = docManager.findPath(activeWidget);
-      docManager.saveFile(path);
+      docManager.save(activeWidget);
     }
   }]);
 
@@ -192,15 +194,6 @@ function main(): void {
       text: 'Download',
       icon: 'fa fa-download',
       handler: () => { fbWidget.download(); }
-    }),
-    new MenuItem({
-      text: 'Save',
-      icon: 'fa fa-save',
-      handler: () => { fbWidget.save(); }
-    }),
-    new MenuItem({
-      text: 'Revert',
-      handler: () => { fbWidget.revert(); }
     }),
     new MenuItem({
       text: 'Shutdown Kernel',
