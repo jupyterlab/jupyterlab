@@ -27,7 +27,7 @@ import {
 } from './history';
 
 import {
-  EditorModel, IEditorKeydown, IEditorModel, IEditorOptions, EdgeLocation
+  EditorModel, IEditorModel, IEditorOptions, EdgeLocation, ITextCompletion
 } from '../editor/model';
 
 import {
@@ -339,12 +339,13 @@ class ConsoleModel implements IConsoleModel {
     let input = constructor.createInput(editor);
     let output = constructor.createOutputArea();
     let cell = new CodeCellModel(input, output);
+    let textEditor = input.textEditor;
     cell.trusted = true;
 
     // Connect each new prompt with console history.
-    input.textEditor.edgeRequested.connect(this._onEdgeRequested, this);
-    // Broadcast keydown events for each new prompt.
-    input.textEditor.keydown.connect(this._onKeydown, this);
+    textEditor.edgeRequested.connect(this.onEdgeRequest, this);
+    // Connect each new prompt's state changes to handle tooltip events.
+    textEditor.completionRequested.connect(this.onCompletionRequest, this);
 
     return cell;
   }
@@ -401,7 +402,19 @@ class ConsoleModel implements IConsoleModel {
     }
   }
 
-  private _onEdgeRequested(sender: any, args: EdgeLocation): void {
+  /**
+   * Handle a text completion request in the prompt model.
+   */
+  protected onCompletionRequest(sender: any, args: ITextCompletion) {
+    let { top, left } = args.coords;
+    let text = `tooltip popover:\n\ttop: ${top}\n\tleft: ${left}`;
+    this.tooltip = { top, left, text };
+  }
+
+  /**
+   * Handle an edge request in the prompt model.
+   */
+  protected onEdgeRequest(sender: any, args: EdgeLocation): void {
     switch (args) {
     case 'top':
       this._history.back().then(value => {
@@ -419,12 +432,6 @@ class ConsoleModel implements IConsoleModel {
       });
       break;
     }
-  }
-
-  private _onKeydown(sender: any, args: IEditorKeydown): void {
-    let { top, left } = args.coords;
-    let text = `tooltip popover:\n\ttop: ${top}\n\tleft: ${left}`;
-    this.tooltip = { top, left, text };
   }
 
   private _banner: IRawCellModel = null;

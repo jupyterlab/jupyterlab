@@ -29,7 +29,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IEditorModel, IEditorKeydown
+  IEditorModel
 } from './model';
 
 
@@ -105,26 +105,33 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
     this.updateCursorPosition(model.cursorPosition);
     let doc = editor.getDoc();
     CodeMirror.on(doc, 'change', (instance, change) => {
-      if (change.origin !== 'setValue') {
-        this._model.text = instance.getValue();
-      }
-    });
-    CodeMirror.on(editor, 'keydown', (instance: any, evt: KeyboardEvent) => {
+      if (change.origin === 'setValue') return;
+
+      let model = this._model;
+      let oldValue = model.text;
+      model.text = instance.getValue();
+      let newValue = model.text;
+      if (oldValue === newValue) return;
+
       let cursor = doc.getCursor();
       let line = cursor.line;
       let ch = cursor.ch;
       let coords = editor.charCoords({line, ch}, 'page');
+      model.completionRequested.emit({line, ch, coords, oldValue, newValue});
+    });
+    CodeMirror.on(editor, 'keydown', (instance: any, event: KeyboardEvent) => {
+      let cursor = doc.getCursor();
+      let line = cursor.line;
+      let ch = cursor.ch;
 
-      this._model.keydown.emit({ ch, line, coords, event: evt });
-
-      if (line === 0 && ch === 0 && evt.keyCode === UP_ARROW) {
+      if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
         this._model.edgeRequested.emit('top');
         return
       }
 
       let lastLine = doc.lastLine();
       let lastCh = doc.getLineHandle(lastLine).text.length;
-      if (line === lastLine && ch === lastCh && evt.keyCode === DOWN_ARROW) {
+      if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
         this._model.edgeRequested.emit('bottom');
         return
       }

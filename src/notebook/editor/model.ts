@@ -23,19 +23,14 @@ type EdgeLocation = 'top' | 'bottom';
 
 
 /**
- * An interface describing editor keydown events.
+ * An interface describing editor text completion events.
  */
 export
-interface IEditorKeydown {
+interface ITextCompletion {
   /**
    * The character number of the editor cursor within a line.
    */
   ch: number;
-
-  /**
-   * The native keyboard event.
-   */
-  event: KeyboardEvent;
 
   /**
    * The line number of the editor cursor.
@@ -46,6 +41,16 @@ interface IEditorKeydown {
    * The coordinate position of the cursor.
    */
   coords: { left: number; right: number; top: number; bottom: number; }
+
+  /**
+   * The old value of the editor text.
+   */
+  oldValue: string;
+
+  /**
+   * The new value of the editor text.
+   */
+  newValue: string;
 }
 
 
@@ -65,9 +70,9 @@ interface IEditorModel extends IDisposable {
   edgeRequested: ISignal<IEditorModel, EdgeLocation>;
 
   /**
-   * A signal emitted when a keydown event occurs in the editor.
+   * A signal emitted when a text completion is requested.
    */
-  keydown: ISignal<IEditorModel, IEditorKeydown>;
+  completionRequested: ISignal<IEditorModel, ITextCompletion>;
 
   /**
    * The text in the text editor.
@@ -190,10 +195,10 @@ class EditorModel implements IEditorModel {
   }
 
   /**
-   * A signal emitted when a keydown event occurs in the editor.
+   * A signal emitted when a text completion is requested.
    */
-  get keydown(): ISignal<IEditorModel, IEditorKeydown> {
-    return EditorModelPrivate.keydownSignal.bind(this);
+  get completionRequested(): ISignal<IEditorModel, ITextCompletion> {
+    return EditorModelPrivate.completionRequestedSignal.bind(this);
   }
 
   /**
@@ -375,10 +380,10 @@ namespace EditorModelPrivate {
   const edgeRequestedSignal = new Signal<EditorModel, EdgeLocation>();
 
   /**
-   * A signal emitted when a keydown event occurs in the editor.
+   * A signal emitted when a text completion is requested.
    */
   export
-  const keydownSignal = new Signal<EditorModel, IEditorKeydown>();
+  const completionRequestedSignal = new Signal<EditorModel, ITextCompletion>();
 
   /**
    * Initialize an editor view model from an options object.
