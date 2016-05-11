@@ -32,7 +32,7 @@ import {
 } from '../filebrowser/browser';
 
 import {
-  IDocumentContext, IDocumentModel
+  IDocumentContext, IDocumentModel, IModelFactoryOptions
 } from './index';
 
 
@@ -232,29 +232,43 @@ class ContextManager implements IDisposable {
     this._sessionManager = null;
     this._kernelspecids = null;
     for (let id in this._contexts) {
-      this._contexts[id].dispose();
-      this._models[id].dispose();
-      let session = this._sessions[id];
+      let contextEx = this._contexts[id];
+      contextEx.context.dispose();
+      contextEx.model.dispose();
+      let session = contextEx.session;
       if (session) session.dispose();
     }
     this._contexts = null;
-    this._models = null;
-    this._paths = null;
     this._opener = null;
-    this._options = null;
   }
 
   /**
    * Create a new context.
    */
-  createNew(path: string, model: IDocumentModel, options: IContentsOpts): IDocumentContext {
+  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions): IDocumentContext {
     let context = new Context(this);
-    let id = context.id;
-    this._paths[id] = path;
-    this._contexts[id] = context;
-    this._models[id] = model;
-    this._options[id] = options;
+    this._contexts[context.id] = {
+      context,
+      path,
+      model,
+      modelName: options.name,
+      opts: options.contentsOptions,
+      session: null
+    };
     return context;
+  }
+
+
+  /**
+   * Get a context for a given path and model name.
+   */
+  findContext(path: string, modelName: string): string {
+    for (let id in this._contexts) {
+      let contextEx = this._contexts[id];
+      if (contextEx.path === path && contextEx.modelName === modelName) {
+        return id;
+      }
+    }
   }
 
   /**
@@ -262,8 +276,8 @@ class ContextManager implements IDisposable {
    */
   getIdsForPath(path: string): string[] {
     let ids: string[] = [];
-    for (let id in this._paths) {
-      if (this._paths[id] === path) {
+    for (let id in this._contexts) {
+      if (this._contexts[id].path === path) {
         ids.push(id);
       }
     }
@@ -274,37 +288,32 @@ class ContextManager implements IDisposable {
    * Get a context by id.
    */
   getContext(id: string): IDocumentContext {
-    return this._contexts[id];
+    return this._contexts[id].context;
   }
 
   /**
    * Get the model associated with a context.
    */
   getModel(id: string): IDocumentModel {
-    return this._models[id];
+    return this._contexts[id].model;
   }
 
   /**
    * Remove a context.
    */
   removeContext(id: string): INotebookSession {
-    let model = this._models[id];
-    model.dispose();
-    delete this._models[id];
-    delete this._paths[id];
-    let context = this._contexts[id];
-    context.dispose();
+    let contextEx = this._contexts[id];
+    contextEx.model.dispose();
+    contextEx.context.dispose();
     delete this._contexts[id];
-    let session = this._sessions[id];
-    delete this._sessions[id];
-    return session;
+    return contextEx.session;
   }
 
   /**
    * Get the current kernel associated with a document.
    */
   getKernel(id: string): IKernel {
-    let session = this._sessions[id];
+    let session = this._contexts[id].session;
     return session ? session.kernel : null;
   }
 
@@ -312,16 +321,17 @@ class ContextManager implements IDisposable {
    * Get the current path associated with a document.
    */
   getPath(id: string): string {
-    return this._paths[id];
+    return this._contexts[id].path;
   }
 
   /**
    * Change the current kernel associated with the document.
    */
   changeKernel(id: string, options: IKernelId): Promise<IKernel> {
-    let session = this._sessions[id];
+    let contextEx = this._contexts[id];
+    let session = contextEx.session;
     if (!session) {
-      let path = this._paths[id];
+      let path = contextEx.path;
       let sOptions = {
         notebook: { path },
         kernel: { options }
@@ -340,13 +350,13 @@ class ContextManager implements IDisposable {
    * @param newPath - The new path.
    */
   rename(id: string, newPath: string): Promise<void> {
-    let session = this._sessions[id];
+    let contextEx = this._contexts[id];
+    let session = contextEx.session;
     if (session) {
       return session.renameNotebook(newPath);
     }
-    let context = this._contexts[id];
-    this._paths[id] = newPath;
-    context.pathChanged.emit(newPath);
+    this._contexts[id].path = newPath;
+    contextEx.context.pathChanged.emit(newPath);
     return Promise.resolve(void 0);
   }
 
@@ -361,9 +371,10 @@ class ContextManager implements IDisposable {
    * Save the document contents to disk.
    */
   save(id: string): Promise<void> {
-    let opts = utils.copy(this._options[id]);
-    let path = this._paths[id];
-    let model = this._models[id];
+    let contextEx =  this._contexts[id];
+    let opts = utils.copy(contextEx.opts);
+    let path = contextEx.path;
+    let model = contextEx.model;
     if (model.readOnly) {
       return Promise.reject(new Error('Read only'));
     }
@@ -377,9 +388,10 @@ class ContextManager implements IDisposable {
    * Revert the contents of a path.
    */
   revert(id: string): Promise<void> {
-    let opts = utils.copy(this._options[id]);
-    let path = this._paths[id];
-    let model = this._models[id];
+    let contextEx = this._contexts[id];
+    let opts = contextEx.opts;
+    let path = contextEx.path;
+    let model = contextEx.model;
     return this._contentsManager.get(path, opts).then(contents => {
       model.deserialize(contents.content);
       model.dirty = false;
@@ -405,12 +417,13 @@ class ContextManager implements IDisposable {
    * Start a session and set up its signals.
    */
   private _startSession(id: string, options: ISessionOptions): Promise<IKernel> {
-    let context = this._contexts[id];
+    let contextEx = this._contexts[id];
+    let context = contextEx.context;
     return this._sessionManager.startNew(options).then(session => {
-      this._sessions[id] = session;
+      contextEx.session = session;
       context.kernelChanged.emit(session.kernel);
       session.notebookPathChanged.connect((s, path) => {
-        this._paths[id] = path;
+        contextEx.path = path;
         context.pathChanged.emit(path);
       });
       session.kernelChanged.connect((s, kernel) => {
@@ -423,18 +436,22 @@ class ContextManager implements IDisposable {
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
   private _kernelspecids: IKernelSpecIds = null;
-  private _contexts: { [key: string]: IDocumentContext } = Object.create(null);
-  private _models: { [key: string]: IDocumentModel } = Object.create(null);
-  private _sessions: { [key: string]: INotebookSession } = Object.create(null);
+  private _contexts: { [key: string]: Private.IContextEx } = Object.create(null);
   private _opener: (id: string, widget: Widget) => IDisposable = null;
-  private _options: { [key: string]: IContentsOpts } = Object.create(null);
-  private _paths: { [key: string]: string } = Object.create(null);
 }
 
 
-//
-// It looks like context is tied to modelName and path
-// If that is the case, what does it mean to save by path?
-// Do we base it on the most recently opened, the most recently
-// focused?
-// Maybe we cannot save by path but only save by widget.
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  export
+  interface IContextEx {
+    context: IDocumentContext;
+    model: IDocumentModel;
+    session: INotebookSession;
+    opts: IContentsOpts;
+    path: string;
+    modelName: string;
+  }
+}

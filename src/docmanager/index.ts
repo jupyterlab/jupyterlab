@@ -518,7 +518,6 @@ class DocumentManager implements IDisposable {
    * @param kernel - An optional kernel name/id to override the default.
    */
   open(path: string, widgetName='default', kernel?: IKernelId): Widget {
-    let ids = this._contextManager.getIdsForPath(path);
     let widget = new Widget();
     let manager = this._contentsManager;
     let mFactoryEx: Private.IModelFactoryEx;
@@ -530,13 +529,17 @@ class DocumentManager implements IDisposable {
     }
     let lang = mFactoryEx.factory.preferredLanguage(path);
     let model: IDocumentModel;
-    // TODO: decide whether to use an existing model here.
-    model = mFactoryEx.factory.createNew(lang);
+    let id = this._contextManager.findContext(path, mFactoryEx.name);
+    if (id) {
+      model = this._contextManager.getModel(id);
+    } else {
+      model = mFactoryEx.factory.createNew(lang);
+    }
     let opts = mFactoryEx.contentsOptions;
     manager.get(path, opts).then(contents => {
       model.deserialize(contents.content);
       model.dirty = false;
-      this._createWidget(path, opts, model, widgetName, widget, kernel);
+      this._createWidget(path, model, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
     Private.factoryProperty.set(widget, widgetName);
@@ -570,7 +573,7 @@ class DocumentManager implements IDisposable {
     let opts = mFactoryEx.contentsOptions;
     opts.content = model.serialize();
     manager.save(path, opts).then(content => {
-      this._createWidget(path, opts, model, widgetName, widget, kernel);
+      this._createWidget(path, model, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
     Private.factoryProperty.set(widget, widgetName);
@@ -715,17 +718,22 @@ class DocumentManager implements IDisposable {
   /**
    * Create a or reuse a context and create a widget.
    */
-  private _createWidget(path: string, options: IContentsOpts, model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
+  private _createWidget(path: string, model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
-    let ids = this._contextManager.getIdsForPath(path);
+    let mFactoryEx = this._getModelFactoryEx(widgetName);
     let context: IDocumentContext;
-    // TODO: decide whether to use an existing context here.
-    context = this._contextManager.createNew(path, model, options);
-    Private.contextProperty.set(parent, context.id);
-    if (!(context.id in this._widgets)) {
-      this._widgets[context.id] = [];
+    let id = this._contextManager.findContext(path, mFactoryEx.name);
+    if (id) {
+      context = this._contextManager.getContext(id);
+    } else {
+      context = this._contextManager.createNew(path, model, mFactoryEx);
+      id = context.id;
     }
-    this._widgets[context.id].push(parent);
+    Private.contextProperty.set(parent, id);
+    if (!(id in this._widgets)) {
+      this._widgets[id] = [];
+    }
+    this._widgets[id].push(parent);
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
     this._attachChild(parent, child);
