@@ -286,9 +286,12 @@ class ContextManager implements IDisposable {
    * Remove a context.
    */
   removeContext(id: string): INotebookSession {
-    // TODO: make models and contexts disposable.
+    let model = this._models[id];
+    model.dispose();
     delete this._models[id];
     delete this._paths[id];
+    let context = this._contexts[id];
+    context.dispose();
     delete this._contexts[id];
     let session = this._sessions[id];
     delete this._sessions[id];
