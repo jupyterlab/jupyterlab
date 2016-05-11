@@ -586,21 +586,6 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Save a widget to a different file name.
-   *
-   * #### Notes
-   * It is assumed that all other widgets associated with the new path
-   * have been closed and that the path is either not in conflict
-   * or the user has chosen to overwrite the file.
-   */
-  saveAs(widget: Widget, path: string): Promise<void> {
-    let id = Private.contextProperty.get(widget);
-    return this._contextManager.rename(id, path).then(() => {
-      return this._contextManager.save(id);
-    });
-  }
-
-  /**
    * Filter messages on the widget.
    */
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
@@ -664,6 +649,10 @@ class DocumentManager implements IDisposable {
 
   /**
    * Save the document contents to disk.
+   *
+   * #### Notes
+   * This will affect the contents of all other widgets
+   * that share the same model as the given widget.
    */
   save(widget: Widget): Promise<void> {
     let id = Private.contextProperty.get(widget);
@@ -671,7 +660,28 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * Save a widget to a different file name.
+   *
+   * #### Notes
+   * It is assumed that all other widgets associated with the new path
+   * have been closed and that the path is either not in conflict
+   * or the user has chosen to overwrite the file.
+   * This will affect the contents of all other widgets
+   * that share the same model as the given widget.
+   */
+  saveAs(widget: Widget, path: string): Promise<void> {
+    let id = Private.contextProperty.get(widget);
+    return this._contextManager.rename(id, path).then(() => {
+      return this._contextManager.save(id);
+    });
+  }
+
+  /**
    * Revert the document contents to disk contents.
+   *
+   * #### Notes
+   * This will affect the contents of all other widgets
+   * that share the same model as the given widget.
    */
   revert(widget: Widget): Promise<void> {
     let id = Private.contextProperty.get(widget);
