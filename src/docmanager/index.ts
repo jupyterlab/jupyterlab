@@ -49,7 +49,7 @@ import {
  * The interface for a document model.
  */
 export
-interface IDocumentModel {
+interface IDocumentModel extends IDisposable {
   /**
    * A signal emitted when the document content changes.
    */
@@ -108,7 +108,7 @@ interface IDocumentModel {
 /**
  * The document context object.
  */
-export interface IDocumentContext {
+export interface IDocumentContext extends IDisposable {
   /**
    * The unique id of the context.
    *
@@ -227,7 +227,7 @@ interface IWidgetFactoryOptions {
  * The interface for a widget factory.
  */
 export
-interface IWidgetFactory<T extends Widget> {
+interface IWidgetFactory<T extends Widget> extends IDisposable {
   /**
    * Create a new widget.
    */
@@ -264,7 +264,7 @@ interface IModelFactoryOptions {
  * The interface for a model factory.
  */
 export
-interface IModelFactory {
+interface IModelFactory extends IDisposable {
   /**
    * Create a new model for a given path.
    *
@@ -307,7 +307,7 @@ interface IKernelPreference {
  * The document manager.
  */
 export
-class DocumentManager {
+class DocumentManager implements IDisposable {
   /**
    * Construct a new document manager.
    */
@@ -327,6 +327,40 @@ class DocumentManager {
         parent.dispose();
       });
     });
+  }
+
+  /**
+   * Get whether the document manager has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._contentsManager === null;
+  }
+
+  /**
+   * Dispose of the resources held by the document manager.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    for (let modelName in this._modelFactories) {
+      this._modelFactories[modelName].factory.dispose();
+    }
+    this._modelFactories = null;
+    for (let widgetName in this._widgetFactories) {
+      this._widgetFactories[widgetName].factory.dispose();
+    }
+    this._widgetFactories = null;
+    for (let id in this._widgets) {
+      for (let widget of this._widgets[id]) {
+        widget.dispose();
+      }
+    }
+    this._widgets = null;
+    this._contentsManager = null;
+    this._sessionManager = null;
+    this._contextManager.dispose();
+    this._contextManager = null;
   }
 
   /**

@@ -80,6 +80,24 @@ class Context implements IDocumentContext {
   }
 
   /**
+   * Get whether the context has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._manager === null;
+  }
+
+  /**
+   * Dispose of the resources held by the context.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._manager = null;
+    this._id = '';
+  }
+
+  /**
    * The current kernel associated with the document.
    */
   getKernel(): IKernel {
@@ -182,7 +200,7 @@ namespace Private {
  * An object which manages the active contexts.
  */
 export
-class ContextManager {
+class ContextManager implements IDisposable {
   /**
    * Construct a new context manager.
    */
@@ -194,6 +212,36 @@ class ContextManager {
     sessionManager.getSpecs().then(specs => {
       this._kernelspecids = specs;
     });
+  }
+
+  /**
+   * Get whether the context manager has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._contentsManager === null;
+  }
+
+  /**
+   * Dispose of the resources held by the document manager.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._contentsManager = null;
+    this._sessionManager = null;
+    this._kernelspecids = null;
+    for (let id in this._contexts) {
+      this._contexts[id].dispose();
+      this._models[id].dispose();
+      let session = this._sessions[id];
+      if (session) session.dispose();
+    }
+    this._contexts = null;
+    this._models = null;
+    this._paths = null;
+    this._opener = null;
+    this._options = null;
   }
 
   /**

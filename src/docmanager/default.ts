@@ -55,6 +55,20 @@ class DocumentModel implements IDocumentModel {
   }
 
   /**
+   * Get whether the model factory has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the document manager.
+   */
+  dispose(): void {
+    this._isDisposed = true;
+  }
+
+  /**
    * A signal emitted when the document content changes.
    */
   get contentChanged(): ISignal<IDocumentModel, string> {
@@ -138,6 +152,7 @@ class DocumentModel implements IDocumentModel {
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
+  private _isDisposed = false;
 }
 
 
@@ -146,6 +161,20 @@ class DocumentModel implements IDocumentModel {
  */
 export
 class ModelFactory {
+  /**
+   * Get whether the model factory has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the document manager.
+   */
+  dispose(): void {
+    this._isDisposed = true;
+  }
+
   /**
    * Create a new model for a given path.
    *
@@ -164,6 +193,8 @@ class ModelFactory {
     // TODO: use a mapping of extension to language.
     return '';
   }
+
+  private _isDisposed = false;
 }
 
 
@@ -226,6 +257,20 @@ class EditorWidget extends CodeMirrorWidget {
 export
 class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
+   * Get whether the model factory has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the document manager.
+   */
+  dispose(): void {
+    this._isDisposed = true;
+  }
+
+  /**
    * Create a new widget given a document model and a context.
    */
   createNew(model: IDocumentModel, context: IDocumentContext, kernel: IKernelId): EditorWidget {
@@ -244,6 +289,8 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
     // TODO: handle live kernels here.
     return Promise.resolve(true);
   }
+
+  private _isDisposed = false;
 }
 
 
