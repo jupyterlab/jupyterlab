@@ -406,6 +406,10 @@ class ConsoleModel implements IConsoleModel {
    * Handle a text completion request in the prompt model.
    */
   protected onCompletionRequest(sender: any, args: ITextCompletion) {
+    if (!args.newValue) {
+      this.tooltip = null;
+      return;
+    }
     let { top, left } = args.coords;
     let text = `tooltip popover:\n\ttop: ${top}\n\tleft: ${left}`;
     this.tooltip = { top, left, text };

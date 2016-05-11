@@ -247,6 +247,11 @@ class ConsoleWidget extends Widget {
     let constructor = this.constructor as typeof ConsoleWidget;
     switch (args.name) {
     case 'tooltip':
+      if (!args.newValue && this._tooltip) {
+        this._tooltip.dispose();
+        this._tooltip = null;
+        return;
+      }
       let { top, left, text } = args.newValue;
       let rect = { top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT };
       if (!this._tooltip) {
