@@ -74,11 +74,6 @@ interface IDocumentModel extends IDisposable {
   deserialize(value: any): void;
 
   /**
-   * Clone the model.
-   */
-  clone(): IDocumentModel;
-
-  /**
    * The dirty state of the model.
    *
    * #### Notes
