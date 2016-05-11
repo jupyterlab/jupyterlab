@@ -210,6 +210,17 @@ class ContextManager {
   }
 
   /**
+   * Find a context by path.
+   */
+  getIdForPath(path: string): string {
+    for (let id in this._paths) {
+      if (this._paths[id] === path) {
+        return id;
+      }
+    }
+  }
+
+  /**
    * Get a context by id.
    */
   getContext(id: string): IDocumentContext {
@@ -221,6 +232,19 @@ class ContextManager {
    */
   getModel(id: string): IDocumentModel {
     return this._models[id];
+  }
+
+  /**
+   * Remove a context.
+   */
+  removeContext(id: string): INotebookSession {
+    // TODO: make models and contexts disposable.
+    delete this._models[id];
+    delete this._paths[id];
+    delete this._contexts[id];
+    let session = this._sessions[id];
+    delete this._sessions[id];
+    return session;
   }
 
   /**

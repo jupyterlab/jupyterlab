@@ -178,31 +178,18 @@ export interface IDocumentContext {
  */
 export
 interface IWidgetFactoryOptions {
-
-  /**
-   * The file extensions the widget can view.
-   *
-   * #### Notes
-   * Use `'.*'` to denote all file extensions
-   * or give the actual extension (e.g. `'.txt'`).
-   */
-  fileExtensions: string[];
-
   /**
    * The name of the widget to display in dialogs.
    */
   displayName: string;
 
   /**
-   * The registered name of the model type used to create the widgets.
+   * The registered names of the model types that can be used to create the widgets.
    */
-  modelName: string;
+  modelNames: string[];
 
   /**
-   * The file extensions for which the factory should be the default.
-   * #### Notes
-   * Use `'.*'` to denote all file extensions
-   * or give the actual extension (e.g. `'.txt'`).
+   * The model names for which the factory should be the default.
    */
   defaultFor?: string[];
 
@@ -247,6 +234,23 @@ interface IModelFactoryOptions {
    * The name of the model factory.
    */
   name: string;
+
+  /**
+   * The file extensions the models can handle.
+   *
+   * #### Notes
+   * Use `'.*'` to denote all file extensions
+   * or give the actual extension (e.g. `'.txt'`).
+   */
+  fileExtensions: string[];
+
+  /**
+   * The file extensions for which the factory should be the default.
+   * #### Notes
+   * Use `'.*'` to denote all file extensions
+   * or give the actual extension (e.g. `'.txt'`).
+   */
+  defaultFor?: string[];
 
   /**
    * The contents options used to fetch/save files.
@@ -313,6 +317,10 @@ class DocumentManager {
       let parent = new Widget();
       this._attachChild(parent, widget);
       Private.contextProperty.set(widget, id);
+      let sibling = this._widgets[id][0];
+      let factoryName = Private.factoryProperty.get(sibling);
+      Private.factoryProperty.set(parent, factoryName);
+      this._widgets[id].push(parent);
       opener.open(parent);
       return new DisposableDelegate(() => {
         parent.dispose();
@@ -338,32 +346,8 @@ class DocumentManager {
    * as the global default, this factory will override the existing default.
    */
   registerWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions): IDisposable {
-    let name = options.displayName;
-    let exOpt = options as Private.IWidgetFactoryEx;
-    exOpt.factory = factory;
-    this._widgetFactories[name] = exOpt;
-    if (options.defaultFor) {
-      for (let option of options.defaultFor) {
-        if (option === '.*') {
-          this._defaultWidgetFactory = name;
-        }
-        if (option in options.fileExtensions) {
-          this._defaultWidgetFactories[option] = name;
-        }
-      }
-    }
-    return new DisposableDelegate(() => {
-      delete this._widgetFactories[name];
-      if (this._defaultWidgetFactory === name) {
-        this._defaultWidgetFactory = '';
-      }
-      for (let opt of Object.keys(this._defaultWidgetFactories)) {
-        let n = this._defaultWidgetFactories[opt];
-        if (n === name) {
-          delete this._defaultWidgetFactories[opt];
-        }
-      }
-    });
+    // TODO
+    return void 0;
   }
 
   /**
@@ -380,13 +364,8 @@ class DocumentManager {
    * factory will be ignored and a warning will be printed to the console.
    */
   registerModelFactory(factory: IModelFactory, options: IModelFactoryOptions): IDisposable {
-    let exOpt = options as Private.IModelFactoryEx;
-    let name = options.name;
-    exOpt.factory = factory;
-    this._modelFactories[name] = exOpt;
-    return new DisposableDelegate(() => {
-      delete this._modelFactories[name];
-    });
+    // TODO
+    return void 0;
   }
 
   /**
@@ -398,58 +377,16 @@ class DocumentManager {
    * The first item in the list is considered the default.
    */
   listWidgetFactories(path?: string): string[] {
-    let ext = '.' + path.split('.').pop();
-    let factories: string[] = [];
-    let options: Private.IWidgetFactoryEx;
-    let name = '';
-    // If an extension was given, filter by extension.
-    // Make sure the modelFactory is registered.
-    if (ext.length > 1) {
-      if (ext in this._defaultWidgetFactories) {
-        name = this._defaultWidgetFactories[ext];
-        options = this._widgetFactories[name];
-        if (options.modelName in this._modelFactories) {
-          factories.push(name);
-        }
-      }
-    }
-    // Add the default widget if it was not already added.
-    if (name !== this._defaultWidgetFactory && this._defaultWidgetFactory) {
-      name = this._defaultWidgetFactory;
-      options = this._widgetFactories[name];
-      if (options.modelName in this._modelFactories) {
-        factories.push(name);
-      }
-    }
-    // Add the rest of the valid widgetFactories that can open the path.
-    for (name in this._widgetFactories) {
-      if (factories.indexOf(name) !== -1) {
-        continue;
-      }
-      options = this._widgetFactories[name];
-      if (!(options.modelName in this._modelFactories)) {
-        continue;
-      }
-      let exts = options.fileExtensions;
-      if ((ext in exts) || ('.*' in exts)) {
-        factories.push(name);
-      }
-    }
-    return factories;
+    // TODO
+    return void 0;
   }
 
   /**
    * Get the kernel preference.
    */
   getKernelPreference(path: string, widgetName: string): IKernelPreference {
-    let widgetFactoryEx = this._getWidgetFactoryEx(widgetName);
-    let modelFactoryEx = this._getModelFactoryEx(widgetName);
-    let language = modelFactoryEx.factory.preferredLanguage(path);
-    return {
-      language,
-      preferKernel: widgetFactoryEx.preferKernel,
-      canStartKernel: widgetFactoryEx.canStartKernel
-    }
+    // TODO
+    return void 0;
   }
 
   /**
@@ -462,7 +399,7 @@ class DocumentManager {
    * @param kernel - An optional kernel name/id to override the default.
    */
   open(path: string, widgetName='default', kernel?: IKernelId): Widget {
-    // TODO: if the context already exists, use it.
+    let id = this._contextManager.getIdForPath(path);
     let widget = new Widget();
     let manager = this._contentsManager;
     let mFactoryEx: Private.IModelFactoryEx;
@@ -473,7 +410,13 @@ class DocumentManager {
       mFactoryEx = this._getModelFactoryEx(widgetName);
     }
     let lang = mFactoryEx.factory.preferredLanguage(path);
-    let model = mFactoryEx.factory.createNew(lang);
+    let model: IDocumentModel;
+    if (!id) {
+      model = mFactoryEx.factory.createNew(lang);
+    } else {
+      // TODO: if the model name differs, handle conflict resolution.
+      model = this._contextManager.getModel(id);
+    }
     let opts = mFactoryEx.contentsOptions;
     manager.get(path, opts).then(contents => {
       model.deserialize(contents.content);
@@ -481,7 +424,7 @@ class DocumentManager {
       this._createWidget(path, opts, model, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
-    Private.widgetFactoryProperty.set(widget, widgetName);
+    Private.factoryProperty.set(widget, widgetName);
     return widget;
   }
 
@@ -531,42 +474,33 @@ class DocumentManager {
    * Filter messages on the widget.
    */
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
-    let widget = handler as Widget;
-    let child = (widget.layout as PanelLayout).childAt(0);
-    if (msg.type === 'close-request') {
-      if (this._closeGuard) {
-        this._closeGuard = false;
-        return false;
-      }
-      let id = Private.contextProperty.get(widget);
-      let model = this._contextManager.getModel(id);
-      let context = this._contextManager.getContext(id);
-      let factoryName = Private.factoryProperty.get(widget);
-      factoryName = factoryName || this._defaultWidgetFactory;
-      let factory = this._widgetFactories[factoryName].factory;
-      if (!model.dirty) {
-        factory.beforeClose(model, context, child).then(result => {
-          if (result) {
-            this._closeGuard = true;
-            widget.close();
-          }
-        });
-      } else {
-        this._maybeClose(widget).then(result => {
-          if (!result) {
-            return;
-          }
-          factory.beforeClose(model, context, child).then(result => {
-            if (result) {
-              this._closeGuard = true;
-              widget.close();
-            }
-          });
-        });
-      }
-      return true;
+    if (msg.type !== 'close-request') {
+      return false;
     }
-    return false;
+    if (this._closeGuard) {
+      // Allow the close to propagate to the widget and its layout.
+      this._closeGuard = false;
+      return false;
+    }
+    let widget = handler as Widget;
+    let id = Private.contextProperty.get(widget);
+    let model = this._contextManager.getModel(id);
+    let context = this._contextManager.getContext(id);
+    let child = (widget.layout as PanelLayout).childAt(0);
+    let factoryName = Private.factoryProperty.get(widget);
+    factoryName = factoryName || this._defaultWidgetFactory;
+    let factory = this._widgetFactories[factoryName].factory;
+    this._maybeClose(widget, model.dirty).then(result => {
+      if (!result) {
+        return result;
+      }
+      return factory.beforeClose(model, context, child);
+    }).then(result => {
+      if (result) {
+        return this._cleanupWidget(widget);
+      }
+    });
+    return true;
   }
 
   /**
@@ -577,9 +511,11 @@ class DocumentManager {
    * @param newPath - The new path.
    */
   renameFile(oldPath: string, newPath: string): Promise<void> {
-    // TODO: find the appropriate context.
-    //return this._contextManager.rename(id, newPath);
-    return void 0;
+    let id = this._contextManager.getIdForPath(oldPath);
+    if (!id) {
+      return;
+    }
+    return this._contextManager.rename(id, newPath);
   }
 
   /**
@@ -588,49 +524,74 @@ class DocumentManager {
    * @param path - The path of the file to delete.
    */
   deleteFile(path: string): void {
-    // Look up kernel (if exists) and if this session is the only session using the kernel, ask user if they want to shut down the kernel.
-    // dispose everything in the path->(model, session, context, [list,of,widgets]) mapping for the path (disposing a session should not shut down the kernel - needs change in notebook server)
+    let id = this._contextManager.getIdForPath(path);
+    let widgets: Widget[] = this._widgets[id] || [];
+    for (let w of widgets) {
+      this._cleanupWidget(w);
+    }
   }
 
   /**
    * Save the document contents to disk.
    */
   saveFile(path: string): Promise<void> {
-    // TODO: find the appropriate context.
-    //return this._contextManager.save(id);
-    return void 0;
+    let id = this._contextManager.getIdForPath(path);
+    if (!id) {
+      return;
+    }
+    return this._contextManager.save(id);
   }
 
   /**
    * Revert the document contents to disk contents.
    */
   revertFile(path: string): Promise<void> {
-    // TODO: find the appropriate context.
-    //return this._contextManager.revert(id);
-    return void 0;
+    let id = this._contextManager.getIdForPath(path);
+    if (!id) {
+      return;
+    }
+    return this._contextManager.revert(id);
   }
 
   /**
    * Close the widgets associated with a given path.
    */
   closeFile(path: string): void {
-
+    let id = this._contextManager.getIdForPath(path);
+    let widgets: Widget[] = this._widgets[id] || [];
+    for (let w of widgets) {
+      w.close();
+    }
   }
 
   /**
    * Close all of the open documents.
    */
   closeAll(): void {
-
+    for (let id in this._widgets) {
+      for (let w of this._widgets[id]) {
+        w.close();
+      }
+    }
   }
 
   /**
-   * Create a context and a widget.
+   * Create a or reuse a context and create a widget.
    */
   private _createWidget(path: string, options: IContentsOpts, model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
-    let context = this._contextManager.createNew(path, model, options);
+    let id = this._contextManager.getIdForPath(path);
+    let context: IDocumentContext;
+    if (id) {
+      context = this._contextManager.getContext(id);
+    } else {
+      context = this._contextManager.createNew(path, model, options);
+    }
     Private.contextProperty.set(parent, context.id);
+    if (!(context.id in this._widgets)) {
+      this._widgets[context.id] = [];
+    }
+    this._widgets[context.id].push(parent);
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
     this._attachChild(parent, child);
@@ -658,7 +619,10 @@ class DocumentManager {
   /**
    * Ask the user whether to close an unsaved file.
    */
-  private _maybeClose(widget: Widget): Promise<boolean> {
+  private _maybeClose(widget: Widget, dirty: boolean): Promise<boolean> {
+    if (!dirty) {
+      return Promise.resolve(true);
+    }
     let host = widget.isAttached ? widget.node : document.body;
     return showDialog({
       title: 'Close without saving?',
@@ -670,6 +634,29 @@ class DocumentManager {
       }
       return false;
     });
+  }
+
+  /**
+   * Clean up the data associated with a widget.
+   */
+  private _cleanupWidget(widget: Widget): void {
+    // Remove the widget from our internal storage.
+    let id = Private.contextProperty.get(widget);
+    let index = this._widgets[id].indexOf(widget);
+    this._widgets[id] = this._widgets[id].splice(index, 1);
+    this._closeGuard = true;
+    // If this is the last widget in that context, remove the context.
+    if (!this._widgets[id]) {
+      let session = this._contextManager.removeContext(id);
+      if (session) {
+        // TODO: show a dialog asking whether to shut down the kernel.
+        widget.close();
+        widget.dispose();
+      }
+    } else {
+      widget.close();
+      widget.dispose();
+    }
   }
 
   /**
@@ -693,13 +680,15 @@ class DocumentManager {
     if (!wFactoryEx) {
       return;
     }
-    return this._modelFactories[wFactoryEx.modelName];
+    // TODO
+    return void 0;
   }
 
   private _modelFactories: { [key: string]: Private.IModelFactoryEx } = Object.create(null);
   private _widgetFactories: { [key: string]: Private.IWidgetFactoryEx } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
+  private _widgets: { [key: string]: Widget[] } = Object.create(null);
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
   private _contextManager: ContextManager = null;
