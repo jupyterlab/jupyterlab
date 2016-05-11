@@ -350,9 +350,9 @@ class ConsoleModel implements IConsoleModel {
     let textEditor = input.textEditor;
     cell.trusted = true;
 
-    // Connect each new prompt with console history.
+    // Connect each new prompt's edge requests with console history.
     textEditor.edgeRequested.connect(this.onEdgeRequest, this);
-    // Connect each new prompt's state changes to handle tooltip events.
+    // Connect each new prompt's text completion requests to the tooltip model.
     textEditor.completionRequested.connect(this.onCompletionRequest, this);
 
     return cell;
