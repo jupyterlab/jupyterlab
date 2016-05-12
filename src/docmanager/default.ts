@@ -130,22 +130,42 @@ class DocumentModel implements IDocumentModel {
   }
 
   /**
-   * Serialize the model.
+   * Serialize the model to a string.
    */
-  serialize(): string {
+  toString(): string {
     return this._text;
   }
 
   /**
    * Deserialize the model from a string.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
    */
-  deserialize(value: string): void {
+  fromString(value: string): void {
     if (this._text === value) {
       return;
     }
     this._text = value;
     this.contentChanged.emit(value);
     this.dirty = true;
+  }
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): string {
+    return JSON.stringify(this._text);
+  }
+
+  /**
+   * Deserialize the model from JSON.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
+   */
+  fromJSON(value: any): void {
+    this.fromString(JSON.parse(value));
   }
 
   private _text = '';
@@ -214,9 +234,9 @@ class EditorWidget extends CodeMirrorWidget {
     this._context = context;
     let editor = this.editor;
     let doc = editor.getDoc();
-    doc.setValue(model.serialize());
+    doc.setValue(model.toString());
     this._updateTitle();
-    loadModeByFileName(editor, context.getPath());
+    loadModeByFileName(editor, context.path);
     this._model.dirtyChanged.connect((m, value) => {
       if (value) {
         this.title.className += ` ${DIRTY_CLASS}`;
@@ -230,11 +250,13 @@ class EditorWidget extends CodeMirrorWidget {
     });
     model.contentChanged.connect((m, text) => {
       let old = doc.getValue();
-      if (old !== text) doc.setValue(text);
+      if (old !== text) {
+        doc.setValue(text);
+      }
     });
     CodeMirror.on(doc, 'change', (instance, change) => {
       if (change.origin !== 'setValue') {
-        model.deserialize(instance.getValue());
+        model.fromString(instance.getValue());
       }
     });
   }
@@ -243,7 +265,7 @@ class EditorWidget extends CodeMirrorWidget {
    * Update the title based on the path.
    */
   private _updateTitle(): void {
-    this.title.text = this._context.getPath().split('/').pop();
+    this.title.text = this._context.path.split('/').pop();
   }
 
   private _model: IDocumentModel = null;

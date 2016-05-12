@@ -71,12 +71,42 @@ class Context implements IDocumentContext {
 
   /**
    * The unique id of the context.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   get id(): string {
     return this._id;
   }
-  set id(value: string) {
-    this._id = value;
+
+  /**
+   * The current kernel associated with the document.
+   *
+   * #### Notes
+   * This is a read-only propery.
+   */
+  get kernel(): IKernel {
+    return this._manager.getKernel(this._id);
+  }
+
+  /**
+   * The current path associated with the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get path(): string {
+    return this._manager.getPath(this._id);
+  }
+
+  /**
+   * Get the kernel spec information.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get kernelSpecs(): IKernelSpecIds {
+    return this._manager.getKernelSpecs();
   }
 
   /**
@@ -95,30 +125,6 @@ class Context implements IDocumentContext {
     }
     this._manager = null;
     this._id = '';
-  }
-
-  /**
-   * The current kernel associated with the document.
-   */
-  getKernel(): IKernel {
-    return this._manager.getKernel(this._id);
-  }
-
-  /**
-   * The current path associated with the document.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  getPath(): string {
-    return this._manager.getPath(this._id);
-  }
-
-  /**
-   * Get the current kernelspec information.
-   */
-  getKernelSpecs(): IKernelSpecIds {
-    return this._manager.getKernelSpecs();
   }
 
   /**
@@ -236,7 +242,9 @@ class ContextManager implements IDisposable {
       contextEx.context.dispose();
       contextEx.model.dispose();
       let session = contextEx.session;
-      if (session) session.dispose();
+      if (session) {
+        session.dispose();
+      }
     }
     this._contexts = null;
     this._opener = null;
@@ -377,7 +385,11 @@ class ContextManager implements IDisposable {
     if (model.readOnly) {
       return Promise.reject(new Error('Read only'));
     }
-    opts.content = model.serialize();
+    if (opts.format === 'json') {
+      opts.content = model.toJSON();
+    } else {
+      opts.content = model.toString();
+    }
     return this._contentsManager.save(path, opts).then(() => {
       model.dirty = false;
     });
@@ -392,7 +404,11 @@ class ContextManager implements IDisposable {
     let path = contextEx.path;
     let model = contextEx.model;
     return this._contentsManager.get(path, opts).then(contents => {
-      model.deserialize(contents.content);
+      if (contents.format === 'json') {
+        model.fromJSON(contents.content);
+      } else {
+        model.fromString(contents.content);
+      }
       model.dirty = false;
     });
   }

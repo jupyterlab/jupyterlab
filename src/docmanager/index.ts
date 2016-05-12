@@ -61,17 +61,30 @@ interface IDocumentModel extends IDisposable {
   dirtyChanged: ISignal<IDocumentModel, boolean>;
 
   /**
-   * Serialize the model.  It should return a JSON object or a string.
+   * Serialize the model to a string.
    */
-  serialize(): any;
+  toString(): string;
 
   /**
-   * Deserialize the model from a string or a JSON object.
+   * Deserialize the model from a string.
    *
    * #### Notes
    * Should emit a [contentChanged] signal.
    */
-  deserialize(value: any): void;
+  fromString(value: string): void;
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): string;
+
+  /**
+   * Deserialize the model from JSON.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
+   */
+  fromJSON(value: any): void;
 
   /**
    * The dirty state of the model.
@@ -118,6 +131,30 @@ export interface IDocumentContext extends IDisposable {
   id: string;
 
   /**
+   * The current kernel associated with the document.
+   *
+   * #### Notes
+   * This is a read-only propery.
+   */
+  kernel: IKernel;
+
+  /**
+   * The current path associated with the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  path: string;
+
+  /**
+   * Get the kernel spec information.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  kernelSpecs: IKernelSpecIds;
+
+  /**
    * A signal emitted when the kernel changes.
    */
   kernelChanged: ISignal<IDocumentContext, IKernel>;
@@ -126,21 +163,6 @@ export interface IDocumentContext extends IDisposable {
    * A signal emitted when the path changes.
    */
   pathChanged: ISignal<IDocumentContext, string>;
-
-  /**
-   * Get the current kernel associated with the document.
-   */
-  getKernel(): IKernel;
-
-  /**
-   * Get the current path associated with the document.
-   */
-  getPath(): string;
-
-  /**
-   * Get the current kernelspec information.
-   */
-  getKernelSpecs(): IKernelSpecIds;
 
   /**
    * Change the current kernel associated with the document.
@@ -538,7 +560,11 @@ class DocumentManager implements IDisposable {
     }
     let opts = mFactoryEx.contentsOptions;
     manager.get(path, opts).then(contents => {
-      model.deserialize(contents.content);
+      if (contents.format === 'json') {
+        model.fromJSON(contents.content);
+      } else {
+        model.fromString(contents.content);
+      }
       model.dirty = false;
       this._createWidget(path, model, widgetName, widget, kernel);
     });
@@ -572,7 +598,11 @@ class DocumentManager implements IDisposable {
     let lang = mFactoryEx.factory.preferredLanguage(path);
     let model = mFactoryEx.factory.createNew(lang);
     let opts = mFactoryEx.contentsOptions;
-    opts.content = model.serialize();
+    if (opts.format === 'json') {
+      opts.content = model.toJSON();
+    } else {
+      opts.content = model.toString();
+    }
     manager.save(path, opts).then(content => {
       this._createWidget(path, model, widgetName, widget, kernel);
     });
@@ -678,6 +708,25 @@ class DocumentManager implements IDisposable {
     return this._contextManager.rename(id, path).then(() => {
       return this._contextManager.save(id);
     });
+  }
+
+  /**
+   * Create a new widget based on an existing widget.
+   *
+   * #### Notes
+   * The new widget will have the same model and context as the
+   * existing widget.
+   */
+  clone(widget: Widget): Widget {
+    let parent = new Widget();
+    let id = Private.contextProperty(widget);
+    Private.contextProperty.set(parent, id);
+    let context = this._contextManager.getContext(id);
+    let factoryName = Private.factoryProperty.get(widget);
+    this._widgets[id].push(parent);
+    let factory = this._widgetFactories[factoryName].factory;
+    let child = factory.createNew(model, context, null);
+    this._attachChild(parent, child);
   }
 
   /**
