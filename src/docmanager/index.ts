@@ -653,8 +653,8 @@ class DocumentManager implements IDisposable {
     let name = Private.nameProperty.get(widget);
     // Check for a sibling widget.
     if (!name) {
-      this._closeGuard = true;
-      widget.close();
+      // Do not filter the message.
+      return false;
     }
     let factory = this._widgetFactories[name].factory;
     this._maybeClose(widget, model.dirty).then(result => {
