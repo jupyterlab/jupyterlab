@@ -617,6 +617,10 @@ class DocumentManager implements IDisposable {
 
   /**
    * Clone a widget.
+   *
+   * #### Notes
+   * This will create a new widget with the same model and context
+   * as the existing widget.
    */
   clone(widget: Widget): Widget {
     let parent = new Widget();
