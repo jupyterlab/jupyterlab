@@ -533,7 +533,7 @@ class DocumentManager implements IDisposable {
       language,
       preferKernel: widgetFactoryEx.preferKernel,
       canStartKernel: widgetFactoryEx.canStartKernel
-    }
+    };
   }
 
   /**
