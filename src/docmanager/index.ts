@@ -262,7 +262,7 @@ interface IWidgetFactory<T extends Widget> extends IDisposable {
   /**
    * Create a new widget.
    */
-  createNew(model: IDocumentModel, context: IDocumentContext, kernel: IKernelId): T;
+  createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): T;
 
   /**
    * Take an action on a widget before closing it.

@@ -281,7 +281,7 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
    * Create a new widget given a document model and a context.
    */
-  createNew(model: IDocumentModel, context: IDocumentContext, kernel: IKernelId): EditorWidget {
+  createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): EditorWidget {
     // TODO: if a kernel id or a name other than 'none' or 'default'
     // was given, start that kernel
     return new EditorWidget(model, context);
