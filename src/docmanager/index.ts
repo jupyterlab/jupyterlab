@@ -481,6 +481,7 @@ class DocumentManager implements IDisposable {
    * The first item in the list is considered the default.
    */
   listWidgetFactories(path?: string): string[] {
+    path = path || '';
     let ext = '.' + path.split('.').pop();
     let factories: string[] = [];
     let options: Private.IWidgetFactoryEx;
@@ -496,14 +497,6 @@ class DocumentManager implements IDisposable {
         }
       }
     }
-    // Add the default widget if it was not already added.
-    if (name !== this._defaultWidgetFactory && this._defaultWidgetFactory) {
-      name = this._defaultWidgetFactory;
-      options = this._widgetFactories[name];
-      if (options.modelName in this._modelFactories) {
-        factories.push(name);
-      }
-    }
     // Add the rest of the valid widgetFactories that can open the path.
     for (name in this._widgetFactories) {
       if (factories.indexOf(name) !== -1) {
@@ -515,6 +508,14 @@ class DocumentManager implements IDisposable {
       }
       let exts = options.fileExtensions;
       if ((ext in exts) || ('.*' in exts)) {
+        factories.push(name);
+      }
+    }
+    // Add the default widget if it was not already added.
+    name = this._defaultWidgetFactory;
+    if (name && factories.indexOf(name) === -1) {
+      options = this._widgetFactories[name];
+      if (options.modelName in this._modelFactories) {
         factories.push(name);
       }
     }
