@@ -223,30 +223,27 @@ class ModelFactory {
  */
 export
 class EditorWidget extends CodeMirrorWidget {
-
   /**
    * Construct a new editor widget.
    */
   constructor(model: IDocumentModel, context: IDocumentContext) {
     super();
     this.addClass(EDITOR_CLASS);
-    this._model = model;
-    this._context = context;
     let editor = this.editor;
     let doc = editor.getDoc();
     doc.setValue(model.toString());
-    this._updateTitle();
+    this.title.text = context.path.split('/').pop();
     loadModeByFileName(editor, context.path);
-    this._model.dirtyChanged.connect((m, value) => {
+    model.dirtyChanged.connect((m, value) => {
       if (value) {
         this.title.className += ` ${DIRTY_CLASS}`;
       } else {
         this.title.className = this.title.className.replace(DIRTY_CLASS, '');
       }
     });
-    this._context.pathChanged.connect((c, path) => {
+    context.pathChanged.connect((c, path) => {
       loadModeByFileName(editor, path);
-      this._updateTitle();
+      this.title.text = path.split('/').pop();
     });
     model.contentChanged.connect((m, text) => {
       let old = doc.getValue();
@@ -260,16 +257,6 @@ class EditorWidget extends CodeMirrorWidget {
       }
     });
   }
-
-  /**
-   * Update the title based on the path.
-   */
-  private _updateTitle(): void {
-    this.title.text = this._context.path.split('/').pop();
-  }
-
-  private _model: IDocumentModel = null;
-  private _context: IDocumentContext = null;
 }
 
 
