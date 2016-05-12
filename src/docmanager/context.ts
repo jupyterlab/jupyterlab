@@ -496,6 +496,9 @@ class ContextManager implements IDisposable {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * An extended interface for data associated with a context.
+   */
   export
   interface IContextEx {
     context: IDocumentContext;
