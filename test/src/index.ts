@@ -3,10 +3,6 @@
 'use strict';
 
 import './dialog/dialog.spec';
-import './filehandler/creator.spec';
-import './filehandler/default.spec';
-import './filehandler/filehandler.spec';
-import './filehandler/registry.spec';
 import './renderers/renderers.spec';
 import './rendermime/rendermime.spec';
 import './renderers/latex.spec';
