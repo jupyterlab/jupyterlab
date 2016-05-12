@@ -154,7 +154,7 @@ class DocumentModel implements IDocumentModel {
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): string {
+  toJSON(): any {
     return JSON.stringify(this._text);
   }
 

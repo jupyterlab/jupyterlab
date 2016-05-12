@@ -76,7 +76,7 @@ interface IDocumentModel extends IDisposable {
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): string;
+  toJSON(): any;
 
   /**
    * Deserialize the model from JSON.
