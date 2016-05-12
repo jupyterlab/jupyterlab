@@ -408,8 +408,8 @@ class DocumentManager implements IDisposable {
    * @returns A disposable used to unregister the factory.
    *
    * #### Notes
-   * If a factory with the given `displayName` is already registered, the
-   * factory will be ignored and a warning will be printed to the console.
+   * If a factory with the given `displayName` is already registered,
+   * an error will be thrown.
    * If `'.*'` is given as a default extension, the factory will be registered
    * as the global default.
    * If a factory is already registered as a default for a given extension or
@@ -420,8 +420,7 @@ class DocumentManager implements IDisposable {
     let exOpt = options as Private.IWidgetFactoryEx;
     exOpt.factory = factory;
     if (this._widgetFactories[name]) {
-      console.warn(`Duplicate registered factory ${name}`);
-      return;
+      throw new Error(`Duplicate registered factory ${name}`);
     }
     this._widgetFactories[name] = exOpt;
     if (options.defaultFor) {
@@ -458,16 +457,15 @@ class DocumentManager implements IDisposable {
    * @returns A disposable used to unregister the factory.
    *
    * #### Notes
-   * If a factory with the given `name` is already registered, the
-   * factory will be ignored and a warning will be printed to the console.
+   * If a factory with the given `name` is already registered, an error
+   * will be thrown.
    */
   registerModelFactory(factory: IModelFactory, options: IModelFactoryOptions): IDisposable {
     let exOpt = options as Private.IModelFactoryEx;
     let name = options.name;
     exOpt.factory = factory;
     if (this._modelFactories[name]) {
-      console.warn(`Duplicate registered factory ${name}`);
-      return;
+      throw new Error(`Duplicate registered factory ${name}`);
     }
     this._modelFactories[name] = exOpt;
     return new DisposableDelegate(() => {
