@@ -457,8 +457,10 @@ class ContextManager implements IDisposable {
       contextEx.session = session;
       context.kernelChanged.emit(session.kernel);
       session.notebookPathChanged.connect((s, path) => {
-        contextEx.path = path;
-        context.pathChanged.emit(path);
+        if (path !== contextex.path) {
+          contextEx.path = path;
+          context.pathChanged.emit(path);
+        }
       });
       session.kernelChanged.connect((s, kernel) => {
         context.kernelChanged.emit(kernel);
