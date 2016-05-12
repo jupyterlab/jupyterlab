@@ -548,12 +548,6 @@ class DocumentManager implements IDisposable {
     let model: IDocumentModel;
     let id = this._contextManager.findContext(path, mFactoryEx.name);
     if (id) {
-      // See if we already have a widget open for this path and widgetName.
-      for (let widget of this._widgets[id]) {
-        if (Private.factoryProperty.get(widget) === widgetName) {
-          return widget;
-        }
-      }
       model = this._contextManager.getModel(id);
     } else {
       model = mFactoryEx.factory.createNew(lang);
@@ -614,9 +608,9 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Find the path given a widget.
+   * Get the path given a widget.
    */
-  findPath(widget: Widget): string {
+  getPath(widget: Widget): string {
     let id = Private.contextProperty.get(widget);
     return this._contextManager.getPath(id);
   }
@@ -684,6 +678,27 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * See if a widget already exists for the given path and widget name.
+   *
+   * #### Notes
+   * This can be used to use an existing widget instead of opening
+   * a new widget.
+   */
+  findWidget(path: string, widgetName='default'): Widget {
+    let ids = this._contextManager.getIdsForPath(path);
+    if (widgetName === 'default') {
+      widgetName = this._defaultWidgetFactory;
+    }
+    for (let id of ids) {
+      for (let widget of this._widgets[id]) {
+        if (Private.factoryProperty.get(widget) === widgetName) {
+          return widget;
+        }
+      }
+    }
+  }
+
+  /**
    * Save the document contents to disk.
    *
    * #### Notes
@@ -710,21 +725,6 @@ class DocumentManager implements IDisposable {
     return this._contextManager.rename(id, path).then(() => {
       return this._contextManager.save(id);
     });
-  }
-
-  /**
-   * Create a new widget based on an existing widget.
-   *
-   * #### Notes
-   * The new widget will have the same model and context as the
-   * existing widget.
-   */
-  clone(widget: Widget): Widget {
-    let parent = new Widget();
-    let id = Private.contextProperty.get(widget);
-    let factoryName = Private.factoryProperty.get(widget);
-    this._createWidget(id, factoryName, parent);
-    return parent;
   }
 
   /**

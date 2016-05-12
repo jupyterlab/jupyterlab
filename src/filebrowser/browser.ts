@@ -170,7 +170,8 @@ class FileBrowserWidget extends Widget {
           showErrorMessage(this, 'Open directory', error)
         );
       } else {
-        let widget = this._manager.open(item.path);
+        let path = item.path;
+        let widget = this._manager.findWidget(path) || this._manager.open(item.path);
         this._opener.open(widget);
       }
     }

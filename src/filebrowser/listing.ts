@@ -885,7 +885,8 @@ class DirListing extends Widget {
         showErrorMessage(this, 'Open directory', error)
       );
     } else {
-      let widget = this._manager.open(item.path);
+      let path = item.path;
+      let widget = this._manager.findWidget(path) || this._manager.open(item.path);
       this._opener.open(widget);
     }
   }
@@ -1039,13 +1040,13 @@ class DirListing extends Widget {
     this._drag.mimeData.setData(utils.CONTENTS_MIME, null);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
-        return this._manager.open(item.path);
+        let path = item.path;
+        return this._manager.findWidget(path) || this._manager.open(item.path);
       });
     }
 
     // Start the drag and remove the mousemove listener.
     this._drag.start(clientX, clientY).then(action => {
-      console.log('action', action);
       this._drag = null;
     });
     document.removeEventListener('mousemove', this, true);
