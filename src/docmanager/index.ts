@@ -915,21 +915,33 @@ namespace Private {
   export
   const openedSignal = new Signal<DocumentManager, Widget>();
 
+  /**
+   * An extended interface for a model factory and its options.
+   */
   export
   interface IModelFactoryEx extends IModelFactoryOptions {
     factory: IModelFactory;
   }
 
+  /**
+   * An extended interface for a widget factory and its options.
+   */
   export
   interface IWidgetFactoryEx extends IWidgetFactoryOptions {
     factory: IWidgetFactory<Widget>;
   }
 
+  /**
+   * The widget factory name used to create a widget.
+   */
   export
   const factoryProperty = new Property<Widget, string>({
     name: 'factory'
   });
 
+  /**
+   * The context id associated with a widget.
+   */
   export
   const contextProperty = new Property<Widget, string>({
     name: 'context'
