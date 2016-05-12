@@ -647,7 +647,6 @@ class DocumentManager implements IDisposable {
     let context = this._contextManager.getContext(id);
     let child = (widget.layout as PanelLayout).childAt(0);
     let name = Private.nameProperty.get(widget);
-    name = name || this._defaultWidgetFactory;
     let factory = this._widgetFactories[name].factory;
     this._maybeClose(widget, model.dirty).then(result => {
       if (!result) {
