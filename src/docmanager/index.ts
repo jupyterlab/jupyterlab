@@ -719,14 +719,16 @@ class DocumentManager implements IDisposable {
    */
   clone(widget: Widget): Widget {
     let parent = new Widget();
-    let id = Private.contextProperty(widget);
+    let id = Private.contextProperty.get(widget);
     Private.contextProperty.set(parent, id);
     let context = this._contextManager.getContext(id);
+    let model = this._contextManager.getModel(id);
     let factoryName = Private.factoryProperty.get(widget);
     this._widgets[id].push(parent);
     let factory = this._widgetFactories[factoryName].factory;
     let child = factory.createNew(model, context, null);
     this._attachChild(parent, child);
+    return parent;
   }
 
   /**
