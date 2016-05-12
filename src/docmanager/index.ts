@@ -616,6 +616,17 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * Clone a widget.
+   */
+  clone(widget: Widget): Widget {
+    let parent = new Widget();
+    let id = Private.contextProperty.get(widget);
+    let name = Private.contextProperty.get(id);
+    this._createWidget(id, name, parent);
+    return parent;
+  }
+
+  /**
    * Filter messages on the widget.
    */
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
