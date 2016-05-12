@@ -373,7 +373,7 @@ class ContextManager implements IDisposable {
    *
    * @param newPath - The new path.
    */
-  rename(id: string, newPath: string): Promise<void> {
+  rename(id: string, newPath: string): void {
     let contextEx = this._contexts[id];
     let session = contextEx.session;
     if (session) {
@@ -381,7 +381,6 @@ class ContextManager implements IDisposable {
     }
     this._contexts[id].path = newPath;
     contextEx.context.pathChanged.emit(newPath);
-    return Promise.resolve(void 0);
   }
 
   /**

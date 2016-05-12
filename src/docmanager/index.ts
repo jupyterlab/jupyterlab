@@ -669,10 +669,10 @@ class DocumentManager implements IDisposable {
    *
    * @param newPath - The new path.
    */
-  renameFile(oldPath: string, newPath: string): Promise<void> {
+  renameFile(oldPath: string, newPath: string): void {
     let ids = this._contextManager.getIdsForPath(oldPath);
     for (let id in ids) {
-      return this._contextManager.rename(id, newPath);
+      this._contextManager.rename(id, newPath);
     }
   }
 
@@ -736,9 +736,8 @@ class DocumentManager implements IDisposable {
    */
   saveAs(widget: Widget, path: string): Promise<void> {
     let id = Private.contextProperty.get(widget);
-    return this._contextManager.rename(id, path).then(() => {
-      return this._contextManager.save(id);
-    });
+    this._contextManager.rename(id, path);
+    return this._contextManager.save(id);
   }
 
   /**
