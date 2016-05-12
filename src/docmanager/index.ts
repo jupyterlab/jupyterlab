@@ -355,7 +355,6 @@ class DocumentManager implements IDisposable {
     this._contextManager = new ContextManager(contentsManager, sessionManager, kernelSpecs, (id: string, widget: Widget) => {
       let parent = new Widget();
       this._attachChild(parent, widget);
-      Private.nameProperty.set(parent, name);
       Private.contextProperty.set(parent, id);
       this._widgets[id].push(parent);
       opener.open(parent);
