@@ -119,7 +119,7 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
       let chHeight = editor.defaultTextHeight();
       let chWidth = editor.defaultCharWidth();
       let coords = editor.charCoords({line, ch}, 'page');
-      model.completionRequested.emit({
+      model.textChanged.emit({
         line, ch, chHeight, chWidth, coords, oldValue, newValue
       });
     });

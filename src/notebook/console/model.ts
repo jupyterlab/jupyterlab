@@ -27,7 +27,7 @@ import {
 } from './history';
 
 import {
-  EditorModel, IEditorModel, IEditorOptions, EdgeLocation, ITextCompletion
+  EditorModel, IEditorModel, IEditorOptions, EdgeLocation, ITextChange
 } from '../editor/model';
 
 import {
@@ -68,9 +68,9 @@ const DEFAULT_LANG_INFO = {
 export
 interface ITooltipModel {
   /**
-   * The text completion request that triggered a tooltip.
+   * The text change that triggered a tooltip.
    */
-  request: ITextCompletion;
+  change: ITextChange;
 
   /**
    * The text of the tooltip.
@@ -352,8 +352,8 @@ class ConsoleModel implements IConsoleModel {
 
     // Connect each new prompt's edge requests with console history.
     textEditor.edgeRequested.connect(this.onEdgeRequest, this);
-    // Connect each new prompt's text completion requests to the tooltip model.
-    textEditor.completionRequested.connect(this.onCompletionRequest, this);
+    // Connect each new prompt's text changes to console tooltips.
+    textEditor.textChanged.connect(this.onTextChange, this);
 
     return cell;
   }
@@ -411,9 +411,9 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
-   * Handle a text completion request in the prompt model.
+   * Handle a text change in the prompt model.
    */
-  protected onCompletionRequest(sender: any, args: ITextCompletion) {
+  protected onTextChange(sender: any, args: ITextChange) {
     if (!args.newValue) {
       this.tooltip = null;
       return;
@@ -421,7 +421,7 @@ class ConsoleModel implements IConsoleModel {
 
     let { top, left } = args.coords;
     let text = `tooltip popover:\n\ttop: ${top}\n\tleft: ${left}`;
-    this.tooltip = { text, request: args };
+    this.tooltip = { text, change: args };
   }
 
   /**
@@ -476,15 +476,15 @@ namespace Private {
   const metadataChangedSignal = new Signal<IConsoleModel, string>();
 
   /**
-   * Check if two text completion requests are equal.
+   * Check if two text changes are equal.
    *
-   * @param t1 - The first text completion request.
+   * @param t1 - The first text change.
    *
-   * @param t1 - The second text completion request.
+   * @param t1 - The second text change.
    *
-   * @returns `true` if the text completion requests are equal.
+   * @returns `true` if the text changes are equal.
    */
-  function matchCompletions(t1: ITextCompletion, t2: ITextCompletion): boolean {
+  function matchTextChanges(t1: ITextChange, t2: ITextChange): boolean {
     // Check identity in case both items are null or undefined.
     if (t1 === t2 || !t1 && !t2) return true;
     // If one item is null or undefined, items don't match.
@@ -516,7 +516,7 @@ namespace Private {
     if (t1 === t2 || !t1 && !t2) return true;
     // If one item is null or undefined, items don't match.
     if (!t1 || !t2) return false;
-    return matchCompletions(t1.request, t2.request) && t1.text === t2.text;
+    return matchTextChanges(t1.change, t2.change) && t1.text === t2.text;
   }
 
   /**

@@ -23,10 +23,10 @@ type EdgeLocation = 'top' | 'bottom';
 
 
 /**
- * An interface describing editor text completion requests.
+ * An interface describing editor text changes.
  */
 export
-interface ITextCompletion {
+interface ITextChange {
   /**
    * The character number of the editor cursor within a line.
    */
@@ -80,9 +80,9 @@ interface IEditorModel extends IDisposable {
   edgeRequested: ISignal<IEditorModel, EdgeLocation>;
 
   /**
-   * A signal emitted when a text completion is requested.
+   * A signal emitted when a text change is completed.
    */
-  completionRequested: ISignal<IEditorModel, ITextCompletion>;
+  textChanged: ISignal<IEditorModel, ITextChange>;
 
   /**
    * The text in the text editor.
@@ -205,10 +205,10 @@ class EditorModel implements IEditorModel {
   }
 
   /**
-   * A signal emitted when a text completion is requested.
+   * A signal emitted when a text change is completed.
    */
-  get completionRequested(): ISignal<IEditorModel, ITextCompletion> {
-    return EditorModelPrivate.completionRequestedSignal.bind(this);
+  get textChanged(): ISignal<IEditorModel, ITextChange> {
+    return EditorModelPrivate.textChangedSignal.bind(this);
   }
 
   /**
@@ -390,10 +390,10 @@ namespace EditorModelPrivate {
   const edgeRequestedSignal = new Signal<EditorModel, EdgeLocation>();
 
   /**
-   * A signal emitted when a text completion is requested.
+   * A signal emitted when a text change is completed.
    */
   export
-  const completionRequestedSignal = new Signal<EditorModel, ITextCompletion>();
+  const textChangedSignal = new Signal<EditorModel, ITextChange>();
 
   /**
    * Initialize an editor view model from an options object.

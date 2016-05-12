@@ -257,9 +257,9 @@ class ConsoleWidget extends Widget {
         return;
       }
 
-      let {top, left} = model.request.coords;
-      top += model.request.chHeight;
-      left -= model.request.chWidth;
+      let {top, left} = model.change.coords;
+      top += model.change.chHeight;
+      left -= model.change.chWidth;
       let rect = {top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT};
 
       if (!this._tooltip) {
