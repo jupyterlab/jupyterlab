@@ -437,7 +437,7 @@ class DocumentManager implements IDisposable {
       if (this._defaultWidgetFactory === name) {
         this._defaultWidgetFactory = '';
       }
-      for (let opt in Object.keys(this._defaultWidgetFactories)) {
+      for (let opt of Object.keys(this._defaultWidgetFactories)) {
         let n = this._defaultWidgetFactories[opt];
         if (n === name) {
           delete this._defaultWidgetFactories[opt];
