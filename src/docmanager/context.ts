@@ -12,12 +12,8 @@ import * as utils
   from 'jupyter-js-utils';
 
 import {
-  IDisposable, DisposableDelegate
+  IDisposable
 } from 'phosphor-disposable';
-
-import {
-  Property
-} from 'phosphor-properties';
 
 import {
   ISignal, Signal

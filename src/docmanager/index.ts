@@ -61,32 +61,6 @@ interface IDocumentModel extends IDisposable {
   dirtyChanged: ISignal<IDocumentModel, boolean>;
 
   /**
-   * Serialize the model to a string.
-   */
-  toString(): string;
-
-  /**
-   * Deserialize the model from a string.
-   *
-   * #### Notes
-   * Should emit a [contentChanged] signal.
-   */
-  fromString(value: string): void;
-
-  /**
-   * Serialize the model to JSON.
-   */
-  toJSON(): any;
-
-  /**
-   * Deserialize the model from JSON.
-   *
-   * #### Notes
-   * Should emit a [contentChanged] signal.
-   */
-  fromJSON(value: any): void;
-
-  /**
    * The dirty state of the model.
    *
    * #### Notes
@@ -115,6 +89,32 @@ interface IDocumentModel extends IDisposable {
    * This is a read-only property.
    */
   defaultKernelLanguage: string;
+
+  /**
+   * Serialize the model to a string.
+   */
+  toString(): string;
+
+  /**
+   * Deserialize the model from a string.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
+   */
+  fromString(value: string): void;
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): any;
+
+  /**
+   * Deserialize the model from JSON.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
+   */
+  fromJSON(value: any): void;
 }
 
 

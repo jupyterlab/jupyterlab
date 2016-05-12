@@ -61,13 +61,6 @@ class DocumentModel implements IDocumentModel {
   }
 
   /**
-   * Dispose of the resources held by the document manager.
-   */
-  dispose(): void {
-    this._isDisposed = true;
-  }
-
-  /**
    * A signal emitted when the document content changes.
    */
   get contentChanged(): ISignal<IDocumentModel, string> {
@@ -126,6 +119,13 @@ class DocumentModel implements IDocumentModel {
    */
   get defaultKernelLanguage(): string {
     return this._defaultLang;
+  }
+
+  /**
+   * Dispose of the resources held by the document manager.
+   */
+  dispose(): void {
+    this._isDisposed = true;
   }
 
   /**
