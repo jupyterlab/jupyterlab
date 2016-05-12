@@ -548,13 +548,10 @@ class DocumentManager implements IDisposable {
   open(path: string, widgetName='default', kernel?: IKernelId): Widget {
     let widget = new Widget();
     let manager = this._contentsManager;
-    let mFactoryEx: Private.IModelFactoryEx;
-    if (widgetName !== 'default') {
-      mFactoryEx = this._getModelFactoryEx(widgetName);
-    } else {
+    if (widgetName === 'default') {
       widgetName = this.listWidgetFactories(path)[0];
-      mFactoryEx = this._getModelFactoryEx(widgetName);
     }
+    let mFactoryEx = this._getModelFactoryEx(widgetName);
     let lang = mFactoryEx.factory.preferredLanguage(path);
     let model: IDocumentModel;
     let id = this._contextManager.findContext(path, mFactoryEx.name);
@@ -590,13 +587,10 @@ class DocumentManager implements IDisposable {
   createNew(path: string, widgetName='default', kernel?: IKernelId): Widget {
     let widget = new Widget();
     let manager = this._contentsManager;
-    let mFactoryEx: Private.IModelFactoryEx;
-    if (widgetName !== 'default') {
-      mFactoryEx = this._getModelFactoryEx(widgetName);
-    } else {
+    if (widgetName === 'default') {
       widgetName = this.listWidgetFactories(path)[0];
-      mFactoryEx = this._getModelFactoryEx(widgetName);
     }
+    let mFactoryEx = this._getModelFactoryEx(widgetName);
     if (!mFactoryEx) {
       return;
     }

@@ -226,8 +226,7 @@ class ContextManager implements IDisposable {
   /**
    * Create a new context.
    */
-  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions,
-    contents: IContentsModel): string {
+  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions, contents: IContentsModel): string {
     let context = new Context(this);
     this._contexts[context.id] = {
       context,
