@@ -349,10 +349,10 @@ class DocumentManager implements IDisposable {
   /**
    * Construct a new document manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, opener: IWidgetOpener) {
+  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, kernelSpecs: IKernelSpecIds, opener: IWidgetOpener) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
-    this._contextManager = new ContextManager(contentsManager, sessionManager, (id: string, widget: Widget) => {
+    this._contextManager = new ContextManager(contentsManager, sessionManager, kernelSpecs, (id: string, widget: Widget) => {
       let parent = new Widget();
       this._attachChild(parent, widget);
       let sibling = this._widgets[id][0];

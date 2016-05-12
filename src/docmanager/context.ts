@@ -221,14 +221,11 @@ class ContextManager implements IDisposable {
   /**
    * Construct a new context manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, opener: (id: string, widget: Widget) => IDisposable) {
+  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager,  kernelSpecs: IKernelSpecIds, opener: (id: string, widget: Widget) => IDisposable) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
     this._opener = opener;
-    // Fetch and store the kernelspecids.
-    sessionManager.getSpecs().then(specs => {
-      this._kernelspecids = specs;
-    });
+    this._kernelspecids = kernelSpecs;
   }
 
   /**
@@ -380,7 +377,7 @@ class ContextManager implements IDisposable {
     let contextEx = this._contexts[id];
     let session = contextEx.session;
     if (session) {
-      return session.renameNotebook(newPath);
+      session.renameNotebook(newPath);
     }
     this._contexts[id].path = newPath;
     contextEx.context.pathChanged.emit(newPath);

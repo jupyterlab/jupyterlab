@@ -6,7 +6,8 @@
 'use strict';
 
 import {
-  ContentsManager, ISessionOptions, NotebookSessionManager
+  ContentsManager, ISessionOptions, NotebookSessionManager,
+  IKernelSpecIds
 } from 'jupyter-js-services';
 
 import {
@@ -61,11 +62,15 @@ import 'jupyter-js-ui/lib/theme.css';
 
 
 function main(): void {
+  let sessionsManager = new NotebookSessionManager();
+  sessionsManager.getSpecs().then(specs => {
+    createApp(sessionsManager, specs);
+  });
+}
 
-  let baseUrl = getConfigOption('baseUrl');
-  let contentsManager = new ContentsManager(baseUrl);
-  let sessionsManager = new NotebookSessionManager({ baseUrl: baseUrl });
 
+function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecIds): void {
+  let contentsManager = new ContentsManager();
   let widgets: CodeMirrorWidget[] = [];
   let activeWidget: CodeMirrorWidget;
 
@@ -81,7 +86,7 @@ function main(): void {
   };
 
   let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
-  let docManager = new DocumentManager(contentsManager, sessionsManager, opener);
+  let docManager = new DocumentManager(contentsManager, sessionsManager, specs, opener);
   let mFactory = new ModelFactory();
   let wFactory = new WidgetFactory();
   docManager.registerModelFactory(mFactory, {
