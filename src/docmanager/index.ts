@@ -355,8 +355,6 @@ class DocumentManager implements IDisposable {
     this._contextManager = new ContextManager(contentsManager, sessionManager, kernelSpecs, (id: string, widget: Widget) => {
       let parent = new Widget();
       this._attachChild(parent, widget);
-      let sibling = this._widgets[id][0];
-      let name = Private.nameProperty.get(sibling);
       Private.nameProperty.set(parent, name);
       Private.contextProperty.set(parent, id);
       this._widgets[id].push(parent);
@@ -647,6 +645,11 @@ class DocumentManager implements IDisposable {
     let context = this._contextManager.getContext(id);
     let child = (widget.layout as PanelLayout).childAt(0);
     let name = Private.nameProperty.get(widget);
+    // Check for a sibling widget.
+    if (!name) {
+      this._closeGuard = true;
+      widget.close();
+    }
     let factory = this._widgetFactories[name].factory;
     this._maybeClose(widget, model.dirty).then(result => {
       if (!result) {
