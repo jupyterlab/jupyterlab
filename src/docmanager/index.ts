@@ -566,7 +566,8 @@ class DocumentManager implements IDisposable {
         model.fromString(contents.content);
       }
       model.dirty = false;
-      this._createWidget(path, model, widgetName, widget, kernel);
+      id = this._createContext(path, model, widgetName);
+      this._createWidget(id, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
     Private.factoryProperty.set(widget, widgetName);
@@ -604,7 +605,8 @@ class DocumentManager implements IDisposable {
       opts.content = model.toString();
     }
     manager.save(path, opts).then(content => {
-      this._createWidget(path, model, widgetName, widget, kernel);
+      let id = this._createContext(path, model, widgetName);
+      this._createWidget(id, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
     Private.factoryProperty.set(widget, widgetName);
@@ -720,14 +722,8 @@ class DocumentManager implements IDisposable {
   clone(widget: Widget): Widget {
     let parent = new Widget();
     let id = Private.contextProperty.get(widget);
-    Private.contextProperty.set(parent, id);
-    let context = this._contextManager.getContext(id);
-    let model = this._contextManager.getModel(id);
     let factoryName = Private.factoryProperty.get(widget);
-    this._widgets[id].push(parent);
-    let factory = this._widgetFactories[factoryName].factory;
-    let child = factory.createNew(model, context, null);
-    this._attachChild(parent, child);
+    this._createWidget(id, factoryName, parent);
     return parent;
   }
 
@@ -768,24 +764,30 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Create a or reuse a context and create a widget.
+   * Create a context or reuse an existing one.
    */
-  private _createWidget(path: string, model: IDocumentModel, widgetName: string, parent: Widget, kernel?:IKernelId): void {
-    let wFactoryEx = this._getWidgetFactoryEx(widgetName);
+  private _createContext(path: string, model: IDocumentModel, widgetName: string): string {
     let mFactoryEx = this._getModelFactoryEx(widgetName);
-    let context: IDocumentContext;
     let id = this._contextManager.findContext(path, mFactoryEx.name);
     if (id) {
-      context = this._contextManager.getContext(id);
+      return id;
     } else {
-      context = this._contextManager.createNew(path, model, mFactoryEx);
-      id = context.id;
+      return this._contextManager.createNew(path, model, mFactoryEx);
     }
-    Private.contextProperty.set(parent, id);
-    if (!(id in this._widgets)) {
-      this._widgets[id] = [];
+  }
+
+  /**
+   * Create a or reuse a context and create a widget.
+   */
+  private _createWidget(contextId: string, widgetName: string, parent: Widget, kernel?:IKernelId): void {
+    let wFactoryEx = this._getWidgetFactoryEx(widgetName);
+    Private.contextProperty.set(parent, contextId);
+    if (!(contextId in this._widgets)) {
+      this._widgets[contextId] = [];
     }
-    this._widgets[id].push(parent);
+    this._widgets[contextId].push(parent);
+    let context = this._contextManager.getContext(contextId);
+    let model = this._contextManager.getModel(contextId);
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
     this._attachChild(parent, child);

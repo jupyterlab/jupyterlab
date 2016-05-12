@@ -253,7 +253,7 @@ class ContextManager implements IDisposable {
   /**
    * Create a new context.
    */
-  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions): IDocumentContext {
+  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions): string {
     let context = new Context(this);
     this._contexts[context.id] = {
       context,
@@ -263,7 +263,7 @@ class ContextManager implements IDisposable {
       opts: options.contentsOptions,
       session: null
     };
-    return context;
+    return context.id;
   }
 
   /**
