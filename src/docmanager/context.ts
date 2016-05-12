@@ -178,33 +178,6 @@ class Context implements IDocumentContext {
 }
 
 
-
-/**
- * A namespace for module private data.
- */
-namespace Private {
-
-  /**
-   * A signal emitted when the kernel changes.
-   */
-  export
-  const kernelChangedSignal = new Signal<IDocumentContext, IKernel>();
-
-  /**
-   * A signal emitted when the path changes.
-   */
-  export
-  const pathChangedSignal = new Signal<IDocumentContext, string>();
-
-  /**
-   * A signal emitted when the model is saved or reverted.
-   */
-  export
-  const dirtyClearedSignal = new Signal<IDocumentContext, void>();
-
-}
-
-
 /**
  * An object which manages the active contexts.
  */
@@ -351,7 +324,7 @@ class ContextManager implements IDisposable {
       let sOptions = {
         notebook: { path },
         kernel: { options }
-      }
+      };
       return this._startSession(id, sOptions);
     } else {
       return session.changeKernel(options);
@@ -501,4 +474,22 @@ namespace Private {
     contentsModel: IContentsModel;
     modelName: string;
   }
+
+  /**
+   * A signal emitted when the kernel changes.
+   */
+  export
+  const kernelChangedSignal = new Signal<IDocumentContext, IKernel>();
+
+  /**
+   * A signal emitted when the path changes.
+   */
+  export
+  const pathChangedSignal = new Signal<IDocumentContext, string>();
+
+  /**
+   * A signal emitted when the model is saved or reverted.
+   */
+  export
+  const dirtyClearedSignal = new Signal<IDocumentContext, void>();
 }
