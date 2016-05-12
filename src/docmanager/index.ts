@@ -8,6 +8,9 @@ import {
   IKernelSpecIds, ISessionId
 } from 'jupyter-js-services';
 
+import * as utils
+  from 'jupyter-js-utils';
+
 import {
   IDisposable, DisposableDelegate
 } from 'phosphor-disposable';
@@ -594,7 +597,7 @@ class DocumentManager implements IDisposable {
     }
     let lang = mFactoryEx.factory.preferredLanguage(path);
     let model = mFactoryEx.factory.createNew(lang);
-    let opts = mFactoryEx.contentsOptions;
+    let opts = utils.copy(mFactoryEx.contentsOptions);
     if (opts.format === 'json') {
       opts.content = model.toJSON();
     } else {
