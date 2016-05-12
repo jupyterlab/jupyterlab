@@ -147,6 +147,15 @@ export interface IDocumentContext extends IDisposable {
   path: string;
 
   /**
+   * The current contents model associated with the document
+   *
+   * #### Notes
+   * This is a read-only property.  The model will have an
+   * empty `contents` field.
+   */
+  contentsModel: IContentsModel;
+
+  /**
    * Get the kernel spec information.
    *
    * #### Notes
@@ -560,11 +569,10 @@ class DocumentManager implements IDisposable {
         model.fromString(contents.content);
       }
       model.dirty = false;
-      id = this._createContext(path, model, widgetName);
+      id = this._createContext(path, model, widgetName, contents);
       this._createWidget(id, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
-    Private.factoryProperty.set(widget, widgetName);
     return widget;
   }
 
@@ -598,12 +606,11 @@ class DocumentManager implements IDisposable {
     } else {
       opts.content = model.toString();
     }
-    manager.save(path, opts).then(content => {
-      let id = this._createContext(path, model, widgetName);
+    manager.save(path, opts).then(contents => {
+      let id = this._createContext(path, model, widgetName, contents);
       this._createWidget(id, widgetName, widget, kernel);
     });
     installMessageFilter(widget, this);
-    Private.factoryProperty.set(widget, widgetName);
     return widget;
   }
 
@@ -766,22 +773,21 @@ class DocumentManager implements IDisposable {
   /**
    * Create a context or reuse an existing one.
    */
-  private _createContext(path: string, model: IDocumentModel, widgetName: string): string {
+  private _createContext(path: string, model: IDocumentModel, widgetName: string, contents: IContentsModel): string {
     let mFactoryEx = this._getModelFactoryEx(widgetName);
     let id = this._contextManager.findContext(path, mFactoryEx.name);
     if (id) {
       return id;
     } else {
-      return this._contextManager.createNew(path, model, mFactoryEx);
+      return this._contextManager.createNew(path, model, mFactoryEx, contents);
     }
   }
 
   /**
-   * Create a or reuse a context and create a widget.
+   * Create a widget from a context and attach it to the parent.
    */
-  private _createWidget(contextId: string, widgetName: string, parent: Widget, kernel?:IKernelId): void {
+  private _createWidget(contextId: string, widgetName: string, parent: Widget, kernel?: IKernelId): void {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
-    Private.contextProperty.set(parent, contextId);
     if (!(contextId in this._widgets)) {
       this._widgets[contextId] = [];
     }
@@ -791,6 +797,8 @@ class DocumentManager implements IDisposable {
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
     this._attachChild(parent, child);
+    Private.factoryProperty.set(parent, widgetName);
+    Private.contextProperty.set(parent, contextId);
   }
 
   /**

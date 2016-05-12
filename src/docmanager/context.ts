@@ -5,7 +5,7 @@
 import {
   IKernelId, IKernel, IKernelSpecIds, IContentsManager,
   INotebookSessionManager, INotebookSession, ISessionId,
-  IContentsOpts, ISessionOptions
+  IContentsOpts, ISessionOptions, IContentsModel
 } from 'jupyter-js-services';
 
 import * as utils
@@ -97,6 +97,17 @@ class Context implements IDocumentContext {
    */
   get path(): string {
     return this._manager.getPath(this._id);
+  }
+
+  /**
+   * The current contents model associated with the document
+   *
+   * #### Notes
+   * This is a read-only property.  The model will have an
+   * empty `contents` field.
+   */
+  get contentsModel(): IContentsModel {
+    return this._manager.getContentsModel(this._id);
   }
 
   /**
@@ -253,7 +264,8 @@ class ContextManager implements IDisposable {
   /**
    * Create a new context.
    */
-  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions): string {
+  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions,
+    contents: IContentsModel): string {
     let context = new Context(this);
     this._contexts[context.id] = {
       context,
@@ -261,6 +273,7 @@ class ContextManager implements IDisposable {
       model,
       modelName: options.name,
       opts: options.contentsOptions,
+      contentsModel: this._copyContentsModel(contents),
       session: null
     };
     return context.id;
@@ -332,6 +345,13 @@ class ContextManager implements IDisposable {
   }
 
   /**
+   * Get the current contents model associated with a document.
+   */
+  getContentsModel(id: string): IContentsModel {
+    return this._contexts[id].contentsModel;
+  }
+
+  /**
    * Change the current kernel associated with the document.
    */
   changeKernel(id: string, options: IKernelId): Promise<IKernel> {
@@ -390,7 +410,8 @@ class ContextManager implements IDisposable {
     } else {
       opts.content = model.toString();
     }
-    return this._contentsManager.save(path, opts).then(() => {
+    return this._contentsManager.save(path, opts).then(contents => {
+      contextEx.contentsModel = this._copyContentsModel(contents);
       model.dirty = false;
     });
   }
@@ -409,6 +430,7 @@ class ContextManager implements IDisposable {
       } else {
         model.fromString(contents.content);
       }
+      contextEx.contentsModel = this._copyContentsModel(contents);
       model.dirty = false;
     });
   }
@@ -448,6 +470,22 @@ class ContextManager implements IDisposable {
     });
   }
 
+  /**
+   * Copy the contents of a contents model, without the content.
+   */
+  private _copyContentsModel(model: IContentsModel): IContentsModel {
+    return {
+      path: model.path,
+      name: model.name,
+      type: model.type,
+      writable: model.writable,
+      created: model.created,
+      last_modified: model.last_modified,
+      mimetype: model.mimetype,
+      format: model.format
+    };
+  }
+
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
   private _kernelspecids: IKernelSpecIds = null;
@@ -467,6 +505,7 @@ namespace Private {
     session: INotebookSession;
     opts: IContentsOpts;
     path: string;
+    contentsModel: IContentsModel;
     modelName: string;
   }
 }
