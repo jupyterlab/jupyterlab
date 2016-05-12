@@ -385,6 +385,7 @@ class ConsoleModel implements IConsoleModel {
       this._prompt = this.createPrompt()
       this._cells.add(this._prompt);
     };
+    this.tooltip = null;
     // Whether the code cell executes or not, create a new prompt.
     executeCodeCell(prompt, session.kernel).then(newPrompt, newPrompt);
   }
