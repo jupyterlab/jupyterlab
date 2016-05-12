@@ -255,9 +255,6 @@ class ConsoleWidget extends Widget {
       }
 
       let {top, left} = model.change.coords;
-      let lines = model.change.newValue.split('\n');
-      let lastLine = lines[lines.length - 1];
-      let lastChar = lastLine[lastLine.length - 1];
       let text = model.text;
 
       // Offset the height of the tooltip by the height of cursor characters.
