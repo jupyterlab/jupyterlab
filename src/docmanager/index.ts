@@ -348,10 +348,10 @@ class DocumentManager implements IDisposable {
     this._contextManager = new ContextManager(contentsManager, sessionManager, (id: string, widget: Widget) => {
       let parent = new Widget();
       this._attachChild(parent, widget);
-      Private.contextProperty.set(widget, id);
       let sibling = this._widgets[id][0];
       let factoryName = Private.factoryProperty.get(sibling);
       Private.factoryProperty.set(parent, factoryName);
+      Private.contextProperty.set(parent, id);
       this._widgets[id].push(parent);
       opener.open(parent);
       return new DisposableDelegate(() => {
