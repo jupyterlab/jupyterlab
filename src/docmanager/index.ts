@@ -336,6 +336,13 @@ interface IKernelPreference {
 
 /**
  * The document manager.
+ *
+ * #### Notes
+ * The document manager is used to register model and widget creators,
+ * and the file browser uses the document manager to create widgets. The
+ * document manager maintains a context for each path and model type that is
+ * open, and a list of widgets for each context. The document manager is in
+ * control of the proper closing and disposal of the widgets and contexts.
  */
 export
 class DocumentManager implements IDisposable {
