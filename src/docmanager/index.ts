@@ -3,8 +3,8 @@
 'use strict';
 
 import {
-  IContentsModel, IKernelId, IKernelSpecId, IContentsOpts, IKernel,
-  INotebookSession, IContentsManager, INotebookSessionManager,
+  IContentsModel, IKernelId, IContentsOpts, IKernel,
+  IContentsManager, INotebookSessionManager,
   IKernelSpecIds, ISessionId
 } from 'jupyter-js-services';
 
@@ -13,7 +13,7 @@ import {
 } from 'phosphor-disposable';
 
 import {
-  IMessageFilter, IMessageHandler, Message, installMessageFilter
+  IMessageHandler, Message, installMessageFilter
 } from 'phosphor-messaging';
 
 import {

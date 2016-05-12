@@ -28,10 +28,6 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IWidgetOpener
-} from '../filebrowser/browser';
-
-import {
   IDocumentContext, IDocumentModel, IModelFactoryOptions
 } from './index';
 

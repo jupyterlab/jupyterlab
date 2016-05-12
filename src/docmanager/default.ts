@@ -6,7 +6,7 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
-  IKernelSpecId, IContentsOpts, IKernelId
+  IKernelId
 } from 'jupyter-js-services';
 
 import {
@@ -26,8 +26,7 @@ import {
 } from '../codemirror/widget';
 
 import {
-  IDocumentModel, IWidgetFactory, IModelFactory, IDocumentContext,
-  IKernelPreference
+  IDocumentModel, IWidgetFactory, IDocumentContext
 } from './index';
 
 
