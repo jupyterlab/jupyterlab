@@ -356,8 +356,8 @@ class DocumentManager implements IDisposable {
       let parent = new Widget();
       this._attachChild(parent, widget);
       let sibling = this._widgets[id][0];
-      let factoryName = Private.factoryProperty.get(sibling);
-      Private.factoryProperty.set(parent, factoryName);
+      let name = Private.nameProperty.get(sibling);
+      Private.nameProperty.set(parent, name);
       Private.contextProperty.set(parent, id);
       this._widgets[id].push(parent);
       opener.open(parent);
@@ -646,9 +646,9 @@ class DocumentManager implements IDisposable {
     let model = this._contextManager.getModel(id);
     let context = this._contextManager.getContext(id);
     let child = (widget.layout as PanelLayout).childAt(0);
-    let factoryName = Private.factoryProperty.get(widget);
-    factoryName = factoryName || this._defaultWidgetFactory;
-    let factory = this._widgetFactories[factoryName].factory;
+    let name = Private.nameProperty.get(widget);
+    name = name || this._defaultWidgetFactory;
+    let factory = this._widgetFactories[name].factory;
     this._maybeClose(widget, model.dirty).then(result => {
       if (!result) {
         return result;
@@ -705,7 +705,7 @@ class DocumentManager implements IDisposable {
     }
     for (let id of ids) {
       for (let widget of this._widgets[id]) {
-        if (Private.factoryProperty.get(widget) === widgetName) {
+        if (Private.nameProperty.get(widget) === widgetName) {
           return widget;
         }
       }
@@ -803,7 +803,7 @@ class DocumentManager implements IDisposable {
     // Create the child widget using the factory.
     let child = wFactoryEx.factory.createNew(model, context, kernel);
     this._attachChild(parent, child);
-    Private.factoryProperty.set(parent, widgetName);
+    Private.nameProperty.set(parent, widgetName);
     Private.contextProperty.set(parent, contextId);
   }
 
@@ -935,8 +935,8 @@ namespace Private {
    * The widget factory name used to create a widget.
    */
   export
-  const factoryProperty = new Property<Widget, string>({
-    name: 'factory'
+  const nameProperty = new Property<Widget, string>({
+    name: 'name'
   });
 
   /**
