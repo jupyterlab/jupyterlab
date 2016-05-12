@@ -553,13 +553,12 @@ class DocumentManager implements IDisposable {
     }
     let mFactoryEx = this._getModelFactoryEx(widgetName);
     let lang = mFactoryEx.factory.preferredLanguage(path);
-    let model: IDocumentModel;
     let id = this._contextManager.findContext(path, mFactoryEx.name);
     if (id) {
-      model = this._contextManager.getModel(id);
-    } else {
-      model = mFactoryEx.factory.createNew(lang);
+      this._createWidget(id, widgetName, widget, kernel);
+      return widget;
     }
+    let model = mFactoryEx.factory.createNew(lang);
     let opts = mFactoryEx.contentsOptions;
     manager.get(path, opts).then(contents => {
       if (contents.format === 'json') {
@@ -571,7 +570,6 @@ class DocumentManager implements IDisposable {
       id = this._createContext(path, model, widgetName, contents);
       this._createWidget(id, widgetName, widget, kernel);
     });
-    installMessageFilter(widget, this);
     return widget;
   }
 
@@ -606,7 +604,6 @@ class DocumentManager implements IDisposable {
       let id = this._createContext(path, model, widgetName, contents);
       this._createWidget(id, widgetName, widget, kernel);
     });
-    installMessageFilter(widget, this);
     return widget;
   }
 
@@ -798,6 +795,7 @@ class DocumentManager implements IDisposable {
     this._attachChild(parent, child);
     Private.nameProperty.set(parent, widgetName);
     Private.contextProperty.set(parent, contextId);
+    installMessageFilter(parent, this);
   }
 
   /**
