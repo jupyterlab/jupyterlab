@@ -129,7 +129,7 @@ class ConsoleTooltip extends Widget {
    * Handle keydown events for the widget.
    *
    * #### Notes
-   * Disposes the tooltip if a keydown happens anywhere on the document outside
+   * Hides the tooltip if a keydown happens anywhere on the document outside
    * of either the tooltip or its parent.
    */
   private _evtKeydown(event: KeyboardEvent) {
@@ -146,7 +146,7 @@ class ConsoleTooltip extends Widget {
    * Handle mousedown events for the widget.
    *
    * #### Notes
-   * Disposes the tooltip if a mousedown happens anywhere outside the tooltip.
+   * Hides the tooltip if a mousedown happens anywhere outside the tooltip.
    */
   private _evtMousedown(event: MouseEvent) {
     let target = event.target as HTMLElement;
@@ -154,7 +154,7 @@ class ConsoleTooltip extends Widget {
       if (target === this.node) return;
       target = target.parentElement;
     }
-    this.dispose();
+    this.hide();
   }
 
   private _rect: ClientRect = null;

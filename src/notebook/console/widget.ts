@@ -250,27 +250,33 @@ class ConsoleWidget extends Widget {
       let model = args.newValue;
 
       if (!model) {
-        if (this._tooltip) {
-          this._tooltip.dispose();
-          this._tooltip = null;
-        }
+        if (this._tooltip) this._tooltip.hide();
         return;
       }
 
       let {top, left} = model.change.coords;
+      let lines = model.change.newValue.split('\n');
+      let lastLine = lines[lines.length - 1];
+      let lastChar = lastLine[lastLine.length - 1];
+      let text = model.text;
+
+      // Offset the height of the tooltip by the height of cursor characters.
       top += model.change.chHeight;
-      left -= model.change.chWidth;
+      // If the last character is a word character, offset its width;
+      if (model.change.newValue.match(/\w$/)) left -= model.change.chWidth;
+
       let rect = {top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT};
 
       if (!this._tooltip) {
-        this._tooltip = constructor.createTooltip(top, left, model.text);
+        this._tooltip = constructor.createTooltip(top, left, text);
         this._tooltip.reference = this;
         this._tooltip.attach(document.body);
       } else {
         this._tooltip.rect = rect as ClientRect;
         this._tooltip.text = model.text;
-        if (this._tooltip.isHidden) this._tooltip.show();
       }
+
+      if (this._tooltip.isHidden) this._tooltip.show();
       return;
     }
   }
