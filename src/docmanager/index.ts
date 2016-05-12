@@ -427,8 +427,7 @@ class DocumentManager implements IDisposable {
       for (let option of options.defaultFor) {
         if (option === '.*') {
           this._defaultWidgetFactory = name;
-        }
-        if (option in options.fileExtensions) {
+        } else if (option in options.fileExtensions) {
           this._defaultWidgetFactories[option] = name;
         }
       }
@@ -438,7 +437,7 @@ class DocumentManager implements IDisposable {
       if (this._defaultWidgetFactory === name) {
         this._defaultWidgetFactory = '';
       }
-      for (let opt of Object.keys(this._defaultWidgetFactories)) {
+      for (let opt in Object.keys(this._defaultWidgetFactories)) {
         let n = this._defaultWidgetFactories[opt];
         if (n === name) {
           delete this._defaultWidgetFactories[opt];
