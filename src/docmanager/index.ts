@@ -596,7 +596,7 @@ class DocumentManager implements IDisposable {
     }
     let lang = mFactoryEx.factory.preferredLanguage(path);
     let model = mFactoryEx.factory.createNew(lang);
-    let id = this._contextManager._createNew(path, model, mFactoryEx);
+    let id = this._contextManager.createNew(path, model, mFactoryEx);
     let widget = this._createWidget(widgetName, id);
     // Save the contents to disk to get a valid contentsModel for the
     // context.
@@ -607,14 +607,21 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Update the path of an open document.
+   * Handle the renaming of an open document.
    *
    * @param oldPath - The previous path.
    *
    * @param newPath - The new path.
    */
-  renameFile(oldPath: string, newPath: string): void {
+  handleRename(oldPath: string, newPath: string): void {
     this._contextManager.rename(oldPath, newPath);
+  }
+
+  /**
+   * Handle a file deletion.
+   */
+  handleDelete(path: string): void {
+    // TODO
   }
 
   /**
@@ -645,7 +652,7 @@ class DocumentManager implements IDisposable {
    * This will create a new widget with the same model and context
    * as this widget.
    */
-  clone(widget: Widget): DocumentWidget {
+  clone(widget: DocumentWidget): DocumentWidget {
     let parent = this._createWidget(widget.name, widget.context.id);
     this._populateWidget(parent);
     return parent;
@@ -657,7 +664,7 @@ class DocumentManager implements IDisposable {
   closeFile(path: string): void {
     let ids = this._contextManager.getIdsForPath(path);
     for (let id of ids) {
-      let widgets: Widget[] = this._widgets[id] || [];
+      let widgets: DocumentWidget[] = this._widgets[id] || [];
       for (let w of widgets) {
         w.close();
       }
@@ -679,22 +686,23 @@ class DocumentManager implements IDisposable {
    * Create a container widget and handle its lifecycle.
    */
   private _createWidget(name: string, id: string): DocumentWidget {
-    let context = this._contextManager.getContext(id);
-    let widget = new DocumentWidget(name, context);
+    let factory = this._widgetFactories[name].factory;
+    let widget = new DocumentWidget(name, id, this._contextManager, factory);
     if (!(id in this._widgets)) {
       this._widgets[id] = [];
     }
-    this._widgets[id].push(child);
+    this._widgets[id].push(widget);
     widget.disposed.connect(() => {
       let index = this._widgets[id].indexOf(widget);
       this._widgets[id] = this._widgets[id].splice(index, 1);
     });
+    return widget;
   }
 
   /**
    * Create a content widget and add it to the container widget.
    */
-  private _populateWidget(parent: DocumentWidget, kernel?: IKernel): void {
+  private _populateWidget(parent: DocumentWidget, kernel?: IKernelId): void {
     let factory = this._widgetFactories[parent.name].factory;
     let id = parent.context.id;
     let model = this._contextManager.getModel(id);
@@ -731,7 +739,7 @@ class DocumentManager implements IDisposable {
   private _widgetFactories: { [key: string]: Private.IWidgetFactoryEx } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
-  private _widgets: { [key: string]: Widget[] } = Object.create(null);
+  private _widgets: { [key: string]: DocumentWidget[] } = Object.create(null);
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
   private _contextManager: ContextManager = null;
@@ -742,16 +750,17 @@ class DocumentManager implements IDisposable {
  * A container widget for documents.
  */
 export
-class DocumentWidget {
+class DocumentWidget extends Widget {
   /**
    * Construct a new document widget.
    */
-  constructor(name: string, context: IDocumentContext) {
+  constructor(name: string, id: string, manager: ContextManager, factory: IWidgetFactory<Widget>) {
     super();
     this.addClass(DOCUMENT_CLASS);
     this.layout = new PanelLayout();
     this._name = name;
-    this._context = context;
+    this._id = id;
+    this._manager = manager;
     this.title.closable = true;
   }
 
@@ -772,7 +781,14 @@ class DocumentWidget {
    * This is a read-only property.
    */
   get context(): IDocumentContext {
-    return this._context;
+    return this._manager.getContext(this._id);
+  }
+
+  /**
+   * Bring up a dialog to select a kernel.
+   */
+  selectKernel(): Promise<IKernel> {
+    return void 0;
   }
 
   /**
@@ -782,7 +798,8 @@ class DocumentWidget {
     if (this.isDisposed) {
       return;
     }
-    this._context = null;
+    this._manager = null;
+    this._factory = null;
     super.dispose();
   }
 
@@ -814,25 +831,39 @@ class DocumentWidget {
    * Handle `'close-request'` messages.
    */
   protected onCloseRequest(msg: Message): void {
-    // Handle dirty.
-    // Call the beforeClose on the widget factory.
-    // Check for dangling kernel.
-    // THEN,
-    super.onCloseRequest(msg);
+    let model = this._manager.getModel(this._id);
+    let layout = this.layout as PanelLayout;
+    let child = layout.childAt(0);
+    this._maybeClose(model.dirty).then(result => {
+      return this._factory.beforeClose(model, this.context, child);
+    }).then(result => {
+      if (result) {
+        this._actuallyClose();
+      }
+    }).catch(() => {
+      this._actuallyClose();
+    });
+  }
+
+  /**
+   * Perform closing tasks for the widget.
+   */
+  private _actuallyClose(): void {
+    // TODO: check for a dangling kernel.
+    this.dispose();
   }
 
   /**
    * Ask the user whether to close an unsaved file.
    */
-  private _maybeClose(widget: Widget, dirty: boolean): Promise<boolean> {
+  private _maybeClose(dirty: boolean): Promise<boolean> {
     if (!dirty) {
       return Promise.resolve(true);
     }
-    let host = widget.isAttached ? widget.node : document.body;
     return showDialog({
       title: 'Close without saving?',
-      body: `File "${widget.title.text}" has unsaved changes, close without saving?`,
-      host
+      body: `File "${this.title.text}" has unsaved changes, close without saving?`,
+      host: this.node
     }).then(value => {
       if (value && value.text === 'OK') {
         return true;
@@ -841,7 +872,9 @@ class DocumentWidget {
     });
   }
 
-  private _context = IDocumentContext;
+  private _manager: ContextManager = null;
+  private _factory: IWidgetFactory<Widget> = null;
+  private _id = '';
   private _name = '';
 }
 

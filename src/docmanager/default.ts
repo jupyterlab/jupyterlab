@@ -294,7 +294,7 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
    *   and false otherwise.
    */
   beforeClose(model: IDocumentModel, context: IDocumentContext, widget: Widget): Promise<boolean> {
-    // TODO: handle live kernels here.
+    // There is nothing specific to do.
     return Promise.resolve(true);
   }
 

@@ -103,9 +103,9 @@ class FileBrowserWidget extends Widget {
 
     model.fileChanged.connect((fbModel, args) => {
       if (args.newValue) {
-        manager.renameFile(args.oldValue, args.newValue);
+        manager.handleRename(args.oldValue, args.newValue);
       } else {
-        manager.deleteFile(args.oldValue);
+        manager.handleDelete(args.oldValue);
       }
     });
 
