@@ -253,25 +253,27 @@ class ConsoleWidget extends Widget {
       // Offset the width of the tooltip by the width of cursor characters.
       left -= model.change.chWidth;
 
-      let rect = {top, left, width: null as any, height: null as any};
       // Account for 1px border on top and bottom.
       let maxHeight = window.innerHeight - top - 2;
       // Account for 1px border on both sides.
       let maxWidth = window.innerWidth - left - 2;
+
+      let content = this._rendermime.render(model.bundle);
+      if (!content) {
+        console.error('rendermime failed to render', model.bundle);
+        return;
+      }
 
       if (!this._tooltip) {
         this._tooltip = constructor.createTooltip(top, left);
         this._tooltip.reference = this;
         this._tooltip.attach(document.body);
       }
-
-      let content = this._rendermime.render(model.bundle) || new Widget();
-      this._tooltip.rect = rect as ClientRect;
+      this._tooltip.rect = {top, left} as ClientRect;
       this._tooltip.content = content;
       this._tooltip.node.style.maxHeight = maxHeight + 'px';
       this._tooltip.node.style.maxWidth = maxWidth + 'px';
       if (this._tooltip.isHidden) this._tooltip.show();
-
       return;
     }
   }
