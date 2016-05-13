@@ -3,3 +3,4 @@
 /// <reference path="../typings/codemirror/codemirror.d.ts"/>
 /// <reference path="../typings/diff-match-patch/diff-match-patch.d.ts"/>
 /// <reference path="../typings/mathjax/mathjax.d.ts"/>
+/// <reference path="../typings/ansi-to-html/ansi-to-html.d.ts"/>

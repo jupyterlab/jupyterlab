@@ -362,10 +362,12 @@
 
 
 .jp-ConsoleTooltip {
+  display: inline-block;
   background: #FFFFCA;
   border: 1px solid black;
 }
 
 .jp-ConsoleTooltip pre {
   margin: 0;
+  padding: 2px;
 }

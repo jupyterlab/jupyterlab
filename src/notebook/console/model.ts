@@ -46,6 +46,13 @@ import {
   RawCellModel, isRawCellModel, MetadataCursor, IMetadataCursor
 } from '../cells/model';
 
+import {
+  MimeBundle
+} from '../notebook';
+
+declare var require: any;
+const Filter = require('ansi-to-html');
+
 
 /**
  * The default console kernelspec metadata.
@@ -62,6 +69,7 @@ const DEFAULT_LANG_INFO = {
   name: 'unknown'
 }
 
+
 /**
  * The definition of a model object for a console tooltip widget.
  */
@@ -73,9 +81,14 @@ interface ITooltipModel {
   change: ITextChange;
 
   /**
+   * The current line of code (which was submitted to API for inspection).
+   */
+  currentLine: string;
+
+  /**
    * The API inspect request data payload.
    */
-  bundle: { [mimetype: string]: string };
+  bundle: MimeBundle;
 }
 
 
@@ -420,20 +433,27 @@ class ConsoleModel implements IConsoleModel {
       return;
     }
 
-    let pendingInspect = ++this._pendingInspect;
+    // If final character of current line isn't a whitespace character, bail.
+    let currentLine = args.newValue.split('\n')[args.line];
+    if (!currentLine.match(/\S$/)) {
+      this.tooltip = null;
+      return;
+    }
 
-    this._session.kernel.inspect({
-      code: args.newValue,
-      cursor_pos: args.ch,
-      detail_level: 0
-    }).then((value: IInspectReply) => {
-      if (pendingInspect !== this._pendingInspect || !value.found) {
-        return;
-      }
-      console.log('value', value)
-      let change = args;
-      let bundle = value.data;
-      this.tooltip = { change, bundle };
+    let pendingInspect = ++this._pendingInspect;
+    let contents = {code: currentLine, cursor_pos: args.ch, detail_level: 0};
+
+    this._session.kernel.inspect(contents).then((value: IInspectReply) => {
+      // If a newer text change has created a pending request, bail.
+      if (pendingInspect !== this._pendingInspect) return;
+      // Tooltip request failures or negative results fail silently.
+      if (value.status !== 'ok' || !value.found) return;
+      console.log('value', value);
+      this.tooltip = {
+        change: args,
+        currentLine: currentLine,
+        bundle: Private.formatInspectReply(value.data)
+      };
     });
   }
 
@@ -546,7 +566,7 @@ namespace Private {
     });
   }
 
-  /*
+  /**
    * Handle a change to the model session.
    */
   export
@@ -554,6 +574,20 @@ namespace Private {
     model.session.kernelChanged.connect(() => { kernelChanged(model); });
     // Update the kernel data now.
     kernelChanged(model);
+  }
+
+  /**
+   * Format the IInspectReply plain text data.
+   */
+  export
+  function formatInspectReply(bundle: MimeBundle): MimeBundle {
+    let textMime = 'text/plain';
+    let textHTML = 'text/html';
+    if (!bundle[textMime]) return bundle;
+    // Add a 'text/html' formatted version of the plain text.
+    let filter = new Filter();
+    bundle[textHTML] = `<pre>${filter.toHtml(bundle[textMime])}</pre>`;
+    return bundle;
   }
 
 }

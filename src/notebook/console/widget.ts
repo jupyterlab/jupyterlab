@@ -57,15 +57,6 @@ const CONSOLE_PANEL = 'jp-Console-panel';
  */
 const BANNER_CLASS = 'jp-Console-banner';
 
-/**
- * The width of tooltips.
- */
-const TOOLTIP_WIDTH = 250;
-
-/**
- * The height of tooltips.
- */
-const TOOLTIP_HEIGHT = 175;
 
 /**
  * A panel which contains a toolbar and a console.
@@ -138,7 +129,8 @@ class ConsoleWidget extends Widget {
    * @returns A ConsoleTooltip widget.
    */
   static createTooltip(top: number, left: number): ConsoleTooltip {
-    let rect = { top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT };
+    // Null values are automatically set to 'auto'.
+    let rect = { top, left, width: null as any, height: null as any };
     return new ConsoleTooltip(rect as ClientRect);
   }
 
@@ -258,25 +250,27 @@ class ConsoleWidget extends Widget {
 
       // Offset the height of the tooltip by the height of cursor characters.
       top += model.change.chHeight;
-      // If the last character is a word character, offset its width;
-      if (model.change.newValue.match(/\w$/)) left -= model.change.chWidth;
+      // Offset the width of the tooltip by the width of cursor characters.
+      left -= model.change.chWidth;
 
-      let rect = {top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT};
+      let rect = {top, left, width: null as any, height: null as any};
+      // Account for 1px border on top and bottom.
+      let maxHeight = window.innerHeight - top - 2;
+      // Account for 1px border on both sides.
+      let maxWidth = window.innerWidth - left - 2;
 
-      if (this._tooltip) {
-        this._tooltip.rect = rect as ClientRect;
-      } else {
+      if (!this._tooltip) {
         this._tooltip = constructor.createTooltip(top, left);
         this._tooltip.reference = this;
         this._tooltip.attach(document.body);
       }
 
       let content = this._rendermime.render(model.bundle) || new Widget();
+      this._tooltip.rect = rect as ClientRect;
       this._tooltip.content = content;
-
-      if (this._tooltip.isHidden) {
-        this._tooltip.show();
-      }
+      this._tooltip.node.style.maxHeight = maxHeight + 'px';
+      this._tooltip.node.style.maxWidth = maxWidth + 'px';
+      if (this._tooltip.isHidden) this._tooltip.show();
 
       return;
     }
