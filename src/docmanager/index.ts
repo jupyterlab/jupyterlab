@@ -8,15 +8,12 @@ import {
   IKernelSpecIds, ISessionId
 } from 'jupyter-js-services';
 
-import * as utils
-  from 'jupyter-js-utils';
-
 import {
   IDisposable, DisposableDelegate
 } from 'phosphor-disposable';
 
 import {
-  IMessageHandler, Message, installMessageFilter
+  Message
 } from 'phosphor-messaging';
 
 import {
@@ -24,11 +21,7 @@ import {
 } from 'phosphor-panel';
 
 import {
-  Property
-} from 'phosphor-properties';
-
-import {
-  ISignal, Signal
+  ISignal
 } from 'phosphor-signaling';
 
 import {
@@ -46,6 +39,12 @@ import {
 import {
   ContextManager
 } from './context';
+
+
+/**
+ * The class name added to a document container widgets.
+ */
+const DOCUMENT_CLASS = 'jp-DocumentWidget';
 
 
 /**
@@ -185,6 +184,11 @@ export interface IDocumentContext extends IDisposable {
    * Save the document contents to disk.
    */
   save(): Promise<void>;
+
+  /**
+   * Save the document to a different path.
+   */
+  saveAs(path: string): Promise<void>;
 
   /**
    * Revert the document contents to disk contents.
@@ -356,10 +360,8 @@ class DocumentManager implements IDisposable {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
     this._contextManager = new ContextManager(contentsManager, sessionManager, kernelSpecs, (id: string, widget: Widget) => {
-      let parent = new Widget();
-      this._attachChild(parent, widget);
-      Private.contextProperty.set(parent, id);
-      this._widgets[id].push(parent);
+      let parent = this._createWidget('', id);
+      parent.setContent(widget);
       opener.open(parent);
       return new DisposableDelegate(() => {
         parent.close();
@@ -549,29 +551,28 @@ class DocumentManager implements IDisposable {
    * @param kernel - An optional kernel name/id to override the default.
    */
   open(path: string, widgetName='default', kernel?: IKernelId): Widget {
-    let widget = new Widget();
-    let manager = this._contentsManager;
     if (widgetName === 'default') {
       widgetName = this.listWidgetFactories(path)[0];
     }
     let mFactoryEx = this._getModelFactoryEx(widgetName);
-    let lang = mFactoryEx.factory.preferredLanguage(path);
+    if (!mFactoryEx) {
+      return;
+    }
+    let widget: DocumentWidget;
+    // Use an existing context if available.
     let id = this._contextManager.findContext(path, mFactoryEx.name);
     if (id) {
-      this._createWidget(id, widgetName, widget, kernel);
+      widget = this._createWidget(widgetName, id);
+      this._populateWidget(widget, kernel);
       return widget;
     }
+    let lang = mFactoryEx.factory.preferredLanguage(path);
     let model = mFactoryEx.factory.createNew(lang);
-    let opts = mFactoryEx.contentsOptions;
-    manager.get(path, opts).then(contents => {
-      if (contents.format === 'json') {
-        model.fromJSON(contents.content);
-      } else {
-        model.fromString(contents.content);
-      }
-      model.dirty = false;
-      id = this._createContext(path, model, widgetName, contents);
-      this._createWidget(id, widgetName, widget, kernel);
+    id = this._contextManager.createNew(path, model, mFactoryEx);
+    widget = this._createWidget(widgetName, id);
+    // Load the contents from disk.
+    this._contextManager.revert(id).then(() => {
+      this._populateWidget(widget, kernel);
     });
     return widget;
   }
@@ -586,8 +587,6 @@ class DocumentManager implements IDisposable {
    * @param kernel - An optional kernel name/id to override the default.
    */
   createNew(path: string, widgetName='default', kernel?: IKernelId): Widget {
-    let widget = new Widget();
-    let manager = this._contentsManager;
     if (widgetName === 'default') {
       widgetName = this.listWidgetFactories(path)[0];
     }
@@ -597,77 +596,14 @@ class DocumentManager implements IDisposable {
     }
     let lang = mFactoryEx.factory.preferredLanguage(path);
     let model = mFactoryEx.factory.createNew(lang);
-    let opts = utils.copy(mFactoryEx.contentsOptions);
-    if (opts.format === 'json') {
-      opts.content = model.toJSON();
-    } else {
-      opts.content = model.toString();
-    }
-    manager.save(path, opts).then(contents => {
-      let id = this._createContext(path, model, widgetName, contents);
-      this._createWidget(id, widgetName, widget, kernel);
+    let id = this._contextManager._createNew(path, model, mFactoryEx);
+    let widget = this._createWidget(widgetName, id);
+    // Save the contents to disk to get a valid contentsModel for the
+    // context.
+    this._contextManager.save(id).then(() => {
+      this._populateWidget(widget, kernel);
     });
     return widget;
-  }
-
-  /**
-   * Get the path given a widget.
-   */
-  getPath(widget: Widget): string {
-    let id = Private.contextProperty.get(widget);
-    return this._contextManager.getPath(id);
-  }
-
-  /**
-   * Clone a widget.
-   *
-   * #### Notes
-   * This will create a new widget with the same model and context
-   * as the existing widget.
-   */
-  clone(widget: Widget): Widget {
-    let parent = new Widget();
-    let id = Private.contextProperty.get(widget);
-    let name = Private.nameProperty.get(widget);
-    this._createWidget(id, name, parent);
-    return parent;
-  }
-
-  /**
-   * Filter messages on the widget.
-   */
-  filterMessage(handler: IMessageHandler, msg: Message): boolean {
-    if (msg.type !== 'close-request') {
-      return false;
-    }
-    if (this._closeGuard) {
-      // Allow the close to propagate to the widget and its layout.
-      this._closeGuard = false;
-      return false;
-    }
-    let widget = handler as Widget;
-    let id = Private.contextProperty.get(widget);
-    let model = this._contextManager.getModel(id);
-    let context = this._contextManager.getContext(id);
-    let child = (widget.layout as PanelLayout).childAt(0);
-    let name = Private.nameProperty.get(widget);
-    // Check for a sibling widget.
-    if (!name) {
-      // Do not filter the message.
-      return false;
-    }
-    let factory = this._widgetFactories[name].factory;
-    this._maybeClose(widget, model.dirty).then(result => {
-      if (!result) {
-        return result;
-      }
-      return factory.beforeClose(model, context, child);
-    }).then(result => {
-      if (result) {
-        return this._cleanupWidget(widget);
-      }
-    });
-    return true;
   }
 
   /**
@@ -679,21 +615,6 @@ class DocumentManager implements IDisposable {
    */
   renameFile(oldPath: string, newPath: string): void {
     this._contextManager.rename(oldPath, newPath);
-  }
-
-  /**
-   * Handle a file deletion on the currently open widgets.
-   *
-   * @param path - The path of the file to delete.
-   */
-  deleteFile(path: string): void {
-    let ids = this._contextManager.getIdsForPath(path);
-    for (let id of ids) {
-      let widgets: Widget[] = this._widgets[id] || [];
-      for (let w of widgets) {
-        this._cleanupWidget(w);
-      }
-    }
   }
 
   /**
@@ -710,7 +631,7 @@ class DocumentManager implements IDisposable {
     }
     for (let id of ids) {
       for (let widget of this._widgets[id]) {
-        if (Private.nameProperty.get(widget) === widgetName) {
+        if (widget.name === widgetName) {
           return widget;
         }
       }
@@ -718,42 +639,16 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Save the document contents to disk.
+   * Clone a widget.
    *
    * #### Notes
-   * This will affect the contents of all other widgets
-   * that share the same model as the given widget.
+   * This will create a new widget with the same model and context
+   * as this widget.
    */
-  save(widget: Widget): Promise<void> {
-    let id = Private.contextProperty.get(widget);
-    return this._contextManager.save(id);
-  }
-
-  /**
-   * Save a widget to a different file name.
-   *
-   * #### Notes
-   * It is assumed that all other widgets associated with the new path
-   * have been closed and that the path is either not in conflict
-   * or the user has chosen to overwrite the file.
-   * This will affect the contents of all other widgets
-   * that share the same model as the given widget.
-   */
-  saveAs(widget: Widget, path: string): Promise<void> {
-    let id = Private.contextProperty.get(widget);
-    return this._contextManager.saveAs(id, path);
-  }
-
-  /**
-   * Revert the document contents to disk contents.
-   *
-   * #### Notes
-   * This will affect the contents of all other widgets
-   * that share the same model as the given widget.
-   */
-  revert(widget: Widget): Promise<void> {
-    let id = Private.contextProperty.get(widget);
-    return this._contextManager.revert(id);
+  clone(widget: Widget): DocumentWidget {
+    let parent = this._createWidget(widget.name, widget.context.id);
+    this._populateWidget(parent);
+    return parent;
   }
 
   /**
@@ -781,97 +676,31 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Create a context or reuse an existing one.
+   * Create a container widget and handle its lifecycle.
    */
-  private _createContext(path: string, model: IDocumentModel, widgetName: string, contents: IContentsModel): string {
-    let mFactoryEx = this._getModelFactoryEx(widgetName);
-    let id = this._contextManager.findContext(path, mFactoryEx.name);
-    if (id) {
-      return id;
-    } else {
-      return this._contextManager.createNew(path, model, mFactoryEx, contents);
+  private _createWidget(name: string, id: string): DocumentWidget {
+    let context = this._contextManager.getContext(id);
+    let widget = new DocumentWidget(name, context);
+    if (!(id in this._widgets)) {
+      this._widgets[id] = [];
     }
-  }
-
-  /**
-   * Create a widget from a context and attach it to the parent.
-   */
-  private _createWidget(contextId: string, widgetName: string, parent: Widget, kernel?: IKernelId): void {
-    let wFactoryEx = this._getWidgetFactoryEx(widgetName);
-    if (!(contextId in this._widgets)) {
-      this._widgets[contextId] = [];
-    }
-    this._widgets[contextId].push(parent);
-    let context = this._contextManager.getContext(contextId);
-    let model = this._contextManager.getModel(contextId);
-    // Create the child widget using the factory.
-    let child = wFactoryEx.factory.createNew(model, context, kernel);
-    this._attachChild(parent, child);
-    Private.nameProperty.set(parent, widgetName);
-    Private.contextProperty.set(parent, contextId);
-    installMessageFilter(parent, this);
-  }
-
-  /**
-   * Attach a child widget to a parent container.
-   */
-  private _attachChild(parent: Widget, child: Widget) {
-    parent.layout = new PanelLayout();
-    parent.title.closable = true;
-    parent.title.text = child.title.text;
-    parent.title.icon = child.title.icon;
-    parent.title.className = child.title.className;
-    // Mirror the parent title based on the child.
-    child.title.changed.connect(() => {
-      child.parent.title.text = child.title.text;
-      child.parent.title.icon = child.title.icon;
-      child.parent.title.className = child.title.className;
-    });
-    // Add the child widget to the parent widget.
-    (parent.layout as PanelLayout).addChild(child);
-  }
-
-  /**
-   * Ask the user whether to close an unsaved file.
-   */
-  private _maybeClose(widget: Widget, dirty: boolean): Promise<boolean> {
-    if (!dirty) {
-      return Promise.resolve(true);
-    }
-    let host = widget.isAttached ? widget.node : document.body;
-    return showDialog({
-      title: 'Close without saving?',
-      body: `File "${widget.title.text}" has unsaved changes, close without saving?`,
-      host
-    }).then(value => {
-      if (value && value.text === 'OK') {
-        return true;
-      }
-      return false;
+    this._widgets[id].push(child);
+    widget.disposed.connect(() => {
+      let index = this._widgets[id].indexOf(widget);
+      this._widgets[id] = this._widgets[id].splice(index, 1);
     });
   }
 
   /**
-   * Clean up the data associated with a widget.
+   * Create a content widget and add it to the container widget.
    */
-  private _cleanupWidget(widget: Widget): void {
-    // Remove the widget from our internal storage.
-    let id = Private.contextProperty.get(widget);
-    let index = this._widgets[id].indexOf(widget);
-    this._widgets[id] = this._widgets[id].splice(index, 1);
-    this._closeGuard = true;
-    // If this is the last widget in that context, remove the context.
-    if (!this._widgets[id]) {
-      let session = this._contextManager.removeContext(id);
-      if (session) {
-        // TODO: show a dialog asking whether to shut down the kernel.
-        widget.close();
-        widget.dispose();
-      }
-    } else {
-      widget.close();
-      widget.dispose();
-    }
+  private _populateWidget(parent: DocumentWidget, kernel?: IKernel): void {
+    let factory = this._widgetFactories[parent.name].factory;
+    let id = parent.context.id;
+    let model = this._contextManager.getModel(id);
+    let context = this._contextManager.getContext(id);
+    let child = factory.createNew(model, context, kernel);
+    parent.setContent(child);
   }
 
   /**
@@ -906,7 +735,114 @@ class DocumentManager implements IDisposable {
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
   private _contextManager: ContextManager = null;
-  private _closeGuard = false;
+}
+
+
+/**
+ * A container widget for documents.
+ */
+export
+class DocumentWidget {
+  /**
+   * Construct a new document widget.
+   */
+  constructor(name: string, context: IDocumentContext) {
+    super();
+    this.addClass(DOCUMENT_CLASS);
+    this.layout = new PanelLayout();
+    this._name = name;
+    this._context = context;
+    this.title.closable = true;
+  }
+
+  /**
+   * Get the name of the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return this._name;
+  }
+
+  /**
+   * The context for the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get context(): IDocumentContext {
+    return this._context;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._context = null;
+    super.dispose();
+  }
+
+  /**
+   * Set the child and context of the widget.
+   *
+   * #### Notes
+   * This function is not intended to be called by user code.
+   */
+  setContent(child: Widget): void {
+    let layout = this.layout as PanelLayout;
+    if (layout.childAt(0)) {
+      throw new Error('Content already set');
+    }
+    this.title.text = child.title.text;
+    this.title.icon = child.title.icon;
+    this.title.className = child.title.className;
+    // Mirror this title based on the child.
+    this.title.changed.connect(() => {
+      this.parent.title.text = child.title.text;
+      this.parent.title.icon = child.title.icon;
+      this.parent.title.className = child.title.className;
+    });
+    // Add the child widget to the layout.
+    (this.layout as PanelLayout).addChild(child);
+  }
+
+  /**
+   * Handle `'close-request'` messages.
+   */
+  protected onCloseRequest(msg: Message): void {
+    // Handle dirty.
+    // Call the beforeClose on the widget factory.
+    // Check for dangling kernel.
+    // THEN,
+    super.onCloseRequest(msg);
+  }
+
+  /**
+   * Ask the user whether to close an unsaved file.
+   */
+  private _maybeClose(widget: Widget, dirty: boolean): Promise<boolean> {
+    if (!dirty) {
+      return Promise.resolve(true);
+    }
+    let host = widget.isAttached ? widget.node : document.body;
+    return showDialog({
+      title: 'Close without saving?',
+      body: `File "${widget.title.text}" has unsaved changes, close without saving?`,
+      host
+    }).then(value => {
+      if (value && value.text === 'OK') {
+        return true;
+      }
+      return false;
+    });
+  }
+
+  private _context = IDocumentContext;
+  private _name = '';
 }
 
 
@@ -914,12 +850,6 @@ class DocumentManager implements IDisposable {
  * A private namespace for DocumentManager data.
  */
 namespace Private {
-  /**
-   * A signal emitted when a file is opened.
-   */
-  export
-  const openedSignal = new Signal<DocumentManager, Widget>();
-
   /**
    * An extended interface for a model factory and its options.
    */
@@ -935,20 +865,4 @@ namespace Private {
   interface IWidgetFactoryEx extends IWidgetFactoryOptions {
     factory: IWidgetFactory<Widget>;
   }
-
-  /**
-   * The widget factory name used to create a widget.
-   */
-  export
-  const nameProperty = new Property<Widget, string>({
-    name: 'name'
-  });
-
-  /**
-   * The context id associated with a widget.
-   */
-  export
-  const contextProperty = new Property<Widget, string>({
-    name: 'context'
-  });
 }

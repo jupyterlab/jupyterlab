@@ -145,6 +145,13 @@ class Context implements IDocumentContext {
   }
 
   /**
+   * Save the document to a different path.
+   */
+  saveAs(path: string): Promise<void> {
+    return this._manager.saveAs(this._id, path);
+  }
+
+  /**
    * Revert the document contents to disk contents.
    */
   revert(): Promise<void> {
@@ -226,7 +233,7 @@ class ContextManager implements IDisposable {
   /**
    * Create a new context.
    */
-  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions, contents: IContentsModel): string {
+  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions): string {
     let context = new Context(this);
     let id = context.id;
     this._contexts[id] = {
@@ -235,7 +242,7 @@ class ContextManager implements IDisposable {
       model,
       modelName: options.name,
       opts: options.contentsOptions,
-      contentsModel: this._copyContentsModel(contents),
+      contentsModel: null,
       session: null
     };
     // Handle the session - use one created for another model on this
