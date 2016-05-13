@@ -228,7 +228,8 @@ class ContextManager implements IDisposable {
    */
   createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions, contents: IContentsModel): string {
     let context = new Context(this);
-    this._contexts[context.id] = {
+    let id = context.id;
+    this._contexts[id] = {
       context,
       path,
       model,
@@ -237,7 +238,25 @@ class ContextManager implements IDisposable {
       contentsModel: this._copyContentsModel(contents),
       session: null
     };
-    return context.id;
+    // Handle the session - use one created for another model on this
+    // path or see if there is one running otherwise.
+    if (this.getIdsForPath(path)) {
+      this._syncSessions(path);
+    } else {
+      this._sessionManager.findByPath(path).then(sessionId => {
+        let contextEx = this._contexts[id];
+        let session = contextEx.session;
+        if (session) {
+          return;
+        }
+        let sOptions = {
+          notebook: { path: contextEx.path },
+          kernel: { id: sessionId.kernel.id }
+        };
+        this._startSession(id, sOptions);
+      });
+    }
+    return id;
   }
 
   /**
@@ -317,6 +336,7 @@ class ContextManager implements IDisposable {
    */
   changeKernel(id: string, options: IKernelId): Promise<IKernel> {
     let contextEx = this._contexts[id];
+    this._syncSessions(contextEx.path);
     let session = contextEx.session;
     if (!session) {
       let path = contextEx.path;
@@ -337,14 +357,24 @@ class ContextManager implements IDisposable {
    *
    * @param newPath - The new path.
    */
-  rename(id: string, newPath: string): void {
-    let contextEx = this._contexts[id];
-    let session = contextEx.session;
-    if (session) {
-      session.renameNotebook(newPath);
+  rename(oldPath: string, newPath: string): void {
+    this._syncSessions(oldPath);
+    // Update all of the paths, but only update one session
+    // so there is only one REST API call.
+    let ids = this.getIdsForPath(oldPath);
+    let sessionUpdated = false;
+    for (let id of ids) {
+      let contextEx = this._contexts[id];
+      contextEx.path = newPath;
+      contextEx.context.pathChanged.emit(newPath);
+      if (!sessionUpdated) {
+        let session = contextEx.session;
+        if (session) {
+          session.renameNotebook(newPath);
+          sessionUpdated = true;
+        }
+      }
     }
-    this._contexts[id].path = newPath;
-    contextEx.context.pathChanged.emit(newPath);
   }
 
   /**
@@ -374,6 +404,27 @@ class ContextManager implements IDisposable {
       contextEx.contentsModel = this._copyContentsModel(contents);
       model.dirty = false;
     });
+  }
+
+  /**
+   * Save a document to a new file name.
+   *
+   * This results in a new session.
+   */
+  saveAs(id: string, newPath: string): Promise<void> {
+    let contextEx = this._contexts[id];
+    contextEx.path = newPath;
+    contextEx.context.pathChanged.emit(newPath);
+    if (contextEx.session) {
+      let options = {
+        notebook: { path: newPath },
+        kernel: { id: contextEx.session.id }
+      };
+      return this._startSession(id, options).then(() => {
+        return this.save(id);
+      });
+    }
+    return this.save(id);
   }
 
   /**
@@ -417,6 +468,9 @@ class ContextManager implements IDisposable {
     let contextEx = this._contexts[id];
     let context = contextEx.context;
     return this._sessionManager.startNew(options).then(session => {
+      if (contextEx.session) {
+        contextEx.session.dispose();
+      }
       contextEx.session = session;
       context.kernelChanged.emit(session.kernel);
       session.notebookPathChanged.connect((s, path) => {
@@ -425,11 +479,39 @@ class ContextManager implements IDisposable {
           context.pathChanged.emit(path);
         }
       });
+      this._syncSessions(session.notebookPath);
       session.kernelChanged.connect((s, kernel) => {
         context.kernelChanged.emit(kernel);
       });
       return session.kernel;
     });
+  }
+
+  /**
+   * Make sure the same session is used for all of the contexts
+   * associated with a path.
+   */
+  private _syncSessions(path: string): void {
+    let session: INotebookSession;
+    let ids = this.getIdsForPath(path);
+    for (let id of ids) {
+      if (this._contexts[id].session) {
+        session = this._contexts[id].session;
+        break;
+      }
+    }
+    if (!session) {
+      return;
+    }
+    let sOptions = {
+      notebook: { path: session.notebookPath },
+      kernel: { id: session.kernel.id }
+    };
+    for (let id of ids) {
+      if (!this._contexts[id].session) {
+        this._startSession(id, sOptions);
+      }
+    }
   }
 
   /**
