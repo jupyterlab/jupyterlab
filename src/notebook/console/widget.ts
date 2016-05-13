@@ -131,15 +131,15 @@ class ConsoleWidget extends Widget {
   /**
    * Create a new tooltip widget.
    *
-   * @param x The x position of the current cursor.
+   * @param top The top position of the tooltip.
    *
-   * @param y The y position of the current cursor.
+   * @param left The left position of the tooltip.
    *
-   * @param text The text of the tooltip.
+   * @returns A ConsoleTooltip widget.
    */
-  static createTooltip(top: number, left: number, text = '...'): ConsoleTooltip {
+  static createTooltip(top: number, left: number): ConsoleTooltip {
     let rect = { top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT };
-    return new ConsoleTooltip(text, rect as ClientRect);
+    return new ConsoleTooltip(rect as ClientRect);
   }
 
   /*
@@ -255,7 +255,6 @@ class ConsoleWidget extends Widget {
       }
 
       let {top, left} = model.change.coords;
-      let text = model.text;
 
       // Offset the height of the tooltip by the height of cursor characters.
       top += model.change.chHeight;
@@ -264,16 +263,21 @@ class ConsoleWidget extends Widget {
 
       let rect = {top, left, width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT};
 
-      if (!this._tooltip) {
-        this._tooltip = constructor.createTooltip(top, left, text);
+      if (this._tooltip) {
+        this._tooltip.rect = rect as ClientRect;
+      } else {
+        this._tooltip = constructor.createTooltip(top, left);
         this._tooltip.reference = this;
         this._tooltip.attach(document.body);
-      } else {
-        this._tooltip.rect = rect as ClientRect;
-        this._tooltip.text = model.text;
       }
 
-      if (this._tooltip.isHidden) this._tooltip.show();
+      let content = this._rendermime.render(model.bundle) || new Widget();
+      this._tooltip.content = content;
+
+      if (this._tooltip.isHidden) {
+        this._tooltip.show();
+      }
+
       return;
     }
   }

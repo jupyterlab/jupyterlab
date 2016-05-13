@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  INotebookSession
+  INotebookSession, IInspectReply
 } from 'jupyter-js-services';
 
 import {
@@ -73,9 +73,9 @@ interface ITooltipModel {
   change: ITextChange;
 
   /**
-   * The text of the tooltip.
+   * The API inspect request data payload.
    */
-  text: string;
+  bundle: { [mimetype: string]: string };
 }
 
 
@@ -376,6 +376,7 @@ class ConsoleModel implements IConsoleModel {
   run(): void {
     let prompt = this._cells.get(this._cells.length - 1) as ICodeCellModel;
     let session = this.session;
+    this.tooltip = null;
     if (!session || !session.kernel) {
       return;
     }
@@ -385,7 +386,6 @@ class ConsoleModel implements IConsoleModel {
       this._prompt = this.createPrompt()
       this._cells.add(this._prompt);
     };
-    this.tooltip = null;
     // Whether the code cell executes or not, create a new prompt.
     executeCodeCell(prompt, session.kernel).then(newPrompt, newPrompt);
   }
@@ -420,9 +420,21 @@ class ConsoleModel implements IConsoleModel {
       return;
     }
 
-    let { top, left } = args.coords;
-    let text = `tooltip popover:\n\ttop: ${top}\n\tleft: ${left}`;
-    this.tooltip = { text, change: args };
+    let pendingInspect = ++this._pendingInspect;
+
+    this._session.kernel.inspect({
+      code: args.newValue,
+      cursor_pos: args.ch,
+      detail_level: 0
+    }).then((value: IInspectReply) => {
+      if (pendingInspect !== this._pendingInspect || !value.found) {
+        return;
+      }
+      console.log('value', value)
+      let change = args;
+      let bundle = value.data;
+      this.tooltip = { change, bundle };
+    });
   }
 
   /**
@@ -454,6 +466,7 @@ class ConsoleModel implements IConsoleModel {
   private _defaultMimetype = 'text/x-ipython';
   private _history: IConsoleHistory = null;
   private _metadata: { [key: string]: string } = Object.create(null);
+  private _pendingInspect: number = 0;
   private _prompt: ICodeCellModel = null;
   private _tooltip: ITooltipModel = null;
   private _session: INotebookSession = null;
@@ -517,7 +530,7 @@ namespace Private {
     if (t1 === t2 || !t1 && !t2) return true;
     // If one item is null or undefined, items don't match.
     if (!t1 || !t2) return false;
-    return matchTextChanges(t1.change, t2.change) && t1.text === t2.text;
+    return matchTextChanges(t1.change, t2.change);
   }
 
   /**

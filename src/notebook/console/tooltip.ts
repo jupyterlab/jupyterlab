@@ -7,6 +7,10 @@ import {
 } from 'phosphor-messaging';
 
 import {
+  Panel
+} from 'phosphor-panel';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -21,7 +25,7 @@ const TOOLTIP_CLASS = 'jp-ConsoleTooltip';
 const CONTENT_CLASS = 'jp-ConsoleTooltip-content';
 
 export
-class ConsoleTooltip extends Widget {
+class ConsoleTooltip extends Panel {
   /**
    * Create the DOM node for a console tooltip.
    */
@@ -36,10 +40,9 @@ class ConsoleTooltip extends Widget {
   /**
    * Construct a console tooltip widget.
    */
-  constructor(text: string, rect: ClientRect) {
+  constructor(rect: ClientRect) {
     super();
     this.addClass(TOOLTIP_CLASS);
-    this.text = text;
     this.rect = rect;
   }
 
@@ -74,15 +77,19 @@ class ConsoleTooltip extends Widget {
   /**
    * The text of the tooltip.
    */
-  get text(): string {
-    return this._text;
+  get content(): Widget {
+    return this._content;
   }
-  set text(newValue: string) {
-    if (newValue === this._text) {
+  set content(newValue: Widget) {
+    if (newValue === this._content) {
       return;
     }
-    this._text = newValue;
-    this.node.getElementsByTagName('pre')[0].textContent = this._text;
+    if (this._content) {
+      this._content.dispose();
+    }
+    this._content = newValue;
+    this.node.textContent = '';
+    this.addChild(this._content);
   }
 
   /**
@@ -159,7 +166,7 @@ class ConsoleTooltip extends Widget {
 
   private _rect: ClientRect = null;
   private _reference: Widget = null;
-  private _text = '';
+  private _content: Widget = null;
 }
 
 
