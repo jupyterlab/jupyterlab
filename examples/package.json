@@ -3,6 +3,8 @@
   "name": "jupyter-js-notebook-examples",
   "dependencies": {
     "jupyter-js-notebook": "file:..",
+    "jupyter-js-ui": "^0.11.0",
+    "jupyter-js-utils": "^0.4.0",
     "phosphor-commandpalette": "^0.2.0",
     "phosphor-keymap": "^0.8.0",
     "phosphor-splitpanel": "^1.0.0-rc.1",
