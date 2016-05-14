@@ -57,10 +57,10 @@ Build Example
 Follow the source build instructions first.
 
 ```bash
-npm run build:example
+npm run build:examples
 ```
 
-Change to `example` directory and navigate to `index.html`.
+Change to `examples/notebook` directory and run `python main.py`.  Open your browser to URL printed in the output.
 
 
 
