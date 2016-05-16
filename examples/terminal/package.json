@@ -7,7 +7,8 @@
   },
   "dependencies": {
     "jupyter-js-ui": "file:../..",
-    "phosphor-dockpanel": "^0.9.7"
+    "phosphor-dockpanel": "^0.9.7",
+    "phosphor-widget": "^1.0.0-rc.1"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
