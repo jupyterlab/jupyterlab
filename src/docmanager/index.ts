@@ -621,7 +621,7 @@ class DocumentManager implements IDisposable {
    * Handle a file deletion.
    */
   handleDelete(path: string): void {
-    // TODO
+    // TODO: Leave all of the widgets open and flag them as orphaned?
   }
 
   /**
@@ -687,15 +687,11 @@ class DocumentManager implements IDisposable {
    */
   private _createWidget(name: string, id: string): DocumentWidget {
     let factory = this._widgetFactories[name].factory;
-    let widget = new DocumentWidget(name, id, this._contextManager, factory);
+    let widget = new DocumentWidget(name, id, this._contextManager, factory, this._widgets);
     if (!(id in this._widgets)) {
       this._widgets[id] = [];
     }
     this._widgets[id].push(widget);
-    widget.disposed.connect(() => {
-      let index = this._widgets[id].indexOf(widget);
-      this._widgets[id] = this._widgets[id].splice(index, 1);
-    });
     return widget;
   }
 
@@ -754,13 +750,14 @@ class DocumentWidget extends Widget {
   /**
    * Construct a new document widget.
    */
-  constructor(name: string, id: string, manager: ContextManager, factory: IWidgetFactory<Widget>) {
+  constructor(name: string, id: string, manager: ContextManager, factory: IWidgetFactory<Widget>, widgets: { [key: string]: DocumentWidget[] }) {
     super();
     this.addClass(DOCUMENT_CLASS);
     this.layout = new PanelLayout();
     this._name = name;
     this._id = id;
     this._manager = manager;
+    this._widgets = widgets;
     this.title.closable = true;
   }
 
@@ -788,6 +785,9 @@ class DocumentWidget extends Widget {
    * Bring up a dialog to select a kernel.
    */
   selectKernel(): Promise<IKernel> {
+    // TODO: the dialog should take kernel information only,
+    // and return kernel information.  We then change the
+    // kernel in the context.
     return void 0;
   }
 
@@ -798,8 +798,17 @@ class DocumentWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
+    // Remove the widget from the widget registry.
+    let id = this._id;
+    let index = this._widgets[id].indexOf(this);
+    this._widgets[id] = this._widgets[id].splice(index, 1);
+    // Dispose of the context if this is the last widget using it.
+    if (!this._widgets[id].length) {
+      this._manager.removeContext(id);
+    }
     this._manager = null;
     this._factory = null;
+    this._widgets = null;
     super.dispose();
   }
 
@@ -834,30 +843,36 @@ class DocumentWidget extends Widget {
     let model = this._manager.getModel(this._id);
     let layout = this.layout as PanelLayout;
     let child = layout.childAt(0);
+    // Handle dirty state.
     this._maybeClose(model.dirty).then(result => {
-      return this._factory.beforeClose(model, this.context, child);
+      if (result) {
+        // Let the widget factory handle closing.
+        return this._factory.beforeClose(model, this.context, child);
+      }
+      return result;
     }).then(result => {
       if (result) {
-        this._actuallyClose();
+        // Perform close tasks.
+        return this._actuallyClose();
+      }
+      return result;
+    }).then(result => {
+      if (result) {
+        // Dispose of document widgets when they are closed.
+        this.dispose();
       }
     }).catch(() => {
-      this._actuallyClose();
+      this.dispose();
     });
-  }
-
-  /**
-   * Perform closing tasks for the widget.
-   */
-  private _actuallyClose(): void {
-    // TODO: check for a dangling kernel.
-    this.dispose();
   }
 
   /**
    * Ask the user whether to close an unsaved file.
    */
   private _maybeClose(dirty: boolean): Promise<boolean> {
-    if (!dirty) {
+    // Bail if the model is not dirty or other widgets are using the model.
+    let widgets = this._widgets[this._id];
+    if (!dirty || widgets.length > 1) {
       return Promise.resolve(true);
     }
     return showDialog({
@@ -872,10 +887,42 @@ class DocumentWidget extends Widget {
     });
   }
 
+  /**
+   * Perform closing tasks for the widget.
+   */
+  private _actuallyClose(): Promise<boolean> {
+    // Check for a dangling kernel.
+    let widgets = this._widgets[this._id];
+    let kernelId = this.context.kernel ? this.context.kernel.id : '';
+    if (!kernelId || widgets.length > 1) {
+      return Promise.resolve(true);
+    }
+    for (let id in this._widgets) {
+      for (let widget of this._widgets[id]) {
+        let kId = widget.context.kernel || widget.context.kernel.id;
+        if (widget !== this && kId == kernelId) {
+          return Promise.resolve(true);
+        }
+      }
+    }
+    return showDialog({
+      title: 'Shut down kernel?',
+      body: `Shut down ${this.context.kernel.name}?`,
+      host: this.node
+    }).then(value => {
+      if (value && value.text === 'OK') {
+        return this.context.kernel.shutdown();
+      }
+    }).then(() => {
+      return true;
+    });
+  }
+
   private _manager: ContextManager = null;
   private _factory: IWidgetFactory<Widget> = null;
   private _id = '';
   private _name = '';
+  private _widgets: { [key: string]: DocumentWidget[] } = null;
 }
 
 

@@ -308,12 +308,11 @@ class ContextManager implements IDisposable {
   /**
    * Remove a context.
    */
-  removeContext(id: string): INotebookSession {
+  removeContext(id: string): void {
     let contextEx = this._contexts[id];
     contextEx.model.dispose();
     contextEx.context.dispose();
     delete this._contexts[id];
-    return contextEx.session;
   }
 
   /**
