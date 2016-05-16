@@ -6,31 +6,25 @@
 'use strict';
 
 import {
-  ContentsManager, ISessionOptions, NotebookSessionManager
+  ContentsManager, NotebookSessionManager,
+  IKernelSpecIds
 } from 'jupyter-js-services';
-
-import {
-  FileHandler, FileHandlerRegistry, FileCreator, DirectoryCreator
-} from 'jupyter-js-ui/lib/filehandler';
 
 import {
   FileBrowserWidget, FileBrowserModel
 } from 'jupyter-js-ui/lib/filebrowser';
 
 import {
+  DocumentManager, DocumentWidget
+} from 'jupyter-js-ui/lib/docmanager';
+
+import {
+  ModelFactory, WidgetFactory
+} from 'jupyter-js-ui/lib/docmanager/default';
+
+import {
   showDialog, okButton
 } from 'jupyter-js-ui/lib/dialog';
-
-import {
-  CodeMirrorWidget
-} from 'jupyter-js-ui/lib/codemirror/widget';
-
-import {
-  getConfigOption
-} from 'jupyter-js-utils';
-
-import * as arrays
- from 'phosphor-arrays';
 
 import {
   DockPanel
@@ -41,46 +35,62 @@ import {
 } from 'phosphor-keymap';
 
 import {
-  Menu, MenuBar, MenuItem
+  Menu, MenuItem
 } from 'phosphor-menus';
 
 import {
   SplitPanel
 } from 'phosphor-splitpanel';
 
-import {
-  Widget
-} from 'phosphor-widget';
-
 import 'jupyter-js-ui/lib/index.css';
 import 'jupyter-js-ui/lib/theme.css';
 
 
 function main(): void {
+  let sessionsManager = new NotebookSessionManager();
+  sessionsManager.getSpecs().then(specs => {
+    createApp(sessionsManager, specs);
+  });
+}
 
-  let baseUrl = getConfigOption('baseUrl');
-  let contentsManager = new ContentsManager(baseUrl);
-  let sessionsManager = new NotebookSessionManager({ baseUrl: baseUrl });
+
+function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecIds): void {
+  let contentsManager = new ContentsManager();
+  let widgets: DocumentWidget[] = [];
+  let activeWidget: DocumentWidget;
+
+  let opener = {
+    open: (widget: DocumentWidget) => {
+      if (widgets.indexOf(widget) === -1) {
+        dock.insertTabAfter(widget);
+        widgets.push(widget);
+      }
+      dock.selectWidget(widget);
+      activeWidget = widget;
+      widget.disposed.connect((w: DocumentWidget) => {
+        let index = widgets.indexOf(w);
+        widgets.splice(index, 1);
+      });
+    }
+  };
 
   let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
-  let registry = new FileHandlerRegistry();
-  let fileHandler = new FileHandler(contentsManager);
-
-  registry.addDefaultHandler(fileHandler);
-
-  let fbWidget = new FileBrowserWidget(fbModel, registry);
-
-  let dirCreator = new DirectoryCreator(contentsManager);
-  let fileCreator = new FileCreator(contentsManager);
-  registry.addCreator(
-    'New Directory', dirCreator.createNew.bind(dirCreator));
-  registry.addCreator('New File', fileCreator.createNew.bind(fileCreator));
-
-  let widgets: CodeMirrorWidget[] = [];
-  registry.opened.connect((r, widget) => {
-    dock.insertTabAfter(widget);
-    widgets.push(widget as CodeMirrorWidget);
+  let docManager = new DocumentManager(contentsManager, sessionsManager, specs, opener);
+  let mFactory = new ModelFactory();
+  let wFactory = new WidgetFactory();
+  docManager.registerModelFactory(mFactory, {
+    name: 'default',
+    contentsOptions: { format: 'text', type: 'file' }
   });
+  docManager.registerWidgetFactory(wFactory, {
+    displayName: 'Editor',
+    modelName: 'default',
+    fileExtensions: ['.*'],
+    defaultFor: ['.*'],
+    preferKernel: false,
+    canStartKernel: true
+  });
+  let fbWidget = new FileBrowserWidget(fbModel, docManager, opener);
 
   let panel = new SplitPanel();
   panel.id = 'main';
@@ -90,8 +100,6 @@ function main(): void {
   panel.addChild(dock);
   SplitPanel.setStretch(dock, 1);
   dock.spacing = 8;
-
-  let activeWidget: CodeMirrorWidget;
 
   document.addEventListener('focus', event => {
     for (let i = 0; i < widgets.length; i++) {
@@ -109,29 +117,24 @@ function main(): void {
     selector: '.jp-DirListing',
     handler: () => {
       fbWidget.open();
-      return true;
     }
   }, {
     sequence: ['Ctrl N'], // Add emacs keybinding for select next.
     selector: '.jp-DirListing',
     handler: () => {
       fbWidget.selectNext();
-      return true;
     }
   }, {
     sequence: ['Ctrl P'], // Add emacs keybinding for select previous.
     selector: '.jp-DirListing',
     handler: () => {
       fbWidget.selectPrevious();
-      return true;
     }
   }, {
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      let path = fileHandler.findPath(activeWidget);
-      fileHandler.save(path);
-      return true;
+      activeWidget.context.save();
     }
   }]);
 
@@ -185,10 +188,6 @@ function main(): void {
       text: 'Download',
       icon: 'fa fa-download',
       handler: () => { fbWidget.download(); }
-    }),
-    new MenuItem({
-      text: 'Revert',
-      handler: () => { fbWidget.revert(); }
     }),
     new MenuItem({
       text: 'Shutdown Kernel',

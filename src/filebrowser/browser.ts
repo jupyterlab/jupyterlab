@@ -22,8 +22,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  FileHandlerRegistry
-} from '../filehandler';
+  DocumentManager
+} from '../docmanager';
 
 import {
   FileButtons
@@ -68,6 +68,15 @@ const REFRESH_DURATION = 30000;
 
 
 /**
+ * An interface for a widget opener.
+ */
+export
+interface IWidgetOpener {
+  open(widget: Widget): void;
+}
+
+
+/**
  * A widget which hosts a file browser.
  *
  * The widget uses the Jupyter Contents API to retreive contents,
@@ -81,18 +90,23 @@ class FileBrowserWidget extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, registry: FileHandlerRegistry) {
+  constructor(model: FileBrowserModel, manager: DocumentManager, opener: IWidgetOpener) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
     this._model = model;
     this._model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs(model);
-    this._buttons = new FileButtons(model, registry);
-    this._listing = new DirListing(model, registry);
-    this._registry = registry;
+    this._buttons = new FileButtons(model, manager, opener);
+    this._listing = new DirListing(model, manager, opener);
+    this._manager = manager;
+    this._opener = opener;
 
     model.fileChanged.connect((fbModel, args) => {
-      registry.rename(args.oldValue, args.newValue);
+      if (args.newValue) {
+        manager.handleRename(args.oldValue, args.newValue);
+      } else {
+        manager.handleDelete(args.oldValue);
+      }
     });
 
     this._crumbs.addClass(CRUMBS_CLASS);
@@ -126,7 +140,8 @@ class FileBrowserWidget extends Widget {
     this._crumbs = null;
     this._buttons = null;
     this._listing = null;
-    this._registry = null;
+    this._manager = null;
+    this._opener = null;
     super.dispose();
   }
 
@@ -155,52 +170,9 @@ class FileBrowserWidget extends Widget {
           showErrorMessage(this, 'Open directory', error)
         );
       } else {
-        this._registry.open(item.path);
-      }
-    }
-  }
-
-  /**
-   * Revert the currently selected item(s).
-   */
-  revert(): void {
-    let items = this._model.sortedItems;
-    for (let item of items) {
-      if (!this._model.isSelected(item.name)) {
-        continue;
-      }
-      if (item.type !== 'directory') {
-        this._registry.revert(item.path);
-      }
-    }
-  }
-
-  /**
-   * Save the currently selected item(s).
-   */
-  save(): void {
-    let items = this._model.sortedItems;
-    for (let item of items) {
-      if (!this._model.isSelected(item.name)) {
-        continue;
-      }
-      if (item.type !== 'directory') {
-        this._registry.save(item.path);
-      }
-    }
-  }
-
-  /**
-   * Close the currently selected item(s).
-   */
-  close(): void {
-    let items = this._model.sortedItems;
-    for (let item of items) {
-      if (!this._model.isSelected(item.name)) {
-        continue;
-      }
-      if (item.type !== 'directory') {
-        this._registry.close(item.path);
+        let path = item.path;
+        let widget = this._manager.findWidget(path) || this._manager.open(item.path);
+        this._opener.open(widget);
       }
     }
   }
@@ -320,5 +292,6 @@ class FileBrowserWidget extends Widget {
   private _buttons: FileButtons = null;
   private _listing: DirListing = null;
   private _timeoutId = -1;
-  private _registry: FileHandlerRegistry = null;
+  private _manager: DocumentManager = null;
+  private _opener: IWidgetOpener = null;
 }

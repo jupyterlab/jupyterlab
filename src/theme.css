@@ -3,6 +3,9 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+@import './docmanager/theme.css';
 @import './dialog/theme.css';
 @import './filebrowser/theme.css';
 @import './terminal/theme.css';
+
+

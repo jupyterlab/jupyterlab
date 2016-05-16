@@ -19,12 +19,16 @@ import {
 } from '../dialog';
 
 import {
-  FileHandlerRegistry
-} from '../filehandler';
+  DocumentManager
+} from '../docmanager';
 
 import {
   FileBrowserModel
 } from './model';
+
+import {
+  IWidgetOpener
+} from './browser';
 
 import * as utils
   from './utils';
@@ -51,11 +55,6 @@ const CONTENT_CLASS = 'jp-FileButtons-buttonContent';
 const ICON_CLASS = 'jp-FileButtons-buttonIcon';
 
 /**
- * The class name added to a dropdown icon.
- */
-const DROPDOWN_CLASS = 'jp-FileButtons-dropdownIcon';
-
-/**
  * The class name added to the create button.
  */
 const CREATE_CLASS = 'jp-id-create';
@@ -75,6 +74,11 @@ const REFRESH_CLASS = 'jp-id-refresh';
  */
 const ACTIVE_CLASS = 'jp-mod-active';
 
+/**
+ * The class name added to a dropdown icon.
+ */
+const DROPDOWN_CLASS = 'jp-FileButtons-dropdownIcon';
+
 
 /**
  * A widget which hosts the file browser buttons.
@@ -86,7 +90,7 @@ class FileButtons extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, registry: FileHandlerRegistry) {
+  constructor(model: FileBrowserModel, manager: DocumentManager, opener: IWidgetOpener) {
     super();
     this.addClass(FILE_BUTTONS_CLASS);
     this._model = model;
@@ -101,7 +105,8 @@ class FileButtons extends Widget {
     node.appendChild(this._buttons.upload);
     node.appendChild(this._buttons.refresh);
 
-    this._registry = registry;
+    this._manager = manager;
+    this._opener = opener;
   }
 
   /**
@@ -111,7 +116,8 @@ class FileButtons extends Widget {
     this._model = null;
     this._buttons = null;
     this._input = null;
-    this._registry = null;
+    this._manager = null;
+    this._opener = null;
     super.dispose();
   }
 
@@ -126,10 +132,19 @@ class FileButtons extends Widget {
   }
 
   /**
-   * Get the file handler registry used by the widget.
+   * Get the document manager used by the widget.
    */
-  get registry(): FileHandlerRegistry {
-    return this._registry;
+  get manager(): DocumentManager {
+    return this._manager;
+  }
+
+  /**
+   * Open a file by path.
+   */
+  open(path: string): void {
+    let widget = this._manager.open(path);
+    let opener = this._opener;
+    opener.open(widget);
   }
 
   /**
@@ -171,11 +186,14 @@ class FileButtons extends Widget {
     dropdown.popup(rect.left, rect.bottom, false, true);
   };
 
+
   /**
    * The 'click' handler for the upload button.
    */
   private _onUploadButtonClicked = (event: MouseEvent) => {
-    if (event.button !== 0) return;
+    if (event.button !== 0) {
+      return;
+    }
     this._input.click();
   };
 
@@ -183,7 +201,9 @@ class FileButtons extends Widget {
    * The 'click' handler for the refresh button.
    */
   private _onRefreshButtonClicked = (event: MouseEvent) => {
-    if (event.button !== 0) return;
+    if (event.button !== 0) {
+      return;
+    }
     this._model.refresh().catch(error => {
       utils.showErrorMessage(this, 'Server Connection Error', error);
     });
@@ -200,7 +220,8 @@ class FileButtons extends Widget {
   private _model: FileBrowserModel;
   private _buttons = Private.createButtons();
   private _input = Private.createUploadInput();
-  private _registry: FileHandlerRegistry = null
+  private _manager: DocumentManager = null;
+  private _opener: IWidgetOpener = null;
 }
 
 
@@ -282,41 +303,88 @@ namespace Private {
   }
 
   /**
+   * Create a new source file.
+   */
+  export
+  function createNewFile(widget: FileButtons): void {
+    createFile(widget, 'file').then(contents => {
+      if (contents === void 0) {
+        return;
+      }
+      widget.model.refresh().then(() => widget.open(contents.name));
+    }).catch(error => {
+      utils.showErrorMessage(widget, 'New File Error', error);
+    });
+  }
+
+  /**
+   * Create a new folder.
+   */
+  export
+  function createNewFolder(widget: FileButtons): void {
+    createFile(widget, 'directory').then(contents => {
+      if (contents === void 0) {
+        return;
+      }
+      widget.model.refresh();
+    }).catch(error => {
+      utils.showErrorMessage(widget, 'New Folder Error', error);
+    });
+  }
+
+  /**
+   * Create a new notebook.
+   */
+  export
+  function createNewNotebook(widget: FileButtons, spec: IKernelSpecId): void {
+    createFile(widget, 'notebook').then(contents => {
+      let started = widget.model.startSession(contents.path, spec.name);
+      return started.then(() => contents);
+    }).then(contents => {
+      if (contents === void 0) {
+        return;
+      }
+      widget.model.refresh().then(() => widget.open(contents.name));
+    }).catch(error => {
+      utils.showErrorMessage(widget, 'New Notebook Error', error);
+    });
+  }
+
+  /**
+   * Create a new file, prompting the user for a name.
+   */
+  function createFile(widget: FileButtons, type: string): Promise<IContentsModel> {
+    return widget.model.newUntitled(type);
+  }
+
+  /**
    * Create a new dropdown menu for the create new button.
    */
   export
   function createDropdownMenu(widget: FileButtons): Menu {
-    let registry = widget.registry;
-    let creators = registry.listCreators();
-    creators = creators.sort((a, b) => a.localeCompare(b));
-    let items: MenuItem[] = [];
-    for (var text of creators) {
-      items.push(createItem(text, widget));
-    }
-    return new Menu(items);
-  }
-
-  /**
-   * Create a menu item in the dropdown menu.
-   */
-  function createItem(text: string, widget: FileButtons): MenuItem {
-    let registry = widget.registry;
-    let model = widget.model;
-    let host = widget.parent.node;
-    return new MenuItem({
-      text,
-      handler: () => {
-        registry.createNew(text, model.path, host).then(contents => {
-          if (contents === void 0) {
-            return;
-          }
-          if (contents.type !== 'directory') {
-            registry.open(contents.path);
-          }
-          model.refresh();
-        });
-      }
+    let items = [
+      new MenuItem({
+        text: 'Text File',
+        handler: () => { createNewFile(widget); }
+      }),
+      new MenuItem({
+        text: 'Folder',
+        handler: () => { createNewFolder(widget); }
+      }),
+      new MenuItem({
+        type: MenuItem.Separator
+      })
+    ];
+    // TODO the kernels below are suffixed with "Notebook" as a
+    // temporary measure until we can update the Menu widget to
+    // show text in a separator for a "Notebooks" group.
+    let extra = widget.model.kernelSpecs.map(spec => {
+      return new MenuItem({
+        text: `${spec.spec.display_name} Notebook`,
+        handler: () => { createNewNotebook(widget, spec); }
+      });
     });
+    return new Menu(items.concat(extra));
   }
 
   /**
@@ -338,7 +406,9 @@ namespace Private {
   function uploadFile(widget: FileButtons, file: File): Promise<any> {
     return widget.model.upload(file).catch(error => {
       let exists = error.message.indexOf('already exists') !== -1;
-      if (exists) return uploadFileOverride(widget, file);
+      if (exists) {
+        return uploadFileOverride(widget, file);
+      }
       throw error;
     });
   }
@@ -349,11 +419,13 @@ namespace Private {
   function uploadFileOverride(widget: FileButtons, file: File): Promise<any> {
     let options = {
       title: 'Overwrite File?',
-      host: this.parent.node,
+      host: widget.parent.node,
       body: `"${file.name}" already exists, overwrite?`
     };
     return showDialog(options).then(button => {
-      if (button.text !== 'Ok') return;
+      if (button.text !== 'Ok') {
+        return;
+      }
       return widget.model.upload(file, true);
     });
   }

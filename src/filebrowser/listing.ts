@@ -29,12 +29,16 @@ import {
 } from '../dialog';
 
 import {
-  FileHandlerRegistry
-} from '../filehandler';
+  DocumentManager
+} from '../docmanager';
 
 import {
   FileBrowserModel
 } from './model';
+
+import {
+  IWidgetOpener
+} from './browser';
 
 import * as utils
   from './utils';
@@ -292,7 +296,7 @@ class DirListing extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, registry: FileHandlerRegistry) {
+  constructor(model: FileBrowserModel, manager: DocumentManager, opener: IWidgetOpener) {
     super();
     this.addClass(DIR_LISTING_CLASS);
     this._model = model;
@@ -300,7 +304,8 @@ class DirListing extends Widget {
     this._model.selectionChanged.connect(this._onSelectionChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
-    this._registry = registry;
+    this._manager = manager;
+    this._opener = opener;
   }
 
   /**
@@ -312,7 +317,8 @@ class DirListing extends Widget {
     this._editNode = null;
     this._drag = null;
     this._dragData = null;
-    this._registry = null;
+    this._manager = null;
+    this._opener = null;
     super.dispose();
   }
 
@@ -879,7 +885,9 @@ class DirListing extends Widget {
         showErrorMessage(this, 'Open directory', error)
       );
     } else {
-      this._registry.open(item.path);
+      let path = item.path;
+      let widget = this._manager.findWidget(path) || this._manager.open(item.path);
+      this._opener.open(widget);
     }
   }
 
@@ -1028,13 +1036,13 @@ class DirListing extends Widget {
     this._drag.mimeData.setData(utils.CONTENTS_MIME, selectedNames);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
-        this._registry.open(item.path);
+        let path = item.path;
+        return this._manager.findWidget(path) || this._manager.open(item.path);
       });
     }
 
     // Start the drag and remove the mousemove listener.
     this._drag.start(clientX, clientY).then(action => {
-      console.log('action', action);
       this._drag = null;
       clearTimeout(this._selectTimer);
     });
@@ -1251,7 +1259,8 @@ class DirListing extends Widget {
   private _prevPath = '';
   private _clipboard: string[] = [];
   private _softSelection = '';
-  private _registry: FileHandlerRegistry = null;
+  private _manager: DocumentManager = null;
+  private _opener: IWidgetOpener = null;
 }
 
 
