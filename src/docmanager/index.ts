@@ -827,10 +827,10 @@ class DocumentWidget extends Widget {
     this.title.icon = child.title.icon;
     this.title.className = child.title.className;
     // Mirror this title based on the child.
-    this.title.changed.connect(() => {
-      this.parent.title.text = child.title.text;
-      this.parent.title.icon = child.title.icon;
-      this.parent.title.className = child.title.className;
+    child.title.changed.connect(() => {
+      this.title.text = child.title.text;
+      this.title.icon = child.title.icon;
+      this.title.className = child.title.className;
     });
     // Add the child widget to the layout.
     (this.layout as PanelLayout).addChild(child);
