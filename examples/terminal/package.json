@@ -3,12 +3,13 @@
   "name": "example",
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
+    "clean": "rimraf build && rimraf node_modules",
+    "postinstall": "npm dedupe",
     "update": "rimraf node_modules/jupyter-js-ui && npm install"
   },
   "dependencies": {
     "jupyter-js-ui": "file:../..",
-    "phosphor-dockpanel": "^0.9.7",
-    "phosphor-widget": "^1.0.0-rc.1"
+    "phosphor-dockpanel": "^0.9.7"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
