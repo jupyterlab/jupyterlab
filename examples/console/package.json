@@ -16,11 +16,14 @@
     "webpack": "^1.13.0"
   },
   "dependencies": {
-    "jupyter-js-ui": "file:../..",
+    "jupyter-js-notebook": "file:../..",
     "jupyter-js-services": "^0.10.1",
     "jupyter-js-utils": "^0.4.0",
+    "phosphor-commandpalette": "^0.2.0",
     "phosphor-disposable": "^1.0.5",
+    "phosphor-keymap": "^0.8.0",
     "phosphor-signaling": "^1.2.0",
+    "phosphor-splitpanel": "^1.0.0-rc.1",
     "phosphor-widget": "^1.0.0-rc.1"
   }
 }
