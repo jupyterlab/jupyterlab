@@ -2,6 +2,22 @@
   "private": true,
   "name": "example",
   "scripts": {
-    "build": "tsc --project src && webpack --config webpack.conf.js"
+    "build": "tsc --project src && webpack --config webpack.conf.js",
+    "update": "rimraf node_modules/jupyter-js-ui && npm update"
+  },
+  "dependencies": {
+    "jupyter-js-services": "^0.10.1",
+    "jupyter-js-ui": "file:../..",
+    "phosphor-dockpanel": "^0.9.7",
+    "phosphor-keymap": "^0.8.0",
+    "phosphor-menus": "^1.0.0-rc.1",
+    "phosphor-splitpanel": "^1.0.0-rc.1"
+  },
+  "devDependencies": {
+    "css-loader": "^0.23.1",
+    "rimraf": "^2.5.2",
+    "style-loader": "^0.13.1",
+    "typescript": "^1.8.10",
+    "webpack": "^1.13.0"
   }
 }
