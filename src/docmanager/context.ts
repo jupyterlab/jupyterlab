@@ -245,24 +245,6 @@ class ContextManager implements IDisposable {
       contentsModel: null,
       session: null
     };
-    // Handle the session - use one created for another model on this
-    // path or see if there is one running otherwise.
-    if (this.getIdsForPath(path)) {
-      this._syncSessions(path);
-    } else {
-      this._sessionManager.findByPath(path).then(sessionId => {
-        let contextEx = this._contexts[id];
-        let session = contextEx.session;
-        if (session) {
-          return;
-        }
-        let sOptions = {
-          notebook: { path: contextEx.path },
-          kernel: { id: sessionId.kernel.id }
-        };
-        this._startSession(id, sOptions);
-      });
-    }
     return id;
   }
 
@@ -342,7 +324,6 @@ class ContextManager implements IDisposable {
    */
   changeKernel(id: string, options: IKernelId): Promise<IKernel> {
     let contextEx = this._contexts[id];
-    this._syncSessions(contextEx.path);
     let session = contextEx.session;
     if (!session) {
       let path = contextEx.path;
@@ -364,7 +345,6 @@ class ContextManager implements IDisposable {
    * @param newPath - The new path.
    */
   rename(oldPath: string, newPath: string): void {
-    this._syncSessions(oldPath);
     // Update all of the paths, but only update one session
     // so there is only one REST API call.
     let ids = this.getIdsForPath(oldPath);
@@ -485,39 +465,11 @@ class ContextManager implements IDisposable {
           context.pathChanged.emit(path);
         }
       });
-      this._syncSessions(session.notebookPath);
       session.kernelChanged.connect((s, kernel) => {
         context.kernelChanged.emit(kernel);
       });
       return session.kernel;
     });
-  }
-
-  /**
-   * Make sure the same session is used for all of the contexts
-   * associated with a path.
-   */
-  private _syncSessions(path: string): void {
-    let session: INotebookSession;
-    let ids = this.getIdsForPath(path);
-    for (let id of ids) {
-      if (this._contexts[id].session) {
-        session = this._contexts[id].session;
-        break;
-      }
-    }
-    if (!session) {
-      return;
-    }
-    let sOptions = {
-      notebook: { path: session.notebookPath },
-      kernel: { id: session.kernel.id }
-    };
-    for (let id of ids) {
-      if (!this._contexts[id].session) {
-        this._startSession(id, sOptions);
-      }
-    }
   }
 
   /**
