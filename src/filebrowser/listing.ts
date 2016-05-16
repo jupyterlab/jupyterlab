@@ -893,11 +893,12 @@ class DirListing extends Widget {
       if (index === -1) {
         return;
       }
+      let item = this._model.sortedItems[index];
       let target = this._items[index];
       if (!target.classList.contains(FOLDER_TYPE_CLASS)) {
         return;
       }
-      if (target.classList.contains(SELECTED_CLASS)) {
+      if (!this._softSelection && this._model.isSelected(item.name)) {
         return;
       }
       target.classList.add(utils.DROP_TARGET_CLASS);
@@ -935,6 +936,7 @@ class DirListing extends Widget {
   private _evtDrop(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
+    clearTimeout(this._selectTimer);
     if (event.proposedAction === DropAction.None) {
       event.dropAction = DropAction.None;
       return;
@@ -956,19 +958,13 @@ class DirListing extends Widget {
     // Get the path based on the target node.
     let index = this._items.indexOf(target);
     let items = this._model.sortedItems;
-    var path = items[index].name + '/';
+    let path = items[index].name + '/';
 
     // Move all of the items.
     let promises: Promise<IContentsModel>[] = [];
-    for (let item of items) {
-      if (!this._softSelection && !this._model.isSelected(item.name)) {
-        continue;
-      }
-      if (this._softSelection !== item.name) {
-        continue;
-      }
-      var name = item.name;
-      var newPath = path + name;
+    let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
+    for (let name of names) {
+      let newPath = path + name;
       promises.push(this._model.rename(name, newPath).catch(error => {
         if (error.xhr) {
           error.message = `${error.xhr.statusText} ${error.xhr.status}`;
@@ -1029,7 +1025,7 @@ class DirListing extends Widget {
       supportedActions: DropActions.Move,
       proposedAction: DropAction.Move
     });
-    this._drag.mimeData.setData(utils.CONTENTS_MIME, null);
+    this._drag.mimeData.setData(utils.CONTENTS_MIME, selectedNames);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
         this._registry.open(item.path);
@@ -1040,6 +1036,7 @@ class DirListing extends Widget {
     this._drag.start(clientX, clientY).then(action => {
       console.log('action', action);
       this._drag = null;
+      clearTimeout(this._selectTimer);
     });
     document.removeEventListener('mousemove', this, true);
   }

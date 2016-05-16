@@ -219,18 +219,16 @@ class BreadCrumbs extends Widget {
 
     // Get the path based on the target node.
     let index = this._crumbs.indexOf(target);
-    if (index === -1) return;
-    var path = BREAD_CRUMB_PATHS[index];
+    if (index === -1) {
+      return;
+    }
+    let path = BREAD_CRUMB_PATHS[index];
 
     // Move all of the items.
     let promises: Promise<void>[] = [];
-    let items = this._model.sortedItems;
-    for (let item of items) {
-      var name = item.name;
-      if (!this._model.isSelected(name)) {
-        continue;
-      }
-      var newPath = path + name;
+    let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
+    for (let name of names) {
+      let newPath = path + name;
       promises.push(this._model.rename(name, newPath).catch(error => {
         if (error.xhr) {
           error.message = `${error.xhr.status}: error.statusText`;
