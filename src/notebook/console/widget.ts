@@ -34,8 +34,12 @@ import {
 } from '../cells';
 
 import {
-  IConsoleModel
+  IConsoleModel, ITooltipModel
 } from './model';
+
+import {
+  ConsoleTooltip
+} from './tooltip';
 
 
 /**
@@ -52,6 +56,7 @@ const CONSOLE_PANEL = 'jp-Console-panel';
  * The class name added to the console banner.
  */
 const BANNER_CLASS = 'jp-Console-banner';
+
 
 /**
  * A panel which contains a toolbar and a console.
@@ -114,6 +119,21 @@ class ConsoleWidget extends Widget {
     return widget;
   }
 
+  /**
+   * Create a new tooltip widget.
+   *
+   * @param top The top position of the tooltip.
+   *
+   * @param left The left position of the tooltip.
+   *
+   * @returns A ConsoleTooltip widget.
+   */
+  static createTooltip(top: number, left: number): ConsoleTooltip {
+    // Null values are automatically set to 'auto'.
+    let rect = { top, left, width: null as any, height: null as any };
+    return new ConsoleTooltip(rect as ClientRect);
+  }
+
   /*
    * The last cell in a console is always a `CodeCellWidget` prompt.
    */
@@ -134,6 +154,7 @@ class ConsoleWidget extends Widget {
     this.layout = new PanelLayout();
     this._initHeader();
     model.cells.changed.connect(this.onCellsChanged, this);
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -144,6 +165,17 @@ class ConsoleWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
+
+    this._model.dispose()
+    this._model = null;
+
+    // Because tooltips are attached to the document body and are not children
+    // of the console, they must be disposed manually.
+    if (this._tooltip) {
+      this._tooltip.dispose();
+      this._tooltip = null;
+    }
+
     super.dispose();
   }
 
@@ -200,6 +232,52 @@ class ConsoleWidget extends Widget {
     this.update();
   }
 
+  /**
+   * Handle a model state change event.
+   */
+  protected onModelChanged(sender: IConsoleModel, args: IChangedArgs<ITooltipModel>) {
+    let constructor = this.constructor as typeof ConsoleWidget;
+    switch (args.name) {
+    case 'tooltip':
+      let model = args.newValue;
+
+      if (!model) {
+        if (this._tooltip) this._tooltip.hide();
+        return;
+      }
+
+      let {top, left} = model.change.coords;
+
+      // Offset the height of the tooltip by the height of cursor characters.
+      top += model.change.chHeight;
+      // Offset the width of the tooltip by the width of cursor characters.
+      left -= model.change.chWidth;
+
+      // Account for 1px border on top and bottom.
+      let maxHeight = window.innerHeight - top - 2;
+      // Account for 1px border on both sides.
+      let maxWidth = window.innerWidth - left - 2;
+
+      let content = this._rendermime.render(model.bundle);
+      if (!content) {
+        console.error('rendermime failed to render', model.bundle);
+        return;
+      }
+
+      if (!this._tooltip) {
+        this._tooltip = constructor.createTooltip(top, left);
+        this._tooltip.reference = this;
+        this._tooltip.attach(document.body);
+      }
+      this._tooltip.rect = {top, left} as ClientRect;
+      this._tooltip.content = content;
+      this._tooltip.node.style.maxHeight = maxHeight + 'px';
+      this._tooltip.node.style.maxWidth = maxWidth + 'px';
+      if (this._tooltip.isHidden) this._tooltip.show();
+      return;
+    }
+  }
+
   private _initHeader(): void {
     let constructor = this.constructor as typeof ConsoleWidget;
     let cellsLayout = this.layout as PanelLayout;
@@ -211,8 +289,9 @@ class ConsoleWidget extends Widget {
     }
   }
 
-  private _model: IConsoleModel;
+  private _model: IConsoleModel = null;
   private _rendermime: RenderMime<Widget> = null;
+  private _tooltip: ConsoleTooltip = null;
 }
 
 

@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  INotebookSession
+  INotebookSession, IInspectReply
 } from 'jupyter-js-services';
 
 import {
@@ -27,7 +27,7 @@ import {
 } from './history';
 
 import {
-  EditorModel, IEditorModel, IEditorOptions, EdgeLocation
+  EditorModel, IEditorModel, IEditorOptions, EdgeLocation, ITextChange
 } from '../editor/model';
 
 import {
@@ -45,6 +45,10 @@ import {
   IRawCellModel, isCodeCellModel, isMarkdownCellModel,
   RawCellModel, isRawCellModel, MetadataCursor, IMetadataCursor
 } from '../cells/model';
+
+import {
+  MimeBundle
+} from '../notebook';
 
 
 /**
@@ -64,6 +68,28 @@ const DEFAULT_LANG_INFO = {
 
 
 /**
+ * The definition of a model object for a console tooltip widget.
+ */
+export
+interface ITooltipModel {
+  /**
+   * The text change that triggered a tooltip.
+   */
+  change: ITextChange;
+
+  /**
+   * The current line of code (which was submitted to API for inspection).
+   */
+  currentLine: string;
+
+  /**
+   * The API inspect request data payload.
+   */
+  bundle: MimeBundle;
+}
+
+
+/**
  * The definition of a model object for a console widget.
  */
 export
@@ -77,11 +103,6 @@ interface IConsoleModel extends IDisposable {
    * A signal emitted when a user metadata state changes.
    */
   metadataChanged: ISignal<IConsoleModel, string>;
-
-  /**
-   * A signal emitted when the selection changes.
-   */
-  selectionChanged: ISignal<IConsoleModel, void>;
 
   /**
    * The banner that appears at the top of a console session.
@@ -103,6 +124,11 @@ interface IConsoleModel extends IDisposable {
    * This can be considered the default language of the console.
    */
   defaultMimetype: string;
+
+  /**
+   * The dimensions and contents of a console widget tooltip.
+   */
+  tooltip: ITooltipModel;
 
   /**
    * The console history manager instance.
@@ -185,7 +211,7 @@ class ConsoleModel implements IConsoleModel {
    * A signal emitted when the state of the model changes.
    */
   get stateChanged(): ISignal<IConsoleModel, IChangedArgs<any>> {
-    return ConsoleModelPrivate.stateChangedSignal.bind(this);
+    return Private.stateChangedSignal.bind(this);
   }
 
   /**
@@ -195,14 +221,7 @@ class ConsoleModel implements IConsoleModel {
    * The signal argument is the namespace of the metadata that changed.
    */
   get metadataChanged(): ISignal<IConsoleModel, string> {
-    return ConsoleModelPrivate.metadataChangedSignal.bind(this);
-  }
-
-  /**
-   * A signal emitted when the selection changes.
-   */
-  get selectionChanged(): ISignal<IConsoleModel, void> {
-    return ConsoleModelPrivate.selectionChangedSignal.bind(this);
+    return Private.metadataChangedSignal.bind(this);
   }
 
   /**
@@ -251,6 +270,22 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
+   * The dimensions and contents of a console widget tooltip.
+   */
+  get tooltip(): ITooltipModel {
+    return this._tooltip;
+  }
+  set tooltip(newValue: ITooltipModel) {
+    if (Private.matchTooltips(this._tooltip, newValue)) {
+      return;
+    }
+    let oldValue = this._tooltip;
+    this._tooltip = newValue;
+    let name = 'tooltip';
+    this.stateChanged.emit({ name, oldValue, newValue });
+  }
+
+  /**
    * Get the console history manager instance.
    *
    * #### Notes
@@ -272,7 +307,7 @@ class ConsoleModel implements IConsoleModel {
     }
     let oldValue = this._session;
     this._session = newValue;
-    ConsoleModelPrivate.sessionChanged(this, newValue);
+    Private.sessionChanged(this, newValue);
     let name = 'session';
     this.stateChanged.emit({ name, oldValue, newValue });
   }
@@ -322,10 +357,13 @@ class ConsoleModel implements IConsoleModel {
     let input = constructor.createInput(editor);
     let output = constructor.createOutputArea();
     let cell = new CodeCellModel(input, output);
+    let textEditor = input.textEditor;
     cell.trusted = true;
 
-    // Connect each new prompt with console history.
-    input.textEditor.edgeRequested.connect(this._onEdgeRequested, this);
+    // Connect each new prompt's edge requests with console history.
+    textEditor.edgeRequested.connect(this.onEdgeRequest, this);
+    // Connect each new prompt's text changes to console tooltips.
+    textEditor.textChanged.connect(this.onTextChange, this);
 
     return cell;
   }
@@ -348,6 +386,7 @@ class ConsoleModel implements IConsoleModel {
   run(): void {
     let prompt = this._cells.get(this._cells.length - 1) as ICodeCellModel;
     let session = this.session;
+    this.tooltip = null;
     if (!session || !session.kernel) {
       return;
     }
@@ -382,7 +421,43 @@ class ConsoleModel implements IConsoleModel {
     }
   }
 
-  private _onEdgeRequested(sender: any, args: EdgeLocation): void {
+  /**
+   * Handle a text change in the prompt model.
+   */
+  protected onTextChange(sender: any, args: ITextChange) {
+    if (!args.newValue) {
+      this.tooltip = null;
+      return;
+    }
+
+    // If final character of current line isn't a whitespace character, bail.
+    let currentLine = args.newValue.split('\n')[args.line];
+    if (!currentLine.match(/\S$/)) {
+      this.tooltip = null;
+      return;
+    }
+
+    let pendingInspect = ++this._pendingInspect;
+    let contents = {code: currentLine, cursor_pos: args.ch, detail_level: 0};
+
+    this._session.kernel.inspect(contents).then((value: IInspectReply) => {
+      // If a newer text change has created a pending request, bail.
+      if (pendingInspect !== this._pendingInspect) return;
+      // Tooltip request failures or negative results fail silently.
+      if (value.status !== 'ok' || !value.found) return;
+      console.log('value', value);
+      this.tooltip = {
+        change: args,
+        currentLine: currentLine,
+        bundle: Private.processInspectReply(value.data)
+      };
+    });
+  }
+
+  /**
+   * Handle an edge request in the prompt model.
+   */
+  protected onEdgeRequest(sender: any, args: EdgeLocation): void {
     switch (args) {
     case 'top':
       this._history.back().then(value => {
@@ -408,7 +483,9 @@ class ConsoleModel implements IConsoleModel {
   private _defaultMimetype = 'text/x-ipython';
   private _history: IConsoleHistory = null;
   private _metadata: { [key: string]: string } = Object.create(null);
+  private _pendingInspect: number = 0;
   private _prompt: ICodeCellModel = null;
+  private _tooltip: ITooltipModel = null;
   private _session: INotebookSession = null;
 }
 
@@ -416,7 +493,7 @@ class ConsoleModel implements IConsoleModel {
 /**
  * A private namespace for console model data.
  */
-namespace ConsoleModelPrivate {
+namespace Private {
   /**
    * A signal emitted when the state of the model changes.
    */
@@ -430,19 +507,48 @@ namespace ConsoleModelPrivate {
   const metadataChangedSignal = new Signal<IConsoleModel, string>();
 
   /**
-   * A signal emitted when a the selection state changes.
+   * Check if two text changes are equal.
+   *
+   * @param t1 - The first text change.
+   *
+   * @param t1 - The second text change.
+   *
+   * @returns `true` if the text changes are equal.
    */
-  export
-  const selectionChangedSignal = new Signal<IConsoleModel, void>();
+  function matchTextChanges(t1: ITextChange, t2: ITextChange): boolean {
+    // Check identity in case both items are null or undefined.
+    if (t1 === t2 || !t1 && !t2) return true;
+    // If one item is null or undefined, items don't match.
+    if (!t1 || !t2) return false;
+    return t1.ch === t2.ch &&
+           t1.chHeight === t2.chHeight &&
+           t1.chWidth === t2.chWidth &&
+           t1.line === t2.line &&
+           t1.oldValue === t2.oldValue &&
+           t1.newValue === t2.newValue &&
+           t1.coords.left === t2.coords.left &&
+           t1.coords.right === t2.coords.right &&
+           t1.coords.top === t2.coords.top &&
+           t1.coords.bottom === t2.coords.bottom;
+  }
 
   /**
-   * An attached property for the selected state of a cell.
+   * Check if two tooltip models are equal.
+   *
+   * @param t1 - The first tooltip model.
+   *
+   * @param t2 - The second tooltip model.
+   *
+   * @returns `true` if the tooltips are equal.
    */
   export
-  const selectedProperty = new Property<ICellModel, boolean>({
-    name: 'selected',
-    value: false
-  });
+  function matchTooltips(t1: ITooltipModel, t2: ITooltipModel): boolean {
+    // Check identity in case both items are null or undefined.
+    if (t1 === t2 || !t1 && !t2) return true;
+    // If one item is null or undefined, items don't match.
+    if (!t1 || !t2) return false;
+    return matchTextChanges(t1.change, t2.change);
+  }
 
   /**
    * Handle a change to the model kernel.
@@ -457,7 +563,7 @@ namespace ConsoleModelPrivate {
     });
   }
 
-  /*
+  /**
    * Handle a change to the model session.
    */
   export
@@ -465,6 +571,25 @@ namespace ConsoleModelPrivate {
     model.session.kernelChanged.connect(() => { kernelChanged(model); });
     // Update the kernel data now.
     kernelChanged(model);
+  }
+
+  /**
+   * Process the IInspectReply plain text data.
+   *
+   * @param bundle - The MIME bundle of an API inspect reply.
+   *
+   * #### Notes
+   * The `text/plain` value sent by the API in inspect replies contains ANSI
+   * terminal escape sequences. In order for these sequences to be parsed into
+   * usable data in the client, they must have the MIME type that the console
+   * text renderer expects: `application/vnd.jupyter.console-text`.
+   */
+  export
+  function processInspectReply(bundle: MimeBundle): MimeBundle {
+    let textMime = 'text/plain';
+    let consoleMime = 'application/vnd.jupyter.console-text';
+    bundle[consoleMime] = bundle[consoleMime] || bundle[textMime];
+    return bundle;
   }
 
 }

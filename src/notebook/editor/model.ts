@@ -23,7 +23,49 @@ type EdgeLocation = 'top' | 'bottom';
 
 
 /**
- * An interface required for implementing the editor model
+ * An interface describing editor text changes.
+ */
+export
+interface ITextChange {
+  /**
+   * The character number of the editor cursor within a line.
+   */
+  ch: number;
+
+  /**
+   * The height of a character in the editor.
+   */
+  chHeight: number;
+
+  /**
+   * The width of a character in the editor.
+   */
+  chWidth: number;
+
+  /**
+   * The line number of the editor cursor.
+   */
+  line: number;
+
+  /**
+   * The coordinate position of the cursor.
+   */
+  coords: { left: number; right: number; top: number; bottom: number; }
+
+  /**
+   * The old value of the editor text.
+   */
+  oldValue: string;
+
+  /**
+   * The new value of the editor text.
+   */
+  newValue: string;
+}
+
+
+/**
+ * An interface required for implementing the editor model.
  */
 export
 interface IEditorModel extends IDisposable {
@@ -36,6 +78,11 @@ interface IEditorModel extends IDisposable {
    * A signal emitted when either the top or bottom edge is requested.
    */
   edgeRequested: ISignal<IEditorModel, EdgeLocation>;
+
+  /**
+   * A signal emitted when a text change is completed.
+   */
+  textChanged: ISignal<IEditorModel, ITextChange>;
 
   /**
    * The text in the text editor.
@@ -155,6 +202,13 @@ class EditorModel implements IEditorModel {
    */
   get edgeRequested(): ISignal<EditorModel, EdgeLocation> {
     return EditorModelPrivate.edgeRequestedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a text change is completed.
+   */
+  get textChanged(): ISignal<IEditorModel, ITextChange> {
+    return EditorModelPrivate.textChangedSignal.bind(this);
   }
 
   /**
@@ -334,6 +388,12 @@ namespace EditorModelPrivate {
    */
   export
   const edgeRequestedSignal = new Signal<EditorModel, EdgeLocation>();
+
+  /**
+   * A signal emitted when a text change is completed.
+   */
+  export
+  const textChangedSignal = new Signal<EditorModel, ITextChange>();
 
   /**
    * Initialize an editor view model from an options object.
