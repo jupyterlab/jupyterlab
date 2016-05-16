@@ -1,11 +1,6 @@
 var childProcess = require('child_process');
 var fs = require('fs');
 
-process.chdir('examples');
-childProcess.execSync('npm install', { stdio: 'inherit' });
-childProcess.execSync('npm run update', { stdio: 'inherit' });
-process.chdir('..');
-
 // Build all of the example folders.
 dirs = fs.readdirSync('examples');
 
@@ -19,6 +14,7 @@ for (var i = 0; i < dirs.length; i++) {
   }
   console.log('\n***********\nBuilding: ' + dirs[i] + '...');
   process.chdir('examples/' + dirs[i]);
+  childProcess.execSync('npm run update', { stdio: 'inherit' });
   childProcess.execSync('npm run build', { stdio: 'inherit' });
   process.chdir('../..');
 

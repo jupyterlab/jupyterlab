@@ -8,6 +8,19 @@
     "update": "rimraf node_modules/jupyter-js-notebook && npm install"
   },
   "devDependencies": {
-    "concurrently": "^2.0.0"
+    "concurrently": "^2.0.0",
+    "css-loader": "^0.23.1",
+    "rimraf": "^2.5.2",
+    "style-loader": "^0.13.1",
+    "typescript": "^1.8.10",
+    "webpack": "^1.13.0"
+  },
+  "dependencies": {
+    "jupyter-js-ui": "file:../..",
+    "jupyter-js-services": "^0.10.1",
+    "jupyter-js-utils": "^0.4.0",
+    "phosphor-disposable": "^1.0.5",
+    "phosphor-signaling": "^1.2.0",
+    "phosphor-widget": "^1.0.0-rc.1"
   }
 }
