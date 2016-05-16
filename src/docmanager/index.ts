@@ -900,7 +900,7 @@ class DocumentWidget extends Widget {
     for (let id in this._widgets) {
       for (let widget of this._widgets[id]) {
         let kId = widget.context.kernel || widget.context.kernel.id;
-        if (widget !== this && kId == kernelId) {
+        if (widget !== this && kId === kernelId) {
           return Promise.resolve(true);
         }
       }

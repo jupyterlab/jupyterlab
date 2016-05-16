@@ -6,7 +6,7 @@
 'use strict';
 
 import {
-  ContentsManager, ISessionOptions, NotebookSessionManager,
+  ContentsManager, NotebookSessionManager,
   IKernelSpecIds
 } from 'jupyter-js-services';
 
@@ -15,7 +15,7 @@ import {
 } from 'jupyter-js-ui/lib/filebrowser';
 
 import {
-  DocumentManager
+  DocumentManager, DocumentWidget
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
@@ -31,13 +31,6 @@ import {
 } from 'jupyter-js-ui/lib/codemirror/widget';
 
 import {
-  getConfigOption
-} from 'jupyter-js-utils';
-
-import * as arrays
- from 'phosphor-arrays';
-
-import {
   DockPanel
 } from 'phosphor-dockpanel';
 
@@ -46,16 +39,12 @@ import {
 } from 'phosphor-keymap';
 
 import {
-  Menu, MenuBar, MenuItem
+  Menu, MenuItem
 } from 'phosphor-menus';
 
 import {
   SplitPanel
 } from 'phosphor-splitpanel';
-
-import {
-  Widget
-} from 'phosphor-widget';
 
 import 'jupyter-js-ui/lib/index.css';
 import 'jupyter-js-ui/lib/theme.css';
@@ -71,11 +60,11 @@ function main(): void {
 
 function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecIds): void {
   let contentsManager = new ContentsManager();
-  let widgets: CodeMirrorWidget[] = [];
-  let activeWidget: CodeMirrorWidget;
+  let widgets: DocumentWidget[] = [];
+  let activeWidget: DocumentWidget;
 
   let opener = {
-    open: (widget: CodeMirrorWidget) => {
+    open: (widget: DocumentWidget) => {
       if (widgets.indexOf(widget) === -1) {
         dock.insertTabAfter(widget);
         widgets.push(widget);
@@ -145,7 +134,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      docManager.save(activeWidget);
+      activeWidget.context.save();
     }
   }]);
 
