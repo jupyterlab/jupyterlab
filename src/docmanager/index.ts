@@ -813,7 +813,7 @@ class DocumentWidget extends Widget {
   }
 
   /**
-   * Set the child and context of the widget.
+   * Set the child the widget.
    *
    * #### Notes
    * This function is not intended to be called by user code.
