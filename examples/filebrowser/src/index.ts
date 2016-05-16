@@ -27,10 +27,6 @@ import {
 } from 'jupyter-js-ui/lib/dialog';
 
 import {
-  CodeMirrorWidget
-} from 'jupyter-js-ui/lib/codemirror/widget';
-
-import {
   DockPanel
 } from 'phosphor-dockpanel';
 
@@ -71,6 +67,10 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
       }
       dock.selectWidget(widget);
       activeWidget = widget;
+      widget.disposed.connect((w: DocumentWidget) => {
+        let index = widgets.indexOf(w);
+        widgets.splice(index, 1);
+      });
     }
   };
 

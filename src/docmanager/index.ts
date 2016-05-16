@@ -801,7 +801,7 @@ class DocumentWidget extends Widget {
     // Remove the widget from the widget registry.
     let id = this._id;
     let index = this._widgets[id].indexOf(this);
-    this._widgets[id] = this._widgets[id].splice(index, 1);
+    this._widgets[id].splice(index, 1);
     // Dispose of the context if this is the last widget using it.
     if (!this._widgets[id].length) {
       this._manager.removeContext(id);
