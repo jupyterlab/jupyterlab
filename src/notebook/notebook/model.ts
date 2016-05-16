@@ -2,58 +2,27 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import * as CodeMirror
-  from 'codemirror';
-
-import 'codemirror/mode/meta';
-
 import {
-  INotebookSession
-} from 'jupyter-js-services';
-
-import {
-  copy, shallowEquals
-} from 'jupyter-js-utils';
-
-import {
-  IDisposable
-} from 'phosphor-disposable';
+  IDocumentModel
+} from 'jupyter-js-ui/lib/docmanager';
 
 import {
   IObservableList, ObservableList, ListChangeType, IListChangedArgs
 } from 'phosphor-observablelist';
 
 import {
-  IChangedArgs, Property
-} from 'phosphor-properties';
-
-import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
 import {
-  EditorModel, IEditorModel, IEditorOptions, EdgeLocation
-} from '../editor/model';
-
-import {
-  InputAreaModel, IInputAreaModel
-} from '../input-area/model';
-
-import {
-  OutputAreaModel, IOutputAreaModel
-} from '../output-area/model';
-
-import {
   ICellModel,
-  ICodeCellModel, CodeCellModel,
-  IMarkdownCellModel, MarkdownCellModel,
-  IRawCellModel, isCodeCellModel, isMarkdownCellModel,
-  RawCellModel, isRawCellModel, MetadataCursor, IMetadataCursor,
-  executeCodeCell
+  ICodeCellModel,
+  IMarkdownCellModel,
+  IRawCellModel, MetadataCursor, IMetadataCursor,
 } from '../cells/model';
 
 import {
-  OutputType, IKernelspecMetadata, ILanguageInfoMetadata
+  IKernelspecMetadata, ILanguageInfoMetadata
 } from './nbformat';
 
 
@@ -70,71 +39,48 @@ type NotebookMode = 'command' | 'edit';
 const DEFAULT_KERNELSPEC = {
   name: 'unknown',
   display_name: 'No Kernel!'
-}
+};
 
 /**
  * The default notebook languageinfo metadata.
  */
 const DEFAULT_LANG_INFO = {
   name: 'unknown'
-}
+};
 
 
 /**
  * The definition of a model object for a notebook widget.
  */
 export
-interface INotebookModel extends IDisposable {
+interface INotebookModel extends IDocumentModel {
   /**
-   * A signal emitted when state of the notebook changes.
-   */
-  stateChanged: ISignal<INotebookModel, IChangedArgs<any>>;
-
-  /**
-   * A signal emitted when a user metadata state changes.
+   * A signal emitted when a metadata state changes.
    */
   metadataChanged: ISignal<INotebookModel, string>;
 
   /**
-   * A signal emitted when the selection changes.
-   */
-  selectionChanged: ISignal<INotebookModel, void>;
-
-  /**
-   * The default mime type for new code cells in the notebook.
+   * The kernelspec metadata associated with the notebook.
    *
    * #### Notes
-   * This can be considered the default language of the notebook.
-   */
-  defaultMimetype: string;
-
-  /**
-   * The interactivity mode of the notebook.
-   */
-  mode: NotebookMode;
-
-  /**
-   * Whether the notebook has unsaved changes.
-   */
-  dirty: boolean;
-
-  /**
-   * Whether the notebook is read-only.
-   */
-  readOnly: boolean;
-
-  /**
-   * The kernelspec metadata associated with the notebook.
+   * This is a read-only property.
    */
   kernelspec: IKernelspecMetadata;
 
   /**
    * The language info metadata associated with the notebook.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   languageInfo: ILanguageInfoMetadata;
 
   /**
-   * The original nbformat associated with the notebook.
+   * The original nbformat associated with the notebook (if applicable).
+   *
+   * #### Notes
+   * This is a read-only property.  This value is assigned by the server
+   * when it converts a notebook prior to serving the file.
    */
   origNbformat: number;
 
@@ -145,70 +91,6 @@ interface INotebookModel extends IDisposable {
    * This is a read-only property.
    */
   cells: IObservableList<ICellModel>;
-
-  /**
-   * The optional notebook session associated with the model.
-   */
-  session?: INotebookSession;
-
-  /**
-   * The index of the active cell.
-   */
-  activeCellIndex: number;
-
-  /**
-   * Select a cell.
-   */
-  select(cell: ICellModel): void;
-
-  /**
-   * Deselect a cell.
-   */
-  deselect(cell: ICellModel): void;
-
-  /**
-   * Whether a cell is selected.
-   */
-  isSelected(cell: ICellModel): boolean;
-
-  /**
-   * A factory for creating a new code cell.
-   *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new code cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   *
-   * #### Notes
-   * If the source argument does not give an input mimetype, the code cell
-   * defaults to the notebook [[defaultMimetype]].
-   */
-  createCodeCell(source?: ICellModel): ICodeCellModel;
-
-  /**
-   * A factory for creating a new Markdown cell.
-   *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new markdown cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createMarkdownCell(source?: ICellModel): IMarkdownCellModel;
-
-  /**
-   * A factory for creating a new raw cell.
-   *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new raw cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createRawCell(source?: ICellModel): IRawCellModel;
-
-  /**
-   * Run the active cell, taking the appropriate action.
-   */
-  runActiveCell(): void;
 
   /**
    * Get a metadata cursor for the notebook.
@@ -236,27 +118,6 @@ interface INotebookModel extends IDisposable {
 export
 class NotebookModel implements INotebookModel {
   /**
-   * Create an editor model.
-   */
-  static createEditor(options?: IEditorOptions): IEditorModel {
-    return new EditorModel(options);
-  }
-
-  /**
-   * Create an input area model.
-   */
-  static createInput(editor: IEditorModel) : IInputAreaModel {
-    return new InputAreaModel(editor);
-  }
-
-  /**
-   * Create an output area model.
-   */
-  static createOutputArea(): IOutputAreaModel {
-    return new OutputAreaModel();
-  }
-
-  /**
    * Construct a new notebook model.
    */
   constructor() {
@@ -265,27 +126,27 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * A signal emitted when the state of the model changes.
+   * A signal emitted when the document content changes.
    */
-  get stateChanged(): ISignal<INotebookModel, IChangedArgs<any>> {
-    return NotebookModelPrivate.stateChangedSignal.bind(this);
+  get contentChanged(): ISignal<INotebookModel, void> {
+    return NotebookModelPrivate.contentChangedSignal.bind(this);
   }
 
   /**
-   * A signal emitted when a user metadata state changes.
+   * A signal emitted when the model dirty state changes.
+   */
+  get dirtyChanged(): ISignal<IDocumentModel, boolean> {
+    return NotebookModelPrivate.dirtyChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a metadata state changes.
    *
    * #### Notes
-   * The signal argument is the namespace of the metadata that changed.
+   * The signal argument is the name of the metadata that changed.
    */
   get metadataChanged(): ISignal<INotebookModel, string> {
     return NotebookModelPrivate.metadataChangedSignal.bind(this);
-  }
-
-  /**
-   * A signal emitted when the selection changes.
-   */
-  get selectionChanged(): ISignal<INotebookModel, void> {
-    return NotebookModelPrivate.selectionChangedSignal.bind(this);
   }
 
   /**
@@ -299,175 +160,95 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * The default mimetype for cells new code cells.
-   */
-  get defaultMimetype(): string {
-    return this._defaultMimetype;
-  }
-  set defaultMimetype(newValue: string) {
-    if (newValue === this._defaultMimetype) {
-      return;
-    }
-    let oldValue = this._defaultMimetype;
-    this._defaultMimetype = newValue;
-    let name = 'defaultMimetype';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The read-only status of the notebook.
-   */
-  get readOnly(): boolean {
-    return this._readOnly;
-  }
-  set readOnly(newValue: boolean) {
-    if (newValue === this._readOnly) {
-      return;
-    }
-    let oldValue = this._readOnly;
-    this._readOnly = newValue;
-    let cells = this._cells;
-    for (let i = 0; i < cells.length; i++) {
-      cells.get(i).input.textEditor.readOnly = newValue;
-    }
-    let name = 'readOnly';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The session for the notebook.
-   */
-  get session(): INotebookSession {
-    return this._session;
-  }
-  set session(newValue: INotebookSession) {
-    if (newValue === this._session) {
-      return;
-    }
-    let oldValue = this._session;
-    this._session = newValue;
-    NotebookModelPrivate.sessionChanged(this, newValue);
-    let name = 'session';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The kernelspec metadata for the notebook.
-   */
-  get kernelspec(): IKernelspecMetadata {
-    return JSON.parse(this._kernelspec);
-  }
-  set kernelspec(newValue: IKernelspecMetadata) {
-    let oldValue = JSON.parse(this._kernelspec);
-    if (shallowEquals(oldValue, newValue)) {
-      return;
-    }
-    this._kernelspec = JSON.stringify(newValue);
-    let name = 'kernelspec';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
    * The language info metadata for the notebook.
    */
   get languageInfo(): ILanguageInfoMetadata {
     return JSON.parse(this._langInfo);
   }
-  set languageInfo(newValue: ILanguageInfoMetadata) {
-    let oldValue = JSON.parse(this._langInfo);
-    if (shallowEquals(oldValue, newValue)) {
+  set languageInfo(value: ILanguageInfoMetadata) {
+    let data = JSON.stringify(value);
+    if (data === this._langInfo) {
       return;
     }
-    this._langInfo = JSON.stringify(newValue);
-    let name = 'languageInfo';
-    this.stateChanged.emit({ name, oldValue, newValue });
+    this._langInfo = data;
+    this.metadataChanged.emit('languageInfo');
   }
 
   /**
-   * The original nbformat version for the notebook.
+   * The kernelspec metadata associated with the notebook.
+   */
+  get kernelspec(): IKernelspecMetadata {
+    return JSON.parse(this._kernelspec);
+  }
+  set kernelspec(value: IKernelspecMetadata) {
+    let data = JSON.stringify(value);
+    if (data === this._kernelspec) {
+      return;
+    }
+    this._kernelspec = data;
+    this.metadataChanged.emit('kernelspec');
+  }
+
+  /**
+   * The original nbformat associated with the notebook (if applicable).
+   *
+   * #### Notes
+   * This is a read-only property.  This value is assigned by the server
+   * when it converts a notebook prior to serving the file.
    */
   get origNbformat(): number {
     return this._origNbformat;
   }
-  set origNbformat(newValue: number) {
-    if (newValue === this._origNbformat) {
-      return;
-    }
-    let oldValue = this._origNbformat;
-    this._origNbformat = newValue;
-    let name = 'origNbformat';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
 
   /**
-   * The index of the active cell.
+   * The dirty state of the model.
    *
    * #### Notes
-   * The value will be clamped.  The active cell is considered to be selected.
-   */
-  get activeCellIndex(): number {
-    return this._activeCellIndex;
-  }
-  set activeCellIndex(newValue: number) {
-    newValue = Math.max(newValue, 0);
-    newValue = Math.min(newValue, this.cells.length - 1);
-    if (newValue === this._activeCellIndex) {
-      return;
-    }
-    let oldValue = this._activeCellIndex;
-    this._activeCellIndex = newValue;
-    let newCell = this.cells.get(newValue);
-    if (newCell && isMarkdownCellModel(newCell)) {
-      if (this.mode === 'edit') {
-        newCell.rendered = false;
-      }
-    }
-    let name = 'activeCellIndex';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The mode of the notebook.
-   *
-   * #### Notes
-   * Selected markdown cells are rendered if mode is set to 'command'
-   * and unrendered if mode is set to 'edit'.
-   */
-  get mode(): NotebookMode {
-    return this._mode;
-  }
-  set mode(newValue: NotebookMode) {
-    if (newValue === this._mode) {
-      return;
-    }
-    let oldValue = this._mode;
-    this._mode = newValue;
-    NotebookModelPrivate.modeChanged(this, newValue);
-    // Edit mode deselects all cells.
-    if (newValue === 'edit') {
-      for (let i = 0; i < this.cells.length; i++) {
-        let cell = this.cells.get(i);
-        this.deselect(cell);
-      }
-    }
-    let name = 'mode';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * Whether the notebook has unsaved changes.
+   * This should be cleared when the document is loaded from
+   * or saved to disk.
    */
   get dirty(): boolean {
     return this._dirty;
   }
-  set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
+  set dirty(value: boolean) {
+    if (value === this._dirty) {
       return;
     }
-    let oldValue = this._dirty;
-    this._dirty = newValue;
-    let name = 'dirty';
-    this.stateChanged.emit({ name, oldValue, newValue });
+    this._dirty = value;
+    this.dirtyChanged.emit(value);
+  }
+
+  /**
+   * The read-only state of the model.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
+  }
+  set readOnly(value: boolean) {
+    if (value === this._readOnly) {
+      return;
+    }
+    this._readOnly = value;
+  }
+
+  /**
+   * The default kernel name of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get defaultKernelName(): string {
+    return this.kernelspec ? this.kernelspec.name : '';
+  }
+
+  /**
+   * The default kernel language of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get defaultKernelLanguage(): string {
+    return this.languageInfo ? this.languageInfo.name : '';
   }
 
   /**
@@ -499,138 +280,38 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Select a cell.
+   * Serialize the model to a string.
    */
-  select(cell: ICellModel): void {
-    NotebookModelPrivate.selectedProperty.set(cell, true);
-    this.selectionChanged.emit(void 0);
+  toString(): string {
+    return JSON.stringify(this.toJSON());
   }
 
   /**
-   * Deselect a cell.
+   * Deserialize the model from a string.
    *
    * #### Notes
-   * This has no effect on the "active" cell.
+   * Should emit a [contentChanged] signal.
    */
-  deselect(cell: ICellModel): void {
-    NotebookModelPrivate.selectedProperty.set(cell, false);
-    this.selectionChanged.emit(void 0);
+  fromString(value: string): void {
+    this.fromJSON(JSON.parse(value));
   }
 
   /**
-   * Whether a cell is selected.
+   * Serialize the model to JSON.
    */
-  isSelected(cell: ICellModel): boolean {
-    return (NotebookModelPrivate.selectedProperty.get(cell) ||
-            this.cells.indexOf(cell) === this.activeCellIndex);
+  toJSON(): any {
+    // TODO
+    return void 0;
   }
 
   /**
-   * Create a code cell model.
-   */
-  createCodeCell(source?: ICellModel): ICodeCellModel {
-    let mimetype = this.defaultMimetype;
-    if (source && isCodeCellModel(source)) {
-      mimetype = source.input.textEditor.mimetype;
-    }
-    let constructor = this.constructor as typeof NotebookModel;
-    let editor = constructor.createEditor({
-      mimetype,
-      readOnly: this.readOnly
-    });
-    let input = constructor.createInput(editor);
-    let output = constructor.createOutputArea();
-    let cell = new CodeCellModel(input, output);
-    cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isCodeCellModel(source)) {
-        cell.collapsed = source.collapsed;
-        cell.scrolled = source.scrolled;
-        for (let i = 0; i < source.output.outputs.length; i++) {
-          let sourceOutput = source.output.outputs.get(i);
-          cell.output.outputs.add(sourceOutput);
-        }
-      }
-    }
-    return cell;
-  }
-
-  /**
-   * Create a markdown cell model.
-   */
-  createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
-    let constructor = this.constructor as typeof NotebookModel;
-    let editor = constructor.createEditor({
-      mimetype: 'text/x-ipythongfm',
-      readOnly: this.readOnly
-    });
-    let input = constructor.createInput(editor);
-    let cell = new MarkdownCellModel(input);
-    cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isMarkdownCellModel(source)) {
-        cell.rendered = source.rendered;
-      }
-    }
-    return cell;
-  }
-
-  /**
-   * Create a raw cell model.
-   */
-  createRawCell(source?: ICellModel): IRawCellModel {
-    let constructor = this.constructor as typeof NotebookModel;
-    let editor = constructor.createEditor({
-      readOnly: this.readOnly
-    });
-    let input = constructor.createInput(editor);
-    let cell = new RawCellModel(input);
-    cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isRawCellModel(source)) {
-        cell.format = (source as IRawCellModel).format;
-      }
-    }
-    return cell;
-  }
-
-  /**
-   * Run the active cell, taking the appropriate action.
+   * Deserialize the model from JSON.
    *
    * #### Notes
-   * If the notebook is read-only or has no active cell, this is a no-op.
-   * Markdown cells are rendered and code cells are executed.
-   * All cells are marked as trusted.
+   * Should emit a [contentChanged] signal.
    */
-  runActiveCell(): void {
-    if (this.readOnly) {
-      return;
-    }
-    let cell = this.cells.get(this.activeCellIndex);
-    if (!cell) {
-      return;
-    }
-    cell.trusted = true;
-    if (isCodeCellModel(cell)) {
-      let session = this.session;
-      if (!session || !session.kernel) {
-        cell.clear();
-        return;
-      }
-      executeCodeCell(cell, session.kernel);
-    } else if (isMarkdownCellModel(cell) && cell.rendered === false) {
-      cell.rendered = true;
-    }
-    this.mode = 'command';
+  fromJSON(value: any): void {
+    // TODO
   }
 
   /**
@@ -665,52 +346,37 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Handle changes to cell editors.
-   */
-  protected onEditorChanged(editor: IEditorModel, args: IChangedArgs<any>): void {
-    if (args.name === 'text') {
-      this.dirty = true;
-    }
-  }
-
-  /**
-   * Handle an edge request from a text editor.
-   */
-  protected onEdgeRequested(sender: IEditorModel, args: EdgeLocation): void {
-    switch (args) {
-    case 'top':
-      this.activeCellIndex--;
-      break;
-    case 'bottom':
-      this.activeCellIndex++;
-      break;
-    }
-  }
-
-  /**
    * Handle a change in the cells list.
    */
   protected onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
     let cell: ICellModel;
     switch (change.type) {
     case ListChangeType.Add:
-      this.activeCellIndex = change.newIndex;
       cell = change.newValue as ICellModel;
-      cell.input.textEditor.edgeRequested.connect(this.onEdgeRequested, this);
-      cell.input.textEditor.stateChanged.connect(this.onEditorChanged, this);
+      cell.stateChanged.connect(this.onCellChanged, this);
       break;
     case ListChangeType.Remove:
       (change.oldValue as ICellModel).dispose();
-      this.activeCellIndex = Math.min(change.oldIndex, this.cells.length - 1);
       break;
     case ListChangeType.Replace:
       let oldValues = change.oldValue as ICellModel[];
       for (cell of oldValues) {
         cell.dispose();
       }
+      let newValues = change.newValue as ICellModel[];
+      for (cell of newValues) {
+        cell.stateChanged.connect(this.onCellChanged, this);
+      }
       break;
     }
     this.dirty = true;
+  }
+
+  /**
+   * Handle a change to a cell state.
+   */
+  protected onCellChanged(cell: ICellModel, change: any): void {
+    this.contentChanged.emit(void 0);
   }
 
   /**
@@ -722,15 +388,11 @@ class NotebookModel implements INotebookModel {
 
   private _cells: IObservableList<ICellModel> = null;
   private _metadata: { [key: string]: string } = Object.create(null);
-  private _defaultMimetype = 'text/x-ipython';
-  private _readOnly = false;
-  private _session: INotebookSession = null;
   private _kernelspec = JSON.stringify(DEFAULT_KERNELSPEC);
   private _langInfo = JSON.stringify(DEFAULT_LANG_INFO);
   private _origNbformat: number = null;
-  private _activeCellIndex: number = null;
-  private _mode: NotebookMode = 'command';
   private _dirty = false;
+  private _readOnly = false;
 }
 
 
@@ -739,112 +401,20 @@ class NotebookModel implements INotebookModel {
  */
 namespace NotebookModelPrivate {
   /**
-   * A signal emitted when the state of the model changes.
+   * A signal emitted when the content of the model changes.
    */
   export
-  const stateChangedSignal = new Signal<INotebookModel, IChangedArgs<any>>();
+  const contentChangedSignal = new Signal<INotebookModel, void>();
+
+  /**
+   * A signal emitted when the dirty state of the model changes.
+   */
+  export
+  const dirtyChangedSignal = new Signal<INotebookModel, boolean>();
 
   /**
    * A signal emitted when a user metadata state changes.
    */
   export
   const metadataChangedSignal = new Signal<INotebookModel, string>();
-
-  /**
-   * A signal emitted when a the selection state changes.
-   */
-  export
-  const selectionChangedSignal = new Signal<INotebookModel, void>();
-
-  /**
-   * An attached property for the selected state of a cell.
-   */
-  export
-  const selectedProperty = new Property<ICellModel, boolean>({
-    name: 'selected',
-    value: false
-  });
-
-  /**
-   * Handle a change in mode.
-   */
-  export
-  function modeChanged(model: INotebookModel, mode: NotebookMode): void {
-    let cells = model.cells;
-    for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
-        if (isMarkdownCellModel(cell)) {
-          if (mode === 'edit') {
-            cell.rendered = false;
-          }
-        }
-      }
-    }
-  }
-
-  /*
-   * Handle a change to the model session.
-   */
-  export
-  function sessionChanged(model: INotebookModel, session: INotebookSession): void {
-    model.session.kernelChanged.connect(() => { kernelChanged(model); });
-    // Update the kernel data now.
-    kernelChanged(model);
-  }
-
-  /**
-   * Handle a change to the model kernel.
-   */
-  function kernelChanged(model: INotebookModel): void {
-    let session = model.session;
-    let kernel = session.kernel;
-    kernel.getKernelSpec().then(spec => {
-      let kernelspec = copy(model.kernelspec);
-      kernelspec.display_name = spec.display_name;
-      kernelspec.name = session.kernel.name;
-      // Trigger a change to the notebook metadata.
-      model.kernelspec = kernelspec;
-      return session.kernel.kernelInfo();
-    }).then(info => {
-      let languageInfo = info.language_info;
-      // Use the codemirror mode if given since some kernels rely on it.
-      let mode = languageInfo.codemirror_mode;
-      let mime = '';
-      if (mode) {
-        if (typeof mode === 'string') {
-          if (CodeMirror.modes.hasOwnProperty(mode as string)) {
-            mode = CodeMirror.modes[mode as string];
-          } else {
-            mode = CodeMirror.findModeByName(mode as string);
-          }
-        } else if ((mode as CodeMirror.modespec).mime) {
-          // Do nothing.
-        } else if ((mode as CodeMirror.modespec).name) {
-          let name = (mode as CodeMirror.modespec).name
-          if (CodeMirror.modes.hasOwnProperty(name)) {
-            mode = CodeMirror.modes[name];
-          } else {
-            mode = CodeMirror.findModeByName(mode as string);
-          }
-        }
-        if (mode) mime = (mode as CodeMirror.modespec).mime;
-      } else {
-        mime = info.language_info.mimetype;
-      }
-      if (mime) {
-        model.defaultMimetype = mime;
-        let cells = model.cells;
-        for (let i = 0; i < cells.length; i++) {
-          let cell = cells.get(i);
-          if (isCodeCellModel(cell)) {
-            cell.input.textEditor.mimetype = mime;
-          }
-        }
-      }
-      // Trigger a change to the notebook metadata.
-      model.languageInfo = languageInfo;
-    });
-  }
-
 }

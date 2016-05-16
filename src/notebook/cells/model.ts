@@ -27,7 +27,7 @@ import {
 } from '../input-area';
 
 import {
-  CellType, OutputType
+  CellType, OutputType,
 } from '../notebook/nbformat';
 
 import {
@@ -53,19 +53,9 @@ interface IBaseCellModel extends IDisposable {
   type: CellType;
 
   /**
-   * The cell's name. If present, must be a non-empty string.
+   * A signal emitted the text of the cell changes.
    */
-  name?: string;
-
-  /**
-   * The cell's tags. Tags must be unique, and must not contain commas.
-   */
-  tags?: string[];
-
-  /**
-   * A signal emitted when state of the cell changes.
-   */
-  stateChanged: ISignal<IBaseCellModel, IChangedArgs<any>>;
+  textChanged: ISignal<IBaseCellModel, string>;
 
   /**
    * A signal emitted when a user metadata state changes.
@@ -73,19 +63,37 @@ interface IBaseCellModel extends IDisposable {
   metadataChanged: ISignal<IBaseCellModel, string>;
 
   /**
-   * The input area of the cell.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  input: IInputAreaModel;
-
-  /**
    * Whether the cell is trusted.
    *
    * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
    */
   trusted: boolean;
+
+  /**
+   * The input text of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  text: string;
+
+  /**
+   * The mimetype of the cell.
+   */
+  mimetype: string;
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): any;
+
+  /**
+   * Deserialize the model from JSON.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
+   */
+  fromJSON(value: any): void;
 
   /**
    * Get a metadata cursor for the cell.
@@ -113,9 +121,9 @@ interface IBaseCellModel extends IDisposable {
 export
 interface ICodeCellModel extends IBaseCellModel {
   /**
-   * Execution, display, or stream outputs.
+   * A signal emitted when the cell's output changes.
    */
-  output: IOutputAreaModel;
+  outputChanged: ISignal<ICodeCellModel, void>;
 
   /**
    * The code cell's prompt number. Will be null if the cell has not been run.
@@ -133,9 +141,9 @@ interface ICodeCellModel extends IBaseCellModel {
   scrolled?: ScrollSetting;
 
   /**
-   * Clear the cell state.
+   * Execute the code cell using the given kernel.
    */
-  clear(): void;
+  execute(kernel: IKernel): void;
 }
 
 
@@ -361,13 +369,6 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   }
 
   /**
-   * Get the output area model.
-   */
-  get output(): IOutputAreaModel {
-    return this._output;
-  }
-
-  /**
    * The execution count.
    */
   get executionCount(): number {
@@ -438,12 +439,22 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
   }
 
   /**
-   * Clear the cell state.
+   * Execute the code cell using the given kernel.
    */
-  clear(): void {
-    this.output.clear(false);
-    this.executionCount = null;
-    this.input.prompt = '';
+  execute(kernel: IKernel): void {
+    let input = this.input;
+    let text = this.text.trim();
+    if (text.length === 0) {
+      return Promise.resolve(void 0);
+    }
+    input.prompt = '*';
+    let cb = (output: IOutput) => {
+      this._output.add(output);
+      this.stateChanged.emit(void 0);
+    };
+    return executeCode(text, kernel, cb).then(reply => {
+      cell.executionCount = reply.execution_count;
+    });
   }
 
   /**
@@ -531,29 +542,10 @@ class RawCellModel extends BaseCellModel implements IRawCellModel {
 
 
 /**
- * Execute the code cell using the given kernel.
- */
-export
-function executeCodeCell(cell: ICodeCellModel, kernel: IKernel): Promise<void> {
-  let input = cell.input;
-  let output = cell.output;
-  let text = input.textEditor.text.trim();
-  cell.clear();
-  if (text.length === 0) {
-    return Promise.resolve(void 0);
-  }
-  input.prompt = '*';
-  return executeCode(text, kernel, output).then(reply => {
-    cell.executionCount = reply.execution_count;
-  });
-}
-
-
-/**
  * Execute code and send outputs to an output area.
  */
 export
-function executeCode(code: string, kernel: IKernel, outputArea: IOutputAreaModel): Promise<IExecuteReply> {
+function executeCode(code: string, kernel: IKernel, callback: (IOutput) => void): Promise<IExecuteReply> {
   let exRequest = {
     code,
     silent: false,
@@ -561,14 +553,13 @@ function executeCode(code: string, kernel: IKernel, outputArea: IOutputAreaModel
     stop_on_error: true,
     allow_stdin: true
   };
-  outputArea.clear(false);
   return new Promise<IExecuteReply>((resolve, reject) => {
     let future = kernel.execute(exRequest);
     future.onIOPub = (msg => {
       let model = msg.content;
       if (model !== void 0) {
         model.output_type = msg.header.msg_type as OutputType;
-        outputArea.add(model);
+        callback.call(void 0, model);
       }
     });
     future.onReply = (msg => {
@@ -579,24 +570,24 @@ function executeCode(code: string, kernel: IKernel, outputArea: IOutputAreaModel
 
 
 /**
-  * A type guard for testing if a cell model is a markdown cell.
-  */
+ * A type guard for testing if a cell model is a markdown cell.
+ */
 export
 function isMarkdownCellModel(m: ICellModel): m is IMarkdownCellModel {
   return (m.type === 'markdown');
 }
 
 /**
-  * A type guard for testing if a cell is a code cell.
-  */
+ * A type guard for testing if a cell is a code cell.
+ */
 export
 function isCodeCellModel(m: ICellModel): m is ICodeCellModel {
   return (m.type === 'code');
 }
 
 /**
-  * A type guard for testing if a cell is a raw cell.
-  */
+ * A type guard for testing if a cell is a raw cell.
+ */
 export
 function isRawCellModel(m: ICellModel): m is IRawCellModel {
   return (m.type === 'raw');
