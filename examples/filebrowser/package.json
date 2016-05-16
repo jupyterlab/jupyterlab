@@ -3,7 +3,7 @@
   "name": "example",
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
-    "update": "rimraf node_modules/jupyter-js-ui && npm update"
+    "update": "rimraf node_modules/jupyter-js-ui && npm install"
   },
   "dependencies": {
     "jupyter-js-services": "^0.10.1",
