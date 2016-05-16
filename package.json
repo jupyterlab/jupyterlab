@@ -5,7 +5,6 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "ansi-to-html": "^0.4.1",
     "codemirror": "^5.11.0",
     "diff-match-patch": "^1.0.0",
     "file-loader": "^0.8.5",

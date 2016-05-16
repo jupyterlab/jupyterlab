@@ -50,9 +50,6 @@ import {
   MimeBundle
 } from '../notebook';
 
-declare var require: any;
-const Filter = require('ansi-to-html');
-
 
 /**
  * The default console kernelspec metadata.
@@ -452,7 +449,7 @@ class ConsoleModel implements IConsoleModel {
       this.tooltip = {
         change: args,
         currentLine: currentLine,
-        bundle: Private.formatInspectReply(value.data)
+        bundle: Private.processInspectReply(value.data)
       };
     });
   }
@@ -577,16 +574,21 @@ namespace Private {
   }
 
   /**
-   * Format the IInspectReply plain text data.
+   * Process the IInspectReply plain text data.
+   *
+   * @param bundle - The MIME bundle of an API inspect reply.
+   *
+   * #### Notes
+   * The `text/plain` value sent by the API in inspect replies contains ANSI
+   * terminal escape sequences. In order for these sequences to be parsed into
+   * usable data in the client, they must have the MIME type that the console
+   * text renderer expects: `application/vnd.jupyter.console-text`.
    */
   export
-  function formatInspectReply(bundle: MimeBundle): MimeBundle {
+  function processInspectReply(bundle: MimeBundle): MimeBundle {
     let textMime = 'text/plain';
-    let textHTML = 'text/html';
-    if (!bundle[textMime]) return bundle;
-    // Add a 'text/html' formatted version of the plain text.
-    let filter = new Filter();
-    bundle[textHTML] = `<pre>${filter.toHtml(bundle[textMime])}</pre>`;
+    let consoleMime = 'application/vnd.jupyter.console-text';
+    bundle[consoleMime] = bundle[consoleMime] || bundle[textMime];
     return bundle;
   }
 
