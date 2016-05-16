@@ -74,6 +74,11 @@ const REFRESH_CLASS = 'jp-id-refresh';
  */
 const ACTIVE_CLASS = 'jp-mod-active';
 
+/**
+ * The class name added to a dropdown icon.
+ */
+const DROPDOWN_CLASS = 'jp-FileButtons-dropdownIcon';
+
 
 /**
  * A widget which hosts the file browser buttons.
@@ -134,6 +139,15 @@ class FileButtons extends Widget {
   }
 
   /**
+   * Open a file by path.
+   */
+  open(path: string): void {
+    let widget = this._manager.open(path);
+    let opener = this._opener;
+    opener.open(widget);
+  }
+
+  /**
    * The 'mousedown' handler for the create button.
    */
   private _onCreateButtonPressed = (event: MouseEvent) => {
@@ -141,9 +155,37 @@ class FileButtons extends Widget {
     if (event.button !== 0) {
       return;
     }
-    // TODO
-    //this._manager.createNew(this._model.path, this.parent.node);
+
+    // Do nothing if the create button is already active.
+    let button = this._buttons.create;
+    if (button.classList.contains(ACTIVE_CLASS)) {
+      return;
+    }
+
+    // Create a new dropdown menu and snap the button geometry.
+    let dropdown = Private.createDropdownMenu(this);
+    let rect = button.getBoundingClientRect();
+
+    // Mark the button as active.
+    button.classList.add(ACTIVE_CLASS);
+
+    // Setup the `closed` signal handler. The menu is disposed on an
+    // animation frame to allow a mouse press event which closed the
+    // menu to run its course. This keeps the button from re-opening.
+    dropdown.closed.connect(() => {
+      requestAnimationFrame(() => { dropdown.dispose(); });
+    });
+
+    // Setup the `disposed` signal handler. This restores the button
+    // to the non-active state and allows a new menu to be opened.
+    dropdown.disposed.connect(() => {
+      button.classList.remove(ACTIVE_CLASS);
+    });
+
+    // Popup the menu aligned with the bottom of the create button.
+    dropdown.popup(rect.left, rect.bottom, false, true);
   };
+
 
   /**
    * The 'click' handler for the upload button.
@@ -159,7 +201,9 @@ class FileButtons extends Widget {
    * The 'click' handler for the refresh button.
    */
   private _onRefreshButtonClicked = (event: MouseEvent) => {
-    if (event.button !== 0) return;
+    if (event.button !== 0) {
+      return;
+    }
     this._model.refresh().catch(error => {
       utils.showErrorMessage(this, 'Server Connection Error', error);
     });
@@ -211,6 +255,7 @@ namespace Private {
     let createIcon = document.createElement('span');
     let uploadIcon = document.createElement('span');
     let refreshIcon = document.createElement('span');
+    let dropdownIcon = document.createElement('span');
 
     create.type = 'button';
     upload.type = 'button';
@@ -232,8 +277,10 @@ namespace Private {
     createIcon.className = ICON_CLASS + ' fa fa-plus';
     uploadIcon.className = ICON_CLASS + ' fa fa-upload';
     refreshIcon.className = ICON_CLASS + ' fa fa-refresh';
+    dropdownIcon.className = DROPDOWN_CLASS + ' fa fa-caret-down';
 
     createContent.appendChild(createIcon);
+    createContent.appendChild(dropdownIcon);
     uploadContent.appendChild(uploadIcon);
     refreshContent.appendChild(refreshIcon);
 
@@ -256,6 +303,91 @@ namespace Private {
   }
 
   /**
+   * Create a new source file.
+   */
+  export
+  function createNewFile(widget: FileButtons): void {
+    createFile(widget, 'file').then(contents => {
+      if (contents === void 0) {
+        return;
+      }
+      widget.model.refresh().then(() => widget.open(contents.name));
+    }).catch(error => {
+      utils.showErrorMessage(widget, 'New File Error', error);
+    });
+  }
+
+  /**
+   * Create a new folder.
+   */
+  export
+  function createNewFolder(widget: FileButtons): void {
+    createFile(widget, 'directory').then(contents => {
+      if (contents === void 0) {
+        return;
+      }
+      widget.model.refresh();
+    }).catch(error => {
+      utils.showErrorMessage(widget, 'New Folder Error', error);
+    });
+  }
+
+  /**
+   * Create a new notebook.
+   */
+  export
+  function createNewNotebook(widget: FileButtons, spec: IKernelSpecId): void {
+    createFile(widget, 'notebook').then(contents => {
+      let started = widget.model.startSession(contents.path, spec.name);
+      return started.then(() => contents);
+    }).then(contents => {
+      if (contents === void 0) {
+        return;
+      }
+      widget.model.refresh().then(() => widget.open(contents.name));
+    }).catch(error => {
+      utils.showErrorMessage(widget, 'New Notebook Error', error);
+    });
+  }
+
+  /**
+   * Create a new file, prompting the user for a name.
+   */
+  function createFile(widget: FileButtons, type: string): Promise<IContentsModel> {
+    return widget.model.newUntitled(type);
+  }
+
+  /**
+   * Create a new dropdown menu for the create new button.
+   */
+  export
+  function createDropdownMenu(widget: FileButtons): Menu {
+    let items = [
+      new MenuItem({
+        text: 'Text File',
+        handler: () => { createNewFile(widget); }
+      }),
+      new MenuItem({
+        text: 'Folder',
+        handler: () => { createNewFolder(widget); }
+      }),
+      new MenuItem({
+        type: MenuItem.Separator
+      })
+    ];
+    // TODO the kernels below are suffixed with "Notebook" as a
+    // temporary measure until we can update the Menu widget to
+    // show text in a separator for a "Notebooks" group.
+    let extra = widget.model.kernelSpecs.map(spec => {
+      return new MenuItem({
+        text: `${spec.spec.display_name} Notebook`,
+        handler: () => { createNewNotebook(widget, spec); }
+      });
+    });
+    return new Menu(items.concat(extra));
+  }
+
+  /**
    * Upload an array of files to the server.
    */
   export
@@ -274,7 +406,9 @@ namespace Private {
   function uploadFile(widget: FileButtons, file: File): Promise<any> {
     return widget.model.upload(file).catch(error => {
       let exists = error.message.indexOf('already exists') !== -1;
-      if (exists) return uploadFileOverride(widget, file);
+      if (exists) {
+        return uploadFileOverride(widget, file);
+      }
       throw error;
     });
   }
@@ -285,11 +419,13 @@ namespace Private {
   function uploadFileOverride(widget: FileButtons, file: File): Promise<any> {
     let options = {
       title: 'Overwrite File?',
-      host: this.parent.node,
+      host: widget.parent.node,
       body: `"${file.name}" already exists, overwrite?`
     };
     return showDialog(options).then(button => {
-      if (button.text !== 'Ok') return;
+      if (button.text !== 'Ok') {
+        return;
+      }
       return widget.model.upload(file, true);
     });
   }
