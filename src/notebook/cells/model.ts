@@ -2,85 +2,45 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import {
-  IKernel, IKernelFuture, IExecuteReply
-} from 'jupyter-js-services';
-
-import {
-  shallowEquals
-} from 'jupyter-js-utils';
+import * as utils
+ from 'jupyter-js-utils';
 
 import {
   IDisposable
 } from 'phosphor-disposable';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
 import {
-  IInputAreaModel
-} from '../input-area';
-
-import {
-  CellType, OutputType,
+  CellType, IBaseCell, ICodeCell
 } from '../notebook/nbformat';
 
 import {
-  IOutputAreaModel
+  ObservableOutputs
 } from '../output-area';
 
 
 /**
- * The scrolled setting of a cell.
+ * The definition of a model object for a cell.
  */
 export
-type ScrollSetting = boolean | 'auto';
-
-
-/**
- * The definition of a model object for a base cell.
- */
-export
-interface IBaseCellModel extends IDisposable {
+interface ICellModel extends I {
   /**
    * The type of cell.
    */
   type: CellType;
 
   /**
-   * A signal emitted the text of the cell changes.
+   * A signal emitted when the content of the model changes.
    */
-  textChanged: ISignal<IBaseCellModel, string>;
+  contentChanged: ISignal<ICellModel, string>;
 
   /**
-   * A signal emitted when a user metadata state changes.
+   * The input content of the cell.
    */
-  metadataChanged: ISignal<IBaseCellModel, string>;
-
-  /**
-   * Whether the cell is trusted.
-   *
-   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
-   */
-  trusted: boolean;
-
-  /**
-   * The input text of the cell.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  text: string;
-
-  /**
-   * The mimetype of the cell.
-   */
-  mimetype: string;
+  source: string;
 
   /**
    * Serialize the model to JSON.
@@ -89,9 +49,6 @@ interface IBaseCellModel extends IDisposable {
 
   /**
    * Deserialize the model from JSON.
-   *
-   * #### Notes
-   * Should emit a [contentChanged] signal.
    */
   fromJSON(value: any): void;
 
@@ -119,153 +76,62 @@ interface IBaseCellModel extends IDisposable {
  * The definition of a code cell.
  */
 export
-interface ICodeCellModel extends IBaseCellModel {
-  /**
-   * A signal emitted when the cell's output changes.
-   */
-  outputChanged: ISignal<ICodeCellModel, void>;
-
+interface ICodeCellModel extends ICellModel {
   /**
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   executionCount: number;
 
   /**
-   * Whether the cell is collapsed/expanded.
+   * The cell outputs.
    */
-  collapsed?: boolean;
-
-  /**
-   * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
-   */
-  scrolled?: ScrollSetting;
-
-  /**
-   * Execute the code cell using the given kernel.
-   */
-  execute(kernel: IKernel): void;
+  outputs: ObservableOutputs;
 }
 
 
 /**
- * The definition of a raw cell.
+ * An implementation of the cell model.
  */
 export
-interface IRawCellModel extends IBaseCellModel {
+class CellModel implements ICellModel {
   /**
-   * Raw cell metadata format for nbconvert.
+   * Construct a cell model from optional cell content.
    */
-  format?: string;
-}
-
-
-/**
- * The definition of a markdown cell.
- */
-export
-interface IMarkdownCellModel extends IBaseCellModel {
-  /**
-   * Whether the cell is rendered.
-   */
-  rendered: boolean;
-}
-
-
-
-/**
- * A model consisting of any valid cell type.
- */
-export
-type ICellModel =  (
-  IRawCellModel | IMarkdownCellModel | ICodeCellModel
-);
-
-
-/**
- * An implemention of the base cell Model.
- */
-export
-class BaseCellModel implements IBaseCellModel {
-  /**
-   * Construct a new base cell model.
-   */
-  constructor(input: IInputAreaModel) {
-    this._input = input;
+  constructor(cell?: IBaseCell) {
+    if (!cell) {
+      return;
+    }
+    this.source = value.source;
+    let metadata = utils.copy(cell.metadata);
+    if (this.type !== 'raw') {
+      delete metadata['format'];
+    }
+    if (this.type !== 'code') {
+      delete metadata['collapsed'];
+      delete metadata['scrolled'];
+    }
+    this._metadata = metadata;
   }
 
   /**
    * A signal emitted when the state of the model changes.
    */
-  get stateChanged(): ISignal<IBaseCellModel, IChangedArgs<any>> {
-    return CellModelPrivate.stateChangedSignal.bind(this);
+  get contentChanged(): ISignal<ICellModel, string> {
+    return Private.contentChangedSignal.bind(this);
   }
 
   /**
-   * A signal emitted when a user metadata state changes.
-   *
-   * #### Notes
-   * The signal argument is the namespace of the metadata that changed.
+   * The input content of the cell.
    */
-  get metadataChanged(): ISignal<IBaseCellModel, string> {
-    return CellModelPrivate.metadataChangedSignal.bind(this);
+  get source(): string {
+    return this._source;
   }
-
-  /**
-   * Get the input area model.
-   */
-  get input(): IInputAreaModel {
-    return this._input;
-  }
-
-  /**
-   * The trusted state of the cell.
-   *
-   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
-   */
-  get trusted(): boolean {
-    return this._trusted;
-  }
-  set trusted(newValue: boolean) {
-    if (newValue === this._trusted) {
+  set source(value: string) {
+    if (this._source === value) {
       return;
     }
-    let oldValue = this._trusted;
-    this._trusted = newValue;
-    this.onTrustChanged(newValue);
-    let name = 'trusted';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The name of the cell.
-   */
-  get name(): string {
-    return this._name;
-  }
-  set name(newValue: string) {
-    if (newValue === this._name) {
-      return;
-    }
-    let oldValue = this._name;
-    this._name = newValue;
-    let name = 'name';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The tags for the cell.
-   */
-  get tags(): string[] {
-    return JSON.parse(this._tags);
-  }
-  set tags(newValue: string[]) {
-    let oldValue = JSON.parse(this._tags);
-    if (shallowEquals(oldValue, newValue)) {
-      return;
-    }
-    this._tags = JSON.stringify(newValue);
-    let name = 'tags';
-    this.stateChanged.emit({ name, oldValue, newValue });
+    this._source = value;
+    this.contentChanged.emit('source');
   }
 
   /**
@@ -275,7 +141,7 @@ class BaseCellModel implements IBaseCellModel {
    * This is a read-only property.
    */
   get isDisposed(): boolean {
-    return this._input === null;
+    return this._metadata === null;
   }
 
   /**
@@ -287,8 +153,22 @@ class BaseCellModel implements IBaseCellModel {
       return;
     }
     clearSignalData(this);
-    this._input.dispose();
-    this._input = null;
+    for (let cursor of this._cursors) {
+      cursor.dispose();
+    }
+    this._cursors = null;
+    this._metadata = null;
+  }
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): IBaseCell {
+    return {
+      cell_type: this.type,
+      source: this.source,
+      metadata: utils.copy(this._metadata)
+    };
   }
 
   /**
@@ -300,17 +180,17 @@ class BaseCellModel implements IBaseCellModel {
    * set of metadata on the cell.
    */
   getMetadata(name: string): IMetadataCursor {
-    let blacklist = ['tags', 'name', 'trusted', 'collapsed', 'scrolled',
-                     'execution_count', 'format'];
-    if (blacklist.indexOf(name) !== -1) {
-      let key = blacklist[blacklist.indexOf(name)];
-      throw Error(`Use model attribute for ${key} directly`);
-    }
-    return new MetadataCursor(
+    let cursor = new MetadataCursor(
       name,
-      this._metadata,
-      this._cursorCallback.bind(this)
+      () => {
+        return this._metadata[name];
+      },
+      (value: string) => {
+        this.setCursorData(name, value);
+      }
     );
+    this._cursors.push(cursor);
+    return cursor;
   }
 
   /**
@@ -324,20 +204,14 @@ class BaseCellModel implements IBaseCellModel {
   }
 
   /**
-   * Handle changes to cell trust.
-   *
-   * #### Notes
-   * The default implementation is a no-op.
+   * Set the cursor data for a given field.
    */
-  protected onTrustChanged(value: boolean): void {
-
-  }
-
-  /**
-   * The singleton callback for cursor change events.
-   */
-  private _cursorCallback(name: string): void {
-    this.metadataChanged.emit(name);
+  protected setCursorData(name: string, value: string): void {
+    if (this._metadata[name] === value) {
+      return;
+    }
+    this._metadata[name] = value;
+    this.contentChanged.emit(`metadata.${name}`);
   }
 
   /**
@@ -345,12 +219,26 @@ class BaseCellModel implements IBaseCellModel {
    */
   type: CellType;
 
-  private _input: IInputAreaModel = null;
-  private _tags = '[]';
-  private _name: string = null;
-  private _trusted = false;
-  private _readOnly = false;
   private _metadata: { [key: string]: string } = Object.create(null);
+  private _cursors: MetadataCursor[] = [];
+}
+
+
+/**
+ * An implementation of a raw cell model.
+ */
+export
+class RawCellModel extends CellModel {
+  type: CellType = 'code';
+}
+
+
+/**
+ * An implementation of a markdown cell model.
+ */
+export
+class MarkdownCellModel extends CellModel {
+  type: CellType = 'markdown';
 }
 
 
@@ -358,72 +246,45 @@ class BaseCellModel implements IBaseCellModel {
  * An implementation of a code cell Model.
  */
 export
-class CodeCellModel extends BaseCellModel implements ICodeCellModel {
+class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
-   * Construct a new code cell model.
+   * Construct a new code cell with optional original cell content.
    */
-  constructor(input: IInputAreaModel, output: IOutputAreaModel) {
-    super(input);
-    this._output = output;
-    this.input.prompt = '';
+  constructor(cell?: IBaseCell) {
+    super(cell);
+    this._outputs = new ObservableOutputs();
+    if (cell && cell.cell_type === 'code') {
+      this.executionCount = cell.execution_count;
+      this._outputs.assign(cell.outputs);
+    }
+    this._outputs.changed.connect(() => {
+      this.contentChanged.emit(void 0);
+      this.stateChanged.emit('outputs');
+    });
   }
 
   /**
-   * The execution count.
+   * The execution count of the cell.
    */
   get executionCount(): number {
     return this._executionCount;
   }
   set executionCount(value: number) {
-    if (this._executionCount === value) {
+    if (value === this._executionCount) {
       return;
     }
-    let prev = this._executionCount;
     this._executionCount = value;
-    this.input.prompt = `${value || ''}`;
-    this.stateChanged.emit({
-      name: 'executionCount',
-      oldValue: prev,
-      newValue: value
-    });
+    this.stateChanged.emit('executionCount');
   }
 
   /**
-   * Whether the cell is collapsed/expanded.
+   * The cell outputs.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  get collapsed(): boolean {
-    return this._collapsed;
-  }
-  set collapsed(value: boolean) {
-    if (this._collapsed === value) {
-      return;
-    }
-    let prev = this._collapsed;
-    this._collapsed = value;
-    this.stateChanged.emit({
-      name: 'collapsed',
-      oldValue: prev,
-      newValue: value
-    });
-  }
-
-  /**
-   * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
-   */
-  get scrolled(): ScrollSetting {
-    return this._scrolled;
-  }
-  set scrolled(value: ScrollSetting) {
-    if (this._scrolled === value) {
-      return;
-    }
-    let prev = this._scrolled;
-    this._scrolled = value;
-    this.stateChanged.emit({
-      name: 'scrolled',
-      oldValue: prev,
-      newValue: value
-    });
+  get outputs(): ObservableOutputs {
+    return this._outputs;
   }
 
   /**
@@ -433,191 +294,37 @@ class CodeCellModel extends BaseCellModel implements ICodeCellModel {
     if (this.isDisposed) {
       return;
     }
-    this._output.dispose();
+    this._output.clear(false);
     this._output = null;
     super.dispose();
   }
 
   /**
-   * Execute the code cell using the given kernel.
+   * Serialize the model to JSON.
    */
-  execute(kernel: IKernel): void {
-    let input = this.input;
-    let text = this.text.trim();
-    if (text.length === 0) {
-      return Promise.resolve(void 0);
+  toJSON(): ICodeCell {
+    let cell = super.toJSON() as ICodeCell;
+    cell.execution_count = this.executionCount;
+    let outputs = this.outputs;
+    cell.outputs = [];
+    for (let i = 0; i < outputs.length; i++) {
+      cell.outputs.push(outputs.get(i));
     }
-    input.prompt = '*';
-    let cb = (output: IOutput) => {
-      this._output.add(output);
-      this.stateChanged.emit(void 0);
-    };
-    return executeCode(text, kernel, cb).then(reply => {
-      cell.executionCount = reply.execution_count;
-    });
-  }
-
-  /**
-   * Handle changes to cell trust.
-   *
-   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
-   */
-  protected onTrustChanged(value: boolean): void {
-    this.output.trusted = value;
+    return cell;
   }
 
   type: CellType = 'code';
 
-  private _output: IOutputAreaModel = null;
-  private _scrolled: ScrollSetting = false;
-  private _collapsed = false;
+  private _outputs: ObservableOutputs = null;
   private _executionCount: number = null;
 }
-
-
-/**
- * An implementation of a Markdown cell Model.
- */
-export
-class MarkdownCellModel extends BaseCellModel implements IMarkdownCellModel {
-  /**
-   * Whether we should display a rendered representation.
-   */
-  get rendered() {
-    return this._rendered;
-  }
-  set rendered(value: boolean) {
-    if (this._rendered === value) {
-      return;
-    }
-    let prev = this._rendered;
-    this._rendered = value;
-    this.stateChanged.emit({
-      name: 'rendered',
-      oldValue: prev,
-      newValue: value
-    });
-  }
-
-  type: CellType = 'markdown';
-  private _rendered = true;
-}
-
-
-/**
- * An implementation of a Raw cell Model.
- */
-export
-class RawCellModel extends BaseCellModel implements IRawCellModel {
-  /**
-   * Construct a new raw cell model.
-   */
-  constructor(input: IInputAreaModel) {
-    super(input);
-    input.textEditor.mimetype = 'text/plain';
-  }
-
-  /**
-   * The raw cell metadata format for nbconvert.
-   */
-  get format(): string {
-    return this._format;
-  }
-  set format(value: string) {
-    if (this._format === value) {
-      return;
-    }
-    let prev = this._format;
-    this._format = value;
-    this.stateChanged.emit({
-      name: 'format',
-      oldValue: prev,
-      newValue: value
-    });
-  }
-
-  type: CellType = 'raw';
-  private _format: string = null;
-}
-
-
-/**
- * Execute code and send outputs to an output area.
- */
-export
-function executeCode(code: string, kernel: IKernel, callback: (IOutput) => void): Promise<IExecuteReply> {
-  let exRequest = {
-    code,
-    silent: false,
-    store_history: true,
-    stop_on_error: true,
-    allow_stdin: true
-  };
-  return new Promise<IExecuteReply>((resolve, reject) => {
-    let future = kernel.execute(exRequest);
-    future.onIOPub = (msg => {
-      let model = msg.content;
-      if (model !== void 0) {
-        model.output_type = msg.header.msg_type as OutputType;
-        callback.call(void 0, model);
-      }
-    });
-    future.onReply = (msg => {
-      resolve(msg.content as IExecuteReply);
-    });
-  });
-}
-
-
-/**
- * A type guard for testing if a cell model is a markdown cell.
- */
-export
-function isMarkdownCellModel(m: ICellModel): m is IMarkdownCellModel {
-  return (m.type === 'markdown');
-}
-
-/**
- * A type guard for testing if a cell is a code cell.
- */
-export
-function isCodeCellModel(m: ICellModel): m is ICodeCellModel {
-  return (m.type === 'code');
-}
-
-/**
- * A type guard for testing if a cell is a raw cell.
- */
-export
-function isRawCellModel(m: ICellModel): m is IRawCellModel {
-  return (m.type === 'raw');
-}
-
-
-/**
- * A namespace for cell private data.
- */
-namespace CellModelPrivate {
-  /**
-   * A signal emitted when the state of the model changes.
-   */
-  export
-  const stateChangedSignal = new Signal<IBaseCellModel, IChangedArgs<any>>();
-
-  /**
-   * A signal emitted when a user metadata state changes.
-   */
-  export
-  const metadataChangedSignal = new Signal<IBaseCellModel, string>();
-}
-
 
 
 /**
  * A class used to interact with user level metadata.
  */
 export
-interface IMetadataCursor {
+interface IMetadataCursor extends IDisposable {
   /**
    * The metadata namespace.
    */
@@ -650,10 +357,10 @@ class MetadataCursor implements IMetadataCursor {
    *
    * @param cb - a change callback.
    */
-  constructor(name: string, metadata: { [key: string]: string }, cb: (name: string) => void) {
+  constructor(name: string, read: () => string, write: (value: string) => void) {
     this._name = name;
-    this._metadata = metadata;
-    this._cb = cb;
+    this._read = read;
+    this._write = write;
   }
 
   /**
@@ -667,26 +374,51 @@ class MetadataCursor implements IMetadataCursor {
   }
 
   /**
+   * Get whether the cursor is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._read === null;
+  }
+
+  /**
+   * Dispose of the resources used by the cursor.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._read = null;
+    this._write = null;
+  }
+
+  /**
    * Get the value of the namespace data.
    */
   getValue(): any {
-    return JSON.parse(this._metadata[this._name] || 'null');
+    let value = this._read.call(void 0);
+    return JSON.parse(value || 'null');
   }
 
   /**
    * Set the value of the namespace data.
    */
   setValue(value: any): any {
-    let prev = this._metadata[this._name];
-    if (prev === value) {
-      return;
-    }
-    this._metadata[this._name] = JSON.stringify(value);
-    let cb = this._cb;
-    cb(this._name);
+    this._write.call(void 0, JSON.stringify(value));
   }
 
   private _name = '';
-  private _cb: (name: string) => void = null;
-  private _metadata: { [key: string]: string } = null;
+  private _read: () => string = null;
+  private _write: (value: string) => void = null;
+}
+
+
+/**
+ * A namespace for cell private data.
+ */
+namespace Private {
+  /**
+   * A signal emitted when the state of the model changes.
+   */
+  export
+  const contentChangedSignal = new Signal<ICellModel, string>();
 }

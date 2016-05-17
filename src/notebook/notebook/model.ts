@@ -2,6 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
+import * as utils
+ from 'jupyter-js-utils';
+
 import {
   IDocumentModel
 } from 'jupyter-js-ui/lib/docmanager';
@@ -15,38 +18,13 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  ICellModel,
-  ICodeCellModel,
-  IMarkdownCellModel,
-  IRawCellModel, MetadataCursor, IMetadataCursor,
+  ICellModel, MetadataCursor, IMetadataCursor,
+  CodeCellModel, RawCellModel, MarkdownCellModel
 } from '../cells/model';
 
 import {
-  IKernelspecMetadata, ILanguageInfoMetadata
+  INotebookContent, ICell, INotebookMetadata
 } from './nbformat';
-
-
-/**
- * The interactivity modes for the notebook.
- */
-export
-type NotebookMode = 'command' | 'edit';
-
-
-/**
- * The default notebook kernelspec metadata.
- */
-const DEFAULT_KERNELSPEC = {
-  name: 'unknown',
-  display_name: 'No Kernel!'
-};
-
-/**
- * The default notebook languageinfo metadata.
- */
-const DEFAULT_LANG_INFO = {
-  name: 'unknown'
-};
 
 
 /**
@@ -55,42 +33,28 @@ const DEFAULT_LANG_INFO = {
 export
 interface INotebookModel extends IDocumentModel {
   /**
-   * A signal emitted when a metadata state changes.
-   */
-  metadataChanged: ISignal<INotebookModel, string>;
-
-  /**
-   * The kernelspec metadata associated with the notebook.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  kernelspec: IKernelspecMetadata;
-
-  /**
-   * The language info metadata associated with the notebook.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  languageInfo: ILanguageInfoMetadata;
-
-  /**
-   * The original nbformat associated with the notebook (if applicable).
-   *
-   * #### Notes
-   * This is a read-only property.  This value is assigned by the server
-   * when it converts a notebook prior to serving the file.
-   */
-  origNbformat: number;
-
-  /**
    * The list of cells in the notebook.
    *
    * #### Notes
    * This is a read-only property.
    */
   cells: IObservableList<ICellModel>;
+
+  /**
+   * The major version number of the nbformat.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  nbformat: number;
+
+  /**
+   * The minor version number of the nbformat.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  nbformatMinor: number;
 
   /**
    * Get a metadata cursor for the notebook.
@@ -127,8 +91,11 @@ class NotebookModel implements INotebookModel {
 
   /**
    * A signal emitted when the document content changes.
+   *
+   * #### Notes
+   * The argument is the type of change.
    */
-  get contentChanged(): ISignal<INotebookModel, void> {
+  get contentChanged(): ISignal<INotebookModel, string> {
     return NotebookModelPrivate.contentChangedSignal.bind(this);
   }
 
@@ -137,16 +104,6 @@ class NotebookModel implements INotebookModel {
    */
   get dirtyChanged(): ISignal<IDocumentModel, boolean> {
     return NotebookModelPrivate.dirtyChangedSignal.bind(this);
-  }
-
-  /**
-   * A signal emitted when a metadata state changes.
-   *
-   * #### Notes
-   * The signal argument is the name of the metadata that changed.
-   */
-  get metadataChanged(): ISignal<INotebookModel, string> {
-    return NotebookModelPrivate.metadataChangedSignal.bind(this);
   }
 
   /**
@@ -160,44 +117,23 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * The language info metadata for the notebook.
-   */
-  get languageInfo(): ILanguageInfoMetadata {
-    return JSON.parse(this._langInfo);
-  }
-  set languageInfo(value: ILanguageInfoMetadata) {
-    let data = JSON.stringify(value);
-    if (data === this._langInfo) {
-      return;
-    }
-    this._langInfo = data;
-    this.metadataChanged.emit('languageInfo');
-  }
-
-  /**
-   * The kernelspec metadata associated with the notebook.
-   */
-  get kernelspec(): IKernelspecMetadata {
-    return JSON.parse(this._kernelspec);
-  }
-  set kernelspec(value: IKernelspecMetadata) {
-    let data = JSON.stringify(value);
-    if (data === this._kernelspec) {
-      return;
-    }
-    this._kernelspec = data;
-    this.metadataChanged.emit('kernelspec');
-  }
-
-  /**
-   * The original nbformat associated with the notebook (if applicable).
+   * The major version number of the nbformat.
    *
    * #### Notes
-   * This is a read-only property.  This value is assigned by the server
-   * when it converts a notebook prior to serving the file.
+   * This is a read-only property.
    */
-  get origNbformat(): number {
-    return this._origNbformat;
+  get nbformat(): number {
+    return this._nbformat;
+  }
+
+  /**
+   * The minor version number of the nbformat.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get nbformatMinor(): number {
+    return this._nbformatMinor;
   }
 
   /**
@@ -238,7 +174,7 @@ class NotebookModel implements INotebookModel {
    * This is a read-only property.
    */
   get defaultKernelName(): string {
-    return this.kernelspec ? this.kernelspec.name : '';
+    return JSON.parse(this._metadata['kernelspec']).name;
   }
 
   /**
@@ -248,7 +184,7 @@ class NotebookModel implements INotebookModel {
    * This is a read-only property.
    */
   get defaultKernelLanguage(): string {
-    return this.languageInfo ? this.languageInfo.name : '';
+    return JSON.parse(this._metadata['language_info']).name;
   }
 
   /**
@@ -277,6 +213,11 @@ class NotebookModel implements INotebookModel {
     }
     cells.clear();
     this._cells = null;
+    for (let cursor of this._cursors) {
+      cursor.dispose();
+    }
+    this._cursors = null;
+    this._metadata = null;
   }
 
   /**
@@ -299,9 +240,19 @@ class NotebookModel implements INotebookModel {
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): any {
-    // TODO
-    return void 0;
+  toJSON(): INotebookContent {
+    let cells: ICell[] = [];
+    for (let i = 0; i < this.cells.length; i++) {
+      let cell = this.cells.get(i);
+      cells.push(cell.toJSON());
+    }
+    let metadata = utils.copy(this._metadata) as INotebookMetadata;
+    return {
+      metadata,
+      nbformat_minor: this._nbformatMinor,
+      nbformat: this._nbformat,
+      cells;
+    };
   }
 
   /**
@@ -310,8 +261,28 @@ class NotebookModel implements INotebookModel {
    * #### Notes
    * Should emit a [contentChanged] signal.
    */
-  fromJSON(value: any): void {
-    // TODO
+  fromJSON(value: INotebookContent): void {
+    let cells = ICellModel[] = [];
+    for (let data of value.cells) {
+      switch (data.type) {
+      case 'code':
+        cells.push(new CodeCellModel(data));
+        break;
+      case 'markdown':
+        cells.push(new MarkdownCellModel(data));
+        break;
+      case 'raw':
+        cells.push(new RawCellModel(data));
+        break;
+      default:
+        continue;
+      }
+    }
+    this.cells.replace(cells);
+    this._nbformat = value.nbformat;
+    this._nbformatMinor = value.nbformat_minor;
+    this._metadata = utils.copy(value.metadata);
+    this.contentChanged.emit('metadata');
   }
 
   /**
@@ -323,16 +294,17 @@ class NotebookModel implements INotebookModel {
    * set of metadata on the notebook.
    */
   getMetadata(name: string): IMetadataCursor {
-    let invalid = ['kernelspec', 'languageInfo', 'origNbformat'];
-    if (invalid.indexOf(name) !== -1) {
-      let key = invalid[invalid.indexOf(name)];
-      throw Error(`Use model attribute for ${key} directly`);
-    }
-    return new MetadataCursor(
+    let cursor = new MetadataCursor(
       name,
-      this._metadata,
-      this._cursorCallback.bind(this)
+      () => {
+        return this._metadata[name];
+      },
+      (value: string) => {
+        this.setCursorData(name, value);
+      }
     );
+    this._cursors.push(cursor);
+    return cursor;
   }
 
   /**
@@ -353,7 +325,7 @@ class NotebookModel implements INotebookModel {
     switch (change.type) {
     case ListChangeType.Add:
       cell = change.newValue as ICellModel;
-      cell.stateChanged.connect(this.onCellChanged, this);
+      cell.contentChanged.connect(this.onCellChanged, this);
       break;
     case ListChangeType.Remove:
       (change.oldValue as ICellModel).dispose();
@@ -365,9 +337,16 @@ class NotebookModel implements INotebookModel {
       }
       let newValues = change.newValue as ICellModel[];
       for (cell of newValues) {
-        cell.stateChanged.connect(this.onCellChanged, this);
+        cell.contentChanged.connect(this.onCellChanged, this);
       }
       break;
+    case ListChangeType.Set:
+      (change.oldValue as ICellModel).dispose();
+      cell = change.newValue as ICellModel;
+      cell.contentChanged.connect(this.onCellChanged, this);
+      break;
+    default:
+      return;
     }
     this.dirty = true;
   }
@@ -376,23 +355,27 @@ class NotebookModel implements INotebookModel {
    * Handle a change to a cell state.
    */
   protected onCellChanged(cell: ICellModel, change: any): void {
-    this.contentChanged.emit(void 0);
+    this.contentChanged.emit('cells');
   }
 
   /**
-   * The singleton callback for cursor change events.
+   * Set the cursor data for a given field.
    */
-  private _cursorCallback(name: string): void {
-    this.metadataChanged.emit(name);
+  protected setCursorData(name: string, value: string): void {
+    if (this._metadata[name] === value) {
+      return;
+    }
+    this._metadata[name] = value;
+    this.contentChanged.emit(`metadata.${name}`);
   }
 
   private _cells: IObservableList<ICellModel> = null;
-  private _metadata: { [key: string]: string } = Object.create(null);
-  private _kernelspec = JSON.stringify(DEFAULT_KERNELSPEC);
-  private _langInfo = JSON.stringify(DEFAULT_LANG_INFO);
-  private _origNbformat: number = null;
+  private _metadata: { [key: string]: string } = Private.createMetadata();
   private _dirty = false;
   private _readOnly = false;
+  private _cursors: MetadataCursor[] = [];
+  private _nbformat = -1;
+  private _nbformatMinor = -1;
 }
 
 
@@ -413,8 +396,14 @@ namespace NotebookModelPrivate {
   const dirtyChangedSignal = new Signal<INotebookModel, boolean>();
 
   /**
-   * A signal emitted when a user metadata state changes.
+   * Create an empty notebook metadata.
    */
   export
-  const metadataChangedSignal = new Signal<INotebookModel, string>();
+  function createMetadata(): INotebookMetadata {
+    return {
+      kernelspec: { name: 'unknown', display_name: 'unknown' },
+      language_info: { name: 'unknown' },
+      orig_nbformat: -1
+    };
+  }
 }
