@@ -3,20 +3,12 @@
 'use strict';
 
 import {
-  IDisposable
-} from 'phosphor-disposable';
+  IKernel, IExecuteReply
+} from 'jupyter-js-services';
 
 import {
   ObservableList
 } from 'phosphor-observablelist';
-
-import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
-  ISignal, Signal, clearSignalData
-} from 'phosphor-signaling';
 
 import {
   IOutput, IStream, isStream
@@ -24,152 +16,10 @@ import {
 
 
 /**
- * The model for an output area.
+ * An observable list that handles output area data.
  */
 export
-interface IOutputAreaModel extends IDisposable {
-  /**
-   * A signal emitted when state of the output area changes.
-   */
-  stateChanged: ISignal<IOutputAreaModel, IChangedArgs<any>>;
-
-  /**
-   * Whether the output is trusted.
-   *
-   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
-   */
-  trusted: boolean;
-
-  /**
-   * Whether the output is collapsed.
-   */
-  collapsed: boolean;
-
-  /**
-   * Whether the output has a fixed maximum height.
-   */
-  fixedHeight: boolean;
-
-  /**
-   * The actual outputs.
-   */
-  outputs: ObservableList<IOutput>;
-
-  /**
-   * A convenience method to add an output to the end of the outputs list,
-   * combining outputs if necessary.
-   */
-  add(output: IOutput): void;
-
-  /**
-   * Clear all of the output.
-   */
-  clear(wait: boolean): void;
-}
-
-
-/**
- * An implementation of an output area model.
- */
-export
-class OutputAreaModel implements IOutputAreaModel {
-  /**
-   * Construct a new output area model.
-   */
-  constructor() {
-    this._outputs = new ObservableList<IOutput>();
-  }
-
-  /**
-   * A signal emitted when the state of the model changes.
-   */
-  get stateChanged() {
-    return Private.stateChangedSignal.bind(this);
-  }
-
-  /**
-   * Get the model execution, display, or stream outputs.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get outputs(): ObservableList<IOutput> {
-    return this._outputs;
-  }
-
-  /**
-   * Whether the output is trusted.
-   *
-   * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
-   */
-  get trusted(): boolean {
-    return this._trusted;
-  }
-  set trusted(newValue: boolean) {
-    if (newValue === this._trusted) {
-      return;
-    }
-    let oldValue = this._trusted;
-    let name = 'trusted';
-    this._trusted = newValue;
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * Whether the output has a maximum fixed height.
-   */
-  get fixedHeight(): boolean {
-    return this._fixedHeight;
-  }
-  set fixedHeight(newValue: boolean) {
-    if (newValue === this._fixedHeight) {
-      return;
-    }
-    let oldValue = this._fixedHeight;
-    let name = 'fixedHeight';
-    this._fixedHeight = newValue;
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * Whether the output should be collapsed or displayed.
-   */
-  get collapsed(): boolean {
-    return this._collapsed;
-  }
-  set collapsed(newValue: boolean) {
-    if (newValue === this._collapsed) {
-      return;
-    }
-    let oldValue = this._collapsed;
-    let name = 'collapsed';
-    this._collapsed = newValue;
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * Get whether the model is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get isDisposed(): boolean {
-    return this._outputs === null;
-  }
-
-  /**
-   * Dispose of the resources held by the model.
-   */
-  dispose(): void {
-    // Do nothing if already disposed.
-    if (this.isDisposed) {
-      return;
-    }
-    clearSignalData(this);
-    this._outputs.clear();
-    this._outputs = null;
-  }
-
+class ObservableOutputs extends ObservableList<IOutput> {
   /**
    * Add an output, which may be combined with previous output
    * (e.g. for streams).
@@ -182,7 +32,7 @@ class OutputAreaModel implements IOutputAreaModel {
     }
 
     // Consolidate outputs if they are stream outputs of the same kind.
-    let lastOutput = this.outputs.get(-1) as IStream;
+    let lastOutput = this.get(-1) as IStream;
     if (isStream(output)
         && lastOutput && isStream(lastOutput)
         && output.name === lastOutput.name) {
@@ -191,14 +41,16 @@ class OutputAreaModel implements IOutputAreaModel {
       // This also replaces the metadata of the last item.
       let text: string = output.text;
       output.text = lastOutput.text as string + text;
-      this.outputs.set(-1, output);
+      this.set(-1, output);
     } else {
       switch (output.output_type) {
       case 'stream':
       case 'execute_result':
       case 'display_data':
       case 'error':
-        this.outputs.add(output);
+        super.add(output);
+        break;
+      default:
         break;
       }
     }
@@ -213,25 +65,38 @@ class OutputAreaModel implements IOutputAreaModel {
     if (wait) {
       this._clearNext = true;
     } else {
-      this.outputs.clear();
+      super.clear();
     }
   }
 
-  private _outputs: ObservableList<IOutput> = null;
   private _clearNext = false;
-  private _trusted = false;
-  private _fixedHeight = false;
-  private _collapsed = false;
 }
 
 
 /**
- * A private namespace for output area model data.
+ * Execute code on a kernel and send outputs to an observable output.
  */
-namespace Private {
-  /**
-   * A signal emitted when the state of the model changes.
-   */
-  export
-  const stateChangedSignal = new Signal<OutputAreaModel, IChangedArgs<any>>();
+export
+function executeCode(code: string, kernel: IKernel, output: ObservableOutputs): Promise<IExecuteReply> {
+  let exRequest = {
+    code,
+    silent: false,
+    store_history: true,
+    stop_on_error: true,
+    allow_stdin: true
+  };
+  outputs.clear(false);
+  return new Promise<IExecuteReply>((resolve, reject) => {
+    let future = kernel.execute(exRequest);
+    future.onIOPub = (msg => {
+      let model = msg.content;
+      if (model !== void 0) {
+        model.output_type = msg.header.msg_type as OutputType;
+        output.add(model);
+      }
+    });
+    future.onReply = (msg => {
+      resolve(msg.content as IExecuteReply);
+    });
+  });
 }
