@@ -15,23 +15,19 @@ import {
 } from 'phosphor-panel';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  InputAreaWidget, IInputAreaModel
-} from '../input-area';
+  IEditorWidget, IEditorModel, EditorWidget
+} from '../editor';
 
 import {
   MimeBundle
 } from '../notebook/nbformat';
 
 import {
-  OutputAreaWidget, IOutputAreaModel
+  OutputAreaWidget, ObservableOutputs
 } from '../output-area';
 
 import {
@@ -39,7 +35,7 @@ import {
 } from 'sanitizer';
 
 import {
-  ICodeCellModel, IMarkdownCellModel, ICellModel, IRawCellModel
+  ICodeCellModel, ICellModel
 } from './model';
 
 
@@ -85,10 +81,10 @@ const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 export
 class BaseCellWidget extends Widget {
   /**
-   * Create a new input widget.
+   * Create a new editor widget.
    */
-  static createInput(model: IInputAreaModel): InputAreaWidget {
-    return new InputAreaWidget(model);
+  static createEditor(model: IEditorModel): IEditorWidget {
+    return new EditorWidget(model);
   }
 
   /**
@@ -99,7 +95,9 @@ class BaseCellWidget extends Widget {
     this.addClass(CELL_CLASS);
     this._model = model;
     let constructor = this.constructor as typeof BaseCellWidget;
-    this._input = constructor.createInput(model.input);
+    this._editor = constructor.createEditor(model.editor);
+    // TODO: Create the input area.
+    this._input = new Widget();
     this.layout = new PanelLayout();
     (this.layout as PanelLayout).addChild(this._input);
   }
@@ -115,13 +113,13 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Get the input widget used by the widget.
+   * Get the editor widget used by the widget.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get input(): InputAreaWidget {
-    return this._input;
+  get editor(): IEditorWidget {
+    return this._editor;
   }
 
   /**
@@ -132,12 +130,12 @@ class BaseCellWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._model.dispose();
     this._model = null;
     super.dispose();
   }
 
-  private _input: InputAreaWidget = null;
+  private _input: Widget = null;
+  private _editor: IEditorWidget = null;
   private _model: ICellModel = null;
 }
 
@@ -151,8 +149,8 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Create an output area widget.
    */
-  static createOutput(model: IOutputAreaModel, rendermime: RenderMime<Widget>): OutputAreaWidget {
-    return new OutputAreaWidget(model, rendermime);
+  static createOutput(outputs: ObservableOutputs, rendermime: RenderMime<Widget>): OutputAreaWidget {
+    return new OutputAreaWidget(outputs, rendermime);
   }
 
   /**
@@ -163,7 +161,7 @@ class CodeCellWidget extends BaseCellWidget {
     this._rendermime = rendermime;
     this.addClass(CODE_CELL_CLASS);
     let constructor = this.constructor as typeof CodeCellWidget;
-    this._output = constructor.createOutput(model.output, rendermime);
+    this._output = constructor.createOutput(model.outputs, rendermime);
     (this.layout as PanelLayout).addChild(this._output);
   }
 
@@ -201,7 +199,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     this._rendermime = rendermime;
     this.addClass(MARKDOWN_CELL_CLASS);
     // Insist on the Github-flavored markdown mode.
-    model.input.textEditor.mimetype = 'text/x-ipythongfm';
+    model.mimetype = 'text/x-ipythongfm';
     this._rendered = new Widget();
     this._rendered.addClass(RENDERER_CLASS);
     (this.layout as PanelLayout).addChild(this._rendered);
@@ -251,18 +249,6 @@ class MarkdownCellWidget extends BaseCellWidget {
     }
     this._dirty = false;
     super.onUpdateRequest(message);
-  }
-
-  /**
-   * Change handler for model updates.
-   */
-  protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
-    switch (args.name) {
-    case 'rendered':
-      this._dirty = true;
-      this.update();
-      break;
-    }
   }
 
   private _rendermime: RenderMime<Widget> = null;

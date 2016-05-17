@@ -35,7 +35,7 @@ import {
 } from '../notebook/nbformat';
 
 import {
-  IOutputAreaModel
+  ObservableOutputs
 } from './model';
 
 
@@ -80,7 +80,7 @@ const ERROR_CLASS = 'jp-Output-error';
 const FIXED_HEIGHT_CLASS = 'jp-mod-fixedHeight';
 
 /**
- The class name added to collaped output areas.
+ * The class name added to collaped output areas.
  */
 const COLLAPSED_CLASS = 'jp-mod-collapsed';
 
@@ -115,29 +115,69 @@ class OutputAreaWidget extends Widget {
   /**
    * Construct an output area widget.
    */
-  constructor(model: IOutputAreaModel, rendermime: RenderMime<Widget>) {
+  constructor(outputs: ObservableOutputs, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(OUTPUT_AREA_CLASS);
-    this._model = model;
     this._rendermime = rendermime;
     this.layout = new PanelLayout();
-    model.stateChanged.connect(this.modelStateChanged, this);
-    let outputs = model.outputs;
     for (let i = 0; i < outputs.length; i++) {
       let widget = this.createOutput(outputs.get(i));
       (this.layout as PanelLayout).addChild(widget);
     }
-    model.outputs.changed.connect(this.outputsChanged, this);
+    outputs.changed.connect(this.outputsChanged, this);
+    this._outputs = outputs;
   }
 
   /**
-   * Get the model used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * The trusted state of the widget.
    */
-  get model(): IOutputAreaModel {
-    return this._model;
+  get trusted(): boolean {
+    return this._trusted;
+  }
+  set trusted(value: boolean) {
+    if (this._trusted === value) {
+      return;
+    }
+    this._trusted = value;
+    // Re-render only if necessary.
+    if ((this._sanitized && value) || (!value)) {
+      let layout = this.layout as PanelLayout;
+      for (let i = 0; i < layout.childCount(); i++) {
+        layout.childAt(0).dispose();
+      }
+      let outputs = this._outputs;
+      for (let i = 0; i < outputs.length; i++) {
+        layout.addChild(this.createOutput(outputs.get(i)));
+      }
+    }
+  }
+
+  /**
+   * The collapsed state of the widget.
+   */
+  get collapsed(): boolean {
+    return this._collapsed;
+  }
+  set collapsed(value: boolean) {
+    if (this._collapsed === value) {
+      return;
+    }
+    this._collapsed = value;
+    this.update();
+  }
+
+  /**
+   * The fixed height state of the widget.
+   */
+  get fixedHeight(): boolean {
+    return this._fixedHeight;
+  }
+  set fixedHeight(value: boolean) {
+    if (this._fixedHeight === value) {
+      return;
+    }
+    this._fixedHeight = value;
+    this.update();
   }
 
   /**
@@ -148,8 +188,8 @@ class OutputAreaWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._model.dispose();
-    this._model = null;
+    this._outputs = null;
+    this._rendermime = null;
     super.dispose();
   }
 
@@ -195,7 +235,7 @@ class OutputAreaWidget extends Widget {
     }
 
     // Sanitize outputs as needed.
-    if (!this.model.trusted) {
+    if (!this.trusted) {
       let keys = Object.keys(bundle);
       for (let key of keys) {
         if (safeOutputs.indexOf(key) !== -1) {
@@ -267,6 +307,8 @@ class OutputAreaWidget extends Widget {
       widget = this.createOutput(args.newValue as IOutput);
       layout.insertChild(args.newIndex, widget);
       break;
+    default:
+      break;
     }
   }
 
@@ -275,45 +317,22 @@ class OutputAreaWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
-    if (this.model.collapsed) {
+    if (this.collapsed) {
       this.addClass(COLLAPSED_CLASS);
     } else {
       this.removeClass(COLLAPSED_CLASS);
     }
-    if (this.model.fixedHeight) {
+    if (this.fixedHeight) {
       this.addClass(FIXED_HEIGHT_CLASS);
     } else {
       this.removeClass(FIXED_HEIGHT_CLASS);
     }
   }
 
-  /**
-   * Change handler for model state changes.
-   */
-  protected modelStateChanged(sender: IOutputAreaModel, args: IChangedArgs<any>) {
-    switch (args.name) {
-    case 'collapsed':
-      this.update();
-      break;
-    case 'fixedHeight':
-      this.update();
-      break;
-    case 'trusted':
-      // Re-render only if necessary.
-      if ((this._sanitized && args.newValue) || (!args.newValue)) {
-        let layout = this.layout as PanelLayout;
-        for (let i = 0; i < layout.childCount(); i++) {
-          layout.removeChild(layout.childAt(0));
-        }
-        let outputs = this.model.outputs;
-        for (let i = 0; i < outputs.length; i++) {
-          layout.insertChild(0, this.createOutput(outputs.get(i)));
-        }
-      }
-    }
-  }
-
   private _sanitized = false;
-  private _model: IOutputAreaModel = null;
+  private _trusted = false;
+  private _fixedHeight = false;
+  private _collapsed = false;
+  private _outputs: ObservableOutputs = null;
   private _rendermime: RenderMime<Widget> = null;
 }
