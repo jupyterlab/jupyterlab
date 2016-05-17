@@ -20,7 +20,7 @@ import {
 const TOOLTIP_CLASS = 'jp-ConsoleTooltip';
 
 /**
- * The class name added to tooltip contens.
+ * The class name added to tooltip contents.
  */
 const CONTENT_CLASS = 'jp-ConsoleTooltip-content';
 
