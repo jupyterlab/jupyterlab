@@ -175,7 +175,8 @@ class NotebookModel implements INotebookModel {
    * This is a read-only property.
    */
   get defaultKernelName(): string {
-    return JSON.parse(this._metadata['kernelspec']).name;
+    let spec = JSON.parse(this._metadata['kernelspec']);
+    return spec ? spec.name : '';
   }
 
   /**
@@ -185,7 +186,8 @@ class NotebookModel implements INotebookModel {
    * This is a read-only property.
    */
   get defaultKernelLanguage(): string {
-    return JSON.parse(this._metadata['language_info']).name;
+    let info = JSON.parse(this._metadata['language_info']);
+    return info ? info.name : '';
   }
 
   /**
@@ -371,7 +373,7 @@ class NotebookModel implements INotebookModel {
   }
 
   private _cells: IObservableList<ICellModel> = null;
-  private _metadata: { [key: string]: string } = Private.createMetadata();
+  private _metadata: { [key: string]: string } = Object.create(null);
   private _dirty = false;
   private _readOnly = false;
   private _cursors: MetadataCursor[] = [];
@@ -395,16 +397,4 @@ namespace Private {
    */
   export
   const dirtyChangedSignal = new Signal<INotebookModel, boolean>();
-
-  /**
-   * Create an empty notebook metadata.
-   */
-  export
-  function createMetadata(): { [key: string]: string } {
-    return {
-      kernelspec: '{"name":"unknown","display_name":"unknown"}',
-      language_info: '{"name":"unknown"}',
-      orig_nbformat: String(MAJOR_VERSION)
-    };
-  }
 }

@@ -32,7 +32,8 @@ class ObservableOutputs extends ObservableList<IOutput> {
     }
 
     // Consolidate outputs if they are stream outputs of the same kind.
-    let lastOutput = this.get(-1) as IStream;
+    let index = this.length - 1;
+    let lastOutput = this.get(indexx) as IStream;
     if (isStream(output)
         && lastOutput && isStream(lastOutput)
         && output.name === lastOutput.name) {
@@ -41,20 +42,20 @@ class ObservableOutputs extends ObservableList<IOutput> {
       // This also replaces the metadata of the last item.
       let text: string = output.text;
       output.text = lastOutput.text as string + text;
-      this.set(-1, output);
+      this.set(index, output);
+      return index;
     } else {
       switch (output.output_type) {
       case 'stream':
       case 'execute_result':
       case 'display_data':
       case 'error':
-        super.add(output);
-        break;
+        return super.add(output);
       default:
         break;
       }
     }
-    return this.length - 1;
+    return -1;
   }
 
   /**
@@ -86,7 +87,7 @@ function executeCode(code: string, kernel: IKernel, outputs: ObservableOutputs):
     stop_on_error: true,
     allow_stdin: true
   };
-  outputs.clear(false);
+  outputs.clear();
   return new Promise<IExecuteReply>((resolve, reject) => {
     let future = kernel.execute(exRequest);
     future.onIOPub = (msg => {
