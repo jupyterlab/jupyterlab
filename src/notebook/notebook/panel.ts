@@ -47,7 +47,7 @@ const NB_CONTAINER = 'jp-Notebook-container';
 
 
 /**
- * A widget that hosts a toolbar and a notebook content area.
+ * A widget that hosts a notebook toolbar and content area.
  *
  * #### Notes
  * The widget keeps the document metadata in sync with the current
@@ -64,13 +64,16 @@ class NotebookPanel extends Widget {
 
   /**
    * Create a new toolbar for the notebook.
-   *
-   * #### Notes
-   * The default implementation provides a set of toolbar items.
    */
   static createToolbar(): NotebookToolbar {
-    // TODO: fill this in with the default content.
     return new NotebookToolbar();
+  }
+
+  /**
+   * Populate the toolbar with the default items.
+   */
+  static populateToolbar(toolbar: NotebookToolbar): void {
+    Private.populateToolbar(toolbar);
   }
 
   /**
@@ -86,6 +89,7 @@ class NotebookPanel extends Widget {
 
     let ctor = this.constructor as typeof NotebookPanel;
     let toolbar = ctor.createToolbar();
+    ctor.populateToolbar(toolbar);
     this._content = ctor.createContent(model, rendermime);
 
     let container = new Panel();
@@ -171,7 +175,7 @@ class NotebookPanel extends Widget {
   protected handleKernelChange(kernel: IKernel): void {
     kernel.kernelInfo().then(info => {
       let infoCursor = this.model.getMetadata('language_info');
-      infoCursor.setValue(info);
+      infoCursor.setValue(info.language_info);
       infoCursor.dispose();
     });
     kernel.getKernelSpec().then(spec => {
@@ -189,4 +193,18 @@ class NotebookPanel extends Widget {
   private _context: IDocumentContext = null;
   private _model: INotebookModel = null;
   private _content: ActiveNotebook = null;
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Populate the default items in the toolbar.
+   */
+  export
+  function populateToolbar(toolbar: NotebookToolbar): void {
+    // TODO
+  }
 }
