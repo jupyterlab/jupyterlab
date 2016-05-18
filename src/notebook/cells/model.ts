@@ -225,7 +225,7 @@ class CellModel implements ICellModel {
  */
 export
 class RawCellModel extends CellModel {
-  type: CellType = 'code';
+  type: CellType = 'raw';
 }
 
 

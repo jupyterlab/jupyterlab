@@ -61,8 +61,7 @@ interface INotebookModel extends IDocumentModel {
    * Get a metadata cursor for the notebook.
    *
    * #### Notes
-   * Metadata associated with the nbformat spec are set directly
-   * on the model.  This method is used to interact with a namespaced
+   * This method is used to interact with a namespaced
    * set of metadata on the notebook.
    */
   getMetadata(namespace: string): IMetadataCursor;
