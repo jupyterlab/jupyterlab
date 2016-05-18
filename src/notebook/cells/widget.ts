@@ -303,6 +303,8 @@ class CodeCellWidget extends BaseCellWidget {
     (this.layout as PanelLayout).addChild(this._output);
     this._collapsedCursor = model.getMetadata('collapsed');
     this._scrolledCursor = model.getMetadata('scrolled');
+    let value = model.executionCount;
+    this.setPrompt(`In [${value || ' '}]:`);
   }
 
   /**
@@ -334,11 +336,15 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the model.
    */
-  protected onModelChanged(model: ICellModel, change: string): void {
+  protected onModelChanged(model: ICodeCellModel, change: string): void {
     switch (change) {
     case 'metadata.collapsed':
     case 'metadata.scrolled':
       this.update();
+      break;
+    case 'executionCount':
+      let value = model.executionCount;
+      this.setPrompt(`In [${value || ' '}]:`);
       break;
     default:
       break;
