@@ -3,8 +3,8 @@
 'use strict';
 
 import {
-  IDisposable, DisposableDelegate
-} from 'phosphor-disposable';
+  Property
+} from 'phosphor-property';
 
 import {
   PanelLayout
@@ -31,7 +31,7 @@ const TOOLBAR_ITEM = 'jp-NBToolbar-item';
 export
 class NotebookToolbar extends Widget {
   /**
-   * Construct a new toolbar widget
+   * Construct a new toolbar widget.
    */
   constructor() {
     super();
@@ -48,33 +48,23 @@ class NotebookToolbar extends Widget {
    *
    * @param after - The optional name of the item to insert after.
    *
-   * @returns A disposable which can be used to remove the item from
-   *   the toolbar.
-   *
    * #### Notes
    * An error is thrown if a widget of the same name is already given.
    * If not `after` is given, or the named widget is not in the toolbar,
    * the widget will be added to the end of the toolbar.
    */
-  add(widget: Widget, name: string, after?: string): IDisposable {
+  add(widget: Widget, name: string, after?: string): void {
     if (this._names.indexOf(name) !== -1) {
       throw new Error(`A button named "${name}" was already added`);
     }
     widget.addClass(TOOLBAR_ITEM);
     let layout = this.layout as PanelLayout;
-    let index = this._names.indexOf(after);
+    let index = this.list().indexOf(after);
     if (index === -1) {
-      this._names.push(name);
       layout.addChild(widget);
     } else {
-      this._names.splice(index, 0, name);
       layout.insertChild(index, widget);
     }
-    return new DisposableDelegate(() => {
-      index = this._names.indexOf(name);
-      this._names.splice(index, 1);
-      layout.removeChild(widget);
-    });
   }
 
   /**
@@ -83,8 +73,26 @@ class NotebookToolbar extends Widget {
    * @returns A new array of the current toolbar items.
    */
   list(): string[] {
-    return this._names.slice();
+    let names: string[] = [];
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount(); i++) {
+      let widget = layout.childAt(i);
+      names.push(Private.nameProperty.get(widget));
+    }
+    return names;
   }
+}
 
-  private _names: string[] = [];
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * An attached property for the name of a toolbar item.
+   */
+  export
+  const nameProperty = new Property<Widget, string>({
+    name: 'name',
+  });
 }
