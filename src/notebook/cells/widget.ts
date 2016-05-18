@@ -123,6 +123,7 @@ class BaseCellWidget extends Widget {
     this._initializeEditor();
     model.contentChanged.connect(this.onModelChanged, this);
     this._trustedCursor = model.getMetadata('trusted');
+    this._trusted = this._trustedCursor.getValue();
   }
 
   /**
@@ -177,7 +178,7 @@ class BaseCellWidget extends Widget {
    * The trusted state of the cell.
    */
   get trusted(): boolean {
-    return this._trustedCursor.getValue();
+    return this._trusted;
   }
   set trusted(value: boolean) {
     this._trustedCursor.setValue(value);
@@ -245,6 +246,7 @@ class BaseCellWidget extends Widget {
       break;
     case 'metadata':
     case 'metadata.trusted':
+      this._trusted = this._trustedCursor.getValue();
       this.update();
       break;
     default:
@@ -271,6 +273,7 @@ class BaseCellWidget extends Widget {
   private _mimetype = 'text/plain';
   private _readOnly = false;
   private _trustedCursor: IMetadataCursor = null;
+  private _trusted = false;
 }
 
 
@@ -452,7 +455,7 @@ class RawCellWidget extends BaseCellWidget {
 
 
 /**
- * An input area widget, which hosts an editor widget.
+ * An input area widget, which hosts a prompt and an editor widget.
  */
 class InputAreaWidget extends Widget {
   /**
