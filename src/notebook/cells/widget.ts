@@ -3,6 +3,14 @@
 'use strict';
 
 import {
+  loadModeByMIME
+} from 'jupyter-js-ui/lib/codemirror';
+
+import {
+  CodeMirrorWidget
+} from 'jupyter-js-ui/lib/codemirror/widget';
+
+import {
   RenderMime
 } from 'jupyter-js-ui/lib/rendermime';
 
@@ -17,10 +25,6 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
-
-import {
-  IEditorWidget, IEditorModel, EditorWidget
-} from '../editor';
 
 import {
   MimeBundle
@@ -43,6 +47,31 @@ import {
  * The class name added to cell widgets.
  */
 const CELL_CLASS = 'jp-Cell';
+
+/**
+ * The class name added to input area widgets.
+ */
+const INPUT_CLASS = 'jp-InputArea';
+
+/**
+ * The class name added to the prompt area of cell.
+ */
+const PROMPT_CLASS = 'jp-InputArea-prompt';
+
+/**
+ * The class name added to the editor area of the cell.
+ */
+const EDITOR_CLASS = 'jp-InputArea-editor';
+
+/**
+ * The class name added to the cell when collapsed.
+ */
+const COLLAPSED_CLASS = 'jp-mod-collapsed';
+
+/**
+ * The class name added to the cell when readonly.
+ */
+const READONLY_CLASS = 'jp-mod-readOnly';
 
 /**
  * The class name added to code cells.
@@ -81,25 +110,18 @@ const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 export
 class BaseCellWidget extends Widget {
   /**
-   * Create a new editor widget.
-   */
-  static createEditor(model: IEditorModel): IEditorWidget {
-    return new EditorWidget(model);
-  }
-
-  /**
    * Construct a new base cell widget.
    */
   constructor(model: ICellModel) {
     super();
     this.addClass(CELL_CLASS);
     this._model = model;
-    let constructor = this.constructor as typeof BaseCellWidget;
-    this._editor = constructor.createEditor(model.editor);
-    // TODO: Create the input area.
-    this._input = new Widget();
+    this._editor = new CodeMirrorWidget();
+    this._input = new InputAreaWidget(this._editor);
     this.layout = new PanelLayout();
     (this.layout as PanelLayout).addChild(this._input);
+    this._initializeEditor();
+    model.contentChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -113,13 +135,59 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Get the editor widget used by the widget.
+   * Get the editor used by the widget.
    *
    * #### Notes
-   * This is a read-only property.
+   * This is a ready-only property.
    */
-  get editor(): IEditorWidget {
-    return this._editor;
+   get editor(): CodeMirror.Editor {
+     return this._editor.editor;
+   }
+
+  /**
+   * The mimetype used by the cell.
+   */
+  get mimetype(): string {
+    return this._mimetype;
+  }
+  set mimetype(value: string) {
+    if (this._mimetype === value) {
+      return;
+    }
+    this._mimetype = value;
+    loadModeByMIME(this.editor, value);
+  }
+
+  /**
+   * The read only state of the cell.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
+  }
+  set readOnly(value: boolean) {
+    if (value === this._readOnly) {
+      return;
+    }
+    let option = value ? 'nocursor' : false;
+    this.editor.setOption('readOnly', option);
+  }
+  /**
+   * Set the prompt for the widget.
+   */
+  setPrompt(value: string): void {
+    this._input.setPrompt(value);
+  }
+
+  /**
+   * Toggle whether the input is shown.
+   */
+  toggleInput(value: boolean): void {
+    if (value) {
+      this._input.show();
+      this.editor.focus();
+    } else {
+      this._input.hide();
+    }
   }
 
   /**
@@ -131,12 +199,42 @@ class BaseCellWidget extends Widget {
       return;
     }
     this._model = null;
+    this._input = null;
+    this._editor = null;
     super.dispose();
   }
 
-  private _input: Widget = null;
-  private _editor: IEditorWidget = null;
+  /**
+   * Handle changes in the model.
+   */
+  protected onModelChanged(model: ICellModel, change: string): void {
+    switch (change) {
+    case 'source':
+      this.editor.getDoc().setValue(model.source);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Initialize the codemirror editor.
+   */
+  private _initializeEditor(): void {
+    let doc = this.editor.getDoc();
+    CodeMirror.on(doc, 'change', (instance, change) => {
+      if (change.origin === 'setValue') {
+        return;
+      }
+      this._model.source = instance.getValue();
+    });
+  }
+
+  private _input: InputAreaWidget = null;
+  private _editor: CodeMirrorWidget = null;
   private _model: ICellModel = null;
+  private _mimetype = 'text/plain';
+  private _readOnly = false;
 }
 
 
@@ -194,26 +292,30 @@ class MarkdownCellWidget extends BaseCellWidget {
   /**
    * Construct a Markdown cell widget.
    */
-  constructor(model: IMarkdownCellModel, rendermime: RenderMime<Widget>) {
+  constructor(model: ICellModel, rendermime: RenderMime<Widget>) {
     super(model);
     this._rendermime = rendermime;
     this.addClass(MARKDOWN_CELL_CLASS);
     // Insist on the Github-flavored markdown mode.
-    model.mimetype = 'text/x-ipythongfm';
-    this._rendered = new Widget();
-    this._rendered.addClass(RENDERER_CLASS);
-    (this.layout as PanelLayout).addChild(this._rendered);
-    this.model.stateChanged.connect(this.onModelChanged, this);
+    this.mimetype = 'text/x-ipythongfm';
+    this._renderer = new Widget();
+    this._renderer.addClass(RENDERER_CLASS);
+    (this.layout as PanelLayout).addChild(this._renderer);
+    this.model.contentChanged.connect(this.onModelChanged, this);
   }
 
   /**
-   * Get the rendering widget used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * Whether the cell is rendered.
    */
-  get rendered(): Widget {
+  get rendered(): boolean {
     return this._rendered;
+  }
+  set rendered(value: boolean) {
+    if (value === this._rendered) {
+      return;
+    }
+    this._rendered = value;
+    this.update();
   }
 
   /**
@@ -227,24 +329,23 @@ class MarkdownCellWidget extends BaseCellWidget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(message: Message): void {
-    let model = this.model as IMarkdownCellModel;
-    if (model.rendered) {
+    let model = this.model;
+    if (this.rendered) {
       if (this._dirty) {
-        let text = model.input.textEditor.text || DEFAULT_MARKDOWN_TEXT;
+        let text = model.source || DEFAULT_MARKDOWN_TEXT;
         text = sanitize(text);
         let bundle: MimeBundle = { 'text/markdown': text };
-        this._rendered.dispose();
-        this._rendered = this._rendermime.render(bundle) || new Widget();
-        this._rendered.addClass(RENDERER_CLASS);
-        (this.layout as PanelLayout).addChild(this._rendered);
+        this._renderer.dispose();
+        this._renderer = this._rendermime.render(bundle) || new Widget();
+        this._renderer.addClass(RENDERER_CLASS);
+        (this.layout as PanelLayout).addChild(this._renderer);
       }
-      this._rendered.show();
-      this.input.hide();
+      this._renderer.show();
+      this.toggleInput(false);
       this.addClass(RENDERED_CLASS);
     } else {
-      this._rendered.hide();
-      this.input.show();
-      this.input.editor.focus();
+      this._renderer.hide();
+      this.toggleInput(true);
       this.removeClass(RENDERED_CLASS);
     }
     this._dirty = false;
@@ -252,7 +353,8 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   private _rendermime: RenderMime<Widget> = null;
-  private _rendered: Widget = null;
+  private _renderer: Widget = null;
+  private _rendered = true;
   private _dirty = true;
 }
 
@@ -265,8 +367,37 @@ class RawCellWidget extends BaseCellWidget {
   /**
    * Construct a raw cell widget.
    */
-  constructor(model: IRawCellModel) {
+  constructor(model: ICellModel) {
     super(model);
     this.addClass(RAW_CELL_CLASS);
+  }
+}
+
+
+/**
+ * An input area widget, which hosts an editor widget.
+ */
+class InputAreaWidget extends Widget {
+  /**
+   * Construct an input area widget.
+   */
+  constructor(editor: CodeMirrorWidget) {
+    super();
+    this.addClass(INPUT_CLASS);
+    editor.addClass(EDITOR_CLASS);
+    this.layout = new PanelLayout();
+    let prompt = new Widget();
+    prompt.addClass(PROMPT_CLASS);
+    let layout = this.layout as PanelLayout;
+    layout.addChild(prompt);
+    layout.addChild(editor);
+  }
+
+  /**
+   * Set the prompt of the input area.
+   */
+  setPrompt(value: string): void {
+    let prompt = (this.layout as PanelLayout).childAt(0);
+    prompt.node.textContent = value;
   }
 }
