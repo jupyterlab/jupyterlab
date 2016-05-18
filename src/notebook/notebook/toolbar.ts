@@ -4,7 +4,7 @@
 
 import {
   Property
-} from 'phosphor-property';
+} from 'phosphor-properties';
 
 import {
   PanelLayout
@@ -54,12 +54,13 @@ class NotebookToolbar extends Widget {
    * the widget will be added to the end of the toolbar.
    */
   add(widget: Widget, name: string, after?: string): void {
-    if (this._names.indexOf(name) !== -1) {
+    let names = this.list();
+    if (names.indexOf(name) !== -1) {
       throw new Error(`A button named "${name}" was already added`);
     }
     widget.addClass(TOOLBAR_ITEM);
     let layout = this.layout as PanelLayout;
-    let index = this.list().indexOf(after);
+    let index = names.indexOf(after);
     if (index === -1) {
       layout.addChild(widget);
     } else {
@@ -70,7 +71,7 @@ class NotebookToolbar extends Widget {
   /**
    * List the names of the toolbar items.
    *
-   * @returns A new array of the current toolbar items.
+   * @returns A new array of the current toolbar item names.
    */
   list(): string[] {
     let names: string[] = [];
