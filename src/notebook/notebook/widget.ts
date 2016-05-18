@@ -158,6 +158,14 @@ class NotebookRenderer extends Widget {
   }
 
   /**
+   * Get the child widget at the specified index.
+   */
+  childAt(index: number): BaseCellWidget {
+    let layout = this.layout as PanelLayout;
+    return layout.childAt(index) as BaseCellWidget;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {

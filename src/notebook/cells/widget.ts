@@ -192,6 +192,15 @@ class BaseCellWidget extends Widget {
   }
 
   /**
+   * Get the current cursor position of the editor.
+   */
+  getCursorPosition(): number {
+    let doc = this.editor.getDoc();
+    let position = doc.getCursor();
+    return doc.indexFromPos(position);
+  }
+
+  /**
    * Set the prompt for the widget.
    */
   setPrompt(value: string): void {

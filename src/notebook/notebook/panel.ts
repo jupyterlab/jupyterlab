@@ -70,10 +70,10 @@ class NotebookPanel extends Widget {
   }
 
   /**
-   * Populate the toolbar with the default items.
+   * Populate the toolbar on a panel with the default items.
    */
-  static populateToolbar(toolbar: NotebookToolbar): void {
-    Private.populateToolbar(toolbar);
+  static populateToolbar(panel: NotebookPanel): void {
+    Private.populateToolbar(panel);
   }
 
   /**
@@ -89,7 +89,7 @@ class NotebookPanel extends Widget {
 
     let ctor = this.constructor as typeof NotebookPanel;
     let toolbar = ctor.createToolbar();
-    ctor.populateToolbar(toolbar);
+    ctor.populateToolbar(this);
     this._content = ctor.createContent(model, rendermime);
 
     let container = new Panel();
@@ -204,7 +204,7 @@ namespace Private {
    * Populate the default items in the toolbar.
    */
   export
-  function populateToolbar(toolbar: NotebookToolbar): void {
+  function populateToolbar(panel: NotebookPanel): void {
     // TODO
   }
 }
