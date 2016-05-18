@@ -2,6 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
+import * as CodeMirror
+  from 'codemirror';
+
+import 'codemirror/mode/meta';
+
 import {
   RenderMime
 } from 'jupyter-js-ui/lib/rendermime';
@@ -29,12 +34,16 @@ import {
 import {
   ICellModel, BaseCellWidget, MarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
-  CodeCellModel, RawCellWidget
+  CodeCellModel, RawCellWidget, IMetadataCursor
 } from '../cells';
 
 import {
   INotebookModel
 } from './model';
+
+import {
+  ILanguageInfoMetadata
+} from './nbformat';
 
 
 /**
@@ -110,14 +119,22 @@ class NotebookRenderer extends Widget {
     this._model = model;
     this._rendermime = rendermime;
     this.layout = new PanelLayout();
-    let constructor = this.constructor as typeof NotebookRenderer;
-    let cellsLayout = this.layout as PanelLayout;
-    let factory = constructor.createCell;
-    for (let i = 0; i < model.cells.length; i++) {
-      cellsLayout.addChild(factory(model.cells.get(i), rendermime));
-    }
     model.cells.changed.connect(this.onCellsChanged, this);
     model.contentChanged.connect(this.onModelChanged, this);
+    this._langInfoCursor = model.getMetadata('language_info');
+    this.setMimetype();
+    // Add the current cells.
+    if (model.cells.length === 0) {
+      return;
+    }
+    let layout = this.layout as PanelLayout;
+    let constructor = this.constructor as typeof NotebookRenderer;
+    let factory = constructor.createCell;
+    for (let i = 0; i < model.cells.length; i++) {
+      let widget = factory(model.cells.get(i), rendermime);
+      this._initializeCellWidget(widget);
+      layout.addChild(widget);
+    }
   }
 
   /**
@@ -141,26 +158,6 @@ class NotebookRenderer extends Widget {
   }
 
   /**
-   * The mime type for code cells.
-   */
-  get mimetype(): string {
-    return this._mimetype;
-  }
-  set mimetype(value: string) {
-    if (value === this._mimetype) {
-      return;
-    }
-    this._mimetype = value;
-    let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.childCount(); i++) {
-      let widget = layout.childAt(i) as CodeCellWidget;
-      if (widget.model.type === 'code') {
-        widget.mimetype = value;
-      }
-    }
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -168,6 +165,8 @@ class NotebookRenderer extends Widget {
     if (this.isDisposed) {
       return;
     }
+    this._langInfoCursor.dispose();
+    this._langInfoCursor = null;
     this._model.dispose();
     this._model = null;
     super.dispose();
@@ -201,7 +200,14 @@ class NotebookRenderer extends Widget {
    * Handle changes to the notebook model.
    */
   protected onModelChanged(model: INotebookModel, change: string): void {
-    // TODO
+    switch (change) {
+    case 'metadata':
+    case 'metadata.language_info':
+      this.setMimetype();
+      break;
+    default:
+      break;
+    }
   }
 
   /**
@@ -255,18 +261,35 @@ class NotebookRenderer extends Widget {
   }
 
   /**
+   * The mime type for code cells.
+   */
+  protected setMimetype(): void {
+    let info = this._langInfoCursor.getValue() as ILanguageInfoMetadata;
+    let value = Private.mimetypeForLangauge(info);
+    this._mimetype = value;
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount(); i++) {
+      let widget = layout.childAt(i) as CodeCellWidget;
+      if (widget.model.type === 'code') {
+        widget.mimetype = value;
+      }
+    }
+  }
+
+  /**
    * Initialize a cell widget.
    */
   private _initializeCellWidget(widget: BaseCellWidget): void {
     widget.addClass(NB_CELL_CLASS);
     if (widget.model.type === 'code') {
-      widget.mimetype = this.mimetype;
+      widget.mimetype = this._mimetype;
     }
   }
 
   private _model: INotebookModel = null;
   private _rendermime: RenderMime<Widget> = null;
   private _mimetype = 'text/plain';
+  private _langInfoCursor: IMetadataCursor = null;
 }
 
 
@@ -484,4 +507,38 @@ namespace Private {
     name: 'selected',
     value: false
   });
+
+  /**
+   * Get the appropriate mimetype for code cell given language info.
+   */
+  export
+  function mimetypeForLangauge(info: ILanguageInfoMetadata): string {
+    // Use the codemirror mode if given since some kernels rely on it.
+    let mode = info.codemirror_mode;
+    let mime = 'text/plain';
+    if (mode) {
+      if (typeof mode === 'string') {
+        if (CodeMirror.modes.hasOwnProperty(mode as string)) {
+          mode = CodeMirror.modes[mode as string];
+        } else {
+          mode = CodeMirror.findModeByName(mode as string);
+        }
+      } else if ((mode as CodeMirror.modespec).mime) {
+        // Do nothing.
+      } else if ((mode as CodeMirror.modespec).name) {
+        let name = (mode as CodeMirror.modespec).name;
+        if (CodeMirror.modes.hasOwnProperty(name)) {
+          mode = CodeMirror.modes[name];
+        } else {
+          mode = CodeMirror.findModeByName(mode as string);
+        }
+      }
+      if (mode) {
+        mime = (mode as CodeMirror.modespec).mime;
+      }
+    } else if (info.mimetype) {
+      mime = info.mimetype;
+    }
+    return mime;
+  }
 }
