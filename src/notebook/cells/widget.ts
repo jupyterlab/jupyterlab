@@ -39,7 +39,7 @@ import {
 } from 'sanitizer';
 
 import {
-  ICodeCellModel, ICellModel
+  ICodeCellModel, ICellModel, IMetadataCursor
 } from './model';
 
 
@@ -122,6 +122,7 @@ class BaseCellWidget extends Widget {
     (this.layout as PanelLayout).addChild(this._input);
     this._initializeEditor();
     model.contentChanged.connect(this.onModelChanged, this);
+    this._trustedCursor = model.getMetadata('trusted');
   }
 
   /**
@@ -168,9 +169,20 @@ class BaseCellWidget extends Widget {
     if (value === this._readOnly) {
       return;
     }
-    let option = value ? 'nocursor' : false;
-    this.editor.setOption('readOnly', option);
+    this._readOnly = value;
+    this.update();
   }
+
+  /**
+   * The trusted state of the cell.
+   */
+  get trusted(): boolean {
+    return this._trustedCursor.getValue();
+  }
+  set trusted(value: boolean) {
+    this._trustedCursor.setValue(value);
+  }
+
   /**
    * Set the prompt for the widget.
    */
@@ -179,7 +191,7 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Toggle whether the input is shown.
+   * Toggle whether the input area is shown.
    */
   toggleInput(value: boolean): void {
     if (value) {
@@ -201,7 +213,26 @@ class BaseCellWidget extends Widget {
     this._model = null;
     this._input = null;
     this._editor = null;
+    this._trustedCursor.dispose();
+    this._trustedCursor = null;
     super.dispose();
+  }
+
+  /**
+   * Handle `after-attach` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.update();
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(message: Message): void {
+    // Handle read only state.
+    let option = this._readOnly ? 'nocursor' : false;
+    this.editor.setOption('readOnly', option);
+    this.toggleClass(READONLY_CLASS, this._readOnly);
   }
 
   /**
@@ -211,6 +242,10 @@ class BaseCellWidget extends Widget {
     switch (change) {
     case 'source':
       this.editor.getDoc().setValue(model.source);
+      break;
+    case 'metadata':
+    case 'metadata.trusted':
+      this.update();
       break;
     default:
       break;
@@ -235,6 +270,7 @@ class BaseCellWidget extends Widget {
   private _model: ICellModel = null;
   private _mimetype = 'text/plain';
   private _readOnly = false;
+  private _trustedCursor: IMetadataCursor = null;
 }
 
 
@@ -260,21 +296,57 @@ class CodeCellWidget extends BaseCellWidget {
     this.addClass(CODE_CELL_CLASS);
     let constructor = this.constructor as typeof CodeCellWidget;
     this._output = constructor.createOutput(model.outputs, rendermime);
+    this._output.trusted = this.trusted;
     (this.layout as PanelLayout).addChild(this._output);
+    this._collapsedCursor = model.getMetadata('collapsed');
+    this._scrolledCursor = model.getMetadata('scrolled');
   }
 
   /**
-   * Get the output widget used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * Dispose of the resources used by the widget.
    */
-  get output(): OutputAreaWidget {
-    return this._output;
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._rendermime = null;
+    this._collapsedCursor.dispose();
+    this._collapsedCursor = null;
+    this._scrolledCursor.dispose();
+    this._scrolledCursor = null;
+    this._output = null;
+    super.dispose();
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(message: Message): void {
+    this.toggleClass(COLLAPSED_CLASS, this._collapsedCursor.getValue());
+    // TODO: handle scrolled state.
+    this._output.trusted = this.trusted;
+    super.onUpdateRequest(message);
+  }
+
+  /**
+   * Handle changes in the model.
+   */
+  protected onModelChanged(model: ICellModel, change: string): void {
+    switch (change) {
+    case 'metadata.collapsed':
+    case 'metadata.scrolled':
+      this.update();
+      break;
+    default:
+      break;
+    }
+    super.onModelChanged(model, change);
   }
 
   private _output: OutputAreaWidget = null;
   private _rendermime: RenderMime<Widget> = null;
+  private _collapsedCursor: IMetadataCursor = null;
+  private _scrolledCursor: IMetadataCursor = null;
 }
 
 
@@ -319,10 +391,15 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   /**
-   * Handle `after-attach` messages.
+   * Dispose of the resource held by the widget.
    */
-  protected onAfterAttach(msg: Message): void {
-    this.update();
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._renderer = null;
+    this._rendermime = null;
+    super.dispose();
   }
 
   /**

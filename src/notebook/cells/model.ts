@@ -67,7 +67,6 @@ interface ICellModel extends IDisposable {
 }
 
 
-
 /**
  * The definition of a code cell.
  */
