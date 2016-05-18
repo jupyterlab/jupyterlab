@@ -58,6 +58,22 @@ interface INotebookModel extends IDocumentModel {
   nbformatMinor: number;
 
   /**
+   * Whether the model can redo changes.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  canRedo: boolean;
+
+  /**
+   * Whether the model can undo changes.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  canUndo: boolean;
+
+  /**
    * Get a metadata cursor for the notebook.
    *
    * #### Notes
@@ -72,7 +88,27 @@ interface INotebookModel extends IDocumentModel {
    * #### Notes
    * Metadata associated with the nbformat are not included.
    */
-   listMetadata(): string[];
+  listMetadata(): string[];
+
+  /**
+   * Begin a compound operation.
+   */
+  beginCompoundOperation(isUndoAble?: boolean): void;
+
+  /**
+   * End a compound operation.
+   */
+  endCompoundOperation(): void;
+
+  /**
+   * Undo an operation.
+   */
+  undo(): void;
+
+  /**
+   * Redo an operation.
+   */
+  redo(): void;
 }
 
 
