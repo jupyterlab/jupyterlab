@@ -19,10 +19,6 @@ import {
 } from 'phosphor-panel';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
   Widget
 } from 'phosphor-widget';
 
