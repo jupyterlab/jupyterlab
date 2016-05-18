@@ -50,7 +50,7 @@ class NotebookToolbar extends Widget {
    *
    * #### Notes
    * An error is thrown if a widget of the same name is already given.
-   * If not `after` is given, or the named widget is not in the toolbar,
+   * If `after` is not given, or the named widget is not in the toolbar,
    * the widget will be added to the end of the toolbar.
    */
   add(widget: Widget, name: string, after?: string): void {
