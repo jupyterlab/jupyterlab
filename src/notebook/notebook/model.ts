@@ -311,9 +311,6 @@ class NotebookModel implements INotebookModel {
 
   /**
    * List the metadata namespace keys for the notebook.
-   *
-   * #### Notes
-   * Metadata associated with the nbformat are not included.
    */
   listMetadata(): string[] {
     return Object.keys(this._metadata);
