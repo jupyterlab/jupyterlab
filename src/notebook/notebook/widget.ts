@@ -88,21 +88,16 @@ class NotebookRenderer extends Widget {
    * Create a new cell widget given a cell model.
    */
   static createCell(cell: ICellModel, rendermime: RenderMime<Widget>): BaseCellWidget {
-    let widget: BaseCellWidget;
     switch (cell.type) {
     case 'code':
-      widget = new CodeCellWidget(cell as CodeCellModel, rendermime);
-      break;
+      return new CodeCellWidget(cell as CodeCellModel, rendermime);
     case 'markdown':
-      widget = new MarkdownCellWidget(cell, rendermime);
-      break;
+      return new MarkdownCellWidget(cell, rendermime);
     // If there are any issues, just return a raw
     // widget so the lists stay in sync.
     default:
-      widget = new RawCellWidget(cell);
-      break;
+      return new RawCellWidget(cell);
     }
-    return widget;
   }
 
   /**
@@ -146,13 +141,23 @@ class NotebookRenderer extends Widget {
   }
 
   /**
-   * The default mime type for code cells.
+   * The mime type for code cells.
    */
-  get defaultMimetype(): string {
-    return this._defaultMimetype;
+  get mimetype(): string {
+    return this._mimetype;
   }
-  set defaultMimetype(value: string) {
-    this._defaultMimetype = value;
+  set mimetype(value: string) {
+    if (value === this._mimetype) {
+      return;
+    }
+    this._mimetype = value;
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount(); i++) {
+      let widget = layout.childAt(i) as CodeCellWidget;
+      if (widget.model.type === 'code') {
+        widget.mimetype = value;
+      }
+    }
   }
 
   /**
@@ -255,13 +260,13 @@ class NotebookRenderer extends Widget {
   private _initializeCellWidget(widget: BaseCellWidget): void {
     widget.addClass(NB_CELL_CLASS);
     if (widget.model.type === 'code') {
-      widget.mimetype = this.defaultMimetype;
+      widget.mimetype = this.mimetype;
     }
   }
 
   private _model: INotebookModel = null;
   private _rendermime: RenderMime<Widget> = null;
-  private _defaultMimetype = 'text/plain';
+  private _mimetype = 'text/plain';
 }
 
 
@@ -465,6 +470,7 @@ class ActiveNotebook extends NotebookRenderer {
   private _mode: NotebookMode = 'command';
   private _activeCellIndex = -1;
 }
+
 
 /**
  * A namespace for private data.
