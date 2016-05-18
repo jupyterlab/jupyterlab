@@ -185,6 +185,13 @@ class BaseCellWidget extends Widget {
   }
 
   /**
+   * Focus the widget.
+   */
+  focus(): void {
+    this.editor.focus();
+  }
+
+  /**
    * Set the prompt for the widget.
    */
   setPrompt(value: string): void {
@@ -197,7 +204,7 @@ class BaseCellWidget extends Widget {
   toggleInput(value: boolean): void {
     if (value) {
       this._input.show();
-      this.editor.focus();
+      this.focus();
     } else {
       this._input.hide();
     }
