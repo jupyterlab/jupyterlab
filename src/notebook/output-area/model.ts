@@ -33,7 +33,7 @@ class ObservableOutputs extends ObservableList<IOutput> {
 
     // Consolidate outputs if they are stream outputs of the same kind.
     let index = this.length - 1;
-    let lastOutput = this.get(indexx) as IStream;
+    let lastOutput = this.get(index) as IStream;
     if (isStream(output)
         && lastOutput && isStream(lastOutput)
         && output.name === lastOutput.name) {

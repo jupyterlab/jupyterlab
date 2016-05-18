@@ -2,6 +2,5 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-export * from './console/index';
 export * from './kernel-selector/index';
 export * from './notebook/index';
