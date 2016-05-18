@@ -376,7 +376,6 @@ class MarkdownCellWidget extends BaseCellWidget {
     this._renderer = new Widget();
     this._renderer.addClass(RENDERER_CLASS);
     (this.layout as PanelLayout).addChild(this._renderer);
-    this.model.contentChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -411,8 +410,9 @@ class MarkdownCellWidget extends BaseCellWidget {
   protected onUpdateRequest(message: Message): void {
     let model = this.model;
     if (this.rendered) {
-      if (this._dirty) {
-        let text = model.source || DEFAULT_MARKDOWN_TEXT;
+      let text = model.source || DEFAULT_MARKDOWN_TEXT;
+      // Do not re-render if the text has not changed.
+      if (text !== this._prev) {
         text = sanitize(text);
         let bundle: MimeBundle = { 'text/markdown': text };
         this._renderer.dispose();
@@ -420,6 +420,7 @@ class MarkdownCellWidget extends BaseCellWidget {
         this._renderer.addClass(RENDERER_CLASS);
         (this.layout as PanelLayout).addChild(this._renderer);
       }
+      this._prev = text;
       this._renderer.show();
       this.toggleInput(false);
       this.addClass(RENDERED_CLASS);
@@ -428,14 +429,13 @@ class MarkdownCellWidget extends BaseCellWidget {
       this.toggleInput(true);
       this.removeClass(RENDERED_CLASS);
     }
-    this._dirty = false;
     super.onUpdateRequest(message);
   }
 
   private _rendermime: RenderMime<Widget> = null;
   private _renderer: Widget = null;
   private _rendered = true;
-  private _dirty = true;
+  private _prev = '';
 }
 
 
