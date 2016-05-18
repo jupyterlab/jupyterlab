@@ -122,7 +122,7 @@ class NotebookRenderer extends Widget {
     model.cells.changed.connect(this.onCellsChanged, this);
     model.contentChanged.connect(this.onModelChanged, this);
     this._langInfoCursor = model.getMetadata('language_info');
-    this.setMimetype();
+    this._mimetype = this.getMimetype();
     // Add the current cells.
     if (model.cells.length === 0) {
       return;
@@ -203,7 +203,8 @@ class NotebookRenderer extends Widget {
     switch (change) {
     case 'metadata':
     case 'metadata.language_info':
-      this.setMimetype();
+      this._mimetype = this.getMimetype();
+      this._updateMimetypes();
       break;
     default:
       break;
@@ -262,18 +263,14 @@ class NotebookRenderer extends Widget {
 
   /**
    * The mime type for code cells.
+   *
+   * #### Notes
+   * The default implementation uses the language info to set the
+   * mimetype.
    */
-  protected setMimetype(): void {
+  protected getMimetype(): string {
     let info = this._langInfoCursor.getValue() as ILanguageInfoMetadata;
-    let value = Private.mimetypeForLangauge(info);
-    this._mimetype = value;
-    let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.childCount(); i++) {
-      let widget = layout.childAt(i) as CodeCellWidget;
-      if (widget.model.type === 'code') {
-        widget.mimetype = value;
-      }
-    }
+    return Private.mimetypeForLangauge(info);
   }
 
   /**
@@ -283,6 +280,19 @@ class NotebookRenderer extends Widget {
     widget.addClass(NB_CELL_CLASS);
     if (widget.model.type === 'code') {
       widget.mimetype = this._mimetype;
+    }
+  }
+
+  /**
+   * Update the mimetype of code widgets.
+   */
+  private _updateMimetypes(): void {
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount(); i++) {
+      let widget = layout.childAt(i) as CodeCellWidget;
+      if (widget instanceof CodeCellWidget) {
+        widget.mimetype = this._mimetype;
+      }
     }
   }
 
