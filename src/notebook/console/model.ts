@@ -445,7 +445,6 @@ class ConsoleModel implements IConsoleModel {
       if (pendingInspect !== this._pendingInspect) return;
       // Tooltip request failures or negative results fail silently.
       if (value.status !== 'ok' || !value.found) return;
-      console.log('value', value);
       this.tooltip = {
         change: args,
         currentLine: currentLine,

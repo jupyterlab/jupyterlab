@@ -61,7 +61,7 @@ class ConsoleTooltip extends Panel {
       return;
     }
     this._rect = newValue;
-    Private.setBoundingClientRect(this.node, this._rect);
+    this.update();
   }
 
   /**
@@ -88,8 +88,8 @@ class ConsoleTooltip extends Panel {
       this._content.dispose();
     }
     this._content = newValue;
-    this.node.textContent = '';
     this.addChild(this._content);
+    this.update();
   }
 
   /**
@@ -128,8 +128,16 @@ class ConsoleTooltip extends Panel {
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('keydown', this);
-    this.node.removeEventListener('mousedown', this);
+    document.removeEventListener('keydown', this);
+    document.removeEventListener('mousedown', this);
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    // Set the dimensions of the tooltip widget.
+    Private.setBoundingClientRect(this.node, this._rect);
   }
 
   /**

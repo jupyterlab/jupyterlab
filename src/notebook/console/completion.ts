@@ -33,9 +33,9 @@ class ConsoleCompletion extends Widget {
    */
   static createNode(): HTMLElement {
     let node = document.createElement('div');
-    let pre = document.createElement('pre');
-    pre.className = CONTENT_CLASS;
-    node.appendChild(pre);
+    let ul = document.createElement('ul');
+    ul.className = CONTENT_CLASS;
+    node.appendChild(ul);
     return node;
   }
 
@@ -45,6 +45,34 @@ class ConsoleCompletion extends Widget {
   constructor() {
     super();
     this.addClass(COMPLETION_CLASS);
+  }
+
+  /**
+   * The list element of the completion widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get listNode(): HTMLElement {
+    return this.node.getElementsByTagName('ul')[0];
+  }
+
+  /**
+   * This list of completion options.
+   */
+  get options(): string[] {
+    return this._options;
+  }
+  set options(newValue: string[]) {
+    // If the new value and the old value are falsey, return;
+    if (newValue === this._options || !newValue && !this._options) {
+      return;
+    }
+    if (newValue.join() === this._options.join()) {
+      return;
+    }
+    this._options = newValue;
+    this.update();
   }
 
   /**
@@ -72,7 +100,7 @@ class ConsoleCompletion extends Widget {
    * Captures document events in the capture phase to dismiss the tooltip.
    */
   protected onAfterAttach(msg: Message): void {
-    document.addEventListener('mousedown', this, true);
+    this.node.addEventListener('mousedown', this, true);
   }
 
   /**
@@ -80,6 +108,20 @@ class ConsoleCompletion extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('mousedown', this);
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    if (this._options && this._options.length) {
+      let list = this.listNode;
+      for (let i = 0, len = this._options.length; i < len; i++) {
+        let item = document.createElement('li');
+        item.className = ITEM_CLASS;
+        item.innerHTML = this._options[i];
+      }
+    }
   }
 
   /**
@@ -98,6 +140,8 @@ class ConsoleCompletion extends Widget {
       target = target.parentElement;
     }
   }
+
+  private _options: string[] = null;
 }
 
 
