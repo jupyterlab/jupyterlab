@@ -80,10 +80,10 @@ type NotebookMode = 'command' | 'edit';
 
 
 /**
- * A widget holding the notebook cells.
+ * A widget which renders notebooks.
  */
 export
-class NotebookWidget extends Widget {
+class NotebookRenderer extends Widget {
   /**
    * Create a new cell widget given a cell model.
    */
@@ -115,7 +115,7 @@ class NotebookWidget extends Widget {
     this._model = model;
     this._rendermime = rendermime;
     this.layout = new PanelLayout();
-    let constructor = this.constructor as typeof NotebookWidget;
+    let constructor = this.constructor as typeof NotebookRenderer;
     let cellsLayout = this.layout as PanelLayout;
     let factory = constructor.createCell;
     for (let i = 0; i < model.cells.length; i++) {
@@ -145,6 +145,131 @@ class NotebookWidget extends Widget {
     return this._rendermime;
   }
 
+  /**
+   * The default mime type for code cells.
+   */
+  get defaultMimetype(): string {
+    return this._defaultMimetype;
+  }
+  set defaultMimetype(value: string) {
+    this._defaultMimetype = value;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose() {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    this._model.dispose();
+    this._model = null;
+    super.dispose();
+  }
+
+  /**
+   * Find the cell index containing the target html element.
+   *
+   * #### Notes
+   * Returns -1 if the cell is not found.
+   */
+  protected findCell(node: HTMLElement): number {
+    // Trace up the DOM hierarchy to find the root cell node.
+    // Then find the corresponding child and select it.
+    let layout = this.layout as PanelLayout;
+    while (node && node !== this.node) {
+      if (node.classList.contains(NB_CELL_CLASS)) {
+        for (let i = 0; i < layout.childCount(); i++) {
+          if (layout.childAt(i).node === node) {
+            return i;
+          }
+        }
+        break;
+      }
+      node = node.parentElement;
+    }
+    return -1;
+  }
+
+  /**
+   * Handle changes to the notebook model.
+   */
+  protected onModelChanged(model: INotebookModel, change: string): void {
+    // TODO
+  }
+
+  /**
+   * Handle a change cells event.
+   */
+  protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
+    let layout = this.layout as PanelLayout;
+    let constructor = this.constructor as typeof NotebookRenderer;
+    let factory = constructor.createCell;
+    let widget: BaseCellWidget;
+    switch (args.type) {
+    case ListChangeType.Add:
+      widget = factory(args.newValue as ICellModel, this._rendermime);
+      this._initializeCellWidget(widget);
+      layout.insertChild(args.newIndex, widget);
+      break;
+    case ListChangeType.Move:
+      layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
+      break;
+    case ListChangeType.Remove:
+      widget = layout.childAt(args.oldIndex) as BaseCellWidget;
+      layout.removeChild(widget);
+      widget.dispose();
+      break;
+    case ListChangeType.Replace:
+      let oldValues = args.oldValue as ICellModel[];
+      for (let i = args.oldIndex; i < oldValues.length; i++) {
+        widget = layout.childAt(args.oldIndex) as BaseCellWidget;
+        layout.removeChild(widget);
+        widget.dispose();
+      }
+      let newValues = args.newValue as ICellModel[];
+      for (let i = newValues.length; i < 0; i--) {
+        widget = factory(newValues[i], this._rendermime);
+        this._initializeCellWidget(widget);
+        layout.insertChild(args.newIndex, widget);
+      }
+      break;
+    case ListChangeType.Set:
+      widget = layout.childAt(args.newIndex) as BaseCellWidget;
+      layout.removeChild(widget);
+      widget.dispose();
+      widget = factory(args.newValue as ICellModel, this._rendermime);
+      layout.insertChild(args.newIndex, widget);
+      this._initializeCellWidget(widget);
+      break;
+    default:
+      return;
+    }
+    this.update();
+  }
+
+  /**
+   * Initialize a cell widget.
+   */
+  private _initializeCellWidget(widget: BaseCellWidget): void {
+    widget.addClass(NB_CELL_CLASS);
+    if (widget.model.type === 'code') {
+      widget.mimetype = this.defaultMimetype;
+    }
+  }
+
+  private _model: INotebookModel = null;
+  private _rendermime: RenderMime<Widget> = null;
+  private _defaultMimetype = 'text/plain';
+}
+
+
+/**
+ * A notebook widget that supports interactivity.
+ */
+export
+class ActiveNotebook extends NotebookRenderer {
   /**
    * The interactivity mode of the notebook.
    */
@@ -187,29 +312,6 @@ class NotebookWidget extends Widget {
       }
     }
     this.update();
-  }
-
-  /**
-   * The default mime type for code cells.
-   */
-  get defaultMimetype(): string {
-    return this._defaultMimetype;
-  }
-  set defaultMimetype(value: string) {
-    this._defaultMimetype = value;
-  }
-
-  /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose() {
-    // Do nothing if already disposed.
-    if (this.isDisposed) {
-      return;
-    }
-    this._model.dispose();
-    this._model = null;
-    super.dispose();
   }
 
   /**
@@ -282,35 +384,10 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Find the cell index containing the target html element.
-   *
-   * #### Notes
-   * Returns -1 if the cell is not found.
-   */
-  protected findCell(node: HTMLElement): number {
-    // Trace up the DOM hierarchy to find the root cell node.
-    // Then find the corresponding child and select it.
-    let layout = this.layout as PanelLayout;
-    while (node && node !== this.node) {
-      if (node.classList.contains(NB_CELL_CLASS)) {
-        for (let i = 0; i < layout.childCount(); i++) {
-          if (layout.childAt(i).node === node) {
-            return i;
-          }
-        }
-        break;
-      }
-      node = node.parentElement;
-    }
-    return -1;
-  }
-
-  /**
    * Handle `update-request` messages sent to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
     // Set the appropriate classes on the cells.
-    let model = this.model;
     let layout = this.layout as PanelLayout;
     let widget = layout.childAt(this.activeCellIndex) as BaseCellWidget;
     if (this.mode === 'edit') {
@@ -345,81 +422,6 @@ class NotebookWidget extends Widget {
       widget = layout.childAt(this.activeCellIndex) as BaseCellWidget;
       widget.addClass(OTHER_SELECTED_CLASS);
     }
-  }
-
-  /**
-   * Handle changes to the notebook model.
-   */
-  protected onModelChanged(model: INotebookModel, change: string): void {
-    // TODO
-  }
-
-  /**
-   * Handle a change cells event.
-   */
-  protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
-    let layout = this.layout as PanelLayout;
-    let constructor = this.constructor as typeof NotebookWidget;
-    let factory = constructor.createCell;
-    let widget: BaseCellWidget;
-    switch (args.type) {
-    case ListChangeType.Add:
-      widget = factory(args.newValue as ICellModel, this._rendermime);
-      this._initializeCellWidget(widget);
-      layout.insertChild(args.newIndex, widget);
-      break;
-    case ListChangeType.Move:
-      layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
-      break;
-    case ListChangeType.Remove:
-      widget = layout.childAt(args.oldIndex) as BaseCellWidget;
-      layout.removeChild(widget);
-      widget.dispose();
-      break;
-    case ListChangeType.Replace:
-      let oldValues = args.oldValue as ICellModel[];
-      for (let i = args.oldIndex; i < oldValues.length; i++) {
-        widget = layout.childAt(args.oldIndex) as BaseCellWidget;
-        layout.removeChild(widget);
-        widget.dispose();
-      }
-      let newValues = args.newValue as ICellModel[];
-      for (let i = newValues.length; i < 0; i--) {
-        widget = factory(newValues[i], this._rendermime);
-        this._initializeCellWidget(widget);
-        layout.insertChild(args.newIndex, widget);
-      }
-      break;
-    case ListChangeType.Set:
-      widget = layout.childAt(args.newIndex) as BaseCellWidget;
-      layout.removeChild(widget);
-      widget.dispose();
-      widget = factory(args.newValue as ICellModel, this._rendermime);
-      layout.insertChild(args.newIndex, widget);
-      this._initializeCellWidget(widget);
-      break;
-    default:
-      return;
-    }
-    this.update();
-  }
-
-
-  /**
-   * Initialize a cell widget.
-   */
-  private _initializeCellWidget(widget: BaseCellWidget): void {
-    widget.addClass(NB_CELL_CLASS);
-    if (widget.model.type === 'code') {
-      widget.mimetype = this.defaultMimetype;
-    }
-  }
-
-  /**
-   * Handle a change in the model selection.
-   */
-  protected onSelectionChanged(model: INotebookModel): void {
-    this.update();
   }
 
   /**
@@ -460,13 +462,9 @@ class NotebookWidget extends Widget {
     }
   }
 
-  private _model: INotebookModel = null;
-  private _rendermime: RenderMime<Widget> = null;
   private _mode: NotebookMode = 'command';
   private _activeCellIndex = -1;
-  private _defaultMimetype = 'text/plain';
 }
-
 
 /**
  * A namespace for private data.
