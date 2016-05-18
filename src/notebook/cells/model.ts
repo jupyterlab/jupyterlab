@@ -26,7 +26,7 @@ import {
  * The definition of a model object for a cell.
  */
 export
-interface ICellModel extends I {
+interface ICellModel extends IDisposable {
   /**
    * The type of cell.
    */
@@ -46,11 +46,6 @@ interface ICellModel extends I {
    * Serialize the model to JSON.
    */
   toJSON(): any;
-
-  /**
-   * Deserialize the model from JSON.
-   */
-  fromJSON(value: any): void;
 
   /**
    * Get a metadata cursor for the cell.
@@ -101,7 +96,7 @@ class CellModel implements ICellModel {
     if (!cell) {
       return;
     }
-    this.source = value.source;
+    this.source = cell.source;
     let metadata = utils.copy(cell.metadata);
     if (this.type !== 'raw') {
       delete metadata['format'];
@@ -221,6 +216,7 @@ class CellModel implements ICellModel {
 
   private _metadata: { [key: string]: string } = Object.create(null);
   private _cursors: MetadataCursor[] = [];
+  private _source = '';
 }
 
 
@@ -254,12 +250,11 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     super(cell);
     this._outputs = new ObservableOutputs();
     if (cell && cell.cell_type === 'code') {
-      this.executionCount = cell.execution_count;
-      this._outputs.assign(cell.outputs);
+      this.executionCount = (cell as ICodeCell).execution_count;
+      this._outputs.assign((cell as ICodeCell).outputs);
     }
     this._outputs.changed.connect(() => {
-      this.contentChanged.emit(void 0);
-      this.stateChanged.emit('outputs');
+      this.contentChanged.emit('outputs');
     });
   }
 
@@ -274,7 +269,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       return;
     }
     this._executionCount = value;
-    this.stateChanged.emit('executionCount');
+    this.contentChanged.emit('executionCount');
   }
 
   /**
@@ -294,8 +289,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     if (this.isDisposed) {
       return;
     }
-    this._output.clear(false);
-    this._output = null;
+    this._outputs.clear(false);
+    this._outputs = null;
     super.dispose();
   }
 

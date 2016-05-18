@@ -23,7 +23,8 @@ import {
 } from '../cells/model';
 
 import {
-  INotebookContent, ICell, INotebookMetadata
+  INotebookContent, ICell, INotebookMetadata, MAJOR_VERSION,
+  MINOR_VERSION
 } from './nbformat';
 
 
@@ -96,14 +97,14 @@ class NotebookModel implements INotebookModel {
    * The argument is the type of change.
    */
   get contentChanged(): ISignal<INotebookModel, string> {
-    return NotebookModelPrivate.contentChangedSignal.bind(this);
+    return Private.contentChangedSignal.bind(this);
   }
 
   /**
    * A signal emitted when the model dirty state changes.
    */
   get dirtyChanged(): ISignal<IDocumentModel, boolean> {
-    return NotebookModelPrivate.dirtyChangedSignal.bind(this);
+    return Private.dirtyChangedSignal.bind(this);
   }
 
   /**
@@ -251,7 +252,7 @@ class NotebookModel implements INotebookModel {
       metadata,
       nbformat_minor: this._nbformatMinor,
       nbformat: this._nbformat,
-      cells;
+      cells
     };
   }
 
@@ -262,9 +263,9 @@ class NotebookModel implements INotebookModel {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: INotebookContent): void {
-    let cells = ICellModel[] = [];
+    let cells: ICellModel[] = [];
     for (let data of value.cells) {
-      switch (data.type) {
+      switch (data.cell_type) {
       case 'code':
         cells.push(new CodeCellModel(data));
         break;
@@ -278,7 +279,7 @@ class NotebookModel implements INotebookModel {
         continue;
       }
     }
-    this.cells.replace(cells);
+    this.cells.assign(cells);
     this._nbformat = value.nbformat;
     this._nbformatMinor = value.nbformat_minor;
     this._metadata = utils.copy(value.metadata);
@@ -374,20 +375,20 @@ class NotebookModel implements INotebookModel {
   private _dirty = false;
   private _readOnly = false;
   private _cursors: MetadataCursor[] = [];
-  private _nbformat = -1;
-  private _nbformatMinor = -1;
+  private _nbformat = MAJOR_VERSION;
+  private _nbformatMinor = MINOR_VERSION;
 }
 
 
 /**
  * A private namespace for notebook model data.
  */
-namespace NotebookModelPrivate {
+namespace Private {
   /**
    * A signal emitted when the content of the model changes.
    */
   export
-  const contentChangedSignal = new Signal<INotebookModel, void>();
+  const contentChangedSignal = new Signal<INotebookModel, string>();
 
   /**
    * A signal emitted when the dirty state of the model changes.
@@ -399,11 +400,11 @@ namespace NotebookModelPrivate {
    * Create an empty notebook metadata.
    */
   export
-  function createMetadata(): INotebookMetadata {
+  function createMetadata(): { [key: string]: string } {
     return {
-      kernelspec: { name: 'unknown', display_name: 'unknown' },
-      language_info: { name: 'unknown' },
-      orig_nbformat: -1
+      kernelspec: '{"name":"unknown","display_name":"unknown"}',
+      language_info: '{"name":"unknown"}',
+      orig_nbformat: String(MAJOR_VERSION)
     };
   }
 }

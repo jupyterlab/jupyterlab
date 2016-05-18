@@ -11,7 +11,7 @@ import {
 } from 'phosphor-observablelist';
 
 import {
-  IOutput, IStream, isStream
+  IOutput, IStream, isStream, OutputType
 } from '../notebook/nbformat';
 
 
@@ -24,7 +24,7 @@ class ObservableOutputs extends ObservableList<IOutput> {
    * Add an output, which may be combined with previous output
    * (e.g. for streams).
    */
-  add(output: IOutput) {
+  add(output: IOutput): number {
     // If we received a delayed clear message, then clear now.
     if (this._clearNext) {
       this.clear();
@@ -54,6 +54,7 @@ class ObservableOutputs extends ObservableList<IOutput> {
         break;
       }
     }
+    return this.length - 1;
   }
 
   /**
@@ -61,12 +62,12 @@ class ObservableOutputs extends ObservableList<IOutput> {
    *
    * @param wait Delay clearing the output until the next message is added.
    */
-  clear(wait: boolean = false) {
+  clear(wait: boolean = false): IOutput[] {
     if (wait) {
       this._clearNext = true;
-    } else {
-      super.clear();
+      return [];
     }
+    return super.clear();
   }
 
   private _clearNext = false;
@@ -77,7 +78,7 @@ class ObservableOutputs extends ObservableList<IOutput> {
  * Execute code on a kernel and send outputs to an observable output.
  */
 export
-function executeCode(code: string, kernel: IKernel, output: ObservableOutputs): Promise<IExecuteReply> {
+function executeCode(code: string, kernel: IKernel, outputs: ObservableOutputs): Promise<IExecuteReply> {
   let exRequest = {
     code,
     silent: false,
@@ -92,7 +93,7 @@ function executeCode(code: string, kernel: IKernel, output: ObservableOutputs): 
       let model = msg.content;
       if (model !== void 0) {
         model.output_type = msg.header.msg_type as OutputType;
-        output.add(model);
+        outputs.add(model);
       }
     });
     future.onReply = (msg => {
