@@ -7,17 +7,35 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  MimeData as IClipboard
+} from 'phosphor-dragdrop';
+
+import {
   executeCode
 } from '../output-area';
 
 import {
-  ICellModel, MarkdownCellModel, CodeCellModel, RawCellModel,
+  ICellModel, CodeCellModel,
   CodeCellWidget, BaseCellWidget, MarkdownCellWidget
 } from '../cells';
 
 import {
+  INotebookModel
+} from './model';
+
+import {
+  IBaseCell
+} from './nbformat';
+
+import {
   ActiveNotebook
 } from './widget';
+
+
+/**
+ * The mimetype used for Jupyter cell data.
+ */
+const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 
 /**
@@ -33,7 +51,7 @@ namespace NotebookActions {
     Private.deselectCells(widget);
     let oldCell = widget.childAt(widget.activeCellIndex);
     let position = oldCell.getCursorPosition();
-    let newModel = Private.cloneCell(oldCell.model);
+    let newModel = Private.cloneCell(widget.model, oldCell.model);
     let orig = oldCell.model.source;
     oldCell.model.source = orig.slice(0, position);
     if (oldCell instanceof CodeCellWidget) {
@@ -44,6 +62,9 @@ namespace NotebookActions {
     newModel.source = newText.replace(/^\s+/g, '');
     widget.model.cells.insert(widget.activeCellIndex + 1, newModel);
   }
+
+  /**
+   * Delete the
 
   /**
    * Merge selected cells.
@@ -80,7 +101,7 @@ namespace NotebookActions {
     // Remove the other cells and add them to the delete stack.
     let copies: ICellModel[] = [];
     for (let cell of toDelete) {
-      copies.push(Private.cloneCell(cell));
+      copies.push(Private.cloneCell(model, cell));
       model.cells.remove(cell);
     }
     // TODO
@@ -94,7 +115,7 @@ namespace NotebookActions {
    */
   export
   function insertAbove(widget: ActiveNotebook): void {
-    let cell = new CodeCellModel();
+    let cell = widget.model.createCodeCell();
     widget.model.cells.insert(widget.activeCellIndex, cell);
     Private.deselectCells(widget);
   }
@@ -104,7 +125,7 @@ namespace NotebookActions {
    */
   export
   function insertBelow(widget: ActiveNotebook): void {
-    let cell = new CodeCellModel();
+    let cell = widget.model.createCodeCell();
     widget.model.cells.insert(widget.activeCellIndex + 1, cell);
     Private.deselectCells(widget);
   }
@@ -121,18 +142,7 @@ namespace NotebookActions {
       if (!widget.isSelected(child)) {
         continue;
       }
-      let newCell: ICellModel;
-      switch (value) {
-      case 'code':
-        newCell = new CodeCellModel(cell.toJSON());
-        break;
-      case 'markdown':
-        newCell = new MarkdownCellModel(cell.toJSON());
-        break;
-      default:
-        newCell = new RawCellModel(cell.toJSON());
-        break;
-      }
+      let newCell = Private.cloneCell(widget.model, cell);
       model.cells.remove(cell);
       model.cells.insert(i, newCell);
       if (value === 'markdown') {
@@ -187,7 +197,7 @@ namespace NotebookActions {
     run(widget, kernel);
     let model = widget.model;
     if (widget.activeCellIndex === model.cells.length - 1) {
-      let cell = new CodeCellModel();
+      let cell = model.createCodeCell();
       model.cells.add(cell);
       widget.mode = 'edit';
     } else {
@@ -203,7 +213,7 @@ namespace NotebookActions {
   function runAndInsert(widget: ActiveNotebook, kernel?: IKernel): void {
     run(widget, kernel);
     let model = widget.model;
-    let cell = new CodeCellModel();
+    let cell = model.createCodeCell();
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.mode = 'edit';
     Private.deselectCells(widget);
@@ -287,6 +297,50 @@ namespace NotebookActions {
     }
     widget.activeCellIndex += 1;
   }
+
+  /**
+   * Copy the selected cells to a clipboard.
+   */
+  export
+  function copy(widget: ActiveNotebook, clipboard: IClipboard): void {
+    clipboard.clear();
+    let data: IBaseCell[] = [];
+    for (let i = 0; i < widget.model.cells.length; i++) {
+      let child = widget.childAt(i);
+      if (widget.isSelected(child)) {
+        data.push(child.model.toJSON());
+      }
+    }
+    clipboard.setData(JUPYTER_CELL_MIME, data);
+  }
+
+  /**
+   * Paste cells from a clipboard.
+   */
+  export
+  function paste(widget: ActiveNotebook, clipboard: IClipboard): void {
+    if (!clipboard.hasData(JUPYTER_CELL_MIME)) {
+      return;
+    }
+    let values = clipboard.getData(JUPYTER_CELL_MIME) as IBaseCell[];
+    let model = widget.model;
+    let cells: ICellModel[] = [];
+    for (let value of values) {
+      switch (value.cell_type) {
+      case 'code':
+        cells.push(model.createCodeCell(value));
+        break;
+      case 'markdown':
+        cells.push(model.createMarkdownCell(value));
+        break;
+      default:
+        cells.push(model.createRawCell(value));
+        break;
+      }
+    }
+    let index = widget.activeCellIndex;
+    widget.model.cells.replace(index, 0, cells);
+  }
 }
 
 
@@ -311,14 +365,14 @@ namespace Private {
    * Clone a cell model.
    */
   export
-  function cloneCell(cell: ICellModel): ICellModel {
+  function cloneCell(model: INotebookModel, cell: ICellModel): ICellModel {
     switch (cell.type) {
     case 'code':
-      return new CodeCellModel(cell.toJSON());
+      return model.createCodeCell(cell.toJSON());
     case 'markdown':
-      return new MarkdownCellModel(cell.toJSON());
+      return model.createMarkdownCell(cell.toJSON());
     default:
-      return new RawCellModel(cell.toJSON());
+      return model.createRawCell(cell.toJSON());
     }
   }
 

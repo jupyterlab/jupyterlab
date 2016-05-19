@@ -24,8 +24,12 @@ import {
 
 import {
   INotebookContent, ICell, INotebookMetadata, MAJOR_VERSION,
-  MINOR_VERSION
+  MINOR_VERSION, IBaseCell
 } from './nbformat';
+
+import {
+  NotebookUndo
+} from './undo';
 
 
 /**
@@ -91,6 +95,40 @@ interface INotebookModel extends IDocumentModel {
   listMetadata(): string[];
 
   /**
+   * A factory for creating a new code cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new code cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   *
+   * #### Notes
+   * If the source argument does not give an input mimetype, the code cell
+   * defaults to the notebook [[defaultMimetype]].
+   */
+  createCodeCell(source?: IBaseCell): CodeCellModel;
+
+  /**
+   * A factory for creating a new Markdown cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new markdown cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createMarkdownCell(source?: IBaseCell): MarkdownCellModel;
+
+  /**
+   * A factory for creating a new raw cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new raw cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createRawCell(source?: IBaseCell): RawCellModel;
+
+  /**
    * Begin a compound operation.
    */
   beginCompoundOperation(isUndoAble?: boolean): void;
@@ -123,6 +161,7 @@ class NotebookModel implements INotebookModel {
   constructor() {
     this._cells = new ObservableList<ICellModel>();
     this._cells.changed.connect(this.onCellsChanged, this);
+    this._changeStack = new NotebookUndo(this);
   }
 
   /**
@@ -226,6 +265,26 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Whether the model can redo changes.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get canRedo(): boolean {
+    return this._changeStack.canRedo;
+  }
+
+  /**
+   * Whether the model can undo changes.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get canUndo(): boolean {
+    return this._changeStack.canUndo;
+  }
+
+  /**
    * Get whether the model is disposed.
    *
    * #### Notes
@@ -256,6 +315,8 @@ class NotebookModel implements INotebookModel {
     }
     this._cursors = null;
     this._metadata = null;
+    this._changeStack.dispose();
+    this._changeStack = null;
   }
 
   /**
@@ -324,6 +385,74 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * A factory for creating a new code cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new code cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   *
+   * #### Notes
+   * If the source argument does not give an input mimetype, the code cell
+   * defaults to the notebook [[defaultMimetype]].
+   */
+  createCodeCell(source?: IBaseCell): CodeCellModel {
+    return new CodeCellModel(source);
+  }
+
+  /**
+   * A factory for creating a new Markdown cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new markdown cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createMarkdownCell(source?: IBaseCell): MarkdownCellModel {
+    return new MarkdownCellModel(source);
+  }
+
+  /**
+   * A factory for creating a new raw cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new raw cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createRawCell(source?: IBaseCell): RawCellModel {
+    return new RawCellModel(source);
+  }
+
+  /**
+   * Begin a compound operation.
+   */
+  beginCompoundOperation(isUndoAble?: boolean): void {
+    this._changeStack.beginCompoundOperation(isUndoAble);
+  }
+
+  /**
+   * End a compound operation.
+   */
+  endCompoundOperation(): void {
+    this._changeStack.endCompoundOperation();
+  }
+
+  /**
+   * Undo an operation.
+   */
+  undo(): void {
+    this._changeStack.undo();
+  }
+
+  /**
+   * Redo an operation.
+   */
+  redo(): void {
+    this._changeStack.redo();
+  }
+
+  /**
    * Get a metadata cursor for the notebook.
    *
    * #### Notes
@@ -355,7 +484,7 @@ class NotebookModel implements INotebookModel {
   /**
    * Handle a change in the cells list.
    */
-  protected onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
+  protected onCellsChanged(list: IObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
     let cell: ICellModel;
     switch (change.type) {
     case ListChangeType.Add:
@@ -411,6 +540,7 @@ class NotebookModel implements INotebookModel {
   private _cursors: MetadataCursor[] = [];
   private _nbformat = MAJOR_VERSION;
   private _nbformatMinor = MINOR_VERSION;
+  private _changeStack: NotebookUndo = null;
 }
 
 

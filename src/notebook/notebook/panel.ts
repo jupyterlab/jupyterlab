@@ -15,6 +15,10 @@ import {
 } from 'jupyter-js-ui/lib/rendermime';
 
 import {
+  MimeData as IClipboard
+} from 'phosphor-dragdrop';
+
+import {
   Panel, PanelLayout
 } from 'phosphor-panel';
 
@@ -79,26 +83,13 @@ class NotebookPanel extends Widget {
   /**
    * Construct a new notebook panel.
    */
-  constructor(model: INotebookModel, rendermime: RenderMime<Widget>, context: IDocumentContext) {
+  constructor(model: INotebookModel, rendermime: RenderMime<Widget>, context: IDocumentContext, clipboard: IClipboard) {
     super();
     this.addClass(NB_PANEL);
     this._model = model;
     this._rendermime = rendermime;
     this._context = context;
-    this.layout = new PanelLayout();
-
-    let ctor = this.constructor as typeof NotebookPanel;
-    let toolbar = ctor.createToolbar();
-    ctor.populateToolbar(this);
-    this._content = ctor.createContent(model, rendermime);
-
-    let container = new Panel();
-    container.addClass(NB_CONTAINER);
-    container.addChild(this._content);
-
-    let layout = this.layout as PanelLayout;
-    layout.addChild(toolbar);
-    layout.addChild(container);
+    this._clipboard = clipboard;
 
     context.kernelChanged.connect(() => {
       this.handleKernelChange(context.kernel);
@@ -106,14 +97,27 @@ class NotebookPanel extends Widget {
     if (context.kernel) {
       this.handleKernelChange(context.kernel);
     }
+
+    this.layout = new PanelLayout();
+    let ctor = this.constructor as typeof NotebookPanel;
+    this._content = ctor.createContent(model, rendermime);
+    this._toolbar = ctor.createToolbar();
+    ctor.populateToolbar(this);
+
+    let container = new Panel();
+    container.addClass(NB_CONTAINER);
+    container.addChild(this._content);
+
+    let layout = this.layout as PanelLayout;
+    layout.addChild(this._toolbar);
+    layout.addChild(container);
   }
 
   /**
    * Get the toolbar used by the widget.
    */
   get toolbar(): NotebookToolbar {
-    let layout = this.layout as PanelLayout;
-    return layout.childAt(0) as NotebookToolbar;
+    return this._toolbar;
   }
 
   /**
@@ -134,6 +138,16 @@ class NotebookPanel extends Widget {
    */
   get rendermime(): RenderMime<Widget> {
     return this._rendermime;
+  }
+
+  /**
+   * Get the clipboard instance used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get clipboard(): IClipboard {
+    return this._clipboard;
   }
 
   /**
@@ -166,6 +180,8 @@ class NotebookPanel extends Widget {
     this._context = null;
     this._rendermime = null;
     this._content = null;
+    this._toolbar = null;
+    this._clipboard = null;
     super.dispose();
   }
 
@@ -193,6 +209,8 @@ class NotebookPanel extends Widget {
   private _context: IDocumentContext = null;
   private _model: INotebookModel = null;
   private _content: ActiveNotebook = null;
+  private _toolbar: NotebookToolbar = null;
+  private _clipboard: IClipboard = null;
 }
 
 

@@ -391,29 +391,6 @@ class ActiveNotebook extends NotebookRenderer {
   }
 
   /**
-   * Copy the selected cells to the clipboard.
-   *
-   * #### Notes
-   * The clipboard is shared among all [ActiveNotebook] instances.
-   */
-  copyToClipboard(): void {
-    let data: IBaseCell[] = [];
-    let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.childCount(); i++) {
-      let widget = layout.childAt(i) as BaseCellWidget;
-      data.push(widget.model.toJSON());
-    }
-    Private.clipboard = data;
-  }
-
-  /**
-   * Get the contents of the clipboard.
-   */
-  getClipboard(): IBaseCell[] {
-    return Private.clipboard.slice();
-  }
-
-  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -582,10 +559,4 @@ namespace Private {
     }
     return mime;
   }
-
-  /**
-   * The shared clipboard for active notebooks.
-   */
-  export
-  var clipboard: IBaseCell[] = [];
 }
