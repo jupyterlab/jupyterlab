@@ -174,10 +174,10 @@ class ToolbarButton extends Widget {
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.addEventListener('click', this);
+    this.node.removeEventListener('click', this);
     this.node.removeEventListener('mousedown', this);
     this.node.removeEventListener('mouseup', this);
-    this.node.addEventListener('mouseout', this);
+    this.node.removeEventListener('mouseout', this);
   }
 
   private _onClick: () => void = null;
