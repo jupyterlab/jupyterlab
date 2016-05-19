@@ -58,8 +58,8 @@ namespace NotebookActions {
     // Create new models to preserve history.
     let clone0 = Private.cloneCell(nbModel, child.model);
     let clone1 = Private.cloneCell(nbModel, child.model);
-    if (clone1.type === 'code') {
-      (clone1 as CodeCellModel).outputs.clear();
+    if (clone0.type === 'code') {
+      (clone0 as CodeCellModel).outputs.clear();
     }
     clone0.source = orig.slice(0, position);
     clone1.source = orig.slice(position).replace(/^\s+/g, '');
