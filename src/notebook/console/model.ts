@@ -441,6 +441,8 @@ class ConsoleModel implements IConsoleModel {
     let contents = {code: currentLine, cursor_pos: args.ch, detail_level: 0};
 
     this._session.kernel.inspect(contents).then((value: IInspectReply) => {
+      // If model has been disposed, bail.
+      if (this.isDisposed) return;
       // If a newer text change has created a pending request, bail.
       if (pendingInspect !== this._pendingInspect) return;
       // Tooltip request failures or negative results fail silently.
