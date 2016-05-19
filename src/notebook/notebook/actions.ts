@@ -169,9 +169,13 @@ namespace NotebookActions {
   export
   function changeCellType(widget: ActiveNotebook, value: string): void {
     let model = widget.model;
+    model.beginCompoundOperation();
     for (let i = 0; i < model.cells.length; i++) {
       let child = widget.childAt(i);
       if (!widget.isSelected(child)) {
+        continue;
+      }
+      if (child.model.type === value) {
         continue;
       }
       let newCell = Private.cloneCell(model, child.model);
@@ -182,6 +186,7 @@ namespace NotebookActions {
         (child as MarkdownCellWidget).rendered = false;
       }
     }
+    model.endCompoundOperation();
     Private.deselectCells(widget);
   }
 
