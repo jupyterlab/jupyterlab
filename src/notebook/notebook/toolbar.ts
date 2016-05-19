@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  Message
+} from 'phosphor-messaging';
+
+import {
   Property
 } from 'phosphor-properties';
 
@@ -23,6 +27,16 @@ const NB_TOOLBAR = 'jp-NBToolbar';
  * The class name added to notebook toolbar items.
  */
 const TOOLBAR_ITEM = 'jp-NBToolbar-item';
+
+/**
+ * The class name added to notebook toolbar buttons.
+ */
+const TOOLBAR_BUTTON = 'jp-NBToolbar-button';
+
+/**
+ * The class name added to a pressed button.
+ */
+const TOOLBAR_PRESSED = 'jp-mod-pressed';
 
 
 /**
@@ -82,6 +96,91 @@ class NotebookToolbar extends Widget {
     }
     return names;
   }
+}
+
+
+/**
+ * A widget which acts as a button in a toolbar.
+ */
+export
+class ToolbarButton extends Widget {
+  /**
+   * Create the node for the toolbar button.
+   */
+  static createNode(): HTMLElement {
+    return document.createElement('span');
+  }
+
+  /**
+   * Construct a new toolbar button.
+   */
+  constructor(className: string, onClick: () => void, tooltip?: string) {
+    super();
+    this.addClass(TOOLBAR_BUTTON);
+    this.addClass(className);
+    this._onClick = onClick;
+    if (tooltip) {
+      this.node.title = tooltip;
+    }
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    this._onClick = null;
+    super.dispose();
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'click':
+      let cb = this._onClick;
+      cb();
+      break;
+    case 'mousedown':
+      this.addClass(TOOLBAR_PRESSED);
+      break;
+    case 'mouseup':
+    case 'mouseout':
+      this.removeClass(TOOLBAR_PRESSED);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle `after_attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('click', this);
+    this.node.addEventListener('mousedown', this);
+    this.node.addEventListener('mouseup', this);
+    this.node.addEventListener('mouseout', this);
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.addEventListener('click', this);
+    this.node.removeEventListener('mousedown', this);
+    this.node.removeEventListener('mouseup', this);
+    this.node.addEventListener('mouseout', this);
+  }
+
+  private _onClick: () => void = null;
 }
 
 

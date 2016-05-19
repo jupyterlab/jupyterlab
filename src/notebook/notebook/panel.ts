@@ -74,13 +74,6 @@ class NotebookPanel extends Widget {
   }
 
   /**
-   * Populate the toolbar on a panel with the default items.
-   */
-  static populateToolbar(panel: NotebookPanel): void {
-    Private.populateToolbar(panel);
-  }
-
-  /**
    * Construct a new notebook panel.
    */
   constructor(model: INotebookModel, rendermime: RenderMime<Widget>, context: IDocumentContext, clipboard: IClipboard) {
@@ -102,7 +95,6 @@ class NotebookPanel extends Widget {
     let ctor = this.constructor as typeof NotebookPanel;
     this._content = ctor.createContent(model, rendermime);
     this._toolbar = ctor.createToolbar();
-    ctor.populateToolbar(this);
 
     let container = new Panel();
     container.addClass(NB_CONTAINER);
@@ -211,18 +203,4 @@ class NotebookPanel extends Widget {
   private _content: ActiveNotebook = null;
   private _toolbar: NotebookToolbar = null;
   private _clipboard: IClipboard = null;
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * Populate the default items in the toolbar.
-   */
-  export
-  function populateToolbar(panel: NotebookPanel): void {
-    // TODO
-  }
 }

@@ -20,6 +20,10 @@ import {
 } from 'phosphor-observablelist';
 
 import {
+  Signal, ISignal
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -317,6 +321,13 @@ class NotebookRenderer extends Widget {
 export
 class ActiveNotebook extends NotebookRenderer {
   /**
+   * A signal emitted when the active index changes on the notebook.
+   */
+  get activeIndexChanged(): ISignal<ActiveNotebook, number> {
+    return Private.activeIndexChangedSignal.bind(this);
+  }
+
+  /**
    * The interactivity mode of the notebook.
    */
   get mode(): NotebookMode {
@@ -357,6 +368,7 @@ class ActiveNotebook extends NotebookRenderer {
         widget.rendered = false;
       }
     }
+    this.activeIndexChanged.emit(value);
     this.update();
   }
 
@@ -525,6 +537,12 @@ namespace Private {
     name: 'selected',
     value: false
   });
+
+  /**
+   * A signal emitted when the active index changes on the notebook.
+   */
+  export
+  const activeIndexChangedSignal = new Signal<ActiveNotebook, number>();
 
   /**
    * Get the appropriate mimetype for code cell given language info.
