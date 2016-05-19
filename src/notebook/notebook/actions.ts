@@ -175,7 +175,7 @@ namespace NotebookActions {
         continue;
       }
       let newCell = Private.cloneCell(model, child.model);
-      model.cells.replace(i, 0, [newCell]);
+      model.cells.replace(i, 1, [newCell]);
       if (value === 'markdown') {
         // Fetch the new widget.
         child = widget.childAt(i);
