@@ -103,7 +103,7 @@ class NotebookUndo implements IDisposable {
     }
     let changes = this._stack[this._index];
     this._isUndoable = false;
-    for (let change of changes) {
+    for (let change of changes.reverse()) {
       this._undoChange(change);
     }
     this._isUndoable = true;

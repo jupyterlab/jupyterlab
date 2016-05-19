@@ -47,67 +47,100 @@ namespace NotebookActions {
    * Split the active cell into two cells.
    */
   export
-  function split(widget: ActiveNotebook): void {
+  function splitCell(widget: ActiveNotebook): void {
     Private.deselectCells(widget);
-    let oldCell = widget.childAt(widget.activeCellIndex);
-    let position = oldCell.getCursorPosition();
-    let newModel = Private.cloneCell(widget.model, oldCell.model);
-    let orig = oldCell.model.source;
-    oldCell.model.source = orig.slice(0, position);
-    if (oldCell instanceof CodeCellWidget) {
-      (oldCell.model as CodeCellModel).outputs.clear();
-    }
-    // Strip leading whitespace off the the new text
-    let newText = orig.slice(position);
-    newModel.source = newText.replace(/^\s+/g, '');
-    widget.model.cells.insert(widget.activeCellIndex + 1, newModel);
-  }
+    let nbModel = widget.model;
+    let index = widget.activeCellIndex;
+    let child = widget.childAt(index);
+    let position = child.getCursorPosition();
+    let orig = child.model.source;
 
-  /**
-   * Delete the
+    // Create new models to preserve history.
+    let clone0 = Private.cloneCell(nbModel, child.model);
+    let clone1 = Private.cloneCell(nbModel, child.model);
+    if (clone1.type === 'code') {
+      (clone1 as CodeCellModel).outputs.clear();
+    }
+    clone0.source = orig.slice(0, position);
+    clone1.source = orig.slice(position).replace(/^\s+/g, '');
+
+    // Make the changes while preserving history.
+    nbModel.cells.replace(index, 1, [clone0, clone1]);
+  }
 
   /**
    * Merge selected cells.
    */
   export
-  function merge(widget: ActiveNotebook): void {
+  function mergeCells(widget: ActiveNotebook): void {
     let toMerge: string[] = [];
     let toDelete: ICellModel[] = [];
-    let activeCell: ICellModel;
-    let activeWidget: BaseCellWidget;
     let model = widget.model;
+    let cells = model.cells;
+    let index = widget.activeCellIndex;
+    let primary = widget.childAt(widget.activeCellIndex);
+    if (!primary) {
+      return;
+    }
+
+    // Get the other cells to merge.
     for (let i = 0; i < model.cells.length; i++) {
+      if (i === index) {
+        continue;
+      }
       let child = widget.childAt(i);
       if (widget.isSelected(child)) {
         toMerge.push(child.model.source);
-      }
-      if (i === widget.activeCellIndex) {
-        activeWidget = widget.childAt(i);
-      } else {
-        toDelete.push(model.cells.get(i));
+        toDelete.push(child.model);
       }
     }
-    Private.deselectCells(widget);
-    // Make sure there are cells to merge.
-    if (toMerge.length < 2 || !activeCell) {
+
+    // Make sure there are cells to merge and select cells.
+    if (!toMerge.length) {
       return;
     }
-    // For rendered markdown cells, unrender before setting the text.
-    if ((activeWidget as MarkdownCellWidget).rendered) {
-      (activeWidget as MarkdownCellWidget).rendered = false;
+    Private.deselectCells(widget);
+
+    // Create a new cell for the source to preserve history.
+    let newModel = Private.cloneCell(model, primary.model);
+    newModel.source += toMerge.join('\n\n');
+    if (newModel instanceof CodeCellModel) {
+      newModel.outputs.clear();
     }
-    // For all cells types, set the merged text.
-    activeWidget.model.source = toMerge.join('\n\n');
-    // Remove the other cells and add them to the delete stack.
-    let copies: ICellModel[] = [];
+
+    // Make the changes while preserving history.
+    model.beginCompoundOperation();
+    cells.set(index, newModel);
     for (let cell of toDelete) {
-      copies.push(Private.cloneCell(model, cell));
-      model.cells.remove(cell);
+      cells.remove(cell);
     }
-    // TODO
-    //this._undeleteStack.push(toDelete);
-    // Make sure the previous cell is still active.
-    widget.activeCellIndex = model.cells.indexOf(activeWidget.model);
+    model.endCompoundOperation();
+
+    // If the original cell is a markdown cell, make sure it is unrendered.
+    if (primary instanceof MarkdownCellWidget) {
+      let current = widget.childAt(index);
+      (current as MarkdownCellWidget).rendered = false;
+    }
+  }
+
+  /**
+   * Delete the selected cells.
+   */
+  export
+  function deleteCells(widget: ActiveNotebook): void {
+    let model = widget.model;
+    let cells = model.cells;
+    // Delete the cells as one undo event.
+    model.beginCompoundOperation();
+    for (let i = 0; i < cells.length; i++) {
+      let child = widget.childAt(i);
+      if (widget.isSelected(child)) {
+        let cell = cells.get(i);
+        cells.remove(cell);
+      }
+    }
+    model.endCompoundOperation();
+    Private.deselectCells(widget);
   }
 
   /**
@@ -137,15 +170,14 @@ namespace NotebookActions {
   function changeCellType(widget: ActiveNotebook, value: string): void {
     let model = widget.model;
     for (let i = 0; i < model.cells.length; i++) {
-      let cell = model.cells.get(i);
       let child = widget.childAt(i);
       if (!widget.isSelected(child)) {
         continue;
       }
-      let newCell = Private.cloneCell(widget.model, cell);
-      model.cells.remove(cell);
-      model.cells.insert(i, newCell);
+      let newCell = Private.cloneCell(model, child.model);
+      model.cells.replace(i, 0, [newCell]);
       if (value === 'markdown') {
+        // Fetch the new widget.
         child = widget.childAt(i);
         (child as MarkdownCellWidget).rendered = false;
       }
@@ -312,6 +344,30 @@ namespace NotebookActions {
       }
     }
     clipboard.setData(JUPYTER_CELL_MIME, data);
+    Private.deselectCells(widget);
+  }
+
+  /**
+   * Cut the selected cells to a clipboard.
+   */
+  export
+  function cut(widget: ActiveNotebook, clipboard: IClipboard): void {
+    clipboard.clear();
+    let data: IBaseCell[] = [];
+    let model = widget.model;
+    let cells = model.cells;
+    // Preserve the history as one undo event.
+    model.beginCompoundOperation();
+    for (let i = 0; i < widget.model.cells.length; i++) {
+      let child = widget.childAt(i);
+      if (widget.isSelected(child)) {
+        data.push(child.model.toJSON());
+        cells.remove(child.model);
+      }
+    }
+    model.endCompoundOperation();
+    clipboard.setData(JUPYTER_CELL_MIME, data);
+    Private.deselectCells(widget);
   }
 
   /**
@@ -340,6 +396,7 @@ namespace NotebookActions {
     }
     let index = widget.activeCellIndex;
     widget.model.cells.replace(index, 0, cells);
+    Private.deselectCells(widget);
   }
 }
 
