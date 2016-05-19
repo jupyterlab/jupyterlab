@@ -126,13 +126,11 @@ class ConsoleCompletion extends Widget {
 
   /**
    * Handle mousedown events for the widget.
-   *
-   * #### Notes
-   * Hides the tooltip if a mousedown happens anywhere outside the tooltip.
    */
   private _evtMousedown(event: MouseEvent) {
     let target = event.target as HTMLElement;
     while (target !== this.node) {
+      // If a completion value is selected, set the model and return.
       if (target.classList.contains(ITEM_CLASS)) {
         // TODO: return a value and dismiss the completion menu.
         return;
