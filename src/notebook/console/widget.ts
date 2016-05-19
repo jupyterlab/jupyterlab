@@ -42,7 +42,7 @@ import {
 } from './tooltip';
 
 import {
-  CompletionWidget, CompletionModel, ICompletionModel
+  CompletionWidget, ICompletionModel
 } from '../completion';
 
 

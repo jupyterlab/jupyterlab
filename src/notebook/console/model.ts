@@ -47,6 +47,10 @@ import {
 } from '../cells/model';
 
 import {
+  ICompletionModel, CompletionModel
+} from '../completion';
+
+import {
   MimeBundle
 } from '../notebook';
 
@@ -118,17 +122,17 @@ interface IConsoleModel extends IDisposable {
   cells: IObservableList<ICellModel>;
 
   /**
+   * The data source for a console's text completion functionality.
+   */
+  completion: ICompletionModel;
+
+  /**
    * The default mime type for new code cells in the console.
    *
    * #### Notes
    * This can be considered the default language of the console.
    */
   defaultMimetype: string;
-
-  /**
-   * The dimensions and contents of a console widget tooltip.
-   */
-  tooltip: ITooltipModel;
 
   /**
    * The console history manager instance.
@@ -139,6 +143,11 @@ interface IConsoleModel extends IDisposable {
    * The optional notebook session associated with the console model.
    */
   session?: INotebookSession;
+
+  /**
+   * The dimensions and contents of a console widget tooltip.
+   */
+  tooltip: ITooltipModel;
 
   /**
    * Run the current contents of the console prompt.
@@ -195,6 +204,7 @@ class ConsoleModel implements IConsoleModel {
     this._banner.input.textEditor.readOnly = true;
     this._banner.input.textEditor.text = this._bannerText;
     this._cells = new ObservableList<ICellModel>();
+    this._completion = new CompletionModel();
     this._history = new ConsoleHistory(this._session && this._session.kernel);
     this._prompt = this.createPrompt();
 
@@ -251,6 +261,16 @@ class ConsoleModel implements IConsoleModel {
    */
   get cells(): IObservableList<ICellModel> {
     return this._cells;
+  }
+
+  /**
+   * The data source for a console's text completion functionality.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get completion(): ICompletionModel {
+    return this._completion;
   }
 
   /**
@@ -481,6 +501,7 @@ class ConsoleModel implements IConsoleModel {
   private _banner: IRawCellModel = null;
   private _bannerText: string = '...';
   private _cells: IObservableList<ICellModel> = null;
+  private _completion: ICompletionModel = null;
   private _defaultMimetype = 'text/x-ipython';
   private _history: IConsoleHistory = null;
   private _metadata: { [key: string]: string } = Object.create(null);
