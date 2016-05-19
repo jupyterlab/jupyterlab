@@ -41,6 +41,10 @@ import {
   ConsoleTooltip
 } from './tooltip';
 
+import {
+  CompletionWidget, CompletionModel, ICompletionModel
+} from '../completion';
+
 
 /**
  * The class name added to console widgets.
@@ -117,6 +121,17 @@ class ConsoleWidget extends Widget {
       widget = new BaseCellWidget(cell);
     }
     return widget;
+  }
+
+  /**
+   * Create a new completion widget.
+   *
+   * @param model A completion model instance.
+   *
+   * @returns A completion widget.
+   */
+  static createCompletion(model: ICompletionModel): CompletionWidget {
+    return new CompletionWidget(model);
   }
 
   /**

@@ -10,26 +10,30 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import {
+  ICompletionModel
+} from './model';
+
 /**
  * The class name added to completion menu widgets.
  */
-const COMPLETION_CLASS = 'jp-ConsoleCompletion';
+const COMPLETION_CLASS = 'jp-Completion';
 
 /**
  * The class name added to completion menu contents.
  */
-const CONTENT_CLASS = 'jp-ConsoleCompletion-content';
+const CONTENT_CLASS = 'jp-Completion-content';
 
 /**
  * The class name added to completion menu contents.
  */
-const ITEM_CLASS = 'jp-ConsoleCompletion-item';
+const ITEM_CLASS = 'jp-Completion-item';
 
 
 export
-class ConsoleCompletion extends Widget {
+class CompletionWidget extends Widget {
   /**
-   * Create the DOM node for a console completion menu.
+   * Create the DOM node for a text completion menu.
    */
   static createNode(): HTMLElement {
     let node = document.createElement('div');
@@ -40,10 +44,11 @@ class ConsoleCompletion extends Widget {
   }
 
   /**
-   * Construct a console completion menu widget.
+   * Construct a text completion menu widget.
    */
-  constructor() {
+  constructor(model: ICompletionModel) {
     super();
+    this._model = model;
     this.addClass(COMPLETION_CLASS);
   }
 
@@ -73,6 +78,17 @@ class ConsoleCompletion extends Widget {
     }
     this._options = newValue;
     this.update();
+  }
+
+  /**
+   * Dispose of the resources held by the completion widget.
+   */
+  dispose() {
+    if (this.isDisposed) return;
+    this._model.dispose();
+    this._model = null;
+    this.options = null;
+    super.dispose();
   }
 
   /**
@@ -139,12 +155,13 @@ class ConsoleCompletion extends Widget {
     }
   }
 
+  private _model: ICompletionModel = null;
   private _options: string[] = null;
 }
 
 
 /**
- * A namespace for ConsoleCompletion widget private data.
+ * A namespace for completion widget private data.
  */
 namespace Private {
 }

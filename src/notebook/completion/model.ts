@@ -83,10 +83,6 @@ class CompletionModel implements ICompletionModel {
 
   /**
    * Dispose of the resources held by the model.
-   *
-   * #### Notes
-   * This model is disposable in order to allow outstanding promises to ignore
-   * their incoming results if no longer necessary.
    */
   dispose(): void {
     if (this.isDisposed) return;
@@ -94,6 +90,9 @@ class CompletionModel implements ICompletionModel {
     this._isDisposed = true;
   }
 
+  /**
+   * Apply the query to the complete options list to return the matching subset.
+   */
   private _filter(): string[] {
     return this._options;
   }
