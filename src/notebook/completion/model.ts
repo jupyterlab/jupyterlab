@@ -85,7 +85,10 @@ class CompletionModel implements ICompletionModel {
    * Dispose of the resources held by the model.
    */
   dispose(): void {
-    if (this.isDisposed) return;
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
     clearSignalData(this);
     this._isDisposed = true;
   }

@@ -358,6 +358,8 @@ class ConsoleModel implements IConsoleModel {
     }
     cells.clear();
     this._cells = null;
+    this._completion.dispose();
+    this._completion = null;
   }
 
   /**

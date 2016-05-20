@@ -65,6 +65,43 @@ interface ITextChange {
 
 
 /**
+ * An interface describing editor text changes.
+ */
+export
+interface ICompletionRequest {
+  /**
+   * The character number of the editor cursor within a line.
+   */
+  ch: number;
+
+  /**
+   * The height of a character in the editor.
+   */
+  chHeight: number;
+
+  /**
+   * The width of a character in the editor.
+   */
+  chWidth: number;
+
+  /**
+   * The line number of the editor cursor.
+   */
+  line: number;
+
+  /**
+   * The coordinate position of the cursor.
+   */
+  coords: { left: number; right: number; top: number; bottom: number; }
+
+  /**
+   * The current value of the editor text.
+   */
+  value: string;
+}
+
+
+/**
  * An interface required for implementing the editor model.
  */
 export
@@ -73,6 +110,11 @@ interface IEditorModel extends IDisposable {
    * A signal emitted when the editor model state changes.
    */
   stateChanged: ISignal<IEditorModel, IChangedArgs<any>>;
+
+  /**
+   * A signal emitted when a tab (text) completion is requested.
+   */
+  completionRequested: ISignal<IEditorModel, ICompletionRequest>;
 
   /**
    * A signal emitted when either the top or bottom edge is requested.
@@ -197,7 +239,14 @@ class EditorModel implements IEditorModel {
     return EditorModelPrivate.stateChangedSignal.bind(this);
   }
 
- /**
+  /**
+   * A signal emitted when a tab (text) completion is requested.
+   */
+  get completionRequested(): ISignal<IEditorModel, ICompletionRequest> {
+    return EditorModelPrivate.completionRequested.bind(this);
+  }
+
+  /**
    * A signal emitted when either the top or bottom edge is requested.
    */
   get edgeRequested(): ISignal<EditorModel, EdgeLocation> {
@@ -388,6 +437,12 @@ namespace EditorModelPrivate {
    */
   export
   const edgeRequestedSignal = new Signal<EditorModel, EdgeLocation>();
+
+  /**
+   * A signal emitted when a tab (text) completion is requested.
+   */
+  export
+  const completionRequested = new Signal<IEditorModel, ICompletionRequest>();
 
   /**
    * A signal emitted when a text change is completed.

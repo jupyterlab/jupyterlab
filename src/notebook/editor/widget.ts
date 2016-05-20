@@ -59,6 +59,11 @@ const UP_ARROW = 38;
 const DOWN_ARROW = 40;
 
 /**
+ * The key code for the tab key.
+ */
+const TAB = 9;
+
+/**
  * Initialize diff match patch.
  */
 let diffMatchPatch = new dmp.diff_match_patch();
@@ -127,6 +132,22 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
       let cursor = doc.getCursor();
       let line = cursor.line;
       let ch = cursor.ch;
+
+      if (event.keyCode === TAB) {
+        let value = instance.getValue();
+        let currentLine = value.split('\n')[line];
+        let chHeight = editor.defaultTextHeight();
+        let chWidth = editor.defaultCharWidth();
+        let coords = editor.charCoords({line, ch}, 'page');
+        if (currentLine.match(/\S$/)) {
+          model.completionRequested.emit({
+            line, ch, chHeight, chWidth, coords, value
+          });
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        return;
+      }
 
       if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
         this._model.edgeRequested.emit('top');
