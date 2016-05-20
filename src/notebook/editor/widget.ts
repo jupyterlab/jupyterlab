@@ -123,10 +123,9 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
       let ch = cursor.ch;
       let chHeight = editor.defaultTextHeight();
       let chWidth = editor.defaultCharWidth();
-      let coords = editor.charCoords({line, ch}, 'page');
-      model.textChanged.emit({
-        line, ch, chHeight, chWidth, coords, oldValue, newValue
-      });
+      let coords = editor.charCoords({ line, ch }, 'page');
+      let data = { line, ch, chHeight, chWidth, coords, oldValue, newValue };
+      model.textChanged.emit(data);
     });
     CodeMirror.on(editor, 'keydown', (instance: any, event: KeyboardEvent) => {
       let cursor = doc.getCursor();
@@ -140,9 +139,8 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
         let chWidth = editor.defaultCharWidth();
         let coords = editor.charCoords({line, ch}, 'page');
         if (currentLine.match(/\S$/)) {
-          model.completionRequested.emit({
-            line, ch, chHeight, chWidth, coords, value
-          });
+          let data = { line, ch, chHeight, chWidth, coords, value };
+          model.completionRequested.emit(data);
           event.preventDefault();
           event.stopPropagation();
         }

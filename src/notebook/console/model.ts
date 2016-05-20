@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  INotebookSession, IInspectReply
+  INotebookSession, IInspectReply, ICompleteReply
 } from 'jupyter-js-services';
 
 import {
@@ -27,7 +27,8 @@ import {
 } from './history';
 
 import {
-  EditorModel, IEditorModel, IEditorOptions, EdgeLocation, ITextChange
+  EditorModel, IEditorModel, IEditorOptions, EdgeLocation,
+  ITextChange, ICompletionRequest
 } from '../editor/model';
 
 import {
@@ -386,6 +387,8 @@ class ConsoleModel implements IConsoleModel {
     textEditor.edgeRequested.connect(this.onEdgeRequest, this);
     // Connect each new prompt's text changes to console tooltips.
     textEditor.textChanged.connect(this.onTextChange, this);
+    // Connect each new prompt's tab completions requests to console completion.
+    textEditor.completionRequested.connect(this.onCompletionRequest, this);
 
     return cell;
   }
@@ -444,6 +447,31 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
+   * Handle a completion request in the prompt model.
+   */
+  protected onCompletionRequest(sender: any, args: ICompletionRequest) {
+    let pendingComplete = ++this._pendingComplete;
+    let contents = { code: args.value, cursor_pos: args.ch };
+
+    this._session.kernel.complete(contents).then((value: ICompleteReply) => {
+      // If model has been disposed, bail.
+      if (this.isDisposed) {
+        return;
+      }
+      // If a newer completion requesy has created a pending request, bail.
+      if (pendingComplete !== this._pendingComplete) {
+        return;
+      }
+      // Completion request failures or negative results fail silently.
+      if (value.status !== 'ok') {
+        return;
+      }
+
+      console.log('value', value);
+    });
+  }
+
+  /**
    * Handle a text change in the prompt model.
    */
   protected onTextChange(sender: any, args: ITextChange) {
@@ -460,15 +488,22 @@ class ConsoleModel implements IConsoleModel {
     }
 
     let pendingInspect = ++this._pendingInspect;
-    let contents = {code: currentLine, cursor_pos: args.ch, detail_level: 0};
+    let contents = { code: currentLine, cursor_pos: args.ch, detail_level: 0 };
 
     this._session.kernel.inspect(contents).then((value: IInspectReply) => {
       // If model has been disposed, bail.
-      if (this.isDisposed) return;
+      if (this.isDisposed) {
+        return;
+      }
       // If a newer text change has created a pending request, bail.
-      if (pendingInspect !== this._pendingInspect) return;
+      if (pendingInspect !== this._pendingInspect) {
+        return;
+      }
       // Tooltip request failures or negative results fail silently.
-      if (value.status !== 'ok' || !value.found) return;
+      if (value.status !== 'ok' || !value.found) {
+        return;
+      }
+
       this.tooltip = {
         change: args,
         currentLine: currentLine,
@@ -507,7 +542,8 @@ class ConsoleModel implements IConsoleModel {
   private _defaultMimetype = 'text/x-ipython';
   private _history: IConsoleHistory = null;
   private _metadata: { [key: string]: string } = Object.create(null);
-  private _pendingInspect: number = 0;
+  private _pendingComplete = 0;
+  private _pendingInspect = 0;
   private _prompt: ICodeCellModel = null;
   private _tooltip: ITooltipModel = null;
   private _session: INotebookSession = null;
