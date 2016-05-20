@@ -50,6 +50,7 @@ class CompletionWidget extends Widget {
     super();
     this._model = model;
     this.addClass(COMPLETION_CLASS);
+    this.hide();
   }
 
   /**
@@ -78,6 +79,16 @@ class CompletionWidget extends Widget {
     }
     this._options = newValue;
     this.update();
+  }
+
+  /**
+   * The semantic parent of the completion widget, its reference widget.
+   */
+  get reference(): Widget {
+    return this._reference;
+  }
+  set reference(widget: Widget) {
+    this._reference = widget;
   }
 
   /**
@@ -157,6 +168,7 @@ class CompletionWidget extends Widget {
 
   private _model: ICompletionModel = null;
   private _options: string[] = null;
+  private _reference: Widget = null;
 }
 
 

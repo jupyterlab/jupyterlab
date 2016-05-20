@@ -138,6 +138,11 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
         let chHeight = editor.defaultTextHeight();
         let chWidth = editor.defaultCharWidth();
         let coords = editor.charCoords({line, ch}, 'page');
+
+        // A completion request signal should only be emitted if the final
+        // character of the current line is not whitespace. Otherwise, the
+        // default tab action of creating a tab character should be allowed to
+        // propagate.
         if (currentLine.match(/\S$/)) {
           let data = { line, ch, chHeight, chWidth, coords, value };
           model.completionRequested.emit(data);

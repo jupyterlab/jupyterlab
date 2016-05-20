@@ -44,6 +44,7 @@ class ConsoleTooltip extends Panel {
     super();
     this.addClass(TOOLTIP_CLASS);
     this.rect = rect;
+    this.hide();
   }
 
   /**
@@ -61,7 +62,7 @@ class ConsoleTooltip extends Panel {
       return;
     }
     this._rect = newValue;
-    this.update();
+    if (this.isVisible) this.update();
   }
 
   /**
@@ -88,8 +89,10 @@ class ConsoleTooltip extends Panel {
       this._content.dispose();
     }
     this._content = newValue;
-    this.addChild(this._content);
-    this.update();
+    if (this._content) {
+      this.addChild(this._content);
+      this.update();
+    }
   }
 
   /**
@@ -136,6 +139,7 @@ class ConsoleTooltip extends Panel {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
+    this.show();
     // Set the dimensions of the tooltip widget.
     Private.setBoundingClientRect(this.node, this._rect);
   }
@@ -154,7 +158,7 @@ class ConsoleTooltip extends Panel {
       if (this._reference && target === this._reference.node) return;
       target = target.parentElement;
     }
-    this.dispose();
+    this.hide();
   }
 
   /**

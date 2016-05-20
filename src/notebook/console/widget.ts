@@ -163,11 +163,21 @@ class ConsoleWidget extends Widget {
    */
   constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
     super();
+    let constructor = this.constructor as typeof ConsoleWidget;
     this.addClass(CONSOLE_CLASS);
+    this.layout = new PanelLayout();
     this._model = model;
     this._rendermime = rendermime;
-    this.layout = new PanelLayout();
     this._initHeader();
+
+    this._completion = constructor.createCompletion(this._model.completion);
+    this._completion.reference = this;
+    this._completion.attach(document.body);
+
+    this._tooltip = constructor.createTooltip(0, 0);
+    this._tooltip.reference = this;
+    this._tooltip.attach(document.body);
+
     model.cells.changed.connect(this.onCellsChanged, this);
     model.stateChanged.connect(this.onModelChanged, this);
   }
@@ -257,7 +267,7 @@ class ConsoleWidget extends Widget {
       let model = args.newValue;
 
       if (!model) {
-        if (this._tooltip) this._tooltip.hide();
+        this._tooltip.hide();
         return;
       }
 
@@ -279,11 +289,6 @@ class ConsoleWidget extends Widget {
         return;
       }
 
-      if (!this._tooltip) {
-        this._tooltip = constructor.createTooltip(top, left);
-        this._tooltip.reference = this;
-        this._tooltip.attach(document.body);
-      }
       this._tooltip.rect = {top, left} as ClientRect;
       this._tooltip.content = content;
       this._tooltip.node.style.maxHeight = maxHeight + 'px';
@@ -304,6 +309,7 @@ class ConsoleWidget extends Widget {
     }
   }
 
+  private _completion: CompletionWidget = null;
   private _model: IConsoleModel = null;
   private _rendermime: RenderMime<Widget> = null;
   private _tooltip: ConsoleTooltip = null;
