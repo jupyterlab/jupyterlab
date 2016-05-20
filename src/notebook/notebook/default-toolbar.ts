@@ -237,17 +237,17 @@ namespace ToolbarItems {
   export
   function populateDefaults(panel: NotebookPanel): void {
     let toolbar = panel.toolbar;
-    toolbar.add('save', ToolbarItems.createSaveButton(panel));
-    toolbar.add('insert', ToolbarItems.createInsertButton(panel));
-    toolbar.add('cut', ToolbarItems.createCutButton(panel));
-    toolbar.add('copy', ToolbarItems.createCopyButton(panel));
-    toolbar.add('paste', ToolbarItems.createPasteButton(panel));
-    toolbar.add('run', ToolbarItems.createRunButton(panel));
-    toolbar.add('interrupt', ToolbarItems.createInterruptButton(panel));
-    toolbar.add('restart', ToolbarItems.createRestartButton(panel));
-    toolbar.add('cellType', ToolbarItems.createCellTypeItem(panel));
-    toolbar.add('kernelName', ToolbarItems.createKernelNameItem(panel));
-    toolbar.add('kernelStatus', ToolbarItems.createKernelStatusItem(panel));
+    toolbar.add('save', createSaveButton(panel));
+    toolbar.add('insert', createInsertButton(panel));
+    toolbar.add('cut', createCutButton(panel));
+    toolbar.add('copy', createCopyButton(panel));
+    toolbar.add('paste', createPasteButton(panel));
+    toolbar.add('run', createRunButton(panel));
+    toolbar.add('interrupt', createInterruptButton(panel));
+    toolbar.add('restart', createRestartButton(panel));
+    toolbar.add('cellType', createCellTypeItem(panel));
+    toolbar.add('kernelName', createKernelNameItem(panel));
+    toolbar.add('kernelStatus', createKernelStatusItem(panel));
   }
 }
 
