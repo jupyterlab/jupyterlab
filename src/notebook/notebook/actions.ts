@@ -178,7 +178,17 @@ namespace NotebookActions {
       if (child.model.type === value) {
         continue;
       }
-      let newCell = Private.cloneCell(model, child.model);
+      let newCell: ICellModel;
+      switch (value) {
+      case 'code':
+        newCell = model.createCodeCell(child.model.toJSON());
+        break;
+      case 'markdown':
+        newCell = model.createMarkdownCell(child.model.toJSON());
+        break;
+      default:
+        newCell = model.createRawCell(child.model.toJSON());
+      }
       model.cells.replace(i, 1, [newCell]);
       if (value === 'markdown') {
         // Fetch the new widget.
