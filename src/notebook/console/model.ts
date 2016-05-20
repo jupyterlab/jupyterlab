@@ -453,6 +453,11 @@ class ConsoleModel implements IConsoleModel {
     let pendingComplete = ++this._pendingComplete;
     let contents = { code: args.value, cursor_pos: args.ch };
 
+    // If there is no session, no requests can be sent to the API.
+    if (!this._session) {
+      return;
+    }
+
     this._session.kernel.complete(contents).then((value: ICompleteReply) => {
       // If model has been disposed, bail.
       if (this.isDisposed) {
@@ -466,8 +471,8 @@ class ConsoleModel implements IConsoleModel {
       if (value.status !== 'ok') {
         return;
       }
-
-      console.log('value', value);
+      // Update the completion model options.
+      this._completion.options = value.matches;
     });
   }
 
@@ -477,6 +482,11 @@ class ConsoleModel implements IConsoleModel {
   protected onTextChange(sender: any, args: ITextChange) {
     if (!args.newValue) {
       this.tooltip = null;
+      return;
+    }
+
+    // If there is no session, no requests can be sent to the API.
+    if (!this._session) {
       return;
     }
 

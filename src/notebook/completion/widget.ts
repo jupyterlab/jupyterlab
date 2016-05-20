@@ -73,7 +73,7 @@ class CompletionWidget extends Widget {
     if (newValue === this._options || !newValue && !this._options) {
       return;
     }
-    if (newValue.join() === this._options.join()) {
+    if (newValue && this._options && newValue.join() === this._options.join()) {
       return;
     }
     this._options = newValue;
