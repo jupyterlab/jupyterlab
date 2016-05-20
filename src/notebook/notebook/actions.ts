@@ -191,7 +191,7 @@ namespace NotebookActions {
       }
       model.cells.replace(i, 1, [newCell]);
       if (value === 'markdown') {
-        // Fetch the new widget.
+        // Fetch the new widget and unrender it.
         child = widget.childAt(i);
         (child as MarkdownCellWidget).rendered = false;
       }

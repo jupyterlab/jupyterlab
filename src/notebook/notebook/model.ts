@@ -158,10 +158,13 @@ class NotebookModel implements INotebookModel {
   /**
    * Construct a new notebook model.
    */
-  constructor() {
+  constructor(languagePreference?: string) {
     this._cells = new ObservableList<ICellModel>();
     this._cells.changed.connect(this.onCellsChanged, this);
     this._changeStack = new NotebookUndo(this);
+    if (languagePreference) {
+      this._metadata['language_info'] = `{"name":"${languagePreference}"`;
+    }
   }
 
   /**
