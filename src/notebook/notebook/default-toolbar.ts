@@ -198,7 +198,7 @@ namespace ToolbarItems {
    * Create a cell type switcher item.
    */
   export
-  function createCellSwitchItem(panel: NotebookPanel): Widget {
+  function createCellTypeItem(panel: NotebookPanel): Widget {
     return new CellTypeSwitcher(panel);
   }
 
@@ -209,13 +209,16 @@ namespace ToolbarItems {
   function createKernelNameItem(panel: NotebookPanel): Widget {
     let widget = new Widget();
     widget.addClass(TOOLBAR_KERNEL);
+    widget.node.textContent = 'No Kernel!';
     if (panel.context.kernel) {
-      widget.node.textContent = panel.context.kernel.name;
-    } else {
-      widget.node.textContent = 'No Kernel!';
+      panel.context.kernel.getKernelSpec().then(spec => {
+        widget.node.textContent = spec.display_name;
+      });
     }
     panel.context.kernelChanged.connect(() => {
-      widget.node.textContent = panel.context.kernel.name;
+      panel.context.kernel.getKernelSpec().then(spec => {
+        widget.node.textContent = spec.display_name;
+      });
     });
     return widget;
   }
@@ -226,6 +229,25 @@ namespace ToolbarItems {
   export
   function createKernelStatusItem(panel: NotebookPanel): Widget {
     return new KernelIndicator(panel.context);
+  }
+
+  /**
+   * Add the default items to a toolbar.
+   */
+  export
+  function populateDefaults(panel: NotebookPanel): void {
+    let toolbar = panel.toolbar;
+    toolbar.add('save', ToolbarItems.createSaveButton(panel));
+    toolbar.add('insert', ToolbarItems.createInsertButton(panel));
+    toolbar.add('cut', ToolbarItems.createCutButton(panel));
+    toolbar.add('copy', ToolbarItems.createCopyButton(panel));
+    toolbar.add('paste', ToolbarItems.createPasteButton(panel));
+    toolbar.add('run', ToolbarItems.createRunButton(panel));
+    toolbar.add('interrupt', ToolbarItems.createInterruptButton(panel));
+    toolbar.add('restart', ToolbarItems.createRestartButton(panel));
+    toolbar.add('cellType', ToolbarItems.createCellTypeItem(panel));
+    toolbar.add('kernelName', ToolbarItems.createKernelNameItem(panel));
+    toolbar.add('kernelStatus', ToolbarItems.createKernelStatusItem(panel));
   }
 }
 

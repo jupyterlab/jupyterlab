@@ -56,9 +56,9 @@ class NotebookToolbar extends Widget {
   /**
    * Add an item to the toolbar.
    *
-   * @param widget - The widget to add to the toolbar.
-   *
    * @param name - The name of the widget to add to the toolbar.
+   *
+   * @param widget - The widget to add to the toolbar.
    *
    * @param after - The optional name of the item to insert after.
    *
@@ -67,7 +67,7 @@ class NotebookToolbar extends Widget {
    * If `after` is not given, or the named widget is not in the toolbar,
    * the widget will be added to the end of the toolbar.
    */
-  add(widget: Widget, name: string, after?: string): void {
+  add(name: string, widget: Widget, after?: string): void {
     let names = this.list();
     if (names.indexOf(name) !== -1) {
       throw new Error(`A button named "${name}" was already added`);

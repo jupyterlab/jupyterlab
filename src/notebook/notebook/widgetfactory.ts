@@ -23,6 +23,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  ToolbarItems
+} from './default-toolbar';
+
+import {
   INotebookModel
 } from './model';
 
@@ -67,7 +71,9 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
     if (kernel) {
       context.changeKernel(kernel);
     }
-    return new NotebookPanel(model, rendermime, context, this._clipboard);
+    let panel = new NotebookPanel(model, rendermime, context, this._clipboard);
+    ToolbarItems.populateDefaults(panel);
+    return panel;
   }
 
   /**
