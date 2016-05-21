@@ -64,7 +64,6 @@
     "test:ie": "karma start --browsers=IE test/karma.conf.js",
     "test:debug": "karma start --browsers=Chrome --singleRun=false --debug=true test/karma.conf.js",
     "test": "npm run test:firefox",
-    "watch:examples": "watch 'npm run build && npm run build:examples' src --wait 10",
     "watch": "watch 'npm run build' src"
   },
   "repository": {
