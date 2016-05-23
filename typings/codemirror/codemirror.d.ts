@@ -32,6 +32,14 @@ declare module CodeMirror {
         [key: string]: any;
     }
 
+    interface modeinfo {
+      ext: string[];
+      mime: string;
+      mode: string;
+      name: string;
+    }
+    var modeInfo: modeinfo[];
+
     var version: string;
 
     /** If you want to define extra methods in terms of the CodeMirror API, it is possible to use defineExtension.

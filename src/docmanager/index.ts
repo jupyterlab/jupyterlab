@@ -21,7 +21,7 @@ import {
 } from 'phosphor-panel';
 
 import {
-  ISignal
+  ISignal, Signal
 } from 'phosphor-signaling';
 
 import {
@@ -117,6 +117,11 @@ interface IDocumentModel extends IDisposable {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: any): void;
+
+  /**
+   * Initialize the model state.
+   */
+  initialize(): void;
 }
 
 
@@ -432,7 +437,7 @@ class DocumentManager implements IDisposable {
       for (let option of options.defaultFor) {
         if (option === '.*') {
           this._defaultWidgetFactory = name;
-        } else if (option in options.fileExtensions) {
+        } else if (options.fileExtensions.indexOf(option) !== -1) {
           this._defaultWidgetFactories[option] = name;
         }
       }
@@ -512,7 +517,7 @@ class DocumentManager implements IDisposable {
         continue;
       }
       let exts = options.fileExtensions;
-      if ((ext in exts) || ('.*' in exts)) {
+      if ((exts.indexOf(ext) !== -1) || (exts.indexOf('.*') !== -1)) {
         factories.push(name);
       }
     }
@@ -550,7 +555,7 @@ class DocumentManager implements IDisposable {
    *
    * @param kernel - An optional kernel name/id to override the default.
    */
-  open(path: string, widgetName='default', kernel?: IKernelId): Widget {
+  open(path: string, widgetName='default', kernel?: IKernelId): DocumentWidget {
     if (widgetName === 'default') {
       widgetName = this.listWidgetFactories(path)[0];
     }
@@ -572,6 +577,7 @@ class DocumentManager implements IDisposable {
     widget = this._createWidget(widgetName, id);
     // Load the contents from disk.
     this._contextManager.revert(id).then(() => {
+      model.initialize();
       this._populateWidget(widget, kernel);
     });
     return widget;
@@ -601,6 +607,7 @@ class DocumentManager implements IDisposable {
     // Save the contents to disk to get a valid contentsModel for the
     // context.
     this._contextManager.save(id).then(() => {
+      model.initialize();
       this._populateWidget(widget, kernel);
     });
     return widget;
@@ -748,6 +755,13 @@ class DocumentManager implements IDisposable {
 export
 class DocumentWidget extends Widget {
   /**
+   * A signal emitted when the document widget is populated.
+   */
+  get populated(): ISignal<DocumentWidget, Widget> {
+    return Private.populatedSignal.bind(this);
+  }
+
+  /**
    * Construct a new document widget.
    */
   constructor(name: string, id: string, manager: ContextManager, factory: IWidgetFactory<Widget>, widgets: { [key: string]: DocumentWidget[] }) {
@@ -779,6 +793,14 @@ class DocumentWidget extends Widget {
    */
   get context(): IDocumentContext {
     return this._manager.getContext(this._id);
+  }
+
+  /**
+   * The content widget used by the document widget.
+   */
+  get content(): Widget {
+    let layout = this.layout as PanelLayout;
+    return layout.childAt(0);
   }
 
   /**
@@ -834,6 +856,7 @@ class DocumentWidget extends Widget {
     });
     // Add the child widget to the layout.
     (this.layout as PanelLayout).addChild(child);
+    this.populated.emit(child);
   }
 
   /**
@@ -930,6 +953,12 @@ class DocumentWidget extends Widget {
  * A private namespace for DocumentManager data.
  */
 namespace Private {
+  /**
+   * A signal emitted when the document widget is populated.
+   */
+  export
+  const populatedSignal = new Signal<DocumentWidget, Widget>();
+
   /**
    * An extended interface for a model factory and its options.
    */
