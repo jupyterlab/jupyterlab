@@ -304,6 +304,7 @@ namespace NotebookActions {
     if (widget.activeCellIndex === 0) {
       return;
     }
+    widget.mode = 'command';
     let current = widget.childAt(widget.activeCellIndex);
     let prev = widget.childAt(widget.activeCellIndex - 1);
     if (widget.isSelected(prev)) {
@@ -332,6 +333,7 @@ namespace NotebookActions {
     if (widget.activeCellIndex === model.cells.length - 1) {
       return;
     }
+    widget.mode = 'command';
     let current = widget.childAt(widget.activeCellIndex);
     let next = widget.childAt(widget.activeCellIndex + 1);
     if (widget.isSelected(next)) {

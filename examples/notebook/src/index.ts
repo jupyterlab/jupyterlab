@@ -206,9 +206,11 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     NotebookActions.splitCell(nbWidget.content);
   };
   let undoHandler = () => {
+    nbWidget.content.mode = 'command';
     nbWidget.model.undo();
   };
   let redoHandler = () => {
+    nbWidget.content.mode = 'command';
     nbWidget.model.redo();
   };
 

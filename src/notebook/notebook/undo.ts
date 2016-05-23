@@ -171,7 +171,7 @@ class NotebookUndo implements IDisposable {
       break;
     case ListChangeType.Set:
       cell = this._createCell(change.oldValue as IBaseCell);
-      list.set(change.newIndex, cell);
+      list.set(change.oldIndex, cell);
       break;
     case ListChangeType.Remove:
       cell = this._createCell(change.oldValue as IBaseCell);
