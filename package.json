@@ -52,7 +52,7 @@
     "postinstall": "npm dedupe",
     "prepublish": "npm run build",
     "test:chrome": "karma start --browsers=Chrome test/karma.conf.js",
-    "test:coverage": "webpack --config test/webpack-cov.conf.js && karma start test/karma-cov.conf.js",
+    "test:coverage": "npm run build:test && webpack --config test/webpack-cov.conf.js && karma start test/karma-cov.conf.js",
     "test:firefox": "karma start --browsers=Firefox test/karma.conf.js",
     "test:ie": "karma start --browsers=IE test/karma.conf.js",
     "test:debug": "karma start --browsers=Chrome --singleRun=false --debug=true test/karma.conf.js",
