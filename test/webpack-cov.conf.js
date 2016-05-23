@@ -3,7 +3,9 @@ var path = require('path');
 module.exports = {
   entry: './test/build/index.js',
   output: {
-    filename: './test/build/coverage.js'
+    path: __dirname + "/build",
+    filename: "coverage.js",
+    publicPath: "./build/"
   },
   bail: true,
   module: {

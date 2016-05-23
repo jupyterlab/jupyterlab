@@ -54,18 +54,18 @@
     "build:example": "cd example && npm run update && npm run build",
     "build:src": "tsc --project src && node scripts/copyfiles.js",
     "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
-    "build": "npm run build:src && npm run build:test",
+    "build": "npm run build:src",
     "docs": "typedoc --mode file --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
     "postinstall": "npm dedupe",
     "prepublish": "npm run build",
     "test:chrome": "karma start --browsers=Chrome test/karma.conf.js",
-    "test:coverage": "webpack --config test/webpack-cov.conf.js && karma start test/karma-cov.conf.js",
+    "test:coverage": "npm run build:test && webpack --config test/webpack-cov.conf.js && karma start test/karma-cov.conf.js",
     "test:firefox": "karma start --browsers=Firefox test/karma.conf.js",
     "test:ie": "karma start --browsers=IE test/karma.conf.js",
     "test:debug": "karma start --browsers=Chrome --singleRun=false --debug=true test/karma.conf.js",
-    "test": "npm run test:firefox",
-    "watch:example": "watch 'npm run build && npm run build:example' src --wait 10",
-    "watch": "watch 'npm run build' src"
+    "test": "npm run build:test && npm run test:firefox",
+    "watch": "watch 'npm run build' src --wait 10",
+    "watch:test": "watch 'npm run build && npm test' src src/test --wait 10"
   },
   "repository": {
     "type": "git",
