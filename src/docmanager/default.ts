@@ -167,6 +167,13 @@ class DocumentModel implements IDocumentModel {
     this.fromString(JSON.parse(value));
   }
 
+  /**
+   * Initialize the model state.
+   */
+  initialize(): void {
+    // No action necessary.
+  }
+
   private _text = '';
   private _defaultLang = '';
   private _dirty = false;

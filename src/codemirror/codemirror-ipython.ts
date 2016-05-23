@@ -27,3 +27,9 @@ CodeMirror.defineMode('ipython', (config: CodeMirror.EditorConfiguration, modeOp
 });
 
 CodeMirror.defineMIME('text/x-ipython', 'ipython');
+CodeMirror.modeInfo.push({
+  ext: [],
+  mime: 'text/x-ipython',
+  mode: 'ipython',
+  name: 'ipython'
+});

@@ -328,8 +328,9 @@ class ContextManager implements IDisposable {
     if (!session) {
       let path = contextEx.path;
       let sOptions = {
-        notebook: { path },
-        kernel: { options }
+        notebookPath: path,
+        kernelName: options.name,
+        kernelId: options.id
       };
       return this._startSession(id, sOptions);
     } else {
@@ -381,7 +382,7 @@ class ContextManager implements IDisposable {
     if (model.readOnly) {
       return Promise.reject(new Error('Read only'));
     }
-    if (opts.format === 'json') {
+    if (opts.type === 'notebook' || opts.format === 'json') {
       opts.content = model.toJSON();
     } else {
       opts.content = model.toString();
