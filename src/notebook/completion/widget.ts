@@ -51,6 +51,7 @@ class CompletionWidget extends Widget {
     this._model = model;
     this.addClass(COMPLETION_CLASS);
     this.hide();
+    this._model.optionsChanged.connect(this.onOptionsChanged, this);
   }
 
   /**
@@ -141,14 +142,25 @@ class CompletionWidget extends Widget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
+    let list = this.listNode;
+    list.textContent = '';
     if (this._options && this._options.length) {
       let list = this.listNode;
       for (let i = 0, len = this._options.length; i < len; i++) {
         let item = document.createElement('li');
         item.className = ITEM_CLASS;
         item.innerHTML = this._options[i];
+        list.appendChild(item);
       }
     }
+    this.show();
+  }
+
+  /**
+   * Handle option changes from the model.
+   */
+  protected onOptionsChanged(sender: ICompletionModel, args: void): void {
+    this.options = this._model.options;
   }
 
   /**

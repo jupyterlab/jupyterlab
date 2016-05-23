@@ -60,7 +60,6 @@ class CompletionModel implements ICompletionModel {
     return this._filter();
   }
   set options(newValue: string[]) {
-    console.log('new completion options', newValue);
     // If the new value and the old value are falsey, return;
     if (newValue === this._options || !newValue && !this._options) {
       return;

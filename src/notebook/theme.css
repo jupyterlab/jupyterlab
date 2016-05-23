@@ -362,9 +362,10 @@
 
 
 .jp-ConsoleTooltip {
-  display: inline-block;
+  position: absolute;
   background: #FFFFCA;
   border: 1px solid black;
+  z-index: 10001;
 }
 
 .jp-ConsoleTooltip pre {
@@ -468,3 +469,10 @@
 
 
 .jp-ConsoleTooltip pre .ansi-bright-white-bg { background-color: #FFFFFF; }
+
+
+.jp-Completion {
+  position: absolute;
+  border: 1px solid black;
+}
+

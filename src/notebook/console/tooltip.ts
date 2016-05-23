@@ -170,7 +170,9 @@ class ConsoleTooltip extends Panel {
   private _evtMousedown(event: MouseEvent) {
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
-      if (target === this.node) return;
+      if (target === this.node) {
+        return;
+      }
       target = target.parentElement;
     }
     this.hide();
