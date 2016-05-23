@@ -253,8 +253,8 @@ class NotebookRenderer extends Widget {
         widget.dispose();
       }
       let newValues = args.newValue as ICellModel[];
-      for (let i = newValues.length; i < 0; i--) {
-        widget = factory(newValues[i], this._rendermime);
+      for (let i = newValues.length; i > 0; i--) {
+        widget = factory(newValues[i - 1], this._rendermime);
         this._initializeCellWidget(widget);
         layout.insertChild(args.newIndex, widget);
       }
@@ -431,6 +431,7 @@ class ActiveNotebook extends NotebookRenderer {
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
     this.node.addEventListener('dblclick', this);
+    this.update();
   }
 
   /**
@@ -453,6 +454,9 @@ class ActiveNotebook extends NotebookRenderer {
       this.removeClass(COMMAND_CLASS);
       if (widget) {
         widget.focus();
+      }
+      if (widget instanceof MarkdownCellWidget) {
+        (widget as MarkdownCellWidget).rendered = false;
       }
     } else {
       this.addClass(COMMAND_CLASS);
@@ -521,7 +525,7 @@ class ActiveNotebook extends NotebookRenderer {
   }
 
   private _mode: NotebookMode = 'command';
-  private _activeCellIndex = -1;
+  private _activeCellIndex = 0;
 }
 
 
@@ -563,11 +567,7 @@ namespace Private {
         // Do nothing.
       } else if ((mode as CodeMirror.modespec).name) {
         let name = (mode as CodeMirror.modespec).name;
-        if (CodeMirror.modes.hasOwnProperty(name)) {
-          mode = CodeMirror.modes[name];
-        } else {
-          mode = CodeMirror.findModeByName(mode as string);
-        }
+        mode = CodeMirror.findModeByName(name);
       }
       if (mode) {
         mime = (mode as CodeMirror.modespec).mime;

@@ -12,8 +12,13 @@
 }
 
 
+.p-Widget.jp-Notebook-panel {
+  height: 100%;
+}
+
+
 .p-Widget.jp-Notebook-container {
-  overflow-y: auto;
+  overflow: auto;
   padding-left: 10px;
   padding-right: 10px;
   padding-bottom: 20px;
@@ -37,7 +42,7 @@
 }
 
 
-.jp-InputArea-editor.jp-CodeMirror {
+.jp-CodeMirror {
   border: 1px solid #cfcfcf;
   border-radius: 2px;
   background: #f7f7f7;
@@ -113,7 +118,7 @@
 }
 
 
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-otherSelected.jp-mod-active {
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-multiSelected.jp-mod-active {
   background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 7px, #E3F2FD 7px, #E3F2FD 100%);
 }
 

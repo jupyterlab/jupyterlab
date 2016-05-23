@@ -40,10 +40,6 @@ import {
 } from 'phosphor-keymap';
 
 import {
-  PanelLayout
-} from 'phosphor-panel';
-
-import {
   SplitPanel
 } from 'phosphor-splitpanel';
 
@@ -97,14 +93,9 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   }
   let rendermime = new RenderMime<Widget>(renderers, order);
 
-  let nbWidget: NotebookPanel;
-
   let opener = {
     open: (widget: DocumentWidget) => {
-      panel.addChild(widget);
-      SplitPanel.setStretch(widget, 1);
-      let layout = widget.layout as PanelLayout;
-      nbWidget = layout.childAt(0) as NotebookPanel;
+      // Do nothing for sibling widgets for now.
     }
   };
 
@@ -115,7 +106,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   let wFactory = new NotebookWidgetFactory(rendermime, clipboard);
   docManager.registerModelFactory(mFactory, {
     name: 'notebook',
-    contentsOptions: { format: 'json', type: 'notebook' }
+    contentsOptions: { type: 'notebook' }
   });
   docManager.registerWidgetFactory(wFactory, {
     displayName: 'Notebook',
@@ -125,7 +116,11 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     preferKernel: true,
     canStartKernel: true
   });
-  docManager.open(NOTEBOOK);
+  let doc = docManager.open(NOTEBOOK);
+  let nbWidget: NotebookPanel;
+  doc.populated.connect((d, widget) => {
+    nbWidget = widget as NotebookPanel;
+  });
 
   let pModel = new StandardPaletteModel();
   let palette = new CommandPalette();
@@ -138,6 +133,8 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   SplitPanel.setStretch(palette, 0);
   panel.attach(document.body);
   panel.addChild(palette);
+  panel.addChild(doc);
+  SplitPanel.setStretch(doc, 1);
   window.onresize = () => { panel.update(); };
 
   let saveHandler = () => { nbWidget.context.save(); };
@@ -146,10 +143,17 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
       nbWidget.context.kernel.interrupt();
     }
   };
-  let restartHandler = () => {
-    if (nbWidget.context.kernel) {
-      nbWidget.context.kernel.restart();
+  let restartHandler = () => {  nbWidget.restart(); };
+  let switchHandler = () => {
+    let context = nbWidget.context;
+    if (!context.kernel) {
+      return;
     }
+    selectKernel(nbWidget.node, context.kernel.name, specs).then(name => {
+      if (name) {
+        context.changeKernel({ name });
+      }
+    });
   };
   let runAdvanceHandler = () => {
     NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.kernel);
@@ -201,6 +205,12 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   let splitHandler = () => {
     NotebookActions.splitCell(nbWidget.content);
   };
+  let undoHandler = () => {
+    nbWidget.model.undo();
+  };
+  let redoHandler = () => {
+    nbWidget.model.redo();
+  };
 
   let items: IStandardPaletteItemOptions[] = [
   {
@@ -220,6 +230,11 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     text: 'Restart Kernel',
     shortcut: '0 0',
     handler: restartHandler
+  },
+  {
+    category: 'Notebook',
+    text: 'Switch Kernel',
+    handler: switchHandler
   },
   {
     category: 'Notebook',
@@ -320,7 +335,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   {
     category: 'Notebook Cell',
     text: 'To Code Type',
-    shortcut: 'Y',
+    shortcut: 'E',
     handler: codeHandler
   },
   {
@@ -346,6 +361,18 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     text: 'Select Below',
     shortcut: 'ArrowDown',
     handler: selectBelowHandler
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Undo Cell Action',
+    shortcut: 'Z',
+    handler: undoHandler
+  },
+  {
+    category: 'Notebook Cell',
+    text: 'Redo Cell Action',
+    shortcut: 'Y',
+    handler: redoHandler
   },
   ];
   pModel.addItems(items);
@@ -383,7 +410,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Y'],
+    sequence: ['E'],
     handler: codeHandler
   },
   {
@@ -465,6 +492,16 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Shift J'],
     handler: extendBelowHandler
+  },
+  {
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Z'],
+    handler: undoHandler
+  },
+    {
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Y'],
+    handler: redoHandler
   }
   ];
   keymap.add(bindings);

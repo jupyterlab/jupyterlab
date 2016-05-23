@@ -252,7 +252,7 @@ class NotebookModel implements INotebookModel {
    * This is a read-only property.
    */
   get defaultKernelName(): string {
-    let spec = JSON.parse(this._metadata['kernelspec']);
+    let spec = this._metadata['kernelspec'];
     return spec ? spec.name : '';
   }
 
@@ -263,7 +263,7 @@ class NotebookModel implements INotebookModel {
    * This is a read-only property.
    */
   get defaultKernelLanguage(): string {
-    let info = JSON.parse(this._metadata['language_info']);
+    let info = this._metadata['language_info'];
     return info ? info.name : '';
   }
 
@@ -388,6 +388,13 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Initialize the model state.
+   */
+  initialize(): void {
+    this._changeStack.clear();
+  }
+
+  /**
    * A factory for creating a new code cell.
    *
    * @param source - The data to use for the original source data.
@@ -495,20 +502,15 @@ class NotebookModel implements INotebookModel {
       cell.contentChanged.connect(this.onCellChanged, this);
       break;
     case ListChangeType.Remove:
-      (change.oldValue as ICellModel).dispose();
+      // Handled by undo.
       break;
     case ListChangeType.Replace:
-      let oldValues = change.oldValue as ICellModel[];
-      for (cell of oldValues) {
-        cell.dispose();
-      }
       let newValues = change.newValue as ICellModel[];
       for (cell of newValues) {
         cell.contentChanged.connect(this.onCellChanged, this);
       }
       break;
     case ListChangeType.Set:
-      (change.oldValue as ICellModel).dispose();
       cell = change.newValue as ICellModel;
       cell.contentChanged.connect(this.onCellChanged, this);
       break;
@@ -537,7 +539,7 @@ class NotebookModel implements INotebookModel {
   }
 
   private _cells: IObservableList<ICellModel> = null;
-  private _metadata: { [key: string]: string } = Object.create(null);
+  private _metadata: { [key: string]: any } = Object.create(null);
   private _dirty = false;
   private _readOnly = false;
   private _cursors: MetadataCursor[] = [];

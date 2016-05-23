@@ -80,6 +80,7 @@ class NotebookToolbar extends Widget {
     } else {
       layout.insertChild(index, widget);
     }
+    Private.nameProperty.set(widget, name);
   }
 
   /**

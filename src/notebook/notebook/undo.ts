@@ -79,7 +79,7 @@ class NotebookUndo implements IDisposable {
    */
   beginCompoundOperation(isUndoAble?: boolean): void {
     this._inCompound = true;
-    this._isUndoable = isUndoAble === true;
+    this._isUndoable = (isUndoAble !== false);
     this._madeCompoundChange = false;
   }
 
@@ -127,6 +127,14 @@ class NotebookUndo implements IDisposable {
   }
 
   /**
+   * Clear the change stack.
+   */
+  clear(): void {
+    this._index = -1;
+    this._stack = [];
+  }
+
+  /**
    * Handle a change in the cells list.
    */
   private _onCellsChanged(list: IObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
@@ -138,8 +146,8 @@ class NotebookUndo implements IDisposable {
     // Copy the change.
     let evt = this._copyChange(change);
     // Put the change in the stack.
-    if (this._stack[this._index]) {
-      this._stack[this._index].push(evt);
+    if (this._stack[this._index + 1]) {
+      this._stack[this._index + 1].push(evt);
     } else {
       this._stack.push([evt]);
     }
@@ -198,7 +206,7 @@ class NotebookUndo implements IDisposable {
       list.set(change.newIndex, cell);
       break;
     case ListChangeType.Remove:
-      list.removeAt(change.newIndex);
+      list.removeAt(change.oldIndex);
       break;
     case ListChangeType.Move:
       list.move(change.oldIndex, change.newIndex);
@@ -264,6 +272,9 @@ class NotebookUndo implements IDisposable {
     default:
       return;
     }
+    if (oldValue) {
+      (change.oldValue as ICellModel).dispose();
+    }
     return {
       type: change.type,
       oldIndex: change.oldIndex,
@@ -280,6 +291,7 @@ class NotebookUndo implements IDisposable {
     let oldValue: IBaseCell[] = [];
     for (let cell of (change.oldValue as ICellModel[])) {
       oldValue.push(cell.toJSON());
+      cell.dispose();
     }
     let newValue: IBaseCell[] = [];
     for (let cell of (change.newValue as ICellModel[])) {

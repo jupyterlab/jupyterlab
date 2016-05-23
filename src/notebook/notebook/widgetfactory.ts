@@ -23,6 +23,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  findKernel
+} from '../kernel-selector';
+
+import {
   ToolbarItems
 } from './default-toolbar';
 
@@ -70,6 +74,9 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
     let rendermime = this._rendermime.clone();
     if (kernel) {
       context.changeKernel(kernel);
+    } else {
+      let name = findKernel(model.defaultKernelName, model.defaultKernelLanguage, context.kernelSpecs);
+      context.changeKernel({ name });
     }
     let panel = new NotebookPanel(model, rendermime, context, this._clipboard);
     ToolbarItems.populateDefaults(panel);

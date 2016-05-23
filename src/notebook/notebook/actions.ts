@@ -66,6 +66,7 @@ namespace NotebookActions {
 
     // Make the changes while preserving history.
     nbModel.cells.replace(index, 1, [clone0, clone1]);
+    widget.activeCellIndex++;
   }
 
   /**
@@ -249,6 +250,7 @@ namespace NotebookActions {
       widget.mode = 'edit';
     } else {
       widget.activeCellIndex++;
+      widget.mode = 'command';
     }
     Private.deselectCells(widget);
   }
@@ -262,6 +264,7 @@ namespace NotebookActions {
     let model = widget.model;
     let cell = model.createCodeCell();
     model.cells.insert(widget.activeCellIndex + 1, cell);
+    widget.activeCellIndex++;
     widget.mode = 'edit';
     Private.deselectCells(widget);
   }
@@ -275,6 +278,7 @@ namespace NotebookActions {
       return;
     }
     widget.activeCellIndex += 1;
+    widget.mode = 'command';
     Private.deselectCells(widget);
   }
 
@@ -287,6 +291,7 @@ namespace NotebookActions {
       return;
     }
     widget.activeCellIndex -= 1;
+    widget.mode = 'command';
     Private.deselectCells(widget);
   }
 

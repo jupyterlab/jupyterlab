@@ -180,17 +180,7 @@ namespace ToolbarItems {
   export
   function createRestartButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton(TOOLBAR_RESTART, () => {
-      if (panel.context.kernel) {
-        showDialog({
-          title: 'Restart Kernel?',
-          body: 'Do you want to restart the current kernel? All variables will be lost.',
-          host: panel.node
-        }).then(result => {
-          if (result.text === 'OK') {
-            panel.context.kernel.restart();
-          }
-        });
-      }
+      panel.restart();
     }, 'Restart the kernel');
   }
 
@@ -329,7 +319,7 @@ class KernelIndicator extends Widget {
    * Handle a status on a kernel.
    */
   private _handleStatus(kernel: IKernel, status: KernelStatus) {
-    this.toggleClass(TOOLBAR_BUSY, status === KernelStatus.Idle);
+    this.toggleClass(TOOLBAR_BUSY, status !== KernelStatus.Idle);
     switch (status) {
     case KernelStatus.Idle:
       this.node.title = 'Kernel Idle';

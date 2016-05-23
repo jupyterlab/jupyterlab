@@ -7,6 +7,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  showDialog
+} from 'jupyter-js-ui/lib/dialog';
+
+import {
   IDocumentContext
 } from 'jupyter-js-ui/lib/docmanager';
 
@@ -175,6 +179,25 @@ class NotebookPanel extends Widget {
     this._toolbar = null;
     this._clipboard = null;
     super.dispose();
+  }
+
+  /**
+   * Restart the kernel on the panel.
+   */
+  restart(): void {
+    let kernel = this.context.kernel;
+    if (!kernel) {
+      return;
+    }
+    showDialog({
+      title: 'Restart Kernel?',
+      body: 'Do you want to restart the current kernel? All variables will be lost.',
+      host: this.node
+    }).then(result => {
+      if (result.text === 'OK') {
+        kernel.restart();
+      }
+    });
   }
 
   /**

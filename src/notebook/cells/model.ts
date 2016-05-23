@@ -201,7 +201,7 @@ class CellModel implements ICellModel {
   /**
    * Set the cursor data for a given field.
    */
-  protected setCursorData(name: string, value: string): void {
+  protected setCursorData(name: string, value: any): void {
     if (this._metadata[name] === value) {
       return;
     }
@@ -214,7 +214,7 @@ class CellModel implements ICellModel {
    */
   type: CellType;
 
-  private _metadata: { [key: string]: string } = Object.create(null);
+  private _metadata: { [key: string]: any } = Object.create(null);
   private _cursors: MetadataCursor[] = [];
   private _source = '';
 }
@@ -352,7 +352,7 @@ class MetadataCursor implements IMetadataCursor {
    *
    * @param cb - a change callback.
    */
-  constructor(name: string, read: () => string, write: (value: string) => void) {
+  constructor(name: string, read: () => any, write: (value: any) => void) {
     this._name = name;
     this._read = read;
     this._write = write;
@@ -390,15 +390,16 @@ class MetadataCursor implements IMetadataCursor {
    * Get the value of the namespace data.
    */
   getValue(): any {
-    let value = this._read.call(void 0);
-    return JSON.parse(value || 'null');
+    let read = this._read;
+    return read();
   }
 
   /**
    * Set the value of the namespace data.
    */
-  setValue(value: any): any {
-    this._write.call(void 0, JSON.stringify(value));
+  setValue(value: any): void {
+    let write = this._write;
+    write(value);
   }
 
   private _name = '';

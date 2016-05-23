@@ -38,7 +38,10 @@ class NotebookModelFactory implements IModelFactory {
    * @returns A new document model.
    */
   createNew(languagePreference?: string): INotebookModel {
-    return new NotebookModel(languagePreference);
+    let model = new NotebookModel(languagePreference);
+    let cell = model.createCodeCell();
+    model.cells.add(cell);
+    return model;
   }
 
   /**

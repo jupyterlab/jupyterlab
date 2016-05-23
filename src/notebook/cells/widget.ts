@@ -2,6 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
+import * as CodeMirror
+  from 'codemirror';
+
 import {
   loadModeByMIME
 } from 'jupyter-js-ui/lib/codemirror';
@@ -64,6 +67,11 @@ const PROMPT_CLASS = 'jp-InputArea-prompt';
 const EDITOR_CLASS = 'jp-InputArea-editor';
 
 /**
+ * The class name added to a codemirror widget.
+ */
+const CODEMIRROR_CLASS = 'jp-CodeMirror';
+
+/**
  * The class name added to the cell when collapsed.
  */
 const COLLAPSED_CLASS = 'jp-mod-collapsed';
@@ -124,6 +132,7 @@ class BaseCellWidget extends Widget {
     model.contentChanged.connect(this.onModelChanged, this);
     this._trustedCursor = model.getMetadata('trusted');
     this._trusted = this._trustedCursor.getValue();
+    this.editor.getDoc().setValue(model.source);
   }
 
   /**
@@ -258,7 +267,11 @@ class BaseCellWidget extends Widget {
   protected onModelChanged(model: ICellModel, change: string): void {
     switch (change) {
     case 'source':
-      this.editor.getDoc().setValue(model.source);
+      let doc = this.editor.getDoc();
+      let value = doc.getValue();
+      if (value !== model.source) {
+        doc.setValue(model.source);
+      }
       break;
     case 'metadata':
     case 'metadata.trusted':
@@ -319,8 +332,7 @@ class CodeCellWidget extends BaseCellWidget {
     (this.layout as PanelLayout).addChild(this._output);
     this._collapsedCursor = model.getMetadata('collapsed');
     this._scrolledCursor = model.getMetadata('scrolled');
-    let value = model.executionCount;
-    this.setPrompt(`In [${value || ' '}]:`);
+    this.setPrompt(String(model.executionCount));
   }
 
   /**
@@ -359,8 +371,7 @@ class CodeCellWidget extends BaseCellWidget {
       this.update();
       break;
     case 'executionCount':
-      let value = model.executionCount;
-      this.setPrompt(`In [${value || ' '}]:`);
+      this.setPrompt(String(model.executionCount));
       break;
     default:
       break;
@@ -487,6 +498,7 @@ class InputAreaWidget extends Widget {
     super();
     this.addClass(INPUT_CLASS);
     editor.addClass(EDITOR_CLASS);
+    editor.addClass(CODEMIRROR_CLASS);
     this.layout = new PanelLayout();
     let prompt = new Widget();
     prompt.addClass(PROMPT_CLASS);
@@ -500,6 +512,10 @@ class InputAreaWidget extends Widget {
    */
   setPrompt(value: string): void {
     let prompt = (this.layout as PanelLayout).childAt(0);
-    prompt.node.textContent = value;
+    if (value === 'null') {
+      value = ' ';
+    }
+    let text = `In [${value || ' '}]:`;
+    prompt.node.textContent = text;
   }
 }
