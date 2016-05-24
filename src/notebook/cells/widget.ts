@@ -42,7 +42,11 @@ import {
 } from 'sanitizer';
 
 import {
-  ICodeCellModel, ICellModel, IMetadataCursor
+  IMetadataCursor
+} from '../common/metadata';
+
+import {
+  ICodeCellModel, ICellModel
 } from './model';
 
 

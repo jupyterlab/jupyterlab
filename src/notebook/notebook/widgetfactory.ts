@@ -28,7 +28,7 @@ import {
 
 import {
   findKernel
-} from '../kernel-selector';
+} from '../common/selectkernel';
 
 import {
   ToolbarItems

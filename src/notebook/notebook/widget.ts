@@ -38,8 +38,12 @@ import {
 import {
   ICellModel, BaseCellWidget, MarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
-  CodeCellModel, RawCellWidget, IMetadataCursor
+  CodeCellModel, RawCellWidget
 } from '../cells';
+
+import {
+  IMetadataCursor
+} from '../common/metadata';
 
 import {
   INotebookModel

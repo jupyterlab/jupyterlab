@@ -17,10 +17,14 @@ import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
+
 import {
-  ICellModel, MetadataCursor, IMetadataCursor,
-  CodeCellModel, RawCellModel, MarkdownCellModel
+  ICellModel, CodeCellModel, RawCellModel, MarkdownCellModel
 } from '../cells/model';
+
+import {
+  IMetadataCursor, MetadataCursor
+} from '../common/metadata';
 
 import {
   INotebookContent, ICell, INotebookMetadata, MAJOR_VERSION,
