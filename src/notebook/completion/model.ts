@@ -68,15 +68,8 @@ class CompletionModel implements ICompletionModel {
   get options(): string[] {
     return this._filter();
   }
-  set options(newValue: string[]) {
-    // If the new value and the old value are falsey, return;
-    if (newValue === this._options || !newValue && !this._options) {
-      return;
-    }
-    if (newValue && this._options && newValue.join() === this._options.join()) {
-      return;
-    }
-    this._options = newValue;
+  set options(options: string[]) {
+    this._options = options;
     this.optionsChanged.emit(void 0);
   }
 

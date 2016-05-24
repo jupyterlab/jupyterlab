@@ -29,11 +29,6 @@ const ITEM_CLASS = 'jp-Completion-item';
  */
 const MAX_HEIGHT = 250;
 
-/**
- * The offset to add to the widget width if a scrollbar exists.
- */
-const SCROLLBAR_OFFSET = 20;
-
 
 export
 class CompletionWidget extends Widget {
@@ -62,15 +57,9 @@ class CompletionWidget extends Widget {
   get options(): string[] {
     return this._options;
   }
-  set options(newValue: string[]) {
-    // If the new value and the old value are falsey, return;
-    if (newValue === this._options || !newValue && !this._options) {
-      return;
-    }
-    if (newValue && this._options && newValue.join() === this._options.join()) {
-      return;
-    }
-    this._options = newValue;
+  set options(options: string[]) {
+    this._options = [];
+    this._options.push(...options);
     this.update();
   }
 
@@ -117,17 +106,17 @@ class CompletionWidget extends Widget {
    * Handle `after_attach` messages for the widget.
    *
    * #### Notes
-   * Captures document events in the capture phase to dismiss the tooltip.
+   * Captures document events in capture phase to dismiss completion widget.
    */
   protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('mousedown', this, true);
+    document.addEventListener('mousedown', this, true);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('mousedown', this);
+    document.removeEventListener('mousedown', this);
   }
 
   /**
@@ -165,15 +154,11 @@ class CompletionWidget extends Widget {
     let top = maxHeight - rect.height;
     node.style.left = `${left}px`;
     node.style.top = `${top}px`;
-
-    // If a scrollbar is necessary, add padding to prevent horizontal scrollbar.
-    let lineHeight = node.getElementsByTagName('li')[0]
-      .getBoundingClientRect().height;
-    if (lineHeight * this._options.length > maxHeight) {
-      node.style.paddingRight = `${SCROLLBAR_OFFSET}px`;
-    } else {
-      node.style.paddingRight = `0px`;
+    // Expand the menu width by the scrollbar size, if present.
+    if (node.scrollHeight > maxHeight) {
+      node.style.width = `${2 * node.offsetWidth - node.clientWidth}px`;
     }
+
   }
 
   /**
@@ -188,14 +173,14 @@ class CompletionWidget extends Widget {
    */
   private _evtMousedown(event: MouseEvent) {
     let target = event.target as HTMLElement;
-    while (target !== this.node) {
-      // If a completion value is selected, set the model and return.
-      if (target.classList.contains(ITEM_CLASS)) {
-        // TODO: return a value and dismiss the completion menu.
+    while (target !== document.documentElement) {
+      if (target === this.node) {
+        // TODO: Emit a value and dismiss the completion menu.
         return;
       }
       target = target.parentElement;
     }
+    this.hide();
   }
 
   private _model: ICompletionModel = null;
