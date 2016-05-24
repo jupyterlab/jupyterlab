@@ -3,12 +3,8 @@
 'use strict';
 
 import {
-  IContentsModel, IKernelSpecId
+  ISessionId, IKernelId
 } from 'jupyter-js-services';
-
-import {
-  Menu, MenuItem
-} from 'phosphor-menus';
 
 import {
   Widget
@@ -69,16 +65,6 @@ const UPLOAD_CLASS = 'jp-id-upload';
  */
 const REFRESH_CLASS = 'jp-id-refresh';
 
-/**
- * The class name added to an active create button.
- */
-const ACTIVE_CLASS = 'jp-mod-active';
-
-/**
- * The class name added to a dropdown icon.
- */
-const DROPDOWN_CLASS = 'jp-FileButtons-dropdownIcon';
-
 
 /**
  * A widget which hosts the file browser buttons.
@@ -95,7 +81,7 @@ class FileButtons extends Widget {
     this.addClass(FILE_BUTTONS_CLASS);
     this._model = model;
 
-    this._buttons.create.onmousedown = this._onCreateButtonPressed;
+    this._buttons.create.onclick = this._onCreateButtonClicked;
     this._buttons.upload.onclick = this._onUploadButtonClicked;
     this._buttons.refresh.onclick = this._onRefreshButtonClicked;
     this._input.onchange = this._onInputChanged;
@@ -150,40 +136,15 @@ class FileButtons extends Widget {
   /**
    * The 'mousedown' handler for the create button.
    */
-  private _onCreateButtonPressed = (event: MouseEvent) => {
+  private _onCreateButtonClicked = (event: MouseEvent) => {
     // Do nothing if nothing if it's not a left press.
     if (event.button !== 0) {
       return;
     }
 
-    // Do nothing if the create button is already active.
-    let button = this._buttons.create;
-    if (button.classList.contains(ACTIVE_CLASS)) {
-      return;
-    }
-
-    // Create a new dropdown menu and snap the button geometry.
-    let dropdown = Private.createDropdownMenu(this);
-    let rect = button.getBoundingClientRect();
-
-    // Mark the button as active.
-    button.classList.add(ACTIVE_CLASS);
-
-    // Setup the `closed` signal handler. The menu is disposed on an
-    // animation frame to allow a mouse press event which closed the
-    // menu to run its course. This keeps the button from re-opening.
-    dropdown.closed.connect(() => {
-      requestAnimationFrame(() => { dropdown.dispose(); });
+    createWithDialog(this).catch(error => {
+      utils.showErrorMessage(this, 'New File Error', error);
     });
-
-    // Setup the `disposed` signal handler. This restores the button
-    // to the non-active state and allows a new menu to be opened.
-    dropdown.disposed.connect(() => {
-      button.classList.remove(ACTIVE_CLASS);
-    });
-
-    // Popup the menu aligned with the bottom of the create button.
-    dropdown.popup(rect.left, rect.bottom, false, true);
   };
 
 
@@ -226,6 +187,253 @@ class FileButtons extends Widget {
 
 
 /**
+ * Create a new file using a dialog.
+ */
+function
+createWithDialog(widget: FileButtons): Promise<Widget> {
+  let handler: CreateNewHandler;
+  let model = widget.model;
+  let manager = widget.manager;
+  // Create a file name based on the current time.
+  let time = new Date();
+  time.setMinutes(time.getMinutes() - time.getTimezoneOffset());
+  let name = time.toJSON().slice(0, 10);
+  name += '-' + time.getHours() + time.getMinutes() + time.getSeconds();
+  name += '.txt';
+  // Get the current sessions.
+  return manager.listSessions().then(sessions => {
+    // Create the dialog and show it to the user.
+    handler = new CreateNewHandler(name, model, manager, sessions);
+    return showDialog({
+      title: 'Create a new file',
+      host: widget.parent.node,
+      body: handler.node
+    });
+  }).then(result => {
+    if (result.text !== 'OK') {
+      throw new Error('Aborted');
+    }
+    // Create the empty file.
+    if (handler.ext === '.ipynb') {
+      return widget.model.newUntitled('notebook');
+    } else {
+      return widget.model.newUntitled('file');
+    }
+  }).then(contents => {
+    // Rename the file.
+    return model.rename(contents.name, handler.input.value);
+  }).then(contents => {
+    // Create the widget.
+    let widgetName = handler.widgetDropdown.value;
+    let value = handler.kernelDropdown.value;
+    let kernel: IKernelId;
+    if (value === 'None') {
+      kernel = void 0;
+    } else {
+      kernel = JSON.parse(value) as IKernelId;
+    }
+    return manager.createNew(contents.path, widgetName, kernel);
+  });
+}
+
+
+/**
+ * A widget used to open files with a specific widget/kernel.
+ */
+class OpenWithHandler extends Widget {
+  /**
+   * Create the node for a create new handler.
+   */
+  static createNode(): HTMLElement {
+    let body = document.createElement('div');
+    let name = document.createElement('input');
+    let widgetDropdown = document.createElement('select');
+    let kernelDropdown = document.createElement('select');
+    body.appendChild(name);
+    body.appendChild(widgetDropdown);
+    body.appendChild(kernelDropdown);
+    return body;
+  }
+
+  /**
+   * Construct a new "open with" dialog.
+   */
+  constructor(name: string, model: FileBrowserModel, manager: DocumentManager, sessions: ISessionId[]) {
+    super();
+    this._model = model;
+    this._manager = manager;
+    this._sessions = sessions;
+
+    this.input.value = name;
+    this.input.disabled = true;
+
+    // When a widget changes, we update the kernel list.
+    let widgetDropdown = this.node.children[1] as HTMLSelectElement;
+    this.populateFactories();
+    widgetDropdown.onchange = this.widgetChanged.bind(this);
+  }
+
+  /**
+   * Dispose of the resources used by the widget.
+   */
+  dispose(): void {
+    this._model = null;
+    this._sessions = null;
+    this._manager = null;
+    super.dispose();
+  }
+
+  /**
+   * Get the input node for the dialog.
+   */
+  get input(): HTMLInputElement {
+    return this.node.firstChild as HTMLInputElement;
+  }
+
+  /**
+   * Get the current extension of the file.
+   */
+  get ext(): string {
+    return '.' + this.input.textContent.split('.').pop();
+  }
+
+  /**
+   * Get the widget dropdown node for the dialog.
+   */
+  get widgetDropdown(): HTMLSelectElement {
+    return this.node.children[1] as HTMLSelectElement;
+  }
+
+  /**
+   * Get the kernel dropdown node for the dialog.
+   */
+  get kernelDropdown(): HTMLSelectElement {
+    return this.node.children[2] as HTMLSelectElement;
+  }
+
+  /**
+   * Populate the widget factories.
+   */
+  populateFactories(): void {
+    let ext = this.ext;
+    let factories = this._manager.listWidgetFactories(ext);
+    let widgetDropdown = this.widgetDropdown;
+    for (let factory of factories) {
+      let option = document.createElement('option');
+      option.text = factory;
+      widgetDropdown.appendChild(option);
+    }
+  }
+
+  /**
+   * Handle a change to the widget.
+   */
+  widgetChanged(): void {
+    let widgetDropdown = this.widgetDropdown;
+    let kernelDropdown = this.kernelDropdown;
+    let widgetName = widgetDropdown.value;
+    let ext = this.ext;
+    let preference = this._manager.getKernelPreference(ext, widgetName);
+    let lang = preference.language;
+    let specs = this._manager.kernelSpecs;
+    // Find the preferred kernel name.
+    let kernelName = specs.default;
+    for (let name in specs.kernelspecs) {
+      let kernelLanguage = specs.kernelspecs[name].spec.language;
+      if (lang === kernelLanguage) {
+        kernelName = name;
+        break;
+      }
+    }
+    // Remove existing kernel list.
+    while (kernelDropdown.firstChild) {
+      kernelDropdown.removeChild(kernelDropdown.firstChild);
+    }
+    let option: HTMLOptionElement;
+    // Put the preferred kernel name first.
+    option = document.createElement('option');
+    option.text = this.getDisplayName(kernelName);
+    option.value = kernelName;
+    // Add the rest of the names.
+    for (let name in specs.kernelspecs) {
+      if (name === kernelName) {
+        continue;
+      }
+      option = document.createElement('option');
+      option.text = this.getDisplayName(name);
+      option.value = JSON.stringify({ name });
+    }
+    // Add running session info.
+    for (let session of this._sessions) {
+      option = document.createElement('option');
+      let name = session.notebook.path.split('/').pop();
+      name = name.split('.')[0];
+      kernelName = session.kernel.name;
+      option.text = name + ' (' + this.getDisplayName(kernelName) + ')';
+      option.value = JSON.stringify({ id: session.kernel.id });
+    }
+    // Create an option that starts no kernel.
+    option = document.createElement('option');
+    option.text = 'None';
+    kernelDropdown.value = kernelDropdown.value || kernelName;
+    if (!preference.canStartKernel) {
+      kernelDropdown.disabled = true;
+    } else if (!preference.preferKernel) {
+      kernelDropdown.value = 'None';
+    }
+  }
+
+  /**
+   * Get the display name given a kernel name.
+   */
+  getDisplayName(name: string): string {
+    let specs = this._manager.kernelSpecs;
+    return specs.kernelspecs[name].spec.display_name;
+  }
+
+  private _model: FileBrowserModel = null;
+  private _manager: DocumentManager = null;
+  private _sessions: ISessionId[] = null;
+}
+
+
+/**
+ * A widget used to create new files.
+ */
+class CreateNewHandler extends OpenWithHandler {
+  /**
+   * Construct a new "create new" dialog.
+   */
+  constructor(name: string, model: FileBrowserModel, manager: DocumentManager, sessions: ISessionId[]) {
+    super(name, model, manager, sessions);
+
+    // When an extension changes, we update the widget and kernel lists.
+    this.input.oninput = this.inputChanged.bind(this);
+    this.input.disabled = false;
+  }
+
+  /**
+   * Handle a change to the input.
+   */
+  inputChanged(): void {
+    let ext = this.ext;
+    if (ext === this._prevExt) {
+      return;
+    }
+    let widgetDropdown = this.widgetDropdown;
+    while (widgetDropdown.firstChild) {
+      widgetDropdown.removeChild(widgetDropdown.firstChild);
+    }
+    this.populateFactories();
+    this.widgetChanged();
+    this._prevExt = ext;
+  }
+
+  private _prevExt = '';
+}
+
+
+/**
  * The namespace for the `FileButtons` private data.
  */
 namespace Private {
@@ -255,7 +463,6 @@ namespace Private {
     let createIcon = document.createElement('span');
     let uploadIcon = document.createElement('span');
     let refreshIcon = document.createElement('span');
-    let dropdownIcon = document.createElement('span');
 
     create.type = 'button';
     upload.type = 'button';
@@ -277,10 +484,8 @@ namespace Private {
     createIcon.className = ICON_CLASS + ' fa fa-plus';
     uploadIcon.className = ICON_CLASS + ' fa fa-upload';
     refreshIcon.className = ICON_CLASS + ' fa fa-refresh';
-    dropdownIcon.className = DROPDOWN_CLASS + ' fa fa-caret-down';
 
     createContent.appendChild(createIcon);
-    createContent.appendChild(dropdownIcon);
     uploadContent.appendChild(uploadIcon);
     refreshContent.appendChild(refreshIcon);
 
@@ -300,91 +505,6 @@ namespace Private {
     input.type = 'file';
     input.multiple = true;
     return input;
-  }
-
-  /**
-   * Create a new source file.
-   */
-  export
-  function createNewFile(widget: FileButtons): void {
-    createFile(widget, 'file').then(contents => {
-      if (contents === void 0) {
-        return;
-      }
-      widget.model.refresh().then(() => widget.open(contents.name));
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'New File Error', error);
-    });
-  }
-
-  /**
-   * Create a new folder.
-   */
-  export
-  function createNewFolder(widget: FileButtons): void {
-    createFile(widget, 'directory').then(contents => {
-      if (contents === void 0) {
-        return;
-      }
-      widget.model.refresh();
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'New Folder Error', error);
-    });
-  }
-
-  /**
-   * Create a new notebook.
-   */
-  export
-  function createNewNotebook(widget: FileButtons, spec: IKernelSpecId): void {
-    createFile(widget, 'notebook').then(contents => {
-      let started = widget.model.startSession(contents.path, spec.name);
-      return started.then(() => contents);
-    }).then(contents => {
-      if (contents === void 0) {
-        return;
-      }
-      widget.model.refresh().then(() => widget.open(contents.name));
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'New Notebook Error', error);
-    });
-  }
-
-  /**
-   * Create a new file, prompting the user for a name.
-   */
-  function createFile(widget: FileButtons, type: string): Promise<IContentsModel> {
-    return widget.model.newUntitled(type);
-  }
-
-  /**
-   * Create a new dropdown menu for the create new button.
-   */
-  export
-  function createDropdownMenu(widget: FileButtons): Menu {
-    let items = [
-      new MenuItem({
-        text: 'Text File',
-        handler: () => { createNewFile(widget); }
-      }),
-      new MenuItem({
-        text: 'Folder',
-        handler: () => { createNewFolder(widget); }
-      }),
-      new MenuItem({
-        type: MenuItem.Separator
-      })
-    ];
-    // TODO the kernels below are suffixed with "Notebook" as a
-    // temporary measure until we can update the Menu widget to
-    // show text in a separator for a "Notebooks" group.
-    let extra = widget.model.kernelSpecs.map(spec => {
-      return new MenuItem({
-        text: `${spec.spec.display_name} Notebook`,
-        handler: () => { createNewNotebook(widget, spec); }
-      });
-    });
-    return new Menu(items.concat(extra));
   }
 
   /**
@@ -423,7 +543,7 @@ namespace Private {
       body: `"${file.name}" already exists, overwrite?`
     };
     return showDialog(options).then(button => {
-      if (button.text !== 'Ok') {
+      if (button.text !== 'OK') {
         return;
       }
       return widget.model.upload(file, true);

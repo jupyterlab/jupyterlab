@@ -364,6 +364,7 @@ class DocumentManager implements IDisposable {
   constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, kernelSpecs: IKernelSpecIds, opener: IWidgetOpener) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
+    this._specs = kernelSpecs;
     this._contextManager = new ContextManager(contentsManager, sessionManager, kernelSpecs, (id: string, widget: Widget) => {
       let parent = this._createWidget('', id);
       parent.setContent(widget);
@@ -372,6 +373,16 @@ class DocumentManager implements IDisposable {
         parent.close();
       });
     });
+  }
+
+  /**
+   * Get the kernel spec ids for the manager.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get kernelSpecs(): IKernelSpecIds {
+    return this._specs;
   }
 
   /**
@@ -490,9 +501,8 @@ class DocumentManager implements IDisposable {
    * #### Notes
    * The first item in the list is considered the default.
    */
-  listWidgetFactories(path?: string): string[] {
-    path = path || '';
-    let ext = '.' + path.split('.').pop();
+  listWidgetFactories(ext?: string): string[] {
+    ext = ext || '';
     let factories: string[] = [];
     let options: Private.IWidgetFactoryEx;
     let name = '';
@@ -535,15 +545,22 @@ class DocumentManager implements IDisposable {
   /**
    * Get the kernel preference.
    */
-  getKernelPreference(path: string, widgetName: string): IKernelPreference {
+  getKernelPreference(ext: string, widgetName: string): IKernelPreference {
     let widgetFactoryEx = this._getWidgetFactoryEx(widgetName);
     let modelFactoryEx = this._getModelFactoryEx(widgetName);
-    let language = modelFactoryEx.factory.preferredLanguage(path);
+    let language = modelFactoryEx.factory.preferredLanguage(ext);
     return {
       language,
       preferKernel: widgetFactoryEx.preferKernel,
       canStartKernel: widgetFactoryEx.canStartKernel
     };
+  }
+
+  /**
+   * List the running notebook sessions.
+   */
+  listSessions(): Promise<ISessionId[]> {
+    return this._sessionManager.listRunning();
   }
 
   /**
@@ -746,6 +763,7 @@ class DocumentManager implements IDisposable {
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
   private _contextManager: ContextManager = null;
+  private _specs: IKernelSpecIds = null;
 }
 
 
