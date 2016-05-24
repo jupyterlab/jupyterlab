@@ -5,6 +5,7 @@
 import * as CodeMirror
   from 'codemirror';
 
+import 'codemirror/mode/meta';
 import 'codemirror/mode/python/python';
 
 
@@ -15,7 +16,7 @@ import 'codemirror/mode/python/python';
  */
 CodeMirror.defineMode('ipython', (config: CodeMirror.EditorConfiguration, modeOptions?: any) => {
     let pythonConf: any = {};
-    for (var prop in modeOptions) {
+    for (let prop in modeOptions) {
       if (modeOptions.hasOwnProperty(prop)) {
         pythonConf[prop] = modeOptions[prop];
       }
