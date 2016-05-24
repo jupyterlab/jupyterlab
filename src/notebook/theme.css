@@ -364,7 +364,7 @@
 .jp-ConsoleTooltip {
   position: absolute;
   background: #FFFFCA;
-  border: 1px solid black;
+  border: 1px solid #000000;
   z-index: 10001;
 }
 
@@ -473,6 +473,26 @@
 
 .jp-Completion {
   position: absolute;
-  border: 1px solid black;
+  background: #eeeeee;
+  border: 1px solid #000000;
+  /* Allow for eight lines of text + padding. */
+  max-height: 254px;
+  padding: 2px;
+  z-index: 10001;
 }
 
+
+.jp-Completion-content {
+  list-style-type: none;
+}
+
+
+.jp-Completion-item {
+  padding: 0;
+}
+
+
+.jp-Completion-item code {
+  font-size: 13px;
+  line-height: 25px;
+}

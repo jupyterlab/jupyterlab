@@ -123,6 +123,11 @@ interface IConsoleModel extends IDisposable {
   cells: IObservableList<ICellModel>;
 
   /**
+   * Clear the cells of a console except for the banner.
+   */
+  clear(): void;
+
+  /**
    * The data source for a console's text completion functionality.
    */
   completion: ICompletionModel;
@@ -361,6 +366,16 @@ class ConsoleModel implements IConsoleModel {
     this._cells = null;
     this._completion.dispose();
     this._completion = null;
+  }
+
+  /**
+   * Clear the cells of a console except for the banner.
+   */
+  clear(): void {
+    let cells = this._cells;
+    while (cells.length > 1) {
+      cells.removeAt(cells.length - 1);
+    }
   }
 
   /**
@@ -629,6 +644,9 @@ namespace Private {
     // Update the console history manager kernel.
     model.history.kernel = kernel;
     session.kernel.kernelInfo().then(info => {
+      // Clear the console of old kernel's cells.
+      model.clear();
+      // Update the console banner.
       model.banner = info.banner;
     });
   }

@@ -148,8 +148,12 @@ class CompletionWidget extends Widget {
       let list = this.listNode;
       for (let i = 0, len = this._options.length; i < len; i++) {
         let item = document.createElement('li');
+        let code = document.createElement('code');
+
+        // Use innerHTML because search results include <mark> tags.
+        code.innerHTML = this._options[i];
         item.className = ITEM_CLASS;
-        item.innerHTML = this._options[i];
+        item.appendChild(code);
         list.appendChild(item);
       }
     }

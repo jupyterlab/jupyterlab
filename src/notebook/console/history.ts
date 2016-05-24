@@ -76,9 +76,9 @@ class ConsoleHistory implements IConsoleHistory {
   /**
    * The current kernel supplying navigation history.
    */
-  get kernel(): IKernel {
-    return this._kernel;
-  }
+  // get kernel(): IKernel {
+  //   return this._kernel;
+  // }
   set kernel(newValue: IKernel) {
     if (newValue === this._kernel) {
       return;
@@ -98,7 +98,8 @@ class ConsoleHistory implements IConsoleHistory {
           this._history.push(last = current);
         }
       }
-      this._resetCursor();
+      // Reset the history navigation cursor back to the bottom.
+      this._cursor = this._history.length;
     });
 
   }
@@ -161,14 +162,8 @@ class ConsoleHistory implements IConsoleHistory {
     if (item && item !== this._history[this._history.length - 1]) {
       this._history.push(item);
     }
-    this._resetCursor();
-  }
-
-  /**
-   * Reset the history navigation cursor back to the bottom.
-   */
-  private _resetCursor(): void {
-    this._cursor =  this._history.length;
+    // Reset the history navigation cursor back to the bottom.
+    this._cursor = this._history.length;
   }
 
   private _cursor = 0;

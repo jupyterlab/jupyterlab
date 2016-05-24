@@ -197,22 +197,37 @@ class ConsoleWidget extends Widget {
   constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
     super();
     let constructor = this.constructor as typeof ConsoleWidget;
-    this.addClass(CONSOLE_CLASS);
-    this.layout = new PanelLayout();
+    let layout = new PanelLayout();
+
+    this.layout = layout;
     this._model = model;
     this._rendermime = rendermime;
-    this._initHeader();
 
+    // Instantiate tab completion widget.
     this._completion = constructor.createCompletion(this._model.completion);
     this._completion.reference = this;
     this._completion.attach(document.body);
 
+    // Instantiate tooltip widget.
     this._tooltip = constructor.createTooltip(0, 0);
     this._tooltip.reference = this;
     this._tooltip.attach(document.body);
 
+
+    let factory = constructor.createCell;
+    for (let i = 0; i < model.cells.length; i++) {
+      let cell = factory(model.cells.get(i), this._rendermime);
+      layout.addChild(cell);
+    }
+    let banner = layout.childAt(0);
+    banner.addClass(BANNER_CLASS);
+
     model.cells.changed.connect(this.onCellsChanged, this);
     model.stateChanged.connect(this.onModelChanged, this);
+
+    // Hide the console until banner is set.
+    this.addClass(CONSOLE_CLASS);
+    this.hide();
   }
 
   /**
@@ -243,6 +258,13 @@ class ConsoleWidget extends Widget {
   protected onAfterAttach(msg: Message): void {
     let prompt = this.prompt;
     if (prompt) prompt.input.editor.focus();
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+
   }
 
   /**
@@ -303,17 +325,6 @@ class ConsoleWidget extends Widget {
       this._tooltip.node.style.maxWidth = maxWidth + 'px';
       if (this._tooltip.isHidden) this._tooltip.show();
       return;
-    }
-  }
-
-  private _initHeader(): void {
-    let constructor = this.constructor as typeof ConsoleWidget;
-    let cellsLayout = this.layout as PanelLayout;
-    let factory = constructor.createCell;
-    for (let i = 0; i < this._model.cells.length; i++) {
-      let cell = factory(this._model.cells.get(i), this._rendermime)
-      if (i === 0) cell.addClass(BANNER_CLASS);
-      cellsLayout.addChild(cell);
     }
   }
 
