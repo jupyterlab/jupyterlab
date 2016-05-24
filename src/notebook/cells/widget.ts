@@ -2,16 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import * as CodeMirror
-  from 'codemirror';
-
 import {
   loadModeByMIME
 } from 'jupyter-js-ui/lib/codemirror';
-
-import {
-  CodeMirrorWidget
-} from 'jupyter-js-ui/lib/codemirror/widget';
 
 import {
   RenderMime
@@ -46,6 +39,10 @@ import {
 } from '../common/metadata';
 
 import {
+  CellEditorWidget
+} from './editor';
+
+import {
   ICodeCellModel, ICellModel
 } from './model';
 
@@ -69,11 +66,6 @@ const PROMPT_CLASS = 'jp-InputArea-prompt';
  * The class name added to the editor area of the cell.
  */
 const EDITOR_CLASS = 'jp-InputArea-editor';
-
-/**
- * The class name added to a codemirror widget.
- */
-const CODEMIRROR_CLASS = 'jp-CodeMirror';
 
 /**
  * The class name added to the cell when collapsed.
@@ -122,21 +114,27 @@ const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 export
 class BaseCellWidget extends Widget {
   /**
+   * Create a new cell editor widget.
+   */
+  static createCellEditor(model: ICellModel): CellEditorWidget {
+    return new CellEditorWidget(model);
+  }
+
+  /**
    * Construct a new base cell widget.
    */
   constructor(model: ICellModel) {
     super();
     this.addClass(CELL_CLASS);
     this._model = model;
-    this._editor = new CodeMirrorWidget();
+    let ctor = this.constructor as typeof BaseCellWidget;
+    this._editor = ctor.createCellEditor(model);
     this._input = new InputAreaWidget(this._editor);
     this.layout = new PanelLayout();
     (this.layout as PanelLayout).addChild(this._input);
-    this._initializeEditor();
     model.contentChanged.connect(this.onModelChanged, this);
     this._trustedCursor = model.getMetadata('trusted');
     this._trusted = this._trustedCursor.getValue();
-    this.editor.getDoc().setValue(model.source);
   }
 
   /**
@@ -150,14 +148,14 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Get the editor used by the widget.
+   * Get the editor widget used by the cell.
    *
    * #### Notes
    * This is a ready-only property.
    */
-   get editor(): CodeMirror.Editor {
-     return this._editor.editor;
-   }
+  get editor(): CellEditorWidget {
+    return this._editor;
+  }
 
   /**
    * The mimetype used by the cell.
@@ -170,7 +168,7 @@ class BaseCellWidget extends Widget {
       return;
     }
     this._mimetype = value;
-    loadModeByMIME(this.editor, value);
+    loadModeByMIME(this.editor.editor, value);
   }
 
   /**
@@ -201,16 +199,7 @@ class BaseCellWidget extends Widget {
    * Focus the widget.
    */
   focus(): void {
-    this.editor.focus();
-  }
-
-  /**
-   * Get the current cursor position of the editor.
-   */
-  getCursorPosition(): number {
-    let doc = this.editor.getDoc();
-    let position = doc.getCursor();
-    return doc.indexFromPos(position);
+    this.editor.editor.focus();
   }
 
   /**
@@ -261,7 +250,7 @@ class BaseCellWidget extends Widget {
   protected onUpdateRequest(message: Message): void {
     // Handle read only state.
     let option = this._readOnly ? 'nocursor' : false;
-    this.editor.setOption('readOnly', option);
+    this.editor.editor.setOption('readOnly', option);
     this.toggleClass(READONLY_CLASS, this._readOnly);
   }
 
@@ -270,13 +259,6 @@ class BaseCellWidget extends Widget {
    */
   protected onModelChanged(model: ICellModel, change: string): void {
     switch (change) {
-    case 'source':
-      let doc = this.editor.getDoc();
-      let value = doc.getValue();
-      if (value !== model.source) {
-        doc.setValue(model.source);
-      }
-      break;
     case 'metadata':
     case 'metadata.trusted':
       this._trusted = this._trustedCursor.getValue();
@@ -287,21 +269,8 @@ class BaseCellWidget extends Widget {
     }
   }
 
-  /**
-   * Initialize the codemirror editor.
-   */
-  private _initializeEditor(): void {
-    let doc = this.editor.getDoc();
-    CodeMirror.on(doc, 'change', (instance, change) => {
-      if (change.origin === 'setValue') {
-        return;
-      }
-      this._model.source = instance.getValue();
-    });
-  }
-
   private _input: InputAreaWidget = null;
-  private _editor: CodeMirrorWidget = null;
+  private _editor: CellEditorWidget = null;
   private _model: ICellModel = null;
   private _mimetype = 'text/plain';
   private _readOnly = false;
@@ -498,11 +467,10 @@ class InputAreaWidget extends Widget {
   /**
    * Construct an input area widget.
    */
-  constructor(editor: CodeMirrorWidget) {
+  constructor(editor: CellEditorWidget) {
     super();
     this.addClass(INPUT_CLASS);
     editor.addClass(EDITOR_CLASS);
-    editor.addClass(CODEMIRROR_CLASS);
     this.layout = new PanelLayout();
     let prompt = new Widget();
     prompt.addClass(PROMPT_CLASS);

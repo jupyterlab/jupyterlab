@@ -52,7 +52,7 @@ namespace NotebookActions {
     let nbModel = widget.model;
     let index = widget.activeCellIndex;
     let child = widget.childAt(index);
-    let position = child.getCursorPosition();
+    let position = child.editor.getCursorPosition();
     let orig = child.model.source;
 
     // Create new models to preserve history.
