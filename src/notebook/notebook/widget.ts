@@ -46,6 +46,10 @@ import {
 } from '../common/metadata';
 
 import {
+  EdgeLocation
+} from '../cells/editor';
+
+import {
   INotebookModel
 } from './model';
 
@@ -140,7 +144,7 @@ class NotebookRenderer extends Widget {
     let factory = constructor.createCell;
     for (let i = 0; i < model.cells.length; i++) {
       let widget = factory(model.cells.get(i), rendermime);
-      this._initializeCellWidget(widget);
+      this.initializeCellWidget(widget);
       layout.addChild(widget);
     }
   }
@@ -238,7 +242,7 @@ class NotebookRenderer extends Widget {
     switch (args.type) {
     case ListChangeType.Add:
       widget = factory(args.newValue as ICellModel, this._rendermime);
-      this._initializeCellWidget(widget);
+      this.initializeCellWidget(widget);
       layout.insertChild(args.newIndex, widget);
       break;
     case ListChangeType.Move:
@@ -259,7 +263,7 @@ class NotebookRenderer extends Widget {
       let newValues = args.newValue as ICellModel[];
       for (let i = newValues.length; i > 0; i--) {
         widget = factory(newValues[i - 1], this._rendermime);
-        this._initializeCellWidget(widget);
+        this.initializeCellWidget(widget);
         layout.insertChild(args.newIndex, widget);
       }
       break;
@@ -269,7 +273,7 @@ class NotebookRenderer extends Widget {
       widget.dispose();
       widget = factory(args.newValue as ICellModel, this._rendermime);
       layout.insertChild(args.newIndex, widget);
-      this._initializeCellWidget(widget);
+      this.initializeCellWidget(widget);
       break;
     default:
       return;
@@ -292,7 +296,7 @@ class NotebookRenderer extends Widget {
   /**
    * Initialize a cell widget.
    */
-  private _initializeCellWidget(widget: BaseCellWidget): void {
+  protected initializeCellWidget(widget: BaseCellWidget): void {
     widget.addClass(NB_CELL_CLASS);
     if (widget.model.type === 'code') {
       widget.mimetype = this._mimetype;
@@ -487,6 +491,25 @@ class ActiveNotebook extends NotebookRenderer {
     if (count > 1) {
       widget = layout.childAt(this.activeCellIndex) as BaseCellWidget;
       widget.addClass(OTHER_SELECTED_CLASS);
+    }
+  }
+
+  /**
+   * Initialize a cell widget.
+   */
+  protected initializeCellWidget(widget: BaseCellWidget): void {
+    super.initializeCellWidget(widget);
+    widget.editor.edgeRequested.connect(this.onEdgeRequest, this);
+  }
+
+  /**
+   * Handle edge request signals from cells.
+   */
+  protected onEdgeRequest(widget: Widget, location: EdgeLocation): void {
+    if (location === 'top') {
+      this.activeCellIndex--;
+    } else {
+      this.activeCellIndex++;
     }
   }
 
