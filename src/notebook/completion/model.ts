@@ -10,6 +10,10 @@ import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
+import {
+  ICompletionRequest, ITextChange
+} from '../editor/model';
+
 
 export
 interface ICompletionModel extends IDisposable {
@@ -24,9 +28,14 @@ interface ICompletionModel extends IDisposable {
   options: string[];
 
   /**
-   * The query string used to filter options.
+   * The original completion request details.
    */
-  query: string;
+  original: ICompletionRequest;
+
+  /**
+   * The current text change details.
+   */
+  current: ITextChange;
 }
 
 /**
@@ -72,13 +81,24 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
-   * The query string used to filter options.
+   * The original completion request details.
    */
-  get query(): string {
-    return this._query;
+  get original(): ICompletionRequest {
+    return this._original;
   }
-  set query(newValue: string) {
-    this._query = newValue;
+  set original(request: ICompletionRequest) {
+    this._original = request;
+    this._current = null;
+  }
+
+  /**
+   * The current text change details.
+   */
+  get current(): ITextChange {
+    return this._current;
+  }
+  set current(change: ITextChange) {
+    this._current = change;
   }
 
   /**
@@ -102,7 +122,8 @@ class CompletionModel implements ICompletionModel {
 
   private _isDisposed = false;
   private _options: string[] = null;
-  private _query = '';
+  private _original: ICompletionRequest = null;
+  private _current: ITextChange = null;
 }
 
 

@@ -22,12 +22,17 @@ const COMPLETION_CLASS = 'jp-Completion';
 /**
  * The class name added to completion menu contents.
  */
-const CONTENT_CLASS = 'jp-Completion-content';
+const ITEM_CLASS = 'jp-Completion-item';
 
 /**
- * The class name added to completion menu contents.
+ * The maximum height of a completion widget.
  */
-const ITEM_CLASS = 'jp-Completion-item';
+const MAX_HEIGHT = 250;
+
+/**
+ * The offset to add to the widget width if a scrollbar exists.
+ */
+const SCROLLBAR_OFFSET = 20;
 
 
 export
@@ -36,10 +41,7 @@ class CompletionWidget extends Widget {
    * Create the DOM node for a text completion menu.
    */
   static createNode(): HTMLElement {
-    let node = document.createElement('div');
-    let ul = document.createElement('ul');
-    ul.className = CONTENT_CLASS;
-    node.appendChild(ul);
+    let node = document.createElement('ul');
     return node;
   }
 
@@ -49,19 +51,9 @@ class CompletionWidget extends Widget {
   constructor(model: ICompletionModel) {
     super();
     this._model = model;
-    this.addClass(COMPLETION_CLASS);
-    this.hide();
     this._model.optionsChanged.connect(this.onOptionsChanged, this);
-  }
-
-  /**
-   * The list element of the completion widget.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get listNode(): HTMLElement {
-    return this.node.getElementsByTagName('ul')[0];
+    this.addClass(COMPLETION_CLASS);
+    this.update();
   }
 
   /**
@@ -142,22 +134,46 @@ class CompletionWidget extends Widget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    let list = this.listNode;
-    list.textContent = '';
-    if (this._options && this._options.length) {
-      let list = this.listNode;
-      for (let i = 0, len = this._options.length; i < len; i++) {
-        let item = document.createElement('li');
-        let code = document.createElement('code');
+    let node = this.node;
+    node.textContent = '';
 
-        // Use innerHTML because search results include <mark> tags.
-        code.innerHTML = this._options[i];
-        item.className = ITEM_CLASS;
-        item.appendChild(code);
-        list.appendChild(item);
-      }
+    if (!this._options || !this._options.length) {
+      this.hide();
+      return;
     }
-    this.show();
+
+    for (let i = 0, len = this._options.length; i < len; i++) {
+      let li = document.createElement('li');
+      let code = document.createElement('code');
+
+      // Use innerHTML because search results include <mark> tags.
+      code.innerHTML = this._options[i];
+      li.className = ITEM_CLASS;
+      li.appendChild(code);
+      node.appendChild(li);
+    }
+
+    if (this.isHidden) this.show();
+
+    let availableHeight = this._model.original.coords.top;
+    let maxHeight = Math.min(availableHeight, MAX_HEIGHT);
+    node.style.maxHeight = `${maxHeight}px`;
+
+    // Account for 1px border width.
+    let left = Math.floor(this._model.original.coords.left) + 1;
+    let rect = node.getBoundingClientRect();
+    let top = maxHeight - rect.height;
+    node.style.left = `${left}px`;
+    node.style.top = `${top}px`;
+
+    // If a scrollbar is necessary, add padding to prevent horizontal scrollbar.
+    let lineHeight = node.getElementsByTagName('li')[0]
+      .getBoundingClientRect().height;
+    if (lineHeight * this._options.length > maxHeight) {
+      node.style.paddingRight = `${SCROLLBAR_OFFSET}px`;
+    } else {
+      node.style.paddingRight = `0px`;
+    }
   }
 
   /**

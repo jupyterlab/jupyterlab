@@ -219,15 +219,12 @@ class ConsoleWidget extends Widget {
       let cell = factory(model.cells.get(i), this._rendermime);
       layout.addChild(cell);
     }
-    let banner = layout.childAt(0);
-    banner.addClass(BANNER_CLASS);
+    layout.childAt(0).addClass(BANNER_CLASS);
 
     model.cells.changed.connect(this.onCellsChanged, this);
     model.stateChanged.connect(this.onModelChanged, this);
 
-    // Hide the console until banner is set.
     this.addClass(CONSOLE_CLASS);
-    this.hide();
   }
 
   /**
@@ -293,6 +290,10 @@ class ConsoleWidget extends Widget {
   protected onModelChanged(sender: IConsoleModel, args: IChangedArgs<ITooltipModel>) {
     let constructor = this.constructor as typeof ConsoleWidget;
     switch (args.name) {
+    case 'banner':
+      let prompt = this.prompt;
+      if (prompt) prompt.input.editor.focus();
+      return;
     case 'tooltip':
       let model = args.newValue;
 
@@ -305,8 +306,8 @@ class ConsoleWidget extends Widget {
 
       // Offset the height of the tooltip by the height of cursor characters.
       top += model.change.chHeight;
-      // Offset the width of the tooltip by the width of cursor characters.
-      left -= model.change.chWidth;
+      // Account for 1px border width.
+      left += 1;
 
       // Account for 1px border on top and bottom.
       let maxHeight = window.innerHeight - top - 2;
@@ -321,8 +322,8 @@ class ConsoleWidget extends Widget {
 
       this._tooltip.rect = {top, left} as ClientRect;
       this._tooltip.content = content;
-      this._tooltip.node.style.maxHeight = maxHeight + 'px';
-      this._tooltip.node.style.maxWidth = maxWidth + 'px';
+      this._tooltip.node.style.maxHeight = `${maxHeight}px`;
+      this._tooltip.node.style.maxWidth = `${maxWidth}px`;
       if (this._tooltip.isHidden) this._tooltip.show();
       return;
     }

@@ -146,6 +146,11 @@ interface IConsoleModel extends IDisposable {
   history: IConsoleHistory;
 
   /**
+   * The console's prompt, a code cell model.
+   */
+  prompt: ICodeCellModel;
+
+  /**
    * The optional notebook session associated with the console model.
    */
   session?: INotebookSession;
@@ -212,13 +217,9 @@ class ConsoleModel implements IConsoleModel {
     this._cells = new ObservableList<ICellModel>();
     this._completion = new CompletionModel();
     this._history = new ConsoleHistory(this._session && this._session.kernel);
-    this._prompt = this.createPrompt();
 
     // The first cell in a console is always the banner.
     this._cells.add(this._banner);
-
-    // The last cell in a console is always the prompt.
-    this._cells.add(this._prompt);
 
     this._cells.changed.connect(this.onCellsChanged, this);
   }
@@ -277,6 +278,20 @@ class ConsoleModel implements IConsoleModel {
    */
   get completion(): ICompletionModel {
     return this._completion;
+  }
+
+  /**
+   * The console's prompt, a code cell model.
+   */
+  get prompt(): ICodeCellModel {
+    return this._prompt;
+  }
+  set prompt(newValue: ICodeCellModel) {
+    if (newValue === this._prompt) {
+      return;
+    }
+    this._prompt = newValue;
+    this._cells.add(newValue);
   }
 
   /**
@@ -486,8 +501,9 @@ class ConsoleModel implements IConsoleModel {
       if (value.status !== 'ok') {
         return;
       }
-      // Update the completion model options.
+      // Update the completion model options and request.
       this._completion.options = value.matches;
+      this._completion.original = args;
     });
   }
 
@@ -648,6 +664,7 @@ namespace Private {
       model.clear();
       // Update the console banner.
       model.banner = info.banner;
+      model.prompt = model.createPrompt();
     });
   }
 
