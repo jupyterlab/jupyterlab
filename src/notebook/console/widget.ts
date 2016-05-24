@@ -95,6 +95,39 @@ class ConsolePanel extends Panel {
     super.dispose();
   }
 
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'click':
+        let prompt = this.console.prompt;
+        if (prompt) prompt.input.editor.focus();
+        break;
+    }
+  }
+
+  /**
+   * Handle `after_attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('click', this);
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('click', this);
+  }
+
   private _console: ConsoleWidget = null;
 }
 
@@ -205,36 +238,11 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-  }
-
-  /**
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
     let prompt = this.prompt;
     if (prompt) prompt.input.editor.focus();
-  }
-
-  /**
-   * Handle `before_detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-  }
-
-  /**
-   * Handle `update-request` messages sent to the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
   }
 
   /**
