@@ -114,10 +114,17 @@ const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 export
 class BaseCellWidget extends Widget {
   /**
-   * Create a new cell editor widget.
+   * Create a new cell editor for the widget.
    */
   static createCellEditor(model: ICellModel): CellEditorWidget {
     return new CellEditorWidget(model);
+  }
+
+  /**
+   * Create a new input area for the widget.
+   */
+  static createInputArea(editor: CellEditorWidget): InputAreaWidget {
+    return new InputAreaWidget(editor);
   }
 
   /**
@@ -129,7 +136,7 @@ class BaseCellWidget extends Widget {
     this._model = model;
     let ctor = this.constructor as typeof BaseCellWidget;
     this._editor = ctor.createCellEditor(model);
-    this._input = new InputAreaWidget(this._editor);
+    this._input = ctor.createInputArea(this._editor);
     this.layout = new PanelLayout();
     (this.layout as PanelLayout).addChild(this._input);
     model.contentChanged.connect(this.onModelChanged, this);
@@ -463,6 +470,7 @@ class RawCellWidget extends BaseCellWidget {
 /**
  * An input area widget, which hosts a prompt and an editor widget.
  */
+export
 class InputAreaWidget extends Widget {
   /**
    * Construct an input area widget.
