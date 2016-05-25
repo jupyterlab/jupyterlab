@@ -7,10 +7,6 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
   Widget
 } from 'phosphor-widget';
 
@@ -56,18 +52,6 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * This list of completion options.
-   */
-  get options(): string[] {
-    return this._options;
-  }
-  set options(options: string[]) {
-    this._options = [];
-    this._options.push(...options);
-    this.update();
-  }
-
-  /**
    * The semantic parent of the completion widget, its reference widget.
    */
   get reference(): Widget {
@@ -84,7 +68,6 @@ class CompletionWidget extends Widget {
     if (this.isDisposed) return;
     this._model.dispose();
     this._model = null;
-    this.options = null;
     super.dispose();
   }
 
@@ -131,19 +114,20 @@ class CompletionWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     let node = this.node;
+    let options = this._model.options;
     node.textContent = '';
 
-    if (!this._options || !this._options.length) {
+    if (!options || !options.length) {
       this.hide();
       return;
     }
 
-    for (let i = 0, len = this._options.length; i < len; i++) {
+    for (let i = 0, len = options.length; i < len; i++) {
       let li = document.createElement('li');
       let code = document.createElement('code');
 
       // Use innerHTML because search results include <mark> tags.
-      code.innerHTML = this._options[i];
+      code.innerHTML = options[i];
       li.className = ITEM_CLASS;
       li.appendChild(code);
       node.appendChild(li);
@@ -174,17 +158,8 @@ class CompletionWidget extends Widget {
   /**
    * Handle a model state change event.
    */
-  protected onModelChanged(sender: ICompletionModel, args: IChangedArgs<any>) {
-    switch (args.name) {
-      case 'current':
-        console.log('current updated, original', args.newValue);
-        this.update();
-        return;
-      case 'options':
-        console.log('options updated', args.newValue);
-        this.options = args.newValue;
-        return;
-    }
+  protected onModelChanged(sender: ICompletionModel, args: void) {
+    this.update();
   }
 
   /**
@@ -209,7 +184,6 @@ class CompletionWidget extends Widget {
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
       if (target === this.node) {
-        console.log('boom');
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -220,7 +194,6 @@ class CompletionWidget extends Widget {
   }
 
   private _model: ICompletionModel = null;
-  private _options: string[] = null;
   private _reference: Widget = null;
 }
 

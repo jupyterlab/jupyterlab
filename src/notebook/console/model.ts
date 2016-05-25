@@ -512,7 +512,8 @@ class ConsoleModel implements IConsoleModel {
       // If there is currently a completion
       if (completion && completion.original) {
         let contents = { code: args.newValue, cursor_pos: args.ch };
-        this._complete(contents).then(() => completion.current = args);
+        // this._complete(contents).then(() => completion.current = args);
+        completion.current = args;
       }
     } else {
       // If final character is whitespace, reset tooltip and completion.

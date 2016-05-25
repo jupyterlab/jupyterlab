@@ -7,10 +7,6 @@ import {
 } from 'phosphor-disposable';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
@@ -19,12 +15,33 @@ import {
 } from '../editor/model';
 
 
+/**
+ * A filtered completion menu matching result.
+ */
+interface ICompletionMatch {
+  /**
+   * The highlighted text of a completion match.
+   */
+  text: string;
+
+  /**
+   * A score which indicates the strength of the match.
+   *
+   * A lower score is better. Zero is the best possible score.
+   */
+  score: number;
+}
+
+
+/**
+ * The data model backing a code completion widget.
+ */
 export
 interface ICompletionModel extends IDisposable {
   /**
    * A signal emitted when state of the completion menu changes.
    */
-  stateChanged: ISignal<ICompletionModel, IChangedArgs<any>>;
+  stateChanged: ISignal<ICompletionModel, void>;
 
   /**
    * The list of filtered options, including any `<mark>`ed characters.
@@ -57,7 +74,7 @@ class CompletionModel implements ICompletionModel {
   /**
    * A signal emitted when state of the completion menu changes.
    */
-  get stateChanged(): ISignal<ICompletionModel, IChangedArgs<any>> {
+  get stateChanged(): ISignal<ICompletionModel, void> {
     return Private.stateChangedSignal.bind(this);
   }
 
@@ -80,8 +97,7 @@ class CompletionModel implements ICompletionModel {
     } else {
       this._options = null;
     }
-    let name = 'options';
-    this.stateChanged.emit({ name, oldValue, newValue });
+    this.stateChanged.emit(void 0);
   }
 
   /**
@@ -93,6 +109,7 @@ class CompletionModel implements ICompletionModel {
   set original(request: ICompletionRequest) {
     this._original = request;
     this._current = null;
+    this.stateChanged.emit(void 0);
   }
 
   /**
@@ -104,8 +121,22 @@ class CompletionModel implements ICompletionModel {
   set current(newValue: ITextChange) {
     let oldValue = this._current;
     this._current = newValue;
-    let name = 'current';
-    this.stateChanged.emit({ name, oldValue, newValue });
+
+    let original = this._original;
+    let current = this._current;
+    let originalLine = original.value.split('\n')[original.line];
+    let currentLine = current.newValue.split('\n')[current.line];
+
+    // If the text change means that the original starting has been preceded,
+    // then the completion is no longer valid and should be reset.
+    if (currentLine.length < originalLine.length) {
+      this.original = null;
+      this.options = null;
+      this._query = '';
+    } else {
+      this._query = currentLine.replace(originalLine, '');
+    }
+    this.stateChanged.emit(void 0);
   }
 
   /**
@@ -124,17 +155,31 @@ class CompletionModel implements ICompletionModel {
    * Apply the query to the complete options list to return the matching subset.
    */
   private _filter(): string[] {
-    let original = this._original;
-    let current = this._current;
-    console.log('original', original && original.value);
-    console.log('current', current && current.newValue);
-    return this._options;
+    let options = this._options;
+    let query = this._query;
+    if (!query) {
+      return options;
+    }
+    let results: ICompletionMatch[] = [];
+    for (let option of options) {
+      let match = StringSearch.sumOfSquares(option, query);
+      if (match) {
+        results.push({
+          text: StringSearch.highlight(option, match.indices),
+          score: match.score
+        })
+      }
+    }
+    return results.sort((a, b) => {
+      return a.score - b.score;
+    }).map(result => result.text);
   }
 
   private _isDisposed = false;
   private _options: string[] = null;
   private _original: ICompletionRequest = null;
   private _current: ITextChange = null;
+  private _query = '';
 }
 
 
@@ -143,5 +188,104 @@ namespace Private {
    * A signal emitted when state of the completion menu changes.
    */
   export
-  const stateChangedSignal = new Signal<ICompletionModel, IChangedArgs<any>>();
+  const stateChangedSignal = new Signal<ICompletionModel, void>();
+}
+
+
+/**
+ * A namespace which holds string searching functionality.
+ *
+ * #### Notes
+ * This functionality comes from phosphor-core and can be removed from this file
+ * once newer versions of phosphor libraries are used throughout
+ * jupyter-js-notebook.
+ */
+namespace StringSearch {
+  /**
+   * The result of a sum-of-squares string search.
+   */
+  export
+  interface ISumOfSquaresResult {
+    /**
+     * A score which indicates the strength of the match.
+     *
+     * A lower score is better. Zero is the best possible score.
+     */
+    score: number;
+
+    /**
+     * The indices of the matched characters in the source text.
+     *
+     * The indices will appear in increasing order.
+     */
+    indices: number[];
+  }
+
+  /**
+   * Compute the sum-of-squares match for the given search text.
+   *
+   * @param sourceText - The text which should be searched.
+   *
+   * @param queryText - The query text to locate in the source text.
+   *
+   * @returns The match result object, or `null` if there is no match.
+   *
+   * #### Complexity
+   * Linear on `sourceText`.
+   *
+   * #### Notes
+   * This scoring algorithm uses a sum-of-squares approach to determine
+   * the score. In order for there to be a match, all of the characters
+   * in `queryText` **must** appear in `sourceText` in order. The index
+   * of each matching character is squared and added to the score. This
+   * means that early and consecutive character matches are preferred.
+   *
+   * The character match is performed with strict equality. It is case
+   * sensitive and does not ignore whitespace. If those behaviors are
+   * required, the text should be transformed before scoring.
+   */
+  export
+  function sumOfSquares(sourceText: string, queryText: string): ISumOfSquaresResult {
+    let score = 0;
+    let indices = new Array<number>(queryText.length);
+    for (let i = 0, j = 0, n = queryText.length; i < n; ++i, ++j) {
+      j = sourceText.indexOf(queryText[i], j);
+      if (j === -1) {
+        return null;
+      }
+      indices[i] = j;
+      score += j * j;
+    }
+    return { score, indices };
+  }
+
+  /**
+   * Highlight the matched characters of a source string.
+   *
+   * @param source - The text which should be highlighted.
+   *
+   * @param indices - The indices of the matched characters. They must
+   *   appear in increasing order and must be in bounds of the source.
+   *
+   * @returns A string with interpolated `<mark>` tags.
+   */
+  export
+  function highlight(sourceText: string, indices: number[]): string {
+    let k = 0;
+    let last = 0;
+    let result = '';
+    let n = indices.length;
+    while (k < n) {
+      let i = indices[k];
+      let j = indices[k];
+      while (++k < n && indices[k] === j + 1) {
+        j++;
+      }
+      let head = sourceText.slice(last, i);
+      let chunk = sourceText.slice(i, j + 1);
+      result += `${head}<mark>${chunk}</mark>`;
+      last = j + 1;
+    }
+    return result + sourceText.slice(last);
+  }
 }
