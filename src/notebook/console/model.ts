@@ -504,19 +504,21 @@ class ConsoleModel implements IConsoleModel {
       return;
     }
 
-    // If there is currently a completion
-    if (this._completion && this.completion.options) {
-      let contents = { code: args.newValue, cursor_pos: args.ch };
-      this._complete(contents).then(() => {
-        this._completion.current = args;
-      });
-    }
-
-    // If final character of current line isn't a whitespace character, bail.
     let currentLine = args.newValue.split('\n')[args.line];
-    if (!currentLine.match(/\S$/)) {
+    let completion = this._completion;
+
+    // If final character of current line is not whitespace.
+    if (currentLine.match(/\S$/)) {
+      // If there is currently a completion
+      if (completion && completion.original) {
+        let contents = { code: args.newValue, cursor_pos: args.ch };
+        this._complete(contents).then(() => completion.current = args);
+      }
+    } else {
+      // If final character is whitespace, reset tooltip and completion.
       this.tooltip = null;
-      this.completion.options = null;
+      completion.options = null;
+      completion.original = null;
       return;
     }
 

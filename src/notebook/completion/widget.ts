@@ -177,11 +177,11 @@ class CompletionWidget extends Widget {
   protected onModelChanged(sender: ICompletionModel, args: IChangedArgs<any>) {
     switch (args.name) {
       case 'current':
-        console.log('current updated');
+        console.log('current updated, original', args.newValue);
         this.update();
         return;
       case 'options':
-        console.log('options updated');
+        console.log('options updated', args.newValue);
         this.options = args.newValue;
         return;
     }
