@@ -213,15 +213,7 @@ createWithDialog(widget: FileButtons): Promise<Widget> {
     if (result.text !== 'OK') {
       throw new Error('Aborted');
     }
-    // Create the empty file.
-    if (handler.ext === '.ipynb') {
-      return widget.model.newUntitled('notebook');
-    } else {
-      return widget.model.newUntitled('file');
-    }
-  }).then(contents => {
-    // Rename the file.
-    return model.rename(contents.name, handler.input.value);
+    // TODO: check for a name conflict.
   }).then(contents => {
     // Create the widget.
     let widgetName = handler.widgetDropdown.value;
@@ -232,6 +224,7 @@ createWithDialog(widget: FileButtons): Promise<Widget> {
     } else {
       kernel = JSON.parse(value) as IKernelId;
     }
+    // TODO: get the full path here.
     return manager.createNew(contents.path, widgetName, kernel);
   });
 }

@@ -220,19 +220,16 @@ export interface IDocumentContext extends IDisposable {
 }
 
 
-
 /**
  * The options used to register a widget factory.
  */
 export
 interface IWidgetFactoryOptions {
-
   /**
    * The file extensions the widget can view.
    *
    * #### Notes
-   * Use `'.*'` to denote all file extensions
-   * or give the actual extension (e.g. `'.txt'`).
+   * Use ".*" to denote all files.
    */
   fileExtensions: string[];
 
@@ -248,9 +245,9 @@ interface IWidgetFactoryOptions {
 
   /**
    * The file extensions for which the factory should be the default.
+   *
    * #### Notes
-   * Use `'.*'` to denote all file extensions
-   * or give the actual extension (e.g. `'.txt'`).
+   * Use ".*" to denote all files.
    */
   defaultFor?: string[];
 
@@ -318,9 +315,9 @@ interface IModelFactory extends IDisposable {
   createNew(languagePreference?: string): IDocumentModel;
 
   /**
-   * Get the preferred kernel language given a path.
+   * Get the preferred kernel language given an extension.
    */
-  preferredLanguage(path: string): string;
+  preferredLanguage(ext: string): string;
 }
 
 
@@ -343,6 +340,28 @@ interface IKernelPreference {
    * Whether a kernel when can be started when opening.
    */
   canStartKernel: boolean;
+}
+
+
+/**
+ * An interface for a file creator type.
+ */
+export
+interface IFileCreator {
+  /**
+   * The name of the file type to create.
+   */
+  name: string;
+
+  /**
+   * The default extension of the file type.
+   */
+  extension: string;
+
+  /**
+   * An icon to associate with the file type.
+   */
+  icon?: string;
 }
 
 
@@ -417,6 +436,17 @@ class DocumentManager implements IDisposable {
     this._sessionManager = null;
     this._contextManager.dispose();
     this._contextManager = null;
+  }
+
+  /**
+   * Add a file creator.
+   */
+  addFileCreator(creator: IFileCreator): IDisposable {
+    this._creators.push(creator);
+    return new DisposableDelegate(() => {
+      let index = this._creators.indexOf(creator);
+      this._creators.splice(index, 1);
+    });
   }
 
   /**
@@ -540,6 +570,13 @@ class DocumentManager implements IDisposable {
       }
     }
     return factories;
+  }
+
+  /**
+   * Get a list of the file creator options.
+   */
+  listFileCreators(): IFileCreator[] {
+    return this._creators.slice();
   }
 
   /**
@@ -764,6 +801,7 @@ class DocumentManager implements IDisposable {
   private _sessionManager: INotebookSessionManager = null;
   private _contextManager: ContextManager = null;
   private _specs: IKernelSpecIds = null;
+  private _creators: IFileCreator[] = [];
 }
 
 
