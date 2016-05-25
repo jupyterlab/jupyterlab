@@ -126,7 +126,6 @@ function main(): void {
     kernelspecs = specs;
     let kernelName = specs.default;
     let language = specs.default;
-    console.log('specs', specs);
     return startNewSession({
       notebookPath: 'fake_path',
       kernelName: findKernel(kernelName, language, specs),

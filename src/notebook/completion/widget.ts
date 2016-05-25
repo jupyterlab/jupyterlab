@@ -46,7 +46,7 @@ class CompletionWidget extends Widget {
   constructor(model: ICompletionModel) {
     super();
     this._model = model;
-    this._model.stateChanged.connect(this.onModelChanged, this);
+    this._model.stateChanged.connect(() => this.update(), this);
     this.addClass(COMPLETION_CLASS);
     this.update();
   }
@@ -152,14 +152,6 @@ class CompletionWidget extends Widget {
     if (node.scrollHeight > maxHeight) {
       node.style.width = `${2 * node.offsetWidth - node.clientWidth}px`;
     }
-
-  }
-
-  /**
-   * Handle a model state change event.
-   */
-  protected onModelChanged(sender: ICompletionModel, args: void) {
-    this.update();
   }
 
   /**
