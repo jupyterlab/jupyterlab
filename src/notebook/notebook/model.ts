@@ -167,7 +167,7 @@ class NotebookModel implements INotebookModel {
     this._cells.changed.connect(this.onCellsChanged, this);
     this._changeStack = new NotebookUndo(this);
     if (languagePreference) {
-      this._metadata['language_info'] = `{"name":"${languagePreference}"`;
+      this._metadata['language_info'] = `{"name":"${languagePreference}}"`;
     }
   }
 
