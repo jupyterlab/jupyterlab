@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  INotebookSession, IInspectReply, ICompleteReply
+  INotebookSession, IInspectReply, ICompleteRequest, ICompleteReply
 } from 'jupyter-js-services';
 
 import {
@@ -480,29 +480,12 @@ class ConsoleModel implements IConsoleModel {
    * Handle a completion request in the prompt model.
    */
   protected onCompletionRequest(sender: any, args: ICompletionRequest) {
-    let pendingComplete = ++this._pendingComplete;
     let contents = { code: args.value, cursor_pos: args.ch };
-
     // If there is no session, no requests can be sent to the API.
     if (!this._session) {
       return;
     }
-
-    this._session.kernel.complete(contents).then((value: ICompleteReply) => {
-      // If model has been disposed, bail.
-      if (this.isDisposed) {
-        return;
-      }
-      // If a newer completion requesy has created a pending request, bail.
-      if (pendingComplete !== this._pendingComplete) {
-        return;
-      }
-      // Completion request failures or negative results fail silently.
-      if (value.status !== 'ok') {
-        return;
-      }
-      // Update the completion model options and request.
-      this._completion.options = value.matches;
+    this._complete(contents).then(() => {
       this._completion.original = args;
     });
   }
@@ -521,15 +504,24 @@ class ConsoleModel implements IConsoleModel {
       return;
     }
 
+    // If there is currently a completion
+    if (this._completion && this.completion.options) {
+      let contents = { code: args.newValue, cursor_pos: args.ch };
+      this._complete(contents).then(() => {
+        this._completion.current = args;
+      });
+    }
+
     // If final character of current line isn't a whitespace character, bail.
     let currentLine = args.newValue.split('\n')[args.line];
     if (!currentLine.match(/\S$/)) {
       this.tooltip = null;
+      this.completion.options = null;
       return;
     }
 
-    let pendingInspect = ++this._pendingInspect;
     let contents = { code: currentLine, cursor_pos: args.ch, detail_level: 0 };
+    let pendingInspect = ++this._pendingInspect;
 
     this._session.kernel.inspect(contents).then((value: IInspectReply) => {
       // If model has been disposed, bail.
@@ -574,6 +566,27 @@ class ConsoleModel implements IConsoleModel {
       });
       break;
     }
+  }
+
+  private _complete(contents: ICompleteRequest): Promise<void> {
+    let pendingComplete = ++this._pendingComplete;
+    return this._session.kernel.complete(contents).then((value: ICompleteReply) => {
+      // If model has been disposed, bail.
+      if (this.isDisposed) {
+        return;
+      }
+      // If a newer completion requesy has created a pending request, bail.
+      if (pendingComplete !== this._pendingComplete) {
+        return;
+      }
+      // Completion request failures or negative results fail silently.
+      if (value.status !== 'ok') {
+        return;
+      }
+      // Update the completion model options and request.
+      this._completion.options = value.matches;
+      return null;
+    });
   }
 
   private _banner: IRawCellModel = null;

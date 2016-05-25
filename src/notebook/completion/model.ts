@@ -7,6 +7,10 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
@@ -18,9 +22,9 @@ import {
 export
 interface ICompletionModel extends IDisposable {
   /**
-   * A signal emitted when choosable completion options change.
+   * A signal emitted when state of the completion menu changes.
    */
-  optionsChanged: ISignal<ICompletionModel, void>;
+  stateChanged: ISignal<ICompletionModel, IChangedArgs<any>>;
 
   /**
    * The list of filtered options, including any `<mark>`ed characters.
@@ -51,10 +55,10 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
-   * A signal emitted when choosable completion options change.
+   * A signal emitted when state of the completion menu changes.
    */
-  get optionsChanged(): ISignal<ICompletionModel, void> {
-    return Private.optionsChangedSignal.bind(this);
+  get stateChanged(): ISignal<ICompletionModel, IChangedArgs<any>> {
+    return Private.stateChangedSignal.bind(this);
   }
 
   /**
@@ -68,9 +72,16 @@ class CompletionModel implements ICompletionModel {
   get options(): string[] {
     return this._filter();
   }
-  set options(options: string[]) {
-    this._options = options;
-    this.optionsChanged.emit(void 0);
+  set options(newValue: string[]) {
+    let oldValue = this._options;
+    if (newValue) {
+      this._options = [];
+      this._options.push(...newValue);
+    } else {
+      this._options = null;
+    }
+    let name = 'options';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -90,8 +101,11 @@ class CompletionModel implements ICompletionModel {
   get current(): ITextChange {
     return this._current;
   }
-  set current(change: ITextChange) {
-    this._current = change;
+  set current(newValue: ITextChange) {
+    let oldValue = this._current;
+    this._current = newValue;
+    let name = 'current';
+    this.stateChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -110,6 +124,10 @@ class CompletionModel implements ICompletionModel {
    * Apply the query to the complete options list to return the matching subset.
    */
   private _filter(): string[] {
+    let original = this._original;
+    let current = this._current;
+    console.log('original', original && original.value);
+    console.log('current', current && current.newValue);
     return this._options;
   }
 
@@ -122,8 +140,8 @@ class CompletionModel implements ICompletionModel {
 
 namespace Private {
   /**
-   * A signal emitted when choosable completion options change.
+   * A signal emitted when state of the completion menu changes.
    */
   export
-  const optionsChangedSignal = new Signal<ICompletionModel, void>();
+  const stateChangedSignal = new Signal<ICompletionModel, IChangedArgs<any>>();
 }

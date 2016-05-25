@@ -7,6 +7,10 @@ import {
 } from 'phosphor-messaging';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -46,7 +50,7 @@ class CompletionWidget extends Widget {
   constructor(model: ICompletionModel) {
     super();
     this._model = model;
-    this._model.optionsChanged.connect(this.onOptionsChanged, this);
+    this._model.stateChanged.connect(this.onModelChanged, this);
     this.addClass(COMPLETION_CLASS);
     this.update();
   }
@@ -106,9 +110,11 @@ class CompletionWidget extends Widget {
    * Handle `after_attach` messages for the widget.
    *
    * #### Notes
-   * Captures document events in capture phase to dismiss completion widget.
+   * Captures document events in capture phase to dismiss or navigate the
+   * completion widget.
    */
   protected onAfterAttach(msg: Message): void {
+    document.addEventListener('keydown', this, true);
     document.addEventListener('mousedown', this, true);
   }
 
@@ -116,6 +122,7 @@ class CompletionWidget extends Widget {
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
+    document.removeEventListener('keydown', this);
     document.removeEventListener('mousedown', this);
   }
 
@@ -144,16 +151,19 @@ class CompletionWidget extends Widget {
 
     if (this.isHidden) this.show();
 
-    let availableHeight = this._model.original.coords.top;
+    let coords = this._model.current ? this._model.current.coords
+      : this._model.original.coords;
+    let availableHeight = coords.top;
     let maxHeight = Math.min(availableHeight, MAX_HEIGHT);
     node.style.maxHeight = `${maxHeight}px`;
 
     // Account for 1px border width.
-    let left = Math.floor(this._model.original.coords.left) + 1;
+    let left = Math.floor(coords.left) + 1;
     let rect = node.getBoundingClientRect();
     let top = maxHeight - rect.height;
     node.style.left = `${left}px`;
     node.style.top = `${top}px`;
+    node.style.width = 'auto';
     // Expand the menu width by the scrollbar size, if present.
     if (node.scrollHeight > maxHeight) {
       node.style.width = `${2 * node.offsetWidth - node.clientWidth}px`;
@@ -162,10 +172,19 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * Handle option changes from the model.
+   * Handle a model state change event.
    */
-  protected onOptionsChanged(sender: ICompletionModel, args: void): void {
-    this.options = this._model.options;
+  protected onModelChanged(sender: ICompletionModel, args: IChangedArgs<any>) {
+    switch (args.name) {
+      case 'current':
+        console.log('current updated');
+        this.update();
+        return;
+      case 'options':
+        console.log('options updated');
+        this.options = args.newValue;
+        return;
+    }
   }
 
   /**
@@ -176,6 +195,23 @@ class CompletionWidget extends Widget {
     while (target !== document.documentElement) {
       if (target === this.node) {
         // TODO: Emit a value and dismiss the completion menu.
+        return;
+      }
+      target = target.parentElement;
+    }
+    this.hide();
+  }
+
+  /**
+   * Handle keydown events for the widget.
+   */
+  private _evtKeydown(event: KeyboardEvent) {
+    let target = event.target as HTMLElement;
+    while (target !== document.documentElement) {
+      if (target === this.node) {
+        console.log('boom');
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
       target = target.parentElement;
