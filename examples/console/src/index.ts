@@ -106,6 +106,12 @@ function main(): void {
   let items: IStandardPaletteItemOptions[] = [
     {
       category: 'Console',
+      text: 'Clear',
+      shortcut: 'Accel R',
+      handler: () => { consoleModel.clear(); }
+    },
+    {
+      category: 'Console',
       text: 'Execute Prompt',
       shortcut: 'Shift Enter',
       handler: () => { consoleModel.run(); }
@@ -114,6 +120,11 @@ function main(): void {
   pModel.addItems(items);
 
   let bindings = [
+    {
+      selector: '.jp-Console',
+      sequence: ['Accel R'],
+      handler: () => { consoleModel.clear(); }
+    },
     {
       selector: '.jp-Console',
       sequence: ['Shift Enter'],

@@ -386,11 +386,14 @@ class ConsoleModel implements IConsoleModel {
   /**
    * Clear the cells of a console except for the banner.
    */
-  clear(): void {
+  clear() {
     let cells = this._cells;
+    // Clear internal reference to prompt, since it will be removed.
+    this._prompt = null;
     while (cells.length > 1) {
       cells.removeAt(cells.length - 1);
     }
+    this.prompt = this.createPrompt();
   }
 
   /**
@@ -447,10 +450,7 @@ class ConsoleModel implements IConsoleModel {
     }
     prompt.trusted = true;
     prompt.input.textEditor.readOnly = true;
-    let newPrompt = () => {
-      this._prompt = this.createPrompt()
-      this._cells.add(this._prompt);
-    };
+    let newPrompt = () => { this.prompt = this.createPrompt(); };
     // Whether the code cell executes or not, create a new prompt.
     executeCodeCell(prompt, session.kernel).then(newPrompt, newPrompt);
   }
@@ -461,11 +461,9 @@ class ConsoleModel implements IConsoleModel {
   protected onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
     switch (change.type) {
     case ListChangeType.Add:
-      // TODO: Handle addition: change.newIndex
       break;
     case ListChangeType.Remove:
       (change.oldValue as ICellModel).dispose();
-      // TODO: Handle removal: change.oldIndex
       break;
     case ListChangeType.Replace:
       let oldValues = change.oldValue as ICellModel[];
@@ -680,7 +678,6 @@ namespace Private {
       model.clear();
       // Update the console banner.
       model.banner = info.banner;
-      model.prompt = model.createPrompt();
     });
   }
 

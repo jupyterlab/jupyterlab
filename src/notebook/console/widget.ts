@@ -261,7 +261,9 @@ class ConsoleWidget extends Widget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-
+    let prompt = this.prompt;
+    Private.scrollIfNeeded(this.parent.node, prompt.node);
+    prompt.input.editor.focus();
   }
 
   /**
@@ -276,9 +278,11 @@ class ConsoleWidget extends Widget {
     case ListChangeType.Add:
       widget = factory(args.newValue as ICellModel, this._rendermime);
       layout.insertChild(args.newIndex, widget);
-      let prompt = this.prompt;
-      Private.scrollIfNeeded(this.parent.node, prompt.node);
-      prompt.input.editor.focus();
+      break;
+    case ListChangeType.Remove:
+      widget = layout.childAt(args.oldIndex) as BaseCellWidget;
+      layout.removeChild(widget);
+      widget.dispose();
       break;
     }
     this.update();
