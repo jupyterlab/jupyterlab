@@ -110,12 +110,12 @@ namespace NotebookActions {
     }
 
     // Make the changes while preserving history.
-    model.beginCompoundOperation();
+    model.cells.beginCompoundOperation();
     cells.set(index, newModel);
     for (let cell of toDelete) {
       cells.remove(cell);
     }
-    model.endCompoundOperation();
+    model.cells.endCompoundOperation();
 
     // If the original cell is a markdown cell, make sure it is unrendered.
     if (primary instanceof MarkdownCellWidget) {
@@ -132,7 +132,7 @@ namespace NotebookActions {
     let model = widget.model;
     let cells = model.cells;
     // Delete the cells as one undo event.
-    model.beginCompoundOperation();
+    model.cells.beginCompoundOperation();
     for (let i = 0; i < cells.length; i++) {
       let child = widget.childAt(i);
       if (widget.isSelected(child)) {
@@ -140,7 +140,7 @@ namespace NotebookActions {
         cells.remove(cell);
       }
     }
-    model.endCompoundOperation();
+    model.cells.endCompoundOperation();
     Private.deselectCells(widget);
   }
 
@@ -170,7 +170,7 @@ namespace NotebookActions {
   export
   function changeCellType(widget: ActiveNotebook, value: string): void {
     let model = widget.model;
-    model.beginCompoundOperation();
+    model.cells.beginCompoundOperation();
     for (let i = 0; i < model.cells.length; i++) {
       let child = widget.childAt(i);
       if (!widget.isSelected(child)) {
@@ -197,7 +197,7 @@ namespace NotebookActions {
         (child as MarkdownCellWidget).rendered = false;
       }
     }
-    model.endCompoundOperation();
+    model.cells.endCompoundOperation();
     Private.deselectCells(widget);
   }
 
@@ -379,7 +379,7 @@ namespace NotebookActions {
     let model = widget.model;
     let cells = model.cells;
     // Preserve the history as one undo event.
-    model.beginCompoundOperation();
+    model.cells.beginCompoundOperation();
     for (let i = 0; i < widget.model.cells.length; i++) {
       let child = widget.childAt(i);
       if (widget.isSelected(child)) {
@@ -387,7 +387,7 @@ namespace NotebookActions {
         cells.remove(child.model);
       }
     }
-    model.endCompoundOperation();
+    model.cells.endCompoundOperation();
     clipboard.setData(JUPYTER_CELL_MIME, data);
     Private.deselectCells(widget);
   }

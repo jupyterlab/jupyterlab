@@ -1,39 +1,41 @@
-import {
-  IDisposable
-} from 'phosphor-disposable';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+'use strict';
+
 
 import {
-  IObservableList, ListChangeType, IListChangedArgs
+  IObservableList, ListChangeType, IListChangedArgs, ObservableList
 } from 'phosphor-observablelist';
-
-import {
-  ICellModel
-} from '../cells/model';
-
-import {
-  INotebookModel
-} from './model';
-
-import {
-  IBaseCell
-} from './nbformat';
 
 
 /**
- * A stack that manages undo/redo for the the notebook.
+ * An object which is JSON-able.
  */
 export
-class NotebookUndo implements IDisposable {
+interface IJSONable {
   /**
-   * Construct a new changestack.
+   * Convert the object to JSON.
    */
-  constructor(model: INotebookModel) {
-    this._model = model;
-    this._model.cells.changed.connect(this._onCellsChanged, this);
+  toJSON(): any;
+}
+
+
+/**
+ * An observable list that supports undo/redo.
+ */
+export
+class OberservableUndoableList<T extends IJSONable> extends ObservableList<T> {
+  /**
+   * Construct a new undoable observable list.
+   */
+  constructor(factory: (value: any) => T) {
+    super();
+    this._factory = factory;
+    this.changed.connect(this._onListChanged, this);
   }
 
   /**
-   * Whether the model can redo changes.
+   * Whether the object can redo changes.
    *
    * #### Notes
    * This is a read-only property.
@@ -43,7 +45,7 @@ class NotebookUndo implements IDisposable {
   }
 
   /**
-   * Whether the model can undo changes.
+   * Whether the object can undo changes.
    *
    * #### Notes
    * This is a read-only property.
@@ -53,13 +55,13 @@ class NotebookUndo implements IDisposable {
   }
 
   /**
-   * Get whether the model is disposed.
+   * Get whether the object is disposed.
    *
    * #### Notes
    * This is a read-only property.
    */
   get isDisposed(): boolean {
-    return this._model === null;
+    return this._stack === null;
   }
 
   /**
@@ -70,7 +72,7 @@ class NotebookUndo implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    this._model = null;
+    this._factory = null;
     this._stack = null;
   }
 
@@ -129,15 +131,15 @@ class NotebookUndo implements IDisposable {
   /**
    * Clear the change stack.
    */
-  clear(): void {
+  clearUndo(): void {
     this._index = -1;
     this._stack = [];
   }
 
   /**
-   * Handle a change in the cells list.
+   * Handle a change in the list.
    */
-  private _onCellsChanged(list: IObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
+  private _onListChanged(list: IObservableList<T>, change: IListChangedArgs<T>): void {
     if (!this._isUndoable) {
       return;
     }
@@ -162,28 +164,27 @@ class NotebookUndo implements IDisposable {
   /**
    * Undo a change event.
    */
-  private _undoChange(change: IListChangedArgs<IBaseCell>): void {
-    let cell: ICellModel;
-    let list = this._model.cells;
+  private _undoChange(change: IListChangedArgs<any>): void {
+    let value: T;
     switch (change.type) {
     case ListChangeType.Add:
-      list.removeAt(change.newIndex);
+      this.removeAt(change.newIndex);
       break;
     case ListChangeType.Set:
-      cell = this._createCell(change.oldValue as IBaseCell);
-      list.set(change.oldIndex, cell);
+      value = this._createValue(change.oldValue as any);
+      this.set(change.oldIndex, value);
       break;
     case ListChangeType.Remove:
-      cell = this._createCell(change.oldValue as IBaseCell);
-      list.insert(change.oldIndex, cell);
+      value = this._createValue(change.oldValue as any);
+      this.insert(change.oldIndex, value);
       break;
     case ListChangeType.Move:
-      list.move(change.newIndex, change.oldIndex);
+      this.move(change.newIndex, change.oldIndex);
       break;
     case ListChangeType.Replace:
-      let len = (change.newValue as IBaseCell[]).length;
-      let cells = this._createCells(change.oldValue as IBaseCell[]);
-      list.replace(change.oldIndex, len, cells);
+      let len = (change.newValue as any[]).length;
+      let values = this._createValues(change.oldValue as any[]);
+      this.replace(change.oldIndex, len, values);
       break;
     default:
       return;
@@ -193,28 +194,27 @@ class NotebookUndo implements IDisposable {
   /**
    * Redo a change event.
    */
-  private _redoChange(change: IListChangedArgs<IBaseCell>): void {
-    let cell: ICellModel;
-    let list = this._model.cells;
+  private _redoChange(change: IListChangedArgs<any>): void {
+    let value: T;
     switch (change.type) {
     case ListChangeType.Add:
-      cell = this._createCell(change.newValue as IBaseCell);
-      list.insert(change.newIndex, cell);
+      value = this._createValue(change.newValue as any);
+      this.insert(change.newIndex, value);
       break;
     case ListChangeType.Set:
-      cell = this._createCell(change.newValue as IBaseCell);
-      list.set(change.newIndex, cell);
+      value = this._createValue(change.newValue as any);
+      this.set(change.newIndex, value);
       break;
     case ListChangeType.Remove:
-      list.removeAt(change.oldIndex);
+      this.removeAt(change.oldIndex);
       break;
     case ListChangeType.Move:
-      list.move(change.oldIndex, change.newIndex);
+      this.move(change.oldIndex, change.newIndex);
       break;
     case ListChangeType.Replace:
-      let len = (change.oldValue as IBaseCell[]).length;
-      let cells = this._createCells(change.newValue as IBaseCell[]);
-      list.replace(change.oldIndex, len, cells);
+      let len = (change.oldValue as any[]).length;
+      let cells = this._createValues(change.newValue as any[]);
+      this.replace(change.oldIndex, len, cells);
       break;
     default:
       return;
@@ -222,48 +222,42 @@ class NotebookUndo implements IDisposable {
   }
 
   /**
-   * Create a cell model from JSON.
+   * Create a value from JSON.
    */
-  private _createCell(data: IBaseCell): ICellModel {
-    switch (data.cell_type) {
-    case 'code':
-      return this._model.createCodeCell(data);
-    case 'markdown':
-      return this._model.createMarkdownCell(data);
-    default:
-      return this._model.createRawCell(data);
-    }
+  private _createValue(data: any): T {
+    let factory = this._factory;
+    return factory(data);
   }
 
   /**
    * Create a list of cell models from JSON.
    */
-  private _createCells(bundles: IBaseCell[]): ICellModel[] {
-    let cells: ICellModel[] = [];
+  private _createValues(bundles: any[]): T[] {
+    let values: T[] = [];
     for (let bundle of bundles) {
-      cells.push(this._createCell(bundle));
+      values.push(this._createValue(bundle));
     }
-    return cells;
+    return values;
   }
 
   /**
-   * Copy a cell change as JSON.
+   * Copy a change as JSON.
    */
-  private _copyChange(change: IListChangedArgs<ICellModel>): IListChangedArgs<IBaseCell> {
+  private _copyChange(change: IListChangedArgs<T>): IListChangedArgs<any> {
     if (change.type === ListChangeType.Replace) {
       return this._copyReplace(change);
     }
-    let oldValue: IBaseCell = null;
-    let newValue: IBaseCell = null;
+    let oldValue: any = null;
+    let newValue: any = null;
     switch (change.type) {
     case ListChangeType.Add:
     case ListChangeType.Set:
     case ListChangeType.Remove:
       if (change.oldValue) {
-        oldValue = (change.oldValue as ICellModel).toJSON();
+        oldValue = (change.oldValue as T).toJSON();
       }
       if (change.newValue) {
-        newValue = (change.newValue as ICellModel).toJSON();
+        newValue = (change.newValue as T).toJSON();
       }
       break;
     case ListChangeType.Move:
@@ -271,9 +265,6 @@ class NotebookUndo implements IDisposable {
       break;
     default:
       return;
-    }
-    if (oldValue) {
-      (change.oldValue as ICellModel).dispose();
     }
     return {
       type: change.type,
@@ -285,17 +276,16 @@ class NotebookUndo implements IDisposable {
   }
 
   /**
-   * Copy a cell replace change as JSON.
+   * Copy a replace change as JSON.
    */
-  private _copyReplace(change: IListChangedArgs<ICellModel>): IListChangedArgs<IBaseCell> {
-    let oldValue: IBaseCell[] = [];
-    for (let cell of (change.oldValue as ICellModel[])) {
-      oldValue.push(cell.toJSON());
-      cell.dispose();
+  private _copyReplace(change: IListChangedArgs<T>): IListChangedArgs<any> {
+    let oldValue: any[] = [];
+    for (let value of (change.oldValue as T[])) {
+      oldValue.push(value.toJSON());
     }
-    let newValue: IBaseCell[] = [];
-    for (let cell of (change.newValue as ICellModel[])) {
-      newValue.push(cell.toJSON());
+    let newValue: any[] = [];
+    for (let value of (change.newValue as T[])) {
+      newValue.push(value.toJSON());
     }
     return {
       type: ListChangeType.Replace,
@@ -310,6 +300,6 @@ class NotebookUndo implements IDisposable {
   private _isUndoable = true;
   private _madeCompoundChange = false;
   private _index = -1;
-  private _stack: IListChangedArgs<IBaseCell>[][] = [];
-  private _model: INotebookModel = null;
+  private _stack: IListChangedArgs<any>[][] = [];
+  private _factory: (value: any) => T = null;
 }

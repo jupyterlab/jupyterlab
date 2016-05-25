@@ -10,7 +10,7 @@ import {
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
-  IObservableList, ObservableList, ListChangeType, IListChangedArgs
+  IObservableList, ListChangeType, IListChangedArgs
 } from 'phosphor-observablelist';
 
 import {
@@ -27,13 +27,13 @@ import {
 } from '../common/metadata';
 
 import {
+  OberservableUndoableList
+} from '../common/undo';
+
+import {
   INotebookContent, ICell, INotebookMetadata, MAJOR_VERSION,
   MINOR_VERSION, IBaseCell
 } from './nbformat';
-
-import {
-  NotebookUndo
-} from './undo';
 
 
 /**
@@ -47,7 +47,7 @@ interface INotebookModel extends IDocumentModel {
    * #### Notes
    * This is a read-only property.
    */
-  cells: IObservableList<ICellModel>;
+  cells: OberservableUndoableList<ICellModel>;
 
   /**
    * The major version number of the nbformat.
@@ -64,22 +64,6 @@ interface INotebookModel extends IDocumentModel {
    * This is a read-only property.
    */
   nbformatMinor: number;
-
-  /**
-   * Whether the model can redo changes.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  canRedo: boolean;
-
-  /**
-   * Whether the model can undo changes.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  canUndo: boolean;
 
   /**
    * Get a metadata cursor for the notebook.
@@ -131,26 +115,6 @@ interface INotebookModel extends IDocumentModel {
    *   new cell will be intialized with the data from the source.
    */
   createRawCell(source?: IBaseCell): RawCellModel;
-
-  /**
-   * Begin a compound operation.
-   */
-  beginCompoundOperation(isUndoAble?: boolean): void;
-
-  /**
-   * End a compound operation.
-   */
-  endCompoundOperation(): void;
-
-  /**
-   * Undo an operation.
-   */
-  undo(): void;
-
-  /**
-   * Redo an operation.
-   */
-  redo(): void;
 }
 
 
@@ -163,9 +127,17 @@ class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(languagePreference?: string) {
-    this._cells = new ObservableList<ICellModel>();
+    this._cells = new OberservableUndoableList<ICellModel>((data: IBaseCell) => {
+      switch (data.cell_type) {
+        case 'code':
+          return this.createCodeCell(data);
+        case 'markdown':
+          return this.createMarkdownCell(data);
+        default:
+          return this.createRawCell(data);
+      }
+    });
     this._cells.changed.connect(this.onCellsChanged, this);
-    this._changeStack = new NotebookUndo(this);
     if (languagePreference) {
       this._metadata['language_info'] = `{"name":"${languagePreference}"}`;
     }
@@ -194,7 +166,7 @@ class NotebookModel implements INotebookModel {
    * #### Notes
    * This is a read-only property.
    */
-  get cells(): IObservableList<ICellModel> {
+  get cells(): OberservableUndoableList<ICellModel> {
     return this._cells;
   }
 
@@ -272,26 +244,6 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Whether the model can redo changes.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get canRedo(): boolean {
-    return this._changeStack.canRedo;
-  }
-
-  /**
-   * Whether the model can undo changes.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get canUndo(): boolean {
-    return this._changeStack.canUndo;
-  }
-
-  /**
    * Get whether the model is disposed.
    *
    * #### Notes
@@ -310,6 +262,7 @@ class NotebookModel implements INotebookModel {
       return;
     }
     let cells = this._cells;
+    cells.dispose();
     clearSignalData(this);
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
@@ -322,8 +275,6 @@ class NotebookModel implements INotebookModel {
     }
     this._cursors = null;
     this._metadata = null;
-    this._changeStack.dispose();
-    this._changeStack = null;
   }
 
   /**
@@ -395,7 +346,7 @@ class NotebookModel implements INotebookModel {
    * Initialize the model state.
    */
   initialize(): void {
-    this._changeStack.clear();
+    this._cells.clearUndo();
   }
 
   /**
@@ -439,34 +390,6 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Begin a compound operation.
-   */
-  beginCompoundOperation(isUndoAble?: boolean): void {
-    this._changeStack.beginCompoundOperation(isUndoAble);
-  }
-
-  /**
-   * End a compound operation.
-   */
-  endCompoundOperation(): void {
-    this._changeStack.endCompoundOperation();
-  }
-
-  /**
-   * Undo an operation.
-   */
-  undo(): void {
-    this._changeStack.undo();
-  }
-
-  /**
-   * Redo an operation.
-   */
-  redo(): void {
-    this._changeStack.redo();
-  }
-
-  /**
    * Get a metadata cursor for the notebook.
    *
    * #### Notes
@@ -506,17 +429,24 @@ class NotebookModel implements INotebookModel {
       cell.contentChanged.connect(this.onCellChanged, this);
       break;
     case ListChangeType.Remove:
-      // Handled by undo.
+      (change.oldValue as ICellModel).dispose();
       break;
     case ListChangeType.Replace:
       let newValues = change.newValue as ICellModel[];
       for (cell of newValues) {
         cell.contentChanged.connect(this.onCellChanged, this);
       }
+      let oldValues = change.oldValue as ICellModel[];
+      for (cell of oldValues) {
+        cell.dispose();
+      }
       break;
     case ListChangeType.Set:
       cell = change.newValue as ICellModel;
       cell.contentChanged.connect(this.onCellChanged, this);
+      if (change.oldValue) {
+        (change.oldValue as ICellModel).dispose();
+      }
       break;
     default:
       return;
@@ -542,14 +472,13 @@ class NotebookModel implements INotebookModel {
     this.contentChanged.emit(`metadata.${name}`);
   }
 
-  private _cells: IObservableList<ICellModel> = null;
+  private _cells: OberservableUndoableList<ICellModel> = null;
   private _metadata: { [key: string]: any } = Object.create(null);
   private _dirty = false;
   private _readOnly = false;
   private _cursors: MetadataCursor[] = [];
   private _nbformat = MAJOR_VERSION;
   private _nbformatMinor = MINOR_VERSION;
-  private _changeStack: NotebookUndo = null;
 }
 
 

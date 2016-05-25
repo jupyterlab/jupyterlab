@@ -207,11 +207,11 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   };
   let undoHandler = () => {
     nbWidget.content.mode = 'command';
-    nbWidget.model.undo();
+    nbWidget.model.cells.undo();
   };
   let redoHandler = () => {
     nbWidget.content.mode = 'command';
-    nbWidget.model.redo();
+    nbWidget.model.cells.redo();
   };
 
   let items: IStandardPaletteItemOptions[] = [
