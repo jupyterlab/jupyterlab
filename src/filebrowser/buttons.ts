@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  ISessionId, IKernelId
+  ISessionId, IKernelId, IKernelSpecIds
 } from 'jupyter-js-services';
 
 import {
@@ -15,7 +15,7 @@ import {
 } from '../dialog';
 
 import {
-  DocumentManager
+  DocumentManager, IKernelPreference
 } from '../docmanager';
 
 import {
@@ -64,6 +64,11 @@ const UPLOAD_CLASS = 'jp-id-upload';
  * The class name added to the refresh button.
  */
 const REFRESH_CLASS = 'jp-id-refresh';
+
+/**
+ * The class name added for a file conflict.
+ */
+const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
 
 
 /**
@@ -196,7 +201,7 @@ function createWithDialog(widget: FileButtons): Promise<Widget> {
   // Get the current sessions.
   return manager.listSessions().then(sessions => {
     // Create the dialog and show it to the user.
-    handler = new CreateNewHandler(name, model, manager, sessions);
+    handler = new CreateNewHandler(model, manager, sessions);
     return showDialog({
       title: 'Create a new file',
       host: widget.parent.node,
@@ -218,7 +223,8 @@ function createWithDialog(widget: FileButtons): Promise<Widget> {
       kernel = JSON.parse(value) as IKernelId;
     }
     // TODO: get the full path here.
-    return manager.createNew(contents.path, widgetName, kernel);
+    let path = '';
+    return manager.createNew(path, widgetName, kernel);
   });
 }
 
@@ -246,7 +252,6 @@ class OpenWithHandler extends Widget {
    */
   constructor(name: string, manager: DocumentManager, sessions: ISessionId[]) {
     super();
-    this._model = model;
     this._manager = manager;
     this._sessions = sessions;
 
@@ -303,6 +308,7 @@ class OpenWithHandler extends Widget {
     updateKernels(preference, this.kernelDropdown, this._manager.kernelSpecs, this._sessions);
   }
 
+  private _ext = '';
   private _manager: DocumentManager = null;
   private _sessions: ISessionId[] = null;
 }
@@ -337,14 +343,12 @@ class CreateNewHandler extends Widget {
     this._manager = manager;
     this._sessions = sessions;
 
-    let fileTypes = this._manager.listFileTypes();
-
     // Create a file name based on the current time.
     let time = new Date();
     time.setMinutes(time.getMinutes() - time.getTimezoneOffset());
     let name = time.toJSON().slice(0, 10);
     name += '-' + time.getHours() + time.getMinutes() + time.getSeconds();
-    this.input.value = name + fileTypes[0].extension;
+    this.input.value = name + '.txt';
 
     // Check for name conflicts when the input changes.
     this.input.addEventListener('input', () => {
@@ -370,13 +374,21 @@ class CreateNewHandler extends Widget {
     let path = this.input.value;
     for (let item of this._model.sortedItems) {
       if (item.path === path) {
-        this.addClass(FILE_CONFLICT);
+        this.addClass(FILE_CONFLICT_CLASS);
         return;
       }
     }
-    if (this.ext !== this._prevExt) {
-      this.populateFactories();
+    let ext = this.ext;
+    if (ext === this._prevExt) {
+      return;
     }
+    // Update the file type dropdown and the factories.
+    if (this._extensions.indexOf(ext) === -1) {
+      this.fileTypeDropdown.value = this._sentinal;
+    } else {
+      this.fileTypeDropdown.value = ext;
+    }
+    this.populateFactories();
   }
 
   /**
@@ -420,7 +432,7 @@ class CreateNewHandler extends Widget {
   /**
    * Get the current extension for the file.
    */
-  get ext(): void {
+  get ext(): string {
     return this.input.value.split('.').pop();
   }
 
@@ -430,13 +442,21 @@ class CreateNewHandler extends Widget {
   protected populateFileTypes(): void {
     let fileTypes = this._manager.listFileTypes();
     let dropdown = this.fileTypeDropdown;
+    let option = document.createElement('option');
+    option.text = 'File';
+    option.value = this._sentinal;
     for (let ft of fileTypes) {
-      let option = document.createElement('option');
+      option = document.createElement('option');
       option.text = `${ft.name} (${ft.extension})`;
       option.value = ft.extension;
       dropdown.appendChild(option);
+      this._extensions.push(ft.extension);
     }
-    this._prevExt = fileTypes[0].extension;
+    if (this.ext in this._extensions) {
+      dropdown.value = this.ext;
+    } else {
+      dropdown.value = this._sentinal;
+    }
   }
 
   /**
@@ -451,7 +471,7 @@ class CreateNewHandler extends Widget {
       option.text = factory;
       widgetDropdown.appendChild(option);
     }
-    this.widgetChanged();
+    this.widgetDropdownChanged();
     this._prevExt = ext;
   }
 
@@ -461,8 +481,8 @@ class CreateNewHandler extends Widget {
   protected fileTypeChanged(): void {
     // Update the current input.
     let oldExt = this.ext;
-    let newExt = this.fileTypeChanged.value;
-    if (oldExt === newExt) {
+    let newExt = this.fileTypeDropdown.value;
+    if (oldExt === newExt || newExt === '') {
       return;
     }
     let oldName = this.input.value;
@@ -483,7 +503,9 @@ class CreateNewHandler extends Widget {
   private _model: FileBrowserModel = null;
   private _manager: DocumentManager = null;
   private _sessions: ISessionId[] = null;
+  private _sentinal = 'UNKOWN_EXTENSION';
   private _prevExt = '';
+  private _extensions: string[] = [];
 }
 
 
@@ -493,14 +515,14 @@ class CreateNewHandler extends Widget {
 function updateKernels(preference: IKernelPreference, node: HTMLSelectElement, specs: IKernelSpecIds, running: ISessionId[]): void {
   if (!preference.canStartKernel) {
     while (node.firstChild) {
-      node.removeChild(kernelDropdown.firstChild);
+      node.removeChild(node.firstChild);
     }
     node.disabled = true;
     return;
   }
   let lang = preference.language;
   node.disabled = false;
-  populateKernels(kernelDropdown, specs, running, lang);
+  populateKernels(node, specs, running, lang);
   // Select the "null" valued kernel if we do not prefer a kernel.
   if (!preference.preferKernel) {
     node.value = 'null';
@@ -542,22 +564,20 @@ function populateKernels(node: HTMLSelectElement, specs: IKernelSpecIds, running
   // Create mappings of display names and languages for kernel name.
   let displayNames: { [key: string]: string } = Object.create(null);
   let languages: { [key: string]: string } = Object.create(null);
-  for (let name in spec.kernelspecs) {
-    displayNames[name] = spec.kernelspecs[name].display_name;
+  for (let name in specs.kernelspecs) {
+    displayNames[name] = specs.kernelspecs[name].spec.display_name;
     maxLength = Math.max(maxLength, displayNames[name].length);
-    languages[name] = spec.kernelspecs[name].language;
+    languages[name] = specs.kernelspecs[name].spec.language;
   }
   // Handle a preferred kernel language in order of display name.
   let names: string[] = [];
   if (preferredLanguage) {
-    for (let name in spec.kernelspecs) {
+    for (let name in specs.kernelspecs) {
       if (languages[name] === preferredLanguage) {
         names.push(name);
       }
     }
-    names.sort((a, b) => {
-      displayNames[a].localCompare(displayNames[b]);
-    });
+    names.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
     for (let name of names) {
       node.appendChild(optionForName(name, displayNames[name]));
     }
@@ -571,17 +591,15 @@ function populateKernels(node: HTMLSelectElement, specs: IKernelSpecIds, running
   node.appendChild(createSeparatorOption(maxLength));
   // Add the rest of the kernel names in alphabetical order.
   let otherNames: string[] = [];
-  for (let name in spec.kernelspecs) {
+  for (let name in specs.kernelspecs) {
     if (names.indexOf(name) !== -1) {
       continue;
     }
     otherNames.push(name);
   }
-  otherNames.sort((a, b) => {
-    displayNames[a].localCompare(displayNames[b]);
-  });
+  otherNames.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
   for (let name of otherNames) {
-    node.appendChild(optionForName(name));
+    node.appendChild(optionForName(name, displayNames[name]));
   }
   // Add a separator option if there were any other names.
   if (otherNames.length) {
@@ -590,14 +608,14 @@ function populateKernels(node: HTMLSelectElement, specs: IKernelSpecIds, running
   // Add the sessions using the preferred language first.
   let matchingSessions: ISessionId[] = [];
   if (preferredLanguage) {
-    for (let session of sessions) {
+    for (let session of running) {
       if (languages[session.kernel.name] === preferredLanguage) {
         matchingSessions.push(session);
       }
     }
     if (matchingSessions) {
       matchingSessions.sort((a, b) => {
-        a.notebook.path.localCompare(b.notebook.path);
+        return a.notebook.path.localeCompare(b.notebook.path);
       });
       for (let session of matchingSessions) {
         let name = displayNames[session.kernel.name];
@@ -607,15 +625,15 @@ function populateKernels(node: HTMLSelectElement, specs: IKernelSpecIds, running
     }
   }
   // Add the other remaining sessions.
-  let otherSessions: ISessionId = [];
-  for (let session of sessions) {
+  let otherSessions: ISessionId[] = [];
+  for (let session of running) {
     if (matchingSessions.indexOf(session) === -1) {
       otherSessions.push(session);
     }
   }
   if (otherSessions) {
     otherSessions.sort((a, b) => {
-      a.notebook.path.localCompare(b.notebook.path);
+      return a.notebook.path.localeCompare(b.notebook.path);
     });
     for (let session of otherSessions) {
       let name = displayNames[session.kernel.name];
@@ -664,8 +682,8 @@ function optionForSession(session: ISessionId, displayName: string, maxLength: n
   }
   option.text = sessionName;
   option.value = JSON.stringify({ id: session.kernel.id });
-  option.title = `Path: ${session.notebook.path}\n`
-    `Kernel Name: ${displayName}\n`
+  option.title = `Path: ${session.notebook.path}\n` +
+    `Kernel Name: ${displayName}\n` +
     `Kernel Id: ${session.kernel.id}`;
   return option;
 }

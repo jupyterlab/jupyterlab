@@ -525,9 +525,7 @@ class DocumentManager implements IDisposable {
    */
   registerFileType(fileType: IFileType): IDisposable {
     this._fileTypes.push(fileType);
-    this._fileTypes.sort((a, b) => {
-      a.name.localCompare(b.name);
-    });
+    this._fileTypes.sort((a, b) => a.name.localeCompare(b.name));
     return new DisposableDelegate(() => {
       let index = this._fileTypes.indexOf(fileType);
       this._fileTypes.splice(index, 1);
