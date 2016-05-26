@@ -189,17 +189,10 @@ class FileButtons extends Widget {
 /**
  * Create a new file using a dialog.
  */
-function
-createWithDialog(widget: FileButtons): Promise<Widget> {
+function createWithDialog(widget: FileButtons): Promise<Widget> {
   let handler: CreateNewHandler;
   let model = widget.model;
   let manager = widget.manager;
-  // Create a file name based on the current time.
-  let time = new Date();
-  time.setMinutes(time.getMinutes() - time.getTimezoneOffset());
-  let name = time.toJSON().slice(0, 10);
-  name += '-' + time.getHours() + time.getMinutes() + time.getSeconds();
-  name += '.txt';
   // Get the current sessions.
   return manager.listSessions().then(sessions => {
     // Create the dialog and show it to the user.
@@ -235,11 +228,11 @@ createWithDialog(widget: FileButtons): Promise<Widget> {
  */
 class OpenWithHandler extends Widget {
   /**
-   * Create the node for a create new handler.
+   * Create the node for an open with handler.
    */
   static createNode(): HTMLElement {
     let body = document.createElement('div');
-    let name = document.createElement('input');
+    let name = document.createElement('span');
     let widgetDropdown = document.createElement('select');
     let kernelDropdown = document.createElement('select');
     body.appendChild(name);
@@ -251,19 +244,139 @@ class OpenWithHandler extends Widget {
   /**
    * Construct a new "open with" dialog.
    */
-  constructor(name: string, model: FileBrowserModel, manager: DocumentManager, sessions: ISessionId[]) {
+  constructor(name: string, manager: DocumentManager, sessions: ISessionId[]) {
     super();
     this._model = model;
     this._manager = manager;
     this._sessions = sessions;
 
-    this.input.value = name;
-    this.input.disabled = true;
+    let input = this.node.firstChild as HTMLElement;
+    input.textContent = name;
+    this._ext = name.split('.').pop();
 
-    // When a widget changes, we update the kernel list.
-    let widgetDropdown = this.node.children[1] as HTMLSelectElement;
     this.populateFactories();
-    widgetDropdown.onchange = this.widgetChanged.bind(this);
+    this.widgetDropdown.onchange = this.widgetChanged.bind(this);
+  }
+
+  /**
+   * Dispose of the resources used by the widget.
+   */
+  dispose(): void {
+    this._sessions = null;
+    this._manager = null;
+    super.dispose();
+  }
+
+  /**
+   * Get the widget dropdown node.
+   */
+  get widgetDropdown(): HTMLSelectElement {
+    return this.node.children[1] as HTMLSelectElement;
+  }
+
+  /**
+   * Get the kernel dropdown node.
+   */
+  get kernelDropdown(): HTMLSelectElement {
+    return this.node.children[2] as HTMLSelectElement;
+  }
+
+  /**
+   * Populate the widget factories.
+   */
+  protected populateFactories(): void {
+    let factories = this._manager.listWidgetFactories(this._ext);
+    let widgetDropdown = this.widgetDropdown;
+    for (let factory of factories) {
+      let option = document.createElement('option');
+      option.text = factory;
+      widgetDropdown.appendChild(option);
+    }
+  }
+
+  /**
+   * Handle a change to the widget.
+   */
+  protected widgetChanged(): void {
+    let widgetName = this.widgetDropdown.value;
+    let preference = this._manager.getKernelPreference(this._ext, widgetName);
+    updateKernels(preference, this.kernelDropdown, this._manager.kernelSpecs, this._sessions);
+  }
+
+  private _manager: DocumentManager = null;
+  private _sessions: ISessionId[] = null;
+}
+
+
+/**
+ * A widget used to create new files.
+ */
+class CreateNewHandler extends Widget {
+  /**
+   * Create the node for a create new handler.
+   */
+  static createNode(): HTMLElement {
+    let body = document.createElement('div');
+    let name = document.createElement('input');
+    let fileTypeDropdown = document.createElement('select');
+    let widgetDropdown = document.createElement('select');
+    let kernelDropdown = document.createElement('select');
+    body.appendChild(name);
+    body.appendChild(fileTypeDropdown);
+    body.appendChild(widgetDropdown);
+    body.appendChild(kernelDropdown);
+    return body;
+  }
+
+  /**
+   * Construct a new "create new" dialog.
+   */
+  constructor(model: FileBrowserModel, manager: DocumentManager, sessions: ISessionId[]) {
+    super();
+    this._model = model;
+    this._manager = manager;
+    this._sessions = sessions;
+
+    let fileTypes = this._manager.listFileTypes();
+
+    // Create a file name based on the current time.
+    let time = new Date();
+    time.setMinutes(time.getMinutes() - time.getTimezoneOffset());
+    let name = time.toJSON().slice(0, 10);
+    name += '-' + time.getHours() + time.getMinutes() + time.getSeconds();
+    this.input.value = name + fileTypes[0].extension;
+
+    // Check for name conflicts when the input changes.
+    this.input.addEventListener('input', () => {
+      this.inputChanged();
+    });
+    // Update the widget choices when the file type changes.
+    this.fileTypeDropdown.addEventListener('change', () => {
+      this.fileTypeChanged();
+    });
+    // Update the kernel choices when the widget changes.
+    this.widgetDropdown.addEventListener('change', () => {
+      this.widgetDropdownChanged();
+    });
+    // Populate the lists of file types and widget factories.
+    this.populateFileTypes();
+    this.populateFactories();
+  }
+
+  /**
+   * Handle a change to the input.
+   */
+  inputChanged(): void {
+    let path = this.input.value;
+    for (let item of this._model.sortedItems) {
+      if (item.path === path) {
+        this.addClass(FILE_CONFLICT);
+        return;
+      }
+    }
+    if (this.ext !== this._prevExt) {
+      this.populateFactories();
+    }
   }
 
   /**
@@ -277,37 +390,59 @@ class OpenWithHandler extends Widget {
   }
 
   /**
-   * Get the input node for the dialog.
+   * Get the input text node.
    */
   get input(): HTMLInputElement {
     return this.node.firstChild as HTMLInputElement;
   }
 
   /**
-   * Get the current extension of the file.
+   * Get the file type dropdown node.
    */
-  get ext(): string {
-    return '.' + this.input.textContent.split('.').pop();
-  }
-
-  /**
-   * Get the widget dropdown node for the dialog.
-   */
-  get widgetDropdown(): HTMLSelectElement {
+  get fileTypeDropdown(): HTMLSelectElement {
     return this.node.children[1] as HTMLSelectElement;
   }
 
   /**
-   * Get the kernel dropdown node for the dialog.
+   * Get the widget dropdown node.
+   */
+  get widgetDropdown(): HTMLSelectElement {
+    return this.node.children[2] as HTMLSelectElement;
+  }
+
+  /**
+   * Get the kernel dropdown node.
    */
   get kernelDropdown(): HTMLSelectElement {
-    return this.node.children[2] as HTMLSelectElement;
+    return this.node.children[3] as HTMLSelectElement;
+  }
+
+  /**
+   * Get the current extension for the file.
+   */
+  get ext(): void {
+    return this.input.value.split('.').pop();
+  }
+
+  /**
+   * Populate the file types.
+   */
+  protected populateFileTypes(): void {
+    let fileTypes = this._manager.listFileTypes();
+    let dropdown = this.fileTypeDropdown;
+    for (let ft of fileTypes) {
+      let option = document.createElement('option');
+      option.text = `${ft.name} (${ft.extension})`;
+      option.value = ft.extension;
+      dropdown.appendChild(option);
+    }
+    this._prevExt = fileTypes[0].extension;
   }
 
   /**
    * Populate the widget factories.
    */
-  populateFactories(): void {
+  protected populateFactories(): void {
     let ext = this.ext;
     let factories = this._manager.listWidgetFactories(ext);
     let widgetDropdown = this.widgetDropdown;
@@ -316,37 +451,60 @@ class OpenWithHandler extends Widget {
       option.text = factory;
       widgetDropdown.appendChild(option);
     }
+    this.widgetChanged();
+    this._prevExt = ext;
   }
 
   /**
-   * Handle a change to the widget.
+   * Handle changes to the file type dropdown.
    */
-  widgetChanged(): void {
-    let widgetDropdown = this.widgetDropdown;
-    let kernelDropdown = this.kernelDropdown;
-    let widgetName = widgetDropdown.value;
-    let ext = this.ext;
-    let preference = this._manager.getKernelPreference(ext, widgetName);
-    if (!preference.canStartKernel) {
-      while (kernelDropdown.firstChild) {
-        kernelDropdown.removeChild(kernelDropdown.firstChild);
-      }
-      kernelDropdown.disabled = true;
+  protected fileTypeChanged(): void {
+    // Update the current input.
+    let oldExt = this.ext;
+    let newExt = this.fileTypeChanged.value;
+    if (oldExt === newExt) {
       return;
     }
-    let lang = preference.language;
-    let specs = this._manager.kernelSpecs;
-    kernelDropdown.disabled = false;
-    populateKernels(kernelDropdown, specs, this._sessions, lang);
-    // Select the "null" valued kernel if we do not prefer a kernel.
-    if (!preference.preferKernel) {
-      kernelDropdown.value = 'null';
-    }
+    let oldName = this.input.value;
+    let base = oldName.slice(0, oldName.length - oldExt.length - 1);
+    this.input.value = base + newExt;
+  }
+
+  /**
+   * Handle a change to the widget dropdown.
+   */
+  protected widgetDropdownChanged(): void {
+    let ext = this.ext;
+    let widgetName = this.widgetDropdown.value;
+    let preference = this._manager.getKernelPreference(ext, widgetName);
+    updateKernels(preference, this.kernelDropdown, this._manager.kernelSpecs, this._sessions);
   }
 
   private _model: FileBrowserModel = null;
   private _manager: DocumentManager = null;
   private _sessions: ISessionId[] = null;
+  private _prevExt = '';
+}
+
+
+/**
+ * Update a kernel listing based on a kernel preference.
+ */
+function updateKernels(preference: IKernelPreference, node: HTMLSelectElement, specs: IKernelSpecIds, running: ISessionId[]): void {
+  if (!preference.canStartKernel) {
+    while (node.firstChild) {
+      node.removeChild(kernelDropdown.firstChild);
+    }
+    node.disabled = true;
+    return;
+  }
+  let lang = preference.language;
+  node.disabled = false;
+  populateKernels(kernelDropdown, specs, running, lang);
+  // Select the "null" valued kernel if we do not prefer a kernel.
+  if (!preference.preferKernel) {
+    node.value = 'null';
+  }
 }
 
 
@@ -510,42 +668,6 @@ function optionForSession(session: ISessionId, displayName: string, maxLength: n
     `Kernel Name: ${displayName}\n`
     `Kernel Id: ${session.kernel.id}`;
   return option;
-}
-
-
-/**
- * A widget used to create new files.
- */
-class CreateNewHandler extends OpenWithHandler {
-  /**
-   * Construct a new "create new" dialog.
-   */
-  constructor(name: string, model: FileBrowserModel, manager: DocumentManager, sessions: ISessionId[]) {
-    super(name, model, manager, sessions);
-
-    // When an extension changes, we update the widget and kernel lists.
-    this.input.oninput = this.inputChanged.bind(this);
-    this.input.disabled = false;
-  }
-
-  /**
-   * Handle a change to the input.
-   */
-  inputChanged(): void {
-    let ext = this.ext;
-    if (ext === this._prevExt) {
-      return;
-    }
-    let widgetDropdown = this.widgetDropdown;
-    while (widgetDropdown.firstChild) {
-      widgetDropdown.removeChild(widgetDropdown.firstChild);
-    }
-    this.populateFactories();
-    this.widgetChanged();
-    this._prevExt = ext;
-  }
-
-  private _prevExt = '';
 }
 
 

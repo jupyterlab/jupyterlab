@@ -344,22 +344,27 @@ interface IKernelPreference {
 
 
 /**
- * An interface for a file creator type.
+ * An interface for a file type.
  */
 export
-interface IFileCreator {
+interface IFileType {
   /**
-   * The name of the file type to create.
+   * The name of the file type.
    */
   name: string;
 
   /**
-   * The default extension of the file type.
+   * The extension of the file type (e.g. `".txt"`).
    */
   extension: string;
 
   /**
-   * An icon to associate with the file type.
+   * The optional mimetype of the file type.
+   */
+  mimetype?: string;
+
+  /**
+   * The optional icon class to use for the file type.
    */
   icon?: string;
 }
@@ -439,17 +444,6 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Add a file creator.
-   */
-  addFileCreator(creator: IFileCreator): IDisposable {
-    this._creators.push(creator);
-    return new DisposableDelegate(() => {
-      let index = this._creators.indexOf(creator);
-      this._creators.splice(index, 1);
-    });
-  }
-
-  /**
    * Register a widget factory with the document manager.
    *
    * @param factory - The factory instance.
@@ -524,6 +518,23 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * Register a file type with the document manager.
+   *
+   * #### Notes
+   * These are used to populate the "Create New" dialog.
+   */
+  registerFileType(fileType: IFileType): IDisposable {
+    this._fileTypes.push(fileType);
+    this._fileTypes.sort((a, b) => {
+      a.name.localCompare(b.name);
+    });
+    return new DisposableDelegate(() => {
+      let index = this._fileTypes.indexOf(fileType);
+      this._fileTypes.splice(index, 1);
+    });
+  }
+
+  /**
    * Get the list of registered widget factory display names.
    *
    * @param path - An optional file path to filter the results.
@@ -573,10 +584,10 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get a list of the file creator options.
+   * Get a list of file types that have been registered.
    */
-  listFileCreators(): IFileCreator[] {
-    return this._creators.slice();
+  listFileTypes(): IFileType[] {
+    return this._fileTypes.slice();
   }
 
   /**
@@ -801,7 +812,7 @@ class DocumentManager implements IDisposable {
   private _sessionManager: INotebookSessionManager = null;
   private _contextManager: ContextManager = null;
   private _specs: IKernelSpecIds = null;
-  private _creators: IFileCreator[] = [];
+  private _fileTypes: IFileType[] = [];
 }
 
 
