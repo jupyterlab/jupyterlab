@@ -62,7 +62,7 @@
 
 
 .jp-OutputArea {
-  background: #ffffff;
+  background: #FFFFFF;
 }
 
 
@@ -472,12 +472,12 @@
 
 
 .jp-Completion {
-  background: #eeeeee;
+  background: #EEEEEE;
   border: 1px solid #000000;
   list-style-type: none;
   margin: 0;
   overflow: auto;
-  padding: 0 2px;
+  padding: 0;
   position: absolute;
   z-index: 10001;
 }
@@ -486,7 +486,12 @@
 .jp-Completion-item {
   margin: 0;
   min-width: 150px;
-  padding: 0;
+  padding: 0 2px;
+}
+
+
+.jp-Completion-item:nth-child(odd) {
+  background: #FFFFFF;
 }
 
 

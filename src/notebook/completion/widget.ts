@@ -24,9 +24,14 @@ import {
 const COMPLETION_CLASS = 'jp-Completion';
 
 /**
- * The class name added to completion menu contents.
+ * The class name added to completion menu items.
  */
 const ITEM_CLASS = 'jp-Completion-item';
+
+/**
+ * The class name added to an active completion menu item.
+ */
+const ACTIVE_CLASS = 'jp-mod-active';
 
 /**
  * The maximum height of a completion widget.
@@ -162,6 +167,9 @@ class CompletionWidget extends Widget {
     for (let item of items) {
       node.appendChild(constructor.createItemNode(item));
     }
+
+    let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
+    active.classList.add(ACTIVE_CLASS);
 
     if (this.isHidden) this.show();
 
