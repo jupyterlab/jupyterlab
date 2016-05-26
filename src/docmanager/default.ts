@@ -5,6 +5,8 @@
 import * as CodeMirror
   from 'codemirror';
 
+import 'codemirror/mode/meta';
+
 import {
   IKernelId
 } from 'jupyter-js-services';
@@ -215,9 +217,11 @@ class ModelFactory {
   /**
    * Get the preferred kernel language given a path.
    */
-  preferredLanguage(path: string): string {
-    // TODO: use a mapping of extension to language.
-    return '';
+  preferredLanguage(ext: string): string {
+    let mode = CodeMirror.findModeByExtension(ext.slice(1));
+    if (mode) {
+      return mode.mode;
+    }
   }
 
   private _isDisposed = false;

@@ -503,7 +503,7 @@ class CreateNewHandler extends Widget {
   private _model: FileBrowserModel = null;
   private _manager: DocumentManager = null;
   private _sessions: ISessionId[] = null;
-  private _sentinal = 'UNKOWN_EXTENSION';
+  private _sentinal = 'UNKNOWN_EXTENSION';
   private _prevExt = '';
   private _extensions: string[] = [];
 }
