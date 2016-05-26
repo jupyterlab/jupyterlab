@@ -189,6 +189,7 @@ class CompletionWidget extends Widget {
     // Expand the menu width by the scrollbar size, if present.
     if (node.scrollHeight > maxHeight) {
       node.style.width = `${2 * node.offsetWidth - node.clientWidth}px`;
+      node.scrollTop = 0;
     }
   }
 
@@ -196,6 +197,10 @@ class CompletionWidget extends Widget {
    * Handle mousedown events for the widget.
    */
   private _evtMousedown(event: MouseEvent) {
+    if (Private.nonstandardClick(event)) {
+      return;
+    }
+
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
       // If the user has made a selection, emit its value and reset the model.
@@ -218,37 +223,48 @@ class CompletionWidget extends Widget {
    */
   private _evtKeydown(event: KeyboardEvent) {
     let target = event.target as HTMLElement;
+    let node = this.node;
+
     if (!this._reference) {
       this.hide();
       return;
     }
-    if (this.isHidden) {
+    if (this
+      .isHidden) {
       return;
     }
+
+    let active: HTMLElement;
     while (target !== document.documentElement) {
       if (target === this._reference.node) {
         switch (event.keyCode) {
         case 13: // Enter key
+        case 9: // Tab key
+          event.preventDefault();
+          event.stopPropagation();
+          active = node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+          this.selected.emit(active.dataset['value']);
+          this._model.reset();
+          return;
         case 27: // Escape key
           event.preventDefault();
           event.stopPropagation();
           this._model.reset();
           return;
-        case 9: // Tab key
-          event.preventDefault();
-          event.stopPropagation();
-          console.log('tab');
-          break;
         case 38: // Up arrow key
-          event.preventDefault();
-          event.stopPropagation();
-          console.log('up');
-          break;
         case 40: // Down arrow key
           event.preventDefault();
           event.stopPropagation();
-          console.log('down');
-          break;
+          let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+          active = node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+          active.classList.remove(ACTIVE_CLASS);
+          this._activeIndex = event.keyCode === 38 ?
+            Math.max(--this._activeIndex, 0)
+              : Math.min(++this._activeIndex, items.length - 1);
+          active = items[this._activeIndex] as HTMLElement;
+          active.classList.add(ACTIVE_CLASS);
+          Private.scrollIfNeeded(this.node, active);
+          return;
         }
         return;
       }
@@ -272,4 +288,34 @@ namespace Private {
    */
   export
   const selectedSignal = new Signal<CompletionWidget, string>();
+
+  /**
+   * Returns true for any modified click event (i.e., not a left-click).
+   */
+  export
+  function nonstandardClick(event: MouseEvent): boolean {
+    return event.button !== 0 ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.metaKey;
+  }
+
+  /**
+   * Scroll an element into view if needed.
+   *
+   * @param area - The scroll area element.
+   *
+   * @param elem - The element of interest.
+   */
+  export
+    function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
+    let ar = area.getBoundingClientRect();
+    let er = elem.getBoundingClientRect();
+    if (er.top < ar.top - 10) {
+      area.scrollTop -= ar.top - er.top + 10;
+    } else if (er.bottom > ar.bottom + 10) {
+      area.scrollTop += er.bottom - ar.bottom + 10;
+    }
+  }
 }

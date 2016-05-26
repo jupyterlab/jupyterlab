@@ -207,6 +207,7 @@ class ConsoleWidget extends Widget {
     this._completion = constructor.createCompletion(this._model.completion);
     this._completion.reference = this;
     this._completion.attach(document.body);
+    this._completion.selected.connect(this.onCompletionSelected, this);
 
     // Instantiate tooltip widget.
     this._tooltip = constructor.createTooltip(0, 0);
@@ -264,6 +265,13 @@ class ConsoleWidget extends Widget {
     let prompt = this.prompt;
     Private.scrollIfNeeded(this.parent.node, prompt.node);
     prompt.input.editor.focus();
+  }
+
+  /**
+   * Handle a completion menu selection event.
+   */
+  protected onCompletionSelected(sender: CompletionWidget, args: string) {
+    console.log('completion:', args);
   }
 
   /**
