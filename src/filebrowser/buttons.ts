@@ -327,66 +327,189 @@ class OpenWithHandler extends Widget {
     let widgetName = widgetDropdown.value;
     let ext = this.ext;
     let preference = this._manager.getKernelPreference(ext, widgetName);
+    if (!preference.canStartKernel) {
+      while (kernelDropdown.firstChild) {
+        kernelDropdown.removeChild(kernelDropdown.firstChild);
+      }
+      kernelDropdown.disabled = true;
+      return;
+    }
     let lang = preference.language;
     let specs = this._manager.kernelSpecs;
-    // Find the preferred kernel name.
-    let kernelName = specs.default;
-    for (let name in specs.kernelspecs) {
-      let kernelLanguage = specs.kernelspecs[name].spec.language;
-      if (lang === kernelLanguage) {
-        kernelName = name;
-        break;
-      }
+    kernelDropdown.disabled = false;
+    populateKernels(kernelDropdown, specs, this._sessions, lang);
+    // Select the "null" valued kernel if we do not prefer a kernel.
+    if (!preference.preferKernel) {
+      kernelDropdown.value = 'null';
     }
-    // Remove existing kernel list.
-    while (kernelDropdown.firstChild) {
-      kernelDropdown.removeChild(kernelDropdown.firstChild);
-    }
-    let option: HTMLOptionElement;
-    // Put the preferred kernel name first.
-    option = document.createElement('option');
-    option.text = this.getDisplayName(kernelName);
-    option.value = kernelName;
-    // Add the rest of the names.
-    for (let name in specs.kernelspecs) {
-      if (name === kernelName) {
-        continue;
-      }
-      option = document.createElement('option');
-      option.text = this.getDisplayName(name);
-      option.value = JSON.stringify({ name });
-    }
-    // Add running session info.
-    for (let session of this._sessions) {
-      option = document.createElement('option');
-      let name = session.notebook.path.split('/').pop();
-      name = name.split('.')[0];
-      kernelName = session.kernel.name;
-      option.text = name + ' (' + this.getDisplayName(kernelName) + ')';
-      option.value = JSON.stringify({ id: session.kernel.id });
-    }
-    // Create an option that starts no kernel.
-    option = document.createElement('option');
-    option.text = 'None';
-    kernelDropdown.value = kernelDropdown.value || kernelName;
-    if (!preference.canStartKernel) {
-      kernelDropdown.disabled = true;
-    } else if (!preference.preferKernel) {
-      kernelDropdown.value = 'None';
-    }
-  }
-
-  /**
-   * Get the display name given a kernel name.
-   */
-  getDisplayName(name: string): string {
-    let specs = this._manager.kernelSpecs;
-    return specs.kernelspecs[name].spec.display_name;
   }
 
   private _model: FileBrowserModel = null;
   private _manager: DocumentManager = null;
   private _sessions: ISessionId[] = null;
+}
+
+
+/**
+ * Populate a kernel dropdown list.
+ *
+ * @param node - The host html element.
+ *
+ * @param specs - The available kernel spec information.
+ *
+ * @param running - The list of running session ids.
+ *
+ * @param preferredLanguage - The preferred language for the kernel.
+ *
+ * #### Notes
+ * Populates the list with separated sections:
+ *   - Kernels matching the preferred language (display names).
+ *   - The remaining kernels.
+ *   - Sessions matching the preferred language (file names).
+ *   - The remaining sessions.
+ *   - "None" signifying no kernel.
+ * If no preferred language is given or no kernels are found using
+ * the preferred language, the default kernel is used in the first
+ * section.  Kernels are sorted by display name.  Sessions display the
+ * base name of the file with an ellipsis overflow and a tooltip with
+ * the explicit session information.
+ */
+export
+function populateKernels(node: HTMLSelectElement, specs: IKernelSpecIds, running: ISessionId[], preferredLanguage?: string): void {
+  // Clear any existing options.
+  while (node.firstChild) {
+    node.removeChild(node.firstChild);
+  }
+  let maxLength = 10;
+  // Create mappings of display names and languages for kernel name.
+  let displayNames: { [key: string]: string } = Object.create(null);
+  let languages: { [key: string]: string } = Object.create(null);
+  for (let name in spec.kernelspecs) {
+    displayNames[name] = spec.kernelspecs[name].display_name;
+    maxLength = Math.max(maxLength, displayNames[name].length);
+    languages[name] = spec.kernelspecs[name].language;
+  }
+  // Handle a preferred kernel language in order of display name.
+  let names: string[] = [];
+  if (preferredLanguage) {
+    for (let name in spec.kernelspecs) {
+      if (languages[name] === preferredLanguage) {
+        names.push(name);
+      }
+    }
+    names.sort((a, b) => {
+      displayNames[a].localCompare(displayNames[b]);
+    });
+    for (let name of names) {
+      node.appendChild(optionForName(name, displayNames[name]));
+    }
+  }
+  // Use the default kernel if no preferred language or none were found.
+  if (!names) {
+    let name = specs.default;
+    node.appendChild(optionForName(name, displayNames[name]));
+  }
+  // Add a separator.
+  node.appendChild(createSeparatorOption(maxLength));
+  // Add the rest of the kernel names in alphabetical order.
+  let otherNames: string[] = [];
+  for (let name in spec.kernelspecs) {
+    if (names.indexOf(name) !== -1) {
+      continue;
+    }
+    otherNames.push(name);
+  }
+  otherNames.sort((a, b) => {
+    displayNames[a].localCompare(displayNames[b]);
+  });
+  for (let name of otherNames) {
+    node.appendChild(optionForName(name));
+  }
+  // Add a separator option if there were any other names.
+  if (otherNames.length) {
+    node.appendChild(createSeparatorOption(maxLength));
+  }
+  // Add the sessions using the preferred language first.
+  let matchingSessions: ISessionId[] = [];
+  if (preferredLanguage) {
+    for (let session of sessions) {
+      if (languages[session.kernel.name] === preferredLanguage) {
+        matchingSessions.push(session);
+      }
+    }
+    if (matchingSessions) {
+      matchingSessions.sort((a, b) => {
+        a.notebook.path.localCompare(b.notebook.path);
+      });
+      for (let session of matchingSessions) {
+        let name = displayNames[session.kernel.name];
+        node.appendChild(optionForSession(session, name, maxLength));
+      }
+      node.appendChild(createSeparatorOption(maxLength));
+    }
+  }
+  // Add the other remaining sessions.
+  let otherSessions: ISessionId = [];
+  for (let session of sessions) {
+    if (matchingSessions.indexOf(session) === -1) {
+      otherSessions.push(session);
+    }
+  }
+  if (otherSessions) {
+    otherSessions.sort((a, b) => {
+      a.notebook.path.localCompare(b.notebook.path);
+    });
+    for (let session of otherSessions) {
+      let name = displayNames[session.kernel.name];
+      node.appendChild(optionForSession(session, name, maxLength));
+    }
+    node.appendChild(createSeparatorOption(maxLength));
+  }
+  // Add the option to have no kernel.
+  let option = document.createElement('option');
+  option.text = 'None';
+  option.value = 'null';
+  node.appendChild(option);
+  node.selectedIndex = 0;
+}
+
+
+/**
+ * Create a separator option.
+ */
+function createSeparatorOption(length: number): HTMLOptionElement {
+  let option = document.createElement('option');
+  option.disabled = true;
+  option.text = Array(length).join('─');
+  return option;
+}
+
+/**
+ * Create an option element for a kernel name.
+ */
+function optionForName(name: string, displayName: string): HTMLOptionElement {
+  let option = document.createElement('option');
+  option.text = displayName;
+  option.value = JSON.stringify({ name });
+  return option;
+}
+
+
+/**
+ * Create an option element for a session.
+ */
+function optionForSession(session: ISessionId, displayName: string, maxLength: number): HTMLOptionElement {
+  let option = document.createElement('option');
+  let sessionName = session.notebook.path.split('/').pop();
+  if (sessionName.length > maxLength) {
+    sessionName = sessionName.slice(0, maxLength - 3) + '...';
+  }
+  option.text = sessionName;
+  option.value = JSON.stringify({ id: session.kernel.id });
+  option.title = `Path: ${session.notebook.path}\n`
+    `Kernel Name: ${displayName}\n`
+    `Kernel Id: ${session.kernel.id}`;
+  return option;
 }
 
 
