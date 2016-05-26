@@ -84,6 +84,11 @@ interface ICompletionModel extends IDisposable {
    * The current text change details.
    */
   current: ITextChange;
+
+  /**
+   * Reset the state of the model.
+   */
+  reset(): void;
 }
 
 /**
@@ -162,9 +167,7 @@ class CompletionModel implements ICompletionModel {
     // If the text change means that the original starting has been preceded,
     // then the completion is no longer valid and should be reset.
     if (currentLine.length < originalLine.length) {
-      this.original = null;
-      this.options = null;
-      this._query = '';
+      this.reset();
     } else {
       this._query = currentLine.replace(originalLine, '');
     }
@@ -181,6 +184,15 @@ class CompletionModel implements ICompletionModel {
     }
     clearSignalData(this);
     this._isDisposed = true;
+  }
+
+  /**
+   * Reset the state of the model.
+   */
+  reset() {
+    this.original = null;
+    this.options = null;
+    this._query = '';
   }
 
   /**
@@ -216,6 +228,9 @@ class CompletionModel implements ICompletionModel {
 }
 
 
+/**
+ * A namespace for completion model private data.
+ */
 namespace Private {
   /**
    * A signal emitted when state of the completion menu changes.

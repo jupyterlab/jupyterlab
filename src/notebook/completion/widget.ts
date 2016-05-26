@@ -7,6 +7,10 @@ import {
 } from 'phosphor-messaging';
 
 import {
+  ISignal, Signal, clearSignalData
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -52,6 +56,13 @@ class CompletionWidget extends Widget {
   }
 
   /**
+   * A signal emitted when a selection is made from the completion menu.
+   */
+  get selected(): ISignal<CompletionWidget, string> {
+    return Private.selectedSignal.bind(this);
+  }
+
+  /**
    * The semantic parent of the completion widget, its reference widget.
    */
   get reference(): Widget {
@@ -68,6 +79,7 @@ class CompletionWidget extends Widget {
     if (this.isDisposed) return;
     this._model.dispose();
     this._model = null;
+    clearSignalData(this);
     super.dispose();
   }
 
@@ -83,6 +95,9 @@ class CompletionWidget extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
+    case 'keydown':
+      this._evtKeydown(event as KeyboardEvent);
+      break;
     case 'mousedown':
       this._evtMousedown(event as MouseEvent);
       break;
@@ -164,16 +179,19 @@ class CompletionWidget extends Widget {
   private _evtMousedown(event: MouseEvent) {
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
+      // If the user has made a selection, emit its value and reset the model.
       if (target.classList.contains(ITEM_CLASS)) {
-        console.log('new value', target.dataset['value']);
+        this.selected.emit(target.dataset['value']);
+        this._model.reset();
         return;
       }
+      // If the mouse event happened anywhere else in the widget, bail.
       if (target === this.node) {
         return;
       }
       target = target.parentElement;
     }
-    this.hide();
+    this._model.reset();
   }
 
   /**
@@ -201,4 +219,9 @@ class CompletionWidget extends Widget {
  * A namespace for completion widget private data.
  */
 namespace Private {
+  /**
+   * A signal emitted when state of the completion menu changes.
+   */
+  export
+  const selectedSignal = new Signal<CompletionWidget, string>();
 }
