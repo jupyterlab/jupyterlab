@@ -20,9 +20,9 @@ import {
  */
 interface ICompletionMatch {
   /**
-   * The highlighted text of a completion match.
+   * The raw text of a completion match.
    */
-  text: string;
+  raw: string;
 
   /**
    * A score which indicates the strength of the match.
@@ -30,6 +30,28 @@ interface ICompletionMatch {
    * A lower score is better. Zero is the best possible score.
    */
   score: number;
+
+  /**
+   * The highlighted text of a completion match.
+   */
+  text: string;
+}
+
+
+/**
+ * A completion menu item.
+ */
+export
+interface ICompletionItem {
+  /**
+   * The highlighted, marked up text of a visible completion item.
+   */
+  text: string;
+
+  /**
+   * The raw text of a visible completion item.
+   */
+  raw: string;
 }
 
 
@@ -44,7 +66,12 @@ interface ICompletionModel extends IDisposable {
   stateChanged: ISignal<ICompletionModel, void>;
 
   /**
-   * The list of filtered options, including any `<mark>`ed characters.
+   * The list of visible items in the completion menu.
+   */
+  items: ICompletionItem[];
+
+  /**
+   * The unfiltered list of all available options in a completion menu.
    */
   options: string[];
 
@@ -79,15 +106,20 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
-   * The list of filtered options, including any `<mark>`ed characters.
+   * The list of visible items in the completion menu.
    *
    * #### Notes
-   * Setting the options means the raw, unfiltered complete list of options are
-   * reset. Getting must only ever return the subset of options that have been
-   * filtered against a query.
+   * This is a read-only property.
+   */
+  get items(): ICompletionItem[] {
+    return this._filter();
+  }
+
+  /**
+   * The unfiltered list of all available options in a completion menu.
    */
   get options(): string[] {
-    return this._filter();
+    return this._options;
   }
   set options(newValue: string[]) {
     let oldValue = this._options;
@@ -154,25 +186,26 @@ class CompletionModel implements ICompletionModel {
   /**
    * Apply the query to the complete options list to return the matching subset.
    */
-  private _filter(): string[] {
-    let options = this._options;
+  private _filter(): ICompletionItem[] {
+    let options = this._options || [];
     let query = this._query;
     if (!query) {
-      return options;
+      return options.map(option => ({ raw: option, text: option }));
     }
     let results: ICompletionMatch[] = [];
     for (let option of options) {
       let match = StringSearch.sumOfSquares(option, query);
       if (match) {
         results.push({
-          text: StringSearch.highlight(option, match.indices),
-          score: match.score
+          raw: option,
+          score: match.score,
+          text: StringSearch.highlight(option, match.indices)
         })
       }
     }
     return results.sort((a, b) => {
       return a.score - b.score;
-    }).map(result => result.text);
+    }).map(result => ({ text: result.text, raw: result.raw }));
   }
 
   private _isDisposed = false;

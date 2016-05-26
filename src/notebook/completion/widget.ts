@@ -114,20 +114,24 @@ class CompletionWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     let node = this.node;
-    let options = this._model.options;
+    let items = this._model.items;
     node.textContent = '';
 
-    if (!options || !options.length) {
+    if (!items || !items.length) {
       this.hide();
       return;
     }
 
-    for (let i = 0, len = options.length; i < len; i++) {
+    for (let item of items) {
       let li = document.createElement('li');
       let code = document.createElement('code');
 
+      // Set the raw, un-marked up value as a data attribute.
+      li.dataset['value'] = item.raw;
+
       // Use innerHTML because search results include <mark> tags.
-      code.innerHTML = options[i];
+      code.innerHTML = item.text;
+
       li.className = ITEM_CLASS;
       li.appendChild(code);
       node.appendChild(li);
@@ -160,8 +164,11 @@ class CompletionWidget extends Widget {
   private _evtMousedown(event: MouseEvent) {
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
+      if (target.classList.contains(ITEM_CLASS)) {
+        console.log('new value', target.dataset['value']);
+        return;
+      }
       if (target === this.node) {
-        // TODO: Emit a value and dismiss the completion menu.
         return;
       }
       target = target.parentElement;
