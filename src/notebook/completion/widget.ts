@@ -15,7 +15,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ICompletionModel
+  ICompletionModel, ICompletionItem
 } from './model';
 
 /**
@@ -42,6 +42,24 @@ class CompletionWidget extends Widget {
   static createNode(): HTMLElement {
     let node = document.createElement('ul');
     return node;
+  }
+
+  /**
+   * Create an item node for a text completion menu.
+   */
+  static createItemNode(item: ICompletionItem): HTMLElement {
+    let li = document.createElement('li');
+    let code = document.createElement('code');
+
+    // Set the raw, un-marked up value as a data attribute.
+    li.dataset['value'] = item.raw;
+
+    // Use innerHTML because search results include <mark> tags.
+    code.innerHTML = item.text;
+
+    li.className = ITEM_CLASS;
+    li.appendChild(code);
+    return li;
   }
 
   /**
@@ -130,7 +148,11 @@ class CompletionWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     let node = this.node;
     let items = this._model.items;
+    let constructor = this.constructor as typeof CompletionWidget;
     node.textContent = '';
+
+    // All repaints reset the index back to 0.
+    this._activeIndex = 0;
 
     if (!items || !items.length) {
       this.hide();
@@ -138,18 +160,7 @@ class CompletionWidget extends Widget {
     }
 
     for (let item of items) {
-      let li = document.createElement('li');
-      let code = document.createElement('code');
-
-      // Set the raw, un-marked up value as a data attribute.
-      li.dataset['value'] = item.raw;
-
-      // Use innerHTML because search results include <mark> tags.
-      code.innerHTML = item.text;
-
-      li.className = ITEM_CLASS;
-      li.appendChild(code);
-      node.appendChild(li);
+      node.appendChild(constructor.createItemNode(item));
     }
 
     if (this.isHidden) this.show();
@@ -199,10 +210,38 @@ class CompletionWidget extends Widget {
    */
   private _evtKeydown(event: KeyboardEvent) {
     let target = event.target as HTMLElement;
+    if (!this._reference) {
+      this.hide();
+      return;
+    }
+    if (this.isHidden) {
+      return;
+    }
     while (target !== document.documentElement) {
-      if (target === this.node) {
-        event.preventDefault();
-        event.stopPropagation();
+      if (target === this._reference.node) {
+        switch (event.keyCode) {
+        case 13: // Enter key
+        case 27: // Escape key
+          event.preventDefault();
+          event.stopPropagation();
+          this._model.reset();
+          return;
+        case 9: // Tab key
+          event.preventDefault();
+          event.stopPropagation();
+          console.log('tab');
+          break;
+        case 38: // Up arrow key
+          event.preventDefault();
+          event.stopPropagation();
+          console.log('up');
+          break;
+        case 40: // Down arrow key
+          event.preventDefault();
+          event.stopPropagation();
+          console.log('down');
+          break;
+        }
         return;
       }
       target = target.parentElement;
@@ -210,6 +249,7 @@ class CompletionWidget extends Widget {
     this.hide();
   }
 
+  private _activeIndex = 0;
   private _model: ICompletionModel = null;
   private _reference: Widget = null;
 }
