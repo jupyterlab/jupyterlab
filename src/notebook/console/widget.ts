@@ -41,6 +41,10 @@ import {
   ConsoleTooltip
 } from './tooltip';
 
+import {
+  CompletionWidget, ICompletionModel
+} from '../completion';
+
 
 /**
  * The class name added to console widgets.
@@ -91,6 +95,39 @@ class ConsolePanel extends Panel {
     super.dispose();
   }
 
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'click':
+        let prompt = this.console.prompt;
+        if (prompt) prompt.input.editor.focus();
+        break;
+    }
+  }
+
+  /**
+   * Handle `after_attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('click', this);
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('click', this);
+  }
+
   private _console: ConsoleWidget = null;
 }
 
@@ -117,6 +154,17 @@ class ConsoleWidget extends Widget {
       widget = new BaseCellWidget(cell);
     }
     return widget;
+  }
+
+  /**
+   * Create a new completion widget.
+   *
+   * @param model A completion model instance.
+   *
+   * @returns A completion widget.
+   */
+  static createCompletion(model: ICompletionModel): CompletionWidget {
+    return new CompletionWidget(model);
   }
 
   /**
@@ -148,13 +196,36 @@ class ConsoleWidget extends Widget {
    */
   constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
     super();
-    this.addClass(CONSOLE_CLASS);
+    let constructor = this.constructor as typeof ConsoleWidget;
+    let layout = new PanelLayout();
+
+    this.layout = layout;
     this._model = model;
     this._rendermime = rendermime;
-    this.layout = new PanelLayout();
-    this._initHeader();
+
+    // Instantiate tab completion widget.
+    this._completion = constructor.createCompletion(this._model.completion);
+    this._completion.reference = this;
+    this._completion.attach(document.body);
+    this._completion.selected.connect(this.onCompletionSelected, this);
+
+    // Instantiate tooltip widget.
+    this._tooltip = constructor.createTooltip(0, 0);
+    this._tooltip.reference = this;
+    this._tooltip.attach(document.body);
+
+
+    let factory = constructor.createCell;
+    for (let i = 0; i < model.cells.length; i++) {
+      let cell = factory(model.cells.get(i), this._rendermime);
+      layout.addChild(cell);
+    }
+    layout.childAt(0).addClass(BANNER_CLASS);
+
     model.cells.changed.connect(this.onCellsChanged, this);
     model.stateChanged.connect(this.onModelChanged, this);
+
+    this.addClass(CONSOLE_CLASS);
   }
 
   /**
@@ -180,19 +251,6 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-  }
-
-  /**
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
@@ -201,15 +259,20 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Handle `before_detach` messages for the widget.
+   * Handle `update_request` messages.
    */
-  protected onBeforeDetach(msg: Message): void {
+  protected onUpdateRequest(msg: Message): void {
+    let prompt = this.prompt;
+    Private.scrollIfNeeded(this.parent.node, prompt.node);
+    prompt.input.editor.focus();
   }
 
   /**
-   * Handle `update-request` messages sent to the widget.
+   * Handle a completion menu selection event.
    */
-  protected onUpdateRequest(msg: Message): void {
+  protected onCompletionSelected(sender: CompletionWidget, args: string) {
+    let patch = this._model.completion.createPatch(args);
+    this._model.applyPatch(patch);
   }
 
   /**
@@ -224,9 +287,11 @@ class ConsoleWidget extends Widget {
     case ListChangeType.Add:
       widget = factory(args.newValue as ICellModel, this._rendermime);
       layout.insertChild(args.newIndex, widget);
-      let prompt = this.prompt;
-      Private.scrollIfNeeded(this.parent.node, prompt.node);
-      prompt.input.editor.focus();
+      break;
+    case ListChangeType.Remove:
+      widget = layout.childAt(args.oldIndex) as BaseCellWidget;
+      layout.removeChild(widget);
+      widget.dispose();
       break;
     }
     this.update();
@@ -238,11 +303,15 @@ class ConsoleWidget extends Widget {
   protected onModelChanged(sender: IConsoleModel, args: IChangedArgs<ITooltipModel>) {
     let constructor = this.constructor as typeof ConsoleWidget;
     switch (args.name) {
+    case 'banner':
+      let prompt = this.prompt;
+      if (prompt) prompt.input.editor.focus();
+      return;
     case 'tooltip':
       let model = args.newValue;
 
       if (!model) {
-        if (this._tooltip) this._tooltip.hide();
+        this._tooltip.hide();
         return;
       }
 
@@ -250,8 +319,8 @@ class ConsoleWidget extends Widget {
 
       // Offset the height of the tooltip by the height of cursor characters.
       top += model.change.chHeight;
-      // Offset the width of the tooltip by the width of cursor characters.
-      left -= model.change.chWidth;
+      // Account for 1px border width.
+      left += 1;
 
       // Account for 1px border on top and bottom.
       let maxHeight = window.innerHeight - top - 2;
@@ -264,31 +333,16 @@ class ConsoleWidget extends Widget {
         return;
       }
 
-      if (!this._tooltip) {
-        this._tooltip = constructor.createTooltip(top, left);
-        this._tooltip.reference = this;
-        this._tooltip.attach(document.body);
-      }
       this._tooltip.rect = {top, left} as ClientRect;
       this._tooltip.content = content;
-      this._tooltip.node.style.maxHeight = maxHeight + 'px';
-      this._tooltip.node.style.maxWidth = maxWidth + 'px';
+      this._tooltip.node.style.maxHeight = `${maxHeight}px`;
+      this._tooltip.node.style.maxWidth = `${maxWidth}px`;
       if (this._tooltip.isHidden) this._tooltip.show();
       return;
     }
   }
 
-  private _initHeader(): void {
-    let constructor = this.constructor as typeof ConsoleWidget;
-    let cellsLayout = this.layout as PanelLayout;
-    let factory = constructor.createCell;
-    for (let i = 0; i < this._model.cells.length; i++) {
-      let cell = factory(this._model.cells.get(i), this._rendermime)
-      if (i === 0) cell.addClass(BANNER_CLASS);
-      cellsLayout.addChild(cell);
-    }
-  }
-
+  private _completion: CompletionWidget = null;
   private _model: IConsoleModel = null;
   private _rendermime: RenderMime<Widget> = null;
   private _tooltip: ConsoleTooltip = null;

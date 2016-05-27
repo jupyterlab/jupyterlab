@@ -59,6 +59,11 @@ const UP_ARROW = 38;
 const DOWN_ARROW = 40;
 
 /**
+ * The key code for the tab key.
+ */
+const TAB = 9;
+
+/**
  * Initialize diff match patch.
  */
 let diffMatchPatch = new dmp.diff_match_patch();
@@ -118,15 +123,34 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
       let ch = cursor.ch;
       let chHeight = editor.defaultTextHeight();
       let chWidth = editor.defaultCharWidth();
-      let coords = editor.charCoords({line, ch}, 'page');
-      model.textChanged.emit({
-        line, ch, chHeight, chWidth, coords, oldValue, newValue
-      });
+      let coords = editor.charCoords({ line, ch }, 'page');
+      let data = { line, ch, chHeight, chWidth, coords, oldValue, newValue };
+      model.textChanged.emit(data);
     });
     CodeMirror.on(editor, 'keydown', (instance: any, event: KeyboardEvent) => {
       let cursor = doc.getCursor();
       let line = cursor.line;
       let ch = cursor.ch;
+
+      if (event.keyCode === TAB) {
+        let currentValue = instance.getValue();
+        let currentLine = currentValue.split('\n')[line];
+        let chHeight = editor.defaultTextHeight();
+        let chWidth = editor.defaultCharWidth();
+        let coords = editor.charCoords({line, ch}, 'page');
+
+        // A completion request signal should only be emitted if the final
+        // character of the current line is not whitespace. Otherwise, the
+        // default tab action of creating a tab character should be allowed to
+        // propagate.
+        if (currentLine.match(/\S$/)) {
+          let data = { line, ch, chHeight, chWidth, coords, currentValue };
+          model.completionRequested.emit(data);
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        return;
+      }
 
       if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
         this._model.edgeRequested.emit('top');

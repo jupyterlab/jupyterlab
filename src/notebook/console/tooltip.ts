@@ -20,7 +20,7 @@ import {
 const TOOLTIP_CLASS = 'jp-ConsoleTooltip';
 
 /**
- * The class name added to tooltip contens.
+ * The class name added to tooltip contents.
  */
 const CONTENT_CLASS = 'jp-ConsoleTooltip-content';
 
@@ -44,6 +44,7 @@ class ConsoleTooltip extends Panel {
     super();
     this.addClass(TOOLTIP_CLASS);
     this.rect = rect;
+    this.hide();
   }
 
   /**
@@ -61,7 +62,7 @@ class ConsoleTooltip extends Panel {
       return;
     }
     this._rect = newValue;
-    Private.setBoundingClientRect(this.node, this._rect);
+    if (this.isVisible) this.update();
   }
 
   /**
@@ -88,8 +89,10 @@ class ConsoleTooltip extends Panel {
       this._content.dispose();
     }
     this._content = newValue;
-    this.node.textContent = '';
-    this.addChild(this._content);
+    if (this._content) {
+      this.addChild(this._content);
+      this.update();
+    }
   }
 
   /**
@@ -128,8 +131,17 @@ class ConsoleTooltip extends Panel {
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('keydown', this);
-    this.node.removeEventListener('mousedown', this);
+    document.removeEventListener('keydown', this);
+    document.removeEventListener('mousedown', this);
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this.show();
+    // Set the dimensions of the tooltip widget.
+    Private.setBoundingClientRect(this.node, this._rect);
   }
 
   /**
@@ -141,12 +153,26 @@ class ConsoleTooltip extends Panel {
    */
   private _evtKeydown(event: KeyboardEvent) {
     let target = event.target as HTMLElement;
+
+    if (!this._reference) {
+      this.hide();
+      return;
+    }
+
+    if (this.isHidden) {
+      return;
+    }
+
     while (target !== document.documentElement) {
-      if (target === this.node) return;
-      if (this._reference && target === this._reference.node) return;
+      if (target === this._reference.node) {
+        if (event.keyCode === 27) { // Escape key
+          this.hide();
+        }
+        return;
+      }
       target = target.parentElement;
     }
-    this.dispose();
+    this.hide();
   }
 
   /**
@@ -158,7 +184,9 @@ class ConsoleTooltip extends Panel {
   private _evtMousedown(event: MouseEvent) {
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
-      if (target === this.node) return;
+      if (target === this.node) {
+        return;
+      }
       target = target.parentElement;
     }
     this.hide();
