@@ -12,27 +12,68 @@ import {
 
 
 /**
+ * The options used to select a kernel.
+ */
+export
+interface IKernelSelectOptions {
+  /**
+   * The host element for the dialog.
+   */
+  host: HTMLElement;
+
+  /**
+   * The path of the file.
+   */
+  path: string;
+
+  /**
+   * The kernel spec id information.
+   */
+  specs: IKernelSpecIds;
+
+  /**
+   * The list of running sessions.
+   */
+  running: ISessionId[];
+
+  /**
+   * The preferred kernel language.
+   */
+  preferredLanguage: string;
+
+  /**
+   * The optional existing kernel information.
+   */
+  existing: IKernelId;
+}
+
+
+/**
  * Bring up a dialog to select the kernel for a path.
  */
 export
-function selectKernel(host: HTMLElement, path: string, specs: IKernelSpecIds, running: ISessionId[], preferredLanguage?: string, existing?: IKernelId): Promise<IKernelId> {
+function selectKernel(options: IKernelSelectOptions): Promise<IKernelId> {
   let body = document.createElement('div');
   let text = document.createElement('pre');
-  text.textContent = `Select kernel for "${path}"`;
+  text.textContent = `Select kernel for "${options.path}"`;
   body.appendChild(text);
-  if (existing) {
-    let displayName = specs.kernelspecs[existing.name].spec.display_name;
+  if (options.existing !== void 0) {
+    let name = options.existing.name;
+    let displayName = options.specs.kernelspecs[name].spec.display_name;
     text.textContent += `\nCurrent: ${displayName}`;
-    text.title = `Path: ${path}\n` +
+    text.title = `Path: ${options.path}\n` +
     `Kernel Name: ${displayName}\n` +
-    `Kernel Id: ${existing.id}`;
+    `Kernel Id: ${options.existing.id}`;
   }
   let selector = document.createElement('select');
-  populateKernels(selector, specs, running, preferredLanguage);
+  body.appendChild(selector);
+  populateKernels(
+    selector, options.specs, options.running, options.preferredLanguage
+  );
   return showDialog({
     title: 'Select Kernel',
     body,
-    host,
+    host: options.host,
     okText: 'SELECT'
   }).then(result => {
     if (result.text === 'SELECT') {

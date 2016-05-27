@@ -599,9 +599,17 @@ class DocumentWidget extends Widget {
     let context = this.context;
     let path = context.path;
     let specs = context.kernelspecs;
-    let lang = this.context.model.defaultKernelLanguage;
+    let preferredLanguage = this.context.model.defaultKernelLanguage;
     return context.listSessions().then(running => {
-      return selectKernel(this.node, path, specs, running, lang, context.kernel);
+      let options = {
+        host: this.node,
+        path,
+        specs,
+        running,
+        preferredLanguage,
+        existing: context.kernel
+      };
+      return selectKernel(options);
     });
   }
 
