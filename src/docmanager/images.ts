@@ -59,12 +59,18 @@ class ImageModel implements IDocumentModel {
   get dirty(): boolean {
     return false;
   }
+  set dirty(value: boolean) {
+    // No effect.
+  }
 
   /**
    * The read only state of the document.
    */
   get readOnly(): boolean {
     return true;
+  }
+  set readOnly(value: boolean) {
+    // No effect.
   }
 
   /**
@@ -198,7 +204,7 @@ class ImageWidget extends Widget {
   }
 
   /**
-   * Construct a new editor widget.
+   * Construct a new image widget.
    */
   constructor(model: ImageModel, context: IDocumentContext) {
     super();
@@ -210,7 +216,7 @@ class ImageWidget extends Widget {
     if (model.toString()) {
       this.update();
     }
-    context.pathChanged.connect((c, path) => {
+    context.pathChanged.connect(() => {
       this.update();
     });
     model.contentChanged.connect(() => {
