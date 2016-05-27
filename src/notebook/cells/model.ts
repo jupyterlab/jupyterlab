@@ -238,7 +238,7 @@ class RawCellModel extends CellModel {
    * #### Notes
    * This is a read-only property.
    */
-  get type(): nbformat.CellType {
+  get type(): 'raw' {
     return 'raw';
   }
 }
@@ -255,7 +255,7 @@ class MarkdownCellModel extends CellModel {
    * #### Notes
    * This is a read-only property.
    */
-  get type(): nbformat.CellType {
+  get type(): 'markdown' {
     return 'markdown';
   }
 }
@@ -287,7 +287,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * #### Notes
    * This is a read-only property.
    */
-  get type(): nbformat.CellType {
+  get type(): 'code' {
     return 'code';
   }
 
