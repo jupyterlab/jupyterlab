@@ -32,7 +32,10 @@ import {
 export
 interface ICellModel extends IDisposable {
   /**
-   * The type of cell.
+   * The type of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   type: nbformat.CellType;
 
@@ -229,7 +232,15 @@ class CellModel implements ICellModel {
  */
 export
 class RawCellModel extends CellModel {
-  type: nbformat.CellType = 'raw';
+  /**
+   * The type of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get type(): nbformat.CellType {
+    return 'raw';
+  }
 }
 
 
@@ -238,7 +249,15 @@ class RawCellModel extends CellModel {
  */
 export
 class MarkdownCellModel extends CellModel {
-  type: nbformat.CellType = 'markdown';
+  /**
+   * The type of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get type(): nbformat.CellType {
+    return 'markdown';
+  }
 }
 
 
@@ -260,6 +279,16 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     this._outputs.changed.connect(() => {
       this.contentChanged.emit('outputs');
     });
+  }
+
+  /**
+   * The type of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get type(): nbformat.CellType {
+    return 'code';
   }
 
   /**
@@ -311,8 +340,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     }
     return cell;
   }
-
-  type: nbformat.CellType = 'code';
 
   private _outputs: ObservableOutputs = null;
   private _executionCount: number = null;
