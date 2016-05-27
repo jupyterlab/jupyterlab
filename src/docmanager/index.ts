@@ -17,6 +17,10 @@ import {
 } from 'phosphor-messaging';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   PanelLayout
 } from 'phosphor-panel';
 
@@ -55,12 +59,12 @@ interface IDocumentModel extends IDisposable {
   /**
    * A signal emitted when the document content changes.
    */
-  contentChanged: ISignal<IDocumentModel, any>;
+  contentChanged: ISignal<IDocumentModel, void>;
 
   /**
-   * A signal emitted when the model dirty state changes.
+   * A signal emitted when the model state changes.
    */
-  dirtyChanged: ISignal<IDocumentModel, boolean>;
+  stateChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
 
   /**
    * The dirty state of the model.

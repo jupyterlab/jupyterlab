@@ -12,6 +12,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   ISignal, Signal
 } from 'phosphor-signaling';
 
@@ -65,15 +69,15 @@ class DocumentModel implements IDocumentModel {
   /**
    * A signal emitted when the document content changes.
    */
-  get contentChanged(): ISignal<IDocumentModel, string> {
+  get contentChanged(): ISignal<IDocumentModel, void> {
     return Private.contentChangedSignal.bind(this);
   }
 
   /**
-   * A signal emitted when the document dirty state changes.
+   * A signal emitted when the document state changes.
    */
-  get dirtyChanged(): ISignal<IDocumentModel, boolean> {
-    return Private.dirtyChangedSignal.bind(this);
+  get stateChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
+    return Private.stateChangedSignal.bind(this);
   }
 
   /**
@@ -82,12 +86,13 @@ class DocumentModel implements IDocumentModel {
   get dirty(): boolean {
     return this._dirty;
   }
-  set dirty(value: boolean) {
-    if (value === this._dirty) {
+  set dirty(newValue: boolean) {
+    if (newValue === this._dirty) {
       return;
     }
-    this._dirty = value;
-    this.dirtyChanged.emit(value);
+    let oldValue = this._dirty;
+    this._dirty = newValue;
+    this.stateChanged.emit({ name: 'dirty', oldValue, newValue });
   }
 
   /**
@@ -96,11 +101,13 @@ class DocumentModel implements IDocumentModel {
   get readOnly(): boolean {
     return this._readOnly;
   }
-  set readOnly(value: boolean) {
-    if (value === this._readOnly) {
+  set readOnly(newValue: boolean) {
+    if (newValue === this._readOnly) {
       return;
     }
-    this._readOnly = value;
+    let oldValue = this._readOnly;
+    this._readOnly = newValue;
+    this.stateChanged.emit({ name: 'readOnly', oldValue, newValue });
   }
 
   /**
@@ -148,7 +155,7 @@ class DocumentModel implements IDocumentModel {
       return;
     }
     this._text = value;
-    this.contentChanged.emit(value);
+    this.contentChanged.emit(void 0);
     this.dirty = true;
   }
 
@@ -204,7 +211,7 @@ class ModelFactory {
   }
 
   /**
-   * Create a new model for a given path.
+   * Create a new model.
    *
    * @param languagePreference - An optional kernel language preference.
    *
@@ -215,7 +222,7 @@ class ModelFactory {
   }
 
   /**
-   * Get the preferred kernel language given a path.
+   * Get the preferred kernel language given an extension.
    */
   preferredLanguage(ext: string): string {
     let mode = CodeMirror.findModeByExtension(ext.slice(1));
@@ -244,19 +251,22 @@ class EditorWidget extends CodeMirrorWidget {
     doc.setValue(model.toString());
     this.title.text = context.path.split('/').pop();
     loadModeByFileName(editor, context.path);
-    model.dirtyChanged.connect((m, value) => {
-      if (value) {
-        this.title.className += ` ${DIRTY_CLASS}`;
-      } else {
-        this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+    model.stateChanged.connect((m, args) => {
+      if (args.name === 'dirty') {
+        if (args.newValue) {
+          this.title.className += ` ${DIRTY_CLASS}`;
+        } else {
+          this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+        }
       }
     });
     context.pathChanged.connect((c, path) => {
       loadModeByFileName(editor, path);
       this.title.text = path.split('/').pop();
     });
-    model.contentChanged.connect((m, text) => {
+    model.contentChanged.connect(() => {
       let old = doc.getValue();
+      let text = model.toString();
       if (old !== text) {
         doc.setValue(text);
       }
@@ -321,11 +331,11 @@ namespace Private {
    * A signal emitted when a document content changes.
    */
   export
-  const contentChangedSignal = new Signal<IDocumentModel, string>();
+  const contentChangedSignal = new Signal<IDocumentModel, void>();
 
   /**
    * A signal emitted when a document dirty state changes.
    */
   export
-  const dirtyChangedSignal = new Signal<IDocumentModel, boolean>();
+  const stateChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
 }
