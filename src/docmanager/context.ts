@@ -343,8 +343,14 @@ class ContextManager implements IDisposable {
         kernelId: options.id
       };
       return this._startSession(id, sOptions);
-    } else {
+    } else if (options) {
       return session.changeKernel(options);
+    } else if (session) {
+      return session.shutdown().then(() => {
+        session.dispose();
+        contextEx.session = null;
+        return void 0;
+      });
     }
   }
 

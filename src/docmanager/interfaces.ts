@@ -167,8 +167,11 @@ export interface IDocumentContext extends IDisposable {
 
   /**
    * Change the current kernel associated with the document.
+   *
+   * #### Notes
+   * If no options are given, the session is shut down.
    */
-  changeKernel(options: IKernelId): Promise<IKernel>;
+  changeKernel(options?: IKernelId): Promise<IKernel>;
 
   /**
    * Save the document contents to disk.
