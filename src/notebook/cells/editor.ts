@@ -10,6 +10,10 @@ import {
 } from 'jupyter-js-ui/lib/codemirror/widget';
 
 import {
+  Message
+} from 'phosphor-messaging';
+
+import {
   ISignal, Signal
 } from 'phosphor-signaling';
 
@@ -29,6 +33,11 @@ const UP_ARROW = 38;
 const DOWN_ARROW = 40;
 
 /**
+ * The key code for the tab key.
+ */
+const TAB = 9;
+
+/**
  * The location of requested edges.
  */
 export
@@ -41,10 +50,10 @@ const CELL_EDITOR_CLASS = 'jp-CellEditor';
 
 
 /**
- * An interface describing editor text changes.
+ * And interface describing the state of the editor in an event.
  */
 export
-interface ITextChange {
+interface IEditorState {
   /**
    * The character number of the editor cursor within a line.
    */
@@ -69,7 +78,14 @@ interface ITextChange {
    * The coordinate position of the cursor.
    */
   coords: { left: number; right: number; top: number; bottom: number; };
+}
 
+
+/**
+ * An interface describing editor text changes.
+ */
+export
+interface ITextChange extends IEditorState {
   /**
    * The old value of the editor text.
    */
@@ -79,6 +95,18 @@ interface ITextChange {
    * The new value of the editor text.
    */
   newValue: string;
+}
+
+
+/**
+ * An interface describing completion requests.
+ */
+export
+interface ICompletionRequest extends IEditorState {
+  /**
+   * The current value of the editor text.
+   */
+  currentValue: string;
 }
 
 
@@ -102,7 +130,7 @@ class CellEditorWidget extends CodeMirrorWidget {
     CodeMirror.on(editor, 'keydown', (instance, evt) => {
       this.onEditorKeydown(instance, evt);
     });
-    doc.setValue(model.source);
+    this.update();
   }
 
   /**
@@ -117,6 +145,13 @@ class CellEditorWidget extends CodeMirrorWidget {
    */
   get textChanged(): ISignal<CellEditorWidget, ITextChange> {
     return Private.textChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a tab (text) completion is requested.
+   */
+  get completionRequested(): ISignal<CellEditorWidget, ICompletionRequest> {
+    return Private.completionRequestedSignal.bind(this);
   }
 
   /**
@@ -147,16 +182,23 @@ class CellEditorWidget extends CodeMirrorWidget {
   }
 
   /**
+   * Handle an `update-request` message.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    let doc = this.editor.getDoc();
+    let value = doc.getValue();
+    if (value !== this._model.source) {
+      doc.setValue(this._model.source);
+    }
+  }
+
+  /**
    * Handle changes in the model.
    */
   protected onModelChanged(model: ICellModel, change: string): void {
     switch (change) {
     case 'source':
-      let doc = this.editor.getDoc();
-      let value = doc.getValue();
-      if (value !== model.source) {
-        doc.setValue(model.source);
-      }
+      this.update();
       break;
     default:
       break;
@@ -199,6 +241,10 @@ class CellEditorWidget extends CodeMirrorWidget {
     let line = cursor.line;
     let ch = cursor.ch;
 
+    if (event.keyCode === TAB) {
+      return this.onTabEvent(event, ch, line);
+    }
+
     if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
       this.edgeRequested.emit('top');
       return;
@@ -209,6 +255,29 @@ class CellEditorWidget extends CodeMirrorWidget {
     if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
       this.edgeRequested.emit('bottom');
       return;
+    }
+  }
+
+  /**
+   * Handle a tab key press.
+   */
+  protected onTabEvent(event: KeyboardEvent, ch: number, line: number): void {
+    let editor = this.editor;
+    let currentValue = editor.getDoc().getValue();
+    let currentLine = currentValue.split('\n')[line];
+    let chHeight = editor.defaultTextHeight();
+    let chWidth = editor.defaultCharWidth();
+    let coords = editor.charCoords({line, ch}, 'page');
+
+    // A completion request signal should only be emitted if the final
+    // character of the current line is not whitespace. Otherwise, the
+    // default tab action of creating a tab character should be allowed to
+    // propagate.
+    if (currentLine.match(/\S$/)) {
+      let data = { line, ch, chHeight, chWidth, coords, currentValue };
+      this.completionRequested.emit(data);
+      event.preventDefault();
+      event.stopPropagation();
     }
   }
 
@@ -231,4 +300,10 @@ namespace Private {
    */
   export
   const textChangedSignal = new Signal<CellEditorWidget, ITextChange>();
+
+  /**
+   * A signal emitted when a tab (text) completion is requested.
+   */
+  export
+  const completionRequestedSignal = new Signal<CellEditorWidget, ICompletionRequest>();
 }
