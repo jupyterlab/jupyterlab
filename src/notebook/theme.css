@@ -504,3 +504,11 @@
   font-size: 13px;
   line-height: 25px;
 }
+
+
+.jp-Completion-item mark {
+  font-weight: bold;
+  text-decoration: underline;
+  background: inherit;
+  color: inherit;
+}

@@ -395,6 +395,10 @@ class ConsoleModel implements IConsoleModel {
     if (!this._prompt) {
       return;
     }
+    // Setting both the text and the cursorPosition of an editor model appears
+    // to create a race condition where the cursor ends up in the wrong spot.
+    // Because the editor model itself is being refactored and removed, this
+    // code remains as is for the time being.
     let editor = this._prompt.input.textEditor;
     editor.text = patch.text;
     editor.cursorPosition = patch.position;
