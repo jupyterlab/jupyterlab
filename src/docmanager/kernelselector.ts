@@ -10,74 +10,50 @@ import {
   showDialog
 } from '../dialog';
 
-
-/**
- * The options used to select a kernel.
- */
-export
-interface IKernelSelectOptions {
-  /**
-   * The host element for the dialog.
-   */
-  host: HTMLElement;
-
-  /**
-   * The path of the file.
-   */
-  path: string;
-
-  /**
-   * The kernel spec id information.
-   */
-  specs: IKernelSpecIds;
-
-  /**
-   * The list of running sessions.
-   */
-  running: ISessionId[];
-
-  /**
-   * The preferred kernel language.
-   */
-  preferredLanguage: string;
-
-  /**
-   * The optional existing kernel information.
-   */
-  existing: IKernelId;
-}
+import {
+  IDocumentContext
+} from './interfaces';
 
 
 /**
- * Bring up a dialog to select the kernel for a path.
+ * Bring up a dialog to select the kernel for a context.
  */
 export
-function selectKernel(options: IKernelSelectOptions): Promise<IKernelId> {
+function selectKernel(context: IDocumentContext, host?: HTMLElement): Promise<IKernelId> {
+  let path = context.path;
+  let specs = context.kernelspecs;
+  let kernel = context.kernel;
+
+  // Create the dialog body.
   let body = document.createElement('div');
   let text = document.createElement('pre');
-  text.textContent = `Select kernel for "${options.path}"`;
+  text.textContent = `Select kernel for "${path}"`;
   body.appendChild(text);
-  if (options.existing !== void 0) {
-    let name = options.existing.name;
-    let displayName = options.specs.kernelspecs[name].spec.display_name;
+  if (kernel) {
+    let displayName = specs.kernelspecs[kernel.name].spec.display_name;
     text.textContent += `\nCurrent: ${displayName}`;
-    text.title = `Path: ${options.path}\n` +
+    text.title = `Path: ${path}\n` +
     `Kernel Name: ${displayName}\n` +
-    `Kernel Id: ${options.existing.id}`;
+    `Kernel Id: ${kernel.id}`;
   }
   let selector = document.createElement('select');
   body.appendChild(selector);
-  populateKernels(
-    selector, options.specs, options.running, options.preferredLanguage
-  );
-  return showDialog({
-    title: 'Select Kernel',
-    body,
-    host: options.host,
-    okText: 'SELECT'
+
+  // Get the current sessions, populate the kernels, and show the dialog.
+  return context.listSessions().then(running => {
+    let lang = context.model.defaultKernelLanguage;
+    populateKernels(selector, specs, running, lang);
+    return showDialog({
+      title: 'Select Kernel',
+      body,
+      host,
+      okText: 'SELECT'});
   }).then(result => {
+    // Change the kernel if a kernel was selected.
     if (result.text === 'SELECT') {
-      return JSON.parse(selector.value);
+      let kernelId = JSON.parse(selector.value) as IKernelId;
+      context.changeKernel(kernelId);
+      return kernel;
     }
     return void 0;
   });

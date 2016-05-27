@@ -593,27 +593,6 @@ class DocumentWidget extends Widget {
   }
 
   /**
-   * Bring up a dialog to select a kernel.
-   */
-  selectKernel(): Promise<IKernel> {
-    let context = this.context;
-    let path = context.path;
-    let specs = context.kernelspecs;
-    let preferredLanguage = this.context.model.defaultKernelLanguage;
-    return context.listSessions().then(running => {
-      let options = {
-        host: this.node,
-        path,
-        specs,
-        running,
-        preferredLanguage,
-        existing: context.kernel
-      };
-      return selectKernel(options);
-    });
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {

@@ -365,9 +365,9 @@ interface IFileCreator {
   name: string;
 
   /**
-   * The contents options used to create the file.
+   * The extension for the new file (e.g. `".txt"`).
    */
-  options: IContentsOpts;
+  extension: string;
 
   /**
    * The optional widget name.
