@@ -161,7 +161,7 @@ class CompletionModel implements ICompletionModel {
 
     let original = this._original;
     let current = this._current;
-    let originalLine = original.value.split('\n')[original.line];
+    let originalLine = original.currentValue.split('\n')[original.line];
     let currentLine = current.newValue.split('\n')[current.line];
 
     // If the text change means that the original starting has been preceded,

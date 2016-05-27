@@ -133,8 +133,8 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
       let ch = cursor.ch;
 
       if (event.keyCode === TAB) {
-        let value = instance.getValue();
-        let currentLine = value.split('\n')[line];
+        let currentValue = instance.getValue();
+        let currentLine = currentValue.split('\n')[line];
         let chHeight = editor.defaultTextHeight();
         let chWidth = editor.defaultCharWidth();
         let coords = editor.charCoords({line, ch}, 'page');
@@ -144,7 +144,7 @@ class CodeMirrorWidget extends Widget implements IEditorWidget {
         // default tab action of creating a tab character should be allowed to
         // propagate.
         if (currentLine.match(/\S$/)) {
-          let data = { line, ch, chHeight, chWidth, coords, value };
+          let data = { line, ch, chHeight, chWidth, coords, currentValue };
           model.completionRequested.emit(data);
           event.preventDefault();
           event.stopPropagation();

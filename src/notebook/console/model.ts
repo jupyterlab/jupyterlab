@@ -478,14 +478,12 @@ class ConsoleModel implements IConsoleModel {
    * Handle a completion request in the prompt model.
    */
   protected onCompletionRequest(sender: any, args: ICompletionRequest) {
-    let contents = { code: args.value, cursor_pos: args.ch };
+    let contents = { code: args.currentValue, cursor_pos: args.ch };
     // If there is no session, no requests can be sent to the API.
     if (!this._session) {
       return;
     }
-    this._complete(contents).then(() => {
-      this._completion.original = args;
-    });
+    this._complete(contents).then(() => this._completion.original = args);
   }
 
   /**
@@ -510,7 +508,6 @@ class ConsoleModel implements IConsoleModel {
       // If there is currently a completion
       if (completion && completion.original) {
         let contents = { code: args.newValue, cursor_pos: args.ch };
-        // this._complete(contents).then(() => completion.current = args);
         completion.current = args;
       }
     } else {

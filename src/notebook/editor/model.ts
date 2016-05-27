@@ -22,11 +22,8 @@ export
 type EdgeLocation = 'top' | 'bottom';
 
 
-/**
- * An interface describing editor text changes.
- */
 export
-interface ITextChange {
+interface IEditorChange {
   /**
    * The character number of the editor cursor within a line.
    */
@@ -51,7 +48,13 @@ interface ITextChange {
    * The coordinate position of the cursor.
    */
   coords: { left: number; right: number; top: number; bottom: number; }
+}
 
+/**
+ * An interface describing editor text changes.
+ */
+export
+interface ITextChange extends IEditorChange {
   /**
    * The old value of the editor text.
    */
@@ -65,39 +68,14 @@ interface ITextChange {
 
 
 /**
- * An interface describing editor text changes.
+ * An interface describing completion requests.
  */
 export
-interface ICompletionRequest {
-  /**
-   * The character number of the editor cursor within a line.
-   */
-  ch: number;
-
-  /**
-   * The height of a character in the editor.
-   */
-  chHeight: number;
-
-  /**
-   * The width of a character in the editor.
-   */
-  chWidth: number;
-
-  /**
-   * The line number of the editor cursor.
-   */
-  line: number;
-
-  /**
-   * The coordinate position of the cursor.
-   */
-  coords: { left: number; right: number; top: number; bottom: number; }
-
+interface ICompletionRequest extends IEditorChange {
   /**
    * The current value of the editor text.
    */
-  value: string;
+  currentValue: string;
 }
 
 
