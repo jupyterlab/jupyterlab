@@ -335,7 +335,7 @@ class ContextManager implements IDisposable {
   changeKernel(id: string, options: IKernelId): Promise<IKernel> {
     let contextEx = this._contexts[id];
     let session = contextEx.session;
-    if (!session) {
+    if (!session && options) {
       let path = contextEx.path;
       let sOptions = {
         notebookPath: path,

@@ -47,7 +47,8 @@ function selectKernel(context: IDocumentContext, host?: HTMLElement): Promise<IK
       title: 'Select Kernel',
       body,
       host,
-      okText: 'SELECT'});
+      okText: 'SELECT'
+    });
   }).then(result => {
     // Change the kernel if a kernel was selected.
     if (result.text === 'SELECT') {
@@ -74,10 +75,10 @@ function selectKernel(context: IDocumentContext, host?: HTMLElement): Promise<IK
  * #### Notes
  * Populates the list with separated sections:
  *   - Kernels matching the preferred language (display names).
+ *   - "None" signifying no kernel.
  *   - The remaining kernels.
  *   - Sessions matching the preferred language (file names).
  *   - The remaining sessions.
- *   - "None" signifying no kernel.
  * If no preferred language is given or no kernels are found using
  * the preferred language, the default kernel is used in the first
  * section.  Kernels are sorted by display name.  Sessions display the
@@ -118,6 +119,12 @@ function populateKernels(node: HTMLSelectElement, specs: IKernelSpecIds, running
     node.appendChild(optionForName(name, displayNames[name]));
   }
   // Add a separator.
+  node.appendChild(createSeparatorOption(maxLength));
+  // Add the option to have no kernel.
+  let option = document.createElement('option');
+  option.text = 'None';
+  option.value = 'null';
+  node.appendChild(option);
   node.appendChild(createSeparatorOption(maxLength));
   // Add the rest of the kernel names in alphabetical order.
   let otherNames: string[] = [];
@@ -169,13 +176,7 @@ function populateKernels(node: HTMLSelectElement, specs: IKernelSpecIds, running
       let name = displayNames[session.kernel.name];
       node.appendChild(optionForSession(session, name, maxLength));
     }
-    node.appendChild(createSeparatorOption(maxLength));
   }
-  // Add the option to have no kernel.
-  let option = document.createElement('option');
-  option.text = 'None';
-  option.value = 'null';
-  node.appendChild(option);
   node.selectedIndex = 0;
 }
 
