@@ -72,6 +72,16 @@ class Context implements IDocumentContext {
   }
 
   /**
+   * Get the model associated with the document.
+   *
+   * #### Notes
+   * This is a read-only property
+   */
+  get model(): IDocumentModel {
+    return this._manager.getModel(this._id);
+  }
+
+  /**
    * The current kernel associated with the document.
    *
    * #### Notes
@@ -108,8 +118,8 @@ class Context implements IDocumentContext {
    * #### Notes
    * This is a read-only property.
    */
-  get kernelSpecs(): IKernelSpecIds {
-    return this._manager.getKernelSpecs();
+  get kernelspecs(): IKernelSpecIds {
+    return this._manager.getKernelspecs();
   }
 
   /**
@@ -193,11 +203,11 @@ class ContextManager implements IDisposable {
   /**
    * Construct a new context manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager,  kernelSpecs: IKernelSpecIds, opener: (id: string, widget: Widget) => IDisposable) {
+  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager,  kernelspecs: IKernelSpecIds, opener: (id: string, widget: Widget) => IDisposable) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
     this._opener = opener;
-    this._kernelspecids = kernelSpecs;
+    this._kernelspecids = kernelspecs;
   }
 
   /**
@@ -367,7 +377,7 @@ class ContextManager implements IDisposable {
   /**
    * Get the current kernelspec information.
    */
-  getKernelSpecs(): IKernelSpecIds {
+  getKernelspecs(): IKernelSpecIds {
     return this._kernelspecids;
   }
 

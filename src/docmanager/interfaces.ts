@@ -115,6 +115,14 @@ export interface IDocumentContext extends IDisposable {
   id: string;
 
   /**
+   * Get the model associated with the document.
+   *
+   * #### Notes
+   * This is a read-only property
+   */
+  model: IDocumentModel;
+
+  /**
    * The current kernel associated with the document.
    *
    * #### Notes
@@ -145,7 +153,7 @@ export interface IDocumentContext extends IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  kernelSpecs: IKernelSpecIds;
+  kernelspecs: IKernelSpecIds;
 
   /**
    * A signal emitted when the kernel changes.
@@ -343,4 +351,31 @@ interface IFileType {
    * The optional icon class to use for the file type.
    */
   icon?: string;
+}
+
+
+/**
+ * An interface for a "Create New" item.
+ */
+export
+interface IFileCreator {
+  /**
+   * The display name of the item.
+   */
+  name: string;
+
+  /**
+   * The contents options used to create the file.
+   */
+  options: IContentsOpts;
+
+  /**
+   * The optional widget name.
+   */
+  widgetName?: string;
+
+  /**
+   * The optional kernel name.
+   */
+  kernelName?: string;
 }

@@ -36,7 +36,7 @@ const DIRTY_CLASS = 'jp-mod-dirty';
 /**
  * The class name added to a jupyter code mirror widget.
  */
-const EDITOR_CLASS = 'jp-CodeMirrorWidget';
+const EDITOR_CLASS = 'jp-EditorWidget';
 
 
 /**
@@ -93,7 +93,9 @@ class EditorWidgetFactory extends ABCWidgetFactory implements IWidgetFactory<Edi
    * Create a new widget given a document model and a context.
    */
   createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): EditorWidget {
-    // TODO: use the kernel.
+    if (kernel) {
+      context.changeKernel(kernel);
+    }
     return new EditorWidget(model, context);
   }
 }

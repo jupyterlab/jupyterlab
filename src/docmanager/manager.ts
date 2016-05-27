@@ -8,6 +8,9 @@ import {
   IKernelSpecIds, ISessionId
 } from 'jupyter-js-services';
 
+import * as utils
+  from 'jupyter-js-utils';
+
 import {
   IDisposable, DisposableDelegate
 } from 'phosphor-disposable';
@@ -41,8 +44,12 @@ import {
 } from './context';
 
 import {
+  selectKernel
+} from './kernelselector';
+
+import {
   IDocumentContext, IModelFactory, IWidgetFactory, IWidgetFactoryOptions,
-  IFileType, IKernelPreference
+  IFileType, IKernelPreference, IFileCreator
 } from './interfaces';
 
 
@@ -67,11 +74,11 @@ class DocumentManager implements IDisposable {
   /**
    * Construct a new document manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, kernelSpecs: IKernelSpecIds, opener: IWidgetOpener) {
+  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, kernelspecs: IKernelSpecIds, opener: IWidgetOpener) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
-    this._specs = kernelSpecs;
-    this._contextManager = new ContextManager(contentsManager, sessionManager, kernelSpecs, (id: string, widget: Widget) => {
+    this._specs = kernelspecs;
+    this._contextManager = new ContextManager(contentsManager, sessionManager, kernelspecs, (id: string, widget: Widget) => {
       let parent = this._createWidget('', id);
       parent.setContent(widget);
       opener.open(parent);
@@ -87,7 +94,7 @@ class DocumentManager implements IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  get kernelSpecs(): IKernelSpecIds {
+  get kernelspecs(): IKernelSpecIds {
     return this._specs;
   }
 
@@ -144,7 +151,7 @@ class DocumentManager implements IDisposable {
    */
   registerWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions): IDisposable {
     let name = options.displayName;
-    let exOpt = options as Private.IWidgetFactoryEx;
+    let exOpt = utils.copy(options) as Private.IWidgetFactoryEx;
     exOpt.factory = factory;
     if (this._widgetFactories[name]) {
       throw new Error(`Duplicate registered factory ${name}`);
@@ -211,6 +218,37 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * Register a Create New handler.
+   *
+   * @params creator - The file creator object.
+   *
+   * @params after - The optional item name to insert after.
+   *
+   * #### Notes
+   * If `after` is not given or not already registered, it will be moved
+   * to the end.
+   */
+  registerCreator(creator: IFileCreator, after?: string): IDisposable {
+    let added = false;
+    if (after) {
+      for (let existing of this._creators) {
+        if (existing.name === after) {
+          let index = this._creators.indexOf(existing);
+          this._creators.splice(index, 0, creator);
+          added = true;
+        }
+      }
+    }
+    if (!added) {
+      this._creators.push(creator);
+    }
+    return new DisposableDelegate(() => {
+      let index = this._creators.indexOf(creator);
+      this._creators.splice(index, 1);
+    });
+  }
+
+  /**
    * Get the list of registered widget factory display names.
    *
    * @param path - An optional file path to filter the results.
@@ -264,6 +302,13 @@ class DocumentManager implements IDisposable {
    */
   listFileTypes(): IFileType[] {
     return this._fileTypes.slice();
+  }
+
+  /**
+   * Get the ordered list of file creator names.
+   */
+  listCreators(): IFileCreator[] {
+    return this._creators.slice();
   }
 
   /**
@@ -489,6 +534,7 @@ class DocumentManager implements IDisposable {
   private _contextManager: ContextManager = null;
   private _specs: IKernelSpecIds = null;
   private _fileTypes: IFileType[] = [];
+  private _creators: IFileCreator[] = [];
 }
 
 
@@ -550,10 +596,13 @@ class DocumentWidget extends Widget {
    * Bring up a dialog to select a kernel.
    */
   selectKernel(): Promise<IKernel> {
-    // TODO: the dialog should take kernel information only,
-    // and return kernel information.  We then change the
-    // kernel in the context.
-    return void 0;
+    let context = this.context;
+    let path = context.path;
+    let specs = context.kernelspecs;
+    let lang = this.context.model.defaultKernelLanguage;
+    return context.listSessions().then(running => {
+      return selectKernel(this.node, path, specs, running, lang, context.kernel);
+    });
   }
 
   /**
