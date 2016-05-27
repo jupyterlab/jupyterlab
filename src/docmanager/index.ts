@@ -288,27 +288,26 @@ interface IWidgetFactory<T extends Widget> extends IDisposable {
 
 
 /**
- * The options used to register a model factory.
+ * The interface for a model factory.
  */
 export
-interface IModelFactoryOptions {
+interface IModelFactory extends IDisposable {
   /**
-   * The name of the model factory.
+   * The name of the model.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   name: string;
 
   /**
    * The contents options used to fetch/save files.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   contentsOptions: IContentsOpts;
-}
 
-
-/**
- * The interface for a model factory.
- */
-export
-interface IModelFactory extends IDisposable {
   /**
    * Create a new model for a given path.
    *
@@ -428,7 +427,7 @@ class DocumentManager implements IDisposable {
       return;
     }
     for (let modelName in this._modelFactories) {
-      this._modelFactories[modelName].factory.dispose();
+      this._modelFactories[modelName].dispose();
     }
     this._modelFactories = null;
     for (let widgetName in this._widgetFactories) {
@@ -500,22 +499,18 @@ class DocumentManager implements IDisposable {
    *
    * @param factory - The factory instance.
    *
-   * @param options - The options used to register the factory.
-   *
    * @returns A disposable used to unregister the factory.
    *
    * #### Notes
    * If a factory with the given `name` is already registered, an error
    * will be thrown.
    */
-  registerModelFactory(factory: IModelFactory, options: IModelFactoryOptions): IDisposable {
-    let exOpt = options as Private.IModelFactoryEx;
-    let name = options.name;
-    exOpt.factory = factory;
+  registerModelFactory(factory: IModelFactory): IDisposable {
+    let name = factory.name;
     if (this._modelFactories[name]) {
       throw new Error(`Duplicate registered factory ${name}`);
     }
-    this._modelFactories[name] = exOpt;
+    this._modelFactories[name] = factory;
     return new DisposableDelegate(() => {
       delete this._modelFactories[name];
     });
@@ -597,8 +592,8 @@ class DocumentManager implements IDisposable {
    */
   getKernelPreference(ext: string, widgetName: string): IKernelPreference {
     let widgetFactoryEx = this._getWidgetFactoryEx(widgetName);
-    let modelFactoryEx = this._getModelFactoryEx(widgetName);
-    let language = modelFactoryEx.factory.preferredLanguage(ext);
+    let modelFactory = this._getModelFactory(widgetName);
+    let language = modelFactory.preferredLanguage(ext);
     return {
       language,
       preferKernel: widgetFactoryEx.preferKernel,
@@ -626,21 +621,21 @@ class DocumentManager implements IDisposable {
     if (widgetName === 'default') {
       widgetName = this.listWidgetFactories(path)[0];
     }
-    let mFactoryEx = this._getModelFactoryEx(widgetName);
-    if (!mFactoryEx) {
+    let mFactory = this._getModelFactory(widgetName);
+    if (!mFactory) {
       return;
     }
     let widget: DocumentWidget;
     // Use an existing context if available.
-    let id = this._contextManager.findContext(path, mFactoryEx.name);
+    let id = this._contextManager.findContext(path, mFactory.name);
     if (id) {
       widget = this._createWidget(widgetName, id);
       this._populateWidget(widget, kernel);
       return widget;
     }
-    let lang = mFactoryEx.factory.preferredLanguage(path);
-    let model = mFactoryEx.factory.createNew(lang);
-    id = this._contextManager.createNew(path, model, mFactoryEx);
+    let lang = mFactory.preferredLanguage(path);
+    let model = mFactory.createNew(lang);
+    id = this._contextManager.createNew(path, model, mFactory);
     widget = this._createWidget(widgetName, id);
     // Load the contents from disk.
     this._contextManager.revert(id).then(() => {
@@ -663,13 +658,13 @@ class DocumentManager implements IDisposable {
     if (widgetName === 'default') {
       widgetName = this.listWidgetFactories(path)[0];
     }
-    let mFactoryEx = this._getModelFactoryEx(widgetName);
-    if (!mFactoryEx) {
+    let mFactory = this._getModelFactory(widgetName);
+    if (!mFactory) {
       return;
     }
-    let lang = mFactoryEx.factory.preferredLanguage(path);
-    let model = mFactoryEx.factory.createNew(lang);
-    let id = this._contextManager.createNew(path, model, mFactoryEx);
+    let lang = mFactory.preferredLanguage(path);
+    let model = mFactory.createNew(lang);
+    let id = this._contextManager.createNew(path, model, mFactory);
     let widget = this._createWidget(widgetName, id);
     // Save the contents to disk to get a valid contentsModel for the
     // context.
@@ -797,7 +792,7 @@ class DocumentManager implements IDisposable {
   /**
    * Get the appropriate model factory given a widget factory.
    */
-  private _getModelFactoryEx(widgetName: string): Private.IModelFactoryEx {
+  private _getModelFactory(widgetName: string): IModelFactory {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
     if (!wFactoryEx) {
       return;
@@ -805,7 +800,7 @@ class DocumentManager implements IDisposable {
     return this._modelFactories[wFactoryEx.modelName];
   }
 
-  private _modelFactories: { [key: string]: Private.IModelFactoryEx } = Object.create(null);
+  private _modelFactories: { [key: string]: IModelFactory } = Object.create(null);
   private _widgetFactories: { [key: string]: Private.IWidgetFactoryEx } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
@@ -1027,14 +1022,6 @@ namespace Private {
    */
   export
   const populatedSignal = new Signal<DocumentWidget, Widget>();
-
-  /**
-   * An extended interface for a model factory and its options.
-   */
-  export
-  interface IModelFactoryEx extends IModelFactoryOptions {
-    factory: IModelFactory;
-  }
 
   /**
    * An extended interface for a widget factory and its options.

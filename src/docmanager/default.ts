@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  IKernelId
+  IKernelId, IContentsOpts
 } from 'jupyter-js-services';
 
 import {
@@ -19,7 +19,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IDocumentModel, IWidgetFactory, IDocumentContext
+  IDocumentModel, IWidgetFactory, IDocumentContext, IModelFactory
 } from './index';
 
 
@@ -171,7 +171,27 @@ class DocumentModel implements IDocumentModel {
  * The default implementation of a model factory.
  */
 export
-class ModelFactory {
+class ModelFactory implements IModelFactory {
+  /**
+   * The name of the model.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return 'default';
+  }
+
+  /**
+   * The contents options used to fetch/save files.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get contentsOptions(): IContentsOpts {
+    return { type: 'file' };
+  }
+
   /**
    * Get whether the model factory has been disposed.
    */

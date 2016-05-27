@@ -24,7 +24,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IDocumentContext, IDocumentModel, IModelFactoryOptions
+  IDocumentContext, IDocumentModel, IModelFactory
 } from './index';
 
 
@@ -233,15 +233,15 @@ class ContextManager implements IDisposable {
   /**
    * Create a new context.
    */
-  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions): string {
+  createNew(path: string, model: IDocumentModel, factory: IModelFactory): string {
     let context = new Context(this);
     let id = context.id;
     this._contexts[id] = {
       context,
       path,
       model,
-      modelName: options.name,
-      opts: options.contentsOptions,
+      modelName: factory.name,
+      opts: factory.contentsOptions,
       contentsModel: null,
       session: null
     };
