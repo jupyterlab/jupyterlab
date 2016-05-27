@@ -378,7 +378,7 @@ class DocumentManager implements IDisposable {
    *
    * @param kernel - An optional kernel name/id to override the default.
    */
-  createNew(path: string, widgetName='default', kernel?: IKernelId): Widget {
+  createNew(path: string, widgetName='default', kernel?: IKernelId): DocumentWidget {
     if (widgetName === 'default') {
       widgetName = this.listWidgetFactories(path)[0];
     }
