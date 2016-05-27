@@ -39,6 +39,23 @@ interface ICompletionMatch {
 
 
 /**
+ * An object describing a completion option injection into text.
+ */
+export
+interface ICompletionPatch {
+  /**
+   * The patch text.
+   */
+  text: string;
+
+  /**
+   * The position in the text where cursor should be after patch application.
+   */
+  position: number;
+}
+
+
+/**
  * A completion menu item.
  */
 export
@@ -66,6 +83,16 @@ interface ICompletionModel extends IDisposable {
   stateChanged: ISignal<ICompletionModel, void>;
 
   /**
+   * The current text change details.
+   */
+  current: ITextChange;
+
+  /**
+   * The cursor details that the API has used to return matching options.
+   */
+  cursor: { start: number, end: number };
+
+  /**
    * The list of visible items in the completion menu.
    */
   items: ICompletionItem[];
@@ -81,9 +108,9 @@ interface ICompletionModel extends IDisposable {
   original: ICompletionRequest;
 
   /**
-   * The current text change details.
+   * Create a resolved patch between the original state and a patch string.
    */
-  current: ITextChange;
+  createPatch(patch: string): ICompletionPatch;
 
   /**
    * Reset the state of the model.
@@ -108,6 +135,16 @@ class CompletionModel implements ICompletionModel {
    */
   get stateChanged(): ISignal<ICompletionModel, void> {
     return Private.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * The cursor details that the API has used to return matching options.
+   */
+  get cursor(): { start: number, end: number } {
+    return this._cursor;
+  }
+  set cursor(cursor: { start: number, end: number }) {
+    this._cursor = cursor;
   }
 
   /**
@@ -164,14 +201,61 @@ class CompletionModel implements ICompletionModel {
     let originalLine = original.currentValue.split('\n')[original.line];
     let currentLine = current.newValue.split('\n')[current.line];
 
-    // If the text change means that the original starting has been preceded,
+    // If the text change means that the original start point has been preceded,
     // then the completion is no longer valid and should be reset.
     if (currentLine.length < originalLine.length) {
+      console.log('A');
       this.reset();
     } else {
-      this._query = currentLine.replace(originalLine, '');
+      let {start, end} = this._cursor;
+      // Clip the front of the current line.
+      let query = currentLine.substring(start);
+      // Clip the back of the current line.
+      let ending = originalLine.substring(end);
+      query = query.substring(0, query.lastIndexOf(ending));
+      this._query = query;
     }
     this.stateChanged.emit(void 0);
+  }
+
+  /**
+   * Create a resolved patch between the original state and a patch string.
+   *
+   * @param patch - The patch string to apply to the original value.
+   *
+   * @returns A patched text change or null if original value did not exist.
+   *
+   * #### Notes
+   * The coords field is set to null because it is calculated by the editor, so
+   * a patched version cannot reliably produce accurate coordinates for the
+   * cursor.
+   */
+  createPatch(patch: string): ICompletionPatch {
+    let original = this._original;
+    let cursor = this._cursor;
+
+    if (!original || !cursor) {
+      return null;
+    }
+
+    let {start, end} = cursor;
+    let lines = original.currentValue.split('\n');
+    let line = lines[original.line];
+    let prefix = line.substring(0, start);
+    let suffix = line.substring(end);
+
+    lines[original.line] = prefix + patch + suffix;
+    let text = lines.join('\n');
+
+    // Add current line to position.
+    let position = prefix.length + patch.length;
+    // Add all the preceding lines lengths to position.
+    for (let i = 0; i < original.line; i++) {
+      // Add an extra character for the line break.
+      position += lines[i].length + 1;
+    }
+
+    return { position, text };
   }
 
   /**
@@ -193,6 +277,7 @@ class CompletionModel implements ICompletionModel {
     this.original = null;
     this.options = null;
     this._query = '';
+    this._cursor = null;
   }
 
   /**
@@ -215,9 +300,8 @@ class CompletionModel implements ICompletionModel {
         })
       }
     }
-    return results.sort((a, b) => {
-      return a.score - b.score;
-    }).map(result => ({ text: result.text, raw: result.raw }));
+    return results.sort((a, b) => { return a.score - b.score; })
+      .map(result => ({ text: result.text, raw: result.raw }));
   }
 
   private _isDisposed = false;
@@ -225,6 +309,7 @@ class CompletionModel implements ICompletionModel {
   private _original: ICompletionRequest = null;
   private _current: ITextChange = null;
   private _query = '';
+  private _cursor: { start: number, end: number } = null;
 }
 
 

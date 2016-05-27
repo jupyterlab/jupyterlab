@@ -22,8 +22,11 @@ export
 type EdgeLocation = 'top' | 'bottom';
 
 
+/**
+ * And interface describing the state of the editor in an event.
+ */
 export
-interface IEditorChange {
+interface IEditorState {
   /**
    * The character number of the editor cursor within a line.
    */
@@ -54,7 +57,7 @@ interface IEditorChange {
  * An interface describing editor text changes.
  */
 export
-interface ITextChange extends IEditorChange {
+interface ITextChange extends IEditorState {
   /**
    * The old value of the editor text.
    */
@@ -71,7 +74,7 @@ interface ITextChange extends IEditorChange {
  * An interface describing completion requests.
  */
 export
-interface ICompletionRequest extends IEditorChange {
+interface ICompletionRequest extends IEditorState {
   /**
    * The current value of the editor text.
    */

@@ -229,8 +229,7 @@ class CompletionWidget extends Widget {
       this.hide();
       return;
     }
-    if (this
-      .isHidden) {
+    if (this.isHidden) {
       return;
     }
 

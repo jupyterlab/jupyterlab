@@ -271,7 +271,8 @@ class ConsoleWidget extends Widget {
    * Handle a completion menu selection event.
    */
   protected onCompletionSelected(sender: CompletionWidget, args: string) {
-    console.log('completion:', args);
+    let patch = this._model.completion.createPatch(args);
+    this._model.applyPatch(patch);
   }
 
   /**

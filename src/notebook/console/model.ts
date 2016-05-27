@@ -48,7 +48,7 @@ import {
 } from '../cells/model';
 
 import {
-  ICompletionModel, CompletionModel
+  ICompletionModel, ICompletionPatch, CompletionModel
 } from '../completion';
 
 import {
@@ -123,11 +123,6 @@ interface IConsoleModel extends IDisposable {
   cells: IObservableList<ICellModel>;
 
   /**
-   * Clear the cells of a console except for the banner.
-   */
-  clear(): void;
-
-  /**
    * The data source for a console's text completion functionality.
    */
   completion: ICompletionModel;
@@ -161,9 +156,14 @@ interface IConsoleModel extends IDisposable {
   tooltip: ITooltipModel;
 
   /**
-   * Run the current contents of the console prompt.
+   * Apply a patched value to the prompt's text editor.
    */
-  run(): void;
+  applyPatch(patch: ICompletionPatch): void;
+
+  /**
+   * Clear the cells of a console except for the banner.
+   */
+  clear(): void;
 
   /**
    * A factory for creating a new console prompt cell.
@@ -178,6 +178,11 @@ interface IConsoleModel extends IDisposable {
    * @returns A new raw cell.
    */
   createRawCell(): IRawCellModel;
+
+  /**
+   * Run the current contents of the console prompt.
+   */
+  run(): void;
 }
 
 
@@ -384,6 +389,18 @@ class ConsoleModel implements IConsoleModel {
   }
 
   /**
+   * Apply a patched value to the prompt's text editor.
+   */
+  applyPatch(patch: ICompletionPatch) {
+    if (!this._prompt) {
+      return;
+    }
+    let editor = this._prompt.input.textEditor;
+    editor.text = patch.text;
+    editor.cursorPosition = patch.position;
+  }
+
+  /**
    * Clear the cells of a console except for the banner.
    */
   clear() {
@@ -478,7 +495,11 @@ class ConsoleModel implements IConsoleModel {
    * Handle a completion request in the prompt model.
    */
   protected onCompletionRequest(sender: any, args: ICompletionRequest) {
-    let contents = { code: args.currentValue, cursor_pos: args.ch };
+    let contents = {
+      // Only send the current line of code for completion.
+      code: args.currentValue.split('\n')[args.line],
+      cursor_pos: args.ch
+    };
     // If there is no session, no requests can be sent to the API.
     if (!this._session) {
       return;
@@ -503,11 +524,11 @@ class ConsoleModel implements IConsoleModel {
     let currentLine = args.newValue.split('\n')[args.line];
     let completion = this._completion;
 
-    // If final character of current line is not whitespace.
-    if (currentLine.match(/\S$/)) {
+
+    // If last character entered is not whitespace, update completion.
+    if (currentLine[args.ch - 1] && currentLine[args.ch - 1].match(/\S/)) {
       // If there is currently a completion
       if (completion && completion.original) {
-        let contents = { code: args.newValue, cursor_pos: args.ch };
         completion.current = args;
       }
     } else {
@@ -515,6 +536,7 @@ class ConsoleModel implements IConsoleModel {
       this.tooltip = null;
       completion.options = null;
       completion.original = null;
+      completion.cursor = null;
       return;
     }
 
@@ -581,8 +603,10 @@ class ConsoleModel implements IConsoleModel {
       if (value.status !== 'ok') {
         return;
       }
-      // Update the completion model options and request.
-      this._completion.options = value.matches;
+      // Update the completion model.
+      let completion = this._completion;
+      completion.options = value.matches;
+      completion.cursor = { start: value.cursor_start, end: value.cursor_end };
       return null;
     });
   }

@@ -153,9 +153,23 @@ class ConsoleTooltip extends Panel {
    */
   private _evtKeydown(event: KeyboardEvent) {
     let target = event.target as HTMLElement;
+
+    if (!this._reference) {
+      this.hide();
+      return;
+    }
+
+    if (this.isHidden) {
+      return;
+    }
+
     while (target !== document.documentElement) {
-      if (target === this.node) return;
-      if (this._reference && target === this._reference.node) return;
+      if (target === this._reference.node) {
+        if (event.keyCode === 27) { // Escape key
+          this.hide();
+        }
+        return;
+      }
       target = target.parentElement;
     }
     this.hide();
