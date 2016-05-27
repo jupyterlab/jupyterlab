@@ -24,7 +24,7 @@ import {
 } from './model';
 
 import {
-  IBaseCell
+  nbformat
 } from './nbformat';
 
 import {
@@ -358,7 +358,7 @@ namespace NotebookActions {
   export
   function copy(widget: ActiveNotebook, clipboard: IClipboard): void {
     clipboard.clear();
-    let data: IBaseCell[] = [];
+    let data: nbformat.IBaseCell[] = [];
     for (let i = 0; i < widget.model.cells.length; i++) {
       let child = widget.childAt(i);
       if (widget.isSelected(child)) {
@@ -375,7 +375,7 @@ namespace NotebookActions {
   export
   function cut(widget: ActiveNotebook, clipboard: IClipboard): void {
     clipboard.clear();
-    let data: IBaseCell[] = [];
+    let data: nbformat.IBaseCell[] = [];
     let model = widget.model;
     let cells = model.cells;
     // Preserve the history as one undo event.
@@ -400,7 +400,7 @@ namespace NotebookActions {
     if (!clipboard.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
-    let values = clipboard.getData(JUPYTER_CELL_MIME) as IBaseCell[];
+    let values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
     let model = widget.model;
     let cells: ICellModel[] = [];
     for (let value of values) {

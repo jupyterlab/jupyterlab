@@ -31,8 +31,7 @@ import {
 } from '../common/undo';
 
 import {
-  INotebookContent, ICell, INotebookMetadata, MAJOR_VERSION,
-  MINOR_VERSION, IBaseCell
+  nbformat
 } from './nbformat';
 
 
@@ -94,7 +93,7 @@ interface INotebookModel extends IDocumentModel {
    * If the source argument does not give an input mimetype, the code cell
    * defaults to the notebook [[defaultMimetype]].
    */
-  createCodeCell(source?: IBaseCell): CodeCellModel;
+  createCodeCell(source?: nbformat.IBaseCell): CodeCellModel;
 
   /**
    * A factory for creating a new Markdown cell.
@@ -104,7 +103,7 @@ interface INotebookModel extends IDocumentModel {
    * @returns A new markdown cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  createMarkdownCell(source?: IBaseCell): MarkdownCellModel;
+  createMarkdownCell(source?: nbformat.IBaseCell): MarkdownCellModel;
 
   /**
    * A factory for creating a new raw cell.
@@ -114,7 +113,7 @@ interface INotebookModel extends IDocumentModel {
    * @returns A new raw cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  createRawCell(source?: IBaseCell): RawCellModel;
+  createRawCell(source?: nbformat.IBaseCell): RawCellModel;
 }
 
 
@@ -127,7 +126,7 @@ class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(languagePreference?: string) {
-    this._cells = new OberservableUndoableList<ICellModel>((data: IBaseCell) => {
+    this._cells = new OberservableUndoableList<ICellModel>((data: nbformat.IBaseCell) => {
       switch (data.cell_type) {
         case 'code':
           return this.createCodeCell(data);
@@ -297,13 +296,13 @@ class NotebookModel implements INotebookModel {
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): INotebookContent {
-    let cells: ICell[] = [];
+  toJSON(): nbformat.INotebookContent {
+    let cells: nbformat.ICell[] = [];
     for (let i = 0; i < this.cells.length; i++) {
       let cell = this.cells.get(i);
       cells.push(cell.toJSON());
     }
-    let metadata = utils.copy(this._metadata) as INotebookMetadata;
+    let metadata = utils.copy(this._metadata) as nbformat.INotebookMetadata;
     return {
       metadata,
       nbformat_minor: this._nbformatMinor,
@@ -318,7 +317,7 @@ class NotebookModel implements INotebookModel {
    * #### Notes
    * Should emit a [contentChanged] signal.
    */
-  fromJSON(value: INotebookContent): void {
+  fromJSON(value: nbformat.INotebookContent): void {
     let cells: ICellModel[] = [];
     for (let data of value.cells) {
       switch (data.cell_type) {
@@ -361,7 +360,7 @@ class NotebookModel implements INotebookModel {
    * If the source argument does not give an input mimetype, the code cell
    * defaults to the notebook [[defaultMimetype]].
    */
-  createCodeCell(source?: IBaseCell): CodeCellModel {
+  createCodeCell(source?: nbformat.IBaseCell): CodeCellModel {
     return new CodeCellModel(source);
   }
 
@@ -373,7 +372,7 @@ class NotebookModel implements INotebookModel {
    * @returns A new markdown cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  createMarkdownCell(source?: IBaseCell): MarkdownCellModel {
+  createMarkdownCell(source?: nbformat.IBaseCell): MarkdownCellModel {
     return new MarkdownCellModel(source);
   }
 
@@ -385,7 +384,7 @@ class NotebookModel implements INotebookModel {
    * @returns A new raw cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  createRawCell(source?: IBaseCell): RawCellModel {
+  createRawCell(source?: nbformat.IBaseCell): RawCellModel {
     return new RawCellModel(source);
   }
 
@@ -477,8 +476,8 @@ class NotebookModel implements INotebookModel {
   private _dirty = false;
   private _readOnly = false;
   private _cursors: MetadataCursor[] = [];
-  private _nbformat = MAJOR_VERSION;
-  private _nbformatMinor = MINOR_VERSION;
+  private _nbformat = nbformat.MAJOR_VERSION;
+  private _nbformatMinor = nbformat.MINOR_VERSION;
 }
 
 

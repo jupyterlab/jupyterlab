@@ -27,7 +27,7 @@ import {
 } from 'sanitizer';
 
 import {
-  IOutput, IExecuteResult, IDisplayData, IStream, IError, MimeBundle
+  nbformat
 } from '../notebook/nbformat';
 
 import {
@@ -192,35 +192,35 @@ class OutputAreaWidget extends Widget {
   /**
    * Create an output node from an output model.
    */
-  protected createOutput(output: IOutput): Widget {
+  protected createOutput(output: nbformat.IOutput): Widget {
     let widget = new Panel();
     widget.addClass(OUTPUT_CLASS);
-    let bundle: MimeBundle;
+    let bundle: nbformat.MimeBundle;
     this._sanitized = false;
     switch (output.output_type) {
     case 'execute_result':
-      bundle = (output as IExecuteResult).data;
+      bundle = (output as nbformat.IExecuteResult).data;
       widget.addClass(EXECUTE_CLASS);
       let prompt = new Widget();
       prompt.addClass(PROMPT_CLASS);
-      let count = (output as IExecuteResult).execution_count;
+      let count = (output as nbformat.IExecuteResult).execution_count;
       prompt.node.textContent = `Out [${count === null ? ' ' : count}]:`;
       widget.addChild(prompt);
       break;
     case 'display_data':
-      bundle = (output as IDisplayData).data;
+      bundle = (output as nbformat.IDisplayData).data;
       widget.addClass(DISPLAY_CLASS);
       break;
     case 'stream':
-      bundle = {'application/vnd.jupyter.console-text': (output as IStream).text};
-      if ((output as IStream).name === 'stdout') {
+      bundle = {'application/vnd.jupyter.console-text': (output as nbformat.IStream).text};
+      if ((output as nbformat.IStream).name === 'stdout') {
         widget.addClass(STDOUT_CLASS);
       } else {
         widget.addClass(STDERR_CLASS);
       }
       break;
     case 'error':
-      let out: IError = output as IError;
+      let out: nbformat.IError = output as nbformat.IError;
       let traceback = out.traceback.join('\n');
       bundle = {'application/vnd.jupyter.console-text': traceback || `${out.ename}: ${out.evalue}`};
       widget.addClass(ERROR_CLASS);
@@ -268,12 +268,12 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes to the outputs list.
    */
-  protected outputsChanged(sender: ObservableList<IOutput>, args: IListChangedArgs<IOutput>) {
+  protected outputsChanged(sender: ObservableList<nbformat.IOutput>, args: IListChangedArgs<nbformat.IOutput>) {
     let layout = this.layout as PanelLayout;
     let widget: Widget;
     switch (args.type) {
     case ListChangeType.Add:
-      let value = args.newValue as IOutput;
+      let value = args.newValue as nbformat.IOutput;
       layout.insertChild(args.newIndex, this.createOutput(value));
       break;
     case ListChangeType.Move:
@@ -285,13 +285,13 @@ class OutputAreaWidget extends Widget {
       widget.dispose();
       break;
     case ListChangeType.Replace:
-      let oldValues = args.oldValue as IOutput[];
+      let oldValues = args.oldValue as nbformat.IOutput[];
       for (let i = args.oldIndex; i < oldValues.length; i++) {
         widget = layout.childAt(args.oldIndex);
         layout.removeChild(widget);
         widget.dispose();
       }
-      let newValues = args.newValue as IOutput[];
+      let newValues = args.newValue as nbformat.IOutput[];
       for (let i = newValues.length; i < 0; i--) {
         layout.insertChild(args.newIndex, this.createOutput(newValues[i]));
       }
@@ -300,7 +300,7 @@ class OutputAreaWidget extends Widget {
       widget = layout.childAt(args.newIndex);
       layout.removeChild(widget);
       widget.dispose();
-      widget = this.createOutput(args.newValue as IOutput);
+      widget = this.createOutput(args.newValue as nbformat.IOutput);
       layout.insertChild(args.newIndex, widget);
       break;
     default:

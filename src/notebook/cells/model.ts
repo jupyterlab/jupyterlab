@@ -14,7 +14,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  CellType, IBaseCell, ICodeCell
+  nbformat
 } from '../notebook/nbformat';
 
 import {
@@ -34,7 +34,7 @@ interface ICellModel extends IDisposable {
   /**
    * The type of cell.
    */
-  type: CellType;
+  type: nbformat.CellType;
 
   /**
    * A signal emitted when the content of the model changes.
@@ -96,7 +96,7 @@ class CellModel implements ICellModel {
   /**
    * Construct a cell model from optional cell content.
    */
-  constructor(cell?: IBaseCell) {
+  constructor(cell?: nbformat.IBaseCell) {
     if (!cell) {
       return;
     }
@@ -162,7 +162,7 @@ class CellModel implements ICellModel {
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): IBaseCell {
+  toJSON(): nbformat.IBaseCell {
     return {
       cell_type: this.type,
       source: this.source,
@@ -216,7 +216,7 @@ class CellModel implements ICellModel {
   /**
    * The type of cell.
    */
-  type: CellType;
+  type: nbformat.CellType;
 
   private _metadata: { [key: string]: any } = Object.create(null);
   private _cursors: MetadataCursor[] = [];
@@ -229,7 +229,7 @@ class CellModel implements ICellModel {
  */
 export
 class RawCellModel extends CellModel {
-  type: CellType = 'raw';
+  type: nbformat.CellType = 'raw';
 }
 
 
@@ -238,7 +238,7 @@ class RawCellModel extends CellModel {
  */
 export
 class MarkdownCellModel extends CellModel {
-  type: CellType = 'markdown';
+  type: nbformat.CellType = 'markdown';
 }
 
 
@@ -250,12 +250,12 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Construct a new code cell with optional original cell content.
    */
-  constructor(cell?: IBaseCell) {
+  constructor(cell?: nbformat.IBaseCell) {
     super(cell);
     this._outputs = new ObservableOutputs();
     if (cell && cell.cell_type === 'code') {
-      this.executionCount = (cell as ICodeCell).execution_count;
-      this._outputs.assign((cell as ICodeCell).outputs);
+      this.executionCount = (cell as nbformat.ICodeCell).execution_count;
+      this._outputs.assign((cell as nbformat.ICodeCell).outputs);
     }
     this._outputs.changed.connect(() => {
       this.contentChanged.emit('outputs');
@@ -301,8 +301,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): ICodeCell {
-    let cell = super.toJSON() as ICodeCell;
+  toJSON(): nbformat.ICodeCell {
+    let cell = super.toJSON() as nbformat.ICodeCell;
     cell.execution_count = this.executionCount;
     let outputs = this.outputs;
     cell.outputs = [];
@@ -312,7 +312,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     return cell;
   }
 
-  type: CellType = 'code';
+  type: nbformat.CellType = 'code';
 
   private _outputs: ObservableOutputs = null;
   private _executionCount: number = null;

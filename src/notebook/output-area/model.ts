@@ -11,7 +11,7 @@ import {
 } from 'phosphor-observablelist';
 
 import {
-  IOutput, IStream, isStream, OutputType
+  nbformat
 } from '../notebook/nbformat';
 
 
@@ -19,12 +19,12 @@ import {
  * An observable list that handles output area data.
  */
 export
-class ObservableOutputs extends ObservableList<IOutput> {
+class ObservableOutputs extends ObservableList<nbformat.IOutput> {
   /**
    * Add an output, which may be combined with previous output
    * (e.g. for streams).
    */
-  add(output: IOutput): number {
+  add(output: nbformat.IOutput): number {
     // If we received a delayed clear message, then clear now.
     if (this._clearNext) {
       this.clear();
@@ -33,9 +33,9 @@ class ObservableOutputs extends ObservableList<IOutput> {
 
     // Consolidate outputs if they are stream outputs of the same kind.
     let index = this.length - 1;
-    let lastOutput = this.get(index) as IStream;
-    if (isStream(output)
-        && lastOutput && isStream(lastOutput)
+    let lastOutput = this.get(index) as nbformat.IStream;
+    if (nbformat.isStream(output)
+        && lastOutput && nbformat.isStream(lastOutput)
         && output.name === lastOutput.name) {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
@@ -63,7 +63,7 @@ class ObservableOutputs extends ObservableList<IOutput> {
    *
    * @param wait Delay clearing the output until the next message is added.
    */
-  clear(wait: boolean = false): IOutput[] {
+  clear(wait: boolean = false): nbformat.IOutput[] {
     if (wait) {
       this._clearNext = true;
       return [];
@@ -93,7 +93,7 @@ function executeCode(code: string, kernel: IKernel, outputs: ObservableOutputs):
     future.onIOPub = (msg => {
       let model = msg.content;
       if (model !== void 0) {
-        model.output_type = msg.header.msg_type as OutputType;
+        model.output_type = msg.header.msg_type as nbformat.OutputType;
         outputs.add(model);
       }
     });

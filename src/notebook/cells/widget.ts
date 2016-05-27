@@ -23,7 +23,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  MimeBundle
+  nbformat
 } from '../notebook/nbformat';
 
 import {
@@ -427,7 +427,7 @@ class MarkdownCellWidget extends BaseCellWidget {
       // Do not re-render if the text has not changed.
       if (text !== this._prev) {
         text = sanitize(text);
-        let bundle: MimeBundle = { 'text/markdown': text };
+        let bundle: nbformat.MimeBundle = { 'text/markdown': text };
         this._renderer.dispose();
         this._renderer = this._rendermime.render(bundle) || new Widget();
         this._renderer.addClass(RENDERER_CLASS);

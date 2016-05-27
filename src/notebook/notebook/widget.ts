@@ -54,7 +54,7 @@ import {
 } from './model';
 
 import {
-  ILanguageInfoMetadata
+  nbformat
 } from './nbformat';
 
 
@@ -289,7 +289,7 @@ class NotebookRenderer extends Widget {
    * mimetype.
    */
   protected getMimetype(): string {
-    let info = this._langInfoCursor.getValue() as ILanguageInfoMetadata;
+    let info = this._langInfoCursor.getValue() as nbformat.ILanguageInfoMetadata;
     return Private.mimetypeForLangauge(info);
   }
 
@@ -579,7 +579,7 @@ namespace Private {
    * Get the appropriate mimetype for code cell given language info.
    */
   export
-  function mimetypeForLangauge(info: ILanguageInfoMetadata): string {
+  function mimetypeForLangauge(info: nbformat.ILanguageInfoMetadata): string {
     // Use the codemirror mode if given since some kernels rely on it.
     let mode = info.codemirror_mode;
     let mime = 'text/plain';
