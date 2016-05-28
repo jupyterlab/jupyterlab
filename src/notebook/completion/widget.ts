@@ -3,19 +3,23 @@
 'use strict';
 
 import {
-  Message
-} from 'phosphor-messaging';
+  IKernel
+} from 'jupyter-js-services';
 
 import {
-  ISignal, Signal, clearSignalData
-} from 'phosphor-signaling';
+  Message
+} from 'phosphor-messaging';
 
 import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  ICompletionModel, ICompletionItem
+  ITextChange, ICompletionRequest, CellEditorWidget
+} from '../cells/editor';
+
+import {
+  ICompletionModel, ICompletionItem, CompletionModel
 } from './model';
 
 /**
@@ -39,6 +43,9 @@ const ACTIVE_CLASS = 'jp-mod-active';
 const MAX_HEIGHT = 250;
 
 
+/**
+ * A widget which provides text completions.
+ */
 export
 class CompletionWidget extends Widget {
   /**
@@ -68,42 +75,61 @@ class CompletionWidget extends Widget {
   }
 
   /**
+   * Create a new model for the widget.
+   */
+  static createModel(): ICompletionModel {
+    return new CompletionModel();
+  }
+
+  /**
    * Construct a text completion menu widget.
    */
-  constructor(model: ICompletionModel) {
+  constructor() {
     super();
-    this._model = model;
+    let constructor = this.constructor as typeof CompletionWidget;
+    this._model = constructor.createModel();
     this._model.stateChanged.connect(() => this.update(), this);
     this.addClass(COMPLETION_CLASS);
     this.update();
   }
 
   /**
-   * A signal emitted when a selection is made from the completion menu.
-   */
-  get selected(): ISignal<CompletionWidget, string> {
-    return Private.selectedSignal.bind(this);
-  }
-
-  /**
-   * The semantic parent of the completion widget, its reference widget.
-   */
-  get reference(): Widget {
-    return this._reference;
-  }
-  set reference(widget: Widget) {
-    this._reference = widget;
-  }
-
-  /**
    * Dispose of the resources held by the completion widget.
    */
   dispose() {
-    if (this.isDisposed) return;
+    if (this.isDisposed) {
+      return;
+    }
     this._model.dispose();
     this._model = null;
-    clearSignalData(this);
     super.dispose();
+  }
+
+  /**
+   * The kernel used for handling completions.
+   */
+  get kernel(): IKernel {
+    return this._kernel;
+  }
+  set kernel(value: IKernel) {
+    this._kernel = value;
+  }
+
+  /**
+   * The current code cell editor.
+   */
+  get editor(): CellEditorWidget {
+    return this._editor;
+  }
+  set editor(value: CellEditorWidget) {
+    // Remove existing signals.
+    if (this._editor) {
+      this._editor.completionRequested.disconnect(this.onCompletionRequest, this);
+      this._editor.textChanged.disconnect(this.onTextChange, this);
+    }
+    this._editor = value;
+    value.completionRequested.connect(this.onCompletionRequest, this);
+    value.textChanged.connect(this.onTextChange, this);
   }
 
   /**
@@ -123,6 +149,8 @@ class CompletionWidget extends Widget {
       break;
     case 'mousedown':
       this._evtMousedown(event as MouseEvent);
+      break;
+    default:
       break;
     }
   }
@@ -171,7 +199,9 @@ class CompletionWidget extends Widget {
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
 
-    if (this.isHidden) this.show();
+    if (this.isHidden) {
+      this.show();
+    }
 
     let coords = this._model.current ? this._model.current.coords
       : this._model.original.coords;
@@ -194,6 +224,74 @@ class CompletionWidget extends Widget {
   }
 
   /**
+   * Handle a completion request from the editor widget.
+   */
+  protected onCompletionRequest(widget: CellEditorWidget, args: ICompletionRequest): void {
+    // Bail if there is no current kernel.
+    if (!this._kernel) {
+      return;
+    }
+    let contents = {
+      // Only send the current line of code for completion.
+      code: args.currentValue.split('\n')[args.line],
+      cursor_pos: args.ch
+    };
+    let pendingComplete = ++this._pendingComplete;
+    let model = this._model;
+    this._kernel.complete(contents).then(value => {
+      // If model has been disposed, bail.
+      if (this.isDisposed) {
+        return;
+      }
+      // If a newer completion requesy has created a pending request, bail.
+      if (pendingComplete !== this._pendingComplete) {
+        return;
+      }
+      // Completion request failures or negative results fail silently.
+      if (value.status !== 'ok') {
+        return;
+      }
+      // Update the model.
+      model.options = value.matches;
+      model.cursor = { start: value.cursor_start, end: value.cursor_end };
+    }).then(() => {
+      model.original = args;
+    });
+  }
+
+  /**
+   * Handle a text change on the editor widget.
+   */
+  protected onTextChange(widget: CellEditorWidget, args: ITextChange): void {
+    let line = args.newValue.split('\n')[args.line];
+    let model = this._model;
+    // If last character entered is not whitespace, update completion.
+    if (line[args.ch - 1] && line[args.ch - 1].match(/\S/)) {
+      // If there is currently a completion
+      if (model.original) {
+        model.current = args;
+      }
+    } else {
+      // If final character is whitespace, reset completion.
+      model.options = null;
+      model.original = null;
+      model.cursor = null;
+      return;
+    }
+  }
+
+  /**
+   * Perform a selection on a codemirror widget.
+   */
+  protected handleSelection(value: string): void {
+    let patch = this._model.createPatch(value);
+    let editor = this._editor.editor;
+    let doc = editor.getDoc();
+    doc.setValue(patch.text);
+    doc.setCursor(doc.posFromIndex(patch.position));
+  }
+
+  /**
    * Handle mousedown events for the widget.
    */
   private _evtMousedown(event: MouseEvent) {
@@ -205,7 +303,7 @@ class CompletionWidget extends Widget {
     while (target !== document.documentElement) {
       // If the user has made a selection, emit its value and reset the model.
       if (target.classList.contains(ITEM_CLASS)) {
-        this.selected.emit(target.dataset['value']);
+        this.handleSelection(target.dataset['value']);
         this._model.reset();
         return;
       }
@@ -225,7 +323,7 @@ class CompletionWidget extends Widget {
     let target = event.target as HTMLElement;
     let node = this.node;
 
-    if (!this._reference) {
+    if (!this._editor) {
       this.hide();
       return;
     }
@@ -235,14 +333,14 @@ class CompletionWidget extends Widget {
 
     let active: HTMLElement;
     while (target !== document.documentElement) {
-      if (target === this._reference.node) {
+      if (target === this._editor.node) {
         switch (event.keyCode) {
         case 13: // Enter key
         case 9: // Tab key
           event.preventDefault();
           event.stopPropagation();
           active = node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
-          this.selected.emit(active.dataset['value']);
+          this.handleSelection(target.dataset['value']);
           this._model.reset();
           return;
         case 27: // Escape key
@@ -264,8 +362,9 @@ class CompletionWidget extends Widget {
           active.classList.add(ACTIVE_CLASS);
           Private.scrollIfNeeded(this.node, active);
           return;
+        default:
+          return;
         }
-        return;
       }
       target = target.parentElement;
     }
@@ -274,7 +373,9 @@ class CompletionWidget extends Widget {
 
   private _activeIndex = 0;
   private _model: ICompletionModel = null;
-  private _reference: Widget = null;
+  private _pendingComplete = 0;
+  private _editor: CellEditorWidget = null;
+  private _kernel: IKernel = null;
 }
 
 
@@ -282,12 +383,6 @@ class CompletionWidget extends Widget {
  * A namespace for completion widget private data.
  */
 namespace Private {
-  /**
-   * A signal emitted when state of the completion menu changes.
-   */
-  export
-  const selectedSignal = new Signal<CompletionWidget, string>();
-
   /**
    * Returns true for any modified click event (i.e., not a left-click).
    */

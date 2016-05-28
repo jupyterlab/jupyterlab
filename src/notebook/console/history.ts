@@ -11,81 +11,21 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  IKernel, IHistoryRequest, IHistoryReply
+  IKernel, IHistoryRequest
 } from 'jupyter-js-services';
 
-import {
-  IConsoleModel
-} from './model';
-
-
-/**
- * The definition of a console history manager object.
- */
-export
-interface IConsoleHistory extends IDisposable {
-  /**
-   * The current kernel supplying navigation history.
-   */
-  kernel: IKernel;
-
-  /**
-   * Get the previous item in the console history.
-   *
-   * @returns A Promise for console command text or `undefined` if unavailable.
-   */
-  back(): Promise<string>;
-
-  /**
-   * Get the next item in the console history.
-   *
-   * @returns A Promise for console command text or `undefined` if unavailable.
-   */
-  forward(): Promise<string>;
-
-  /**
-   * Add a new item to the bottom of history.
-   *
-   * @param item The item being added to the bottom of history.
-   *
-   * #### Notes
-   * If the item being added is undefined or empty, it is ignored. If the item
-   * being added is the same as the last item in history, it is ignored as well
-   * so that the console's history will consist of no contiguous repetitions.
-   * This behavior varies from some shells, but the Jupyter Qt Console is
-   * implemented this way.
-   */
-  push(item: string): void;
-}
 
 /**
  * A console history manager object.
  */
 export
-class ConsoleHistory implements IConsoleHistory {
+class ConsoleHistory implements IDisposable {
   /**
-   * Get whether the console history manager is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * Construct a new console history object.
    */
-  get isDisposed(): boolean {
-    return this._history === null;
-  }
-
-  /**
-   * The current kernel supplying navigation history.
-   */
-  // get kernel(): IKernel {
-  //   return this._kernel;
-  // }
-  set kernel(newValue: IKernel) {
-    if (newValue === this._kernel) {
-      return;
-    }
-    let contents = ConsoleHistoryPrivate.initialRequest;
-    this._kernel = newValue;
-    this._kernel.history(contents).then((value: IHistoryReply) => {
+  constructor(kernel: IKernel) {
+    this._history = [];
+    kernel.history(Private.historyRequest).then(value => {
       this._history = [];
       let last = '';
       let current = '';
@@ -101,15 +41,16 @@ class ConsoleHistory implements IConsoleHistory {
       // Reset the history navigation cursor back to the bottom.
       this._cursor = this._history.length;
     });
-
   }
 
   /**
-   * Construct a new console history object.
+   * Get whether the console history manager is disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  constructor(kernel: IKernel) {
-    this._history = [];
-    if (kernel) this.kernel = kernel;
+  get isDisposed(): boolean {
+    return this._history === null;
   }
 
   /**
@@ -168,12 +109,15 @@ class ConsoleHistory implements IConsoleHistory {
 
   private _cursor = 0;
   private _history: string[] = null;
-  private _kernel: IKernel = null;
 }
 
-namespace ConsoleHistoryPrivate {
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
   export
-  const initialRequest: IHistoryRequest = {
+  const historyRequest: IHistoryRequest = {
     output: false,
     raw: true,
     hist_access_type: 'tail',

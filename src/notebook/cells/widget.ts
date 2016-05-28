@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  IKernel
+} from 'jupyter-js-services';
+
+import {
   loadModeByMIME
 } from 'jupyter-js-ui/lib/codemirror';
 
@@ -27,7 +31,7 @@ import {
 } from '../notebook/nbformat';
 
 import {
-  OutputAreaWidget, ObservableOutputs
+  OutputAreaWidget, ObservableOutputs, executeCode
 } from '../output-area';
 
 import {
@@ -329,6 +333,23 @@ class CodeCellWidget extends BaseCellWidget {
     this._scrolledCursor = null;
     this._output = null;
     super.dispose();
+  }
+
+  /**
+   * Execute the cell given a kernel.
+   */
+  execute(kernel: IKernel): Promise<void> {
+    let model = this.model as ICodeCellModel;
+    let code = model.source;
+    if (!code.trim()) {
+      model.executionCount = null;
+      return Promise.resolve(void 0);
+    }
+    this.setPrompt('*');
+    let outputs = model.outputs;
+    return executeCode(code, kernel, outputs).then(reply => {
+      model.executionCount = reply.execution_count;
+    });
   }
 
   /**

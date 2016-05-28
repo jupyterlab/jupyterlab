@@ -11,10 +11,6 @@ import {
 } from 'phosphor-dragdrop';
 
 import {
-  executeCode
-} from '../output-area';
-
-import {
   ICellModel, CodeCellModel,
   CodeCellWidget, BaseCellWidget, MarkdownCellWidget
 } from '../cells';
@@ -222,7 +218,7 @@ namespace NotebookActions {
         break;
       case 'code':
         if (kernel) {
-          Private.executeCodeCell(child as CodeCellWidget, kernel);
+          (child as CodeCellWidget).execute(kernel);
         } else {
           (child.model as CodeCellModel).executionCount = null;
         }
@@ -453,22 +449,5 @@ namespace Private {
     default:
       return model.createRawCell(cell.toJSON());
     }
-  }
-
-  /**
-   * Execute a code cell given a kernel.
-   */
-  export
-  function executeCodeCell(cell: CodeCellWidget, kernel: IKernel): void {
-    let code = cell.model.source;
-    if (!code.trim()) {
-      (cell.model as CodeCellModel).executionCount = null;
-      return;
-    }
-    cell.setPrompt('*');
-    let outputs = (cell.model as CodeCellModel).outputs;
-    executeCode(code, kernel, outputs).then(reply => {
-      (cell.model as CodeCellModel).executionCount = reply.execution_count;
-    });
   }
 }

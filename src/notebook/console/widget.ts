@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  IKernel
+} from 'jupyter-js-services';
+
+import {
   RenderMime
 } from 'jupyter-js-ui/lib/rendermime';
 
@@ -11,12 +15,8 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
-  IObservableList, IListChangedArgs, ListChangeType
-} from 'phosphor-observablelist';
+  clearSignalData
+} from 'phosphor-signaling';
 
 import {
   Widget
@@ -27,14 +27,15 @@ import {
 } from 'phosphor-panel';
 
 import {
-  ICellModel, BaseCellWidget,
-  CodeCellWidget, MarkdownCellWidget,
-  CodeCellModel, MarkdownCellModel, isMarkdownCellModel,
-  RawCellModel, RawCellWidget
+  CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
 } from '../cells';
 
 import {
-  IConsoleModel, ITooltipModel
+  EdgeLocation, CellEditorWidget
+} from '../cells/editor';
+
+import {
+  IConsoleModel
 } from './model';
 
 import {
@@ -42,7 +43,11 @@ import {
 } from './tooltip';
 
 import {
-  CompletionWidget, ICompletionModel
+  ConsoleHistory
+} from './history';
+
+import {
+  CompletionWidget
 } from '../completion';
 
 
@@ -67,19 +72,21 @@ const BANNER_CLASS = 'jp-Console-banner';
  */
 export
 class ConsolePanel extends Panel {
-
-  static createConsole(model: IConsoleModel, rendermime: RenderMime<Widget>): ConsoleWidget {
-    return new ConsoleWidget(model, rendermime);
+  /**
+   * Create a new console widget for the panel.
+   */
+  static createConsole(model: IConsoleModel, kernel: IKernel, rendermime: RenderMime<Widget>): ConsoleWidget {
+    return new ConsoleWidget(model, kernel, rendermime);
   }
 
   /**
    * Construct a console panel.
    */
-  constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
+  constructor(model: IConsoleModel, kernel: IKernel, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(CONSOLE_PANEL);
     let constructor = this.constructor as typeof ConsolePanel;
-    this._console = constructor.createConsole(model, rendermime);
+    this._console = constructor.createConsole(model, kernel, rendermime);
     this.addChild(this._console);
   }
 
@@ -107,10 +114,14 @@ class ConsolePanel extends Panel {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'click':
-        let prompt = this.console.prompt;
-        if (prompt) prompt.input.editor.focus();
-        break;
+    case 'click':
+      let prompt = this.console.prompt;
+      if (prompt) {
+        prompt.focus();
+      }
+      break;
+    default:
+      break;
     }
   }
 
@@ -131,55 +142,92 @@ class ConsolePanel extends Panel {
   private _console: ConsoleWidget = null;
 }
 
+
+/**
+ * A widget containing a Jupyter console.
+ */
 export
 class ConsoleWidget extends Widget {
   /**
-   * Create a new cell widget given a cell model.
+   * Create a new banner widget given a banner model.
    */
-  static createCell(cell: ICellModel, rendermime: RenderMime<Widget>): BaseCellWidget {
-    let widget: BaseCellWidget;
-    switch (cell.type) {
-    case 'code':
-      widget = new CodeCellWidget(cell as CodeCellModel, rendermime);
-      break;
-    case 'markdown':
-      widget = new MarkdownCellWidget(cell as MarkdownCellModel, rendermime);
-      break;
-    case 'raw':
-      widget = new RawCellWidget(cell as RawCellModel);
-      break;
-    default:
-      // If there are any issues, just return a blank placeholder
-      // widget so the lists stay in sync.
-      widget = new BaseCellWidget(cell);
-    }
-    return widget;
+  static createBanner(cell: RawCellModel) {
+    return new RawCellWidget(cell);
+  }
+
+  /**
+   * Create a new prompt widget given a prompt model and a rendermime.
+   */
+  static createPrompt(cell: CodeCellModel, rendermime: RenderMime<Widget>): CodeCellWidget {
+    return new CodeCellWidget(cell as CodeCellModel, rendermime);
   }
 
   /**
    * Create a new completion widget.
-   *
-   * @param model A completion model instance.
-   *
-   * @returns A completion widget.
    */
-  static createCompletion(model: ICompletionModel): CompletionWidget {
-    return new CompletionWidget(model);
+  static createCompletion(): CompletionWidget {
+    return new CompletionWidget();
+  }
+
+  /**
+   * Create a console history.
+   */
+  static createHistory(kernel: IKernel): ConsoleHistory {
+    return new ConsoleHistory(kernel);
   }
 
   /**
    * Create a new tooltip widget.
    *
-   * @param top The top position of the tooltip.
-   *
-   * @param left The left position of the tooltip.
-   *
    * @returns A ConsoleTooltip widget.
    */
-  static createTooltip(top: number, left: number): ConsoleTooltip {
-    // Null values are automatically set to 'auto'.
-    let rect = { top, left, width: null as any, height: null as any };
-    return new ConsoleTooltip(rect as ClientRect);
+  static createTooltip(rendermime: RenderMime<Widget>): ConsoleTooltip {
+    return new ConsoleTooltip(rendermime);
+  }
+
+  /**
+   * Construct a console widget.
+   */
+  constructor(model: IConsoleModel, kernel: IKernel, rendermime: RenderMime<Widget>) {
+    super();
+    this.addClass(CONSOLE_CLASS);
+
+    let constructor = this.constructor as typeof ConsoleWidget;
+    let layout = new PanelLayout();
+
+    this.layout = layout;
+    this._model = model;
+    this._rendermime = rendermime;
+    this._kernel = kernel;
+
+    this._history = constructor.createHistory(kernel);
+
+    // Instantiate tab completion widget.
+    this._completion = constructor.createCompletion();
+    this._completion.kernel = kernel;
+    this._completion.attach(document.body);
+
+    // Instantiate tooltip widget.
+    this._tooltip = constructor.createTooltip(this._rendermime);
+    this._tooltip.kernel = kernel;
+    this._tooltip.attach(document.body);
+
+    // Create the banner.
+    let banner = constructor.createBanner(model.banner);
+    banner.addClass(BANNER_CLASS);
+    banner.readOnly = true;
+    layout.addChild(banner);
+
+    // Create the prompt(s).
+    let promptFactory = constructor.createPrompt;
+    let prompts = model.prompts;
+    for (let prompt of prompts) {
+      let cell = promptFactory(prompt, this._rendermime);
+      layout.addChild(cell);
+    }
+
+    model.promptAdded.connect(this.onPromptAdded, this);
+    this.handleNewPrompt();
   }
 
   /*
@@ -192,40 +240,13 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Construct a console widget.
+   * The model used by the console.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  constructor(model: IConsoleModel, rendermime: RenderMime<Widget>) {
-    super();
-    let constructor = this.constructor as typeof ConsoleWidget;
-    let layout = new PanelLayout();
-
-    this.layout = layout;
-    this._model = model;
-    this._rendermime = rendermime;
-
-    // Instantiate tab completion widget.
-    this._completion = constructor.createCompletion(this._model.completion);
-    this._completion.reference = this;
-    this._completion.attach(document.body);
-    this._completion.selected.connect(this.onCompletionSelected, this);
-
-    // Instantiate tooltip widget.
-    this._tooltip = constructor.createTooltip(0, 0);
-    this._tooltip.reference = this;
-    this._tooltip.attach(document.body);
-
-
-    let factory = constructor.createCell;
-    for (let i = 0; i < model.cells.length; i++) {
-      let cell = factory(model.cells.get(i), this._rendermime);
-      layout.addChild(cell);
-    }
-    layout.childAt(0).addClass(BANNER_CLASS);
-
-    model.cells.changed.connect(this.onCellsChanged, this);
-    model.stateChanged.connect(this.onModelChanged, this);
-
-    this.addClass(CONSOLE_CLASS);
+  get model(): IConsoleModel {
+    return this._model;
   }
 
   /**
@@ -236,18 +257,28 @@ class ConsoleWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-
-    this._model.dispose()
+    this._model.dispose();
     this._model = null;
-
-    // Because tooltips are attached to the document body and are not children
-    // of the console, they must be disposed manually.
-    if (this._tooltip) {
-      this._tooltip.dispose();
-      this._tooltip = null;
-    }
-
+    this._tooltip.dispose();
+    this._tooltip = null;
+    this._history.dispose();
+    this._history = null;
+    this._completion.dispose();
+    this._completion = null;
     super.dispose();
+  }
+
+  /**
+   * Execute the current prompt.
+   */
+  execute(): Promise<void> {
+    let prompt = this.prompt;
+    prompt.trusted = true;
+    this._history.push(prompt.model.source);
+    return prompt.execute(this._kernel).then(
+      () => this._model.newPrompt(),
+      () => this._model.newPrompt()
+    );
   }
 
   /**
@@ -255,7 +286,9 @@ class ConsoleWidget extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     let prompt = this.prompt;
-    if (prompt) prompt.input.editor.focus();
+    if (prompt) {
+      prompt.focus();
+    }
   }
 
   /**
@@ -264,81 +297,56 @@ class ConsoleWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     let prompt = this.prompt;
     Private.scrollIfNeeded(this.parent.node, prompt.node);
-    prompt.input.editor.focus();
+    prompt.focus();
   }
 
   /**
-   * Handle a completion menu selection event.
+   * Handle a new prompt.
    */
-  protected onCompletionSelected(sender: CompletionWidget, args: string) {
-    let patch = this._model.completion.createPatch(args);
-    this._model.applyPatch(patch);
-  }
+  protected onPromptAdded(console: IConsoleModel, model: CodeCellModel): void {
+    // Make the previous editor read-only and clear its signals.
+    let prompt = this.prompt;
+    prompt.readOnly = true;
+    clearSignalData(prompt);
 
-  /**
-   * Handle a change cells event.
-   */
-  protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
+    // Create the new prompt, add to layout, and connect its signals.
     let layout = this.layout as PanelLayout;
     let constructor = this.constructor as typeof ConsoleWidget;
-    let factory = constructor.createCell;
-    let widget: BaseCellWidget;
-    switch (args.type) {
-    case ListChangeType.Add:
-      widget = factory(args.newValue as ICellModel, this._rendermime);
-      layout.insertChild(args.newIndex, widget);
-      break;
-    case ListChangeType.Remove:
-      widget = layout.childAt(args.oldIndex) as BaseCellWidget;
-      layout.removeChild(widget);
-      widget.dispose();
-      break;
-    }
-    this.update();
+    prompt = constructor.createPrompt(model, this._rendermime);
+    layout.addChild(prompt);
+    this.handleNewPrompt();
   }
 
   /**
-   * Handle a model state change event.
+   * Handle a new prompt.
    */
-  protected onModelChanged(sender: IConsoleModel, args: IChangedArgs<ITooltipModel>) {
-    let constructor = this.constructor as typeof ConsoleWidget;
-    switch (args.name) {
-    case 'banner':
-      let prompt = this.prompt;
-      if (prompt) prompt.input.editor.focus();
-      return;
-    case 'tooltip':
-      let model = args.newValue;
+  protected handleNewPrompt(): void {
+    let editor = this.prompt.editor;
+    this._completion.editor = editor;
+    this._tooltip.editor = editor;
+    editor.edgeRequested.connect(this.onEdgeRequest, this);
+  }
 
-      if (!model) {
-        this._tooltip.hide();
-        return;
-      }
-
-      let {top, left} = model.change.coords;
-
-      // Offset the height of the tooltip by the height of cursor characters.
-      top += model.change.chHeight;
-      // Account for 1px border width.
-      left += 1;
-
-      // Account for 1px border on top and bottom.
-      let maxHeight = window.innerHeight - top - 2;
-      // Account for 1px border on both sides.
-      let maxWidth = window.innerWidth - left - 2;
-
-      let content = this._rendermime.render(model.bundle);
-      if (!content) {
-        console.error('rendermime failed to render', model.bundle);
-        return;
-      }
-
-      this._tooltip.rect = {top, left} as ClientRect;
-      this._tooltip.content = content;
-      this._tooltip.node.style.maxHeight = `${maxHeight}px`;
-      this._tooltip.node.style.maxWidth = `${maxWidth}px`;
-      if (this._tooltip.isHidden) this._tooltip.show();
-      return;
+  /**
+   * Handle an edge requested signal.
+   */
+  protected onEdgeRequest(editor: CellEditorWidget, location: EdgeLocation): void {
+    let doc = editor.editor.getDoc();
+    if (location === 'top') {
+      this._history.back().then(value => {
+        if (!value) {
+          return;
+        }
+        doc.setValue(value);
+        doc.setCursor(doc.posFromIndex(0));
+      });
+    } else {
+      this._history.forward().then(value => {
+        // If at the bottom end of history, then clear the prompt.
+        let text = value || '';
+        doc.setValue(text);
+        doc.setCursor(doc.posFromIndex(text.length));
+      });
     }
   }
 
@@ -346,6 +354,8 @@ class ConsoleWidget extends Widget {
   private _model: IConsoleModel = null;
   private _rendermime: RenderMime<Widget> = null;
   private _tooltip: ConsoleTooltip = null;
+  private _history: ConsoleHistory = null;
+  private _kernel: IKernel = null;
 }
 
 

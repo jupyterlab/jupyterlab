@@ -12,7 +12,7 @@ import {
 
 import {
   ICompletionRequest, ITextChange
-} from '../editor/model';
+} from '../cells/editor';
 
 
 /**
