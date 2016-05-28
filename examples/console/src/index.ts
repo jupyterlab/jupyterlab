@@ -10,7 +10,7 @@ import {
 } from 'jupyter-js-notebook';
 
 import {
-  startNewSession, IKernel
+  startNewSession, INotebookSession
 } from 'jupyter-js-services';
 
 import {
@@ -50,12 +50,12 @@ function main(): void {
   startNewSession({
     notebookPath: 'fake_path',
   }).then(session => {
-    startApp(session.kernel);
+    startApp(session);
   });
 }
 
 
-function startApp(kernel: IKernel) {
+function startApp(session: INotebookSession) {
   // Initialize the keymap manager with the bindings.
   let keymap = new KeymapManager();
 
@@ -83,7 +83,7 @@ function startApp(kernel: IKernel) {
   }
   let rendermime = new RenderMime<Widget>(renderers, order);
 
-  let consolePanel = new ConsolePanel(kernel, rendermime);
+  let consolePanel = new ConsolePanel(session, rendermime);
   consolePanel.title.text = TITLE;
 
   let pModel = new StandardPaletteModel();

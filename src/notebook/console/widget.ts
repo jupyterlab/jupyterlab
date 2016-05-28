@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  IKernel
+  IKernel, INotebookSession
 } from 'jupyter-js-services';
 
 import {
@@ -75,18 +75,18 @@ class ConsolePanel extends Panel {
   /**
    * Create a new console widget for the panel.
    */
-  static createConsole(kernel: IKernel, rendermime: RenderMime<Widget>): ConsoleWidget {
-    return new ConsoleWidget(kernel, rendermime);
+  static createConsole(session: INotebookSession, rendermime: RenderMime<Widget>): ConsoleWidget {
+    return new ConsoleWidget(session, rendermime);
   }
 
   /**
    * Construct a console panel.
    */
-  constructor(kernel: IKernel, rendermime: RenderMime<Widget>) {
+  constructor(session: INotebookSession, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(CONSOLE_PANEL);
     let constructor = this.constructor as typeof ConsolePanel;
-    this._console = constructor.createConsole(kernel, rendermime);
+    this._console = constructor.createConsole(session, rendermime);
     this.addChild(this._console);
   }
 
@@ -196,7 +196,7 @@ class ConsoleWidget extends Widget {
   /**
    * Construct a console widget.
    */
-  constructor(kernel: IKernel, rendermime: RenderMime<Widget>) {
+  constructor(session: INotebookSession, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(CONSOLE_CLASS);
 
@@ -205,18 +205,18 @@ class ConsoleWidget extends Widget {
 
     this.layout = layout;
     this._rendermime = rendermime;
-    this._kernel = kernel;
+    this._session = session;
 
-    this._history = constructor.createHistory(kernel);
+    this._history = constructor.createHistory(session.kernel);
 
     // Instantiate tab completion widget.
     this._completion = constructor.createCompletion();
-    this._completion.kernel = kernel;
+    this._completion.kernel = session.kernel;
     this._completion.attach(document.body);
 
     // Instantiate tooltip widget.
     this._tooltip = constructor.createTooltip(this._rendermime);
-    this._tooltip.kernel = kernel;
+    this._tooltip.kernel = session.kernel;
     this._tooltip.attach(document.body);
 
     // Create the banner.
@@ -226,14 +226,20 @@ class ConsoleWidget extends Widget {
     layout.addChild(banner);
 
     // Set the banner text and the mimetype.
-    kernel.kernelInfo().then(info => {
-      banner.model.source = info.banner;
-      this._mimetype = mimetypeForLangauge(info.language_info);
-      this.prompt.mimetype = this._mimetype;
-    });
+    this.initialize();
 
     // Create the prompt.
     this.newPrompt();
+
+    // Handle changes to the session.
+    session.kernelChanged.connect((s, kernel) => {
+      this.clear();
+      this.newPrompt();
+      this.initialize();
+      this._history = constructor.createHistory(kernel);
+      this._completion.kernel = kernel;
+      this._tooltip.kernel = kernel;
+    });
   }
 
   /*
@@ -269,7 +275,7 @@ class ConsoleWidget extends Widget {
     let prompt = this.prompt;
     prompt.trusted = true;
     this._history.push(prompt.model.source);
-    return prompt.execute(this._kernel).then(
+    return prompt.execute(this._session.kernel).then(
       () => this.newPrompt(),
       () => this.newPrompt()
     );
@@ -332,6 +338,19 @@ class ConsoleWidget extends Widget {
   }
 
   /**
+   * Initialize the banner and mimetype.
+   */
+  protected initialize(): void {
+    let layout = this.layout as PanelLayout;
+    let banner = layout.childAt(0) as RawCellWidget;
+    this._session.kernel.kernelInfo().then(info => {
+      banner.model.source = info.banner;
+      this._mimetype = mimetypeForLangauge(info.language_info);
+      this.prompt.mimetype = this._mimetype;
+    });
+  }
+
+  /**
    * Handle an edge requested signal.
    */
   protected onEdgeRequest(editor: CellEditorWidget, location: EdgeLocation): void {
@@ -359,7 +378,7 @@ class ConsoleWidget extends Widget {
   private _rendermime: RenderMime<Widget> = null;
   private _tooltip: ConsoleTooltip = null;
   private _history: ConsoleHistory = null;
-  private _kernel: IKernel = null;
+  private _session: INotebookSession = null;
 }
 
 
