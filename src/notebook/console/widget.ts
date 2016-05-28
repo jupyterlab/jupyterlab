@@ -35,6 +35,10 @@ import {
 } from '../cells/editor';
 
 import {
+  mimetypeForLangauge
+} from '../common/mimetype';
+
+import {
   IConsoleModel
 } from './model';
 
@@ -217,17 +221,20 @@ class ConsoleWidget extends Widget {
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     layout.addChild(banner);
+
+    // Set the banner text and the mimetype.
     kernel.kernelInfo().then(info => {
       model.banner.source = info.banner;
+      this._mimetype = mimetypeForLangauge(info.language_info);
+      this.prompt.mimetype = this._mimetype;
     });
-
-    // TODO: handle the mimetype the same way the notebook panel does.
 
     // Create the prompt(s).
     let promptFactory = constructor.createPrompt;
     let prompts = model.prompts;
     for (let prompt of prompts) {
       let cell = promptFactory(prompt, this._rendermime);
+      cell.mimetype = this._mimetype;
       layout.addChild(cell);
     }
 
@@ -318,6 +325,7 @@ class ConsoleWidget extends Widget {
     let layout = this.layout as PanelLayout;
     let constructor = this.constructor as typeof ConsoleWidget;
     prompt = constructor.createPrompt(model, this._rendermime);
+    prompt.mimetype = this._mimetype;
     layout.addChild(prompt);
     this.handleNewPrompt();
   }
@@ -357,6 +365,7 @@ class ConsoleWidget extends Widget {
 
   private _completion: CompletionWidget = null;
   private _model: IConsoleModel = null;
+  private _mimetype = 'text/x-ipython';
   private _rendermime: RenderMime<Widget> = null;
   private _tooltip: ConsoleTooltip = null;
   private _history: ConsoleHistory = null;
