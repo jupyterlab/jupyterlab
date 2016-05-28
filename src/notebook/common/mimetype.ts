@@ -5,7 +5,7 @@
 import * as CodeMirror
   from 'codemirror';
 
-import 'codemirror/modes/meta';
+import 'codemirror/mode/meta';
 
 import {
   IKernelLanguageInfo

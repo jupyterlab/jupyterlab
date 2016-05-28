@@ -6,33 +6,28 @@
 'use strict';
 
 import {
-  ConsolePanel, ConsoleWidget, ConsoleModel, findKernel
+  ConsolePanel
 } from 'jupyter-js-notebook';
 
 import {
-  ContentsManager, IKernelSpecIds, startNewSession,
-  getKernelSpecs
+  startNewSession, IKernel
 } from 'jupyter-js-services';
 
 import {
-  RenderMime
+  RenderMime, IRenderer, MimeMap
 } from 'jupyter-js-ui/lib/rendermime';
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer, MarkdownRenderer
+  JavascriptRenderer, SVGRenderer, MarkdownRenderer
 } from 'jupyter-js-ui/lib/renderers';
-
-import {
-  getBaseUrl
-} from 'jupyter-js-utils';
 
 import {
   CommandPalette, StandardPaletteModel, IStandardPaletteItemOptions
 } from 'phosphor-commandpalette';
 
 import {
-  KeymapManager, IKeyBinding
+  KeymapManager
 } from 'phosphor-keymap';
 
 import {
@@ -48,43 +43,48 @@ import 'jupyter-js-notebook/lib/theme.css';
 import 'jupyter-js-ui/lib/dialog/index.css';
 import 'jupyter-js-ui/lib/dialog/theme.css';
 
-
-let SERVER_URL = getBaseUrl();
 let TITLE = 'Console';
 
 
 function main(): void {
+  startNewSession({
+    notebookPath: 'fake_path',
+  }).then(session => {
+    startApp(session.kernel);
+  });
+}
+
+
+function startApp(kernel: IKernel) {
   // Initialize the keymap manager with the bindings.
-  var keymap = new KeymapManager();
+  let keymap = new KeymapManager();
 
   // Setup the keydown listener for the document.
   document.addEventListener('keydown', event => {
     keymap.processKeydownEvent(event);
   });
 
-  let contents = new ContentsManager(SERVER_URL);
-  let rendermime = new RenderMime<Widget>();
   const transformers = [
     new JavascriptRenderer(),
+    new MarkdownRenderer(),
     new HTMLRenderer(),
     new ImageRenderer(),
     new SVGRenderer(),
     new LatexRenderer(),
-    new ConsoleTextRenderer(),
-    new TextRenderer(),
-    new MarkdownRenderer()
+    new TextRenderer()
   ];
-
+  let renderers: MimeMap<IRenderer<Widget>> = {};
+  let order: string[] = [];
   for (let t of transformers) {
     for (let m of t.mimetypes) {
-      rendermime.order.push(m);
-      rendermime.renderers[m] = t;
+      renderers[m] = t;
+      order.push(m);
     }
   }
+  let rendermime = new RenderMime<Widget>(renderers, order);
 
-  let consoleModel = new ConsoleModel();
-  let consoleWidget = new ConsolePanel(consoleModel, rendermime);
-  consoleWidget.title.text = TITLE;
+  let consolePanel = new ConsolePanel(kernel, rendermime);
+  consolePanel.title.text = TITLE;
 
   let pModel = new StandardPaletteModel();
   let palette = new CommandPalette();
@@ -95,26 +95,24 @@ function main(): void {
   panel.orientation = SplitPanel.Horizontal;
   panel.spacing = 0;
   SplitPanel.setStretch(palette, 0);
-  SplitPanel.setStretch(consoleWidget, 1);
+  SplitPanel.setStretch(consolePanel, 1);
   panel.attach(document.body);
   panel.addChild(palette);
-  panel.addChild(consoleWidget);
+  panel.addChild(consolePanel);
   window.onresize = () => { panel.update(); };
-
-  let kernelspecs: IKernelSpecIds;
 
   let items: IStandardPaletteItemOptions[] = [
     {
       category: 'Console',
       text: 'Clear',
       shortcut: 'Accel R',
-      handler: () => { consoleModel.clear(); }
+      handler: () => { consolePanel.content.clear(); }
     },
     {
       category: 'Console',
       text: 'Execute Prompt',
       shortcut: 'Shift Enter',
-      handler: () => { consoleModel.run(); }
+      handler: () => { consolePanel.content.execute(); }
     }
   ];
   pModel.addItems(items);
@@ -123,26 +121,15 @@ function main(): void {
     {
       selector: '.jp-Console',
       sequence: ['Accel R'],
-      handler: () => { consoleModel.clear(); }
+      handler: () => { consolePanel.content.clear(); }
     },
     {
       selector: '.jp-Console',
       sequence: ['Shift Enter'],
-      handler: () => { consoleModel.run(); }
+      handler: () => { consolePanel.content.execute(); }
     }
-  ]
+  ];
   keymap.add(bindings);
-
-  getKernelSpecs({}).then(specs => {
-    kernelspecs = specs;
-    let kernelName = specs.default;
-    let language = specs.default;
-    return startNewSession({
-      notebookPath: 'fake_path',
-      kernelName: findKernel(kernelName, language, specs),
-      baseUrl: SERVER_URL
-    });
-  }).then(session => consoleModel.session = session);
 }
 
 window.onload = main;

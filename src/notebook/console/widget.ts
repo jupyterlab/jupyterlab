@@ -39,10 +39,6 @@ import {
 } from '../common/mimetype';
 
 import {
-  IConsoleModel
-} from './model';
-
-import {
   ConsoleTooltip
 } from './tooltip';
 
@@ -79,22 +75,28 @@ class ConsolePanel extends Panel {
   /**
    * Create a new console widget for the panel.
    */
-  static createConsole(model: IConsoleModel, kernel: IKernel, rendermime: RenderMime<Widget>): ConsoleWidget {
-    return new ConsoleWidget(model, kernel, rendermime);
+  static createConsole(kernel: IKernel, rendermime: RenderMime<Widget>): ConsoleWidget {
+    return new ConsoleWidget(kernel, rendermime);
   }
 
   /**
    * Construct a console panel.
    */
-  constructor(model: IConsoleModel, kernel: IKernel, rendermime: RenderMime<Widget>) {
+  constructor(kernel: IKernel, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(CONSOLE_PANEL);
     let constructor = this.constructor as typeof ConsolePanel;
-    this._console = constructor.createConsole(model, kernel, rendermime);
+    this._console = constructor.createConsole(kernel, rendermime);
     this.addChild(this._console);
   }
 
-  get console(): ConsoleWidget {
+  /**
+   * The console widget used by the panel.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get content(): ConsoleWidget {
     return this._console;
   }
 
@@ -119,7 +121,7 @@ class ConsolePanel extends Panel {
   handleEvent(event: Event): void {
     switch (event.type) {
     case 'click':
-      let prompt = this.console.prompt;
+      let prompt = this.content.prompt;
       if (prompt) {
         prompt.focus();
       }
@@ -155,15 +157,17 @@ class ConsoleWidget extends Widget {
   /**
    * Create a new banner widget given a banner model.
    */
-  static createBanner(cell: RawCellModel) {
-    return new RawCellWidget(cell);
+  static createBanner() {
+    let model = new RawCellModel();
+    return new RawCellWidget(model);
   }
 
   /**
    * Create a new prompt widget given a prompt model and a rendermime.
    */
-  static createPrompt(cell: CodeCellModel, rendermime: RenderMime<Widget>): CodeCellWidget {
-    return new CodeCellWidget(cell as CodeCellModel, rendermime);
+  static createPrompt(rendermime: RenderMime<Widget>): CodeCellWidget {
+    let model = new CodeCellModel();
+    return new CodeCellWidget(model, rendermime);
   }
 
   /**
@@ -192,7 +196,7 @@ class ConsoleWidget extends Widget {
   /**
    * Construct a console widget.
    */
-  constructor(model: IConsoleModel, kernel: IKernel, rendermime: RenderMime<Widget>) {
+  constructor(kernel: IKernel, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(CONSOLE_CLASS);
 
@@ -200,7 +204,6 @@ class ConsoleWidget extends Widget {
     let layout = new PanelLayout();
 
     this.layout = layout;
-    this._model = model;
     this._rendermime = rendermime;
     this._kernel = kernel;
 
@@ -217,48 +220,29 @@ class ConsoleWidget extends Widget {
     this._tooltip.attach(document.body);
 
     // Create the banner.
-    let banner = constructor.createBanner(model.banner);
+    let banner = constructor.createBanner();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     layout.addChild(banner);
 
     // Set the banner text and the mimetype.
     kernel.kernelInfo().then(info => {
-      model.banner.source = info.banner;
+      banner.model.source = info.banner;
       this._mimetype = mimetypeForLangauge(info.language_info);
       this.prompt.mimetype = this._mimetype;
     });
 
-    // Create the prompt(s).
-    let promptFactory = constructor.createPrompt;
-    let prompts = model.prompts;
-    for (let prompt of prompts) {
-      let cell = promptFactory(prompt, this._rendermime);
-      cell.mimetype = this._mimetype;
-      layout.addChild(cell);
-    }
-
-    model.promptAdded.connect(this.onPromptAdded, this);
-    this.handleNewPrompt();
+    // Create the prompt.
+    this.newPrompt();
   }
 
   /*
    * The last cell in a console is always a `CodeCellWidget` prompt.
    */
   get prompt(): CodeCellWidget {
-    let layout = (this.layout as PanelLayout);
+    let layout = this.layout as PanelLayout;
     let last = layout.childCount() - 1;
     return last > -1 ? layout.childAt(last) as CodeCellWidget : null;
-  }
-
-  /**
-   * The model used by the console.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get model(): IConsoleModel {
-    return this._model;
   }
 
   /**
@@ -269,8 +253,6 @@ class ConsoleWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._model.dispose();
-    this._model = null;
     this._tooltip.dispose();
     this._tooltip = null;
     this._history.dispose();
@@ -288,9 +270,21 @@ class ConsoleWidget extends Widget {
     prompt.trusted = true;
     this._history.push(prompt.model.source);
     return prompt.execute(this._kernel).then(
-      () => this._model.newPrompt(),
-      () => this._model.newPrompt()
+      () => this.newPrompt(),
+      () => this.newPrompt()
     );
+  }
+
+  /**
+   * Clear the code cells.
+   */
+  clear(): void {
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount() - 2; i++) {
+      let cell = layout.childAt(1) as CodeCellWidget;
+      cell.dispose();
+    }
+    this.newPrompt();
   }
 
   /**
@@ -313,28 +307,25 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Handle a new prompt.
+   * Make a new prompt.
    */
-  protected onPromptAdded(console: IConsoleModel, model: CodeCellModel): void {
+  protected newPrompt(): void {
     // Make the previous editor read-only and clear its signals.
     let prompt = this.prompt;
-    prompt.readOnly = true;
-    clearSignalData(prompt);
+    if (prompt) {
+      prompt.readOnly = true;
+      clearSignalData(prompt);
+    }
 
-    // Create the new prompt, add to layout, and connect its signals.
+    // Create the new prompt and add to layout.
     let layout = this.layout as PanelLayout;
     let constructor = this.constructor as typeof ConsoleWidget;
-    prompt = constructor.createPrompt(model, this._rendermime);
+    prompt = constructor.createPrompt(this._rendermime);
     prompt.mimetype = this._mimetype;
     layout.addChild(prompt);
-    this.handleNewPrompt();
-  }
 
-  /**
-   * Handle a new prompt.
-   */
-  protected handleNewPrompt(): void {
-    let editor = this.prompt.editor;
+    // Hook up completion, tooltip, and history handling.
+    let editor = prompt.editor;
     this._completion.editor = editor;
     this._tooltip.editor = editor;
     editor.edgeRequested.connect(this.onEdgeRequest, this);
@@ -364,7 +355,6 @@ class ConsoleWidget extends Widget {
   }
 
   private _completion: CompletionWidget = null;
-  private _model: IConsoleModel = null;
   private _mimetype = 'text/x-ipython';
   private _rendermime: RenderMime<Widget> = null;
   private _tooltip: ConsoleTooltip = null;

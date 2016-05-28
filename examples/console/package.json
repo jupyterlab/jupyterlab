@@ -20,7 +20,7 @@
   "dependencies": {
     "jupyter-js-notebook": "file:../..",
     "jupyter-js-services": "^0.10.1",
-    "jupyter-js-ui": "^0.11.0",
+    "jupyter-js-ui": "^0.12.3",
     "jupyter-js-utils": "^0.4.0",
     "phosphor-commandpalette": "^0.2.0",
     "phosphor-disposable": "^1.0.5",
