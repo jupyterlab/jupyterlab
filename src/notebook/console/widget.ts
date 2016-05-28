@@ -217,6 +217,11 @@ class ConsoleWidget extends Widget {
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     layout.addChild(banner);
+    kernel.kernelInfo().then(info => {
+      model.banner.source = info.banner;
+    });
+
+    // TODO: handle the mimetype the same way the notebook panel does.
 
     // Create the prompt(s).
     let promptFactory = constructor.createPrompt;
