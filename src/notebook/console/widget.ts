@@ -39,6 +39,10 @@ import {
 } from '../common/mimetype';
 
 import {
+  nbformat
+} from '../notebook';
+
+import {
   ConsoleTooltip
 } from './tooltip';
 
@@ -231,7 +235,7 @@ class ConsoleWidget extends Widget {
     // Create the prompt.
     this.newPrompt();
 
-    // Handle changes to the session.
+    // Handle changes to the kernel.
     session.kernelChanged.connect((s, kernel) => {
       this.clear();
       this.newPrompt();
@@ -291,6 +295,19 @@ class ConsoleWidget extends Widget {
       cell.dispose();
     }
     this.newPrompt();
+  }
+
+  /**
+   * Serialize the output.
+   */
+  serialize(): nbformat.ICodeCell[] {
+    let output: nbformat.ICodeCell[] = [];
+    let layout = this.layout as PanelLayout;
+    for (let i = 1; i < layout.childCount(); i++) {
+      let widget = layout.childAt(i) as CodeCellWidget;
+      output.push(widget.model.toJSON());
+    }
+    return output;
   }
 
   /**
