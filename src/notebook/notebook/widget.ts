@@ -19,20 +19,20 @@ import {
 } from 'phosphor-observablelist';
 
 import {
+  PanelLayout
+} from 'phosphor-panel';
+
+import {
+  Property, IChangedArgs
+} from 'phosphor-properties';
+
+import {
   Signal, ISignal
 } from 'phosphor-signaling';
 
 import {
   Widget
 } from 'phosphor-widget';
-
-import {
-  PanelLayout
-} from 'phosphor-panel';
-
-import {
-  Property
-} from 'phosphor-properties';
 
 import {
   ICellModel, BaseCellWidget, MarkdownCellModel,
@@ -135,7 +135,7 @@ class NotebookRenderer extends Widget {
     this._rendermime = rendermime;
     this.layout = new PanelLayout();
     model.cells.changed.connect(this.onCellsChanged, this);
-    model.contentChanged.connect(this.onModelChanged, this);
+    model.metadataChanged.connect(this.onMetadataChanged, this);
     this._langInfoCursor = model.getMetadata('language_info');
     this._mimetype = this.getMimetype();
     // Add the current cells.
@@ -221,10 +221,9 @@ class NotebookRenderer extends Widget {
   /**
    * Handle changes to the notebook model.
    */
-  protected onModelChanged(model: INotebookModel, change: string): void {
-    switch (change) {
-    case 'metadata':
-    case 'metadata.language_info':
+  protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'language_info':
       this._mimetype = this.getMimetype();
       this._updateMimetypes();
       break;
@@ -331,10 +330,10 @@ class NotebookRenderer extends Widget {
 export
 class ActiveNotebook extends NotebookRenderer {
   /**
-   * A signal emitted when the active index changes on the notebook.
+   * A signal emitted when the state of the notebook changes.
    */
-  get activeIndexChanged(): ISignal<ActiveNotebook, number> {
-    return Private.activeIndexChangedSignal.bind(this);
+  get stateChanged(): ISignal<ActiveNotebook, IChangedArgs<any>> {
+    return Private.stateChangedSignal.bind(this);
   }
 
   /**
@@ -343,19 +342,21 @@ class ActiveNotebook extends NotebookRenderer {
   get mode(): NotebookMode {
     return this._mode;
   }
-  set mode(value: NotebookMode) {
-    if (value === this._mode) {
+  set mode(newValue: NotebookMode) {
+    if (newValue === this._mode) {
       return;
     }
-    this._mode = value;
+    let oldValue = this._mode;
+    this._mode = newValue;
     // Edit mode deselects all cells.
-    if (value === 'edit') {
+    if (newValue === 'edit') {
       let layout = this.layout as PanelLayout;
       for (let i = 0; i < layout.childCount(); i++) {
         let widget = layout.childAt(i) as BaseCellWidget;
         this.deselect(widget);
       }
     }
+    this.stateChanged.emit({ name: 'mode', oldValue, newValue });
     this.update();
   }
 
@@ -365,20 +366,21 @@ class ActiveNotebook extends NotebookRenderer {
   get activeCellIndex(): number {
     return this._activeCellIndex;
   }
-  set activeCellIndex(value: number) {
-    value = Math.max(value, 0);
-    value = Math.min(value, this.model.cells.length - 1);
-    if (value === this._activeCellIndex) {
+  set activeCellIndex(newValue: number) {
+    newValue = Math.max(newValue, 0);
+    newValue = Math.min(newValue, this.model.cells.length - 1);
+    if (newValue === this._activeCellIndex) {
       return;
     }
-    this._activeCellIndex = value;
-    let widget = (this.layout as PanelLayout).childAt(value);
+    let oldValue = this._activeCellIndex;
+    this._activeCellIndex = newValue;
+    let widget = (this.layout as PanelLayout).childAt(newValue);
     if (widget instanceof MarkdownCellWidget) {
       if (this.mode === 'edit') {
         widget.rendered = false;
       }
     }
-    this.activeIndexChanged.emit(value);
+    this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
     this.update();
   }
 
@@ -572,8 +574,8 @@ namespace Private {
   });
 
   /**
-   * A signal emitted when the active index changes on the notebook.
+   * A signal emitted when the state changes on the notebook.
    */
   export
-  const activeIndexChangedSignal = new Signal<ActiveNotebook, number>();
+  const stateChangedSignal = new Signal<ActiveNotebook, IChangedArgs<any>>();
 }

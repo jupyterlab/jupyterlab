@@ -27,8 +27,20 @@ import {
 } from 'phosphor-panel';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  CellEditorWidget, ITextChange, ICompletionRequest
+} from '../cells/editor';
+
+import {
+  CompletionWidget, CompletionModel
+} from '../completion';
 
 import {
   INotebookModel
@@ -78,6 +90,14 @@ class NotebookPanel extends Widget {
   }
 
   /**
+   * Create a new completion widget.
+   */
+  static createCompletion(): CompletionWidget {
+    let model = new CompletionModel();
+    return new CompletionWidget(model);
+  }
+
+  /**
    * Construct a new notebook panel.
    */
   constructor(model: INotebookModel, rendermime: RenderMime<Widget>, context: IDocumentContext, clipboard: IClipboard) {
@@ -107,6 +127,21 @@ class NotebookPanel extends Widget {
     let layout = this.layout as PanelLayout;
     layout.addChild(this._toolbar);
     layout.addChild(container);
+
+    // Instantiate tab completion widget.
+    this._completion = ctor.createCompletion();
+    this._completion.reference = this;
+    this._completion.attach(document.body);
+    this._completion.selected.connect(this.onCompletionSelect, this);
+
+    // Connect signals.
+    this._content.stateChanged.connect(this.onContentChanged, this);
+    let cell = this._content.childAt(this._content.activeCellIndex);
+    if (cell) {
+      let editor = cell.editor;
+      editor.textChanged.connect(this.onTextChange, this);
+      editor.completionRequested.connect(this.onCompletionRequest, this);
+    }
   }
 
   /**
@@ -178,6 +213,8 @@ class NotebookPanel extends Widget {
     this._content = null;
     this._toolbar = null;
     this._clipboard = null;
+    this._completion.dispose();
+    this._completion = null;
     super.dispose();
   }
 
@@ -218,10 +255,102 @@ class NotebookPanel extends Widget {
     });
   }
 
+  /**
+   * Handle a change in the content area.
+   */
+  protected onContentChanged(sender: ActiveNotebook, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'activeCellIndex':
+      let cell = this._content.childAt(args.oldValue);
+      let editor = cell.editor;
+      editor.textChanged.disconnect(this.onTextChange, this);
+      editor.completionRequested.disconnect(this.onCompletionRequest, this);
+
+      cell = this._content.childAt(args.newValue);
+      editor = cell.editor;
+      editor.textChanged.connect(this.onTextChange, this);
+      editor.completionRequested.connect(this.onCompletionRequest, this);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle a text changed signal from an editor.
+   */
+  protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
+    let line = change.newValue.split('\n')[change.line];
+    let model = this._completion.model;
+    // If last character entered is not whitespace, update completion.
+    if (line[change.ch - 1] && line[change.ch - 1].match(/\S/)) {
+      // If there is currently a completion
+      if (model.original) {
+        model.current = change;
+      }
+    } else {
+      // If final character is whitespace, reset completion.
+      model.options = null;
+      model.original = null;
+      model.cursor = null;
+      return;
+    }
+  }
+
+  /**
+   * Handle a completion requested signal from an editor.
+   */
+  protected onCompletionRequest(editor: CellEditorWidget, change: ICompletionRequest): void {
+    let kernel = this.context.kernel;
+    if (!kernel) {
+      return;
+    }
+    let contents = {
+      // Only send the current line of code for completion.
+      code: change.currentValue.split('\n')[change.line],
+      cursor_pos: change.ch
+    };
+    let pendingComplete = ++this._pendingComplete;
+    let model = this._completion.model;
+    kernel.complete(contents).then(value => {
+      // If model has been disposed, bail.
+      if (model.isDisposed) {
+        return;
+      }
+      // If a newer completion requesy has created a pending request, bail.
+      if (pendingComplete !== this._pendingComplete) {
+        return;
+      }
+      // Completion request failures or negative results fail silently.
+      if (value.status !== 'ok') {
+        return;
+      }
+      // Update the model.
+      model.options = value.matches;
+      model.cursor = { start: value.cursor_start, end: value.cursor_end };
+    }).then(() => {
+      model.original = change;
+    });
+  }
+
+  /**
+   * Handle a completion selected signal from the completion widget.
+   */
+  protected onCompletionSelect(widget: CompletionWidget, value: string): void {
+    let patch = this._completion.model.createPatch(value);
+    let cell = this._content.childAt(this._content.activeCellIndex);
+    let editor = cell.editor.editor;
+    let doc = editor.getDoc();
+    doc.setValue(patch.text);
+    doc.setCursor(doc.posFromIndex(patch.position));
+  }
+
   private _rendermime: RenderMime<Widget> = null;
   private _context: IDocumentContext = null;
   private _model: INotebookModel = null;
   private _content: ActiveNotebook = null;
   private _toolbar: NotebookToolbar = null;
   private _clipboard: IClipboard = null;
+  private _completion: CompletionWidget = null;
+  private _pendingComplete = 0;
 }

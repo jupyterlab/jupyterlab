@@ -274,11 +274,12 @@ class CellTypeSwitcher extends Widget {
     let index = panel.content.activeCellIndex;
     select.value = panel.model.cells.get(index).type;
     // Follow the type of the current cell.
-    panel.content.activeIndexChanged.connect(() => {
-      index = panel.content.activeCellIndex;
-      this._changeGuard = true;
-      select.value = panel.model.cells.get(index).type;
-      this._changeGuard = false;
+    panel.content.stateChanged.connect((sender, args) => {
+      if (args.name === 'activeCellIndex') {
+        this._changeGuard = true;
+        select.value = panel.model.cells.get(args.newValue).type;
+        this._changeGuard = false;
+      }
     });
     // Change current cell type on a change in the dropdown.
     select.addEventListener('change', event => {
