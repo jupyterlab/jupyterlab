@@ -2,11 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import {
-  IDisposable
-} from 'phosphor-disposable';
-
-
 /**
  * A class used to interact with user level metadata.
  */
@@ -61,6 +56,9 @@ class MetadataCursor implements IMetadataCursor {
 
   /**
    * Dispose of the resources used by the cursor.
+   *
+   * #### Notes
+   * This is not meant to be called by user code.
    */
   dispose(): void {
     this._read = null;
