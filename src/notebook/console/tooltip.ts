@@ -3,14 +3,6 @@
 'use strict';
 
 import {
-  IKernel
-} from 'jupyter-js-services';
-
-import {
-  RenderMime
-} from 'jupyter-js-ui/lib/rendermime';
-
-import {
   Message
 } from 'phosphor-messaging';
 
@@ -21,15 +13,6 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
-
-import {
-  CellEditorWidget, ITextChange
-} from '../cells/editor';
-
-import {
-  nbformat
-} from '../notebook';
-
 
 /**
  * The class name added to tooltip widgets.
@@ -45,37 +28,63 @@ class ConsoleTooltip extends Widget {
   /**
    * Construct a console tooltip widget.
    */
-  constructor(rendermime: RenderMime<Widget>) {
+  constructor(rect: ClientRect) {
     super();
     this.addClass(TOOLTIP_CLASS);
-    this._rendermime = rendermime;
-    this.hide();
+    this.rect = rect;
     this.layout = new PanelLayout();
+    this.hide();
   }
 
   /**
-   * The kernel used for handling completions.
+   * The dimenions of the tooltip.
+   *
+   * #### Notes
+   * `bottom` and `right` values are ignored as it is sufficient to provide
+   * `top`, `left`, `width`, and `height` values.
    */
-  get kernel(): IKernel {
-    return this._kernel;
+  get rect(): ClientRect {
+    return this._rect;
   }
-  set kernel(value: IKernel) {
-    this._kernel = value;
-  }
-
-  /**
-   * The current code cell editor.
-   */
-  get editor(): CellEditorWidget {
-    return this._editor;
-  }
-  set editor(value: CellEditorWidget) {
-    // Remove existing signals.
-    if (this._editor) {
-      this._editor.textChanged.disconnect(this.onTextChange, this);
+  set rect(newValue: ClientRect) {
+    if (Private.matchClientRects(this._rect, newValue)) {
+      return;
     }
-    this._editor = value;
-    value.textChanged.connect(this.onTextChange, this);
+    this._rect = newValue;
+    if (this.isVisible) {
+      this.update();
+    }
+  }
+
+  /**
+   * The semantic parent of the tooltip, its reference widget.
+   */
+  get reference(): Widget {
+    return this._reference;
+  }
+  set reference(widget: Widget) {
+    this._reference = widget;
+  }
+
+  /**
+   * The text of the tooltip.
+   */
+  get content(): Widget {
+    return this._content;
+  }
+  set content(newValue: Widget) {
+    if (newValue === this._content) {
+      return;
+    }
+    if (this._content) {
+      this._content.dispose();
+    }
+    this._content = newValue;
+    if (this._content) {
+      let layout = this.layout as PanelLayout;
+      layout.addChild(this._content);
+      this.update();
+    }
   }
 
   /**
@@ -97,7 +106,7 @@ class ConsoleTooltip extends Widget {
       this._evtMousedown(event as MouseEvent);
       break;
     default:
-      return;
+      break;
     }
   }
 
@@ -130,84 +139,6 @@ class ConsoleTooltip extends Widget {
   }
 
   /**
-   * Handle a text change on the editor widget..
-   */
-  protected onTextChange(widget: CellEditorWidget, args: ITextChange): void {
-    if (!args.newValue || !this._kernel) {
-      this.hide();
-      return;
-    }
-    let currentLine = args.newValue.split('\n')[args.line];
-    // If final character is whitespace, hide the tooltip.
-    if (!currentLine[args.ch - 1] || !currentLine[args.ch - 1].match(/\S/)) {
-      this.hide();
-      return;
-    }
-    let contents = { code: currentLine, cursor_pos: args.ch, detail_level: 0 };
-    let pendingInspect = ++this._pendingInspect;
-    this._kernel.inspect(contents).then(value => {
-      // If widget has been disposed, bail.
-      if (this.isDisposed) {
-        return;
-      }
-      // If a newer text change has created a pending request, bail.
-      if (pendingInspect !== this._pendingInspect) {
-        return;
-      }
-      // Tooltip request failures or negative results fail silently.
-      if (value.status !== 'ok' || !value.found) {
-        return;
-      }
-      let bundle = Private.processInspectReply(value.data);
-      let content = this._rendermime.render(bundle);
-      this.showTooltip(args, content);
-    });
-  }
-
-  /**
-   * Show the tooltip.
-   */
-  protected showTooltip(change: ITextChange, content: Widget): void {
-    let layout = this.layout as PanelLayout;
-    let prev = layout.childAt(0);
-    if (prev) {
-      prev.dispose();
-    }
-    layout.addChild(content);
-
-    let {top, left} = change.coords;
-    // Offset the height of the tooltip by the height of cursor characters.
-    top += change.chHeight;
-    // Account for 1px border width.
-    left += 1;
-
-    // Account for 1px border on top and bottom.
-    let maxHeight = window.innerHeight - top - 2;
-    // Account for 1px border on both sides.
-    let maxWidth = window.innerWidth - left - 2;
-
-    this.setRect({top, left} as ClientRect);
-    this.node.style.maxHeight = `${maxHeight}px`;
-    this.node.style.maxWidth = `${maxWidth}px`;
-    if (this.isHidden) {
-      this.show();
-    }
-  }
-
-  /**
-   * Set the client rect of the tooltip.
-   */
-  protected setRect(rect: ClientRect): void {
-    if (Private.matchClientRects(this._rect, rect)) {
-      return;
-    }
-    this._rect = rect;
-    if (this.isVisible) {
-      this.update();
-    }
-  }
-
-  /**
    * Handle keydown events for the widget.
    *
    * #### Notes
@@ -217,7 +148,7 @@ class ConsoleTooltip extends Widget {
   private _evtKeydown(event: KeyboardEvent) {
     let target = event.target as HTMLElement;
 
-    if (!this._editor) {
+    if (!this._reference) {
       this.hide();
       return;
     }
@@ -227,7 +158,7 @@ class ConsoleTooltip extends Widget {
     }
 
     while (target !== document.documentElement) {
-      if (target === this._editor.node) {
+      if (target === this._reference.node) {
         if (event.keyCode === 27) { // Escape key
           this.hide();
         }
@@ -256,10 +187,8 @@ class ConsoleTooltip extends Widget {
   }
 
   private _rect: ClientRect = null;
-  private _kernel: IKernel = null;
-  private _editor: CellEditorWidget = null;
-  private _pendingInspect = 0;
-  private _rendermime: RenderMime<Widget> = null;
+  private _reference: Widget = null;
+  private _content: Widget = null;
 }
 
 
@@ -267,25 +196,6 @@ class ConsoleTooltip extends Widget {
  * A namespace for ConsoleTooltip widget private data.
  */
 namespace Private {
-  /**
-   * Process the IInspectReply plain text data.
-   *
-   * @param bundle - The MIME bundle of an API inspect reply.
-   *
-   * #### Notes
-   * The `text/plain` value sent by the API in inspect replies contains ANSI
-   * terminal escape sequences. In order for these sequences to be parsed into
-   * usable data in the client, they must have the MIME type that the console
-   * text renderer expects: `application/vnd.jupyter.console-text`.
-   */
-  export
-  function processInspectReply(bundle: nbformat.MimeBundle): nbformat.MimeBundle {
-    let textMime = 'text/plain';
-    let consoleMime = 'application/vnd.jupyter.console-text';
-    bundle[consoleMime] = bundle[consoleMime] || bundle[textMime];
-    return bundle;
-  }
-
   /**
    * Compare two client rectangles.
    *
@@ -317,7 +227,6 @@ namespace Private {
             r1.width === r2.width &&
             r1.height === r2.height);
   }
-
   /**
    * Set the dimensions of an element.
    *

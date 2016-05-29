@@ -31,7 +31,7 @@ import {
 } from '../cells';
 
 import {
-  EdgeLocation, CellEditorWidget
+  EdgeLocation, CellEditorWidget, ITextChange, ICompletionRequest
 } from '../cells/editor';
 
 import {
@@ -47,11 +47,11 @@ import {
 } from './tooltip';
 
 import {
-  ConsoleHistory
+  ConsoleHistory, IConsoleHistory
 } from './history';
 
 import {
-  CompletionWidget
+  CompletionWidget, CompletionModel
 } from '../completion';
 
 
@@ -178,13 +178,14 @@ class ConsoleWidget extends Widget {
    * Create a new completion widget.
    */
   static createCompletion(): CompletionWidget {
-    return new CompletionWidget();
+    let model = new CompletionModel();
+    return new CompletionWidget(model);
   }
 
   /**
    * Create a console history.
    */
-  static createHistory(kernel: IKernel): ConsoleHistory {
+  static createHistory(kernel: IKernel): IConsoleHistory {
     return new ConsoleHistory(kernel);
   }
 
@@ -193,8 +194,10 @@ class ConsoleWidget extends Widget {
    *
    * @returns A ConsoleTooltip widget.
    */
-  static createTooltip(rendermime: RenderMime<Widget>): ConsoleTooltip {
-    return new ConsoleTooltip(rendermime);
+  static createTooltip(): ConsoleTooltip {
+    // Null values are automatically set to 'auto'.
+    let rect = { top: 0, left: 0, width: null as any, height: null as any };
+    return new ConsoleTooltip(rect as ClientRect);
   }
 
   /**
@@ -215,12 +218,12 @@ class ConsoleWidget extends Widget {
 
     // Instantiate tab completion widget.
     this._completion = constructor.createCompletion();
-    this._completion.kernel = session.kernel;
+    this._completion.reference = this;
     this._completion.attach(document.body);
+    this._completion.selected.connect(this.onCompletionSelect, this);
 
     // Instantiate tooltip widget.
-    this._tooltip = constructor.createTooltip(this._rendermime);
-    this._tooltip.kernel = session.kernel;
+    this._tooltip = constructor.createTooltip();
     this._tooltip.attach(document.body);
 
     // Create the banner.
@@ -241,8 +244,6 @@ class ConsoleWidget extends Widget {
       this.newPrompt();
       this.initialize();
       this._history = constructor.createHistory(kernel);
-      this._completion.kernel = kernel;
-      this._tooltip.kernel = kernel;
     });
   }
 
@@ -337,7 +338,7 @@ class ConsoleWidget extends Widget {
     let prompt = this.prompt;
     if (prompt) {
       prompt.readOnly = true;
-      clearSignalData(prompt);
+      clearSignalData(prompt.editor);
     }
 
     // Create the new prompt and add to layout.
@@ -349,8 +350,8 @@ class ConsoleWidget extends Widget {
 
     // Hook up completion, tooltip, and history handling.
     let editor = prompt.editor;
-    this._completion.editor = editor;
-    this._tooltip.editor = editor;
+    editor.textChanged.connect(this.onTextChange, this);
+    editor.completionRequested.connect(this.onCompletionRequest, this);
     editor.edgeRequested.connect(this.onEdgeRequest, this);
   }
 
@@ -364,6 +365,112 @@ class ConsoleWidget extends Widget {
       banner.model.source = info.banner;
       this._mimetype = mimetypeForLangauge(info.language_info);
       this.prompt.mimetype = this._mimetype;
+    });
+  }
+
+  /**
+   * Handle a text changed signal from an editor.
+   */
+  protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
+    let line = change.newValue.split('\n')[change.line];
+    let model = this._completion.model;
+    // If last character entered is not whitespace, update completion.
+    if (line[change.ch - 1] && line[change.ch - 1].match(/\S/)) {
+      // If there is currently a completion
+      if (model.original) {
+        model.current = change;
+      }
+    } else {
+      // If final character is whitespace, reset completion and tooltip.
+      this._tooltip.hide();
+      model.options = null;
+      model.original = null;
+      model.cursor = null;
+      return;
+    }
+    if (change.newValue) {
+      this.updateTooltip(change);
+    }
+  }
+
+  /**
+   * Update the tooltip based on a text change.
+   */
+  protected updateTooltip(change: ITextChange): void {
+    let line = change.newValue.split('\n')[change.line];
+    let contents = { code: line, cursor_pos: change.ch, detail_level: 0 };
+    let pendingInspect = ++this._pendingInspect;
+    this._session.kernel.inspect(contents).then(value => {
+      // If widget has been disposed, bail.
+      if (this.isDisposed) {
+        return;
+      }
+      // If a newer text change has created a pending request, bail.
+      if (pendingInspect !== this._pendingInspect) {
+        return;
+      }
+      // Tooltip request failures or negative results fail silently.
+      if (value.status !== 'ok' || !value.found) {
+        return;
+      }
+      let bundle = Private.processInspectReply(value.data);
+      this.showTooltip(change, bundle);
+    });
+  }
+
+  /**
+   * Show the tooltip.
+   */
+  protected showTooltip(change: ITextChange, bundle: nbformat.MimeBundle): void {
+    let {top, left} = change.coords;
+
+    // Offset the height of the tooltip by the height of cursor characters.
+    top += change.chHeight;
+    // Account for 1px border width.
+    left += 1;
+
+    // Account for 1px border on top and bottom.
+    let maxHeight = window.innerHeight - top - 2;
+    // Account for 1px border on both sides.
+    let maxWidth = window.innerWidth - left - 2;
+
+    let tooltip = this._tooltip;
+    tooltip.rect = {top, left} as ClientRect;
+    tooltip.content = this._rendermime.render(bundle);
+    tooltip.node.style.maxHeight = `${maxHeight}px`;
+    tooltip.node.style.maxWidth = `${maxWidth}px`;
+    tooltip.show();
+  }
+
+  /**
+   * Handle a completion requested signal from an editor.
+   */
+  protected onCompletionRequest(editor: CellEditorWidget, change: ICompletionRequest): void {
+    let contents = {
+      // Only send the current line of code for completion.
+      code: change.currentValue.split('\n')[change.line],
+      cursor_pos: change.ch
+    };
+    let pendingComplete = ++this._pendingComplete;
+    let model = this._completion.model;
+    this._session.kernel.complete(contents).then(value => {
+      // If model has been disposed, bail.
+      if (model.isDisposed) {
+        return;
+      }
+      // If a newer completion requesy has created a pending request, bail.
+      if (pendingComplete !== this._pendingComplete) {
+        return;
+      }
+      // Completion request failures or negative results fail silently.
+      if (value.status !== 'ok') {
+        return;
+      }
+      // Update the model.
+      model.options = value.matches;
+      model.cursor = { start: value.cursor_start, end: value.cursor_end };
+    }).then(() => {
+      model.original = change;
     });
   }
 
@@ -390,12 +497,25 @@ class ConsoleWidget extends Widget {
     }
   }
 
+  /**
+   * Handle a completion selected signal from the completion widget.
+   */
+  protected onCompletionSelect(widget: CompletionWidget, value: string): void {
+    let patch = this._completion.model.createPatch(value);
+    let editor = this.prompt.editor.editor;
+    let doc = editor.getDoc();
+    doc.setValue(patch.text);
+    doc.setCursor(doc.posFromIndex(patch.position));
+  }
+
   private _completion: CompletionWidget = null;
   private _mimetype = 'text/x-ipython';
   private _rendermime: RenderMime<Widget> = null;
   private _tooltip: ConsoleTooltip = null;
-  private _history: ConsoleHistory = null;
+  private _history: IConsoleHistory = null;
   private _session: INotebookSession = null;
+  private _pendingComplete = 0;
+  private _pendingInspect = 0;
 }
 
 
@@ -419,5 +539,24 @@ namespace Private {
     } else if (er.bottom > ar.bottom + 10) {
       area.scrollTop += er.bottom - ar.bottom + 10;
     }
+  }
+
+  /**
+   * Process the IInspectReply plain text data.
+   *
+   * @param bundle - The MIME bundle of an API inspect reply.
+   *
+   * #### Notes
+   * The `text/plain` value sent by the API in inspect replies contains ANSI
+   * terminal escape sequences. In order for these sequences to be parsed into
+   * usable data in the client, they must have the MIME type that the console
+   * text renderer expects: `application/vnd.jupyter.console-text`.
+   */
+  export
+  function processInspectReply(bundle: nbformat.MimeBundle): nbformat.MimeBundle {
+    let textMime = 'text/plain';
+    let consoleMime = 'application/vnd.jupyter.console-text';
+    bundle[consoleMime] = bundle[consoleMime] || bundle[textMime];
+    return bundle;
   }
 }
