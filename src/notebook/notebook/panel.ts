@@ -207,7 +207,6 @@ class NotebookPanel extends Widget {
     kernel.kernelInfo().then(info => {
       let infoCursor = this.model.getMetadata('language_info');
       infoCursor.setValue(info.language_info);
-      infoCursor.dispose();
     });
     kernel.getKernelSpec().then(spec => {
       let specCursor = this.model.getMetadata('kernelspec');
@@ -216,7 +215,6 @@ class NotebookPanel extends Widget {
         display_name: spec.display_name,
         language: spec.language
       });
-      specCursor.dispose();
     });
   }
 

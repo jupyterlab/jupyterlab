@@ -188,7 +188,6 @@ class NotebookRenderer extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._langInfoCursor.dispose();
     this._langInfoCursor = null;
     this._model.dispose();
     this._model = null;

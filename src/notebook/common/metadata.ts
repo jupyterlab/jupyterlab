@@ -11,7 +11,7 @@ import {
  * A class used to interact with user level metadata.
  */
 export
-interface IMetadataCursor extends IDisposable {
+interface IMetadataCursor {
   /**
    * The metadata namespace.
    */
@@ -60,19 +60,9 @@ class MetadataCursor implements IMetadataCursor {
   }
 
   /**
-   * Get whether the cursor is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._read === null;
-  }
-
-  /**
    * Dispose of the resources used by the cursor.
    */
   dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
     this._read = null;
     this._write = null;
   }
