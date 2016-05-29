@@ -168,10 +168,10 @@ class DocumentModel implements IDocumentModel {
 
 
 /**
- * The default implementation of a model factory.
+ * An implementation of a model factory for text files.
  */
 export
-class ModelFactory implements IModelFactory {
+class TextModelFactory implements IModelFactory {
   /**
    * The name of the model.
    *
@@ -179,7 +179,7 @@ class ModelFactory implements IModelFactory {
    * This is a read-only property.
    */
   get name(): string {
-    return 'default';
+    return 'text';
   }
 
   /**
@@ -189,7 +189,7 @@ class ModelFactory implements IModelFactory {
    * This is a read-only property.
    */
   get contentsOptions(): IContentsOpts {
-    return { type: 'file' };
+    return { type: 'file', format: 'text'};
   }
 
   /**
@@ -228,6 +228,33 @@ class ModelFactory implements IModelFactory {
   }
 
   private _isDisposed = false;
+}
+
+
+/**
+ * An implementation of a model factory for base64 files.
+ */
+export
+class Base64ModelFactory extends TextModelFactory {
+  /**
+   * The name of the model.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return 'base64';
+  }
+
+  /**
+   * The contents options used to fetch/save files.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get contentsOptions(): IContentsOpts {
+    return { type: 'file', format: 'base64'};
+  }
 }
 
 
