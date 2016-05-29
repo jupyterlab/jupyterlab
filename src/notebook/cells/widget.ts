@@ -346,6 +346,7 @@ class CodeCellWidget extends BaseCellWidget {
       model.executionCount = null;
       return Promise.resolve(void 0);
     }
+    model.executionCount = null;
     this.setPrompt('*');
     let outputs = model.outputs;
     return executeCode(code, kernel, outputs).then(reply => {
