@@ -10,6 +10,10 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
@@ -42,7 +46,17 @@ interface ICellModel extends IDisposable {
   /**
    * A signal emitted when the content of the model changes.
    */
-  contentChanged: ISignal<ICellModel, string>;
+  contentChanged: ISignal<ICellModel, void>;
+
+  /**
+   * A signal emitted when a model state changes.
+   */
+  stateChanged: ISignal<ICellModel, IChangedArgs<any>>;
+
+  /**
+   * A signal emitted when a metadata field changes.
+   */
+  metadataChanged: ISignal<ICellModel, IChangedArgs<any>>;
 
   /**
    * The input content of the cell.
@@ -118,8 +132,22 @@ class CellModel implements ICellModel {
   /**
    * A signal emitted when the state of the model changes.
    */
-  get contentChanged(): ISignal<ICellModel, string> {
+  get contentChanged(): ISignal<ICellModel, void> {
     return Private.contentChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a model state changes.
+   */
+  get stateChanged(): ISignal<ICellModel, IChangedArgs<any>> {
+    return Private.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a metadata field changes.
+   */
+  get metadataChanged(): ISignal<ICellModel, IChangedArgs<any>> {
+    return Private.metadataChangedSignal.bind(this);
   }
 
   /**
@@ -128,12 +156,14 @@ class CellModel implements ICellModel {
   get source(): string {
     return this._source;
   }
-  set source(value: string) {
-    if (this._source === value) {
+  set source(newValue: string) {
+    if (this._source === newValue) {
       return;
     }
-    this._source = value;
-    this.contentChanged.emit('source');
+    let oldValue = this._source;
+    this._source = newValue;
+    this.contentChanged.emit(void 0);
+    this.stateChanged.emit({ name: 'source', oldValue, newValue });
   }
 
   /**
@@ -155,8 +185,8 @@ class CellModel implements ICellModel {
       return;
     }
     clearSignalData(this);
-    for (let cursor of this._cursors) {
-      cursor.dispose();
+    for (let key in this._cursors) {
+      this._cursors[key].dispose();
     }
     this._cursors = null;
     this._metadata = null;
@@ -182,6 +212,9 @@ class CellModel implements ICellModel {
    * set of metadata on the cell.
    */
   getMetadata(name: string): IMetadataCursor {
+    if (name in this._cursors) {
+      return this._cursors[name];
+    }
     let cursor = new MetadataCursor(
       name,
       () => {
@@ -191,7 +224,7 @@ class CellModel implements ICellModel {
         this.setCursorData(name, value);
       }
     );
-    this._cursors.push(cursor);
+    this._cursors[name] = cursor;
     return cursor;
   }
 
@@ -208,12 +241,14 @@ class CellModel implements ICellModel {
   /**
    * Set the cursor data for a given field.
    */
-  protected setCursorData(name: string, value: any): void {
-    if (this._metadata[name] === value) {
+  protected setCursorData(name: string, newValue: any): void {
+    let oldValue = this._metadata[name];
+    if (oldValue === newValue) {
       return;
     }
-    this._metadata[name] = value;
-    this.contentChanged.emit(`metadata.${name}`);
+    this._metadata[name] = newValue;
+    this.contentChanged.emit(void 0);
+    this.metadataChanged.emit({ name, oldValue, newValue });
   }
 
   /**
@@ -222,7 +257,7 @@ class CellModel implements ICellModel {
   type: nbformat.CellType;
 
   private _metadata: { [key: string]: any } = Object.create(null);
-  private _cursors: MetadataCursor[] = [];
+  private _cursors: { [key: string]: MetadataCursor } = Object.create(null);
   private _source = '';
 }
 
@@ -277,7 +312,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       this._outputs.assign((cell as nbformat.ICodeCell).outputs);
     }
     this._outputs.changed.connect(() => {
-      this.contentChanged.emit('outputs');
+      this.contentChanged.emit(void 0);
     });
   }
 
@@ -297,12 +332,14 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   get executionCount(): number {
     return this._executionCount;
   }
-  set executionCount(value: number) {
-    if (value === this._executionCount) {
+  set executionCount(newValue: number) {
+    if (newValue === this._executionCount) {
       return;
     }
-    this._executionCount = value;
-    this.contentChanged.emit('executionCount');
+    let oldValue = this.executionCount;
+    this._executionCount = newValue;
+    this.contentChanged.emit(void 0);
+    this.stateChanged.emit({ name: 'executionCount', oldValue, newValue });
   }
 
   /**
@@ -354,5 +391,17 @@ namespace Private {
    * A signal emitted when the state of the model changes.
    */
   export
-  const contentChangedSignal = new Signal<ICellModel, string>();
+  const contentChangedSignal = new Signal<ICellModel, void>();
+
+  /**
+   * A signal emitted when a model state changes.
+   */
+  export
+  const stateChangedSignal = new Signal<ICellModel, IChangedArgs<any>>();
+
+  /**
+   * A signal emitted when a metadata field changes.
+   */
+  export
+  const metadataChangedSignal = new Signal<ICellModel, IChangedArgs<any>>();
 }

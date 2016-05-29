@@ -14,6 +14,10 @@ import {
 } from 'phosphor-messaging';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   ISignal, Signal
 } from 'phosphor-signaling';
 
@@ -131,7 +135,7 @@ class CellEditorWidget extends CodeMirrorWidget {
       this.onEditorKeydown(instance, evt);
     });
     this.update();
-    model.contentChanged.connect(this.onModelChanged, this);
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -196,8 +200,8 @@ class CellEditorWidget extends CodeMirrorWidget {
   /**
    * Handle changes in the model.
    */
-  protected onModelChanged(model: ICellModel, change: string): void {
-    switch (change) {
+  protected onModelChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
     case 'source':
       this.update();
       break;

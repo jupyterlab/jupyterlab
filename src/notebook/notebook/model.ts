@@ -14,6 +14,10 @@ import {
 } from 'phosphor-observablelist';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
@@ -40,6 +44,16 @@ import {
  */
 export
 interface INotebookModel extends IDocumentModel {
+  /**
+   * A signal emitted when a model state changes.
+   */
+  stateChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
+
+  /**
+   * A signal emitted when a metadata field changes.
+   */
+  metadataChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
+
   /**
    * The list of cells in the notebook.
    *
@@ -144,11 +158,8 @@ class NotebookModel implements INotebookModel {
 
   /**
    * A signal emitted when the document content changes.
-   *
-   * #### Notes
-   * The argument is the type of change.
    */
-  get contentChanged(): ISignal<INotebookModel, string> {
+  get contentChanged(): ISignal<INotebookModel, void> {
     return Private.contentChangedSignal.bind(this);
   }
 
@@ -156,7 +167,22 @@ class NotebookModel implements INotebookModel {
    * A signal emitted when the model dirty state changes.
    */
   get dirtyChanged(): ISignal<IDocumentModel, boolean> {
+    // TODO: Remove in jupyter-js-ui and then remove here.
     return Private.dirtyChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a model state changes.
+   */
+  get stateChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
+    return Private.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a metadata field changes.
+   */
+  get metadataChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
+    return Private.metadataChangedSignal.bind(this);
   }
 
   /**
@@ -199,12 +225,14 @@ class NotebookModel implements INotebookModel {
   get dirty(): boolean {
     return this._dirty;
   }
-  set dirty(value: boolean) {
-    if (value === this._dirty) {
+  set dirty(newValue: boolean) {
+    if (newValue === this._dirty) {
       return;
     }
-    this._dirty = value;
-    this.dirtyChanged.emit(value);
+    let oldValue = this._dirty;
+    this._dirty = newValue;
+    this.dirtyChanged.emit(newValue);
+    this.stateChanged.emit({ name: 'dirty', oldValue, newValue });
   }
 
   /**
@@ -213,11 +241,13 @@ class NotebookModel implements INotebookModel {
   get readOnly(): boolean {
     return this._readOnly;
   }
-  set readOnly(value: boolean) {
-    if (value === this._readOnly) {
+  set readOnly(newValue: boolean) {
+    if (newValue === this._readOnly) {
       return;
     }
-    this._readOnly = value;
+    let oldValue = this._readOnly;
+    this._readOnly = newValue;
+    this.stateChanged.emit({ name: 'readOnly', oldValue, newValue });
   }
 
   /**
@@ -269,8 +299,8 @@ class NotebookModel implements INotebookModel {
     }
     cells.clear();
     this._cells = null;
-    for (let cursor of this._cursors) {
-      cursor.dispose();
+    for (let key in this._cursors) {
+      this._cursors[key].dispose();
     }
     this._cursors = null;
     this._metadata = null;
@@ -335,10 +365,31 @@ class NotebookModel implements INotebookModel {
       }
     }
     this.cells.assign(cells);
-    this._nbformat = value.nbformat;
-    this._nbformatMinor = value.nbformat_minor;
-    this._metadata = utils.copy(value.metadata);
-    this.contentChanged.emit('metadata');
+    let oldValue = 0;
+    let newValue = 0;
+    if (value.nbformat !== this._nbformat) {
+      oldValue = this._nbformat;
+      this._nbformat = newValue = value.nbformat;
+      this.stateChanged.emit({ name: 'nbformat', oldValue, newValue });
+    }
+    if (value.nbformat_minor !== this._nbformatMinor) {
+      oldValue = this._nbformat;
+      this._nbformatMinor = newValue = value.nbformat_minor;
+      this.stateChanged.emit({ name: 'nbformatMinor', oldValue, newValue });
+    }
+    // Update the metadata.
+    let metadata = value.metadata;
+    for (let key in this._metadata) {
+      if (!(key in metadata)) {
+        this.setCursorData(key, null);
+        delete this._metadata[key];
+        this._cursors[name].dispose();
+        delete this._cursors[name];
+      }
+    }
+    for (let key in metadata) {
+      this.setCursorData(key, (metadata as any)[key]);
+    }
   }
 
   /**
@@ -397,6 +448,9 @@ class NotebookModel implements INotebookModel {
    * set of metadata on the notebook.
    */
   getMetadata(name: string): IMetadataCursor {
+    if (name in this._cursors) {
+      return this._cursors[name];
+    }
     let cursor = new MetadataCursor(
       name,
       () => {
@@ -406,7 +460,7 @@ class NotebookModel implements INotebookModel {
         this.setCursorData(name, value);
       }
     );
-    this._cursors.push(cursor);
+    this._cursors[name] = cursor;
     return cursor;
   }
 
@@ -457,25 +511,27 @@ class NotebookModel implements INotebookModel {
    * Handle a change to a cell state.
    */
   protected onCellChanged(cell: ICellModel, change: any): void {
-    this.contentChanged.emit('cells');
+    this.contentChanged.emit(void 0);
   }
 
   /**
    * Set the cursor data for a given field.
    */
-  protected setCursorData(name: string, value: string): void {
-    if (this._metadata[name] === value) {
+  protected setCursorData(name: string, newValue: any): void {
+    let oldValue = this._metadata[name];
+    if (oldValue === newValue) {
       return;
     }
-    this._metadata[name] = value;
-    this.contentChanged.emit(`metadata.${name}`);
+    this._metadata[name] = newValue;
+    this.contentChanged.emit(void 0);
+    this.metadataChanged.emit({ name, oldValue, newValue });
   }
 
   private _cells: OberservableUndoableList<ICellModel> = null;
   private _metadata: { [key: string]: any } = Object.create(null);
   private _dirty = false;
   private _readOnly = false;
-  private _cursors: MetadataCursor[] = [];
+  private _cursors: { [key: string]: MetadataCursor } = Object.create(null);
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
 }
@@ -489,11 +545,23 @@ namespace Private {
    * A signal emitted when the content of the model changes.
    */
   export
-  const contentChangedSignal = new Signal<INotebookModel, string>();
+  const contentChangedSignal = new Signal<INotebookModel, void>();
 
   /**
    * A signal emitted when the dirty state of the model changes.
    */
   export
   const dirtyChangedSignal = new Signal<INotebookModel, boolean>();
+
+  /**
+   * A signal emitted when a model state changes.
+   */
+  export
+  const stateChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
+
+  /**
+   * A signal emitted when a metadata field changes.
+   */
+  export
+  const metadataChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
 }

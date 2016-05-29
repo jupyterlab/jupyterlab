@@ -23,6 +23,10 @@ import {
 } from 'phosphor-panel';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -143,7 +147,7 @@ class BaseCellWidget extends Widget {
     this._input = ctor.createInputArea(this._editor);
     this.layout = new PanelLayout();
     (this.layout as PanelLayout).addChild(this._input);
-    model.contentChanged.connect(this.onModelChanged, this);
+    model.metadataChanged.connect(this.onMetadataChanged, this);
     this._trustedCursor = model.getMetadata('trusted');
     this._trusted = this._trustedCursor.getValue();
   }
@@ -243,7 +247,6 @@ class BaseCellWidget extends Widget {
     this._model = null;
     this._input = null;
     this._editor = null;
-    this._trustedCursor.dispose();
     this._trustedCursor = null;
     super.dispose();
   }
@@ -268,10 +271,9 @@ class BaseCellWidget extends Widget {
   /**
    * Handle changes in the model.
    */
-  protected onModelChanged(model: ICellModel, change: string): void {
-    switch (change) {
-    case 'metadata':
-    case 'metadata.trusted':
+  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'trusted':
       this._trusted = this._trustedCursor.getValue();
       this.update();
       break;
@@ -317,6 +319,7 @@ class CodeCellWidget extends BaseCellWidget {
     this._collapsedCursor = model.getMetadata('collapsed');
     this._scrolledCursor = model.getMetadata('scrolled');
     this.setPrompt(String(model.executionCount));
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -327,9 +330,7 @@ class CodeCellWidget extends BaseCellWidget {
       return;
     }
     this._rendermime = null;
-    this._collapsedCursor.dispose();
     this._collapsedCursor = null;
-    this._scrolledCursor.dispose();
     this._scrolledCursor = null;
     this._output = null;
     super.dispose();
@@ -365,19 +366,29 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the model.
    */
-  protected onModelChanged(model: ICodeCellModel, change: string): void {
-    switch (change) {
-    case 'metadata.collapsed':
-    case 'metadata.scrolled':
-      this.update();
-      break;
+  protected onModelChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
     case 'executionCount':
       this.setPrompt(String(model.executionCount));
       break;
     default:
       break;
     }
-    super.onModelChanged(model, change);
+  }
+
+  /**
+   * Handle changes in the metadata.
+   */
+  protected onMetadataChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'collapsed':
+    case 'scrolled':
+      this.update();
+      break;
+    default:
+      break;
+    }
+    super.onMetadataChanged(model, args);
   }
 
   private _output: OutputAreaWidget = null;

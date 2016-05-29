@@ -34,15 +34,14 @@ interface IMetadataCursor extends IDisposable {
  */
 export
 class MetadataCursor implements IMetadataCursor {
-
   /**
    * Construct a new metadata cursor.
    *
-   * @param name - the metadata namespace key.
+   * @param name - The metadata namespace key.
    *
-   * @param value - this initial value of the namespace.
+   * @param read - The read callback.
    *
-   * @param cb - a change callback.
+   * @param write - The write callback.
    */
   constructor(name: string, read: () => any, write: (value: any) => void) {
     this._name = name;
