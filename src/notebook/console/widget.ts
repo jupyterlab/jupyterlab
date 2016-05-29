@@ -230,6 +230,7 @@ class ConsoleWidget extends Widget {
     let banner = constructor.createBanner();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
+    banner.model.source = '...';
     layout.addChild(banner);
 
     // Set the banner text and the mimetype.
@@ -253,7 +254,7 @@ class ConsoleWidget extends Widget {
   get prompt(): CodeCellWidget {
     let layout = this.layout as PanelLayout;
     let last = layout.childCount() - 1;
-    return last > -1 ? layout.childAt(last) as CodeCellWidget : null;
+    return last > 0 ? layout.childAt(last) as CodeCellWidget : null;
   }
 
   /**
@@ -290,10 +291,8 @@ class ConsoleWidget extends Widget {
    * Clear the code cells.
    */
   clear(): void {
-    let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.childCount() - 2; i++) {
-      let cell = layout.childAt(1) as CodeCellWidget;
-      cell.dispose();
+    while (this.prompt) {
+      this.prompt.dispose();
     }
     this.newPrompt();
   }

@@ -131,6 +131,7 @@ class CellEditorWidget extends CodeMirrorWidget {
       this.onEditorKeydown(instance, evt);
     });
     this.update();
+    model.contentChanged.connect(this.onModelChanged, this);
   }
 
   /**
