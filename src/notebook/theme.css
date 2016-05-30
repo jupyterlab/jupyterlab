@@ -12,8 +12,13 @@
 }
 
 
+.p-Widget.jp-Notebook-panel {
+  height: 100%;
+}
+
+
 .p-Widget.jp-Notebook-container {
-  overflow-y: auto;
+  overflow: auto;
   padding-left: 10px;
   padding-right: 10px;
   padding-bottom: 20px;
@@ -37,7 +42,7 @@
 }
 
 
-.jp-InputArea-editor.jp-CodeMirror {
+.jp-CellEditor {
   border: 1px solid #cfcfcf;
   border-radius: 2px;
   background: #f7f7f7;
@@ -113,7 +118,7 @@
 }
 
 
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-otherSelected.jp-mod-active {
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-multiSelected.jp-mod-active {
   background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 7px, #E3F2FD 7px, #E3F2FD 100%);
 }
 
@@ -279,7 +284,7 @@
 }
 
 
-.jp-CodeMirror > .CodeMirror {
+.jp-CellEditor > .CodeMirror {
   line-height: 1.21429em;
   /* Changed from 1em to our global default */
   font-size: 14px;
@@ -290,7 +295,7 @@
 }
 
 
-.jp-CodeMirror > .CodeMirror-scroll {
+.jp-CellEditor > .CodeMirror-scroll {
   /*  The CodeMirror docs are a bit fuzzy on if overflow-y should be hidden or visible.*/
   /*  We have found that if it is visible, vertical scrollbars appear with font size changes.*/
   overflow-y: hidden;
@@ -298,25 +303,25 @@
 }
 
 
-.jp-CodeMirror > .CodeMirror-lines {
+.jp-CellEditor > .CodeMirror-lines {
   /* In CM2, this used to be 0.4em, but in CM3 it went to 4px. We need the em value because */
   /* we have set a different line-height and want this to scale with that. */
   padding: 0.4em;
 }
 
 
-.jp-CodeMirror > .CodeMirror-linenumber {
+.jp-CellEditor > .CodeMirror-linenumber {
   padding: 0 8px 0 4px;
 }
 
 
-.jp-CodeMirror > .CodeMirror-gutters {
+.jp-CellEditor > .CodeMirror-gutters {
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
 }
 
 
-.jp-CodeMirror > .CodeMirror pre {
+.jp-CellEditor > .CodeMirror pre {
   /* In CM3 this went to 4px from 0 in CM2. We need the 0 value because of how we size */
   /* .CodeMirror-lines */
   padding: 0;
@@ -331,7 +336,7 @@
 }
 
 
-.jp-Console .jp-InputArea-editor.jp-CodeMirror {
+.jp-Console .jp-InputArea-editor.jp-CellEditor {
   background: transparent;
   border-color: transparent;
 }

@@ -3,6 +3,14 @@
 'use strict';
 
 import {
+  IKernel
+} from 'jupyter-js-services';
+
+import {
+  loadModeByMIME
+} from 'jupyter-js-ui/lib/codemirror';
+
+import {
   RenderMime
 } from 'jupyter-js-ui/lib/rendermime';
 
@@ -23,15 +31,11 @@ import {
 } from 'phosphor-widget';
 
 import {
-  InputAreaWidget, IInputAreaModel
-} from '../input-area';
-
-import {
-  MimeBundle
+  nbformat
 } from '../notebook/nbformat';
 
 import {
-  OutputAreaWidget, IOutputAreaModel
+  OutputAreaWidget, ObservableOutputs, executeCode
 } from '../output-area';
 
 import {
@@ -39,7 +43,15 @@ import {
 } from 'sanitizer';
 
 import {
-  ICodeCellModel, IMarkdownCellModel, ICellModel, IRawCellModel
+  IMetadataCursor
+} from '../common/metadata';
+
+import {
+  CellEditorWidget
+} from './editor';
+
+import {
+  ICodeCellModel, ICellModel
 } from './model';
 
 
@@ -47,6 +59,31 @@ import {
  * The class name added to cell widgets.
  */
 const CELL_CLASS = 'jp-Cell';
+
+/**
+ * The class name added to input area widgets.
+ */
+const INPUT_CLASS = 'jp-InputArea';
+
+/**
+ * The class name added to the prompt area of cell.
+ */
+const PROMPT_CLASS = 'jp-InputArea-prompt';
+
+/**
+ * The class name added to the editor area of the cell.
+ */
+const EDITOR_CLASS = 'jp-InputArea-editor';
+
+/**
+ * The class name added to the cell when collapsed.
+ */
+const COLLAPSED_CLASS = 'jp-mod-collapsed';
+
+/**
+ * The class name added to the cell when readonly.
+ */
+const READONLY_CLASS = 'jp-mod-readOnly';
 
 /**
  * The class name added to code cells.
@@ -85,10 +122,17 @@ const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 export
 class BaseCellWidget extends Widget {
   /**
-   * Create a new input widget.
+   * Create a new cell editor for the widget.
    */
-  static createInput(model: IInputAreaModel): InputAreaWidget {
-    return new InputAreaWidget(model);
+  static createCellEditor(model: ICellModel): CellEditorWidget {
+    return new CellEditorWidget(model);
+  }
+
+  /**
+   * Create a new input area for the widget.
+   */
+  static createInputArea(editor: CellEditorWidget): InputAreaWidget {
+    return new InputAreaWidget(editor);
   }
 
   /**
@@ -98,10 +142,14 @@ class BaseCellWidget extends Widget {
     super();
     this.addClass(CELL_CLASS);
     this._model = model;
-    let constructor = this.constructor as typeof BaseCellWidget;
-    this._input = constructor.createInput(model.input);
+    let ctor = this.constructor as typeof BaseCellWidget;
+    this._editor = ctor.createCellEditor(model);
+    this._input = ctor.createInputArea(this._editor);
     this.layout = new PanelLayout();
     (this.layout as PanelLayout).addChild(this._input);
+    model.metadataChanged.connect(this.onMetadataChanged, this);
+    this._trustedCursor = model.getMetadata('trusted');
+    this._trusted = this._trustedCursor.getValue();
   }
 
   /**
@@ -115,13 +163,77 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Get the input widget used by the widget.
+   * Get the editor widget used by the cell.
    *
    * #### Notes
-   * This is a read-only property.
+   * This is a ready-only property.
    */
-  get input(): InputAreaWidget {
-    return this._input;
+  get editor(): CellEditorWidget {
+    return this._editor;
+  }
+
+  /**
+   * The mimetype used by the cell.
+   */
+  get mimetype(): string {
+    return this._mimetype;
+  }
+  set mimetype(value: string) {
+    if (this._mimetype === value) {
+      return;
+    }
+    this._mimetype = value;
+    loadModeByMIME(this.editor.editor, value);
+  }
+
+  /**
+   * The read only state of the cell.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
+  }
+  set readOnly(value: boolean) {
+    if (value === this._readOnly) {
+      return;
+    }
+    this._readOnly = value;
+    this.update();
+  }
+
+  /**
+   * The trusted state of the cell.
+   */
+  get trusted(): boolean {
+    return this._trusted;
+  }
+  set trusted(value: boolean) {
+    this._trustedCursor.setValue(value);
+  }
+
+  /**
+   * Focus the widget.
+   */
+  focus(): void {
+    this.editor.editor.focus();
+  }
+
+  /**
+   * Set the prompt for the widget.
+   */
+  setPrompt(value: string): void {
+    this._input.setPrompt(value);
+  }
+
+  /**
+   * Toggle whether the input area is shown.
+   */
+  toggleInput(value: boolean): void {
+    if (value) {
+      this._input.show();
+      this.focus();
+    } else {
+      this._input.hide();
+    }
   }
 
   /**
@@ -132,13 +244,51 @@ class BaseCellWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._model.dispose();
     this._model = null;
+    this._input = null;
+    this._editor = null;
+    this._trustedCursor = null;
     super.dispose();
   }
 
+  /**
+   * Handle `after-attach` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.update();
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(message: Message): void {
+    // Handle read only state.
+    let option = this._readOnly ? 'nocursor' : false;
+    this.editor.editor.setOption('readOnly', option);
+    this.toggleClass(READONLY_CLASS, this._readOnly);
+  }
+
+  /**
+   * Handle changes in the model.
+   */
+  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'trusted':
+      this._trusted = this._trustedCursor.getValue();
+      this.update();
+      break;
+    default:
+      break;
+    }
+  }
+
   private _input: InputAreaWidget = null;
+  private _editor: CellEditorWidget = null;
   private _model: ICellModel = null;
+  private _mimetype = 'text/plain';
+  private _readOnly = false;
+  private _trustedCursor: IMetadataCursor = null;
+  private _trusted = false;
 }
 
 
@@ -151,8 +301,8 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Create an output area widget.
    */
-  static createOutput(model: IOutputAreaModel, rendermime: RenderMime<Widget>): OutputAreaWidget {
-    return new OutputAreaWidget(model, rendermime);
+  static createOutput(outputs: ObservableOutputs, rendermime: RenderMime<Widget>): OutputAreaWidget {
+    return new OutputAreaWidget(outputs, rendermime);
   }
 
   /**
@@ -163,22 +313,89 @@ class CodeCellWidget extends BaseCellWidget {
     this._rendermime = rendermime;
     this.addClass(CODE_CELL_CLASS);
     let constructor = this.constructor as typeof CodeCellWidget;
-    this._output = constructor.createOutput(model.output, rendermime);
+    this._output = constructor.createOutput(model.outputs, rendermime);
+    this._output.trusted = this.trusted;
     (this.layout as PanelLayout).addChild(this._output);
+    this._collapsedCursor = model.getMetadata('collapsed');
+    this._scrolledCursor = model.getMetadata('scrolled');
+    this.setPrompt(String(model.executionCount));
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
-   * Get the output widget used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * Dispose of the resources used by the widget.
    */
-  get output(): OutputAreaWidget {
-    return this._output;
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._rendermime = null;
+    this._collapsedCursor = null;
+    this._scrolledCursor = null;
+    this._output = null;
+    super.dispose();
+  }
+
+  /**
+   * Execute the cell given a kernel.
+   */
+  execute(kernel: IKernel): Promise<void> {
+    let model = this.model as ICodeCellModel;
+    let code = model.source;
+    if (!code.trim()) {
+      model.executionCount = null;
+      return Promise.resolve(void 0);
+    }
+    model.executionCount = null;
+    this.setPrompt('*');
+    let outputs = model.outputs;
+    return executeCode(code, kernel, outputs).then(reply => {
+      model.executionCount = reply.execution_count;
+    });
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(message: Message): void {
+    this.toggleClass(COLLAPSED_CLASS, this._collapsedCursor.getValue());
+    // TODO: handle scrolled state.
+    this._output.trusted = this.trusted;
+    super.onUpdateRequest(message);
+  }
+
+  /**
+   * Handle changes in the model.
+   */
+  protected onModelChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'executionCount':
+      this.setPrompt(String(model.executionCount));
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle changes in the metadata.
+   */
+  protected onMetadataChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'collapsed':
+    case 'scrolled':
+      this.update();
+      break;
+    default:
+      break;
+    }
+    super.onMetadataChanged(model, args);
   }
 
   private _output: OutputAreaWidget = null;
   private _rendermime: RenderMime<Widget> = null;
+  private _collapsedCursor: IMetadataCursor = null;
+  private _scrolledCursor: IMetadataCursor = null;
 }
 
 
@@ -196,78 +413,75 @@ class MarkdownCellWidget extends BaseCellWidget {
   /**
    * Construct a Markdown cell widget.
    */
-  constructor(model: IMarkdownCellModel, rendermime: RenderMime<Widget>) {
+  constructor(model: ICellModel, rendermime: RenderMime<Widget>) {
     super(model);
     this._rendermime = rendermime;
     this.addClass(MARKDOWN_CELL_CLASS);
     // Insist on the Github-flavored markdown mode.
-    model.input.textEditor.mimetype = 'text/x-ipythongfm';
-    this._rendered = new Widget();
-    this._rendered.addClass(RENDERER_CLASS);
-    (this.layout as PanelLayout).addChild(this._rendered);
-    this.model.stateChanged.connect(this.onModelChanged, this);
+    this.mimetype = 'text/x-ipythongfm';
+    this._renderer = new Widget();
+    this._renderer.addClass(RENDERER_CLASS);
+    (this.layout as PanelLayout).addChild(this._renderer);
   }
 
   /**
-   * Get the rendering widget used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * Whether the cell is rendered.
    */
-  get rendered(): Widget {
+  get rendered(): boolean {
     return this._rendered;
   }
+  set rendered(value: boolean) {
+    if (value === this._rendered) {
+      return;
+    }
+    this._rendered = value;
+    this.update();
+  }
 
   /**
-   * Handle `after-attach` messages.
+   * Dispose of the resource held by the widget.
    */
-  protected onAfterAttach(msg: Message): void {
-    this.update();
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._renderer = null;
+    this._rendermime = null;
+    super.dispose();
   }
 
   /**
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(message: Message): void {
-    let model = this.model as IMarkdownCellModel;
-    if (model.rendered) {
-      if (this._dirty) {
-        let text = model.input.textEditor.text || DEFAULT_MARKDOWN_TEXT;
+    let model = this.model;
+    if (this.rendered) {
+      let text = model.source || DEFAULT_MARKDOWN_TEXT;
+      // Do not re-render if the text has not changed.
+      if (text !== this._prev) {
         text = sanitize(text);
-        let bundle: MimeBundle = { 'text/markdown': text };
-        this._rendered.dispose();
-        this._rendered = this._rendermime.render(bundle) || new Widget();
-        this._rendered.addClass(RENDERER_CLASS);
-        (this.layout as PanelLayout).addChild(this._rendered);
+        let bundle: nbformat.MimeBundle = { 'text/markdown': text };
+        this._renderer.dispose();
+        this._renderer = this._rendermime.render(bundle) || new Widget();
+        this._renderer.addClass(RENDERER_CLASS);
+        (this.layout as PanelLayout).addChild(this._renderer);
       }
-      this._rendered.show();
-      this.input.hide();
+      this._prev = text;
+      this._renderer.show();
+      this.toggleInput(false);
       this.addClass(RENDERED_CLASS);
     } else {
-      this._rendered.hide();
-      this.input.show();
-      this.input.editor.focus();
+      this._renderer.hide();
+      this.toggleInput(true);
       this.removeClass(RENDERED_CLASS);
     }
-    this._dirty = false;
     super.onUpdateRequest(message);
   }
 
-  /**
-   * Change handler for model updates.
-   */
-  protected onModelChanged(sender: ICellModel, args: IChangedArgs<any>) {
-    switch (args.name) {
-    case 'rendered':
-      this._dirty = true;
-      this.update();
-      break;
-    }
-  }
-
   private _rendermime: RenderMime<Widget> = null;
-  private _rendered: Widget = null;
-  private _dirty = true;
+  private _renderer: Widget = null;
+  private _rendered = true;
+  private _prev = '';
 }
 
 
@@ -279,8 +493,42 @@ class RawCellWidget extends BaseCellWidget {
   /**
    * Construct a raw cell widget.
    */
-  constructor(model: IRawCellModel) {
+  constructor(model: ICellModel) {
     super(model);
     this.addClass(RAW_CELL_CLASS);
+  }
+}
+
+
+/**
+ * An input area widget, which hosts a prompt and an editor widget.
+ */
+export
+class InputAreaWidget extends Widget {
+  /**
+   * Construct an input area widget.
+   */
+  constructor(editor: CellEditorWidget) {
+    super();
+    this.addClass(INPUT_CLASS);
+    editor.addClass(EDITOR_CLASS);
+    this.layout = new PanelLayout();
+    let prompt = new Widget();
+    prompt.addClass(PROMPT_CLASS);
+    let layout = this.layout as PanelLayout;
+    layout.addChild(prompt);
+    layout.addChild(editor);
+  }
+
+  /**
+   * Set the prompt of the input area.
+   */
+  setPrompt(value: string): void {
+    let prompt = (this.layout as PanelLayout).childAt(0);
+    if (value === 'null') {
+      value = ' ';
+    }
+    let text = `In [${value || ' '}]:`;
+    prompt.node.textContent = text;
   }
 }

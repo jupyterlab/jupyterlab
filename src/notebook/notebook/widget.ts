@@ -3,12 +3,8 @@
 'use strict';
 
 import {
-  KernelStatus
+  IKernelLanguageInfo
 } from 'jupyter-js-services';
-
-import {
-  showDialog
-} from 'jupyter-js-ui/lib/dialog';
 
 import {
   RenderMime
@@ -19,35 +15,50 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  IChangedArgs
+  IObservableList, IListChangedArgs, ListChangeType
+} from 'phosphor-observablelist';
+
+import {
+  PanelLayout
+} from 'phosphor-panel';
+
+import {
+  Property, IChangedArgs
 } from 'phosphor-properties';
 
 import {
-  IObservableList, IListChangedArgs, ListChangeType
-} from 'phosphor-observablelist';
+  Signal, ISignal
+} from 'phosphor-signaling';
 
 import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  PanelLayout, Panel
-} from 'phosphor-panel';
-
-import {
-  ICellModel, BaseCellWidget,
+  ICellModel, BaseCellWidget, MarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
-  CodeCellModel, MarkdownCellModel, isMarkdownCellModel,
-  RawCellModel, RawCellWidget, IMarkdownCellModel
+  CodeCellModel, RawCellWidget
 } from '../cells';
 
 import {
-  NotebookManager
-} from './manager';
+  IMetadataCursor
+} from '../common/metadata';
+
+import {
+  mimetypeForLangauge
+} from '../common/mimetype';
+
+import {
+  EdgeLocation
+} from '../cells/editor';
 
 import {
   INotebookModel
 } from './model';
+
+import {
+  nbformat
+} from './nbformat';
 
 
 /**
@@ -56,104 +67,9 @@ import {
 const NB_CLASS = 'jp-Notebook';
 
 /**
- * The class name added to notebook container widgets.
- */
-const NB_CONTAINER = 'jp-Notebook-container';
-
-/**
- * The class name added to notebook panels.
- */
-const NB_PANEL = 'jp-Notebook-panel';
-
-/**
  * The class name added to notebook widget cells.
  */
 const NB_CELL_CLASS = 'jp-Notebook-cell';
-
-/**
- * The class name added to notebook toolbars.
- */
-const NB_TOOLBAR = 'jp-NBToolbar';
-
-/**
- * The class name added to notebook toolbar items.
- */
-const TOOLBAR_ITEM = 'jp-NBToolbar-item';
-
-/**
- * The class name added to notebook toolbar buttons.
- */
-const TOOLBAR_BUTTON = 'jp-NBToolbar-button';
-
-/**
- * The class name added to toolbar save button.
- */
-const TOOLBAR_SAVE = 'jp-NBToolbar-save';
-
-/**
- * The class name added to toolbar insert button.
- */
-const TOOLBAR_INSERT = 'jp-NBToolbar-insert';
-
-/**
- * The class name added to toolbar cut button.
- */
-const TOOLBAR_CUT = 'jp-NBToolbar-cut';
-
-/**
- * The class name added to toolbar copy button.
- */
-const TOOLBAR_COPY = 'jp-NBToolbar-copy';
-
-/**
- * The class name added to toolbar paste button.
- */
-const TOOLBAR_PASTE = 'jp-NBToolbar-paste';
-
-/**
- * The class name added to toolbar run button.
- */
-const TOOLBAR_RUN = 'jp-NBToolbar-run';
-
-/**
- * The class name added to toolbar interrupt button.
- */
-const TOOLBAR_INTERRUPT = 'jp-NBToolbar-interrupt';
-
-/**
- * The class name added to toolbar restart button.
- */
-const TOOLBAR_RESTART = 'jp-NBToolbar-restart';
-
-/**
- * The class name added to toolbar cell type dropdown wrapper.
- */
-const TOOLBAR_CELL_WRAP = 'jp-NBToolbar-cellWrapper';
-
-/**
- * The class name added to toolbar cell type dropdown.
- */
-const TOOLBAR_CELL = 'jp-NBToolbar-cellType';
-
-/**
- * The class name added to toolbar kernel name text.
- */
-const TOOLBAR_KERNEL = 'jp-NBToolbar-kernelName';
-
-/**
- * The class name added to toolbar kernel indicator icon.
- */
-const TOOLBAR_INDICATOR = 'jp-NBToolbar-kernelIndicator';
-
-/**
- * The class name added to a pressed button.
- */
-const TOOLBAR_PRESSED = 'jp-mod-pressed';
-
-/**
- * The class name added to a busy kernel indicator.
- */
-const TOOLBAR_BUSY = 'jp-mod-busy';
 
 /**
  * The class name added to a notebook in edit mode.
@@ -164,11 +80,6 @@ const EDIT_CLASS = 'jp-mod-editMode';
  * The class name added to a notebook in command mode.
  */
 const COMMAND_CLASS = 'jp-mod-commandMode';
-
-/**
- * The class name added to notebook editor instances.
- */
-const NB_EDITOR_CLASS = 'jp-Notebook-editor';
 
 /**
  * The class name added to the active cell.
@@ -185,122 +96,32 @@ const SELECTED_CLASS = 'jp-mod-selected';
  */
 const OTHER_SELECTED_CLASS = 'jp-mod-multiSelected';
 
-
 /**
- * A panel which contains a toolbar and a notebook.
+ * The interactivity modes for the notebook.
  */
 export
-class NotebookPanel extends Panel {
-  /**
-   * Create a new toolbar for the pane.
-   */
-  static createToolbar(manager: NotebookManager): NotebookToolbar {
-    return new NotebookToolbar(manager);
-  }
-
-  /**
-   * Create a new notebook for the pane.
-   */
-  static createNotebook(model: INotebookModel, rendermime: RenderMime<Widget>): NotebookWidget {
-    return new NotebookWidget(model, rendermime);
-  }
-
-  /**
-   * Construct a notebook panel.
-   */
-  constructor(manager: NotebookManager, rendermime: RenderMime<Widget>) {
-    super();
-    this.addClass(NB_PANEL);
-    this._manager = manager;
-    let constructor = this.constructor as typeof NotebookPanel;
-    this._toolbar = constructor.createToolbar(manager);
-    this.addChild(this._toolbar);
-    let container = new Panel();
-    container.addClass(NB_CONTAINER);
-    this._notebook = constructor.createNotebook(manager.model, rendermime);
-    container.addChild(this._notebook);
-    this.addChild(container);
-  }
-
-  /**
-   * Get the toolbar used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get toolbar(): NotebookToolbar {
-    return this._toolbar;
-  }
-
-  /**
-   * Get the notebook used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get notebook(): NotebookWidget {
-    return this._notebook;
-  }
-
-  /**
-   * Get the manager used by the widget.
-   */
-  get manager(): NotebookManager {
-    return this._manager;
-  }
-
-  /**
-   * Get the model used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get model(): INotebookModel {
-    return this._manager.model;
-  }
-
-  /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose(): void {
-    this._toolbar = null;
-    this._notebook = null;
-    this._manager = null;
-    super.dispose();
-  }
-
-  private _toolbar: NotebookToolbar = null;
-  private _notebook: NotebookWidget = null;
-  private _manager: NotebookManager = null;
-}
+type NotebookMode = 'command' | 'edit';
 
 
 /**
- * A widget holding the notebook cells.
+ * A widget which renders notebooks.
  */
 export
-class NotebookWidget extends Widget {
+class NotebookRenderer extends Widget {
   /**
    * Create a new cell widget given a cell model.
    */
   static createCell(cell: ICellModel, rendermime: RenderMime<Widget>): BaseCellWidget {
-    let widget: BaseCellWidget;
     switch (cell.type) {
     case 'code':
-      widget = new CodeCellWidget(cell as CodeCellModel, rendermime);
-      break;
+      return new CodeCellWidget(cell as CodeCellModel, rendermime);
     case 'markdown':
-      widget = new MarkdownCellWidget(cell as MarkdownCellModel, rendermime);
-      break;
-    case 'raw':
-      widget = new RawCellWidget(cell as RawCellModel);
-      break;
+      return new MarkdownCellWidget(cell, rendermime);
+    // If there are any issues, just return a raw
+    // widget so the lists stay in sync.
     default:
-      // If there are any issues, just return a blank placeholder
-      // widget so the lists stay in sync.
-      widget = new BaseCellWidget(cell);
+      return new RawCellWidget(cell);
     }
-    return widget;
   }
 
   /**
@@ -313,15 +134,22 @@ class NotebookWidget extends Widget {
     this._model = model;
     this._rendermime = rendermime;
     this.layout = new PanelLayout();
-    let constructor = this.constructor as typeof NotebookWidget;
-    let cellsLayout = this.layout as PanelLayout;
+    model.cells.changed.connect(this.onCellsChanged, this);
+    model.metadataChanged.connect(this.onMetadataChanged, this);
+    this._langInfoCursor = model.getMetadata('language_info');
+    this._mimetype = this.getMimetype();
+    // Add the current cells.
+    if (model.cells.length === 0) {
+      return;
+    }
+    let layout = this.layout as PanelLayout;
+    let constructor = this.constructor as typeof NotebookRenderer;
     let factory = constructor.createCell;
     for (let i = 0; i < model.cells.length; i++) {
-      cellsLayout.addChild(factory(model.cells.get(i), rendermime));
+      let widget = factory(model.cells.get(i), rendermime);
+      this.initializeCellWidget(widget);
+      layout.addChild(widget);
     }
-    model.cells.changed.connect(this.onCellsChanged, this);
-    model.stateChanged.connect(this.onModelChanged, this);
-    model.selectionChanged.connect(this.onSelectionChanged, this);
   }
 
   /**
@@ -335,6 +163,24 @@ class NotebookWidget extends Widget {
   }
 
   /**
+   * Get the rendermime instance used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get rendermime(): RenderMime<Widget> {
+    return this._rendermime;
+  }
+
+  /**
+   * Get the child widget at the specified index.
+   */
+  childAt(index: number): BaseCellWidget {
+    let layout = this.layout as PanelLayout;
+    return layout.childAt(index) as BaseCellWidget;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -342,46 +188,10 @@ class NotebookWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
+    this._langInfoCursor = null;
     this._model.dispose();
     this._model = null;
     super.dispose();
-  }
-
-  /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    case 'dblclick':
-      this._evtDblClick(event as MouseEvent);
-      break;
-    }
-  }
-
-  /**
-   * Handle `after_attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
-    this.node.addEventListener('dblclick', this);
-  }
-
-  /**
-   * Handle `before_detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
-    this.node.removeEventListener('dblclick', this);
   }
 
   /**
@@ -409,64 +219,16 @@ class NotebookWidget extends Widget {
   }
 
   /**
-   * Handle `update-request` messages sent to the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    // Set the appropriate classes on the cells.
-    let model = this.model;
-    let layout = this.layout as PanelLayout;
-    let widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
-    if (model.mode === 'edit') {
-      this.addClass(EDIT_CLASS);
-      this.removeClass(COMMAND_CLASS);
-      if (widget) {
-        widget.input.editor.focus();
-      }
-    } else {
-      this.addClass(COMMAND_CLASS);
-      this.removeClass(EDIT_CLASS);
-      this.node.focus();
-    }
-    if (widget) {
-      widget.addClass(ACTIVE_CLASS);
-    }
-    let count = 0;
-    for (let i = 0; i < layout.childCount(); i++) {
-      let cell = model.cells.get(i);
-      widget = layout.childAt(i) as BaseCellWidget;
-      if (i !== model.activeCellIndex) {
-        widget.removeClass(ACTIVE_CLASS);
-      }
-      widget.removeClass(OTHER_SELECTED_CLASS);
-      if (model.isSelected(cell)) {
-        widget.addClass(SELECTED_CLASS);
-        count++;
-      } else {
-        widget.removeClass(SELECTED_CLASS);
-      }
-    }
-    if (count > 1) {
-      widget = layout.childAt(model.activeCellIndex) as BaseCellWidget;
-      widget.addClass(OTHER_SELECTED_CLASS);
-    }
-  }
-
-  /**
    * Handle changes to the notebook model.
    */
-  protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
+  protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
     switch (args.name) {
-    case 'mode':
-      this.update();
+    case 'language_info':
+      this._mimetype = this.getMimetype();
+      this._updateMimetypes();
       break;
-    case 'activeCellIndex':
-      let layout = this.layout as PanelLayout;
-      let child = layout.childAt(args.newValue);
-      if (!child) {
-        return;
-      }
-      Private.scrollIfNeeded(this.parent.node, child.node);
-      this.update();
+    default:
+      break;
     }
   }
 
@@ -475,14 +237,13 @@ class NotebookWidget extends Widget {
    */
   protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
     let layout = this.layout as PanelLayout;
-    let constructor = this.constructor as typeof NotebookWidget;
+    let constructor = this.constructor as typeof NotebookRenderer;
     let factory = constructor.createCell;
     let widget: BaseCellWidget;
     switch (args.type) {
     case ListChangeType.Add:
       widget = factory(args.newValue as ICellModel, this._rendermime);
-      widget.addClass(NB_CELL_CLASS);
-      widget.input.editor.addClass(NB_EDITOR_CLASS);
+      this.initializeCellWidget(widget);
       layout.insertChild(args.newIndex, widget);
       break;
     case ListChangeType.Move:
@@ -501,10 +262,9 @@ class NotebookWidget extends Widget {
         widget.dispose();
       }
       let newValues = args.newValue as ICellModel[];
-      for (let i = newValues.length; i < 0; i--) {
-        widget = factory(newValues[i], this._rendermime);
-        widget.addClass(NB_CELL_CLASS);
-        widget.input.editor.addClass(NB_EDITOR_CLASS);
+      for (let i = newValues.length; i > 0; i--) {
+        widget = factory(newValues[i - 1], this._rendermime);
+        this.initializeCellWidget(widget);
         layout.insertChild(args.newIndex, widget);
       }
       break;
@@ -514,18 +274,247 @@ class NotebookWidget extends Widget {
       widget.dispose();
       widget = factory(args.newValue as ICellModel, this._rendermime);
       layout.insertChild(args.newIndex, widget);
-      widget.addClass(NB_CELL_CLASS);
-      widget.input.editor.addClass(NB_EDITOR_CLASS);
+      this.initializeCellWidget(widget);
       break;
+    default:
+      return;
     }
     this.update();
   }
 
   /**
-   * Handle a change in the model selection.
+   * The mime type for code cells.
+   *
+   * #### Notes
+   * The default implementation uses the language info to set the
+   * mimetype.
    */
-  protected onSelectionChanged(model: INotebookModel): void {
+  protected getMimetype(): string {
+    let info = this._langInfoCursor.getValue() as nbformat.ILanguageInfoMetadata;
+    return mimetypeForLangauge(info as IKernelLanguageInfo);
+  }
+
+  /**
+   * Initialize a cell widget.
+   */
+  protected initializeCellWidget(widget: BaseCellWidget): void {
+    widget.addClass(NB_CELL_CLASS);
+    if (widget.model.type === 'code') {
+      widget.mimetype = this._mimetype;
+    }
+  }
+
+  /**
+   * Update the mimetype of code widgets.
+   */
+  private _updateMimetypes(): void {
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount(); i++) {
+      let widget = layout.childAt(i) as CodeCellWidget;
+      if (widget instanceof CodeCellWidget) {
+        widget.mimetype = this._mimetype;
+      }
+    }
+  }
+
+  private _model: INotebookModel = null;
+  private _rendermime: RenderMime<Widget> = null;
+  private _mimetype = 'text/plain';
+  private _langInfoCursor: IMetadataCursor = null;
+}
+
+
+/**
+ * A notebook widget that supports interactivity.
+ */
+export
+class ActiveNotebook extends NotebookRenderer {
+  /**
+   * A signal emitted when the state of the notebook changes.
+   */
+  get stateChanged(): ISignal<ActiveNotebook, IChangedArgs<any>> {
+    return Private.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * The interactivity mode of the notebook.
+   */
+  get mode(): NotebookMode {
+    return this._mode;
+  }
+  set mode(newValue: NotebookMode) {
+    if (newValue === this._mode) {
+      return;
+    }
+    let oldValue = this._mode;
+    this._mode = newValue;
+    // Edit mode deselects all cells.
+    if (newValue === 'edit') {
+      let layout = this.layout as PanelLayout;
+      for (let i = 0; i < layout.childCount(); i++) {
+        let widget = layout.childAt(i) as BaseCellWidget;
+        this.deselect(widget);
+      }
+    }
+    this.stateChanged.emit({ name: 'mode', oldValue, newValue });
     this.update();
+  }
+
+  /**
+   * The active cell index of the notebook.
+   */
+  get activeCellIndex(): number {
+    return this._activeCellIndex;
+  }
+  set activeCellIndex(newValue: number) {
+    newValue = Math.max(newValue, 0);
+    newValue = Math.min(newValue, this.model.cells.length - 1);
+    if (newValue === this._activeCellIndex) {
+      return;
+    }
+    let oldValue = this._activeCellIndex;
+    this._activeCellIndex = newValue;
+    let widget = (this.layout as PanelLayout).childAt(newValue);
+    if (widget instanceof MarkdownCellWidget) {
+      if (this.mode === 'edit') {
+        widget.rendered = false;
+      }
+    }
+    this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
+    this.update();
+  }
+
+  /**
+   * Select a cell widget.
+   */
+  select(widget: BaseCellWidget): void {
+    Private.selectedProperty.set(widget, true);
+    this.update();
+  }
+
+  /**
+   * Deselect a cell widget.
+   *
+   * #### Notes
+   * This has no effect on the "active" cell.
+   */
+  deselect(widget: BaseCellWidget): void {
+    Private.selectedProperty.set(widget, false);
+    this.update();
+  }
+
+  /**
+   * Whether a cell is selected or is the active cell.
+   */
+  isSelected(widget: BaseCellWidget): boolean {
+    let layout = this.layout as PanelLayout;
+    if (layout.childAt(this._activeCellIndex) === widget) {
+      return true;
+    }
+    return Private.selectedProperty.get(widget);
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'click':
+      this._evtClick(event as MouseEvent);
+      break;
+    case 'dblclick':
+      this._evtDblClick(event as MouseEvent);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle `after_attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('click', this);
+    this.node.addEventListener('dblclick', this);
+    this.update();
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('click', this);
+    this.node.removeEventListener('dblclick', this);
+  }
+
+  /**
+   * Handle `update-request` messages sent to the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    // Set the appropriate classes on the cells.
+    let layout = this.layout as PanelLayout;
+    let widget = layout.childAt(this.activeCellIndex) as BaseCellWidget;
+    if (this.mode === 'edit') {
+      this.addClass(EDIT_CLASS);
+      this.removeClass(COMMAND_CLASS);
+      if (widget) {
+        widget.focus();
+      }
+      if (widget instanceof MarkdownCellWidget) {
+        (widget as MarkdownCellWidget).rendered = false;
+      }
+    } else {
+      this.addClass(COMMAND_CLASS);
+      this.removeClass(EDIT_CLASS);
+      this.node.focus();
+    }
+    if (widget) {
+      widget.addClass(ACTIVE_CLASS);
+    }
+    let count = 0;
+    for (let i = 0; i < layout.childCount(); i++) {
+      widget = layout.childAt(i) as BaseCellWidget;
+      if (i !== this.activeCellIndex) {
+        widget.removeClass(ACTIVE_CLASS);
+      }
+      widget.removeClass(OTHER_SELECTED_CLASS);
+      if (this.isSelected(widget)) {
+        widget.addClass(SELECTED_CLASS);
+        count++;
+      } else {
+        widget.removeClass(SELECTED_CLASS);
+      }
+    }
+    if (count > 1) {
+      widget = layout.childAt(this.activeCellIndex) as BaseCellWidget;
+      widget.addClass(OTHER_SELECTED_CLASS);
+    }
+  }
+
+  /**
+   * Initialize a cell widget.
+   */
+  protected initializeCellWidget(widget: BaseCellWidget): void {
+    super.initializeCellWidget(widget);
+    widget.editor.edgeRequested.connect(this.onEdgeRequest, this);
+  }
+
+  /**
+   * Handle edge request signals from cells.
+   */
+  protected onEdgeRequest(widget: Widget, location: EdgeLocation): void {
+    if (location === 'top') {
+      this.activeCellIndex--;
+    } else {
+      this.activeCellIndex++;
+    }
   }
 
   /**
@@ -540,8 +529,8 @@ class NotebookWidget extends Widget {
     if (i === -1) {
       return;
     }
-    model.activeCellIndex = i;
-    model.mode = document.activeElement === this.node ? 'command' : 'edit';
+    this.activeCellIndex = i;
+    this.mode = document.activeElement === this.node ? 'command' : 'edit';
   }
 
   /**
@@ -556,333 +545,37 @@ class NotebookWidget extends Widget {
     if (i === -1) {
       return;
     }
-    let cell = model.cells.get(i) as IMarkdownCellModel;
-    if (!isMarkdownCellModel(cell) || !cell.rendered) {
+    let cell = model.cells.get(i) as MarkdownCellModel;
+    let widget = (this.layout as PanelLayout).childAt(i) as MarkdownCellWidget;
+    if (cell.type !== 'markdown' || !widget.rendered) {
       return;
     }
-    let child = (this.layout as PanelLayout).childAt(i);
-    let node = (child as MarkdownCellWidget).rendered.node;
-    if (node.contains(event.target as HTMLElement)) {
-      model.mode = 'edit';
+    if (widget.node.contains(event.target as HTMLElement)) {
+      this.mode = 'edit';
     }
   }
 
-  private _model: INotebookModel = null;
-  private _rendermime: RenderMime<Widget> = null;
+  private _mode: NotebookMode = 'command';
+  private _activeCellIndex = 0;
 }
 
 
 /**
- * A class which provides a notebook toolbar widget.
- */
-export
-class NotebookToolbar extends Widget {
-  /**
-   * Create a new node for the widget.
-   */
-  static createNode(): HTMLElement {
-    let node = document.createElement('div');
-    let names = [TOOLBAR_SAVE, TOOLBAR_INSERT, TOOLBAR_CUT,
-                 TOOLBAR_COPY, TOOLBAR_PASTE,
-                 TOOLBAR_RUN, TOOLBAR_INTERRUPT,
-                 TOOLBAR_RESTART, TOOLBAR_CELL_WRAP,
-                 TOOLBAR_KERNEL, TOOLBAR_INDICATOR];
-    for (let name of names) {
-      let el: HTMLElement;
-      if (name === TOOLBAR_CELL_WRAP) {
-        el = document.createElement('div');
-        let select = document.createElement('select');
-        for (let t of ['Code', 'Markdown', 'Raw']) {
-          let option = document.createElement('option');
-          option.value = t.toLowerCase();
-          option.textContent = t;
-          select.appendChild(option);
-        }
-        select.className = `${TOOLBAR_CELL} ${TOOLBAR_ITEM}`;
-        el.appendChild(select);
-      } else {
-        el = document.createElement('span');
-      }
-      el.className = name;
-      el.classList.add(TOOLBAR_ITEM);
-      let nonButtons = [TOOLBAR_CELL_WRAP, TOOLBAR_KERNEL, TOOLBAR_INDICATOR];
-      if (nonButtons.indexOf(name) === -1) {
-        el.classList.add(TOOLBAR_BUTTON);
-      }
-      node.appendChild(el);
-    }
-    return node;
-  }
-
-  /**
-   * Construct a new toolbar widget.
-   */
-  constructor(manager: NotebookManager) {
-    super();
-    this.addClass(NB_TOOLBAR);
-    this._manager = manager;
-    let model = this._model = manager.model;
-    if (model.kernelspec) {
-      this.kernelNameNode.textContent = model.kernelspec.display_name;
-    } else {
-      this.kernelNameNode.textContent = 'No Kernel!';
-    }
-    if (model.cells.length) {
-      let cell = model.cells.get(model.activeCellIndex);
-      this.cellTypeNode.value = cell.type;
-    }
-    this.cellTypeNode.addEventListener('change', event => {
-      manager.changeCellType(this.cellTypeNode.value);
-    });
-    if (model.session) {
-      this.handleSession();
-    } else {
-      this.kernelIndicatorNode.classList.add(TOOLBAR_BUSY);
-    }
-    model.stateChanged.connect(this.onModelChanged, this);
-  }
-
-  /**
-   * Get the model used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get model(): INotebookModel {
-    return this._model;
-  }
-
-  /**
-   * Get the kernel name node.
-   */
-  get kernelNameNode(): HTMLElement {
-    let node = this.node.getElementsByClassName(TOOLBAR_KERNEL)[0];
-    return node as HTMLElement;
-  }
-
-  /**
-   * Get the cell selector node.
-   */
-  get cellTypeNode(): HTMLSelectElement {
-    let node = this.node.getElementsByClassName(TOOLBAR_CELL)[0];
-    return node as HTMLSelectElement;
-  }
-
-  /**
-   * Get the kernel status indicator node.
-   */
-  get kernelIndicatorNode(): HTMLElement {
-    let node = this.node.getElementsByClassName(TOOLBAR_INDICATOR)[0];
-    return node as HTMLElement;
-  }
-
-  /*
-   * Restart the kernel with a confirmation dialog.
-   */
-   restart(): Promise<void> {
-    return showDialog({
-      title: 'Restart Kernel?',
-      body: 'Do you want to restart the current kernel? All variables will be lost.',
-      host: this.parent.node
-    }).then(result => {
-      if (result.text === 'OK') {
-        return this._manager.restart();
-      }
-    });
-   }
-
-  /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    let node: HTMLElement;
-    switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    case 'mousedown':
-      node = event.target as HTMLElement;
-      if (node.classList.contains(TOOLBAR_BUTTON)) {
-        node.classList.add(TOOLBAR_PRESSED);
-      }
-      break;
-    case 'mouseup':
-    case 'mouseout':
-      let nodes = this.node.childNodes;
-      for (let i = 0; i < nodes.length; i++) {
-        node = nodes[i] as HTMLElement;
-        node.classList.remove(TOOLBAR_PRESSED);
-      }
-      break;
-    }
-  }
-
-  /**
-   * Handle `after_attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
-    this.node.addEventListener('mousedown', this);
-    this.node.addEventListener('mouseup', this);
-    this.node.addEventListener('mouseout', this);
-  }
-
-  /**
-   * Handle `before_detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
-    this.node.removeEventListener('mousedown', this);
-    this.node.removeEventListener('mouseup', this);
-    this.node.addEventListener('mouseout', this);
-  }
-
-  /**
-   * Handle changes to the model.
-   */
-  protected onModelChanged(model: INotebookModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'kernelspec':
-      if (model.kernelspec) {
-        let name = model.kernelspec.display_name || 'No kernel!';
-        this.kernelNameNode.textContent = name;
-      }
-      break;
-    case 'activeCellIndex':
-      let cell = model.cells.get(model.activeCellIndex);
-      this.cellTypeNode.value = cell.type;
-      break;
-    case 'session':
-      this.handleSession();
-      break;
-    }
-  }
-
-  /**
-   * Handle a change to the session.
-   */
-  protected handleSession(): void {
-    let node = this.kernelIndicatorNode;
-    let session = this.model.session;
-    session.statusChanged.connect((sender, status) => {
-      if (status === KernelStatus.Idle) {
-        node.classList.remove(TOOLBAR_BUSY);
-      } else {
-        node.classList.add(TOOLBAR_BUSY);
-      }
-      switch (status) {
-      case KernelStatus.Idle:
-        node.title = 'Kernel Idle';
-        break;
-      case KernelStatus.Busy:
-        node.title = 'Kernel Busy';
-        break;
-      case KernelStatus.Dead:
-        node.title = 'Kernel Died';
-        this.kernelNameNode.textContent = 'No Kernel!';
-        break;
-      case KernelStatus.Reconnecting:
-        node.title = 'Kernel Reconnecting';
-        break;
-      case KernelStatus.Restarting:
-        node.title = 'Kernel Restarting';
-        break;
-      case KernelStatus.Starting:
-        node.title = 'Kernel Starting';
-        break;
-      case KernelStatus.Unknown:
-        node.title = 'Kernel Status Unknown';
-        break;
-      }
-    });
-    session.sessionDied.connect(() => {
-      node.classList.add(TOOLBAR_BUSY);
-      node.title = 'Kernel Died';
-      this.kernelNameNode.textContent = 'No Kernel!';
-    });
-    if (session.status === KernelStatus.Idle) {
-      node.classList.remove(TOOLBAR_BUSY);
-    } else {
-      node.classList.add(TOOLBAR_BUSY);
-    }
-  }
-
-  /**
-   * Handle `click` events for the widget.
-   */
-  private _evtClick(event: MouseEvent): void {
-    let  names = [TOOLBAR_SAVE, TOOLBAR_INSERT, TOOLBAR_CUT,
-                  TOOLBAR_COPY, TOOLBAR_PASTE,
-                  TOOLBAR_RUN, TOOLBAR_INTERRUPT,
-                  TOOLBAR_RESTART, TOOLBAR_CELL,
-                  TOOLBAR_KERNEL, TOOLBAR_INDICATOR];
-    let selected = '';
-    for (let name of names) {
-      if ((event.target as HTMLElement).className.indexOf(name) !== -1) {
-        selected = name;
-        break;
-      }
-    }
-    let manager = this._manager;
-    switch (selected) {
-    case TOOLBAR_SAVE:
-      manager.save();
-      break;
-    case TOOLBAR_INSERT:
-      manager.insertBelow();
-      break;
-    case TOOLBAR_CUT:
-      manager.cut();
-      break;
-    case TOOLBAR_COPY:
-      manager.copy();
-      break;
-    case TOOLBAR_PASTE:
-      manager.paste();
-      break;
-    case TOOLBAR_RUN:
-      manager.runAndAdvance();
-      break;
-    case TOOLBAR_INTERRUPT:
-      manager.interrupt();
-      break;
-    case TOOLBAR_RESTART:
-      this.restart();
-      break;
-    }
-  }
-
-  private _manager: NotebookManager = null;
-  private _model: INotebookModel = null;
-}
-
-
-/**
- * A namespace for Notebook widget private data.
+ * A namespace for private data.
  */
 namespace Private {
   /**
-   * Scroll an element into view if needed.
-   *
-   * @param area - The scroll area element.
-   *
-   * @param elem - The element of interest.
+   * An attached property for the selected state of a cell.
    */
   export
-  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
-    let ar = area.getBoundingClientRect();
-    let er = elem.getBoundingClientRect();
-    if (er.top < ar.top - 10) {
-      area.scrollTop -= ar.top - er.top + 10;
-    } else if (er.bottom > ar.bottom + 10) {
-      area.scrollTop += er.bottom - ar.bottom + 10;
-    }
-  }
+  const selectedProperty = new Property<BaseCellWidget, boolean>({
+    name: 'selected',
+    value: false
+  });
+
+  /**
+   * A signal emitted when the state changes on the notebook.
+   */
+  export
+  const stateChangedSignal = new Signal<ActiveNotebook, IChangedArgs<any>>();
 }

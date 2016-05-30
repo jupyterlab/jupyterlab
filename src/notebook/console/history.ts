@@ -14,10 +14,6 @@ import {
   IKernel, IHistoryRequest, IHistoryReply
 } from 'jupyter-js-services';
 
-import {
-  IConsoleModel
-} from './model';
-
 
 /**
  * The definition of a console history manager object.
@@ -58,6 +54,7 @@ interface IConsoleHistory extends IDisposable {
   push(item: string): void;
 }
 
+
 /**
  * A console history manager object.
  */
@@ -76,14 +73,14 @@ class ConsoleHistory implements IConsoleHistory {
   /**
    * The current kernel supplying navigation history.
    */
-  // get kernel(): IKernel {
-  //   return this._kernel;
-  // }
+  get kernel(): IKernel {
+    return this._kernel;
+  }
   set kernel(newValue: IKernel) {
     if (newValue === this._kernel) {
       return;
     }
-    let contents = ConsoleHistoryPrivate.initialRequest;
+    let contents = Private.initialRequest;
     this._kernel = newValue;
     this._kernel.history(contents).then((value: IHistoryReply) => {
       this._history = [];
@@ -109,7 +106,9 @@ class ConsoleHistory implements IConsoleHistory {
    */
   constructor(kernel: IKernel) {
     this._history = [];
-    if (kernel) this.kernel = kernel;
+    if (kernel) {
+      this.kernel = kernel;
+    }
   }
 
   /**
@@ -171,7 +170,11 @@ class ConsoleHistory implements IConsoleHistory {
   private _kernel: IKernel = null;
 }
 
-namespace ConsoleHistoryPrivate {
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
   export
   const initialRequest: IHistoryRequest = {
     output: false,

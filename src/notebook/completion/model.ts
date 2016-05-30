@@ -12,7 +12,7 @@ import {
 
 import {
   ICompletionRequest, ITextChange
-} from '../editor/model';
+} from '../cells/editor';
 
 
 /**
@@ -73,6 +73,23 @@ interface ICompletionItem {
 
 
 /**
+ * A cursor span.
+ */
+export
+interface ICursorSpan {
+  /**
+   * The start position of the cursor.
+   */
+  start: number;
+
+  /**
+   * The end position of the cursor.
+   */
+  end: number;
+}
+
+
+/**
  * The data model backing a code completion widget.
  */
 export
@@ -90,7 +107,7 @@ interface ICompletionModel extends IDisposable {
   /**
    * The cursor details that the API has used to return matching options.
    */
-  cursor: { start: number, end: number };
+  cursor: ICursorSpan;
 
   /**
    * The list of visible items in the completion menu.
@@ -118,6 +135,7 @@ interface ICompletionModel extends IDisposable {
   reset(): void;
 }
 
+
 /**
  * An implementation of a completion model.
  */
@@ -140,10 +158,10 @@ class CompletionModel implements ICompletionModel {
   /**
    * The cursor details that the API has used to return matching options.
    */
-  get cursor(): { start: number, end: number } {
+  get cursor(): ICursorSpan {
     return this._cursor;
   }
-  set cursor(cursor: { start: number, end: number }) {
+  set cursor(cursor: ICursorSpan) {
     this._cursor = cursor;
   }
 
@@ -164,7 +182,6 @@ class CompletionModel implements ICompletionModel {
     return this._options;
   }
   set options(newValue: string[]) {
-    let oldValue = this._options;
     if (newValue) {
       this._options = [];
       this._options.push(...newValue);
@@ -193,7 +210,6 @@ class CompletionModel implements ICompletionModel {
     return this._current;
   }
   set current(newValue: ITextChange) {
-    let oldValue = this._current;
     this._current = newValue;
 
     let original = this._original;
@@ -297,7 +313,7 @@ class CompletionModel implements ICompletionModel {
           raw: option,
           score: match.score,
           text: StringSearch.highlight(option, match.indices)
-        })
+        });
       }
     }
     return results.sort((a, b) => { return a.score - b.score; })

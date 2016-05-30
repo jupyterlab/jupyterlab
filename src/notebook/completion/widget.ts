@@ -39,6 +39,9 @@ const ACTIVE_CLASS = 'jp-mod-active';
 const MAX_HEIGHT = 250;
 
 
+/**
+ * A widget that enables text completion.
+ */
 export
 class CompletionWidget extends Widget {
   /**
@@ -78,11 +81,22 @@ class CompletionWidget extends Widget {
     this.update();
   }
 
+
   /**
    * A signal emitted when a selection is made from the completion menu.
    */
   get selected(): ISignal<CompletionWidget, string> {
     return Private.selectedSignal.bind(this);
+  }
+
+  /**
+   * The model used by the completion widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get model(): ICompletionModel {
+    return this._model;
   }
 
   /**
@@ -99,7 +113,9 @@ class CompletionWidget extends Widget {
    * Dispose of the resources held by the completion widget.
    */
   dispose() {
-    if (this.isDisposed) return;
+    if (this.isDisposed) {
+      return;
+    }
     this._model.dispose();
     this._model = null;
     clearSignalData(this);
@@ -123,6 +139,8 @@ class CompletionWidget extends Widget {
       break;
     case 'mousedown':
       this._evtMousedown(event as MouseEvent);
+      break;
+    default:
       break;
     }
   }
@@ -171,7 +189,9 @@ class CompletionWidget extends Widget {
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
 
-    if (this.isHidden) this.show();
+    if (this.isHidden) {
+      this.show();
+    }
 
     let coords = this._model.current ? this._model.current.coords
       : this._model.original.coords;
@@ -264,8 +284,9 @@ class CompletionWidget extends Widget {
           active.classList.add(ACTIVE_CLASS);
           Private.scrollIfNeeded(this.node, active);
           return;
+        default:
+          return;
         }
-        return;
       }
       target = target.parentElement;
     }

@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  IKernelSpecIds, IKernel
+  IKernelSpecIds
 } from 'jupyter-js-services';
 
 import {

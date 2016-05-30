@@ -2,141 +2,57 @@
 // Distributed under the terms of the Modified BSD License.
 'use strict';
 
-import * as CodeMirror
-  from 'codemirror';
-
-import 'codemirror/mode/meta';
+import * as utils
+ from 'jupyter-js-utils';
 
 import {
-  INotebookSession
-} from 'jupyter-js-services';
+  IDocumentModel
+} from 'jupyter-js-ui/lib/docmanager';
 
 import {
-  copy, shallowEquals
-} from 'jupyter-js-utils';
-
-import {
-  IDisposable
-} from 'phosphor-disposable';
-
-import {
-  IObservableList, ObservableList, ListChangeType, IListChangedArgs
+  IObservableList, ListChangeType, IListChangedArgs
 } from 'phosphor-observablelist';
 
 import {
-  IChangedArgs, Property
+  IChangedArgs
 } from 'phosphor-properties';
 
 import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
-import {
-  EditorModel, IEditorModel, IEditorOptions, EdgeLocation
-} from '../editor/model';
 
 import {
-  InputAreaModel, IInputAreaModel
-} from '../input-area/model';
-
-import {
-  OutputAreaModel, IOutputAreaModel
-} from '../output-area/model';
-
-import {
-  ICellModel,
-  ICodeCellModel, CodeCellModel,
-  IMarkdownCellModel, MarkdownCellModel,
-  IRawCellModel, isCodeCellModel, isMarkdownCellModel,
-  RawCellModel, isRawCellModel, MetadataCursor, IMetadataCursor,
-  executeCodeCell
+  ICellModel, CodeCellModel, RawCellModel, MarkdownCellModel
 } from '../cells/model';
 
 import {
-  OutputType, IKernelspecMetadata, ILanguageInfoMetadata
+  IMetadataCursor, MetadataCursor
+} from '../common/metadata';
+
+import {
+  OberservableUndoableList
+} from '../common/undo';
+
+import {
+  nbformat
 } from './nbformat';
-
-
-/**
- * The interactivity modes for the notebook.
- */
-export
-type NotebookMode = 'command' | 'edit';
-
-
-/**
- * The default notebook kernelspec metadata.
- */
-const DEFAULT_KERNELSPEC = {
-  name: 'unknown',
-  display_name: 'No Kernel!'
-}
-
-/**
- * The default notebook languageinfo metadata.
- */
-const DEFAULT_LANG_INFO = {
-  name: 'unknown'
-}
 
 
 /**
  * The definition of a model object for a notebook widget.
  */
 export
-interface INotebookModel extends IDisposable {
+interface INotebookModel extends IDocumentModel {
   /**
-   * A signal emitted when state of the notebook changes.
+   * A signal emitted when a model state changes.
    */
-  stateChanged: ISignal<INotebookModel, IChangedArgs<any>>;
+  stateChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
 
   /**
-   * A signal emitted when a user metadata state changes.
+   * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<INotebookModel, string>;
-
-  /**
-   * A signal emitted when the selection changes.
-   */
-  selectionChanged: ISignal<INotebookModel, void>;
-
-  /**
-   * The default mime type for new code cells in the notebook.
-   *
-   * #### Notes
-   * This can be considered the default language of the notebook.
-   */
-  defaultMimetype: string;
-
-  /**
-   * The interactivity mode of the notebook.
-   */
-  mode: NotebookMode;
-
-  /**
-   * Whether the notebook has unsaved changes.
-   */
-  dirty: boolean;
-
-  /**
-   * Whether the notebook is read-only.
-   */
-  readOnly: boolean;
-
-  /**
-   * The kernelspec metadata associated with the notebook.
-   */
-  kernelspec: IKernelspecMetadata;
-
-  /**
-   * The language info metadata associated with the notebook.
-   */
-  languageInfo: ILanguageInfoMetadata;
-
-  /**
-   * The original nbformat associated with the notebook.
-   */
-  origNbformat: number;
+  metadataChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
 
   /**
    * The list of cells in the notebook.
@@ -144,78 +60,29 @@ interface INotebookModel extends IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  cells: IObservableList<ICellModel>;
+  cells: OberservableUndoableList<ICellModel>;
 
   /**
-   * The optional notebook session associated with the model.
-   */
-  session?: INotebookSession;
-
-  /**
-   * The index of the active cell.
-   */
-  activeCellIndex: number;
-
-  /**
-   * Select a cell.
-   */
-  select(cell: ICellModel): void;
-
-  /**
-   * Deselect a cell.
-   */
-  deselect(cell: ICellModel): void;
-
-  /**
-   * Whether a cell is selected.
-   */
-  isSelected(cell: ICellModel): boolean;
-
-  /**
-   * A factory for creating a new code cell.
-   *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new code cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
+   * The major version number of the nbformat.
    *
    * #### Notes
-   * If the source argument does not give an input mimetype, the code cell
-   * defaults to the notebook [[defaultMimetype]].
+   * This is a read-only property.
    */
-  createCodeCell(source?: ICellModel): ICodeCellModel;
+  nbformat: number;
 
   /**
-   * A factory for creating a new Markdown cell.
+   * The minor version number of the nbformat.
    *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new markdown cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
+   * #### Notes
+   * This is a read-only property.
    */
-  createMarkdownCell(source?: ICellModel): IMarkdownCellModel;
-
-  /**
-   * A factory for creating a new raw cell.
-   *
-   * @param source - The cell to use for the original source data.
-   *
-   * @returns A new raw cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createRawCell(source?: ICellModel): IRawCellModel;
-
-  /**
-   * Run the active cell, taking the appropriate action.
-   */
-  runActiveCell(): void;
+  nbformatMinor: number;
 
   /**
    * Get a metadata cursor for the notebook.
    *
    * #### Notes
-   * Metadata associated with the nbformat spec are set directly
-   * on the model.  This method is used to interact with a namespaced
+   * This method is used to interact with a namespaced
    * set of metadata on the notebook.
    */
   getMetadata(namespace: string): IMetadataCursor;
@@ -226,7 +93,41 @@ interface INotebookModel extends IDisposable {
    * #### Notes
    * Metadata associated with the nbformat are not included.
    */
-   listMetadata(): string[];
+  listMetadata(): string[];
+
+  /**
+   * A factory for creating a new code cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new code cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   *
+   * #### Notes
+   * If the source argument does not give an input mimetype, the code cell
+   * defaults to the notebook [[defaultMimetype]].
+   */
+  createCodeCell(source?: nbformat.IBaseCell): CodeCellModel;
+
+  /**
+   * A factory for creating a new Markdown cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new markdown cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createMarkdownCell(source?: nbformat.IBaseCell): MarkdownCellModel;
+
+  /**
+   * A factory for creating a new raw cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new raw cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createRawCell(source?: nbformat.IBaseCell): RawCellModel;
 }
 
 
@@ -236,56 +137,52 @@ interface INotebookModel extends IDisposable {
 export
 class NotebookModel implements INotebookModel {
   /**
-   * Create an editor model.
-   */
-  static createEditor(options?: IEditorOptions): IEditorModel {
-    return new EditorModel(options);
-  }
-
-  /**
-   * Create an input area model.
-   */
-  static createInput(editor: IEditorModel) : IInputAreaModel {
-    return new InputAreaModel(editor);
-  }
-
-  /**
-   * Create an output area model.
-   */
-  static createOutputArea(): IOutputAreaModel {
-    return new OutputAreaModel();
-  }
-
-  /**
    * Construct a new notebook model.
    */
-  constructor() {
-    this._cells = new ObservableList<ICellModel>();
+  constructor(languagePreference?: string) {
+    this._cells = new OberservableUndoableList<ICellModel>((data: nbformat.IBaseCell) => {
+      switch (data.cell_type) {
+        case 'code':
+          return this.createCodeCell(data);
+        case 'markdown':
+          return this.createMarkdownCell(data);
+        default:
+          return this.createRawCell(data);
+      }
+    });
     this._cells.changed.connect(this.onCellsChanged, this);
+    if (languagePreference) {
+      this._metadata['language_info'] = `{"name":"${languagePreference}"}`;
+    }
   }
 
   /**
-   * A signal emitted when the state of the model changes.
+   * A signal emitted when the document content changes.
    */
-  get stateChanged(): ISignal<INotebookModel, IChangedArgs<any>> {
-    return NotebookModelPrivate.stateChangedSignal.bind(this);
+  get contentChanged(): ISignal<INotebookModel, void> {
+    return Private.contentChangedSignal.bind(this);
   }
 
   /**
-   * A signal emitted when a user metadata state changes.
-   *
-   * #### Notes
-   * The signal argument is the namespace of the metadata that changed.
+   * A signal emitted when the model dirty state changes.
    */
-  get metadataChanged(): ISignal<INotebookModel, string> {
-    return NotebookModelPrivate.metadataChangedSignal.bind(this);
+  get dirtyChanged(): ISignal<IDocumentModel, boolean> {
+    // TODO: Remove in jupyter-js-ui and then remove here.
+    return Private.dirtyChangedSignal.bind(this);
   }
 
   /**
-   * A signal emitted when the selection changes.
+   * A signal emitted when a model state changes.
    */
-  get selectionChanged(): ISignal<INotebookModel, void> {
-    return NotebookModelPrivate.selectionChangedSignal.bind(this);
+  get stateChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
+    return Private.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a metadata field changes.
+   */
+  get metadataChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
+    return Private.metadataChangedSignal.bind(this);
   }
 
   /**
@@ -294,168 +191,36 @@ class NotebookModel implements INotebookModel {
    * #### Notes
    * This is a read-only property.
    */
-  get cells(): IObservableList<ICellModel> {
+  get cells(): OberservableUndoableList<ICellModel> {
     return this._cells;
   }
 
   /**
-   * The default mimetype for cells new code cells.
-   */
-  get defaultMimetype(): string {
-    return this._defaultMimetype;
-  }
-  set defaultMimetype(newValue: string) {
-    if (newValue === this._defaultMimetype) {
-      return;
-    }
-    let oldValue = this._defaultMimetype;
-    this._defaultMimetype = newValue;
-    let name = 'defaultMimetype';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The read-only status of the notebook.
-   */
-  get readOnly(): boolean {
-    return this._readOnly;
-  }
-  set readOnly(newValue: boolean) {
-    if (newValue === this._readOnly) {
-      return;
-    }
-    let oldValue = this._readOnly;
-    this._readOnly = newValue;
-    let cells = this._cells;
-    for (let i = 0; i < cells.length; i++) {
-      cells.get(i).input.textEditor.readOnly = newValue;
-    }
-    let name = 'readOnly';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The session for the notebook.
-   */
-  get session(): INotebookSession {
-    return this._session;
-  }
-  set session(newValue: INotebookSession) {
-    if (newValue === this._session) {
-      return;
-    }
-    let oldValue = this._session;
-    this._session = newValue;
-    NotebookModelPrivate.sessionChanged(this, newValue);
-    let name = 'session';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The kernelspec metadata for the notebook.
-   */
-  get kernelspec(): IKernelspecMetadata {
-    return JSON.parse(this._kernelspec);
-  }
-  set kernelspec(newValue: IKernelspecMetadata) {
-    let oldValue = JSON.parse(this._kernelspec);
-    if (shallowEquals(oldValue, newValue)) {
-      return;
-    }
-    this._kernelspec = JSON.stringify(newValue);
-    let name = 'kernelspec';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The language info metadata for the notebook.
-   */
-  get languageInfo(): ILanguageInfoMetadata {
-    return JSON.parse(this._langInfo);
-  }
-  set languageInfo(newValue: ILanguageInfoMetadata) {
-    let oldValue = JSON.parse(this._langInfo);
-    if (shallowEquals(oldValue, newValue)) {
-      return;
-    }
-    this._langInfo = JSON.stringify(newValue);
-    let name = 'languageInfo';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The original nbformat version for the notebook.
-   */
-  get origNbformat(): number {
-    return this._origNbformat;
-  }
-  set origNbformat(newValue: number) {
-    if (newValue === this._origNbformat) {
-      return;
-    }
-    let oldValue = this._origNbformat;
-    this._origNbformat = newValue;
-    let name = 'origNbformat';
-    this.stateChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The index of the active cell.
+   * The major version number of the nbformat.
    *
    * #### Notes
-   * The value will be clamped.  The active cell is considered to be selected.
+   * This is a read-only property.
    */
-  get activeCellIndex(): number {
-    return this._activeCellIndex;
-  }
-  set activeCellIndex(newValue: number) {
-    newValue = Math.max(newValue, 0);
-    newValue = Math.min(newValue, this.cells.length - 1);
-    if (newValue === this._activeCellIndex) {
-      return;
-    }
-    let oldValue = this._activeCellIndex;
-    this._activeCellIndex = newValue;
-    let newCell = this.cells.get(newValue);
-    if (newCell && isMarkdownCellModel(newCell)) {
-      if (this.mode === 'edit') {
-        newCell.rendered = false;
-      }
-    }
-    let name = 'activeCellIndex';
-    this.stateChanged.emit({ name, oldValue, newValue });
+  get nbformat(): number {
+    return this._nbformat;
   }
 
   /**
-   * The mode of the notebook.
+   * The minor version number of the nbformat.
    *
    * #### Notes
-   * Selected markdown cells are rendered if mode is set to 'command'
-   * and unrendered if mode is set to 'edit'.
+   * This is a read-only property.
    */
-  get mode(): NotebookMode {
-    return this._mode;
-  }
-  set mode(newValue: NotebookMode) {
-    if (newValue === this._mode) {
-      return;
-    }
-    let oldValue = this._mode;
-    this._mode = newValue;
-    NotebookModelPrivate.modeChanged(this, newValue);
-    // Edit mode deselects all cells.
-    if (newValue === 'edit') {
-      for (let i = 0; i < this.cells.length; i++) {
-        let cell = this.cells.get(i);
-        this.deselect(cell);
-      }
-    }
-    let name = 'mode';
-    this.stateChanged.emit({ name, oldValue, newValue });
+  get nbformatMinor(): number {
+    return this._nbformatMinor;
   }
 
   /**
-   * Whether the notebook has unsaved changes.
+   * The dirty state of the model.
+   *
+   * #### Notes
+   * This should be cleared when the document is loaded from
+   * or saved to disk.
    */
   get dirty(): boolean {
     return this._dirty;
@@ -466,8 +231,45 @@ class NotebookModel implements INotebookModel {
     }
     let oldValue = this._dirty;
     this._dirty = newValue;
-    let name = 'dirty';
-    this.stateChanged.emit({ name, oldValue, newValue });
+    this.dirtyChanged.emit(newValue);
+    this.stateChanged.emit({ name: 'dirty', oldValue, newValue });
+  }
+
+  /**
+   * The read-only state of the model.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
+  }
+  set readOnly(newValue: boolean) {
+    if (newValue === this._readOnly) {
+      return;
+    }
+    let oldValue = this._readOnly;
+    this._readOnly = newValue;
+    this.stateChanged.emit({ name: 'readOnly', oldValue, newValue });
+  }
+
+  /**
+   * The default kernel name of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get defaultKernelName(): string {
+    let spec = this._metadata['kernelspec'];
+    return spec ? spec.name : '';
+  }
+
+  /**
+   * The default kernel language of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get defaultKernelLanguage(): string {
+    let info = this._metadata['language_info'];
+    return info ? info.name : '';
   }
 
   /**
@@ -489,6 +291,7 @@ class NotebookModel implements INotebookModel {
       return;
     }
     let cells = this._cells;
+    cells.dispose();
     clearSignalData(this);
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i);
@@ -496,141 +299,144 @@ class NotebookModel implements INotebookModel {
     }
     cells.clear();
     this._cells = null;
+    for (let key in this._cursors) {
+      this._cursors[key].dispose();
+    }
+    this._cursors = null;
+    this._metadata = null;
   }
 
   /**
-   * Select a cell.
+   * Serialize the model to a string.
    */
-  select(cell: ICellModel): void {
-    NotebookModelPrivate.selectedProperty.set(cell, true);
-    this.selectionChanged.emit(void 0);
+  toString(): string {
+    return JSON.stringify(this.toJSON());
   }
 
   /**
-   * Deselect a cell.
+   * Deserialize the model from a string.
    *
    * #### Notes
-   * This has no effect on the "active" cell.
+   * Should emit a [contentChanged] signal.
    */
-  deselect(cell: ICellModel): void {
-    NotebookModelPrivate.selectedProperty.set(cell, false);
-    this.selectionChanged.emit(void 0);
+  fromString(value: string): void {
+    this.fromJSON(JSON.parse(value));
   }
 
   /**
-   * Whether a cell is selected.
+   * Serialize the model to JSON.
    */
-  isSelected(cell: ICellModel): boolean {
-    return (NotebookModelPrivate.selectedProperty.get(cell) ||
-            this.cells.indexOf(cell) === this.activeCellIndex);
-  }
-
-  /**
-   * Create a code cell model.
-   */
-  createCodeCell(source?: ICellModel): ICodeCellModel {
-    let mimetype = this.defaultMimetype;
-    if (source && isCodeCellModel(source)) {
-      mimetype = source.input.textEditor.mimetype;
+  toJSON(): nbformat.INotebookContent {
+    let cells: nbformat.ICell[] = [];
+    for (let i = 0; i < this.cells.length; i++) {
+      let cell = this.cells.get(i);
+      cells.push(cell.toJSON());
     }
-    let constructor = this.constructor as typeof NotebookModel;
-    let editor = constructor.createEditor({
-      mimetype,
-      readOnly: this.readOnly
-    });
-    let input = constructor.createInput(editor);
-    let output = constructor.createOutputArea();
-    let cell = new CodeCellModel(input, output);
-    cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isCodeCellModel(source)) {
-        cell.collapsed = source.collapsed;
-        cell.scrolled = source.scrolled;
-        for (let i = 0; i < source.output.outputs.length; i++) {
-          let sourceOutput = source.output.outputs.get(i);
-          cell.output.outputs.add(sourceOutput);
-        }
-      }
-    }
-    return cell;
+    let metadata = utils.copy(this._metadata) as nbformat.INotebookMetadata;
+    return {
+      metadata,
+      nbformat_minor: this._nbformatMinor,
+      nbformat: this._nbformat,
+      cells
+    };
   }
 
   /**
-   * Create a markdown cell model.
-   */
-  createMarkdownCell(source?: ICellModel): IMarkdownCellModel {
-    let constructor = this.constructor as typeof NotebookModel;
-    let editor = constructor.createEditor({
-      mimetype: 'text/x-ipythongfm',
-      readOnly: this.readOnly
-    });
-    let input = constructor.createInput(editor);
-    let cell = new MarkdownCellModel(input);
-    cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isMarkdownCellModel(source)) {
-        cell.rendered = source.rendered;
-      }
-    }
-    return cell;
-  }
-
-  /**
-   * Create a raw cell model.
-   */
-  createRawCell(source?: ICellModel): IRawCellModel {
-    let constructor = this.constructor as typeof NotebookModel;
-    let editor = constructor.createEditor({
-      readOnly: this.readOnly
-    });
-    let input = constructor.createInput(editor);
-    let cell = new RawCellModel(input);
-    cell.trusted = true;
-    if (source) {
-      cell.trusted = source.trusted;
-      cell.input.textEditor.text = source.input.textEditor.text;
-      cell.tags = source.tags;
-      if (isRawCellModel(source)) {
-        cell.format = (source as IRawCellModel).format;
-      }
-    }
-    return cell;
-  }
-
-  /**
-   * Run the active cell, taking the appropriate action.
+   * Deserialize the model from JSON.
    *
    * #### Notes
-   * If the notebook is read-only or has no active cell, this is a no-op.
-   * Markdown cells are rendered and code cells are executed.
-   * All cells are marked as trusted.
+   * Should emit a [contentChanged] signal.
    */
-  runActiveCell(): void {
-    if (this.readOnly) {
-      return;
-    }
-    let cell = this.cells.get(this.activeCellIndex);
-    if (!cell) {
-      return;
-    }
-    cell.trusted = true;
-    if (isCodeCellModel(cell)) {
-      let session = this.session;
-      if (!session || !session.kernel) {
-        cell.clear();
-        return;
+  fromJSON(value: nbformat.INotebookContent): void {
+    let cells: ICellModel[] = [];
+    for (let data of value.cells) {
+      switch (data.cell_type) {
+      case 'code':
+        cells.push(new CodeCellModel(data));
+        break;
+      case 'markdown':
+        cells.push(new MarkdownCellModel(data));
+        break;
+      case 'raw':
+        cells.push(new RawCellModel(data));
+        break;
+      default:
+        continue;
       }
-      executeCodeCell(cell, session.kernel);
-    } else if (isMarkdownCellModel(cell) && cell.rendered === false) {
-      cell.rendered = true;
     }
-    this.mode = 'command';
+    this.cells.assign(cells);
+    let oldValue = 0;
+    let newValue = 0;
+    if (value.nbformat !== this._nbformat) {
+      oldValue = this._nbformat;
+      this._nbformat = newValue = value.nbformat;
+      this.stateChanged.emit({ name: 'nbformat', oldValue, newValue });
+    }
+    if (value.nbformat_minor !== this._nbformatMinor) {
+      oldValue = this._nbformat;
+      this._nbformatMinor = newValue = value.nbformat_minor;
+      this.stateChanged.emit({ name: 'nbformatMinor', oldValue, newValue });
+    }
+    // Update the metadata.
+    let metadata = value.metadata;
+    for (let key in this._metadata) {
+      if (!(key in metadata)) {
+        this.setCursorData(key, null);
+        delete this._metadata[key];
+        this._cursors[name].dispose();
+        delete this._cursors[name];
+      }
+    }
+    for (let key in metadata) {
+      this.setCursorData(key, (metadata as any)[key]);
+    }
+  }
+
+  /**
+   * Initialize the model state.
+   */
+  initialize(): void {
+    this._cells.clearUndo();
+  }
+
+  /**
+   * A factory for creating a new code cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new code cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   *
+   * #### Notes
+   * If the source argument does not give an input mimetype, the code cell
+   * defaults to the notebook [[defaultMimetype]].
+   */
+  createCodeCell(source?: nbformat.IBaseCell): CodeCellModel {
+    return new CodeCellModel(source);
+  }
+
+  /**
+   * A factory for creating a new Markdown cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new markdown cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createMarkdownCell(source?: nbformat.IBaseCell): MarkdownCellModel {
+    return new MarkdownCellModel(source);
+  }
+
+  /**
+   * A factory for creating a new raw cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new raw cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createRawCell(source?: nbformat.IBaseCell): RawCellModel {
+    return new RawCellModel(source);
   }
 
   /**
@@ -642,209 +448,120 @@ class NotebookModel implements INotebookModel {
    * set of metadata on the notebook.
    */
   getMetadata(name: string): IMetadataCursor {
-    let invalid = ['kernelspec', 'languageInfo', 'origNbformat'];
-    if (invalid.indexOf(name) !== -1) {
-      let key = invalid[invalid.indexOf(name)];
-      throw Error(`Use model attribute for ${key} directly`);
+    if (name in this._cursors) {
+      return this._cursors[name];
     }
-    return new MetadataCursor(
+    let cursor = new MetadataCursor(
       name,
-      this._metadata,
-      this._cursorCallback.bind(this)
+      () => {
+        return this._metadata[name];
+      },
+      (value: string) => {
+        this.setCursorData(name, value);
+      }
     );
+    this._cursors[name] = cursor;
+    return cursor;
   }
 
   /**
    * List the metadata namespace keys for the notebook.
-   *
-   * #### Notes
-   * Metadata associated with the nbformat are not included.
    */
   listMetadata(): string[] {
     return Object.keys(this._metadata);
   }
 
   /**
-   * Handle changes to cell editors.
-   */
-  protected onEditorChanged(editor: IEditorModel, args: IChangedArgs<any>): void {
-    if (args.name === 'text') {
-      this.dirty = true;
-    }
-  }
-
-  /**
-   * Handle an edge request from a text editor.
-   */
-  protected onEdgeRequested(sender: IEditorModel, args: EdgeLocation): void {
-    switch (args) {
-    case 'top':
-      this.activeCellIndex--;
-      break;
-    case 'bottom':
-      this.activeCellIndex++;
-      break;
-    }
-  }
-
-  /**
    * Handle a change in the cells list.
    */
-  protected onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
+  protected onCellsChanged(list: IObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
     let cell: ICellModel;
     switch (change.type) {
     case ListChangeType.Add:
-      this.activeCellIndex = change.newIndex;
       cell = change.newValue as ICellModel;
-      cell.input.textEditor.edgeRequested.connect(this.onEdgeRequested, this);
-      cell.input.textEditor.stateChanged.connect(this.onEditorChanged, this);
+      cell.contentChanged.connect(this.onCellChanged, this);
       break;
     case ListChangeType.Remove:
       (change.oldValue as ICellModel).dispose();
-      this.activeCellIndex = Math.min(change.oldIndex, this.cells.length - 1);
       break;
     case ListChangeType.Replace:
+      let newValues = change.newValue as ICellModel[];
+      for (cell of newValues) {
+        cell.contentChanged.connect(this.onCellChanged, this);
+      }
       let oldValues = change.oldValue as ICellModel[];
       for (cell of oldValues) {
         cell.dispose();
       }
       break;
+    case ListChangeType.Set:
+      cell = change.newValue as ICellModel;
+      cell.contentChanged.connect(this.onCellChanged, this);
+      if (change.oldValue) {
+        (change.oldValue as ICellModel).dispose();
+      }
+      break;
+    default:
+      return;
     }
     this.dirty = true;
   }
 
   /**
-   * The singleton callback for cursor change events.
+   * Handle a change to a cell state.
    */
-  private _cursorCallback(name: string): void {
-    this.metadataChanged.emit(name);
+  protected onCellChanged(cell: ICellModel, change: any): void {
+    this.contentChanged.emit(void 0);
   }
 
-  private _cells: IObservableList<ICellModel> = null;
-  private _metadata: { [key: string]: string } = Object.create(null);
-  private _defaultMimetype = 'text/x-ipython';
-  private _readOnly = false;
-  private _session: INotebookSession = null;
-  private _kernelspec = JSON.stringify(DEFAULT_KERNELSPEC);
-  private _langInfo = JSON.stringify(DEFAULT_LANG_INFO);
-  private _origNbformat: number = null;
-  private _activeCellIndex: number = null;
-  private _mode: NotebookMode = 'command';
+  /**
+   * Set the cursor data for a given field.
+   */
+  protected setCursorData(name: string, newValue: any): void {
+    let oldValue = this._metadata[name];
+    if (oldValue === newValue) {
+      return;
+    }
+    this._metadata[name] = newValue;
+    this.contentChanged.emit(void 0);
+    this.metadataChanged.emit({ name, oldValue, newValue });
+  }
+
+  private _cells: OberservableUndoableList<ICellModel> = null;
+  private _metadata: { [key: string]: any } = Object.create(null);
   private _dirty = false;
+  private _readOnly = false;
+  private _cursors: { [key: string]: MetadataCursor } = Object.create(null);
+  private _nbformat = nbformat.MAJOR_VERSION;
+  private _nbformatMinor = nbformat.MINOR_VERSION;
 }
 
 
 /**
  * A private namespace for notebook model data.
  */
-namespace NotebookModelPrivate {
+namespace Private {
   /**
-   * A signal emitted when the state of the model changes.
+   * A signal emitted when the content of the model changes.
    */
   export
-  const stateChangedSignal = new Signal<INotebookModel, IChangedArgs<any>>();
+  const contentChangedSignal = new Signal<INotebookModel, void>();
 
   /**
-   * A signal emitted when a user metadata state changes.
+   * A signal emitted when the dirty state of the model changes.
    */
   export
-  const metadataChangedSignal = new Signal<INotebookModel, string>();
+  const dirtyChangedSignal = new Signal<INotebookModel, boolean>();
 
   /**
-   * A signal emitted when a the selection state changes.
+   * A signal emitted when a model state changes.
    */
   export
-  const selectionChangedSignal = new Signal<INotebookModel, void>();
+  const stateChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
 
   /**
-   * An attached property for the selected state of a cell.
+   * A signal emitted when a metadata field changes.
    */
   export
-  const selectedProperty = new Property<ICellModel, boolean>({
-    name: 'selected',
-    value: false
-  });
-
-  /**
-   * Handle a change in mode.
-   */
-  export
-  function modeChanged(model: INotebookModel, mode: NotebookMode): void {
-    let cells = model.cells;
-    for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i);
-      if (i === model.activeCellIndex || model.isSelected(cell)) {
-        if (isMarkdownCellModel(cell)) {
-          if (mode === 'edit') {
-            cell.rendered = false;
-          }
-        }
-      }
-    }
-  }
-
-  /*
-   * Handle a change to the model session.
-   */
-  export
-  function sessionChanged(model: INotebookModel, session: INotebookSession): void {
-    model.session.kernelChanged.connect(() => { kernelChanged(model); });
-    // Update the kernel data now.
-    kernelChanged(model);
-  }
-
-  /**
-   * Handle a change to the model kernel.
-   */
-  function kernelChanged(model: INotebookModel): void {
-    let session = model.session;
-    let kernel = session.kernel;
-    kernel.getKernelSpec().then(spec => {
-      let kernelspec = copy(model.kernelspec);
-      kernelspec.display_name = spec.display_name;
-      kernelspec.name = session.kernel.name;
-      // Trigger a change to the notebook metadata.
-      model.kernelspec = kernelspec;
-      return session.kernel.kernelInfo();
-    }).then(info => {
-      let languageInfo = info.language_info;
-      // Use the codemirror mode if given since some kernels rely on it.
-      let mode = languageInfo.codemirror_mode;
-      let mime = '';
-      if (mode) {
-        if (typeof mode === 'string') {
-          if (CodeMirror.modes.hasOwnProperty(mode as string)) {
-            mode = CodeMirror.modes[mode as string];
-          } else {
-            mode = CodeMirror.findModeByName(mode as string);
-          }
-        } else if ((mode as CodeMirror.modespec).mime) {
-          // Do nothing.
-        } else if ((mode as CodeMirror.modespec).name) {
-          let name = (mode as CodeMirror.modespec).name
-          if (CodeMirror.modes.hasOwnProperty(name)) {
-            mode = CodeMirror.modes[name];
-          } else {
-            mode = CodeMirror.findModeByName(mode as string);
-          }
-        }
-        if (mode) mime = (mode as CodeMirror.modespec).mime;
-      } else {
-        mime = info.language_info.mimetype;
-      }
-      if (mime) {
-        model.defaultMimetype = mime;
-        let cells = model.cells;
-        for (let i = 0; i < cells.length; i++) {
-          let cell = cells.get(i);
-          if (isCodeCellModel(cell)) {
-            cell.input.textEditor.mimetype = mime;
-          }
-        }
-      }
-      // Trigger a change to the notebook metadata.
-      model.languageInfo = languageInfo;
-    });
-  }
-
+  const metadataChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
 }

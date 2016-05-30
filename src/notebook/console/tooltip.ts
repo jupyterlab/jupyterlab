@@ -7,7 +7,7 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  Panel
+  PanelLayout
 } from 'phosphor-panel';
 
 import {
@@ -19,24 +19,12 @@ import {
  */
 const TOOLTIP_CLASS = 'jp-ConsoleTooltip';
 
+
 /**
- * The class name added to tooltip contents.
+ * A tooltip widget for a console.
  */
-const CONTENT_CLASS = 'jp-ConsoleTooltip-content';
-
 export
-class ConsoleTooltip extends Panel {
-  /**
-   * Create the DOM node for a console tooltip.
-   */
-  static createNode(): HTMLElement {
-    let node = document.createElement('div');
-    let pre = document.createElement('pre');
-    pre.className = CONTENT_CLASS;
-    node.appendChild(pre);
-    return node;
-  }
-
+class ConsoleTooltip extends Widget {
   /**
    * Construct a console tooltip widget.
    */
@@ -44,6 +32,7 @@ class ConsoleTooltip extends Panel {
     super();
     this.addClass(TOOLTIP_CLASS);
     this.rect = rect;
+    this.layout = new PanelLayout();
     this.hide();
   }
 
@@ -62,7 +51,9 @@ class ConsoleTooltip extends Panel {
       return;
     }
     this._rect = newValue;
-    if (this.isVisible) this.update();
+    if (this.isVisible) {
+      this.update();
+    }
   }
 
   /**
@@ -90,7 +81,8 @@ class ConsoleTooltip extends Panel {
     }
     this._content = newValue;
     if (this._content) {
-      this.addChild(this._content);
+      let layout = this.layout as PanelLayout;
+      layout.addChild(this._content);
       this.update();
     }
   }
@@ -112,6 +104,8 @@ class ConsoleTooltip extends Panel {
       break;
     case 'mousedown':
       this._evtMousedown(event as MouseEvent);
+      break;
+    default:
       break;
     }
   }
@@ -220,9 +214,13 @@ namespace Private {
   export
   function matchClientRects(r1: ClientRect, r2: ClientRect): boolean {
     // Check identity in case both items are null or undefined.
-    if (r1 === r2 || !r1 && !r2) return true;
+    if (r1 === r2 || !r1 && !r2) {
+      return true;
+    }
     // If one item is null or undefined, items don't match.
-    if (!r1 || !r2) return false;
+    if (!r1 || !r2) {
+      return false;
+    }
     return (r1.top === r2.top &&
             r1.left === r2.left &&
             r1.right === r2.right &&
