@@ -19,8 +19,13 @@ import {
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
-  ModelFactory, WidgetFactory
+  TextModelFactory
 } from 'jupyter-js-ui/lib/docmanager/default';
+
+import {
+  EditorWidgetFactory
+} from 'jupyter-js-ui/lib/docmanager/editor';
+
 
 import {
   showDialog, okButton
@@ -76,15 +81,12 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
 
   let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
   let docManager = new DocumentManager(contentsManager, sessionsManager, specs, opener);
-  let mFactory = new ModelFactory();
-  let wFactory = new WidgetFactory();
-  docManager.registerModelFactory(mFactory, {
-    name: 'default',
-    contentsOptions: { format: 'text', type: 'file' }
-  });
+  let mFactory = new TextModelFactory();
+  let wFactory = new EditorWidgetFactory();
+  docManager.registerModelFactory(mFactory);
   docManager.registerWidgetFactory(wFactory, {
     displayName: 'Editor',
-    modelName: 'default',
+    modelName: 'text',
     fileExtensions: ['.*'],
     defaultFor: ['.*'],
     preferKernel: false,

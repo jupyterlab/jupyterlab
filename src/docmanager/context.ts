@@ -331,26 +331,36 @@ class ContextManager implements IDisposable {
 
   /**
    * Change the current kernel associated with the document.
+   *
+   * @param options - If given, change the kernel (starting a session
+   * if necessary). If falsey, shut down any existing session and return
+   * a void promise.
    */
   changeKernel(id: string, options: IKernelId): Promise<IKernel> {
     let contextEx = this._contexts[id];
     let session = contextEx.session;
-    if (!session && options) {
-      let path = contextEx.path;
-      let sOptions = {
-        notebookPath: path,
-        kernelName: options.name,
-        kernelId: options.id
-      };
-      return this._startSession(id, sOptions);
-    } else if (options) {
-      return session.changeKernel(options);
-    } else if (session) {
-      return session.shutdown().then(() => {
-        session.dispose();
-        contextEx.session = null;
-        return void 0;
-      });
+    if (options) {
+      if (session) {
+        return session.changeKernel(options);
+      } else {
+        let path = contextEx.path;
+        let sOptions = {
+          notebookPath: path,
+          kernelName: options.name,
+          kernelId: options.id
+        };
+        return this._startSession(id, sOptions);
+      }
+    } else {
+      if (session) {
+        return session.shutdown().then(() => {
+          session.dispose();
+          contextEx.session = null;
+          return void 0;
+        });
+      } else {
+        return Promise.resolve(void 0);
+      }
     }
   }
 

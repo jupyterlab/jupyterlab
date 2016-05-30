@@ -343,7 +343,14 @@ class DocumentManager implements IDisposable {
    */
   open(path: string, widgetName='default', kernel?: IKernelId): DocumentWidget {
     if (widgetName === 'default') {
-      widgetName = this.listWidgetFactories(path)[0];
+      let parts = path.split('.');
+      let ext: string;
+      if (parts.length === 1 || (parts[0] === "" && parts.length === 2)) {
+        ext = "";
+      } else {
+        ext = "." + parts.pop().toLowerCase();
+      }
+      widgetName = this.listWidgetFactories(ext)[0];
     }
     let mFactory = this._getModelFactory(widgetName);
     if (!mFactory) {
