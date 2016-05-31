@@ -445,7 +445,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     command: cmdIds['run'],
     category: 'Notebook Cell Operations',
-    text: 'Run selected'
+    text: 'Run Selected'
   },
   {
     command: cmdIds['runAndAdvance'],
