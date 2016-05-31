@@ -136,6 +136,10 @@ namespace NotebookActions {
         cells.remove(cell);
       }
     }
+    if (!model.cells.length) {
+      let cell = model.createCodeCell();
+      model.cells.add(cell);
+    }
     model.cells.endCompoundOperation();
     Private.deselectCells(widget);
   }
@@ -227,6 +231,12 @@ namespace NotebookActions {
         break;
       }
     }
+    if (widget.mode === 'command') {
+      widget.node.focus();
+    } else {
+      let active = widget.childAt(widget.activeCellIndex);
+      active.focus();
+    }
   }
 
   /**
@@ -245,9 +255,9 @@ namespace NotebookActions {
       model.cells.add(cell);
       widget.mode = 'edit';
     } else {
-      widget.activeCellIndex++;
       widget.mode = 'command';
     }
+    widget.activeCellIndex++;
     Private.deselectCells(widget);
   }
 
@@ -382,6 +392,10 @@ namespace NotebookActions {
         data.push(child.model.toJSON());
         cells.remove(child.model);
       }
+    }
+    if (!model.cells.length) {
+      let cell = model.createCodeCell();
+      model.cells.add(cell);
     }
     model.cells.endCompoundOperation();
     clipboard.setData(JUPYTER_CELL_MIME, data);

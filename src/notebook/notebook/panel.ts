@@ -65,6 +65,11 @@ const NB_PANEL = 'jp-Notebook-panel';
  */
 const NB_CONTAINER = 'jp-Notebook-container';
 
+/**
+ * The class name added to a dirty widget.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
+
 
 /**
  * A widget that hosts a notebook toolbar and content area.
@@ -147,6 +152,17 @@ class NotebookPanel extends Widget {
     this.title.text = context.path.split('/').pop();
     context.pathChanged.connect((c, path) => {
       this.title.text = path.split('/').pop();
+    });
+
+    // Handle changes to dirty state.
+    model.stateChanged.connect((m, args) => {
+      if (args.name === 'dirty') {
+        if (args.newValue) {
+          this.title.className += ` ${DIRTY_CLASS}`;
+        } else {
+          this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+        }
+      }
     });
   }
 

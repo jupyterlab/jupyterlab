@@ -258,7 +258,7 @@ class NotebookRenderer extends Widget {
       break;
     case ListChangeType.Replace:
       let oldValues = args.oldValue as ICellModel[];
-      for (let i = args.oldIndex; i < oldValues.length; i++) {
+      for (let i = 0; i < oldValues.length; i++) {
         widget = layout.childAt(args.oldIndex) as BaseCellWidget;
         layout.removeChild(widget);
         widget.dispose();
