@@ -202,7 +202,7 @@ class CompletionWidget extends Widget {
     // Account for 1px border width.
     let left = Math.floor(coords.left) + 1;
     let rect = node.getBoundingClientRect();
-    let top = maxHeight - rect.height;
+    let top = availableHeight - rect.height;
     node.style.left = `${left}px`;
     node.style.top = `${top}px`;
     node.style.width = 'auto';
