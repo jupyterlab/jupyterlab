@@ -3,6 +3,14 @@
 'use strict';
 
 import {
+  IKernelId
+} from 'jupyter-js-services';
+
+import {
+  Menu, MenuItem
+} from 'phosphor-menus';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -11,7 +19,7 @@ import {
 } from '../dialog';
 
 import {
-  DocumentManager
+  DocumentManager, IFileCreator
 } from '../docmanager';
 
 import {
@@ -62,9 +70,14 @@ const UPLOAD_CLASS = 'jp-id-upload';
 const REFRESH_CLASS = 'jp-id-refresh';
 
 /**
- * The class name added for a file conflict.
+ * The class name added to an active create button.
  */
-const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
+const ACTIVE_CLASS = 'jp-mod-active';
+
+/**
+ * The class name added to a dropdown icon.
+ */
+const DROPDOWN_CLASS = 'jp-FileButtons-dropdownIcon';
 
 
 /**
@@ -82,7 +95,7 @@ class FileButtons extends Widget {
     this.addClass(FILE_BUTTONS_CLASS);
     this._model = model;
 
-    this._buttons.create.onclick = this._onCreateButtonClicked;
+    this._buttons.create.onmousedown = this._onCreateButtonPressed;
     this._buttons.upload.onclick = this._onUploadButtonClicked;
     this._buttons.refresh.onclick = this._onRefreshButtonClicked;
     this._input.onchange = this._onInputChanged;
@@ -128,7 +141,7 @@ class FileButtons extends Widget {
   /**
    * Open a file by path.
    */
-  open(path: string): void {
+  open(path: string, widgetName='default', kernel?: IKernelId): void {
     let widget = this._manager.open(path);
     let opener = this._opener;
     opener.open(widget);
@@ -137,12 +150,40 @@ class FileButtons extends Widget {
   /**
    * The 'mousedown' handler for the create button.
    */
-  private _onCreateButtonClicked = (event: MouseEvent) => {
+  private _onCreateButtonPressed = (event: MouseEvent) => {
     // Do nothing if nothing if it's not a left press.
     if (event.button !== 0) {
       return;
     }
-    // TODO.
+
+    // Do nothing if the create button is already active.
+    let button = this._buttons.create;
+    if (button.classList.contains(ACTIVE_CLASS)) {
+      return;
+    }
+
+    // Create a new dropdown menu and snap the button geometry.
+    let dropdown = Private.createDropdownMenu(this);
+    let rect = button.getBoundingClientRect();
+
+    // Mark the button as active.
+    button.classList.add(ACTIVE_CLASS);
+
+    // Setup the `closed` signal handler. The menu is disposed on an
+    // animation frame to allow a mouse press event which closed the
+    // menu to run its course. This keeps the button from re-opening.
+    dropdown.closed.connect(() => {
+      requestAnimationFrame(() => { dropdown.dispose(); });
+    });
+
+    // Setup the `disposed` signal handler. This restores the button
+    // to the non-active state and allows a new menu to be opened.
+    dropdown.disposed.connect(() => {
+      button.classList.remove(ACTIVE_CLASS);
+    });
+
+    // Popup the menu aligned with the bottom of the create button.
+    dropdown.popup(rect.left, rect.bottom, false, true);
   };
 
 
@@ -214,6 +255,7 @@ namespace Private {
     let createIcon = document.createElement('span');
     let uploadIcon = document.createElement('span');
     let refreshIcon = document.createElement('span');
+    let dropdownIcon = document.createElement('span');
 
     create.type = 'button';
     upload.type = 'button';
@@ -235,8 +277,10 @@ namespace Private {
     createIcon.className = ICON_CLASS + ' fa fa-plus';
     uploadIcon.className = ICON_CLASS + ' fa fa-upload';
     refreshIcon.className = ICON_CLASS + ' fa fa-refresh';
+    dropdownIcon.className = DROPDOWN_CLASS + ' fa fa-caret-down';
 
     createContent.appendChild(createIcon);
+    createContent.appendChild(dropdownIcon);
     uploadContent.appendChild(uploadIcon);
     refreshContent.appendChild(refreshIcon);
 
@@ -256,6 +300,76 @@ namespace Private {
     input.type = 'file';
     input.multiple = true;
     return input;
+  }
+
+  /**
+   * Create a new source file.
+   */
+  export
+  function createNewFile(widget: FileButtons): void {
+    widget.model.newUntitled('file').then(contents => {
+      return widget.open(contents.path);
+    }).then(contents => {
+      return widget.model.refresh();
+    }).catch(error => {
+      utils.showErrorMessage(widget, 'New File Error', error);
+    });
+  }
+
+  /**
+   * Create a new folder.
+   */
+  export
+  function createNewFolder(widget: FileButtons): void {
+    widget.model.newUntitled('directory').then(contents => {
+      widget.model.refresh();
+    }).catch(error => {
+      utils.showErrorMessage(widget, 'New Folder Error', error);
+    });
+  }
+
+  /**
+   * Create a new item using a file creator.
+   */
+  function createNewItem(widget: FileButtons, creator: IFileCreator): void {
+    let fileType = creator.type || 'file';
+    let widgetName = creator.widgetName || 'default';
+    let kernel: IKernelId;
+    if (creator.kernelName) {
+      kernel = { name: creator.kernelName };
+    }
+    widget.model.newUntitled(fileType, creator.extension).then(contents => {
+      widget.open(contents.path, widgetName, kernel);
+    });
+  }
+
+  /**
+   * Create a new dropdown menu for the create new button.
+   */
+  export
+  function createDropdownMenu(widget: FileButtons): Menu {
+    let items = [
+      new MenuItem({
+        text: 'Text File',
+        handler: () => { createNewFile(widget); }
+      }),
+      new MenuItem({
+        text: 'Folder',
+        handler: () => { createNewFolder(widget); }
+      })
+    ];
+    let creators = widget.manager.listCreators();
+    if (creators) {
+      items.push(new MenuItem({ type: MenuItem.Separator }));
+    }
+    for (let creator of creators) {
+      let item = new MenuItem({
+        text: creator.name,
+        handler: () => { createNewItem(widget, creator); }
+      });
+      items.push(item);
+    }
+    return new Menu(items);
   }
 
   /**
@@ -294,7 +408,7 @@ namespace Private {
       body: `"${file.name}" already exists, overwrite?`
     };
     return showDialog(options).then(button => {
-      if (button.text !== 'OK') {
+      if (button.text !== 'Ok') {
         return;
       }
       return widget.model.upload(file, true);
