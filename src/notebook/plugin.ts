@@ -56,6 +56,7 @@ const cmdIds = {
   cut: 'notebook-cells:cut',
   copy: 'notebook-cells:copy',
   paste: 'notebook-cells:paste',
+  deleteCell: 'notebook-cells:delete',
   insertAbove: 'notebook-cells:insert-above',
   insertBelow: 'notebook-cells:insert-below',
   selectAbove: 'notebook-cells:select-above',
@@ -314,6 +315,15 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
+    id: cmdIds['deleteCell'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.deleteCells(nbWidget.content);
+      }
+    }
+  },
+  {
     id: cmdIds['insertAbove'],
     handler: () => {
       if (tracker.activeNotebook) {
@@ -467,6 +477,11 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     command: cmdIds['paste'],
     category: 'Notebook Cell Operations',
     text: 'Paste Cell(s)'
+  },
+  {
+    command: cmdIds['deleteCell'],
+    category: 'Notebook Cell Operations',
+    text: 'Delete Cell(s)'
   },
   {
     command: cmdIds['insertAbove'],

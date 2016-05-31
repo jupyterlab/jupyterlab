@@ -104,7 +104,7 @@ const SHORTCUTS = [
   {
     command: 'notebook-cells:to-code',
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Y']
+    sequence: ['E']
   },
   {
     command: 'notebook-cells:to-markdown',
@@ -115,6 +115,31 @@ const SHORTCUTS = [
     command: 'notebook-cells:to-raw',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['R']
+  },
+  {
+    command: 'notebook-cells:delete',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['D', 'D'],
+  },
+  {
+    command: 'notebook-cells:extend-above',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Shift K'],
+  },
+  {
+    command: 'notebook-cells:extend-below',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Shift J'],
+  },
+  {
+    command: 'notebook-cells:undo',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Z'],
+  },
+  {
+    command: 'notebook-cells:redo',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Y'],
   },
   {
     command: 'notebook-cells:cut',
