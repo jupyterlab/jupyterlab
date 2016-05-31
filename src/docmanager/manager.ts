@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  IKernelId, IKernel,
+  IKernelId,
   IContentsManager, INotebookSessionManager,
   IKernelSpecIds, ISessionId
 } from 'jupyter-js-services';
@@ -42,10 +42,6 @@ import {
 import {
   ContextManager
 } from './context';
-
-import {
-  selectKernel
-} from './kernelselector';
 
 import {
   IDocumentContext, IModelFactory, IWidgetFactory, IWidgetFactoryOptions,
@@ -345,10 +341,10 @@ class DocumentManager implements IDisposable {
     if (widgetName === 'default') {
       let parts = path.split('.');
       let ext: string;
-      if (parts.length === 1 || (parts[0] === "" && parts.length === 2)) {
-        ext = "";
+      if (parts.length === 1 || (parts[0] === '' && parts.length === 2)) {
+        ext = '';
       } else {
-        ext = "." + parts.pop().toLowerCase();
+        ext = '.' + parts.pop().toLowerCase();
       }
       widgetName = this.listWidgetFactories(ext)[0];
     }

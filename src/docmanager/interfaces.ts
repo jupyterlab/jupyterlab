@@ -373,6 +373,11 @@ interface IFileCreator {
   extension: string;
 
   /**
+   * The type of the new file (defaults to `"file"`).
+   */
+  type?: string;
+
+  /**
    * The optional widget name.
    */
   widgetName?: string;

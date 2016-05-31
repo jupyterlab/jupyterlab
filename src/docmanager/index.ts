@@ -4,6 +4,7 @@
 
 export * from './interfaces';
 export * from './default';
+export * from './kernelselector';
 export * from './editor';
 export * from './images';
 export * from './manager';
