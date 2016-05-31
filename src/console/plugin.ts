@@ -15,6 +15,10 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
+  TabPanel
+} from 'phosphor-tabs';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -62,7 +66,21 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
           kernelName: `${displayNameMap[displayName]}`
         }).then(session => {
           let console = new ConsolePanel(session, rendermime.clone());
+          console.id = `console-${count}`;
+          console.title.text = `Console-${count}`;
+          console.title.closable = true;
           app.shell.addToMainArea(console);
+          Private.activeWidget = console;
+          // TODO: Move this logic to the shell.
+          let stack = console.parent;
+          if (!stack) {
+            return;
+          }
+          let tabs = stack.parent;
+          if (tabs instanceof TabPanel) {
+            tabs.currentWidget = console;
+          }
+          console.content.prompt.focus();
           console.disposed.connect(() => {
             let index = Private.widgets.indexOf(console);
             Private.widgets.splice(index, 1);
@@ -115,12 +133,12 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
   {
     command: 'console:clear',
     category: 'Console',
-    text: 'Clear'
+    text: 'Clear Cells'
   },
   {
     command: 'console:execute',
     category: 'Console',
-    text: 'Execute'
+    text: 'Execute Cell'
   }]);
 
   return Promise.resolve(void 0);

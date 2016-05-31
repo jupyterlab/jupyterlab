@@ -206,7 +206,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
       name: `${displayName} Notebook`,
       extension: '.ipynb',
       type: 'notebook',
-      kernelName: displayNameMap[name]
+      kernelName: displayNameMap[displayName]
     });
   }
 

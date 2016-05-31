@@ -165,7 +165,12 @@ const SHORTCUTS = [
     command: 'notebook-cells:commandMode',
     selector: '.jp-Notebook.jp-mod-editMode',
     sequence: ['Escape']
-  }
+  },
+    {
+    command: 'console:execute',
+    selector: '.jp-Console .jp-CellEditor',
+    sequence: ['Shift Enter']
+  },
 ];
 
 
