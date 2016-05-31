@@ -189,7 +189,14 @@ class DocumentManager implements IDisposable {
   createNew(path: string, widgetName='default', kernel?: IKernelId): DocumentWidget {
     let registry = this._registry;
     if (widgetName === 'default') {
-      widgetName = registry.listWidgetFactories(path)[0];
+      let parts = path.split('.');
+      let ext: string;
+      if (parts.length === 1 || (parts[0] === '' && parts.length === 2)) {
+        ext = '';
+      } else {
+        ext = '.' + parts.pop().toLowerCase();
+      }
+      widgetName = registry.listWidgetFactories(ext)[0];
     }
     let mFactory = registry.getModelFactory(widgetName);
     if (!mFactory) {
@@ -348,6 +355,7 @@ class DocumentWidget extends Widget {
     this._id = id;
     this._manager = manager;
     this._widgets = widgets;
+    this._factory = factory;
     this.title.closable = true;
   }
 
