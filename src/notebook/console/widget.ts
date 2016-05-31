@@ -326,7 +326,9 @@ class ConsoleWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     let prompt = this.prompt;
     Private.scrollIfNeeded(this.parent.node, prompt.node);
-    prompt.focus();
+    if (prompt) {
+      prompt.focus();
+    }
   }
 
   /**
@@ -352,6 +354,8 @@ class ConsoleWidget extends Widget {
     editor.textChanged.connect(this.onTextChange, this);
     editor.completionRequested.connect(this.onCompletionRequest, this);
     editor.edgeRequested.connect(this.onEdgeRequest, this);
+
+    prompt.focus();
   }
 
   /**
