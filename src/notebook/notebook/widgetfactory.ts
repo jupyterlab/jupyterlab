@@ -64,7 +64,7 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
    * Construct a new notebook widget factory.
    */
   constructor(rendermime: RenderMime<Widget>, clipboard: IClipboard) {
-    this._rendermime = rendermime;
+    this._rendermime = rendermime.clone();
     this._clipboard = clipboard;
   }
 

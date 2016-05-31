@@ -370,12 +370,18 @@ class NotebookModel implements INotebookModel {
     }
     // Update the metadata.
     let metadata = value.metadata;
+    let builtins = ['kernelspec', 'language_info', 'orig_nbformat'];
     for (let key in this._metadata) {
+      if (builtins.indexOf(key) !== -1) {
+        continue;
+      }
       if (!(key in metadata)) {
         this.setCursorData(key, null);
         delete this._metadata[key];
-        this._cursors[name].dispose();
-        delete this._cursors[name];
+        if (this._cursors[key]) {
+          this._cursors[key].dispose();
+          delete this._cursors[key];
+        }
       }
     }
     for (let key in metadata) {
@@ -519,7 +525,7 @@ class NotebookModel implements INotebookModel {
   }
 
   private _cells: OberservableUndoableList<ICellModel> = null;
-  private _metadata: { [key: string]: any } = Object.create(null);
+  private _metadata: { [key: string]: any } = Private.createMetadata();
   private _dirty = false;
   private _readOnly = false;
   private _cursors: { [key: string]: MetadataCursor } = Object.create(null);
@@ -549,4 +555,16 @@ namespace Private {
    */
   export
   const metadataChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
+
+  /**
+   * Create the default metadata for the notebook.
+   */
+  export
+  function createMetadata(): nbformat.INotebookMetadata {
+    return {
+      kernelspec: { name: 'unknown', display_name: 'Unknown' },
+      language_info: { name: 'unknown' },
+      orig_nbformat: -1
+    };
+  }
 }

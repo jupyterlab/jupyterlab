@@ -142,6 +142,12 @@ class NotebookPanel extends Widget {
       editor.textChanged.connect(this.onTextChange, this);
       editor.completionRequested.connect(this.onCompletionRequest, this);
     }
+
+    // Handle the document title.
+    this.title.text = context.path.split('/').pop();
+    context.pathChanged.connect((c, path) => {
+      this.title.text = path.split('/').pop();
+    });
   }
 
   /**

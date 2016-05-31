@@ -139,8 +139,10 @@ class NotebookRenderer extends Widget {
     this._langInfoCursor = model.getMetadata('language_info');
     this._mimetype = this.getMimetype();
     // Add the current cells.
+    // Add a new code cell if there are no cells.
     if (model.cells.length === 0) {
-      return;
+      let cell = model.createCodeCell();
+      model.cells.add(cell);
     }
     let layout = this.layout as PanelLayout;
     let constructor = this.constructor as typeof NotebookRenderer;

@@ -65,9 +65,9 @@ function findKernel(kernelName: string, language: string, specs: IKernelSpecIds)
     return specs.default;
   }
   for (let specName in specs.kernelspecs) {
-    let kernelLanguage = specs.kernelspecs[name].spec.language;
+    let kernelLanguage = specs.kernelspecs[specName].spec.language;
     if (language === kernelLanguage) {
-      console.log('No exact match found for ' + name +
+      console.log('No exact match found for ' + specName +
                   ', using kernel ' + specName + ' that matches ' +
                   'language=' + language);
       return specName;
