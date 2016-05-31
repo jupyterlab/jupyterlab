@@ -67,8 +67,7 @@ const cmdIds = {
   commandMode: 'notebook-cells:commandMode',
   newNotebook: 'notebook:create-new',
   undo: 'notebook-cells:undo',
-  redo: 'notebook-cells:redo',
-  launchConsole: 'notebook:launch-console'
+  redo: 'notebook-cells:redo'
 };
 
 

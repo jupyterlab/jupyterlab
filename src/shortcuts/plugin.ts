@@ -92,6 +92,16 @@ const SHORTCUTS = [
     sequence: ['Shift Enter']
   },
   {
+    command: 'notebook-cells:runAndInsert',
+    selector: '.jp-Notebook',
+    sequence: ['Alt Enter']
+  },
+  {
+    command: 'notebook-cells:run',
+    selector: '.jp-Notebook',
+    sequence: ['Ctrl Enter']
+  },
+  {
     command: 'notebook:interrupt-kernel',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['I', 'I']
@@ -122,14 +132,24 @@ const SHORTCUTS = [
     sequence: ['D', 'D'],
   },
   {
+    command: 'notebook-cells:select-above',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['ArrowUp'],
+  },
+  {
+    command: 'notebook-cells:select-below',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['ArrowDown'],
+  },
+  {
     command: 'notebook-cells:extend-above',
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Shift K'],
+    sequence: ['Shift ArrowUp'],
   },
   {
     command: 'notebook-cells:extend-below',
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Shift J'],
+    sequence: ['Shift ArrowDown'],
   },
   {
     command: 'notebook-cells:undo',
