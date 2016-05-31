@@ -151,6 +151,10 @@ class CompletionWidget extends Widget {
    * #### Notes
    * Captures window events in capture phase to dismiss or navigate the
    * completion widget.
+   *
+   * Because its parent (reference) widgets use window listeners instead of
+   * document listeners, the completion widget must also use window listeners
+   * in the capture phase.
    */
   protected onAfterAttach(msg: Message): void {
     window.addEventListener('keydown', this, true);
@@ -261,6 +265,7 @@ class CompletionWidget extends Widget {
         case 9: // Tab key
           event.preventDefault();
           event.stopPropagation();
+          event.stopImmediatePropagation();
           active = node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
           this.selected.emit(active.dataset['value']);
           this._model.reset();
@@ -268,12 +273,14 @@ class CompletionWidget extends Widget {
         case 27: // Escape key
           event.preventDefault();
           event.stopPropagation();
+          event.stopImmediatePropagation();
           this._model.reset();
           return;
         case 38: // Up arrow key
         case 40: // Down arrow key
           event.preventDefault();
           event.stopPropagation();
+          event.stopImmediatePropagation();
           let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
           active = node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
           active.classList.remove(ACTIVE_CLASS);
