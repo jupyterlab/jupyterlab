@@ -19,10 +19,6 @@ import {
 } from 'phosphor-dragdrop';
 
 import {
-  IDisposable, DisposableDelegate, DisposableSet
-} from 'phosphor-disposable';
-
-import {
   Widget
 } from 'phosphor-widget';
 
@@ -41,18 +37,6 @@ import {
 import {
   NotebookPanel
 } from './panel';
-
-
-/**
- * An interface for a notebook extension.
- */
-export
-interface INotebookExtension {
-  /**
-   * Create a new extension for a given notebook panel.
-   */
-   createNew(panel: NotebookPanel): IDisposable;
-}
 
 
 /**
@@ -81,22 +65,6 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
   dispose(): void {
     this._rendermime = null;
     this._clipboard = null;
-    this._extenders = null;
-  }
-
-  /**
-   * Register a notebook extension.
-   *
-   * @param extension - A notebook extension.
-   *
-   * @returns A disposable that can be used to unregister the extension.
-   */
-  registerExtension(extension: INotebookExtension): IDisposable {
-    this._extenders.push(extension);
-    return new DisposableDelegate(() => {
-      let index = this._extenders.indexOf(extension);
-      this._extenders.splice(index, 1);
-    });
   }
 
   /**
@@ -112,13 +80,6 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
     }
     let panel = new NotebookPanel(model, rendermime, context, this._clipboard);
     ToolbarItems.populateDefaults(panel);
-    let extensions = new DisposableSet();
-    for (let extender of this._extenders) {
-      extensions.add(extender.createNew(panel));
-    }
-    panel.disposed.connect(() => {
-      extensions.dispose();
-    });
     return panel;
   }
 
@@ -135,5 +96,4 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
 
   private _rendermime: RenderMime<Widget> = null;
   private _clipboard: IClipboard = null;
-  private _extenders: INotebookExtension[] = [];
 }
