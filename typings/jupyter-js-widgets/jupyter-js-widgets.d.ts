@@ -1,21 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-declare module Widgets {
-    export class ManagerBase {
-        display_view(msg: any, view: any, options: any): Promise<any>;
-        handle_comm_open(comm: shims.services.Comm, msg: any): Promise<any>;
-    }
-    
-    export module shims {
-        export module services {
-            export class Comm {
-                constructor(comm: any);
-            }            
-        }
-    }
-}
+/// <reference path="../backbone/backbone-global.d.ts" />
+
 
 declare module "jupyter-js-widgets" {
-    export = Widgets;
+  import * as services from 'jupyter-js-services';
+
+  export class ManagerBase<T> {
+    display_view(msg: services.IKernelMessage, view: Backbone.View<Backbone.Model>, options: any): T;
+    handle_comm_open(comm: shims.services.Comm, msg: services.IKernelIOPubCommOpenMessage): Promise<Backbone.Model>;
+    display_model(msg: services.IKernelMessage, model: Backbone.Model, options: any): Promise<T>;
+    get_model(id: string): Promise<Backbone.Model>;
+    validateVersion(): Promise<boolean>;
+    comm_target_name: string;
+  }
+
+  export namespace shims {
+    export namespace services {
+      export class Comm {
+        constructor(comm: any);
+      }
+    }
+  }
 }
