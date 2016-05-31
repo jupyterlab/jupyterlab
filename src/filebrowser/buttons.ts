@@ -142,7 +142,16 @@ class FileButtons extends Widget {
    * Open a file by path.
    */
   open(path: string, widgetName='default', kernel?: IKernelId): void {
-    let widget = this._manager.open(path);
+    let widget = this._manager.open(path, widgetName, kernel);
+    let opener = this._opener;
+    opener.open(widget);
+  }
+
+  /**
+   * Create a new file by path.
+   */
+  createNew(path: string, widgetName='default', kernel?: IKernelId): void {
+    let widget = this._manager.createNew(path, widgetName, kernel);
     let opener = this._opener;
     opener.open(widget);
   }
@@ -339,7 +348,7 @@ namespace Private {
       kernel = { name: creator.kernelName };
     }
     widget.model.newUntitled(fileType, creator.extension).then(contents => {
-      widget.open(contents.path, widgetName, kernel);
+      widget.createNew(contents.path, widgetName, kernel);
     });
   }
 
