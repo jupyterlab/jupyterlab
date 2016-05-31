@@ -8,7 +8,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IDisposable
+  IDisposable, DisposableDelegate, DisposableSet
 } from 'phosphor-disposable';
 
 import {
@@ -268,6 +268,18 @@ interface IWidgetFactory<T extends Widget> extends IDisposable {
    *   and false otherwise.
    */
   beforeClose(model: IDocumentModel, context: IDocumentContext, widget: Widget): Promise<boolean>;
+}
+
+
+/**
+ * An interface for a widget extension.
+ */
+export
+interface IWidgetExtension<T extends Widget> {
+  /**
+   * Create a new extension for a given widget.
+   */
+   createNew(widget: T, model: IDocumentModel, context: IDocumentContext): IDisposable;
 }
 
 

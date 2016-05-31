@@ -15,7 +15,7 @@ import {
 
 import {
   IModelFactory, IWidgetFactory, IWidgetFactoryOptions,
-  IFileType, IKernelPreference, IFileCreator
+  IFileType, IKernelPreference, IFileCreator, IWidgetExtension
 } from './interfaces';
 
 
@@ -128,6 +128,24 @@ class DocumentRegistry implements IDisposable {
     this._modelFactories[name] = factory;
     return new DisposableDelegate(() => {
       delete this._modelFactories[name];
+    });
+  }
+
+  /**
+   * Register a widget extension.
+   *
+   * @param extension - A widget extension.
+   *
+   * @returns A disposable that can be used to unregister the extension.
+   */
+  registerExtension(widgetName: string, extension: IWidgetExtension<Widget>): IDisposable {
+    if (!(widgetName in this._extenders)) {
+      this._extenders[widgetName] = [];
+    }
+    this._extenders[widgetName].push(extension);
+    return new DisposableDelegate(() => {
+      let index = this._extenders[widgetName].indexOf(extension);
+      this._extenders[widgetName].splice(index, 1);
     });
   }
 
@@ -274,6 +292,16 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
+   * Get the registered extensions for a given widget.
+   */
+  getWidgetExtensions(widgetName: string): IWidgetExtension<Widget>[] {
+    if (!(widgetName in this._extenders)) {
+      return [];
+    }
+    return this._extenders[widgetName].slice();
+  }
+
+  /**
    * Get the appropriate widget factory by name.
    */
   private _getWidgetFactoryEx(widgetName: string): Private.IWidgetFactoryEx {
@@ -292,6 +320,7 @@ class DocumentRegistry implements IDisposable {
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _fileTypes: IFileType[] = [];
   private _creators: IFileCreator[] = [];
+  private _extenders: { [key: string] : IWidgetExtension<Widget>[] } = Object.create(null);
 }
 
 
