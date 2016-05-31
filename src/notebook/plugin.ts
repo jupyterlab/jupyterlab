@@ -64,6 +64,8 @@ const cmdIds = {
   extendAbove: 'notebook-cells:extend-above',
   extendBelow: 'notebook-cells:extend-below',
   editMode: 'notebook-cells:editMode',
+  merge: 'notebook-cells:merge',
+  split: 'notebook-cells:split',
   commandMode: 'notebook-cells:commandMode',
   newNotebook: 'notebook:create-new',
   undo: 'notebook-cells:undo',
@@ -323,6 +325,24 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
+    id: cmdIds['split'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.splitCell(nbWidget.content);
+      }
+    }
+  },
+  {
+    id: cmdIds['merge'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.mergeCells(nbWidget.content);
+      }
+    }
+  },
+  {
     id: cmdIds['insertAbove'],
     handler: () => {
       if (tracker.activeNotebook) {
@@ -481,6 +501,16 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     command: cmdIds['deleteCell'],
     category: 'Notebook Cell Operations',
     text: 'Delete Cell(s)'
+  },
+  {
+    command: cmdIds['split'],
+    category: 'Notebook Cell Operations',
+    text: 'Split Cell'
+  },
+  {
+    command: cmdIds['merge'],
+    category: 'Notebook Cell Operations',
+    text: 'Merge Selected Cell(s)'
   },
   {
     command: cmdIds['insertAbove'],

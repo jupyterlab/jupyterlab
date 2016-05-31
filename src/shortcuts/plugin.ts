@@ -132,6 +132,16 @@ const SHORTCUTS = [
     sequence: ['D', 'D'],
   },
   {
+    command: 'notebook-cells:split',
+    selector: '.jp-Notebook.jp-mod-editMode',
+    sequence: ['Ctrl Shift -'],
+  },
+  {
+    command: 'notebook-cells:merge',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Shift M'],
+  },
+  {
     command: 'notebook-cells:select-above',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['ArrowUp'],
