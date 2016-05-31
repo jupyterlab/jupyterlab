@@ -15,7 +15,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  DocumentWidget, DocumentManager, selectKernel
+  DocumentWidget, DocumentManager, DocumentRegistry, selectKernel
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
@@ -100,12 +100,15 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   };
 
   let contentsManager = new ContentsManager();
-  let docManager = new DocumentManager(contentsManager, sessionsManager, specs, opener);
+  let docRegistry = new DocumentRegistry();
+  let docManager = new DocumentManager(
+    docRegistry, contentsManager, sessionsManager, specs, opener
+  );
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
   let wFactory = new NotebookWidgetFactory(rendermime, clipboard);
-  docManager.registerModelFactory(mFactory);
-  docManager.registerWidgetFactory(wFactory, {
+  docRegistry.registerModelFactory(mFactory);
+  docRegistry.registerWidgetFactory(wFactory, {
     displayName: 'Notebook',
     modelName: 'notebook',
     fileExtensions: ['.ipynb'],
@@ -113,23 +116,6 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     preferKernel: true,
     canStartKernel: true
   });
-  // Store a mapping of display names to kernel name.
-  let displayNameMap: { [key: string]: string } = Object.create(null);
-  for (let kernelName in specs.kernelspecs) {
-    let displayName = specs.kernelspecs[kernelName].spec.display_name;
-    displayNameMap[displayName] = kernelName;
-  }
-  let displayNames = Object.keys(displayNameMap).sort((a, b) => {
-    return a.localeCompare(b);
-  });
-  for (let displayName of displayNames) {
-    docManager.registerCreator({
-      name: `${displayName} Notebook`,
-      extension: '.ipynb',
-      type: 'notebook',
-      kernelName: displayNameMap[name]
-    });
-  }
 
   let doc = docManager.open(NOTEBOOK);
   let nbWidget: NotebookPanel;
