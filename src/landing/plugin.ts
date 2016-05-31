@@ -69,12 +69,12 @@ function activateLanding(app: Application): void {
 
   let img = body.getElementsByClassName('jp-Landing-imageNotebook')[0];
   img.addEventListener('click', () => {
-    app.commands.execute('notebook:create-new');
+    app.commands.execute('file-operations:new-notebook');
   });
 
   img = body.getElementsByClassName('jp-Landing-imageTextEditor')[0];
   img.addEventListener('click', () => {
-    app.commands.execute('text-file:create-new');
+    app.commands.execute('file-operations:new-text-file');
   });
 
   img = body.getElementsByClassName('jp-Landing-imageTerminal')[0];
@@ -85,7 +85,9 @@ function activateLanding(app: Application): void {
   app.commands.add([{
     id: 'jupyterlab-launcher:show',
     handler: () => {
-      if (!widget.isAttached) app.shell.addToMainArea(widget);
+      if (!widget.isAttached) {
+        app.shell.addToMainArea(widget);
+      }
       app.shell.activateMain(widget.id);
     }
   }]);

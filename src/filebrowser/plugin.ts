@@ -108,12 +108,25 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
       id: newTextFileId,
       handler: () => {
         model.newUntitled('file').then(contents => {
-          let widget = docManager.open(contents.path);
+          let widget = docManager.createNew(contents.path);
           opener.open(widget);
         });
       }
     }
   ]);
+
+  let newNotebookId = 'file-operations:new-notebook';
+
+  app.commands.add([
+  {
+    id: newNotebookId,
+    handler: () => {
+      model.newUntitled('notebook').then(contents => {
+        let widget = docManager.createNew(contents.path);
+        opener.open(widget);
+      });
+    }
+  }]);
 
 
   // Add the command for saving a document.
@@ -210,6 +223,12 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
       category: 'File Operations',
       text: 'New Text File',
       caption: 'Create a new text file'
+    },
+    {
+      command: newNotebookId,
+      category: 'File Operations',
+      text: 'New Notebook',
+      caption: 'Create a new notebook'
     }
   ]);
 
