@@ -221,7 +221,8 @@ class CompletionWidget extends Widget {
    * Handle mousedown events for the widget.
    */
   private _evtMousedown(event: MouseEvent) {
-    if (Private.nonstandardClick(event)) {
+    if (!this._reference || this.isHidden || Private.nonstandardClick(event)) {
+      this.hide();
       return;
     }
 
@@ -229,12 +230,18 @@ class CompletionWidget extends Widget {
     while (target !== document.documentElement) {
       // If the user has made a selection, emit its value and reset the model.
       if (target.classList.contains(ITEM_CLASS)) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
         this.selected.emit(target.dataset['value']);
         this._model.reset();
         return;
       }
       // If the mouse event happened anywhere else in the widget, bail.
       if (target === this.node) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
         return;
       }
       target = target.parentElement;
@@ -246,17 +253,13 @@ class CompletionWidget extends Widget {
    * Handle keydown events for the widget.
    */
   private _evtKeydown(event: KeyboardEvent) {
-    let target = event.target as HTMLElement;
-    let node = this.node;
-
-    if (!this._reference) {
+    if (!this._reference || this.isHidden) {
       this.hide();
       return;
     }
-    if (this.isHidden) {
-      return;
-    }
 
+    let target = event.target as HTMLElement;
+    let node = this.node;
     let active: HTMLElement;
     while (target !== document.documentElement) {
       if (target === this._reference.node) {
