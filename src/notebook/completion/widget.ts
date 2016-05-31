@@ -149,20 +149,20 @@ class CompletionWidget extends Widget {
    * Handle `after_attach` messages for the widget.
    *
    * #### Notes
-   * Captures document events in capture phase to dismiss or navigate the
+   * Captures window events in capture phase to dismiss or navigate the
    * completion widget.
    */
   protected onAfterAttach(msg: Message): void {
-    document.addEventListener('keydown', this, true);
-    document.addEventListener('mousedown', this, true);
+    window.addEventListener('keydown', this, true);
+    window.addEventListener('mousedown', this, true);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    document.removeEventListener('keydown', this);
-    document.removeEventListener('mousedown', this);
+    window.removeEventListener('keydown', this);
+    window.removeEventListener('mousedown', this);
   }
 
   /**
