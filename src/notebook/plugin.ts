@@ -456,47 +456,47 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     command: cmdIds['cut'],
     category: 'Notebook Cell Operations',
-    text: 'Cut selected'
+    text: 'Cut Selected'
   },
   {
     command: cmdIds['copy'],
     category: 'Notebook Cell Operations',
-    text: 'Copy selected'
+    text: 'Copy Selected'
   },
   {
     command: cmdIds['paste'],
     category: 'Notebook Cell Operations',
-    text: 'Paste cell(s)'
+    text: 'Paste Cell(s)'
   },
   {
     command: cmdIds['insertAbove'],
     category: 'Notebook Cell Operations',
-    text: 'Insert cell above'
+    text: 'Insert Cell Above'
   },
   {
     command: cmdIds['insertBelow'],
     category: 'Notebook Cell Operations',
-    text: 'Insert cell below'
+    text: 'Insert Cell Below'
   },
   {
     command: cmdIds['selectAbove'],
     category: 'Notebook Cell Operations',
-    text: 'Select cell below'
+    text: 'Select Cell Above'
   },
   {
     command: cmdIds['selectBelow'],
     category: 'Notebook Cell Operations',
-    text: 'Select cell above'
+    text: 'Select Cell Below'
   },
   {
     command: cmdIds['extendAbove'],
     category: 'Notebook Cell Operations',
-    text: 'Extend selection above'
+    text: 'Extend Selection Above'
   },
   {
     command: cmdIds['extendBelow'],
     category: 'Notebook Cell Operations',
-    text: 'Extend selction below'
+    text: 'Extend Selection Below'
   },
   {
     command: cmdIds['editMode'],
@@ -512,6 +512,16 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     command: cmdIds['switchKernel'],
     category: 'Notebook Operations',
     text: 'Switch Kernel'
+  },
+  {
+    command: cmdIds['undo'],
+    category: 'Notebook Cell Operations',
+    text: 'Undo Cell Operation'
+  },
+  {
+    command: cmdIds['redo'],
+    category: 'Notebook Cell Operations',
+    text: 'Redo Cell Operation'
   }
   ]);
 
