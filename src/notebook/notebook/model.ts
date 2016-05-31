@@ -164,14 +164,6 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * A signal emitted when the model dirty state changes.
-   */
-  get dirtyChanged(): ISignal<IDocumentModel, boolean> {
-    // TODO: Remove in jupyter-js-ui and then remove here.
-    return Private.dirtyChangedSignal.bind(this);
-  }
-
-  /**
    * A signal emitted when a model state changes.
    */
   get stateChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
@@ -231,7 +223,6 @@ class NotebookModel implements INotebookModel {
     }
     let oldValue = this._dirty;
     this._dirty = newValue;
-    this.dirtyChanged.emit(newValue);
     this.stateChanged.emit({ name: 'dirty', oldValue, newValue });
   }
 
@@ -546,12 +537,6 @@ namespace Private {
    */
   export
   const contentChangedSignal = new Signal<INotebookModel, void>();
-
-  /**
-   * A signal emitted when the dirty state of the model changes.
-   */
-  export
-  const dirtyChangedSignal = new Signal<INotebookModel, boolean>();
 
   /**
    * A signal emitted when a model state changes.

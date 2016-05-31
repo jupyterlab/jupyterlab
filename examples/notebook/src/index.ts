@@ -6,7 +6,7 @@
 'use strict';
 
 import {
-  NotebookPanel, selectKernel, trustNotebook, NotebookWidgetFactory,
+  NotebookPanel, trustNotebook, NotebookWidgetFactory,
   NotebookModelFactory, NotebookActions
 } from 'jupyter-js-notebook';
 
@@ -15,7 +15,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  DocumentWidget, DocumentManager
+  DocumentWidget, DocumentManager, selectKernel
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
@@ -104,10 +104,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
   let wFactory = new NotebookWidgetFactory(rendermime, clipboard);
-  docManager.registerModelFactory(mFactory, {
-    name: 'notebook',
-    contentsOptions: { type: 'notebook' }
-  });
+  docManager.registerModelFactory(mFactory);
   docManager.registerWidgetFactory(wFactory, {
     displayName: 'Notebook',
     modelName: 'notebook',
@@ -116,6 +113,24 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     preferKernel: true,
     canStartKernel: true
   });
+  // Store a mapping of display names to kernel name.
+  let displayNameMap: { [key: string]: string } = Object.create(null);
+  for (let kernelName in specs.kernelspecs) {
+    let displayName = specs.kernelspecs[kernelName].spec.display_name;
+    displayNameMap[displayName] = kernelName;
+  }
+  let displayNames = Object.keys(displayNameMap).sort((a, b) => {
+    return a.localeCompare(b);
+  });
+  for (let displayName of displayNames) {
+    docManager.registerCreator({
+      name: `${displayName} Notebook`,
+      extension: '.ipynb',
+      type: 'notebook',
+      kernelName: displayNameMap[name]
+    });
+  }
+
   let doc = docManager.open(NOTEBOOK);
   let nbWidget: NotebookPanel;
   doc.populated.connect((d, widget) => {
@@ -135,26 +150,16 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   panel.addChild(palette);
   panel.addChild(doc);
   SplitPanel.setStretch(doc, 1);
-  window.onresize = () => { panel.update(); };
+  window.onresize = () => panel.update();
 
-  let saveHandler = () => { nbWidget.context.save(); };
+  let saveHandler = () => nbWidget.context.save();
   let interruptHandler = () => {
     if (nbWidget.context.kernel) {
       nbWidget.context.kernel.interrupt();
     }
   };
-  let restartHandler = () => {  nbWidget.restart(); };
-  let switchHandler = () => {
-    let context = nbWidget.context;
-    if (!context.kernel) {
-      return;
-    }
-    selectKernel(nbWidget.node, context.kernel.name, specs).then(name => {
-      if (name) {
-        context.changeKernel({ name });
-      }
-    });
-  };
+  let restartHandler = () => nbWidget.restart();
+  let switchHandler = () => selectKernel(nbWidget.context, nbWidget.node);
   let runAdvanceHandler = () => {
     NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.kernel);
   };

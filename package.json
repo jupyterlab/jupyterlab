@@ -9,7 +9,7 @@
     "diff-match-patch": "^1.0.0",
     "file-loader": "^0.8.5",
     "jupyter-js-services": "^0.10.1",
-    "jupyter-js-ui": "^0.12.2",
+    "jupyter-js-ui": "file:../ui",
     "jupyter-js-utils": "^0.4.0",
     "marked": "^0.3.5",
     "phosphor-disposable": "^1.0.5",

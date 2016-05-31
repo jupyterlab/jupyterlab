@@ -107,7 +107,7 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
     if (kernel) {
       context.changeKernel(kernel);
     } else {
-      let name = findKernel(model.defaultKernelName, model.defaultKernelLanguage, context.kernelSpecs);
+      let name = findKernel(model.defaultKernelName, model.defaultKernelLanguage, context.kernelspecs);
       context.changeKernel({ name });
     }
     let panel = new NotebookPanel(model, rendermime, context, this._clipboard);
