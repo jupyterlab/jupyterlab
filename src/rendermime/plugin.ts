@@ -3,12 +3,12 @@
 'use strict';
 
 import {
-  RenderMime
+  RenderMime, MimeMap, IRenderer
 } from 'jupyter-js-ui/lib/rendermime';
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer, MarkdownRenderer
+  JavascriptRenderer, SVGRenderer, MarkdownRenderer
 } from 'jupyter-js-ui/lib/renderers';
 
 import {
@@ -24,7 +24,6 @@ const renderMimeProvider = {
   id: 'jupyter.services.rendermime',
   provides: RenderMime,
   resolve: () => {
-    let rendermime = new RenderMime<Widget>();
     const transformers = [
       new JavascriptRenderer(),
       new MarkdownRenderer(),
@@ -32,16 +31,16 @@ const renderMimeProvider = {
       new ImageRenderer(),
       new SVGRenderer(),
       new LatexRenderer(),
-      new ConsoleTextRenderer(),
       new TextRenderer()
     ];
-
+    let renderers: MimeMap<IRenderer<Widget>> = {};
+    let order: string[] = [];
     for (let t of transformers) {
       for (let m of t.mimetypes) {
-        rendermime.order.push(m);
-        rendermime.renderers[m] = t;
+        renderers[m] = t;
+        order.push(m);
       }
     }
-    return rendermime;
+    return new RenderMime<Widget>(renderers, order);
   }
 };

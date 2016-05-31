@@ -8,7 +8,8 @@ import {
 
 import {
   IKernelManager, INotebookSessionManager, IContentsManager,
-  ContentsManager, KernelManager, NotebookSessionManager
+  ContentsManager, KernelManager, NotebookSessionManager,
+  getKernelSpecs, IKernelSpecIds, IAjaxSettings
 } from 'jupyter-js-services';
 
 
@@ -21,13 +22,19 @@ class JupyterServices {
   /**
    * Construct a new services provider.
    */
-  constructor() {
-    let baseUrl = getBaseUrl();
-    let ajaxSettings = getConfigOption('ajaxSettings');
+  constructor(baseUrl: string, ajaxSettings: IAjaxSettings, specs: IKernelSpecIds) {
     let options = { baseUrl, ajaxSettings };
+    this._kernelspecs = specs;
     this._kernelManager = new KernelManager(options);
     this._sessionManager = new NotebookSessionManager(options);
     this._contentsManager = new ContentsManager(baseUrl, ajaxSettings);
+  }
+
+  /**
+   * Get kernel specs.
+   */
+  get kernelspecs(): IKernelSpecIds {
+    return this._kernelspecs;
   }
 
   /**
@@ -63,6 +70,7 @@ class JupyterServices {
   private _kernelManager: IKernelManager = null;
   private _sessionManager: INotebookSessionManager = null;
   private _contentsManager: IContentsManager = null;
+  private _kernelspecs: IKernelSpecIds = null;
 }
 
 
@@ -74,6 +82,11 @@ const servicesProvider = {
   id: 'jupyter.services.services',
   provides: JupyterServices,
   resolve: () => {
-    return new JupyterServices();
+    let baseUrl = getBaseUrl();
+    let ajaxSettings = getConfigOption('ajaxSettings');
+    let options = { baseUrl, ajaxSettings };
+    return getKernelSpecs(options).then(specs => {
+      return new JupyterServices(baseUrl, ajaxSettings, specs);
+    });
   }
 };

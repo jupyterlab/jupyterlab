@@ -3,24 +3,16 @@
 'use strict';
 
 import {
-  IContentsModel
-} from 'jupyter-js-services';
-
-import {
   FileBrowserWidget, FileBrowserModel
 } from 'jupyter-js-ui/lib/filebrowser';
 
 import {
-  FileHandlerRegistry
-} from 'jupyter-js-ui/lib/filehandler';
+  DocumentManager, DocumentRegistry, DocumentWidget
+} from 'jupyter-js-ui/lib/docmanager';
 
 import {
   Application
 } from 'phosphide/lib/core/application';
-
-import {
-  IChangedArgs
-} from 'phosphor-properties';
 
 import {
   Menu, MenuItem
@@ -29,10 +21,6 @@ import {
 import {
   TabPanel
 } from 'phosphor-tabs';
-
-import {
-  Widget
-} from 'phosphor-widget';
 
 import {
   JupyterServices
@@ -45,7 +33,7 @@ import {
 export
 const fileBrowserExtension = {
   id: 'jupyter.extensions.fileBrowser',
-  requires: [JupyterServices, FileHandlerRegistry],
+  requires: [JupyterServices, DocumentRegistry],
   activate: activateFileBrowser
 };
 
@@ -53,11 +41,54 @@ const fileBrowserExtension = {
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: Application, provider: JupyterServices, registry: FileHandlerRegistry): Promise<void> {
+function activateFileBrowser(app: Application, provider: JupyterServices, registry: DocumentRegistry): Promise<void> {
   let contents = provider.contentsManager;
   let sessions = provider.notebookSessionManager;
+  let widgets: DocumentWidget[] = [];
+  let activeWidget: DocumentWidget;
+  let id = 0;
+
+  let opener = {
+    open: (widget: DocumentWidget) => {
+      if (!widget.id) {
+        widget.id = `document-manager-${++id}`;
+      }
+      if (!widget.isAttached) {
+        app.shell.addToMainArea(widget);
+      }
+      // TODO: Move this logic to the shell.
+      let stack = widget.parent;
+      if (!stack) {
+        return;
+      }
+      let tabs = stack.parent;
+      if (tabs instanceof TabPanel) {
+        tabs.currentWidget = widget;
+      }
+      activeWidget = widget;
+      widget.disposed.connect((w: DocumentWidget) => {
+        let index = widgets.indexOf(w);
+        widgets.splice(index, 1);
+      });
+    }
+  };
+
+  // TODO: Move focus tracking to the shell.
+  document.addEventListener('focus', event => {
+    for (let i = 0; i < widgets.length; i++) {
+      let widget = widgets[i];
+      if (widget.node.contains(event.target as HTMLElement)) {
+        activeWidget = widget;
+        break;
+      }
+    }
+  });
+
+  let docManager = new DocumentManager(
+    registry, contents, sessions, provider.kernelspecs, opener
+  );
   let model = new FileBrowserModel(contents, sessions);
-  let widget = new FileBrowserWidget(model, registry);
+  let widget = new FileBrowserWidget(model, docManager, opener);
   let menu = createMenu(widget);
 
   // Add a context menu to the dir listing.
@@ -69,68 +100,20 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     menu.popup(x, y);
   });
 
-  model.fileChanged.connect((mModel, args) => (args: IChangedArgs<string>) => {
-    registry.rename(args.oldValue, args.newValue);
-  });
-
-  let id = 0;
-  registry.opened.connect((r, widget) => {
-    if (!widget.id) widget.id = `document-manager-${++id}`;
-    if (!widget.isAttached) app.shell.addToMainArea(widget);
-    let stack = widget.parent;
-    if (!stack) {
-      return;
-    }
-    let tabs = stack.parent;
-    if (tabs instanceof TabPanel) {
-      tabs.currentWidget = widget;
-    }
-  });
-
   // Add the command for a new items.
   let newTextFileId = 'file-operations:new-text-file';
-  let newNotebookId = 'file-operations:new-notebook';
 
   app.commands.add([
     {
-      id: newNotebookId,
-      handler: () => {
-        registry.createNew('notebook', model.path, widget.node).then(contents => {
-          registry.open(contents.path);
-        });
-      }
-    },
-    {
       id: newTextFileId,
       handler: () => {
-        registry.createNew('file', model.path, widget.node).then(contents => {
-          registry.open(contents.path);
+        model.newUntitled('file').then(contents => {
+          let widget = docManager.open(contents.path);
+          opener.open(widget);
         });
       }
     }
   ]);
-
-
-  // Temporary file object focus follower.
-  let activeWidget: Widget;
-  let widgets: Widget[] = [];
-  document.body.addEventListener('focus', event => {
-    for (let widget of widgets) {
-      let target = event.target as HTMLElement;
-      if (widget.isAttached && widget.isVisible) {
-        if (widget.node.contains(target)) {
-          activeWidget = widget;
-          return;
-        }
-      }
-    }
-  });
-
-  // Add opened files to the widget list temporarily.
-  registry.opened.connect((r, widget) => {
-    activeWidget = widget;
-    widgets.push(widget);
-  });
 
 
   // Add the command for saving a document.
@@ -140,8 +123,10 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: saveDocumentId,
       handler: () => {
-        let path = registry.findPath(activeWidget);
-        if (path) registry.save(path);
+        if (!activeWidget) {
+          return;
+        }
+        activeWidget.context.save();
       }
     }
   ]);
@@ -161,8 +146,10 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: revertDocumentId,
       handler: () => {
-        let path = registry.findPath(activeWidget);
-        if (path) registry.revert(path);
+        if (!activeWidget) {
+          return;
+        }
+        activeWidget.context.revert();
       }
     }
   ]);
@@ -182,8 +169,9 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: closeDocumentId,
       handler: () => {
-        let path = registry.findPath(activeWidget);
-        if (path) registry.close(path);
+        if (activeWidget) {
+          activeWidget.close();
+        }
       }
     }
   ]);
@@ -203,7 +191,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: closeAllId,
       handler: () => {
-        registry.closeAll();
+        docManager.closeAll();
       }
     }
   ]);
@@ -217,12 +205,6 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   ]);
 
   app.palette.add([
-    {
-      command: newNotebookId,
-      category: 'File Operations',
-      text: 'New Notebook',
-      caption: 'Create a new Jupyter Notebook'
-    },
     {
       command: newTextFileId,
       category: 'File Operations',
@@ -257,7 +239,9 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   }
 
   function hideBrowser(): void {
-    if (!widget.isHidden) app.shell.collapseLeft();
+    if (!widget.isHidden) {
+      app.shell.collapseLeft();
+    }
   }
 
   function toggleBrowser(): void {

@@ -3,49 +3,33 @@
 'use strict';
 
 import {
-  NotebookWidget, NotebookModel, serialize, INotebookModel, deserialize,
-  NotebookManager, NotebookToolbar, selectKernel,
-  findKernel, NotebookFileHandler, NotebookCreator, NotebookPanel
+  NotebookPanel, NotebookModelFactory, INotebookModel,
+  NotebookWidgetFactory, NotebookActions
 } from 'jupyter-js-notebook';
 
 import {
-  IContentsModel, IContentsManager, IContentsOpts,
-  INotebookSessionManager, INotebookSession, IKernelSpecIds,
-  IKernelMessage, IComm, KernelStatus, getKernelSpecs
+  IKernelId
 } from 'jupyter-js-services';
+
+import {
+  IDocumentContext, DocumentRegistry, selectKernel
+} from 'jupyter-js-ui/lib/docmanager';
 
 import {
   RenderMime
 } from 'jupyter-js-ui/lib/rendermime';
 
 import {
-  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  ConsoleTextRenderer, JavascriptRenderer, SVGRenderer
-} from 'jupyter-js-ui/lib/renderers';
-
-import {
-  showDialog
-} from 'jupyter-js-ui/lib/dialog';
-
-import {
-  FileHandlerRegistry
-} from 'jupyter-js-ui/lib/filehandler';
-
-import {
   Application
 } from 'phosphide/lib/core/application';
 
 import {
-  Panel, PanelLayout
-} from 'phosphor-panel';
+  MimeData as IClipboard
+} from 'phosphor-dragdrop';
 
 import {
   ISignal, Signal
 } from 'phosphor-signaling';
-
-import {
-  IChangedArgs
-} from 'phosphor-properties';
 
 import {
   Widget
@@ -54,10 +38,6 @@ import {
 import {
   JupyterServices
 } from '../services/plugin';
-
-import {
-   WidgetManager
-} from './widgetmanager';
 
 
 /**
@@ -78,31 +58,17 @@ const cmdIds = {
   paste: 'notebook-cells:paste',
   insertAbove: 'notebook-cells:insert-above',
   insertBelow: 'notebook-cells:insert-below',
-  selectPrevious: 'notebook-cells:select-previous',
-  selectNext: 'notebook-cells:select-next',
-  toggleLinenumbers: 'notebook-cells:toggle-linenumbers',
-  toggleAllLinenumbers: 'notebook:toggle-allLinenumbers',
+  selectAbove: 'notebook-cells:select-above',
+  selectBelow: 'notebook-cells:select-below',
+  extendAbove: 'notebook-cells:extend-above',
+  extendBelow: 'notebook-cells:extend-below',
   editMode: 'notebook-cells:editMode',
   commandMode: 'notebook-cells:commandMode',
-  newNotebook: 'notebook:create-new'
+  newNotebook: 'notebook:create-new',
+  undo: 'notebook-cells:undo',
+  redo: 'notebook-cells:redo',
+  launchConsole: 'notebook:launch-console'
 };
-
-
-/**
- * The class name added to notebook container widgets.
- */
-const NB_CONTAINER = 'jp-Notebook-container';
-
-/**
- * The class name added to notebook panels.
- */
-const NB_PANE = 'jp-Notebook-panel';
-
-
-/**
- * The class name added to the widget area.
- */
-let WIDGET_CLASS = 'jp-NotebookPane-widget';
 
 
 /**
@@ -111,7 +77,7 @@ let WIDGET_CLASS = 'jp-NotebookPane-widget';
 export
 const notebookHandlerExtension = {
   id: 'jupyter.extensions.notebookHandler',
-  requires: [FileHandlerRegistry, JupyterServices, RenderMime],
+  requires: [DocumentRegistry, JupyterServices, RenderMime, IClipboard],
   activate: activateNotebookHandler
 };
 
@@ -122,6 +88,24 @@ const notebookHandlerExtension = {
 export
 class ActiveNotebook {
   /**
+   * Construct a new active notebook tracker.
+   */
+  constructor() {
+    // Temporary notebook focus follower.
+    document.body.addEventListener('focus', event => {
+      for (let widget of this._widgets) {
+        let target = event.target as HTMLElement;
+        if (widget.isAttached && widget.isVisible) {
+          if (widget.node.contains(target)) {
+            this.activeNotebook = widget;
+            return;
+          }
+        }
+      }
+    }, true);
+  }
+
+  /**
    * A signal emitted when the active notebook changes.
    */
   get activeNotebookChanged(): ISignal<ActiveNotebook, NotebookPanel> {
@@ -129,14 +113,35 @@ class ActiveNotebook {
   }
 
   /**
-   * Get the current active notebook.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * The current active notebook.
    */
   get activeNotebook(): NotebookPanel {
-    return Private.activeWidget;
+    return this._activeWidget;
   }
+  set activeNotebook(widget: NotebookPanel) {
+    if (this._activeWidget === widget) {
+      return;
+    }
+    if (this._widgets.indexOf(widget) !== -1) {
+      this._activeWidget = widget;
+      this.activeNotebookChanged.emit(widget);
+      return;
+    }
+    if (widget === null) {
+      return;
+    }
+    this._widgets.push(widget);
+    widget.disposed.connect(() => {
+      let index = this._widgets.indexOf(widget);
+      this._widgets.splice(index, 1);
+      if (this._activeWidget === widget) {
+        this.activeNotebook = null;
+      }
+    });
+  }
+
+  private _activeWidget: NotebookPanel = null;
+  private _widgets: NotebookPanel[] = [];
 }
 
 
@@ -148,7 +153,22 @@ const activeNotebookProvider = {
   id: 'jupyter.services.activeNotebook',
   provides: ActiveNotebook,
   resolve: () => {
-    return new ActiveNotebook();
+    return Private.notebookTracker;
+  }
+};
+
+
+/**
+ * A version of the notebook widget factory that uses the notebook tracker.
+ */
+class TrackingNotebookWidgetFactory extends NotebookWidgetFactory {
+  /**
+   * Create a new widget.
+   */
+  createNew(model: INotebookModel, context: IDocumentContext, kernel?: IKernelId): NotebookPanel {
+    let widget = super.createNew(model, context, kernel);
+    Private.notebookTracker.activeNotebook = widget;
+    return widget;
   }
 }
 
@@ -156,192 +176,241 @@ const activeNotebookProvider = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: Application, registry: FileHandlerRegistry, services: JupyterServices, rendermime: RenderMime<Widget>): Promise<void> {
-  let handler = new NotebookFileHandler(
-    services.contentsManager,
-    services.notebookSessionManager,
-    rendermime
-  );
-  registry.addHandler(handler);
+function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: JupyterServices, rendermime: RenderMime<Widget>, clipboard: IClipboard): Promise<void> {
 
-  let creator = new NotebookCreator(handler);
-  registry.addCreator('New Notebook', creator.createNew.bind(creator));
-
-  // Temporary notebook focus follower.
-  document.body.addEventListener('focus', event => {
-    for (let widget of Private.widgets) {
-      let target = event.target as HTMLElement;
-      if (widget.isAttached && widget.isVisible) {
-        if (widget.node.contains(target)) {
-          Private.activeWidget = widget;
-          return;
-        }
-      }
-    }
-  }, true);
-
-  // Add opened notebooks to the widget list temporarily
-  handler.opened.connect((h, widget) => {
-    Private.activeWidget = widget;
-    Private.widgets.push(widget);
+  let widgetFactory = new TrackingNotebookWidgetFactory(rendermime, clipboard);
+  registry.registerModelFactory(new NotebookModelFactory());
+  registry.registerWidgetFactory(widgetFactory,
+  {
+    fileExtensions: ['.ipynb'],
+    displayName: 'Notebook',
+    modelName: 'notebook',
+    defaultFor: ['.ipynb'],
+    preferKernel: true,
+    canStartKernel: true
   });
 
+
+  // Add the ability to launch notebooks for each kernel type.
+  let displayNameMap: { [key: string]: string } = Object.create(null);
+  let specs = services.kernelspecs;
+  for (let kernelName in specs.kernelspecs) {
+    let displayName = specs.kernelspecs[kernelName].spec.display_name;
+    displayNameMap[displayName] = kernelName;
+  }
+  let displayNames = Object.keys(displayNameMap).sort((a, b) => {
+    return a.localeCompare(b);
+  });
+  for (let displayName of displayNames) {
+    registry.registerCreator({
+      name: `${displayName} Notebook`,
+      extension: '.ipynb',
+      type: 'notebook',
+      kernelName: displayNameMap[name]
+    });
+  }
+
+  let tracker = Private.notebookTracker;
   app.commands.add([
   {
     id: cmdIds['runAndAdvance'],
     handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.runAndAdvance();
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.kernel);
+      }
     }
   },
   {
     id: cmdIds['run'],
     handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.run();
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.run(nbWidget.content, nbWidget.context.kernel);
+      }
     }
   },
   {
     id: cmdIds['runAndInsert'],
     handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.runAndInsert();
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.runAndInsert(nbWidget.content, nbWidget.context.kernel);
+      }
     }
   },
   {
     id: cmdIds['restart'],
     handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.restart();
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        nbWidget.restart();
+      }
     }
   },
   {
     id: cmdIds['interrupt'],
     handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.interrupt();
-    }
-  },
-  {
-    id: cmdIds['toCode'],
-    handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.changeCellType('code'); }
-  },
-  {
-    id: cmdIds['toMarkdown'],
-    handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.changeCellType('markdown'); }
-  },
-  {
-    id: cmdIds['toRaw'],
-    handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.changeCellType('raw');
-    }
-  },
-  {
-    id: cmdIds['cut'],
-    handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.cut();
-    }
-  },
-  {
-    id: cmdIds['copy'],
-    handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.copy();
-    }
-  },
-  {
-    id: cmdIds['paste'],
-    handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.paste();
-    }
-  },
-  {
-    id: cmdIds['insertAbove'],
-    handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.insertAbove();
-    }
-  },
-  {
-    id: cmdIds['insertBelow'],
-    handler: () => {
-      let manager = Private.activeWidget.manager;
-      if (manager) manager.insertBelow();
-    }
-  },
-  {
-    id: cmdIds['selectPrevious'],
-    handler: () => {
-      let model = Private.activeWidget.model;
-      if (model) model.activeCellIndex -= 1;
-    }
-  },
-  {
-    id: cmdIds['selectNext'],
-    handler: () => {
-      let model = Private.activeWidget.model;;
-      if (model) model.activeCellIndex += 1;
-    }
-  },
-  {
-    id: cmdIds['toggleLinenumbers'],
-    handler: () => {
-      let model = Private.activeWidget.model;
-      if (model) {
-        let cell = model.cells.get(model.activeCellIndex);
-        let lineNumbers = cell.input.textEditor.lineNumbers;
-        for (let i = 0; i < model.cells.length; i++) {
-          cell = model.cells.get(i);
-          if (model.isSelected(cell) || i === model.activeCellIndex) {
-            cell.input.textEditor.lineNumbers = !lineNumbers;
-          }
+      if (tracker.activeNotebook) {
+        let kernel = tracker.activeNotebook.context.kernel;
+        if (kernel) {
+          kernel.interrupt();
         }
       }
     }
   },
   {
-    id: cmdIds['toggleAllLinenumbers'],
+    id: cmdIds['toCode'],
     handler: () => {
-      let model = Private.activeWidget.model;
-      if (model) {
-        let cell = model.cells.get(model.activeCellIndex);
-        let lineNumbers = cell.input.textEditor.lineNumbers;
-        for (let i = 0; i < model.cells.length; i++) {
-          cell = model.cells.get(i);
-          cell.input.textEditor.lineNumbers = !lineNumbers;
-        }
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.changeCellType(nbWidget.content, 'code');
+      }
+    }
+  },
+  {
+    id: cmdIds['toMarkdown'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.changeCellType(nbWidget.content, 'markdown');
+      }
+    }
+  },
+  {
+    id: cmdIds['toRaw'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.changeCellType(nbWidget.content, 'raw');
+      }
+    }
+  },
+  {
+    id: cmdIds['cut'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.cut(nbWidget.content, nbWidget.clipboard);
+      }
+    }
+  },
+  {
+    id: cmdIds['copy'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.copy(nbWidget.content, nbWidget.clipboard);
+      }
+    }
+  },
+  {
+    id: cmdIds['paste'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.paste(nbWidget.content, nbWidget.clipboard);
+      }
+    }
+  },
+  {
+    id: cmdIds['insertAbove'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.insertAbove(nbWidget.content);
+      }
+    }
+  },
+  {
+    id: cmdIds['insertBelow'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.insertBelow(nbWidget.content);
+      }
+    }
+  },
+  {
+    id: cmdIds['selectAbove'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.selectAbove(nbWidget.content);
+      }
+    }
+  },
+  {
+    id: cmdIds['selectBelow'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.selectBelow(nbWidget.content);
+      }
+    }
+  },
+  {
+    id: cmdIds['extendAbove'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.extendSelectionAbove(nbWidget.content);
+      }
+    }
+  },
+  {
+    id: cmdIds['extendBelow'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.extendSelectionBelow(nbWidget.content);
       }
     }
   },
   {
     id: cmdIds['commandMode'],
     handler: () => {
-      let model = Private.activeWidget.model;
-      if (model) model.mode = 'command';
+      if (tracker.activeNotebook) {
+        tracker.activeNotebook.content.mode = 'command';
+      }
     }
   },
   {
     id: cmdIds['editMode'],
     handler: () => {
-      let model = Private.activeWidget.model;
-      if (model) model.mode = 'edit';
+      if (tracker.activeNotebook) {
+        tracker.activeNotebook.content.mode = 'edit';
+      }
     }
   },
   {
-    id: cmdIds['newNotebook'],
+    id: cmdIds['undo'],
     handler: () => {
-      creator.createNew('').then(contents => {
-        registry.open(contents.path);
-      });
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        nbWidget.content.mode = 'command';
+        nbWidget.content.model.cells.undo();
+      }
     }
   },
+  {
+    id: cmdIds['redo'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        nbWidget.content.mode = 'command';
+        nbWidget.content.model.cells.redo();
+      }
+    }
+  },
+  {
+    id: cmdIds['switchKernel'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        selectKernel(tracker.activeNotebook.context, tracker.activeNotebook.node);
+      }
+    }
+  }
   ]);
   app.palette.add([
   {
@@ -410,24 +479,24 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
     text: 'Insert cell below'
   },
   {
-    command: cmdIds['selectPrevious'],
+    command: cmdIds['selectAbove'],
     category: 'Notebook Cell Operations',
-    text: 'Select previous cell'
+    text: 'Select cell below'
   },
   {
-    command: cmdIds['selectNext'],
+    command: cmdIds['selectBelow'],
     category: 'Notebook Cell Operations',
-    text: 'Select next cell'
+    text: 'Select cell above'
   },
   {
-    command: cmdIds['toggleLinenumbers'],
+    command: cmdIds['extendAbove'],
     category: 'Notebook Cell Operations',
-    text: 'Toggle line numbers'
+    text: 'Extend selection above'
   },
   {
-    command: cmdIds['toggleAllLinenumbers'],
-    category: 'Notebook Operations',
-    text: 'Toggle all line numbers'
+    command: cmdIds['extendBelow'],
+    category: 'Notebook Cell Operations',
+    text: 'Extend selction below'
   },
   {
     command: cmdIds['editMode'],
@@ -438,30 +507,13 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
     command: cmdIds['commandMode'],
     category: 'Notebook Cell Operations',
     text: 'To Command Mode'
+  },
+  {
+    command: cmdIds['switchKernel'],
+    category: 'Notebook Operations',
+    text: 'Switch Kernel'
   }
   ]);
-
-  getKernelSpecs({}).then(specs => {
-    app.commands.add([
-    {
-      id: cmdIds['switchKernel'],
-      handler: () => {
-        let model = Private.activeWidget.model;
-        let name = model.kernelspec.name;
-        if (model) {
-          selectKernel(Private.activeWidget.parent.node, name, specs).then(newName => {
-            if (newName) model.session.changeKernel({name: newName});
-          });
-        }
-      }
-    }]);
-    app.palette.add([
-    {
-      command: cmdIds['switchKernel'],
-      category: 'Notebook Operations',
-      text: 'Switch Kernel'
-    }]);
-  });
 
   return Promise.resolve(void 0);
 }
@@ -471,12 +523,15 @@ function activateNotebookHandler(app: Application, registry: FileHandlerRegistry
  * A namespace for notebook plugin private data.
  */
 namespace Private {
-  export
-  var activeWidget: NotebookPanel = null;
-
-  export
-  var widgets: NotebookPanel[] = [];
-
+  /**
+   * A signal emitted when the active notebook changes.
+   */
   export
   const activeNotebookChangedSignal = new Signal<ActiveNotebook, NotebookPanel>();
+
+  /**
+   * A singleton notebook tracker instance.
+   */
+  export
+  const notebookTracker = new ActiveNotebook();
 }
