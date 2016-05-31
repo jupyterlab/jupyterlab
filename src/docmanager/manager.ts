@@ -9,7 +9,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IDisposable, DisposableDelegate
+  IDisposable, DisposableDelegate, DisposableSet
 } from 'phosphor-disposable';
 
 import {
@@ -41,8 +41,7 @@ import {
 } from './context';
 
 import {
-  IDocumentContext, IModelFactory, IWidgetFactory, IWidgetFactoryOptions,
-  IFileType, IKernelPreference, IFileCreator
+  IDocumentContext, IWidgetFactory, IWidgetFactoryOptions
 } from './interfaces';
 
 import {
@@ -321,6 +320,14 @@ class DocumentManager implements IDisposable {
     let context = this._contextManager.getContext(id);
     let child = factory.createNew(model, context, kernel);
     parent.setContent(child);
+    // Handle widget extensions.
+    let disposables = new DisposableSet();
+    for (let extender of this._registry.getWidgetExtensions(parent.name)) {
+      disposables.add(extender.createNew(child, model, context));
+    }
+    parent.disposed.connect(() => {
+      disposables.dispose();
+    });
   }
 
   private _widgets: { [key: string]: DocumentWidget[] } = Object.create(null);
