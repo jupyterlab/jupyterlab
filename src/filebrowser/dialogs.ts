@@ -159,7 +159,7 @@ class OpenWithHandler extends Widget {
    * Populate the widget factories.
    */
   protected populateFactories(): void {
-    let factories = this._manager.listWidgetFactories(this._ext);
+    let factories = this._manager.registry.listWidgetFactories(this._ext);
     let widgetDropdown = this.widgetDropdown;
     for (let factory of factories) {
       let option = document.createElement('option');
@@ -174,7 +174,9 @@ class OpenWithHandler extends Widget {
    */
   protected widgetChanged(): void {
     let widgetName = this.widgetDropdown.value;
-    let preference = this._manager.getKernelPreference(this._ext, widgetName);
+    let preference = this._manager.registry.getKernelPreference(
+      this._ext, widgetName
+    );
     updateKernels(preference, this.kernelDropdown, this._manager.kernelspecs, this._sessions);
   }
 
@@ -325,7 +327,7 @@ class CreateNewHandler extends Widget {
    * Populate the file types.
    */
   protected populateFileTypes(): void {
-    let fileTypes = this._manager.listFileTypes();
+    let fileTypes = this._manager.registry.listFileTypes();
     let dropdown = this.fileTypeDropdown;
     let option = document.createElement('option');
     option.text = 'File';
@@ -349,7 +351,7 @@ class CreateNewHandler extends Widget {
    */
   protected populateFactories(): void {
     let ext = this.ext;
-    let factories = this._manager.listWidgetFactories(ext);
+    let factories = this._manager.registry.listWidgetFactories(ext);
     let widgetDropdown = this.widgetDropdown;
     for (let factory of factories) {
       let option = document.createElement('option');
@@ -381,7 +383,7 @@ class CreateNewHandler extends Widget {
   protected widgetDropdownChanged(): void {
     let ext = this.ext;
     let widgetName = this.widgetDropdown.value;
-    let preference = this._manager.getKernelPreference(ext, widgetName);
+    let preference = this._manager.registry.getKernelPreference(ext, widgetName);
     updateKernels(preference, this.kernelDropdown, this._manager.kernelspecs, this._sessions);
   }
 

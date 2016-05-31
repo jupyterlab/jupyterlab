@@ -358,7 +358,7 @@ namespace Private {
         handler: () => { createNewFolder(widget); }
       })
     ];
-    let creators = widget.manager.listCreators();
+    let creators = widget.manager.registry.listCreators();
     if (creators) {
       items.push(new MenuItem({ type: MenuItem.Separator }));
     }

@@ -8,3 +8,4 @@ export * from './kernelselector';
 export * from './editor';
 export * from './images';
 export * from './manager';
+export * from './registry';

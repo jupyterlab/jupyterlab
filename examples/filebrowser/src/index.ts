@@ -15,7 +15,7 @@ import {
 } from 'jupyter-js-ui/lib/filebrowser';
 
 import {
-  DocumentManager, DocumentWidget
+  DocumentManager, DocumentWidget, DocumentRegistry
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
@@ -79,12 +79,14 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     }
   };
 
-  let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
-  let docManager = new DocumentManager(contentsManager, sessionsManager, specs, opener);
+  let docRegistry = new DocumentRegistry();
+  let docManager = new DocumentManager(
+    docRegistry, contentsManager, sessionsManager, specs, opener
+  );
   let mFactory = new TextModelFactory();
   let wFactory = new EditorWidgetFactory();
-  docManager.registerModelFactory(mFactory);
-  docManager.registerWidgetFactory(wFactory, {
+  docRegistry.registerModelFactory(mFactory);
+  docRegistry.registerWidgetFactory(wFactory, {
     displayName: 'Editor',
     modelName: 'text',
     fileExtensions: ['.*'],
@@ -92,6 +94,8 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     preferKernel: false,
     canStartKernel: true
   });
+
+  let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
   let fbWidget = new FileBrowserWidget(fbModel, docManager, opener);
 
   let panel = new SplitPanel();

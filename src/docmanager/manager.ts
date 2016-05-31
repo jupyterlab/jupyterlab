@@ -8,9 +8,6 @@ import {
   IKernelSpecIds, ISessionId
 } from 'jupyter-js-services';
 
-import * as utils
-  from 'jupyter-js-utils';
-
 import {
   IDisposable, DisposableDelegate
 } from 'phosphor-disposable';
@@ -48,6 +45,10 @@ import {
   IFileType, IKernelPreference, IFileCreator
 } from './interfaces';
 
+import {
+  DocumentRegistry
+} from './registry';
+
 
 /**
  * The class name added to a document container widgets.
@@ -70,7 +71,8 @@ class DocumentManager implements IDisposable {
   /**
    * Construct a new document manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, kernelspecs: IKernelSpecIds, opener: IWidgetOpener) {
+  constructor(registry: DocumentRegistry, contentsManager: IContentsManager, sessionManager: INotebookSessionManager, kernelspecs: IKernelSpecIds, opener: IWidgetOpener) {
+    this._registry = registry;
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
     this._specs = kernelspecs;
@@ -95,6 +97,16 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * Get the registry used by the manager.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get registry(): DocumentRegistry {
+    return this._registry;
+  }
+
+  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
@@ -108,14 +120,6 @@ class DocumentManager implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    for (let modelName in this._modelFactories) {
-      this._modelFactories[modelName].dispose();
-    }
-    this._modelFactories = null;
-    for (let widgetName in this._widgetFactories) {
-      this._widgetFactories[widgetName].factory.dispose();
-    }
-    this._widgetFactories = null;
     for (let id in this._widgets) {
       for (let widget of this._widgets[id]) {
         widget.dispose();
@@ -129,206 +133,6 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Register a widget factory with the document manager.
-   *
-   * @param factory - The factory instance.
-   *
-   * @param options - The options used to register the factory.
-   *
-   * @returns A disposable used to unregister the factory.
-   *
-   * #### Notes
-   * If a factory with the given `displayName` is already registered,
-   * an error will be thrown.
-   * If `'.*'` is given as a default extension, the factory will be registered
-   * as the global default.
-   * If a factory is already registered as a default for a given extension or
-   * as the global default, this factory will override the existing default.
-   */
-  registerWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions): IDisposable {
-    let name = options.displayName;
-    let exOpt = utils.copy(options) as Private.IWidgetFactoryEx;
-    exOpt.factory = factory;
-    if (this._widgetFactories[name]) {
-      throw new Error(`Duplicate registered factory ${name}`);
-    }
-    this._widgetFactories[name] = exOpt;
-    if (options.defaultFor) {
-      for (let option of options.defaultFor) {
-        if (option === '.*') {
-          this._defaultWidgetFactory = name;
-        } else if (options.fileExtensions.indexOf(option) !== -1) {
-          this._defaultWidgetFactories[option] = name;
-        }
-      }
-    }
-    return new DisposableDelegate(() => {
-      delete this._widgetFactories[name];
-      if (this._defaultWidgetFactory === name) {
-        this._defaultWidgetFactory = '';
-      }
-      for (let opt of Object.keys(this._defaultWidgetFactories)) {
-        let n = this._defaultWidgetFactories[opt];
-        if (n === name) {
-          delete this._defaultWidgetFactories[opt];
-        }
-      }
-    });
-  }
-
-  /**
-   * Register a model factory.
-   *
-   * @param factory - The factory instance.
-   *
-   * @returns A disposable used to unregister the factory.
-   *
-   * #### Notes
-   * If a factory with the given `name` is already registered, an error
-   * will be thrown.
-   */
-  registerModelFactory(factory: IModelFactory): IDisposable {
-    let name = factory.name;
-    if (this._modelFactories[name]) {
-      throw new Error(`Duplicate registered factory ${name}`);
-    }
-    this._modelFactories[name] = factory;
-    return new DisposableDelegate(() => {
-      delete this._modelFactories[name];
-    });
-  }
-
-  /**
-   * Register a file type with the document manager.
-   *
-   * #### Notes
-   * These are used to populate the "Create New" dialog.
-   */
-  registerFileType(fileType: IFileType): IDisposable {
-    this._fileTypes.push(fileType);
-    this._fileTypes.sort((a, b) => a.name.localeCompare(b.name));
-    return new DisposableDelegate(() => {
-      let index = this._fileTypes.indexOf(fileType);
-      this._fileTypes.splice(index, 1);
-    });
-  }
-
-  /**
-   * Register a Create New handler.
-   *
-   * @params creator - The file creator object.
-   *
-   * @params after - The optional item name to insert after.
-   *
-   * #### Notes
-   * If `after` is not given or not already registered, it will be moved
-   * to the end.
-   */
-  registerCreator(creator: IFileCreator, after?: string): IDisposable {
-    let added = false;
-    if (after) {
-      for (let existing of this._creators) {
-        if (existing.name === after) {
-          let index = this._creators.indexOf(existing);
-          this._creators.splice(index, 0, creator);
-          added = true;
-        }
-      }
-    }
-    if (!added) {
-      this._creators.push(creator);
-    }
-    return new DisposableDelegate(() => {
-      let index = this._creators.indexOf(creator);
-      this._creators.splice(index, 1);
-    });
-  }
-
-  /**
-   * Get the list of registered widget factory display names.
-   *
-   * @param path - An optional file path to filter the results.
-   *
-   * #### Notes
-   * The first item in the list is considered the default.
-   */
-  listWidgetFactories(ext?: string): string[] {
-    ext = ext || '';
-    let factories: string[] = [];
-    let options: Private.IWidgetFactoryEx;
-    let name = '';
-    // If an extension was given, filter by extension.
-    // Make sure the modelFactory is registered.
-    if (ext.length > 1) {
-      if (ext in this._defaultWidgetFactories) {
-        name = this._defaultWidgetFactories[ext];
-        options = this._widgetFactories[name];
-        if (options.modelName in this._modelFactories) {
-          factories.push(name);
-        }
-      }
-    }
-    // Add the rest of the valid widgetFactories that can open the path.
-    for (name in this._widgetFactories) {
-      if (factories.indexOf(name) !== -1) {
-        continue;
-      }
-      options = this._widgetFactories[name];
-      if (!(options.modelName in this._modelFactories)) {
-        continue;
-      }
-      let exts = options.fileExtensions;
-      if ((exts.indexOf(ext) !== -1) || (exts.indexOf('.*') !== -1)) {
-        factories.push(name);
-      }
-    }
-    // Add the default widget if it was not already added.
-    name = this._defaultWidgetFactory;
-    if (name && factories.indexOf(name) === -1) {
-      options = this._widgetFactories[name];
-      if (options.modelName in this._modelFactories) {
-        factories.push(name);
-      }
-    }
-    return factories;
-  }
-
-  /**
-   * Get a list of file types that have been registered.
-   */
-  listFileTypes(): IFileType[] {
-    return this._fileTypes.slice();
-  }
-
-  /**
-   * Get the ordered list of file creator names.
-   */
-  listCreators(): IFileCreator[] {
-    return this._creators.slice();
-  }
-
-  /**
-   * Get the kernel preference.
-   */
-  getKernelPreference(ext: string, widgetName: string): IKernelPreference {
-    let widgetFactoryEx = this._getWidgetFactoryEx(widgetName);
-    let modelFactory = this._getModelFactory(widgetName);
-    let language = modelFactory.preferredLanguage(ext);
-    return {
-      language,
-      preferKernel: widgetFactoryEx.preferKernel,
-      canStartKernel: widgetFactoryEx.canStartKernel
-    };
-  }
-
-  /**
-   * List the running notebook sessions.
-   */
-  listSessions(): Promise<ISessionId[]> {
-    return this._sessionManager.listRunning();
-  }
-
-  /**
    * Open a file and return the widget used to display the contents.
    *
    * @param path - The file path to open.
@@ -338,6 +142,7 @@ class DocumentManager implements IDisposable {
    * @param kernel - An optional kernel name/id to override the default.
    */
   open(path: string, widgetName='default', kernel?: IKernelId): DocumentWidget {
+    let registry = this._registry;
     if (widgetName === 'default') {
       let parts = path.split('.');
       let ext: string;
@@ -346,9 +151,9 @@ class DocumentManager implements IDisposable {
       } else {
         ext = '.' + parts.pop().toLowerCase();
       }
-      widgetName = this.listWidgetFactories(ext)[0];
+      widgetName = registry.listWidgetFactories(ext)[0];
     }
-    let mFactory = this._getModelFactory(widgetName);
+    let mFactory = registry.getModelFactory(widgetName);
     if (!mFactory) {
       return;
     }
@@ -382,10 +187,11 @@ class DocumentManager implements IDisposable {
    * @param kernel - An optional kernel name/id to override the default.
    */
   createNew(path: string, widgetName='default', kernel?: IKernelId): DocumentWidget {
+    let registry = this._registry;
     if (widgetName === 'default') {
-      widgetName = this.listWidgetFactories(path)[0];
+      widgetName = registry.listWidgetFactories(path)[0];
     }
-    let mFactory = this._getModelFactory(widgetName);
+    let mFactory = registry.getModelFactory(widgetName);
     if (!mFactory) {
       return;
     }
@@ -400,6 +206,13 @@ class DocumentManager implements IDisposable {
       this._populateWidget(widget, kernel);
     });
     return widget;
+  }
+
+  /**
+   * List the running notebook sessions.
+   */
+  listSessions(): Promise<ISessionId[]> {
+    return this._sessionManager.listRunning();
   }
 
   /**
@@ -430,7 +243,7 @@ class DocumentManager implements IDisposable {
   findWidget(path: string, widgetName='default'): Widget {
     let ids = this._contextManager.getIdsForPath(path);
     if (widgetName === 'default') {
-      widgetName = this._defaultWidgetFactory;
+      widgetName = this._registry.defaultWidgetFactory;
     }
     for (let id of ids) {
       for (let widget of this._widgets[id]) {
@@ -482,7 +295,7 @@ class DocumentManager implements IDisposable {
    * Create a container widget and handle its lifecycle.
    */
   private _createWidget(name: string, id: string): DocumentWidget {
-    let factory = this._widgetFactories[name].factory;
+    let factory = this._registry.getWidgetFactory(name);
     let widget = new DocumentWidget(name, id, this._contextManager, factory, this._widgets);
     if (!(id in this._widgets)) {
       this._widgets[id] = [];
@@ -495,7 +308,7 @@ class DocumentManager implements IDisposable {
    * Create a content widget and add it to the container widget.
    */
   private _populateWidget(parent: DocumentWidget, kernel?: IKernelId): void {
-    let factory = this._widgetFactories[parent.name].factory;
+    let factory = this._registry.getWidgetFactory(parent.name);
     let id = parent.context.id;
     let model = this._contextManager.getModel(id);
     let context = this._contextManager.getContext(id);
@@ -503,41 +316,12 @@ class DocumentManager implements IDisposable {
     parent.setContent(child);
   }
 
-  /**
-   * Get the appropriate widget factory by name.
-   */
-  private _getWidgetFactoryEx(widgetName: string): Private.IWidgetFactoryEx {
-    let options: Private.IWidgetFactoryEx;
-    if (widgetName === 'default') {
-      options = this._widgetFactories[this._defaultWidgetFactory];
-    } else {
-      options = this._widgetFactories[widgetName];
-    }
-    return options;
-  }
-
-  /**
-   * Get the appropriate model factory given a widget factory.
-   */
-  private _getModelFactory(widgetName: string): IModelFactory {
-    let wFactoryEx = this._getWidgetFactoryEx(widgetName);
-    if (!wFactoryEx) {
-      return;
-    }
-    return this._modelFactories[wFactoryEx.modelName];
-  }
-
-  private _modelFactories: { [key: string]: IModelFactory } = Object.create(null);
-  private _widgetFactories: { [key: string]: Private.IWidgetFactoryEx } = Object.create(null);
-  private _defaultWidgetFactory = '';
-  private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _widgets: { [key: string]: DocumentWidget[] } = Object.create(null);
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
   private _contextManager: ContextManager = null;
   private _specs: IKernelSpecIds = null;
-  private _fileTypes: IFileType[] = [];
-  private _creators: IFileCreator[] = [];
+  private _registry: DocumentRegistry = null;
 }
 
 
