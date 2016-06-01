@@ -16,48 +16,134 @@ import {
 
 
 /**
- * Bring up a dialog to select the kernel for a context.
+ * An interface for selecting a new kernel.
  */
 export
-function selectKernel(context: IDocumentContext, host?: HTMLElement): Promise<IKernelId> {
-  let path = context.path;
-  let specs = context.kernelspecs;
-  let kernel = context.kernel;
+interface IKernelSelection {
+  /**
+   * The name of the current session.
+   */
+  name: string;
+
+  /**
+   * The kernel spec information.
+   */
+  specs: IKernelSpecIds;
+
+  /**
+   * The current running sessions.
+   */
+  sessions: ISessionId[];
+
+  /**
+   * The desired kernel language.
+   */
+  preferredLanguage: string;
+
+  /**
+   * The optional existing kernel id.
+   */
+  kernel?: IKernelId;
+
+  /**
+   * The host node for the dialog.
+   */
+  host?: HTMLElement;
+}
+
+
+/**
+ * Bring up a dialog to select a kernel.
+ */
+export
+function selectKernel(options: IKernelSelection): Promise<IKernelId> {
+  let specs = options.specs;
+  let kernel = options.kernel;
 
   // Create the dialog body.
   let body = document.createElement('div');
   let text = document.createElement('pre');
-  text.textContent = `Select kernel for "${path}"`;
+  text.textContent = `Select kernel for\n"${options.name}"`;
   body.appendChild(text);
   if (kernel) {
     let displayName = specs.kernelspecs[kernel.name].spec.display_name;
     text.textContent += `\nCurrent: ${displayName}`;
-    text.title = `Path: ${path}\n` +
-    `Kernel Name: ${displayName}\n` +
+    text.title = `Kernel Name: ${displayName}\n` +
     `Kernel Id: ${kernel.id}`;
   }
   let selector = document.createElement('select');
   body.appendChild(selector);
 
   // Get the current sessions, populate the kernels, and show the dialog.
-  return context.listSessions().then(running => {
-    let lang = context.model.defaultKernelLanguage;
-    populateKernels(selector, specs, running, lang);
-    return showDialog({
-      title: 'Select Kernel',
-      body,
-      host,
-      okText: 'SELECT'
-    });
+  let lang = options.preferredLanguage;
+  populateKernels(selector, specs, options.sessions, lang);
+  return showDialog({
+    title: 'Select Kernel',
+    body,
+    host: options.host,
+    okText: 'SELECT'
   }).then(result => {
     // Change the kernel if a kernel was selected.
     if (result.text === 'SELECT') {
-      let kernelId = JSON.parse(selector.value) as IKernelId;
-      context.changeKernel(kernelId);
-      return kernel;
+      return JSON.parse(selector.value) as IKernelId;
     }
     return void 0;
   });
+}
+
+
+/**
+ * Change the kernel on a context.
+ */
+export
+function selectKernelForContext(context: IDocumentContext, host?: HTMLElement): Promise<void> {
+  return context.listSessions().then(sessions => {
+    let options = {
+      name: context.path.split('/').pop(),
+      specs: context.kernelspecs,
+      sessions,
+      preferredLanguage: context.model.defaultKernelLanguage,
+      kernel: context.kernel,
+      host
+    };
+    return selectKernel(options);
+  }).then(kernel => {
+    context.changeKernel(kernel);
+  });
+}
+
+
+/**
+ * Get the appropriate kernel name.
+ */
+export
+function findKernel(kernelName: string, language: string, specs: IKernelSpecIds): string {
+  if (kernelName === 'unknown') {
+    return specs.default;
+  }
+  // Look for an exact match.
+  for (let specName in specs.kernelspecs) {
+    if (specName === kernelName) {
+      return kernelName;
+    }
+  }
+  // Next try to match the language name.
+  if (language === 'unknown') {
+    return specs.default;
+  }
+  for (let specName in specs.kernelspecs) {
+    let kernelLanguage = specs.kernelspecs[specName].spec.language;
+    if (language === kernelLanguage) {
+      console.log('No exact match found for ' + specName +
+                  ', using kernel ' + specName + ' that matches ' +
+                  'language=' + language);
+      return specName;
+    }
+  }
+  // Finally, use the default kernel.
+  console.log(`No matching kernel found for ${kernelName}, ` +
+              `using default kernel ${specs.default}`);
+  return specs.default;
 }
 
 
@@ -114,7 +200,7 @@ function populateKernels(node: HTMLSelectElement, specs: IKernelSpecIds, running
     }
   }
   // Use the default kernel if no preferred language or none were found.
-  if (!names) {
+  if (!names.length) {
     let name = specs.default;
     node.appendChild(optionForName(name, displayNames[name]));
   }
