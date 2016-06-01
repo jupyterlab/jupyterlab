@@ -7,6 +7,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  showDialog
+} from 'jupyter-js-ui/lib/dialog';
+
+import {
   RenderMime
 } from 'jupyter-js-ui/lib/rendermime';
 
@@ -147,6 +151,28 @@ class ConsolePanel extends Panel {
    */
   protected onBeforeDetach(msg: Message): void {
     this.content.node.removeEventListener('click', this);
+  }
+
+  /**
+   * Handle `'close-request'` messages.
+   */
+  protected onCloseRequest(msg: Message): void {
+    let session = this.content.session;
+    if (!session.kernel) {
+      this.dispose();
+    }
+    session.kernel.getKernelSpec().then(spec => {
+      let name = spec.display_name;
+      return showDialog({
+        title: 'Shut down kernel?',
+        body: `Shut down ${name}?`,
+        host: this.node
+      });
+    }).then(value => {
+      if (value && value.text === 'OK') {
+        return session.shutdown();
+      }
+    }).then(() => session.dispose() );
   }
 
   private _console: ConsoleWidget = null;
