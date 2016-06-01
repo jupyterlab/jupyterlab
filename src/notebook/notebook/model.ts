@@ -387,6 +387,7 @@ class NotebookModel implements INotebookModel {
     for (let key in metadata) {
       this.setCursorData(key, (metadata as any)[key]);
     }
+    this.dirty = true;
   }
 
   /**
@@ -508,6 +509,7 @@ class NotebookModel implements INotebookModel {
    * Handle a change to a cell state.
    */
   protected onCellChanged(cell: ICellModel, change: any): void {
+    this.dirty = true;
     this.contentChanged.emit(void 0);
   }
 
