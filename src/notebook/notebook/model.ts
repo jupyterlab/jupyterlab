@@ -572,7 +572,7 @@ namespace Private {
     return {
       kernelspec: { name: 'unknown', display_name: 'Unknown' },
       language_info: { name: 'unknown' },
-      orig_nbformat: -1
+      orig_nbformat: 1
     };
   }
 }
