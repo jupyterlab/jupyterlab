@@ -51,6 +51,7 @@ class EditorWidget extends CodeMirrorWidget {
     super();
     this.addClass(EDITOR_CLASS);
     let editor = this.editor;
+    editor.setOption('lineNumbers', true);
     let doc = editor.getDoc();
     doc.setValue(model.toString());
     this.title.text = context.path.split('/').pop();

@@ -154,6 +154,7 @@ class FileButtons extends Widget {
     let widget = this._manager.createNew(path, widgetName, kernel);
     let opener = this._opener;
     opener.open(widget);
+    this.model.refresh();
   }
 
   /**
