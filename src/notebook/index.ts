@@ -3,5 +3,4 @@
 'use strict';
 
 export * from './console';
-export * from './common/selectkernel';
 export * from './notebook/index';

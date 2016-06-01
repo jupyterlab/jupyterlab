@@ -7,7 +7,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IWidgetFactory, IDocumentContext
+  IWidgetFactory, IDocumentContext, findKernel
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
@@ -21,10 +21,6 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
-
-import {
-  findKernel
-} from '../common/selectkernel';
 
 import {
   ToolbarItems

@@ -256,6 +256,16 @@ class ConsoleWidget extends Widget {
   }
 
   /**
+   * Get the session used by the console.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get session(): INotebookSession {
+    return this._session;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
