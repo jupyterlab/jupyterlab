@@ -4,6 +4,7 @@
   "dependencies": {
     "es6-promise": "^3.1.2",
     "jupyter-js-plugins": "file:..",
+    "jupyter-js-services": "^0.10.4",
     "phosphide": "^0.9.4"
   },
   "scripts": {

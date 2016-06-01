@@ -11,7 +11,7 @@
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5",
     "jupyter-js-notebook": "file:../js-notebook",
-    "jupyter-js-services": "^0.10.2",
+    "jupyter-js-services": "^0.10.4",
     "jupyter-js-ui": "file:../ui",
     "jupyter-js-utils": "^0.4.0",
     "jupyter-js-widgets": "0.0.17",
