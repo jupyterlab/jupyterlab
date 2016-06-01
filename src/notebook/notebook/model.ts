@@ -395,6 +395,7 @@ class NotebookModel implements INotebookModel {
    */
   initialize(): void {
     this._cells.clearUndo();
+    this.dirty = false;
   }
 
   /**
@@ -522,6 +523,7 @@ class NotebookModel implements INotebookModel {
       return;
     }
     this._metadata[name] = newValue;
+    this.dirty = true;
     this.contentChanged.emit(void 0);
     this.metadataChanged.emit({ name, oldValue, newValue });
   }

@@ -204,7 +204,7 @@ class OutputAreaWidget extends Widget {
       let prompt = new Widget();
       prompt.addClass(PROMPT_CLASS);
       let count = (output as nbformat.IExecuteResult).execution_count;
-      prompt.node.textContent = `Out [${count === null ? ' ' : count}]:`;
+      prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
       widget.addChild(prompt);
       break;
     case 'display_data':
