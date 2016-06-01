@@ -376,22 +376,23 @@ class ConsoleWidget extends Widget {
    */
   protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
     let line = change.newValue.split('\n')[change.line];
+    let lastChar = change.ch - 1;
     let model = this._completion.model;
+    let hasCompletion = !!model.original;
     // If last character entered is not whitespace, update completion.
-    if (line[change.ch - 1] && line[change.ch - 1].match(/\S/)) {
-      // If there is currently a completion
-      if (model.original) {
-        model.current = change;
-      }
+    if (line[lastChar] && line[lastChar].match(/\S/) && hasCompletion) {
+      // Update the current completion state.
+      model.current = change;
     } else {
-      // If final character is whitespace, reset completion and tooltip.
-      this._tooltip.hide();
+      // If final character is whitespace, reset completion.
       model.options = null;
       model.original = null;
       model.cursor = null;
-      return;
     }
-    if (change.newValue) {
+    // Displaying completion widget overrides displaying tooltip.
+    if (hasCompletion) {
+      this._tooltip.hide();
+    } else if (change.newValue) {
       this.updateTooltip(change);
     }
   }
