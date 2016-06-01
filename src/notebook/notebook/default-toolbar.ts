@@ -281,6 +281,13 @@ class CellTypeSwitcher extends Widget {
         this._changeGuard = false;
       }
     });
+    // Follow a change in the cells.
+    panel.content.model.cells.changed.connect((sender, args) => {
+      index = panel.content.activeCellIndex;
+      this._changeGuard = true;
+      select.value = panel.model.cells.get(index).type;
+      this._changeGuard = false;
+    });
     // Change current cell type on a change in the dropdown.
     select.addEventListener('change', event => {
       if (!this._changeGuard) {
@@ -288,6 +295,7 @@ class CellTypeSwitcher extends Widget {
       }
     });
   }
+
 
   private _changeGuard = false;
 }

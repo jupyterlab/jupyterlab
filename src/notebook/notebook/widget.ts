@@ -183,6 +183,14 @@ class NotebookRenderer extends Widget {
   }
 
   /**
+   * Get the number of child widgets.
+   */
+  childCount(): number {
+    let layout = this.layout as PanelLayout;
+    return layout.childCount();
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
