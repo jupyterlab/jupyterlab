@@ -133,14 +133,13 @@ class NotebookRenderer extends Widget {
     this.addClass(NB_CLASS);
     this._model = model;
     this._rendermime = rendermime;
-    this.layout = new PanelLayout();
-    model.cells.changed.connect(this.onCellsChanged, this);
-    model.metadataChanged.connect(this.onMetadataChanged, this);
     this._langInfoCursor = model.getMetadata('language_info');
     this._mimetype = this.getMimetype();
+    this.layout = new PanelLayout();
+
     // Add the current cells.
-    // Add a new code cell if there are no cells.
     if (model.cells.length === 0) {
+      // Add a new code cell if there are no cells.
       let cell = model.createCodeCell();
       model.cells.add(cell);
     }
@@ -152,6 +151,9 @@ class NotebookRenderer extends Widget {
       this.initializeCellWidget(widget);
       layout.addChild(widget);
     }
+
+    model.cells.changed.connect(this.onCellsChanged, this);
+    model.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
   /**
