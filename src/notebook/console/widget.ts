@@ -195,9 +195,7 @@ class ConsoleWidget extends Widget {
    * @returns A ConsoleTooltip widget.
    */
   static createTooltip(): ConsoleTooltip {
-    // Null values are automatically set to 'auto'.
-    let rect = { top: 0, left: 0, width: null as any, height: null as any };
-    return new ConsoleTooltip(rect as ClientRect);
+    return new ConsoleTooltip();
   }
 
   /**
@@ -426,24 +424,44 @@ class ConsoleWidget extends Widget {
    * Show the tooltip.
    */
   protected showTooltip(change: ITextChange, bundle: nbformat.MimeBundle): void {
-    let {top, left} = change.coords;
-
-    // Offset the height of the tooltip by the height of cursor characters.
-    top += change.chHeight;
-    // Account for 1px border width.
-    left += 1;
-
-    // Account for 1px border on top and bottom.
-    let maxHeight = window.innerHeight - top - 2;
-    // Account for 1px border on both sides.
-    let maxWidth = window.innerWidth - left - 2;
-
+    let { top, bottom, left } = change.coords;
     let tooltip = this._tooltip;
-    tooltip.rect = {top, left} as ClientRect;
+    let heightAbove = top + 1; // 1px border
+    let heightBelow = window.innerHeight - bottom - 1; // 1px border
+    let widthLeft = left;
+    let widthRight = window.innerWidth - left;
+
+    // Add content and measure.
     tooltip.content = this._rendermime.render(bundle);
+    tooltip.show();
+    let { width, height } = tooltip.node.getBoundingClientRect();
+    let maxWidth: number;
+    let maxHeight: number;
+
+    // Prefer displaying below.
+    if (heightBelow >= height || heightBelow >= heightAbove) {
+      // Offset the height of the tooltip by the height of cursor characters.
+      top += change.chHeight;
+      maxHeight = heightBelow;
+    } else {
+      maxHeight = heightAbove;
+      top -= Math.min(height, maxHeight);
+    }
+
+    // Prefer displaying on the right.
+    if (widthRight >= width || widthRight >= widthLeft) {
+      // Account for 1px border width.
+      left += 1;
+      maxWidth = widthRight;
+    } else {
+      maxWidth = widthLeft;
+      left -= Math.min(width, maxWidth);
+    }
+
+    tooltip.node.style.top = `${top}px`;
+    tooltip.node.style.left = `${left}px`;
     tooltip.node.style.maxHeight = `${maxHeight}px`;
     tooltip.node.style.maxWidth = `${maxWidth}px`;
-    tooltip.show();
   }
 
   /**
