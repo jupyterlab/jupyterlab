@@ -68,6 +68,8 @@ const cmdIds = {
   split: 'notebook-cells:split',
   commandMode: 'notebook-cells:commandMode',
   newNotebook: 'notebook:create-new',
+  toggleLines: 'notebook-cells:toggle-lines',
+  toggleAllLines: 'notebook-cells:toggle-all-lines',
   undo: 'notebook-cells:undo',
   redo: 'notebook-cells:redo'
 };
@@ -397,6 +399,24 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
+    id: cmdIds['toggleLines'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.toggleLineNumbers(nbWidget.content);
+      }
+    }
+  },
+  {
+    id: cmdIds['toggleAllLines'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.toggleAllLineNumbers(nbWidget.content);
+      }
+    }
+  },
+  {
     id: cmdIds['commandMode'],
     handler: () => {
       if (tracker.activeNotebook) {
@@ -416,9 +436,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     id: cmdIds['undo'],
     handler: () => {
       if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
-        nbWidget.content.mode = 'command';
-        nbWidget.content.model.cells.undo();
+        NotebookActions.undo(tracker.activeNotebook.content);
       }
     }
   },
@@ -426,9 +444,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     id: cmdIds['redo'],
     handler: () => {
       if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
-        nbWidget.content.mode = 'command';
-        nbWidget.content.model.cells.redo();
+        NotebookActions.redo(tracker.activeNotebook.content);
       }
     }
   },
@@ -541,6 +557,16 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     command: cmdIds['extendBelow'],
     category: 'Notebook Cell Operations',
     text: 'Extend Selection Below'
+  },
+  {
+    command: cmdIds['toggleLines'],
+    category: 'Notebook Cell Operations',
+    text: 'Toggle Line Numbers'
+  },
+  {
+    command: cmdIds['toggleAllLines'],
+    category: 'Notebook Cell Operations',
+    text: 'Toggle All Line Numbers'
   },
   {
     command: cmdIds['editMode'],
