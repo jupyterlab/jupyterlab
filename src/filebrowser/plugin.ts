@@ -110,6 +110,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
         model.newUntitled('file').then(contents => {
           let widget = docManager.createNew(contents.path);
           opener.open(widget);
+          model.refresh();
         });
       }
     }
@@ -124,6 +125,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
       model.newUntitled('notebook').then(contents => {
         let widget = docManager.createNew(contents.path);
         opener.open(widget);
+        model.refresh();
       });
     }
   }]);
