@@ -170,11 +170,24 @@ class FileBrowserWidget extends Widget {
           showErrorMessage(this, 'Open directory', error)
         );
       } else {
-        let path = item.path;
-        let widget = this._manager.findWidget(path) || this._manager.open(item.path);
-        this._opener.open(widget);
+        this.openPath(item.path);
       }
     }
+  }
+
+  /**
+   * Open a file by path.
+   */
+  openPath(path: string): Widget {
+    let model = this.model;
+    let widget = this._manager.findWidget(path);
+    if (!widget) {
+      widget = this._manager.open(path);
+      widget.populated.connect(() => model.refresh() );
+      widget.context.kernelChanged.connect(() => model.refresh() );
+    }
+    this._opener.open(widget);
+    return widget;
   }
 
   /**

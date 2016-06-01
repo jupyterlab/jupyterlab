@@ -323,6 +323,16 @@ class DirListing extends Widget {
   }
 
   /**
+   * Get the model used by the listing.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get model(): FileBrowserModel {
+    return this._model;
+  }
+
+  /**
    * Get the dir listing header node.
    *
    * #### Notes
@@ -673,11 +683,12 @@ class DirListing extends Widget {
 
     // Handle notebook session statuses.
     let paths = items.map(item => item.path);
+    let specs = this._model.kernelspecs;
     for (let sessionId of this._model.sessionIds) {
       let index = paths.indexOf(sessionId.notebook.path);
       let node = this._items[index];
       node.classList.add(RUNNING_CLASS);
-      node.title = sessionId.kernel.name;
+      node.title = specs.kernelspecs[sessionId.kernel.name].spec.display_name;
     }
 
     this._prevPath = this._model.path;
@@ -886,7 +897,12 @@ class DirListing extends Widget {
       );
     } else {
       let path = item.path;
-      let widget = this._manager.findWidget(path) || this._manager.open(item.path);
+      let widget = this._manager.findWidget(path);
+      if (!widget) {
+        widget = this._manager.open(item.path);
+        widget.populated.connect(() => this.model.refresh() );
+        widget.context.kernelChanged.connect(() => this.model.refresh() );
+      }
       this._opener.open(widget);
     }
   }
@@ -1037,7 +1053,12 @@ class DirListing extends Widget {
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
         let path = item.path;
-        return this._manager.findWidget(path) || this._manager.open(item.path);
+        let widget = this._manager.findWidget(path);
+        if (!widget) {
+          widget = this._manager.open(item.path);
+          widget.populated.connect(() => this.model.refresh() );
+          widget.context.kernelChanged.connect(() => this.model.refresh() );
+        }
       });
     }
 

@@ -145,6 +145,8 @@ class FileButtons extends Widget {
     let widget = this._manager.open(path, widgetName, kernel);
     let opener = this._opener;
     opener.open(widget);
+    widget.populated.connect(() => this.model.refresh() );
+    widget.context.kernelChanged.connect(() => this.model.refresh() );
   }
 
   /**
@@ -154,7 +156,8 @@ class FileButtons extends Widget {
     let widget = this._manager.createNew(path, widgetName, kernel);
     let opener = this._opener;
     opener.open(widget);
-    this.model.refresh();
+    widget.populated.connect(() => this.model.refresh() );
+    widget.context.kernelChanged.connect(() => this.model.refresh() );
   }
 
   /**
@@ -319,8 +322,6 @@ namespace Private {
   function createNewFile(widget: FileButtons): void {
     widget.model.newUntitled('file').then(contents => {
       return widget.open(contents.path);
-    }).then(contents => {
-      return widget.model.refresh();
     }).catch(error => {
       utils.showErrorMessage(widget, 'New File Error', error);
     });

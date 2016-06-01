@@ -4,8 +4,12 @@
 
 import {
   IContentsManager, IContentsModel, IContentsOpts, INotebookSessionManager,
-  INotebookSession, ISessionId, KernelStatus, IKernelSpecId
+  INotebookSession, ISessionId, KernelStatus, IKernelSpecIds
 } from 'jupyter-js-services';
+
+import {
+  PromiseDelegate
+} from 'jupyter-js-utils';
 
 import {
   IDisposable
@@ -32,9 +36,10 @@ class FileBrowserModel implements IDisposable {
   /**
    * Construct a new file browser view model.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager) {
+  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, specs: IKernelSpecIds) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
+    this._specs = specs;
     this._model = { path: '', name: '/', type: 'directory', content: [] };
     this.cd();
   }
@@ -85,6 +90,13 @@ class FileBrowserModel implements IDisposable {
    */
   get sessionIds(): ISessionId[] {
     return this._sessionIds.slice();
+  }
+
+  /**
+   * Get the kernel specs.
+   */
+  get kernelspecs(): IKernelSpecIds {
+    return this._specs;
   }
 
   /**
@@ -518,6 +530,7 @@ class FileBrowserModel implements IDisposable {
   private _sortKey = 'name';
   private _ascending = true;
   private _unsortedNames: string[] = [];
+  private _specs: IKernelSpecIds = null;
 }
 
 

@@ -246,7 +246,7 @@ class DocumentManager implements IDisposable {
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
-  findWidget(path: string, widgetName='default'): Widget {
+  findWidget(path: string, widgetName='default'): DocumentWidget {
     let ids = this._contextManager.getIdsForPath(path);
     if (widgetName === 'default') {
       widgetName = this._registry.defaultWidgetFactory;

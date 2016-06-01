@@ -95,7 +95,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     canStartKernel: true
   });
 
-  let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
+  let fbModel = new FileBrowserModel(contentsManager, sessionsManager, specs);
   let fbWidget = new FileBrowserWidget(fbModel, docManager, opener);
 
   let panel = new SplitPanel();
