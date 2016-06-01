@@ -487,6 +487,7 @@ class ActiveNotebook extends NotebookRenderer {
     }
     if (widget) {
       widget.addClass(ACTIVE_CLASS);
+      Private.scrollIfNeeded(this.parent.node, widget.node);
     }
     let count = 0;
     for (let i = 0; i < layout.childCount(); i++) {
@@ -506,6 +507,7 @@ class ActiveNotebook extends NotebookRenderer {
       widget = layout.childAt(this.activeCellIndex) as BaseCellWidget;
       widget.addClass(OTHER_SELECTED_CLASS);
     }
+
   }
 
   /**
@@ -588,4 +590,22 @@ namespace Private {
    */
   export
   const stateChangedSignal = new Signal<ActiveNotebook, IChangedArgs<any>>();
+
+ /**
+  * Scroll an element into view if needed.
+  *
+  * @param area - The scroll area element.
+  *
+  * @param elem - The element of interest.
+  */
+  export
+  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
+    let ar = area.getBoundingClientRect();
+    let er = elem.getBoundingClientRect();
+    if (er.top < ar.top - 10) {
+      area.scrollTop -= ar.top - er.top + 10;
+    } else if (er.bottom > ar.bottom + 10) {
+      area.scrollTop += er.bottom - ar.bottom + 10;
+    }
+  }
 }
