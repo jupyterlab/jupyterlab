@@ -172,7 +172,10 @@ class ConsolePanel extends Panel {
       if (value && value.text === 'OK') {
         return session.shutdown();
       }
-    }).then(() => session.dispose() );
+    }).then(() => {
+      super.onCloseRequest(msg);
+      this.dispose();
+    });
   }
 
   private _console: ConsoleWidget = null;
@@ -305,6 +308,8 @@ class ConsoleWidget extends Widget {
     this._history = null;
     this._completion.dispose();
     this._completion = null;
+    this._session.dispose();
+    this._session = null;
     super.dispose();
   }
 
