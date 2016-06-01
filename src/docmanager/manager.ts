@@ -170,7 +170,6 @@ class DocumentManager implements IDisposable {
     widget = this._createWidget(widgetName, id);
     // Load the contents from disk.
     this._contextManager.revert(id).then(() => {
-      model.initialize();
       this._populateWidget(widget, kernel);
     });
     return widget;
@@ -208,7 +207,6 @@ class DocumentManager implements IDisposable {
     // Save the contents to disk to get a valid contentsModel for the
     // context.
     this._contextManager.save(id).then(() => {
-      model.initialize();
       this._populateWidget(widget, kernel);
     });
     return widget;
@@ -317,6 +315,7 @@ class DocumentManager implements IDisposable {
     let factory = this._registry.getWidgetFactory(parent.name);
     let id = parent.context.id;
     let model = this._contextManager.getModel(id);
+    model.initialize();
     let context = this._contextManager.getContext(id);
     let child = factory.createNew(model, context, kernel);
     parent.setContent(child);
