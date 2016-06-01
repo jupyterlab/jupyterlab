@@ -207,7 +207,7 @@ const SHORTCUTS = [
     sequence: ['ArrowDown']
   },
   {
-    command: 'notebook-cells:toggle-linenumbers',
+    command: 'notebook-cells:toggle-lineNumbers',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['L']
   },

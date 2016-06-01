@@ -106,11 +106,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   app.commands.add([
     {
       id: newTextFileId,
-      handler: () => {
-        model.newUntitled('file').then(contents => {
-          widget.openPath(contents.path);
-        });
-      }
+      handler: () => widget.createNew('file')
     }
   ]);
 
@@ -119,11 +115,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   app.commands.add([
   {
     id: newNotebookId,
-    handler: () => {
-      model.newUntitled('notebook').then(contents => {
-        widget.openPath(contents.path);
-      });
-    }
+    handler: () => widget.createNew('notebook')
   }]);
 
 

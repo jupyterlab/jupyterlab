@@ -68,8 +68,8 @@ const cmdIds = {
   split: 'notebook-cells:split',
   commandMode: 'notebook-cells:commandMode',
   newNotebook: 'notebook:create-new',
-  toggleLines: 'notebook-cells:toggle-lines',
-  toggleAllLines: 'notebook-cells:toggle-all-lines',
+  toggleLines: 'notebook-cells:toggle-lineNumbers',
+  toggleAllLines: 'notebook-cells:toggle-allLineNumbers',
   undo: 'notebook-cells:undo',
   redo: 'notebook-cells:redo'
 };
