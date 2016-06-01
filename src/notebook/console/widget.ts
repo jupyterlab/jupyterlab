@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  IKernel, INotebookSession
+  IKernel, INotebookSession, KernelStatus
 } from 'jupyter-js-services';
 
 import {
@@ -139,14 +139,14 @@ class ConsolePanel extends Panel {
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
+    this.content.node.addEventListener('click', this);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
+    this.content.node.removeEventListener('click', this);
   }
 
   private _console: ConsoleWidget = null;
@@ -286,6 +286,9 @@ class ConsoleWidget extends Widget {
    * Execute the current prompt.
    */
   execute(): Promise<void> {
+    if (this._session.status === KernelStatus.Dead) {
+      return;
+    }
     let prompt = this.prompt;
     prompt.trusted = true;
     this._history.push(prompt.model.source);
@@ -334,9 +337,6 @@ class ConsoleWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     let prompt = this.prompt;
     Private.scrollIfNeeded(this.parent.node, prompt.node);
-    if (prompt) {
-      prompt.focus();
-    }
   }
 
   /**

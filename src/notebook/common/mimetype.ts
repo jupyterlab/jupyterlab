@@ -22,11 +22,7 @@ function mimetypeForLangauge(info: IKernelLanguageInfo): string {
   let mime = 'text/plain';
   if (mode) {
     if (typeof mode === 'string') {
-      if (CodeMirror.modes.hasOwnProperty(mode as string)) {
-        mode = CodeMirror.modes[mode as string];
-      } else {
-        mode = CodeMirror.findModeByName(mode as string);
-      }
+      mode = CodeMirror.findModeByName(mode as string);
     } else if ((mode as CodeMirror.modespec).mime) {
       // Do nothing.
     } else if ((mode as CodeMirror.modespec).name) {

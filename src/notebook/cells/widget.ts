@@ -179,6 +179,9 @@ class BaseCellWidget extends Widget {
     return this._mimetype;
   }
   set mimetype(value: string) {
+    if (!value) {
+      return;
+    }
     if (this._mimetype === value) {
       return;
     }
