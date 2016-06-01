@@ -502,22 +502,15 @@ class FileBrowserModel implements IDisposable {
       if (!sessionIds.length) {
         return;
       }
-      let promises: Promise<void>[] = [];
       let paths = notebooks.map((notebook: IContentsModel) => {
         return notebook.path;
       });
       for (let sessionId of sessionIds) {
         let index = paths.indexOf(sessionId.notebook.path);
         if (index !== -1) {
-          promises.push(this._sessionManager.connectTo(sessionId.id).then(session => {
-            if (session.status !== KernelStatus.Dead) {
-              this._sessionIds.push(sessionId);
-              return void 0;
-            }
-          }));
+          this._sessionIds.push(sessionId);
         }
       }
-      return Promise.all(promises).then(() => { return void 0; });
     });
   }
 
