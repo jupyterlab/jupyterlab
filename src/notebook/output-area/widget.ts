@@ -237,17 +237,19 @@ class OutputAreaWidget extends Widget {
         if (safeOutputs.indexOf(key) !== -1) {
           continue;
         } else if (sanitizable.indexOf(key) !== -1) {
+          this._sanitized = true;
           let out = bundle[key];
           if (typeof out === 'string') {
             bundle[key] = sanitize(out);
-            this._sanitized = true;
+          } else {
+            console.log('Ignoring unsanitized ' + key + ' output; could not sanitize because output is not a string.');
+            delete bundle[key];
           }
         } else {
           this._sanitized = true;
           // Don't display if we don't know how to sanitize it.
           console.log('Ignoring untrusted ' + key + ' output.');
           delete bundle[key];
-          continue;
         }
       }
     }
@@ -325,7 +327,7 @@ class OutputAreaWidget extends Widget {
     }
   }
 
-  private _sanitized = false;
+  private _sanitized = false; // true if sanitized outputs are displayed
   private _trusted = false;
   private _fixedHeight = false;
   private _collapsed = false;
