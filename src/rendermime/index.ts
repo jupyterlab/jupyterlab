@@ -100,14 +100,15 @@ class RenderMime<T> {
    * @param mimetype - The mimetype of the renderer.
    * @param renderer - The renderer instance.
    * @param index - The optional order index.
+   * 
+   * ####Notes
+   * Negative indices count from the end, so -1 refers to the penultimate index.
+   * Use the index of `.order.length` to add to the end of the render precedence list,
+   * which would make the new renderer the last choice.
    */
-  addRenderer(mimetype: string, renderer: IRenderer<T>, index = -1): void {
+  addRenderer(mimetype: string, renderer: IRenderer<T>, index = 0): void {
     this._renderers[mimetype] = renderer;
-    if (index !== -1) {
-      this._order.splice(index, 0, mimetype);
-    } else {
-      this._order.push(mimetype);
-    }
+    this._order.splice(index, 0, mimetype)
   }
 
   /**

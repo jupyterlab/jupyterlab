@@ -138,7 +138,7 @@ describe('jupyter-ui', () => {
         r.addRenderer('text/foo', t);
         expect(r.getRenderer('text/foo')).to.be(t);
         let index = r.order.indexOf('text/foo');
-        expect(index).to.be(r.order.length - 1);
+        expect(index).to.be(0);
       });
 
       it('should take an optional order index', () => {
