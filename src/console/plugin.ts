@@ -11,6 +11,10 @@ import {
 } from 'jupyter-js-ui/lib/rendermime';
 
 import {
+  selectKernel
+} from 'jupyter-js-ui/lib/docmanager';
+
+import {
   Application
 } from 'phosphide/lib/core/application';
 
@@ -127,7 +131,38 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
         Private.activeWidget.content.execute();
       }
     }
+  },
+  {
+    id: 'console:switch-kernel',
+    handler: () => {
+      if (Private.activeWidget) {
+        let widget = Private.activeWidget.content;
+        let session = widget.session;
+        let lang = '';
+        if (session.kernel) {
+          lang = specs.kernelspecs[session.kernel.name].spec.language;
+        }
+        manager.listRunning().then(sessions => {
+          let options = {
+            name: widget.parent.title.text,
+            specs,
+            sessions,
+            preferredLanguage: lang,
+            kernel: session.kernel,
+            host: widget.parent.node
+          };
+          return selectKernel(options);
+        }).then(kernelId => {
+          if (kernelId) {
+            session.changeKernel(kernelId);
+          } else {
+            session.kernel.shutdown();
+          }
+        });
+      }
+    }
   }
+
   ]);
   app.palette.add([
   {
@@ -139,6 +174,11 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
     command: 'console:execute',
     category: 'Console',
     text: 'Execute Cell'
+  },
+  {
+    command: 'console:switch-kernel',
+    category: 'Console',
+    text: 'Switch Kernel'
   }]);
 
   return Promise.resolve(void 0);

@@ -12,7 +12,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IDocumentContext, DocumentRegistry, selectKernel
+  IDocumentContext, DocumentRegistry, selectKernelForContext
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
@@ -452,7 +452,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     id: cmdIds['switchKernel'],
     handler: () => {
       if (tracker.activeNotebook) {
-        selectKernel(tracker.activeNotebook.context, tracker.activeNotebook.node);
+        selectKernelForContext(tracker.activeNotebook.context, tracker.activeNotebook.node);
       }
     }
   }
