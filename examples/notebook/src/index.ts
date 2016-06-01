@@ -15,7 +15,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  DocumentWidget, DocumentManager, DocumentRegistry, selectKernel
+  DocumentWidget, DocumentManager, DocumentRegistry, selectKernelForContext
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
@@ -145,7 +145,9 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     }
   };
   let restartHandler = () => nbWidget.restart();
-  let switchHandler = () => selectKernel(nbWidget.context, nbWidget.node);
+  let switchHandler = () => {
+    selectKernelForContext(nbWidget.context, nbWidget.node);
+  };
   let runAdvanceHandler = () => {
     NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.kernel);
   };
