@@ -87,7 +87,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   let docManager = new DocumentManager(
     registry, contents, sessions, provider.kernelspecs, opener
   );
-  let model = new FileBrowserModel(contents, sessions);
+  let model = new FileBrowserModel(contents, sessions, provider.kernelspecs);
   let widget = new FileBrowserWidget(model, docManager, opener);
   let menu = createMenu(widget);
 
@@ -108,9 +108,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
       id: newTextFileId,
       handler: () => {
         model.newUntitled('file').then(contents => {
-          let widget = docManager.createNew(contents.path);
-          opener.open(widget);
-          model.refresh();
+          widget.openPath(contents.path);
         });
       }
     }
@@ -123,9 +121,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     id: newNotebookId,
     handler: () => {
       model.newUntitled('notebook').then(contents => {
-        let widget = docManager.createNew(contents.path);
-        opener.open(widget);
-        model.refresh();
+        widget.openPath(contents.path);
       });
     }
   }]);
