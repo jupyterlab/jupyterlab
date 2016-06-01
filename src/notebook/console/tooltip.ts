@@ -105,6 +105,9 @@ class ConsoleTooltip extends Widget {
     case 'mousedown':
       this._evtMousedown(event as MouseEvent);
       break;
+    case 'scroll':
+      this._evtScroll(event as MouseEvent);
+      break;
     default:
       break;
     }
@@ -114,19 +117,25 @@ class ConsoleTooltip extends Widget {
    * Handle `after_attach` messages for the widget.
    *
    * #### Notes
-   * Captures document events in the capture phase to dismiss the tooltip.
+   * Captures window events in capture phase to dismiss the tooltip widget.
+   *
+   * Because its parent (reference) widgets use window listeners instead of
+   * document listeners, the tooltip widget must also use window listeners
+   * in the capture phase.
    */
   protected onAfterAttach(msg: Message): void {
-    document.addEventListener('keydown', this, true);
-    document.addEventListener('mousedown', this, true);
+    window.addEventListener('keydown', this, true);
+    window.addEventListener('mousedown', this, true);
+    window.addEventListener('scroll', this, true);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    document.removeEventListener('keydown', this);
-    document.removeEventListener('mousedown', this);
+    window.removeEventListener('keydown', this);
+    window.removeEventListener('mousedown', this);
+    window.removeEventListener('scroll', this);
   }
 
   /**
@@ -178,6 +187,26 @@ class ConsoleTooltip extends Widget {
   private _evtMousedown(event: MouseEvent) {
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
+      if (target === this.node) {
+        return;
+      }
+      target = target.parentElement;
+    }
+    this.hide();
+  }
+
+  /**
+   * Handle scroll events for the widget
+   */
+  private _evtScroll(event: MouseEvent) {
+    if (!this._reference || this.isHidden) {
+      this.hide();
+      return;
+    }
+
+    let target = event.target as HTMLElement;
+    while (target !== document.documentElement) {
+      // If the scroll event happened in the tooltip widget, allow it.
       if (target === this.node) {
         return;
       }

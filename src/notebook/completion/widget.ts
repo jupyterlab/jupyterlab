@@ -140,6 +140,9 @@ class CompletionWidget extends Widget {
     case 'mousedown':
       this._evtMousedown(event as MouseEvent);
       break;
+    case 'scroll':
+      this._evtScroll(event as MouseEvent);
+      break;
     default:
       break;
     }
@@ -159,6 +162,7 @@ class CompletionWidget extends Widget {
   protected onAfterAttach(msg: Message): void {
     window.addEventListener('keydown', this, true);
     window.addEventListener('mousedown', this, true);
+    window.addEventListener('scroll', this, true);
   }
 
   /**
@@ -167,6 +171,7 @@ class CompletionWidget extends Widget {
   protected onBeforeDetach(msg: Message): void {
     window.removeEventListener('keydown', this);
     window.removeEventListener('mousedown', this);
+    window.removeEventListener('scroll', this);
   }
 
   /**
@@ -297,6 +302,26 @@ class CompletionWidget extends Widget {
         default:
           return;
         }
+      }
+      target = target.parentElement;
+    }
+    this.hide();
+  }
+
+  /**
+   * Handle scroll events for the widget
+   */
+  private _evtScroll(event: MouseEvent) {
+    if (!this._reference || this.isHidden) {
+      this.hide();
+      return;
+    }
+
+    let target = event.target as HTMLElement;
+    while (target !== document.documentElement) {
+      // If the scroll event happened in the completion widget, allow it.
+      if (target === this.node) {
+        return;
       }
       target = target.parentElement;
     }
