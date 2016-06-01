@@ -140,6 +140,9 @@ class CompletionWidget extends Widget {
     case 'mousedown':
       this._evtMousedown(event as MouseEvent);
       break;
+    case 'scroll':
+      this._evtScroll(event as MouseEvent);
+      break;
     default:
       break;
     }
@@ -149,20 +152,26 @@ class CompletionWidget extends Widget {
    * Handle `after_attach` messages for the widget.
    *
    * #### Notes
-   * Captures document events in capture phase to dismiss or navigate the
+   * Captures window events in capture phase to dismiss or navigate the
    * completion widget.
+   *
+   * Because its parent (reference) widgets use window listeners instead of
+   * document listeners, the completion widget must also use window listeners
+   * in the capture phase.
    */
   protected onAfterAttach(msg: Message): void {
-    document.addEventListener('keydown', this, true);
-    document.addEventListener('mousedown', this, true);
+    window.addEventListener('keydown', this, true);
+    window.addEventListener('mousedown', this, true);
+    window.addEventListener('scroll', this, true);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    document.removeEventListener('keydown', this);
-    document.removeEventListener('mousedown', this);
+    window.removeEventListener('keydown', this);
+    window.removeEventListener('mousedown', this);
+    window.removeEventListener('scroll', this);
   }
 
   /**
@@ -202,7 +211,7 @@ class CompletionWidget extends Widget {
     // Account for 1px border width.
     let left = Math.floor(coords.left) + 1;
     let rect = node.getBoundingClientRect();
-    let top = maxHeight - rect.height;
+    let top = availableHeight - rect.height;
     node.style.left = `${left}px`;
     node.style.top = `${top}px`;
     node.style.width = 'auto';
@@ -217,7 +226,8 @@ class CompletionWidget extends Widget {
    * Handle mousedown events for the widget.
    */
   private _evtMousedown(event: MouseEvent) {
-    if (Private.nonstandardClick(event)) {
+    if (!this._reference || this.isHidden || Private.nonstandardClick(event)) {
+      this.hide();
       return;
     }
 
@@ -225,12 +235,18 @@ class CompletionWidget extends Widget {
     while (target !== document.documentElement) {
       // If the user has made a selection, emit its value and reset the model.
       if (target.classList.contains(ITEM_CLASS)) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
         this.selected.emit(target.dataset['value']);
         this._model.reset();
         return;
       }
       // If the mouse event happened anywhere else in the widget, bail.
       if (target === this.node) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
         return;
       }
       target = target.parentElement;
@@ -242,17 +258,13 @@ class CompletionWidget extends Widget {
    * Handle keydown events for the widget.
    */
   private _evtKeydown(event: KeyboardEvent) {
-    let target = event.target as HTMLElement;
-    let node = this.node;
-
-    if (!this._reference) {
+    if (!this._reference || this.isHidden) {
       this.hide();
       return;
     }
-    if (this.isHidden) {
-      return;
-    }
 
+    let target = event.target as HTMLElement;
+    let node = this.node;
     let active: HTMLElement;
     while (target !== document.documentElement) {
       if (target === this._reference.node) {
@@ -261,6 +273,7 @@ class CompletionWidget extends Widget {
         case 9: // Tab key
           event.preventDefault();
           event.stopPropagation();
+          event.stopImmediatePropagation();
           active = node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
           this.selected.emit(active.dataset['value']);
           this._model.reset();
@@ -268,12 +281,14 @@ class CompletionWidget extends Widget {
         case 27: // Escape key
           event.preventDefault();
           event.stopPropagation();
+          event.stopImmediatePropagation();
           this._model.reset();
           return;
         case 38: // Up arrow key
         case 40: // Down arrow key
           event.preventDefault();
           event.stopPropagation();
+          event.stopImmediatePropagation();
           let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
           active = node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
           active.classList.remove(ACTIVE_CLASS);
@@ -287,6 +302,26 @@ class CompletionWidget extends Widget {
         default:
           return;
         }
+      }
+      target = target.parentElement;
+    }
+    this.hide();
+  }
+
+  /**
+   * Handle scroll events for the widget
+   */
+  private _evtScroll(event: MouseEvent) {
+    if (!this._reference || this.isHidden) {
+      this.hide();
+      return;
+    }
+
+    let target = event.target as HTMLElement;
+    while (target !== document.documentElement) {
+      // If the scroll event happened in the completion widget, allow it.
+      if (target === this.node) {
+        return;
       }
       target = target.parentElement;
     }
