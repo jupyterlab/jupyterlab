@@ -76,6 +76,7 @@ namespace NotebookActions {
     let cells = model.cells;
     let index = widget.activeCellIndex;
     let primary = widget.childAt(widget.activeCellIndex);
+    let child: BaseCellWidget;
     if (!primary) {
       return;
     }
@@ -85,7 +86,7 @@ namespace NotebookActions {
       if (i === index) {
         continue;
       }
-      let child = widget.childAt(i);
+      child = widget.childAt(i);
       if (widget.isSelected(child)) {
         toMerge.push(child.model.source);
         toDelete.push(child.model);
@@ -94,7 +95,13 @@ namespace NotebookActions {
 
     // Make sure there are cells to merge and select cells.
     if (!toMerge.length) {
-      return;
+      // Choose the cell after the active cell.
+      child = widget.childAt(cells.length - 1);
+      if (!child) {
+        return;
+      }
+      toMerge.push(child.model.source);
+      toDelete.push(child.model);
     }
     Private.deselectCells(widget);
 
