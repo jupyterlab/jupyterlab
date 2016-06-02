@@ -517,17 +517,17 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     command: cmdIds['run'],
     category: 'Notebook Cell Operations',
-    text: 'Run Selected'
+    text: 'Run Cell(s)'
   },
   {
     command: cmdIds['runAndAdvance'],
     category: 'Notebook Cell Operations',
-    text: 'Run and Advance'
+    text: 'Run Cell(s) and Advance'
   },
   {
     command: cmdIds['runAndInsert'],
     category: 'Notebook Cell Operations',
-    text: 'Run and Insert'
+    text: 'Run Cell(s) and Insert'
   },
   {
     command: cmdIds['interrupt'],
@@ -542,7 +542,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     command: cmdIds['restartClear'],
     category: 'Notebook Operations',
-    text: 'Restart Kernel & Clear Output'
+    text: 'Restart Kernel & Clear Outputs'
   },
   {
     command: cmdIds['restartRunAll'],
@@ -562,7 +562,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     command: cmdIds['clearOutputs'],
     category: 'Notebook Cell Operations',
-    text: 'Clear Current Outputs'
+    text: 'Clear Output(s)'
   },
   {
     command: cmdIds['toCode'],
@@ -582,12 +582,12 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     command: cmdIds['cut'],
     category: 'Notebook Cell Operations',
-    text: 'Cut Selected'
+    text: 'Cut Cell(s)'
   },
   {
     command: cmdIds['copy'],
     category: 'Notebook Cell Operations',
-    text: 'Copy Selected'
+    text: 'Copy Cell(s)'
   },
   {
     command: cmdIds['paste'],
