@@ -68,10 +68,10 @@ const cmdIds = {
   selectBelow: 'notebook-cells:select-below',
   extendAbove: 'notebook-cells:extend-above',
   extendBelow: 'notebook-cells:extend-below',
-  editMode: 'notebook-cells:editMode',
+  editMode: 'notebook:editMode',
   merge: 'notebook-cells:merge',
   split: 'notebook-cells:split',
-  commandMode: 'notebook-cells:commandMode',
+  commandMode: 'notebook:commandMode',
   newNotebook: 'notebook:create-new',
   toggleLines: 'notebook-cells:toggle-lineNumbers',
   toggleAllLines: 'notebook-cells:toggle-allLineNumbers',
@@ -651,12 +651,12 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   },
   {
     command: cmdIds['editMode'],
-    category: 'Notebook Cell Operations',
+    category: 'Notebook Operations',
     text: 'To Edit Mode'
   },
   {
     command: cmdIds['commandMode'],
-    category: 'Notebook Cell Operations',
+    category: 'Notebook Operations',
     text: 'To Command Mode'
   },
   {
