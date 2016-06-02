@@ -46,16 +46,21 @@ import {
 const cmdIds = {
   interrupt: 'notebook:interrupt-kernel',
   restart: 'notebook:restart-kernel',
+  restartClear: 'notebook:restart-clear',
+  restartRunAll: 'notebook:restart-runAll',
   switchKernel: 'notebook:switch-kernel',
+  clearAllOutputs: 'notebook:clear-outputs',
   run: 'notebook-cells:run',
   runAndAdvance: 'notebook-cells:runAndAdvance',
   runAndInsert: 'notebook-cells:runAndInsert',
+  runAll: 'notebook:run-all',
   toCode: 'notebook-cells:to-code',
   toMarkdown: 'notebook-cells:to-markdown',
   toRaw: 'notebook-cells:to-raw',
   cut: 'notebook-cells:cut',
   copy: 'notebook-cells:copy',
   paste: 'notebook-cells:paste',
+  clearOutputs: 'notebook-cells:clear-output',
   deleteCell: 'notebook-cells:delete',
   insertAbove: 'notebook-cells:insert-above',
   insertBelow: 'notebook-cells:insert-below',
@@ -244,11 +249,62 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
+    id: cmdIds['runAll'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.runAll(nbWidget.content, nbWidget.context.kernel);
+      }
+    }
+  },
+  {
     id: cmdIds['restart'],
     handler: () => {
       if (tracker.activeNotebook) {
         let nbWidget = tracker.activeNotebook;
         nbWidget.restart();
+      }
+    }
+  },
+  {
+    id: cmdIds['restartClear'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        nbWidget.restart().then(result => {
+          if (result) {
+            NotebookActions.clearAllOutputs(nbWidget.content);
+          }
+        });
+      }
+    }
+  },
+  {
+    id: cmdIds['restartRunAll'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        nbWidget.restart().then(result => {
+          NotebookActions.runAll(nbWidget.content, nbWidget.context.kernel);
+        });
+      }
+    }
+  },
+  {
+    id: cmdIds['clearAllOutputs'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.clearAllOutputs(nbWidget.content);
+      }
+    }
+  },
+  {
+    id: cmdIds['clearOutputs'],
+    handler: () => {
+      if (tracker.activeNotebook) {
+        let nbWidget = tracker.activeNotebook;
+        NotebookActions.clearOutputs(nbWidget.content);
       }
     }
   },
@@ -484,6 +540,31 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     text: 'Restart Kernel'
   },
   {
+    command: cmdIds['restartClear'],
+    category: 'Notebook Operations',
+    text: 'Restart Kernel & Clear Output'
+  },
+  {
+    command: cmdIds['restartRunAll'],
+    category: 'Notebook Operations',
+    text: 'Restart Kernel & Run All'
+  },
+  {
+    command: cmdIds['runAll'],
+    category: 'Notebook Operations',
+    text: 'Run All Cells'
+  },
+  {
+    command: cmdIds['clearAllOutputs'],
+    category: 'Notebook Operations',
+    text: 'Clear All Outputs'
+  },
+  {
+    command: cmdIds['clearOutputs'],
+    category: 'Notebook Cell Operations',
+    text: 'Clear Current Outputs'
+  },
+  {
     command: cmdIds['toCode'],
     category: 'Notebook Cell Operations',
     text: 'Convert to Code'
@@ -565,7 +646,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   },
   {
     command: cmdIds['toggleAllLines'],
-    category: 'Notebook Cell Operations',
+    category: 'Notebook Operations',
     text: 'Toggle All Line Numbers'
   },
   {
