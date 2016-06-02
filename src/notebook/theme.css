@@ -330,6 +330,11 @@
 }
 
 
+.jp-Console {
+  height: 100%;
+}
+
+
 .jp-Console .jp-Cell {
   padding-top: 0;
   padding-bottom: 0;
