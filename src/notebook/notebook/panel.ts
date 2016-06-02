@@ -65,6 +65,11 @@ const NB_PANEL = 'jp-Notebook-panel';
  */
 const NB_CONTAINER = 'jp-Notebook-container';
 
+/**
+ * The class name added to a dirty widget.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
+
 
 /**
  * A widget that hosts a notebook toolbar and content area.
@@ -142,6 +147,23 @@ class NotebookPanel extends Widget {
       editor.textChanged.connect(this.onTextChange, this);
       editor.completionRequested.connect(this.onCompletionRequest, this);
     }
+
+    // Handle the document title.
+    this.title.text = context.path.split('/').pop();
+    context.pathChanged.connect((c, path) => {
+      this.title.text = path.split('/').pop();
+    });
+
+    // Handle changes to dirty state.
+    model.stateChanged.connect((m, args) => {
+      if (args.name === 'dirty') {
+        if (args.newValue) {
+          this.title.className += ` ${DIRTY_CLASS}`;
+        } else {
+          this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+        }
+      }
+    });
   }
 
   /**
@@ -221,18 +243,20 @@ class NotebookPanel extends Widget {
   /**
    * Restart the kernel on the panel.
    */
-  restart(): void {
+  restart(): Promise<boolean> {
     let kernel = this.context.kernel;
     if (!kernel) {
-      return;
+      return Promise.resolve(false);
     }
-    showDialog({
+    return showDialog({
       title: 'Restart Kernel?',
       body: 'Do you want to restart the current kernel? All variables will be lost.',
       host: this.node
     }).then(result => {
       if (result.text === 'OK') {
-        kernel.restart();
+        return kernel.restart().then(() => { return true; });
+      } else {
+        return false;
       }
     });
   }

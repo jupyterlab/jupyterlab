@@ -22,6 +22,10 @@ import {
 } from '../notebook/nbformat';
 
 import {
+  deepEqual
+} from '../common/json';
+
+import {
   IMetadataCursor, MetadataCursor
 } from '../common/metadata';
 
@@ -243,7 +247,7 @@ class CellModel implements ICellModel {
    */
   protected setCursorData(name: string, newValue: any): void {
     let oldValue = this._metadata[name];
-    if (oldValue === newValue) {
+    if (deepEqual(oldValue, newValue)) {
       return;
     }
     this._metadata[name] = newValue;

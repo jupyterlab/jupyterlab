@@ -3,8 +3,12 @@
 'use strict';
 
 import {
-  IKernel, INotebookSession
+  IKernel, INotebookSession, KernelStatus
 } from 'jupyter-js-services';
+
+import {
+  showDialog
+} from 'jupyter-js-ui/lib/dialog';
 
 import {
   RenderMime
@@ -139,14 +143,39 @@ class ConsolePanel extends Panel {
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
+    this.content.node.addEventListener('click', this);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
+    this.content.node.removeEventListener('click', this);
+  }
+
+  /**
+   * Handle `'close-request'` messages.
+   */
+  protected onCloseRequest(msg: Message): void {
+    let session = this.content.session;
+    if (!session.kernel) {
+      this.dispose();
+    }
+    session.kernel.getKernelSpec().then(spec => {
+      let name = spec.display_name;
+      return showDialog({
+        title: 'Shut down kernel?',
+        body: `Shut down ${name}?`,
+        host: this.node
+      });
+    }).then(value => {
+      if (value && value.text === 'OK') {
+        return session.shutdown();
+      }
+    }).then(() => {
+      super.onCloseRequest(msg);
+      this.dispose();
+    });
   }
 
   private _console: ConsoleWidget = null;
@@ -256,6 +285,16 @@ class ConsoleWidget extends Widget {
   }
 
   /**
+   * Get the session used by the console.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get session(): INotebookSession {
+    return this._session;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -269,6 +308,8 @@ class ConsoleWidget extends Widget {
     this._history = null;
     this._completion.dispose();
     this._completion = null;
+    this._session.dispose();
+    this._session = null;
     super.dispose();
   }
 
@@ -276,6 +317,9 @@ class ConsoleWidget extends Widget {
    * Execute the current prompt.
    */
   execute(): Promise<void> {
+    if (this._session.status === KernelStatus.Dead) {
+      return;
+    }
     let prompt = this.prompt;
     prompt.trusted = true;
     this._history.push(prompt.model.source);
@@ -324,9 +368,6 @@ class ConsoleWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     let prompt = this.prompt;
     Private.scrollIfNeeded(this.parent.node, prompt.node);
-    if (prompt) {
-      prompt.focus();
-    }
   }
 
   /**

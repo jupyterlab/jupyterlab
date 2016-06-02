@@ -6,7 +6,7 @@
 'use strict';
 
 import {
-  NotebookPanel, selectKernel, trustNotebook, NotebookWidgetFactory,
+  NotebookPanel, trustNotebook, NotebookWidgetFactory,
   NotebookModelFactory, NotebookActions
 } from 'jupyter-js-notebook';
 
@@ -15,7 +15,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  DocumentWidget, DocumentManager
+  DocumentWidget, DocumentManager, DocumentRegistry, selectKernelForContext
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
@@ -100,15 +100,15 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   };
 
   let contentsManager = new ContentsManager();
-  let docManager = new DocumentManager(contentsManager, sessionsManager, specs, opener);
+  let docRegistry = new DocumentRegistry();
+  let docManager = new DocumentManager(
+    docRegistry, contentsManager, sessionsManager, specs, opener
+  );
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
   let wFactory = new NotebookWidgetFactory(rendermime, clipboard);
-  docManager.registerModelFactory(mFactory, {
-    name: 'notebook',
-    contentsOptions: { type: 'notebook' }
-  });
-  docManager.registerWidgetFactory(wFactory, {
+  docRegistry.registerModelFactory(mFactory);
+  docRegistry.registerWidgetFactory(wFactory, {
     displayName: 'Notebook',
     modelName: 'notebook',
     fileExtensions: ['.ipynb'],
@@ -116,6 +116,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     preferKernel: true,
     canStartKernel: true
   });
+
   let doc = docManager.open(NOTEBOOK);
   let nbWidget: NotebookPanel;
   doc.populated.connect((d, widget) => {
@@ -135,25 +136,17 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   panel.addChild(palette);
   panel.addChild(doc);
   SplitPanel.setStretch(doc, 1);
-  window.onresize = () => { panel.update(); };
+  window.onresize = () => panel.update();
 
-  let saveHandler = () => { nbWidget.context.save(); };
+  let saveHandler = () => nbWidget.context.save();
   let interruptHandler = () => {
     if (nbWidget.context.kernel) {
       nbWidget.context.kernel.interrupt();
     }
   };
-  let restartHandler = () => {  nbWidget.restart(); };
+  let restartHandler = () => nbWidget.restart();
   let switchHandler = () => {
-    let context = nbWidget.context;
-    if (!context.kernel) {
-      return;
-    }
-    selectKernel(nbWidget.node, context.kernel.name, specs).then(name => {
-      if (name) {
-        context.changeKernel({ name });
-      }
-    });
+    selectKernelForContext(nbWidget.context, nbWidget.node);
   };
   let runAdvanceHandler = () => {
     NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.kernel);

@@ -133,14 +133,15 @@ class NotebookRenderer extends Widget {
     this.addClass(NB_CLASS);
     this._model = model;
     this._rendermime = rendermime;
-    this.layout = new PanelLayout();
-    model.cells.changed.connect(this.onCellsChanged, this);
-    model.metadataChanged.connect(this.onMetadataChanged, this);
     this._langInfoCursor = model.getMetadata('language_info');
     this._mimetype = this.getMimetype();
+    this.layout = new PanelLayout();
+
     // Add the current cells.
     if (model.cells.length === 0) {
-      return;
+      // Add a new code cell if there are no cells.
+      let cell = model.createCodeCell();
+      model.cells.add(cell);
     }
     let layout = this.layout as PanelLayout;
     let constructor = this.constructor as typeof NotebookRenderer;
@@ -150,6 +151,9 @@ class NotebookRenderer extends Widget {
       this.initializeCellWidget(widget);
       layout.addChild(widget);
     }
+
+    model.cells.changed.connect(this.onCellsChanged, this);
+    model.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
   /**
@@ -178,6 +182,14 @@ class NotebookRenderer extends Widget {
   childAt(index: number): BaseCellWidget {
     let layout = this.layout as PanelLayout;
     return layout.childAt(index) as BaseCellWidget;
+  }
+
+  /**
+   * Get the number of child widgets.
+   */
+  childCount(): number {
+    let layout = this.layout as PanelLayout;
+    return layout.childCount();
   }
 
   /**
@@ -256,7 +268,7 @@ class NotebookRenderer extends Widget {
       break;
     case ListChangeType.Replace:
       let oldValues = args.oldValue as ICellModel[];
-      for (let i = args.oldIndex; i < oldValues.length; i++) {
+      for (let i = 0; i < oldValues.length; i++) {
         widget = layout.childAt(args.oldIndex) as BaseCellWidget;
         layout.removeChild(widget);
         widget.dispose();
@@ -477,6 +489,7 @@ class ActiveNotebook extends NotebookRenderer {
     }
     if (widget) {
       widget.addClass(ACTIVE_CLASS);
+      Private.scrollIfNeeded(this.parent.node, widget.node);
     }
     let count = 0;
     for (let i = 0; i < layout.childCount(); i++) {
@@ -496,6 +509,7 @@ class ActiveNotebook extends NotebookRenderer {
       widget = layout.childAt(this.activeCellIndex) as BaseCellWidget;
       widget.addClass(OTHER_SELECTED_CLASS);
     }
+
   }
 
   /**
@@ -578,4 +592,22 @@ namespace Private {
    */
   export
   const stateChangedSignal = new Signal<ActiveNotebook, IChangedArgs<any>>();
+
+ /**
+  * Scroll an element into view if needed.
+  *
+  * @param area - The scroll area element.
+  *
+  * @param elem - The element of interest.
+  */
+  export
+  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
+    let ar = area.getBoundingClientRect();
+    let er = elem.getBoundingClientRect();
+    if (er.top < ar.top - 10) {
+      area.scrollTop -= ar.top - er.top + 10;
+    } else if (er.bottom > ar.bottom + 10) {
+      area.scrollTop += er.bottom - ar.bottom + 10;
+    }
+  }
 }

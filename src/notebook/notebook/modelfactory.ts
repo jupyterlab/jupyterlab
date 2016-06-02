@@ -3,6 +3,10 @@
 'use strict';
 
 import {
+  IContentsOpts
+} from 'jupyter-js-services';
+
+import {
   IModelFactory
 } from 'jupyter-js-ui/lib/docmanager';
 
@@ -16,6 +20,26 @@ import {
  */
 export
 class NotebookModelFactory implements IModelFactory {
+  /**
+   * The name of the model.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return 'notebook';
+  }
+
+  /**
+   * The contents options used to fetch/save files.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get contentsOptions(): IContentsOpts {
+    return { type: 'notebook' };
+  }
+
   /**
    * Get whether the model factory has been disposed.
    */

@@ -179,6 +179,9 @@ class BaseCellWidget extends Widget {
     return this._mimetype;
   }
   set mimetype(value: string) {
+    if (!value) {
+      return;
+    }
     if (this._mimetype === value) {
       return;
     }
@@ -348,6 +351,7 @@ class CodeCellWidget extends BaseCellWidget {
     }
     model.executionCount = null;
     this.setPrompt('*');
+    this.trusted = true;
     let outputs = model.outputs;
     return executeCode(code, kernel, outputs).then(reply => {
       model.executionCount = reply.execution_count;
