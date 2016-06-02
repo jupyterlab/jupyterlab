@@ -142,11 +142,17 @@ class BaseCellWidget extends Widget {
     super();
     this.addClass(CELL_CLASS);
     this._model = model;
+
     let ctor = this.constructor as typeof BaseCellWidget;
     this._editor = ctor.createCellEditor(model);
     this._input = ctor.createInputArea(this._editor);
+
+    // Set the editor mode to be the default MIME type.
+    loadModeByMIME(this._editor.editor, this._mimetype);
+
     this.layout = new PanelLayout();
     (this.layout as PanelLayout).addChild(this._input);
+
     model.metadataChanged.connect(this.onMetadataChanged, this);
     this._trustedCursor = model.getMetadata('trusted');
     this._trusted = this._trustedCursor.getValue();
