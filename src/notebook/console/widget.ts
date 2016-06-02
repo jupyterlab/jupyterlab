@@ -39,7 +39,7 @@ import {
 } from '../cells/editor';
 
 import {
-  mimetypeForLangauge
+  mimetypeForLanguage
 } from '../common/mimetype';
 
 import {
@@ -405,7 +405,7 @@ class ConsoleWidget extends Widget {
     let banner = layout.childAt(0) as RawCellWidget;
     this._session.kernel.kernelInfo().then(info => {
       banner.model.source = info.banner;
-      this._mimetype = mimetypeForLangauge(info.language_info);
+      this._mimetype = mimetypeForLanguage(info.language_info);
       this.prompt.mimetype = this._mimetype;
     });
   }

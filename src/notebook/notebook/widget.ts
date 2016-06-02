@@ -45,7 +45,7 @@ import {
 } from '../common/metadata';
 
 import {
-  mimetypeForLangauge
+  mimetypeForLanguage
 } from '../common/mimetype';
 
 import {
@@ -303,7 +303,7 @@ class NotebookRenderer extends Widget {
    */
   protected getMimetype(): string {
     let info = this._langInfoCursor.getValue() as nbformat.ILanguageInfoMetadata;
-    return mimetypeForLangauge(info as IKernelLanguageInfo);
+    return mimetypeForLanguage(info as IKernelLanguageInfo);
   }
 
   /**
