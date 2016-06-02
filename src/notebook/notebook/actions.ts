@@ -221,20 +221,7 @@ namespace NotebookActions {
       }
     }
     for (let child of selected) {
-      switch (child.model.type) {
-      case 'markdown':
-        (child as MarkdownCellWidget).rendered = true;
-        break;
-      case 'code':
-        if (kernel) {
-          (child as CodeCellWidget).execute(kernel);
-        } else {
-          (child.model as CodeCellModel).executionCount = null;
-        }
-        break;
-      default:
-        break;
-      }
+      Private.runCell(child, kernel);
     }
     if (widget.mode === 'command') {
       widget.node.focus();
@@ -278,6 +265,18 @@ namespace NotebookActions {
     widget.activeCellIndex++;
     widget.mode = 'edit';
     Private.deselectCells(widget);
+  }
+
+  /**
+   * Run all of the cells in the notebook.
+   */
+  export
+  function runAll(widget: ActiveNotebook, kernel?: IKernel): void {
+    for (let i = 0; i < widget.childCount(); i++) {
+      Private.runCell(widget.childAt(i), kernel);
+    }
+    widget.mode = 'command';
+    widget.activeCellIndex = widget.childCount() - 1;
   }
 
   /**
@@ -484,6 +483,37 @@ namespace NotebookActions {
       editor.setOption('lineNumbers', !lineNumbers);
     }
   }
+
+  /**
+   * Clear the outputs of the currently selected cells.
+   */
+  export
+  function clearOutputs(widget: ActiveNotebook): void {
+    let cells = widget.model.cells;
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.get(i) as CodeCellModel;
+      let child = widget.childAt(i);
+      if (widget.isSelected(child) && cell.type === 'code') {
+        cell.outputs.clear();
+        cell.executionCount = null;
+      }
+    }
+  }
+
+  /**
+   * Clear the code outputs on the widget.
+   */
+  export
+  function clearAllOutputs(widget: ActiveNotebook): void {
+    let cells = widget.model.cells;
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.get(i) as CodeCellModel;
+      if (cell.type === 'code') {
+        cell.outputs.clear();
+        cell.executionCount = null;
+      }
+    }
+  }
 }
 
 
@@ -514,6 +544,27 @@ namespace Private {
       return model.createMarkdownCell(cell.toJSON());
     default:
       return model.createRawCell(cell.toJSON());
+    }
+  }
+
+  /**
+   * Run a cell.
+   */
+  export
+  function runCell(widget: BaseCellWidget, kernel?: IKernel): void {
+    switch (widget.model.type) {
+    case 'markdown':
+      (widget as MarkdownCellWidget).rendered = true;
+      break;
+    case 'code':
+      if (kernel) {
+        (widget as CodeCellWidget).execute(kernel);
+      } else {
+        (widget.model as CodeCellModel).executionCount = null;
+      }
+      break;
+    default:
+      break;
     }
   }
 }

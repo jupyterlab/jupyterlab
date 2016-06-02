@@ -243,18 +243,20 @@ class NotebookPanel extends Widget {
   /**
    * Restart the kernel on the panel.
    */
-  restart(): void {
+  restart(): Promise<boolean> {
     let kernel = this.context.kernel;
     if (!kernel) {
-      return;
+      return Promise.resolve(false);
     }
-    showDialog({
+    return showDialog({
       title: 'Restart Kernel?',
       body: 'Do you want to restart the current kernel? All variables will be lost.',
       host: this.node
     }).then(result => {
       if (result.text === 'OK') {
-        kernel.restart();
+        return kernel.restart().then(() => { return true; });
+      } else {
+        return false;
       }
     });
   }
