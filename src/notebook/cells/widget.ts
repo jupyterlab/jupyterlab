@@ -185,7 +185,6 @@ class BaseCellWidget extends Widget {
     if (this._mimetype === value) {
       return;
     }
-    console.log('value', value);
     this._mimetype = value;
     loadModeByMIME(this.editor.editor, value);
   }
