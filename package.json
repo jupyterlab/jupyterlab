@@ -1,6 +1,6 @@
 {
   "name": "jupyter-js-notebook",
-  "version": "0.21.0",
+  "version": "0.21.1",
   "description": "Notebook widget for JupyterLab",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
