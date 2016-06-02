@@ -133,6 +133,17 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
     }
   },
   {
+    id: 'console:interrupt-kernel',
+    handler: () => {
+      if (Private.activeWidget) {
+        let kernel = Private.activeWidget.content.session.kernel;
+        if (kernel) {
+          kernel.interrupt();
+        }
+      }
+    }
+  },
+  {
     id: 'console:switch-kernel',
     handler: () => {
       if (Private.activeWidget) {
@@ -174,6 +185,11 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
     command: 'console:execute',
     category: 'Console',
     text: 'Execute Cell'
+  },
+  {
+    command: 'console:interrupt-kernel',
+    category: 'Console',
+    text: 'Interrupt Kernel'
   },
   {
     command: 'console:switch-kernel',
