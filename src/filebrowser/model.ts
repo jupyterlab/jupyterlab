@@ -4,11 +4,12 @@
 
 import {
   IContentsManager, IContentsModel, IContentsOpts, INotebookSessionManager,
-  INotebookSession, ISessionId, KernelStatus, IKernelSpecId
+  INotebookSession, ISessionId, KernelStatus, IKernelSpecIds
 } from 'jupyter-js-services';
 
-import * as arrays
-  from 'phosphor-arrays';
+import {
+  PromiseDelegate
+} from 'jupyter-js-utils';
 
 import {
   IDisposable
@@ -35,11 +36,11 @@ class FileBrowserModel implements IDisposable {
   /**
    * Construct a new file browser view model.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager) {
+  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, specs: IKernelSpecIds) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
+    this._specs = specs;
     this._model = { path: '', name: '/', type: 'directory', content: [] };
-    this._getKernelSpecs();
     this.cd();
   }
 
@@ -92,13 +93,10 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get a the list of available kernel specs.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * Get the kernel specs.
    */
-  get kernelSpecs(): IKernelSpecId[] {
-    return this._kernelSpecs.slice();
+  get kernelspecs(): IKernelSpecIds {
+    return this._specs;
   }
 
   /**
@@ -228,7 +226,9 @@ class FileBrowserModel implements IDisposable {
         }
       }
       this._unsortedNames = content.map((value, index) => value.name);
-      if (this._sortKey !== 'name' || !this._ascending) this._sort();
+      if (this._sortKey !== 'name' || !this._ascending) {
+        this._sort();
+      }
       return this._findSessions();
     }).then(() => {
       this.selectionChanged.emit(void 0);
@@ -240,10 +240,7 @@ class FileBrowserModel implements IDisposable {
    * Refresh the current directory.
    */
   refresh(): Promise<void> {
-    // Refresh the list of kernelspecs and our directory listing.
-    return this._getKernelSpecs().then(() => {
-      return this.cd('.');
-    }).catch(error => {
+    return this.cd('.').catch(error => {
       console.error(error);
       let msg = 'Unable to refresh the directory listing due to ';
       msg += 'lost server connection.';
@@ -380,8 +377,8 @@ class FileBrowserModel implements IDisposable {
    */
   upload(file: File, overwrite?: boolean): Promise<IContentsModel> {
     // Skip large files with a warning.
-    if (file.size > this._max_upload_size_mb * 1024 * 1024) {
-      let msg = `Cannot upload file (>${this._max_upload_size_mb} MB) `;
+    if (file.size > this._maxUploadSizeMb * 1024 * 1024) {
+      let msg = `Cannot upload file (>${this._maxUploadSizeMb} MB) `;
       msg += `"${file.name}"`;
       console.warn(msg);
       return Promise.reject(new Error(msg));
@@ -505,51 +502,28 @@ class FileBrowserModel implements IDisposable {
       if (!sessionIds.length) {
         return;
       }
-      let promises: Promise<void>[] = [];
       let paths = notebooks.map((notebook: IContentsModel) => {
         return notebook.path;
       });
-      for (var sessionId of sessionIds) {
+      for (let sessionId of sessionIds) {
         let index = paths.indexOf(sessionId.notebook.path);
         if (index !== -1) {
-          promises.push(this._sessionManager.connectTo(sessionId.id).then(session => {
-            if (session.status !== KernelStatus.Dead) {
-              this._sessionIds.push(sessionId);
-              return void 0;
-            }
-          }));
+          this._sessionIds.push(sessionId);
         }
       }
-      return Promise.all(promises).then(() => {});
     });
   }
 
-  /**
-   * Load the list of kernel specs.
-   */
-  private _getKernelSpecs(): Promise<void> {
-    return this._sessionManager.getSpecs().then(specs => {
-      let kernelSpecs: IKernelSpecId[] = [];
-      for (let key in specs.kernelspecs) {
-        kernelSpecs.push(specs.kernelspecs[key]);
-      }
-      kernelSpecs.sort((a, b) => {
-        return a.spec.display_name.localeCompare(b.spec.display_name);
-      });
-      this._kernelSpecs = kernelSpecs;
-    });
-  }
-
-  private _max_upload_size_mb = 15;
+  private _maxUploadSizeMb = 15;
   private _contentsManager: IContentsManager = null;
   private _sessionIds: ISessionId[] = [];
   private _sessionManager: INotebookSessionManager = null;
   private _model: IContentsModel;
-  private _kernelSpecs: IKernelSpecId[] = [];
   private _selection: { [key: string]: boolean; } = Object.create(null);
   private _sortKey = 'name';
   private _ascending = true;
   private _unsortedNames: string[] = [];
+  private _specs: IKernelSpecIds = null;
 }
 
 

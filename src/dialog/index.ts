@@ -171,7 +171,7 @@ interface IDialogOptions {
  * @returns The button item that was selected.
  */
 export
-function showDialog(options?: IDialogOptions): Promise<IButtonItem>{
+function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
   options = options || {};
   let host = options.host || document.body;
   options.host = host;
@@ -183,7 +183,9 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem>{
   host.appendChild(dialog);
   // Focus the ok button if given.
   let index = buttons.indexOf(okButton);
-  if (index !== -1) buttonNodes[index].focus();
+  if (index !== -1) {
+    buttonNodes[index].focus();
+  }
   return new Promise<IButtonItem>((resolve, reject) => {
     buttonNodes.map(node => {
       node.addEventListener('click', evt => {
@@ -287,10 +289,15 @@ function styleElements(element: HTMLElement): HTMLElement {
 function createButton(item: IButtonItem): HTMLElement {
   let button = document.createElement('button');
   button.className = BUTTON_CLASS;
-  if (item.className) button.classList.add(item.className);
+  button.tabIndex = -1;
+  if (item.className) {
+    button.classList.add(item.className);
+  }
   let icon = document.createElement('span');
   icon.className = BUTTON_ICON_CLASS;
-  if (item.icon) icon.classList.add(item.icon);
+  if (item.icon) {
+    icon.classList.add(item.icon);
+  }
   let text = document.createElement('span');
   text.className = BUTTON_TEXT_CLASS;
   text.textContent = item.text;

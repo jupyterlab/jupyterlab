@@ -24,7 +24,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IDocumentContext, IDocumentModel, IModelFactoryOptions
+  IDocumentContext, IDocumentModel, IModelFactory
 } from './index';
 
 
@@ -72,6 +72,16 @@ class Context implements IDocumentContext {
   }
 
   /**
+   * Get the model associated with the document.
+   *
+   * #### Notes
+   * This is a read-only property
+   */
+  get model(): IDocumentModel {
+    return this._manager.getModel(this._id);
+  }
+
+  /**
    * The current kernel associated with the document.
    *
    * #### Notes
@@ -108,8 +118,8 @@ class Context implements IDocumentContext {
    * #### Notes
    * This is a read-only property.
    */
-  get kernelSpecs(): IKernelSpecIds {
-    return this._manager.getKernelSpecs();
+  get kernelspecs(): IKernelSpecIds {
+    return this._manager.getKernelspecs();
   }
 
   /**
@@ -193,11 +203,11 @@ class ContextManager implements IDisposable {
   /**
    * Construct a new context manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager,  kernelSpecs: IKernelSpecIds, opener: (id: string, widget: Widget) => IDisposable) {
+  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager,  kernelspecs: IKernelSpecIds, opener: (id: string, widget: Widget) => IDisposable) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
     this._opener = opener;
-    this._kernelspecids = kernelSpecs;
+    this._kernelspecids = kernelspecs;
   }
 
   /**
@@ -233,15 +243,15 @@ class ContextManager implements IDisposable {
   /**
    * Create a new context.
    */
-  createNew(path: string, model: IDocumentModel, options: IModelFactoryOptions): string {
+  createNew(path: string, model: IDocumentModel, factory: IModelFactory): string {
     let context = new Context(this);
     let id = context.id;
     this._contexts[id] = {
       context,
       path,
       model,
-      modelName: options.name,
-      opts: options.contentsOptions,
+      modelName: factory.name,
+      opts: factory.contentsOptions,
       contentsModel: null,
       session: null
     };
@@ -321,20 +331,36 @@ class ContextManager implements IDisposable {
 
   /**
    * Change the current kernel associated with the document.
+   *
+   * @param options - If given, change the kernel (starting a session
+   * if necessary). If falsey, shut down any existing session and return
+   * a void promise.
    */
   changeKernel(id: string, options: IKernelId): Promise<IKernel> {
     let contextEx = this._contexts[id];
     let session = contextEx.session;
-    if (!session) {
-      let path = contextEx.path;
-      let sOptions = {
-        notebookPath: path,
-        kernelName: options.name,
-        kernelId: options.id
-      };
-      return this._startSession(id, sOptions);
+    if (options) {
+      if (session) {
+        return session.changeKernel(options);
+      } else {
+        let path = contextEx.path;
+        let sOptions = {
+          notebookPath: path,
+          kernelName: options.name,
+          kernelId: options.id
+        };
+        return this._startSession(id, sOptions);
+      }
     } else {
-      return session.changeKernel(options);
+      if (session) {
+        return session.shutdown().then(() => {
+          session.dispose();
+          contextEx.session = null;
+          return void 0;
+        });
+      } else {
+        return Promise.resolve(void 0);
+      }
     }
   }
 
@@ -367,7 +393,7 @@ class ContextManager implements IDisposable {
   /**
    * Get the current kernelspec information.
    */
-  getKernelSpecs(): IKernelSpecIds {
+  getKernelspecs(): IKernelSpecIds {
     return this._kernelspecids;
   }
 

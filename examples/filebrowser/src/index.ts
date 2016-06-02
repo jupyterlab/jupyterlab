@@ -15,12 +15,17 @@ import {
 } from 'jupyter-js-ui/lib/filebrowser';
 
 import {
-  DocumentManager, DocumentWidget
+  DocumentManager, DocumentWidget, DocumentRegistry
 } from 'jupyter-js-ui/lib/docmanager';
 
 import {
-  ModelFactory, WidgetFactory
+  TextModelFactory
 } from 'jupyter-js-ui/lib/docmanager/default';
+
+import {
+  EditorWidgetFactory
+} from 'jupyter-js-ui/lib/docmanager/editor';
+
 
 import {
   showDialog, okButton
@@ -74,22 +79,23 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     }
   };
 
-  let fbModel = new FileBrowserModel(contentsManager, sessionsManager);
-  let docManager = new DocumentManager(contentsManager, sessionsManager, specs, opener);
-  let mFactory = new ModelFactory();
-  let wFactory = new WidgetFactory();
-  docManager.registerModelFactory(mFactory, {
-    name: 'default',
-    contentsOptions: { format: 'text', type: 'file' }
-  });
-  docManager.registerWidgetFactory(wFactory, {
+  let docRegistry = new DocumentRegistry();
+  let docManager = new DocumentManager(
+    docRegistry, contentsManager, sessionsManager, specs, opener
+  );
+  let mFactory = new TextModelFactory();
+  let wFactory = new EditorWidgetFactory();
+  docRegistry.registerModelFactory(mFactory);
+  docRegistry.registerWidgetFactory(wFactory, {
     displayName: 'Editor',
-    modelName: 'default',
+    modelName: 'text',
     fileExtensions: ['.*'],
     defaultFor: ['.*'],
     preferKernel: false,
     canStartKernel: true
   });
+
+  let fbModel = new FileBrowserModel(contentsManager, sessionsManager, specs);
   let fbWidget = new FileBrowserWidget(fbModel, docManager, opener);
 
   let panel = new SplitPanel();

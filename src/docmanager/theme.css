@@ -19,7 +19,7 @@
 }
 
 
-.jp-CodeMirrorWidget > .CodeMirror-scroll {
+.jp-CodeMirrorWidget .CodeMirror-scroll {
   /*  The CodeMirror docs are a bit fuzzy on if overflow-y should be hidden or visible.*/
   /*  We have found that if it is visible, vertical scrollbars appear with font size changes.*/
   overflow-y: hidden;
@@ -27,19 +27,19 @@
 }
 
 
-.jp-CodeMirrorWidget > .CodeMirror-lines {
+.jp-CodeMirrorWidget .CodeMirror-lines {
   /* In CM2, this used to be 0.4em, but in CM3 it went to 4px. We need the em value because */
   /* we have set a different line-height and want this to scale with that. */
   padding: 0.4em;
 }
 
 
-.jp-CodeMirrorWidget > .CodeMirror-linenumber {
+.jp-CodeMirrorWidget .CodeMirror-linenumber {
   padding: 0 8px 0 4px;
 }
 
 
-.jp-CodeMirrorWidget > .CodeMirror-gutters {
+.jp-CodeMirrorWidget .CodeMirror-gutters {
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
 }

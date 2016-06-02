@@ -26,7 +26,7 @@ import {
 /**
  * The class name added to CodeMirrorWidget instances.
  */
-const EDITOR_CLASS = 'p-CodeMirrorWidget';
+const EDITOR_CLASS = 'jp-CodeMirrorWidget';
 
 
 /**

@@ -164,24 +164,46 @@ class FileBrowserWidget extends Widget {
       if (!this._model.isSelected(item.name)) {
         continue;
       }
-      if (item.type === 'directory' && !foundDir) {
-        foundDir = true;
-        this._model.cd(item.name).catch(error =>
-          showErrorMessage(this, 'Open directory', error)
-        );
+      if (item.type === 'directory') {
+        if (!foundDir) {
+          foundDir = true;
+          this._model.cd(item.name).catch(error =>
+            showErrorMessage(this, 'Open directory', error)
+          );
+        }
       } else {
-        let path = item.path;
-        let widget = this._manager.findWidget(path) || this._manager.open(item.path);
-        this._opener.open(widget);
+        this.openPath(item.path);
       }
     }
   }
 
   /**
-   * Create a new untitled file or directory in the current directory.
+   * Open a file by path.
    */
-  newUntitled(type: string, ext?: string): Promise<IContentsModel> {
-    return this.model.newUntitled(type, ext);
+  openPath(path: string): Widget {
+    let model = this.model;
+    let widget = this._manager.findWidget(path);
+    if (!widget) {
+      widget = this._manager.open(path);
+      widget.populated.connect(() => model.refresh() );
+      widget.context.kernelChanged.connect(() => model.refresh() );
+    }
+    this._opener.open(widget);
+    return widget;
+  }
+
+  /**
+   * Create a new untitled file in the current directory.
+   */
+  createNew(type: string, ext?: string): Promise<Widget> {
+    let model = this.model;
+    return model.newUntitled(type, ext).then(contents => {
+      let widget = this._manager.createNew(contents.path);
+      widget.populated.connect(() => model.refresh() );
+      widget.context.kernelChanged.connect(() => model.refresh() );
+      this._opener.open(widget);
+      return widget;
+    });
   }
 
   /**

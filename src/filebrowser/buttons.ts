@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  IContentsModel, IKernelSpecId
+  IKernelId
 } from 'jupyter-js-services';
 
 import {
@@ -19,7 +19,7 @@ import {
 } from '../dialog';
 
 import {
-  DocumentManager
+  DocumentManager, IFileCreator
 } from '../docmanager';
 
 import {
@@ -141,10 +141,23 @@ class FileButtons extends Widget {
   /**
    * Open a file by path.
    */
-  open(path: string): void {
-    let widget = this._manager.open(path);
+  open(path: string, widgetName='default', kernel?: IKernelId): void {
+    let widget = this._manager.open(path, widgetName, kernel);
     let opener = this._opener;
     opener.open(widget);
+    widget.populated.connect(() => this.model.refresh() );
+    widget.context.kernelChanged.connect(() => this.model.refresh() );
+  }
+
+  /**
+   * Create a new file by path.
+   */
+  createNew(path: string, widgetName='default', kernel?: IKernelId): void {
+    let widget = this._manager.createNew(path, widgetName, kernel);
+    let opener = this._opener;
+    opener.open(widget);
+    widget.populated.connect(() => this.model.refresh() );
+    widget.context.kernelChanged.connect(() => this.model.refresh() );
   }
 
   /**
@@ -307,11 +320,8 @@ namespace Private {
    */
   export
   function createNewFile(widget: FileButtons): void {
-    createFile(widget, 'file').then(contents => {
-      if (contents === void 0) {
-        return;
-      }
-      widget.model.refresh().then(() => widget.open(contents.name));
+    widget.model.newUntitled('file').then(contents => {
+      return widget.open(contents.path);
     }).catch(error => {
       utils.showErrorMessage(widget, 'New File Error', error);
     });
@@ -322,10 +332,7 @@ namespace Private {
    */
   export
   function createNewFolder(widget: FileButtons): void {
-    createFile(widget, 'directory').then(contents => {
-      if (contents === void 0) {
-        return;
-      }
+    widget.model.newUntitled('directory').then(contents => {
       widget.model.refresh();
     }).catch(error => {
       utils.showErrorMessage(widget, 'New Folder Error', error);
@@ -333,28 +340,18 @@ namespace Private {
   }
 
   /**
-   * Create a new notebook.
+   * Create a new item using a file creator.
    */
-  export
-  function createNewNotebook(widget: FileButtons, spec: IKernelSpecId): void {
-    createFile(widget, 'notebook').then(contents => {
-      let started = widget.model.startSession(contents.path, spec.name);
-      return started.then(() => contents);
-    }).then(contents => {
-      if (contents === void 0) {
-        return;
-      }
-      widget.model.refresh().then(() => widget.open(contents.name));
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'New Notebook Error', error);
+  function createNewItem(widget: FileButtons, creator: IFileCreator): void {
+    let fileType = creator.type || 'file';
+    let widgetName = creator.widgetName || 'default';
+    let kernel: IKernelId;
+    if (creator.kernelName) {
+      kernel = { name: creator.kernelName };
+    }
+    widget.model.newUntitled(fileType, creator.extension).then(contents => {
+      widget.createNew(contents.path, widgetName, kernel);
     });
-  }
-
-  /**
-   * Create a new file, prompting the user for a name.
-   */
-  function createFile(widget: FileButtons, type: string): Promise<IContentsModel> {
-    return widget.model.newUntitled(type);
   }
 
   /**
@@ -370,21 +367,20 @@ namespace Private {
       new MenuItem({
         text: 'Folder',
         handler: () => { createNewFolder(widget); }
-      }),
-      new MenuItem({
-        type: MenuItem.Separator
       })
     ];
-    // TODO the kernels below are suffixed with "Notebook" as a
-    // temporary measure until we can update the Menu widget to
-    // show text in a separator for a "Notebooks" group.
-    let extra = widget.model.kernelSpecs.map(spec => {
-      return new MenuItem({
-        text: `${spec.spec.display_name} Notebook`,
-        handler: () => { createNewNotebook(widget, spec); }
+    let creators = widget.manager.registry.listCreators();
+    if (creators) {
+      items.push(new MenuItem({ type: MenuItem.Separator }));
+    }
+    for (let creator of creators) {
+      let item = new MenuItem({
+        text: creator.name,
+        handler: () => { createNewItem(widget, creator); }
       });
-    });
-    return new Menu(items.concat(extra));
+      items.push(item);
+    }
+    return new Menu(items);
   }
 
   /**

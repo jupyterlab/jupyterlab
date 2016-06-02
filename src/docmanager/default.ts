@@ -6,8 +6,12 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
-  IKernelId
+  IKernelId, IContentsOpts
 } from 'jupyter-js-services';
+
+import {
+  IChangedArgs
+} from 'phosphor-properties';
 
 import {
   ISignal, Signal
@@ -18,27 +22,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  loadModeByFileName
-} from '../codemirror';
-
-import {
-  CodeMirrorWidget
-} from '../codemirror/widget';
-
-import {
-  IDocumentModel, IWidgetFactory, IDocumentContext
+  IDocumentModel, IWidgetFactory, IDocumentContext, IModelFactory
 } from './index';
-
-
-/**
- * The class name added to a dirty widget.
- */
-const DIRTY_CLASS = 'jp-mod-dirty';
-
-/**
- * The class name added to a jupyter code mirror widget.
- */
-const EDITOR_CLASS = 'jp-CodeMirrorWidget';
 
 
 /**
@@ -63,15 +48,15 @@ class DocumentModel implements IDocumentModel {
   /**
    * A signal emitted when the document content changes.
    */
-  get contentChanged(): ISignal<IDocumentModel, string> {
+  get contentChanged(): ISignal<IDocumentModel, void> {
     return Private.contentChangedSignal.bind(this);
   }
 
   /**
-   * A signal emitted when the document dirty state changes.
+   * A signal emitted when the document state changes.
    */
-  get dirtyChanged(): ISignal<IDocumentModel, boolean> {
-    return Private.dirtyChangedSignal.bind(this);
+  get stateChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
+    return Private.stateChangedSignal.bind(this);
   }
 
   /**
@@ -80,12 +65,13 @@ class DocumentModel implements IDocumentModel {
   get dirty(): boolean {
     return this._dirty;
   }
-  set dirty(value: boolean) {
-    if (value === this._dirty) {
+  set dirty(newValue: boolean) {
+    if (newValue === this._dirty) {
       return;
     }
-    this._dirty = value;
-    this.dirtyChanged.emit(value);
+    let oldValue = this._dirty;
+    this._dirty = newValue;
+    this.stateChanged.emit({ name: 'dirty', oldValue, newValue });
   }
 
   /**
@@ -94,11 +80,13 @@ class DocumentModel implements IDocumentModel {
   get readOnly(): boolean {
     return this._readOnly;
   }
-  set readOnly(value: boolean) {
-    if (value === this._readOnly) {
+  set readOnly(newValue: boolean) {
+    if (newValue === this._readOnly) {
       return;
     }
-    this._readOnly = value;
+    let oldValue = this._readOnly;
+    this._readOnly = newValue;
+    this.stateChanged.emit({ name: 'readOnly', oldValue, newValue });
   }
 
   /**
@@ -146,7 +134,7 @@ class DocumentModel implements IDocumentModel {
       return;
     }
     this._text = value;
-    this.contentChanged.emit(value);
+    this.contentChanged.emit(void 0);
     this.dirty = true;
   }
 
@@ -183,10 +171,30 @@ class DocumentModel implements IDocumentModel {
 
 
 /**
- * The default implementation of a model factory.
+ * An implementation of a model factory for text files.
  */
 export
-class ModelFactory {
+class TextModelFactory implements IModelFactory {
+  /**
+   * The name of the model.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return 'text';
+  }
+
+  /**
+   * The contents options used to fetch/save files.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get contentsOptions(): IContentsOpts {
+    return { type: 'file', format: 'text'};
+  }
+
   /**
    * Get whether the model factory has been disposed.
    */
@@ -202,7 +210,7 @@ class ModelFactory {
   }
 
   /**
-   * Create a new model for a given path.
+   * Create a new model.
    *
    * @param languagePreference - An optional kernel language preference.
    *
@@ -213,11 +221,13 @@ class ModelFactory {
   }
 
   /**
-   * Get the preferred kernel language given a path.
+   * Get the preferred kernel language given an extension.
    */
-  preferredLanguage(path: string): string {
-    // TODO: use a mapping of extension to language.
-    return '';
+  preferredLanguage(ext: string): string {
+    let mode = CodeMirror.findModeByExtension(ext.slice(1));
+    if (mode) {
+      return mode.mode;
+    }
   }
 
   private _isDisposed = false;
@@ -225,43 +235,28 @@ class ModelFactory {
 
 
 /**
- * A document widget for codemirrors.
+ * An implementation of a model factory for base64 files.
  */
 export
-class EditorWidget extends CodeMirrorWidget {
+class Base64ModelFactory extends TextModelFactory {
   /**
-   * Construct a new editor widget.
+   * The name of the model.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  constructor(model: IDocumentModel, context: IDocumentContext) {
-    super();
-    this.addClass(EDITOR_CLASS);
-    let editor = this.editor;
-    let doc = editor.getDoc();
-    doc.setValue(model.toString());
-    this.title.text = context.path.split('/').pop();
-    loadModeByFileName(editor, context.path);
-    model.dirtyChanged.connect((m, value) => {
-      if (value) {
-        this.title.className += ` ${DIRTY_CLASS}`;
-      } else {
-        this.title.className = this.title.className.replace(DIRTY_CLASS, '');
-      }
-    });
-    context.pathChanged.connect((c, path) => {
-      loadModeByFileName(editor, path);
-      this.title.text = path.split('/').pop();
-    });
-    model.contentChanged.connect((m, text) => {
-      let old = doc.getValue();
-      if (old !== text) {
-        doc.setValue(text);
-      }
-    });
-    CodeMirror.on(doc, 'change', (instance, change) => {
-      if (change.origin !== 'setValue') {
-        model.fromString(instance.getValue());
-      }
-    });
+  get name(): string {
+    return 'base64';
+  }
+
+  /**
+   * The contents options used to fetch/save files.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get contentsOptions(): IContentsOpts {
+    return { type: 'file', format: 'base64'};
   }
 }
 
@@ -270,7 +265,7 @@ class EditorWidget extends CodeMirrorWidget {
  * The default implemetation of a widget factory.
  */
 export
-class WidgetFactory implements IWidgetFactory<EditorWidget> {
+abstract class ABCWidgetFactory implements IWidgetFactory<Widget> {
   /**
    * Get whether the model factory has been disposed.
    */
@@ -288,11 +283,7 @@ class WidgetFactory implements IWidgetFactory<EditorWidget> {
   /**
    * Create a new widget given a document model and a context.
    */
-  createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): EditorWidget {
-    // TODO: if a kernel id or a name other than 'none' or 'default'
-    // was given, start that kernel
-    return new EditorWidget(model, context);
-  }
+  abstract createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): Widget;
 
   /**
    * Take an action on a widget before closing it.
@@ -317,11 +308,11 @@ namespace Private {
    * A signal emitted when a document content changes.
    */
   export
-  const contentChangedSignal = new Signal<IDocumentModel, string>();
+  const contentChangedSignal = new Signal<IDocumentModel, void>();
 
   /**
    * A signal emitted when a document dirty state changes.
    */
   export
-  const dirtyChangedSignal = new Signal<IDocumentModel, boolean>();
+  const stateChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
 }
