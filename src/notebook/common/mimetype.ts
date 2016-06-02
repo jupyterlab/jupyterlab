@@ -16,7 +16,7 @@ import {
  * Get the appropriate codemirror mimetype given language info.
  */
 export
-function mimetypeForLangauge(info: IKernelLanguageInfo): string {
+function mimetypeForLanguage(info: IKernelLanguageInfo): string {
   // Use the codemirror mode if given since some kernels rely on it.
   let mode = info.codemirror_mode;
   let mime = 'text/plain';
