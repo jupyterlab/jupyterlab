@@ -63,17 +63,17 @@ const SHORTCUTS = [
   },
   {
     command: 'file-operations:save',
-    selector: '.jp-Document',
+    selector: '.jp-DocumentWidget',
     sequence: ['Accel S']
   },
   {
     command: 'file-operations:close',
-    selector: '.jp-Document',
+    selector: '.jp-DocumentWidget',
     sequence: ['Ctrl Q']
   },
   {
     command: 'file-operations:close-all',
-    selector: '.jp-Document',
+    selector: '.jp-DocumentWidget',
     sequence: ['Ctrl Shift Q']
   },
   {
@@ -92,6 +92,16 @@ const SHORTCUTS = [
     sequence: ['Shift Enter']
   },
   {
+    command: 'notebook-cells:runAndInsert',
+    selector: '.jp-Notebook',
+    sequence: ['Alt Enter']
+  },
+  {
+    command: 'notebook-cells:run',
+    selector: '.jp-Notebook',
+    sequence: ['Ctrl Enter']
+  },
+  {
     command: 'notebook:interrupt-kernel',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['I', 'I']
@@ -104,7 +114,7 @@ const SHORTCUTS = [
   {
     command: 'notebook-cells:to-code',
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Y']
+    sequence: ['E']
   },
   {
     command: 'notebook-cells:to-markdown',
@@ -115,6 +125,51 @@ const SHORTCUTS = [
     command: 'notebook-cells:to-raw',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['R']
+  },
+  {
+    command: 'notebook-cells:delete',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['D', 'D'],
+  },
+  {
+    command: 'notebook-cells:split',
+    selector: '.jp-Notebook.jp-mod-editMode',
+    sequence: ['Ctrl Shift -'],
+  },
+  {
+    command: 'notebook-cells:merge',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Shift M'],
+  },
+  {
+    command: 'notebook-cells:select-above',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['ArrowUp'],
+  },
+  {
+    command: 'notebook-cells:select-below',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['ArrowDown'],
+  },
+  {
+    command: 'notebook-cells:extend-above',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Shift ArrowUp'],
+  },
+  {
+    command: 'notebook-cells:extend-below',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Shift ArrowDown'],
+  },
+  {
+    command: 'notebook-cells:undo',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Z'],
+  },
+  {
+    command: 'notebook-cells:redo',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['Y'],
   },
   {
     command: 'notebook-cells:cut',
@@ -152,7 +207,7 @@ const SHORTCUTS = [
     sequence: ['ArrowDown']
   },
   {
-    command: 'notebook-cells:toggle-linenumbers',
+    command: 'notebook-cells:toggle-lineNumbers',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['L']
   },
@@ -165,7 +220,12 @@ const SHORTCUTS = [
     command: 'notebook-cells:commandMode',
     selector: '.jp-Notebook.jp-mod-editMode',
     sequence: ['Escape']
-  }
+  },
+  {
+    command: 'console:execute',
+    selector: '.jp-Console .jp-CellEditor',
+    sequence: ['Shift Enter']
+  },
 ];
 
 
