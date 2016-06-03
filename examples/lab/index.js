@@ -23,7 +23,7 @@ var app = new phosphide.Application({
     require('jupyter-js-plugins/lib/landing/plugin').landingExtension,
     require('jupyter-js-plugins/lib/console/plugin').consoleExtension,
     require('jupyter-js-plugins/lib/main/plugin').mainExtension,
-    require('jupyter-js-plugins/lib/widgets/index').widgetManagerExtension,
+    require('jupyter-js-plugins/lib/widgets/plugin').widgetManagerExtension,
   ],
   providers: [
     require('jupyter-js-plugins/lib/clipboard/plugin').clipboardProvider,
