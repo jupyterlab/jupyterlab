@@ -466,7 +466,7 @@ class DirListing extends Widget {
   /**
    * Download the currently selected item(s).
    */
-  download(): Promise<void> {
+  download(): Promise<IContentsModel> {
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
         return this._model.download(item.path).catch(error =>

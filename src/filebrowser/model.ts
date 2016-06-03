@@ -381,7 +381,7 @@ class FileBrowserModel implements IDisposable {
       let msg = `Cannot upload file (>${this._maxUploadSizeMb} MB) `;
       msg += `"${file.name}"`;
       console.warn(msg);
-      return Promise.reject(new Error(msg));
+      return Promise.reject<IContentsModel>(new Error(msg));
     }
 
     if (overwrite) {

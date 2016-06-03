@@ -225,7 +225,7 @@ class BreadCrumbs extends Widget {
     let path = BREAD_CRUMB_PATHS[index];
 
     // Move all of the items.
-    let promises: Promise<void>[] = [];
+    let promises: Promise<any>[] = [];
     let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
