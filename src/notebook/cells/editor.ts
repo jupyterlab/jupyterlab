@@ -22,10 +22,6 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  Widget
-} from 'phosphor-widget';
-
-import {
   ICellModel
 } from './model';
 
