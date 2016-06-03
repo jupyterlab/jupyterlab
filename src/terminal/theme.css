@@ -1,0 +1,20 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-TerminalWidget {
+  min-width: 200px;
+  min-height: 200px;
+  padding: 8px;
+}
+
+
+.jp-TerminalWidget-body {
+  outline: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+
+@import '~xterm/src/xterm.css';
+

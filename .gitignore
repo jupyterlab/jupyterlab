@@ -11,6 +11,11 @@ example/untitled*
 example/Untitled*
 example/*.png
 example/*.gif
+coverage
+lib
+build
 docs
 
 .ipynb_checkpoints
+Unititled*
+untitled*

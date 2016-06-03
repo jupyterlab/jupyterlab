@@ -1,0 +1,64 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-FileBrowser {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.jp-BreadCrumbs {
+  flex: 0 0 auto;
+}
+
+
+.jp-FileButtons {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+
+.jp-FileButtons-buttonContent {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+
+.jp-FileButtons-buttonIcon {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.jp-DirListing {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.jp-DirListing-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+
+.jp-DirListing-content {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  overflow: auto;
+}
+
+
+.jp-DirListing-item {
+  display: flex;
+  flex-direction: row;
+}

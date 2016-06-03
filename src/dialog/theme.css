@@ -1,0 +1,112 @@
+
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-Dialog {
+  background: rgba(0,0,0,0.25);
+  color: #757575;
+}
+
+
+.jp-Dialog-content {
+  background: #FAFAFA;
+  padding: 24px;
+  width: 300px;
+  box-sizing: border-box;
+  box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.5);
+}
+
+
+.jp-Dialog-header {
+  padding-bottom: 12px;
+  font: 18px Helvetica-Neue Medium, Arial, sans-serif;
+  color: #616161;
+}
+
+
+.jp-Dialog-body {
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  background: #FAFAFA;
+}
+
+
+.jp-Dialog-bodyContent {
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  outline: none;
+  margin-bottom: 12px;
+}
+
+
+.jp-Dialog-footer {
+  margin-top: 24px;
+}
+
+
+.jp-Dialog-button {
+  font: 15px Helvetica-Neue Medium, Arial, sans-serif;
+  border: none;
+  min-width: 120px;
+  max-width: 120px;
+  text-transform: uppercase;
+  line-height: 38px;
+  border-radius: 2px;
+  outline: none;
+  padding: 0px;
+}
+
+
+.jp-Dialog-okButton {
+  background: #F27624;
+  color: white;
+}
+
+
+.jp-Dialog-cancelButton {
+  background: #9E9E9E;
+  margin-right: 12px;
+  color: white;
+}
+
+
+.jp-Dialog-inputWrapper {
+  padding: 7px;
+  background: white;
+  width: 252px;
+  box-sizing: border-box;
+  border: 1px solid #BDBDBD;
+  border-radius: 2px;
+  margin-bottom: 12px;
+}
+
+
+.jp-Dialog-input {
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  color: #676767;
+  width: 100%;
+  outline: none;
+  border: none;
+}
+
+
+.jp-Dialog-selectWrapper {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background: white;
+  width: 252px;
+  box-sizing: border-box;
+  border: 1px solid #BDBDBD;
+  border-radius: 2px;
+  margin-bottom: 12px;
+}
+
+
+.jp-Dialog-select {
+  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  background: white;
+  color: #676767;
+  width: 100%;
+  outline: none;
+  border: none;
+}

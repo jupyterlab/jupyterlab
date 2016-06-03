@@ -11,6 +11,8 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
+      { test: /\.md$/, loader: 'raw-loader'},
+      { test: /\.html$/, loader: "file?name=[name].[ext]" }
     ],
     preLoaders: [
       // instrument only testing sources with Istanbul

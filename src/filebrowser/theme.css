@@ -1,0 +1,222 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-FileBrowser {
+  min-width: 300px;
+  color: #757575;
+  background: #FAFAFA;
+  font: 13px Helvetica-Neue, Arial, sans-serif;
+}
+
+
+.jp-BreadCrumbs {
+  margin: 8px;
+  margin-bottom: 0px;
+}
+
+
+.jp-BreadCrumbs-item {
+  margin: 0px 4px;
+  cursor: pointer;
+}
+
+
+.jp-BreadCrumbs-item:first-child {
+  margin-left: 0px;
+}
+
+
+.jp-BreadCrumbs-item.jp-mod-dropTarget {
+  background: #FEDBC4;
+}
+
+
+.jp-FileButtons {
+  margin: 8px;
+}
+
+
+.jp-FileButtons-button {
+  flex: 1 1 auto;
+  max-width: 100px;
+  padding: 4px 6px;
+  color: #757575;
+  background: #FFFFFF;
+  border: 1px solid #E0E0E0;
+  font-size: 16px;
+  outline: 0;
+}
+
+
+.jp-FileButtons-button::-moz-focus-inner {
+  border: 0;
+}
+
+
+.jp-FileButtons-button:hover {
+  background: #F5F5F5;
+  border-color: #D0D0D0;
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-FileButtons-button:active,
+.jp-FileButtons-button.jp-id-create.jp-mod-active {
+  background: #EEEEEE;
+  border-color: #BDBDBD;
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-FileButtons-button.jp-id-create {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+
+.jp-FileButtons-button.jp-id-upload {
+  margin-left: -1px; /* overlap borders */
+}
+
+
+.jp-FileButtons-button.jp-id-refresh {
+  margin-left: -1px; /* overlap borders */
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+
+.jp-DirListing {
+  outline: 0;
+}
+
+
+.jp-DirListing-header {
+  margin-bottom: 4px;
+  border-top: 1px solid #E0E0E0;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+
+.jp-DirListing-headerItem {
+  padding: 4px 6px;
+  font-weight: 500;
+}
+
+
+.jp-DirListing-headerItem:hover {
+  background: #EEEEEE;
+  border-radius: 2px;
+}
+
+
+.jp-DirListing-headerItem.jp-id-name {
+  flex: 1 0 84px;
+}
+
+
+.jp-DirListing-headerItem.jp-id-modified {
+  flex: 0 0 112px;
+  border-left: 1px solid #E0E0E0;
+}
+
+
+.jp-DirListing-headerItem.jp-mod-selected {
+  font-weight: 600;
+}
+
+
+.jp-DirListing-headerItem.jp-mod-selected .jp-DirListing-headerItemIcon:before {
+  font-family: FontAwesome;
+  content: "\f0d8";
+  float: right;
+}
+
+
+.jp-DirListing-headerItem.jp-mod-selected.jp-mod-descending .jp-DirListing-headerItemIcon:before {
+  font-family: FontAwesome;
+  content: "\f0d7";
+  float: right;
+}
+
+
+/* increase specificity to override bundled default */
+.jp-DirListing > .jp-DirListing-content {
+  padding: 0px 8px;
+}
+
+
+.jp-DirListing-item {
+  padding: 4px;
+}
+
+
+.jp-DirListing-item.jp-mod-selected {
+  color: white;
+  background: #F27624;
+  border-radius: 2px;
+}
+
+
+.jp-DirListing-item.jp-mod-dropTarget {
+  background: #FEDBC4;
+}
+
+
+.jp-DirListing-item:hover:not(.jp-mod-selected) {
+  background: #EEEEEE;
+}
+
+
+.jp-DirListing-itemIcon {
+  flex: 0 0 20px;
+  font-family: FontAwesome;
+}
+
+
+.jp-DirListing-itemText {
+  flex: 1 0 64px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.jp-DirListing-itemModified {
+  flex: 0 0 108px;
+  text-align: right;
+}
+
+
+.jp-DirListing-editor {
+  flex: 1 0 64px;
+}
+
+
+/** TODO
+.jp-DirListing-item.jp-mod-selected.jp-mod-cut {
+  background: #F1C40F;
+  color: #F5F5F5;
+}
+**/
+
+
+.jp-DirListing-item.jp-type-folder .jp-DirListing-itemIcon:before {
+  content: "\f114";
+}
+
+
+.jp-DirListing-item.jp-type-file .jp-DirListing-itemIcon:before {
+  content: "\f016";
+}
+
+
+.jp-DirListing-item.jp-type-notebook .jp-DirListing-itemIcon:before {
+  content: "\f02d";
+}
+
+
+.jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon {
+  color: #27AE60;
+}

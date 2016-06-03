@@ -1,10 +1,9 @@
-Jupyter JS Plugins
+JupyterLab
 ==================
 
-Plugins for JupyterLab.  The default set of [phosphide](https://github.com/phosphorjs/phosphide) 
-plugins used to create [JupyterLab](https://github.com/jupyter/notebook/tree/master/notebook/lab).
+An extensible computational environment for Jupyter.
 
-[API Docs](http://jupyter.github.io/jupyter-js-plugins/)
+[API Docs](http://jupyter.github.io/jupyterlab/)
 
 <img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
 
