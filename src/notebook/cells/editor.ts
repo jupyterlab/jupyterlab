@@ -128,13 +128,15 @@ class CellEditorWidget extends CodeMirrorWidget {
     this._model = model;
     let editor = this.editor;
     let doc = editor.getDoc();
+    if (model.source) {
+      doc.setValue(model.source);
+    }
     CodeMirror.on(doc, 'change', (instance, change) => {
       this.onDocChange(instance, change);
     });
     CodeMirror.on(editor, 'keydown', (instance, evt) => {
       this.onEditorKeydown(instance, evt);
     });
-    this.update();
     model.stateChanged.connect(this.onModelChanged, this);
   }
 
@@ -187,14 +189,11 @@ class CellEditorWidget extends CodeMirrorWidget {
   }
 
   /**
-   * Handle an `update-request` message.
+   * Set the current cursor position of the editor.
    */
-  protected onUpdateRequest(msg: Message): void {
+  setCursorPosition(position: number): void {
     let doc = this.editor.getDoc();
-    let value = doc.getValue();
-    if (value !== this._model.source) {
-      doc.setValue(this._model.source);
-    }
+    doc.setCursor(doc.posFromIndex(position));
   }
 
   /**
@@ -203,7 +202,10 @@ class CellEditorWidget extends CodeMirrorWidget {
   protected onModelChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'source':
-      this.update();
+      let doc = this.editor.getDoc();
+      if (doc.getValue() !== args.newValue) {
+        doc.setValue(args.newValue);
+      }
       break;
     default:
       break;
