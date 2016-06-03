@@ -204,7 +204,7 @@ class CellEditorWidget extends CodeMirrorWidget {
     case 'source':
       let doc = this.editor.getDoc();
       if (doc.getValue() !== args.newValue) {
-        doc.setValue(this._model.source);
+        doc.setValue(args.newValue);
       }
       break;
     default:
