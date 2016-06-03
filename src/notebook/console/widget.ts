@@ -564,9 +564,13 @@ class ConsoleWidget extends Widget {
    * Handle a completion selected signal from the completion widget.
    */
   protected onCompletionSelect(widget: CompletionWidget, value: string): void {
+    let prompt = this.prompt;
     let patch = this._completion.model.createPatch(value);
-    let editor = this.prompt.editor.editor;
-    let doc = editor.getDoc();
+    let doc = prompt.editor.editor.getDoc();
+    // Update the prompt model.
+    prompt.model.source = patch.text;
+    // Because the prompt model triggers a DOM update asynchronously,
+    // CodeMirror value and position need to be set manually (synchronously).
     doc.setValue(patch.text);
     doc.setCursor(doc.posFromIndex(patch.position));
   }
