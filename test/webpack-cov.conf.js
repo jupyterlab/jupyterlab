@@ -10,6 +10,8 @@ module.exports = {
   bail: true,
   module: {
     loaders: [
+      { test: /\.json$/, loader: 'json-loader' },
+      { test: /\.ipynb$/, loader: 'json-loader' },
       { test: /\.css$/, loader: 'style-loader!css-loader' },
       { test: /\.md$/, loader: 'raw-loader'},
       { test: /\.html$/, loader: "file?name=[name].[ext]" }

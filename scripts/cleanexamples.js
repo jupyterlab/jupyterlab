@@ -1,7 +1,7 @@
 var childProcess = require('child_process');
 var fs = require('fs');
 
-childProcess.execSync('rimraf examples/node_modules', { stdio: [0, 1, 2] });
+childProcess.execSync('rimraf examples/node_modules', { stdio: 'inherit' });
 
 // Clean all of the example folders.
 dirs = fs.readdirSync('examples');
@@ -12,5 +12,4 @@ for (var i = 0; i < dirs.length; i++) {
   }
   var cmd = 'rimraf examples/' + dirs[i] + '/build';
   childProcess.execSync(cmd, { stdio: [0, 1, 2] });
-  
 }

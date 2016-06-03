@@ -7,6 +7,8 @@
   "dependencies": {
     "backbone": "^1.2.0",
     "codemirror": "^5.12.0",
+    "codemirror": "^5.11.0",
+    "diff-match-patch": "^1.0.0",
     "file-loader": "^0.8.5",
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5",
@@ -26,12 +28,15 @@
     "phosphor-dragdrop": "^0.9.0",
     "phosphor-menus": "^1.0.0-rc.1",
     "phosphor-messaging": "^1.0.6",
+    "phosphor-disposable": "^1.0.5",
+    "phosphor-observablelist": "^1.0.0-beta",
     "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
     "phosphor-tabs": "^1.0.0-rc.2", 
     "phosphor-widget": "^1.0.0-rc.1",
     "xterm": "^0.33.0"
+    "sanitizer": "^0.1.3"
   },
   "devDependencies": {
     "concurrently": "^2.0.0",
@@ -51,6 +56,10 @@
     "mocha": "^2.3.4",
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.0",
+    "karma-mocha": "^0.2.0",
+    "karma-mocha-reporter": "^1.1.1",
+    "mocha": "^2.2.5",
+    "rimraf": "^2.4.2",
     "style-loader": "^0.13.0",
     "typedoc": "https://github.com/SierraSoftworks/typedoc.git#cb5aea2b218b4f773451e2818a48629ee9c5066e",
     "typescript": "^1.8.0",

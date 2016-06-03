@@ -1,0 +1,64 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-Notebook-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.p-Widget.jp-NBToolbar {
+  flex: 0 0 auto;
+}
+
+
+.p-Widget.jp-Notebook-container {
+  flex: 1 1 auto;
+}
+
+
+.jp-InputArea {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.jp-InputArea-prompt {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+
+.jp-InputArea-editor {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+
+.jp-MarkdownCell-renderer.p-Widget {
+  user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+}
+
+
+.jp-OutputArea-result.p-Widget {
+  user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+}
+
+
+.jp-Console-panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.p-Widget.jp-Console {
+  overflow: auto;
+}

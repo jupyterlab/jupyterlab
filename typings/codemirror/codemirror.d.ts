@@ -65,6 +65,12 @@ declare module CodeMirror {
     function on(element: any, eventName: string, handler: Function): void;
     function off(element: any, eventName: string, handler: Function): void;
 
+    /**
+     * Fired on a keydown event on the editor.
+     */
+    function on(editor: Editor, eventName: 'keydown', handler: (instance: Editor, event: KeyboardEvent) => void): void;
+    function off(editor: Editor, eventName: 'keydown', handler: (instance: Editor, event: KeyboardEvent) => void): void;
+
     /** Fired whenever a change occurs to the document. changeObj has a similar type as the object passed to the editor's "change" event,
     but it never has a next property, because document change events are not batched (whereas editor change events are). */
     function on(doc: Doc, eventName: 'change', handler: (instance: Doc, change: EditorChange) => void ): void;

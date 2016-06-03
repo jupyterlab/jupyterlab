@@ -18,3 +18,4 @@ for (var i = 0; i < dirs.length; i++) {
   childProcess.execSync('npm run build', { stdio: [0, 1, 2] });
   process.chdir('../..');
 }
+console.log('\n********\nDone!');
