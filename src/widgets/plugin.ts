@@ -3,7 +3,7 @@
 
 import {
   IWidgetExtension, IDocumentContext, IDocumentModel, DocumentRegistry
-} from 'jupyter-js-ui/lib/docmanager';
+} from '../docmanager';
 
 import {
   IDisposable, DisposableDelegate
@@ -15,7 +15,7 @@ import {
 
 import {
   NotebookPanel
-} from 'jupyter-js-notebook/lib/notebook/panel';
+} from '../notebook/notebook/panel';
 
 import {
   Application
@@ -23,7 +23,7 @@ import {
 
 import {
   WidgetManager, WidgetRenderer
-} from 'jupyter-js-ui/lib/widgets';
+} from './index';
 
 import {
   IKernel

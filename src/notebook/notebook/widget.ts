@@ -8,7 +8,7 @@ import {
 
 import {
   RenderMime
-} from 'jupyter-js-ui/lib/rendermime';
+} from '../../rendermime';
 
 import {
   Message

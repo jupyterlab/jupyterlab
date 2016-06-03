@@ -4,7 +4,7 @@
 
 import {
   RenderMime
-} from 'jupyter-js-ui/lib/rendermime';
+} from '../../rendermime';
 
 import {
   IListChangedArgs, ListChangeType, ObservableList

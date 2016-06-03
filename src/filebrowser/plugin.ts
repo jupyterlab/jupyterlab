@@ -3,12 +3,16 @@
 'use strict';
 
 import {
-  FileBrowserWidget, FileBrowserModel
-} from 'jupyter-js-ui/lib/filebrowser';
+  FileBrowserWidget
+} from './browser';
+
+import {
+  FileBrowserModel
+} from './model';
 
 import {
   DocumentManager, DocumentRegistry, DocumentWidget
-} from 'jupyter-js-ui/lib/docmanager';
+} from '../docmanager';
 
 import {
   Application

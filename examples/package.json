@@ -1,9 +1,8 @@
 {
   "private": true,
-  "name": "jupyter-js-notebook-examples",
+  "name": "jupyterlab-examples",
   "dependencies": {
-    "jupyter-js-notebook": "file:..",
-    "jupyter-js-ui": "^0.11.0",
+    "jupyterlab": "file:..",
     "jupyter-js-utils": "^0.4.0",
     "phosphor-commandpalette": "^0.2.0",
     "phosphor-keymap": "^0.8.0",
@@ -14,7 +13,7 @@
     "build": "cd .. && npm run build:examples",
     "clean": "rimraf node_modules",
     "postinstall": "npm dedupe",
-    "update": "rimraf node_modules/jupyter-js-notebook && npm install"
+    "update": "rimraf node_modules/jupyterlab && npm install"
   },
   "devDependencies": {
     "rimraf": "^2.5.2"

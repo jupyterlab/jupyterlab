@@ -4,7 +4,7 @@
 
 import {
   DocumentRegistry, TextModelFactory, Base64ModelFactory
-} from 'jupyter-js-ui/lib/docmanager';
+} from '../docmanager';
 
 
 /**

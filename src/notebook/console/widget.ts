@@ -8,11 +8,11 @@ import {
 
 import {
   showDialog
-} from 'jupyter-js-ui/lib/dialog';
+} from '../../dialog';
 
 import {
   RenderMime
-} from 'jupyter-js-ui/lib/rendermime';
+} from '../../rendermime';
 
 import {
   Message

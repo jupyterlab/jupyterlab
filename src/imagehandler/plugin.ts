@@ -4,7 +4,7 @@
 
 import {
   DocumentRegistry, ImageWidgetFactory
-} from 'jupyter-js-ui/lib/docmanager';
+} from '../docmanager';
 
 import {
   Application

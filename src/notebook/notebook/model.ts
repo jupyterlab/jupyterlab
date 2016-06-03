@@ -7,7 +7,7 @@ import * as utils
 
 import {
   IDocumentModel
-} from 'jupyter-js-ui/lib/docmanager';
+} from '../../docmanager';
 
 import {
   IObservableList, ListChangeType, IListChangedArgs

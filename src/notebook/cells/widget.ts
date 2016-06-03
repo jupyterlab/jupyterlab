@@ -8,11 +8,11 @@ import {
 
 import {
   loadModeByMIME
-} from 'jupyter-js-ui/lib/codemirror';
+} from '../../codemirror';
 
 import {
   RenderMime
-} from 'jupyter-js-ui/lib/rendermime';
+} from '../../rendermime';
 
 import {
   Message

@@ -2,10 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-@import url('~jupyter-js-notebook/lib/index.css');
-@import url('~jupyter-js-notebook/lib/theme.css');
-@import url('~jupyter-js-ui/lib/index.css');
-@import url('~jupyter-js-ui/lib/theme.css');
+@import url('~jupyterlab/lib/notebook/index.css');
+@import url('~jupyterlab/lib/notebook/theme.css');
+@import url('~jupyterlab/lib/index.css');
+@import url('~jupyterlab/lib/theme.css');
 @import './commandpalette.css';
 @import './help.css';
 @import './about.css';

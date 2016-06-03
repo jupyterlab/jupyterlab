@@ -1,42 +1,40 @@
 {
-  "name": "jupyter-js-plugins",
-  "version": "0.13.0",
-  "description": "Plugins for JupyterLab",
+  "name": "jupyterlab",
+  "version": "0.0.1",
+  "description": "A computational environment for Jupyter.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
+    "ansi_up": "^1.3.0",
     "backbone": "^1.2.0",
     "codemirror": "^5.12.0",
-    "codemirror": "^5.11.0",
     "diff-match-patch": "^1.0.0",
     "file-loader": "^0.8.5",
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5",
-    "jupyter-js-notebook": "^0.21.2",
     "jupyter-js-services": "^0.10.4",
     "jupyter-js-utils": "^0.4.0",
-    "phosphide": "^0.9.4",
-    "phosphor-codemirror": "^0.0.1",
-    "phosphor-di": "^0.9.0",
-    "phosphor-disposable": "^1.0.5",
-    "phosphor-keymap": "^0.8.0",
     "jupyter-js-widgets": "2.0.0-dev.0",
     "marked": "^0.3.5",
     "moment": "^2.11.2",
+    "phosphide": "^0.9.4",
     "phosphor-arrays": "^1.0.6",
+    "phosphor-codemirror": "^0.0.1",
+    "phosphor-di": "^0.9.0",
+    "phosphor-disposable": "^1.0.5",
     "phosphor-domutil": "^1.2.0",
     "phosphor-dragdrop": "^0.9.0",
+    "phosphor-keymap": "^0.8.0",
     "phosphor-menus": "^1.0.0-rc.1",
     "phosphor-messaging": "^1.0.6",
-    "phosphor-disposable": "^1.0.5",
     "phosphor-observablelist": "^1.0.0-beta",
     "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
     "phosphor-tabs": "^1.0.0-rc.2", 
     "phosphor-widget": "^1.0.0-rc.1",
+    "sanitizer": "^0.1.3",
     "xterm": "^0.33.0"
-    "sanitizer": "^0.1.3"
   },
   "devDependencies": {
     "concurrently": "^2.0.0",
@@ -56,10 +54,6 @@
     "mocha": "^2.3.4",
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.0",
-    "karma-mocha": "^0.2.0",
-    "karma-mocha-reporter": "^1.1.1",
-    "mocha": "^2.2.5",
-    "rimraf": "^2.4.2",
     "style-loader": "^0.13.0",
     "typedoc": "https://github.com/SierraSoftworks/typedoc.git#cb5aea2b218b4f773451e2818a48629ee9c5066e",
     "typescript": "^1.8.0",
@@ -68,39 +62,31 @@
     "webpack": "^1.12.11"
   },
   "scripts": {
-    "clean": "rimraf docs && rimraf lib && rimraf test/build",
-    "clean:example": "rimraf example/build",
-    "build:example": "cd example && npm run update && npm run build",
+    "build": "npm run build:src",
+    "build:examples": "node scripts/buildexamples.js",
     "build:src": "tsc --project src && node scripts/copyfiles.js",
+    "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
     "clean:examples": "node scripts/cleanexamples.js",
-    "build:examples": "node scripts/buildexamples.js",
-    "build:src": "tsc --project src && node scripts/copycss.js",
-    "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
-    "build": "npm run build:src",
     "docs": "typedoc --mode file --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
     "postinstall": "npm dedupe",
-    "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
     "prepublish": "npm run build",
-    "postinstall": "npm dedupe",
+    "test": "npm run build:test && npm run test:firefox",
     "test:chrome": "karma start --browsers=Chrome test/karma.conf.js",
     "test:coverage": "npm run build:test && webpack --config test/webpack-cov.conf.js && karma start test/karma-cov.conf.js",
+    "test:debug": "karma start --browsers=Chrome --singleRun=false --debug=true test/karma.conf.js",
     "test:firefox": "karma start --browsers=Firefox test/karma.conf.js",
     "test:ie": "karma start --browsers=IE test/karma.conf.js",
-    "test:debug": "karma start --browsers=Chrome --singleRun=false --debug=true test/karma.conf.js",
-    "test": "npm run build:test && npm run test:firefox",
     "watch": "watch 'npm run build' src --wait 10",
-    "watch:test": "watch 'npm run build && npm test' src src/test --wait 10"
-  },
+    "watch:test": "watch 'npm run build && npm test' src src/test --wait 10"  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jupyter/jupyter-js-plugins"
+    "url": "https://github.com/jupyter/jupyterlab"
   },
   "keywords": [
     "jupyter",
     "jupyterlab",
-    "plugins",
-    "lab"
+    "plugins"
   ],
   "files": [
     "lib/*.css",
@@ -114,7 +100,7 @@
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/jupyter/jupyter-js-plugins/issues"
+    "url": "https://github.com/jupyter/jupyterlab/issues"
   },
-  "homepage": "https://github.com/jupyter/jupyter-js-plugins"
+  "homepage": "https://github.com/jupyter/jupyterlab"
 }

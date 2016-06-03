@@ -7,30 +7,30 @@ var phosphide = require('phosphide/lib/core/application');
 // ES6 Promise polyfill
 require('es6-promise').polyfill();
 
-require('jupyter-js-plugins/lib/default-theme/index.css');
+require('jupyterlab/lib/default-theme/index.css');
 
 var app = new phosphide.Application({
   extensions: [
     require('phosphide/lib/extensions/commandpalette').commandPaletteExtension,
-    require('jupyter-js-plugins/lib/terminal/plugin').terminalExtension,
-    require('jupyter-js-plugins/lib/editorhandler/plugin').editorHandlerExtension,
-    require('jupyter-js-plugins/lib/filebrowser/plugin').fileBrowserExtension,
-    require('jupyter-js-plugins/lib/imagehandler/plugin').imageHandlerExtension,
-    require('jupyter-js-plugins/lib/help/plugin').helpHandlerExtension,
-    require('jupyter-js-plugins/lib/notebook/plugin').notebookHandlerExtension,
-    require('jupyter-js-plugins/lib/shortcuts/plugin').shortcutsExtension,
-    require('jupyter-js-plugins/lib/about/plugin').aboutExtension,
-    require('jupyter-js-plugins/lib/landing/plugin').landingExtension,
-    require('jupyter-js-plugins/lib/console/plugin').consoleExtension,
-    require('jupyter-js-plugins/lib/main/plugin').mainExtension,
-    require('jupyter-js-plugins/lib/widgets/plugin').widgetManagerExtension,
+    require('jupyterlab/lib/terminal/plugin').terminalExtension,
+    require('jupyterlab/lib/editorhandler/plugin').editorHandlerExtension,
+    require('jupyterlab/lib/filebrowser/plugin').fileBrowserExtension,
+    require('jupyterlab/lib/imagehandler/plugin').imageHandlerExtension,
+    require('jupyterlab/lib/help/plugin').helpHandlerExtension,
+    require('jupyterlab/lib/notebook/plugin').notebookHandlerExtension,
+    require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
+    require('jupyterlab/lib/about/plugin').aboutExtension,
+    require('jupyterlab/lib/landing/plugin').landingExtension,
+    require('jupyterlab/lib/console/plugin').consoleExtension,
+    require('jupyterlab/lib/main/plugin').mainExtension,
+    require('jupyterlab/lib/widgets/plugin').widgetManagerExtension,
   ],
   providers: [
-    require('jupyter-js-plugins/lib/clipboard/plugin').clipboardProvider,
-    require('jupyter-js-plugins/lib/docregistry/plugin').docRegistryProvider,
-    require('jupyter-js-plugins/lib/services/plugin').servicesProvider,
-    require('jupyter-js-plugins/lib/rendermime/plugin').renderMimeProvider,
-    require('jupyter-js-plugins/lib/notebook/plugin').activeNotebookProvider
+    require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
+    require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
+    require('jupyterlab/lib/services/plugin').servicesProvider,
+    require('jupyterlab/lib/rendermime/plugin').renderMimeProvider,
+    require('jupyterlab/lib/notebook/plugin').activeNotebookProvider
   ]
 });
 

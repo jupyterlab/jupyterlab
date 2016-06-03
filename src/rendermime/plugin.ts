@@ -4,12 +4,12 @@
 
 import {
   RenderMime, MimeMap, IRenderer
-} from 'jupyter-js-ui/lib/rendermime';
+} from './index';
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
   JavascriptRenderer, SVGRenderer, MarkdownRenderer
-} from 'jupyter-js-ui/lib/renderers';
+} from '../renderers';
 
 import {
   Widget

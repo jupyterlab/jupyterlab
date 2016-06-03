@@ -5,7 +5,7 @@
 import {
   NotebookPanel, NotebookModelFactory, INotebookModel,
   NotebookWidgetFactory, NotebookActions
-} from 'jupyter-js-notebook';
+} from './index';
 
 import {
   IKernelId
@@ -13,11 +13,11 @@ import {
 
 import {
   IDocumentContext, DocumentRegistry, selectKernelForContext
-} from 'jupyter-js-ui/lib/docmanager';
+} from '../docmanager';
 
 import {
   RenderMime
-} from 'jupyter-js-ui/lib/rendermime';
+} from '../rendermime';
 
 import {
   Application

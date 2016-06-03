@@ -8,11 +8,11 @@ import {
 
 import {
   IWidgetFactory, IDocumentContext, findKernel
-} from 'jupyter-js-ui/lib/docmanager';
+} from '../../docmanager';
 
 import {
   RenderMime
-} from 'jupyter-js-ui/lib/rendermime';
+} from '../../rendermime';
 
 import {
   MimeData as IClipboard

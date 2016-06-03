@@ -8,7 +8,7 @@ import {
 
 import {
   IModelFactory
-} from 'jupyter-js-ui/lib/docmanager';
+} from '../../docmanager';
 
 import {
   INotebookModel, NotebookModel

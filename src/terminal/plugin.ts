@@ -4,7 +4,7 @@
 
 import {
   TerminalWidget
-} from 'jupyter-js-ui/lib/terminal';
+} from './index';
 
 import {
   Application

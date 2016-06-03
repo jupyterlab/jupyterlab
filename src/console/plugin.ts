@@ -4,15 +4,15 @@
 
 import {
   ConsolePanel
-} from 'jupyter-js-notebook/lib/console';
+} from '../notebook/console';
 
 import {
   RenderMime
-} from 'jupyter-js-ui/lib/rendermime';
+} from '../rendermime';
 
 import {
   selectKernel
-} from 'jupyter-js-ui/lib/docmanager';
+} from '../docmanager';
 
 import {
   Application

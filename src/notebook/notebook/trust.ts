@@ -7,7 +7,7 @@
 
 import {
   showDialog
-} from 'jupyter-js-ui/lib/dialog';
+} from '../../dialog';
 
 import {
   INotebookModel

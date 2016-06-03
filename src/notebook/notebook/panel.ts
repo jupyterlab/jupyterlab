@@ -8,15 +8,15 @@ import {
 
 import {
   showDialog
-} from 'jupyter-js-ui/lib/dialog';
+} from '../../dialog';
 
 import {
   IDocumentContext
-} from 'jupyter-js-ui/lib/docmanager';
+} from '../../docmanager';
 
 import {
   RenderMime
-} from 'jupyter-js-ui/lib/rendermime';
+} from '../../rendermime';
 
 import {
   MimeData as IClipboard

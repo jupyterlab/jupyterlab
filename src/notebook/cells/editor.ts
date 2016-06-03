@@ -7,7 +7,7 @@ import * as CodeMirror
 
 import {
   CodeMirrorWidget
-} from 'jupyter-js-ui/lib/codemirror/widget';
+} from '../../codemirror/widget';
 
 import {
   Message
