@@ -20,12 +20,9 @@
   "dependencies": {
     "jupyter-js-notebook": "file:../..",
     "jupyter-js-services": "^0.10.4",
-    "jupyter-js-ui": "^0.13.0",
-    "jupyter-js-utils": "^0.4.0",
+    "jupyter-js-ui": "^0.14.0",
     "phosphor-commandpalette": "^0.2.0",
-    "phosphor-disposable": "^1.0.5",
     "phosphor-keymap": "^0.8.0",
-    "phosphor-signaling": "^1.2.0",
     "phosphor-splitpanel": "^1.0.0-rc.1",
     "phosphor-widget": "^1.0.0-rc.1"
   }
