@@ -145,7 +145,7 @@ setup_args = {
     'url': 'http://jupyter.org',
     'keywords': ['ipython', 'jupyter', 'Web'],
     'classifiers': [
-        'Development Status :: 1 - Alpha',
+        'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
