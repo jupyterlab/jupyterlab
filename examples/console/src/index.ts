@@ -7,7 +7,7 @@
 
 import {
   ConsolePanel
-} from 'jupyter-js-notebook';
+} from 'jupyterlab/lib/notebook';
 
 import {
   startNewSession, INotebookSession
@@ -15,12 +15,12 @@ import {
 
 import {
   RenderMime, IRenderer, MimeMap
-} from 'jupyter-js-ui/lib/rendermime';
+} from 'jupyterlab/lib/rendermime';
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
   JavascriptRenderer, SVGRenderer, MarkdownRenderer
-} from 'jupyter-js-ui/lib/renderers';
+} from 'jupyterlab/lib/renderers';
 
 import {
   CommandPalette, StandardPaletteModel, IStandardPaletteItemOptions
@@ -38,10 +38,10 @@ import {
   Widget
 } from 'phosphor-widget';
 
-import 'jupyter-js-notebook/lib/index.css';
-import 'jupyter-js-notebook/lib/theme.css';
-import 'jupyter-js-ui/lib/dialog/index.css';
-import 'jupyter-js-ui/lib/dialog/theme.css';
+import 'jupyterlab/lib/notebook/index.css';
+import 'jupyterlab/lib/notebook/theme.css';
+import 'jupyterlab/lib/dialog/index.css';
+import 'jupyterlab/lib/dialog/theme.css';
 
 let TITLE = 'Console';
 

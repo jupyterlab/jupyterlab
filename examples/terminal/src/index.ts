@@ -11,10 +11,10 @@ import {
 
 import {
   TerminalWidget
-} from 'jupyter-js-ui/lib/terminal';
+} from 'jupyterlab/lib/terminal';
 
-import 'jupyter-js-ui/lib/index.css';
-import 'jupyter-js-ui/lib/theme.css';
+import 'jupyterlab/lib/index.css';
+import 'jupyterlab/lib/theme.css';
 
 
 function main(): void {

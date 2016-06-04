@@ -1,12 +1,20 @@
 {
   "private": true,
-  "name": "jupyter-js-notebook-example",
+  "name": "jupyterlab-example-console",
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules",
     "postinstall": "npm dedupe",
-    "update": "rimraf node_modules/jupyter-js-notebook && npm install",
+    "update": "rimraf node_modules/jupyterlab && npm install",
     "watch": "watch 'npm run update && npm run build' ../../src src --wait 10"
+  },
+  "dependencies": {
+    "jupyter-js-services": "^0.10.4",
+    "jupyterlab": "file:../..",
+    "phosphor-commandpalette": "^0.2.0",
+    "phosphor-keymap": "^0.8.0",
+    "phosphor-splitpanel": "^1.0.0-rc.1",
+    "phosphor-widget": "^1.0.0-rc.1"
   },
   "devDependencies": {
     "concurrently": "^2.0.0",
@@ -16,14 +24,5 @@
     "typescript": "^1.8.10",
     "watch": "^0.18.0",
     "webpack": "^1.13.0"
-  },
-  "dependencies": {
-    "jupyter-js-notebook": "file:../..",
-    "jupyter-js-services": "^0.10.4",
-    "jupyter-js-ui": "^0.14.0",
-    "phosphor-commandpalette": "^0.2.0",
-    "phosphor-keymap": "^0.8.0",
-    "phosphor-splitpanel": "^1.0.0-rc.1",
-    "phosphor-widget": "^1.0.0-rc.1"
   }
 }

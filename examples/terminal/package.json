@@ -1,15 +1,15 @@
 {
   "private": true,
-  "name": "example",
+  "name": "jupyterlab-example-terminal",
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules",
     "postinstall": "npm dedupe",
-    "update": "rimraf node_modules/jupyter-js-ui && npm install",
+    "update": "rimraf node_modules/jupyterlab && npm install",
     "watch": "watch 'npm run update && npm run build' ../../src src --wait 10"
   },
   "dependencies": {
-    "jupyter-js-ui": "file:../..",
+    "jupyterlab": "file:../..",
     "phosphor-dockpanel": "^0.9.7"
   },
   "devDependencies": {

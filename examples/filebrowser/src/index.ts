@@ -12,24 +12,24 @@ import {
 
 import {
   FileBrowserWidget, FileBrowserModel
-} from 'jupyter-js-ui/lib/filebrowser';
+} from 'jupyterlab/lib/filebrowser';
 
 import {
   DocumentManager, DocumentWidget, DocumentRegistry
-} from 'jupyter-js-ui/lib/docmanager';
+} from 'jupyterlab/lib/docmanager';
 
 import {
   TextModelFactory
-} from 'jupyter-js-ui/lib/docmanager/default';
+} from 'jupyterlab/lib/docmanager/default';
 
 import {
   EditorWidgetFactory
-} from 'jupyter-js-ui/lib/docmanager/editor';
+} from 'jupyterlab/lib/docmanager/editor';
 
 
 import {
   showDialog, okButton
-} from 'jupyter-js-ui/lib/dialog';
+} from 'jupyterlab/lib/dialog';
 
 import {
   DockPanel
@@ -47,8 +47,8 @@ import {
   SplitPanel
 } from 'phosphor-splitpanel';
 
-import 'jupyter-js-ui/lib/index.css';
-import 'jupyter-js-ui/lib/theme.css';
+import 'jupyterlab/lib/index.css';
+import 'jupyterlab/lib/theme.css';
 
 
 function main(): void {

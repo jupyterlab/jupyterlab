@@ -1,18 +1,18 @@
 {
   "private": true,
-  "name": "jupyterlab-lab-example",
-  "dependencies": {
-    "es6-promise": "^3.1.2",
-    "jupyterlab": "file:../..",
-    "jupyter-js-services": "^0.10.4",
-    "phosphide": "^0.9.4"
-  },
+  "name": "jupyterlab-example",
   "scripts": {
     "build": "webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules",
     "postinstall": "npm dedupe",
     "update": "rimraf node_modules/jupyterlab && npm install",
     "watch": "watch 'npm run update && npm run build' ../../src --wait 10"
+  },
+  "dependencies": {
+    "es6-promise": "^3.1.2",
+    "jupyter-js-services": "^0.10.4",
+    "jupyterlab": "file:../../",
+    "phosphide": "^0.9.4"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
