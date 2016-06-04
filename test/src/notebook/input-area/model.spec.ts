@@ -6,11 +6,11 @@ import expect = require('expect.js');
 
 import {
   EditorModel
-} from '../../../lib/editor/model';
+} from '../../../../lib/notebook/editor/model';
 
 import {
   InputAreaModel
-} from '../../../lib/input-area/model';
+} from '../../../../lib/notebook/input-area/model';
 
 
 describe('jupyter-js-notebook', () => {

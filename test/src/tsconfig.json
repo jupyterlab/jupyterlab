@@ -6,5 +6,6 @@
     "moduleResolution": "node",
     "target": "ES5",
     "outDir": "../build"
-  }
+  },
+  "exclude": ["notebook"]
 }

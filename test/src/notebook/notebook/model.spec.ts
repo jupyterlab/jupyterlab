@@ -18,24 +18,24 @@ import {
 
 import {
   EditorModel, IEditorModel
-} from '../../../lib/editor/model';
+} from '../../../../lib/notebook/editor/model';
 
 import {
   InputAreaModel
-} from '../../../lib/input-area/model';
+} from '../../../../lib/notebook/input-area/model';
 
 import {
   OutputAreaModel
-} from '../../../lib/output-area/model';
+} from '../../../../lib/notebook/output-area/model';
 
 import {
   BaseCellModel, CodeCellModel, MarkdownCellModel, MetadataCursor,
   RawCellModel, ICellModel
-} from '../../../lib/cells/model';
+} from '../../../../lib/notebook/cells/model';
 
 import {
   NotebookModel
-} from '../../../lib/notebook/model';
+} from '../../../../lib/notebook/notebook/model';
 
 import {
   MockSession

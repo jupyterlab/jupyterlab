@@ -7,7 +7,7 @@ import expect = require('expect.js');
 import {
   isMarkdownCell, isCodeCell, isRawCell, isExecuteResult,
   isDisplayData, isStream, isError, IBaseCell, IBaseOutput
-} from '../../../lib/notebook/nbformat';
+} from '../../../../lib/notebook/notebook/nbformat';
 
 
 describe('jupyter-js-notebook', () => {

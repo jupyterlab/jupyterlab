@@ -10,11 +10,11 @@ import {
 
 import {
   OutputAreaModel
-} from '../../../lib/output-area/model';
+} from '../../../../lib/notebook/output-area/model';
 
 import {
   IOutput, IStream
-} from '../../../lib/notebook/nbformat';
+} from '../../../../lib/notebook/notebook/nbformat';
 
 
 describe('jupyter-js-notebook', () => {

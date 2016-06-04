@@ -6,19 +6,19 @@ import expect = require('expect.js');
 
 import {
   ICodeCellModel, IRawCellModel
-} from '../../../lib/cells/model';
+} from '../../../../lib/notebook/cells/model';
 
 import {
   IStream, ICodeCell, IRawCell, INotebookContent
-} from '../../../lib/notebook/nbformat';
+} from '../../../../lib/notebook/notebook/nbformat';
 
 import {
   serialize, deserialize, serializeCell, deserializeCell
-} from '../../../lib/notebook/serialize';
+} from '../../../../lib/notebook/notebook/serialize';
 
 import {
   NotebookModel
-} from '../../../lib/notebook/model';
+} from '../../../../lib/notebook/notebook/model';
 
 
 // Create a sample code cell.

@@ -6,7 +6,7 @@ import expect = require('expect.js');
 
 import {
   EditorModel
-} from '../../../lib/editor/model';
+} from '../../../../lib/notebook/editor/model';
 
 
 describe('jupyter-js-notebook', () => {

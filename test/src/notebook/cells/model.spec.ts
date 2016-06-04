@@ -10,21 +10,21 @@ import {
 
 import {
   EditorModel
-} from '../../../lib/editor/model';
+} from '../../../../lib/notebook/editor/model';
 
 import {
   InputAreaModel
-} from '../../../lib/input-area/model';
+} from '../../../../lib/notebook/input-area/model';
 
 import {
   OutputAreaModel
-} from '../../../lib/output-area/model';
+} from '../../../../lib/notebook/output-area/model';
 
 import {
   BaseCellModel, CodeCellModel, MarkdownCellModel, MetadataCursor,
   RawCellModel, isMarkdownCellModel, isRawCellModel, isCodeCellModel,
   executeCodeCell
-} from '../../../lib/cells/model';
+} from '../../../../lib/notebook/cells/model';
 
 
 /**
