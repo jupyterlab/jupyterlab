@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A computational environment for Jupyter.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -31,7 +31,7 @@
     "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
-    "phosphor-tabs": "^1.0.0-rc.2", 
+    "phosphor-tabs": "^1.0.0-rc.2",
     "phosphor-widget": "^1.0.0-rc.1",
     "sanitizer": "^0.1.3",
     "xterm": "^0.33.0"
@@ -78,7 +78,7 @@
     "test:firefox": "karma start --browsers=Firefox test/karma.conf.js",
     "test:ie": "karma start --browsers=IE test/karma.conf.js",
     "watch": "watch 'npm run build' src --wait 10",
-    "watch:test": "watch 'npm run build && npm test' src src/test --wait 10"  
+    "watch:test": "watch 'npm run build && npm test' src src/test --wait 10"
   },
   "repository": {
     "type": "git",
