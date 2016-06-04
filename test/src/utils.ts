@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-'use strict';
-
 
 export
 function triggerMouseEvent(node: HTMLElement, eventType: string, options: any = {}) {

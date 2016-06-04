@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_BRANCH == "master" ]]
 then
     echo "-- pushing docs --"

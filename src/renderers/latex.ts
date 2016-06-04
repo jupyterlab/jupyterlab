@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-'use strict';
-
 
 // Some magic for deferring mathematical expressions to MathJax
 // by hiding them from the Markdown parser.
