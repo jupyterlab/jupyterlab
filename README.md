@@ -10,24 +10,42 @@ An extensible computational environment for Jupyter.
 Jupyter Notebook Extension
 --------------------------
 
+The Jupyter notebook extension source files are in the `jupyterlab/` subdirectory.
+
 ### Prerequisites
 - Jupyter notebook 4.2+
 
-### Developer Installation
-
+### User installation
 ```
-git clone https://github.com/jupyter/jupyterlab.git
-pip install -e jupyterlab
+pip install jupyterlab
 jupyter serverextension enable --py jupyterlab
 ```
 
-### Use
+Start up the Jupyter notebook and open a browser to the server's URL with the path `/lab` (e.g., `http://localhost:8888/lab`).
+
+
+### Developer Installation
+You will need npm (preferably version 5 or later).
+
+```
+git clone https://github.com/jupyter/jupyterlab.git
+cd jupyterlab
+npm install
+npm run build
+python setup.py build
+pip install -e .
+jupyter serverextension enable --py jupyterlab
+```
 
 Start up the Jupyter notebook, and then open a browser to the server's URL with path `/lab` (e.g., `http://localhost:8888/lab`).
+
+When you make a change to the jupyterlab npm package source files, run `python setup.py build` to rebuild the extension and refresh your browser to see the changes.
 
 
 NPM Package Install
 -------------------
+
+The npm package source files are in the `src/` subdirectory.
 
 **Prerequisites**
 - [node](http://nodejs.org/)
