@@ -1,0 +1,33 @@
+<!--
+Copyright (c) Jupyter Development Team.
+Distributed under the terms of the Modified BSD License.
+-->
+
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+    <title>{{page_title}}</title>
+{#
+    {% if mathjax_url %}
+    <script type="text/javascript" src="{{mathjax_url}}?config={{mathjax_config}}&amp;delayStartupUntil=configured" charset="utf-8"></script>
+    {% endif %}
+#}
+</head>
+
+
+
+<body>
+
+<script id='jupyter-config-data' type="application/json">{
+  "baseUrl": "{{base_url | urlencode}}",
+  "wsUrl": "{{ws_url| urlencode}}",
+  "notebookPath": "{{notebook_path | urlencode}}"
+}</script>
+<script src="{{static_prefix}}/bundle.js" type="text/javascript" charset="utf-8"></script>
+
+</body>
+
+</html>

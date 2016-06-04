@@ -1,0 +1,32 @@
+{
+  "private": true,
+  "name": "jupyterlab-extension",
+  "version": "0.0.1",
+  "description": "JupyterLab extension",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "dependencies": {
+    "es6-promise": "^3.1.2",
+    "font-awesome": "^4.6.1",
+    "jupyterlab": "../",
+    "phosphide": "^0.9.4"
+  },
+  "devDependencies": {
+    "css-loader": "^0.23.1",
+    "file-loader": "^0.8.5",
+    "json-loader": "^0.5.4",
+    "rimraf": "^2.5.0",
+    "style-loader": "^0.13.0",
+    "typescript": "^1.7.5",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.12.11"
+  },
+  "scripts": {
+    "clean": "rimraf build",
+    "build": "npm update jupyterlab && webpack --config webpack.conf.js",
+    "postinstall": "npm dedupe",
+    "test": "echo 'no tests specified'"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause"
+}

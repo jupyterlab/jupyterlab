@@ -1,0 +1,3 @@
+recursive-include jupyterlab/build *
+include jupyterlab/lab.html
+include package.json

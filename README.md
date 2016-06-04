@@ -1,5 +1,5 @@
 JupyterLab
-==================
+==========
 
 An extensible computational environment for Jupyter.
 
@@ -7,21 +7,40 @@ An extensible computational environment for Jupyter.
 
 <img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
 
-Package Install
----------------
+Jupyter Notebook Extension
+--------------------------
+
+### Prerequisites
+- Jupyter notebook 4.2+
+
+### Developer Installation
+
+```
+git clone https://github.com/jupyter/jupyterlab.git
+pip install -e jupyterlab
+jupyter serverextension enable --py jupyterlab
+```
+
+### Use
+
+Start up the Jupyter notebook, and then open a browser to the server's URL with path `/lab` (e.g., `http://localhost:8888/lab`).
+
+
+NPM Package Install
+-------------------
 
 **Prerequisites**
 - [node](http://nodejs.org/)
 - [python](https://www.continuum.io/downloads)
 
 ```bash
-npm install --save jupyter-js-plugins
+npm install --save jupyterlab
 conda install notebook  # notebook 4.2+ required
 ```
 
 
-Source Build
-------------
+NPM Source Build
+----------------
 
 **Prerequisites**
 - [git](http://git-scm.com/)
@@ -29,8 +48,8 @@ Source Build
 - [python](https://www.continuum.io/downloads)
 
 ```bash
-git clone https://github.com/jupyter/jupyter-js-plugins.git
-cd jupyter-js-plugins
+git clone https://github.com/jupyter/jupyterlab.git
+cd jupyterlab
 npm install
 npm run build
 conda install notebook  # notebook 4.2+ required
@@ -57,13 +76,13 @@ Build Example
 -------------
 
 Follow the source build instructions first.
-Requires a Python install with the Jupyter notebook.
+Requires a Python install with the Jupyter notebook (version 4.2 or later).
 
 ```bash
-npm run build:example
+npm run build:examples
 ```
 
-Change to `example` directory and run `python main.py`.
+Change to the appropriate example in the `examples` directory and run `python main.py`.
 
 
 Build Docs
