@@ -103,8 +103,8 @@ class NPM(Command):
 
         if self.should_run_npm_install():
             log.info("Installing build dependencies with npm.  This may take a while...")
-            # remove just jupyterlab
-            shutil.rmtree(os.path.join(node_root, 'node_modules', 'jupyterlab'), ignore_errors=True)
+            # remove just jupyterlab so that it is always updated
+            shutil.rmtree(os.path.join(self.node_modules, 'jupyterlab'), ignore_errors=True)
             check_call(['npm', 'install'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
             check_call(['npm', 'run', 'build'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
             os.utime(self.node_modules, None)
