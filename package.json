@@ -68,7 +68,7 @@
     "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
     "clean:examples": "node scripts/cleanexamples.js",
-    "docs": "typedoc --mode file --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
+    "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
     "postinstall": "npm dedupe",
     "prepublish": "npm run build",
     "test": "npm run build:test && npm run test:firefox",
