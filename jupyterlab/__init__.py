@@ -8,8 +8,9 @@ from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 
-
-FILE_LOADER = FileSystemLoader(os.path.dirname(__file__))
+HERE = os.path.dirname(__file__)
+FILE_LOADER = FileSystemLoader(HERE)
+BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
 
 class LabHandler(IPythonHandler):
@@ -36,7 +37,7 @@ class LabHandler(IPythonHandler):
 default_handlers = [
     (PREFIX, LabHandler),
     (PREFIX+r"/(.*)", FileFindHandler,
-        {'path': os.path.join(os.path.dirname(__file__), 'build')}),
+        {'path': BUILT_FILES}),
     ]
 
 def _jupyter_server_extension_paths():
@@ -45,8 +46,7 @@ def _jupyter_server_extension_paths():
     }]
     
 def load_jupyter_server_extension(nbapp):
-    nbapp.log.info('Pre-alpha version of Lab extension loaded')
-
+    nbapp.log.info('Pre-alpha version of JupyterLab extension loaded from %s'%HERE)
     webapp = nbapp.web_app
     #base_url = webapp.settings['base_url']
     webapp.add_handlers(".*$", default_handlers)
