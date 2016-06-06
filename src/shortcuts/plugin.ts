@@ -211,12 +211,12 @@ const SHORTCUTS = [
     sequence: ['L']
   },
   {
-    command: 'notebook-cells:editMode',
+    command: 'notebook:editMode',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Enter']
   },
   {
-    command: 'notebook-cells:commandMode',
+    command: 'notebook:commandMode',
     selector: '.jp-Notebook.jp-mod-editMode',
     sequence: ['Escape']
   },
