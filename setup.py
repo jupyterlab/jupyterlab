@@ -28,7 +28,7 @@ log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
-LONG_DESCRIPTION = 'A pre-alpha JupyterLab demo.'
+LONG_DESCRIPTION = 'This is a very early pre-alpha developer preview. It is not ready for general usage yet.'
 
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
