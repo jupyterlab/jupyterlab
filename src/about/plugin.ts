@@ -29,7 +29,7 @@ function activateAbout(app: Application): void {
   widget.node.innerHTML = `
 <h1>Welcome to the JupyterLab pre-alpha preview</h1>
 
-<p>This demo gives an pre-alpha-level preview of the JupyterLab environment. We are developing JupyterLab at <a href="https://github.com/jupyter/jupyterlab">https://github.com/jupyter/jupyterlab</a>. Pull requests are welcome!</p>
+<p>This demo gives an pre-alpha-level developer preview of the JupyterLab environment. <b>It is not ready for general usage yet.</b> We are developing JupyterLab at <a href="https://github.com/jupyter/jupyterlab">https://github.com/jupyter/jupyterlab</a>. Pull requests are welcome!</p>
 
 <p>Click on the JupyterLab tab for the initial JupyterLab screen.</p>
 

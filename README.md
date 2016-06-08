@@ -3,6 +3,8 @@ JupyterLab
 
 An extensible computational environment for Jupyter.
 
+**This is a very early pre-alpha developer preview. It is not ready for general usage yet.**
+
 [API Docs](http://jupyter.github.io/jupyterlab/)
 
 <img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
