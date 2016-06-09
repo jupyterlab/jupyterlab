@@ -97,7 +97,7 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
     app.palette.add([{
       command: id,
       category: 'Console',
-      text: `New ${displayName}`
+      text: `New ${displayName} console`
     }]);
   }
 
