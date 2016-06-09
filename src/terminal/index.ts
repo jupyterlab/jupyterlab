@@ -319,9 +319,9 @@ class TerminalWidget extends Widget {
     this._term.open(this.node);
     this._term.element.classList.add(TERMINAL_BODY_CLASS);
 
-    this.fontSize = options.fontSize || 11;
-    this.background = options.background || 'white';
-    this.color = options.color || 'black';
+    this.fontSize = options.fontSize || 14;
+    this.background = options.background || 'black';
+    this.color = options.color || 'white';
 
     this._term.on('data', (data: string) => {
       this._ws.send(JSON.stringify(['stdin', data]));

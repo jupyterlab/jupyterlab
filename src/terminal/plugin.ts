@@ -32,8 +32,6 @@ function activateTerminal(app: Application): Promise<void> {
     id: newTerminalId,
     handler: () => {
       let term = new TerminalWidget();
-      term.color = 'black';
-      term.background = 'white';
       term.title.closable = true;
       app.shell.addToMainArea(term);
       let stack = term.parent;
