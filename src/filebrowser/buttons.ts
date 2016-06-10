@@ -195,7 +195,7 @@ class FileButtons extends Widget {
     });
 
     // Popup the menu aligned with the bottom of the create button.
-    dropdown.popup(rect.left, rect.bottom, false, true);
+    dropdown.popup(rect.left, rect.top, false, false);
   };
 
 
@@ -289,7 +289,7 @@ namespace Private {
     createIcon.className = ICON_CLASS + ' fa fa-plus';
     uploadIcon.className = ICON_CLASS + ' fa fa-upload';
     refreshIcon.className = ICON_CLASS + ' fa fa-refresh';
-    dropdownIcon.className = DROPDOWN_CLASS + ' fa fa-caret-down';
+    dropdownIcon.className = DROPDOWN_CLASS + ' fa fa-caret-up';
 
     createContent.appendChild(createIcon);
     createContent.appendChild(dropdownIcon);

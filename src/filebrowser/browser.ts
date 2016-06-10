@@ -114,8 +114,8 @@ class FileBrowserWidget extends Widget {
 
     let layout = new PanelLayout();
     layout.addChild(this._crumbs);
-    layout.addChild(this._buttons);
     layout.addChild(this._listing);
+    layout.addChild(this._buttons);
 
     this.layout = layout;
   }
