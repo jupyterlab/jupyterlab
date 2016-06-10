@@ -237,7 +237,8 @@ body {
 
 .p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon:before {
   font-family: FontAwesome;
-  content: '\f069'; /* asterisk */
+  content: '\f111'; /* circle */
+  font-size: 10px;
 }
 
 
