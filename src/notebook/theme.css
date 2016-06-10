@@ -158,6 +158,7 @@
     background-color: #F8F8F8;
     border-top: none;
     border-bottom: 1px solid #E0E0E0;
+    height: 24px;
 }
 
 
@@ -167,48 +168,47 @@
     padding-right: 8px;
     vertical-align: middle;
     font-size: 13px;
+    color: #616161;
+    line-height: 23px;
     font-family: "Helvetica Neue";
-    color: #767676;
 }
 
 
 .jp-NBToolbar-item.jp-NBToolbar-button,
 .jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
     font-family: FontAwesome;
-    padding-top: 5px;
-    padding-bottom: 6px;
-    color: #616161;
     text-align: center;
     display: inline-block;
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-cellWrapper {
+.jp-NBToolbar-item.jp-NBToolbar-cellType {
     border-left: 1px solid #E0E0E0;
     border-right: 1px solid #E0E0E0;
     flex-basis: 100px;
-    padding-top: 3px;
-    padding-bottom: 3px;
 }
 
 
-.jp-NBToolbar-cellType.jp-NBToolbar-item {
-    font-size: 13px;
-    font-family: "Helvetica Neue";
-    color: #767676;
-}
-
-
-.jp-NBToolbar-cellWrapper .jp-NBToolbar-cellType {
+.jp-NBToolbar-cellType .jp-NBToolbar-cellTypeDropdown {
     border: none;
     border-radius: 0;
     outline: none;
     width: 100%;
+    font-size: 13px;
+    line-height: 23px;
+    color: #616161;
+}
+
+
+.jp-NBToolbar-item.jp-NBToolbar-kernelName {
+    text-align: right;
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
 
 .jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
-  border-right: none;
+    border-right: none;
 }
 
 
@@ -221,16 +221,6 @@
 .jp-NBToolbar-button:hover {
     background-color: #EEEEEE;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
-}
-
-
-.jp-NBToolbar-item.jp-NBToolbar-kernelName {
-    text-align: right;
-    color: #767676;
-    flex-grow: 1;
-    flex-shrink: 1;
-    padding-top: 4px;
-    padding-bottom: 4px;
 }
 
 
