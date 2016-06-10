@@ -73,12 +73,12 @@ const TOOLBAR_RESTART = 'jp-NBToolbar-restart';
 /**
  * The class name added to toolbar cell type dropdown wrapper.
  */
-const TOOLBAR_CELL_WRAP = 'jp-NBToolbar-cellWrapper';
+const TOOLBAR_CELLTYPE = 'jp-NBToolbar-cellType';
 
 /**
  * The class name added to toolbar cell type dropdown.
  */
-const TOOLBAR_CELL = 'jp-NBToolbar-cellType';
+const TOOLBAR_CELLTYPE_DROPDOWN = 'jp-NBToolbar-cellTypeDropdown';
 
 /**
  * The class name added to toolbar kernel name text.
@@ -257,7 +257,7 @@ class CellTypeSwitcher extends Widget {
       option.textContent = t;
       select.appendChild(option);
     }
-    select.className = TOOLBAR_CELL;
+    select.className = TOOLBAR_CELLTYPE_DROPDOWN;
     div.appendChild(select);
     return div;
   }
@@ -267,7 +267,7 @@ class CellTypeSwitcher extends Widget {
    */
   constructor(panel: NotebookPanel) {
     super();
-    this.addClass(TOOLBAR_CELL_WRAP);
+    this.addClass(TOOLBAR_CELLTYPE);
     let select = this.node.firstChild as HTMLSelectElement;
     // Set the initial value.
     let index = panel.content.activeCellIndex;
