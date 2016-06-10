@@ -143,6 +143,11 @@ setup_args = {
         'sdist': js_prerelease(sdist, strict=True),
         'jsdeps': NPM,
     },
+    'entry_points': {
+        'console_scripts': [
+            'jupyter-lab = jupyterlab.labapp:main',
+        ]
+    },
     'author': 'Jupyter Development Team',
     'author_email': 'jupyter@googlegroups.com',
     'url': 'http://jupyter.org',
