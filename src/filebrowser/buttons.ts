@@ -195,7 +195,7 @@ class FileButtons extends Widget {
     });
 
     // Popup the menu aligned with the bottom of the create button.
-    dropdown.popup(rect.left, rect.bottom, false, true);
+    dropdown.popup(rect.left, rect.top, false, false);
   };
 
 

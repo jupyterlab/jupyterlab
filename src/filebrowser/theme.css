@@ -12,7 +12,6 @@
 
 .jp-BreadCrumbs {
   margin: 8px;
-  margin-bottom: 0px;
 }
 
 
@@ -33,7 +32,7 @@
 
 
 .jp-FileButtons {
-  margin: 8px;
+  border-top: 1px solid #E0E0E0;
 }
 
 
@@ -42,8 +41,8 @@
   max-width: 100px;
   padding: 4px 6px;
   color: #757575;
-  background: #FFFFFF;
-  border: 1px solid #E0E0E0;
+  background: #FAFAFA;
+  border: none;
   font-size: 16px;
   outline: 0;
 }
