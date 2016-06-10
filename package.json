@@ -55,7 +55,7 @@
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.0",
     "style-loader": "^0.13.0",
-    "typedoc": "https://github.com/SierraSoftworks/typedoc.git#cb5aea2b218b4f773451e2818a48629ee9c5066e",
+    "typedoc": "^0.4.2",
     "typescript": "^1.8.0",
     "url-loader": "^0.5.7",
     "watch": "^0.17.1",
