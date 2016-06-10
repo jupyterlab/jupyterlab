@@ -9,10 +9,10 @@ An extensible computational environment for Jupyter.
 
 <img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
 
-Jupyter Notebook Extension
---------------------------
+Jupyter Server Extension
+------------------------
 
-The Jupyter notebook extension source files are in the `jupyterlab/` subdirectory. To use this extension, you need Jupyter notebook version 4.2 or later.
+The Jupyter server extension source files are in the `jupyterlab/` subdirectory. To use this extension, you need the Jupyter notebook server version 4.2 or later.
 
 ### User installation
 ```
@@ -20,7 +20,7 @@ pip install jupyterlab
 jupyter serverextension enable --py jupyterlab
 ```
 
-Start up the Jupyter notebook and open a browser to the server's URL with the path `/lab` (e.g., `http://localhost:8888/lab`).
+Start up Jupyterlab with the command `jupyter lab`, open a browser to the server's URL (e.g., `http://localhost:8888`).
 
 
 ### Developer Installation
@@ -34,7 +34,7 @@ pip install -e . # will take a long time to build everything
 jupyter serverextension enable --py jupyterlab
 ```
 
-Start up the Jupyter notebook, and then open a browser to the server's URL with path `/lab` (e.g., `http://localhost:8888/lab`).
+Start up Jupyterlab with the command `jupyter lab`, open a browser to the server's URL (e.g., `http://localhost:8888`).
 
 When you make a change to JupyterLab npm package source files, run `python setup.py jsdeps` to build the changes and refresh your browser to see the changes.
 
@@ -46,7 +46,7 @@ The npm package source files are in the `src/` subdirectory.
 
 **Prerequisites**
 - [node](http://nodejs.org/) (preferably version 5 or later)
-- Jupyter notebook version 4.2 or later (to run examples)
+- Jupyter notebook server version 4.2 or later (to run examples)
 
 ```bash
 npm install --save jupyterlab
