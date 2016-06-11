@@ -7,6 +7,7 @@ import os
 from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
+from notebook.utils import url_path_join as ujoin
 
 HERE = os.path.dirname(__file__)
 FILE_LOADER = FileSystemLoader(HERE)
@@ -19,7 +20,7 @@ class LabHandler(IPythonHandler):
     @web.authenticated
     def get(self):
         self.write(self.render_template('lab.html',
-            static_prefix=PREFIX,
+            static_prefix=ujoin(self.application.settings['base_url'], PREFIX),
             page_title='Pre-Alpha Jupyter Lab Demo',
             terminals_available=self.settings['terminals_available'],
             mathjax_url=self.mathjax_url,
@@ -45,8 +46,9 @@ def _jupyter_server_extension_paths():
         "module": "jupyterlab"
     }]
     
+
 def load_jupyter_server_extension(nbapp):
     nbapp.log.info('Pre-alpha version of JupyterLab extension loaded from %s'%HERE)
     webapp = nbapp.web_app
-    #base_url = webapp.settings['base_url']
-    webapp.add_handlers(".*$", default_handlers)
+    base_url = webapp.settings['base_url']
+    webapp.add_handlers(".*$", [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
