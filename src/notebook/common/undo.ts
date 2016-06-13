@@ -22,7 +22,7 @@ interface IJSONable {
  * An observable list that supports undo/redo.
  */
 export
-class OberservableUndoableList<T extends IJSONable> extends ObservableList<T> {
+class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> {
   /**
    * Construct a new undoable observable list.
    */

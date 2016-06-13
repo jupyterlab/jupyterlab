@@ -20,6 +20,9 @@ import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
+import {
+  DocumentModel
+} from '../../docmanager/default';
 
 import {
   ICellModel, CodeCellModel, RawCellModel, MarkdownCellModel
@@ -34,7 +37,7 @@ import {
 } from '../common/metadata';
 
 import {
-  OberservableUndoableList
+  ObservableUndoableList
 } from '../common/undo';
 
 import {
@@ -63,7 +66,7 @@ interface INotebookModel extends IDocumentModel {
    * #### Notes
    * This is a read-only property.
    */
-  cells: OberservableUndoableList<ICellModel>;
+  cells: ObservableUndoableList<ICellModel>;
 
   /**
    * The major version number of the nbformat.
@@ -138,12 +141,13 @@ interface INotebookModel extends IDocumentModel {
  * An implementation of a notebook Model.
  */
 export
-class NotebookModel implements INotebookModel {
+class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Construct a new notebook model.
    */
   constructor(languagePreference?: string) {
-    this._cells = new OberservableUndoableList<ICellModel>((data: nbformat.IBaseCell) => {
+    super(languagePreference);
+    this._cells = new ObservableUndoableList<ICellModel>((data: nbformat.IBaseCell) => {
       switch (data.cell_type) {
         case 'code':
           return this.createCodeCell(data);
@@ -155,22 +159,8 @@ class NotebookModel implements INotebookModel {
     });
     this._cells.changed.connect(this.onCellsChanged, this);
     if (languagePreference) {
-      this._metadata['language_info'] = `{"name":"${languagePreference}"}`;
+      this._metadata['language_info'] = { name: languagePreference };
     }
-  }
-
-  /**
-   * A signal emitted when the document content changes.
-   */
-  get contentChanged(): ISignal<INotebookModel, void> {
-    return Private.contentChangedSignal.bind(this);
-  }
-
-  /**
-   * A signal emitted when a model state changes.
-   */
-  get stateChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
-    return Private.stateChangedSignal.bind(this);
   }
 
   /**
@@ -186,7 +176,7 @@ class NotebookModel implements INotebookModel {
    * #### Notes
    * This is a read-only property.
    */
-  get cells(): OberservableUndoableList<ICellModel> {
+  get cells(): ObservableUndoableList<ICellModel> {
     return this._cells;
   }
 
@@ -208,40 +198,6 @@ class NotebookModel implements INotebookModel {
    */
   get nbformatMinor(): number {
     return this._nbformatMinor;
-  }
-
-  /**
-   * The dirty state of the model.
-   *
-   * #### Notes
-   * This should be cleared when the document is loaded from
-   * or saved to disk.
-   */
-  get dirty(): boolean {
-    return this._dirty;
-  }
-  set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
-      return;
-    }
-    let oldValue = this._dirty;
-    this._dirty = newValue;
-    this.stateChanged.emit({ name: 'dirty', oldValue, newValue });
-  }
-
-  /**
-   * The read-only state of the model.
-   */
-  get readOnly(): boolean {
-    return this._readOnly;
-  }
-  set readOnly(newValue: boolean) {
-    if (newValue === this._readOnly) {
-      return;
-    }
-    let oldValue = this._readOnly;
-    this._readOnly = newValue;
-    this.stateChanged.emit({ name: 'readOnly', oldValue, newValue });
   }
 
   /**
@@ -267,16 +223,6 @@ class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Get whether the model is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get isDisposed(): boolean {
-    return this._cells === null;
-  }
-
-  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
@@ -298,6 +244,7 @@ class NotebookModel implements INotebookModel {
     }
     this._cursors = null;
     this._metadata = null;
+    super.dispose();
   }
 
   /**
@@ -506,6 +453,7 @@ class NotebookModel implements INotebookModel {
     default:
       return;
     }
+    this.contentChanged.emit(void 0);
     this.dirty = true;
   }
 
@@ -531,10 +479,8 @@ class NotebookModel implements INotebookModel {
     this.metadataChanged.emit({ name, oldValue, newValue });
   }
 
-  private _cells: OberservableUndoableList<ICellModel> = null;
+  private _cells: ObservableUndoableList<ICellModel> = null;
   private _metadata: { [key: string]: any } = Private.createMetadata();
-  private _dirty = false;
-  private _readOnly = false;
   private _cursors: { [key: string]: MetadataCursor } = Object.create(null);
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
@@ -545,18 +491,6 @@ class NotebookModel implements INotebookModel {
  * A private namespace for notebook model data.
  */
 namespace Private {
-  /**
-   * A signal emitted when the content of the model changes.
-   */
-  export
-  const contentChangedSignal = new Signal<INotebookModel, void>();
-
-  /**
-   * A signal emitted when a model state changes.
-   */
-  export
-  const stateChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
-
   /**
    * A signal emitted when a metadata field changes.
    */
@@ -569,8 +503,8 @@ namespace Private {
   export
   function createMetadata(): nbformat.INotebookMetadata {
     return {
-      kernelspec: { name: 'unknown', display_name: 'Unknown' },
-      language_info: { name: 'unknown' },
+      kernelspec: { name: '', display_name: '' },
+      language_info: { name: '' },
       orig_nbformat: 1
     };
   }

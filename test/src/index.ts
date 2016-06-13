@@ -7,3 +7,4 @@ import './rendermime/rendermime.spec';
 import './renderers/latex.spec';
 
 import './notebook/notebook/nbformat.spec';
+import './notebook/notebook/model.spec';
