@@ -12,6 +12,6 @@ npm run build
 npm test
 npm run test:coverage
 export PATH="$HOME/miniconda/bin:$PATH"
-npm run build:example
+npm run build:examples
 npm run docs
 cp jupyter-plugins-demo.gif docs
