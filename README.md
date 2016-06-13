@@ -20,7 +20,12 @@ pip install jupyterlab
 jupyter serverextension enable --py jupyterlab
 ```
 
-Start up Jupyterlab with the command `jupyter lab`, open a browser to the server's URL (e.g., `http://localhost:8888`).
+Start up Jupyterlab with the command:
+```
+jupyter lab
+```
+
+Open a browser to the notebook server's URL (e.g., `http://localhost:8888`).
 
 
 ### Developer Installation
@@ -34,9 +39,19 @@ pip install -e . # will take a long time to build everything
 jupyter serverextension enable --py jupyterlab
 ```
 
-Start up Jupyterlab with the command `jupyter lab`, open a browser to the server's URL (e.g., `http://localhost:8888`).
+Start up Jupyterlab with the command:
+```
+jupyter lab
+```
 
-When you make a change to JupyterLab npm package source files, run `python setup.py jsdeps` to build the changes and refresh your browser to see the changes.
+Open a browser to the notebook server's URL (e.g., `http://localhost:8888`).
+
+When you make a change to JupyterLab npm package source files, run:
+```
+python setup.py jsdeps
+```
+
+to build the changes and refresh your browser to see the changes.
 
 
 NPM Package
