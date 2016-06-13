@@ -10,7 +10,7 @@ import {
 } from './model';
 
 import {
-  DocumentManager, DocumentRegistry, DocumentWidget
+  DocumentManager, DocumentRegistry, DocumentWrapper
 } from '../docmanager';
 
 import {
@@ -47,12 +47,12 @@ const fileBrowserExtension = {
 function activateFileBrowser(app: Application, provider: JupyterServices, registry: DocumentRegistry): Promise<void> {
   let contents = provider.contentsManager;
   let sessions = provider.notebookSessionManager;
-  let widgets: DocumentWidget[] = [];
-  let activeWidget: DocumentWidget;
+  let widgets: DocumentWrapper[] = [];
+  let activeWidget: DocumentWrapper;
   let id = 0;
 
   let opener = {
-    open: (widget: DocumentWidget) => {
+    open: (widget: DocumentWrapper) => {
       if (!widget.id) {
         widget.id = `document-manager-${++id}`;
       }
@@ -69,7 +69,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
         tabs.currentWidget = widget;
       }
       activeWidget = widget;
-      widget.disposed.connect((w: DocumentWidget) => {
+      widget.disposed.connect((w: DocumentWrapper) => {
         let index = widgets.indexOf(w);
         widgets.splice(index, 1);
       });

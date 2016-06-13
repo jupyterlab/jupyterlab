@@ -14,7 +14,7 @@ import {
 } from '../dialog';
 
 import {
-  DocumentManager, IKernelPreference, DocumentWidget
+  DocumentManager, IKernelPreference, DocumentWrapper
 } from '../docmanager';
 
 import {
@@ -35,7 +35,7 @@ const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
  * Open a file using a dialog.
  */
 export
-function openWithDialog(path: string, manager: DocumentManager, host?: HTMLElement): Promise<DocumentWidget> {
+function openWithDialog(path: string, manager: DocumentManager, host?: HTMLElement): Promise<DocumentWrapper> {
   let handler: OpenWithHandler;
   return manager.listSessions().then(sessions => {
     handler = new OpenWithHandler(path, manager, sessions);
@@ -57,7 +57,7 @@ function openWithDialog(path: string, manager: DocumentManager, host?: HTMLEleme
  * Create a new file using a dialog.
  */
 export
-function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host?: HTMLElement): Promise<DocumentWidget> {
+function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host?: HTMLElement): Promise<DocumentWrapper> {
   let handler: CreateNewHandler;
   return manager.listSessions().then(sessions => {
     handler = new CreateNewHandler(model, manager, sessions);
@@ -143,7 +143,7 @@ class OpenWithHandler extends Widget {
   /**
    * Open the file and return the document widget.
    */
-  open(): DocumentWidget {
+  open(): DocumentWrapper {
     let path = this.input.textContent;
     let widgetName = this.widgetDropdown.value;
     let kernelValue = this.kernelDropdown.value;
@@ -287,7 +287,7 @@ class CreateNewHandler extends Widget {
   /**
    * Open the file and return the document widget.
    */
-  open(): DocumentWidget {
+  open(): DocumentWrapper {
     let path = this.input.textContent;
     let widgetName = this.widgetDropdown.value;
     let kernelValue = this.kernelDropdown.value;
