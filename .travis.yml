@@ -6,8 +6,8 @@ env:
   matrix:
   - GROUP=
   global:
-  - GH_REF: TODO
-  - secure: TODO
+  - GH_REF: github.com/jupyter/jupyterlab.git
+  - secure: Ifp7Xmi8p0wJpUqjtHNcf3pvewVM9uBlMvfsJ+B3bHKXziQ4ar06u0YzYpGH31/aiQlMjCeFu8Cxq1CABjeCGpMTaqaOdiQCjE1r6ISYd4pV2CmbmKCr82EPn7Zxn9CydFkKTSxLuk93XGOfzjpsXE8dQ0REdYi1o7KL9JjSpOD+MRwffVSCToI1hVv696dqlLlNmzcFJC8aTtP7SLX0zKEn58/PkvIDIlgtJvyriwVzA5I4jyiKbChhpe/RpgC66+iey+7klLhw0CvrrOxRWWMpInqYgxsnoYigjCWji444S7mEV/tZmDsVsy/cHlD18mLczkHphCGyANsGa64QtCSp9d/dpkAUUOeWisT/zZrOa/OCScDXuS6xZfPqXMNre07XFnYlAgbwJaCDWn03XeJDNINOT33Hz7gH+E8kvLH4geZu259cxBhPJ4sdY+2HwUSPfJ2iSlsfLk38wir9xqFgTxf5orEtYY1qgaqDwrZB5FHw6tVbqBYq3iTbQZ0hUN9c2ltNm9hrqIGee2KvNGo+rui2xKl3P/s7nIwOpK8NUueuEJEy2AIPQ9FKC6BMPwVemdahIgmao8s5Wgjm5a/qSw7FO8/ADxz7ZFZhKjWtZ4c2BMgr+GbbW/Xh4ClasxqkJtp3xGO95K1Yo0NETjzM1zodKpN+Uxxz7fABqRM=
 install:
 - bash ./scripts/travis_install.sh
 script:
