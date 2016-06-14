@@ -1058,6 +1058,7 @@ class DirListing extends Widget {
           widget.populated.connect(() => this.model.refresh() );
           widget.context.kernelChanged.connect(() => this.model.refresh() );
         }
+        return widget;
       });
     }
 
