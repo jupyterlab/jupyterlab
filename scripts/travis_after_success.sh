@@ -12,6 +12,7 @@ then
     git config user.email "travis@travis-ci.com"
     git config user.name "Travis Bot"
 
+    touch .nojekyll  # disable jekyll
     git add .
     git commit -m "Deploy to GitHub Pages"
     git push --force --quiet "https://${GHTOKEN}@${GH_REF}" master:gh-pages > /dev/null 2>&1
