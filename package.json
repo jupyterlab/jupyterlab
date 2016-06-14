@@ -78,7 +78,7 @@
     "test:firefox": "karma start --browsers=Firefox test/karma.conf.js",
     "test:ie": "karma start --browsers=IE test/karma.conf.js",
     "watch": "watch 'npm run build' src --wait 10",
-    "watch:test": "watch 'npm run build && npm test' src src/test --wait 10"
+    "watch:test": "watch 'npm run build && npm test' src test/src --wait 10"
   },
   "repository": {
     "type": "git",
