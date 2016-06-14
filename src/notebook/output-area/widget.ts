@@ -255,7 +255,6 @@ class OutputAreaWidget extends Widget {
 
     if (bundle) {
       let mimemap = this.convertBundle(bundle);
-      debugger;
       let child = this._rendermime.render(mimemap);
       if (child) {
         child.addClass(RESULT_CLASS);
