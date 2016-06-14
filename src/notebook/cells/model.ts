@@ -120,7 +120,11 @@ class CellModel implements ICellModel {
     if (!cell) {
       return;
     }
-    this.source = cell.source;
+    if (Array.isArray(cell.source)) {
+      this.source = (cell.source as string[]).join('\n');
+    } else {
+      this.source = cell.source as string;
+    }
     let metadata = utils.copy(cell.metadata);
     if (this.type !== 'raw') {
       delete metadata['format'];

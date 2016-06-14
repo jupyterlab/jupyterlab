@@ -29,6 +29,12 @@ class ObservableOutputs extends ObservableList<nbformat.IOutput> {
       this.clear();
       this._clearNext = false;
     }
+    // Join multiline text outputs.
+    if (nbformat.isStream(output)) {
+      if (Array.isArray(output.text)) {
+        output.text = (output.text as string[]).join('\n');
+      }
+    }
 
     // Consolidate outputs if they are stream outputs of the same kind.
     let index = this.length - 1;
@@ -39,7 +45,7 @@ class ObservableOutputs extends ObservableList<nbformat.IOutput> {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
       // This also replaces the metadata of the last item.
-      let text: string = output.text;
+      let text = output.text as string;
       output.text = lastOutput.text as string + text;
       this.set(index, output);
       return index;

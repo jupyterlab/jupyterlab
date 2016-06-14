@@ -70,7 +70,7 @@ describe('jupyter-ui', () => {
     let base64PDF = "I don't have a b64'd PDF";
     let t = new PDFRenderer();
     let w = t.render('application/pdf', base64PDF);
-    expect(w.node.innerHTML).to.be('<a href="data:application/pdf;base64,I don\'t have a b64\'d PDF" target="_blank">View PDF</a>');
+    expect(w.node.innerHTML.indexOf('data:application/pdf')).to.not.be(-1);
   });
 
   });

@@ -74,7 +74,7 @@ class RenderMime<T> {
    */
   preferredMimetype(bundle: MimeMap<string>): string {
     for (let m of this.order) {
-      if (bundle.hasOwnProperty(m)) {
+      if (m in bundle) {
         return m;
       }
     }
@@ -100,7 +100,7 @@ class RenderMime<T> {
    * @param mimetype - The mimetype of the renderer.
    * @param renderer - The renderer instance.
    * @param index - The optional order index.
-   * 
+   *
    * ####Notes
    * Negative indices count from the end, so -1 refers to the penultimate index.
    * Use the index of `.order.length` to add to the end of the render precedence list,

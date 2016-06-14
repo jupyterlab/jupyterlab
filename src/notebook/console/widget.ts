@@ -10,7 +10,7 @@ import {
 } from '../../dialog';
 
 import {
-  RenderMime
+  RenderMime, MimeMap
 } from '../../rendermime';
 
 import {
@@ -455,15 +455,14 @@ class ConsoleWidget extends Widget {
       if (value.status !== 'ok' || !value.found) {
         return;
       }
-      let bundle = Private.processInspectReply(value.data);
-      this.showTooltip(change, bundle);
+      this.showTooltip(change, value.data);
     });
   }
 
   /**
    * Show the tooltip.
    */
-  protected showTooltip(change: ITextChange, bundle: nbformat.MimeBundle): void {
+  protected showTooltip(change: ITextChange, bundle: MimeMap<string>): void {
     let { top, bottom, left } = change.coords;
     let tooltip = this._tooltip;
     let heightAbove = top + 1; // 1px border
@@ -600,24 +599,5 @@ namespace Private {
     } else if (er.bottom > ar.bottom + 10) {
       area.scrollTop += er.bottom - ar.bottom + 10;
     }
-  }
-
-  /**
-   * Process the IInspectReply plain text data.
-   *
-   * @param bundle - The MIME bundle of an API inspect reply.
-   *
-   * #### Notes
-   * The `text/plain` value sent by the API in inspect replies contains ANSI
-   * terminal escape sequences. In order for these sequences to be parsed into
-   * usable data in the client, they must have the MIME type that the console
-   * text renderer expects: `application/vnd.jupyter.console-text`.
-   */
-  export
-  function processInspectReply(bundle: nbformat.MimeBundle): nbformat.MimeBundle {
-    let textMime = 'text/plain';
-    let consoleMime = 'application/vnd.jupyter.console-text';
-    bundle[consoleMime] = bundle[consoleMime] || bundle[textMime];
-    return bundle;
   }
 }
