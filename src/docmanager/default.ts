@@ -33,8 +33,8 @@ class DocumentModel implements IDocumentModel {
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference: string) {
-    this._defaultLang = languagePreference;
+  constructor(languagePreference?: string) {
+    this._defaultLang = languagePreference || '';
   }
 
   /**
@@ -158,7 +158,7 @@ class DocumentModel implements IDocumentModel {
    * Initialize the model state.
    */
   initialize(): void {
-    // No action necessary.
+    this.dirty = false;
   }
 
   private _text = '';
@@ -202,7 +202,7 @@ class TextModelFactory implements IModelFactory {
   }
 
   /**
-   * Dispose of the resources held by the document manager.
+   * Dispose of the resources held by the model factory.
    */
   dispose(): void {
     this._isDisposed = true;
