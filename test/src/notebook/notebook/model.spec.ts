@@ -12,10 +12,6 @@ import {
 } from '../../../../lib/notebook/cells/model';
 
 import {
-  JSONObject, deepEqual
-} from '../../../../lib/notebook/common/json';
-
-import {
   ObservableUndoableList
 } from '../../../../lib/notebook/common/undo';
 
@@ -39,7 +35,7 @@ class LogNotebookModel extends NotebookModel {
 
   protected onCellChanged(cell: ICellModel, change: any): void {
     super.onCellChanged(cell, change);
-    this.methods.push('onCellsChanged');
+    this.methods.push('onCellChanged');
   }
 
   protected onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
@@ -122,6 +118,18 @@ describe('notebook/notebook', () => {
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.cells.indexOf(cell)).to.be(-1);
         expect(model.cells.length).to.be(6);
+      });
+
+      it('should allow undoing a change', () => {
+        let model = new NotebookModel();
+        let cell = model.createCodeCell();
+        cell.source = 'foo';
+        model.cells.add(cell);
+        model.fromJSON(DEFAULT_CONTENT);
+        model.cells.undo();
+        expect(model.cells.length).to.be(1);
+        expect(model.cells.get(0).source).to.be('foo');
+        expect(model.cells.get(0)).to.not.be(cell);  // should be a clone.
       });
 
       it('should be read-only', () => {
@@ -414,13 +422,102 @@ describe('notebook/notebook', () => {
 
     describe('#onCellsChanged()', () => {
 
+      it('should emit a `contentChanged` signal', () => {
+        let model = new LogNotebookModel();
+        let cell = model.createCodeCell();
+        let called = false;
+        model.contentChanged.connect(() => { called = true; });
+        model.cells.add(cell);
+        expect(model.methods.indexOf('onCellsChanged')).to.not.be(-1);
+        expect(called).to.be(true);
+      });
+
+      it('should set the dirty flag', () => {
+        let model = new LogNotebookModel();
+        let cell = model.createCodeCell();
+        model.cells.add(cell);
+        expect(model.methods.indexOf('onCellsChanged')).to.not.be(-1);
+        expect(model.dirty).to.be(true);
+      });
+
+      it('should dispose of old cells', () => {
+        let model = new LogNotebookModel();
+        let cell = model.createCodeCell();
+        model.cells.add(cell);
+        model.cells.clear();
+        expect(cell.isDisposed).to.be(true);
+      });
+
     });
 
     describe('#onCellChanged()', () => {
 
+      it('should be called when a cell content changes', () => {
+        let model = new LogNotebookModel();
+        let cell = model.createCodeCell();
+        model.cells.add(cell);
+        cell.source = 'foo';
+        expect(model.methods.indexOf('onCellChanged')).to.not.be(-1);
+      });
+
+      it('should emit the `contentChanged` signal', () => {
+        let model = new LogNotebookModel();
+        let cell = model.createCodeCell();
+        model.cells.add(cell);
+        let called = false;
+        model.contentChanged.connect(() => { called = true; });
+        let cursor = cell.getMetadata('foo');
+        cursor.setValue('bar');
+        expect(model.methods.indexOf('onCellChanged')).to.not.be(-1);
+        expect(called).to.be(true);
+      });
+
+      it('should set the dirty flag', () => {
+        let model = new LogNotebookModel();
+        let cell = model.createCodeCell();
+        model.cells.add(cell);
+        model.dirty = false;
+        cell.source = 'foo';
+        expect(model.methods.indexOf('onCellChanged')).to.not.be(-1);
+        expect(model.dirty).to.be(true);
+      });
+
     });
 
     describe('#setCursorData()', () => {
+
+      it('should set the dirty flag', () => {
+        let model = new LogNotebookModel();
+        let cursor = model.getMetadata('foo');
+        cursor.setValue('bar');
+        expect(model.methods.indexOf('setCursorData')).to.not.be(-1);
+      });
+
+      it('should emit the `contentChanged` signal', () => {
+        let model = new LogNotebookModel();
+        let cursor = model.getMetadata('foo');
+        let called = false;
+        model.contentChanged.connect(() => { called = true; });
+        cursor.setValue('bar');
+        expect(model.methods.indexOf('setCursorData')).to.not.be(-1);
+        expect(called).to.be(true);
+      });
+
+      it('should emit the `metadataChanged` signal', () => {
+        let model = new LogNotebookModel();
+        let cursor = model.getMetadata('foo');
+        let called = false;
+        model.metadataChanged.connect((sender, args) => {
+          expect(sender).to.be(model);
+          expect(args.name).to.be('foo');
+          expect(args.oldValue).to.be(void 0);
+          expect(args.newValue).to.be('bar');
+          called = true;
+        });
+        cursor.setValue('bar');
+        expect(model.methods.indexOf('setCursorData')).to.not.be(-1);
+        expect(called).to.be(true);
+      });
 
     });
 

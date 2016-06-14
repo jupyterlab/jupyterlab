@@ -355,10 +355,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    *
    * @returns A new code cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
-   *
-   * #### Notes
-   * If the source argument does not give an input mimetype, the code cell
-   * defaults to the notebook [[defaultMimetype]].
    */
   createCodeCell(source?: nbformat.IBaseCell): CodeCellModel {
     return new CodeCellModel(source);
