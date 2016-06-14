@@ -21,6 +21,7 @@ const TRANSFORMERS = [
   new JavascriptRenderer(),
   new MarkdownRenderer(),
   new HTMLRenderer(),
+  new PDFRenderer(),
   new ImageRenderer(),
   new SVGRenderer(),
   new LatexRenderer(),
@@ -28,6 +29,7 @@ const TRANSFORMERS = [
 ];
 
 
+export
 function defaultRenderMime(): RenderMime<Widget> {
   let renderers: MimeMap<IRenderer<Widget>> = {};
   let order: string[] = [];

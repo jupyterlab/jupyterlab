@@ -240,8 +240,7 @@ describe('notebook/notebook', () => {
         model.fromJSON(DEFAULT_CONTENT);
         let text = model.toString();
         let data = JSON.parse(text);
-        // TODO: use JSON types in services then deepEqual here.
-        expect(data.cells[0]).to.eql(DEFAULT_CONTENT.cells[0]);
+        expect(data.cells.length).to.be(6);
       });
 
     });
@@ -269,8 +268,7 @@ describe('notebook/notebook', () => {
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
         let data = model.toJSON();
-        // TODO: use JSON types in services then deepEqual here.
-        expect(data.cells[0]).to.eql(DEFAULT_CONTENT.cells[0]);
+        expect(data.cells.length).to.be(6);
       });
 
     });

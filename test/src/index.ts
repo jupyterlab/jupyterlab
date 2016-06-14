@@ -9,3 +9,4 @@ import './renderers/latex.spec';
 
 import './notebook/notebook/nbformat.spec';
 import './notebook/notebook/model.spec';
+import './notebook/notebook/widget.spec';

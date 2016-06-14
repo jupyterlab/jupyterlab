@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  RenderMime
+  RenderMime, MimeMap
 } from '../../rendermime';
 
 import {
@@ -254,7 +254,8 @@ class OutputAreaWidget extends Widget {
     }
 
     if (bundle) {
-      let child = this._rendermime.render(bundle);
+      let mimemap = this.convertBundle(bundle);
+      let child = this._rendermime.render(mimemap);
       if (child) {
         child.addClass(RESULT_CLASS);
         widget.addChild(child);
@@ -264,6 +265,22 @@ class OutputAreaWidget extends Widget {
       }
     }
     return widget;
+  }
+
+  /**
+   * Convert a mime bundle to a mime map.
+   */
+  protected convertBundle(bundle: nbformat.MimeBundle): MimeMap<string> {
+    let map: MimeMap<string> = Object.create(null);
+    for (let mimeType in bundle) {
+      let value = bundle[mimeType];
+      if (Array.isArray(value)) {
+        map[mimeType] = (value as string[]).join('\n');
+      } else {
+        map[mimeType] = value as string;
+      }
+    }
+    return map;
   }
 
   /**

@@ -75,7 +75,7 @@ namespace nbformat {
    * On disk, this could be a string[] too.
    */
   export
-  type multilineString = string;
+  type multilineString = string | string[];
 
 
   /**
