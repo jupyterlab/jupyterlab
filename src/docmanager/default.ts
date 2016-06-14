@@ -175,7 +175,7 @@ class DocumentModel implements IDocumentModel {
 export
 class TextModelFactory implements IModelFactory {
   /**
-   * The name of the model.
+   * The name of the model type.
    *
    * #### Notes
    * This is a read-only property.
@@ -239,7 +239,7 @@ class TextModelFactory implements IModelFactory {
 export
 class Base64ModelFactory extends TextModelFactory {
   /**
-   * The name of the model.
+   * The name of the model type.
    *
    * #### Notes
    * This is a read-only property.
