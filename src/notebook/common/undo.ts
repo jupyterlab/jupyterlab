@@ -2,6 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IDisposable
+} from 'phosphor-disposable';
+
+import {
+  clearSignalData
+} from 'phosphor-signaling';
+
+import {
   IObservableList, ListChangeType, IListChangedArgs, ObservableList
 } from 'phosphor-observablelist';
 
@@ -22,7 +30,7 @@ interface IJSONable {
  * An observable list that supports undo/redo.
  */
 export
-class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> {
+class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> implements IDisposable {
   /**
    * Construct a new undoable observable list.
    */
@@ -70,6 +78,7 @@ class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> {
     if (this.isDisposed) {
       return;
     }
+    clearSignalData(this);
     this._factory = null;
     this._stack = null;
   }
