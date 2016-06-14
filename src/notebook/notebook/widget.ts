@@ -40,10 +40,6 @@ import {
 } from '../cells';
 
 import {
-  IMetadataCursor
-} from '../common/metadata';
-
-import {
   mimetypeForLanguage
 } from '../common/mimetype';
 
@@ -132,27 +128,8 @@ class NotebookRenderer extends Widget {
     this.addClass(NB_CLASS);
     this._model = model;
     this._rendermime = rendermime;
-    this._langInfoCursor = model.getMetadata('language_info');
-    this._mimetype = this.getMimetype();
     this.layout = new PanelLayout();
-
-    // Add the current cells.
-    if (model.cells.length === 0) {
-      // Add a new code cell if there are no cells.
-      let cell = model.createCodeCell();
-      model.cells.add(cell);
-    }
-    let layout = this.layout as PanelLayout;
-    let constructor = this.constructor as typeof NotebookRenderer;
-    let factory = constructor.createCell;
-    for (let i = 0; i < model.cells.length; i++) {
-      let widget = factory(model.cells.get(i), rendermime);
-      this.initializeCellWidget(widget);
-      layout.addChild(widget);
-    }
-
-    model.cells.changed.connect(this.onCellsChanged, this);
-    model.metadataChanged.connect(this.onMetadataChanged, this);
+    this._initialized = false;
   }
 
   /**
@@ -199,34 +176,45 @@ class NotebookRenderer extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._langInfoCursor = null;
-    this._model.dispose();
     this._model = null;
+    this._rendermime = null;
     super.dispose();
   }
 
   /**
-   * Find the cell index containing the target html element.
-   *
-   * #### Notes
-   * Returns -1 if the cell is not found.
+   * Handle `after_attach` messages for the widget.
    */
-  protected findCell(node: HTMLElement): number {
-    // Trace up the DOM hierarchy to find the root cell node.
-    // Then find the corresponding child and select it.
-    let layout = this.layout as PanelLayout;
-    while (node && node !== this.node) {
-      if (node.classList.contains(NB_CELL_CLASS)) {
-        for (let i = 0; i < layout.childCount(); i++) {
-          if (layout.childAt(i).node === node) {
-            return i;
-          }
-        }
-        break;
-      }
-      node = node.parentElement;
+  protected onAfterAttach(msg: Message): void {
+    if (!this._initialized) {
+      this.initialize();
+      this._initialized = true;
     }
-    return -1;
+  }
+
+  /**
+   * It should initialize the contents of the widget.
+   */
+  protected initialize(): void {
+    let model = this.model;
+    let rendermime = this.rendermime;
+
+    // Add the current cells.
+    if (model.cells.length === 0) {
+      // Add a new code cell if there are no cells.
+      let cell = model.createCodeCell();
+      model.cells.add(cell);
+    }
+    let layout = this.layout as PanelLayout;
+    let constructor = this.constructor as typeof NotebookRenderer;
+    let factory = constructor.createCell;
+    for (let i = 0; i < model.cells.length; i++) {
+      let widget = factory(model.cells.get(i), rendermime);
+      this.initializeCellWidget(widget);
+      layout.addChild(widget);
+    }
+    this.updateMimetypes();
+    model.cells.changed.connect(this.onCellsChanged, this);
+    model.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
   /**
@@ -235,8 +223,7 @@ class NotebookRenderer extends Widget {
   protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'language_info':
-      this._mimetype = this.getMimetype();
-      this._updateMimetypes();
+      this.updateMimetypes();
       break;
     default:
       break;
@@ -294,44 +281,31 @@ class NotebookRenderer extends Widget {
   }
 
   /**
-   * The mime type for code cells.
-   *
-   * #### Notes
-   * The default implementation uses the language info to set the
-   * mimetype.
-   */
-  protected getMimetype(): string {
-    let info = this._langInfoCursor.getValue() as nbformat.ILanguageInfoMetadata;
-    return mimetypeForLanguage(info as IKernelLanguageInfo);
-  }
-
-  /**
    * Initialize a cell widget.
    */
   protected initializeCellWidget(widget: BaseCellWidget): void {
     widget.addClass(NB_CELL_CLASS);
-    if (widget.model.type === 'code') {
-      widget.mimetype = this._mimetype;
-    }
   }
 
   /**
    * Update the mimetype of code widgets.
    */
-  private _updateMimetypes(): void {
+  protected updateMimetypes(): void {
+    let cursor = this.model.getMetadata('language_info');
+    let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
+    let mimetype = mimetypeForLanguage(info as IKernelLanguageInfo);
     let layout = this.layout as PanelLayout;
     for (let i = 0; i < layout.childCount(); i++) {
       let widget = layout.childAt(i) as CodeCellWidget;
       if (widget instanceof CodeCellWidget) {
-        widget.mimetype = this._mimetype;
+        widget.mimetype = mimetype;
       }
     }
   }
 
   private _model: INotebookModel = null;
   private _rendermime: RenderMime<Widget> = null;
-  private _mimetype = 'text/plain';
-  private _langInfoCursor: IMetadataCursor = null;
+  private _initialized = false;
 }
 
 
@@ -452,6 +426,7 @@ class ActiveNotebook extends NotebookRenderer {
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
     this.node.addEventListener('click', this);
     this.node.addEventListener('dblclick', this);
     this.update();
@@ -531,6 +506,30 @@ class ActiveNotebook extends NotebookRenderer {
   }
 
   /**
+   * Find the cell index containing the target html element.
+   *
+   * #### Notes
+   * Returns -1 if the cell is not found.
+   */
+  private _findCell(node: HTMLElement): number {
+    // Trace up the DOM hierarchy to find the root cell node.
+    // Then find the corresponding child and select it.
+    let layout = this.layout as PanelLayout;
+    while (node && node !== this.node) {
+      if (node.classList.contains(NB_CELL_CLASS)) {
+        for (let i = 0; i < layout.childCount(); i++) {
+          if (layout.childAt(i).node === node) {
+            return i;
+          }
+        }
+        break;
+      }
+      node = node.parentElement;
+    }
+    return -1;
+  }
+
+  /**
    * Handle `click` events for the widget.
    */
   private _evtClick(event: MouseEvent): void {
@@ -538,7 +537,7 @@ class ActiveNotebook extends NotebookRenderer {
     if (model.readOnly) {
       return;
     }
-    let i = this.findCell(event.target as HTMLElement);
+    let i = this._findCell(event.target as HTMLElement);
     if (i === -1) {
       return;
     }
@@ -554,7 +553,7 @@ class ActiveNotebook extends NotebookRenderer {
     if (model.readOnly) {
       return;
     }
-    let i = this.findCell(event.target as HTMLElement);
+    let i = this._findCell(event.target as HTMLElement);
     if (i === -1) {
       return;
     }
