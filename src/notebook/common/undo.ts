@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  clearSignalData
+} from 'phosphor-signaling';
+
+import {
   IObservableList, ListChangeType, IListChangedArgs, ObservableList
 } from 'phosphor-observablelist';
 
@@ -70,6 +74,7 @@ class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> {
     if (this.isDisposed) {
       return;
     }
+    clearSignalData(this);
     this._factory = null;
     this._stack = null;
   }
