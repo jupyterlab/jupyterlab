@@ -11,7 +11,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  DocumentWidget, DocumentManager, DocumentRegistry, selectKernelForContext
+  DocumentWrapper, DocumentManager, DocumentRegistry, selectKernelForContext
 } from 'jupyterlab/lib/docmanager';
 
 import {
@@ -90,7 +90,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   let rendermime = new RenderMime<Widget>(renderers, order);
 
   let opener = {
-    open: (widget: DocumentWidget) => {
+    open: (widget: DocumentWrapper) => {
       // Do nothing for sibling widgets for now.
     }
   };

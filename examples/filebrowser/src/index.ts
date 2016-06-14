@@ -11,7 +11,7 @@ import {
 } from 'jupyterlab/lib/filebrowser';
 
 import {
-  DocumentManager, DocumentWidget, DocumentRegistry
+  DocumentManager, DocumentWrapper, DocumentRegistry
 } from 'jupyterlab/lib/docmanager';
 
 import {
@@ -57,18 +57,18 @@ function main(): void {
 
 function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecIds): void {
   let contentsManager = new ContentsManager();
-  let widgets: DocumentWidget[] = [];
-  let activeWidget: DocumentWidget;
+  let widgets: DocumentWrapper[] = [];
+  let activeWidget: DocumentWrapper;
 
   let opener = {
-    open: (widget: DocumentWidget) => {
+    open: (widget: DocumentWrapper) => {
       if (widgets.indexOf(widget) === -1) {
         dock.insertTabAfter(widget);
         widgets.push(widget);
       }
       dock.selectWidget(widget);
       activeWidget = widget;
-      widget.disposed.connect((w: DocumentWidget) => {
+      widget.disposed.connect((w: DocumentWrapper) => {
         let index = widgets.indexOf(w);
         widgets.splice(index, 1);
       });

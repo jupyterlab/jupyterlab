@@ -49,9 +49,9 @@ import {
 
 
 /**
- * The class name added to a document container widgets.
+ * The class name added to a document wrapper widgets.
  */
-const DOCUMENT_CLASS = 'jp-DocumentWidget';
+const DOCUMENT_CLASS = 'jp-DocumentWrapper';
 
 
 /**
@@ -139,7 +139,7 @@ class DocumentManager implements IDisposable {
    *
    * @param kernel - An optional kernel name/id to override the default.
    */
-  open(path: string, widgetName='default', kernel?: IKernelId): DocumentWidget {
+  open(path: string, widgetName='default', kernel?: IKernelId): DocumentWrapper {
     let registry = this._registry;
     if (widgetName === 'default') {
       let parts = path.split('.');
@@ -155,7 +155,7 @@ class DocumentManager implements IDisposable {
     if (!mFactory) {
       return;
     }
-    let widget: DocumentWidget;
+    let widget: DocumentWrapper;
     // Use an existing context if available.
     let id = this._contextManager.findContext(path, mFactory.name);
     if (id) {
@@ -183,7 +183,7 @@ class DocumentManager implements IDisposable {
    *
    * @param kernel - An optional kernel name/id to override the default.
    */
-  createNew(path: string, widgetName='default', kernel?: IKernelId): DocumentWidget {
+  createNew(path: string, widgetName='default', kernel?: IKernelId): DocumentWrapper {
     let registry = this._registry;
     if (widgetName === 'default') {
       let parts = path.split('.');
@@ -243,7 +243,7 @@ class DocumentManager implements IDisposable {
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
-  findWidget(path: string, widgetName='default'): DocumentWidget {
+  findWidget(path: string, widgetName='default'): DocumentWrapper {
     let ids = this._contextManager.getIdsForPath(path);
     if (widgetName === 'default') {
       widgetName = this._registry.defaultWidgetFactory;
@@ -264,7 +264,7 @@ class DocumentManager implements IDisposable {
    * This will create a new widget with the same model and context
    * as this widget.
    */
-  clone(widget: DocumentWidget): DocumentWidget {
+  clone(widget: DocumentWrapper): DocumentWrapper {
     let parent = this._createWidget(widget.name, widget.context.id);
     this._populateWidget(parent);
     return parent;
@@ -276,7 +276,7 @@ class DocumentManager implements IDisposable {
   closeFile(path: string): void {
     let ids = this._contextManager.getIdsForPath(path);
     for (let id of ids) {
-      let widgets: DocumentWidget[] = this._widgets[id] || [];
+      let widgets: DocumentWrapper[] = this._widgets[id] || [];
       for (let w of widgets) {
         w.close();
       }
@@ -297,9 +297,9 @@ class DocumentManager implements IDisposable {
   /**
    * Create a container widget and handle its lifecycle.
    */
-  private _createWidget(name: string, id: string): DocumentWidget {
+  private _createWidget(name: string, id: string): DocumentWrapper {
     let factory = this._registry.getWidgetFactory(name);
-    let widget = new DocumentWidget(name, id, this._contextManager, factory, this._widgets);
+    let widget = new DocumentWrapper(name, id, this._contextManager, factory, this._widgets);
     if (!(id in this._widgets)) {
       this._widgets[id] = [];
     }
@@ -310,7 +310,7 @@ class DocumentManager implements IDisposable {
   /**
    * Create a content widget and add it to the container widget.
    */
-  private _populateWidget(parent: DocumentWidget, kernel?: IKernelId): void {
+  private _populateWidget(parent: DocumentWrapper, kernel?: IKernelId): void {
     let factory = this._registry.getWidgetFactory(parent.name);
     let id = parent.context.id;
     let model = this._contextManager.getModel(id);
@@ -328,7 +328,7 @@ class DocumentManager implements IDisposable {
     });
   }
 
-  private _widgets: { [key: string]: DocumentWidget[] } = Object.create(null);
+  private _widgets: { [key: string]: DocumentWrapper[] } = Object.create(null);
   private _contentsManager: IContentsManager = null;
   private _sessionManager: INotebookSessionManager = null;
   private _contextManager: ContextManager = null;
@@ -341,18 +341,18 @@ class DocumentManager implements IDisposable {
  * A container widget for documents.
  */
 export
-class DocumentWidget extends Widget {
+class DocumentWrapper extends Widget {
   /**
    * A signal emitted when the document widget is populated.
    */
-  get populated(): ISignal<DocumentWidget, Widget> {
+  get populated(): ISignal<DocumentWrapper, Widget> {
     return Private.populatedSignal.bind(this);
   }
 
   /**
    * Construct a new document widget.
    */
-  constructor(name: string, id: string, manager: ContextManager, factory: IWidgetFactory<Widget>, widgets: { [key: string]: DocumentWidget[] }) {
+  constructor(name: string, id: string, manager: ContextManager, factory: IWidgetFactory<Widget>, widgets: { [key: string]: DocumentWrapper[] }) {
     super();
     this.addClass(DOCUMENT_CLASS);
     this.layout = new PanelLayout();
@@ -524,7 +524,7 @@ class DocumentWidget extends Widget {
   private _factory: IWidgetFactory<Widget> = null;
   private _id = '';
   private _name = '';
-  private _widgets: { [key: string]: DocumentWidget[] } = null;
+  private _widgets: { [key: string]: DocumentWrapper[] } = null;
 }
 
 
@@ -536,7 +536,7 @@ namespace Private {
    * A signal emitted when the document widget is populated.
    */
   export
-  const populatedSignal = new Signal<DocumentWidget, Widget>();
+  const populatedSignal = new Signal<DocumentWrapper, Widget>();
 
   /**
    * An extended interface for a widget factory and its options.
