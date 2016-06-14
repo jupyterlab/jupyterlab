@@ -8,7 +8,7 @@
   "dependencies": {
     "es6-promise": "^3.1.2",
     "font-awesome": "^4.6.1",
-    "jupyterlab": "../",
+    "jupyterlab": "file:../",
     "phosphide": "^0.9.4"
   },
   "devDependencies": {
@@ -23,7 +23,7 @@
   },
   "scripts": {
     "clean": "rimraf build",
-    "build": "npm update jupyterlab && webpack --config webpack.conf.js",
+    "build": "rimraf node_modules/jupyterlab && npm install && webpack --config webpack.conf.js",
     "postinstall": "npm dedupe",
     "test": "echo 'no tests specified'"
   },
