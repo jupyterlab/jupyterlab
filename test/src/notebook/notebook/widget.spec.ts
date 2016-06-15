@@ -50,7 +50,9 @@ const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples
 function createWidget(): LogNotebookRenderer {
   let model = new NotebookModel();
   let rendermime = defaultRenderMime();
-  return new LogNotebookRenderer(model, rendermime);
+  let widget = new LogNotebookRenderer(rendermime);
+  widget.model = model;
+  return widget;
 }
 
 
@@ -58,19 +60,9 @@ class LogNotebookRenderer extends NotebookRenderer {
 
   methods: string[] = [];
 
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    this.methods.push('onAfterAttach');
-  }
-
   protected onUpdateRequest(msg: Message): void {
     super.onAfterAttach(msg);
     this.methods.push('onUpdateRequest');
-  }
-
-  protected initialize(): void {
-    super.initialize();
-    this.methods.push('initialize');
   }
 
   protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
@@ -81,6 +73,11 @@ class LogNotebookRenderer extends NotebookRenderer {
   protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
     super.onCellsChanged(sender, args);
     this.methods.push('onCellsChanged');
+  }
+
+  protected initialize(model: INotebookModel): void {
+    super.initialize(model);
+    this.methods.push('initialize');
   }
 
   protected initializeCellWidget(widget: BaseCellWidget): void {
@@ -136,7 +133,9 @@ class LogActiveNotebook extends ActiveNotebook {
 function createActiveWidget(): LogActiveNotebook {
   let model = new NotebookModel();
   let rendermime = defaultRenderMime();
-  return new LogActiveNotebook(model, rendermime);
+  let widget = new LogActiveNotebook(rendermime);
+  widget.model = model;
+  return widget;
 }
 
 
@@ -176,13 +175,13 @@ describe('notebook/notebook/widget', () => {
 
       it('should create a notebook widget', () => {
         let rendermime = defaultRenderMime();
-        let widget = new NotebookRenderer(new NotebookModel(), rendermime);
+        let widget = new NotebookRenderer(rendermime);
         expect(widget).to.be.a(NotebookRenderer);
       });
 
       it('should add the `jp-Notebook` class', () => {
         let rendermime = defaultRenderMime();
-        let widget = new NotebookRenderer(new NotebookModel(), rendermime);
+        let widget = new NotebookRenderer(rendermime);
         expect(widget.hasClass('jp-Notebook')).to.be(true);
       });
 
@@ -191,14 +190,43 @@ describe('notebook/notebook/widget', () => {
     describe('#model', () => {
 
       it('should get the model for the widget', () => {
+        let widget = new NotebookRenderer(defaultRenderMime());
+        expect(widget.model).to.be(null);
+      });
+
+      it('should set the model for the widget', () => {
+        let widget = new NotebookRenderer(defaultRenderMime());
         let model = new NotebookModel();
-        let widget = new NotebookRenderer(model, defaultRenderMime());
+        widget.model = model;
         expect(widget.model).to.be(model);
       });
 
-      it('should be read-only', () => {
-        let widget = createWidget();
+      it('should call `initialize()` on the widget', () => {
+        let widget = new LogNotebookRenderer(defaultRenderMime());
+        let model = new NotebookModel();
+        widget.model = model;
+        expect(widget.methods.indexOf('initialize')).to.not.be(-1);
+      });
+
+      it('should throw an error when changing to a different value', () => {
+        let widget = new LogNotebookRenderer(defaultRenderMime());
+        let model = new NotebookModel();
+        widget.model = model;
+        expect(() => { widget.model = new NotebookModel(); }).to.throwError();
+      });
+
+      it('should throw an error if set to `null`', () => {
+        let widget = new LogNotebookRenderer(defaultRenderMime());
+        widget.model = new NotebookModel();
         expect(() => { widget.model = null; }).to.throwError();
+      });
+
+      it('should be a no-op if the value does not change', () => {
+        let widget = new NotebookRenderer(defaultRenderMime());
+        let model = new NotebookModel();
+        widget.model = model;
+        widget.model = model;
+        expect(widget.model).to.be(model);
       });
 
     });
@@ -207,7 +235,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should be the rendermime instance used by the widget', () => {
         let rendermime = defaultRenderMime();
-        let widget = new NotebookRenderer(new NotebookModel(), rendermime);
+        let widget = new NotebookRenderer(rendermime);
         expect(widget.rendermime).to.be(rendermime);
       });
 
@@ -220,15 +248,10 @@ describe('notebook/notebook/widget', () => {
 
     describe('#childAt()', () => {
 
-      it('should get the child widget at a specified index', (done) => {
+      it('should get the child widget at a specified index', () => {
         let widget = createWidget();
-        widget.attach(document.body);
-        requestAnimationFrame(() => {
-          let child = widget.childAt(0);
-          expect(child).to.be.a(CodeCellWidget);
-          widget.dispose();
-          done();
-        });
+        let child = widget.childAt(0);
+        expect(child).to.be.a(CodeCellWidget);
       });
 
       it('should return `undefined` if out of range', () => {
@@ -241,16 +264,11 @@ describe('notebook/notebook/widget', () => {
 
     describe('#childCount()', () => {
 
-      it('should get the number of child widgets', (done) => {
+      it('should get the number of child widgets', () => {
         let widget = createWidget();
-        expect(widget.childCount()).to.be(0);
+        expect(widget.childCount()).to.be(1);
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
-        requestAnimationFrame(() => {
-          expect(widget.childCount()).to.be(6);
-          widget.dispose();
-          done();
-        });
+        expect(widget.childCount()).to.be(6);
       });
 
     });
@@ -275,66 +293,43 @@ describe('notebook/notebook/widget', () => {
 
     });
 
-    describe('#onAfterAttach()', () => {
-
-      it('should initialize the widget', (done) => {
-        let widget = createWidget();
-        widget.attach(document.body);
-        requestAnimationFrame(() => {
-          expect(widget.methods.indexOf('onAfterAttach')).to.not.be(-1);
-          expect(widget.methods.indexOf('initialize')).to.not.be(-1);
-          done();
-        });
-      });
-
-    });
-
     describe('#initialize()', () => {
 
-      it('should add the cells to the initial layout', (done) => {
+      it('should add the cells to the initial layout', () => {
         let widget = createWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
-        requestAnimationFrame(() => {
-          expect(widget.childCount()).to.be(6);
-          expect(widget.methods.indexOf('initialize')).to.not.be(-1);
-          widget.dispose();
-          done();
-        });
+        expect(widget.childCount()).to.be(6);
+        expect(widget.methods.indexOf('initialize')).to.not.be(-1);
       });
 
     });
 
     describe('#onMetadataChanged()', () => {
 
-      it('should be called when the metadata on the notebook changes', (done) => {
+      it('should be called when the metadata on the notebook changes', () => {
         let widget = createWidget();
-        widget.attach(document.body);
-        requestAnimationFrame(() => {
-          widget.model.metadataChanged.connect(() => {
-            expect(widget.methods.indexOf('onMetadataChanged')).to.not.be(-1);
-            widget.dispose();
-            done();
-          });
-          let cursor = widget.model.getMetadata('foo');
-          cursor.setValue(1);
+        let called = false;
+        widget.model.metadataChanged.connect(() => {
+          expect(widget.methods.indexOf('onMetadataChanged')).to.not.be(-1);
+          called = true;
         });
+        let cursor = widget.model.getMetadata('foo');
+        cursor.setValue(1);
+        expect(called).to.be(true);
       });
 
-      it('should update the cell widget mimetype based on language info', (done) => {
+      it('should update the cell widget mimetype based on language info', () => {
         let widget = createWidget();
-        widget.attach(document.body);
-        requestAnimationFrame(() => {
-          widget.model.metadataChanged.connect(() => {
-            expect(widget.methods.indexOf('onMetadataChanged')).to.not.be(-1);
-            let child = widget.childAt(0);
-            expect(child.mimetype).to.be('text/x-python');
-            widget.dispose();
-            done();
-          });
-          let cursor = widget.model.getMetadata('language_info');
-          cursor.setValue({ name: 'python', mimetype: 'text/x-python' });
+        let called = false;
+        widget.model.metadataChanged.connect(() => {
+          expect(widget.methods.indexOf('onMetadataChanged')).to.not.be(-1);
+          let child = widget.childAt(0);
+          expect(child.mimetype).to.be('text/x-python');
+          called = true;
         });
+        let cursor = widget.model.getMetadata('language_info');
+        cursor.setValue({ name: 'python', mimetype: 'text/x-python' });
+        expect(called).to.be(true);
       });
 
     });
@@ -343,11 +338,9 @@ describe('notebook/notebook/widget', () => {
 
       let widget: LogNotebookRenderer;
 
-      beforeEach((done) => {
+      beforeEach(() => {
         widget = createWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
-        requestAnimationFrame(() => { done(); });
       });
 
       afterEach(() => {
@@ -355,6 +348,7 @@ describe('notebook/notebook/widget', () => {
       });
 
       it('should handle changes to the model cell list', () => {
+        widget = createWidget();
         expect(widget.methods.indexOf('onCellsChanged')).to.be(-1);
         widget.model.cells.clear();
         expect(widget.methods.indexOf('onCellsChanged')).to.not.be(-1);
@@ -401,33 +395,23 @@ describe('notebook/notebook/widget', () => {
 
     describe('#initializeCellWidget()', () => {
 
-      it('should add the `jp-Notebook-cell` class', (done) => {
+      it('should add the `jp-Notebook-cell` class', () => {
         let widget = createWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
-        requestAnimationFrame(() => {
-          expect(widget.methods.indexOf('initializeCellWidget')).to.not.be(-1);
-          widget.dispose();
-          done();
-        });
+        expect(widget.methods.indexOf('initializeCellWidget')).to.not.be(-1);
       });
 
     });
 
     describe('#updateMimetypes()', () => {
 
-      it('should set the mime types of the code cells', (done) => {
+      it('should set the mime types of the code cells', () => {
         let widget = createWidget();
         let cursor = widget.model.getMetadata('language_info');
         cursor.setValue({ name: 'python', codemirror_mode: 'python' });
-        widget.attach(document.body);
-        requestAnimationFrame(() => {
-          expect(widget.methods.indexOf('updateMimetypes')).to.not.be(-1);
-          let child = widget.childAt(0);
-          expect(child.mimetype).to.be('text/x-python');
-          widget.dispose();
-          done();
-        });
+        expect(widget.methods.indexOf('updateMimetypes')).to.not.be(-1);
+        let child = widget.childAt(0);
+        expect(child.mimetype).to.be('text/x-python');
       });
 
     });
@@ -498,22 +482,28 @@ describe('notebook/notebook/widget', () => {
         widget.mode = 'edit';
       });
 
-      it('should deselect all cells if switching to edit mode', () => {
+      it('should deselect all cells if switching to edit mode', (done) => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        for (let i = 0; i < widget.childCount(); i++) {
-          let cell = widget.childAt(i);
-          widget.select(cell);
-          expect(widget.isSelected(cell)).to.be(true);
-        }
-        widget.mode = 'edit';
-        for (let i = 0; i < widget.childCount(); i++) {
-          if (i === widget.activeCellIndex) {
-            continue;
+        widget.attach(document.body);
+        requestAnimationFrame(() => {
+          for (let i = 0; i < widget.childCount(); i++) {
+            let cell = widget.childAt(i);
+            widget.select(cell);
+            expect(widget.isSelected(cell)).to.be(true);
           }
-          let cell = widget.childAt(i);
-          expect(widget.isSelected(cell)).to.be(false);
-        }
+          widget.mode = 'edit';
+          for (let i = 0; i < widget.childCount(); i++) {
+            if (i === widget.activeCellIndex) {
+              continue;
+            }
+            let cell = widget.childAt(i);
+            expect(widget.isSelected(cell)).to.be(false);
+          }
+          widget.dispose();
+          done();
+        });
+
       });
 
     });
@@ -522,7 +512,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should get the active cell index of the notebook', () => {
         let widget = createActiveWidget();
-        expect(widget.activeCellIndex).to.be(-1);
+        expect(widget.activeCellIndex).to.be(0);
       });
 
       it('should set the active cell index of the notebook', () => {
@@ -556,17 +546,113 @@ describe('notebook/notebook/widget', () => {
         expect(called).to.be(true);
       });
 
+      it('should be a no-op if the value does not change', () => {
+        let widget = createActiveWidget();
+        let called = false;
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.stateChanged.connect(() => { called = true; });
+        widget.activeCellIndex = 0;
+        expect(called).to.be(false);
+      });
+
+      it('should post an update request', (done) => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        requestAnimationFrame(() => {
+          expect(widget.methods.indexOf('onUpdateRequest')).to.not.be(-1);
+          done();
+        });
+        widget.activeCellIndex = 1;
+      });
+
     });
 
     describe('#select()', () => {
+
+      let widget: LogActiveNotebook;
+
+      beforeEach((done) => {
+        widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.attach(document.body);
+        requestAnimationFrame(() => { done(); });
+      });
+
+      afterEach(() => {
+        widget.dispose();
+      });
+
+      it('should select a cell widget', () => {
+        let cell = widget.childAt(0);
+        widget.select(cell);
+        expect(widget.isSelected(cell)).to.be(true);
+      });
+
+      it('should allow multiple widgets to be selected', () => {
+        for (let i = 0; i < widget.childCount(); i++) {
+          let cell = widget.childAt(i);
+          widget.select(cell);
+          expect(widget.isSelected(cell)).to.be(true);
+        }
+      });
 
     });
 
     describe('#deselect()', () => {
 
+      let widget: LogActiveNotebook;
+
+      beforeEach((done) => {
+        widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.attach(document.body);
+        requestAnimationFrame(() => { done(); });
+      });
+
+      afterEach(() => {
+        widget.dispose();
+      });
+
+      it('should deselect a cell', () => {
+        for (let i = 0; i < widget.childCount(); i++) {
+          if (i === widget.activeCellIndex) {
+            continue;
+          }
+          let cell = widget.childAt(i);
+          widget.select(cell);
+          expect(widget.isSelected(cell)).to.be(true);
+          widget.deselect(cell);
+          expect(widget.isSelected(cell)).to.be(false);
+        }
+      });
+
+      it('should have no effect on the active cell', () => {
+        let cell = widget.childAt(widget.activeCellIndex);
+        expect(widget.isSelected(cell)).to.be(true);
+        widget.deselect(cell);
+        expect(widget.isSelected(cell)).to.be(true);
+      });
+
     });
 
     describe('#isSelected()', () => {
+
+      let widget: LogActiveNotebook;
+
+      beforeEach((done) => {
+        widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.attach(document.body);
+        requestAnimationFrame(() => { done(); });
+      });
+
+      afterEach(() => {
+        widget.dispose();
+      });
+
+      it('should get whether the cell is selected', () => {
+
+      });
 
     });
 

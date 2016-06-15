@@ -83,7 +83,9 @@ class NotebookPanel extends Widget {
    * Create a new content area for the notebook.
    */
   static createContent(model: INotebookModel, rendermime: RenderMime<Widget>): ActiveNotebook {
-    return new ActiveNotebook(model, rendermime);
+    let widget = new ActiveNotebook(rendermime);
+    widget.model = model;
+    return widget;
   }
 
   /**

@@ -122,24 +122,39 @@ class NotebookRenderer extends Widget {
   /**
    * Construct a notebook widget.
    */
-  constructor(model: INotebookModel, rendermime: RenderMime<Widget>) {
+  constructor(rendermime: RenderMime<Widget>) {
     super();
     this.node.tabIndex = -1;  // Allow the widget to take focus.
     this.addClass(NB_CLASS);
-    this._model = model;
     this._rendermime = rendermime;
     this.layout = new PanelLayout();
-    this._initialized = false;
   }
 
   /**
    * Get the model for the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get model(): INotebookModel {
     return this._model;
+  }
+
+  /**
+   * Set the model for the widget.
+   *
+   * #### Notes
+   * The model is single-use only. It cannot be set to `null` and it
+   * cannot be changed after the first assignment.
+   *
+   */
+  set model(value: INotebookModel) {
+    value = value || null;
+    if (this._model === value) {
+      return;
+    }
+    if (this._model) {
+      throw new Error('Cannot change widget model.');
+    }
+    this._model = value;
+    this.initialize(value);
   }
 
   /**
@@ -182,20 +197,9 @@ class NotebookRenderer extends Widget {
   }
 
   /**
-   * Handle `after_attach` messages for the widget.
+   * Initialize the widget based on the model.
    */
-  protected onAfterAttach(msg: Message): void {
-    if (!this._initialized) {
-      this.initialize();
-      this._initialized = true;
-    }
-  }
-
-  /**
-   * It should initialize the contents of the widget.
-   */
-  protected initialize(): void {
-    let model = this.model;
+  protected initialize(model: INotebookModel): void {
     let rendermime = this.rendermime;
 
     // Add the current cells.
@@ -305,7 +309,6 @@ class NotebookRenderer extends Widget {
 
   private _model: INotebookModel = null;
   private _rendermime: RenderMime<Widget> = null;
-  private _initialized = false;
 }
 
 
@@ -365,12 +368,6 @@ class ActiveNotebook extends NotebookRenderer {
     }
     let oldValue = this._activeCellIndex;
     this._activeCellIndex = newValue;
-    let widget = (this.layout as PanelLayout).childAt(newValue);
-    if (widget instanceof MarkdownCellWidget) {
-      if (this.mode === 'edit') {
-        widget.rendered = false;
-      }
-    }
     this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
     this.update();
   }
@@ -470,7 +467,13 @@ class ActiveNotebook extends NotebookRenderer {
     if (widget) {
       widget.addClass(ACTIVE_CLASS);
       Private.scrollIfNeeded(this.parent.node, widget.node);
+      if (widget instanceof MarkdownCellWidget) {
+        if (this.mode === 'edit') {
+          widget.rendered = false;
+        }
+      }
     }
+
     let count = 0;
     for (let i = 0; i < layout.childCount(); i++) {
       widget = layout.childAt(i) as BaseCellWidget;
