@@ -20,6 +20,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  simulate
+} from 'simulate-event';
+
+import {
   BaseCellWidget, CodeCellWidget, ICellModel, MarkdownCellWidget, RawCellWidget
 } from '../../../../lib/notebook/cells';
 
@@ -61,7 +65,7 @@ class LogNotebookRenderer extends NotebookRenderer {
   methods: string[] = [];
 
   protected onUpdateRequest(msg: Message): void {
-    super.onAfterAttach(msg);
+    super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
   }
 
@@ -114,7 +118,7 @@ class LogActiveNotebook extends ActiveNotebook {
   }
 
   protected onUpdateRequest(msg: Message): void {
-    super.onAfterAttach(msg);
+    super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
   }
 
@@ -660,11 +664,86 @@ describe('notebook/notebook/widget', () => {
 
     describe('#handleEvent()', () => {
 
+      let widget: LogActiveNotebook;
+
+      beforeEach((done) => {
+        widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.attach(document.body);
+        requestAnimationFrame(() => { done(); });
+      });
+
+      afterEach(() => {
+        widget.dispose();
+      });
+
       context('click', () => {
+
+        it('should set the active cell index', () => {
+          let child = widget.childAt(1);
+          simulate(child.node, 'click');
+          expect(widget.events.indexOf('click')).to.not.be(-1);
+          expect(widget.activeCellIndex).to.be(1);
+        });
+
+        it('should be a no-op if the model is read only', () => {
+          let child = widget.childAt(1);
+          widget.model.readOnly = true;
+          simulate(child.node, 'click');
+          expect(widget.events.indexOf('click')).to.not.be(-1);
+          expect(widget.activeCellIndex).to.be(0);
+        });
+
+        it('should be a no-op if not not a cell', () => {
+          simulate(widget.node, 'click');
+          expect(widget.events.indexOf('click')).to.not.be(-1);
+          expect(widget.activeCellIndex).to.be(0);
+        });
 
       });
 
       context('dblclick', () => {
+
+        it('should unrender a markdown cell', () => {
+          let cell = widget.model.createMarkdownCell();
+          widget.model.cells.add(cell);
+          let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
+          expect(child.rendered).to.be(true);
+          simulate(child.node, 'dblclick');
+          expect(child.rendered).to.be(false);
+        });
+
+        it('should be a no-op if the model is read only', () => {
+          let cell = widget.model.createMarkdownCell();
+          widget.model.cells.add(cell);
+          widget.model.readOnly = true;
+          let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
+          expect(child.rendered).to.be(true);
+          simulate(child.node, 'dblclick');
+          expect(child.rendered).to.be(true);
+        });
+
+      });
+
+      context('focus', () => {
+
+        it('should change to edit mode if a child cell takes focus', () => {
+          let child = widget.childAt(0);
+          simulate(child.editor.node, 'focus');
+          expect(widget.events.indexOf('focus')).to.not.be(-1);
+          expect(widget.mode).to.be('edit');
+        });
+
+        it('should change to command mode if the widget takes focus', () => {
+          let child = widget.childAt(0);
+          simulate(child.editor.node, 'focus');
+          expect(widget.events.indexOf('focus')).to.not.be(-1);
+          expect(widget.mode).to.be('edit');
+          widget.events = [];
+          simulate(widget.node, 'focus');
+          expect(widget.events.indexOf('focus')).to.not.be(-1);
+          expect(widget.mode).to.be('command');
+        });
 
       });
 
@@ -672,21 +751,181 @@ describe('notebook/notebook/widget', () => {
 
     describe('#onAfterAttach()', () => {
 
+      it('should add event listeners', (done) => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.attach(document.body);
+        let child = widget.childAt(0);
+        requestAnimationFrame(() => {
+          expect(widget.methods.indexOf('onAfterAttach')).to.not.be(-1);
+          simulate(widget.node, 'click');
+          expect(widget.events.indexOf('click')).to.not.be(-1);
+          simulate(widget.node, 'dblclick');
+          expect(widget.events.indexOf('dblclick')).to.not.be(-1);
+          simulate(child.node, 'focus');
+          expect(widget.events.indexOf('focus')).to.not.be(-1);
+          widget.dispose();
+          done();
+        });
+      });
+
+      it('should post an update request', (done) => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.attach(document.body);
+        requestAnimationFrame(() => {
+          expect(widget.methods.indexOf('onAfterAttach')).to.not.be(-1);
+          requestAnimationFrame(() => {
+            expect(widget.methods.indexOf('onUpdateRequest')).to.not.be(-1);
+            widget.dispose();
+            done();
+          });
+        });
+      });
+
     });
 
     describe('#onBeforeDetach()', () => {
+
+      it('should remove event listeners', (done) => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.attach(document.body);
+        let child = widget.childAt(0);
+        requestAnimationFrame(() => {
+          widget.detach();
+          expect(widget.methods.indexOf('onBeforeDetach')).to.not.be(-1);
+          simulate(widget.node, 'click');
+          expect(widget.events.indexOf('click')).to.be(-1);
+          simulate(widget.node, 'dblclick');
+          expect(widget.events.indexOf('dblclick')).to.be(-1);
+          simulate(child.node, 'focus');
+          expect(widget.events.indexOf('focus')).to.be(-1);
+          widget.dispose();
+          done();
+        });
+      });
 
     });
 
     describe('#onUpdateRequest()', () => {
 
+      let widget: LogActiveNotebook;
+
+      beforeEach((done) => {
+        widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.attach(document.body);
+        requestAnimationFrame(() => {  done(); });
+      });
+
+      afterEach(() => {
+        widget.dispose();
+      });
+
+      it('should apply the command class if in command mode', () => {
+        expect(widget.methods.indexOf('onUpdateRequest')).to.not.be(-1);
+        expect(widget.hasClass('jp-mod-commandMode')).to.be(true);
+      });
+
+      it('should focus the widget if in command mode', () => {
+        expect(widget.node).to.be(document.activeElement);
+      });
+
+      it('should apply the edit class if in edit mode', (done) => {
+        widget.mode = 'edit';
+        requestAnimationFrame(() => {
+          expect(widget.hasClass('jp-mod-editMode')).to.be(true);
+          done();
+        });
+      });
+
+      it('should focus the cell if in edit mode', (done) => {
+        widget.mode = 'edit';
+        let cell = widget.childAt(widget.activeCellIndex);
+        requestAnimationFrame(() => {
+          expect(cell.node.contains(document.activeElement)).to.be(true);
+          done();
+        });
+      });
+
+      it('should unrender a markdown cell in edit mode', (done) => {
+        let cell = widget.model.createMarkdownCell();
+        widget.model.cells.add(cell);
+        let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
+        expect(child.rendered).to.be(true);
+        widget.activeCellIndex = widget.childCount() - 1;
+        widget.mode = 'edit';
+        requestAnimationFrame(() => {
+          expect(child.rendered).to.be(false);
+          done();
+        });
+      });
+
+      it('should add the active class to the active widget', () => {
+        let cell = widget.childAt(widget.activeCellIndex);
+        expect(cell.hasClass('jp-mod-active')).to.be(true);
+      });
+
+      it('should set the selected class on the selected widgets', (done) => {
+        widget.select(widget.childAt(1));
+        requestAnimationFrame(() => {
+          for (let i = 0; i < 2; i++) {
+            let cell = widget.childAt(i);
+            expect(cell.hasClass('jp-mod-selected')).to.be(true);
+            done();
+          }
+        });
+      });
+
+      it('should add the multi select class if there is more than one widget', (done) => {
+        widget.select(widget.childAt(1));
+        expect(widget.hasClass('jp-mod-multSelected')).to.be(false);
+        requestAnimationFrame(() => {
+          expect(widget.hasClass('jp-mod-multSelected')).to.be(false);
+          done();
+        });
+      });
+
     });
 
     describe('#initializeCellWidget()', () => {
 
+      it('should add the `jp-Notebook-cell` class', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        expect(widget.methods.indexOf('initializeCellWidget')).to.not.be(-1);
+      });
+
+      it("should connect edge requested signals from the widget's editor", () => {
+        let widget = createActiveWidget();
+        let child = widget.childAt(widget.activeCellIndex);
+        child.editor.edgeRequested.emit('top');
+        expect(widget.methods.indexOf('onEdgeRequest')).to.not.be(-1);
+      });
+
     });
 
     describe('#onEdgeRequest()', () => {
+
+      it('should activate the previous cell if top is requested', () => {
+        let widget = createActiveWidget()
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.activeCellIndex = 1;
+        let child = widget.childAt(widget.activeCellIndex);
+        child.editor.edgeRequested.emit('top');
+        expect(widget.methods.indexOf('onEdgeRequest')).to.not.be(-1);
+        expect(widget.activeCellIndex).to.be(0);
+      });
+
+      it('should activate the next cell if bottom is requested', ()  => {
+        let widget = createActiveWidget()
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        let child = widget.childAt(widget.activeCellIndex);
+        child.editor.edgeRequested.emit('bottom');
+        expect(widget.methods.indexOf('onEdgeRequest')).to.not.be(-1);
+        expect(widget.activeCellIndex).to.be(1);
+      });
 
     });
 

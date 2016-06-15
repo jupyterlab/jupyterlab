@@ -425,6 +425,9 @@ class ActiveNotebook extends NotebookRenderer {
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
+    case 'focus':
+      this._evtFocus(event as FocusEvent);
+      break;
     default:
       break;
     }
@@ -437,6 +440,7 @@ class ActiveNotebook extends NotebookRenderer {
     super.onAfterAttach(msg);
     this.node.addEventListener('click', this);
     this.node.addEventListener('dblclick', this);
+    this.node.addEventListener('focus', this, true);
     this.update();
   }
 
@@ -446,6 +450,7 @@ class ActiveNotebook extends NotebookRenderer {
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('dblclick', this);
+    this.node.removeEventListener('focus', this, true);
   }
 
   /**
@@ -460,9 +465,9 @@ class ActiveNotebook extends NotebookRenderer {
       this.removeClass(COMMAND_CLASS);
       if (widget) {
         widget.focus();
-      }
-      if (widget instanceof MarkdownCellWidget) {
-        (widget as MarkdownCellWidget).rendered = false;
+        if (widget instanceof MarkdownCellWidget) {
+          (widget as MarkdownCellWidget).rendered = false;
+        }
       }
     } else {
       this.addClass(COMMAND_CLASS);
@@ -471,11 +476,8 @@ class ActiveNotebook extends NotebookRenderer {
     }
     if (widget) {
       widget.addClass(ACTIVE_CLASS);
-      Private.scrollIfNeeded(this.parent.node, widget.node);
-      if (widget instanceof MarkdownCellWidget) {
-        if (this.mode === 'edit') {
-          widget.rendered = false;
-        }
+      if (this.parent) {
+        Private.scrollIfNeeded(this.parent.node, widget.node);
       }
     }
 
@@ -556,7 +558,6 @@ class ActiveNotebook extends NotebookRenderer {
       return;
     }
     this.activeCellIndex = i;
-    this.mode = document.activeElement === this.node ? 'command' : 'edit';
   }
 
   /**
@@ -573,10 +574,19 @@ class ActiveNotebook extends NotebookRenderer {
     }
     let cell = model.cells.get(i) as MarkdownCellModel;
     let widget = (this.layout as PanelLayout).childAt(i) as MarkdownCellWidget;
-    if (cell.type !== 'markdown' || !widget.rendered) {
+    if (cell.type === 'markdown') {
+      widget.rendered = false;
       return;
     }
-    if (widget.node.contains(event.target as HTMLElement)) {
+  }
+
+  /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocus(event: FocusEvent): void {
+    if (event.target === this.node) {
+      this.mode = 'command';
+    } else {
       this.mode = 'edit';
     }
   }
