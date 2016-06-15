@@ -795,6 +795,7 @@ describe('notebook/notebook/widget', () => {
         requestAnimationFrame(() => {
           widget.detach();
           expect(widget.methods.indexOf('onBeforeDetach')).to.not.be(-1);
+          widget.events = [];
           simulate(widget.node, 'click');
           expect(widget.events.indexOf('click')).to.be(-1);
           simulate(widget.node, 'dblclick');
@@ -909,7 +910,7 @@ describe('notebook/notebook/widget', () => {
     describe('#onEdgeRequest()', () => {
 
       it('should activate the previous cell if top is requested', () => {
-        let widget = createActiveWidget()
+        let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         widget.activeCellIndex = 1;
         let child = widget.childAt(widget.activeCellIndex);
@@ -919,7 +920,7 @@ describe('notebook/notebook/widget', () => {
       });
 
       it('should activate the next cell if bottom is requested', ()  => {
-        let widget = createActiveWidget()
+        let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         let child = widget.childAt(widget.activeCellIndex);
         child.editor.edgeRequested.emit('bottom');
