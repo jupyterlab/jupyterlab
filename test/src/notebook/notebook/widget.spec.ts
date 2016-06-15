@@ -16,15 +16,23 @@ import {
 } from 'phosphor-properties';
 
 import {
+  Widget
+} from 'phosphor-widget';
+
+import {
   BaseCellWidget, CodeCellWidget, ICellModel, MarkdownCellWidget, RawCellWidget
 } from '../../../../lib/notebook/cells';
+
+import {
+  EdgeLocation
+} from '../../../../lib/notebook/cells/editor';
 
 import {
   INotebookModel, NotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
 import {
-  NotebookRenderer
+  ActiveNotebook, NotebookRenderer
 } from '../../../../lib/notebook/notebook/widget';
 
 import {
@@ -84,6 +92,51 @@ class LogNotebookRenderer extends NotebookRenderer {
     this.methods.push('updateMimetypes');
     return super.updateMimetypes();
   }
+}
+
+
+class LogActiveNotebook extends ActiveNotebook {
+
+  events: string[] = [];
+
+  methods: string[] = [];
+
+  handleEvent(event: Event): void {
+    this.events.push(event.type);
+    super.handleEvent(event);
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.methods.push('onAfterAttach');
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    super.onBeforeDetach(msg);
+    this.methods.push('onBeforeDetach');
+  }
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.methods.push('onUpdateRequest');
+  }
+
+  protected initializeCellWidget(widget: BaseCellWidget): void {
+    super.initializeCellWidget(widget);
+    this.methods.push('initializeCellWidget');
+  }
+
+  protected onEdgeRequest(widget: Widget, location: EdgeLocation): void {
+    super.onEdgeRequest(widget, location);
+    this.methods.push('onEdgeRequest');
+  }
+}
+
+
+function createActiveWidget(): LogActiveNotebook {
+  let model = new NotebookModel();
+  let rendermime = defaultRenderMime();
+  return new LogActiveNotebook(model, rendermime);
 }
 
 
@@ -376,6 +429,176 @@ describe('notebook/notebook/widget', () => {
           done();
         });
       });
+
+    });
+
+  });
+
+  describe('ActiveNotebook', () => {
+
+    describe('#stateChanged', () => {
+
+      it('should be emitted when the state of the notebook changes', () => {
+        let widget = createActiveWidget();
+        let called = false;
+        widget.stateChanged.connect((sender, args) => {
+          expect(sender).to.be(widget);
+          expect(args.name).to.be('mode');
+          expect(args.oldValue).to.be('command');
+          expect(args.newValue).to.be('edit');
+          called = true;
+        });
+        widget.mode = 'edit';
+        expect(called).to.be(true);
+      });
+
+    });
+
+    describe('#mode', () => {
+
+      it('should get the interactivity mode of the notebook', () => {
+        let widget = createActiveWidget();
+        expect(widget.mode).to.be('command');
+      });
+
+      it('should set the interactivity mode of the notebook', () => {
+        let widget = createActiveWidget();
+        widget.mode = 'edit';
+        expect(widget.mode).to.be('edit');
+      });
+
+      it('should emit the `stateChanged` signal', () => {
+        let widget = createActiveWidget();
+        let called = false;
+        widget.stateChanged.connect((sender, args) => {
+          expect(sender).to.be(widget);
+          expect(args.name).to.be('mode');
+          expect(args.oldValue).to.be('command');
+          expect(args.newValue).to.be('edit');
+          called = true;
+        });
+        widget.mode = 'edit';
+        expect(called).to.be(true);
+      });
+
+      it('should be a no-op if the value does not change', () => {
+        let widget = createActiveWidget();
+        let called = false;
+        widget.stateChanged.connect(() => { called = true; });
+        widget.mode = 'command';
+        expect(called).to.be(false);
+      });
+
+      it('should post an update request', (done) => {
+        let widget = createActiveWidget();
+        requestAnimationFrame(() => {
+          expect(widget.methods.indexOf('onUpdateRequest')).to.not.be(-1);
+          done();
+        });
+        widget.mode = 'edit';
+      });
+
+      it('should deselect all cells if switching to edit mode', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        for (let i = 0; i < widget.childCount(); i++) {
+          let cell = widget.childAt(i);
+          widget.select(cell);
+          expect(widget.isSelected(cell)).to.be(true);
+        }
+        widget.mode = 'edit';
+        for (let i = 0; i < widget.childCount(); i++) {
+          if (i === widget.activeCellIndex) {
+            continue;
+          }
+          let cell = widget.childAt(i);
+          expect(widget.isSelected(cell)).to.be(false);
+        }
+      });
+
+    });
+
+    describe('#activeCellIndex', () => {
+
+      it('should get the active cell index of the notebook', () => {
+        let widget = createActiveWidget();
+        expect(widget.activeCellIndex).to.be(-1);
+      });
+
+      it('should set the active cell index of the notebook', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.activeCellIndex = 1;
+        expect(widget.activeCellIndex).to.be(1);
+      });
+
+      it('should clamp the index to the bounds of the notebook cells', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.activeCellIndex = -2;
+        expect(widget.activeCellIndex).to.be(0);
+        widget.activeCellIndex = 100;
+        expect(widget.activeCellIndex).to.be(5);
+      });
+
+      it('should emit the `stateChanged` signal', () => {
+        let widget = createActiveWidget();
+        let called = false;
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.stateChanged.connect((sender, args) => {
+          expect(sender).to.be(widget);
+          expect(args.name).to.be('activeCellIndex');
+          expect(args.oldValue).to.be(0);
+          expect(args.newValue).to.be(1);
+          called = true;
+        });
+        widget.activeCellIndex = 1;
+        expect(called).to.be(true);
+      });
+
+    });
+
+    describe('#select()', () => {
+
+    });
+
+    describe('#deselect()', () => {
+
+    });
+
+    describe('#isSelected()', () => {
+
+    });
+
+    describe('#handleEvent()', () => {
+
+      context('click', () => {
+
+      });
+
+      context('dblclick', () => {
+
+      });
+
+    });
+
+    describe('#onAfterAttach()', () => {
+
+    });
+
+    describe('#onBeforeDetach()', () => {
+
+    });
+
+    describe('#onUpdateRequest()', () => {
+
+    });
+
+    describe('#initializeCellWidget()', () => {
+
+    });
+
+    describe('#onEdgeRequest()', () => {
 
     });
 

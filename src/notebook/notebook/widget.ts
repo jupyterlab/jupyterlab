@@ -347,11 +347,17 @@ class ActiveNotebook extends NotebookRenderer {
 
   /**
    * The active cell index of the notebook.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the notebook cells.
    */
   get activeCellIndex(): number {
-    return this._activeCellIndex;
+    return this.model.cells.length ? this._activeCellIndex : -1;
   }
   set activeCellIndex(newValue: number) {
+    if (!this.model.cells.length) {
+      return;
+    }
     newValue = Math.max(newValue, 0);
     newValue = Math.min(newValue, this.model.cells.length - 1);
     if (newValue === this._activeCellIndex) {
