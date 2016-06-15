@@ -66,6 +66,7 @@
     "build:examples": "node scripts/buildexamples.js",
     "build:src": "tsc --project src && node scripts/copyfiles.js",
     "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
+    "build:serverextension": "cd jupyterlab && npm run build && cd ..",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
     "clean:examples": "node scripts/cleanexamples.js",
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
@@ -78,6 +79,7 @@
     "test:firefox": "karma start --browsers=Firefox test/karma.conf.js",
     "test:ie": "karma start --browsers=IE test/karma.conf.js",
     "watch": "watch 'npm run build' src --wait 10",
+    "watch:serverextension": "watch 'npm run build:serverextension' src --wait 10",
     "watch:test": "watch 'npm run build && npm test' src test/src --wait 10"
   },
   "repository": {

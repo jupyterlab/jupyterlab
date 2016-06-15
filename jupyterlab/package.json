@@ -23,7 +23,9 @@
   },
   "scripts": {
     "clean": "rimraf build",
-    "build": "rimraf node_modules/jupyterlab && npm install && webpack --config webpack.conf.js",
+    "update": "rimraf node_modules/jupyterlab && npm install",
+    "build": "npm run update && npm run build:extension",
+    "build:extension": "webpack --config webpack.conf.js",
     "postinstall": "npm dedupe",
     "test": "echo 'no tests specified'"
   },

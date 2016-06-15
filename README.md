@@ -15,13 +15,15 @@ Jupyter Server Extension
 The Jupyter server extension source files are in the `jupyterlab/` subdirectory. To use this extension, you need the Jupyter notebook server version 4.2 or later.
 
 ### User installation
-```
+
+```bash
 pip install jupyterlab
 jupyter serverextension enable --py jupyterlab
 ```
 
 Start up Jupyterlab with the command:
-```
+
+```bash
 jupyter lab
 ```
 
@@ -29,9 +31,10 @@ Open a browser to the notebook server's URL (e.g., `http://localhost:8888`).
 
 
 ### Developer Installation
+
 You will need npm (preferably version 5 or later).
 
-```
+```bash
 git clone https://github.com/jupyter/jupyterlab.git
 cd jupyterlab
 npm install
@@ -40,18 +43,28 @@ jupyter serverextension enable --py jupyterlab
 ```
 
 Start up Jupyterlab with the command:
-```
+
+```bash
 jupyter lab
 ```
 
 Open a browser to the notebook server's URL (e.g., `http://localhost:8888`).
 
 When you make a change to JupyterLab npm package source files, run:
-```
-python setup.py jsdeps
+
+```bash
+npm run build:serverextension
 ```
 
 to build the changes and refresh your browser to see the changes.
+
+To have the system build after each change to the source files, run:
+ 
+```bash
+npm run watch:serverextension
+```
+
+and refresh the browser after each sucessful update.
 
 
 NPM Package
@@ -78,10 +91,18 @@ npm run build
 ```
 
 **Rebuild**
+
 ```bash
 npm run clean
 npm run build
 ```
+
+### Build JupyterLab server extension
+
+```bash
+npm run build:serverextension
+```
+
 
 ### Run Tests
 
