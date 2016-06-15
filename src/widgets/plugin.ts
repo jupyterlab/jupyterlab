@@ -3,7 +3,7 @@
 
 import {
   IWidgetExtension, IDocumentContext, IDocumentModel, DocumentRegistry
-} from '../docmanager';
+} from '../docregistry';
 
 import {
   IDisposable, DisposableDelegate
@@ -47,7 +47,7 @@ class IPyWidgetExtension implements IWidgetExtension<NotebookPanel>{
   /**
    * Create a new extension object.
    */
-  createNew(nb: NotebookPanel, model: IDocumentModel, 
+  createNew(nb: NotebookPanel, model: IDocumentModel,
             context: IDocumentContext): IDisposable {
     let wManager = new WidgetManager(context);
     let wRenderer = new WidgetRenderer(wManager);

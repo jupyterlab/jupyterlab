@@ -11,7 +11,7 @@ import {
 
 import {
   selectKernel
-} from '../docmanager';
+} from '../docregistry';
 
 import {
   Application

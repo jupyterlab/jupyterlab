@@ -24,7 +24,7 @@ import {
 
 import {
   IDocumentContext, IDocumentModel, IModelFactory
-} from './index';
+} from '../docregistry';
 
 
 /**

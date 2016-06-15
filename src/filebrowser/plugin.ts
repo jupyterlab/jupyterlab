@@ -10,8 +10,12 @@ import {
 } from './model';
 
 import {
-  DocumentManager, DocumentRegistry, DocumentWrapper
+  DocumentManager, DocumentWrapper
 } from '../docmanager';
+
+import {
+  DocumentRegistry
+} from '../docregistry';
 
 import {
   Application

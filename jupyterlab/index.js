@@ -13,10 +13,10 @@ var app = new phosphide.Application({
   extensions: [
     require('jupyterlab/lib/about/plugin').aboutExtension,
     require('jupyterlab/lib/console/plugin').consoleExtension,
-    require('jupyterlab/lib/editorhandler/plugin').editorHandlerExtension,
+    require('jupyterlab/lib/editorwidget/plugin').editorHandlerExtension,
     require('jupyterlab/lib/filebrowser/plugin').fileBrowserExtension,
     require('jupyterlab/lib/help/plugin').helpHandlerExtension,
-    require('jupyterlab/lib/imagehandler/plugin').imageHandlerExtension,
+    require('jupyterlab/lib/imagewidget/plugin').imageHandlerExtension,
     require('jupyterlab/lib/landing/plugin').landingExtension,
     require('jupyterlab/lib/main/plugin').mainExtension,
     require('jupyterlab/lib/notebook/plugin').notebookHandlerExtension,

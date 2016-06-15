@@ -11,8 +11,12 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  DocumentWrapper, DocumentManager, DocumentRegistry, selectKernelForContext
+  DocumentWrapper, DocumentManager
 } from 'jupyterlab/lib/docmanager';
+
+import {
+  DocumentRegistry, selectKernelForContext
+} from 'jupyterlab/lib/docregistry';
 
 import {
   RenderMime, IRenderer, MimeMap

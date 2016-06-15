@@ -7,7 +7,7 @@ import {
 
 import {
   IModelFactory
-} from '../../docmanager';
+} from '../../docregistry';
 
 import {
   INotebookModel, NotebookModel

@@ -14,12 +14,12 @@ import {
 } from '../dialog';
 
 import {
-  DocumentManager, IKernelPreference, DocumentWrapper
+  DocumentManager, DocumentWrapper
 } from '../docmanager';
 
 import {
-  populateKernels
-} from '../docmanager/kernelselector';
+  IKernelPreference, populateKernels
+} from '../docregistry';
 
 import {
   FileBrowserModel

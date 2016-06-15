@@ -36,16 +36,12 @@ import {
 } from '../filebrowser/browser';
 
 import {
+  DocumentRegistry, IDocumentContext, IWidgetFactory, IWidgetFactoryOptions
+} from '../docregistry';
+
+import {
   ContextManager
 } from './context';
-
-import {
-  IDocumentContext, IWidgetFactory, IWidgetFactoryOptions
-} from './interfaces';
-
-import {
-  DocumentRegistry
-} from './registry';
 
 
 /**

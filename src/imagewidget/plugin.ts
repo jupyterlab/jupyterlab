@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  DocumentRegistry, ImageWidgetFactory
-} from '../docmanager';
+  DocumentRegistry
+} from '../docregistry';
+
+import {
+  ImageWidgetFactory
+} from './widget';
 
 import {
   Application
