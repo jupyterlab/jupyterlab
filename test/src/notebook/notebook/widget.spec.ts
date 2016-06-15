@@ -16,7 +16,7 @@ import {
 } from 'phosphor-properties';
 
 import {
-  Widget
+  ChildMessage, Widget
 } from 'phosphor-widget';
 
 import {
@@ -36,7 +36,7 @@ import {
 } from '../../../../lib/notebook/notebook/model';
 
 import {
-  ActiveNotebook, NotebookRenderer
+  Notebook, StaticNotebook
 } from '../../../../lib/notebook/notebook/widget';
 
 import {
@@ -51,16 +51,16 @@ import {
 const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
 
-function createWidget(): LogNotebookRenderer {
+function createWidget(): LogStaticNotebook {
   let model = new NotebookModel();
   let rendermime = defaultRenderMime();
-  let widget = new LogNotebookRenderer(rendermime);
+  let widget = new LogStaticNotebook(rendermime);
   widget.model = model;
   return widget;
 }
 
 
-class LogNotebookRenderer extends NotebookRenderer {
+class LogStaticNotebook extends StaticNotebook {
 
   methods: string[] = [];
 
@@ -69,34 +69,29 @@ class LogNotebookRenderer extends NotebookRenderer {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
-    super.onMetadataChanged(model, args);
-    this.methods.push('onMetadataChanged');
+  protected onChildAdded(msg: ChildMessage): void {
+    super.onChildAdded(msg);
+    this.methods.push('onChildAdded');
   }
 
-  protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
-    super.onCellsChanged(sender, args);
-    this.methods.push('onCellsChanged');
+  protected onChildRemoved(msg: ChildMessage): void {
+    super.onChildRemoved(msg);
+    this.methods.push('onChildRemoved');
   }
 
-  protected initialize(model: INotebookModel): void {
-    super.initialize(model);
-    this.methods.push('initialize');
+  protected changeModel(oldValue: INotebookModel, newValue: INotebookModel): void {
+    super.changeModel(oldValue, newValue);
+    this.methods.push('changeModel');
   }
 
-  protected initializeCellWidget(widget: BaseCellWidget): void {
-    super.initializeCellWidget(widget);
-    this.methods.push('initializeCellWidget');
-  }
-
-  protected updateMimetypes(): void {
-    this.methods.push('updateMimetypes');
-    return super.updateMimetypes();
+  protected setChildMimetypes(): void {
+    this.methods.push('setChildMimetypes');
+    return super.setChildMimetypes();
   }
 }
 
 
-class LogActiveNotebook extends ActiveNotebook {
+class LogNotebook extends Notebook {
 
   events: string[] = [];
 
@@ -122,22 +117,17 @@ class LogActiveNotebook extends ActiveNotebook {
     this.methods.push('onUpdateRequest');
   }
 
-  protected initializeCellWidget(widget: BaseCellWidget): void {
-    super.initializeCellWidget(widget);
-    this.methods.push('initializeCellWidget');
-  }
-
-  protected onEdgeRequest(widget: Widget, location: EdgeLocation): void {
-    super.onEdgeRequest(widget, location);
-    this.methods.push('onEdgeRequest');
+  protected onChildAdded(msg: ChildMessage): void {
+    super.onChildAdded(msg);
+    this.methods.push('onChildAdded');
   }
 }
 
 
-function createActiveWidget(): LogActiveNotebook {
+function createActiveWidget(): LogNotebook {
   let model = new NotebookModel();
   let rendermime = defaultRenderMime();
-  let widget = new LogActiveNotebook(rendermime);
+  let widget = new LogNotebook(rendermime);
   widget.model = model;
   return widget;
 }
@@ -145,7 +135,7 @@ function createActiveWidget(): LogActiveNotebook {
 
 describe('notebook/notebook/widget', () => {
 
-  describe('NotebookRenderer', () => {
+  describe('StaticNotebook', () => {
 
     describe('.createCell()', () => {
 
@@ -153,7 +143,7 @@ describe('notebook/notebook/widget', () => {
         let model = new NotebookModel();
         let rendermime = defaultRenderMime();
         let cell = model.createCodeCell();
-        let widget = NotebookRenderer.createCell(cell, rendermime);
+        let widget = StaticNotebook.createCell(cell, rendermime);
         expect(widget).to.be.a(CodeCellWidget);
       });
 
@@ -161,7 +151,7 @@ describe('notebook/notebook/widget', () => {
         let model = new NotebookModel();
         let rendermime = defaultRenderMime();
         let cell = model.createRawCell();
-        let widget = NotebookRenderer.createCell(cell, rendermime);
+        let widget = StaticNotebook.createCell(cell, rendermime);
         expect(widget).to.be.a(RawCellWidget);
       });
 
@@ -169,7 +159,7 @@ describe('notebook/notebook/widget', () => {
         let model = new NotebookModel();
         let rendermime = defaultRenderMime();
         let cell = model.createMarkdownCell();
-        let widget = NotebookRenderer.createCell(cell, rendermime);
+        let widget = StaticNotebook.createCell(cell, rendermime);
         expect(widget).to.be.a(MarkdownCellWidget);
       });
 
@@ -179,14 +169,31 @@ describe('notebook/notebook/widget', () => {
 
       it('should create a notebook widget', () => {
         let rendermime = defaultRenderMime();
-        let widget = new NotebookRenderer(rendermime);
-        expect(widget).to.be.a(NotebookRenderer);
+        let widget = new StaticNotebook(rendermime);
+        expect(widget).to.be.a(StaticNotebook);
       });
 
       it('should add the `jp-Notebook` class', () => {
         let rendermime = defaultRenderMime();
-        let widget = new NotebookRenderer(rendermime);
+        let widget = new StaticNotebook(rendermime);
         expect(widget.hasClass('jp-Notebook')).to.be(true);
+      });
+
+    });
+
+    describe('#modelChanged', () => {
+
+      it('should be emitted when the model changes', () => {
+        let widget = new StaticNotebook(defaultRenderMime());
+        let model = new NotebookModel();
+        let called = false;
+        widget.modelChanged.connect((sender, args) => {
+          expect(sender).to.be(widget);
+          expect(args).to.be(model);
+          called = true;
+        });
+        widget.model = model;
+        expect(called).to.be(true);
       });
 
     });
@@ -194,43 +201,50 @@ describe('notebook/notebook/widget', () => {
     describe('#model', () => {
 
       it('should get the model for the widget', () => {
-        let widget = new NotebookRenderer(defaultRenderMime());
+        let widget = new StaticNotebook(defaultRenderMime());
         expect(widget.model).to.be(null);
       });
 
       it('should set the model for the widget', () => {
-        let widget = new NotebookRenderer(defaultRenderMime());
+        let widget = new StaticNotebook(defaultRenderMime());
         let model = new NotebookModel();
         widget.model = model;
         expect(widget.model).to.be(model);
       });
 
-      it('should call `initialize()` on the widget', () => {
-        let widget = new LogNotebookRenderer(defaultRenderMime());
+      it('should emit the `modelChanged` signal', () => {
+        let widget = new StaticNotebook(defaultRenderMime());
         let model = new NotebookModel();
         widget.model = model;
-        expect(widget.methods.indexOf('initialize')).to.not.be(-1);
-      });
-
-      it('should throw an error when changing to a different value', () => {
-        let widget = new LogNotebookRenderer(defaultRenderMime());
-        let model = new NotebookModel();
-        widget.model = model;
-        expect(() => { widget.model = new NotebookModel(); }).to.throwError();
-      });
-
-      it('should throw an error if set to `null`', () => {
-        let widget = new LogNotebookRenderer(defaultRenderMime());
+        let called = false;
+        widget.modelChanged.connect(() => { called = true; });
         widget.model = new NotebookModel();
-        expect(() => { widget.model = null; }).to.throwError();
+        expect(called).to.be(true);
       });
 
       it('should be a no-op if the value does not change', () => {
-        let widget = new NotebookRenderer(defaultRenderMime());
+        let widget = new StaticNotebook(defaultRenderMime());
         let model = new NotebookModel();
         widget.model = model;
+        let called = false;
+        widget.modelChanged.connect(() => { called = true; });
         widget.model = model;
-        expect(widget.model).to.be(model);
+        expect(called).to.be(false);
+      });
+
+      it('should call `changeModel`', () => {
+        let widget = new LogStaticNotebook(defaultRenderMime());
+        let model = new NotebookModel();
+        widget.model = model;
+        expect(widget.methods.indexOf('changeModel')).to.not.be(-1);
+      });
+
+      context('`cells.changed` signal', () => {
+
+      });
+
+      context('`metadataChanged` signal', () => {
+
       });
 
     });
@@ -239,7 +253,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should be the rendermime instance used by the widget', () => {
         let rendermime = defaultRenderMime();
-        let widget = new NotebookRenderer(rendermime);
+        let widget = new StaticNotebook(rendermime);
         expect(widget.rendermime).to.be(rendermime);
       });
 
@@ -297,31 +311,20 @@ describe('notebook/notebook/widget', () => {
 
     });
 
-    describe('#initialize()', () => {
+    describe('#changeModel()', () => {
 
-      it('should add the cells to the initial layout', () => {
-        let widget = new LogNotebookRenderer(defaultRenderMime());
+      it('should add the model cells to the layout', () => {
+        let widget = new LogStaticNotebook(defaultRenderMime());
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
-        expect(widget.methods.indexOf('initialize')).to.be(-1);
+        expect(widget.methods.indexOf('changeModel')).to.be(-1);
         widget.model = model;
         expect(widget.childCount()).to.be(6);
-        expect(widget.methods.indexOf('initialize')).to.not.be(-1);
-      });
-
-      it('should add a code cell if there are no cells', () => {
-        let widget = new LogNotebookRenderer(defaultRenderMime());
-        let model = new NotebookModel();
-        expect(widget.methods.indexOf('initialize')).to.be(-1);
-        widget.model = model;
-        expect(widget.childCount()).to.be(1);
-        expect(widget.methods.indexOf('initialize')).to.not.be(-1);
-        let cell = widget.childAt(0);
-        expect(cell).to.be.a(CodeCellWidget);
+        expect(widget.methods.indexOf('changeModel')).to.not.be(-1);
       });
 
       it('should set the mime types of the cell widgets', () => {
-        let widget = new LogNotebookRenderer(defaultRenderMime());
+        let widget = new LogStaticNotebook(defaultRenderMime());
         let model = new NotebookModel();
         let cursor = model.getMetadata('language_info');
         cursor.setValue({ name: 'python', codemirror_mode: 'python' });
@@ -364,7 +367,7 @@ describe('notebook/notebook/widget', () => {
 
     describe('#onCellsChanged()', () => {
 
-      let widget: LogNotebookRenderer;
+      let widget: LogStaticNotebook;
 
       beforeEach(() => {
         widget = createWidget();
@@ -446,7 +449,7 @@ describe('notebook/notebook/widget', () => {
 
   });
 
-  describe('ActiveNotebook', () => {
+  describe('Notebook', () => {
 
     describe('#stateChanged', () => {
 
@@ -664,7 +667,7 @@ describe('notebook/notebook/widget', () => {
 
     describe('#handleEvent()', () => {
 
-      let widget: LogActiveNotebook;
+      let widget: LogNotebook;
 
       beforeEach((done) => {
         widget = createActiveWidget();
@@ -811,7 +814,7 @@ describe('notebook/notebook/widget', () => {
 
     describe('#onUpdateRequest()', () => {
 
-      let widget: LogActiveNotebook;
+      let widget: LogNotebook;
 
       beforeEach((done) => {
         widget = createActiveWidget();
