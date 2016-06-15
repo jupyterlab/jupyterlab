@@ -21,6 +21,10 @@ import {
 } from 'phosphor-messaging';
 
 import {
+  sanitize
+} from 'sanitizer';
+
+import {
   typeset, removeMath, replaceMath
 } from './latex';
 
@@ -202,6 +206,7 @@ class MarkdownRenderer implements IRenderer<Widget> {
   render(mimetype: string, text: string): Widget {
     let data = removeMath(text);
     let html = marked(data['text']);
-    return new HTMLWidget(replaceMath(html, data['math']));
+    let sanitized = sanitize(replaceMath(html, data['math']));
+    return new HTMLWidget(sanitized);
   }
 }
