@@ -173,7 +173,7 @@ class BaseCellWidget extends Widget {
 
     model.metadataChanged.connect(this.onMetadataChanged, this);
     this._trustedCursor = model.getMetadata('trusted');
-    this._trusted = this._trustedCursor.getValue();
+    this._trusted = !!this._trustedCursor.getValue();
   }
 
   /**
