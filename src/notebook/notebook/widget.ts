@@ -198,26 +198,31 @@ class NotebookRenderer extends Widget {
 
   /**
    * Initialize the widget based on the model.
+   *
+   * #### Notes
+   * Creates child widgets for each of the cells in the model.
+   * If there are no cells, adds a single code cell.
    */
   protected initialize(model: INotebookModel): void {
     let rendermime = this.rendermime;
+    let cells = model.cells;
 
     // Add the current cells.
-    if (model.cells.length === 0) {
+    if (cells.length === 0) {
       // Add a new code cell if there are no cells.
       let cell = model.createCodeCell();
-      model.cells.add(cell);
+      cells.add(cell);
     }
     let layout = this.layout as PanelLayout;
     let constructor = this.constructor as typeof NotebookRenderer;
     let factory = constructor.createCell;
-    for (let i = 0; i < model.cells.length; i++) {
-      let widget = factory(model.cells.get(i), rendermime);
+    for (let i = 0; i < cells.length; i++) {
+      let widget = factory(cells.get(i), rendermime);
       this.initializeCellWidget(widget);
       layout.addChild(widget);
     }
     this.updateMimetypes();
-    model.cells.changed.connect(this.onCellsChanged, this);
+    cells.changed.connect(this.onCellsChanged, this);
     model.metadataChanged.connect(this.onMetadataChanged, this);
   }
 

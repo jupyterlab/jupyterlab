@@ -296,10 +296,34 @@ describe('notebook/notebook/widget', () => {
     describe('#initialize()', () => {
 
       it('should add the cells to the initial layout', () => {
-        let widget = createWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        let widget = new LogNotebookRenderer(defaultRenderMime());
+        let model = new NotebookModel();
+        model.fromJSON(DEFAULT_CONTENT);
+        expect(widget.methods.indexOf('initialize')).to.be(-1);
+        widget.model = model;
         expect(widget.childCount()).to.be(6);
         expect(widget.methods.indexOf('initialize')).to.not.be(-1);
+      });
+
+      it('should add a code cell if there are no cells', () => {
+        let widget = new LogNotebookRenderer(defaultRenderMime());
+        let model = new NotebookModel();
+        expect(widget.methods.indexOf('initialize')).to.be(-1);
+        widget.model = model;
+        expect(widget.childCount()).to.be(1);
+        expect(widget.methods.indexOf('initialize')).to.not.be(-1);
+        let cell = widget.childAt(0);
+        expect(cell).to.be.a(CodeCellWidget);
+      });
+
+      it('should set the mime types of the cell widgets', () => {
+        let widget = new LogNotebookRenderer(defaultRenderMime());
+        let model = new NotebookModel();
+        let cursor = model.getMetadata('language_info');
+        cursor.setValue({ name: 'python', codemirror_mode: 'python' });
+        widget.model = model;
+        let child = widget.childAt(0);
+        expect(child.mimetype).to.be('text/x-python');
       });
 
     });
@@ -569,26 +593,17 @@ describe('notebook/notebook/widget', () => {
 
     describe('#select()', () => {
 
-      let widget: LogActiveNotebook;
-
-      beforeEach((done) => {
-        widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
-        requestAnimationFrame(() => { done(); });
-      });
-
-      afterEach(() => {
-        widget.dispose();
-      });
-
       it('should select a cell widget', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
         let cell = widget.childAt(0);
         widget.select(cell);
         expect(widget.isSelected(cell)).to.be(true);
       });
 
       it('should allow multiple widgets to be selected', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
         for (let i = 0; i < widget.childCount(); i++) {
           let cell = widget.childAt(i);
           widget.select(cell);
@@ -600,20 +615,9 @@ describe('notebook/notebook/widget', () => {
 
     describe('#deselect()', () => {
 
-      let widget: LogActiveNotebook;
-
-      beforeEach((done) => {
-        widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
-        requestAnimationFrame(() => { done(); });
-      });
-
-      afterEach(() => {
-        widget.dispose();
-      });
-
       it('should deselect a cell', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
         for (let i = 0; i < widget.childCount(); i++) {
           if (i === widget.activeCellIndex) {
             continue;
@@ -627,6 +631,8 @@ describe('notebook/notebook/widget', () => {
       });
 
       it('should have no effect on the active cell', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
         let cell = widget.childAt(widget.activeCellIndex);
         expect(widget.isSelected(cell)).to.be(true);
         widget.deselect(cell);
@@ -637,21 +643,17 @@ describe('notebook/notebook/widget', () => {
 
     describe('#isSelected()', () => {
 
-      let widget: LogActiveNotebook;
-
-      beforeEach((done) => {
-        widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
-        requestAnimationFrame(() => { done(); });
-      });
-
-      afterEach(() => {
-        widget.dispose();
-      });
-
       it('should get whether the cell is selected', () => {
-
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        for (let i = 0; i < widget.childCount(); i++) {
+          let cell = widget.childAt(i);
+          if (i === widget.activeCellIndex) {
+            expect(widget.isSelected(cell)).to.be(true);
+          } else {
+            expect(widget.isSelected(cell)).to.be(false);
+          }
+        }
       });
 
     });
