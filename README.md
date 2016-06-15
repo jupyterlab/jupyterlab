@@ -32,10 +32,11 @@ Open a browser to the notebook server's URL (e.g., `http://localhost:8888`).
 
 ### Developer Installation
 
-You will need npm (preferably version 5 or later).
+You will need npm (preferably version 5 or later). First fork the repo in the GitHub UI and then
+clone locally:
 
 ```bash
-git clone https://github.com/jupyter/jupyterlab.git
+git clone https://github.com/<your-github-username>/jupyterlab.git
 cd jupyterlab
 npm install
 pip install -e . # will take a long time to build everything
