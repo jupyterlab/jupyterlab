@@ -5,10 +5,6 @@ import * as utils
  from 'jupyter-js-utils';
 
 import {
-  IDocumentModel
-} from '../../docmanager';
-
-import {
   IObservableList, ListChangeType, IListChangedArgs
 } from 'phosphor-observablelist';
 
@@ -21,8 +17,8 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  DocumentModel
-} from '../../docmanager/default';
+  DocumentModel, IDocumentModel
+} from '../../docregistry';
 
 import {
   ICellModel, CodeCellModel, RawCellModel, MarkdownCellModel

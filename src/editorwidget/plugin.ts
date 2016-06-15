@@ -2,12 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  DocumentRegistry, EditorWidgetFactory
-} from '../docmanager';
-
-import {
   Application
 } from 'phosphide/lib/core/application';
+
+import {
+  DocumentRegistry
+} from '../docregistry';
+
+import {
+  EditorWidgetFactory
+} from './widget';
 
 
 /**

@@ -12,7 +12,7 @@ import {
 
 import {
   IDocumentContext, DocumentRegistry, selectKernelForContext
-} from '../docmanager';
+} from '../docregistry';
 
 import {
   RenderMime

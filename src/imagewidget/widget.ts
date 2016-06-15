@@ -14,12 +14,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IDocumentModel, IWidgetFactory, IDocumentContext
-} from './index';
-
-import {
-  ABCWidgetFactory
-} from './default';
+  ABCWidgetFactory, IDocumentModel, IWidgetFactory, IDocumentContext
+} from '../docregistry';
 
 
 /**

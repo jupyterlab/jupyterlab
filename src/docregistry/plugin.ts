@@ -3,7 +3,7 @@
 
 import {
   DocumentRegistry, TextModelFactory, Base64ModelFactory
-} from '../docmanager';
+} from './index';
 
 
 /**

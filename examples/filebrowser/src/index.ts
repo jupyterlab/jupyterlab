@@ -11,16 +11,16 @@ import {
 } from 'jupyterlab/lib/filebrowser';
 
 import {
-  DocumentManager, DocumentWrapper, DocumentRegistry
+  DocumentManager, DocumentWrapper
 } from 'jupyterlab/lib/docmanager';
 
 import {
-  TextModelFactory
-} from 'jupyterlab/lib/docmanager/default';
+  DocumentRegistry, TextModelFactory
+} from 'jupyterlab/lib/docregistry';
 
 import {
   EditorWidgetFactory
-} from 'jupyterlab/lib/docmanager/editor';
+} from 'jupyterlab/lib/editorwidget/widget';
 
 
 import {

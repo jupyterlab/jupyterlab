@@ -18,8 +18,12 @@ import {
 } from '../dialog';
 
 import {
-  DocumentManager, IFileCreator
+  DocumentManager
 } from '../docmanager';
+
+import {
+  IFileCreator
+} from '../docregistry';
 
 import {
   FileBrowserModel

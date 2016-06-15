@@ -11,7 +11,7 @@ import {
 
 import {
   IDocumentContext
-} from '../../docmanager';
+} from '../../docregistry';
 
 import {
   RenderMime

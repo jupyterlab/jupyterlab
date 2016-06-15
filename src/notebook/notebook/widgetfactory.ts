@@ -7,7 +7,7 @@ import {
 
 import {
   IWidgetFactory, IDocumentContext, findKernel
-} from '../../docmanager';
+} from '../../docregistry';
 
 import {
   RenderMime

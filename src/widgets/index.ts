@@ -29,7 +29,7 @@ import {
 
 import {
   IDocumentContext
-} from '../docmanager';
+} from '../docregistry';
 
 import 'jquery-ui/themes/smoothness/jquery-ui.min.css';
 
