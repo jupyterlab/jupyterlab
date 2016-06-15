@@ -14,11 +14,11 @@ import {
 import {
   ABCWidgetFactory, Base64ModelFactory, DocumentModel,
   IDocumentModel, IDocumentContext, TextModelFactory
-} from '../../../lib/docmanager';
+} from '../../../lib/docregistry';
 
 import {
   MockContext
-} from './mockcontext';
+} from '../docmanager/mockcontext';
 
 
 class WidgetFactory extends ABCWidgetFactory {

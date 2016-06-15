@@ -21,7 +21,7 @@ import {
 
 import {
   IDocumentContext, IDocumentModel
-} from '../../../lib/docmanager';
+} from '../../../lib/docregistry';
 
 
 
