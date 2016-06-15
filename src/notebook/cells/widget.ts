@@ -38,10 +38,6 @@ import {
 } from '../output-area';
 
 import {
-  sanitize
-} from 'sanitizer';
-
-import {
   IMetadataCursor
 } from '../common/metadata';
 
@@ -468,7 +464,6 @@ class MarkdownCellWidget extends BaseCellWidget {
       let text = model.source || DEFAULT_MARKDOWN_TEXT;
       // Do not re-render if the text has not changed.
       if (text !== this._prev) {
-        text = sanitize(text);
         let bundle: MimeMap<string> = { 'text/markdown': text };
         this._renderer.dispose();
         this._renderer = this._rendermime.render(bundle) || new Widget();
