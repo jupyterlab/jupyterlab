@@ -3,7 +3,7 @@
 
 import {
   ConsolePanel
-} from 'jupyterlab/lib/notebook';
+} from 'jupyterlab/lib/console';
 
 import {
   startNewSession, INotebookSession
