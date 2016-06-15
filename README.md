@@ -58,6 +58,14 @@ npm run build:serverextension
 
 to build the changes and refresh your browser to see the changes.
 
+To have the system build after each change to the source files, run:
+ 
+```bash
+npm run watch:serverextension
+```
+
+and refresh the browser after each sucessful update.
+
 
 NPM Package
 -----------
