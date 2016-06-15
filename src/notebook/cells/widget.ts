@@ -136,6 +136,31 @@ class BaseCellWidget extends Widget {
   constructor(model: ICellModel) {
     super();
     this.addClass(CELL_CLASS);
+    this.layout = new PanelLayout();
+    this.model = model;
+  }
+
+  /**
+   * The model used by the widget.
+   */
+  get model(): ICellModel {
+    return this._model;
+  }
+  set model(model: ICellModel) {
+    if (!model && !this._model || model === this._model) {
+      return;
+    }
+
+    if (!model) {
+      if (this._model) {
+        this._input.dispose();
+        this._editor.dispose();
+        this._model.dispose();
+        this._model = null;
+      }
+      return;
+    }
+
     this._model = model;
 
     let ctor = this.constructor as typeof BaseCellWidget;
@@ -144,23 +169,11 @@ class BaseCellWidget extends Widget {
 
     // Set the editor mode to be the default MIME type.
     loadModeByMIME(this._editor.editor, this._mimetype);
-
-    this.layout = new PanelLayout();
     (this.layout as PanelLayout).addChild(this._input);
 
     model.metadataChanged.connect(this.onMetadataChanged, this);
     this._trustedCursor = model.getMetadata('trusted');
     this._trusted = this._trustedCursor.getValue();
-  }
-
-  /**
-   * Get the model used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get model(): ICellModel {
-    return this._model;
   }
 
   /**
