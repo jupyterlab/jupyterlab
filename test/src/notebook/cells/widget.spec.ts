@@ -77,9 +77,12 @@ describe('jupyter-js-notebook', () => {
 
     describe('#model', () => {
 
-      it('should be read-only', () => {
-        let widget = new BaseCellWidget(new CellModel());
-        expect(() => { widget.model = null; }).to.throwError();
+      it('should be settable', () => {
+        let model = new CellModel();
+        let widget = new BaseCellWidget(model);
+        expect(widget.model).to.be(model);
+        widget.model = new CellModel();
+        expect(widget.model).not.to.be(model);
       });
 
     });
