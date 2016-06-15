@@ -7,11 +7,11 @@ import {
 
 import {
   showDialog
-} from '../../dialog';
+} from '../dialog';
 
 import {
   RenderMime, MimeMap
-} from '../../rendermime';
+} from '../rendermime';
 
 import {
   Message
@@ -31,15 +31,15 @@ import {
 
 import {
   CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
-} from '../cells';
+} from '../notebook/cells';
 
 import {
   EdgeLocation, CellEditorWidget, ITextChange, ICompletionRequest
-} from '../cells/editor';
+} from '../notebook/cells/editor';
 
 import {
   mimetypeForLanguage
-} from '../common/mimetype';
+} from '../notebook/common/mimetype';
 
 import {
   nbformat
@@ -55,7 +55,7 @@ import {
 
 import {
   CompletionWidget, CompletionModel
-} from '../completion';
+} from '../notebook/completion';
 
 
 /**

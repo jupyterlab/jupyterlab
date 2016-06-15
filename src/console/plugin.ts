@@ -3,7 +3,7 @@
 
 import {
   ConsolePanel
-} from '../notebook/console';
+} from './widget';
 
 import {
   RenderMime
