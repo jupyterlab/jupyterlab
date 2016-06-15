@@ -30,7 +30,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  Widget
+  ChildMessage, Widget
 } from 'phosphor-widget';
 
 import {
@@ -99,10 +99,10 @@ type NotebookMode = 'command' | 'edit';
 
 
 /**
- * A widget which renders notebooks.
+ * A widget which renders static non-interactive notebooks.
  */
 export
-class NotebookRenderer extends Widget {
+class StaticNotebook extends Widget {
   /**
    * Create a new cell widget given a cell model.
    */
@@ -131,6 +131,13 @@ class NotebookRenderer extends Widget {
   }
 
   /**
+   * A signal emitted when the model of the notebook changes.
+   */
+  get modelChanged(): ISignal<StaticNotebook, INotebookModel> {
+    return Private.modelChangedSignal.bind(this);
+  }
+
+  /**
    * Get the model for the widget.
    */
   get model(): INotebookModel {
@@ -140,21 +147,16 @@ class NotebookRenderer extends Widget {
   /**
    * Set the model for the widget.
    *
-   * #### Notes
-   * The model is single-use only. It cannot be set to `null` and it
-   * cannot be changed after the first assignment.
-   *
    */
-  set model(value: INotebookModel) {
-    value = value || null;
-    if (this._model === value) {
+  set model(newValue: INotebookModel) {
+    newValue = newValue || null;
+    if (this._model === newValue) {
       return;
     }
-    if (this._model) {
-      throw new Error('Cannot change widget model.');
-    }
-    this._model = value;
-    this.initialize(value);
+    let oldValue = this._model;
+    this._model = newValue;
+    this.changeModel(oldValue, newValue);
+    this.modelChanged.emit(newValue);
   }
 
   /**
@@ -197,109 +199,55 @@ class NotebookRenderer extends Widget {
   }
 
   /**
-   * Initialize the widget based on the model.
+   * Handle a new model on the widget.
    *
    * #### Notes
    * Creates child widgets for each of the cells in the model.
    * If there are no cells, adds a single code cell.
    */
-  protected initialize(model: INotebookModel): void {
-    let rendermime = this.rendermime;
-    let cells = model.cells;
-
-    // Add the current cells.
-    if (cells.length === 0) {
-      // Add a new code cell if there are no cells.
-      let cell = model.createCodeCell();
-      cells.add(cell);
-    }
+  protected changeModel(oldValue: INotebookModel, newValue: INotebookModel): void {
     let layout = this.layout as PanelLayout;
-    let constructor = this.constructor as typeof NotebookRenderer;
+    if (oldValue) {
+      oldValue.cells.changed.disconnect(this._onCellsChanged, this);
+      oldValue.metadataChanged.disconnect(this._onMetadataChanged, this);
+      // TODO: reuse existing cell widgets if possible.
+      for (let i = 0; i < layout.childCount(); i++) {
+        layout.removeChild(layout.childAt(0));
+      }
+    }
+    let rendermime = this.rendermime;
+    let cells = newValue.cells;
+    let constructor = this.constructor as typeof StaticNotebook;
     let factory = constructor.createCell;
     for (let i = 0; i < cells.length; i++) {
       let widget = factory(cells.get(i), rendermime);
-      this.initializeCellWidget(widget);
       layout.addChild(widget);
     }
-    this.updateMimetypes();
-    cells.changed.connect(this.onCellsChanged, this);
-    model.metadataChanged.connect(this.onMetadataChanged, this);
+    this.setChildMimetypes();
+    cells.changed.connect(this._onCellsChanged, this);
+    newValue.metadataChanged.connect(this._onMetadataChanged, this);
   }
 
   /**
-   * Handle changes to the notebook model.
+   * Handle a `child-added` message.
    */
-  protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'language_info':
-      this.updateMimetypes();
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle a change cells event.
-   */
-  protected onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
-    let layout = this.layout as PanelLayout;
-    let constructor = this.constructor as typeof NotebookRenderer;
-    let factory = constructor.createCell;
-    let widget: BaseCellWidget;
-    switch (args.type) {
-    case ListChangeType.Add:
-      widget = factory(args.newValue as ICellModel, this._rendermime);
-      this.initializeCellWidget(widget);
-      layout.insertChild(args.newIndex, widget);
-      break;
-    case ListChangeType.Move:
-      layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
-      break;
-    case ListChangeType.Remove:
-      widget = layout.childAt(args.oldIndex) as BaseCellWidget;
-      layout.removeChild(widget);
-      widget.dispose();
-      break;
-    case ListChangeType.Replace:
-      let oldValues = args.oldValue as ICellModel[];
-      for (let i = 0; i < oldValues.length; i++) {
-        widget = layout.childAt(args.oldIndex) as BaseCellWidget;
-        layout.removeChild(widget);
-        widget.dispose();
-      }
-      let newValues = args.newValue as ICellModel[];
-      for (let i = newValues.length; i > 0; i--) {
-        widget = factory(newValues[i - 1], this._rendermime);
-        this.initializeCellWidget(widget);
-        layout.insertChild(args.newIndex, widget);
-      }
-      break;
-    case ListChangeType.Set:
-      widget = layout.childAt(args.newIndex) as BaseCellWidget;
-      layout.removeChild(widget);
-      widget.dispose();
-      widget = factory(args.newValue as ICellModel, this._rendermime);
-      layout.insertChild(args.newIndex, widget);
-      this.initializeCellWidget(widget);
-      break;
-    default:
-      return;
-    }
+  protected onChildAdded(msg: ChildMessage): void {
+    msg.child.addClass(NB_CLASS);
     this.update();
   }
 
   /**
-   * Initialize a cell widget.
+   * Handle a `child-removed` message.
    */
-  protected initializeCellWidget(widget: BaseCellWidget): void {
-    widget.addClass(NB_CELL_CLASS);
+  protected onChildRemoved(msg: ChildMessage): void {
+    msg.child.dispose();
+    this.update();
   }
 
   /**
-   * Update the mimetype of code widgets.
+   * Set the mimetype of the child code widgets.
    */
-  protected updateMimetypes(): void {
+  protected setChildMimetypes(): void {
     let cursor = this.model.getMetadata('language_info');
     let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
     let mimetype = mimetypeForLanguage(info as IKernelLanguageInfo);
@@ -312,6 +260,62 @@ class NotebookRenderer extends Widget {
     }
   }
 
+  /**
+   * Handle changes to the notebook model.
+   */
+  private _onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'language_info':
+      this.setChildMimetypes();
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle a change cells event.
+   */
+  private _onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
+    let layout = this.layout as PanelLayout;
+    let constructor = this.constructor as typeof StaticNotebook;
+    let factory = constructor.createCell;
+    let widget: BaseCellWidget;
+    switch (args.type) {
+    case ListChangeType.Add:
+      widget = factory(args.newValue as ICellModel, this._rendermime);
+      layout.insertChild(args.newIndex, widget);
+      break;
+    case ListChangeType.Move:
+      layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
+      break;
+    case ListChangeType.Remove:
+      widget = layout.childAt(args.oldIndex) as BaseCellWidget;
+      layout.removeChild(widget);
+      break;
+    case ListChangeType.Replace:
+      let oldValues = args.oldValue as ICellModel[];
+      for (let i = 0; i < oldValues.length; i++) {
+        widget = layout.childAt(args.oldIndex) as BaseCellWidget;
+        layout.removeChild(widget);
+      }
+      let newValues = args.newValue as ICellModel[];
+      for (let i = newValues.length; i > 0; i--) {
+        widget = factory(newValues[i - 1], this._rendermime);
+        layout.insertChild(args.newIndex, widget);
+      }
+      break;
+    case ListChangeType.Set:
+      widget = layout.childAt(args.newIndex) as BaseCellWidget;
+      layout.removeChild(widget);
+      widget = factory(args.newValue as ICellModel, this._rendermime);
+      layout.insertChild(args.newIndex, widget);
+      break;
+    default:
+      return;
+    }
+  }
+
   private _model: INotebookModel = null;
   private _rendermime: RenderMime<Widget> = null;
 }
@@ -321,11 +325,11 @@ class NotebookRenderer extends Widget {
  * A notebook widget that supports interactivity.
  */
 export
-class ActiveNotebook extends NotebookRenderer {
+class Notebook extends StaticNotebook {
   /**
    * A signal emitted when the state of the notebook changes.
    */
-  get stateChanged(): ISignal<ActiveNotebook, IChangedArgs<any>> {
+  get stateChanged(): ISignal<Notebook, IChangedArgs<any>> {
     return Private.stateChangedSignal.bind(this);
   }
 
@@ -503,17 +507,18 @@ class ActiveNotebook extends NotebookRenderer {
   }
 
   /**
-   * Initialize a cell widget.
+   * Handle a `child-added` message.
    */
-  protected initializeCellWidget(widget: BaseCellWidget): void {
-    super.initializeCellWidget(widget);
-    widget.editor.edgeRequested.connect(this.onEdgeRequest, this);
+  protected onChildAdded(msg: ChildMessage): void {
+    super.onChildAdded(msg);
+    let widget = msg.child as BaseCellWidget;
+    widget.editor.edgeRequested.connect(this._onEdgeRequest, this);
   }
 
   /**
    * Handle edge request signals from cells.
    */
-  protected onEdgeRequest(widget: Widget, location: EdgeLocation): void {
+  private _onEdgeRequest(widget: Widget, location: EdgeLocation): void {
     if (location === 'top') {
       this.activeCellIndex--;
     } else {
@@ -610,10 +615,17 @@ namespace Private {
   });
 
   /**
+   * A signal emitted when the model changes on the notebook.
+   */
+  export
+  const modelChangedSignal = new Signal<StaticNotebook, INotebookModel>();
+
+
+  /**
    * A signal emitted when the state changes on the notebook.
    */
   export
-  const stateChangedSignal = new Signal<ActiveNotebook, IChangedArgs<any>>();
+  const stateChangedSignal = new Signal<Notebook, IChangedArgs<any>>();
 
  /**
   * Scroll an element into view if needed.

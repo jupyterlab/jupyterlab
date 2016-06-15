@@ -50,7 +50,7 @@ import {
 } from './toolbar';
 
 import {
-  ActiveNotebook
+  Notebook
 } from './widget';
 
 
@@ -82,8 +82,8 @@ class NotebookPanel extends Widget {
   /**
    * Create a new content area for the notebook.
    */
-  static createContent(model: INotebookModel, rendermime: RenderMime<Widget>): ActiveNotebook {
-    let widget = new ActiveNotebook(rendermime);
+  static createContent(model: INotebookModel, rendermime: RenderMime<Widget>): Notebook {
+    let widget = new Notebook(rendermime);
     widget.model = model;
     return widget;
   }
@@ -180,7 +180,7 @@ class NotebookPanel extends Widget {
    * #### Notes
    * This is a read-only property.
    */
-  get content(): ActiveNotebook {
+  get content(): Notebook {
     return this._content;
   }
 
@@ -283,7 +283,7 @@ class NotebookPanel extends Widget {
   /**
    * Handle a change in the content area.
    */
-  protected onContentChanged(sender: ActiveNotebook, args: IChangedArgs<any>): void {
+  protected onContentChanged(sender: Notebook, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'activeCellIndex':
       let cell = this._content.childAt(args.oldValue);
@@ -373,7 +373,7 @@ class NotebookPanel extends Widget {
   private _rendermime: RenderMime<Widget> = null;
   private _context: IDocumentContext = null;
   private _model: INotebookModel = null;
-  private _content: ActiveNotebook = null;
+  private _content: Notebook = null;
   private _toolbar: NotebookToolbar = null;
   private _clipboard: IClipboard = null;
   private _completion: CompletionWidget = null;
