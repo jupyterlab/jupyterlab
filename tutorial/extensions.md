@@ -26,8 +26,8 @@ The default services providers in the JupyterLab application include:
 ## [Extensions](https://github.com/phosphorjs/phosphide/blob/master/src/core/extensionregistry.ts#L19) 
 Extensions use the Application object and optionally other services to provide 
 functionality to the application. 
-- Extensions provided to the application are activated immediately. 
-- Extensions are activated explicitly through the Application [instance](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts#L71).
+- Extensions provided to the application on startup are activated immediately. 
+- Extensions can also be activated explicitly at runtime through the Application [instance](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts#L71).
 
 The default extensions in the application include:
 - Command palette - Adds the command palette widget to the sidebar.
