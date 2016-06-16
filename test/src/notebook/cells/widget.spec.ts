@@ -22,8 +22,13 @@ import {
 } from 'phosphor-widget';
 
 import {
-  BaseCellWidget, CellModel, InputAreaWidget, ICellModel
+  BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
+  CodeCellWidget
 } from '../../../../lib/notebook/cells';
+
+import {
+  OutputAreaWidget
+} from '../../../../lib/notebook/output-area';
 
 import {
   CellEditorWidget
@@ -285,6 +290,17 @@ describe('jupyter-js-notebook', () => {
 
   });
 
+  describe('CodeCellWidget', () => {
 
+    describe('.createOutput()', () => {
+
+      it('should create an input area widget', () => {
+        let editor = CodeCellWidget.createInputArea(new CodeCellModel());
+        expect(editor).to.be.a(CellEditorWidget);
+      });
+
+    });
+
+  });
 
 });
