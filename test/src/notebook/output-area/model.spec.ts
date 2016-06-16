@@ -12,11 +12,11 @@ import {
 } from '../../../../lib/notebook/output-area/model';
 
 import {
-  IOutput, IStream
+  IStream
 } from '../../../../lib/notebook/notebook/nbformat';
 
 
-describe('jupyter-js-notebook', () => {
+describe('notebook/output-area/model', () => {
 
   describe('OutputAreaModel', () => {
 
@@ -193,7 +193,7 @@ describe('jupyter-js-notebook', () => {
           output_type: 'stream',
           name: 'stdout',
           text: 'foo\nbar'
-        }
+        };
         let model = new OutputAreaModel();
         model.add(output);
         expect(model.outputs.length).to.be(1);
@@ -204,21 +204,21 @@ describe('jupyter-js-notebook', () => {
           output_type: 'stream',
           name: 'stdout',
           text: 'foo\nbar'
-        }
+        };
         let model = new OutputAreaModel();
         model.add(output);
         output = {
           output_type: 'stream',
           name: 'stdout',
           text: 'fizz\buzz'
-        }
+        };
         model.add(output);
         expect(model.outputs.length).to.be(1);
         output  = {
           output_type: 'stream',
           name: 'stderr',
           text: 'oh no!'
-        }
+        };
         model.add(output);
         expect(model.outputs.length).to.be(2);
       });
@@ -232,7 +232,7 @@ describe('jupyter-js-notebook', () => {
           output_type: 'stream',
           name: 'stdout',
           text: 'foo\nbar'
-        }
+        };
         let model = new OutputAreaModel();
         model.add(output);
         model.clear();
@@ -244,7 +244,7 @@ describe('jupyter-js-notebook', () => {
           output_type: 'stream',
           name: 'stdout',
           text: 'foo\nbar'
-        }
+        };
         let model = new OutputAreaModel();
         model.add(output);
         model.clear(true);
@@ -254,8 +254,8 @@ describe('jupyter-js-notebook', () => {
           ename: 'foo',
           evalue: '',
           traceback: ['']
-        }
-        model.add(output);
+        };
+        model.add(output2);
         expect(model.outputs.length).to.be(1);
       });
     });

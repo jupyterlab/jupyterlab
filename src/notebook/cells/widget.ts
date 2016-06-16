@@ -321,7 +321,9 @@ class CodeCellWidget extends BaseCellWidget {
    * Create an output area widget.
    */
   static createOutput(outputs: ObservableOutputs, rendermime: RenderMime<Widget>): OutputAreaWidget {
-    return new OutputAreaWidget(outputs, rendermime);
+    let output = new OutputAreaWidget({ rendermime });
+    output.outputs = outputs;
+    return output;
   }
 
   /**
