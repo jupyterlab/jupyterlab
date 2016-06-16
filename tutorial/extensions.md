@@ -10,7 +10,7 @@ The JupyterLab Application object is passed to all extensions and is
 used to add content to the main area and the sidebars, as well as 
 add commands, keyboard shortcuts, and command palette entries.
 
-## Extensions(https://github.com/phosphorjs/phosphide/blob/master/src/core/extensionregistry.ts#L19) 
+## [Extensions](https://github.com/phosphorjs/phosphide/blob/master/src/core/extensionregistry.ts#L19) 
 Add content to the [application](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts) itself or to services.
 - An example extension is the [editor widget](https://github.com/jupyter/jupyterlab/blob/master/src/editorwidget/plugin.ts), which registers an 
 editor widget factory with the Document Registry.
@@ -19,7 +19,7 @@ editor widget factory with the Document Registry.
 
 ## [Services](https://github.com/phosphorjs/phosphide/blob/master/src/core/serviceregistry.ts) 
 Provide functionality to other parts of the application.
-- An example service is the [docucment registry](https://github.com/jupyter/jupyterlab/blob/master/src/docregistry/plugin.ts), which is used by extensions
+- An example service is the [document registry](https://github.com/jupyter/jupyterlab/blob/master/src/docregistry/plugin.ts), which is used by extensions
 to add functionality around widgets backed by files.
 - Services are activated on-demand.
 
