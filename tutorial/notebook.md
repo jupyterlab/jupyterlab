@@ -26,6 +26,75 @@ We'll walk through two notebook extensions.
 
 ### Adding a button to the toolbar
 
+Create a `src/mybutton/plugin.ts` file with the following contents.
+
+```typescript
+import {
+  IWidgetExtension, IDocumentContext, IDocumentModel, DocumentRegistry
+} from '../docregistry';
+
+import {
+  IDisposable, DisposableDelegate
+} from 'phosphor-disposable';
+
+import {
+  NotebookPanel
+} from '../notebook/notebook/panel';
+
+import {
+  Application
+} from 'phosphide/lib/core/application';
+
+import {
+  ToolbarButton
+} from '../notebook/notebook/toolbar';
+
+/**
+ * The plugin registration information.
+ */
+export
+const widgetExtension = {
+  id: 'jupyter.extensions.newButton',
+  requires: [DocumentRegistry],
+  activate: activateExtension
+};
+
+export
+class ButtonExtension implements IWidgetExtension<NotebookPanel>{
+  /**
+   * Create a new extension object.
+   */
+  createNew(nb: NotebookPanel, model: IDocumentModel,
+            context: IDocumentContext): IDisposable {
+    let button = new ToolbarButton('myButton', () => {
+      // Action when button is pressed. We could modify
+      // the notebook, etc.
+      alert('hi');
+    }, 'Tooltip');
+    let i = document.createElement('i');
+    i.classList.add('fa', 'fa-diamond')
+    button.node.appendChild(i);
+
+    nb.toolbar.add('mybutton', button, 'cellType')
+    return new DisposableDelegate(() => {
+      button.dispose();
+    })
+  }
+}
+
+/**
+ * Activate the extension.
+ */
+function activateExtension(app: Application, registry: DocumentRegistry) {
+  registry.registerExtension('Notebook', new ButtonExtension());
+}
+```
+
+Then add this extension to the JupyterLab extension list and relaunch JupyterLab:
+
+```typescript
+    require('jupyterlab/lib/mybutton/plugin').widgetExtension,
+```
 
 
 ### The ipywidgets extension
