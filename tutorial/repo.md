@@ -38,4 +38,4 @@ To build and install a development version of the server extension, do `pip inst
 
 To rebuild the javascript for the server extension, do `npm run build:serverextension`. To have the system do this automatically after every change to the typescript source files, do `npm run watch:serverextension` and refresh your browser after each successful update.
 
-To build just the `jupyterlab` npm package, do `npm install` and then `npm run build`. To run the tests, build the npm package, then do `npm test`. To build the docs, do `npm run docs` and go to `docs/index.html`.
+To build just the `jupyterlab` npm package, do `npm install` and then `npm run build`. To run the tests, build the npm package, then do `npm test`. To build the docs, do `npm run docs` and go to `docs/index.html`. An automatically-generated version of the docs is hosted at http://jupyter.org/jupyterlab/.
