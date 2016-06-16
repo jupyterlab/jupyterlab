@@ -170,14 +170,14 @@ class CellEditorWidget extends CodeMirrorWidget {
 
     if (!model) {
       doc.setValue('');
-      this._model.dispose();
+      this._model.stateChanged.disconnect(this.onModelChanged, this);
       this._model = null;
       return;
     }
 
     this._model = model;
     doc.setValue(model.source || '');
-    model.stateChanged.connect(this.onModelChanged, this);
+    this._model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**

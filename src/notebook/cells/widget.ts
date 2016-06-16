@@ -158,8 +158,8 @@ class BaseCellWidget extends Widget {
     }
 
     if (!model) {
+      this._model.metadataChanged.disconnect(this.onMetadataChanged, this);
       this._editor.model = null;
-      this._model.dispose();
       this._model = null;
       return;
     }
@@ -169,7 +169,7 @@ class BaseCellWidget extends Widget {
 
     // Set the editor mode to be the default MIME type.
     loadModeByMIME(this._editor.editor, this._mimetype);
-    model.metadataChanged.connect(this.onMetadataChanged, this);
+    this._model.metadataChanged.connect(this.onMetadataChanged, this);
     this._trustedCursor = model.getMetadata('trusted');
     this._trusted = !!this._trustedCursor.getValue();
   }
