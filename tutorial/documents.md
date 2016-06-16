@@ -33,11 +33,11 @@ Intended for create quick launch file creators. The default use will be for
 the "create new" dropdown in the file browser, giving list of items that can 
 be created with default options  (e.g. "Python 3 Notebook").
 
-## Document Model
+## Document Models
 Created by the model factories and passed to widget factories and widget 
 extensions.
 
-## Document Context
+## Document Contexts
 Created by the Document Manager and passed to widget factories and
 widget extensions.  They are used to provide an abstracted interface
 to the session and contents API from jupyter-js-services for the 
@@ -46,7 +46,7 @@ The reason for a separate context and model is so that it is easy to create
 model factories and the heavy lifting of the context is left to the Document
 Manager.
 
-## Document Wrapper
+## Document Wrappers
 The top level widget created by the Document Manager that wraps the widget 
 returned by the widget factory.  They are used because they can be
 created synchronously, while the widgets created using the widget
