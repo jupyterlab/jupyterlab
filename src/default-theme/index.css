@@ -57,7 +57,7 @@ body {
   min-width: 36px;
   max-width: 36px;
   font-size: 13px;
-  font-family: Helvetica, Arial;
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   color: #757575;
   background: #EEEEEE;
 }
@@ -265,7 +265,7 @@ body {
   background: #FAFAFA;
   color: rgba(0, 0, 0, 0.87);
   border-bottom: 1px solid #DDDDDD;
-  font: 13px Helvetica, Arial, sans-serif;
+  font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 
