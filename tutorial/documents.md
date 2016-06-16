@@ -10,25 +10,25 @@ and manages their life cycle.
 Extensions in the JupyterLab application can register widget factories, 
 model factories, widget extensions, file types, and file creators.
 
-## Widget factories 
+## Widget Factories 
 Create a widget for a given file. An example is the notebook widget 
 factory that creates NotebookPanel widgets.
 
-## Model factories 
+## Model Factories 
 Create a model for a given file.  Models are generally differentiated by 
 the contents options used to fetch the model (e.g. text, base64, notebook).
 
-## Widget extensions
+## Widget Extensions
 Add additional functionality to a widget. An extension instance is created 
 for each widget.  An example is the ipywidgets extension that is created 
 for NotebookPanel widgets.  Another example would be to add a button to the 
 toolbar of each NotebookPanel widget.
 
-## File types 
+## File Types 
 Intended to be used in a "Create New" dialog, providing a list of known 
 file types.
 
-## File creators 
+## File Creators 
 Intended for create quick launch file creators. The default use will be for 
 the "create new" dropdown in the file browser, giving list of items that can 
 be created with default options  (e.g. "Python 3 Notebook").
