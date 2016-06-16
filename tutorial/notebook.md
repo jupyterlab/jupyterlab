@@ -49,6 +49,9 @@ import {
   ToolbarButton
 } from '../notebook/notebook/toolbar';
 
+import {
+  NotebookActions
+} from '../notebook/notebook/actions';
 /**
  * The plugin registration information.
  */
@@ -67,12 +70,11 @@ class ButtonExtension implements IWidgetExtension<NotebookPanel>{
   createNew(nb: NotebookPanel, model: IDocumentModel,
             context: IDocumentContext): IDisposable {
     let button = new ToolbarButton('myButton', () => {
-      // Action when button is pressed. We could modify
-      // the notebook, etc.
-      alert('hi');
+      NotebookActions.runAll(nb.content, context.kernel);
     }, 'Tooltip');
+
     let i = document.createElement('i');
-    i.classList.add('fa', 'fa-diamond')
+    i.classList.add('fa', 'fa-fast-forward')
     button.node.appendChild(i);
 
     nb.toolbar.add('mybutton', button, 'cellType')
@@ -88,6 +90,7 @@ class ButtonExtension implements IWidgetExtension<NotebookPanel>{
 function activateExtension(app: Application, registry: DocumentRegistry) {
   registry.registerExtension('Notebook', new ButtonExtension());
 }
+
 ```
 
 Then add this extension to the JupyterLab extension list and relaunch JupyterLab:
