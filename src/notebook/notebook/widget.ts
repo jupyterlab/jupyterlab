@@ -185,8 +185,7 @@ class StaticNotebook extends Widget {
    * Handle a `child-added` message.
    */
   protected onChildAdded(msg: ChildMessage): void {
-    msg.child.addClass(NB_CLASS);
-    this.update();
+    msg.child.addClass(NB_CELL_CLASS);
   }
 
   /**
@@ -194,7 +193,6 @@ class StaticNotebook extends Widget {
    */
   protected onChildRemoved(msg: ChildMessage): void {
     msg.child.dispose();
-    this.update();
   }
 
   /**
@@ -280,12 +278,12 @@ class StaticNotebook extends Widget {
       layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
       break;
     case ListChangeType.Remove:
-      layout.removeChild(layout.childAt(args.oldIndex));
+      layout.childAt(args.oldIndex).parent = null;
       break;
     case ListChangeType.Replace:
       let oldValues = args.oldValue as ICellModel[];
       for (let i = 0; i < oldValues.length; i++) {
-        layout.removeChild(layout.childAt(args.oldIndex));
+        layout.childAt(args.oldIndex).parent = null;
       }
       let newValues = args.newValue as ICellModel[];
       for (let i = newValues.length; i > 0; i--) {
@@ -294,7 +292,7 @@ class StaticNotebook extends Widget {
       }
       break;
     case ListChangeType.Set:
-      layout.removeChild(layout.childAt(args.newIndex));
+      layout.childAt(args.newIndex).parent = null;
       model = args.newValue as ICellModel;
       layout.insertChild(args.newIndex, this._createWidget(model));
       break;
@@ -552,6 +550,15 @@ class Notebook extends StaticNotebook {
     super.onChildAdded(msg);
     let widget = msg.child as BaseCellWidget;
     widget.editor.edgeRequested.connect(this._onEdgeRequest, this);
+    this.update();
+  }
+
+  /**
+   * Handle a `child-removed` message.
+   */
+  protected onChildRemoved(msg: ChildMessage): void {
+    msg.child.dispose();
+    this.update();
   }
 
   /**
