@@ -175,6 +175,7 @@ class StaticNotebook extends Widget {
     }
     this._model = null;
     this._rendermime = null;
+    this._factory = null;
     super.dispose();
   }
 

@@ -67,6 +67,9 @@ interface INotebookModel extends IDocumentModel {
 
   /**
    * The factory for creating new cell models.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   cellFactory: ICellModelFactory;
 
@@ -97,9 +100,6 @@ interface INotebookModel extends IDocumentModel {
 
   /**
    * List the metadata namespace keys for the notebook.
-   *
-   * #### Notes
-   * Metadata associated with the nbformat are not included.
    */
   listMetadata(): string[];
 }
