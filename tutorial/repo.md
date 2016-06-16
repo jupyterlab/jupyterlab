@@ -6,8 +6,8 @@ The repository contains an npm package and a python package, both named `jupyter
 
 ### NPM package: `src/`, `lib/`, `typings/`, `scripts/`
 
-* `src/`: the source Typescript files. `npm run build` builds the source files into javascript files in `lib/`. `npm run clean` deletes the `lib/` directory.
-* `typings/`: type definitions for external libraries that Typescript needs.
+* `src/`: the source typescript files. `npm run build` builds the source files into javascript files in `lib/`. `npm run clean` deletes the `lib/` directory.
+* `typings/`: type definitions for external libraries that typescript needs.
 * `scripts/`: various scripts that the npm commands invoke.
 
 ### Examples: `examples/`
@@ -30,9 +30,9 @@ Here are some convenience git hooks that automatically rebuild the npm package a
 
 After building the docs (`npm run docs`), the `docs/index.html` is the entry point to the documentation. 
 
-## Packaging
+## Development Quickstart
 
-All the instructions below assume you are in the root directory of the repository.
+All the instructions below assume you are in the root directory of the repository. See the README for more instructions (which may be more up to date as well).
 
 To build and install a development version of the server extension, do `pip install -e .` (this will build the npm package, build and webpack the server extension javascript, and install the appropriate links into your python environment). To enable the server extension, do `jupyter serverextension enable --sys-prefix --py jupyterlab` after installation. Then start up JupyterLab with `jupyter lab`.
 
