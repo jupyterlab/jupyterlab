@@ -137,6 +137,12 @@ class BaseCellWidget extends Widget {
     super();
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
+
+    let constructor = this.constructor as typeof BaseCellWidget;
+    this._editor = constructor.createCellEditor(model);
+    this._input = constructor.createInputArea(this._editor);
+    (this.layout as PanelLayout).addChild(this._input);
+
     this.model = model;
   }
 
@@ -151,28 +157,24 @@ class BaseCellWidget extends Widget {
       return;
     }
 
+    // If the model is being replaced, disconnect the old signal handler.
+    if (this._model) {
+      this._model.metadataChanged.disconnect(this.onMetadataChanged, this);
+    }
+
     if (!model) {
-      if (this._model) {
-        this._input.dispose();
-        this._editor.dispose();
-        this._model.dispose();
-        this._model = null;
-      }
+      this._editor.model = null;
+      this._model = null;
       return;
     }
 
     this._model = model;
-
-    let ctor = this.constructor as typeof BaseCellWidget;
-    this._editor = ctor.createCellEditor(model);
-    this._input = ctor.createInputArea(this._editor);
+    this._editor.model = this._model;
 
     // Set the editor mode to be the default MIME type.
     loadModeByMIME(this._editor.editor, this._mimetype);
-    (this.layout as PanelLayout).addChild(this._input);
-
-    model.metadataChanged.connect(this.onMetadataChanged, this);
-    this._trustedCursor = model.getMetadata('trusted');
+    this._model.metadataChanged.connect(this.onMetadataChanged, this);
+    this._trustedCursor = this._model.getMetadata('trusted');
     this._trusted = !!this._trustedCursor.getValue();
   }
 
