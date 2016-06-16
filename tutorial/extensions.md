@@ -18,10 +18,10 @@ application.
 - Services are activated when they are needed by other services or extensions.
 
 The default services providers in the JupyterLab application include:
-- Services - An application-specific interface to `jupyter-js-services`.
-- RenderMime - The registry for adding kernel `display_data` renderers.
-- Document Registry - Used to add functionality around widgets backed by files.
-- Clipboard - The application-wide clipboard for arbitrary MIME data.
+- [Services](http://jupyter.org/jupyterlab/modules/_services_plugin_.html#servicesprovider) - An application-specific interface to `jupyter-js-services`.
+- [RenderMime](http://jupyter.org/jupyterlab/modules/_rendermime_plugin_.html#rendermimeprovider) - The registry for adding kernel `display_data` renderers.
+- [Document Registry](http://jupyter.org/jupyterlab/modules/_docregistry_plugin_.html#docregistryprovider) - Used to add functionality around widgets backed by files.
+- [Clipboard](http://jupyter.org/jupyterlab/modules/_clipboard_plugin_.html#clipboardprovider) - The application-wide clipboard for arbitrary MIME data.
 
 ## [Extensions](https://github.com/phosphorjs/phosphide/blob/master/src/core/extensionregistry.ts#L19) 
 Extensions use the Application object and optionally other services to provide 
@@ -30,15 +30,14 @@ functionality to the application.
 - Extensions can also be activated explicitly at runtime through the Application [instance](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts#L71).
 
 The default extensions in the application include:
-- Command palette - Adds the command palette widget to the sidebar.
-- Widget manager - Manages comm channels for ipywidgets.
-- Terminal - Adds the ability to create command prompt terminals.
-- Shortcuts - Provides the default set of shortcuts for the application.
-- Images - Adds a widget factory for displaying image files.
-- Help - Adds a side bar widget for displaying external documentation.
-- File Browser - Creates the file browser and the document manager and the file browser to the side bar.
-- Editor - Add a widget factory for displaying editable source files.
-- Console - Adds the ability to launch Jupyter Console instances for
+- [Widget manager](http://jupyter.org/jupyterlab/modules/_widgets_plugin_.html#widgetmanagerextension) - Manages comm channels for ipywidgets.
+- [Terminal](http://jupyter.org/jupyterlab/modules/_terminal_plugin_.html) - Adds the ability to create command prompt terminals.
+- [Shortcuts](http://jupyter.org/jupyterlab/modules/_shortcuts_plugin_.html) - Provides the default set of shortcuts for the application.
+- [Images](http://jupyter.org/jupyterlab/modules/_imagewidget_plugin_.html) - Adds a widget factory for displaying image files.
+- [Help](http://jupyter.org/jupyterlab/modules/_help_plugin_.html) - Adds a side bar widget for displaying external documentation.
+- [File Browser](http://jupyter.org/jupyterlab/modules/_filebrowser_plugin_.html) - Creates the file browser and the document manager and the file browser to the side bar.
+- [Editor](http://jupyter.org/jupyterlab/modules/_editorwidget_plugin_.html) - Add a widget factory for displaying editable source files.
+- [Console](http://jupyter.org/jupyterlab/modules/_console_plugin_.html) - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
 
 
