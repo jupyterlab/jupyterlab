@@ -31,10 +31,10 @@ editor widget factory with the Document Registry.
 The default providers in the JupyterLab application include:
 - Services - An application-specific interface to `jupyter-js-services`.
 - RenderMime - The registry for adding kernel `display_data` renderers.
-- Document Registry - Used to add functionality around widgets backed by files
+- Document Registry - Used to add functionality around widgets backed by files.
 - Clipboard - The application-wide clipboard for arbitrary MIME data.
 
-The default extension in the application include:
+The default extensions in the application include:
 - Command palette - Adds a command palette widget to the sidebar.
 - Widget manager - Manages comm channels for ipywidgets.
 - Terminal - Adds the ability to create command prompt terminals.
