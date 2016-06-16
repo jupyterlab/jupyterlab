@@ -1,7 +1,8 @@
 # Documents
 The Document Registry is the default mechanism for interacting with
 files in JupyterLab.  The Document Manager uses it to create models and 
-widgets for documents.  The File Browser uses the Document Manager when creating and opening files.
+widgets for documents.  The File Browser uses the Document Manager when 
+creating and opening files.
 
 The Document Manager creates models, contexts, and widgets for documents 
 and manages their life cycle.
