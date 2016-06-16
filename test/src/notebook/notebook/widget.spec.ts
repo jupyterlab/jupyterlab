@@ -54,7 +54,7 @@ const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples
 function createWidget(): LogStaticNotebook {
   let model = new NotebookModel();
   let rendermime = defaultRenderMime();
-  let widget = new LogStaticNotebook(rendermime);
+  let widget = new LogStaticNotebook({ rendermime });
   widget.model = model;
   return widget;
 }
@@ -77,16 +77,6 @@ class LogStaticNotebook extends StaticNotebook {
   protected onChildRemoved(msg: ChildMessage): void {
     super.onChildRemoved(msg);
     this.methods.push('onChildRemoved');
-  }
-
-  protected changeModel(oldValue: INotebookModel, newValue: INotebookModel): void {
-    super.changeModel(oldValue, newValue);
-    this.methods.push('changeModel');
-  }
-
-  protected setChildMimetypes(): void {
-    this.methods.push('setChildMimetypes');
-    return super.setChildMimetypes();
   }
 }
 
@@ -127,7 +117,7 @@ class LogNotebook extends Notebook {
 function createActiveWidget(): LogNotebook {
   let model = new NotebookModel();
   let rendermime = defaultRenderMime();
-  let widget = new LogNotebook(rendermime);
+  let widget = new LogNotebook({ rendermime });
   widget.model = model;
   return widget;
 }
@@ -137,45 +127,17 @@ describe('notebook/notebook/widget', () => {
 
   describe('StaticNotebook', () => {
 
-    describe('.createCell()', () => {
-
-      it('should create a new code cell widget given a cell model', () => {
-        let model = new NotebookModel();
-        let rendermime = defaultRenderMime();
-        let cell = model.createCodeCell();
-        let widget = StaticNotebook.createCell(cell, rendermime);
-        expect(widget).to.be.a(CodeCellWidget);
-      });
-
-      it('should create a new raw cell widget given a cell model', () => {
-        let model = new NotebookModel();
-        let rendermime = defaultRenderMime();
-        let cell = model.createRawCell();
-        let widget = StaticNotebook.createCell(cell, rendermime);
-        expect(widget).to.be.a(RawCellWidget);
-      });
-
-      it('should create a new markdown cell widget given a cell model', () => {
-        let model = new NotebookModel();
-        let rendermime = defaultRenderMime();
-        let cell = model.createMarkdownCell();
-        let widget = StaticNotebook.createCell(cell, rendermime);
-        expect(widget).to.be.a(MarkdownCellWidget);
-      });
-
-    });
-
     describe('#constructor()', () => {
 
       it('should create a notebook widget', () => {
         let rendermime = defaultRenderMime();
-        let widget = new StaticNotebook(rendermime);
+        let widget = new StaticNotebook({ rendermime });
         expect(widget).to.be.a(StaticNotebook);
       });
 
       it('should add the `jp-Notebook` class', () => {
         let rendermime = defaultRenderMime();
-        let widget = new StaticNotebook(rendermime);
+        let widget = new StaticNotebook({ rendermime });
         expect(widget.hasClass('jp-Notebook')).to.be(true);
       });
 
@@ -184,7 +146,7 @@ describe('notebook/notebook/widget', () => {
     describe('#modelChanged', () => {
 
       it('should be emitted when the model changes', () => {
-        let widget = new StaticNotebook(defaultRenderMime());
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime() });
         let model = new NotebookModel();
         let called = false;
         widget.modelChanged.connect((sender, args) => {
@@ -201,19 +163,19 @@ describe('notebook/notebook/widget', () => {
     describe('#model', () => {
 
       it('should get the model for the widget', () => {
-        let widget = new StaticNotebook(defaultRenderMime());
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime() });
         expect(widget.model).to.be(null);
       });
 
       it('should set the model for the widget', () => {
-        let widget = new StaticNotebook(defaultRenderMime());
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime() });
         let model = new NotebookModel();
         widget.model = model;
         expect(widget.model).to.be(model);
       });
 
       it('should emit the `modelChanged` signal', () => {
-        let widget = new StaticNotebook(defaultRenderMime());
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime() });
         let model = new NotebookModel();
         widget.model = model;
         let called = false;
@@ -223,7 +185,7 @@ describe('notebook/notebook/widget', () => {
       });
 
       it('should be a no-op if the value does not change', () => {
-        let widget = new StaticNotebook(defaultRenderMime());
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime() });
         let model = new NotebookModel();
         widget.model = model;
         let called = false;
@@ -232,11 +194,22 @@ describe('notebook/notebook/widget', () => {
         expect(called).to.be(false);
       });
 
-      it('should call `changeModel`', () => {
-        let widget = new LogStaticNotebook(defaultRenderMime());
+      it('should add the model cells to the layout', () => {
+        let widget = new LogStaticNotebook({ rendermime: defaultRenderMime() });
         let model = new NotebookModel();
+        model.fromJSON(DEFAULT_CONTENT);
         widget.model = model;
-        expect(widget.methods.indexOf('changeModel')).to.not.be(-1);
+        expect(widget.childCount()).to.be(6);
+      });
+
+      it('should set the mime types of the cell widgets', () => {
+        let widget = new LogStaticNotebook({ rendermime: defaultRenderMime() });
+        let model = new NotebookModel();
+        let cursor = model.getMetadata('language_info');
+        cursor.setValue({ name: 'python', codemirror_mode: 'python' });
+        widget.model = model;
+        let child = widget.childAt(0);
+        expect(child.mimetype).to.be('text/x-python');
       });
 
       context('`cells.changed` signal', () => {
@@ -253,7 +226,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should be the rendermime instance used by the widget', () => {
         let rendermime = defaultRenderMime();
-        let widget = new StaticNotebook(rendermime);
+        let widget = new StaticNotebook({ rendermime });
         expect(widget.rendermime).to.be(rendermime);
       });
 
@@ -307,30 +280,6 @@ describe('notebook/notebook/widget', () => {
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
-      });
-
-    });
-
-    describe('#changeModel()', () => {
-
-      it('should add the model cells to the layout', () => {
-        let widget = new LogStaticNotebook(defaultRenderMime());
-        let model = new NotebookModel();
-        model.fromJSON(DEFAULT_CONTENT);
-        expect(widget.methods.indexOf('changeModel')).to.be(-1);
-        widget.model = model;
-        expect(widget.childCount()).to.be(6);
-        expect(widget.methods.indexOf('changeModel')).to.not.be(-1);
-      });
-
-      it('should set the mime types of the cell widgets', () => {
-        let widget = new LogStaticNotebook(defaultRenderMime());
-        let model = new NotebookModel();
-        let cursor = model.getMetadata('language_info');
-        cursor.setValue({ name: 'python', codemirror_mode: 'python' });
-        widget.model = model;
-        let child = widget.childAt(0);
-        expect(child.mimetype).to.be('text/x-python');
       });
 
     });

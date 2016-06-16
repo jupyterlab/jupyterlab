@@ -61,7 +61,7 @@ class NotebookModelFactory implements IModelFactory {
    * @returns A new document model.
    */
   createNew(languagePreference?: string): INotebookModel {
-    return new NotebookModel(languagePreference);
+    return new NotebookModel({ languagePreference });
   }
 
   /**

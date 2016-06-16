@@ -107,9 +107,9 @@ describe('notebook/notebook', () => {
         model.cells.add(cell);
         model.fromJSON(DEFAULT_CONTENT);
         model.cells.undo();
-        expect(model.cells.length).to.be(1);
-        expect(model.cells.get(0).source).to.be('foo');
-        expect(model.cells.get(0)).to.not.be(cell);  // should be a clone.
+        expect(model.cells.length).to.be(2);
+        expect(model.cells.get(1).source).to.be('foo');
+        expect(model.cells.get(1)).to.not.be(cell);  // should be a clone.
       });
 
       it('should be read-only', () => {
@@ -242,7 +242,7 @@ describe('notebook/notebook', () => {
       });
 
       it('should be set from the constructor arg', () => {
-        let model = new NotebookModel('foo');
+        let model = new NotebookModel({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).to.be('foo');
       });
 
