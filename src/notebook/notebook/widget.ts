@@ -36,7 +36,8 @@ import {
 import {
   ICellModel, BaseCellWidget, MarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
-  CodeCellModel, RawCellWidget, RawCellModel
+  CodeCellModel, RawCellWidget, RawCellModel,
+  ICodeCellModel, IMarkdownCellModel, IRawCellModel
 } from '../cells';
 
 import {
@@ -224,13 +225,13 @@ class StaticNotebook extends Widget {
   private _createWidget(model: ICellModel): BaseCellWidget {
     switch (model.type) {
     case 'code':
-      let codeFactory = this._factory.newCodeCell;
+      let codeFactory = this._factory.createCodeCell;
       return codeFactory(model as CodeCellModel, this._rendermime);
     case 'markdown':
-      let mdFactory = this._factory.newMarkdownCell;
+      let mdFactory = this._factory.createMarkdownCell;
       return mdFactory(model as MarkdownCellModel, this._rendermime);
     default:
-      let rawFactory = this._factory.newRawCell;
+      let rawFactory = this._factory.createRawCell;
       return rawFactory(model as RawCellModel);
     }
   }
@@ -344,17 +345,17 @@ namespace StaticNotebook {
     /**
      * Create a new code cell widget.
      */
-    newCodeCell(model: CodeCellModel, rendermime: RenderMime<Widget>): CodeCellWidget;
+    createCodeCell(model: ICodeCellModel, rendermime: RenderMime<Widget>): CodeCellWidget;
 
     /**
      * Create a new markdown cell widget.
      */
-    newMarkdownCell(model: MarkdownCellModel, rendermime: RenderMime<Widget>): MarkdownCellWidget;
+    createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime<Widget>): MarkdownCellWidget;
 
     /**
      * Create a new raw cell widget.
      */
-    newRawCell(model: RawCellModel): RawCellWidget;
+    createRawCell(model: IRawCellModel): RawCellWidget;
   }
 }
 
@@ -670,13 +671,13 @@ namespace Private {
    */
   export
   const defaultFactory: StaticNotebook.ICellWidgetFactory = {
-    newCodeCell: (model: CodeCellModel, rendermime: RenderMime<Widget>) => {
+    createCodeCell: (model: ICodeCellModel, rendermime: RenderMime<Widget>) => {
       return new CodeCellWidget(model, rendermime);
     },
-    newMarkdownCell: (model: MarkdownCellModel, rendermime: RenderMime<Widget>) => {
+    createMarkdownCell: (model: IMarkdownCellModel, rendermime: RenderMime<Widget>) => {
       return new MarkdownCellWidget(model, rendermime);
     },
-    newRawCell: (model: RawCellModel) => {
+    createRawCell: (model: IRawCellModel) => {
       return new RawCellWidget(model);
     }
   };

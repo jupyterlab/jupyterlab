@@ -4,11 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  ObservableList, IListChangedArgs
-} from 'phosphor-observablelist';
-
-import {
-  ICellModel
+  CodeCellModel
 } from '../../../../lib/notebook/cells/model';
 
 import {
@@ -43,6 +39,12 @@ describe('notebook/notebook', () => {
         let cursor = model.getMetadata('language_info');
         let lang = cursor.getValue() as nbformat.ILanguageInfoMetadata;
         expect(lang.name).to.be('python');
+      });
+
+      it('should add a single code cell by default', () => {
+        let model = new NotebookModel();
+        expect(model.cells.length).to.be(1);
+        expect(model.cells.get(0)).to.be.a(CodeCellModel);
       });
 
     });
@@ -83,9 +85,10 @@ describe('notebook/notebook', () => {
         expect(model.cells).to.be.an(ObservableUndoableList);
       });
 
-      it('should default to an empty list', () => {
+      it('should add an empty code cell by default', () => {
         let model = new NotebookModel();
-        expect(model.cells.length).to.be(0);
+        expect(model.cells.length).to.be(1);
+        expect(model.cells.get(0)).to.be.a(CodeCellModel);
       });
 
       it('should be reset when loading from disk', () => {
