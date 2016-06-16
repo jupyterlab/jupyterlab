@@ -124,19 +124,14 @@ class CellEditorWidget extends CodeMirrorWidget {
   constructor(model: ICellModel) {
     super();
     this.addClass(CELL_EDITOR_CLASS);
-    this._model = model;
-    let editor = this.editor;
-    let doc = editor.getDoc();
-    if (model.source) {
-      doc.setValue(model.source);
-    }
-    CodeMirror.on(doc, 'change', (instance, change) => {
+    this.model = model;
+
+    CodeMirror.on(this.editor.getDoc(), 'change', (instance, change) => {
       this.onDocChange(instance, change);
     });
-    CodeMirror.on(editor, 'keydown', (instance, evt) => {
+    CodeMirror.on(this.editor, 'keydown', (instance, evt) => {
       this.onEditorKeydown(instance, evt);
     });
-    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -161,13 +156,28 @@ class CellEditorWidget extends CodeMirrorWidget {
   }
 
   /**
-   * Get the cell model used by the editor.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * The cell model used by the editor.
    */
   get model(): ICellModel {
     return this._model;
+  }
+  set model(model: ICellModel) {
+    if (!model && !this._model || model === this._model) {
+      return;
+    }
+
+    let doc = this.editor.getDoc();
+
+    if (!model) {
+      doc.setValue('');
+      this._model.dispose();
+      this._model = null;
+      return;
+    }
+
+    this._model = model;
+    doc.setValue(model.source || '');
+    model.stateChanged.connect(this.onModelChanged, this);
   }
 
   /**
