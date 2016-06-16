@@ -46,7 +46,7 @@ import {
  * The definition of a model object for a notebook widget.
  */
 export
-interface INotebookModel extends IDocumentModel {
+interface INotebookModel extends IDocumentModel, ICellModelFactory {
   /**
    * A signal emitted when a model state changes.
    */
@@ -64,14 +64,6 @@ interface INotebookModel extends IDocumentModel {
    * This is a read-only property.
    */
   cells: ObservableUndoableList<ICellModel>;
-
-  /**
-   * The factory for creating new cell models.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  cellFactory: ICellModelFactory;
 
   /**
    * The major version number of the nbformat.
@@ -231,16 +223,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
-   * Get the factory used to create cell models.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get cellFactory(): ICellModelFactory {
-    return this._factory;
-  }
-
-  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
@@ -396,6 +378,42 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    */
   listMetadata(): string[] {
     return Object.keys(this._metadata);
+  }
+
+  /**
+   * Create a new code cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new code cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  newCodeCell(source?: nbformat.IBaseCell): ICodeCellModel {
+    return this._factory.newCodeCell(source);
+  }
+
+  /**
+   * Create a new markdown cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new markdown cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  newMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel {
+    return this._factory.newMarkdownCell(source);
+  }
+
+  /**
+   * Create a new raw cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new raw cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  newRawCell(source?: nbformat.IBaseCell): IRawCellModel {
+    return this._factory.newRawCell(source);
   }
 
   /**
