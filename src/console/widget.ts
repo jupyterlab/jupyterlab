@@ -191,7 +191,7 @@ class ConsoleWidget extends Widget {
    */
   static createBanner() {
     let model = new RawCellModel();
-    return new RawCellWidget(model);
+    return new RawCellWidget({ model });
   }
 
   /**

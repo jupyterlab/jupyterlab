@@ -127,12 +127,14 @@ class BaseCellWidget extends Widget {
     super();
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
+    this.modelChanged.connect(this.onModelChanged, this);
 
-    let factory = options.cellWidgetFactory || Private.defaultFactory;
-    this._editor = factory.createCellEditor(options.model || null);
-    this._input = factory.createInputArea(this._editor);
+    this._options = options;
+    this._factory = options.cellWidgetFactory || Private.defaultFactory;
+    this._editor = this._factory.createCellEditor(options.model || null);
+    this._input = this._factory.createInputArea(this._editor);
+
     (this.layout as PanelLayout).addChild(this._input);
-
     this.model = options.model || null;
   }
 
@@ -146,12 +148,10 @@ class BaseCellWidget extends Widget {
     if (!model && !this._model || model === this._model) {
       return;
     }
-
     // If the model is being replaced, disconnect the old signal handler.
     if (this._model) {
       this._model.metadataChanged.disconnect(this.onMetadataChanged, this);
     }
-
     let args: IChangedArgs<ICellModel>;
 
     if (!model) {
@@ -161,17 +161,29 @@ class BaseCellWidget extends Widget {
       this.modelChanged.emit(args);
       return;
     }
-
     args = { name: 'model', oldValue: this._model, newValue: model };
     this._model = model;
     this._editor.model = this._model;
-
     // Set the editor mode to be the default MIME type.
     loadModeByMIME(this._editor.editor, this._mimetype);
     this._model.metadataChanged.connect(this.onMetadataChanged, this);
     this._trustedCursor = this._model.getMetadata('trusted');
     this._trusted = !!this._trustedCursor.getValue();
     this.modelChanged.emit(args);
+  }
+
+  /**
+   * The widget renderer factory.
+   */
+  get factory(): BaseCellWidget.ICellWidgetFactory {
+    return this._factory;
+  }
+
+  /**
+   * The instantiation options of the widget.
+   */
+  get options(): BaseCellWidget.IOptions {
+    return this._options;
   }
 
   /**
@@ -230,6 +242,7 @@ class BaseCellWidget extends Widget {
   }
   set trusted(value: boolean) {
     this._trustedCursor.setValue(value);
+    this._trusted = value;
   }
 
   /**
@@ -266,10 +279,12 @@ class BaseCellWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
+    this.modelChanged.disconnect(this.onModelChanged, this);
     this._model = null;
     this._input = null;
     this._editor = null;
     this._trustedCursor = null;
+    this._options = null;
     super.dispose();
   }
 
@@ -291,12 +306,22 @@ class BaseCellWidget extends Widget {
   }
 
   /**
+   * Handle the widget receiving a new model.
+   *
+   * #### Notes
+   * This method should be implemented by subclasses that need to respond to
+   * the model being replaced.
+   */
+  protected onModelChanged(sender: any, args: IChangedArgs<ICellModel>): void {
+  }
+
+  /**
    * Handle changes in the model.
    */
   protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'trusted':
-      this._trusted = this._trustedCursor.getValue();
+      this._trusted = !!this._trustedCursor.getValue();
       this.update();
       break;
     default:
@@ -304,6 +329,8 @@ class BaseCellWidget extends Widget {
     }
   }
 
+  private _factory: BaseCellWidget.ICellWidgetFactory;
+  private _options: BaseCellWidget.IOptions;
   private _input: InputAreaWidget = null;
   private _editor: CellEditorWidget = null;
   private _model: ICellModel = null;
@@ -330,11 +357,22 @@ namespace BaseCellWidget {
      * The default is a shared factory instance.
      */
     cellWidgetFactory?: ICellWidgetFactory;
+  }
+
+  /**
+   * A factory for creating code cell widgets.
+   */
+  export
+  interface ICellWidgetFactory {
+    /**
+     * Create a new cell editor for the widget.
+     */
+    createCellEditor(model: ICellModel): CellEditorWidget;
 
     /**
-     * A model for the cell widget.
+     * Create a new input area for the widget.
      */
-    model?: ICellModel
+    createInputArea(editor: CellEditorWidget): InputAreaWidget;
   }
 
   /**
@@ -363,11 +401,8 @@ class CodeCellWidget extends BaseCellWidget {
    * Construct a code cell widget.
    */
   constructor(options: CodeCellWidget.IOptions) {
-    super(options.model);
-    this._rendermime = options.rendermime;
-    this._factory = options.cellWidgetFactory || Private.defaultFactory;
+    super(options);
     this.addClass(CODE_CELL_CLASS);
-    this.modelChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -377,8 +412,6 @@ class CodeCellWidget extends BaseCellWidget {
     if (this.isDisposed) {
       return;
     }
-    this.modelChanged.disconnect(this.onModelChanged, this);
-    this._rendermime = null;
     this._collapsedCursor = null;
     this._scrolledCursor = null;
     this._output = null;
@@ -408,27 +441,33 @@ class CodeCellWidget extends BaseCellWidget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(message: Message): void {
-    this.toggleClass(COLLAPSED_CLASS, this._collapsedCursor.getValue());
-    // TODO: handle scrolled state.
-    this._output.trusted = this.trusted;
+    if (this._collapsedCursor) {
+      this.toggleClass(COLLAPSED_CLASS, this._collapsedCursor.getValue());
+    }
+    if (this._output) {
+      // TODO: handle scrolled state.
+      this._output.trusted = this.trusted;
+    }
     super.onUpdateRequest(message);
   }
 
   /**
    * Handle the widget receiving a new model.
    */
-  protected onModelChanged(sender: BaseCellWidget, args: IChangedArgs<ICellModel>): void {
+  protected onModelChanged(sender: any, args: IChangedArgs<ICellModel>): void {
     if (args.oldValue) {
       args.oldValue.stateChanged.disconnect(this.onModelStateChanged, this);
     }
 
-    let factory = this._factory;
-    let model = args.newValue as ICodeCellModel;
+    let factory = this.factory as CodeCellWidget.ICellWidgetFactory;
+    let model = this.model as ICodeCellModel;
+    let options = this.options as CodeCellWidget.IOptions
 
     if (this._output) {
       this._output.dispose();
     }
-    this._output = factory.createOutputArea(model.outputs, this._rendermime);
+
+    this._output = factory.createOutputArea(model.outputs, options.rendermime);
     this._output.trusted = this.trusted;
     (this.layout as PanelLayout).addChild(this._output);
     this._collapsedCursor = model.getMetadata('collapsed');
@@ -465,9 +504,7 @@ class CodeCellWidget extends BaseCellWidget {
     super.onMetadataChanged(model, args);
   }
 
-  private _factory: CodeCellWidget.ICellWidgetFactory = null;
   private _output: OutputAreaWidget = null;
-  private _rendermime: RenderMime<Widget> = null;
   private _collapsedCursor: IMetadataCursor = null;
   private _scrolledCursor: IMetadataCursor = null;
 }
@@ -493,12 +530,12 @@ namespace CodeCellWidget {
     /**
      * A model for the cell widget.
      */
-    model: ICodeCellModel
+    model: ICodeCellModel;
 
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMime<Widget>
+    rendermime: RenderMime<Widget>;
   }
 
   /**
@@ -529,8 +566,7 @@ class MarkdownCellWidget extends BaseCellWidget {
    * Construct a Markdown cell widget.
    */
   constructor(options: MarkdownCellWidget.IOptions) {
-    super(options.model || null);
-    this._rendermime = options.rendermime;
+    super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
     // Insist on the Github-flavored markdown mode.
     this.mimetype = 'text/x-ipythongfm';
@@ -561,7 +597,6 @@ class MarkdownCellWidget extends BaseCellWidget {
       return;
     }
     this._renderer = null;
-    this._rendermime = null;
     super.dispose();
   }
 
@@ -570,13 +605,14 @@ class MarkdownCellWidget extends BaseCellWidget {
    */
   protected onUpdateRequest(message: Message): void {
     let model = this.model;
+    let options = this.options as MarkdownCellWidget.IOptions;
     if (this.rendered) {
       let text = model.source || DEFAULT_MARKDOWN_TEXT;
       // Do not re-render if the text has not changed.
       if (text !== this._prev) {
         let bundle: MimeMap<string> = { 'text/markdown': text };
         this._renderer.dispose();
-        this._renderer = this._rendermime.render(bundle) || new Widget();
+        this._renderer = options.rendermime.render(bundle) || new Widget();
         this._renderer.addClass(RENDERER_CLASS);
         (this.layout as PanelLayout).addChild(this._renderer);
       }
@@ -592,7 +628,6 @@ class MarkdownCellWidget extends BaseCellWidget {
     super.onUpdateRequest(message);
   }
 
-  private _rendermime: RenderMime<Widget> = null;
   private _renderer: Widget = null;
   private _rendered = true;
   private _prev = '';
@@ -619,12 +654,12 @@ namespace MarkdownCellWidget {
     /**
      * A model for the cell widget.
      */
-    model?: ICellModel
+    model?: ICellModel;
 
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMime<Widget>
+    rendermime: RenderMime<Widget>;
   }
 }
 
