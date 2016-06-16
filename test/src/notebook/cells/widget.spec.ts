@@ -10,11 +10,19 @@ import {
 } from 'jupyter-js-services/lib/mockkernel';
 
 import {
-  Message
+  Message, sendMessage
 } from 'phosphor-messaging';
 
 import {
-  BaseCellWidget, CellModel, InputAreaWidget
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
+  Widget
+} from 'phosphor-widget';
+
+import {
+  BaseCellWidget, CellModel, InputAreaWidget, ICellModel
 } from '../../../../lib/notebook/cells';
 
 import {
@@ -39,6 +47,16 @@ class LogCell extends BaseCellWidget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.methods.push('onAfterAttach');
+  }
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.methods.push('onUpdateRequest');
+  }
+
+  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    super.onMetadataChanged(model, args);
+    this.methods.push('onMetadataChanged');
   }
 }
 
@@ -229,12 +247,38 @@ describe('jupyter-js-notebook', () => {
 
     describe('#onAfterAttach()', () => {
 
-      it('should update the widget', () => {
+      it('should run when widget is attached', () => {
         let widget = new LogCell(new CellModel());
         expect(widget.methods).to.not.contain('onAfterAttach');
         widget.attach(document.body);
         expect(widget.methods).to.contain('onAfterAttach');
         widget.dispose();
+      });
+
+    });
+
+    describe('#onUpdateRequest()', () => {
+
+      it('should update the widget', () => {
+        let widget = new LogCell(new CellModel());
+        expect(widget.methods).to.not.contain('onUpdateRequest');
+        sendMessage(widget, Widget.MsgUpdateRequest);
+        expect(widget.methods).to.contain('onUpdateRequest');
+      });
+
+    });
+
+    describe('#onMetadataChanged()', () => {
+
+      it('should fire when model metadata changes', () => {
+        let widget = new LogCell(new CellModel());
+        expect(widget.methods).to.not.contain('onMetadataChanged');
+        widget.model.metadataChanged.emit({
+          name: 'foo',
+          oldValue: 'bar',
+          newValue: 'baz'
+        });
+        expect(widget.methods).to.contain('onMetadataChanged');
       });
 
     });
