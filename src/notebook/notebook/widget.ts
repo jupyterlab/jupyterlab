@@ -106,15 +106,13 @@ class StaticNotebook extends Widget {
   /**
    * Construct a notebook widget.
    */
-  constructor(rendermime: RenderMime<Widget>, options: StaticNotebook.IOptions = {}) {
+  constructor(options: StaticNotebook.IOptions) {
     super();
     this.node.tabIndex = -1;  // Allow the widget to take focus.
     this.addClass(NB_CLASS);
-    this._rendermime = rendermime;
+    this._rendermime = options.rendermime;
     this.layout = new PanelLayout();
-    this._codeFactory = options.codeCellFactory || Private.createCodeCell;
-    this._mdFactory = options.markdownCellFactory || Private.createMarkdownCell;
-    this._rawFactory = options.rawCellFactory || Private.createRawCell;
+    this._factory = options.cellWidgetFactory || Private.defaultFactory;
   }
 
   /**
@@ -225,13 +223,13 @@ class StaticNotebook extends Widget {
   private _createWidget(model: ICellModel): BaseCellWidget {
     switch (model.type) {
     case 'code':
-      let codeFactory = this._codeFactory;
+      let codeFactory = this._factory.newCodeCell;
       return codeFactory(model as CodeCellModel, this._rendermime);
     case 'markdown':
-      let mdFactory = this._mdFactory;
+      let mdFactory = this._factory.newMarkdownCell;
       return mdFactory(model as MarkdownCellModel, this._rendermime);
     default:
-      let rawFactory = this._rawFactory;
+      let rawFactory = this._factory.newRawCell;
       return rawFactory(model as RawCellModel);
     }
   }
@@ -305,11 +303,8 @@ class StaticNotebook extends Widget {
 
   private _model: INotebookModel = null;
   private _rendermime: RenderMime<Widget> = null;
-  private _codeFactory: (model: CodeCellModel, rendermime: RenderMime<Widget>) => CodeCellWidget = null;
-  private _mdFactory: (model: MarkdownCellModel, rendermime: RenderMime<Widget>) => MarkdownCellWidget = null;
-  private _rawFactory: (model: RawCellModel) => RawCellWidget = null;
+  private _factory: StaticNotebook.ICellWidgetFactory = null;
 }
-
 
 
 /**
@@ -323,24 +318,42 @@ namespace StaticNotebook {
   export
   interface IOptions {
     /**
+     * The rendermime instance used by the widget.
+     */
+    rendermime: RenderMime<Widget>;
+
+    /**
      * The language preference for the model.
      */
     languagePreference?: string;
 
     /**
-     * A factory for creating code cell models.
+     * A factory for creating code cell widgets.
+     *
+     * The default is a shared factory instance.
      */
-    codeCellFactory?: (model: CodeCellModel, rendermime: RenderMime<Widget>) => CodeCellWidget;
+    cellWidgetFactory?: ICellWidgetFactory;
+  }
+
+  /**
+   * A factory for creating code cell widgets.
+   */
+  export
+  interface ICellWidgetFactory {
+    /**
+     * Create a new code cell widget.
+     */
+    newCodeCell(model: CodeCellModel, rendermime: RenderMime<Widget>): CodeCellWidget;
 
     /**
-     * A factory for creating markdown cell models.
+     * Create a new markdown cell widget.
      */
-    markdownCellFactory?: (model: MarkdownCellModel, rendermime: RenderMime<Widget>) => MarkdownCellWidget;
+    newMarkdownCell(model: MarkdownCellModel, rendermime: RenderMime<Widget>): MarkdownCellWidget;
 
     /**
-     * A factory for creating raw cell models.
+     * Create a new raw cell widget.
      */
-    rawCellFactory?: (model: RawCellModel) => RawCellWidget;
+    newRawCell(model: RawCellModel): RawCellWidget;
   }
 }
 
@@ -652,28 +665,20 @@ namespace Private {
   const stateChangedSignal = new Signal<Notebook, IChangedArgs<any>>();
 
   /**
-   * A factory for creating a new code cell widget.
+   * The default `ICellWidgetFactory` instance.
    */
   export
-  function createCodeCell(model: CodeCellModel, rendermime: RenderMime<Widget>): CodeCellWidget {
-    return new CodeCellWidget(model, rendermime);
-  }
-
-  /**
-   * A factory for creating a new markdown cell widget.
-   */
-  export
-  function createMarkdownCell(model: MarkdownCellModel, rendermime: RenderMime<Widget>): MarkdownCellWidget {
-    return new MarkdownCellWidget(model, rendermime);
-  }
-
-  /**
-   * A factory for creating a new raw cell widget.
-   */
-  export
-  function createRawCell(model: RawCellModel): RawCellWidget {
-    return new RawCellWidget(model);
-  }
+  const defaultFactory: StaticNotebook.ICellWidgetFactory = {
+    newCodeCell: (model: CodeCellModel, rendermime: RenderMime<Widget>) => {
+      return new CodeCellWidget(model, rendermime);
+    },
+    newMarkdownCell: (model: MarkdownCellModel, rendermime: RenderMime<Widget>) => {
+      return new MarkdownCellWidget(model, rendermime);
+    },
+    newRawCell: (model: RawCellModel) => {
+      return new RawCellWidget(model);
+    }
+  };
 
  /**
   * Scroll an element into view if needed.
