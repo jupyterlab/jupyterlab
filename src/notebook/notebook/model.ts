@@ -110,7 +110,7 @@ interface ICellModelFactory {
    * @returns A new code cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  newCodeCell(source?: nbformat.IBaseCell): ICodeCellModel;
+  createCodeCell(source?: nbformat.IBaseCell): ICodeCellModel;
 
   /**
    * Create a new markdown cell.
@@ -120,7 +120,7 @@ interface ICellModelFactory {
    * @returns A new markdown cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  newMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel;
+  createMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel;
 
   /**
    * Create a new raw cell.
@@ -130,7 +130,7 @@ interface ICellModelFactory {
    * @returns A new raw cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  newRawCell(source?: nbformat.IBaseCell): IRawCellModel;
+  createRawCell(source?: nbformat.IBaseCell): IRawCellModel;
 }
 
 
@@ -148,15 +148,15 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     this._cells = new ObservableUndoableList<ICellModel>((data: nbformat.IBaseCell) => {
       switch (data.cell_type) {
         case 'code':
-          return this._factory.newCodeCell(data);
+          return this._factory.createCodeCell(data);
         case 'markdown':
-          return this._factory.newMarkdownCell(data);
+          return this._factory.createMarkdownCell(data);
         default:
-          return this._factory.newRawCell(data);
+          return this._factory.createRawCell(data);
       }
     });
     // Add an initial code cell by default.
-    this._cells.add(this._factory.newCodeCell());
+    this._cells.add(this._factory.createCodeCell());
     this._cells.changed.connect(this._onCellsChanged, this);
     if (options.languagePreference) {
       this._metadata['language_info'] = { name: options.languagePreference };
@@ -388,8 +388,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * @returns A new code cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  newCodeCell(source?: nbformat.IBaseCell): ICodeCellModel {
-    return this._factory.newCodeCell(source);
+  createCodeCell(source?: nbformat.IBaseCell): ICodeCellModel {
+    return this._factory.createCodeCell(source);
   }
 
   /**
@@ -400,8 +400,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * @returns A new markdown cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  newMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel {
-    return this._factory.newMarkdownCell(source);
+  createMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel {
+    return this._factory.createMarkdownCell(source);
   }
 
   /**
@@ -412,8 +412,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * @returns A new raw cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  newRawCell(source?: nbformat.IBaseCell): IRawCellModel {
-    return this._factory.newRawCell(source);
+  createRawCell(source?: nbformat.IBaseCell): IRawCellModel {
+    return this._factory.createRawCell(source);
   }
 
   /**
@@ -524,13 +524,13 @@ namespace Private {
    */
   export
   const defaultFactory: ICellModelFactory = {
-    newCodeCell: (source?: nbformat.IBaseCell) => {
+    createCodeCell: (source?: nbformat.IBaseCell) => {
       return new CodeCellModel(source);
     },
-    newMarkdownCell: (source?: nbformat.IBaseCell) => {
+    createMarkdownCell: (source?: nbformat.IBaseCell) => {
       return new MarkdownCellModel(source);
     },
-    newRawCell: (source?: nbformat.IBaseCell) => {
+    createRawCell: (source?: nbformat.IBaseCell) => {
       return new RawCellModel(source);
     }
   };

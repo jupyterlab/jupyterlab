@@ -143,7 +143,7 @@ namespace NotebookActions {
       }
     }
     if (!model.cells.length) {
-      let cell = model.newCodeCell();
+      let cell = model.createCodeCell();
       model.cells.add(cell);
     }
     model.cells.endCompoundOperation();
@@ -155,7 +155,7 @@ namespace NotebookActions {
    */
   export
   function insertAbove(widget: Notebook): void {
-    let cell = widget.model.newCodeCell();
+    let cell = widget.model.createCodeCell();
     widget.model.cells.insert(widget.activeCellIndex, cell);
     Private.deselectCells(widget);
   }
@@ -165,7 +165,7 @@ namespace NotebookActions {
    */
   export
   function insertBelow(widget: Notebook): void {
-    let cell = widget.model.newCodeCell();
+    let cell = widget.model.createCodeCell();
     widget.model.cells.insert(widget.activeCellIndex + 1, cell);
     Private.deselectCells(widget);
   }
@@ -188,13 +188,13 @@ namespace NotebookActions {
       let newCell: ICellModel;
       switch (value) {
       case 'code':
-        newCell = model.newCodeCell(child.model.toJSON());
+        newCell = model.createCodeCell(child.model.toJSON());
         break;
       case 'markdown':
-        newCell = model.newMarkdownCell(child.model.toJSON());
+        newCell = model.createMarkdownCell(child.model.toJSON());
         break;
       default:
-        newCell = model.newRawCell(child.model.toJSON());
+        newCell = model.createRawCell(child.model.toJSON());
       }
       model.cells.replace(i, 1, [newCell]);
       if (value === 'markdown') {
@@ -242,7 +242,7 @@ namespace NotebookActions {
     run(widget, kernel);
     let model = widget.model;
     if (widget.activeCellIndex === widget.childCount() - 1) {
-      let cell = model.newCodeCell();
+      let cell = model.createCodeCell();
       model.cells.add(cell);
       widget.mode = 'edit';
     } else {
@@ -259,7 +259,7 @@ namespace NotebookActions {
   function runAndInsert(widget: Notebook, kernel?: IKernel): void {
     run(widget, kernel);
     let model = widget.model;
-    let cell = model.newCodeCell();
+    let cell = model.createCodeCell();
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
     widget.mode = 'edit';
@@ -396,7 +396,7 @@ namespace NotebookActions {
       }
     }
     if (!model.cells.length) {
-      let cell = model.newCodeCell();
+      let cell = model.createCodeCell();
       model.cells.add(cell);
     }
     model.cells.endCompoundOperation();
@@ -418,13 +418,13 @@ namespace NotebookActions {
     for (let value of values) {
       switch (value.cell_type) {
       case 'code':
-        cells.push(model.newCodeCell(value));
+        cells.push(model.createCodeCell(value));
         break;
       case 'markdown':
-        cells.push(model.newMarkdownCell(value));
+        cells.push(model.createMarkdownCell(value));
         break;
       default:
-        cells.push(model.newRawCell(value));
+        cells.push(model.createRawCell(value));
         break;
       }
     }
@@ -538,11 +538,11 @@ namespace Private {
   function cloneCell(model: INotebookModel, cell: ICellModel): ICellModel {
     switch (cell.type) {
     case 'code':
-      return model.newCodeCell(cell.toJSON());
+      return model.createCodeCell(cell.toJSON());
     case 'markdown':
-      return model.newMarkdownCell(cell.toJSON());
+      return model.createMarkdownCell(cell.toJSON());
     default:
-      return model.newRawCell(cell.toJSON());
+      return model.createRawCell(cell.toJSON());
     }
   }
 
