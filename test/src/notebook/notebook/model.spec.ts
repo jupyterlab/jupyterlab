@@ -4,11 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  ObservableList, IListChangedArgs
-} from 'phosphor-observablelist';
-
-import {
-  ICellModel
+  CodeCellModel
 } from '../../../../lib/notebook/cells/model';
 
 import {
@@ -27,29 +23,6 @@ import {
 const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
 
-/**
- * A notebook model which tests protected methods.
- */
-class LogNotebookModel extends NotebookModel {
-  methods: string[] = [];
-
-  protected onCellChanged(cell: ICellModel, change: any): void {
-    super.onCellChanged(cell, change);
-    this.methods.push('onCellChanged');
-  }
-
-  protected onCellsChanged(list: ObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
-    super.onCellsChanged(list, change);
-    this.methods.push('onCellsChanged');
-  }
-
-  protected setCursorData(name: string, newValue: any): void {
-    super.setCursorData(name, newValue);
-    this.methods.push('setCursorData');
-  }
-}
-
-
 describe('notebook/notebook', () => {
 
   describe('NotebookModel', () => {
@@ -62,10 +35,16 @@ describe('notebook/notebook', () => {
       });
 
       it('should accept an optional language preference', () => {
-        let model = new NotebookModel('python');
+        let model = new NotebookModel({ languagePreference: 'python' });
         let cursor = model.getMetadata('language_info');
         let lang = cursor.getValue() as nbformat.ILanguageInfoMetadata;
         expect(lang.name).to.be('python');
+      });
+
+      it('should add a single code cell by default', () => {
+        let model = new NotebookModel();
+        expect(model.cells.length).to.be(1);
+        expect(model.cells.get(0)).to.be.a(CodeCellModel);
       });
 
     });
@@ -106,9 +85,10 @@ describe('notebook/notebook', () => {
         expect(model.cells).to.be.an(ObservableUndoableList);
       });
 
-      it('should default to an empty list', () => {
+      it('should add an empty code cell by default', () => {
         let model = new NotebookModel();
-        expect(model.cells.length).to.be(0);
+        expect(model.cells.length).to.be(1);
+        expect(model.cells.get(0)).to.be.a(CodeCellModel);
       });
 
       it('should be reset when loading from disk', () => {
@@ -127,14 +107,73 @@ describe('notebook/notebook', () => {
         model.cells.add(cell);
         model.fromJSON(DEFAULT_CONTENT);
         model.cells.undo();
-        expect(model.cells.length).to.be(1);
-        expect(model.cells.get(0).source).to.be('foo');
-        expect(model.cells.get(0)).to.not.be(cell);  // should be a clone.
+        expect(model.cells.length).to.be(2);
+        expect(model.cells.get(1).source).to.be('foo');
+        expect(model.cells.get(1)).to.not.be(cell);  // should be a clone.
       });
 
       it('should be read-only', () => {
         let model = new NotebookModel();
         expect(() => { model.cells = null; }).to.throwError();
+      });
+
+      context('cells `changed` signal', () => {
+
+        it('should emit a `contentChanged` signal', () => {
+          let model = new NotebookModel();
+          let cell = model.createCodeCell();
+          let called = false;
+          model.contentChanged.connect(() => { called = true; });
+          model.cells.add(cell);
+          expect(called).to.be(true);
+        });
+
+        it('should set the dirty flag', () => {
+          let model = new NotebookModel();
+          let cell = model.createCodeCell();
+          model.cells.add(cell);
+          expect(model.dirty).to.be(true);
+        });
+
+        it('should dispose of old cells', () => {
+          let model = new NotebookModel();
+          let cell = model.createCodeCell();
+          model.cells.add(cell);
+          model.cells.clear();
+          expect(cell.isDisposed).to.be(true);
+        });
+
+      });
+
+      describe('cell `changed` signal', () => {
+
+        it('should be called when a cell content changes', () => {
+          let model = new NotebookModel();
+          let cell = model.createCodeCell();
+          model.cells.add(cell);
+          cell.source = 'foo';
+        });
+
+        it('should emit the `contentChanged` signal', () => {
+          let model = new NotebookModel();
+          let cell = model.createCodeCell();
+          model.cells.add(cell);
+          let called = false;
+          model.contentChanged.connect(() => { called = true; });
+          let cursor = cell.getMetadata('foo');
+          cursor.setValue('bar');
+          expect(called).to.be(true);
+        });
+
+        it('should set the dirty flag', () => {
+          let model = new NotebookModel();
+          let cell = model.createCodeCell();
+          model.cells.add(cell);
+          model.dirty = false;
+          cell.source = 'foo';
+          expect(model.dirty).to.be(true);
+        });
+
       });
 
     });
@@ -203,7 +242,7 @@ describe('notebook/notebook', () => {
       });
 
       it('should be set from the constructor arg', () => {
-        let model = new NotebookModel('foo');
+        let model = new NotebookModel({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).to.be('foo');
       });
 
@@ -401,6 +440,36 @@ describe('notebook/notebook', () => {
         expect(cursor1.getValue()).to.be(1);
       });
 
+      it('should set the dirty flag', () => {
+        let model = new NotebookModel();
+        let cursor = model.getMetadata('foo');
+        cursor.setValue('bar');
+        expect(model.dirty).to.be(true);
+      });
+
+      it('should emit the `contentChanged` signal', () => {
+        let model = new NotebookModel();
+        let cursor = model.getMetadata('foo');
+        let called = false;
+        model.contentChanged.connect(() => { called = true; });
+        cursor.setValue('bar');
+        expect(called).to.be(true);
+      });
+
+      it('should emit the `metadataChanged` signal', () => {
+        let model = new NotebookModel();
+        let cursor = model.getMetadata('foo');
+        let called = false;
+        model.metadataChanged.connect((sender, args) => {
+          expect(sender).to.be(model);
+          expect(args.name).to.be('foo');
+          expect(args.oldValue).to.be(void 0);
+          expect(args.newValue).to.be('bar');
+          called = true;
+        });
+        cursor.setValue('bar');
+        expect(called).to.be(true);
+      });
     });
 
     describe('#listMetadata()', () => {
@@ -414,107 +483,6 @@ describe('notebook/notebook', () => {
         cursor.setValue(1);
         keys.push('foo');
         expect(model.listMetadata()).to.eql(keys);
-      });
-
-    });
-
-    describe('#onCellsChanged()', () => {
-
-      it('should emit a `contentChanged` signal', () => {
-        let model = new LogNotebookModel();
-        let cell = model.createCodeCell();
-        let called = false;
-        model.contentChanged.connect(() => { called = true; });
-        model.cells.add(cell);
-        expect(model.methods.indexOf('onCellsChanged')).to.not.be(-1);
-        expect(called).to.be(true);
-      });
-
-      it('should set the dirty flag', () => {
-        let model = new LogNotebookModel();
-        let cell = model.createCodeCell();
-        model.cells.add(cell);
-        expect(model.methods.indexOf('onCellsChanged')).to.not.be(-1);
-        expect(model.dirty).to.be(true);
-      });
-
-      it('should dispose of old cells', () => {
-        let model = new LogNotebookModel();
-        let cell = model.createCodeCell();
-        model.cells.add(cell);
-        model.cells.clear();
-        expect(cell.isDisposed).to.be(true);
-      });
-
-    });
-
-    describe('#onCellChanged()', () => {
-
-      it('should be called when a cell content changes', () => {
-        let model = new LogNotebookModel();
-        let cell = model.createCodeCell();
-        model.cells.add(cell);
-        cell.source = 'foo';
-        expect(model.methods.indexOf('onCellChanged')).to.not.be(-1);
-      });
-
-      it('should emit the `contentChanged` signal', () => {
-        let model = new LogNotebookModel();
-        let cell = model.createCodeCell();
-        model.cells.add(cell);
-        let called = false;
-        model.contentChanged.connect(() => { called = true; });
-        let cursor = cell.getMetadata('foo');
-        cursor.setValue('bar');
-        expect(model.methods.indexOf('onCellChanged')).to.not.be(-1);
-        expect(called).to.be(true);
-      });
-
-      it('should set the dirty flag', () => {
-        let model = new LogNotebookModel();
-        let cell = model.createCodeCell();
-        model.cells.add(cell);
-        model.dirty = false;
-        cell.source = 'foo';
-        expect(model.methods.indexOf('onCellChanged')).to.not.be(-1);
-        expect(model.dirty).to.be(true);
-      });
-
-    });
-
-    describe('#setCursorData()', () => {
-
-      it('should set the dirty flag', () => {
-        let model = new LogNotebookModel();
-        let cursor = model.getMetadata('foo');
-        cursor.setValue('bar');
-        expect(model.methods.indexOf('setCursorData')).to.not.be(-1);
-      });
-
-      it('should emit the `contentChanged` signal', () => {
-        let model = new LogNotebookModel();
-        let cursor = model.getMetadata('foo');
-        let called = false;
-        model.contentChanged.connect(() => { called = true; });
-        cursor.setValue('bar');
-        expect(model.methods.indexOf('setCursorData')).to.not.be(-1);
-        expect(called).to.be(true);
-      });
-
-      it('should emit the `metadataChanged` signal', () => {
-        let model = new LogNotebookModel();
-        let cursor = model.getMetadata('foo');
-        let called = false;
-        model.metadataChanged.connect((sender, args) => {
-          expect(sender).to.be(model);
-          expect(args.name).to.be('foo');
-          expect(args.oldValue).to.be(void 0);
-          expect(args.newValue).to.be('bar');
-          called = true;
-        });
-        cursor.setValue('bar');
-        expect(model.methods.indexOf('setCursorData')).to.not.be(-1);
-        expect(called).to.be(true);
       });
 
     });

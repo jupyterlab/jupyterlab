@@ -109,6 +109,20 @@ interface ICodeCellModel extends ICellModel {
 
 
 /**
+ * The definition of a markdown cell.
+ */
+export
+interface IMarkdownCellModel extends ICellModel { }
+
+
+/**
+ * The definition of a raw cell.
+ */
+export
+interface IRawCellModel extends ICellModel { }
+
+
+/**
  * An implementation of the cell model.
  */
 export

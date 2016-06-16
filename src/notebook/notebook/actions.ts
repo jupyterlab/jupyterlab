@@ -23,7 +23,7 @@ import {
 } from './nbformat';
 
 import {
-  ActiveNotebook
+  Notebook
 } from './widget';
 
 
@@ -42,7 +42,7 @@ namespace NotebookActions {
    * Split the active cell into two cells.
    */
   export
-  function splitCell(widget: ActiveNotebook): void {
+  function splitCell(widget: Notebook): void {
     Private.deselectCells(widget);
     let nbModel = widget.model;
     let index = widget.activeCellIndex;
@@ -68,7 +68,7 @@ namespace NotebookActions {
    * Merge selected cells.
    */
   export
-  function mergeCells(widget: ActiveNotebook): void {
+  function mergeCells(widget: Notebook): void {
     let toMerge: string[] = [];
     let toDelete: ICellModel[] = [];
     let model = widget.model;
@@ -130,7 +130,7 @@ namespace NotebookActions {
    * Delete the selected cells.
    */
   export
-  function deleteCells(widget: ActiveNotebook): void {
+  function deleteCells(widget: Notebook): void {
     let model = widget.model;
     let cells = model.cells;
     // Delete the cells as one undo event.
@@ -154,7 +154,7 @@ namespace NotebookActions {
    * Insert a new code cell above the current cell.
    */
   export
-  function insertAbove(widget: ActiveNotebook): void {
+  function insertAbove(widget: Notebook): void {
     let cell = widget.model.createCodeCell();
     widget.model.cells.insert(widget.activeCellIndex, cell);
     Private.deselectCells(widget);
@@ -164,7 +164,7 @@ namespace NotebookActions {
    * Insert a node code cell below the current cell.
    */
   export
-  function insertBelow(widget: ActiveNotebook): void {
+  function insertBelow(widget: Notebook): void {
     let cell = widget.model.createCodeCell();
     widget.model.cells.insert(widget.activeCellIndex + 1, cell);
     Private.deselectCells(widget);
@@ -174,7 +174,7 @@ namespace NotebookActions {
    * Change the selected cell type(s).
    */
   export
-  function changeCellType(widget: ActiveNotebook, value: string): void {
+  function changeCellType(widget: Notebook, value: string): void {
     let model = widget.model;
     model.cells.beginCompoundOperation();
     for (let i = 0; i < widget.childCount(); i++) {
@@ -211,7 +211,7 @@ namespace NotebookActions {
    * Run the selected cell(s).
    */
   export
-  function run(widget: ActiveNotebook, kernel?: IKernel): void {
+  function run(widget: Notebook, kernel?: IKernel): void {
     let selected: BaseCellWidget[] = [];
     for (let i = 0; i < widget.childCount(); i++) {
       let child = widget.childAt(i);
@@ -238,7 +238,7 @@ namespace NotebookActions {
    * edit mode and selected.
    */
   export
-  function runAndAdvance(widget: ActiveNotebook, kernel?: IKernel): void {
+  function runAndAdvance(widget: Notebook, kernel?: IKernel): void {
     run(widget, kernel);
     let model = widget.model;
     if (widget.activeCellIndex === widget.childCount() - 1) {
@@ -256,7 +256,7 @@ namespace NotebookActions {
    * Run the selected cell(s) and insert a new code cell below in edit mode.
    */
   export
-  function runAndInsert(widget: ActiveNotebook, kernel?: IKernel): void {
+  function runAndInsert(widget: Notebook, kernel?: IKernel): void {
     run(widget, kernel);
     let model = widget.model;
     let cell = model.createCodeCell();
@@ -270,7 +270,7 @@ namespace NotebookActions {
    * Run all of the cells in the notebook.
    */
   export
-  function runAll(widget: ActiveNotebook, kernel?: IKernel): void {
+  function runAll(widget: Notebook, kernel?: IKernel): void {
     for (let i = 0; i < widget.childCount(); i++) {
       Private.runCell(widget.childAt(i), kernel);
     }
@@ -282,7 +282,7 @@ namespace NotebookActions {
    * Select the cell below the active cell.
    */
   export
-  function selectBelow(widget: ActiveNotebook): void {
+  function selectBelow(widget: Notebook): void {
     if (widget.activeCellIndex === widget.childCount() - 1) {
       return;
     }
@@ -295,7 +295,7 @@ namespace NotebookActions {
    * Select the above the active cell.
    */
   export
-  function selectAbove(widget: ActiveNotebook): void {
+  function selectAbove(widget: Notebook): void {
     if (widget.activeCellIndex === 0) {
       return;
     }
@@ -308,7 +308,7 @@ namespace NotebookActions {
    * Extend the selection to the cell above.
    */
   export
-  function extendSelectionAbove(widget: ActiveNotebook): void {
+  function extendSelectionAbove(widget: Notebook): void {
     // Do not wrap around.
     if (widget.activeCellIndex === 0) {
       return;
@@ -336,7 +336,7 @@ namespace NotebookActions {
    * Extend the selection to the cell below.
    */
   export
-  function extendSelectionBelow(widget: ActiveNotebook): void {
+  function extendSelectionBelow(widget: Notebook): void {
     // Do not wrap around.
     if (widget.activeCellIndex === widget.childCount() - 1) {
       return;
@@ -364,7 +364,7 @@ namespace NotebookActions {
    * Copy the selected cells to a clipboard.
    */
   export
-  function copy(widget: ActiveNotebook, clipboard: IClipboard): void {
+  function copy(widget: Notebook, clipboard: IClipboard): void {
     clipboard.clear();
     let data: nbformat.IBaseCell[] = [];
     for (let i = 0; i < widget.childCount(); i++) {
@@ -381,7 +381,7 @@ namespace NotebookActions {
    * Cut the selected cells to a clipboard.
    */
   export
-  function cut(widget: ActiveNotebook, clipboard: IClipboard): void {
+  function cut(widget: Notebook, clipboard: IClipboard): void {
     clipboard.clear();
     let data: nbformat.IBaseCell[] = [];
     let model = widget.model;
@@ -408,7 +408,7 @@ namespace NotebookActions {
    * Paste cells from a clipboard.
    */
   export
-  function paste(widget: ActiveNotebook, clipboard: IClipboard): void {
+  function paste(widget: Notebook, clipboard: IClipboard): void {
     if (!clipboard.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
@@ -437,7 +437,7 @@ namespace NotebookActions {
    * Undo a cell action.
    */
   export
-  function undo(widget: ActiveNotebook): void {
+  function undo(widget: Notebook): void {
     widget.mode = 'command';
     widget.model.cells.undo();
   }
@@ -446,7 +446,7 @@ namespace NotebookActions {
    * Redo a cell action.
    */
   export
-  function redo(widget: ActiveNotebook): void {
+  function redo(widget: Notebook): void {
     widget.mode = 'command';
     widget.model.cells.redo();
   }
@@ -455,7 +455,7 @@ namespace NotebookActions {
    * Toggle line numbers on the selected cell(s).
    */
   export
-  function toggleLineNumbers(widget: ActiveNotebook): void {
+  function toggleLineNumbers(widget: Notebook): void {
     let cell = widget.childAt(widget.activeCellIndex);
     let editor = cell.editor.editor;
     let lineNumbers = editor.getOption('lineNumbers');
@@ -472,7 +472,7 @@ namespace NotebookActions {
    * Toggle the line number of all cells.
    */
   export
-  function toggleAllLineNumbers(widget: ActiveNotebook): void {
+  function toggleAllLineNumbers(widget: Notebook): void {
     let cell = widget.childAt(widget.activeCellIndex);
     let editor = cell.editor.editor;
     let lineNumbers = editor.getOption('lineNumbers');
@@ -487,7 +487,7 @@ namespace NotebookActions {
    * Clear the outputs of the currently selected cells.
    */
   export
-  function clearOutputs(widget: ActiveNotebook): void {
+  function clearOutputs(widget: Notebook): void {
     let cells = widget.model.cells;
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i) as CodeCellModel;
@@ -503,7 +503,7 @@ namespace NotebookActions {
    * Clear the code outputs on the widget.
    */
   export
-  function clearAllOutputs(widget: ActiveNotebook): void {
+  function clearAllOutputs(widget: Notebook): void {
     let cells = widget.model.cells;
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i) as CodeCellModel;
@@ -524,7 +524,7 @@ namespace Private {
    * Deselect all of the cells.
    */
   export
-  function deselectCells(widget: ActiveNotebook): void {
+  function deselectCells(widget: Notebook): void {
     for (let i = 0; i < widget.childCount(); i++) {
       let child = widget.childAt(i);
       widget.deselect(child);

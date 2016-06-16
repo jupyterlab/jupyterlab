@@ -21,7 +21,8 @@ import {
 } from '../../docregistry';
 
 import {
-  ICellModel, CodeCellModel, RawCellModel, MarkdownCellModel
+  ICellModel, ICodeCellModel, IRawCellModel, IMarkdownCellModel,
+  CodeCellModel, RawCellModel, MarkdownCellModel
 } from '../cells/model';
 
 import {
@@ -45,7 +46,7 @@ import {
  * The definition of a model object for a notebook widget.
  */
 export
-interface INotebookModel extends IDocumentModel {
+interface INotebookModel extends IDocumentModel, ICellModelFactory {
   /**
    * A signal emitted when a model state changes.
    */
@@ -91,45 +92,45 @@ interface INotebookModel extends IDocumentModel {
 
   /**
    * List the metadata namespace keys for the notebook.
-   *
-   * #### Notes
-   * Metadata associated with the nbformat are not included.
    */
   listMetadata(): string[];
+}
 
+
+/**
+ * A factory for creating cell models.
+ */
+export
+interface ICellModelFactory {
   /**
-   * A factory for creating a new code cell.
+   * Create a new code cell.
    *
    * @param source - The data to use for the original source data.
    *
    * @returns A new code cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
-   *
-   * #### Notes
-   * If the source argument does not give an input mimetype, the code cell
-   * defaults to the notebook [[defaultMimetype]].
    */
-  createCodeCell(source?: nbformat.IBaseCell): CodeCellModel;
+  createCodeCell(source?: nbformat.IBaseCell): ICodeCellModel;
 
   /**
-   * A factory for creating a new Markdown cell.
+   * Create a new markdown cell.
    *
    * @param source - The data to use for the original source data.
    *
    * @returns A new markdown cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  createMarkdownCell(source?: nbformat.IBaseCell): MarkdownCellModel;
+  createMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel;
 
   /**
-   * A factory for creating a new raw cell.
+   * Create a new raw cell.
    *
    * @param source - The data to use for the original source data.
    *
    * @returns A new raw cell. If a source cell is provided, the
    *   new cell will be intialized with the data from the source.
    */
-  createRawCell(source?: nbformat.IBaseCell): RawCellModel;
+  createRawCell(source?: nbformat.IBaseCell): IRawCellModel;
 }
 
 
@@ -141,21 +142,24 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Construct a new notebook model.
    */
-  constructor(languagePreference?: string) {
-    super(languagePreference);
+  constructor(options: NotebookModel.IOptions = {}) {
+    super(options.languagePreference);
+    this._factory = options.cellModelFactory || Private.defaultFactory;
     this._cells = new ObservableUndoableList<ICellModel>((data: nbformat.IBaseCell) => {
       switch (data.cell_type) {
         case 'code':
-          return this.createCodeCell(data);
+          return this._factory.createCodeCell(data);
         case 'markdown':
-          return this.createMarkdownCell(data);
+          return this._factory.createMarkdownCell(data);
         default:
-          return this.createRawCell(data);
+          return this._factory.createRawCell(data);
       }
     });
-    this._cells.changed.connect(this.onCellsChanged, this);
-    if (languagePreference) {
-      this._metadata['language_info'] = { name: languagePreference };
+    // Add an initial code cell by default.
+    this._cells.add(this._factory.createCodeCell());
+    this._cells.changed.connect(this._onCellsChanged, this);
+    if (options.languagePreference) {
+      this._metadata['language_info'] = { name: options.languagePreference };
     }
   }
 
@@ -322,7 +326,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         continue;
       }
       if (!(key in metadata)) {
-        this.setCursorData(key, null);
+        this._setCursorData(key, null);
         delete this._metadata[key];
         if (this._cursors[key]) {
           this._cursors[key].dispose();
@@ -331,7 +335,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       }
     }
     for (let key in metadata) {
-      this.setCursorData(key, (metadata as any)[key]);
+      this._setCursorData(key, (metadata as any)[key]);
     }
     this.dirty = true;
   }
@@ -342,42 +346,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   initialize(): void {
     this._cells.clearUndo();
     this.dirty = false;
-  }
-
-  /**
-   * A factory for creating a new code cell.
-   *
-   * @param source - The data to use for the original source data.
-   *
-   * @returns A new code cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createCodeCell(source?: nbformat.IBaseCell): CodeCellModel {
-    return new CodeCellModel(source);
-  }
-
-  /**
-   * A factory for creating a new Markdown cell.
-   *
-   * @param source - The data to use for the original source data.
-   *
-   * @returns A new markdown cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createMarkdownCell(source?: nbformat.IBaseCell): MarkdownCellModel {
-    return new MarkdownCellModel(source);
-  }
-
-  /**
-   * A factory for creating a new raw cell.
-   *
-   * @param source - The data to use for the original source data.
-   *
-   * @returns A new raw cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createRawCell(source?: nbformat.IBaseCell): RawCellModel {
-    return new RawCellModel(source);
   }
 
   /**
@@ -398,7 +366,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         return this._metadata[name];
       },
       (value: string) => {
-        this.setCursorData(name, value);
+        this._setCursorData(name, value);
       }
     );
     this._cursors[name] = cursor;
@@ -413,14 +381,64 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
+   * Create a new code cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new code cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createCodeCell(source?: nbformat.IBaseCell): ICodeCellModel {
+    return this._factory.createCodeCell(source);
+  }
+
+  /**
+   * Create a new markdown cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new markdown cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel {
+    return this._factory.createMarkdownCell(source);
+  }
+
+  /**
+   * Create a new raw cell.
+   *
+   * @param source - The data to use for the original source data.
+   *
+   * @returns A new raw cell. If a source cell is provided, the
+   *   new cell will be intialized with the data from the source.
+   */
+  createRawCell(source?: nbformat.IBaseCell): IRawCellModel {
+    return this._factory.createRawCell(source);
+  }
+
+  /**
+   * Set the cursor data for a given field.
+   */
+  private _setCursorData(name: string, newValue: any): void {
+    let oldValue = this._metadata[name];
+    if (deepEqual(oldValue, newValue)) {
+      return;
+    }
+    this._metadata[name] = newValue;
+    this.dirty = true;
+    this.contentChanged.emit(void 0);
+    this.metadataChanged.emit({ name, oldValue, newValue });
+  }
+
+  /**
    * Handle a change in the cells list.
    */
-  protected onCellsChanged(list: IObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
+  private _onCellsChanged(list: IObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
     let cell: ICellModel;
     switch (change.type) {
     case ListChangeType.Add:
       cell = change.newValue as ICellModel;
-      cell.contentChanged.connect(this.onCellChanged, this);
+      cell.contentChanged.connect(this._onCellChanged, this);
       break;
     case ListChangeType.Remove:
       (change.oldValue as ICellModel).dispose();
@@ -428,7 +446,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     case ListChangeType.Replace:
       let newValues = change.newValue as ICellModel[];
       for (cell of newValues) {
-        cell.contentChanged.connect(this.onCellChanged, this);
+        cell.contentChanged.connect(this._onCellChanged, this);
       }
       let oldValues = change.oldValue as ICellModel[];
       for (cell of oldValues) {
@@ -437,7 +455,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       break;
     case ListChangeType.Set:
       cell = change.newValue as ICellModel;
-      cell.contentChanged.connect(this.onCellChanged, this);
+      cell.contentChanged.connect(this._onCellChanged, this);
       if (change.oldValue) {
         (change.oldValue as ICellModel).dispose();
       }
@@ -452,30 +470,42 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Handle a change to a cell state.
    */
-  protected onCellChanged(cell: ICellModel, change: any): void {
+  private _onCellChanged(cell: ICellModel, change: any): void {
     this.dirty = true;
     this.contentChanged.emit(void 0);
-  }
-
-  /**
-   * Set the cursor data for a given field.
-   */
-  protected setCursorData(name: string, newValue: any): void {
-    let oldValue = this._metadata[name];
-    if (deepEqual(oldValue, newValue)) {
-      return;
-    }
-    this._metadata[name] = newValue;
-    this.dirty = true;
-    this.contentChanged.emit(void 0);
-    this.metadataChanged.emit({ name, oldValue, newValue });
   }
 
   private _cells: ObservableUndoableList<ICellModel> = null;
+  private _factory: ICellModelFactory = null;
   private _metadata: { [key: string]: any } = Private.createMetadata();
   private _cursors: { [key: string]: MetadataCursor } = Object.create(null);
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
+}
+
+
+/**
+ * The namespace for the `NotebookModel` class statics.
+ */
+export
+namespace NotebookModel {
+  /**
+   * An options object for initializing a notebook model.
+   */
+  export
+  interface IOptions {
+    /**
+     * The language preference for the model.
+     */
+    languagePreference?: string;
+
+    /**
+     * A factory for creating cell models.
+     *
+     * The default is a shared factory instance.
+     */
+    cellModelFactory?: ICellModelFactory;
+  }
 }
 
 
@@ -488,6 +518,22 @@ namespace Private {
    */
   export
   const metadataChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
+
+  /**
+   * The default `ICellModelFactory` instance.
+   */
+  export
+  const defaultFactory: ICellModelFactory = {
+    createCodeCell: (source?: nbformat.IBaseCell) => {
+      return new CodeCellModel(source);
+    },
+    createMarkdownCell: (source?: nbformat.IBaseCell) => {
+      return new MarkdownCellModel(source);
+    },
+    createRawCell: (source?: nbformat.IBaseCell) => {
+      return new RawCellModel(source);
+    }
+  };
 
   /**
    * Create the default metadata for the notebook.
