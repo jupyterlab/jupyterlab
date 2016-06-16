@@ -26,6 +26,10 @@ import {
 } from 'phosphor-properties';
 
 import {
+  ISignal, Signal, disconnectReceiver
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -117,33 +121,19 @@ const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 export
 class BaseCellWidget extends Widget {
   /**
-   * Create a new cell editor for the widget.
-   */
-  static createCellEditor(model: ICellModel): CellEditorWidget {
-    return new CellEditorWidget(model);
-  }
-
-  /**
-   * Create a new input area for the widget.
-   */
-  static createInputArea(editor: CellEditorWidget): InputAreaWidget {
-    return new InputAreaWidget(editor);
-  }
-
-  /**
    * Construct a new base cell widget.
    */
-  constructor(model: ICellModel) {
+  constructor(options: BaseCellWidget.IOptions = {}) {
     super();
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
 
-    let constructor = this.constructor as typeof BaseCellWidget;
-    this._editor = constructor.createCellEditor(model);
-    this._input = constructor.createInputArea(this._editor);
+    let factory = options.cellWidgetFactory || Private.defaultFactory;
+    this._editor = factory.createCellEditor(options.model || null);
+    this._input = factory.createInputArea(this._editor);
     (this.layout as PanelLayout).addChild(this._input);
 
-    this.model = model;
+    this.model = options.model || null;
   }
 
   /**
@@ -162,12 +152,17 @@ class BaseCellWidget extends Widget {
       this._model.metadataChanged.disconnect(this.onMetadataChanged, this);
     }
 
+    let args: IChangedArgs<ICellModel>;
+
     if (!model) {
+      args = { name: 'model', oldValue: this._model, newValue: null };
       this._editor.model = null;
       this._model = null;
+      this.modelChanged.emit(args);
       return;
     }
 
+    args = { name: 'model', oldValue: this._model, newValue: model };
     this._model = model;
     this._editor.model = this._model;
 
@@ -176,6 +171,14 @@ class BaseCellWidget extends Widget {
     this._model.metadataChanged.connect(this.onMetadataChanged, this);
     this._trustedCursor = this._model.getMetadata('trusted');
     this._trusted = !!this._trustedCursor.getValue();
+    this.modelChanged.emit(args);
+  }
+
+  /**
+   * A signal emitted when the model of the notebook changes.
+   */
+  get modelChanged(): ISignal<BaseCellWidget, IChangedArgs<ICellModel>> {
+    return Private.modelChangedSignal.bind(this);
   }
 
   /**
@@ -312,35 +315,59 @@ class BaseCellWidget extends Widget {
 
 
 /**
+ * The namespace for the `BaseCellWidget` class statics.
+ */
+export
+namespace BaseCellWidget {
+  /**
+   * An options object for initializing a base cell widget.
+   */
+  export
+  interface IOptions {
+    /**
+     * A factory for creating code cell widgets.
+     *
+     * The default is a shared factory instance.
+     */
+    cellWidgetFactory?: ICellWidgetFactory;
+
+    /**
+     * A model for the cell widget.
+     */
+    model?: ICellModel
+  }
+
+  /**
+   * A factory for creating code cell widgets.
+   */
+  export
+  interface ICellWidgetFactory {
+    /**
+     * Create a new cell editor for the widget.
+     */
+    createCellEditor(model: ICellModel): CellEditorWidget;
+
+    /**
+     * Create a new input area for the widget.
+     */
+    createInputArea(editor: CellEditorWidget): InputAreaWidget;
+  }
+}
+
+/**
  * A widget for a code cell.
  */
 export
 class CodeCellWidget extends BaseCellWidget {
-
-  /**
-   * Create an output area widget.
-   */
-  static createOutput(model: OutputAreaModel, rendermime: RenderMime<Widget>): OutputAreaWidget {
-    let output = new OutputAreaWidget({ rendermime });
-    output.model = model;
-    return output;
-  }
-
   /**
    * Construct a code cell widget.
    */
-  constructor(model: ICodeCellModel, rendermime: RenderMime<Widget>) {
-    super(model);
-    this._rendermime = rendermime;
+  constructor(options: CodeCellWidget.IOptions) {
+    super(options.model);
+    this._rendermime = options.rendermime;
+    this._factory = options.cellWidgetFactory || Private.defaultFactory;
     this.addClass(CODE_CELL_CLASS);
-    let constructor = this.constructor as typeof CodeCellWidget;
-    this._output = constructor.createOutput(model.outputs, rendermime);
-    this._output.trusted = this.trusted;
-    (this.layout as PanelLayout).addChild(this._output);
-    this._collapsedCursor = model.getMetadata('collapsed');
-    this._scrolledCursor = model.getMetadata('scrolled');
-    this.setPrompt(String(model.executionCount));
-    model.stateChanged.connect(this.onModelChanged, this);
+    this.modelChanged.connect(this.onModelChanged, this);
   }
 
   /**
@@ -350,6 +377,7 @@ class CodeCellWidget extends BaseCellWidget {
     if (this.isDisposed) {
       return;
     }
+    this.modelChanged.disconnect(this.onModelChanged, this);
     this._rendermime = null;
     this._collapsedCursor = null;
     this._scrolledCursor = null;
@@ -387,9 +415,29 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   /**
+   * Handle if the widget receives a new model.
+   */
+  protected onModelChanged(sender: BaseCellWidget, args: IChangedArgs<ICellModel>): void {
+    if (args.oldValue) {
+      args.oldValue.stateChanged.disconnect(this.onModelStateChanged, this);
+    }
+
+    let factory = this._factory;
+    let model = args.newValue as ICodeCellModel;
+
+    this._output = factory.createOutputArea(model.outputs, this._rendermime);
+    this._output.trusted = this.trusted;
+    (this.layout as PanelLayout).addChild(this._output);
+    this._collapsedCursor = model.getMetadata('collapsed');
+    this._scrolledCursor = model.getMetadata('scrolled');
+    this.setPrompt(String(model.executionCount));
+    model.stateChanged.connect(this.onModelStateChanged, this);
+  }
+
+  /**
    * Handle changes in the model.
    */
-  protected onModelChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'executionCount':
       this.setPrompt(String(model.executionCount));
@@ -414,10 +462,52 @@ class CodeCellWidget extends BaseCellWidget {
     super.onMetadataChanged(model, args);
   }
 
+  private _factory: CodeCellWidget.ICellWidgetFactory = null;
   private _output: OutputAreaWidget = null;
   private _rendermime: RenderMime<Widget> = null;
   private _collapsedCursor: IMetadataCursor = null;
   private _scrolledCursor: IMetadataCursor = null;
+}
+
+
+/**
+ * The namespace for the `CodeCellWidget` class statics.
+ */
+export
+namespace CodeCellWidget {
+  /**
+   * An options object for initializing a base cell widget.
+   */
+  export
+  interface IOptions {
+    /**
+     * A factory for creating code cell widgets.
+     *
+     * The default is a shared factory instance.
+     */
+    cellWidgetFactory?: ICellWidgetFactory;
+
+    /**
+     * A model for the cell widget.
+     */
+    model: ICodeCellModel
+
+    /**
+     * The mime renderer for the cell widget.
+     */
+    rendermime: RenderMime<Widget>
+  }
+
+  /**
+   * A factory for creating code cell widgets.
+   */
+  export
+  interface ICellWidgetFactory extends BaseCellWidget.ICellWidgetFactory {
+    /**
+     * Create a new output area for the widget.
+     */
+    createOutputArea(outputs: ObservableOutputs, rendermime: RenderMime<Widget>): OutputAreaWidget;
+  }
 }
 
 
@@ -435,9 +525,9 @@ class MarkdownCellWidget extends BaseCellWidget {
   /**
    * Construct a Markdown cell widget.
    */
-  constructor(model: ICellModel, rendermime: RenderMime<Widget>) {
-    super(model);
-    this._rendermime = rendermime;
+  constructor(options: MarkdownCellWidget.IOptions) {
+    super(options.model || null);
+    this._rendermime = options.rendermime;
     this.addClass(MARKDOWN_CELL_CLASS);
     // Insist on the Github-flavored markdown mode.
     this.mimetype = 'text/x-ipythongfm';
@@ -507,6 +597,36 @@ class MarkdownCellWidget extends BaseCellWidget {
 
 
 /**
+ * The namespace for the `CodeCellWidget` class statics.
+ */
+export
+namespace MarkdownCellWidget {
+  /**
+   * An options object for initializing a base cell widget.
+   */
+  export
+    interface IOptions {
+    /**
+     * A factory for creating code cell widgets.
+     *
+     * The default is a shared factory instance.
+     */
+    cellWidgetFactory?: BaseCellWidget.ICellWidgetFactory;
+
+    /**
+     * A model for the cell widget.
+     */
+    model?: ICellModel
+
+    /**
+     * The mime renderer for the cell widget.
+     */
+    rendermime: RenderMime<Widget>
+  }
+}
+
+
+/**
  * A widget for a raw cell.
  */
 export
@@ -552,4 +672,43 @@ class InputAreaWidget extends Widget {
     let text = `In [${value || ' '}]:`;
     prompt.node.textContent = text;
   }
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * A signal emitted when the model changes on a cell widget.
+   */
+  export
+  const modelChangedSignal = new Signal<BaseCellWidget, IChangedArgs<ICellModel>>();
+
+
+  export
+  const defaultFactory: CodeCellWidget.ICellWidgetFactory = {
+    /**
+     * Create a new cell editor for the widget.
+     */
+    createCellEditor: (model: ICellModel): CellEditorWidget => {
+      return new CellEditorWidget(model);
+    },
+
+    /**
+    * Create a new input area for the widget.
+    */
+    createInputArea: (editor: CellEditorWidget): InputAreaWidget => {
+      return new InputAreaWidget(editor);
+    },
+
+    /**
+    * Create an output area widget.
+    */
+    createOutputArea: (model: OutputAreaModel, rendermime: RenderMime<Widget>): OutputAreaWidget => {
+      let output = new OutputAreaWidget({ rendermime });
+      output.model = model;
+      return output;
+    }
+  };
 }
