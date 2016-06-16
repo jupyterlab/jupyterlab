@@ -19,10 +19,10 @@ Create a model for a given file.  Models are generally differentiated by
 the contents options used to fetch the model (e.g. text, base64, notebook).
 
 ## Widget Extensions
-Add additional functionality to a widget. An extension instance is created 
-for each widget.  An example is the ipywidgets extension that is created 
-for NotebookPanel widgets.  Another example would be to add a button to the 
-toolbar of each NotebookPanel widget.
+Add additional functionality to a widget type. An extension instance is 
+created  for each widget instance.  An example is the ipywidgets extension 
+that is created for NotebookPanel widgets.  Another example would be to add a 
+button to the toolbar of each NotebookPanel widget.
 
 ## File Types 
 Intended to be used in a "Create New" dialog, providing a list of known 
