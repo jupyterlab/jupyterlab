@@ -1,6 +1,5 @@
 # Notebook
 
-
 The NotebookWidgetFactory constructs a new NotebookPanel from a model and populates the toolbar with default widgets.
 
 ## Model
@@ -27,4 +26,12 @@ We'll walk through two notebook extensions.
 
 ### Adding a button to the toolbar
 
+
+
 ### The ipywidgets extension
+
+This discussion will be a bit confusing since we've been using "widget" to refer to phosphor widgets. In the discussion below, ipython widgets will be referred to as "ipywidgets". There is no intrinsic relation between phosphor widgets and ipython widgets.
+
+The ipywidgets plugin registers a factory for a notebook extension. The `createNew()` function is called with a NotebookPanel and DocumentContext. The plugin then creates a ipywidget manager (which uses the context to interact the kernel and kernel's comm manager). The plugin then registers an ipywidget renderer with the notebook instance's rendermime (which is specific to that particular notebook).
+
+When an ipywidget model is created in the kernel, a comm message is sent to the browser and handled by the ipywidget manager to create a browser-side ipywidget model. When the model is displayed in the kernel, a `display_data` output is sent to the browser with the ipywidget model id. The renderer registered in that notebook's rendermime is asked to render the output. The renderer asks the ipywidget manager instance to render the corresponding model, which returns a javascript promise. The renderer creates a container *phosphor* widget which it hands back synchronously to the OutputAreaWidget, and then fills the container with the rendered ipywidget when the promise resolves.
