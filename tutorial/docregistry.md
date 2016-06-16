@@ -8,8 +8,7 @@ Extensions in the application can register widget factories,
 model factories, widget extensions, file types, and file creators.
 
 ## Widget factories 
-Create a widget for a given file. An example is the notebook widget factory that creates NotebookPanel
-widgets.
+Create a widget for a given file. An example is the notebook widget factory that creates NotebookPanel widgets.
 
 ## Model factories 
 Create a model for a given file.  Models
@@ -23,11 +22,30 @@ ipywidgets extension that is created for notebook widgets.  Another
 example would be to add a button to the toolbar of each notebook widget.
 
 ## File types 
-Intended to be used in a "Create New" dialog, as a
-list of known file types.
+Intended to be used in a "Create New" dialog, providing a list of known file types.
 
 ## File creators 
 Intended used to create quick launch file creators.
 The default use will be for the create new dropdown in the file browser,
 to give a list of items that can be created with default options 
 (e.g. Python 3 Notebook).
+
+## Document Model
+Created by the model factories and passed to widget factories and
+widget extensions.  They can shared by widgets and their
+lifecycle is managed by the Document Manager.
+
+## Document Context
+Created by the Document Manager and passed to widget factories and
+widget extensions.  They are used to provide an abstracted interface
+to the session and contents API from jupyter-js-services for the 
+given model.  They are tied to a model can be shared between widgets.
+
+## Document Wrapper
+The top level widget added to the application that wraps the widget
+returned by the widget factory.  They are used because they can be
+created synchronously, while the widgets created using the widget
+factory are created asynchronously after potentially loading data
+from disk.  Some interfaces (like drag and drop) require a widget to be
+returned synchronously.
+
