@@ -11,11 +11,23 @@ core [Application](https://github.com/phosphorjs/phosphide/blob/master/src/core/
 
 A full example is contained [here](https://github.com/jupyter/jupyterlab/tree/master/examples/lab).
 
-The default providers in the JupyterLab application include:
+## [Services](https://github.com/phosphorjs/phosphide/blob/master/src/core/serviceregistry.ts) 
+A service provider is used by extensions to add functionality to the
+application. 
+- Service providers can require other services.
+- Services are activated when they are needed by other services or extensions.
+
+The default services providers in the JupyterLab application include:
 - Services - An application-specific interface to `jupyter-js-services`.
 - RenderMime - The registry for adding kernel `display_data` renderers.
 - Document Registry - Used to add functionality around widgets backed by files.
 - Clipboard - The application-wide clipboard for arbitrary MIME data.
+
+## [Extensions](https://github.com/phosphorjs/phosphide/blob/master/src/core/extensionregistry.ts#L19) 
+Extensions use the Application object and optionally other services to provide 
+functionality to the application. 
+- Extensions provided to the application are activated immediately. 
+- Extensions are activated explicitly through the Application [instance](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts#L71).
 
 The default extensions in the application include:
 - Command palette - Adds a command palette widget to the sidebar.
@@ -28,15 +40,3 @@ The default extensions in the application include:
 - Editor - Add a widget factory for displaying editable source files.
 - Console - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
-
-## [Services](https://github.com/phosphorjs/phosphide/blob/master/src/core/serviceregistry.ts) 
-A service provider is used by extensions to add functionality to the
-application. 
-- Service providers can require other services.
-- Services are activated when they are needed by other services or extensions.
-
-## [Extensions](https://github.com/phosphorjs/phosphide/blob/master/src/core/extensionregistry.ts#L19) 
-Extensions use the Application object and optionally other services to provide 
-functionality to the application. 
-- Extensions provided to the application are activated immediately. 
-- Extensions are activated explicitly through the Application [instance](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts#L71).
