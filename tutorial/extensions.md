@@ -30,7 +30,7 @@ functionality to the application.
 - Extensions are activated explicitly through the Application [instance](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts#L71).
 
 The default extensions in the application include:
-- Command palette - Adds a command palette widget to the sidebar.
+- Command palette - Adds the command palette widget to the sidebar.
 - Widget manager - Manages comm channels for ipywidgets.
 - Terminal - Adds the ability to create command prompt terminals.
 - Shortcuts - Provides the default set of shortcuts for the application.
@@ -40,3 +40,25 @@ The default extensions in the application include:
 - Editor - Add a widget factory for displaying editable source files.
 - Console - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
+
+
+## Command Palette
+
+The command palette is a part of the application object and is intended to
+be the primary way to display and execute commands in the application.
+Many of the default extensions add commands to the command palette for actions
+such as executing a cell on a notebook or launching a new terminal instance.
+
+
+## Phosphor
+Phosphor is used as the underlying architecture of JupyterLab and provides 
+many of the low level primitives and widget structure used in the application.
+It provides a rich set of widgets for developing desktop-like applications
+in the browser, as well as patterns and objects for writing clean, 
+well-abstracted code.  The widgets in the application are primarily Phosphor 
+widgets, and Phosphor concepts like message passing and signals are used
+throughout.  Phosphor messages are a many-to-one interaction that allows
+information like resize events to flow through the widget heirarchy in 
+the application.  Phosphor signals are a one-to-many interaction that allow
+listeners to react to changes in an observed object.
+
