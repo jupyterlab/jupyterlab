@@ -168,15 +168,19 @@ class CellEditorWidget extends CodeMirrorWidget {
 
     let doc = this.editor.getDoc();
 
+    // If the model is being replaced, disconnect the old signal handler.
+    if (this._model) {
+      this._model.stateChanged.disconnect(this.onModelChanged, this);
+    }
+
     if (!model) {
       doc.setValue('');
-      this._model.stateChanged.disconnect(this.onModelChanged, this);
       this._model = null;
       return;
     }
 
     this._model = model;
-    doc.setValue(model.source || '');
+    doc.setValue(this._model.source || '');
     this._model.stateChanged.connect(this.onModelChanged, this);
   }
 
