@@ -41,7 +41,10 @@ extensions.
 Created by the Document Manager and passed to widget factories and
 widget extensions.  They are used to provide an abstracted interface
 to the session and contents API from jupyter-js-services for the 
-given model.  They are tied to a model can be shared between widgets.
+given model.  They are tied to a model and can be shared between widgets.
+The reason for a separate context and model is so that it is easy to create
+model factories and the heavy lifting of the context is left to the Document
+Manager.
 
 ## Document Wrapper
 The top level widget created by the Document Manager that wraps the widget 
