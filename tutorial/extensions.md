@@ -23,6 +23,25 @@ functionality to the application.
 - Extensions provided to the application are activated immediately. 
 - An example extension is the [editor widget](https://github.com/jupyter/jupyterlab/blob/master/src/editorwidget/plugin.ts), which registers an 
 editor widget factory with the Document Registry.
-- Extensions are activated explicitly through the Application [instance](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts#L71). 
+- Extensions are activated explicitly through the Application [instance](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts#L71).
 
 - A full example is contained [here](https://github.com/jupyter/jupyterlab/tree/master/examples/lab).
+
+
+The default providers in the JupyterLab application include:
+- Services - An application-specific interface to `jupyter-js-services`.
+- RenderMime - The registry for adding kernel `display_data` renderers.
+- Document Registry - Used to add functionality around widgets backed by files
+- Clipboard - The application-wide clipboard for arbitrary MIME data.
+
+The default extension in the application include:
+- Command palette - Adds a command palette widget to the sidebar.
+- Widget manager - Manages comm channels for ipywidgets.
+- Terminal - Adds the ability to create command prompt terminals.
+- Shortcuts - Provides the default set of shortcuts for the application.
+- Images - Adds a widget factory for displaying image files.
+- Help - Adds a side bar widget for displaying external documentation.
+- File Browser - Creates the file browser and the document manager and the file browser to the side bar.
+- Editor - Add a widget factory for displaying editable source files.
+- Console - Adds the ability to launch Jupyter Console instances for
+interactive kernel console sessions.
