@@ -199,7 +199,7 @@ class ConsoleWidget extends Widget {
    */
   static createPrompt(rendermime: RenderMime<Widget>): CodeCellWidget {
     let model = new CodeCellModel();
-    return new CodeCellWidget(model, rendermime);
+    return new CodeCellWidget({ model, rendermime });
   }
 
   /**

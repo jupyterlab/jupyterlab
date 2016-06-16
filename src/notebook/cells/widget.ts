@@ -415,7 +415,7 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   /**
-   * Handle if the widget receives a new model.
+   * Handle the widget receiving a new model.
    */
   protected onModelChanged(sender: BaseCellWidget, args: IChangedArgs<ICellModel>): void {
     if (args.oldValue) {
@@ -425,12 +425,15 @@ class CodeCellWidget extends BaseCellWidget {
     let factory = this._factory;
     let model = args.newValue as ICodeCellModel;
 
+    if (this._output) {
+      this._output.dispose();
+    }
     this._output = factory.createOutputArea(model.outputs, this._rendermime);
     this._output.trusted = this.trusted;
     (this.layout as PanelLayout).addChild(this._output);
     this._collapsedCursor = model.getMetadata('collapsed');
     this._scrolledCursor = model.getMetadata('scrolled');
-    this.setPrompt(String(model.executionCount));
+    this.setPrompt(`${model.executionCount}`);
     model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
@@ -440,7 +443,7 @@ class CodeCellWidget extends BaseCellWidget {
   protected onModelStateChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'executionCount':
-      this.setPrompt(String(model.executionCount));
+      this.setPrompt(`${model.executionCount}`);
       break;
     default:
       break;
@@ -634,8 +637,8 @@ class RawCellWidget extends BaseCellWidget {
   /**
    * Construct a raw cell widget.
    */
-  constructor(model: ICellModel) {
-    super(model);
+  constructor(options: BaseCellWidget.IOptions) {
+    super(options);
     this.addClass(RAW_CELL_CLASS);
   }
 }
