@@ -45,6 +45,62 @@
 }
 
 
+.jp-MarkdownCell-renderer.p-Widget h1 {
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  font-size: 26px;
+  line-height: 1.0;
+}
+
+
+.jp-MarkdownCell-renderer.p-Widget h2 {
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  font-size: 22px;
+  line-height: 1.0;
+}
+
+
+.jp-MarkdownCell-renderer.p-Widget h3 {
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  font-size: 18px;
+  line-height: 1.0;
+}
+
+
+.jp-MarkdownCell-renderer.p-Widget h4 {
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  font-size: 14px;
+  line-height: 1.0;
+}
+
+
+.jp-MarkdownCell-renderer.p-Widget h5 {
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.0;
+}
+
+
+.jp-MarkdownCell-renderer.p-Widget h6 { 
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.0;
+}
+
+
+.jp-MarkdownCell-renderer.p-Widget p {
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+} 
+
+
+.jp-MarkdownCell-renderer.p-Widget li {
+  line-height: 20px;
+}
+
+
 .jp-OutputArea-result.p-Widget {
   user-select: text;
   -moz-user-select: text;
@@ -58,6 +114,7 @@
   flex: 1 1 auto;
   flex-direction: column;
 }
+
 
 .p-Widget.jp-Console {
   overflow: auto;
