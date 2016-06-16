@@ -25,10 +25,10 @@ example would be to add a button to the toolbar of each notebook widget.
 Intended to be used in a "Create New" dialog, providing a list of known file types.
 
 ## File creators 
-Intended used to create quick launch file creators.
-The default use will be for the create new dropdown in the file browser,
-to give a list of items that can be created with default options 
-(e.g. Python 3 Notebook).
+Intended to be used to create quick launch file creators.
+The default use will be for the "create new" dropdown in the file browser,
+giving list of items that can be created with default options 
+(e.g. "Python 3 Notebook").
 
 ## Document Model
 Created by the model factories and passed to widget factories and
