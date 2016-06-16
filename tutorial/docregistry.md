@@ -8,7 +8,8 @@ Extensions in the application can register widget factories,
 model factories, widget extensions, file types, and file creators.
 
 ## Widget factories 
-Create a widget for a given file. An example is the notebook widget factory that creates NotebookPanel widgets.
+Create a widget for a given file. An example is the notebook widget 
+factory that creates NotebookPanel widgets.
 
 ## Model factories 
 Create a model for a given file.  Models
@@ -22,7 +23,8 @@ ipywidgets extension that is created for notebook widgets.  Another
 example would be to add a button to the toolbar of each notebook widget.
 
 ## File types 
-Intended to be used in a "Create New" dialog, providing a list of known file types.
+Intended to be used in a "Create New" dialog, providing a list of known 
+file types.
 
 ## File creators 
 Intended to be used to create quick launch file creators.
