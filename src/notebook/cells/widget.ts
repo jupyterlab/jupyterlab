@@ -128,9 +128,9 @@ class BaseCellWidget extends Widget {
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
 
-    this._factory = options.cellWidgetFactory || Private.defaultFactory;
-    this._editor = this._factory.createCellEditor(options.model || null);
-    this._input = this._factory.createInputArea(this._editor);
+    let factory = options.cellWidgetFactory || Private.defaultFactory;
+    this._editor = factory.createCellEditor(options.model || null);
+    this._input = factory.createInputArea(this._editor);
 
     (this.layout as PanelLayout).addChild(this._input);
     this.model = options.model || null;
@@ -168,13 +168,6 @@ class BaseCellWidget extends Widget {
     this._trusted = !!this._trustedCursor.getValue();
     this._model.stateChanged.connect(this.onModelStateChanged, this);
     postMessage(this, new Message('model-changed'));
-  }
-
-  /**
-   * The widget renderer factory.
-   */
-  get factory(): BaseCellWidget.ICellWidgetFactory {
-    return this._factory;
   }
 
   /**
@@ -344,7 +337,6 @@ class BaseCellWidget extends Widget {
     }
   }
 
-  private _factory: BaseCellWidget.ICellWidgetFactory;
   private _input: InputAreaWidget = null;
   private _editor: CellEditorWidget = null;
   private _model: ICellModel = null;
@@ -418,6 +410,7 @@ class CodeCellWidget extends BaseCellWidget {
     super(options);
     this.addClass(CODE_CELL_CLASS);
     this._rendermime = options.rendermime;
+    this._factory = options.cellWidgetFactory || Private.defaultFactory;
   }
 
   /**
@@ -470,8 +463,8 @@ class CodeCellWidget extends BaseCellWidget {
    * Handle the widget receiving a new model.
    */
   protected onModelChanged(msg: Message): void {
-    let factory = this.factory as CodeCellWidget.ICellWidgetFactory;
     let model = this.model as ICodeCellModel;
+    let factory = this._factory;
 
     if (this._output) {
       this._output.dispose();
@@ -514,6 +507,7 @@ class CodeCellWidget extends BaseCellWidget {
     super.onMetadataChanged(model, args);
   }
 
+  private _factory: CodeCellWidget.ICellWidgetFactory;
   private _rendermime: RenderMime<Widget> = null;
   private _output: OutputAreaWidget = null;
   private _collapsedCursor: IMetadataCursor = null;
