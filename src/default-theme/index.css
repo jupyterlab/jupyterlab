@@ -58,7 +58,7 @@ body {
   max-width: 36px;
   font-size: 13px;
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
-  color: #757575;
+  color: #777777;
   background: #EEEEEE;
 }
 
@@ -157,7 +157,7 @@ body {
 .p-TabBar {
   min-height: 28px;
   max-height: 28px;
-  color: #757575;
+  color: #777777;
   background: #F5F5F5;
   font: 12px Helvetica, Arial, sans-serif;
 }
@@ -245,7 +245,7 @@ body {
 .p-TabBar-tab.p-mod-drag-image {
   min-height: 24px;
   min-width: 124px;
-  color: #757575;
+  color: #777777;
   background: white;
   border: 1px solid #BDBDBD;
   border-top: 1px solid #F27624;
