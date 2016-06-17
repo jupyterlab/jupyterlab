@@ -141,6 +141,10 @@ class OutputAreaWidget extends Widget {
     }
     let oldValue = this._model;
     this._model = newValue;
+    if (oldValue) {
+      oldValue.changed.disconnect(this._onModelChange, this);
+    }
+    newValue.changed.connect(this._onModelChange, this);
     this.onModelChanged(oldValue, newValue);
     this.modelChanged.emit(void 0);
   }
@@ -176,7 +180,7 @@ class OutputAreaWidget extends Widget {
       return;
     }
     this._trusted = value;
-    this.onTrustedChanged(value);
+    this.onTrustChanged(value);
   }
 
   /**
@@ -269,6 +273,9 @@ class OutputAreaWidget extends Widget {
 
   /**
    * Handle a change to the model.
+   *
+   * The default implementation is to remove all of the old widgets
+   * and add new widgets for the new outputs.
    */
   protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
     let layout = this.layout as PanelLayout;
@@ -279,54 +286,40 @@ class OutputAreaWidget extends Widget {
     if (!newValue) {
       return;
     }
-    newValue.changed.connect(this.onModelChange, this);
+    let renderer = this.renderer;
+    let rendermime = this.rendermime;
+    let trusted = this.trusted;
     for (let i = 0; i < newValue.length; i++) {
-      let widget = this.createOutput(newValue.get(i));
+      let output = newValue.get(i);
+      let widget = renderer.createOutput(output, rendermime, trusted);
       layout.addChild(widget);
     }
   }
 
   /**
-   * Handle a change to the trusted state.
+   * Handle a change in trust.
+   *
+   * The default implementation is to call `onModelChanged`.
    */
-  protected onTrustedChanged(value: boolean): void {
-    // Re-render only if necessary.
-    let model = this.model;
-    if (!model) {
-      return;
-    }
-    let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.childCount(); i++) {
-      layout.childAt(0).dispose();
-    }
-    for (let i = 0; i < model.length; i++) {
-      layout.addChild(this.createOutput(model.get(i)));
-    }
-  }
-
-  /**
-   * Create an output widget for an output model.
-   */
-  protected createOutput(output: nbformat.IOutput): Widget {
-    let renderer = this.renderer;
-    let bundle = renderer.getBundle(output);
-    let map = OutputAreaWidget.convertBundle(bundle);
-    if (!this.trusted) {
-      renderer.sanitize(map);
-    }
-    return renderer.createOutput(output, map, this.rendermime);
+  protected onTrustChanged(value: boolean): void {
+    this.onModelChanged(this.model, this.model);
   }
 
   /**
    * Follow changes to the model.
    */
-  protected onModelChange(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
+  private _onModelChange(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
     let layout = this.layout as PanelLayout;
+    let value: nbformat.IOutput;
+    let renderer = this.renderer;
+    let rendermime = this.rendermime;
+    let trusted = this.trusted;
     let widget: Widget;
     switch (args.type) {
     case ListChangeType.Add:
-      let value = args.newValue as nbformat.IOutput;
-      layout.insertChild(args.newIndex, this.createOutput(value));
+      value = args.newValue as nbformat.IOutput;
+      widget = renderer.createOutput(value, rendermime, trusted);
+      layout.addChild(widget);
       break;
     case ListChangeType.Replace:
       // Only "clear" is supported by the model.
@@ -336,9 +329,10 @@ class OutputAreaWidget extends Widget {
       }
       break;
     case ListChangeType.Set:
-      layout.childAt(args.newIndex).parent = null;
-      widget = this.createOutput(args.newValue as nbformat.IOutput);
-      layout.insertChild(args.newIndex, widget);
+      layout.childAt(args.oldIndex).parent = null;
+      value = args.newValue as nbformat.IOutput;
+      widget = renderer.createOutput(value, rendermime, trusted);
+      layout.addChild(widget);
       break;
     default:
       break;
@@ -384,50 +378,17 @@ namespace OutputAreaWidget {
   export
   interface IRenderer {
     /**
-     * Get the mime bundle for an output.
-     *
-     * @params output - A kernel output message payload.
-     *
-     * @returns - A mime bundle for the payload.
-     */
-    getBundle(output: nbformat.IOutput): nbformat.MimeBundle;
-
-    /**
-     * Sanitize a mime map.
-     *
-     * @params map - The map to sanitize.
-     */
-    sanitize(map: MimeMap<string>): void;
-
-    /**
      * Create an output widget.
      *
-     * @param output - The original kernel output message payload.
-     *
-     * @param data - The processed data from the output.
+     * @param output - The kernel output message payload.
      *
      * @param rendermime - The rendermime instance.
      *
+     * @param trusted - Whether the output is trusted.
+     *
      * @returns A widget containing the rendered data.
      */
-    createOutput(output: nbformat.IOutput, data: MimeMap<string>, rendermime: RenderMime<Widget>): Widget;
-  }
-
-  /**
-   * Convert a mime bundle to a mime map.
-   */
-  export
-  function convertBundle(bundle: nbformat.MimeBundle): MimeMap<string> {
-    let map: MimeMap<string> = Object.create(null);
-    for (let mimeType in bundle) {
-      let value = bundle[mimeType];
-      if (Array.isArray(value)) {
-        map[mimeType] = (value as string[]).join('\n');
-      } else {
-        map[mimeType] = value as string;
-      }
-    }
-    return map;
+    createOutput(output: nbformat.IOutput, rendermime: RenderMime<Widget>, trusted?: boolean): Widget;
   }
 
   /**
@@ -436,74 +397,22 @@ namespace OutputAreaWidget {
   export
   class Renderer implements IRenderer {
     /**
-     * Get the mime bundle for an output.
-     *
-     * @params output - A kernel output message payload.
-     *
-     * @returns - A mime bundle for the payload.
-     */
-    getBundle(output: nbformat.IOutput): nbformat.MimeBundle {
-      let bundle: nbformat.MimeBundle;
-      switch (output.output_type) {
-      case 'execute_result':
-        bundle = (output as nbformat.IExecuteResult).data;
-        break;
-      case 'display_data':
-        bundle = (output as nbformat.IDisplayData).data;
-        break;
-      case 'stream':
-        bundle = {'application/vnd.jupyter.console-text': (output as nbformat.IStream).text};
-        break;
-      case 'error':
-        let out: nbformat.IError = output as nbformat.IError;
-        let traceback = out.traceback.join('\n');
-        bundle = {'application/vnd.jupyter.console-text': traceback || `${out.ename}: ${out.evalue}`};
-        break;
-      default:
-        console.error(`Unrecognized output type: ${output.output_type}`);
-        bundle = {};
-      }
-      return bundle;
-    }
-
-    /**
-     * Sanitize a mime map.
-     *
-     * @params map - The map to sanitize.
-     */
-    sanitize(map: MimeMap<string>): void {
-      let keys = Object.keys(map);
-      for (let key of keys) {
-        if (safeOutputs.indexOf(key) !== -1) {
-          continue;
-        } else if (sanitizable.indexOf(key) !== -1) {
-          let out = map[key];
-          if (typeof out === 'string') {
-            map[key] = sanitize(out);
-          } else {
-            console.log('Ignoring unsanitized ' + key + ' output; could not sanitize because output is not a string.');
-            delete map[key];
-          }
-        } else {
-          // Don't display if we don't know how to sanitize it.
-          console.log('Ignoring untrusted ' + key + ' output.');
-          delete map[key];
-        }
-      }
-    }
-
-    /**
      * Create an output widget.
      *
-     * @param output - The original kernel output message payload.
-     *
-     * @param data - The processed data from the output.
+     * @param output - The kernel output message payload.
      *
      * @param rendermime - The rendermime instance.
      *
+     * @param trusted - Whether the output is trusted.
+     *
      * @returns A widget containing the rendered data.
      */
-    createOutput(output: nbformat.IOutput, data: MimeMap<string>, rendermime: RenderMime<Widget>): Widget {
+    createOutput(output: nbformat.IOutput, rendermime: RenderMime<Widget>, trusted = false): Widget {
+      let bundle = this.getBundle(output);
+      let data = this.convertBundle(bundle);
+      if (!trusted) {
+        this.sanitize(data);
+      }
       let widget = new Panel();
       switch (output.output_type) {
       case 'execute_result':
@@ -543,6 +452,81 @@ namespace OutputAreaWidget {
         }
       }
       return widget;
+    }
+
+    /**
+     * Get the mime bundle for an output.
+     *
+     * @params output - A kernel output message payload.
+     *
+     * @returns - A mime bundle for the payload.
+     */
+    getBundle(output: nbformat.IOutput): nbformat.MimeBundle {
+      let bundle: nbformat.MimeBundle;
+      switch (output.output_type) {
+      case 'execute_result':
+        bundle = (output as nbformat.IExecuteResult).data;
+        break;
+      case 'display_data':
+        bundle = (output as nbformat.IDisplayData).data;
+        break;
+      case 'stream':
+        bundle = {'application/vnd.jupyter.console-text': (output as nbformat.IStream).text};
+        break;
+      case 'error':
+        let out: nbformat.IError = output as nbformat.IError;
+        let traceback = out.traceback.join('\n');
+        bundle = {'application/vnd.jupyter.console-text': traceback || `${out.ename}: ${out.evalue}`};
+        break;
+      default:
+        console.error(`Unrecognized output type: ${output.output_type}`);
+        bundle = {};
+      }
+      return bundle;
+    }
+
+    /**
+     * Convert a mime bundle to a mime map.
+     */
+    convertBundle(bundle: nbformat.MimeBundle): MimeMap<string> {
+      let map: MimeMap<string> = Object.create(null);
+      for (let mimeType in bundle) {
+        let value = bundle[mimeType];
+        if (Array.isArray(value)) {
+          map[mimeType] = (value as string[]).join('\n');
+        } else {
+          map[mimeType] = value as string;
+        }
+      }
+      return map;
+    }
+
+    /**
+     * Sanitize a mime map.
+     *
+     * @params map - The map to sanitize.
+     *
+     * @returns Whether the
+     */
+    sanitize(map: MimeMap<string>): void {
+      let keys = Object.keys(map);
+      for (let key of keys) {
+        if (safeOutputs.indexOf(key) !== -1) {
+          continue;
+        } else if (sanitizable.indexOf(key) !== -1) {
+          let out = map[key];
+          if (typeof out === 'string') {
+            map[key] = sanitize(out);
+          } else {
+            console.log('Ignoring unsanitized ' + key + ' output; could not sanitize because output is not a string.');
+            delete map[key];
+          }
+        } else {
+          // Don't display if we don't know how to sanitize it.
+          console.log('Ignoring untrusted ' + key + ' output.');
+          delete map[key];
+        }
+      }
     }
   }
 

@@ -62,20 +62,9 @@ class LogOutputAreaWidget extends OutputAreaWidget {
     this.methods.push('onModelChanged');
   }
 
-  protected onTrustedChanged(value: boolean): void {
-    super.onTrustedChanged(value);
-    this.methods.push('onTrustedChanged');
-  }
-
-  protected createOutput(output: nbformat.IOutput): Widget {
-    let widget = super.createOutput(output);
-    this.methods.push('createOutput');
-    return widget;
-  }
-
-  protected onModelChange(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
-    super.onModelChange(sender, args);
-    this.methods.push('onModelChange');
+  protected onTrustChanged(value: boolean): void {
+    super.onTrustChanged(value);
+    this.methods.push('onTrustChanged');
   }
 }
 
@@ -411,9 +400,13 @@ describe('notebook/output-area/widget', () => {
 
     });
 
-    describe('.convertBundle()', () => {
+    describe('#onModelChange()', () => {
 
-      it('should convert a mime bundle to a mime map', () => {
+      it('should be called when trust changes', () => {
+        let widget = new LogOutputAreaWidget({ rendermime });
+      });
+
+      it('should should call `onModelChanged`', () => {
 
       });
 
@@ -422,6 +415,11 @@ describe('notebook/output-area/widget', () => {
     describe('.Renderer', () => {
 
       describe('#getBundle()', () => {
+
+      });
+
+      describe('#convertBundle()', () => {
+
 
       });
 
