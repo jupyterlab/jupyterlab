@@ -315,8 +315,7 @@ class BaseCellWidget extends Widget {
    * Handle the widget receiving a new model.
    *
    * #### Notes
-   * This method should be implemented by subclasses that need to respond to
-   * the model being replaced.
+   * Subclasses may reimplement this method as needed.
    */
   protected onModelChanged(msg: Message): void {
     this.modelChanged.emit(void 0);
@@ -326,8 +325,7 @@ class BaseCellWidget extends Widget {
    * Handle changes in the model.
    *
    * #### Notes
-   * This method should be implemented by subclasses that need to respond to
-   * the model being replaced.
+   * Subclasses may reimplement this method as needed.
    */
   protected onModelStateChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
   }
