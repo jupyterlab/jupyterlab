@@ -18,6 +18,10 @@ import {
 } from 'phosphor-panel';
 
 import {
+  ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
   ChildMessage, Widget
 } from 'phosphor-widget';
 
@@ -114,27 +118,37 @@ class OutputAreaWidget extends Widget {
     super();
     this.addClass(OUTPUT_AREA_CLASS);
     this._rendermime = options.rendermime;
+    this._renderer = options.renderer || Private.defaultRenderer;
     this.layout = new PanelLayout();
   }
 
   /**
-   * The observable outputs for the outputarea widget.
+   * A signal emitted when the model of the widget changes.
    */
-  get outputs(): ObservableOutputs {
-    return this._outputs;
+  get modelChanged(): ISignal<OutputAreaWidget, void> {
+     return Private.modelChangedSignal.bind(this);
   }
-  set outputs(newValue: ObservableOutputs) {
-    if (!newValue && !this._outputs || newValue === this._outputs) {
+
+  /**
+   * The model for the widget.
+   */
+  get model(): ObservableOutputs {
+    return this._model;
+  }
+  set model(newValue: ObservableOutputs) {
+    if (!newValue && !this._model || newValue === this._model) {
       return;
     }
 
     // TODO: Reuse widgets if possible.
-    if (this._outputs) {
-      this._outputs.clear();
-      this._outputs.changed.disconnect(this._onOutputsChanged, this);
+    if (this._model) {
+      this._model.clear();
+      this._model.changed.disconnect(this._onModelChanged, this);
     }
 
-    this._outputs = newValue;
+    this._model = newValue;
+
+    this.modelChanged.emit(void 0);
 
     if (!newValue) {
       return;
@@ -144,7 +158,7 @@ class OutputAreaWidget extends Widget {
       let widget = this._createOutput(newValue.get(i));
       (this.layout as PanelLayout).addChild(widget);
     }
-    newValue.changed.connect(this._onOutputsChanged, this);
+    newValue.changed.connect(this._onModelChanged, this);
   }
 
   /**
@@ -164,9 +178,9 @@ class OutputAreaWidget extends Widget {
       for (let i = 0; i < layout.childCount(); i++) {
         layout.childAt(0).dispose();
       }
-      let outputs = this._outputs;
-      for (let i = 0; i < outputs.length; i++) {
-        layout.addChild(this._createOutput(outputs.get(i)));
+      let model = this._model;
+      for (let i = 0; i < model.length; i++) {
+        layout.addChild(this._createOutput(model.get(i)));
       }
     }
   }
@@ -207,9 +221,9 @@ class OutputAreaWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._outputs = null;
+    this._model = null;
     this._rendermime = null;
-    this._factory = null;
+    this._renderer = null;
     super.dispose();
   }
 
@@ -238,9 +252,9 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * Follow changes to the outputs list.
+   * Follow changes to the model.
    */
-  private _onOutputsChanged(sender: ObservableList<nbformat.IOutput>, args: IListChangedArgs<nbformat.IOutput>) {
+  private _onModelChanged(sender: ObservableList<nbformat.IOutput>, args: IListChangedArgs<nbformat.IOutput>) {
     let layout = this.layout as PanelLayout;
     let widget: Widget;
     switch (args.type) {
@@ -294,20 +308,20 @@ class OutputAreaWidget extends Widget {
    * Create an output widget for an output model.
    */
   private _createOutput(output: nbformat.IOutput): Widget {
-    let bundle = this._factory.getBundle(output);
+    let bundle = this._renderer.getBundle(output);
     let map = this._convertBundle(bundle);
     if (!this.trusted) {
-      this._factory.sanitize(map);
+      this._renderer.sanitize(map);
     }
-    return this._factory.createOutput(output, map, this._rendermime);
+    return this._renderer.createOutput(output, map, this._rendermime);
   }
 
   private _trusted = false;
   private _fixedHeight = false;
   private _collapsed = false;
-  private _outputs: ObservableOutputs = null;
+  private _model: ObservableOutputs = null;
   private _rendermime: RenderMime<Widget> = null;
-  private _factory: OutputAreaWidget.IOutputRenderer = null;
+  private _renderer: OutputAreaWidget.IRenderer = null;
 }
 
 
@@ -329,28 +343,42 @@ namespace OutputAreaWidget {
     /**
      * The output widget renderer.
      *
-     * Defaults to a shared `IOutputRenderer` instance.
+     * Defaults to a shared `IRenderer` instance.
      */
-     renderer?: IOutputRenderer;
+     renderer?: IRenderer;
   }
 
   /**
    * An output widget renderer.
    */
   export
-  interface IOutputRenderer {
+  interface IRenderer {
     /**
      * Get the mime bundle for an output.
+     *
+     * @params output - A kernel output message payload.
+     *
+     * @returns - A mime bundle for the payload.
      */
     getBundle(output: nbformat.IOutput): nbformat.MimeBundle;
 
     /**
      * Sanitize a mime map.
+     *
+     * @params map - The map to sanitize.
      */
     sanitize(map: MimeMap<string>): void;
 
     /**
      * Create an output widget.
+     *
+     * @param output - The original kernel output message payload.
+     *
+     * @param data - The processed data from the output.
+     *
+     * @param rendermime - The rendermime instance.
+     *
+     * @returns A widget containing the rendered data.
      */
     createOutput(output: nbformat.IOutput, data: MimeMap<string>, rendermime: RenderMime<Widget>): Widget;
   }
@@ -361,9 +389,17 @@ namespace OutputAreaWidget {
  * A namespace for private data.
  */
 namespace Private {
-
+  /**
+   * A signal emitted when the model of the output area widget changes.
+   */
   export
-  const defaultRenderer: OutputAreaWidget.IOutputRenderer = {
+  const modelChangedSignal = new Signal<OutputAreaWidget, void>();
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export
+  const defaultRenderer: OutputAreaWidget.IRenderer = {
     getBundle: (output: nbformat.IOutput) => {
       let bundle: nbformat.MimeBundle;
       switch (output.output_type) {
