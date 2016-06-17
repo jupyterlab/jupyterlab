@@ -41,14 +41,21 @@ export
 class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
   /**
    * Construct a new notebook widget factory.
+   *
+   * @param rendermime - The rendermime instance.
+   *
+   * @param clipboard - The application clipboard.
    */
   constructor(rendermime: RenderMime<Widget>, clipboard: IClipboard) {
-    this._rendermime = rendermime.clone();
+    this._rendermime = rendermime;
     this._clipboard = clipboard;
   }
 
   /**
    * Get whether the factory has been disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   get isDisposed(): boolean {
     return this._rendermime === null;
