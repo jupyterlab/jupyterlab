@@ -8,8 +8,16 @@ import {
 } from 'phosphor-messaging';
 
 import {
+  IListChangedArgs
+} from 'phosphor-observablelist';
+
+import {
   ChildMessage, Widget
 } from 'phosphor-widget';
+
+import {
+  nbformat
+} from '../../../../lib/notebook/notebook/nbformat';
 
 import {
   OutputAreaModel, OutputAreaWidget
@@ -30,8 +38,6 @@ import {
 const rendermime = defaultRenderMime();
 
 
-
-
 class LogOutputAreaWidget extends OutputAreaWidget {
 
   methods: string[] = [];
@@ -41,9 +47,35 @@ class LogOutputAreaWidget extends OutputAreaWidget {
     this.methods.push('onUpdateRequest');
   }
 
+  protected onChildAdded(msg: ChildMessage): void {
+    super.onChildAdded(msg);
+    this.methods.push('onChildAdded');
+  }
+
   protected onChildRemoved(msg: ChildMessage): void {
     super.onChildRemoved(msg);
     this.methods.push('onChildRemoved');
+  }
+
+  protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
+    super.onModelChanged(oldValue, newValue);
+    this.methods.push('onModelChanged');
+  }
+
+  protected onTrustedChanged(value: boolean): void {
+    super.onTrustedChanged(value);
+    this.methods.push('onTrustedChanged');
+  }
+
+  protected createOutput(output: nbformat.IOutput): Widget {
+    let widget = super.createOutput(output);
+    this.methods.push('createOutput');
+    return widget;
+  }
+
+  protected onModelChange(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
+    super.onModelChange(sender, args);
+    this.methods.push('onModelChange');
   }
 }
 
@@ -83,6 +115,22 @@ describe('notebook/output-area/widget', () => {
 
     });
 
+    describe('#modelChanged', () => {
+
+      it('should be emitted when the model of the widget changes', () => {
+        let widget = new OutputAreaWidget({ rendermime });
+        let called = false;
+        widget.modelChanged.connect((sender, args) => {
+          expect(sender).to.be(widget);
+          expect(args).to.be(void 0);
+          called = true;
+        });
+        widget.model = new OutputAreaModel();
+        expect(called).to.be(true);
+      });
+
+    });
+
     describe('#model', () => {
 
       it('should default to `null`', () => {
@@ -97,46 +145,27 @@ describe('notebook/output-area/widget', () => {
         expect(widget.model).to.be(model);
       });
 
+      it('should emit `modelChanged` when the model changes', () => {
+        let widget = new OutputAreaWidget({ rendermime });
+        let called = false;
+        widget.modelChanged.connect(() => { called = true; });
+        widget.model = new OutputAreaModel();
+        expect(called).to.be(true);
+      });
+
+      it('should not emit `modelChanged` when the model does not change', () => {
+        let widget = new OutputAreaWidget({ rendermime });
+        let called = false;
+        let model = new OutputAreaModel();
+        widget.model = model;
+        widget.modelChanged.connect(() => { called = true; });
+        widget.model = model;
+        expect(called).to.be(false);
+      });
+
       it('should create widgets for the model items', () => {
         let widget = createWidget();
         expect(widget.childCount()).to.be(5);
-      });
-
-      it('should be a no-op if set to the same value', () => {
-        let widget = new OutputAreaWidget({ rendermime });
-        let model = new OutputAreaModel();
-        widget.model = model;
-        widget.model = model;
-        expect(widget.model).to.be(model);
-      });
-
-      it('should be write-once', () => {
-        let widget = new OutputAreaWidget({ rendermime });
-        let model = new OutputAreaModel();
-        widget.model = model;
-        expect(() => { widget.model = new OutputAreaModel(); }).to.throwError();
-      });
-
-      it('should add the `jp-OutputArea-output` class to the child widgets', () => {
-        let widget = createWidget();
-        let child = widget.childAt(0);
-        expect(child.hasClass('jp-OutputArea-output')).to.be(true);
-      });
-
-      context('model `changed` signal', () => {
-
-        it('should add a new widget', () => {
-          let widget = createWidget();
-          widget.model.add(DEFAULT_OUTPUTS[0]);
-          expect(widget.childCount()).to.be(6);
-        });
-
-        it('should clear the widgets', () => {
-          let widget = createWidget();
-          widget.model.clear();
-          expect(widget.childCount()).to.be(0);
-        });
-
       });
 
     });
@@ -158,7 +187,7 @@ describe('notebook/output-area/widget', () => {
     describe('#renderer', () => {
 
       it('should be the renderer used by the widget', () => {
-        let renderer = Object.create(OutputAreaWidget.defaultRenderer);
+        let renderer = new OutputAreaWidget.Renderer();
         let widget = new OutputAreaWidget({ rendermime, renderer });
         expect(widget.renderer).to.be(renderer);
       });
@@ -181,14 +210,6 @@ describe('notebook/output-area/widget', () => {
         let widget = new OutputAreaWidget({ rendermime });
         widget.trusted = true;
         expect(widget.trusted).to.be(true);
-      });
-
-      it('should re-render if trusted changes', () => {
-        let widget = createWidget();
-        let child = widget.childAt(0);
-        widget.trusted = true;
-        expect(child.isDisposed).to.be(true);
-        expect(widget.childCount()).to.be(7);
       });
 
     });
@@ -245,9 +266,7 @@ describe('notebook/output-area/widget', () => {
 
       it('should dispose of the resources held by the widget', () => {
         let widget = createWidget();
-        let model = widget.model;
         widget.dispose();
-        expect(model.isDisposed).to.be(true);
         expect(widget.model).to.be(null);
         expect(widget.rendermime).to.be(null);
         expect(widget.renderer).to.be(null);
@@ -298,6 +317,19 @@ describe('notebook/output-area/widget', () => {
 
     });
 
+    describe('#onChildAdded()', () => {
+
+      it('should add the `jp-OutputArea-output` class', () => {
+        let widget = new LogOutputAreaWidget({ rendermime });
+        widget.model = new OutputAreaModel();
+        widget.model.add(DEFAULT_OUTPUTS[0]);
+        expect(widget.methods).to.contain('onChildAdded');
+        let child = widget.childAt(0);
+        expect(child.hasClass('jp-OutputArea-output')).to.be(true);
+      });
+
+    });
+
     describe('#onChildRemoved()', () => {
 
       it('should dispose of the child widget', () => {
@@ -307,6 +339,103 @@ describe('notebook/output-area/widget', () => {
         expect(widget.methods).to.contain('onChildRemoved');
         expect(child.isDisposed).to.be(true);
       });
+
+    });
+
+    describe('#onModelChanged()', () => {
+
+      it('should be called when the model changes', () => {
+        let widget = new LogOutputAreaWidget({ rendermime });
+        widget.model = new OutputAreaModel();
+        expect(widget.methods).to.contain('onModelChanged');
+      });
+
+      it('should not be called when the model does not change', () => {
+        let widget = new LogOutputAreaWidget({ rendermime });
+        widget.model = new OutputAreaModel();
+        widget.methods = [];
+        widget.model = widget.model;
+        expect(widget.methods).to.not.contain('onModelChanged');
+      });
+
+    });
+
+    describe('#onTrustedChanged()', () => {
+
+      it('should be called when the trusted state changes', () => {
+        let widget = new LogOutputAreaWidget({ rendermime });
+        widget.trusted = true;
+        expect(widget.methods).to.contain('onTrustedChanged');
+      });
+
+      it('should re-render the widgets', () => {
+        let widget = createWidget();
+        let child = widget.childAt(0);
+        widget.trusted = true;
+        expect(widget.methods).to.contain('onTrustedChanged');
+        expect(child.isDisposed).to.be(true);
+        expect(widget.childCount()).to.be(7);
+      });
+
+    });
+
+    describe('#createOutput()', () => {
+
+      it('should be called when an output is added to the model', () => {
+        let widget = new LogOutputAreaWidget({ rendermime });
+        let model = new OutputAreaModel();
+        widget.model = model;
+        model.add(DEFAULT_OUTPUTS[0]);
+        expect(widget.methods).to.contain('createOutput');
+      });
+
+    });
+
+    describe('#onModelChange()', () => {
+
+      it('should add a new widget', () => {
+        let widget = new LogOutputAreaWidget({ rendermime });
+        widget.model = new OutputAreaModel();
+        widget.model.add(DEFAULT_OUTPUTS[0]);
+        expect(widget.methods).to.contain('onModelChange');
+        expect(widget.childCount()).to.be(1);
+      });
+
+      it('should clear the widgets', () => {
+        let widget = createWidget();
+        widget.methods = [];
+        widget.model.clear();
+        expect(widget.methods).to.contain('onModelChange');
+        expect(widget.childCount()).to.be(0);
+      });
+
+    });
+
+    describe('.convertBundle()', () => {
+
+      it('should convert a mime bundle to a mime map', () => {
+
+      });
+
+    });
+
+    describe('.Renderer', () => {
+
+      describe('#getBundle()', () => {
+
+      });
+
+      describe('#sanitize()', () => {
+
+      });
+
+      describe('#createOutput()', () => {
+
+      });
+
+    });
+
+    describe('.defaultRenderer', () => {
 
     });
 
