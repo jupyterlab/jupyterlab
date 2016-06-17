@@ -29,7 +29,7 @@ import {
 } from '../common/metadata';
 
 import {
-  ObservableOutputs
+  OutputAreaModel
 } from '../output-area';
 
 
@@ -104,7 +104,7 @@ interface ICodeCellModel extends ICellModel {
   /**
    * The cell outputs.
    */
-  outputs: ObservableOutputs;
+  outputs: OutputAreaModel;
 }
 
 
@@ -327,10 +327,12 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   constructor(cell?: nbformat.IBaseCell) {
     super(cell);
-    this._outputs = new ObservableOutputs();
+    this._outputs = new OutputAreaModel();
     if (cell && cell.cell_type === 'code') {
       this.executionCount = (cell as nbformat.ICodeCell).execution_count;
-      this._outputs.assign((cell as nbformat.ICodeCell).outputs);
+      for (let output of (cell as nbformat.ICodeCell).outputs) {
+        this._outputs.add(output);
+      }
     }
     this._outputs.changed.connect(() => {
       this.contentChanged.emit(void 0);
@@ -369,7 +371,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * #### Notes
    * This is a read-only property.
    */
-  get outputs(): ObservableOutputs {
+  get outputs(): OutputAreaModel {
     return this._outputs;
   }
 
@@ -399,7 +401,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     return cell;
   }
 
-  private _outputs: ObservableOutputs = null;
+  private _outputs: OutputAreaModel = null;
   private _executionCount: number = null;
 }
 

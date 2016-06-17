@@ -6,7 +6,7 @@ import {
 } from '../../rendermime';
 
 import {
-  IListChangedArgs, ListChangeType, ObservableList
+  IListChangedArgs, ListChangeType
 } from 'phosphor-observablelist';
 
 import {
@@ -34,7 +34,7 @@ import {
 } from '../notebook/nbformat';
 
 import {
-  ObservableOutputs
+  OutputAreaModel
 } from './model';
 
 
@@ -118,12 +118,12 @@ class OutputAreaWidget extends Widget {
     super();
     this.addClass(OUTPUT_AREA_CLASS);
     this._rendermime = options.rendermime;
-    this._renderer = options.renderer || Private.defaultRenderer;
+    this._renderer = options.renderer || OutputAreaWidget.defaultRenderer;
     this.layout = new PanelLayout();
   }
 
   /**
-   * A signal emitted when the model of the widget changes.
+   * A signal emitted when the widget's model changes.
    */
   get modelChanged(): ISignal<OutputAreaWidget, void> {
      return Private.modelChangedSignal.bind(this);
@@ -132,10 +132,10 @@ class OutputAreaWidget extends Widget {
   /**
    * The model for the widget.
    */
-  get model(): ObservableOutputs {
+  get model(): OutputAreaModel {
     return this._model;
   }
-  set model(newValue: ObservableOutputs) {
+  set model(newValue: OutputAreaModel) {
     if (!newValue && !this._model || newValue === this._model) {
       return;
     }
@@ -162,6 +162,26 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
+   * Get the rendermime instance used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get rendermime(): RenderMime<Widget> {
+    return this._rendermime;
+  }
+
+  /**
+   * Get the renderer used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get renderer(): OutputAreaWidget.IRenderer {
+    return this._renderer;
+  }
+
+  /**
    * The trusted state of the widget.
    */
   get trusted(): boolean {
@@ -173,15 +193,16 @@ class OutputAreaWidget extends Widget {
     }
     this._trusted = value;
     // Re-render only if necessary.
-    if (!value) {
-      let layout = this.layout as PanelLayout;
-      for (let i = 0; i < layout.childCount(); i++) {
-        layout.childAt(0).dispose();
-      }
-      let model = this._model;
-      for (let i = 0; i < model.length; i++) {
-        layout.addChild(this._createOutput(model.get(i)));
-      }
+    let model = this._model;
+    if (!model) {
+      return;
+    }
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount(); i++) {
+      layout.childAt(0).dispose();
+    }
+    for (let i = 0; i < model.length; i++) {
+      layout.addChild(this._createOutput(model.get(i)));
     }
   }
 
@@ -228,10 +249,25 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
+   * Get the child widget at the specified index.
+   */
+  childAt(index: number): Widget {
+    let layout = this.layout as PanelLayout;
+    return layout.childAt(index);
+  }
+
+  /**
+   * Get the number of child widgets.
+   */
+  childCount(): number {
+    let layout = this.layout as PanelLayout;
+    return layout.childCount();
+  }
+
+  /**
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    super.onUpdateRequest(msg);
     if (this.collapsed) {
       this.addClass(COLLAPSED_CLASS);
     } else {
@@ -254,7 +290,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes to the model.
    */
-  private _onModelChanged(sender: ObservableList<nbformat.IOutput>, args: IListChangedArgs<nbformat.IOutput>) {
+  private _onModelChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
     let layout = this.layout as PanelLayout;
     let widget: Widget;
     switch (args.type) {
@@ -262,20 +298,11 @@ class OutputAreaWidget extends Widget {
       let value = args.newValue as nbformat.IOutput;
       layout.insertChild(args.newIndex, this._createOutput(value));
       break;
-    case ListChangeType.Move:
-      layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
-      break;
-    case ListChangeType.Remove:
-      layout.childAt(args.oldIndex).parent = null;
-      break;
     case ListChangeType.Replace:
+      // Only "clear" is supported by the model.
       let oldValues = args.oldValue as nbformat.IOutput[];
       for (let i = args.oldIndex; i < oldValues.length; i++) {
         layout.childAt(args.oldIndex).parent = null;
-      }
-      let newValues = args.newValue as nbformat.IOutput[];
-      for (let i = newValues.length; i < 0; i--) {
-        layout.insertChild(args.newIndex, this._createOutput(newValues[i]));
       }
       break;
     case ListChangeType.Set:
@@ -286,6 +313,7 @@ class OutputAreaWidget extends Widget {
     default:
       break;
     }
+    this.update();
   }
 
   /**
@@ -319,7 +347,7 @@ class OutputAreaWidget extends Widget {
   private _trusted = false;
   private _fixedHeight = false;
   private _collapsed = false;
-  private _model: ObservableOutputs = null;
+  private _model: OutputAreaModel = null;
   private _rendermime: RenderMime<Widget> = null;
   private _renderer: OutputAreaWidget.IRenderer = null;
 }
@@ -382,18 +410,6 @@ namespace OutputAreaWidget {
      */
     createOutput(output: nbformat.IOutput, data: MimeMap<string>, rendermime: RenderMime<Widget>): Widget;
   }
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * A signal emitted when the model of the output area widget changes.
-   */
-  export
-  const modelChangedSignal = new Signal<OutputAreaWidget, void>();
 
   /**
    * The default `IRenderer` instance.
@@ -486,4 +502,16 @@ namespace Private {
       }
     }
   };
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * A signal emitted when the widget's model changes.
+   */
+  export
+  const modelChangedSignal = new Signal<OutputAreaWidget, void>();
 }

@@ -34,7 +34,7 @@ import {
 } from '../notebook/nbformat';
 
 import {
-  OutputAreaWidget, ObservableOutputs, executeCode
+  OutputAreaWidget, OutputAreaModel, executeCode
 } from '../output-area';
 
 import {
@@ -320,7 +320,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Create an output area widget.
    */
-  static createOutput(model: ObservableOutputs, rendermime: RenderMime<Widget>): OutputAreaWidget {
+  static createOutput(model: OutputAreaModel, rendermime: RenderMime<Widget>): OutputAreaWidget {
     let output = new OutputAreaWidget({ rendermime });
     output.model = model;
     return output;
