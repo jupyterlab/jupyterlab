@@ -123,33 +123,26 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
+   * A signal emitted when the widget's model changes.
+   */
+  get modelChanged(): ISignal<OutputAreaWidget, void> {
+     return Private.modelChangedSignal.bind(this);
+  }
+
+  /**
    * The model for the widget.
-   *
-   * #### Notes
-   * The model is single-use only. It cannot be set to `null` and it
-   * cannot be changed after the first assignment.
-   *
-   * The model is disposed automatically when the widget is disposed.
    */
   get model(): OutputAreaModel {
     return this._model;
   }
-  set model(value: OutputAreaModel) {
-    value = value || null;
-    if (this._model === value) {
+  set model(newValue: OutputAreaModel) {
+    if (!newValue && !this._model || newValue === this._model) {
       return;
     }
-    if (this._model) {
-      throw new Error('Cannot change widget model.');
-    }
-
-    this._model = value;
-    let layout = this.layout as PanelLayout;
-    for (let i = 0; i < value.length; i++) {
-      let widget = this._createOutput(value.get(i));
-      layout.addChild(widget);
-    }
-    value.changed.connect(this._onModelChanged, this);
+    let oldValue = this._model;
+    this._model = newValue;
+    this.onModelChanged(oldValue, newValue);
+    this.modelChanged.emit(void 0);
   }
 
   /**
@@ -183,18 +176,7 @@ class OutputAreaWidget extends Widget {
       return;
     }
     this._trusted = value;
-    // Re-render only if necessary.
-    let model = this._model;
-    if (!model) {
-      return;
-    }
-    let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.childCount(); i++) {
-      layout.childAt(0).dispose();
-    }
-    for (let i = 0; i < model.length; i++) {
-      layout.addChild(this._createOutput(model.get(i)));
-    }
+    this.onTrustedChanged(value);
   }
 
   /**
@@ -233,7 +215,6 @@ class OutputAreaWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._model.dispose();
     this._model = null;
     this._rendermime = null;
     this._renderer = null;
@@ -273,6 +254,13 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
+   * Handle `child-added` messages.
+   */
+  protected onChildAdded(msg: ChildMessage): void {
+    msg.child.addClass(OUTPUT_CLASS);
+  }
+
+  /**
    * Handle `child-removed` messages.
    */
   protected onChildRemoved(msg: ChildMessage): void {
@@ -280,15 +268,65 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
+   * Handle a change to the model.
+   */
+  protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < this.childCount(); i++) {
+      let child = layout.childAt(i);
+      child.parent = null;
+    }
+    if (!newValue) {
+      return;
+    }
+    newValue.changed.connect(this.onModelChange, this);
+    for (let i = 0; i < newValue.length; i++) {
+      let widget = this.createOutput(newValue.get(i));
+      layout.addChild(widget);
+    }
+  }
+
+  /**
+   * Handle a change to the trusted state.
+   */
+  protected onTrustedChanged(value: boolean): void {
+    // Re-render only if necessary.
+    let model = this.model;
+    if (!model) {
+      return;
+    }
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount(); i++) {
+      layout.childAt(0).dispose();
+    }
+    for (let i = 0; i < model.length; i++) {
+      layout.addChild(this.createOutput(model.get(i)));
+    }
+  }
+
+  /**
+   * Create an output widget for an output model.
+   */
+  protected createOutput(output: nbformat.IOutput): Widget {
+    let renderer = this.renderer;
+    let bundle = renderer.getBundle(output);
+    let map = OutputAreaWidget.convertBundle(bundle);
+    if (!this.trusted) {
+      renderer.sanitize(map);
+    }
+    return renderer.createOutput(output, map, this.rendermime);
+  }
+
+  /**
    * Follow changes to the model.
    */
-  private _onModelChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
+  protected onModelChange(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
     let layout = this.layout as PanelLayout;
     let widget: Widget;
     switch (args.type) {
     case ListChangeType.Add:
       let value = args.newValue as nbformat.IOutput;
-      layout.insertChild(args.newIndex, this._createOutput(value));
+      layout.insertChild(args.newIndex, this.createOutput(value));
       break;
     case ListChangeType.Replace:
       // Only "clear" is supported by the model.
@@ -299,41 +337,13 @@ class OutputAreaWidget extends Widget {
       break;
     case ListChangeType.Set:
       layout.childAt(args.newIndex).parent = null;
-      widget = this._createOutput(args.newValue as nbformat.IOutput);
+      widget = this.createOutput(args.newValue as nbformat.IOutput);
       layout.insertChild(args.newIndex, widget);
       break;
     default:
       break;
     }
     this.update();
-  }
-
-  /**
-   * Convert a mime bundle to a mime map.
-   */
-  private _convertBundle(bundle: nbformat.MimeBundle): MimeMap<string> {
-    let map: MimeMap<string> = Object.create(null);
-    for (let mimeType in bundle) {
-      let value = bundle[mimeType];
-      if (Array.isArray(value)) {
-        map[mimeType] = (value as string[]).join('\n');
-      } else {
-        map[mimeType] = value as string;
-      }
-    }
-    return map;
-  }
-
-  /**
-   * Create an output widget for an output model.
-   */
-  private _createOutput(output: nbformat.IOutput): Widget {
-    let bundle = this._renderer.getBundle(output);
-    let map = this._convertBundle(bundle);
-    if (!this.trusted) {
-      this._renderer.sanitize(map);
-    }
-    return this._renderer.createOutput(output, map, this._rendermime);
   }
 
   private _trusted = false;
@@ -404,11 +414,35 @@ namespace OutputAreaWidget {
   }
 
   /**
-   * The default `IRenderer` instance.
+   * Convert a mime bundle to a mime map.
    */
   export
-  const defaultRenderer: OutputAreaWidget.IRenderer = {
-    getBundle: (output: nbformat.IOutput) => {
+  function convertBundle(bundle: nbformat.MimeBundle): MimeMap<string> {
+    let map: MimeMap<string> = Object.create(null);
+    for (let mimeType in bundle) {
+      let value = bundle[mimeType];
+      if (Array.isArray(value)) {
+        map[mimeType] = (value as string[]).join('\n');
+      } else {
+        map[mimeType] = value as string;
+      }
+    }
+    return map;
+  }
+
+  /**
+   * The default implementation of `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+    /**
+     * Get the mime bundle for an output.
+     *
+     * @params output - A kernel output message payload.
+     *
+     * @returns - A mime bundle for the payload.
+     */
+    getBundle(output: nbformat.IOutput): nbformat.MimeBundle {
       let bundle: nbformat.MimeBundle;
       switch (output.output_type) {
       case 'execute_result':
@@ -430,10 +464,47 @@ namespace OutputAreaWidget {
         bundle = {};
       }
       return bundle;
-    },
-    createOutput: (output: nbformat.IOutput, map: MimeMap<string>, rendermime: RenderMime<Widget>) => {
+    }
+
+    /**
+     * Sanitize a mime map.
+     *
+     * @params map - The map to sanitize.
+     */
+    sanitize(map: MimeMap<string>): void {
+      let keys = Object.keys(map);
+      for (let key of keys) {
+        if (safeOutputs.indexOf(key) !== -1) {
+          continue;
+        } else if (sanitizable.indexOf(key) !== -1) {
+          let out = map[key];
+          if (typeof out === 'string') {
+            map[key] = sanitize(out);
+          } else {
+            console.log('Ignoring unsanitized ' + key + ' output; could not sanitize because output is not a string.');
+            delete map[key];
+          }
+        } else {
+          // Don't display if we don't know how to sanitize it.
+          console.log('Ignoring untrusted ' + key + ' output.');
+          delete map[key];
+        }
+      }
+    }
+
+    /**
+     * Create an output widget.
+     *
+     * @param output - The original kernel output message payload.
+     *
+     * @param data - The processed data from the output.
+     *
+     * @param rendermime - The rendermime instance.
+     *
+     * @returns A widget containing the rendered data.
+     */
+    createOutput(output: nbformat.IOutput, data: MimeMap<string>, rendermime: RenderMime<Widget>): Widget {
       let widget = new Panel();
-      widget.addClass(OUTPUT_CLASS);
       switch (output.output_type) {
       case 'execute_result':
         widget.addClass(EXECUTE_CLASS);
@@ -458,42 +529,28 @@ namespace OutputAreaWidget {
         break;
       default:
         console.error(`Unrecognized output type: ${output.output_type}`);
-        map = {};
+        data = {};
       }
 
-      if (map) {
-        let child = rendermime.render(map);
+      if (data) {
+        let child = rendermime.render(data);
         if (child) {
           child.addClass(RESULT_CLASS);
           widget.addChild(child);
         } else {
           console.log('Did not find renderer for output mimebundle.');
-          console.log(map);
+          console.log(data);
         }
       }
       return widget;
-    },
-    sanitize: (map: MimeMap<string>) => {
-      let keys = Object.keys(map);
-      for (let key of keys) {
-        if (safeOutputs.indexOf(key) !== -1) {
-          continue;
-        } else if (sanitizable.indexOf(key) !== -1) {
-          let out = map[key];
-          if (typeof out === 'string') {
-            map[key] = sanitize(out);
-          } else {
-            console.log('Ignoring unsanitized ' + key + ' output; could not sanitize because output is not a string.');
-            delete map[key];
-          }
-        } else {
-          // Don't display if we don't know how to sanitize it.
-          console.log('Ignoring untrusted ' + key + ' output.');
-          delete map[key];
-        }
-      }
     }
-  };
+  }
+
+  /**
+   * The default `Renderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
 }
 
 
