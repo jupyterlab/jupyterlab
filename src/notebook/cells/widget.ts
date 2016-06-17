@@ -151,17 +151,14 @@ class BaseCellWidget extends Widget {
       this._model.stateChanged.disconnect(this.onModelStateChanged, this);
       this._model.metadataChanged.disconnect(this.onMetadataChanged, this);
     }
-    let args: IChangedArgs<ICellModel>;
 
     if (!model) {
-      args = { name: 'model', oldValue: this._model, newValue: null };
       this._editor.model = null;
       this._model = null;
-      this.modelChanged.emit(args);
       postMessage(this, new Message('model-changed'));
       return;
     }
-    args = { name: 'model', oldValue: this._model, newValue: model };
+
     this._model = model;
     this._editor.model = this._model;
     // Set the editor mode to be the default MIME type.
@@ -170,7 +167,6 @@ class BaseCellWidget extends Widget {
     this._trustedCursor = this._model.getMetadata('trusted');
     this._trusted = !!this._trustedCursor.getValue();
     this._model.stateChanged.connect(this.onModelStateChanged, this);
-    this.modelChanged.emit(args);
     postMessage(this, new Message('model-changed'));
   }
 
@@ -184,7 +180,7 @@ class BaseCellWidget extends Widget {
   /**
    * A signal emitted when the model of the notebook changes.
    */
-  get modelChanged(): ISignal<BaseCellWidget, IChangedArgs<ICellModel>> {
+  get modelChanged(): ISignal<BaseCellWidget, void> {
     return Private.modelChangedSignal.bind(this);
   }
 
@@ -323,6 +319,7 @@ class BaseCellWidget extends Widget {
    * the model being replaced.
    */
   protected onModelChanged(msg: Message): void {
+    this.modelChanged.emit(void 0);
   }
 
   /**
@@ -738,7 +735,7 @@ namespace Private {
    * A signal emitted when the model changes on a cell widget.
    */
   export
-  const modelChangedSignal = new Signal<BaseCellWidget, IChangedArgs<ICellModel>>();
+  const modelChangedSignal = new Signal<BaseCellWidget, void>();
 
 
   export
