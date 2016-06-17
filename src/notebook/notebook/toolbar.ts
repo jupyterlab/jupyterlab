@@ -77,13 +77,13 @@ class NotebookToolbar extends Widget {
     if (index === -1) {
       layout.addChild(widget);
     } else {
-      layout.insertChild(index, widget);
+      layout.insertChild(index + 1, widget);
     }
     Private.nameProperty.set(widget, name);
   }
 
   /**
-   * List the names of the toolbar items.
+   * Get an ordered list the toolbar item names.
    *
    * @returns A new array of the current toolbar item names.
    */
@@ -114,14 +114,15 @@ class ToolbarButton extends Widget {
   /**
    * Construct a new toolbar button.
    */
-  constructor(className: string, onClick: () => void, tooltip?: string) {
+  constructor(options: ToolbarButton.IOptions = {}) {
     super();
+    options = options || {};
     this.addClass(TOOLBAR_BUTTON);
-    this.addClass(className);
-    this._onClick = onClick;
-    if (tooltip) {
-      this.node.title = tooltip;
+    this._onClick = options.onClick;
+    if (options.className) {
+      this.addClass(options.className);
     }
+    this.node.title = options.tooltip || '';
   }
 
   /**
@@ -180,7 +181,35 @@ class ToolbarButton extends Widget {
     this.node.removeEventListener('mouseout', this);
   }
 
-  private _onClick: () => void = null;
+  private _onClick: () => void = () => { return void 0; };
+}
+
+
+/**
+ * A namespace for `ToolbarButton` statics.
+ */
+export
+namespace ToolbarButton {
+  /**
+   * The options used to construct a toolbar button.
+   */
+  export
+  interface IOptions {
+    /**
+     * The callback for a click event.
+     */
+    onClick?: () => void;
+
+    /**
+     * The class name added to the button.
+     */
+    className?: string;
+
+    /**
+     * The tooltip added to the button node.
+     */
+    tooltip?: string;
+  }
 }
 
 
