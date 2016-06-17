@@ -8,15 +8,7 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  IObservableList, IListChangedArgs
-} from 'phosphor-observablelist';
-
-import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
-  ChildMessage, Widget
+  ChildMessage
 } from 'phosphor-widget';
 
 import {
@@ -24,15 +16,11 @@ import {
 } from 'simulate-event';
 
 import {
-  BaseCellWidget, CodeCellWidget, ICellModel, MarkdownCellWidget, RawCellWidget
+  CodeCellWidget, MarkdownCellWidget
 } from '../../../../lib/notebook/cells';
 
 import {
-  EdgeLocation
-} from '../../../../lib/notebook/cells/editor';
-
-import {
-  INotebookModel, NotebookModel
+  NotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
 import {
@@ -243,7 +231,7 @@ describe('notebook/notebook/widget', () => {
         });
 
         it('should handle an add', () => {
-          let cell = widget.model.createCodeCell();
+          let cell = widget.model.factory.createCodeCell();
           widget.model.cells.add(cell);
           expect(widget.childCount()).to.be(7);
         });
@@ -255,7 +243,7 @@ describe('notebook/notebook/widget', () => {
         });
 
         it('should handle a replace', () => {
-          let cell = widget.model.createCodeCell();
+          let cell = widget.model.factory.createCodeCell();
           widget.model.cells.replace(0, 6, [cell]);
           expect(widget.childCount()).to.be(1);
         });
@@ -638,7 +626,7 @@ describe('notebook/notebook/widget', () => {
       context('dblclick', () => {
 
         it('should unrender a markdown cell', () => {
-          let cell = widget.model.createMarkdownCell();
+          let cell = widget.model.factory.createMarkdownCell();
           widget.model.cells.add(cell);
           let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
           expect(child.rendered).to.be(true);
@@ -647,7 +635,7 @@ describe('notebook/notebook/widget', () => {
         });
 
         it('should be a no-op if the model is read only', () => {
-          let cell = widget.model.createMarkdownCell();
+          let cell = widget.model.factory.createMarkdownCell();
           widget.model.cells.add(cell);
           widget.model.readOnly = true;
           let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
@@ -784,7 +772,7 @@ describe('notebook/notebook/widget', () => {
       });
 
       it('should unrender a markdown cell in edit mode', (done) => {
-        let cell = widget.model.createMarkdownCell();
+        let cell = widget.model.factory.createMarkdownCell();
         widget.model.cells.add(cell);
         let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
         expect(child.rendered).to.be(true);
