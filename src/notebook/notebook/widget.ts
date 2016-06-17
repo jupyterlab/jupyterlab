@@ -113,7 +113,7 @@ class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this._rendermime = options.rendermime;
     this.layout = new PanelLayout();
-    this._factory = options.cellWidgetFactory || Private.defaultFactory;
+    this._factory = options.factory || StaticNotebook.defaultFactory;
   }
 
   /**
@@ -303,7 +303,7 @@ class StaticNotebook extends Widget {
 
   private _model: INotebookModel = null;
   private _rendermime: RenderMime<Widget> = null;
-  private _factory: StaticNotebook.ICellWidgetFactory = null;
+  private _factory: StaticNotebook.IFactory = null;
 }
 
 
@@ -332,14 +332,14 @@ namespace StaticNotebook {
      *
      * The default is a shared factory instance.
      */
-    cellWidgetFactory?: ICellWidgetFactory;
+    factory?: IFactory;
   }
 
   /**
    * A factory for creating code cell widgets.
    */
   export
-  interface ICellWidgetFactory {
+  interface IFactory {
     /**
      * Create a new code cell widget.
      */
@@ -355,6 +355,22 @@ namespace StaticNotebook {
      */
     createRawCell(model: IRawCellModel): RawCellWidget;
   }
+
+  /**
+   * The default `IFactory` instance.
+   */
+  export
+  const defaultFactory: IFactory = {
+    createCodeCell: (model: ICodeCellModel, rendermime: RenderMime<Widget>) => {
+      return new CodeCellWidget(model, rendermime);
+    },
+    createMarkdownCell: (model: IMarkdownCellModel, rendermime: RenderMime<Widget>) => {
+      return new MarkdownCellWidget(model, rendermime);
+    },
+    createRawCell: (model: IRawCellModel) => {
+      return new RawCellWidget(model);
+    }
+  };
 }
 
 
@@ -672,22 +688,6 @@ namespace Private {
    */
   export
   const stateChangedSignal = new Signal<Notebook, IChangedArgs<any>>();
-
-  /**
-   * The default `ICellWidgetFactory` instance.
-   */
-  export
-  const defaultFactory: StaticNotebook.ICellWidgetFactory = {
-    createCodeCell: (model: ICodeCellModel, rendermime: RenderMime<Widget>) => {
-      return new CodeCellWidget(model, rendermime);
-    },
-    createMarkdownCell: (model: IMarkdownCellModel, rendermime: RenderMime<Widget>) => {
-      return new MarkdownCellWidget(model, rendermime);
-    },
-    createRawCell: (model: IRawCellModel) => {
-      return new RawCellWidget(model);
-    }
-  };
 
  /**
   * Scroll an element into view if needed.
