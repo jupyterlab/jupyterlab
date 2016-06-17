@@ -151,6 +151,16 @@ class StaticNotebook extends Widget {
   }
 
   /**
+   * The cell widget factory used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get factory(): StaticNotebook.IFactory {
+    return this._factory;
+  }
+
+  /**
    * Get the child widget at the specified index.
    */
   childAt(index: number): BaseCellWidget {

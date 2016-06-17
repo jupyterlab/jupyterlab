@@ -36,12 +36,13 @@ import {
 } from '../../rendermime/rendermime.spec';
 
 
+const rendermime = defaultRenderMime();
+
 const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
 
 function createWidget(): LogStaticNotebook {
   let model = new NotebookModel();
-  let rendermime = defaultRenderMime();
   let widget = new LogStaticNotebook({ rendermime });
   widget.model = model;
   return widget;
@@ -109,7 +110,6 @@ class LogNotebook extends Notebook {
 
 function createActiveWidget(): LogNotebook {
   let model = new NotebookModel();
-  let rendermime = defaultRenderMime();
   let widget = new LogNotebook({ rendermime });
   widget.model = model;
   return widget;
@@ -123,15 +123,19 @@ describe('notebook/notebook/widget', () => {
     describe('#constructor()', () => {
 
       it('should create a notebook widget', () => {
-        let rendermime = defaultRenderMime();
         let widget = new StaticNotebook({ rendermime });
         expect(widget).to.be.a(StaticNotebook);
       });
 
       it('should add the `jp-Notebook` class', () => {
-        let rendermime = defaultRenderMime();
         let widget = new StaticNotebook({ rendermime });
         expect(widget.hasClass('jp-Notebook')).to.be(true);
+      });
+
+      it('should accept an optional factory', () => {
+        let factory = Object.create(StaticNotebook.defaultFactory);
+        let widget = new StaticNotebook({ rendermime, factory });
+        expect(widget.factory).to.be(factory);
       });
 
     });
@@ -283,7 +287,6 @@ describe('notebook/notebook/widget', () => {
     describe('#rendermime', () => {
 
       it('should be the rendermime instance used by the widget', () => {
-        let rendermime = defaultRenderMime();
         let widget = new StaticNotebook({ rendermime });
         expect(widget.rendermime).to.be(rendermime);
       });
@@ -291,6 +294,20 @@ describe('notebook/notebook/widget', () => {
       it('should be read-only', () => {
         let widget = createWidget();
         expect(() => { widget.rendermime = null; }).to.throwError();
+      });
+
+    });
+
+    describe('#factory', () => {
+
+      it('should be the cell widget factory used by the widget', () => {
+        let widget = new StaticNotebook({ rendermime });
+        expect(widget.factory).to.be(StaticNotebook.defaultFactory);
+      });
+
+      it('should be read-only', () => {
+        let widget = createWidget();
+        expect(() => { widget.factory = null; }).to.throwError();
       });
 
     });
