@@ -123,42 +123,33 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * A signal emitted when the widget's model changes.
-   */
-  get modelChanged(): ISignal<OutputAreaWidget, void> {
-     return Private.modelChangedSignal.bind(this);
-  }
-
-  /**
    * The model for the widget.
+   *
+   * #### Notes
+   * The model is single-use only. It cannot be set to `null` and it
+   * cannot be changed after the first assignment.
+   *
+   * The model is disposed automatically when the widget is disposed.
    */
   get model(): OutputAreaModel {
     return this._model;
   }
-  set model(newValue: OutputAreaModel) {
-    if (!newValue && !this._model || newValue === this._model) {
+  set model(value: OutputAreaModel) {
+    value = value || null;
+    if (this._model === value) {
       return;
     }
-
-    // TODO: Reuse widgets if possible.
     if (this._model) {
-      this._model.clear();
-      this._model.changed.disconnect(this._onModelChanged, this);
+      throw new Error('Cannot change widget model.');
     }
 
-    this._model = newValue;
-
-    this.modelChanged.emit(void 0);
-
-    if (!newValue) {
-      return;
+    this._model = value;
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < value.length; i++) {
+      let widget = this._createOutput(value.get(i));
+      layout.addChild(widget);
     }
-
-    for (let i = 0; i < newValue.length; i++) {
-      let widget = this._createOutput(newValue.get(i));
-      (this.layout as PanelLayout).addChild(widget);
-    }
-    newValue.changed.connect(this._onModelChanged, this);
+    value.changed.connect(this._onModelChanged, this);
   }
 
   /**
@@ -242,6 +233,7 @@ class OutputAreaWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
+    this._model.dispose();
     this._model = null;
     this._rendermime = null;
     this._renderer = null;

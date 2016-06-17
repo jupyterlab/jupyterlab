@@ -83,22 +83,6 @@ describe('notebook/output-area/widget', () => {
 
     });
 
-    describe('#modelChanged', () => {
-
-      it('should be emitted when the model of the widget changes', () => {
-        let widget = new OutputAreaWidget({ rendermime });
-        let called = false;
-        widget.modelChanged.connect((sender, args) => {
-          expect(sender).to.be(widget);
-          expect(args).to.be(void 0);
-          called = true;
-        });
-        widget.model = new OutputAreaModel();
-        expect(called).to.be(true);
-      });
-
-    });
-
     describe('#model', () => {
 
       it('should default to `null`', () => {
@@ -113,27 +97,24 @@ describe('notebook/output-area/widget', () => {
         expect(widget.model).to.be(model);
       });
 
-      it('should emit `modelChanged` when the model changes', () => {
-        let widget = new OutputAreaWidget({ rendermime });
-        let called = false;
-        widget.modelChanged.connect(() => { called = true; });
-        widget.model = new OutputAreaModel();
-        expect(called).to.be(true);
-      });
-
-      it('should not emit `modelChanged` when the model does not change', () => {
-        let widget = new OutputAreaWidget({ rendermime });
-        let called = false;
-        let model = new OutputAreaModel();
-        widget.model = model;
-        widget.modelChanged.connect(() => { called = true; });
-        widget.model = model;
-        expect(called).to.be(false);
-      });
-
       it('should create widgets for the model items', () => {
         let widget = createWidget();
         expect(widget.childCount()).to.be(5);
+      });
+
+      it('should be a no-op if set to the same value', () => {
+        let widget = new OutputAreaWidget({ rendermime });
+        let model = new OutputAreaModel();
+        widget.model = model;
+        widget.model = model;
+        expect(widget.model).to.be(model);
+      });
+
+      it('should be write-once', () => {
+        let widget = new OutputAreaWidget({ rendermime });
+        let model = new OutputAreaModel();
+        widget.model = model;
+        expect(() => { widget.model = new OutputAreaModel(); }).to.throwError();
       });
 
       it('should add the `jp-OutputArea-output` class to the child widgets', () => {
@@ -264,7 +245,9 @@ describe('notebook/output-area/widget', () => {
 
       it('should dispose of the resources held by the widget', () => {
         let widget = createWidget();
+        let model = widget.model;
         widget.dispose();
+        expect(model.isDisposed).to.be(true);
         expect(widget.model).to.be(null);
         expect(widget.rendermime).to.be(null);
         expect(widget.renderer).to.be(null);
