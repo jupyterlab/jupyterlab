@@ -141,11 +141,9 @@ class OutputAreaWidget extends Widget {
     }
     let oldValue = this._model;
     this._model = newValue;
-    if (oldValue) {
-      oldValue.changed.disconnect(this._onModelStateChanged, this);
-    }
-    newValue.changed.connect(this._onModelStateChanged, this);
+    // Trigger private, protected, and public updates.
     this._onModelChanged(oldValue, newValue);
+    this.onModelChanged(oldValue, newValue);
     this.modelChanged.emit(void 0);
   }
 
@@ -274,6 +272,10 @@ class OutputAreaWidget extends Widget {
    */
   private _onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
     let layout = this.layout as PanelLayout;
+    if (oldValue) {
+      oldValue.changed.disconnect(this._onModelStateChanged, this);
+    }
+    newValue.changed.connect(this._onModelStateChanged, this);
     let start = newValue ? newValue.length : 0;
     // Clear unnecessary child widgets.
     for (let i = start; i < layout.childCount(); i++) {
