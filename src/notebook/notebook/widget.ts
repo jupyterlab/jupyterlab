@@ -113,7 +113,7 @@ class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this._rendermime = options.rendermime;
     this.layout = new PanelLayout();
-    this._factory = options.factory || StaticNotebook.defaultFactory;
+    this._renderer = options.renderer || StaticNotebook.defaultRenderer;
   }
 
   /**
@@ -188,7 +188,7 @@ class StaticNotebook extends Widget {
     }
     this._model = null;
     this._rendermime = null;
-    this._factory = null;
+    this._renderer = null;
     super.dispose();
   }
 
@@ -199,7 +199,7 @@ class StaticNotebook extends Widget {
    * The default implementation is a no-op.
    */
   protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
-
+    // No-op.
   }
 
   /**
@@ -208,24 +208,12 @@ class StaticNotebook extends Widget {
   protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'language_info':
-      this._mimetype = this.getMimetype();
+      this._mimetype = this._renderer.getCodeMimetype(model);
       this._updateChildren();
       break;
     default:
       break;
     }
-  }
-
-  /**
-   * Update a child widget.
-   */
-  private _updateChild(index: number): void {
-    let layout = this.layout as PanelLayout;
-    let child = layout.childAt(index);
-    if (child instanceof CodeCellWidget) {
-      child.mimetype = this._mimetype;
-    }
-    this._factory.updateChild(child);
   }
 
   /**
@@ -241,7 +229,11 @@ class StaticNotebook extends Widget {
         this._removeChild(0);
       }
     }
-    this._mimetype = this.getMimetype();
+    if (!newValue) {
+      this._mimetype = 'text/plain';
+      return;
+    }
+    this._mimetype = this._renderer.getCodeMimetype(newValue);
     let cells = newValue.cells;
     for (let i = 0; i < cells.length; i++) {
       this._insertChild(i, cells.get(i));
@@ -257,15 +249,15 @@ class StaticNotebook extends Widget {
     let widget: BaseCellWidget;
     switch (cell.type) {
     case 'code':
-      let codeFactory = this._factory.createCodeCell;
+      let codeFactory = this._renderer.createCodeCell;
       widget = codeFactory(cell as CodeCellModel, this._rendermime);
       break;
     case 'markdown':
-      let mdFactory = this._factory.createMarkdownCell;
+      let mdFactory = this._renderer.createMarkdownCell;
       widget = mdFactory(cell as MarkdownCellModel, this._rendermime);
       break;
     default:
-      widget = this._factory.createRawCell(cell as RawCellModel);
+      widget = this._renderer.createRawCell(cell as RawCellModel);
     }
     widget.addClass(NB_CELL_CLASS);
     let layout = this.layout as PanelLayout;
@@ -281,6 +273,18 @@ class StaticNotebook extends Widget {
     for (let i = 0; i < layout.childCount(); i++) {
       this._updateChild(i);
     }
+  }
+
+  /**
+   * Update a child widget.
+   */
+  private _updateChild(index: number): void {
+    let layout = this.layout as PanelLayout;
+    let child = layout.childAt(index) as BaseCellWidget;
+    if (child instanceof CodeCellWidget) {
+      child.mimetype = this._mimetype;
+    }
+    this._renderer.updateCell(child);
   }
 
   /**
@@ -330,7 +334,7 @@ class StaticNotebook extends Widget {
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _rendermime: RenderMime<Widget> = null;
-  private _factory: StaticNotebook.ICellWidgetFactory = null;
+  private _renderer: StaticNotebook.IRenderer = null;
 }
 
 
@@ -355,11 +359,11 @@ namespace StaticNotebook {
     languagePreference?: string;
 
     /**
-     * A factory for creating code cell widgets.
+     * A renderer for a notebook.
      *
-     * The default is a shared factory instance.
+     * The default is a shared renderer instance.
      */
-    factory?: ICellWidgetFactory;
+    renderer?: IRenderer;
   }
 
   /**
@@ -389,8 +393,11 @@ namespace StaticNotebook {
 
     /**
      * Get the preferred mime type for code cells in the notebook.
+     *
+     * #### Notes
+     * The model is guaranteed to be non-null.
      */
-    getMimetype(model: INotebookModel): string;
+    getCodeMimetype(model: INotebookModel): string;
   }
 
   /**
@@ -422,15 +429,17 @@ namespace StaticNotebook {
     /**
      * Update a cell widget.
      */
-    updateCell(cell: BaseCellWidget): void { }
+    updateCell(cell: BaseCellWidget): void {
+      // No-op.
+    }
 
     /**
      * Get the preferred mime type for code cells in the notebook.
+     *
+     * #### Notes
+     * The model is guaranteed to be non-null.
      */
-    getMimetype(model: INotebookModel): string {
-      if (!model) {
-        return 'text/plain';
-      }
+    getCodeMimetype(model: INotebookModel): string {
       let cursor = model.getMetadata('language_info');
       let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
       return mimetypeForLanguage(info as IKernelLanguageInfo);
