@@ -44,7 +44,7 @@ import {
 const OUTPUT_AREA_CLASS = 'jp-OutputArea';
 
 /**
- * The class name added to an output area output.
+ * The class name added to an output area output widget.
  */
 const OUTPUT_CLASS = 'jp-OutputArea-output';
 
@@ -142,10 +142,10 @@ class OutputAreaWidget extends Widget {
     let oldValue = this._model;
     this._model = newValue;
     if (oldValue) {
-      oldValue.changed.disconnect(this._onModelChange, this);
+      oldValue.changed.disconnect(this._onModelStateChanged, this);
     }
-    newValue.changed.connect(this._onModelChange, this);
-    this.onModelChanged(oldValue, newValue);
+    newValue.changed.connect(this._onModelStateChanged, this);
+    this._onModelChanged(oldValue, newValue);
     this.modelChanged.emit(void 0);
   }
 
@@ -180,7 +180,11 @@ class OutputAreaWidget extends Widget {
       return;
     }
     this._trusted = value;
-    this.onTrustChanged(value);
+    // Trigger a update of the child widgets.
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < layout.childCount(); i++) {
+      this._updateChild(i);
+    }
   }
 
   /**
@@ -258,81 +262,85 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * Handle `child-added` messages.
+   * Handle a new model.
+   *
+   * #### Notes
+   * The default implementation is a no-op.
    */
-  protected onChildAdded(msg: ChildMessage): void {
-    msg.child.addClass(OUTPUT_CLASS);
-  }
-
-  /**
-   * Handle `child-removed` messages.
-   */
-  protected onChildRemoved(msg: ChildMessage): void {
-    msg.child.dispose();
-  }
+  protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void { }
 
   /**
    * Handle a change to the model.
-   *
-   * The default implementation is to remove all of the old widgets
-   * and add new widgets for the new outputs.
    */
-  protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
+  private _onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
     let layout = this.layout as PanelLayout;
-    for (let i = 0; i < this.childCount(); i++) {
-      let child = layout.childAt(i);
-      child.parent = null;
+    let start = newValue ? newValue.length : 0;
+    // Clear unnecessary child widgets.
+    for (let i = start; i < layout.childCount(); i++) {
+      this._removeChild(i);
     }
     if (!newValue) {
       return;
     }
-    let renderer = this.renderer;
-    let rendermime = this.rendermime;
-    let trusted = this.trusted;
-    for (let i = 0; i < newValue.length; i++) {
-      let output = newValue.get(i);
-      let widget = renderer.createOutput(output, rendermime, trusted);
-      layout.addChild(widget);
+    // Reuse existing child widgets.
+    for (let i = 0; i < layout.childCount(); i++) {
+      this._updateChild(i);
+    }
+    // Add new widgets as necessary.
+    for (let i = oldValue.length; i < newValue.length; i++) {
+      this._addChild();
     }
   }
 
   /**
-   * Handle a change in trust.
-   *
-   * The default implementation is to call `onModelChanged`.
+   * Add a child to the layout.
    */
-  protected onTrustChanged(value: boolean): void {
-    this.onModelChanged(this.model, this.model);
+  private _addChild(): void {
+    let widget = this._renderer.createOutput();
+    let layout = this.layout as PanelLayout;
+    layout.addChild(widget);
+    widget.addClass(OUTPUT_CLASS);
+    this._updateChild(layout.childCount() - 1);
   }
 
   /**
-   * Follow changes to the model.
+   * Remove a child from the layout.
    */
-  private _onModelChange(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
+  private _removeChild(index: number): void {
     let layout = this.layout as PanelLayout;
-    let value: nbformat.IOutput;
-    let renderer = this.renderer;
-    let rendermime = this.rendermime;
-    let trusted = this.trusted;
-    let widget: Widget;
+    layout.childAt(index).dispose();
+  }
+
+  /**
+   * Update a child in the layout.
+   */
+  private _updateChild(index: number): void {
+    let rendermime = this._rendermime;
+    let trusted = this._trusted;
+    let layout = this.layout as PanelLayout;
+    let widget = layout.childAt(index);
+    let output = this._model.get(index);
+    this._renderer.updateOutput(output, rendermime, widget, trusted);
+  }
+
+  /**
+   * Follow changes on the model state.
+   */
+  private _onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
     switch (args.type) {
     case ListChangeType.Add:
-      value = args.newValue as nbformat.IOutput;
-      widget = renderer.createOutput(value, rendermime, trusted);
-      layout.addChild(widget);
+      // Children are always added at the end.
+      this._addChild();
       break;
     case ListChangeType.Replace:
       // Only "clear" is supported by the model.
       let oldValues = args.oldValue as nbformat.IOutput[];
       for (let i = args.oldIndex; i < oldValues.length; i++) {
-        layout.childAt(args.oldIndex).parent = null;
+        this._removeChild(i);
       }
       break;
     case ListChangeType.Set:
-      layout.childAt(args.oldIndex).parent = null;
-      value = args.newValue as nbformat.IOutput;
-      widget = renderer.createOutput(value, rendermime, trusted);
-      layout.addChild(widget);
+      this._updateChild(args.newIndex);
       break;
     default:
       break;
@@ -380,15 +388,29 @@ namespace OutputAreaWidget {
     /**
      * Create an output widget.
      *
+     *
+     * @returns A new widget for an output.
+     *
+     * #### Notes
+     * The widget should be uninitialized.
+     *
+     * The `updateOutput` method will be called for initialization.
+     */
+    createOutput(): Widget;
+
+    /**
+     * Update an output widget.
+     *
      * @param output - The kernel output message payload.
      *
      * @param rendermime - The rendermime instance.
      *
-     * @param trusted - Whether the output is trusted.
+     * @param widget - The widget created by a call to `createOutput`.
      *
-     * @returns A widget containing the rendered data.
+     * @param trusted - Whether the output is trusted.
      */
-    createOutput(output: nbformat.IOutput, rendermime: RenderMime<Widget>, trusted?: boolean): Widget;
+    updateOutput(output: nbformat.IOutput, rendermime: RenderMime<Widget>,
+    widget: Widget, trusted?: boolean): void;
   }
 
   /**
@@ -399,59 +421,89 @@ namespace OutputAreaWidget {
     /**
      * Create an output widget.
      *
+     *
+     * @returns A new widget for an output.
+     *
+     * #### Notes
+     * The widget should be uninitialized.
+     *
+     * The `updateOutput` method will be called for initialization.
+     */
+    createOutput(): Widget {
+      let widget = new Widget();
+      widget.layout = new PanelLayout();
+      return widget;
+    }
+
+    /**
+     * Update an output widget.
+     *
      * @param output - The kernel output message payload.
      *
      * @param rendermime - The rendermime instance.
      *
-     * @param trusted - Whether the output is trusted.
+     * @param widget - The widget created by a call to `createOutput`.
      *
-     * @returns A widget containing the rendered data.
+     * @param trusted - Whether the output is trusted.
      */
-    createOutput(output: nbformat.IOutput, rendermime: RenderMime<Widget>, trusted = false): Widget {
+    updateOutput(output: nbformat.IOutput, rendermime: RenderMime<Widget>, widget: Widget, trusted?: boolean): void {
+      // Extract the data from the output and sanitize if necessary.
       let bundle = this.getBundle(output);
       let data = this.convertBundle(bundle);
       if (!trusted) {
         this.sanitize(data);
       }
-      let widget = new Panel();
+
+      // Remove any existing content.
+      let layout = widget.layout as PanelLayout;
+      for (let i = 0; i < layout.childCount(); i++) {
+        layout.childAt(0).dispose();
+      }
+
+      // Bail if no data to display.
+      let msg = 'Did not find renderer for output mimebundle.';
+      if (!data) {
+        console.log(msg);
+        return;
+      }
+
+      // Create the output result area.
+      let child = rendermime.render(data);
+      if (!child) {
+        console.log(msg);
+        console.log(data);
+        return;
+      }
+      child.addClass(RESULT_CLASS);
+      layout.addChild(child);
+
+      // Add classes and output prompt as necessary.
       switch (output.output_type) {
       case 'execute_result':
-        widget.addClass(EXECUTE_CLASS);
+        child.addClass(EXECUTE_CLASS);
         let prompt = new Widget();
         prompt.addClass(PROMPT_CLASS);
         let count = (output as nbformat.IExecuteResult).execution_count;
         prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
-        widget.addChild(prompt);
+        layout.addChild(prompt);
         break;
       case 'display_data':
-        widget.addClass(DISPLAY_CLASS);
+        child.addClass(DISPLAY_CLASS);
         break;
       case 'stream':
         if ((output as nbformat.IStream).name === 'stdout') {
-          widget.addClass(STDOUT_CLASS);
+          child.addClass(STDOUT_CLASS);
         } else {
-          widget.addClass(STDERR_CLASS);
+          child.addClass(STDERR_CLASS);
         }
         break;
       case 'error':
-        widget.addClass(ERROR_CLASS);
+        child.addClass(ERROR_CLASS);
         break;
       default:
         console.error(`Unrecognized output type: ${output.output_type}`);
         data = {};
       }
-
-      if (data) {
-        let child = rendermime.render(data);
-        if (child) {
-          child.addClass(RESULT_CLASS);
-          widget.addChild(child);
-        } else {
-          console.log('Did not find renderer for output mimebundle.');
-          console.log(data);
-        }
-      }
-      return widget;
     }
 
     /**
