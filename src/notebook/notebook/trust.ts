@@ -28,6 +28,9 @@ const TRUST_MESSAGE = '<p>A trusted Jupyter notebook may execute hidden maliciou
  */
 export
 function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void> {
+  if (!model) {
+    return;
+  }
   // Do nothing if already trusted.
   let cells = model.cells;
   let trusted = true;
