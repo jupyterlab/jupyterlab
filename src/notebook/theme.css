@@ -151,12 +151,6 @@
   outline: none;
 }
 
-
-.jp-MarkdownCell {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-
 .jp-NBToolbar {
     display: flex;
     flex-direction: row;
@@ -175,7 +169,6 @@
     font-size: 13px;
     color: #616161;
     line-height: 23px;
-    font-family: "Helvetica Neue";
 }
 
 
