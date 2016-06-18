@@ -80,18 +80,18 @@ body {
 
 .p-SideBar-content {
   height: 35px;
+  white-space: nowrap;
+  position: absolute;
   transform-origin: 0 0 0;
 }
 
 
 .p-SideBar.p-mod-left > .p-SideBar-content {
-  flex-direction: row-reverse;
   transform: rotate(-90deg) translateX(-100%);
 }
 
 
 .p-SideBar.p-mod-right > .p-SideBar-content {
-  flex-direction: row;
   transform: rotate(90deg) translateY(-100%);
 }
 
