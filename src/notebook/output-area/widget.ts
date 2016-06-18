@@ -14,7 +14,7 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  Panel, PanelLayout
+  PanelLayout
 } from 'phosphor-panel';
 
 import {
@@ -22,7 +22,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  ChildMessage, Widget
+  Widget
 } from 'phosphor-widget';
 
 import {
