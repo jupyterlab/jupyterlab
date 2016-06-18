@@ -217,32 +217,15 @@ class StaticNotebook extends Widget {
   }
 
   /**
-   * Get the preferred mime type for code cells in the notebook.
-   *
-   * #### Notes
-   * The default implementation uses the `language_info` metadata.
-   */
-  protected getMimetype(): string {
-    if (!this.model) {
-      return 'text/plain';
-    }
-    let cursor = this.model.getMetadata('language_info');
-    let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
-    return mimetypeForLanguage(info as IKernelLanguageInfo);
-  }
-
-  /**
    * Update a child widget.
-   *
-   * #### Notes
-   * The default implementation updates the code cell mimetypes.
    */
-  protected updateChild(index: number): void {
+  private _updateChild(index: number): void {
     let layout = this.layout as PanelLayout;
     let child = layout.childAt(index);
     if (child instanceof CodeCellWidget) {
       child.mimetype = this._mimetype;
     }
+    this._factory.updateChild(child);
   }
 
   /**
@@ -287,7 +270,7 @@ class StaticNotebook extends Widget {
     widget.addClass(NB_CELL_CLASS);
     let layout = this.layout as PanelLayout;
     layout.insertChild(index, widget);
-    this.updateChild(index);
+    this._updateChild(index);
   }
 
   /**
@@ -296,7 +279,7 @@ class StaticNotebook extends Widget {
   private _updateChildren(): void {
     let layout = this.layout as PanelLayout;
     for (let i = 0; i < layout.childCount(); i++) {
-      this.updateChild(i);
+      this._updateChild(i);
     }
   }
 
@@ -383,7 +366,7 @@ namespace StaticNotebook {
    * A factory for creating code cell widgets.
    */
   export
-  interface ICellWidgetFactory {
+  interface IRenderer {
     /**
      * Create a new code cell widget.
      */
@@ -398,13 +381,23 @@ namespace StaticNotebook {
      * Create a new raw cell widget.
      */
     createRawCell(model: IRawCellModel): RawCellWidget;
+
+    /**
+     * Update a cell widget.
+     */
+    updateCell(cell: BaseCellWidget): void;
+
+    /**
+     * Get the preferred mime type for code cells in the notebook.
+     */
+    getMimetype(model: INotebookModel): string;
   }
 
   /**
-   * The default implementation of a cell widget factory.
+   * The default implementation of an `IRenderer`.
    */
   export
-  class CellWidgetFactory implements ICellWidgetFactory {
+  class Renderer implements IRenderer {
     /**
      * Create a new code cell widget.
      */
@@ -425,13 +418,30 @@ namespace StaticNotebook {
     createRawCell(model: IRawCellModel): RawCellWidget {
       return new RawCellWidget(model);
     }
+
+    /**
+     * Update a cell widget.
+     */
+    updateCell(cell: BaseCellWidget): void { }
+
+    /**
+     * Get the preferred mime type for code cells in the notebook.
+     */
+    getMimetype(model: INotebookModel): string {
+      if (!model) {
+        return 'text/plain';
+      }
+      let cursor = model.getMetadata('language_info');
+      let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
+      return mimetypeForLanguage(info as IKernelLanguageInfo);
+    }
   }
 
   /**
-   * The default `ICellWidgetFactory` instance.
+   * The default `IRenderer` instance.
    */
   export
-  const defaultFactory = new CellWidgetFactory();
+  const defaultRenderer = new Renderer();
 }
 
 
