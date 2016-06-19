@@ -289,7 +289,7 @@ class OutputAreaWidget extends Widget {
       this._updateChild(i);
     }
     // Add new widgets as necessary.
-    for (let i = oldValue.length; i < newValue.length; i++) {
+    for (let i = layout.childCount(); i < newValue.length; i++) {
       this._addChild();
     }
   }
@@ -338,7 +338,7 @@ class OutputAreaWidget extends Widget {
       // Only "clear" is supported by the model.
       let oldValues = args.oldValue as nbformat.IOutput[];
       for (let i = args.oldIndex; i < oldValues.length; i++) {
-        this._removeChild(i);
+        this._removeChild(args.oldIndex);
       }
       break;
     case ListChangeType.Set:

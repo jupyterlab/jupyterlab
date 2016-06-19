@@ -8,10 +8,6 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  IListChangedArgs
-} from 'phosphor-observablelist';
-
-import {
   ChildMessage, Widget
 } from 'phosphor-widget';
 
@@ -22,6 +18,10 @@ import {
 import {
   OutputAreaModel, OutputAreaWidget
 } from '../../../../lib/notebook/output-area';
+
+import {
+  MimeMap, RenderMime
+} from '../../../../lib/rendermime';
 
 import {
   defaultRenderMime
@@ -61,10 +61,21 @@ class LogOutputAreaWidget extends OutputAreaWidget {
     super.onModelChanged(oldValue, newValue);
     this.methods.push('onModelChanged');
   }
+}
 
-  protected onTrustChanged(value: boolean): void {
-    super.onTrustChanged(value);
-    this.methods.push('onTrustChanged');
+
+class LogRenderer extends OutputAreaWidget.Renderer {
+
+  methods: string[] = [];
+
+  createOutput(): Widget {
+    this.methods.push('createOutput');
+    return super.createOutput();
+  }
+
+  updateOutput(output: nbformat.IOutput, rendermime: RenderMime<Widget>, widget: Widget, trusted?: boolean): void {
+    super.updateOutput(output, rendermime, widget, trusted);
+    this.methods.push('updateOutput');
   }
 }
 
@@ -157,6 +168,25 @@ describe('notebook/output-area/widget', () => {
         expect(widget.childCount()).to.be(5);
       });
 
+      context('model `changed` signal', () => {
+
+        it('should dispose of the child widget when an output is removed', () => {
+          let widget = createWidget();
+          let child = widget.childAt(0);
+          widget.model.clear();
+          expect(child.isDisposed).to.be(true);
+        });
+
+        it('should add the `jp-OutputArea-output` class to new widgets', () => {
+          let widget = new LogOutputAreaWidget({ rendermime });
+          widget.model = new OutputAreaModel();
+          widget.model.add(DEFAULT_OUTPUTS[0]);
+          let child = widget.childAt(0);
+          expect(child.hasClass('jp-OutputArea-output')).to.be(true);
+        });
+
+      });
+
     });
 
     describe('#rendermime', () => {
@@ -186,6 +216,16 @@ describe('notebook/output-area/widget', () => {
         expect(() => { widget.renderer = null; }).to.throwError();
       });
 
+      it('should be called to create and update when a widget is added', () => {
+        let renderer = new LogRenderer();
+        let widget = new LogOutputAreaWidget({ rendermime, renderer });
+        let model = new OutputAreaModel();
+        widget.model = model;
+        model.add(DEFAULT_OUTPUTS[0]);
+        expect(renderer.methods).to.contain('createOutput');
+        expect(renderer.methods).to.contain('updateOutput');
+      });
+
     });
 
     describe('#trusted', () => {
@@ -199,6 +239,16 @@ describe('notebook/output-area/widget', () => {
         let widget = new OutputAreaWidget({ rendermime });
         widget.trusted = true;
         expect(widget.trusted).to.be(true);
+      });
+
+      it('should re-render the widgets', () => {
+        let renderer = new LogRenderer();
+        let widget = new OutputAreaWidget({ rendermime, renderer });
+        widget.model = new OutputAreaModel();
+        widget.model.add(DEFAULT_OUTPUTS[0]);
+        renderer.methods = [];
+        widget.trusted = true;
+        expect(renderer.methods).to.contain('updateOutput');
       });
 
     });
@@ -306,31 +356,6 @@ describe('notebook/output-area/widget', () => {
 
     });
 
-    describe('#onChildAdded()', () => {
-
-      it('should add the `jp-OutputArea-output` class', () => {
-        let widget = new LogOutputAreaWidget({ rendermime });
-        widget.model = new OutputAreaModel();
-        widget.model.add(DEFAULT_OUTPUTS[0]);
-        expect(widget.methods).to.contain('onChildAdded');
-        let child = widget.childAt(0);
-        expect(child.hasClass('jp-OutputArea-output')).to.be(true);
-      });
-
-    });
-
-    describe('#onChildRemoved()', () => {
-
-      it('should dispose of the child widget', () => {
-        let widget = createWidget();
-        let child = widget.childAt(0);
-        child.parent = null;
-        expect(widget.methods).to.contain('onChildRemoved');
-        expect(child.isDisposed).to.be(true);
-      });
-
-    });
-
     describe('#onModelChanged()', () => {
 
       it('should be called when the model changes', () => {
@@ -349,91 +374,113 @@ describe('notebook/output-area/widget', () => {
 
     });
 
-    describe('#onTrustedChanged()', () => {
-
-      it('should be called when the trusted state changes', () => {
-        let widget = new LogOutputAreaWidget({ rendermime });
-        widget.trusted = true;
-        expect(widget.methods).to.contain('onTrustedChanged');
-      });
-
-      it('should re-render the widgets', () => {
-        let widget = createWidget();
-        let child = widget.childAt(0);
-        widget.trusted = true;
-        expect(widget.methods).to.contain('onTrustedChanged');
-        expect(child.isDisposed).to.be(true);
-        expect(widget.childCount()).to.be(7);
-      });
-
-    });
-
-    describe('#createOutput()', () => {
-
-      it('should be called when an output is added to the model', () => {
-        let widget = new LogOutputAreaWidget({ rendermime });
-        let model = new OutputAreaModel();
-        widget.model = model;
-        model.add(DEFAULT_OUTPUTS[0]);
-        expect(widget.methods).to.contain('createOutput');
-      });
-
-    });
-
-    describe('#onModelChange()', () => {
-
-      it('should add a new widget', () => {
-        let widget = new LogOutputAreaWidget({ rendermime });
-        widget.model = new OutputAreaModel();
-        widget.model.add(DEFAULT_OUTPUTS[0]);
-        expect(widget.methods).to.contain('onModelChange');
-        expect(widget.childCount()).to.be(1);
-      });
-
-      it('should clear the widgets', () => {
-        let widget = createWidget();
-        widget.methods = [];
-        widget.model.clear();
-        expect(widget.methods).to.contain('onModelChange');
-        expect(widget.childCount()).to.be(0);
-      });
-
-    });
-
-    describe('#onModelChange()', () => {
-
-      it('should be called when trust changes', () => {
-        let widget = new LogOutputAreaWidget({ rendermime });
-      });
-
-      it('should should call `onModelChanged`', () => {
-
-      });
-
-    });
-
     describe('.Renderer', () => {
 
+      describe('#createOutput()', () => {
+
+        it('should create a widget', () => {
+          let renderer = new OutputAreaWidget.Renderer();
+          let widget = renderer.createOutput();
+          expect(widget).to.be.a(Widget);
+        });
+
+      });
+
+      describe('#updateOutput()', () => {
+
+        it('should handle all bundle types when trusted', () => {
+          let renderer = new OutputAreaWidget.Renderer();
+          let widget = renderer.createOutput();
+          for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
+            let output = DEFAULT_OUTPUTS[i];
+            renderer.updateOutput(output, rendermime, widget, true);
+          }
+        });
+
+        it('should handle all bundle types when not trusted', () => {
+          let renderer = new OutputAreaWidget.Renderer();
+          let widget = renderer.createOutput();
+          for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
+            let output = DEFAULT_OUTPUTS[i];
+            renderer.updateOutput(output, rendermime, widget, false);
+          }
+        });
+
+      });
+
       describe('#getBundle()', () => {
+
+        it('should handle all bundle types', () => {
+          let renderer = new OutputAreaWidget.Renderer();
+          for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
+            let output = DEFAULT_OUTPUTS[i];
+            let bundle = renderer.getBundle(output);
+            expect(Object.keys(bundle).length).to.not.be(0);
+          }
+        });
 
       });
 
       describe('#convertBundle()', () => {
 
+        it('should handle bundles with strings', () => {
+          let bundle: nbformat.MimeBundle = {
+            'text/plain': 'foo'
+          };
+          let renderer = new OutputAreaWidget.Renderer();
+          let map = renderer.convertBundle(bundle);
+          expect(map).to.eql(bundle);
+        });
+
+        it('should handle bundles with string arrays', () => {
+          let bundle: nbformat.MimeBundle = {
+            'text/plain': ['foo', 'bar']
+          };
+          let renderer = new OutputAreaWidget.Renderer();
+          let map = renderer.convertBundle(bundle);
+          expect(map).to.eql({ 'text/plain': 'foo\nbar' });
+        });
 
       });
 
       describe('#sanitize()', () => {
 
-      });
+        it('should sanitize html input', () => {
+          let map: MimeMap<string> = {
+            'text/html': '<div>hello, 1 < 2</div>'
+          };
+          let renderer = new OutputAreaWidget.Renderer();
+          renderer.sanitize(map);
+          expect(map['text/html']).to.be('<div>hello, 1 &lt; 2</div>');
+        });
 
-      describe('#createOutput()', () => {
+        it('should allow text/plain', () => {
+          let map: MimeMap<string> = {
+            'text/plain': '<div>hello, 1 < 2</div>'
+          };
+          let renderer = new OutputAreaWidget.Renderer();
+          renderer.sanitize(map);
+          expect(map['text/plain']).to.be('<div>hello, 1 < 2</div>');
+        });
+
+        it('should disallow unknown mimetype', () => {
+          let map: MimeMap<string> = {
+            'foo/bar': '<div>hello, 1 < 2</div>'
+          };
+          let renderer = new OutputAreaWidget.Renderer();
+          renderer.sanitize(map);
+          expect(map['foo/bar']).to.be(void 0);
+        });
 
       });
 
     });
 
     describe('.defaultRenderer', () => {
+
+      it('should be a `Renderer` instance', () => {
+        expect(OutputAreaWidget.defaultRenderer).to.be.an(OutputAreaWidget.Renderer);
+      });
 
     });
 
