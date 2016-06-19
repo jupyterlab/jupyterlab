@@ -41,52 +41,23 @@
 .jp-FileButtons-button {
   flex: 1 1 auto;
   max-width: 100px;
+  margin: 0;
   padding: 4px 6px;
   color: #757575;
+  cursor: pointer;
   background: #FAFAFA;
   border: none;
   font-size: 16px;
   outline: 0;
 }
 
-
-.jp-FileButtons-button::-moz-focus-inner {
-  border: 0;
+.jp-FileButtons-button + .jp-FileButtons-button {
+  border-left: 1px solid #E0E0E0;
 }
-
 
 .jp-FileButtons-button:hover {
-  background: #F5F5F5;
-  border-color: #D0D0D0;
-  z-index: 1; /* raise overlapping border */
-}
-
-
-.jp-FileButtons-button:active,
-.jp-FileButtons-button.jp-id-create.jp-mod-active {
   background: #EEEEEE;
-  border-color: #BDBDBD;
-  z-index: 1; /* raise overlapping border */
 }
-
-
-.jp-FileButtons-button.jp-id-create {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-
-
-.jp-FileButtons-button.jp-id-upload {
-  margin-left: -1px; /* overlap borders */
-}
-
-
-.jp-FileButtons-button.jp-id-refresh {
-  margin-left: -1px; /* overlap borders */
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
 
 .jp-DirListing {
   outline: 0;
