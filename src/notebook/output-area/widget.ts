@@ -108,6 +108,12 @@ const sanitizable = ['text/svg', 'text/html'];
 
 /**
  * An output area widget.
+ *
+ * #### Notes
+ * The widget model must be set separately and can be changed
+ * at any time.  Consumers of the widget must account for a
+ * `null` model, and may want to listen to the `modelChanged`
+ * signal.
  */
 export
 class OutputAreaWidget extends Widget {
@@ -263,6 +269,8 @@ class OutputAreaWidget extends Widget {
    * Handle a new model.
    *
    * #### Notes
+   * This method is called after the model change has been handled
+   * internally and before the `modelChanged` signal is emitted.
    * The default implementation is a no-op.
    */
   protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void { }
