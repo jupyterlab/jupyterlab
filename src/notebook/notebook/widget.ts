@@ -101,6 +101,12 @@ type NotebookMode = 'command' | 'edit';
 
 /**
  * A widget which renders static non-interactive notebooks.
+ *
+ * #### Notes
+ * The widget model must be set separately and can be changed
+ * at any time.  Consumers of the widget must account for a
+ * `null` model, and may want to listen to the `modelChanged`
+ * signal.
  */
 export
 class StaticNotebook extends Widget {
@@ -193,9 +199,11 @@ class StaticNotebook extends Widget {
   }
 
   /**
-   * Handle a new model on the widget.
+   * Handle a new model.
    *
    * #### Notes
+   * This method is called after the model change has been handled
+   * internally and before the `modelChanged` signal is emitted.
    * The default implementation is a no-op.
    */
   protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
