@@ -159,6 +159,16 @@ class StaticNotebook extends Widget {
   }
 
   /**
+   * Get the renderer used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get renderer(): StaticNotebook.IRenderer {
+    return this._renderer;
+  }
+
+  /**
    * Get the mime type for code cells.
    *
    * #### Notes

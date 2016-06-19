@@ -490,20 +490,52 @@ namespace NotebookModel {
   }
 
   /**
-   * The default `ICellModelFactory` instance.
+   * The default implementation of an `ICellModelFactory`.
    */
   export
-  const defaultFactory: ICellModelFactory = {
-    createCodeCell: (source?: nbformat.IBaseCell) => {
+  class Factory {
+    /**
+     * Create a new code cell.
+     *
+     * @param source - The data to use for the original source data.
+     *
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createCodeCell(source?: nbformat.IBaseCell): ICodeCellModel {
       return new CodeCellModel(source);
-    },
-    createMarkdownCell: (source?: nbformat.IBaseCell) => {
-      return new MarkdownCellModel(source);
-    },
-    createRawCell: (source?: nbformat.IBaseCell) => {
-      return new RawCellModel(source);
     }
-  };
+
+    /**
+     * Create a new markdown cell.
+     *
+     * @param source - The data to use for the original source data.
+     *
+     * @returns A new markdown cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel {
+      return new MarkdownCellModel(source);
+    }
+
+    /**
+     * Create a new raw cell.
+     *
+     * @param source - The data to use for the original source data.
+     *
+     * @returns A new raw cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createRawCell(source?: nbformat.IBaseCell): IRawCellModel {
+     return new RawCellModel(source);
+    }
+  }
+
+  /**
+   * The default `Factory` instance.
+   */
+  export
+  const defaultFactory = new Factory();
 }
 
 

@@ -284,13 +284,15 @@ class CellTypeSwitcher extends Widget {
       }
     });
 
-    panel.content.modelChanged.connect(() => { this.followModel(); });
+    panel.content.modelChanged.connect(() => {
+      this.followModel(panel);
+    });
     if (panel.model) {
-      this.followModel();
+      this.followModel(panel);
     }
   }
 
-  followModel(): void {
+  followModel(panel: NotebookPanel): void {
     let select = this.node.firstChild as HTMLSelectElement;
     // Set the initial value.
     let index = panel.content.activeCellIndex;

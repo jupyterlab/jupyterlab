@@ -132,10 +132,10 @@ describe('notebook/notebook/widget', () => {
         expect(widget.hasClass('jp-Notebook')).to.be(true);
       });
 
-      it('should accept an optional factory', () => {
-        let factory = Object.create(StaticNotebook.defaultFactory);
-        let widget = new StaticNotebook({ rendermime, factory });
-        expect(widget.factory).to.be(factory);
+      it('should accept an optional render', () => {
+        let renderer = new StaticNotebook.Renderer();
+        let widget = new StaticNotebook({ rendermime, renderer });
+        expect(widget.renderer).to.be(renderer);
       });
 
     });
@@ -298,16 +298,16 @@ describe('notebook/notebook/widget', () => {
 
     });
 
-    describe('#factory', () => {
+    describe('#renderer', () => {
 
-      it('should be the cell widget factory used by the widget', () => {
+      it('should be the cell widget renderer used by the widget', () => {
         let widget = new StaticNotebook({ rendermime });
-        expect(widget.factory).to.be(StaticNotebook.defaultFactory);
+        expect(widget.renderer).to.be(StaticNotebook.defaultRenderer);
       });
 
       it('should be read-only', () => {
         let widget = createWidget();
-        expect(() => { widget.factory = null; }).to.throwError();
+        expect(() => { widget.renderer = null; }).to.throwError();
       });
 
     });

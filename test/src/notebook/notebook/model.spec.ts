@@ -48,7 +48,7 @@ describe('notebook/notebook', () => {
       });
 
       it('should accept an optional factory', () => {
-        let factory = Object.create(NotebookModel.defaultFactory);
+        let factory = new NotebookModel.Factory();
         let model = new NotebookModel({ factory });
         expect(model.factory).to.be(factory);
       });
