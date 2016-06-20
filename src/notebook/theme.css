@@ -71,19 +71,19 @@
 }
 
 
-.jp-OutputArea-output {
+.jp-Output {
   display: flex;
   flex-direction: row;
 }
 
 
-.jp-OutputArea-executeResult {
+.jp-Output-executeResult {
   margin-left: 0px;
   flex: 1 1 auto;
 }
 
 
-.jp-OutputArea-prompt {
+.jp-Output-prompt {
   color: #D84315;
   font-family: monospace;
   text-align: right;
@@ -95,18 +95,23 @@
 }
 
 
-.jp-OutputArea-result {
+.jp-Output-result {
   padding: 0.4em;
 }
 
 
-.jp-OutputArea pre {
+.jp-Output pre {
   border: none;
   margin: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 
-.jp-OutputArea-stderr {
+.jp-Output-stderr {
   background: #fdd;
 }
 
@@ -343,7 +348,7 @@
 }
 
 
-.jp-Console .jp-OutputArea-output.jp-OutputArea-executeResult > .jp-OutputArea-prompt {
+.jp-Console .jp-Output.jp-Output-executeResult > .jp-Output-prompt {
   flex-basis: auto;
   text-align: left;
 }
