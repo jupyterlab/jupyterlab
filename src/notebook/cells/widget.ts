@@ -34,10 +34,6 @@ import {
 } from 'phosphor-widget';
 
 import {
-  nbformat
-} from '../notebook/nbformat';
-
-import {
   OutputAreaWidget, OutputAreaModel, executeCode
 } from '../output-area';
 
@@ -155,7 +151,7 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * A signal emitted when the model of the notebook changes.
+   * A signal emitted when the model of the cell changes.
    */
   get modelChanged(): ISignal<BaseCellWidget, void> {
     return Private.modelChangedSignal.bind(this);
