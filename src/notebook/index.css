@@ -37,67 +37,117 @@
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget {
+.jp-MarkdownCell-content.p-Widget {
+  padding-left: 5.6px;
+  padding-top: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;
   -ms-user-select: text;
 }
 
+/*
+Trying to copy CSS from JupyterNotebook (.rendered_html * + p)
 
-.jp-MarkdownCell-renderer.p-Widget h1 {
+.p-Widget * + p {
+  margin-top: 14px;
+}
+*/
+
+
+.jp-MarkdownCell-content.p-Widget h1 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 26px;
   line-height: 1.0;
+  -webkit-margin-after: 0em;
+  -webkit-margin-before: 0em;
+  -webkit-margin-start: 0em;
+  -webkit-margin-end: 0em;
+  margin-top: 14px; 
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget h2 {
+.jp-MarkdownCell-content.p-Widget h2 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 22px;
   line-height: 1.0;
+  -webkit-margin-after: 0em;
+  -webkit-margin-before: 0em;
+  -webkit-margin-start: 0em;
+  -webkit-margin-end: 0em;
+  margin-top: 14px; 
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget h3 {
+.jp-MarkdownCell-content.p-Widget h3 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 18px;
   line-height: 1.0;
+  -webkit-margin-after: 0em;
+  -webkit-margin-before: 0em;
+  -webkit-margin-start: 0em;
+  -webkit-margin-end: 0em;
+  margin-top: 14px; 
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget h4 {
+.jp-MarkdownCell-content.p-Widget h4 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 14px;
   line-height: 1.0;
+  -webkit-margin-after: 0em;
+  -webkit-margin-before: 0em;
+  -webkit-margin-start: 0em;
+  -webkit-margin-end: 0em;
+  margin-top: 14px; 
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget h5 {
+.jp-MarkdownCell-content.p-Widget h5 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 14px;
   font-style: italic;
   line-height: 1.0;
+  -webkit-margin-after: 0em;
+  -webkit-margin-before: 0em;
+  -webkit-margin-start: 0em;
+  -webkit-margin-end: 0em;
+  margin-top: 14px; 
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget h6 { 
+.jp-MarkdownCell-content.p-Widget h6 { 
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 14px;
   font-style: italic;
   line-height: 1.0;
+  -webkit-margin-after: 0em;
+  -webkit-margin-before: 0em;
+  -webkit-margin-start: 0em;
+  -webkit-margin-end: 0em;
+  margin-top: 14px; 
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget p {
+.jp-MarkdownCell-content.p-Widget p {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 14px;
   line-height: 20px;
+  -webkit-margin-after: 0em;
+  -webkit-margin-before: 0em;
+  -webkit-margin-start: 0em;
+  -webkit-margin-end: 0em;
 } 
 
 
-.jp-MarkdownCell-renderer.p-Widget li {
+.jp-MarkdownCell-content.p-Widget li {
   line-height: 20px;
+  -webkit-margin-after: 0em;
+  -webkit-margin-before: 0em;
+  -webkit-margin-start: 0em;
+  -webkit-margin-end: 0em;
 }
 
 
