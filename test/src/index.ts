@@ -11,3 +11,6 @@ import './notebook/notebook/nbformat.spec';
 import './notebook/notebook/model.spec';
 import './notebook/notebook/modelfactory.spec';
 import './notebook/notebook/widget.spec';
+
+import './notebook/output-area/model.spec';
+import './notebook/output-area/widget.spec';

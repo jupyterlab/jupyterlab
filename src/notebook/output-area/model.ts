@@ -6,8 +6,16 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  ObservableList
+  IDisposable
+} from 'phosphor-disposable';
+
+import {
+  IListChangedArgs, IObservableList, ObservableList
 } from 'phosphor-observablelist';
+
+import {
+  ISignal, Signal, clearSignalData
+} from 'phosphor-signaling';
 
 import {
   nbformat
@@ -15,13 +23,70 @@ import {
 
 
 /**
- * An observable list that handles output area data.
+ * An model that maintains a list of output data.
  */
 export
-class ObservableOutputs extends ObservableList<nbformat.IOutput> {
+class OutputAreaModel implements IDisposable {
   /**
-   * Add an output, which may be combined with previous output
-   * (e.g. for streams).
+   * Construct a new observable outputs instance.
+   */
+  constructor() {
+    this._list = new ObservableList<nbformat.IOutput>();
+    this._list.changed.connect(this._onListChanged, this);
+  }
+
+  /**
+   * A signal emitted when the model changes.
+   */
+  get changed(): ISignal<OutputAreaModel, IListChangedArgs<nbformat.IOutput>> {
+    return Private.changedSignal.bind(this);
+  }
+
+  /**
+   * Get the length of the items in the model.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get length(): number {
+    return this._list ? this._list.length : 0;
+  }
+
+  /**
+   * Test whether the model is disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get isDisposed(): boolean {
+    return this._list === null;
+  }
+
+  /**
+   * Dispose of the resources used by the model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._list.clear();
+    this._list = null;
+    clearSignalData(this);
+  }
+
+  /**
+   * Get an item at the specified index.
+   */
+  get(index: number): nbformat.IOutput {
+    return this._list.get(index);
+  }
+
+  /**
+   * Add an output, which may be combined with previous output.
+   *
+   * #### Notes
+   * The output bundle is copied.
+   * Contiguous stream outputs of the same `name` are combined.
    */
   add(output: nbformat.IOutput): number {
     // If we received a delayed clear message, then clear now.
@@ -29,6 +94,10 @@ class ObservableOutputs extends ObservableList<nbformat.IOutput> {
       this.clear();
       this._clearNext = false;
     }
+
+    // Make a copy of the output bundle.
+    output = JSON.parse(JSON.stringify(output));
+
     // Join multiline text outputs.
     if (nbformat.isStream(output)) {
       if (Array.isArray(output.text)) {
@@ -47,7 +116,7 @@ class ObservableOutputs extends ObservableList<nbformat.IOutput> {
       // This also replaces the metadata of the last item.
       let text = output.text as string;
       output.text = lastOutput.text as string + text;
-      this.set(index, output);
+      this._list.set(index, output);
       return index;
     } else {
       switch (output.output_type) {
@@ -55,7 +124,7 @@ class ObservableOutputs extends ObservableList<nbformat.IOutput> {
       case 'execute_result':
       case 'display_data':
       case 'error':
-        return super.add(output);
+        return this._list.add(output);
       default:
         break;
       }
@@ -73,10 +142,18 @@ class ObservableOutputs extends ObservableList<nbformat.IOutput> {
       this._clearNext = true;
       return [];
     }
-    return super.clear();
+    return this._list.clear();
+  }
+
+  /**
+   * Handle a change to the list.
+   */
+  private _onListChanged(sender: IObservableList<nbformat.IOutput>, args: IListChangedArgs<nbformat.IOutput>) {
+    this.changed.emit(args);
   }
 
   private _clearNext = false;
+  private _list: IObservableList<nbformat.IOutput> = null;
 }
 
 
@@ -84,7 +161,7 @@ class ObservableOutputs extends ObservableList<nbformat.IOutput> {
  * Execute code on a kernel and send outputs to an observable output.
  */
 export
-function executeCode(code: string, kernel: IKernel, outputs: ObservableOutputs): Promise<IExecuteReply> {
+function executeCode(code: string, kernel: IKernel, outputs: OutputAreaModel): Promise<IExecuteReply> {
   let exRequest = {
     code,
     silent: false,
@@ -106,4 +183,16 @@ function executeCode(code: string, kernel: IKernel, outputs: ObservableOutputs):
       resolve(msg.content as IExecuteReply);
     });
   });
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * A signal emitted when the model changes.
+   */
+  export
+  const changedSignal = new Signal<OutputAreaModel, IListChangedArgs<nbformat.IOutput>>();
 }
