@@ -23,19 +23,26 @@ The `examples/` directory contains a few stand-alone examples of components in t
 
 ### Testing: `test/`
 
-The tests are stored and run in the `test/` directory. The source files are in `test/src`.
+The tests are stored and run in the `test/` directory. The source files are in `test/src/`.
 
 ### Notebook extension: `jupyterlab/`
 
-The `jupyterlab/` directory contains the Jupyter server extension. The server extension has includes a private npm package in order to build the webpack bundle the extension serves. The private npm package depends on the npm package at the root.
+The `jupyterlab/` directory contains the Jupyter server extension.
+
+The server extension includes a private npm package in order to build the
+**webpack bundle** which the extension serves. The private npm package depends
+on the `jupyterlab` npm package found in the repo's root directory.
 
 ### Git hooks: `git-hooks/`
 
-Here are some convenience git hooks that automatically rebuild the npm package and server extension every time you check out or merge in the git repo.
+The `git-hooks/` directory stores some convenience git hooks that automatically
+rebuild the npm package and server extension every time you check out or merge
+(via pull request or direct push to master) in the git repo.
 
 ### Documentation: `docs/`
 
-After building the docs (`npm run docs`), the `docs/index.html` is the entry point to the documentation.
+After building the docs (`npm run docs`), `docs/index.html` is the entry
+point to the documentation.
 
 ## Development Quickstart
 
