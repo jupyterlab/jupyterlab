@@ -190,16 +190,18 @@ class ConsoleWidget extends Widget {
    * Create a new banner widget given a banner model.
    */
   static createBanner() {
-    let model = new RawCellModel();
-    return new RawCellWidget(model);
+    let widget = new RawCellWidget();
+    widget.model = new RawCellModel();
+    return widget;
   }
 
   /**
    * Create a new prompt widget given a prompt model and a rendermime.
    */
   static createPrompt(rendermime: RenderMime<Widget>): CodeCellWidget {
-    let model = new CodeCellModel();
-    return new CodeCellWidget(model, rendermime);
+    let widget = new CodeCellWidget({ rendermime });
+    widget.model = new CodeCellModel();
+    return widget;
   }
 
   /**
@@ -539,21 +541,21 @@ class ConsoleWidget extends Widget {
    * Handle an edge requested signal.
    */
   protected onEdgeRequest(editor: CellEditorWidget, location: EdgeLocation): void {
-    let doc = editor.editor.getDoc();
+    let prompt = this.prompt;
     if (location === 'top') {
       this._history.back().then(value => {
         if (!value) {
           return;
         }
-        doc.setValue(value);
-        doc.setCursor(doc.posFromIndex(0));
+        prompt.model.source = value;
+        prompt.editor.setCursorPosition(0);
       });
     } else {
       this._history.forward().then(value => {
         // If at the bottom end of history, then clear the prompt.
         let text = value || '';
-        doc.setValue(text);
-        doc.setCursor(doc.posFromIndex(text.length));
+        prompt.model.source = text;
+        prompt.editor.setCursorPosition(text.length);
       });
     }
   }

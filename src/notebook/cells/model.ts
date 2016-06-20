@@ -29,7 +29,7 @@ import {
 } from '../common/metadata';
 
 import {
-  ObservableOutputs
+  OutputAreaModel
 } from '../output-area';
 
 
@@ -97,6 +97,14 @@ interface ICellModel extends IDisposable {
 export
 interface ICodeCellModel extends ICellModel {
   /**
+   * The type of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  type: 'code';
+
+  /**
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   executionCount: number;
@@ -104,7 +112,7 @@ interface ICodeCellModel extends ICellModel {
   /**
    * The cell outputs.
    */
-  outputs: ObservableOutputs;
+  outputs: OutputAreaModel;
 }
 
 
@@ -112,14 +120,30 @@ interface ICodeCellModel extends ICellModel {
  * The definition of a markdown cell.
  */
 export
-interface IMarkdownCellModel extends ICellModel { }
+interface IMarkdownCellModel extends ICellModel {
+  /**
+   * The type of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  type: 'markdown';
+ }
 
 
 /**
  * The definition of a raw cell.
  */
 export
-interface IRawCellModel extends ICellModel { }
+interface IRawCellModel extends ICellModel {
+  /**
+   * The type of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  type: 'raw';
+}
 
 
 /**
@@ -327,10 +351,12 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   constructor(cell?: nbformat.IBaseCell) {
     super(cell);
-    this._outputs = new ObservableOutputs();
+    this._outputs = new OutputAreaModel();
     if (cell && cell.cell_type === 'code') {
       this.executionCount = (cell as nbformat.ICodeCell).execution_count;
-      this._outputs.assign((cell as nbformat.ICodeCell).outputs);
+      for (let output of (cell as nbformat.ICodeCell).outputs) {
+        this._outputs.add(output);
+      }
     }
     this._outputs.changed.connect(() => {
       this.contentChanged.emit(void 0);
@@ -369,7 +395,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * #### Notes
    * This is a read-only property.
    */
-  get outputs(): ObservableOutputs {
+  get outputs(): OutputAreaModel {
     return this._outputs;
   }
 
@@ -399,7 +425,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     return cell;
   }
 
-  private _outputs: ObservableOutputs = null;
+  private _outputs: OutputAreaModel = null;
   private _executionCount: number = null;
 }
 

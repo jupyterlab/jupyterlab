@@ -6,10 +6,6 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  showDialog
-} from '../../dialog';
-
-import {
   IDocumentContext
 } from '../../docregistry';
 
@@ -106,9 +102,11 @@ namespace ToolbarItems {
    */
   export
   function createSaveButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton(TOOLBAR_SAVE, () => {
-      panel.context.save();
-    }, 'Save the notebook contents');
+    return new ToolbarButton({
+      className: TOOLBAR_SAVE,
+      onClick: () => { panel.context.save();  },
+      tooltip: 'Save the notebook contents'
+    });
   }
 
   /**
@@ -116,9 +114,11 @@ namespace ToolbarItems {
    */
   export
   function createInsertButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton(TOOLBAR_INSERT, () => {
-      NotebookActions.insertBelow(panel.content);
-    }, 'Insert a cell below');
+    return new ToolbarButton({
+      className: TOOLBAR_INSERT,
+      onClick: () => { NotebookActions.insertBelow(panel.content); },
+      tooltip: 'Insert a cell below'
+    });
   }
 
   /**
@@ -126,9 +126,13 @@ namespace ToolbarItems {
    */
   export
   function createCutButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton(TOOLBAR_CUT, () => {
-      NotebookActions.cut(panel.content, panel.clipboard);
-    }, 'Cut the selected cell(s)');
+    return new ToolbarButton({
+      className: TOOLBAR_CUT,
+      onClick: () => {
+        NotebookActions.cut(panel.content, panel.clipboard);
+      },
+      tooltip: 'Cut the selected cell(s)'
+    });
   }
 
   /**
@@ -136,9 +140,13 @@ namespace ToolbarItems {
    */
   export
   function createCopyButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton(TOOLBAR_COPY, () => {
-      NotebookActions.copy(panel.content, panel.clipboard);
-    }, 'Copy the selected cell(s)');
+    return new ToolbarButton({
+      className: TOOLBAR_COPY,
+      onClick: () => {
+        NotebookActions.copy(panel.content, panel.clipboard);
+      },
+      tooltip: 'Copy the selected cell(s)'
+    });
   }
 
   /**
@@ -146,9 +154,13 @@ namespace ToolbarItems {
    */
   export
   function createPasteButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton(TOOLBAR_PASTE, () => {
-      NotebookActions.paste(panel.content, panel.clipboard);
-    }, 'Paste cell(s) from the clipboard');
+    return new ToolbarButton({
+      className: TOOLBAR_PASTE,
+      onClick: () => {
+        NotebookActions.paste(panel.content, panel.clipboard);
+      },
+      tooltip: 'Paste cell(s) from the clipboard'
+    });
   }
 
   /**
@@ -156,9 +168,13 @@ namespace ToolbarItems {
    */
   export
   function createRunButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton(TOOLBAR_RUN, () => {
-      NotebookActions.runAndAdvance(panel.content, panel.context.kernel);
-    }, 'Run the selected cell(s) and advance');
+    return new ToolbarButton({
+      className: TOOLBAR_RUN,
+      onClick: () => {
+        NotebookActions.runAndAdvance(panel.content, panel.context.kernel);
+      },
+      tooltip: 'Run the selected cell(s) and advance'
+    });
   }
 
   /**
@@ -166,11 +182,15 @@ namespace ToolbarItems {
    */
   export
   function createInterruptButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton(TOOLBAR_INTERRUPT, () => {
-      if (panel.context.kernel) {
-        panel.context.kernel.interrupt();
-      }
-    }, 'Interrupt the kernel');
+    return new ToolbarButton({
+      className: TOOLBAR_INTERRUPT,
+      onClick: () => {
+        if (panel.context.kernel) {
+          panel.context.kernel.interrupt();
+        }
+      },
+      tooltip: 'Interrupt the kernel'
+    });
   }
 
   /**
@@ -178,9 +198,13 @@ namespace ToolbarItems {
    */
   export
   function createRestartButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton(TOOLBAR_RESTART, () => {
-      panel.restart();
-    }, 'Restart the kernel');
+    return new ToolbarButton({
+      className: TOOLBAR_RESTART,
+      onClick: () => {
+        panel.restart();
+      },
+      tooltip: 'Restart the kernel'
+    });
   }
 
   /**
@@ -268,18 +292,39 @@ class CellTypeSwitcher extends Widget {
   constructor(panel: NotebookPanel) {
     super();
     this.addClass(TOOLBAR_CELLTYPE);
+
     let select = this.node.firstChild as HTMLSelectElement;
-    // Set the initial value.
-    let index = panel.content.activeCellIndex;
-    select.value = panel.model.cells.get(index).type;
+    // Change current cell type on a change in the dropdown.
+    select.addEventListener('change', event => {
+      if (!this._changeGuard) {
+        NotebookActions.changeCellType(panel.content, select.value);
+      }
+    });
     // Follow the type of the current cell.
     panel.content.stateChanged.connect((sender, args) => {
+      if (!panel.model) {
+        return;
+      }
       if (args.name === 'activeCellIndex') {
         this._changeGuard = true;
         select.value = panel.model.cells.get(args.newValue).type;
         this._changeGuard = false;
       }
     });
+
+    panel.content.modelChanged.connect(() => {
+      this.followModel(panel);
+    });
+    if (panel.model) {
+      this.followModel(panel);
+    }
+  }
+
+  followModel(panel: NotebookPanel): void {
+    let select = this.node.firstChild as HTMLSelectElement;
+    // Set the initial value.
+    let index = panel.content.activeCellIndex;
+    select.value = panel.model.cells.get(index).type;
     // Follow a change in the cells.
     panel.content.model.cells.changed.connect((sender, args) => {
       index = panel.content.activeCellIndex;
@@ -287,14 +332,7 @@ class CellTypeSwitcher extends Widget {
       select.value = panel.model.cells.get(index).type;
       this._changeGuard = false;
     });
-    // Change current cell type on a change in the dropdown.
-    select.addEventListener('change', event => {
-      if (!this._changeGuard) {
-        NotebookActions.changeCellType(panel.content, select.value);
-      }
-    });
   }
-
 
   private _changeGuard = false;
 }

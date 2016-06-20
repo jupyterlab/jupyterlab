@@ -266,6 +266,9 @@ class NotebookPanel extends Widget {
    * Handle a change in the kernel by updating the document metadata.
    */
   protected handleKernelChange(kernel: IKernel): void {
+    if (!this.model) {
+      return;
+    }
     kernel.kernelInfo().then(info => {
       let infoCursor = this.model.getMetadata('language_info');
       infoCursor.setValue(info.language_info);
@@ -305,6 +308,9 @@ class NotebookPanel extends Widget {
    * Handle a text changed signal from an editor.
    */
   protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
+    if (!this.model) {
+      return;
+    }
     let line = change.newValue.split('\n')[change.line];
     let model = this._completion.model;
     // If last character entered is not whitespace, update completion.
@@ -326,6 +332,9 @@ class NotebookPanel extends Widget {
    * Handle a completion requested signal from an editor.
    */
   protected onCompletionRequest(editor: CellEditorWidget, change: ICompletionRequest): void {
+    if (!this.model) {
+      return;
+    }
     let kernel = this.context.kernel;
     if (!kernel) {
       return;
@@ -362,6 +371,9 @@ class NotebookPanel extends Widget {
    * Handle a completion selected signal from the completion widget.
    */
   protected onCompletionSelect(widget: CompletionWidget, value: string): void {
+    if (!this.model) {
+      return;
+    }
     let patch = this._completion.model.createPatch(value);
     let cell = this._content.childAt(this._content.activeCellIndex);
     let editor = cell.editor.editor;

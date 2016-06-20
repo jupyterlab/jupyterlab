@@ -41,14 +41,21 @@ export
 class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
   /**
    * Construct a new notebook widget factory.
+   *
+   * @param rendermime - The rendermime instance.
+   *
+   * @param clipboard - The application clipboard.
    */
   constructor(rendermime: RenderMime<Widget>, clipboard: IClipboard) {
-    this._rendermime = rendermime.clone();
+    this._rendermime = rendermime;
     this._clipboard = clipboard;
   }
 
   /**
    * Get whether the factory has been disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   get isDisposed(): boolean {
     return this._rendermime === null;
@@ -64,6 +71,10 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
 
   /**
    * Create a new widget.
+   *
+   * #### Notes
+   * The factory will start the appropriate kernel and populate
+   * the default toolbar items using `ToolbarItems.populateDefaults`.
    */
   createNew(model: INotebookModel, context: IDocumentContext, kernel?: IKernelId): NotebookPanel {
     let rendermime = this._rendermime.clone();
@@ -83,6 +94,8 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
    *
    * @returns A promise that resolves to true if the document should close
    *   and false otherwise.
+   *
+   * ### The default implementation is a no-op.
    */
   beforeClose(model: INotebookModel, context: IDocumentContext, widget: NotebookPanel): Promise<boolean> {
     // No special action required.

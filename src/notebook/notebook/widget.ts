@@ -101,6 +101,12 @@ type NotebookMode = 'command' | 'edit';
 
 /**
  * A widget which renders static non-interactive notebooks.
+ *
+ * #### Notes
+ * The widget model must be set separately and can be changed
+ * at any time.  Consumers of the widget must account for a
+ * `null` model, and may want to listen to the `modelChanged`
+ * signal.
  */
 export
 class StaticNotebook extends Widget {
@@ -113,13 +119,13 @@ class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this._rendermime = options.rendermime;
     this.layout = new PanelLayout();
-    this._factory = options.cellWidgetFactory || Private.defaultFactory;
+    this._renderer = options.renderer || StaticNotebook.defaultRenderer;
   }
 
   /**
    * A signal emitted when the model of the notebook changes.
    */
-  get modelChanged(): ISignal<StaticNotebook, INotebookModel> {
+  get modelChanged(): ISignal<StaticNotebook, void> {
     return Private.modelChangedSignal.bind(this);
   }
 
@@ -136,8 +142,10 @@ class StaticNotebook extends Widget {
     }
     let oldValue = this._model;
     this._model = newValue;
-    this._changeModel(oldValue, newValue);
-    this.modelChanged.emit(newValue);
+    // Trigger private, protected, and public changes.
+    this._onModelChanged(oldValue, newValue);
+    this.onModelChanged(oldValue, newValue);
+    this.modelChanged.emit(void 0);
   }
 
   /**
@@ -148,6 +156,26 @@ class StaticNotebook extends Widget {
    */
   get rendermime(): RenderMime<Widget> {
     return this._rendermime;
+  }
+
+  /**
+   * Get the renderer used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get renderer(): StaticNotebook.IRenderer {
+    return this._renderer;
+  }
+
+  /**
+   * Get the mimetype for code cells.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get codeMimetype(): string {
+    return this._mimetype;
   }
 
   /**
@@ -176,91 +204,113 @@ class StaticNotebook extends Widget {
     }
     this._model = null;
     this._rendermime = null;
-    this._factory = null;
+    this._renderer = null;
     super.dispose();
   }
 
-
   /**
-   * Handle a `child-added` message.
+   * Handle a new model.
+   *
+   * #### Notes
+   * This method is called after the model change has been handled
+   * internally and before the `modelChanged` signal is emitted.
+   * The default implementation is a no-op.
    */
-  protected onChildAdded(msg: ChildMessage): void {
-    msg.child.addClass(NB_CELL_CLASS);
+  protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
+    // No-op.
   }
 
   /**
-   * Handle a `child-removed` message.
+   * Handle changes to the notebook model metadata.
    */
-  protected onChildRemoved(msg: ChildMessage): void {
-    msg.child.dispose();
+  protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'language_info':
+      this._mimetype = this._renderer.getCodeMimetype(model);
+      this._updateChildren();
+      break;
+    default:
+      break;
+    }
   }
 
   /**
    * Handle a new model on the widget.
    */
-  private _changeModel(oldValue: INotebookModel, newValue: INotebookModel): void {
+  private _onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
     let layout = this.layout as PanelLayout;
     if (oldValue) {
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
-      oldValue.metadataChanged.disconnect(this._onMetadataChanged, this);
+      oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
       // TODO: reuse existing cell widgets if possible.
       for (let i = 0; i < layout.childCount(); i++) {
-        layout.removeChild(layout.childAt(0));
+        this._removeChild(0);
       }
     }
+    if (!newValue) {
+      this._mimetype = 'text/plain';
+      return;
+    }
+    this._mimetype = this._renderer.getCodeMimetype(newValue);
     let cells = newValue.cells;
     for (let i = 0; i < cells.length; i++) {
-      layout.addChild(this._createWidget(cells.get(i)));
+      this._insertChild(i, cells.get(i));
     }
-    this._setChildMimetypes();
     cells.changed.connect(this._onCellsChanged, this);
-    newValue.metadataChanged.connect(this._onMetadataChanged, this);
+    newValue.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
   /**
-   * Create a widget from a model using the appropriate factory.
+   * Create a child widget and insert into to the notebook.
    */
-  private _createWidget(model: ICellModel): BaseCellWidget {
-    switch (model.type) {
+  private _insertChild(index: number, cell: ICellModel): void {
+    let widget: BaseCellWidget;
+    switch (cell.type) {
     case 'code':
-      let codeFactory = this._factory.createCodeCell;
-      return codeFactory(model as CodeCellModel, this._rendermime);
+      let codeFactory = this._renderer.createCodeCell;
+      widget = codeFactory(cell as CodeCellModel, this._rendermime);
+      break;
     case 'markdown':
-      let mdFactory = this._factory.createMarkdownCell;
-      return mdFactory(model as MarkdownCellModel, this._rendermime);
+      let mdFactory = this._renderer.createMarkdownCell;
+      widget = mdFactory(cell as MarkdownCellModel, this._rendermime);
+      break;
     default:
-      let rawFactory = this._factory.createRawCell;
-      return rawFactory(model as RawCellModel);
+      widget = this._renderer.createRawCell(cell as RawCellModel);
     }
+    widget.addClass(NB_CELL_CLASS);
+    let layout = this.layout as PanelLayout;
+    layout.insertChild(index, widget);
+    this._updateChild(index);
   }
 
   /**
-   * Set the mimetype of the child code widgets.
+   * Update the child widgets.
    */
-  private _setChildMimetypes(): void {
-    let cursor = this.model.getMetadata('language_info');
-    let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
-    let mimetype = mimetypeForLanguage(info as IKernelLanguageInfo);
+  private _updateChildren(): void {
     let layout = this.layout as PanelLayout;
     for (let i = 0; i < layout.childCount(); i++) {
-      let widget = layout.childAt(i) as CodeCellWidget;
-      if (widget instanceof CodeCellWidget) {
-        widget.mimetype = mimetype;
-      }
+      this._updateChild(i);
     }
   }
 
   /**
-   * Handle changes to the notebook model.
+   * Update a child widget.
    */
-  private _onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'language_info':
-      this._setChildMimetypes();
-      break;
-    default:
-      break;
+  private _updateChild(index: number): void {
+    let layout = this.layout as PanelLayout;
+    let child = layout.childAt(index) as BaseCellWidget;
+    if (child instanceof CodeCellWidget) {
+      child.mimetype = this._mimetype;
     }
+    this._renderer.updateCell(child);
+  }
+
+  /**
+   * Remove a child widget.
+   */
+  private _removeChild(index: number): void {
+    let layout = this.layout as PanelLayout;
+    layout.childAt(index).dispose();
   }
 
   /**
@@ -268,42 +318,41 @@ class StaticNotebook extends Widget {
    */
   private _onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
     let layout = this.layout as PanelLayout;
-    let model: ICellModel;
     switch (args.type) {
     case ListChangeType.Add:
-      model = args.newValue as ICellModel;
-      layout.insertChild(args.newIndex, this._createWidget(model));
+      this._insertChild(args.newIndex, args.newValue as ICellModel);
       break;
     case ListChangeType.Move:
       layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
       break;
     case ListChangeType.Remove:
-      layout.childAt(args.oldIndex).parent = null;
+      this._removeChild(args.oldIndex);
       break;
     case ListChangeType.Replace:
+      // TODO: reuse existing cell widgets if possible.
       let oldValues = args.oldValue as ICellModel[];
       for (let i = 0; i < oldValues.length; i++) {
-        layout.childAt(args.oldIndex).parent = null;
+        this._removeChild(args.oldIndex);
       }
       let newValues = args.newValue as ICellModel[];
       for (let i = newValues.length; i > 0; i--) {
-        model = newValues[i - 1];
-        layout.insertChild(args.newIndex, this._createWidget(model));
+        this._insertChild(args.newIndex, newValues[i - 1]);
       }
       break;
     case ListChangeType.Set:
-      layout.childAt(args.newIndex).parent = null;
-      model = args.newValue as ICellModel;
-      layout.insertChild(args.newIndex, this._createWidget(model));
+      // TODO: reuse existing widget if possible.
+      this._removeChild(args.newIndex);
+      this._insertChild(args.newIndex, args.newValue as ICellModel);
       break;
     default:
       return;
     }
   }
 
+  private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _rendermime: RenderMime<Widget> = null;
-  private _factory: StaticNotebook.ICellWidgetFactory = null;
+  private _renderer: StaticNotebook.IRenderer = null;
 }
 
 
@@ -328,18 +377,18 @@ namespace StaticNotebook {
     languagePreference?: string;
 
     /**
-     * A factory for creating code cell widgets.
+     * A renderer for a notebook.
      *
-     * The default is a shared factory instance.
+     * The default is a shared renderer instance.
      */
-    cellWidgetFactory?: ICellWidgetFactory;
+    renderer?: IRenderer;
   }
 
   /**
    * A factory for creating code cell widgets.
    */
   export
-  interface ICellWidgetFactory {
+  interface IRenderer {
     /**
      * Create a new code cell widget.
      */
@@ -354,7 +403,79 @@ namespace StaticNotebook {
      * Create a new raw cell widget.
      */
     createRawCell(model: IRawCellModel): RawCellWidget;
+
+    /**
+     * Update a cell widget.
+     */
+    updateCell(cell: BaseCellWidget): void;
+
+    /**
+     * Get the preferred mime type for code cells in the notebook.
+     *
+     * #### Notes
+     * The model is guaranteed to be non-null.
+     */
+    getCodeMimetype(model: INotebookModel): string;
   }
+
+  /**
+   * The default implementation of an `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+    /**
+     * Create a new code cell widget.
+     */
+    createCodeCell(model: ICodeCellModel, rendermime: RenderMime<Widget>): CodeCellWidget {
+      let widget = new CodeCellWidget({ rendermime });
+      widget.model = model;
+      return widget;
+    }
+
+    /**
+     * Create a new markdown cell widget.
+     */
+    createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime<Widget>): MarkdownCellWidget {
+      let widget = new MarkdownCellWidget({ rendermime });
+      widget.model = model;
+      return widget;
+    }
+
+    /**
+     * Create a new raw cell widget.
+     */
+    createRawCell(model: IRawCellModel): RawCellWidget {
+      let widget = new RawCellWidget();
+      widget.model = model;
+      return widget;
+    }
+
+    /**
+     * Update a cell widget.
+     *
+     * #### Notes
+     * The base implementation is a no-op.
+     */
+    updateCell(cell: BaseCellWidget): void { }
+
+    /**
+     * Get the preferred mimetype for code cells in the notebook.
+     *
+     * #### Notes
+     * The model is guaranteed to be non-null.
+     */
+    getCodeMimetype(model: INotebookModel): string {
+      let cursor = model.getMetadata('language_info');
+      let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
+      return mimetypeForLanguage(info as IKernelLanguageInfo);
+    }
+  }
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
 }
 
 
@@ -547,7 +668,6 @@ class Notebook extends StaticNotebook {
    * Handle a `child-added` message.
    */
   protected onChildAdded(msg: ChildMessage): void {
-    super.onChildAdded(msg);
     let widget = msg.child as BaseCellWidget;
     widget.editor.edgeRequested.connect(this._onEdgeRequest, this);
     this.update();
@@ -557,7 +677,6 @@ class Notebook extends StaticNotebook {
    * Handle a `child-removed` message.
    */
   protected onChildRemoved(msg: ChildMessage): void {
-    msg.child.dispose();
     this.update();
   }
 
@@ -664,7 +783,7 @@ namespace Private {
    * A signal emitted when the model changes on the notebook.
    */
   export
-  const modelChangedSignal = new Signal<StaticNotebook, INotebookModel>();
+  const modelChangedSignal = new Signal<StaticNotebook, void>();
 
 
   /**
@@ -674,28 +793,12 @@ namespace Private {
   const stateChangedSignal = new Signal<Notebook, IChangedArgs<any>>();
 
   /**
-   * The default `ICellWidgetFactory` instance.
+   * Scroll an element into view if needed.
+   *
+   * @param area - The scroll area element.
+   *
+   * @param elem - The element of interest.
    */
-  export
-  const defaultFactory: StaticNotebook.ICellWidgetFactory = {
-    createCodeCell: (model: ICodeCellModel, rendermime: RenderMime<Widget>) => {
-      return new CodeCellWidget(model, rendermime);
-    },
-    createMarkdownCell: (model: IMarkdownCellModel, rendermime: RenderMime<Widget>) => {
-      return new MarkdownCellWidget(model, rendermime);
-    },
-    createRawCell: (model: IRawCellModel) => {
-      return new RawCellWidget(model);
-    }
-  };
-
- /**
-  * Scroll an element into view if needed.
-  *
-  * @param area - The scroll area element.
-  *
-  * @param elem - The element of interest.
-  */
   export
   function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
     let ar = area.getBoundingClientRect();
