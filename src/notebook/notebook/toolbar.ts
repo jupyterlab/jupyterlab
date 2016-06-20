@@ -147,7 +147,9 @@ class ToolbarButton extends Widget {
     switch (event.type) {
     case 'click':
       let cb = this._onClick;
-      cb();
+      if (cb) {
+        cb();
+      }
       break;
     case 'mousedown':
       this.addClass(TOOLBAR_PRESSED);
@@ -181,7 +183,7 @@ class ToolbarButton extends Widget {
     this.node.removeEventListener('mouseout', this);
   }
 
-  private _onClick: () => void = () => { return void 0; };
+  private _onClick: () => void;
 }
 
 
