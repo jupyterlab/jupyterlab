@@ -427,21 +427,27 @@ namespace StaticNotebook {
      * Create a new code cell widget.
      */
     createCodeCell(model: ICodeCellModel, rendermime: RenderMime<Widget>): CodeCellWidget {
-      return new CodeCellWidget(model, rendermime);
+      let widget = new CodeCellWidget({ rendermime });
+      widget.model = model;
+      return widget;
     }
 
     /**
      * Create a new markdown cell widget.
      */
     createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime<Widget>): MarkdownCellWidget {
-      return new MarkdownCellWidget(model, rendermime);
+      let widget = new MarkdownCellWidget({ rendermime });
+      widget.model = model;
+      return widget;
     }
 
     /**
      * Create a new raw cell widget.
      */
     createRawCell(model: IRawCellModel): RawCellWidget {
-      return new RawCellWidget(model);
+      let widget = new RawCellWidget();
+      widget.model = model;
+      return widget;
     }
 
     /**
@@ -450,9 +456,7 @@ namespace StaticNotebook {
      * #### Notes
      * The base implementation is a no-op.
      */
-    updateCell(cell: BaseCellWidget): void {
-      // No-op.
-    }
+    updateCell(cell: BaseCellWidget): void { }
 
     /**
      * Get the preferred mimetype for code cells in the notebook.
