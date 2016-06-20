@@ -97,6 +97,14 @@ interface ICellModel extends IDisposable {
 export
 interface ICodeCellModel extends ICellModel {
   /**
+   * The type of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  type: 'code';
+
+  /**
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   executionCount: number;
@@ -112,14 +120,30 @@ interface ICodeCellModel extends ICellModel {
  * The definition of a markdown cell.
  */
 export
-interface IMarkdownCellModel extends ICellModel { }
+interface IMarkdownCellModel extends ICellModel {
+  /**
+   * The type of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  type: 'markdown';
+ }
 
 
 /**
  * The definition of a raw cell.
  */
 export
-interface IRawCellModel extends ICellModel { }
+interface IRawCellModel extends ICellModel {
+  /**
+   * The type of the cell.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  type: 'raw';
+}
 
 
 /**
