@@ -69,18 +69,23 @@ class ButtonExtension implements IWidgetExtension<NotebookPanel>{
    */
   createNew(nb: NotebookPanel, model: IDocumentModel,
             context: IDocumentContext): IDisposable {
-    let button = new ToolbarButton('myButton', () => {
+    let callback = () => {
       NotebookActions.runAll(nb.content, context.kernel);
-    }, 'Tooltip');
+    };
+    let button = new ToolbarButton({
+      className: 'myButton',
+      onClick: callback,
+      tooltip: 'Tooltip'
+    });
 
     let i = document.createElement('i');
     i.classList.add('fa', 'fa-fast-forward')
     button.node.appendChild(i);
 
-    nb.toolbar.add('mybutton', button, 'cellType')
+    nb.toolbar.add('mybutton', button, 'run')
     return new DisposableDelegate(() => {
       button.dispose();
-    })
+    });
   }
 }
 
@@ -90,7 +95,6 @@ class ButtonExtension implements IWidgetExtension<NotebookPanel>{
 function activateExtension(app: Application, registry: DocumentRegistry) {
   registry.registerExtension('Notebook', new ButtonExtension());
 }
-
 ```
 
 Then add this extension to the JupyterLab extension list and relaunch JupyterLab:
