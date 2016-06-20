@@ -14,7 +14,7 @@ import {
 } from '../../rendermime';
 
 import {
-  Message, postMessage
+  Message
 } from 'phosphor-messaging';
 
 import {
