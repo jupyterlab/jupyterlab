@@ -453,13 +453,13 @@ class CodeCellWidget extends BaseCellWidget {
     let model = newValue as ICodeCellModel;
     let factory = this._factory;
 
-    if (this._output) {
-      this._output.dispose();
+    if (!this._output) {
+      this._output = factory.createOutputArea(this._rendermime);
+      (this.layout as PanelLayout).addChild(this._output);
     }
 
-    this._output = factory.createOutputArea(model.outputs, this._rendermime);
+    this._output.model = model.outputs;
     this._output.trusted = this.trusted;
-    (this.layout as PanelLayout).addChild(this._output);
     this._collapsedCursor = model.getMetadata('collapsed');
     this._scrolledCursor = model.getMetadata('scrolled');
     this.setPrompt(`${model.executionCount}`);
@@ -533,7 +533,7 @@ namespace CodeCellWidget {
     /**
      * Create a new output area for the widget.
      */
-    createOutputArea(model: OutputAreaModel, rendermime: RenderMime<Widget>): OutputAreaWidget;
+    createOutputArea(rendermime: RenderMime<Widget>): OutputAreaWidget;
   }
 }
 
@@ -726,10 +726,8 @@ namespace Private {
     /**
     * Create an output area widget.
     */
-    createOutputArea: (model: OutputAreaModel, rendermime: RenderMime<Widget>): OutputAreaWidget => {
-      let output = new OutputAreaWidget({ rendermime });
-      output.model = model;
-      return output;
+    createOutputArea: (rendermime: RenderMime<Widget>): OutputAreaWidget => {
+      return new OutputAreaWidget({ rendermime });
     }
   };
 }
