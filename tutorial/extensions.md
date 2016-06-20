@@ -3,7 +3,7 @@
 JupyterLab can be extended in two ways via:
 
 - **application plugins (top level):** Application plugins extend the
-  functionality of JupyterLab itself, and this tutorial focuses on them.
+  functionality of JupyterLab itself, and **this tutorial focuses on them.**
 - document widget extensions (lower level): Document widget extensions extend
   the functionality of document widgets added to the application, and we cover
   them in the "Documents" tutorial.
@@ -13,8 +13,9 @@ A JupyterLab application is comprised of several parts:
 - Extensions
 - a core [Application](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts) object
 
-A full example of an application is contained [here](https://github.com/jupyter/jupyterlab/tree/master/examples/lab). Looking at the `index.js` file, you can
-see the extensions and providers used in the tutorial example.
+A full example of an application is contained [here](https://github.com/jupyter/jupyterlab/tree/master/examples/lab).
+Looking at the `index.js` file, you can see the extensions and service providers
+used in the tutorial example.
 
 ## [Services](https://github.com/phosphorjs/phosphide/blob/master/src/core/serviceregistry.ts)
 A service provider adds a core functionality to the application:
