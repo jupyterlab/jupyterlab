@@ -95,9 +95,9 @@ const CODE_CELL_CLASS = 'jp-CodeCell';
 const MARKDOWN_CELL_CLASS = 'jp-MarkdownCell';
 
 /**
- * The class name added to the markdown cell renderer widget.
+ * The class name added to the markdown cell rendered widget.
  */
-const RENDERER_CLASS = 'jp-MarkdownCell-renderer';
+const RENDEREDMIME_CLASS = 'jp-MarkdownCell-renderedMime';
 
 /**
  * The class name added to raw cells.
@@ -128,7 +128,7 @@ class BaseCellWidget extends Widget {
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
 
-    let factory = options.cellWidgetFactory || Private.defaultFactory;
+    let factory = options.renderer || BaseCellWidget.defaultRenderer;
     this._editor = factory.createCellEditor(null);
     this._input = factory.createInputArea(this._editor);
 
@@ -345,18 +345,19 @@ namespace BaseCellWidget {
   export
   interface IOptions {
     /**
-     * A factory for creating code cell widgets.
+     * A renderer for creating cell widgets.
      *
-     * The default is a shared factory instance.
+     * The default is a shared renderer instance.
      */
-    cellWidgetFactory?: ICellWidgetFactory;
+    renderer?: IRenderer;
   }
 
+
   /**
-   * A factory for creating code cell widgets.
+   * A renderer for creating cell widgets.
    */
   export
-  interface ICellWidgetFactory {
+  interface IRenderer {
     /**
      * Create a new cell editor for the widget.
      */
@@ -368,21 +369,33 @@ namespace BaseCellWidget {
     createInputArea(editor: CellEditorWidget): InputAreaWidget;
   }
 
+
   /**
-   * A factory for creating code cell widgets.
+   * The default implementation of an `IRenderer`.
    */
   export
-  interface ICellWidgetFactory {
+  class Renderer implements IRenderer {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(model: ICellModel): CellEditorWidget;
+    createCellEditor(model: ICellModel): CellEditorWidget {
+      return new CellEditorWidget(model);
+    }
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(editor: CellEditorWidget): InputAreaWidget;
+    createInputArea(editor: CellEditorWidget): InputAreaWidget {
+      return new InputAreaWidget(editor);
+    }
   }
+
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
 }
 
 /**
@@ -397,7 +410,7 @@ class CodeCellWidget extends BaseCellWidget {
     super(options);
     this.addClass(CODE_CELL_CLASS);
     this._rendermime = options.rendermime;
-    this._factory = options.cellWidgetFactory || Private.defaultFactory;
+    this._factory = options.renderer || CodeCellWidget.defaultRenderer;
   }
 
   /**
@@ -494,7 +507,7 @@ class CodeCellWidget extends BaseCellWidget {
     super.onMetadataChanged(model, args);
   }
 
-  private _factory: CodeCellWidget.ICellWidgetFactory;
+  private _factory: CodeCellWidget.IRenderer;
   private _rendermime: RenderMime<Widget> = null;
   private _output: OutputAreaWidget = null;
   private _collapsedCursor: IMetadataCursor = null;
@@ -513,11 +526,11 @@ namespace CodeCellWidget {
   export
   interface IOptions {
     /**
-     * A factory for creating code cell widgets.
+     * A renderer for creating cell widgets.
      *
-     * The default is a shared factory instance.
+     * The default is a shared renderer instance.
      */
-    cellWidgetFactory?: ICellWidgetFactory;
+    renderer?: IRenderer
 
     /**
      * The mime renderer for the cell widget.
@@ -525,16 +538,37 @@ namespace CodeCellWidget {
     rendermime: RenderMime<Widget>;
   }
 
+
   /**
-   * A factory for creating code cell widgets.
+   * A renderer for creating code cell widgets.
    */
   export
-  interface ICellWidgetFactory extends BaseCellWidget.ICellWidgetFactory {
+  interface IRenderer extends BaseCellWidget.IRenderer {
     /**
      * Create a new output area for the widget.
      */
     createOutputArea(rendermime: RenderMime<Widget>): OutputAreaWidget;
   }
+
+
+  /**
+   * The default implementation of an `IRenderer`.
+   */
+  export
+  class Renderer extends BaseCellWidget.Renderer implements IRenderer {
+    /**
+     * Create an output area widget.
+     */
+    createOutputArea(rendermime: RenderMime<Widget>): OutputAreaWidget {
+      return new OutputAreaWidget({ rendermime });
+    }
+  }
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
 }
 
 
@@ -558,9 +592,9 @@ class MarkdownCellWidget extends BaseCellWidget {
     // Insist on the Github-flavored markdown mode.
     this.mimetype = 'text/x-ipythongfm';
     this._rendermime = options.rendermime;
-    this._renderer = new Widget();
-    this._renderer.addClass(RENDERER_CLASS);
-    (this.layout as PanelLayout).addChild(this._renderer);
+    this._renderedMIME = new Widget();
+    this._renderedMIME.addClass(RENDEREDMIME_CLASS);
+    (this.layout as PanelLayout).addChild(this._renderedMIME);
   }
 
   /**
@@ -584,7 +618,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     if (this.isDisposed) {
       return;
     }
-    this._renderer = null;
+    this._renderedMIME = null;
     super.dispose();
   }
 
@@ -598,17 +632,17 @@ class MarkdownCellWidget extends BaseCellWidget {
       // Do not re-render if the text has not changed.
       if (text !== this._prev) {
         let bundle: MimeMap<string> = { 'text/markdown': text };
-        this._renderer.dispose();
-        this._renderer = this._rendermime.render(bundle) || new Widget();
-        this._renderer.addClass(RENDERER_CLASS);
-        (this.layout as PanelLayout).addChild(this._renderer);
+        this._renderedMIME.dispose();
+        this._renderedMIME = this._rendermime.render(bundle) || new Widget();
+        this._renderedMIME.addClass(RENDEREDMIME_CLASS);
+        (this.layout as PanelLayout).addChild(this._renderedMIME);
       }
       this._prev = text;
-      this._renderer.show();
+      this._renderedMIME.show();
       this.toggleInput(false);
       this.addClass(RENDERED_CLASS);
     } else {
-      this._renderer.hide();
+      this._renderedMIME.hide();
       this.toggleInput(true);
       this.removeClass(RENDERED_CLASS);
     }
@@ -616,7 +650,7 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   private _rendermime: RenderMime<Widget> = null;
-  private _renderer: Widget = null;
+  private _renderedMIME: Widget = null;
   private _rendered = true;
   private _prev = '';
 }
@@ -633,11 +667,11 @@ namespace MarkdownCellWidget {
   export
     interface IOptions {
     /**
-     * A factory for creating code cell widgets.
+     * A renderer for creating cell widgets.
      *
-     * The default is a shared factory instance.
+     * The default is a shared renderer instance.
      */
-    cellWidgetFactory?: BaseCellWidget.ICellWidgetFactory;
+    renderer?: BaseCellWidget.IRenderer;
 
     /**
      * The mime renderer for the cell widget.
@@ -705,29 +739,4 @@ namespace Private {
    */
   export
   const modelChangedSignal = new Signal<BaseCellWidget, void>();
-
-
-  export
-  const defaultFactory: CodeCellWidget.ICellWidgetFactory = {
-    /**
-     * Create a new cell editor for the widget.
-     */
-    createCellEditor: (model: ICellModel): CellEditorWidget => {
-      return new CellEditorWidget(model);
-    },
-
-    /**
-    * Create a new input area for the widget.
-    */
-    createInputArea: (editor: CellEditorWidget): InputAreaWidget => {
-      return new InputAreaWidget(editor);
-    },
-
-    /**
-    * Create an output area widget.
-    */
-    createOutputArea: (rendermime: RenderMime<Widget>): OutputAreaWidget => {
-      return new OutputAreaWidget({ rendermime });
-    }
-  };
 }
