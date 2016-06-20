@@ -91,9 +91,9 @@ const CODE_CELL_CLASS = 'jp-CodeCell';
 const MARKDOWN_CELL_CLASS = 'jp-MarkdownCell';
 
 /**
- * The class name added to the markdown cell rendered widget.
+ * The class name added to the rendered markdown widget.
  */
-const RENDEREDMIME_CLASS = 'jp-MarkdownCell-renderedMime';
+const MARKDOWN_CONTENT_CLASS = 'jp-MarkdownCell-content';
 
 /**
  * The class name added to raw cells.
@@ -588,9 +588,9 @@ class MarkdownCellWidget extends BaseCellWidget {
     // Insist on the Github-flavored markdown mode.
     this.mimetype = 'text/x-ipythongfm';
     this._rendermime = options.rendermime;
-    this._renderedMIME = new Widget();
-    this._renderedMIME.addClass(RENDEREDMIME_CLASS);
-    (this.layout as PanelLayout).addChild(this._renderedMIME);
+    this._markdownWidget = new Widget();
+    this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
+    (this.layout as PanelLayout).addChild(this._markdownWidget);
   }
 
   /**
@@ -614,7 +614,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     if (this.isDisposed) {
       return;
     }
-    this._renderedMIME = null;
+    this._markdownWidget = null;
     super.dispose();
   }
 
@@ -628,17 +628,17 @@ class MarkdownCellWidget extends BaseCellWidget {
       // Do not re-render if the text has not changed.
       if (text !== this._prev) {
         let bundle: MimeMap<string> = { 'text/markdown': text };
-        this._renderedMIME.dispose();
-        this._renderedMIME = this._rendermime.render(bundle) || new Widget();
-        this._renderedMIME.addClass(RENDEREDMIME_CLASS);
-        (this.layout as PanelLayout).addChild(this._renderedMIME);
+        this._markdownWidget.dispose();
+        this._markdownWidget = this._rendermime.render(bundle) || new Widget();
+        this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
+        (this.layout as PanelLayout).addChild(this._markdownWidget);
       }
       this._prev = text;
-      this._renderedMIME.show();
+      this._markdownWidget.show();
       this.toggleInput(false);
       this.addClass(RENDERED_CLASS);
     } else {
-      this._renderedMIME.hide();
+      this._markdownWidget.hide();
       this.toggleInput(true);
       this.removeClass(RENDERED_CLASS);
     }
@@ -646,7 +646,7 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   private _rendermime: RenderMime<Widget> = null;
-  private _renderedMIME: Widget = null;
+  private _markdownWidget: Widget = null;
   private _rendered = true;
   private _prev = '';
 }
