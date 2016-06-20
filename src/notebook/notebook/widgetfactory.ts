@@ -71,6 +71,10 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
 
   /**
    * Create a new widget.
+   *
+   * #### Notes
+   * The factory will start the appropriate kernel and populate
+   * the default toolbar items using `ToolbarItems.populateDefaults`.
    */
   createNew(model: INotebookModel, context: IDocumentContext, kernel?: IKernelId): NotebookPanel {
     let rendermime = this._rendermime.clone();
@@ -90,6 +94,8 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
    *
    * @returns A promise that resolves to true if the document should close
    *   and false otherwise.
+   *
+   * ### The default implementation is a no-op.
    */
   beforeClose(model: INotebookModel, context: IDocumentContext, widget: NotebookPanel): Promise<boolean> {
     // No special action required.
