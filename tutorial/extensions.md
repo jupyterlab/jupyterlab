@@ -11,7 +11,7 @@ JupyterLab can be extended in two ways via:
 A JupyterLab application is comprised of several parts:
 - Service Providers
 - Extensions
-a core [Application](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts) object
+- a core [Application](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts) object
 
 A full example of an application is contained [here](https://github.com/jupyter/jupyterlab/tree/master/examples/lab). Looking at the `index.js` file, you can
 see the extensions and providers used in the tutorial example.
