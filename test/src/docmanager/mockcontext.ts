@@ -8,6 +8,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  MockKernel
+} from 'jupyter-js-services/lib/mockkernel';
+
+import {
   IDisposable
 } from 'phosphor-disposable';
 
@@ -53,7 +57,7 @@ class MockContext implements IDocumentContext {
   }
 
   get kernel(): IKernel {
-    return null;
+    return this._kernel;
   }
 
   get path(): string {
@@ -65,7 +69,31 @@ class MockContext implements IDocumentContext {
   }
 
   get kernelspecs(): IKernelSpecIds {
-    return void 0;
+    return {
+      default: 'python',
+      kernelspecs: {
+        python: {
+          name: 'python',
+          spec: {
+            language: 'python',
+            argv: [],
+            display_name: 'Python',
+            env: {}
+          },
+          resources: {}
+        },
+        shell: {
+          name: 'shell',
+          spec: {
+            language: 'shell',
+            argv: [],
+            display_name: 'Shell',
+            env: {}
+          },
+          resources: {}
+        }
+      }
+    };
   }
 
   get isDisposed(): boolean {
@@ -78,7 +106,9 @@ class MockContext implements IDocumentContext {
   }
 
   changeKernel(options: IKernelId): Promise<IKernel> {
-    return Promise.resolve(void 0);
+    this._kernel = new MockKernel(options);
+    this.kernelChanged.emit(this._kernel);
+    return Promise.resolve(this._kernel);
   }
 
   save(): Promise<void> {
@@ -102,6 +132,7 @@ class MockContext implements IDocumentContext {
   }
 
   private _model: IDocumentModel = null;
+  private _kernel: IKernel = null;
 }
 
 
