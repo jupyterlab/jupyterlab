@@ -788,13 +788,13 @@ namespace Private {
   export
   const stateChangedSignal = new Signal<Notebook, IChangedArgs<any>>();
 
- /**
-  * Scroll an element into view if needed.
-  *
-  * @param area - The scroll area element.
-  *
-  * @param elem - The element of interest.
-  */
+  /**
+   * Scroll an element into view if needed.
+   *
+   * @param area - The scroll area element.
+   *
+   * @param elem - The element of interest.
+   */
   export
   function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
     let ar = area.getBoundingClientRect();

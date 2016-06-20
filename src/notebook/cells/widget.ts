@@ -129,11 +129,10 @@ class BaseCellWidget extends Widget {
     this.layout = new PanelLayout();
 
     let factory = options.cellWidgetFactory || Private.defaultFactory;
-    this._editor = factory.createCellEditor(options.model || null);
+    this._editor = factory.createCellEditor(null);
     this._input = factory.createInputArea(this._editor);
 
     (this.layout as PanelLayout).addChild(this._input);
-    this.model = options.model || null;
   }
 
   /**
@@ -142,32 +141,17 @@ class BaseCellWidget extends Widget {
   get model(): ICellModel {
     return this._model;
   }
-  set model(model: ICellModel) {
-    if (!model && !this._model || model === this._model) {
-      return;
-    }
-    // If the model is being replaced, disconnect the old signal handler.
-    if (this._model) {
-      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
-      this._model.metadataChanged.disconnect(this.onMetadataChanged, this);
-    }
-
-    if (!model) {
-      this._editor.model = null;
-      this._model = null;
-      postMessage(this, new Message('model-changed'));
+  set model(newValue: ICellModel) {
+    if (!newValue && !this._model || newValue === this._model) {
       return;
     }
 
-    this._model = model;
-    this._editor.model = this._model;
-    // Set the editor mode to be the default MIME type.
-    loadModeByMIME(this._editor.editor, this._mimetype);
-    this._model.metadataChanged.connect(this.onMetadataChanged, this);
-    this._trustedCursor = this._model.getMetadata('trusted');
-    this._trusted = !!this._trustedCursor.getValue();
-    this._model.stateChanged.connect(this.onModelStateChanged, this);
-    postMessage(this, new Message('model-changed'));
+    let oldValue: ICellModel = this._model;
+    this._model = newValue;
+    // Trigger private, protected, and public updates.
+    this._onModelChanged(oldValue, newValue);
+    this.onModelChanged(oldValue, newValue);
+    this.modelChanged.emit(void 0);
   }
 
   /**
@@ -271,23 +255,6 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Process a message sent to the widget.
-   *
-   * @param msg - The message sent to the widget.
-   *
-   * #### Notes
-   * Subclasses may reimplement this method as needed.
-   */
-  processMessage(msg: Message): void {
-    super.processMessage(msg);
-    switch (msg.type) {
-      case 'model-changed':
-        this.onModelChanged(msg);
-        break;
-    }
-  }
-
-  /**
    * Handle `after-attach` messages.
    */
   protected onAfterAttach(msg: Message): void {
@@ -305,16 +272,6 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Handle the widget receiving a new model.
-   *
-   * #### Notes
-   * Subclasses may reimplement this method as needed.
-   */
-  protected onModelChanged(msg: Message): void {
-    this.modelChanged.emit(void 0);
-  }
-
-  /**
    * Handle changes in the model.
    *
    * #### Notes
@@ -328,13 +285,43 @@ class BaseCellWidget extends Widget {
    */
   protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
-    case 'trusted':
-      this._trusted = !!this._trustedCursor.getValue();
-      this.update();
-      break;
-    default:
-      break;
+      case 'trusted':
+        this._trusted = !!this._trustedCursor.getValue();
+        this.update();
+        break;
+      default:
+        break;
     }
+  }
+
+  /**
+   * Handle a new model.
+   *
+   * #### Notes
+   * This method is called after the model change has been handled
+   * internally and before the `modelChanged` signal is emitted.
+   * The default implementation is a no-op.
+   */
+  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void { }
+
+  private _onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
+    // If the model is being replaced, disconnect the old signal handler.
+    if (oldValue) {
+      oldValue.stateChanged.disconnect(this.onModelStateChanged, this);
+      oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
+    }
+
+    // Reset the editor model and set its mode to be the default MIME type.
+    this._editor.model = this._model;
+    loadModeByMIME(this._editor.editor, this._mimetype);
+
+    // Handle trusted cursor.
+    this._trustedCursor = this._model.getMetadata('trusted');
+    this._trusted = !!this._trustedCursor.getValue();
+
+    // Connect signal handlers.
+    this._model.metadataChanged.connect(this.onMetadataChanged, this);
+    this._model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   private _input: InputAreaWidget = null;
@@ -462,8 +449,8 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle the widget receiving a new model.
    */
-  protected onModelChanged(msg: Message): void {
-    let model = this.model as ICodeCellModel;
+  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
+    let model = newValue as ICodeCellModel;
     let factory = this._factory;
 
     if (this._output) {
@@ -531,11 +518,6 @@ namespace CodeCellWidget {
      * The default is a shared factory instance.
      */
     cellWidgetFactory?: ICellWidgetFactory;
-
-    /**
-     * A model for the cell widget.
-     */
-    model: ICodeCellModel;
 
     /**
      * The mime renderer for the cell widget.
@@ -658,11 +640,6 @@ namespace MarkdownCellWidget {
     cellWidgetFactory?: BaseCellWidget.ICellWidgetFactory;
 
     /**
-     * A model for the cell widget.
-     */
-    model?: ICellModel;
-
-    /**
      * The mime renderer for the cell widget.
      */
     rendermime: RenderMime<Widget>;
@@ -678,7 +655,7 @@ class RawCellWidget extends BaseCellWidget {
   /**
    * Construct a raw cell widget.
    */
-  constructor(options: BaseCellWidget.IOptions) {
+  constructor(options: BaseCellWidget.IOptions = {}) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
   }

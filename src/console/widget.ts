@@ -190,16 +190,18 @@ class ConsoleWidget extends Widget {
    * Create a new banner widget given a banner model.
    */
   static createBanner() {
-    let model = new RawCellModel();
-    return new RawCellWidget({ model });
+    let widget = new RawCellWidget();
+    widget.model = new RawCellModel();
+    return widget;
   }
 
   /**
    * Create a new prompt widget given a prompt model and a rendermime.
    */
   static createPrompt(rendermime: RenderMime<Widget>): CodeCellWidget {
-    let model = new CodeCellModel();
-    return new CodeCellWidget({ model, rendermime });
+    let widget = new CodeCellWidget({ rendermime });
+    widget.model = new CodeCellModel();
+    return widget;
   }
 
   /**
