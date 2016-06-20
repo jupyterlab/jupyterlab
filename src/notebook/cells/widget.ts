@@ -533,7 +533,7 @@ namespace CodeCellWidget {
     /**
      * Create a new output area for the widget.
      */
-    createOutputArea(outputs: ObservableOutputs, rendermime: RenderMime<Widget>): OutputAreaWidget;
+    createOutputArea(model: OutputAreaModel, rendermime: RenderMime<Widget>): OutputAreaWidget;
   }
 }
 
