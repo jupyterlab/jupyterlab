@@ -1,21 +1,27 @@
 # Plugins
 
-JupyterLab can be extended in two ways: via top level application plugins
-or document widget extensions.  Application plugins extend the 
-functionality of JupyterLab itself and are the focus of this tutorial. 
-Document widget extensions extend the functionality of document widgets added 
-to the application and are covered in the Documents tutorial.
+JupyterLab can be extended in two ways via:
 
-A JupyterLab application is comprised of Services and Extensions, as well as a 
-core [Application](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts) object.
+- application plugins (top level): Application plugins extend the
+  functionality of JupyterLab itself, and this tutorial focuses on them.
+- document widget extensions (lower level): Document widget extensions extend
+  the functionality of document widgets added to the application, and we cover
+  them in the "Documents" tutorial.
 
-A full example is contained [here](https://github.com/jupyter/jupyterlab/tree/master/examples/lab).
+A JupyterLab application is comprised of several parts:
+- Service Providers
+- Extensions
+a core [Application](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts) object
 
-## [Services](https://github.com/phosphorjs/phosphide/blob/master/src/core/serviceregistry.ts) 
-A service provider is used by extensions to add functionality to the
-application. 
-- Service providers can require other services.
-- Services are activated when they are needed by other services or extensions.
+A full example of an application is contained [here](https://github.com/jupyter/jupyterlab/tree/master/examples/lab). Looking at the `index.js` file, you can
+see the extensions and providers used in the tutorial example.
+
+## [Services](https://github.com/phosphorjs/phosphide/blob/master/src/core/serviceregistry.ts)
+A service provider adds a core functionality to the application:
+- A service provider does not use the Application object.
+- A Service provider can require other services for operation.
+- Extensions can use providers to offer additional functionality to the user.
+- A Service provider is activated when it is needed by other services or extensions.
 
 The default services providers in the JupyterLab application include:
 - [Services](http://jupyter.org/jupyterlab/modules/_services_plugin_.html#servicesprovider) - An application-specific interface to `jupyter-js-services`.
@@ -23,10 +29,10 @@ The default services providers in the JupyterLab application include:
 - [Document Registry](http://jupyter.org/jupyterlab/modules/_docregistry_plugin_.html#docregistryprovider) - Used to add functionality around widgets backed by files.
 - [Clipboard](http://jupyter.org/jupyterlab/modules/_clipboard_plugin_.html#clipboardprovider) - The application-wide clipboard for arbitrary MIME data.
 
-## [Extensions](https://github.com/phosphorjs/phosphide/blob/master/src/core/extensionregistry.ts#L19) 
-Extensions use the Application object and optionally other services to provide 
-functionality to the application. 
-- Extensions provided to the application on startup are activated immediately. 
+## [Extensions](https://github.com/phosphorjs/phosphide/blob/master/src/core/extensionregistry.ts#L19)
+Extensions use the Application object and optionally other services to provide
+functionality to the application.
+- Extensions provided to the application on startup are activated immediately.
 - Extensions can also be activated explicitly at runtime through the Application [instance](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts#L71).
 
 The default extensions in the application include:
