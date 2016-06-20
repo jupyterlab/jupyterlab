@@ -64,7 +64,6 @@ export
 class LatexWidget extends Widget {
   constructor(text: string) {
     super();
-    text = text.replace(/<br>|\$\$|^\$|\$$|\\\(|\\\)|\\\[|\\\]/g, '');
     this.node.innerHTML = text;
   }
 

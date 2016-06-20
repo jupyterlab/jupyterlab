@@ -97,13 +97,13 @@ const RESULT_CLASS = 'jp-OutputArea-result';
 /**
  * A list of outputs considered safe.
  */
-const safeOutputs = ['text/plain', 'text/latex', 'image/png', 'image/jpeg',
+const safeOutputs = ['text/plain', 'image/png', 'image/jpeg',
                      'application/vnd.jupyter.console-text'];
 
 /**
  * A list of outputs that are sanitizable.
  */
-const sanitizable = ['text/svg', 'text/html'];
+const sanitizable = ['text/svg', 'text/html', 'text/latex'];
 
 
 /**
