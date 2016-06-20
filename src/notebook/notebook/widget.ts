@@ -125,7 +125,7 @@ class StaticNotebook extends Widget {
   /**
    * A signal emitted when the model of the notebook changes.
    */
-  get modelChanged(): ISignal<StaticNotebook, INotebookModel> {
+  get modelChanged(): ISignal<StaticNotebook, void> {
     return Private.modelChangedSignal.bind(this);
   }
 
@@ -145,7 +145,7 @@ class StaticNotebook extends Widget {
     // Trigger private, protected, and public changes.
     this._onModelChanged(oldValue, newValue);
     this.onModelChanged(oldValue, newValue);
-    this.modelChanged.emit(newValue);
+    this.modelChanged.emit(void 0);
   }
 
   /**
@@ -169,7 +169,7 @@ class StaticNotebook extends Widget {
   }
 
   /**
-   * Get the mime type for code cells.
+   * Get the mimetype for code cells.
    *
    * #### Notes
    * This is a read-only property.
@@ -446,13 +446,16 @@ namespace StaticNotebook {
 
     /**
      * Update a cell widget.
+     *
+     * #### Notes
+     * The base implementation is a no-op.
      */
     updateCell(cell: BaseCellWidget): void {
       // No-op.
     }
 
     /**
-     * Get the preferred mime type for code cells in the notebook.
+     * Get the preferred mimetype for code cells in the notebook.
      *
      * #### Notes
      * The model is guaranteed to be non-null.
@@ -776,7 +779,7 @@ namespace Private {
    * A signal emitted when the model changes on the notebook.
    */
   export
-  const modelChangedSignal = new Signal<StaticNotebook, INotebookModel>();
+  const modelChangedSignal = new Signal<StaticNotebook, void>();
 
 
   /**
