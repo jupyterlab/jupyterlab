@@ -11,7 +11,9 @@ Th npm package and the Python package are both named `jupyterlab`.
 
 ### NPM package: `src/`, `lib/`, `typings/`, `scripts/`
 
-* `src/`: the source typescript files. `npm run build` builds the source files into javascript files in `lib/`. `npm run clean` deletes the `lib/` directory.
+* `src/`: the source typescript files.
+    - `npm run build` builds the source files into javascript files in `lib/`.
+    - `npm run clean` deletes the `lib/` directory.
 * `typings/`: type definitions for external libraries that typescript needs.
 * `scripts/`: various scripts that the npm commands invoke.
 
@@ -33,7 +35,7 @@ Here are some convenience git hooks that automatically rebuild the npm package a
 
 ### Documentation: `docs/`
 
-After building the docs (`npm run docs`), the `docs/index.html` is the entry point to the documentation. 
+After building the docs (`npm run docs`), the `docs/index.html` is the entry point to the documentation.
 
 ## Development Quickstart
 
