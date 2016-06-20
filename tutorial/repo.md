@@ -19,11 +19,14 @@ Th npm package and the Python package are both named `jupyterlab`.
 
 ### Examples: `examples/`
 
-The `examples/` directory contains a few stand-alone examples of components in the package, such as a simple notebook on a page, a console, terminal, filebrowser, etc.
+The `examples/` directory contains a few stand-alone examples of components in
+the package, such as a simple notebook on a page, a console, terminal,
+filebrowser, etc.
 
 ### Testing: `test/`
 
-The tests are stored and run in the `test/` directory. The source files are in `test/src/`.
+The tests are stored and run in the `test/` directory. The source files are in
+`test/src/`.
 
 ### Notebook extension: `jupyterlab/`
 
@@ -46,10 +49,61 @@ point to the documentation.
 
 ## Development Quickstart
 
-All the instructions below assume you are in the root directory of the repository. See the README for more instructions (which may be more up to date as well).
+*Note: See the README for the most up to date instructions as well as added details.*
 
-To build and install a development version of the server extension, do `pip install -e .` (this will build the npm package, build and webpack the server extension javascript, and install the appropriate links into your python environment). To enable the server extension, do `jupyter serverextension enable --sys-prefix --py jupyterlab` after installation. Then start up JupyterLab with `jupyter lab`.
+All the instructions below assume you are in the root directory of the repository.
 
-To rebuild the javascript for the server extension, do `npm run build:serverextension`. To have the system do this automatically after every change to the typescript source files, do `npm run watch:serverextension` and refresh your browser after each successful update.
+### Build, install and run the development version
 
-To build just the `jupyterlab` npm package, do `npm install` and then `npm run build`. To run the tests, build the npm package, then do `npm test`. To build the docs, do `npm run docs` and go to `docs/index.html`. An automatically-generated version of the docs is hosted at http://jupyter.org/jupyterlab/.
+To build and install a development version of the server extension, do:
+
+    pip install -e .
+
+ This command will build the npm package, build and webpack the server
+ extension javascript, and install the appropriate links into your python
+ environment.
+
+ To enable the server extension, do:
+
+    jupyter serverextension enable --sys-prefix --py jupyterlab
+
+ after installation. Then start up JupyterLab with:
+
+    jupyter lab
+
+### Rebuild JavaScript
+
+To rebuild the javascript for the server extension, do:
+
+    npm run build:serverextension
+
+To have the system do this automatically after every change to the typescript
+source files, do:
+
+    npm run watch:serverextension
+
+and refresh your browser after each successful update.
+
+### Build npm package
+
+To build just the `jupyterlab` npm package, do:
+
+	npm install
+	npm run build
+
+### Run tests
+
+To run the tests, build the npm package and run tests:
+
+    npm install
+    npm run build
+    npm test
+
+### Build documentation
+
+To build the docs:
+
+    npm run docs
+
+and go to `docs/index.html`. An automatically-generated version of the docs is
+hosted at http://jupyter.org/jupyterlab/.
