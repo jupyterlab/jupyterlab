@@ -442,6 +442,9 @@ namespace OutputAreaWidget {
     createOutput(): Widget {
       let widget = new Widget();
       widget.layout = new PanelLayout();
+      let prompt = new Widget();
+      prompt.addClass(PROMPT_CLASS);
+      (widget.layout as PanelLayout).addChild(prompt);
       return widget;
     }
 
@@ -466,9 +469,12 @@ namespace OutputAreaWidget {
 
       // Remove any existing content.
       let layout = widget.layout as PanelLayout;
-      for (let i = 0; i < layout.childCount(); i++) {
-        layout.childAt(0).dispose();
+      let child = layout.childAt(1);
+      if (child) {
+        child.dispose();
       }
+      let prompt = layout.childAt(0);
+      prompt.node.textContent = '';
 
       // Bail if no data to display.
       let msg = 'Did not find renderer for output mimebundle.';
@@ -478,7 +484,7 @@ namespace OutputAreaWidget {
       }
 
       // Create the output result area.
-      let child = rendermime.render(data);
+      child = rendermime.render(data);
       if (!child) {
         console.log(msg);
         console.log(data);
@@ -491,11 +497,8 @@ namespace OutputAreaWidget {
       switch (output.output_type) {
       case 'execute_result':
         child.addClass(EXECUTE_CLASS);
-        let prompt = new Widget();
-        prompt.addClass(PROMPT_CLASS);
         let count = (output as nbformat.IExecuteResult).execution_count;
         prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
-        layout.addChild(prompt);
         break;
       case 'display_data':
         child.addClass(DISPLAY_CLASS);

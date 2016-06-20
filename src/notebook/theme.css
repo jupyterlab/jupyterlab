@@ -71,24 +71,23 @@
 }
 
 
-.jp-OutputArea > .jp-OutputArea-output {
-  margin-left: 90px;
+.jp-OutputArea-output {
   display: flex;
   flex-direction: row;
 }
 
 
-.jp-OutputArea > .jp-OutputArea-output.jp-OutputArea-executeResult {
+.jp-OutputArea-executeResult {
   margin-left: 0px;
   flex: 1 1 auto;
 }
 
 
-.jp-OutputArea-output.jp-OutputArea-executeResult > .jp-OutputArea-prompt {
+.jp-OutputArea-prompt {
   color: #D84315;
   font-family: monospace;
   text-align: right;
-  line-height: 20px;
+  vertical-align: middle;
   padding: 0.4em;
   font-size: 14px;
   flex: 0 0 90px;
@@ -96,17 +95,18 @@
 }
 
 
-.jp-OutputArea-output > .jp-OutputArea-result {
-  padding: 4px;
+.jp-OutputArea-result {
+  padding: 0.4em;
 }
 
 
 .jp-OutputArea pre {
   border: none;
+  margin: 0;
 }
 
 
-.jp-OutputArea > .jp-OutputArea-output.jp-OutputArea-stderr {
+.jp-OutputArea-stderr {
   background: #fdd;
 }
 
