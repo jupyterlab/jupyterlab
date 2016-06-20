@@ -6,10 +6,6 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  showDialog
-} from '../../dialog';
-
-import {
   IDocumentContext
 } from '../../docregistry';
 
@@ -268,18 +264,39 @@ class CellTypeSwitcher extends Widget {
   constructor(panel: NotebookPanel) {
     super();
     this.addClass(TOOLBAR_CELLTYPE);
+
     let select = this.node.firstChild as HTMLSelectElement;
-    // Set the initial value.
-    let index = panel.content.activeCellIndex;
-    select.value = panel.model.cells.get(index).type;
+    // Change current cell type on a change in the dropdown.
+    select.addEventListener('change', event => {
+      if (!this._changeGuard) {
+        NotebookActions.changeCellType(panel.content, select.value);
+      }
+    });
     // Follow the type of the current cell.
     panel.content.stateChanged.connect((sender, args) => {
+      if (!panel.model) {
+        return;
+      }
       if (args.name === 'activeCellIndex') {
         this._changeGuard = true;
         select.value = panel.model.cells.get(args.newValue).type;
         this._changeGuard = false;
       }
     });
+
+    panel.content.modelChanged.connect(() => {
+      this.followModel(panel);
+    });
+    if (panel.model) {
+      this.followModel(panel);
+    }
+  }
+
+  followModel(panel: NotebookPanel): void {
+    let select = this.node.firstChild as HTMLSelectElement;
+    // Set the initial value.
+    let index = panel.content.activeCellIndex;
+    select.value = panel.model.cells.get(index).type;
     // Follow a change in the cells.
     panel.content.model.cells.changed.connect((sender, args) => {
       index = panel.content.activeCellIndex;
@@ -287,14 +304,7 @@ class CellTypeSwitcher extends Widget {
       select.value = panel.model.cells.get(index).type;
       this._changeGuard = false;
     });
-    // Change current cell type on a change in the dropdown.
-    select.addEventListener('change', event => {
-      if (!this._changeGuard) {
-        NotebookActions.changeCellType(panel.content, select.value);
-      }
-    });
   }
-
 
   private _changeGuard = false;
 }

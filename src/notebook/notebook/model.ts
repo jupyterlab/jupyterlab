@@ -46,7 +46,7 @@ import {
  * The definition of a model object for a notebook widget.
  */
 export
-interface INotebookModel extends IDocumentModel, ICellModelFactory {
+interface INotebookModel extends IDocumentModel {
   /**
    * A signal emitted when a model state changes.
    */
@@ -64,6 +64,14 @@ interface INotebookModel extends IDocumentModel, ICellModelFactory {
    * This is a read-only property.
    */
   cells: ObservableUndoableList<ICellModel>;
+
+  /**
+   * The cell model factory for the notebook.
+   *
+   * #### Notes
+   * This is a read-only propery.
+   */
+  factory: ICellModelFactory;
 
   /**
    * The major version number of the nbformat.
@@ -144,7 +152,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    */
   constructor(options: NotebookModel.IOptions = {}) {
     super(options.languagePreference);
-    this._factory = options.cellModelFactory || Private.defaultFactory;
+    this._factory = options.factory || NotebookModel.defaultFactory;
     this._cells = new ObservableUndoableList<ICellModel>((data: nbformat.IBaseCell) => {
       switch (data.cell_type) {
         case 'code':
@@ -178,6 +186,16 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    */
   get cells(): ObservableUndoableList<ICellModel> {
     return this._cells;
+  }
+
+  /**
+   * The cell model factory for the notebook.
+   *
+   * #### Notes
+   * This is a read-only propery.
+   */
+  get factory(): ICellModelFactory {
+    return this._factory;
   }
 
   /**
@@ -381,42 +399,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
-   * Create a new code cell.
-   *
-   * @param source - The data to use for the original source data.
-   *
-   * @returns A new code cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createCodeCell(source?: nbformat.IBaseCell): ICodeCellModel {
-    return this._factory.createCodeCell(source);
-  }
-
-  /**
-   * Create a new markdown cell.
-   *
-   * @param source - The data to use for the original source data.
-   *
-   * @returns A new markdown cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel {
-    return this._factory.createMarkdownCell(source);
-  }
-
-  /**
-   * Create a new raw cell.
-   *
-   * @param source - The data to use for the original source data.
-   *
-   * @returns A new raw cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createRawCell(source?: nbformat.IBaseCell): IRawCellModel {
-    return this._factory.createRawCell(source);
-  }
-
-  /**
    * Set the cursor data for a given field.
    */
   private _setCursorData(name: string, newValue: any): void {
@@ -504,8 +486,56 @@ namespace NotebookModel {
      *
      * The default is a shared factory instance.
      */
-    cellModelFactory?: ICellModelFactory;
+    factory?: ICellModelFactory;
   }
+
+  /**
+   * The default implementation of an `ICellModelFactory`.
+   */
+  export
+  class Factory {
+    /**
+     * Create a new code cell.
+     *
+     * @param source - The data to use for the original source data.
+     *
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createCodeCell(source?: nbformat.IBaseCell): ICodeCellModel {
+      return new CodeCellModel(source);
+    }
+
+    /**
+     * Create a new markdown cell.
+     *
+     * @param source - The data to use for the original source data.
+     *
+     * @returns A new markdown cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel {
+      return new MarkdownCellModel(source);
+    }
+
+    /**
+     * Create a new raw cell.
+     *
+     * @param source - The data to use for the original source data.
+     *
+     * @returns A new raw cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createRawCell(source?: nbformat.IBaseCell): IRawCellModel {
+     return new RawCellModel(source);
+    }
+  }
+
+  /**
+   * The default `Factory` instance.
+   */
+  export
+  const defaultFactory = new Factory();
 }
 
 
@@ -518,22 +548,6 @@ namespace Private {
    */
   export
   const metadataChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
-
-  /**
-   * The default `ICellModelFactory` instance.
-   */
-  export
-  const defaultFactory: ICellModelFactory = {
-    createCodeCell: (source?: nbformat.IBaseCell) => {
-      return new CodeCellModel(source);
-    },
-    createMarkdownCell: (source?: nbformat.IBaseCell) => {
-      return new MarkdownCellModel(source);
-    },
-    createRawCell: (source?: nbformat.IBaseCell) => {
-      return new RawCellModel(source);
-    }
-  };
 
   /**
    * Create the default metadata for the notebook.
