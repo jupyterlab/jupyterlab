@@ -261,7 +261,7 @@ class StaticNotebook extends Widget {
   }
 
   /**
-   * Create a child widget and insert into to the notebook.
+   * Create a child widget and insert into the notebook.
    */
   private _insertChild(index: number, cell: ICellModel): void {
     let widget: BaseCellWidget;
