@@ -44,29 +44,29 @@ import {
 const OUTPUT_AREA_CLASS = 'jp-OutputArea';
 
 /**
- * The class name added to an output area output widget.
+ * The class name added to an output widget.
  */
-const OUTPUT_CLASS = 'jp-OutputArea-output';
+const OUTPUT_CLASS = 'jp-Output';
 
 /**
  * The class name added to an execute result.
  */
-const EXECUTE_CLASS = 'jp-OutputArea-executeResult';
+const EXECUTE_CLASS = 'jp-Output-executeResult';
 
 /**
  * The class name added to display data.
  */
-const DISPLAY_CLASS = 'jp-OutputArea-displayData';
+const DISPLAY_CLASS = 'jp-Output-displayData';
 
 /**
  * The class name added to stdout data.
  */
-const STDOUT_CLASS = 'jp-OutputArea-stdout';
+const STDOUT_CLASS = 'jp-Output-stdout';
 
 /**
  * The class name added to stderr data.
  */
-const STDERR_CLASS = 'jp-OutputArea-stderr';
+const STDERR_CLASS = 'jp-Output-stderr';
 
 /**
  * The class anme added to error data.
@@ -86,12 +86,12 @@ const COLLAPSED_CLASS = 'jp-mod-collapsed';
 /**
  * The class name added to output area prompts.
  */
-const PROMPT_CLASS = 'jp-OutputArea-prompt';
+const PROMPT_CLASS = 'jp-Output-prompt';
 
 /**
  * The class name added to output area results.
  */
-const RESULT_CLASS = 'jp-OutputArea-result';
+const RESULT_CLASS = 'jp-Output-result';
 
 
 /**
@@ -236,9 +236,9 @@ class OutputAreaWidget extends Widget {
   /**
    * Get the child widget at the specified index.
    */
-  childAt(index: number): Widget {
+  childAt(index: number): OutputWidget {
     let layout = this.layout as PanelLayout;
-    return layout.childAt(index);
+    return layout.childAt(index) as OutputWidget;
   }
 
   /**
@@ -306,10 +306,9 @@ class OutputAreaWidget extends Widget {
    * Add a child to the layout.
    */
   private _addChild(): void {
-    let widget = this._renderer.createOutput();
+    let widget = this._renderer.createOutput({ rendermime: this.rendermime });
     let layout = this.layout as PanelLayout;
     layout.addChild(widget);
-    widget.addClass(OUTPUT_CLASS);
     this._updateChild(layout.childCount() - 1);
   }
 
@@ -325,12 +324,10 @@ class OutputAreaWidget extends Widget {
    * Update a child in the layout.
    */
   private _updateChild(index: number): void {
-    let rendermime = this._rendermime;
-    let trusted = this._trusted;
     let layout = this.layout as PanelLayout;
-    let widget = layout.childAt(index);
+    let widget = layout.childAt(index) as OutputWidget;
     let output = this._model.get(index);
-    this._renderer.updateOutput(output, rendermime, widget, trusted);
+    widget.render(output, this._trusted);
   }
 
   /**
@@ -373,7 +370,7 @@ class OutputAreaWidget extends Widget {
 export
 namespace OutputAreaWidget {
   /**
-   * The options to pass to an `OutputAreaWidget.
+   * The options to pass to an `OutputAreaWidget`.
    */
   export
   interface IOptions {
@@ -400,27 +397,8 @@ namespace OutputAreaWidget {
      *
      *
      * @returns A new widget for an output.
-     *
-     * #### Notes
-     * The widget should be uninitialized.
-     *
-     * The `updateOutput` method will be called for initialization.
      */
-    createOutput(): Widget;
-
-    /**
-     * Update an output widget.
-     *
-     * @param output - The kernel output message payload.
-     *
-     * @param rendermime - The rendermime instance.
-     *
-     * @param widget - The widget created by a call to `createOutput`.
-     *
-     * @param trusted - Whether the output is trusted.
-     */
-    updateOutput(output: nbformat.IOutput, rendermime: RenderMime<Widget>,
-    widget: Widget, trusted?: boolean): void;
+    createOutput(options: OutputWidget.IOptions): Widget;
   }
 
   /**
@@ -433,162 +411,9 @@ namespace OutputAreaWidget {
      *
      *
      * @returns A new widget for an output.
-     *
-     * #### Notes
-     * The widget should be uninitialized.
-     *
-     * The `updateOutput` method will be called for initialization.
      */
-    createOutput(): Widget {
-      let widget = new Widget();
-      widget.layout = new PanelLayout();
-      return widget;
-    }
-
-    /**
-     * Update an output widget.
-     *
-     * @param output - The kernel output message payload.
-     *
-     * @param rendermime - The rendermime instance.
-     *
-     * @param widget - The widget created by a call to `createOutput`.
-     *
-     * @param trusted - Whether the output is trusted.
-     */
-    updateOutput(output: nbformat.IOutput, rendermime: RenderMime<Widget>, widget: Widget, trusted?: boolean): void {
-      // Extract the data from the output and sanitize if necessary.
-      let bundle = this.getBundle(output);
-      let data = this.convertBundle(bundle);
-      if (!trusted) {
-        this.sanitize(data);
-      }
-
-      // Remove any existing content.
-      let layout = widget.layout as PanelLayout;
-      for (let i = 0; i < layout.childCount(); i++) {
-        layout.childAt(0).dispose();
-      }
-
-      // Bail if no data to display.
-      let msg = 'Did not find renderer for output mimebundle.';
-      if (!data) {
-        console.log(msg);
-        return;
-      }
-
-      // Create the output result area.
-      let child = rendermime.render(data);
-      if (!child) {
-        console.log(msg);
-        console.log(data);
-        return;
-      }
-      child.addClass(RESULT_CLASS);
-      layout.addChild(child);
-
-      // Add classes and output prompt as necessary.
-      switch (output.output_type) {
-      case 'execute_result':
-        child.addClass(EXECUTE_CLASS);
-        let prompt = new Widget();
-        prompt.addClass(PROMPT_CLASS);
-        let count = (output as nbformat.IExecuteResult).execution_count;
-        prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
-        layout.addChild(prompt);
-        break;
-      case 'display_data':
-        child.addClass(DISPLAY_CLASS);
-        break;
-      case 'stream':
-        if ((output as nbformat.IStream).name === 'stdout') {
-          child.addClass(STDOUT_CLASS);
-        } else {
-          child.addClass(STDERR_CLASS);
-        }
-        break;
-      case 'error':
-        child.addClass(ERROR_CLASS);
-        break;
-      default:
-        console.error(`Unrecognized output type: ${output.output_type}`);
-        data = {};
-      }
-    }
-
-    /**
-     * Get the mime bundle for an output.
-     *
-     * @params output - A kernel output message payload.
-     *
-     * @returns - A mime bundle for the payload.
-     */
-    getBundle(output: nbformat.IOutput): nbformat.MimeBundle {
-      let bundle: nbformat.MimeBundle;
-      switch (output.output_type) {
-      case 'execute_result':
-        bundle = (output as nbformat.IExecuteResult).data;
-        break;
-      case 'display_data':
-        bundle = (output as nbformat.IDisplayData).data;
-        break;
-      case 'stream':
-        bundle = {'application/vnd.jupyter.console-text': (output as nbformat.IStream).text};
-        break;
-      case 'error':
-        let out: nbformat.IError = output as nbformat.IError;
-        let traceback = out.traceback.join('\n');
-        bundle = {'application/vnd.jupyter.console-text': traceback || `${out.ename}: ${out.evalue}`};
-        break;
-      default:
-        console.error(`Unrecognized output type: ${output.output_type}`);
-        bundle = {};
-      }
-      return bundle;
-    }
-
-    /**
-     * Convert a mime bundle to a mime map.
-     */
-    convertBundle(bundle: nbformat.MimeBundle): MimeMap<string> {
-      let map: MimeMap<string> = Object.create(null);
-      for (let mimeType in bundle) {
-        let value = bundle[mimeType];
-        if (Array.isArray(value)) {
-          map[mimeType] = (value as string[]).join('\n');
-        } else {
-          map[mimeType] = value as string;
-        }
-      }
-      return map;
-    }
-
-    /**
-     * Sanitize a mime map.
-     *
-     * @params map - The map to sanitize.
-     *
-     * @returns Whether the
-     */
-    sanitize(map: MimeMap<string>): void {
-      let keys = Object.keys(map);
-      for (let key of keys) {
-        if (safeOutputs.indexOf(key) !== -1) {
-          continue;
-        } else if (sanitizable.indexOf(key) !== -1) {
-          let out = map[key];
-          if (typeof out === 'string') {
-            map[key] = sanitize(out);
-          } else {
-            console.log('Ignoring unsanitized ' + key + ' output; could not sanitize because output is not a string.');
-            delete map[key];
-          }
-        } else {
-          // Don't display if we don't know how to sanitize it.
-          console.log('Ignoring untrusted ' + key + ' output.');
-          delete map[key];
-        }
-      }
+    createOutput(options: OutputWidget.IOptions): OutputWidget {
+      return new OutputWidget(options);
     }
   }
 
@@ -597,6 +422,252 @@ namespace OutputAreaWidget {
    */
   export
   const defaultRenderer = new Renderer();
+}
+
+
+/**
+ * An output widget.
+ */
+export
+class OutputWidget extends Widget {
+  /**
+   * Construct a new output widget.
+   */
+  constructor(options: OutputWidget.IOptions) {
+    super();
+    let layout = new PanelLayout();
+    this.layout = layout;
+    let prompt = new Widget();
+    this._placeholder = new Widget();
+    this.addClass(OUTPUT_CLASS);
+    prompt.addClass(PROMPT_CLASS);
+    this._placeholder.addClass(RESULT_CLASS);
+    layout.addChild(prompt);
+    layout.addChild(this._placeholder);
+    this._rendermime = options.rendermime;
+  }
+
+  /**
+   * The prompt widget used by the output widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get prompt(): Widget {
+    let layout = this.layout as PanelLayout;
+    return layout.childAt(0);
+  }
+
+  /**
+   * The rendered output used by the output widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get output(): Widget {
+    let layout = this.layout as PanelLayout;
+    return layout.childAt(1);
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    this._rendermime = null;
+    this._placeholder = null;
+    super.dispose();
+  }
+
+  /**
+   * Clear the widget contents.
+   */
+  clear(): void {
+    this.setOutput(this._placeholder);
+    this.prompt.node.textContent = '';
+  }
+
+  /**
+   * Render an output.
+   *
+   * @param output - The kernel output message payload.
+   *
+   * @param trusted - Whether the output is trusted.
+   */
+  render(output: nbformat.IOutput, trusted?: boolean): void {
+    // Extract the data from the output and sanitize if necessary.
+    let rendermime = this._rendermime;
+    let bundle = this.getBundle(output);
+    let data = this.convertBundle(bundle);
+    if (!trusted) {
+      this.sanitize(data);
+    }
+
+    // Clear the content.
+    this.clear();
+
+    // Bail if no data to display.
+    let msg = 'Did not find renderer for output mimebundle.';
+    if (!data) {
+      console.log(msg);
+      return;
+    }
+
+    // Create the output result area.
+    let child = rendermime.render(data);
+    if (!child) {
+      console.log(msg);
+      console.log(data);
+      return;
+    }
+    this.setOutput(child);
+
+    // Add classes and output prompt as necessary.
+    switch (output.output_type) {
+    case 'execute_result':
+      child.addClass(EXECUTE_CLASS);
+      let count = (output as nbformat.IExecuteResult).execution_count;
+      this.prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
+      break;
+    case 'display_data':
+      child.addClass(DISPLAY_CLASS);
+      break;
+    case 'stream':
+      if ((output as nbformat.IStream).name === 'stdout') {
+        child.addClass(STDOUT_CLASS);
+      } else {
+        child.addClass(STDERR_CLASS);
+      }
+      break;
+    case 'error':
+      child.addClass(ERROR_CLASS);
+      break;
+    default:
+      console.error(`Unrecognized output type: ${output.output_type}`);
+      data = {};
+    }
+  }
+
+  /**
+   * Set the widget output.
+   */
+  protected setOutput(value: Widget): void {
+    let layout = this.layout as PanelLayout;
+    let old = this.output;
+    value = value || null;
+    if (old === value) {
+      return;
+    }
+    if (old) {
+      if (old !== this._placeholder) {
+        old.dispose();
+      } else {
+        old.parent = null;
+      }
+    }
+    if (value) {
+      layout.addChild(value);
+      value.addClass(RESULT_CLASS);
+    } else {
+      layout.addChild(this._placeholder);
+    }
+  }
+
+  /**
+   * Get the mime bundle for an output.
+   *
+   * @params output - A kernel output message payload.
+   *
+   * @returns - A mime bundle for the payload.
+   */
+  protected getBundle(output: nbformat.IOutput): nbformat.MimeBundle {
+    let bundle: nbformat.MimeBundle;
+    switch (output.output_type) {
+    case 'execute_result':
+      bundle = (output as nbformat.IExecuteResult).data;
+      break;
+    case 'display_data':
+      bundle = (output as nbformat.IDisplayData).data;
+      break;
+    case 'stream':
+      bundle = {'application/vnd.jupyter.console-text': (output as nbformat.IStream).text};
+      break;
+    case 'error':
+      let out: nbformat.IError = output as nbformat.IError;
+      let traceback = out.traceback.join('\n');
+      bundle = {'application/vnd.jupyter.console-text': traceback || `${out.ename}: ${out.evalue}`};
+      break;
+    default:
+      console.error(`Unrecognized output type: ${output.output_type}`);
+      bundle = {};
+    }
+    return bundle;
+  }
+
+  /**
+   * Convert a mime bundle to a mime map.
+   */
+  protected convertBundle(bundle: nbformat.MimeBundle): MimeMap<string> {
+    let map: MimeMap<string> = Object.create(null);
+    for (let mimeType in bundle) {
+      let value = bundle[mimeType];
+      if (Array.isArray(value)) {
+        map[mimeType] = (value as string[]).join('\n');
+      } else {
+        map[mimeType] = value as string;
+      }
+    }
+    return map;
+  }
+
+  /**
+   * Sanitize a mime map.
+   *
+   * @params map - The map to sanitize.
+   *
+   * @returns Whether the
+   */
+  protected sanitize(map: MimeMap<string>): void {
+    let keys = Object.keys(map);
+    for (let key of keys) {
+      if (safeOutputs.indexOf(key) !== -1) {
+        continue;
+      } else if (sanitizable.indexOf(key) !== -1) {
+        let out = map[key];
+        if (typeof out === 'string') {
+          map[key] = sanitize(out);
+        } else {
+          console.log('Ignoring unsanitized ' + key + ' output; could not sanitize because output is not a string.');
+          delete map[key];
+        }
+      } else {
+        // Don't display if we don't know how to sanitize it.
+        console.log('Ignoring untrusted ' + key + ' output.');
+        delete map[key];
+      }
+    }
+  }
+
+  private _rendermime: RenderMime<Widget> = null;
+  private _placeholder: Widget = null;
+}
+
+
+
+/**
+ * A namespace for OutputArea statics.
+ */
+export
+namespace OutputWidget {
+  /**
+   * The options to pass to an `OutputWidget`.
+   */
+  export
+  interface IOptions {
+    /**
+     * The rendermime instance used by the widget.
+     */
+    rendermime: RenderMime<Widget>;
+  }
 }
 
 
