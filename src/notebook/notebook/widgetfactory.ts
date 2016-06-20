@@ -84,7 +84,8 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
       let name = findKernel(model.defaultKernelName, model.defaultKernelLanguage, context.kernelspecs);
       context.changeKernel({ name });
     }
-    let panel = new NotebookPanel(model, rendermime, context, this._clipboard);
+    let panel = new NotebookPanel({ rendermime, clipboard: this._clipboard });
+    panel.context = context;
     ToolbarItems.populateDefaults(panel);
     return panel;
   }

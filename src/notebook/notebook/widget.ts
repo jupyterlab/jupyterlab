@@ -767,6 +767,31 @@ class Notebook extends StaticNotebook {
 
 
 /**
+ * The namespace for the `Notebook` class statics.
+ */
+export
+namespace Notebook {
+  /**
+   * An options object for initializing a notebook.
+   */
+  export
+  interface IOptions extends StaticNotebook.IOptions { }
+
+  /**
+   * The default implementation of an `IRenderer`.
+   */
+  export
+  class Renderer extends StaticNotebook.Renderer { }
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
+}
+
+
+/**
  * A namespace for private data.
  */
 namespace Private {
