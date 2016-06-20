@@ -49,21 +49,21 @@ interactive kernel console sessions.
 
 ## Command Palette
 
-The command palette is a part of the application object and is intended to
+The command palette, as a part of the application object, is intended to
 be the primary way to display and execute commands in the application.
-Many of the default extensions add commands to the command palette for actions
-such as executing a cell on a notebook or launching a new terminal instance.
+Many of the default extensions add new commands to the command palette to provide
+actions such as executing a notebook cell or launching a new terminal instance.
 
 
 ## Phosphor
-Phosphor is used as the underlying architecture of JupyterLab and provides 
+The Phosphor library is used as the underlying architecture of JupyterLab and provides 
 many of the low level primitives and widget structure used in the application.
-It provides a rich set of widgets for developing desktop-like applications
+Phosphor provides a rich set of widgets for developing desktop-like applications
 in the browser, as well as patterns and objects for writing clean, 
-well-abstracted code.  The widgets in the application are primarily Phosphor 
-widgets, and Phosphor concepts like message passing and signals are used
-throughout.  Phosphor messages are a many-to-one interaction that allows
-information like resize events to flow through the widget heirarchy in 
-the application.  Phosphor signals are a one-to-many interaction that allow
+well-abstracted code.  The widgets in the application are primarily **Phosphor 
+widgets**, and Phosphor concepts, like message passing and signals, are used
+throughout.  **Phosphor messages** are a *many-to-one* interaction that allows
+information like resize events to flow through the widget hierarchy in 
+the application.  **Phosphor signals** are a *one-to-many* interaction that allow
 listeners to react to changes in an observed object.
 
