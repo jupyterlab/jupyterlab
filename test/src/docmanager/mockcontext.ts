@@ -116,7 +116,7 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
   }
 
   get path(): string {
-    return '';
+    return this._path;
   }
 
   get contentsModel(): IContentsModel {
@@ -164,6 +164,8 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
   }
 
   saveAs(path: string): Promise<void> {
+    this._path = path;
+    this.pathChanged.emit(path);
     return Promise.resolve(void 0);
   }
 
@@ -180,6 +182,7 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
   }
 
   private _model: T = null;
+  private _path = '';
   private _kernel: IKernel = null;
 }
 

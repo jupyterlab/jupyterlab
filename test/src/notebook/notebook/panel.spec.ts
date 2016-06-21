@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  IKernel
+} from 'jupyter-js-services';
+
+import {
   MockKernel
 } from 'jupyter-js-services/lib/mockkernel';
 
@@ -32,6 +36,10 @@ import {
 } from '../../../../lib/notebook/notebook/model';
 
 import {
+  nbformat
+} from '../../../../lib/notebook/notebook/nbformat';
+
+import {
   NotebookPanel
 } from '../../../../lib/notebook/notebook/panel';
 
@@ -53,10 +61,11 @@ import {
 
 
 /**
- * Default rendermime and clipboard instances.
+ * Default data.
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
+const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
 
 class LogNotebookPanel extends NotebookPanel {
@@ -77,32 +86,13 @@ class LogNotebookPanel extends NotebookPanel {
     super.onPathChanged(sender, path);
     this.methods.push('onPathChanged');
   }
-
-  protected onContentStateChanged(sender: Notebook, args: IChangedArgs<any>): void {
-    super.onContentStateChanged(sender, args);
-    this.methods.push('onContentStateChanged');
-  }
-
-  protected onTextChanged(editor: CellEditorWidget, change: ITextChange): void {
-    super.onTextChanged(editor, change);
-    this.methods.push('onTextChanged');
-  }
-
-  protected onCompletionRequested(editor: CellEditorWidget, change: ICompletionRequest): void {
-    super.onCompletionRequested(editor, change);
-    this.methods.push('onCompletionRequested');
-  }
-
-  protected onCompletionSelected(widget: CompletionWidget, value: string): void {
-    super.onCompletionSelected(widget, value);
-    this.methods.push('onCompletionSelected');
-  }
 }
 
 
 function createPanel(): LogNotebookPanel {
   let panel = new LogNotebookPanel({ rendermime, clipboard });
   let model = new NotebookModel();
+  model.fromJSON(DEFAULT_CONTENT);
   let context = new MockContext<NotebookModel>(model);
   panel.context = context;
   return panel;
@@ -327,28 +317,24 @@ describe('notebook/notebook/panel', () => {
         expect(panel.isDisposed).to.be(true);
       });
 
-      // it('should be safe to call more than once', () => {
-      //   let panel = new NotebookPanel({ rendermime, clipboard });
-      //   panel.dispose();
-      //   panel.dispose();
-      //   expect(panel.isDisposed).to.be(true);
-      // });
+      it('should be safe to call more than once', () => {
+        let panel = new NotebookPanel({ rendermime, clipboard });
+        panel.dispose();
+        panel.dispose();
+        expect(panel.isDisposed).to.be(true);
+      });
 
     });
 
     describe('#onContextChanged()', () => {
 
       it('should be called when the context changes', () => {
-        //let panel = createPanel();
-
-      });
-
-    });
-
-    describe('#onKernelChanged()', () => {
-
-      it('should be called when the kernel changes', () => {
-
+        let panel = new LogNotebookPanel({ rendermime, clipboard });
+        let model = new NotebookModel();
+        let context = new MockContext<NotebookModel>(model);
+        panel.methods = [];
+        panel.context = context;
+        expect(panel.methods).to.contain('onContextChanged');
       });
 
     });
@@ -356,7 +342,18 @@ describe('notebook/notebook/panel', () => {
     describe('#onModelStateChanged()', () => {
 
       it('should be called when the model state changes', () => {
+        let panel = createPanel();
+        panel.methods = [];
+        panel.model.dirty = false;
+        expect(panel.methods).to.contain('onModelStateChanged');
+      });
 
+      it('should update the title className based on the dirty state', () => {
+        let panel = createPanel();
+        panel.model.dirty = true;
+        expect(panel.title.className).to.contain('jp-mod-dirty');
+        panel.model.dirty = false;
+        expect(panel.title.className).to.not.contain('jp-mod-dirty');
       });
 
     });
@@ -364,39 +361,27 @@ describe('notebook/notebook/panel', () => {
     describe('#onPathChanged()', () => {
 
       it('should be called when the path changes', () => {
-
+        let panel = createPanel();
+        panel.methods = [];
+        panel.context.saveAs('foo.ipynb');
+        expect(panel.methods).to.contain('onPathChanged');
       });
 
-    });
-
-    describe('#onContentStateChanged()', () => {
-
-      it('should be called when the content state changes', () => {
-
+      it('should be called when the context changes', () => {
+        let panel = new LogNotebookPanel({ rendermime, clipboard });
+        let model = new NotebookModel();
+        let context = new MockContext<NotebookModel>(model);
+        panel.methods = [];
+        panel.context = context;
+        expect(panel.methods).to.contain('onPathChanged');
       });
 
-    });
-
-    describe('#onTextChanged()', () => {
-
-      it('should be called on a text changed signal from the current editor', () => {
-
-      });
-
-    });
-
-    describe('#onCompletionRequested()', () => {
-
-      it('should be called on a `completionRequested` signal from the current editor', () => {
-
-      });
-
-    });
-
-    describe('#onCompletionSelected()', () => {
-
-      it('should be called on a `completionSelected` signal from the completion widget', () => {
-
+      it('should update the title text', () => {
+        let panel = createPanel();
+        panel.methods = [];
+        panel.context.saveAs('test/foo.ipynb');
+        expect(panel.methods).to.contain('onPathChanged');
+        expect(panel.title.text).to.be('foo.ipynb');
       });
 
     });
