@@ -279,7 +279,7 @@ class BaseCellWidget extends Widget {
    * #### Notes
    * Subclasses may reimplement this method as needed.
    */
-  protected onModelStateChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
   }
 
   /**
@@ -483,10 +483,10 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the model.
    */
-  protected onModelStateChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'executionCount':
-      this.setPrompt(`${model.executionCount}`);
+      this.setPrompt(`${(model as ICodeCellModel).executionCount}`);
       break;
     default:
       break;
@@ -497,7 +497,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'collapsed':
     case 'scrolled':
