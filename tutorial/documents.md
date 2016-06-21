@@ -3,7 +3,7 @@
 JupyterLab can be extended in two ways via:
 
 - application plugins (top level): Application plugins extend the
-  functionality of JupyterLab itself, and and we cover them in the
+  functionality of JupyterLab itself, and we cover them in the
   "Extensions" tutorial focuses.
 - **document widget extensions (lower level):** Document widget extensions extend
   the functionality of document widgets added to the application, and we cover
