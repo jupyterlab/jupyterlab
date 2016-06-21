@@ -136,6 +136,7 @@ import {
 import {
   NotebookActions
 } from '../notebook/notebook/actions';
+
 /**
  * The plugin registration information.
  */
@@ -181,7 +182,8 @@ function activateExtension(app: Application, registry: DocumentRegistry) {
 }
 ```
 
-Then add this extension to the JupyterLab extension list and relaunch JupyterLab:
+Then add this extension to the JupyterLab extensions list in the
+[`index.js` file](../examples/lab/index.js) and relaunch JupyterLab:
 
 ```typescript
     require('jupyterlab/lib/mybutton/plugin').widgetExtension,
