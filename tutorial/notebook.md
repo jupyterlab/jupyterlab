@@ -113,29 +113,39 @@ We'll walk through two notebook extensions:
 Create a `src/mybutton/plugin.ts` file with the following contents.
 
 ```typescript
-import {
-  IWidgetExtension, IDocumentContext, IDocumentModel, DocumentRegistry
-} from '../docregistry';
-
-import {
-  IDisposable, DisposableDelegate
-} from 'phosphor-disposable';
-
-import {
-  NotebookPanel
-} from '../notebook/notebook/panel';
 
 import {
   Application
 } from 'phosphide/lib/core/application';
 
 import {
-  ToolbarButton
-} from '../notebook/notebook/toolbar';
+  IDisposable, DisposableDelegate
+} from 'phosphor-disposable';
 
 import {
   NotebookActions
 } from '../notebook/notebook/actions';
+
+import {
+  NotebookPanel
+} from '../notebook/notebook/panel';
+
+import {
+  INotebookModel
+} from '../notebook/notebook/model';
+
+import {
+  ToolbarButton
+} from '../notebook/notebook/toolbar';
+
+import {
+<<<<<<< HEAD
+  NotebookActions
+} from '../notebook/notebook/actions';
+=======
+  IWidgetExtension, IDocumentContext, IDocumentModel, DocumentRegistry
+} from '../docregistry';
+>>>>>>> 803d561... Clean up the notebook plugin example
 
 /**
  * The plugin registration information.
@@ -148,12 +158,11 @@ const widgetExtension = {
 };
 
 export
-class ButtonExtension implements IWidgetExtension<NotebookPanel>{
+class ButtonExtension implements IWidgetExtension<NotebookPanel, INotebookModel> {
   /**
    * Create a new extension object.
    */
-  createNew(nb: NotebookPanel, model: IDocumentModel,
-            context: IDocumentContext): IDisposable {
+  createNew(nb: NotebookPanel, context: IDocumentContext<INotebookModel>): IDisposable {
     let callback = () => {
       NotebookActions.runAll(nb.content, context.kernel);
     };
@@ -164,10 +173,10 @@ class ButtonExtension implements IWidgetExtension<NotebookPanel>{
     });
 
     let i = document.createElement('i');
-    i.classList.add('fa', 'fa-fast-forward')
+    i.classList.add('fa', 'fa-fast-forward');
     button.node.appendChild(i);
 
-    nb.toolbar.add('mybutton', button, 'run')
+    nb.toolbar.add('mybutton', button, 'run');
     return new DisposableDelegate(() => {
       button.dispose();
     });
