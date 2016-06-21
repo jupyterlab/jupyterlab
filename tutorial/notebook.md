@@ -47,7 +47,7 @@ specific metadata key from a notebook model or a cell model.
 ### Notebook widget
 
 After the NotebookModel is created, the NotebookWidgetFactory constructs a
-new NotebookPanel from the model. The NotebookPanel widget is embedded into
+new NotebookPanel from the model. The NotebookPanel widget is added to
 the DockPanel. The **NotebookPanel** contains:
 
 - a [NotebookToolbar](http://jupyter.org/jupyterlab/classes/_notebook_notebook_toolbar_.notebooktoolbar.html)
@@ -85,8 +85,8 @@ corresponding to the cell models in its cell list.
 A [CodeCellWidget](http://jupyter.org/jupyterlab/classes/_notebook_cells_widget_.codecellwidget.html)
 also contains an [OutputAreaWidget](http://jupyter.org/jupyterlab/classes/_notebook_output_area_widget_.outputareawidget.html).
 An OutputAreaWidget is responsible for rendering the outputs in the
-[ObservableOutputs](http://jupyter.org/jupyterlab/classes/_notebook_output_area_model_.observableoutputs.html)
-list in the corresponding code cell model. An OutputAreaWidget uses a
+[OutputAreaModel](http://jupyter.org/jupyterlab/classes/_notebook_output_area_model_.outputareamodel.html)
+list. An OutputAreaWidget uses a
 notebook-specific [RenderMime](http://jupyter.org/jupyterlab/classes/_rendermime_index_.rendermime.html)
 object to render `display_data` output messages.
 
@@ -211,7 +211,7 @@ ipywidget model. When the model is displayed in the kernel, a `display_data`
 output is sent to the browser with the ipywidget model id. The renderer
 registered in that notebook's rendermime is asked to render the output. The
 renderer asks the ipywidget manager instance to render the corresponding
-model, which returns a javascript promise. The renderer creates a container
+model, which returns a JavaScript promise. The renderer creates a container
 **phosphor widget** which it hands back synchronously to the
 OutputAreaWidget, and then fills the container with the rendered *ipywidget*
 when the promise resolves.
