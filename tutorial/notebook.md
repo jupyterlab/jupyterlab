@@ -4,8 +4,8 @@
 
 [JupyterLab Walkthrough June 16, 2016 YouTube video](https://youtu.be/4Qm6oD_Rlw8?t=55m19s)
 
-The most complicated plugin included in the JupyterLab application is the
-Notebook plugin. The Notebook plugin provides a model and widgets for
+The most complicated plugin included in the **JupyterLab application** is the
+**Notebook plugin**. The Notebook plugin provides a model and widgets for
 dealing with notebook files.
 
 The [NotebookWidgetFactory](http://jupyter.org/jupyterlab/classes/_notebook_notebook_widgetfactory_.notebookwidgetfactory.html) constructs a new [NotebookPanel](http://jupyter.org/jupyterlab/classes/_notebook_notebook_panel_.notebookpanel.html) from a model and populates the toolbar with default widgets.
@@ -14,9 +14,25 @@ The [NotebookWidgetFactory](http://jupyter.org/jupyterlab/classes/_notebook_note
 
 ### Model
 
-The [NotebookModel](http://jupyter.org/jupyterlab/classes/_notebook_notebook_model_.notebookmodel.html) contains an observable list of cells (which implements undo functionality). A [cell model](http://jupyter.org/jupyterlab/modules/_notebook_cells_model_.html) can be a code cell, a markdown cell, or a raw cell. A code cell contains a list of output models. The list of cells and the list of outputs can be observed for changes.
+The **[NotebookModel](http://jupyter.org/jupyterlab/classes/_notebook_notebook_model_.notebookmodel.html)**
+contains an observable list of cells.
 
-The notebook model cell list supports undo/redo on cell list operations (such as moving cells or adding/deleting cells). Compound operations are also supported. Right now, undo/redo is not supported on other notebook attributes, such as notebook metadata. Undo/redo for individual cell input content is supported by the CodeMirror editor undo (which does not cover cell metadata changes).
+A **[cell model](http://jupyter.org/jupyterlab/modules/_notebook_cells_model_.html)**
+can be:
+
+- a code cell
+- a markdown cell
+- raw cell
+
+A code cell contains a list of **output models**. The list of cells and the
+list of outputs can be observed for changes.
+
+The NotebookModel cell list supports single-step operations such as moving, adding, or
+deleting cells. Compound cell list operations, such as undo/redo, are also
+supported by the NotebookModel. Right now, undo/redo is only supported on cells
+and is not supported on notebook attributes, such as notebook metadata. Curerntly,
+undo/redo for individual cell input content is supported by the *CodeMirror editor undo*.
+(Note: *CodeMirror editor undo*which does not cover cell metadata changes.)
 
 The notebook model and notebook cells support getting and setting metadata through cursors. One can request a cursor to write to a specific metadata key from a notebook model or a cell model.
 
