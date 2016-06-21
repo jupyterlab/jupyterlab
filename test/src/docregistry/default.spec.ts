@@ -23,7 +23,7 @@ import {
 
 class WidgetFactory extends ABCWidgetFactory {
 
-  createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): Widget {
+  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernelId): Widget {
     return new Widget();
   }
 }
@@ -72,7 +72,7 @@ describe('docmanager/default', () => {
         let factory = new WidgetFactory();
         let model = new DocumentModel();
         let context = new MockContext(model);
-        let widget = factory.createNew(model, context);
+        let widget = factory.createNew(context);
         expect(widget).to.be.a(Widget);
       });
 
@@ -84,8 +84,8 @@ describe('docmanager/default', () => {
         let factory = new WidgetFactory();
         let model = new DocumentModel();
         let context = new MockContext(model);
-        let widget = factory.createNew(model, context);
-        factory.beforeClose(model, context, widget).then(() => {
+        let widget = factory.createNew(context);
+        factory.beforeClose(widget, context).then(() => {
           done();
         });
       });
