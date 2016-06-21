@@ -667,7 +667,7 @@ namespace MarkdownCellWidget {
    * An options object for initializing a base cell widget.
    */
   export
-    interface IOptions {
+  interface IOptions {
     /**
      * A renderer for creating cell widgets.
      *
