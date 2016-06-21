@@ -847,6 +847,17 @@ describe('notebook/notebook/widget', () => {
           expect(widget.activeCellIndex).to.be(0);
         });
 
+        it('should preserve "command" mode if in a markdown cell', () => {
+          let cell = widget.model.factory.createMarkdownCell();
+          widget.model.cells.add(cell);
+          let count = widget.childCount();
+          let child = widget.childAt(count - 1) as MarkdownCellWidget;
+          expect(child.rendered).to.be(true);
+          simulate(child.node, 'click');
+          expect(child.rendered).to.be(true);
+          expect(widget.activeCell).to.be(child);
+        });
+
       });
 
       context('dblclick', () => {
