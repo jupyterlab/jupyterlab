@@ -44,11 +44,47 @@ specific metadata key from a notebook model or a cell model.
 
 ### Notebook widget
 
-The widget embedded into the DockPanel is the NotebookPanel. The NotebookPanel contains a [NotebookToolbar](http://jupyter.org/jupyterlab/classes/_notebook_notebook_toolbar_.notebooktoolbar.html) and a [Notebook widget](http://jupyter.org/jupyterlab/classes/_notebook_notebook_widget_.notebook.html) and adds completion logic. The NotebookToolbar maintains a list of widgets to add to the toolbar. The Notebook widget contains the rendering of the notebook and handles most of the interaction logic with the notebook itself (such as keeping track of selected and active cells and the current edit/command mode).
+After the NotebookModel is created, the NotebookWidgetFactory constructs a
+new NotebookPanel from the model. The NotebookPanel widget is embedded into
+the DockPanel. The **NotebookPanel** contains:
 
-The notebook model cell list provides ways to do fine-grained changes to the cell list. Higher-level actions are contained in the [NotebookActions](http://jupyter.org/jupyterlab/modules/_notebook_notebook_actions_.notebookactions.html) namespace, which has functions to (given a notebook widget) run a cell and select the next cell, merge or split cells at the cursor, delete selected cells, etc.
+- a [NotebookToolbar](http://jupyter.org/jupyterlab/classes/_notebook_notebook_toolbar_.notebooktoolbar.html)
+- a [Notebook widget](http://jupyter.org/jupyterlab/classes/_notebook_notebook_widget_.notebook.html).
 
-A Notebook widget contains a list of [cell widgets](http://jupyter.org/jupyterlab/modules/_notebook_cells_widget_.html), corresponding to the cell models in its cell list. Each cell widget contains an [InputAreaWidget](http://jupyter.org/jupyterlab/classes/_notebook_cells_widget_.inputareawidget.html), which contains a [CellEditorWidget](http://jupyter.org/jupyterlab/classes/_notebook_cells_editor_.celleditorwidget.html), which contains a CodeMirror instance. A [CodeCellWidget](http://jupyter.org/jupyterlab/classes/_notebook_cells_widget_.codecellwidget.html) also contains an [OutputAreaWidget](http://jupyter.org/jupyterlab/classes/_notebook_output_area_widget_.outputareawidget.html). An OutputAreaWidget is responsible for rendering the outputs in the [ObservableOutputs](http://jupyter.org/jupyterlab/classes/_notebook_output_area_model_.observableoutputs.html) list in the corresponding code cell model. An OutputAreaWidget uses a notebook-specific [RenderMime](http://jupyter.org/jupyterlab/classes/_rendermime_index_.rendermime.html) object to render `display_data` output messages.
+The NotebookPanel also adds completion logic.
+
+The **NotebookToolbar** maintains a list of widgets to add to the toolbar. The
+**Notebook widget** contains the rendering of the notebook and handles most of
+the interaction logic with the notebook itself (such as keeping track of
+interactions such as selected and active cells and also the
+current edit/command mode).
+
+The NotebookModel cell list provides ways to do fine-grained changes to the
+cell list.
+
+#### Higher level actions using NotebookActions
+Higher-level actions are contained in the
+[NotebookActions](http://jupyter.org/jupyterlab/modules/_notebook_notebook_actions_.notebookactions.html) namespace,
+which has functions, when given a notebook widget, to run a cell and select
+the next cell, merge or split cells at the cursor, delete selected cells, etc.
+
+#### Widget hierarchy
+A Notebook widget contains a list of [cell widgets](http://jupyter.org/jupyterlab/modules/_notebook_cells_widget_.html),
+corresponding to the cell models in its cell list.
+
+- Each cell widget contains an [InputAreaWidget](http://jupyter.org/jupyterlab/classes/_notebook_cells_widget_.inputareawidget.html),
+
+    + which contains a [CellEditorWidget](http://jupyter.org/jupyterlab/classes/_notebook_cells_editor_.celleditorwidget.html),
+
+        - which contains a CodeMirror instance.
+
+A [CodeCellWidget](http://jupyter.org/jupyterlab/classes/_notebook_cells_widget_.codecellwidget.html)
+also contains an [OutputAreaWidget](http://jupyter.org/jupyterlab/classes/_notebook_output_area_widget_.outputareawidget.html).
+An OutputAreaWidget is responsible for rendering the outputs in the
+[ObservableOutputs](http://jupyter.org/jupyterlab/classes/_notebook_output_area_model_.observableoutputs.html)
+list in the corresponding code cell model. An OutputAreaWidget uses a
+notebook-specific [RenderMime](http://jupyter.org/jupyterlab/classes/_rendermime_index_.rendermime.html)
+object to render `display_data` output messages.
 
 A Rendermime plugin provides a pluggable system for rendering output messages. Default renderers are provided for markdown, html, images, text, etc. Extensions can register renderers to be used across the entire application by registering a handler and mimetype in the rendermime registry. When a notebook is created, it copies the global Rendermime singleton so that notebook-specific renderers can be added. The ipywidgets widget manager is an example of an extension that adds a notebook-specific renderer, since rendering a widget depends on notebook-specific widget state.
 
