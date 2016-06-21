@@ -27,7 +27,8 @@ import {
 
 import {
   BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
-  CodeCellWidget, CodeCellModel, ICodeCellModel
+  CodeCellWidget, CodeCellModel, ICodeCellModel, MarkdownCellWidget,
+  RawCellWidget
 } from '../../../../lib/notebook/cells';
 
 import {
@@ -47,10 +48,13 @@ import {
 const INPUT_CLASS = 'jp-InputArea';
 
 
+const RENDERED_CLASS = 'jp-mod-rendered';
+
+
 const rendermime = defaultRenderMime();
 
 
-class LogCell extends BaseCellWidget {
+class LogBaseCell extends BaseCellWidget {
 
   methods: string[] = [];
 
@@ -84,6 +88,43 @@ class LogCell extends BaseCellWidget {
   protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     super.onModelStateChanged(model, args);
     this.methods.push('onModelStateChanged');
+  }
+}
+
+
+class LogCodeCell extends CodeCellWidget {
+
+  methods: string[] = [];
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.methods.push('onUpdateRequest');
+  }
+
+  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    super.onMetadataChanged(model, args);
+    this.methods.push('onMetadataChanged');
+  }
+
+  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
+    super.onModelChanged(oldValue, newValue);
+    this.methods.push('onModelChanged');
+  }
+
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    super.onModelStateChanged(model, args);
+    this.methods.push('onModelStateChanged');
+  }
+}
+
+
+class LogMarkdownCell extends MarkdownCellWidget {
+
+  methods: string[] = [];
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.methods.push('onUpdateRequest');
   }
 }
 
@@ -305,7 +346,7 @@ describe('notebook/cells', () => {
     describe('#onAfterAttach()', () => {
 
       it('should run when widget is attached', () => {
-        let widget = new LogCell();
+        let widget = new LogBaseCell();
         expect(widget.methods).to.not.contain('onAfterAttach');
         widget.attach(document.body);
         expect(widget.methods).to.contain('onAfterAttach');
@@ -317,7 +358,7 @@ describe('notebook/cells', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should update the widget', () => {
-        let widget = new LogCell();
+        let widget = new LogBaseCell();
         expect(widget.methods).to.not.contain('onUpdateRequest');
         sendMessage(widget, Widget.MsgUpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
@@ -329,7 +370,7 @@ describe('notebook/cells', () => {
 
       it('should fire when model state changes', () => {
         let method = 'onModelStateChanged';
-        let widget = new LogCell();
+        let widget = new LogBaseCell();
         widget.model = new CellModel();
         expect(widget.methods).to.not.contain(method);
         widget.model.source = 'foo';
@@ -342,7 +383,7 @@ describe('notebook/cells', () => {
 
       it('should fire when model metadata changes', () => {
         let method = 'onMetadataChanged';
-        let widget = new LogCell();
+        let widget = new LogBaseCell();
         widget.model = new CellModel();
         expect(widget.methods).to.not.contain(method);
         widget.model.metadataChanged.emit({
@@ -359,7 +400,7 @@ describe('notebook/cells', () => {
 
       it('should fire when the model changes', () => {
         let method = 'onModelChanged';
-        let widget = new LogCell();
+        let widget = new LogBaseCell();
         expect(widget.methods).to.not.contain(method);
         widget.model = new CellModel();
         expect(widget.methods).to.contain(method);
@@ -466,6 +507,59 @@ describe('notebook/cells', () => {
 
     });
 
+    describe('#onUpdateRequest()', () => {
+
+      it('should update the widget', () => {
+        let widget = new LogCodeCell({ rendermime });
+        expect(widget.methods).to.not.contain('onUpdateRequest');
+        sendMessage(widget, Widget.MsgUpdateRequest);
+        expect(widget.methods).to.contain('onUpdateRequest');
+      });
+
+    });
+
+    describe('#onModelChanged()', () => {
+
+      it('should fire when the model changes', () => {
+        let method = 'onModelChanged';
+        let widget = new LogCodeCell({ rendermime });
+        expect(widget.methods).to.not.contain(method);
+        widget.model = new CellModel();
+        expect(widget.methods).to.contain(method);
+      });
+
+    });
+
+    describe('#onModelStateChanged()', () => {
+
+      it('should fire when model state changes', () => {
+        let method = 'onModelStateChanged';
+        let widget = new LogCodeCell({ rendermime });
+        widget.model = new CodeCellModel();
+        expect(widget.methods).to.not.contain(method);
+        widget.model.source = 'foo';
+        expect(widget.methods).to.contain(method);
+      });
+
+    });
+
+    describe('#onMetadataChanged()', () => {
+
+      it('should fire when model metadata changes', () => {
+        let method = 'onMetadataChanged';
+        let widget = new LogCodeCell({ rendermime });
+        widget.model = new CodeCellModel();
+        expect(widget.methods).to.not.contain(method);
+        widget.model.metadataChanged.emit({
+          name: 'foo',
+          oldValue: 'bar',
+          newValue: 'baz'
+        });
+        expect(widget.methods).to.contain(method);
+      });
+
+    });
+
     describe('.Renderer', () => {
 
       describe('#constructor()', () => {
@@ -494,6 +588,98 @@ describe('notebook/cells', () => {
           expect(defaultRenderer).to.be.a(CodeCellWidget.Renderer);
         });
 
+      });
+
+    });
+
+  });
+
+  describe('MarkdownCellWidget', () => {
+
+    describe('#constructor()', () => {
+
+      it('should create a markdown cell widget', () => {
+        let widget = new MarkdownCellWidget({ rendermime });
+        expect(widget).to.be.a(MarkdownCellWidget);
+      });
+
+      it('should accept a custom renderer', () => {
+        let renderer = new LogRenderer();
+
+        expect(renderer.methods).to.not.contain('createCellEditor');
+        expect(renderer.methods).to.not.contain('createInputArea');
+
+        let widget = new MarkdownCellWidget({ renderer, rendermime });
+
+        expect(widget).to.be.a(MarkdownCellWidget);
+        expect(renderer.methods).to.contain('createCellEditor');
+        expect(renderer.methods).to.contain('createInputArea');
+      });
+
+      it('should set the default mimetype to text/x-ipythongfm', () => {
+        let widget = new MarkdownCellWidget({ rendermime });
+        expect(widget.mimetype).to.be('text/x-ipythongfm');
+      });
+
+    });
+
+    describe('#rendered', () => {
+
+      it('should default to true', () => {
+        let widget = new MarkdownCellWidget({ rendermime });
+        expect(widget.rendered).to.be(true);
+        requestAnimationFrame(() => {
+          expect(widget.node.classList.contains(RENDERED_CLASS)).to.be(true);
+        });
+      });
+
+      it('should un-render the widget', () => {
+        let widget = new MarkdownCellWidget({ rendermime });
+        widget.rendered = false;
+        requestAnimationFrame(() => {
+          expect(widget.node.classList.contains(RENDERED_CLASS)).to.be(false);
+        });
+      });
+
+    });
+
+    describe('#dispose()', () => {
+
+      it('should dispose of the resources held by the widget', () => {
+        let widget = new MarkdownCellWidget({ rendermime });
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
+      });
+
+      it('should be safe to call multiple times', () => {
+        let widget = new MarkdownCellWidget({ rendermime });
+        widget.dispose();
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#onUpdateRequest()', () => {
+
+      it('should update the widget', () => {
+        let widget = new LogMarkdownCell({ rendermime });
+        expect(widget.methods).to.not.contain('onUpdateRequest');
+        sendMessage(widget, Widget.MsgUpdateRequest);
+        expect(widget.methods).to.contain('onUpdateRequest');
+      });
+
+    });
+
+  });
+
+  describe('RawCellWidget', () => {
+
+    describe('#constructor()', () => {
+
+      it('should create a raw cell widget', () => {
+        let widget = new RawCellWidget();
+        expect(widget).to.be.a(RawCellWidget);
       });
 
     });
