@@ -1,10 +1,18 @@
 # Notebook
 
-[JupyterLab Walkthrough June 16, 2016 YouTube video link](https://youtu.be/4Qm6oD_Rlw8?t=55m19s)
+## Background
+
+[JupyterLab Walkthrough June 16, 2016 YouTube video](https://youtu.be/4Qm6oD_Rlw8?t=55m19s)
+
+The most complicated plugin included in the JupyterLab application is the
+Notebook plugin. The Notebook plugin provides a model and widgets for
+dealing with notebook files.
 
 The [NotebookWidgetFactory](http://jupyter.org/jupyterlab/classes/_notebook_notebook_widgetfactory_.notebookwidgetfactory.html) constructs a new [NotebookPanel](http://jupyter.org/jupyterlab/classes/_notebook_notebook_panel_.notebookpanel.html) from a model and populates the toolbar with default widgets.
 
-## Model
+## Structure of the Notebook plugin
+
+### Model
 
 The [NotebookModel](http://jupyter.org/jupyterlab/classes/_notebook_notebook_model_.notebookmodel.html) contains an observable list of cells (which implements undo functionality). A [cell model](http://jupyter.org/jupyterlab/modules/_notebook_cells_model_.html) can be a code cell, a markdown cell, or a raw cell. A code cell contains a list of output models. The list of cells and the list of outputs can be observed for changes.
 
@@ -12,7 +20,7 @@ The notebook model cell list supports undo/redo on cell list operations (such as
 
 The notebook model and notebook cells support getting and setting metadata through cursors. One can request a cursor to write to a specific metadata key from a notebook model or a cell model.
 
-## Notebook widget
+### Notebook widget
 
 The widget embedded into the DockPanel is the NotebookPanel. The NotebookPanel contains a [NotebookToolbar](http://jupyter.org/jupyterlab/classes/_notebook_notebook_toolbar_.notebooktoolbar.html) and a [Notebook widget](http://jupyter.org/jupyterlab/classes/_notebook_notebook_widget_.notebook.html) and adds completion logic. The NotebookToolbar maintains a list of widgets to add to the toolbar. The Notebook widget contains the rendering of the notebook and handles most of the interaction logic with the notebook itself (such as keeping track of selected and active cells and the current edit/command mode).
 
@@ -22,7 +30,7 @@ A Notebook widget contains a list of [cell widgets](http://jupyter.org/jupyterla
 
 A Rendermime plugin provides a pluggable system for rendering output messages. Default renderers are provided for markdown, html, images, text, etc. Extensions can register renderers to be used across the entire application by registering a handler and mimetype in the rendermime registry. When a notebook is created, it copies the global Rendermime singleton so that notebook-specific renderers can be added. The ipywidgets widget manager is an example of an extension that adds a notebook-specific renderer, since rendering a widget depends on notebook-specific widget state.
 
-## Notebook extensions
+## How to extend the Notebook plugin
 
 We'll walk through two notebook extensions.
 
