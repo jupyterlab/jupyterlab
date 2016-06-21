@@ -10,6 +10,10 @@ import {
 } from 'phosphor-dragdrop';
 
 import {
+  showDialog
+} from '../../dialog';
+
+import {
   ICellModel, CodeCellModel,
   CodeCellWidget, BaseCellWidget, MarkdownCellWidget
 } from '../cells';
@@ -581,6 +585,27 @@ namespace NotebookActions {
         cell.executionCount = null;
       }
     }
+  }
+
+  /**
+   * Restart a kernel.
+   */
+  export
+  function restart(kernel: IKernel, host?: HTMLElement): Promise<boolean> {
+    if (!kernel) {
+      return Promise.resolve(false);
+    }
+    return showDialog({
+      title: 'Restart Kernel?',
+      body: 'Do you want to restart the current kernel? All variables will be lost.',
+      host
+    }).then(result => {
+      if (result.text === 'OK') {
+        return kernel.restart().then(() => { return true; });
+      } else {
+        return false;
+      }
+    });
   }
 }
 

@@ -201,7 +201,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_RESTART,
       onClick: () => {
-        panel.restart();
+        NotebookActions.restart(panel.kernel, panel.node);
       },
       tooltip: 'Restart the kernel'
     });
