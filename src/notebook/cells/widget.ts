@@ -205,6 +205,9 @@ class BaseCellWidget extends Widget {
     return this._trusted;
   }
   set trusted(value: boolean) {
+    if (!this._model) {
+      return;
+    }
     this._trustedCursor.setValue(value);
     this._trusted = value;
   }
@@ -261,6 +264,9 @@ class BaseCellWidget extends Widget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(message: Message): void {
+    if (!this._model) {
+      return;
+    }
     // Handle read only state.
     let option = this._readOnly ? 'nocursor' : false;
     this.editor.editor.setOption('readOnly', option);
