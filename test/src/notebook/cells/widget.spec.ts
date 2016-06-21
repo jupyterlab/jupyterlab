@@ -22,8 +22,12 @@ import {
 } from 'phosphor-widget';
 
 import {
+  RenderMime
+} from '../../../../lib/rendermime';
+
+import {
   BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
-  CodeCellWidget
+  CodeCellWidget, CodeCellModel
 } from '../../../../lib/notebook/cells';
 
 import {
@@ -41,9 +45,6 @@ import {
 
 
 const INPUT_CLASS = 'jp-InputArea';
-
-
-const defer = requestAnimationFrame;
 
 
 const rendermime = defaultRenderMime();
@@ -79,13 +80,30 @@ class LogCell extends BaseCellWidget {
     super.onModelChanged(oldValue, newValue);
     this.methods.push('onModelChanged');
   }
+
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    super.onModelStateChanged(model, args);
+    this.methods.push('onModelStateChanged');
+  }
 }
 
 
-class TestRenderer extends CodeCellWidget.Renderer {
-  constructor(callback: () => void) {
-    super();
-    callback();
+class LogRenderer extends CodeCellWidget.Renderer {
+  methods: string[] = [];
+
+  createCellEditor(model: ICellModel): CellEditorWidget {
+    this.methods.push('createCellEditor');
+    return super.createCellEditor(model);
+  }
+
+  createInputArea(editor: CellEditorWidget): InputAreaWidget {
+    this.methods.push('createInputArea');
+    return super.createInputArea(editor);
+  }
+
+  createOutputArea(rendermime: RenderMime<Widget>): OutputAreaWidget {
+    this.methods.push('createOutputArea');
+    return super.createOutputArea(rendermime);
   }
 }
 
@@ -101,14 +119,17 @@ describe('notebook/cells', () => {
         expect(widget).to.be.a(BaseCellWidget);
       });
 
-      it('should accept a different renderer', () => {
-        let called = false;
-        expect(called).to.be(false);
-        let renderer = new TestRenderer(() => { called = true; });
-        expect(called).to.be(true);
+      it('should accept a custom renderer', () => {
+        let renderer = new LogRenderer();
+
+        expect(renderer.methods).to.not.contain('createCellEditor');
+        expect(renderer.methods).to.not.contain('createInputArea');
+
         let widget = new BaseCellWidget({ renderer });
+
         expect(widget).to.be.a(BaseCellWidget);
-        expect(widget.editor).to.be.a(CellEditorWidget);
+        expect(renderer.methods).to.contain('createCellEditor');
+        expect(renderer.methods).to.contain('createInputArea');
       });
 
     });
@@ -312,7 +333,7 @@ describe('notebook/cells', () => {
         widget.model = new CellModel();
         expect(widget.methods).to.not.contain(method);
         widget.model.source = 'foo';
-        defer(() => { expect(widget.methods).to.contain(method); });
+        expect(widget.methods).to.contain(method);
       });
 
     });
@@ -398,6 +419,22 @@ describe('notebook/cells', () => {
       it('should create a code cell widget', () => {
         let widget = new CodeCellWidget({ rendermime });
         expect(widget).to.be.a(CodeCellWidget);
+      });
+
+      it('should accept a custom renderer', () => {
+        let renderer = new LogRenderer();
+
+        expect(renderer.methods).to.not.contain('createCellEditor');
+        expect(renderer.methods).to.not.contain('createInputArea');
+        expect(renderer.methods).to.not.contain('createOutputArea');
+
+        let widget = new CodeCellWidget({ renderer, rendermime });
+        widget.model = new CodeCellModel();
+
+        expect(widget).to.be.a(CodeCellWidget);
+        expect(renderer.methods).to.contain('createCellEditor');
+        expect(renderer.methods).to.contain('createInputArea');
+        expect(renderer.methods).to.contain('createOutputArea');
       });
 
     });
