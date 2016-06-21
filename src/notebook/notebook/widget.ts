@@ -130,6 +130,13 @@ class StaticNotebook extends Widget {
   }
 
   /**
+   * A signal emitted when the widget has changed.
+   */
+  get changed(): ISignal<StaticNotebook, void> {
+    return Private.changedSignal.bind(this);
+  }
+
+  /**
    * The model for the widget.
    */
   get model(): INotebookModel {
@@ -146,6 +153,7 @@ class StaticNotebook extends Widget {
     this._onModelChanged(oldValue, newValue);
     this.onModelChanged(oldValue, newValue);
     this.modelChanged.emit(void 0);
+    this.changed.emit(void 0);
   }
 
   /**
@@ -228,6 +236,7 @@ class StaticNotebook extends Widget {
     case 'language_info':
       this._mimetype = this._renderer.getCodeMimetype(model);
       this._updateChildren();
+      this.changed.emit(void 0);
       break;
     default:
       break;
@@ -347,6 +356,7 @@ class StaticNotebook extends Widget {
     default:
       return;
     }
+    this.changed.emit(void 0);
   }
 
   private _mimetype = 'text/plain';
@@ -816,6 +826,12 @@ namespace Private {
    */
   export
   const stateChangedSignal = new Signal<Notebook, IChangedArgs<any>>();
+
+  /**
+   * A signal emitted when the widget has changed.
+   */
+  export
+  const changedSignal = new Signal<StaticNotebook, void>();
 
   /**
    * Scroll an element into view if needed.
