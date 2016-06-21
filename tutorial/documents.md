@@ -97,7 +97,7 @@ Manager.
 The top level widget created by the Document Manager that wraps the widget
 returned by the widget factory.
 
-Document wrappers are used because they can be created synchronously; while,
+Document wrappers are used because they are created synchronously; while,
 the widgets created using the widget factory are created asynchronously after
 potentially loading data from disk. Some interfaces (like drag and drop)
 require a widget to be returned synchronously.
