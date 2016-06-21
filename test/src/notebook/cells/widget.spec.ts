@@ -35,7 +35,18 @@ import {
 } from '../../../../lib/notebook/cells/editor';
 
 
+import {
+  defaultRenderMime
+} from '../../rendermime/rendermime.spec';
+
+
 const INPUT_CLASS = 'jp-InputArea';
+
+
+const defer = requestAnimationFrame;
+
+
+const rendermime = defaultRenderMime();
 
 
 class LogCell extends BaseCellWidget {
@@ -63,6 +74,19 @@ class LogCell extends BaseCellWidget {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
   }
+
+  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
+    super.onModelChanged(oldValue, newValue);
+    this.methods.push('onModelChanged');
+  }
+}
+
+
+class TestRenderer extends CodeCellWidget.Renderer {
+  constructor(callback: () => void) {
+    super();
+    callback();
+  }
 }
 
 
@@ -77,6 +101,16 @@ describe('notebook/cells', () => {
         expect(widget).to.be.a(BaseCellWidget);
       });
 
+      it('should accept a different renderer', () => {
+        let called = false;
+        expect(called).to.be(false);
+        let renderer = new TestRenderer(() => { called = true; });
+        expect(called).to.be(true);
+        let widget = new BaseCellWidget({ renderer });
+        expect(widget).to.be.a(BaseCellWidget);
+        expect(widget.editor).to.be.a(CellEditorWidget);
+      });
+
     });
 
     describe('#model', () => {
@@ -89,6 +123,19 @@ describe('notebook/cells', () => {
         expect(widget.model).to.be(model);
         widget.model = new CellModel();
         expect(widget.model).not.to.be(model);
+      });
+
+    });
+
+    describe('#modelChanged', () => {
+
+      it('should emit a signal when the model changes', () => {
+        let widget = new BaseCellWidget();
+        let called = false;
+        widget.modelChanged.connect(() => { called = true; });
+        expect(called).to.be(false);
+        widget.model = new CellModel();
+        expect(called).to.be(true);
       });
 
     });
@@ -257,18 +304,87 @@ describe('notebook/cells', () => {
 
     });
 
+    describe('#onModelStateChanged()', () => {
+
+      it('should fire when model state changes', () => {
+        let method = 'onModelStateChanged';
+        let widget = new LogCell();
+        widget.model = new CellModel();
+        expect(widget.methods).to.not.contain(method);
+        widget.model.source = 'foo';
+        defer(() => { expect(widget.methods).to.contain(method); });
+      });
+
+    });
+
     describe('#onMetadataChanged()', () => {
 
       it('should fire when model metadata changes', () => {
+        let method = 'onMetadataChanged';
         let widget = new LogCell();
         widget.model = new CellModel();
-        expect(widget.methods).to.not.contain('onMetadataChanged');
+        expect(widget.methods).to.not.contain(method);
         widget.model.metadataChanged.emit({
           name: 'foo',
           oldValue: 'bar',
           newValue: 'baz'
         });
-        expect(widget.methods).to.contain('onMetadataChanged');
+        expect(widget.methods).to.contain(method);
+      });
+
+    });
+
+    describe('#onModelChanged()', () => {
+
+      it('should fire when the model changes', () => {
+        let method = 'onModelChanged';
+        let widget = new LogCell();
+        expect(widget.methods).to.not.contain(method);
+        widget.model = new CellModel();
+        expect(widget.methods).to.contain(method);
+      });
+
+    });
+
+    describe('.Renderer', () => {
+
+      describe('#constructor()', () => {
+
+        it('should create a renderer', () => {
+          let renderer = new BaseCellWidget.Renderer();
+          expect(renderer).to.be.a(BaseCellWidget.Renderer);
+        });
+
+      });
+
+      describe('#createCellEditor()', () => {
+
+        it('should create a cell editor widget', () => {
+          let renderer = new BaseCellWidget.Renderer();
+          let editor = renderer.createCellEditor(new CellModel());
+          expect(editor).to.be.a(CellEditorWidget);
+        });
+
+      });
+
+      describe('#createInputArea()', () => {
+
+        it('should create an input area widget', () => {
+          let renderer = new BaseCellWidget.Renderer();
+          let editor = renderer.createCellEditor(new CellModel());
+          let input = renderer.createInputArea(editor);
+          expect(input).to.be.an(InputAreaWidget);
+        });
+
+      });
+
+      describe('#defaultRenderer', () => {
+
+        it('should be a renderer', () => {
+          let defaultRenderer = BaseCellWidget.defaultRenderer;
+          expect(defaultRenderer).to.be.a(BaseCellWidget.Renderer);
+        });
+
       });
 
     });
@@ -276,6 +392,47 @@ describe('notebook/cells', () => {
   });
 
   describe('CodeCellWidget', () => {
+
+    describe('#constructor()', () => {
+
+      it('should create a code cell widget', () => {
+        let widget = new CodeCellWidget({ rendermime });
+        expect(widget).to.be.a(CodeCellWidget);
+      });
+
+    });
+
+    describe('.Renderer', () => {
+
+      describe('#constructor()', () => {
+
+        it('should create a renderer', () => {
+          let renderer = new CodeCellWidget.Renderer();
+          expect(renderer).to.be.a(CodeCellWidget.Renderer);
+        });
+
+      });
+
+      describe('#createOutputArea()', () => {
+
+        it('should create an output area widget', () => {
+          let renderer = new CodeCellWidget.Renderer();
+          let output = renderer.createOutputArea(rendermime);
+          expect(output).to.be.an(OutputAreaWidget);
+        });
+
+      });
+
+      describe('#defaultRenderer', () => {
+
+        it('should be a renderer', () => {
+          let defaultRenderer = CodeCellWidget.defaultRenderer;
+          expect(defaultRenderer).to.be.a(CodeCellWidget.Renderer);
+        });
+
+      });
+
+    });
 
   });
 
