@@ -458,21 +458,10 @@ describe('notebook/cells', () => {
 
     describe('#execute()', () => {
 
-      it('should change the execute count of the model', (done) => {
+      it('should return a promise', () => {
         let widget = new CodeCellWidget({ rendermime });
-
         widget.model = new CodeCellModel();
-        widget.model.source = '1 + 1';
-        expect((widget.model as ICodeCellModel).executionCount).to.be(null);
-        widget.execute(new MockKernel()).then(() => {
-          let model = widget.model as ICodeCellModel;
-          expect(model.executionCount).to.not.be(null);
-          done();
-        }).catch((reason: any) => {
-          console.log('oops:', reason);
-          done();
-        });
-
+        expect(widget.execute(new MockKernel())).to.be.a(Promise);
       });
 
     });
