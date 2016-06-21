@@ -27,14 +27,20 @@ can be:
 A code cell contains a list of **output models**. The list of cells and the
 list of outputs can be observed for changes.
 
+#### Cell operations
+
 The NotebookModel cell list supports single-step operations such as moving, adding, or
 deleting cells. Compound cell list operations, such as undo/redo, are also
 supported by the NotebookModel. Right now, undo/redo is only supported on cells
-and is not supported on notebook attributes, such as notebook metadata. Curerntly,
-undo/redo for individual cell input content is supported by the *CodeMirror editor undo*.
-(Note: *CodeMirror editor undo*which does not cover cell metadata changes.)
+and is not supported on notebook attributes, such as notebook metadata. Currently,
+undo/redo for individual cell input content is supported by the CodeMirror editor's undo
+feature. (Note: CodeMirror editor's undo does not cover cell metadata changes.)
 
-The notebook model and notebook cells support getting and setting metadata through cursors. One can request a cursor to write to a specific metadata key from a notebook model or a cell model.
+#### Cursors and metadata
+
+The notebook model and the cell model (i.e. notebook cells) support getting
+and setting metadata through cursors. You may request a cursor to write to a
+specific metadata key from a notebook model or a cell model.
 
 ### Notebook widget
 
