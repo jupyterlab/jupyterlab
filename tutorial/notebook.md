@@ -199,6 +199,19 @@ will be referred to as *ipywidgets*. There is no intrinsic relation between
 
 The *ipywidgets* plugin registers a factory for a notebook **widget** extension
 using the [Document Registry](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#registermodelfactory).
-The `createNew()` function is called with a NotebookPanel and [DocumentContext](http://jupyter.org/jupyterlab/interfaces/_docregistry_interfaces_.idocumentcontext.html). The plugin then creates a ipywidget manager (which uses the context to interact the kernel and kernel's comm manager). The plugin then registers an ipywidget renderer with the notebook instance's rendermime (which is specific to that particular notebook).
+The `createNew()` function is called with a NotebookPanel and [DocumentContext](http://jupyter.org/jupyterlab/interfaces/_docregistry_interfaces_.idocumentcontext.html).
+The plugin then creates a ipywidget manager (which uses the context to
+interact the kernel and kernel's comm manager). The plugin then registers an
+ipywidget renderer with the notebook instance's rendermime (which is specific
+to that particular notebook).
 
-When an ipywidget model is created in the kernel, a comm message is sent to the browser and handled by the ipywidget manager to create a browser-side ipywidget model. When the model is displayed in the kernel, a `display_data` output is sent to the browser with the ipywidget model id. The renderer registered in that notebook's rendermime is asked to render the output. The renderer asks the ipywidget manager instance to render the corresponding model, which returns a javascript promise. The renderer creates a container *phosphor* widget which it hands back synchronously to the OutputAreaWidget, and then fills the container with the rendered ipywidget when the promise resolves.
+When an ipywidget model is created in the kernel, a comm message is sent to
+the browser and handled by the ipywidget manager to create a browser-side
+ipywidget model. When the model is displayed in the kernel, a `display_data`
+output is sent to the browser with the ipywidget model id. The renderer
+registered in that notebook's rendermime is asked to render the output. The
+renderer asks the ipywidget manager instance to render the corresponding
+model, which returns a javascript promise. The renderer creates a container
+**phosphor widget** which it hands back synchronously to the
+OutputAreaWidget, and then fills the container with the rendered *ipywidget*
+when the promise resolves.
