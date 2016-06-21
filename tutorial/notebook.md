@@ -5,12 +5,14 @@
 [JupyterLab Walkthrough June 16, 2016 YouTube video](https://youtu.be/4Qm6oD_Rlw8?t=55m19s)
 
 The most complicated plugin included in the **JupyterLab application** is the
-**Notebook plugin**. The Notebook plugin provides a model and widgets for
-dealing with notebook files.
+**Notebook plugin**.
 
 The [NotebookWidgetFactory](http://jupyter.org/jupyterlab/classes/_notebook_notebook_widgetfactory_.notebookwidgetfactory.html) constructs a new [NotebookPanel](http://jupyter.org/jupyterlab/classes/_notebook_notebook_panel_.notebookpanel.html) from a model and populates the toolbar with default widgets.
 
 ## Structure of the Notebook plugin
+
+The Notebook plugin provides a model and widgets for dealing with notebook
+files.
 
 ### Model
 
@@ -76,7 +78,7 @@ corresponding to the cell models in its cell list.
 
     + which contains a [CellEditorWidget](http://jupyter.org/jupyterlab/classes/_notebook_cells_editor_.celleditorwidget.html),
 
-        - which contains a CodeMirror instance.
+        - which contains a JavaScript CodeMirror instance.
 
 A [CodeCellWidget](http://jupyter.org/jupyterlab/classes/_notebook_cells_widget_.codecellwidget.html)
 also contains an [OutputAreaWidget](http://jupyter.org/jupyterlab/classes/_notebook_output_area_widget_.outputareawidget.html).
@@ -86,11 +88,21 @@ list in the corresponding code cell model. An OutputAreaWidget uses a
 notebook-specific [RenderMime](http://jupyter.org/jupyterlab/classes/_rendermime_index_.rendermime.html)
 object to render `display_data` output messages.
 
-A Rendermime plugin provides a pluggable system for rendering output messages. Default renderers are provided for markdown, html, images, text, etc. Extensions can register renderers to be used across the entire application by registering a handler and mimetype in the rendermime registry. When a notebook is created, it copies the global Rendermime singleton so that notebook-specific renderers can be added. The ipywidgets widget manager is an example of an extension that adds a notebook-specific renderer, since rendering a widget depends on notebook-specific widget state.
+A **Rendermime plugin** provides a pluggable system for rendering output
+messages. Default renderers are provided for markdown, html, images, text, etc.
+Extensions can register renderers to be used across the entire application by
+registering a handler and mimetype in the rendermime registry. When a notebook
+is created, it copies the global Rendermime singleton so that notebook-specific
+renderers can be added. The ipywidgets widget manager is an example of an
+extension that adds a notebook-specific renderer, since rendering a widget
+depends on notebook-specific widget state.
 
 ## How to extend the Notebook plugin
 
-We'll walk through two notebook extensions.
+We'll walk through two notebook extensions:
+
+- adding a button to the toolbar
+- adding an ipywidgets extension
 
 ### Adding a button to the toolbar
 
