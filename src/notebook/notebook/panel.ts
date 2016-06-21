@@ -26,10 +26,6 @@ import {
 } from 'phosphor-widget';
 
 import {
-  showDialog
-} from '../../dialog';
-
-import {
   IDocumentContext
 } from '../../docregistry';
 
@@ -97,14 +93,14 @@ class NotebookPanel extends Widget {
     let rendermime = this._rendermime;
     this._content = this._renderer.createContent({ rendermime });
     this._content.stateChanged.connect(this.onContentStateChanged, this);
-    this._toolbar = this._renderer.createToolbar();
+    let toolbar = this._renderer.createToolbar();
 
     let container = new Panel();
     container.addClass(NB_CONTAINER);
     container.addChild(this._content);
 
     let layout = this.layout as PanelLayout;
-    layout.addChild(this._toolbar);
+    layout.addChild(toolbar);
     layout.addChild(container);
 
     // Instantiate tab completion widget.
@@ -130,9 +126,12 @@ class NotebookPanel extends Widget {
 
   /**
    * Get the toolbar used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   get toolbar(): NotebookToolbar {
-    return this._toolbar;
+    return (this.layout as PanelLayout).childAt(0) as NotebookToolbar;
   }
 
   /**
@@ -189,7 +188,7 @@ class NotebookPanel extends Widget {
    * This is a read-only property.
    */
   get model(): INotebookModel {
-    return this._content.model;
+    return this._content ? this._content.model : null;
   }
 
   /**
@@ -223,9 +222,8 @@ class NotebookPanel extends Widget {
       return;
     }
     this._context = null;
-    this._rendermime = null;
     this._content = null;
-    this._toolbar = null;
+    this._rendermime = null;
     this._clipboard = null;
     this._completion.dispose();
     this._completion = null;
@@ -390,10 +388,9 @@ class NotebookPanel extends Widget {
 
   private _rendermime: RenderMime<Widget> = null;
   private _context: IDocumentContext<INotebookModel> = null;
-  private _content: Notebook = null;
-  private _toolbar: NotebookToolbar = null;
   private _clipboard: IClipboard = null;
   private _completion: CompletionWidget = null;
+  private _content: Notebook = null;
   private _renderer: NotebookPanel.IRenderer = null;
 }
 
