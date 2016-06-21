@@ -65,12 +65,14 @@ The NotebookModel cell list provides ways to do fine-grained changes to the
 cell list.
 
 #### Higher level actions using NotebookActions
+
 Higher-level actions are contained in the
 [NotebookActions](http://jupyter.org/jupyterlab/modules/_notebook_notebook_actions_.notebookactions.html) namespace,
 which has functions, when given a notebook widget, to run a cell and select
 the next cell, merge or split cells at the cursor, delete selected cells, etc.
 
 #### Widget hierarchy
+
 A Notebook widget contains a list of [cell widgets](http://jupyter.org/jupyterlab/modules/_notebook_cells_widget_.html),
 corresponding to the cell models in its cell list.
 
@@ -87,6 +89,8 @@ An OutputAreaWidget is responsible for rendering the outputs in the
 list in the corresponding code cell model. An OutputAreaWidget uses a
 notebook-specific [RenderMime](http://jupyter.org/jupyterlab/classes/_rendermime_index_.rendermime.html)
 object to render `display_data` output messages.
+
+#### Rendering output messages
 
 A **Rendermime plugin** provides a pluggable system for rendering output
 messages. Default renderers are provided for markdown, html, images, text, etc.
