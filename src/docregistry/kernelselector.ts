@@ -10,7 +10,7 @@ import {
 } from '../dialog';
 
 import {
-  IDocumentContext
+  IDocumentContext, IDocumentModel
 } from './interfaces';
 
 
@@ -95,7 +95,7 @@ function selectKernel(options: IKernelSelection): Promise<IKernelId> {
  * Change the kernel on a context.
  */
 export
-function selectKernelForContext(context: IDocumentContext, host?: HTMLElement): Promise<void> {
+function selectKernelForContext(context: IDocumentContext<IDocumentModel>, host?: HTMLElement): Promise<void> {
   return context.listSessions().then(sessions => {
     let options = {
       name: context.path.split('/').pop(),

@@ -30,7 +30,7 @@ import {
 /**
  * An implementation of a document context.
  */
-class Context implements IDocumentContext {
+class Context implements IDocumentContext<IDocumentModel> {
   /**
    * Construct a new document context.
    */
@@ -42,21 +42,21 @@ class Context implements IDocumentContext {
   /**
    * A signal emitted when the kernel changes.
    */
-  get kernelChanged(): ISignal<IDocumentContext, IKernel> {
+  get kernelChanged(): ISignal<Context, IKernel> {
     return Private.kernelChangedSignal.bind(this);
   }
 
   /**
    * A signal emitted when the path changes.
    */
-  get pathChanged(): ISignal<IDocumentContext, string> {
+  get pathChanged(): ISignal<Context, string> {
     return Private.pathChangedSignal.bind(this);
   }
 
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  get dirtyCleared(): ISignal<IDocumentContext, void> {
+  get dirtyCleared(): ISignal<Context, void> {
     return Private.dirtyClearedSignal.bind(this);
   }
 
@@ -285,7 +285,7 @@ class ContextManager implements IDisposable {
   /**
    * Get a context by id.
    */
-  getContext(id: string): IDocumentContext {
+  getContext(id: string): IDocumentContext<IDocumentModel> {
     return this._contexts[id].context;
   }
 
@@ -531,7 +531,7 @@ namespace Private {
    */
   export
   interface IContextEx {
-    context: IDocumentContext;
+    context: IDocumentContext<IDocumentModel>;
     model: IDocumentModel;
     session: INotebookSession;
     opts: IContentsOpts;
@@ -544,17 +544,17 @@ namespace Private {
    * A signal emitted when the kernel changes.
    */
   export
-  const kernelChangedSignal = new Signal<IDocumentContext, IKernel>();
+  const kernelChangedSignal = new Signal<Context, IKernel>();
 
   /**
    * A signal emitted when the path changes.
    */
   export
-  const pathChangedSignal = new Signal<IDocumentContext, string>();
+  const pathChangedSignal = new Signal<Context, string>();
 
   /**
    * A signal emitted when the model is saved or reverted.
    */
   export
-  const dirtyClearedSignal = new Signal<IDocumentContext, void>();
+  const dirtyClearedSignal = new Signal<Context, void>();
 }

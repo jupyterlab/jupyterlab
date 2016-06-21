@@ -104,7 +104,7 @@ interface IDocumentModel extends IDisposable {
 /**
  * The document context object.
  */
-export interface IDocumentContext extends IDisposable {
+export interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
   /**
    * The unique id of the context.
    *
@@ -119,7 +119,7 @@ export interface IDocumentContext extends IDisposable {
    * #### Notes
    * This is a read-only property
    */
-  model: IDocumentModel;
+  model: T;
 
   /**
    * The current kernel associated with the document.
@@ -157,12 +157,12 @@ export interface IDocumentContext extends IDisposable {
   /**
    * A signal emitted when the kernel changes.
    */
-  kernelChanged: ISignal<IDocumentContext, IKernel>;
+  kernelChanged: ISignal<IDocumentContext<T>, IKernel>;
 
   /**
    * A signal emitted when the path changes.
    */
-  pathChanged: ISignal<IDocumentContext, string>;
+  pathChanged: ISignal<IDocumentContext<T>, string>;
 
   /**
    * Change the current kernel associated with the document.
@@ -254,11 +254,11 @@ interface IWidgetFactoryOptions {
  * The interface for a widget factory.
  */
 export
-interface IWidgetFactory<T extends Widget> extends IDisposable {
+interface IWidgetFactory<T extends Widget, U extends IDocumentModel> extends IDisposable {
   /**
    * Create a new widget.
    */
-  createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): T;
+  createNew(context: IDocumentContext<U>, kernel?: IKernelId): T;
 
   /**
    * Take an action on a widget before closing it.
@@ -266,7 +266,7 @@ interface IWidgetFactory<T extends Widget> extends IDisposable {
    * @returns A promise that resolves to true if the document should close
    *   and false otherwise.
    */
-  beforeClose(model: IDocumentModel, context: IDocumentContext, widget: Widget): Promise<boolean>;
+  beforeClose(widget: T, context: IDocumentContext<U>): Promise<boolean>;
 }
 
 
@@ -274,11 +274,11 @@ interface IWidgetFactory<T extends Widget> extends IDisposable {
  * An interface for a widget extension.
  */
 export
-interface IWidgetExtension<T extends Widget> {
+interface IWidgetExtension<T extends Widget, U extends IDocumentModel> {
   /**
    * Create a new extension for a given widget.
    */
-   createNew(widget: T, model: IDocumentModel, context: IDocumentContext): IDisposable;
+   createNew(widget: T, context: IDocumentContext<U>): IDisposable;
 }
 
 

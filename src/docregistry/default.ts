@@ -264,7 +264,7 @@ class Base64ModelFactory extends TextModelFactory {
  * The default implemetation of a widget factory.
  */
 export
-abstract class ABCWidgetFactory implements IWidgetFactory<Widget> {
+abstract class ABCWidgetFactory implements IWidgetFactory<Widget, IDocumentModel> {
   /**
    * Get whether the model factory has been disposed.
    */
@@ -282,7 +282,7 @@ abstract class ABCWidgetFactory implements IWidgetFactory<Widget> {
   /**
    * Create a new widget given a document model and a context.
    */
-  abstract createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): Widget;
+  abstract createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernelId): Widget;
 
   /**
    * Take an action on a widget before closing it.
@@ -290,7 +290,7 @@ abstract class ABCWidgetFactory implements IWidgetFactory<Widget> {
    * @returns A promise that resolves to true if the document should close
    *   and false otherwise.
    */
-  beforeClose(model: IDocumentModel, context: IDocumentContext, widget: Widget): Promise<boolean> {
+  beforeClose(widget: Widget, context: IDocumentContext<IDocumentModel>): Promise<boolean> {
     // There is nothing specific to do.
     return Promise.resolve(true);
   }

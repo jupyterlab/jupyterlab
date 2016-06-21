@@ -38,7 +38,7 @@ import {
  * A widget factory for notebook panels.
  */
 export
-class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
+class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel, INotebookModel> {
   /**
    * Construct a new notebook widget factory.
    *
@@ -76,8 +76,9 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
    * The factory will start the appropriate kernel and populate
    * the default toolbar items using `ToolbarItems.populateDefaults`.
    */
-  createNew(model: INotebookModel, context: IDocumentContext, kernel?: IKernelId): NotebookPanel {
+  createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernelId): NotebookPanel {
     let rendermime = this._rendermime.clone();
+    let model = context.model;
     if (kernel) {
       context.changeKernel(kernel);
     } else {
@@ -98,7 +99,7 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel> {
    *
    * ### The default implementation is a no-op.
    */
-  beforeClose(model: INotebookModel, context: IDocumentContext, widget: NotebookPanel): Promise<boolean> {
+  beforeClose(widget: NotebookPanel, context: IDocumentContext<INotebookModel>): Promise<boolean> {
     // No special action required.
     return Promise.resolve(true);
   }

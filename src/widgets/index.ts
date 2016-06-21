@@ -28,7 +28,7 @@ import {
 } from '../rendermime';
 
 import {
-  IDocumentContext
+  IDocumentContext, IDocumentModel
 } from '../docregistry';
 
 import 'jquery-ui/themes/smoothness/jquery-ui.min.css';
@@ -69,8 +69,8 @@ class BackboneViewWrapper extends Widget {
  */
 export
 class WidgetManager extends ManagerBase<Widget> implements IDisposable {
-  constructor(context: IDocumentContext) {
-    super()
+  constructor(context: IDocumentContext<IDocumentModel>) {
+    super();
     this._context = context;
 
     let newKernel = (kernel: IKernel) => {
@@ -79,12 +79,12 @@ class WidgetManager extends ManagerBase<Widget> implements IDisposable {
         }
         this._commRegistration = kernel.registerCommTarget(this.comm_target_name,
         (comm, msg) => {this.handle_comm_open(comm, msg)});
-    }
+    };
 
     context.kernelChanged.connect((sender, kernel) => {
       this.validateVersion();
       newKernel(kernel);
-    })
+    });
 
     if (context.kernel) {
       this.validateVersion();
@@ -150,7 +150,7 @@ class WidgetManager extends ManagerBase<Widget> implements IDisposable {
     this._context = null;
   }
 
-  _context: IDocumentContext;
+  _context: IDocumentContext<IDocumentModel>;
   _commRegistration: IDisposable;
 }
 

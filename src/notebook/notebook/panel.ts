@@ -130,6 +130,13 @@ class NotebookPanel extends Widget {
   }
 
   /**
+   * A signal emitted when the kernel used by the panel changes.
+   */
+  get kernelChanged(): ISignal<NotebookPanel, IKernel> {
+    return Private.kernelChangedSignal.bind(this);
+  }
+
+  /**
    * Get the toolbar used by the widget.
    */
   get toolbar(): NotebookToolbar {
@@ -144,6 +151,16 @@ class NotebookPanel extends Widget {
    */
   get content(): Notebook {
     return this._content;
+  }
+
+  /**
+   * Get the current kernel used by the panel.
+   *
+   * #### Notes
+   * This is a a read-only property.
+   */
+  get kernel(): IKernel {
+    return this._context ? this._context.kernel : null;
   }
 
   /**
@@ -174,11 +191,10 @@ class NotebookPanel extends Widget {
   }
 
   /**
-   * Get the model used by the widget.
+   * The model for the widget.
    *
    * #### Notes
-   * This is a read-only property.  Changing the model on the `content`
-   * directly would result in undefined behavior.
+   * This is a read-only property.
    */
   get model(): INotebookModel {
     return this._content.model;
@@ -191,10 +207,10 @@ class NotebookPanel extends Widget {
    * Changing the context also changes the model on the
    * `content`.
    */
-  get context(): IDocumentContext {
+  get context(): IDocumentContext<INotebookModel> {
     return this._context;
   }
-  set context(newValue: IDocumentContext) {
+  set context(newValue: IDocumentContext<INotebookModel>) {
     newValue = newValue || null;
     if (newValue === this._context) {
       return;
@@ -256,15 +272,16 @@ class NotebookPanel extends Widget {
    * #### Notes
    * The default implementation is a no-op.
    */
-  protected onContextChanged(oldValue: IDocumentContext, newValue: IDocumentContext): void { }
+  protected onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void { }
 
   /**
    * Handle a change in the kernel by updating the document metadata.
    */
-  protected onKernelChanged(context: IDocumentContext, kernel: IKernel): void {
+  protected onKernelChanged(context: IDocumentContext<INotebookModel>, kernel: IKernel): void {
     if (!this.model) {
       return;
     }
+    this.kernelChanged.emit(kernel);
     kernel.kernelInfo().then(info => {
       let infoCursor = this.model.getMetadata('language_info');
       infoCursor.setValue(info.language_info);
@@ -295,7 +312,7 @@ class NotebookPanel extends Widget {
   /**
    * Handle a change to the document path.
    */
-  protected onPathChanged(sender: IDocumentContext, path: string): void {
+  protected onPathChanged(sender: IDocumentContext<INotebookModel>, path: string): void {
     this.title.text = path.split('/').pop();
   }
 
@@ -401,7 +418,7 @@ class NotebookPanel extends Widget {
   /**
    * Handle a change in the context.
    */
-  private _onContextChanged(oldValue: IDocumentContext, newValue: IDocumentContext): void {
+  private _onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void {
     if (oldValue) {
       oldValue.kernelChanged.disconnect(this.onKernelChanged, this);
       oldValue.pathChanged.disconnect(this.onPathChanged, this);
@@ -425,7 +442,7 @@ class NotebookPanel extends Widget {
   }
 
   private _rendermime: RenderMime<Widget> = null;
-  private _context: IDocumentContext = null;
+  private _context: IDocumentContext<INotebookModel> = null;
   private _content: Notebook = null;
   private _toolbar: NotebookToolbar = null;
   private _clipboard: IClipboard = null;
@@ -528,4 +545,10 @@ namespace Private {
    */
   export
   const contextChangedSignal = new Signal<NotebookPanel, void>();
+
+  /**
+   * A signal emitted when the kernel used by the panel changes.
+   */
+  export
+  const kernelChangedSignal = new Signal<NotebookPanel, IKernel>();
 }

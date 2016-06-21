@@ -14,7 +14,8 @@ import {
 
 import {
   IModelFactory, IWidgetFactory, IWidgetFactoryOptions,
-  IFileType, IKernelPreference, IFileCreator, IWidgetExtension
+  IFileType, IKernelPreference, IFileCreator, IWidgetExtension,
+  IDocumentModel
 } from './interfaces';
 
 
@@ -74,7 +75,7 @@ class DocumentRegistry implements IDisposable {
    * If a factory is already registered as a default for a given extension or
    * as the global default, this factory will override the existing default.
    */
-  addWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions): IDisposable {
+  addWidgetFactory(factory: IWidgetFactory<Widget, IDocumentModel>, options: IWidgetFactoryOptions): IDisposable {
     let name = options.displayName;
     let exOpt = utils.copy(options) as Private.IWidgetFactoryEx;
     exOpt.factory = factory;
@@ -136,7 +137,7 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A disposable which will unregister the extension.
    */
-  addWidgetExtension(widgetName: string, extension: IWidgetExtension<Widget>): IDisposable {
+  addExtension(widgetName: string, extension: IWidgetExtension<Widget, IDocumentModel>): IDisposable {
     if (!(widgetName in this._extenders)) {
       this._extenders[widgetName] = [];
     }
@@ -319,7 +320,7 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A widget factory instance.
    */
-  getWidgetFactory(widgetName: string): IWidgetFactory<Widget> {
+  getWidgetFactory(widgetName: string): IWidgetFactory<Widget, IDocumentModel> {
     return this._getWidgetFactoryEx(widgetName).factory;
   }
 
@@ -330,7 +331,7 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A new array of widget extensions.
    */
-  getWidgetExtensions(widgetName: string): IWidgetExtension<Widget>[] {
+  getWidgetExtensions(widgetName: string): IWidgetExtension<Widget, IDocumentModel>[] {
     if (!(widgetName in this._extenders)) {
       return [];
     }
@@ -356,7 +357,7 @@ class DocumentRegistry implements IDisposable {
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _fileTypes: IFileType[] = [];
   private _creators: IFileCreator[] = [];
-  private _extenders: { [key: string] : IWidgetExtension<Widget>[] } = Object.create(null);
+  private _extenders: { [key: string] : IWidgetExtension<Widget, IDocumentModel>[] } = Object.create(null);
 }
 
 
@@ -369,6 +370,6 @@ namespace Private {
    */
   export
   interface IWidgetFactoryEx extends IWidgetFactoryOptions {
-    factory: IWidgetFactory<Widget>;
+    factory: IWidgetFactory<Widget, IDocumentModel>;
   }
 }

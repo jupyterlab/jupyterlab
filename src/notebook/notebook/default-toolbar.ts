@@ -6,16 +6,16 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IDocumentContext
-} from '../../docregistry';
-
-import {
   Widget
 } from 'phosphor-widget';
 
 import {
   NotebookPanel
 } from './panel';
+
+import {
+  Notebook
+} from './widget';
 
 import {
   ToolbarButton
@@ -171,7 +171,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_RUN,
       onClick: () => {
-        NotebookActions.runAndAdvance(panel.content, panel.context.kernel);
+        NotebookActions.runAndAdvance(panel.content, panel.kernel);
       },
       tooltip: 'Run the selected cell(s) and advance'
     });
@@ -185,7 +185,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_INTERRUPT,
       onClick: () => {
-        if (panel.context.kernel) {
+        if (panel.kernel) {
           panel.context.kernel.interrupt();
         }
       },
@@ -212,7 +212,7 @@ namespace ToolbarItems {
    */
   export
   function createCellTypeItem(panel: NotebookPanel): Widget {
-    return new CellTypeSwitcher(panel);
+    return new CellTypeSwitcher(panel.content);
   }
 
   /**
@@ -223,13 +223,13 @@ namespace ToolbarItems {
     let widget = new Widget();
     widget.addClass(TOOLBAR_KERNEL);
     widget.node.textContent = 'No Kernel!';
-    if (panel.context.kernel) {
-      panel.context.kernel.getKernelSpec().then(spec => {
+    if (panel.kernel) {
+      panel.kernel.getKernelSpec().then(spec => {
         widget.node.textContent = spec.display_name;
       });
     }
-    panel.context.kernelChanged.connect(() => {
-      panel.context.kernel.getKernelSpec().then(spec => {
+    panel.kernelChanged.connect(() => {
+      panel.kernel.getKernelSpec().then(spec => {
         widget.node.textContent = spec.display_name;
       });
     });
@@ -241,7 +241,7 @@ namespace ToolbarItems {
    */
   export
   function createKernelStatusItem(panel: NotebookPanel): Widget {
-    return new KernelIndicator(panel.context);
+    return new KernelIndicator(panel);
   }
 
   /**
@@ -289,7 +289,7 @@ class CellTypeSwitcher extends Widget {
   /**
    * Construct a new cell type switcher.
    */
-  constructor(panel: NotebookPanel) {
+  constructor(content: Notebook) {
     super();
     this.addClass(TOOLBAR_CELLTYPE);
 
@@ -297,39 +297,24 @@ class CellTypeSwitcher extends Widget {
     // Change current cell type on a change in the dropdown.
     select.addEventListener('change', event => {
       if (!this._changeGuard) {
-        NotebookActions.changeCellType(panel.content, select.value);
+        NotebookActions.changeCellType(content, select.value);
       }
     });
+
+    // Set the initial value.
+    let index = content.activeCellIndex;
+    if (content.model) {
+      select.value = content.model.cells.get(index).type;
+    }
+
     // Follow the type of the current cell.
-    panel.content.stateChanged.connect((sender, args) => {
-      if (!panel.model) {
+    content.stateChanged.connect(() => {
+      if (!content.model) {
         return;
       }
-      if (args.name === 'activeCellIndex') {
-        this._changeGuard = true;
-        select.value = panel.model.cells.get(args.newValue).type;
-        this._changeGuard = false;
-      }
-    });
-
-    panel.content.modelChanged.connect(() => {
-      this.followModel(panel);
-    });
-    if (panel.model) {
-      this.followModel(panel);
-    }
-  }
-
-  followModel(panel: NotebookPanel): void {
-    let select = this.node.firstChild as HTMLSelectElement;
-    // Set the initial value.
-    let index = panel.content.activeCellIndex;
-    select.value = panel.model.cells.get(index).type;
-    // Follow a change in the cells.
-    panel.content.model.cells.changed.connect((sender, args) => {
-      index = panel.content.activeCellIndex;
+      index = content.activeCellIndex;
       this._changeGuard = true;
-      select.value = panel.model.cells.get(index).type;
+      select.value = content.model.cells.get(index).type;
       this._changeGuard = false;
     });
   }
@@ -345,17 +330,17 @@ class KernelIndicator extends Widget {
   /**
    * Construct a new kernel status widget.
    */
-  constructor(context: IDocumentContext) {
+  constructor(panel: NotebookPanel) {
     super();
     this.addClass(TOOLBAR_INDICATOR);
-    if (context.kernel) {
-      this._handleStatus(context.kernel, context.kernel.status);
-      context.kernel.statusChanged.connect(this._handleStatus, this);
+    if (panel.kernel) {
+      this._handleStatus(panel.kernel, panel.kernel.status);
+      panel.kernel.statusChanged.connect(this._handleStatus, this);
     } else {
       this.addClass(TOOLBAR_BUSY);
       this.node.title = 'No Kernel!';
     }
-    context.kernelChanged.connect((c, kernel) => {
+    panel.kernelChanged.connect((c, kernel) => {
       this._handleStatus(kernel, kernel.status);
       kernel.statusChanged.connect(this._handleStatus, this);
     });

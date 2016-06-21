@@ -173,8 +173,8 @@ class TrackingNotebookWidgetFactory extends NotebookWidgetFactory {
   /**
    * Create a new widget.
    */
-  createNew(model: INotebookModel, context: IDocumentContext, kernel?: IKernelId): NotebookPanel {
-    let widget = super.createNew(model, context, kernel);
+  createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernelId): NotebookPanel {
+    let widget = super.createNew(context, kernel);
     Private.notebookTracker.activeNotebook = widget;
     return widget;
   }
