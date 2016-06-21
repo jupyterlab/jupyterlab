@@ -96,6 +96,7 @@ class NotebookPanel extends Widget {
     this.layout = new PanelLayout();
     let rendermime = this._rendermime;
     this._content = this._renderer.createContent({ rendermime });
+    this._content.stateChanged.connect(this.onContentStateChanged, this);
     this._toolbar = this._renderer.createToolbar();
 
     let container = new Panel();
@@ -111,15 +112,6 @@ class NotebookPanel extends Widget {
     this._completion.reference = this;
     this._completion.attach(document.body);
     this._completion.selected.connect(this.onCompletionSelected, this);
-
-    // Connect signals.
-    this._content.stateChanged.connect(this.onContentStateChanged, this);
-    let cell = this._content.childAt(this._content.activeCellIndex);
-    if (cell) {
-      let editor = cell.editor;
-      editor.textChanged.connect(this.onTextChanged, this);
-      editor.completionRequested.connect(this.onCompletionRequested, this);
-    }
   }
 
   /**
@@ -432,6 +424,13 @@ class NotebookPanel extends Widget {
       this.onKernelChanged(this._context, this._context.kernel);
     }
     this._content.model = newValue.model as INotebookModel;
+
+    let cell = this._content.childAt(this._content.activeCellIndex);
+    if (cell) {
+      let editor = cell.editor;
+      editor.textChanged.connect(this.onTextChanged, this);
+      editor.completionRequested.connect(this.onCompletionRequested, this);
+    }
 
     // Handle the document title.
     this.title.text = context.path.split('/').pop();

@@ -532,10 +532,13 @@ class Notebook extends StaticNotebook {
    * The index will be clamped to the bounds of the notebook cells.
    */
   get activeCellIndex(): number {
+    if (!this.model) {
+      return -1;
+    }
     return this.model.cells.length ? this._activeCellIndex : -1;
   }
   set activeCellIndex(newValue: number) {
-    if (!this.model.cells.length) {
+    if (!this.model || !this.model.cells.length) {
       return;
     }
     newValue = Math.max(newValue, 0);
@@ -730,7 +733,7 @@ class Notebook extends StaticNotebook {
    */
   private _evtClick(event: MouseEvent): void {
     let model = this.model;
-    if (model.readOnly) {
+    if (!model || model.readOnly) {
       return;
     }
     let i = this._findCell(event.target as HTMLElement);
@@ -745,7 +748,7 @@ class Notebook extends StaticNotebook {
    */
   private _evtDblClick(event: MouseEvent): void {
     let model = this.model;
-    if (model.readOnly) {
+    if (!model || model.readOnly) {
       return;
     }
     let i = this._findCell(event.target as HTMLElement);
