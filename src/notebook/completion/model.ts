@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IKernel
+} from 'jupyter-js-services';
+
+import {
   IDisposable
 } from 'phosphor-disposable';
 
@@ -124,6 +128,11 @@ interface ICompletionModel extends IDisposable {
   original: ICompletionRequest;
 
   /**
+   * Handle a completion request using a kernel.
+   */
+  makeKernelRequest(request: ICompletionRequest, kernel: IKernel): void;
+
+  /**
    * Create a resolved patch between the original state and a patch string.
    */
   createPatch(patch: string): ICompletionPatch;
@@ -234,6 +243,37 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
+   * Make a request using a kernel.
+   */
+  makeKernelRequest(request: ICompletionRequest, kernel: IKernel): void {
+    let contents = {
+      // Only send the current line of code for completion.
+      code: request.currentValue.split('\n')[request.line],
+      cursor_pos: request.ch
+    };
+    let pendingComplete = ++this._pendingComplete;
+    kernel.complete(contents).then(value => {
+      // If we have been disposed, bail.
+      if (this.isDisposed) {
+        return;
+      }
+      // If a newer completion request has created a pending request, bail.
+      if (pendingComplete !== this._pendingComplete) {
+        return;
+      }
+      // Completion request failures or negative results fail silently.
+      if (value.status !== 'ok') {
+        return;
+      }
+      // Update the state.
+      this.options = value.matches;
+      this.cursor = { start: value.cursor_start, end: value.cursor_end };
+    }).then(() => {
+      this.original = request;
+    });
+  }
+
+  /**
    * Create a resolved patch between the original state and a patch string.
    *
    * @param patch - The patch string to apply to the original value.
@@ -325,6 +365,7 @@ class CompletionModel implements ICompletionModel {
   private _current: ITextChange = null;
   private _query = '';
   private _cursor: { start: number, end: number } = null;
+  private _pendingComplete = 0;
 }
 
 
