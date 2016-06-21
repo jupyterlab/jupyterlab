@@ -130,10 +130,13 @@ class StaticNotebook extends Widget {
   }
 
   /**
-   * A signal emitted when the widget has changed.
+   * A signal emitted when the model content changes.
+   *
+   * #### Notes
+   * This is a convenience signal that follows the current model.
    */
-  get changed(): ISignal<StaticNotebook, void> {
-    return Private.changedSignal.bind(this);
+  get modelContentChanged(): ISignal<StaticNotebook, void> {
+    return Private.modelContentChanged.bind(this);
   }
 
   /**
@@ -153,7 +156,6 @@ class StaticNotebook extends Widget {
     this._onModelChanged(oldValue, newValue);
     this.onModelChanged(oldValue, newValue);
     this.modelChanged.emit(void 0);
-    this.changed.emit(void 0);
   }
 
   /**
@@ -229,14 +231,27 @@ class StaticNotebook extends Widget {
   }
 
   /**
+   * Handle changes to the notebook model content.
+   *
+   * #### Notes
+   * The default implementation emits the `modelContentChanged` signal.
+   */
+  protected onModelContentChanged(model: INotebookModel, args: void): void {
+    this.modelContentChanged.emit(void 0);
+  }
+
+  /**
    * Handle changes to the notebook model metadata.
+   *
+   * #### Notes
+   * The default implementation updates the mimetypes of the code cells
+   * when the `language_info` metadata changes.
    */
   protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'language_info':
       this._mimetype = this._renderer.getCodeMimetype(model);
       this._updateChildren();
-      this.changed.emit(void 0);
       break;
     default:
       break;
@@ -251,6 +266,7 @@ class StaticNotebook extends Widget {
     if (oldValue) {
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
       oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
+      oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       // TODO: reuse existing cell widgets if possible.
       for (let i = 0; i < layout.childCount(); i++) {
         this._removeChild(0);
@@ -266,6 +282,7 @@ class StaticNotebook extends Widget {
       this._insertChild(i, cells.get(i));
     }
     cells.changed.connect(this._onCellsChanged, this);
+    newValue.contentChanged.connect(this.onModelContentChanged, this);
     newValue.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
@@ -356,7 +373,6 @@ class StaticNotebook extends Widget {
     default:
       return;
     }
-    this.changed.emit(void 0);
   }
 
   private _mimetype = 'text/plain';
@@ -831,10 +847,10 @@ namespace Private {
   const stateChangedSignal = new Signal<Notebook, IChangedArgs<any>>();
 
   /**
-   * A signal emitted when the widget has changed.
+   * A signal emitted when the model content changes.
    */
   export
-  const changedSignal = new Signal<StaticNotebook, void>();
+  const modelContentChanged = new Signal<StaticNotebook, void>();
 
   /**
    * Scroll an element into view if needed.
