@@ -12,6 +12,7 @@ import './notebook/cells/model.spec';
 import './notebook/notebook/nbformat.spec';
 import './notebook/notebook/model.spec';
 import './notebook/notebook/modelfactory.spec';
+import './notebook/notebook/panel.spec';
 import './notebook/notebook/toolbar.spec';
 import './notebook/notebook/widget.spec';
 import './notebook/notebook/widgetfactory.spec';
