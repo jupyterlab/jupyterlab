@@ -162,6 +162,30 @@ describe('notebook/notebook/widget', () => {
 
     });
 
+    describe('#modelContentChanged', () => {
+
+      it('should be emitted when a cell is added', () => {
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime() });
+        widget.model = new NotebookModel();
+        let called = false;
+        widget.modelContentChanged.connect(() => { called = true; });
+        let cell = widget.model.factory.createCodeCell();
+        widget.model.cells.add(cell);
+        expect(called).to.be(true);
+      });
+
+      it('should be emitted when metadata is set', () => {
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime() });
+        widget.model = new NotebookModel();
+        let called = false;
+        widget.modelContentChanged.connect(() => { called = true; });
+        let cursor = widget.model.getMetadata('foo');
+        cursor.setValue(1);
+        expect(called).to.be(true);
+      });
+
+    });
+
     describe('#model', () => {
 
       it('should get the model for the widget', () => {
