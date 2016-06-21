@@ -124,9 +124,9 @@ class BaseCellWidget extends Widget {
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
 
-    let factory = options.renderer || BaseCellWidget.defaultRenderer;
-    this._editor = factory.createCellEditor(null);
-    this._input = factory.createInputArea(this._editor);
+    let renderer = options.renderer || BaseCellWidget.defaultRenderer;
+    this._editor = renderer.createCellEditor(null);
+    this._input = renderer.createInputArea(this._editor);
 
     (this.layout as PanelLayout).addChild(this._input);
   }
@@ -412,7 +412,7 @@ class CodeCellWidget extends BaseCellWidget {
     super(options);
     this.addClass(CODE_CELL_CLASS);
     this._rendermime = options.rendermime;
-    this._factory = options.renderer || CodeCellWidget.defaultRenderer;
+    this._renderer = options.renderer || CodeCellWidget.defaultRenderer;
   }
 
   /**
@@ -466,10 +466,10 @@ class CodeCellWidget extends BaseCellWidget {
    */
   protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
     let model = newValue as ICodeCellModel;
-    let factory = this._factory;
+    let renderer = this._renderer;
 
     if (!this._output) {
-      this._output = factory.createOutputArea(this._rendermime);
+      this._output = renderer.createOutputArea(this._rendermime);
       (this.layout as PanelLayout).addChild(this._output);
     }
 
@@ -509,7 +509,7 @@ class CodeCellWidget extends BaseCellWidget {
     super.onMetadataChanged(model, args);
   }
 
-  private _factory: CodeCellWidget.IRenderer;
+  private _renderer: CodeCellWidget.IRenderer;
   private _rendermime: RenderMime<Widget> = null;
   private _output: OutputAreaWidget = null;
   private _collapsedCursor: IMetadataCursor = null;
