@@ -27,7 +27,7 @@ import {
 
 import {
   BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
-  CodeCellWidget, CodeCellModel
+  CodeCellWidget, CodeCellModel, ICodeCellModel
 } from '../../../../lib/notebook/cells';
 
 import {
@@ -435,6 +435,44 @@ describe('notebook/cells', () => {
         expect(renderer.methods).to.contain('createCellEditor');
         expect(renderer.methods).to.contain('createInputArea');
         expect(renderer.methods).to.contain('createOutputArea');
+      });
+
+    });
+
+    describe('#dispose()', () => {
+
+      it('should dispose of the resources held by the widget', () => {
+        let widget = new CodeCellWidget({ rendermime });
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
+      });
+
+      it('should be safe to call multiple times', () => {
+        let widget = new CodeCellWidget({ rendermime });
+        widget.dispose();
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#execute()', () => {
+
+      it('should change the execute count of the model', (done) => {
+        let widget = new CodeCellWidget({ rendermime });
+
+        widget.model = new CodeCellModel();
+        widget.model.source = '1 + 1';
+        expect((widget.model as ICodeCellModel).executionCount).to.be(null);
+        widget.execute(new MockKernel()).then(() => {
+          let model = widget.model as ICodeCellModel;
+          expect(model.executionCount).to.not.be(null);
+          done();
+        }).catch((reason: any) => {
+          console.log('oops:', reason);
+          done();
+        });
+
       });
 
     });
