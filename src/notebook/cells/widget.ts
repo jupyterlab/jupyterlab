@@ -263,7 +263,7 @@ class BaseCellWidget extends Widget {
   /**
    * Handle `update_request` messages.
    */
-  protected onUpdateRequest(message: Message): void {
+  protected onUpdateRequest(msg: Message): void {
     if (!this._model) {
       return;
     }
@@ -450,7 +450,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle `update_request` messages.
    */
-  protected onUpdateRequest(message: Message): void {
+  protected onUpdateRequest(msg: Message): void {
     if (this._collapsedCursor) {
       this.toggleClass(COLLAPSED_CLASS, this._collapsedCursor.getValue());
     }
@@ -458,7 +458,7 @@ class CodeCellWidget extends BaseCellWidget {
       // TODO: handle scrolled state.
       this._output.trusted = this.trusted;
     }
-    super.onUpdateRequest(message);
+    super.onUpdateRequest(msg);
   }
 
   /**
@@ -627,10 +627,10 @@ class MarkdownCellWidget extends BaseCellWidget {
   /**
    * Handle `update_request` messages.
    */
-  protected onUpdateRequest(message: Message): void {
+  protected onUpdateRequest(msg: Message): void {
     let model = this.model;
     if (this.rendered) {
-      let text = model.source || DEFAULT_MARKDOWN_TEXT;
+      let text = model && model.source || DEFAULT_MARKDOWN_TEXT;
       // Do not re-render if the text has not changed.
       if (text !== this._prev) {
         let bundle: MimeMap<string> = { 'text/markdown': text };
@@ -648,7 +648,7 @@ class MarkdownCellWidget extends BaseCellWidget {
       this.toggleInput(true);
       this.removeClass(RENDERED_CLASS);
     }
-    super.onUpdateRequest(message);
+    super.onUpdateRequest(msg);
   }
 
   private _rendermime: RenderMime<Widget> = null;
