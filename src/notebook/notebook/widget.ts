@@ -890,9 +890,14 @@ class Notebook extends StaticNotebook {
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: FocusEvent): void {
-    if (event.target === this.node) {
-      this.mode = 'command';
-    } else {
+    this.mode = 'command';
+    let i = this._findCell(event.target as HTMLElement);
+    if (i === -1) {
+      return;
+    }
+    this.activeCellIndex = i;
+    let widget = this.childAt(i);
+    if (widget.editor.node.contains(event.target as HTMLElement)) {
       this.mode = 'edit';
     }
   }
