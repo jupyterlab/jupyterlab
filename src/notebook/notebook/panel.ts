@@ -233,30 +233,6 @@ class NotebookPanel extends Widget {
     super.dispose();
   }
 
-  /**
-   * Restart the kernel on the panel.
-   */
-  restart(): Promise<boolean> {
-    if (!this.context) {
-      return;
-    }
-    let kernel = this.context.kernel;
-    if (!kernel) {
-      return Promise.resolve(false);
-    }
-    return showDialog({
-      title: 'Restart Kernel?',
-      body: 'Do you want to restart the current kernel? All variables will be lost.',
-      host: this.node
-    }).then(result => {
-      if (result.text === 'OK') {
-        return kernel.restart().then(() => { return true; });
-      } else {
-        return false;
-      }
-    });
-  }
-
 
   /**
    * Handle a change to the document context.
@@ -357,39 +333,10 @@ class NotebookPanel extends Widget {
    * Handle a completion requested signal from an editor.
    */
   protected onCompletionRequested(editor: CellEditorWidget, change: ICompletionRequest): void {
-    if (!this.model || !this.context) {
+    if (!this.kernel) {
       return;
     }
-    let kernel = this.context.kernel;
-    if (!kernel) {
-      return;
-    }
-    let contents = {
-      // Only send the current line of code for completion.
-      code: change.currentValue.split('\n')[change.line],
-      cursor_pos: change.ch
-    };
-    let pendingComplete = ++this._pendingComplete;
-    let model = this._completion.model;
-    kernel.complete(contents).then(value => {
-      // If model has been disposed, bail.
-      if (model.isDisposed) {
-        return;
-      }
-      // If a newer completion requesy has created a pending request, bail.
-      if (pendingComplete !== this._pendingComplete) {
-        return;
-      }
-      // Completion request failures or negative results fail silently.
-      if (value.status !== 'ok') {
-        return;
-      }
-      // Update the model.
-      model.options = value.matches;
-      model.cursor = { start: value.cursor_start, end: value.cursor_end };
-    }).then(() => {
-      model.original = change;
-    });
+    this._completion.model.makeKernelRequest(change, this.kernel);
   }
 
   /**
@@ -420,7 +367,8 @@ class NotebookPanel extends Widget {
     }
     let context = newValue;
     context.kernelChanged.connect(this.onKernelChanged, this);
-    if (context.kernel) {
+    let oldKernel = oldValue ? oldValue.kernel : null;
+    if (context.kernel !== oldKernel) {
       this.onKernelChanged(this._context, this._context.kernel);
     }
     this._content.model = newValue.model as INotebookModel;
@@ -446,7 +394,6 @@ class NotebookPanel extends Widget {
   private _toolbar: NotebookToolbar = null;
   private _clipboard: IClipboard = null;
   private _completion: CompletionWidget = null;
-  private _pendingComplete = 0;
   private _renderer: NotebookPanel.IRenderer = null;
 }
 
