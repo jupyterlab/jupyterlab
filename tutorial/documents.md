@@ -3,7 +3,7 @@
 JupyterLab can be extended in two ways via:
 
 - application plugins (top level): Application plugins extend the
-  functionality of JupyterLab itself, and and we cover them in the
+  functionality of JupyterLab itself, and we cover them in the
   "Extensions" tutorial focuses.
 - **document widget extensions (lower level):** Document widget extensions extend
   the functionality of document widgets added to the application, and we cover
@@ -97,7 +97,7 @@ Manager.
 The top level widget created by the Document Manager that wraps the widget
 returned by the widget factory.
 
-Document wrappers are used because they can be created synchronously; while,
+Document wrappers are used because they are created synchronously; while,
 the widgets created using the widget factory are created asynchronously after
 potentially loading data from disk. Some interfaces (like drag and drop)
 require a widget to be returned synchronously.
