@@ -37,6 +37,11 @@ const ACTIVE_CLASS = 'jp-mod-active';
  */
 const MAX_HEIGHT = 250;
 
+/**
+ * A flag to indicate that event handlers are caught in the capture phase.
+ */
+const USE_CAPTURE = true;
+
 
 /**
  * A widget that enables text completion.
@@ -159,18 +164,18 @@ class CompletionWidget extends Widget {
    * in the capture phase.
    */
   protected onAfterAttach(msg: Message): void {
-    window.addEventListener('keydown', this, true);
-    window.addEventListener('mousedown', this, true);
-    window.addEventListener('scroll', this, true);
+    window.addEventListener('keydown', this, USE_CAPTURE);
+    window.addEventListener('mousedown', this, USE_CAPTURE);
+    window.addEventListener('scroll', this, USE_CAPTURE);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    window.removeEventListener('keydown', this);
-    window.removeEventListener('mousedown', this);
-    window.removeEventListener('scroll', this);
+    window.removeEventListener('keydown', this, USE_CAPTURE);
+    window.removeEventListener('mousedown', this, USE_CAPTURE);
+    window.removeEventListener('scroll', this, USE_CAPTURE);
   }
 
   /**
