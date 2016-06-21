@@ -391,7 +391,8 @@ describe('notebook/notebook/panel', () => {
       describe('#createContent()', () => {
 
         it('should create a notebook widget', () => {
-
+          let renderer = new NotebookPanel.Renderer();
+          expect(renderer.createContent({ rendermime })).to.be.a(Notebook);
         });
 
       });
@@ -399,7 +400,8 @@ describe('notebook/notebook/panel', () => {
       describe('#createToolbar()', () => {
 
         it('should create a notebook toolbar', () => {
-
+          let renderer = new NotebookPanel.Renderer();
+          expect(renderer.createToolbar()).to.be.a(NotebookToolbar);
         });
 
       });
@@ -407,9 +409,18 @@ describe('notebook/notebook/panel', () => {
       describe('#createCompletion()', () => {
 
         it('should create a completion widget', () => {
-
+          let renderer = new NotebookPanel.Renderer();
+          expect(renderer.createCompletion()).to.be.a(CompletionWidget);
         });
 
+      });
+
+    });
+
+    describe('.defaultRenderer', () => {
+
+      it('should be an instance of a `Renderer`', () => {
+        expect(NotebookPanel.defaultRenderer).to.be.a(NotebookPanel.Renderer);
       });
 
     });
