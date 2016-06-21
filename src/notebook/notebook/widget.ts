@@ -518,6 +518,17 @@ class Notebook extends StaticNotebook {
   }
 
   /**
+   * A signal emitted when the active cell changes.
+   *
+   * #### Notes
+   * This can be due to the active index changing or the
+   * cell at the active index changing.
+   */
+  get activeCellChanged(): ISignal<StaticNotebook, BaseCellWidget> {
+    return Private.activeCellChangedSignal.bind(this);
+  }
+
+  /**
    * The interactivity mode of the notebook.
    */
   get mode(): NotebookMode {
@@ -559,13 +570,42 @@ class Notebook extends StaticNotebook {
     }
     newValue = Math.max(newValue, 0);
     newValue = Math.min(newValue, this.model.cells.length - 1);
-    if (newValue === this._activeCellIndex) {
+    let newCell = this.childAt(newValue);
+    let isNew = false;
+    if (newCell !== this._activeCell) {
+      this._activeCell = newCell;
+      isNew = true;
+    }
+    if (newValue !== this._activeCellIndex) {
+      let oldValue = this._activeCellIndex;
+      this._activeCellIndex = newValue;
+      this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
+      this.update();
+    }
+    if (isNew) {
+      this.activeCellChanged.emit(this._activeCell);
+    }
+  }
+
+  /**
+   * Get the active cell widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get activeCell(): BaseCellWidget {
+    return this._activeCell;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
       return;
     }
-    let oldValue = this._activeCellIndex;
-    this._activeCellIndex = newValue;
-    this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
-    this.update();
+    this._activeCell = null;
+    super.dispose();
   }
 
   /**
@@ -699,6 +739,12 @@ class Notebook extends StaticNotebook {
   protected onChildAdded(msg: ChildMessage): void {
     let widget = msg.child as BaseCellWidget;
     widget.editor.edgeRequested.connect(this._onEdgeRequest, this);
+    // If the new cell is the active cell, emit `activeCellChanged`.
+    let active = this.childAt(this.activeCellIndex);
+    if (active === widget) {
+      this._activeCell = widget;
+      this.activeCellChanged.emit(void 0);
+    }
     this.update();
   }
 
@@ -706,7 +752,19 @@ class Notebook extends StaticNotebook {
    * Handle a `child-removed` message.
    */
   protected onChildRemoved(msg: ChildMessage): void {
+    let widget = msg.child as BaseCellWidget;
+    if (widget === this._activeCell) {
+      this._activeCell = this.childAt(this.activeCellIndex);
+      this.activeCellChanged.emit(void 0);
+    }
     this.update();
+  }
+
+  /**
+   * Handle a new model.
+   */
+  protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
+    this.activeCellIndex = 0;
   }
 
   /**
@@ -792,6 +850,7 @@ class Notebook extends StaticNotebook {
 
   private _mode: NotebookMode = 'command';
   private _activeCellIndex = 0;
+  private _activeCell: BaseCellWidget = null;
 }
 
 
@@ -839,18 +898,27 @@ namespace Private {
   export
   const modelChangedSignal = new Signal<StaticNotebook, void>();
 
+  /**
+   * A signal emitted when the model content changes.
+   */
+  export
+  const modelContentChanged = new Signal<StaticNotebook, void>();
+
+  /**
+   * A signal emitted when the active cell changes.
+   *
+   * #### Notes
+   * This can be due to the active index changing or the
+   * cell at the active index changing.
+   */
+  export
+  const activeCellChangedSignal = new Signal<StaticNotebook, BaseCellWidget>();
 
   /**
    * A signal emitted when the state changes on the notebook.
    */
   export
   const stateChangedSignal = new Signal<Notebook, IChangedArgs<any>>();
-
-  /**
-   * A signal emitted when the model content changes.
-   */
-  export
-  const modelContentChanged = new Signal<StaticNotebook, void>();
 
   /**
    * Scroll an element into view if needed.

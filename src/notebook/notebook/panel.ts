@@ -34,11 +34,7 @@ import {
 } from '../../rendermime';
 
 import {
-  CellEditorWidget, ITextChange, ICompletionRequest
-} from '../cells/editor';
-
-import {
-  CompletionWidget, CompletionModel
+  CompletionWidget, CompletionModel, CellCompletionHandler
 } from '../completion';
 
 import {
@@ -92,7 +88,6 @@ class NotebookPanel extends Widget {
     this.layout = new PanelLayout();
     let rendermime = this._rendermime;
     this._content = this._renderer.createContent({ rendermime });
-    this._content.stateChanged.connect(this.onContentStateChanged, this);
     let toolbar = this._renderer.createToolbar();
 
     let container = new Panel();
@@ -103,11 +98,15 @@ class NotebookPanel extends Widget {
     layout.addChild(toolbar);
     layout.addChild(container);
 
-    // Instantiate tab completion widget.
     this._completion = this._renderer.createCompletion();
     this._completion.reference = this;
     this._completion.attach(document.body);
-    this._completion.selected.connect(this.onCompletionSelected, this);
+
+    this._completionHandler = new CellCompletionHandler(this._completion);
+    this._completionHandler.activeCell = this._content.activeCell;
+    this._content.activeCellChanged.connect((s, cell) => {
+      this._completionHandler.activeCell = cell;
+    });
   }
 
   /**
@@ -225,12 +224,13 @@ class NotebookPanel extends Widget {
     this._content = null;
     this._rendermime = null;
     this._clipboard = null;
+    this._completionHandler.dispose();
+    this._completionHandler = null;
     this._completion.dispose();
     this._completion = null;
     this._renderer = null;
     super.dispose();
   }
-
 
   /**
    * Handle a change to the document context.
@@ -240,14 +240,56 @@ class NotebookPanel extends Widget {
    */
   protected onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void { }
 
+
+  /**
+   * Handle a change in the model state.
+   */
+  protected onModelStateChanged(sender: INotebookModel, args: IChangedArgs<any>): void {
+    if (args.name === 'dirty') {
+      this._handleDirtyState();
+    }
+  }
+
+  /**
+   * Handle a change to the document path.
+   */
+  protected onPathChanged(sender: IDocumentContext<INotebookModel>, path: string): void {
+    this.title.text = path.split('/').pop();
+  }
+
+  /**
+   * Handle a change in the context.
+   */
+  private _onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void {
+    if (oldValue) {
+      oldValue.kernelChanged.disconnect(this._onKernelChanged, this);
+      oldValue.pathChanged.disconnect(this.onPathChanged, this);
+      if (oldValue.model) {
+        oldValue.model.stateChanged.disconnect(this.onModelStateChanged, this);
+      }
+    }
+    let context = newValue;
+    context.kernelChanged.connect(this._onKernelChanged, this);
+    let oldKernel = oldValue ? oldValue.kernel : null;
+    if (context.kernel !== oldKernel) {
+      this._onKernelChanged(this._context, this._context.kernel);
+    }
+    this._content.model = newValue.model;
+    this._handleDirtyState();
+    newValue.model.stateChanged.connect(this.onModelStateChanged, this);
+
+    // Handle the document title.
+    this.onPathChanged(context, context.path);
+    context.pathChanged.connect(this.onPathChanged, this);
+  }
+
   /**
    * Handle a change in the kernel by updating the document metadata.
    */
-  protected onKernelChanged(context: IDocumentContext<INotebookModel>, kernel: IKernel): void {
+  private _onKernelChanged(context: IDocumentContext<INotebookModel>, kernel: IKernel): void {
     if (!this.model) {
       return;
     }
-    this.kernelChanged.emit(kernel);
     kernel.kernelInfo().then(info => {
       let infoCursor = this.model.getMetadata('language_info');
       infoCursor.setValue(info.language_info);
@@ -260,138 +302,31 @@ class NotebookPanel extends Widget {
         language: spec.language
       });
     });
+    this._completionHandler.kernel = kernel;
+    this.kernelChanged.emit(kernel);
   }
 
   /**
-   * Handle a change in the model state.
+   * Handle the dirty state of the model.
    */
-  protected onModelStateChanged(sender: INotebookModel, args: IChangedArgs<any>): void {
-    if (args.name === 'dirty') {
-      if (args.newValue) {
-        this.title.className += ` ${DIRTY_CLASS}`;
-      } else {
-        this.title.className = this.title.className.replace(DIRTY_CLASS, '');
-      }
-    }
-  }
-
-  /**
-   * Handle a change to the document path.
-   */
-  protected onPathChanged(sender: IDocumentContext<INotebookModel>, path: string): void {
-    this.title.text = path.split('/').pop();
-  }
-
-  /**
-   * Handle a state change in the content area.
-   */
-  protected onContentStateChanged(sender: Notebook, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'activeCellIndex':
-      let cell = this._content.childAt(args.oldValue);
-      let editor = cell.editor;
-      editor.textChanged.disconnect(this.onTextChanged, this);
-      editor.completionRequested.disconnect(this.onCompletionRequested, this);
-
-      cell = this._content.childAt(args.newValue);
-      editor = cell.editor;
-      editor.textChanged.connect(this.onTextChanged, this);
-      editor.completionRequested.connect(this.onCompletionRequested, this);
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle a text changed signal from an editor.
-   */
-  protected onTextChanged(editor: CellEditorWidget, change: ITextChange): void {
+  private _handleDirtyState(): void {
     if (!this.model) {
       return;
     }
-    let line = change.newValue.split('\n')[change.line];
-    let model = this._completion.model;
-    // If last character entered is not whitespace, update completion.
-    if (line[change.ch - 1] && line[change.ch - 1].match(/\S/)) {
-      // If there is currently a completion
-      if (model.original) {
-        model.current = change;
-      }
+    if (this.model.dirty) {
+      this.title.className += ` ${DIRTY_CLASS}`;
     } else {
-      // If final character is whitespace, reset completion.
-      model.options = null;
-      model.original = null;
-      model.cursor = null;
-      return;
+      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
     }
-  }
-
-  /**
-   * Handle a completion requested signal from an editor.
-   */
-  protected onCompletionRequested(editor: CellEditorWidget, change: ICompletionRequest): void {
-    if (!this.kernel) {
-      return;
-    }
-    this._completion.model.makeKernelRequest(change, this.kernel);
-  }
-
-  /**
-   * Handle a completion selected signal from the completion widget.
-   */
-  protected onCompletionSelected(widget: CompletionWidget, value: string): void {
-    if (!this.model) {
-      return;
-    }
-    let patch = this._completion.model.createPatch(value);
-    let cell = this._content.childAt(this._content.activeCellIndex);
-    let editor = cell.editor.editor;
-    let doc = editor.getDoc();
-    doc.setValue(patch.text);
-    doc.setCursor(doc.posFromIndex(patch.position));
-  }
-
-  /**
-   * Handle a change in the context.
-   */
-  private _onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void {
-    if (oldValue) {
-      oldValue.kernelChanged.disconnect(this.onKernelChanged, this);
-      oldValue.pathChanged.disconnect(this.onPathChanged, this);
-      if (oldValue.model) {
-        oldValue.model.stateChanged.disconnect(this.onModelStateChanged, this);
-      }
-    }
-    let context = newValue;
-    context.kernelChanged.connect(this.onKernelChanged, this);
-    let oldKernel = oldValue ? oldValue.kernel : null;
-    if (context.kernel !== oldKernel) {
-      this.onKernelChanged(this._context, this._context.kernel);
-    }
-    this._content.model = newValue.model as INotebookModel;
-
-    let cell = this._content.childAt(this._content.activeCellIndex);
-    if (cell) {
-      let editor = cell.editor;
-      editor.textChanged.connect(this.onTextChanged, this);
-      editor.completionRequested.connect(this.onCompletionRequested, this);
-    }
-
-    // Handle the document title.
-    this.title.text = context.path.split('/').pop();
-    context.pathChanged.connect(this.onPathChanged, this);
-
-    // Handle changes to dirty state.
-    context.model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   private _rendermime: RenderMime<Widget> = null;
   private _context: IDocumentContext<INotebookModel> = null;
   private _clipboard: IClipboard = null;
-  private _completion: CompletionWidget = null;
   private _content: Notebook = null;
   private _renderer: NotebookPanel.IRenderer = null;
+  private _completion: CompletionWidget = null;
+  private _completionHandler: CellCompletionHandler = null;
 }
 
 

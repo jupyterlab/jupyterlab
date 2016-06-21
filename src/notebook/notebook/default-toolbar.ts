@@ -307,17 +307,12 @@ class CellTypeSwitcher extends Widget {
       select.value = content.model.cells.get(index).type;
     }
 
-    let update = () => {
-      select = this.node.firstChild as HTMLSelectElement;
-      index = content.activeCellIndex;
+    // Follow the type of the active cell.
+    content.activeCellChanged.connect((sender, cell) => {
       this._changeGuard = true;
-      select.value = content.model.cells.get(index).type;
+      select.value = cell.model.type;
       this._changeGuard = false;
-    };
-
-    // Follow the type of the current cell.
-    content.modelContentChanged.connect(() => { update(); });
-    content.stateChanged.connect(() => { update(); });
+    });
   }
 
   private _changeGuard = false;

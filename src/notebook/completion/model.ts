@@ -133,6 +133,11 @@ interface ICompletionModel extends IDisposable {
   makeKernelRequest(request: ICompletionRequest, kernel: IKernel): void;
 
   /**
+   * Handle a text change.
+   */
+  handleTextChange(change: ITextChange): void;
+
+  /**
    * Create a resolved patch between the original state and a patch string.
    */
   createPatch(patch: string): ICompletionPatch;
@@ -271,6 +276,26 @@ class CompletionModel implements ICompletionModel {
     }).then(() => {
       this.original = request;
     });
+  }
+
+  /**
+   * Handle a text change.
+   */
+  handleTextChange(change: ITextChange): void {
+    let line = change.newValue.split('\n')[change.line];
+    // If last character entered is not whitespace, update completion.
+    if (line[change.ch - 1] && line[change.ch - 1].match(/\S/)) {
+      // If there is currently a completion
+      if (this.original) {
+        this.current = change;
+      }
+    } else {
+      // If final character is whitespace, reset completion.
+      this.options = null;
+      this.original = null;
+      this.cursor = null;
+      return;
+    }
   }
 
   /**
