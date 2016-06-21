@@ -390,13 +390,25 @@ describe('notebook/notebook/panel', () => {
 
       describe('#createContent()', () => {
 
+        it('should create a notebook widget', () => {
+
+        });
+
       });
 
       describe('#createToolbar()', () => {
 
+        it('should create a notebook toolbar', () => {
+
+        });
+
       });
 
       describe('#createCompletion()', () => {
+
+        it('should create a completion widget', () => {
+
+        });
 
       });
 

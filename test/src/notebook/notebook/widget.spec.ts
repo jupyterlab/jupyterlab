@@ -518,6 +518,18 @@ describe('notebook/notebook/widget', () => {
 
     });
 
+    describe('#activeCellChanged', () => {
+
+      it('should be emitted when the active cell changes', () => {
+
+      });
+
+      it('should not be emitted when the active cell does not change', () => {
+
+      });
+
+    });
+
     describe('#mode', () => {
 
       it('should get the interactivity mode of the notebook', () => {
@@ -643,6 +655,22 @@ describe('notebook/notebook/widget', () => {
           done();
         });
         widget.activeCellIndex = 1;
+      });
+
+      it('should update the active cell if necessary', () => {
+
+      });
+
+    });
+
+    describe('#activeCell', () => {
+
+      it('should get the active cell widget', () => {
+
+      });
+
+      it('should be read-only', () => {
+
       });
 
     });
@@ -954,6 +982,10 @@ describe('notebook/notebook/widget', () => {
         });
       });
 
+      it('should update the active cell if necessary', () => {
+
+      });
+
       context('`edgeRequested` signal', () => {
 
         it('should activate the previous cell if top is requested', () => {
@@ -988,6 +1020,10 @@ describe('notebook/notebook/widget', () => {
           expect(widget.methods).to.contain('onUpdateRequest');
           done();
         });
+      });
+
+      it('should update the active cell if necessary', () => {
+
       });
 
     });
