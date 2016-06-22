@@ -37,7 +37,8 @@
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget {
+.jp-MarkdownCell-content.p-Widget {
+  padding: 7px;
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;
@@ -45,59 +46,67 @@
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget h1 {
+.jp-MarkdownCell-content.p-Widget h1 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 26px;
   line-height: 1.0;
+  margin: 14px 0 0 0;
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget h2 {
+.jp-MarkdownCell-content.p-Widget h2 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 22px;
   line-height: 1.0;
+  margin: 14px 0 0 0;
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget h3 {
+.jp-MarkdownCell-content.p-Widget h3 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 18px;
   line-height: 1.0;
+  margin: 14px 0 0 0;
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget h4 {
+.jp-MarkdownCell-content.p-Widget h4 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 14px;
   line-height: 1.0;
+  margin: 14px 0 0 0;
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget h5 {
-  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
-  font-size: 14px;
-  font-style: italic;
-  line-height: 1.0;
-}
-
-
-.jp-MarkdownCell-renderer.p-Widget h6 { 
+.jp-MarkdownCell-content.p-Widget h5 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 14px;
   font-style: italic;
   line-height: 1.0;
+  margin: 14px 0 0 0;
 }
 
 
-.jp-MarkdownCell-renderer.p-Widget p {
+.jp-MarkdownCell-content.p-Widget h6 { 
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.0;
+  margin: 14px 0 0 0;
+}
+
+
+.jp-MarkdownCell-content.p-Widget p {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 14px;
   line-height: 20px;
+  margin: 0 0 0 0;
 } 
 
 
-.jp-MarkdownCell-renderer.p-Widget li {
+.jp-MarkdownCell-content.p-Widget li {
   line-height: 20px;
+  margin: 14px 0 0 0;
 }
 
 
