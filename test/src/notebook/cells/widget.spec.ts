@@ -540,17 +540,25 @@ describe('notebook/cells/widget', () => {
 
     describe('#execute()', () => {
 
-      it('should return a promise if there is no code to execute', () => {
+      it('should fulfill a promise if there is no code to execute', (done) => {
         let widget = new CodeCellWidget({ rendermime });
+        let kernel = new MockKernel();
         widget.model = new CodeCellModel();
-        expect(widget.execute(new MockKernel())).to.be.a(Promise);
+        widget.execute(kernel).then(done);
       });
 
-      it('should return a promise if there is code to exectue', () => {
+      it('should fulfill a promise if there is code to execute', (done) => {
         let widget = new CodeCellWidget({ rendermime });
+        let kernel = new MockKernel();
         widget.model = new CodeCellModel();
         widget.model.source = 'foo';
-        expect(widget.execute(new MockKernel())).to.be.a(Promise);
+
+        let originalCount = (widget.model as ICodeCellModel).executionCount;
+        widget.execute(kernel).then(() => {
+          let executionCount = (widget.model as ICodeCellModel).executionCount;
+          expect(executionCount).to.not.equal(originalCount);
+          done();
+        });
       });
 
     });
