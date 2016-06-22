@@ -3,12 +3,8 @@
 
 import {
   IContentsManager, IContentsModel, IContentsOpts, INotebookSessionManager,
-  INotebookSession, ISessionId, KernelStatus, IKernelSpecIds
+  INotebookSession, ISessionId, IKernelSpecIds
 } from 'jupyter-js-services';
-
-import {
-  PromiseDelegate
-} from 'jupyter-js-utils';
 
 import {
   IDisposable
