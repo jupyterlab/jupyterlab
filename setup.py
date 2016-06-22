@@ -23,7 +23,7 @@ def run(cmd, cwd=None):
 
     >>> run('npm install', cwd='./subdir')
     """
-    check_call(cmd.split(), cwd=cwd, stdout=sys.stdout, stderr=sys.stderr)
+    check_call(cmd, shell=True, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr)
 
 from distutils import log
 log.set_verbosity(log.DEBUG)
