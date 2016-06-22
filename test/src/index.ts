@@ -6,6 +6,7 @@ import './docregistry/default.spec';
 import './renderers/renderers.spec';
 import './rendermime/rendermime.spec';
 import './renderers/latex.spec';
+import './notebook/cells/editor.spec';
 import './notebook/cells/widget.spec';
 import './notebook/cells/model.spec';
 import './notebook/notebook/nbformat.spec';
