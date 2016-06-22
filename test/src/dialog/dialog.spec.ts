@@ -4,13 +4,16 @@
 import expect = require('expect.js');
 
 import {
+  simulate
+} from 'simulate-event';
+
+import {
   showDialog, okButton
 } from '../../../lib/dialog';
 
 import {
-  triggerMouseEvent, triggerKeyEvent, acceptDialog, dismissDialog
+  acceptDialog, dismissDialog
 } from '../utils';
-
 
 
 describe('jupyter-ui', () => {
@@ -24,7 +27,7 @@ describe('jupyter-ui', () => {
       });
       Promise.resolve().then(() => {
         let node = document.body.getElementsByClassName('jp-Dialog')[0];
-        triggerKeyEvent(node as HTMLElement, 'keydown', { keyCode: 27 });
+        simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
       });
     });
 
@@ -37,14 +40,14 @@ describe('jupyter-ui', () => {
         host: node,
         buttons: [okButton],
         okText: 'Yep'
-      }
+      };
       showDialog(options).then(result => {
         expect(result).to.be(null);
         done();
       });
       Promise.resolve().then(() => {
         let target = document.body.getElementsByClassName('jp-Dialog')[0];
-        triggerKeyEvent(target as HTMLElement, 'keydown', { keyCode: 27 });
+        simulate(target as HTMLElement, 'keydown', { keyCode: 27 });
       });
     });
 
@@ -84,7 +87,7 @@ describe('jupyter-ui', () => {
         text: 'foo',
         className: 'bar',
         icon: 'baz'
-      }
+      };
       showDialog({ buttons: [button] }).then(result => {
         expect(result.text).to.be('foo');
         done();
@@ -103,8 +106,8 @@ describe('jupyter-ui', () => {
       });
       Promise.resolve().then(() => {
         let node = document.body.getElementsByClassName('jp-Dialog')[0];
-        triggerMouseEvent(node as HTMLElement, 'contextmenu');
-        triggerKeyEvent(node as HTMLElement, 'keydown', { keyCode: 27 });
+        simulate(node as HTMLElement, 'contextmenu');
+        simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
       });
     });
 

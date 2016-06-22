@@ -19,8 +19,9 @@ import {
   NotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
-
-const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
+import {
+  DEFAULT_CONTENT
+} from '../utils';
 
 
 describe('notebook/notebook', () => {

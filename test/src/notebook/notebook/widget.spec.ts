@@ -33,17 +33,15 @@ import {
 } from '../../../../lib/notebook/notebook/widget';
 
 import {
-  nbformat
-} from '../../../../lib/notebook/notebook/nbformat';
-
-import {
   defaultRenderMime
 } from '../../rendermime/rendermime.spec';
 
+import {
+  DEFAULT_CONTENT
+} from '../utils';
+
 
 const rendermime = defaultRenderMime();
-
-const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
 
 function createWidget(): LogStaticNotebook {
