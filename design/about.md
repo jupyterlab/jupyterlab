@@ -8,7 +8,7 @@ This document describes the design of the "About JupyterLab" plugin. This docume
 
 * Male 25, Full Stack Engineer
 
-* uses single notebook to explain a very specific topic or teach people something
+* Uses single notebook to explain a very specific topic or teach people something
 
     * Done with charts, graphs, tables (Matplotlib and Pandas), live code, images integrated in text
 
