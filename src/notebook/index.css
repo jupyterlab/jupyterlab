@@ -48,24 +48,12 @@
   -ms-user-select: text;
 }
 
-/*
-Trying to copy CSS from JupyterNotebook (.rendered_html * + p)
-
-.p-Widget * + p {
-  margin-top: 14px;
-}
-*/
-
 
 .jp-MarkdownCell-content.p-Widget h1 {
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 26px;
   line-height: 1.0;
-  -webkit-margin-after: 0em;
-  -webkit-margin-before: 0em;
-  -webkit-margin-start: 0em;
-  -webkit-margin-end: 0em;
-  margin-top: 14px; 
+  margin: 14px 0 0 0;
 }
 
 
@@ -73,11 +61,7 @@ Trying to copy CSS from JupyterNotebook (.rendered_html * + p)
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 22px;
   line-height: 1.0;
-  -webkit-margin-after: 0em;
-  -webkit-margin-before: 0em;
-  -webkit-margin-start: 0em;
-  -webkit-margin-end: 0em;
-  margin-top: 14px; 
+  margin: 14px 0 0 0;
 }
 
 
@@ -85,11 +69,7 @@ Trying to copy CSS from JupyterNotebook (.rendered_html * + p)
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 18px;
   line-height: 1.0;
-  -webkit-margin-after: 0em;
-  -webkit-margin-before: 0em;
-  -webkit-margin-start: 0em;
-  -webkit-margin-end: 0em;
-  margin-top: 14px; 
+  margin: 14px 0 0 0;
 }
 
 
@@ -97,11 +77,15 @@ Trying to copy CSS from JupyterNotebook (.rendered_html * + p)
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 14px;
   line-height: 1.0;
-  -webkit-margin-after: 0em;
-  -webkit-margin-before: 0em;
-  -webkit-margin-start: 0em;
-  -webkit-margin-end: 0em;
-  margin-top: 14px; 
+  margin: 14px 0 0 0;
+}
+
+
+.jp-MarkdownCell-content.p-Widget h4 {
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  font-size: 14px;
+  line-height: 1.0;
+  margin: 14px 0 0 0;
 }
 
 
@@ -110,11 +94,7 @@ Trying to copy CSS from JupyterNotebook (.rendered_html * + p)
   font-size: 14px;
   font-style: italic;
   line-height: 1.0;
-  -webkit-margin-after: 0em;
-  -webkit-margin-before: 0em;
-  -webkit-margin-start: 0em;
-  -webkit-margin-end: 0em;
-  margin-top: 14px; 
+  margin: 14px 0 0 0;
 }
 
 
@@ -123,11 +103,7 @@ Trying to copy CSS from JupyterNotebook (.rendered_html * + p)
   font-size: 14px;
   font-style: italic;
   line-height: 1.0;
-  -webkit-margin-after: 0em;
-  -webkit-margin-before: 0em;
-  -webkit-margin-start: 0em;
-  -webkit-margin-end: 0em;
-  margin-top: 14px; 
+  margin: 14px 0 0 0;
 }
 
 
@@ -135,19 +111,13 @@ Trying to copy CSS from JupyterNotebook (.rendered_html * + p)
   font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
   font-size: 14px;
   line-height: 20px;
-  -webkit-margin-after: 0em;
-  -webkit-margin-before: 0em;
-  -webkit-margin-start: 0em;
-  -webkit-margin-end: 0em;
+  margin: 0 0 0 0;
 } 
 
 
 .jp-MarkdownCell-content.p-Widget li {
   line-height: 20px;
-  -webkit-margin-after: 0em;
-  -webkit-margin-before: 0em;
-  -webkit-margin-start: 0em;
-  -webkit-margin-end: 0em;
+  margin: 14px 0 0 0;
 }
 
 
