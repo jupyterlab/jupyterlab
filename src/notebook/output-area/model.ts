@@ -158,7 +158,7 @@ class OutputAreaModel implements IDisposable {
 
 
 /**
- * Execute code on a kernel and send outputs to an observable output.
+ * Execute code on a kernel and send outputs to an output area model.
  */
 export
 function executeCode(code: string, kernel: IKernel, outputs: OutputAreaModel): Promise<IExecuteReply> {
