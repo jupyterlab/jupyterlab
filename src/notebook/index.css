@@ -38,7 +38,7 @@
 
 
 .jp-MarkdownCell-content.p-Widget {
-  padding-left: 5.6px;
+  padding-left: 7px;
   padding-top: 7px;
   padding-right: 7px;
   padding-bottom: 7px;
@@ -79,7 +79,6 @@
   line-height: 1.0;
   margin: 14px 0 0 0;
 }
-
 
 
 .jp-MarkdownCell-content.p-Widget h5 {
