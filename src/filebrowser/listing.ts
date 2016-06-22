@@ -300,7 +300,7 @@ class DirListing extends Widget {
     this.addClass(DIR_LISTING_CLASS);
     this._model = model;
     this._model.refreshed.connect(this._onModelRefreshed, this);
-    this._model.selectionChanged.connect(this._onSelectionChanged, this);
+    this._model.pathChanged.connect(this._onPathChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = manager;
@@ -422,7 +422,7 @@ class DirListing extends Widget {
     } else {
       let items = this._model.sortedItems;
       for (let item of items) {
-        if (this._model.isSelected(item.name)) {
+        if (this._selection[item.name]) {
           names.push(item.name);
         }
       }
@@ -484,7 +484,7 @@ class DirListing extends Widget {
     let paths = items.map(item => item.path);
     for (let sessionId of this._model.sessionIds) {
       let index = paths.indexOf(sessionId.notebook.path);
-      if (!this._softSelection && this._model.isSelected(items[index].name)) {
+      if (!this._softSelection && this._selection[items[index].name]) {
         promises.push(this._model.shutdown(sessionId));
       } else if (this._softSelection === items[index].name) {
         promises.push(this._model.shutdown(sessionId));
@@ -503,7 +503,7 @@ class DirListing extends Widget {
    */
   selectNext(keepExisting = false): void {
     let index = -1;
-    let selected = this._model.getSelected();
+    let selected = Object.keys(this._selection);
     let items = this._model.sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the next item.
@@ -529,7 +529,7 @@ class DirListing extends Widget {
    */
   selectPrevious(keepExisting = false): void {
     let index = -1;
-    let selected = this._model.getSelected();
+    let selected = Object.keys(this._selection);
     let items = this._model.sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the previous item.
@@ -546,6 +546,13 @@ class DirListing extends Widget {
       index = arrays.findIndex(items, (value, index) => value.name === name);
     }
     if (index !== -1) this._selectItem(index, keepExisting);
+  }
+
+  /**
+   * Get whether an item is selected by name.
+   */
+  isSelected(name: string): boolean {
+    return this._selection[name] === true;
   }
 
   /**
@@ -663,7 +670,7 @@ class DirListing extends Widget {
     // Update the node states to match the model contents.
     for (let i = 0, n = items.length; i < n; ++i) {
       subtype.updateItemNode(nodes[i], items[i]);
-      if (this._model.isSelected(items[i].name)) {
+      if (this._selection[items[i].name]) {
         nodes[i].classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
           nodes[i].classList.add(CUT_CLASS);
@@ -672,7 +679,7 @@ class DirListing extends Widget {
     }
 
     // Handle the selectors on the widget node.
-    let selectedNames = this._model.getSelected();
+    let selectedNames = Object.keys(this._selection);
     if (selectedNames.length > 1) {
       this.addClass(MULTI_SELECTED_CLASS);
     }
@@ -785,7 +792,7 @@ class DirListing extends Widget {
     }
     this._softSelection = '';
     let items = this._model.sortedItems;
-    let selected = this._model.getSelected();
+    let selected = Object.keys(this._selection);
     if (selected.indexOf(items[index].name) === -1) {
       this._softSelection = items[index].name;
     }
@@ -921,7 +928,7 @@ class DirListing extends Widget {
       if (!target.classList.contains(FOLDER_TYPE_CLASS)) {
         return;
       }
-      if (!this._softSelection && this._model.isSelected(item.name)) {
+      if (!this._softSelection && this._selection[item.name]) {
         return;
       }
       target.classList.add(utils.DROP_TARGET_CLASS);
@@ -1019,7 +1026,7 @@ class DirListing extends Widget {
    * Start a drag event.
    */
   private _startDrag(index: number, clientX: number, clientY: number): void {
-    let selectedNames = this._model.getSelected();
+    let selectedNames = Object.keys(this._selection);
     let source = this._items[index];
     let items = this._model.sortedItems;
     let item: IContentsModel = null;
@@ -1080,17 +1087,19 @@ class DirListing extends Widget {
 
     clearTimeout(this._selectTimer);
 
-    if (index == -1) return;
+    if (index == -1) {
+      return;
+    }
 
     let name = items[index].name;
-    let selected = this._model.getSelected();
+    let selected = Object.keys(this._selection);
 
     // Handle toggling.
     if (event.metaKey || event.ctrlKey) {
-      if (this._model.isSelected(name)) {
-        this._model.deselect(name);
+      if (this._selection[name]) {
+        delete this._selection[name];
       } else {
-        this._model.select(name);
+        this._selection[name] = true;
       }
 
     // Handle multiple select.
@@ -1107,8 +1116,8 @@ class DirListing extends Widget {
           }
         }, RENAME_DURATION);
       }
-      this._model.clearSelected();
-      this._model.select(name);
+      this._selection = Object.create(null);
+      this._selection[name] = true;
     }
     this._isCut = false;
     this.update();
@@ -1146,7 +1155,7 @@ class DirListing extends Widget {
     for (let i = 0; i < this._items.length; i++) {
       if (nearestIndex >= i && index <= i ||
           nearestIndex <= i && index >= i) {
-        this._model.select(items[i].name);
+        this._selection[items[i].name] = true;
       }
     }
   }
@@ -1157,7 +1166,7 @@ class DirListing extends Widget {
   private _getSelectedItems(): IContentsModel[] {
     let items = this._model.sortedItems;
     if (!this._softSelection) {
-      return items.filter(item => this._model.isSelected(item.name));
+      return items.filter(item => this._selection[item.name]);
     }
     return items.filter(item => item.name === this._softSelection);
   }
@@ -1195,7 +1204,7 @@ class DirListing extends Widget {
    */
   private _doRename(): Promise<string> {
     let items = this._model.sortedItems;
-    let name = this._softSelection || this._model.getSelected()[0];
+    let name = this._softSelection || Object.keys(this._selection)[0];
     let index = arrays.findIndex(items, (value, index) => value.name === name);
     let row = this._items[index];
     let text = utils.findElement(row, ITEM_TEXT_CLASS);
@@ -1247,10 +1256,10 @@ class DirListing extends Widget {
     // Selected the given row(s)
     let items = this._model.sortedItems;
     if (!keepExisting) {
-      this._model.clearSelected();
+      this._selection = Object.create(null);
     }
     let name = items[index].name;
-    this._model.select(name);
+    this._selection[name] = true;
     Private.scrollIfNeeded(this.contentNode, this._items[index]);
     this._isCut = false;
   }
@@ -1259,14 +1268,22 @@ class DirListing extends Widget {
    * Handle the `refreshed` signal from the model.
    */
   private _onModelRefreshed(): void {
+    let existing = Object.keys(this._selection);
+    this._selection = Object.create(null);
+    for (let name of this._model.names) {
+      if (existing.indexOf(name) !== -1) {
+        this._selection[name] = true;
+      }
+    }
     this.update();
   }
 
   /**
-   * Handle the `selectionChanged` signal from the model.
+   * Handle a `pathChanged` signal from the model.
    */
-  private _onSelectionChanged(): void {
-    this.update();
+  private _onPathChanged(): void {
+    // Reset the selection.
+    this._selection = Object.create(null);
   }
 
   private _model: FileBrowserModel = null;
@@ -1282,6 +1299,7 @@ class DirListing extends Widget {
   private _softSelection = '';
   private _manager: DocumentManager = null;
   private _opener: IWidgetOpener = null;
+  private _selection: { [key: string]: boolean; } = Object.create(null);
 }
 
 
