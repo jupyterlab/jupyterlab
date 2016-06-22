@@ -139,13 +139,8 @@ import {
 } from '../notebook/notebook/toolbar';
 
 import {
-<<<<<<< HEAD
-  NotebookActions
-} from '../notebook/notebook/actions';
-=======
   IWidgetExtension, IDocumentContext, IDocumentModel, DocumentRegistry
 } from '../docregistry';
->>>>>>> 803d561... Clean up the notebook plugin example
 
 /**
  * The plugin registration information.
