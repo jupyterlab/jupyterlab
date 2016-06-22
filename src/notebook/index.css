@@ -38,10 +38,7 @@
 
 
 .jp-MarkdownCell-content.p-Widget {
-  padding-left: 7px;
-  padding-top: 7px;
-  padding-right: 7px;
-  padding-bottom: 7px;
+  padding: 7px;
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;
