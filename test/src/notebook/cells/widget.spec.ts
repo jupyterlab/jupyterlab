@@ -3,8 +3,6 @@
 
 import expect = require('expect.js');
 
-import * as CodeMirror from 'codemirror';
-
 import {
   MockKernel
 } from 'jupyter-js-services/lib/mockkernel';
@@ -47,9 +45,9 @@ import {
 
 const INPUT_CLASS = 'jp-InputArea';
 
-
 const RENDERED_CLASS = 'jp-mod-rendered';
 
+const PROMPT_CLASS = 'jp-InputArea-prompt';
 
 const rendermime = defaultRenderMime();
 
@@ -122,6 +120,13 @@ class LogMarkdownCell extends MarkdownCellWidget {
 
   methods: string[] = [];
 
+  messages: string[] = [];
+
+  processMessage(msg: Message): void {
+    super.processMessage(msg);
+    this.messages.push(msg.type);
+  }
+
   protected onUpdateRequest(msg: Message): void {
     super.onAfterAttach(msg);
     this.methods.push('onUpdateRequest');
@@ -149,7 +154,7 @@ class LogRenderer extends CodeCellWidget.Renderer {
 }
 
 
-describe('notebook/cells', () => {
+describe('notebook/cells/widget', () => {
 
   describe('BaseCellWidget', () => {
 
@@ -200,6 +205,18 @@ describe('notebook/cells', () => {
         expect(called).to.be(true);
       });
 
+      it('should not emit a signal when the model has not changed', () => {
+        let widget = new BaseCellWidget();
+        let model = new CellModel();
+        let called = 0;
+        widget.modelChanged.connect(() => { called++; });
+        expect(called).to.be(0);
+        widget.model = model;
+        expect(called).to.be(1);
+        widget.model = model;
+        expect(called).to.be(1);
+      });
+
     });
 
     describe('#editor', () => {
@@ -234,6 +251,13 @@ describe('notebook/cells', () => {
         expect(widget.mimetype).to.be('test/test');
       });
 
+      it('should be safe to set multiple times', () => {
+        let widget = new BaseCellWidget();
+        widget.mimetype = 'test/test';
+        widget.mimetype = 'test/test';
+        expect(widget.mimetype).to.be('test/test');
+      });
+
       it('should not allow being set to empty or null strings', () => {
         let widget = new BaseCellWidget();
         widget.mimetype = null;
@@ -262,6 +286,16 @@ describe('notebook/cells', () => {
         expect(widget.readOnly).to.be(true);
       });
 
+      it('should ignore being set to the same value', (done) => {
+        let widget = new LogBaseCell();
+        widget.readOnly = true;
+        widget.readOnly = true;
+        requestAnimationFrame(() => {
+          expect(widget.messages).to.eql([Widget.MsgUpdateRequest.type]);
+          done();
+        });
+      });
+
     });
 
     describe('#trusted', () => {
@@ -281,6 +315,13 @@ describe('notebook/cells', () => {
         widget.model = new CellModel();
         widget.trusted = true;
         expect(widget.trusted).to.be(true);
+      });
+
+      it('should do nothing if there is no model', () => {
+        let widget = new BaseCellWidget();
+        expect(widget.trusted).to.be(false);
+        widget.trusted = true;
+        expect(widget.trusted).to.be(false);
       });
 
     });
@@ -499,9 +540,16 @@ describe('notebook/cells', () => {
 
     describe('#execute()', () => {
 
-      it('should return a promise', () => {
+      it('should return a promise if there is no code to execute', () => {
         let widget = new CodeCellWidget({ rendermime });
         widget.model = new CodeCellModel();
+        expect(widget.execute(new MockKernel())).to.be.a(Promise);
+      });
+
+      it('should return a promise if there is code to exectue', () => {
+        let widget = new CodeCellWidget({ rendermime });
+        widget.model = new CodeCellModel();
+        widget.model.source = 'foo';
         expect(widget.execute(new MockKernel())).to.be.a(Promise);
       });
 
@@ -625,19 +673,39 @@ describe('notebook/cells', () => {
 
     describe('#rendered', () => {
 
-      it('should default to true', () => {
+      it('should default to true', (done) => {
         let widget = new MarkdownCellWidget({ rendermime });
+        widget.attach(document.body);
         expect(widget.rendered).to.be(true);
         requestAnimationFrame(() => {
           expect(widget.node.classList.contains(RENDERED_CLASS)).to.be(true);
+          widget.dispose();
+          done();
         });
       });
 
-      it('should un-render the widget', () => {
+      it('should unrender the widget', (done) => {
         let widget = new MarkdownCellWidget({ rendermime });
+        widget.attach(document.body);
         widget.rendered = false;
         requestAnimationFrame(() => {
           expect(widget.node.classList.contains(RENDERED_CLASS)).to.be(false);
+          widget.dispose();
+          done();
+        });
+      });
+
+      it('should ignore being set to the same value', (done) => {
+        let widget = new LogMarkdownCell({ rendermime });
+        widget.attach(document.body);
+        widget.rendered = false;
+        widget.rendered = false;
+        requestAnimationFrame(() => {
+          let updates = widget.messages.filter((msg) => {
+            return msg === Widget.MsgUpdateRequest.type;
+          });
+          expect(updates).to.have.length(1);
+          done();
         });
       });
 
@@ -680,6 +748,42 @@ describe('notebook/cells', () => {
       it('should create a raw cell widget', () => {
         let widget = new RawCellWidget();
         expect(widget).to.be.a(RawCellWidget);
+      });
+
+    });
+
+  });
+
+  describe('InputAreaWidget', () => {
+
+    describe('#constructor()', () => {
+
+      it('should create an input area widget', () => {
+        let editor = new CellEditorWidget(new CellModel());
+        let widget = new InputAreaWidget(editor);
+        expect(widget).to.be.an(InputAreaWidget);
+      });
+
+    });
+
+    describe('#setPrompt()', () => {
+
+      it('should change the value of the input prompt', () => {
+        let editor = new CellEditorWidget(new CellModel());
+        let widget = new InputAreaWidget(editor);
+        let prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
+        expect(prompt.textContent).to.be.empty();
+        widget.setPrompt('foo');
+        expect(prompt.textContent).to.contain('foo');
+      });
+
+      it('should treat the string value "null" as special', () => {
+        let editor = new CellEditorWidget(new CellModel());
+        let widget = new InputAreaWidget(editor);
+        let prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
+        expect(prompt.textContent).to.be.empty();
+        widget.setPrompt('null');
+        expect(prompt.textContent).to.not.contain('null');
       });
 
     });

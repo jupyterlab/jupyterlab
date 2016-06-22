@@ -246,7 +246,7 @@ class CellEditorWidget extends CodeMirrorWidget {
     let ch = cursor.ch;
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
-    let coords = editor.charCoords({line, ch}, 'page');
+    let coords = editor.charCoords({ line, ch }, 'page');
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, oldValue, newValue
     });
@@ -287,7 +287,7 @@ class CellEditorWidget extends CodeMirrorWidget {
     let currentLine = currentValue.split('\n')[line];
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
-    let coords = editor.charCoords({line, ch}, 'page');
+    let coords = editor.charCoords({ line, ch }, 'page');
 
     // A completion request signal should only be emitted if the final
     // character of the current line is not whitespace. Otherwise, the
