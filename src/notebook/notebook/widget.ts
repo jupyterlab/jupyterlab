@@ -600,12 +600,12 @@ class Notebook extends StaticNotebook {
   set activeCellIndex(newValue: number) {
     let oldValue = this._activeCellIndex;
     if (!this.model || !this.model.cells.length) {
-      this._activeCellIndex = -1;
+      newValue = -1;
     } else {
       newValue = Math.max(newValue, 0);
       newValue = Math.min(newValue, this.model.cells.length - 1);
-      this._activeCellIndex = newValue;
     }
+    this._activeCellIndex = newValue;
     let cell = this.childAt(newValue);
     if (cell !== this._activeCell) {
       this._activeCell = cell;
