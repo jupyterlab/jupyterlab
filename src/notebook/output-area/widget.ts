@@ -623,8 +623,6 @@ class OutputWidget extends Widget {
    * Sanitize a mime map.
    *
    * @params map - The map to sanitize.
-   *
-   * @returns Whether the
    */
   protected sanitize(map: MimeMap<string>): void {
     let keys = Object.keys(map);

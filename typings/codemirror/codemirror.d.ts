@@ -424,6 +424,12 @@ declare module CodeMirror {
         The handler may mess with the style of the resulting element, or add event handlers, but should not try to change the state of the editor. */
         on(eventName: 'renderLine', handler: (instance: CodeMirror.Editor, line: number, element: HTMLElement) => void ): void;
         off(eventName: 'renderLine', handler: (instance: CodeMirror.Editor, line: number, element: HTMLElement) => void ): void;
+
+        /** Trigger key events onto the editor instance. Not for production use, only for testing.
+        See this comment: https://github.com/codemirror/CodeMirror/issues/1935#issuecomment-28178991 */
+        triggerOnKeyDown(event: Event): void;
+        triggerOnKeyPress(event: Event): void;
+        triggerOnKeyUp(event: Event): void;
     }
 
     interface EditorFromTextArea extends Editor {

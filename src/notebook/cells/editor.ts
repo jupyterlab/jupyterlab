@@ -170,7 +170,7 @@ class CellEditorWidget extends CodeMirrorWidget {
 
     // If the model is being replaced, disconnect the old signal handler.
     if (this._model) {
-      this._model.stateChanged.disconnect(this.onModelChanged, this);
+      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
     }
 
     if (!model) {
@@ -181,7 +181,7 @@ class CellEditorWidget extends CodeMirrorWidget {
 
     this._model = model;
     doc.setValue(this._model.source || '');
-    this._model.stateChanged.connect(this.onModelChanged, this);
+    this._model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /**
@@ -210,9 +210,9 @@ class CellEditorWidget extends CodeMirrorWidget {
   }
 
   /**
-   * Handle changes in the model.
+   * Handle changes in the model state.
    */
-  protected onModelChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'source':
       let doc = this.editor.getDoc();
@@ -246,7 +246,7 @@ class CellEditorWidget extends CodeMirrorWidget {
     let ch = cursor.ch;
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
-    let coords = editor.charCoords({line, ch}, 'page');
+    let coords = editor.charCoords({ line, ch }, 'page');
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, oldValue, newValue
     });
@@ -287,7 +287,7 @@ class CellEditorWidget extends CodeMirrorWidget {
     let currentLine = currentValue.split('\n')[line];
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
-    let coords = editor.charCoords({line, ch}, 'page');
+    let coords = editor.charCoords({ line, ch }, 'page');
 
     // A completion request signal should only be emitted if the final
     // character of the current line is not whitespace. Otherwise, the
