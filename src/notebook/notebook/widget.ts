@@ -599,6 +599,7 @@ class Notebook extends StaticNotebook {
   }
   set activeCellIndex(newValue: number) {
     if (!this.model || !this.model.cells.length) {
+      this._activeCellIndex = -1;
       if (this._activeCell) {
         this._activeCell = null;
         this.activeCellChanged.emit(null);
