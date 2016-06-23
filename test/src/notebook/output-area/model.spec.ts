@@ -4,11 +4,15 @@
 import expect = require('expect.js');
 
 import {
+  MockKernel
+} from 'jupyter-js-services/lib/mockkernel';
+
+import {
   ListChangeType
 } from 'phosphor-observablelist';
 
 import {
-  OutputAreaModel
+  OutputAreaModel, executeCode
 } from '../../../../lib/notebook/output-area/model';
 
 import {
@@ -205,6 +209,34 @@ describe('notebook/output-area/model', () => {
         expect(model.length).to.be(1);
         model.add(DEFAULT_OUTPUTS[1]);
         expect(model.length).to.be(1);
+      });
+    });
+
+  });
+
+  describe('#executeCode()', () => {
+
+    it('should execute code on a kernel and send outputs to an output area model', (done) => {
+      let kernel = new MockKernel();
+      let model = new OutputAreaModel();
+      expect(model.length).to.be(0);
+      executeCode('foo', kernel, model).then(reply => {
+        expect(reply.execution_count).to.be(1);
+        expect(model.length).to.be(1);
+        done();
+      });
+    });
+
+    it('should clear existing outputs', (done) => {
+      let kernel = new MockKernel();
+      let model = new OutputAreaModel();
+      for (let output of DEFAULT_OUTPUTS) {
+        model.add(output);
+      }
+      executeCode('foo', kernel, model).then(reply => {
+        expect(reply.execution_count).to.be(1);
+        expect(model.length).to.be(1);
+        done();
       });
     });
 
