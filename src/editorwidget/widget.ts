@@ -42,10 +42,11 @@ class EditorWidget extends CodeMirrorWidget {
   /**
    * Construct a new editor widget.
    */
-  constructor(model: IDocumentModel, context: IDocumentContext) {
+  constructor(context: IDocumentContext<IDocumentModel>) {
     super();
     this.addClass(EDITOR_CLASS);
     let editor = this.editor;
+    let model = context.model;
     editor.setOption('lineNumbers', true);
     let doc = editor.getDoc();
     doc.setValue(model.toString());
@@ -84,14 +85,14 @@ class EditorWidget extends CodeMirrorWidget {
  * A widget factory for editors.
  */
 export
-class EditorWidgetFactory extends ABCWidgetFactory implements IWidgetFactory<EditorWidget> {
+class EditorWidgetFactory extends ABCWidgetFactory implements IWidgetFactory<EditorWidget, IDocumentModel> {
   /**
-   * Create a new widget given a document model and a context.
+   * Create a new widget given a context.
    */
-  createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): EditorWidget {
+  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernelId): EditorWidget {
     if (kernel) {
       context.changeKernel(kernel);
     }
-    return new EditorWidget(model, context);
+    return new EditorWidget(context);
   }
 }

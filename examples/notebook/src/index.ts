@@ -144,7 +144,9 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
       nbWidget.context.kernel.interrupt();
     }
   };
-  let restartHandler = () => nbWidget.restart();
+  let restartHandler = () => {
+    NotebookActions.restart(nbWidget.kernel, nbWidget.node);
+  }
   let switchHandler = () => {
     selectKernelForContext(nbWidget.context, nbWidget.node);
   };

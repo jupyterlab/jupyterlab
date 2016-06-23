@@ -509,32 +509,11 @@ class ConsoleWidget extends Widget {
    * Handle a completion requested signal from an editor.
    */
   protected onCompletionRequest(editor: CellEditorWidget, change: ICompletionRequest): void {
-    let contents = {
-      // Only send the current line of code for completion.
-      code: change.currentValue.split('\n')[change.line],
-      cursor_pos: change.ch
-    };
-    let pendingComplete = ++this._pendingComplete;
-    let model = this._completion.model;
-    this._session.kernel.complete(contents).then(value => {
-      // If model has been disposed, bail.
-      if (model.isDisposed) {
-        return;
-      }
-      // If a newer completion requesy has created a pending request, bail.
-      if (pendingComplete !== this._pendingComplete) {
-        return;
-      }
-      // Completion request failures or negative results fail silently.
-      if (value.status !== 'ok') {
-        return;
-      }
-      // Update the model.
-      model.options = value.matches;
-      model.cursor = { start: value.cursor_start, end: value.cursor_end };
-    }).then(() => {
-      model.original = change;
-    });
+    let kernel = this._session.kernel;
+    if (!kernel) {
+      return;
+    }
+    this._completion.model.makeKernelRequest(change, kernel);
   }
 
   /**
@@ -576,7 +555,6 @@ class ConsoleWidget extends Widget {
   private _tooltip: ConsoleTooltip = null;
   private _history: IConsoleHistory = null;
   private _session: INotebookSession = null;
-  private _pendingComplete = 0;
   private _pendingInspect = 0;
 }
 

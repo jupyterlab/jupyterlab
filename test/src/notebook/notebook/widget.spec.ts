@@ -12,16 +12,12 @@ import {
 } from 'phosphor-properties';
 
 import {
-  ChildMessage
-} from 'phosphor-widget';
-
-import {
   simulate
 } from 'simulate-event';
 
 import {
   CodeCellModel, CodeCellWidget, MarkdownCellModel, MarkdownCellWidget,
-  RawCellModel, RawCellWidget
+  RawCellModel, RawCellWidget, BaseCellWidget
 } from '../../../../lib/notebook/cells';
 
 import {
@@ -70,6 +66,21 @@ class LogStaticNotebook extends StaticNotebook {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
   }
+
+  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+    super.onCellInserted(index, cell);
+    this.methods.push('onCellInserted');
+  }
+
+  protected onCellMoved(fromIndex: number, toIndex: number): void {
+    super.onCellMoved(fromIndex, toIndex);
+    this.methods.push('onCellMoved');
+  }
+
+  protected onCellRemoved(cell: BaseCellWidget): void {
+    super.onCellRemoved(cell);
+    this.methods.push('onCellRemoved');
+  }
 }
 
 
@@ -99,14 +110,19 @@ class LogNotebook extends Notebook {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onChildAdded(msg: ChildMessage): void {
-    super.onChildAdded(msg);
-    this.methods.push('onChildAdded');
+  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+    super.onCellInserted(index, cell);
+    this.methods.push('onCellInserted');
   }
 
-  protected onChildRemoved(msg: ChildMessage): void {
-    super.onChildRemoved(msg);
-    this.methods.push('onChildRemoved');
+  protected onCellMoved(fromIndex: number, toIndex: number): void {
+    super.onCellMoved(fromIndex, toIndex);
+    this.methods.push('onCellMoved');
+  }
+
+  protected onCellRemoved(cell: BaseCellWidget): void {
+    super.onCellRemoved(cell);
+    this.methods.push('onCellRemoved');
   }
 }
 
@@ -155,6 +171,30 @@ describe('notebook/notebook/widget', () => {
           called = true;
         });
         widget.model = model;
+        expect(called).to.be(true);
+      });
+
+    });
+
+    describe('#modelContentChanged', () => {
+
+      it('should be emitted when a cell is added', () => {
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime() });
+        widget.model = new NotebookModel();
+        let called = false;
+        widget.modelContentChanged.connect(() => { called = true; });
+        let cell = widget.model.factory.createCodeCell();
+        widget.model.cells.add(cell);
+        expect(called).to.be(true);
+      });
+
+      it('should be emitted when metadata is set', () => {
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime() });
+        widget.model = new NotebookModel();
+        let called = false;
+        widget.modelContentChanged.connect(() => { called = true; });
+        let cursor = widget.model.getMetadata('foo');
+        cursor.setValue(1);
         expect(called).to.be(true);
       });
 
@@ -401,6 +441,38 @@ describe('notebook/notebook/widget', () => {
 
     });
 
+    describe('#onCellInserted()', () => {
+
+      it('should be called when a cell is inserted', () => {
+        let widget = createWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        expect(widget.methods).to.contain('onCellInserted');
+      });
+
+    });
+
+    describe('#onCellMoved()', () => {
+
+      it('should be called when a cell is moved', () => {
+        let widget = createWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.cells.move(0, 1);
+        expect(widget.methods).to.contain('onCellMoved');
+      });
+
+    });
+
+    describe('#onCellRemoved()', () => {
+
+      it('should be called when a cell is removed', () => {
+        let widget = createWidget();
+        let cell = widget.model.cells.get(0);
+        widget.model.cells.remove(cell);
+        expect(widget.methods).to.contain('onCellRemoved');
+      });
+
+    });
+
     describe('.Renderer', () => {
 
       describe('#createCodeCell()', () => {
@@ -488,6 +560,32 @@ describe('notebook/notebook/widget', () => {
         });
         widget.mode = 'edit';
         expect(called).to.be(true);
+      });
+
+    });
+
+    describe('#activeCellChanged', () => {
+
+      it('should be emitted when the active cell changes', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        let called = false;
+        widget.activeCellChanged.connect((sender, args) => {
+          expect(sender).to.be(widget);
+          expect(args).to.be(widget.activeCell);
+          called = true;
+        });
+        widget.activeCellIndex++;
+        expect(called).to.be(true);
+      });
+
+      it('should not be emitted when the active cell does not change', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        let called = false;
+        widget.activeCellChanged.connect(() => { called = true; });
+        widget.activeCellIndex = widget.activeCellIndex;
+        expect(called).to.be(false);
       });
 
     });
@@ -619,6 +717,27 @@ describe('notebook/notebook/widget', () => {
         widget.activeCellIndex = 1;
       });
 
+      it('should update the active cell if necessary', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.activeCellIndex = 1;
+        expect(widget.activeCell).to.be(widget.childAt(1));
+      });
+
+    });
+
+    describe('#activeCell', () => {
+
+      it('should get the active cell widget', () => {
+        let widget = createActiveWidget();
+        expect(widget.activeCell).to.be(widget.childAt(0));
+      });
+
+      it('should be read-only', () => {
+        let widget = createActiveWidget();
+        expect(() => { widget.activeCell = null; }).to.throwError();
+      });
+
     });
 
     describe('#select()', () => {
@@ -724,6 +843,17 @@ describe('notebook/notebook/widget', () => {
           simulate(widget.node, 'click');
           expect(widget.events).to.contain('click');
           expect(widget.activeCellIndex).to.be(0);
+        });
+
+        it('should preserve "command" mode if in a markdown cell', () => {
+          let cell = widget.model.factory.createMarkdownCell();
+          widget.model.cells.add(cell);
+          let count = widget.childCount();
+          let child = widget.childAt(count - 1) as MarkdownCellWidget;
+          expect(child.rendered).to.be(true);
+          simulate(child.node, 'click');
+          expect(child.rendered).to.be(true);
+          expect(widget.activeCell).to.be(child);
         });
 
       });
@@ -916,16 +1046,22 @@ describe('notebook/notebook/widget', () => {
 
     });
 
-    describe('#onChildAdded()', () => {
+    describe('#onCellInserted()', () => {
 
       it('should post an `update-request', (done) => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        expect(widget.methods).to.contain('onChildAdded');
+        expect(widget.methods).to.contain('onCellInserted');
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
           done();
         });
+      });
+
+      it('should update the active cell if necessary', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        expect(widget.activeCell).to.be(widget.childAt(0));
       });
 
       context('`edgeRequested` signal', () => {
@@ -951,17 +1087,35 @@ describe('notebook/notebook/widget', () => {
 
     });
 
-    describe('#onChildRemoved()', () => {
+    describe('#onCellMoved()', () => {
+
+      it('should update the active cell index if necessary', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.cells.move(1, 0);
+        expect(widget.activeCellIndex).to.be(1);
+      });
+
+    });
+
+    describe('#onCellRemoved()', () => {
 
       it('should post an `update-request', (done) => {
         let widget = createActiveWidget();
         let cell = widget.model.cells.get(0);
         widget.model.cells.remove(cell);
-        expect(widget.methods).to.contain('onChildRemoved');
+        expect(widget.methods).to.contain('onCellRemoved');
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
           done();
         });
+      });
+
+      it('should update the active cell if necessary', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.cells.removeAt(0);
+        expect(widget.activeCell).to.be(widget.childAt(0));
       });
 
     });

@@ -85,21 +85,21 @@ const LANGUAGE_INFOS: { [key: string]: IKernelLanguageInfo } = {
 
 
 export
-class MockContext implements IDocumentContext {
+class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
 
-  constructor(model: IDocumentModel) {
+  constructor(model: T) {
     this._model = model;
   }
 
-  get kernelChanged(): ISignal<MockContext, IKernel> {
+  get kernelChanged(): ISignal<IDocumentContext<IDocumentModel>, IKernel> {
     return Private.kernelChangedSignal.bind(this);
   }
 
-  get pathChanged(): ISignal<MockContext, string> {
+  get pathChanged(): ISignal<IDocumentContext<IDocumentModel>, string> {
     return Private.pathChangedSignal.bind(this);
   }
 
-  get dirtyCleared(): ISignal<MockContext, void> {
+  get dirtyCleared(): ISignal<IDocumentContext<IDocumentModel>, void> {
     return Private.dirtyClearedSignal.bind(this);
   }
 
@@ -107,7 +107,7 @@ class MockContext implements IDocumentContext {
     return '';
   }
 
-  get model(): IDocumentModel {
+  get model(): T {
     return this._model;
   }
 
@@ -116,7 +116,7 @@ class MockContext implements IDocumentContext {
   }
 
   get path(): string {
-    return '';
+    return this._path;
   }
 
   get contentsModel(): IContentsModel {
@@ -164,6 +164,8 @@ class MockContext implements IDocumentContext {
   }
 
   saveAs(path: string): Promise<void> {
+    this._path = path;
+    this.pathChanged.emit(path);
     return Promise.resolve(void 0);
   }
 
@@ -179,7 +181,8 @@ class MockContext implements IDocumentContext {
     return void 0;
   }
 
-  private _model: IDocumentModel = null;
+  private _model: T = null;
+  private _path = '';
   private _kernel: IKernel = null;
 }
 
@@ -194,17 +197,17 @@ namespace Private {
    * A signal emitted when the kernel changes.
    */
   export
-  const kernelChangedSignal = new Signal<MockContext, IKernel>();
+  const kernelChangedSignal = new Signal<IDocumentContext<IDocumentModel>, IKernel>();
 
   /**
    * A signal emitted when the path changes.
    */
   export
-  const pathChangedSignal = new Signal<MockContext, string>();
+  const pathChangedSignal = new Signal<IDocumentContext<IDocumentModel>, string>();
 
   /**
    * A signal emitted when the model is saved or reverted.
    */
   export
-  const dirtyClearedSignal = new Signal<MockContext, void>();
+  const dirtyClearedSignal = new Signal<IDocumentContext<IDocumentModel>, void>();
 }

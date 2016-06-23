@@ -36,7 +36,8 @@ import {
 } from '../filebrowser/browser';
 
 import {
-  DocumentRegistry, IDocumentContext, IWidgetFactory, IWidgetFactoryOptions
+  DocumentRegistry, IDocumentContext, IWidgetFactory, IWidgetFactoryOptions,
+  IDocumentModel
 } from '../docregistry';
 
 import {
@@ -312,12 +313,12 @@ class DocumentManager implements IDisposable {
     let model = this._contextManager.getModel(id);
     model.initialize();
     let context = this._contextManager.getContext(id);
-    let child = factory.createNew(model, context, kernel);
+    let child = factory.createNew(context, kernel);
     parent.setContent(child);
     // Handle widget extensions.
     let disposables = new DisposableSet();
     for (let extender of this._registry.getWidgetExtensions(parent.name)) {
-      disposables.add(extender.createNew(child, model, context));
+      disposables.add(extender.createNew(child, context));
     }
     parent.disposed.connect(() => {
       disposables.dispose();
@@ -348,7 +349,7 @@ class DocumentWrapper extends Widget {
   /**
    * Construct a new document widget.
    */
-  constructor(name: string, id: string, manager: ContextManager, factory: IWidgetFactory<Widget>, widgets: { [key: string]: DocumentWrapper[] }) {
+  constructor(name: string, id: string, manager: ContextManager, factory: IWidgetFactory<Widget, IDocumentModel>, widgets: { [key: string]: DocumentWrapper[] }) {
     super();
     this.addClass(DOCUMENT_CLASS);
     this.layout = new PanelLayout();
@@ -376,7 +377,7 @@ class DocumentWrapper extends Widget {
    * #### Notes
    * This is a read-only property.
    */
-  get context(): IDocumentContext {
+  get context(): IDocumentContext<IDocumentModel> {
     return this._manager.getContext(this._id);
   }
 
@@ -445,7 +446,7 @@ class DocumentWrapper extends Widget {
     this._maybeClose(model.dirty).then(result => {
       if (result) {
         // Let the widget factory handle closing.
-        return this._factory.beforeClose(model, this.context, child);
+        return this._factory.beforeClose(child, this.context);
       }
       return result;
     }).then(result => {
@@ -517,7 +518,7 @@ class DocumentWrapper extends Widget {
   }
 
   private _manager: ContextManager = null;
-  private _factory: IWidgetFactory<Widget> = null;
+  private _factory: IWidgetFactory<Widget, IDocumentModel> = null;
   private _id = '';
   private _name = '';
   private _widgets: { [key: string]: DocumentWrapper[] } = null;
@@ -539,6 +540,6 @@ namespace Private {
    */
   export
   interface IWidgetFactoryEx extends IWidgetFactoryOptions {
-    factory: IWidgetFactory<Widget>;
+    factory: IWidgetFactory<Widget, IDocumentModel>;
   }
 }

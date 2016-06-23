@@ -82,33 +82,33 @@ describe('notebook/notebook/widgetfactory', () => {
 
       it('should create a new `NotebookPanel` widget', () => {
         let model = new NotebookModel();
-        let context = new MockContext(model);
+        let context = new MockContext<NotebookModel>(model);
         let factory = new NotebookWidgetFactory(rendermime, clipboard);
-        let panel = factory.createNew(model, context);
+        let panel = factory.createNew(context);
         expect(panel).to.be.a(NotebookPanel);
       });
 
       it('should create a clone of the rendermime', () => {
         let model = new NotebookModel();
-        let context = new MockContext(model);
+        let context = new MockContext<NotebookModel>(model);
         let factory = new NotebookWidgetFactory(rendermime, clipboard);
-        let panel = factory.createNew(model, context);
+        let panel = factory.createNew(context);
         expect(panel.rendermime).to.not.be(rendermime);
       });
 
       it('should start a kernel if one is given', () => {
         let model = new NotebookModel();
-        let context = new MockContext(model);
+        let context = new MockContext<NotebookModel>(model);
         let factory = new NotebookWidgetFactory(rendermime, clipboard);
-        let panel = factory.createNew(model, context, { name: 'shell' });
+        let panel = factory.createNew(context, { name: 'shell' });
         expect(panel.context.kernel.name).to.be('shell');
       });
 
       it('should start a kernel given the default kernel language', () => {
         let model = new NotebookModel();
-        let context = new MockContext(model);
+        let context = new MockContext<NotebookModel>(model);
         let factory = new NotebookWidgetFactory(rendermime, clipboard);
-        let panel = factory.createNew(model, context);
+        let panel = factory.createNew(context);
         expect(panel.context.kernel.name).to.be('python');
       });
 
@@ -116,17 +116,17 @@ describe('notebook/notebook/widgetfactory', () => {
         let model = new NotebookModel();
         let cursor = model.getMetadata('language_info');
         cursor.setValue({ name: 'shell' });
-        let context = new MockContext(model);
+        let context = new MockContext<NotebookModel>(model);
         let factory = new NotebookWidgetFactory(rendermime, clipboard);
-        let panel = factory.createNew(model, context);
+        let panel = factory.createNew(context);
         expect(panel.context.kernel.name).to.be('shell');
       });
 
       it('should populate the default toolbar items', () => {
         let model = new NotebookModel();
-        let context = new MockContext(model);
+        let context = new MockContext<NotebookModel>(model);
         let factory = new NotebookWidgetFactory(rendermime, clipboard);
-        let panel = factory.createNew(model, context);
+        let panel = factory.createNew(context);
         let items = panel.toolbar.list();
         expect(items).to.contain('save');
         expect(items).to.contain('restart');
@@ -139,10 +139,10 @@ describe('notebook/notebook/widgetfactory', () => {
 
       it('should be a no-op', (done) => {
         let model = new NotebookModel();
-        let context = new MockContext(model);
+        let context = new MockContext<NotebookModel>(model);
         let factory = new NotebookWidgetFactory(rendermime, clipboard);
-        let panel = factory.createNew(model, context);
-        factory.beforeClose(model, context, panel).then(() => {
+        let panel = factory.createNew(context);
+        factory.beforeClose(panel, context).then(() => {
           done();
         });
       });
