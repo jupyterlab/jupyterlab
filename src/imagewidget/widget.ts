@@ -67,7 +67,7 @@ class ImageWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     this.title.text = this._context.path.split('/').pop();
     let node = this.node as HTMLImageElement;
-    let content = this._context.toString();
+    let content = this._context.model.toString();
     let cm = this._context.contentsModel;
     node.src = `data:${cm.mimetype};${cm.format},${content}`;
   }
