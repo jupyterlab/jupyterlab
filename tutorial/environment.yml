@@ -1,4 +1,4 @@
-name: notebook_tutorial
+name: lab_tutorial
 dependencies:
 - python=3.5
 - sphinx_rtd_theme
