@@ -170,7 +170,7 @@ class CellEditorWidget extends CodeMirrorWidget {
 
     // If the model is being replaced, disconnect the old signal handler.
     if (this._model) {
-      this._model.stateChanged.disconnect(this.onModelChanged, this);
+      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
     }
 
     if (!model) {
@@ -181,7 +181,7 @@ class CellEditorWidget extends CodeMirrorWidget {
 
     this._model = model;
     doc.setValue(this._model.source || '');
-    this._model.stateChanged.connect(this.onModelChanged, this);
+    this._model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /**
@@ -210,9 +210,9 @@ class CellEditorWidget extends CodeMirrorWidget {
   }
 
   /**
-   * Handle changes in the model.
+   * Handle changes in the model state.
    */
-  protected onModelChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'source':
       let doc = this.editor.getDoc();
