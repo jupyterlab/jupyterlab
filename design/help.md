@@ -7,7 +7,7 @@ our research on personas and other solutions translates into the design decision
 
 ## Tim Burns
 
-Tim Burns works at Bloomberg as a marketing data scientist. He takes 
+Tim Burns works at SomeCompany as a marketing data scientist. He takes 
 large chunks of marketing data and visualizes them.
 
 **Goal:** Use Jupyter to help visualize data.
