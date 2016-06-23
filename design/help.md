@@ -1,7 +1,7 @@
 # Design of the Help plugin
 
 This document describes the design of the Help plugin. This document illustrates how
-our research translates into the design decisions made to improve the Help plugin.
+our research on personas and other solutions translates into the design decisions made to improve the Help plugin.
 
 # Personas
 
@@ -31,8 +31,8 @@ isn't very helpful for beginners
 
 Users should be able to:
 
-* Find Help
-* Find documentation
+* Have a basic understanding of how to use JupyterLab
+* Find Documentation
 
 #Research of Other Solutions
 
@@ -45,7 +45,7 @@ Users should be able to:
 * See Help tab immediately on left menu
 * More Help Content by including a Quickstart Guide and FAQs page
 
-##All possible actions a user could take:
+##All possible actions a user could take
 
 * Click Help which opens a submenu
 * Click About JupyterLab which opens a new window
@@ -67,7 +67,7 @@ Users should be able to:
 
 * Place “Help” on the same left side bar as “Commands” and “Files”
 * Remove “Help” plugin from “Commands” because it is difficult to find and should be shown when first entering JupyterLab
-* “Help” tab will match the present design of the side menu “Files” and “Commands” (Helvetica Neue sans-serif 12px with grey background and grey font)
+* “Help” tab will match the present design of the side menu “Files” and “Commands” 
 * Submenu bar for “Help” will stay consistent with the present design for “Commands” and “Files” submenu
 
 ##Typography
@@ -79,6 +79,6 @@ Users should be able to:
 
 * The “Help” tab colors will stay consistent with the present colors on the left menu
 * The “Help” submenu colors will stay consistent with the colors used in “Commands” and “Files” submenu
-* White background, grey text, orange Highlight
+* Light grey background, grey text, orange Highlight
  
 
