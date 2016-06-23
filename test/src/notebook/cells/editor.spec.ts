@@ -7,15 +7,19 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   simulate, generate
 } from 'simulate-event';
 
 import {
-  CellModel
+  CellModel, ICellModel
 } from '../../../../lib/notebook/cells';
 
 import {
-  CellEditorWidget, ITextChange, ICompletionRequest
+  CellEditorWidget, ITextChange, ICompletionRequest, EdgeLocation
 } from '../../../../lib/notebook/cells/editor';
 
 
@@ -24,6 +28,31 @@ const UP_ARROW = 38;
 const DOWN_ARROW = 40;
 
 const TAB = 9;
+
+
+class LogEditorWidget extends CellEditorWidget {
+  methods: string[] = [];
+
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    super.onModelStateChanged(model, args);
+    this.methods.push('onModelStateChanged');
+  }
+
+  protected onDocChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange): void {
+    super.onDocChange(doc, change);
+    this.methods.push('onDocChange');
+  }
+
+  protected onEditorKeydown(editor: CodeMirror.Editor, event: KeyboardEvent): void {
+    super.onEditorKeydown(editor, event);
+    this.methods.push('onEditorKeydown');
+  }
+
+  protected onTabEvent(event: KeyboardEvent, ch: number, line: number): void {
+    super.onTabEvent(event, ch, line);
+    this.methods.push('onTabEvent');
+  }
+}
 
 
 describe('notebook/cells/editor', () => {
@@ -43,22 +72,24 @@ describe('notebook/cells/editor', () => {
 
       it('should emit a signal when the top edge is requested', () => {
         let widget = new CellEditorWidget(new CellModel());
-        let called = false;
+        let edge: EdgeLocation = null;
         let event = generate('keydown', { keyCode: UP_ARROW });
-        widget.edgeRequested.connect(() => { called = true; });
-        expect(called).to.be(false);
+        let listener = (sender: any, args: EdgeLocation) => { edge = args; }
+        widget.edgeRequested.connect(listener);
+        expect(edge).to.be(null);
         widget.editor.triggerOnKeyDown(event);
-        expect(called).to.be(true);
+        expect(edge).to.be('top');
       });
 
       it('should emit a signal when the bottom edge is requested', () => {
         let widget = new CellEditorWidget(new CellModel());
-        let called = false;
+        let edge: EdgeLocation = null;
         let event = generate('keydown', { keyCode: DOWN_ARROW });
-        widget.edgeRequested.connect(() => { called = true; });
-        expect(called).to.be(false);
+        let listener = (sender: any, args: EdgeLocation) => { edge = args; }
+        widget.edgeRequested.connect(listener);
+        expect(edge).to.be(null);
         widget.editor.triggerOnKeyDown(event);
-        expect(called).to.be(true);
+        expect(edge).to.be('bottom');
       });
 
     });
@@ -86,6 +117,21 @@ describe('notebook/cells/editor', () => {
         expect(change).to.be.ok();
         expect(change.oldValue).to.equal(want.oldValue);
         expect(change.newValue).to.equal(want.newValue);
+      });
+
+      it('should not emit a signal if editor text already matches model', () => {
+        let widget = new CellEditorWidget(new CellModel());
+        let doc = widget.editor.getDoc();
+        let fromPos = { line: 0, ch: 0 };
+        let toPos = { line: 0, ch: 3 };
+        let called = false;
+        let listener = (sender: any, args: ITextChange) => { called = true; };
+        widget.model.source = 'foo';
+        widget.textChanged.connect(listener);
+
+        expect(called).to.be(false);
+        doc.replaceRange('foo', fromPos, toPos);
+        expect(called).to.be(false);
       });
 
     });
@@ -182,6 +228,55 @@ describe('notebook/cells/editor', () => {
         expect(widget.getCursorPosition()).to.be(0);
         widget.setCursorPosition(3);
         expect(widget.getCursorPosition()).to.be(3);
+      });
+
+    });
+
+    describe('#onModelStateChanged()', () => {
+
+      it('should run the model state changes', () => {
+        let widget = new LogEditorWidget(new CellModel());
+        expect(widget.methods).to.not.contain('onModelStateChanged');
+        widget.model.source = 'foo';
+        expect(widget.methods).to.contain('onModelStateChanged');
+      });
+
+    });
+
+    describe('#onDocChange()', () => {
+
+      it('should run when the code mirror document changes', () => {
+        let widget = new LogEditorWidget(new CellModel());
+        let doc = widget.editor.getDoc();
+        let fromPos = { line: 0, ch: 0 };
+        let toPos = { line: 0, ch: 0 };
+        expect(widget.methods).to.not.contain('onDocChange');
+        doc.replaceRange('foo', fromPos, toPos);
+        expect(widget.methods).to.contain('onDocChange');
+      });
+
+    });
+
+    describe('#onEditorKeydown()', () => {
+
+      it('should run when there is a keydown event on the editor', () => {
+        let widget = new LogEditorWidget(new CellModel());
+        let event = generate('keydown', { keyCode: UP_ARROW });
+        expect(widget.methods).to.not.contain('onEditorKeydown');
+        widget.editor.triggerOnKeyDown(event);
+        expect(widget.methods).to.contain('onEditorKeydown');
+      });
+
+    });
+
+    describe('#onTabEvent()', () => {
+
+      it('should run when there is a tab keydown event on the editor', () => {
+        let widget = new LogEditorWidget(new CellModel());
+        let event = generate('keydown', { keyCode: TAB });
+        expect(widget.methods).to.not.contain('onTabEvent');
+        widget.editor.triggerOnKeyDown(event);
+        expect(widget.methods).to.contain('onTabEvent');
       });
 
     });
