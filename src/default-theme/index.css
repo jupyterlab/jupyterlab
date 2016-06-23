@@ -220,7 +220,8 @@ body {
 .p-TabBar-tabIcon,
 .p-TabBar-tabText,
 .p-TabBar-tabCloseIcon {
-  line-height: 18px;
+  line-height: 24px;
+  vertical-align: middle;
 }
 
 
