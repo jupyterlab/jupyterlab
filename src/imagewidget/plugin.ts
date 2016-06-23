@@ -29,7 +29,7 @@ const imageHandlerExtension = {
   id: 'jupyter.extensions.imageHandler',
   requires: [DocumentRegistry],
   activate: (app: Application, registry: DocumentRegistry) => {
-    registry.registerWidgetFactory(new ImageWidgetFactory(),
+    registry.addWidgetFactory(new ImageWidgetFactory(),
     {
       fileExtensions: EXTENSIONS,
       displayName: 'Image',

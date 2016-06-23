@@ -15,8 +15,8 @@ const docRegistryProvider = {
   provides: DocumentRegistry,
   resolve: () => {
     let registry = new DocumentRegistry();
-    registry.registerModelFactory(new TextModelFactory());
-    registry.registerModelFactory(new Base64ModelFactory());
+    registry.addModelFactory(new TextModelFactory());
+    registry.addModelFactory(new Base64ModelFactory());
     return registry;
   }
 };

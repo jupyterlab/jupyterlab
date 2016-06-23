@@ -65,5 +65,5 @@ class IPyWidgetExtension implements IWidgetExtension<NotebookPanel>{
  * Activate the widget extension.
  */
 function activateWidgetExtension(app: Application, registry: DocumentRegistry) {
-  registry.registerExtension('Notebook', new IPyWidgetExtension());
+  registry.addWidgetExtension('Notebook', new IPyWidgetExtension());
 }

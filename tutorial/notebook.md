@@ -178,7 +178,7 @@ class ButtonExtension implements IWidgetExtension<NotebookPanel>{
  * Activate the extension.
  */
 function activateExtension(app: Application, registry: DocumentRegistry) {
-  registry.registerExtension('Notebook', new ButtonExtension());
+  registry.addWidgetExtension('Notebook', new ButtonExtension());
 }
 ```
 
