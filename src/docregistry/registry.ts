@@ -137,7 +137,7 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A disposable which will unregister the extension.
    */
-  addExtension(widgetName: string, extension: IWidgetExtension<Widget, IDocumentModel>): IDisposable {
+  addWidgetExtension(widgetName: string, extension: IWidgetExtension<Widget, IDocumentModel>): IDisposable {
     if (!(widgetName in this._extenders)) {
       this._extenders[widgetName] = [];
     }
