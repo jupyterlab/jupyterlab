@@ -3,12 +3,8 @@
 
 import {
   IContentsManager, IContentsModel, IContentsOpts, INotebookSessionManager,
-  INotebookSession, ISessionId, KernelStatus, IKernelSpecIds
+  INotebookSession, ISessionId, IKernelSpecIds
 } from 'jupyter-js-services';
-
-import {
-  PromiseDelegate
-} from 'jupyter-js-utils';
 
 import {
   IDisposable
@@ -44,6 +40,13 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * A signal emitted when the path changes.
+   */
+  get pathChanged(): ISignal<FileBrowserModel, IChangedArgs<string>> {
+    return Private.pathChangedSignal.bind(this);
+  }
+
+  /**
    * Get the refreshed signal.
    */
   get refreshed(): ISignal<FileBrowserModel, void> {
@@ -68,10 +71,14 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get the selection changed signal.
+   * Get a read-only, unsorted list of file names in the current path.
+   *
+   * #### Notes
+   * This is a read-only property.
+   *
    */
-  get selectionChanged(): ISignal<FileBrowserModel, void> {
-    return Private.selectionChangedSignal.bind(this);
+  get names(): string[] {
+    return this._unsortedNames.slice();
   }
 
   /**
@@ -139,63 +146,11 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Select an item by name.
-   *
-   * #### Notes
-   * This is a no-op if the name is not valid or already selected.
-   */
-  select(name: string): void {
-    if (!this._selection[name]) {
-      this._selection[name] = true;
-      this.selectionChanged.emit(void 0);
-    }
-  }
-
-  /**
-   * De-select an item by name.
-   *
-   * #### Notes
-   * This is a no-op if the name is not valid or not selected.
-   */
-  deselect(name: string): void {
-    if (this._selection[name]) {
-      delete this._selection[name];
-      this.selectionChanged.emit(void 0);
-    }
-  }
-
-  /**
-   * Check whether an item is selected.
-   *
-   * #### Notes
-   * Returns `true` for a valid name that is selected, `false` otherwise.
-   */
-  isSelected(name: string): boolean {
-    return !!this._selection[name];
-  }
-
-  /**
-   * Get the list of selected names.
-   */
-  getSelected(): string[] {
-    return Object.keys(this._selection);
-  }
-
-  /**
-   * Clear the selected items.
-   */
-  clearSelected(): void {
-    this._selection = Object.create(null);
-    this.selectionChanged.emit(void 0);
-  }
-
-  /**
    * Dispose of the resources held by the view model.
    */
   dispose(): void {
     this._model = null;
     this._contentsManager = null;
-    this._selection = null;
     clearSignalData(this);
   }
 
@@ -206,31 +161,27 @@ class FileBrowserModel implements IDisposable {
    *
    * @returns A promise with the contents of the directory.
    */
-  cd(path = ''): Promise<void> {
-    if (path !== '') {
-      path = Private.normalizePath(this._model.path, path);
+  cd(newValue = ''): Promise<void> {
+    if (newValue !== '') {
+      newValue = Private.normalizePath(this._model.path, newValue);
     }
-    let previous = this._selection;
-    if (path !== this.path) {
-      previous = Object.create(null);
-    }
-    let selection = Object.create(null);
-    return this._contentsManager.get(path, {}).then(contents => {
+    let oldValue = this.path;
+    return this._contentsManager.get(newValue, {}).then(contents => {
       this._model = contents;
       let content = contents.content as IContentsModel[];
-      let names = content.map((value, index) => value.name);
-      for (let name of names) {
-        if (previous[name]) {
-          selection[name] = true;
-        }
-      }
       this._unsortedNames = content.map((value, index) => value.name);
       if (this._sortKey !== 'name' || !this._ascending) {
         this._sort();
       }
       return this._findSessions();
     }).then(() => {
-      this.selectionChanged.emit(void 0);
+      if (oldValue !== newValue) {
+        this.pathChanged.emit({
+          name: 'path',
+          oldValue,
+          newValue
+        });
+      }
       this.refreshed.emit(void 0);
     });
   }
@@ -518,7 +469,6 @@ class FileBrowserModel implements IDisposable {
   private _sessionIds: ISessionId[] = [];
   private _sessionManager: INotebookSessionManager = null;
   private _model: IContentsModel;
-  private _selection: { [key: string]: boolean; } = Object.create(null);
   private _sortKey = 'name';
   private _ascending = true;
   private _unsortedNames: string[] = [];
@@ -543,10 +493,10 @@ namespace Private {
   const fileChangedSignal = new Signal<FileBrowserModel, IChangedArgs<string>>();
 
   /**
-   * A signal emitted when the selection changes.
+   * A signal emitted when the path changes.
    */
   export
-  const selectionChangedSignal = new Signal<FileBrowserModel, void>();
+  const pathChangedSignal = new Signal<FileBrowserModel, IChangedArgs<string>> ();
 
   /**
    * Parse the content of a `FileReader`.
