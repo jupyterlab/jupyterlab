@@ -599,20 +599,24 @@ class Notebook extends StaticNotebook {
   }
   set activeCellIndex(newValue: number) {
     if (!this.model || !this.model.cells.length) {
+      if (this._activeCell) {
+        this._activeCell = null;
+        this.activeCellChanged.emit(null);
+      }
       return;
     }
     newValue = Math.max(newValue, 0);
     newValue = Math.min(newValue, this.model.cells.length - 1);
+    let cell = this.childAt(newValue);
+    if (cell !== this._activeCell) {
+      this._activeCell = cell;
+      this.activeCellChanged.emit(cell);
+    }
     if (newValue === this._activeCellIndex) {
       return;
     }
     let oldValue = this._activeCellIndex;
     this._activeCellIndex = newValue;
-    let cell = this.childAt(this._activeCellIndex);
-    if (cell !== this._activeCell) {
-      this._activeCell = cell;
-      this.activeCellChanged.emit(cell);
-    }
     this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
     this.update();
   }
@@ -768,7 +772,8 @@ class Notebook extends StaticNotebook {
    */
   protected onCellInserted(index: number, cell: BaseCellWidget): void {
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
-    this._updateActiveCell();
+    // Trigger an update of the active cell.
+    this.activeCellIndex = this.activeCellIndex;
     this.update();
   }
 
@@ -785,7 +790,8 @@ class Notebook extends StaticNotebook {
    * Handle a cell being removed.
    */
   protected onCellRemoved(cell: BaseCellWidget): void {
-    this._updateActiveCell();
+    // Trigger an update of the active cell.
+    this.activeCellIndex = this.activeCellIndex;
     this.update();
   }
 
@@ -829,26 +835,6 @@ class Notebook extends StaticNotebook {
       node = node.parentElement;
     }
     return -1;
-  }
-
-  /**
-   * Update the active cell when a cell is added or removed.
-   */
-  private _updateActiveCell(): void {
-    let count = this.childCount();
-    if (count > 0 && this.activeCellIndex === -1) {
-      this.activeCellIndex = 0;
-    } else if (count === 0) {
-      this.activeCellIndex = -1;
-    } else if (this._activeCellIndex > count) {
-      this.activeCellIndex = count - 1;
-    } else {
-      let active = this.childAt(this.activeCellIndex);
-      if (active !== this._activeCell) {
-        this._activeCell = active;
-        this.activeCellChanged.emit(active);
-      }
-    }
   }
 
   /**

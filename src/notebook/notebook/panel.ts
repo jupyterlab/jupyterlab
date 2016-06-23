@@ -382,7 +382,7 @@ export namespace NotebookPanel {
    * The default implementation of an `IRenderer`.
    */
   export
-  class Renderer {
+  class Renderer implements IRenderer {
     /**
      * Create a new content area for the panel.
      */
