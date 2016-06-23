@@ -199,7 +199,7 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
       // Check for escape key
       if (evt.keyCode === 27) {
         host.removeChild(dialog);
-        resolve(null);
+        resolve(cancelButton);
       }
     }, true);
     dialog.addEventListener('contextmenu', evt => {
