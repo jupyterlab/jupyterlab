@@ -598,26 +598,22 @@ class Notebook extends StaticNotebook {
     return this.model.cells.length ? this._activeCellIndex : -1;
   }
   set activeCellIndex(newValue: number) {
+    let oldValue = this._activeCellIndex;
     if (!this.model || !this.model.cells.length) {
       this._activeCellIndex = -1;
-      if (this._activeCell) {
-        this._activeCell = null;
-        this.activeCellChanged.emit(null);
-      }
-      return;
+    } else {
+      newValue = Math.max(newValue, 0);
+      newValue = Math.min(newValue, this.model.cells.length - 1);
+      this._activeCellIndex = newValue;
     }
-    newValue = Math.max(newValue, 0);
-    newValue = Math.min(newValue, this.model.cells.length - 1);
     let cell = this.childAt(newValue);
     if (cell !== this._activeCell) {
       this._activeCell = cell;
       this.activeCellChanged.emit(cell);
     }
-    if (newValue === this._activeCellIndex) {
+    if (newValue === oldValue) {
       return;
     }
-    let oldValue = this._activeCellIndex;
-    this._activeCellIndex = newValue;
     this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
     this.update();
   }
