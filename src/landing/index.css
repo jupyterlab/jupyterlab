@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-Landing {
-  background: rgba(0,0,0,0.25);
   color: #757575;
   position: absolute;
   z-index: 10000;
