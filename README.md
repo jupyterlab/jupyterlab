@@ -136,6 +136,19 @@ npm run docs
 
 Navigate to `docs/index.html`.
 
+Publishing packages for a JupyterLab release
+--------------------------------------------
+
+We publish an npm package, a pypi source package, and a pypi universal binary wheel.
+
+```bash
+npm version patch
+git push origin master --tags
+npm publish
+python setup.py sdist upload
+python setup.py bdist_wheel --universal upload
+```
+
 
 Supported Runtimes
 ------------------
