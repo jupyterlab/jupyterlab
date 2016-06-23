@@ -16,13 +16,13 @@ import {
 } from '../utils';
 
 
-describe('jupyter-ui', () => {
+describe('dialog/index', () => {
 
   describe('showDialog()', () => {
 
     it('should accept zero arguments', (done) => {
       showDialog().then(result => {
-        expect(result).to.be(null);
+        expect(result.text).to.be('CANCEL');
         done();
       });
       Promise.resolve().then(() => {
@@ -42,7 +42,7 @@ describe('jupyter-ui', () => {
         okText: 'Yep'
       };
       showDialog(options).then(result => {
-        expect(result).to.be(null);
+        expect(result.text).to.be('CANCEL');
         done();
       });
       Promise.resolve().then(() => {
@@ -67,7 +67,7 @@ describe('jupyter-ui', () => {
     it('should accept an input body', (done) => {
       let body = document.createElement('input');
       showDialog({ body }).then(result => {
-        expect(result).to.be(null);
+        expect(result.text).to.be('CANCEL');
         done();
       });
       dismissDialog();
@@ -101,7 +101,7 @@ describe('jupyter-ui', () => {
     it('should ignore context menu events', (done) => {
       let body = document.createElement('div');
       showDialog({ body }).then(result => {
-        expect(result).to.be(null);
+        expect(result.text).to.be('CANCEL');
         done();
       });
       Promise.resolve().then(() => {
