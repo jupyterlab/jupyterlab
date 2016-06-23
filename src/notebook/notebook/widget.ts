@@ -796,6 +796,8 @@ class Notebook extends StaticNotebook {
    * Handle a new model.
    */
   protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
+    // Try to set the active cell index to 0.
+    // It will be set to `-1` if there is no new model or the model is empty.
     this.activeCellIndex = 0;
   }
 
