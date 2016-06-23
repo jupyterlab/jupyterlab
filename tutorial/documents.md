@@ -31,20 +31,20 @@ is the default mechanism for interacting with files in JupyterLab.
 - file types
 - file creators
 
-### [Widget Factories](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#registerwidgetfactory)
+### [Widget Factories](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#addwidgetfactory)
 
 Create a widget for a given file.
 
 *Example*
 - The notebook widget factory that creates NotebookPanel widgets.
 
-### [Model Factories](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#registermodelfactory)
+### [Model Factories](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#addmodelfactory)
 
 Create a model for a given file.
 
 Models are generally differentiated by the contents options used to fetch the model (e.g. text, base64, notebook).
 
-### [Widget Extensions](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#registerextension)
+### [Widget Extensions](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#addwidgetextension)
 
 Add additional functionality to a widget type. An extension instance is
 created for each widget instance.
@@ -53,11 +53,11 @@ created for each widget instance.
 - The ipywidgets extension that is created for NotebookPanel widgets.
 - Adding a button to the toolbar of each NotebookPanel widget.
 
-### [File Types](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#registerfiletype)
+### [File Types](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#addfiletype)
 
 Intended to be used in a "Create New" dialog, providing a list of known file types.
 
-### [File Creators](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#registercreator)
+### [File Creators](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#addcreator)
 
 Intended for create quick launch file creators.
 

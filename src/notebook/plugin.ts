@@ -187,8 +187,8 @@ class TrackingNotebookWidgetFactory extends NotebookWidgetFactory {
 function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: JupyterServices, rendermime: RenderMime<Widget>, clipboard: IClipboard): Promise<void> {
 
   let widgetFactory = new TrackingNotebookWidgetFactory(rendermime, clipboard);
-  registry.registerModelFactory(new NotebookModelFactory());
-  registry.registerWidgetFactory(widgetFactory,
+  registry.addModelFactory(new NotebookModelFactory());
+  registry.addWidgetFactory(widgetFactory,
   {
     fileExtensions: ['.ipynb'],
     displayName: 'Notebook',
@@ -210,7 +210,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     return a.localeCompare(b);
   });
   for (let displayName of displayNames) {
-    registry.registerCreator({
+    registry.addCreator({
       name: `${displayName} Notebook`,
       extension: '.ipynb',
       type: 'notebook',

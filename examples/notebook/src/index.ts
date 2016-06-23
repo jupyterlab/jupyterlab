@@ -107,8 +107,8 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
   let wFactory = new NotebookWidgetFactory(rendermime, clipboard);
-  docRegistry.registerModelFactory(mFactory);
-  docRegistry.registerWidgetFactory(wFactory, {
+  docRegistry.addModelFactory(mFactory);
+  docRegistry.addWidgetFactory(wFactory, {
     displayName: 'Notebook',
     modelName: 'notebook',
     fileExtensions: ['.ipynb'],

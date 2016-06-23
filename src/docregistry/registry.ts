@@ -20,9 +20,6 @@ import {
 
 /**
  * The document registery.
- *
- * #### Notes
- * The document registry is used to register model and widget creators.
  */
 export
 class DocumentRegistry implements IDisposable {
@@ -61,13 +58,13 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Register a widget factory with the document registry.
+   * Add a widget factory to the registry.
    *
-   * @param factory - The factory instance.
+   * @param factory - The factory instance to register.
    *
    * @param options - The options used to register the factory.
    *
-   * @returns A disposable used to unregister the factory.
+   * @returns A disposable which will unregister the factory.
    *
    * #### Notes
    * If a factory with the given `displayName` is already registered,
@@ -77,7 +74,7 @@ class DocumentRegistry implements IDisposable {
    * If a factory is already registered as a default for a given extension or
    * as the global default, this factory will override the existing default.
    */
-  registerWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions): IDisposable {
+  addWidgetFactory(factory: IWidgetFactory<Widget>, options: IWidgetFactoryOptions): IDisposable {
     let name = options.displayName;
     let exOpt = utils.copy(options) as Private.IWidgetFactoryEx;
     exOpt.factory = factory;
@@ -109,17 +106,17 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Register a model factory.
+   * Add a model factory to the registry.
    *
    * @param factory - The factory instance.
    *
-   * @returns A disposable used to unregister the factory.
+   * @returns A disposable which will unregister the factory.
    *
    * #### Notes
    * If a factory with the given `name` is already registered, an error
    * will be thrown.
    */
-  registerModelFactory(factory: IModelFactory): IDisposable {
+  addModelFactory(factory: IModelFactory): IDisposable {
     let name = factory.name;
     if (this._modelFactories[name]) {
       throw new Error(`Duplicate registered factory ${name}`);
@@ -131,13 +128,15 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Register a widget extension.
+   * Add a widget extension to the registry.
+   *
+   * @param widgetName - The name of the widget factory.
    *
    * @param extension - A widget extension.
    *
-   * @returns A disposable that can be used to unregister the extension.
+   * @returns A disposable which will unregister the extension.
    */
-  registerExtension(widgetName: string, extension: IWidgetExtension<Widget>): IDisposable {
+  addWidgetExtension(widgetName: string, extension: IWidgetExtension<Widget>): IDisposable {
     if (!(widgetName in this._extenders)) {
       this._extenders[widgetName] = [];
     }
@@ -149,12 +148,16 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Register a file type with the document registry.
+   * Add a file type to the document registry.
+   *
+   * @params fileType - The file type object to register.
+   *
+   * @returns A disposable which will unregister the command.
    *
    * #### Notes
    * These are used to populate the "Create New" dialog.
    */
-  registerFileType(fileType: IFileType): IDisposable {
+  addFileType(fileType: IFileType): IDisposable {
     this._fileTypes.push(fileType);
     this._fileTypes.sort((a, b) => a.name.localeCompare(b.name));
     return new DisposableDelegate(() => {
@@ -164,17 +167,19 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Register a Create New handler.
+   * Add a creator to the registry.
    *
-   * @params creator - The file creator object.
+   * @params creator - The file creator object to register.
    *
    * @params after - The optional item name to insert after.
+   *
+   * @returns A disposable which will unregister the creator.
    *
    * #### Notes
    * If `after` is not given or not already registered, it will be moved
    * to the end.
    */
-  registerCreator(creator: IFileCreator, after?: string): IDisposable {
+  addCreator(creator: IFileCreator, after?: string): IDisposable {
     let added = false;
     if (after) {
       for (let existing of this._creators) {
@@ -195,9 +200,11 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Get the list of registered widget factory display names.
+   * List the names of the registered widget factories.
    *
-   * @param path - An optional file path to filter the results.
+   * @param ext - An optional file extension to filter the results.
+   *
+   * @returns A new array of registered widget factory names.
    *
    * #### Notes
    * The first item in the list is considered the default.
@@ -244,21 +251,40 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
+   * List the names of the registered model factories.
+   *
+   * @returns A new array of registered model factory names.
+   */
+  listModelFactories(): string[] {
+    return Object.keys(this._modelFactories);
+  }
+
+  /**
    * Get a list of file types that have been registered.
+   *
+   * @returns A new array of registered file type objects.
    */
   listFileTypes(): IFileType[] {
     return this._fileTypes.slice();
   }
 
   /**
-   * Get the ordered list of file creator names.
+   * Get an ordered list of the file creators that have been registered.
+   *
+   * @returns A new array of registered file creator objects.
    */
   listCreators(): IFileCreator[] {
     return this._creators.slice();
   }
 
   /**
-   * Get the kernel preference.
+   * Get a kernel preference.
+   *
+   * @param ext - The file extension.
+   *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @returns A kernel preference.
    */
   getKernelPreference(ext: string, widgetName: string): IKernelPreference {
     let widgetFactoryEx = this._getWidgetFactoryEx(widgetName);
@@ -274,6 +300,9 @@ class DocumentRegistry implements IDisposable {
   /**
    * Get the model factory registered for a given widget factory.
    *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @returns A model factory instance.
    */
   getModelFactory(widgetName: string): IModelFactory {
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
@@ -285,6 +314,10 @@ class DocumentRegistry implements IDisposable {
 
   /**
    * Get a widget factory by name.
+   *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @returns A widget factory instance.
    */
   getWidgetFactory(widgetName: string): IWidgetFactory<Widget> {
     return this._getWidgetFactoryEx(widgetName).factory;
@@ -292,6 +325,10 @@ class DocumentRegistry implements IDisposable {
 
   /**
    * Get the registered extensions for a given widget.
+   *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @returns A new array of widget extensions.
    */
   getWidgetExtensions(widgetName: string): IWidgetExtension<Widget>[] {
     if (!(widgetName in this._extenders)) {
