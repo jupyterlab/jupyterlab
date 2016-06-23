@@ -81,8 +81,8 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   );
   let mFactory = new TextModelFactory();
   let wFactory = new EditorWidgetFactory();
-  docRegistry.registerModelFactory(mFactory);
-  docRegistry.registerWidgetFactory(wFactory, {
+  docRegistry.addModelFactory(mFactory);
+  docRegistry.addWidgetFactory(wFactory, {
     displayName: 'Editor',
     modelName: 'text',
     fileExtensions: ['.*'],
