@@ -45,7 +45,10 @@ namespace NotebookActions {
   /**
    * Split the active cell into two cells.
    *
+   * @param widget - The target notebook widget.
+   *
    * #### Notes
+   * It will preserve the widget `mode`.
    * The second cell will be activated.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells are created.
@@ -83,7 +86,10 @@ namespace NotebookActions {
   /**
    * Merge the selected cells.
    *
+   * @param widget - The target notebook widget.
+   *
    * #### Notes
+   * It will switch the widget to `'command'` mode.
    * This is be a no-op if there is no model or only one cell is
    * selected.
    * The existing selection will be cleared.
@@ -156,7 +162,10 @@ namespace NotebookActions {
   /**
    * Delete the selected cells.
    *
+   * @param widget - The target notebook widget.
+   *
    * #### Notes
+   * It will switch the widget to `'command'` mode.
    * This is be a no-op if there is no model.
    * This action is undo-able.
    */
@@ -187,7 +196,10 @@ namespace NotebookActions {
   /**
    * Insert a new code cell above the active cell.
    *
+   * @param widget - The target notebook widget.
+   *
    * #### Notes
+   * It preserve the widget `mode`.
    * This will be a no-op if there is no model.
    * This action is undo-able.
    * The existing selection will be cleared.
@@ -206,7 +218,10 @@ namespace NotebookActions {
   /**
    * Insert a new code cell below the active cell.
    *
+   * @param widget - The target notebook widget.
+   *
    * #### Notes
+   * It preserve the widget `mode`.
    * This is be a no-op if there is no model.
    * This action is undo-able.
    * The existing selection will be cleared.
@@ -225,13 +240,18 @@ namespace NotebookActions {
   /**
    * Change the selected cell type(s).
    *
+   * @param widget - The target notebook widget.
+   *
+   * @param value - The target cell type.
+   *
    * #### Notes
+   * It will switch the widget to `'command'` mode.
    * This is be a no-op if there is no model.
    * This action is undo-able.
    * The existing selection will be cleared.
    */
   export
-  function changeCellType(widget: Notebook, value: string): void {
+  function changeCellType(widget: Notebook, value: nbformat.CellType): void {
     if (!widget.model) {
       return;
     }
@@ -270,9 +290,14 @@ namespace NotebookActions {
   /**
    * Run the selected cell(s).
    *
+   * @param widget - The target notebook widget.
+   *
+   * @param kernel - An optional kernel object.
+   *
    * #### Notes
+   * It will switch the widget to `'command'` mode before running.
    * This is a no-op if there is no model.
-   * The existing selection will be cleared.
+   * The existing selection will be maintained.
    */
   export
   function run(widget: Notebook, kernel?: IKernel): void {
@@ -289,18 +314,22 @@ namespace NotebookActions {
     for (let child of selected) {
       Private.runCell(child, kernel);
     }
-    Private.deselectCells(widget);
   }
 
   /**
    * Run the selected cell(s) and advance to the next cell.
    *
+   * @param widget - The target notebook widget.
+   *
+   * @param kernel - An optional kernel object.
+   *
    * #### Notes
+   * It will switch the widget to `'command'` mode before running.
    * This is a no-op if there is no model.
    * The existing selection will be cleared.
    * The cell after the last selected cell will be activated.
    * If the last selected cell is the last cell, a new code cell
-   * will be created in edit mode.
+   * will be created in `'edit'` mode.  The new cell creation is undo-able.
    */
   export
   function runAndAdvance(widget: Notebook, kernel?: IKernel): void {
@@ -313,19 +342,23 @@ namespace NotebookActions {
       let cell = model.factory.createCodeCell();
       model.cells.add(cell);
       widget.mode = 'edit';
-    } else {
-      widget.mode = 'command';
     }
     widget.activeCellIndex++;
     Private.deselectCells(widget);
   }
 
   /**
-   * Run the selected cell(s) and insert a new code cell below in edit mode.
+   * Run the selected cell(s) and insert a new code cell.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * @param kernel - An optional kernel object.
    *
    * #### Notes
+   * It will switch the widget to `'edit'` mode after running.
    * This is a no-op if there is no model.
    * The existing selection will be cleared.
+   * The cell insert is undo-able.
    */
   export
   function runAndInsert(widget: Notebook, kernel?: IKernel): void {
@@ -343,6 +376,15 @@ namespace NotebookActions {
 
   /**
    * Run all of the cells in the notebook.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * @param kernel - An optional kernel object.
+   *
+   * #### Notes
+   * It will switch the widget to `'command'` mode.
+   * This is a no-op if there is no model.
+   * The existing selection will be cleared.
    */
   export
   function runAll(widget: Notebook, kernel?: IKernel): void {
@@ -354,26 +396,19 @@ namespace NotebookActions {
     }
     widget.mode = 'command';
     widget.activeCellIndex = widget.childCount() - 1;
-  }
-
-  /**
-   * Select the cell below the active cell.
-   */
-  export
-  function selectBelow(widget: Notebook): void {
-    if (!widget.model) {
-      return;
-    }
-    if (widget.activeCellIndex === widget.childCount() - 1) {
-      return;
-    }
-    widget.activeCellIndex += 1;
-    widget.mode = 'command';
     Private.deselectCells(widget);
   }
 
   /**
    * Select the above the active cell.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * It will switch the widget to `'command'` mode.
+   * This is a no-op if there is no model.
+   * The existing selection will be cleared.
+   * It will not wrap around to the bottom.
    */
   export
   function selectAbove(widget: Notebook): void {
@@ -389,7 +424,39 @@ namespace NotebookActions {
   }
 
   /**
+   * Select the cell below the active cell.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * It will switch the widget to `'command'` mode.
+   * This is a no-op if there is no model.
+   * The existing selection will be cleared.
+   * It will not wrap around to the top.
+   */
+  export
+  function selectBelow(widget: Notebook): void {
+    if (!widget.model) {
+      return;
+    }
+    if (widget.activeCellIndex === widget.childCount() - 1) {
+      return;
+    }
+    widget.activeCellIndex += 1;
+    widget.mode = 'command';
+    Private.deselectCells(widget);
+  }
+
+  /**
    * Extend the selection to the cell above.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * It will switch the widget to `'command'` mode.
+   * This is a no-op if there is no model.
+   * The new cell will be activated.
+   * It will not wrap around to the bottom.
    */
   export
   function extendSelectionAbove(widget: Notebook): void {
@@ -421,6 +488,14 @@ namespace NotebookActions {
 
   /**
    * Extend the selection to the cell below.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * It will switch the widget to `'command'` mode.
+   * This is a no-op if there is no model.
+   * The new cell will be activated.
+   * It will not wrap around to the bottom.
    */
   export
   function extendSelectionBelow(widget: Notebook): void {
@@ -452,6 +527,15 @@ namespace NotebookActions {
 
   /**
    * Copy the selected cells to a clipboard.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * @param clipboard - The clipboard object.
+   *
+   * #### Notes
+   * It preserve the widget `mode`.
+   * This is a no-op if there is no model.
+   * It will clear the existing selection.
    */
   export
   function copy(widget: Notebook, clipboard: IClipboard): void {
@@ -472,6 +556,15 @@ namespace NotebookActions {
 
   /**
    * Cut the selected cells to a clipboard.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * @param clipboard - The clipboard object.
+   *
+   * #### Notes
+   * It will switch the widget to `'command'` mode.
+   * This is a no-op if there is no model.
+   * This action is undo-able.
    */
   export
   function cut(widget: Notebook, clipboard: IClipboard): void {
@@ -502,6 +595,16 @@ namespace NotebookActions {
 
   /**
    * Paste cells from a clipboard.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * @param clipboard - The clipboard object.
+   *
+   * #### Notes
+   * It will switch the widget to `'command'` mode.
+   * This is a no-op if there is no model.
+   * This is a no-op if there is no cell data on the clipboard.
+   * This action is undo-able.
    */
   export
   function paste(widget: Notebook, clipboard: IClipboard): void {
@@ -514,6 +617,7 @@ namespace NotebookActions {
     let values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
     let model = widget.model;
     let cells: ICellModel[] = [];
+    widget.mode = 'command';
     for (let value of values) {
       switch (value.cell_type) {
       case 'code':
@@ -534,6 +638,13 @@ namespace NotebookActions {
 
   /**
    * Undo a cell action.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * It will switch the widget to `'command'` mode.
+   * It will be a no-op if there is no model or if there are no
+   * cell actions to undo.
    */
   export
   function undo(widget: Notebook): void {
@@ -546,6 +657,13 @@ namespace NotebookActions {
 
   /**
    * Redo a cell action.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * It will switch the widget to `'command'` mode.
+   * It will be a no-op if there is no model or if there are no
+   * cell actions to redo.
    */
   export
   function redo(widget: Notebook): void {
@@ -558,6 +676,13 @@ namespace NotebookActions {
 
   /**
    * Toggle line numbers on the selected cell(s).
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * It preserve the widget `mode`.
+   * It will be based on the line number state of the first selected cell.
+   * It will be a no-op if there is no model.
    */
   export
   function toggleLineNumbers(widget: Notebook): void {
@@ -578,6 +703,13 @@ namespace NotebookActions {
 
   /**
    * Toggle the line number of all cells.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * It preserve the widget `mode`.
+   * It will be based on the line number state of the first cell.
+   * It will be a no-op if there is no model.
    */
   export
   function toggleAllLineNumbers(widget: Notebook): void {
@@ -596,6 +728,12 @@ namespace NotebookActions {
 
   /**
    * Clear the outputs of the currently selected cells.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * It preserve the widget `mode`.
+   * It will be a no-op if there is no model.
    */
   export
   function clearOutputs(widget: Notebook): void {
@@ -615,6 +753,12 @@ namespace NotebookActions {
 
   /**
    * Clear the code outputs on the widget.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * It preserve the widget `mode`.
+   * It will be a no-op if there is no model.
    */
   export
   function clearAllOutputs(widget: Notebook): void {
@@ -632,7 +776,16 @@ namespace NotebookActions {
   }
 
   /**
-   * Restart a kernel.
+   * Restart a kernel after presenting a dialog.
+   *
+   * @param kernel - The kernel to restart.
+   *
+   * @param host - The optional host element for the dialog.
+   *
+   * @returns A promise that resolves to `true` the user elects to restart.
+   *
+   * #### Notes
+   * It will be a no-op if there is no kernel.
    */
   export
   function restart(kernel: IKernel, host?: HTMLElement): Promise<boolean> {

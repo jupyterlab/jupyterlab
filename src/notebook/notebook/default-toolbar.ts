@@ -10,6 +10,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  nbformat
+} from './nbformat';
+
+import {
   NotebookPanel
 } from './panel';
 
@@ -297,7 +301,8 @@ class CellTypeSwitcher extends Widget {
     // Change current cell type on a change in the dropdown.
     select.addEventListener('change', event => {
       if (!this._changeGuard) {
-        NotebookActions.changeCellType(content, select.value);
+        let value = select.value as nbformat.CellType;
+        NotebookActions.changeCellType(content, value);
       }
     });
 

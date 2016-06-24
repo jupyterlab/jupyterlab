@@ -229,7 +229,7 @@ describe('notebook/notebook/actions', () => {
 
       });
 
-      it('should clear the existing selection', () => {
+      it('should maintain the existing selection', () => {
 
       });
 
@@ -254,6 +254,202 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should create a new code cell in edit mode if necessary', () => {
+
+      });
+
+      it('should allow an undo of the new cell', () => {
+
+      });
+
+    });
+
+    describe('#runAndInsert()', () => {
+
+      it('should run the selected cells', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should clear the existing selection', () => {
+
+      });
+
+      it('should have an undo-able cell insert', () => {
+
+      });
+
+    });
+
+    describe('#runAll()', () => {
+
+      it('should run the selected cells', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should clear the existing selection', () => {
+
+      });
+
+    });
+
+    describe('#selectAbove()', () => {
+
+      it('should select the cell above the active cell', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should not wrap around to the bottom', () => {
+
+      });
+
+      it('should clear the existing selection', () => {
+
+      });
+
+    });
+
+    describe('#selectBelow()', () => {
+
+      it('should select the cell below the active cell', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should not wrap around to the top', () => {
+
+      });
+
+      it('should clear the existing selection', () => {
+
+      });
+
+    });
+
+    describe('#extendSelectionAbove()', () => {
+
+      it('should extend the selection to the cell above', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should not wrap around to the bottom', () => {
+
+      });
+
+      it('should activate the cell', () => {
+
+      });
+
+    });
+
+    describe('#extendSelectionBelow()', () => {
+
+      it('should extend the selection to the cell below', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should not wrap around to the top', () => {
+
+      });
+
+      it('should activate the cell', () => {
+
+      });
+
+    });
+
+    describe('#copy()', () => {
+
+      it('should copy the selected cells to a clipboard', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should clear the existing selection', () => {
+
+      });
+
+    });
+
+    describe('#cut()', () => {
+
+      it('should cut the selected cells to a clipboard', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should be undo-able', () => {
+
+      });
+
+    });
+
+    describe('#paste()', () => {
+
+      it('should paste cells from a clipboard', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should be a no-op if there is no cell data on the clipboard', () => {
+
+      });
+
+      it('should switch the widget to command mode', () => {
+
+      });
+
+      it('should be undo-able', () => {
+
+      });
+
+    });
+
+    describe('#undo()', () => {
+
+      it('should undo a cell action', () => {
+
+      });
+
+      it('should switch the widget to command mode', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should be a no-op if there are no cell actions to undo', () => {
 
       });
 
