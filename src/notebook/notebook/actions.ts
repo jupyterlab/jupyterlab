@@ -39,6 +39,12 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 /**
  * A namespace for handling actions on a notebook.
+ *
+ * #### Notes
+ * All of the actions are a no-op if there is no model on the notebook.
+ * The actions will preserve the notebook `mode` unless otherwise specified.
+ * The actions will preserve the selection on the notebook unless
+ * otherwise specified.
  */
 export
 namespace NotebookActions {
@@ -48,11 +54,9 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * #### Notes
-   * It will preserve the widget `mode`.
    * The second cell will be activated.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells are created.
-   * This is a no-op if there is no model.
    * Both cells will have the same type as the original cell.
    * This action is undo-able.
    * The existing selection will be cleared.
@@ -90,8 +94,7 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * This is be a no-op if there is no model or only one cell is
-   * selected.
+   * This is be a no-op if only one cell is selected.
    * The existing selection will be cleared.
    * This action is undo-able.
    * This is unrender a markdown cell.
@@ -166,7 +169,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * This is be a no-op if there is no model.
    * This action is undo-able.
    */
   export
@@ -199,8 +201,6 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * #### Notes
-   * It preserve the widget `mode`.
-   * This will be a no-op if there is no model.
    * This action is undo-able.
    * The existing selection will be cleared.
    * The new cell will be the active cell.
@@ -221,8 +221,6 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * #### Notes
-   * It preserve the widget `mode`.
-   * This is be a no-op if there is no model.
    * This action is undo-able.
    * The existing selection will be cleared.
    * The new cell will be the active cell.
@@ -246,7 +244,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * This is be a no-op if there is no model.
    * This action is undo-able.
    * The existing selection will be cleared.
    */
@@ -296,8 +293,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode before running.
-   * This is a no-op if there is no model.
-   * The existing selection will be maintained.
    */
   export
   function run(widget: Notebook, kernel?: IKernel): void {
@@ -325,7 +320,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode before running.
-   * This is a no-op if there is no model.
    * The existing selection will be cleared.
    * The cell after the last selected cell will be activated.
    * If the last selected cell is the last cell, a new code cell
@@ -356,7 +350,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'edit'` mode after running.
-   * This is a no-op if there is no model.
    * The existing selection will be cleared.
    * The cell insert is undo-able.
    */
@@ -383,7 +376,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * This is a no-op if there is no model.
    * The existing selection will be cleared.
    */
   export
@@ -406,7 +398,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * This is a no-op if there is no model.
    * The existing selection will be cleared.
    * It will not wrap around to the bottom.
    */
@@ -430,7 +421,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * This is a no-op if there is no model.
    * The existing selection will be cleared.
    * It will not wrap around to the top.
    */
@@ -454,7 +444,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * This is a no-op if there is no model.
    * The new cell will be activated.
    * It will not wrap around to the bottom.
    */
@@ -493,7 +482,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * This is a no-op if there is no model.
    * The new cell will be activated.
    * It will not wrap around to the bottom.
    */
@@ -533,8 +521,6 @@ namespace NotebookActions {
    * @param clipboard - The clipboard object.
    *
    * #### Notes
-   * It preserve the widget `mode`.
-   * This is a no-op if there is no model.
    * It will clear the existing selection.
    */
   export
@@ -563,7 +549,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * This is a no-op if there is no model.
    * This action is undo-able.
    */
   export
@@ -602,7 +587,6 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * This is a no-op if there is no model.
    * This is a no-op if there is no cell data on the clipboard.
    * This action is undo-able.
    */
@@ -643,8 +627,7 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * It will be a no-op if there is no model or if there are no
-   * cell actions to undo.
+   * It will be a no-op if if there are no cell actions to undo.
    */
   export
   function undo(widget: Notebook): void {
@@ -662,8 +645,7 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode.
-   * It will be a no-op if there is no model or if there are no
-   * cell actions to redo.
+   * It will be a no-op if there are no cell actions to redo.
    */
   export
   function redo(widget: Notebook): void {
@@ -680,9 +662,7 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * #### Notes
-   * It preserve the widget `mode`.
    * It will be based on the line number state of the first selected cell.
-   * It will be a no-op if there is no model.
    */
   export
   function toggleLineNumbers(widget: Notebook): void {
@@ -707,9 +687,7 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * #### Notes
-   * It preserve the widget `mode`.
    * It will be based on the line number state of the first cell.
-   * It will be a no-op if there is no model.
    */
   export
   function toggleAllLineNumbers(widget: Notebook): void {
@@ -730,10 +708,6 @@ namespace NotebookActions {
    * Clear the outputs of the currently selected cells.
    *
    * @param widget - The target notebook widget.
-   *
-   * #### Notes
-   * It preserve the widget `mode`.
-   * It will be a no-op if there is no model.
    */
   export
   function clearOutputs(widget: Notebook): void {
@@ -755,10 +729,6 @@ namespace NotebookActions {
    * Clear the code outputs on the widget.
    *
    * @param widget - The target notebook widget.
-   *
-   * #### Notes
-   * It preserve the widget `mode`.
-   * It will be a no-op if there is no model.
    */
   export
   function clearAllOutputs(widget: Notebook): void {
