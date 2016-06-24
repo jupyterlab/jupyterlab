@@ -1,33 +1,51 @@
-JupyterLab
-==========
+# [JupyterLab](http://jupyter.github.io/jupyterlab/)
 
 An extensible computational environment for Jupyter.
 
-**This is a very early pre-alpha developer preview. It is not ready for general usage yet.**
+**This is a very early pre-alpha developer preview and not suitable for
+general usage yet. Features and implementation are subject to change.**
 
-[API Docs](http://jupyter.github.io/jupyterlab/)
+With JupyterLab, you can create a computational environment for Jupyter that
+meets your workflow needs. Here's a quick preview of JupyterLab:
 
 <img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
 
-Jupyter Server Extension
-------------------------
+## Getting started
 
-The Jupyter server extension source files are in the `jupyterlab/` subdirectory. To use this extension, you need the Jupyter notebook server version 4.2 or later.
+### Prerequisites
+
+Jupyter notebook version 4.2 or later
 
 ### User installation
+
+Install JupyterLab from the command line:
 
 ```bash
 pip install jupyterlab
 jupyter serverextension enable --py jupyterlab
 ```
 
-Start up Jupyterlab with the command:
+Start up JupyterLab with the command:
 
 ```bash
 jupyter lab
 ```
 
-Open a browser to the notebook server's URL (e.g., `http://localhost:8888`).
+JupyterLab should open automatically in your browser. You can also access it
+by opening a browser to the notebook server's URL (e.g., `http://localhost:8888`).
+
+----
+
+## Documentation
+
+- [API Docs](http://jupyter.github.io/jupyterlab/)
+- [Architecture tutorial - useful for individuals developing JupyterLab](http://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
+
+----
+
+## Jupyter Server Extension
+
+The Jupyter server extension source files are in the `jupyterlab/` subdirectory. To use this extension, you need the Jupyter notebook server version 4.2 or later.
 
 
 ### Developer Installation
@@ -67,9 +85,7 @@ npm run watch:serverextension
 
 and refresh the browser after each successful update.
 
-
-NPM Package
------------
+## NPM Package
 
 The npm package source files are in the `src/` subdirectory.
 
@@ -136,8 +152,7 @@ npm run docs
 
 Navigate to `docs/index.html`.
 
-Publishing packages for a JupyterLab release
---------------------------------------------
+## Publishing packages for a JupyterLab release
 
 We publish an npm package, a pypi source package, and a pypi universal binary wheel.
 
@@ -150,8 +165,7 @@ python setup.py bdist_wheel --universal upload
 ```
 
 
-Supported Runtimes
-------------------
+## Supported Runtimes
 
 The runtime versions which are currently *known to work* are listed below.
 Earlier versions may also work, but come with no guarantees.
@@ -164,8 +178,7 @@ Note: "requirejs" must be included in a global context (usually as a
 `<script>` tag) for Comm targets.
 
 
-Bundle for the Browser
-----------------------
+## Bundle for the Browser
 
 Follow the package install instructions first.
 
