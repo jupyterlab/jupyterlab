@@ -66,7 +66,7 @@ pip install -e . # will take a long time to build everything
 jupyter serverextension enable --py jupyterlab
 ```
 
-### Running JupyterLab
+### Run JupyterLab
 Start up Jupyterlab with the command:
 
 ```bash
@@ -74,6 +74,43 @@ jupyter lab
 ```
 
 Open a browser to the notebook server's URL (e.g., `http://localhost:8888`).
+
+### Run Tests
+
+Follow the source build instructions first. Enter:
+
+```bash
+npm test
+```
+
+### Build and Run the Examples
+
+To install and build the examples in the `examples` directory:
+
+- Follow the source build instructions first.
+- Requires a Python install with the Jupyter notebook (version 4.2 or later).
+- Run the command:
+
+```bash
+npm run build:examples
+```
+
+To run an example:
+
+- Change into the specific example's directory in the `examples` directory
+- run `python main.py`
+
+### Build API Docs
+
+Follow the source build instructions first. Enter:
+
+```bash
+npm run docs
+```
+
+Navigate to `docs/index.html`.
+
+----
 
 ## High level Architecture
 
@@ -142,42 +179,6 @@ npm run build:serverextension
 ```
 
 ----
-
-### Run Tests
-
-Follow the source build instructions first. Enter:
-
-```bash
-npm test
-```
-
-### Build and Run the Examples
-
-To install and build the examples in the `examples` directory:
-
-- Follow the source build instructions first.
-- Requires a Python install with the Jupyter notebook (version 4.2 or later).
-- Run the command:
-
-```bash
-npm run build:examples
-```
-
-To run an example:
-
-- Change into the specific example's directory in the `examples` directory
-- run `python main.py`
-
-
-### Build API Docs
-
-Follow the source build instructions first. Enter:
-
-```bash
-npm run docs
-```
-
-Navigate to `docs/index.html`.
 
 ----
 
