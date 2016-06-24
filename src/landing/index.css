@@ -22,10 +22,9 @@
 
 .jp-Landing-dialog {
   padding-bottom: 20px;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 16px;
   color: #757575;
-   background: #FAFAFA;
+  background: #FAFAFA;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -62,7 +61,7 @@
 
 
 .jp-Landing-header {
-  
+
   padding-top: 20px;
   padding-bottom: 8px;
 }

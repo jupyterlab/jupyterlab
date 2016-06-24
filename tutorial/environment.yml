@@ -1,0 +1,7 @@
+name: lab_tutorial
+dependencies:
+- python=3.5
+- sphinx_rtd_theme
+- pip:
+  - sphinx>1.4
+  - recommonmark
