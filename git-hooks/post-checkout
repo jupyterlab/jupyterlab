@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "rebuilding extension"
-(npm install && npm run build:serverextension) || echo "fail to rebuild javascript"
+(npm install && npm run build:all) || echo "fail to rebuild javascript"

@@ -72,21 +72,34 @@ To build and install a development version of the server extension, do:
     jupyter lab
 
 ### Rebuild JavaScript
+To rebuild the javascript for both the JupyterLab source and the server extension, run:
 
-To rebuild the javascript for the server extension, do:
+    npm run build:all
+
+To rebuild JupyterLab source only, run:
+
+    npm run build:src
+
+To have the system rebuild the JupyterLab source automatically after every
+change to the typescript source files, run:
+
+    npm run watch:src
+
+To rebuild the javascript for only the server extension, run:
 
     npm run build:serverextension
 
-To have the system do this automatically after every change to the typescript
-source files, do:
 
-    npm run watch:serverextension
+To have the system do both automatically after every change to the typescript
+source files, run:
+
+    npm run watch
 
 and refresh your browser after each successful update.
 
 ### Build npm package
 
-To build just the `jupyterlab` npm package, do:
+To build just the `jupyterlab` npm package, run:
 
 	npm install
 	npm run build
