@@ -43,15 +43,20 @@ by opening a browser to the notebook server's URL (e.g., `http://localhost:8888`
 
 ----
 
-## Jupyter Server Extension
+## Development of JupyterLab
 
-The Jupyter server extension source files are in the `jupyterlab/` subdirectory. To use this extension, you need the Jupyter notebook server version 4.2 or later.
+The remainder of this document provides information for individuals that are
+developing JupyterLab. 
 
+### Prerequisites
 
-### Developer Installation
+- Jupyter notebook version 4.2 or later
+- npm (preferably version 5 or later)
 
-You will need npm (preferably version 5 or later). First fork the repo in the GitHub UI and then
-clone locally:
+### Installation
+
+First fork the JupyterLab repo in the GitHub UI. Then
+clone the repo locally and building using these commands:
 
 ```bash
 git clone https://github.com/<your-github-username>/jupyterlab.git
@@ -61,6 +66,7 @@ pip install -e . # will take a long time to build everything
 jupyter serverextension enable --py jupyterlab
 ```
 
+### Running JupyterLab
 Start up Jupyterlab with the command:
 
 ```bash
@@ -68,6 +74,17 @@ jupyter lab
 ```
 
 Open a browser to the notebook server's URL (e.g., `http://localhost:8888`).
+
+## High level Architecture
+
+The JupyterLab application is made up of two major parts:
+
+- an npm package
+- a Jupyter server extension (Python package)
+
+Each part is named `jupyterlab`. The [developer tutorial documentation](http://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
+provides additional architecture information.
+
 
 When you make a change to JupyterLab npm package source files, run:
 
@@ -97,7 +114,6 @@ The npm package source files are in the `src/` subdirectory.
 npm install --save jupyterlab
 ```
 
-
 ### NPM Source Build
 
 ```bash
@@ -114,43 +130,56 @@ npm run clean
 npm run build:all
 ```
 
+
+### Install the Jupyter Server Extension
+
+The Jupyter server extension source files are in the `jupyterlab/` subdirectory. To use this extension, you need the Jupyter notebook server version 4.2 or later.
+
 ### Build JupyterLab server extension
 
 ```bash
 npm run build:serverextension
 ```
 
+----
 
 ### Run Tests
 
-Follow the source build instructions first.
+Follow the source build instructions first. Enter:
 
 ```bash
 npm test
 ```
 
+### Build and Run the Examples
 
-### Build Examples
+To install and build the examples in the `examples` directory:
 
-Follow the source build instructions first.
-Requires a Python install with the Jupyter notebook (version 4.2 or later).
+- Follow the source build instructions first.
+- Requires a Python install with the Jupyter notebook (version 4.2 or later).
+- Run the command:
 
 ```bash
 npm run build:examples
 ```
 
-Change to the appropriate example in the `examples` directory and run `python main.py`.
+To run an example:
+
+- Change into the specific example's directory in the `examples` directory
+- run `python main.py`
 
 
-### Build Docs
+### Build API Docs
 
-Follow the source build instructions first.
+Follow the source build instructions first. Enter:
 
 ```bash
 npm run docs
 ```
 
 Navigate to `docs/index.html`.
+
+----
 
 ## Publishing packages for a JupyterLab release
 
@@ -164,7 +193,6 @@ python setup.py sdist upload
 python setup.py bdist_wheel --universal upload
 ```
 
-
 ## Supported Runtimes
 
 The runtime versions which are currently *known to work* are listed below.
@@ -176,7 +204,6 @@ Earlier versions may also work, but come with no guarantees.
 
 Note: "requirejs" must be included in a global context (usually as a
 `<script>` tag) for Comm targets.
-
 
 ## Bundle for the Browser
 
