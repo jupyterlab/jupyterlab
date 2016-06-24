@@ -54,7 +54,7 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * #### Notes
-   * It will be a no-op if the widget is in `'command' mode.
+   * It will change the widget to `'edit'` mode.
    * The second cell will be activated.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells are created.
