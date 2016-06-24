@@ -1,11 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
-
 import {
-  IKernelId, IKernel, IKernelSpecIds, ISessionId, IContentsModel,
-  IKernelLanguageInfo
+  IKernelId, IKernel, IKernelSpecIds, ISessionId, IContentsModel
 } from 'jupyter-js-services';
 
 import {
@@ -28,60 +25,9 @@ import {
   IDocumentContext, IDocumentModel
 } from '../../../lib/docregistry';
 
-
-
-/**
- * The default kernel spec ids.
- */
-const KERNELSPECS: IKernelSpecIds = {
-  default: 'python',
-  kernelspecs: {
-    python: {
-      name: 'python',
-      spec: {
-        language: 'python',
-        argv: [],
-        display_name: 'Python',
-        env: {}
-      },
-      resources: {}
-    },
-    shell: {
-      name: 'shell',
-      spec: {
-        language: 'shell',
-        argv: [],
-        display_name: 'Shell',
-        env: {}
-      },
-      resources: {}
-    }
-  }
-};
-
-/**
- * The default language infos.
- */
-const LANGUAGE_INFOS: { [key: string]: IKernelLanguageInfo } = {
-  python: {
-    name: 'python',
-    version: '1',
-    mimetype: 'text/x-python',
-    file_extension: '.py',
-    pygments_lexer: 'python',
-    codemirror_mode: 'python',
-    nbconverter_exporter: ''
-  },
-  shell: {
-    name: 'shell',
-    version: '1',
-    mimetype: 'text/x-sh',
-    file_extension: '.sh',
-    pygments_lexer: 'shell',
-    codemirror_mode: 'shell',
-    nbconverter_exporter: ''
-  }
-};
+import {
+  KERNELSPECS, getKernelInfo
+} from '../utils';
 
 
 export
@@ -140,19 +86,12 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     this._kernel = new MockKernel(options);
     if (options.name) {
       let name = options.name;
-      if (!LANGUAGE_INFOS[name]) {
+      if (!KERNELSPECS.kernelspecs[name]) {
         name = KERNELSPECS['default'];
       }
       let kernel = this._kernel as MockKernel;
       kernel.setKernelSpec(KERNELSPECS.kernelspecs[name].spec);
-      kernel.setKernelInfo({
-        protocol_version: '1',
-        implementation: 'foo',
-        implementation_version: '1',
-        language_info: LANGUAGE_INFOS[name],
-        banner: 'Hello',
-        help_links: {}
-      });
+      kernel.setKernelInfo(getKernelInfo(name));
     }
 
     this.kernelChanged.emit(this._kernel);
@@ -185,8 +124,6 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
   private _path = '';
   private _kernel: IKernel = null;
 }
-
-
 
 
 /**

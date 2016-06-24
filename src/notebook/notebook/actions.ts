@@ -44,6 +44,14 @@ export
 namespace NotebookActions {
   /**
    * Split the active cell into two cells.
+   *
+   * #### Notes
+   * The second cell will be activated.
+   * The leading whitespace in the second cell will be removed.
+   * If there is no content, two empty cells are created.
+   * It is a no-op if there is no model.
+   * Both cells will have the same type as the original cell.
+   * This action is undo-able.
    */
   export
   function splitCell(widget: Notebook): void {
@@ -72,7 +80,15 @@ namespace NotebookActions {
   }
 
   /**
-   * Merge selected cells.
+   * Merge the selected cells.
+   *
+   * #### Notes
+   * It will be a no-op if there is no model or only one cell is
+   * selected.
+   * Existing selections are removed.
+   * This action is undo-able.
+   * It will unrender a markdown cell.
+   * The final cell will have the same type as the active cell.
    */
   export
   function mergeCells(widget: Notebook): void {
