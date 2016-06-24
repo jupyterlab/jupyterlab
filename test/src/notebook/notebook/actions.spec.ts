@@ -77,7 +77,7 @@ describe('notebook/notebook/actions', () => {
 
       });
 
-      it('should remove existing selections', () => {
+      it('should clear the existing selection', () => {
 
       });
 
@@ -105,7 +105,7 @@ describe('notebook/notebook/actions', () => {
 
     describe('#mergeCells', () => {
 
-      it('should merged the selected cells', () => {
+      it('should merge the selected cells', () => {
 
       });
 
@@ -117,7 +117,7 @@ describe('notebook/notebook/actions', () => {
 
       });
 
-      it('should remove existing selections', () => {
+      it('should clear the existing selection', () => {
 
       });
 
@@ -130,6 +130,130 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should preserve the cell type of the active cell', () => {
+
+      });
+
+    });
+
+    describe('#deleteCells()', () => {
+
+      it('should delete the selected cells', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should be undo-able', () => {
+
+      });
+
+    });
+
+    describe('#insertAbove()', () => {
+
+      it('should insert a code cell above the active cell', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should be undo-able', () => {
+
+      });
+
+      it('should clear the existing selection', () => {
+
+      });
+
+      it('should be the new active cell', () => {
+
+      });
+
+    });
+
+    describe('#insertBelow()', () => {
+
+      it('should insert a code cell below the active cell', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should be undo-able', () => {
+
+      });
+
+      it('should clear the existing selection', () => {
+
+      });
+
+      it('should be the new active cell', () => {
+
+      });
+
+    });
+
+    describe('#changeCellType()', () => {
+
+      it('should change the selected cell type(s)', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should be undo-able', () => {
+
+      });
+
+      it('should clear the existing selection', () => {
+
+      });
+
+    });
+
+    describe('#run()', () => {
+
+      it('should run the selected cells', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should clear the existing selection', () => {
+
+      });
+
+    });
+
+    describe('#runAndAdvance()', () => {
+
+      it('should run the selected cells', () => {
+
+      });
+
+      it('should be a no-op if there is no model', () => {
+
+      });
+
+      it('should clear the existing selection', () => {
+
+      });
+
+      it('should activate the cell after the last selected cell', () => {
+
+      });
+
+      it('should create a new code cell in edit mode if necessary', () => {
 
       });
 

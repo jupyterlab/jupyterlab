@@ -49,9 +49,10 @@ namespace NotebookActions {
    * The second cell will be activated.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells are created.
-   * It is a no-op if there is no model.
+   * This is a no-op if there is no model.
    * Both cells will have the same type as the original cell.
    * This action is undo-able.
+   * The existing selection will be cleared.
    */
   export
   function splitCell(widget: Notebook): void {
@@ -83,11 +84,11 @@ namespace NotebookActions {
    * Merge the selected cells.
    *
    * #### Notes
-   * It will be a no-op if there is no model or only one cell is
+   * This is be a no-op if there is no model or only one cell is
    * selected.
-   * Existing selections are removed.
+   * The existing selection will be cleared.
    * This action is undo-able.
-   * It will unrender a markdown cell.
+   * This is unrender a markdown cell.
    * The final cell will have the same type as the active cell.
    */
   export
@@ -145,7 +146,7 @@ namespace NotebookActions {
     }
     model.cells.endCompoundOperation();
 
-    // If the original cell is a markdown cell, make sure it is unrendered.
+    // If the original cell is a markdown cell, make sure This is unrendered.
     if (primary instanceof MarkdownCellWidget) {
       let current = widget.childAt(index);
       (current as MarkdownCellWidget).rendered = false;
@@ -154,6 +155,10 @@ namespace NotebookActions {
 
   /**
    * Delete the selected cells.
+   *
+   * #### Notes
+   * This is be a no-op if there is no model.
+   * This action is undo-able.
    */
   export
   function deleteCells(widget: Notebook): void {
@@ -180,7 +185,13 @@ namespace NotebookActions {
   }
 
   /**
-   * Insert a new code cell above the current cell.
+   * Insert a new code cell above the active cell.
+   *
+   * #### Notes
+   * This will be a no-op if there is no model.
+   * This action is undo-able.
+   * The existing selection will be cleared.
+   * The new cell will be the active cell.
    */
   export
   function insertAbove(widget: Notebook): void {
@@ -193,7 +204,13 @@ namespace NotebookActions {
   }
 
   /**
-   * Insert a node code cell below the current cell.
+   * Insert a new code cell below the active cell.
+   *
+   * #### Notes
+   * This is be a no-op if there is no model.
+   * This action is undo-able.
+   * The existing selection will be cleared.
+   * The new cell will be the active cell.
    */
   export
   function insertBelow(widget: Notebook): void {
@@ -207,6 +224,11 @@ namespace NotebookActions {
 
   /**
    * Change the selected cell type(s).
+   *
+   * #### Notes
+   * This is be a no-op if there is no model.
+   * This action is undo-able.
+   * The existing selection will be cleared.
    */
   export
   function changeCellType(widget: Notebook, value: string): void {
@@ -247,6 +269,10 @@ namespace NotebookActions {
 
   /**
    * Run the selected cell(s).
+   *
+   * #### Notes
+   * This is a no-op if there is no model.
+   * The existing selection will be cleared.
    */
   export
   function run(widget: Notebook, kernel?: IKernel): void {
@@ -263,20 +289,18 @@ namespace NotebookActions {
     for (let child of selected) {
       Private.runCell(child, kernel);
     }
-    if (widget.mode === 'command') {
-      widget.node.focus();
-    } else {
-      let active = widget.childAt(widget.activeCellIndex);
-      active.focus();
-    }
+    Private.deselectCells(widget);
   }
 
   /**
    * Run the selected cell(s) and advance to the next cell.
    *
    * #### Notes
-   * If the last cell is run, a new code cell will be created in
-   * edit mode and selected.
+   * This is a no-op if there is no model.
+   * The existing selection will be cleared.
+   * The cell after the last selected cell will be activated.
+   * If the last selected cell is the last cell, a new code cell
+   * will be created in edit mode.
    */
   export
   function runAndAdvance(widget: Notebook, kernel?: IKernel): void {
@@ -298,6 +322,10 @@ namespace NotebookActions {
 
   /**
    * Run the selected cell(s) and insert a new code cell below in edit mode.
+   *
+   * #### Notes
+   * This is a no-op if there is no model.
+   * The existing selection will be cleared.
    */
   export
   function runAndInsert(widget: Notebook, kernel?: IKernel): void {
