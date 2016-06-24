@@ -54,12 +54,12 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * #### Notes
+   * It will be a no-op if the widget is in `'command' mode.
    * The second cell will be activated.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells are created.
    * Both cells will have the same type as the original cell.
    * This action is undo-able.
-   * The existing selection will be cleared.
    */
   export
   function splitCell(widget: Notebook): void {
@@ -293,6 +293,7 @@ namespace NotebookActions {
    *
    * #### Notes
    * It will switch the widget to `'command'` mode before running.
+   * It will clear the existing selection.
    */
   export
   function run(widget: Notebook, kernel?: IKernel): void {
@@ -519,9 +520,6 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * @param clipboard - The clipboard object.
-   *
-   * #### Notes
-   * It will clear the existing selection.
    */
   export
   function copy(widget: Notebook, clipboard: IClipboard): void {
