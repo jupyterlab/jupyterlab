@@ -122,6 +122,40 @@ The JupyterLab application is made up of two major parts:
 Each part is named `jupyterlab`. The [developer tutorial documentation](http://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
 provides additional architecture information.
 
+## The NPM Package
+
+The npm package source files are in the `src/` subdirectory.
+
+**Prerequisites**
+- [node](http://nodejs.org/) (preferably version 5 or later)
+- Jupyter notebook server version 4.2 or later (to run examples)
+
+```bash
+npm install --save jupyterlab
+```
+
+### Build the NPM Package from Source
+
+```bash
+git clone https://github.com/jupyter/jupyterlab.git
+cd jupyterlab
+npm install
+npm run build:all
+```
+
+**Rebuild**
+
+```bash
+npm run clean
+npm run build:all
+```
+
+## The Jupyter Server Extension
+
+The Jupyter server extension source files are in the `jupyterlab/` subdirectory. 
+To use this extension, you need the Jupyter notebook server version 4.2 or later.
+
+### Build JupyterLab server extension
 
 When you make a change to JupyterLab npm package source files, run:
 
@@ -139,60 +173,15 @@ npm run watch:serverextension
 
 and refresh the browser after each successful update.
 
-## NPM Package
+## Bundle for the Browser
 
-The npm package source files are in the `src/` subdirectory.
+Follow the package install instructions first.
 
-**Prerequisites**
-- [node](http://nodejs.org/) (preferably version 5 or later)
-- Jupyter notebook server version 4.2 or later (to run examples)
+Any bundler that understands how to `require()` files with `.js` and `.css`
+extensions can be used with this package.
 
-```bash
-npm install --save jupyterlab
-```
-
-### NPM Source Build
-
-```bash
-git clone https://github.com/jupyter/jupyterlab.git
-cd jupyterlab
-npm install
-npm run build:all
-```
-
-**Rebuild**
-
-```bash
-npm run clean
-npm run build:all
-```
-
-
-### Install the Jupyter Server Extension
-
-The Jupyter server extension source files are in the `jupyterlab/` subdirectory. To use this extension, you need the Jupyter notebook server version 4.2 or later.
-
-### Build JupyterLab server extension
-
-```bash
-npm run build:serverextension
-```
-
-----
-
-----
-
-## Publishing packages for a JupyterLab release
-
-We publish an npm package, a pypi source package, and a pypi universal binary wheel.
-
-```bash
-npm version patch
-git push origin master --tags
-npm publish
-python setup.py sdist upload
-python setup.py bdist_wheel --universal upload
-```
+**Note:** This npm module is fully compatible with Node/Babel/ES6/ES5. Simply
+omit the type declarations when using a language other than TypeScript.
 
 ## Supported Runtimes
 
@@ -206,12 +195,14 @@ Earlier versions may also work, but come with no guarantees.
 Note: "requirejs" must be included in a global context (usually as a
 `<script>` tag) for Comm targets.
 
-## Bundle for the Browser
+## Publishing packages for a JupyterLab release
 
-Follow the package install instructions first.
+We publish an npm package, a pypi source package, and a pypi universal binary wheel.
 
-Any bundler that understands how to `require()` files with `.js` and `.css`
-extensions can be used with this package.
-
-**Note:** This npm module is fully compatible with Node/Babel/ES6/ES5. Simply
-omit the type declarations when using a language other than TypeScript.
+```bash
+npm version patch
+git push origin master --tags
+npm publish
+python setup.py sdist upload
+python setup.py bdist_wheel --universal upload
+```
