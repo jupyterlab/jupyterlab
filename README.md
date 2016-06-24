@@ -155,7 +155,7 @@ npm run build:all
 The Jupyter server extension source files are in the `jupyterlab/` subdirectory. 
 To use this extension, you need the Jupyter notebook server version 4.2 or later.
 
-### Build JupyterLab server extension
+### Build the JupyterLab server extension
 
 When you make a change to JupyterLab npm package source files, run:
 
