@@ -57,30 +57,12 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * Create an item node for a text completion menu.
-   */
-  static createItemNode(item: ICompletionItem): HTMLElement {
-    let li = document.createElement('li');
-    let code = document.createElement('code');
-
-    // Set the raw, un-marked up value as a data attribute.
-    li.dataset['value'] = item.raw;
-
-    // Use innerHTML because search results include <mark> tags.
-    code.innerHTML = item.text;
-
-    li.className = ITEM_CLASS;
-    li.appendChild(code);
-    return li;
-  }
-
-  /**
    * Construct a text completion menu widget.
    */
-  constructor(model: ICompletionModel) {
+  constructor(options: CompletionWidget.IOptions = {}) {
     super();
-    this._model = model;
-    this._model.stateChanged.connect(() => this.update(), this);
+    this._renderer = options.renderer || CompletionWidget.defaultRenderer;
+    this.model = options.model || null;
     this.addClass(COMPLETION_CLASS);
     this.update();
   }
@@ -102,6 +84,18 @@ class CompletionWidget extends Widget {
   get model(): ICompletionModel {
     return this._model;
   }
+  set model(model: ICompletionModel) {
+    if (!model && !this._model || model === this._model) {
+      return;
+    }
+    if (this._model) {
+      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
+    }
+    this._model = model;
+    if (this._model) {
+      this._model.stateChanged.connect(this.onModelStateChanged, this);
+    }
+  }
 
   /**
    * The semantic parent of the completion widget, its reference widget.
@@ -120,7 +114,6 @@ class CompletionWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._model.dispose();
     this._model = null;
     super.dispose();
   }
@@ -181,9 +174,13 @@ class CompletionWidget extends Widget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
+    let model = this.model;
+    if (!model) {
+      return;
+    }
+
     let node = this.node;
-    let items = this._model.items;
-    let constructor = this.constructor as typeof CompletionWidget;
+    let items = model.items;
     node.textContent = '';
 
     // All repaints reset the index back to 0.
@@ -195,7 +192,7 @@ class CompletionWidget extends Widget {
     }
 
     for (let item of items) {
-      node.appendChild(constructor.createItemNode(item));
+      node.appendChild(this._renderer.createItemNode(item));
     }
 
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
@@ -223,6 +220,13 @@ class CompletionWidget extends Widget {
       node.style.width = `${2 * node.offsetWidth - node.clientWidth}px`;
       node.scrollTop = 0;
     }
+  }
+
+  /**
+   * Handle model state changes.
+   */
+  protected onModelStateChanged(): void {
+    this.update();
   }
 
   /**
@@ -334,6 +338,69 @@ class CompletionWidget extends Widget {
   private _activeIndex = 0;
   private _model: ICompletionModel = null;
   private _reference: Widget = null;
+  private _renderer: CompletionWidget.IRenderer = null;
+}
+
+
+export
+namespace CompletionWidget {
+  /**
+   * The initialization options for a completion widget.
+   */
+  export
+  interface IOptions {
+    /**
+     * The model for the completion widget.
+     */
+    model?: ICompletionModel;
+
+    /**
+     * The renderer for the completion widget nodes.
+     */
+    renderer?: IRenderer;
+  }
+
+  /**
+   * A renderer for completion widget nodes.
+   */
+  export
+  interface IRenderer {
+    /**
+     * Create an item node (an `li` element) for a text completion menu.
+     */
+    createItemNode(item: ICompletionItem): HTMLLIElement;
+  }
+
+  /**
+   * The default implementation of an `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+    /**
+     * Create an item node for a text completion menu.
+     */
+    createItemNode(item: ICompletionItem): HTMLLIElement {
+      let li = document.createElement('li');
+      let code = document.createElement('code');
+
+      // Set the raw, un-marked up value as a data attribute.
+      li.dataset['value'] = item.raw;
+
+      // Use innerHTML because search results include <mark> tags.
+      code.innerHTML = item.text;
+
+      li.className = ITEM_CLASS;
+      li.appendChild(code);
+      return li;
+    }
+  }
+
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
 }
 
 

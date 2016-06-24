@@ -209,7 +209,7 @@ class ConsoleWidget extends Widget {
    */
   static createCompletion(): CompletionWidget {
     let model = new CompletionModel();
-    return new CompletionWidget(model);
+    return new CompletionWidget({ model });
   }
 
   /**
