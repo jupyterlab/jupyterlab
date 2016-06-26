@@ -580,7 +580,7 @@ describe('notebook/cells/widget', () => {
         let method = 'onModelChanged';
         let widget = new LogCodeCell({ rendermime });
         expect(widget.methods).to.not.contain(method);
-        widget.model = new CellModel();
+        widget.model = new CodeCellModel();
         expect(widget.methods).to.contain(method);
       });
 
