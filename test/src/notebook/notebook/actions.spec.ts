@@ -24,7 +24,7 @@ import {
 } from '../../../../lib/notebook/notebook/model';
 
 import {
-  NotebookActions
+  NotebookActions, JUPYTER_CELL_MIME
 } from '../../../../lib/notebook/notebook/actions';
 
 import {
@@ -70,6 +70,7 @@ describe('notebook/notebook/actions', () => {
     afterEach(() => {
       widget.dispose();
       kernel.dispose();
+      clipboard.clear();
     });
 
     describe('#splitCell()', () => {
@@ -593,24 +594,33 @@ describe('notebook/notebook/actions', () => {
       it('should extend the selection to the cell above', () => {
         widget.activeCellIndex = 1;
         NotebookActions.extendSelectionAbove(widget);
-        expect(widget.activeCellIndex).to.be(1);
         expect(widget.isSelected(widget.childAt(0))).to.be(true);
       });
 
       it('should be a no-op if there is no model', () => {
-
+        widget.model = null;
+        NotebookActions.extendSelectionAbove(widget);
+        expect(widget.activeCellIndex).to.be(-1);
       });
 
       it('should change to command mode', () => {
-
+        widget.mode = 'edit';
+        widget.activeCellIndex = 1;
+        NotebookActions.extendSelectionAbove(widget);
+        expect(widget.mode).to.be('command');
       });
 
       it('should not wrap around to the bottom', () => {
-
+        NotebookActions.extendSelectionAbove(widget);
+        expect(widget.activeCellIndex).to.be(0);
+        let last = widget.childAt(widget.childCount() - 1);
+        expect(widget.isSelected(last)).to.be(false);
       });
 
       it('should activate the cell', () => {
-
+        widget.activeCellIndex = 1;
+        NotebookActions.extendSelectionAbove(widget);
+        expect(widget.activeCellIndex).to.be(0);
       });
 
     });
@@ -618,23 +628,34 @@ describe('notebook/notebook/actions', () => {
     describe('#extendSelectionBelow()', () => {
 
       it('should extend the selection to the cell below', () => {
-
+        NotebookActions.extendSelectionBelow(widget);
+        expect(widget.isSelected(widget.childAt(0))).to.be(true);
+        expect(widget.isSelected(widget.childAt(1))).to.be(true);
       });
 
       it('should be a no-op if there is no model', () => {
-
+        widget.model = null;
+        NotebookActions.extendSelectionBelow(widget);
+        expect(widget.activeCellIndex).to.be(-1);
       });
 
       it('should change to command mode', () => {
-
+        widget.mode = 'edit';
+        NotebookActions.extendSelectionBelow(widget);
+        expect(widget.mode).to.be('command');
       });
 
-      it('should not wrap around to the top', () => {
-
+      it('should not wrap around to the bottom', () => {
+        let last = widget.childCount() - 1;
+        widget.activeCellIndex = last;
+        NotebookActions.extendSelectionBelow(widget);
+        expect(widget.activeCellIndex).to.be(last);
+        expect(widget.isSelected(widget.childAt(0))).to.be(false);
       });
 
       it('should activate the cell', () => {
-
+        NotebookActions.extendSelectionBelow(widget);
+        expect(widget.activeCellIndex).to.be(1);
       });
 
     });
@@ -642,15 +663,24 @@ describe('notebook/notebook/actions', () => {
     describe('#copy()', () => {
 
       it('should copy the selected cells to a clipboard', () => {
-
+        let next = widget.childAt(1);
+        widget.select(next);
+        NotebookActions.copy(widget, clipboard);
+        expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
+        let data = clipboard.getData(JUPYTER_CELL_MIME);
+        expect(data.length).to.be(2);
       });
 
       it('should be a no-op if there is no model', () => {
-
+        widget.model = null;
+        NotebookActions.copy(widget, clipboard);
+        expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(false);
       });
 
       it('should change to command mode', () => {
-
+        widget.mode = 'edit';
+        NotebookActions.copy(widget, clipboard);
+        expect(widget.mode).to.be('command');
       });
 
     });
@@ -658,19 +688,39 @@ describe('notebook/notebook/actions', () => {
     describe('#cut()', () => {
 
       it('should cut the selected cells to a clipboard', () => {
-
+        let next = widget.childAt(1);
+        widget.select(next);
+        let count = widget.childCount();
+        NotebookActions.cut(widget, clipboard);
+        expect(widget.childCount()).to.be(count - 2);
       });
 
       it('should be a no-op if there is no model', () => {
-
+        widget.model = null;
+        NotebookActions.cut(widget, clipboard);
+        expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(false);
       });
 
       it('should change to command mode', () => {
-
+        widget.mode = 'edit';
+        NotebookActions.cut(widget, clipboard);
+        expect(widget.mode).to.be('command');
       });
 
       it('should be undo-able', () => {
+        let source = widget.activeCell.model.source;
+        NotebookActions.cut(widget, clipboard);
+        NotebookActions.undo(widget);
+        expect(widget.childAt(0).model.source).to.be(source);
+      });
 
+      it('should add a new code cell if all cells were cut', () => {
+        for (let i = 0; i < widget.childCount(); i++) {
+          widget.select(widget.childAt(i));
+        }
+        NotebookActions.cut(widget, clipboard);
+        expect(widget.childCount()).to.be(1);
+        expect(widget.activeCell).to.be.a(CodeCellWidget);
       });
 
     });
@@ -678,23 +728,46 @@ describe('notebook/notebook/actions', () => {
     describe('#paste()', () => {
 
       it('should paste cells from a clipboard', () => {
-
+        let source = widget.activeCell.model.source;
+        let next = widget.childAt(1);
+        widget.select(next);
+        let count = widget.childCount();
+        NotebookActions.cut(widget, clipboard);
+        widget.activeCellIndex = 1;
+        NotebookActions.paste(widget, clipboard);
+        expect(widget.childCount()).to.be(count);
+        expect(widget.childAt(1).model.source).to.be(source);
       });
 
       it('should be a no-op if there is no model', () => {
-
+        NotebookActions.copy(widget, clipboard);
+        widget.model = null;
+        NotebookActions.paste(widget, clipboard);
+        expect(widget.activeCellIndex).to.be(-1);
       });
 
       it('should be a no-op if there is no cell data on the clipboard', () => {
-
+        let count = widget.childCount();
+        NotebookActions.paste(widget, clipboard);
+        expect(widget.childCount()).to.be(count);
       });
 
       it('should change to command mode', () => {
-
+        widget.mode = 'edit';
+        NotebookActions.cut(widget, clipboard);
+        NotebookActions.paste(widget, clipboard);
+        expect(widget.mode).to.be('command');
       });
 
       it('should be undo-able', () => {
-
+        let next = widget.childAt(1);
+        widget.select(next);
+        let count = widget.childCount();
+        NotebookActions.cut(widget, clipboard);
+        widget.activeCellIndex = 1;
+        NotebookActions.paste(widget, clipboard);
+        NotebookActions.undo(widget);
+        expect(widget.childCount()).to.be(count - 2);
       });
 
     });
@@ -702,19 +775,32 @@ describe('notebook/notebook/actions', () => {
     describe('#undo()', () => {
 
       it('should undo a cell action', () => {
-
+        let count = widget.childCount();
+        let next = widget.childAt(1);
+        widget.select(next);
+        NotebookActions.deleteCells(widget);
+        NotebookActions.undo(widget);
+        expect(widget.childCount()).to.be(count);
       });
 
       it('should switch the widget to command mode', () => {
-
+        widget.mode = 'edit';
+        NotebookActions.undo(widget);
+        expect(widget.mode).to.be('command');
       });
 
       it('should be a no-op if there is no model', () => {
-
+        widget.model = null;
+        NotebookActions.undo(widget);
+        expect(widget.activeCellIndex).to.be(-1);
       });
 
       it('should be a no-op if there are no cell actions to undo', () => {
-
+        let count = widget.childCount();
+        NotebookActions.deleteCells(widget);
+        widget.model.cells.clearUndo();
+        NotebookActions.undo(widget);
+        expect(widget.childCount()).to.be(count - 1);
       });
 
     });
@@ -722,39 +808,67 @@ describe('notebook/notebook/actions', () => {
     describe('#redo()', () => {
 
       it('should redo a cell action', () => {
-
+        let count = widget.childCount();
+        let next = widget.childAt(1);
+        widget.select(next);
+        NotebookActions.deleteCells(widget);
+        NotebookActions.undo(widget);
+        NotebookActions.redo(widget);
+        expect(widget.childCount()).to.be(count - 2);
       });
 
       it('should switch the widget to command mode', () => {
-
+        NotebookActions.undo(widget);
+        widget.mode = 'edit';
+        NotebookActions.redo(widget);
+        expect(widget.mode).to.be('command');
       });
 
       it('should be a no-op if there is no model', () => {
-
+        NotebookActions.undo(widget);
+        widget.model = null;
+        NotebookActions.redo(widget);
+        expect(widget.activeCellIndex).to.be(-1);
       });
 
       it('should be a no-op if there are no cell actions to redo', () => {
-
+        let count = widget.childCount();
+        NotebookActions.redo(widget);
+        expect(widget.childCount()).to.be(count);
       });
 
     });
 
-    describe('#toggeLineNumbers()', () => {
+    describe('#toggleLineNumbers()', () => {
 
       it('should toggle line numbers on the selected cells', () => {
-
+        let state = widget.activeCell.editor.lineNumbers;
+        NotebookActions.toggleLineNumbers(widget);
+        expect(widget.activeCell.editor.lineNumbers).to.be(!state);
       });
 
       it('should be based on the state of the active cell', () => {
-
+        let state = widget.activeCell.editor.lineNumbers;
+        let next = widget.childAt(1);
+        next.editor.lineNumbers = !state;
+        widget.select(next);
+        NotebookActions.toggleLineNumbers(widget);
+        expect(widget.childAt(0).editor.lineNumbers).to.be(!state);
+        expect(widget.childAt(1).editor.lineNumbers).to.be(!state);
       });
 
       it('should preserve the widget mode', () => {
-
+        NotebookActions.toggleLineNumbers(widget);
+        expect(widget.mode).to.be('command');
+        widget.mode = 'edit';
+        NotebookActions.toggleLineNumbers(widget);
+        expect(widget.mode).to.be('edit');
       });
 
       it('should be a no-op if there is no model', () => {
-
+        widget.model = null;
+        NotebookActions.toggleLineNumbers(widget);
+        expect(widget.activeCellIndex).to.be(-1)
       });
 
     });
@@ -762,19 +876,36 @@ describe('notebook/notebook/actions', () => {
     describe('#toggleAllLineNumbers()', () => {
 
       it('should toggle line numbers on all cells', () => {
-
+        let state = widget.activeCell.editor.lineNumbers;
+        NotebookActions.toggleAllLineNumbers(widget);
+        for (let i = 0; i < widget.childCount(); i++) {
+          expect(widget.childAt(i).editor.lineNumbers).to.be(!state);
+        }
       });
 
       it('should be based on the state of the active cell', () => {
-
+        let state = widget.activeCell.editor.lineNumbers;
+        for (let i = 1; i < widget.childCount(); i++) {
+          widget.childAt(i).editor.lineNumbers = !state;
+        }
+        NotebookActions.toggleAllLineNumbers(widget);
+        for (let i = 0; i < widget.childCount(); i++) {
+          expect(widget.childAt(i).editor.lineNumbers).to.be(!state);
+        }
       });
 
       it('should preserve the widget mode', () => {
-
+        NotebookActions.toggleAllLineNumbers(widget);
+        expect(widget.mode).to.be('command');
+        widget.mode = 'edit';
+        NotebookActions.toggleAllLineNumbers(widget);
+        expect(widget.mode).to.be('edit');
       });
 
       it('should be a no-op if there is no model', () => {
-
+        widget.model = null;
+        NotebookActions.toggleAllLineNumbers(widget);
+        expect(widget.activeCellIndex).to.be(-1);
       });
 
     });
@@ -782,15 +913,35 @@ describe('notebook/notebook/actions', () => {
     describe('#clearOutputs()', () => {
 
       it('should clear the outputs on the selected cells', () => {
-
+        // Select the next code cell that has outputs.
+        let index = 0;
+        for (let i = 1; i < widget.childCount(); i++) {
+          let cell = widget.childAt(i);
+          if (cell instanceof CodeCellWidget && cell.model.outputs.length) {
+            widget.select(cell);
+            index = i;
+            break;
+          }
+        }
+        NotebookActions.clearOutputs(widget);
+        let cell = widget.childAt(0) as CodeCellWidget;
+        expect(cell.model.outputs.length).to.be(0);
+        cell = widget.childAt(index) as CodeCellWidget;
+        expect(cell.model.outputs.length).to.be(0);
       });
 
-      it('should switch the widget to command mode', () => {
-
+      it('should preserve the widget mode', () => {
+        NotebookActions.clearOutputs(widget);
+        expect(widget.mode).to.be('command');
+        widget.mode = 'edit';
+        NotebookActions.clearOutputs(widget);
+        expect(widget.mode).to.be('edit');
       });
 
       it('should be a no-op if there is no model', () => {
-
+        widget.model = null;
+        NotebookActions.clearOutputs(widget);
+        expect(widget.activeCellIndex).to.be(-1);
       });
 
     });
@@ -798,17 +949,30 @@ describe('notebook/notebook/actions', () => {
     describe('#clearAllOutputs()', () => {
 
       it('should clear the outputs on all cells', () => {
-
+        let next = widget.childAt(1);
+        widget.select(next);
+        NotebookActions.clearAllOutputs(widget);
+        for (let i = 0; i < widget.childCount(); i++) {
+          let cell = widget.childAt(i);
+          if (cell instanceof CodeCellWidget) {
+            expect(cell.model.outputs.length).to.be(0);
+          }
+        }
       });
 
-      it('should switch the widget to command mode', () => {
-
+      it('should preserve the widget mode', () => {
+        NotebookActions.clearAllOutputs(widget);
+        expect(widget.mode).to.be('command');
+        widget.mode = 'edit';
+        NotebookActions.clearAllOutputs(widget);
+        expect(widget.mode).to.be('edit');
       });
 
       it('should be a no-op if there is no model', () => {
-
+        widget.model = null;
+        NotebookActions.clearAllOutputs(widget);
+        expect(widget.activeCellIndex).to.be(-1);
       });
-
     });
 
   });
