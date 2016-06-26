@@ -15,7 +15,7 @@ import {
 } from 'jupyterlab/lib/docmanager';
 
 import {
-  DocumentRegistry, selectKernelForContext
+  DocumentRegistry, restartKernel, selectKernelForContext
 } from 'jupyterlab/lib/docregistry';
 
 import {
@@ -145,8 +145,8 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     }
   };
   let restartHandler = () => {
-    NotebookActions.restart(nbWidget.kernel, nbWidget.node);
-  }
+    restartKernel(nbWidget.kernel, nbWidget.node);
+  };
   let switchHandler = () => {
     selectKernelForContext(nbWidget.context, nbWidget.node);
   };
