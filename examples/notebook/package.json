@@ -12,6 +12,7 @@
     "jupyter-js-services": "^0.10.4",
     "jupyterlab": "file:../..",
     "phosphor-commandpalette": "^0.2.0",
+    "phosphor-dragdrop": "^0.9.1",
     "phosphor-keymap": "^0.8.0",
     "phosphor-splitpanel": "^1.0.0-rc.1",
     "phosphor-widget": "^1.0.0-rc.1"
