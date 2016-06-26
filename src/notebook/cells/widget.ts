@@ -34,7 +34,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  OutputAreaWidget, OutputAreaModel, executeCode
+  OutputAreaWidget, executeCode
 } from '../output-area';
 
 import {
@@ -46,7 +46,7 @@ import {
 } from './editor';
 
 import {
-  ICodeCellModel, ICellModel
+  ICellModel, ICodeCellModel, IMarkdownCellModel, IRawCellModel
 } from './model';
 
 
@@ -416,6 +416,11 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   /**
+   * The model used by the widget.
+   */
+  model: ICodeCellModel;
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
@@ -532,7 +537,7 @@ namespace CodeCellWidget {
      *
      * The default is a shared renderer instance.
      */
-    renderer?: IRenderer
+    renderer?: IRenderer;
 
     /**
      * The mime renderer for the cell widget.
@@ -598,6 +603,11 @@ class MarkdownCellWidget extends BaseCellWidget {
     this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
     (this.layout as PanelLayout).addChild(this._markdownWidget);
   }
+
+  /**
+   * The model used by the widget.
+   */
+  model: IMarkdownCellModel;
 
   /**
    * Whether the cell is rendered.
@@ -695,6 +705,11 @@ class RawCellWidget extends BaseCellWidget {
     super(options);
     this.addClass(RAW_CELL_CLASS);
   }
+
+  /**
+   * The model used by the widget.
+   */
+  model: IRawCellModel;
 }
 
 
