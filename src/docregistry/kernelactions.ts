@@ -23,7 +23,7 @@ import {
  * This is a no-op if there is no kernel.
  */
 export
-function restart(kernel: IKernel, host?: HTMLElement): Promise<boolean> {
+function restartKernel(kernel: IKernel, host?: HTMLElement): Promise<boolean> {
   if (!kernel) {
     return Promise.resolve(false);
   }

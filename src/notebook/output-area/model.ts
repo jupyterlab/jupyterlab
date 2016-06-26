@@ -161,7 +161,7 @@ class OutputAreaModel implements IDisposable {
  * Execute code on a kernel and send outputs to an output area model.
  */
 export
-function executeCode(code: string, kernel: IKernel, outputs: OutputAreaModel): Promise<IExecuteReply> {
+function executeCode(code: string, kernel: IKernel, outputs: OutputAreaModel): Promise<any> {
   let exRequest = {
     code,
     silent: false,
@@ -170,7 +170,7 @@ function executeCode(code: string, kernel: IKernel, outputs: OutputAreaModel): P
     allow_stdin: true
   };
   outputs.clear();
-  return new Promise<IExecuteReply>((resolve, reject) => {
+  return new Promise<any>((resolve, reject) => {
     let future = kernel.execute(exRequest);
     future.onIOPub = (msg => {
       let model = msg.content;
@@ -180,7 +180,7 @@ function executeCode(code: string, kernel: IKernel, outputs: OutputAreaModel): P
       }
     });
     future.onReply = (msg => {
-      resolve(msg.content as IExecuteReply);
+      resolve(msg);
     });
   });
 }

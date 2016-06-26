@@ -10,6 +10,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  restartKernel
+} from '../../docregistry';
+
+import {
   nbformat
 } from './nbformat';
 
@@ -205,7 +209,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_RESTART,
       onClick: () => {
-        NotebookActions.restart(panel.kernel, panel.node);
+        restartKernel(panel.kernel, panel.node);
       },
       tooltip: 'Restart the kernel'
     });

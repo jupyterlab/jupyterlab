@@ -30,6 +30,7 @@ import {
 /**
  * The mimetype used for Jupyter cell data.
  */
+export
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 /**
@@ -315,7 +316,7 @@ namespace NotebookActions {
    * The existing selection will be cleared.
    */
   export
-  function run(widget: Notebook, kernel?: IKernel): void {
+  function run(widget: Notebook, kernel?: IKernel): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return;
     }
@@ -329,9 +330,14 @@ namespace NotebookActions {
     }
     Private.deselectCells(widget);
 
+    let promises: Promise<boolean>[] = [];
     for (let child of selected) {
-      Private.runCell(child, kernel);
+      promises.push(Private.runCell(child, kernel));
     }
+    return Promise.all(promises).then(
+      () => { return true; },
+      () => { return false; }
+    );
   }
 
   /**
@@ -348,19 +354,23 @@ namespace NotebookActions {
    * will be created in `'edit'` mode.  The new cell creation can be undone.
    */
   export
-  function runAndAdvance(widget: Notebook, kernel?: IKernel): void {
+  function runAndAdvance(widget: Notebook, kernel?: IKernel): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
-      return;
+      return Promise.resolve(false);
     }
-    run(widget, kernel);
-    let model = widget.model;
-    if (widget.activeCellIndex === widget.childCount() - 1) {
-      let cell = model.factory.createCodeCell();
-      model.cells.add(cell);
-      widget.mode = 'edit';
-    }
-    widget.activeCellIndex++;
-    Private.deselectCells(widget);
+    return run(widget, kernel).then(result => {
+      if (!result) {
+        return false;
+      }
+      let model = widget.model;
+      if (widget.activeCellIndex === widget.childCount() - 1) {
+        let cell = model.factory.createCodeCell();
+        model.cells.add(cell);
+        widget.mode = 'edit';
+      }
+      widget.activeCellIndex++;
+      return true;
+    });
   }
 
   /**
@@ -376,17 +386,21 @@ namespace NotebookActions {
    * The cell insert can be undone.
    */
   export
-  function runAndInsert(widget: Notebook, kernel?: IKernel): void {
+  function runAndInsert(widget: Notebook, kernel?: IKernel): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
-      return;
+      return Promise.resolve(false);
     }
-    run(widget, kernel);
-    let model = widget.model;
-    let cell = model.factory.createCodeCell();
-    model.cells.insert(widget.activeCellIndex + 1, cell);
-    widget.activeCellIndex++;
-    widget.mode = 'edit';
-    Private.deselectCells(widget);
+    return run(widget, kernel).then(result => {
+      if (!result) {
+        return false;
+      }
+      let model = widget.model;
+      let cell = model.factory.createCodeCell();
+      model.cells.insert(widget.activeCellIndex + 1, cell);
+      widget.activeCellIndex++;
+      widget.mode = 'edit';
+      return true;
+    });
   }
 
   /**
@@ -395,21 +409,18 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * @param kernel - An optional kernel object.
-   *
    * #### Notes
    * The existing selection will be cleared.
    */
   export
-  function runAll(widget: Notebook, kernel?: IKernel): void {
+  function runAll(widget: Notebook, kernel?: IKernel): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
-      return;
+      return Promise.resolve(false);
     }
-    widget.mode = 'command';
     for (let i = 0; i < widget.childCount(); i++) {
-      Private.runCell(widget.childAt(i), kernel);
+      widget.select(widget.childAt(i));
     }
-    widget.activeCellIndex = widget.childCount() - 1;
-    Private.deselectCells(widget);
+    return run(widget, kernel);
   }
 
   /**
@@ -564,6 +575,7 @@ namespace NotebookActions {
    *
    * #### Notes
    * This action can be undone.
+   * A new code cell is added if all cells are cut.
    */
   export
   function cut(widget: Notebook, clipboard: IClipboard): void {
@@ -573,17 +585,25 @@ namespace NotebookActions {
     let data: nbformat.IBaseCell[] = [];
     let model = widget.model;
     let cells = model.cells;
+    let toDelete: ICellModel[] = [];
     widget.mode = 'command';
 
-    // Preserve the history as one undo event.
-    model.cells.beginCompoundOperation();
+    // Gather the cell data.
     for (let i = 0; i < widget.childCount(); i++) {
       let child = widget.childAt(i);
       if (widget.isSelected(child)) {
         data.push(child.model.toJSON());
-        cells.remove(child.model);
+        toDelete.push(child.model);
       }
     }
+
+    // Preserve the history as one undo event.
+    model.cells.beginCompoundOperation();
+    for (let cell of toDelete) {
+      cells.remove(cell);
+    }
+
+    // If there are no cells, add a code cell.
     if (!model.cells.length) {
       let cell = model.factory.createCodeCell();
       model.cells.add(cell);
@@ -591,7 +611,6 @@ namespace NotebookActions {
     model.cells.endCompoundOperation();
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
-    Private.deselectCells(widget);
   }
 
   /**
@@ -684,14 +703,11 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let cell = widget.activeCell;
-    let editor = cell.editor.editor;
-    let lineNumbers = editor.getOption('lineNumbers');
+    let lineNumbers = widget.activeCell.editor.lineNumbers;
     for (let i = 0; i < widget.childCount(); i++) {
-      cell = widget.childAt(i);
+      let cell = widget.childAt(i);
       if (widget.isSelected(cell)) {
-        editor = cell.editor.editor;
-        editor.setOption('lineNumbers', !lineNumbers);
+        cell.editor.lineNumbers = !lineNumbers;
       }
     }
   }
@@ -703,20 +719,17 @@ namespace NotebookActions {
    *
    * #### Notes
    * The original state is based on the state of the active cell.
+   * The `mode` of the widget will be preserved.
    */
   export
   function toggleAllLineNumbers(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    widget.mode = 'command';
-    let cell = widget.activeCell;
-    let editor = cell.editor.editor;
-    let lineNumbers = editor.getOption('lineNumbers');
+    let lineNumbers = widget.activeCell.editor.lineNumbers;
     for (let i = 0; i < widget.childCount(); i++) {
-      cell = widget.childAt(i);
-      editor = cell.editor.editor;
-      editor.setOption('lineNumbers', !lineNumbers);
+      let cell = widget.childAt(i);
+      cell.editor.lineNumbers = !lineNumbers;
     }
   }
 
@@ -724,13 +737,15 @@ namespace NotebookActions {
    * Clear the code outputs of the selected cells.
    *
    * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * The widget `mode` will be preserved.
    */
   export
   function clearOutputs(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    widget.mode = 'command';
     let cells = widget.model.cells;
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i) as CodeCellModel;
@@ -746,13 +761,15 @@ namespace NotebookActions {
    * Clear all the code outputs on the widget.
    *
    * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * The widget `mode` will be preserved.
    */
   export
   function clearAllOutputs(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    widget.mode = 'command';
     let cells = widget.model.cells;
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.get(i) as CodeCellModel;
@@ -799,20 +816,23 @@ namespace Private {
    * Run a cell.
    */
   export
-  function runCell(widget: BaseCellWidget, kernel?: IKernel): void {
+  function runCell(widget: BaseCellWidget, kernel?: IKernel): Promise<boolean> {
     switch (widget.model.type) {
     case 'markdown':
       (widget as MarkdownCellWidget).rendered = true;
       break;
     case 'code':
       if (kernel) {
-        (widget as CodeCellWidget).execute(kernel);
-      } else {
-        (widget.model as CodeCellModel).executionCount = null;
+        return (widget as CodeCellWidget).execute(kernel).then(reply => {
+          let status = (reply as any).content.status;
+          return status === 'ok';
+        });
       }
+      (widget.model as CodeCellModel).executionCount = null;
       break;
     default:
       break;
     }
+    return Promise.resolve(true);
   }
 }

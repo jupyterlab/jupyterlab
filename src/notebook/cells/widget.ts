@@ -436,19 +436,20 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Execute the cell given a kernel.
    */
-  execute(kernel: IKernel): Promise<void> {
+  execute(kernel: IKernel): Promise<boolean> {
     let model = this.model as ICodeCellModel;
     let code = model.source;
     if (!code.trim()) {
       model.executionCount = null;
-      return Promise.resolve(void 0);
+      return Promise.resolve(true);
     }
     model.executionCount = null;
     this.setPrompt('*');
     this.trusted = true;
     let outputs = model.outputs;
-    return executeCode(code, kernel, outputs).then(reply => {
-      model.executionCount = reply.execution_count;
+    return executeCode(code, kernel, outputs).then((reply: any) => {
+      model.executionCount = reply.content.execution_count;
+      return reply.content.status === 'ok';
     });
   }
 
