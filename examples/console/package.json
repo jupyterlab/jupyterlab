@@ -23,6 +23,6 @@
     "style-loader": "^0.13.1",
     "typescript": "^1.8.10",
     "watch": "^0.18.0",
-    "webpack": "^1.13.0"
+    "webpack": "^1.13.1"
   }
 }
