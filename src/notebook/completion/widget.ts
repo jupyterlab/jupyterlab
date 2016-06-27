@@ -192,7 +192,10 @@ class CompletionWidget extends Widget {
     }
 
     for (let item of items) {
-      node.appendChild(this._renderer.createItemNode(item));
+      let li = this._renderer.createItemNode(item);
+      // Set the raw, un-marked up value as a data attribute.
+      li.dataset['value'] = item.raw;
+      node.appendChild(li);
     }
 
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
@@ -226,6 +229,13 @@ class CompletionWidget extends Widget {
    * Handle model state changes.
    */
   protected onModelStateChanged(): void {
+    let items = this._model.items;
+    // If there is only one item, do not bother rendering.
+    if (items.length === 1) {
+      this.selected.emit(items[0].raw);
+      this._model.reset();
+      return;
+    }
     this.update();
   }
 
@@ -382,9 +392,6 @@ namespace CompletionWidget {
     createItemNode(item: ICompletionItem): HTMLLIElement {
       let li = document.createElement('li');
       let code = document.createElement('code');
-
-      // Set the raw, un-marked up value as a data attribute.
-      li.dataset['value'] = item.raw;
 
       // Use innerHTML because search results include <mark> tags.
       code.innerHTML = item.text;
