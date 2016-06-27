@@ -302,7 +302,7 @@ class NotebookPanel extends Widget {
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(context: IDocumentContext<INotebookModel>, kernel: IKernel): void {
-    if (!this.model) {
+    if (!this.model || !kernel) {
       return;
     }
     kernel.kernelInfo().then(msg => {

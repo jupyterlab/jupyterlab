@@ -557,8 +557,15 @@ class Notebook extends StaticNotebook {
    * This can be due to the active index changing or the
    * cell at the active index changing.
    */
-  get activeCellChanged(): ISignal<StaticNotebook, BaseCellWidget> {
+  get activeCellChanged(): ISignal<Notebook, BaseCellWidget> {
     return Private.activeCellChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when the selection state of the notebook changes.
+   */
+  get selectionChanged(): ISignal<Notebook, void> {
+    return Private.selectionChangedSignal.bind(this);
   }
 
   /**
@@ -641,9 +648,17 @@ class Notebook extends StaticNotebook {
 
   /**
    * Select a cell widget.
+   *
+   * #### Notes
+   * It is a no-op if the value does not change.
+   * It will emit the `selectionChanged` signal.
    */
   select(widget: BaseCellWidget): void {
+    if (Private.selectedProperty.get(widget)) {
+      return;
+    }
     Private.selectedProperty.set(widget, true);
+    this.selectionChanged.emit(void 0);
     this.update();
   }
 
@@ -651,10 +666,15 @@ class Notebook extends StaticNotebook {
    * Deselect a cell widget.
    *
    * #### Notes
-   * This has no effect on the "active" cell.
+   * It is a no-op if the value does not change.
+   * It will emit the `selectionChanged` signal.
    */
   deselect(widget: BaseCellWidget): void {
+    if (!Private.selectedProperty.get(widget)) {
+      return;
+    }
     Private.selectedProperty.set(widget, false);
+    this.selectionChanged.emit(void 0);
     this.update();
   }
 
@@ -662,7 +682,7 @@ class Notebook extends StaticNotebook {
    * Whether a cell is selected or is the active cell.
    */
   isSelected(widget: BaseCellWidget): boolean {
-    if (widget === this.activeCell) {
+    if (widget === this._activeCell) {
       return true;
     }
     return Private.selectedProperty.get(widget);
@@ -788,6 +808,9 @@ class Notebook extends StaticNotebook {
   protected onCellRemoved(cell: BaseCellWidget): void {
     // Trigger an update of the active cell.
     this.activeCellIndex = this.activeCellIndex;
+    if (this.isSelected(cell)) {
+      this.selectionChanged.emit(void 0);
+    }
     this.update();
   }
 
@@ -950,13 +973,19 @@ namespace Private {
    * cell at the active index changing.
    */
   export
-  const activeCellChangedSignal = new Signal<StaticNotebook, BaseCellWidget>();
+  const activeCellChangedSignal = new Signal<Notebook, BaseCellWidget>();
 
   /**
    * A signal emitted when the state changes on the notebook.
    */
   export
   const stateChangedSignal = new Signal<Notebook, IChangedArgs<any>>();
+
+  /**
+   * A signal emitted when the selection changes on the notebook.
+   */
+  export
+  const selectionChangedSignal = new Signal<Notebook, void>();
 
   /**
    * Scroll an element into view if needed.
