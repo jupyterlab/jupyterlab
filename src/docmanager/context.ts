@@ -341,8 +341,8 @@ class ContextManager implements IDisposable {
         return session.changeKernel(options);
       } else {
         let path = contextEx.path;
-        let sOptions = {
-          notebookPath: path,
+        let sOptions: ISession.IOptions = {
+          path: path,
           kernelName: options.name,
           kernelId: options.id
         };
