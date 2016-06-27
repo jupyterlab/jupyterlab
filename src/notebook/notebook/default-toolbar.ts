@@ -217,6 +217,14 @@ namespace ToolbarItems {
 
   /**
    * Create a cell type switcher item.
+   *
+   * #### Notes
+   * It will display the type of the current active cell.
+   * If more than one cell is selected but are of different types,
+   * it will display `'-'`.
+   * When the user changes the cell type, it will change the
+   * cell types of the selected cells.
+   * It can handle a change to the context.
    */
   export
   function createCellTypeItem(panel: NotebookPanel): Widget {
@@ -225,6 +233,11 @@ namespace ToolbarItems {
 
   /**
    * Create a kernel name indicator item.
+   *
+   * #### Notes
+   * It will display the `'display_name`' of the current kernel,
+   * or `'No Kernel!'` if there is no kernel.
+   * It can handle a change in context or kernel.
    */
   export
   function createKernelNameItem(panel: NotebookPanel): Widget {
@@ -246,6 +259,12 @@ namespace ToolbarItems {
 
   /**
    * Create a kernel status indicator item.
+   *
+   * #### Notes
+   * It show display a busy status if the kernel status is
+   * not idle.
+   * It will show the current status in the node title.
+   * It can handle a change to the context or the kernel.
    */
   export
   function createKernelStatusItem(panel: NotebookPanel): Widget {
@@ -253,7 +272,7 @@ namespace ToolbarItems {
   }
 
   /**
-   * Add the default items to a toolbar.
+   * Add the default items to the panel toolbar.
    */
   export
   function populateDefaults(panel: NotebookPanel): void {

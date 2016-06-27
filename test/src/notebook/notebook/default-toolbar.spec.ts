@@ -8,7 +8,7 @@ import {
 } from 'phosphor-dragdrop';
 
 import {
- CodeCellWidget
+ CodeCellWidget, MarkdownCellWidget
 } from '../../../../lib/notebook/cells/widget';
 
 import {
@@ -34,6 +34,10 @@ import {
 import {
   defaultRenderMime
 } from '../../rendermime/rendermime.spec';
+
+import {
+  acceptDialog
+} from '../../utils';
 
 import {
   DEFAULT_CONTENT
@@ -162,53 +166,144 @@ describe('notebook/notebook/default-toolbar', () => {
 
     describe('#createRunButton()', () => {
 
-      it('should run and advance when clicked', () => {
+      it('should run and advance when clicked', (done) => {
+        let button = ToolbarItems.createRunButton(panel);
 
+        let widget = panel.content;
+        let next = widget.childAt(1) as MarkdownCellWidget;
+        widget.select(next);
+        let cell = widget.activeCell as CodeCellWidget;
+        cell.model.outputs.clear();
+        next.rendered = false;
+
+        button.attach(document.body);
+        button.node.click();
+
+        Promise.resolve(void 0).then(() => {
+          expect(cell.model.outputs.length).to.be.above(0);
+          expect(next.rendered).to.be(true);
+          button.dispose();
+          done();
+        });
       });
 
       it("should have the `'jp-NBToolbar-run'` class", () => {
-
+        let button = ToolbarItems.createRunButton(panel);
+        expect(button.hasClass('jp-NBToolbar-run')).to.be(true);
       });
 
     });
 
     describe('#createInterruptButton()', () => {
 
-      it('should interrupt the kernel when clicked', () => {
-
+      it('should interrupt the kernel when clicked', (done) => {
+        let button = ToolbarItems.createInterruptButton(panel);
+        button.attach(document.body);
+        button.node.click();
+        expect(panel.context.kernel.status).to.be('busy');
+        Promise.resolve(void 0).then(() => {
+          expect(panel.context.kernel.status).to.be('idle');
+          button.dispose();
+          done();
+        });
       });
 
       it("should have the `'jp-NBToolbar-interrupt'` class", () => {
-
+        let button = ToolbarItems.createInterruptButton(panel);
+        expect(button.hasClass('jp-NBToolbar-interrupt')).to.be(true);
       });
 
     });
 
     describe('#createRestartButton()', () => {
 
-      it('should restart the kernel when clicked', () => {
-
+      it('should restart the kernel when the dialog is accepted', (done) => {
+        let button = ToolbarItems.createRestartButton(panel);
+        button.attach(document.body);
+        button.node.click();
+        acceptDialog(panel.node).then(() => {
+          expect(context.kernel.status).to.be('restarting');
+          button.dispose();
+          done();
+        });
       });
 
       it("should have the `'jp-NBToolbar-restart'` class", () => {
-
+        let button = ToolbarItems.createRestartButton(panel);
+        expect(button.hasClass('jp-NBToolbar-restart')).to.be(true);
       });
 
     });
 
     describe('#createCellTypeItem()', () => {
 
+      it('should track the cell type of the current cell', () => {
+
+      });
+
+      it("should display `'-'` if multiple cell types are selected", () => {
+
+      });
+
+      it('should display the active cell type if multiple cells of the same type are selected', () => {
+
+      });
+
+      it('should change the types of the active cells if the selection changes', () => {
+
+      });
+
+      it('should handle a change in context', () => {
+
+      });
+
     });
 
     describe('#createKernelNameItem()', () => {
+
+      it("should display the `'display_name`' of the current kernel", () => {
+
+      });
+
+      it("should display `'No Kernel!'` if there is no kernel", () => {
+
+      });
+
+      it('should handle a change in kernel', () => {
+
+      });
+
+      it('should handle a change in context', () => {
+
+      });
 
     });
 
     describe('#createKernelStatusItem()', () => {
 
+      it('should display a busy status if the kernel status is not idle', () => {
+
+      });
+
+      it('should show the current status in the node title', () => {
+
+      });
+
+      it('should handle a change to the kernel', () => {
+
+      });
+
+      it('should handle a change to the context', () => {
+
+      });
+
     });
 
     describe('#populateDefaults()', () => {
+
+      it('should add the default items to the panel toolbar', () => {
+
+      });
 
     });
 
