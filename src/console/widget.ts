@@ -549,8 +549,12 @@ class ConsoleWidget extends Widget {
    * Handle a completion selected signal from the completion widget.
    */
   protected onCompletionSelect(widget: CompletionWidget, value: string): void {
-    let prompt = this.prompt;
     let patch = this._completion.model.createPatch(value);
+    if (!patch) {
+      return;
+    }
+
+    let prompt = this.prompt;
     prompt.model.source = patch.text;
     prompt.editor.setCursorPosition(patch.position);
   }

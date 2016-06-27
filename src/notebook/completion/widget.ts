@@ -287,7 +287,6 @@ class CompletionWidget extends Widget {
       if (target === this._reference.node) {
         switch (event.keyCode) {
         case 13: // Enter key
-        case 9: // Tab key
           event.preventDefault();
           event.stopPropagation();
           event.stopImmediatePropagation();
@@ -301,17 +300,21 @@ class CompletionWidget extends Widget {
           event.stopImmediatePropagation();
           this._model.reset();
           return;
+        case 9: // Tab key
         case 38: // Up arrow key
         case 40: // Down arrow key
           event.preventDefault();
           event.stopPropagation();
           event.stopImmediatePropagation();
           let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+          let index = this._activeIndex;
           active = node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
           active.classList.remove(ACTIVE_CLASS);
-          this._activeIndex = event.keyCode === 38 ?
-            Math.max(--this._activeIndex, 0)
-              : Math.min(++this._activeIndex, items.length - 1);
+          if (event.keyCode === 38) { // For up arrow, cycle up.
+            this._activeIndex = index === 0 ? items.length - 1 : index - 1;
+          } else { // For down arrow or tab, cycle down.
+            this._activeIndex = index < items.length - 1 ? index + 1 : 0;
+          }
           active = items[this._activeIndex] as HTMLElement;
           active.classList.add(ACTIVE_CLASS);
           Private.scrollIfNeeded(this.node, active);

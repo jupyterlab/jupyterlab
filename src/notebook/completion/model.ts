@@ -233,7 +233,6 @@ class CompletionModel implements ICompletionModel {
     // If the text change means that the original start point has been preceded,
     // then the completion is no longer valid and should be reset.
     if (currentLine.length < originalLine.length) {
-      console.log('A');
       this.reset();
     } else {
       let {start, end} = this._cursor;
@@ -355,10 +354,11 @@ class CompletionModel implements ICompletionModel {
    * Reset the state of the model.
    */
   reset() {
-    this.original = null;
-    this.options = null;
+    this._original = null;
     this._query = '';
     this._cursor = null;
+    this._options = null;
+    this.stateChanged.emit(void 0);
   }
 
   /**
