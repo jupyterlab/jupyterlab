@@ -25,7 +25,7 @@ import {
 
 import {
   BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
-  CodeCellWidget, CodeCellModel, ICodeCellModel, MarkdownCellWidget,
+  CodeCellWidget, CodeCellModel, MarkdownCellWidget,
   RawCellWidget
 } from '../../../../lib/notebook/cells';
 
@@ -55,13 +55,6 @@ const rendermime = defaultRenderMime();
 class LogBaseCell extends BaseCellWidget {
 
   methods: string[] = [];
-
-  messages: string[] = [];
-
-  processMessage(msg: Message): void {
-    super.processMessage(msg);
-    this.messages.push(msg.type);
-  }
 
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
@@ -119,13 +112,6 @@ class LogCodeCell extends CodeCellWidget {
 class LogMarkdownCell extends MarkdownCellWidget {
 
   methods: string[] = [];
-
-  messages: string[] = [];
-
-  processMessage(msg: Message): void {
-    super.processMessage(msg);
-    this.messages.push(msg.type);
-  }
 
   protected onUpdateRequest(msg: Message): void {
     super.onAfterAttach(msg);
@@ -291,7 +277,7 @@ describe('notebook/cells/widget', () => {
         widget.readOnly = true;
         widget.readOnly = true;
         requestAnimationFrame(() => {
-          expect(widget.messages).to.eql([Widget.MsgUpdateRequest.type]);
+          expect(widget.methods).to.eql(['onUpdateRequest']);
           done();
         });
       });
@@ -544,7 +530,7 @@ describe('notebook/cells/widget', () => {
         let widget = new CodeCellWidget({ rendermime });
         let kernel = new MockKernel();
         widget.model = new CodeCellModel();
-        widget.execute(kernel).then(done);
+        widget.execute(kernel).then(() => { done(); });
       });
 
       it('should fulfill a promise if there is code to execute', (done) => {
@@ -553,9 +539,9 @@ describe('notebook/cells/widget', () => {
         widget.model = new CodeCellModel();
         widget.model.source = 'foo';
 
-        let originalCount = (widget.model as ICodeCellModel).executionCount;
+        let originalCount = (widget.model).executionCount;
         widget.execute(kernel).then(() => {
-          let executionCount = (widget.model as ICodeCellModel).executionCount;
+          let executionCount = (widget.model).executionCount;
           expect(executionCount).to.not.equal(originalCount);
           done();
         });
@@ -709,8 +695,8 @@ describe('notebook/cells/widget', () => {
         widget.rendered = false;
         widget.rendered = false;
         requestAnimationFrame(() => {
-          let updates = widget.messages.filter((msg) => {
-            return msg === Widget.MsgUpdateRequest.type;
+          let updates = widget.methods.filter((method) => {
+            return method === 'onUpdateRequest';
           });
           expect(updates).to.have.length(1);
           done();

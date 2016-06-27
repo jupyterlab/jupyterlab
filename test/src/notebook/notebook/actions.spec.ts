@@ -435,20 +435,64 @@ describe('notebook/notebook/actions', () => {
 
     describe('#run()', () => {
 
-      it('should run the selected cells', () => {
-
+      it('should run the selected cells', (done) => {
+        let next = widget.childAt(1) as MarkdownCellWidget;
+        widget.select(next);
+        let cell = widget.activeCell as CodeCellWidget;
+        cell.model.outputs.clear();
+        next.rendered = false;
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(cell.model.outputs.length).to.be.above(0);
+          expect(next.rendered).to.be(true);
+          done();
+        });
       });
 
-      it('should be a no-op if there is no model', () => {
-
+      it('should be a no-op if there is no model', (done) => {
+        widget.model = null;
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          done();
+        });
       });
 
-      it('should maintain the existing selection', () => {
-
+      it('should activate the last selected cell', (done) => {
+        let other = widget.childAt(1);
+        widget.select(other);
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.activeCell).to.be(other);
+          done();
+        });
       });
 
-      it('should change to command mode', () => {
+      it('should clear the selection', (done) => {
+        let next = widget.childAt(1);
+        widget.select(next);
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.isSelected(widget.childAt(0))).to.be(false);
+          done();
+        });
+      });
 
+      it('should change to command mode', (done) => {
+        widget.mode = 'edit';
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.mode).to.be('command');
+          done();
+        });
+      });
+
+      it('should handle no kernel', (done) => {
+        NotebookActions.run(widget, null).then(result => {
+          expect(result).to.be(true);
+          let cell = widget.activeCell as CodeCellWidget;
+          expect(cell.model.executionCount).to.be(null);
+          done();
+        });
       });
 
     });
