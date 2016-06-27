@@ -221,7 +221,7 @@ describe('notebook/output-area/model', () => {
       let model = new OutputAreaModel();
       expect(model.length).to.be(0);
       executeCode('foo', kernel, model).then(reply => {
-        expect(reply.execution_count).to.be(1);
+        expect((reply as any).content.execution_count).to.be(1);
         expect(model.length).to.be(1);
         done();
       });
@@ -234,7 +234,7 @@ describe('notebook/output-area/model', () => {
         model.add(output);
       }
       executeCode('foo', kernel, model).then(reply => {
-        expect(reply.execution_count).to.be(1);
+        expect((reply as any).content.execution_count).to.be(1);
         expect(model.length).to.be(1);
         done();
       });

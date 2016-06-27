@@ -10,6 +10,14 @@ import {
 } from 'phosphor-widget';
 
 import {
+  restartKernel
+} from '../../docregistry';
+
+import {
+  nbformat
+} from './nbformat';
+
+import {
   NotebookPanel
 } from './panel';
 
@@ -201,7 +209,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_RESTART,
       onClick: () => {
-        NotebookActions.restart(panel.kernel, panel.node);
+        restartKernel(panel.kernel, panel.node);
       },
       tooltip: 'Restart the kernel'
     });
@@ -297,7 +305,8 @@ class CellTypeSwitcher extends Widget {
     // Change current cell type on a change in the dropdown.
     select.addEventListener('change', event => {
       if (!this._changeGuard) {
-        NotebookActions.changeCellType(content, select.value);
+        let value = select.value as nbformat.CellType;
+        NotebookActions.changeCellType(content, value);
       }
     });
 

@@ -662,8 +662,7 @@ class Notebook extends StaticNotebook {
    * Whether a cell is selected or is the active cell.
    */
   isSelected(widget: BaseCellWidget): boolean {
-    let layout = this.layout as PanelLayout;
-    if (layout.childAt(this._activeCellIndex) === widget) {
+    if (widget === this.activeCell) {
       return true;
     }
     return Private.selectedProperty.get(widget);
