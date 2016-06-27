@@ -313,31 +313,39 @@ namespace NotebookActions {
    * @param kernel - An optional kernel object.
    *
    * #### Notes
+   * The last selected cell will be activated.
    * The existing selection will be cleared.
    */
   export
   function run(widget: Notebook, kernel?: IKernel): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
-      return;
+      return Promise.resolve(false);
     }
     widget.mode = 'command';
     let selected: BaseCellWidget[] = [];
+    let lastIndex = widget.activeCellIndex;
     for (let i = 0; i < widget.childCount(); i++) {
       let child = widget.childAt(i);
       if (widget.isSelected(child)) {
         selected.push(child);
+        lastIndex = i;
       }
     }
+    widget.activeCellIndex = lastIndex;
     Private.deselectCells(widget);
 
     let promises: Promise<boolean>[] = [];
     for (let child of selected) {
       promises.push(Private.runCell(child, kernel));
     }
-    return Promise.all(promises).then(
-      () => { return true; },
-      () => { return false; }
-    );
+    return Promise.all(promises).then(results => {
+      for (let result of results) {
+        if (!result) {
+          return false;
+        }
+      }
+      return true;
+    });
   }
 
   /**
@@ -824,8 +832,9 @@ namespace Private {
     case 'code':
       if (kernel) {
         return (widget as CodeCellWidget).execute(kernel).then(reply => {
-          let status = (reply as any).content.status;
-          return status === 'ok';
+          // TODO: let status = (reply as any).content.status;
+          // return status === 'ok';
+          return true;
         });
       }
       (widget.model as CodeCellModel).executionCount = null;

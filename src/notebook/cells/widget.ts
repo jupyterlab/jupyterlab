@@ -449,7 +449,9 @@ class CodeCellWidget extends BaseCellWidget {
     let outputs = model.outputs;
     return executeCode(code, kernel, outputs).then((reply: any) => {
       model.executionCount = reply.content.execution_count;
-      return reply.content.status === 'ok';
+      // TODO: check the return status and clear the execution state
+      // if necessary.
+      return true;
     });
   }
 
