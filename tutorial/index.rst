@@ -23,7 +23,7 @@ Contents:
    documents.md
    notebook.md
    patterns.md
-
+   examples.md
 
 Indices and tables
 ==================
