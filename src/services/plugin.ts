@@ -6,9 +6,9 @@ import {
 } from 'jupyter-js-utils';
 
 import {
-  IKernelManager, INotebookSessionManager, IContentsManager,
-  ContentsManager, KernelManager, NotebookSessionManager,
-  getKernelSpecs, IKernelSpecIds, IAjaxSettings
+  IKernel, ISession, IContentsManager,
+  ContentsManager, KernelManager, SessionManager,
+  getKernelSpecs, IAjaxSettings
 } from 'jupyter-js-services';
 
 
@@ -21,18 +21,18 @@ class JupyterServices {
   /**
    * Construct a new services provider.
    */
-  constructor(baseUrl: string, ajaxSettings: IAjaxSettings, specs: IKernelSpecIds) {
+  constructor(baseUrl: string, ajaxSettings: IAjaxSettings, specs: IKernel.ISpecModels) {
     let options = { baseUrl, ajaxSettings };
     this._kernelspecs = specs;
     this._kernelManager = new KernelManager(options);
-    this._sessionManager = new NotebookSessionManager(options);
+    this._sessionManager = new SessionManager(options);
     this._contentsManager = new ContentsManager(baseUrl, ajaxSettings);
   }
 
   /**
    * Get kernel specs.
    */
-  get kernelspecs(): IKernelSpecIds {
+  get kernelspecs(): IKernel.ISpecModels {
     return this._kernelspecs;
   }
 
@@ -42,7 +42,7 @@ class JupyterServices {
    * #### Notes
    * This is a read-only property.
    */
-  get kernelManager(): IKernelManager {
+  get kernelManager(): IKernel.IManager {
     return this._kernelManager;
   }
 
@@ -52,7 +52,7 @@ class JupyterServices {
    * #### Notes
    * This is a read-only property.
    */
-  get notebookSessionManager(): INotebookSessionManager {
+  get sessionManager(): ISession.IManager {
     return this._sessionManager;
   }
 
@@ -66,10 +66,10 @@ class JupyterServices {
     return this._contentsManager;
   }
 
-  private _kernelManager: IKernelManager = null;
-  private _sessionManager: INotebookSessionManager = null;
+  private _kernelManager: IKernel.IManager = null;
+  private _sessionManager: ISession.IManager = null;
   private _contentsManager: IContentsManager = null;
-  private _kernelspecs: IKernelSpecIds = null;
+  private _kernelspecs: IKernel.ISpecModels = null;
 }
 
 

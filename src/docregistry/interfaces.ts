@@ -2,12 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsModel, IKernelId, IContentsOpts, IKernel,
-  IKernelSpecIds, ISessionId
+  IContentsModel, IContentsOpts, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
-  IDisposable, DisposableDelegate, DisposableSet
+  IDisposable
 } from 'phosphor-disposable';
 
 import {
@@ -152,7 +151,7 @@ export interface IDocumentContext<T extends IDocumentModel> extends IDisposable 
    * #### Notes
    * This is a read-only property.
    */
-  kernelspecs: IKernelSpecIds;
+  kernelspecs: IKernel.ISpecModels;
 
   /**
    * A signal emitted when the kernel changes.
@@ -170,7 +169,7 @@ export interface IDocumentContext<T extends IDocumentModel> extends IDisposable 
    * #### Notes
    * If no options are given, the session is shut down.
    */
-  changeKernel(options?: IKernelId): Promise<IKernel>;
+  changeKernel(options?: IKernel.IModel): Promise<IKernel>;
 
   /**
    * Save the document contents to disk.
@@ -190,7 +189,7 @@ export interface IDocumentContext<T extends IDocumentModel> extends IDisposable 
   /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISessionId[]>;
+  listSessions(): Promise<ISession.IModel[]>;
 
   /**
    * Add a sibling widget to the document manager.
@@ -258,7 +257,7 @@ interface IWidgetFactory<T extends Widget, U extends IDocumentModel> extends IDi
   /**
    * Create a new widget.
    */
-  createNew(context: IDocumentContext<U>, kernel?: IKernelId): T;
+  createNew(context: IDocumentContext<U>, kernel?: IKernel.IModel): T;
 
   /**
    * Take an action on a widget before closing it.

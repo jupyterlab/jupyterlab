@@ -7,11 +7,11 @@ import {
 } from './index';
 
 import {
-  IKernelId
+  IKernel
 } from 'jupyter-js-services';
 
 import {
-  IDocumentContext, DocumentRegistry, selectKernelForContext
+  IDocumentContext, DocumentRegistry, restartKernel, selectKernelForContext
 } from '../docregistry';
 
 import {
@@ -173,7 +173,7 @@ class TrackingNotebookWidgetFactory extends NotebookWidgetFactory {
   /**
    * Create a new widget.
    */
-  createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernelId): NotebookPanel {
+  createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernel.IModel): NotebookPanel {
     let widget = super.createNew(context, kernel);
     Private.notebookTracker.activeNotebook = widget;
     return widget;
@@ -261,7 +261,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     handler: () => {
       if (tracker.activeNotebook) {
         let nbWidget = tracker.activeNotebook;
-        NotebookActions.restart(nbWidget.kernel, nbWidget.node);
+        restartKernel(nbWidget.kernel, nbWidget.node);
       }
     }
   },
@@ -270,7 +270,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     handler: () => {
       if (tracker.activeNotebook) {
         let nbWidget = tracker.activeNotebook;
-        let promise = NotebookActions.restart(nbWidget.kernel, nbWidget.node);
+        let promise = restartKernel(nbWidget.kernel, nbWidget.node);
         promise.then(result => {
           if (result) {
             NotebookActions.clearAllOutputs(nbWidget.content);
@@ -284,7 +284,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     handler: () => {
       if (tracker.activeNotebook) {
         let nbWidget = tracker.activeNotebook;
-        let promise = NotebookActions.restart(nbWidget.kernel, nbWidget.node);
+        let promise = restartKernel(nbWidget.kernel, nbWidget.node);
         promise.then(result => {
           NotebookActions.runAll(nbWidget.content, nbWidget.context.kernel);
         });

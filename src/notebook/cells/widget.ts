@@ -34,7 +34,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  OutputAreaWidget, OutputAreaModel, executeCode
+  OutputAreaWidget, executeCode
 } from '../output-area';
 
 import {
@@ -46,7 +46,7 @@ import {
 } from './editor';
 
 import {
-  ICodeCellModel, ICellModel
+  ICellModel, ICodeCellModel, IMarkdownCellModel, IRawCellModel
 } from './model';
 
 
@@ -416,6 +416,11 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   /**
+   * The model used by the widget.
+   */
+  model: ICodeCellModel;
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
@@ -431,19 +436,22 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Execute the cell given a kernel.
    */
-  execute(kernel: IKernel): Promise<void> {
+  execute(kernel: IKernel): Promise<boolean> {
     let model = this.model as ICodeCellModel;
     let code = model.source;
     if (!code.trim()) {
       model.executionCount = null;
-      return Promise.resolve(void 0);
+      return Promise.resolve(true);
     }
     model.executionCount = null;
     this.setPrompt('*');
     this.trusted = true;
     let outputs = model.outputs;
-    return executeCode(code, kernel, outputs).then(reply => {
-      model.executionCount = reply.execution_count;
+    return executeCode(code, kernel, outputs).then((reply: any) => {
+      model.executionCount = reply.content.execution_count;
+      // TODO: check the return status and clear the execution state
+      // if necessary.
+      return true;
     });
   }
 
@@ -532,7 +540,7 @@ namespace CodeCellWidget {
      *
      * The default is a shared renderer instance.
      */
-    renderer?: IRenderer
+    renderer?: IRenderer;
 
     /**
      * The mime renderer for the cell widget.
@@ -598,6 +606,11 @@ class MarkdownCellWidget extends BaseCellWidget {
     this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
     (this.layout as PanelLayout).addChild(this._markdownWidget);
   }
+
+  /**
+   * The model used by the widget.
+   */
+  model: IMarkdownCellModel;
 
   /**
    * Whether the cell is rendered.
@@ -695,6 +708,11 @@ class RawCellWidget extends BaseCellWidget {
     super(options);
     this.addClass(RAW_CELL_CLASS);
   }
+
+  /**
+   * The model used by the widget.
+   */
+  model: IRawCellModel;
 }
 
 

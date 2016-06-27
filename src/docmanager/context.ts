@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernelId, IKernel, IKernelSpecIds, IContentsManager,
-  INotebookSessionManager, INotebookSession, ISessionId,
-  IContentsOpts, ISessionOptions, IContentsModel
+  IContentsManager, IContentsModel, IContentsOpts, IKernel, ISession
 } from 'jupyter-js-services';
 
 import * as utils
@@ -117,7 +115,7 @@ class Context implements IDocumentContext<IDocumentModel> {
    * #### Notes
    * This is a read-only property.
    */
-  get kernelspecs(): IKernelSpecIds {
+  get kernelspecs(): IKernel.ISpecModels {
     return this._manager.getKernelspecs();
   }
 
@@ -142,7 +140,7 @@ class Context implements IDocumentContext<IDocumentModel> {
   /**
    * Change the current kernel associated with the document.
    */
-  changeKernel(options: IKernelId): Promise<IKernel> {
+  changeKernel(options: IKernel.IModel): Promise<IKernel> {
     return this._manager.changeKernel(this._id, options);
   }
 
@@ -170,7 +168,7 @@ class Context implements IDocumentContext<IDocumentModel> {
   /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISessionId[]> {
+  listSessions(): Promise<ISession.IModel[]> {
     return this._manager.listSessions();
   }
 
@@ -202,7 +200,7 @@ class ContextManager implements IDisposable {
   /**
    * Construct a new context manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager,  kernelspecs: IKernelSpecIds, opener: (id: string, widget: Widget) => IDisposable) {
+  constructor(contentsManager: IContentsManager, sessionManager: ISession.IManager,  kernelspecs: IKernel.ISpecModels, opener: (id: string, widget: Widget) => IDisposable) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
     this._opener = opener;
@@ -335,7 +333,7 @@ class ContextManager implements IDisposable {
    * if necessary). If falsey, shut down any existing session and return
    * a void promise.
    */
-  changeKernel(id: string, options: IKernelId): Promise<IKernel> {
+  changeKernel(id: string, options: IKernel.IModel): Promise<IKernel> {
     let contextEx = this._contexts[id];
     let session = contextEx.session;
     if (options) {
@@ -343,8 +341,8 @@ class ContextManager implements IDisposable {
         return session.changeKernel(options);
       } else {
         let path = contextEx.path;
-        let sOptions = {
-          notebookPath: path,
+        let sOptions: ISession.IOptions = {
+          path: path,
           kernelName: options.name,
           kernelId: options.id
         };
@@ -382,7 +380,7 @@ class ContextManager implements IDisposable {
       if (!sessionUpdated) {
         let session = contextEx.session;
         if (session) {
-          session.renameNotebook(newPath);
+          session.rename(newPath);
           sessionUpdated = true;
         }
       }
@@ -392,7 +390,7 @@ class ContextManager implements IDisposable {
   /**
    * Get the current kernelspec information.
    */
-  getKernelspecs(): IKernelSpecIds {
+  getKernelspecs(): IKernel.ISpecModels {
     return this._kernelspecids;
   }
 
@@ -461,7 +459,7 @@ class ContextManager implements IDisposable {
   /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISessionId[]> {
+  listSessions(): Promise<ISession.IModel[]> {
     return this._sessionManager.listRunning();
   }
 
@@ -476,7 +474,7 @@ class ContextManager implements IDisposable {
   /**
    * Start a session and set up its signals.
    */
-  private _startSession(id: string, options: ISessionOptions): Promise<IKernel> {
+  private _startSession(id: string, options: ISession.IOptions): Promise<IKernel> {
     let contextEx = this._contexts[id];
     let context = contextEx.context;
     return this._sessionManager.startNew(options).then(session => {
@@ -485,7 +483,7 @@ class ContextManager implements IDisposable {
       }
       contextEx.session = session;
       context.kernelChanged.emit(session.kernel);
-      session.notebookPathChanged.connect((s, path) => {
+      session.pathChanged.connect((s, path) => {
         if (path !== contextEx.path) {
           contextEx.path = path;
           context.pathChanged.emit(path);
@@ -515,8 +513,8 @@ class ContextManager implements IDisposable {
   }
 
   private _contentsManager: IContentsManager = null;
-  private _sessionManager: INotebookSessionManager = null;
-  private _kernelspecids: IKernelSpecIds = null;
+  private _sessionManager: ISession.IManager = null;
+  private _kernelspecids: IKernel.ISpecModels = null;
   private _contexts: { [key: string]: Private.IContextEx } = Object.create(null);
   private _opener: (id: string, widget: Widget) => IDisposable = null;
 }
@@ -533,7 +531,7 @@ namespace Private {
   interface IContextEx {
     context: IDocumentContext<IDocumentModel>;
     model: IDocumentModel;
-    session: INotebookSession;
+    session: ISession;
     opts: IContentsOpts;
     path: string;
     contentsModel: IContentsModel;

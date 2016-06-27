@@ -68,6 +68,21 @@ describe('notebook/cells/editor', () => {
 
     });
 
+    describe('#lineNumbers', () => {
+
+      it('should get the line numbers state of the editor', () => {
+        let widget = new CellEditorWidget(new CellModel());
+        expect(widget.lineNumbers).to.be(widget.editor.getOption('lineNumbers'));
+      });
+
+      it('should set the line numbers state of the editor', () => {
+        let widget = new CellEditorWidget(new CellModel());
+        widget.lineNumbers = !widget.lineNumbers;
+        expect(widget.lineNumbers).to.be(widget.editor.getOption('lineNumbers'));
+      });
+
+    });
+
     describe('#edgeRequested', () => {
 
       it('should emit a signal when the top edge is requested', () => {

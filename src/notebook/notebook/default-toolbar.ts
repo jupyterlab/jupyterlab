@@ -2,12 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelStatus
+  IKernel
 } from 'jupyter-js-services';
 
 import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  restartKernel
+} from '../../docregistry';
+
+import {
+  nbformat
+} from './nbformat';
 
 import {
   NotebookPanel
@@ -201,7 +209,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_RESTART,
       onClick: () => {
-        NotebookActions.restart(panel.kernel, panel.node);
+        restartKernel(panel.kernel, panel.node);
       },
       tooltip: 'Restart the kernel'
     });
@@ -297,7 +305,8 @@ class CellTypeSwitcher extends Widget {
     // Change current cell type on a change in the dropdown.
     select.addEventListener('change', event => {
       if (!this._changeGuard) {
-        NotebookActions.changeCellType(content, select.value);
+        let value = select.value as nbformat.CellType;
+        NotebookActions.changeCellType(content, value);
       }
     });
 
@@ -345,30 +354,9 @@ class KernelIndicator extends Widget {
   /**
    * Handle a status on a kernel.
    */
-  private _handleStatus(kernel: IKernel, status: KernelStatus) {
-    this.toggleClass(TOOLBAR_BUSY, status !== KernelStatus.Idle);
-    switch (status) {
-    case KernelStatus.Idle:
-      this.node.title = 'Kernel Idle';
-      break;
-    case KernelStatus.Busy:
-      this.node.title = 'Kernel Busy';
-      break;
-    case KernelStatus.Dead:
-      this.node.title = 'Kernel Died';
-      break;
-    case KernelStatus.Reconnecting:
-      this.node.title = 'Kernel Reconnecting';
-      break;
-    case KernelStatus.Restarting:
-      this.node.title = 'Kernel Restarting';
-      break;
-    case KernelStatus.Starting:
-      this.node.title = 'Kernel Starting';
-      break;
-    default:
-      this.node.title = 'Kernel Status Unknown';
-      break;
-    }
+  private _handleStatus(kernel: IKernel, status: IKernel.Status) {
+    this.toggleClass(TOOLBAR_BUSY, status !== 'idle');
+    let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
+    this.node.title = title;
   }
 }

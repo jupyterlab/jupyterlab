@@ -50,7 +50,7 @@ const fileBrowserExtension = {
  */
 function activateFileBrowser(app: Application, provider: JupyterServices, registry: DocumentRegistry): Promise<void> {
   let contents = provider.contentsManager;
-  let sessions = provider.notebookSessionManager;
+  let sessions = provider.sessionManager;
   let widgets: DocumentWrapper[] = [];
   let activeWidget: DocumentWrapper;
   let id = 0;

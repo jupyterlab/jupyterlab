@@ -12,6 +12,10 @@ import {
 } from 'phosphor-observablelist';
 
 import {
+  deepEqual
+} from '../../../../lib/notebook/common/json';
+
+import {
   OutputAreaModel, executeCode
 } from '../../../../lib/notebook/output-area/model';
 
@@ -93,7 +97,7 @@ describe('notebook/output-area/model', () => {
           expect(args.oldIndex).to.be(-1);
           expect(args.newIndex).to.be(0);
           expect(args.oldValue).to.be(void 0);
-          // TODO: use deepEqual when we update nbformat
+          expect(deepEqual(args.newValue, DEFAULT_OUTPUTS[0]));
           called = true;
         });
         model.add(DEFAULT_OUTPUTS[0]);
@@ -160,7 +164,6 @@ describe('notebook/output-area/model', () => {
         model.add(DEFAULT_OUTPUTS[0]);
         let output = model.get(0);
         expect(output).to.not.be(DEFAULT_OUTPUTS[0]);
-        // TODO: use deepEqual when nbformat is updated.
         expect(output.output_type).to.be(DEFAULT_OUTPUTS[0].output_type);
       });
 
@@ -221,7 +224,7 @@ describe('notebook/output-area/model', () => {
       let model = new OutputAreaModel();
       expect(model.length).to.be(0);
       executeCode('foo', kernel, model).then(reply => {
-        expect(reply.execution_count).to.be(1);
+        expect((reply as any).content.execution_count).to.be(1);
         expect(model.length).to.be(1);
         done();
       });
@@ -234,7 +237,7 @@ describe('notebook/output-area/model', () => {
         model.add(output);
       }
       executeCode('foo', kernel, model).then(reply => {
-        expect(reply.execution_count).to.be(1);
+        expect((reply as any).content.execution_count).to.be(1);
         expect(model.length).to.be(1);
         done();
       });

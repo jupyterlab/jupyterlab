@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernelLanguageInfo
+  KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -526,7 +526,7 @@ namespace StaticNotebook {
     getCodeMimetype(model: INotebookModel): string {
       let cursor = model.getMetadata('language_info');
       let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
-      return mimetypeForLanguage(info as IKernelLanguageInfo);
+      return mimetypeForLanguage(info as KernelMessage.ILanguageInfo);
     }
   }
 
@@ -662,8 +662,7 @@ class Notebook extends StaticNotebook {
    * Whether a cell is selected or is the active cell.
    */
   isSelected(widget: BaseCellWidget): boolean {
-    let layout = this.layout as PanelLayout;
-    if (layout.childAt(this._activeCellIndex) === widget) {
+    if (widget === this.activeCell) {
       return true;
     }
     return Private.selectedProperty.get(widget);

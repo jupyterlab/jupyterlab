@@ -185,6 +185,16 @@ class CellEditorWidget extends CodeMirrorWidget {
   }
 
   /**
+   * The line numbers state of the editor.
+   */
+  get lineNumbers(): boolean {
+    return this.editor.getOption('lineNumbers');
+  }
+  set lineNumbers(value: boolean) {
+    this.editor.setOption('lineNumbers', value);
+  }
+
+  /**
    * Dispose of the resources held by the editor.
    */
   dispose(): void {
