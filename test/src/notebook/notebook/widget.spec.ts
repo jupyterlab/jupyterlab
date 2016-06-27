@@ -590,6 +590,33 @@ describe('notebook/notebook/widget', () => {
 
     });
 
+    describe('#selectionChanged', () => {
+
+      it('should be emitted when the selection changes', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        let called = false;
+        widget.selectionChanged.connect((sender, args) => {
+          expect(sender).to.be(widget);
+          expect(args).to.be(void 0);
+          called = true;
+        });
+        widget.select(widget.childAt(1));
+        expect(called).to.be(true);
+      });
+
+      it('should not be emitted when the selection does not change', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        let called = false;
+        widget.select(widget.childAt(1));
+        widget.selectionChanged.connect(() => { called = true; });
+        widget.select(widget.childAt(1));
+        expect(called).to.be(false);
+      });
+
+    });
+
     describe('#mode', () => {
 
       it('should get the interactivity mode of the notebook', () => {

@@ -238,63 +238,134 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#createCellTypeItem()', () => {
 
       it('should track the cell type of the current cell', () => {
-
+        let item = ToolbarItems.createCellTypeItem(panel);
+        let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
+        expect(node.value).to.be('code');
+        panel.content.activeCellIndex++;
+        expect(node.value).to.be('markdown');
       });
 
       it("should display `'-'` if multiple cell types are selected", () => {
-
+        let item = ToolbarItems.createCellTypeItem(panel);
+        let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
+        expect(node.value).to.be('code');
+        panel.content.select(panel.content.childAt(1));
+        expect(node.value).to.be('-');
       });
 
       it('should display the active cell type if multiple cells of the same type are selected', () => {
-
-      });
-
-      it('should change the types of the active cells if the selection changes', () => {
-
+        let item = ToolbarItems.createCellTypeItem(panel);
+        let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
+        expect(node.value).to.be('code');
+        let cell = panel.model.factory.createCodeCell();
+        panel.model.cells.insert(1, cell);
+        panel.content.select(panel.content.childAt(1));
+        expect(node.value).to.be('code');
       });
 
       it('should handle a change in context', () => {
-
+        let item = ToolbarItems.createCellTypeItem(panel);
+        let model = new NotebookModel();
+        model.fromJSON(DEFAULT_CONTENT);
+        context = new MockContext<NotebookModel>(model);
+        context.changeKernel({ name: 'python' });
+        panel.context = context;
+        panel.content.activeCellIndex++;
+        let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
+        expect(node.value).to.be('markdown');
       });
 
     });
 
     describe('#createKernelNameItem()', () => {
 
-      it("should display the `'display_name`' of the current kernel", () => {
-
+      it("should display the `'display_name`' of the current kernel", (done) => {
+        let item = ToolbarItems.createKernelNameItem(panel);
+        panel.kernel.getKernelSpec().then(spec => {
+          expect(item.node.textContent).to.be(spec.display_name);
+          done();
+        });
       });
 
       it("should display `'No Kernel!'` if there is no kernel", () => {
-
+        let model = new NotebookModel();
+        model.fromJSON(DEFAULT_CONTENT);
+        context = new MockContext<NotebookModel>(model);
+        panel.context = context;
+        let item = ToolbarItems.createKernelNameItem(panel);
+        expect(item.node.textContent).to.be('No Kernel!');
       });
 
-      it('should handle a change in kernel', () => {
-
+      it('should handle a change in kernel', (done) => {
+        let item = ToolbarItems.createKernelNameItem(panel);
+        panel.context.changeKernel({ name: 'shell' }).then(kernel => {
+          kernel.getKernelSpec().then(spec => {
+            expect(item.node.textContent).to.be(spec.display_name);
+            done();
+          });
+        });
       });
 
       it('should handle a change in context', () => {
-
+        let item = ToolbarItems.createKernelNameItem(panel);
+        let model = new NotebookModel();
+        model.fromJSON(DEFAULT_CONTENT);
+        context = new MockContext<NotebookModel>(model);
+        panel.context = context;
+        expect(item.node.textContent).to.be('No Kernel!');
       });
 
     });
 
     describe('#createKernelStatusItem()', () => {
 
-      it('should display a busy status if the kernel status is not idle', () => {
-
+      it('should display a busy status if the kernel status is not idle', (done) => {
+        let item = ToolbarItems.createKernelStatusItem(panel);
+        expect(item.hasClass('jp-mod-busy')).to.be(true);
+        panel.kernel.statusChanged.connect(() => {
+          if (panel.kernel.status === 'idle') {
+            expect(item.hasClass('jp-mod-busy')).to.be(false);
+            done();
+          }
+        });
       });
 
-      it('should show the current status in the node title', () => {
-
+      it('should show the current status in the node title', (done) => {
+        let item = ToolbarItems.createKernelStatusItem(panel);
+        let status = panel.kernel.status;
+        expect(item.node.title.toLowerCase()).to.contain(status);
+        panel.kernel.statusChanged.connect(() => {
+          if (panel.kernel.status === 'idle') {
+            expect(item.node.title.toLowerCase()).to.contain('idle');
+            done();
+          }
+        });
       });
 
-      it('should handle a change to the kernel', () => {
-
+      it('should handle a change to the kernel', (done) => {
+        let item = ToolbarItems.createKernelStatusItem(panel);
+        panel.context.changeKernel({ name: 'shell' });
+        panel.kernel.statusChanged.connect(() => {
+          if (panel.kernel.status === 'idle') {
+            expect(item.hasClass('jp-mod-busy')).to.be(false);
+            done();
+          }
+        });
       });
 
-      it('should handle a change to the context', () => {
-
+      it('should handle a change to the context', (done) => {
+        let item = ToolbarItems.createKernelStatusItem(panel);
+        let model = new NotebookModel();
+        model.fromJSON(DEFAULT_CONTENT);
+        context = new MockContext<NotebookModel>(model);
+        context.changeKernel({ name: 'python' });
+        panel.context = context;
+        panel.kernel.statusChanged.connect(() => {
+          if (panel.kernel.status === 'idle') {
+            expect(item.hasClass('jp-mod-busy')).to.be(false);
+            done();
+          }
+        });
       });
 
     });
@@ -302,7 +373,10 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#populateDefaults()', () => {
 
       it('should add the default items to the panel toolbar', () => {
-
+        ToolbarItems.populateDefaults(panel);
+        expect(panel.toolbar.list()).to.eql(['save', 'insert', 'cut',
+          'copy', 'paste', 'run', 'interrupt', 'restart', 'cellType',
+          'kernelName', 'kernelStatus']);
       });
 
     });
