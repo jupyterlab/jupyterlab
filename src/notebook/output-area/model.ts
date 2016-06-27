@@ -168,14 +168,21 @@ function executeCode(code: string, kernel: IKernel, outputs: OutputAreaModel): P
     stop_on_error: true
   };
   outputs.clear();
-  return new Promise<any>((resolve, reject) => {
+  return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
     let future = kernel.execute(content);
     future.onIOPub = ((msg: KernelMessage.IIOPubMessage) => {
-      // TODO: fix when nbformat uses JSON objects
-      let model = msg.content as any;
-      if (model !== void 0) {
-        model.output_type = msg.header.msg_type as any;
-        outputs.add(model as any);
+      let msgType = msg.header.msg_type as nbformat.OutputType;
+      switch (msgType) {
+      case 'execute_result':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+        let model = msg.content as nbformat.IOutput;
+        model.output_type = msgType;
+        outputs.add(model);
+        break;
+      default:
+        break;
       }
     });
     future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
