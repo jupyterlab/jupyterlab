@@ -2,8 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsManager, IContentsModel, IContentsOpts, INotebookSessionManager,
-  INotebookSession, ISessionId, IKernelSpecIds
+  IContentsManager, IContentsModel, IContentsOpts, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -31,7 +30,7 @@ class FileBrowserModel implements IDisposable {
   /**
    * Construct a new file browser view model.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, specs: IKernelSpecIds) {
+  constructor(contentsManager: IContentsManager, sessionManager: ISession.IManager, specs: IKernel.ISpecModels) {
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
     this._specs = specs;
@@ -94,14 +93,14 @@ class FileBrowserModel implements IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  get sessionIds(): ISessionId[] {
-    return this._sessionIds.slice();
+  get sessionIds(): ISession.IModel[] {
+    return this._sessions.slice();
   }
 
   /**
    * Get the kernel specs.
    */
-  get kernelspecs(): IKernelSpecIds {
+  get kernelspecs(): IKernel.ISpecModels {
     return this._specs;
   }
 
@@ -346,20 +345,20 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Shut down a notebook session by session id.
+   * Shut down a session by session id.
    */
-  shutdown(sessionId: ISessionId): Promise<void> {
+  shutdown(sessionId: ISession.IModel): Promise<void> {
     return this._sessionManager.connectTo(sessionId.id).then(session => {
       return session.shutdown();
     });
   }
 
   /**
-   * Start a new session on a notebook.
+   * Start a new session for a path.
    */
-  startSession(path: string, kernel: string): Promise<INotebookSession> {
+  startSession(path: string, kernel: string): Promise<ISession> {
     return this._sessionManager.startNew({
-      notebookPath: path,
+      path,
       kernelName: kernel
     });
   }
@@ -439,26 +438,22 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get the notebook sessions for the current directory.
+   * Get the sessions for the current directory.
    */
   private _findSessions(): Promise<void> {
-    this._sessionIds = [];
-    let notebooks = this._model.content.filter((content: IContentsModel) => { return content.type === 'notebook'; });
-    if (!notebooks.length) {
-      return Promise.resolve(void 0);
-    }
+    this._sessions = [];
 
-    return this._sessionManager.listRunning().then(sessionIds => {
-      if (!sessionIds.length) {
+    return this._sessionManager.listRunning().then(models => {
+      if (!models.length) {
         return;
       }
-      let paths = notebooks.map((notebook: IContentsModel) => {
-        return notebook.path;
+      let paths = this._model.content.map((contents: IContentsModel) => {
+        return contents.path;
       });
-      for (let sessionId of sessionIds) {
-        let index = paths.indexOf(sessionId.notebook.path);
+      for (let model of models) {
+        let index = paths.indexOf(model.notebook.path);
         if (index !== -1) {
-          this._sessionIds.push(sessionId);
+          this._sessions.push(model);
         }
       }
     });
@@ -466,13 +461,13 @@ class FileBrowserModel implements IDisposable {
 
   private _maxUploadSizeMb = 15;
   private _contentsManager: IContentsManager = null;
-  private _sessionIds: ISessionId[] = [];
-  private _sessionManager: INotebookSessionManager = null;
+  private _sessions: ISession.IModel[] = [];
+  private _sessionManager: ISession.IManager = null;
   private _model: IContentsModel;
   private _sortKey = 'name';
   private _ascending = true;
   private _unsortedNames: string[] = [];
-  private _specs: IKernelSpecIds = null;
+  private _specs: IKernel.ISpecModels = null;
 }
 
 

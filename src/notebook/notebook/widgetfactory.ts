@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernelId
+  IKernel
 } from 'jupyter-js-services';
 
 import {
@@ -76,7 +76,7 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel, INotebookMo
    * The factory will start the appropriate kernel and populate
    * the default toolbar items using `ToolbarItems.populateDefaults`.
    */
-  createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernelId): NotebookPanel {
+  createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernel.IModel): NotebookPanel {
     let rendermime = this._rendermime.clone();
     let model = context.model;
     if (kernel) {

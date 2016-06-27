@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, IExecuteReply
+  IKernel, KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -161,27 +161,26 @@ class OutputAreaModel implements IDisposable {
  * Execute code on a kernel and send outputs to an output area model.
  */
 export
-function executeCode(code: string, kernel: IKernel, outputs: OutputAreaModel): Promise<any> {
-  let exRequest = {
+function executeCode(code: string, kernel: IKernel, outputs: OutputAreaModel): Promise<KernelMessage.IExecuteReplyMsg> {
+  // Override the default for `stop_on_error`.
+  let content: KernelMessage.IExecuteRequest = {
     code,
-    silent: false,
-    store_history: true,
-    stop_on_error: true,
-    allow_stdin: true
+    stop_on_error: true
   };
   outputs.clear();
   return new Promise<any>((resolve, reject) => {
-    let future = kernel.execute(exRequest);
-    future.onIOPub = (msg => {
-      let model = msg.content;
+    let future = kernel.execute(content);
+    future.onIOPub = ((msg: KernelMessage.IIOPubMessage) => {
+      // TODO: fix when nbformat uses JSON objects
+      let model = msg.content as any;
       if (model !== void 0) {
-        model.output_type = msg.header.msg_type as nbformat.OutputType;
-        outputs.add(model);
+        model.output_type = msg.header.msg_type as any;
+        outputs.add(model as any);
       }
     });
-    future.onReply = (msg => {
+    future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
       resolve(msg);
-    });
+    };
   });
 }
 

@@ -46,7 +46,7 @@ const consoleExtension = {
  */
 function activateConsole(app: Application, services: JupyterServices, rendermime: RenderMime<Widget>): Promise<void> {
 
-  let manager = services.notebookSessionManager;
+  let manager = services.sessionManager;
 
   // Add the ability to create new consoles for each kernel.
   let specs = services.kernelspecs;
@@ -65,7 +65,7 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
       id,
       handler: () => {
         manager.startNew({
-          notebookPath: `Console-${count++}`,
+          path: `Console-${count++}`,
           kernelName: `${displayNameMap[displayName]}`
         }).then(session => {
           let console = new ConsolePanel(session, rendermime.clone());

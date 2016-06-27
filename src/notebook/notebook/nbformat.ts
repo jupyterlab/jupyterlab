@@ -5,7 +5,6 @@
 // https://nbformat.readthedocs.org/en/latest/format_description.html
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
-
 /**
  * A namespace for nbformat interfaces.
  */

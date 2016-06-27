@@ -2,8 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, NotebookSessionManager,
-  IKernelSpecIds
+  ContentsManager, SessionManager, IKernel
 } from 'jupyter-js-services';
 
 import {
@@ -48,14 +47,14 @@ import 'jupyterlab/lib/theme.css';
 
 
 function main(): void {
-  let sessionsManager = new NotebookSessionManager();
+  let sessionsManager = new SessionManager();
   sessionsManager.getSpecs().then(specs => {
     createApp(sessionsManager, specs);
   });
 }
 
 
-function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecIds): void {
+function createApp(sessionsManager: SessionManager, specs: IKernel.ISpecModels): void {
   let contentsManager = new ContentsManager();
   let widgets: DocumentWrapper[] = [];
   let activeWidget: DocumentWrapper;

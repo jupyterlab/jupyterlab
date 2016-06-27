@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelStatus
+  IKernel
 } from 'jupyter-js-services';
 
 import {
@@ -354,30 +354,9 @@ class KernelIndicator extends Widget {
   /**
    * Handle a status on a kernel.
    */
-  private _handleStatus(kernel: IKernel, status: KernelStatus) {
-    this.toggleClass(TOOLBAR_BUSY, status !== KernelStatus.Idle);
-    switch (status) {
-    case KernelStatus.Idle:
-      this.node.title = 'Kernel Idle';
-      break;
-    case KernelStatus.Busy:
-      this.node.title = 'Kernel Busy';
-      break;
-    case KernelStatus.Dead:
-      this.node.title = 'Kernel Died';
-      break;
-    case KernelStatus.Reconnecting:
-      this.node.title = 'Kernel Reconnecting';
-      break;
-    case KernelStatus.Restarting:
-      this.node.title = 'Kernel Restarting';
-      break;
-    case KernelStatus.Starting:
-      this.node.title = 'Kernel Starting';
-      break;
-    default:
-      this.node.title = 'Kernel Status Unknown';
-      break;
-    }
+  private _handleStatus(kernel: IKernel, status: IKernel.Status) {
+    this.toggleClass(TOOLBAR_BUSY, status !== 'idle');
+    let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
+    this.node.title = title;
   }
 }

@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernelId, IKernel, IKernelSpecIds, ISessionId, IContentsModel
+  IContentsModel, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
-  MockKernel
+  MockKernel, KERNELSPECS
 } from 'jupyter-js-services/lib/mockkernel';
 
 import {
@@ -24,10 +24,6 @@ import {
 import {
   IDocumentContext, IDocumentModel
 } from '../../../lib/docregistry';
-
-import {
-  KERNELSPECS, getKernelInfo
-} from '../utils';
 
 
 export
@@ -69,7 +65,7 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     return void 0;
   }
 
-  get kernelspecs(): IKernelSpecIds {
+  get kernelspecs(): IKernel.ISpecModels {
     return KERNELSPECS;
   }
 
@@ -82,18 +78,8 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     this._model = null;
   }
 
-  changeKernel(options: IKernelId): Promise<IKernel> {
+  changeKernel(options: IKernel.IModel): Promise<IKernel> {
     this._kernel = new MockKernel(options);
-    if (options.name) {
-      let name = options.name;
-      if (!KERNELSPECS.kernelspecs[name]) {
-        name = KERNELSPECS['default'];
-      }
-      let kernel = this._kernel as MockKernel;
-      kernel.setKernelSpec(KERNELSPECS.kernelspecs[name].spec);
-      kernel.setKernelInfo(getKernelInfo(name));
-    }
-
     this.kernelChanged.emit(this._kernel);
     return Promise.resolve(this._kernel);
   }
@@ -112,8 +98,8 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     return Promise.resolve(void 0);
   }
 
-  listSessions(): Promise<ISessionId[]> {
-    return Promise.resolve([] as ISessionId[]);
+  listSessions(): Promise<ISession.IModel[]> {
+    return Promise.resolve([] as ISession.IModel[]);
   }
 
   addSibling(widget: Widget): IDisposable {
