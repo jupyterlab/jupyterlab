@@ -54,7 +54,7 @@ import {
 } from './history';
 
 import {
-  CompletionWidget, CompletionModel
+  CompletionWidget, CompletionModel, CellCompletionHandler
 } from '../notebook/completion';
 
 
@@ -248,7 +248,8 @@ class ConsoleWidget extends Widget {
     this._completion = constructor.createCompletion();
     this._completion.reference = this;
     this._completion.attach(document.body);
-    this._completion.selected.connect(this.onCompletionSelect, this);
+    this._completionHandler = new CellCompletionHandler(this._completion);
+    this._completionHandler.kernel = session.kernel;
 
     // Instantiate tooltip widget.
     this._tooltip = constructor.createTooltip();
@@ -273,6 +274,7 @@ class ConsoleWidget extends Widget {
       this.newPrompt();
       this.initialize();
       this._history = constructor.createHistory(kernel);
+      this._completionHandler.kernel = kernel;
     });
   }
 
@@ -307,6 +309,8 @@ class ConsoleWidget extends Widget {
     this._tooltip = null;
     this._history.dispose();
     this._history = null;
+    this._completionHandler.dispose();
+    this._completionHandler = null;
     this._completion.dispose();
     this._completion = null;
     this._session.dispose();
@@ -392,8 +396,10 @@ class ConsoleWidget extends Widget {
     // Hook up completion, tooltip, and history handling.
     let editor = prompt.editor;
     editor.textChanged.connect(this.onTextChange, this);
-    editor.completionRequested.connect(this.onCompletionRequest, this);
     editor.edgeRequested.connect(this.onEdgeRequest, this);
+
+    // Associate the new prompt with the completion handler.
+    this._completionHandler.activeCell = prompt;
 
     prompt.focus();
   }
@@ -512,17 +518,6 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Handle a completion requested signal from an editor.
-   */
-  protected onCompletionRequest(editor: CellEditorWidget, change: ICompletionRequest): void {
-    let kernel = this._session.kernel;
-    if (!kernel) {
-      return;
-    }
-    this._completion.model.makeKernelRequest(change, kernel);
-  }
-
-  /**
    * Handle an edge requested signal.
    */
   protected onEdgeRequest(editor: CellEditorWidget, location: EdgeLocation): void {
@@ -545,21 +540,8 @@ class ConsoleWidget extends Widget {
     }
   }
 
-  /**
-   * Handle a completion selected signal from the completion widget.
-   */
-  protected onCompletionSelect(widget: CompletionWidget, value: string): void {
-    let patch = this._completion.model.createPatch(value);
-    if (!patch) {
-      return;
-    }
-
-    let prompt = this.prompt;
-    prompt.model.source = patch.text;
-    prompt.editor.setCursorPosition(patch.position);
-  }
-
   private _completion: CompletionWidget = null;
+  private _completionHandler: CellCompletionHandler = null;
   private _mimetype = 'text/x-ipython';
   private _rendermime: RenderMime<Widget> = null;
   private _tooltip: ConsoleTooltip = null;

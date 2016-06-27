@@ -99,7 +99,7 @@ class CellCompletionHandler implements IDisposable {
    * Handle a completion requested signal from an editor.
    */
   private _onCompletionRequested(editor: CellEditorWidget, change: ICompletionRequest): void {
-    if (!this.kernel) {
+    if (!this.kernel || !this._completion.model) {
       return;
     }
     this._completion.model.makeKernelRequest(change, this.kernel);
@@ -113,10 +113,12 @@ class CellCompletionHandler implements IDisposable {
       return;
     }
     let patch = this._completion.model.createPatch(value);
-    let editor = this._activeCell.editor.editor;
-    let doc = editor.getDoc();
-    doc.setValue(patch.text);
-    doc.setCursor(doc.posFromIndex(patch.position));
+    if (!patch) {
+      return;
+    }
+    let cell = this._activeCell;
+    cell.model.source = patch.text;
+    cell.editor.setCursorPosition(patch.position);
   }
 
   private _kernel: IKernel = null;
