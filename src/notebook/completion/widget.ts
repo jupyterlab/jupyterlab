@@ -179,17 +179,26 @@ class CompletionWidget extends Widget {
       return;
     }
 
-    let node = this.node;
     let items = model.items;
-    node.textContent = '';
 
-    // All repaints reset the index back to 0.
-    this._activeIndex = 0;
-
+    // If there are no items, hide and bail.
     if (!items || !items.length) {
       this.hide();
       return;
     }
+
+    // If there is only one item, signal and bail.
+    if (items.length === 1) {
+      this.selected.emit(items[0].raw);
+      this._model.reset();
+      return;
+    }
+
+    let node = this.node;
+    node.textContent = '';
+
+    // All repaints reset the index back to 0.
+    this._activeIndex = 0;
 
     for (let item of items) {
       let li = this._renderer.createItemNode(item);
@@ -229,13 +238,6 @@ class CompletionWidget extends Widget {
    * Handle model state changes.
    */
   protected onModelStateChanged(): void {
-    let items = this._model.items;
-    // If there is only one item, do not bother rendering.
-    if (items.length === 1) {
-      this.selected.emit(items[0].raw);
-      this._model.reset();
-      return;
-    }
     this.update();
   }
 
