@@ -235,7 +235,7 @@ class CompletionModel implements ICompletionModel {
     if (currentLine.length < originalLine.length) {
       this.reset();
     } else {
-      let {start, end} = this._cursor;
+      let { start, end } = this._cursor;
       // Clip the front of the current line.
       let query = currentLine.substring(start);
       // Clip the back of the current line.
@@ -304,11 +304,6 @@ class CompletionModel implements ICompletionModel {
    * @param patch - The patch string to apply to the original value.
    *
    * @returns A patched text change or null if original value did not exist.
-   *
-   * #### Notes
-   * The coords field is set to null because it is calculated by the editor, so
-   * a patched version cannot reliably produce accurate coordinates for the
-   * cursor.
    */
   createPatch(patch: string): ICompletionPatch {
     let original = this._original;
@@ -318,7 +313,7 @@ class CompletionModel implements ICompletionModel {
       return null;
     }
 
-    let {start, end} = cursor;
+    let { start, end } = cursor;
     let lines = original.currentValue.split('\n');
     let line = lines[original.line];
     let prefix = line.substring(0, start);
@@ -329,7 +324,7 @@ class CompletionModel implements ICompletionModel {
 
     // Add current line to position.
     let position = prefix.length + patch.length;
-    // Add all the preceding lines lengths to position.
+    // Add all the preceding lines' lengths to position.
     for (let i = 0; i < original.line; i++) {
       // Add an extra character for the line break.
       position += lines[i].length + 1;
