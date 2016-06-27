@@ -7,7 +7,7 @@ import * as CodeMirror
 import 'codemirror/mode/meta';
 
 import {
-  IKernelLanguageInfo
+  KernelMessage
 } from 'jupyter-js-services';
 
 
@@ -15,7 +15,7 @@ import {
  * Get the appropriate codemirror mimetype given language info.
  */
 export
-function mimetypeForLanguage(info: IKernelLanguageInfo): string {
+function mimetypeForLanguage(info: KernelMessage.ILanguageInfo): string {
   // Use the codemirror mode if given since some kernels rely on it.
   let mode = info.codemirror_mode;
   let mime = 'text/plain';

@@ -2,80 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernelSpecIds, IKernelLanguageInfo, IKernelInfo
-} from 'jupyter-js-services';
-
-import {
   simulate
 } from 'simulate-event';
-
-
-/**
- * The default kernel spec ids.
- */
-export
-const KERNELSPECS: IKernelSpecIds = {
-  default: 'python',
-  kernelspecs: {
-    python: {
-      name: 'python',
-      spec: {
-        language: 'python',
-        argv: [],
-        display_name: 'Python',
-        env: {}
-      },
-      resources: {}
-    },
-    shell: {
-      name: 'shell',
-      spec: {
-        language: 'shell',
-        argv: [],
-        display_name: 'Shell',
-        env: {}
-      },
-      resources: {}
-    }
-  }
-};
-
-/**
- * The default language infos.
- */
-export
-function getKernelInfo(name: string): IKernelInfo {
-  return {
-    protocol_version: '1',
-    implementation: 'foo',
-    implementation_version: '1',
-    language_info: LANGUAGE_INFOS[name],
-    banner: 'Hello',
-    help_links: {}
-  };
-}
-
-
-const LANGUAGE_INFOS: { [key: string]: IKernelLanguageInfo } = {
-  python: {
-    name: 'python',
-    version: '1',
-    mimetype: 'text/x-python',
-    file_extension: '.py',
-    pygments_lexer: 'python',
-    codemirror_mode: 'python',
-    nbconverter_exporter: ''
-  },
-  shell: {
-    name: 'shell',
-    version: '1',
-    mimetype: 'text/x-sh',
-    file_extension: '.sh',
-    pygments_lexer: 'shell',
-    codemirror_mode: 'shell',
-    nbconverter_exporter: ''
-  }
-};
 
 
 /**

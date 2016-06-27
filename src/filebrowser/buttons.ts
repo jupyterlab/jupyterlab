@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernelId
+  IKernel
 } from 'jupyter-js-services';
 
 import {
@@ -144,7 +144,7 @@ class FileButtons extends Widget {
   /**
    * Open a file by path.
    */
-  open(path: string, widgetName='default', kernel?: IKernelId): void {
+  open(path: string, widgetName='default', kernel?: IKernel.IModel): void {
     let widget = this._manager.open(path, widgetName, kernel);
     let opener = this._opener;
     opener.open(widget);
@@ -155,7 +155,7 @@ class FileButtons extends Widget {
   /**
    * Create a new file by path.
    */
-  createNew(path: string, widgetName='default', kernel?: IKernelId): void {
+  createNew(path: string, widgetName='default', kernel?: IKernel.IModel): void {
     let widget = this._manager.createNew(path, widgetName, kernel);
     let opener = this._opener;
     opener.open(widget);
@@ -348,7 +348,7 @@ namespace Private {
   function createNewItem(widget: FileButtons, creator: IFileCreator): void {
     let fileType = creator.type || 'file';
     let widgetName = creator.widgetName || 'default';
-    let kernel: IKernelId;
+    let kernel: IKernel.IModel;
     if (creator.kernelName) {
       kernel = { name: creator.kernelName };
     }

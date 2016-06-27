@@ -5,7 +5,7 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
-  IKernelId, IContentsOpts
+  IKernel, IContentsOpts
 } from 'jupyter-js-services';
 
 import {
@@ -282,7 +282,7 @@ abstract class ABCWidgetFactory implements IWidgetFactory<Widget, IDocumentModel
   /**
    * Create a new widget given a document model and a context.
    */
-  abstract createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernelId): Widget;
+  abstract createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): Widget;
 
   /**
    * Take an action on a widget before closing it.

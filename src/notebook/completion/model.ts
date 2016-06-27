@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  IKernel, KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -251,13 +251,14 @@ class CompletionModel implements ICompletionModel {
    * Make a request using a kernel.
    */
   makeKernelRequest(request: ICompletionRequest, kernel: IKernel): void {
-    let contents = {
+    let content: KernelMessage.ICompleteRequest = {
       // Only send the current line of code for completion.
       code: request.currentValue.split('\n')[request.line],
       cursor_pos: request.ch
     };
     let pendingComplete = ++this._pendingComplete;
-    kernel.complete(contents).then(value => {
+    kernel.complete(content).then(msg => {
+      let value = msg.content;
       // If we have been disposed, bail.
       if (this.isDisposed) {
         return;

@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernelId,
-  IContentsManager, INotebookSessionManager,
-  IKernelSpecIds, ISessionId
+  IContentsManager, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -66,7 +64,7 @@ class DocumentManager implements IDisposable {
   /**
    * Construct a new document manager.
    */
-  constructor(registry: DocumentRegistry, contentsManager: IContentsManager, sessionManager: INotebookSessionManager, kernelspecs: IKernelSpecIds, opener: IWidgetOpener) {
+  constructor(registry: DocumentRegistry, contentsManager: IContentsManager, sessionManager: ISession.IManager, kernelspecs: IKernel.ISpecModels, opener: IWidgetOpener) {
     this._registry = registry;
     this._contentsManager = contentsManager;
     this._sessionManager = sessionManager;
@@ -87,7 +85,7 @@ class DocumentManager implements IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  get kernelspecs(): IKernelSpecIds {
+  get kernelspecs(): IKernel.ISpecModels {
     return this._specs;
   }
 
@@ -136,7 +134,7 @@ class DocumentManager implements IDisposable {
    *
    * @param kernel - An optional kernel name/id to override the default.
    */
-  open(path: string, widgetName='default', kernel?: IKernelId): DocumentWrapper {
+  open(path: string, widgetName='default', kernel?: IKernel.IModel): DocumentWrapper {
     let registry = this._registry;
     if (widgetName === 'default') {
       let parts = path.split('.');
@@ -180,7 +178,7 @@ class DocumentManager implements IDisposable {
    *
    * @param kernel - An optional kernel name/id to override the default.
    */
-  createNew(path: string, widgetName='default', kernel?: IKernelId): DocumentWrapper {
+  createNew(path: string, widgetName='default', kernel?: IKernel.IModel): DocumentWrapper {
     let registry = this._registry;
     if (widgetName === 'default') {
       let parts = path.split('.');
@@ -211,7 +209,7 @@ class DocumentManager implements IDisposable {
   /**
    * List the running notebook sessions.
    */
-  listSessions(): Promise<ISessionId[]> {
+  listSessions(): Promise<ISession.IModel[]> {
     return this._sessionManager.listRunning();
   }
 
@@ -307,7 +305,7 @@ class DocumentManager implements IDisposable {
   /**
    * Create a content widget and add it to the container widget.
    */
-  private _populateWidget(parent: DocumentWrapper, kernel?: IKernelId): void {
+  private _populateWidget(parent: DocumentWrapper, kernel?: IKernel.IModel): void {
     let factory = this._registry.getWidgetFactory(parent.name);
     let id = parent.context.id;
     let model = this._contextManager.getModel(id);
@@ -327,9 +325,9 @@ class DocumentManager implements IDisposable {
 
   private _widgets: { [key: string]: DocumentWrapper[] } = Object.create(null);
   private _contentsManager: IContentsManager = null;
-  private _sessionManager: INotebookSessionManager = null;
+  private _sessionManager: ISession.IManager = null;
   private _contextManager: ContextManager = null;
-  private _specs: IKernelSpecIds = null;
+  private _specs: IKernel.ISpecModels = null;
   private _registry: DocumentRegistry = null;
 }
 

@@ -8,7 +8,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  MockKernel
+  MockKernel, KERNELSPECS
 } from 'jupyter-js-services/lib/mockkernel';
 
 import {
@@ -36,7 +36,7 @@ import {
 } from '../../rendermime/rendermime.spec';
 
 import {
-  acceptDialog, dismissDialog, KERNELSPECS, getKernelInfo
+  acceptDialog, dismissDialog
 } from '../../utils';
 
 import {
@@ -61,9 +61,6 @@ describe('notebook/notebook/actions', () => {
       widget.model = model;
 
       kernel = new MockKernel({ name: 'python' });
-      (kernel as MockKernel).setKernelInfo(getKernelInfo('python'));
-      let spec = KERNELSPECS.kernelspecs['python'].spec;
-      (kernel as MockKernel).setKernelSpec(spec);
       widget.activeCellIndex = 0;
     });
 

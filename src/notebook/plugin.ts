@@ -7,7 +7,7 @@ import {
 } from './index';
 
 import {
-  IKernelId
+  IKernel
 } from 'jupyter-js-services';
 
 import {
@@ -173,7 +173,7 @@ class TrackingNotebookWidgetFactory extends NotebookWidgetFactory {
   /**
    * Create a new widget.
    */
-  createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernelId): NotebookPanel {
+  createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernel.IModel): NotebookPanel {
     let widget = super.createNew(context, kernel);
     Private.notebookTracker.activeNotebook = widget;
     return widget;

@@ -4,7 +4,7 @@
 import * as Backbone from 'backbone';
 
 import {
-  IKernelIOPubCommOpenMessage, IComm, IKernel
+  IKernel, KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -101,7 +101,7 @@ class WidgetManager extends ManagerBase<Widget> implements IDisposable {
   /**
    * Handle when a comm is opened.
    */
-  handle_comm_open(comm: IComm, msg: IKernelIOPubCommOpenMessage) {
+  handle_comm_open(comm: IKernel.IComm, msg: KernelMessage.ICommOpenMsg) {
     // Convert jupyter-js-services comm to old comm
     // so that widget models use it compatibly
     let oldComm = new shims.services.Comm(comm);
@@ -122,7 +122,7 @@ class WidgetManager extends ManagerBase<Widget> implements IDisposable {
    */
   _get_comm_info(): Promise<any> {
     return this._context.kernel.commInfo({target: 'jupyter.widget'}).then((reply) => {
-      return reply.comms;
+      return reply.content.comms;
     })
   }
 
