@@ -499,56 +499,140 @@ describe('notebook/notebook/actions', () => {
 
     describe('#runAndAdvance()', () => {
 
-      it('should run the selected cells', () => {
-
+      it('should run the selected cells ', (done) => {
+        let next = widget.childAt(1) as MarkdownCellWidget;
+        widget.select(next);
+        let cell = widget.activeCell as CodeCellWidget;
+        cell.model.outputs.clear();
+        next.rendered = false;
+        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(cell.model.outputs.length).to.be.above(0);
+          expect(next.rendered).to.be(true);
+          done();
+        });
       });
 
-      it('should be a no-op if there is no model', () => {
-
+      it('should be a no-op if there is no model', (done) => {
+        widget.model = null;
+        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          done();
+        });
       });
 
-      it('should clear the existing selection', () => {
-
+      it('should clear the existing selection', (done) => {
+        let next = widget.childAt(1);
+        widget.select(next);
+        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.isSelected(widget.childAt(0))).to.be(false);
+          done();
+        });
       });
 
-      it('should change to command mode', () => {
-
+      it('should change to command mode', (done) => {
+        widget.mode = 'edit';
+        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.mode).to.be('command');
+          done();
+        });
       });
 
-      it('should activate the cell after the last selected cell', () => {
-
+      it('should activate the cell after the last selected cell', (done) => {
+        let next = widget.childAt(3) as MarkdownCellWidget;
+        widget.select(next);
+        // TODO: use an actual kernel here.
+        NotebookActions.runAndAdvance(widget, null).then(result => {
+          expect(result).to.be(true);
+          expect(widget.activeCellIndex).to.be(4);
+          done();
+        });
       });
 
-      it('should create a new code cell in edit mode if necessary', () => {
-
+      it('should create a new code cell in edit mode if necessary', (done) => {
+        let count = widget.childCount();
+        widget.activeCellIndex = count - 1;
+        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.childCount()).to.be(count + 1);
+          expect(widget.activeCell).to.be.a(CodeCellWidget);
+          expect(widget.mode).to.be('edit');
+          done();
+        });
       });
 
-      it('should allow an undo of the new cell', () => {
-
+      it('should allow an undo of the new cell', (done) => {
+        let count = widget.childCount();
+        widget.activeCellIndex = count - 1;
+        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          NotebookActions.undo(widget);
+          expect(widget.childCount()).to.be(count);
+          done();
+        });
       });
 
     });
 
     describe('#runAndInsert()', () => {
 
-      it('should run the selected cells', () => {
-
+      it('should run the selected cells ', (done) => {
+        let next = widget.childAt(1) as MarkdownCellWidget;
+        widget.select(next);
+        let cell = widget.activeCell as CodeCellWidget;
+        cell.model.outputs.clear();
+        next.rendered = false;
+        NotebookActions.runAndInsert(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(cell.model.outputs.length).to.be.above(0);
+          expect(next.rendered).to.be(true);
+          done();
+        });
       });
 
-      it('should be a no-op if there is no model', () => {
-
+      it('should be a no-op if there is no model', (done) => {
+        widget.model = null;
+        NotebookActions.runAndInsert(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          done();
+        });
       });
 
-      it('should change to command mode', () => {
-
+      it('should clear the existing selection', (done) => {
+        let next = widget.childAt(1);
+        widget.select(next);
+        NotebookActions.runAndInsert(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.isSelected(widget.childAt(0))).to.be(false);
+          done();
+        });
       });
 
-      it('should clear the existing selection', () => {
-
+      it('should insert a new code cell in edit mode after the last selected cell', (done) => {
+        let next = widget.childAt(2);
+        widget.select(next);
+        let count = widget.childCount();
+        NotebookActions.runAndInsert(widget, null).then(result => {
+          expect(result).to.be(true);
+          expect(widget.activeCell).to.be.a(CodeCellWidget);
+          expect(widget.mode).to.be('edit');
+          expect(widget.childCount()).to.be(count + 1);
+          done();
+        });
       });
 
-      it('should have an undo-able cell insert', () => {
-
+      it('should allow an undo of the cell insert', (done) => {
+        let next = widget.childAt(2);
+        widget.select(next);
+        let count = widget.childCount();
+        NotebookActions.runAndInsert(widget, null).then(result => {
+          expect(result).to.be(true);
+          NotebookActions.undo(widget);
+          expect(widget.childCount()).to.be(count);
+          done();
+        });
       });
 
     });
