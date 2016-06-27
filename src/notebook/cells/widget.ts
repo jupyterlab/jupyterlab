@@ -34,7 +34,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  OutputAreaWidget, executeCode
+  OutputAreaWidget
 } from '../output-area';
 
 import {
@@ -447,10 +447,12 @@ class CodeCellWidget extends BaseCellWidget {
     this.setPrompt('*');
     this.trusted = true;
     let outputs = model.outputs;
-    return executeCode(code, kernel, outputs).then((reply: any) => {
+    return outputs.execute(code, kernel).then((reply: any) => {
       model.executionCount = reply.content.execution_count;
-      // TODO: check the return status and clear the execution state
-      // if necessary.
+      if (reply.content.status !== 'ok') {
+        model.executionCount = null;
+        return false;
+      }
       return true;
     });
   }
