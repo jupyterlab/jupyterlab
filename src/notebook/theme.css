@@ -178,16 +178,12 @@
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-cellType {
-    flex-basis: 100px;
-}
-
 .jp-NBToolbar-item.jp-NBToolbar-cellType select {
     background: #FFFFFF;
 }
 
 .jp-NBToolbar-cellType .jp-NBToolbar-cellTypeDropdown {
-    border: none;
+    border: 1px solid #BDBDBD;
     border-radius: 0;
     outline: none;
     width: 100%;
