@@ -20,7 +20,7 @@ Some things they would do in the terminal include:
 
 ### Student learning the terminal in Software Carpentry
 
-The student is a Junior statistics majorw ho is attending a cnoference which is hosting a software carpentry workshop. He has used
+The student is a Junior statistics major who is attending a conference which is hosting a software carpentry workshop. He has used
 limited MATLAB and R in his statistics classes, and has been introduced to Jupyter Notebooks. He hasn't ever used JupyterLab,
 but would like to use it to set up some data visualizations for his senior project.
 
