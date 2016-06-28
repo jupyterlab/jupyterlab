@@ -356,6 +356,9 @@ class CellTypeSwitcher extends Widget {
    * Update the value of the dropdown from the widget state.
    */
   private _updateValue(widget: Notebook, select: HTMLSelectElement): void {
+    if (!widget.activeCell) {
+      return;
+    }
     let mType: string = widget.activeCell.model.type;
     for (let i = 0; i < widget.childCount(); i++) {
       let child = widget.childAt(i);
