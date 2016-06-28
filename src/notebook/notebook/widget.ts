@@ -118,7 +118,7 @@ class StaticNotebook extends Widget {
     this.node.tabIndex = -1;  // Allow the widget to take focus.
     this.addClass(NB_CLASS);
     this._rendermime = options.rendermime;
-    this.layout = new PanelLayout();
+    this.layout = new Private.NotebookPanelLayout();
     this._renderer = options.renderer || StaticNotebook.defaultRenderer;
   }
 
@@ -974,5 +974,20 @@ namespace Private {
     } else if (er.bottom > ar.bottom + 10) {
       area.scrollTop += er.bottom - ar.bottom + 10;
     }
+  }
+
+  /**
+   * A custom panel layout for the notebook.
+   */
+  export
+  class NotebookPanelLayout extends PanelLayout {
+    /**
+     * A message handler invoked on an `'update-request'` message.
+     *
+     * #### Notes
+     * This is a reimplementation of the base class method,
+     * and is a no-op.
+     */
+    protected onUpdateRequest(msg: Message): void { }
   }
 }
