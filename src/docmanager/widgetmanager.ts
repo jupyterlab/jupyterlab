@@ -189,7 +189,9 @@ class DocumentWidgetManager {
    */
   filterMessage(handler: IMessageHandler, msg: Message): boolean {
     if (msg.type === 'close-request') {
-      // TODO: allow the original close method to be called eventually.
+      if (this._closeGuard) {
+        return false;
+      }
       this.onClose(handler as Widget);
       return true;
     }
@@ -209,11 +211,14 @@ class DocumentWidgetManager {
       return result;
     }).then(result => {
       if (result) {
+        this._closeGuard = true;
+        widget.close();
+        this._closeGuard = false;
         // Dispose of document widgets when they are closed.
-        this.dispose();
+        widget.dispose();
       }
     }).catch(() => {
-      this.dispose();
+      widget.dispose();
     });
   }
 
@@ -275,6 +280,7 @@ class DocumentWidgetManager {
     });
   }
 
+  private _closeGuard = false;
   private _contextManager: ContextManager = null;
   private _registry: DocumentRegistry = null;
   private _widgets: { [key: string]: Widget[] } = Object.create(null);
