@@ -228,7 +228,7 @@ describe('notebook/notebook/default-toolbar', () => {
         button.node.click();
         console.log('***1');
         acceptDialog(panel.node).then(() => {
-          console.log('**4');
+          console.log('**4', context.kernel.status);
           expect(context.kernel.status).to.be('restarting');
           console.log('**5');
           panel.dispose();
