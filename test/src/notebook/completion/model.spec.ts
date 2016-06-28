@@ -192,6 +192,115 @@ describe('notebook/completion/model', () => {
 
     });
 
+    describe('#options', () => {
+
+      it('should default to null', () => {
+        let model = new CompletionModel();
+        expect(model.options).to.be(null);
+      });
+
+      it('should return model options', () => {
+        let model = new CompletionModel();
+        let options = ['foo'];
+        model.options = options;
+        expect(model.options).to.not.equal(options);
+        expect(model.options).to.eql(options);
+      });
+
+    });
+
+    describe('#original', () => {
+
+      it('should default to null', () => {
+        let model = new CompletionModel();
+        expect(model.original).to.be(null);
+      });
+
+      it('should return the original request', () => {
+        let model = new CompletionModel();
+        let currentValue = 'foo';
+        let coords: ICoords = null;
+        let request: ICompletionRequest = {
+          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+        };
+        model.original = request;
+        expect(model.original).to.equal(request);
+      });
+
+    });
+
+    describe('#current', () => {
+
+      it('should default to null', () => {
+        let model = new CompletionModel();
+        expect(model.current).to.be(null);
+      });
+
+      it('should not set if original request is nonexistent', () => {
+        let model = new TestModel();
+        let currentValue = 'foo';
+        let oldValue = currentValue;
+        let newValue = 'foob';
+        let coords: ICoords = null;
+        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let request: ICompletionRequest = {
+          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+        };
+        let change: ITextChange = {
+          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+        };
+        model.current = change;
+        expect(model.current).to.be(null);
+        model.original = request;
+        model.setCursor(cursor);
+        model.current = change;
+        expect(model.current).to.be(change);
+      });
+
+      it('should not set if cursor is nonexistent', () => {
+        let model = new TestModel();
+        let currentValue = 'foo';
+        let oldValue = currentValue;
+        let newValue = 'foob';
+        let coords: ICoords = null;
+        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let request: ICompletionRequest = {
+          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+        };
+        let change: ITextChange = {
+          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+        };
+        model.original = request;
+        model.current = change;
+        expect(model.current).to.be(null);
+        model.setCursor(cursor);
+        model.current = change;
+        expect(model.current).to.be(change);
+      });
+
+      it('should reset model if change is shorter than original', () => {
+        let model = new TestModel();
+        let currentValue = 'foo';
+        let oldValue = currentValue;
+        let newValue = 'fo';
+        let coords: ICoords = null;
+        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let request: ICompletionRequest = {
+          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+        };
+        let change: ITextChange = {
+          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+        };
+        model.original = request;
+        model.setCursor(cursor);
+        model.current = change;
+        expect(model.current).to.be(null);
+        expect(model.original).to.be(null);
+        expect(model.options).to.be(null);
+      });
+
+    });
+
   });
 
 });

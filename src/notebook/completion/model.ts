@@ -208,6 +208,8 @@ class CompletionModel implements ICompletionModel {
     }
     this._original = newValue;
     this._current = null;
+    this.setQuery('');
+    this.setCursor(null);
     this.stateChanged.emit(void 0);
   }
 
@@ -251,6 +253,7 @@ class CompletionModel implements ICompletionModel {
     // then the completion is no longer valid and should be reset.
     if (currentLine.length < originalLine.length) {
       this.reset();
+      return;
     } else {
       let { start, end } = this._cursor;
       // Clip the front of the current line.
@@ -362,10 +365,11 @@ class CompletionModel implements ICompletionModel {
    * Reset the state of the model.
    */
   reset() {
+    this._current = null;
     this._original = null;
+    this._options = null;
     this.setQuery('');
     this.setCursor(null);
-    this._options = null;
     this.stateChanged.emit(void 0);
   }
 
