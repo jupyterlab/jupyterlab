@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  FileBrowserWidget
+  IWidgetOpener, FileBrowserWidget
 } from './browser';
 
 import {
@@ -10,7 +10,7 @@ import {
 } from './model';
 
 import {
-  DocumentManager, DocumentWrapper
+  DocumentManager
 } from '../docmanager';
 
 import {
@@ -28,6 +28,10 @@ import {
 import {
   TabPanel
 } from 'phosphor-tabs';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 import {
   JupyterServices
@@ -51,12 +55,12 @@ const fileBrowserExtension = {
 function activateFileBrowser(app: Application, provider: JupyterServices, registry: DocumentRegistry): Promise<void> {
   let contents = provider.contentsManager;
   let sessions = provider.sessionManager;
-  let widgets: DocumentWrapper[] = [];
-  let activeWidget: DocumentWrapper;
+  let widgets: Widget[] = [];
+  let activeWidget: Widget;
   let id = 0;
 
-  let opener = {
-    open: (widget: DocumentWrapper) => {
+  let opener: IWidgetOpener = {
+    open: (widget) => {
       if (!widget.id) {
         widget.id = `document-manager-${++id}`;
       }
@@ -73,8 +77,8 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
         tabs.currentWidget = widget;
       }
       activeWidget = widget;
-      widget.disposed.connect((w: DocumentWrapper) => {
-        let index = widgets.indexOf(w);
+      widget.disposed.connect(() => {
+        let index = widgets.indexOf(widget);
         widgets.splice(index, 1);
       });
     }
@@ -91,9 +95,13 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     }
   });
 
-  let docManager = new DocumentManager(
-    registry, contents, sessions, provider.kernelspecs, opener
-  );
+  let docManager = new DocumentManager({
+    registry,
+    contentsManager: contents,
+    sessionManager: sessions,
+    kernelspecs: provider.kernelspecs,
+    opener
+  });
   let model = new FileBrowserModel(contents, sessions, provider.kernelspecs);
   let widget = new FileBrowserWidget(model, docManager, opener);
   let menu = createMenu(widget);
@@ -136,7 +144,8 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
         if (!activeWidget) {
           return;
         }
-        activeWidget.context.save();
+        let context = docManager.contextForWidget(activeWidget);
+        context.save();
       }
     }
   ]);
@@ -159,7 +168,8 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
         if (!activeWidget) {
           return;
         }
-        activeWidget.context.revert();
+        let context = docManager.contextForWidget(activeWidget);
+        context.revert();
       }
     }
   ]);

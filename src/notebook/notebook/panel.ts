@@ -258,12 +258,23 @@ class NotebookPanel extends Widget {
   }
 
   /**
+   * Handle a context population.
+   */
+  protected onPopulated(sender: IDocumentContext<INotebookModel>, args: void): void {
+    // Clear the undo state of the cells.
+    if (sender.model) {
+      sender.model.cells.clearUndo();
+    }
+  }
+
+  /**
    * Handle a change in the context.
    */
   private _onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void {
     if (oldValue) {
       oldValue.kernelChanged.disconnect(this._onKernelChanged, this);
       oldValue.pathChanged.disconnect(this.onPathChanged, this);
+      oldValue.populated.disconnect(this.onPopulated, this);
       if (oldValue.model) {
         oldValue.model.stateChanged.disconnect(this.onModelStateChanged, this);
       }
@@ -277,7 +288,11 @@ class NotebookPanel extends Widget {
     this._content.model = newValue.model;
     this._handleDirtyState();
     newValue.model.stateChanged.connect(this.onModelStateChanged, this);
-
+    if (newValue.isPopulated) {
+      this.onPopulated(newValue, void 0);
+    } else {
+      newValue.populated.connect(this.onPopulated, this);
+    }
     // Handle the document title.
     this.onPathChanged(context, context.path);
     context.pathChanged.connect(this.onPathChanged, this);

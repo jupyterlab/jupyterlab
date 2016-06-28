@@ -2,13 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsModel
-} from 'jupyter-js-services';
-
-import * as arrays
-  from 'phosphor-arrays';
-
-import {
   Message
 } from 'phosphor-messaging';
 
@@ -184,8 +177,9 @@ class FileBrowserWidget extends Widget {
     let widget = this._manager.findWidget(path);
     if (!widget) {
       widget = this._manager.open(path);
-      widget.populated.connect(() => model.refresh() );
-      widget.context.kernelChanged.connect(() => model.refresh() );
+      let context = this._manager.contextForWidget(widget);
+      context.populated.connect(() => model.refresh() );
+      context.kernelChanged.connect(() => model.refresh() );
     }
     this._opener.open(widget);
     return widget;
@@ -198,8 +192,9 @@ class FileBrowserWidget extends Widget {
     let model = this.model;
     return model.newUntitled(type, ext).then(contents => {
       let widget = this._manager.createNew(contents.path);
-      widget.populated.connect(() => model.refresh() );
-      widget.context.kernelChanged.connect(() => model.refresh() );
+      let context = this._manager.contextForWidget(widget);
+      context.populated.connect(() => model.refresh() );
+      context.kernelChanged.connect(() => model.refresh() );
       this._opener.open(widget);
       return widget;
     });

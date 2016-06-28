@@ -896,9 +896,10 @@ class DirListing extends Widget {
       return;
     }
 
-    let item = this._model.sortedItems[i];
+    let model = this._model;
+    let item = model.sortedItems[i];
     if (item.type === 'directory') {
-      this._model.cd(item.name).catch(error =>
+      model.cd(item.name).catch(error =>
         showErrorMessage(this, 'Open directory', error)
       );
     } else {
@@ -906,8 +907,9 @@ class DirListing extends Widget {
       let widget = this._manager.findWidget(path);
       if (!widget) {
         widget = this._manager.open(item.path);
-        widget.populated.connect(() => this.model.refresh() );
-        widget.context.kernelChanged.connect(() => this.model.refresh() );
+        let context = this._manager.contextForWidget(widget);
+        context.populated.connect(() => model.refresh() );
+        context.kernelChanged.connect(() => model.refresh() );
       }
       this._opener.open(widget);
     }
@@ -1028,7 +1030,8 @@ class DirListing extends Widget {
   private _startDrag(index: number, clientX: number, clientY: number): void {
     let selectedNames = Object.keys(this._selection);
     let source = this._items[index];
-    let items = this._model.sortedItems;
+    let model = this._model;
+    let items = model.sortedItems;
     let item: IContentsModel = null;
 
     // If the source node is not selected, use just that node.
@@ -1041,7 +1044,7 @@ class DirListing extends Widget {
     }
 
     // Create the drag image.
-    var dragImage = source.cloneNode(true) as HTMLElement;
+    let dragImage = source.cloneNode(true) as HTMLElement;
     dragImage.removeChild(dragImage.lastChild);
     if (selectedNames.length > 1) {
       let text = utils.findElement(dragImage, ITEM_TEXT_CLASS);
@@ -1062,8 +1065,9 @@ class DirListing extends Widget {
         let widget = this._manager.findWidget(path);
         if (!widget) {
           widget = this._manager.open(item.path);
-          widget.populated.connect(() => this.model.refresh() );
-          widget.context.kernelChanged.connect(() => this.model.refresh() );
+          let context = this._manager.contextForWidget(widget);
+          context.populated.connect(() => model.refresh() );
+          context.kernelChanged.connect(() => model.refresh() );
         }
         return widget;
       });
