@@ -41,8 +41,12 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     return Private.pathChangedSignal.bind(this);
   }
 
-  get dirtyCleared(): ISignal<IDocumentContext<IDocumentModel>, void> {
-    return Private.dirtyClearedSignal.bind(this);
+  get contentsModelChanged(): ISignal<IDocumentContext<T>, IContentsModel> {
+    return Private.contentsModelChanged.bind(this);
+  }
+
+  get populated(): ISignal<IDocumentContext<IDocumentModel>, void> {
+    return Private.populatedSignal.bind(this);
   }
 
   get id(): string {
@@ -67,6 +71,10 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
 
   get kernelspecs(): IKernel.ISpecModels {
     return KERNELSPECS;
+  }
+
+  get isPopulated(): boolean {
+    return true;
   }
 
   get isDisposed(): boolean {
@@ -129,8 +137,14 @@ namespace Private {
   const pathChangedSignal = new Signal<IDocumentContext<IDocumentModel>, string>();
 
   /**
-   * A signal emitted when the model is saved or reverted.
+   * A signal emitted when the context is fully populated for the first time.
    */
   export
-  const dirtyClearedSignal = new Signal<IDocumentContext<IDocumentModel>, void>();
+  const populatedSignal = new Signal<IDocumentContext<IDocumentModel>, void>();
+
+  /**
+   * A signal emitted when the contentsModel changes.
+   */
+  export
+  const contentsModelChanged = new Signal<IDocumentContext<IDocumentModel>, IContentsModel>();
 }

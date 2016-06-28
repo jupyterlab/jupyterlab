@@ -430,21 +430,6 @@ describe('notebook/notebook', () => {
 
     });
 
-    describe('#initialize()', () => {
-
-      it('should initialize the model state', () => {
-        let model = new NotebookModel();
-        let cell = model.factory.createCodeCell();
-        model.cells.add(cell);
-        expect(model.dirty).to.be(true);
-        expect(model.cells.canUndo).to.be(true);
-        model.initialize();
-        expect(model.dirty).to.be(false);
-        expect(model.cells.canUndo).to.be(false);
-      });
-
-    });
-
     describe('#getMetadata()', () => {
 
       it('should get a metadata cursor for the notebook', () => {

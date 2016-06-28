@@ -86,6 +86,11 @@ class LogNotebookPanel extends NotebookPanel {
     super.onPathChanged(sender, path);
     this.methods.push('onPathChanged');
   }
+
+  protected onPopulated(sender: IDocumentContext<INotebookModel>, args: void): void {
+    super.onPopulated(sender, args);
+    this.methods.push('onPopulated');
+  }
 }
 
 
@@ -335,6 +340,21 @@ describe('notebook/notebook/panel', () => {
         panel.methods = [];
         panel.context = context;
         expect(panel.methods).to.contain('onContextChanged');
+      });
+
+    });
+
+    describe('#onPopulated()', () => {
+
+      it('should initialize the model state', () => {
+        let panel = new LogNotebookPanel({ rendermime, clipboard });
+        let model = new NotebookModel();
+        model.fromJSON(DEFAULT_CONTENT);
+        expect(model.cells.canUndo).to.be(true);
+        let context = new MockContext<NotebookModel>(model);
+        panel.context = context;
+        expect(panel.methods).to.contain('onPopulated');
+        expect(model.cells.canUndo).to.be(false);
       });
 
     });
