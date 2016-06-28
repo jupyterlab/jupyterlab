@@ -3,7 +3,7 @@
 The `examples` directory in the JupyterLab repo contains:
 - several stand-alone plugin examples (`console`, `filebrowser`,
   `notebook`, `terminal`)
-- a more complex example (`lab`).
+- a more complex example using plugins (`lab`).
 
 Installation instructions for the examples are found in the project's
 README.
