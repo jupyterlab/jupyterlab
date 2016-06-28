@@ -24,7 +24,7 @@ To run a particular plugin, navigate to the plugin's subdirectory in the
 The filebrowser plugin provides a stand-alone implementation of a 
 filebrowser.
 
-![filebrowser user interface](filebrowser_example_.png)
+![filebrowser user interface](filebrowser_example.png)
 
 Let's take a closer look at the source code for the plugin in
 ``examples/filebrowser``.
