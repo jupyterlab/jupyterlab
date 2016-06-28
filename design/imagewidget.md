@@ -12,7 +12,7 @@ programs that utilizes the information revealed in the MRI scans.
 
 **Goal:** To be able to manipulate images in JupyterLab to go alongside and support data analysis.
 
-Some things they would with the imagewidget include:
+Some things they would do with the imagewidget include:
 
 * Pull images from the file browser and make it larger/smaller
 * Images should be centered
