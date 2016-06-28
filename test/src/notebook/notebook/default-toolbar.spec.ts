@@ -326,13 +326,14 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should display a busy status if the kernel status is not idle', (done) => {
         let item = ToolbarItems.createKernelStatusItem(panel);
-        expect(item.hasClass('jp-mod-busy')).to.be(true);
+        expect(item.hasClass('jp-mod-busy')).to.be(false);
         panel.kernel.statusChanged.connect(() => {
-          if (panel.kernel.status === 'idle') {
-            expect(item.hasClass('jp-mod-busy')).to.be(false);
+          if (panel.kernel.status === 'busy') {
+            expect(item.hasClass('jp-mod-busy')).to.be(true);
             done();
           }
         });
+        panel.kernel.interrupt();
       });
 
       it('should show the current status in the node title', (done) => {
@@ -340,21 +341,24 @@ describe('notebook/notebook/default-toolbar', () => {
         let status = panel.kernel.status;
         expect(item.node.title.toLowerCase()).to.contain(status);
         panel.kernel.statusChanged.connect(() => {
-          if (panel.kernel.status === 'idle') {
-            expect(item.node.title.toLowerCase()).to.contain('idle');
+          if (panel.kernel.status === 'busy') {
+            expect(item.node.title.toLowerCase()).to.contain('busy');
             done();
           }
         });
+        panel.kernel.interrupt();
       });
 
       it('should handle a change to the kernel', (done) => {
         let item = ToolbarItems.createKernelStatusItem(panel);
-        panel.context.changeKernel({ name: 'shell' });
-        panel.kernel.statusChanged.connect(() => {
-          if (panel.kernel.status === 'idle') {
-            expect(item.hasClass('jp-mod-busy')).to.be(false);
-            done();
-          }
+        panel.context.changeKernel({ name: 'shell' }).then(() => {
+          panel.kernel.statusChanged.connect(() => {
+            if (panel.kernel.status === 'busy') {
+              expect(item.hasClass('jp-mod-busy')).to.be(true);
+              done();
+            }
+          });
+          panel.kernel.interrupt();
         });
       });
 
@@ -363,13 +367,15 @@ describe('notebook/notebook/default-toolbar', () => {
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
         context = new MockContext<NotebookModel>(model);
-        context.changeKernel({ name: 'python' });
         panel.context = context;
-        panel.kernel.statusChanged.connect(() => {
-          if (panel.kernel.status === 'idle') {
-            expect(item.hasClass('jp-mod-busy')).to.be(false);
-            done();
-          }
+        context.changeKernel({ name: 'python' }).then(() => {
+          panel.kernel.statusChanged.connect(() => {
+            if (panel.kernel.status === 'idle') {
+              expect(item.hasClass('jp-mod-busy')).to.be(false);
+              done();
+            }
+          });
+          panel.kernel.interrupt();
         });
       });
 
