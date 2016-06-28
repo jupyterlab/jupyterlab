@@ -7,7 +7,7 @@ JupyterLab Tutorial
 ===================
 
 .. important::
-    
+
     This is a very early pre-alpha developer preview and not suitable for
     general usage yet. Features and implementation are subject to change.
 
@@ -24,6 +24,7 @@ Contents:
    notebook.md
    patterns.md
    examples.md
+   terminology.md
 
 Indices and tables
 ==================
