@@ -178,9 +178,10 @@ class DirListing extends Widget {
    */
   static createNode(): HTMLElement {
     let node = document.createElement('div');
+    let header = document.createElement('div');
     let content = document.createElement('ul');
-    let header = this.createHeaderNode();
     content.className = CONTENT_CLASS;
+    header.className = HEADER_CLASS;
     node.appendChild(header);
     node.appendChild(content);
     node.tabIndex = 1;
@@ -188,123 +189,23 @@ class DirListing extends Widget {
   }
 
   /**
-   * Create the header node for a dir listing.
-   *
-   * @returns A new DOM node to use as the dir listing header.
-   *
-   * #### Notes
-   * This method may be reimplemented to create custom headers.
-   */
-  static createHeaderNode(): HTMLElement {
-    let node = document.createElement('div');
-    let name = createItemNode('Name');
-    let modified = createItemNode('Last Modified');
-    node.className = HEADER_CLASS;
-    name.classList.add(NAME_ID_CLASS);
-    name.classList.add(SELECTED_CLASS);
-    modified.classList.add(MODIFIED_ID_CLASS);
-    node.appendChild(name);
-    node.appendChild(modified);
-    return node;
-
-    function createItemNode(label: string): HTMLElement {
-      let node = document.createElement('div');
-      let text = document.createElement('span');
-      let icon = document.createElement('span');
-      node.className = HEADER_ITEM_CLASS;
-      text.className = HEADER_ITEM_TEXT_CLASS;
-      icon.className = HEADER_ITEM_ICON_CLASS;
-      text.textContent = label;
-      node.appendChild(text);
-      node.appendChild(icon);
-      return node;
-    }
-  }
-
-  /**
-   * Create a new item node for a dir listing.
-   *
-   * @returns A new DOM node to use as a content item.
-   *
-   * #### Notes
-   * This method may be reimplemented to create custom items.
-   */
-  static createItemNode(): HTMLElement {
-    let node = document.createElement('li');
-    let icon = document.createElement('span');
-    let text = document.createElement('span');
-    let modified = document.createElement('span');
-    node.className = ITEM_CLASS;
-    icon.className = ITEM_ICON_CLASS;
-    text.className = ITEM_TEXT_CLASS;
-    modified.className = ITEM_MODIFIED_CLASS;
-    node.appendChild(icon);
-    node.appendChild(text);
-    node.appendChild(modified);
-    return node;
-  }
-
-  /**
-   * Update an item node to reflect the current state of a model.
-   *
-   * @param node - A node created by a call to [[createItemNode]].
-   *
-   * @param model - The model object to use for the item state.
-   *
-   * #### Notes
-   * This is called automatically when the item should be updated.
-   *
-   * If the [[createItemNode]] method is reimplemented, this method
-   * should also be reimplemented so that the item state is properly
-   * updated.
-   */
-  static updateItemNode(node: HTMLElement, model: IContentsModel) {
-    let icon = node.firstChild as HTMLElement;
-    let text = icon.nextSibling as HTMLElement;
-    let modified = text.nextSibling as HTMLElement;
-
-    let type: string;
-    switch (model.type) {
-    case 'directory':
-      type = FOLDER_TYPE_CLASS;
-      break;
-    case 'notebook':
-      type = NOTEBOOK_TYPE_CLASS;
-      break;
-    default:
-      type = FILE_TYPE_CLASS;
-      break;
-    }
-
-    let modText = '';
-    let modTitle = '';
-    if (model.last_modified) {
-      let time = moment(model.last_modified).fromNow();
-      modText = time === 'a few seconds ago' ? 'seconds ago' : time;
-      modTitle = moment(model.last_modified).format('YYYY-MM-DD HH:mm');
-    }
-
-    node.className = `${ITEM_CLASS} ${type}`;
-    text.textContent = model.name;
-    modified.textContent = modText;
-    modified.title = modTitle;
-  }
-
-  /**
    * Construct a new file browser directory listing widget.
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, manager: DocumentManager, opener: IWidgetOpener) {
+  constructor(options: DirListing.IOptions) {
     super();
     this.addClass(DIR_LISTING_CLASS);
-    this._model = model;
+    this._model = options.model;
     this._model.refreshed.connect(this._onModelRefreshed, this);
     this._model.pathChanged.connect(this._onPathChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
-    this._manager = manager;
-    this._opener = opener;
+    this._manager = options.manager;
+    this._opener = options.opener;
+    this._renderer = options.renderer || DirListing.defaultRenderer;
+    let headerNode = utils.findElement(this.node, HEADER_CLASS);
+    this._renderer.populateHeaderNode(headerNode);
   }
 
   /**
@@ -649,7 +550,7 @@ class DirListing extends Widget {
     let items = this._model.sortedItems;
     let nodes = this._items;
     let content = utils.findElement(this.node, CONTENT_CLASS);
-    let subtype = this.constructor as typeof DirListing;
+    let renderer = this._renderer;
 
     this.removeClass(MULTI_SELECTED_CLASS);
     this.removeClass(SELECTED_CLASS);
@@ -662,14 +563,14 @@ class DirListing extends Widget {
 
     // Add any missing item nodes.
     while (nodes.length < items.length) {
-      let node = subtype.createItemNode();
+      let node = renderer.createItemNode();
       nodes.push(node);
       content.appendChild(node);
     }
 
     // Update the node states to match the model contents.
     for (let i = 0, n = items.length; i < n; ++i) {
-      subtype.updateItemNode(nodes[i], items[i]);
+      renderer.updateItemNode(nodes[i], items[i]);
       if (this._selection[items[i].name]) {
         nodes[i].classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
@@ -1304,7 +1205,202 @@ class DirListing extends Widget {
   private _manager: DocumentManager = null;
   private _opener: IWidgetOpener = null;
   private _selection: { [key: string]: boolean; } = Object.create(null);
+  private _renderer: DirListing.IRenderer = null;
 }
+
+
+/**
+ * The namespace for the `DirListing` class statics.
+ */
+export
+namespace DirListing {
+  /**
+   * An options object for initializing a file browser directory listing.
+   */
+  export
+  interface IOptions {
+    /**
+     * A file browser model instance.
+     */
+    model: FileBrowserModel;
+
+    /**
+     * A document manager instance.
+     */
+    manager: DocumentManager;
+
+    /**
+     * A widget opener function.
+     */
+    opener: IWidgetOpener;
+
+    /**
+     * A renderer for file items.
+     *
+     * The default is a shared `Renderer` instance.
+     */
+    renderer?: IRenderer;
+  }
+
+
+  /**
+   * The render interface for file browser listing options.
+   */
+  export
+  interface IRenderer {
+    /**
+     * Populate and empty header node for a dir listing.
+     *
+     * @returns A new DOM node to use as the dir listing header.
+     *
+     * #### Notes
+     * This method may be reimplemented to create custom headers.
+     */
+    populateHeaderNode(node: HTMLElement): void;
+
+    /**
+     * Create a new item node for a dir listing.
+     *
+     * @returns A new DOM node to use as a content item.
+     *
+     * #### Notes
+     * This method may be reimplemented to create custom items.
+     */
+    createItemNode(): HTMLElement;
+
+    /**
+     * Update an item node to reflect the current state of a model.
+     *
+     * @param node - A node created by a call to [[createItemNode]].
+     *
+     * @param model - The model object to use for the item state.
+     *
+     * #### Notes
+     * This is called automatically when the item should be updated.
+     *
+     * If the [[createItemNode]] method is reimplemented, this method
+     * should also be reimplemented so that the item state is properly
+     * updated.
+     */
+    updateItemNode(node: HTMLElement, model: IContentsModel): void;
+  }
+
+  /**
+   * The default implementation of an `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+    /**
+     * Populate and empty header node for a dir listing.
+     *
+     * @returns A new DOM node to use as the dir listing header.
+     *
+     * #### Notes
+     * This method may be reimplemented to create custom headers.
+     */
+    populateHeaderNode(node: HTMLElement): void {
+      let name = this._createHeaderItemNode('Name');
+      let modified = this._createHeaderItemNode('Last Modified');
+      name.classList.add(NAME_ID_CLASS);
+      name.classList.add(SELECTED_CLASS);
+      modified.classList.add(MODIFIED_ID_CLASS);
+      node.appendChild(name);
+      node.appendChild(modified);
+    }
+
+    /**
+     * Create a new item node for a dir listing.
+     *
+     * @returns A new DOM node to use as a content item.
+     *
+     * #### Notes
+     * This method may be reimplemented to create custom items.
+     */
+    createItemNode(): HTMLElement {
+      let node = document.createElement('li');
+      let icon = document.createElement('span');
+      let text = document.createElement('span');
+      let modified = document.createElement('span');
+      node.className = ITEM_CLASS;
+      icon.className = ITEM_ICON_CLASS;
+      text.className = ITEM_TEXT_CLASS;
+      modified.className = ITEM_MODIFIED_CLASS;
+      node.appendChild(icon);
+      node.appendChild(text);
+      node.appendChild(modified);
+      return node;
+    }
+
+    /**
+     * Update an item node to reflect the current state of a model.
+     *
+     * @param node - A node created by a call to [[createItemNode]].
+     *
+     * @param model - The model object to use for the item state.
+     *
+     * #### Notes
+     * This is called automatically when the item should be updated.
+     *
+     * If the [[createItemNode]] method is reimplemented, this method
+     * should also be reimplemented so that the item state is properly
+     * updated.
+     */
+    updateItemNode(node: HTMLElement, model: IContentsModel): void {
+      let icon = node.firstChild as HTMLElement;
+      let text = icon.nextSibling as HTMLElement;
+      let modified = text.nextSibling as HTMLElement;
+
+      let type: string;
+      switch (model.type) {
+      case 'directory':
+        type = FOLDER_TYPE_CLASS;
+        break;
+      case 'notebook':
+        type = NOTEBOOK_TYPE_CLASS;
+        break;
+      default:
+        type = FILE_TYPE_CLASS;
+        break;
+      }
+
+      let modText = '';
+      let modTitle = '';
+      if (model.last_modified) {
+        let time = moment(model.last_modified).fromNow();
+        modText = time === 'a few seconds ago' ? 'seconds ago' : time;
+        modTitle = moment(model.last_modified).format('YYYY-MM-DD HH:mm');
+      }
+
+      node.className = `${ITEM_CLASS} ${type}`;
+      text.textContent = model.name;
+      modified.textContent = modText;
+      modified.title = modTitle;
+    }
+
+    /**
+     * Create a node for a header item.
+     */
+    private _createHeaderItemNode(label: string): HTMLElement {
+      let node = document.createElement('div');
+      let text = document.createElement('span');
+      let icon = document.createElement('span');
+      node.className = HEADER_ITEM_CLASS;
+      text.className = HEADER_ITEM_TEXT_CLASS;
+      icon.className = HEADER_ITEM_ICON_CLASS;
+      text.textContent = label;
+      node.appendChild(text);
+      node.appendChild(icon);
+      return node;
+    }
+  }
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
+}
+
 
 
 /**

@@ -30,10 +30,10 @@ class FileBrowserModel implements IDisposable {
   /**
    * Construct a new file browser view model.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: ISession.IManager, specs: IKernel.ISpecModels) {
-    this._contentsManager = contentsManager;
-    this._sessionManager = sessionManager;
-    this._specs = specs;
+  constructor(options: FileBrowserModel.IOptions) {
+    this._contentsManager = options.contentsManager;
+    this._sessionManager = options.sessionManager;
+    this._specs = options.kernelspecs;
     this._model = { path: '', name: '/', type: 'directory', content: [] };
     this.cd();
   }
@@ -468,6 +468,34 @@ class FileBrowserModel implements IDisposable {
   private _ascending = true;
   private _unsortedNames: string[] = [];
   private _specs: IKernel.ISpecModels = null;
+}
+
+
+/**
+ * The namespace for the `FileBrowserModel` class statics.
+ */
+export
+namespace FileBrowserModel {
+  /**
+   * An options object for initializing a file browser.
+   */
+  export
+  interface IOptions {
+    /**
+     * A contents manager instance.
+     */
+    contentsManager: IContentsManager;
+
+    /**
+     * A session manager instance.
+     */
+    sessionManager: ISession.IManager;
+
+    /**
+     * The kernelspec models.
+     */
+    kernelspecs: IKernel.ISpecModels;
+  }
 }
 
 
