@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+
 import './dialog/dialog.spec';
 
 import './docregistry/default.spec';
@@ -10,8 +11,10 @@ import './renderers/latex.spec';
 import './rendermime/rendermime.spec';
 
 import './notebook/cells/editor.spec';
-import './notebook/cells/widget.spec';
 import './notebook/cells/model.spec';
+import './notebook/cells/widget.spec';
+
+import './notebook/completion/model.spec';
 
 import './notebook/notebook/actions.spec';
 import './notebook/notebook/default-toolbar.spec';

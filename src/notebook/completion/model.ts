@@ -258,7 +258,7 @@ class CompletionModel implements ICompletionModel {
       // Clip the back of the current line.
       let ending = originalLine.substring(end);
       query = query.substring(0, query.lastIndexOf(ending));
-      this._query = query;
+      this.setQuery(query);
     }
     this.stateChanged.emit(void 0);
   }
@@ -363,8 +363,8 @@ class CompletionModel implements ICompletionModel {
    */
   reset() {
     this._original = null;
-    this._query = '';
-    this._cursor = null;
+    this.setQuery('');
+    this.setCursor(null);
     this._options = null;
     this.stateChanged.emit(void 0);
   }
@@ -374,6 +374,13 @@ class CompletionModel implements ICompletionModel {
    */
   protected setCursor(cursor: ICursorSpan): void {
     this._cursor = cursor;
+  }
+
+  /**
+   * Set the query value that the model filters against.
+   */
+  protected setQuery(query: string): void {
+    this._query = query;
   }
 
   /**
