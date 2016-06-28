@@ -219,10 +219,6 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should restart the kernel when the dialog is accepted', (done) => {
         let button = ToolbarItems.createRestartButton(panel);
-        button.node.style.minHeight = '10px';
-        button.node.style.minWidth = '10px';
-        panel.node.style.minHeight = '300px';
-        panel.node.style.minWidth = '300px';
         panel.attach(document.body);
         button.attach(document.body);
         button.node.click();
