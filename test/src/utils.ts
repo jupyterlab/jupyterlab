@@ -31,10 +31,8 @@ function waitForDialog(host: HTMLElement = document.body): Promise<void> {
 export
 function acceptDialog(host: HTMLElement = document.body): Promise<void> {
   return waitForDialog(host).then(() => {
-    console.log('***2');
     let node = host.getElementsByClassName('jp-Dialog-okButton')[0];
     if (node) {
-      console.log('***3');
       (node as HTMLElement).click();
     }
   });

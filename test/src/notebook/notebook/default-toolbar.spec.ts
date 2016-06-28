@@ -221,17 +221,15 @@ describe('notebook/notebook/default-toolbar', () => {
         let button = ToolbarItems.createRestartButton(panel);
         panel.attach(document.body);
         button.attach(document.body);
-        button.node.click();
-        console.log('***1');
-        acceptDialog(panel.node).then(() => {
-          console.log('**4', context.kernel.status);
-          expect(context.kernel.status).to.be('restarting');
-          console.log('**5');
-          panel.dispose();
-          console.log('**6');
-          button.dispose();
-          done();
+        panel.kernel.statusChanged.connect((sender, status) => {
+          if (status === 'restarting') {
+            panel.dispose();
+            button.dispose();
+            done();
+          }
         });
+        button.node.click();
+        acceptDialog(panel.node);
       });
 
       it("should have the `'jp-NBToolbar-restart'` class", () => {
