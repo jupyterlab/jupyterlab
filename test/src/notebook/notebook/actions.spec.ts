@@ -8,7 +8,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  MockKernel, KERNELSPECS
+  MockKernel, ERROR_INPUT
 } from 'jupyter-js-services/lib/mockkernel';
 
 import {
@@ -34,10 +34,6 @@ import {
 import {
   defaultRenderMime
 } from '../../rendermime/rendermime.spec';
-
-import {
-  acceptDialog, dismissDialog
-} from '../../utils';
 
 import {
   DEFAULT_CONTENT
@@ -455,7 +451,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should activate the last selected cell', (done) => {
-        let other = widget.childAt(1);
+        let other = widget.childAt(2);
         widget.select(other);
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(true);
@@ -492,6 +488,34 @@ describe('notebook/notebook/actions', () => {
         });
       });
 
+      it('should stop executing code cells on an error', (done) => {
+        let cell = widget.model.factory.createCodeCell();
+        cell.source = ERROR_INPUT;
+        widget.model.cells.insert(2, cell);
+        widget.select(widget.childAt(2));
+        cell = widget.model.factory.createCodeCell();
+        widget.model.cells.add(cell);
+        widget.select(widget.childAt(widget.childCount() - 1));
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(cell.executionCount).to.be(null);
+          done();
+        });
+      });
+
+      it('should render all markdown cells on an error', () => {
+        let cell = widget.model.factory.createMarkdownCell();
+        widget.model.cells.add(cell);
+        let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
+        child.rendered = false;
+        widget.select(child);
+        widget.activeCell.model.source = ERROR_INPUT;
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(child.rendered).to.be(true);
+        });
+      });
+
     });
 
     describe('#runAndAdvance()', () => {
@@ -519,7 +543,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should clear the existing selection', (done) => {
-        let next = widget.childAt(1);
+        let next = widget.childAt(2);
         widget.select(next);
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(true);
@@ -540,8 +564,7 @@ describe('notebook/notebook/actions', () => {
       it('should activate the cell after the last selected cell', (done) => {
         let next = widget.childAt(3) as MarkdownCellWidget;
         widget.select(next);
-        // TODO: use an actual kernel here.
-        NotebookActions.runAndAdvance(widget, null).then(result => {
+        NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCellIndex).to.be(4);
           done();
@@ -567,6 +590,31 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(true);
           NotebookActions.undo(widget);
           expect(widget.childCount()).to.be(count);
+          done();
+        });
+      });
+
+      it('should stop executing code cells on an error', (done) => {
+        widget.activeCell.model.source = ERROR_INPUT;
+        let cell = widget.model.factory.createCodeCell();
+        widget.model.cells.add(cell);
+        widget.select(widget.childAt(widget.childCount() - 1));
+        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(cell.executionCount).to.be(null);
+          done();
+        });
+      });
+
+      it('should render all markdown cells on an error', (done) => {
+        widget.activeCell.model.source = ERROR_INPUT;
+        let cell = widget.childAt(1) as MarkdownCellWidget;
+        cell.rendered = false;
+        widget.select(cell);
+        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(cell.rendered).to.be(true);
+          expect(widget.activeCellIndex).to.be(2);
           done();
         });
       });
@@ -611,7 +659,7 @@ describe('notebook/notebook/actions', () => {
         let next = widget.childAt(2);
         widget.select(next);
         let count = widget.childCount();
-        NotebookActions.runAndInsert(widget, null).then(result => {
+        NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCell).to.be.a(CodeCellWidget);
           expect(widget.mode).to.be('edit');
@@ -624,10 +672,35 @@ describe('notebook/notebook/actions', () => {
         let next = widget.childAt(2);
         widget.select(next);
         let count = widget.childCount();
-        NotebookActions.runAndInsert(widget, null).then(result => {
+        NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(true);
           NotebookActions.undo(widget);
           expect(widget.childCount()).to.be(count);
+          done();
+        });
+      });
+
+      it('should stop executing code cells on an error', (done) => {
+        widget.activeCell.model.source = ERROR_INPUT;
+        let cell = widget.model.factory.createCodeCell();
+        widget.model.cells.add(cell);
+        widget.select(widget.childAt(widget.childCount() - 1));
+        NotebookActions.runAndInsert(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(cell.executionCount).to.be(null);
+          done();
+        });
+      });
+
+      it('should render all markdown cells on an error', (done) => {
+        widget.activeCell.model.source = ERROR_INPUT;
+        let cell = widget.childAt(1) as MarkdownCellWidget;
+        cell.rendered = false;
+        widget.select(cell);
+        NotebookActions.runAndInsert(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(cell.rendered).to.be(true);
+          expect(widget.activeCellIndex).to.be(2);
           done();
         });
       });
@@ -636,20 +709,74 @@ describe('notebook/notebook/actions', () => {
 
     describe('#runAll()', () => {
 
-      it('should run the selected cells', () => {
-
+      it('should run all of the cells in the notebok', (done) => {
+        let next = widget.childAt(1) as MarkdownCellWidget;
+        let cell = widget.activeCell as CodeCellWidget;
+        cell.model.outputs.clear();
+        next.rendered = false;
+        NotebookActions.runAll(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(cell.model.outputs.length).to.be.above(0);
+          expect(next.rendered).to.be(true);
+          done();
+        });
       });
 
-      it('should be a no-op if there is no model', () => {
-
+      it('should be a no-op if there is no model', (done) => {
+        widget.model = null;
+        NotebookActions.runAll(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          done();
+        });
       });
 
-      it('should change to command mode', () => {
-
+      it('should change to command mode', (done) => {
+        widget.mode = 'edit';
+        NotebookActions.runAll(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.mode).to.be('command');
+          done();
+        });
       });
 
-      it('should clear the existing selection', () => {
+      it('should clear the existing selection', (done) => {
+        let next = widget.childAt(2);
+        widget.select(next);
+        NotebookActions.runAll(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.isSelected(widget.childAt(2))).to.be(false);
+          done();
+        });
+      });
 
+      it('should activate the last cell', (done) => {
+        NotebookActions.runAll(widget, kernel).then(result => {
+          expect(widget.activeCellIndex).to.be(widget.childCount() - 1);
+          done();
+        });
+      });
+
+      it('should stop executing code cells on an error', (done) => {
+        widget.activeCell.model.source = ERROR_INPUT;
+        let cell = widget.model.factory.createCodeCell();
+        widget.model.cells.add(cell);
+        NotebookActions.runAll(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(cell.executionCount).to.be(null);
+          expect(widget.activeCellIndex).to.be(widget.childCount() - 1);
+          done();
+        });
+      });
+
+      it('should render all markdown cells on an error', (done) => {
+        widget.activeCell.model.source = ERROR_INPUT;
+        let cell = widget.childAt(1) as MarkdownCellWidget;
+        cell.rendered = false;
+        NotebookActions.runAll(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(cell.rendered).to.be(true);
+          done();
+        });
       });
 
     });

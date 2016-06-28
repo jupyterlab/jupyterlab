@@ -16,7 +16,7 @@ import {
 } from '../../../../lib/notebook/common/json';
 
 import {
-  OutputAreaModel, executeCode
+  OutputAreaModel
 } from '../../../../lib/notebook/output-area/model';
 
 import {
@@ -215,32 +215,33 @@ describe('notebook/output-area/model', () => {
       });
     });
 
-  });
+    describe('#execute()', () => {
 
-  describe('#executeCode()', () => {
-
-    it('should execute code on a kernel and send outputs to an output area model', (done) => {
-      let kernel = new MockKernel();
-      let model = new OutputAreaModel();
-      expect(model.length).to.be(0);
-      executeCode('foo', kernel, model).then(reply => {
-        expect((reply as any).content.execution_count).to.be(1);
-        expect(model.length).to.be(1);
-        done();
+      it('should execute code on a kernel and send outputs to the model', (done) => {
+        let kernel = new MockKernel();
+        let model = new OutputAreaModel();
+        expect(model.length).to.be(0);
+        model.execute('foo', kernel).then(reply => {
+          expect(reply.content.execution_count).to.be(1);
+          expect(reply.content.status).to.be('ok');
+          expect(model.length).to.be(1);
+          done();
+        });
       });
-    });
 
-    it('should clear existing outputs', (done) => {
-      let kernel = new MockKernel();
-      let model = new OutputAreaModel();
-      for (let output of DEFAULT_OUTPUTS) {
-        model.add(output);
-      }
-      executeCode('foo', kernel, model).then(reply => {
-        expect((reply as any).content.execution_count).to.be(1);
-        expect(model.length).to.be(1);
-        done();
+      it('should clear existing outputs', (done) => {
+        let kernel = new MockKernel();
+        let model = new OutputAreaModel();
+        for (let output of DEFAULT_OUTPUTS) {
+          model.add(output);
+        }
+        model.execute('foo', kernel).then(reply => {
+          expect(reply.content.execution_count).to.be(1);
+          expect(model.length).to.be(1);
+          done();
+        });
       });
+
     });
 
   });
