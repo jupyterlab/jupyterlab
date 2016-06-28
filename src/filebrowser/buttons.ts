@@ -148,8 +148,9 @@ class FileButtons extends Widget {
     let widget = this._manager.open(path, widgetName, kernel);
     let opener = this._opener;
     opener.open(widget);
-    widget.populated.connect(() => this.model.refresh() );
-    widget.context.kernelChanged.connect(() => this.model.refresh() );
+    let context = this._manager.contextForWidget(widget);
+    context.populated.connect(() => this.model.refresh() );
+    context.kernelChanged.connect(() => this.model.refresh() );
   }
 
   /**
@@ -159,8 +160,9 @@ class FileButtons extends Widget {
     let widget = this._manager.createNew(path, widgetName, kernel);
     let opener = this._opener;
     opener.open(widget);
-    widget.populated.connect(() => this.model.refresh() );
-    widget.context.kernelChanged.connect(() => this.model.refresh() );
+    let context = this._manager.contextForWidget(widget);
+    context.populated.connect(() => this.model.refresh() );
+    context.kernelChanged.connect(() => this.model.refresh() );
   }
 
   /**

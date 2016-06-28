@@ -48,6 +48,9 @@ class ImageWidget extends Widget {
     context.model.contentChanged.connect(() => {
       this.update();
     });
+    context.contentsModelChanged.connect(() => {
+      this.update();
+    });
   }
 
   /**
@@ -67,8 +70,11 @@ class ImageWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     this.title.text = this._context.path.split('/').pop();
     let node = this.node as HTMLImageElement;
-    let content = this._context.model.toString();
     let cm = this._context.contentsModel;
+    if (cm === null) {
+      return;
+    }
+    let content = this._context.model.toString();
     node.src = `data:${cm.mimetype};${cm.format},${content}`;
   }
 
