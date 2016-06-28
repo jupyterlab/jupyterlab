@@ -14,8 +14,6 @@
   font-size: 14px;
   height: 100%;
   /* Changed to auto to autogrow */
-  background: none;
-  /* Changed from white to allow our bg to show through */
 }
 
 

@@ -49,4 +49,5 @@ CodeMirror.defineMode('ipythongfm', (config: CodeMirror.EditorConfiguration, mod
   );
 });
 
+
 CodeMirror.defineMIME('text/x-ipythongfm', 'ipythongfm');
