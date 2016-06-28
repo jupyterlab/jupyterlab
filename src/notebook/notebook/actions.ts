@@ -501,12 +501,8 @@ namespace NotebookActions {
     let prev = widget.childAt(widget.activeCellIndex - 1);
     if (widget.isSelected(prev)) {
       widget.deselect(current);
-      if (widget.activeCellIndex >= 1) {
-        let prevPrev = widget.childAt(widget.activeCellIndex - 1);
-        if (!widget.isSelected(prevPrev)) {
-          widget.deselect(prev);
-        }
-      } else {
+      let prevPrev = widget.childAt(widget.activeCellIndex - 2);
+      if (!widget.isSelected(prevPrev)) {
         widget.deselect(prev);
       }
     } else {
@@ -538,12 +534,8 @@ namespace NotebookActions {
     let next = widget.childAt(widget.activeCellIndex + 1);
     if (widget.isSelected(next)) {
       widget.deselect(current);
-      if (widget.activeCellIndex < widget.childCount() - 1) {
-        let nextNext = widget.childAt(widget.activeCellIndex + 1);
-        if (!widget.isSelected(nextNext)) {
-          widget.deselect(next);
-        }
-      } else {
+      let nextNext = widget.childAt(widget.activeCellIndex + 2);
+      if (!widget.isSelected(nextNext)) {
         widget.deselect(next);
       }
     } else {

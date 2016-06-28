@@ -36,10 +36,6 @@ import {
 } from '../../../../lib/notebook/notebook/model';
 
 import {
-  nbformat
-} from '../../../../lib/notebook/notebook/nbformat';
-
-import {
   NotebookPanel
 } from '../../../../lib/notebook/notebook/panel';
 
@@ -59,13 +55,16 @@ import {
   defaultRenderMime
 } from '../../rendermime/rendermime.spec';
 
+import {
+  DEFAULT_CONTENT
+} from '../utils';
+
 
 /**
  * Default data.
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
-const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
 
 class LogNotebookPanel extends NotebookPanel {
