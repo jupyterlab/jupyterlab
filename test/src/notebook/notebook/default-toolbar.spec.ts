@@ -226,9 +226,13 @@ describe('notebook/notebook/default-toolbar', () => {
         panel.attach(document.body);
         button.attach(document.body);
         button.node.click();
+        console.log('***1');
         acceptDialog(panel.node).then(() => {
+          console.log('**4');
           expect(context.kernel.status).to.be('restarting');
+          console.log('**5');
           panel.dispose();
+          console.log('**6');
           button.dispose();
           done();
         });
