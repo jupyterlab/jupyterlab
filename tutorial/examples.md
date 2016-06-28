@@ -22,7 +22,7 @@ To run a particular plugin, navigate to the plugin's subdirectory in the
 ##  Dissecting the 'filebrowser' plugin
 
 The filebrowser plugin provides a stand-alone implementation of a 
-filebrowser.
+filebrowser. Here's what the filebrowser plugin's user interface looks like:
 
 ![filebrowser user interface](filebrowser_example.png)
 
@@ -32,6 +32,14 @@ Let's take a closer look at the source code for the plugin in
 ### Directory structure of 'filebrowser' plugin
 
 The plugin in ``examples/file`` is comprised by a handful of files and
-the ``src`` directory.
+the ``src`` directory:
 
 ![filebrowser source code](filebrowser_source.png)
+
+The filebrowser plugin example has two key source files:
+
+- ``src/index.ts``: the TypeScript file that defines the plugin's functionality
+- ``main.py``: the Python file that enables the plugin to be run as an example
+
+Reviewing the source code of each file will help you see the role that each
+file plays in the plugin.
