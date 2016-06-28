@@ -36,17 +36,6 @@ describe('notebook/completion/model', () => {
 
     });
 
-    describe('#isDisposed', () => {
-
-      it('should be true if model has been disposed', () => {
-        let model = new CompletionModel();
-        expect(model.isDisposed).to.be(false);
-        model.dispose();
-        expect(model.isDisposed).to.be(true);
-      });
-
-    });
-
     describe('#stateChanged', () => {
 
       it('should signal when model options have changed', () => {
@@ -297,6 +286,39 @@ describe('notebook/completion/model', () => {
         expect(model.current).to.be(null);
         expect(model.original).to.be(null);
         expect(model.options).to.be(null);
+      });
+
+    });
+
+    describe('#isDisposed', () => {
+
+      it('should be true if model has been disposed', () => {
+        let model = new CompletionModel();
+        expect(model.isDisposed).to.be(false);
+        model.dispose();
+        expect(model.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#dispose()', () => {
+
+      it('should dispose of the model resources', () => {
+        let model = new CompletionModel();
+        model.options = ['foo'];
+        expect(model.isDisposed).to.be(false);
+        expect(model.options).to.be.ok();
+        model.dispose();
+        expect(model.isDisposed).to.be(true);
+        expect(model.options).to.not.be.ok();
+      });
+
+      it('should be safe to call multiple times', () => {
+        let model = new CompletionModel();
+        expect(model.isDisposed).to.be(false);
+        model.dispose();
+        model.dispose();
+        expect(model.isDisposed).to.be(true);
       });
 
     });
