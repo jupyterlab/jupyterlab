@@ -17,6 +17,10 @@ import {
   ICompletionRequest, ITextChange
 } from '../cells/editor';
 
+import {
+  deepEqual, JSONObject
+} from '../common/json';
+
 
 /**
  * A filtered completion menu matching result.
@@ -195,7 +199,10 @@ class CompletionModel implements ICompletionModel {
     return this._options;
   }
   set options(newValue: string[]) {
-    if (newValue) {
+    if (deepEqual(newValue, this._options)) {
+      return;
+    }
+    if (newValue && newValue.length) {
       this._options = [];
       this._options.push(...newValue);
     } else {
@@ -210,8 +217,11 @@ class CompletionModel implements ICompletionModel {
   get original(): ICompletionRequest {
     return this._original;
   }
-  set original(request: ICompletionRequest) {
-    this._original = request;
+  set original(newValue: ICompletionRequest) {
+    if (deepEqual(newValue, this._original)) {
+      return;
+    }
+    this._original = newValue;
     this._current = null;
     this.stateChanged.emit(void 0);
   }
@@ -223,6 +233,9 @@ class CompletionModel implements ICompletionModel {
     return this._current;
   }
   set current(newValue: ITextChange) {
+    if (deepEqual(newValue, this._current)) {
+      return;
+    }
     this._current = newValue;
 
     let original = this._original;
@@ -273,9 +286,7 @@ class CompletionModel implements ICompletionModel {
       // Update the state.
       this.options = value.matches;
       this.cursor = { start: value.cursor_start, end: value.cursor_end };
-    }).then(() => {
-      this.original = request;
-    });
+    }).then(() => { this.original = request; });
   }
 
   /**
@@ -291,10 +302,7 @@ class CompletionModel implements ICompletionModel {
       }
     } else {
       // If final character is whitespace, reset completion.
-      this.options = null;
-      this.original = null;
-      this.cursor = null;
-      return;
+      this.reset();
     }
   }
 

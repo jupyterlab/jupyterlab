@@ -92,6 +92,9 @@ class CellCompletionHandler implements IDisposable {
    * Handle a text changed signal from an editor.
    */
   private _onTextChanged(editor: CellEditorWidget, change: ITextChange): void {
+    if (!this._completion.model) {
+      return;
+    }
     this._completion.model.handleTextChange(change);
   }
 
@@ -109,7 +112,7 @@ class CellCompletionHandler implements IDisposable {
    * Handle a completion selected signal from the completion widget.
    */
   private _onCompletionSelected(widget: CompletionWidget, value: string): void {
-    if (!this._activeCell) {
+    if (!this._activeCell || !this._completion.model) {
       return;
     }
     let patch = this._completion.model.createPatch(value);
