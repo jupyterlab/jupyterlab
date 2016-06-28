@@ -219,10 +219,12 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should restart the kernel when the dialog is accepted', (done) => {
         let button = ToolbarItems.createRestartButton(panel);
+        panel.attach(document.body);
         button.attach(document.body);
         button.node.click();
         acceptDialog(panel.node).then(() => {
           expect(context.kernel.status).to.be('restarting');
+          panel.dispose();
           button.dispose();
           done();
         });
