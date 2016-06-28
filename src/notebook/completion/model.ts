@@ -154,13 +154,6 @@ interface ICompletionModel extends IDisposable {
 export
 class CompletionModel implements ICompletionModel {
   /**
-   * Get whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * A signal emitted when state of the completion menu changes.
    */
   get stateChanged(): ISignal<ICompletionModel, void> {
@@ -267,6 +260,26 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
+   * Get whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    clearSignalData(this);
+    this._reset();
+  }
+
+  /**
    * Make a request using a kernel.
    */
   makeKernelRequest(request: ICompletionRequest, kernel: IKernel): void {
@@ -350,26 +363,10 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
-   * Dispose of the resources held by the model.
-   */
-  dispose(): void {
-    // Do nothing if already disposed.
-    if (this.isDisposed) {
-      return;
-    }
-    clearSignalData(this);
-    this._isDisposed = true;
-  }
-
-  /**
-   * Reset the state of the model.
+   * Reset the state of the model and emit a state change signal.
    */
   reset() {
-    this._current = null;
-    this._original = null;
-    this._options = null;
-    this.setQuery('');
-    this.setCursor(null);
+    this._reset();
     this.stateChanged.emit(void 0);
   }
 
@@ -409,6 +406,17 @@ class CompletionModel implements ICompletionModel {
     }
     return results.sort((a, b) => { return a.score - b.score; })
       .map(result => ({ text: result.text, raw: result.raw }));
+  }
+
+  /**
+   * Reset the state of the model.
+   */
+  private _reset(): void {
+    this._current = null;
+    this._original = null;
+    this._options = null;
+    this.setQuery('');
+    this.setCursor(null);
   }
 
   private _isDisposed = false;
