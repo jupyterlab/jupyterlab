@@ -432,9 +432,7 @@ class ConsoleWidget extends Widget {
       model.current = change;
     } else {
       // If final character is whitespace, reset completion.
-      model.options = null;
-      model.original = null;
-      model.cursor = null;
+      model.reset();
     }
     // Displaying completion widget overrides displaying tooltip.
     if (hasCompletion) {

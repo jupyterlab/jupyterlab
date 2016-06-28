@@ -112,11 +112,6 @@ interface ICompletionModel extends IDisposable {
   current: ITextChange;
 
   /**
-   * The cursor details that the API has used to return matching options.
-   */
-  cursor: ICursorSpan;
-
-  /**
    * The list of visible items in the completion menu.
    */
   items: ICompletionItem[];
@@ -173,16 +168,6 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
-   * The cursor details that the API has used to return matching options.
-   */
-  get cursor(): ICursorSpan {
-    return this._cursor;
-  }
-  set cursor(cursor: ICursorSpan) {
-    this._cursor = cursor;
-  }
-
-  /**
    * The list of visible items in the completion menu.
    *
    * #### Notes
@@ -236,7 +221,26 @@ class CompletionModel implements ICompletionModel {
     if (deepEqual(newValue, this._current)) {
       return;
     }
+
+    // Original request must always be set before a text change. If it isn't
+    // the model fails silently.
+    if (!this.original) {
+      return;
+    }
+
+    // Cursor must always be set before a text change. This happens
+    // automatically in the API response but since `current` is a public
+    // attribute, this defensive check is necessary.
+    if (!this._cursor) {
+      return;
+    }
+
     this._current = newValue;
+
+    if (!this.current) {
+      this.stateChanged.emit(void 0);
+      return;
+    }
 
     let original = this._original;
     let current = this._current;
@@ -283,9 +287,10 @@ class CompletionModel implements ICompletionModel {
       if (value.status !== 'ok') {
         return;
       }
-      // Update the state.
+      // Update the options.
       this.options = value.matches;
-      this.cursor = { start: value.cursor_start, end: value.cursor_end };
+      // Update the cursor.
+      this.setCursor({ start: value.cursor_start, end: value.cursor_end });
     }).then(() => { this.original = request; });
   }
 
@@ -365,6 +370,13 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
+   * Set the cursor details that the API has used to return matching options.
+   */
+  protected setCursor(cursor: ICursorSpan): void {
+    this._cursor = cursor;
+  }
+
+  /**
    * Apply the query to the complete options list to return the matching subset.
    */
   private _filter(): ICompletionItem[] {
@@ -393,7 +405,7 @@ class CompletionModel implements ICompletionModel {
   private _original: ICompletionRequest = null;
   private _current: ITextChange = null;
   private _query = '';
-  private _cursor: { start: number, end: number } = null;
+  private _cursor: ICursorSpan = null;
   private _pendingComplete = 0;
 }
 
