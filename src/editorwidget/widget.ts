@@ -8,6 +8,8 @@ import * as CodeMirror
  * Themes are very very important 
  */
 import 'codemirror/mode/meta';
+import 'codemirror/keymap/vim.js';
+// import 'codemirror/edit/matchbrackets.js';
 import 'codemirror/theme/material.css';
 import 'codemirror/theme/zenburn.css';
 import 'codemirror/theme/abcdef.css';
@@ -77,7 +79,7 @@ class EditorWidget extends Widget {
     var layout = this.layout as PanelLayout;
     let editor = codeMirror.editor;
     let model = context.model;
-    this.createMenu(layout);
+    this.createMenu(layout, editor);
     layout.addChild(codeMirror);
     editor.setOption('lineNumbers', true);
     editor.setOption('theme', "material");
@@ -111,22 +113,58 @@ class EditorWidget extends Widget {
       }
     });
   }
-  // onClick() {
-  //   let theme_arr = ["zenburn", ""];
-  //   let selectedTheme = "zenburn";
-  //   this.editor.setOption('theme', selectedTheme);
-  // }
 
-  createMenu(layout : PanelLayout) {
+  createMenu(layout : PanelLayout, editor : any) {
+    var vimMode = false, brackets = false, defaultEditor = true, lineWrap = false, lineNums = true;
+
+    let themeHandler = (item : MenuItem) => {
+      editor.setOption('theme', item.text);
+    }
+
+    let matchBrackets = (item : MenuItem) => {
+      brackets = !brackets;
+      editor.setOption('matchBrackets', brackets);
+    }
+
+    let vimHandler = (item : MenuItem) => {
+      vimMode = !vimMode;
+      defaultEditor = false;
+      if (vimMode) {
+        editor.setOption('keyMap', "vim");
+      }
+      else {
+        editor.setOption('keyMap', "default");
+      }
+    }
+
+    let defaultMode = (item : MenuItem) => {
+      defaultEditor = true;
+      vimMode = false;
+      editor.setOption('keyMap', "default");
+    }
+
+    let lineWrapping = (item : MenuItem) => {
+      lineWrap = !lineWrap;
+      editor.setOption('lineWrapping', lineWrap);
+    }
+
+    let lineNumbers = (item : MenuItem) => {
+      lineNums = !lineNums;
+      editor.setOption('lineNumbers', lineNums);
+    }
+
     let menuOne = new Menu([
       new MenuItem({
-        text: 'Match Brackets'
+        text: 'Match Brackets',
+        handler: matchBrackets
       }),
       new MenuItem({
-        text: 'Line Numbers'
+        text: 'Line Numbers',
+        handler: lineNumbers
       }),
       new MenuItem({
-        text: 'Line Wrapping'
+        text: 'Line Wrapping',
+        handler: lineWrapping
       }),
       new MenuItem({
         text: 'Syntax Highlighting'
@@ -135,43 +173,64 @@ class EditorWidget extends Widget {
 
     let menuTwo = new Menu([
       new MenuItem({
-        text: 'abcdef'
+        text: 'default',
+        handler: themeHandler
       }),
       new MenuItem({
-        text: 'base16-dark'
+        text: 'abcdef',
+        handler: themeHandler
       }),
       new MenuItem({
-        text: 'base16-light'
+        text: 'base16-dark',
+        handler: themeHandler
       }),
       new MenuItem({
-        text: 'hopscotch'
+        text: 'base16-light',
+        handler: themeHandler
       }),
       new MenuItem({
-        text: 'material'
+        text: 'hopscotch',
+        handler: themeHandler
       }),
       new MenuItem({
-        text: 'mbo'
+        text: 'material',
+        handler: themeHandler
       }),
       new MenuItem({
-        text: 'mdn-like'
+        text: 'mbo',
+        handler: themeHandler
       }),
       new MenuItem({
-        text: 'seti'
+        text: 'mdn-like',
+        handler: themeHandler
+      }),
+      new MenuItem({
+        text: 'seti',
+        handler: themeHandler
       }),      
       new MenuItem({
-        text: 'the-matrix'
+        text: 'the-matrix',
+        handler: themeHandler
       }),
       new MenuItem({
-        text: 'xq-light'
+        text: 'xq-light',
+        handler: themeHandler
       }),
       new MenuItem({
-        text: 'zenburn'
+        text: 'zenburn',
+        handler: themeHandler
       })
       ]);
 
     let menuThree = new Menu([
       new MenuItem({
-        text: 'Vim Mode'
+        text: 'Default',
+        handler: defaultMode,
+        shortcut: 'Ctrl+D'
+      }),
+      new MenuItem({
+        text: 'Vim Mode',
+        handler: vimHandler
       }),
       new MenuItem({
         text: 'EMacs Mode'
@@ -182,7 +241,7 @@ class EditorWidget extends Widget {
       new MenuItem({
         text: 'Settings',
         submenu: menuOne,
-        shortcut: 'Ctrl-S'
+        shortcut: 'Ctrl+S'
       }),
       new MenuItem({
         text: 'Themes',
@@ -202,6 +261,10 @@ class EditorWidget extends Widget {
   createEditor() {
     let editor = new CodeMirrorWidget().editor;
     return editor;
+  }
+
+  selectTheme(val : number) {
+
   }
 }
 
