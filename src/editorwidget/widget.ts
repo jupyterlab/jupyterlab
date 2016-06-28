@@ -4,12 +4,8 @@
 import * as CodeMirror
   from 'codemirror';
 
-/**
- * Themes are very very important 
- */
 import 'codemirror/mode/meta';
 import 'codemirror/keymap/vim.js';
-// import 'codemirror/edit/matchbrackets.js';
 import 'codemirror/theme/material.css';
 import 'codemirror/theme/zenburn.css';
 import 'codemirror/theme/abcdef.css';
@@ -22,6 +18,8 @@ import 'codemirror/theme/mdn-like.css';
 import 'codemirror/theme/seti.css';
 import 'codemirror/theme/the-matrix.css';
 import 'codemirror/theme/xq-light.css';
+import 'codemirror/addon/edit/matchbrackets.js';
+
 
 import {
   IKernelId
@@ -82,7 +80,6 @@ class EditorWidget extends Widget {
     this.createMenu(layout, editor);
     layout.addChild(codeMirror);
     editor.setOption('lineNumbers', true);
-    editor.setOption('theme', "material");
     let doc = editor.getDoc();
     doc.setValue(model.toString());
     this.title.text = context.path.split('/').pop();
@@ -121,57 +118,106 @@ class EditorWidget extends Widget {
       editor.setOption('theme', item.text);
     }
 
-    let matchBrackets = (item : MenuItem) => {
+    let matchBracketsHandler = (item : MenuItem) => {
       brackets = !brackets;
       editor.setOption('matchBrackets', brackets);
+      editor.setOption('closeBrackets', "()[]{}''\"\"``");
     }
 
-    let vimHandler = (item : MenuItem) => {
-      vimMode = !vimMode;
-      defaultEditor = false;
-      if (vimMode) {
-        editor.setOption('keyMap', "vim");
-      }
-      else {
-        editor.setOption('keyMap', "default");
-      }
-    }
+    /**
+      * Disabled until I can figure out why attempting to input a command in vim mode
+      * removes the menu bar :/
+      */
+    // let vimHandler = (item : MenuItem) => {
+    //   vimMode = !vimMode;
+    //   defaultEditor = false;
+    //   if (vimMode) {
+    //     editor.setOption('keyMap', "vim");
+    //   }
+    //   else {
+    //     editor.setOption('keyMap', "default");
+    //   }
+    // }
 
-    let defaultMode = (item : MenuItem) => {
+    let defaultModeHandler = (item : MenuItem) => {
       defaultEditor = true;
       vimMode = false;
       editor.setOption('keyMap', "default");
     }
 
-    let lineWrapping = (item : MenuItem) => {
+    let lineWrapHandler = (item : MenuItem) => {
       lineWrap = !lineWrap;
       editor.setOption('lineWrapping', lineWrap);
     }
 
-    let lineNumbers = (item : MenuItem) => {
+    let lineNumHandler = (item : MenuItem) => {
       lineNums = !lineNums;
       editor.setOption('lineNumbers', lineNums);
+    }
+
+    let syntaxHandler = (item : MenuItem) => {
+      editor.setOption('');
     }
 
     let menuOne = new Menu([
       new MenuItem({
         text: 'Match Brackets',
-        handler: matchBrackets
+        handler: matchBracketsHandler
       }),
       new MenuItem({
         text: 'Line Numbers',
-        handler: lineNumbers
+        handler: lineNumHandler
       }),
       new MenuItem({
         text: 'Line Wrapping',
-        handler: lineWrapping
+        handler: lineWrapHandler
       }),
       new MenuItem({
         text: 'Syntax Highlighting'
+        // handler: syntaxHandler
       })
       ]);
 
-    let menuTwo = new Menu([
+    let menuTwo = this.createThemeMenu(themeHandler);
+
+    let menuThree = new Menu([
+      new MenuItem({
+        text: 'Default',
+        handler: defaultModeHandler,
+        shortcut: 'Ctrl+D'
+      }),
+      new MenuItem({
+        text: 'Vim Mode'
+        // handler: vimHandler
+      }),
+      new MenuItem({
+        text: 'EMacs Mode'
+      })
+      ]);
+
+    let menuBar = new MenuBar([
+      new MenuItem({
+        text: 'Settings',
+        submenu: menuOne,
+        shortcut: 'Ctrl+S'
+      }),
+      new MenuItem({
+        text: 'Themes',
+        submenu: menuTwo,
+        shortcut: 'Ctrl+T'
+      }),
+      new MenuItem({
+        text: 'Modes',
+        submenu: menuThree,
+        shortcut: 'Ctrl+M'
+      })
+      ])
+
+    layout.addChild(menuBar);
+  }
+
+  createThemeMenu(themeHandler : any) : Menu {
+    let menu = new Menu([
       new MenuItem({
         text: 'default',
         handler: themeHandler
@@ -222,49 +268,7 @@ class EditorWidget extends Widget {
       })
       ]);
 
-    let menuThree = new Menu([
-      new MenuItem({
-        text: 'Default',
-        handler: defaultMode,
-        shortcut: 'Ctrl+D'
-      }),
-      new MenuItem({
-        text: 'Vim Mode',
-        handler: vimHandler
-      }),
-      new MenuItem({
-        text: 'EMacs Mode'
-      })
-      ]);
-
-    let menuBar = new MenuBar([
-      new MenuItem({
-        text: 'Settings',
-        submenu: menuOne,
-        shortcut: 'Ctrl+S'
-      }),
-      new MenuItem({
-        text: 'Themes',
-        submenu: menuTwo,
-        shortcut: 'Ctrl+T'
-      }),
-      new MenuItem({
-        text: 'Modes',
-        submenu: menuThree,
-        shortcut: 'Ctrl+M'
-      })
-      ])
-
-    layout.addChild(menuBar);
-  }
-
-  createEditor() {
-    let editor = new CodeMirrorWidget().editor;
-    return editor;
-  }
-
-  selectTheme(val : number) {
-
+    return menu;
   }
 }
 
