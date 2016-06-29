@@ -826,7 +826,9 @@ namespace Private {
       break;
     case 'code':
       if (kernel) {
-        return (widget as CodeCellWidget).execute(kernel);
+        return (widget as CodeCellWidget).execute(kernel).then(reply => {
+          return reply ? reply.content.status === 'ok' : true;
+        });
       }
       (widget.model as CodeCellModel).executionCount = null;
       break;
