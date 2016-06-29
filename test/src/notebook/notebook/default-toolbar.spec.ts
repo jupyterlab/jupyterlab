@@ -53,7 +53,7 @@ const clipboard = new MimeData();
 
 describe('notebook/notebook/default-toolbar', () => {
 
-  describe('TooolbarItems', () => {
+  describe('ToolbarItems', () => {
 
     let panel: NotebookPanel;
     let context: MockContext<NotebookModel>;
@@ -176,16 +176,16 @@ describe('notebook/notebook/default-toolbar', () => {
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
         next.rendered = false;
-
         button.attach(document.body);
-        button.node.click();
-
-        Promise.resolve(void 0).then(() => {
-          expect(cell.model.outputs.length).to.be.above(0);
-          expect(next.rendered).to.be(true);
-          button.dispose();
-          done();
+        widget.kernel.statusChanged.connect((sender, status) => {
+          if (status === 'idle') {
+            expect(cell.model.outputs.length).to.be.above(0);
+            expect(next.rendered).to.be(true);
+            button.dispose();
+            done();
+          }
         });
+        button.node.click();
       });
 
       it("should have the `'jp-NBToolbar-run'` class", () => {
@@ -202,10 +202,11 @@ describe('notebook/notebook/default-toolbar', () => {
         button.attach(document.body);
         button.node.click();
         expect(panel.context.kernel.status).to.be('busy');
-        Promise.resolve(void 0).then(() => {
-          expect(panel.context.kernel.status).to.be('idle');
-          button.dispose();
-          done();
+        widget.kernel.statusChanged.connect(() => {
+          if (status === 'idle') {
+            button.dispose();
+            done();
+          }
         });
       });
 
