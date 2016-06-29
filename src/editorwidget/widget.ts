@@ -75,7 +75,7 @@ class EditorWidget extends Widget {
     var layout = this.layout as PanelLayout;
     let editor = codeMirror.editor;
     let model = context.model;
-    this.createMenu(editor);
+    layout.addChild(this.createMenu(editor, context));
     layout.addChild(codeMirror);
     editor.setOption('lineNumbers', true);
     let doc = editor.getDoc();
@@ -112,7 +112,7 @@ class EditorWidget extends Widget {
   /**
    * Creates a menu bar that is then attached as a child to layout
    */
-  protected createMenu(editor : CodeMirror.Editor) : MenuBar {
+  protected createMenu(editor : CodeMirror.Editor, context : IDocumentContext<IDocumentModel>) : MenuBar {
     var vimMode = false, brackets = false, defaultEditor = true, lineWrap = false, lineNums = true;
 
     let themeHandler = (item : MenuItem) => {
@@ -141,6 +141,10 @@ class EditorWidget extends Widget {
       editor.setOption('lineNumbers', lineNums);
     }
 
+    let saveHandler = (item : MenuItem) => {
+      context.save();
+    }
+
     let menuOne = new Menu([
       new MenuItem({
         text: 'Match Brackets',
@@ -155,8 +159,8 @@ class EditorWidget extends Widget {
         handler: lineWrapHandler
       }),
       new MenuItem({
-        text: 'Syntax Highlighting'
-        // handler: syntaxHandler
+        text: 'Save File',
+        handler: saveHandler
       })
       ]);
 
