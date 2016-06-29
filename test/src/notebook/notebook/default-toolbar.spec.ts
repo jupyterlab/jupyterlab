@@ -177,7 +177,7 @@ describe('notebook/notebook/default-toolbar', () => {
         cell.model.outputs.clear();
         next.rendered = false;
         button.attach(document.body);
-        widget.kernel.statusChanged.connect((sender, status) => {
+        panel.kernel.statusChanged.connect((sender, status) => {
           if (status === 'idle') {
             expect(cell.model.outputs.length).to.be.above(0);
             expect(next.rendered).to.be(true);
@@ -202,7 +202,7 @@ describe('notebook/notebook/default-toolbar', () => {
         button.attach(document.body);
         button.node.click();
         expect(panel.context.kernel.status).to.be('busy');
-        widget.kernel.statusChanged.connect(() => {
+        panel.kernel.statusChanged.connect((sender, status) => {
           if (status === 'idle') {
             button.dispose();
             done();
