@@ -92,7 +92,12 @@ class FileBrowserWidget extends Widget {
     model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs({ model });
     this._buttons = new FileButtons({ model, manager, opener });
-    this._listing = new DirListing({ model, manager, opener });
+    this._listing = new DirListing({
+      model,
+      manager,
+      opener,
+      renderer: options.renderer
+    });
 
     model.fileChanged.connect((fbModel, args) => {
       if (args.newValue) {
@@ -338,5 +343,12 @@ namespace FileBrowserWidget {
      * A widget opener function.
      */
     opener: IWidgetOpener;
+
+    /**
+     * An optional renderer for the directory listing area.
+     *
+     * The default is a shared instance of `DirListing.Renderer`.
+     */
+    renderer?: DirListing.IRenderer;
   }
 }
