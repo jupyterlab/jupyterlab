@@ -2,20 +2,28 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelStatus
+  IKernel
 } from 'jupyter-js-services';
-
-import {
-  IDocumentContext
-} from '../../docregistry';
 
 import {
   Widget
 } from 'phosphor-widget';
 
 import {
+  restartKernel
+} from '../../docregistry';
+
+import {
+  nbformat
+} from './nbformat';
+
+import {
   NotebookPanel
 } from './panel';
+
+import {
+  Notebook
+} from './widget';
 
 import {
   ToolbarButton
@@ -171,7 +179,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_RUN,
       onClick: () => {
-        NotebookActions.runAndAdvance(panel.content, panel.context.kernel);
+        NotebookActions.runAndAdvance(panel.content, panel.kernel);
       },
       tooltip: 'Run the selected cell(s) and advance'
     });
@@ -185,7 +193,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_INTERRUPT,
       onClick: () => {
-        if (panel.context.kernel) {
+        if (panel.kernel) {
           panel.context.kernel.interrupt();
         }
       },
@@ -201,7 +209,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_RESTART,
       onClick: () => {
-        panel.restart();
+        restartKernel(panel.kernel, panel.node);
       },
       tooltip: 'Restart the kernel'
     });
@@ -209,27 +217,40 @@ namespace ToolbarItems {
 
   /**
    * Create a cell type switcher item.
+   *
+   * #### Notes
+   * It will display the type of the current active cell.
+   * If more than one cell is selected but are of different types,
+   * it will display `'-'`.
+   * When the user changes the cell type, it will change the
+   * cell types of the selected cells.
+   * It can handle a change to the context.
    */
   export
   function createCellTypeItem(panel: NotebookPanel): Widget {
-    return new CellTypeSwitcher(panel);
+    return new CellTypeSwitcher(panel.content);
   }
 
   /**
    * Create a kernel name indicator item.
+   *
+   * #### Notes
+   * It will display the `'display_name`' of the current kernel,
+   * or `'No Kernel!'` if there is no kernel.
+   * It can handle a change in context or kernel.
    */
   export
   function createKernelNameItem(panel: NotebookPanel): Widget {
     let widget = new Widget();
     widget.addClass(TOOLBAR_KERNEL);
     widget.node.textContent = 'No Kernel!';
-    if (panel.context.kernel) {
-      panel.context.kernel.getKernelSpec().then(spec => {
+    if (panel.kernel) {
+      panel.kernel.getKernelSpec().then(spec => {
         widget.node.textContent = spec.display_name;
       });
     }
-    panel.context.kernelChanged.connect(() => {
-      panel.context.kernel.getKernelSpec().then(spec => {
+    panel.kernelChanged.connect(() => {
+      panel.kernel.getKernelSpec().then(spec => {
         widget.node.textContent = spec.display_name;
       });
     });
@@ -238,14 +259,20 @@ namespace ToolbarItems {
 
   /**
    * Create a kernel status indicator item.
+   *
+   * #### Notes
+   * It show display a busy status if the kernel status is
+   * not idle.
+   * It will show the current status in the node title.
+   * It can handle a change to the context or the kernel.
    */
   export
   function createKernelStatusItem(panel: NotebookPanel): Widget {
-    return new KernelIndicator(panel.context);
+    return new KernelIndicator(panel);
   }
 
   /**
-   * Add the default items to a toolbar.
+   * Add the default items to the panel toolbar.
    */
   export
   function populateDefaults(panel: NotebookPanel): void {
@@ -289,52 +316,70 @@ class CellTypeSwitcher extends Widget {
   /**
    * Construct a new cell type switcher.
    */
-  constructor(panel: NotebookPanel) {
+  constructor(widget: Notebook) {
     super();
     this.addClass(TOOLBAR_CELLTYPE);
 
     let select = this.node.firstChild as HTMLSelectElement;
+    this._wildCard = document.createElement('option');
+    this._wildCard.value = '-';
+    this._wildCard.textContent = '-';
+
     // Change current cell type on a change in the dropdown.
     select.addEventListener('change', event => {
-      if (!this._changeGuard) {
-        NotebookActions.changeCellType(panel.content, select.value);
-      }
-    });
-    // Follow the type of the current cell.
-    panel.content.stateChanged.connect((sender, args) => {
-      if (!panel.model) {
+      if (select.value === '-') {
         return;
       }
-      if (args.name === 'activeCellIndex') {
-        this._changeGuard = true;
-        select.value = panel.model.cells.get(args.newValue).type;
-        this._changeGuard = false;
+      if (!this._changeGuard) {
+        let value = select.value as nbformat.CellType;
+        NotebookActions.changeCellType(widget, value);
       }
     });
 
-    panel.content.modelChanged.connect(() => {
-      this.followModel(panel);
-    });
-    if (panel.model) {
-      this.followModel(panel);
+    // Set the initial value.
+    if (widget.model) {
+      this._updateValue(widget, select);
     }
+
+    // Follow the type of the active cell.
+    widget.activeCellChanged.connect((sender, cell) => {
+      this._updateValue(widget, select);
+    });
+
+    // Follow a change in the selection.
+    widget.selectionChanged.connect(() => {
+      this._updateValue(widget, select);
+    });
   }
 
-  followModel(panel: NotebookPanel): void {
-    let select = this.node.firstChild as HTMLSelectElement;
-    // Set the initial value.
-    let index = panel.content.activeCellIndex;
-    select.value = panel.model.cells.get(index).type;
-    // Follow a change in the cells.
-    panel.content.model.cells.changed.connect((sender, args) => {
-      index = panel.content.activeCellIndex;
-      this._changeGuard = true;
-      select.value = panel.model.cells.get(index).type;
-      this._changeGuard = false;
-    });
+  /**
+   * Update the value of the dropdown from the widget state.
+   */
+  private _updateValue(widget: Notebook, select: HTMLSelectElement): void {
+    if (!widget.activeCell) {
+      return;
+    }
+    let mType: string = widget.activeCell.model.type;
+    for (let i = 0; i < widget.childCount(); i++) {
+      let child = widget.childAt(i);
+      if (widget.isSelected(child)) {
+        if (child.model.type !== mType) {
+          mType = '-';
+          select.appendChild(this._wildCard);
+          break;
+        }
+      }
+    }
+    if (mType !== '-') {
+      select.remove(3);
+    }
+    this._changeGuard = true;
+    select.value = mType;
+    this._changeGuard = false;
   }
 
   private _changeGuard = false;
+  private _wildCard: HTMLOptionElement = null;
 }
 
 
@@ -345,17 +390,17 @@ class KernelIndicator extends Widget {
   /**
    * Construct a new kernel status widget.
    */
-  constructor(context: IDocumentContext) {
+  constructor(panel: NotebookPanel) {
     super();
     this.addClass(TOOLBAR_INDICATOR);
-    if (context.kernel) {
-      this._handleStatus(context.kernel, context.kernel.status);
-      context.kernel.statusChanged.connect(this._handleStatus, this);
+    if (panel.kernel) {
+      this._handleStatus(panel.kernel, panel.kernel.status);
+      panel.kernel.statusChanged.connect(this._handleStatus, this);
     } else {
       this.addClass(TOOLBAR_BUSY);
       this.node.title = 'No Kernel!';
     }
-    context.kernelChanged.connect((c, kernel) => {
+    panel.kernelChanged.connect((c, kernel) => {
       this._handleStatus(kernel, kernel.status);
       kernel.statusChanged.connect(this._handleStatus, this);
     });
@@ -364,30 +409,9 @@ class KernelIndicator extends Widget {
   /**
    * Handle a status on a kernel.
    */
-  private _handleStatus(kernel: IKernel, status: KernelStatus) {
-    this.toggleClass(TOOLBAR_BUSY, status !== KernelStatus.Idle);
-    switch (status) {
-    case KernelStatus.Idle:
-      this.node.title = 'Kernel Idle';
-      break;
-    case KernelStatus.Busy:
-      this.node.title = 'Kernel Busy';
-      break;
-    case KernelStatus.Dead:
-      this.node.title = 'Kernel Died';
-      break;
-    case KernelStatus.Reconnecting:
-      this.node.title = 'Kernel Reconnecting';
-      break;
-    case KernelStatus.Restarting:
-      this.node.title = 'Kernel Restarting';
-      break;
-    case KernelStatus.Starting:
-      this.node.title = 'Kernel Starting';
-      break;
-    default:
-      this.node.title = 'Kernel Status Unknown';
-      break;
-    }
+  private _handleStatus(kernel: IKernel, status: IKernel.Status) {
+    this.toggleClass(TOOLBAR_BUSY, status !== 'idle');
+    let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
+    this.node.title = title;
   }
 }

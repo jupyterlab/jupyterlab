@@ -4,8 +4,16 @@
 import expect = require('expect.js');
 
 import {
+  MockKernel
+} from 'jupyter-js-services/lib/mockkernel';
+
+import {
   ListChangeType
 } from 'phosphor-observablelist';
+
+import {
+  deepEqual
+} from '../../../../lib/notebook/common/json';
 
 import {
   OutputAreaModel
@@ -89,7 +97,7 @@ describe('notebook/output-area/model', () => {
           expect(args.oldIndex).to.be(-1);
           expect(args.newIndex).to.be(0);
           expect(args.oldValue).to.be(void 0);
-          // TODO: use deepEqual when we update nbformat
+          expect(deepEqual(args.newValue, DEFAULT_OUTPUTS[0]));
           called = true;
         });
         model.add(DEFAULT_OUTPUTS[0]);
@@ -156,7 +164,6 @@ describe('notebook/output-area/model', () => {
         model.add(DEFAULT_OUTPUTS[0]);
         let output = model.get(0);
         expect(output).to.not.be(DEFAULT_OUTPUTS[0]);
-        // TODO: use deepEqual when nbformat is updated.
         expect(output.output_type).to.be(DEFAULT_OUTPUTS[0].output_type);
       });
 
@@ -206,6 +213,35 @@ describe('notebook/output-area/model', () => {
         model.add(DEFAULT_OUTPUTS[1]);
         expect(model.length).to.be(1);
       });
+    });
+
+    describe('#execute()', () => {
+
+      it('should execute code on a kernel and send outputs to the model', (done) => {
+        let kernel = new MockKernel();
+        let model = new OutputAreaModel();
+        expect(model.length).to.be(0);
+        model.execute('foo', kernel).then(reply => {
+          expect(reply.content.execution_count).to.be(1);
+          expect(reply.content.status).to.be('ok');
+          expect(model.length).to.be(1);
+          done();
+        });
+      });
+
+      it('should clear existing outputs', (done) => {
+        let kernel = new MockKernel();
+        let model = new OutputAreaModel();
+        for (let output of DEFAULT_OUTPUTS) {
+          model.add(output);
+        }
+        model.execute('foo', kernel).then(reply => {
+          expect(reply.content.execution_count).to.be(1);
+          expect(model.length).to.be(1);
+          done();
+        });
+      });
+
     });
 
   });

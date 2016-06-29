@@ -6,7 +6,7 @@
   min-width: 300px;
   color: #757575;
   background: #FAFAFA;
-  font: 13px Helvetica-Neue, Arial, sans-serif;
+  font-size: 13px;
 }
 
 
@@ -201,17 +201,17 @@
 **/
 
 
-.jp-DirListing-item.jp-type-folder .jp-DirListing-itemIcon:before {
+.jp-type-folder.jp-DirListing-itemIcon:before {
   content: "\f114";
 }
 
 
-.jp-DirListing-item.jp-type-file .jp-DirListing-itemIcon:before {
+.jp-type-file.jp-DirListing-itemIcon:before {
   content: "\f016";
 }
 
 
-.jp-DirListing-item.jp-type-notebook .jp-DirListing-itemIcon:before {
+.jp-type-notebook.jp-DirListing-itemIcon:before {
   content: "\f02d";
 }
 

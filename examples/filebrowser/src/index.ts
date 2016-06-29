@@ -2,8 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, NotebookSessionManager,
-  IKernelSpecIds
+  ContentsManager, SessionManager, IKernel
 } from 'jupyter-js-services';
 
 import {
@@ -11,7 +10,7 @@ import {
 } from 'jupyterlab/lib/filebrowser';
 
 import {
-  DocumentManager, DocumentWrapper
+  DocumentManager
 } from 'jupyterlab/lib/docmanager';
 
 import {
@@ -43,32 +42,36 @@ import {
   SplitPanel
 } from 'phosphor-splitpanel';
 
+import {
+  Widget
+} from 'phosphor-widget';
+
 import 'jupyterlab/lib/index.css';
 import 'jupyterlab/lib/theme.css';
 
 
 function main(): void {
-  let sessionsManager = new NotebookSessionManager();
-  sessionsManager.getSpecs().then(specs => {
-    createApp(sessionsManager, specs);
+  let sessionManager = new SessionManager();
+  sessionManager.getSpecs().then(kernelspecs => {
+    createApp(sessionManager, kernelspecs);
   });
 }
 
 
-function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecIds): void {
+function createApp(sessionManager: SessionManager, kernelspecs: IKernel.ISpecModels): void {
   let contentsManager = new ContentsManager();
-  let widgets: DocumentWrapper[] = [];
-  let activeWidget: DocumentWrapper;
+  let widgets: Widget[] = [];
+  let activeWidget: Widget;
 
   let opener = {
-    open: (widget: DocumentWrapper) => {
+    open: (widget: Widget) => {
       if (widgets.indexOf(widget) === -1) {
         dock.insertTabAfter(widget);
         widgets.push(widget);
       }
       dock.selectWidget(widget);
       activeWidget = widget;
-      widget.disposed.connect((w: DocumentWrapper) => {
+      widget.disposed.connect((w: Widget) => {
         let index = widgets.indexOf(w);
         widgets.splice(index, 1);
       });
@@ -76,13 +79,17 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   };
 
   let docRegistry = new DocumentRegistry();
-  let docManager = new DocumentManager(
-    docRegistry, contentsManager, sessionsManager, specs, opener
-  );
+  let docManager = new DocumentManager({
+    registry: docRegistry,
+    contentsManager,
+    sessionManager,
+    kernelspecs,
+    opener
+  });
   let mFactory = new TextModelFactory();
   let wFactory = new EditorWidgetFactory();
-  docRegistry.registerModelFactory(mFactory);
-  docRegistry.registerWidgetFactory(wFactory, {
+  docRegistry.addModelFactory(mFactory);
+  docRegistry.addWidgetFactory(wFactory, {
     displayName: 'Editor',
     modelName: 'text',
     fileExtensions: ['.*'],
@@ -91,8 +98,16 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     canStartKernel: true
   });
 
-  let fbModel = new FileBrowserModel(contentsManager, sessionsManager, specs);
-  let fbWidget = new FileBrowserWidget(fbModel, docManager, opener);
+  let fbModel = new FileBrowserModel({
+    contentsManager,
+    sessionManager,
+    kernelspecs
+  });
+  let fbWidget = new FileBrowserWidget({
+    model: fbModel,
+    manager: docManager,
+    opener
+  });
 
   let panel = new SplitPanel();
   panel.id = 'main';
@@ -136,7 +151,8 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      activeWidget.context.save();
+      let context = docManager.contextForWidget(activeWidget);
+      context.save();
     }
   }]);
 
@@ -203,7 +219,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     new MenuItem({
       text: 'Info Demo',
       handler: () => {
-        let msg = 'The quick brown fox jumped over the lazy dog'
+        let msg = 'The quick brown fox jumped over the lazy dog';
         showDialog({
           title: 'Cool Title',
           body: msg,
@@ -234,7 +250,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
 function dialogDemo(): void {
   let body = document.createElement('div');
   let input = document.createElement('input');
-  input.value = 'Untitled.ipynb'
+  input.value = 'Untitled.ipynb';
   let selector = document.createElement('select');
   let option0 = document.createElement('option');
   option0.value = 'python';

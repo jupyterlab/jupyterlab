@@ -257,6 +257,9 @@ class CellModel implements ICellModel {
    * set of metadata on the cell.
    */
   getMetadata(name: string): IMetadataCursor {
+    if (this.isDisposed) {
+      return null;
+    }
     if (name in this._cursors) {
       return this._cursors[name];
     }

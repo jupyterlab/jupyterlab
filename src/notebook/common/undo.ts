@@ -150,8 +150,10 @@ class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> impl
     if (!this._isUndoable) {
       return;
     }
-    // Clear everything after this position.
-    this._stack = this._stack.slice(0, this._index + 1);
+    // Clear everything after this position if necessary.
+    if (!this._inCompound || !this._madeCompoundChange) {
+      this._stack = this._stack.slice(0, this._index + 1);
+    }
     // Copy the change.
     let evt = this._copyChange(change);
     // Put the change in the stack.

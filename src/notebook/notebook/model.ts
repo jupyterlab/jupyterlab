@@ -359,14 +359,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
-   * Initialize the model state.
-   */
-  initialize(): void {
-    this._cells.clearUndo();
-    this.dirty = false;
-  }
-
-  /**
    * Get a metadata cursor for the notebook.
    *
    * #### Notes

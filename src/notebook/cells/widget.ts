@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  IKernel, KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -34,7 +34,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  OutputAreaWidget, OutputAreaModel, executeCode
+  OutputAreaWidget
 } from '../output-area';
 
 import {
@@ -46,7 +46,7 @@ import {
 } from './editor';
 
 import {
-  ICodeCellModel, ICellModel
+  ICellModel, ICodeCellModel, IMarkdownCellModel, IRawCellModel
 } from './model';
 
 
@@ -124,9 +124,9 @@ class BaseCellWidget extends Widget {
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
 
-    let factory = options.renderer || BaseCellWidget.defaultRenderer;
-    this._editor = factory.createCellEditor(null);
-    this._input = factory.createInputArea(this._editor);
+    let renderer = options.renderer || BaseCellWidget.defaultRenderer;
+    this._editor = renderer.createCellEditor(null);
+    this._input = renderer.createInputArea(this._editor);
 
     (this.layout as PanelLayout).addChild(this._input);
   }
@@ -205,6 +205,9 @@ class BaseCellWidget extends Widget {
     return this._trusted;
   }
   set trusted(value: boolean) {
+    if (!this._model) {
+      return;
+    }
     this._trustedCursor.setValue(value);
     this._trusted = value;
   }
@@ -260,7 +263,10 @@ class BaseCellWidget extends Widget {
   /**
    * Handle `update_request` messages.
    */
-  protected onUpdateRequest(message: Message): void {
+  protected onUpdateRequest(msg: Message): void {
+    if (!this._model) {
+      return;
+    }
     // Handle read only state.
     let option = this._readOnly ? 'nocursor' : false;
     this.editor.editor.setOption('readOnly', option);
@@ -273,7 +279,7 @@ class BaseCellWidget extends Widget {
    * #### Notes
    * Subclasses may reimplement this method as needed.
    */
-  protected onModelStateChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
   }
 
   /**
@@ -406,8 +412,13 @@ class CodeCellWidget extends BaseCellWidget {
     super(options);
     this.addClass(CODE_CELL_CLASS);
     this._rendermime = options.rendermime;
-    this._factory = options.renderer || CodeCellWidget.defaultRenderer;
+    this._renderer = options.renderer || CodeCellWidget.defaultRenderer;
   }
+
+  /**
+   * The model used by the widget.
+   */
+  model: ICodeCellModel;
 
   /**
    * Dispose of the resources used by the widget.
@@ -425,26 +436,27 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Execute the cell given a kernel.
    */
-  execute(kernel: IKernel): Promise<void> {
+  execute(kernel: IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
     let model = this.model as ICodeCellModel;
     let code = model.source;
     if (!code.trim()) {
       model.executionCount = null;
-      return Promise.resolve(void 0);
+      return Promise.resolve(null);
     }
     model.executionCount = null;
     this.setPrompt('*');
     this.trusted = true;
     let outputs = model.outputs;
-    return executeCode(code, kernel, outputs).then(reply => {
-      model.executionCount = reply.execution_count;
+    return outputs.execute(code, kernel).then(reply => {
+      model.executionCount = reply.content.execution_count;
+      return reply;
     });
   }
 
   /**
    * Handle `update_request` messages.
    */
-  protected onUpdateRequest(message: Message): void {
+  protected onUpdateRequest(msg: Message): void {
     if (this._collapsedCursor) {
       this.toggleClass(COLLAPSED_CLASS, this._collapsedCursor.getValue());
     }
@@ -452,7 +464,7 @@ class CodeCellWidget extends BaseCellWidget {
       // TODO: handle scrolled state.
       this._output.trusted = this.trusted;
     }
-    super.onUpdateRequest(message);
+    super.onUpdateRequest(msg);
   }
 
   /**
@@ -460,10 +472,10 @@ class CodeCellWidget extends BaseCellWidget {
    */
   protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
     let model = newValue as ICodeCellModel;
-    let factory = this._factory;
+    let renderer = this._renderer;
 
     if (!this._output) {
-      this._output = factory.createOutputArea(this._rendermime);
+      this._output = renderer.createOutputArea(this._rendermime);
       (this.layout as PanelLayout).addChild(this._output);
     }
 
@@ -477,10 +489,10 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the model.
    */
-  protected onModelStateChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'executionCount':
-      this.setPrompt(`${model.executionCount}`);
+      this.setPrompt(`${(model as ICodeCellModel).executionCount}`);
       break;
     default:
       break;
@@ -491,7 +503,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(model: ICodeCellModel, args: IChangedArgs<any>): void {
+  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'collapsed':
     case 'scrolled':
@@ -503,7 +515,7 @@ class CodeCellWidget extends BaseCellWidget {
     super.onMetadataChanged(model, args);
   }
 
-  private _factory: CodeCellWidget.IRenderer;
+  private _renderer: CodeCellWidget.IRenderer;
   private _rendermime: RenderMime<Widget> = null;
   private _output: OutputAreaWidget = null;
   private _collapsedCursor: IMetadataCursor = null;
@@ -526,7 +538,7 @@ namespace CodeCellWidget {
      *
      * The default is a shared renderer instance.
      */
-    renderer?: IRenderer
+    renderer?: IRenderer;
 
     /**
      * The mime renderer for the cell widget.
@@ -594,6 +606,11 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   /**
+   * The model used by the widget.
+   */
+  model: IMarkdownCellModel;
+
+  /**
    * Whether the cell is rendered.
    */
   get rendered(): boolean {
@@ -621,10 +638,10 @@ class MarkdownCellWidget extends BaseCellWidget {
   /**
    * Handle `update_request` messages.
    */
-  protected onUpdateRequest(message: Message): void {
+  protected onUpdateRequest(msg: Message): void {
     let model = this.model;
     if (this.rendered) {
-      let text = model.source || DEFAULT_MARKDOWN_TEXT;
+      let text = model && model.source || DEFAULT_MARKDOWN_TEXT;
       // Do not re-render if the text has not changed.
       if (text !== this._prev) {
         let bundle: MimeMap<string> = { 'text/markdown': text };
@@ -642,7 +659,7 @@ class MarkdownCellWidget extends BaseCellWidget {
       this.toggleInput(true);
       this.removeClass(RENDERED_CLASS);
     }
-    super.onUpdateRequest(message);
+    super.onUpdateRequest(msg);
   }
 
   private _rendermime: RenderMime<Widget> = null;
@@ -661,7 +678,7 @@ namespace MarkdownCellWidget {
    * An options object for initializing a base cell widget.
    */
   export
-    interface IOptions {
+  interface IOptions {
     /**
      * A renderer for creating cell widgets.
      *
@@ -689,6 +706,11 @@ class RawCellWidget extends BaseCellWidget {
     super(options);
     this.addClass(RAW_CELL_CLASS);
   }
+
+  /**
+   * The model used by the widget.
+   */
+  model: IRawCellModel;
 }
 
 

@@ -6,7 +6,10 @@ module.exports = function (config) {
     browsers: ['Firefox'],
     frameworks: ['mocha'],
     reporters: ['mocha', 'coverage'],
-    files: ['test/build/coverage.js'],
+    files: [
+      'node_modules/es6-promise/dist/es6-promise.js',
+      'test/build/coverage.js'
+    ],
     coverageReporter: {
       reporters : [
         { 'type': 'text' },

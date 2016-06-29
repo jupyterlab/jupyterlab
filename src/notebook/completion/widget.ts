@@ -122,7 +122,6 @@ class CompletionWidget extends Widget {
     }
     this._model.dispose();
     this._model = null;
-    clearSignalData(this);
     super.dispose();
   }
 

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernelId
+  IKernel
 } from 'jupyter-js-services';
 
 import {
@@ -33,20 +33,22 @@ class ImageWidget extends Widget {
   /**
    * Construct a new image widget.
    */
-  constructor(model: IDocumentModel, context: IDocumentContext) {
+  constructor(context: IDocumentContext<IDocumentModel>) {
     super();
-    this._model = model;
     this._context = context;
     this.node.tabIndex = -1;
     this.node.style.overflowX = 'auto';
     this.node.style.overflowY = 'auto';
-    if (model.toString()) {
+    if (context.model.toString()) {
       this.update();
     }
     context.pathChanged.connect(() => {
       this.update();
     });
-    model.contentChanged.connect(() => {
+    context.model.contentChanged.connect(() => {
+      this.update();
+    });
+    context.contentsModelChanged.connect(() => {
       this.update();
     });
   }
@@ -58,7 +60,6 @@ class ImageWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._model = null;
     this._context = null;
     super.dispose();
   }
@@ -69,13 +70,15 @@ class ImageWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     this.title.text = this._context.path.split('/').pop();
     let node = this.node as HTMLImageElement;
-    let content = this._model.toString();
-    let model = this._context.contentsModel;
-    node.src = `data:${model.mimetype};${model.format},${content}`;
+    let cm = this._context.contentsModel;
+    if (cm === null) {
+      return;
+    }
+    let content = this._context.model.toString();
+    node.src = `data:${cm.mimetype};${cm.format},${content}`;
   }
 
-  private _model: IDocumentModel;
-  private _context: IDocumentContext;
+  private _context: IDocumentContext<IDocumentModel>;
 }
 
 
@@ -83,11 +86,11 @@ class ImageWidget extends Widget {
  * A widget factory for images.
  */
 export
-class ImageWidgetFactory extends ABCWidgetFactory implements IWidgetFactory<ImageWidget> {
+class ImageWidgetFactory extends ABCWidgetFactory implements IWidgetFactory<ImageWidget, IDocumentModel> {
   /**
-   * Create a new widget given a document model and a context.
+   * Create a new widget given a context.
    */
-  createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): ImageWidget {
-    return new ImageWidget(model, context);
+  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): ImageWidget {
+    return new ImageWidget(context);
   }
 }

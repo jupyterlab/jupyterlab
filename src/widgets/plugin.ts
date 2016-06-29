@@ -14,6 +14,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  INotebookModel
+} from '../notebook/notebook/model';
+
+import {
   NotebookPanel
 } from '../notebook/notebook/panel';
 
@@ -43,21 +47,20 @@ const widgetManagerExtension = {
 };
 
 export
-class IPyWidgetExtension implements IWidgetExtension<NotebookPanel>{
+class IPyWidgetExtension implements IWidgetExtension<NotebookPanel, INotebookModel> {
   /**
    * Create a new extension object.
    */
-  createNew(nb: NotebookPanel, model: IDocumentModel,
-            context: IDocumentContext): IDisposable {
+  createNew(nb: NotebookPanel, context: IDocumentContext<INotebookModel>): IDisposable {
     let wManager = new WidgetManager(context);
     let wRenderer = new WidgetRenderer(wManager);
 
-    nb.content.rendermime.addRenderer(WIDGET_MIMETYPE, wRenderer, 0)
+    nb.content.rendermime.addRenderer(WIDGET_MIMETYPE, wRenderer, 0);
     return new DisposableDelegate(() => {
       nb.content.rendermime.removeRenderer(WIDGET_MIMETYPE);
       wRenderer.dispose();
       wManager.dispose();
-    })
+    });
   }
 }
 
@@ -65,5 +68,5 @@ class IPyWidgetExtension implements IWidgetExtension<NotebookPanel>{
  * Activate the widget extension.
  */
 function activateWidgetExtension(app: Application, registry: DocumentRegistry) {
-  registry.registerExtension('Notebook', new IPyWidgetExtension());
+  registry.addWidgetExtension('Notebook', new IPyWidgetExtension());
 }

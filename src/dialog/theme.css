@@ -21,19 +21,19 @@
 
 .jp-Dialog-header {
   padding-bottom: 12px;
-  font: 18px Helvetica-Neue Medium, Arial, sans-serif;
+  font-size: 18px;
   color: #616161;
 }
 
 
 .jp-Dialog-body {
-  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  font-size: 15px;
   background: #FAFAFA;
 }
 
 
 .jp-Dialog-bodyContent {
-  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  font-size: 15px;
   outline: none;
   margin-bottom: 12px;
 }
@@ -45,7 +45,7 @@
 
 
 .jp-Dialog-button {
-  font: 15px Helvetica-Neue Medium, Arial, sans-serif;
+  font-size: 15px;
   border: none;
   min-width: 120px;
   max-width: 120px;
@@ -82,7 +82,7 @@
 
 
 .jp-Dialog-input {
-  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  font-size: 15px;
   color: #676767;
   width: 100%;
   outline: none;
@@ -103,7 +103,7 @@
 
 
 .jp-Dialog-select {
-  font: 15px Helvetica-Neue Regular, Arial, sans-serif;
+  font-size: 15px;
   background: white;
   color: #676767;
   width: 100%;

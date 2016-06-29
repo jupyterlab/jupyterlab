@@ -17,7 +17,7 @@ module.exports = {
   },
   debug: true,
   bail: true,
-  devtool: 'source-map',
+  devtool: 'inline-source-map',
   module: {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
@@ -32,10 +32,5 @@ module.exports = {
       { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
       { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&minetype=image/svg+xml" }
     ]
-  },
-  externals: {
-      "base/js/namespace": "base/js/namespace",
-      "notebook/js/outputarea": "notebook/js/outputarea",
-      "services/kernels/comm": "services/kernels/comm"
   }
 }

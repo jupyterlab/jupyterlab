@@ -1,24 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-export
-function triggerMouseEvent(node: HTMLElement, eventType: string, options: any = {}) {
-  let evt = new MouseEvent(eventType, options);
-  node.dispatchEvent(evt);
-}
+import {
+  simulate
+} from 'simulate-event';
 
 
-export
-function triggerKeyEvent(node: HTMLElement, eventType: string, options: any = {}) {
-  let evt = new KeyboardEvent(eventType, options);
-  // Work around bug in Chrome that zeros out the keyCode.
-  if ('keyCode' in options) {
-    Object.defineProperty(evt, 'keyCode', { value: options['keyCode'] });
-  }
-  node.dispatchEvent(evt);
-}
-
-
+/**
+ * Wait for a dialog to be attached to an element.
+ */
 export
 function waitForDialog(host: HTMLElement = document.body): Promise<void> {
   return new Promise<void>((resolve, reject) => {
@@ -29,27 +19,35 @@ function waitForDialog(host: HTMLElement = document.body): Promise<void> {
         return;
       }
       setTimeout(refresh, 10);
-    }
+    };
     refresh();
   });
 }
 
 
+/**
+ * Accept a dialog after it is attached if it has an OK button.
+ */
 export
 function acceptDialog(host: HTMLElement = document.body): Promise<void> {
-  return waitForDialog().then(() => {
+  return waitForDialog(host).then(() => {
     let node = host.getElementsByClassName('jp-Dialog-okButton')[0];
-    if (node) (node as HTMLElement).click();
+    if (node) {
+      (node as HTMLElement).click();
+    }
   });
 }
 
 
+/**
+ * Dismiss a dialog after it is attached.
+ */
 export
 function dismissDialog(host: HTMLElement = document.body): Promise<void> {
-  return waitForDialog().then(() => {
+  return waitForDialog(host).then(() => {
     let node = host.getElementsByClassName('jp-Dialog')[0];
     if (node) {
-      triggerKeyEvent(node as HTMLElement, 'keydown', { keyCode: 27 });
+      simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
     }
   });
 }

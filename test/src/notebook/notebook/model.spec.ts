@@ -19,8 +19,9 @@ import {
   NotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
-
-const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
+import {
+  DEFAULT_CONTENT
+} from '../utils';
 
 
 describe('notebook/notebook', () => {
@@ -425,21 +426,6 @@ describe('notebook/notebook', () => {
         model.dirty = false;
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.dirty).to.be(true);
-      });
-
-    });
-
-    describe('#initialize()', () => {
-
-      it('should initialize the model state', () => {
-        let model = new NotebookModel();
-        let cell = model.factory.createCodeCell();
-        model.cells.add(cell);
-        expect(model.dirty).to.be(true);
-        expect(model.cells.canUndo).to.be(true);
-        model.initialize();
-        expect(model.dirty).to.be(false);
-        expect(model.cells.canUndo).to.be(false);
       });
 
     });

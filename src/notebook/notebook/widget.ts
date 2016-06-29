@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernelLanguageInfo
+  KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -30,7 +30,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  ChildMessage, Widget
+  Widget
 } from 'phosphor-widget';
 
 import {
@@ -118,7 +118,7 @@ class StaticNotebook extends Widget {
     this.node.tabIndex = -1;  // Allow the widget to take focus.
     this.addClass(NB_CLASS);
     this._rendermime = options.rendermime;
-    this.layout = new PanelLayout();
+    this.layout = new Private.NotebookPanelLayout();
     this._renderer = options.renderer || StaticNotebook.defaultRenderer;
   }
 
@@ -127,6 +127,16 @@ class StaticNotebook extends Widget {
    */
   get modelChanged(): ISignal<StaticNotebook, void> {
     return Private.modelChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when the model content changes.
+   *
+   * #### Notes
+   * This is a convenience signal that follows the current model.
+   */
+  get modelContentChanged(): ISignal<StaticNotebook, void> {
+    return Private.modelContentChanged.bind(this);
   }
 
   /**
@@ -221,18 +231,53 @@ class StaticNotebook extends Widget {
   }
 
   /**
+   * Handle changes to the notebook model content.
+   *
+   * #### Notes
+   * The default implementation emits the `modelContentChanged` signal.
+   */
+  protected onModelContentChanged(model: INotebookModel, args: void): void {
+    this.modelContentChanged.emit(void 0);
+  }
+
+  /**
    * Handle changes to the notebook model metadata.
+   *
+   * #### Notes
+   * The default implementation updates the mimetypes of the code cells
+   * when the `language_info` metadata changes.
    */
   protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'language_info':
       this._mimetype = this._renderer.getCodeMimetype(model);
-      this._updateChildren();
+      this._updateCells();
       break;
     default:
       break;
     }
   }
+
+  /**
+   * Handle a cell being inserted.
+   *
+   * The default implementation is a no-op
+   */
+  protected onCellInserted(index: number, cell: BaseCellWidget): void { }
+
+  /**
+   * Handle a cell being moved.
+   *
+   * The default implementation is a no-op
+   */
+  protected onCellMoved(fromIndex: number, toIndex: number): void { }
+
+  /**
+   * Handle a cell being removed.
+   *
+   * The default implementation is a no-op
+   */
+  protected onCellRemoved(cell: BaseCellWidget): void { }
 
   /**
    * Handle a new model on the widget.
@@ -242,9 +287,10 @@ class StaticNotebook extends Widget {
     if (oldValue) {
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
       oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
+      oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       // TODO: reuse existing cell widgets if possible.
       for (let i = 0; i < layout.childCount(); i++) {
-        this._removeChild(0);
+        this._removeCell(0);
       }
     }
     if (!newValue) {
@@ -254,16 +300,52 @@ class StaticNotebook extends Widget {
     this._mimetype = this._renderer.getCodeMimetype(newValue);
     let cells = newValue.cells;
     for (let i = 0; i < cells.length; i++) {
-      this._insertChild(i, cells.get(i));
+      this._insertCell(i, cells.get(i));
     }
     cells.changed.connect(this._onCellsChanged, this);
+    newValue.contentChanged.connect(this.onModelContentChanged, this);
     newValue.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
   /**
-   * Create a child widget and insert into to the notebook.
+   * Handle a change cells event.
    */
-  private _insertChild(index: number, cell: ICellModel): void {
+  private _onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
+    switch (args.type) {
+    case ListChangeType.Add:
+      this._insertCell(args.newIndex, args.newValue as ICellModel);
+      break;
+    case ListChangeType.Move:
+      this._moveCell(args.newIndex, args.oldIndex);
+      break;
+    case ListChangeType.Remove:
+      this._removeCell(args.oldIndex);
+      break;
+    case ListChangeType.Replace:
+      // TODO: reuse existing cell widgets if possible.
+      let oldValues = args.oldValue as ICellModel[];
+      for (let i = 0; i < oldValues.length; i++) {
+        this._removeCell(args.oldIndex);
+      }
+      let newValues = args.newValue as ICellModel[];
+      for (let i = newValues.length; i > 0; i--) {
+        this._insertCell(args.newIndex, newValues[i - 1]);
+      }
+      break;
+    case ListChangeType.Set:
+      // TODO: reuse existing widget if possible.
+      this._removeCell(args.newIndex);
+      this._insertCell(args.newIndex, args.newValue as ICellModel);
+      break;
+    default:
+      return;
+    }
+  }
+
+  /**
+   * Create a cell widget and insert into the notebook.
+   */
+  private _insertCell(index: number, cell: ICellModel): void {
     let widget: BaseCellWidget;
     switch (cell.type) {
     case 'code':
@@ -280,73 +362,50 @@ class StaticNotebook extends Widget {
     widget.addClass(NB_CELL_CLASS);
     let layout = this.layout as PanelLayout;
     layout.insertChild(index, widget);
-    this._updateChild(index);
+    this._updateCell(index);
+    this.onCellInserted(index, widget);
   }
 
   /**
-   * Update the child widgets.
+   * Move a cell widget.
    */
-  private _updateChildren(): void {
+  private _moveCell(fromIndex: number, toIndex: number): void {
+    let layout = this.layout as PanelLayout;
+    layout.insertChild(toIndex, layout.childAt(fromIndex));
+    this.onCellMoved(fromIndex, toIndex);
+  }
+
+  /**
+   * Remove a cell widget.
+   */
+  private _removeCell(index: number): void {
+    let layout = this.layout as PanelLayout;
+    let widget = layout.childAt(index) as BaseCellWidget;
+    widget.parent = null;
+    this.onCellRemoved(widget);
+    widget.dispose();
+  }
+
+  /**
+   * Update the cell widgets.
+   */
+  private _updateCells(): void {
     let layout = this.layout as PanelLayout;
     for (let i = 0; i < layout.childCount(); i++) {
-      this._updateChild(i);
+      this._updateCell(i);
     }
   }
 
   /**
-   * Update a child widget.
+   * Update a cell widget.
    */
-  private _updateChild(index: number): void {
+  private _updateCell(index: number): void {
     let layout = this.layout as PanelLayout;
     let child = layout.childAt(index) as BaseCellWidget;
     if (child instanceof CodeCellWidget) {
       child.mimetype = this._mimetype;
     }
     this._renderer.updateCell(child);
-  }
-
-  /**
-   * Remove a child widget.
-   */
-  private _removeChild(index: number): void {
-    let layout = this.layout as PanelLayout;
-    layout.childAt(index).dispose();
-  }
-
-  /**
-   * Handle a change cells event.
-   */
-  private _onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
-    let layout = this.layout as PanelLayout;
-    switch (args.type) {
-    case ListChangeType.Add:
-      this._insertChild(args.newIndex, args.newValue as ICellModel);
-      break;
-    case ListChangeType.Move:
-      layout.insertChild(args.newIndex, layout.childAt(args.oldIndex));
-      break;
-    case ListChangeType.Remove:
-      this._removeChild(args.oldIndex);
-      break;
-    case ListChangeType.Replace:
-      // TODO: reuse existing cell widgets if possible.
-      let oldValues = args.oldValue as ICellModel[];
-      for (let i = 0; i < oldValues.length; i++) {
-        this._removeChild(args.oldIndex);
-      }
-      let newValues = args.newValue as ICellModel[];
-      for (let i = newValues.length; i > 0; i--) {
-        this._insertChild(args.newIndex, newValues[i - 1]);
-      }
-      break;
-    case ListChangeType.Set:
-      // TODO: reuse existing widget if possible.
-      this._removeChild(args.newIndex);
-      this._insertChild(args.newIndex, args.newValue as ICellModel);
-      break;
-    default:
-      return;
-    }
   }
 
   private _mimetype = 'text/plain';
@@ -467,7 +526,7 @@ namespace StaticNotebook {
     getCodeMimetype(model: INotebookModel): string {
       let cursor = model.getMetadata('language_info');
       let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
-      return mimetypeForLanguage(info as IKernelLanguageInfo);
+      return mimetypeForLanguage(info as KernelMessage.ILanguageInfo);
     }
   }
 
@@ -489,6 +548,24 @@ class Notebook extends StaticNotebook {
    */
   get stateChanged(): ISignal<Notebook, IChangedArgs<any>> {
     return Private.stateChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when the active cell changes.
+   *
+   * #### Notes
+   * This can be due to the active index changing or the
+   * cell at the active index changing.
+   */
+  get activeCellChanged(): ISignal<Notebook, BaseCellWidget> {
+    return Private.activeCellChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when the selection state of the notebook changes.
+   */
+  get selectionChanged(): ISignal<Notebook, void> {
+    return Private.selectionChangedSignal.bind(this);
   }
 
   /**
@@ -522,28 +599,66 @@ class Notebook extends StaticNotebook {
    * The index will be clamped to the bounds of the notebook cells.
    */
   get activeCellIndex(): number {
+    if (!this.model) {
+      return -1;
+    }
     return this.model.cells.length ? this._activeCellIndex : -1;
   }
   set activeCellIndex(newValue: number) {
-    if (!this.model.cells.length) {
-      return;
-    }
-    newValue = Math.max(newValue, 0);
-    newValue = Math.min(newValue, this.model.cells.length - 1);
-    if (newValue === this._activeCellIndex) {
-      return;
-    }
     let oldValue = this._activeCellIndex;
+    if (!this.model || !this.model.cells.length) {
+      newValue = -1;
+    } else {
+      newValue = Math.max(newValue, 0);
+      newValue = Math.min(newValue, this.model.cells.length - 1);
+    }
     this._activeCellIndex = newValue;
+    let cell = this.childAt(newValue);
+    if (cell !== this._activeCell) {
+      this._activeCell = cell;
+      this.activeCellChanged.emit(cell);
+    }
+    if (newValue === oldValue) {
+      return;
+    }
     this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
     this.update();
   }
 
   /**
+   * Get the active cell widget.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get activeCell(): BaseCellWidget {
+    return this._activeCell;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._activeCell = null;
+    super.dispose();
+  }
+
+  /**
    * Select a cell widget.
+   *
+   * #### Notes
+   * It is a no-op if the value does not change.
+   * It will emit the `selectionChanged` signal.
    */
   select(widget: BaseCellWidget): void {
+    if (Private.selectedProperty.get(widget)) {
+      return;
+    }
     Private.selectedProperty.set(widget, true);
+    this.selectionChanged.emit(void 0);
     this.update();
   }
 
@@ -551,10 +666,15 @@ class Notebook extends StaticNotebook {
    * Deselect a cell widget.
    *
    * #### Notes
-   * This has no effect on the "active" cell.
+   * It is a no-op if the value does not change.
+   * It will emit the `selectionChanged` signal.
    */
   deselect(widget: BaseCellWidget): void {
+    if (!Private.selectedProperty.get(widget)) {
+      return;
+    }
     Private.selectedProperty.set(widget, false);
+    this.selectionChanged.emit(void 0);
     this.update();
   }
 
@@ -562,8 +682,7 @@ class Notebook extends StaticNotebook {
    * Whether a cell is selected or is the active cell.
    */
   isSelected(widget: BaseCellWidget): boolean {
-    let layout = this.layout as PanelLayout;
-    if (layout.childAt(this._activeCellIndex) === widget) {
+    if (widget === this._activeCell) {
       return true;
     }
     return Private.selectedProperty.get(widget);
@@ -665,19 +784,43 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle a `child-added` message.
+   * Handle a cell being inserted.
    */
-  protected onChildAdded(msg: ChildMessage): void {
-    let widget = msg.child as BaseCellWidget;
-    widget.editor.edgeRequested.connect(this._onEdgeRequest, this);
+  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+    cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
+    // Trigger an update of the active cell.
+    this.activeCellIndex = this.activeCellIndex;
     this.update();
   }
 
   /**
-   * Handle a `child-removed` message.
+   * Handle a cell being moved.
    */
-  protected onChildRemoved(msg: ChildMessage): void {
+  protected onCellMoved(fromIndex: number, toIndex: number): void {
+    if (fromIndex === this.activeCellIndex) {
+      this.activeCellIndex = toIndex;
+    }
+  }
+
+  /**
+   * Handle a cell being removed.
+   */
+  protected onCellRemoved(cell: BaseCellWidget): void {
+    // Trigger an update of the active cell.
+    this.activeCellIndex = this.activeCellIndex;
+    if (this.isSelected(cell)) {
+      this.selectionChanged.emit(void 0);
+    }
     this.update();
+  }
+
+  /**
+   * Handle a new model.
+   */
+  protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
+    // Try to set the active cell index to 0.
+    // It will be set to `-1` if there is no new model or the model is empty.
+    this.activeCellIndex = 0;
   }
 
   /**
@@ -720,7 +863,7 @@ class Notebook extends StaticNotebook {
    */
   private _evtClick(event: MouseEvent): void {
     let model = this.model;
-    if (model.readOnly) {
+    if (!model || model.readOnly) {
       return;
     }
     let i = this._findCell(event.target as HTMLElement);
@@ -735,7 +878,7 @@ class Notebook extends StaticNotebook {
    */
   private _evtDblClick(event: MouseEvent): void {
     let model = this.model;
-    if (model.readOnly) {
+    if (!model || model.readOnly) {
       return;
     }
     let i = this._findCell(event.target as HTMLElement);
@@ -754,15 +897,46 @@ class Notebook extends StaticNotebook {
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: FocusEvent): void {
-    if (event.target === this.node) {
-      this.mode = 'command';
-    } else {
+    this.mode = 'command';
+    let i = this._findCell(event.target as HTMLElement);
+    if (i === -1) {
+      return;
+    }
+    this.activeCellIndex = i;
+    let widget = this.childAt(i);
+    if (widget.editor.node.contains(event.target as HTMLElement)) {
       this.mode = 'edit';
     }
   }
 
   private _mode: NotebookMode = 'command';
-  private _activeCellIndex = 0;
+  private _activeCellIndex = -1;
+  private _activeCell: BaseCellWidget = null;
+}
+
+
+/**
+ * The namespace for the `Notebook` class statics.
+ */
+export
+namespace Notebook {
+  /**
+   * An options object for initializing a notebook.
+   */
+  export
+  interface IOptions extends StaticNotebook.IOptions { }
+
+  /**
+   * The default implementation of an `IRenderer`.
+   */
+  export
+  class Renderer extends StaticNotebook.Renderer { }
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
 }
 
 
@@ -785,12 +959,33 @@ namespace Private {
   export
   const modelChangedSignal = new Signal<StaticNotebook, void>();
 
+  /**
+   * A signal emitted when the model content changes.
+   */
+  export
+  const modelContentChanged = new Signal<StaticNotebook, void>();
+
+  /**
+   * A signal emitted when the active cell changes.
+   *
+   * #### Notes
+   * This can be due to the active index changing or the
+   * cell at the active index changing.
+   */
+  export
+  const activeCellChangedSignal = new Signal<Notebook, BaseCellWidget>();
 
   /**
    * A signal emitted when the state changes on the notebook.
    */
   export
   const stateChangedSignal = new Signal<Notebook, IChangedArgs<any>>();
+
+  /**
+   * A signal emitted when the selection changes on the notebook.
+   */
+  export
+  const selectionChangedSignal = new Signal<Notebook, void>();
 
   /**
    * Scroll an element into view if needed.
@@ -808,5 +1003,20 @@ namespace Private {
     } else if (er.bottom > ar.bottom + 10) {
       area.scrollTop += er.bottom - ar.bottom + 10;
     }
+  }
+
+  /**
+   * A custom panel layout for the notebook.
+   */
+  export
+  class NotebookPanelLayout extends PanelLayout {
+    /**
+     * A message handler invoked on an `'update-request'` message.
+     *
+     * #### Notes
+     * This is a reimplementation of the base class method,
+     * and is a no-op.
+     */
+    protected onUpdateRequest(msg: Message): void { }
   }
 }

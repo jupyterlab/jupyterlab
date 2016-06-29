@@ -10,7 +10,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  IKernel, IHistoryRequest, IHistoryReply
+  IKernel, KernelMessage
 } from 'jupyter-js-services';
 
 
@@ -81,15 +81,15 @@ class ConsoleHistory implements IConsoleHistory {
     }
     let contents = Private.initialRequest;
     this._kernel = newValue;
-    this._kernel.history(contents).then((value: IHistoryReply) => {
+    this._kernel.history(contents).then((value: KernelMessage.IHistoryReplyMsg) => {
       this._history = [];
       let last = '';
       let current = '';
-      for (let i = 0; i < value.history.length; i++) {
+      for (let i = 0; i < value.content.history.length; i++) {
         // History entries have the shape:
         // [session: number, line: number, input: string]
         // Contiguous duplicates are stripped out of the API response.
-        current = value.history[i][2];
+        current = (value.content.history[i] as string[])[2];
         if (current !== last) {
           this._history.push(last = current);
         }
@@ -175,7 +175,7 @@ class ConsoleHistory implements IConsoleHistory {
  */
 namespace Private {
   export
-  const initialRequest: IHistoryRequest = {
+  const initialRequest: KernelMessage.IHistoryRequest = {
     output: false,
     raw: true,
     hist_access_type: 'tail',

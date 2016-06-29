@@ -7,15 +7,15 @@ import {
 } from 'jupyterlab/lib/notebook';
 
 import {
-  ContentsManager, IKernelSpecIds, NotebookSessionManager
+  ContentsManager, IKernel, SessionManager
 } from 'jupyter-js-services';
 
 import {
-  DocumentWrapper, DocumentManager
+  DocumentManager
 } from 'jupyterlab/lib/docmanager';
 
 import {
-  DocumentRegistry, selectKernelForContext
+  DocumentRegistry, restartKernel, selectKernelForContext
 } from 'jupyterlab/lib/docregistry';
 
 import {
@@ -57,14 +57,14 @@ let NOTEBOOK = 'test.ipynb';
 
 
 function main(): void {
-  let sessionsManager = new NotebookSessionManager();
-  sessionsManager.getSpecs().then(specs => {
-    createApp(sessionsManager, specs);
+  let sessionManager = new SessionManager();
+  sessionManager.getSpecs().then(kernelspecs => {
+    createApp(sessionManager, kernelspecs);
   });
 }
 
 
-function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecIds): void {
+function createApp(sessionManager: SessionManager, kernelspecs: IKernel.ISpecModels): void {
   // Initialize the keymap manager with the bindings.
   let keymap = new KeymapManager();
   let useCapture = true;
@@ -94,21 +94,25 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   let rendermime = new RenderMime<Widget>(renderers, order);
 
   let opener = {
-    open: (widget: DocumentWrapper) => {
+    open: (widget: Widget) => {
       // Do nothing for sibling widgets for now.
     }
   };
 
   let contentsManager = new ContentsManager();
   let docRegistry = new DocumentRegistry();
-  let docManager = new DocumentManager(
-    docRegistry, contentsManager, sessionsManager, specs, opener
-  );
+  let docManager = new DocumentManager({
+    registry: docRegistry,
+    contentsManager,
+    sessionManager,
+    kernelspecs,
+    opener
+  });
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
   let wFactory = new NotebookWidgetFactory(rendermime, clipboard);
-  docRegistry.registerModelFactory(mFactory);
-  docRegistry.registerWidgetFactory(wFactory, {
+  docRegistry.addModelFactory(mFactory);
+  docRegistry.addWidgetFactory(wFactory, {
     displayName: 'Notebook',
     modelName: 'notebook',
     fileExtensions: ['.ipynb'],
@@ -117,12 +121,7 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
     canStartKernel: true
   });
 
-  let doc = docManager.open(NOTEBOOK);
-  let nbWidget: NotebookPanel;
-  doc.populated.connect((d, widget) => {
-    nbWidget = widget as NotebookPanel;
-  });
-
+  let nbWidget = docManager.open(NOTEBOOK) as NotebookPanel;
   let pModel = new StandardPaletteModel();
   let palette = new CommandPalette();
   palette.model = pModel;
@@ -134,8 +133,8 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
   SplitPanel.setStretch(palette, 0);
   panel.attach(document.body);
   panel.addChild(palette);
-  panel.addChild(doc);
-  SplitPanel.setStretch(doc, 1);
+  panel.addChild(nbWidget);
+  SplitPanel.setStretch(nbWidget, 1);
   window.onresize = () => panel.update();
 
   let saveHandler = () => nbWidget.context.save();
@@ -144,7 +143,9 @@ function createApp(sessionsManager: NotebookSessionManager, specs: IKernelSpecId
       nbWidget.context.kernel.interrupt();
     }
   };
-  let restartHandler = () => nbWidget.restart();
+  let restartHandler = () => {
+    restartKernel(nbWidget.kernel, nbWidget.node);
+  };
   let switchHandler = () => {
     selectKernelForContext(nbWidget.context, nbWidget.node);
   };

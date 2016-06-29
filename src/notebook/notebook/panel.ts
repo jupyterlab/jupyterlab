@@ -6,18 +6,6 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  showDialog
-} from '../../dialog';
-
-import {
-  IDocumentContext
-} from '../../docregistry';
-
-import {
-  RenderMime
-} from '../../rendermime';
-
-import {
   MimeData as IClipboard
 } from 'phosphor-dragdrop';
 
@@ -30,15 +18,23 @@ import {
 } from 'phosphor-properties';
 
 import {
+  ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  CellEditorWidget, ITextChange, ICompletionRequest
-} from '../cells/editor';
+  IDocumentContext
+} from '../../docregistry';
 
 import {
-  CompletionWidget, CompletionModel
+  RenderMime
+} from '../../rendermime';
+
+import {
+  CompletionWidget, CompletionModel, CellCompletionHandler
 } from '../completion';
 
 import {
@@ -80,98 +76,61 @@ const DIRTY_CLASS = 'jp-mod-dirty';
 export
 class NotebookPanel extends Widget {
   /**
-   * Create a new content area for the notebook.
-   */
-  static createContent(model: INotebookModel, rendermime: RenderMime<Widget>): Notebook {
-    let widget = new Notebook({ rendermime });
-    widget.model = model;
-    return widget;
-  }
-
-  /**
-   * Create a new toolbar for the notebook.
-   */
-  static createToolbar(): NotebookToolbar {
-    return new NotebookToolbar();
-  }
-
-  /**
-   * Create a new completion widget.
-   */
-  static createCompletion(): CompletionWidget {
-    let model = new CompletionModel();
-    return new CompletionWidget(model);
-  }
-
-  /**
    * Construct a new notebook panel.
    */
-  constructor(model: INotebookModel, rendermime: RenderMime<Widget>, context: IDocumentContext, clipboard: IClipboard) {
+  constructor(options: NotebookPanel.IOptions) {
     super();
     this.addClass(NB_PANEL);
-    this._model = model;
-    this._rendermime = rendermime;
-    this._context = context;
-    this._clipboard = clipboard;
-
-    context.kernelChanged.connect(() => {
-      this.handleKernelChange(context.kernel);
-    });
-    if (context.kernel) {
-      this.handleKernelChange(context.kernel);
-    }
+    this._rendermime = options.rendermime;
+    this._clipboard = options.clipboard;
+    this._renderer = options.renderer || NotebookPanel.defaultRenderer;
 
     this.layout = new PanelLayout();
-    let ctor = this.constructor as typeof NotebookPanel;
-    this._content = ctor.createContent(model, rendermime);
-    this._toolbar = ctor.createToolbar();
+    let rendermime = this._rendermime;
+    this._content = this._renderer.createContent({ rendermime });
+    let toolbar = this._renderer.createToolbar();
 
     let container = new Panel();
     container.addClass(NB_CONTAINER);
     container.addChild(this._content);
 
     let layout = this.layout as PanelLayout;
-    layout.addChild(this._toolbar);
+    layout.addChild(toolbar);
     layout.addChild(container);
 
-    // Instantiate tab completion widget.
-    this._completion = ctor.createCompletion();
+    this._completion = this._renderer.createCompletion();
     this._completion.reference = this;
     this._completion.attach(document.body);
-    this._completion.selected.connect(this.onCompletionSelect, this);
 
-    // Connect signals.
-    this._content.stateChanged.connect(this.onContentChanged, this);
-    let cell = this._content.childAt(this._content.activeCellIndex);
-    if (cell) {
-      let editor = cell.editor;
-      editor.textChanged.connect(this.onTextChange, this);
-      editor.completionRequested.connect(this.onCompletionRequest, this);
-    }
-
-    // Handle the document title.
-    this.title.text = context.path.split('/').pop();
-    context.pathChanged.connect((c, path) => {
-      this.title.text = path.split('/').pop();
-    });
-
-    // Handle changes to dirty state.
-    model.stateChanged.connect((m, args) => {
-      if (args.name === 'dirty') {
-        if (args.newValue) {
-          this.title.className += ` ${DIRTY_CLASS}`;
-        } else {
-          this.title.className = this.title.className.replace(DIRTY_CLASS, '');
-        }
-      }
+    this._completionHandler = new CellCompletionHandler(this._completion);
+    this._completionHandler.activeCell = this._content.activeCell;
+    this._content.activeCellChanged.connect((s, cell) => {
+      this._completionHandler.activeCell = cell;
     });
   }
 
   /**
+   * A signal emitted when the panel context changes.
+   */
+  get contextChanged(): ISignal<NotebookPanel, void> {
+    return Private.contextChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when the kernel used by the panel changes.
+   */
+  get kernelChanged(): ISignal<NotebookPanel, IKernel> {
+    return Private.kernelChangedSignal.bind(this);
+  }
+
+  /**
    * Get the toolbar used by the widget.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
   get toolbar(): NotebookToolbar {
-    return this._toolbar;
+    return (this.layout as PanelLayout).childAt(0) as NotebookToolbar;
   }
 
   /**
@@ -185,6 +144,16 @@ class NotebookPanel extends Widget {
   }
 
   /**
+   * Get the current kernel used by the panel.
+   *
+   * #### Notes
+   * This is a a read-only property.
+   */
+  get kernel(): IKernel {
+    return this._context ? this._context.kernel : null;
+  }
+
+  /**
    * Get the rendermime instance used by the widget.
    *
    * #### Notes
@@ -192,6 +161,13 @@ class NotebookPanel extends Widget {
    */
   get rendermime(): RenderMime<Widget> {
     return this._rendermime;
+  }
+
+  /**
+   * Get the renderer used by the widget.
+   */
+  get renderer(): NotebookPanel.IRenderer {
+    return this._renderer;
   }
 
   /**
@@ -205,23 +181,36 @@ class NotebookPanel extends Widget {
   }
 
   /**
-   * Get the model used by the widget.
+   * The model for the widget.
    *
    * #### Notes
    * This is a read-only property.
    */
   get model(): INotebookModel {
-    return this._model;
+    return this._content ? this._content.model : null;
   }
 
   /**
-   * Get the document context for the widget.
+   * The document context for the widget.
    *
    * #### Notes
-   * This is a read-only property.
+   * Changing the context also changes the model on the
+   * `content`.
    */
-  get context(): IDocumentContext {
+  get context(): IDocumentContext<INotebookModel> {
     return this._context;
+  }
+  set context(newValue: IDocumentContext<INotebookModel>) {
+    newValue = newValue || null;
+    if (newValue === this._context) {
+      return;
+    }
+    let oldValue = this._context;
+    this._context = newValue;
+    // Trigger private, protected, and public changes.
+    this._onContextChanged(oldValue, newValue);
+    this.onContextChanged(oldValue, newValue);
+    this.contextChanged.emit(void 0);
   }
 
   /**
@@ -232,46 +221,93 @@ class NotebookPanel extends Widget {
       return;
     }
     this._context = null;
-    this._rendermime = null;
     this._content = null;
-    this._toolbar = null;
+    this._rendermime = null;
     this._clipboard = null;
+    this._completionHandler.dispose();
+    this._completionHandler = null;
     this._completion.dispose();
     this._completion = null;
+    this._renderer = null;
     super.dispose();
   }
 
   /**
-   * Restart the kernel on the panel.
+   * Handle a change to the document context.
+   *
+   * #### Notes
+   * The default implementation is a no-op.
    */
-  restart(): Promise<boolean> {
-    let kernel = this.context.kernel;
-    if (!kernel) {
-      return Promise.resolve(false);
+  protected onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void { }
+
+
+  /**
+   * Handle a change in the model state.
+   */
+  protected onModelStateChanged(sender: INotebookModel, args: IChangedArgs<any>): void {
+    if (args.name === 'dirty') {
+      this._handleDirtyState();
     }
-    return showDialog({
-      title: 'Restart Kernel?',
-      body: 'Do you want to restart the current kernel? All variables will be lost.',
-      host: this.node
-    }).then(result => {
-      if (result.text === 'OK') {
-        return kernel.restart().then(() => { return true; });
-      } else {
-        return false;
+  }
+
+  /**
+   * Handle a change to the document path.
+   */
+  protected onPathChanged(sender: IDocumentContext<INotebookModel>, path: string): void {
+    this.title.text = path.split('/').pop();
+  }
+
+  /**
+   * Handle a context population.
+   */
+  protected onPopulated(sender: IDocumentContext<INotebookModel>, args: void): void {
+    // Clear the undo state of the cells.
+    if (sender.model) {
+      sender.model.cells.clearUndo();
+    }
+  }
+
+  /**
+   * Handle a change in the context.
+   */
+  private _onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void {
+    if (oldValue) {
+      oldValue.kernelChanged.disconnect(this._onKernelChanged, this);
+      oldValue.pathChanged.disconnect(this.onPathChanged, this);
+      oldValue.populated.disconnect(this.onPopulated, this);
+      if (oldValue.model) {
+        oldValue.model.stateChanged.disconnect(this.onModelStateChanged, this);
       }
-    });
+    }
+    let context = newValue;
+    context.kernelChanged.connect(this._onKernelChanged, this);
+    let oldKernel = oldValue ? oldValue.kernel : null;
+    if (context.kernel !== oldKernel) {
+      this._onKernelChanged(this._context, this._context.kernel);
+    }
+    this._content.model = newValue.model;
+    this._handleDirtyState();
+    newValue.model.stateChanged.connect(this.onModelStateChanged, this);
+    if (newValue.isPopulated) {
+      this.onPopulated(newValue, void 0);
+    } else {
+      newValue.populated.connect(this.onPopulated, this);
+    }
+    // Handle the document title.
+    this.onPathChanged(context, context.path);
+    context.pathChanged.connect(this.onPathChanged, this);
   }
 
   /**
    * Handle a change in the kernel by updating the document metadata.
    */
-  protected handleKernelChange(kernel: IKernel): void {
-    if (!this.model) {
+  private _onKernelChanged(context: IDocumentContext<INotebookModel>, kernel: IKernel): void {
+    if (!this.model || !kernel) {
       return;
     }
-    kernel.kernelInfo().then(info => {
+    kernel.kernelInfo().then(msg => {
       let infoCursor = this.model.getMetadata('language_info');
-      infoCursor.setValue(info.language_info);
+      infoCursor.setValue(msg.content.language_info);
     });
     kernel.getKernelSpec().then(spec => {
       let specCursor = this.model.getMetadata('kernelspec');
@@ -281,113 +317,131 @@ class NotebookPanel extends Widget {
         language: spec.language
       });
     });
+    this._completionHandler.kernel = kernel;
+    this.kernelChanged.emit(kernel);
   }
 
   /**
-   * Handle a change in the content area.
+   * Handle the dirty state of the model.
    */
-  protected onContentChanged(sender: Notebook, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'activeCellIndex':
-      let cell = this._content.childAt(args.oldValue);
-      let editor = cell.editor;
-      editor.textChanged.disconnect(this.onTextChange, this);
-      editor.completionRequested.disconnect(this.onCompletionRequest, this);
-
-      cell = this._content.childAt(args.newValue);
-      editor = cell.editor;
-      editor.textChanged.connect(this.onTextChange, this);
-      editor.completionRequested.connect(this.onCompletionRequest, this);
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle a text changed signal from an editor.
-   */
-  protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
+  private _handleDirtyState(): void {
     if (!this.model) {
       return;
     }
-    let line = change.newValue.split('\n')[change.line];
-    let model = this._completion.model;
-    // If last character entered is not whitespace, update completion.
-    if (line[change.ch - 1] && line[change.ch - 1].match(/\S/)) {
-      // If there is currently a completion
-      if (model.original) {
-        model.current = change;
-      }
+    if (this.model.dirty) {
+      this.title.className += ` ${DIRTY_CLASS}`;
     } else {
-      // If final character is whitespace, reset completion.
-      model.options = null;
-      model.original = null;
-      model.cursor = null;
-      return;
+      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
     }
-  }
-
-  /**
-   * Handle a completion requested signal from an editor.
-   */
-  protected onCompletionRequest(editor: CellEditorWidget, change: ICompletionRequest): void {
-    if (!this.model) {
-      return;
-    }
-    let kernel = this.context.kernel;
-    if (!kernel) {
-      return;
-    }
-    let contents = {
-      // Only send the current line of code for completion.
-      code: change.currentValue.split('\n')[change.line],
-      cursor_pos: change.ch
-    };
-    let pendingComplete = ++this._pendingComplete;
-    let model = this._completion.model;
-    kernel.complete(contents).then(value => {
-      // If model has been disposed, bail.
-      if (model.isDisposed) {
-        return;
-      }
-      // If a newer completion requesy has created a pending request, bail.
-      if (pendingComplete !== this._pendingComplete) {
-        return;
-      }
-      // Completion request failures or negative results fail silently.
-      if (value.status !== 'ok') {
-        return;
-      }
-      // Update the model.
-      model.options = value.matches;
-      model.cursor = { start: value.cursor_start, end: value.cursor_end };
-    }).then(() => {
-      model.original = change;
-    });
-  }
-
-  /**
-   * Handle a completion selected signal from the completion widget.
-   */
-  protected onCompletionSelect(widget: CompletionWidget, value: string): void {
-    if (!this.model) {
-      return;
-    }
-    let patch = this._completion.model.createPatch(value);
-    let cell = this._content.childAt(this._content.activeCellIndex);
-    let editor = cell.editor.editor;
-    let doc = editor.getDoc();
-    doc.setValue(patch.text);
-    doc.setCursor(doc.posFromIndex(patch.position));
   }
 
   private _rendermime: RenderMime<Widget> = null;
-  private _context: IDocumentContext = null;
-  private _model: INotebookModel = null;
-  private _content: Notebook = null;
-  private _toolbar: NotebookToolbar = null;
+  private _context: IDocumentContext<INotebookModel> = null;
   private _clipboard: IClipboard = null;
+  private _content: Notebook = null;
+  private _renderer: NotebookPanel.IRenderer = null;
   private _completion: CompletionWidget = null;
-  private _pendingComplete = 0;
+  private _completionHandler: CellCompletionHandler = null;
+}
+
+
+/**
+ * A namespace for `NotebookPanel` statics.
+ */
+export namespace NotebookPanel {
+  /**
+   * An options interface for NotebookPanels.
+   */
+  export
+  interface IOptions {
+    /**
+     * The rendermime instance used by the panel.
+     */
+    rendermime: RenderMime<Widget>;
+
+    /**
+     * The application clipboard.
+     */
+    clipboard: IClipboard;
+
+    /**
+     * The content renderer for the panel.
+     *
+     * The default is a shared `IRenderer` instance.
+     */
+    renderer?: IRenderer;
+  }
+
+  /**
+   * A renderer interface for NotebookPanels.
+   */
+  export
+  interface IRenderer {
+    /**
+     * Create a new content area for the panel.
+     */
+    createContent(options: Notebook.IOptions): Notebook;
+
+    /**
+     * Create a new toolbar for the panel.
+     */
+    createToolbar(): NotebookToolbar;
+
+    /**
+     * Create a new completion widget for the panel.
+     */
+    createCompletion(): CompletionWidget;
+  }
+
+  /**
+   * The default implementation of an `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+    /**
+     * Create a new content area for the panel.
+     */
+    createContent(options: Notebook.IOptions): Notebook {
+      return new Notebook(options);
+    }
+
+    /**
+     * Create a new toolbar for the panel.
+     */
+    createToolbar(): NotebookToolbar {
+      return new NotebookToolbar();
+    }
+
+    /**
+     * Create a new completion widget.
+     */
+    createCompletion(): CompletionWidget {
+      let model = new CompletionModel();
+      return new CompletionWidget(model);
+    }
+  }
+
+  /**
+   * The shared default instance of a `Renderer`.
+   */
+   export
+   const defaultRenderer = new Renderer();
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * A signal emitted when the panel context changes.
+   */
+  export
+  const contextChangedSignal = new Signal<NotebookPanel, void>();
+
+  /**
+   * A signal emitted when the kernel used by the panel changes.
+   */
+  export
+  const kernelChangedSignal = new Signal<NotebookPanel, IKernel>();
 }

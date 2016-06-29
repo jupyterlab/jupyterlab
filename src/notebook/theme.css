@@ -151,17 +151,9 @@
   outline: none;
 }
 
-
-.jp-MarkdownCell {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-
 .jp-NBToolbar {
     display: flex;
     flex-direction: row;
-    background-color: #F8F8F8;
-    border-top: none;
     border-bottom: 1px solid #E0E0E0;
     height: 24px;
 }
@@ -175,7 +167,6 @@
     font-size: 13px;
     color: #616161;
     line-height: 23px;
-    font-family: "Helvetica Neue";
 }
 
 
@@ -187,15 +178,12 @@
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-cellType {
-    border-left: 1px solid #E0E0E0;
-    border-right: 1px solid #E0E0E0;
-    flex-basis: 100px;
+.jp-NBToolbar-item.jp-NBToolbar-cellType select {
+    background: #FFFFFF;
 }
 
-
 .jp-NBToolbar-cellType .jp-NBToolbar-cellTypeDropdown {
-    border: none;
+    border: 1px solid #BDBDBD;
     border-radius: 0;
     outline: none;
     width: 100%;

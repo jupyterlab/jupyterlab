@@ -3,7 +3,10 @@ module.exports = function (config) {
     basePath: '..',
     frameworks: ['mocha'],
     reporters: ['mocha'],
-    files: ['test/build/bundle.js'],
+    files: [
+      'node_modules/es6-promise/dist/es6-promise.js',
+      'test/build/bundle.js'
+    ],
     port: 9876,
     colors: true,
     singleRun: true,

@@ -2,13 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsModel
-} from 'jupyter-js-services';
-
-import * as arrays
-  from 'phosphor-arrays';
-
-import {
   Message
 } from 'phosphor-messaging';
 
@@ -89,16 +82,22 @@ class FileBrowserWidget extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, manager: DocumentManager, opener: IWidgetOpener) {
+  constructor(options: FileBrowserWidget.IOptions) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
-    this._model = model;
-    this._model.refreshed.connect(this._handleRefresh, this);
-    this._crumbs = new BreadCrumbs(model);
-    this._buttons = new FileButtons(model, manager, opener);
-    this._listing = new DirListing(model, manager, opener);
-    this._manager = manager;
-    this._opener = opener;
+    let model = this._model = options.model;
+    let manager = this._manager = options.manager;
+    let opener = this._opener = options.opener;
+
+    model.refreshed.connect(this._handleRefresh, this);
+    this._crumbs = new BreadCrumbs({ model });
+    this._buttons = new FileButtons({ model, manager, opener });
+    this._listing = new DirListing({
+      model,
+      manager,
+      opener,
+      renderer: options.renderer
+    });
 
     model.fileChanged.connect((fbModel, args) => {
       if (args.newValue) {
@@ -158,9 +157,9 @@ class FileBrowserWidget extends Widget {
    */
   open(): void {
     let foundDir = false;
-    let items = this._model.sortedItems;
+    let items = this._model.items;
     for (let item of items) {
-      if (!this._model.isSelected(item.name)) {
+      if (!this._listing.isSelected(item.name)) {
         continue;
       }
       if (item.type === 'directory') {
@@ -184,8 +183,9 @@ class FileBrowserWidget extends Widget {
     let widget = this._manager.findWidget(path);
     if (!widget) {
       widget = this._manager.open(path);
-      widget.populated.connect(() => model.refresh() );
-      widget.context.kernelChanged.connect(() => model.refresh() );
+      let context = this._manager.contextForWidget(widget);
+      context.populated.connect(() => model.refresh() );
+      context.kernelChanged.connect(() => model.refresh() );
     }
     this._opener.open(widget);
     return widget;
@@ -198,8 +198,9 @@ class FileBrowserWidget extends Widget {
     let model = this.model;
     return model.newUntitled(type, ext).then(contents => {
       let widget = this._manager.createNew(contents.path);
-      widget.populated.connect(() => model.refresh() );
-      widget.context.kernelChanged.connect(() => model.refresh() );
+      let context = this._manager.contextForWidget(widget);
+      context.populated.connect(() => model.refresh() );
+      context.kernelChanged.connect(() => model.refresh() );
       this._opener.open(widget);
       return widget;
     });
@@ -315,4 +316,39 @@ class FileBrowserWidget extends Widget {
   private _timeoutId = -1;
   private _manager: DocumentManager = null;
   private _opener: IWidgetOpener = null;
+}
+
+
+/**
+ * The namespace for the `FileBrowserWidget` class statics.
+ */
+export
+namespace FileBrowserWidget {
+  /**
+   * An options object for initializing a file browser widget.
+   */
+  export
+  interface IOptions {
+    /**
+     * A file browser model instance.
+     */
+    model: FileBrowserModel;
+
+    /**
+     * A document manager instance.
+     */
+    manager: DocumentManager;
+
+    /**
+     * A widget opener function.
+     */
+    opener: IWidgetOpener;
+
+    /**
+     * An optional renderer for the directory listing area.
+     *
+     * The default is a shared instance of `DirListing.Renderer`.
+     */
+    renderer?: DirListing.IRenderer;
+  }
 }

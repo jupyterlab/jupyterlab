@@ -6,7 +6,7 @@ import {
 } from 'jupyterlab/lib/console';
 
 import {
-  startNewSession, INotebookSession
+  startNewSession, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -44,14 +44,14 @@ let TITLE = 'Console';
 
 function main(): void {
   startNewSession({
-    notebookPath: 'fake_path',
+    path: 'fake_path',
   }).then(session => {
     startApp(session);
   });
 }
 
 
-function startApp(session: INotebookSession) {
+function startApp(session: ISession) {
   // Initialize the keymap manager with the bindings.
   let keymap = new KeymapManager();
 

@@ -2,13 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsManager, IContentsModel, IContentsOpts, INotebookSessionManager,
-  INotebookSession, ISessionId, KernelStatus, IKernelSpecIds
+  IContentsManager, IContentsModel, IContentsOpts, IKernel, ISession
 } from 'jupyter-js-services';
-
-import {
-  PromiseDelegate
-} from 'jupyter-js-utils';
 
 import {
   IDisposable
@@ -35,12 +30,19 @@ class FileBrowserModel implements IDisposable {
   /**
    * Construct a new file browser view model.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager, specs: IKernelSpecIds) {
-    this._contentsManager = contentsManager;
-    this._sessionManager = sessionManager;
-    this._specs = specs;
+  constructor(options: FileBrowserModel.IOptions) {
+    this._contentsManager = options.contentsManager;
+    this._sessionManager = options.sessionManager;
+    this._specs = options.kernelspecs;
     this._model = { path: '', name: '/', type: 'directory', content: [] };
     this.cd();
+  }
+
+  /**
+   * A signal emitted when the path changes.
+   */
+  get pathChanged(): ISignal<FileBrowserModel, IChangedArgs<string>> {
+    return Private.pathChangedSignal.bind(this);
   }
 
   /**
@@ -68,10 +70,10 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get the selection changed signal.
+   * Get a read-only list of the items in the current path.
    */
-  get selectionChanged(): ISignal<FileBrowserModel, void> {
-    return Private.selectionChangedSignal.bind(this);
+  get items(): IContentsModel[] {
+    return this._model.content ? this._model.content.slice() : [];
   }
 
   /**
@@ -87,106 +89,15 @@ class FileBrowserModel implements IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  get sessionIds(): ISessionId[] {
-    return this._sessionIds.slice();
+  get sessionIds(): ISession.IModel[] {
+    return this._sessions.slice();
   }
 
   /**
    * Get the kernel specs.
    */
-  get kernelspecs(): IKernelSpecIds {
+  get kernelspecs(): IKernel.ISpecModels {
     return this._specs;
-  }
-
-  /**
-   * Get whether the items are sorted in ascending order.
-   */
-  get sortAscending(): boolean {
-    return this._ascending;
-  }
-
-  /**
-   * Set whether the items are sorted in ascending order.
-   */
-  set sortAscending(value: boolean) {
-    this._ascending = value;
-    this._sort();
-  }
-
-  /**
-   * Get which key the items are sorted on.
-   */
-  get sortKey(): string {
-    return this._sortKey;
-  }
-
-  /**
-   * Set which key the items are sorted on.
-   */
-  set sortKey(value: string) {
-    this._sortKey = value;
-    this._sort();
-  }
-
-  /**
-   * Get the sorted list of items.
-   *
-   * #### Notes
-   * This is a read-only property and should be treated as immutable.
-   */
-  get sortedItems(): IContentsModel[] {
-    return this._model.content;
-  }
-
-  /**
-   * Select an item by name.
-   *
-   * #### Notes
-   * This is a no-op if the name is not valid or already selected.
-   */
-  select(name: string): void {
-    if (!this._selection[name]) {
-      this._selection[name] = true;
-      this.selectionChanged.emit(void 0);
-    }
-  }
-
-  /**
-   * De-select an item by name.
-   *
-   * #### Notes
-   * This is a no-op if the name is not valid or not selected.
-   */
-  deselect(name: string): void {
-    if (this._selection[name]) {
-      delete this._selection[name];
-      this.selectionChanged.emit(void 0);
-    }
-  }
-
-  /**
-   * Check whether an item is selected.
-   *
-   * #### Notes
-   * Returns `true` for a valid name that is selected, `false` otherwise.
-   */
-  isSelected(name: string): boolean {
-    return !!this._selection[name];
-  }
-
-  /**
-   * Get the list of selected names.
-   */
-  getSelected(): string[] {
-    return Object.keys(this._selection);
-  }
-
-  /**
-   * Clear the selected items.
-   */
-  clearSelected(): void {
-    this._selection = Object.create(null);
-    this.selectionChanged.emit(void 0);
   }
 
   /**
@@ -195,7 +106,6 @@ class FileBrowserModel implements IDisposable {
   dispose(): void {
     this._model = null;
     this._contentsManager = null;
-    this._selection = null;
     clearSignalData(this);
   }
 
@@ -206,31 +116,22 @@ class FileBrowserModel implements IDisposable {
    *
    * @returns A promise with the contents of the directory.
    */
-  cd(path = ''): Promise<void> {
-    if (path !== '') {
-      path = Private.normalizePath(this._model.path, path);
+  cd(newValue = ''): Promise<void> {
+    if (newValue !== '') {
+      newValue = Private.normalizePath(this._model.path, newValue);
     }
-    let previous = this._selection;
-    if (path !== this.path) {
-      previous = Object.create(null);
-    }
-    let selection = Object.create(null);
-    return this._contentsManager.get(path, {}).then(contents => {
+    let oldValue = this.path;
+    return this._contentsManager.get(newValue, {}).then(contents => {
       this._model = contents;
-      let content = contents.content as IContentsModel[];
-      let names = content.map((value, index) => value.name);
-      for (let name of names) {
-        if (previous[name]) {
-          selection[name] = true;
-        }
-      }
-      this._unsortedNames = content.map((value, index) => value.name);
-      if (this._sortKey !== 'name' || !this._ascending) {
-        this._sort();
-      }
       return this._findSessions();
     }).then(() => {
-      this.selectionChanged.emit(void 0);
+      if (oldValue !== newValue) {
+        this.pathChanged.emit({
+          name: 'path',
+          oldValue,
+          newValue
+        });
+      }
       this.refreshed.emit(void 0);
     });
   }
@@ -395,51 +296,22 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Shut down a notebook session by session id.
+   * Shut down a session by session id.
    */
-  shutdown(sessionId: ISessionId): Promise<void> {
+  shutdown(sessionId: ISession.IModel): Promise<void> {
     return this._sessionManager.connectTo(sessionId.id).then(session => {
       return session.shutdown();
     });
   }
 
   /**
-   * Start a new session on a notebook.
+   * Start a new session for a path.
    */
-  startSession(path: string, kernel: string): Promise<INotebookSession> {
+  startSession(path: string, kernel: string): Promise<ISession> {
     return this._sessionManager.startNew({
-      notebookPath: path,
+      path,
       kernelName: kernel
     });
-  }
-
-  /**
-   * Sort the model items.
-   */
-  private _sort(): void {
-    if (!this._unsortedNames) {
-      return;
-    }
-    let items = this._model.content.slice() as IContentsModel[];
-    if (this._sortKey === 'name') {
-      items.sort((a, b) => {
-        let indexA = this._unsortedNames.indexOf(a.name);
-        let indexB = this._unsortedNames.indexOf(b.name);
-        return indexA - indexB;
-      });
-    } else if (this._sortKey === 'last_modified') {
-      items.sort((a, b) => {
-        let valA = new Date(a.last_modified).getTime();
-        let valB = new Date(b.last_modified).getTime();
-        return valB - valA;
-      });
-    }
-
-    // Reverse the order if descending.
-    if (!this._ascending) {
-      items.reverse();
-    }
-    this._model.content = items;
   }
 
   /**
@@ -488,26 +360,22 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get the notebook sessions for the current directory.
+   * Get the sessions for the current directory.
    */
   private _findSessions(): Promise<void> {
-    this._sessionIds = [];
-    let notebooks = this._model.content.filter((content: IContentsModel) => { return content.type === 'notebook'; });
-    if (!notebooks.length) {
-      return Promise.resolve(void 0);
-    }
+    this._sessions = [];
 
-    return this._sessionManager.listRunning().then(sessionIds => {
-      if (!sessionIds.length) {
+    return this._sessionManager.listRunning().then(models => {
+      if (!models.length) {
         return;
       }
-      let paths = notebooks.map((notebook: IContentsModel) => {
-        return notebook.path;
+      let paths = this._model.content.map((contents: IContentsModel) => {
+        return contents.path;
       });
-      for (let sessionId of sessionIds) {
-        let index = paths.indexOf(sessionId.notebook.path);
+      for (let model of models) {
+        let index = paths.indexOf(model.notebook.path);
         if (index !== -1) {
-          this._sessionIds.push(sessionId);
+          this._sessions.push(model);
         }
       }
     });
@@ -515,14 +383,38 @@ class FileBrowserModel implements IDisposable {
 
   private _maxUploadSizeMb = 15;
   private _contentsManager: IContentsManager = null;
-  private _sessionIds: ISessionId[] = [];
-  private _sessionManager: INotebookSessionManager = null;
+  private _sessions: ISession.IModel[] = [];
+  private _sessionManager: ISession.IManager = null;
   private _model: IContentsModel;
-  private _selection: { [key: string]: boolean; } = Object.create(null);
-  private _sortKey = 'name';
-  private _ascending = true;
-  private _unsortedNames: string[] = [];
-  private _specs: IKernelSpecIds = null;
+  private _specs: IKernel.ISpecModels = null;
+}
+
+
+/**
+ * The namespace for the `FileBrowserModel` class statics.
+ */
+export
+namespace FileBrowserModel {
+  /**
+   * An options object for initializing a file browser.
+   */
+  export
+  interface IOptions {
+    /**
+     * A contents manager instance.
+     */
+    contentsManager: IContentsManager;
+
+    /**
+     * A session manager instance.
+     */
+    sessionManager: ISession.IManager;
+
+    /**
+     * The kernelspec models.
+     */
+    kernelspecs: IKernel.ISpecModels;
+  }
 }
 
 
@@ -543,10 +435,10 @@ namespace Private {
   const fileChangedSignal = new Signal<FileBrowserModel, IChangedArgs<string>>();
 
   /**
-   * A signal emitted when the selection changes.
+   * A signal emitted when the path changes.
    */
   export
-  const selectionChangedSignal = new Signal<FileBrowserModel, void>();
+  const pathChangedSignal = new Signal<FileBrowserModel, IChangedArgs<string>> ();
 
   /**
    * Parse the content of a `FileReader`.

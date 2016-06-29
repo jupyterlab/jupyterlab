@@ -2,12 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsModel, IKernelId, IContentsOpts, IKernel,
-  IKernelSpecIds, ISessionId
+  IContentsModel, IContentsOpts, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
-  IDisposable, DisposableDelegate, DisposableSet
+  IDisposable
 } from 'phosphor-disposable';
 
 import {
@@ -93,18 +92,33 @@ interface IDocumentModel extends IDisposable {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: any): void;
-
-  /**
-   * Initialize the model state.
-   */
-  initialize(): void;
 }
 
 
 /**
  * The document context object.
  */
-export interface IDocumentContext extends IDisposable {
+export interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
+  /**
+   * A signal emitted when the kernel changes.
+   */
+  kernelChanged: ISignal<IDocumentContext<T>, IKernel>;
+
+  /**
+   * A signal emitted when the path changes.
+   */
+  pathChanged: ISignal<IDocumentContext<T>, string>;
+
+  /**
+   * A signal emitted when the contentsModel changes.
+   */
+  contentsModelChanged: ISignal<IDocumentContext<T>, IContentsModel>;
+
+  /**
+   * A signal emitted when the context is fully populated for the first time.
+   */
+  populated: ISignal<IDocumentContext<T>, void>;
+
   /**
    * The unique id of the context.
    *
@@ -119,7 +133,7 @@ export interface IDocumentContext extends IDisposable {
    * #### Notes
    * This is a read-only property
    */
-  model: IDocumentModel;
+  model: T;
 
   /**
    * The current kernel associated with the document.
@@ -142,7 +156,8 @@ export interface IDocumentContext extends IDisposable {
    *
    * #### Notes
    * This is a read-only property.  The model will have an
-   * empty `contents` field.
+   * empty `contents` field.  It will be `null` until the
+   * first save or load to disk.
    */
   contentsModel: IContentsModel;
 
@@ -152,17 +167,15 @@ export interface IDocumentContext extends IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  kernelspecs: IKernelSpecIds;
+  kernelspecs: IKernel.ISpecModels;
 
   /**
-   * A signal emitted when the kernel changes.
+   * Test whether the context is fully populated.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  kernelChanged: ISignal<IDocumentContext, IKernel>;
-
-  /**
-   * A signal emitted when the path changes.
-   */
-  pathChanged: ISignal<IDocumentContext, string>;
+  isPopulated: boolean;
 
   /**
    * Change the current kernel associated with the document.
@@ -170,7 +183,7 @@ export interface IDocumentContext extends IDisposable {
    * #### Notes
    * If no options are given, the session is shut down.
    */
-  changeKernel(options?: IKernelId): Promise<IKernel>;
+  changeKernel(options?: IKernel.IModel): Promise<IKernel>;
 
   /**
    * Save the document contents to disk.
@@ -190,7 +203,7 @@ export interface IDocumentContext extends IDisposable {
   /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISessionId[]>;
+  listSessions(): Promise<ISession.IModel[]>;
 
   /**
    * Add a sibling widget to the document manager.
@@ -254,19 +267,11 @@ interface IWidgetFactoryOptions {
  * The interface for a widget factory.
  */
 export
-interface IWidgetFactory<T extends Widget> extends IDisposable {
+interface IWidgetFactory<T extends Widget, U extends IDocumentModel> extends IDisposable {
   /**
    * Create a new widget.
    */
-  createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): T;
-
-  /**
-   * Take an action on a widget before closing it.
-   *
-   * @returns A promise that resolves to true if the document should close
-   *   and false otherwise.
-   */
-  beforeClose(model: IDocumentModel, context: IDocumentContext, widget: Widget): Promise<boolean>;
+  createNew(context: IDocumentContext<U>, kernel?: IKernel.IModel): T;
 }
 
 
@@ -274,11 +279,11 @@ interface IWidgetFactory<T extends Widget> extends IDisposable {
  * An interface for a widget extension.
  */
 export
-interface IWidgetExtension<T extends Widget> {
+interface IWidgetExtension<T extends Widget, U extends IDocumentModel> {
   /**
    * Create a new extension for a given widget.
    */
-   createNew(widget: T, model: IDocumentModel, context: IDocumentContext): IDisposable;
+   createNew(widget: T, context: IDocumentContext<U>): IDisposable;
 }
 
 

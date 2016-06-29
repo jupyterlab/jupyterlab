@@ -7,11 +7,11 @@ import {
 } from './index';
 
 import {
-  IKernelId
+  IKernel
 } from 'jupyter-js-services';
 
 import {
-  IDocumentContext, DocumentRegistry, selectKernelForContext
+  IDocumentContext, DocumentRegistry, restartKernel, selectKernelForContext
 } from '../docregistry';
 
 import {
@@ -173,8 +173,8 @@ class TrackingNotebookWidgetFactory extends NotebookWidgetFactory {
   /**
    * Create a new widget.
    */
-  createNew(model: INotebookModel, context: IDocumentContext, kernel?: IKernelId): NotebookPanel {
-    let widget = super.createNew(model, context, kernel);
+  createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernel.IModel): NotebookPanel {
+    let widget = super.createNew(context, kernel);
     Private.notebookTracker.activeNotebook = widget;
     return widget;
   }
@@ -187,8 +187,8 @@ class TrackingNotebookWidgetFactory extends NotebookWidgetFactory {
 function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: JupyterServices, rendermime: RenderMime<Widget>, clipboard: IClipboard): Promise<void> {
 
   let widgetFactory = new TrackingNotebookWidgetFactory(rendermime, clipboard);
-  registry.registerModelFactory(new NotebookModelFactory());
-  registry.registerWidgetFactory(widgetFactory,
+  registry.addModelFactory(new NotebookModelFactory());
+  registry.addWidgetFactory(widgetFactory,
   {
     fileExtensions: ['.ipynb'],
     displayName: 'Notebook',
@@ -210,7 +210,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     return a.localeCompare(b);
   });
   for (let displayName of displayNames) {
-    registry.registerCreator({
+    registry.addCreator({
       name: `${displayName} Notebook`,
       extension: '.ipynb',
       type: 'notebook',
@@ -261,7 +261,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     handler: () => {
       if (tracker.activeNotebook) {
         let nbWidget = tracker.activeNotebook;
-        nbWidget.restart();
+        restartKernel(nbWidget.kernel, nbWidget.node);
       }
     }
   },
@@ -270,7 +270,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     handler: () => {
       if (tracker.activeNotebook) {
         let nbWidget = tracker.activeNotebook;
-        nbWidget.restart().then(result => {
+        let promise = restartKernel(nbWidget.kernel, nbWidget.node);
+        promise.then(result => {
           if (result) {
             NotebookActions.clearAllOutputs(nbWidget.content);
           }
@@ -283,7 +284,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     handler: () => {
       if (tracker.activeNotebook) {
         let nbWidget = tracker.activeNotebook;
-        nbWidget.restart().then(result => {
+        let promise = restartKernel(nbWidget.kernel, nbWidget.node);
+        promise.then(result => {
           NotebookActions.runAll(nbWidget.content, nbWidget.context.kernel);
         });
       }

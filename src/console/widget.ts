@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, INotebookSession, KernelStatus
+  IKernel, ISession, KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -82,14 +82,14 @@ class ConsolePanel extends Panel {
   /**
    * Create a new console widget for the panel.
    */
-  static createConsole(session: INotebookSession, rendermime: RenderMime<Widget>): ConsoleWidget {
+  static createConsole(session: ISession, rendermime: RenderMime<Widget>): ConsoleWidget {
     return new ConsoleWidget(session, rendermime);
   }
 
   /**
    * Construct a console panel.
    */
-  constructor(session: INotebookSession, rendermime: RenderMime<Widget>) {
+  constructor(session: ISession, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(CONSOLE_PANEL);
     let constructor = this.constructor as typeof ConsolePanel;
@@ -231,7 +231,7 @@ class ConsoleWidget extends Widget {
   /**
    * Construct a console widget.
    */
-  constructor(session: INotebookSession, rendermime: RenderMime<Widget>) {
+  constructor(session: ISession, rendermime: RenderMime<Widget>) {
     super();
     this.addClass(CONSOLE_CLASS);
 
@@ -291,7 +291,7 @@ class ConsoleWidget extends Widget {
    * #### Notes
    * This is a read-only property.
    */
-  get session(): INotebookSession {
+  get session(): ISession {
     return this._session;
   }
 
@@ -318,7 +318,7 @@ class ConsoleWidget extends Widget {
    * Execute the current prompt.
    */
   execute(): Promise<void> {
-    if (this._session.status === KernelStatus.Dead) {
+    if (this._session.status === 'dead') {
       return;
     }
     let prompt = this.prompt;
@@ -404,7 +404,8 @@ class ConsoleWidget extends Widget {
   protected initialize(): void {
     let layout = this.layout as PanelLayout;
     let banner = layout.childAt(0) as RawCellWidget;
-    this._session.kernel.kernelInfo().then(info => {
+    this._session.kernel.kernelInfo().then(msg => {
+      let info = msg.content;
       banner.model.source = info.banner;
       this._mimetype = mimetypeForLanguage(info.language_info);
       this.prompt.mimetype = this._mimetype;
@@ -442,9 +443,14 @@ class ConsoleWidget extends Widget {
    */
   protected updateTooltip(change: ITextChange): void {
     let line = change.newValue.split('\n')[change.line];
-    let contents = { code: line, cursor_pos: change.ch, detail_level: 0 };
+    let contents: KernelMessage.IInspectRequest = {
+      code: line,
+      cursor_pos: change.ch,
+      detail_level: 0
+    };
     let pendingInspect = ++this._pendingInspect;
-    this._session.kernel.inspect(contents).then(value => {
+    this._session.kernel.inspect(contents).then(msg => {
+      let value = msg.content;
       // If widget has been disposed, bail.
       if (this.isDisposed) {
         return;
@@ -457,7 +463,7 @@ class ConsoleWidget extends Widget {
       if (value.status !== 'ok' || !value.found) {
         return;
       }
-      this.showTooltip(change, value.data);
+      this.showTooltip(change, value.data as MimeMap<string>);
     });
   }
 
@@ -509,32 +515,11 @@ class ConsoleWidget extends Widget {
    * Handle a completion requested signal from an editor.
    */
   protected onCompletionRequest(editor: CellEditorWidget, change: ICompletionRequest): void {
-    let contents = {
-      // Only send the current line of code for completion.
-      code: change.currentValue.split('\n')[change.line],
-      cursor_pos: change.ch
-    };
-    let pendingComplete = ++this._pendingComplete;
-    let model = this._completion.model;
-    this._session.kernel.complete(contents).then(value => {
-      // If model has been disposed, bail.
-      if (model.isDisposed) {
-        return;
-      }
-      // If a newer completion requesy has created a pending request, bail.
-      if (pendingComplete !== this._pendingComplete) {
-        return;
-      }
-      // Completion request failures or negative results fail silently.
-      if (value.status !== 'ok') {
-        return;
-      }
-      // Update the model.
-      model.options = value.matches;
-      model.cursor = { start: value.cursor_start, end: value.cursor_end };
-    }).then(() => {
-      model.original = change;
-    });
+    let kernel = this._session.kernel;
+    if (!kernel) {
+      return;
+    }
+    this._completion.model.makeKernelRequest(change, kernel);
   }
 
   /**
@@ -575,8 +560,7 @@ class ConsoleWidget extends Widget {
   private _rendermime: RenderMime<Widget> = null;
   private _tooltip: ConsoleTooltip = null;
   private _history: IConsoleHistory = null;
-  private _session: INotebookSession = null;
-  private _pendingComplete = 0;
+  private _session: ISession = null;
   private _pendingInspect = 0;
 }
 

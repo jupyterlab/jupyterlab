@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernelId, IKernel, IKernelSpecIds, IContentsManager,
-  INotebookSessionManager, INotebookSession, ISessionId,
-  IContentsOpts, ISessionOptions, IContentsModel
+  IContentsManager, IContentsModel, IContentsOpts, IKernel, ISession
 } from 'jupyter-js-services';
 
 import * as utils
@@ -30,7 +28,7 @@ import {
 /**
  * An implementation of a document context.
  */
-class Context implements IDocumentContext {
+class Context implements IDocumentContext<IDocumentModel> {
   /**
    * Construct a new document context.
    */
@@ -42,22 +40,29 @@ class Context implements IDocumentContext {
   /**
    * A signal emitted when the kernel changes.
    */
-  get kernelChanged(): ISignal<IDocumentContext, IKernel> {
+  get kernelChanged(): ISignal<Context, IKernel> {
     return Private.kernelChangedSignal.bind(this);
   }
 
   /**
    * A signal emitted when the path changes.
    */
-  get pathChanged(): ISignal<IDocumentContext, string> {
+  get pathChanged(): ISignal<Context, string> {
     return Private.pathChangedSignal.bind(this);
   }
 
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  get dirtyCleared(): ISignal<IDocumentContext, void> {
-    return Private.dirtyClearedSignal.bind(this);
+  get contentsModelChanged(): ISignal<Context, IContentsModel> {
+    return Private.contentsModelChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when the context is fully populated for the first time.
+   */
+  get populated(): ISignal<IDocumentContext<IDocumentModel>, void> {
+    return Private.populatedSignal.bind(this);
   }
 
   /**
@@ -117,12 +122,22 @@ class Context implements IDocumentContext {
    * #### Notes
    * This is a read-only property.
    */
-  get kernelspecs(): IKernelSpecIds {
+  get kernelspecs(): IKernel.ISpecModels {
     return this._manager.getKernelspecs();
   }
 
   /**
-   * Get whether the context has been disposed.
+   * Test whether the context is fully populated.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get isPopulated(): boolean {
+    return this._manager.isPopulated(this._id);
+  }
+
+  /**
+   * Test whether the context has been disposed.
    */
   get isDisposed(): boolean {
     return this._manager === null;
@@ -142,7 +157,7 @@ class Context implements IDocumentContext {
   /**
    * Change the current kernel associated with the document.
    */
-  changeKernel(options: IKernelId): Promise<IKernel> {
+  changeKernel(options: IKernel.IModel): Promise<IKernel> {
     return this._manager.changeKernel(this._id, options);
   }
 
@@ -170,7 +185,7 @@ class Context implements IDocumentContext {
   /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISessionId[]> {
+  listSessions(): Promise<ISession.IModel[]> {
     return this._manager.listSessions();
   }
 
@@ -202,11 +217,11 @@ class ContextManager implements IDisposable {
   /**
    * Construct a new context manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: INotebookSessionManager,  kernelspecs: IKernelSpecIds, opener: (id: string, widget: Widget) => IDisposable) {
-    this._contentsManager = contentsManager;
-    this._sessionManager = sessionManager;
-    this._opener = opener;
-    this._kernelspecids = kernelspecs;
+  constructor(options: ContextManager.IOptions) {
+    this._contentsManager = options.contentsManager;
+    this._sessionManager = options.sessionManager;
+    this._opener = options.opener;
+    this._kernelspecids = options.kernelspecs;
   }
 
   /**
@@ -252,7 +267,8 @@ class ContextManager implements IDisposable {
       modelName: factory.name,
       opts: factory.contentsOptions,
       contentsModel: null,
-      session: null
+      session: null,
+      isPopulated: false
     };
     return id;
   }
@@ -285,7 +301,7 @@ class ContextManager implements IDisposable {
   /**
    * Get a context by id.
    */
-  getContext(id: string): IDocumentContext {
+  getContext(id: string): IDocumentContext<IDocumentModel> {
     return this._contexts[id].context;
   }
 
@@ -335,7 +351,7 @@ class ContextManager implements IDisposable {
    * if necessary). If falsey, shut down any existing session and return
    * a void promise.
    */
-  changeKernel(id: string, options: IKernelId): Promise<IKernel> {
+  changeKernel(id: string, options: IKernel.IModel): Promise<IKernel> {
     let contextEx = this._contexts[id];
     let session = contextEx.session;
     if (options) {
@@ -343,8 +359,8 @@ class ContextManager implements IDisposable {
         return session.changeKernel(options);
       } else {
         let path = contextEx.path;
-        let sOptions = {
-          notebookPath: path,
+        let sOptions: ISession.IOptions = {
+          path: path,
           kernelName: options.name,
           kernelId: options.id
         };
@@ -370,7 +386,7 @@ class ContextManager implements IDisposable {
    *
    * @param newPath - The new path.
    */
-  rename(oldPath: string, newPath: string): void {
+  handleRename(oldPath: string, newPath: string): void {
     // Update all of the paths, but only update one session
     // so there is only one REST API call.
     let ids = this.getIdsForPath(oldPath);
@@ -382,7 +398,7 @@ class ContextManager implements IDisposable {
       if (!sessionUpdated) {
         let session = contextEx.session;
         if (session) {
-          session.renameNotebook(newPath);
+          session.rename(newPath);
           sessionUpdated = true;
         }
       }
@@ -392,7 +408,7 @@ class ContextManager implements IDisposable {
   /**
    * Get the current kernelspec information.
    */
-  getKernelspecs(): IKernelSpecIds {
+  getKernelspecs(): IKernel.ISpecModels {
     return this._kernelspecids;
   }
 
@@ -453,15 +469,38 @@ class ContextManager implements IDisposable {
       } else {
         model.fromString(contents.content);
       }
-      contextEx.contentsModel = this._copyContentsModel(contents);
+      let contentsModel = this._copyContentsModel(contents);
+      // TODO: use deepEqual to check for equality
+      contextEx.contentsModel = contentsModel;
+      contextEx.context.contentsModelChanged.emit(contentsModel);
       model.dirty = false;
     });
   }
 
   /**
+   * Test whether the context is fully populated.
+   */
+  isPopulated(id: string): boolean {
+    let contextEx = this._contexts[id];
+    return contextEx.isPopulated;
+  }
+
+  /**
+   * Finalize a context.
+   */
+  finalize(id: string): void {
+    let contextEx = this._contexts[id];
+    if (contextEx.isPopulated) {
+      return;
+    }
+    contextEx.isPopulated = true;
+    this._contexts[id].context.populated.emit(void 0);
+  }
+
+  /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISessionId[]> {
+  listSessions(): Promise<ISession.IModel[]> {
     return this._sessionManager.listRunning();
   }
 
@@ -476,7 +515,7 @@ class ContextManager implements IDisposable {
   /**
    * Start a session and set up its signals.
    */
-  private _startSession(id: string, options: ISessionOptions): Promise<IKernel> {
+  private _startSession(id: string, options: ISession.IOptions): Promise<IKernel> {
     let contextEx = this._contexts[id];
     let context = contextEx.context;
     return this._sessionManager.startNew(options).then(session => {
@@ -485,7 +524,7 @@ class ContextManager implements IDisposable {
       }
       contextEx.session = session;
       context.kernelChanged.emit(session.kernel);
-      session.notebookPathChanged.connect((s, path) => {
+      session.pathChanged.connect((s, path) => {
         if (path !== contextEx.path) {
           contextEx.path = path;
           context.pathChanged.emit(path);
@@ -515,10 +554,42 @@ class ContextManager implements IDisposable {
   }
 
   private _contentsManager: IContentsManager = null;
-  private _sessionManager: INotebookSessionManager = null;
-  private _kernelspecids: IKernelSpecIds = null;
+  private _sessionManager: ISession.IManager = null;
+  private _kernelspecids: IKernel.ISpecModels = null;
   private _contexts: { [key: string]: Private.IContextEx } = Object.create(null);
   private _opener: (id: string, widget: Widget) => IDisposable = null;
+}
+
+
+/**
+ * A namespace for ContextManager statics.
+ */
+export namespace ContextManager {
+  /**
+   * The options used to initialize a context manager.
+   */
+  export
+  interface IOptions {
+    /**
+     * A contents manager instance.
+     */
+    contentsManager: IContentsManager;
+
+    /**
+     * A session manager instance.
+     */
+    sessionManager: ISession.IManager;
+
+    /**
+     * The system kernelspec information.
+     */
+    kernelspecs: IKernel.ISpecModels;
+
+    /**
+     * A callback for opening sibling widgets.
+     */
+    opener: (id: string, widget: Widget) => IDisposable;
+  }
 }
 
 
@@ -531,30 +602,37 @@ namespace Private {
    */
   export
   interface IContextEx {
-    context: IDocumentContext;
+    context: IDocumentContext<IDocumentModel>;
     model: IDocumentModel;
-    session: INotebookSession;
+    session: ISession;
     opts: IContentsOpts;
     path: string;
     contentsModel: IContentsModel;
     modelName: string;
+    isPopulated: boolean;
   }
 
   /**
    * A signal emitted when the kernel changes.
    */
   export
-  const kernelChangedSignal = new Signal<IDocumentContext, IKernel>();
+  const kernelChangedSignal = new Signal<Context, IKernel>();
 
   /**
    * A signal emitted when the path changes.
    */
   export
-  const pathChangedSignal = new Signal<IDocumentContext, string>();
+  const pathChangedSignal = new Signal<Context, string>();
 
   /**
-   * A signal emitted when the model is saved or reverted.
+   * A signal emitted when the contentsModel changes.
    */
   export
-  const dirtyClearedSignal = new Signal<IDocumentContext, void>();
+  const contentsModelChangedSignal = new Signal<Context, IContentsModel>();
+
+  /**
+   * A signal emitted when the context is fully populated for the first time.
+   */
+  export
+  const populatedSignal = new Signal<Context, void>();
 }

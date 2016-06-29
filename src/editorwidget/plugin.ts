@@ -22,7 +22,7 @@ const editorHandlerExtension = {
   id: 'jupyter.extensions.editorHandler',
   requires: [DocumentRegistry],
   activate: (app: Application, registry: DocumentRegistry) => {
-    registry.registerWidgetFactory(new EditorWidgetFactory(),
+    registry.addWidgetFactory(new EditorWidgetFactory(),
     {
       fileExtensions: ['.*'],
       displayName: 'Editor',

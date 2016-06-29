@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  IKernelId
+  IKernel
 } from 'jupyter-js-services';
 
 import {
@@ -23,7 +23,7 @@ import {
 
 class WidgetFactory extends ABCWidgetFactory {
 
-  createNew(model: IDocumentModel, context: IDocumentContext, kernel?: IKernelId): Widget {
+  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): Widget {
     return new Widget();
   }
 }
@@ -72,22 +72,8 @@ describe('docmanager/default', () => {
         let factory = new WidgetFactory();
         let model = new DocumentModel();
         let context = new MockContext(model);
-        let widget = factory.createNew(model, context);
+        let widget = factory.createNew(context);
         expect(widget).to.be.a(Widget);
-      });
-
-    });
-
-    describe('#beforeClose()', () => {
-
-      it('should take an action on a widget before closing it', (done) => {
-        let factory = new WidgetFactory();
-        let model = new DocumentModel();
-        let context = new MockContext(model);
-        let widget = factory.createNew(model, context);
-        factory.beforeClose(model, context, widget).then(() => {
-          done();
-        });
       });
 
     });
@@ -354,19 +340,6 @@ describe('docmanager/default', () => {
       it('should deserialize the model from JSON', () => {
         let model = new DocumentModel();
         model.fromJSON('"foo"');
-        expect(model.toString()).to.be('foo');
-      });
-
-    });
-
-    describe('#initialize()', () => {
-
-      it('should clear the dirty flag', () => {
-        let model = new DocumentModel();
-        model.fromString('foo');
-        expect(model.dirty).to.be(true);
-        model.initialize();
-        expect(model.dirty).to.be(false);
         expect(model.toString()).to.be('foo');
       });
 

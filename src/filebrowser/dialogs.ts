@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ISessionId, IKernelSpecIds, IKernelId
+  IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '../dialog';
 
 import {
-  DocumentManager, DocumentWrapper
+  DocumentManager
 } from '../docmanager';
 
 import {
@@ -35,7 +35,7 @@ const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
  * Open a file using a dialog.
  */
 export
-function openWithDialog(path: string, manager: DocumentManager, host?: HTMLElement): Promise<DocumentWrapper> {
+function openWithDialog(path: string, manager: DocumentManager, host?: HTMLElement): Promise<Widget> {
   let handler: OpenWithHandler;
   return manager.listSessions().then(sessions => {
     handler = new OpenWithHandler(path, manager, sessions);
@@ -57,7 +57,7 @@ function openWithDialog(path: string, manager: DocumentManager, host?: HTMLEleme
  * Create a new file using a dialog.
  */
 export
-function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host?: HTMLElement): Promise<DocumentWrapper> {
+function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host?: HTMLElement): Promise<Widget> {
   let handler: CreateNewHandler;
   return manager.listSessions().then(sessions => {
     handler = new CreateNewHandler(model, manager, sessions);
@@ -96,7 +96,7 @@ class OpenWithHandler extends Widget {
   /**
    * Construct a new "open with" dialog.
    */
-  constructor(path: string, manager: DocumentManager, sessions: ISessionId[], host?: HTMLElement) {
+  constructor(path: string, manager: DocumentManager, sessions: ISession.IModel[], host?: HTMLElement) {
     super();
     this._manager = manager;
     this._host = host;
@@ -143,13 +143,13 @@ class OpenWithHandler extends Widget {
   /**
    * Open the file and return the document widget.
    */
-  open(): DocumentWrapper {
+  open(): Widget {
     let path = this.input.textContent;
     let widgetName = this.widgetDropdown.value;
     let kernelValue = this.kernelDropdown.value;
-    let kernelId: IKernelId;
+    let kernelId: IKernel.IModel;
     if (kernelValue !== 'null') {
-      kernelId = JSON.parse(kernelValue) as IKernelId;
+      kernelId = JSON.parse(kernelValue) as IKernel.IModel;
     }
     return this._manager.open(path, widgetName, kernelId);
   }
@@ -182,7 +182,7 @@ class OpenWithHandler extends Widget {
   private _ext = '';
   private _manager: DocumentManager = null;
   private _host: HTMLElement = null;
-  private _sessions: ISessionId[] = null;
+  private _sessions: ISession.IModel[] = null;
 }
 
 
@@ -209,7 +209,7 @@ class CreateNewHandler extends Widget {
   /**
    * Construct a new "create new" dialog.
    */
-  constructor(model: FileBrowserModel, manager: DocumentManager, sessions: ISessionId[]) {
+  constructor(model: FileBrowserModel, manager: DocumentManager, sessions: ISession.IModel[]) {
     super();
     this._model = model;
     this._manager = manager;
@@ -287,13 +287,13 @@ class CreateNewHandler extends Widget {
   /**
    * Open the file and return the document widget.
    */
-  open(): DocumentWrapper {
+  open(): Widget {
     let path = this.input.textContent;
     let widgetName = this.widgetDropdown.value;
     let kernelValue = this.kernelDropdown.value;
-    let kernelId: IKernelId;
+    let kernelId: IKernel.IModel;
     if (kernelValue !== 'null') {
-      kernelId = JSON.parse(kernelValue) as IKernelId;
+      kernelId = JSON.parse(kernelValue) as IKernel.IModel;
     }
     return this._manager.createNew(path, widgetName, kernelId);
   }
@@ -303,7 +303,7 @@ class CreateNewHandler extends Widget {
    */
   protected inputChanged(): void {
     let path = this.input.value;
-    for (let item of this._model.sortedItems) {
+    for (let item of this._model.items) {
       if (item.path === path) {
         this.addClass(FILE_CONFLICT_CLASS);
         return;
@@ -388,7 +388,7 @@ class CreateNewHandler extends Widget {
 
   private _model: FileBrowserModel = null;
   private _manager: DocumentManager = null;
-  private _sessions: ISessionId[] = null;
+  private _sessions: ISession.IModel[] = null;
   private _sentinal = 'UNKNOWN_EXTENSION';
   private _prevExt = '';
   private _extensions: string[] = [];
@@ -398,7 +398,7 @@ class CreateNewHandler extends Widget {
 /**
  * Update a kernel listing based on a kernel preference.
  */
-function updateKernels(preference: IKernelPreference, node: HTMLSelectElement, specs: IKernelSpecIds, running: ISessionId[]): void {
+function updateKernels(preference: IKernelPreference, node: HTMLSelectElement, specs: IKernel.ISpecModels, running: ISession.IModel[]): void {
   if (!preference.canStartKernel) {
     while (node.firstChild) {
       node.removeChild(node.firstChild);

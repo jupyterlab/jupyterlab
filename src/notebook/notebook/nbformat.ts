@@ -5,6 +5,10 @@
 // https://nbformat.readthedocs.org/en/latest/format_description.html
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
+import {
+  JSONObject
+} from '../common/json';
+
 
 /**
  * A namespace for nbformat interfaces.
@@ -27,7 +31,7 @@ namespace nbformat {
    * The kernelspec metadata.
    */
   export
-  interface IKernelspecMetadata {
+  interface IKernelspecMetadata extends JSONObject {
     name: string;
     display_name: string;
   }
@@ -36,9 +40,9 @@ namespace nbformat {
    * The language info metatda
    */
   export
-  interface ILanguageInfoMetadata {
+  interface ILanguageInfoMetadata extends JSONObject {
     name: string;
-    codemirror_mode?: any;
+    codemirror_mode?: string | JSONObject;
     file_extension?: string;
     mimetype?: string;
     pygments_lexer?: string;
@@ -49,7 +53,7 @@ namespace nbformat {
    * The default metadata for the notebook.
    */
   export
-  interface INotebookMetadata {
+  interface INotebookMetadata extends JSONObject {
     kernelspec: IKernelspecMetadata;
     language_info: ILanguageInfoMetadata;
     orig_nbformat: number;
@@ -60,7 +64,7 @@ namespace nbformat {
    * The notebook content.
    */
   export
-  interface INotebookContent {
+  interface INotebookContent extends JSONObject {
     metadata: INotebookMetadata;
     nbformat_minor: number;
     nbformat: number;
@@ -82,7 +86,7 @@ namespace nbformat {
    * A mime-type keyed dictionary of data.
    */
   export
-  interface MimeBundle {
+  interface MimeBundle extends JSONObject {
     [key: string]: multilineString;
     'application/json'?: any;
   }
@@ -99,7 +103,7 @@ namespace nbformat {
    * Cell-level metadata.
    */
   export
-  interface IBaseCellMetadata {
+  interface IBaseCellMetadata extends JSONObject {
     /**
      * Whether the cell is trusted.
      *
@@ -127,7 +131,7 @@ namespace nbformat {
    * The base cell interface.
    */
   export
-  interface IBaseCell {
+  interface IBaseCell extends JSONObject {
     /**
      * String identifying the type of cell.
      */
@@ -281,7 +285,7 @@ namespace nbformat {
    * The base output type.
    */
   export
-  interface IBaseOutput {
+  interface IBaseOutput extends JSONObject {
     /**
      * Type of cell output.
      */
@@ -312,7 +316,7 @@ namespace nbformat {
     /**
      * Cell output metadata.
      */
-    metadata: {};
+    metadata: JSONObject;
   }
 
 
@@ -334,7 +338,7 @@ namespace nbformat {
     /**
      * Cell output metadata.
      */
-    metadata: {};
+    metadata: JSONObject;
   }
 
 

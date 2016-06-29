@@ -178,9 +178,10 @@ class DirListing extends Widget {
    */
   static createNode(): HTMLElement {
     let node = document.createElement('div');
+    let header = document.createElement('div');
     let content = document.createElement('ul');
-    let header = this.createHeaderNode();
     content.className = CONTENT_CLASS;
+    header.className = HEADER_CLASS;
     node.appendChild(header);
     node.appendChild(content);
     node.tabIndex = 1;
@@ -188,123 +189,23 @@ class DirListing extends Widget {
   }
 
   /**
-   * Create the header node for a dir listing.
-   *
-   * @returns A new DOM node to use as the dir listing header.
-   *
-   * #### Notes
-   * This method may be reimplemented to create custom headers.
-   */
-  static createHeaderNode(): HTMLElement {
-    let node = document.createElement('div');
-    let name = createItemNode('Name');
-    let modified = createItemNode('Last Modified');
-    node.className = HEADER_CLASS;
-    name.classList.add(NAME_ID_CLASS);
-    name.classList.add(SELECTED_CLASS);
-    modified.classList.add(MODIFIED_ID_CLASS);
-    node.appendChild(name);
-    node.appendChild(modified);
-    return node;
-
-    function createItemNode(label: string): HTMLElement {
-      let node = document.createElement('div');
-      let text = document.createElement('span');
-      let icon = document.createElement('span');
-      node.className = HEADER_ITEM_CLASS;
-      text.className = HEADER_ITEM_TEXT_CLASS;
-      icon.className = HEADER_ITEM_ICON_CLASS;
-      text.textContent = label;
-      node.appendChild(text);
-      node.appendChild(icon);
-      return node;
-    }
-  }
-
-  /**
-   * Create a new item node for a dir listing.
-   *
-   * @returns A new DOM node to use as a content item.
-   *
-   * #### Notes
-   * This method may be reimplemented to create custom items.
-   */
-  static createItemNode(): HTMLElement {
-    let node = document.createElement('li');
-    let icon = document.createElement('span');
-    let text = document.createElement('span');
-    let modified = document.createElement('span');
-    node.className = ITEM_CLASS;
-    icon.className = ITEM_ICON_CLASS;
-    text.className = ITEM_TEXT_CLASS;
-    modified.className = ITEM_MODIFIED_CLASS;
-    node.appendChild(icon);
-    node.appendChild(text);
-    node.appendChild(modified);
-    return node;
-  }
-
-  /**
-   * Update an item node to reflect the current state of a model.
-   *
-   * @param node - A node created by a call to [[createItemNode]].
-   *
-   * @param model - The model object to use for the item state.
-   *
-   * #### Notes
-   * This is called automatically when the item should be updated.
-   *
-   * If the [[createItemNode]] method is reimplemented, this method
-   * should also be reimplemented so that the item state is properly
-   * updated.
-   */
-  static updateItemNode(node: HTMLElement, model: IContentsModel) {
-    let icon = node.firstChild as HTMLElement;
-    let text = icon.nextSibling as HTMLElement;
-    let modified = text.nextSibling as HTMLElement;
-
-    let type: string;
-    switch (model.type) {
-    case 'directory':
-      type = FOLDER_TYPE_CLASS;
-      break;
-    case 'notebook':
-      type = NOTEBOOK_TYPE_CLASS;
-      break;
-    default:
-      type = FILE_TYPE_CLASS;
-      break;
-    }
-
-    let modText = '';
-    let modTitle = '';
-    if (model.last_modified) {
-      let time = moment(model.last_modified).fromNow();
-      modText = time === 'a few seconds ago' ? 'seconds ago' : time;
-      modTitle = moment(model.last_modified).format('YYYY-MM-DD HH:mm');
-    }
-
-    node.className = `${ITEM_CLASS} ${type}`;
-    text.textContent = model.name;
-    modified.textContent = modText;
-    modified.title = modTitle;
-  }
-
-  /**
    * Construct a new file browser directory listing widget.
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, manager: DocumentManager, opener: IWidgetOpener) {
+  constructor(options: DirListing.IOptions) {
     super();
     this.addClass(DIR_LISTING_CLASS);
-    this._model = model;
+    this._model = options.model;
     this._model.refreshed.connect(this._onModelRefreshed, this);
-    this._model.selectionChanged.connect(this._onSelectionChanged, this);
+    this._model.pathChanged.connect(this._onPathChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
-    this._manager = manager;
-    this._opener = opener;
+    this._manager = options.manager;
+    this._opener = options.opener;
+    this._renderer = options.renderer || DirListing.defaultRenderer;
+    let headerNode = utils.findElement(this.node, HEADER_CLASS);
+    this._renderer.populateHeaderNode(headerNode);
   }
 
   /**
@@ -357,6 +258,41 @@ class DirListing extends Widget {
    */
   get contentNode(): HTMLElement {
     return utils.findElement(this.node, CONTENT_CLASS);
+  }
+
+  /**
+   * The renderer instance used by the directory listing.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get renderer(): DirListing.IRenderer {
+    return this._renderer;
+  }
+
+  /**
+   * The the sorted content items.
+   */
+  get sortedItems(): IContentsModel[] {
+    return this._sortedModels;
+  }
+
+  /**
+   * The current sort state.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get sortState(): DirListing.ISortState {
+    return this._sortState;
+  }
+
+  /**
+   * Sort the items using a sort condition.
+   */
+  sort(state: DirListing.ISortState): void {
+    this._sortedModels = Private.sort(this.model.items, state);
+    this.update();
   }
 
   /**
@@ -420,9 +356,9 @@ class DirListing extends Widget {
     if (this._softSelection) {
       names.push(this._softSelection);
     } else {
-      let items = this._model.sortedItems;
+      let items = this._model.items;
       for (let item of items) {
-        if (this._model.isSelected(item.name)) {
+        if (this._selection[item.name]) {
           names.push(item.name);
         }
       }
@@ -480,11 +416,11 @@ class DirListing extends Widget {
    */
   shutdownKernels(): Promise<void> {
     let promises: Promise<void>[] = [];
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let paths = items.map(item => item.path);
     for (let sessionId of this._model.sessionIds) {
       let index = paths.indexOf(sessionId.notebook.path);
-      if (!this._softSelection && this._model.isSelected(items[index].name)) {
+      if (!this._softSelection && this._selection[items[index].name]) {
         promises.push(this._model.shutdown(sessionId));
       } else if (this._softSelection === items[index].name) {
         promises.push(this._model.shutdown(sessionId));
@@ -503,23 +439,27 @@ class DirListing extends Widget {
    */
   selectNext(keepExisting = false): void {
     let index = -1;
-    let selected = this._model.getSelected();
-    let items = this._model.sortedItems;
+    let selected = Object.keys(this._selection);
+    let items = this.sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the next item.
       let name = selected[selected.length - 1];
-      index = arrays.findIndex(items, (value, index) => value.name === name);
+      index = arrays.findIndex(items, (value) => value.name === name);
       index += 1;
-      if (index === this._items.length) index = 0;
+      if (index === this._items.length) {
+        index = 0;
+      }
     } else if (selected.length === 0) {
       // Select the first item.
       index = 0;
     } else {
       // Select the last selected item.
       let name = selected[selected.length - 1];
-      index = arrays.findIndex(items, (value, index) => value.name === name);
+      index = arrays.findIndex(items, (value) => value.name === name);
     }
-    if (index !== -1) this._selectItem(index, keepExisting);
+    if (index !== -1) {
+      this._selectItem(index, keepExisting);
+    }
   }
 
   /**
@@ -529,23 +469,34 @@ class DirListing extends Widget {
    */
   selectPrevious(keepExisting = false): void {
     let index = -1;
-    let selected = this._model.getSelected();
-    let items = this._model.sortedItems;
+    let selected = Object.keys(this._selection);
+    let items = this.sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the previous item.
       let name = selected[0];
-      index = arrays.findIndex(items, (value, index) => value.name === name);
+      index = arrays.findIndex(items, (value) => value.name === name);
       index -= 1;
-      if (index === -1) index = this._items.length - 1;
+      if (index === -1) {
+        index = this._items.length - 1;
+      }
     } else if (selected.length === 0) {
       // Select the last item.
       index = this._items.length - 1;
     } else {
       // Select the first selected item.
       let name = selected[0];
-      index = arrays.findIndex(items, (value, index) => value.name === name);
+      index = arrays.findIndex(items, (value) => value.name === name);
     }
-    if (index !== -1) this._selectItem(index, keepExisting);
+    if (index !== -1) {
+      this._selectItem(index, keepExisting);
+    }
+  }
+
+  /**
+   * Get whether an item is selected by name.
+   */
+  isSelected(name: string): boolean {
+    return this._selection[name] === true;
   }
 
   /**
@@ -639,10 +590,10 @@ class DirListing extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Fetch common variables.
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let nodes = this._items;
     let content = utils.findElement(this.node, CONTENT_CLASS);
-    let subtype = this.constructor as typeof DirListing;
+    let renderer = this._renderer;
 
     this.removeClass(MULTI_SELECTED_CLASS);
     this.removeClass(SELECTED_CLASS);
@@ -655,15 +606,16 @@ class DirListing extends Widget {
 
     // Add any missing item nodes.
     while (nodes.length < items.length) {
-      let node = subtype.createItemNode();
+      let node = renderer.createItemNode();
+      node.classList.add(ITEM_CLASS);
       nodes.push(node);
       content.appendChild(node);
     }
 
     // Update the node states to match the model contents.
     for (let i = 0, n = items.length; i < n; ++i) {
-      subtype.updateItemNode(nodes[i], items[i]);
-      if (this._model.isSelected(items[i].name)) {
+      renderer.updateItemNode(nodes[i], items[i]);
+      if (this._selection[items[i].name]) {
         nodes[i].classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
           nodes[i].classList.add(CUT_CLASS);
@@ -672,7 +624,7 @@ class DirListing extends Widget {
     }
 
     // Handle the selectors on the widget node.
-    let selectedNames = this._model.getSelected();
+    let selectedNames = Object.keys(this._selection);
     if (selectedNames.length > 1) {
       this.addClass(MULTI_SELECTED_CLASS);
     }
@@ -702,41 +654,10 @@ class DirListing extends Widget {
 
     let header = this.headerNode;
     if (header.contains(target)) {
-
-      let children = header.getElementsByClassName(HEADER_ITEM_CLASS);
-      let name = children[0] as HTMLElement;
-      let modified = children[1] as HTMLElement;
-
-      if (name.contains(target)) {
-        if (this._model.sortKey === 'name') {
-          let flag = !this._model.sortAscending;
-          this._model.sortAscending = flag;
-          if (flag) name.classList.remove(DESCENDING_CLASS);
-          else name.classList.add(DESCENDING_CLASS);
-        } else {
-          this._model.sortKey = 'name';
-          this._model.sortAscending = true;
-          name.classList.remove(DESCENDING_CLASS);
-        }
-        name.classList.add(SELECTED_CLASS);
-        modified.classList.remove(SELECTED_CLASS);
-        modified.classList.remove(DESCENDING_CLASS);
-      } else if (modified.contains(target)) {
-        if (this._model.sortKey === 'last_modified') {
-          let flag = !this._model.sortAscending;
-          this._model.sortAscending = flag;
-          if (flag) modified.classList.remove(DESCENDING_CLASS);
-          else modified.classList.add(DESCENDING_CLASS);
-        } else {
-          this._model.sortKey = 'last_modified';
-          this._model.sortAscending = true;
-          modified.classList.remove(DESCENDING_CLASS);
-        }
-        modified.classList.add(SELECTED_CLASS);
-        name.classList.remove(SELECTED_CLASS);
-        name.classList.remove(DESCENDING_CLASS);
+      let state = this.renderer.handleHeaderClick(header, event);
+      if (state) {
+        this.sort(state);
       }
-      this.update();
       return;
     }
 
@@ -784,8 +705,8 @@ class DirListing extends Widget {
       return;
     }
     this._softSelection = '';
-    let items = this._model.sortedItems;
-    let selected = this._model.getSelected();
+    let items = this.sortedItems;
+    let selected = Object.keys(this._selection);
     if (selected.indexOf(items[index].name) === -1) {
       this._softSelection = items[index].name;
     }
@@ -889,9 +810,10 @@ class DirListing extends Widget {
       return;
     }
 
-    let item = this._model.sortedItems[i];
+    let model = this._model;
+    let item = this.sortedItems[i];
     if (item.type === 'directory') {
-      this._model.cd(item.name).catch(error =>
+      model.cd(item.name).catch(error =>
         showErrorMessage(this, 'Open directory', error)
       );
     } else {
@@ -899,8 +821,9 @@ class DirListing extends Widget {
       let widget = this._manager.findWidget(path);
       if (!widget) {
         widget = this._manager.open(item.path);
-        widget.populated.connect(() => this.model.refresh() );
-        widget.context.kernelChanged.connect(() => this.model.refresh() );
+        let context = this._manager.contextForWidget(widget);
+        context.populated.connect(() => model.refresh() );
+        context.kernelChanged.connect(() => model.refresh() );
       }
       this._opener.open(widget);
     }
@@ -916,12 +839,12 @@ class DirListing extends Widget {
       if (index === -1) {
         return;
       }
-      let item = this._model.sortedItems[index];
+      let item = this.sortedItems[index];
       let target = this._items[index];
       if (!target.classList.contains(FOLDER_TYPE_CLASS)) {
         return;
       }
-      if (!this._softSelection && this._model.isSelected(item.name)) {
+      if (!this._softSelection && this._selection[item.name]) {
         return;
       }
       target.classList.add(utils.DROP_TARGET_CLASS);
@@ -937,7 +860,9 @@ class DirListing extends Widget {
     event.preventDefault();
     event.stopPropagation();
     let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
-    if (dropTarget) dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    if (dropTarget) {
+      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    }
   }
 
   /**
@@ -948,7 +873,9 @@ class DirListing extends Widget {
     event.stopPropagation();
     event.dropAction = event.proposedAction;
     let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
-    if (dropTarget) dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    if (dropTarget) {
+      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    }
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
     this._items[index].classList.add(utils.DROP_TARGET_CLASS);
   }
@@ -980,7 +907,7 @@ class DirListing extends Widget {
 
     // Get the path based on the target node.
     let index = this._items.indexOf(target);
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let path = items[index].name + '/';
 
     // Move all of the items.
@@ -1019,9 +946,10 @@ class DirListing extends Widget {
    * Start a drag event.
    */
   private _startDrag(index: number, clientX: number, clientY: number): void {
-    let selectedNames = this._model.getSelected();
+    let selectedNames = Object.keys(this._selection);
     let source = this._items[index];
-    let items = this._model.sortedItems;
+    let model = this._model;
+    let items = this.sortedItems;
     let item: IContentsModel = null;
 
     // If the source node is not selected, use just that node.
@@ -1030,20 +958,15 @@ class DirListing extends Widget {
       selectedNames = [item.name];
     } else if (selectedNames.length === 1) {
       let name = selectedNames[0];
-      item = arrays.find(items, (value, index) => value.name === name);
+      item = arrays.find(items, (value) => value.name === name);
     }
 
     // Create the drag image.
-    var dragImage = source.cloneNode(true) as HTMLElement;
-    dragImage.removeChild(dragImage.lastChild);
-    if (selectedNames.length > 1) {
-      let text = utils.findElement(dragImage, ITEM_TEXT_CLASS);
-      text.textContent = '(' + selectedNames.length + ')';
-    }
+    let dragImage = this.renderer.createDragImage(source, selectedNames.length);
 
     // Set up the drag event.
     this._drag = new Drag({
-      dragImage: dragImage,
+      dragImage,
       mimeData: new MimeData(),
       supportedActions: DropActions.Move,
       proposedAction: DropAction.Move
@@ -1055,8 +978,9 @@ class DirListing extends Widget {
         let widget = this._manager.findWidget(path);
         if (!widget) {
           widget = this._manager.open(item.path);
-          widget.populated.connect(() => this.model.refresh() );
-          widget.context.kernelChanged.connect(() => this.model.refresh() );
+          let context = this._manager.contextForWidget(widget);
+          context.populated.connect(() => model.refresh() );
+          context.kernelChanged.connect(() => model.refresh() );
         }
         return widget;
       });
@@ -1075,22 +999,24 @@ class DirListing extends Widget {
    */
   private _handleFileSelect(event: MouseEvent): void {
     // Fetch common variables.
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
 
     clearTimeout(this._selectTimer);
 
-    if (index == -1) return;
+    if (index === -1) {
+      return;
+    }
 
     let name = items[index].name;
-    let selected = this._model.getSelected();
+    let selected = Object.keys(this._selection);
 
     // Handle toggling.
     if (event.metaKey || event.ctrlKey) {
-      if (this._model.isSelected(name)) {
-        this._model.deselect(name);
+      if (this._selection[name]) {
+        delete this._selection[name];
       } else {
-        this._model.select(name);
+        this._selection[name] = true;
       }
 
     // Handle multiple select.
@@ -1107,8 +1033,8 @@ class DirListing extends Widget {
           }
         }, RENAME_DURATION);
       }
-      this._model.clearSelected();
-      this._model.select(name);
+      this._selection = Object.create(null);
+      this._selection[name] = true;
     }
     this._isCut = false;
     this.update();
@@ -1119,7 +1045,7 @@ class DirListing extends Widget {
    */
   private _handleMultiSelect(selected: string[], index: number): void {
     // Find the "nearest selected".
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let nearestIndex = -1;
     for (let i = 0; i < this._items.length; i++) {
       if (i === index) {
@@ -1146,7 +1072,7 @@ class DirListing extends Widget {
     for (let i = 0; i < this._items.length; i++) {
       if (nearestIndex >= i && index <= i ||
           nearestIndex <= i && index >= i) {
-        this._model.select(items[i].name);
+        this._selection[items[i].name] = true;
       }
     }
   }
@@ -1155,9 +1081,9 @@ class DirListing extends Widget {
    * Get the currently selected items.
    */
   private _getSelectedItems(): IContentsModel[] {
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     if (!this._softSelection) {
-      return items.filter(item => this._model.isSelected(item.name));
+      return items.filter(item => this._selection[item.name]);
     }
     return items.filter(item => item.name === this._softSelection);
   }
@@ -1167,7 +1093,7 @@ class DirListing extends Widget {
    */
   private _copy(): void {
     this._clipboard = [];
-    for (var item of this._getSelectedItems()) {
+    for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
         // Store the absolute path of the item.
         this._clipboard.push('/' + item.path);
@@ -1194,19 +1120,20 @@ class DirListing extends Widget {
    * Allow the user to rename item on a given row.
    */
   private _doRename(): Promise<string> {
-    let items = this._model.sortedItems;
-    let name = this._softSelection || this._model.getSelected()[0];
-    let index = arrays.findIndex(items, (value, index) => value.name === name);
+    let items = this.sortedItems;
+    let name = this._softSelection || Object.keys(this._selection)[0];
+    let index = arrays.findIndex(items, (value) => value.name === name);
     let row = this._items[index];
-    let text = utils.findElement(row, ITEM_TEXT_CLASS);
-    let original = text.textContent;
+    let item = items[index];
+    let nameNode = this.renderer.getNameNode(row);
+    let original = item.name;
+    this._editNode.value = original;
 
-    return Private.doRename(row, text, this._editNode).then(changed => {
-      if (!changed) {
-        return original;
+    return Private.doRename(nameNode, this._editNode).then(newName => {
+      if (newName === original) {
+        return;
       }
-      let newPath = text.textContent;
-      return this._model.rename(original, newPath).catch(error => {
+      return this._model.rename(original, newName).catch(error => {
         if (error.xhr) {
           error.message = `${error.xhr.status}: error.statusText`;
         }
@@ -1215,18 +1142,16 @@ class DirListing extends Widget {
           let options = {
             title: 'Overwrite file?',
             host: this.parent.node,
-            body: `"${newPath}" already exists, overwrite?`,
+            body: `"${newName}" already exists, overwrite?`,
             okText: 'OVERWRITE'
           };
           return showDialog(options).then(button => {
             if (button.text === 'OVERWRITE') {
-              return this._model.delete(newPath).then(() => {
-                return this._model.rename(original, newPath).then(() => {
+              return this._model.delete(newName).then(() => {
+                return this._model.rename(original, newName).then(() => {
                   this._model.refresh();
                 });
               });
-            } else {
-              text.textContent = original;
             }
           });
         }
@@ -1235,7 +1160,7 @@ class DirListing extends Widget {
         return original;
       }).then(() => {
         this._model.refresh();
-        return text.textContent;
+        return newName;
       });
     });
   }
@@ -1245,12 +1170,12 @@ class DirListing extends Widget {
    */
   private _selectItem(index: number, keepExisting: boolean) {
     // Selected the given row(s)
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     if (!keepExisting) {
-      this._model.clearSelected();
+      this._selection = Object.create(null);
     }
     let name = items[index].name;
-    this._model.select(name);
+    this._selection[name] = true;
     Private.scrollIfNeeded(this.contentNode, this._items[index]);
     this._isCut = false;
   }
@@ -1259,19 +1184,34 @@ class DirListing extends Widget {
    * Handle the `refreshed` signal from the model.
    */
   private _onModelRefreshed(): void {
-    this.update();
+    // Update the selection.
+    let existing = Object.keys(this._selection);
+    this._selection = Object.create(null);
+    for (let item of this._model.items) {
+      let name = item.name;
+      if (existing.indexOf(name) !== -1) {
+        this._selection[name] = true;
+      }
+    }
+    // Update the sorted items.
+    this.sort(this.sortState);
   }
 
   /**
-   * Handle the `selectionChanged` signal from the model.
+   * Handle a `pathChanged` signal from the model.
    */
-  private _onSelectionChanged(): void {
-    this.update();
+  private _onPathChanged(): void {
+    // Reset the selection.
+    this._selection = Object.create(null);
+    // Update the sorted items.
+    this.sort(this.sortState);
   }
 
   private _model: FileBrowserModel = null;
   private _editNode: HTMLInputElement = null;
   private _items: HTMLElement[] = [];
+  private _sortedModels: IContentsModel[] = null;
+  private _sortState: DirListing.ISortState = { direction: 'ascending', key: 'name' };
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
   private _selectTimer = -1;
@@ -1282,6 +1222,300 @@ class DirListing extends Widget {
   private _softSelection = '';
   private _manager: DocumentManager = null;
   private _opener: IWidgetOpener = null;
+  private _selection: { [key: string]: boolean; } = Object.create(null);
+  private _renderer: DirListing.IRenderer = null;
+}
+
+
+/**
+ * The namespace for the `DirListing` class statics.
+ */
+export
+namespace DirListing {
+  /**
+   * An options object for initializing a file browser directory listing.
+   */
+  export
+  interface IOptions {
+    /**
+     * A file browser model instance.
+     */
+    model: FileBrowserModel;
+
+    /**
+     * A document manager instance.
+     */
+    manager: DocumentManager;
+
+    /**
+     * A widget opener function.
+     */
+    opener: IWidgetOpener;
+
+    /**
+     * A renderer for file items.
+     *
+     * The default is a shared `Renderer` instance.
+     */
+    renderer?: IRenderer;
+  }
+
+  /**
+   * A sort state.
+   */
+  export
+  interface ISortState {
+    /**
+     * The direction of sort.
+     */
+    direction: 'ascending' | 'descending';
+
+    /**
+     * The sort key.
+     */
+    key: 'name' | 'last_modified';
+  }
+
+  /**
+   * The render interface for file browser listing options.
+   */
+  export
+  interface IRenderer {
+    /**
+     * Populate and empty header node for a dir listing.
+     *
+     * @param node - The header node to populate.
+     */
+    populateHeaderNode(node: HTMLElement): void;
+
+    /**
+     * Handle a header click.
+     *
+     * @param node - A node populated by [[populateHeaderNode]].
+     *
+     * @param event - A click event on the node.
+     *
+     * @returns The sort state of the header after the click event.
+     */
+    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState;
+
+    /**
+     * Create a new item node for a dir listing.
+     *
+     * @returns A new DOM node to use as a content item.
+     */
+    createItemNode(): HTMLElement;
+
+    /**
+     * Update an item node to reflect the current state of a model.
+     *
+     * @param node - A node created by [[createItemNode]].
+     *
+     * @param model - The model object to use for the item state.
+     */
+    updateItemNode(node: HTMLElement, model: IContentsModel): void;
+
+    /**
+     * Get the node containing the file name.
+     *
+     * @param node - A node created by [[createItemNode]].
+     *
+     * @returns The node containing the file name.
+     */
+    getNameNode(node: HTMLElement): HTMLElement;
+
+    /**
+     * Create an appropriate drag image for an item.
+     *
+     * @param node - A node created by [[createItemNode]].
+     *
+     * @param count - The number of items being dragged.
+     *
+     * @returns An element to use as the drag image.
+     */
+    createDragImage(node: HTMLElement, count: number): HTMLElement;
+  }
+
+  /**
+   * The default implementation of an `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+    /**
+     * Populate and empty header node for a dir listing.
+     *
+     * @param node - The header node to populate.
+     */
+    populateHeaderNode(node: HTMLElement): void {
+      let name = this._createHeaderItemNode('Name');
+      let modified = this._createHeaderItemNode('Last Modified');
+      name.classList.add(NAME_ID_CLASS);
+      name.classList.add(SELECTED_CLASS);
+      modified.classList.add(MODIFIED_ID_CLASS);
+      node.appendChild(name);
+      node.appendChild(modified);
+    }
+
+    /**
+     * Handle a header click.
+     *
+     * @param node - A node populated by [[populateHeaderNode]].
+     *
+     * @param event - A click event on the node.
+     *
+     * @returns The sort state of the header after the click event.
+     */
+    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState {
+      let name = utils.findElement(node, NAME_ID_CLASS);
+      let modified = utils.findElement(node, MODIFIED_ID_CLASS);
+      let state: ISortState = { direction: 'ascending', key: 'name' };
+      let target = event.target as HTMLElement;
+      if (name.contains(target)) {
+        if (name.classList.contains(SELECTED_CLASS)) {
+          if (!name.classList.contains(DESCENDING_CLASS)) {
+            state.direction = 'descending';
+            name.classList.add(DESCENDING_CLASS);
+          } else {
+            name.classList.remove(DESCENDING_CLASS);
+          }
+        } else {
+          name.classList.remove(DESCENDING_CLASS);
+        }
+        name.classList.add(SELECTED_CLASS);
+        modified.classList.remove(SELECTED_CLASS);
+        modified.classList.remove(DESCENDING_CLASS);
+        return state;
+      }
+      if (modified.contains(target)) {
+        state.key = 'last_modified';
+        if (modified.classList.contains(SELECTED_CLASS)) {
+          if (!modified.classList.contains(DESCENDING_CLASS)) {
+            state.direction = 'descending';
+            modified.classList.add(DESCENDING_CLASS);
+          } else {
+            modified.classList.remove(DESCENDING_CLASS);
+          }
+        } else {
+          modified.classList.remove(DESCENDING_CLASS);
+        }
+        modified.classList.add(SELECTED_CLASS);
+        name.classList.remove(SELECTED_CLASS);
+        name.classList.remove(DESCENDING_CLASS);
+        return state;
+      }
+      return void 0;
+    }
+
+    /**
+     * Create a new item node for a dir listing.
+     *
+     * @returns A new DOM node to use as a content item.
+     */
+    createItemNode(): HTMLElement {
+      let node = document.createElement('li');
+      let icon = document.createElement('span');
+      let text = document.createElement('span');
+      let modified = document.createElement('span');
+      icon.className = ITEM_ICON_CLASS;
+      text.className = ITEM_TEXT_CLASS;
+      modified.className = ITEM_MODIFIED_CLASS;
+      node.appendChild(icon);
+      node.appendChild(text);
+      node.appendChild(modified);
+      return node;
+    }
+
+    /**
+     * Update an item node to reflect the current state of a model.
+     *
+     * @param node - A node created by [[createItemNode]].
+     *
+     * @param model - The model object to use for the item state.
+     */
+    updateItemNode(node: HTMLElement, model: IContentsModel): void {
+      let icon = utils.findElement(node, ITEM_ICON_CLASS);
+      let text = utils.findElement(node, ITEM_TEXT_CLASS);
+      let modified = utils.findElement(node, ITEM_MODIFIED_CLASS);
+
+      icon.className = ITEM_ICON_CLASS;
+      switch (model.type) {
+      case 'directory':
+        icon.classList.add(FOLDER_TYPE_CLASS);
+        break;
+      case 'notebook':
+        icon.classList.add(NOTEBOOK_TYPE_CLASS);
+        break;
+      default:
+        icon.classList.add(FILE_TYPE_CLASS);
+        break;
+      }
+
+      let modText = '';
+      let modTitle = '';
+      if (model.last_modified) {
+        let time = moment(model.last_modified).fromNow();
+        modText = time === 'a few seconds ago' ? 'seconds ago' : time;
+        modTitle = moment(model.last_modified).format('YYYY-MM-DD HH:mm');
+      }
+
+      text.textContent = model.name;
+      modified.textContent = modText;
+      modified.title = modTitle;
+    }
+
+    /**
+     * Get the node containing the file name.
+     *
+     * @param node - A node created by [[createItemNode]].
+     *
+     * @returns The node containing the file name.
+     */
+    getNameNode(node: HTMLElement): HTMLElement {
+      return utils.findElement(node, ITEM_TEXT_CLASS);
+    }
+
+    /**
+     * Create a drag image for an item.
+     *
+     * @param node - A node created by [[createItemNode]].
+     *
+     * @param count - The number of items being dragged.
+     *
+     * @returns An element to use as the drag image.
+     */
+    createDragImage(node: HTMLElement, count: number): HTMLElement {
+      let dragImage = node.cloneNode(true) as HTMLElement;
+      let modified = utils.findElement(node, ITEM_MODIFIED_CLASS);
+      dragImage.removeChild(modified as HTMLElement);
+      if (count > 1) {
+        let nameNode = utils.findElement(node, ITEM_TEXT_CLASS);
+        nameNode.textContent = '(' + count + ')';
+      }
+      return dragImage;
+    }
+
+    /**
+     * Create a node for a header item.
+     */
+    private _createHeaderItemNode(label: string): HTMLElement {
+      let node = document.createElement('div');
+      let text = document.createElement('span');
+      let icon = document.createElement('span');
+      node.className = HEADER_ITEM_CLASS;
+      text.className = HEADER_ITEM_TEXT_CLASS;
+      icon.className = HEADER_ITEM_ICON_CLASS;
+      text.textContent = label;
+      node.appendChild(text);
+      node.appendChild(icon);
+      return node;
+    }
+  }
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
 }
 
 
@@ -1295,10 +1529,10 @@ namespace Private {
    * @returns Boolean indicating whether the name changed.
    */
   export
-  function doRename(parent: HTMLElement, text: HTMLElement, edit: HTMLInputElement): Promise<boolean> {
+  function doRename(text: HTMLElement, edit: HTMLInputElement): Promise<string> {
     let changed = true;
+    let parent = text.parentElement as HTMLElement;
     parent.replaceChild(edit, text);
-    edit.value = text.textContent;
     edit.focus();
     let index = edit.value.lastIndexOf('.');
     if (index === -1) {
@@ -1307,14 +1541,10 @@ namespace Private {
       edit.setSelectionRange(0, index);
     }
 
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       edit.onblur = () => {
         parent.replaceChild(text, edit);
-        if (text.textContent === edit.value) {
-          changed = false;
-        }
-        if (changed) text.textContent = edit.value;
-        resolve(changed);
+        resolve(edit.value);
       };
       edit.onkeydown = (event: KeyboardEvent) => {
         switch (event.keyCode) {
@@ -1332,6 +1562,27 @@ namespace Private {
         }
       };
     });
+  }
+
+  /**
+   * Sort a list of items by sort state as a new array.
+   */
+  export
+  function sort(items: IContentsModel[], state: DirListing.ISortState) : IContentsModel[] {
+    let output = items.slice();
+    if (state.key === 'last_modified') {
+      output.sort((a, b) => {
+        let valA = new Date(a.last_modified).getTime();
+        let valB = new Date(b.last_modified).getTime();
+        return valB - valA;
+      });
+    }
+
+    // Reverse the order if descending.
+    if (state.direction === 'descending') {
+      output.reverse();
+    }
+    return output;
   }
 
   /**

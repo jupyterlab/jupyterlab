@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, IExecuteReply
+  IKernel, KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -146,6 +146,39 @@ class OutputAreaModel implements IDisposable {
   }
 
   /**
+   * Execute code on a kernel and send outputs to the model.
+   */
+  execute(code: string, kernel: IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
+    // Override the default for `stop_on_error`.
+    let content: KernelMessage.IExecuteRequest = {
+      code,
+      stop_on_error: true
+    };
+    this.clear();
+    return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
+      let future = kernel.execute(content);
+      future.onIOPub = ((msg: KernelMessage.IIOPubMessage) => {
+        let msgType = msg.header.msg_type as nbformat.OutputType;
+        switch (msgType) {
+        case 'execute_result':
+        case 'display_data':
+        case 'stream':
+        case 'error':
+          let model = msg.content as nbformat.IOutput;
+          model.output_type = msgType;
+          this.add(model);
+          break;
+        default:
+          break;
+        }
+      });
+      future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
+        resolve(msg);
+      };
+    });
+  }
+
+  /**
    * Handle a change to the list.
    */
   private _onListChanged(sender: IObservableList<nbformat.IOutput>, args: IListChangedArgs<nbformat.IOutput>) {
@@ -154,35 +187,6 @@ class OutputAreaModel implements IDisposable {
 
   private _clearNext = false;
   private _list: IObservableList<nbformat.IOutput> = null;
-}
-
-
-/**
- * Execute code on a kernel and send outputs to an observable output.
- */
-export
-function executeCode(code: string, kernel: IKernel, outputs: OutputAreaModel): Promise<IExecuteReply> {
-  let exRequest = {
-    code,
-    silent: false,
-    store_history: true,
-    stop_on_error: true,
-    allow_stdin: true
-  };
-  outputs.clear();
-  return new Promise<IExecuteReply>((resolve, reject) => {
-    let future = kernel.execute(exRequest);
-    future.onIOPub = (msg => {
-      let model = msg.content;
-      if (model !== void 0) {
-        model.output_type = msg.header.msg_type as nbformat.OutputType;
-        outputs.add(model);
-      }
-    });
-    future.onReply = (msg => {
-      resolve(msg.content as IExecuteReply);
-    });
-  });
 }
 
 
