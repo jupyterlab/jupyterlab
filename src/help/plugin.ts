@@ -96,11 +96,11 @@ function activateHelpHandler(app: Application): Promise<void> {
         app.shell.addToMainArea(widget);
         let stack = widget.parent;
         if (!stack) {
-            return;
+          return;
         }
         let tabs = stack.parent;
         if (tabs instanceof TabPanel) {
-            tabs.currentWidget = widget;
+          tabs.currentWidget = widget;
         }
       }
     };
