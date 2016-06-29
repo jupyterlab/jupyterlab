@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		
+		<title> FAQ </title>
+		<link rel="stylesheet" href="style.css" type="text/css" />
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+		<script>
+			$(document).ready(function() {
+				$('li.a').addClass('hide');
+
+
+
+				$('li.q').click(function(){
+					$(this).data('clicked', false).next()	
+						.slideToggle(200)
+						.siblings('li.a')
+						.slideUp(200);
+
+
+				})
+			});
+		</script>
+	</head>
+	<body>
+		<section id="header">
+			<img id="icon" src="faqicon.svg">
+			<h1>
+				<span class="short-faq">FAQ</span><span class="long-faq">Frequently Asked Questions</span>
+			</h1>
+		</section>
+		<p>
+			<section id="content">
+				<h2>
+					THE BASICS
+				</h2>
+				<ul>
+					<li class="q"> What is JupyterLab? </li>
+					<li class="a"> Central to the project is the Jupyter Notebook, a web-based platform that allows users to combine live code, equations, narrative text, visualizations, interactive dashboards and other media. Together these building blocks make science and data reproducible across over 40 programming languages and combine to form what we call a computational narrative. </li>
+					<li class="q"> How is JupyterLab different from the Jupyter Notebook? </li>
+					<li class="a"> JupyterLab allows users to arrange multiple jupyter notebooks, text editors, terminals, output areas, etc. on a single page with multiple panels and tabs into one application. The codebase and UI of JupyterLab is based on a flexible plugin system that makes it easy to extend with new components.
+ 					</li>
+				</ul>
+				<h2>
+					FEATURES
+				</h2>
+				<ul>
+					<li class="q"> How do I add more kernels/languages to JupyterLab? </li>
+					<li class="a"> To add more languages to the JupyterLab you must install a new kernel. Installing a kernel is usually fairly simple and can be done with a couple terminal commands. For further instructions, click this <a href="https://ipython.readthedocs.io/en/latest/install/kernel_install.html">link</a>. </li>
+				</ul>
+			</section>
+		</p>
+	</body>
+</html>
+  

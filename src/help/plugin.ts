@@ -6,8 +6,24 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
+  TabPanel
+} from 'phosphor-tabs';
+
+import {
   IFrame
 } from './iframe';
+
+
+import {
+ CommandPalette, IStandardPaletteItemOptions, StandardPaletteModel
+} from 'phosphor-commandpalette';
+
+
+import {
+  Widget
+} from 'phosphor-widget';
+
+import 'jupyterlab/lib/default-theme/index.css';
 
 
 /**
@@ -40,7 +56,13 @@ const COMMANDS = [
     id: 'help-doc:notebook-tutorial',
     url: 'http://nbviewer.jupyter.org/github/jupyter/notebook/' +
       'blob/master/docs/source/examples/Notebook/Notebook Basics.ipynb'
+  },
+  {
+    text: 'Frequently Asked Questions',
+    id: 'help-doc:FAQ-Page',
+    url: 'test.html'
   }
+
 ];
 
 
@@ -62,21 +84,62 @@ const helpHandlerExtension = {
  * returns A promise that resolves when the extension is activated.
  */
 function activateHelpHandler(app: Application): Promise<void> {
-  let widget = new IFrame();
-  widget.addClass(HELP_CLASS);
-  widget.title.text = 'Help';
-  widget.id = 'help-doc';
+  let p1 = new CommandPalette();
+  let m1 = new StandardPaletteModel();
+  p1.title.text = 'Help';
+  p1.id = 'help-doc';
+  //p1.addClass(HELP_CLASS); 
 
+  let widget = new IFrame();
+  widget.addClass(HELP_CLASS); 
+  widget.id = 'help-doc'; 
   let helpCommandItems = COMMANDS.map(command => {
     return {
       id: command.id,
       handler: () => {
-        attachHelp();
-        showHelp();
+        widget.title.text = command.text;
+        widget.title.closable = true;
+
         widget.loadURL(command.url);
+        app.shell.addToMainArea(widget);
+        let stack = widget.parent;
+        if (!stack) {
+           return;
+        }
+        let tabs = stack.parent;
+        if (tabs instanceof TabPanel) {
+           tabs.currentWidget = widget;
+        }
       }
     };
   });
+
+  let command2 = COMMANDS.map(command => {
+    return {
+      id: command.id,
+      text: command.text,
+      caption: `Open ${command.text}`,
+      category: 'Help',
+      handler: () => {
+        widget.title.text = command.text;
+        widget.title.closable = true;        
+
+        widget.loadURL(command.url);
+        app.shell.addToMainArea(widget);
+        let stack = widget.parent;
+        if (!stack) {
+           return;
+        }
+        let tabs = stack.parent;
+        if (tabs instanceof TabPanel) {
+           tabs.currentWidget = widget;
+        }
+      }
+    };
+  });
+
+  m1.addItems(command2);
+  p1.model = m1;
 
   app.commands.add(helpCommandItems);
 
@@ -105,23 +168,24 @@ function activateHelpHandler(app: Application): Promise<void> {
   });
 
   app.palette.add(helpPaletteItems);
+  attachHelp();
 
   return Promise.resolve(void 0);
 
   function attachHelp(): void {
-    if (!widget.isAttached) app.shell.addToRightArea(widget);
+    if (!p1.isAttached) app.shell.addToLeftArea(p1, {rank: 101});
   }
 
   function showHelp(): void {
-    app.shell.activateRight(widget.id);
+    app.shell.activateLeft(p1.id);
   }
 
   function hideHelp(): void {
-    if (!widget.isHidden) app.shell.collapseRight();
+    if (!p1.isHidden) app.shell.collapseLeft();
   }
 
   function toggleHelp(): void {
-    if (widget.isHidden) {
+    if (p1.isHidden) {
       showHelp();
     } else {
       hideHelp();
