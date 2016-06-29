@@ -56,13 +56,7 @@ const COMMANDS = [
     id: 'help-doc:notebook-tutorial',
     url: 'http://nbviewer.jupyter.org/github/jupyter/notebook/' +
       'blob/master/docs/source/examples/Notebook/Notebook Basics.ipynb'
-  },
-  {
-    text: 'Frequently Asked Questions',
-    id: 'help-doc:FAQ-Page',
-    url: 'test.html'
   }
-
 ];
 
 
@@ -84,15 +78,13 @@ const helpHandlerExtension = {
  * returns A promise that resolves when the extension is activated.
  */
 function activateHelpHandler(app: Application): Promise<void> {
-  let p1 = new CommandPalette();
-  let m1 = new StandardPaletteModel();
-  p1.title.text = 'Help';
-  p1.id = 'help-doc';
-  //p1.addClass(HELP_CLASS); 
+  let helpPalette = new CommandPalette();
+  let mPalette = new StandardPaletteModel();
+  helpPalette.title.text = 'Help';
+  helpPalette.id = 'help-doc';
 
   let widget = new IFrame();
   widget.addClass(HELP_CLASS); 
-  widget.id = 'help-doc'; 
   let helpCommandItems = COMMANDS.map(command => {
     return {
       id: command.id,
@@ -104,17 +96,17 @@ function activateHelpHandler(app: Application): Promise<void> {
         app.shell.addToMainArea(widget);
         let stack = widget.parent;
         if (!stack) {
-           return;
+            return;
         }
         let tabs = stack.parent;
         if (tabs instanceof TabPanel) {
-           tabs.currentWidget = widget;
+            tabs.currentWidget = widget;
         }
       }
     };
   });
 
-  let command2 = COMMANDS.map(command => {
+  let mainHelpPaletteItems = COMMANDS.map(command => {
     return {
       id: command.id,
       text: command.text,
@@ -138,8 +130,8 @@ function activateHelpHandler(app: Application): Promise<void> {
     };
   });
 
-  m1.addItems(command2);
-  p1.model = m1;
+  mPalette.addItems(mainHelpPaletteItems);
+  helpPalette.model = mPalette;
 
   app.commands.add(helpCommandItems);
 
@@ -173,19 +165,19 @@ function activateHelpHandler(app: Application): Promise<void> {
   return Promise.resolve(void 0);
 
   function attachHelp(): void {
-    if (!p1.isAttached) app.shell.addToLeftArea(p1, {rank: 101});
+    if (!helpPalette.isAttached) app.shell.addToLeftArea(p1, {rank: 101});
   }
 
   function showHelp(): void {
-    app.shell.activateLeft(p1.id);
+    app.shell.activateLeft(helpPalette.id);
   }
 
   function hideHelp(): void {
-    if (!p1.isHidden) app.shell.collapseLeft();
+    if (!helpPalette.isHidden) app.shell.collapseLeft();
   }
 
   function toggleHelp(): void {
-    if (p1.isHidden) {
+    if (helpPalette.isHidden) {
       showHelp();
     } else {
       hideHelp();
