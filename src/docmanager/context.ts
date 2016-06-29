@@ -54,8 +54,15 @@ class Context implements IDocumentContext<IDocumentModel> {
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  get dirtyCleared(): ISignal<Context, void> {
-    return Private.dirtyClearedSignal.bind(this);
+  get contentsModelChanged(): ISignal<Context, IContentsModel> {
+    return Private.contentsModelChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when the context is fully populated for the first time.
+   */
+  get populated(): ISignal<IDocumentContext<IDocumentModel>, void> {
+    return Private.populatedSignal.bind(this);
   }
 
   /**
@@ -120,7 +127,17 @@ class Context implements IDocumentContext<IDocumentModel> {
   }
 
   /**
-   * Get whether the context has been disposed.
+   * Test whether the context is fully populated.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get isPopulated(): boolean {
+    return this._manager.isPopulated(this._id);
+  }
+
+  /**
+   * Test whether the context has been disposed.
    */
   get isDisposed(): boolean {
     return this._manager === null;
@@ -200,11 +217,11 @@ class ContextManager implements IDisposable {
   /**
    * Construct a new context manager.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: ISession.IManager,  kernelspecs: IKernel.ISpecModels, opener: (id: string, widget: Widget) => IDisposable) {
-    this._contentsManager = contentsManager;
-    this._sessionManager = sessionManager;
-    this._opener = opener;
-    this._kernelspecids = kernelspecs;
+  constructor(options: ContextManager.IOptions) {
+    this._contentsManager = options.contentsManager;
+    this._sessionManager = options.sessionManager;
+    this._opener = options.opener;
+    this._kernelspecids = options.kernelspecs;
   }
 
   /**
@@ -250,7 +267,8 @@ class ContextManager implements IDisposable {
       modelName: factory.name,
       opts: factory.contentsOptions,
       contentsModel: null,
-      session: null
+      session: null,
+      isPopulated: false
     };
     return id;
   }
@@ -368,7 +386,7 @@ class ContextManager implements IDisposable {
    *
    * @param newPath - The new path.
    */
-  rename(oldPath: string, newPath: string): void {
+  handleRename(oldPath: string, newPath: string): void {
     // Update all of the paths, but only update one session
     // so there is only one REST API call.
     let ids = this.getIdsForPath(oldPath);
@@ -451,9 +469,32 @@ class ContextManager implements IDisposable {
       } else {
         model.fromString(contents.content);
       }
-      contextEx.contentsModel = this._copyContentsModel(contents);
+      let contentsModel = this._copyContentsModel(contents);
+      // TODO: use deepEqual to check for equality
+      contextEx.contentsModel = contentsModel;
+      contextEx.context.contentsModelChanged.emit(contentsModel);
       model.dirty = false;
     });
+  }
+
+  /**
+   * Test whether the context is fully populated.
+   */
+  isPopulated(id: string): boolean {
+    let contextEx = this._contexts[id];
+    return contextEx.isPopulated;
+  }
+
+  /**
+   * Finalize a context.
+   */
+  finalize(id: string): void {
+    let contextEx = this._contexts[id];
+    if (contextEx.isPopulated) {
+      return;
+    }
+    contextEx.isPopulated = true;
+    this._contexts[id].context.populated.emit(void 0);
   }
 
   /**
@@ -521,6 +562,38 @@ class ContextManager implements IDisposable {
 
 
 /**
+ * A namespace for ContextManager statics.
+ */
+export namespace ContextManager {
+  /**
+   * The options used to initialize a context manager.
+   */
+  export
+  interface IOptions {
+    /**
+     * A contents manager instance.
+     */
+    contentsManager: IContentsManager;
+
+    /**
+     * A session manager instance.
+     */
+    sessionManager: ISession.IManager;
+
+    /**
+     * The system kernelspec information.
+     */
+    kernelspecs: IKernel.ISpecModels;
+
+    /**
+     * A callback for opening sibling widgets.
+     */
+    opener: (id: string, widget: Widget) => IDisposable;
+  }
+}
+
+
+/**
  * A namespace for private data.
  */
 namespace Private {
@@ -536,6 +609,7 @@ namespace Private {
     path: string;
     contentsModel: IContentsModel;
     modelName: string;
+    isPopulated: boolean;
   }
 
   /**
@@ -551,8 +625,14 @@ namespace Private {
   const pathChangedSignal = new Signal<Context, string>();
 
   /**
-   * A signal emitted when the model is saved or reverted.
+   * A signal emitted when the contentsModel changes.
    */
   export
-  const dirtyClearedSignal = new Signal<Context, void>();
+  const contentsModelChangedSignal = new Signal<Context, IContentsModel>();
+
+  /**
+   * A signal emitted when the context is fully populated for the first time.
+   */
+  export
+  const populatedSignal = new Signal<Context, void>();
 }

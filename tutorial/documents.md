@@ -91,13 +91,3 @@ given model.  They are tied to a model and can be shared between widgets.
 The reason for a separate context and model is so that it is easy to create
 model factories and the heavy lifting of the context is left to the Document
 Manager.
-
-### [Document Wrappers](http://jupyter.org/jupyterlab/classes/_docmanager_manager_.documentwrapper.html)
-
-The top level widget created by the Document Manager that wraps the widget
-returned by the widget factory.
-
-Document wrappers are used because they are created synchronously; while,
-the widgets created using the widget factory are created asynchronously after
-potentially loading data from disk. Some interfaces (like drag and drop)
-require a widget to be returned synchronously.

@@ -217,6 +217,14 @@ namespace ToolbarItems {
 
   /**
    * Create a cell type switcher item.
+   *
+   * #### Notes
+   * It will display the type of the current active cell.
+   * If more than one cell is selected but are of different types,
+   * it will display `'-'`.
+   * When the user changes the cell type, it will change the
+   * cell types of the selected cells.
+   * It can handle a change to the context.
    */
   export
   function createCellTypeItem(panel: NotebookPanel): Widget {
@@ -225,6 +233,11 @@ namespace ToolbarItems {
 
   /**
    * Create a kernel name indicator item.
+   *
+   * #### Notes
+   * It will display the `'display_name`' of the current kernel,
+   * or `'No Kernel!'` if there is no kernel.
+   * It can handle a change in context or kernel.
    */
   export
   function createKernelNameItem(panel: NotebookPanel): Widget {
@@ -246,6 +259,12 @@ namespace ToolbarItems {
 
   /**
    * Create a kernel status indicator item.
+   *
+   * #### Notes
+   * It show display a busy status if the kernel status is
+   * not idle.
+   * It will show the current status in the node title.
+   * It can handle a change to the context or the kernel.
    */
   export
   function createKernelStatusItem(panel: NotebookPanel): Widget {
@@ -253,7 +272,7 @@ namespace ToolbarItems {
   }
 
   /**
-   * Add the default items to a toolbar.
+   * Add the default items to the panel toolbar.
    */
   export
   function populateDefaults(panel: NotebookPanel): void {
@@ -297,34 +316,70 @@ class CellTypeSwitcher extends Widget {
   /**
    * Construct a new cell type switcher.
    */
-  constructor(content: Notebook) {
+  constructor(widget: Notebook) {
     super();
     this.addClass(TOOLBAR_CELLTYPE);
 
     let select = this.node.firstChild as HTMLSelectElement;
+    this._wildCard = document.createElement('option');
+    this._wildCard.value = '-';
+    this._wildCard.textContent = '-';
+
     // Change current cell type on a change in the dropdown.
     select.addEventListener('change', event => {
+      if (select.value === '-') {
+        return;
+      }
       if (!this._changeGuard) {
         let value = select.value as nbformat.CellType;
-        NotebookActions.changeCellType(content, value);
+        NotebookActions.changeCellType(widget, value);
       }
     });
 
     // Set the initial value.
-    let index = content.activeCellIndex;
-    if (content.model) {
-      select.value = content.model.cells.get(index).type;
+    if (widget.model) {
+      this._updateValue(widget, select);
     }
 
     // Follow the type of the active cell.
-    content.activeCellChanged.connect((sender, cell) => {
-      this._changeGuard = true;
-      select.value = cell.model.type;
-      this._changeGuard = false;
+    widget.activeCellChanged.connect((sender, cell) => {
+      this._updateValue(widget, select);
+    });
+
+    // Follow a change in the selection.
+    widget.selectionChanged.connect(() => {
+      this._updateValue(widget, select);
     });
   }
 
+  /**
+   * Update the value of the dropdown from the widget state.
+   */
+  private _updateValue(widget: Notebook, select: HTMLSelectElement): void {
+    if (!widget.activeCell) {
+      return;
+    }
+    let mType: string = widget.activeCell.model.type;
+    for (let i = 0; i < widget.childCount(); i++) {
+      let child = widget.childAt(i);
+      if (widget.isSelected(child)) {
+        if (child.model.type !== mType) {
+          mType = '-';
+          select.appendChild(this._wildCard);
+          break;
+        }
+      }
+    }
+    if (mType !== '-') {
+      select.remove(3);
+    }
+    this._changeGuard = true;
+    select.value = mType;
+    this._changeGuard = false;
+  }
+
   private _changeGuard = false;
+  private _wildCard: HTMLOptionElement = null;
 }
 
 

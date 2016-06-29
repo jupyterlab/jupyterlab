@@ -29,6 +29,8 @@ import {
 export
 class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
 
+  methods: string[] = [];
+
   constructor(model: T) {
     this._model = model;
   }
@@ -41,8 +43,12 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     return Private.pathChangedSignal.bind(this);
   }
 
-  get dirtyCleared(): ISignal<IDocumentContext<IDocumentModel>, void> {
-    return Private.dirtyClearedSignal.bind(this);
+  get contentsModelChanged(): ISignal<IDocumentContext<T>, IContentsModel> {
+    return Private.contentsModelChanged.bind(this);
+  }
+
+  get populated(): ISignal<IDocumentContext<IDocumentModel>, void> {
+    return Private.populatedSignal.bind(this);
   }
 
   get id(): string {
@@ -69,6 +75,10 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     return KERNELSPECS;
   }
 
+  get isPopulated(): boolean {
+    return true;
+  }
+
   get isDisposed(): boolean {
     return this._model === null;
   }
@@ -76,33 +86,40 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
   dispose(): void {
     this._model.dispose();
     this._model = null;
+    this.methods.push('dispose');
   }
 
   changeKernel(options: IKernel.IModel): Promise<IKernel> {
     this._kernel = new MockKernel(options);
     this.kernelChanged.emit(this._kernel);
+    this.methods.push('changeKernel');
     return Promise.resolve(this._kernel);
   }
 
   save(): Promise<void> {
+    this.methods.push('save');
     return Promise.resolve(void 0);
   }
 
   saveAs(path: string): Promise<void> {
     this._path = path;
     this.pathChanged.emit(path);
+    this.methods.push('saveAs');
     return Promise.resolve(void 0);
   }
 
   revert(): Promise<void> {
+    this.methods.push('revert');
     return Promise.resolve(void 0);
   }
 
   listSessions(): Promise<ISession.IModel[]> {
+    this.methods.push('listSessions');
     return Promise.resolve([] as ISession.IModel[]);
   }
 
   addSibling(widget: Widget): IDisposable {
+    this.methods.push('addSibling');
     return void 0;
   }
 
@@ -129,8 +146,14 @@ namespace Private {
   const pathChangedSignal = new Signal<IDocumentContext<IDocumentModel>, string>();
 
   /**
-   * A signal emitted when the model is saved or reverted.
+   * A signal emitted when the context is fully populated for the first time.
    */
   export
-  const dirtyClearedSignal = new Signal<IDocumentContext<IDocumentModel>, void>();
+  const populatedSignal = new Signal<IDocumentContext<IDocumentModel>, void>();
+
+  /**
+   * A signal emitted when the contentsModel changes.
+   */
+  export
+  const contentsModelChanged = new Signal<IDocumentContext<IDocumentModel>, IContentsModel>();
 }

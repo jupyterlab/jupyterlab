@@ -62,17 +62,17 @@ const SHORTCUTS = [
   },
   {
     command: 'file-operations:save',
-    selector: '.jp-DocumentWrapper',
+    selector: '.jp-Document',
     sequence: ['Accel S']
   },
   {
     command: 'file-operations:close',
-    selector: '.jp-DocumentWrapper',
+    selector: '.jp-Document',
     sequence: ['Ctrl Q']
   },
   {
     command: 'file-operations:close-all',
-    selector: '.jp-DocumentWrapper',
+    selector: '.jp-Document',
     sequence: ['Ctrl Shift Q']
   },
   {

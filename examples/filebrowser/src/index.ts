@@ -10,7 +10,7 @@ import {
 } from 'jupyterlab/lib/filebrowser';
 
 import {
-  DocumentManager, DocumentWrapper
+  DocumentManager
 } from 'jupyterlab/lib/docmanager';
 
 import {
@@ -42,32 +42,36 @@ import {
   SplitPanel
 } from 'phosphor-splitpanel';
 
+import {
+  Widget
+} from 'phosphor-widget';
+
 import 'jupyterlab/lib/index.css';
 import 'jupyterlab/lib/theme.css';
 
 
 function main(): void {
-  let sessionsManager = new SessionManager();
-  sessionsManager.getSpecs().then(specs => {
-    createApp(sessionsManager, specs);
+  let sessionManager = new SessionManager();
+  sessionManager.getSpecs().then(kernelspecs => {
+    createApp(sessionManager, kernelspecs);
   });
 }
 
 
-function createApp(sessionsManager: SessionManager, specs: IKernel.ISpecModels): void {
+function createApp(sessionManager: SessionManager, kernelspecs: IKernel.ISpecModels): void {
   let contentsManager = new ContentsManager();
-  let widgets: DocumentWrapper[] = [];
-  let activeWidget: DocumentWrapper;
+  let widgets: Widget[] = [];
+  let activeWidget: Widget;
 
   let opener = {
-    open: (widget: DocumentWrapper) => {
+    open: (widget: Widget) => {
       if (widgets.indexOf(widget) === -1) {
         dock.insertTabAfter(widget);
         widgets.push(widget);
       }
       dock.selectWidget(widget);
       activeWidget = widget;
-      widget.disposed.connect((w: DocumentWrapper) => {
+      widget.disposed.connect((w: Widget) => {
         let index = widgets.indexOf(w);
         widgets.splice(index, 1);
       });
@@ -75,9 +79,13 @@ function createApp(sessionsManager: SessionManager, specs: IKernel.ISpecModels):
   };
 
   let docRegistry = new DocumentRegistry();
-  let docManager = new DocumentManager(
-    docRegistry, contentsManager, sessionsManager, specs, opener
-  );
+  let docManager = new DocumentManager({
+    registry: docRegistry,
+    contentsManager,
+    sessionManager,
+    kernelspecs,
+    opener
+  });
   let mFactory = new TextModelFactory();
   let wFactory = new EditorWidgetFactory();
   docRegistry.addModelFactory(mFactory);
@@ -90,7 +98,7 @@ function createApp(sessionsManager: SessionManager, specs: IKernel.ISpecModels):
     canStartKernel: true
   });
 
-  let fbModel = new FileBrowserModel(contentsManager, sessionsManager, specs);
+  let fbModel = new FileBrowserModel(contentsManager, sessionManager, kernelspecs);
   let fbWidget = new FileBrowserWidget(fbModel, docManager, opener);
 
   let panel = new SplitPanel();
@@ -135,7 +143,8 @@ function createApp(sessionsManager: SessionManager, specs: IKernel.ISpecModels):
     sequence: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     handler: () => {
-      activeWidget.context.save();
+      let context = docManager.contextForWidget(activeWidget);
+      context.save();
     }
   }]);
 
@@ -202,7 +211,7 @@ function createApp(sessionsManager: SessionManager, specs: IKernel.ISpecModels):
     new MenuItem({
       text: 'Info Demo',
       handler: () => {
-        let msg = 'The quick brown fox jumped over the lazy dog'
+        let msg = 'The quick brown fox jumped over the lazy dog';
         showDialog({
           title: 'Cool Title',
           body: msg,
@@ -233,7 +242,7 @@ function createApp(sessionsManager: SessionManager, specs: IKernel.ISpecModels):
 function dialogDemo(): void {
   let body = document.createElement('div');
   let input = document.createElement('input');
-  input.value = 'Untitled.ipynb'
+  input.value = 'Untitled.ipynb';
   let selector = document.createElement('select');
   let option0 = document.createElement('option');
   option0.value = 'python';

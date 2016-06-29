@@ -78,20 +78,6 @@ describe('docmanager/default', () => {
 
     });
 
-    describe('#beforeClose()', () => {
-
-      it('should take an action on a widget before closing it', (done) => {
-        let factory = new WidgetFactory();
-        let model = new DocumentModel();
-        let context = new MockContext(model);
-        let widget = factory.createNew(context);
-        factory.beforeClose(widget, context).then(() => {
-          done();
-        });
-      });
-
-    });
-
   });
 
   describe('Base64ModelFactory', () => {
@@ -354,19 +340,6 @@ describe('docmanager/default', () => {
       it('should deserialize the model from JSON', () => {
         let model = new DocumentModel();
         model.fromJSON('"foo"');
-        expect(model.toString()).to.be('foo');
-      });
-
-    });
-
-    describe('#initialize()', () => {
-
-      it('should clear the dirty flag', () => {
-        let model = new DocumentModel();
-        model.fromString('foo');
-        expect(model.dirty).to.be(true);
-        model.initialize();
-        expect(model.dirty).to.be(false);
         expect(model.toString()).to.be('foo');
       });
 

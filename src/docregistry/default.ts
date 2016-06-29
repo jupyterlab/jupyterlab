@@ -154,13 +154,6 @@ class DocumentModel implements IDocumentModel {
     this.fromString(JSON.parse(value));
   }
 
-  /**
-   * Initialize the model state.
-   */
-  initialize(): void {
-    this.dirty = false;
-  }
-
   private _text = '';
   private _defaultLang = '';
   private _dirty = false;
@@ -283,17 +276,6 @@ abstract class ABCWidgetFactory implements IWidgetFactory<Widget, IDocumentModel
    * Create a new widget given a document model and a context.
    */
   abstract createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): Widget;
-
-  /**
-   * Take an action on a widget before closing it.
-   *
-   * @returns A promise that resolves to true if the document should close
-   *   and false otherwise.
-   */
-  beforeClose(widget: Widget, context: IDocumentContext<IDocumentModel>): Promise<boolean> {
-    // There is nothing specific to do.
-    return Promise.resolve(true);
-  }
 
   private _isDisposed = false;
 }

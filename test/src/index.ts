@@ -14,6 +14,7 @@ import './notebook/cells/widget.spec';
 import './notebook/cells/model.spec';
 
 import './notebook/notebook/actions.spec';
+import './notebook/notebook/default-toolbar.spec';
 import './notebook/notebook/model.spec';
 import './notebook/notebook/modelfactory.spec';
 import './notebook/notebook/nbformat.spec';

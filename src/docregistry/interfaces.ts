@@ -92,11 +92,6 @@ interface IDocumentModel extends IDisposable {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: any): void;
-
-  /**
-   * Initialize the model state.
-   */
-  initialize(): void;
 }
 
 
@@ -104,6 +99,26 @@ interface IDocumentModel extends IDisposable {
  * The document context object.
  */
 export interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
+  /**
+   * A signal emitted when the kernel changes.
+   */
+  kernelChanged: ISignal<IDocumentContext<T>, IKernel>;
+
+  /**
+   * A signal emitted when the path changes.
+   */
+  pathChanged: ISignal<IDocumentContext<T>, string>;
+
+  /**
+   * A signal emitted when the contentsModel changes.
+   */
+  contentsModelChanged: ISignal<IDocumentContext<T>, IContentsModel>;
+
+  /**
+   * A signal emitted when the context is fully populated for the first time.
+   */
+  populated: ISignal<IDocumentContext<T>, void>;
+
   /**
    * The unique id of the context.
    *
@@ -141,7 +156,8 @@ export interface IDocumentContext<T extends IDocumentModel> extends IDisposable 
    *
    * #### Notes
    * This is a read-only property.  The model will have an
-   * empty `contents` field.
+   * empty `contents` field.  It will be `null` until the
+   * first save or load to disk.
    */
   contentsModel: IContentsModel;
 
@@ -154,14 +170,12 @@ export interface IDocumentContext<T extends IDocumentModel> extends IDisposable 
   kernelspecs: IKernel.ISpecModels;
 
   /**
-   * A signal emitted when the kernel changes.
+   * Test whether the context is fully populated.
+   *
+   * #### Notes
+   * This is a read-only property.
    */
-  kernelChanged: ISignal<IDocumentContext<T>, IKernel>;
-
-  /**
-   * A signal emitted when the path changes.
-   */
-  pathChanged: ISignal<IDocumentContext<T>, string>;
+  isPopulated: boolean;
 
   /**
    * Change the current kernel associated with the document.
@@ -258,14 +272,6 @@ interface IWidgetFactory<T extends Widget, U extends IDocumentModel> extends IDi
    * Create a new widget.
    */
   createNew(context: IDocumentContext<U>, kernel?: IKernel.IModel): T;
-
-  /**
-   * Take an action on a widget before closing it.
-   *
-   * @returns A promise that resolves to true if the document should close
-   *   and false otherwise.
-   */
-  beforeClose(widget: T, context: IDocumentContext<U>): Promise<boolean>;
 }
 
 

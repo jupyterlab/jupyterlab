@@ -154,8 +154,6 @@
 .jp-NBToolbar {
     display: flex;
     flex-direction: row;
-    background-color: #F8F8F8;
-    border-top: none;
     border-bottom: 1px solid #E0E0E0;
     height: 24px;
 }
@@ -180,15 +178,12 @@
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-cellType {
-    border-left: 1px solid #E0E0E0;
-    border-right: 1px solid #E0E0E0;
-    flex-basis: 100px;
+.jp-NBToolbar-item.jp-NBToolbar-cellType select {
+    background: #FFFFFF;
 }
 
-
 .jp-NBToolbar-cellType .jp-NBToolbar-cellTypeDropdown {
-    border: none;
+    border: 1px solid #BDBDBD;
     border-radius: 0;
     outline: none;
     width: 100%;

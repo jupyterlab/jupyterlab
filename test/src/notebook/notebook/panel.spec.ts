@@ -36,10 +36,6 @@ import {
 } from '../../../../lib/notebook/notebook/model';
 
 import {
-  nbformat
-} from '../../../../lib/notebook/notebook/nbformat';
-
-import {
   NotebookPanel
 } from '../../../../lib/notebook/notebook/panel';
 
@@ -59,13 +55,16 @@ import {
   defaultRenderMime
 } from '../../rendermime/rendermime.spec';
 
+import {
+  DEFAULT_CONTENT
+} from '../utils';
+
 
 /**
  * Default data.
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
-const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
 
 class LogNotebookPanel extends NotebookPanel {
@@ -85,6 +84,11 @@ class LogNotebookPanel extends NotebookPanel {
   protected onPathChanged(sender: IDocumentContext<INotebookModel>, path: string): void {
     super.onPathChanged(sender, path);
     this.methods.push('onPathChanged');
+  }
+
+  protected onPopulated(sender: IDocumentContext<INotebookModel>, args: void): void {
+    super.onPopulated(sender, args);
+    this.methods.push('onPopulated');
   }
 }
 
@@ -335,6 +339,21 @@ describe('notebook/notebook/panel', () => {
         panel.methods = [];
         panel.context = context;
         expect(panel.methods).to.contain('onContextChanged');
+      });
+
+    });
+
+    describe('#onPopulated()', () => {
+
+      it('should initialize the model state', () => {
+        let panel = new LogNotebookPanel({ rendermime, clipboard });
+        let model = new NotebookModel();
+        model.fromJSON(DEFAULT_CONTENT);
+        expect(model.cells.canUndo).to.be(true);
+        let context = new MockContext<NotebookModel>(model);
+        panel.context = context;
+        expect(panel.methods).to.contain('onPopulated');
+        expect(model.cells.canUndo).to.be(false);
       });
 
     });

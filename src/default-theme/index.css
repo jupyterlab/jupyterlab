@@ -178,10 +178,9 @@ body {
 
 /* increase specificity to override default */
 .p-TabBar > .p-TabBar-footer {
-  flex: 0 0 3px;
-  background: #FAFAFA;
+  flex: 0 0 4px;
+  background: #FFFFFF;
   border-top: 1px solid #BDBDBD;
-  border-bottom: 1px solid #E0E0E0;
 }
 
 
@@ -207,7 +206,7 @@ body {
 .p-TabBar-tab.p-mod-current {
   min-height: 24px;
   max-height: 24px;
-  background: #FAFAFA;
+  background: #FFFFFF;
   border-top: 1px solid #F27624;
 }
 

@@ -315,6 +315,8 @@ namespace NotebookActions {
    * #### Notes
    * The last selected cell will be activated.
    * The existing selection will be cleared.
+   * An execution error will prevent the remaining code cells from executing.
+   * All markdown cells will be rendered.
    */
   export
   function run(widget: Notebook, kernel?: IKernel): Promise<boolean> {
@@ -358,6 +360,8 @@ namespace NotebookActions {
    * #### Notes
    * The existing selection will be cleared.
    * The cell after the last selected cell will be activated.
+   * An execution error will prevent the remaining code cells from executing.
+   * All markdown cells will be rendered.
    * If the last selected cell is the last cell, a new code cell
    * will be created in `'edit'` mode.  The new cell creation can be undone.
    */
@@ -367,9 +371,6 @@ namespace NotebookActions {
       return Promise.resolve(false);
     }
     return run(widget, kernel).then(result => {
-      if (!result) {
-        return false;
-      }
       let model = widget.model;
       if (widget.activeCellIndex === widget.childCount() - 1) {
         let cell = model.factory.createCodeCell();
@@ -377,7 +378,7 @@ namespace NotebookActions {
         widget.mode = 'edit';
       }
       widget.activeCellIndex++;
-      return true;
+      return result;
     });
   }
 
@@ -389,6 +390,8 @@ namespace NotebookActions {
    * @param kernel - An optional kernel object.
    *
    * #### Notes
+   * An execution error will prevent the remaining code cells from executing.
+   * All markdown cells will be rendered.
    * The widget mode will be set to `'edit'` after running.
    * The existing selection will be cleared.
    * The cell insert can be undone.
@@ -399,15 +402,12 @@ namespace NotebookActions {
       return Promise.resolve(false);
     }
     return run(widget, kernel).then(result => {
-      if (!result) {
-        return false;
-      }
       let model = widget.model;
       let cell = model.factory.createCodeCell();
       model.cells.insert(widget.activeCellIndex + 1, cell);
       widget.activeCellIndex++;
       widget.mode = 'edit';
-      return true;
+      return result;
     });
   }
 
@@ -419,6 +419,9 @@ namespace NotebookActions {
    * @param kernel - An optional kernel object.
    * #### Notes
    * The existing selection will be cleared.
+   * An execution error will prevent the remaining code cells from executing.
+   * All markdown cells will be rendered.
+   * The last cell in the notebook will be activated.
    */
   export
   function runAll(widget: Notebook, kernel?: IKernel): Promise<boolean> {
@@ -498,12 +501,8 @@ namespace NotebookActions {
     let prev = widget.childAt(widget.activeCellIndex - 1);
     if (widget.isSelected(prev)) {
       widget.deselect(current);
-      if (widget.activeCellIndex >= 1) {
-        let prevPrev = widget.childAt(widget.activeCellIndex - 1);
-        if (!widget.isSelected(prevPrev)) {
-          widget.deselect(prev);
-        }
-      } else {
+      let prevPrev = widget.childAt(widget.activeCellIndex - 2);
+      if (!widget.isSelected(prevPrev)) {
         widget.deselect(prev);
       }
     } else {
@@ -535,12 +534,8 @@ namespace NotebookActions {
     let next = widget.childAt(widget.activeCellIndex + 1);
     if (widget.isSelected(next)) {
       widget.deselect(current);
-      if (widget.activeCellIndex < widget.childCount() - 1) {
-        let nextNext = widget.childAt(widget.activeCellIndex + 1);
-        if (!widget.isSelected(nextNext)) {
-          widget.deselect(next);
-        }
-      } else {
+      let nextNext = widget.childAt(widget.activeCellIndex + 2);
+      if (!widget.isSelected(nextNext)) {
         widget.deselect(next);
       }
     } else {
@@ -831,11 +826,7 @@ namespace Private {
       break;
     case 'code':
       if (kernel) {
-        return (widget as CodeCellWidget).execute(kernel).then(reply => {
-          // TODO: let status = (reply as any).content.status;
-          // return status === 'ok';
-          return true;
-        });
+        return (widget as CodeCellWidget).execute(kernel);
       }
       (widget.model as CodeCellModel).executionCount = null;
       break;
