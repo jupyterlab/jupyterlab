@@ -98,8 +98,16 @@ function createApp(sessionManager: SessionManager, kernelspecs: IKernel.ISpecMod
     canStartKernel: true
   });
 
-  let fbModel = new FileBrowserModel(contentsManager, sessionManager, kernelspecs);
-  let fbWidget = new FileBrowserWidget(fbModel, docManager, opener);
+  let fbModel = new FileBrowserModel({
+    contentsManager,
+    sessionManager,
+    kernelspecs
+  });
+  let fbWidget = new FileBrowserWidget({
+    model: fbModel,
+    manager: docManager,
+    opener
+  });
 
   let panel = new SplitPanel();
   panel.id = 'main';

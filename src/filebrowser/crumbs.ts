@@ -52,9 +52,9 @@ class BreadCrumbs extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel) {
+  constructor(options: BreadCrumbs.IOptions) {
     super();
-    this._model = model;
+    this._model = options.model;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
@@ -260,6 +260,25 @@ class BreadCrumbs extends Widget {
   private _model: FileBrowserModel = null;
   private _crumbs: HTMLElement[] = [];
   private _crumbSeps: HTMLElement[] = [];
+}
+
+
+
+/**
+ * The namespace for the `BreadCrumbs` class statics.
+ */
+export
+namespace BreadCrumbs {
+  /**
+   * An options object for initializing a bread crumb widget.
+   */
+  export
+  interface IOptions {
+    /**
+     * A file browser model instance.
+     */
+    model: FileBrowserModel;
+  }
 }
 
 
