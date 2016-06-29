@@ -8,7 +8,7 @@ import {
 } from 'jupyter-js-services/lib/mockkernel';
 
 import {
-  CompletionModel, ICursorSpan, ICompletionItem
+  CompletionModel, ICursorSpan, ICompletionItem, ICompletionPatch
 } from '../../../../lib/notebook/completion';
 
 import {
@@ -179,6 +179,17 @@ describe('notebook/completion/model', () => {
         expect(model.items).to.eql(want);
       });
 
+      it('should order list based on score', () => {
+        let model = new TestModel();
+        let want: ICompletionItem[] = [
+          { raw: 'qux', text: '<mark>qux</mark>' },
+          { raw: 'quux', text: '<mark>qu</mark>u<mark>x</mark>' }
+        ];
+        model.options = ['qux', 'quux'];
+        model.setQuery('qux');
+        expect(model.items).to.eql(want);
+      });
+
     });
 
     describe('#options', () => {
@@ -343,6 +354,87 @@ describe('notebook/completion/model', () => {
         model.dispose();
         model.dispose();
         expect(model.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#handleTextChange()', () => {
+
+      it('should set current change value', () => {
+        let model = new CompletionModel();
+        let currentValue = 'foo';
+        let oldValue = currentValue;
+        let newValue = 'foob';
+        let coords: ICoords = null;
+        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let request: ICompletionRequest = {
+          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+        };
+        let change: ITextChange = {
+          ch: 4, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+        };
+        model.original = request;
+        model.cursor = cursor;
+        expect(model.current).to.be(null);
+        model.handleTextChange(change);
+        expect(model.current).to.be.ok();
+      });
+
+      it('should reset model if last character of change is whitespace', () => {
+        let model = new CompletionModel();
+        let currentValue = 'foo';
+        let oldValue = currentValue;
+        let newValue = 'foo ';
+        let coords: ICoords = null;
+        let request: ICompletionRequest = {
+          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+        };
+        let change: ITextChange = {
+          ch: 4, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+        };
+        model.original = request;
+        expect(model.original).to.be.ok();
+        model.handleTextChange(change);
+        expect(model.original).to.be(null);
+      });
+
+    });
+
+    describe('#createPatch()', () => {
+
+      it('should return a patch value', () => {
+        let model = new CompletionModel();
+        let currentValue = 'foo';
+        let patch = 'foobar';
+        let want: ICompletionPatch = { text: patch, position: patch.length };
+        let coords: ICoords = null;
+        let cursor: ICursorSpan = { start: 0, end: 3 };
+        let request: ICompletionRequest = {
+          ch: 3, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+        };
+        model.original = request;
+        model.cursor = cursor;
+        expect(model.createPatch(patch)).to.eql(want);
+      });
+
+      it('should return null if original request or cursor are null', () => {
+        let model = new CompletionModel();
+        expect(model.createPatch('foo')).to.be(null);
+      });
+
+      it('should handle line breaks in original value', () => {
+        let model = new CompletionModel();
+        let currentValue = 'foo\nbar';
+        let patch = 'barbaz';
+        let want: ICompletionPatch = { text: 'foo\nbarbaz', position: 10 };
+        let coords: ICoords = null;
+        let cursor: ICursorSpan = { start: 0, end: 3 };
+        let request: ICompletionRequest = {
+          ch: 3, chHeight: 0, chWidth: 0, line: 1, coords, currentValue
+        };
+        model.original = request;
+        model.cursor = cursor;
+        expect(model.createPatch(patch)).to.eql(want);
       });
 
     });

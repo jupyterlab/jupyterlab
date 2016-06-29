@@ -261,9 +261,6 @@ class CompletionModel implements ICompletionModel {
     return this._cursor;
   }
   set cursor(newValue: ICursorSpan) {
-    if (deepEqual(newValue, this._cursor)) {
-      return;
-    }
     // Original request must always be set before a cursor change. If it isn't
     // the model fails silently.
     if (!this.original) {
