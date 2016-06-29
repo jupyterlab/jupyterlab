@@ -826,7 +826,12 @@ namespace Private {
       break;
     case 'code':
       if (kernel) {
-        return (widget as CodeCellWidget).execute(kernel);
+        return (widget as CodeCellWidget).execute(kernel).then(reply => {
+          if (reply)
+            return reply.content.status === 'ok';
+          else
+            return true;
+        });
       }
       (widget.model as CodeCellModel).executionCount = null;
       break;

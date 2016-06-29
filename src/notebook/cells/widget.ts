@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  IKernel, KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -436,24 +436,20 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Execute the cell given a kernel.
    */
-  execute(kernel: IKernel): Promise<boolean> {
+  execute(kernel: IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
     let model = this.model as ICodeCellModel;
     let code = model.source;
     if (!code.trim()) {
       model.executionCount = null;
-      return Promise.resolve(true);
+      return Promise.resolve(null);
     }
     model.executionCount = null;
     this.setPrompt('*');
     this.trusted = true;
     let outputs = model.outputs;
-    return outputs.execute(code, kernel).then((reply: any) => {
+    return outputs.execute(code, kernel).then(reply => {
       model.executionCount = reply.content.execution_count;
-      if (reply.content.status !== 'ok') {
-        model.executionCount = null;
-        return false;
-      }
-      return true;
+      return reply;
     });
   }
 
