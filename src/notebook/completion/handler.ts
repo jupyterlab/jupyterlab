@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  IKernel, KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -16,6 +16,10 @@ import {
 import {
   CellEditorWidget, ITextChange, ICompletionRequest
 } from '../cells/editor';
+
+import {
+  ICursorSpan
+} from './model';
 
 import {
   CompletionWidget
@@ -89,6 +93,41 @@ class CellCompletionHandler implements IDisposable {
   }
 
   /**
+   * Make a completion request using the kernel.
+   */
+  private _complete(request: ICompletionRequest): void {
+    let content: KernelMessage.ICompleteRequest = {
+      // Only send the current line of code for completion.
+      code: request.currentValue.split('\n')[request.line],
+      cursor_pos: request.ch
+    };
+    let pending = ++this._pending;
+    this._kernel.complete(content).then(msg => {
+      // If we have been disposed, bail.
+      if (this.isDisposed) {
+        return;
+      }
+      // If a newer completion request has created a pending request, bail.
+      if (pending !== this._pending) {
+        return;
+      }
+      let value = msg.content;
+      let model = this._completion.model;
+      // Completion request failures or negative results fail silently.
+      if (value.status !== 'ok') {
+        model.reset();
+        return;
+      }
+      // Update the original request.
+      model.original = request;
+      // Update the options.
+      model.options = value.matches;
+      // Update the cursor.
+      model.cursor = { start: value.cursor_start, end: value.cursor_end };
+    });
+  }
+
+  /**
    * Handle a text changed signal from an editor.
    */
   private _onTextChanged(editor: CellEditorWidget, change: ITextChange): void {
@@ -101,11 +140,11 @@ class CellCompletionHandler implements IDisposable {
   /**
    * Handle a completion requested signal from an editor.
    */
-  private _onCompletionRequested(editor: CellEditorWidget, change: ICompletionRequest): void {
+  private _onCompletionRequested(editor: CellEditorWidget, request: ICompletionRequest): void {
     if (!this.kernel || !this._completion.model) {
       return;
     }
-    this._completion.model.makeKernelRequest(change, this.kernel);
+    this._complete(request);
   }
 
   /**
@@ -124,7 +163,8 @@ class CellCompletionHandler implements IDisposable {
     cell.editor.setCursorPosition(patch.position);
   }
 
-  private _kernel: IKernel = null;
   private _activeCell: BaseCellWidget = null;
   private _completion: CompletionWidget = null;
+  private _kernel: IKernel = null;
+  private _pending = 0;
 }

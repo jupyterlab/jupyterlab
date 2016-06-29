@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  MockKernel
+} from 'jupyter-js-services/lib/mockkernel';
+
+import {
   CompletionModel, ICursorSpan, ICompletionItem
 } from '../../../../lib/notebook/completion';
 
@@ -13,10 +17,6 @@ import {
 
 
 class TestModel extends CompletionModel {
-  setCursor(cursor: ICursorSpan) {
-    super.setCursor(cursor);
-  }
-
   setQuery(query: string) {
     super.setQuery(query);
   }
@@ -119,7 +119,7 @@ describe('notebook/completion/model', () => {
         expect(called).to.be(0);
         model.original = request;
         expect(called).to.be(1);
-        model.setCursor(cursor);
+        model.cursor = cursor;
         model.current = change;
         expect(called).to.be(2);
         model.current = null;
@@ -145,7 +145,7 @@ describe('notebook/completion/model', () => {
         expect(called).to.be(0);
         model.original = request;
         expect(called).to.be(1);
-        model.setCursor(cursor);
+        model.cursor = cursor;
         model.current = change;
         model.current = change;
         expect(called).to.be(2);
@@ -241,7 +241,7 @@ describe('notebook/completion/model', () => {
         model.current = change;
         expect(model.current).to.be(null);
         model.original = request;
-        model.setCursor(cursor);
+        model.cursor = cursor;
         model.current = change;
         expect(model.current).to.be(change);
       });
@@ -262,7 +262,7 @@ describe('notebook/completion/model', () => {
         model.original = request;
         model.current = change;
         expect(model.current).to.be(null);
-        model.setCursor(cursor);
+        model.cursor = cursor;
         model.current = change;
         expect(model.current).to.be(change);
       });
@@ -281,11 +281,35 @@ describe('notebook/completion/model', () => {
           ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
         };
         model.original = request;
-        model.setCursor(cursor);
+        model.cursor = cursor;
         model.current = change;
         expect(model.current).to.be(null);
         expect(model.original).to.be(null);
         expect(model.options).to.be(null);
+      });
+
+    });
+
+    describe('#cursor', () => {
+
+      it('should default to null', () => {
+        let model = new CompletionModel();
+        expect(model.cursor).to.be(null);
+      });
+
+      it('should not set if original request is nonexistent', () => {
+        let model = new TestModel();
+        let currentValue = 'foo';
+        let coords: ICoords = null;
+        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let request: ICompletionRequest = {
+          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+        };
+        model.cursor = cursor;
+        expect(model.cursor).to.be(null);
+        model.original = request;
+        model.cursor = cursor;
+        expect(model.cursor).to.be(cursor);
       });
 
     });

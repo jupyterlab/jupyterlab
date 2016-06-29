@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelMessage
-} from 'jupyter-js-services';
-
-import {
   IDisposable
 } from 'phosphor-disposable';
 
@@ -83,7 +79,7 @@ interface ICompletionItem {
  * A cursor span.
  */
 export
-interface ICursorSpan {
+interface ICursorSpan extends JSONObject {
   /**
    * The start position of the cursor.
    */
@@ -112,6 +108,11 @@ interface ICompletionModel extends IDisposable {
   current: ITextChange;
 
   /**
+   * The cursor details that the API has used to return matching options.
+   */
+  cursor: ICursorSpan;
+
+  /**
    * The list of visible items in the completion menu.
    */
   items: ICompletionItem[];
@@ -125,11 +126,6 @@ interface ICompletionModel extends IDisposable {
    * The original completion request details.
    */
   original: ICompletionRequest;
-
-  /**
-   * Handle a completion request using a kernel.
-   */
-  makeKernelRequest(request: ICompletionRequest, kernel: IKernel): void;
 
   /**
    * Handle a text change.
@@ -199,10 +195,8 @@ class CompletionModel implements ICompletionModel {
     if (deepEqual(newValue, this._original)) {
       return;
     }
+    this._reset();
     this._original = newValue;
-    this._current = null;
-    this.setQuery('');
-    this.setCursor(null);
     this.stateChanged.emit(void 0);
   }
 
@@ -259,6 +253,26 @@ class CompletionModel implements ICompletionModel {
     this.stateChanged.emit(void 0);
   }
 
+
+  /**
+   * The cursor details that the API has used to return matching options.
+   */
+  get cursor(): ICursorSpan {
+    return this._cursor;
+  }
+  set cursor(newValue: ICursorSpan) {
+    if (deepEqual(newValue, this._cursor)) {
+      return;
+    }
+    // Original request must always be set before a cursor change. If it isn't
+    // the model fails silently.
+    if (!this.original) {
+      return;
+    }
+    this._cursor = newValue;
+  }
+
+
   /**
    * Get whether the model is disposed.
    */
@@ -277,37 +291,6 @@ class CompletionModel implements ICompletionModel {
     this._isDisposed = true;
     clearSignalData(this);
     this._reset();
-  }
-
-  /**
-   * Make a request using a kernel.
-   */
-  makeKernelRequest(request: ICompletionRequest, kernel: IKernel): void {
-    let content: KernelMessage.ICompleteRequest = {
-      // Only send the current line of code for completion.
-      code: request.currentValue.split('\n')[request.line],
-      cursor_pos: request.ch
-    };
-    let pendingComplete = ++this._pendingComplete;
-    kernel.complete(content).then(msg => {
-      let value = msg.content;
-      // If we have been disposed, bail.
-      if (this.isDisposed) {
-        return;
-      }
-      // If a newer completion request has created a pending request, bail.
-      if (pendingComplete !== this._pendingComplete) {
-        return;
-      }
-      // Completion request failures or negative results fail silently.
-      if (value.status !== 'ok') {
-        return;
-      }
-      // Update the options.
-      this.options = value.matches;
-      // Update the cursor.
-      this.setCursor({ start: value.cursor_start, end: value.cursor_end });
-    }).then(() => { this.original = request; });
   }
 
   /**
@@ -371,13 +354,6 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
-   * Set the cursor details that the API has used to return matching options.
-   */
-  protected setCursor(cursor: ICursorSpan): void {
-    this._cursor = cursor;
-  }
-
-  /**
    * Set the query value that the model filters against.
    */
   protected setQuery(query: string): void {
@@ -415,8 +391,8 @@ class CompletionModel implements ICompletionModel {
     this._current = null;
     this._original = null;
     this._options = null;
+    this._cursor = null;
     this.setQuery('');
-    this.setCursor(null);
   }
 
   private _isDisposed = false;
@@ -425,7 +401,6 @@ class CompletionModel implements ICompletionModel {
   private _current: ITextChange = null;
   private _query = '';
   private _cursor: ICursorSpan = null;
-  private _pendingComplete = 0;
 }
 
 
