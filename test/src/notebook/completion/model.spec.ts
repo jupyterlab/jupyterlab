@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  MockKernel
-} from 'jupyter-js-services/lib/mockkernel';
-
-import {
   CompletionModel, ICursorSpan, ICompletionItem, ICompletionPatch
 } from '../../../../lib/notebook/completion';
 

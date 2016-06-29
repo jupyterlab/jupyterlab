@@ -62,9 +62,9 @@ class CompletionWidget extends Widget {
   constructor(options: CompletionWidget.IOptions = {}) {
     super();
     this._renderer = options.renderer || CompletionWidget.defaultRenderer;
+    this._reference = options.reference || null;
     this.model = options.model || null;
     this.addClass(COMPLETION_CLASS);
-    this.update();
   }
 
 
@@ -238,7 +238,9 @@ class CompletionWidget extends Widget {
    * Handle model state changes.
    */
   protected onModelStateChanged(): void {
-    this.update();
+    if (this.isAttached) {
+      this.update();
+    }
   }
 
   /**
@@ -368,6 +370,11 @@ namespace CompletionWidget {
      * The model for the completion widget.
      */
     model?: ICompletionModel;
+
+    /**
+     * The semantic parent of the completion widget, its reference widget.
+     */
+    reference?: Widget;
 
     /**
      * The renderer for the completion widget nodes.
