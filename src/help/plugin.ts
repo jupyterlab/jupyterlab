@@ -84,7 +84,8 @@ function activateHelpHandler(app: Application): Promise<void> {
   helpPalette.id = 'help-doc';
 
   let widget = new IFrame();
-  widget.addClass(HELP_CLASS); 
+  widget.addClass(HELP_CLASS);
+  widget.id = 'help-doc'; 
   let helpCommandItems = COMMANDS.map(command => {
     return {
       id: command.id,
@@ -165,7 +166,7 @@ function activateHelpHandler(app: Application): Promise<void> {
   return Promise.resolve(void 0);
 
   function attachHelp(): void {
-    if (!helpPalette.isAttached) app.shell.addToLeftArea(p1, {rank: 101});
+    if (!helpPalette.isAttached) app.shell.addToLeftArea(helpPalette, {rank: 101});
   }
 
   function showHelp(): void {
