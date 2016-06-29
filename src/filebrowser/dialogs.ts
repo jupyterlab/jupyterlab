@@ -303,7 +303,7 @@ class CreateNewHandler extends Widget {
    */
   protected inputChanged(): void {
     let path = this.input.value;
-    for (let item of this._model.sortedItems) {
+    for (let item of this._model.items) {
       if (item.path === path) {
         this.addClass(FILE_CONFLICT_CLASS);
         return;
