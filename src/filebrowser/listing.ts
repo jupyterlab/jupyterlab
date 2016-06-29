@@ -291,7 +291,8 @@ class DirListing extends Widget {
    * Sort the items using a sort condition.
    */
   sort(state: DirListing.ISortState): void {
-
+    this._sortedModels = Private.sort(this.model.items, state);
+    this.update();
   }
 
   /**
@@ -654,8 +655,9 @@ class DirListing extends Widget {
     let header = this.headerNode;
     if (header.contains(target)) {
       let state = this.renderer.handleHeaderClick(header, event);
-      this.sort(state);
-      this.update();
+      if (state) {
+        this.sort(state);
+      }
       return;
     }
 
@@ -1127,7 +1129,7 @@ class DirListing extends Widget {
     let original = item.name;
     this._editNode.value = original;
 
-    return Private.doRename(row, nameNode, this._editNode).then(newName => {
+    return Private.doRename(nameNode, this._editNode).then(newName => {
       if (newName === original) {
         return;
       }
@@ -1193,7 +1195,6 @@ class DirListing extends Widget {
     }
     // Update the sorted items.
     this.sort(this.sortState);
-    this.update();
   }
 
   /**
@@ -1365,6 +1366,43 @@ namespace DirListing {
      * @returns The sort state of the header after the click event.
      */
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState {
+      let name = utils.findElement(node, NAME_ID_CLASS);
+      let modified = utils.findElement(node, MODIFIED_ID_CLASS);
+      let state: ISortState = { direction: 'ascending', key: 'name' };
+      let target = event.target as HTMLElement;
+      if (name.contains(target)) {
+        if (name.classList.contains(SELECTED_CLASS)) {
+          if (!name.classList.contains(DESCENDING_CLASS)) {
+            state.direction = 'descending';
+            name.classList.add(DESCENDING_CLASS);
+          } else {
+            name.classList.remove(DESCENDING_CLASS);
+          }
+        } else {
+          name.classList.remove(DESCENDING_CLASS);
+        }
+        name.classList.add(SELECTED_CLASS);
+        modified.classList.remove(SELECTED_CLASS);
+        modified.classList.remove(DESCENDING_CLASS);
+        return state;
+      }
+      if (modified.contains(target)) {
+        state.key = 'last_modified';
+        if (modified.classList.contains(SELECTED_CLASS)) {
+          if (!modified.classList.contains(DESCENDING_CLASS)) {
+            state.direction = 'descending';
+            modified.classList.add(DESCENDING_CLASS);
+          } else {
+            modified.classList.remove(DESCENDING_CLASS);
+          }
+        } else {
+          modified.classList.remove(DESCENDING_CLASS);
+        }
+        modified.classList.add(SELECTED_CLASS);
+        name.classList.remove(SELECTED_CLASS);
+        name.classList.remove(DESCENDING_CLASS);
+        return state;
+      }
       return void 0;
     }
 
@@ -1395,20 +1433,20 @@ namespace DirListing {
      * @param model - The model object to use for the item state.
      */
     updateItemNode(node: HTMLElement, model: IContentsModel): void {
-      let icon = node.firstChild as HTMLElement;
-      let text = icon.nextSibling as HTMLElement;
-      let modified = text.nextSibling as HTMLElement;
+      let icon = utils.findElement(node, ITEM_ICON_CLASS);
+      let text = utils.findElement(node, ITEM_TEXT_CLASS);
+      let modified = utils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      let type: string;
+      icon.className = ITEM_ICON_CLASS;
       switch (model.type) {
       case 'directory':
-        type = FOLDER_TYPE_CLASS;
+        icon.classList.add(FOLDER_TYPE_CLASS);
         break;
       case 'notebook':
-        type = NOTEBOOK_TYPE_CLASS;
+        icon.classList.add(NOTEBOOK_TYPE_CLASS);
         break;
       default:
-        type = FILE_TYPE_CLASS;
+        icon.classList.add(FILE_TYPE_CLASS);
         break;
       }
 
@@ -1420,7 +1458,6 @@ namespace DirListing {
         modTitle = moment(model.last_modified).format('YYYY-MM-DD HH:mm');
       }
 
-      node.className = `${ITEM_CLASS} ${type}`;
       text.textContent = model.name;
       modified.textContent = modText;
       modified.title = modTitle;
@@ -1434,11 +1471,11 @@ namespace DirListing {
      * @returns The node containing the file name.
      */
     getNameNode(node: HTMLElement): HTMLElement {
-      return void 0;
+      return utils.findElement(node, ITEM_TEXT_CLASS);
     }
 
     /**
-     * Create an appropriate drag image for an item.
+     * Create a drag image for an item.
      *
      * @param node - A node created by [[createItemNode]].
      *
@@ -1447,7 +1484,14 @@ namespace DirListing {
      * @returns An element to use as the drag image.
      */
     createDragImage(node: HTMLElement, count: number): HTMLElement {
-      return void 0;
+      let dragImage = node.cloneNode(true) as HTMLElement;
+      let modified = utils.findElement(node, ITEM_MODIFIED_CLASS);
+      dragImage.removeChild(modified as HTMLElement);
+      if (count > 1) {
+        let nameNode = utils.findElement(node, ITEM_TEXT_CLASS);
+        nameNode.textContent = '(' + count + ')';
+      }
+      return dragImage;
     }
 
     /**
@@ -1475,7 +1519,6 @@ namespace DirListing {
 }
 
 
-
 /**
  * The namespace for the listing private data.
  */
@@ -1486,8 +1529,9 @@ namespace Private {
    * @returns Boolean indicating whether the name changed.
    */
   export
-  function doRename(parent: HTMLElement, text: HTMLElement, edit: HTMLInputElement): Promise<string> {
+  function doRename(text: HTMLElement, edit: HTMLInputElement): Promise<string> {
     let changed = true;
+    let parent = text.parentElement as HTMLElement;
     parent.replaceChild(edit, text);
     edit.focus();
     let index = edit.value.lastIndexOf('.');
@@ -1518,6 +1562,27 @@ namespace Private {
         }
       };
     });
+  }
+
+  /**
+   * Sort a list of items by sort state as a new array.
+   */
+  export
+  function sort(items: IContentsModel[], state: DirListing.ISortState) : IContentsModel[] {
+    let output = items.slice();
+    if (state.key === 'last_modified') {
+      output.sort((a, b) => {
+        let valA = new Date(a.last_modified).getTime();
+        let valB = new Date(b.last_modified).getTime();
+        return valB - valA;
+      });
+    }
+
+    // Reverse the order if descending.
+    if (state.direction === 'descending') {
+      output.reverse();
+    }
+    return output;
   }
 
   /**
