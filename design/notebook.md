@@ -65,7 +65,8 @@ Make the Kernel label on the top right of the notebook a dropdown menu where you
 
 Include an indicator that the file is being saved on the toolbar. 
 
-Popup for creating a new notebook fades the background to dark grey. Popup appears in the center of the screen.
+Popup for creating a new notebook fades the background to dark grey. Popup appears in the center of the screen. Under
+"Create a new notebook", user can name their notebook and select kernel.
 
 ### Typography
 
