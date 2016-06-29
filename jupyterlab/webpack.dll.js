@@ -5,11 +5,17 @@
 // See https://github.com/webpack/css-loader/issues/144
 require('es6-promise').polyfill();
 
+var path = require("path");
+var webpack = require("webpack");
+
 module.exports = {
-  entry: './index.js',
+  entry: {
+    jupyterlab: ['./dll.js']
+  },
   output: {
     path: __dirname + "/build",
-    filename: "bundle.js",
+    filename: "[name]_dll.js",
+    library: "[name]_[hash]",
     publicPath: "lab/"
   },
   node: {
@@ -17,7 +23,6 @@ module.exports = {
   },
   debug: true,
   bail: true,
-  devtool: 'inline-source-map',
   module: {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
@@ -32,5 +37,11 @@ module.exports = {
       { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
       { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&minetype=image/svg+xml" }
     ]
-  }
+  },
+  plugins: [
+    new webpack.DllPlugin({
+            path: path.join(__dirname, "[name]-manifest.json"),
+            name: "[name]_[hash]"
+    })
+  ]
 }
