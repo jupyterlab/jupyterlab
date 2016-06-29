@@ -3,6 +3,9 @@
 
 import * as CodeMirror
   from 'codemirror';
+  
+import 'codemirror/mode/meta';
+import 'codemirror/keymap/vim';
 
 import {
   Menu, MenuBar, MenuItem
@@ -32,8 +35,6 @@ import {
   ABCWidgetFactory, IDocumentModel, IWidgetFactory, IDocumentContext
 } from '../docregistry';
 
-import 'codemirror/mode/meta';
-import 'codemirror/keymap/vim.js';
 import 'codemirror/theme/material.css';
 import 'codemirror/theme/zenburn.css';
 import 'codemirror/theme/abcdef.css';
@@ -110,7 +111,7 @@ class EditorWidget extends Widget {
   }
 
   /**
-   * Creates a menu bar that is then attached as a child to layout
+   * Creates a menu bar for the editor widget.
    */
   protected createMenu(editor : CodeMirror.Editor, context : IDocumentContext<IDocumentModel>) : MenuBar {
     var vimMode = false, brackets = false, defaultEditor = true, lineWrap = false, lineNums = true;
@@ -203,7 +204,7 @@ class EditorWidget extends Widget {
   }
 
   /**
-   * Creates the theme menu to be added to the MenuBar
+   * Create a theme menu for the editor widget.
    */
   protected createThemeMenu(themeHandler : (Item : MenuItem) => void) : Menu {
     let menu = new Menu([
