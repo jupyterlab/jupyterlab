@@ -53,6 +53,7 @@ Section off the different tools according to their category to make it easier fo
 ## What users should be able to see or do
 
 * Easily identify what the icon actions do
+* When “New Notebook” command is selected, "Create New Notebook" popup appears
 
 ## Visual Design
 
@@ -63,6 +64,8 @@ Section the icon tools off according to their category using dividers like the o
 Make the Kernel label on the top right of the notebook a dropdown menu where you can select to switch kernels.
 
 Include an indicator that the file is being saved on the toolbar. 
+
+Popup for creating a new notebook fades the background to dark grey. Popup appears in the center of the screen.
 
 ### Typography
 
