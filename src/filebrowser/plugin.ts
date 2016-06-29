@@ -102,8 +102,16 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     kernelspecs: provider.kernelspecs,
     opener
   });
-  let model = new FileBrowserModel(contents, sessions, provider.kernelspecs);
-  let widget = new FileBrowserWidget(model, docManager, opener);
+  let model = new FileBrowserModel({
+    contentsManager: contents,
+    sessionManager: sessions,
+    kernelspecs: provider.kernelspecs
+  });
+  let widget = new FileBrowserWidget({
+    model,
+    manager: docManager,
+    opener
+  });
   let menu = createMenu(widget);
 
   // Add a context menu to the dir listing.

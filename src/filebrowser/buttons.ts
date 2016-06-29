@@ -93,10 +93,10 @@ class FileButtons extends Widget {
    *
    * @param model - The file browser view model.
    */
-  constructor(model: FileBrowserModel, manager: DocumentManager, opener: IWidgetOpener) {
+  constructor(options: FileButtons.IOptions) {
     super();
     this.addClass(FILE_BUTTONS_CLASS);
-    this._model = model;
+    this._model = options.model;
 
     this._buttons.create.onmousedown = this._onCreateButtonPressed;
     this._buttons.upload.onclick = this._onUploadButtonClicked;
@@ -108,8 +108,8 @@ class FileButtons extends Widget {
     node.appendChild(this._buttons.upload);
     node.appendChild(this._buttons.refresh);
 
-    this._manager = manager;
-    this._opener = opener;
+    this._manager = options.manager;
+    this._opener = options.opener;
   }
 
   /**
@@ -240,6 +240,35 @@ class FileButtons extends Widget {
   private _input = Private.createUploadInput();
   private _manager: DocumentManager = null;
   private _opener: IWidgetOpener = null;
+}
+
+
+
+/**
+ * The namespace for the `FileButtons` class statics.
+ */
+export
+namespace FileButtons {
+  /**
+   * An options object for initializing a file buttons widget.
+   */
+  export
+  interface IOptions {
+    /**
+     * A file browser model instance.
+     */
+    model: FileBrowserModel;
+
+    /**
+     * A document manager instance.
+     */
+    manager: DocumentManager;
+
+    /**
+     * A widget opener function.
+     */
+    opener: IWidgetOpener;
+  }
 }
 
 

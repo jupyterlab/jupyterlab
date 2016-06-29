@@ -30,10 +30,10 @@ class FileBrowserModel implements IDisposable {
   /**
    * Construct a new file browser view model.
    */
-  constructor(contentsManager: IContentsManager, sessionManager: ISession.IManager, specs: IKernel.ISpecModels) {
-    this._contentsManager = contentsManager;
-    this._sessionManager = sessionManager;
-    this._specs = specs;
+  constructor(options: FileBrowserModel.IOptions) {
+    this._contentsManager = options.contentsManager;
+    this._sessionManager = options.sessionManager;
+    this._specs = options.kernelspecs;
     this._model = { path: '', name: '/', type: 'directory', content: [] };
     this.cd();
   }
@@ -70,14 +70,10 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get a read-only, unsorted list of file names in the current path.
-   *
-   * #### Notes
-   * This is a read-only property.
-   *
+   * Get a read-only list of the items in the current path.
    */
-  get names(): string[] {
-    return this._unsortedNames.slice();
+  get items(): IContentsModel[] {
+    return this._model.content ? this._model.content.slice() : [];
   }
 
   /**
@@ -105,46 +101,6 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get whether the items are sorted in ascending order.
-   */
-  get sortAscending(): boolean {
-    return this._ascending;
-  }
-
-  /**
-   * Set whether the items are sorted in ascending order.
-   */
-  set sortAscending(value: boolean) {
-    this._ascending = value;
-    this._sort();
-  }
-
-  /**
-   * Get which key the items are sorted on.
-   */
-  get sortKey(): string {
-    return this._sortKey;
-  }
-
-  /**
-   * Set which key the items are sorted on.
-   */
-  set sortKey(value: string) {
-    this._sortKey = value;
-    this._sort();
-  }
-
-  /**
-   * Get the sorted list of items.
-   *
-   * #### Notes
-   * This is a read-only property and should be treated as immutable.
-   */
-  get sortedItems(): IContentsModel[] {
-    return this._model.content;
-  }
-
-  /**
    * Dispose of the resources held by the view model.
    */
   dispose(): void {
@@ -167,11 +123,6 @@ class FileBrowserModel implements IDisposable {
     let oldValue = this.path;
     return this._contentsManager.get(newValue, {}).then(contents => {
       this._model = contents;
-      let content = contents.content as IContentsModel[];
-      this._unsortedNames = content.map((value, index) => value.name);
-      if (this._sortKey !== 'name' || !this._ascending) {
-        this._sort();
-      }
       return this._findSessions();
     }).then(() => {
       if (oldValue !== newValue) {
@@ -364,35 +315,6 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Sort the model items.
-   */
-  private _sort(): void {
-    if (!this._unsortedNames) {
-      return;
-    }
-    let items = this._model.content.slice() as IContentsModel[];
-    if (this._sortKey === 'name') {
-      items.sort((a, b) => {
-        let indexA = this._unsortedNames.indexOf(a.name);
-        let indexB = this._unsortedNames.indexOf(b.name);
-        return indexA - indexB;
-      });
-    } else if (this._sortKey === 'last_modified') {
-      items.sort((a, b) => {
-        let valA = new Date(a.last_modified).getTime();
-        let valB = new Date(b.last_modified).getTime();
-        return valB - valA;
-      });
-    }
-
-    // Reverse the order if descending.
-    if (!this._ascending) {
-      items.reverse();
-    }
-    this._model.content = items;
-  }
-
-  /**
    * Perform the actual upload.
    */
   private _upload(file: File): Promise<IContentsModel> {
@@ -464,10 +386,35 @@ class FileBrowserModel implements IDisposable {
   private _sessions: ISession.IModel[] = [];
   private _sessionManager: ISession.IManager = null;
   private _model: IContentsModel;
-  private _sortKey = 'name';
-  private _ascending = true;
-  private _unsortedNames: string[] = [];
   private _specs: IKernel.ISpecModels = null;
+}
+
+
+/**
+ * The namespace for the `FileBrowserModel` class statics.
+ */
+export
+namespace FileBrowserModel {
+  /**
+   * An options object for initializing a file browser.
+   */
+  export
+  interface IOptions {
+    /**
+     * A contents manager instance.
+     */
+    contentsManager: IContentsManager;
+
+    /**
+     * A session manager instance.
+     */
+    sessionManager: ISession.IManager;
+
+    /**
+     * The kernelspec models.
+     */
+    kernelspecs: IKernel.ISpecModels;
+  }
 }
 
 
