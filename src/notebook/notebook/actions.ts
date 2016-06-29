@@ -827,10 +827,7 @@ namespace Private {
     case 'code':
       if (kernel) {
         return (widget as CodeCellWidget).execute(kernel).then(reply => {
-          if (reply)
-            return reply.content.status === 'ok';
-          else
-            return true;
+          return reply ? reply.content.status === 'ok' : true;
         });
       }
       (widget.model as CodeCellModel).executionCount = null;
