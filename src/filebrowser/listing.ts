@@ -261,6 +261,40 @@ class DirListing extends Widget {
   }
 
   /**
+   * The renderer instance used by the directory listing.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get renderer(): DirListing.IRenderer {
+    return this._renderer;
+  }
+
+  /**
+   * The the sorted content items.
+   */
+  get sortedItems(): IContentsModel[] {
+    return this._sortedModels;
+  }
+
+  /**
+   * The current sort state.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get sortState(): DirListing.ISortState {
+    return this._sortState;
+  }
+
+  /**
+   * Sort the items using a sort condition.
+   */
+  sort(state: DirListing.ISortState): void {
+
+  }
+
+  /**
    * Rename the first currently selected item.
    */
   rename(): Promise<string> {
@@ -321,7 +355,7 @@ class DirListing extends Widget {
     if (this._softSelection) {
       names.push(this._softSelection);
     } else {
-      let items = this._model.sortedItems;
+      let items = this._model.items;
       for (let item of items) {
         if (this._selection[item.name]) {
           names.push(item.name);
@@ -381,7 +415,7 @@ class DirListing extends Widget {
    */
   shutdownKernels(): Promise<void> {
     let promises: Promise<void>[] = [];
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let paths = items.map(item => item.path);
     for (let sessionId of this._model.sessionIds) {
       let index = paths.indexOf(sessionId.notebook.path);
@@ -405,22 +439,26 @@ class DirListing extends Widget {
   selectNext(keepExisting = false): void {
     let index = -1;
     let selected = Object.keys(this._selection);
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the next item.
       let name = selected[selected.length - 1];
-      index = arrays.findIndex(items, (value, index) => value.name === name);
+      index = arrays.findIndex(items, (value) => value.name === name);
       index += 1;
-      if (index === this._items.length) index = 0;
+      if (index === this._items.length) {
+        index = 0;
+      }
     } else if (selected.length === 0) {
       // Select the first item.
       index = 0;
     } else {
       // Select the last selected item.
       let name = selected[selected.length - 1];
-      index = arrays.findIndex(items, (value, index) => value.name === name);
+      index = arrays.findIndex(items, (value) => value.name === name);
     }
-    if (index !== -1) this._selectItem(index, keepExisting);
+    if (index !== -1) {
+      this._selectItem(index, keepExisting);
+    }
   }
 
   /**
@@ -431,22 +469,26 @@ class DirListing extends Widget {
   selectPrevious(keepExisting = false): void {
     let index = -1;
     let selected = Object.keys(this._selection);
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the previous item.
       let name = selected[0];
-      index = arrays.findIndex(items, (value, index) => value.name === name);
+      index = arrays.findIndex(items, (value) => value.name === name);
       index -= 1;
-      if (index === -1) index = this._items.length - 1;
+      if (index === -1) {
+        index = this._items.length - 1;
+      }
     } else if (selected.length === 0) {
       // Select the last item.
       index = this._items.length - 1;
     } else {
       // Select the first selected item.
       let name = selected[0];
-      index = arrays.findIndex(items, (value, index) => value.name === name);
+      index = arrays.findIndex(items, (value) => value.name === name);
     }
-    if (index !== -1) this._selectItem(index, keepExisting);
+    if (index !== -1) {
+      this._selectItem(index, keepExisting);
+    }
   }
 
   /**
@@ -547,7 +589,7 @@ class DirListing extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Fetch common variables.
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let nodes = this._items;
     let content = utils.findElement(this.node, CONTENT_CLASS);
     let renderer = this._renderer;
@@ -564,6 +606,7 @@ class DirListing extends Widget {
     // Add any missing item nodes.
     while (nodes.length < items.length) {
       let node = renderer.createItemNode();
+      node.classList.add(ITEM_CLASS);
       nodes.push(node);
       content.appendChild(node);
     }
@@ -610,40 +653,8 @@ class DirListing extends Widget {
 
     let header = this.headerNode;
     if (header.contains(target)) {
-
-      let children = header.getElementsByClassName(HEADER_ITEM_CLASS);
-      let name = children[0] as HTMLElement;
-      let modified = children[1] as HTMLElement;
-
-      if (name.contains(target)) {
-        if (this._model.sortKey === 'name') {
-          let flag = !this._model.sortAscending;
-          this._model.sortAscending = flag;
-          if (flag) name.classList.remove(DESCENDING_CLASS);
-          else name.classList.add(DESCENDING_CLASS);
-        } else {
-          this._model.sortKey = 'name';
-          this._model.sortAscending = true;
-          name.classList.remove(DESCENDING_CLASS);
-        }
-        name.classList.add(SELECTED_CLASS);
-        modified.classList.remove(SELECTED_CLASS);
-        modified.classList.remove(DESCENDING_CLASS);
-      } else if (modified.contains(target)) {
-        if (this._model.sortKey === 'last_modified') {
-          let flag = !this._model.sortAscending;
-          this._model.sortAscending = flag;
-          if (flag) modified.classList.remove(DESCENDING_CLASS);
-          else modified.classList.add(DESCENDING_CLASS);
-        } else {
-          this._model.sortKey = 'last_modified';
-          this._model.sortAscending = true;
-          modified.classList.remove(DESCENDING_CLASS);
-        }
-        modified.classList.add(SELECTED_CLASS);
-        name.classList.remove(SELECTED_CLASS);
-        name.classList.remove(DESCENDING_CLASS);
-      }
+      let state = this.renderer.handleHeaderClick(header, event);
+      this.sort(state);
       this.update();
       return;
     }
@@ -692,7 +703,7 @@ class DirListing extends Widget {
       return;
     }
     this._softSelection = '';
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let selected = Object.keys(this._selection);
     if (selected.indexOf(items[index].name) === -1) {
       this._softSelection = items[index].name;
@@ -798,7 +809,7 @@ class DirListing extends Widget {
     }
 
     let model = this._model;
-    let item = model.sortedItems[i];
+    let item = this.sortedItems[i];
     if (item.type === 'directory') {
       model.cd(item.name).catch(error =>
         showErrorMessage(this, 'Open directory', error)
@@ -826,7 +837,7 @@ class DirListing extends Widget {
       if (index === -1) {
         return;
       }
-      let item = this._model.sortedItems[index];
+      let item = this.sortedItems[index];
       let target = this._items[index];
       if (!target.classList.contains(FOLDER_TYPE_CLASS)) {
         return;
@@ -847,7 +858,9 @@ class DirListing extends Widget {
     event.preventDefault();
     event.stopPropagation();
     let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
-    if (dropTarget) dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    if (dropTarget) {
+      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    }
   }
 
   /**
@@ -858,7 +871,9 @@ class DirListing extends Widget {
     event.stopPropagation();
     event.dropAction = event.proposedAction;
     let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
-    if (dropTarget) dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    if (dropTarget) {
+      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    }
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
     this._items[index].classList.add(utils.DROP_TARGET_CLASS);
   }
@@ -890,7 +905,7 @@ class DirListing extends Widget {
 
     // Get the path based on the target node.
     let index = this._items.indexOf(target);
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let path = items[index].name + '/';
 
     // Move all of the items.
@@ -932,7 +947,7 @@ class DirListing extends Widget {
     let selectedNames = Object.keys(this._selection);
     let source = this._items[index];
     let model = this._model;
-    let items = model.sortedItems;
+    let items = this.sortedItems;
     let item: IContentsModel = null;
 
     // If the source node is not selected, use just that node.
@@ -941,20 +956,15 @@ class DirListing extends Widget {
       selectedNames = [item.name];
     } else if (selectedNames.length === 1) {
       let name = selectedNames[0];
-      item = arrays.find(items, (value, index) => value.name === name);
+      item = arrays.find(items, (value) => value.name === name);
     }
 
     // Create the drag image.
-    let dragImage = source.cloneNode(true) as HTMLElement;
-    dragImage.removeChild(dragImage.lastChild);
-    if (selectedNames.length > 1) {
-      let text = utils.findElement(dragImage, ITEM_TEXT_CLASS);
-      text.textContent = '(' + selectedNames.length + ')';
-    }
+    let dragImage = this.renderer.createDragImage(source, selectedNames.length);
 
     // Set up the drag event.
     this._drag = new Drag({
-      dragImage: dragImage,
+      dragImage,
       mimeData: new MimeData(),
       supportedActions: DropActions.Move,
       proposedAction: DropAction.Move
@@ -987,12 +997,12 @@ class DirListing extends Widget {
    */
   private _handleFileSelect(event: MouseEvent): void {
     // Fetch common variables.
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
 
     clearTimeout(this._selectTimer);
 
-    if (index == -1) {
+    if (index === -1) {
       return;
     }
 
@@ -1033,7 +1043,7 @@ class DirListing extends Widget {
    */
   private _handleMultiSelect(selected: string[], index: number): void {
     // Find the "nearest selected".
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let nearestIndex = -1;
     for (let i = 0; i < this._items.length; i++) {
       if (i === index) {
@@ -1069,7 +1079,7 @@ class DirListing extends Widget {
    * Get the currently selected items.
    */
   private _getSelectedItems(): IContentsModel[] {
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     if (!this._softSelection) {
       return items.filter(item => this._selection[item.name]);
     }
@@ -1081,7 +1091,7 @@ class DirListing extends Widget {
    */
   private _copy(): void {
     this._clipboard = [];
-    for (var item of this._getSelectedItems()) {
+    for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
         // Store the absolute path of the item.
         this._clipboard.push('/' + item.path);
@@ -1108,11 +1118,11 @@ class DirListing extends Widget {
    * Allow the user to rename item on a given row.
    */
   private _doRename(): Promise<string> {
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     let name = this._softSelection || Object.keys(this._selection)[0];
-    let index = arrays.findIndex(items, (value, index) => value.name === name);
+    let index = arrays.findIndex(items, (value) => value.name === name);
     let row = this._items[index];
-    let text = utils.findElement(row, ITEM_TEXT_CLASS);
+    let text = this.renderer.getItemText(row);
     let original = text.textContent;
 
     return Private.doRename(row, text, this._editNode).then(changed => {
@@ -1159,7 +1169,7 @@ class DirListing extends Widget {
    */
   private _selectItem(index: number, keepExisting: boolean) {
     // Selected the given row(s)
-    let items = this._model.sortedItems;
+    let items = this.sortedItems;
     if (!keepExisting) {
       this._selection = Object.create(null);
     }
@@ -1173,13 +1183,17 @@ class DirListing extends Widget {
    * Handle the `refreshed` signal from the model.
    */
   private _onModelRefreshed(): void {
+    // Update the selection.
     let existing = Object.keys(this._selection);
     this._selection = Object.create(null);
-    for (let name of this._model.names) {
+    for (let item of this._model.items) {
+      let name = item.name;
       if (existing.indexOf(name) !== -1) {
         this._selection[name] = true;
       }
     }
+    // Update the sorted items.
+    this.sort(this.sortState);
     this.update();
   }
 
@@ -1189,11 +1203,15 @@ class DirListing extends Widget {
   private _onPathChanged(): void {
     // Reset the selection.
     this._selection = Object.create(null);
+    // Update the sorted items.
+    this.sort(this.sortState);
   }
 
   private _model: FileBrowserModel = null;
   private _editNode: HTMLInputElement = null;
   private _items: HTMLElement[] = [];
+  private _sortedModels: IContentsModel[] = null;
+  private _sortState: DirListing.ISortState = { direction: 'ascending', key: 'name' };
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
   private _selectTimer = -1;
@@ -1242,6 +1260,21 @@ namespace DirListing {
     renderer?: IRenderer;
   }
 
+  /**
+   * A sort state.
+   */
+  export
+  interface ISortState {
+    /**
+     * The direction of sort.
+     */
+    direction: 'ascending' | 'descending';
+
+    /**
+     * The sort key.
+     */
+    key: 'name' | 'last_modified';
+  }
 
   /**
    * The render interface for file browser listing options.
@@ -1251,38 +1284,56 @@ namespace DirListing {
     /**
      * Populate and empty header node for a dir listing.
      *
-     * @returns A new DOM node to use as the dir listing header.
-     *
-     * #### Notes
-     * This method may be reimplemented to create custom headers.
+     * @param node - The header node to populate.
      */
     populateHeaderNode(node: HTMLElement): void;
+
+    /**
+     * Handle a header click.
+     *
+     * @param node - A node populated by [[populateHeaderNode]].
+     *
+     * @param event - A click event on the node.
+     *
+     * @returns The sort state of the header after the click event.
+     */
+    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState;
 
     /**
      * Create a new item node for a dir listing.
      *
      * @returns A new DOM node to use as a content item.
-     *
-     * #### Notes
-     * This method may be reimplemented to create custom items.
      */
     createItemNode(): HTMLElement;
 
     /**
      * Update an item node to reflect the current state of a model.
      *
-     * @param node - A node created by a call to [[createItemNode]].
+     * @param node - A node created by [[createItemNode]].
      *
      * @param model - The model object to use for the item state.
-     *
-     * #### Notes
-     * This is called automatically when the item should be updated.
-     *
-     * If the [[createItemNode]] method is reimplemented, this method
-     * should also be reimplemented so that the item state is properly
-     * updated.
      */
     updateItemNode(node: HTMLElement, model: IContentsModel): void;
+
+    /**
+     * Get the node containing the file name.
+     *
+     * @param node - A node created by [[createItemNode]].
+     *
+     * @returns The node containing the file name.
+     */
+    getNameNode(node: HTMLElement): HTMLElement;
+
+    /**
+     * Create an appropriate drag image for an item.
+     *
+     * @param node - A node created by [[createItemNode]].
+     *
+     * @param count - The number of items being dragged.
+     *
+     * @returns An element to use as the drag image.
+     */
+    createDragImage(node: HTMLElement, count: number): HTMLElement;
   }
 
   /**
@@ -1293,10 +1344,7 @@ namespace DirListing {
     /**
      * Populate and empty header node for a dir listing.
      *
-     * @returns A new DOM node to use as the dir listing header.
-     *
-     * #### Notes
-     * This method may be reimplemented to create custom headers.
+     * @param node - The header node to populate.
      */
     populateHeaderNode(node: HTMLElement): void {
       let name = this._createHeaderItemNode('Name');
@@ -1309,19 +1357,28 @@ namespace DirListing {
     }
 
     /**
+     * Handle a header click.
+     *
+     * @param node - A node populated by [[populateHeaderNode]].
+     *
+     * @param event - A click event on the node.
+     *
+     * @returns The sort state of the header after the click event.
+     */
+    handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState {
+      return void 0;
+    }
+
+    /**
      * Create a new item node for a dir listing.
      *
      * @returns A new DOM node to use as a content item.
-     *
-     * #### Notes
-     * This method may be reimplemented to create custom items.
      */
     createItemNode(): HTMLElement {
       let node = document.createElement('li');
       let icon = document.createElement('span');
       let text = document.createElement('span');
       let modified = document.createElement('span');
-      node.className = ITEM_CLASS;
       icon.className = ITEM_ICON_CLASS;
       text.className = ITEM_TEXT_CLASS;
       modified.className = ITEM_MODIFIED_CLASS;
@@ -1334,16 +1391,9 @@ namespace DirListing {
     /**
      * Update an item node to reflect the current state of a model.
      *
-     * @param node - A node created by a call to [[createItemNode]].
+     * @param node - A node created by [[createItemNode]].
      *
      * @param model - The model object to use for the item state.
-     *
-     * #### Notes
-     * This is called automatically when the item should be updated.
-     *
-     * If the [[createItemNode]] method is reimplemented, this method
-     * should also be reimplemented so that the item state is properly
-     * updated.
      */
     updateItemNode(node: HTMLElement, model: IContentsModel): void {
       let icon = node.firstChild as HTMLElement;
@@ -1375,6 +1425,30 @@ namespace DirListing {
       text.textContent = model.name;
       modified.textContent = modText;
       modified.title = modTitle;
+    }
+
+    /**
+     * Get the node containing the file name.
+     *
+     * @param node - A node created by [[createItemNode]].
+     *
+     * @returns The node containing the file name.
+     */
+    getNameNode(node: HTMLElement): HTMLElement {
+      return void 0;
+    }
+
+    /**
+     * Create an appropriate drag image for an item.
+     *
+     * @param node - A node created by [[createItemNode]].
+     *
+     * @param count - The number of items being dragged.
+     *
+     * @returns An element to use as the drag image.
+     */
+    createDragImage(node: HTMLElement, count: number): HTMLElement {
+      return void 0;
     }
 
     /**
@@ -1431,7 +1505,9 @@ namespace Private {
         if (text.textContent === edit.value) {
           changed = false;
         }
-        if (changed) text.textContent = edit.value;
+        if (changed) {
+          text.textContent = edit.value;
+        }
         resolve(changed);
       };
       edit.onkeydown = (event: KeyboardEvent) => {

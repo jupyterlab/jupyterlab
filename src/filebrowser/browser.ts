@@ -152,7 +152,7 @@ class FileBrowserWidget extends Widget {
    */
   open(): void {
     let foundDir = false;
-    let items = this._model.sortedItems;
+    let items = this._model.items;
     for (let item of items) {
       if (!this._listing.isSelected(item.name)) {
         continue;
