@@ -36,6 +36,21 @@ class CustomRenderer extends CompletionWidget.Renderer {
 }
 
 
+class LogWidget extends CompletionWidget {
+  events: string[] = [];
+
+  dispose(): void {
+    super.dispose();
+    this.events.length = 0;
+  }
+
+  handleEvent(event: Event): void {
+    super.handleEvent(event);
+    this.events.push(event.type);
+  }
+}
+
+
 describe('notebook/completion/widget', () => {
 
   describe('CompletionWidget', () => {
@@ -132,14 +147,6 @@ describe('notebook/completion/widget', () => {
         expect(widget.model).to.be(model);
       });
 
-      it('should be safe to set multiple times', () => {
-        let model = new CompletionModel();
-        let widget = new CompletionWidget();
-        widget.model = model;
-        widget.model = model;
-        expect(widget.model).to.be(model);
-      });
-
       it('should be safe to reset', () => {
         let model = new CompletionModel();
         let widget = new CompletionWidget({ model: new CompletionModel() });
@@ -170,6 +177,37 @@ describe('notebook/completion/widget', () => {
         expect(widget.reference).not.to.be(reference);
         widget.reference = reference;
         expect(widget.reference).to.be(reference);
+      });
+
+    });
+
+    describe('#dispose()', () => {
+
+      it('should dispose of the resources held by the widget', () => {
+        let widget = new CompletionWidget();
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
+      });
+
+      it('should be safe to call multiple times', () => {
+        let widget = new CompletionWidget();
+        widget.dispose();
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#handleEvent()', () => {
+
+      it('should handle window keydown, mousedown, and scroll events', () => {
+        let widget = new LogWidget();
+        widget.attach(document.body);
+        ['keydown', 'mousedown', 'scroll'].forEach(type => {
+          simulate(window, type);
+          expect(widget.events).to.contain(type);
+        });
+        widget.dispose();
       });
 
     });
