@@ -1122,15 +1122,16 @@ class DirListing extends Widget {
     let name = this._softSelection || Object.keys(this._selection)[0];
     let index = arrays.findIndex(items, (value) => value.name === name);
     let row = this._items[index];
-    let text = this.renderer.getItemText(row);
-    let original = text.textContent;
+    let item = items[index];
+    let nameNode = this.renderer.getNameNode(row);
+    let original = item.name;
+    this._editNode.value = original;
 
-    return Private.doRename(row, text, this._editNode).then(changed => {
-      if (!changed) {
-        return original;
+    return Private.doRename(row, nameNode, this._editNode).then(newName => {
+      if (newName === original) {
+        return;
       }
-      let newPath = text.textContent;
-      return this._model.rename(original, newPath).catch(error => {
+      return this._model.rename(original, newName).catch(error => {
         if (error.xhr) {
           error.message = `${error.xhr.status}: error.statusText`;
         }
@@ -1139,18 +1140,16 @@ class DirListing extends Widget {
           let options = {
             title: 'Overwrite file?',
             host: this.parent.node,
-            body: `"${newPath}" already exists, overwrite?`,
+            body: `"${newName}" already exists, overwrite?`,
             okText: 'OVERWRITE'
           };
           return showDialog(options).then(button => {
             if (button.text === 'OVERWRITE') {
-              return this._model.delete(newPath).then(() => {
-                return this._model.rename(original, newPath).then(() => {
+              return this._model.delete(newName).then(() => {
+                return this._model.rename(original, newName).then(() => {
                   this._model.refresh();
                 });
               });
-            } else {
-              text.textContent = original;
             }
           });
         }
@@ -1159,7 +1158,7 @@ class DirListing extends Widget {
         return original;
       }).then(() => {
         this._model.refresh();
-        return text.textContent;
+        return newName;
       });
     });
   }
@@ -1487,10 +1486,9 @@ namespace Private {
    * @returns Boolean indicating whether the name changed.
    */
   export
-  function doRename(parent: HTMLElement, text: HTMLElement, edit: HTMLInputElement): Promise<boolean> {
+  function doRename(parent: HTMLElement, text: HTMLElement, edit: HTMLInputElement): Promise<string> {
     let changed = true;
     parent.replaceChild(edit, text);
-    edit.value = text.textContent;
     edit.focus();
     let index = edit.value.lastIndexOf('.');
     if (index === -1) {
@@ -1499,16 +1497,10 @@ namespace Private {
       edit.setSelectionRange(0, index);
     }
 
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       edit.onblur = () => {
         parent.replaceChild(text, edit);
-        if (text.textContent === edit.value) {
-          changed = false;
-        }
-        if (changed) {
-          text.textContent = edit.value;
-        }
-        resolve(changed);
+        resolve(edit.value);
       };
       edit.onkeydown = (event: KeyboardEvent) => {
         switch (event.keyCode) {
