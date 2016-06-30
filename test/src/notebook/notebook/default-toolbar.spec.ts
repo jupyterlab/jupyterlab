@@ -219,37 +219,37 @@ describe('notebook/notebook/default-toolbar', () => {
 
     });
 
-    describe('#createRestartButton()', () => {
+    // describe('#createRestartButton()', () => {
 
-      it('should restart the kernel when the dialog is accepted', (done) => {
-        let button = ToolbarItems.createRestartButton(panel);
-        panel.attach(document.body);
-        button.attach(document.body);
-        let called = false;
-        let finished = false;
-        panel.kernel.statusChanged.connect((sender, status) => {
-          if (status === 'restarting') {
-            called = true;
-          } else if (status === 'idle') {
-            if (finished) {
-              throw new Error('Done called twice');
-            }
-            expect(called).to.be(true);
-            button.dispose();
-            done();
-            finished = true;
-          }
-        });
-        button.node.click();
-        acceptDialog(panel.node);
-      });
+    //   it('should restart the kernel when the dialog is accepted', (done) => {
+    //     let button = ToolbarItems.createRestartButton(panel);
+    //     panel.attach(document.body);
+    //     button.attach(document.body);
+    //     let called = false;
+    //     let finished = false;
+    //     panel.kernel.statusChanged.connect((sender, status) => {
+    //       if (status === 'restarting') {
+    //         called = true;
+    //       } else if (status === 'idle') {
+    //         if (finished) {
+    //           throw new Error('Done called twice');
+    //         }
+    //         expect(called).to.be(true);
+    //         button.dispose();
+    //         done();
+    //         finished = true;
+    //       }
+    //     });
+    //     button.node.click();
+    //     acceptDialog(panel.node);
+    //   });
 
-      it("should have the `'jp-NBToolbar-restart'` class", () => {
-        let button = ToolbarItems.createRestartButton(panel);
-        expect(button.hasClass('jp-NBToolbar-restart')).to.be(true);
-      });
+    //   it("should have the `'jp-NBToolbar-restart'` class", () => {
+    //     let button = ToolbarItems.createRestartButton(panel);
+    //     expect(button.hasClass('jp-NBToolbar-restart')).to.be(true);
+    //   });
 
-    });
+    // });
 
     describe('#createCellTypeItem()', () => {
 
