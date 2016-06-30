@@ -56,15 +56,15 @@ function activateMainMenu(app: Application): void {
 export
 class MainMenu {
   /**
-   * Add a new menu to the main menu.
+   * Add a new menu item to the main menu.
    */
-  addMenu(menu: MenuItem, options: MainMenu.IAddMenuOptions = {}): void {
+  addItem(item: MenuItem, options: MainMenu.IAddMenuOptions = {}): void {
     let rank = 'rank' in options ? options.rank : 100;
-    let rankItem = { menu, rank };
+    let rankItem = { item, rank };
     let index = arrays.upperBound(this._items, rankItem, Private.itemCmp);
     arrays.insert(this._items, index, rankItem);
     let items = Private.menuBar.items.slice();
-    arrays.insert(items, index, menu);
+    arrays.insert(items, index, item);
     Private.menuBar.items = items;
   }
 
@@ -115,7 +115,7 @@ namespace Private {
     /**
      * The menu for the item.
      */
-    menu: MenuItem;
+    item: MenuItem;
 
     /**
      * The sort rank of the menu.
