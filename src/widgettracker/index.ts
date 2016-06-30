@@ -19,11 +19,16 @@ import {
 
 
 /**
- * An object that tracks the active widget of a given type in
- * an application.
+ * The class name added to the currently active widget's title.
+ */
+const SEMANTIC_FOCUS_CLASS = 'jp-mod-semanticFocus';
+
+
+/**
+ * An object that tracks the active widget in an application.
  */
 export
-class WidgetTracker<T extends Widget> implements IDisposable {
+class WidgetTracker implements IDisposable {
   /**
    * Construct a new widget tracker.
    */
@@ -36,7 +41,7 @@ class WidgetTracker<T extends Widget> implements IDisposable {
   /**
    * A signal emitted when the active widget changes.
    */
-  get activeWidgetChanged(): ISignal<WidgetTracker<T>, T> {
+  get activeWidgetChanged(): ISignal<WidgetTracker, Widget> {
     return activeWidgetChangedSignal.bind(this);
   }
 
@@ -56,7 +61,7 @@ class WidgetTracker<T extends Widget> implements IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  get widgets(): T[] {
+  get widgets(): Widget[] {
     return this._widgets.slice();
   }
 
@@ -70,10 +75,10 @@ class WidgetTracker<T extends Widget> implements IDisposable {
    * The widget will be activated in the application shell.
    * The [[activeWidgetChanged]] signal will be emitted.
    */
-  get activeWidget(): T {
+  get activeWidget(): Widget {
     return this._activeWidget;
   }
-  set activeWidget(widget: T) {
+  set activeWidget(widget: Widget) {
     if (this._activeWidget === widget) {
       return;
     }
@@ -90,7 +95,16 @@ class WidgetTracker<T extends Widget> implements IDisposable {
     if (tabs instanceof TabPanel) {
       tabs.currentWidget = widget;
     }
+    // Toggle the active class in the widget titles.
+    if (this._activeWidget) {
+      let className =  this._activeWidget.title.className;
+      className = className.replace(SEMANTIC_FOCUS_CLASS, '');
+      this._activeWidget.title.className = className;
+    }
     this._activeWidget = widget;
+    if (widget) {
+      widget.title.className += ` ${SEMANTIC_FOCUS_CLASS}`;
+    }
     this.activeWidgetChanged.emit(widget);
   }
 
@@ -117,7 +131,7 @@ class WidgetTracker<T extends Widget> implements IDisposable {
    * #### Notes
    * The new widget will be set as the active widget.
    */
-  addWidget(widget: T): IDisposable {
+  addWidget(widget: Widget): IDisposable {
     this._widgets.push(widget);
     this.activeWidget = widget;
     let disposal = () => {
@@ -147,12 +161,12 @@ class WidgetTracker<T extends Widget> implements IDisposable {
     }
   }
 
-  private _widgets: T[] = [];
-  private _activeWidget: T = null;
+  private _widgets: Widget[] = [];
+  private _activeWidget: Widget = null;
 }
 
 
 /**
  * A signal emitted when the active widget changes.
  */
- const activeWidgetChangedSignal = new Signal<WidgetTracker<Widget>, Widget>();
+ const activeWidgetChangedSignal = new Signal<WidgetTracker, Widget>();
