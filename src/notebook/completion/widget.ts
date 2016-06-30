@@ -329,7 +329,7 @@ class CompletionWidget extends Widget {
       }
       target = target.parentElement;
     }
-    this.hide();
+    this._model.reset();
   }
 
   /**
