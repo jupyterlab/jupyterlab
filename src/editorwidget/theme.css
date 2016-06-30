@@ -3,5 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-EditorWidget {
-    border-top: 1px solid #E0E0E0;
+	 height: 100%;
+}
+
+.p-Widget.p-MenuBar {
+	background: #FFFFFF;
+}
+
+.p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
+	border-top: 1px solid #C0C0C0;
 }
