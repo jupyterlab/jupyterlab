@@ -9,3 +9,4 @@
 /// <reference path="../typings/jupyter-js-widgets/jupyter-js-widgets.d.ts"/>
 /// <reference path="../typings/xterm/xterm.d.ts"/>
 /// <reference path="../typings/marked/marked.d.ts"/>
+/// <reference path="../typings/fullpage.js/fullpage.js.d.ts"/>
