@@ -418,7 +418,7 @@ describe('notebook/completion/widget', () => {
           reference.dispose();
         });
 
-        it('should hide widget if mouse down misses it', (done) => {
+        it('should hide widget if mouse down misses it', () => {
           let reference = new Widget();
           let model = new CompletionModel();
           let options: CompletionWidget.IOptions = { model, reference };
@@ -436,12 +436,58 @@ describe('notebook/completion/widget', () => {
           sendMessage(widget, Widget.MsgUpdateRequest);
           expect(widget.isHidden).to.be(false);
           simulate(options.reference.node, 'mousedown');
-          requestAnimationFrame(() => {
-            expect(widget.isHidden).to.be(true);
-            widget.dispose();
-            reference.dispose();
-            done();
-          });
+          sendMessage(widget, Widget.MsgUpdateRequest);
+          expect(widget.isHidden).to.be(true);
+          widget.dispose();
+          reference.dispose();
+        });
+
+      });
+
+      context('scroll', () => {
+
+        it('should reset if scroll is outside widget', () => {
+          let reference = new Widget();
+          let model = new CompletionModel();
+          let options: CompletionWidget.IOptions = { model, reference };
+          let target = document.createElement('div');
+          model.options = ['foo', 'bar'];
+          reference.attach(document.body);
+          reference.node.appendChild(target);
+
+          let widget = new CompletionWidget(options);
+
+          widget.attach(document.body);
+          sendMessage(widget, Widget.MsgUpdateRequest);
+          expect(widget.isHidden).to.be(false);
+          expect(model.options).to.be.ok();
+          simulate(target, 'scroll');
+          sendMessage(widget, Widget.MsgUpdateRequest);
+          expect(widget.isHidden).to.be(true);
+          expect(model.options).to.not.be.ok();
+          widget.dispose();
+          reference.dispose();
+        });
+
+        it('should allow scrolling inside the widget', () => {
+          let reference = new Widget();
+          let model = new CompletionModel();
+          let options: CompletionWidget.IOptions = { model, reference };
+          model.options = ['foo', 'bar'];
+          reference.attach(document.body);
+
+          let widget = new CompletionWidget(options);
+
+          widget.attach(document.body);
+          sendMessage(widget, Widget.MsgUpdateRequest);
+          expect(widget.isHidden).to.be(false);
+          expect(model.options).to.be.ok();
+          simulate(widget.node, 'scroll');
+          sendMessage(widget, Widget.MsgUpdateRequest);
+          expect(widget.isHidden).to.be(false);
+          expect(model.options).to.be.ok();
+          widget.dispose();
+          reference.dispose();
         });
 
       });

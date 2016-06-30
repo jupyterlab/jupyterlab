@@ -337,7 +337,6 @@ class CompletionWidget extends Widget {
    */
   private _evtScroll(event: MouseEvent) {
     if (!this._reference || this.isHidden) {
-      this.hide();
       return;
     }
 
@@ -349,7 +348,7 @@ class CompletionWidget extends Widget {
       }
       target = target.parentElement;
     }
-    this.hide();
+    this._model.reset();
   }
 
   private _activeIndex = 0;
