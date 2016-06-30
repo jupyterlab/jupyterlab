@@ -19,6 +19,7 @@ var app = new phosphide.Application({
     require('jupyterlab/lib/imagewidget/plugin').imageHandlerExtension,
     require('jupyterlab/lib/landing/plugin').landingExtension,
     require('jupyterlab/lib/main/plugin').mainExtension,
+    require('jupyterlab/lib/mainmenu/plugin').mainMenuExtension,
     require('jupyterlab/lib/notebook/plugin').notebookHandlerExtension,
     require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
     require('jupyterlab/lib/terminal/plugin').terminalExtension,
@@ -29,6 +30,7 @@ var app = new phosphide.Application({
     require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
     require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
     require('jupyterlab/lib/notebook/plugin').notebookTrackerProvider,
+    require('jupyterlab/lib/mainmenu/plugin').mainMenuProvider,
     require('jupyterlab/lib/rendermime/plugin').renderMimeProvider,
     require('jupyterlab/lib/services/plugin').servicesProvider,
   ]
