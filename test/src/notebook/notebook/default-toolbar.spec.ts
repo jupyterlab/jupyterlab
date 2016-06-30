@@ -224,13 +224,18 @@ describe('notebook/notebook/default-toolbar', () => {
         panel.attach(document.body);
         button.attach(document.body);
         let called = false;
+        let finished = false;
         panel.kernel.statusChanged.connect((sender, status) => {
           if (status === 'restarting') {
             called = true;
           } else if (status === 'idle') {
+            if (finished) {
+              throw new Error('Done called twice');
+            }
             expect(called).to.be(true);
             button.dispose();
             done();
+            finished = true;
           }
         });
         button.node.click();
