@@ -21,7 +21,7 @@ import {
 } from '../docmanager/mockcontext';
 
 
-class WidgetFactory extends ABCWidgetFactory {
+class WidgetFactory extends ABCWidgetFactory<Widget, IDocumentModel> {
 
   createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): Widget {
     return new Widget();

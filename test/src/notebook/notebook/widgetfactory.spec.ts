@@ -135,20 +135,6 @@ describe('notebook/notebook/widgetfactory', () => {
 
     });
 
-    describe('#beforeClose()', () => {
-
-      it('should be a no-op', (done) => {
-        let model = new NotebookModel();
-        let context = new MockContext<NotebookModel>(model);
-        let factory = new NotebookWidgetFactory(rendermime, clipboard);
-        let panel = factory.createNew(context);
-        factory.beforeClose(panel, context).then(() => {
-          done();
-        });
-      });
-
-    });
-
   });
 
 });
