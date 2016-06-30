@@ -620,6 +620,8 @@ class DirListing extends Widget {
         if (this._isCut && this._model.path === this._prevPath) {
           nodes[i].classList.add(CUT_CLASS);
         }
+      } else {
+        nodes[i].classList.remove(SELECTED_CLASS);
       }
     }
 
@@ -1485,7 +1487,7 @@ namespace DirListing {
      */
     createDragImage(node: HTMLElement, count: number): HTMLElement {
       let dragImage = node.cloneNode(true) as HTMLElement;
-      let modified = utils.findElement(node, ITEM_MODIFIED_CLASS);
+      let modified = utils.findElement(dragImage, ITEM_MODIFIED_CLASS);
       dragImage.removeChild(modified as HTMLElement);
       if (count > 1) {
         let nameNode = utils.findElement(node, ITEM_TEXT_CLASS);

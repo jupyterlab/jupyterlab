@@ -57,7 +57,7 @@ body {
 .p-SideBar {
   min-width: 36px;
   max-width: 36px;
-  font-size: 13px;
+  font-size: 14px;
   color: #777777;
   background: #EEEEEE;
 }
@@ -157,7 +157,7 @@ body {
   min-height: 28px;
   max-height: 28px;
   color: #777777;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 
@@ -242,7 +242,7 @@ body {
   background: white;
   border: 1px solid #BDBDBD;
   border-top: 1px solid #F27624;
-  font-size: 12px;
+  font-size: 14px;
   box-shadow: 1px 1px 2px rgba(0, 0, 1, 0.1);
   transform: translateX(-40%) translateY(-58%);
 }
@@ -265,7 +265,7 @@ body {
   background: #FAFAFA;
   color: rgba(0, 0, 0, 0.87);
   border-bottom: 1px solid #DDDDDD;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 
@@ -314,7 +314,7 @@ body {
   background: white;
   color: rgba(0, 0, 0, 0.87);
   border: 1px solid #C0C0C0;
-  font-size: 12px;
+  font-size: 14px;
   box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
 }
 
