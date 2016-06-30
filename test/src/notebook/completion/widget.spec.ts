@@ -51,13 +51,6 @@ class LogWidget extends CompletionWidget {
 }
 
 
-class TestModel extends CompletionModel {
-  setQuery(query: string): void {
-    super.setQuery(query);
-  }
-}
-
-
 describe('notebook/completion/widget', () => {
 
   describe('CompletionWidget', () => {
@@ -263,7 +256,7 @@ describe('notebook/completion/widget', () => {
 
         it('should trigger a selected signal on enter key', () => {
           let reference = new Widget();
-          let model = new TestModel();
+          let model = new CompletionModel();
           let options: CompletionWidget.IOptions = { model, reference };
           let value = '';
           let listener = (sender: any, selected: string) => {
@@ -284,7 +277,7 @@ describe('notebook/completion/widget', () => {
           reference.dispose();
         });
 
-        it('should select the item below and cycle back on down or tab', () => {
+        it('should select the item below and cycle back on down', () => {
           let reference = new Widget();
           let model = new CompletionModel();
           let options: CompletionWidget.IOptions = { model, reference };
@@ -312,18 +305,6 @@ describe('notebook/completion/widget', () => {
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.contain(ACTIVE_CLASS);
           simulate(target, 'keydown', { keyCode: 40 });  // Down
-          expect(items[0].classList).to.contain(ACTIVE_CLASS);
-          expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
-          expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
-          simulate(target, 'keydown', { keyCode: 9 });   // Tab
-          expect(items[0].classList).to.not.contain(ACTIVE_CLASS);
-          expect(items[1].classList).to.contain(ACTIVE_CLASS);
-          expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
-          simulate(target, 'keydown', { keyCode: 9 });   // Tab
-          expect(items[0].classList).to.not.contain(ACTIVE_CLASS);
-          expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
-          expect(items[2].classList).to.contain(ACTIVE_CLASS);
-          simulate(target, 'keydown', { keyCode: 9 });   // Tab
           expect(items[0].classList).to.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
@@ -370,14 +351,14 @@ describe('notebook/completion/widget', () => {
 
         it('should trigger a selected signal on mouse down', () => {
           let reference = new Widget();
-          let model = new TestModel();
+          let model = new CompletionModel();
           let options: CompletionWidget.IOptions = { model, reference };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
           model.options = ['foo', 'bar', 'baz'];
-          model.setQuery('b');
+          model.query = 'b';
           reference.attach(document.body);
 
           let widget = new CompletionWidget(options);
@@ -438,54 +419,6 @@ describe('notebook/completion/widget', () => {
           simulate(options.reference.node, 'mousedown');
           sendMessage(widget, Widget.MsgUpdateRequest);
           expect(widget.isHidden).to.be(true);
-          widget.dispose();
-          reference.dispose();
-        });
-
-      });
-
-      context('scroll', () => {
-
-        it('should reset if scroll is outside widget', () => {
-          let reference = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = { model, reference };
-          let target = document.createElement('div');
-          model.options = ['foo', 'bar'];
-          reference.attach(document.body);
-          reference.node.appendChild(target);
-
-          let widget = new CompletionWidget(options);
-
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
-          expect(widget.isHidden).to.be(false);
-          expect(model.options).to.be.ok();
-          simulate(target, 'scroll');
-          sendMessage(widget, Widget.MsgUpdateRequest);
-          expect(widget.isHidden).to.be(true);
-          expect(model.options).to.not.be.ok();
-          widget.dispose();
-          reference.dispose();
-        });
-
-        it('should allow scrolling inside the widget', () => {
-          let reference = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = { model, reference };
-          model.options = ['foo', 'bar'];
-          reference.attach(document.body);
-
-          let widget = new CompletionWidget(options);
-
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
-          expect(widget.isHidden).to.be(false);
-          expect(model.options).to.be.ok();
-          simulate(widget.node, 'scroll');
-          sendMessage(widget, Widget.MsgUpdateRequest);
-          expect(widget.isHidden).to.be(false);
-          expect(model.options).to.be.ok();
           widget.dispose();
           reference.dispose();
         });

@@ -12,13 +12,6 @@ import {
 } from '../../../../lib/notebook/cells/editor'
 
 
-class TestModel extends CompletionModel {
-  setQuery(query: string) {
-    super.setQuery(query);
-  }
-}
-
-
 describe('notebook/completion/model', () => {
 
   describe('CompletionModel', () => {
@@ -97,7 +90,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should signal when current text changes', () => {
-        let model = new TestModel();
+        let model = new CompletionModel();
         let called = 0;
         let currentValue = 'foo';
         let oldValue = currentValue;
@@ -123,7 +116,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should not signal when current text has not change', () => {
-        let model = new TestModel();
+        let model = new CompletionModel();
         let called = 0;
         let currentValue = 'foo';
         let oldValue = currentValue;
@@ -166,23 +159,23 @@ describe('notebook/completion/model', () => {
       });
 
       it('should return a filtered list of items if query is set', () => {
-        let model = new TestModel();
+        let model = new CompletionModel();
         let want: ICompletionItem[] = [
           { raw: 'foo', text: '<mark>f</mark>oo' }
         ];
         model.options = ['foo', 'bar', 'baz'];
-        model.setQuery('f');
+        model.query = 'f';
         expect(model.items).to.eql(want);
       });
 
       it('should order list based on score', () => {
-        let model = new TestModel();
+        let model = new CompletionModel();
         let want: ICompletionItem[] = [
           { raw: 'qux', text: '<mark>qux</mark>' },
           { raw: 'quux', text: '<mark>qu</mark>u<mark>x</mark>' }
         ];
         model.options = ['qux', 'quux'];
-        model.setQuery('qux');
+        model.query = 'qux';
         expect(model.items).to.eql(want);
       });
 
@@ -233,7 +226,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should not set if original request is nonexistent', () => {
-        let model = new TestModel();
+        let model = new CompletionModel();
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foob';
@@ -254,7 +247,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should not set if cursor is nonexistent', () => {
-        let model = new TestModel();
+        let model = new CompletionModel();
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foob';
@@ -275,7 +268,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should reset model if change is shorter than original', () => {
-        let model = new TestModel();
+        let model = new CompletionModel();
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'fo';
@@ -305,7 +298,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should not set if original request is nonexistent', () => {
-        let model = new TestModel();
+        let model = new CompletionModel();
         let currentValue = 'foo';
         let coords: ICoords = null;
         let cursor: ICursorSpan = { start: 0, end: 0 };

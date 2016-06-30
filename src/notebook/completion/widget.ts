@@ -129,6 +129,9 @@ class CompletionWidget extends Widget {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
+    if (this.isHidden || !this._reference) {
+      return;
+    }
     switch (event.type) {
     case 'keydown':
       this._evtKeydown(event as KeyboardEvent);
@@ -190,15 +193,12 @@ class CompletionWidget extends Widget {
     // If there is only one item, signal and bail.
     if (items.length === 1) {
       this.selected.emit(items[0].raw);
-      this._model.reset();
+      this._reset();
       return;
     }
 
     let node = this.node;
     node.textContent = '';
-
-    // All repaints reset the index back to 0.
-    this._activeIndex = 0;
 
     for (let item of items) {
       let li = this._renderer.createItemNode(item);
@@ -247,20 +247,20 @@ class CompletionWidget extends Widget {
    * Handle mousedown events for the widget.
    */
   private _evtMousedown(event: MouseEvent) {
-    if (!this._reference || this.isHidden || Private.nonstandardClick(event)) {
-      this.hide();
+    if (Private.nonstandardClick(event)) {
+      this._reset();
       return;
     }
 
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
-      // If the user has made a selection, emit its value and reset the model.
+      // If the user has made a selection, emit its value and reset the widget.
       if (target.classList.contains(ITEM_CLASS)) {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
         this.selected.emit(target.dataset['value']);
-        this._model.reset();
+        this._reset();
         return;
       }
       // If the mouse event happened anywhere else in the widget, bail.
@@ -272,56 +272,44 @@ class CompletionWidget extends Widget {
       }
       target = target.parentElement;
     }
-    this._model.reset();
+    this._reset();
   }
 
   /**
    * Handle keydown events for the widget.
    */
   private _evtKeydown(event: KeyboardEvent) {
-    if (!this._reference || this.isHidden) {
-      this.hide();
-      return;
-    }
-
     let target = event.target as HTMLElement;
-    let node = this.node;
-    let active: HTMLElement;
     while (target !== document.documentElement) {
       if (target === this._reference.node) {
         switch (event.keyCode) {
+        case 9:  // Tab key
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          if (this._populateSubset()) {
+            return;
+          }
+          this._selectActive();
+          return;
         case 13: // Enter key
           event.preventDefault();
           event.stopPropagation();
           event.stopImmediatePropagation();
-          active = node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
-          this.selected.emit(active.dataset['value']);
-          this._model.reset();
+          this._selectActive();
           return;
         case 27: // Escape key
           event.preventDefault();
           event.stopPropagation();
           event.stopImmediatePropagation();
-          this._model.reset();
+          this._reset();
           return;
-        case 9: // Tab key
         case 38: // Up arrow key
         case 40: // Down arrow key
           event.preventDefault();
           event.stopPropagation();
           event.stopImmediatePropagation();
-          let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
-          let index = this._activeIndex;
-          active = node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
-          active.classList.remove(ACTIVE_CLASS);
-          if (event.keyCode === 38) { // For up arrow, cycle up.
-            this._activeIndex = index === 0 ? items.length - 1 : index - 1;
-          } else { // For down arrow or tab, cycle down.
-            this._activeIndex = index < items.length - 1 ? index + 1 : 0;
-          }
-          active = items[this._activeIndex] as HTMLElement;
-          active.classList.add(ACTIVE_CLASS);
-          Private.scrollIfNeeded(this.node, active);
+          this._cycle(event.keyCode === 38 ? 'up' : 'down');
           return;
         default:
           return;
@@ -329,26 +317,80 @@ class CompletionWidget extends Widget {
       }
       target = target.parentElement;
     }
-    this._model.reset();
+    this._reset();
   }
 
   /**
    * Handle scroll events for the widget
    */
   private _evtScroll(event: MouseEvent) {
-    if (!this._reference || this.isHidden) {
-      return;
-    }
-
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
       // If the scroll event happened in the completion widget, allow it.
       if (target === this.node) {
         return;
       }
+      if (window.getComputedStyle(target).overflow === 'hidden') {
+        return;
+      }
       target = target.parentElement;
     }
-    this._model.reset();
+    this._reset();
+  }
+
+  /**
+   * Cycle through the available completion items.
+   */
+  private _cycle(direction: 'up' | 'down'): void {
+    let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+    let index = this._activeIndex;
+    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+    active.classList.remove(ACTIVE_CLASS);
+    if (direction === 'up') {
+      this._activeIndex = index === 0 ? items.length - 1 : index - 1;
+    } else {
+      this._activeIndex = index < items.length - 1 ? index + 1 : 0;
+    }
+    active = items[this._activeIndex] as HTMLElement;
+    active.classList.add(ACTIVE_CLASS);
+    Private.scrollIfNeeded(this.node, active);
+  }
+
+  /**
+   * Populate the completion up to the longest initial subset of items.
+   *
+   * @returns `true` if a subset match was found and populated.
+   */
+  private _populateSubset(): boolean {
+    let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+    let subset = Private.commonSubset(Private.itemValues(items));
+    let query = this.model.query;
+    if (subset && subset !== query && subset.indexOf(query) === 0) {
+      this.model.query = subset;
+      this.selected.emit(subset);
+      this.update();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Reset the widget.
+   */
+  private _reset(): void {
+    if (this._model) {
+      this._model.reset();
+    }
+    this._activeIndex = 0;
+  }
+
+  /**
+   * Emit the selected signal for the current active item and reset.
+   */
+  private _selectActive(): void {
+    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+    this.selected.emit(active.dataset['value']);
+    this._reset();
   }
 
   private _activeIndex = 0;
@@ -433,6 +475,41 @@ namespace Private {
   const selectedSignal = new Signal<CompletionWidget, string>();
 
   /**
+   * Returns the common subset string that a list of strings shares.
+   */
+  export
+  function commonSubset(values: string[]): string {
+    let len = values.length;
+    let subset = '';
+    if (len < 2) {
+      return subset;
+    }
+    let strlen = values[0].length;
+    for (let i = 0; i < strlen; i++) {
+      let ch = values[0][i];
+      for (let j = 1; j < len; j++) {
+        if (values[j][i] !== ch) {
+          return subset;
+        }
+      }
+      subset += ch;
+    }
+    return subset;
+  }
+
+  /**
+   * Returns the list of raw item values currently in the DOM.
+   */
+  export
+  function itemValues(items: NodeList): string[] {
+    let values: string[] = [];
+    for (let i = 0, len = items.length; i < len; i++) {
+      values.push((items[i] as HTMLElement).dataset['value']);
+    }
+    return values;
+  }
+
+  /**
    * Returns true for any modified click event (i.e., not a left-click).
    */
   export
@@ -452,7 +529,7 @@ namespace Private {
    * @param elem - The element of interest.
    */
   export
-    function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
+  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
     let ar = area.getBoundingClientRect();
     let er = elem.getBoundingClientRect();
     if (er.top < ar.top - 10) {

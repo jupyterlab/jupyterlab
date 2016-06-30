@@ -422,19 +422,7 @@ class ConsoleWidget extends Widget {
    * Handle a text changed signal from an editor.
    */
   protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
-    let line = change.newValue.split('\n')[change.line];
-    let lastChar = change.ch - 1;
-    let model = this._completion.model;
-    let hasCompletion = !!model.original;
-    // If last character entered is not whitespace, update completion.
-    if (line[lastChar] && line[lastChar].match(/\S/) && hasCompletion) {
-      // Update the current completion state.
-      model.current = change;
-    } else {
-      // If final character is whitespace, reset completion.
-      model.reset();
-    }
-    // Displaying completion widget overrides displaying tooltip.
+    let hasCompletion = !!this._completion.model.original;
     if (hasCompletion) {
       this._tooltip.hide();
     } else if (change.newValue) {

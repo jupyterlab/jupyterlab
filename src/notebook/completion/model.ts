@@ -128,6 +128,11 @@ interface ICompletionModel extends IDisposable {
   original: ICompletionRequest;
 
   /**
+   * The query against which items are filtered.
+   */
+  query: string;
+
+  /**
    * Handle a text change.
    */
   handleTextChange(change: ITextChange): void;
@@ -223,7 +228,6 @@ class CompletionModel implements ICompletionModel {
     if (!this._cursor) {
       return;
     }
-
     this._current = newValue;
 
     if (!this.current) {
@@ -248,7 +252,7 @@ class CompletionModel implements ICompletionModel {
       // Clip the back of the current line.
       let ending = originalLine.substring(end);
       query = query.substring(0, query.lastIndexOf(ending));
-      this.setQuery(query);
+      this._query = query;
     }
     this.stateChanged.emit(void 0);
   }
@@ -269,6 +273,15 @@ class CompletionModel implements ICompletionModel {
     this._cursor = newValue;
   }
 
+  /**
+   * The query against which items are filtered.
+   */
+  get query(): string {
+    return this._query;
+  }
+  set query(newValue: string) {
+    this._query = newValue;
+  }
 
   /**
    * Get whether the model is disposed.
@@ -351,13 +364,6 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
-   * Set the query value that the model filters against.
-   */
-  protected setQuery(query: string): void {
-    this._query = query;
-  }
-
-  /**
    * Apply the query to the complete options list to return the matching subset.
    */
   private _filter(): ICompletionItem[] {
@@ -389,7 +395,7 @@ class CompletionModel implements ICompletionModel {
     this._original = null;
     this._options = null;
     this._cursor = null;
-    this.setQuery('');
+    this._query = '';
   }
 
   private _isDisposed = false;
