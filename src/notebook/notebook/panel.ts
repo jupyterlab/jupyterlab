@@ -224,10 +224,14 @@ class NotebookPanel extends Widget {
     this._content = null;
     this._rendermime = null;
     this._clipboard = null;
-    this._completionHandler.dispose();
-    this._completionHandler = null;
-    this._completion.dispose();
-    this._completion = null;
+    if (this._completionHandler) {
+      this._completionHandler.dispose();
+      this._completionHandler = null;
+    }
+    if (this._completion) {
+      this._completion.dispose();
+      this._completion = null;
+    }
     this._renderer = null;
     super.dispose();
   }
