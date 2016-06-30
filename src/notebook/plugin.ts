@@ -2,21 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  NotebookPanel, NotebookModelFactory, INotebookModel,
-  NotebookWidgetFactory, NotebookActions
-} from './index';
-
-import {
   IKernel
 } from 'jupyter-js-services';
-
-import {
-  IDocumentContext, DocumentRegistry, restartKernel, selectKernelForContext
-} from '../docregistry';
-
-import {
-  RenderMime
-} from '../rendermime';
 
 import {
   Application
@@ -35,8 +22,25 @@ import {
 } from 'phosphor-widget';
 
 import {
+  IDocumentContext, DocumentRegistry, restartKernel, selectKernelForContext
+} from '../docregistry';
+
+import {
+  RenderMime
+} from '../rendermime';
+
+import {
   JupyterServices
 } from '../services/plugin';
+
+import {
+  WidgetTracker
+} from '../widgettracker';
+
+import {
+  NotebookPanel, NotebookModelFactory, INotebookModel,
+  NotebookWidgetFactory, NotebookActions
+} from './index';
 
 
 /**
@@ -91,75 +95,12 @@ const notebookHandlerExtension = {
 
 
 /**
- * An interface exposing the current active notebook.
- */
-export
-class ActiveNotebook {
-  /**
-   * Construct a new active notebook tracker.
-   */
-  constructor() {
-    // Temporary notebook focus follower.
-    document.body.addEventListener('focus', event => {
-      for (let widget of this._widgets) {
-        let target = event.target as HTMLElement;
-        if (widget.isAttached && widget.isVisible) {
-          if (widget.node.contains(target)) {
-            this.activeNotebook = widget;
-            return;
-          }
-        }
-      }
-    }, true);
-  }
-
-  /**
-   * A signal emitted when the active notebook changes.
-   */
-  get activeNotebookChanged(): ISignal<ActiveNotebook, NotebookPanel> {
-    return Private.activeNotebookChangedSignal.bind(this);
-  }
-
-  /**
-   * The current active notebook.
-   */
-  get activeNotebook(): NotebookPanel {
-    return this._activeWidget;
-  }
-  set activeNotebook(widget: NotebookPanel) {
-    if (this._activeWidget === widget) {
-      return;
-    }
-    if (this._widgets.indexOf(widget) !== -1) {
-      this._activeWidget = widget;
-      this.activeNotebookChanged.emit(widget);
-      return;
-    }
-    if (widget === null) {
-      return;
-    }
-    this._widgets.push(widget);
-    widget.disposed.connect(() => {
-      let index = this._widgets.indexOf(widget);
-      this._widgets.splice(index, 1);
-      if (this._activeWidget === widget) {
-        this.activeNotebook = null;
-      }
-    });
-  }
-
-  private _activeWidget: NotebookPanel = null;
-  private _widgets: NotebookPanel[] = [];
-}
-
-
-/**
  * A service tracking the active notebook widget.
  */
 export
 const activeNotebookProvider = {
   id: 'jupyter.services.activeNotebook',
-  provides: ActiveNotebook,
+  provides: WidgetTracker,
   resolve: () => {
     return Private.notebookTracker;
   }
@@ -175,7 +116,7 @@ class TrackingNotebookWidgetFactory extends NotebookWidgetFactory {
    */
   createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernel.IModel): NotebookPanel {
     let widget = super.createNew(context, kernel);
-    Private.notebookTracker.activeNotebook = widget;
+    Private.notebookTracker.addWidget(widget);
     return widget;
   }
 }
@@ -184,7 +125,7 @@ class TrackingNotebookWidgetFactory extends NotebookWidgetFactory {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: JupyterServices, rendermime: RenderMime<Widget>, clipboard: IClipboard): Promise<void> {
+function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: JupyterServices, rendermime: RenderMime<Widget>, clipboard: IClipboard): void {
 
   let widgetFactory = new TrackingNotebookWidgetFactory(rendermime, clipboard);
   registry.addModelFactory(new NotebookModelFactory());
@@ -223,8 +164,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['runAndAdvance'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.kernel);
       }
     }
@@ -232,8 +173,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['run'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.run(nbWidget.content, nbWidget.context.kernel);
       }
     }
@@ -241,8 +182,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['runAndInsert'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.runAndInsert(nbWidget.content, nbWidget.context.kernel);
       }
     }
@@ -250,8 +191,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['runAll'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.runAll(nbWidget.content, nbWidget.context.kernel);
       }
     }
@@ -259,8 +200,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['restart'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         restartKernel(nbWidget.kernel, nbWidget.node);
       }
     }
@@ -268,8 +209,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['restartClear'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         let promise = restartKernel(nbWidget.kernel, nbWidget.node);
         promise.then(result => {
           if (result) {
@@ -282,8 +223,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['restartRunAll'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         let promise = restartKernel(nbWidget.kernel, nbWidget.node);
         promise.then(result => {
           NotebookActions.runAll(nbWidget.content, nbWidget.context.kernel);
@@ -294,8 +235,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['clearAllOutputs'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.clearAllOutputs(nbWidget.content);
       }
     }
@@ -303,8 +244,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['clearOutputs'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.clearOutputs(nbWidget.content);
       }
     }
@@ -312,8 +253,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['interrupt'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let kernel = tracker.activeNotebook.context.kernel;
+      if (tracker.activeWidget) {
+        let kernel = tracker.activeWidget.context.kernel;
         if (kernel) {
           kernel.interrupt();
         }
@@ -323,8 +264,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['toCode'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.changeCellType(nbWidget.content, 'code');
       }
     }
@@ -332,8 +273,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['toMarkdown'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.changeCellType(nbWidget.content, 'markdown');
       }
     }
@@ -341,8 +282,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['toRaw'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.changeCellType(nbWidget.content, 'raw');
       }
     }
@@ -350,8 +291,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['cut'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.cut(nbWidget.content, nbWidget.clipboard);
       }
     }
@@ -359,8 +300,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['copy'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.copy(nbWidget.content, nbWidget.clipboard);
       }
     }
@@ -368,8 +309,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['paste'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.paste(nbWidget.content, nbWidget.clipboard);
       }
     }
@@ -377,8 +318,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['deleteCell'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.deleteCells(nbWidget.content);
       }
     }
@@ -386,8 +327,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['split'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.splitCell(nbWidget.content);
       }
     }
@@ -395,8 +336,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['merge'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.mergeCells(nbWidget.content);
       }
     }
@@ -404,8 +345,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['insertAbove'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.insertAbove(nbWidget.content);
       }
     }
@@ -413,8 +354,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['insertBelow'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.insertBelow(nbWidget.content);
       }
     }
@@ -422,8 +363,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['selectAbove'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.selectAbove(nbWidget.content);
       }
     }
@@ -431,8 +372,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['selectBelow'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.selectBelow(nbWidget.content);
       }
     }
@@ -440,8 +381,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['extendAbove'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.extendSelectionAbove(nbWidget.content);
       }
     }
@@ -449,8 +390,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['extendBelow'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.extendSelectionBelow(nbWidget.content);
       }
     }
@@ -458,8 +399,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['toggleLines'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.toggleLineNumbers(nbWidget.content);
       }
     }
@@ -467,8 +408,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['toggleAllLines'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        let nbWidget = tracker.activeNotebook;
+      if (tracker.activeWidget) {
+        let nbWidget = tracker.activeWidget;
         NotebookActions.toggleAllLineNumbers(nbWidget.content);
       }
     }
@@ -476,40 +417,40 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   {
     id: cmdIds['commandMode'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        tracker.activeNotebook.content.mode = 'command';
+      if (tracker.activeWidget) {
+        tracker.activeWidget.content.mode = 'command';
       }
     }
   },
   {
     id: cmdIds['editMode'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        tracker.activeNotebook.content.mode = 'edit';
+      if (tracker.activeWidget) {
+        tracker.activeWidget.content.mode = 'edit';
       }
     }
   },
   {
     id: cmdIds['undo'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        NotebookActions.undo(tracker.activeNotebook.content);
+      if (tracker.activeWidget) {
+        NotebookActions.undo(tracker.activeWidget.content);
       }
     }
   },
   {
     id: cmdIds['redo'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        NotebookActions.redo(tracker.activeNotebook.content);
+      if (tracker.activeWidget) {
+        NotebookActions.redo(tracker.activeWidget.content);
       }
     }
   },
   {
     id: cmdIds['switchKernel'],
     handler: () => {
-      if (tracker.activeNotebook) {
-        selectKernelForContext(tracker.activeNotebook.context, tracker.activeNotebook.node);
+      if (tracker.activeWidget) {
+        selectKernelForContext(tracker.activeWidget.context, tracker.activeWidget.node);
       }
     }
   }
@@ -676,8 +617,6 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     text: 'Redo Cell Operation'
   }
   ]);
-
-  return Promise.resolve(void 0);
 }
 
 
@@ -686,14 +625,8 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
  */
 namespace Private {
   /**
-   * A signal emitted when the active notebook changes.
-   */
-  export
-  const activeNotebookChangedSignal = new Signal<ActiveNotebook, NotebookPanel>();
-
-  /**
    * A singleton notebook tracker instance.
    */
   export
-  const notebookTracker = new ActiveNotebook();
+  const notebookTracker = new WidgetTracker<NotebookPanel>();
 }
