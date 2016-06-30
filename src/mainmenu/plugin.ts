@@ -9,7 +9,7 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  MenuItem, Menu, MenuBar
+  MenuItem, MenuBar
 } from 'phosphor-menus';
 
 
