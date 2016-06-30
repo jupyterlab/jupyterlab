@@ -6,8 +6,24 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
+  TabPanel
+} from 'phosphor-tabs';
+
+import {
   IFrame
 } from './iframe';
+
+
+import {
+ CommandPalette, IStandardPaletteItemOptions, StandardPaletteModel
+} from 'phosphor-commandpalette';
+
+
+import {
+  Widget
+} from 'phosphor-widget';
+
+import 'jupyterlab/lib/default-theme/index.css';
 
 
 /**
@@ -62,21 +78,61 @@ const helpHandlerExtension = {
  * returns A promise that resolves when the extension is activated.
  */
 function activateHelpHandler(app: Application): Promise<void> {
+  let helpPalette = new CommandPalette();
+  let mPalette = new StandardPaletteModel();
+  helpPalette.title.text = 'Help';
+  helpPalette.id = 'help-doc';
+
   let widget = new IFrame();
   widget.addClass(HELP_CLASS);
-  widget.title.text = 'Help';
-  widget.id = 'help-doc';
-
+  widget.id = 'help-doc'; 
   let helpCommandItems = COMMANDS.map(command => {
     return {
       id: command.id,
       handler: () => {
-        attachHelp();
-        showHelp();
+        widget.title.text = command.text;
+        widget.title.closable = true;
+
         widget.loadURL(command.url);
+        app.shell.addToMainArea(widget);
+        let stack = widget.parent;
+        if (!stack) {
+          return;
+        }
+        let tabs = stack.parent;
+        if (tabs instanceof TabPanel) {
+          tabs.currentWidget = widget;
+        }
       }
     };
   });
+
+  let mainHelpPaletteItems = COMMANDS.map(command => {
+    return {
+      id: command.id,
+      text: command.text,
+      caption: `Open ${command.text}`,
+      category: 'Help',
+      handler: () => {
+        widget.title.text = command.text;
+        widget.title.closable = true;        
+
+        widget.loadURL(command.url);
+        app.shell.addToMainArea(widget);
+        let stack = widget.parent;
+        if (!stack) {
+           return;
+        }
+        let tabs = stack.parent;
+        if (tabs instanceof TabPanel) {
+           tabs.currentWidget = widget;
+        }
+      }
+    };
+  });
+
+  mPalette.addItems(mainHelpPaletteItems);
+  helpPalette.model = mPalette;
 
   app.commands.add(helpCommandItems);
 
@@ -105,23 +161,24 @@ function activateHelpHandler(app: Application): Promise<void> {
   });
 
   app.palette.add(helpPaletteItems);
+  attachHelp();
 
   return Promise.resolve(void 0);
 
   function attachHelp(): void {
-    if (!widget.isAttached) app.shell.addToRightArea(widget);
+    if (!helpPalette.isAttached) app.shell.addToLeftArea(helpPalette, {rank: 101});
   }
 
   function showHelp(): void {
-    app.shell.activateRight(widget.id);
+    app.shell.activateLeft(helpPalette.id);
   }
 
   function hideHelp(): void {
-    if (!widget.isHidden) app.shell.collapseRight();
+    if (!helpPalette.isHidden) app.shell.collapseLeft();
   }
 
   function toggleHelp(): void {
-    if (widget.isHidden) {
+    if (helpPalette.isHidden) {
       showHelp();
     } else {
       hideHelp();
