@@ -164,7 +164,7 @@
     padding-left: 8px;
     padding-right: 8px;
     vertical-align: middle;
-    font-size: 13px;
+    font-size: 14px;
     color: #616161;
     line-height: 23px;
 }
@@ -187,7 +187,7 @@
     border-radius: 0;
     outline: none;
     width: 100%;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 23px;
     color: #616161;
 }
@@ -494,7 +494,7 @@
 
 
 .jp-Completion-item code {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 25px;
 }
 
