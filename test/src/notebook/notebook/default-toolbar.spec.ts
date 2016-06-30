@@ -59,17 +59,25 @@ describe('notebook/notebook/default-toolbar', () => {
     let context: MockContext<NotebookModel>;
 
     beforeEach((done) => {
+      console.log('***1');
       panel = new NotebookPanel({ rendermime, clipboard });
+      console.log('***2');
       let model = new NotebookModel();
+      console.log('***3');
       model.fromJSON(DEFAULT_CONTENT);
+      console.log('***4');
       context = new MockContext<NotebookModel>(model);
+      console.log('***5');
       panel.context = context;
+      console.log('***6');
       context.changeKernel({ name: 'python' }).then(() => {
+        console.log('***7');
         done();
       });
     });
 
     afterEach(() => {
+      console.log('***8');
       panel.dispose();
     });
 
