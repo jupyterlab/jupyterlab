@@ -6,7 +6,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IWidgetFactory, IDocumentContext, findKernel
+  ABCWidgetFactory, IDocumentContext, findKernel
 } from '../../docregistry';
 
 import {
@@ -38,7 +38,7 @@ import {
  * A widget factory for notebook panels.
  */
 export
-class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel, INotebookModel> {
+class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookModel> {
   /**
    * Construct a new notebook widget factory.
    *
@@ -47,26 +47,21 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel, INotebookMo
    * @param clipboard - The application clipboard.
    */
   constructor(rendermime: RenderMime<Widget>, clipboard: IClipboard) {
+    super();
     this._rendermime = rendermime;
     this._clipboard = clipboard;
-  }
-
-  /**
-   * Get whether the factory has been disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get isDisposed(): boolean {
-    return this._rendermime === null;
   }
 
   /**
    * Dispose of the resources used by the factory.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     this._rendermime = null;
     this._clipboard = null;
+    super.dispose();
   }
 
   /**
@@ -88,20 +83,8 @@ class NotebookWidgetFactory implements IWidgetFactory<NotebookPanel, INotebookMo
     let panel = new NotebookPanel({ rendermime, clipboard: this._clipboard });
     panel.context = context;
     ToolbarItems.populateDefaults(panel);
+    this.widgetCreated.emit(panel);
     return panel;
-  }
-
-  /**
-   * Take an action on a widget before closing it.
-   *
-   * @returns A promise that resolves to true if the document should close
-   *   and false otherwise.
-   *
-   * ### The default implementation is a no-op.
-   */
-  beforeClose(widget: NotebookPanel, context: IDocumentContext<INotebookModel>): Promise<boolean> {
-    // No special action required.
-    return Promise.resolve(true);
   }
 
   private _rendermime: RenderMime<Widget> = null;

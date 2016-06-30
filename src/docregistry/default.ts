@@ -257,7 +257,14 @@ class Base64ModelFactory extends TextModelFactory {
  * The default implemetation of a widget factory.
  */
 export
-abstract class ABCWidgetFactory implements IWidgetFactory<Widget, IDocumentModel> {
+abstract class ABCWidgetFactory<T extends Widget, U extends IDocumentModel> implements IWidgetFactory<T, U> {
+  /**
+   * A signal emitted when a widget is created.
+   */
+  get widgetCreated(): ISignal<IWidgetFactory<T, U>, T> {
+    return Private.widgetCreatedSignal.bind(this);
+  }
+
   /**
    * Get whether the model factory has been disposed.
    */
@@ -274,8 +281,11 @@ abstract class ABCWidgetFactory implements IWidgetFactory<Widget, IDocumentModel
 
   /**
    * Create a new widget given a document model and a context.
+   *
+   * #### Notes
+   * It should emit the [widgetCreated] signal with the new widget.
    */
-  abstract createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): Widget;
+  abstract createNew(context: IDocumentContext<U>, kernel?: IKernel.IModel): T;
 
   private _isDisposed = false;
 }
@@ -290,6 +300,12 @@ namespace Private {
    */
   export
   const contentChangedSignal = new Signal<IDocumentModel, void>();
+
+  /**
+   * A signal emitted when a widget is created.
+   */
+  export
+  const widgetCreatedSignal = new Signal<IWidgetFactory<Widget, IDocumentModel>, Widget>();
 
   /**
    * A signal emitted when a document dirty state changes.

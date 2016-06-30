@@ -20,23 +20,19 @@ import {
 export
 const terminalExtension = {
   id: 'jupyter.extensions.terminal',
-  requires: [WidgetTracker],
   activate: activateTerminal
 };
 
 
-function activateTerminal(app: Application, tracker: WidgetTracker): void {
+function activateTerminal(app: Application): void {
 
   let newTerminalId = 'terminal:create-new';
 
   // Track the current active terminal.
+  let tracker = new WidgetTracker<TerminalWidget>();
   let activeTerm: TerminalWidget;
   tracker.activeWidgetChanged.connect((sender, widget) => {
-    if (widget instanceof TerminalWidget) {
-      activeTerm = widget as TerminalWidget;
-    } else {
-      activeTerm = null;
-    }
+    activeTerm = widget;
   });
 
   app.commands.add([{

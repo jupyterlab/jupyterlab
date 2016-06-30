@@ -14,7 +14,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  DocumentRegistry, restartKernel, selectKernelForContext
+  DocumentRegistry, restartKernel, selectKernelForContext,
+  IWidgetExtension
 } from '../docregistry';
 
 import {
@@ -75,20 +76,40 @@ const cmdIds = {
 
 
 /**
- * The notebook file handler provider.
+ * The notebook file handler extension.
  */
 export
 const notebookHandlerExtension = {
   id: 'jupyter.extensions.notebookHandler',
-  requires: [DocumentRegistry, JupyterServices, RenderMime, IClipboard, WidgetTracker],
+  requires: [DocumentRegistry, JupyterServices, RenderMime, IClipboard],
   activate: activateNotebookHandler
 };
 
 
 /**
+ * The notebook widget tracker provider.
+ */
+export
+const notebookTrackerProvider = {
+  id: 'jupyter.plugins.notebookTracker',
+  provides: NotebookTracker,
+  resolve: () => {
+    return Private.notebookTracker;
+  }
+};
+
+
+/**
+ * A class that tracks notebook widgets.
+ */
+export
+class NotebookTracker extends WidgetTracker<NotebookPanel> { }
+
+
+/**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: JupyterServices, rendermime: RenderMime<Widget>, clipboard: IClipboard, tracker: WidgetTracker): void {
+function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: JupyterServices, rendermime: RenderMime<Widget>, clipboard: IClipboard): void {
 
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard);
   registry.addModelFactory(new NotebookModelFactory());
@@ -124,12 +145,12 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
 
   // Track the current active notebook.
   let activeNotebook: NotebookPanel;
+  let tracker = Private.notebookTracker;
+  widgetFactory.widgetCreated.connect((sender, widget) => {
+    tracker.addWidget(widget);
+  });
   tracker.activeWidgetChanged.connect((sender, widget) => {
-    if (widget instanceof NotebookPanel) {
-      activeNotebook = widget as NotebookPanel;
-    } else {
-      activeNotebook = null;
-    }
+    activeNotebook = widget;
   });
 
   app.commands.add([
@@ -589,4 +610,16 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     text: 'Redo Cell Operation'
   }
   ]);
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * A singleton instance of a notebook tracker.
+   */
+  export
+  const notebookTracker = new NotebookTracker();
 }

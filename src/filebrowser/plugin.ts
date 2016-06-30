@@ -44,7 +44,7 @@ import {
 export
 const fileBrowserExtension = {
   id: 'jupyter.extensions.fileBrowser',
-  requires: [JupyterServices, DocumentRegistry, WidgetTracker],
+  requires: [JupyterServices, DocumentRegistry],
   activate: activateFileBrowser
 };
 
@@ -52,10 +52,16 @@ const fileBrowserExtension = {
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: Application, provider: JupyterServices, registry: DocumentRegistry, tracker: WidgetTracker): Promise<void> {
+function activateFileBrowser(app: Application, provider: JupyterServices, registry: DocumentRegistry): Promise<void> {
   let contents = provider.contentsManager;
   let sessions = provider.sessionManager;
   let id = 0;
+
+  let tracker = new WidgetTracker<Widget>();
+  let activeWidget: Widget;
+  tracker.activeWidgetChanged.connect((sender, widget) => {
+    activeWidget = widget;
+  });
 
   let opener: IWidgetOpener = {
     open: (widget) => {
@@ -97,16 +103,6 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     menu.popup(x, y);
   });
 
-  // Track the current active document.
-  let activeWidget: Widget;
-  tracker.activeWidgetChanged.connect((sender, widget) => {
-    if (widget && widget.hasClass('jp-Document')) {
-      activeWidget = widget;
-    } else {
-      activeWidget = null;
-    }
-  });
-
   // Add the command for a new items.
   let newTextFileId = 'file-operations:new-text-file';
 
@@ -133,11 +129,10 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: saveDocumentId,
       handler: () => {
-        if (!activeWidget) {
-          return;
+        if (activeWidget) {
+          let context = docManager.contextForWidget(activeWidget);
+          context.save();
         }
-        let context = docManager.contextForWidget(activeWidget);
-        context.save();
       }
     }
   ]);
@@ -157,11 +152,10 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: revertDocumentId,
       handler: () => {
-        if (!activeWidget) {
-          return;
+        if (activeWidget) {
+          let context = docManager.contextForWidget(activeWidget);
+          context.revert();
         }
-        let context = docManager.contextForWidget(activeWidget);
-        context.revert();
       }
     }
   ]);

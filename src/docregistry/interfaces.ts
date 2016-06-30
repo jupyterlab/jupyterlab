@@ -269,7 +269,15 @@ interface IWidgetFactoryOptions {
 export
 interface IWidgetFactory<T extends Widget, U extends IDocumentModel> extends IDisposable {
   /**
+   * A signal emitted when a widget is created.
+   */
+  widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
+
+  /**
    * Create a new widget.
+   *
+   * #### Notes
+   * It should emit the [widgetCreated] signal with the new widget.
    */
   createNew(context: IDocumentContext<U>, kernel?: IKernel.IModel): T;
 }

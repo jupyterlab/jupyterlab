@@ -86,11 +86,13 @@ class ImageWidget extends Widget {
  * A widget factory for images.
  */
 export
-class ImageWidgetFactory extends ABCWidgetFactory implements IWidgetFactory<ImageWidget, IDocumentModel> {
+class ImageWidgetFactory extends ABCWidgetFactory<ImageWidget, IDocumentModel> {
   /**
    * Create a new widget given a context.
    */
   createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): ImageWidget {
-    return new ImageWidget(context);
+    let widget = new ImageWidget(context);
+    this.widgetCreated.emit(widget);
+    return widget;
   }
 }
