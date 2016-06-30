@@ -223,8 +223,12 @@ describe('notebook/notebook/default-toolbar', () => {
         let button = ToolbarItems.createRestartButton(panel);
         panel.attach(document.body);
         button.attach(document.body);
+        let called = false;
         panel.kernel.statusChanged.connect((sender, status) => {
           if (status === 'restarting') {
+            called = true;
+          } else if (status === 'idle') {
+            expect(called).to.be(true);
             button.dispose();
             done();
           }
