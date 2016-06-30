@@ -6,7 +6,7 @@ import 'fullpage.js';
 import 'fullpage.js/jquery.fullPage.css';
 
 let options = { controlArrows: true };
-jQuery.fullpage(options);
+jQuery('fullpage.js').fullpage(options);
 
 import {
   Application
