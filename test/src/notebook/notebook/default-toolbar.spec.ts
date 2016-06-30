@@ -59,25 +59,17 @@ describe('notebook/notebook/default-toolbar', () => {
     let context: MockContext<NotebookModel>;
 
     beforeEach((done) => {
-      console.log('***1');
       panel = new NotebookPanel({ rendermime, clipboard });
-      console.log('***2');
       let model = new NotebookModel();
-      console.log('***3');
       model.fromJSON(DEFAULT_CONTENT);
-      console.log('***4');
       context = new MockContext<NotebookModel>(model);
-      console.log('***5');
       panel.context = context;
-      console.log('***6');
       context.changeKernel({ name: 'python' }).then(() => {
-        console.log('***7');
         done();
-      });
+      }).catch(done);
     });
 
     afterEach(() => {
-      console.log('***8');
       panel.dispose();
     });
 
@@ -301,7 +293,7 @@ describe('notebook/notebook/default-toolbar', () => {
         panel.kernel.getKernelSpec().then(spec => {
           expect(item.node.textContent).to.be(spec.display_name);
           done();
-        });
+        }).catch(done);
       });
 
       it("should display `'No Kernel!'` if there is no kernel", () => {
@@ -319,7 +311,7 @@ describe('notebook/notebook/default-toolbar', () => {
           kernel.getKernelSpec().then(spec => {
             expect(item.node.textContent).to.be(spec.display_name);
             done();
-          });
+          }).catch(done);
         });
       });
 
@@ -370,8 +362,8 @@ describe('notebook/notebook/default-toolbar', () => {
               done();
             }
           });
-          panel.kernel.interrupt();
-        });
+          panel.kernel.interrupt().catch(done);
+        }).catch(done);
       });
 
       it('should handle a change to the context', (done) => {
@@ -387,8 +379,8 @@ describe('notebook/notebook/default-toolbar', () => {
               done();
             }
           });
-          panel.kernel.interrupt();
-        });
+          panel.kernel.interrupt().catch(done);
+        }).catch(done);
       });
 
     });
