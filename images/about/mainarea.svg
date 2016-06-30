@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="60px" height="60px" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>Main Area icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M0,2.99593743 C0,1.34132688 1.33782998,0 2.99841946,0 L23.2515805,0 C24.9075619,0 26.25,1.33730974 26.25,2.99593743 L26.25,57.0040626 C26.25,58.6586731 24.91217,60 23.2515805,60 L2.99841946,60 C1.34243812,60 0,58.6626903 0,57.0040626 L0,2.99593743 Z M33.75,2.99841946 C33.75,1.34243812 35.08783,0 36.7484195,0 L57.0015805,0 C58.6575619,0 60,1.33782998 60,2.99841946 L60,23.2515805 C60,24.9075619 58.66217,26.25 57.0015805,26.25 L36.7484195,26.25 C35.0924381,26.25 33.75,24.91217 33.75,23.2515805 L33.75,2.99841946 Z M33.75,36.7484195 C33.75,35.0924381 35.08783,33.75 36.7484195,33.75 L57.0015805,33.75 C58.6575619,33.75 60,35.08783 60,36.7484195 L60,57.0015805 C60,58.6575619 58.66217,60 57.0015805,60 L36.7484195,60 C35.0924381,60 33.75,58.66217 33.75,57.0015805 L33.75,36.7484195 Z" id="path-1"></path>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-3">
+            <stop stop-color="#FAAE4A" offset="0%"></stop>
+            <stop stop-color="#F27624" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard-1" transform="translate(-763.000000, -189.000000)">
+            <g id="Window---(Full)-1/1-100-x-100" transform="translate(344.000000, 7.000000)">
+                <g id="About" transform="translate(148.000000, 179.000000)">
+                    <g id="Page-2" transform="translate(0.000000, 3.000000)">
+                        <g id="Main-Area-title" transform="translate(271.000000, 0.000000)">
+                            <g id="Main-Area-icon">
+                                <mask id="mask-2" fill="white">
+                                    <use xlink:href="#path-1"></use>
+                                </mask>
+                                <use id="Mask" fill-opacity="0.8" fill="#F27624" xlink:href="#path-1"></use>
+                                <rect id="Mask" fill="url(#linearGradient-3)" mask="url(#mask-2)" x="0" y="0" width="60" height="60"></rect>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
