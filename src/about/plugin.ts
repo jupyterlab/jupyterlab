@@ -5,6 +5,9 @@ import 'jQuery';
 import 'fullpage.js'; 
 import 'fullpage.js/jquery.fullPage.css';
 
+let options = { controlArrows: true };
+jQuery.fullpage(options);
+
 import {
   Application
 } from 'phosphide/lib/core/application';
