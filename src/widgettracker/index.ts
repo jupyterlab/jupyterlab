@@ -28,7 +28,7 @@ const SEMANTIC_FOCUS_CLASS = 'jp-mod-semanticFocus';
  * An object that tracks the active widget in an application.
  */
 export
-class WidgetTracker implements IDisposable {
+class WidgetTracker<T extends Widget> implements IDisposable {
   /**
    * Construct a new widget tracker.
    */
@@ -41,7 +41,7 @@ class WidgetTracker implements IDisposable {
   /**
    * A signal emitted when the active widget changes.
    */
-  get activeWidgetChanged(): ISignal<WidgetTracker, Widget> {
+  get activeWidgetChanged(): ISignal<WidgetTracker<T>, T> {
     return activeWidgetChangedSignal.bind(this);
   }
 
@@ -61,7 +61,7 @@ class WidgetTracker implements IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  get widgets(): Widget[] {
+  get widgets(): T[] {
     return this._widgets.slice();
   }
 
@@ -75,10 +75,10 @@ class WidgetTracker implements IDisposable {
    * The widget will be activated in the application shell.
    * The [[activeWidgetChanged]] signal will be emitted.
    */
-  get activeWidget(): Widget {
+  get activeWidget(): T {
     return this._activeWidget;
   }
-  set activeWidget(widget: Widget) {
+  set activeWidget(widget: T) {
     if (this._activeWidget === widget) {
       return;
     }
@@ -131,7 +131,7 @@ class WidgetTracker implements IDisposable {
    * #### Notes
    * The new widget will be set as the active widget.
    */
-  addWidget(widget: Widget): IDisposable {
+  addWidget(widget: T): IDisposable {
     this._widgets.push(widget);
     this.activeWidget = widget;
     let disposal = () => {
@@ -161,12 +161,12 @@ class WidgetTracker implements IDisposable {
     }
   }
 
-  private _widgets: Widget[] = [];
-  private _activeWidget: Widget = null;
+  private _widgets: T[] = [];
+  private _activeWidget: T = null;
 }
 
 
 /**
  * A signal emitted when the active widget changes.
  */
- const activeWidgetChangedSignal = new Signal<WidgetTracker, Widget>();
+ const activeWidgetChangedSignal = new Signal<WidgetTracker<Widget>, Widget>();
