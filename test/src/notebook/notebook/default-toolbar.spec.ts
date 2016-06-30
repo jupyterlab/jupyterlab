@@ -225,7 +225,6 @@ describe('notebook/notebook/default-toolbar', () => {
         button.attach(document.body);
         panel.kernel.statusChanged.connect((sender, status) => {
           if (status === 'restarting') {
-            panel.dispose();
             button.dispose();
             done();
           }
