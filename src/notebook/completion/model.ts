@@ -218,7 +218,7 @@ class CompletionModel implements ICompletionModel {
     }
 
     // Cursor must always be set before a text change. This happens
-    // automatically in the API response but since `current` is a public
+    // automatically in the completion handler, but since `current` is a public
     // attribute, this defensive check is necessary.
     if (!this._cursor) {
       return;

@@ -24,8 +24,6 @@ const TEST_ITEM_CLASS = 'jp-TestItem';
 
 const ITEM_CLASS = 'jp-Completion-item';
 
-const DOWN_ARROW = 40;
-
 
 class CustomRenderer extends CompletionWidget.Renderer {
   createItemNode(item: ICompletionItem): HTMLLIElement {
@@ -47,6 +45,13 @@ class LogWidget extends CompletionWidget {
   handleEvent(event: Event): void {
     super.handleEvent(event);
     this.events.push(event.type);
+  }
+}
+
+
+class TestModel extends CompletionModel {
+  setQuery(query: string): void {
+    super.setQuery(query);
   }
 }
 
@@ -208,6 +213,89 @@ describe('notebook/completion/widget', () => {
           expect(widget.events).to.contain(type);
         });
         widget.dispose();
+      });
+
+      context('mousedown', () => {
+
+        it('should trigger a selected signal on mouse down', () => {
+          let options: CompletionWidget.IOptions = {
+            model: new TestModel(),
+            reference: new Widget()
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          options.model.options = ['foo', 'bar', 'baz'];
+          (options.model as TestModel).setQuery('b');
+          options.reference.attach(document.body);
+
+          let widget = new CompletionWidget(options);
+
+          widget.selected.connect(listener);
+          widget.attach(document.body);
+          sendMessage(widget, Widget.MsgUpdateRequest);
+
+          let items = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
+
+          expect(value).to.be('');
+          simulate(items[1], 'mousedown');
+          expect(value).to.be('baz');
+          widget.dispose();
+          options.reference.dispose();
+        });
+
+        it('should ignore a mouse down that misses an item', () => {
+          let options: CompletionWidget.IOptions = {
+            model: new CompletionModel(),
+            reference: new Widget()
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          options.model.options = ['foo', 'bar'];
+          options.reference.attach(document.body);
+
+          let widget = new CompletionWidget(options);
+
+          widget.selected.connect(listener);
+          widget.attach(document.body);
+          sendMessage(widget, Widget.MsgUpdateRequest);
+          expect(value).to.be('');
+          simulate(widget.node, 'mousedown');
+          expect(value).to.be('');
+          widget.dispose();
+          options.reference.dispose();
+        });
+
+        it('should hide widget if mouse down misses it', (done) => {
+          let options: CompletionWidget.IOptions = {
+            model: new CompletionModel(),
+            reference: new Widget()
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          options.model.options = ['foo', 'bar'];
+          options.reference.attach(document.body);
+
+          let widget = new CompletionWidget(options);
+
+          widget.selected.connect(listener);
+          widget.attach(document.body);
+          sendMessage(widget, Widget.MsgUpdateRequest);
+          expect(widget.isHidden).to.be(false);
+          simulate(options.reference.node, 'mousedown');
+          requestAnimationFrame(() => {
+            expect(widget.isHidden).to.be(true);
+            widget.dispose();
+            options.reference.dispose();
+            done();
+          });
+        });
+
       });
 
     });
