@@ -31,6 +31,12 @@ body {
 }
 
 
+#p-top-panel {
+  display: flex;
+  min-height: 24px;
+}
+
+
 .jp-Document {
   min-width: 120px;
   min-height: 120px;
