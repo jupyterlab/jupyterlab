@@ -25,10 +25,18 @@ function main(): void {
   dock.insertTabBefore(term1);
   dock.insertTabBefore(term2);
 
+
   dock.attach(document.body);
   dock.id = 'main';
 
   window.onresize = () => dock.fit();
+  console.log(term1);
+  console.log('Font Size is ' + '\n');
+
+  console.log(term1.fontSize.toString());
+
+  term1.fontSize = 15;
+  console.log(term1.fontSize.toString());
 }
 
 
