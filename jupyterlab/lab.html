@@ -13,6 +13,10 @@ Distributed under the terms of the Modified BSD License.
     {% if mathjax_url %}
     <script type="text/javascript" src="{{mathjax_url}}?config={{mathjax_config}}&amp;delayStartupUntil=configured" charset="utf-8"></script>
     {% endif %}
+    <script src="{{static_url("components/codemirror/lib/codemirror.js") }}" type="text/javascript" charset="utf-8"></script>
+    <script src="{{static_url("components/codemirror/mode/meta.js") }}" type="text/javascript" charset="utf-8"></script>
+    <script src="{{static_url("components/jquery/jquery.min.js") }}" type="text/javascript" charset="utf-8"></script> <!-- window.$ -->
+    <script src="{{static_url("components/jquery-ui/ui/minified/jquery-ui.min.js") }}" type="text/javascript" charset="utf-8"></script> <!-- extends window.$ -->
 </head>
 
 
