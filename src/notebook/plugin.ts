@@ -76,6 +76,13 @@ const cmdIds = {
 
 
 /**
+ * A class that tracks notebook widgets.
+ */
+export
+class NotebookTracker extends WidgetTracker<NotebookPanel> { }
+
+
+/**
  * The notebook file handler extension.
  */
 export
@@ -97,13 +104,6 @@ const notebookTrackerProvider = {
     return Private.notebookTracker;
   }
 };
-
-
-/**
- * A class that tracks notebook widgets.
- */
-export
-class NotebookTracker extends WidgetTracker<NotebookPanel> { }
 
 
 /**
