@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  TerminalWidget
-} from './index';
-
-import {
   Application
 } from 'phosphide/lib/core/application';
 
 import {
-  TabPanel
-} from 'phosphor-tabs';
+  WidgetTracker
+} from '../widgettracker';
+
+import {
+  TerminalWidget
+} from './index';
 
 
 /**
@@ -24,9 +24,16 @@ const terminalExtension = {
 };
 
 
-function activateTerminal(app: Application): Promise<void> {
+function activateTerminal(app: Application): void {
 
   let newTerminalId = 'terminal:create-new';
+
+  // Track the current active terminal.
+  let tracker = new WidgetTracker<TerminalWidget>();
+  let activeTerm: TerminalWidget;
+  tracker.activeWidgetChanged.connect((sender, widget) => {
+    activeTerm = widget;
+  });
 
   app.commands.add([{
     id: newTerminalId,
@@ -34,14 +41,7 @@ function activateTerminal(app: Application): Promise<void> {
       let term = new TerminalWidget();
       term.title.closable = true;
       app.shell.addToMainArea(term);
-      let stack = term.parent;
-      if (!stack) {
-        return;
-      }
-      let tabs = stack.parent;
-      if (tabs instanceof TabPanel) {
-        tabs.currentWidget = term;
-      }
+      tracker.addWidget(term);
     }
   }]);
   app.palette.add([
@@ -52,6 +52,4 @@ function activateTerminal(app: Application): Promise<void> {
       caption: 'Start a new terminal session'
     }
   ]);
-
-  return Promise.resolve(void 0);
 }

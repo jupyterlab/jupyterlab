@@ -26,16 +26,16 @@ import {
 } from 'phosphor-menus';
 
 import {
-  TabPanel
-} from 'phosphor-tabs';
-
-import {
   Widget
 } from 'phosphor-widget';
 
 import {
   JupyterServices
 } from '../services/plugin';
+
+import {
+  WidgetTracker
+} from '../widgettracker';
 
 
 /**
@@ -55,9 +55,13 @@ const fileBrowserExtension = {
 function activateFileBrowser(app: Application, provider: JupyterServices, registry: DocumentRegistry): Promise<void> {
   let contents = provider.contentsManager;
   let sessions = provider.sessionManager;
-  let widgets: Widget[] = [];
-  let activeWidget: Widget;
   let id = 0;
+
+  let tracker = new WidgetTracker<Widget>();
+  let activeWidget: Widget;
+  tracker.activeWidgetChanged.connect((sender, widget) => {
+    activeWidget = widget;
+  });
 
   let opener: IWidgetOpener = {
     open: (widget) => {
@@ -66,34 +70,10 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
       }
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
+        tracker.addWidget(widget);
       }
-      // TODO: Move this logic to the shell.
-      let stack = widget.parent;
-      if (!stack) {
-        return;
-      }
-      let tabs = stack.parent;
-      if (tabs instanceof TabPanel) {
-        tabs.currentWidget = widget;
-      }
-      activeWidget = widget;
-      widget.disposed.connect(() => {
-        let index = widgets.indexOf(widget);
-        widgets.splice(index, 1);
-      });
     }
   };
-
-  // TODO: Move focus tracking to the shell.
-  document.addEventListener('focus', event => {
-    for (let i = 0; i < widgets.length; i++) {
-      let widget = widgets[i];
-      if (widget.node.contains(event.target as HTMLElement)) {
-        activeWidget = widget;
-        break;
-      }
-    }
-  });
 
   let docManager = new DocumentManager({
     registry,
@@ -102,20 +82,20 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     kernelspecs: provider.kernelspecs,
     opener
   });
-  let model = new FileBrowserModel({
+  let fbModel = new FileBrowserModel({
     contentsManager: contents,
     sessionManager: sessions,
     kernelspecs: provider.kernelspecs
   });
-  let widget = new FileBrowserWidget({
-    model,
+  let fbWidget = new FileBrowserWidget({
+    model: fbModel,
     manager: docManager,
     opener
   });
-  let menu = createMenu(widget);
+  let menu = createMenu(fbWidget);
 
   // Add a context menu to the dir listing.
-  let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
+  let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
   node.addEventListener('contextmenu', (event: MouseEvent) => {
     event.preventDefault();
     let x = event.clientX;
@@ -129,7 +109,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   app.commands.add([
     {
       id: newTextFileId,
-      handler: () => widget.createNew('file')
+      handler: () => fbWidget.createNew('file')
     }
   ]);
 
@@ -138,7 +118,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   app.commands.add([
   {
     id: newNotebookId,
-    handler: () => widget.createNew('notebook')
+    handler: () => fbWidget.createNew('notebook')
   }]);
 
 
@@ -149,11 +129,10 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: saveDocumentId,
       handler: () => {
-        if (!activeWidget) {
-          return;
+        if (activeWidget) {
+          let context = docManager.contextForWidget(activeWidget);
+          context.save();
         }
-        let context = docManager.contextForWidget(activeWidget);
-        context.save();
       }
     }
   ]);
@@ -173,11 +152,10 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     {
       id: revertDocumentId,
       handler: () => {
-        if (!activeWidget) {
-          return;
+        if (activeWidget) {
+          let context = docManager.contextForWidget(activeWidget);
+          context.revert();
         }
-        let context = docManager.contextForWidget(activeWidget);
-        context.revert();
       }
     }
   ]);
@@ -262,24 +240,24 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     }
   ]);
 
-  widget.title.text = 'Files';
-  widget.id = 'file-browser';
-  app.shell.addToLeftArea(widget, { rank: 40 });
+  fbWidget.title.text = 'Files';
+  fbWidget.id = 'file-browser';
+  app.shell.addToLeftArea(fbWidget, { rank: 40 });
   showBrowser();
   return Promise.resolve(void 0);
 
   function showBrowser(): void {
-    app.shell.activateLeft(widget.id);
+    app.shell.activateLeft(fbWidget.id);
   }
 
   function hideBrowser(): void {
-    if (!widget.isHidden) {
+    if (!fbWidget.isHidden) {
       app.shell.collapseLeft();
     }
   }
 
   function toggleBrowser(): void {
-    if (widget.isHidden) {
+    if (fbWidget.isHidden) {
       showBrowser();
     } else {
       hideBrowser();

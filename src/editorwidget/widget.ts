@@ -85,7 +85,7 @@ class EditorWidget extends CodeMirrorWidget {
  * A widget factory for editors.
  */
 export
-class EditorWidgetFactory extends ABCWidgetFactory implements IWidgetFactory<EditorWidget, IDocumentModel> {
+class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, IDocumentModel> {
   /**
    * Create a new widget given a context.
    */
@@ -93,6 +93,8 @@ class EditorWidgetFactory extends ABCWidgetFactory implements IWidgetFactory<Edi
     if (kernel) {
       context.changeKernel(kernel);
     }
-    return new EditorWidget(context);
+    let widget = new EditorWidget(context);
+    this.widgetCreated.emit(widget);
+    return widget;
   }
 }
