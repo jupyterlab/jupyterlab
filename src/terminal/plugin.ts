@@ -65,7 +65,7 @@ function activateTerminal(app: Application): void {
     {
       command: newTerminalId,
       category: 'Terminal',
-      text: 'Create a new Terminal',
+      text: 'New Terminal',
       caption: 'Start a new terminal session'
     },
     {
