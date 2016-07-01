@@ -336,21 +336,11 @@ class CompletionModel implements ICompletionModel {
     }
 
     let { start, end } = cursor;
-    let lines = original.currentValue.split('\n');
-    let line = lines[original.line];
-    let prefix = line.substring(0, start);
-    let suffix = line.substring(end);
-
-    lines[original.line] = prefix + patch + suffix;
-    let text = lines.join('\n');
-
-    // Add current line to position.
-    let position = prefix.length + patch.length;
-    // Add all the preceding lines' lengths to position.
-    for (let i = 0; i < original.line; i++) {
-      // Add an extra character for the line break.
-      position += lines[i].length + 1;
-    }
+    let value = original.currentValue;
+    let prefix = value.substring(0, start);
+    let suffix = value.substring(end);
+    let text = prefix + patch + suffix;
+    let position = (prefix + patch).length;
 
     return { position, text };
   }

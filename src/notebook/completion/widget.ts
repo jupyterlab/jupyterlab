@@ -389,6 +389,9 @@ class CompletionWidget extends Widget {
    */
   private _selectActive(): void {
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+    if (!active) {
+      return;
+    }
     this.selected.emit(active.dataset['value']);
     this._reset();
   }

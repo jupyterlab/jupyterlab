@@ -97,9 +97,8 @@ class CellCompletionHandler implements IDisposable {
    */
   private _complete(request: ICompletionRequest): void {
     let content: KernelMessage.ICompleteRequest = {
-      // Only send the current line of code for completion.
-      code: request.currentValue.split('\n')[request.line],
-      cursor_pos: request.ch
+      code: request.currentValue,
+      cursor_pos: request.position
     };
     let pending = ++this._pending;
     this._kernel.complete(content).then(msg => {

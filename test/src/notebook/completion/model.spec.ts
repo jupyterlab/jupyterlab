@@ -56,10 +56,14 @@ describe('notebook/completion/model', () => {
       it('should signal when original request changes', () => {
         let model = new CompletionModel();
         let called = 0;
-        let currentValue = 'foo';
-        let coords: ICoords = null;
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: null,
+          position: 0,
+          currentValue: 'foo'
         };
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
@@ -73,10 +77,14 @@ describe('notebook/completion/model', () => {
       it('should not signal when original request has not changed', () => {
         let model = new CompletionModel();
         let called = 0;
-        let currentValue = 'foo';
-        let coords: ICoords = null;
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: null,
+          position: 0,
+          currentValue: 'foo'
         };
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
@@ -98,7 +106,13 @@ describe('notebook/completion/model', () => {
         let coords: ICoords = null;
         let cursor: ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: coords,
+          position: 0,
+          currentValue: currentValue
         };
         let change: ITextChange = {
           ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
@@ -124,7 +138,13 @@ describe('notebook/completion/model', () => {
         let coords: ICoords = null;
         let cursor: ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: coords,
+          position: 0,
+          currentValue: currentValue
         };
         let change: ITextChange = {
           ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
@@ -207,10 +227,14 @@ describe('notebook/completion/model', () => {
 
       it('should return the original request', () => {
         let model = new CompletionModel();
-        let currentValue = 'foo';
-        let coords: ICoords = null;
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: null,
+          position: 0,
+          currentValue: 'foo'
         };
         model.original = request;
         expect(model.original).to.equal(request);
@@ -233,7 +257,13 @@ describe('notebook/completion/model', () => {
         let coords: ICoords = null;
         let cursor: ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: coords,
+          position: 0,
+          currentValue: currentValue
         };
         let change: ITextChange = {
           ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
@@ -254,7 +284,13 @@ describe('notebook/completion/model', () => {
         let coords: ICoords = null;
         let cursor: ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: coords,
+          position: 0,
+          currentValue: currentValue
         };
         let change: ITextChange = {
           ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
@@ -275,7 +311,13 @@ describe('notebook/completion/model', () => {
         let coords: ICoords = null;
         let cursor: ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: coords,
+          position: 0,
+          currentValue: currentValue
         };
         let change: ITextChange = {
           ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
@@ -299,11 +341,15 @@ describe('notebook/completion/model', () => {
 
       it('should not set if original request is nonexistent', () => {
         let model = new CompletionModel();
-        let currentValue = 'foo';
-        let coords: ICoords = null;
         let cursor: ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: null,
+          position: 0,
+          currentValue: 'foo'
         };
         model.cursor = cursor;
         expect(model.cursor).to.be(null);
@@ -357,7 +403,13 @@ describe('notebook/completion/model', () => {
         let coords: ICoords = null;
         let cursor: ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: coords,
+          position: 0,
+          currentValue: currentValue
         };
         let change: ITextChange = {
           ch: 4, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
@@ -376,7 +428,13 @@ describe('notebook/completion/model', () => {
         let newValue = 'foo ';
         let coords: ICoords = null;
         let request: ICompletionRequest = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: coords,
+          position: 0,
+          currentValue: currentValue
         };
         let change: ITextChange = {
           ch: 4, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
@@ -393,13 +451,17 @@ describe('notebook/completion/model', () => {
 
       it('should return a patch value', () => {
         let model = new CompletionModel();
-        let currentValue = 'foo';
         let patch = 'foobar';
         let want: ICompletionPatch = { text: patch, position: patch.length };
-        let coords: ICoords = null;
         let cursor: ICursorSpan = { start: 0, end: 3 };
         let request: ICompletionRequest = {
-          ch: 3, chHeight: 0, chWidth: 0, line: 0, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: null,
+          position: 0,
+          currentValue: 'foo'
         };
         model.original = request;
         model.cursor = cursor;
@@ -416,10 +478,15 @@ describe('notebook/completion/model', () => {
         let currentValue = 'foo\nbar';
         let patch = 'barbaz';
         let want: ICompletionPatch = { text: 'foo\nbarbaz', position: 10 };
-        let coords: ICoords = null;
-        let cursor: ICursorSpan = { start: 0, end: 3 };
+        let cursor: ICursorSpan = { start: 4, end: 7 };
         let request: ICompletionRequest = {
-          ch: 3, chHeight: 0, chWidth: 0, line: 1, coords, currentValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: null,
+          position: 0,
+          currentValue: currentValue
         };
         model.original = request;
         model.cursor = cursor;

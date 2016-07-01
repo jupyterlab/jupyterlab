@@ -137,6 +137,11 @@ interface ITextChange extends IEditorState {
 export
 interface ICompletionRequest extends IEditorState {
   /**
+   * The cursor position of the request, including line breaks.
+   */
+  position: number;
+
+  /**
    * The current value of the editor text.
    */
   currentValue: string;
@@ -328,16 +333,20 @@ class CellEditorWidget extends CodeMirrorWidget {
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
     let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
+    let position = editor.getDoc().indexFromPos({ line, ch })
 
     // A completion request signal should only be emitted if the final
     // character of the current line is not whitespace. Otherwise, the
     // default tab action of creating a tab character should be allowed to
     // propagate.
     if (currentLine.match(/\S$/)) {
-      let data = { line, ch, chHeight, chWidth, coords, currentValue };
+      let data = {
+        line, ch, chHeight, chWidth, coords, position, currentValue
+      };
       this.completionRequested.emit(data as ICompletionRequest);
       event.preventDefault();
       event.stopPropagation();
+      event.stopImmediatePropagation();
     }
   }
 
