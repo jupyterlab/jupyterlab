@@ -3,76 +3,79 @@
 // Definitions by: Steven Silvester <https://github.com/blink1073>
 
 
-
 /**
-   * Typing for a term.js terminal object.
-   */
-  interface Terminal {
-
-    options: ITerminalConfig;
-
-    element: HTMLElement;
-
-    colors: string[];
-
-    rows: number;
-
-    cols: number;
-
-    visualBell: boolean;
-
-    popOnBell: boolean;
-
-    scrollback: number;
-
-    on(event: string, callback: (arg: any) => void): void;
-
-    open(el: HTMLElement): void;
-
-    write(msg: string): void;
-
-    resize(width: number, height: number): void;
-
-    destroy(): void;
-
-    focus(): void;
-  }
-
-  interface TerminalConstructor {
-    new (options?: ITerminalConfig): Terminal;
-    (options?: ITerminalConfig): Terminal;
-    brokenBold: boolean;
-  }
-
-/**
- * A terminal configuration.
+ * Typing for a term.js terminal object.
  */
-interface ITerminalConfig {
-  colors?: string[];
+interface Xterm {
 
-  theme?: string;
+  options: Xterm.IOptions;
 
-  convertEol?: boolean;
+  element: HTMLElement;
 
-  termName?: string;
+  colors: string[];
 
-  geometry?: number[];
+  rows: number;
 
-  cursorBlink?: boolean;
+  cols: number;
 
-  visualBell?: boolean;
+  visualBell: boolean;
 
-  popOnBell?: boolean;
+  popOnBell: boolean;
 
-  scrollback?: number;
+  scrollback: number;
 
-  debug?: boolean;
+  on(event: string, callback: (arg: any) => void): void;
 
-  cancelEvents?: boolean;
+  open(el: HTMLElement): void;
+
+  write(msg: string): void;
+
+  resize(width: number, height: number): void;
+
+  destroy(): void;
+
+  focus(): void;
 }
 
 
-declare var Xterm: TerminalConstructor;
+interface XtermConstructor {
+  new (options?: Xterm.IOptions): Xterm;
+  (options?: Xterm.IOptions): Xterm;
+  brokenBold: boolean;
+}
+
+
+/**
+ * A terminal options.
+ */
+declare module Xterm {
+  interface IOptions {
+    colors?: string[];
+
+    theme?: string;
+
+    convertEol?: boolean;
+
+    termName?: string;
+
+    geometry?: number[];
+
+    cursorBlink?: boolean;
+
+    visualBell?: boolean;
+
+    popOnBell?: boolean;
+
+    scrollback?: number;
+
+    debug?: boolean;
+
+    cancelEvents?: boolean;
+  }
+}
+
+
+declare var Xterm: XtermConstructor;
 
 
 declare module 'xterm' {
