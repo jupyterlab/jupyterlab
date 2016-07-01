@@ -6,7 +6,7 @@ import 'fullpage.js';
 import 'fullpage.js/jquery.fullPage.css';
 
 let options = { controlArrows: true };
-jQuery('fullpage.js').fullpage(options);
+// jQuery('about-jupyterlab').fullpage(options);
 
 import {
   Application
