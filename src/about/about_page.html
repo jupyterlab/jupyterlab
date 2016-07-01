@@ -1,10 +1,23 @@
-<div id="fullpage">
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>About</title>
+    <link rel="stylesheet" type="text/css" href="css/grid.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery.fullPage.css" />
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="css/about.css" />
+</head>
+
+<body>
+    <div id="fullpage">
         <!-- PAGE ONE -->
         <div class="section">
             <div class="container">
                 <div class="row">
                     <div class="column">
-                        <img src="images/about/logo.svg" alt="jupyterlab logo">
+                        <img src="images/logo.svg" alt="jupyterlab logo">
                         <p class="header">Welcome to the JupyterLab pre-alpha preview</p>
                         <div class="desc-one">
                             <p>Click on the JupyterLab tab for the initial JupyterLab screen.</p>
@@ -18,12 +31,12 @@
                     <div class="one-half column">
                         <p class="desc-two-header">
                             <a href="#main-area">
-                                <img style="margin:-12px 20px;" src="images/about/main-area.svg">
+                                <img style="margin:-12px 20px;" src="images/main-area.svg">
                                 <span style="verical-align: middle">Main Area</span>
                             </a>
                         </p>
                         <p class="desc-two">
-                            Open the tabs you want</br>Drag and drop them to split your screen your way
+                            Open tabs and drag and drop them to rearrange them
                         </p>
                     </div>
                     <div class="one-half column">
@@ -110,14 +123,19 @@
             <img class="content-img" src="images/mainareascreen.gif" alt="Notebook Screenshot">
             <p class="content-desc">Opening a notebook will open a minimally-featured notebook. Code execution, Markdown rendering, and basic cell toolbar actions are supported. Future versions will add more features from the existing Jupyter notebook.</p>
         </div>
+
     </div>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script type="text/javascript" src="vendors/scrolloverflow.min.js"></script>
-    <script type="text/javascript" src="js/jquery.fullPage.min.js"></script>
-    <script>
-      $(document).ready(function () {
+</body>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="vendors/scrolloverflow.min.js"></script>
+<script type="text/javascript" src="js/jquery.fullPage.min.js"></script>
+<script>
+    $(document).ready(function () {
         $('#fullpage').fullpage({
             anchors: ['about', 'main-area', 'command', 'file-browser', 'notebook']
         });
-      });
-    </script>
+    });
+</script>
+
+</html>

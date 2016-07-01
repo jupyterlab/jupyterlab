@@ -7,7 +7,7 @@ import 'fullpage.js/jquery.fullPage.css';
 
 const url = require('./about_page.html');
 let options = { controlArrows: true };
-// jQuery('about-jupyterlab').fullpage(options);
+jQuery('about-jupyterlab').fullpage(options);
 
 import {
   Application
@@ -40,7 +40,6 @@ import {
    iframe.src = url as string;
    iframe.height = '100%';
    iframe.width = '100%';
-   iframe.border = 'none';
    widget.node.style.overflowY = 'auto';
    app.commands.add([{
      id: commandId,
