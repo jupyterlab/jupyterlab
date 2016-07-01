@@ -99,6 +99,7 @@
     "lib/*.d.ts",
     "lib/*.js",
     "lib/**/*.css",
+    "lib/**/*.html",
     "lib/**/*.d.ts",
     "lib/**/*.js",
     "lib/**/*.svg"
