@@ -17,7 +17,8 @@ import {
   ResizeMessage, Widget
 } from 'phosphor-widget';
 
-import * as Terminal from 'xterm';
+import * as Xterm
+  from 'xterm';
 
 
 /**
@@ -42,53 +43,6 @@ const DUMMY_COLS = 80;
 
 
 /**
- * Options for the terminal widget.
- */
-export
-interface ITerminalOptions {
-  /**
-   * The base websocket url.
-   */
-  baseUrl?: string;
-
-  /**
-   * The font size of the terminal in pixels.
-   */
-  fontSize?: number;
-
-  /**
-   * The background color of the terminal.
-   */
-  background?: string;
-
-  /**
-   * The text color of the terminal.
-   */
-  color?: string;
-
-  /**
-   * Whether to blink the cursor.  Can only be set at startup.
-   */
-  cursorBlink?: boolean;
-
-  /**
-   * Whether to show a bell in the terminal.
-   */
-  visualBell?: boolean;
-
-  /**
-   * Whether to focus on a bell event.
-   */
-  popOnBell?: boolean;
-
-  /**
-   * The size of the scrollback buffer in the terminal.
-   */
-  scrollback?: number;
-}
-
-
-/**
  * A widget which manages a terminal session.
  */
 export
@@ -104,7 +58,7 @@ class TerminalWidget extends Widget {
    *
    * @param options - The terminal configuration options.
    */
-  constructor(options?: ITerminalOptions) {
+  constructor(options?: TerminalWidget.IOptions) {
     super();
     options = options || {};
     this.addClass(TERMINAL_CLASS);
@@ -118,12 +72,17 @@ class TerminalWidget extends Widget {
     // Set the default title.
     this.title.text = 'Terminal ' + TerminalWidget.nterms;
 
-    Terminal.brokenBold = true;
+    Xterm.brokenBold = true;
 
-    this._dummyTerm = createDummyTerm();
+    this._term = new Xterm(Private.getConfig(options));
+    this._fontSize = options.fontSize || 14;
+    this._background = options.background || 'black';
+    this._color = options.color || 'white';
+
+    this._dummyTerm = Private.createDummyTerm();
 
     this._ws.onopen = (event: MessageEvent) => {
-      this._createTerm(options);
+      this._intializeTerm();
     };
 
     this._ws.onmessage = (event: MessageEvent) => {
@@ -146,6 +105,9 @@ class TerminalWidget extends Widget {
    */
   set fontSize(size: number) {
     this._fontSize = size;
+    if (!this._intialized) {
+      return;
+    }
     this._term.element.style.fontSize = `${size}px`;
     this._snapTermSizing();
   }
@@ -162,7 +124,9 @@ class TerminalWidget extends Widget {
    */
   set background(value: string) {
     this._background = value;
-    this.update();
+    if (this._intialized) {
+      this.update();
+    }
   }
 
   /**
@@ -177,7 +141,9 @@ class TerminalWidget extends Widget {
    */
   set color(value: string) {
     this._color = value;
-    this.update();
+    if (this._intialized) {
+      this.update();
+    }
   }
 
   /**
@@ -314,14 +280,9 @@ class TerminalWidget extends Widget {
   /**
    * Create the terminal object.
    */
-  private _createTerm(options: ITerminalOptions): void {
-    this._term = new Terminal(getConfig(options));
+  private _intializeTerm(): void {
     this._term.open(this.node);
     this._term.element.classList.add(TERMINAL_BODY_CLASS);
-
-    this.fontSize = options.fontSize || 14;
-    this.background = options.background || 'black';
-    this.color = options.color || 'white';
 
     this._term.on('data', (data: string) => {
       this._ws.send(JSON.stringify(['stdin', data]));
@@ -330,17 +291,20 @@ class TerminalWidget extends Widget {
     this._term.on('title', (title: string) => {
         this.title.text = title;
     });
-    this._resizeTerminal(-1, -1);
+
+    // Update the font size, which snaps term sizing and resizes the terminal.
+    this._intialized = true;
+    this.fontSize = this.fontSize;
   }
 
   /**
    * Handle a message from the terminal websocket.
    */
   private _handleWSMessage(event: MessageEvent): void {
-    let json_msg = JSON.parse(event.data);
-    switch (json_msg[0]) {
+    let msg = JSON.parse(event.data);
+    switch (msg[0]) {
     case 'stdout':
-      this._term.write(json_msg[1]);
+      this._term.write(msg[1]);
       break;
     case 'disconnect':
       this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
@@ -389,9 +353,10 @@ class TerminalWidget extends Widget {
     this._ws.send(JSON.stringify(['set_size', rows, cols,
                                 height, width]));
     this._dirty = false;
+    this.update();
   }
 
-  private _term: Terminal = null;
+  private _term: Xterm = null;
   private _ws: WebSocket = null;
   private _sheet: HTMLElement = null;
   private _dummyTerm: HTMLElement = null;
@@ -402,47 +367,107 @@ class TerminalWidget extends Widget {
   private _background = '';
   private _color = '';
   private _box: IBoxSizing = null;
+  private _intialized = false;
 }
 
 
 /**
- * Get term.js options from ITerminalOptions.
+ * The namespace for `TerminalWidget` class statics.
  */
-function getConfig(options: ITerminalOptions): ITerminalConfig {
-  let config: ITerminalConfig = {};
-  if (options.cursorBlink !== void 0) {
-    config.cursorBlink = options.cursorBlink;
-  } else {
-    config.cursorBlink = true;
+export
+namespace TerminalWidget {
+  /**
+   * Options for the terminal widget.
+   */
+  export
+  interface IOptions {
+    /**
+     * The base websocket url.
+     */
+    baseUrl?: string;
+
+    /**
+     * The font size of the terminal in pixels.
+     */
+    fontSize?: number;
+
+    /**
+     * The background color of the terminal.
+     */
+    background?: string;
+
+    /**
+     * The text color of the terminal.
+     */
+    color?: string;
+
+    /**
+     * Whether to blink the cursor.  Can only be set at startup.
+     */
+    cursorBlink?: boolean;
+
+    /**
+     * Whether to show a bell in the terminal.
+     */
+    visualBell?: boolean;
+
+    /**
+     * Whether to focus on a bell event.
+     */
+    popOnBell?: boolean;
+
+    /**
+     * The size of the scrollback buffer in the terminal.
+     */
+    scrollback?: number;
   }
-  if (options.visualBell !== void 0) {
-    config.visualBell = options.visualBell;
-  }
-  if (options.popOnBell !== void 0) {
-    config.popOnBell = options.popOnBell;
-  }
-  if (options.scrollback !== void 0) {
-    config.scrollback = options.scrollback;
-  }
-  return config;
 }
 
 
 /**
- * Create a dummy terminal element used to measure text size.
+ * A namespace for private data.
  */
-function createDummyTerm(): HTMLElement {
-  let node = document.createElement('div');
-  let rowspan = document.createElement('span');
-  rowspan.innerHTML = Array(DUMMY_ROWS).join('a<br>');
-  let colspan = document.createElement('span');
-  colspan.textContent = Array(DUMMY_COLS + 1).join('a');
-  node.appendChild(rowspan);
-  node.appendChild(colspan);
-  node.style.visibility = 'hidden';
-  node.style.position = 'absolute';
-  node.style.height = 'auto';
-  node.style.width = 'auto';
-  (node.style as any)['white-space'] = 'nowrap';
-  return node;
+namespace Private {
+  /**
+   * Get term.js options from ITerminalOptions.
+   */
+  export
+  function getConfig(options: TerminalWidget.IOptions): Xterm.IOptions {
+    let config: Xterm.IOptions = {};
+    if (options.cursorBlink !== void 0) {
+      config.cursorBlink = options.cursorBlink;
+    } else {
+      config.cursorBlink = true;
+    }
+    if (options.visualBell !== void 0) {
+      config.visualBell = options.visualBell;
+    }
+    if (options.popOnBell !== void 0) {
+      config.popOnBell = options.popOnBell;
+    }
+    if (options.scrollback !== void 0) {
+      config.scrollback = options.scrollback;
+    }
+    return config;
+  }
+
+  /**
+   * Create a dummy terminal element used to measure text size.
+   */
+  export
+  function createDummyTerm(): HTMLElement {
+    let node = document.createElement('div');
+    let rowspan = document.createElement('span');
+    rowspan.innerHTML = Array(DUMMY_ROWS).join('a<br>');
+    let colspan = document.createElement('span');
+    colspan.textContent = Array(DUMMY_COLS + 1).join('a');
+    node.appendChild(rowspan);
+    node.appendChild(colspan);
+    node.style.visibility = 'hidden';
+    node.style.position = 'absolute';
+    node.style.height = 'auto';
+    node.style.width = 'auto';
+    (node.style as any)['white-space'] = 'nowrap';
+    return node;
+  }
 }
