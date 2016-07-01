@@ -35,12 +35,6 @@ module.exports = {
   },
   externals: {
     jquery: '$',
-    'jquery-ui': '$',
-    'codemirror': 'CodeMirror',
-    'codemirror/lib/codemirror': 'CodeMirror',
-    'codemirror/mode/meta': 'CodeMirror',
-    // Account for relative paths from other CodeMirror files
-    '../../lib/codemirror': 'CodeMirror',
-    '../lib/codemirror': 'CodeMirror' 
+    'jquery-ui': '$'
   }
 }
