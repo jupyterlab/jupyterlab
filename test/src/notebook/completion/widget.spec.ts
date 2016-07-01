@@ -102,14 +102,15 @@ describe('notebook/completion/widget', () => {
     describe('#selected', () => {
 
       it('should emit a signal when an item is selected', () => {
+        let anchor = new Widget();
         let options: CompletionWidget.IOptions = {
           model: new CompletionModel(),
-          reference: new Widget()
+          anchor: anchor.node
         };
         let value = '';
         let listener = (sender: any, selected: string) => { value = selected; };
         options.model.options = ['foo', 'bar'];
-        options.reference.attach(document.body);
+        anchor.attach(document.body);
 
         let widget = new CompletionWidget(options);
 
@@ -117,10 +118,10 @@ describe('notebook/completion/widget', () => {
         widget.attach(document.body);
         sendMessage(widget, Widget.MsgUpdateRequest);
         expect(value).to.be('');
-        simulate(options.reference.node, 'keydown', { keyCode: 13 }); // Enter
+        simulate(anchor.node, 'keydown', { keyCode: 13 }); // Enter
         expect(value).to.be('foo');
         widget.dispose();
-        options.reference.dispose();
+        anchor.dispose();
       });
 
     });
@@ -157,26 +158,26 @@ describe('notebook/completion/widget', () => {
 
     });
 
-    describe('#reference', () => {
+    describe('#anchor', () => {
 
       it('should default to null', () => {
         let widget = new CompletionWidget();
-        expect(widget.reference).to.be(null);
+        expect(widget.anchor).to.be(null);
       });
 
       it('should be settable', () => {
         let widget = new CompletionWidget();
-        expect(widget.reference).to.be(null);
-        widget.reference = new Widget();
-        expect(widget.reference).to.be.a(Widget);
+        expect(widget.anchor).to.be(null);
+        widget.anchor = new Widget().node;
+        expect(widget.anchor).to.be.a(Node);
       });
 
       it('should be safe to reset', () => {
-        let reference = new Widget();
-        let widget = new CompletionWidget({ reference: new Widget() });
-        expect(widget.reference).not.to.be(reference);
-        widget.reference = reference;
-        expect(widget.reference).to.be(reference);
+        let anchor = new Widget();
+        let widget = new CompletionWidget({ anchor: (new Widget()).node });
+        expect(widget.anchor).not.to.be(anchor.node);
+        widget.anchor = anchor.node;
+        expect(widget.anchor).to.be(anchor.node);
       });
 
     });
@@ -200,10 +201,10 @@ describe('notebook/completion/widget', () => {
 
     describe('#handleEvent()', () => {
 
-      it('should handle window keydown, mousedown, and scroll events', () => {
+      it('should handle window keydown and mousedown events', () => {
         let widget = new LogWidget();
         widget.attach(document.body);
-        ['keydown', 'mousedown', 'scroll'].forEach(type => {
+        ['keydown', 'mousedown'].forEach(type => {
           simulate(window, type);
           expect(widget.events).to.contain(type);
         });
@@ -212,12 +213,14 @@ describe('notebook/completion/widget', () => {
 
       context('keydown', () => {
 
-        it('should reset if keydown is outside reference', () => {
-          let reference = new Widget();
+        it('should reset if keydown is outside anchor', () => {
+          let anchor = new Widget();
           let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = { model, reference };
+          let options: CompletionWidget.IOptions = {
+            model, anchor: anchor.node
+          };
           model.options = ['foo', 'bar'];
-          reference.attach(document.body);
+          anchor.attach(document.body);
 
           let widget = new CompletionWidget(options);
 
@@ -230,15 +233,17 @@ describe('notebook/completion/widget', () => {
           expect(widget.isHidden).to.be(true);
           expect(model.options).to.not.be.ok();
           widget.dispose();
-          reference.dispose();
+          anchor.dispose();
         });
 
         it('should reset on escape key', () => {
-          let reference = new Widget();
+          let anchor = new Widget();
           let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = { model, reference };
+          let options: CompletionWidget.IOptions = {
+            model, anchor: anchor.node
+          };
           model.options = ['foo', 'bar'];
-          reference.attach(document.body);
+          anchor.attach(document.body);
 
           let widget = new CompletionWidget(options);
 
@@ -246,24 +251,26 @@ describe('notebook/completion/widget', () => {
           sendMessage(widget, Widget.MsgUpdateRequest);
           expect(widget.isHidden).to.be(false);
           expect(model.options).to.be.ok();
-          simulate(reference.node, 'keydown', { keyCode: 27 }); // Escape
+          simulate(anchor.node, 'keydown', { keyCode: 27 }); // Escape
           sendMessage(widget, Widget.MsgUpdateRequest);
           expect(widget.isHidden).to.be(true);
           expect(model.options).to.not.be.ok();
           widget.dispose();
-          reference.dispose();
+          anchor.dispose();
         });
 
         it('should trigger a selected signal on enter key', () => {
-          let reference = new Widget();
+          let anchor = new Widget();
           let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = { model, reference };
+          let options: CompletionWidget.IOptions = {
+            model, anchor: anchor.node
+          };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
           model.options = ['foo', 'bar', 'baz'];
-          reference.attach(document.body);
+          anchor.attach(document.body);
 
           let widget = new CompletionWidget(options);
 
@@ -271,23 +278,25 @@ describe('notebook/completion/widget', () => {
           widget.attach(document.body);
           sendMessage(widget, Widget.MsgUpdateRequest);
           expect(value).to.be('');
-          simulate(reference.node, 'keydown', { keyCode: 13 }); // Enter
+          simulate(anchor.node, 'keydown', { keyCode: 13 }); // Enter
           expect(value).to.be('foo');
           widget.dispose();
-          reference.dispose();
+          anchor.dispose();
         });
 
         it('should select the item below and cycle back on down', () => {
-          let reference = new Widget();
+          let anchor = new Widget();
           let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = { model, reference };
+          let options: CompletionWidget.IOptions = {
+            model, anchor: anchor.node
+          };
           model.options = ['foo', 'bar', 'baz'];
-          reference.attach(document.body);
+          anchor.attach(document.body);
 
           let widget = new CompletionWidget(options);
           let target = document.createElement('div');
 
-          reference.node.appendChild(target);
+          anchor.node.appendChild(target);
           widget.attach(document.body);
           sendMessage(widget, Widget.MsgUpdateRequest);
 
@@ -309,15 +318,17 @@ describe('notebook/completion/widget', () => {
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
           widget.dispose();
-          reference.dispose();
+          anchor.dispose();
         });
 
         it('should select the item above and cycle back on up', () => {
-          let reference = new Widget();
+          let anchor = new Widget();
           let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = { model, reference };
+          let options: CompletionWidget.IOptions = {
+            model, anchor: anchor.node
+          };
           model.options = ['foo', 'bar', 'baz'];
-          reference.attach(document.body);
+          anchor.attach(document.body);
 
           let widget = new CompletionWidget(options);
 
@@ -329,20 +340,20 @@ describe('notebook/completion/widget', () => {
           expect(items[0].classList).to.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
-          simulate(reference.node, 'keydown', { keyCode: 38 }); // Up
+          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
           expect(items[0].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.contain(ACTIVE_CLASS);
-          simulate(reference.node, 'keydown', { keyCode: 38 }); // Up
+          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
           expect(items[0].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
-          simulate(reference.node, 'keydown', { keyCode: 38 }); // Up
+          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
           expect(items[0].classList).to.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
           widget.dispose();
-          reference.dispose();
+          anchor.dispose();
         });
 
       });
@@ -350,16 +361,18 @@ describe('notebook/completion/widget', () => {
       context('mousedown', () => {
 
         it('should trigger a selected signal on mouse down', () => {
-          let reference = new Widget();
+          let anchor = new Widget();
           let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = { model, reference };
+          let options: CompletionWidget.IOptions = {
+            model, anchor: anchor.node
+          };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
           model.options = ['foo', 'bar', 'baz'];
           model.query = 'b';
-          reference.attach(document.body);
+          anchor.attach(document.body);
 
           let widget = new CompletionWidget(options);
 
@@ -373,19 +386,21 @@ describe('notebook/completion/widget', () => {
           simulate(item, 'mousedown');
           expect(value).to.be('baz');
           widget.dispose();
-          reference.dispose();
+          anchor.dispose();
         });
 
         it('should ignore a mouse down that misses an item', () => {
-          let reference = new Widget();
+          let anchor = new Widget();
           let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = { model, reference };
+          let options: CompletionWidget.IOptions = {
+            model, anchor: anchor.node
+          };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
           model.options = ['foo', 'bar'];
-          reference.attach(document.body);
+          anchor.attach(document.body);
 
           let widget = new CompletionWidget(options);
 
@@ -396,19 +411,21 @@ describe('notebook/completion/widget', () => {
           simulate(widget.node, 'mousedown');
           expect(value).to.be('');
           widget.dispose();
-          reference.dispose();
+          anchor.dispose();
         });
 
         it('should hide widget if mouse down misses it', () => {
-          let reference = new Widget();
+          let anchor = new Widget();
           let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = { model, reference };
+          let options: CompletionWidget.IOptions = {
+            model, anchor: anchor.node
+          };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
           model.options = ['foo', 'bar'];
-          reference.attach(document.body);
+          anchor.attach(document.body);
 
           let widget = new CompletionWidget(options);
 
@@ -416,11 +433,11 @@ describe('notebook/completion/widget', () => {
           widget.attach(document.body);
           sendMessage(widget, Widget.MsgUpdateRequest);
           expect(widget.isHidden).to.be(false);
-          simulate(options.reference.node, 'mousedown');
+          simulate(anchor.node, 'mousedown');
           sendMessage(widget, Widget.MsgUpdateRequest);
           expect(widget.isHidden).to.be(true);
           widget.dispose();
-          reference.dispose();
+          anchor.dispose();
         });
 
       });

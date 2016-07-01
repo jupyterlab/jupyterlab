@@ -246,7 +246,7 @@ class ConsoleWidget extends Widget {
 
     // Instantiate tab completion widget.
     this._completion = constructor.createCompletion();
-    this._completion.reference = this;
+    this._completion.anchor = this.node;
     this._completion.attach(document.body);
     this._completionHandler = new CellCompletionHandler(this._completion);
     this._completionHandler.kernel = session.kernel;

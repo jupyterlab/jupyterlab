@@ -33,6 +33,11 @@ const ITEM_CLASS = 'jp-Completion-item';
 const ACTIVE_CLASS = 'jp-mod-active';
 
 /**
+ * The class name added to a completion widget that is scrolled out of view.
+ */
+const OUTOFVIEW_CLASS = 'jp-mod-outofview'
+
+/**
  * The maximum height of a completion widget.
  */
 const MAX_HEIGHT = 250;
@@ -62,7 +67,7 @@ class CompletionWidget extends Widget {
   constructor(options: CompletionWidget.IOptions = {}) {
     super();
     this._renderer = options.renderer || CompletionWidget.defaultRenderer;
-    this._reference = options.reference || null;
+    this._anchor = options.anchor || null;
     this.model = options.model || null;
     this.addClass(COMPLETION_CLASS);
   }
@@ -98,13 +103,17 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * The semantic parent of the completion widget, its reference widget.
+   * The semantic parent of the completion widget, its anchor element. An
+   * event listener will peg the position of the completion widget to the
+   * anchor element's scroll position. Other event listeners will guarantee
+   * the completion widget behaves like a child of the reference element even
+   * if it does not appear as a descendant in the DOM.
    */
-  get reference(): Widget {
-    return this._reference;
+  get anchor(): HTMLElement {
+    return this._anchor;
   }
-  set reference(widget: Widget) {
-    this._reference = widget;
+  set anchor(element: HTMLElement) {
+    this._anchor = element;
   }
 
   /**
@@ -129,7 +138,7 @@ class CompletionWidget extends Widget {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
-    if (this.isHidden || !this._reference) {
+    if (this.isHidden || !this._anchor) {
       return;
     }
     switch (event.type) {
@@ -152,16 +161,15 @@ class CompletionWidget extends Widget {
    *
    * #### Notes
    * Captures window events in capture phase to dismiss or navigate the
-   * completion widget.
-   *
-   * Because its parent (reference) widgets use window listeners instead of
-   * document listeners, the completion widget must also use window listeners
-   * in the capture phase.
+   * completion widget. Captures scroll events on the anchor element to
+   * peg the completion widget's scroll position to the anchor.
    */
   protected onAfterAttach(msg: Message): void {
     window.addEventListener('keydown', this, USE_CAPTURE);
     window.addEventListener('mousedown', this, USE_CAPTURE);
-    window.addEventListener('scroll', this, USE_CAPTURE);
+    if (this._anchor) {
+      this._anchor.addEventListener('scroll', this, USE_CAPTURE);
+    }
   }
 
   /**
@@ -170,7 +178,18 @@ class CompletionWidget extends Widget {
   protected onBeforeDetach(msg: Message): void {
     window.removeEventListener('keydown', this, USE_CAPTURE);
     window.removeEventListener('mousedown', this, USE_CAPTURE);
-    window.removeEventListener('scroll', this, USE_CAPTURE);
+    if (this._anchor) {
+      this._anchor.removeEventListener('scroll', this, USE_CAPTURE);
+    }
+  }
+
+  /**
+   * Handle model state changes.
+   */
+  protected onModelStateChanged(): void {
+    if (this.isAttached) {
+      this.update();
+    }
   }
 
   /**
@@ -213,34 +232,70 @@ class CompletionWidget extends Widget {
     if (this.isHidden) {
       this.show();
     }
-
-    let coords = this._model.current ? this._model.current.coords
-      : this._model.original.coords;
-    let availableHeight = coords.top;
-    let maxHeight = Math.min(availableHeight, MAX_HEIGHT);
-    node.style.maxHeight = `${maxHeight}px`;
-
-    // Account for 1px border width.
-    let left = Math.floor(coords.left) + 1;
-    let rect = node.getBoundingClientRect();
-    let top = availableHeight - rect.height;
-    node.style.left = `${left}px`;
-    node.style.top = `${top}px`;
-    node.style.width = 'auto';
-    // Expand the menu width by the scrollbar size, if present.
-    if (node.scrollHeight > maxHeight) {
-      node.style.width = `${2 * node.offsetWidth - node.clientWidth}px`;
-      node.scrollTop = 0;
-    }
+    this._setGeometry();
   }
 
   /**
-   * Handle model state changes.
+   * Cycle through the available completion items.
    */
-  protected onModelStateChanged(): void {
-    if (this.isAttached) {
-      this.update();
+  private _cycle(direction: 'up' | 'down'): void {
+    let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+    let index = this._activeIndex;
+    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+    active.classList.remove(ACTIVE_CLASS);
+    if (direction === 'up') {
+      this._activeIndex = index === 0 ? items.length - 1 : index - 1;
+    } else {
+      this._activeIndex = index < items.length - 1 ? index + 1 : 0;
     }
+    active = items[this._activeIndex] as HTMLElement;
+    active.classList.add(ACTIVE_CLASS);
+    Private.scrollIfNeeded(this.node, active);
+  }
+
+  /**
+   * Handle keydown events for the widget.
+   */
+  private _evtKeydown(event: KeyboardEvent) {
+    let target = event.target as HTMLElement;
+    while (target !== document.documentElement) {
+      if (target === this._anchor) {
+        switch (event.keyCode) {
+          case 9:  // Tab key
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            if (this._populateSubset()) {
+              return;
+            }
+            this._selectActive();
+            return;
+          case 13: // Enter key
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            this._selectActive();
+            return;
+          case 27: // Escape key
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            this._reset();
+            return;
+          case 38: // Up arrow key
+          case 40: // Down arrow key
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            this._cycle(event.keyCode === 38 ? 'up' : 'down');
+            return;
+          default:
+            return;
+        }
+      }
+      target = target.parentElement;
+    }
+    this._reset();
   }
 
   /**
@@ -276,51 +331,6 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * Handle keydown events for the widget.
-   */
-  private _evtKeydown(event: KeyboardEvent) {
-    let target = event.target as HTMLElement;
-    while (target !== document.documentElement) {
-      if (target === this._reference.node) {
-        switch (event.keyCode) {
-        case 9:  // Tab key
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-          if (this._populateSubset()) {
-            return;
-          }
-          this._selectActive();
-          return;
-        case 13: // Enter key
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-          this._selectActive();
-          return;
-        case 27: // Escape key
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-          this._reset();
-          return;
-        case 38: // Up arrow key
-        case 40: // Down arrow key
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-          this._cycle(event.keyCode === 38 ? 'up' : 'down');
-          return;
-        default:
-          return;
-        }
-      }
-      target = target.parentElement;
-    }
-    this._reset();
-  }
-
-  /**
    * Handle scroll events for the widget
    */
   private _evtScroll(event: MouseEvent) {
@@ -336,24 +346,6 @@ class CompletionWidget extends Widget {
       target = target.parentElement;
     }
     this._reset();
-  }
-
-  /**
-   * Cycle through the available completion items.
-   */
-  private _cycle(direction: 'up' | 'down'): void {
-    let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
-    let index = this._activeIndex;
-    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
-    active.classList.remove(ACTIVE_CLASS);
-    if (direction === 'up') {
-      this._activeIndex = index === 0 ? items.length - 1 : index - 1;
-    } else {
-      this._activeIndex = index < items.length - 1 ? index + 1 : 0;
-    }
-    active = items[this._activeIndex] as HTMLElement;
-    active.classList.add(ACTIVE_CLASS);
-    Private.scrollIfNeeded(this.node, active);
   }
 
   /**
@@ -382,6 +374,40 @@ class CompletionWidget extends Widget {
       this._model.reset();
     }
     this._activeIndex = 0;
+    this._scrollDelta = 0;
+  }
+
+  /**
+   * Set the visible dimensions of the widget.
+   */
+  private _setGeometry(): void {
+    let node = this.node;
+    let coords = this._model.current ? this._model.current.coords
+      : this._model.original.coords;
+    let availableHeight = coords.top;
+    let maxHeight = Math.max(0, Math.min(availableHeight, MAX_HEIGHT));
+
+    if (maxHeight) {
+      node.classList.remove(OUTOFVIEW_CLASS);
+    } else {
+      node.classList.add(OUTOFVIEW_CLASS);
+      return;
+    }
+    node.style.maxHeight = `${maxHeight}px`;
+
+    // Account for 1px border width.
+    let left = Math.floor(coords.left) + 1;
+    let rect = node.getBoundingClientRect();
+    let top = availableHeight - rect.height;
+    node.style.left = `${left}px`;
+    node.style.top = `${top}px`;
+    node.style.width = 'auto';
+
+    // Expand the menu width by the scrollbar size, if present.
+    if (node.scrollHeight > maxHeight) {
+      node.style.width = `${2 * node.offsetWidth - node.clientWidth}px`;
+      node.scrollTop = 0;
+    }
   }
 
   /**
@@ -396,10 +422,11 @@ class CompletionWidget extends Widget {
     this._reset();
   }
 
+  private _anchor: HTMLElement = null;
   private _activeIndex = 0;
   private _model: ICompletionModel = null;
-  private _reference: Widget = null;
   private _renderer: CompletionWidget.IRenderer = null;
+  private _scrollDelta = 0;
 }
 
 
@@ -416,9 +443,13 @@ namespace CompletionWidget {
     model?: ICompletionModel;
 
     /**
-     * The semantic parent of the completion widget, its reference widget.
+     * The semantic parent of the completion widget, its anchor element. An
+     * event listener will peg the position of the completion widget to the
+     * anchor element's scroll position. Other event listeners will guarantee
+     * the completion widget behaves like a child of the reference element even
+     * if it does not appear as a descendant in the DOM.
      */
-    reference?: Widget;
+    anchor?: HTMLElement;
 
     /**
      * The renderer for the completion widget nodes.
