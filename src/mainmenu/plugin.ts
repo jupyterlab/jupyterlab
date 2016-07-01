@@ -14,43 +14,6 @@ import {
 
 
 /**
- * The main menu extension.
- *
- * #### Notes
- * The main menu extension adds a menu bar to the top area
- * of the application shell.
- *
- */
-export
-const mainMenuExtension = {
-  id: 'jupyter.extensions.mainMenu',
-  activate: activateMainMenu
-};
-
-
-/**
- * A service providing an interface to the main menu.
- */
-export
-const mainMenuProvider = {
-  id: 'jupyter.services.mainMenu',
-  provides: MainMenu,
-  resolve: () => {
-    return Private.mainMenu;
-  }
-};
-
-
-/**
- * Activate the main menu extension.
- */
-function activateMainMenu(app: Application): void {
-  Private.menuBar.id = 'jp-MainMenu';
-  app.shell.addToTopArea(Private.menuBar);
-}
-
-
-/**
  * The main menu class.  It is intended to be used as a singleton.
  */
 export
@@ -87,6 +50,43 @@ namespace MainMenu {
      */
     rank?: number;
   }
+}
+
+
+/**
+ * The main menu extension.
+ *
+ * #### Notes
+ * The main menu extension adds a menu bar to the top area
+ * of the application shell.
+ *
+ */
+export
+const mainMenuExtension = {
+  id: 'jupyter.extensions.mainMenu',
+  activate: activateMainMenu
+};
+
+
+/**
+ * A service providing an interface to the main menu.
+ */
+export
+const mainMenuProvider = {
+  id: 'jupyter.services.mainMenu',
+  provides: MainMenu,
+  resolve: () => {
+    return Private.mainMenu;
+  }
+};
+
+
+/**
+ * Activate the main menu extension.
+ */
+function activateMainMenu(app: Application): void {
+  Private.menuBar.id = 'jp-MainMenu';
+  app.shell.addToTopArea(Private.menuBar);
 }
 
 
