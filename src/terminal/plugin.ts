@@ -98,9 +98,10 @@ function activateTerminal(app: Application): void {
 
   function increaseFont(): void {
     if (!tracker.isDisposed) {
-      for (var i = 0; i < tracker.widgets.length; i++) {
-        if (tracker.widgets[i].fontSize < 72) {
-          tracker.widgets[i].fontSize = tracker.widgets[i].fontSize + 1;
+      let widgets = tracker.widgets;
+      for (let i = 0; i < widgets.length; i++) {
+        if (widgets[i].fontSize < 72) {
+          widgets[i].fontSize = widgets[i].fontSize + 1;
         }
       }
     }
@@ -108,9 +109,10 @@ function activateTerminal(app: Application): void {
 
   function decreaseFont(): void {
     if (!tracker.isDisposed) {
-      for (var i = 0; i < tracker.widgets.length; i++) {
-        if (tracker.widgets[i].fontSize > 9) {
-          tracker.widgets[i].fontSize = tracker.widgets[i].fontSize - 1;
+      let widgets = tracker.widgets;
+      for (let i = 0; i < widgets.length; i++) {
+        if (widgets[i].fontSize > 9) {
+          widgets[i].fontSize = widgets[i].fontSize - 1;
         }
       }
     }
@@ -118,14 +120,15 @@ function activateTerminal(app: Application): void {
 
   function toggleTheme(): void {
     if (!tracker.isDisposed) {
-      for (var i = 0; i < tracker.widgets.length; i++) {
-        if (tracker.widgets[i].background === 'black') {
-          tracker.widgets[i].background = 'white';
-          tracker.widgets[i].color = 'black';
+      let widgets = tracker.widgets;
+      for (let i = 0; i < widgets.length; i++) {
+        if (widgets[i].background === 'black') {
+          widgets[i].background = 'white';
+          widgets[i].color = 'black';
         }
         else {
-          tracker.widgets[i].background = 'black';
-          tracker.widgets[i].color = 'white';
+          widgets[i].background = 'black';
+          widgets[i].color = 'white';
         }
       }
     }
@@ -133,8 +136,9 @@ function activateTerminal(app: Application): void {
 
   function closeAllTerms(): void {
     if (!tracker.isDisposed) {
-      for (var i = 0; i < tracker.widgets.length; i++) {
-        tracker.widgets[i].dispose();
+      let widgets = tracker.widgets;
+      for (let i = 0; i < widgets.length; i++) {
+        widgets[i].dispose();
       }
     }
   }
