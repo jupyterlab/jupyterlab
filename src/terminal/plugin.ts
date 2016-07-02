@@ -30,6 +30,7 @@ function activateTerminal(app: Application): void {
   let increaseTerminalFontSize = 'terminal:increase-font';
   let decreaseTerminalFontSize = 'terminal:decrease-font';
   let toggleTerminalTheme = 'terminal:toggle-theme';
+  let closeAllTerminals = 'terminal:close-all-terminals';
 
   // Track the current active terminal.
   let tracker = new WidgetTracker<TerminalWidget>();
@@ -59,6 +60,10 @@ function activateTerminal(app: Application): void {
     {
       id: toggleTerminalTheme,
       handler: toggleTheme
+    },
+    {
+      id: closeAllTerminals,
+      handler: closeAllTerms
     }
 ]);
   app.palette.add([
@@ -83,6 +88,11 @@ function activateTerminal(app: Application): void {
       category: 'Terminal',
       text: 'Toggle Terminal Theme',
       caption: 'Switch Terminal Background and Font Colors'
+    },
+    {
+      command: closeAllTerminals,
+      category: 'Terminal',
+      text: 'Close All Terminals'
     }
   ]);
 
@@ -117,6 +127,14 @@ function activateTerminal(app: Application): void {
           tracker.widgets[i].background = 'black';
           tracker.widgets[i].color = 'white';
         }
+      }
+    }
+  }
+
+  function closeAllTerms(): void {
+    if (!tracker.isDisposed) {
+      for (var i = 0; i < tracker.widgets.length; i++) {
+        tracker.widgets[i].dispose();
       }
     }
   }
