@@ -9,8 +9,7 @@ require('es6-promise').polyfill();
 require('font-awesome/css/font-awesome.min.css');
 require('jupyterlab/lib/default-theme/index.css');
 
-var app = new phosphide.Application({
-  extensions: [
+var extensions = [
     require('jupyterlab/lib/about/plugin').aboutExtension,
     require('jupyterlab/lib/console/plugin').consoleExtension,
     require('jupyterlab/lib/editorwidget/plugin').editorHandlerExtension,
@@ -25,17 +24,17 @@ var app = new phosphide.Application({
     require('jupyterlab/lib/terminal/plugin').terminalExtension,
     require('jupyterlab/lib/widgets/plugin').widgetManagerExtension,
     require('phosphide/lib/extensions/commandpalette').commandPaletteExtension,
-  ],
-  providers: [
+];
+var providers = [
     require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
     require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
     require('jupyterlab/lib/notebook/plugin').notebookTrackerProvider,
     require('jupyterlab/lib/mainmenu/plugin').mainMenuProvider,
     require('jupyterlab/lib/rendermime/plugin').renderMimeProvider,
     require('jupyterlab/lib/services/plugin').servicesProvider,
-  ]
-});
+];
 
-window.onload = function() {
-    app.run();
+module.exports = {
+    extensions: extensions,
+    providers: providers
 }
