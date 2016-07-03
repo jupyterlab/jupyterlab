@@ -32,8 +32,8 @@ Distributed under the terms of the Modified BSD License.
 <script src="{{static_prefix}}/app.bundle.js" type="text/javascript" charset="utf-8"></script>
 <script>
 var app = new phosphide.Application({
-  extensions: Window['jupyterlab-app'].extensions
-  providers: Window['jupyterlab-app'].providers
+  extensions: jupyter.plugins.extensions
+  providers: jupyter.plugins.providers
 });
 
 window.onload = function() {

@@ -42,7 +42,7 @@ module.exports = [
   },
   output: {
     path: __dirname + "/build",
-    library: '[name]',
+    library: ['jupyter', 'lab'],
     libraryTarget: 'umd',
     filename: "[name].bundle.js",
     publicPath: "lab/"
@@ -89,7 +89,7 @@ module.exports = [
     output: {
         filename: 'jupyter-js-services.bundle.js',
         path: './build',
-        library: 'jupyter-js-services',
+        library: ['jupyter', 'services'],
         libraryTarget: 'umd',
     },
     module: {
@@ -115,7 +115,7 @@ module.exports = [
    output: {
         filename: 'app.bundle.js',
         path: './build',
-        libary: 'jupyterlab-app',
+        libary: ['jupyter', 'plugins'],
         libraryTarget: 'umd'
    },
    externals: [
