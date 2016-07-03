@@ -3,56 +3,31 @@
 
 var webpack = require('webpack');
 var glob = require('glob');
+var findImports = require('find-imports');
 
 // Support for Node 0.10
 // See https://github.com/webpack/css-loader/issues/144
 require('es6-promise').polyfill();
 
-// The list of known vendor libraries/files.
-var vendorFiles = [
-  'ansi_up',
-  'backbone',
-  'codemirror',
-  'codemirror/addon/mode/multiplex.js',
-  'codemirror/lib/codemirror.css',
-  'codemirror/mode/meta.js',
-  'codemirror/mode/python/python.js',
-  'codemirror/mode/stex/stex.js',
-  'codemirror/mode/gfm/gfm.js',
-  'codemirror/mode/javascript/javascript.js',
-  'codemirror/mode/css/css.js',
-  'codemirror/mode/julia/julia.js',
-  'codemirror/mode/r/r.js',
-  'codemirror/mode/markdown/markdown.js',
-  'codemirror/lib/codemirror.css',
-  'diff-match-patch',
-  'es6-promise',
-  'font-awesome/css/font-awesome.min.css',
-  'jquery-ui/themes/smoothness/jquery-ui.min.css',
-  'jupyter-js-widgets',
-  'jupyter-js-widgets/css/widgets.min.css',
-  'marked',
-  'moment',
-  'sanitizer',
-  'simulate-event',
-  'xterm',
-  'xterm/src/xterm.css'
-]
-// Manually add all phosphor entry points.
-// (This will be replaced with a glob of the condensed phosphor library)
-glob.sync("node_modules/phosphor-*/**/index.js").forEach(function(file) {
-  vendorFiles.push(file.replace('node_modules/', ''));
-});
+// Get the list of vendor files.
+console.log('Finding vendored files...')
+var vendorFiles = findImports('../lib/**/*.js', { flatten: true });
+vendorFiles.push('xterm/src/xterm.css');
+console.log('Vendored files:\n', vendorFiles)
 
+// Build the bundles.
+console.log('\nBuilding webpack bundles...')
 
-module.exports = {
+module.exports = [{
   entry: {
     main: './index.js',
     vendor: vendorFiles
   },
   output: {
     path: __dirname + "/build",
-    filename: "bundle.js",
+    library: '[name]',
+    libraryTarget: 'umd',
+    filename: "[name].bundle.js",
     publicPath: "lab/"
   },
   node: {
@@ -66,7 +41,6 @@ module.exports = {
       { test: /\.css$/, loader: 'style-loader!css-loader' },
       { test: /\.json$/, loader: 'json-loader' },
       { test: /\.html$/, loader: 'file'},
-      { test: /\.svg$/, loader: 'file' },
       // jquery-ui loads some images
       { test: /\.(jpg|png|gif)$/, loader: "file" },
       // required to load font-awesome
@@ -79,9 +53,19 @@ module.exports = {
   },
   externals: {
     jquery: '$',
-    'jquery-ui': '$'
+    'jquery-ui': '$',
+    'jupyter-js-services': 'umd jupyter-js-services'
   },
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.bundle.js"),
+    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
   ]
-}
+},
+{
+    entry: 'jupyter-js-services',
+    output: {
+        filename: 'jupyter-js-services.bundle.js',
+        path: './build',
+        library: 'jupyter-js-services',
+        libraryTarget: 'umd',
+    }
+}]
