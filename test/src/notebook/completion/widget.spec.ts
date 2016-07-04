@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  sendMessage
+  sendMessage, Message
 } from 'phosphor-messaging';
 
 import {
@@ -45,6 +45,8 @@ class CustomRenderer extends CompletionWidget.Renderer {
 class LogWidget extends CompletionWidget {
   events: string[] = [];
 
+  methods: string[] = [];
+
   dispose(): void {
     super.dispose();
     this.events.length = 0;
@@ -53,6 +55,11 @@ class LogWidget extends CompletionWidget {
   handleEvent(event: Event): void {
     super.handleEvent(event);
     this.events.push(event.type);
+  }
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    this.methods.push('onUpdateRequest');
   }
 }
 
@@ -598,6 +605,40 @@ describe('notebook/completion/widget', () => {
         expect(value).to.be('');
         sendMessage(widget, Widget.MsgUpdateRequest);
         expect(value).to.be('foo');
+        widget.dispose();
+        anchor.dispose();
+      });
+
+      it('should do nothing if a model does not exist', () => {
+        let widget = new LogWidget();
+        sendMessage(widget, Widget.MsgUpdateRequest);
+        expect(widget.methods).to.contain('onUpdateRequest');
+      });
+
+      it('should un-hide widget if multiple options are available', () => {
+        let anchor = new Widget();
+        let model = new CompletionModel();
+        let request: ICompletionRequest = {
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: null,
+          position: 0,
+          currentValue: 'f'
+        };
+        let options: CompletionWidget.IOptions = { model, anchor: anchor.node };
+
+        anchor.attach(document.body);
+        model.original = request;
+        model.options = ['foo', 'bar', 'baz'];
+
+        let widget = new CompletionWidget(options);
+        widget.hide();
+        expect(widget.isHidden).to.be(true);
+        widget.attach(document.body);
+        sendMessage(widget, Widget.MsgUpdateRequest);
+        expect(widget.isVisible).to.be(true);
         widget.dispose();
         anchor.dispose();
       });
