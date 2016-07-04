@@ -38,6 +38,11 @@ const ACTIVE_CLASS = 'jp-mod-active';
 const OUTOFVIEW_CLASS = 'jp-mod-outofview'
 
 /**
+ * The minimum height of a completion widget.
+ */
+const MIN_HEIGHT = 75;
+
+/**
  * The maximum height of a completion widget.
  */
 const MAX_HEIGHT = 250;
@@ -232,6 +237,7 @@ class CompletionWidget extends Widget {
     if (this.isHidden) {
       this.show();
     }
+    this._anchorPoint = this._anchor.scrollTop;
     this._setGeometry();
   }
 
@@ -334,18 +340,10 @@ class CompletionWidget extends Widget {
    * Handle scroll events for the widget
    */
   private _evtScroll(event: MouseEvent) {
-    let target = event.target as HTMLElement;
-    while (target !== document.documentElement) {
-      // If the scroll event happened in the completion widget, allow it.
-      if (target === this.node) {
-        return;
-      }
-      if (window.getComputedStyle(target).overflow === 'hidden') {
-        return;
-      }
-      target = target.parentElement;
+    if (this.isHidden) {
+      return;
     }
-    this._reset();
+    this._setGeometry();
   }
 
   /**
@@ -374,20 +372,25 @@ class CompletionWidget extends Widget {
       this._model.reset();
     }
     this._activeIndex = 0;
-    this._scrollDelta = 0;
+    this._anchorPoint = 0;
   }
 
   /**
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
+    if (!this._model.original) {
+      return;
+    }
+
     let node = this.node;
     let coords = this._model.current ? this._model.current.coords
       : this._model.original.coords;
-    let availableHeight = coords.top;
+    let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
+    let availableHeight = coords.top + scrollDelta;
     let maxHeight = Math.max(0, Math.min(availableHeight, MAX_HEIGHT));
 
-    if (maxHeight) {
+    if (maxHeight > MIN_HEIGHT) {
       node.classList.remove(OUTOFVIEW_CLASS);
     } else {
       node.classList.add(OUTOFVIEW_CLASS);
@@ -423,10 +426,10 @@ class CompletionWidget extends Widget {
   }
 
   private _anchor: HTMLElement = null;
+  private _anchorPoint = 0;
   private _activeIndex = 0;
   private _model: ICompletionModel = null;
   private _renderer: CompletionWidget.IRenderer = null;
-  private _scrollDelta = 0;
 }
 
 
