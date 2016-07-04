@@ -72,7 +72,7 @@ class CompletionWidget extends Widget {
   constructor(options: CompletionWidget.IOptions = {}) {
     super();
     this._renderer = options.renderer || CompletionWidget.defaultRenderer;
-    this._anchor = options.anchor || null;
+    this.anchor = options.anchor || null;
     this.model = options.model || null;
     this.addClass(COMPLETION_CLASS);
   }
@@ -118,7 +118,20 @@ class CompletionWidget extends Widget {
     return this._anchor;
   }
   set anchor(element: HTMLElement) {
+    if (this._anchor === element) {
+      return;
+    }
+    // Clean up scroll listener if anchor is being replaced.
+    if (this._anchor) {
+      this._anchor.removeEventListener('scroll', this, USE_CAPTURE);
+    }
+
     this._anchor = element;
+
+    // Add scroll listener to anchor element.
+    if (this._anchor) {
+      this._anchor.addEventListener('scroll', this, USE_CAPTURE);
+    }
   }
 
   /**
@@ -172,9 +185,6 @@ class CompletionWidget extends Widget {
   protected onAfterAttach(msg: Message): void {
     window.addEventListener('keydown', this, USE_CAPTURE);
     window.addEventListener('mousedown', this, USE_CAPTURE);
-    if (this._anchor) {
-      this._anchor.addEventListener('scroll', this, USE_CAPTURE);
-    }
   }
 
   /**
