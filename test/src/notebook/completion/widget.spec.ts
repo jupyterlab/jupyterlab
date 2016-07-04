@@ -16,6 +16,10 @@ import {
 } from 'simulate-event';
 
 import {
+  ICompletionRequest, ICoords
+} from '../../../../lib/notebook/cells/editor'
+
+import {
   CompletionWidget, CompletionModel, ICompletionItem
 } from '../../../../lib/notebook/completion';
 
@@ -25,6 +29,8 @@ const TEST_ITEM_CLASS = 'jp-TestItem';
 const ITEM_CLASS = 'jp-Completion-item';
 
 const ACTIVE_CLASS = 'jp-mod-active';
+
+const MAX_HEIGHT = 250;
 
 
 class CustomRenderer extends CompletionWidget.Renderer {
@@ -510,6 +516,90 @@ describe('notebook/completion/widget', () => {
           anchor.dispose();
         });
 
+      });
+
+      context('scroll', () => {
+
+        it('should move along with the pegged anchor', (done) => {
+          let anchor = document.createElement('div');
+          let container = new Widget();
+          let model = new CompletionModel();
+          let coords: ICoords = { left: 0, right: 0, top: 500, bottom: 0 };
+          let request: ICompletionRequest = {
+            ch: 0,
+            chHeight: 0,
+            chWidth: 0,
+            line: 0,
+            coords: coords,
+            position: 0,
+            currentValue: 'f'
+          };
+          let options: CompletionWidget.IOptions = { model, anchor: anchor };
+
+          document.body.appendChild(anchor);
+          anchor.style.height = '1000px';
+          anchor.style.overflow = 'auto';
+
+          container.attach(anchor);
+          container.node.style.height = '5000px';
+          anchor.scrollTop = 0;
+          model.original = request;
+          model.options = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+          let widget = new CompletionWidget(options);
+          widget.attach(document.body);
+          sendMessage(widget, Widget.MsgUpdateRequest);
+
+          let top = parseInt(window.getComputedStyle(widget.node).top, 10);
+          let offset = 200;
+          expect(top).to.be(coords.top - MAX_HEIGHT);
+          anchor.scrollTop = offset;
+          simulate(anchor, 'scroll');
+
+          requestAnimationFrame(() => {
+            let top = parseInt(window.getComputedStyle(widget.node).top, 10);
+            expect(top).to.be(coords.top - MAX_HEIGHT - offset);
+            widget.dispose();
+            container.dispose();
+            done();
+          });
+        });
+
+      });
+
+    });
+
+    describe('#onUpdateRequest()', () => {
+
+      it('should emit a selection if there is only one match', () => {
+        let anchor = new Widget();
+        let model = new CompletionModel();
+        let request: ICompletionRequest = {
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: null,
+          position: 0,
+          currentValue: 'f'
+        };
+        let value = '';
+        let options: CompletionWidget.IOptions = { model, anchor: anchor.node };
+        let listener = (sender: any, selected: string) => { value = selected; };
+
+        anchor.attach(document.body);
+        model.original = request;
+        model.options = ['foo'];
+
+        let widget = new CompletionWidget(options);
+        widget.selected.connect(listener);
+        widget.attach(document.body);
+
+        expect(value).to.be('');
+        sendMessage(widget, Widget.MsgUpdateRequest);
+        expect(value).to.be('foo');
+        widget.dispose();
+        anchor.dispose();
       });
 
     });
