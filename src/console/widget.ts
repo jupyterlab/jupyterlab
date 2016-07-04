@@ -463,19 +463,20 @@ class ConsoleWidget extends Widget {
    * Show the tooltip.
    */
   protected showTooltip(change: ITextChange, bundle: MimeMap<string>): void {
-    let { top, bottom, left } = change.coords;
-    let tooltip = this._tooltip;
-    let heightAbove = top + 1; // 1px border
-    let heightBelow = window.innerHeight - bottom - 1; // 1px border
-    let widthLeft = left;
-    let widthRight = window.innerWidth - left;
-
     // Add content and measure.
-    tooltip.content = this._rendermime.render(bundle);
-    tooltip.show();
-    let { width, height } = tooltip.node.getBoundingClientRect();
+    this._tooltip.content = this._rendermime.render(bundle);
+    this._tooltip.show();
+
+    let tooltip = this._tooltip.node;
+    let { width, height } = tooltip.getBoundingClientRect();
     let maxWidth: number;
     let maxHeight: number;
+    let { top, bottom, left } = change.coords;
+    let border = parseInt(window.getComputedStyle(tooltip).borderWidth, 10);
+    let heightAbove = top + border;
+    let heightBelow = window.innerHeight - bottom - border;
+    let widthLeft = left;
+    let widthRight = window.innerWidth - left;
 
     // Prefer displaying below.
     if (heightBelow >= height || heightBelow >= heightAbove) {
@@ -489,18 +490,17 @@ class ConsoleWidget extends Widget {
 
     // Prefer displaying on the right.
     if (widthRight >= width || widthRight >= widthLeft) {
-      // Account for 1px border width.
-      left += 1;
+      left += border;
       maxWidth = widthRight;
     } else {
       maxWidth = widthLeft;
       left -= Math.min(width, maxWidth);
     }
 
-    tooltip.node.style.top = `${top}px`;
-    tooltip.node.style.left = `${left}px`;
-    tooltip.node.style.maxHeight = `${maxHeight}px`;
-    tooltip.node.style.maxWidth = `${maxWidth}px`;
+    tooltip.style.top = `${Math.floor(top)}px`;
+    tooltip.style.left = `${Math.floor(left)}px`;
+    tooltip.style.maxHeight = `${Math.floor(maxHeight)}px`;
+    tooltip.style.maxWidth = `${Math.floor(maxWidth)}px`;
   }
 
   /**

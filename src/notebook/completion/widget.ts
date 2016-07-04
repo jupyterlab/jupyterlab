@@ -398,12 +398,12 @@ class CompletionWidget extends Widget {
     }
     node.style.maxHeight = `${maxHeight}px`;
 
-    let borderWidth = parseInt(window.getComputedStyle(node).borderWidth, 10);
-    let left = Math.floor(coords.left) + borderWidth;
+    let border = parseInt(window.getComputedStyle(node).borderWidth, 10);
+    let left = coords.left + border
     let rect = node.getBoundingClientRect();
     let top = availableHeight - rect.height;
-    node.style.left = `${left}px`;
-    node.style.top = `${top}px`;
+    node.style.left = `${Math.floor(left)}px`;
+    node.style.top = `${Math.floor(top)}px`;
     node.style.width = 'auto';
 
     // Expand the menu width by the scrollbar size, if present.
