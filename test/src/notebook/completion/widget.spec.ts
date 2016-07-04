@@ -211,6 +211,15 @@ describe('notebook/completion/widget', () => {
         widget.dispose();
       });
 
+      it('should handle anchor element scroll events', () => {
+        let anchor = new Widget();
+        let widget = new LogWidget({ anchor: anchor.node });
+        widget.attach(document.body);
+        simulate(anchor.node, 'scroll');
+        expect(widget.events).to.contain('scroll');
+        widget.dispose();
+      });
+
       context('keydown', () => {
 
         it('should reset if keydown is outside anchor', () => {
@@ -356,6 +365,42 @@ describe('notebook/completion/widget', () => {
           anchor.dispose();
         });
 
+        it('should mark common subset on tab and select on next tab', () => {
+          let anchor = new Widget();
+          let model = new CompletionModel();
+          let options: CompletionWidget.IOptions = {
+            model, anchor: anchor.node
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          model.options = ['foo', 'four', 'foz'];
+          anchor.attach(document.body);
+
+          let widget = new CompletionWidget(options);
+
+          widget.selected.connect(listener);
+          widget.attach(document.body);
+          sendMessage(widget, Widget.MsgUpdateRequest);
+
+          let marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
+          expect(marked).to.be.empty();
+          expect(value).to.be('');
+          simulate(anchor.node, 'keydown', { keyCode: 9 });  // Tab
+          sendMessage(widget, Widget.MsgUpdateRequest);
+          marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
+          expect(value).to.be('fo');
+          expect(marked).to.have.length(3);
+          expect(marked[0].textContent).to.be('fo');
+          expect(marked[1].textContent).to.be('fo');
+          expect(marked[2].textContent).to.be('fo');
+          simulate(anchor.node, 'keydown', { keyCode: 9 });  // Tab
+          expect(value).to.be('foo');
+          widget.dispose();
+          anchor.dispose();
+        });
+
       });
 
       context('mousedown', () => {
@@ -385,6 +430,31 @@ describe('notebook/completion/widget', () => {
           expect(value).to.be('');
           simulate(item, 'mousedown');
           expect(value).to.be('baz');
+          widget.dispose();
+          anchor.dispose();
+        });
+
+        it('should ignore nonstandard mouse clicks (e.g., right click)', () => {
+          let anchor = new Widget();
+          let model = new CompletionModel();
+          let options: CompletionWidget.IOptions = {
+            model, anchor: anchor.node
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          model.options = ['foo', 'bar'];
+          anchor.attach(document.body);
+
+          let widget = new CompletionWidget(options);
+
+          widget.selected.connect(listener);
+          widget.attach(document.body);
+          sendMessage(widget, Widget.MsgUpdateRequest);
+          expect(value).to.be('');
+          simulate(widget.node, 'mousedown', { button: 1 });
+          expect(value).to.be('');
           widget.dispose();
           anchor.dispose();
         });

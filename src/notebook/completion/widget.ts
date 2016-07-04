@@ -379,7 +379,7 @@ class CompletionWidget extends Widget {
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
-    if (!this._model.original) {
+    if (!this.model || !this._model.original) {
       return;
     }
 
@@ -398,8 +398,8 @@ class CompletionWidget extends Widget {
     }
     node.style.maxHeight = `${maxHeight}px`;
 
-    // Account for 1px border width.
-    let left = Math.floor(coords.left) + 1;
+    let borderWidth = parseInt(window.getComputedStyle(node).borderWidth, 10);
+    let left = Math.floor(coords.left) + borderWidth;
     let rect = node.getBoundingClientRect();
     let top = availableHeight - rect.height;
     node.style.left = `${left}px`;
