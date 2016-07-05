@@ -8,6 +8,7 @@ from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
+from notebook.base.handlers import AuthenticatedHandler
 
 HERE = os.path.dirname(__file__)
 FILE_LOADER = FileSystemLoader(HERE)
@@ -15,7 +16,7 @@ BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
 
 class LabHandler(IPythonHandler):
-    """Render the Jupyter Lab View."""   
+    """Render the Jupyter Lab View."""
 
     @web.authenticated
     def get(self):
@@ -31,12 +32,18 @@ class LabHandler(IPythonHandler):
     def get_template(self, name):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
+class AboutHandler(AuthenticatedHandler):
+
+    def get(self):
+        self.write(self.render_template("about.html"))
+
 #-----------------------------------------------------------------------------
 # URL to handler mappings
 #-----------------------------------------------------------------------------
 
 default_handlers = [
     (PREFIX, LabHandler),
+    (PREFIX+"/about.html", AboutHandler),
     (PREFIX+r"/(.*)", FileFindHandler,
         {'path': BUILT_FILES}),
     ]
@@ -45,7 +52,7 @@ def _jupyter_server_extension_paths():
     return [{
         "module": "jupyterlab"
     }]
-    
+
 
 def load_jupyter_server_extension(nbapp):
     nbapp.log.info('Pre-alpha version of JupyterLab extension loaded from %s'%HERE)
