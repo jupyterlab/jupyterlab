@@ -18,6 +18,9 @@ import {
 } from '../docregistry';
 
 
+const IMAGE_CLASS = 'jp-ImageWidget';
+
+
 /**
  * A widget for images.
  */
@@ -27,7 +30,7 @@ class ImageWidget extends Widget {
    * Create the node for the image widget.
    */
   static createNode(): HTMLElement {
-    return document.createElement('div');
+    return document.createElement('img');
   }
 
   /**
@@ -37,12 +40,13 @@ class ImageWidget extends Widget {
     super();
     this._context = context;
     this.node.tabIndex = -1;
+    this.addClass(IMAGE_CLASS);
     this.node.style.overflowX = 'auto';
     this.node.style.overflowY = 'auto';
-    this.node.style.padding = '15px 15px 15px 15px';
-    this.node.style.border = 'none';
-    this.node.style.height = '100px';
-    this.node.style.width = '100px';
+    // this.node.style.padding = '15px 15px 15px 15px';
+    // this.node.style.border = 'none';
+    // this.node.style.height = '100px';
+    // this.node.style.width = '100px';
     if (context.model.toString()) {
       this.update();
     }
@@ -73,16 +77,18 @@ class ImageWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     this.title.text = this._context.path.split('/').pop();
-    let node = this.node as HTMLElement;
+    let node = this.node as HTMLImageElement;
     let cm = this._context.contentsModel;
     if (cm === null) {
       return;
     }
     let content = this._context.model.toString();
-    cm.mimetype
-    let innerurl = 'data:' + cm.mimetype + ';' + cm.format + ',' + content;
+    node.src = `data:${cm.mimetype};${cm.format},${content}`;
+    //let innerurl: string;
+    //innerurl = `url(data:${cm.mimetype};${cm.format},${content})`;
     //node.style.backgroundImage = "url(" + "data:" + cm.mimetype + ";" + cm.format + "," + content + ")";
-    node.style.backgroundImage = `url(data:${cm.mimetype};${cm.format},${content})`;
+    //node.style.background = innerurl;
+    //console.log(innerurl);
   }
 
   private _context: IDocumentContext<IDocumentModel>;
