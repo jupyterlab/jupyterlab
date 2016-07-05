@@ -33,6 +33,7 @@ class LabHandler(IPythonHandler):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
 class AboutHandler(IPythonHandler):
+    """Render the About Page"""
 
     @web.authenticated
     def get(self):
