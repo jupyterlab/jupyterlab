@@ -54,7 +54,7 @@ import {
 } from './history';
 
 import {
-  CompletionWidget, CompletionModel
+  CompletionWidget, CompletionModel, CellCompletionHandler
 } from '../notebook/completion';
 
 
@@ -209,7 +209,7 @@ class ConsoleWidget extends Widget {
    */
   static createCompletion(): CompletionWidget {
     let model = new CompletionModel();
-    return new CompletionWidget(model);
+    return new CompletionWidget({ model });
   }
 
   /**
@@ -246,9 +246,10 @@ class ConsoleWidget extends Widget {
 
     // Instantiate tab completion widget.
     this._completion = constructor.createCompletion();
-    this._completion.reference = this;
+    this._completion.anchor = this.node;
     this._completion.attach(document.body);
-    this._completion.selected.connect(this.onCompletionSelect, this);
+    this._completionHandler = new CellCompletionHandler(this._completion);
+    this._completionHandler.kernel = session.kernel;
 
     // Instantiate tooltip widget.
     this._tooltip = constructor.createTooltip();
@@ -273,6 +274,7 @@ class ConsoleWidget extends Widget {
       this.newPrompt();
       this.initialize();
       this._history = constructor.createHistory(kernel);
+      this._completionHandler.kernel = kernel;
     });
   }
 
@@ -307,6 +309,8 @@ class ConsoleWidget extends Widget {
     this._tooltip = null;
     this._history.dispose();
     this._history = null;
+    this._completionHandler.dispose();
+    this._completionHandler = null;
     this._completion.dispose();
     this._completion = null;
     this._session.dispose();
@@ -392,8 +396,10 @@ class ConsoleWidget extends Widget {
     // Hook up completion, tooltip, and history handling.
     let editor = prompt.editor;
     editor.textChanged.connect(this.onTextChange, this);
-    editor.completionRequested.connect(this.onCompletionRequest, this);
     editor.edgeRequested.connect(this.onEdgeRequest, this);
+
+    // Associate the new prompt with the completion handler.
+    this._completionHandler.activeCell = prompt;
 
     prompt.focus();
   }
@@ -416,21 +422,7 @@ class ConsoleWidget extends Widget {
    * Handle a text changed signal from an editor.
    */
   protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
-    let line = change.newValue.split('\n')[change.line];
-    let lastChar = change.ch - 1;
-    let model = this._completion.model;
-    let hasCompletion = !!model.original;
-    // If last character entered is not whitespace, update completion.
-    if (line[lastChar] && line[lastChar].match(/\S/) && hasCompletion) {
-      // Update the current completion state.
-      model.current = change;
-    } else {
-      // If final character is whitespace, reset completion.
-      model.options = null;
-      model.original = null;
-      model.cursor = null;
-    }
-    // Displaying completion widget overrides displaying tooltip.
+    let hasCompletion = !!this._completion.model.original;
     if (hasCompletion) {
       this._tooltip.hide();
     } else if (change.newValue) {
@@ -471,19 +463,20 @@ class ConsoleWidget extends Widget {
    * Show the tooltip.
    */
   protected showTooltip(change: ITextChange, bundle: MimeMap<string>): void {
-    let { top, bottom, left } = change.coords;
-    let tooltip = this._tooltip;
-    let heightAbove = top + 1; // 1px border
-    let heightBelow = window.innerHeight - bottom - 1; // 1px border
-    let widthLeft = left;
-    let widthRight = window.innerWidth - left;
-
     // Add content and measure.
-    tooltip.content = this._rendermime.render(bundle);
-    tooltip.show();
-    let { width, height } = tooltip.node.getBoundingClientRect();
+    this._tooltip.content = this._rendermime.render(bundle);
+    this._tooltip.show();
+
+    let tooltip = this._tooltip.node;
+    let { width, height } = tooltip.getBoundingClientRect();
     let maxWidth: number;
     let maxHeight: number;
+    let { top, bottom, left } = change.coords;
+    let border = parseInt(window.getComputedStyle(tooltip).borderWidth, 10);
+    let heightAbove = top + border;
+    let heightBelow = window.innerHeight - bottom - border;
+    let widthLeft = left;
+    let widthRight = window.innerWidth - left;
 
     // Prefer displaying below.
     if (heightBelow >= height || heightBelow >= heightAbove) {
@@ -497,29 +490,17 @@ class ConsoleWidget extends Widget {
 
     // Prefer displaying on the right.
     if (widthRight >= width || widthRight >= widthLeft) {
-      // Account for 1px border width.
-      left += 1;
+      left += border;
       maxWidth = widthRight;
     } else {
       maxWidth = widthLeft;
       left -= Math.min(width, maxWidth);
     }
 
-    tooltip.node.style.top = `${top}px`;
-    tooltip.node.style.left = `${left}px`;
-    tooltip.node.style.maxHeight = `${maxHeight}px`;
-    tooltip.node.style.maxWidth = `${maxWidth}px`;
-  }
-
-  /**
-   * Handle a completion requested signal from an editor.
-   */
-  protected onCompletionRequest(editor: CellEditorWidget, change: ICompletionRequest): void {
-    let kernel = this._session.kernel;
-    if (!kernel) {
-      return;
-    }
-    this._completion.model.makeKernelRequest(change, kernel);
+    tooltip.style.top = `${Math.floor(top)}px`;
+    tooltip.style.left = `${Math.floor(left)}px`;
+    tooltip.style.maxHeight = `${Math.floor(maxHeight)}px`;
+    tooltip.style.maxWidth = `${Math.floor(maxWidth)}px`;
   }
 
   /**
@@ -545,17 +526,8 @@ class ConsoleWidget extends Widget {
     }
   }
 
-  /**
-   * Handle a completion selected signal from the completion widget.
-   */
-  protected onCompletionSelect(widget: CompletionWidget, value: string): void {
-    let prompt = this.prompt;
-    let patch = this._completion.model.createPatch(value);
-    prompt.model.source = patch.text;
-    prompt.editor.setCursorPosition(patch.position);
-  }
-
   private _completion: CompletionWidget = null;
+  private _completionHandler: CellCompletionHandler = null;
   private _mimetype = 'text/x-ipython';
   private _rendermime: RenderMime<Widget> = null;
   private _tooltip: ConsoleTooltip = null;

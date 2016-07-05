@@ -49,6 +49,7 @@ import {
 
 import 'jupyterlab/lib/notebook/index.css';
 import 'jupyterlab/lib/notebook/theme.css';
+import 'jupyterlab/lib/notebook/completion/index.css';
 import 'jupyterlab/lib/dialog/index.css';
 import 'jupyterlab/lib/dialog/theme.css';
 

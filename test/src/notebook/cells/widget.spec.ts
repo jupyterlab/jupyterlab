@@ -62,7 +62,7 @@ class LogBaseCell extends BaseCellWidget {
   }
 
   protected onUpdateRequest(msg: Message): void {
-    super.onAfterAttach(msg);
+    super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
   }
 

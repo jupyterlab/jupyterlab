@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelMessage
-} from 'jupyter-js-services';
-
-import {
   IDisposable
 } from 'phosphor-disposable';
 
@@ -16,6 +12,10 @@ import {
 import {
   ICompletionRequest, ITextChange
 } from '../cells/editor';
+
+import {
+  deepEqual, JSONObject
+} from '../common/json';
 
 
 /**
@@ -79,7 +79,7 @@ interface ICompletionItem {
  * A cursor span.
  */
 export
-interface ICursorSpan {
+interface ICursorSpan extends JSONObject {
   /**
    * The start position of the cursor.
    */
@@ -128,9 +128,9 @@ interface ICompletionModel extends IDisposable {
   original: ICompletionRequest;
 
   /**
-   * Handle a completion request using a kernel.
+   * The query against which items are filtered.
    */
-  makeKernelRequest(request: ICompletionRequest, kernel: IKernel): void;
+  query: string;
 
   /**
    * Handle a text change.
@@ -155,27 +155,10 @@ interface ICompletionModel extends IDisposable {
 export
 class CompletionModel implements ICompletionModel {
   /**
-   * Get whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * A signal emitted when state of the completion menu changes.
    */
   get stateChanged(): ISignal<ICompletionModel, void> {
     return Private.stateChangedSignal.bind(this);
-  }
-
-  /**
-   * The cursor details that the API has used to return matching options.
-   */
-  get cursor(): ICursorSpan {
-    return this._cursor;
-  }
-  set cursor(cursor: ICursorSpan) {
-    this._cursor = cursor;
   }
 
   /**
@@ -195,7 +178,10 @@ class CompletionModel implements ICompletionModel {
     return this._options;
   }
   set options(newValue: string[]) {
-    if (newValue) {
+    if (deepEqual(newValue, this._options)) {
+      return;
+    }
+    if (newValue && newValue.length) {
       this._options = [];
       this._options.push(...newValue);
     } else {
@@ -210,9 +196,12 @@ class CompletionModel implements ICompletionModel {
   get original(): ICompletionRequest {
     return this._original;
   }
-  set original(request: ICompletionRequest) {
-    this._original = request;
-    this._current = null;
+  set original(newValue: ICompletionRequest) {
+    if (deepEqual(newValue, this._original)) {
+      return;
+    }
+    this._reset();
+    this._original = newValue;
     this.stateChanged.emit(void 0);
   }
 
@@ -223,7 +212,28 @@ class CompletionModel implements ICompletionModel {
     return this._current;
   }
   set current(newValue: ITextChange) {
+    if (deepEqual(newValue, this._current)) {
+      return;
+    }
+
+    // Original request must always be set before a text change. If it isn't
+    // the model fails silently.
+    if (!this.original) {
+      return;
+    }
+
+    // Cursor must always be set before a text change. This happens
+    // automatically in the completion handler, but since `current` is a public
+    // attribute, this defensive check is necessary.
+    if (!this._cursor) {
+      return;
+    }
     this._current = newValue;
+
+    if (!this.current) {
+      this.stateChanged.emit(void 0);
+      return;
+    }
 
     let original = this._original;
     let current = this._current;
@@ -233,10 +243,10 @@ class CompletionModel implements ICompletionModel {
     // If the text change means that the original start point has been preceded,
     // then the completion is no longer valid and should be reset.
     if (currentLine.length < originalLine.length) {
-      console.log('A');
       this.reset();
+      return;
     } else {
-      let {start, end} = this._cursor;
+      let { start, end } = this._cursor;
       // Clip the front of the current line.
       let query = currentLine.substring(start);
       // Clip the back of the current line.
@@ -247,36 +257,50 @@ class CompletionModel implements ICompletionModel {
     this.stateChanged.emit(void 0);
   }
 
+
   /**
-   * Make a request using a kernel.
+   * The cursor details that the API has used to return matching options.
    */
-  makeKernelRequest(request: ICompletionRequest, kernel: IKernel): void {
-    let content: KernelMessage.ICompleteRequest = {
-      // Only send the current line of code for completion.
-      code: request.currentValue.split('\n')[request.line],
-      cursor_pos: request.ch
-    };
-    let pendingComplete = ++this._pendingComplete;
-    kernel.complete(content).then(msg => {
-      let value = msg.content;
-      // If we have been disposed, bail.
-      if (this.isDisposed) {
-        return;
-      }
-      // If a newer completion request has created a pending request, bail.
-      if (pendingComplete !== this._pendingComplete) {
-        return;
-      }
-      // Completion request failures or negative results fail silently.
-      if (value.status !== 'ok') {
-        return;
-      }
-      // Update the state.
-      this.options = value.matches;
-      this.cursor = { start: value.cursor_start, end: value.cursor_end };
-    }).then(() => {
-      this.original = request;
-    });
+  get cursor(): ICursorSpan {
+    return this._cursor;
+  }
+  set cursor(newValue: ICursorSpan) {
+    // Original request must always be set before a cursor change. If it isn't
+    // the model fails silently.
+    if (!this.original) {
+      return;
+    }
+    this._cursor = newValue;
+  }
+
+  /**
+   * The query against which items are filtered.
+   */
+  get query(): string {
+    return this._query;
+  }
+  set query(newValue: string) {
+    this._query = newValue;
+  }
+
+  /**
+   * Get whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    clearSignalData(this);
+    this._reset();
   }
 
   /**
@@ -292,10 +316,7 @@ class CompletionModel implements ICompletionModel {
       }
     } else {
       // If final character is whitespace, reset completion.
-      this.options = null;
-      this.original = null;
-      this.cursor = null;
-      return;
+      this.reset();
     }
   }
 
@@ -305,11 +326,6 @@ class CompletionModel implements ICompletionModel {
    * @param patch - The patch string to apply to the original value.
    *
    * @returns A patched text change or null if original value did not exist.
-   *
-   * #### Notes
-   * The coords field is set to null because it is calculated by the editor, so
-   * a patched version cannot reliably produce accurate coordinates for the
-   * cursor.
    */
   createPatch(patch: string): ICompletionPatch {
     let original = this._original;
@@ -319,46 +335,22 @@ class CompletionModel implements ICompletionModel {
       return null;
     }
 
-    let {start, end} = cursor;
-    let lines = original.currentValue.split('\n');
-    let line = lines[original.line];
-    let prefix = line.substring(0, start);
-    let suffix = line.substring(end);
-
-    lines[original.line] = prefix + patch + suffix;
-    let text = lines.join('\n');
-
-    // Add current line to position.
-    let position = prefix.length + patch.length;
-    // Add all the preceding lines lengths to position.
-    for (let i = 0; i < original.line; i++) {
-      // Add an extra character for the line break.
-      position += lines[i].length + 1;
-    }
+    let { start, end } = cursor;
+    let value = original.currentValue;
+    let prefix = value.substring(0, start);
+    let suffix = value.substring(end);
+    let text = prefix + patch + suffix;
+    let position = (prefix + patch).length;
 
     return { position, text };
   }
 
   /**
-   * Dispose of the resources held by the model.
-   */
-  dispose(): void {
-    // Do nothing if already disposed.
-    if (this.isDisposed) {
-      return;
-    }
-    clearSignalData(this);
-    this._isDisposed = true;
-  }
-
-  /**
-   * Reset the state of the model.
+   * Reset the state of the model and emit a state change signal.
    */
   reset() {
-    this.original = null;
-    this.options = null;
-    this._query = '';
-    this._cursor = null;
+    this._reset();
+    this.stateChanged.emit(void 0);
   }
 
   /**
@@ -385,13 +377,23 @@ class CompletionModel implements ICompletionModel {
       .map(result => ({ text: result.text, raw: result.raw }));
   }
 
+  /**
+   * Reset the state of the model.
+   */
+  private _reset(): void {
+    this._current = null;
+    this._original = null;
+    this._options = null;
+    this._cursor = null;
+    this._query = '';
+  }
+
   private _isDisposed = false;
   private _options: string[] = null;
   private _original: ICompletionRequest = null;
   private _current: ITextChange = null;
   private _query = '';
-  private _cursor: { start: number, end: number } = null;
-  private _pendingComplete = 0;
+  private _cursor: ICursorSpan = null;
 }
 
 
