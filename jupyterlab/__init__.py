@@ -8,7 +8,6 @@ from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
-from notebook.base.handlers import AuthenticatedHandler
 
 HERE = os.path.dirname(__file__)
 FILE_LOADER = FileSystemLoader(HERE)
