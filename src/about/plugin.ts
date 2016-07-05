@@ -9,6 +9,14 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import {
+  MainMenu, mainMenuProvider
+} from '../mainmenu/plugin';
+
+import {
+  MenuItem, Menu, IMenuItemOptions, MenuItemType
+} from 'phosphor-menus';
+
 
 /**
  * The about page extension.
@@ -16,11 +24,12 @@ import {
 export
 const aboutExtension = {
   id: 'jupyter.extensions.about',
+  requires: [MainMenu],
   activate: activateAbout
 };
 
 
-function activateAbout(app: Application): void {
+function activateAbout(app: Application, mainMenu: MainMenu): void {
   let widget = new Widget();
   let commandId = 'about-jupyterlab:show';
   widget.id = 'about-jupyterlab';
@@ -62,6 +71,19 @@ function activateAbout(app: Application): void {
 <p>Opening a notebook will open a minimally-featured notebook. Code execution, Markdown rendering, and basic cell toolbar actions are supported.  Future versions will add more features from the existing Jupyter notebook.</p>
 `;
 
+let menu = new Menu([
+  new MenuItem({
+    text: 'Stuff'
+  })
+  ]);
+
+let aboutMenu = new MenuItem({
+  submenu: menu,
+  icon: 'jp-About-jupyter-logo'
+  });
+
+  mainMenu.addItem(aboutMenu);
+  
   widget.node.style.overflowY = 'auto';
   app.commands.add([{
     id: commandId,

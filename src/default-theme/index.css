@@ -36,9 +36,13 @@ body {
 
 #p-top-panel {
   display: flex;
-  min-height: 24px;
+  min-height: 28px;
+  height: 28px;
 }
 
+#jp-MainMenu.p-Widget.p-MenuBar {
+	/* height: 32px;	*/
+}
 
 .jp-Document {
   min-width: 120px;
@@ -258,14 +262,9 @@ body {
 
 
 .p-StackedPanel-child {
+  border-bottom: 1px solid #BDBDBD;
   border-right: 1px solid #BDBDBD;
   border-left: 1px solid #BDBDBD;
-  border-bottom: 1px solid #BDBDBD;
-}
-
-
-#p-main-split-panel > .p-SplitPanel-handle {
-  background: #BDBDBD;
 }
 
 
@@ -273,7 +272,6 @@ body {
   padding-left: 5px;
   background: #FAFAFA;
   color: rgba(0, 0, 0, 0.87);
-  border-bottom: 1px solid #DDDDDD;
   font-size: 14px;
 }
 

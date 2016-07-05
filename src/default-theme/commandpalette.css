@@ -41,6 +41,11 @@
 }
 
 
+.p-CommandPalette.p-StackedPanel-child {
+	border-left: 0px;
+}
+
+
 .p-CommandPalette-command {
   padding: 4px;
   font-size: 14px;
