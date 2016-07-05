@@ -15,6 +15,9 @@ FILE_LOADER = FileSystemLoader(HERE)
 BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
 
+STATIC_PATH = os.path.join(HERE, 'static')
+TEMPLATE_PATH = os.path.join(HERE, 'templates')
+
 class LabHandler(IPythonHandler):
     """Render the Jupyter Lab View."""
 

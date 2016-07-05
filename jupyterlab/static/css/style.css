@@ -1,0 +1,133 @@
+body {
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    text-align: center;
+}
+
+.header {
+    font-size: 26px;
+    font-weight: 300;
+    color: #333333;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.desc-one {
+    font-size: 13px;
+    color: #555555;
+    line-height: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.desc-two {
+    font-size: 13px;
+    color: #555555;
+    padding-left: 50px;
+    padding-right: 50px;
+    margin-top: 0px;
+}
+
+.desc-two-header {
+    color: #333333;
+    font-size: 20px;
+    margin-bottom: 9px;
+    margin-top: 17px;
+}
+
+.row img {
+    margin-top: 20px
+}
+
+.header.content img {
+  vertical-align: middle;
+  padding-right: 30px;
+}
+
+.header.content {
+  vertical-align: middle;
+  line-height: 20px;
+}
+
+.content-img {
+  padding: 40px 0 35px 0;
+  height: 50px;
+}
+
+.content-desc {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-size: 13px;
+  max-width: 550px;
+  margin: 0 auto;
+  float: none;
+  color: #555555;
+  line-height: 20px;
+  padding-bottom: 8px;
+}
+
+.content-desc ul {
+  text-align: left;
+  margin-left: 92px;
+  float: none;
+}
+
+.desc-two-header {
+  padding: 30px 0 25px 0;
+}
+
+.desc-one p {
+  max-width: 740px;
+  margin: 0 auto;
+  float: none;
+}
+
+.column .desc-two-header a {
+    color: #555555;
+    text-decoration: none;
+}
+
+.desc-two-header:hover a{
+  color: #e46e2e;
+}
+
+.nav-button {
+  width: 68px;
+  height: 57px;
+  object-fit: cover;
+  object-position: 0 0;
+  overflow: hidden;
+  margin-top: 50px;
+  padding: 20px;
+  -webkit-animation: navbtn-anim ease 4s infinite;
+  animation: navbtn-anim ease 4s infinite;
+  -webkit-transition: all 300ms ease;
+  transition: all 300ms ease;
+}
+
+.nav-button:hover {
+  object-position: 0 -17px;
+}
+
+@keyframes navbtn-anim{
+  0% { transform: translate(0px,0px); }
+  50% { transform: translate(0px,20px); }
+  100% { transform: translate(0px,0px); }
+}
+
+@-webkit-keyframes navbtn-anim {
+  0% { transform: translate(0px,0px); }
+  50% { transform: translate(0px,20px); }
+  100% { transform: translate(0px,0px); }
+}
+
+a, a:visited {
+  font-weight: 500;
+  color: #e46e2e;
+  text-decoration: none;
+  -webkit-transition: all 200ms ease-out;
+  transition: all 200ms ease-out;
+}
+
+a:hover, a:active {
+  color: #ad4b16;
+  text-decoration: underline;
+}
