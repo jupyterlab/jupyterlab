@@ -36,7 +36,38 @@ class CellCompletionHandler implements IDisposable {
    */
   constructor(completion: CompletionWidget) {
     this._completion = completion;
-    this._completion.selected.connect(this._onCompletionSelected, this);
+    this._completion.selected.connect(this.onCompletionSelected, this);
+  }
+
+  /**
+   * The kernel used by the completion handler.
+   */
+  get kernel(): IKernel {
+    return this._kernel;
+  }
+  set kernel(value: IKernel) {
+    this._kernel = value;
+  }
+
+  /**
+   * The cell widget used by the completion handler.
+   */
+  get activeCell(): BaseCellWidget {
+    return this._activeCell;
+  }
+  set activeCell(newValue: BaseCellWidget) {
+    let editor: CellEditorWidget;
+    if (this._activeCell && !this._activeCell.isDisposed) {
+      editor = this._activeCell.editor;
+      editor.textChanged.disconnect(this.onTextChanged, this);
+      editor.completionRequested.disconnect(this.onCompletionRequested, this);
+    }
+    this._activeCell = newValue;
+    if (newValue) {
+      editor = newValue.editor;
+      editor.textChanged.connect(this.onTextChanged, this);
+      editor.completionRequested.connect(this.onCompletionRequested, this);
+    }
   }
 
   /**
@@ -62,74 +93,55 @@ class CellCompletionHandler implements IDisposable {
   }
 
   /**
-   * The kernel used by the completion handler.
-   */
-  get kernel(): IKernel {
-    return this._kernel;
-  }
-  set kernel(value: IKernel) {
-    this._kernel = value;
-  }
-
-  /**
-   * The cell widget used by the completion handler.
-   */
-  get activeCell(): BaseCellWidget {
-    return this._activeCell;
-  }
-  set activeCell(newValue: BaseCellWidget) {
-    let editor: CellEditorWidget;
-    if (this._activeCell && !this._activeCell.isDisposed) {
-      editor = this._activeCell.editor;
-      editor.textChanged.disconnect(this._onTextChanged, this);
-      editor.completionRequested.disconnect(this._onCompletionRequested, this);
-    }
-    this._activeCell = newValue;
-    if (newValue) {
-      editor = newValue.editor;
-      editor.textChanged.connect(this._onTextChanged, this);
-      editor.completionRequested.connect(this._onCompletionRequested, this);
-    }
-  }
-
-  /**
    * Make a completion request using the kernel.
    */
-  private _complete(request: ICompletionRequest): void {
+  protected makeRequest(request: ICompletionRequest): Promise<void> {
+    if (!this._kernel) {
+      return Promise.reject(new Error('no kernel for completion request'));
+    }
+
     let content: KernelMessage.ICompleteRequest = {
       code: request.currentValue,
       cursor_pos: request.position
     };
     let pending = ++this._pending;
-    this._kernel.complete(content).then(msg => {
-      // If we have been disposed, bail.
-      if (this.isDisposed) {
-        return;
-      }
-      // If a newer completion request has created a pending request, bail.
-      if (pending !== this._pending) {
-        return;
-      }
-      let value = msg.content;
-      let model = this._completion.model;
-      // Completion request failures or negative results fail silently.
-      if (value.status !== 'ok') {
-        model.reset();
-        return;
-      }
-      // Update the original request.
-      model.original = request;
-      // Update the options.
-      model.options = value.matches;
-      // Update the cursor.
-      model.cursor = { start: value.cursor_start, end: value.cursor_end };
+
+    return this._kernel.complete(content).then(msg => {
+      this.onReply(pending, request, msg);
     });
+  }
+
+  /**
+   * Receive a completion reply from the kernel.
+   */
+  protected onReply(pending: number, request: ICompletionRequest, msg: KernelMessage.ICompleteReplyMsg): void {
+    // If we have been disposed, bail.
+    if (this.isDisposed) {
+      return;
+    }
+    // If a newer completion request has created a pending request, bail.
+    if (pending !== this._pending) {
+      return;
+    }
+    let value = msg.content;
+    let model = this._completion.model;
+    // Completion request failures or negative results fail silently.
+    if (value.status !== 'ok') {
+      model.reset();
+      return;
+    }
+    // Update the original request.
+    model.original = request;
+    // Update the options.
+    model.options = value.matches;
+    // Update the cursor.
+    model.cursor = { start: value.cursor_start, end: value.cursor_end };
   }
 
   /**
    * Handle a text changed signal from an editor.
    */
-  private _onTextChanged(editor: CellEditorWidget, change: ITextChange): void {
+  protected onTextChanged(editor: CellEditorWidget, change: ITextChange): void {
     if (!this._completion.model) {
       return;
     }
@@ -139,17 +151,17 @@ class CellCompletionHandler implements IDisposable {
   /**
    * Handle a completion requested signal from an editor.
    */
-  private _onCompletionRequested(editor: CellEditorWidget, request: ICompletionRequest): void {
+  protected onCompletionRequested(editor: CellEditorWidget, request: ICompletionRequest): void {
     if (!this.kernel || !this._completion.model) {
       return;
     }
-    this._complete(request);
+    this.makeRequest(request);
   }
 
   /**
    * Handle a completion selected signal from the completion widget.
    */
-  private _onCompletionSelected(widget: CompletionWidget, value: string): void {
+  protected onCompletionSelected(widget: CompletionWidget, value: string): void {
     if (!this._activeCell || !this._completion.model) {
       return;
     }
