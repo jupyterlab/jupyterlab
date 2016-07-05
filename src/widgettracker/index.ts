@@ -52,7 +52,7 @@ class WidgetTracker<T extends Widget> implements IDisposable {
    * This is a read-only property.
    */
   get isDisposed(): boolean {
-    return this._widgets = null;
+    return this._widgets === null;
   }
 
   /**
