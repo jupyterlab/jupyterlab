@@ -27,7 +27,7 @@ class ImageWidget extends Widget {
    * Create the node for the image widget.
    */
   static createNode(): HTMLElement {
-    return document.createElement('img');
+    return document.createElement('div');
   }
 
   /**
@@ -39,6 +39,10 @@ class ImageWidget extends Widget {
     this.node.tabIndex = -1;
     this.node.style.overflowX = 'auto';
     this.node.style.overflowY = 'auto';
+    this.node.style.padding = '15px 15px 15px 15px';
+    this.node.style.border = 'none';
+    this.node.style.height = '100px';
+    this.node.style.width = '100px';
     if (context.model.toString()) {
       this.update();
     }
@@ -69,13 +73,16 @@ class ImageWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     this.title.text = this._context.path.split('/').pop();
-    let node = this.node as HTMLImageElement;
+    let node = this.node as HTMLElement;
     let cm = this._context.contentsModel;
     if (cm === null) {
       return;
     }
     let content = this._context.model.toString();
-    node.src = `data:${cm.mimetype};${cm.format},${content}`;
+    cm.mimetype
+    let innerurl = 'data:' + cm.mimetype + ';' + cm.format + ',' + content;
+    //node.style.backgroundImage = "url(" + "data:" + cm.mimetype + ";" + cm.format + "," + content + ")";
+    node.style.backgroundImage = `url(data:${cm.mimetype};${cm.format},${content})`;
   }
 
   private _context: IDocumentContext<IDocumentModel>;
