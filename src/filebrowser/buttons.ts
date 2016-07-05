@@ -53,6 +53,11 @@ const BUTTON_CLASS = 'jp-FileButtons-button';
 const CONTENT_CLASS = 'jp-FileButtons-buttonContent';
 
 /**
+ * The class name added to a button text node.
+ */
+const TEXT_CLASS = 'jp-FileButtons-text';
+
+/**
  * The class name added to a button icon node.
  */
 const ICON_CLASS = 'jp-FileButtons-buttonIcon';
@@ -304,6 +309,10 @@ namespace Private {
     let refreshIcon = document.createElement('span');
     let dropdownIcon = document.createElement('span');
 
+    let createText = document.createElement('span')
+    let uploadText = document.createElement('span')
+    let refreshText = document.createElement('span')
+
     create.type = 'button';
     upload.type = 'button';
     refresh.type = 'button';
@@ -316,9 +325,17 @@ namespace Private {
     upload.className = `${BUTTON_CLASS} ${UPLOAD_CLASS}`;
     refresh.className = `${BUTTON_CLASS} ${REFRESH_CLASS}`;
 
+    createText.textContent = 'New';
+    uploadText.textContent = 'Upload';
+    refreshText.textContent = 'Refresh';
+
     createContent.className = CONTENT_CLASS;
     uploadContent.className = CONTENT_CLASS;
     refreshContent.className = CONTENT_CLASS;
+
+    createText.className = TEXT_CLASS;
+    uploadText.className = TEXT_CLASS;
+    refreshText.className = TEXT_CLASS;
 
     // TODO make these icons configurable.
     createIcon.className = ICON_CLASS + ' fa fa-plus';
@@ -327,9 +344,14 @@ namespace Private {
     dropdownIcon.className = DROPDOWN_CLASS + ' fa fa-caret-down';
 
     createContent.appendChild(createIcon);
+    createContent.appendChild(createText)
     createContent.appendChild(dropdownIcon);
+
     uploadContent.appendChild(uploadIcon);
+    uploadContent.appendChild(uploadText);
+
     refreshContent.appendChild(refreshIcon);
+    refreshContent.appendChild(refreshText);
 
     create.appendChild(createContent);
     upload.appendChild(uploadContent);

@@ -24,15 +24,20 @@
 .jp-FileButtons-buttonContent {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   align-items: baseline;
 }
 
 
 .jp-FileButtons-buttonIcon {
-  margin-left: auto;
-  margin-right: auto;
+  font-size: 12px;
 }
 
+
+.jp-id-upload .jp-FileButtons-buttonContent,
+.jp-id-refresh .jp-FileButtons-buttonContent {
+  padding-right: 12px;
+}
 
 .jp-DirListing {
   flex: 1 1 auto;

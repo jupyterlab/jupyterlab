@@ -42,12 +42,11 @@
   flex: 1 1 auto;
   max-width: 100px;
   margin: 0;
-  padding: 4px 6px;
+  padding: 7px;
   color: #757575;
-  cursor: pointer;
   background: #FAFAFA;
   border: none;
-  font-size: 16px;
+  font-size: 13px;
   outline: 0;
 }
 
