@@ -32,10 +32,17 @@ class LabHandler(IPythonHandler):
     def get_template(self, name):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
-class AboutHandler(AuthenticatedHandler):
+class AboutHandler(IPythonHandler):
 
+    @web.authenticated
     def get(self):
-        self.write(self.render_template("about.html"))
+        self.write(self.render_template('about.html',
+            static_prefix=ujoin(self.application.settings['base_url'], PREFIX),
+            page_title='About',
+    ))
+
+    def get_template(self, name):
+        return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
 #-----------------------------------------------------------------------------
 # URL to handler mappings
