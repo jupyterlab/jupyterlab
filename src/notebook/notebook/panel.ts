@@ -99,7 +99,9 @@ class NotebookPanel extends Widget {
     layout.addChild(container);
 
     this._completion = this._renderer.createCompletion();
-    this._completion.reference = this;
+    // The completion widget's anchor node is the node whose scrollTop is
+    // pegged to the completion widget's position.
+    this._completion.anchor = container.node;
     this._completion.attach(document.body);
 
     this._completionHandler = new CellCompletionHandler(this._completion);
@@ -417,7 +419,7 @@ export namespace NotebookPanel {
      */
     createCompletion(): CompletionWidget {
       let model = new CompletionModel();
-      return new CompletionWidget(model);
+      return new CompletionWidget({ model });
     }
   }
 

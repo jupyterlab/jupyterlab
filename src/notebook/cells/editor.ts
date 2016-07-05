@@ -24,6 +24,10 @@ import {
   ICellModel
 } from './model';
 
+import {
+  JSONObject
+} from '../common/json';
+
 
 /**
  * The key code for the up arrow key.
@@ -53,10 +57,36 @@ const CELL_EDITOR_CLASS = 'jp-CellEditor';
 
 
 /**
- * And interface describing the state of the editor in an event.
+ * An interface describing editor state coordinates.
  */
 export
-interface IEditorState {
+interface ICoords extends JSONObject {
+  /**
+   * The left coordinate value.
+   */
+  left: number;
+
+  /**
+   * The right coordinate value.
+   */
+  right: number;
+
+  /**
+   * The top coordinate value.
+   */
+  top: number;
+
+  /**
+   * The bottom coordinate value.
+   */
+  bottom: number;
+}
+
+/**
+ * An interface describing the state of the editor in an event.
+ */
+export
+interface IEditorState extends JSONObject {
   /**
    * The character number of the editor cursor within a line.
    */
@@ -80,7 +110,7 @@ interface IEditorState {
   /**
    * The coordinate position of the cursor.
    */
-  coords: { left: number; right: number; top: number; bottom: number; };
+  coords: ICoords;
 }
 
 
@@ -106,6 +136,11 @@ interface ITextChange extends IEditorState {
  */
 export
 interface ICompletionRequest extends IEditorState {
+  /**
+   * The cursor position of the request, including line breaks.
+   */
+  position: number;
+
   /**
    * The current value of the editor text.
    */
@@ -256,7 +291,7 @@ class CellEditorWidget extends CodeMirrorWidget {
     let ch = cursor.ch;
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
-    let coords = editor.charCoords({ line, ch }, 'page');
+    let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, oldValue, newValue
     });
@@ -297,17 +332,21 @@ class CellEditorWidget extends CodeMirrorWidget {
     let currentLine = currentValue.split('\n')[line];
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
-    let coords = editor.charCoords({ line, ch }, 'page');
+    let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
+    let position = editor.getDoc().indexFromPos({ line, ch })
 
     // A completion request signal should only be emitted if the final
     // character of the current line is not whitespace. Otherwise, the
     // default tab action of creating a tab character should be allowed to
     // propagate.
     if (currentLine.match(/\S$/)) {
-      let data = { line, ch, chHeight, chWidth, coords, currentValue };
-      this.completionRequested.emit(data);
+      let data = {
+        line, ch, chHeight, chWidth, coords, position, currentValue
+      };
+      this.completionRequested.emit(data as ICompletionRequest);
       event.preventDefault();
       event.stopPropagation();
+      event.stopImmediatePropagation();
     }
   }
 
