@@ -17,7 +17,9 @@ import {
   ABCWidgetFactory, IDocumentModel, IWidgetFactory, IDocumentContext
 } from '../docregistry';
 
-
+/**
+ * The class name added to a imagewidget.
+ */
 const IMAGE_CLASS = 'jp-ImageWidget';
 
 
@@ -41,12 +43,6 @@ class ImageWidget extends Widget {
     this._context = context;
     this.node.tabIndex = -1;
     this.addClass(IMAGE_CLASS);
-    this.node.style.overflowX = 'auto';
-    this.node.style.overflowY = 'auto';
-    // this.node.style.padding = '15px 15px 15px 15px';
-    // this.node.style.border = 'none';
-    // this.node.style.height = '100px';
-    // this.node.style.width = '100px';
     if (context.model.toString()) {
       this.update();
     }
