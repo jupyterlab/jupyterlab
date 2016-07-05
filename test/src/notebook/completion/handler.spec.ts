@@ -43,27 +43,29 @@ class TestCompletionHandler extends CellCompletionHandler {
   methods: string[] = [];
 
   makeRequest(request: ICompletionRequest): Promise<void> {
+    let promise = super.makeRequest(request);
     this.methods.push('makeRequest');
-    return super.makeRequest(request);
+    return promise;
   }
 
   onReply(pending: number, request: ICompletionRequest, msg: KernelMessage.ICompleteReplyMsg): void {
     super.onReply(pending, request, msg);
+    this.methods.push('onReply');
   }
 
   onTextChanged(editor: CellEditorWidget, change: ITextChange): void {
-    this.methods.push('onTextChanged');
     super.onTextChanged(editor, change);
+    this.methods.push('onTextChanged');
   }
 
   onCompletionRequested(editor: CellEditorWidget, request: ICompletionRequest): void {
-    this.methods.push('onCompletionRequested');
     super.onCompletionRequested(editor, request);
+    this.methods.push('onCompletionRequested');
   }
 
   onCompletionSelected(widget: CompletionWidget, value: string): void {
-    this.methods.push('onCompletionSelected');
     super.onCompletionSelected(widget, value);
+    this.methods.push('onCompletionSelected');
   }
 }
 
