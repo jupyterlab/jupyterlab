@@ -12,7 +12,7 @@ import {
 } from 'jupyter-js-services/lib/mockkernel';
 
 import {
-  BaseCellWidget
+  BaseCellWidget, CellModel
 } from '../../../../lib/notebook/cells';
 
 import {
@@ -20,12 +20,17 @@ import {
 } from '../../../../lib/notebook/cells/editor';
 
 import {
-  CompletionWidget, CellCompletionHandler, CompletionModel
+  CompletionWidget, CellCompletionHandler, CompletionModel, ICompletionPatch
 } from '../../../../lib/notebook/completion';
 
 
 class TestCompletionModel extends CompletionModel {
   methods: string[] = [];
+
+  createPatch(patch: string): ICompletionPatch {
+    this.methods.push('createPatch');
+    return super.createPatch(patch);
+  }
 
   handleTextChange(change: ITextChange): void {
     this.methods.push('handleTextChange');
@@ -54,6 +59,11 @@ class TestCompletionHandler extends CellCompletionHandler {
   onCompletionRequested(editor: CellEditorWidget, request: ICompletionRequest): void {
     this.methods.push('onCompletionRequested');
     super.onCompletionRequested(editor, request);
+  }
+
+  onCompletionSelected(widget: CompletionWidget, value: string): void {
+    this.methods.push('onCompletionSelected');
+    super.onCompletionSelected(widget, value);
   }
 }
 
@@ -374,6 +384,57 @@ describe('notebook/completion/handler', () => {
         expect(handler.methods).to.not.contain('makeRequest');
         cell.editor.completionRequested.emit(request);
         expect(handler.methods).to.contain('makeRequest');
+      });
+
+    });
+
+    describe('#onCompletionSelected()', () => {
+
+      it('should fire when the completion widget emits a signal', () => {
+        let completion = new CompletionWidget();
+        let handler = new TestCompletionHandler(completion);
+
+        expect(handler.methods).to.not.contain('onCompletionSelected');
+        completion.selected.emit('foo');
+        expect(handler.methods).to.contain('onCompletionSelected');
+      });
+
+      it('should call model create patch method if model exists', () => {
+        let completion = new CompletionWidget({
+          model: new TestCompletionModel()
+        });
+        let handler = new TestCompletionHandler(completion);
+        let model = completion.model as TestCompletionModel;
+
+        handler.activeCell = new BaseCellWidget();
+        expect(model.methods).to.not.contain('createPatch');
+        completion.selected.emit('foo');
+        expect(model.methods).to.contain('createPatch');
+      });
+
+      it('should update cell if patch exists', () => {
+        let model = new CompletionModel();
+        let patch = 'foobar';
+        let completion = new CompletionWidget({ model });
+        let handler = new TestCompletionHandler(completion);
+        let cell = new BaseCellWidget();
+        let request: ICompletionRequest = {
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          coords: null,
+          position: 0,
+          currentValue: 'foo'
+        };
+
+        cell.model = new CellModel();
+        model.original = request;
+        model.cursor = { start: 0, end: 3 };
+        handler.activeCell = cell;
+        handler.activeCell.model.source = request.currentValue;
+        completion.selected.emit(patch);
+        expect(handler.activeCell.model.source).to.equal(patch);
       });
 
     });
