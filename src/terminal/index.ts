@@ -76,10 +76,12 @@ class TerminalWidget extends Widget {
     this._sheet = document.createElement('style');
     this.node.appendChild(this._sheet);
 
-    // Handle settings.
+    // Initialize settings.
     this.fontSize = options.fontSize || 14;
     this.background = options.background || 'black';
     this.color = options.color || 'white';
+    this.id = `jp-TerminalWidget-${Private.id++}`;
+    this.title.text = 'Terminal';
     Xterm.brokenBold = true;
 
     // Handle websocket connection.
@@ -337,7 +339,6 @@ class TerminalWidget extends Widget {
     let name = this._name;
     let url = `${wsUrl}terminals/websocket/${name}`;
     this._ws = new WebSocket(url);
-    this.id = `jp-TerminalWidget-${name}`;
 
     // Set the default title.
     this.title.text = `Terminal ${name}`;
@@ -545,6 +546,12 @@ class TerminalManager {
    * Create a new terminal.
    */
   createNew(options?: TerminalWidget.IOptions): TerminalWidget {
+    options = options || {};
+    options.baseUrl = options.baseUrl || this._baseUrl;
+    options.wsUrl = options.wsUrl || this._wsUrl;
+    options.ajaxSettings = (
+      options.ajaxSettings || utils.copy(this._ajaxSettings)
+    );
     return new TerminalWidget(options);
   }
 
@@ -670,4 +677,10 @@ namespace Private {
     (node.style as any)['white-space'] = 'nowrap';
     return node;
   }
+
+  /**
+   * An incrementing counter for ids.
+   */
+  export
+  var id = 0;
 }
