@@ -1,5 +1,5 @@
 """
-An example demonstrating a stand-alone "console" plugin using JupyterLab.
+An example demonstrating a stand-alone "console" using JupyterLab.
 
 Copyright (c) Jupyter Development Team.
 Distributed under the terms of the Modified BSD License.
@@ -51,10 +51,10 @@ class MainPageHandler(tornado.web.RequestHandler):
 
 
 def main(argv):
-    """Start the 'console' plugin.
+    """Start the 'console' example.
 
     - Start the Tornado main event loop for the Jupyter notebook server
-    - Set up the main page event handler for the 'console' plugin
+    - Set up the main page event handler for the 'console' example
 
     """
     url = "http://localhost:%s" % PORT
