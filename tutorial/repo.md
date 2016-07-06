@@ -19,9 +19,11 @@ Th npm package and the Python package are both named `jupyterlab`.
 
 ### Examples: `examples/`
 
-The `examples/` directory contains a few stand-alone examples of components in
-the package, such as a simple notebook on a page, a console, terminal,
-filebrowser, etc.
+The `examples/` directory contains stand-alone examples of components,
+such as a simple notebook on a page, a console, terminal, and a filebrowser.
+The `lab` example illustrates a simplified combination of components used in
+JupyterLab. This example shows multiple stand-alone components combined to
+create a more complex application.
 
 ### Testing: `test/`
 
