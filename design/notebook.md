@@ -79,3 +79,5 @@ Colors will stay consistent with current color theme.
 ### Motion
 
 Speed of explanatory text should increase when hovering over icons.
+
+**Team IO: @faricacarroll @spoorthyv @charnpreetsingh185 @katiewhite360**
