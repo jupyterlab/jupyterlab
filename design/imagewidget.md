@@ -74,3 +74,5 @@ Typeface will stay consistent with the current typeface on command palette (Helv
 ### Colors
 
 Colors will stay consistent with current colors on command palette
+
+**Team IO: @faricacarroll @spoorthyv @charnpreetsingh185 @katiewhite360**
