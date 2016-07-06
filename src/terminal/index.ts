@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  getWsUrl
-} from 'jupyter-js-utils';
+import * as utils
+  from 'jupyter-js-utils';
 
 import {
   IBoxSizing, boxSizing
@@ -12,6 +11,10 @@ import {
 import {
   Message, sendMessage
 } from 'phosphor-messaging';
+
+import {
+  ISignal, Signal
+} from 'phosphor-signaling';
 
 import {
   ResizeMessage, Widget
@@ -41,56 +44,81 @@ const DUMMY_ROWS = 24;
  */
 const DUMMY_COLS = 80;
 
+/**
+ * The url for the terminal service.
+ */
+const TERMINAL_SERVICE_URL = 'api/terminals';
+
 
 /**
  * A widget which manages a terminal session.
  */
 export
 class TerminalWidget extends Widget {
-
-  /**
-   * The number of terminals started.  Used to ensure unique sessions.
-   */
-  static nterms = 0;
-
   /**
    * Construct a new terminal widget.
    *
    * @param options - The terminal configuration options.
    */
-  constructor(options?: TerminalWidget.IOptions) {
+  constructor(options: TerminalWidget.IOptions = {}) {
     super();
-    options = options || {};
     this.addClass(TERMINAL_CLASS);
-    let baseUrl = options.baseUrl || getWsUrl();
 
-    TerminalWidget.nterms += 1;
-    let url = baseUrl + 'terminals/websocket/' + TerminalWidget.nterms;
-    this._ws = new WebSocket(url);
-    this.id = `jp-TerminalWidget-${TerminalWidget.nterms}`;
+    // Initialize options.
+    this._baseUrl = options.baseUrl || utils.getBaseUrl();
+    this._ajaxSettings = options.ajaxSettings || {};
+    this._name = options.name;
 
-    // Set the default title.
-    this.title.text = 'Terminal ' + TerminalWidget.nterms;
-
-    Xterm.brokenBold = true;
-
+    // Create the xterm, dummy terminal, and private style sheet.
     this._term = new Xterm(Private.getConfig(options));
-    this._fontSize = options.fontSize || 14;
-    this._background = options.background || 'black';
-    this._color = options.color || 'white';
-
+    this._initializeTerm();
     this._dummyTerm = Private.createDummyTerm();
-
-    this._ws.onopen = (event: MessageEvent) => {
-      this._intializeTerm();
-    };
-
-    this._ws.onmessage = (event: MessageEvent) => {
-      this._handleWSMessage(event);
-    };
-
     this._sheet = document.createElement('style');
     this.node.appendChild(this._sheet);
+
+    // Handle settings.
+    this.fontSize = options.fontSize || 14;
+    this.background = options.background || 'black';
+    this.color = options.color || 'white';
+    Xterm.brokenBold = true;
+
+    // Handle websocket connection.
+    let wsUrl = options.wsUrl || utils.getWsUrl(this._baseUrl);
+    if (this._name) {
+      this._intializeSocket(wsUrl);
+    } else {
+      this._getName().then(name => {
+        this._name = name;
+        this._intializeSocket(wsUrl);
+      });
+    }
+  }
+
+  /**
+   * A signal emitted when the terminal is fully connected.
+   */
+  get connected(): ISignal<TerminalWidget, void> {
+    return Private.connectedSignal.bind(this);
+  }
+
+  /**
+   * Test whether the terminal session is connected.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get isConnected(): boolean {
+    return this._connected;
+  }
+
+  /**
+   * Get the name of the terminal session.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return this._name;
   }
 
   /**
@@ -105,9 +133,6 @@ class TerminalWidget extends Widget {
    */
   set fontSize(size: number) {
     this._fontSize = size;
-    if (!this._intialized) {
-      return;
-    }
     this._term.element.style.fontSize = `${size}px`;
     this._snapTermSizing();
   }
@@ -124,9 +149,7 @@ class TerminalWidget extends Widget {
    */
   set background(value: string) {
     this._background = value;
-    if (this._intialized) {
-      this.update();
-    }
+    this.update();
   }
 
   /**
@@ -141,9 +164,7 @@ class TerminalWidget extends Widget {
    */
   set color(value: string) {
     this._color = value;
-    if (this._intialized) {
-      this.update();
-    }
+    this.update();
   }
 
   /**
@@ -203,6 +224,21 @@ class TerminalWidget extends Widget {
     this._dummyTerm = null;
     this._box = null;
     super.dispose();
+  }
+
+  /**
+   * Shut down the terminal session.
+   */
+  shutdown(): Promise<void> {
+    let url = utils.urlPathJoin(this._baseUrl, TERMINAL_SERVICE_URL);
+    let ajaxSettings = utils.copy(this._ajaxSettings);
+    ajaxSettings.method = 'DELETE';
+
+    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+      if (success.xhr.status !== 204) {
+        throw new Error('Invalid Response: ' + success.xhr.status);
+      }
+    });
   }
 
   /**
@@ -278,9 +314,51 @@ class TerminalWidget extends Widget {
   }
 
   /**
+   * Get a name for the terminal from the server.
+   */
+  private _getName(): Promise<string> {
+    let url = utils.urlPathJoin(this._baseUrl, TERMINAL_SERVICE_URL);
+    let ajaxSettings = utils.copy(this._ajaxSettings);
+    ajaxSettings.method = 'POST';
+    ajaxSettings.dataType = 'json';
+
+    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+      if (success.xhr.status !== 200) {
+        throw new Error('Invalid Response: ' + success.xhr.status);
+      }
+      return (success.data as TerminalWidget.IModel).name;
+    });
+  }
+
+  /**
+   * Connect to the websocket.
+   */
+  private _intializeSocket(wsUrl: string): void {
+    let name = this._name;
+    let url = `${wsUrl}terminals/websocket/${name}`;
+    this._ws = new WebSocket(url);
+    this.id = `jp-TerminalWidget-${name}`;
+
+    // Set the default title.
+    this.title.text = `Terminal ${name}`;
+
+    this._ws.onopen = (event: MessageEvent) => {
+      this._connected = true;
+      if (this._dirty) {
+        this._resizeTerminal(-1, -1);
+      }
+      this.connected.emit(void 0);
+    };
+
+    this._ws.onmessage = (event: MessageEvent) => {
+      this._handleWSMessage(event);
+    };
+  }
+
+  /**
    * Create the terminal object.
    */
-  private _intializeTerm(): void {
+  private _initializeTerm(): void {
     this._term.open(this.node);
     this._term.element.classList.add(TERMINAL_BODY_CLASS);
 
@@ -291,10 +369,6 @@ class TerminalWidget extends Widget {
     this._term.on('title', (title: string) => {
         this.title.text = title;
     });
-
-    // Update the font size, which snaps term sizing and resizes the terminal.
-    this._intialized = true;
-    this.fontSize = this.fontSize;
   }
 
   /**
@@ -334,7 +408,7 @@ class TerminalWidget extends Widget {
    * The parent offset dimensions should be `-1` if unknown.
    */
   private _resizeTerminal(offsetWidth: number, offsetHeight: number) {
-    if (this._rowHeight === -1 || !this.isVisible) {
+    if (this._rowHeight === -1 || !this.isVisible || !this._connected) {
       this._dirty = true;
       return;
     }
@@ -367,7 +441,10 @@ class TerminalWidget extends Widget {
   private _background = '';
   private _color = '';
   private _box: IBoxSizing = null;
-  private _intialized = false;
+  private _connected = false;
+  private _name: string;
+  private _baseUrl: string;
+  private _ajaxSettings: utils.IAjaxSettings = null;
 }
 
 
@@ -382,9 +459,24 @@ namespace TerminalWidget {
   export
   interface IOptions {
     /**
-     * The base websocket url.
+     * The name of the terminal.
+     */
+    name?: string;
+
+    /**
+     * The base url.
      */
     baseUrl?: string;
+
+    /**
+     * The base websocket url.
+     */
+    wsUrl?: string;
+
+    /**
+     * The Ajax settings used for server requests.
+     */
+    ajaxSettings?: utils.IAjaxSettings;
 
     /**
      * The font size of the terminal in pixels.
@@ -421,6 +513,108 @@ namespace TerminalWidget {
      */
     scrollback?: number;
   }
+
+  /**
+   * The server model for a terminal widget.
+   */
+  export
+  interface IModel {
+    /**
+     * The name of the terminal session.
+     */
+    name: string;
+  }
+}
+
+
+/**
+ * A terminal session manager.
+ */
+export
+class TerminalManager {
+  /**
+   * Construct a new terminal manager.
+   */
+  constructor(options: TerminalManager.IOptions) {
+    this._baseUrl = options.baseUrl || utils.getBaseUrl();
+    this._wsUrl = options.wsUrl || utils.getWsUrl(this._baseUrl);
+    this._ajaxSettings = utils.copy(options.ajaxSettings) || {};
+  }
+
+  /**
+   * Create a new terminal.
+   */
+  createNew(options?: TerminalWidget.IOptions): TerminalWidget {
+    return new TerminalWidget(options);
+  }
+
+  /**
+   * Shut down a terminal session by name.
+   */
+  shutdown(name: string): Promise<void> {
+    let url = utils.urlPathJoin(this._baseUrl, TERMINAL_SERVICE_URL);
+    let ajaxSettings = utils.copy(this._ajaxSettings) || {};
+    ajaxSettings.method = 'DELETE';
+
+    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+      if (success.xhr.status !== 204) {
+        throw new Error('Invalid Response: ' + success.xhr.status);
+      }
+    });
+  }
+
+  /**
+   * Get the list of models for the terminals running on the server.
+   */
+  listRunning(): Promise<TerminalWidget.IModel[]> {
+    let url = utils.urlPathJoin(this._baseUrl, TERMINAL_SERVICE_URL);
+    let ajaxSettings = utils.copy(this._ajaxSettings) || {};
+    ajaxSettings.method = 'GET';
+    ajaxSettings.dataType = 'json';
+
+    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+      if (success.xhr.status !== 200) {
+        throw new Error('Invalid Response: ' + success.xhr.status);
+      }
+      let data = success.data as TerminalWidget.IModel[];
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid terminal data');
+      }
+      return data;
+    });
+  }
+
+  private _baseUrl = '';
+  private _wsUrl = '';
+  private _ajaxSettings: utils.IAjaxSettings = null;
+}
+
+
+/**
+ * The namespace for TerminalManager statics.
+ */
+export
+namespace TerminalManager {
+  /**
+   * The options used to initialize for the terminal manager.
+   */
+  export
+  interface IOptions {
+    /**
+     * The base url.
+     */
+    baseUrl?: string;
+
+    /**
+     * The base websocket url.
+     */
+    wsUrl?: string;
+
+    /**
+     * The Ajax settings used for server requests.
+     */
+    ajaxSettings?: utils.IAjaxSettings;
+  }
 }
 
 
@@ -428,6 +622,12 @@ namespace TerminalWidget {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * A signal emitted when the terminal is fully connected.
+   */
+  export
+  const connectedSignal = new Signal<TerminalWidget, void>();
+
   /**
    * Get term.js options from ITerminalOptions.
    */
