@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-ImageWidget {
+<<<<<<< HEAD
   overflow: scroll;
   /*padding: 5px;*/
 }
@@ -18,4 +19,10 @@
   /*display: block;*/
   /*margin: auto;*/
   /*object-fit: contain;*/
+=======
+  padding: 5px;
+  object-fit: contain;
+  overflow: auto;
+  /*width: 100%;*/
+>>>>>>> parent of f16a53f... Clean up comments
 }
