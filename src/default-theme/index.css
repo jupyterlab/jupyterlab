@@ -9,6 +9,7 @@
 @import './commandpalette.css';
 @import './help.css';
 @import './about.css';
+@import '../console/index.css';
 @import '../landing/index.css';
 
 
@@ -385,4 +386,9 @@ body {
 
 .p-Menu-item.p-type-submenu > .p-Menu-itemSubmenuIcon::before {
   content: '\f0da';
+}
+
+.jp-MainAreaIcon {
+  background-repeat: no-repeat;
+  width: 24px;
 }
