@@ -70,7 +70,8 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
         }).then(session => {
           let panel = new ConsolePanel(session, rendermime.clone());
           panel.id = `console-${count}`;
-          panel.title.text = `Console-${count}`;
+          panel.title.text = `${displayName} (${count})`;
+          panel.title.icon = 'jp-MainAreaIcon jp-Console-image';
           panel.title.closable = true;
           app.shell.addToMainArea(panel);
           Private.activeWidget = panel;
