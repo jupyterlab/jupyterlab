@@ -238,7 +238,9 @@ class TerminalWidget extends Widget {
     if (this._dirty) {
       this._snapTermSizing();
     }
-    this._term.focus();
+    if (this._intialized) {
+      this._term.focus();
+    }
   }
 
   /**
@@ -295,6 +297,7 @@ class TerminalWidget extends Widget {
     // Update the font size, which snaps term sizing and resizes the terminal.
     this._intialized = true;
     this.fontSize = this.fontSize;
+    this._term.focus();
   }
 
   /**
@@ -316,7 +319,7 @@ class TerminalWidget extends Widget {
    * Use the dummy terminal to measure the row and column sizes.
    */
   private _snapTermSizing(): void {
-    if (!this.isVisible) {
+    if (!this.isVisible || !this._intialized) {
       this._dirty = true;
       return;
     }
@@ -334,7 +337,7 @@ class TerminalWidget extends Widget {
    * The parent offset dimensions should be `-1` if unknown.
    */
   private _resizeTerminal(offsetWidth: number, offsetHeight: number) {
-    if (this._rowHeight === -1 || !this.isVisible) {
+    if (this._rowHeight === -1 || !this.isVisible || !this._intialized) {
       this._dirty = true;
       return;
     }
