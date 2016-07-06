@@ -62,3 +62,5 @@ Typeface will stay consistent with current typeface on command palette (Helvetic
 ### Colors
 
 Colors will stay consistent with current colors on command palette
+
+Team IO: @faricacarroll @spoorthyv @charnpreetsingh185 @katiewhite360
