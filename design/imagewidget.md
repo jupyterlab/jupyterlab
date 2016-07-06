@@ -48,13 +48,13 @@ Adobe PDF uses simple plus and minus buttons in the bottom right corner to resiz
 
 These various ways provide an easy and intuitive interface to manipulate images. However, from our personas research we realized that
 users only seem to need to be able to resize the image and have it placed in the center of the window so it's fully visible. Therefore, functions like
-cropping or rotating the image are not necessary. We considered having a top toolbar, but that would take too much space for only
+cropping or rotating the image may not be necessary. We considered having a top toolbar specifically for the imagewidget, but that would take too much space for only
 adding two new buttons. We rationalized that using floating buttons like Adobe PDF could take away from the clean view of looking at the 
 image. 
 
 We decided to simply add buttons that could increase and decrease the size of the image in the command palette. We realized that
 in most applications users quickly learn a keyboard shortcut to zoom in and out. By having the increase and decrease size shortcuts listed
-in the command palette, the user will quickly learn the shortcut and use that for future times, rather than looking for it in the
+in the command palette or included in the top menu bar (soon to be made), the user will quickly learn the shortcut and use that for future times, rather than looking for it in the
 command palette every time.
 
 
@@ -64,7 +64,8 @@ command palette every time.
 
 * Image starts out centered when opened
 * Place "Image Operations" commands under "Notebook Operations"
-* Have commands "Increase Size" and "Decrease Size" under "Image Operations"
+* Have commands "Zoom in" and "Zoom out" under "Image Operations" in command palette
+* Once top menu bar has been created, include "Zoom In" and "Zoom Out"
 
 ### Typography
 
