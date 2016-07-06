@@ -59,7 +59,7 @@ Section off the different tools according to their category to make it easier fo
 
 ### Layout
 
-Section the icon tools off according to their category using dividers like the ones around the dropdown menu for “Code”.
+Section the icon tools off according to their category using dividers like the ones around the dropdown menu for “Code”. See more detailed design mock up [here](https://github.com/jupyter/jupyterlab/issues/227#issuecomment-230566045).
 
 Make the Kernel label on the top right of the notebook a dropdown menu where you can select to switch kernels.
 
