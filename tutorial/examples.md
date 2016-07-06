@@ -1,9 +1,9 @@
-# Plugin Examples
+# Examples
 
 The `examples` directory in the JupyterLab repo contains:
-- several stand-alone plugin examples (`console`, `filebrowser`,
+- several stand-alone examples (`console`, `filebrowser`,
   `notebook`, `terminal`)
-- a more complex example using plugins (`lab`).
+- a more complex example (`lab`).
 
 Installation instructions for the examples are found in the project's
 README.
@@ -14,32 +14,31 @@ enter from the ``jupyterlab`` repo root directory:
 
     npm run server:examples
 
-To run a particular plugin, navigate to the plugin's subdirectory in the
+To run a particular example, navigate to the example's subdirectory in the
 ``examples`` directory and enter: 
 
     python main.py
 
-##  Dissecting the 'filebrowser' plugin
+##  Dissecting the 'filebrowser' example
 
-The filebrowser plugin provides a stand-alone implementation of a 
-filebrowser. Here's what the filebrowser plugin's user interface looks like:
+The filebrowser example provides a stand-alone implementation of a 
+filebrowser. Here's what the filebrowser's user interface looks like:
 
 ![filebrowser user interface](filebrowser_example.png)
 
-Let's take a closer look at the source code for the plugin in
-``examples/filebrowser``.
+Let's take a closer look at the source code in ``examples/filebrowser``.
 
-### Directory structure of 'filebrowser' plugin
+### Directory structure of 'filebrowser' example
 
-The plugin in ``examples/file`` is comprised by a handful of files and
+The filebrowser in ``examples/file`` is comprised by a handful of files and
 the ``src`` directory:
 
 ![filebrowser source code](filebrowser_source.png)
 
-The filebrowser plugin example has two key source files:
+The filebrowser example has two key source files:
 
-- ``src/index.ts``: the TypeScript file that defines the plugin's functionality
-- ``main.py``: the Python file that enables the plugin to be run as an example
+- ``src/index.ts``: the TypeScript file that defines the functionality
+- ``main.py``: the Python file that enables the example to be run
 
 Reviewing the source code of each file will help you see the role that each
-file plays in the plugin.
+file plays in the stand-alone filebrowser example.
