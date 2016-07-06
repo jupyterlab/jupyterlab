@@ -32,12 +32,7 @@ class ImageWidget extends Widget {
    * Create the node for the image widget.
    */
   static createNode(): HTMLElement {
-    let node = document.createElement('div');
-    let innerNode = document.createElement('div');
-    let image = document.createElement('img');
-    node.appendChild(innerNode);
-    innerNode.appendChild(image);
-    return node;
+    return document.createElement('img');
   }
 
   /**
@@ -48,9 +43,6 @@ class ImageWidget extends Widget {
     this._context = context;
     this.node.tabIndex = -1;
     this.addClass(IMAGE_CLASS);
-    // let scaleNode = (<HTMLElement>this.node.querySelector('div'));
-    // scaleNode.style.transform = 'scale(1.5)';
-
     if (context.model.toString()) {
       this.update();
     }
@@ -81,14 +73,13 @@ class ImageWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     this.title.text = this._context.path.split('/').pop();
-    //let node = this.node.querySelector('image');
+    let node = this.node as HTMLImageElement;
     let cm = this._context.contentsModel;
     if (cm === null) {
       return;
     }
     let content = this._context.model.toString();
-    //node.src = `data:${cm.mimetype};${cm.format},${content}`;
-    this.node.querySelector('img').setAttribute('src', `data:${cm.mimetype};${cm.format},${content}`);
+    node.src = `data:${cm.mimetype};${cm.format},${content}`;
   }
 
   private _context: IDocumentContext<IDocumentModel>;
