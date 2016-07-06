@@ -386,3 +386,22 @@ body {
 .p-Menu-item.p-type-submenu > .p-Menu-itemSubmenuIcon::before {
   content: '\f0da';
 }
+
+
+.p-Widget.jp-Cell.jp-CodeCell.jp-mod-collapsed {
+  border-color: #ABABAB;
+  border-left-width: 1px;
+  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
+}
+
+
+.p-Widget.jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
+  padding-left: 5px;
+  padding-right: 5px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  outline: none;
+  background: transparent;
+  border-color: transparent;
+}

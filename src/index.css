@@ -5,5 +5,5 @@
 |----------------------------------------------------------------------------*/
 @import './dialog/index.css';
 @import './filebrowser/index.css';
-@import './notebook/completion/index.css'
+@import './notebook/completion/index.css';
 @import './terminal/index.css';
