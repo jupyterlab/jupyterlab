@@ -7,7 +7,7 @@ import {
 
 import {
   IFrame
-} from './iframe';
+} from '../iframe';
 
 
 /**
