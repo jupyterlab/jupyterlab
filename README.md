@@ -14,7 +14,11 @@ meets your workflow needs. Here's a quick preview of JupyterLab:
 
 ### Prerequisites
 
-Jupyter notebook version 4.2 or later
+- Jupyter notebook version 4.2 or later. To check the notebook version:
+
+```bash
+jupyter notebook --version
+```
 
 ### User installation
 
