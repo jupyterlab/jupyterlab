@@ -11,6 +11,10 @@ import {
   getKernelSpecs, IAjaxSettings
 } from 'jupyter-js-services';
 
+import {
+  TerminalManager
+} from '../terminal';
+
 
 /**
  * An implementation of a services provider.
@@ -27,6 +31,7 @@ class JupyterServices {
     this._kernelManager = new KernelManager(options);
     this._sessionManager = new SessionManager(options);
     this._contentsManager = new ContentsManager(baseUrl, ajaxSettings);
+    this._terminalManager = new TerminalManager(options);
   }
 
   /**
@@ -66,9 +71,20 @@ class JupyterServices {
     return this._contentsManager;
   }
 
+  /**
+   * Get the terminal manager instance.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get terminalManager(): TerminalManager {
+    return this._terminalManager;
+  }
+
   private _kernelManager: IKernel.IManager = null;
   private _sessionManager: ISession.IManager = null;
   private _contentsManager: IContentsManager = null;
+  private _terminalManager: TerminalManager = null;
   private _kernelspecs: IKernel.ISpecModels = null;
 }
 
