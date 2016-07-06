@@ -1,5 +1,5 @@
 """
-An example demonstrating a stand-alone "filebrowser" example using JupyterLab.
+An example demonstrating a stand-alone "filebrowser" example.
 
 Copyright (c) Jupyter Development Team.
 Distributed under the terms of the Modified BSD License.
