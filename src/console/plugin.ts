@@ -68,26 +68,26 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
           path: `Console-${count++}`,
           kernelName: `${displayNameMap[displayName]}`
         }).then(session => {
-          let console = new ConsolePanel(session, rendermime.clone());
-          console.id = `console-${count}`;
-          console.title.text = `Console-${count}`;
-          console.title.closable = true;
-          app.shell.addToMainArea(console);
-          Private.activeWidget = console;
+          let panel = new ConsolePanel(session, rendermime.clone());
+          panel.id = `console-${count}`;
+          panel.title.text = `Console-${count}`;
+          panel.title.closable = true;
+          app.shell.addToMainArea(panel);
+          Private.activeWidget = panel;
           // TODO: Move this logic to the shell.
-          let stack = console.parent;
+          let stack = panel.parent;
           if (!stack) {
             return;
           }
           let tabs = stack.parent;
           if (tabs instanceof TabPanel) {
-            tabs.currentWidget = console;
+            tabs.currentWidget = panel;
           }
-          console.content.prompt.focus();
-          console.disposed.connect(() => {
-            let index = Private.widgets.indexOf(console);
+          panel.content.prompt.focus();
+          panel.disposed.connect(() => {
+            let index = Private.widgets.indexOf(panel);
             Private.widgets.splice(index, 1);
-            if (Private.activeWidget === console) {
+            if (Private.activeWidget === panel) {
               Private.activeWidget = null;
             }
           });
