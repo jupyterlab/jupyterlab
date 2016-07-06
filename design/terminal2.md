@@ -41,20 +41,17 @@ but would like to use it to set up some data visualizations for his senior proje
 
 ## Other Solutions
 
-* Should place "New Terminal" below "File Operations" because placing it on the bottom makes it difficult to find
 * Add buttons that close all terminals, reconnect all terminals after a network outage, increase font size, decrease font size,
 and toggle between black/white and white/black under "Terminal" heading
 
 ##What user should be able to see or do
 
-* Find terminal commands easier because it being at the very bottom right now is hard to find
 * More options to adjust the terminal visually
 
 ## Visual Design
 
 ### Layout
 
-* Place "Terminal" commands under "File Operations" (Replacing the "Help" Section)
 * Add buttons in listed order: "Close All Terminals", "Reconnect All Terminals", "Increase Font Size", "Decrease Font Size",
 "Toggle Theme"
 
