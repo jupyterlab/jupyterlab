@@ -603,7 +603,7 @@ class TerminalManager {
 export
 namespace TerminalManager {
   /**
-   * The options used to initialize for the terminal manager.
+   * The options used to initialize a terminal manager.
    */
   export
   interface IOptions {
