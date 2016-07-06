@@ -106,6 +106,10 @@
 }
 
 
+.jp-Landing-imageConsole {
+  background-image: url(images/console.svg);
+}
+
 .jp-Landing-imageNotebook {
   background-image: url(images/notebook.svg);
 }
