@@ -46,7 +46,7 @@ The Jupyter Notebook currently has a top menu bar that allows you to save the fi
 
 Display explanatory text should be displayed faster. 
 
-An alert when the file has been saved similar to the Jupyter Notebook.
+An indicator when the file has been saved similar to the Jupyter Notebook.
 
 Section off the different tools according to their category to make it easier for the user to find the button they want to use.
 
