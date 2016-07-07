@@ -16,7 +16,7 @@ import {
 } from 'phosphor-dragdrop';
 
 import {
-  CodeCellWidget, MarkdownCellWidget
+  CodeCellWidget, MarkdownCellWidget, RawCellWidget
 } from '../../../../lib/notebook/cells/widget';
 
 import {
@@ -64,6 +64,458 @@ describe('notebook/notebook/actions', () => {
       widget.dispose();
       kernel.dispose();
       clipboard.clear();
+    });
+
+    describe('#splitCell()', () => {
+
+      it('should split the active cell into two cells', () => {
+        let cell = widget.activeCell;
+        let source = 'thisisasamplestringwithnospaces';
+        cell.model.source = source;
+        let index = widget.activeCellIndex;
+        cell.editor.setCursorPosition(10);
+        NotebookActions.splitCell(widget);
+        let cells = widget.model.cells;
+        let newSource = cells.get(index).source + cells.get(index + 1).source;
+        expect(newSource).to.be(source);
+      });
+
+      it('should remove leading white space in the second cell', () => {
+        let cell = widget.activeCell;
+        let source = 'this\n\n   is a test';
+        cell.model.source = source;
+        cell.editor.setCursorPosition(4);
+        NotebookActions.splitCell(widget);
+        expect(widget.activeCell.model.source).to.be('is a test');
+      });
+
+      it('should clear the existing selection', () => {
+        for (let i = 0; i < widget.childCount(); i++) {
+          widget.select(widget.childAt(i));
+        }
+        NotebookActions.splitCell(widget);
+        for (let i = 0; i < widget.childCount(); i++) {
+          if (i === widget.activeCellIndex) {
+            continue;
+          }
+          expect(widget.isSelected(widget.childAt(i))).to.be(false);
+        }
+      });
+
+      it('should activate the second cell', () => {
+        NotebookActions.splitCell(widget);
+        expect(widget.activeCellIndex).to.be(1);
+      });
+
+      it('should preserve the types of each cell', () => {
+        NotebookActions.changeCellType(widget, 'markdown');
+        NotebookActions.splitCell(widget);
+        expect(widget.activeCell).to.be.a(MarkdownCellWidget);
+        let prev = widget.childAt(0);
+        expect(prev).to.be.a(MarkdownCellWidget);
+      });
+
+      it('should create two empty cells if there is no content', () => {
+        widget.activeCell.model.source = '';
+        NotebookActions.splitCell(widget);
+        expect(widget.activeCell.model.source).to.be('');
+        let prev = widget.childAt(0);
+        expect(prev.model.source).to.be('');
+      });
+
+      it('should be a no-op if there is no model', () => {
+        widget.model = null;
+        NotebookActions.splitCell(widget);
+        expect(widget.activeCell).to.be(void 0);
+      });
+
+      it('should preserve the widget mode', () => {
+        NotebookActions.splitCell(widget);
+        expect(widget.mode).to.be('command');
+        widget.mode = 'edit';
+        NotebookActions.splitCell(widget);
+        expect(widget.mode).to.be('edit');
+      });
+
+      it('should be undo-able', () => {
+        let source = widget.activeCell.model.source;
+        let count = widget.childCount();
+        NotebookActions.splitCell(widget);
+        NotebookActions.undo(widget);
+        expect(widget.childCount()).to.be(count);
+        let cell = widget.childAt(0);
+        expect(cell.model.source).to.be(source);
+      });
+
+    });
+
+    describe('#mergeCells', () => {
+
+      it('should merge the selected cells', () => {
+        let source = widget.activeCell.model.source + '\n\n';
+        let next = widget.childAt(1);
+        source += next.model.source;
+        widget.select(next);
+        let count = widget.childCount();
+        NotebookActions.mergeCells(widget);
+        expect(widget.childCount()).to.be(count - 1);
+        expect(widget.activeCell.model.source).to.be(source);
+      });
+
+      it('should be a no-op if there is no model', () => {
+        widget.model = null;
+        NotebookActions.mergeCells(widget);
+        expect(widget.activeCell).to.be(void 0);
+      });
+
+      it('should select the next cell if there is only one cell selected', () => {
+        let source = widget.activeCell.model.source + '\n\n';
+        let next = widget.childAt(1);
+        source += next.model.source;
+        NotebookActions.mergeCells(widget);
+        expect(widget.activeCell.model.source).to.be(source);
+      });
+
+      it('should clear the outputs of a code cell', () => {
+        NotebookActions.mergeCells(widget);
+        let cell = widget.activeCell as CodeCellWidget;
+        expect(cell.model.outputs.length).to.be(0);
+      });
+
+      it('should preserve the widget mode', () => {
+        widget.mode = 'edit';
+        NotebookActions.mergeCells(widget);
+        expect(widget.mode).to.be('edit');
+        widget.mode = 'command';
+        NotebookActions.mergeCells(widget);
+        expect(widget.mode).to.be('command');
+      });
+
+      it('should be undo-able', () => {
+        let source = widget.activeCell.model.source;
+        let count = widget.childCount();
+        NotebookActions.mergeCells(widget);
+        NotebookActions.undo(widget);
+        expect(widget.childCount()).to.be(count);
+        let cell = widget.childAt(0);
+        expect(cell.model.source).to.be(source);
+      });
+
+      it('should unrender a markdown cell', () => {
+        NotebookActions.changeCellType(widget, 'markdown');
+        let cell = widget.activeCell as MarkdownCellWidget;
+        cell.rendered = true;
+        NotebookActions.mergeCells(widget);
+        cell = widget.activeCell as MarkdownCellWidget;
+        expect(cell.rendered).to.be(false);
+      });
+
+      it('should preserve the cell type of the active cell', () => {
+        NotebookActions.changeCellType(widget, 'raw');
+        NotebookActions.mergeCells(widget);
+        expect(widget.activeCell).to.be.a(RawCellWidget);
+      });
+
+    });
+
+    describe('#deleteCells()', () => {
+
+      it('should delete the selected cells', () => {
+        let next = widget.childAt(1);
+        widget.select(next);
+        let count = widget.childCount();
+        NotebookActions.deleteCells(widget);
+        expect(widget.childCount()).to.be(count - 2);
+      });
+
+      it('should be a no-op if there is no model', () => {
+        widget.model = null;
+        NotebookActions.deleteCells(widget);
+        expect(widget.activeCell).to.be(void 0);
+      });
+
+      it('should switch to command mode', () => {
+        widget.mode = 'edit';
+        NotebookActions.deleteCells(widget);
+        expect(widget.mode).to.be('command');
+      });
+
+      it('should activate the cell before the first selected cell', () => {
+        widget.activeCellIndex = 4;
+        let prev = widget.childAt(2);
+        widget.select(prev);
+        NotebookActions.deleteCells(widget);
+        expect(widget.activeCellIndex).to.be(1);
+      });
+
+      it('should add a code cell if all cells are deleted', () => {
+        for (let i = 0; i < widget.childCount(); i++) {
+          widget.select(widget.childAt(i));
+        }
+        NotebookActions.deleteCells(widget);
+        expect(widget.childCount()).to.be(1);
+        expect(widget.activeCell).to.be.a(CodeCellWidget);
+      });
+
+      it('should be undo-able', () => {
+        let next = widget.childAt(1);
+        widget.select(next);
+        let source = widget.activeCell.model.source;
+        let count = widget.childCount();
+        NotebookActions.deleteCells(widget);
+        NotebookActions.undo(widget);
+        expect(widget.childCount()).to.be(count);
+        let cell = widget.childAt(0);
+        expect(cell.model.source).to.be(source);
+      });
+
+    });
+
+    describe('#insertAbove()', () => {
+
+      it('should insert a code cell above the active cell', () => {
+        let count = widget.childCount();
+        NotebookActions.insertAbove(widget);
+        expect(widget.activeCellIndex).to.be(0);
+        expect(widget.childCount()).to.be(count + 1);
+        expect(widget.activeCell).to.be.a(CodeCellWidget);
+      });
+
+      it('should be a no-op if there is no model', () => {
+        widget.model = null;
+        NotebookActions.insertAbove(widget);
+        expect(widget.activeCell).to.be(void 0);
+      });
+
+      it('should widget mode should be preserved', () => {
+        NotebookActions.insertAbove(widget);
+        expect(widget.mode).to.be('command');
+        widget.mode = 'edit';
+        NotebookActions.insertAbove(widget);
+        expect(widget.mode).to.be('edit');
+      });
+
+      it('should be undo-able', () => {
+        let count = widget.childCount();
+        NotebookActions.insertAbove(widget);
+        NotebookActions.undo(widget);
+        expect(widget.childCount()).to.be(count);
+      });
+
+      it('should clear the existing selection', () => {
+        for (let i = 0; i < widget.childCount(); i++) {
+          widget.select(widget.childAt(i));
+        }
+        NotebookActions.insertAbove(widget);
+        for (let i = 0; i < widget.childCount(); i++) {
+          if (i === widget.activeCellIndex) {
+            continue;
+          }
+          expect(widget.isSelected(widget.childAt(i))).to.be(false);
+        }
+      });
+
+      it('should be the new active cell', () => {
+        NotebookActions.insertAbove(widget);
+        expect(widget.activeCell.model.source).to.be('');
+      });
+
+    });
+
+    describe('#insertBelow()', () => {
+
+      it('should insert a code cell below the active cell', () => {
+        let count = widget.childCount();
+        NotebookActions.insertBelow(widget);
+        expect(widget.activeCellIndex).to.be(1);
+        expect(widget.childCount()).to.be(count + 1);
+        expect(widget.activeCell).to.be.a(CodeCellWidget);
+      });
+
+      it('should be a no-op if there is no model', () => {
+        widget.model = null;
+        NotebookActions.insertBelow(widget);
+        expect(widget.activeCell).to.be(void 0);
+      });
+
+      it('should widget mode should be preserved', () => {
+        NotebookActions.insertBelow(widget);
+        expect(widget.mode).to.be('command');
+        widget.mode = 'edit';
+        NotebookActions.insertBelow(widget);
+        expect(widget.mode).to.be('edit');
+      });
+
+      it('should be undo-able', () => {
+        let count = widget.childCount();
+        NotebookActions.insertBelow(widget);
+        NotebookActions.undo(widget);
+        expect(widget.childCount()).to.be(count);
+      });
+
+      it('should clear the existing selection', () => {
+        for (let i = 0; i < widget.childCount(); i++) {
+          widget.select(widget.childAt(i));
+        }
+        NotebookActions.insertBelow(widget);
+        for (let i = 0; i < widget.childCount(); i++) {
+          if (i === widget.activeCellIndex) {
+            continue;
+          }
+          expect(widget.isSelected(widget.childAt(i))).to.be(false);
+        }
+      });
+
+      it('should be the new active cell', () => {
+        NotebookActions.insertBelow(widget);
+        expect(widget.activeCell.model.source).to.be('');
+      });
+
+    });
+
+    describe('#changeCellType()', () => {
+
+      it('should change the selected cell type(s)', () => {
+        let next = widget.childAt(1);
+        widget.select(next);
+        NotebookActions.changeCellType(widget, 'raw');
+        expect(widget.activeCell).to.be.a(RawCellWidget);
+        next = widget.childAt(widget.activeCellIndex + 1);
+        expect(next).to.be.a(RawCellWidget);
+      });
+
+      it('should be a no-op if there is no model', () => {
+        widget.model = null;
+        NotebookActions.changeCellType(widget, 'code');
+        expect(widget.activeCell).to.be(void 0);
+      });
+
+      it('should preserve the widget mode', () => {
+        NotebookActions.changeCellType(widget, 'code');
+        expect(widget.mode).to.be('command');
+        widget.mode = 'edit';
+        NotebookActions.changeCellType(widget, 'raw');
+        expect(widget.mode).to.be('edit');
+      });
+
+      it('should be undo-able', () => {
+        NotebookActions.changeCellType(widget, 'raw');
+        NotebookActions.undo(widget);
+        let cell = widget.childAt(0);
+        expect(cell).to.be.a(CodeCellWidget);
+      });
+
+      it('should clear the existing selection', () => {
+        for (let i = 0; i < widget.childCount(); i++) {
+          widget.select(widget.childAt(i));
+        }
+        NotebookActions.changeCellType(widget, 'raw');
+        for (let i = 0; i < widget.childCount(); i++) {
+          if (i === widget.activeCellIndex) {
+            continue;
+          }
+          expect(widget.isSelected(widget.childAt(i))).to.be(false);
+        }
+      });
+
+      it('should unrender markdown cells', () => {
+        NotebookActions.changeCellType(widget, 'markdown');
+        let cell = widget.activeCell as MarkdownCellWidget;
+        expect(cell.rendered).to.be(false);
+      });
+
+    });
+
+    describe('#run()', () => {
+
+      it('should run the selected cells', (done) => {
+        let next = widget.childAt(1) as MarkdownCellWidget;
+        widget.select(next);
+        let cell = widget.activeCell as CodeCellWidget;
+        cell.model.outputs.clear();
+        next.rendered = false;
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(cell.model.outputs.length).to.be.above(0);
+          expect(next.rendered).to.be(true);
+          done();
+        });
+      });
+
+      it('should be a no-op if there is no model', (done) => {
+        widget.model = null;
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          done();
+        });
+      });
+
+      it('should activate the last selected cell', (done) => {
+        let other = widget.childAt(2);
+        widget.select(other);
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.activeCell).to.be(other);
+          done();
+        });
+      });
+
+      it('should clear the selection', (done) => {
+        let next = widget.childAt(1);
+        widget.select(next);
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.isSelected(widget.childAt(0))).to.be(false);
+          done();
+        });
+      });
+
+      it('should change to command mode', (done) => {
+        widget.mode = 'edit';
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(true);
+          expect(widget.mode).to.be('command');
+          done();
+        });
+      });
+
+      it('should handle no kernel', (done) => {
+        NotebookActions.run(widget, null).then(result => {
+          expect(result).to.be(true);
+          let cell = widget.activeCell as CodeCellWidget;
+          expect(cell.model.executionCount).to.be(null);
+          done();
+        });
+      });
+
+      it('should stop executing code cells on an error', (done) => {
+        let cell = widget.model.factory.createCodeCell();
+        cell.source = ERROR_INPUT;
+        widget.model.cells.insert(2, cell);
+        widget.select(widget.childAt(2));
+        cell = widget.model.factory.createCodeCell();
+        widget.model.cells.add(cell);
+        widget.select(widget.childAt(widget.childCount() - 1));
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(cell.executionCount).to.be(null);
+          done();
+        });
+      });
+
+      it('should render all markdown cells on an error', () => {
+        let cell = widget.model.factory.createMarkdownCell();
+        widget.model.cells.add(cell);
+        let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
+        child.rendered = false;
+        widget.select(child);
+        widget.activeCell.model.source = ERROR_INPUT;
+        NotebookActions.run(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(child.rendered).to.be(true);
+        });
+      });
+
     });
 
     describe('#runAndAdvance()', () => {
