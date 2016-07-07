@@ -47,7 +47,14 @@ function activateTerminal(app: Application): void {
     {
       id: newTerminalId,
       handler: () => {
-        let term = new TerminalWidget();
+        console.log('CREATED NEW terms length' + tracker.widgets.length);
+        if (!tracker.isDisposed && tracker.widgets.length) {
+          let widgets = tracker.widgets;
+          var term = new TerminalWidget({background: 'green'});
+        }
+        else {
+          var term = new TerminalWidget();
+        }
         term.title.closable = true;
         term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
         app.shell.addToMainArea(term);
@@ -145,6 +152,7 @@ function activateTerminal(app: Application): void {
       for (let i = 0; i < widgets.length; i++) {
         widgets[i].dispose();
       }
+      console.log("length is " + widgets.length);
     }
   }
 }
