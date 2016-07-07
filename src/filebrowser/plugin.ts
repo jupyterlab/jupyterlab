@@ -48,6 +48,21 @@ const fileBrowserExtension = {
   activate: activateFileBrowser
 };
 
+/**
+ * The class name for all main area portrait tab icons.
+ */
+const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
+
+/**
+ * The class name for the notebook icon from the default theme.
+ */
+const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
+
+/**
+ * The class name for the text editor icon from the default theme.
+ */
+const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
+
 
 /**
  * Activate the file browser.
@@ -109,7 +124,10 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   app.commands.add([
     {
       id: newTextFileId,
-      handler: () => fbWidget.createNew('file')
+      handler: () => {
+        let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
+        fbWidget.createNew('file').then(widget => widget.title.icon = icon);
+      }
     }
   ]);
 
@@ -118,7 +136,10 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   app.commands.add([
   {
     id: newNotebookId,
-    handler: () => fbWidget.createNew('notebook')
+    handler: () => {
+      let icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
+      fbWidget.createNew('notebook').then(widget => widget.title.icon = icon);
+    }
   }]);
 
 
