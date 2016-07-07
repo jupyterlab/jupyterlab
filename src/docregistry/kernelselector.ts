@@ -140,8 +140,10 @@ function findKernel(kernelName: string, language: string, specs: IKernel.ISpecMo
     }
   }
   // Finally, use the default kernel.
-  console.log(`No matching kernel found for ${kernelName}, ` +
+  if (kernelName) {
+    console.log(`No matching kernel found for ${kernelName}, ` +
               `using default kernel ${specs.default}`);
+  }
   return specs.default;
 }
 
