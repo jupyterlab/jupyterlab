@@ -463,7 +463,11 @@ class ContextManager implements IDisposable {
    */
   revert(id: string): Promise<void> {
     let contextEx = this._contexts[id];
-    let opts = { format: contextEx.fileFormat, type: contextEx.fileType };
+    let opts: IContents.IFetchOptions = {
+      format: contextEx.fileFormat,
+      type: contextEx.fileType,
+      content: true
+    };
     let path = contextEx.path;
     let model = contextEx.model;
     return this._contentsManager.get(path, opts).then(contents => {
