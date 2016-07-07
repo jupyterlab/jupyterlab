@@ -12,9 +12,3 @@
 .jp-TerminalWidget-body {
   font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
 }
-
-
-.jp-TerminalWidget-icon {
-  background-image: url(images/terminal.svg);
-  background-position: 0 3px;
-}

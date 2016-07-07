@@ -54,14 +54,14 @@ const fileBrowserExtension = {
 const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
 
 /**
- * The class name for the notebook icon.
+ * The class name for the notebook icon from the default theme.
  */
-const NOTEBOOK_ICON_CLASS = 'jp-FileBrowser-notebookIcon';
+const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
 
 /**
- * The class name for the text editor icon.
+ * The class name for the text editor icon from the default theme.
  */
-const TEXTEDITOR_ICON_CLASS = 'jp-FileBrowser-texteditorIcon';
+const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 
 
 /**

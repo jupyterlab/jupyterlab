@@ -46,9 +46,9 @@ const consoleExtension = {
 const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
 
 /**
- * The class name for the console icon.
+ * The class name for the console icon from the default theme.
  */
-const CONSOLE_ICON_CLASS = 'jp-Console-icon';
+const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 
 
 /**

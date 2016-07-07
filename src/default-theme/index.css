@@ -6,9 +6,12 @@
 @import url('~jupyterlab/lib/notebook/theme.css');
 @import url('~jupyterlab/lib/index.css');
 @import url('~jupyterlab/lib/theme.css');
+
+@import './about.css';
 @import './commandpalette.css';
 @import './help.css';
-@import './about.css';
+@import './images.css';
+
 @import '../console/index.css';
 @import '../landing/index.css';
 
@@ -195,7 +198,7 @@ body {
   min-height: 23px;
   max-height: 23px;
   min-width: 35px;
-  padding: 0px 10px;
+  padding: 0px 7px;
   background: #EEEEEE;
   border: 1px solid #BDBDBD;
   border-bottom: none;
@@ -397,8 +400,8 @@ body {
 
 
 .jp-MainAreaPortraitIcon {
-  background-position: 0 2px;
+  background-position: 0 1px;
   background-repeat: no-repeat;
-  margin-right: 2px;
-  width: 14px;
+  margin-right: 0;
+  width: 20px;
 }
