@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsOpts
+  IContents
 } from 'jupyter-js-services';
 
 import {
@@ -30,13 +30,22 @@ class NotebookModelFactory implements IModelFactory {
   }
 
   /**
-   * The contents options used to fetch/save files.
+   * The type of the file.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get contentsOptions(): IContentsOpts {
-    return { type: 'notebook' };
+  get fileType(): IContents.FileType {
+    return 'notebook';
+  }
+
+  /**
+   * The format of the file.
+   *
+   * This is a read-only property.
+   */
+  get fileFormat(): IContents.FileFormat {
+    return 'json';
   }
 
   /**

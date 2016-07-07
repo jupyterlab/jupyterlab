@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsManager, IContentsModel, IContentsOpts, IKernel, ISession
+  IContents, IKernel, ISession
 } from 'jupyter-js-services';
 
 import * as utils
@@ -54,7 +54,7 @@ class Context implements IDocumentContext<IDocumentModel> {
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  get contentsModelChanged(): ISignal<Context, IContentsModel> {
+  get contentsModelChanged(): ISignal<Context, IContents.IModel> {
     return Private.contentsModelChangedSignal.bind(this);
   }
 
@@ -112,7 +112,7 @@ class Context implements IDocumentContext<IDocumentModel> {
    * This is a read-only property.  The model will have an
    * empty `contents` field.
    */
-  get contentsModel(): IContentsModel {
+  get contentsModel(): IContents.IModel {
     return this._manager.getContentsModel(this._id);
   }
 
@@ -265,7 +265,8 @@ class ContextManager implements IDisposable {
       path,
       model,
       modelName: factory.name,
-      opts: factory.contentsOptions,
+      fileType: factory.fileType,
+      fileFormat: factory.fileFormat,
       contentsModel: null,
       session: null,
       isPopulated: false
@@ -340,7 +341,7 @@ class ContextManager implements IDisposable {
   /**
    * Get the current contents model associated with a document.
    */
-  getContentsModel(id: string): IContentsModel {
+  getContentsModel(id: string): IContents.IModel {
     return this._contexts[id].contentsModel;
   }
 
@@ -417,19 +418,21 @@ class ContextManager implements IDisposable {
    */
   save(id: string): Promise<void> {
     let contextEx =  this._contexts[id];
-    let opts = utils.copy(contextEx.opts);
-    let path = contextEx.path;
     let model = contextEx.model;
+    let contents = contextEx.contentsModel || {};
+    let path = contextEx.path;
+    contents.type = contextEx.fileType;
+    contents.format = contextEx.fileFormat;
     if (model.readOnly) {
       return Promise.reject(new Error('Read only'));
     }
-    if (opts.type === 'notebook' || opts.format === 'json') {
-      opts.content = model.toJSON();
+    if (contents.format === 'json') {
+      contents.content = model.toJSON();
     } else {
-      opts.content = model.toString();
+      contents.content = model.toString();
     }
-    return this._contentsManager.save(path, opts).then(contents => {
-      contextEx.contentsModel = this._copyContentsModel(contents);
+    return this._contentsManager.save(path, contents).then(newContents => {
+      contextEx.contentsModel = this._copyContentsModel(newContents);
       model.dirty = false;
     });
   }
@@ -460,7 +463,7 @@ class ContextManager implements IDisposable {
    */
   revert(id: string): Promise<void> {
     let contextEx = this._contexts[id];
-    let opts = contextEx.opts;
+    let opts = { format: contextEx.fileFormat, type: contextEx.fileType };
     let path = contextEx.path;
     let model = contextEx.model;
     return this._contentsManager.get(path, opts).then(contents => {
@@ -540,7 +543,7 @@ class ContextManager implements IDisposable {
   /**
    * Copy the contents of a contents model, without the content.
    */
-  private _copyContentsModel(model: IContentsModel): IContentsModel {
+  private _copyContentsModel(model: IContents.IModel): IContents.IModel {
     return {
       path: model.path,
       name: model.name,
@@ -553,7 +556,7 @@ class ContextManager implements IDisposable {
     };
   }
 
-  private _contentsManager: IContentsManager = null;
+  private _contentsManager: IContents.IManager = null;
   private _sessionManager: ISession.IManager = null;
   private _kernelspecids: IKernel.ISpecModels = null;
   private _contexts: { [key: string]: Private.IContextEx } = Object.create(null);
@@ -573,7 +576,7 @@ export namespace ContextManager {
     /**
      * A contents manager instance.
      */
-    contentsManager: IContentsManager;
+    contentsManager: IContents.IManager;
 
     /**
      * A session manager instance.
@@ -605,9 +608,10 @@ namespace Private {
     context: IDocumentContext<IDocumentModel>;
     model: IDocumentModel;
     session: ISession;
-    opts: IContentsOpts;
+    fileType: IContents.FileType;
+    fileFormat: IContents.FileFormat;
     path: string;
-    contentsModel: IContentsModel;
+    contentsModel: IContents.IModel;
     modelName: string;
     isPopulated: boolean;
   }
@@ -628,7 +632,7 @@ namespace Private {
    * A signal emitted when the contentsModel changes.
    */
   export
-  const contentsModelChangedSignal = new Signal<Context, IContentsModel>();
+  const contentsModelChangedSignal = new Signal<Context, IContents.IModel>();
 
   /**
    * A signal emitted when the context is fully populated for the first time.

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsManager, IKernel, ISession
+  IContents, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -259,7 +259,7 @@ class DocumentManager implements IDisposable {
     this._widgetManager.closeAll();
   }
 
-  private _contentsManager: IContentsManager = null;
+  private _contentsManager: IContents.IManager = null;
   private _sessionManager: ISession.IManager = null;
   private _contextManager: ContextManager = null;
   private _widgetManager: DocumentWidgetManager = null;
@@ -286,7 +286,7 @@ namespace DocumentManager {
     /**
      * A contents manager instance.
      */
-    contentsManager: IContentsManager;
+    contentsManager: IContents.IManager;
 
     /**
      * A session manager instance.

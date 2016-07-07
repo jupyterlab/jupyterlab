@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsModel, IKernel, ISession
+  IContents, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -43,7 +43,7 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     return Private.pathChangedSignal.bind(this);
   }
 
-  get contentsModelChanged(): ISignal<IDocumentContext<T>, IContentsModel> {
+  get contentsModelChanged(): ISignal<IDocumentContext<T>, IContents.IModel> {
     return Private.contentsModelChanged.bind(this);
   }
 
@@ -67,7 +67,7 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     return this._path;
   }
 
-  get contentsModel(): IContentsModel {
+  get contentsModel(): IContents.IModel {
     return void 0;
   }
 
@@ -155,5 +155,5 @@ namespace Private {
    * A signal emitted when the contentsModel changes.
    */
   export
-  const contentsModelChanged = new Signal<IDocumentContext<IDocumentModel>, IContentsModel>();
+  const contentsModelChanged = new Signal<IDocumentContext<IDocumentModel>, IContents.IModel>();
 }

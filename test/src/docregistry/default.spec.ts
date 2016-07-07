@@ -96,17 +96,30 @@ describe('docmanager/default', () => {
 
     });
 
-    describe('#contentsOptions', () => {
+    describe('#type', () => {
 
-      it('should get the contents options used to fetch/save files', () => {
+      it('should get the file type', () => {
         let factory = new Base64ModelFactory();
-        let expected = { type: 'file', format: 'base64' };
-        expect(factory.contentsOptions).to.eql(expected);
+        expect(factory.fileType).to.be('file');
       });
 
       it('should be read-only', () => {
         let factory = new Base64ModelFactory();
-        expect(() => { factory.contentsOptions = null; }).to.throwError();
+        expect(() => { factory.fileType = 'file'; }).to.throwError();
+      });
+
+    });
+
+    describe('#format', () => {
+
+      it('should get the file format', () => {
+        let factory = new Base64ModelFactory();
+        expect(factory.fileFormat).to.be('base64');
+      });
+
+      it('should be read-only', () => {
+        let factory = new Base64ModelFactory();
+        expect(() => { factory.fileFormat = 'base64'; }).to.throwError();
       });
 
     });
@@ -363,17 +376,30 @@ describe('docmanager/default', () => {
 
     });
 
-    describe('#contentsOptions', () => {
+    describe('#type', () => {
 
-      it('should get the contents options used to fetch/save files', () => {
+      it('should get the file type', () => {
         let factory = new TextModelFactory();
-        let options = { type: 'file', format: 'text' };
-        expect(factory.contentsOptions).to.eql(options);
+        expect(factory.fileType).to.be('file');
       });
 
       it('should be read-only', () => {
         let factory = new TextModelFactory();
-        expect(() => { factory.contentsOptions = null; }).to.throwError();
+        expect(() => { factory.fileType = 'file'; }).to.throwError();
+      });
+
+    });
+
+    describe('#format', () => {
+
+      it('should get the file format', () => {
+        let factory = new TextModelFactory();
+        expect(factory.fileFormat).to.be('text');
+      });
+
+      it('should be read-only', () => {
+        let factory = new TextModelFactory();
+        expect(() => { factory.fileFormat = 'text'; }).to.throwError();
       });
 
     });

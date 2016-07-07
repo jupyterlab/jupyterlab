@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IContents
+} from 'jupyter-js-services';
+
+import {
   Message
 } from 'phosphor-messaging';
 
@@ -194,9 +198,9 @@ class FileBrowserWidget extends Widget {
   /**
    * Create a new untitled file in the current directory.
    */
-  createNew(type: string, ext?: string): Promise<Widget> {
+  createNew(options: IContents.ICreateOptions): Promise<Widget> {
     let model = this.model;
-    return model.newUntitled(type, ext).then(contents => {
+    return model.newUntitled(options).then(contents => {
       let widget = this._manager.createNew(contents.path);
       let context = this._manager.contextForWidget(widget);
       context.populated.connect(() => model.refresh() );

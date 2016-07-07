@@ -126,7 +126,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
       id: newTextFileId,
       handler: () => {
         let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
-        fbWidget.createNew('file').then(widget => widget.title.icon = icon);
+        fbWidget.createNew({ type: 'file' }).then(widget => widget.title.icon = icon);
       }
     }
   ]);
@@ -138,7 +138,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     id: newNotebookId,
     handler: () => {
       let icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
-      fbWidget.createNew('notebook').then(widget => widget.title.icon = icon);
+      fbWidget.createNew({ type: 'notebook' }).then(widget => widget.title.icon = icon);
     }
   }]);
 
