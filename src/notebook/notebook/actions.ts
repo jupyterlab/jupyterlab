@@ -873,7 +873,6 @@ namespace Private {
   export
   function setMarkdownHeader(cell: ICellModel, level: number) {
     let source = cell.source;
-    debugger;
     let newHeader = Array(level + 1).join('#') + ' ';
     // Remove existing header or leading white space.
     let regex = /^(#+\s*)|^(\s*)/;
