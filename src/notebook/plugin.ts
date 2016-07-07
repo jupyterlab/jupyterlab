@@ -14,8 +14,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  DocumentRegistry, restartKernel, selectKernelForContext,
-  IWidgetExtension
+  DocumentRegistry, restartKernel, selectKernelForContext
 } from '../docregistry';
 
 import {
@@ -67,11 +66,16 @@ const cmdIds = {
   merge: 'notebook-cells:merge',
   split: 'notebook-cells:split',
   commandMode: 'notebook:commandMode',
-  newNotebook: 'notebook:create-new',
   toggleLines: 'notebook-cells:toggle-lineNumbers',
   toggleAllLines: 'notebook-cells:toggle-allLineNumbers',
   undo: 'notebook-cells:undo',
-  redo: 'notebook-cells:redo'
+  redo: 'notebook-cells:redo',
+  markdown1: 'notebook-cells:markdown-header1',
+  markdown2: 'notebook-cells:markdown-header2',
+  markdown3: 'notebook-cells:markdown-header3',
+  markdown4: 'notebook-cells:markdown-header4',
+  markdown5: 'notebook-cells:markdown-header5',
+  markdown6: 'notebook-cells:markdown-header6',
 };
 
 
@@ -134,11 +138,17 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   let displayNames = Object.keys(displayNameMap).sort((a, b) => {
     return a.localeCompare(b);
   });
+  registry.addFileType({
+    name: 'Notebook',
+    extension: '.ipynb',
+    fileType: 'notebook',
+    fileFormat: 'json'
+  });
   for (let displayName of displayNames) {
     registry.addCreator({
       name: `${displayName} Notebook`,
-      extension: '.ipynb',
-      type: 'notebook',
+      fileType: 'Notebook',
+      widgetName: 'Notebook',
       kernelName: displayNameMap[displayName]
     });
   }
@@ -446,6 +456,54 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
         selectKernelForContext(activeNotebook.context, activeNotebook.node);
       }
     }
+  },
+  {
+    id: cmdIds['markdown1'],
+    handler: () => {
+      if (activeNotebook) {
+        NotebookActions.setMarkdownHeader(activeNotebook.content, 1);
+      }
+    }
+  },
+  {
+    id: cmdIds['markdown2'],
+    handler: () => {
+      if (activeNotebook) {
+        NotebookActions.setMarkdownHeader(activeNotebook.content, 2);
+      }
+    }
+  },
+  {
+    id: cmdIds['markdown3'],
+    handler: () => {
+      if (activeNotebook) {
+        NotebookActions.setMarkdownHeader(activeNotebook.content, 3);
+      }
+    }
+  },
+  {
+    id: cmdIds['markdown4'],
+    handler: () => {
+      if (activeNotebook) {
+        NotebookActions.setMarkdownHeader(activeNotebook.content, 4);
+      }
+    }
+  },
+  {
+    id: cmdIds['markdown5'],
+    handler: () => {
+      if (activeNotebook) {
+        NotebookActions.setMarkdownHeader(activeNotebook.content, 5);
+      }
+    }
+  },
+  {
+    id: cmdIds['markdown6'],
+    handler: () => {
+      if (activeNotebook) {
+        NotebookActions.setMarkdownHeader(activeNotebook.content, 6);
+      }
+    }
   }
   ]);
   app.palette.add([
@@ -608,6 +666,36 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     command: cmdIds['redo'],
     category: 'Notebook Cell Operations',
     text: 'Redo Cell Operation'
+  },
+  {
+    command: cmdIds['markdown1'],
+    category: 'Notebook Cell Operations',
+    text: 'Markdown Header 1'
+  },
+  {
+    command: cmdIds['markdown1'],
+    category: 'Notebook Cell Operations',
+    text: 'Markdown Header 2'
+  },
+  {
+    command: cmdIds['markdown1'],
+    category: 'Notebook Cell Operations',
+    text: 'Markdown Header 3'
+  },
+  {
+    command: cmdIds['markdown1'],
+    category: 'Notebook Cell Operations',
+    text: 'Markdown Header 4'
+  },
+  {
+    command: cmdIds['markdown1'],
+    category: 'Notebook Cell Operations',
+    text: 'Markdown Header 5'
+  },
+  {
+    command: cmdIds['markdown1'],
+    category: 'Notebook Cell Operations',
+    text: 'Markdown Header 6'
   }
   ]);
 }

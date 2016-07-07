@@ -42,8 +42,7 @@
   margin-left: auto;
   margin-right: auto;
   width: 100%;
-  background: white;
-  background-image: url(images/jupyterlab.svg);
+  background-color: white;
   background-size: 193px 40px;
   background-repeat: no-repeat;
   background-position: center top;
@@ -103,19 +102,4 @@
   flex: 0 0 auto;
   font-size: 12px;
   padding-top: 8px;
-}
-
-
-.jp-Landing-imageNotebook {
-  background-image: url(images/notebook.svg);
-}
-
-
-.jp-Landing-imageTerminal {
-  background-image: url(images/terminal.svg);
-}
-
-
-.jp-Landing-imageTextEditor {
-  background-image: url(images/texteditor.svg);
 }

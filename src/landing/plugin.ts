@@ -9,6 +9,10 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import {
+  JupyterServices
+} from '../services/plugin';
+
 
 /**
  * The landing page extension.
@@ -16,11 +20,12 @@ import {
 export
 const landingExtension = {
   id: 'jupyter.extensions.landing',
+  requires: [JupyterServices],
   activate: activateLanding
 };
 
 
-function activateLanding(app: Application): void {
+function activateLanding(app: Application, services: JupyterServices): void {
   let widget = new Widget();
   widget.id = 'landing-jupyterlab';
   widget.title.text = 'JupyterLab';
@@ -37,7 +42,7 @@ function activateLanding(app: Application): void {
   dialog.appendChild(title);
 
   let logo = document.createElement('span');
-  logo.className = 'jp-Landing-logo';
+  logo.className = 'jp-ImageJupyterLab jp-Landing-logo';
   dialog.appendChild(logo);
 
   let header = document.createElement('span');
@@ -49,14 +54,14 @@ function activateLanding(app: Application): void {
   body.className = 'jp-Landing-body';
   dialog.appendChild(body);
 
-  for (let name of ['Notebook', 'Terminal', 'Text Editor']) {
+  for (let name of ['Notebook', 'Console', 'Terminal', 'Text Editor']) {
     let column = document.createElement('div');
     body.appendChild(column);
     column.className = 'jp-Landing-column';
 
     let img = document.createElement('span');
     let imgName = name.replace(' ', '');
-    img.className = `jp-Landing-image${imgName} jp-Landing-image`;
+    img.className = `jp-Image${imgName} jp-Landing-image`;
 
     column.appendChild(img);
 
@@ -66,17 +71,22 @@ function activateLanding(app: Application): void {
     column.appendChild(text);
   }
 
-  let img = body.getElementsByClassName('jp-Landing-imageNotebook')[0];
+  let img = body.getElementsByClassName('jp-ImageNotebook')[0];
   img.addEventListener('click', () => {
     app.commands.execute('file-operations:new-notebook');
   });
 
-  img = body.getElementsByClassName('jp-Landing-imageTextEditor')[0];
+  img = body.getElementsByClassName('jp-ImageConsole')[0];
+  img.addEventListener('click', () => {
+    app.commands.execute(`console:create-${services.kernelspecs.default}`);
+  });
+
+  img = body.getElementsByClassName('jp-ImageTextEditor')[0];
   img.addEventListener('click', () => {
     app.commands.execute('file-operations:new-text-file');
   });
 
-  img = body.getElementsByClassName('jp-Landing-imageTerminal')[0];
+  img = body.getElementsByClassName('jp-ImageTerminal')[0];
   img.addEventListener('click', () => {
     app.commands.execute('terminal:create-new');
   });

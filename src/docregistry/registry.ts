@@ -279,6 +279,30 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
+   * Get a file type by name.
+   */
+  getFileType(name: string): IFileType {
+    for (let i = 0; i < this._fileTypes.length; i++) {
+      let fileType = this._fileTypes[i];
+      if (fileType.name === name) {
+        return fileType;
+      }
+    }
+  }
+
+  /**
+   * Get a creator by name.
+   */
+  getCreator(name: string): IFileCreator {
+    for (let i = 0; i < this._creators.length; i++) {
+      let creator = this._creators[i];
+      if (creator.name === name) {
+        return creator;
+      }
+    }
+  }
+
+  /**
    * Get a kernel preference.
    *
    * @param ext - The file extension.
