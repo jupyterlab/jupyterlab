@@ -1,9 +1,0 @@
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
-.jp-ImageWidget {
-  padding: 5px;
-  object-fit: contain;
-  overflow: auto;
-}
