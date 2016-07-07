@@ -612,7 +612,14 @@ class DirListing extends Widget {
       content.appendChild(node);
     }
 
-    // Update the node states to match the model contents.
+    // Remove extra classes from the nodes.
+    for (let i = 0, n = items.length; i < n; ++i) {
+      nodes[i].classList.remove(SELECTED_CLASS);
+      nodes[i].classList.remove(RUNNING_CLASS);
+      nodes[i].classList.remove(CUT_CLASS);
+    }
+
+    // Add extra classes to item nodes based on widget state.
     for (let i = 0, n = items.length; i < n; ++i) {
       renderer.updateItemNode(nodes[i], items[i]);
       if (this._selection[items[i].name]) {
@@ -620,8 +627,6 @@ class DirListing extends Widget {
         if (this._isCut && this._model.path === this._prevPath) {
           nodes[i].classList.add(CUT_CLASS);
         }
-      } else {
-        nodes[i].classList.remove(SELECTED_CLASS);
       }
     }
 

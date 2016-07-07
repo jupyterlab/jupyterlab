@@ -273,7 +273,7 @@ class DocumentWidgetManager {
       host: widget.node
     }).then(value => {
       if (value && value.text === 'OK') {
-        return context.kernel.shutdown();
+        return context.changeKernel(null);
       }
     }).then(() => {
       return true;

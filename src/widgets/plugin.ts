@@ -57,7 +57,9 @@ class IPyWidgetExtension implements IWidgetExtension<NotebookPanel, INotebookMod
 
     nb.content.rendermime.addRenderer(WIDGET_MIMETYPE, wRenderer, 0);
     return new DisposableDelegate(() => {
-      nb.content.rendermime.removeRenderer(WIDGET_MIMETYPE);
+      if (nb.rendermime) {
+        nb.rendermime.removeRenderer(WIDGET_MIMETYPE);
+      }
       wRenderer.dispose();
       wManager.dispose();
     });
