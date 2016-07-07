@@ -211,6 +211,36 @@ const SHORTCUTS = [
     sequence: ['L']
   },
   {
+    command: 'notebook-cells:markdown-header1',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['1']
+  },
+  {
+    command: 'notebook-cells:markdown-header2',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['2']
+  },
+  {
+    command: 'notebook-cells:markdown-header3',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['3']
+  },
+  {
+    command: 'notebook-cells:markdown-header4',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['4']
+  },
+  {
+    command: 'notebook-cells:markdown-header5',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['5']
+  },
+  {
+    command: 'notebook-cells:markdown-header6',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    sequence: ['6']
+  },
+  {
     command: 'notebook:editMode',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Enter']
