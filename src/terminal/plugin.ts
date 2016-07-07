@@ -55,7 +55,7 @@ function activateTerminal(app: Application): void {
       handler: () => {
         let term = new TerminalWidget();
         term.title.closable = true;
-        term.title.icon = LANDSCAPE_ICON_CLASS + ' ' + TERMINAL_ICON_CLASS;
+        term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
         app.shell.addToMainArea(term);
         tracker.addWidget(term);
       }
