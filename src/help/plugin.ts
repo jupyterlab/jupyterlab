@@ -40,6 +40,36 @@ const COMMANDS = [
     id: 'help-doc:notebook-tutorial',
     url: 'http://nbviewer.jupyter.org/github/jupyter/notebook/' +
       'blob/master/docs/source/examples/Notebook/Notebook Basics.ipynb'
+  },
+  {
+    text: 'Python Reference',
+    id: 'help-doc:python-reference',
+    url: 'https://docs.python.org/3.5/'
+  },
+  {
+    text: 'IPython Reference',
+    id: 'help-doc:ipython-reference',
+    url: 'http://ipython.org/documentation.html?v=20160707164940'
+  },
+  {
+    text: 'Matplotlib Reference',
+    id: 'help-doc:mathplotlib-reference',
+    url: 'http://matplotlib.org/contents.html?v=20160707164940'
+  },
+  {
+    text: 'SymPy Reference',
+    id: 'help-doc:sympy-reference',
+    url: 'http://docs.sympy.org/latest/index.html?v=20160707164940'
+  },
+  {
+    text: 'Pandas Reference',
+    id: 'help-doc:pandas-reference',
+    url: 'http://pandas.pydata.org/pandas-docs/stable/?v=20160707164940'
+  },
+  {
+    text: 'Markdown Reference',
+    id: 'help-doc:markdown-reference',
+    url: 'https://help.github.com/articles/getting-started-with-writing-and-formatting-on-github/'
   }
 ];
 
