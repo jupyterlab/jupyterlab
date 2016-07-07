@@ -77,12 +77,17 @@ class WidgetManager extends ManagerBase<Widget> implements IDisposable {
         if (this._commRegistration) {
           this._commRegistration.dispose();
         }
+        if (!kernel) {
+          return;
+        }
         this._commRegistration = kernel.registerCommTarget(this.comm_target_name,
         (comm, msg) => {this.handle_comm_open(comm, msg)});
     };
 
     context.kernelChanged.connect((sender, kernel) => {
-      this.validateVersion();
+      if (context.kernel) {
+        this.validateVersion();
+      }
       newKernel(kernel);
     });
 
@@ -112,7 +117,7 @@ class WidgetManager extends ManagerBase<Widget> implements IDisposable {
    * Create a comm.
    */
    _create_comm(target_name: string, model_id: string, data?: any): Promise<any> {
-    var comm = this._context.kernel.connectToComm(target_name, model_id);
+    let comm = this._context.kernel.connectToComm(target_name, model_id);
     comm.open(); // should we open it???
     return Promise.resolve(new shims.services.Comm(comm));
   }
