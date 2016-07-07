@@ -9,7 +9,11 @@
     "watch": "watch 'npm run update && npm run build' ../../src src --wait 10"
   },
   "dependencies": {
+<<<<<<< HEAD
     "jupyter-js-services": "^0.12.3",
+=======
+    "jupyter-js-services": "^0.12.4",
+>>>>>>> c9f42bd... Use the terminal session from services
     "jupyterlab": "file:../..",
     "phosphor-dockpanel": "^0.9.7",
     "phosphor-keymap": "^0.8.0",

@@ -13,7 +13,11 @@
     "file-loader": "^0.8.5",
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5",
+<<<<<<< HEAD
     "jupyter-js-services": "^0.12.3",
+=======
+    "jupyter-js-services": "^0.12.4",
+>>>>>>> c9f42bd... Use the terminal session from services
     "jupyter-js-utils": "^0.4.0",
     "jupyter-js-widgets": "2.0.0-dev.0",
     "marked": "^0.3.5",

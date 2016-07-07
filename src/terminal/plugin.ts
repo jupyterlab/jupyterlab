@@ -6,6 +6,10 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
+  JupyterServices
+} from '../services/plugin';
+
+import {
   WidgetTracker
 } from '../widgettracker';
 
@@ -20,6 +24,7 @@ import {
 export
 const terminalExtension = {
   id: 'jupyter.extensions.terminal',
+  requires: [JupyterServices],
   activate: activateTerminal
 };
 
@@ -34,7 +39,7 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
 const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
 
 
-function activateTerminal(app: Application): void {
+function activateTerminal(app: Application, services: JupyterServices): void {
 
   let newTerminalId = 'terminal:create-new';
   let increaseTerminalFontSize = 'terminal:increase-font';
@@ -52,6 +57,9 @@ function activateTerminal(app: Application): void {
         term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
         app.shell.addToMainArea(term);
         tracker.addWidget(term);
+        services.terminalManager.createNew().then(session => {
+          term.session = session;
+        });
       }
     },
     {

@@ -8,7 +8,11 @@
   "dependencies": {
     "es6-promise": "^3.1.2",
     "font-awesome": "^4.6.1",
+<<<<<<< HEAD
     "jupyter-js-services": "^0.12.3",
+=======
+    "jupyter-js-services": "^0.12.4",
+>>>>>>> c9f42bd... Use the terminal session from services
     "jupyterlab": "file:../",
     "phosphide": "^0.9.5"
   },
