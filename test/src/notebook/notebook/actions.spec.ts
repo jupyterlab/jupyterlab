@@ -1225,37 +1225,53 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.clearAllOutputs(widget);
         expect(widget.activeCellIndex).to.be(-1);
       });
-    });
-
-  });
-
-  describe('#setMarkdownHeader()', () => {
-
-    it('should set the markdown header level of selected cells', () => {
-      let next = widget.childAt(1);
-      widget.select(next);
-      NotebookActions.setMarkdownHeader(widget, 2);
-      expect(widget.activeCell.model.source.slice(0, 3)).to.be('## ');
-      expect(next.activeCell.model.source.slice(0, 3)).to.be('## ');
-    });
-
-    it('should convert the cells to markdown type', () => {
 
     });
 
-    it('should be clamped between 1 and 6', () => {
+    describe('#setMarkdownHeader()', () => {
 
-    });
+      it('should set the markdown header level of selected cells', () => {
+        let next = widget.childAt(1);
+        widget.select(next);
+        NotebookActions.setMarkdownHeader(widget, 2);
+        expect(widget.activeCell.model.source.slice(0, 3)).to.be('## ');
+        expect(next.model.source.slice(0, 3)).to.be('## ');
+      });
 
-    it('should replace an existing header', () => {
+      it('should convert the cells to markdown type', () => {
+        NotebookActions.setMarkdownHeader(widget, 2);
+        expect(widget.activeCell).to.be.a(MarkdownCellWidget);
+      });
 
-    });
+      it('should be clamped between 1 and 6', () => {
+        NotebookActions.setMarkdownHeader(widget, -1);
+        expect(widget.activeCell.model.source.slice(0, 2)).to.be('# ');
+        NotebookActions.setMarkdownHeader(widget, 10);
+        expect(widget.activeCell.model.source.slice(0, 7)).to.be('###### ');
+      });
 
-    it('should replace leading white space', () => {
+      it('should be a no-op if there is no model', () => {
+        widget.model = null;
+        NotebookActions.setMarkdownHeader(widget, 1);
+        expect(widget.activeCellIndex).to.be(-1);
+      });
 
-    });
+      it('should replace an existing header', () => {
+        widget.activeCell.model.source = '# foo';
+        NotebookActions.setMarkdownHeader(widget, 2);
+        expect(widget.activeCell.model.source).to.be('## foo');
+      });
 
-    it('should unrender the cells', () => {
+      it('should replace leading white space', () => {
+        widget.activeCell.model.source = '      foo';
+        NotebookActions.setMarkdownHeader(widget, 2);
+        expect(widget.activeCell.model.source).to.be('## foo');
+      });
+
+      it('should unrender the cells', () => {
+        NotebookActions.setMarkdownHeader(widget, 1);
+        expect((widget.activeCell as MarkdownCellWidget).rendered).to.be(false);
+      });
 
     });
 

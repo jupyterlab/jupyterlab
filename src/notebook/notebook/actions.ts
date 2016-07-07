@@ -280,21 +280,20 @@ namespace NotebookActions {
       if (!widget.isSelected(child)) {
         continue;
       }
-      if (child.model.type === value) {
-        continue;
+      if (child.model.type !== value) {
+        let newCell: ICellModel;
+        switch (value) {
+        case 'code':
+          newCell = model.factory.createCodeCell(child.model.toJSON());
+          break;
+        case 'markdown':
+          newCell = model.factory.createMarkdownCell(child.model.toJSON());
+          break;
+        default:
+          newCell = model.factory.createRawCell(child.model.toJSON());
+        }
+        cells.set(i, newCell);
       }
-      let newCell: ICellModel;
-      switch (value) {
-      case 'code':
-        newCell = model.factory.createCodeCell(child.model.toJSON());
-        break;
-      case 'markdown':
-        newCell = model.factory.createMarkdownCell(child.model.toJSON());
-        break;
-      default:
-        newCell = model.factory.createRawCell(child.model.toJSON());
-      }
-      cells.set(i, newCell);
       if (value === 'markdown') {
         // Fetch the new widget and unrender it.
         child = widget.childAt(i);
@@ -803,16 +802,14 @@ namespace NotebookActions {
       return;
     }
     level = Math.min(Math.max(level, 1), 6);
-    changeCellType(widget, 'markdown');
     let cells = widget.model.cells;
     for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i) as CodeCellModel;
-      let child = widget.childAt(i);
+      let child = widget.childAt(i) as MarkdownCellWidget;
       if (widget.isSelected(child)) {
-        Private.setMarkdownHeader(cell, level);
-        widget.rendered = false;
+        Private.setMarkdownHeader(cells.get(i), level);
       }
     }
+    changeCellType(widget, 'markdown');
   }
 }
 
@@ -876,6 +873,7 @@ namespace Private {
   export
   function setMarkdownHeader(cell: ICellModel, level: number) {
     let source = cell.source;
+    debugger;
     let newHeader = Array(level + 1).join('#') + ' ';
     // Remove existing header or leading white space.
     let regex = /^(#+\s*)|^(\s*)/;
