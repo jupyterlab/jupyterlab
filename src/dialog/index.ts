@@ -77,7 +77,7 @@ const INPUT_CLASS = 'jp-Dialog-input';
 const SELECT_WRAPPER_CLASS = 'jp-Dialog-selectWrapper';
 
 /**
- * The class anem added to dialog select nodes.
+ * The class name added to dialog select nodes.
  */
 const SELECT_CLASS = 'jp-Dialog-select';
 

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsManager, IContentsModel, IContentsOpts, IKernel, ISession
+  IContents, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -72,7 +72,7 @@ class FileBrowserModel implements IDisposable {
   /**
    * Get a read-only list of the items in the current path.
    */
-  get items(): IContentsModel[] {
+  get items(): IContents.IModel[] {
     return this._model.content ? this._model.content.slice() : [];
   }
 
@@ -121,7 +121,8 @@ class FileBrowserModel implements IDisposable {
       newValue = Private.normalizePath(this._model.path, newValue);
     }
     let oldValue = this.path;
-    return this._contentsManager.get(newValue, {}).then(contents => {
+    let options = { content: true };
+    return this._contentsManager.get(newValue, options).then(contents => {
       this._model = contents;
       return this._findSessions();
     }).then(() => {
@@ -158,7 +159,7 @@ class FileBrowserModel implements IDisposable {
    *
    * @returns A promise which resolves to the contents of the file.
    */
-  copy(fromFile: string, toDir: string): Promise<IContentsModel> {
+  copy(fromFile: string, toDir: string): Promise<IContents.IModel> {
     let normalizePath = Private.normalizePath;
     fromFile = normalizePath(this._model.path, fromFile);
     toDir = normalizePath(this._model.path, toDir);
@@ -198,7 +199,7 @@ class FileBrowserModel implements IDisposable {
    *
    * @returns - A promise which resolves to the file contents.
    */
-  download(path: string): Promise<IContentsModel> {
+  download(path: string): Promise<IContents.IModel> {
     let normalizePath = Private.normalizePath;
     path = normalizePath(this._model.path, path);
     return this._contentsManager.get(path, {}).then(contents => {
@@ -220,15 +221,12 @@ class FileBrowserModel implements IDisposable {
    *
    * @returns A promise containing the new file contents model.
    */
-  newUntitled(type: string, ext?: string): Promise<IContentsModel> {
-    if (type === 'file') {
-      ext = ext || '.txt';
-    } else {
-      ext = '';
+  newUntitled(options: IContents.ICreateOptions): Promise<IContents.IModel> {
+    if (options.type === 'file') {
+      options.ext = options.ext || '.txt';
     }
-    return this._contentsManager.newUntitled(this._model.path,
-      { type: type, ext: ext }
-    ).then(contents => {
+    options.path = options.path || this._model.path;
+    return this._contentsManager.newUntitled(options).then(contents => {
       this.fileChanged.emit({
         name: 'file',
         oldValue: void 0,
@@ -247,7 +245,7 @@ class FileBrowserModel implements IDisposable {
    *
    * @returns A promise containing the new file contents model.
    */
-  rename(path: string, newPath: string): Promise<IContentsModel> {
+  rename(path: string, newPath: string): Promise<IContents.IModel> {
     // Handle relative paths.
     let normalizePath = Private.normalizePath;
     path = normalizePath(this._model.path, path);
@@ -275,13 +273,13 @@ class FileBrowserModel implements IDisposable {
    * This will fail to upload files that are too big to be sent in one
    * request to the server.
    */
-  upload(file: File, overwrite?: boolean): Promise<IContentsModel> {
+  upload(file: File, overwrite?: boolean): Promise<IContents.IModel> {
     // Skip large files with a warning.
     if (file.size > this._maxUploadSizeMb * 1024 * 1024) {
       let msg = `Cannot upload file (>${this._maxUploadSizeMb} MB) `;
       msg += `"${file.name}"`;
       console.warn(msg);
-      return Promise.reject<IContentsModel>(new Error(msg));
+      return Promise.reject<IContents.IModel>(new Error(msg));
     }
 
     if (overwrite) {
@@ -289,7 +287,7 @@ class FileBrowserModel implements IDisposable {
     }
 
     return this._contentsManager.get(file.name, {}).then(() => {
-      return Private.typedThrow<IContentsModel>(`"${file.name}" already exists`);
+      return Private.typedThrow<IContents.IModel>(`"${file.name}" already exists`);
     }, () => {
       return this._upload(file);
     });
@@ -317,14 +315,14 @@ class FileBrowserModel implements IDisposable {
   /**
    * Perform the actual upload.
    */
-  private _upload(file: File): Promise<IContentsModel> {
+  private _upload(file: File): Promise<IContents.IModel> {
     // Gather the file model parameters.
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
     let name = file.name;
     let isNotebook = file.name.indexOf('.ipynb') !== -1;
-    let type = isNotebook ? 'notebook' : 'file';
-    let format = isNotebook ? 'json' : 'base64';
+    let type: IContents.FileType = isNotebook ? 'notebook' : 'file';
+    let format: IContents.FileFormat = isNotebook ? 'json' : 'base64';
 
     // Get the file content.
     let reader = new FileReader();
@@ -334,12 +332,12 @@ class FileBrowserModel implements IDisposable {
       reader.readAsArrayBuffer(file);
     }
 
-    return new Promise<IContentsModel>((resolve, reject) => {
+    return new Promise<IContents.IModel>((resolve, reject) => {
       reader.onload = (event: Event) => {
-        let model: IContentsOpts = {
+        let model: IContents.IModel = {
           type: type,
-          format: format,
-          name: name,
+          format,
+          name,
           content: Private.getContent(reader)
         };
         this._contentsManager.save(path, model).then(contents => {
@@ -369,7 +367,7 @@ class FileBrowserModel implements IDisposable {
       if (!models.length) {
         return;
       }
-      let paths = this._model.content.map((contents: IContentsModel) => {
+      let paths = this._model.content.map((contents: IContents.IModel) => {
         return contents.path;
       });
       for (let model of models) {
@@ -382,10 +380,10 @@ class FileBrowserModel implements IDisposable {
   }
 
   private _maxUploadSizeMb = 15;
-  private _contentsManager: IContentsManager = null;
+  private _contentsManager: IContents.IManager = null;
   private _sessions: ISession.IModel[] = [];
   private _sessionManager: ISession.IManager = null;
-  private _model: IContentsModel;
+  private _model: IContents.IModel;
   private _specs: IKernel.ISpecModels = null;
 }
 
@@ -403,7 +401,7 @@ namespace FileBrowserModel {
     /**
      * A contents manager instance.
      */
-    contentsManager: IContentsManager;
+    contentsManager: IContents.IManager;
 
     /**
      * A session manager instance.

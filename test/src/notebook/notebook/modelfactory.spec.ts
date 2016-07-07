@@ -30,16 +30,30 @@ describe('notebook/notebook/modelfactory', () => {
 
     });
 
-    describe('#contentsOptions', () => {
+    describe('#type', () => {
 
-      it('should get the contents options used to fetch/save files', () => {
+      it('should get the file type', () => {
         let factory = new NotebookModelFactory();
-        expect(factory.contentsOptions).to.eql({ type: 'notebook' });
+        expect(factory.fileType).to.be('notebook');
       });
 
       it('should be read-only', () => {
         let factory = new NotebookModelFactory();
-        expect(() => { factory.contentsOptions = null; }).to.throwError();
+        expect(() => { factory.fileType = 'notebook'; }).to.throwError();
+      });
+
+    });
+
+    describe('#format', () => {
+
+      it('should get the file format', () => {
+        let factory = new NotebookModelFactory();
+        expect(factory.fileFormat).to.be('json');
+      });
+
+      it('should be read-only', () => {
+        let factory = new NotebookModelFactory();
+        expect(() => { factory.fileFormat = 'json'; }).to.throwError();
       });
 
     });
