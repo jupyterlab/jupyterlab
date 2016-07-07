@@ -76,7 +76,7 @@ function activateTerminal(app: Application): void {
       id: closeAllTerminals,
       handler: closeAllTerms
     }
-]);
+  ]);
   app.palette.add([
     {
       command: newTerminalId,

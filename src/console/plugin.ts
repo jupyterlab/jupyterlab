@@ -14,6 +14,10 @@ import {
 } from '../docregistry';
 
 import {
+  WidgetTracker
+} from '../widgettracker';
+
+import {
   Application
 } from 'phosphide/lib/core/application';
 
@@ -55,8 +59,14 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
  * Activate the console extension.
  */
 function activateConsole(app: Application, services: JupyterServices, rendermime: RenderMime<Widget>): Promise<void> {
-
+  // Track the current active terminal.
+  let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessionManager;
+  let activeConsole: ConsolePanel;
+
+  tracker.activeWidgetChanged.connect((sender, widget) => {
+    activeConsole = widget;
+  });
 
   // Add the ability to create new consoles for each kernel.
   let specs = services.kernelspecs;
@@ -84,24 +94,7 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
           panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
           panel.title.closable = true;
           app.shell.addToMainArea(panel);
-          Private.activeWidget = panel;
-          // TODO: Move this logic to the shell.
-          let stack = panel.parent;
-          if (!stack) {
-            return;
-          }
-          let tabs = stack.parent;
-          if (tabs instanceof TabPanel) {
-            tabs.currentWidget = panel;
-          }
-          panel.content.prompt.focus();
-          panel.disposed.connect(() => {
-            let index = Private.widgets.indexOf(panel);
-            Private.widgets.splice(index, 1);
-            if (Private.activeWidget === panel) {
-              Private.activeWidget = null;
-            }
-          });
+          tracker.addWidget(panel);
         });
       }
     }]);
@@ -112,41 +105,28 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
     }]);
   }
 
-  // Temporary console focus follower.
-  document.body.addEventListener('focus', event => {
-    for (let widget of Private.widgets) {
-      let target = event.target as HTMLElement;
-      if (widget.isAttached && widget.isVisible) {
-        if (widget.node.contains(target)) {
-          Private.activeWidget = widget;
-          return;
-        }
-      }
-    }
-  }, true);
-
   app.commands.add([
   {
     id: 'console:clear',
     handler: () => {
-      if (Private.activeWidget) {
-        Private.activeWidget.content.clear();
+      if (tracker.activeWidget) {
+        tracker.activeWidget.content.clear();
       }
     }
   },
   {
     id: 'console:execute',
     handler: () => {
-      if (Private.activeWidget) {
-        Private.activeWidget.content.execute();
+      if (tracker.activeWidget) {
+        tracker.activeWidget.content.execute();
       }
     }
   },
   {
     id: 'console:interrupt-kernel',
     handler: () => {
-      if (Private.activeWidget) {
-        let kernel = Private.activeWidget.content.session.kernel;
+      if (tracker.activeWidget) {
+        let kernel = tracker.activeWidget.content.session.kernel;
         if (kernel) {
           kernel.interrupt();
         }
@@ -156,8 +136,8 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
   {
     id: 'console:switch-kernel',
     handler: () => {
-      if (Private.activeWidget) {
-        let widget = Private.activeWidget.content;
+      if (tracker.activeWidget) {
+        let widget = tracker.activeWidget.content;
         let session = widget.session;
         let lang = '';
         if (session.kernel) {
@@ -208,16 +188,4 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
   }]);
 
   return Promise.resolve(void 0);
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  export
-  var widgets: ConsolePanel[] = [];
-
-  export
-  var activeWidget: ConsolePanel = null;
 }
