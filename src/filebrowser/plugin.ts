@@ -124,10 +124,14 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   app.commands.add([
     {
       id: newTextFileId,
+<<<<<<< HEAD
       handler: () => {
         let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
         fbWidget.createNew('file').then(widget => widget.title.icon = icon);
       }
+=======
+      handler: () => fbWidget.createNew({ type: 'file' })
+>>>>>>> e8dce4a... Update jupyter-js-services and clean up interfaces
     }
   ]);
 
@@ -138,7 +142,7 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
     id: newNotebookId,
     handler: () => {
       let icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
-      fbWidget.createNew('notebook').then(widget => widget.title.icon = icon);
+      fbWidget.createNew({ type: 'notebook' }).then(widget => widget.title.icon = icon);
     }
   }]);
 

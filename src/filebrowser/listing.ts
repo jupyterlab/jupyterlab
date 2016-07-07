@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsModel
+  IContents
 } from 'jupyter-js-services';
 
 import * as moment
@@ -273,7 +273,7 @@ class DirListing extends Widget {
   /**
    * The the sorted content items.
    */
-  get sortedItems(): IContentsModel[] {
+  get sortedItems(): IContents.IModel[] {
     return this._sortedModels;
   }
 
@@ -324,7 +324,7 @@ class DirListing extends Widget {
     if (!this._clipboard.length) {
       return;
     }
-    let promises: Promise<IContentsModel>[] = [];
+    let promises: Promise<IContents.IModel>[] = [];
     for (let path of this._clipboard) {
       if (this._isCut) {
         let parts = path.split('/');
@@ -386,7 +386,7 @@ class DirListing extends Widget {
    * Duplicate the currently selected item(s).
    */
   duplicate(): Promise<void> {
-    let promises: Promise<IContentsModel>[] = [];
+    let promises: Promise<IContents.IModel>[] = [];
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
         promises.push(this._model.copy(item.path, this._model.path));
@@ -401,7 +401,7 @@ class DirListing extends Widget {
   /**
    * Download the currently selected item(s).
    */
-  download(): Promise<IContentsModel> {
+  download(): Promise<IContents.IModel> {
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
         return this._model.download(item.path).catch(error =>
@@ -913,7 +913,7 @@ class DirListing extends Widget {
     let path = items[index].name + '/';
 
     // Move all of the items.
-    let promises: Promise<IContentsModel>[] = [];
+    let promises: Promise<IContents.IModel>[] = [];
     let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
@@ -952,7 +952,7 @@ class DirListing extends Widget {
     let source = this._items[index];
     let model = this._model;
     let items = this.sortedItems;
-    let item: IContentsModel = null;
+    let item: IContents.IModel = null;
 
     // If the source node is not selected, use just that node.
     if (!source.classList.contains(SELECTED_CLASS)) {
@@ -1082,7 +1082,7 @@ class DirListing extends Widget {
   /**
    * Get the currently selected items.
    */
-  private _getSelectedItems(): IContentsModel[] {
+  private _getSelectedItems(): IContents.IModel[] {
     let items = this.sortedItems;
     if (!this._softSelection) {
       return items.filter(item => this._selection[item.name]);
@@ -1212,7 +1212,7 @@ class DirListing extends Widget {
   private _model: FileBrowserModel = null;
   private _editNode: HTMLInputElement = null;
   private _items: HTMLElement[] = [];
-  private _sortedModels: IContentsModel[] = null;
+  private _sortedModels: IContents.IModel[] = null;
   private _sortState: DirListing.ISortState = { direction: 'ascending', key: 'name' };
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
@@ -1315,7 +1315,7 @@ namespace DirListing {
      *
      * @param model - The model object to use for the item state.
      */
-    updateItemNode(node: HTMLElement, model: IContentsModel): void;
+    updateItemNode(node: HTMLElement, model: IContents.IModel): void;
 
     /**
      * Get the node containing the file name.
@@ -1434,7 +1434,7 @@ namespace DirListing {
      *
      * @param model - The model object to use for the item state.
      */
-    updateItemNode(node: HTMLElement, model: IContentsModel): void {
+    updateItemNode(node: HTMLElement, model: IContents.IModel): void {
       let icon = utils.findElement(node, ITEM_ICON_CLASS);
       let text = utils.findElement(node, ITEM_TEXT_CLASS);
       let modified = utils.findElement(node, ITEM_MODIFIED_CLASS);
@@ -1570,7 +1570,7 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export
-  function sort(items: IContentsModel[], state: DirListing.ISortState) : IContentsModel[] {
+  function sort(items: IContents.IModel[], state: DirListing.ISortState) : IContents.IModel[] {
     let output = items.slice();
     if (state.key === 'last_modified') {
       output.sort((a, b) => {

@@ -6,7 +6,7 @@ import {
 } from 'jupyter-js-utils';
 
 import {
-  IKernel, ISession, IContentsManager,
+  IKernel, ISession, IContents,
   ContentsManager, KernelManager, SessionManager,
   getKernelSpecs, IAjaxSettings
 } from 'jupyter-js-services';
@@ -30,7 +30,7 @@ class JupyterServices {
     this._kernelspecs = specs;
     this._kernelManager = new KernelManager(options);
     this._sessionManager = new SessionManager(options);
-    this._contentsManager = new ContentsManager(baseUrl, ajaxSettings);
+    this._contentsManager = new ContentsManager(options);
     this._terminalManager = new TerminalManager(options);
   }
 
@@ -67,7 +67,7 @@ class JupyterServices {
    * #### Notes
    * This is a read-only property.
    */
-  get contentsManager(): IContentsManager {
+  get contentsManager(): IContents.IManager {
     return this._contentsManager;
   }
 
@@ -83,7 +83,7 @@ class JupyterServices {
 
   private _kernelManager: IKernel.IManager = null;
   private _sessionManager: ISession.IManager = null;
-  private _contentsManager: IContentsManager = null;
+  private _contentsManager: IContents.IManager = null;
   private _terminalManager: TerminalManager = null;
   private _kernelspecs: IKernel.ISpecModels = null;
 }

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContentsModel, IContentsOpts, IKernel, ISession
+  IContents, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -112,7 +112,7 @@ export interface IDocumentContext<T extends IDocumentModel> extends IDisposable 
   /**
    * A signal emitted when the contentsModel changes.
    */
-  contentsModelChanged: ISignal<IDocumentContext<T>, IContentsModel>;
+  contentsModelChanged: ISignal<IDocumentContext<T>, IContents.IModel>;
 
   /**
    * A signal emitted when the context is fully populated for the first time.
@@ -159,7 +159,7 @@ export interface IDocumentContext<T extends IDocumentModel> extends IDisposable 
    * empty `contents` field.  It will be `null` until the
    * first save or load to disk.
    */
-  contentsModel: IContentsModel;
+  contentsModel: IContents.IModel;
 
   /**
    * Get the kernel spec information.
@@ -309,12 +309,19 @@ interface IModelFactory extends IDisposable {
   name: string;
 
   /**
-   * The contents options used to fetch/save files.
+   * The type of the file (defaults to `"file"`).
    *
    * #### Notes
    * This is a read-only property.
    */
-  contentsOptions: IContentsOpts;
+  fileType: IContents.FileType;
+
+  /**
+   * The format of the file (default to `"text"`).
+   *
+   * This is a read-only property.
+   */
+  fileFormat: IContents.FileFormat;
 
   /**
    * Create a new model for a given path.
@@ -378,6 +385,16 @@ interface IFileType {
    * The optional icon class to use for the file type.
    */
   icon?: string;
+
+  /**
+   * The type of the new file (defaults to `"file"`).
+   */
+  fileType?: IContents.FileType;
+
+  /**
+   * The format of the new file (default to `"text"`).
+   */
+  fileFormat?: IContents.FileFormat;
 }
 
 
@@ -387,19 +404,14 @@ interface IFileType {
 export
 interface IFileCreator {
   /**
-   * The display name of the item.
+   * The name of the file creator.
    */
   name: string;
 
   /**
-   * The extension for the new file (e.g. `".txt"`).
+   * The filetype name associated with the creator.
    */
-  extension: string;
-
-  /**
-   * The type of the new file (defaults to `"file"`).
-   */
-  type?: string;
+  fileType: string;
 
   /**
    * The optional widget name.

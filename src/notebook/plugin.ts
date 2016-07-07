@@ -14,8 +14,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  DocumentRegistry, restartKernel, selectKernelForContext,
-  IWidgetExtension
+  DocumentRegistry, restartKernel, selectKernelForContext
 } from '../docregistry';
 
 import {
@@ -134,11 +133,17 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   let displayNames = Object.keys(displayNameMap).sort((a, b) => {
     return a.localeCompare(b);
   });
+  registry.addFileType({
+    name: 'Notebook',
+    extension: '.ipynb',
+    fileType: 'notebook',
+    fileFormat: 'json'
+  });
   for (let displayName of displayNames) {
     registry.addCreator({
       name: `${displayName} Notebook`,
-      extension: '.ipynb',
-      type: 'notebook',
+      fileType: 'Notebook',
+      widgetName: 'Notebook',
       kernelName: displayNameMap[displayName]
     });
   }

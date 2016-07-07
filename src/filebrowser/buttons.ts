@@ -22,7 +22,7 @@ import {
 } from '../docmanager';
 
 import {
-  IFileCreator
+  IFileType
 } from '../docregistry';
 
 import {
@@ -376,14 +376,14 @@ namespace Private {
   /**
    * Create a new item using a file creator.
    */
-  function createNewItem(widget: FileButtons, creator: IFileCreator): void {
-    let fileType = creator.type || 'file';
-    let widgetName = creator.widgetName || 'default';
+  function createNewItem(widget: FileButtons, fileType: IFileType, widgetName: string, kernelName?: string): void {
     let kernel: IKernel.IModel;
-    if (creator.kernelName) {
-      kernel = { name: creator.kernelName };
+    if (kernelName) {
+      kernel = { name: kernelName };
     }
-    widget.model.newUntitled(fileType, creator.extension).then(contents => {
+    widget.model.newUntitled(
+      { type: fileType.fileType, ext: fileType.extension })
+    .then(contents => {
       widget.createNew(contents.path, widgetName, kernel);
     });
   }
@@ -403,14 +403,19 @@ namespace Private {
         handler: () => { createNewFolder(widget); }
       })
     ];
-    let creators = widget.manager.registry.listCreators();
+    let registry = widget.manager.registry;
+    let creators = registry.listCreators();
     if (creators) {
       items.push(new MenuItem({ type: MenuItem.Separator }));
     }
     for (let creator of creators) {
+      let fileType = registry.getFileType(creator.fileType);
       let item = new MenuItem({
         text: creator.name,
-        handler: () => { createNewItem(widget, creator); }
+        handler: () => {
+          let widgetName = creator.widgetName || 'default';
+          let kernelName = creator.kernelName;
+          createNewItem(widget, fileType, widgetName, kernelName); }
       });
       items.push(item);
     }

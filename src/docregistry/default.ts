@@ -5,7 +5,7 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
-  IKernel, IContentsOpts
+  IContents, IKernel
 } from 'jupyter-js-services';
 
 import {
@@ -178,13 +178,22 @@ class TextModelFactory implements IModelFactory {
   }
 
   /**
-   * The contents options used to fetch/save files.
+   * The type of the file.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get contentsOptions(): IContentsOpts {
-    return { type: 'file', format: 'text'};
+  get fileType(): IContents.FileType {
+    return 'file';
+  }
+
+  /**
+   * The format of the file.
+   *
+   * This is a read-only property.
+   */
+  get fileFormat(): IContents.FileFormat {
+    return 'text';
   }
 
   /**
@@ -242,13 +251,22 @@ class Base64ModelFactory extends TextModelFactory {
   }
 
   /**
-   * The contents options used to fetch/save files.
+   * The type of the file.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get contentsOptions(): IContentsOpts {
-    return { type: 'file', format: 'base64'};
+  get fileType(): IContents.FileType {
+    return 'file';
+  }
+
+  /**
+   * The format of the file.
+   *
+   * This is a read-only property.
+   */
+  get fileFormat(): IContents.FileFormat {
+    return 'base64';
   }
 }
 
