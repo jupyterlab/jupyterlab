@@ -782,6 +782,38 @@ namespace NotebookActions {
       }
     }
   }
+
+  /**
+   * Set the markdown header level.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * @param level - The header level.
+   *
+   * #### Notes
+   * All selected cells will be switched to markdown.
+   * The level will be clamped between 1 and 6.
+   * If there is an existing header, it will be replaced.
+   * There will always be one blank space after the header.
+   * The cells will be unrendered.
+   */
+  export
+  function setMarkdownHeader(widget: Notebook, level: number) {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    level = Math.min(Math.max(level, 1), 6);
+    changeCellType(widget, 'markdown');
+    let cells = widget.model.cells;
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.get(i) as CodeCellModel;
+      let child = widget.childAt(i);
+      if (widget.isSelected(child)) {
+        Private.setMarkdownHeader(cell, level);
+        widget.rendered = false;
+      }
+    }
+  }
 }
 
 
@@ -836,5 +868,21 @@ namespace Private {
       break;
     }
     return Promise.resolve(true);
+  }
+
+  /**
+   * Set the markdown header level of a cell.
+   */
+  export
+  function setMarkdownHeader(cell: ICellModel, level: number) {
+    let source = cell.source;
+    let newHeader = Array(level + 1).join('#') + ' ';
+    // Remove existing header or leading white space.
+    let regex = /^(#+\s*)|^(\s*)/;
+    let matches = regex.exec(source);
+    if (matches) {
+      source = source.slice(matches[0].length);
+    }
+    cell.source = newHeader + source;
   }
 }

@@ -1229,4 +1229,36 @@ describe('notebook/notebook/actions', () => {
 
   });
 
+  describe('#setMarkdownHeader()', () => {
+
+    it('should set the markdown header level of selected cells', () => {
+      let next = widget.childAt(1);
+      widget.select(next);
+      NotebookActions.setMarkdownHeader(widget, 2);
+      expect(widget.activeCell.model.source.slice(0, 3)).to.be('## ');
+      expect(next.activeCell.model.source.slice(0, 3)).to.be('## ');
+    });
+
+    it('should convert the cells to markdown type', () => {
+
+    });
+
+    it('should be clamped between 1 and 6', () => {
+
+    });
+
+    it('should replace an existing header', () => {
+
+    });
+
+    it('should replace leading white space', () => {
+
+    });
+
+    it('should unrender the cells', () => {
+
+    });
+
+  });
+
 });
