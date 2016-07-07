@@ -41,13 +41,7 @@ function activateTerminal(app: Application): void {
   let decreaseTerminalFontSize = 'terminal:decrease-font';
   let toggleTerminalTheme = 'terminal:toggle-theme';
   let closeAllTerminals = 'terminal:close-all-terminals';
-
-  // Track the current active terminal.
   let tracker = new WidgetTracker<TerminalWidget>();
-  let activeTerm: TerminalWidget;
-  tracker.activeWidgetChanged.connect((sender, widget) => {
-    activeTerm = widget;
-  });
 
   app.commands.add([
     {

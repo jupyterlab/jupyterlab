@@ -59,14 +59,8 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
  * Activate the console extension.
  */
 function activateConsole(app: Application, services: JupyterServices, rendermime: RenderMime<Widget>): Promise<void> {
-  // Track the current active terminal.
   let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessionManager;
-  let activeConsole: ConsolePanel;
-
-  tracker.activeWidgetChanged.connect((sender, widget) => {
-    activeConsole = widget;
-  });
 
   // Add the ability to create new consoles for each kernel.
   let specs = services.kernelspecs;
