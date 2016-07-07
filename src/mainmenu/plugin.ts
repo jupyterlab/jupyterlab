@@ -31,6 +31,22 @@ class MainMenu {
     Private.menuBar.items = items;
   }
 
+  removeItem(item: MenuItem): void {
+    let items = Private.menuBar.items.slice();
+    arrays.remove(items, item);
+    Private.menuBar.items = items;
+  }
+
+  containsItem(item: MenuItem): boolean {
+    let items = Private.menuBar.items.slice();
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].text.localeCompare(item.text) === 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private _items: Private.IRankItem[] = [];
 }
 
