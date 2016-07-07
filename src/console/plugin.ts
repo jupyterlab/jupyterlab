@@ -40,6 +40,16 @@ const consoleExtension = {
   activate: activateConsole
 };
 
+/**
+ * The class name for all main area landscape tab icons.
+ */
+const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
+
+/**
+ * The class name for the console icon.
+ */
+const CONSOLE_ICON_CLASS = 'jp-Console-icon';
+
 
 /**
  * Activate the console extension.
@@ -71,7 +81,7 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
           let panel = new ConsolePanel(session, rendermime.clone());
           panel.id = `console-${count}`;
           panel.title.text = `${displayName} (${count})`;
-          panel.title.icon = 'jp-MainAreaIcon jp-Console-image';
+          panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
           panel.title.closable = true;
           app.shell.addToMainArea(panel);
           Private.activeWidget = panel;

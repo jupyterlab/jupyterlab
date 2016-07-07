@@ -388,7 +388,17 @@ body {
   content: '\f0da';
 }
 
-.jp-MainAreaIcon {
+
+.jp-MainAreaLandscapeIcon {
   background-repeat: no-repeat;
-  width: 24px;
+  margin-right: 2px;
+  width: 22px;
+}
+
+
+.jp-MainAreaPortraitIcon {
+  background-position: 0 2px;
+  background-repeat: no-repeat;
+  margin-right: 2px;
+  width: 14px;
 }

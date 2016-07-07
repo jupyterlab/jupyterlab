@@ -8,6 +8,15 @@
 }
 
 
+.jp-FileBrowser-notebookIcon {
+  background-image: url(images/notebook.svg);
+}
+
+.jp-FileBrowser-texteditorIcon {
+  background-image: url(images/texteditor.svg);
+}
+
+
 .jp-BreadCrumbs {
   flex: 0 0 auto;
 }

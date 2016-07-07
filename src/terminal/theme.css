@@ -16,7 +16,7 @@
 }
 
 
-@import '~xterm/src/xterm.css';
+@import url('~xterm/src/xterm.css');
 
 .terminal {
   font-family: monospace;

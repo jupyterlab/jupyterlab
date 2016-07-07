@@ -69,7 +69,7 @@ const STDOUT_CLASS = 'jp-Output-stdout';
 const STDERR_CLASS = 'jp-Output-stderr';
 
 /**
- * The class anme added to error data.
+ * The class name added to error data.
  */
 const ERROR_CLASS = 'jp-Output-error';
 
