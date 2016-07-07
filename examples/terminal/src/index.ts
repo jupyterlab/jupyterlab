@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  createTerminalSession
+} from 'jupyter-js-services';
+
+import {
   DockPanel
 } from 'phosphor-dockpanel';
 
@@ -18,6 +22,13 @@ function main(): void {
                                   color: 'white'});
   let term2 = new TerminalWidget({ background: 'white',
                                   color: 'black'});
+
+  createTerminalSession().then(session => {
+    term1.session = session;
+  });
+  createTerminalSession().then(session => {
+    term2.session = session;
+  });
 
   term1.title.closable = true;
   term2.title.closable = true;

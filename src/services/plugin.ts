@@ -2,18 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  getBaseUrl, getConfigOption
-} from 'jupyter-js-utils';
-
-import {
-  IKernel, ISession, IContents,
-  ContentsManager, KernelManager, SessionManager,
-  getKernelSpecs, IAjaxSettings
+  IAjaxSettings, IContents, IKernel, ISession, ITerminalSession,
+  ContentsManager, KernelManager, SessionManager, TerminalManager,
+  getKernelSpecs
 } from 'jupyter-js-services';
 
 import {
-  TerminalManager
-} from '../terminal';
+  getBaseUrl, getConfigOption
+} from 'jupyter-js-utils';
 
 
 /**
@@ -21,7 +17,6 @@ import {
  */
 export
 class JupyterServices {
-
   /**
    * Construct a new services provider.
    */
@@ -77,13 +72,13 @@ class JupyterServices {
    * #### Notes
    * This is a read-only property.
    */
-  get terminalManager(): TerminalManager {
+  get terminalManager(): ITerminalSession.IManager {
     return this._terminalManager;
   }
 
-  private _kernelManager: IKernel.IManager = null;
-  private _sessionManager: ISession.IManager = null;
-  private _contentsManager: IContents.IManager = null;
+  private _kernelManager: KernelManager = null;
+  private _sessionManager: SessionManager = null;
+  private _contentsManager: ContentsManager = null;
   private _terminalManager: TerminalManager = null;
   private _kernelspecs: IKernel.ISpecModels = null;
 }
