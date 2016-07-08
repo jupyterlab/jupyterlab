@@ -96,7 +96,7 @@ function activateFAQ(app: Application): void {
         </h2>
         <ul class="faqul">
           <li class="faqquestion"> How do I add more kernels/languages to JupyterLab? </li>
-          <li class="faqanswer"> To add more languages to the JupyterLab you must install a new kernel. Installing a kernel is usually fairly simple and can be done with a couple terminal commands. For further instructions, click this <a href="https://ipython.readthedocs.io/en/latest/install/kernel_install.html">link</a>. </li>
+          <li class="faqanswer"> To add more languages to the JupyterLab you must install a new kernel. Installing a kernel is usually fairly simple and can be done with a couple terminal commands. For further instructions, click this <a class="faqa" target="_blank" href="https://ipython.readthedocs.io/en/latest/install/kernel_install.html">link</a>. </li>
         </ul>
       </section>
     </p>

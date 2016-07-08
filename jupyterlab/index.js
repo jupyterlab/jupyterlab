@@ -12,7 +12,7 @@ require('jupyterlab/lib/default-theme/index.css');
 var app = new phosphide.Application({
   extensions: [
     require('jupyterlab/lib/about/plugin').aboutExtension,
-    require('jupyterlab/lib/FAQ/plugin').faqExtension,
+    require('jupyterlab/lib/faq/plugin').faqExtension,
     require('jupyterlab/lib/console/plugin').consoleExtension,
     require('jupyterlab/lib/editorwidget/plugin').editorHandlerExtension,
     require('jupyterlab/lib/filebrowser/plugin').fileBrowserExtension,
