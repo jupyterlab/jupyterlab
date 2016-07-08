@@ -42,7 +42,7 @@
 
 
 .p-CommandPalette-command {
-  padding: 4px 12px 4px 4px;
+  padding: 4px 12px 4px 12px;
   font-size: 14px;
   font-weight: 500;
 }
