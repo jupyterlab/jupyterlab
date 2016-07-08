@@ -25,6 +25,8 @@ import {
   hitTestNodes, findElement
 } from '../utils';
 
+import './index.css';
+
 
 /**
  * The class name added to a running widget.
@@ -49,12 +51,17 @@ const REFRESH_CLASS = 'jp-RunningSessions-headerRefresh';
 /**
  * The class name added to the running terminal sessions section.
  */
-const TERMINALS_CLASS = 'jp-RunningSessions-terminals';
+const SECTION_CLASS = 'jp-RunningSessions-section';
+
+/**
+ * The class name added to the running terminal sessions section.
+ */
+const TERMINALS_CLASS = 'jp-RunningSessions-terminalSection';
 
 /**
  * The class name added to the running kernel sessions section.
  */
-const SESSIONS_CLASS = 'jp-RunningSessions-sessions';
+const SESSIONS_CLASS = 'jp-RunningSessions-sessionsSection';
 
 /**
  * The class name added to the running sessions section header.
@@ -62,14 +69,14 @@ const SESSIONS_CLASS = 'jp-RunningSessions-sessions';
 const SECTION_HEADER_CLASS = 'jp-RunningSessions-sectionHeader';
 
 /**
- * The class name added to the running kernel sessions section list.
+ * The class name added to a section container.
  */
-const SESSION_LIST_CLASS = 'jp-RunningSessions-sessionList';
+const CONTAINER_CLASS = 'jp-RunningSessions-sectionContainer';
 
 /**
- * The class name added to the running terminal sessions section list.
+ * The class name added to the running kernel sessions section list.
  */
-const TERMINAL_LIST_CLASS = 'jp-RunningSessions-terminalList';
+const LIST_CLASS = 'jp-RunningSessions-sectionList';
 
 /**
  * The class name added to the running sessions items.
@@ -94,7 +101,7 @@ const KERNEL_NAME_CLASS = 'jp-RunningSessions-itemKernelName';
 /**
  * The class name added to a running session item shutdown button.
  */
-const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdownButton';
+const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
 
 /**
  * The class name added to a notebook icon.
@@ -125,9 +132,9 @@ class RunningSessions extends Widget {
     let header = document.createElement('div');
     header.className = HEADER_CLASS;
     let terminals = document.createElement('div');
-    terminals.className = TERMINALS_CLASS;
+    terminals.className = `${SECTION_CLASS} ${TERMINALS_CLASS}`;
     let sessions = document.createElement('div');
-    sessions.className = SESSIONS_CLASS;
+    sessions.className = `$${SECTION_CLASS} ${SESSIONS_CLASS}`;
 
     let title = document.createElement('span');
     title.textContent = 'Currently Running Jupyter Processes';
@@ -137,6 +144,7 @@ class RunningSessions extends Widget {
     let refresh = document.createElement('span');
     refresh.className = REFRESH_CLASS;
     header.appendChild(refresh);
+    refresh.textContent = 'REFRESH';
 
     node.appendChild(header);
     node.appendChild(terminals);
@@ -158,18 +166,24 @@ class RunningSessions extends Widget {
     let termHeader = this._renderer.createTerminalHeaderNode();
     termHeader.className = SECTION_HEADER_CLASS;
     termNode.appendChild(termHeader);
+    let termContainer = document.createElement('div');
+    termContainer.className = CONTAINER_CLASS;
     let termList = document.createElement('ul');
-    termList.className = TERMINAL_LIST_CLASS;
-    termNode.appendChild(termList);
+    termList.className = LIST_CLASS;
+    termContainer.appendChild(termList);
+    termNode.appendChild(termContainer);
 
     // Populate the sessions section.
     let sessionNode = findElement(this.node, SESSIONS_CLASS);
     let sessionHeader = this._renderer.createSessionHeaderNode();
     sessionHeader.className = SECTION_HEADER_CLASS;
     sessionNode.appendChild(sessionHeader);
+    let sessionContainer = document.createElement('div');
+    sessionContainer.className = CONTAINER_CLASS;
     let sessionList = document.createElement('ul');
-    sessionList.className = SESSION_LIST_CLASS;
-    sessionNode.appendChild(sessionList);
+    sessionList.className = LIST_CLASS;
+    sessionContainer.appendChild(sessionList);
+    sessionNode.appendChild(sessionContainer);
   }
 
   /**
@@ -227,7 +241,14 @@ class RunningSessions extends Widget {
       this._runningTerminals = running;
       return this._manager.sessions.listRunning();
     }).then(running => {
-      this._runningSessions = running;
+      // Strip out non-file backed sessions.
+      this._runningSessions = [];
+      for (let session of running) {
+        let name = session.notebook.path.split('/').pop();
+        if (name.indexOf('.') !== -1) {
+          this._runningSessions.push(session);
+        }
+      }
       this.update();
     });
   }
@@ -268,8 +289,10 @@ class RunningSessions extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Fetch common variables.
-    let termList = findElement(this.node, TERMINAL_LIST_CLASS);
-    let sessionList = findElement(this.node, SESSION_LIST_CLASS);
+    let termSection = findElement(this.node, TERMINALS_CLASS);
+    let termList = findElement(termSection, LIST_CLASS);
+    let sessionSection = findElement(this.node, SESSIONS_CLASS);
+    let sessionList = findElement(sessionSection, LIST_CLASS);
     let renderer = this._renderer;
     let kernelspecs = this._manager.kernelspecs.kernelspecs;
 
@@ -314,8 +337,10 @@ class RunningSessions extends Widget {
    */
   private _evtClick(event: MouseEvent): void {
     // Fetch common variables.
-    let termList = findElement(this.node, TERMINAL_LIST_CLASS);
-    let sessionList = findElement(this.node, SESSION_LIST_CLASS);
+    let termSection = findElement(this.node, TERMINALS_CLASS);
+    let termList = findElement(termSection, LIST_CLASS);
+    let sessionSection = findElement(this.node, SESSIONS_CLASS);
+    let sessionList = findElement(sessionSection, LIST_CLASS);
     let refresh = findElement(this.node, REFRESH_CLASS);
     let renderer = this._renderer;
     let clientX = event.clientX;
@@ -532,6 +557,7 @@ namespace RunningSessions {
       label.className = ITEM_LABEL_CLASS;
       let shutdown = document.createElement('span');
       shutdown.className = SHUTDOWN_BUTTON_CLASS;
+      shutdown.textContent = 'SHUTDOWN';
 
       node.appendChild(icon);
       node.appendChild(label);

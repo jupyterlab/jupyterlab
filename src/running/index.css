@@ -1,0 +1,77 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-RunningSessions {
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+}
+
+
+.jp-RunningSessions-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+}
+
+
+.jp-RunningSessions-headerTitle {
+  flex: 1 1 auto;
+}
+
+
+.jp-RunningSessions-headerRefresh {
+  flex: 0 0 auto;
+}
+
+
+.jp-RunningSessions-section {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+
+.jp-RunningSessions-sectionHeader {
+  flex: 0 0 auto;
+}
+
+
+.jp-RunningSessions-sectionContainer {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+
+.jp-RunningSessions-sectionList {
+  list-style-type: none;
+}
+
+
+.jp-RunningSessions-item {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.jp-RunningSessions-itemIcon {
+  flex: 0 0 auto;
+}
+
+
+.jp-RunningSessions-itemLabel {
+  flex: 1 1 auto;
+}
+
+
+.jp-RunningSessions-itemKernelName {
+  flex: 0 0 auto;
+}
+
+
+.jp-RunningSessions-itemShutdown {
+  flex: 0 0 auto;
+}
