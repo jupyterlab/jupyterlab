@@ -28,6 +28,7 @@
 .jp-InputArea-prompt {
   flex-grow: 0;
   flex-shrink: 0;
+	padding-top: 8px !important;
 }
 
 
