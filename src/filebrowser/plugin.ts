@@ -134,13 +134,16 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   let newNotebookId = 'file-operations:new-notebook';
 
   app.commands.add([
-  {
-    id: newNotebookId,
-    handler: () => {
-      let icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
-      fbWidget.createNew({ type: 'notebook' }).then(widget => widget.title.icon = icon);
+    {
+      id: newNotebookId,
+      handler: () => {
+        let icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
+        fbWidget.createNew({ type: 'notebook' }).then(widget => {
+          widget.title.icon = icon;
+        });
+      }
     }
-  }]);
+  ]);
 
 
   // Add the command for saving a document.
