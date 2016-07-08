@@ -14,7 +14,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  DocumentRegistry, restartKernel, selectKernelForContext
+  DocumentRegistry, restartKernel, selectKernelForContext, IWidgetFactoryOptions
 } from '../docregistry';
 
 import {
@@ -32,6 +32,17 @@ import {
 import {
   NotebookPanel, NotebookModelFactory, NotebookWidgetFactory, NotebookActions
 } from './index';
+
+
+/**
+ * The class name for all main area portrait tab icons.
+ */
+const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
+
+/**
+ * The class name for the notebook icon from the default theme.
+ */
+const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
 
 
 /**
@@ -116,16 +127,16 @@ const notebookTrackerProvider = {
 function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: JupyterServices, rendermime: RenderMime<Widget>, clipboard: IClipboard): void {
 
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard);
-  registry.addModelFactory(new NotebookModelFactory());
-  registry.addWidgetFactory(widgetFactory,
-  {
+  let options: IWidgetFactoryOptions = {
     fileExtensions: ['.ipynb'],
     displayName: 'Notebook',
     modelName: 'notebook',
     defaultFor: ['.ipynb'],
     preferKernel: true,
     canStartKernel: true
-  });
+  };
+  registry.addModelFactory(new NotebookModelFactory());
+  registry.addWidgetFactory(widgetFactory, options);
 
 
   // Add the ability to launch notebooks for each kernel type.
@@ -157,6 +168,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   let activeNotebook: NotebookPanel;
   let tracker = Private.notebookTracker;
   widgetFactory.widgetCreated.connect((sender, widget) => {
+    widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
     tracker.addWidget(widget);
   });
   tracker.activeWidgetChanged.connect((sender, widget) => {
