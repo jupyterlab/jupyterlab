@@ -2,10 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
 .jp-RunningSessions {
   display: flex;
   flex-direction: column;
-  min-width: 300px;
 }
 
 
@@ -28,7 +28,7 @@
 
 .jp-RunningSessions-section {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   flex-direction: column;
 }
 
@@ -47,6 +47,8 @@
 
 
 .jp-RunningSessions-sectionList {
+  margin: 0;
+  padding: 0;
   list-style-type: none;
 }
 

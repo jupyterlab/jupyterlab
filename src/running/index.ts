@@ -25,8 +25,6 @@ import {
   hitTestNodes, findElement
 } from '../utils';
 
-import './index.css';
-
 
 /**
  * The class name added to a running widget.
@@ -144,7 +142,6 @@ class RunningSessions extends Widget {
     let refresh = document.createElement('span');
     refresh.className = REFRESH_CLASS;
     header.appendChild(refresh);
-    refresh.textContent = 'REFRESH';
 
     node.appendChild(header);
     node.appendChild(terminals);
