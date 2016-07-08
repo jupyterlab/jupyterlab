@@ -118,7 +118,7 @@ function activateHelpHandler(app: Application, mainMenu: MainMenu): Promise<void
       }
     };
   });
-  //console.log(JSON.stringify(helpCommandItems));
+  
   app.commands.add(helpCommandItems);
 
   app.commands.add([
