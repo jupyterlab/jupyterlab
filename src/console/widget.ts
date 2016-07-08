@@ -85,20 +85,15 @@ const PROMPT_CLASS = 'jp-Console-prompt';
 export
 class ConsolePanel extends Panel {
   /**
-   * Create a new console widget for the panel.
-   */
-  static createConsole(session: ISession, rendermime: RenderMime<Widget>): ConsoleWidget {
-    return new ConsoleWidget(session, rendermime);
-  }
-
-  /**
    * Construct a console panel.
    */
-  constructor(session: ISession, rendermime: RenderMime<Widget>) {
+  constructor(options: ConsolePanel.IOptions) {
     super();
     this.addClass(CONSOLE_PANEL);
-    let constructor = this.constructor as typeof ConsolePanel;
-    this._console = constructor.createConsole(session, rendermime);
+    this._console = new ConsoleWidget({
+      session: options.session,
+      rendermime: options.rendermime
+    });
     this.addChild(this._console);
   }
 
@@ -116,6 +111,10 @@ class ConsolePanel extends Panel {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._console.dispose();
     this._console = null;
     super.dispose();
   }
@@ -187,81 +186,62 @@ class ConsolePanel extends Panel {
 
 
 /**
+ * A namespace for ConsolePanel statics.
+ */
+export
+namespace ConsolePanel {
+  /**
+   * The initialization options for a console panel.
+   */
+  export
+    interface IOptions {
+    /**
+     * The session for the console panel.
+     */
+    session: ISession;
+
+    /**
+     * The mime renderer for the console panel.
+     */
+    rendermime: RenderMime<Widget>;
+  }
+}
+
+
+/**
  * A widget containing a Jupyter console.
  */
 export
 class ConsoleWidget extends Widget {
   /**
-   * Create a new banner widget given a banner model.
-   */
-  static createBanner() {
-    let widget = new RawCellWidget();
-    widget.model = new RawCellModel();
-    return widget;
-  }
-
-  /**
-   * Create a new prompt widget given a prompt model and a rendermime.
-   */
-  static createPrompt(rendermime: RenderMime<Widget>): CodeCellWidget {
-    let widget = new CodeCellWidget({ rendermime });
-    widget.model = new CodeCellModel();
-    return widget;
-  }
-
-  /**
-   * Create a new completion widget.
-   */
-  static createCompletion(): CompletionWidget {
-    let model = new CompletionModel();
-    return new CompletionWidget({ model });
-  }
-
-  /**
-   * Create a console history.
-   */
-  static createHistory(kernel: IKernel): IConsoleHistory {
-    return new ConsoleHistory(kernel);
-  }
-
-  /**
-   * Create a new tooltip widget.
-   *
-   * @returns A ConsoleTooltip widget.
-   */
-  static createTooltip(): ConsoleTooltip {
-    return new ConsoleTooltip();
-  }
-
-  /**
    * Construct a console widget.
    */
-  constructor(session: ISession, rendermime: RenderMime<Widget>) {
+  constructor(options: ConsoleWidget.IOptions) {
     super();
     this.addClass(CONSOLE_CLASS);
 
-    let constructor = this.constructor as typeof ConsoleWidget;
     let layout = new PanelLayout();
 
     this.layout = layout;
-    this._rendermime = rendermime;
-    this._session = session;
+    this._renderer = options.renderer || ConsoleWidget.defaultRenderer;
+    this._rendermime = options.rendermime;
+    this._session = options.session;
 
-    this._history = constructor.createHistory(session.kernel);
+    this._history = new ConsoleHistory(this._session.kernel);
 
     // Instantiate tab completion widget.
-    this._completion = constructor.createCompletion();
+    this._completion = this._renderer.createCompletion();
     this._completion.anchor = this.node;
     this._completion.attach(document.body);
     this._completionHandler = new CellCompletionHandler(this._completion);
-    this._completionHandler.kernel = session.kernel;
+    this._completionHandler.kernel = this._session.kernel;
 
     // Instantiate tooltip widget.
-    this._tooltip = constructor.createTooltip();
+    this._tooltip = this._renderer.createTooltip();
     this._tooltip.attach(document.body);
 
     // Create the banner.
-    let banner = constructor.createBanner();
+    let banner = this._renderer.createBanner();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     banner.model.source = '...';
@@ -274,11 +254,12 @@ class ConsoleWidget extends Widget {
     this.newPrompt();
 
     // Handle changes to the kernel.
-    session.kernelChanged.connect((s, kernel) => {
+    this._session.kernelChanged.connect((s, kernel) => {
       this.clear();
       this.newPrompt();
       this.initialize();
-      this._history = constructor.createHistory(kernel);
+      this._history.dispose();
+      this._history = new ConsoleHistory(kernel);
       this._completionHandler.kernel = kernel;
     });
   }
@@ -394,8 +375,7 @@ class ConsoleWidget extends Widget {
 
     // Create the new prompt and add to layout.
     let layout = this.layout as PanelLayout;
-    let constructor = this.constructor as typeof ConsoleWidget;
-    prompt = constructor.createPrompt(this._rendermime);
+    prompt = this._renderer.createPrompt(this._rendermime);
     prompt.mimetype = this._mimetype;
     prompt.addClass(PROMPT_CLASS);
     layout.addChild(prompt);
@@ -537,15 +517,116 @@ class ConsoleWidget extends Widget {
   private _completionHandler: CellCompletionHandler = null;
   private _mimetype = 'text/x-ipython';
   private _rendermime: RenderMime<Widget> = null;
+  private _renderer: ConsoleWidget.IRenderer = null;
   private _tooltip: ConsoleTooltip = null;
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
   private _pendingInspect = 0;
 }
 
+/**
+ * A namespace for ConsoleWidget statics.
+ */
+export
+namespace ConsoleWidget {
+  /**
+   * The initialization options for a console widget.
+   */
+  export
+  interface IOptions {
+    /**
+     * The session for the console widget.
+     */
+    session: ISession;
+
+    /**
+     * The mime renderer for the console widget.
+     */
+    rendermime: RenderMime<Widget>;
+
+    /**
+     * The renderer for a console widget.
+     */
+    renderer?: IRenderer;
+  }
+
+  /**
+   * A renderer for completion widget nodes.
+   */
+  export
+  interface IRenderer {
+    /**
+     * Create a new banner widget given a banner model.
+     */
+    createBanner(): RawCellWidget;
+
+    /**
+     * Create a new prompt widget given a prompt model and a rendermime.
+     */
+    createPrompt(rendermime: RenderMime<Widget>): CodeCellWidget;
+
+    /**
+     * Create a new completion widget.
+     */
+    createCompletion(): CompletionWidget;
+
+    /**
+     * Create a new tooltip widget.
+     */
+    createTooltip(): ConsoleTooltip;
+  }
+
+
+  /**
+   * The default implementation of an `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+    /**
+     * Create a new banner widget given a banner model.
+     */
+    createBanner(): RawCellWidget {
+      let widget = new RawCellWidget();
+      widget.model = new RawCellModel();
+      return widget;
+    }
+
+    /**
+     * Create a new prompt widget given a prompt model and a rendermime.
+     */
+    createPrompt(rendermime: RenderMime<Widget>): CodeCellWidget {
+      let widget = new CodeCellWidget({ rendermime });
+      widget.model = new CodeCellModel();
+      return widget;
+    }
+
+    /**
+     * Create a new completion widget.
+     */
+    createCompletion(): CompletionWidget {
+      let model = new CompletionModel();
+      return new CompletionWidget({ model });
+    }
+
+    /**
+     * Create a new tooltip widget.
+     */
+    createTooltip(): ConsoleTooltip {
+      return new ConsoleTooltip();
+    }
+  }
+
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
+}
+
 
 /**
- * A namespace for Console widget private data.
+ * A namespace for console widget private data.
  */
 namespace Private {
   /**

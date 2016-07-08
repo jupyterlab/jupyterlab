@@ -82,7 +82,9 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
           path: `Console-${count++}`,
           kernelName: `${displayNameMap[displayName]}`
         }).then(session => {
-          let panel = new ConsolePanel(session, rendermime.clone());
+          let panel = new ConsolePanel({
+            session, rendermime: rendermime.clone()
+          });
           panel.id = `console-${count}`;
           panel.title.text = `${displayName} (${count})`;
           panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
