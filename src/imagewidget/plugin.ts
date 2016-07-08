@@ -60,7 +60,6 @@ function activateImageWidget (app: Application, registry: DocumentRegistry): voi
 
     image.widgetCreated.connect((sender, newWidget) => {
         tracker.addWidget(newWidget);
-        newWidget.levelZoom(scale);
     });
 
     app.commands.add([
@@ -101,10 +100,8 @@ function activateImageWidget (app: Application, registry: DocumentRegistry): voi
         } else {
             scale *= 2;
         }
-        let widgets = tracker.widgets;
-        for (let i = 0; i<widgets.length; i++) {
-            widgets[i].levelZoom(scale);
-        }
+        tracker.activeWidget.levelZoom(scale);
+
     }
     function zoomOut(): void {
         if (scale > 1) {
@@ -112,17 +109,10 @@ function activateImageWidget (app: Application, registry: DocumentRegistry): voi
         } else {
             scale /= 2;
         }
-
-        let widgets = tracker.widgets;
-        for (let i = 0; i<widgets.length; i++) {
-            widgets[0].levelZoom(scale);
-        }
+        tracker.activeWidget.levelZoom(scale);
     }
     function resetZoom(): void {
         scale = 1;
-        let widgets = tracker.widgets;
-        for (let i = 0; i<widgets.length; i++) {
-            widgets[0].levelZoom(scale);
-        }
+        tracker.activeWidget.levelZoom(scale);
     }
 }
