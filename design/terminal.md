@@ -3,7 +3,7 @@ This document describes the design of the terminal plugin. Any significant chang
 
 # Personas
 ### Janet Tobin 
-An experienced data scientist with a graduate degree in a technical field and has been coding for more than 5 years in multiple languages. She is 35 years old, has a solid income, and lives in an urban setting. In the past she has used the Jupyter Notebook alongside a text editor (Sublime Text) and the Terminal app on a Mac. She lovse to code and feels at home in a terminal.
+An experienced data scientist with a graduate degree in a technical field and has been coding for more than 5 years in multiple languages. She is 35 years old, has a solid income, and lives in an urban setting. In the past she has used the Jupyter Notebook alongside a text editor (Sublime Text) and the Terminal app on a Mac. She loves to code and feels at home in a terminal.
 
 **Goal:** Replace the usage of Mac's Terminal app, in particular when running Jupyter on a remote system.
 
