@@ -320,10 +320,28 @@ body {
   vertical-align: middle;
 }
 
-/*#about .jp-About-mainarea-cimg {
+#about .jp-About-mainarea-cimg {
   display: block;
-  content: url(images/mainareascreen.gif);
   margin: 40px 0 35px 0;
   height: 38vh;
   max-height: 453px;
-}*/
+  -webkit-animation: jp-About-cimg-anim linear 15s infinite;
+  animation: jp-About-cimg-anim linear 15s infinite;
+  -webkit-transition: all 300ms ease;
+  transition: all 300ms ease;
+}
+/*
+@keyframes jp-About-cimg-anim {
+  0% { background-image: url(images/jl-About-ma1.png); }
+  17% { background-image: url(images/jl-About-ma1.png); }
+  20% { background-image: url(images/jl-About-ma2.png); }
+  37% { background-image: url(images/jl-About-ma2.png); }
+  40% { background-image: url(images/jl-About-ma3.png); }
+  57% { background-image: url(images/jl-About-ma3.png); }
+  60% { background-image: url(images/jl-About-ma4.png); }
+  77% { background-image: url(images/jl-About-ma4.png); }
+  80% { background-image: url(images/jl-About-ma5.png); }
+  97% { background-image: url(images/jl-About-ma5.png); }
+  100% { background-image: url(images/jl-About-ma1.png); }
+}
+*/
