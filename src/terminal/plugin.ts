@@ -52,7 +52,7 @@ function activateTerminal(app: Application, services: JupyterServices): void {
     color: 'white',
     fontSize: 14
   };
-  
+
   app.commands.add([
     {
       id: newTerminalId,
@@ -115,11 +115,9 @@ function activateTerminal(app: Application, services: JupyterServices): void {
   ]);
 
   function increaseFont(): void {
-    if (!tracker.isDisposed) {
+    if (!tracker.isDisposed && options.fontSize < 72) {
       let widgets = tracker.widgets;
-      if (options.fontSize < 72) {
-        options.fontSize++;
-      }
+      options.fontSize++;
       for (let i = 0; i < widgets.length; i++) {
         widgets[i].fontSize = options.fontSize;
       }
@@ -127,11 +125,9 @@ function activateTerminal(app: Application, services: JupyterServices): void {
   }
 
   function decreaseFont(): void {
-    if (!tracker.isDisposed) {
+    if (!tracker.isDisposed && options.fontSize > 9) {
       let widgets = tracker.widgets;
-      if (options.fontSize > 9) {
-        options.fontSize--;
-      }
+      options.fontSize--;
       for (let i = 0; i < widgets.length; i++) {
         widgets[i].fontSize = options.fontSize;
       }
