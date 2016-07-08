@@ -14,8 +14,11 @@ FILE_LOADER = FileSystemLoader(HERE)
 BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
 
+STATIC_PATH = os.path.join(HERE, 'static')
+TEMPLATE_PATH = os.path.join(HERE, 'templates')
+
 class LabHandler(IPythonHandler):
-    """Render the Jupyter Lab View."""   
+    """Render the Jupyter Lab View."""
 
     @web.authenticated
     def get(self):
@@ -31,12 +34,26 @@ class LabHandler(IPythonHandler):
     def get_template(self, name):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
+class AboutHandler(IPythonHandler):
+    """Render the About Page"""
+
+    @web.authenticated
+    def get(self):
+        self.write(self.render_template('about.html',
+            static_prefix=ujoin(self.application.settings['base_url'], PREFIX),
+            page_title='About',
+    ))
+
+    def get_template(self, name):
+        return FILE_LOADER.load(self.settings['jinja2_env'], name)
+
 #-----------------------------------------------------------------------------
 # URL to handler mappings
 #-----------------------------------------------------------------------------
 
 default_handlers = [
     (PREFIX, LabHandler),
+    (PREFIX+"/about.html", AboutHandler),
     (PREFIX+r"/(.*)", FileFindHandler,
         {'path': BUILT_FILES}),
     ]
@@ -45,7 +62,7 @@ def _jupyter_server_extension_paths():
     return [{
         "module": "jupyterlab"
     }]
-    
+
 
 def load_jupyter_server_extension(nbapp):
     nbapp.log.info('Pre-alpha version of JupyterLab extension loaded from %s'%HERE)
