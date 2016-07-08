@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "es6-promise": "^3.1.2",
-    "jupyter-js-services": "^0.12.5",
+    "jupyter-js-services": "^0.14.0",
     "jupyterlab": "file:../../",
     "phosphide": "^0.9.5"
   },
