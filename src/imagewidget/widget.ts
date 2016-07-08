@@ -22,9 +22,6 @@ import {
  */
 const IMAGE_CLASS = 'jp-ImageWidget';
 
-const SCALE_FACTOR = 0.5;
-
-
 /**
  * A widget for images.
  */
@@ -50,18 +47,6 @@ class ImageWidget extends Widget {
     this._context = context;
     this.node.tabIndex = -1;
     this.addClass(IMAGE_CLASS);
-    let scaleNode = (<HTMLElement>this.node.querySelector('div'));
-    let zoomString: string;
-    if (SCALE_FACTOR > 1) {
-      zoomString = 'scale(' + SCALE_FACTOR + ') translate(' + (((SCALE_FACTOR-1)/2)*100/SCALE_FACTOR) + '%, ' + (((SCALE_FACTOR-1)/2)*100/SCALE_FACTOR) + '%)';
-    } else {
-      zoomString = 'scale(' + SCALE_FACTOR + ') translateY(' + (((SCALE_FACTOR-1)/2)*100/SCALE_FACTOR) + '%)';
-    }
-
-    console.log(zoomString);
-    console.log(scaleNode.style.width);
-    scaleNode.style.transform = zoomString;
-    //scaleNode.style.transform = 'scale(1.5) translate(16.7%, 16.7%)';
 
     if (context.model.toString()) {
       this.update();
@@ -99,6 +84,21 @@ class ImageWidget extends Widget {
     }
     let content = this._context.model.toString();
     this.node.querySelector('img').setAttribute('src', `data:${cm.mimetype};${cm.format},${content}`);
+  }
+
+  levelZoom(level: number): void {
+      let scaleNode = (<HTMLElement>this.node.querySelector('div'));
+      let zoomString: string;
+      if (level > 1) {
+        zoomString = 'scale(' + level + ') translate(' + (((level-1)/2)*100/level) + '%, ' + (((level-1)/2)*100/level) + '%)';
+      } else {
+        zoomString = 'scale(' + level + ') translateY(' + (((level-1)/2)*100/level) + '%)';
+      }
+
+      console.log(zoomString);
+      console.log(scaleNode.style.width);
+      scaleNode.style.transform = zoomString;
+      this.update();
   }
 
   private _context: IDocumentContext<IDocumentModel>;
