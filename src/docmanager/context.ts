@@ -372,6 +372,7 @@ class ContextManager implements IDisposable {
         return session.shutdown().then(() => {
           session.dispose();
           contextEx.session = null;
+          contextEx.context.kernelChanged.emit(null);
           return void 0;
         });
       } else {
