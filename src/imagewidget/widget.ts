@@ -17,6 +17,13 @@ import {
   ABCWidgetFactory, IDocumentModel, IWidgetFactory, IDocumentContext
 } from '../docregistry';
 
+/**
+ * The class name added to a imagewidget.
+ */
+const IMAGE_CLASS = 'jp-ImageWidget';
+
+const SCALE_FACTOR = 0.5;
+
 
 /**
  * A widget for images.
@@ -27,7 +34,12 @@ class ImageWidget extends Widget {
    * Create the node for the image widget.
    */
   static createNode(): HTMLElement {
-    return document.createElement('img');
+    let node = document.createElement('div');
+    let innerNode = document.createElement('div');
+    let image = document.createElement('img');
+    node.appendChild(innerNode);
+    innerNode.appendChild(image);
+    return node;
   }
 
   /**
@@ -37,8 +49,20 @@ class ImageWidget extends Widget {
     super();
     this._context = context;
     this.node.tabIndex = -1;
-    this.node.style.overflowX = 'auto';
-    this.node.style.overflowY = 'auto';
+    this.addClass(IMAGE_CLASS);
+    let scaleNode = (<HTMLElement>this.node.querySelector('div'));
+    let zoomString: string;
+    if (SCALE_FACTOR > 1) {
+      zoomString = 'scale(' + SCALE_FACTOR + ') translate(' + (((SCALE_FACTOR-1)/2)*100/SCALE_FACTOR) + '%, ' + (((SCALE_FACTOR-1)/2)*100/SCALE_FACTOR) + '%)';
+    } else {
+      zoomString = 'scale(' + SCALE_FACTOR + ') translateY(' + (((SCALE_FACTOR-1)/2)*100/SCALE_FACTOR) + '%)';
+    }
+
+    console.log(zoomString);
+    console.log(scaleNode.style.width);
+    scaleNode.style.transform = zoomString;
+    //scaleNode.style.transform = 'scale(1.5) translate(16.7%, 16.7%)';
+
     if (context.model.toString()) {
       this.update();
     }
@@ -69,13 +93,12 @@ class ImageWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     this.title.text = this._context.path.split('/').pop();
-    let node = this.node as HTMLImageElement;
     let cm = this._context.contentsModel;
     if (cm === null) {
       return;
     }
     let content = this._context.model.toString();
-    node.src = `data:${cm.mimetype};${cm.format},${content}`;
+    this.node.querySelector('img').setAttribute('src', `data:${cm.mimetype};${cm.format},${content}`);
   }
 
   private _context: IDocumentContext<IDocumentModel>;
