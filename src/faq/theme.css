@@ -4,28 +4,24 @@
 .faqbody {
   font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
 }
-
 .faqh1 {
   font-size: 26px;
   font-weight: 300;
   color: #313940;
   margin: 5px 0 0 20px;
 }
-
 #faqheader {
   width: 412px;
   display: flex;
   margin: 65px auto 0 auto;
   text-align: center;
 }
-
 .faqh2 {
   font-size: 13px;
   font-weight: 300;
   color: #9E9E9E;
   margin: 52px 0 0 0;
 }
-
 .faqul {
   margin: 0 0 0 0;
 }
@@ -48,20 +44,15 @@ li.faqanswer{
   list-style-type: none;
   margin: 28px 0 0 0;
 }
-
 li.faqquestion:hover {
   color: #F27624;
   h1 {
     color: brown;
   }
 }
-
 li.faqquestion:focus{
   color: #F27624;
 }
-
-
-
 .hide {
   display:none;
 }
@@ -70,7 +61,6 @@ li>faqanswer {
   color: #4A90E2;
   text-decoration: none;
 }
-
 #faqcontent {
   margin: 0 auto 0 auto;
   display: block;
@@ -84,4 +74,8 @@ h1 span.short-faq {
 
 h1 span.long-faq {
   display: block;
+}
+.faqa {
+    text-decoration: none;
+    color: #4A90E2;
 }
