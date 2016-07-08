@@ -1,5 +1,5 @@
 # Design of the notebook plugin
-This document describes the design of the Notebook plugin. This document illustrates how our research on personas and other solutions translates into the design decisions made to improve the Notebook plugin.
+This document describes the design of the notebook plugin. This document illustrates how our research on personas and other solutions translates into the design decisions made to improve the notebook plugin.
 
 # Personas
 ### Jane Gomez
