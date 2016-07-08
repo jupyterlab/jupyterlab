@@ -1,5 +1,5 @@
 # Design of the launcher plugin
-This document describes the design of the Launcher plugin. This document illustrates how our research on personas and other solutions translates into the design decisions made to improve the Launcher plugin.
+This document describes the design of the launcher plugin. This document illustrates how our research on personas and other solutions translates into the design decisions made to improve the launcher plugin.
 
 # Personas
 ### William Shar 
