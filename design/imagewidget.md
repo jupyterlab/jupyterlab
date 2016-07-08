@@ -3,7 +3,7 @@ This document describes the design of the imagewidget plugin. This document illu
 
 # Personas
 ### Jackie Lair
-Jackie Lair is an experienced data scientist who is familiar with JupyterLab and uses it regularly. He uses the imagewidget to compare MRI scans alongside her code and write programs that outputs the information found in the MRI scans. 
+Jackie Lair is an experienced data scientist who is familiar with JupyterLab and uses it regularly. She uses the imagewidget to compare MRI scans alongside her code and write programs that outputs the information found in the MRI scans. 
 
 **Goal:** To be able to manipulate images in JupyterLab to view alongside other tabs and support data analysis.
 
