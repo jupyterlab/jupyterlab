@@ -756,17 +756,17 @@ describe('notebook/notebook/actions', () => {
         });
       });
 
-      // it('should stop executing code cells on an error', (done) => {
-      //   widget.activeCell.model.source = ERROR_INPUT;
-      //   let cell = widget.model.factory.createCodeCell();
-      //   widget.model.cells.add(cell);
-      //   NotebookActions.runAll(widget, kernel).then(result => {
-      //     expect(result).to.be(false);
-      //     expect(cell.executionCount).to.be(null);
-      //     expect(widget.activeCellIndex).to.be(widget.childCount() - 1);
-      //     done();
-      //   });
-      // });
+      it('should stop executing code cells on an error', (done) => {
+        widget.activeCell.model.source = ERROR_INPUT;
+        let cell = widget.model.factory.createCodeCell();
+        widget.model.cells.add(cell);
+        NotebookActions.runAll(widget, kernel).then(result => {
+          expect(result).to.be(false);
+          expect(cell.executionCount).to.be(null);
+          expect(widget.activeCellIndex).to.be(widget.childCount() - 1);
+          done();
+        });
+      });
 
       // it('should render all markdown cells on an error', (done) => {
       //   widget.activeCell.model.source = ERROR_INPUT;
