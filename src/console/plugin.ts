@@ -143,7 +143,7 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
             specs,
             sessions,
             preferredLanguage: lang,
-            kernel: session.kernel,
+            kernel: session.kernel.model,
             host: widget.parent.node
           };
           return selectKernel(options);

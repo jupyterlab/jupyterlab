@@ -102,7 +102,7 @@ function selectKernelForContext(context: IDocumentContext<IDocumentModel>, host?
       specs: context.kernelspecs,
       sessions,
       preferredLanguage: context.model.defaultKernelLanguage,
-      kernel: context.kernel,
+      kernel: context.kernel.model,
       host
     };
     return selectKernel(options);
