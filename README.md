@@ -2,7 +2,7 @@
 
 An extensible computational environment for Jupyter.
 
-**This is a very early pre-alpha developer preview and not suitable for
+**JupyterLab is a very early developer preview, and is not suitable for
 general usage yet. Features and implementation are subject to change.**
 
 With JupyterLab, you can create a computational environment for Jupyter that
@@ -22,45 +22,44 @@ jupyter notebook --version
 
 ### User installation
 
-Install JupyterLab from the command line:
+From the command line:
 
 ```bash
 pip install jupyterlab
 jupyter serverextension enable --py jupyterlab
 ```
 
-Start up JupyterLab with the command:
+Start up JupyterLab:
 
 ```bash
 jupyter lab
 ```
 
-JupyterLab should open automatically in your browser. You can also access it
-by opening a browser to the notebook server's URL (e.g., `http://localhost:8888`).
+JupyterLab will open automatically in your browser. You may also access
+JupyterLab by entering the notebook server's URL (`http://localhost:8888`) in
+the browser.
 
 ----
 
 ## Documentation
 
 - [API Docs](http://jupyter.github.io/jupyterlab/)
-- [Architecture tutorial - useful for individuals developing JupyterLab](http://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
+- [Architecture tutorial](http://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
 
 ----
 
-## Development of JupyterLab
+## Contributing to JupyterLab
 
-The remainder of this document provides information for individuals that are
-developing JupyterLab. 
+### Setting up a development system
 
-### Prerequisites
+#### Prerequisites
 
 - Jupyter notebook version 4.2 or later
 - npm (preferably version 5 or later)
 
-### Installation
+#### Installation
 
-First fork the JupyterLab repo in the GitHub UI. Then
-clone the repo locally and building using these commands:
+Fork the JupyterLab repo using the GitHub UI. Clone the repo and build using these commands:
 
 ```bash
 git clone https://github.com/<your-github-username>/jupyterlab.git
@@ -71,42 +70,43 @@ jupyter serverextension enable --py jupyterlab
 ```
 
 ### Run JupyterLab
-Start up Jupyterlab with the command:
+
+Start JupyterLab:
 
 ```bash
 jupyter lab
 ```
 
-Open a browser to the notebook server's URL (e.g., `http://localhost:8888`).
+Alternatively, you can run JupyterLab in debug mode:
 
-### Run Tests
+```bash
+jupyter lab --debug
+```
 
-Follow the source build instructions first. Enter:
+### Run the tests
 
 ```bash
 npm test
 ```
 
-### Build and Run the Examples
+### Build and run the stand-alone examples
 
 To install and build the examples in the `examples` directory:
-
-- Follow the source build instructions first.
-- Requires a Python install with the Jupyter notebook (version 4.2 or later).
-- Run the command:
 
 ```bash
 npm run build:examples
 ```
 
-To run an example:
+To run a specific example, change to the example's directory (i.e.
+`examples/filebrowser`) and enter:
 
-- Change into the specific example's directory in the `examples` directory
-- run `python main.py`
+```bash
+python main.py
+```
 
 ### Build API Docs
 
-Follow the source build instructions first. Enter:
+To build the [API docs](http://jupyter.github.io/jupyterlab/):
 
 ```bash
 npm run docs
@@ -156,8 +156,9 @@ npm run build:all
 
 ## The Jupyter Server Extension
 
-The Jupyter server extension source files are in the `jupyterlab/` subdirectory. 
-To use this extension, you need the Jupyter notebook server version 4.2 or later.
+The Jupyter server extension source files are in the `jupyterlab/`
+subdirectory. To use this extension, make sure the Jupyter notebook server
+version 4.2 or later is installed.
 
 ### Build the JupyterLab server extension
 
@@ -167,15 +168,15 @@ When you make a change to JupyterLab npm package source files, run:
 npm run build:serverextension
 ```
 
-to build the changes and refresh your browser to see the changes.
+to build the changes and then refresh your browser to see the changes.
 
-To have the system build after each change to the source files, run:
+To have the system build after each source file change, run:
  
 ```bash
 npm run watch:serverextension
 ```
 
-and refresh the browser after each successful update.
+and refresh the browser.
 
 ## Bundle for the Browser
 
@@ -189,19 +190,20 @@ omit the type declarations when using a language other than TypeScript.
 
 ## Supported Runtimes
 
-The runtime versions which are currently *known to work* are listed below.
-Earlier versions may also work, but come with no guarantees.
+The runtime versions which are currently *known to work*: 
 
 - IE 11+
 - Firefox 32+
 - Chrome 38+
+
+Earlier browser versions may also work, but come with no guarantees.
 
 Note: "requirejs" must be included in a global context (usually as a
 `<script>` tag) for Comm targets.
 
 ## Publishing packages for a JupyterLab release
 
-We publish an npm package, a pypi source package, and a pypi universal binary wheel.
+We publish an npm package, a Python source package, and a Python universal binary wheel.
 
 ```bash
 npm version patch
