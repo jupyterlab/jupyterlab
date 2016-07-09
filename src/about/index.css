@@ -330,18 +330,17 @@ body {
   -webkit-transition: all 300ms ease;
   transition: all 300ms ease;
 }
-/*
+
 @keyframes jp-About-cimg-anim {
-  0% { background-image: url(images/jl-About-ma1.png); }
-  17% { background-image: url(images/jl-About-ma1.png); }
-  20% { background-image: url(images/jl-About-ma2.png); }
-  37% { background-image: url(images/jl-About-ma2.png); }
-  40% { background-image: url(images/jl-About-ma3.png); }
-  57% { background-image: url(images/jl-About-ma3.png); }
-  60% { background-image: url(images/jl-About-ma4.png); }
-  77% { background-image: url(images/jl-About-ma4.png); }
-  80% { background-image: url(images/jl-About-ma5.png); }
-  97% { background-image: url(images/jl-About-ma5.png); }
-  100% { background-image: url(images/jl-About-ma1.png); }
+  0% { background-image: url(images/jl-About-ma1-01.svg); }
+  17% { background-image: url(images/jl-About-ma1-01.svg); }
+  20% { background-image: url(images/jl-About-ma2-01.svg); }
+  37% { background-image: url(images/jl-About-ma2-01.svg); }
+  40% { background-image: url(images/jl-About-ma3-01.svg); }
+  57% { background-image: url(images/jl-About-ma3-01.svg); }
+  60% { background-image: url(images/jl-About-ma4-01.svg); }
+  77% { background-image: url(images/jl-About-ma4-01.svg); }
+  80% { background-image: url(images/jl-About-ma5-01.svg); }
+  97% { background-image: url(images/jl-About-ma5-01.svg); }
+  100% { background-image: url(images/jl-About-ma1-01.svg); }
 }
-*/
