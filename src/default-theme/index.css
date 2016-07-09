@@ -391,6 +391,25 @@ body {
 }
 
 
+.jp-Console-prompt {
+  border-color: #66BB6A;
+  border-left-width: 1px;
+  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
+}
+
+
+.p-Widget.jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
+  padding-left: 5px;
+  padding-right: 5px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  outline: none;
+  background: transparent;
+  border-color: transparent;
+}
+
+
 .jp-MainAreaLandscapeIcon {
   background-repeat: no-repeat;
   margin-right: 2px;
