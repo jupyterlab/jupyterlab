@@ -1,32 +1,24 @@
 {
   "private": true,
-  "name": "lab-example",
-  "version": "0.0.1",
-  "description": "JupyterLab extension",
+  "name": "jupyterlab-example",
+  "scripts": {
+    "build": "webpack --config webpack.conf.js",
+    "clean": "rimraf build && rimraf node_modules",
+    "postinstall": "npm dedupe",
+    "update": "rimraf node_modules/jupyterlab && npm install",
+    "watch": "watch 'npm run update && npm run build' ../../src --wait 10"
+  },
   "dependencies": {
     "es6-promise": "^3.1.2",
-    "font-awesome": "^4.6.1",
-    "jupyter-js-services": "^0.14.0",
+    "font-awesome": "^4.6.3",
+    "jupyter-js-services": "^0.12.5",
     "jupyterlab": "file:../../",
     "phosphide": "^0.9.5"
   },
   "devDependencies": {
-    "css-loader": "^0.23.1",
-    "file-loader": "^0.8.5",
-    "json-loader": "^0.5.4",
-    "rimraf": "^2.5.0",
-    "style-loader": "^0.13.0",
-    "typescript": "^1.7.5",
+    "rimraf": "^2.5.2",
     "url-loader": "^0.5.7",
-    "webpack": "^1.12.11"
-  },
-  "scripts": {
-    "clean": "rimraf build",
-    "update": "rimraf node_modules/jupyterlab && npm install",
-    "build": "webpack --config webpack.conf.js",
-    "postinstall": "npm dedupe",
-    "test": "echo 'no tests specified'"
-  },
-  "author": "Project Jupyter",
-  "license": "BSD-3-Clause"
+    "watch": "^0.18.0",
+    "webpack": "^1.13.1"
+  }
 }
