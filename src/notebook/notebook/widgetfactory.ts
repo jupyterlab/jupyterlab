@@ -6,7 +6,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  ABCWidgetFactory, IDocumentContext, findKernel
+  ABCWidgetFactory, IDocumentContext
 } from '../../docregistry';
 
 import {
@@ -73,12 +73,8 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    */
   createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernel.IModel): NotebookPanel {
     let rendermime = this._rendermime.clone();
-    let model = context.model;
     if (kernel) {
       context.changeKernel(kernel);
-    } else {
-      let name = findKernel(model.defaultKernelName, model.defaultKernelLanguage, context.kernelspecs);
-      context.changeKernel({ name });
     }
     let panel = new NotebookPanel({ rendermime, clipboard: this._clipboard });
     panel.context = context;
