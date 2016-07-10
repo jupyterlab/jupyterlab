@@ -17,6 +17,10 @@ import {
   ABCWidgetFactory, IDocumentModel, IWidgetFactory, IDocumentContext
 } from '../docregistry';
 
+/**
+ * The class name added to a imagewidget.
+ */
+const IMAGE_CLASS = 'jp-ImageWidget';
 
 /**
  * A widget for images.
@@ -27,7 +31,12 @@ class ImageWidget extends Widget {
    * Create the node for the image widget.
    */
   static createNode(): HTMLElement {
-    return document.createElement('img');
+    let node = document.createElement('div');
+    let innerNode = document.createElement('div');
+    let image = document.createElement('img');
+    node.appendChild(innerNode);
+    innerNode.appendChild(image);
+    return node;
   }
 
   /**
@@ -37,8 +46,8 @@ class ImageWidget extends Widget {
     super();
     this._context = context;
     this.node.tabIndex = -1;
-    this.node.style.overflowX = 'auto';
-    this.node.style.overflowY = 'auto';
+    this.addClass(IMAGE_CLASS);
+
     if (context.model.toString()) {
       this.update();
     }
@@ -69,13 +78,27 @@ class ImageWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     this.title.text = this._context.path.split('/').pop();
-    let node = this.node as HTMLImageElement;
     let cm = this._context.contentsModel;
     if (cm === null) {
       return;
     }
     let content = this._context.model.toString();
-    node.src = `data:${cm.mimetype};${cm.format},${content}`;
+    this.node.querySelector('img').setAttribute('src', `data:${cm.mimetype};${cm.format},${content}`);
+  }
+
+  levelZoom(level: number): void {
+      let scaleNode = (<HTMLElement>this.node.querySelector('div'));
+      let zoomString: string;
+      if (level > 1) {
+        zoomString = 'scale(' + level + ') translate(' + (((level-1)/2)*100/level) + '%, ' + (((level-1)/2)*100/level) + '%)';
+      } else {
+        zoomString = 'scale(' + level + ') translateY(' + (((level-1)/2)*100/level) + '%)';
+      }
+
+      console.log(zoomString);
+      console.log(scaleNode.style.width);
+      scaleNode.style.transform = zoomString;
+      this.update();
   }
 
   private _context: IDocumentContext<IDocumentModel>;
