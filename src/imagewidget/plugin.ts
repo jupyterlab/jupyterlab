@@ -2,22 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Application
+} from 'phosphide/lib/core/application';
+
+import {
   DocumentRegistry
 } from '../docregistry';
 
 import {
-  ImageWidgetFactory
-} from './widget';
-
-import {
-  Application
-} from 'phosphide/lib/core/application';
-import {
   WidgetTracker
 } from '../widgettracker';
+
 import {
-  ImageWidget
-} from './widget.ts';
+  ImageWidget, ImageWidgetFactory
+} from './widget';
 
 
 /**
@@ -37,13 +35,15 @@ const imageHandlerExtension = {
   activate: activateImageWidget
 };
 
-function activateImageWidget (app: Application, registry: DocumentRegistry): void {
+
+/**
+ * Activate the image widget extension.
+ */
+function activateImageWidget(app: Application, registry: DocumentRegistry): void {
     let zoomInImage = 'ImageWidget:zoomIn';
     let zoomOutImage = 'ImageWidget:zoomOut';
     let resetZoomImage = 'ImageWidget:resetZoom';
     let tracker = new WidgetTracker<ImageWidget>();
-
-    let scale = 1.0;
 
     let image = new ImageWidgetFactory();
 
@@ -59,7 +59,7 @@ function activateImageWidget (app: Application, registry: DocumentRegistry): voi
     registry.addWidgetFactory(image, options);
 
     image.widgetCreated.connect((sender, newWidget) => {
-        tracker.addWidget(newWidget);
+      tracker.addWidget(newWidget);
     });
 
     app.commands.add([
@@ -95,24 +95,34 @@ function activateImageWidget (app: Application, registry: DocumentRegistry): voi
     ]);
 
     function zoomIn(): void {
-        if (scale > 1) {
-            scale += .5;
-        } else {
-            scale *= 2;
-        }
-        tracker.activeWidget.levelZoom(scale);
+      if (!tracker.activeWidget) {
+        return;
+      }
+      let widget = tracker.activeWidget;
+      if (widget.scale > 1) {
+        widget.scale += .5;
+      } else {
+        widget.scale *= 2;
+      }
+    }
 
-    }
     function zoomOut(): void {
-        if (scale > 1) {
-            scale -= .5;
-        } else {
-            scale /= 2;
-        }
-        tracker.activeWidget.levelZoom(scale);
+      if (!tracker.activeWidget) {
+        return;
+      }
+      let widget = tracker.activeWidget;
+      if (widget.scale > 1) {
+        widget.scale -= .5;
+      } else {
+        widget.scale /= 2;
+      }
     }
+
     function resetZoom(): void {
-        scale = 1;
-        tracker.activeWidget.levelZoom(scale);
+      if (!tracker.activeWidget) {
+        return;
+      }
+      let widget = tracker.activeWidget;
+      widget.scale = 1;
     }
 }

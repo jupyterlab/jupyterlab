@@ -14,13 +14,14 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ABCWidgetFactory, IDocumentModel, IWidgetFactory, IDocumentContext
+  ABCWidgetFactory, IDocumentModel, IDocumentContext
 } from '../docregistry';
 
 /**
  * The class name added to a imagewidget.
  */
 const IMAGE_CLASS = 'jp-ImageWidget';
+
 
 /**
  * A widget for images.
@@ -63,6 +64,28 @@ class ImageWidget extends Widget {
   }
 
   /**
+   * The scale factor for the image.
+   */
+  get scale(): number {
+    return this._scale;
+  }
+  set scale(value: number) {
+    if (value === this._scale) {
+      return;
+    }
+    this._scale = value;
+    let scaleNode = this.node.querySelector('div') as HTMLElement;
+    let zoomString: string;
+    if (value > 1) {
+      zoomString = 'scale(' + value + ') translate(' + (((value-1)/2)*100/value) + '%, ' + (((value-1)/2)*100/value) + '%)';
+    } else {
+      zoomString = 'scale(' + value + ') translateY(' + (((value-1)/2)*100/value) + '%)';
+    }
+    scaleNode.style.transform = zoomString;
+    this.update();
+  }
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
@@ -86,22 +109,8 @@ class ImageWidget extends Widget {
     this.node.querySelector('img').setAttribute('src', `data:${cm.mimetype};${cm.format},${content}`);
   }
 
-  levelZoom(level: number): void {
-      let scaleNode = (<HTMLElement>this.node.querySelector('div'));
-      let zoomString: string;
-      if (level > 1) {
-        zoomString = 'scale(' + level + ') translate(' + (((level-1)/2)*100/level) + '%, ' + (((level-1)/2)*100/level) + '%)';
-      } else {
-        zoomString = 'scale(' + level + ') translateY(' + (((level-1)/2)*100/level) + '%)';
-      }
-
-      console.log(zoomString);
-      console.log(scaleNode.style.width);
-      scaleNode.style.transform = zoomString;
-      this.update();
-  }
-
   private _context: IDocumentContext<IDocumentModel>;
+  private _scale = 1;
 }
 
 
