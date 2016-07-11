@@ -99,7 +99,7 @@ class ConsoleTooltip extends Widget {
    * Handle `after_attach` messages for the widget.
    *
    * #### Notes
-   * Captures window events in to dismiss the tooltip widget.
+   * Captures document events to dismiss the tooltip widget.
    */
   protected onAfterAttach(msg: Message): void {
     document.addEventListener('keydown', this, USE_CAPTURE);

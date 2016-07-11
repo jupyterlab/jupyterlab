@@ -56,8 +56,8 @@ const cmdIds = {
   switchKernel: 'notebook:switch-kernel',
   clearAllOutputs: 'notebook:clear-outputs',
   run: 'notebook-cells:run',
-  runAndAdvance: 'notebook-cells:runAndAdvance',
-  runAndInsert: 'notebook-cells:runAndInsert',
+  runAndAdvance: 'notebook-cells:run-and-advance',
+  runAndInsert: 'notebook-cells:run-and-insert',
   runAll: 'notebook:run-all',
   toCode: 'notebook-cells:to-code',
   toMarkdown: 'notebook-cells:to-markdown',
@@ -73,12 +73,12 @@ const cmdIds = {
   selectBelow: 'notebook-cells:select-below',
   extendAbove: 'notebook-cells:extend-above',
   extendBelow: 'notebook-cells:extend-below',
-  editMode: 'notebook:editMode',
+  editMode: 'notebook:edit-mode',
   merge: 'notebook-cells:merge',
   split: 'notebook-cells:split',
-  commandMode: 'notebook:commandMode',
-  toggleLines: 'notebook-cells:toggle-lineNumbers',
-  toggleAllLines: 'notebook-cells:toggle-allLineNumbers',
+  commandMode: 'notebook:command-mode',
+  toggleLines: 'notebook-cells:toggle-line-numbers',
+  toggleAllLines: 'notebook-cells:toggle-all-line-numbers',
   undo: 'notebook-cells:undo',
   redo: 'notebook-cells:redo',
   markdown1: 'notebook-cells:markdown-header1',
@@ -173,7 +173,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
 
   app.commands.add([
   {
-    id: cmdIds['runAndAdvance'],
+    id: cmdIds.runAndAdvance,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -182,7 +182,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['run'],
+    id: cmdIds.run,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -191,7 +191,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['runAndInsert'],
+    id: cmdIds.runAndInsert,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -200,7 +200,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['runAll'],
+    id: cmdIds.runAll,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -209,7 +209,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['restart'],
+    id: cmdIds.restart,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -218,7 +218,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['restartClear'],
+    id: cmdIds.restartClear,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -232,7 +232,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['restartRunAll'],
+    id: cmdIds.restartRunAll,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -244,7 +244,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['clearAllOutputs'],
+    id: cmdIds.clearAllOutputs,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -253,7 +253,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['clearOutputs'],
+    id: cmdIds.clearOutputs,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -262,7 +262,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['interrupt'],
+    id: cmdIds.interrupt,
     handler: () => {
       if (tracker.activeWidget) {
         let kernel = tracker.activeWidget.context.kernel;
@@ -273,7 +273,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['toCode'],
+    id: cmdIds.toCode,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -282,7 +282,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['toMarkdown'],
+    id: cmdIds.toMarkdown,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -291,7 +291,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['toRaw'],
+    id: cmdIds.toRaw,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -300,7 +300,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['cut'],
+    id: cmdIds.cut,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -309,7 +309,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['copy'],
+    id: cmdIds.copy,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -318,7 +318,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['paste'],
+    id: cmdIds.paste,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -327,7 +327,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['deleteCell'],
+    id: cmdIds.deleteCell,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -336,7 +336,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['split'],
+    id: cmdIds.split,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -345,7 +345,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['merge'],
+    id: cmdIds.merge,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -354,7 +354,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['insertAbove'],
+    id: cmdIds.insertAbove,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -363,7 +363,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['insertBelow'],
+    id: cmdIds.insertBelow,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -372,7 +372,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['selectAbove'],
+    id: cmdIds.selectAbove,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -381,7 +381,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['selectBelow'],
+    id: cmdIds.selectBelow,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -390,7 +390,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['extendAbove'],
+    id: cmdIds.extendAbove,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -399,7 +399,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['extendBelow'],
+    id: cmdIds.extendBelow,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -408,7 +408,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['toggleLines'],
+    id: cmdIds.toggleLines,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -417,7 +417,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['toggleAllLines'],
+    id: cmdIds.toggleAllLines,
     handler: () => {
       if (tracker.activeWidget) {
         let nbWidget = tracker.activeWidget;
@@ -426,7 +426,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['commandMode'],
+    id: cmdIds.commandMode,
     handler: () => {
       if (tracker.activeWidget) {
         tracker.activeWidget.content.mode = 'command';
@@ -434,7 +434,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['editMode'],
+    id: cmdIds.editMode,
     handler: () => {
       if (tracker.activeWidget) {
         tracker.activeWidget.content.mode = 'edit';
@@ -442,7 +442,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['undo'],
+    id: cmdIds.undo,
     handler: () => {
       if (tracker.activeWidget) {
         NotebookActions.undo(tracker.activeWidget.content);
@@ -450,7 +450,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['redo'],
+    id: cmdIds.redo,
     handler: () => {
       if (tracker.activeWidget) {
         NotebookActions.redo(tracker.activeWidget.content);
@@ -458,7 +458,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['switchKernel'],
+    id: cmdIds.switchKernel,
     handler: () => {
       if (tracker.activeWidget) {
         selectKernelForContext(tracker.activeWidget.context, tracker.activeWidget.node);
@@ -466,7 +466,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['markdown1'],
+    id: cmdIds.markdown1,
     handler: () => {
       if (tracker.activeWidget) {
         NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 1);
@@ -474,7 +474,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['markdown2'],
+    id: cmdIds.markdown2,
     handler: () => {
       if (tracker.activeWidget) {
         NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 2);
@@ -482,7 +482,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['markdown3'],
+    id: cmdIds.markdown3,
     handler: () => {
       if (tracker.activeWidget) {
         NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 3);
@@ -490,7 +490,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['markdown4'],
+    id: cmdIds.markdown4,
     handler: () => {
       if (tracker.activeWidget) {
         NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 4);
@@ -498,7 +498,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['markdown5'],
+    id: cmdIds.markdown5,
     handler: () => {
       if (tracker.activeWidget) {
         NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 5);
@@ -506,7 +506,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     }
   },
   {
-    id: cmdIds['markdown6'],
+    id: cmdIds.markdown6,
     handler: () => {
       if (tracker.activeWidget) {
         NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 6);
@@ -516,192 +516,192 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   ]);
   app.palette.add([
   {
-    command: cmdIds['run'],
+    command: cmdIds.run,
     category: 'Notebook Cell Operations',
     text: 'Run Cell(s)'
   },
   {
-    command: cmdIds['runAndAdvance'],
+    command: cmdIds.runAndAdvance,
     category: 'Notebook Cell Operations',
     text: 'Run Cell(s) and Advance'
   },
   {
-    command: cmdIds['runAndInsert'],
+    command: cmdIds.runAndInsert,
     category: 'Notebook Cell Operations',
     text: 'Run Cell(s) and Insert'
   },
   {
-    command: cmdIds['interrupt'],
+    command: cmdIds.interrupt,
     category: 'Notebook Operations',
     text: 'Interrupt Kernel'
   },
   {
-    command: cmdIds['restart'],
+    command: cmdIds.restart,
     category: 'Notebook Operations',
     text: 'Restart Kernel'
   },
   {
-    command: cmdIds['restartClear'],
+    command: cmdIds.restartClear,
     category: 'Notebook Operations',
     text: 'Restart Kernel & Clear Outputs'
   },
   {
-    command: cmdIds['restartRunAll'],
+    command: cmdIds.restartRunAll,
     category: 'Notebook Operations',
     text: 'Restart Kernel & Run All'
   },
   {
-    command: cmdIds['runAll'],
+    command: cmdIds.runAll,
     category: 'Notebook Operations',
     text: 'Run All Cells'
   },
   {
-    command: cmdIds['clearAllOutputs'],
+    command: cmdIds.clearAllOutputs,
     category: 'Notebook Operations',
     text: 'Clear All Outputs'
   },
   {
-    command: cmdIds['clearOutputs'],
+    command: cmdIds.clearOutputs,
     category: 'Notebook Cell Operations',
     text: 'Clear Output(s)'
   },
   {
-    command: cmdIds['toCode'],
+    command: cmdIds.toCode,
     category: 'Notebook Cell Operations',
     text: 'Convert to Code'
   },
   {
-    command: cmdIds['toMarkdown'],
+    command: cmdIds.toMarkdown,
     category: 'Notebook Cell Operations',
     text: 'Convert to Markdown'
   },
   {
-    command: cmdIds['toRaw'],
+    command: cmdIds.toRaw,
     category: 'Notebook Cell Operations',
     text: 'Convert to Raw'
   },
   {
-    command: cmdIds['cut'],
+    command: cmdIds.cut,
     category: 'Notebook Cell Operations',
     text: 'Cut Cell(s)'
   },
   {
-    command: cmdIds['copy'],
+    command: cmdIds.copy,
     category: 'Notebook Cell Operations',
     text: 'Copy Cell(s)'
   },
   {
-    command: cmdIds['paste'],
+    command: cmdIds.paste,
     category: 'Notebook Cell Operations',
     text: 'Paste Cell(s)'
   },
   {
-    command: cmdIds['deleteCell'],
+    command: cmdIds.deleteCell,
     category: 'Notebook Cell Operations',
     text: 'Delete Cell(s)'
   },
   {
-    command: cmdIds['split'],
+    command: cmdIds.split,
     category: 'Notebook Cell Operations',
     text: 'Split Cell'
   },
   {
-    command: cmdIds['merge'],
+    command: cmdIds.merge,
     category: 'Notebook Cell Operations',
     text: 'Merge Selected Cell(s)'
   },
   {
-    command: cmdIds['insertAbove'],
+    command: cmdIds.insertAbove,
     category: 'Notebook Cell Operations',
     text: 'Insert Cell Above'
   },
   {
-    command: cmdIds['insertBelow'],
+    command: cmdIds.insertBelow,
     category: 'Notebook Cell Operations',
     text: 'Insert Cell Below'
   },
   {
-    command: cmdIds['selectAbove'],
+    command: cmdIds.selectAbove,
     category: 'Notebook Cell Operations',
     text: 'Select Cell Above'
   },
   {
-    command: cmdIds['selectBelow'],
+    command: cmdIds.selectBelow,
     category: 'Notebook Cell Operations',
     text: 'Select Cell Below'
   },
   {
-    command: cmdIds['extendAbove'],
+    command: cmdIds.extendAbove,
     category: 'Notebook Cell Operations',
     text: 'Extend Selection Above'
   },
   {
-    command: cmdIds['extendBelow'],
+    command: cmdIds.extendBelow,
     category: 'Notebook Cell Operations',
     text: 'Extend Selection Below'
   },
   {
-    command: cmdIds['toggleLines'],
+    command: cmdIds.toggleLines,
     category: 'Notebook Cell Operations',
     text: 'Toggle Line Numbers'
   },
   {
-    command: cmdIds['toggleAllLines'],
+    command: cmdIds.toggleAllLines,
     category: 'Notebook Operations',
     text: 'Toggle All Line Numbers'
   },
   {
-    command: cmdIds['editMode'],
+    command: cmdIds.editMode,
     category: 'Notebook Operations',
     text: 'To Edit Mode'
   },
   {
-    command: cmdIds['commandMode'],
+    command: cmdIds.commandMode,
     category: 'Notebook Operations',
     text: 'To Command Mode'
   },
   {
-    command: cmdIds['switchKernel'],
+    command: cmdIds.switchKernel,
     category: 'Notebook Operations',
     text: 'Switch Kernel'
   },
   {
-    command: cmdIds['undo'],
+    command: cmdIds.undo,
     category: 'Notebook Cell Operations',
     text: 'Undo Cell Operation'
   },
   {
-    command: cmdIds['redo'],
+    command: cmdIds.redo,
     category: 'Notebook Cell Operations',
     text: 'Redo Cell Operation'
   },
   {
-    command: cmdIds['markdown1'],
+    command: cmdIds.markdown1,
     category: 'Notebook Cell Operations',
     text: 'Markdown Header 1'
   },
   {
-    command: cmdIds['markdown1'],
+    command: cmdIds.markdown2,
     category: 'Notebook Cell Operations',
     text: 'Markdown Header 2'
   },
   {
-    command: cmdIds['markdown1'],
+    command: cmdIds.markdown3,
     category: 'Notebook Cell Operations',
     text: 'Markdown Header 3'
   },
   {
-    command: cmdIds['markdown1'],
+    command: cmdIds.markdown4,
     category: 'Notebook Cell Operations',
     text: 'Markdown Header 4'
   },
   {
-    command: cmdIds['markdown1'],
+    command: cmdIds.markdown5,
     category: 'Notebook Cell Operations',
     text: 'Markdown Header 5'
   },
   {
-    command: cmdIds['markdown1'],
+    command: cmdIds.markdown6,
     category: 'Notebook Cell Operations',
     text: 'Markdown Header 6'
   }

@@ -146,6 +146,17 @@ class CompletionWidget extends Widget {
   }
 
   /**
+   * Reset the widget.
+   */
+  reset(): void {
+    if (this._model) {
+      this._model.reset();
+    }
+    this._activeIndex = 0;
+    this._anchorPoint = 0;
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -223,7 +234,7 @@ class CompletionWidget extends Widget {
     // If there is only one item, signal and bail.
     if (items.length === 1) {
       this.selected.emit(items[0].raw);
-      this._reset();
+      this.reset();
       return;
     }
 
@@ -288,12 +299,6 @@ class CompletionWidget extends Widget {
             event.stopImmediatePropagation();
             this._selectActive();
             return;
-          case 27: // Escape key
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            this._reset();
-            return;
           case 38: // Up arrow key
           case 40: // Down arrow key
             event.preventDefault();
@@ -307,7 +312,7 @@ class CompletionWidget extends Widget {
       }
       target = target.parentElement;
     }
-    this._reset();
+    this.reset();
   }
 
   /**
@@ -315,7 +320,7 @@ class CompletionWidget extends Widget {
    */
   private _evtMousedown(event: MouseEvent) {
     if (Private.nonstandardClick(event)) {
-      this._reset();
+      this.reset();
       return;
     }
 
@@ -327,7 +332,7 @@ class CompletionWidget extends Widget {
         event.stopPropagation();
         event.stopImmediatePropagation();
         this.selected.emit(target.dataset['value']);
-        this._reset();
+        this.reset();
         return;
       }
       // If the mouse event happened anywhere else in the widget, bail.
@@ -339,7 +344,7 @@ class CompletionWidget extends Widget {
       }
       target = target.parentElement;
     }
-    this._reset();
+    this.reset();
   }
 
   /**
@@ -368,17 +373,6 @@ class CompletionWidget extends Widget {
       return true;
     }
     return false;
-  }
-
-  /**
-   * Reset the widget.
-   */
-  private _reset(): void {
-    if (this._model) {
-      this._model.reset();
-    }
-    this._activeIndex = 0;
-    this._anchorPoint = 0;
   }
 
   /**
@@ -428,7 +422,7 @@ class CompletionWidget extends Widget {
       return;
     }
     this.selected.emit(active.dataset['value']);
-    this._reset();
+    this.reset();
   }
 
   private _anchor: HTMLElement = null;
