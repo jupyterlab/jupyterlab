@@ -116,6 +116,11 @@ const FILE_ICON_CLASS = 'jp-mod-file';
  */
 const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
 
+/**
+ * The duration of auto-refresh in ms.
+ */
+const REFRESH_DURATION = 10000;
+
 
 /**
  * A class that exposes the running terminal and kernel sessions.
@@ -234,6 +239,7 @@ class RunningSessions extends Widget {
    * Refresh the widget.
    */
   refresh(): Promise<void> {
+    clearTimeout(this._refreshId);
     return this._manager.terminals.listRunning().then(running => {
       this._runningTerminals = running;
       return this._manager.sessions.listRunning();
@@ -247,6 +253,9 @@ class RunningSessions extends Widget {
         }
       }
       this.update();
+      this._refreshId = setTimeout(() => {
+        this.refresh();
+      }, REFRESH_DURATION);
     });
   }
 
@@ -384,6 +393,7 @@ class RunningSessions extends Widget {
   private _renderer: RunningSessions.IRenderer = null;
   private _runningSessions: ISession.IModel[] = [];
   private _runningTerminals: ITerminalSession.IModel[] = [];
+  private _refreshId = -1;
 }
 
 
