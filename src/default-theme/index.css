@@ -6,6 +6,8 @@
 @import url('~jupyterlab/lib/notebook/theme.css');
 @import url('~jupyterlab/lib/index.css');
 @import url('~jupyterlab/lib/theme.css');
+@import url('~jupyterlab/lib/running/index.css');
+@import url('~jupyterlab/lib/running/theme.css');
 
 @import './about.css';
 @import './commandpalette.css';

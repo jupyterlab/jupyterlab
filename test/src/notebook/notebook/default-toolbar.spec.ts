@@ -66,7 +66,7 @@ describe('notebook/notebook/default-toolbar', () => {
       panel.context = context;
       context.changeKernel({ name: 'python' }).then(() => {
         done();
-      });
+      }).catch(done);
     });
 
     afterEach(() => {

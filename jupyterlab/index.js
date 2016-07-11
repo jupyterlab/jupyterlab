@@ -12,6 +12,7 @@ require('jupyterlab/lib/default-theme/index.css');
 var app = new phosphide.Application({
   extensions: [
     require('jupyterlab/lib/about/plugin').aboutExtension,
+    require('jupyterlab/lib/faq/plugin').faqExtension,
     require('jupyterlab/lib/console/plugin').consoleExtension,
     require('jupyterlab/lib/editorwidget/plugin').editorHandlerExtension,
     require('jupyterlab/lib/filebrowser/plugin').fileBrowserExtension,
@@ -21,6 +22,7 @@ var app = new phosphide.Application({
     require('jupyterlab/lib/main/plugin').mainExtension,
     require('jupyterlab/lib/mainmenu/plugin').mainMenuExtension,
     require('jupyterlab/lib/notebook/plugin').notebookHandlerExtension,
+    require('jupyterlab/lib/running/plugin').runningSessionsExtension,
     require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
     require('jupyterlab/lib/terminal/plugin').terminalExtension,
     require('jupyterlab/lib/widgets/plugin').widgetManagerExtension,

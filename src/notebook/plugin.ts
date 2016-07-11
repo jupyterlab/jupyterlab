@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ServiceManager
+} from 'jupyter-js-services';
+
+import {
   Application
 } from 'phosphide/lib/core/application';
 
@@ -20,10 +24,6 @@ import {
 import {
   RenderMime
 } from '../rendermime';
-
-import {
-  JupyterServices
-} from '../services/plugin';
 
 import {
   WidgetTracker
@@ -103,7 +103,7 @@ class NotebookTracker extends WidgetTracker<NotebookPanel> { }
 export
 const notebookHandlerExtension = {
   id: 'jupyter.extensions.notebookHandler',
-  requires: [DocumentRegistry, JupyterServices, RenderMime, IClipboard],
+  requires: [DocumentRegistry, ServiceManager, RenderMime, IClipboard],
   activate: activateNotebookHandler
 };
 
@@ -124,7 +124,7 @@ const notebookTrackerProvider = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: JupyterServices, rendermime: RenderMime<Widget>, clipboard: IClipboard): void {
+function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: ServiceManager, rendermime: RenderMime<Widget>, clipboard: IClipboard): void {
 
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard);
   let options: IWidgetFactoryOptions = {

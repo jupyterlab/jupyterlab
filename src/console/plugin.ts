@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ServiceManager
+} from 'jupyter-js-services';
+
+import {
   ConsolePanel
 } from './widget';
 
@@ -29,10 +33,6 @@ import {
   Widget
 } from 'phosphor-widget';
 
-import {
-  JupyterServices
-} from '../services/plugin';
-
 
 /**
  * The console extension.
@@ -40,7 +40,7 @@ import {
 export
 const consoleExtension = {
   id: 'jupyter.extensions.console',
-  requires: [JupyterServices, RenderMime],
+  requires: [ServiceManager, RenderMime],
   activate: activateConsole
 };
 
@@ -58,9 +58,9 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 /**
  * Activate the console extension.
  */
-function activateConsole(app: Application, services: JupyterServices, rendermime: RenderMime<Widget>): Promise<void> {
+function activateConsole(app: Application, services: ServiceManager, rendermime: RenderMime<Widget>): Promise<void> {
   let tracker = new WidgetTracker<ConsolePanel>();
-  let manager = services.sessionManager;
+  let manager = services.sessions;
 
   // Add the ability to create new consoles for each kernel.
   let specs = services.kernelspecs;
@@ -82,7 +82,9 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
           path: `Console-${count++}`,
           kernelName: `${displayNameMap[displayName]}`
         }).then(session => {
-          let panel = new ConsolePanel(session, rendermime.clone());
+          let panel = new ConsolePanel({
+            session, rendermime: rendermime.clone()
+          });
           panel.id = `console-${count}`;
           panel.title.text = `${displayName} (${count})`;
           panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
@@ -143,7 +145,7 @@ function activateConsole(app: Application, services: JupyterServices, rendermime
             specs,
             sessions,
             preferredLanguage: lang,
-            kernel: session.kernel,
+            kernel: session.kernel.model,
             host: widget.parent.node
           };
           return selectKernel(options);
