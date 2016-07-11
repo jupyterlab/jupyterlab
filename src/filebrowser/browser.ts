@@ -60,7 +60,7 @@ const LISTING_CLASS = 'jp-FileBrowser-listing';
 /**
  * The duration of auto-refresh in ms.
  */
-const REFRESH_DURATION = 30000;
+const REFRESH_DURATION = 10000;
 
 
 /**

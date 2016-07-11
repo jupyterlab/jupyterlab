@@ -205,12 +205,6 @@ class DocumentWidgetManager {
     // Handle dirty state.
     this._maybeClose(widget).then(result => {
       if (result) {
-        // Perform close tasks.
-        return this._actuallyClose(widget);
-      }
-      return result;
-    }).then(result => {
-      if (result) {
         this._closeGuard = true;
         widget.close();
         this._closeGuard = false;
@@ -242,41 +236,6 @@ class DocumentWidgetManager {
         return true;
       }
       return false;
-    });
-  }
-
-  /**
-   * Perform closing tasks for the widget.
-   */
-  private _actuallyClose(widget: Widget): Promise<boolean> {
-    let id = Private.idProperty.get(widget);
-    let context = this._contextManager.getContext(id);
-    // Check for a dangling kernel.
-    let widgets = this._widgets[id];
-    let kernelId = context.kernel ? context.kernel.id : '';
-    if (!kernelId || widgets.length > 1) {
-      return Promise.resolve(true);
-    }
-    for (let otherId in this._widgets) {
-      if (otherId === id) {
-        continue;
-      }
-      let otherContext = this._contextManager.getContext(id);
-      let kId = otherContext.kernel || otherContext.kernel.id;
-      if (kId === kernelId) {
-        return Promise.resolve(true);
-      }
-    }
-    return showDialog({
-      title: 'Shut down kernel?',
-      body: `Shut down ${context.kernel.name}?`,
-      host: widget.node
-    }).then(value => {
-      if (value && value.text === 'OK') {
-        return context.changeKernel(null);
-      }
-    }).then(() => {
-      return true;
     });
   }
 
