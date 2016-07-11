@@ -132,7 +132,7 @@ class RunningSessions extends Widget {
     let terminals = document.createElement('div');
     terminals.className = `${SECTION_CLASS} ${TERMINALS_CLASS}`;
     let sessions = document.createElement('div');
-    sessions.className = `$${SECTION_CLASS} ${SESSIONS_CLASS}`;
+    sessions.className = `${SECTION_CLASS} ${SESSIONS_CLASS}`;
 
     let title = document.createElement('span');
     title.textContent = 'Currently Running Jupyter Processes';
