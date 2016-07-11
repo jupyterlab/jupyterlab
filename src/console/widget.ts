@@ -73,6 +73,11 @@ const CONSOLE_PANEL = 'jp-Console-panel';
  */
 const BANNER_CLASS = 'jp-Console-banner';
 
+/**
+ * The class name of the active prompt
+ */
+const PROMPT_CLASS = 'jp-Console-prompt';
+
 
 /**
  * A panel which contains a toolbar and a console.
@@ -383,6 +388,7 @@ class ConsoleWidget extends Widget {
     let prompt = this.prompt;
     if (prompt) {
       prompt.readOnly = true;
+      prompt.removeClass(PROMPT_CLASS);
       clearSignalData(prompt.editor);
     }
 
@@ -391,6 +397,7 @@ class ConsoleWidget extends Widget {
     let constructor = this.constructor as typeof ConsoleWidget;
     prompt = constructor.createPrompt(this._rendermime);
     prompt.mimetype = this._mimetype;
+    prompt.addClass(PROMPT_CLASS);
     layout.addChild(prompt);
 
     // Hook up completion, tooltip, and history handling.
