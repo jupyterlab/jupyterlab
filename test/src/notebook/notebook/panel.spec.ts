@@ -166,15 +166,6 @@ describe('notebook/notebook/panel', () => {
         expect(called).to.be(true);
       });
 
-      it('should not be emitted when the kernel does not change', () => {
-        let panel = createPanel();
-        let called = false;
-        panel.kernelChanged.connect(() => { called = true; });
-        let context = new MockContext<INotebookModel>(panel.model);
-        panel.context = context;
-        expect(called).to.be(false);
-      });
-
     });
 
     describe('#toolbar', () => {
@@ -209,9 +200,9 @@ describe('notebook/notebook/panel', () => {
 
       it('should be the current kernel used by the panel', () => {
         let panel = createPanel();
-        expect(panel.kernel).to.be(null);
-        panel.context.changeKernel({ name: 'python' });
         expect(panel.kernel.name).to.be('python');
+        panel.context.changeKernel({ name: 'shell' });
+        expect(panel.kernel.name).to.be('shell');
       });
 
       it('should be read-only', () => {
