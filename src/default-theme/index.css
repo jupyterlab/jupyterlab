@@ -261,13 +261,6 @@ body {
 }
 
 
-.p-StackedPanel-child {
-  border-right: 1px solid #BDBDBD;
-  border-left: 1px solid #BDBDBD;
-  border-bottom: 1px solid #BDBDBD;
-}
-
-
 #p-main-split-panel > .p-SplitPanel-handle {
   background: #BDBDBD;
 }
