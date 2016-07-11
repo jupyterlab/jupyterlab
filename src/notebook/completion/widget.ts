@@ -176,23 +176,19 @@ class CompletionWidget extends Widget {
 
   /**
    * Handle `after_attach` messages for the widget.
-   *
-   * #### Notes
-   * Captures window events in capture phase to dismiss or navigate the
-   * completion widget. Captures scroll events on the anchor element to
-   * peg the completion widget's scroll position to the anchor.
    */
   protected onAfterAttach(msg: Message): void {
-    window.addEventListener('keydown', this, USE_CAPTURE);
-    window.addEventListener('mousedown', this, USE_CAPTURE);
+    document.addEventListener('keydown', this, USE_CAPTURE);
+    document.addEventListener('mousedown', this, USE_CAPTURE);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    window.removeEventListener('keydown', this, USE_CAPTURE);
-    window.removeEventListener('mousedown', this, USE_CAPTURE);
+    document.removeEventListener('keydown', this, USE_CAPTURE);
+    document.removeEventListener('mousedown', this, USE_CAPTURE);
+
     if (this._anchor) {
       this._anchor.removeEventListener('scroll', this, USE_CAPTURE);
     }

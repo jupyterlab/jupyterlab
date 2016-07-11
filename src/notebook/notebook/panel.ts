@@ -22,6 +22,10 @@ import {
 } from 'phosphor-signaling';
 
 import {
+  Message
+} from 'phosphor-messaging';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -232,6 +236,44 @@ class NotebookPanel extends Widget {
     this._completion = null;
     this._renderer = null;
     super.dispose();
+  }
+
+    /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'keydown':
+      // The notebook panel should swallow all escape keydown events.
+      if ((event as KeyboardEvent).keyCode === 27) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle `after_attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.content.node.addEventListener('keydown', this);
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.content.node.removeEventListener('keydown', this);
   }
 
   /**

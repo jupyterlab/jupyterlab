@@ -137,6 +137,13 @@ class ConsolePanel extends Panel {
         prompt.focus();
       }
       break;
+    case 'keydown':
+      // The console panel should swallow all escape keydown events.
+      if ((event as KeyboardEvent).keyCode === 27) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      break;
     default:
       break;
     }
@@ -147,6 +154,7 @@ class ConsolePanel extends Panel {
    */
   protected onAfterAttach(msg: Message): void {
     this.content.node.addEventListener('click', this);
+    this.content.node.addEventListener('keydown', this);
   }
 
   /**
@@ -154,6 +162,7 @@ class ConsolePanel extends Panel {
    */
   protected onBeforeDetach(msg: Message): void {
     this.content.node.removeEventListener('click', this);
+    this.content.node.removeEventListener('keydown', this);
   }
 
   /**
