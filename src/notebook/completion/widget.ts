@@ -280,6 +280,9 @@ class CompletionWidget extends Widget {
    * Handle keydown events for the widget.
    */
   private _evtKeydown(event: KeyboardEvent) {
+    if (this.isHidden || !this._anchor) {
+      return;
+    }
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
       if (target === this._anchor) {
@@ -319,6 +322,9 @@ class CompletionWidget extends Widget {
    * Handle mousedown events for the widget.
    */
   private _evtMousedown(event: MouseEvent) {
+    if (this.isHidden || !this._anchor) {
+      return;
+    }
     if (Private.nonstandardClick(event)) {
       this.reset();
       return;
@@ -351,7 +357,7 @@ class CompletionWidget extends Widget {
    * Handle scroll events for the widget
    */
   private _evtScroll(event: MouseEvent) {
-    if (this.isHidden) {
+    if (this.isHidden || !this._anchor) {
       return;
     }
     this._setGeometry();
