@@ -137,7 +137,7 @@ function activateAbout(app: Application): void {
           <a name="filebrowser"></a>
           <div class="sectioncenter">
             <p class="header content"><span class="jp-img jp-About-hero-filebrowser"></span>File Browser</p>
-            <span class="jp-img jp-About-mainarea-cimg"></span>
+            <span class="jp-img jp-About-fb"></span>
             <p class="content-desc">Clicking the "Files" tab, located on the left, will toggle the file browser. Navigate into directories by double-clicking, and use the breadcrumbs at the top to navigate out. Create a new file/directory by clicking the plus icon at the top. Click the middle icon to upload files, and click the last icon to reload the file listing. Drag and drop files to move them to subdirectories. Click on a selected file to rename it. Sort the list by clicking on a column header. Open a file by double-clicking it or dragging it into the main area. Opening an image displays the image. Opening a code file opens a code editor. Opening a notebook opens a very preliminary notebook component.</p>
             <a href="#notebook">
               <span class="nav-button"></span>

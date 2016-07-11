@@ -331,6 +331,44 @@
   transition: all 300ms ease;
 }
 
+#about .jp-About-fb {
+  display: block;
+  margin: 40px 0 35px 0;
+  height: 38vh;
+  max-height: 453px;
+  -webkit-animation: jp-About-fb-anim linear 25s infinite;
+  animation: jp-About-fb-anim linear 25s infinite;
+  -webkit-transition: all 300ms ease;
+  transition: all 300ms ease;
+}
+
+
+@keyframes jp-About-fb-anim {
+  0% { background-image: url(images/jl-About-fb1-01.svg); }
+  6% { background-image: url(images/jl-About-fb1-01.svg); }
+  9% { background-image: url(images/jl-About-fb2-01.svg); }
+  15% { background-image: url(images/jl-About-fb2-01.svg); }
+  18% { background-image: url(images/jl-About-fb3-01.svg); }
+  24% { background-image: url(images/jl-About-fb3-01.svg); }
+  27% { background-image: url(images/jl-About-fb4-01.svg); }
+  33% { background-image: url(images/jl-About-fb4-01.svg); }
+  36% { background-image: url(images/jl-About-fb5-01.svg); }
+  42% { background-image: url(images/jl-About-fb5-01.svg); }
+  45% { background-image: url(images/jl-About-fb6-01.svg); }
+  51% { background-image: url(images/jl-About-fb6-01.svg); }
+  57% { background-image: url(images/jl-About-fb7-01.svg); }
+  60% { background-image: url(images/jl-About-fb7-01.svg); }
+  63% { background-image: url(images/jl-About-fb8-01.svg); }
+  69% { background-image: url(images/jl-About-fb8-01.svg); }
+  72% { background-image: url(images/jl-About-fb9-01.svg); }
+  78% { background-image: url(images/jl-About-fb9-01.svg); }
+  81% { background-image: url(images/jl-About-fb10-01.svg); }
+  87% { background-image: url(images/jl-About-fb10-01.svg); }
+  90% { background-image: url(images/jl-About-fb11-01.svg); }
+  96% { background-image: url(images/jl-About-fb11-01.svg); }
+  100% { background-image: url(images/jl-About-fb1-01.svg); }
+}
+
 @keyframes jp-About-cimg-anim {
   0% { background-image: url(images/jl-About-ma1-01.svg); }
   17% { background-image: url(images/jl-About-ma1-01.svg); }
