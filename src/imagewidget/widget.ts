@@ -76,10 +76,11 @@ class ImageWidget extends Widget {
     this._scale = value;
     let scaleNode = this.node.querySelector('div') as HTMLElement;
     let zoomString: string;
+    let percentage = ((value - 1) / 2) * 100 / value;
     if (value > 1) {
-      zoomString = 'scale(' + value + ') translate(' + (((value-1)/2)*100/value) + '%, ' + (((value-1)/2)*100/value) + '%)';
+      zoomString = `scale(${value}) translate(${percentage}%, ${percentage}%)`;
     } else {
-      zoomString = 'scale(' + value + ') translateY(' + (((value-1)/2)*100/value) + '%)';
+      zoomString = `scale(${value}) translateY(${percentage}%)`;
     }
     scaleNode.style.transform = zoomString;
     this.update();
@@ -106,7 +107,8 @@ class ImageWidget extends Widget {
       return;
     }
     let content = this._context.model.toString();
-    this.node.querySelector('img').setAttribute('src', `data:${cm.mimetype};${cm.format},${content}`);
+    let src = `data:${cm.mimetype};${cm.format},${content}`;
+    this.node.querySelector('img').setAttribute('src', src);
   }
 
   private _context: IDocumentContext<IDocumentModel>;
