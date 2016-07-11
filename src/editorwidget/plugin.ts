@@ -6,12 +6,23 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  DocumentRegistry
+  DocumentRegistry, IWidgetFactoryOptions
 } from '../docregistry';
 
 import {
   EditorWidgetFactory
 } from './widget';
+
+
+/**
+ * The class name for all main area portrait tab icons.
+ */
+const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
+
+/**
+ * The class name for the text editor icon from the default theme.
+ */
+const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 
 
 /**
@@ -22,14 +33,17 @@ const editorHandlerExtension = {
   id: 'jupyter.extensions.editorHandler',
   requires: [DocumentRegistry],
   activate: (app: Application, registry: DocumentRegistry) => {
-    registry.addWidgetFactory(new EditorWidgetFactory(),
-    {
+    let options: IWidgetFactoryOptions = {
       fileExtensions: ['.*'],
       displayName: 'Editor',
       modelName: 'text',
       defaultFor: ['.*'],
       preferKernel: false,
       canStartKernel: false
-    });
+    };
+    let factory = new EditorWidgetFactory();
+    let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
+    factory.widgetCreated.connect((sender, widget) => widget.title.icon = icon);
+    registry.addWidgetFactory(factory, options);
   }
 };

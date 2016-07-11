@@ -20,7 +20,7 @@ import {
 
 
 /**
- * The document registery.
+ * The document registry.
  */
 export
 class DocumentRegistry implements IDisposable {

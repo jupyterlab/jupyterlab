@@ -603,6 +603,8 @@ class MarkdownCellWidget extends BaseCellWidget {
     this._markdownWidget = new Widget();
     this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
     (this.layout as PanelLayout).addChild(this._markdownWidget);
+    // Turn on line wrapping for markdown cells.
+    this.editor.editor.setOption('lineWrapping', true);
   }
 
   /**
@@ -705,6 +707,8 @@ class RawCellWidget extends BaseCellWidget {
   constructor(options: BaseCellWidget.IOptions = {}) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
+    // Turn on line wrapping for raw cells.
+    this.editor.editor.setOption('lineWrapping', true);
   }
 
   /**

@@ -81,7 +81,7 @@ function startApp(session: ISession) {
   }
   let rendermime = new RenderMime<Widget>(renderers, order);
 
-  let consolePanel = new ConsolePanel(session, rendermime);
+  let consolePanel = new ConsolePanel({ session, rendermime });
   consolePanel.title.text = TITLE;
 
   let pModel = new StandardPaletteModel();

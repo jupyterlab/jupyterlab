@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ServiceManager
+} from 'jupyter-js-services';
+
+import {
   Application
 } from 'phosphide/lib/core/application';
 
 import {
   Widget
 } from 'phosphor-widget';
-
-import {
-  JupyterServices
-} from '../services/plugin';
 
 
 /**
@@ -20,12 +20,12 @@ import {
 export
 const landingExtension = {
   id: 'jupyter.extensions.landing',
-  requires: [JupyterServices],
+  requires: [ServiceManager],
   activate: activateLanding
 };
 
 
-function activateLanding(app: Application, services: JupyterServices): void {
+function activateLanding(app: Application, services: ServiceManager): void {
   let widget = new Widget();
   widget.id = 'landing-jupyterlab';
   widget.title.text = 'JupyterLab';

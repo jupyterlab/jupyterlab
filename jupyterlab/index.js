@@ -22,6 +22,7 @@ var app = new phosphide.Application({
     require('jupyterlab/lib/main/plugin').mainExtension,
     require('jupyterlab/lib/mainmenu/plugin').mainMenuExtension,
     require('jupyterlab/lib/notebook/plugin').notebookHandlerExtension,
+    require('jupyterlab/lib/running/plugin').runningSessionsExtension,
     require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
     require('jupyterlab/lib/terminal/plugin').terminalExtension,
     require('jupyterlab/lib/widgets/plugin').widgetManagerExtension,

@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
+  ServiceManager
+} from 'jupyter-js-services';
 
 import {
-  JupyterServices
-} from '../services/plugin';
+  Application
+} from 'phosphide/lib/core/application';
 
 import {
   WidgetTracker
@@ -24,7 +24,7 @@ import {
 export
 const terminalExtension = {
   id: 'jupyter.extensions.terminal',
-  requires: [JupyterServices],
+  requires: [ServiceManager],
   activate: activateTerminal
 };
 
@@ -39,7 +39,7 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
 const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
 
 
-function activateTerminal(app: Application, services: JupyterServices): void {
+function activateTerminal(app: Application, services: ServiceManager): void {
 
   let newTerminalId = 'terminal:create-new';
   let increaseTerminalFontSize = 'terminal:increase-font';
@@ -47,17 +47,22 @@ function activateTerminal(app: Application, services: JupyterServices): void {
   let toggleTerminalTheme = 'terminal:toggle-theme';
   let closeAllTerminals = 'terminal:close-all-terminals';
   let tracker = new WidgetTracker<TerminalWidget>();
+  let options = {
+    background: 'black',
+    color: 'white',
+    fontSize: 14
+  };
 
   app.commands.add([
     {
       id: newTerminalId,
       handler: () => {
-        let term = new TerminalWidget();
+        let term = new TerminalWidget(options);
         term.title.closable = true;
         term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
         app.shell.addToMainArea(term);
         tracker.addWidget(term);
-        services.terminalManager.createNew().then(session => {
+        services.terminals.createNew().then(session => {
           term.session = session;
         });
       }
@@ -110,23 +115,21 @@ function activateTerminal(app: Application, services: JupyterServices): void {
   ]);
 
   function increaseFont(): void {
-    if (!tracker.isDisposed) {
+    if (!tracker.isDisposed && options.fontSize < 72) {
       let widgets = tracker.widgets;
+      options.fontSize++;
       for (let i = 0; i < widgets.length; i++) {
-        if (widgets[i].fontSize < 72) {
-          widgets[i].fontSize = widgets[i].fontSize + 1;
-        }
+        widgets[i].fontSize = options.fontSize;
       }
     }
   }
 
   function decreaseFont(): void {
-    if (!tracker.isDisposed) {
+    if (!tracker.isDisposed && options.fontSize > 9) {
       let widgets = tracker.widgets;
+      options.fontSize--;
       for (let i = 0; i < widgets.length; i++) {
-        if (widgets[i].fontSize > 9) {
-          widgets[i].fontSize = widgets[i].fontSize - 1;
-        }
+        widgets[i].fontSize = options.fontSize;
       }
     }
   }
@@ -134,15 +137,17 @@ function activateTerminal(app: Application, services: JupyterServices): void {
   function toggleTheme(): void {
     if (!tracker.isDisposed) {
       let widgets = tracker.widgets;
+      if (options.background === 'black') {
+        options.background = 'white';
+        options.color = 'black';
+      }
+      else {
+        options.background = 'black';
+        options.color = 'white';
+      }
       for (let i = 0; i < widgets.length; i++) {
-        if (widgets[i].background === 'black') {
-          widgets[i].background = 'white';
-          widgets[i].color = 'black';
-        }
-        else {
-          widgets[i].background = 'black';
-          widgets[i].color = 'white';
-        }
+          widgets[i].background = options.background;
+          widgets[i].color = options.color;
       }
     }
   }

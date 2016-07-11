@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ServiceManager
+} from 'jupyter-js-services';
+
+import {
   IWidgetOpener, FileBrowserWidget
 } from './browser';
 
@@ -30,10 +34,6 @@ import {
 } from 'phosphor-widget';
 
 import {
-  JupyterServices
-} from '../services/plugin';
-
-import {
   WidgetTracker
 } from '../widgettracker';
 
@@ -44,7 +44,7 @@ import {
 export
 const fileBrowserExtension = {
   id: 'jupyter.extensions.fileBrowser',
-  requires: [JupyterServices, DocumentRegistry],
+  requires: [ServiceManager, DocumentRegistry],
   activate: activateFileBrowser
 };
 
@@ -67,9 +67,9 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: Application, provider: JupyterServices, registry: DocumentRegistry): Promise<void> {
-  let contents = provider.contentsManager;
-  let sessions = provider.sessionManager;
+function activateFileBrowser(app: Application, provider: ServiceManager, registry: DocumentRegistry): Promise<void> {
+  let contents = provider.contents;
+  let sessions = provider.sessions;
   let id = 0;
 
   let tracker = new WidgetTracker<Widget>();
@@ -134,13 +134,16 @@ function activateFileBrowser(app: Application, provider: JupyterServices, regist
   let newNotebookId = 'file-operations:new-notebook';
 
   app.commands.add([
-  {
-    id: newNotebookId,
-    handler: () => {
-      let icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
-      fbWidget.createNew({ type: 'notebook' }).then(widget => widget.title.icon = icon);
+    {
+      id: newNotebookId,
+      handler: () => {
+        let icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
+        fbWidget.createNew({ type: 'notebook' }).then(widget => {
+          widget.title.icon = icon;
+        });
+      }
     }
-  }]);
+  ]);
 
 
   // Add the command for saving a document.
