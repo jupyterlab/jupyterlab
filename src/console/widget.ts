@@ -339,6 +339,14 @@ class ConsoleWidget extends Widget {
   }
 
   /**
+   * Dismiss the tooltip and completion widget for a console.
+   */
+  dismissOverlays(): void {
+    this._tooltip.hide();
+    this._completion.reset();
+  }
+
+  /**
    * Serialize the output.
    */
   serialize(): nbformat.ICodeCell[] {

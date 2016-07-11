@@ -18,7 +18,7 @@
     "jupyter-js-widgets": "2.0.0-dev.0",
     "marked": "^0.3.5",
     "moment": "^2.11.2",
-    "phosphide": "^0.9.5",
+    "phosphide": "^0.10.0",
     "phosphor-arrays": "^1.0.6",
     "phosphor-codemirror": "^0.0.1",
     "phosphor-di": "^0.9.0",

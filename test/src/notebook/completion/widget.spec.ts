@@ -212,13 +212,40 @@ describe('notebook/completion/widget', () => {
 
     });
 
+    describe('#reset()', () => {
+
+      it('should reset the completion widget', () => {
+        let anchor = new Widget();
+        let model = new CompletionModel();
+        let options: CompletionWidget.IOptions = {
+          model, anchor: anchor.node
+        };
+        model.options = ['foo', 'bar'];
+        anchor.attach(document.body);
+
+        let widget = new CompletionWidget(options);
+
+        widget.attach(document.body);
+        sendMessage(widget, Widget.MsgUpdateRequest);
+        expect(widget.isHidden).to.be(false);
+        expect(model.options).to.be.ok();
+        widget.reset();
+        sendMessage(widget, Widget.MsgUpdateRequest);
+        expect(widget.isHidden).to.be(true);
+        expect(model.options).to.not.be.ok();
+        widget.dispose();
+        anchor.dispose();
+      });
+
+    });
+
     describe('#handleEvent()', () => {
 
-      it('should handle window keydown and mousedown events', () => {
+      it('should handle document keydown and mousedown events', () => {
         let widget = new LogWidget();
         widget.attach(document.body);
         ['keydown', 'mousedown'].forEach(type => {
-          simulate(window, type);
+          simulate(document, type);
           expect(widget.events).to.contain(type);
         });
         widget.dispose();
@@ -251,29 +278,6 @@ describe('notebook/completion/widget', () => {
           expect(widget.isHidden).to.be(false);
           expect(model.options).to.be.ok();
           simulate(document.body, 'keydown', { keyCode: 70 }); // F
-          sendMessage(widget, Widget.MsgUpdateRequest);
-          expect(widget.isHidden).to.be(true);
-          expect(model.options).to.not.be.ok();
-          widget.dispose();
-          anchor.dispose();
-        });
-
-        it('should reset on escape key', () => {
-          let anchor = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = {
-            model, anchor: anchor.node
-          };
-          model.options = ['foo', 'bar'];
-          anchor.attach(document.body);
-
-          let widget = new CompletionWidget(options);
-
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
-          expect(widget.isHidden).to.be(false);
-          expect(model.options).to.be.ok();
-          simulate(anchor.node, 'keydown', { keyCode: 27 }); // Escape
           sendMessage(widget, Widget.MsgUpdateRequest);
           expect(widget.isHidden).to.be(true);
           expect(model.options).to.not.be.ok();
