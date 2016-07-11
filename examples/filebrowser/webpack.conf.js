@@ -17,6 +17,9 @@ module.exports = {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
       { test: /\.html$/, loader: "file?name=[name].[ext]" }
+      { test: /\.html$/, loader: 'file' },
+      // Handle image
+      { test: /\.(jpg|png|gif|svg)$/, loader: "file" },
     ]
   }
 }
