@@ -8,18 +8,3 @@
   border-right: 1px solid #BDBDBD;
   border-left: 1px solid #BDBDBD;
 }
-
-.jp-About-jupyter-logo {
-  background: url(images/logo.svg);
-  background-size: 68px;
-  background-repeat: no-repeat;
-  height: 16px;
-  width: 70px;
-  display: inline-block;
-}
-
-.p-MenuBar-item + .jp-About-jupyter-logo {
-  padding-bottom: 0px;
-  padding-top: 4px;
-  height: 24px;
-}
