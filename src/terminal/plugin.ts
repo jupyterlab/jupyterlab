@@ -70,7 +70,7 @@ function activateTerminal(app: Application, services: ServiceManager, mainMenu: 
         term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
         app.shell.addToMainArea(term);
         tracker.addWidget(term);
-        services.terminals.createNew().then(session => {
+        services.terminals.create().then(session => {
           term.session = session;
         });
       }

@@ -19,6 +19,7 @@ describe('filebrowser/model', () => {
     describe('#constructor()', () => {
 
       it('should construct a new file browser model', () => {
+        let manager = new MockServiceManager();
         let model = new FileBrowserModel({ manager });
         expect(model).to.be.a(FileBrowserModel);
       });
@@ -26,6 +27,18 @@ describe('filebrowser/model', () => {
     });
 
     describe('#pathChanged', () => {
+
+      it('should be emitted when the path changes', (done) => {
+        let manager = new MockServiceManager();
+        let model = new FileBrowserModel({ manager });
+        model.pathChanged.connect((sender, args) => {
+          expect(sender).to.be(model);
+          expect(args).to.be('foo');
+          done();
+        });
+        debugger;
+        model.cd('foo').then(done, done);
+      });
 
     });
 

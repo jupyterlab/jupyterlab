@@ -11,7 +11,7 @@
   "dependencies": {
     "es6-promise": "^3.1.2",
     "font-awesome": "^4.6.3",
-    "jupyter-js-services": "^0.12.5",
+    "jupyter-js-services": "^0.15.0",
     "jupyterlab": "file:../../",
     "phosphide": "^0.10.0"
   },
