@@ -97,12 +97,12 @@ function selectKernel(options: IKernelSelection): Promise<IKernel.IModel> {
 export
 function selectKernelForContext(context: IDocumentContext<IDocumentModel>, host?: HTMLElement): Promise<void> {
   return context.listSessions().then(sessions => {
-    let options = {
+    let options: IKernelSelection = {
       name: context.path.split('/').pop(),
       specs: context.kernelspecs,
       sessions,
       preferredLanguage: context.model.defaultKernelLanguage,
-      kernel: context.kernel,
+      kernel: context.kernel.model,
       host
     };
     return selectKernel(options);
