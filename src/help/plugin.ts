@@ -118,7 +118,7 @@ function activateHelpHandler(app: Application, mainMenu: MainMenu): Promise<void
       }
     };
   });
-  
+
   app.commands.add(helpCommandItems);
 
   app.commands.add([
@@ -157,7 +157,10 @@ function activateHelpHandler(app: Application, mainMenu: MainMenu): Promise<void
       }
     }),
     new MenuItem({
-      type: MenuItem.Separator
+      text: 'Frequently Asked Questions',
+      handler: () => {
+        app.commands.execute('faq-jupyterlab:show');
+      }
     }),
     new MenuItem({
       text: 'Notebook Tutorial',
