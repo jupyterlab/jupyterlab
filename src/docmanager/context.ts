@@ -21,6 +21,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  showDialog, okButton
+} from '../dialog';
+
+import {
   IDocumentContext, IDocumentModel, IModelFactory
 } from '../docregistry';
 
@@ -435,6 +439,12 @@ class ContextManager implements IDisposable {
     return this._contentsManager.save(path, contents).then(newContents => {
       contextEx.contentsModel = this._copyContentsModel(newContents);
       model.dirty = false;
+    }).catch(err => {
+      showDialog({
+        title: 'File Save Error',
+        body: err.xhr.responseText,
+        buttons: [okButton]
+      });
     });
   }
 
@@ -482,6 +492,12 @@ class ContextManager implements IDisposable {
       contextEx.contentsModel = contentsModel;
       contextEx.context.contentsModelChanged.emit(contentsModel);
       model.dirty = false;
+    }).catch(err => {
+      showDialog({
+        title: 'File Load Error',
+        body: err.xhr.responseText,
+        buttons: [okButton]
+      });
     });
   }
 

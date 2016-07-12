@@ -115,8 +115,20 @@ function activateFileBrowser(app: Application, provider: ServiceManager, registr
     let x = event.clientX;
     let y = event.clientY;
     let path = fbWidget.pathForClick(event);
-    let ext = path.split('.').pop();
-    let widgets = registry.listWidgetFactories(ext);
+    let ext = '.' + path.split('.').pop();
+    let widgetNames = registry.listWidgetFactories(ext);
+    let items: MenuItem[] = [];
+    if (widgetNames.length > 1) {
+      for (let widgetName of widgetNames) {
+        items.push(new MenuItem({
+          text: widgetName,
+          handler: () => {
+            fbWidget.openPath(path, widgetName);
+          }
+        }));
+      }
+    }
+    let menu = createMenu(fbWidget, items);
     menu.popup(x, y);
   });
 
@@ -295,14 +307,22 @@ function activateFileBrowser(app: Application, provider: ServiceManager, registr
 /**
  * Create a context menu for the file browser listing.
  */
-function createMenu(fbWidget: FileBrowserWidget):  Menu {
-  return new Menu([
+function createMenu(fbWidget: FileBrowserWidget, openWith: MenuItem[]):  Menu {
+  let items = [
     new MenuItem({
       text: '&Open',
       icon: 'fa fa-folder-open-o',
       shortcut: 'Ctrl+O',
       handler: () => { fbWidget.open(); }
-    }),
+    })
+  ];
+  if (openWith.length) {
+    items.push(new MenuItem({
+      text: 'Open With...',
+      submenu: new Menu(openWith)
+    }));
+  }
+  items.push(
     new MenuItem({
       text: '&Rename',
       icon: 'fa fa-edit',
@@ -348,5 +368,6 @@ function createMenu(fbWidget: FileBrowserWidget):  Menu {
       icon: 'fa fa-stop-circle-o',
       handler: () => { fbWidget.shutdownKernels(); }
     })
-  ]);
+  );
+  return new Menu(items);
 }

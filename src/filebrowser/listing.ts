@@ -496,6 +496,9 @@ class DirListing extends Widget {
    * Get whether an item is selected by name.
    */
   isSelected(name: string): boolean {
+    if (this._softSelection) {
+      return name === this._softSelection;
+    }
     return this._selection[name] === true;
   }
 
