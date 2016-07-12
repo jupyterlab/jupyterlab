@@ -141,7 +141,7 @@
 
 .jp-DirListing-item.jp-mod-selected {
   color: white;
-  background: #F27624;
+  background: #2196F3;
 }
 
 
@@ -158,6 +158,7 @@
 .jp-DirListing-itemIcon {
   flex: 0 0 20px;
   font-family: FontAwesome;
+  font-size: 14px;
 }
 
 
