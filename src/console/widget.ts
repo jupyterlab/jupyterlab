@@ -243,6 +243,7 @@ class ConsoleWidget extends Widget {
 
     // Instantiate tooltip widget.
     this._tooltip = options.tooltip || new ConsoleTooltip();
+    this._tooltip.reference = this;
     // Because a tooltip widget may be passed in, check if it is attached.
     if (!this._tooltip.isAttached) {
       this._tooltip.attach(document.body);
@@ -316,9 +317,13 @@ class ConsoleWidget extends Widget {
    * Execute the current prompt.
    */
   execute(): Promise<void> {
+    // Dismiss any outstanding tooltips or completion widgets.
+    this.dismissOverlays();
+
     if (this._session.status === 'dead') {
       return;
     }
+
     let prompt = this.prompt;
     prompt.trusted = true;
     this._history.push(prompt.model.source);
@@ -425,10 +430,8 @@ class ConsoleWidget extends Widget {
    * Handle a text changed signal from an editor.
    */
   protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
-    let hasCompletion = !!this._completion.model.original;
-    if (hasCompletion) {
-      this._tooltip.hide();
-    } else if (change.newValue) {
+    this._tooltip.hide();
+    if (change.newValue) {
       this.updateTooltip(change);
     }
   }
@@ -437,13 +440,13 @@ class ConsoleWidget extends Widget {
    * Update the tooltip based on a text change.
    */
   protected updateTooltip(change: ITextChange): void {
-    let line = change.newValue.split('\n')[change.line];
     let contents: KernelMessage.IInspectRequest = {
-      code: line,
-      cursor_pos: change.ch,
+      code: change.newValue,
+      cursor_pos: change.position,
       detail_level: 0
     };
     let pendingInspect = ++this._pendingInspect;
+
     this._session.kernel.inspect(contents).then(msg => {
       let value = msg.content;
       // If widget has been disposed, bail.
