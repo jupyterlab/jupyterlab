@@ -86,22 +86,35 @@ function activateFAQ(app: Application): void {
         </h2>
         <ul class="faqul">
           <li class="faqquestion"> What is JupyterLab? </li>
-          <li class="faqanswer"> Central to the project is the Jupyter Notebook, a web-based platform that allows users to combine live code, equations, narrative text, visualizations, interactive dashboards and other media. Together these building blocks make science and data reproducible across over 40 programming languages and combine to form what we call a computational narrative. </li>
-          <li class="faqquestion"> How is JupyterLab different from the Jupyter Notebook? </li>
           <li class="faqanswer"> JupyterLab allows users to arrange multiple jupyter notebooks, text editors, terminals, output areas, etc. on a single page with multiple panels and tabs into one application. The codebase and UI of JupyterLab is based on a flexible plugin system that makes it easy to extend with new components.</li>
-          <li class="faqquestion"> How Stable is JupyterLab? </li>
-          <li class="faqanswer"> JupyterLab is currently in a Alpha release and not ready for public use. New features and bug fixes are being added very frequently. However, testing, development, and user feedback are greatly appreciated. </li>
+          <li class="faqquestion"> What is a Jupyter Notebook? </li>
+          <li class="faqanswer"> Central to the project is the Jupyter Notebook, a web-based platform that allows users to combine live code, equations, narrative text, visualizations, interactive dashboards and other media. Together these building blocks make science and data reproducible across over 40 programming languages and combine to form what we call a computational narrative.</li>
+          <li class="faqquestion"> How stable is JupyterLab? </li>
+          <li class="faqanswer"> JupyterLab is currently in a alpha release and not ready for public use as new features and bug fixes are being added very frequently. We strongly recommend to backup your work before using JupyterLab. However, testing, development, and user feedback are greatly appreciated. </li>
           <li class="faqquestion"> I’m confused with the interface. How do I navigate around JupyterLab? </li>
-          <li class="faqanswer"> Checkout the Jupyter Lab tour (Look in the help secton). </li>
+          <li class="faqanswer"> Checkout the Jupyter Lab tour (look in the help section). </li>
         </ul>
         <h2 class="faqh2">
           FEATURES
         </h2>
         <ul class="faqul">
           <li class="faqquestion"> How do I add more kernels/languages to JupyterLab? </li>
-          <li class="faqanswer"> To add more languages to the JupyterLab you must install a new kernel. Installing a kernel is usually fairly simple and can be done with a couple terminal commands. For further instructions, click this <a class="faqa" target="_blank" href="https://ipython.readthedocs.io/en/latest/install/kernel_install.html">link</a>. </li>
+          <li class="faqanswer"> To add more languages to the JupyterLab you must install a new kernel. Installing a kernel is usually fairly simple and can be done with a couple terminal commands. However the instructions for installing kernels is different for each language. For further instructions, click this <a class="faqa" target="_blank" href="http://jupyter.readthedocs.io/en/latest/install-kernel.html">link</a>. </li>
+          <li class="faqquestion"> How can I share my notebooks? </li>
+          <li class="faqanswer"> You can either publish your notebooks on GitHub or use a free service such as <a class="faqa" target="_blank" href="https://nbviewer.jupyter.org/">nbviewer.org</a> to render your notebooks online. </li>
         </ul>
-      </section>
+        <h2 class="faqh2">
+        DEVELOPER
+        </h2>
+        <ul class="faqul">
+        <li class="faqquestion"> How do I report a bug? </li>
+        <li class="faqanswer"> You can open an issue on our <a class="faqa" target="_blank" href="https://github.com/jupyter/jupyterlab/issues">github repository</a>. Please check already opened issues before posting. </li>
+        <li class="faqquestion"> I have security concerns about JupyterLab.</li>
+        <li class="faqanswer"> If you have any inquiries, concerns, or thought you found a security vulnerability, please write to us <a class="faqa" href="mailto:atsecurity@jupyter.org">atsecurity@jupyter.org</a>. We will do our best to respond to you promptly.  </li>
+        <li class="faqquestion"> How can I contribute? </li>
+        <li class="faqanswer"> There are many ways to contribute to JupyterLab. Whether you are an experienced python programmer or a newcomer, any interested developers are welcome. You can learn about the JupyterLab codebase by watching [Brian Granger’s Keynote] and [talk] at scipy 2016, as well as our tutorial walkthrough and documentation. Also, feel free to ask questions on our <a class="faqa" target="_blank" href="https://github.com/jupyter/jupyterlab">github</a> or through any of our <a class="faqa" target="_blank" href="http://jupyter.org/community.html">community resources</a>. </li>
+        </ul>
+    </section>
     </p>
   </body>
   `;
