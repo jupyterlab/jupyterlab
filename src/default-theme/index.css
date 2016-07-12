@@ -127,7 +127,7 @@ body {
 
 
 .p-SideBar-button.p-mod-current {
-  color: #F27624;
+  color: #2196F3;
   background: #FAFAFA;
 }
 
@@ -162,7 +162,7 @@ body {
 
 .p-DockPanel-overlay {
   background: rgba(242, 118, 36, 0.1);
-  border: 1px dashed #F27624;
+  border: 1px dashed #2196F3;
 }
 
 
@@ -221,7 +221,7 @@ body {
   min-height: 24px;
   max-height: 24px;
   background: #FFFFFF;
-  border-top: 1px solid #F27624;
+  border-top: 1px solid #2196F3;
 }
 
 
@@ -261,7 +261,7 @@ body {
   color: #777777;
   background: white;
   border: 1px solid #BDBDBD;
-  border-top: 1px solid #F27624;
+  border-top: 1px solid #2196F3;
   font-size: 14px;
   box-shadow: 1px 1px 2px rgba(0, 0, 1, 0.1);
   transform: translateX(-40%) translateY(-58%);

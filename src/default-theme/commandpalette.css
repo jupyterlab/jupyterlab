@@ -36,9 +36,10 @@
   margin: 4px 0px;
   padding: 4px 12px;
   font-size: 11px;
-  font-weight: 500;
-  text-transform: capitalize;
+  font-weight: 600;
+  text-transform: uppercase;
   border-bottom: 1px solid #E0E0E0;
+  letter-spacing: 2px;
 }
 
 
@@ -46,13 +47,12 @@
   padding: 4px 12px;
   font-size: 13px;
   font-weight: 500;
+  color: #757575;
 }
 
 
 .p-CommandPalette-commandCaption {
-  font-size: 10px;
-  font-weight: 400;
-  color: #9E9E9E;
+  display: none;
 }
 
 
@@ -62,10 +62,15 @@
 }
 
 
-.p-CommandPalette-header.p-mod-active,
+.p-CommandPalette-header mark {
+  color: #424242;
+  background: inherit;
+}
+
+
 .p-CommandPalette-command.p-mod-active {
-  color: white;
-  background: #F27624;
+  color: rgba(255,255,255,0.7);
+  background: #2196F3;
 }
 
 
@@ -74,8 +79,13 @@
 }
 
 
-.p-CommandPalette mark {
-  color: #424242;
-  font-weight: bold;
-  background: inherit;
+.p-CommandPalette-command.p-mod-active mark {
+    background: inherit;
+    color: rgba(255,255,255,1);
+}
+
+
+.p-CommandPalette-command mark {
+    background: inherit;
+    color: #757575;
 }
