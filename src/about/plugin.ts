@@ -148,7 +148,7 @@ function activateAbout(app: Application): void {
           <a name="notebook"></a>
           <div class="sectioncenter">
             <p class="header content"><span class="jp-img jp-About-hero-notebook"></span>Notebook</p>
-            <span class="jp-img jp-About-mainarea-cimg"></span>
+            <span class="jp-img jp-About-nb"></span>
             <p class="content-desc">Opening a notebook will open a minimally-featured notebook. Code execution, Markdown rendering, and basic cell toolbar actions are supported. Future versions will add more features from the existing Jupyter notebook.</p>
           </div>
         </div>

@@ -320,6 +320,15 @@
   vertical-align: middle;
 }
 
+#about .jp-About-nb {
+  display: inline-block;
+  background-image: url(images/jl-About-nb1-01.svg);  
+  background-size: contain;
+  display: block;
+  margin: 40px 0 35px 0;
+  height: 38vh;
+}
+
 #about .jp-About-mainarea-cimg {
   display: block;
   margin: 40px 0 35px 0;
@@ -341,7 +350,6 @@
   -webkit-transition: all 300ms ease;
   transition: all 300ms ease;
 }
-
 
 @keyframes jp-About-fb-anim {
   0% { background-image: url(images/jl-About-fb1-01.svg); }
