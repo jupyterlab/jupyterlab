@@ -290,6 +290,13 @@ class FileBrowserWidget extends Widget {
   }
 
   /**
+   * Find a path given a click.
+   */
+  pathForClick(event: MouseEvent): string {
+    return this._listing.pathForClick(event);
+  }
+
+  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {

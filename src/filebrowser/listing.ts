@@ -500,6 +500,17 @@ class DirListing extends Widget {
   }
 
   /**
+   * Find a path given a click.
+   */
+  pathForClick(event: MouseEvent): string {
+    let items = this.sortedItems;
+    let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
+    if (index !== -1) {
+      return items[index].path;
+    }
+  }
+
+  /**
    * Handle the DOM events for the directory listing.
    *
    * @param event - The DOM event sent to the widget.

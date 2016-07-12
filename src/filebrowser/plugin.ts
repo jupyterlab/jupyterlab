@@ -107,7 +107,6 @@ function activateFileBrowser(app: Application, provider: ServiceManager, registr
     manager: docManager,
     opener
   });
-  let menu = createMenu(fbWidget);
 
   // Add a context menu to the dir listing.
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
@@ -115,6 +114,9 @@ function activateFileBrowser(app: Application, provider: ServiceManager, registr
     event.preventDefault();
     let x = event.clientX;
     let y = event.clientY;
+    let path = fbWidget.pathForClick(event);
+    let ext = path.split('.').pop();
+    let widgets = registry.listWidgetFactories(ext);
     menu.popup(x, y);
   });
 
