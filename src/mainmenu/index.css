@@ -13,6 +13,6 @@
    top: 0px;
    left: 0px;
    min-height: 24px;
-   height: 24px;
+   max-height: 24px;
    position: absolute;
 }
