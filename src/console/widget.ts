@@ -409,6 +409,9 @@ class ConsoleWidget extends Widget {
     // Associate the new prompt with the completion handler.
     this._completionHandler.activeCell = prompt;
 
+    // Jump to the bottom of the node.
+    this.node.scrollTop = this.node.scrollHeight;
+
     prompt.focus();
   }
 

@@ -1,0 +1,33 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-Completion-item {
+  margin: 0;
+  min-width: 150px;
+  padding: 0 2px;
+}
+
+
+.jp-Completion-item:nth-child(odd) {
+  background: #FFFFFF;
+}
+
+
+.jp-Completion-item.jp-mod-active {
+  background: #BFBFBF;
+}
+
+
+.jp-Completion-item code {
+  font-size: 14px;
+  line-height: 25px;
+}
+
+
+.jp-Completion-item mark {
+  font-weight: bold;
+  text-decoration: underline;
+  background: inherit;
+  color: inherit;
+}
