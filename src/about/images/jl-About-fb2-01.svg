@@ -4,12 +4,13 @@
 	 viewBox="0 0 2863 1606" style="enable-background:new 0 0 2863 1606;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:#FFFFFF;}
-	.st1{fill:none;enable-background:new    ;}
+	.st1{fill-opacity:0;enable-background:new    ;}
 	.st2{fill:#E66838;}
 	.st3{font-family:'HelveticaNeue';}
-	.st4{font-size:34.728px;}
-	.st5{fill:#5B5B5B;}
-	.st6{font-size:41.82px;}
+	.st4{font-size:72.4557px;}
+	.st5{enable-background:new    ;}
+	.st6{fill:#5B5B5B;}
+	.st7{font-size:91.2548px;}
 </style>
 <rect x="-8" y="-5" class="st0" width="2888" height="1614"/>
 <image style="overflow:visible;" width="1979" height="1521" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAB7sAAAXxBAMAAAAafuF3AAAABGdBTUEAALGPC/xhBQAAACBjSFJN
@@ -98,7 +99,7 @@ lrwhS96QJW/IkjdkyRuy5A1Z8oYseUOWvCFL3pAlb8iSN2TJG7LkDVnyhix5Q5a8IUvekCVvyJI3
 ZMkbsuQNWfKGLHlDlrwhS96QJW/IkjdkyRuy5A1Z8oYseUOWvCFL3pAlb8iSN2TJG7LkDVnyhix5
 Q5a8IUvekCVvyJI3ZMkbsuQNWc8f1SbA6111JI0AAAAASUVORK5CYII=" transform="matrix(1 0 0 1 825 36)">
 </image>
-<path class="st1" d="z"/>
+<path class="st1" d="M825,36h1979v1521H825V36z"/>
 <image style="overflow:visible;" width="752" height="1537" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAvAAAAYBCAMAAADs+V/nAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
 AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAA2FBMVEUAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -197,8 +198,8 @@ PnsBT8PZ8eHB7rPZdH0yesAn/M2bZrg6L35rZ//57unpS3gKTk93n+/vbM17Xx0+4Ivm5k1zXfzG
 rMHTMK9xvDoaDh6695vil5bnzQ+Gw+EInoZ5jYN57ctLD937dfHXzc+jhydl6br2B+/91+jhyfkl
 0H8BBgeFIZYRtq8AAAAASUVORK5CYII=" transform="matrix(1.0013 0 0 1.0007 33 28)">
 </image>
-<path class="st1" d="z"/>
-<text id="Files" transform="matrix(6.123234e-17 -1 1 6.123234e-17 89.8867 164)" class="st2 st3 st4">Files</text>
+<path class="st1" d="M33,28h753v1538.1H33V28z"/>
+<text id="Files" transform="matrix(6.123234e-17 -1 1 6.123234e-17 109.48 196)" class="st2 st3 st4">Files</text>
 <image style="overflow:visible;" width="156" height="136" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJwAAACICAYAAAAS/4LAAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
 AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QAAAAAAAD5Q7t/AAAA
 CXBIWXMAAAsSAAALEgHS3X78AAAUS0lEQVR42u2deZxcVZXHf/feV0lwISAacAM/OoCa6epONZ8P
@@ -294,8 +295,6 @@ X6LDK4SzaJI3S9HHKEKIR1u/nRGMOVwURVuUUqcKIdrurZpFh4HzY4IAhBCklDo1iqItptIw2rEP
 w/BBAO8TQjxtMp0uYOwywnF0tay73Tq0fqOTqtXqgyYLwfiVq1EU3eL7/iPMXGbmE4looek0p4oQ
 4o89aN7/p/XXFbrVOkgpnxFC3CyEGKlWqw3ThfB/WSaQWNuJJ5sAAAAASUVORK5CYII=" transform="matrix(1 0 0 1 169 158)">
 </image>
-<path class="st1" d="z"/>
-<text transform="matrix(1 0 0 1 349.7383 225.7012)" class="st5 st3 st6">Directory where you</text>
-<text transform="matrix(1 0 0 1 339.5977 275.8867)" class="st5 st3 st6">launched JupyterLab</text>
+<text transform="matrix(1 0 0 1 121.8433 424.0654)" class="st5"><tspan x="0" y="0" class="st6 st3 st7">Directory where </tspan><tspan x="48" y="109.5" class="st6 st3 st7">you launched </tspan><tspan x="104.6" y="219" class="st6 st3 st7">JupyterLab</tspan></text>
 <rect x="1235.8" y="36" class="st0" width="1568.2" height="96.8"/>
 </svg>
