@@ -77,9 +77,9 @@ function activateLanding(app: Application, services: ServiceManager): void {
   });
 
   let tour = document.createElement('span')
-  title.textContent = 'Take a tour';
-  title.className = 'jp-Landing-tour';
-  dialog.appendChild(header);
+  tour.textContent = 'Take a tour';
+  tour.className = 'jp-Landing-tour';
+  dialog.appendChild(tour);
 
   img = body.getElementsByClassName('jp-ImageConsole')[0];
   img.addEventListener('click', () => {
