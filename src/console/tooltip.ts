@@ -81,9 +81,6 @@ class ConsoleTooltip extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'keydown':
-      this._evtKeydown(event as KeyboardEvent);
-      break;
     case 'mousedown':
       this._evtMousedown(event as MouseEvent);
       break;
@@ -102,7 +99,6 @@ class ConsoleTooltip extends Widget {
    * Captures document events to dismiss the tooltip widget.
    */
   protected onAfterAttach(msg: Message): void {
-    document.addEventListener('keydown', this, USE_CAPTURE);
     document.addEventListener('mousedown', this, USE_CAPTURE);
     document.addEventListener('scroll', this);
   }
@@ -111,7 +107,6 @@ class ConsoleTooltip extends Widget {
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    document.removeEventListener('keydown', this, USE_CAPTURE);
     document.removeEventListener('mousedown', this, USE_CAPTURE);
     document.removeEventListener('scroll', this);
   }
@@ -121,37 +116,6 @@ class ConsoleTooltip extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     this.show();
-  }
-
-  /**
-   * Handle keydown events for the widget.
-   *
-   * #### Notes
-   * Hides the tooltip if a keydown happens anywhere on the document outside
-   * of either the tooltip or its parent.
-   */
-  private _evtKeydown(event: KeyboardEvent) {
-    if (this.isHidden) {
-      return;
-    }
-
-    if (!this._reference) {
-      this.hide();
-      return;
-    }
-
-    let target = event.target as HTMLElement;
-    while (target !== document.documentElement) {
-      if (target === this._reference.node) {
-        if (event.keyCode === 27) { // Escape key
-          this.hide();
-        }
-        return;
-      }
-      target = target.parentElement;
-    }
-
-    this.hide();
   }
 
   /**

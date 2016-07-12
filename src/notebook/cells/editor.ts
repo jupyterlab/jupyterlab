@@ -111,6 +111,11 @@ interface IEditorState extends JSONObject {
    * The coordinate position of the cursor.
    */
   coords: ICoords;
+
+  /**
+   * The cursor position of the request, including line breaks.
+   */
+  position: number;
 }
 
 
@@ -136,11 +141,6 @@ interface ITextChange extends IEditorState {
  */
 export
 interface ICompletionRequest extends IEditorState {
-  /**
-   * The cursor position of the request, including line breaks.
-   */
-  position: number;
-
   /**
    * The current value of the editor text.
    */
@@ -292,8 +292,9 @@ class CellEditorWidget extends CodeMirrorWidget {
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
     let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
+    let position = editor.getDoc().indexFromPos({ line, ch });
     this.textChanged.emit({
-      line, ch, chHeight, chWidth, coords, oldValue, newValue
+      line, ch, chHeight, chWidth, coords, position, oldValue, newValue
     });
   }
 

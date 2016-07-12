@@ -115,7 +115,12 @@ describe('notebook/completion/model', () => {
           currentValue: currentValue
         };
         let change: ITextChange = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          position: 0,
+          coords, oldValue, newValue
         };
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
@@ -147,7 +152,12 @@ describe('notebook/completion/model', () => {
           currentValue: currentValue
         };
         let change: ITextChange = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          position: 0,
+          coords, oldValue, newValue
         };
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
@@ -266,7 +276,12 @@ describe('notebook/completion/model', () => {
           currentValue: currentValue
         };
         let change: ITextChange = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          position: 0,
+          coords, oldValue, newValue
         };
         model.current = change;
         expect(model.current).to.be(null);
@@ -293,7 +308,12 @@ describe('notebook/completion/model', () => {
           currentValue: currentValue
         };
         let change: ITextChange = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          position: 0,
+          coords, oldValue, newValue
         };
         model.original = request;
         model.current = change;
@@ -320,7 +340,12 @@ describe('notebook/completion/model', () => {
           currentValue: currentValue
         };
         let change: ITextChange = {
-          ch: 0, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          position: 0,
+          coords, oldValue, newValue
         };
         model.original = request;
         model.cursor = cursor;
@@ -412,7 +437,12 @@ describe('notebook/completion/model', () => {
           currentValue: currentValue
         };
         let change: ITextChange = {
-          ch: 4, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+          ch: 4,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          position: 4,
+          coords, oldValue, newValue
         };
         model.original = request;
         model.cursor = cursor;
@@ -437,7 +467,12 @@ describe('notebook/completion/model', () => {
           currentValue: currentValue
         };
         let change: ITextChange = {
-          ch: 4, chHeight: 0, chWidth: 0, line: 0, coords, oldValue, newValue
+          ch: 4,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          position: 0,
+          coords, oldValue, newValue
         };
         model.original = request;
         expect(model.original).to.be.ok();

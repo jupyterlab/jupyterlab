@@ -306,6 +306,7 @@ describe('notebook/completion/handler', () => {
           chHeight: 0,
           chWidth: 0,
           line: 0,
+          position: 0,
           coords: null,
           oldValue: 'fo',
           newValue: 'foo'
@@ -328,6 +329,7 @@ describe('notebook/completion/handler', () => {
           chHeight: 0,
           chWidth: 0,
           line: 0,
+          position: 0,
           coords: null,
           oldValue: 'fo',
           newValue: 'foo'
