@@ -81,7 +81,7 @@
 
 .p-CommandPalette-command.p-mod-active mark {
     background: inherit;
-    color: rgba(255,255,255,1);
+    color: white;
 }
 
 
