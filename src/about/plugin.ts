@@ -76,6 +76,4 @@ function activateAbout(app: Application): void {
     text: 'About JupyterLab',
     category: 'Help'
   }]);
-
-  app.shell.addToMainArea(widget);
 }
