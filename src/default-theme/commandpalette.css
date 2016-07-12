@@ -75,6 +75,12 @@
 }
 
 
+.p-CommandPalette.p-StackedPanel-child {
+  border-left: 0px;
+  border-right: 0px;
+}
+
+
 .p-CommandPalette mark {
   color: #424242;
   font-weight: bold;

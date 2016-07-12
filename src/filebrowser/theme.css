@@ -10,6 +10,12 @@
 }
 
 
+.jp-FileBrowser.p-StackedPanel-child {
+  border-left: 0px;
+  border-right: 0px;
+}
+
+
 .jp-BreadCrumbs {
   margin: 4px 4px 4px 6px;
 }
@@ -32,8 +38,8 @@
 
 
 .jp-FileButtons {
-  border-top: 1px solid #E0E0E0;
   border-bottom: 1px solid #E0E0E0;
+  height: 42px;
 }
 
 
