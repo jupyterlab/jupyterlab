@@ -199,3 +199,11 @@
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon {
   color: #27AE60;
 }
+
+.jp-DirListing-item.p-mod-drag-image,
+.jp-DirListing-item.jp-mod-selected.p-mod-drag-image {
+  background-color: #FFFFFF;
+  box-shadow: 5px 5px 10px rgba(46,46,46,0.5);
+  border-radius: 3px;
+  color: #757575
+}
