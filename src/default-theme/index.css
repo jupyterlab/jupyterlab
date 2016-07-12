@@ -165,11 +165,10 @@ body {
 
 
 .p-TabBar {
-  min-height: 28px;
-  max-height: 28px;
+  min-height: 24px;
+  max-height: 24px;
   color: #777777;
-  font-size: 14px;
-  margin-right: -1px;
+  font-size: 13px;
 }
 
 
@@ -181,18 +180,15 @@ body {
 
 .p-TabBar-content {
   min-width: 0;
-  max-height: 22px;
+  /* max-height: 27px; */
   padding-right: 1px;
 }
 
 
 /* increase specificity to override default */
 .p-TabBar > .p-TabBar-footer {
-  flex: 0 0 4px;
-  background: #FFFFFF;
-  border-top: 1px solid #BDBDBD;
-  border-left: 1px solid #BDBDBD;
-  border-right: 1px solid #BDBDBD;
+  flex: 0 0 1px;
+  background: #BDBDBD;
 }
 
 
@@ -204,8 +200,9 @@ body {
   padding: 0px 7px;
   background: #EEEEEE;
   border: 1px solid #BDBDBD;
-  border-bottom: none;
   transform: translateY(-1px);
+  border-bottom: none;
+  margin-right: -1px;
 }
 
 
@@ -226,7 +223,6 @@ body {
 .p-TabBar-tabText,
 .p-TabBar-tabCloseIcon {
   line-height: 24px;
-  vertical-align: middle;
 }
 
 
@@ -258,13 +254,6 @@ body {
   font-size: 14px;
   box-shadow: 1px 1px 2px rgba(0, 0, 1, 0.1);
   transform: translateX(-40%) translateY(-58%);
-}
-
-
-.p-StackedPanel-child {
-  border-right: 1px solid #BDBDBD;
-  border-left: 1px solid #BDBDBD;
-  border-bottom: 1px solid #BDBDBD;
 }
 
 
