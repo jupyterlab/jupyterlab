@@ -496,7 +496,21 @@ class DirListing extends Widget {
    * Get whether an item is selected by name.
    */
   isSelected(name: string): boolean {
+    if (this._softSelection) {
+      return name === this._softSelection;
+    }
     return this._selection[name] === true;
+  }
+
+  /**
+   * Find a path given a click.
+   */
+  pathForClick(event: MouseEvent): string {
+    let items = this.sortedItems;
+    let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
+    if (index !== -1) {
+      return items[index].path;
+    }
   }
 
   /**

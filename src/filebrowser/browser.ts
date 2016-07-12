@@ -182,11 +182,11 @@ class FileBrowserWidget extends Widget {
   /**
    * Open a file by path.
    */
-  openPath(path: string): Widget {
+  openPath(path: string, widgetName='default'): Widget {
     let model = this.model;
     let widget = this._manager.findWidget(path);
     if (!widget) {
-      widget = this._manager.open(path);
+      widget = this._manager.open(path, widgetName);
       let context = this._manager.contextForWidget(widget);
       context.populated.connect(() => model.refresh() );
       context.kernelChanged.connect(() => model.refresh() );
@@ -287,6 +287,13 @@ class FileBrowserWidget extends Widget {
    */
   selectPrevious(): void {
     this._listing.selectPrevious();
+  }
+
+  /**
+   * Find a path given a click.
+   */
+  pathForClick(event: MouseEvent): string {
+    return this._listing.pathForClick(event);
   }
 
   /**
