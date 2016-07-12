@@ -15,7 +15,6 @@
     "jquery-ui": "^1.10.5 <1.12",
     "jupyter-js-services": "^0.15.0",
     "jupyter-js-utils": "^0.4.0",
-    "jupyter-js-widgets": "2.0.0-dev.0",
     "marked": "^0.3.5",
     "moment": "^2.11.2",
     "phosphide": "^0.10.0",
