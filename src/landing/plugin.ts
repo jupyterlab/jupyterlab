@@ -28,7 +28,7 @@ const landingExtension = {
 function activateLanding(app: Application, services: ServiceManager): void {
   let widget = new Widget();
   widget.id = 'landing-jupyterlab';
-  widget.title.text = 'JupyterLab';
+  widget.title.text = 'Launcher';
   widget.title.closable = true;
   widget.addClass('jp-Landing');
 
