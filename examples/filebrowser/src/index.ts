@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, SessionManager, IKernel
+  ContentsManager, SessionManager, IServiceManager, createServiceManager
 } from 'jupyter-js-services';
 
 import {
@@ -51,14 +51,13 @@ import 'jupyterlab/lib/theme.css';
 
 
 function main(): void {
-  let sessionManager = new SessionManager();
-  sessionManager.getSpecs().then(kernelspecs => {
-    createApp(sessionManager, kernelspecs);
+  createServiceManager().then(manager => {
+    createApp(manager);
   });
 }
 
 
-function createApp(sessionManager: SessionManager, kernelspecs: IKernel.ISpecModels): void {
+function createApp(manager: IServiceManager): void {
   let contentsManager = new ContentsManager();
   let widgets: Widget[] = [];
   let activeWidget: Widget;
@@ -81,9 +80,9 @@ function createApp(sessionManager: SessionManager, kernelspecs: IKernel.ISpecMod
   let docRegistry = new DocumentRegistry();
   let docManager = new DocumentManager({
     registry: docRegistry,
-    contentsManager,
-    sessionManager,
-    kernelspecs,
+    contentsManager: manager.contents,
+    sessionManager: manager.sessions,
+    kernelspecs: manager.kernelspecs,
     opener
   });
   let mFactory = new TextModelFactory();
@@ -98,11 +97,7 @@ function createApp(sessionManager: SessionManager, kernelspecs: IKernel.ISpecMod
     canStartKernel: true
   });
 
-  let fbModel = new FileBrowserModel({
-    contentsManager,
-    sessionManager,
-    kernelspecs
-  });
+  let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowserWidget({
     model: fbModel,
     manager: docManager,

@@ -97,8 +97,7 @@ function activateFileBrowser(app: Application, provider: ServiceManager, registr
     kernelspecs: provider.kernelspecs,
     opener
   });
-  // TODO: fix after rebasing PR.
-  let fbModel = new FileBrowserModel({ manager: provider as any });
+  let fbModel = new FileBrowserModel({ manager: provider });
   let fbWidget = new FileBrowserWidget({
     model: fbModel,
     manager: docManager,
