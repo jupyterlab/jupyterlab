@@ -10,7 +10,7 @@ import {
 } from '../docregistry';
 
 import {
-  EditorWidgetFactory
+  EditorWidgetFactory, EditorWidget
 } from './widget';
 
 import {
@@ -51,7 +51,6 @@ let activeEditor : EditorWidget;
 tracker.activeWidgetChanged.connect((sender, widget) => {
   activeEditor = widget;
 });
->>>>>>> 213e609... Added editor main menu item
 
 /**
  * The class name for all main area portrait tab icons.
@@ -70,22 +69,6 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 export
 const editorHandlerExtension = {
   id: 'jupyter.extensions.editorHandler',
-<<<<<<< HEAD
-  requires: [DocumentRegistry],
-  activate: (app: Application, registry: DocumentRegistry) => {
-    let options: IWidgetFactoryOptions = {
-      fileExtensions: ['.*'],
-      displayName: 'Editor',
-      modelName: 'text',
-      defaultFor: ['.*'],
-      preferKernel: false,
-      canStartKernel: false
-    };
-    let factory = new EditorWidgetFactory();
-    let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
-    factory.widgetCreated.connect((sender, widget) => widget.title.icon = icon);
-    registry.addWidgetFactory(factory, options);
-=======
   requires: [DocumentRegistry, MainMenu],
   activate: activateEditorHandler
 };
@@ -283,7 +266,6 @@ function closeAllFiles() {
  * Handlers and menu items for the editor widget menu bar item
  */
 let themeHandler = (item : MenuItem) => {
-  console.log('YAY! ' + tracker.widgets.length);
   let editors = tracker.widgets;
   for (let i = 0; i < editors.length; i++) {
     editors[i].editor.setOption('theme', item.text);
@@ -401,6 +383,5 @@ const editorTrackerProvider = {
   provides: EditorTracker,
   resolve: () => {
     return tracker;
->>>>>>> 213e609... Added editor main menu item
   }
 };
