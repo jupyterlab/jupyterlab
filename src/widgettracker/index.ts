@@ -85,16 +85,6 @@ class WidgetTracker<T extends Widget> implements IDisposable {
     if (this._widgets.indexOf(widget) === -1) {
       return;
     }
-    // Activate the widget in the dock panel.
-    // TODO: Use an API for this for this when available.
-    let stack = widget.parent;
-    if (!stack) {
-      return;
-    }
-    let tabs = stack.parent;
-    if (tabs instanceof TabPanel) {
-      tabs.currentWidget = widget;
-    }
     // Toggle the active class in the widget titles.
     if (this._activeWidget) {
       let className =  this._activeWidget.title.className;
@@ -106,6 +96,16 @@ class WidgetTracker<T extends Widget> implements IDisposable {
       widget.title.className += ` ${SEMANTIC_FOCUS_CLASS}`;
     }
     this.activeWidgetChanged.emit(widget);
+    // Activate the widget in the dock panel.
+    // TODO: Use an API for this for this when available.
+    let stack = widget.parent;
+    if (!stack) {
+      return;
+    }
+    let tabs = stack.parent;
+    if (tabs instanceof TabPanel) {
+      tabs.currentWidget = widget;
+    }
   }
 
   /**
