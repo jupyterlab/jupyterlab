@@ -20,6 +20,7 @@ var app = new phosphide.Application({
     require('jupyterlab/lib/help/plugin').helpHandlerExtension,
     require('jupyterlab/lib/imagewidget/plugin').imageHandlerExtension,
     require('jupyterlab/lib/landing/plugin').landingExtension,
+    require('jupyrerlab/lib/mdrenderwidget/plugin').markdownHandlerExtension,
     require('jupyterlab/lib/main/plugin').mainExtension,
     require('jupyterlab/lib/mainmenu/plugin').mainMenuExtension,
     require('jupyterlab/lib/notebook/plugin').notebookHandlerExtension,
