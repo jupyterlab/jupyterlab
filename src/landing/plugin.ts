@@ -80,6 +80,9 @@ function activateLanding(app: Application, services: ServiceManager): void {
   tour.textContent = 'Take a tour';
   tour.className = 'jp-Landing-tour';
   dialog.appendChild(tour);
+  tour.addEventListener('click', () => {
+    app.commands.execute('about-jupyterlab:show');
+  });
 
   img = body.getElementsByClassName('jp-ImageConsole')[0];
   img.addEventListener('click', () => {
