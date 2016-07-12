@@ -116,7 +116,7 @@ function activateAbout(app: Application): void {
           <a name="command"></a>
           <div class="sectioncenter">
             <p class="header content"><span class="jp-img jp-About-hero-command"></span>Command Palette</p>
-            <span class="jp-img jp-About-mainarea-cimg"></span>
+            <span class="jp-img jp-About-command-cimg"></span>
             <p class="content-desc">Clicking the "Commands" tab, located on the left, will toggle the command palette. Execute a command by clicking, or navigating with your arrow keys and pressing Enter. Filter commands by typing in the text box at the top of the palette. The palette is organized into categories, and you can filter on a single category by clicking on the category header or by typing the header surrounded by colons in the search input (e.g., <code>:file:</code>).</p>
             <div class="content-desc">
                 <p>You can try these things out from the command palette:</p>

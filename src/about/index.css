@@ -351,6 +351,17 @@
   transition: all 300ms ease;
 }
 
+#about .jp-About-command-cimg {
+  display: block;
+  margin: 40px 0 35px 0;
+  height: 38vh;
+  max-height: 453px;
+  -webkit-animation: jp-About-cpimg-anim linear 15s infinite;
+  animation: jp-About-cpimg-anim linear 15s infinite;
+  -webkit-transition: all 0 linear;
+  transition: all 0 linear;
+}
+
 @keyframes jp-About-fb-anim {
   0% { background-image: url(images/jl-About-fb1-01.svg); }
   6% { background-image: url(images/jl-About-fb1-01.svg); }
@@ -389,4 +400,42 @@
   80% { background-image: url(images/jl-About-ma5-01.svg); }
   97% { background-image: url(images/jl-About-ma5-01.svg); }
   100% { background-image: url(images/jl-About-ma1-01.svg); }
+}
+
+@keyframes jp-About-cpimg-anim {
+  0% { background-image: url(images/jl-About-cp1-01.svg); }
+  4.99% { background-image: url(images/jl-About-cp1-01.svg); }
+  5% { background-image: url(images/jl-About-cp1-02.svg); }
+  9.99% { background-image: url(images/jl-About-cp1-02.svg); }
+  10% { background-image: url(images/jl-About-cp1-01.svg); }
+  14.99% { background-image: url(images/jl-About-cp1-01.svg); }
+  15% { background-image: url(images/jl-About-cp1-02.svg); }
+  19.99% { background-image: url(images/jl-About-cp1-02.svg); }
+  20% { background-image: url(images/jl-About-cp1-01.svg); }
+  22.99% { background-image: url(images/jl-About-cp1-01.svg); }
+  23% { background-image: url(images/jl-About-cp1-03.svg); }
+  32.99% { background-image: url(images/jl-About-cp1-03.svg); }
+  33% { background-image: url(images/jl-About-cp1-04.svg); }
+  42.99% { background-image: url(images/jl-About-cp1-04.svg); }
+  43% { background-image: url(images/jl-About-cp1-05.svg); }
+  47.99% { background-image: url(images/jl-About-cp1-05.svg); }
+  48% { background-image: url(images/jl-About-cp1-06.svg); }
+  52.99% { background-image: url(images/jl-About-cp1-06.svg); }
+  53% { background-image: url(images/jl-About-cp1-05.svg); }
+  57.99% { background-image: url(images/jl-About-cp1-05.svg); }
+  58% { background-image: url(images/jl-About-cp1-06.svg); }
+  62.99% { background-image: url(images/jl-About-cp1-06.svg); }
+  63% { background-image: url(images/jl-About-cp1-05.svg); }
+  67.99% { background-image: url(images/jl-About-cp1-05.svg); }
+  68% { background-image: url(images/jl-About-cp1-06.svg); }
+  72.99% { background-image: url(images/jl-About-cp1-06.svg); }
+  73% { background-image: url(images/jl-About-cp1-04.svg); }
+  77.99% { background-image: url(images/jl-About-cp1-04.svg); }
+  78% { background-image: url(images/jl-About-cp1-03.svg); }
+  85.99% { background-image: url(images/jl-About-cp1-03.svg); }
+  86% { background-image: url(images/jl-About-cp1-01.svg); }
+  92.99% { background-image: url(images/jl-About-cp1-01.svg); }
+  93% { background-image: url(images/jl-About-cp1-02.svg); }
+  99.99% { background-image: url(images/jl-About-cp1-02.svg); }
+  100% { background-image: url(images/jl-About-cp1-01.svg); }
 }
