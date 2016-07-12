@@ -65,6 +65,14 @@ body {
 }
 
 
+#p-right-stack {
+  border-left: 1px solid #BDBDBD;
+}
+
+#p-left-stack {
+  border-right: 1px solid #BDBDBD;
+}
+
 .p-SideBar {
   min-width: 36px;
   max-width: 36px;
@@ -146,6 +154,9 @@ body {
 
 .p-DockTabPanel > .p-StackedPanel {
   background: white;
+  border-left: 1px solid #BDBDBD;
+  border-right: 1px solid #BDBDBD;
+  border-bottom: 1px solid #BDBDBD;
 }
 
 
@@ -254,11 +265,6 @@ body {
   font-size: 14px;
   box-shadow: 1px 1px 2px rgba(0, 0, 1, 0.1);
   transform: translateX(-40%) translateY(-58%);
-}
-
-
-#p-main-split-panel > .p-SplitPanel-handle {
-  background: #BDBDBD;
 }
 
 
