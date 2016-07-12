@@ -32,7 +32,6 @@
 
 
 .jp-FileButtons {
-  border-top: 1px solid #E0E0E0;
   border-bottom: 1px solid #E0E0E0;
 }
 
@@ -44,7 +43,7 @@
   color: #757575;
   background: #FAFAFA;
   border: none;
-  font-size: 16px;
+  font-size: 14px;
   outline: 0;
   padding-top: 12px;
   padding-bottom: 12px;
