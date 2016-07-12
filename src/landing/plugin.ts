@@ -76,6 +76,11 @@ function activateLanding(app: Application, services: ServiceManager): void {
     app.commands.execute('file-operations:new-notebook');
   });
 
+  let tour = document.createElement('span')
+  title.textContent = 'Take a tour';
+  title.className = 'jp-Landing-tour';
+  dialog.appendChild(header);
+
   img = body.getElementsByClassName('jp-ImageConsole')[0];
   img.addEventListener('click', () => {
     app.commands.execute(`console:create-${services.kernelspecs.default}`);
