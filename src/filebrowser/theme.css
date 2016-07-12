@@ -180,14 +180,6 @@
 }
 
 
-/** TODO
-.jp-DirListing-item.jp-mod-selected.jp-mod-cut {
-  background: #F1C40F;
-  color: #F5F5F5;
-}
-**/
-
-
 .jp-type-folder.jp-DirListing-itemIcon:before {
   content: "\f114";
 }
