@@ -292,7 +292,7 @@ class CellEditorWidget extends CodeMirrorWidget {
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
     let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
-    let position = editor.getDoc().indexFromPos({ line, ch })
+    let position = editor.getDoc().indexFromPos({ line, ch });
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, position, oldValue, newValue
     });
