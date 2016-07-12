@@ -88,8 +88,11 @@ function activateFAQ(app: Application): void {
           <li class="faqquestion"> What is JupyterLab? </li>
           <li class="faqanswer"> Central to the project is the Jupyter Notebook, a web-based platform that allows users to combine live code, equations, narrative text, visualizations, interactive dashboards and other media. Together these building blocks make science and data reproducible across over 40 programming languages and combine to form what we call a computational narrative. </li>
           <li class="faqquestion"> How is JupyterLab different from the Jupyter Notebook? </li>
-          <li class="faqanswer"> JupyterLab allows users to arrange multiple jupyter notebooks, text editors, terminals, output areas, etc. on a single page with multiple panels and tabs into one application. The codebase and UI of JupyterLab is based on a flexible plugin system that makes it easy to extend with new components.
-          </li>
+          <li class="faqanswer"> JupyterLab allows users to arrange multiple jupyter notebooks, text editors, terminals, output areas, etc. on a single page with multiple panels and tabs into one application. The codebase and UI of JupyterLab is based on a flexible plugin system that makes it easy to extend with new components.</li>
+          <li class="faqquestion"> How Stable is JupyterLab? </li>
+          <li class="faqanswer"> JupyterLab is currently in a Alpha release and not ready for public use. New features and bug fixes are being added very frequently. However, testing, development, and user feedback are greatly appreciated. </li>
+          <li class="faqquestion"> I’m confused with the interface. How do I navigate around JupyterLab? </li>
+          <li class="faqanswer"> Checkout the Jupyter Lab tour (Look in the help secton). </li>
         </ul>
         <h2 class="faqh2">
           FEATURES
