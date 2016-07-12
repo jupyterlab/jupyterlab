@@ -19,9 +19,12 @@ import {
 } from '../codemirror/widget';
 
 import {
-  ABCWidgetFactory, IDocumentModel, IWidgetFactory, IDocumentContext
+  ABCWidgetFactory, IDocumentModel, IDocumentContext
 } from '../docregistry';
 
+import {
+  tracker
+} from './plugin';
 
 /**
  * The class name added to a dirty widget.
@@ -44,6 +47,7 @@ class EditorWidget extends CodeMirrorWidget {
    */
   constructor(context: IDocumentContext<IDocumentModel>) {
     super();
+    tracker.addWidget(this);
     this.addClass(EDITOR_CLASS);
     let editor = this.editor;
     let model = context.model;
