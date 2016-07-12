@@ -6,7 +6,7 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  DocumentRegistry, IWidgetFactoryOptions
+  DocumentRegistry
 } from '../docregistry';
 
 import {
@@ -190,6 +190,13 @@ function saveDoc() {
 }
 
 /**
+ * Creates a new text file
+ */
+function newFile() {
+  currentApp.commands.execute('file-operations:new-text-file');
+}
+
+/**
  * Toggle editor line numbers
  */
 function toggleLineNums() {
@@ -274,9 +281,14 @@ let themeHandler = (item : MenuItem) => {
 
 let file = new Menu([
   new MenuItem({
+    text: 'New file',
+    handler: newFile,
+    shortcut: 'Ctrl-O'
+  }),
+  new MenuItem({
     text: 'Save',
     handler: saveDoc,
-    shortcut: 'Cmd+S'
+    shortcut: 'Cmd-S'
   }),
   new MenuItem({
     text: 'Close all editors',
@@ -361,16 +373,16 @@ let themes = new Menu([
 
 let menu = new Menu([
   new MenuItem({
-    text: 'Themes',
-    submenu: themes
+    text: 'File',
+    submenu: file
   }),
   new MenuItem({
     text: 'Settings',
     submenu: settings
   }),
   new MenuItem({
-    text: 'File',
-    submenu: file
+    text: 'Themes',
+    submenu: themes
   })
   ]);
 
