@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+@import url('~jupyterlab/lib/console/base.css');
 @import url('~jupyterlab/lib/notebook/index.css');
 @import url('~jupyterlab/lib/notebook/theme.css');
 @import url('~jupyterlab/lib/index.css');
@@ -11,6 +12,8 @@
 
 @import './about.css';
 @import './commandpalette.css';
+@import './completion.css';
+@import './console.css';
 @import './help.css';
 @import './images.css';
 
@@ -386,13 +389,6 @@ body {
 
 .p-Menu-item.p-type-submenu > .p-Menu-itemSubmenuIcon::before {
   content: '\f0da';
-}
-
-
-.jp-Console-prompt {
-  border-color: #66BB6A;
-  border-left-width: 1px;
-  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
 }
 
 

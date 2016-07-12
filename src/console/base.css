@@ -1,0 +1,15 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-Console-panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+
+.p-Widget.jp-Console {
+  overflow: auto;
+}

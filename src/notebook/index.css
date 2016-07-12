@@ -110,15 +110,3 @@
   -webkit-user-select: text;
   -ms-user-select: text;
 }
-
-
-.jp-Console-panel {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-}
-
-
-.p-Widget.jp-Console {
-  overflow: auto;
-}
