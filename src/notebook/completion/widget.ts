@@ -146,6 +146,17 @@ class CompletionWidget extends Widget {
   }
 
   /**
+   * Reset the widget.
+   */
+  reset(): void {
+    if (this._model) {
+      this._model.reset();
+    }
+    this._activeIndex = 0;
+    this._anchorPoint = 0;
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -176,23 +187,19 @@ class CompletionWidget extends Widget {
 
   /**
    * Handle `after_attach` messages for the widget.
-   *
-   * #### Notes
-   * Captures window events in capture phase to dismiss or navigate the
-   * completion widget. Captures scroll events on the anchor element to
-   * peg the completion widget's scroll position to the anchor.
    */
   protected onAfterAttach(msg: Message): void {
-    window.addEventListener('keydown', this, USE_CAPTURE);
-    window.addEventListener('mousedown', this, USE_CAPTURE);
+    document.addEventListener('keydown', this, USE_CAPTURE);
+    document.addEventListener('mousedown', this, USE_CAPTURE);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    window.removeEventListener('keydown', this, USE_CAPTURE);
-    window.removeEventListener('mousedown', this, USE_CAPTURE);
+    document.removeEventListener('keydown', this, USE_CAPTURE);
+    document.removeEventListener('mousedown', this, USE_CAPTURE);
+
     if (this._anchor) {
       this._anchor.removeEventListener('scroll', this, USE_CAPTURE);
     }
@@ -227,7 +234,7 @@ class CompletionWidget extends Widget {
     // If there is only one item, signal and bail.
     if (items.length === 1) {
       this.selected.emit(items[0].raw);
-      this._reset();
+      this.reset();
       return;
     }
 
@@ -273,6 +280,9 @@ class CompletionWidget extends Widget {
    * Handle keydown events for the widget.
    */
   private _evtKeydown(event: KeyboardEvent) {
+    if (this.isHidden || !this._anchor) {
+      return;
+    }
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
       if (target === this._anchor) {
@@ -292,12 +302,6 @@ class CompletionWidget extends Widget {
             event.stopImmediatePropagation();
             this._selectActive();
             return;
-          case 27: // Escape key
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            this._reset();
-            return;
           case 38: // Up arrow key
           case 40: // Down arrow key
             event.preventDefault();
@@ -311,15 +315,18 @@ class CompletionWidget extends Widget {
       }
       target = target.parentElement;
     }
-    this._reset();
+    this.reset();
   }
 
   /**
    * Handle mousedown events for the widget.
    */
   private _evtMousedown(event: MouseEvent) {
+    if (this.isHidden || !this._anchor) {
+      return;
+    }
     if (Private.nonstandardClick(event)) {
-      this._reset();
+      this.reset();
       return;
     }
 
@@ -331,7 +338,7 @@ class CompletionWidget extends Widget {
         event.stopPropagation();
         event.stopImmediatePropagation();
         this.selected.emit(target.dataset['value']);
-        this._reset();
+        this.reset();
         return;
       }
       // If the mouse event happened anywhere else in the widget, bail.
@@ -343,14 +350,14 @@ class CompletionWidget extends Widget {
       }
       target = target.parentElement;
     }
-    this._reset();
+    this.reset();
   }
 
   /**
    * Handle scroll events for the widget
    */
   private _evtScroll(event: MouseEvent) {
-    if (this.isHidden) {
+    if (this.isHidden || !this._anchor) {
       return;
     }
     this._setGeometry();
@@ -372,17 +379,6 @@ class CompletionWidget extends Widget {
       return true;
     }
     return false;
-  }
-
-  /**
-   * Reset the widget.
-   */
-  private _reset(): void {
-    if (this._model) {
-      this._model.reset();
-    }
-    this._activeIndex = 0;
-    this._anchorPoint = 0;
   }
 
   /**
@@ -432,7 +428,7 @@ class CompletionWidget extends Widget {
       return;
     }
     this.selected.emit(active.dataset['value']);
-    this._reset();
+    this.reset();
   }
 
   private _anchor: HTMLElement = null;

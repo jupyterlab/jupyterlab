@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+/// <reference path="../es6-promise/es6-promise.d.ts"/>
 /// <reference path="../backbone/backbone-global.d.ts" />
 
 

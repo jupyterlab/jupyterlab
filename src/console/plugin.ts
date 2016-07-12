@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ServiceManager
+  IKernel, ISession, ServiceManager
 } from 'jupyter-js-services';
 
 import {
@@ -111,6 +111,14 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
     }
   },
   {
+    id: 'console:dismiss-overlays',
+    handler: () => {
+      if (tracker.activeWidget) {
+        tracker.activeWidget.content.dismissOverlays();
+      }
+    }
+  },
+  {
     id: 'console:execute',
     handler: () => {
       if (tracker.activeWidget) {
@@ -139,7 +147,7 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
         if (session.kernel) {
           lang = specs.kernelspecs[session.kernel.name].spec.language;
         }
-        manager.listRunning().then(sessions => {
+        manager.listRunning().then((sessions: ISession.IModel[]) => {
           let options = {
             name: widget.parent.title.text,
             specs,
@@ -149,7 +157,7 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
             host: widget.parent.node
           };
           return selectKernel(options);
-        }).then(kernelId => {
+        }).then((kernelId: IKernel.IModel) => {
           if (kernelId) {
             session.changeKernel(kernelId);
           } else {

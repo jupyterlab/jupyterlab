@@ -36,19 +36,9 @@ const SHORTCUTS = [
     sequence: ['Accel Shift P']
   },
   {
-    command: 'command-palette:hide',
-    selector: 'body[data-left-area="command-palette"]',
-    sequence: ['Escape']
-  },
-  {
     command: 'file-browser:toggle',
     selector: 'body',
     sequence: ['Accel Shift F']
-  },
-  {
-    command: 'file-browser:hide',
-    selector: 'body[data-left-area="file-browser"]',
-    sequence: ['Escape']
   },
   {
     command: 'file-operations:new-text-file',
@@ -81,17 +71,12 @@ const SHORTCUTS = [
     sequence: ['Accel Shift H']
   },
   {
-    command: 'help-doc:hide',
-    selector: 'body[data-right-area="help-doc"]',
-    sequence: ['Escape']
-  },
-  {
-    command: 'notebook-cells:runAndAdvance',
+    command: 'notebook-cells:run-and-advance',
     selector: '.jp-Notebook',
     sequence: ['Shift Enter']
   },
   {
-    command: 'notebook-cells:runAndInsert',
+    command: 'notebook-cells:run-and-insert',
     selector: '.jp-Notebook',
     sequence: ['Alt Enter']
   },
@@ -206,7 +191,7 @@ const SHORTCUTS = [
     sequence: ['ArrowDown']
   },
   {
-    command: 'notebook-cells:toggle-lineNumbers',
+    command: 'notebook-cells:toggle-line-numbers',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['L']
   },
@@ -241,12 +226,12 @@ const SHORTCUTS = [
     sequence: ['6']
   },
   {
-    command: 'notebook:editMode',
+    command: 'notebook:edit-mode',
     selector: '.jp-Notebook.jp-mod-commandMode',
     sequence: ['Enter']
   },
   {
-    command: 'notebook:commandMode',
+    command: 'notebook:command-mode',
     selector: '.jp-Notebook.jp-mod-editMode',
     sequence: ['Escape']
   },
@@ -254,6 +239,11 @@ const SHORTCUTS = [
     command: 'console:execute',
     selector: '.jp-Console .jp-CellEditor',
     sequence: ['Shift Enter']
+  },
+  {
+    command: 'console:dismiss-overlays',
+    selector: '.jp-Console .jp-CellEditor',
+    sequence: ['Escape']
   },
 ];
 

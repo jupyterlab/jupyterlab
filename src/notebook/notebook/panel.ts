@@ -22,11 +22,15 @@ import {
 } from 'phosphor-signaling';
 
 import {
+  Message
+} from 'phosphor-messaging';
+
+import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  IDocumentContext
+  IDocumentContext, findKernel
 } from '../../docregistry';
 
 import {
@@ -263,9 +267,18 @@ class NotebookPanel extends Widget {
    * Handle a context population.
    */
   protected onPopulated(sender: IDocumentContext<INotebookModel>, args: void): void {
+    let model = sender.model;
     // Clear the undo state of the cells.
-    if (sender.model) {
-      sender.model.cells.clearUndo();
+    if (model) {
+      model.cells.clearUndo();
+    }
+    if (!sender.kernel && model) {
+      let name = findKernel(
+        model.defaultKernelName,
+        model.defaultKernelLanguage,
+        sender.kernelspecs
+      );
+      sender.changeKernel({ name });
     }
   }
 

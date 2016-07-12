@@ -354,7 +354,7 @@ namespace Private {
    */
   export
   function createNewFile(widget: FileButtons): void {
-    widget.model.newUntitled('file').then(contents => {
+    widget.model.newUntitled({ type: 'file' }).then(contents => {
       return widget.open(contents.path);
     }).catch(error => {
       utils.showErrorMessage(widget, 'New File Error', error);
@@ -366,7 +366,7 @@ namespace Private {
    */
   export
   function createNewFolder(widget: FileButtons): void {
-    widget.model.newUntitled('directory').then(contents => {
+    widget.model.newUntitled({ type: 'directory' }).then(contents => {
       widget.model.refresh();
     }).catch(error => {
       utils.showErrorMessage(widget, 'New Folder Error', error);

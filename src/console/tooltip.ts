@@ -99,25 +99,21 @@ class ConsoleTooltip extends Widget {
    * Handle `after_attach` messages for the widget.
    *
    * #### Notes
-   * Captures window events in capture phase to dismiss the tooltip widget.
-   *
-   * Because its parent (reference) widgets use window listeners instead of
-   * document listeners, the tooltip widget must also use window listeners
-   * in the capture phase.
+   * Captures document events to dismiss the tooltip widget.
    */
   protected onAfterAttach(msg: Message): void {
-    window.addEventListener('keydown', this, USE_CAPTURE);
-    window.addEventListener('mousedown', this, USE_CAPTURE);
-    window.addEventListener('scroll', this, USE_CAPTURE);
+    document.addEventListener('keydown', this, USE_CAPTURE);
+    document.addEventListener('mousedown', this, USE_CAPTURE);
+    document.addEventListener('scroll', this);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    window.removeEventListener('keydown', this, USE_CAPTURE);
-    window.removeEventListener('mousedown', this, USE_CAPTURE);
-    window.removeEventListener('scroll', this, USE_CAPTURE);
+    document.removeEventListener('keydown', this, USE_CAPTURE);
+    document.removeEventListener('mousedown', this, USE_CAPTURE);
+    document.removeEventListener('scroll', this);
   }
 
   /**
@@ -135,17 +131,16 @@ class ConsoleTooltip extends Widget {
    * of either the tooltip or its parent.
    */
   private _evtKeydown(event: KeyboardEvent) {
-    let target = event.target as HTMLElement;
+    if (this.isHidden) {
+      return;
+    }
 
     if (!this._reference) {
       this.hide();
       return;
     }
 
-    if (this.isHidden) {
-      return;
-    }
-
+    let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
       if (target === this._reference.node) {
         if (event.keyCode === 27) { // Escape key
@@ -155,6 +150,7 @@ class ConsoleTooltip extends Widget {
       }
       target = target.parentElement;
     }
+
     this.hide();
   }
 

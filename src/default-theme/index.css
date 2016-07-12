@@ -169,6 +169,7 @@ body {
   max-height: 28px;
   color: #777777;
   font-size: 14px;
+  margin-right: -1px;
 }
 
 
@@ -181,6 +182,7 @@ body {
 .p-TabBar-content {
   min-width: 0;
   max-height: 22px;
+  padding-right: 1px;
 }
 
 
