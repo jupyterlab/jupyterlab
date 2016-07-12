@@ -30,12 +30,53 @@ import {
 } from 'phosphor-menus';
 
 import {
+  ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
 import {
   WidgetTracker
 } from '../widgettracker';
+
+
+/**
+ * A class that tracks the current working directory of the file browser.
+ */
+export
+class DirectoryTracker {
+  /**
+   * A signal emitted when the current working directory changes.
+   */
+  get changed(): ISignal<DirectoryTracker, string> {
+    return Private.changedSignal.bind(this);
+  }
+
+  /**
+   * The current working directory of the filebrowser.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get current(): string {
+    return Private.fbWidget ? Private.fbWidget.model.path : '';
+  }
+}
+
+
+/**
+ * The default file browser provider.
+ */
+export
+const fileBrowserProvider = {
+  id: 'jupyter.services.fileBrowser',
+  provides: DirectoryTracker,
+  resolve: () => {
+    return Private.dirTracker;
+  }
+};
 
 
 /**
@@ -47,6 +88,7 @@ const fileBrowserExtension = {
   requires: [ServiceManager, DocumentRegistry],
   activate: activateFileBrowser
 };
+
 
 /**
  * The class name for all main area portrait tab icons.
@@ -94,10 +136,18 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
     opener
   });
   let fbModel = new FileBrowserModel({ manager });
-  let fbWidget = new FileBrowserWidget({
+  let fbWidget = Private.fbWidget = new FileBrowserWidget({
     model: fbModel,
     manager: docManager,
     opener
+  });
+
+  let path = '';
+  fbModel.refreshed.connect(() => {
+    if (fbModel.path !== path) {
+      path = fbModel.path;
+      Private.dirTracker.changed.emit(path);
+    }
   });
 
   // Add a context menu to the dir listing.
@@ -362,4 +412,22 @@ function createMenu(fbWidget: FileBrowserWidget, openWith: MenuItem[]):  Menu {
     })
   );
   return new Menu(items);
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  export
+  var fbWidget: FileBrowserWidget;
+
+  export
+  const dirTracker = new DirectoryTracker();
+
+  /**
+   * A signal emitted when the current working directory changes.
+   */
+  export
+  const changedSignal = new Signal<DirectoryTracker, string>();
 }
