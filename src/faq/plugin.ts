@@ -15,7 +15,8 @@ import {
   WidgetTracker
 } from '../widgettracker';
 
-import 'jquery';
+import $ = require('jquery');
+
 /**
  * The faq page extension.
  */
