@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContents, IKernel, ISession
+  IContents, IKernel, IServiceManager, ISession
 } from 'jupyter-js-services';
 
 import * as utils
@@ -222,17 +222,15 @@ class ContextManager implements IDisposable {
    * Construct a new context manager.
    */
   constructor(options: ContextManager.IOptions) {
-    this._contentsManager = options.contentsManager;
-    this._sessionManager = options.sessionManager;
+    this._manager = options.manager;
     this._opener = options.opener;
-    this._kernelspecids = options.kernelspecs;
   }
 
   /**
    * Get whether the context manager has been disposed.
    */
   get isDisposed(): boolean {
-    return this._contentsManager === null;
+    return this._manager === null;
   }
 
   /**
@@ -242,9 +240,7 @@ class ContextManager implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    this._contentsManager = null;
-    this._sessionManager = null;
-    this._kernelspecids = null;
+    this._manager = null;
     for (let id in this._contexts) {
       let contextEx = this._contexts[id];
       contextEx.context.dispose();
@@ -415,7 +411,7 @@ class ContextManager implements IDisposable {
    * Get the current kernelspec information.
    */
   getKernelspecs(): IKernel.ISpecModels {
-    return this._kernelspecids;
+    return this._manager.kernelspecs;
   }
 
   /**
@@ -436,7 +432,7 @@ class ContextManager implements IDisposable {
     } else {
       contents.content = model.toString();
     }
-    return this._contentsManager.save(path, contents).then(newContents => {
+    return this._manager.contents.save(path, contents).then(newContents => {
       contextEx.contentsModel = this._copyContentsModel(newContents);
       model.dirty = false;
     }).catch(err => {
@@ -481,7 +477,7 @@ class ContextManager implements IDisposable {
     };
     let path = contextEx.path;
     let model = contextEx.model;
-    return this._contentsManager.get(path, opts).then(contents => {
+    return this._manager.contents.get(path, opts).then(contents => {
       if (contents.format === 'json') {
         model.fromJSON(contents.content);
       } else {
@@ -525,7 +521,7 @@ class ContextManager implements IDisposable {
    * Get the list of running sessions.
    */
   listSessions(): Promise<ISession.IModel[]> {
-    return this._sessionManager.listRunning();
+    return this._manager.sessions.listRunning();
   }
 
   /**
@@ -542,7 +538,7 @@ class ContextManager implements IDisposable {
   private _startSession(id: string, options: ISession.IOptions): Promise<IKernel> {
     let contextEx = this._contexts[id];
     let context = contextEx.context;
-    return this._sessionManager.startNew(options).then(session => {
+    return this._manager.sessions.startNew(options).then(session => {
       if (contextEx.session) {
         contextEx.session.dispose();
       }
@@ -577,9 +573,7 @@ class ContextManager implements IDisposable {
     };
   }
 
-  private _contentsManager: IContents.IManager = null;
-  private _sessionManager: ISession.IManager = null;
-  private _kernelspecids: IKernel.ISpecModels = null;
+  private _manager: IServiceManager = null;
   private _contexts: { [key: string]: Private.IContextEx } = Object.create(null);
   private _opener: (id: string, widget: Widget) => IDisposable = null;
 }
@@ -595,19 +589,9 @@ export namespace ContextManager {
   export
   interface IOptions {
     /**
-     * A contents manager instance.
+     * A service manager instance.
      */
-    contentsManager: IContents.IManager;
-
-    /**
-     * A session manager instance.
-     */
-    sessionManager: ISession.IManager;
-
-    /**
-     * The system kernelspec information.
-     */
-    kernelspecs: IKernel.ISpecModels;
+    manager: IServiceManager;
 
     /**
      * A callback for opening sibling widgets.
