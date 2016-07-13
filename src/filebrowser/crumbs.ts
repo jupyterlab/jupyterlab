@@ -240,7 +240,7 @@ class BreadCrumbs extends Widget {
           };
           return showDialog(options).then(button => {
             if (button.text === 'OVERWRITE') {
-              return this._model.delete(newPath).then(() => {
+              return this._model.deleteFile(newPath).then(() => {
                 return this._model.rename(name, newPath).then(() => {
                   return this._model.refresh();
                 });

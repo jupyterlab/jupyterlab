@@ -5,6 +5,8 @@ import './dialog/dialog.spec';
 
 import './docregistry/default.spec';
 
+import './filebrowser/model.spec';
+
 import './renderers/renderers.spec';
 import './renderers/latex.spec';
 
