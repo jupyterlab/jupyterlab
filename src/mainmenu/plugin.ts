@@ -5,33 +5,54 @@ import * as arrays
   from 'phosphor-arrays';
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
+  PanelLayout
+} from 'phosphor-panel';
 
 import {
   MenuItem, MenuBar
 } from 'phosphor-menus';
+
+import {
+  Widget
+} from 'phosphor-widget';
+
+import {
+  Application
+} from 'phosphide/lib/core/application';
 
 
 /**
  * The main menu class.  It is intended to be used as a singleton.
  */
 export
-class MainMenu {
+class MainMenu extends Widget {
+  /**
+   * Construct a new main menu widget.
+   */
+  constructor() {
+    super();
+    let layout = new PanelLayout();
+    this.layout = layout;
+    this._menu = new MenuBar();
+    layout.addChild(this._menu);
+  }
+
   /**
    * Add a new menu item to the main menu.
    */
   addItem(item: MenuItem, options: MainMenu.IAddMenuOptions = {}): void {
+    let bar = this._menu;
     let rank = 'rank' in options ? options.rank : 100;
     let rankItem = { item, rank };
     let index = arrays.upperBound(this._items, rankItem, Private.itemCmp);
     arrays.insert(this._items, index, rankItem);
-    let items = Private.menuBar.items.slice();
+    let items = bar.items.slice();
     arrays.insert(items, index, item);
-    Private.menuBar.items = items;
+    bar.items = items;
   }
 
   private _items: Private.IRankItem[] = [];
+  private _menu: MenuBar = null;
 }
 
 
@@ -54,6 +75,19 @@ namespace MainMenu {
 
 
 /**
+ * A service providing an interface to the main menu.
+ */
+export
+const mainMenuProvider = {
+  id: 'jupyter.services.mainMenu',
+  provides: MainMenu,
+  resolve: () => {
+    return new MainMenu();
+  }
+};
+
+
+/**
  * The main menu extension.
  *
  * #### Notes
@@ -64,29 +98,19 @@ namespace MainMenu {
 export
 const mainMenuExtension = {
   id: 'jupyter.extensions.mainMenu',
+  requires: [MainMenu],
   activate: activateMainMenu
 };
 
 
-/**
- * A service providing an interface to the main menu.
- */
-export
-const mainMenuProvider = {
-  id: 'jupyter.services.mainMenu',
-  provides: MainMenu,
-  resolve: () => {
-    return Private.mainMenu;
-  }
-};
 
 
 /**
  * Activate the main menu extension.
  */
-function activateMainMenu(app: Application): void {
-  Private.menuBar.id = 'jp-MainMenu';
-  app.shell.addToTopArea(Private.menuBar);
+function activateMainMenu(app: Application, menu: MainMenu): void {
+  menu.id = 'jp-MainMenu';
+  app.shell.addToTopArea(menu);
 }
 
 
@@ -94,19 +118,6 @@ function activateMainMenu(app: Application): void {
  * A namespace for private data.
  */
 namespace Private {
-  /**
-   * The singleton menu bar instance.
-   */
-  export
-  const menuBar = new MenuBar();
-
-  /**
-   * The singleton main menu instance.
-   */
-  export
-  const mainMenu = new MainMenu();
-
-
   /**
    * An object which holds a menu and its sort rank.
    */
