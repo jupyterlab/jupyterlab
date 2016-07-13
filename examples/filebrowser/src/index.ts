@@ -58,7 +58,6 @@ function main(): void {
 
 
 function createApp(manager: IServiceManager): void {
-  let contentsManager = new ContentsManager();
   let widgets: Widget[] = [];
   let activeWidget: Widget;
 
@@ -80,9 +79,7 @@ function createApp(manager: IServiceManager): void {
   let docRegistry = new DocumentRegistry();
   let docManager = new DocumentManager({
     registry: docRegistry,
-    contentsManager: manager.contents,
-    sessionManager: manager.sessions,
-    kernelspecs: manager.kernelspecs,
+    manager,
     opener
   });
   let mFactory = new TextModelFactory();

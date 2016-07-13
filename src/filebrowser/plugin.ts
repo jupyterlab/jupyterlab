@@ -67,9 +67,7 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: Application, provider: ServiceManager, registry: DocumentRegistry): Promise<void> {
-  let contents = provider.contents;
-  let sessions = provider.sessions;
+function activateFileBrowser(app: Application, manager: ServiceManager, registry: DocumentRegistry): Promise<void> {
   let id = 0;
 
   let tracker = new WidgetTracker<Widget>();
@@ -92,12 +90,10 @@ function activateFileBrowser(app: Application, provider: ServiceManager, registr
 
   let docManager = new DocumentManager({
     registry,
-    contentsManager: contents,
-    sessionManager: sessions,
-    kernelspecs: provider.kernelspecs,
+    manager,
     opener
   });
-  let fbModel = new FileBrowserModel({ manager: provider });
+  let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowserWidget({
     model: fbModel,
     manager: docManager,

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContents, IKernel, ISession
+  IContents, IKernel, IServiceManager, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -48,14 +48,10 @@ class DocumentManager implements IDisposable {
    */
   constructor(options: DocumentManager.IOptions) {
     this._registry = options.registry;
-    this._contentsManager = options.contentsManager;
-    this._sessionManager = options.sessionManager;
-    this._specs = options.kernelspecs;
+    this._serviceManager = options.manager;
     let opener = options.opener;
     this._contextManager = new ContextManager({
-      contentsManager: this._contentsManager,
-      sessionManager: this._sessionManager,
-      kernelspecs: this._specs,
+      manager: this._serviceManager,
       opener: (id: string, widget: Widget) => {
         this._widgetManager.adoptWidget(id, widget);
         opener.open(widget);
@@ -71,13 +67,13 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get the kernel spec ids for the manager.
+   * Get the kernel spec models for the manager.
    *
    * #### Notes
    * This is a read-only property.
    */
   get kernelspecs(): IKernel.ISpecModels {
-    return this._specs;
+    return this._serviceManager.kernelspecs;
   }
 
   /**
@@ -94,7 +90,7 @@ class DocumentManager implements IDisposable {
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
-    return this._contentsManager === null;
+    return this._serviceManager === null;
   }
 
   /**
@@ -104,8 +100,7 @@ class DocumentManager implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    this._contentsManager = null;
-    this._sessionManager = null;
+    this._serviceManager = null;
     this._contextManager.dispose();
     this._contextManager = null;
     this._widgetManager.dispose();
@@ -192,7 +187,7 @@ class DocumentManager implements IDisposable {
    * List the running notebook sessions.
    */
   listSessions(): Promise<ISession.IModel[]> {
-    return this._sessionManager.listRunning();
+    return this._serviceManager.sessions.listRunning();
   }
 
   /**
@@ -259,11 +254,9 @@ class DocumentManager implements IDisposable {
     this._widgetManager.closeAll();
   }
 
-  private _contentsManager: IContents.IManager = null;
-  private _sessionManager: ISession.IManager = null;
+  private _serviceManager: IServiceManager = null;
   private _contextManager: ContextManager = null;
   private _widgetManager: DocumentWidgetManager = null;
-  private _specs: IKernel.ISpecModels = null;
   private _registry: DocumentRegistry = null;
 }
 
@@ -284,19 +277,9 @@ namespace DocumentManager {
     registry: DocumentRegistry;
 
     /**
-     * A contents manager instance.
+     * A service manager instance.
      */
-    contentsManager: IContents.IManager;
-
-    /**
-     * A session manager instance.
-     */
-    sessionManager: ISession.IManager;
-
-    /**
-     * The system kernelspec information.
-     */
-    kernelspecs: IKernel.ISpecModels;
+    manager: IServiceManager;
 
     /**
      * A widget opener for sibling widgets.
