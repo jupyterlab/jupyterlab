@@ -38,6 +38,8 @@ import 'codemirror/theme/seti.css';
 import 'codemirror/theme/the-matrix.css';
 import 'codemirror/theme/xq-light.css';
 import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/comment/comment.js';
 import 'codemirror/keymap/vim.js';
 
 export
