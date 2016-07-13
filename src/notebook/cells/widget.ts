@@ -5,9 +5,6 @@ import {
   IKernel, KernelMessage
 } from 'jupyter-js-services';
 
-import * as utils
-  from 'jupyter-js-utils';
-
 import {
   loadModeByMIME
 } from '../../codemirror';
