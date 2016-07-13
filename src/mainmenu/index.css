@@ -16,3 +16,12 @@
    max-height: 24px;
    position: absolute;
 }
+
+.p-MenuBar-itemText {
+  font-size: 13px;
+  color: #777777;
+}
+
+.p-MenuBar-item.p-mod-active > .p-MenuBar-itemText {
+  color: #2196F3;
+}
