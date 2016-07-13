@@ -9,6 +9,10 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import {
+  TabPanel
+} from 'phosphor-tabs';
+
 
 /**
  * The about page extension.
@@ -67,7 +71,14 @@ function activateAbout(app: Application): void {
     id: commandId,
     handler: () => {
       if (!widget.isAttached) app.shell.addToMainArea(widget);
-      app.shell.activateMain(widget.id);
+      let stack = widget.parent;
+      if (!stack) {
+        return;
+      }
+      let tabs = stack.parent;
+      if (tabs instanceof TabPanel) {
+        tabs.currentWidget = widget;
+      }
     }
   }]);
 
@@ -76,6 +87,4 @@ function activateAbout(app: Application): void {
     text: 'About JupyterLab',
     category: 'Help'
   }]);
-
-  app.shell.addToMainArea(widget);
 }

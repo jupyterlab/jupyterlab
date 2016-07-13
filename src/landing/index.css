@@ -103,3 +103,9 @@
   font-size: 12px;
   padding-top: 8px;
 }
+
+.jp-Landing-tour {
+    color: #f37a3c;
+    margin-top: 20px;
+    cursor: pointer;
+}
