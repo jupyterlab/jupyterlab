@@ -54,6 +54,7 @@ class BackboneViewWrapper extends Widget {
    */
   constructor(view: Backbone.View<any>) {
     super();
+    this._view = view;
     view.on('remove', () => {
       this.dispose();
       console.log('View removed', view);
@@ -61,6 +62,17 @@ class BackboneViewWrapper extends Widget {
     this.addClass(BACKBONEVIEWWRAPPER_CLASS);
     this.node.appendChild(view.el);
   }
+
+  onAfterAttach(msg: any) {
+    this._view.trigger('displayed');
+  }
+
+  dispose() {
+    this._view = null;
+    super.dispose();
+  }
+
+  private _view: Backbone.View<any> = null;
 }
 
 
@@ -100,7 +112,7 @@ class WidgetManager extends ManagerBase<Widget> implements IDisposable {
    * Return a phosphor widget representing the view
    */
   display_view(msg: any, view: Backbone.View<Backbone.Model>, options: any): Widget {
-    return new BackboneViewWrapper(view);
+    return (view as any).pWidget ? (view as any).pWidget : new BackboneViewWrapper(view);
   }
 
   /**
