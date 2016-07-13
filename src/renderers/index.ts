@@ -28,6 +28,24 @@ import {
   typeset, removeMath, replaceMath
 } from './latex';
 
+class MarkedRenderer extends marked.Renderer {
+  link(href: string, title: string, text: string): string {
+    let output = super.link(href, title, text);
+    if (!output) {
+      return output;
+    }
+    if (0 === href.indexOf('//') || href.indexOf(':') > -1) {
+      return output.replace('href=', 'rel="nofollow" href=');
+    }
+    return output;
+  }
+}
+
+marked.setOptions({
+  renderer: new MarkedRenderer(),
+  sanitize: true
+});
+
 
 /**
  * A widget for displaying HTML and rendering math.
@@ -205,7 +223,6 @@ class MarkdownRenderer implements IRenderer<Widget> {
   render(mimetype: string, text: string): Widget {
     let data = removeMath(text);
     let html = marked(data['text']);
-    let sanitized = sanitize(replaceMath(html, data['math']));
-    return new HTMLWidget(sanitized);
+    return new HTMLWidget(replaceMath(html, data['math']));
   }
 }
