@@ -371,7 +371,6 @@ class DirListing extends Widget {
       return showDialog({
         title: 'Delete file?',
         body: message,
-        host: this.node.parentElement,
         okText: 'DELETE'
       }).then(result => {
         if (result.text === 'DELETE') {
@@ -943,7 +942,6 @@ class DirListing extends Widget {
         if (error.message.indexOf('409') !== -1) {
           let options = {
             title: 'Overwrite file?',
-            host: this.parent.node,
             body: `"${newPath}" already exists, overwrite?`,
             okText: 'OVERWRITE'
           };
@@ -1162,7 +1160,6 @@ class DirListing extends Widget {
             error.message.indexOf('already exists') !== -1) {
           let options = {
             title: 'Overwrite file?',
-            host: this.parent.node,
             body: `"${newName}" already exists, overwrite?`,
             okText: 'OVERWRITE'
           };

@@ -41,7 +41,6 @@ function openWithDialog(path: string, manager: DocumentManager, host?: HTMLEleme
     handler = new OpenWithHandler(path, manager, sessions);
     return showDialog({
       title: 'Open File',
-      host,
       body: handler.node,
       okText: 'OPEN'
     });

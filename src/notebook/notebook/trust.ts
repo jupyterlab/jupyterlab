@@ -44,7 +44,6 @@ function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void>
     return Promise.resolve(void 0);
   }
   return showDialog({
-    host: host || document.body,
     body: TRUST_MESSAGE,
     title: 'Trust this notebook?'
   }).then(result => {
