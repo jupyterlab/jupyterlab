@@ -206,4 +206,5 @@
   box-shadow: 5px 5px 10px rgba(46,46,46,0.5);
   border-radius: 3px;
   color: #757575
+  transform: translateX(-40%) translateY(-58%);
 }
