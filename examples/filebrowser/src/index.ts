@@ -263,8 +263,7 @@ function dialogDemo(): void {
   body.appendChild(input);
   body.appendChild(selector);
   showDialog({
-    title: 'Create new notebook',
-    body,
+    title: 'Create new notebook'
   });
 }
 

@@ -454,7 +454,6 @@ namespace Private {
   function uploadFileOverride(widget: FileButtons, file: File): Promise<any> {
     let options = {
       title: 'Overwrite File?',
-      host: widget.parent.node,
       body: `"${file.name}" already exists, overwrite?`
     };
     return showDialog(options).then(button => {

@@ -168,8 +168,7 @@ class ConsolePanel extends Panel {
       let name = spec.display_name;
       return showDialog({
         title: 'Shut down kernel?',
-        body: `Shut down ${name}?`,
-        host: this.node
+        body: `Shut down ${name}?`
       });
     }).then(value => {
       if (value && value.text === 'OK') {
