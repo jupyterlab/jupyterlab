@@ -30,6 +30,10 @@ import {
 } from 'phosphor-menus';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
   ISignal, Signal
 } from 'phosphor-signaling';
 
@@ -50,17 +54,17 @@ class PathTracker {
   /**
    * A signal emitted when the current path changes.
    */
-  get changed(): ISignal<PathTracker, string> {
-    return Private.changedSignal.bind(this);
+  get pathChanged(): ISignal<PathTracker, IChangedArgs<string>> {
+    return Private.pathChangedSignal.bind(this);
   }
 
   /**
-   * The current working directory of the filebrowser.
+   * The current path of the filebrowser.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get current(): string {
+  get path(): string {
     return Private.fbWidget ? Private.fbWidget.model.path : '';
   }
 }
@@ -142,12 +146,8 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
     opener
   });
 
-  let path = '';
-  fbModel.refreshed.connect(() => {
-    if (fbModel.path !== path) {
-      path = fbModel.path;
-      Private.pathTracker.changed.emit(path);
-    }
+  fbModel.pathChanged.connect((sender, args) => {
+    Private.pathTracker.pathChanged.emit(args);
   });
 
   // Add a context menu to the dir listing.
@@ -429,5 +429,5 @@ namespace Private {
    * A signal emitted when the current working directory changes.
    */
   export
-  const changedSignal = new Signal<PathTracker, string>();
+  const pathChangedSignal = new Signal<PathTracker, IChangedArgs<string>>();
 }
