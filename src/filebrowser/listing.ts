@@ -292,6 +292,7 @@ class DirListing extends Widget {
    */
   sort(state: DirListing.ISortState): void {
     this._sortedModels = Private.sort(this.model.items, state);
+    this._sortState = state;
     this.update();
   }
 
