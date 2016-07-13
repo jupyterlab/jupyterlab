@@ -114,16 +114,20 @@ class FileBrowserModel implements IDisposable {
    *
    * @returns A promise with the contents of the directory.
    */
-  cd(newValue = ''): Promise<void> {
-    if (newValue !== '') {
+  cd(newValue = '.'): Promise<void> {
+    if (newValue !== '.') {
       newValue = Private.normalizePath(this._model.path, newValue);
     }
     // Collapse requests to the same directory.
     if (newValue === this._pendingPath) {
-      return this._pending;
+      return Promise.resolve(void 0);
     }
     let oldValue = this.path;
     let options = { content: true };
+    this._pendingPath = newValue;
+    if (newValue === '.') {
+      newValue = '';
+    }
     this._pending = this._manager.contents.get(newValue, options).then(contents => {
       this._model = contents;
       return this._findSessions();
@@ -135,9 +139,9 @@ class FileBrowserModel implements IDisposable {
           newValue
         });
       }
+      this._pendingPath = '';
       this.refreshed.emit(void 0);
     });
-    this._pendingPath = newValue;
     return this._pending;
   }
 
