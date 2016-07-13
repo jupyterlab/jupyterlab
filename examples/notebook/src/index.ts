@@ -7,7 +7,7 @@ import {
 } from 'jupyterlab/lib/notebook';
 
 import {
-  ContentsManager, IKernel, SessionManager
+  IServiceManager, createServiceManager
 } from 'jupyter-js-services';
 
 import {
@@ -58,14 +58,13 @@ let NOTEBOOK = 'test.ipynb';
 
 
 function main(): void {
-  let sessionManager = new SessionManager();
-  sessionManager.getSpecs().then(kernelspecs => {
-    createApp(sessionManager, kernelspecs);
+  createServiceManager().then(manager => {
+    createApp(manager);
   });
 }
 
 
-function createApp(sessionManager: SessionManager, kernelspecs: IKernel.ISpecModels): void {
+function createApp(manager: IServiceManager): void {
   // Initialize the keymap manager with the bindings.
   let keymap = new KeymapManager();
   let useCapture = true;
@@ -100,13 +99,10 @@ function createApp(sessionManager: SessionManager, kernelspecs: IKernel.ISpecMod
     }
   };
 
-  let contentsManager = new ContentsManager();
   let docRegistry = new DocumentRegistry();
   let docManager = new DocumentManager({
     registry: docRegistry,
-    contentsManager,
-    sessionManager,
-    kernelspecs,
+    manager,
     opener
   });
   let mFactory = new NotebookModelFactory();
