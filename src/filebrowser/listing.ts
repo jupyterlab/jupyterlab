@@ -20,10 +20,6 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  clearSignalData
-} from 'phosphor-signaling';
-
-import {
   Widget
 } from 'phosphor-widget';
 
