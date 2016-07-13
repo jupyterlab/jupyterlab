@@ -17,6 +17,10 @@ import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
+import {
+  deepEqual
+} from '../notebook/common/json';
+
 
 /**
  * An implementation of a file browser model.
@@ -34,6 +38,7 @@ class FileBrowserModel implements IDisposable {
     this._manager = options.manager;
     this._model = { path: '', name: '/', type: 'directory', content: [] };
     this.cd();
+    this._manager.sessions.runningChanged.connect(this._onRunningChanged, this);
   }
 
   /**
@@ -128,10 +133,14 @@ class FileBrowserModel implements IDisposable {
     if (newValue === '.') {
       newValue = '';
     }
+    if (oldValue !== newValue) {
+      this._sessions = [];
+    }
     this._pending = this._manager.contents.get(newValue, options).then(contents => {
       this._model = contents;
-      return this._findSessions();
-    }).then(() => {
+      return this._manager.sessions.listRunning();
+    }).then(models => {
+      this._onRunningChanged(this._manager.sessions, models);
       if (oldValue !== newValue) {
         this.pathChanged.emit({
           name: 'path',
@@ -139,8 +148,8 @@ class FileBrowserModel implements IDisposable {
           newValue
         });
       }
-      this._pendingPath = '';
       this.refreshed.emit(void 0);
+      this._pendingPath = '';
     });
     return this._pending;
   }
@@ -354,25 +363,27 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get the sessions for the current directory.
+   * Handle a change to the running sessions.
    */
-  private _findSessions(): Promise<void> {
+  private _onRunningChanged(sender: ISession.IManager, models: ISession.IModel[]): void {
+    if (deepEqual(models, this._sessions)) {
+      return;
+    }
     this._sessions = [];
-
-    return this._manager.sessions.listRunning().then(models => {
-      if (!models.length) {
-        return;
-      }
-      let paths = this._model.content.map((contents: IContents.IModel) => {
-        return contents.path;
-      });
-      for (let model of models) {
-        let index = paths.indexOf(model.notebook.path);
-        if (index !== -1) {
-          this._sessions.push(model);
-        }
-      }
+    if (!models.length) {
+      this.refreshed.emit(void 0);
+      return;
+    }
+    let paths = this._model.content.map((contents: IContents.IModel) => {
+      return contents.path;
     });
+    for (let model of models) {
+      let index = paths.indexOf(model.notebook.path);
+      if (index !== -1) {
+        this._sessions.push(model);
+      }
+    }
+    this.refreshed.emit(void 0);
   }
 
   private _maxUploadSizeMb = 15;
