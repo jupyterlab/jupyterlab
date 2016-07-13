@@ -186,6 +186,9 @@ class RunningSessions extends Widget {
     sessionList.className = LIST_CLASS;
     sessionContainer.appendChild(sessionList);
     sessionNode.appendChild(sessionContainer);
+
+    this._manager.terminals.runningChanged.connect(this._onTerminalsChanged, this);
+    this._manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
   }
 
   /**
@@ -239,20 +242,14 @@ class RunningSessions extends Widget {
    * Refresh the widget.
    */
   refresh(): Promise<void> {
+    let terminals = this._manager.terminals;
+    let sessions = this._manager.sessions;
     clearTimeout(this._refreshId);
-    return this._manager.terminals.listRunning().then(running => {
-      this._runningTerminals = running;
-      return this._manager.sessions.listRunning();
+    return terminals.listRunning().then(running => {
+      this._onTerminalsChanged(terminals, running);
+      return sessions.listRunning();
     }).then(running => {
-      // Strip out non-file backed sessions.
-      this._runningSessions = [];
-      for (let session of running) {
-        let name = session.notebook.path.split('/').pop();
-        if (name.indexOf('.') !== -1) {
-          this._runningSessions.push(session);
-        }
-      }
-      this.update();
+      this._onSessionsChanged(sessions, running);
       this._refreshId = setTimeout(() => {
         this.refresh();
       }, REFRESH_DURATION);
@@ -387,6 +384,29 @@ class RunningSessions extends Widget {
       }
       this.sessionOpenRequested.emit(model);
     }
+  }
+
+  /**
+   * Handle a change to the running sessions.
+   */
+  private _onSessionsChanged(sender: ISession.IManager, models: ISession.IModel[]): void {
+    // Strip out non-file backed sessions.
+    this._runningSessions = [];
+    for (let session of models) {
+      let name = session.notebook.path.split('/').pop();
+      if (name.indexOf('.') !== -1) {
+        this._runningSessions.push(session);
+      }
+    }
+    this.update();
+  }
+
+  /**
+   * Handle a change to the running terminals.
+   */
+  private _onTerminalsChanged(sender: ITerminalSession.IManager, models: ITerminalSession.IModel[]): void {
+    this._runningTerminals = models;
+    this.update();
   }
 
   private _manager: IServiceManager = null;

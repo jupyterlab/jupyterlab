@@ -18,11 +18,11 @@ import {
 } from './index';
 
 import {
-  MainMenu, mainMenuProvider
+  MainMenu
 } from '../mainmenu/plugin';
 
 import {
-  MenuItem, Menu, IMenuItemOptions, MenuItemType
+  MenuItem, Menu
 } from 'phosphor-menus';
 
 
@@ -72,6 +72,8 @@ function activateTerminal(app: Application, services: ServiceManager, mainMenu: 
         tracker.addWidget(term);
         services.terminals.create().then(session => {
           term.session = session;
+          // Trigger an update of the running kernels.
+          services.terminals.listRunning();
         });
       }
     },
@@ -167,14 +169,13 @@ function activateTerminal(app: Application, services: ServiceManager, mainMenu: 
       if (options.background === 'black') {
         options.background = 'white';
         options.color = 'black';
-      }
-      else {
+      } else {
         options.background = 'black';
         options.color = 'white';
       }
       for (let i = 0; i < widgets.length; i++) {
-          widgets[i].background = options.background;
-          widgets[i].color = options.color;
+        widgets[i].background = options.background;
+        widgets[i].color = options.color;
       }
     }
   }
