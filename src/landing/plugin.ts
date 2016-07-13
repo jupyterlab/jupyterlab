@@ -28,7 +28,7 @@ const landingExtension = {
 function activateLanding(app: Application, services: ServiceManager): void {
   let widget = new Widget();
   widget.id = 'landing-jupyterlab';
-  widget.title.text = 'JupyterLab';
+  widget.title.text = 'Launcher';
   widget.title.closable = true;
   widget.addClass('jp-Landing');
 
@@ -74,6 +74,14 @@ function activateLanding(app: Application, services: ServiceManager): void {
   let img = body.getElementsByClassName('jp-ImageNotebook')[0];
   img.addEventListener('click', () => {
     app.commands.execute('file-operations:new-notebook');
+  });
+
+  let tour = document.createElement('span')
+  tour.textContent = 'Take a tour';
+  tour.className = 'jp-Landing-tour';
+  dialog.appendChild(tour);
+  tour.addEventListener('click', () => {
+    app.commands.execute('about-jupyterlab:show');
   });
 
   img = body.getElementsByClassName('jp-ImageConsole')[0];

@@ -229,8 +229,7 @@ class DocumentWidgetManager {
     }
     return showDialog({
       title: 'Close without saving?',
-      body: `File "${widget.title.text}" has unsaved changes, close without saving?`,
-      host: widget.node
+      body: `File "${widget.title.text}" has unsaved changes, close without saving?`
     }).then(value => {
       if (value && value.text === 'OK') {
         return true;

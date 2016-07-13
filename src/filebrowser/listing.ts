@@ -292,6 +292,7 @@ class DirListing extends Widget {
    */
   sort(state: DirListing.ISortState): void {
     this._sortedModels = Private.sort(this.model.items, state);
+    this._sortState = state;
     this.update();
   }
 
@@ -371,7 +372,6 @@ class DirListing extends Widget {
       return showDialog({
         title: 'Delete file?',
         body: message,
-        host: this.node.parentElement,
         okText: 'DELETE'
       }).then(result => {
         if (result.text === 'DELETE') {
@@ -418,12 +418,12 @@ class DirListing extends Widget {
     let promises: Promise<void>[] = [];
     let items = this.sortedItems;
     let paths = items.map(item => item.path);
-    for (let sessionId of this._model.sessionIds) {
-      let index = paths.indexOf(sessionId.notebook.path);
+    for (let session of this._model.sessions) {
+      let index = paths.indexOf(session.notebook.path);
       if (!this._softSelection && this._selection[items[index].name]) {
-        promises.push(this._model.shutdown(sessionId));
+        promises.push(this._model.shutdown(session.id));
       } else if (this._softSelection === items[index].name) {
-        promises.push(this._model.shutdown(sessionId));
+        promises.push(this._model.shutdown(session.id));
       }
     }
     return Promise.all(promises).then(
@@ -656,11 +656,11 @@ class DirListing extends Widget {
     // Handle notebook session statuses.
     let paths = items.map(item => item.path);
     let specs = this._model.kernelspecs;
-    for (let sessionId of this._model.sessionIds) {
-      let index = paths.indexOf(sessionId.notebook.path);
+    for (let session of this._model.sessions) {
+      let index = paths.indexOf(session.notebook.path);
       let node = this._items[index];
       node.classList.add(RUNNING_CLASS);
-      node.title = specs.kernelspecs[sessionId.kernel.name].spec.display_name;
+      node.title = specs.kernelspecs[session.kernel.name].spec.display_name;
     }
 
     this._prevPath = this._model.path;
@@ -943,13 +943,12 @@ class DirListing extends Widget {
         if (error.message.indexOf('409') !== -1) {
           let options = {
             title: 'Overwrite file?',
-            host: this.parent.node,
             body: `"${newPath}" already exists, overwrite?`,
             okText: 'OVERWRITE'
           };
           return showDialog(options).then(button => {
             if (button.text === 'OVERWRITE') {
-              return this._model.delete(newPath).then(() => {
+              return this._model.deleteFile(newPath).then(() => {
                 return this._model.rename(name, newPath);
               });
             }
@@ -1129,7 +1128,7 @@ class DirListing extends Widget {
   private _delete(names: string[]): Promise<void> {
     let promises: Promise<void>[] = [];
     for (let name of names) {
-      promises.push(this._model.delete(name));
+      promises.push(this._model.deleteFile(name));
     }
     return Promise.all(promises).then(
       () => this._model.refresh(),
@@ -1162,13 +1161,12 @@ class DirListing extends Widget {
             error.message.indexOf('already exists') !== -1) {
           let options = {
             title: 'Overwrite file?',
-            host: this.parent.node,
             body: `"${newName}" already exists, overwrite?`,
             okText: 'OVERWRITE'
           };
           return showDialog(options).then(button => {
             if (button.text === 'OVERWRITE') {
-              return this._model.delete(newName).then(() => {
+              return this._model.deleteFile(newName).then(() => {
                 return this._model.rename(original, newName).then(() => {
                   this._model.refresh();
                 });

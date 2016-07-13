@@ -12,7 +12,7 @@ module.exports = {
   },
   bail: true,
   debug: true,
-  devtool: 'source-map',
+  devtool: 'inline-source-map',
   module: {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },

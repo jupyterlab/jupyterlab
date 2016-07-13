@@ -29,8 +29,7 @@ function restartKernel(kernel: IKernel, host?: HTMLElement): Promise<boolean> {
   }
   return showDialog({
     title: 'Restart Kernel?',
-    body: 'Do you want to restart the current kernel? All variables will be lost.',
-    host
+    body: 'Do you want to restart the current kernel? All variables will be lost.'
   }).then(result => {
     if (result.text === 'OK') {
       return kernel.restart().then(() => { return true; });

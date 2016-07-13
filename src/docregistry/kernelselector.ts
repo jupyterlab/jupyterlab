@@ -79,7 +79,6 @@ function selectKernel(options: IKernelSelection): Promise<IKernel.IModel> {
   return showDialog({
     title: 'Select Kernel',
     body,
-    host: options.host,
     okText: 'SELECT'
   }).then(result => {
     // Change the kernel if a kernel was selected.

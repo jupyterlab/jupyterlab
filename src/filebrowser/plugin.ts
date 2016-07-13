@@ -97,11 +97,7 @@ function activateFileBrowser(app: Application, provider: ServiceManager, registr
     kernelspecs: provider.kernelspecs,
     opener
   });
-  let fbModel = new FileBrowserModel({
-    contentsManager: contents,
-    sessionManager: sessions,
-    kernelspecs: provider.kernelspecs
-  });
+  let fbModel = new FileBrowserModel({ manager: provider });
   let fbWidget = new FileBrowserWidget({
     model: fbModel,
     manager: docManager,

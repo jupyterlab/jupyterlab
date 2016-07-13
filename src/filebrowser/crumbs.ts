@@ -235,13 +235,12 @@ class BreadCrumbs extends Widget {
         if (error.message.indexOf('409') !== -1) {
           let options = {
             title: 'Overwrite file?',
-            host: this.parent.node,
             body: `"${newPath}" already exists, overwrite?`,
             okText: 'OVERWRITE'
           };
           return showDialog(options).then(button => {
             if (button.text === 'OVERWRITE') {
-              return this._model.delete(newPath).then(() => {
+              return this._model.deleteFile(newPath).then(() => {
                 return this._model.rename(name, newPath).then(() => {
                   return this._model.refresh();
                 });
