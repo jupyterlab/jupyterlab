@@ -188,7 +188,11 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     text: 'Notebook',
     submenu: makeNbMenu()
   });
-  mainMenu.addItem(notebookMenu);
+
+  let menuOptions = {
+    'rank': 1
+  };
+  mainMenu.addItem(notebookMenu, menuOptions);
 
   currentApp = app;
 
@@ -776,8 +780,8 @@ function makeNbMenu() {
       handler: clearOutputHandler
     }),
     new MenuItem({
-      text: 'Restart and run all',
-      handler: restartClearHandler
+      text: 'Run all cells',
+      handler: runAllHandler
     }),
     new MenuItem({
       text: 'Switch kernel',
@@ -795,8 +799,8 @@ function clearOutputHandler() {
   currentApp.commands.execute('notebook:clear-outputs');
 }
 
-function restartClearHandler() {
-  currentApp.commands.execute('notebook:restart-clear');
+function runAllHandler() {
+  currentApp.commands.execute('notebook:run-all');
 }
 
 function changeKernelHandler() {
