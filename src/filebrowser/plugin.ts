@@ -30,6 +30,10 @@ import {
 } from 'phosphor-menus';
 
 import {
+  ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -39,15 +43,38 @@ import {
 
 
 /**
+ * A class that tracks the current path of the file browser.
+ */
+export
+class PathTracker {
+  /**
+   * A signal emitted when the current path changes.
+   */
+  get changed(): ISignal<PathTracker, string> {
+    return Private.changedSignal.bind(this);
+  }
+
+  /**
+   * The current working directory of the filebrowser.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get current(): string {
+    return Private.fbWidget ? Private.fbWidget.model.path : '';
+  }
+}
+
+
+/**
  * The default file browser provider.
  */
 export
 const fileBrowserProvider = {
   id: 'jupyter.services.fileBrowser',
-  requires: [ServiceManager],
-  provides: FileBrowserModel,
-  resolve: (manager: ServiceManager) => {
-    return new FileBrowserModel({ manager });
+  provides: PathTracker,
+  resolve: () => {
+    return Private.pathTracker;
   }
 };
 
@@ -58,7 +85,7 @@ const fileBrowserProvider = {
 export
 const fileBrowserExtension = {
   id: 'jupyter.extensions.fileBrowser',
-  requires: [FileBrowserModel, ServiceManager, DocumentRegistry],
+  requires: [ServiceManager, DocumentRegistry],
   activate: activateFileBrowser
 };
 
@@ -82,7 +109,7 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: Application, model: FileBrowserModel, manager: ServiceManager, registry: DocumentRegistry): Promise<void> {
+function activateFileBrowser(app: Application, manager: ServiceManager, registry: DocumentRegistry): Promise<void> {
   let id = 0;
 
   let tracker = new WidgetTracker<Widget>();
@@ -108,10 +135,19 @@ function activateFileBrowser(app: Application, model: FileBrowserModel, manager:
     manager,
     opener
   });
-  let fbWidget = new FileBrowserWidget({
-    model,
+  let fbModel = new FileBrowserModel({ manager });
+  let fbWidget = Private.fbWidget = new FileBrowserWidget({
+    model: fbModel,
     manager: docManager,
     opener
+  });
+
+  let path = '';
+  fbModel.refreshed.connect(() => {
+    if (fbModel.path !== path) {
+      path = fbModel.path;
+      Private.pathTracker.changed.emit(path);
+    }
   });
 
   // Add a context menu to the dir listing.
@@ -376,4 +412,22 @@ function createMenu(fbWidget: FileBrowserWidget, openWith: MenuItem[]):  Menu {
     })
   );
   return new Menu(items);
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  export
+  var fbWidget: FileBrowserWidget;
+
+  export
+  const pathTracker = new PathTracker();
+
+  /**
+   * A signal emitted when the current working directory changes.
+   */
+  export
+  const changedSignal = new Signal<PathTracker, string>();
 }
