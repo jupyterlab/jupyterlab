@@ -103,7 +103,7 @@ class NotebookTracker extends WidgetTracker<NotebookPanel> { }
 export
 const notebookHandlerExtension = {
   id: 'jupyter.extensions.notebookHandler',
-  requires: [DocumentRegistry, ServiceManager, RenderMime, IClipboard],
+  requires: [NotebookTracker, DocumentRegistry, ServiceManager, RenderMime, IClipboard],
   activate: activateNotebookHandler
 };
 
@@ -116,7 +116,7 @@ const notebookTrackerProvider = {
   id: 'jupyter.plugins.notebookTracker',
   provides: NotebookTracker,
   resolve: () => {
-    return Private.notebookTracker;
+    return new NotebookTracker();
   }
 };
 
@@ -124,7 +124,7 @@ const notebookTrackerProvider = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: ServiceManager, rendermime: RenderMime<Widget>, clipboard: IClipboard): void {
+function activateNotebookHandler(app: Application, tracker: NotebookTracker, registry: DocumentRegistry, services: ServiceManager, rendermime: RenderMime<Widget>, clipboard: IClipboard): void {
 
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard);
   let options: IWidgetFactoryOptions = {
@@ -165,7 +165,6 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   }
 
   // Track the current active notebook.
-  let tracker = Private.notebookTracker;
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
     tracker.addWidget(widget);
@@ -706,16 +705,4 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     text: 'Markdown Header 6'
   }
   ]);
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * A singleton instance of a notebook tracker.
-   */
-  export
-  const notebookTracker = new NotebookTracker();
 }
