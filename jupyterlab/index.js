@@ -6,6 +6,7 @@ var phosphide = require('phosphide/lib/core/application');
 // ES6 Promise polyfill
 require('es6-promise').polyfill();
 
+require('scrollsnap-polyfill/dist/scrollsnap-polyfill.bundled');
 require('font-awesome/css/font-awesome.min.css');
 require('jupyterlab/lib/default-theme/index.css');
 

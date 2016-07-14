@@ -11,7 +11,8 @@
     "jupyter-js-services": "^0.15.1",
     "jupyter-js-widgets-labextension": "^0.0.7",
     "jupyterlab": "file:../",
-    "phosphide": "^0.10.0"
+    "phosphide": "^0.10.0",
+    "scrollsnap-polyfill": "^0.1.0"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
