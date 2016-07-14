@@ -131,7 +131,7 @@ class FileBrowserModel implements IDisposable {
     let options = { content: true };
     this._pendingPath = newValue;
     if (newValue === '.') {
-      newValue = '';
+      newValue = this.path;
     }
     if (oldValue !== newValue) {
       this._sessions = [];
@@ -149,7 +149,7 @@ class FileBrowserModel implements IDisposable {
         });
       }
       this.refreshed.emit(void 0);
-      this._pendingPath = '';
+      this._pendingPath = null;
     });
     return this._pending;
   }
@@ -303,7 +303,8 @@ class FileBrowserModel implements IDisposable {
       return this._upload(file);
     }
 
-    return this._manager.contents.get(file.name, {}).then(() => {
+    let path = `${this.path}/${file.name}`;
+    return this._manager.contents.get(path, {}).then(() => {
       return Private.typedThrow<IContents.IModel>(`"${file.name}" already exists`);
     }, () => {
       return this._upload(file);
@@ -390,7 +391,7 @@ class FileBrowserModel implements IDisposable {
   private _manager: IServiceManager = null;
   private _sessions: ISession.IModel[] = [];
   private _model: IContents.IModel;
-  private _pendingPath = '';
+  private _pendingPath: string = null;
   private _pending: Promise<void> = null;
 }
 
