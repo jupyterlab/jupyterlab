@@ -13,7 +13,7 @@ import {
   MarkdownWidgetFactory
 } from './widget';
 
-
+console.log("Loaded mdrenderwidget");
 /**
  * The class name for all main area portrait tab icons.
  */
@@ -34,16 +34,16 @@ const markdownHandlerExtension = {
   requires: [DocumentRegistry],
   activate: (app: Application, registry: DocumentRegistry) => {
     let options: IWidgetFactoryOptions = {
-      fileExtensions: ['.*'],
+      fileExtensions: ['.md'],
       displayName: 'Rendered Markdown',
-      modelName: 'text/markdown',
-      defaultFor: ['.md'],
+      modelName: 'text',
       preferKernel: false,
       canStartKernel: false
     };
     let factory = new MarkdownWidgetFactory();
     let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
-    factory.widgetCreated.connect((sender, widget) => widget.title.icon = icon);
+    factory.widgetCreated.connect((sender, widget) => { widget.title.icon = icon; });
     registry.addWidgetFactory(factory, options);
+    console.log("Added markdownHandlerExtension to registry");
   }
 };

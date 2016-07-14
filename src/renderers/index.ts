@@ -1,9 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as marked
-  from 'marked';
-
 import {
   IRenderer
 } from '../rendermime';
@@ -28,6 +25,9 @@ import {
   typeset, removeMath, replaceMath
 } from './latex';
 
+import {
+  MarkdownWidget
+} from '../mdrenderwidget/widget';
 
 /**
  * A widget for displaying HTML and rendering math.
