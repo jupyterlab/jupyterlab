@@ -209,15 +209,8 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
     text: 'Switch Kernel'
   }]);
 
-  let newSubmenu = new Menu ([
-    new MenuItem ({
-      text: services.kernelspecs.default,
-      handler: () => {
-        app.commands.execute('console:create-'+ services.kernelspecs.default);
-      }
-    })
+  let newSubmenu = new Menu(newSubmenuItems);
 
-  ]);
 
   let menu = new Menu ([
     new MenuItem ({
