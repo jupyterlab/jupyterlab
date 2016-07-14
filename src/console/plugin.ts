@@ -211,7 +211,6 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
 
   let newSubmenu = new Menu(newSubmenuItems);
 
-
   let menu = new Menu ([
     new MenuItem ({
       text: 'New',
