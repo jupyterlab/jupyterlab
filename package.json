@@ -101,7 +101,8 @@
     "lib/**/*.css",
     "lib/**/*.d.ts",
     "lib/**/*.js",
-    "lib/**/*.svg"
+    "lib/**/*.svg",
+    "lib/**/*.gif"
   ],
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
