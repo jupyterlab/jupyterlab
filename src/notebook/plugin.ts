@@ -740,14 +740,6 @@ function makeNbMenu() {
     new MenuItem({
       text: 'Toggle line numbers',
       handler: lineNumberHandler
-    }),
-    new MenuItem({
-      text: 'Command mode',
-      handler: commandModeHandler
-    }),
-    new MenuItem({
-      text: 'Edit mode',
-      handler: editModeHandler
     })
   ]);
 
