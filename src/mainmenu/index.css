@@ -12,9 +12,13 @@
    background: #EEEEEE;
    top: 0px;
    left: 0px;
-   min-height: 24px;
-   max-height: 24px;
+   min-height: 28px;
+   max-height: 28px;
    position: absolute;
+}
+
+.p-MenuBar .p-MenuBar-item {
+  padding: 6px 8px;
 }
 
 .p-MenuBar-itemText {
