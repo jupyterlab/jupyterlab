@@ -134,7 +134,7 @@ class RunningSessions extends Widget {
     let sessions = document.createElement('div');
     sessions.className = `${SECTION_CLASS} ${SESSIONS_CLASS}`;
 
-    let refresh = document.createElement('span');
+    let refresh = document.createElement('button');
     refresh.className = REFRESH_CLASS;
     header.appendChild(refresh);
 

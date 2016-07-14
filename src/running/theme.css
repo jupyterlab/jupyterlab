@@ -6,13 +6,13 @@
 .jp-RunningSessions {
   min-width: 300px;
   color: #757575;
-  background-color: #fff;
+  background: #FAFAFA;
   font-size: 13px;
 }
 
 
 .jp-RunningSessions-header {
-  background: white;
+  border-bottom: 1px solid #E0E0E0;
 }
 
 
@@ -24,10 +24,16 @@
 
 
 .jp-RunningSessions-headerRefresh {
-  margin: 2px;
-  padding: 1px 5px;
-  border-radius: 1px;
-  border: 1px solid #ccc;
+  flex: 1 1 auto;
+  max-width: 100px;
+  padding: 4px 6px;
+  background: #FAFAFA;
+  color: #757575;
+  border: none;
+  font-size: 14px;
+  outline: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 
