@@ -4,12 +4,12 @@
 |----------------------------------------------------------------------------*/
 
 #jp-MainMenu.p-Widget.p-MenuBar {
-   background: #EEEEEE;
+   background: white;
 }
 
 #p-top-panel.p-Widget.p-Panel {
    border-bottom: 1px solid #BDBDBD;
-   background: #EEEEEE;
+   background: white;
    top: 0px;
    left: 0px;
    min-height: 28px;
