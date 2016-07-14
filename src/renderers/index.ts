@@ -30,7 +30,7 @@ import {
 
 
 // Support GitHub flavored Markdown, leave sanitizing to external library.
-marked.setOptions({ gfm: true, sanitize: false });
+marked.setOptions({ gfm: true, sanitize: false, breaks: true });
 
 
 /**

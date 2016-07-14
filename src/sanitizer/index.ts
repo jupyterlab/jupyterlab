@@ -24,7 +24,7 @@ class Sanitizer implements ISanitizer {
   }
 
   private _options: sanitize.IOptions = {
-    allowedTags: sanitize.defaults.allowedTags.concat('img'),
+    allowedTags: sanitize.defaults.allowedTags.concat('h1', 'h2', 'img'),
     allowedAttributes: {
       // Allow the "rel" attribute for <a> tags.
       'a': sanitize.defaults.allowedAttributes['a'].concat('rel'),
