@@ -303,7 +303,8 @@ class FileBrowserModel implements IDisposable {
       return this._upload(file);
     }
 
-    let path = `${this.path}/${file.name}`;
+    let path = this._model.path;
+    path = path ? path + '/' + file.name : file.name;
     return this._manager.contents.get(path, {}).then(() => {
       return Private.typedThrow<IContents.IModel>(`"${file.name}" already exists`);
     }, () => {
