@@ -229,7 +229,7 @@
   height: 17px;
   overflow: hidden;
   margin-top: 50px;
-  /*background-image: url(images/next-arrow-sprite.svg);*/
+  background-image: url(images/next-arrow-sprite.svg);
   background-size: 100%;
   background-position: top;
   -webkit-animation: navbtn-anim ease 4s infinite;
@@ -278,7 +278,7 @@
 }
 
 #about .jp-About-logo {
-  /*background-image: url(images/logo.svg);*/
+  background-image: url(images/logo.svg);
   width: 234px;
   height: 51px;
   margin: 20px auto 0 auto;
@@ -286,7 +286,7 @@
 
 #about .jp-About-hero-mainarea {
   display: inline-block;
-  /*background-image: url(images/main-area.svg);*/
+  background-image: url(images/main-area.svg);
   width: 40px;
   height: 40px;
   margin: 0 30px;
@@ -295,7 +295,7 @@
 
 #about .jp-About-hero-command {
   display: inline-block;
-  /*background-image: url(images/command.svg);*/
+  background-image: url(images/command.svg);
   width: 40px;
   height: 40px;
   margin: 0 30px;
@@ -304,7 +304,7 @@
 
 #about .jp-About-hero-filebrowser {
   display: inline-block;
-  /*background-image: url(images/file-browser.svg);*/
+  background-image: url(images/file-browser.svg);
   width: 60px;
   height: 40px;
   margin: 0 30px;
@@ -313,7 +313,7 @@
 
 #about .jp-About-hero-notebook {
   display: inline-block;
-  /*background-image: url(images/notebook.svg);*/
+  background-image: url(images/notebook.svg);
   width: 31px;
   height: 40px;
   margin: 0 30px;
@@ -321,129 +321,36 @@
 }
 
 #about .jp-About-nb {
-  display: inline-block;
-  /*background-image: url(images/jl-About-nb1-01.svg);  */
-  background-size: contain;
+  background-image: url(images/jl-About-nb.svg); 
   display: block;
-  margin: 40px 0 35px 0;
+  background-size: contain;
+  margin: 0 0 35px 0;
   height: 38vh;
 }
 
-#about .jp-About-mainarea-cimg {
-  display: block;
-  margin: 40px 0 35px 0;
-  height: 38vh;
-  max-height: 453px;
-  -webkit-animation: jp-About-cimg-anim linear 15s infinite;
-  animation: jp-About-cimg-anim linear 15s infinite;
-  -webkit-transition: all 300ms ease;
-  transition: all 300ms ease;
+#about .jp-About-mainarea {
+  background-image: url(images/jl-About-ma.gif);
+  display: inline-block;
+  margin: 0 0 35px 0;
+  max-height: 390px;
+  height: 325px;
+  width: 650px;
 }
 
 #about .jp-About-fb {
-  display: block;
-  margin: 40px 0 35px 0;
-  height: 38vh;
-  max-height: 453px;
-  -webkit-animation: jp-About-fb-anim linear 25s infinite;
-  animation: jp-About-fb-anim linear 25s infinite;
-  -webkit-transition: all 300ms ease;
-  transition: all 300ms ease;
-}
-
-#about .jp-About-command-cimg {
-  display: block;
-  margin: 40px 0 35px 0;
-  height: 38vh;
-  max-height: 453px;
-  -webkit-animation: jp-About-cpimg-anim linear 15s infinite;
-  animation: jp-About-cpimg-anim linear 15s infinite;
-  -webkit-transition: all 0 linear;
-  transition: all 0 linear;
-}
-
-#about .jp-Dumbo {
-  background-image: url(images/dumbo.gif);
+  background-image: url(images/jl-About-fb.gif);
   display: inline-block;
-  background-size: contain;
-  min-height: 450px;
-  min-width: 450px;
+  margin: 0 0 35px 0;
+  max-height: 390px;
+  height: 325px;
+  width: 650px;
 }
 
-/*@keyframes jp-About-fb-anim {
-  0% { background-image: url(images/jl-About-fb1-01.svg); }
-  6% { background-image: url(images/jl-About-fb1-01.svg); }
-  9% { background-image: url(images/jl-About-fb2-01.svg); }
-  15% { background-image: url(images/jl-About-fb2-01.svg); }
-  18% { background-image: url(images/jl-About-fb3-01.svg); }
-  24% { background-image: url(images/jl-About-fb3-01.svg); }
-  27% { background-image: url(images/jl-About-fb4-01.svg); }
-  33% { background-image: url(images/jl-About-fb4-01.svg); }
-  36% { background-image: url(images/jl-About-fb5-01.svg); }
-  42% { background-image: url(images/jl-About-fb5-01.svg); }
-  45% { background-image: url(images/jl-About-fb6-01.svg); }
-  51% { background-image: url(images/jl-About-fb6-01.svg); }
-  57% { background-image: url(images/jl-About-fb7-01.svg); }
-  60% { background-image: url(images/jl-About-fb7-01.svg); }
-  63% { background-image: url(images/jl-About-fb8-01.svg); }
-  69% { background-image: url(images/jl-About-fb8-01.svg); }
-  72% { background-image: url(images/jl-About-fb9-01.svg); }
-  78% { background-image: url(images/jl-About-fb9-01.svg); }
-  81% { background-image: url(images/jl-About-fb10-01.svg); }
-  87% { background-image: url(images/jl-About-fb10-01.svg); }
-  90% { background-image: url(images/jl-About-fb11-01.svg); }
-  96% { background-image: url(images/jl-About-fb11-01.svg); }
-  100% { background-image: url(images/jl-About-fb1-01.svg); }
+#about .jp-About-command {
+  background-image: url(images/jl-About-cp.gif);
+  display: inline-block;
+  margin: 0 0 35px 0;
+  max-height: 390px;
+  height: 325px;
+  width: 650px;
 }
-
-@keyframes jp-About-cimg-anim {
-  0% { background-image: url(images/jl-About-ma1-01.svg); }
-  17% { background-image: url(images/jl-About-ma1-01.svg); }
-  20% { background-image: url(images/jl-About-ma2-01.svg); }
-  37% { background-image: url(images/jl-About-ma2-01.svg); }
-  40% { background-image: url(images/jl-About-ma3-01.svg); }
-  57% { background-image: url(images/jl-About-ma3-01.svg); }
-  60% { background-image: url(images/jl-About-ma4-01.svg); }
-  77% { background-image: url(images/jl-About-ma4-01.svg); }
-  80% { background-image: url(images/jl-About-ma5-01.svg); }
-  97% { background-image: url(images/jl-About-ma5-01.svg); }
-  100% { background-image: url(images/jl-About-ma1-01.svg); }
-}
-
-@keyframes jp-About-cpimg-anim {
-  0% { background-image: url(images/jl-About-cp1-01.svg); }
-  4.99% { background-image: url(images/jl-About-cp1-01.svg); }
-  5% { background-image: url(images/jl-About-cp1-02.svg); }
-  9.99% { background-image: url(images/jl-About-cp1-02.svg); }
-  10% { background-image: url(images/jl-About-cp1-01.svg); }
-  14.99% { background-image: url(images/jl-About-cp1-01.svg); }
-  15% { background-image: url(images/jl-About-cp1-02.svg); }
-  19.99% { background-image: url(images/jl-About-cp1-02.svg); }
-  20% { background-image: url(images/jl-About-cp1-01.svg); }
-  22.99% { background-image: url(images/jl-About-cp1-01.svg); }
-  23% { background-image: url(images/jl-About-cp1-03.svg); }
-  32.99% { background-image: url(images/jl-About-cp1-03.svg); }
-  33% { background-image: url(images/jl-About-cp1-04.svg); }
-  42.99% { background-image: url(images/jl-About-cp1-04.svg); }
-  43% { background-image: url(images/jl-About-cp1-05.svg); }
-  47.99% { background-image: url(images/jl-About-cp1-05.svg); }
-  48% { background-image: url(images/jl-About-cp1-06.svg); }
-  52.99% { background-image: url(images/jl-About-cp1-06.svg); }
-  53% { background-image: url(images/jl-About-cp1-05.svg); }
-  57.99% { background-image: url(images/jl-About-cp1-05.svg); }
-  58% { background-image: url(images/jl-About-cp1-06.svg); }
-  62.99% { background-image: url(images/jl-About-cp1-06.svg); }
-  63% { background-image: url(images/jl-About-cp1-05.svg); }
-  67.99% { background-image: url(images/jl-About-cp1-05.svg); }
-  68% { background-image: url(images/jl-About-cp1-06.svg); }
-  72.99% { background-image: url(images/jl-About-cp1-06.svg); }
-  73% { background-image: url(images/jl-About-cp1-04.svg); }
-  77.99% { background-image: url(images/jl-About-cp1-04.svg); }
-  78% { background-image: url(images/jl-About-cp1-03.svg); }
-  85.99% { background-image: url(images/jl-About-cp1-03.svg); }
-  86% { background-image: url(images/jl-About-cp1-01.svg); }
-  92.99% { background-image: url(images/jl-About-cp1-01.svg); }
-  93% { background-image: url(images/jl-About-cp1-02.svg); }
-  99.99% { background-image: url(images/jl-About-cp1-02.svg); }
-  100% { background-image: url(images/jl-About-cp1-01.svg); }
-}*/
