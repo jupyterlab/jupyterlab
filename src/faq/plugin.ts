@@ -15,6 +15,10 @@ import {
   WidgetTracker
 } from '../widgettracker';
 
+import {
+  TabPanel
+} from 'phosphor-tabs';
+
 import $ = require('jquery');
 
 /**
@@ -111,7 +115,7 @@ function activateFAQ(app: Application): void {
         <li class="faqquestion"> How do I report a bug? </li>
         <li class="faqanswer"> You can open an issue on our <a class="faqa" target="_blank" href="https://github.com/jupyter/jupyterlab/issues">github repository</a>. Please check already opened issues before posting. </li>
         <li class="faqquestion"> I have security concerns about JupyterLab.</li>
-        <li class="faqanswer"> If you have any inquiries, concerns, or thought you found a security vulnerability, please write to us <a class="faqa" href="mailto:atsecurity@jupyter.org">atsecurity@jupyter.org</a>. We will do our best to respond to you promptly.  </li>
+        <li class="faqanswer"> If you have any inquiries, concerns, or thought you found a security vulnerability, please write to us at <a class="faqa" href="mailto:security@jupyter.org">security@jupyter.org</a>. We will do our best to respond to you promptly.  </li>
         <li class="faqquestion"> How can I contribute? </li>
         <li class="faqanswer"> There are many ways to contribute to JupyterLab. Whether you are an experienced python programmer or a newcomer, any interested developers are welcome. You can learn about the JupyterLab codebase by watching [Brian Granger’s Keynote] and [talk] at scipy 2016, as well as our tutorial walkthrough and documentation. Also, feel free to ask questions on our <a class="faqa" target="_blank" href="https://github.com/jupyter/jupyterlab">github</a> or through any of our <a class="faqa" target="_blank" href="http://jupyter.org/community.html">community resources</a>. </li>
         </ul>
@@ -131,8 +135,15 @@ function activateFAQ(app: Application): void {
     id: commandId,
     handler: () => {
       if (!widget.isAttached) app.shell.addToMainArea(widget);
-      app.shell.activateMain(widget.id);
       tracker.addWidget(widget);
+      let stack = widget.parent;
+      if (!stack) {
+        return;
+      }
+      let tabs = stack.parent;
+      if (tabs instanceof TabPanel) {
+        tabs.currentWidget = widget;
+      }
     }
   }]);
 
