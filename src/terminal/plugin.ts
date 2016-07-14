@@ -141,7 +141,7 @@ function activateTerminal(app: Application, services: ServiceManager, mainMenu: 
     submenu: menu
   });
 
-  mainMenu.addItem(terminalMenu, {rank: 90});
+  mainMenu.addItem(terminalMenu, {rank: 40});
 
   function increaseFont(): void {
     if (!tracker.isDisposed && options.fontSize < 72) {

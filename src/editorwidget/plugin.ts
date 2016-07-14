@@ -92,7 +92,7 @@ function activateEditorHandler(app: Application, registry: DocumentRegistry, mai
     submenu: menu
   });
   currentApp = app;
-  mainMenu.addItem(editorMenu);
+  mainMenu.addItem(editorMenu, {rank: 30});
   registry.addWidgetFactory(new EditorWidgetFactory(),
   {
     fileExtensions: ['.*'],
