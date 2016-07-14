@@ -33,6 +33,13 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import {
+  MainMenu, mainMenuProvider
+} from '../mainmenu/plugin';
+
+import {
+  MenuItem, Menu, IMenuItemOptions, MenuItemType
+} from 'phosphor-menus';
 
 /**
  * The console extension.
@@ -40,7 +47,7 @@ import {
 export
 const consoleExtension = {
   id: 'jupyter.extensions.console',
-  requires: [ServiceManager, RenderMime],
+  requires: [ServiceManager, RenderMime, MainMenu],
   activate: activateConsole
 };
 
@@ -58,7 +65,7 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 /**
  * Activate the console extension.
  */
-function activateConsole(app: Application, services: ServiceManager, rendermime: RenderMime<Widget>): Promise<void> {
+function activateConsole(app: Application, services: ServiceManager, rendermime: RenderMime<Widget>, mainMenu: MainMenu): Promise<void> {
   let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessions;
 
@@ -190,6 +197,54 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
     category: 'Console',
     text: 'Switch Kernel'
   }]);
+
+  let newSubmenu = new Menu ([
+    new MenuItem ({
+      text: 'Python 3 Console',
+      handler: () => {
+        app.commands.execute('console:create-python3');
+      }
+    })
+
+  ]);
+
+  let menu = new Menu ([
+    new MenuItem ({
+      text: 'New',
+      submenu: newSubmenu
+    }),
+    new MenuItem ({
+      text: 'Clear Cells',
+      handler: () => {
+        app.commands.execute('console:clear');
+      }
+    }),
+    new MenuItem ({
+      text: 'Execute Cell',
+      handler: () => {
+        app.commands.execute('console:execute');
+      }
+    }),
+    new MenuItem ({
+      text: 'Interrupt Kernel',
+      handler: () => {
+        app.commands.execute('console:interrupt-kernel');
+      }
+    }),
+    new MenuItem ({
+      text: 'Switch Kernel',
+      handler: () => {
+        app.commands.execute('console:switch-kernel');
+      }
+    })
+  ]);
+
+  let consoleMenu = new MenuItem ({
+    text: 'Console',
+    submenu: menu
+  });
+
+  mainMenu.addItem(consoleMenu, {rank: 50});
 
   return Promise.resolve(void 0);
 }

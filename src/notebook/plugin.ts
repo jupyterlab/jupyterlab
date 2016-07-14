@@ -190,7 +190,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   });
 
   let menuOptions = {
-    'rank': 1
+    'rank': 20
   };
   mainMenu.addItem(notebookMenu, menuOptions);
 
@@ -793,7 +793,7 @@ function makeNbMenu() {
 }
 
 /**
- * Handler functions for the notebook MainMenu item 
+ * Handler functions for the notebook MainMenu item
  */
 function clearOutputHandler() {
   currentApp.commands.execute('notebook:clear-outputs');
