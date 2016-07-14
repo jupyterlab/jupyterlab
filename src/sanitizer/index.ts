@@ -3,15 +3,19 @@
 import * as sanitize from 'sanitize-html';
 
 
+export
+interface ISanitizer {
+  /**
+   * Sanitize an HTML string.
+   */
+  sanitize(dirty: string): string;
+}
+
+
 /**
  * A class to sanitize HTML strings.
- *
- * #### Notes
- * This class should not ordinarily need to be instantiated by user code.
- * Instead, the `defaultSanitizer` instance should be used.
  */
-export
-class Sanitizer {
+class Sanitizer implements ISanitizer {
   /**
    * Sanitize an HTML string.
    */
@@ -36,7 +40,7 @@ class Sanitizer {
 
 
 /**
- * The default instance of the `Sanitizer` class meant for use by user code.
+ * The default instance of an `ISanitizer` meant for use by user code.
  */
 export
-const defaultSanitizer = new Sanitizer();
+const defaultSanitizer: ISanitizer = new Sanitizer();
