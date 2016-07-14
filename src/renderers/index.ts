@@ -25,9 +25,6 @@ import {
   typeset, removeMath, replaceMath
 } from './latex';
 
-import {
-  MarkdownWidget
-} from '../mdrenderwidget/widget';
 
 /**
  * A widget for displaying HTML and rendering math.
