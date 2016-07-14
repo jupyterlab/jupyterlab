@@ -29,7 +29,7 @@ class Sanitizer implements ISanitizer {
       // Allow the "rel" attribute for <a> tags.
       'a': sanitize.defaults.allowedAttributes['a'].concat('rel'),
       // Allow the "src" attribute for <img> tags.
-      'img': ['src']
+      'img': ['src', 'height', 'width', 'alt']
     },
     transformTags: {
       // Set the "rel" attribute for <a> tags to "nofollow".
