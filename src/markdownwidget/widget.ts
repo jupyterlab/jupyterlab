@@ -76,7 +76,6 @@ class MarkdownWidget extends Widget {
     });
 
     model.contentChanged.connect(() => {
-      console.log("Rendering markdown");
       let data = removeMath(model.toString());
       let html = marked(data['text']);
       this.node.innerHTML = sanitize(replaceMath(html, data['math']));
@@ -84,12 +83,6 @@ class MarkdownWidget extends Widget {
     });
 
   }
-
-/*
-  onAfterAttach(msg: Message) {
-    typeset(this.node);
-  }
-*/
 }
 
 
