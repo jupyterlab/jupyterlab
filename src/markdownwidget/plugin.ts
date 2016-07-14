@@ -41,7 +41,9 @@ const markdownHandlerExtension = {
     };
     let factory = new MarkdownWidgetFactory();
     let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
-    factory.widgetCreated.connect((sender, widget) => { widget.title.icon = icon; });
+    factory.widgetCreated.connect((sender, widget) => {
+      widget.title.icon = icon;
+    });
     registry.addWidgetFactory(factory, options);
   }
 };
