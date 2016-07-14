@@ -18,6 +18,14 @@ import {
 } from 'phosphor-widget';
 
 import {
+  MenuItem, Menu
+} from 'phosphor-menus';
+
+import {
+  MainMenu
+} from '../mainmenu/plugin';
+
+import {
   DocumentRegistry, restartKernel, selectKernelForContext, IWidgetFactoryOptions
 } from '../docregistry';
 
@@ -96,6 +104,10 @@ const cmdIds = {
 export
 class NotebookTracker extends WidgetTracker<NotebookPanel> { }
 
+/**
+ * Used to access the application/command palette
+ */
+let currentApp : Application;
 
 /**
  * The notebook file handler extension.
@@ -103,7 +115,7 @@ class NotebookTracker extends WidgetTracker<NotebookPanel> { }
 export
 const notebookHandlerExtension = {
   id: 'jupyter.extensions.notebookHandler',
-  requires: [DocumentRegistry, ServiceManager, RenderMime, IClipboard],
+  requires: [DocumentRegistry, ServiceManager, RenderMime, IClipboard, MainMenu],
   activate: activateNotebookHandler
 };
 
@@ -124,7 +136,7 @@ const notebookTrackerProvider = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: ServiceManager, rendermime: RenderMime<Widget>, clipboard: IClipboard): void {
+function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: ServiceManager, rendermime: RenderMime<Widget>, clipboard: IClipboard, mainMenu: MainMenu): void {
 
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard);
   let options: IWidgetFactoryOptions = {
@@ -170,6 +182,19 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
     tracker.addWidget(widget);
   });
+
+  // Add a MainMenu notebook item
+  let notebookMenu = new MenuItem({
+    text: 'Notebook',
+    submenu: makeNbMenu()
+  });
+
+  let menuOptions = {
+    'rank': 1
+  };
+  mainMenu.addItem(notebookMenu, menuOptions);
+
+  currentApp = app;
 
   app.commands.add([
   {
@@ -707,7 +732,108 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   }
   ]);
 }
+/**
+ * Creates a menu item for the notebook
+ */
+function makeNbMenu() {
+  let settings = new Menu([
+    new MenuItem({
+      text: 'Turn off line numbers',
+      handler: lineNumberHandler
+    }),
+    new MenuItem({
+      text: 'Command mode',
+      handler: commandModeHandler
+    }),
+    new MenuItem({
+      text: 'Edit mode',
+      handler: editModeHandler
+    })
+  ]);
 
+  let menu = new Menu([
+    new MenuItem({
+      text: 'Settings',
+      submenu: settings
+    }),
+    new MenuItem({
+      type: MenuItem.Separator
+    }),
+    new MenuItem({
+      text: 'Undo',
+      handler: undoHandler
+    }),
+    new MenuItem({
+      text: 'Redo',
+      handler: redoHandler
+    }),
+    new MenuItem({
+      text: 'Split cell',
+      handler: splitCellHandler
+    }),
+    new MenuItem({
+      text: 'Delete cell',
+      handler: deleteCellHandler
+    }),
+    new MenuItem({
+      text: 'Clear all outputs',
+      handler: clearOutputHandler
+    }),
+    new MenuItem({
+      text: 'Run all cells',
+      handler: runAllHandler
+    }),
+    new MenuItem({
+      text: 'Switch kernel',
+      handler: changeKernelHandler
+    })
+  ]);
+
+  return menu;
+}
+
+/**
+ * Handler functions for the notebook MainMenu item 
+ */
+function clearOutputHandler() {
+  currentApp.commands.execute('notebook:clear-outputs');
+}
+
+function runAllHandler() {
+  currentApp.commands.execute('notebook:run-all');
+}
+
+function changeKernelHandler() {
+  currentApp.commands.execute('notebook:switch-kernel');
+}
+
+function lineNumberHandler() {
+  currentApp.commands.execute('notebook-cells:toggle-all-line-numbers');
+}
+
+function undoHandler() {
+  currentApp.commands.execute('notebook-cells:undo');
+}
+
+function redoHandler() {
+  currentApp.commands.execute('notebook-cells:redo');
+}
+
+function deleteCellHandler() {
+  currentApp.commands.execute('notebook-cells:delete');
+}
+
+function splitCellHandler() {
+  currentApp.commands.execute('notebook-cells:split');
+}
+
+function commandModeHandler() {
+  currentApp.commands.execute('notebook:command-mode');
+}
+
+function editModeHandler() {
+  currentApp.commands.execute('notebook:edit-mode');
+}
 
 /**
  * A namespace for private data.
