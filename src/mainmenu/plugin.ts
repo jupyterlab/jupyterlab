@@ -12,6 +12,22 @@ import {
   MenuItem, MenuBar
 } from 'phosphor-menus';
 
+import {
+  Widget
+} from 'phosphor-widget';
+
+
+/**
+ * The class name for all main area portrait tab icons.
+ */
+const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
+
+/**
+ * The class name for the jupyter icon from the default theme.
+ */
+const JUPYTER_ICON_CLASS = 'jp-JupyterIcon';
+
+
 
 /**
  * The main menu class.  It is intended to be used as a singleton.
@@ -86,6 +102,10 @@ const mainMenuProvider = {
  */
 function activateMainMenu(app: Application): void {
   Private.menuBar.id = 'jp-MainMenu';
+  let logo = new Widget();
+  logo.node.className = `${PORTRAIT_ICON_CLASS} ${JUPYTER_ICON_CLASS}`;
+  logo.id = 'jp-MainLogo';
+  app.shell.addToTopArea(logo);
   app.shell.addToTopArea(Private.menuBar);
 }
 
