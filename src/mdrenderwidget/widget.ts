@@ -1,6 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as marked
+  from 'marked';
+
 import {
   IKernel
 } from 'jupyter-js-services';
@@ -10,6 +13,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  Message
+} from 'phosphor-messaging';
+
+import {
   MarkdownRenderer
 } from '../renderers';
 
@@ -17,6 +24,17 @@ import {
   IDocumentModel, IDocumentContext, ABCWidgetFactory
 } from '../docregistry';
 
+import {
+  removeMath, replaceMath, typeset
+} from '../renderers/latex';
+
+import {
+  HTMLWidget
+} from '../renderers'
+
+import {
+  sanitize
+} from 'sanitizer';
 
 /**
  * The class name added to a dirty widget.
@@ -30,12 +48,12 @@ const MD_CLASS = 'jp-MarkdownWidget';
 
 
 /**
- * A document widget for codemirrors.
+ * A widget for rendered markdown.
  */
 export
 class MarkdownWidget extends Widget {
   /**
-   * Construct a new editor widget.
+   * Construct a new markdown widget.
    */
 
   constructor(context: IDocumentContext<IDocumentModel>) {
@@ -56,12 +74,22 @@ class MarkdownWidget extends Widget {
     context.pathChanged.connect((c, path) => {
       this.title.text = path.split('/').pop();
     });
-    
+
     model.contentChanged.connect(() => {
-      let rendered_md = new MarkdownRenderer().render('text/markdown', model.toString());
-      this.node.innerHTML = rendered_md.node.innerHTML;
+      console.log("Rendering markdown");
+      let data = removeMath(model.toString());
+      let html = marked(data['text']);
+      this.node.innerHTML = sanitize(replaceMath(html, data['math']));
+      typeset(this.node);
     });
+
   }
+
+/*
+  onAfterAttach(msg: Message) {
+    typeset(this.node);
+  }
+*/
 }
 
 
@@ -71,12 +99,10 @@ class MarkdownWidget extends Widget {
 export
 class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, IDocumentModel> {
   /**
-   * Create a new widget given a context.
+   * Create a new widget given a context
+   * .
    */
   createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): MarkdownWidget {
-    if (kernel) {
-      context.changeKernel(kernel);
-    }
     let widget = new MarkdownWidget(context);
     this.widgetCreated.emit(widget);
     return widget;
