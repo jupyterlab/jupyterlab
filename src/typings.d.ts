@@ -9,3 +9,4 @@
 /// <reference path="../typings/xterm/xterm.d.ts"/>
 /// <reference path="../typings/marked/marked.d.ts"/>
 /// <reference path="../typings/d3-dsv/d3-dsv.d.ts"/>
+/// <reference path="../typings/leaflet/leaflet.d.ts"/>
