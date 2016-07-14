@@ -25,3 +25,13 @@
 .jp-ImageTextEditor {
   background-image: url(images/texteditor.svg);
 }
+
+
+.jp-JupyterIcon {
+  background-image: url(images/jupyter.svg);
+  background-size: 16px;
+  margin: 2px;
+  margin-left: 10px;
+  margin-right: 0px;
+  padding-right: 0px;
+}
