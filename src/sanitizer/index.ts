@@ -23,7 +23,9 @@ class Sanitizer {
     allowedTags: sanitize.defaults.allowedTags.concat('img'),
     allowedAttributes: {
       // Allow the "rel" attribute for <a> tags.
-      'a': sanitize.defaults.allowedAttributes['a'].concat('rel')
+      'a': sanitize.defaults.allowedAttributes['a'].concat('rel'),
+      // Allow the "src" attribute for <img> tags.
+      'img': ['src']
     },
     transformTags: {
       // Set the "rel" attribute for <a> tags to "nofollow".
