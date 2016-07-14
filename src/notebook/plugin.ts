@@ -738,27 +738,12 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
 function makeNbMenu() {
   let settings = new Menu([
     new MenuItem({
-      text: 'Turn off line numbers',
+      text: 'Toggle line numbers',
       handler: lineNumberHandler
-    }),
-    new MenuItem({
-      text: 'Command mode',
-      handler: commandModeHandler
-    }),
-    new MenuItem({
-      text: 'Edit mode',
-      handler: editModeHandler
     })
   ]);
 
   let menu = new Menu([
-    new MenuItem({
-      text: 'Settings',
-      submenu: settings
-    }),
-    new MenuItem({
-      type: MenuItem.Separator
-    }),
     new MenuItem({
       text: 'Undo',
       handler: undoHandler
@@ -786,6 +771,13 @@ function makeNbMenu() {
     new MenuItem({
       text: 'Switch kernel',
       handler: changeKernelHandler
+    }),
+    new MenuItem({
+      type: MenuItem.Separator
+    }),
+    new MenuItem({
+      text: 'Settings',
+      submenu: settings
     })
   ]);
 
