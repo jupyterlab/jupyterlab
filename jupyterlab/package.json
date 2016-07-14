@@ -9,7 +9,7 @@
     "es6-promise": "^3.1.2",
     "font-awesome": "^4.6.1",
     "jupyter-js-services": "^0.15.1",
-    "jupyter-js-widgets-labextension": "^0.0.4",
+    "jupyter-js-widgets-labextension": "^0.0.7",
     "jupyterlab": "file:../",
     "phosphide": "^0.10.0"
   },
