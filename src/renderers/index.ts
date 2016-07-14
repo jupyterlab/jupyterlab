@@ -21,30 +21,16 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  sanitize
-} from 'sanitizer';
-
-import {
   typeset, removeMath, replaceMath
 } from './latex';
 
-class MarkedRenderer extends marked.Renderer {
-  link(href: string, title: string, text: string): string {
-    let output = super.link(href, title, text);
-    if (!output) {
-      return output;
-    }
-    if (0 === href.indexOf('//') || href.indexOf(':') > -1) {
-      return output.replace('href=', 'rel="nofollow" href=');
-    }
-    return output;
-  }
-}
+import {
+  defaultSanitizer
+} from '../sanitizer';
 
-marked.setOptions({
-  renderer: new MarkedRenderer(),
-  sanitize: true
-});
+
+// Support GitHub flavored Markdown, leave sanitizing to external library.
+marked.setOptions({ gfm: true, sanitize: false });
 
 
 /**
@@ -192,7 +178,7 @@ class PDFRenderer implements IRenderer<Widget> {
     let w = new Widget();
     let a = document.createElement('a');
     a.target = '_blank';
-    a.textContent = "View PDF";
+    a.textContent = 'View PDF';
     a.href = 'data:application/pdf;base64,' + data;
     w.node.appendChild(a);
     return w;
@@ -223,6 +209,7 @@ class MarkdownRenderer implements IRenderer<Widget> {
   render(mimetype: string, text: string): Widget {
     let data = removeMath(text);
     let html = marked(data['text']);
-    return new HTMLWidget(replaceMath(html, data['math']));
+    let sanitized = defaultSanitizer.sanitize(replaceMath(html, data['math']));
+    return new HTMLWidget(sanitized);
   }
 }

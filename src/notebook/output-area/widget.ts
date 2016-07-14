@@ -26,16 +26,16 @@ import {
 } from 'phosphor-widget';
 
 import {
-  sanitize
-} from 'sanitizer';
-
-import {
   nbformat
 } from '../notebook/nbformat';
 
 import {
   OutputAreaModel
 } from './model';
+
+import {
+  defaultSanitizer
+} from '../../sanitizer';
 
 
 /**
@@ -589,12 +589,17 @@ class OutputWidget extends Widget {
       bundle = (output as nbformat.IDisplayData).data;
       break;
     case 'stream':
-      bundle = {'application/vnd.jupyter.console-text': (output as nbformat.IStream).text};
+      bundle = {
+        'application/vnd.jupyter.console-text': (output as nbformat.IStream).text
+      };
       break;
     case 'error':
       let out: nbformat.IError = output as nbformat.IError;
       let traceback = out.traceback.join('\n');
-      bundle = {'application/vnd.jupyter.console-text': traceback || `${out.ename}: ${out.evalue}`};
+      bundle = {
+        'application/vnd.jupyter.console-text': traceback ||
+          `${out.ename}: ${out.evalue}`
+      };
       break;
     default:
       console.error(`Unrecognized output type: ${output.output_type}`);
@@ -632,9 +637,11 @@ class OutputWidget extends Widget {
       } else if (sanitizable.indexOf(key) !== -1) {
         let out = map[key];
         if (typeof out === 'string') {
-          map[key] = sanitize(out);
+          map[key] = defaultSanitizer.sanitize(out);
         } else {
-          console.log('Ignoring unsanitized ' + key + ' output; could not sanitize because output is not a string.');
+          let message = 'Ignoring unsanitized ' + key +
+            ' output; could not sanitize because output is not a string.';
+          console.log(message);
           delete map[key];
         }
       } else {
