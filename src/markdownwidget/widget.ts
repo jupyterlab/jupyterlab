@@ -23,7 +23,7 @@ import {
 
 
 /**
- * The class name added to a jupyter MarkdownWidget
+ * The class name added to a Jupyter MarkdownWidget
  */
 const MD_CLASS = 'jp-MarkdownWidget';
 
