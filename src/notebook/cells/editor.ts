@@ -156,10 +156,9 @@ class CellEditorWidget extends CodeMirrorWidget {
   /**
    * Construct a new cell editor widget.
    */
-  constructor(model: ICellModel) {
-    super();
+  constructor(options: CodeMirror.EditorConfiguration = {}) {
+    super(options);
     this.addClass(CELL_EDITOR_CLASS);
-    this.model = model;
 
     CodeMirror.on(this.editor.getDoc(), 'change', (instance, change) => {
       this.onDocChange(instance, change);

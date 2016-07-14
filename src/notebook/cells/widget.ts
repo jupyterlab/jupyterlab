@@ -125,7 +125,22 @@ class BaseCellWidget extends Widget {
     this.layout = new PanelLayout();
 
     let renderer = options.renderer || BaseCellWidget.defaultRenderer;
-    this._editor = renderer.createCellEditor(null);
+    this._editor = renderer.createCellEditor({
+      indentUnit: 4,
+      readOnly: false,
+      theme: 'default',
+      extraKeys: {
+        'Cmd-Right': 'goLineRight',
+        'End': 'goLineRight',
+        'Cmd-Left': 'goLineLeft',
+        'Tab': 'indentMore',
+        'Shift-Tab' : 'indentLess',
+        'Cmd-Alt-[' : 'indentAuto',
+        'Ctrl-Alt-[' : 'indentAuto',
+        'Cmd-/' : 'toggleComment',
+        'Ctrl-/' : 'toggleComment',
+      }
+    });
     this._input = renderer.createInputArea(this._editor);
 
     (this.layout as PanelLayout).addChild(this._input);
@@ -354,7 +369,6 @@ namespace BaseCellWidget {
     renderer?: IRenderer;
   }
 
-
   /**
    * A renderer for creating cell widgets.
    */
@@ -363,7 +377,7 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(model: ICellModel): CellEditorWidget;
+    createCellEditor(options?: CodeMirror.EditorConfiguration): CellEditorWidget;
 
     /**
      * Create a new input area for the widget.
@@ -380,8 +394,8 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(model: ICellModel): CellEditorWidget {
-      return new CellEditorWidget(model);
+    createCellEditor(options?: CodeMirror.EditorConfiguration): CellEditorWidget {
+      return new CellEditorWidget(options);
     }
 
     /**
@@ -410,6 +424,8 @@ class CodeCellWidget extends BaseCellWidget {
    */
   constructor(options: CodeCellWidget.IOptions) {
     super(options);
+    this.editor.editor.setOption('matchBrackets', true);
+    this.editor.editor.setOption('autoCloseBrackets', true);
     this.addClass(CODE_CELL_CLASS);
     this._rendermime = options.rendermime;
     this._renderer = options.renderer || CodeCellWidget.defaultRenderer;

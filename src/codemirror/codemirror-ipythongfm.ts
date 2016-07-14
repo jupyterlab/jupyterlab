@@ -10,7 +10,7 @@ import 'codemirror/addon/mode/multiplex';
 
 
 /**
- * Define an IPython GFM (GitHub Flavored Markdown) mode. 
+ * Define an IPython GFM (GitHub Flavored Markdown) mode.
  *
  * Is just a slightly altered GFM Mode with support for latex.
  * Latex support was supported by Codemirror GFM as of
@@ -47,6 +47,6 @@ CodeMirror.defineMode('ipythongfm', (config: CodeMirror.EditorConfiguration, mod
     }
     // .. more multiplexed styles can follow here
   );
-});
+}, 'gfm');
 
 CodeMirror.defineMIME('text/x-ipythongfm', 'ipythongfm');
