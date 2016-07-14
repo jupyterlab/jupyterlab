@@ -43,7 +43,7 @@ declare namespace sanitize {
     allowedTags?: string[];
     exclusiveFilter?: (frame: IFrame) => boolean;
     selfClosing?: string[];
-    transformTags?: { [tagName: string]: string | Transformer; };
+    transformTags?: { [tagName: string]: string | Transformer };
   }
 
 
