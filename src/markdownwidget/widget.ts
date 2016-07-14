@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as marked
-  from 'marked';
-
 import {
   IKernel
 } from 'jupyter-js-services';
+
+import {
+  PanelLayout
+} from 'phosphor-panel';
 
 import {
   Widget
@@ -17,24 +18,13 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  MarkdownRenderer
-} from '../renderers';
-
-import {
   IDocumentModel, IDocumentContext, ABCWidgetFactory
 } from '../docregistry';
 
 import {
-  removeMath, replaceMath, typeset
-} from '../renderers/latex';
-
-import {
-  HTMLWidget
+  MarkdownRenderer
 } from '../renderers'
 
-import {
-  sanitize
-} from 'sanitizer';
 
 /**
  * The class name added to a dirty widget.
@@ -58,28 +48,33 @@ class MarkdownWidget extends Widget {
 
   constructor(context: IDocumentContext<IDocumentModel>) {
     super();
-    this.addClass(MD_CLASS);
     let model = context.model;
+    this.addClass(MD_CLASS);
+    this.layout = new PanelLayout();
     this.title.text = context.path.split('/').pop();
-    
-    model.stateChanged.connect((m, args) => {
-      if (args.name === 'dirty') {
-        if (args.newValue) {
-          this.title.className += ` ${DIRTY_CLASS}`;
-        } else {
-          this.title.className = this.title.className.replace(DIRTY_CLASS, '');
-        }
-      }
-    });
+
+    // model.stateChanged.connect((m, args) => {
+    //   if (args.name === 'dirty') {
+    //     if (args.newValue) {
+    //       this.title.className += ` ${DIRTY_CLASS}`;
+    //     } else {
+    //       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+    //     }
+    //   }
+    // });
     context.pathChanged.connect((c, path) => {
       this.title.text = path.split('/').pop();
     });
 
+    let layout = this.layout as PanelLayout;
+    let renderer = new MarkdownRenderer();
+
     model.contentChanged.connect(() => {
-      let data = removeMath(model.toString());
-      let html = marked(data['text']);
-      this.node.innerHTML = sanitize(replaceMath(html, data['math']));
-      typeset(this.node);
+      let widget = renderer.render('text/markdown', model.toString());
+      if (layout.childCount()) {
+        layout.childAt(0).dispose();
+      }
+      layout.addChild(widget);
     });
 
   }
