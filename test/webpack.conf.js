@@ -14,6 +14,7 @@ module.exports = {
       { test: /\.md$/, loader: 'raw-loader'},
       { test: /\.html$/, loader: "file?name=[name].[ext]" },
       { test: /\.ipynb$/, loader: 'json-loader' },
-    ],
+      { test: /\.json$/, loader: 'json-loader' }
+    ]
   }
 }

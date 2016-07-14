@@ -61,17 +61,17 @@ describe('jupyter-ui', () => {
 
   describe('PDFRenderer', () => {
 
-  it('should have the application/pdf mimetype', () => {
-    let t = new PDFRenderer();
-    expect(t.mimetypes).to.eql(['application/pdf']);
-  });
+    it('should have the application/pdf mimetype', () => {
+      let t = new PDFRenderer();
+      expect(t.mimetypes).to.eql(['application/pdf']);
+    });
 
-  it('should output the correct HTML', () => {
-    let base64PDF = "I don't have a b64'd PDF";
-    let t = new PDFRenderer();
-    let w = t.render('application/pdf', base64PDF);
-    expect(w.node.innerHTML.indexOf('data:application/pdf')).to.not.be(-1);
-  });
+    it('should output the correct HTML', () => {
+      let base64PDF = "I don't have a b64'd PDF";
+      let t = new PDFRenderer();
+      let w = t.render('application/pdf', base64PDF);
+      expect(w.node.innerHTML.indexOf('data:application/pdf')).to.not.be(-1);
+    });
 
   });
 
@@ -133,7 +133,7 @@ describe('jupyter-ui', () => {
       let md = require('../../../examples/filebrowser/sample.md');
       let t = new MarkdownRenderer();
       let w = t.render('text/markdown', md as string);
-      expect(w.node.innerHTML).to.be(`<h1 id="title-first-level">Title first level</h1>\n<h2 id="title-second-level">Title second Level</h2>\n<h3 id="title-third-level">Title third level</h3>\n<h4 id="h4">h4</h4>\n<h5 id="h5">h5</h5>\n<h6 id="h6">h6</h6>\n<h1 id="h1">h1</h1>\n<h2 id="h2">h2</h2>\n<h3 id="h3">h3</h3>\n<h4 id="h4">h4</h4>\n<h5 id="h6">h6</h5>\n<p>This is just a sample paragraph\nYou can look at different level of nested unorderd list ljbakjn arsvlasc asc asc awsc asc ascd ascd ascd asdc asc</p>\n<ul>\n<li>level 1<ul>\n<li>level 2</li>\n<li>level 2</li>\n<li>level 2<ul>\n<li>level 3</li>\n<li>level 3<ul>\n<li>level 4<ul>\n<li>level 5<ul>\n<li>level 6</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n<li>level 2</li>\n</ul>\n</li>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1\nOrdered list</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1</li>\n</ol>\n</li>\n</ol>\n</li>\n</ol>\n</li>\n</ol>\n</li>\n<li>level 1</li>\n<li>level 1\nsome Horizontal line</li>\n</ul>\n<hr>\n<h2 id="and-another-one">and another one</h2>\n<p>Colons can be used to align columns.\n| Tables        | Are           | Cool  |\n| ------------- |:-------------:| -----:|\n| col 3 is      | right-aligned | 1600  |\n| col 2 is      | centered      |   12  |\n| zebra stripes | are neat      |    1  |\nThere must be at least 3 dashes separating each header cell.\nThe outer pipes (|) are optional, and you don\'t need to make the\nraw Markdown line up prettily. You can also use inline Markdown.</p>\n`);
+      expect(w.node.innerHTML).to.be(`<h1>Title first level</h1>\n<h2>Title second Level</h2>\n<h3>Title third level</h3>\n<h4>h4</h4>\n<h5>h5</h5>\n<h6>h6</h6>\n<h1>h1</h1>\n<h2>h2</h2>\n<h3>h3</h3>\n<h4>h4</h4>\n<h5>h6</h5>\n<p>This is just a sample paragraph<br>You can look at different level of nested unorderd list ljbakjn arsvlasc asc asc awsc asc ascd ascd ascd asdc asc</p>\n<ul>\n<li>level 1<ul>\n<li>level 2</li>\n<li>level 2</li>\n<li>level 2<ul>\n<li>level 3</li>\n<li>level 3<ul>\n<li>level 4<ul>\n<li>level 5<ul>\n<li>level 6</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n<li>level 2</li>\n</ul>\n</li>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1<br>Ordered list</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1</li>\n</ol>\n</li>\n</ol>\n</li>\n</ol>\n</li>\n</ol>\n</li>\n<li>level 1</li>\n<li>level 1<br>some Horizontal line</li>\n</ul>\n<hr>\n<h2>and another one</h2>\n<p>Colons can be used to align columns.</p>\n<table>\n<thead>\n<tr>\n<th>Tables</th>\n<th>Are</th>\n<th>Cool</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>col 3 is</td>\n<td>right-aligned</td>\n<td>1600</td>\n</tr>\n<tr>\n<td>col 2 is</td>\n<td>centered</td>\n<td>12</td>\n</tr>\n<tr>\n<td>zebra stripes</td>\n<td>are neat</td>\n<td>1</td>\n</tr>\n</tbody>\n</table>\n<p>There must be at least 3 dashes separating each header cell.<br>The outer pipes (|) are optional, and you don\'t need to make the<br>raw Markdown line up prettily. You can also use inline Markdown.</p>\n`);
     });
 
   });

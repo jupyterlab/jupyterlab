@@ -21,12 +21,16 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  sanitize
-} from 'sanitizer';
-
-import {
   typeset, removeMath, replaceMath
 } from './latex';
+
+import {
+  defaultSanitizer
+} from '../sanitizer';
+
+
+// Support GitHub flavored Markdown, leave sanitizing to external library.
+marked.setOptions({ gfm: true, sanitize: false, breaks: true });
 
 
 /**
@@ -174,7 +178,7 @@ class PDFRenderer implements IRenderer<Widget> {
     let w = new Widget();
     let a = document.createElement('a');
     a.target = '_blank';
-    a.textContent = "View PDF";
+    a.textContent = 'View PDF';
     a.href = 'data:application/pdf;base64,' + data;
     w.node.appendChild(a);
     return w;
@@ -205,7 +209,7 @@ class MarkdownRenderer implements IRenderer<Widget> {
   render(mimetype: string, text: string): Widget {
     let data = removeMath(text);
     let html = marked(data['text']);
-    let sanitized = sanitize(replaceMath(html, data['math']));
+    let sanitized = defaultSanitizer.sanitize(replaceMath(html, data['math']));
     return new HTMLWidget(sanitized);
   }
 }
