@@ -26,7 +26,7 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  Menu, MenuItem
+  Menu, MenuItem, IMenuItemOptions, MenuItemType
 } from 'phosphor-menus';
 
 import {
@@ -37,6 +37,10 @@ import {
   WidgetTracker
 } from '../widgettracker';
 
+import {
+  MainMenu, mainMenuProvider
+} from '../mainmenu/plugin';
+
 
 /**
  * The default file browser extension.
@@ -44,7 +48,7 @@ import {
 export
 const fileBrowserExtension = {
   id: 'jupyter.extensions.fileBrowser',
-  requires: [ServiceManager, DocumentRegistry],
+  requires: [ServiceManager, DocumentRegistry, MainMenu],
   activate: activateFileBrowser
 };
 
@@ -67,7 +71,7 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: Application, manager: ServiceManager, registry: DocumentRegistry): Promise<void> {
+function activateFileBrowser(app: Application, manager: ServiceManager, registry: DocumentRegistry, mainMenu: MainMenu): Promise<void> {
   let id = 0;
 
   let tracker = new WidgetTracker<Widget>();
@@ -274,6 +278,68 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
   fbWidget.id = 'file-browser';
   app.shell.addToLeftArea(fbWidget, { rank: 40 });
   showBrowser();
+
+
+
+    // Adding Top Menu
+      let newSubMenu = new Menu ([
+        new MenuItem({
+          text: 'Notebook',
+          handler: () => {
+            app.commands.execute(newNotebookId);
+          }
+        }),
+        new MenuItem({
+          text: 'Text File',
+          handler: () => {
+            app.commands.execute(newTextFileId);
+          }
+        })
+
+      ]);
+
+
+
+      let menu = new Menu ([
+        new MenuItem({
+          text: 'New',
+          submenu: newSubMenu
+
+        }),
+        new MenuItem({
+          text: 'Save Document',
+          handler: () => {
+            app.commands.execute(saveDocumentId);
+          }
+        }),
+        new MenuItem({
+          text: 'Revert Document',
+          handler: () => {
+            app.commands.execute(revertDocumentId);
+          }
+        }),
+        new MenuItem({
+          text: 'Close Current',
+          handler: () => {
+            app.commands.execute(closeDocumentId);
+          }
+        }),
+        new MenuItem({
+          text: 'Close All',
+          handler: () => {
+            app.commands.execute(closeAllId);
+          }
+        }),
+
+      ]);
+
+      let fileMenu = new MenuItem({
+        text: 'File',
+        submenu: menu
+      });
+      mainMenu.addItem(fileMenu, {rank: 1});
+
+
   return Promise.resolve(void 0);
 
   function showBrowser(): void {
@@ -293,6 +359,7 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
       hideBrowser();
     }
   }
+
 }
 
 
