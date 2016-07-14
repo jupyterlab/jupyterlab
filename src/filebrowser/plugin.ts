@@ -30,6 +30,14 @@ import {
 } from 'phosphor-menus';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
+  ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -43,6 +51,43 @@ import {
 
 
 /**
+ * A class that tracks the current path of the file browser.
+ */
+export
+class PathTracker {
+  /**
+   * A signal emitted when the current path changes.
+   */
+  get pathChanged(): ISignal<PathTracker, IChangedArgs<string>> {
+    return Private.pathChangedSignal.bind(this);
+  }
+
+  /**
+   * The current path of the filebrowser.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get path(): string {
+    return Private.fbWidget ? Private.fbWidget.model.path : '';
+  }
+}
+
+
+/**
+ * The default file browser provider.
+ */
+export
+const fileBrowserProvider = {
+  id: 'jupyter.services.fileBrowser',
+  provides: PathTracker,
+  resolve: () => {
+    return Private.pathTracker;
+  }
+};
+
+
+/**
  * The default file browser extension.
  */
 export
@@ -51,6 +96,7 @@ const fileBrowserExtension = {
   requires: [ServiceManager, DocumentRegistry, MainMenu],
   activate: activateFileBrowser
 };
+
 
 /**
  * The class name for all main area portrait tab icons.
@@ -98,10 +144,14 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
     opener
   });
   let fbModel = new FileBrowserModel({ manager });
-  let fbWidget = new FileBrowserWidget({
+  let fbWidget = Private.fbWidget = new FileBrowserWidget({
     model: fbModel,
     manager: docManager,
     opener
+  });
+
+  fbModel.pathChanged.connect((sender, args) => {
+    Private.pathTracker.pathChanged.emit(args);
   });
 
   // Add a context menu to the dir listing.
@@ -429,4 +479,22 @@ function createMenu(fbWidget: FileBrowserWidget, openWith: MenuItem[]):  Menu {
     })
   );
   return new Menu(items);
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  export
+  var fbWidget: FileBrowserWidget;
+
+  export
+  const pathTracker = new PathTracker();
+
+  /**
+   * A signal emitted when the current working directory changes.
+   */
+  export
+  const pathChangedSignal = new Signal<PathTracker, IChangedArgs<string>>();
 }

@@ -31,6 +31,7 @@ var app = new phosphide.Application({
   providers: [
     require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
     require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
+    require('jupyterlab/lib/filebrowser/plugin').fileBrowserProvider,
     require('jupyterlab/lib/notebook/plugin').notebookTrackerProvider,
     require('jupyterlab/lib/mainmenu/plugin').mainMenuProvider,
     require('jupyterlab/lib/rendermime/plugin').renderMimeProvider,
