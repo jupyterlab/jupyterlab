@@ -57,7 +57,7 @@
 
 
 .jp-RunningSessions-item {
-  padding: 4px 12px;
+  padding: 3px 12px;
   font-size: 13px;
   font-weight: 500;
   color: #757575;
@@ -70,6 +70,7 @@
 
 
 .jp-RunningSessions-itemIcon {
+  padding: 1px 4px;
   font-size: 14px;
   font-family: FontAwesome;
   color: #5e5e5e;
@@ -79,31 +80,33 @@
 }
 
 .jp-RunningSessions-itemIcon.jp-mod-notebook:before {
-  content: '\f02d'; 
+  content: '\f02d';
 }
 
 
 .jp-RunningSessions-itemIcon.jp-mod-file:before {
-  content: '\f016'; 
+  content: '\f016';
 }
 
 
 .jp-RunningSessions-itemIcon.jp-mod-terminal:before {
-  content: '\f120'; 
+  content: '\f120';
 }
 
+.jp-RunningSessions-itemLabel {
+  padding: 1px;
+}
 
 .jp-RunningSessions-itemKernelName {
+  padding: 1px;
   margin-right: 7px;
 }
 
 
 .jp-RunningSessions-itemShutdown {
-  padding: 4px;
+  padding: 1px 4px;
   color: #ffffff;
   background: #f0ad4e;
-  padding: 2px 5px;
-  font-size: 12px;
   border-radius: 1px;
   cursor: pointer;
 }

@@ -37,11 +37,6 @@ const RUNNING_CLASS = 'jp-RunningSessions';
 const HEADER_CLASS = 'jp-RunningSessions-header';
 
 /**
- * The class name added to a running widget header title.
- */
-const TITLE_CLASS = 'jp-RunningSessions-headerTitle';
-
-/**
  * The class name added to a running widget header refresh button.
  */
 const REFRESH_CLASS = 'jp-RunningSessions-headerRefresh';
@@ -138,11 +133,6 @@ class RunningSessions extends Widget {
     terminals.className = `${SECTION_CLASS} ${TERMINALS_CLASS}`;
     let sessions = document.createElement('div');
     sessions.className = `${SECTION_CLASS} ${SESSIONS_CLASS}`;
-
-    let title = document.createElement('span');
-    title.textContent = 'Currently Running Jupyter Processes';
-    title.className = TITLE_CLASS;
-    header.appendChild(title);
 
     let refresh = document.createElement('span');
     refresh.className = REFRESH_CLASS;
