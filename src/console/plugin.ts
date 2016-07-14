@@ -200,9 +200,9 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
 
   let newSubmenu = new Menu ([
     new MenuItem ({
-      text: 'Python 3 Console',
+      text: services.kernelspecs.default,
       handler: () => {
-        app.commands.execute('console:create-python3');
+        app.commands.execute('console:create-'+ services.kernelspecs.default);
       }
     })
 
