@@ -69,6 +69,8 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
   let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessions;
 
+  let newSubmenuItems : Array<MenuItem> = [];
+
   // Add the ability to create new consoles for each kernel.
   let specs = services.kernelspecs;
   let displayNameMap: { [key: string]: string } = Object.create(null);
@@ -106,6 +108,15 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
       category: 'Console',
       text: `New ${displayName} console`
     }]);
+
+    newSubmenuItems.push(
+      new MenuItem ({
+        text: `${displayName} console`,
+        handler: () => {
+          app.commands.execute(id);
+        }
+      })
+    );
   }
 
   app.commands.add([
@@ -198,15 +209,7 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
     text: 'Switch Kernel'
   }]);
 
-  let newSubmenu = new Menu ([
-    new MenuItem ({
-      text: services.kernelspecs.default,
-      handler: () => {
-        app.commands.execute('console:create-'+ services.kernelspecs.default);
-      }
-    })
-
-  ]);
+ let newSubmenu = new Menu(newSubmenuItems);
 
   let menu = new Menu ([
     new MenuItem ({
