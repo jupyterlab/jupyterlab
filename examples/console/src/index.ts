@@ -34,6 +34,9 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import 'jupyterlab/lib/console/base.css';
+import 'jupyterlab/lib/default-theme/completion.css';
+import 'jupyterlab/lib/default-theme/console.css';
 import 'jupyterlab/lib/dialog/index.css';
 import 'jupyterlab/lib/dialog/theme.css';
 import 'jupyterlab/lib/iframe/index.css';
