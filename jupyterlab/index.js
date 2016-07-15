@@ -30,6 +30,7 @@ var app = new phosphide.Application({
     require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
     require('jupyterlab/lib/terminal/plugin').terminalExtension,
     require('phosphide/lib/extensions/commandpalette').commandPaletteExtension,
+    require('jupyter-js-widgets-labextension/lib/plugin').widgetManagerExtension,
   ],
   providers: [
     require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
