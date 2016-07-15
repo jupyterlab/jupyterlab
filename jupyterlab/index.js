@@ -19,6 +19,8 @@ var app = new phosphide.Application({
     require('jupyterlab/lib/filebrowser/plugin').fileBrowserExtension,
     require('jupyterlab/lib/help/plugin').helpHandlerExtension,
     require('jupyterlab/lib/imagewidget/plugin').imageHandlerExtension,
+    require('jupyterlab/lib/csvwidget/plugin').csvHandlerExtension,
+    require('jupyterlab/lib/leafletwidget/plugin').mapHandlerExtension,
     require('jupyterlab/lib/landing/plugin').landingExtension,
     require('jupyterlab/lib/main/plugin').mainExtension,
     require('jupyterlab/lib/mainmenu/plugin').mainMenuExtension,

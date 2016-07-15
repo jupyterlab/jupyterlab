@@ -1,0 +1,21 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-CSVWidget {
+  padding: 1em;
+  overflow: auto;
+}
+
+
+.jp-CSVWidget th,
+.jp-CSVWidget td {
+  border: 1px solid black;
+  padding: 0.2em 0.5em;
+}
+
+.jp-CSVWidget table {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
