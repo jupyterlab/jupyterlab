@@ -55,7 +55,7 @@ the browser.
 #### Prerequisites
 
 - Jupyter notebook version 4.2 or later
-- npm (preferably version 5 or later)
+- NodeJS (preferably version 5 or later) and npm
 
 #### Installation
 
@@ -171,7 +171,7 @@ npm run build:serverextension
 to build the changes and then refresh your browser to see the changes.
 
 To have the system build after each source file change, run:
- 
+
 ```bash
 npm run watch:serverextension
 ```
@@ -190,7 +190,7 @@ omit the type declarations when using a language other than TypeScript.
 
 ## Supported Runtimes
 
-The runtime versions which are currently *known to work*: 
+The runtime versions which are currently *known to work*:
 
 - IE 11+
 - Firefox 32+
