@@ -1,0 +1,18 @@
+<svg width="40px" height="40px" viewBox="73 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M0,3.0065012 C0,1.34605644 1.34413775,0 3.00835725,0 L14.4916428,0 C16.1531126,0 17.5,1.34230941 17.5,3.0065012 L17.5,36.9934988 C17.5,38.6539436 16.1558622,40 14.4916428,40 L3.00835725,40 C1.34688742,40 0,38.6576906 0,36.9934988 L0,3.0065012 Z M22.5,3.00835725 C22.5,1.34688742 23.8441378,0 25.5083572,0 L36.9916428,0 C38.6531126,0 40,1.34413775 40,3.00835725 L40,14.4916428 C40,16.1531126 38.6558622,17.5 36.9916428,17.5 L25.5083572,17.5 C23.8468874,17.5 22.5,16.1558622 22.5,14.4916428 L22.5,3.00835725 Z M22.5,25.5083572 C22.5,23.8468874 23.8441378,22.5 25.5083572,22.5 L36.9916428,22.5 C38.6531126,22.5 40,23.8441378 40,25.5083572 L40,36.9916428 C40,38.6531126 38.6558622,40 36.9916428,40 L25.5083572,40 C23.8468874,40 22.5,38.6558622 22.5,36.9916428 L22.5,25.5083572 Z" id="path-1"></path>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-3">
+            <stop stop-color="#FAAE4A" offset="0%"></stop>
+            <stop stop-color="#F27624" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Main-Area-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(73.000000, 0.000000)">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Mask" fill-opacity="0.8" fill="#F27624" xlink:href="#path-1"></use>
+        <rect id="Mask" fill="url(#linearGradient-3)" mask="url(#mask-2)" x="0" y="0" width="40" height="40"></rect>
+    </g>
+</svg>
