@@ -119,10 +119,10 @@ function activateAbout(app: Application): void {
             <span class="jp-img jp-About-command"></span>
             <p class="content-desc">Clicking the "Commands" tab, located on the left, will toggle the command palette. Execute a command by clicking, or navigating with your arrow keys and pressing Enter. Filter commands by typing in the text box at the top of the palette. The palette is organized into categories, and you can filter on a single category by clicking on the category header or by typing the header surrounded by colons in the search input (e.g., <code>:file:</code>).</p>
             <div class="content-desc">
-                <p>You can try these things out from the command palette:</p>
+                <p>You can try these things from the command palette:</p>
                 <ul>
                     <li>Open a new terminal (requires OS X or Linux)</li>
-                    <li>Open a ipython console</li>
+                    <li>Open an IPython console</li>
                     <li>Open a new file</li>
                     <li>Save a file</li>
                     <li>Open up a help panel on the right</li>
