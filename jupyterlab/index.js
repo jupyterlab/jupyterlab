@@ -10,8 +10,7 @@ require('font-awesome/css/font-awesome.min.css');
 require('material-design-icons/iconfont/material-icons.css');
 require('jupyterlab/lib/default-theme/index.css');
 
-var app = new phosphide.Application({
-  extensions: [
+var extensions = [
     require('jupyterlab/lib/about/plugin').aboutExtension,
     require('jupyterlab/lib/faq/plugin').faqExtension,
     require('jupyterlab/lib/console/plugin').consoleExtension,
@@ -30,8 +29,8 @@ var app = new phosphide.Application({
     require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
     require('jupyterlab/lib/terminal/plugin').terminalExtension,
     require('phosphide/lib/extensions/commandpalette').commandPaletteExtension,
-  ],
-  providers: [
+];
+var providers = [
     require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
     require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
     require('jupyterlab/lib/filebrowser/plugin').fileBrowserProvider,
@@ -39,9 +38,9 @@ var app = new phosphide.Application({
     require('jupyterlab/lib/mainmenu/plugin').mainMenuProvider,
     require('jupyterlab/lib/rendermime/plugin').renderMimeProvider,
     require('jupyterlab/lib/services/plugin').servicesProvider,
-  ]
-});
+];
 
-window.onload = function() {
-    app.run();
+module.exports = {
+    extensions: extensions,
+    providers: providers
 }

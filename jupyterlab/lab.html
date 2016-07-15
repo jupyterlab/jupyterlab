@@ -26,8 +26,19 @@ Distributed under the terms of the Modified BSD License.
   "wsUrl": "{{ws_url| urlencode}}",
   "notebookPath": "{{notebook_path | urlencode}}"
 }</script>
-<script src="{{static_prefix}}/bundle.js" type="text/javascript" charset="utf-8"></script>
+<script src="{{static_prefix}}/jupyter-js-services.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script src="{{static_prefix}}/vendor.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script src="{{static_prefix}}/jupyterlab.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script src="{{static_prefix}}/app.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script>
+var app = new phosphide.Application({
+  extensions: jupyter.plugins.extensions
+  providers: jupyter.plugins.providers
+});
 
+window.onload = function() {
+    app.run();
+}
+</script>
 </body>
-
 </html>
