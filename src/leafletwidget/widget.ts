@@ -40,7 +40,7 @@ class MapWidget extends Widget {
     this.node.tabIndex = -1;
     this.addClass(MAP_CLASS);
 
-    this._map = leaflet.map(this.node);
+    this._map = leaflet.map(this.node).fitWorld();
     leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution : 'Map data (c) <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
         min_zoom : 0,
@@ -85,7 +85,9 @@ class MapWidget extends Widget {
       return;
     }
     let content = JSON.parse(this._context.model.toString());
-    this._map.removeLayer(this._geojsonLayer);
+    if (this._geojsonLayer) {
+      this._map.removeLayer(this._geojsonLayer);
+    }
     this._geojsonLayer = leaflet.geoJson(content, {
       pointToLayer: function (feature, latlng) {
           return leaflet.circleMarker(latlng);
