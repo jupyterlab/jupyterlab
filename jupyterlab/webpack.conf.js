@@ -22,7 +22,7 @@ module.exports = {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
       { test: /\.json$/, loader: 'json-loader' },
-      { test: /\.html$/, loader: 'file'},
+      { test: /\.html$/, loader: 'file' },
       // jquery-ui loads some images
       { test: /\.(jpg|png|gif)$/, loader: 'file' },
       // required to load font-awesome
