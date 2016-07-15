@@ -341,6 +341,16 @@ class OutputAreaWidget extends Widget {
       break;
     case ListChangeType.Replace:
       // Only "clear" is supported by the model.
+
+      // When an output area is cleared and then quickly replaced with new content
+      // (as happens with @interact in widgets, for example), the quickly changing
+      // height can make the page jitter. We introduce a small delay in the minimum height
+      // to prevent this jitter.
+      let rect = this.node.getBoundingClientRect()
+      let oldHeight = this.node.style.minHeight;
+      this.node.style.minHeight = `${rect.height}px`;
+      setTimeout(() => { this.node.style.minHeight = oldHeight; }, 50);
+
       let oldValues = args.oldValue as nbformat.IOutput[];
       for (let i = args.oldIndex; i < oldValues.length; i++) {
         this._removeChild(args.oldIndex);
