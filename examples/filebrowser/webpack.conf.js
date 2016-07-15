@@ -8,7 +8,7 @@ module.exports = {
     publicPath: './build/'
   },
   node: {
-    fs: "empty"
+    fs: 'empty'
   },
   bail: true,
   debug: true,
