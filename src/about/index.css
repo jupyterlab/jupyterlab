@@ -37,29 +37,29 @@
   width: 100%;
   margin: 0 auto;
   float: none;
-  box-sizing: border-box; 
+  box-sizing: border-box;
 }
 
 /* For devices larger than 400px */
 @media (min-width: 400px) {
   #about .container {
     width: 85%;
-    padding: 0; 
+    padding: 0;
   }
 }
 
 /* For devices larger than 550px */
 @media (min-width: 550px) {
   #about .container {
-    width: 80%; 
+    width: 80%;
   }
   #about .column,
   #about .columns {
-    margin-left: 4%; 
+    margin-left: 4%;
   }
   #about .column:first-child,
   #about .columns:first-child {
-    margin-left: 0; 
+    margin-left: 0;
   }
 
 
@@ -140,6 +140,7 @@
   color: #333333;
   padding-left: 10px;
   padding-right: 10px;
+  margin: 10px 0;
 }
 
 #about .desc-one {
@@ -162,7 +163,7 @@
   color: #333333;
   font-size: 20px;
   margin-bottom: 9px;
-  margin-top: 17px;
+  margin-top: 9px;
 }
 
 #about .row img {
@@ -203,7 +204,7 @@
 }
 
 #about .desc-two-header {
-  padding: 30px 0 25px 0;
+  padding: 15px 0 10px 0;
 }
 
 #about .desc-one p {
@@ -228,7 +229,8 @@
   width: 28px;
   height: 17px;
   overflow: hidden;
-  margin-top: 50px;
+  margin-top: 35px;
+  margin-bottom: 10px;
   background-image: url(images/next-arrow-sprite.svg);
   background-size: 100%;
   background-position: top;
@@ -321,7 +323,7 @@
 }
 
 #about .jp-About-nb {
-  background-image: url(images/jl-About-nb.svg); 
+  background-image: url(images/jl-About-nb.svg);
   display: block;
   background-size: contain;
   margin: 0 0 35px 0;
