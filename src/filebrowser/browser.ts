@@ -184,7 +184,7 @@ class FileBrowserWidget extends Widget {
    */
   openPath(path: string, widgetName='default'): Widget {
     let model = this.model;
-    let widget = this._manager.findWidget(path);
+    let widget = this._manager.findWidget(path, widgetName);
     if (!widget) {
       widget = this._manager.open(path, widgetName);
       let context = this._manager.contextForWidget(widget);
