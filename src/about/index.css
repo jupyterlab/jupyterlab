@@ -230,6 +230,7 @@
   height: 17px;
   overflow: hidden;
   margin-top: 35px;
+  margin-bottom: 10px;
   background-image: url(images/next-arrow-sprite.svg);
   background-size: 100%;
   background-position: top;
