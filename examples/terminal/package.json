@@ -11,7 +11,8 @@
   "dependencies": {
     "jupyter-js-services": "^0.15.0",
     "jupyterlab": "file:../..",
-    "phosphor-dockpanel": "^0.9.7"
+    "phosphor-dockpanel": "^0.9.7",
+    "url-loader": "^0.5.7"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
