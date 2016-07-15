@@ -128,6 +128,11 @@ function startApp(session: ISession) {
       selector: '.jp-Console',
       sequence: ['Shift Enter'],
       handler: () => { consolePanel.content.execute(); }
+    },
+    {
+      selector: 'body',
+      sequence: ['Escape'],
+      handler: () => { consolePanel.content.dismissOverlays(); }
     }
   ];
   keymap.add(bindings);
