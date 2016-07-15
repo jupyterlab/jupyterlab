@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A computational environment for Jupyter.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
