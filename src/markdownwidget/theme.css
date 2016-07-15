@@ -3,5 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-MarkdownWidget {
-    border-top: 1px solid #E0E0E0;
+  border-top: 1px solid #E0E0E0;
+  padding: 14px;
 }

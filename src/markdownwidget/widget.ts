@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  Message
+} from 'phosphor-messaging';
+
+import {
   PanelLayout
 } from 'phosphor-panel';
 
@@ -19,7 +23,7 @@ import {
 
 import {
   MarkdownRenderer
-} from '../renderers'
+} from '../renderers';
 
 
 /**
@@ -41,24 +45,41 @@ class MarkdownWidget extends Widget {
     this.addClass(MD_CLASS);
     this.layout = new PanelLayout();
     this.title.text = context.path.split('/').pop();
-
-    let model = context.model;
-    let layout = this.layout as PanelLayout;
-    let renderer = new MarkdownRenderer();
+    this._renderer = new MarkdownRenderer();
+    this._model = context.model;
 
     context.pathChanged.connect((c, path) => {
       this.title.text = path.split('/').pop();
     });
 
-    model.contentChanged.connect(() => {
-      let widget = renderer.render('text/markdown', model.toString());
-      if (layout.childCount()) {
-        layout.childAt(0).dispose();
-      }
-      layout.addChild(widget);
+    context.model.contentChanged.connect(() => {
+      this.update();
     });
-
   }
+
+  /**
+   * Handle an `after-attach` message to the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.update();
+  }
+
+  /**
+   * Handle an `update-request` message to the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    let renderer = this._renderer;
+    let model = this._model;
+    let layout = this.layout as PanelLayout;
+    let widget = renderer.render('text/markdown', model.toString());
+    if (layout.childCount()) {
+      layout.childAt(0).dispose();
+    }
+    layout.addChild(widget);
+  }
+
+  private _renderer: MarkdownRenderer = null;
+  private _model: IDocumentModel = null;
 }
 
 
