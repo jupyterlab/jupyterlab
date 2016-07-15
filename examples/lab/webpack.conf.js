@@ -8,12 +8,12 @@ require('es6-promise').polyfill();
 module.exports = {
   entry: './index.js',
   output: {
-    path: __dirname + "/build",
-    filename: "bundle.js",
+    path: __dirname + '/build',
+    filename: 'bundle.js',
     publicPath: "lab/"
   },
   node: {
-    fs: "empty"
+    fs: 'empty'
   },
   debug: true,
   bail: true,
@@ -24,13 +24,13 @@ module.exports = {
       { test: /\.json$/, loader: 'json-loader' },
       { test: /\.html$/, loader: 'file'},
       // jquery-ui loads some images
-      { test: /\.(jpg|png|gif)$/, loader: "file" },
+      { test: /\.(jpg|png|gif)$/, loader: 'file' },
       // required to load font-awesome
-      { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&minetype=application/font-woff" },
-      { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&minetype=application/font-woff" },
-      { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&minetype=application/octet-stream" },
-      { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
-      { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&minetype=image/svg+xml" }
+      { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&minetype=application/font-woff' },
+      { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&minetype=application/font-woff' },
+      { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&minetype=application/octet-stream' },
+      { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file' },
+      { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&minetype=image/svg+xml' }
     ]
   },
   externals: {
