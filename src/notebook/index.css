@@ -110,3 +110,9 @@
   -webkit-user-select: text;
   -ms-user-select: text;
 }
+
+/* If we have two nested output areas (for example, as with output widgets),
+   then the inner output looks weird with a prompt, so we hide it. */
+.jp-Output .jp-Output .jp-Output-prompt {
+  display: none;
+}
