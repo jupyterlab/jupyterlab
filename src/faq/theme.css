@@ -8,7 +8,7 @@
   font-size: 26px;
   font-weight: 300;
   color: #313940;
-  margin: 5px 0 0 20px;
+  margin: 10px 0 0 20px;
 }
 #faqheader {
   width: 412px;
@@ -62,7 +62,7 @@ li>faqanswer {
   text-decoration: none;
 }
 #faqcontent {
-  margin: 0 auto 0 auto;
+  margin: 0 auto 60px auto;
   display: block;
   width: 94%;
   max-width: 675px;
