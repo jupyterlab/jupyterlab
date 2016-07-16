@@ -106,8 +106,6 @@ const RAW_CELL_CLASS = 'jp-RawCell';
 const RENDERED_CLASS = 'jp-mod-rendered';
 
 /**
-<<<<<<< HEAD
-=======
  * The class name addded to the cell after it has been executed.
  */
 const CELL_EXECUTED_CLASS = 'jp-ExecutedCell';
@@ -118,7 +116,6 @@ const CELL_EXECUTED_CLASS = 'jp-ExecutedCell';
 const CELL_NEWLY_EDITED_CLASS = 'jp-NewlyEdited';
 
 /**
->>>>>>> 77f5e1a... Added a visaul indicator for cells that have been ran
  * The text applied to an empty markdown cell.
  */
 const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
@@ -475,11 +472,8 @@ class CodeCellWidget extends BaseCellWidget {
     model.executionCount = null;
     this.setPrompt('*');
     this.trusted = true;
-<<<<<<< HEAD
-=======
     this.editor.addClass(CELL_EXECUTED_CLASS);
     this.editor.removeClass(CELL_NEWLY_EDITED_CLASS);
->>>>>>> 77f5e1a... Added a visaul indicator for cells that have been ran
     let outputs = model.outputs;
     return outputs.execute(code, kernel).then(reply => {
       model.executionCount = reply.content.execution_count;
