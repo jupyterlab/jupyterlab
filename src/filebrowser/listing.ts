@@ -1006,12 +1006,13 @@ class DirListing extends Widget {
       });
     }
 
-    // Start the drag and remove the mousemove listener.
+    // Start the drag and remove the mousemove and mouseup listeners.
+    document.removeEventListener('mousemove', this, true);
+    document.removeEventListener('mouseup', this, true);
     this._drag.start(clientX, clientY).then(action => {
       this._drag = null;
       clearTimeout(this._selectTimer);
     });
-    document.removeEventListener('mousemove', this, true);
   }
 
   /**
