@@ -13,8 +13,6 @@ import {
   MarkdownWidgetFactory
 } from './widget';
 
-import './theme.css';
-
 /**
  * The class name for all main area portrait tab icons.
  */
