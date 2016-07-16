@@ -8,10 +8,10 @@
   "dependencies": {
     "es6-promise": "^3.1.2",
     "font-awesome": "^4.6.1",
-    "material-design-icons": "^2.2.3",
-    "jupyter-js-services": "^0.15.1",
+    "jupyter-js-services": "^0.15.2",
     "jupyter-js-widgets-labextension": "^0.1.0",
     "jupyterlab": "file:../",
+    "material-design-icons": "^2.2.3",
     "phosphide": "^0.10.0"
   },
   "devDependencies": {
