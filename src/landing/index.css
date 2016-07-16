@@ -46,8 +46,8 @@
   background-size: 193px 40px;
   background-repeat: no-repeat;
   background-position: center top;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #BDBDBD;
+  padding-bottom: 4px;
+
 }
 
 
@@ -57,6 +57,21 @@
   width: 100%;
 }
 
+.jp-Landing-subtitle {
+  font-size: 20px;
+  background-color: white;
+  width: 100%;
+  padding-bottom: 2px;
+}
+
+.jp-Landing-subtext {
+  font-size: 12px;
+  color: #BABABA;
+  background-color: white;
+  border-bottom: 1px solid #BDBDBD;
+  width: 100%;
+  padding-bottom: 10px;
+}
 
 .jp-Landing-header {
 
