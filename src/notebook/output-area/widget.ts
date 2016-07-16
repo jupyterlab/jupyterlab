@@ -26,6 +26,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  Drag, DropAction, DropActions, IDragEvent, MimeData
+} from 'phosphor-dragdrop';
+
+import {
   nbformat
 } from '../notebook/nbformat';
 
@@ -37,6 +41,16 @@ import {
   defaultSanitizer
 } from '../../sanitizer';
 
+
+/**
+ * The threshold in pixels to start a drag event.
+ */
+const DRAG_THRESHOLD = 5;
+
+/**
+ * The factory MIME type supported by phosphor dock panels.
+ */
+const FACTORY_MIME = 'application/x-phosphor-widget-factory';
 
 /**
  * The class name added to an output area widget.
@@ -230,6 +244,7 @@ class OutputAreaWidget extends Widget {
     this._model = null;
     this._rendermime = null;
     this._renderer = null;
+    this._dragData = null;
     super.dispose();
   }
 
@@ -331,6 +346,129 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
+   * Handle the DOM events for the output area widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the panel's DOM node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'mousedown':
+      this._evtMousedown(event as MouseEvent);
+      break;
+    case 'mouseup':
+      this._evtMouseup(event as MouseEvent);
+      break;
+    case 'mousemove':
+      this._evtMousemove(event as MouseEvent);
+      break;
+    }
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    let node = this.node;
+    node.addEventListener('mousedown', this);
+  }
+
+  /**
+   * A message handler invoked on a `'before-detach'` message.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    super.onBeforeDetach(msg);
+    let node = this.node;
+    node.removeEventListener('mousedown', this);
+  }
+
+  /**
+   * Handle the `'mousedown'` event for the widget.
+   */
+  private _evtMousedown(event: MouseEvent): void {
+
+    // Left mouse press for drag start.
+    if (event.button === 0) {
+      this._dragData = { pressX: event.clientX, pressY: event.clientY };
+      document.addEventListener('mouseup', this, true);
+      document.addEventListener('mousemove', this, true);
+    }
+
+    if (event.button !== 0) {
+      clearTimeout(this._selectTimer);
+    }
+  }
+
+  /**
+   * Handle the `'mouseup'` event for the widget.
+   */
+  private _evtMouseup(event: MouseEvent): void {
+    if (event.button !== 0 || !this._drag) {
+      document.removeEventListener('mousemove', this, true);
+      document.removeEventListener('mouseup', this, true);
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /**
+   * Handle the `'mousemove'` event for the widget.
+   */
+  private _evtMousemove(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Bail if we are the one dragging.
+    if (this._drag) {
+      return;
+    }
+
+    // Check for a drag initialization.
+    let data = this._dragData;
+    let dx = Math.abs(event.clientX - data.pressX);
+    let dy = Math.abs(event.clientY - data.pressY);
+    if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
+      return;
+    }
+
+    this._startDrag(event.clientX, event.clientY);
+  }
+
+  /**
+   * Start a drag event.
+   */
+  private _startDrag(clientX: number, clientY: number): void {
+    // Set up the drag event.
+    this._drag = new Drag({
+      mimeData: new MimeData(),
+      supportedActions: DropActions.Copy,
+      proposedAction: DropAction.Copy
+    });
+
+    this._drag.mimeData.setData(FACTORY_MIME, () => {
+      let rendermime = this._rendermime;
+      let widget = new OutputAreaWidget({ rendermime });
+      widget.model = this._model;
+      widget.title.text = 'Mirrored Output';
+      widget.title.closable = true;
+      return widget;
+    });
+
+    // Start the drag and remove the mousemove listener.
+    this._drag.start(clientX, clientY).then(action => {
+      this._drag = null;
+      clearTimeout(this._selectTimer);
+    });
+    document.removeEventListener('mousemove', this, true);
+  }
+
+  /**
    * Follow changes on the model state.
    */
   private _onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
@@ -371,6 +509,9 @@ class OutputAreaWidget extends Widget {
   private _model: OutputAreaModel = null;
   private _rendermime: RenderMime<Widget> = null;
   private _renderer: OutputAreaWidget.IRenderer = null;
+  private _drag: Drag = null;
+  private _dragData: { pressX: number, pressY: number } = null;
+  private _selectTimer = -1;
 }
 
 
