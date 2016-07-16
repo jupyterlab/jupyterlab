@@ -45,6 +45,16 @@ function activateLanding(app: Application, services: ServiceManager): void {
   logo.className = 'jp-ImageJupyterLab jp-Landing-logo';
   dialog.appendChild(logo);
 
+  let subtitle = document.createElement('span');
+  subtitle.textContent = 'alpha';
+  subtitle.className = 'jp-Landing-subtitle';
+  dialog.appendChild(subtitle);
+
+  let subtext = document.createElement('span');
+  subtext.textContent = 'This is not ready for general usage yet.';
+  subtext.className = 'jp-Landing-subtext';
+  dialog.appendChild(subtext);
+
   let header = document.createElement('span');
   header.textContent = 'Start a new activity:';
   header.className = 'jp-Landing-header';
