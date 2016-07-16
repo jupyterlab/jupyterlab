@@ -57,6 +57,11 @@ const CELL_EDITOR_CLASS = 'jp-CellEditor';
 
 
 /**
+ * The class name addded to the cell after it has been executed.
+ */
+const CELL_EXECUTED_CLASS = 'jp-ExecutedCell';
+
+/**
  * An interface describing editor state coordinates.
  */
 export
@@ -292,6 +297,11 @@ class CellEditorWidget extends CodeMirrorWidget {
     let chWidth = editor.defaultCharWidth();
     let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
     let position = editor.getDoc().indexFromPos({ line, ch });
+<<<<<<< HEAD
+=======
+    this.addClass(CELL_NEWLY_EDITED_CLASS);
+    this.removeClass(CELL_EXECUTED_CLASS);
+>>>>>>> 77f5e1a... Added a visaul indicator for cells that have been ran
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, position, oldValue, newValue
     });

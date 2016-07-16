@@ -37,6 +37,13 @@
   flex-shrink: 1;
 }
 
+<<<<<<< HEAD
+=======
+.jp-ExecutedCell {
+  border-left: 2px solid purple !important;
+}
+
+>>>>>>> 77f5e1a... Added a visaul indicator for cells that have been ran
 
 .jp-MarkdownCell-content.p-Widget {
   padding: 7px;
