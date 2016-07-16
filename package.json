@@ -14,7 +14,7 @@
     "file-loader": "^0.8.5",
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5 <1.12",
-    "jupyter-js-services": "^0.15.1",
+    "jupyter-js-services": "^0.15.2",
     "jupyter-js-utils": "^0.4.0",
     "leaflet": "^0.7.7",
     "marked": "^0.3.5",
