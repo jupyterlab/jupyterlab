@@ -51,7 +51,7 @@ function activateLanding(app: Application, services: ServiceManager): void {
   dialog.appendChild(subtitle);
 
   let subtext = document.createElement('span');
-  subtext.textContent = 'not ready for general usage yet';
+  subtext.textContent = 'This is not ready for general usage yet.';
   subtext.className = 'jp-Landing-subtext';
   dialog.appendChild(subtext);
 
