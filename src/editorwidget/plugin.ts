@@ -281,23 +281,6 @@ let themeHandler = (item : MenuItem) => {
   }
 };
 
-let file = new Menu([
-  new MenuItem({
-    text: 'New file',
-    handler: newFile,
-    shortcut: 'Ctrl-O'
-  }),
-  new MenuItem({
-    text: 'Save',
-    handler: saveDoc,
-    shortcut: 'Cmd-S'
-  }),
-  new MenuItem({
-    text: 'Close all editors',
-    handler: closeAllFiles
-  })
-  ]);
-
 let settings = new Menu([
   new MenuItem({
     text: 'Line Numbers',
@@ -375,8 +358,21 @@ let themes = new Menu([
 
 let menu = new Menu([
   new MenuItem({
-    text: 'File',
-    submenu: file
+    text: 'New file',
+    handler: newFile,
+    shortcut: 'Ctrl-O'
+  }),
+  new MenuItem({
+    text: 'Save',
+    handler: saveDoc,
+    shortcut: 'Cmd-S'
+  }),
+  new MenuItem({
+    text: 'Close all editors',
+    handler: closeAllFiles
+  }),
+  new MenuItem({
+    type: MenuItem.Separator
   }),
   new MenuItem({
     text: 'Settings',

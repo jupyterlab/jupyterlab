@@ -769,6 +769,10 @@ function makeNbMenu() {
       handler: runAllHandler
     }),
     new MenuItem({
+      text: 'Restart kernel',
+      handler: restartKernelHandler
+    })
+    new MenuItem({
       text: 'Switch kernel',
       handler: changeKernelHandler
     }),
@@ -825,6 +829,10 @@ function commandModeHandler() {
 
 function editModeHandler() {
   currentApp.commands.execute('notebook:edit-mode');
+}
+
+function restartKernelHandler() {
+  currentApp.commands.execute('notebook:restart-kernel');
 }
 
 /**
