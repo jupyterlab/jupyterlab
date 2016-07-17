@@ -159,6 +159,13 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
+   * A signal emitted when the widget's model is disposed.
+   */
+  get modelDisposed(): ISignal<OutputAreaWidget, void> {
+     return Private.modelDisposedSignal.bind(this);
+  }
+
+  /**
    * The model for the widget.
    */
   get model(): OutputAreaModel {
@@ -305,8 +312,10 @@ class OutputAreaWidget extends Widget {
     let layout = this.layout as PanelLayout;
     if (oldValue) {
       oldValue.changed.disconnect(this._onModelStateChanged, this);
+      oldValue.disposed.disconnect(this._onModelDisposed, this);
     }
     newValue.changed.connect(this._onModelStateChanged, this);
+    newValue.disposed.connect(this._onModelDisposed, this);
     let start = newValue ? newValue.length : 0;
     // Clear unnecessary child widgets.
     for (let i = start; i < layout.childCount(); i++) {
@@ -323,6 +332,16 @@ class OutputAreaWidget extends Widget {
     for (let i = layout.childCount(); i < newValue.length; i++) {
       this._addChild();
     }
+  }
+
+  /**
+   * Handle a model disposal.
+   */
+  protected onModelDisposed(oldValue: OutputAreaModel, newValue: OutputAreaModel): void { }
+
+  private _onModelDisposed(): void {
+    this.modelDisposed.emit(void 0);
+    this.dispose();
   }
 
   /**
@@ -879,4 +898,6 @@ namespace Private {
    */
   export
   const modelChangedSignal = new Signal<OutputAreaWidget, void>();
+  export
+  const modelDisposedSignal = new Signal<OutputAreaWidget, void>();
 }
