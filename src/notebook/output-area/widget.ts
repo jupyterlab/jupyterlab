@@ -142,6 +142,15 @@ class OutputAreaWidget extends Widget {
     this.layout = new PanelLayout();
   }
 
+  get mirror(): OutputAreaWidget {
+    let rendermime = this._rendermime;
+    let widget = new OutputAreaWidget({ rendermime });
+    widget.model = this._model;
+    widget.title.text = 'Mirrored Output';
+    widget.title.closable = true;
+    return widget;
+  }
+
   /**
    * A signal emitted when the widget's model changes.
    */
@@ -244,7 +253,6 @@ class OutputAreaWidget extends Widget {
     this._model = null;
     this._rendermime = null;
     this._renderer = null;
-    this._dragData = null;
     super.dispose();
   }
 
@@ -345,6 +353,115 @@ class OutputAreaWidget extends Widget {
     widget.render(output, this._trusted);
   }
 
+  /**
+   * Follow changes on the model state.
+   */
+  private _onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
+    switch (args.type) {
+    case ListChangeType.Add:
+      // Children are always added at the end.
+      this._addChild();
+      break;
+    case ListChangeType.Replace:
+      // Only "clear" is supported by the model.
+
+      // When an output area is cleared and then quickly replaced with new content
+      // (as happens with @interact in widgets, for example), the quickly changing
+      // height can make the page jitter. We introduce a small delay in the minimum height
+      // to prevent this jitter.
+      let rect = this.node.getBoundingClientRect()
+      let oldHeight = this.node.style.minHeight;
+      this.node.style.minHeight = `${rect.height}px`;
+      setTimeout(() => { this.node.style.minHeight = oldHeight; }, 50);
+
+      let oldValues = args.oldValue as nbformat.IOutput[];
+      for (let i = args.oldIndex; i < oldValues.length; i++) {
+        this._removeChild(args.oldIndex);
+      }
+      break;
+    case ListChangeType.Set:
+      this._updateChild(args.newIndex);
+      break;
+    default:
+      break;
+    }
+    this.update();
+  }
+
+  private _trusted = false;
+  private _fixedHeight = false;
+  private _collapsed = false;
+  private _model: OutputAreaModel = null;
+  private _rendermime: RenderMime<Widget> = null;
+  private _renderer: OutputAreaWidget.IRenderer = null;
+}
+
+
+/**
+ * A namespace for OutputAreaWidget statics.
+ */
+export
+namespace OutputAreaWidget {
+  /**
+   * The options to pass to an `OutputAreaWidget`.
+   */
+  export
+  interface IOptions {
+    /**
+     * The rendermime instance used by the widget.
+     */
+    rendermime: RenderMime<Widget>;
+
+    /**
+     * The output widget renderer.
+     *
+     * Defaults to a shared `IRenderer` instance.
+     */
+     renderer?: IRenderer;
+  }
+
+  /**
+   * An output widget renderer.
+   */
+  export
+  interface IRenderer {
+    /**
+     * Create an output widget.
+     *
+     *
+     * @returns A new widget for an output.
+     */
+    createOutput(options: OutputWidget.IOptions): Widget;
+  }
+
+  /**
+   * The default implementation of `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+    /**
+     * Create an output widget.
+     *
+     *
+     * @returns A new widget for an output.
+     */
+    createOutput(options: OutputWidget.IOptions): OutputWidget {
+      return new OutputWidget(options);
+    }
+  }
+
+  /**
+   * The default `Renderer` instance.
+   */
+  export
+  const defaultRenderer = new Renderer();
+}
+
+/**
+ * The gutter on the left side of the OutputWidget
+ */
+export
+class OutputGutter extends Widget {
   /**
    * Handle the DOM events for the output area widget.
    *
@@ -452,12 +569,8 @@ class OutputAreaWidget extends Widget {
     });
 
     this._drag.mimeData.setData(FACTORY_MIME, () => {
-      let rendermime = this._rendermime;
-      let widget = new OutputAreaWidget({ rendermime });
-      widget.model = this._model;
-      widget.title.text = 'Mirrored Output';
-      widget.title.closable = true;
-      return widget;
+      let output_area = this.parent.parent as OutputAreaWidget;
+      return output_area.mirror;
     });
 
     // Start the drag and remove the mousemove listener.
@@ -469,110 +582,22 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * Follow changes on the model state.
+   * Dispose of the resources held by the widget.
    */
-  private _onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
-    switch (args.type) {
-    case ListChangeType.Add:
-      // Children are always added at the end.
-      this._addChild();
-      break;
-    case ListChangeType.Replace:
-      // Only "clear" is supported by the model.
-
-      // When an output area is cleared and then quickly replaced with new content
-      // (as happens with @interact in widgets, for example), the quickly changing
-      // height can make the page jitter. We introduce a small delay in the minimum height
-      // to prevent this jitter.
-      let rect = this.node.getBoundingClientRect()
-      let oldHeight = this.node.style.minHeight;
-      this.node.style.minHeight = `${rect.height}px`;
-      setTimeout(() => { this.node.style.minHeight = oldHeight; }, 50);
-
-      let oldValues = args.oldValue as nbformat.IOutput[];
-      for (let i = args.oldIndex; i < oldValues.length; i++) {
-        this._removeChild(args.oldIndex);
-      }
-      break;
-    case ListChangeType.Set:
-      this._updateChild(args.newIndex);
-      break;
-    default:
-      break;
+  dispose() {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
     }
-    this.update();
+    this._dragData = null;
+    this._drag = null;
+    this._selectTimer = null;
+    super.dispose();
   }
 
-  private _trusted = false;
-  private _fixedHeight = false;
-  private _collapsed = false;
-  private _model: OutputAreaModel = null;
-  private _rendermime: RenderMime<Widget> = null;
-  private _renderer: OutputAreaWidget.IRenderer = null;
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number } = null;
   private _selectTimer = -1;
-}
-
-
-/**
- * A namespace for OutputAreaWidget statics.
- */
-export
-namespace OutputAreaWidget {
-  /**
-   * The options to pass to an `OutputAreaWidget`.
-   */
-  export
-  interface IOptions {
-    /**
-     * The rendermime instance used by the widget.
-     */
-    rendermime: RenderMime<Widget>;
-
-    /**
-     * The output widget renderer.
-     *
-     * Defaults to a shared `IRenderer` instance.
-     */
-     renderer?: IRenderer;
-  }
-
-  /**
-   * An output widget renderer.
-   */
-  export
-  interface IRenderer {
-    /**
-     * Create an output widget.
-     *
-     *
-     * @returns A new widget for an output.
-     */
-    createOutput(options: OutputWidget.IOptions): Widget;
-  }
-
-  /**
-   * The default implementation of `IRenderer`.
-   */
-  export
-  class Renderer implements IRenderer {
-    /**
-     * Create an output widget.
-     *
-     *
-     * @returns A new widget for an output.
-     */
-    createOutput(options: OutputWidget.IOptions): OutputWidget {
-      return new OutputWidget(options);
-    }
-  }
-
-  /**
-   * The default `Renderer` instance.
-   */
-  export
-  const defaultRenderer = new Renderer();
 }
 
 
@@ -588,7 +613,7 @@ class OutputWidget extends Widget {
     super();
     let layout = new PanelLayout();
     this.layout = layout;
-    let prompt = new Widget();
+    let prompt = new OutputGutter();
     this._placeholder = new Widget();
     this.addClass(OUTPUT_CLASS);
     prompt.addClass(PROMPT_CLASS);
@@ -805,6 +830,24 @@ class OutputWidget extends Widget {
 
   private _rendermime: RenderMime<Widget> = null;
   private _placeholder: Widget = null;
+}
+
+
+/**
+ * A namespace for OutputGutter statics.
+ */
+export
+namespace OutputGutter {
+  /**
+   * The options to pass to an `OutputGutter`.
+   */
+  export
+  interface IOptions {
+    /**
+     * The rendermime instance used by the widget.
+     */
+    rendermime: RenderMime<Widget>;
+  }
 }
 
 
