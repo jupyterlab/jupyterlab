@@ -58,6 +58,11 @@ const FACTORY_MIME = 'application/x-phosphor-widget-factory';
 const OUTPUT_AREA_CLASS = 'jp-OutputArea';
 
 /**
+ * The class name added to a "mirrored" output area widget created by a drag.
+ */
+const MIRRORED_OUTPUT_AREA_CLASS = 'jp-MirroredOutputArea';
+
+/**
  * The class name added to an output widget.
  */
 const OUTPUT_CLASS = 'jp-Output';
@@ -144,10 +149,12 @@ class OutputAreaWidget extends Widget {
 
   get mirror(): OutputAreaWidget {
     let rendermime = this._rendermime;
-    let widget = new OutputAreaWidget({ rendermime });
+    let renderer = this._renderer;
+    let widget = new OutputAreaWidget({ rendermime, renderer });
     widget.model = this._model;
     widget.title.text = 'Mirrored Output';
     widget.title.closable = true;
+    widget.addClass(MIRRORED_OUTPUT_AREA_CLASS);
     return widget;
   }
 
