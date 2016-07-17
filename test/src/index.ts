@@ -7,6 +7,8 @@ import './docregistry/default.spec';
 
 import './filebrowser/model.spec';
 
+import './markdownwidget/widget.spec';
+
 import './renderers/renderers.spec';
 import './renderers/latex.spec';
 
