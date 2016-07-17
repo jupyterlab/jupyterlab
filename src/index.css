@@ -3,10 +3,12 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+@import './about/index.css';
 @import './dialog/index.css';
 @import './filebrowser/index.css';
 @import './iframe/index.css';
+@import './mainmenu/index.css';
 @import './notebook/completion/index.css';
 @import './terminal/index.css';
-@import './mainmenu/index.css';
-@import './about/index.css';
+
+

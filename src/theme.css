@@ -4,10 +4,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 @import './csvwidget/theme.css';
-@import './docmanager/theme.css';
 @import './dialog/theme.css';
-@import './filebrowser/theme.css';
-@import './terminal/theme.css';
+@import './docmanager/theme.css';
 @import './editorwidget/theme.css';
-@import './imagewidget/theme.css';
 @import './faq/theme.css';
+@import './filebrowser/theme.css';
+@import './imagewidget/theme.css';
+@import './markdownwidget/theme.css';
+@import './terminal/theme.css';
+
+
+
