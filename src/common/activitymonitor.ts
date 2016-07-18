@@ -31,6 +31,16 @@ class ActivityMonitor implements IDisposable {
   }
 
   /**
+   * The timeout associated with the monitor, in milliseconds.
+   */
+  get timeout(): number {
+    return this._timeout;
+  }
+  set timeout(value: number) {
+    this._timeout = value;
+  }
+
+  /**
    * Test whether the monitor has been disposed.
    *
    * #### Notes
@@ -58,7 +68,7 @@ class ActivityMonitor implements IDisposable {
     clearTimeout(this._timer);
     this._timer = setTimeout(() => {
       this.activityStopped.emit(void 0);
-    });
+    }, this._timeout);
   }
 
   private _timer = -1;
