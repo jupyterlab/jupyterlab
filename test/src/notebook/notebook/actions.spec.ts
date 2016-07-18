@@ -248,6 +248,12 @@ describe('notebook/notebook/actions', () => {
         expect(widget.activeCellIndex).to.be(3);
       });
 
+      it('should select the previous cell if the last cell is deleted', () => {
+        widget.select(widget.childAt(widget.childCount() - 1));
+        NotebookActions.deleteCells(widget);
+        expect(widget.activeCellIndex).to.be(widget.childCount() - 1);
+      });
+
       it('should add a code cell if all cells are deleted', () => {
         for (let i = 0; i < widget.childCount(); i++) {
           widget.select(widget.childAt(i));
