@@ -46,7 +46,7 @@ function activateLanding(app: Application, services: ServiceManager): void {
   dialog.appendChild(logo);
 
   let subtitle = document.createElement('span');
-  subtitle.textContent = 'alpha';
+  subtitle.textContent = 'alpha preview';
   subtitle.className = 'jp-Landing-subtitle';
   dialog.appendChild(subtitle);
 
