@@ -165,7 +165,7 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * #### Notes
-   * The cell before the first selected cell will be activated.
+   * The cell after the last selected cell will be activated.
    * It will add a code cell if all cells are deleted.
    * This action can be undone.
    */
@@ -184,12 +184,12 @@ namespace NotebookActions {
     for (let i = 0; i < widget.childCount(); i++) {
       let child = widget.childAt(i);
       if (widget.isSelected(child)) {
-        if (index === -1) {
-          index = i - 1;
-        }
+        index = i;
         toDelete.push(cells.get(i));
       }
     }
+    // We want to select the cell *after* the last selected.
+    index -= toDelete.length - 1;
 
     // Delete the cells as one undo event.
     cells.beginCompoundOperation();
