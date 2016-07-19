@@ -68,7 +68,7 @@ def load_jupyter_server_extension(nbapp):
     dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
     if dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
-    nbapp.log.info('Pre-alpha version of JupyterLab extension loaded from %s'%HERE)
+    nbapp.log.info('JupyterLab alpha preview extension loaded from %s'%HERE)
     webapp = nbapp.web_app
     base_url = webapp.settings['base_url']
     webapp.add_handlers(".*$", [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
