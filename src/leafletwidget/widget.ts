@@ -17,6 +17,10 @@ import {
   ABCWidgetFactory, IDocumentModel, IDocumentContext
 } from '../docregistry';
 
+import {
+  deepEqual, JSONValue
+} from '../notebook/common/json';
+
 import leaflet = require('leaflet');
 
 
@@ -99,8 +103,9 @@ class MapWidget extends Widget {
     if (!this.isAttached) {
       return;
     }
-    let contentString = this._context.model.toString();
-    if (contentString === this._geojsonString) {
+    let content = this._context.model.toString();
+    let geojson: JSONValue = content ? JSON.parse(content) : content;
+    if (deepEqual(geojson, this._geojson)) {
       return;
     }
 
@@ -108,11 +113,10 @@ class MapWidget extends Widget {
     if (this._geojsonLayer) {
       this._map.removeLayer(this._geojsonLayer);
     }
-    this._geojsonString = contentString;
+    this._geojson = geojson;
     this._geojsonLayer = null;
-    if (contentString) {
-      let content = JSON.parse(contentString);
-      this._geojsonLayer = leaflet.geoJson(content, {
+    if (geojson) {
+      this._geojsonLayer = leaflet.geoJson(geojson, {
         pointToLayer: function (feature, latlng) {
             return leaflet.circleMarker(latlng);
         }
@@ -141,9 +145,9 @@ class MapWidget extends Widget {
     this.update();
   }
 
-  private _geojsonString = '';
   private _width: number = -1;
   private _height: number = -1;
+  private _geojson: JSONValue = null;
   private _geojsonLayer: leaflet.GeoJSON;
   private _map: leaflet.Map;
   private _context: IDocumentContext<IDocumentModel>;
