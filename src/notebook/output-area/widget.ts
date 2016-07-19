@@ -26,6 +26,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  Drag, DropAction, DropActions, IDragEvent, MimeData
+} from 'phosphor-dragdrop';
+
+import {
   nbformat
 } from '../notebook/nbformat';
 
@@ -39,9 +43,24 @@ import {
 
 
 /**
+ * The threshold in pixels to start a drag event.
+ */
+const DRAG_THRESHOLD = 5;
+
+/**
+ * The factory MIME type supported by phosphor dock panels.
+ */
+const FACTORY_MIME = 'application/x-phosphor-widget-factory';
+
+/**
  * The class name added to an output area widget.
  */
 const OUTPUT_AREA_CLASS = 'jp-OutputArea';
+
+/**
+ * The class name added to a "mirrored" output area widget created by a drag.
+ */
+const MIRRORED_OUTPUT_AREA_CLASS = 'jp-MirroredOutputArea';
 
 /**
  * The class name added to an output widget.
@@ -128,11 +147,30 @@ class OutputAreaWidget extends Widget {
     this.layout = new PanelLayout();
   }
 
+  get mirror(): OutputAreaWidget {
+    let rendermime = this._rendermime;
+    let renderer = this._renderer;
+    let widget = new OutputAreaWidget({ rendermime, renderer });
+    widget.model = this._model;
+    widget.trusted = this._trusted;
+    widget.title.text = 'Mirrored Output';
+    widget.title.closable = true;
+    widget.addClass(MIRRORED_OUTPUT_AREA_CLASS);
+    return widget;
+  }
+
   /**
    * A signal emitted when the widget's model changes.
    */
   get modelChanged(): ISignal<OutputAreaWidget, void> {
      return Private.modelChangedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when the widget's model is disposed.
+   */
+  get modelDisposed(): ISignal<OutputAreaWidget, void> {
+     return Private.modelDisposedSignal.bind(this);
   }
 
   /**
@@ -282,8 +320,10 @@ class OutputAreaWidget extends Widget {
     let layout = this.layout as PanelLayout;
     if (oldValue) {
       oldValue.changed.disconnect(this._onModelStateChanged, this);
+      oldValue.disposed.disconnect(this._onModelDisposed, this);
     }
     newValue.changed.connect(this._onModelStateChanged, this);
+    newValue.disposed.connect(this._onModelDisposed, this);
     let start = newValue ? newValue.length : 0;
     // Clear unnecessary child widgets.
     for (let i = start; i < layout.childCount(); i++) {
@@ -300,6 +340,16 @@ class OutputAreaWidget extends Widget {
     for (let i = layout.childCount(); i < newValue.length; i++) {
       this._addChild();
     }
+  }
+
+  /**
+   * Handle a model disposal.
+   */
+  protected onModelDisposed(oldValue: OutputAreaModel, newValue: OutputAreaModel): void { }
+
+  private _onModelDisposed(): void {
+    this.modelDisposed.emit(void 0);
+    this.dispose();
   }
 
   /**
@@ -434,6 +484,140 @@ namespace OutputAreaWidget {
   const defaultRenderer = new Renderer();
 }
 
+/**
+ * The gutter on the left side of the OutputWidget
+ */
+export
+class OutputGutter extends Widget {
+  /**
+   * Handle the DOM events for the output gutter widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the panel's DOM node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'mousedown':
+      this._evtMousedown(event as MouseEvent);
+      break;
+    case 'mouseup':
+      this._evtMouseup(event as MouseEvent);
+      break;
+    case 'mousemove':
+      this._evtMousemove(event as MouseEvent);
+      break;
+    }
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.node.addEventListener('mousedown', this);
+  }
+
+  /**
+   * A message handler invoked on a `'before-detach'` message.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    super.onBeforeDetach(msg);
+    let node = this.node;
+    node.removeEventListener('mousedown', this);
+  }
+
+  /**
+   * Handle the `'mousedown'` event for the widget.
+   */
+  private _evtMousedown(event: MouseEvent): void {
+    // Left mouse press for drag start.
+    if (event.button === 0) {
+      this._dragData = { pressX: event.clientX, pressY: event.clientY };
+      document.addEventListener('mouseup', this, true);
+      document.addEventListener('mousemove', this, true);
+    }
+  }
+
+  /**
+   * Handle the `'mouseup'` event for the widget.
+   */
+  private _evtMouseup(event: MouseEvent): void {
+    if (event.button !== 0 || !this._drag) {
+      document.removeEventListener('mousemove', this, true);
+      document.removeEventListener('mouseup', this, true);
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /**
+   * Handle the `'mousemove'` event for the widget.
+   */
+  private _evtMousemove(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Bail if we are the one dragging.
+    if (this._drag) {
+      return;
+    }
+
+    // Check for a drag initialization.
+    let data = this._dragData;
+    let dx = Math.abs(event.clientX - data.pressX);
+    let dy = Math.abs(event.clientY - data.pressY);
+    if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
+      return;
+    }
+
+    this._startDrag(event.clientX, event.clientY);
+  }
+
+  /**
+   * Start a drag event.
+   */
+  private _startDrag(clientX: number, clientY: number): void {
+    // Set up the drag event.
+    this._drag = new Drag({
+      mimeData: new MimeData(),
+      supportedActions: DropActions.Copy,
+      proposedAction: DropAction.Copy
+    });
+
+    this._drag.mimeData.setData(FACTORY_MIME, () => {
+      let output_area = this.parent.parent as OutputAreaWidget;
+      return output_area.mirror;
+    });
+
+    // Start the drag and remove the mousemove listener.
+    this._drag.start(clientX, clientY).then(action => {
+      this._drag = null;
+    });
+    document.removeEventListener('mousemove', this, true);
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose() {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    this._dragData = null;
+    this._drag = null;
+    super.dispose();
+  }
+
+  private _drag: Drag = null;
+  private _dragData: { pressX: number, pressY: number } = null;
+}
+
 
 /**
  * An output widget.
@@ -447,7 +631,7 @@ class OutputWidget extends Widget {
     super();
     let layout = new PanelLayout();
     this.layout = layout;
-    let prompt = new Widget();
+    let prompt = new OutputGutter();
     this._placeholder = new Widget();
     this.addClass(OUTPUT_CLASS);
     prompt.addClass(PROMPT_CLASS);
@@ -667,6 +851,24 @@ class OutputWidget extends Widget {
 }
 
 
+/**
+ * A namespace for OutputGutter statics.
+ */
+export
+namespace OutputGutter {
+  /**
+   * The options to pass to an `OutputGutter`.
+   */
+  export
+  interface IOptions {
+    /**
+     * The rendermime instance used by the widget.
+     */
+    rendermime: RenderMime<Widget>;
+  }
+}
+
+
 
 /**
  * A namespace for OutputArea statics.
@@ -695,4 +897,6 @@ namespace Private {
    */
   export
   const modelChangedSignal = new Signal<OutputAreaWidget, void>();
+  export
+  const modelDisposedSignal = new Signal<OutputAreaWidget, void>();
 }

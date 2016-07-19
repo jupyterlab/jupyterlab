@@ -43,6 +43,13 @@ class OutputAreaModel implements IDisposable {
   }
 
   /**
+   * A signal emitted when the model is disposed.
+   */
+  get disposed(): ISignal<OutputAreaModel, void> {
+    return Private.disposedSignal.bind(this);
+  }
+
+  /**
    * Get the length of the items in the model.
    *
    * #### Notes
@@ -69,6 +76,7 @@ class OutputAreaModel implements IDisposable {
     if (this.isDisposed) {
       return;
     }
+    this.disposed.emit(void 0);
     this._list.clear();
     this._list = null;
     clearSignalData(this);
@@ -199,4 +207,6 @@ namespace Private {
    */
   export
   const changedSignal = new Signal<OutputAreaModel, IListChangedArgs<nbformat.IOutput>>();
+  export
+  const disposedSignal = new Signal<OutputAreaModel, void>();
 }
