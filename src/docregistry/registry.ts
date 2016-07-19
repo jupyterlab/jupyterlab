@@ -227,18 +227,18 @@ class DocumentRegistry implements IDisposable {
         factories.add(this._defaultWidgetFactories[ext]);
       }
 
-      // Add extension-specific factories in registration order
+      // Add the extension-specific factories in registration order.
       if (ext in this._widgetFactoryExtensions) {
         this._widgetFactoryExtensions[ext].forEach(n => { factories.add(n); });
       }
     }
 
-    // Add the gobal default factory
+    // Add the global default factory.
     if (this._defaultWidgetFactory) {
       factories.add(this._defaultWidgetFactory);
     }
 
-    // Add the rest of the global factories, in registration order
+    // Add the rest of the global factories, in registration order.
     if ('*' in this._widgetFactoryExtensions) {
       this._widgetFactoryExtensions['*'].forEach(n => { factories.add(n); });
     }
