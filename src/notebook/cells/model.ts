@@ -409,7 +409,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     if (this.isDisposed) {
       return;
     }
-    this._outputs.clear(false);
     this._outputs.dispose();
     this._outputs = null;
     super.dispose();
