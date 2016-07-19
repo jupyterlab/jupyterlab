@@ -438,6 +438,10 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     default:
       return;
     }
+    // Add code cell if there are no cells remaining.
+    if (!this._cells.length) {
+      this._cells.add(this._factory.createCodeCell());
+    }
     this.contentChanged.emit(void 0);
     this.dirty = true;
   }

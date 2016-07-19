@@ -188,26 +188,18 @@ namespace NotebookActions {
         toDelete.push(cells.get(i));
       }
     }
-    // We want to select the cell *after* the last selected.
-    index -= toDelete.length - 1;
 
     // Delete the cells as one undo event.
     cells.beginCompoundOperation();
     for (let cell of toDelete) {
       cells.remove(cell);
     }
-
-    // Add a new code cell if all cells were deleted.
-    if (!model.cells.length) {
-      let cell = model.factory.createCodeCell();
-      model.cells.add(cell);
-    }
+    // The model will add a new code cell if there are no
+    // remaining cells.
     model.cells.endCompoundOperation();
 
-    // Activate the previous cell.
-    if (index === -1) {
-      index = 0;
-    }
+    // Select the cell *after* the last selected.
+    index -= toDelete.length - 1;
     widget.activeCellIndex = index;
   }
 
