@@ -16,6 +16,8 @@ See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
 ***************************************************************************** */
 
+/// <reference path="../es6-collections/es6-collections.d.ts"/>
+
 interface Symbol {
     /** Returns a string representation of an object. */
     toString(): string;
@@ -121,17 +123,6 @@ interface SymbolConstructor {
     unscopables: symbol;
 }
 declare var Symbol: SymbolConstructor;
-
-interface IteratorResult<T> {
-    done: boolean;
-    value?: T;
-}
-
-interface Iterator<T> {
-    next(value?: any): IteratorResult<T>;
-    return?(value?: any): IteratorResult<T>;
-    throw?(e?: any): IteratorResult<T>;
-}
 
 interface Iterable<T> {
     //[Symbol.iterator](): Iterator<T>;

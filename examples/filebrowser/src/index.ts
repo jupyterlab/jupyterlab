@@ -88,8 +88,8 @@ function createApp(manager: IServiceManager): void {
   docRegistry.addWidgetFactory(wFactory, {
     displayName: 'Editor',
     modelName: 'text',
-    fileExtensions: ['.*'],
-    defaultFor: ['.*'],
+    fileExtensions: ['*'],
+    defaultFor: ['*'],
     preferKernel: false,
     canStartKernel: true
   });
