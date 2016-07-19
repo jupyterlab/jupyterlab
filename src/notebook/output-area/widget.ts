@@ -853,25 +853,6 @@ class OutputWidget extends Widget {
 
 
 /**
- * A namespace for OutputGutter statics.
- */
-export
-namespace OutputGutter {
-  /**
-   * The options to pass to an `OutputGutter`.
-   */
-  export
-  interface IOptions {
-    /**
-     * The rendermime instance used by the widget.
-     */
-    rendermime: RenderMime<Widget>;
-  }
-}
-
-
-
-/**
  * A namespace for OutputArea statics.
  */
 export
