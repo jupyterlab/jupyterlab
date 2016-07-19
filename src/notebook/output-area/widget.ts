@@ -147,7 +147,7 @@ class OutputAreaWidget extends Widget {
     this.layout = new PanelLayout();
   }
 
-  get mirror(): OutputAreaWidget {
+  mirror(): OutputAreaWidget {
     let rendermime = this._rendermime;
     let renderer = this._renderer;
     let widget = new OutputAreaWidget({ rendermime, renderer });
@@ -591,14 +591,15 @@ class OutputGutter extends Widget {
 
     this._drag.mimeData.setData(FACTORY_MIME, () => {
       let output_area = this.parent.parent as OutputAreaWidget;
-      return output_area.mirror;
+      return output_area.mirror();
     });
 
-    // Start the drag and remove the mousemove listener.
+    // Remove mousemove and mouseup listeners and start the drag.
+    document.removeEventListener('mousemove', this, true);
+    document.removeEventListener('mouseup', this, true);
     this._drag.start(clientX, clientY).then(action => {
       this._drag = null;
     });
-    document.removeEventListener('mousemove', this, true);
   }
 
   /**
@@ -849,25 +850,6 @@ class OutputWidget extends Widget {
   private _rendermime: RenderMime<Widget> = null;
   private _placeholder: Widget = null;
 }
-
-
-/**
- * A namespace for OutputGutter statics.
- */
-export
-namespace OutputGutter {
-  /**
-   * The options to pass to an `OutputGutter`.
-   */
-  export
-  interface IOptions {
-    /**
-     * The rendermime instance used by the widget.
-     */
-    rendermime: RenderMime<Widget>;
-  }
-}
-
 
 
 /**
