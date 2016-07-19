@@ -95,10 +95,10 @@ function activateEditorHandler(app: Application, registry: DocumentRegistry, mai
   mainMenu.addItem(editorMenu, {rank: 30});
   registry.addWidgetFactory(new EditorWidgetFactory(),
   {
-    fileExtensions: ['.*'],
+    fileExtensions: ['*'],
     displayName: 'Editor',
     modelName: 'text',
-    defaultFor: ['.*'],
+    defaultFor: ['*'],
     preferKernel: false,
     canStartKernel: false
   });

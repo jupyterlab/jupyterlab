@@ -229,7 +229,8 @@ interface IWidgetFactoryOptions {
    * The file extensions the widget can view.
    *
    * #### Notes
-   * Use ".*" to denote all files.
+   * Use "*" to denote all files. Specific file extensions must be preceded
+   * with '.', like '.png', '.txt', etc.
    */
   fileExtensions: string[];
 
@@ -247,7 +248,11 @@ interface IWidgetFactoryOptions {
    * The file extensions for which the factory should be the default.
    *
    * #### Notes
-   * Use ".*" to denote all files.
+   * Use "*" to denote all files. Specific file extensions must be preceded
+   * with '.', like '.png', '.txt', etc. Entries in this attribute must also
+   * be included in the fileExtensions attribute.
+   *
+   * **See also:** [[fileExtensions]].
    */
   defaultFor?: string[];
 

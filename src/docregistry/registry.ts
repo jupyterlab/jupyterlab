@@ -25,16 +25,6 @@ import {
 export
 class DocumentRegistry implements IDisposable {
   /**
-   * The name of the default widget factory.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get defaultWidgetFactory(): string {
-    return this._defaultWidgetFactory;
-  }
-
-  /**
    * Get whether the document registry has been disposed.
    */
   get isDisposed(): boolean {
@@ -70,7 +60,7 @@ class DocumentRegistry implements IDisposable {
    * #### Notes
    * If a factory with the given `displayName` is already registered,
    * an error will be thrown.
-   * If `'.*'` is given as a default extension, the factory will be registered
+   * If `'*'` is given as a default extension, the factory will be registered
    * as the global default.
    * If a factory is already registered as a default for a given extension or
    * as the global default, this factory will override the existing default.
@@ -84,23 +74,38 @@ class DocumentRegistry implements IDisposable {
     }
     this._widgetFactories[name] = exOpt;
     if (options.defaultFor) {
-      for (let option of options.defaultFor) {
-        if (option === '.*') {
+      for (let ext of options.defaultFor) {
+        if (options.fileExtensions.indexOf(ext) === -1) {
+          continue;
+        }
+        if (ext === '*') {
           this._defaultWidgetFactory = name;
-        } else if (options.fileExtensions.indexOf(option) !== -1) {
-          this._defaultWidgetFactories[option] = name;
+        } else {
+          this._defaultWidgetFactories[ext] = name;
         }
       }
+    }
+    // For convenience, store a mapping of ext -> name
+    for (let ext of options.fileExtensions) {
+      if (!this._widgetFactoryExtensions[ext]) {
+        this._widgetFactoryExtensions[ext] = new Set<string>();
+      }
+      this._widgetFactoryExtensions[ext].add(name);
     }
     return new DisposableDelegate(() => {
       delete this._widgetFactories[name];
       if (this._defaultWidgetFactory === name) {
         this._defaultWidgetFactory = '';
       }
-      for (let opt of Object.keys(this._defaultWidgetFactories)) {
-        let n = this._defaultWidgetFactories[opt];
-        if (n === name) {
-          delete this._defaultWidgetFactories[opt];
+      for (let ext of Object.keys(this._defaultWidgetFactories)) {
+        if (this._defaultWidgetFactories[ext] === name) {
+          delete this._defaultWidgetFactories[ext];
+        }
+      }
+      for (let ext of Object.keys(this._widgetFactoryExtensions)) {
+        this._widgetFactoryExtensions[ext].delete(name);
+        if (this._widgetFactoryExtensions[ext].size === 0) {
+          delete this._widgetFactoryExtensions[ext];
         }
       }
     });
@@ -208,47 +213,57 @@ class DocumentRegistry implements IDisposable {
    * @returns A new array of registered widget factory names.
    *
    * #### Notes
-   * The first item in the list is considered the default.
+   * The first item in the list is considered the default. The returned list
+   * has factories in the following order:
+   * - extension-specific default factory
+   * - extension-specific factories
+   * - last registered global default factory
+   * - all other global default factories
    */
-  listWidgetFactories(ext?: string): string[] {
-    ext = ext || '';
-    let factories: string[] = [];
-    let options: Private.IWidgetFactoryEx;
-    let name = '';
-    // If an extension was given, filter by extension.
-    // Make sure the modelFactory is registered.
+  listWidgetFactories(ext: string = '*'): string[] {
+    let factories = new Set<string>();
     if (ext.length > 1) {
       if (ext in this._defaultWidgetFactories) {
-        name = this._defaultWidgetFactories[ext];
-        options = this._widgetFactories[name];
-        if (options.modelName in this._modelFactories) {
-          factories.push(name);
-        }
+        factories.add(this._defaultWidgetFactories[ext]);
+      }
+
+      // Add the extension-specific factories in registration order.
+      if (ext in this._widgetFactoryExtensions) {
+        this._widgetFactoryExtensions[ext].forEach(n => { factories.add(n); });
       }
     }
-    // Add the rest of the valid widgetFactories that can open the path.
-    for (name in this._widgetFactories) {
-      if (factories.indexOf(name) !== -1) {
-        continue;
-      }
-      options = this._widgetFactories[name];
-      if (!(options.modelName in this._modelFactories)) {
-        continue;
-      }
-      let exts = options.fileExtensions;
-      if ((exts.indexOf(ext) !== -1) || (exts.indexOf('.*') !== -1)) {
-        factories.push(name);
-      }
+
+    // Add the global default factory.
+    if (this._defaultWidgetFactory) {
+      factories.add(this._defaultWidgetFactory);
     }
-    // Add the default widget if it was not already added.
-    name = this._defaultWidgetFactory;
-    if (name && factories.indexOf(name) === -1) {
-      options = this._widgetFactories[name];
-      if (options.modelName in this._modelFactories) {
-        factories.push(name);
-      }
+
+    // Add the rest of the global factories, in registration order.
+    if ('*' in this._widgetFactoryExtensions) {
+      this._widgetFactoryExtensions['*'].forEach(n => { factories.add(n); });
     }
-    return factories;
+
+    // Construct the return list, checking to make sure the corresponding
+    // model factories are registered.
+    let factoryList: string[] = [];
+    factories.forEach(name => {
+      if (this._widgetFactories[name].modelName in this._modelFactories) {
+        factoryList.push(name);
+      }
+    });
+
+    return factoryList;
+  }
+
+  /**
+   * Return the name of the default widget factory for a given extension.
+   *
+   * @param ext - An optional file extension.
+   *
+   * @returns The default widget factory name for the extension (if given) or the global default.
+   */
+  defaultWidgetFactory(ext: string = '*') {
+    return this.listWidgetFactories(ext)[0];
   }
 
   /**
@@ -379,6 +394,7 @@ class DocumentRegistry implements IDisposable {
   private _widgetFactories: { [key: string]: Private.IWidgetFactoryEx } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
+  private _widgetFactoryExtensions: {[key: string]: Set<string> } = Object.create(null);
   private _fileTypes: IFileType[] = [];
   private _creators: IFileCreator[] = [];
   private _extenders: { [key: string] : IWidgetExtension<Widget, IDocumentModel>[] } = Object.create(null);
