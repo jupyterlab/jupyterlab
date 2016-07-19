@@ -594,11 +594,12 @@ class OutputGutter extends Widget {
       return output_area.mirror();
     });
 
-    // Start the drag and remove the mousemove listener.
+    // Remove mousemove and mouseup listeners and start the drag.
+    document.removeEventListener('mousemove', this, true);
+    document.removeEventListener('mouseup', this, true);
     this._drag.start(clientX, clientY).then(action => {
       this._drag = null;
     });
-    document.removeEventListener('mousemove', this, true);
   }
 
   /**
