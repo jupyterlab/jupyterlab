@@ -713,10 +713,11 @@ class DirListing extends Widget {
     }
 
     // Check for clearing a context menu.
-    if (this._inContext) {
+    if (this._inContext && event.button === 0) {
       this._inContext = false;
       return;
     }
+    this._inContext = false;
 
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index === -1) {
