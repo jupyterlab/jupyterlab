@@ -62,10 +62,9 @@ class MapWidget extends Widget {
       if (!map._size || map._sizeChanged) {
         if (this._width < 0 || this._height < 0) {
           return map.prototype.getSize.call(map);
-        } else {
-          map._size = new leaflet.Point(this._width, this._height);
-          map._sizeChanged = false;
         }
+        map._size = new leaflet.Point(this._width, this._height);
+        map._sizeChanged = false;
       }
       return map._size.clone();
     };
@@ -145,8 +144,8 @@ class MapWidget extends Widget {
     this.update();
   }
 
-  private _width: number = -1;
-  private _height: number = -1;
+  private _width = -1;
+  private _height = -1;
   private _geojson: JSONValue = null;
   private _geojsonLayer: leaflet.GeoJSON;
   private _map: leaflet.Map;
