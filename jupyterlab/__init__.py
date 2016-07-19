@@ -9,13 +9,29 @@ from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
 
+
+#-----------------------------------------------------------------------------
+# Module globals
+#-----------------------------------------------------------------------------
+
+DEV_NOTE_NPM = """It looks like you're running JupyterLab from source.
+If you're working on the TypeScript of the notebook, try running
+
+    npm run watch
+
+in another terminal window to have the system incrementally
+watch and build JupyterLab's TypeScript for you, as you make changes.
+"""
+
 HERE = os.path.dirname(__file__)
 FILE_LOADER = FileSystemLoader(HERE)
 BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
 
+
+
 class LabHandler(IPythonHandler):
-    """Render the Jupyter Lab View."""   
+    """Render the Jupyter Lab View."""
 
     @web.authenticated
     def get(self):
@@ -45,9 +61,13 @@ def _jupyter_server_extension_paths():
     return [{
         "module": "jupyterlab"
     }]
-    
+
 
 def load_jupyter_server_extension(nbapp):
+    base_dir = os.path.realpath(os.path.join(HERE, '..'))
+    dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
+    if dev_mode:
+        nbapp.log.info(DEV_NOTE_NPM)
     nbapp.log.info('Pre-alpha version of JupyterLab extension loaded from %s'%HERE)
     webapp = nbapp.web_app
     base_url = webapp.settings['base_url']
