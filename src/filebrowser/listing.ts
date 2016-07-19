@@ -534,6 +534,9 @@ class DirListing extends Widget {
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
+    case 'contextmenu':
+      this._evtContextMenu(event as MouseEvent);
+      break;
     case 'scroll':
       this._evtScroll(event as MouseEvent);
       break;
@@ -563,6 +566,7 @@ class DirListing extends Widget {
     node.addEventListener('keydown', this);
     node.addEventListener('click', this);
     node.addEventListener('dblclick', this);
+    node.addEventListener('contextmenu', this);
     content.addEventListener('scroll', this);
     content.addEventListener('p-dragenter', this);
     content.addEventListener('p-dragleave', this);
@@ -581,6 +585,7 @@ class DirListing extends Widget {
     node.removeEventListener('keydown', this);
     node.removeEventListener('click', this);
     node.removeEventListener('dblclick', this);
+    node.removeEventListener('contextmenu', this);
     content.removeEventListener('scroll', this);
     content.removeEventListener('p-dragenter', this);
     content.removeEventListener('p-dragleave', this);
@@ -681,6 +686,13 @@ class DirListing extends Widget {
   }
 
   /**
+   * Handle the `'contextmenu'` event for the widget.
+   */
+  private _evtContextMenu(event: MouseEvent): void {
+    this._inContext = true;
+  }
+
+  /**
    * Handle the `'mousedown'` event for the widget.
    */
   private _evtMousedown(event: MouseEvent): void {
@@ -698,6 +710,12 @@ class DirListing extends Widget {
       } else {
         return;
       }
+    }
+
+    // Check for clearing a context menu.
+    if (this._inContext) {
+      this._inContext = false;
+      return;
     }
 
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
@@ -1010,6 +1028,9 @@ class DirListing extends Widget {
       return;
     }
 
+    // Clear any existing soft selection.
+    this._softSelection = '';
+
     let name = items[index].name;
     let selected = Object.keys(this._selection);
 
@@ -1026,7 +1047,7 @@ class DirListing extends Widget {
       this._handleMultiSelect(selected, index);
 
     // Handle a 'soft' selection
-    } else if (this._selection[name] === true && Object.keys(this._selection).length > 1) {
+    } else if (name in this._selection && selected.length > 1) {
       this._softSelection = name;
 
     // Default to selecting the only the item.
@@ -1224,6 +1245,7 @@ class DirListing extends Widget {
   private _manager: DocumentManager = null;
   private _opener: IWidgetOpener = null;
   private _softSelection = '';
+  private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
   private _renderer: DirListing.IRenderer = null;
 }
