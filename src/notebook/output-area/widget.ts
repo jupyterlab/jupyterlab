@@ -152,6 +152,7 @@ class OutputAreaWidget extends Widget {
     let renderer = this._renderer;
     let widget = new OutputAreaWidget({ rendermime, renderer });
     widget.model = this._model;
+    widget.trusted = this._trusted;
     widget.title.text = 'Mirrored Output';
     widget.title.closable = true;
     widget.addClass(MIRRORED_OUTPUT_AREA_CLASS);
