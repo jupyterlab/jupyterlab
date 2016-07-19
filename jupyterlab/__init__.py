@@ -15,12 +15,13 @@ from notebook.utils import url_path_join as ujoin
 #-----------------------------------------------------------------------------
 
 DEV_NOTE_NPM = """It looks like you're running JupyterLab from source.
-If you're working on the TypeScript of the notebook, try running
+If you're working on the TypeScript sources of JupyterLab, try running
 
     npm run watch
 
-in another terminal window to have the system incrementally
-watch and build JupyterLab's TypeScript for you, as you make changes.
+from the JupyterLab repo directory in another terminal window to have the system
+incrementally watch and build JupyterLab's TypeScript for you, as you make
+changes.
 """
 
 HERE = os.path.dirname(__file__)
