@@ -147,7 +147,7 @@ class OutputAreaWidget extends Widget {
     this.layout = new PanelLayout();
   }
 
-  get mirror(): OutputAreaWidget {
+  mirror(): OutputAreaWidget {
     let rendermime = this._rendermime;
     let renderer = this._renderer;
     let widget = new OutputAreaWidget({ rendermime, renderer });
@@ -591,7 +591,7 @@ class OutputGutter extends Widget {
 
     this._drag.mimeData.setData(FACTORY_MIME, () => {
       let output_area = this.parent.parent as OutputAreaWidget;
-      return output_area.mirror;
+      return output_area.mirror();
     });
 
     // Start the drag and remove the mousemove listener.
