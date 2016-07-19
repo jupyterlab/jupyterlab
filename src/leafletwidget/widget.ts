@@ -10,7 +10,7 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  Widget
+  Widget, ResizeMessage
 } from 'phosphor-widget';
 
 import {
@@ -50,13 +50,10 @@ class MapWidget extends Widget {
     if (context.model.toString()) {
       this.update();
     }
-    context.pathChanged.connect(() => {
-      this.update();
-    });
     context.model.contentChanged.connect(() => {
       this.update();
     });
-    context.contentsModelChanged.connect(() => {
+    context.pathChanged.connect(() => {
       this.update();
     });
   }
@@ -80,28 +77,51 @@ class MapWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     this.title.text = this._context.path.split('/').pop();
-    let cm = this._context.contentsModel;
-    if (cm === null) {
+    if (!this.isAttached) {
       return;
     }
-    let content = JSON.parse(this._context.model.toString());
+    let contentString = this._context.model.toString();
+    if (contentString === this._geojsonString) {
+      return;
+    }
+
+    // we're attached to the DOM and have new layer content now
     if (this._geojsonLayer) {
       this._map.removeLayer(this._geojsonLayer);
     }
-    this._geojsonLayer = leaflet.geoJson(content, {
-      pointToLayer: function (feature, latlng) {
-          return leaflet.circleMarker(latlng);
-      }
-    });
-    this._map.addLayer(this._geojsonLayer);
-    this._map.fitBounds(this._geojsonLayer.getBounds());
+    this._geojsonString = contentString;
+    this._geojsonLayer = null;
+    if (contentString) {
+      let content = JSON.parse(contentString);
+      this._geojsonLayer = leaflet.geoJson(content, {
+        pointToLayer: function (feature, latlng) {
+            return leaflet.circleMarker(latlng);
+        }
+      });
+      this._map.addLayer(this._geojsonLayer);
+      this._map.fitBounds(this._geojsonLayer.getBounds());
+    }
   }
 
   /**
    * A message handler invoked on a 'resize' message.
    */
-  onResize() {
+  onResize(msg: ResizeMessage) {
+    // Since we know the size from the resize message, we manually
+    // define getSize() so that it does not have to do a DOM read.
+    this._map.getSize = () => {
+      if (msg.width === -1 || msg.height === -1) {
+        return (this._map as any).prototype.getSize();
+      } else {
+        let size: any = new leaflet.Point(msg.width, msg.height);
+        (this._map as any)._size = size;
+        return size.clone();
+      }
+    };
     this._map.invalidateSize(true);
+    if (this._geojsonLayer) {
+      this._map.fitBounds(this._geojsonLayer.getBounds());
+    }
   }
 
   /**
@@ -111,6 +131,7 @@ class MapWidget extends Widget {
     this.update();
   }
 
+  private _geojsonString = '';
   private _geojsonLayer: leaflet.GeoJSON;
   private _map: leaflet.Map;
   private _context: IDocumentContext<IDocumentModel>;
