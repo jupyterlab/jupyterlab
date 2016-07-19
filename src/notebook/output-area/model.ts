@@ -46,7 +46,6 @@ class OutputAreaModel implements IDisposable {
    * A signal emitted when the model is disposed.
    */
   get disposed(): ISignal<OutputAreaModel, void> {
-    console.log('get model disposed signal')
     return Private.disposedSignal.bind(this);
   }
 

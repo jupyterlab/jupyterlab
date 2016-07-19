@@ -490,7 +490,7 @@ namespace OutputAreaWidget {
 export
 class OutputGutter extends Widget {
   /**
-   * Handle the DOM events for the output area widget.
+   * Handle the DOM events for the output gutter widget.
    *
    * @param event - The DOM event sent to the widget.
    *
@@ -518,8 +518,7 @@ class OutputGutter extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    let node = this.node;
-    node.addEventListener('mousedown', this);
+    this.node.addEventListener('mousedown', this);
   }
 
   /**
@@ -535,16 +534,11 @@ class OutputGutter extends Widget {
    * Handle the `'mousedown'` event for the widget.
    */
   private _evtMousedown(event: MouseEvent): void {
-
     // Left mouse press for drag start.
     if (event.button === 0) {
       this._dragData = { pressX: event.clientX, pressY: event.clientY };
       document.addEventListener('mouseup', this, true);
       document.addEventListener('mousemove', this, true);
-    }
-
-    if (event.button !== 0) {
-      clearTimeout(this._selectTimer);
     }
   }
 
@@ -603,7 +597,6 @@ class OutputGutter extends Widget {
     // Start the drag and remove the mousemove listener.
     this._drag.start(clientX, clientY).then(action => {
       this._drag = null;
-      clearTimeout(this._selectTimer);
     });
     document.removeEventListener('mousemove', this, true);
   }
@@ -618,13 +611,11 @@ class OutputGutter extends Widget {
     }
     this._dragData = null;
     this._drag = null;
-    this._selectTimer = null;
     super.dispose();
   }
 
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number } = null;
-  private _selectTimer = -1;
 }
 
 
