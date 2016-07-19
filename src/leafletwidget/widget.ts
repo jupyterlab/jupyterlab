@@ -69,9 +69,7 @@ class MapWidget extends Widget {
       return map._size.clone();
     };
 
-    if (context.model.toString()) {
-      this.update();
-    }
+    this.update();
     context.model.contentChanged.connect(() => {
       this.update();
     });
@@ -121,7 +119,7 @@ class MapWidget extends Widget {
         }
       });
       this._map.addLayer(this._geojsonLayer);
-      this._map.fitBounds(this._geojsonLayer.getBounds());
+      this._fitLayerBounds();
     }
   }
 
@@ -132,8 +130,16 @@ class MapWidget extends Widget {
     this._width = msg.width;
     this._height = msg.height;
     this._map.invalidateSize(true);
-    if (this._geojsonLayer) {
+    this._fitLayerBounds();
+  }
+
+  /**
+   * Make the map fit the geojson layer bounds only once when all info is available.
+   */
+  private _fitLayerBounds() {
+    if (this._fitBounds && this._geojsonLayer && this._width && this._height) {
       this._map.fitBounds(this._geojsonLayer.getBounds());
+      this._fitBounds = false;
     }
   }
 
@@ -144,8 +150,9 @@ class MapWidget extends Widget {
     this.update();
   }
 
-  private _width = -1;
-  private _height = -1;
+  private _fitBounds = true;
+  private _width = 0;
+  private _height = 0;
   private _geojson: JSONValue = null;
   private _geojsonLayer: leaflet.GeoJSON;
   private _map: leaflet.Map;
