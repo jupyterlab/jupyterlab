@@ -358,7 +358,7 @@ let themes = new Menu([
 
 let menu = new Menu([
   new MenuItem({
-    text: 'New file',
+    text: 'New text file',
     handler: newFile,
     shortcut: 'Ctrl-O'
   }),
@@ -379,7 +379,7 @@ let menu = new Menu([
     submenu: settings
   }),
   new MenuItem({
-    text: 'Themes',
+    text: 'Editor themes',
     submenu: themes
   })
   ]);

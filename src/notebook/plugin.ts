@@ -771,7 +771,7 @@ function makeNbMenu() {
     new MenuItem({
       text: 'Restart kernel',
       handler: restartKernelHandler
-    })
+    }),
     new MenuItem({
       text: 'Switch kernel',
       handler: changeKernelHandler
