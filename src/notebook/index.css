@@ -104,11 +104,15 @@
 }
 
 
-.jp-OutputArea-result.p-Widget {
+.jp-Output-result.p-Widget {
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;
   -ms-user-select: text;
+}
+
+.jp-Output-result {
+  overflow: auto;
 }
 
 /* If we have two nested output areas (for example, as with output widgets),
