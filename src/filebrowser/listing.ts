@@ -360,7 +360,7 @@ class DirListing extends Widget {
         names.push(item.name);
       }
     }
-    let message = `Permanantly delete these ${names.length} files?`;
+    let message = `Permanently delete these ${names.length} files?`;
     if (names.length === 1) {
       message = `Permanently delete file "${names[0]}"?`;
     }
