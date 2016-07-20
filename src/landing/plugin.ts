@@ -13,6 +13,9 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import {
+  PathTracker
+} from '../filebrowser/plugin';
 
 /**
  * The landing page extension.
@@ -54,6 +57,17 @@ function activateLanding(app: Application, services: ServiceManager): void {
   subtext.textContent = 'This is not ready for general usage yet.';
   subtext.className = 'jp-Landing-subtext';
   dialog.appendChild(subtext);
+
+  let path = document.createElement('span')
+  let pathTracker = new PathTracker;
+
+  pathTracker.pathChanged.connect((p, path) => {
+    console.log(p);
+    console.log(path);
+  });
+
+  path.className = 'jp-Landing-path';
+  dialog.appendChild(path);
 
   let header = document.createElement('span');
   header.textContent = 'Start a new activity:';
