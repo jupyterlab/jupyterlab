@@ -139,6 +139,32 @@ describe('notebook/completion/widget', () => {
 
     });
 
+    describe('#visibilityChanged', () => {
+
+      it('should emit a signal when completion visibility changes', () => {
+        let anchor = new Widget();
+        let options: CompletionWidget.IOptions = {
+          model: new CompletionModel(),
+          anchor: anchor.node
+        };
+        let called = false;
+        let listener = () => { called = true; };
+        options.model.options = ['foo', 'bar'];
+        anchor.attach(document.body);
+
+        let widget = new CompletionWidget(options);
+
+        widget.visibilityChanged.connect(listener);
+        expect(called).to.be(false);
+        widget.attach(document.body);
+        sendMessage(widget, Widget.MsgUpdateRequest);
+        expect(called).to.be(true);
+        widget.dispose();
+        anchor.dispose();
+      });
+
+    });
+
     describe('#model', () => {
 
       it('should default to null', () => {

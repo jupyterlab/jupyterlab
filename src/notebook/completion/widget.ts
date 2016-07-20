@@ -75,6 +75,9 @@ class CompletionWidget extends Widget {
     this.anchor = options.anchor || null;
     this.model = options.model || null;
     this.addClass(COMPLETION_CLASS);
+
+    // Completion widgets are hidden until they are populated.
+    this.hide();
   }
 
 
@@ -161,6 +164,7 @@ class CompletionWidget extends Widget {
     }
     this._activeIndex = 0;
     this._anchorPoint = 0;
+    this.hide();
     this.visibilityChanged.emit(void 0);
   }
 
