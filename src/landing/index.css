@@ -75,7 +75,7 @@
 
 .jp-Landing-header {
 
-  padding-top: 20px;
+  padding-top: 10px;
   padding-bottom: 8px;
 }
 
@@ -123,4 +123,9 @@
     color: #f37a3c;
     margin-top: 20px;
     cursor: pointer;
+}
+
+.jp-Landing-path {
+  font-size: 12px;
+  padding-top: 20px;
 }

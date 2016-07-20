@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  PathTracker
+} from '../filebrowser/plugin';
+
+import {
   Application
 } from 'phosphide/lib/core/application';
 
@@ -13,22 +17,18 @@ import {
   Widget
 } from 'phosphor-widget';
 
-import {
-  PathTracker
-} from '../filebrowser/plugin';
-
 /**
  * The landing page extension.
  */
 export
 const landingExtension = {
   id: 'jupyter.extensions.landing',
-  requires: [ServiceManager],
+  requires: [ServiceManager, PathTracker],
   activate: activateLanding
 };
 
 
-function activateLanding(app: Application, services: ServiceManager): void {
+function activateLanding(app: Application, services: ServiceManager, pathTracker: PathTracker): void {
   let widget = new Widget();
   widget.id = 'landing-jupyterlab';
   widget.title.text = 'Launcher';
@@ -59,13 +59,11 @@ function activateLanding(app: Application, services: ServiceManager): void {
   dialog.appendChild(subtext);
 
   let path = document.createElement('span')
-  let pathTracker = new PathTracker;
-
-  pathTracker.pathChanged.connect((p, path) => {
-    console.log(p);
-    console.log(path);
+  path.textContent = 'Current Working Directory: Home'
+  pathTracker.pathChanged.connect(() => {
+    path.textContent = 'Current Working Directory: Home/'
+    path.textContent += pathTracker.path;
   });
-
   path.className = 'jp-Landing-path';
   dialog.appendChild(path);
 
