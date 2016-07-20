@@ -82,6 +82,7 @@ namespace NotebookActions {
     // Make the changes while preserving history.
     nbModel.cells.replace(index, 1, [clone0, clone1]);
     widget.activeCellIndex++;
+    widget.scrollToActiveCell();
   }
 
   /**
@@ -452,6 +453,7 @@ namespace NotebookActions {
       return;
     }
     widget.activeCellIndex -= 1;
+    widget.scrollToActiveCell();
     Private.deselectCells(widget);
   }
 
@@ -474,6 +476,7 @@ namespace NotebookActions {
       return;
     }
     widget.activeCellIndex += 1;
+    widget.scrollToActiveCell();
     Private.deselectCells(widget);
   }
 
@@ -508,6 +511,7 @@ namespace NotebookActions {
       widget.select(current);
     }
     widget.activeCellIndex -= 1;
+    widget.scrollToActiveCell();
   }
 
   /**
@@ -541,6 +545,7 @@ namespace NotebookActions {
       widget.select(current);
     }
     widget.activeCellIndex += 1;
+    widget.scrollToActiveCell();
   }
 
   /**
