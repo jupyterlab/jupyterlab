@@ -111,6 +111,10 @@
   -ms-user-select: text;
 }
 
+.jp-Output-result {
+  overflow: auto;
+}
+
 /* If we have two nested output areas (for example, as with output widgets),
    then the inner output looks weird with a prompt, so we hide it. */
 .jp-Output .jp-Output .jp-Output-prompt {
