@@ -229,14 +229,21 @@ class ConsoleWidget extends Widget {
     this._history = new ConsoleHistory(this._session.kernel);
 
     // Instantiate tab completion widget.
-    this._completion = options.completion || new CompletionWidget({
+    let completion = options.completion || new CompletionWidget({
       model: new CompletionModel()
     });
-    this._completion.anchor = this.node;
+    this._completion = completion;
+
+    // Set the completion widget's anchor node to peg its position.
+    completion.anchor = this.node;
+
     // Because a completion widget may be passed in, check if it is attached.
-    if (!this._completion.isAttached) {
-      this._completion.attach(document.body);
+    if (!completion.isAttached) {
+      completion.attach(document.body);
     }
+
+    completion.visibilityChanged.connect(this.onCompletionVisibility, this);
+
     this._completionHandler = new CellCompletionHandler(this._completion);
     this._completionHandler.kernel = this._session.kernel;
 
@@ -374,11 +381,67 @@ class ConsoleWidget extends Widget {
   }
 
   /**
+   * Handle visiblity changes in the completion widget.
+   */
+  protected onCompletionVisibility(): void {
+    if (this._completion.isVisible) {
+      this._tooltip.hide();
+    }
+  }
+
+  /**
+   * Handle an edge requested signal.
+   */
+  protected onEdgeRequest(editor: CellEditorWidget, location: EdgeLocation): void {
+    let prompt = this.prompt;
+    if (location === 'top') {
+      this._history.back().then(value => {
+        if (!value) {
+          return;
+        }
+        prompt.model.source = value;
+        prompt.editor.setCursorPosition(0);
+      });
+    } else {
+      this._history.forward().then(value => {
+        // If at the bottom end of history, then clear the prompt.
+        let text = value || '';
+        prompt.model.source = text;
+        prompt.editor.setCursorPosition(text.length);
+      });
+    }
+  }
+
+  /**
+   * Handle a text changed signal from an editor.
+   */
+  protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
+    this._tooltip.hide();
+    if (change.newValue) {
+      this.updateTooltip(change);
+    }
+  }
+
+  /**
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
     let prompt = this.prompt;
     Private.scrollIfNeeded(this.parent.node, prompt.node);
+  }
+
+  /**
+   * Initialize the banner and mimetype.
+   */
+  protected initialize(): void {
+    let layout = this.layout as PanelLayout;
+    let banner = layout.childAt(0) as RawCellWidget;
+    this._session.kernel.kernelInfo().then(msg => {
+      let info = msg.content;
+      banner.model.source = info.banner;
+      this._mimetype = mimetypeForLanguage(info.language_info);
+      this.prompt.mimetype = this._mimetype;
+    });
   }
 
   /**
@@ -412,59 +475,6 @@ class ConsoleWidget extends Widget {
     this.node.scrollTop = this.node.scrollHeight;
 
     prompt.focus();
-  }
-
-  /**
-   * Initialize the banner and mimetype.
-   */
-  protected initialize(): void {
-    let layout = this.layout as PanelLayout;
-    let banner = layout.childAt(0) as RawCellWidget;
-    this._session.kernel.kernelInfo().then(msg => {
-      let info = msg.content;
-      banner.model.source = info.banner;
-      this._mimetype = mimetypeForLanguage(info.language_info);
-      this.prompt.mimetype = this._mimetype;
-    });
-  }
-
-  /**
-   * Handle a text changed signal from an editor.
-   */
-  protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
-    this._tooltip.hide();
-    if (change.newValue) {
-      this.updateTooltip(change);
-    }
-  }
-
-  /**
-   * Update the tooltip based on a text change.
-   */
-  protected updateTooltip(change: ITextChange): void {
-    let contents: KernelMessage.IInspectRequest = {
-      code: change.newValue,
-      cursor_pos: change.position,
-      detail_level: 0
-    };
-    let pendingInspect = ++this._pendingInspect;
-
-    this._session.kernel.inspect(contents).then(msg => {
-      let value = msg.content;
-      // If widget has been disposed, bail.
-      if (this.isDisposed) {
-        return;
-      }
-      // If a newer text change has created a pending request, bail.
-      if (pendingInspect !== this._pendingInspect) {
-        return;
-      }
-      // Tooltip request failures or negative results fail silently.
-      if (value.status !== 'ok' || !value.found) {
-        return;
-      }
-      this.showTooltip(change, value.data as MimeMap<string>);
-    });
   }
 
   /**
@@ -512,26 +522,32 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Handle an edge requested signal.
+   * Update the tooltip based on a text change.
    */
-  protected onEdgeRequest(editor: CellEditorWidget, location: EdgeLocation): void {
-    let prompt = this.prompt;
-    if (location === 'top') {
-      this._history.back().then(value => {
-        if (!value) {
-          return;
-        }
-        prompt.model.source = value;
-        prompt.editor.setCursorPosition(0);
-      });
-    } else {
-      this._history.forward().then(value => {
-        // If at the bottom end of history, then clear the prompt.
-        let text = value || '';
-        prompt.model.source = text;
-        prompt.editor.setCursorPosition(text.length);
-      });
-    }
+  protected updateTooltip(change: ITextChange): void {
+    let contents: KernelMessage.IInspectRequest = {
+      code: change.newValue,
+      cursor_pos: change.position,
+      detail_level: 0
+    };
+    let pendingInspect = ++this._pendingInspect;
+
+    this._session.kernel.inspect(contents).then(msg => {
+      let value = msg.content;
+      // If widget has been disposed, bail.
+      if (this.isDisposed) {
+        return;
+      }
+      // If a newer text change has created a pending request, bail.
+      if (pendingInspect !== this._pendingInspect) {
+        return;
+      }
+      // Tooltip request failures or negative results fail silently.
+      if (value.status !== 'ok' || !value.found) {
+        return;
+      }
+      this.showTooltip(change, value.data as MimeMap<string>);
+    });
   }
 
   private _completion: CompletionWidget = null;

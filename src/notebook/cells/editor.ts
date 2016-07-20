@@ -335,11 +335,12 @@ class CellEditorWidget extends CodeMirrorWidget {
     let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
     let position = editor.getDoc().indexFromPos({ line, ch })
 
-    // A completion request signal should only be emitted if the final
-    // character of the current line is not whitespace. Otherwise, the
-    // default tab action of creating a tab character should be allowed to
-    // propagate.
-    if (currentLine.match(/\S$/)) {
+    // A completion request signal should only be emitted if the current
+    // character or a preceding character is not whitespace.
+    //
+    // Otherwise, the default tab action of creating a tab character should be
+    // allowed to propagate.
+    if (currentLine.substring(0, ch).match(/\S/)) {
       let data = {
         line, ch, chHeight, chWidth, coords, position, currentValue
       };
