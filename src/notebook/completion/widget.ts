@@ -86,6 +86,13 @@ class CompletionWidget extends Widget {
   }
 
   /**
+   * A signal emitted when the completion widget's visibility changes.
+   */
+  get visibilityChanged(): ISignal<CompletionWidget, void> {
+    return Private.visibilityChangedSignal.bind(this);
+  }
+
+  /**
    * The model used by the completion widget.
    *
    * #### Notes
@@ -154,6 +161,7 @@ class CompletionWidget extends Widget {
     }
     this._activeIndex = 0;
     this._anchorPoint = 0;
+    this.visibilityChanged.emit(void 0);
   }
 
   /**
@@ -225,9 +233,10 @@ class CompletionWidget extends Widget {
 
     let items = model.items;
 
-    // If there are no items, hide and bail.
+    // If there are no items, reset and bail.
     if (!items || !items.length) {
       this.hide();
+      this.visibilityChanged.emit(void 0);
       return;
     }
 
@@ -253,6 +262,7 @@ class CompletionWidget extends Widget {
 
     if (this.isHidden) {
       this.show();
+      this.visibilityChanged.emit(void 0);
     }
     this._anchorPoint = this._anchor.scrollTop;
     this._setGeometry();
@@ -516,6 +526,12 @@ namespace Private {
    */
   export
   const selectedSignal = new Signal<CompletionWidget, string>();
+
+  /**
+   * A signal emitted when the completion widget's visibility changes.
+   */
+  export
+  const visibilityChangedSignal = new Signal<CompletionWidget, void>();
 
   /**
    * Returns the common subset string that a list of strings shares.
