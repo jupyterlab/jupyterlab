@@ -747,8 +747,10 @@ class DirListing extends Widget {
    * Handle the `'mouseup'` event for the widget.
    */
   private _evtMouseup(event: MouseEvent): void {
+    // Handle any soft selection from the previous mouse down.
     if (this._softSelection) {
       let altered = event.metaKey || event.shiftKey || event.ctrlKey;
+      // See if we need to clear the other selection.
       if (!altered && event.button === 0) {
         this._selection = Object.create(null);
         this._selection[this._softSelection] = true;
@@ -756,6 +758,7 @@ class DirListing extends Widget {
       }
       this._softSelection = '';
     }
+    // Remove the drag listeners if necessary.
     if (event.button !== 0 || !this._drag) {
       document.removeEventListener('mousemove', this, true);
       document.removeEventListener('mouseup', this, true);
@@ -1066,6 +1069,7 @@ class DirListing extends Widget {
           }
         }, RENAME_DURATION);
       }
+      // Select only the given item.
       this._selection = Object.create(null);
       this._selection[name] = true;
     }
