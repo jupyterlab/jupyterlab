@@ -90,6 +90,10 @@ class CompletionWidget extends Widget {
 
   /**
    * A signal emitted when the completion widget's visibility changes.
+   *
+   * #### Notes
+   * This signal is useful when there are multiple floating widgets that may
+   * contend with the same space and ought to be mutually exclusive.
    */
   get visibilityChanged(): ISignal<CompletionWidget, void> {
     return Private.visibilityChangedSignal.bind(this);
