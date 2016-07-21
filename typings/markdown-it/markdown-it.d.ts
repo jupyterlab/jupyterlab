@@ -1,3 +1,8 @@
+// Type definitions for markdown-it
+// Project: https://github.com/rapropos/typed-markdown-it
+// Definitions by: rapropos <https://github.com/rapropos>
+// Definitions: https://github.com/rapropos/typed-markdown-it
+
 declare var MarkdownIt: {
   (preset?: string, options?: MarkdownIt.Options): MarkdownIt.MarkdownIt;
   new (preset?: string, options?: MarkdownIt.Options): MarkdownIt.MarkdownIt;
