@@ -11,7 +11,6 @@
     "d3-dsv": "^1.0.0",
     "diff-match-patch": "^1.0.0",
     "es6-promise": "^3.2.1",
-    "file-loader": "^0.8.5",
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5 <1.12",
     "jupyter-js-services": "^0.15.2",
