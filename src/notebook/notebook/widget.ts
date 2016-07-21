@@ -750,7 +750,7 @@ class Notebook extends StaticNotebook {
       if (activeCell) {
         activeCell.focus();
         if (activeCell instanceof MarkdownCellWidget) {
-          (activeCell as MarkdownCellWidget).rendered = false;
+          activeCell.rendered = false;
         }
       }
     } else {
