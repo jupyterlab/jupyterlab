@@ -14,11 +14,11 @@ import {
  * A class that monitors activity on a signal.
  */
 export
-class ActivityMonitor implements IDisposable {
+class ActivityMonitor<Sender, Args> implements IDisposable {
   /**
    * Construct a new activity monitor.
    */
-  constructor(options: ActivityMonitor.IOptions) {
+  constructor(options: ActivityMonitor.IOptions<Sender, Args>) {
     options.signal.connect(this._onSignalFired, this);
     this._timeout = options.timeout || 1000;
   }
@@ -26,7 +26,7 @@ class ActivityMonitor implements IDisposable {
   /**
    * A signal emitted when activity has ceased.
    */
-  get activityStopped(): ISignal<ActivityMonitor, void> {
+  get activityStopped(): ISignal<ActivityMonitor<Sender, Args>, ActivityMonitor.IArguments<Sender, Args>> {
     return Private.activityStoppedSignal.bind(this);
   }
 
@@ -64,15 +64,24 @@ class ActivityMonitor implements IDisposable {
   /**
    * A signal handler for the monitored signal.
    */
-  private _onSignalFired(): void {
+  private _onSignalFired(sender: Sender, args: Args): void {
     clearTimeout(this._timer);
+    this._sender = sender;
+    this._args = args;
     this._timer = setTimeout(() => {
-      this.activityStopped.emit(void 0);
+      this.activityStopped.emit({
+        sender: this._sender,
+        args: this._args
+      });
+      this._sender = null;
+      this._args = null;
     }, this._timeout);
   }
 
   private _timer = -1;
   private _timeout = -1;
+  private _sender: Sender = null;
+  private _args: Args = null;
   private _isDisposed = false;
 }
 
@@ -86,11 +95,11 @@ namespace ActivityMonitor {
    * The options used to construct a new `ActivityMonitor`.
    */
   export
-  interface IOptions {
+  interface IOptions<Sender, Args> {
     /**
      * The signal to monitor.
      */
-    signal: ISignal<any, any>;
+    signal: ISignal<Sender, Args>;
 
     /**
      * The activity timeout in milliseconds.
@@ -98,6 +107,23 @@ namespace ActivityMonitor {
      * The default is 1 second.
      */
     timeout?: number;
+  }
+
+  /**
+   * The argument object for an activity timeout.
+   *
+   */
+  export
+  interface IArguments<Sender, Args> {
+    /**
+     * The most recent sender object.
+     */
+    sender: Sender;
+
+    /**
+     * The most recent argument object.
+     */
+    args: Args;
   }
 }
 
@@ -110,5 +136,5 @@ namespace Private {
    * A signal emitted when activity has ceased.
    */
   export
-  const activityStoppedSignal = new Signal<ActivityMonitor, void>();
+  const activityStoppedSignal = new Signal<ActivityMonitor<any, any>, ActivityMonitor.IArguments<any, any>>();
 }
