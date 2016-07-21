@@ -4,6 +4,8 @@
 import * as marked
   from 'marked';
 
+import MarkdownIt = require('markdown-it');
+
 import {
   IRenderer
 } from '../rendermime';
