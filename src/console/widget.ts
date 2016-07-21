@@ -333,9 +333,11 @@ class ConsoleWidget extends Widget {
     let prompt = this.prompt;
     prompt.trusted = true;
     this._history.push(prompt.model.source);
+    // Create a new prompt before kernel execution to allow typeahead.
+    this.newPrompt();
     return prompt.execute(this._session.kernel).then(
-      () => this.newPrompt(),
-      () => this.newPrompt()
+      () => { Private.scrollToBottom(this.node); },
+      () => { Private.scrollToBottom(this.node); }
     );
   }
 
@@ -471,8 +473,8 @@ class ConsoleWidget extends Widget {
     // Associate the new prompt with the completion handler.
     this._completionHandler.activeCell = prompt;
 
-    // Jump to the bottom of the node.
-    this.node.scrollTop = this.node.scrollHeight;
+    // Jump to the bottom of the console.
+    Private.scrollToBottom(this.node);
 
     prompt.focus();
   }
@@ -667,5 +669,15 @@ namespace Private {
     } else if (er.bottom > ar.bottom + 10) {
       area.scrollTop += er.bottom - ar.bottom + 10;
     }
+  }
+
+  /**
+   * Jump to the bottom of a node.
+   *
+   * @param node - The scrollable element.
+   */
+  export
+  function scrollToBottom(node: HTMLElement): void {
+    node.scrollTop = node.scrollHeight;
   }
 }
