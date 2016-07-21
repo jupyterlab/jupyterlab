@@ -14,7 +14,7 @@ import {
  * A class that monitors activity on a signal.
  */
 export
-class ActivityMonitor implements IDisposable {
+class ActivityMonitor<Sender, Args> implements IDisposable {
   /**
    * Construct a new activity monitor.
    */
@@ -26,7 +26,7 @@ class ActivityMonitor implements IDisposable {
   /**
    * A signal emitted when activity has ceased.
    */
-  get activityStopped(): ISignal<ActivityMonitor, void> {
+  get activityStopped(): ISignal<Sender, Args> {
     return Private.activityStoppedSignal.bind(this);
   }
 
@@ -110,5 +110,5 @@ namespace Private {
    * A signal emitted when activity has ceased.
    */
   export
-  const activityStoppedSignal = new Signal<ActivityMonitor, void>();
+  const activityStoppedSignal = new Signal<any, any>();
 }
