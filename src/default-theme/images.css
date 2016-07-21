@@ -35,3 +35,11 @@
   margin-right: 0px;
   padding-right: 0px;
 }
+
+.jp-Landing-tour {
+  background-image: url(images/tour.svg);
+}
+
+.jp-Landing-folder {
+  background-image: url(images/landingfolder.svg);
+}

@@ -39,36 +39,26 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
   dialog.className = 'jp-Landing-dialog';
   widget.node.appendChild(dialog);
 
-  let title = document.createElement('span');
-  title.textContent = 'Welcome to';
-  title.className = 'jp-Landing-title';
-  dialog.appendChild(title);
-
   let logo = document.createElement('span');
   logo.className = 'jp-ImageJupyterLab jp-Landing-logo';
   dialog.appendChild(logo);
 
+  let previewMessages = ["super alpha preview", "very alpha preview", "extremely alpha preview", "exceedingly alpha preview", "alpha alpha preview", "it’s buggy!"];
+  let ranNum = Math.floor(Math.random()*6);
   let subtitle = document.createElement('span');
-  subtitle.textContent = 'alpha preview';
+  subtitle.textContent = previewMessages[ranNum];
   subtitle.className = 'jp-Landing-subtitle';
   dialog.appendChild(subtitle);
 
-  let subtext = document.createElement('span');
-  subtext.textContent = 'This is not ready for general usage yet.';
-  subtext.className = 'jp-Landing-subtext';
-  dialog.appendChild(subtext);
-
-  let path = document.createElement('span')
-  path.textContent = 'Current Working Directory: Home'
-  pathTracker.pathChanged.connect(() => {
-    path.textContent = 'Current Working Directory: Home/'
-    path.textContent += pathTracker.path;
+  let tour = document.createElement('span')
+  tour.className = 'jp-Landing-tour';
+  dialog.appendChild(tour);
+  tour.addEventListener('click', () => {
+    app.commands.execute('about-jupyterlab:show');
   });
-  path.className = 'jp-Landing-path';
-  dialog.appendChild(path);
 
   let header = document.createElement('span');
-  header.textContent = 'Start a new activity:';
+  header.textContent = 'Start a new activity';
   header.className = 'jp-Landing-header';
   dialog.appendChild(header);
 
@@ -98,14 +88,6 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
     app.commands.execute('file-operations:new-notebook');
   });
 
-  let tour = document.createElement('span')
-  tour.textContent = 'Take a tour';
-  tour.className = 'jp-Landing-tour';
-  dialog.appendChild(tour);
-  tour.addEventListener('click', () => {
-    app.commands.execute('about-jupyterlab:show');
-  });
-
   img = body.getElementsByClassName('jp-ImageConsole')[0];
   img.addEventListener('click', () => {
     app.commands.execute(`console:create-${services.kernelspecs.default}`);
@@ -120,6 +102,33 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
   img.addEventListener('click', () => {
     app.commands.execute('terminal:create-new');
   });
+
+  let cwd = document.createElement('div');
+  cwd.className = 'jp-Landing-cwd';
+
+
+  let folderImage = document.createElement('span');
+  folderImage.className = 'jp-Landing-folder';
+  folderImage.style.height = "12px";
+  folderImage.style.width = "12px";
+
+  let path = document.createElement('span');
+  path.textContent = 'home'
+  pathTracker.pathChanged.connect(() => {
+    if (pathTracker.path.length > 0) {
+      path.textContent = 'home > '
+      var path2 = pathTracker.path;
+      path2 = path2.replace("/"," > ");
+      path.textContent += path2;
+    } else {
+      path.textContent = "home";
+    }
+  });
+  path.className = 'jp-Landing-path';
+
+  cwd.appendChild(folderImage);
+  cwd.appendChild(path);
+  dialog.appendChild(cwd);
 
   app.commands.add([{
     id: 'jupyterlab-launcher:show',
