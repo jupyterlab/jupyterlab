@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContents, IKernel, IServiceManager, ISession
+  IContents, IKernel, IServiceManager, ISession, utils
 } from 'jupyter-js-services';
-
-import * as utils
-  from 'jupyter-js-utils';
 
 import {
   IDisposable

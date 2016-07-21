@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as utils
- from 'jupyter-js-utils';
+import {
+  utils
+} from 'jupyter-js-services';
 
 import {
   IDisposable

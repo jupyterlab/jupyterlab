@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContents, IKernel, IServiceManager, ISession
+  ContentsManager, IKernel, IServiceManager, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -30,26 +30,6 @@ import {
   DocumentWidgetManager
 } from './widgetmanager';
 
-/**
- * Return the extension, given a path.
- *
- * @param path - the file path.
- *
- * @returns the extension for the filepath, with the '.' included, or '' if no extension.
- *
- * #### TODO
- * This should call the jupyter-js-services to get the extension
- */
-function extname(path: string): string {
-  let parts = path.split('.');
-  let ext: string;
-  if (parts.length === 1 || (parts[0] === '' && parts.length === 2)) {
-    ext = '';
-  } else {
-    ext = '.' + parts.pop().toLowerCase();
-  }
-  return ext;
-}
 
 /**
  * The document manager.
@@ -139,7 +119,7 @@ class DocumentManager implements IDisposable {
   open(path: string, widgetName='default', kernel?: IKernel.IModel): Widget {
     let registry = this._registry;
     if (widgetName === 'default') {
-      widgetName = registry.defaultWidgetFactory(extname(path));
+      widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path));
     }
     let mFactory = registry.getModelFactory(widgetName);
     if (!mFactory) {
@@ -173,7 +153,7 @@ class DocumentManager implements IDisposable {
   createNew(path: string, widgetName='default', kernel?: IKernel.IModel): Widget {
     let registry = this._registry;
     if (widgetName === 'default') {
-      widgetName = registry.defaultWidgetFactory(extname(path));
+      widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path));
     }
     let mFactory = registry.getModelFactory(widgetName);
     if (!mFactory) {
@@ -227,7 +207,7 @@ class DocumentManager implements IDisposable {
    */
   findWidget(path: string, widgetName='default'): Widget {
     if (widgetName === 'default') {
-      widgetName = this._registry.defaultWidgetFactory(extname(path));
+      widgetName = this._registry.defaultWidgetFactory(ContentsManager.extname(path));
     }
     return this._widgetManager.findWidget(path, widgetName);
   }
