@@ -14,7 +14,7 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  clearSignalData
+  clearSignalData, ISignal, Signal
 } from 'phosphor-signaling';
 
 import {
@@ -145,6 +145,13 @@ class ConsoleWidget extends Widget {
    */
   get session(): ISession {
     return this._session;
+  }
+
+  /**
+   * A signal emitted when the tooltip changes.
+   */
+  get tooltipChanged(): ISignal<ConsoleWidget, Widget> {
+    return Private.tooltipChangedSignal.bind(this);
   }
 
   /**
@@ -362,22 +369,24 @@ class ConsoleWidget extends Widget {
 
       // If widget has been disposed, bail.
       if (this.isDisposed) {
+        this.tooltipChanged.emit(null);
         return;
       }
 
       // If a newer text change has created a pending request, bail.
       if (pendingInspect !== this._pendingInspect) {
+        this.tooltipChanged.emit(null);
         return;
       }
 
       // Tooltip request failures or negative results fail silently.
       if (value.status !== 'ok' || !value.found) {
+        this.tooltipChanged.emit(null);
         return;
       }
 
       let bundle = value.data as MimeMap<string>;
-      let content: Widget = this._rendermime.render(bundle);
-      console.log('content', content);
+      this.tooltipChanged.emit(this._rendermime.render(bundle));
     });
   }
 
@@ -476,6 +485,12 @@ namespace ConsoleWidget {
  * A namespace for console widget private data.
  */
 namespace Private {
+  /**
+   * A signal emitted when the tooltip changes.
+   */
+  export
+  const tooltipChangedSignal = new Signal<ConsoleWidget, Widget>();
+
   /**
    * Scroll an element into view if needed.
    *
