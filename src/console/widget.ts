@@ -148,6 +148,13 @@ class ConsoleWidget extends Widget {
   }
 
   /**
+   * A signal emitted when the pager changes.
+   */
+  get pagerChanged(): ISignal<ConsoleWidget, Widget> {
+    return Private.pagerChangedSignal.bind(this);
+  }
+
+  /**
    * A signal emitted when the tooltip changes.
    */
   get tooltipChanged(): ISignal<ConsoleWidget, Widget> {
@@ -190,7 +197,13 @@ class ConsoleWidget extends Widget {
     // Create a new prompt before kernel execution to allow typeahead.
     this.newPrompt();
     return prompt.execute(this._session.kernel).then(
-      () => { Private.scrollToBottom(this.node); },
+      (value: KernelMessage.IExecuteReplyMsg) => {
+        if (value.content.status === 'ok') {
+          let content = value.content as any;
+          this.updatePager(content as KernelMessage.IExecuteOkReplyMsg);
+        }
+        Private.scrollToBottom(this.node);
+      },
       () => { Private.scrollToBottom(this.node); }
     );
   }
@@ -354,6 +367,24 @@ class ConsoleWidget extends Widget {
   }
 
   /**
+   * Update the pager based on a kernel response.
+   *
+   * #### Notes
+   * Payloads are deprecated and there are no official interfaces for them in
+   * the kernel type definitions.
+   * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
+   */
+  protected updatePager(content: KernelMessage.IExecuteOkReplyMsg): void {
+    let page = content.payload.filter(i => (i as any).source === 'page')[0];
+    if (page) {
+      let bundle = (page as any).data as MimeMap<string>;
+      this.pagerChanged.emit(this._rendermime.render(bundle));
+      return;
+    }
+    this.pagerChanged.emit(null);
+  }
+
+  /**
    * Update the tooltip based on a text change.
    */
   protected updateTooltip(change: ITextChange): void {
@@ -485,6 +516,12 @@ namespace ConsoleWidget {
  * A namespace for console widget private data.
  */
 namespace Private {
+  /**
+   * A signal emitted when the pager changes.
+   */
+  export
+  const pagerChangedSignal = new Signal<ConsoleWidget, Widget>();
+
   /**
    * A signal emitted when the tooltip changes.
    */
