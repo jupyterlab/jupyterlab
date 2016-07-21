@@ -163,6 +163,11 @@ const RENAME_DURATION = 500;
 const DRAG_THRESHOLD = 5;
 
 /**
+ * A boolean indicating whether the platform is Mac.
+ */
+const IS_MAC = !!navigator.platform.match(/Mac/i);
+
+/**
  * The factory MIME type supported by phosphor dock panels.
  */
 const FACTORY_MIME = 'application/x-phosphor-widget-factory';
@@ -354,17 +359,13 @@ class DirListing extends Widget {
    */
   delete(): Promise<void> {
     let names: string[] = [];
-    if (this._softSelection) {
-      names.push(this._softSelection);
-    } else {
-      let items = this._model.items;
-      for (let item of items) {
-        if (this._selection[item.name]) {
-          names.push(item.name);
-        }
+    let items = this._model.items;
+    for (let item of items) {
+      if (this._selection[item.name]) {
+        names.push(item.name);
       }
     }
-    let message = `Permanantly delete these ${names.length} files?`;
+    let message = `Permanently delete these ${names.length} files?`;
     if (names.length === 1) {
       message = `Permanently delete file "${names[0]}"?`;
     }
@@ -420,9 +421,7 @@ class DirListing extends Widget {
     let paths = items.map(item => item.path);
     for (let session of this._model.sessions) {
       let index = paths.indexOf(session.notebook.path);
-      if (!this._softSelection && this._selection[items[index].name]) {
-        promises.push(this._model.shutdown(session.id));
-      } else if (this._softSelection === items[index].name) {
+      if (this._selection[items[index].name]) {
         promises.push(this._model.shutdown(session.id));
       }
     }
@@ -496,9 +495,6 @@ class DirListing extends Widget {
    * Get whether an item is selected by name.
    */
   isSelected(name: string): boolean {
-    if (this._softSelection) {
-      return name === this._softSelection;
-    }
     return this._selection[name] === true;
   }
 
@@ -543,6 +539,9 @@ class DirListing extends Widget {
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
+    case 'contextmenu':
+      this._evtContextMenu(event as MouseEvent);
+      break;
     case 'scroll':
       this._evtScroll(event as MouseEvent);
       break;
@@ -572,6 +571,7 @@ class DirListing extends Widget {
     node.addEventListener('keydown', this);
     node.addEventListener('click', this);
     node.addEventListener('dblclick', this);
+    node.addEventListener('contextmenu', this);
     content.addEventListener('scroll', this);
     content.addEventListener('p-dragenter', this);
     content.addEventListener('p-dragleave', this);
@@ -590,6 +590,7 @@ class DirListing extends Widget {
     node.removeEventListener('keydown', this);
     node.removeEventListener('click', this);
     node.removeEventListener('dblclick', this);
+    node.removeEventListener('contextmenu', this);
     content.removeEventListener('scroll', this);
     content.removeEventListener('p-dragenter', this);
     content.removeEventListener('p-dragleave', this);
@@ -670,7 +671,6 @@ class DirListing extends Widget {
    * Handle the `'click'` event for the widget.
    */
   private _evtClick(event: MouseEvent) {
-    this._softSelection = '';
     let target = event.target as HTMLElement;
 
     let header = this.headerNode;
@@ -681,17 +681,6 @@ class DirListing extends Widget {
       }
       return;
     }
-
-    // Bail if editing.
-    if (this._editNode.contains(target)) {
-      return;
-    }
-
-    let content = this.contentNode;
-    if (content.contains(target)) {
-      this._handleFileSelect(event);
-    }
-
   }
 
   /**
@@ -699,6 +688,13 @@ class DirListing extends Widget {
    */
   private _evtScroll(event: MouseEvent): void {
     this.headerNode.scrollLeft = this.contentNode.scrollLeft;
+  }
+
+  /**
+   * Handle the `'contextmenu'` event for the widget.
+   */
+  private _evtContextMenu(event: MouseEvent): void {
+    this._inContext = true;
   }
 
   /**
@@ -721,16 +717,19 @@ class DirListing extends Widget {
       }
     }
 
+    // Check for clearing a context menu.
+    let newContext = (IS_MAC && event.ctrlKey) || (event.button === 2);
+    if (this._inContext && !newContext) {
+      this._inContext = false;
+      return;
+    }
+    this._inContext = false;
+
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index === -1) {
       return;
     }
-    this._softSelection = '';
-    let items = this.sortedItems;
-    let selected = Object.keys(this._selection);
-    if (selected.indexOf(items[index].name) === -1) {
-      this._softSelection = items[index].name;
-    }
+    this._handleFileSelect(event);
 
     // Left mouse press for drag start.
     if (event.button === 0) {
@@ -749,6 +748,18 @@ class DirListing extends Widget {
    * Handle the `'mouseup'` event for the widget.
    */
   private _evtMouseup(event: MouseEvent): void {
+    // Handle any soft selection from the previous mouse down.
+    if (this._softSelection) {
+      let altered = event.metaKey || event.shiftKey || event.ctrlKey;
+      // See if we need to clear the other selection.
+      if (!altered && event.button === 0) {
+        this._selection = Object.create(null);
+        this._selection[this._softSelection] = true;
+        this.update();
+      }
+      this._softSelection = '';
+    }
+    // Remove the drag listeners if necessary.
     if (event.button !== 0 || !this._drag) {
       document.removeEventListener('mousemove', this, true);
       document.removeEventListener('mouseup', this, true);
@@ -861,13 +872,10 @@ class DirListing extends Widget {
         return;
       }
       let item = this.sortedItems[index];
-      let target = this._items[index];
-      if (!target.classList.contains(FOLDER_TYPE_CLASS)) {
+      if (item.type !== 'directory' || this._selection[item.name]) {
         return;
       }
-      if (!this._softSelection && this._selection[item.name]) {
-        return;
-      }
+      let target = event.target as HTMLElement;
       target.classList.add(utils.DROP_TARGET_CLASS);
       event.preventDefault();
       event.stopPropagation();
@@ -1009,6 +1017,7 @@ class DirListing extends Widget {
     // Start the drag and remove the mousemove and mouseup listeners.
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
+    clearTimeout(this._selectTimer);
     this._drag.start(clientX, clientY).then(action => {
       this._drag = null;
       clearTimeout(this._selectTimer);
@@ -1029,11 +1038,14 @@ class DirListing extends Widget {
       return;
     }
 
+    // Clear any existing soft selection.
+    this._softSelection = '';
+
     let name = items[index].name;
     let selected = Object.keys(this._selection);
 
     // Handle toggling.
-    if (event.metaKey || event.ctrlKey) {
+    if ((IS_MAC && event.metaKey) || (!IS_MAC && event.ctrlKey)) {
       if (this._selection[name]) {
         delete this._selection[name];
       } else {
@@ -1043,6 +1055,10 @@ class DirListing extends Widget {
     // Handle multiple select.
     } else if (event.shiftKey) {
       this._handleMultiSelect(selected, index);
+
+    // Handle a 'soft' selection
+    } else if (name in this._selection && selected.length > 1) {
+      this._softSelection = name;
 
     // Default to selecting the only the item.
     } else {
@@ -1054,6 +1070,7 @@ class DirListing extends Widget {
           }
         }, RENAME_DURATION);
       }
+      // Select only the given item.
       this._selection = Object.create(null);
       this._selection[name] = true;
     }
@@ -1103,10 +1120,7 @@ class DirListing extends Widget {
    */
   private _getSelectedItems(): IContents.IModel[] {
     let items = this.sortedItems;
-    if (!this._softSelection) {
-      return items.filter(item => this._selection[item.name]);
-    }
-    return items.filter(item => item.name === this._softSelection);
+    return items.filter(item => this._selection[item.name]);
   }
 
   /**
@@ -1142,7 +1156,7 @@ class DirListing extends Widget {
    */
   private _doRename(): Promise<string> {
     let items = this.sortedItems;
-    let name = this._softSelection || Object.keys(this._selection)[0];
+    let name = Object.keys(this._selection)[0];
     let index = arrays.findIndex(items, (value) => value.name === name);
     let row = this._items[index];
     let item = items[index];
@@ -1239,9 +1253,10 @@ class DirListing extends Widget {
   private _isCut = false;
   private _prevPath = '';
   private _clipboard: string[] = [];
-  private _softSelection = '';
   private _manager: DocumentManager = null;
   private _opener: IWidgetOpener = null;
+  private _softSelection = '';
+  private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
   private _renderer: DirListing.IRenderer = null;
 }
@@ -1508,8 +1523,10 @@ namespace DirListing {
       let modified = utils.findElement(dragImage, ITEM_MODIFIED_CLASS);
       dragImage.removeChild(modified as HTMLElement);
       if (count > 1) {
-        let nameNode = utils.findElement(node, ITEM_TEXT_CLASS);
+        let nameNode = utils.findElement(dragImage, ITEM_TEXT_CLASS);
         nameNode.textContent = '(' + count + ')';
+        let iconNode = utils.findElement(dragImage, ITEM_ICON_CLASS);
+        iconNode.className = `${ITEM_ICON_CLASS} ${FILE_TYPE_CLASS}`;
       }
       return dragImage;
     }
