@@ -14,6 +14,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  TabPanel
+} from 'phosphor-tabs';
+
+import {
   SplitPanel
 } from 'phosphor-splitpanel';
 
@@ -24,6 +28,10 @@ import {
 import {
   RenderMime
 } from '../rendermime';
+
+import {
+  ConsoleTooltip
+} from './tooltip';
 
 import {
   ConsoleWidget
@@ -47,11 +55,26 @@ class ConsolePanel extends SplitPanel {
   constructor(options: ConsolePanel.IOptions) {
     super();
     this.addClass(CONSOLE_PANEL);
+
+    // Create console widget.
     this._console = new ConsoleWidget({
       session: options.session,
       rendermime: options.rendermime
     });
+
+    // Create console tooltip widget.
+    this._tooltip = options.tooltip || new ConsoleTooltip();
+    this._tooltip.reference = this._console;
+
+    this._tabs = new TabPanel();
+    this._tabs.node.style.background = 'red';
+
+    let isVertical = options.orientation && options.orientation === 'vertical';
+    this.orientation = isVertical ? SplitPanel.Vertical : SplitPanel.Horizontal;
+
     this.addChild(this._console);
+    this.addChild(this._tabs);
+    this.setSizes([7, 2]);
   }
 
   /**
@@ -71,46 +94,16 @@ class ConsolePanel extends SplitPanel {
     if (this.isDisposed) {
       return;
     }
+
+    // Dispose console tooltip widget.
+    this._tooltip.dispose();
+    this._tooltip = null;
+
+    // Dispose console widget.
     this._console.dispose();
     this._console = null;
+
     super.dispose();
-  }
-
-  /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'click':
-      let prompt = this.content.prompt;
-      if (prompt) {
-        prompt.focus();
-      }
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle `after_attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.content.node.addEventListener('click', this);
-  }
-
-  /**
-   * Handle `before_detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.content.node.removeEventListener('click', this);
   }
 
   /**
@@ -138,6 +131,8 @@ class ConsolePanel extends SplitPanel {
   }
 
   private _console: ConsoleWidget = null;
+  private _tooltip: ConsoleTooltip = null;
+  private _tabs: TabPanel = null;
 }
 
 
@@ -152,6 +147,11 @@ namespace ConsolePanel {
   export
     interface IOptions {
     /**
+     * The orientation of the console panel.
+     */
+    orientation?: 'horizontal' | 'vertical';
+
+    /**
      * The session for the console panel.
      */
     session: ISession;
@@ -160,5 +160,11 @@ namespace ConsolePanel {
      * The mime renderer for the console panel.
      */
     rendermime: RenderMime<Widget>;
+
+
+    /**
+     * The tooltip widget for a console panel.
+     */
+    tooltip?: ConsoleTooltip;
   }
 }

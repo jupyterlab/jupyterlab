@@ -6,10 +6,6 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  showDialog
-} from '../dialog';
-
-import {
   RenderMime, MimeMap
 } from '../rendermime';
 
@@ -30,10 +26,6 @@ import {
 } from 'phosphor-panel';
 
 import {
-  SplitPanel
-} from 'phosphor-splitpanel';
-
-import {
   CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
 } from '../notebook/cells';
 
@@ -48,10 +40,6 @@ import {
 import {
   nbformat
 } from '../notebook';
-
-import {
-  ConsoleTooltip
-} from './tooltip';
 
 import {
   ConsoleHistory, IConsoleHistory
@@ -113,18 +101,8 @@ class ConsoleWidget extends Widget {
       completion.attach(document.body);
     }
 
-    completion.visibilityChanged.connect(this.onCompletionVisibility, this);
-
     this._completionHandler = new CellCompletionHandler(this._completion);
     this._completionHandler.kernel = this._session.kernel;
-
-    // Instantiate tooltip widget.
-    this._tooltip = options.tooltip || new ConsoleTooltip();
-    this._tooltip.reference = this;
-    // Because a tooltip widget may be passed in, check if it is attached.
-    if (!this._tooltip.isAttached) {
-      this._tooltip.attach(document.body);
-    }
 
     // Create the banner.
     let banner = this._renderer.createBanner();
@@ -177,8 +155,6 @@ class ConsoleWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._tooltip.dispose();
-    this._tooltip = null;
     this._history.dispose();
     this._history = null;
     this._completionHandler.dispose();
@@ -194,7 +170,7 @@ class ConsoleWidget extends Widget {
    * Execute the current prompt.
    */
   execute(): Promise<void> {
-    // Dismiss any outstanding tooltips or completion widgets.
+    // Dismiss any outstanding floating widgets.
     this.dismissOverlays();
 
     if (this._session.status === 'dead') {
@@ -223,10 +199,9 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Dismiss the tooltip and completion widget for a console.
+   * Dismiss the completion widget for a console.
    */
   dismissOverlays(): void {
-    this._tooltip.hide();
     this._completion.reset();
   }
 
@@ -244,9 +219,33 @@ class ConsoleWidget extends Widget {
   }
 
   /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'click':
+      let prompt = this.prompt;
+      if (prompt) {
+        prompt.focus();
+      }
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
    * Handle `after_attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('click', this);
     let prompt = this.prompt;
     if (prompt) {
       prompt.focus();
@@ -254,12 +253,10 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Handle visiblity changes in the completion widget.
+   * Handle `before_detach` messages for the widget.
    */
-  protected onCompletionVisibility(): void {
-    if (this._completion.isVisible) {
-      this._tooltip.hide();
-    }
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('click', this);
   }
 
   /**
@@ -289,7 +286,6 @@ class ConsoleWidget extends Widget {
    * Handle a text changed signal from an editor.
    */
   protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
-    this._tooltip.hide();
     if (change.newValue) {
       this.updateTooltip(change);
     }
@@ -351,50 +347,6 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Show the tooltip.
-   */
-  protected showTooltip(change: ITextChange, bundle: MimeMap<string>): void {
-    // Add content and measure.
-    this._tooltip.content = this._rendermime.render(bundle);
-    this._tooltip.show();
-
-    let tooltip = this._tooltip.node;
-    let { width, height } = tooltip.getBoundingClientRect();
-    let maxWidth: number;
-    let maxHeight: number;
-    let { top, bottom, left } = change.coords;
-    let border = parseInt(window.getComputedStyle(tooltip).borderWidth, 10);
-    let heightAbove = top + border;
-    let heightBelow = window.innerHeight - bottom - border;
-    let widthLeft = left;
-    let widthRight = window.innerWidth - left;
-
-    // Prefer displaying below.
-    if (heightBelow >= height || heightBelow >= heightAbove) {
-      // Offset the height of the tooltip by the height of cursor characters.
-      top += change.chHeight;
-      maxHeight = heightBelow;
-    } else {
-      maxHeight = heightAbove;
-      top -= Math.min(height, maxHeight);
-    }
-
-    // Prefer displaying on the right.
-    if (widthRight >= width || widthRight >= widthLeft) {
-      left += border;
-      maxWidth = widthRight;
-    } else {
-      maxWidth = widthLeft;
-      left -= Math.min(width, maxWidth);
-    }
-
-    tooltip.style.top = `${Math.floor(top)}px`;
-    tooltip.style.left = `${Math.floor(left)}px`;
-    tooltip.style.maxHeight = `${Math.floor(maxHeight)}px`;
-    tooltip.style.maxWidth = `${Math.floor(maxWidth)}px`;
-  }
-
-  /**
    * Update the tooltip based on a text change.
    */
   protected updateTooltip(change: ITextChange): void {
@@ -407,19 +359,25 @@ class ConsoleWidget extends Widget {
 
     this._session.kernel.inspect(contents).then(msg => {
       let value = msg.content;
+
       // If widget has been disposed, bail.
       if (this.isDisposed) {
         return;
       }
+
       // If a newer text change has created a pending request, bail.
       if (pendingInspect !== this._pendingInspect) {
         return;
       }
+
       // Tooltip request failures or negative results fail silently.
       if (value.status !== 'ok' || !value.found) {
         return;
       }
-      this.showTooltip(change, value.data as MimeMap<string>);
+
+      let bundle = value.data as MimeMap<string>;
+      let content: Widget = this._rendermime.render(bundle);
+      console.log('content', content);
     });
   }
 
@@ -428,7 +386,6 @@ class ConsoleWidget extends Widget {
   private _mimetype = 'text/x-ipython';
   private _rendermime: RenderMime<Widget> = null;
   private _renderer: ConsoleWidget.IRenderer = null;
-  private _tooltip: ConsoleTooltip = null;
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
   private _pendingInspect = 0;
@@ -463,11 +420,6 @@ namespace ConsoleWidget {
      * The session for the console widget.
      */
     session: ISession;
-
-    /**
-     * The tooltip widget for a console widget.
-     */
-    tooltip?: ConsoleTooltip;
   }
 
   /**
