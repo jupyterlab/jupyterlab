@@ -248,12 +248,12 @@ const SHORTCUTS = [
   {
     command: 'terminal:increase-font',
     selector: '.jp-TerminalWidget .jp-TerminalWidget-body',
-    sequence: ['Ctrl =']
+    sequence: ['Accel Shift =']
   },
   {
     command: 'terminal:decrease-font',
     selector: '.jp-TerminalWidget .jp-TerminalWidget-body',
-    sequence: ['Ctrl -']
+    sequence: ['Accel Shift -']
   }
 ];
 
