@@ -10,6 +10,10 @@ import {
 } from '../../rendermime';
 
 import {
+  scrollIntoViewIfNeeded
+} from '../../utils';
+
+import {
   Message
 } from 'phosphor-messaging';
 
@@ -739,15 +743,14 @@ class Notebook extends StaticNotebook {
    */
   protected onUpdateRequest(msg: Message): void {
     // Set the appropriate classes on the cells.
-    let layout = this.layout as PanelLayout;
-    let widget = layout.childAt(this.activeCellIndex) as BaseCellWidget;
+    let activeCell = this.activeCell;
     if (this.mode === 'edit') {
       this.addClass(EDIT_CLASS);
       this.removeClass(COMMAND_CLASS);
-      if (widget) {
-        widget.focus();
-        if (widget instanceof MarkdownCellWidget) {
-          (widget as MarkdownCellWidget).rendered = false;
+      if (activeCell) {
+        activeCell.focus();
+        if (activeCell instanceof MarkdownCellWidget) {
+          activeCell.rendered = false;
         }
       }
     } else {
@@ -755,16 +758,14 @@ class Notebook extends StaticNotebook {
       this.removeClass(EDIT_CLASS);
       this.node.focus();
     }
-    if (widget) {
-      widget.addClass(ACTIVE_CLASS);
-      if (this.parent) {
-        Private.scrollIfNeeded(this.parent.node, widget.node);
-      }
+    if (activeCell) {
+      activeCell.addClass(ACTIVE_CLASS);
     }
 
     let count = 0;
+    let layout = this.layout as PanelLayout;
     for (let i = 0; i < layout.childCount(); i++) {
-      widget = layout.childAt(i) as BaseCellWidget;
+      let widget = layout.childAt(i) as BaseCellWidget;
       if (i !== this.activeCellIndex) {
         widget.removeClass(ACTIVE_CLASS);
       }
@@ -777,10 +778,8 @@ class Notebook extends StaticNotebook {
       }
     }
     if (count > 1) {
-      widget = layout.childAt(this.activeCellIndex) as BaseCellWidget;
-      widget.addClass(OTHER_SELECTED_CLASS);
+      activeCell.addClass(OTHER_SELECTED_CLASS);
     }
-
   }
 
   /**
@@ -812,6 +811,15 @@ class Notebook extends StaticNotebook {
       this.selectionChanged.emit(void 0);
     }
     this.update();
+  }
+
+  /**
+   * Scroll so that the active cell is visible in the parent widget.
+   */
+  scrollToActiveCell() {
+    if (this.parent && this.activeCell) {
+      scrollIntoViewIfNeeded(this.parent.node, this.activeCell.node);
+    }
   }
 
   /**
@@ -986,24 +994,6 @@ namespace Private {
    */
   export
   const selectionChangedSignal = new Signal<Notebook, void>();
-
-  /**
-   * Scroll an element into view if needed.
-   *
-   * @param area - The scroll area element.
-   *
-   * @param elem - The element of interest.
-   */
-  export
-  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
-    let ar = area.getBoundingClientRect();
-    let er = elem.getBoundingClientRect();
-    if (er.top < ar.top - 10) {
-      area.scrollTop -= ar.top - er.top + 10;
-    } else if (er.bottom > ar.bottom + 10) {
-      area.scrollTop += er.bottom - ar.bottom + 10;
-    }
-  }
 
   /**
    * A custom panel layout for the notebook.
