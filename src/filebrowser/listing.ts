@@ -163,6 +163,11 @@ const RENAME_DURATION = 500;
 const DRAG_THRESHOLD = 5;
 
 /**
+ * A boolean indicating whether the platform is Mac.
+ */
+const IS_MAC = !!navigator.platform.match(/Mac/i);
+
+/**
  * The factory MIME type supported by phosphor dock panels.
  */
 const FACTORY_MIME = 'application/x-phosphor-widget-factory';
@@ -713,7 +718,7 @@ class DirListing extends Widget {
     }
 
     // Check for clearing a context menu.
-    if (this._inContext && event.button === 0) {
+    if (this._inContext && event.button === 0 && event.ctrlKey === false) {
       this._inContext = false;
       return;
     }
@@ -1036,7 +1041,7 @@ class DirListing extends Widget {
     let selected = Object.keys(this._selection);
 
     // Handle toggling.
-    if (event.metaKey || event.ctrlKey) {
+    if ((IS_MAC && event.metaKey) || (!IS_MAC && event.ctrlKey)) {
       if (this._selection[name]) {
         delete this._selection[name];
       } else {
