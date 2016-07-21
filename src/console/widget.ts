@@ -34,7 +34,7 @@ import {
 } from '../notebook/cells';
 
 import {
-  EdgeLocation, CellEditorWidget, ITextChange, ICompletionRequest
+  EdgeLocation, CellEditorWidget, ITextChange
 } from '../notebook/cells/editor';
 
 import {
