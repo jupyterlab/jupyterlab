@@ -148,17 +148,17 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * A signal emitted when the pager changes.
+   * A signal emitted when the details inspector value changes.
    */
-  get pagerChanged(): ISignal<ConsoleWidget, Widget> {
-    return Private.pagerChangedSignal.bind(this);
+  get detailsChanged(): ISignal<ConsoleWidget, Widget> {
+    return Private.detailsChangedSignal.bind(this);
   }
 
   /**
-   * A signal emitted when the tooltip changes.
+   * A signal emitted when the hint inspector value changes.
    */
-  get tooltipChanged(): ISignal<ConsoleWidget, Widget> {
-    return Private.tooltipChangedSignal.bind(this);
+  get hintChanged(): ISignal<ConsoleWidget, Widget> {
+    return Private.hintChangedSignal.bind(this);
   }
 
   /**
@@ -188,6 +188,7 @@ class ConsoleWidget extends Widget {
     this.dismissOverlays();
 
     if (this._session.status === 'dead') {
+      this.updateDetails(null);
       return;
     }
 
@@ -200,7 +201,7 @@ class ConsoleWidget extends Widget {
       (value: KernelMessage.IExecuteReplyMsg) => {
         if (value.content.status === 'ok') {
           let content = value.content as any;
-          this.updatePager(content as KernelMessage.IExecuteOkReplyMsg);
+          this.updateDetails(content as KernelMessage.IExecuteOkReplyMsg);
         }
         Private.scrollToBottom(this.node);
       },
@@ -307,7 +308,7 @@ class ConsoleWidget extends Widget {
    */
   protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
     if (change.newValue) {
-      this.updateTooltip(change);
+      this.updateHint(change);
     }
   }
 
@@ -352,7 +353,7 @@ class ConsoleWidget extends Widget {
     prompt.addClass(PROMPT_CLASS);
     layout.addChild(prompt);
 
-    // Hook up completion, tooltip, and history handling.
+    // Hook up completion, hints, and history handling.
     let editor = prompt.editor;
     editor.textChanged.connect(this.onTextChange, this);
     editor.edgeRequested.connect(this.onEdgeRequest, this);
@@ -367,27 +368,34 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Update the pager based on a kernel response.
+   * Update the details inspector based on a kernel response.
    *
    * #### Notes
    * Payloads are deprecated and there are no official interfaces for them in
    * the kernel type definitions.
    * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
-  protected updatePager(content: KernelMessage.IExecuteOkReplyMsg): void {
-    let page = content.payload.filter(i => (i as any).source === 'page')[0];
-    if (page) {
-      let bundle = (page as any).data as MimeMap<string>;
-      this.pagerChanged.emit(this._rendermime.render(bundle));
+  protected updateDetails(content: KernelMessage.IExecuteOkReplyMsg): void {
+    if (!content) {
+      this.detailsChanged.emit(null);
       return;
     }
-    this.pagerChanged.emit(null);
+
+    let details = content.payload.filter(i => (i as any).source === 'page')[0];
+    if (details) {
+      let bundle = (details as any).data as MimeMap<string>;
+      this.detailsChanged.emit(this._rendermime.render(bundle));
+      return;
+    }
+
+
+    this.detailsChanged.emit(null);
   }
 
   /**
-   * Update the tooltip based on a text change.
+   * Update the hints inspector based on a text change.
    */
-  protected updateTooltip(change: ITextChange): void {
+  protected updateHint(change: ITextChange): void {
     let contents: KernelMessage.IInspectRequest = {
       code: change.newValue,
       cursor_pos: change.position,
@@ -400,24 +408,24 @@ class ConsoleWidget extends Widget {
 
       // If widget has been disposed, bail.
       if (this.isDisposed) {
-        this.tooltipChanged.emit(null);
+        this.hintChanged.emit(null);
         return;
       }
 
       // If a newer text change has created a pending request, bail.
       if (pendingInspect !== this._pendingInspect) {
-        this.tooltipChanged.emit(null);
+        this.hintChanged.emit(null);
         return;
       }
 
-      // Tooltip request failures or negative results fail silently.
+      // Hint request failures or negative results fail silently.
       if (value.status !== 'ok' || !value.found) {
-        this.tooltipChanged.emit(null);
+        this.hintChanged.emit(null);
         return;
       }
 
       let bundle = value.data as MimeMap<string>;
-      this.tooltipChanged.emit(this._rendermime.render(bundle));
+      this.hintChanged.emit(this._rendermime.render(bundle));
     });
   }
 
@@ -517,16 +525,16 @@ namespace ConsoleWidget {
  */
 namespace Private {
   /**
-   * A signal emitted when the pager changes.
+   * A signal emitted when the details inspector value changes.
    */
   export
-  const pagerChangedSignal = new Signal<ConsoleWidget, Widget>();
+  const detailsChangedSignal = new Signal<ConsoleWidget, Widget>();
 
   /**
-   * A signal emitted when the tooltip changes.
+   * A signal emitted when the hint inspector value changes.
    */
   export
-  const tooltipChangedSignal = new Signal<ConsoleWidget, Widget>();
+  const hintChangedSignal = new Signal<ConsoleWidget, Widget>();
 
   /**
    * Scroll an element into view if needed.

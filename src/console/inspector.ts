@@ -11,27 +11,27 @@ import {
 
 
 /**
- * The class name added to tooltip widgets.
+ * The class name added to inspector widgets.
  */
-const TOOLTIP_CLASS = 'jp-ConsoleTooltip';
+const INSPECTOR_CLASS = 'jp-ConsoleInspector';
 
 
 /**
- * A tooltip widget for a console.
+ * An inspector widget for a console.
  */
 export
-class ConsoleTooltip extends Widget {
+class ConsoleInspector extends Widget {
   /**
-   * Construct a console tooltip widget.
+   * Construct a console inspector widget.
    */
   constructor() {
     super();
-    this.addClass(TOOLTIP_CLASS);
+    this.addClass(INSPECTOR_CLASS);
     this.layout = new PanelLayout();
   }
 
   /**
-   * The text of the tooltip.
+   * The text of the inspector.
    */
   get content(): Widget {
     return this._content;

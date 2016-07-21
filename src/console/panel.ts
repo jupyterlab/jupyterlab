@@ -30,12 +30,8 @@ import {
 } from '../rendermime';
 
 import {
-  ConsolePager
-} from './pager';
-
-import {
-  ConsoleTooltip
-} from './tooltip';
+  ConsoleInspector
+} from './inspector';
 
 import {
   ConsoleWidget
@@ -49,7 +45,7 @@ const CONSOLE_PANEL = 'jp-ConsolePanel';
 
 
 /**
- * A panel which contains a toolbar and a console.
+ * A panel which contains a side bar and a console.
  */
 export
 class ConsolePanel extends SplitPanel {
@@ -69,21 +65,26 @@ class ConsolePanel extends SplitPanel {
       rendermime: options.rendermime
     });
 
-    // Create console tooltip widget and add it to the tab panel.
-    this._tooltip = options.tooltip || new ConsoleTooltip();
-    this._tooltip.title.closable = false;
-    this._tooltip.title.text = 'Inspector';
-    this._tabs.addChild(this._tooltip);
+    // Create console hints widget and add it to the tab panel.
+    this._hints = options.hints || new ConsoleInspector();
+    this._hints.title.closable = false;
+    this._hints.title.text = 'Hints';
+    this._tabs.addChild(this._hints);
 
-    // Create console pager widget and add it to the tab panel.
-    this._pager = options.pager || new ConsolePager();
-    this._pager.title.closable = false;
-    this._pager.title.text = 'Details';
-    this._tabs.addChild(this._pager);
+    // Create console details widget and add it to the tab panel.
+    this._details = options.details || new ConsoleInspector();
+    this._details.title.closable = false;
+    this._details.title.text = 'Details';
+    this._tabs.addChild(this._details);
 
-    // Connect the console tooltip signal.
-    this._console.tooltipChanged.connect((sender: any, content: Widget) => {
-      this._tooltip.content = content;
+    // Connect the console hints signal.
+    this._console.hintChanged.connect((sender: any, content: Widget) => {
+      this._hints.content = content;
+    }, this);
+
+    // Connect the console details signal.
+    this._console.detailsChanged.connect((sender: any, content: Widget) => {
+      this._details.content = content;
     }, this);
 
     // Add the panel contents.
@@ -112,9 +113,13 @@ class ConsolePanel extends SplitPanel {
       return;
     }
 
-    // Dispose console tooltip widget.
-    this._tooltip.dispose();
-    this._tooltip = null;
+    // Dispose console details widget.
+    this._details.dispose();
+    this._details = null;
+
+    // Dispose console hints widget.
+    this._hints.dispose();
+    this._hints = null;
 
     // Dispose console widget.
     this._console.dispose();
@@ -148,8 +153,8 @@ class ConsolePanel extends SplitPanel {
   }
 
   private _console: ConsoleWidget = null;
-  private _pager: ConsolePager = null;
-  private _tooltip: ConsoleTooltip = null;
+  private _details: ConsoleInspector = null;
+  private _hints: ConsoleInspector = null;
   private _tabs: TabPanel = null;
 }
 
@@ -165,14 +170,19 @@ namespace ConsolePanel {
   export
     interface IOptions {
     /**
+     * The details (pager) widget for a console panel.
+     */
+    details?: ConsoleInspector;
+
+    /**
+     * The hints widget for a console panel.
+     */
+    hints?: ConsoleInspector;
+
+    /**
      * The orientation of the console panel.
      */
     orientation?: 'horizontal' | 'vertical';
-
-    /**
-     * The pager widget for a console panel.
-     */
-    pager?: ConsolePager;
 
     /**
      * The mime renderer for the console panel.
@@ -183,10 +193,5 @@ namespace ConsolePanel {
      * The session for the console panel.
      */
     session: ISession;
-
-    /**
-     * The tooltip widget for a console panel.
-     */
-    tooltip?: ConsoleTooltip;
   }
 }
