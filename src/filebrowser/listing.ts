@@ -718,7 +718,8 @@ class DirListing extends Widget {
     }
 
     // Check for clearing a context menu.
-    if (this._inContext && event.button === 0 && event.ctrlKey === false) {
+    let newContext = (IS_MAC && event.ctrlKey) || (event.button === 2);
+    if (this._inContext && !newContext) {
       this._inContext = false;
       return;
     }
