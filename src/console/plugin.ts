@@ -7,7 +7,7 @@ import {
 
 import {
   ConsolePanel
-} from './widget';
+} from './';
 
 import {
   RenderMime
@@ -26,19 +26,15 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  TabPanel
-} from 'phosphor-tabs';
-
-import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  MainMenu, mainMenuProvider
+  MainMenu
 } from '../mainmenu/plugin';
 
 import {
-  MenuItem, Menu, IMenuItemOptions, MenuItemType
+  MenuItem, Menu
 } from 'phosphor-menus';
 
 /**
