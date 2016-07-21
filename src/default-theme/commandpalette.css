@@ -15,17 +15,24 @@
 }
 
 
+.p-CommandPalette-searchIcon {
+    display: inline-block;
+    float:right;
+    color: #42A5F5;
+}
+
+
 .p-CommandPalette-inputWrapper {
-  padding: 4px 6px;
-  margin: 4px;
+  padding: 11px;
   background: white;
-  border: 1px solid #E0E0E0;
-  border-radius: 1px;
+  border-bottom: 2px solid #E0E0E0;
+  overflow: overlay;
 }
 
 
 .p-CommandPalette-input {
-  width: 100%;
+  float: left;
+  width: calc(100% - 18px);
   outline: none;
   border: none;
   font-size: 13px;
