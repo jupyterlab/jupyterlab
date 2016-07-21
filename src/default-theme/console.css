@@ -2,6 +2,64 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+.jp-ConsolePanel .p-TabBar {
+  min-height: 24px;
+  max-height: 24px;
+  color: #777777;
+  font-size: 13px;
+}
+
+
+.jp-ConsolePanel .p-TabBar > .p-TabBar-header {
+  flex: 0 0 1px;
+}
+
+
+.jp-ConsolePanel .p-TabBar-content {
+  min-width: 0;
+  padding-right: 1px;
+}
+
+
+.jp-ConsolePanel .p-TabBar > .p-TabBar-footer {
+  flex: 0 0 1px;
+  background: #BDBDBD;
+}
+
+
+.jp-ConsolePanel .p-TabBar-tab {
+  flex-basis: 144px;
+  min-height: 23px;
+  max-height: 23px;
+  min-width: 35px;
+  padding: 0px 7px;
+  background: #EEEEEE;
+  border: 1px solid #BDBDBD;
+  transform: translateY(-1px);
+  border-bottom: none;
+  margin-right: -1px;
+}
+
+
+.jp-ConsolePanel .p-TabBar-tab.p-mod-current {
+  min-height: 24px;
+  max-height: 24px;
+  background: #FFFFFF;
+  border-top: 1px solid #2196F3;
+}
+
+
+.jp-ConsolePanel .p-TabBar-tab:hover:not(.p-mod-current) {
+  background: #FAFAFA;
+}
+
+
+.jp-ConsolePanel .p-TabBar-tabIcon,
+.jp-ConsolePanel .p-TabBar-tabText {
+  line-height: 24px;
+}
+
+
 .jp-Console {
   height: 100%;
   padding: 0 10px 20px 10px;
@@ -56,15 +114,17 @@
 
 
 .jp-ConsoleTooltip {
-  position: absolute;
   background: #FFFFCA;
   border: 1px solid #000000;
-  z-index: 10001;
+  overflow: auto;
 }
 
+
 .jp-ConsoleTooltip pre {
+  font-size: 11px;
   margin: 0;
   padding: 2px;
+  white-space: pre-wrap;
 }
 
 

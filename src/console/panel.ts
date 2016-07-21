@@ -30,6 +30,10 @@ import {
 } from '../rendermime';
 
 import {
+  ConsolePager
+} from './pager';
+
+import {
   ConsoleTooltip
 } from './tooltip';
 
@@ -41,7 +45,7 @@ import {
 /**
  * The class name added to console panels.
  */
-const CONSOLE_PANEL = 'jp-Console-panel';
+const CONSOLE_PANEL = 'jp-ConsolePanel';
 
 
 /**
@@ -56,25 +60,38 @@ class ConsolePanel extends SplitPanel {
     super();
     this.addClass(CONSOLE_PANEL);
 
+    // Create the tab panel.
+    this._tabs = new TabPanel();
+
     // Create console widget.
     this._console = new ConsoleWidget({
       session: options.session,
       rendermime: options.rendermime
     });
 
-    // Create console tooltip widget.
+    // Create console tooltip widget and add it to the tab panel.
     this._tooltip = options.tooltip || new ConsoleTooltip();
-    this._tooltip.reference = this._console;
+    this._tooltip.title.closable = false;
+    this._tooltip.title.text = 'Inspector';
+    this._tabs.addChild(this._tooltip);
 
-    this._tabs = new TabPanel();
-    this._tabs.node.style.background = 'red';
+    // Create console pager widget and add it to the tab panel.
+    this._pager = options.pager || new ConsolePager();
+    this._pager.title.closable = false;
+    this._pager.title.text = 'Details';
+    this._tabs.addChild(this._pager);
 
+    // Connect the console tooltip signal.
+    this._console.tooltipChanged.connect((sender: any, content: Widget) => {
+      this._tooltip.content = content;
+    }, this);
+
+    // Add the panel contents.
     let isVertical = options.orientation && options.orientation === 'vertical';
     this.orientation = isVertical ? SplitPanel.Vertical : SplitPanel.Horizontal;
-
     this.addChild(this._console);
     this.addChild(this._tabs);
-    this.setSizes([7, 2]);
+    this.setSizes([2, 1]);
   }
 
   /**
@@ -131,6 +148,7 @@ class ConsolePanel extends SplitPanel {
   }
 
   private _console: ConsoleWidget = null;
+  private _pager: ConsolePager = null;
   private _tooltip: ConsoleTooltip = null;
   private _tabs: TabPanel = null;
 }
@@ -152,15 +170,19 @@ namespace ConsolePanel {
     orientation?: 'horizontal' | 'vertical';
 
     /**
-     * The session for the console panel.
+     * The pager widget for a console panel.
      */
-    session: ISession;
+    pager?: ConsolePager;
 
     /**
      * The mime renderer for the console panel.
      */
     rendermime: RenderMime<Widget>;
 
+    /**
+     * The session for the console panel.
+     */
+    session: ISession;
 
     /**
      * The tooltip widget for a console panel.
