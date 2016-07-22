@@ -10,7 +10,7 @@ import {
 } from 'phosphor-panel';
 
 import {
-  clearSignalData, ISignal, Signal
+  ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
 import {
@@ -27,12 +27,10 @@ import {
  */
 const INSPECTOR_CLASS = 'jp-ConsoleInspector';
 
-
 /**
  * The class name added to inspector widgets.
  */
 const CHILD_CLASS = 'jp-ConsoleInspector-child';
-
 
 /**
  * The history clear button class name.
@@ -58,6 +56,7 @@ const BOTTOM_TOGGLE_CLASS = 'jp-ConsoleInspector-bottom';
  * The orientation toggle right button class name.
  */
 const RIGHT_TOGGLE_CLASS = 'jp-ConsoleInspector-right';
+
 
 /**
  * An inspector widget for a console.

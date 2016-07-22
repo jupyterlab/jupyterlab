@@ -6,15 +6,15 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  RenderMime, MimeMap
-} from '../rendermime';
-
-import {
   Message
 } from 'phosphor-messaging';
 
 import {
-  clearSignalData, ISignal, Signal
+  PanelLayout
+} from 'phosphor-panel';
+
+import {
+  ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
 
 import {
@@ -22,8 +22,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  PanelLayout
-} from 'phosphor-panel';
+  nbformat
+} from '../notebook';
 
 import {
   CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
@@ -38,16 +38,18 @@ import {
 } from '../notebook/common/mimetype';
 
 import {
-  nbformat
-} from '../notebook';
+  CompletionWidget, CompletionModel, CellCompletionHandler
+} from '../notebook/completion';
+
+import {
+  RenderMime, MimeMap
+} from '../rendermime';
 
 import {
   ConsoleHistory, IConsoleHistory
 } from './history';
 
-import {
-  CompletionWidget, CompletionModel, CellCompletionHandler
-} from '../notebook/completion';
+
 
 
 /**
