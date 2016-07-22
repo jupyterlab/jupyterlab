@@ -43,6 +43,16 @@ import {
  */
 const CONSOLE_PANEL = 'jp-ConsolePanel';
 
+/**
+ * The class name added to console panel detail inspectors.
+ */
+const CONSOLE_DETAILS = 'jp-ConsolePanel-details';
+
+/**
+ * The class name added to console panel hint inspectors.
+ */
+const CONSOLE_HINTS = 'jp-ConsolePanel-hints';
+
 
 /**
  * A panel which contains a side bar and a console.
@@ -69,26 +79,39 @@ class ConsolePanel extends SplitPanel {
     this._hints = options.hints || new ConsoleInspector();
     this._hints.title.closable = false;
     this._hints.title.text = 'Hints';
+    this._hints.addClass(CONSOLE_HINTS);
     this._inspectors.addChild(this._hints);
 
     // Create console details widget and add it to the tab panel.
     this._details = options.details || new ConsoleInspector();
     this._details.title.closable = false;
     this._details.title.text = 'Details';
+    this._hints.addClass(CONSOLE_DETAILS);
     this._inspectors.addChild(this._details);
 
     // Connect the console hints signal.
     this._console.hintChanged.connect((sender: any, content: Widget) => {
       this._hints.content = content;
+      // If content exists and there are no visible details, show hints.
+      if (content && this._details.content === null) {
+        this._inspectors.currentWidget = this._hints;
+      }
     }, this);
 
     // Connect the console details signal.
     this._console.detailsChanged.connect((sender: any, content: Widget) => {
       this._details.content = content;
+      // If content exists, then user requested details always supersede
+      // automatically generated hints.
+      if (content) {
+        this._inspectors.currentWidget = this._details;
+      }
     }, this);
 
     // Add the panel contents.
-    this.orientation = options.orientation || this._orientation;
+    this._orientation = options.orientation || this._orientation;
+    this.orientation = this._orientation === 'vertical' ? SplitPanel.Vertical
+      : SplitPanel.Horizontal;
     this.addChild(this._console);
     this.addChild(this._inspectors);
     this.setSizes([2, 1]);
@@ -159,6 +182,20 @@ class ConsolePanel extends SplitPanel {
   }
 
   /**
+   * Toggle the inspectors open and closed.
+   */
+  toggleInspectors(): void {
+    if (this._inspectors.isHidden) {
+      this._inspectors.show();
+      this.setSizes(this._cachedSizes);
+      this._cachedSizes = null;
+    } else {
+      this._inspectors.hide();
+      this._cachedSizes = this.sizes();
+    }
+  }
+
+  /**
    * Handle `'close-request'` messages.
    */
   protected onCloseRequest(msg: Message): void {
@@ -182,6 +219,7 @@ class ConsolePanel extends SplitPanel {
     });
   }
 
+  private _cachedSizes: number[] = null;
   private _console: ConsoleWidget = null;
   private _details: ConsoleInspector = null;
   private _hints: ConsoleInspector = null;
