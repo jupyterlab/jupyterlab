@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Message
+} from 'phosphor-messaging';
+
+import {
   Panel
 } from 'phosphor-panel';
 
@@ -95,14 +99,7 @@ class ConsoleInspector extends Panel {
     }
     this._remember = newValue;
     this._clear();
-    if (!this._remember) {
-      this._toolbar.dispose();
-      this._toolbar = null;
-      this._history = null;
-    } else {
-      this._toolbar = this._createToolbar();
-      this.insertChild(0, this._toolbar);
-    }
+    this.update();
   }
 
   /**
@@ -130,6 +127,23 @@ class ConsoleInspector extends Panel {
       this._toolbar.dispose();
     }
     super.dispose();
+  }
+
+  /**
+   * Handle `update_request` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    if (this._toolbar) {
+      this._toolbar.dispose();
+      this._toolbar = null;
+    }
+
+    if (this._remember) {
+      this._toolbar = this._createToolbar();
+      this.insertChild(0, this._toolbar);
+    } else {
+      this._history = null;
+    }
   }
 
   /**
