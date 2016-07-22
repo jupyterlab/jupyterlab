@@ -424,7 +424,10 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     let outputs = this.outputs;
     cell.outputs = [];
     for (let i = 0; i < outputs.length; i++) {
-      cell.outputs.push(outputs.get(i));
+      let output = outputs.get(i);
+      if (output.output_type !== 'input_request') {
+        cell.outputs.push(output as nbformat.IOutput);
+      }
     }
     return cell;
   }

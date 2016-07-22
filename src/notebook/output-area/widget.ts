@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  RenderMime, MimeMap
-} from '../../rendermime';
+  IKernel
+} from 'jupyter-js-services';
+
+import {
+  Drag, DropAction, DropActions, MimeData
+} from 'phosphor-dragdrop';
 
 import {
   IListChangedArgs, ListChangeType
@@ -26,8 +30,12 @@ import {
 } from 'phosphor-widget';
 
 import {
-  Drag, DropAction, DropActions, IDragEvent, MimeData
-} from 'phosphor-dragdrop';
+  RenderMime, MimeMap
+} from '../../rendermime';
+
+import {
+  defaultSanitizer
+} from '../../sanitizer';
 
 import {
   nbformat
@@ -36,10 +44,6 @@ import {
 import {
   OutputAreaModel
 } from './model';
-
-import {
-  defaultSanitizer
-} from '../../sanitizer';
 
 
 /**
@@ -93,6 +97,11 @@ const STDERR_CLASS = 'jp-Output-stderr';
 const ERROR_CLASS = 'jp-Output-error';
 
 /**
+ * The class name added to stdin data.
+ */
+const STDIN_CLASS = 'jp-Output-stdin';
+
+/**
  * The class name added to fixed height output areas.
  */
 const FIXED_HEIGHT_CLASS = 'jp-mod-fixedHeight';
@@ -117,7 +126,8 @@ const RESULT_CLASS = 'jp-Output-result';
  * A list of outputs considered safe.
  */
 const safeOutputs = ['text/plain', 'image/png', 'image/jpeg',
-                     'application/vnd.jupyter.console-text'];
+                     'application/vnd.jupyter.console-text',
+                     'application/vnd.jupyter.console-stdin'];
 
 /**
  * A list of outputs that are sanitizable.
@@ -322,8 +332,7 @@ class OutputAreaWidget extends Widget {
       oldValue.changed.disconnect(this._onModelStateChanged, this);
       oldValue.disposed.disconnect(this._onModelDisposed, this);
     }
-    newValue.changed.connect(this._onModelStateChanged, this);
-    newValue.disposed.connect(this._onModelDisposed, this);
+
     let start = newValue ? newValue.length : 0;
     // Clear unnecessary child widgets.
     for (let i = start; i < layout.childCount(); i++) {
@@ -332,6 +341,10 @@ class OutputAreaWidget extends Widget {
     if (!newValue) {
       return;
     }
+
+    newValue.changed.connect(this._onModelStateChanged, this);
+    newValue.disposed.connect(this._onModelDisposed, this);
+
     // Reuse existing child widgets.
     for (let i = 0; i < layout.childCount(); i++) {
       this._updateChild(i);
@@ -391,12 +404,12 @@ class OutputAreaWidget extends Widget {
       break;
     case ListChangeType.Replace:
       // Only "clear" is supported by the model.
-
-      // When an output area is cleared and then quickly replaced with new content
-      // (as happens with @interact in widgets, for example), the quickly changing
-      // height can make the page jitter. We introduce a small delay in the minimum height
+      // When an output area is cleared and then quickly replaced with new
+      // content (as happens with @interact in widgets, for example), the
+      // quickly changing height can make the page jitter.
+      // We introduce a small delay in the minimum height
       // to prevent this jitter.
-      let rect = this.node.getBoundingClientRect()
+      let rect = this.node.getBoundingClientRect();
       let oldHeight = this.node.style.minHeight;
       this.node.style.minHeight = `${rect.height}px`;
       setTimeout(() => { this.node.style.minHeight = oldHeight; }, 50);
@@ -590,8 +603,8 @@ class OutputGutter extends Widget {
     });
 
     this._drag.mimeData.setData(FACTORY_MIME, () => {
-      let output_area = this.parent.parent as OutputAreaWidget;
-      return output_area.mirror();
+      let outputArea = this.parent.parent as OutputAreaWidget;
+      return outputArea.mirror();
     });
 
     // Remove mousemove and mouseup listeners and start the drag.
@@ -688,10 +701,17 @@ class OutputWidget extends Widget {
    *
    * @param trusted - Whether the output is trusted.
    */
-  render(output: nbformat.IOutput, trusted?: boolean): void {
+  render(output: OutputAreaModel.Output, trusted?: boolean): void {
+    // Handle an input request.
+    if (output.output_type === 'input_request') {
+      let child = new InputWidget(output as OutputAreaModel.IInputRequest);
+      this.setOutput(child);
+      return;
+    }
+
     // Extract the data from the output and sanitize if necessary.
     let rendermime = this._rendermime;
-    let bundle = this.getBundle(output);
+    let bundle = this.getBundle(output as nbformat.IOutput);
     let data = this.convertBundle(bundle);
     if (!trusted) {
       this.sanitize(data);
@@ -853,6 +873,86 @@ class OutputWidget extends Widget {
 
 
 /**
+ * A widget that handles stdin requests from the kernel.
+ */
+ class InputWidget extends Widget {
+  /**
+   * Create the node for an InputWidget.
+   */
+  static createNode(): HTMLElement {
+    let node = document.createElement('div');
+    let text = document.createElement('span');
+    let input = document.createElement('input');
+    node.appendChild(text);
+    node.appendChild(input);
+    return node;
+  }
+  /**
+   * Construct a new input widget.
+   */
+  constructor(request: OutputAreaModel.IInputRequest) {
+    super();
+    this.addClass(STDIN_CLASS);
+    let text = this.node.firstChild as HTMLElement;
+    text.textContent = request.prompt;
+    this._input = this.node.lastChild as HTMLInputElement;
+    if (request.password) {
+      this._input.type = 'password';
+    }
+    this._kernel = request.kernel;
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    let input = this._input;
+    if (event.type === 'keydown') {
+      if ((event as KeyboardEvent).keyCode === 13) {  // Enter
+        this._kernel.sendInputReply({
+          value: input.value
+        });
+        let newText = document.createElement('span');
+        if (input.type === 'password') {
+          newText.textContent = Array(input.value.length + 1).join('·');
+        } else {
+          newText.textContent = input.value;
+        }
+        this.node.replaceChild(newText, input);
+      }
+      // Suppress keydown events from leaving the input.
+      event.stopPropagation();
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages sent to the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this._input.focus();
+    this._input.addEventListener('keydown', this);
+  }
+
+  /**
+   * Handle `before-detach` messages sent to the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this._input.removeEventListener('keydown', this);
+  }
+
+  private _kernel: IKernel = null;
+  private _input: HTMLInputElement = null;
+}
+
+
+/**
  * A namespace for OutputArea statics.
  */
 export
@@ -879,6 +979,10 @@ namespace Private {
    */
   export
   const modelChangedSignal = new Signal<OutputAreaWidget, void>();
+
+  /**
+   * A signal emitted when the widget's model is disposed.
+   */
   export
   const modelDisposedSignal = new Signal<OutputAreaWidget, void>();
 }
