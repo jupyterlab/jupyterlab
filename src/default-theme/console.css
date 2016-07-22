@@ -78,7 +78,7 @@
 }
 
 
-.jp-Console-prompt {
+.jp-Console-prompt.jp-Cell {
   border-color: #66BB6A;
   border-left-width: 1px;
   background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
