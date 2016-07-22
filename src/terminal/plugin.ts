@@ -124,11 +124,13 @@ function activateTerminal(app: Application, services: ServiceManager, mainMenu: 
     }),
     new MenuItem({
       text: 'Increase Font Size',
-      handler: increaseFont
+      handler: increaseFont,
+      shortcut: 'Accel Shift ='
     }),
     new MenuItem({
       text: 'Decrease Font Size',
-      handler: decreaseFont
+      handler: decreaseFont,
+      shortcut: 'Accel Shift -'
     }),
     new MenuItem({
       text: 'Toggle Theme',

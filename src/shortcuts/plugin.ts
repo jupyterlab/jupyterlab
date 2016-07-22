@@ -245,6 +245,16 @@ const SHORTCUTS = [
     selector: '.jp-Console .jp-CellEditor',
     sequence: ['Escape']
   },
+  {
+    command: 'terminal:increase-font',
+    selector: '.jp-TerminalWidget .jp-TerminalWidget-body',
+    sequence: ['Accel Shift =']
+  },
+  {
+    command: 'terminal:decrease-font',
+    selector: '.jp-TerminalWidget .jp-TerminalWidget-body',
+    sequence: ['Accel Shift -']
+  }
 ];
 
 
