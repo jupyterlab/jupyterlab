@@ -128,7 +128,7 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
     id: 'console:dismiss-overlays',
     handler: () => {
       if (tracker.activeWidget) {
-        tracker.activeWidget.content.dismissOverlays();
+        tracker.activeWidget.content.dismissCompletion();
       }
     }
   },

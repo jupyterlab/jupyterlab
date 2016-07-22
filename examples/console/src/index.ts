@@ -132,7 +132,7 @@ function startApp(session: ISession) {
     {
       selector: 'body',
       sequence: ['Escape'],
-      handler: () => { consolePanel.content.dismissOverlays(); }
+      handler: () => { consolePanel.content.dismissCompletion(); }
     }
   ];
   keymap.add(bindings);

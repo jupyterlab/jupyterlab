@@ -184,8 +184,7 @@ class ConsoleWidget extends Widget {
    * Execute the current prompt.
    */
   execute(): Promise<void> {
-    // Dismiss any outstanding floating widgets.
-    this.dismissOverlays();
+    this.dismissCompletion();
 
     if (this._session.status === 'dead') {
       this.updateDetails(null);
@@ -222,7 +221,7 @@ class ConsoleWidget extends Widget {
   /**
    * Dismiss the completion widget for a console.
    */
-  dismissOverlays(): void {
+  dismissCompletion(): void {
     this._completion.reset();
   }
 
