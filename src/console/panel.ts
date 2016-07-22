@@ -95,23 +95,10 @@ class ConsolePanel extends SplitPanel {
     this._inspectors.addChild(this._details);
 
     // Connect the console hints signal.
-    this._console.hintChanged.connect((sender: any, content: Widget) => {
-      this._hints.content = content;
-      // If content exists and there are no visible details, show hints.
-      if (content && this._details.content === null) {
-        this._inspectors.currentWidget = this._hints;
-      }
-    }, this);
+    this._console.hintChanged.connect(this.onHintChanged, this);
 
     // Connect the console details signal.
-    this._console.detailsChanged.connect((sender: any, content: Widget) => {
-      this._details.content = content;
-      // If content exists, then user requested details always supersede
-      // automatically generated hints.
-      if (content) {
-        this._inspectors.currentWidget = this._details;
-      }
-    }, this);
+    this._console.detailsChanged.connect(this.onDetailsChanged, this);
 
     // Add the panel contents.
     this._orientation = options.orientation || this._orientation;
@@ -226,6 +213,37 @@ class ConsolePanel extends SplitPanel {
       super.onCloseRequest(msg);
       this.dispose();
     });
+  }
+
+  /**
+   * Handle details inspector change signals.
+   *
+   * #### Notes
+   * This method may be reimplemented by subclasses that wish to change the
+   * priority given to the display of different inspectors.
+   */
+  protected onDetailsChanged(sender: any, content: Widget): void {
+    this._details.content = content;
+    // If content exists, then user requested details always supersede
+    // automatically generated hints.
+    if (content) {
+      this._inspectors.currentWidget = this._details;
+    }
+  }
+
+  /**
+   * Handle hint inspector change signals.
+   *
+   * #### Notes
+   * This method may be reimplemented by subclasses that wish to change the
+   * priority given to the display of different inspectors.
+   */
+  protected onHintChanged(sender: any, content: Widget): void {
+    this._hints.content = content;
+    // If content exists and there are no visible details, show hints.
+    if (content && this._details.content === null) {
+      this._inspectors.currentWidget = this._hints;
+    }
   }
 
   private _cachedSizes: number[] = null;
