@@ -119,6 +119,16 @@
 }
 
 
+.jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-back::before {
+   content: "\f060";  /* arrow-left */
+}
+
+
+.jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-forward::before {
+   content: "\f061";  /* arrow-right */
+}
+
+
 .jp-ConsoleInspector.jp-ConsolePanel-hints {
   background: #FFFFCA;
 }

@@ -9,11 +9,25 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import {
+  NotebookToolbar, ToolbarButton
+} from '../notebook/notebook/toolbar';
+
 
 /**
  * The class name added to inspector widgets.
  */
 const INSPECTOR_CLASS = 'jp-ConsoleInspector';
+
+/**
+ * The back button class name.
+ */
+const BACK_CLASS = 'jp-ConsoleInspector-back';
+
+/**
+ * The forward button class name.
+ */
+const FORWARD_CLASS = 'jp-ConsoleInspector-forward';
 
 
 /**
@@ -41,12 +55,43 @@ class ConsoleInspector extends Widget {
       return;
     }
     if (this._content) {
-      this._content.dispose();
+      if (this._remember) {
+        this._content.hide();
+      } else {
+        this._content.dispose();
+      }
     }
     this._content = newValue;
     if (this._content) {
       let layout = this.layout as PanelLayout;
       layout.addChild(this._content);
+      if (this.remember) {
+        this._history.push(newValue);
+        this._index++;
+      }
+    }
+  }
+
+  /**
+   * A flag that indicates whether the inspector remembers history.
+   */
+  get remember(): boolean {
+    return this._remember;
+  }
+  set remember(newValue: boolean) {
+    if (newValue === this._remember) {
+      return;
+    }
+    this._remember = newValue;
+    if (!this._remember) {
+      this._toolbar.dispose();
+      this._history.forEach(widget => widget.dispose());
+      this._history = null;
+    } else {
+      this._toolbar = this._createToolbar();
+      this._history = [];
+      this._index = -1;
+      (this.layout as PanelLayout).insertChild(0, this._toolbar);
     }
   }
 
@@ -60,6 +105,58 @@ class ConsoleInspector extends Widget {
     this._rank = newValue;
   }
 
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    if (this._history) {
+      this._history.forEach(widget => widget.dispose());
+      this._history = null;
+    }
+
+    super.dispose();
+  }
+
+  /**
+   * Create a history toolbar.
+   */
+  private _createToolbar(): NotebookToolbar {
+    let toolbar = new NotebookToolbar();
+    let back = new ToolbarButton({
+      className: BACK_CLASS,
+      onClick: () => {
+        this._index = Math.max(this._index - 1, 0);
+        this._content.hide();
+        this._content = this._history[this._index];
+        this._content.show();
+      },
+      tooltip: 'Navigate back in history'
+    });
+    toolbar.add('back', back);
+
+    let forward = new ToolbarButton({
+      className: FORWARD_CLASS,
+      onClick: () => {
+        this._index = Math.min(this._index + 1, this._history.length - 1);
+        this._content.hide();
+        this._content = this._history[this._index];
+        this._content.show();
+      },
+      tooltip: 'Navigate forward in history'
+    });
+    toolbar.add('forward', forward);
+
+    return toolbar;
+  }
+
   private _content: Widget = null;
+  private _history: Widget[] = null;
+  private _index: number = -1;
   private _rank: number = Infinity;
+  private _remember: boolean = false;
+  private _toolbar: NotebookToolbar = null;
 }

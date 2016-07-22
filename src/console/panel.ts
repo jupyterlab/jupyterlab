@@ -85,6 +85,7 @@ class ConsolePanel extends SplitPanel {
     (options.inspectors || ConsolePanel.defaultInspectors).forEach(value => {
       let inspector = value.widget || new ConsoleInspector();
       inspector.rank = value.rank;
+      inspector.remember = !!value.remember;
       inspector.title.closable = false;
       inspector.title.text = value.name;
       if (value.className) {
@@ -274,6 +275,11 @@ namespace ConsolePanel {
     rank: number;
 
     /**
+     * A flag that indicates whether the inspector remembers history.
+     */
+    remember?: boolean;
+
+    /**
      * The type of the inspector.
      */
     type: string;
@@ -326,7 +332,18 @@ namespace ConsolePanel {
 
   export
   const defaultInspectors: IInspector[] = [
-    { className: HINTS_CLASS, name: 'Hints', rank: 2, type: 'hints' },
-    { className: DETAILS_CLASS, name: 'Details', rank: 1, type: 'details' }
+    {
+      className: HINTS_CLASS,
+      name: 'Hints',
+      rank: 2,
+      type: 'hints'
+    },
+    {
+      className: DETAILS_CLASS,
+      name: 'Details',
+      rank: 1,
+      remember: true,
+      type: 'details'
+    }
   ];
 }
