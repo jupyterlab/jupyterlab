@@ -165,7 +165,7 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    *
    * #### Notes
-   * The cell before the first selected cell will be activated.
+   * The cell after the last selected cell will be activated.
    * It will add a code cell if all cells are deleted.
    * This action can be undone.
    */
@@ -184,9 +184,7 @@ namespace NotebookActions {
     for (let i = 0; i < widget.childCount(); i++) {
       let child = widget.childAt(i);
       if (widget.isSelected(child)) {
-        if (index === -1) {
-          index = i - 1;
-        }
+        index = i;
         toDelete.push(cells.get(i));
       }
     }
@@ -196,18 +194,14 @@ namespace NotebookActions {
     for (let cell of toDelete) {
       cells.remove(cell);
     }
-
-    // Add a new code cell if all cells were deleted.
-    if (!model.cells.length) {
-      let cell = model.factory.createCodeCell();
-      model.cells.add(cell);
-    }
+    // The model will add a new code cell if there are no
+    // remaining cells.
     model.cells.endCompoundOperation();
 
-    // Activate the previous cell.
-    if (index === -1) {
-      index = 0;
-    }
+    // Select the cell *after* the last selected.
+    // Note: The activeCellIndex is clamped to the available cells,
+    // so if the last cell is deleted the previous cell will be activated.
+    index -= toDelete.length - 1;
     widget.activeCellIndex = index;
   }
 
