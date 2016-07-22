@@ -102,6 +102,21 @@ const ERROR_CLASS = 'jp-Output-error';
 const STDIN_CLASS = 'jp-Output-stdin';
 
 /**
+ * The class name added to stdin data prompt nodes.
+ */
+const STDIN_PROMPT_CLASS = 'jp-Output-stdinPrompt';
+
+/**
+ * The class name added to stdin data input nodes.
+ */
+const STDIN_INPUT_CLASS = 'jp-Output-stdinInput';
+
+/**
+ * The class name added to stdin rendered text nodes.
+ */
+const STDIN_RENDERED_CLASS = 'jp-Output-stdinRendered';
+
+/**
  * The class name added to fixed height output areas.
  */
 const FIXED_HEIGHT_CLASS = 'jp-mod-fixedHeight';
@@ -881,9 +896,11 @@ class OutputWidget extends Widget {
    */
   static createNode(): HTMLElement {
     let node = document.createElement('div');
-    let text = document.createElement('span');
+    let prompt = document.createElement('span');
+    prompt.className = STDIN_PROMPT_CLASS;
     let input = document.createElement('input');
-    node.appendChild(text);
+    input.className = STDIN_INPUT_CLASS;
+    node.appendChild(prompt);
     node.appendChild(input);
     return node;
   }
@@ -919,13 +936,14 @@ class OutputWidget extends Widget {
         this._kernel.sendInputReply({
           value: input.value
         });
-        let newText = document.createElement('span');
+        let rendered = document.createElement('span');
+        rendered.className = STDIN_RENDERED_CLASS;
         if (input.type === 'password') {
-          newText.textContent = Array(input.value.length + 1).join('·');
+          rendered.textContent = Array(input.value.length + 1).join('·');
         } else {
-          newText.textContent = input.value;
+          rendered.textContent = input.value;
         }
-        this.node.replaceChild(newText, input);
+        this.node.replaceChild(rendered, input);
       }
       // Suppress keydown events from leaving the input.
       event.stopPropagation();

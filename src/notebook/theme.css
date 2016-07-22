@@ -116,6 +116,11 @@
 }
 
 
+.jp-Output-stdinPrompt {
+  padding-right: 8px;
+}
+
+
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
   border-color: #ABABAB;
   border-left-width: 1px;
