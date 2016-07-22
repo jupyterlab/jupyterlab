@@ -191,11 +191,11 @@ class OutputAreaModel implements IDisposable {
       };
       // Handle stdin.
       future.onStdin = (msg: KernelMessage.IStdinMessage) => {
-        if (msg.header.msg_type === 'input_request') {
+        if (KernelMessage.isInputRequestMsg(msg)) {
           this.add({
             output_type: 'input_request',
-            prompt: (msg.content as any).prompt,
-            password: (msg.content as any).password,
+            prompt: msg.content.prompt,
+            password: msg.content.password,
             kernel
           });
         }
