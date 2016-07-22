@@ -57,7 +57,7 @@ class ConsolePanel extends SplitPanel {
     this.addClass(CONSOLE_PANEL);
 
     // Create the tab panel.
-    this._tabs = new TabPanel();
+    this._inspectors = new TabPanel();
 
     // Create console widget.
     this._console = new ConsoleWidget({
@@ -69,13 +69,13 @@ class ConsolePanel extends SplitPanel {
     this._hints = options.hints || new ConsoleInspector();
     this._hints.title.closable = false;
     this._hints.title.text = 'Hints';
-    this._tabs.addChild(this._hints);
+    this._inspectors.addChild(this._hints);
 
     // Create console details widget and add it to the tab panel.
     this._details = options.details || new ConsoleInspector();
     this._details.title.closable = false;
     this._details.title.text = 'Details';
-    this._tabs.addChild(this._details);
+    this._inspectors.addChild(this._details);
 
     // Connect the console hints signal.
     this._console.hintChanged.connect((sender: any, content: Widget) => {
@@ -88,10 +88,9 @@ class ConsolePanel extends SplitPanel {
     }, this);
 
     // Add the panel contents.
-    let isVertical = options.orientation && options.orientation === 'vertical';
-    this.orientation = isVertical ? SplitPanel.Vertical : SplitPanel.Horizontal;
+    this.orientation = options.orientation || this._orientation;
     this.addChild(this._console);
-    this.addChild(this._tabs);
+    this.addChild(this._inspectors);
     this.setSizes([2, 1]);
   }
 
@@ -103,6 +102,16 @@ class ConsolePanel extends SplitPanel {
    */
   get content(): ConsoleWidget {
     return this._console;
+  }
+
+  /**
+   * The inspectors tabs used by the panel.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get inspectors(): TabPanel {
+    return this._inspectors;
   }
 
   /**
@@ -121,11 +130,32 @@ class ConsolePanel extends SplitPanel {
     this._hints.dispose();
     this._hints = null;
 
+    // Dispose the inspector tabs.
+    this._inspectors.dispose();
+    this._inspectors = null;
+
     // Dispose console widget.
     this._console.dispose();
     this._console = null;
 
     super.dispose();
+  }
+
+  /**
+   * Change the orientation of the console widget and inspectors.
+   *
+   * #### Notes
+   * This method will become unnecessary once the phosphor mono-repo version of
+   * `SplitPanel` is used because its `orientation` accessor uses 'vertical' and
+   * 'horizontal' as its values instead of an enum.
+   */
+  reorient(orientation: 'horizontal' | 'vertical'): void {
+    if (this._orientation === orientation) {
+      return;
+    }
+
+    let isVertical = orientation === 'vertical';
+    this.orientation = isVertical ? SplitPanel.Vertical : SplitPanel.Horizontal;
   }
 
   /**
@@ -155,7 +185,8 @@ class ConsolePanel extends SplitPanel {
   private _console: ConsoleWidget = null;
   private _details: ConsoleInspector = null;
   private _hints: ConsoleInspector = null;
-  private _tabs: TabPanel = null;
+  private _inspectors: TabPanel = null;
+  private _orientation: 'horizontal' | 'vertical' = 'horizontal';
 }
 
 
@@ -168,7 +199,7 @@ namespace ConsolePanel {
    * The initialization options for a console panel.
    */
   export
-    interface IOptions {
+  interface IOptions {
     /**
      * The details (pager) widget for a console panel.
      */
