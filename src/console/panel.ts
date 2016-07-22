@@ -75,7 +75,7 @@ class ConsolePanel extends SplitPanel {
     this._tabs = new TabPanel();
 
     // Create console widget.
-    this._console = new ConsoleWidget({
+    this._console = options.console || new ConsoleWidget({
       session: options.session,
       rendermime: options.rendermime
     });
@@ -289,6 +289,16 @@ namespace ConsolePanel {
    */
   export
   interface IOptions {
+    /**
+     * The optional console widget instance to display in the console panel.
+     *
+     * #### Notes
+     * If a console widget is passed in, its MIME renderer and session must
+     * match the values in the console panel options argument or it will result
+     * in undefined behavior.
+     */
+    console?: ConsoleWidget;
+
     /**
      * The list of available console inspectors for code introspection.
      *
