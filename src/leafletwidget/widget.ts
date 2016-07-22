@@ -17,6 +17,10 @@ import {
   ABCWidgetFactory, IDocumentModel, IDocumentContext
 } from '../docregistry';
 
+import {
+  deepEqual, JSONValue
+} from '../notebook/common/json';
+
 import leaflet = require('leaflet');
 
 
@@ -47,9 +51,24 @@ class MapWidget extends Widget {
         max_zoom : 18,
     }).addTo(this._map);
 
-    if (context.model.toString()) {
-      this.update();
-    }
+    // Since we keep track of the widget size, we monkeypatch the map
+    // to use our information instead of doing a DOM read every time it needs
+    // the size info. We can stop monkeypatching when we have a size hint change
+    // available from leaflet (cf.
+    // https://github.com/Leaflet/Leaflet/issues/4200#issuecomment-233616337 and
+    // https://github.com/jupyter/jupyterlab/pull/454#discussion_r71349224)
+    this._map.getSize = () => {
+      let map: any = this._map;
+      if (!map._size || map._sizeChanged) {
+        if (this._width < 0 || this._height < 0) {
+          return map.prototype.getSize.call(map);
+        }
+        map._size = new leaflet.Point(this._width, this._height);
+        map._sizeChanged = false;
+      }
+      return map._size.clone();
+    };
+
     context.model.contentChanged.connect(() => {
       this.update();
     });
@@ -80,8 +99,9 @@ class MapWidget extends Widget {
     if (!this.isAttached) {
       return;
     }
-    let contentString = this._context.model.toString();
-    if (contentString === this._geojsonString) {
+    let content = this._context.model.toString();
+    let geojson: JSONValue = content ? JSON.parse(content) : content;
+    if (deepEqual(geojson, this._geojson)) {
       return;
     }
 
@@ -89,17 +109,16 @@ class MapWidget extends Widget {
     if (this._geojsonLayer) {
       this._map.removeLayer(this._geojsonLayer);
     }
-    this._geojsonString = contentString;
+    this._geojson = geojson;
     this._geojsonLayer = null;
-    if (contentString) {
-      let content = JSON.parse(contentString);
-      this._geojsonLayer = leaflet.geoJson(content, {
+    if (geojson) {
+      this._geojsonLayer = leaflet.geoJson(geojson, {
         pointToLayer: function (feature, latlng) {
             return leaflet.circleMarker(latlng);
         }
       });
       this._map.addLayer(this._geojsonLayer);
-      this._map.fitBounds(this._geojsonLayer.getBounds());
+      this._fitLayerBounds();
     }
   }
 
@@ -107,20 +126,22 @@ class MapWidget extends Widget {
    * A message handler invoked on a 'resize' message.
    */
   onResize(msg: ResizeMessage) {
-    // Since we know the size from the resize message, we manually
-    // define getSize() so that it does not have to do a DOM read.
-    this._map.getSize = () => {
-      if (msg.width === -1 || msg.height === -1) {
-        return (this._map as any).prototype.getSize();
-      } else {
-        let size: any = new leaflet.Point(msg.width, msg.height);
-        (this._map as any)._size = size;
-        return size.clone();
-      }
-    };
+    this._width = msg.width;
+    this._height = msg.height;
     this._map.invalidateSize(true);
-    if (this._geojsonLayer) {
+    this._fitLayerBounds();
+  }
+
+  /**
+   * Make the map fit the geojson layer bounds only once when all info is available.
+   */
+  private _fitLayerBounds() {
+    if (this._fitBounds && this._geojsonLayer && this._width && this._height) {
+      // We haven't fitted before, we have layer information, and the
+      // width and height have been updated from their initial falsey values to a
+      // positive size or to -1 (indicating we need to read the size from the DOM).
       this._map.fitBounds(this._geojsonLayer.getBounds());
+      this._fitBounds = false;
     }
   }
 
@@ -131,7 +152,10 @@ class MapWidget extends Widget {
     this.update();
   }
 
-  private _geojsonString = '';
+  private _fitBounds = true;
+  private _width = 0;
+  private _height = 0;
+  private _geojson: JSONValue = null;
   private _geojsonLayer: leaflet.GeoJSON;
   private _map: leaflet.Map;
   private _context: IDocumentContext<IDocumentModel>;
