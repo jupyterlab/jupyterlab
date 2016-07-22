@@ -41,17 +41,17 @@ import {
 /**
  * The class name added to console panels.
  */
-const CONSOLE_PANEL = 'jp-ConsolePanel';
+const PANEL_CLASS = 'jp-ConsolePanel';
 
 /**
  * The class name added to console panel detail inspectors.
  */
-const CONSOLE_DETAILS = 'jp-ConsolePanel-details';
+const DETAILS_CLASS = 'jp-ConsolePanel-details';
 
 /**
  * The class name added to console panel hint inspectors.
  */
-const CONSOLE_HINTS = 'jp-ConsolePanel-hints';
+const HINTS_CLASS = 'jp-ConsolePanel-hints';
 
 /**
  * The default size ratio between the console widget and inspectors.
@@ -69,7 +69,7 @@ class ConsolePanel extends SplitPanel {
    */
   constructor(options: ConsolePanel.IOptions) {
     super();
-    this.addClass(CONSOLE_PANEL);
+    this.addClass(PANEL_CLASS);
 
     // Create the tab panel.
     this._inspectors = new TabPanel();
@@ -84,14 +84,14 @@ class ConsolePanel extends SplitPanel {
     this._hints = options.hints || new ConsoleInspector();
     this._hints.title.closable = false;
     this._hints.title.text = 'Hints';
-    this._hints.addClass(CONSOLE_HINTS);
+    this._hints.addClass(HINTS_CLASS);
     this._inspectors.addChild(this._hints);
 
     // Create console details widget and add it to the tab panel.
     this._details = options.details || new ConsoleInspector();
     this._details.title.closable = false;
     this._details.title.text = 'Details';
-    this._hints.addClass(CONSOLE_DETAILS);
+    this._hints.addClass(DETAILS_CLASS);
     this._inspectors.addChild(this._details);
 
     // Connect the console hints signal.
