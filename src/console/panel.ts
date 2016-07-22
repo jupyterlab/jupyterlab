@@ -10,16 +10,16 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  Widget
-} from 'phosphor-widget';
-
-import {
   TabPanel
 } from 'phosphor-tabs';
 
 import {
   SplitPanel
 } from 'phosphor-splitpanel';
+
+import {
+  Widget
+} from 'phosphor-widget';
 
 import {
   showDialog
@@ -292,6 +292,8 @@ namespace ConsolePanel {
 
     /**
      * A flag that indicates whether the inspector remembers history.
+     *
+     * The default value is `false`.
      */
     remember?: boolean;
 
@@ -332,6 +334,8 @@ namespace ConsolePanel {
 
     /**
      * The orientation of the console panel.
+     *
+     * The default value is `'horizontal'`.
      */
     orientation?: Orientation;
 
