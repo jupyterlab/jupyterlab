@@ -219,7 +219,7 @@ function toggleLineWrap() {
     let editors = tracker.widgets;
     liWrap = !liWrap;
     for (let i = 0; i < editors.length; i++) {
-      editors[i].editor.setOption('lineWrap', liWrap);
+      editors[i].editor.setOption('lineWrapping', liWrap);
     }
   }
 }
