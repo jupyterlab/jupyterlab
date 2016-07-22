@@ -109,4 +109,7 @@ declare namespace MarkdownIt {
   }
 }
 
-export = MarkdownIt;
+declare module "markdown-it" {
+    export = MarkdownIt;
+}
+
