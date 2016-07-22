@@ -144,19 +144,19 @@ function activateEditorHandler(app: Application, registry: DocumentRegistry, mai
   {
     command: lineNumbers,
     category: 'Editor',
-    text: 'Line Numbers',
+    text: 'Toggle Line Numbers',
     caption: 'Toggles the line numbers on the editor'
   },
   {
     command: lineWrap,
     category: 'Editor',
-    text: 'Line Wrap',
+    text: 'Toggle Line Wrap',
     caption: 'Toggles line wrapping on the editor'
   },
   {
     command: matchBrackets,
     category: 'Editor',
-    text: 'Match Brackets',
+    text: 'Toggle Match Brackets',
     caption: 'Toggles bracket matching on the editor'
   },
   {
@@ -203,11 +203,8 @@ function newFile() {
  */
 function toggleLineNums() {
   if (!tracker.isDisposed) {
-    let editors = tracker.widgets;
-    liNums = !liNums;
-    for (let i = 0; i < editors.length; i++) {
-      editors[i].editor.setOption('lineNumbers', liNums);
-    }
+    let editor = tracker.activeWidget.editor;
+    editor.setOption('lineNumbers', !editor.getOption('lineNumbers'));
   }
 }
 
@@ -216,11 +213,8 @@ function toggleLineNums() {
  */
 function toggleLineWrap() {
   if (!tracker.isDisposed) {
-    let editors = tracker.widgets;
-    liWrap = !liWrap;
-    for (let i = 0; i < editors.length; i++) {
-      editors[i].editor.setOption('lineWrapping', liWrap);
-    }
+    let editor = tracker.activeWidget.editor;
+    editor.setOption('lineWrapping', !editor.getOption('lineWrapping'));
   }
 }
 
@@ -229,11 +223,8 @@ function toggleLineWrap() {
  */
 function toggleMatchBrackets() {
   if (!tracker.isDisposed) {
-    let editors = tracker.widgets;
-    matchBracks = !matchBracks;
-    for (let i = 0; i < editors.length; i++) {
-      editors[i].editor.setOption('matchBrackets', matchBracks);
-    }
+    let editor = tracker.activeWidget.editor;
+    editor.setOption('matchBrackets', !editor.getOption('matchBrackets'));
   }
 }
 
@@ -283,24 +274,24 @@ let themeHandler = (item : MenuItem) => {
 
 let settings = new Menu([
   new MenuItem({
-    text: 'Line Numbers',
+    text: 'Toggle Line Numbers',
     handler: toggleLineNums
   }),
   new MenuItem({
-    text: 'Line Wrapping',
+    text: 'Toggle Line Wrapping',
     handler: toggleLineWrap
   }),
   new MenuItem({
-    text: 'Match Brackets',
+    text: 'Toggle Match Brackets',
     handler: toggleMatchBrackets
   }),
   new MenuItem({
-    text: 'Default Mode',
+    text: 'Default Mode (all)',
     handler: toggleDefault,
     shortcut: 'Ctrl+D'
   }),
   new MenuItem({
-    text: 'Vim Mode',
+    text: 'Vim Mode (all)',
     handler: toggleVim
   }),
   ]);
