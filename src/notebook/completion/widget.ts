@@ -6,7 +6,7 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  ISignal, Signal, clearSignalData
+  ISignal, Signal
 } from 'phosphor-signaling';
 
 import {
@@ -35,7 +35,7 @@ const ACTIVE_CLASS = 'jp-mod-active';
 /**
  * The class name added to a completion widget that is scrolled out of view.
  */
-const OUTOFVIEW_CLASS = 'jp-mod-outofview'
+const OUTOFVIEW_CLASS = 'jp-mod-outofview';
 
 /**
  * The minimum height of a completion widget.
@@ -90,6 +90,10 @@ class CompletionWidget extends Widget {
 
   /**
    * A signal emitted when the completion widget's visibility changes.
+   *
+   * #### Notes
+   * This signal is useful when there are multiple floating widgets that may
+   * contend with the same space and ought to be mutually exclusive.
    */
   get visibilityChanged(): ISignal<CompletionWidget, void> {
     return Private.visibilityChangedSignal.bind(this);
@@ -419,7 +423,7 @@ class CompletionWidget extends Widget {
     node.style.maxHeight = `${maxHeight}px`;
 
     let border = parseInt(window.getComputedStyle(node).borderWidth, 10);
-    let left = coords.left + border
+    let left = coords.left + border;
     let rect = node.getBoundingClientRect();
     let top = availableHeight - rect.height;
     node.style.left = `${Math.floor(left)}px`;

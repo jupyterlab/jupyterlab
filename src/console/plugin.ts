@@ -7,7 +7,7 @@ import {
 
 import {
   ConsolePanel
-} from './widget';
+} from './';
 
 import {
   RenderMime
@@ -26,19 +26,15 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  TabPanel
-} from 'phosphor-tabs';
-
-import {
   Widget
 } from 'phosphor-widget';
 
 import {
-  MainMenu, mainMenuProvider
+  MainMenu
 } from '../mainmenu/plugin';
 
 import {
-  MenuItem, Menu, IMenuItemOptions, MenuItemType
+  MenuItem, Menu
 } from 'phosphor-menus';
 
 /**
@@ -120,96 +116,136 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
   }
 
   app.commands.add([
-  {
-    id: 'console:clear',
-    handler: () => {
-      if (tracker.activeWidget) {
-        tracker.activeWidget.content.clear();
-      }
-    }
-  },
-  {
-    id: 'console:dismiss-overlays',
-    handler: () => {
-      if (tracker.activeWidget) {
-        tracker.activeWidget.content.dismissOverlays();
-      }
-    }
-  },
-  {
-    id: 'console:execute',
-    handler: () => {
-      if (tracker.activeWidget) {
-        tracker.activeWidget.content.execute();
-      }
-    }
-  },
-  {
-    id: 'console:interrupt-kernel',
-    handler: () => {
-      if (tracker.activeWidget) {
-        let kernel = tracker.activeWidget.content.session.kernel;
-        if (kernel) {
-          kernel.interrupt();
+    {
+      id: 'console:clear',
+      handler: () => {
+        if (tracker.activeWidget) {
+          tracker.activeWidget.content.clear();
         }
       }
-    }
-  },
-  {
-    id: 'console:switch-kernel',
-    handler: () => {
-      if (tracker.activeWidget) {
-        let widget = tracker.activeWidget.content;
-        let session = widget.session;
-        let lang = '';
-        if (session.kernel) {
-          lang = specs.kernelspecs[session.kernel.name].spec.language;
+    },
+    {
+      id: 'console:dismiss-completion',
+      handler: () => {
+        if (tracker.activeWidget) {
+          tracker.activeWidget.content.dismissCompletion();
         }
-        manager.listRunning().then((sessions: ISession.IModel[]) => {
-          let options = {
-            name: widget.parent.title.text,
-            specs,
-            sessions,
-            preferredLanguage: lang,
-            kernel: session.kernel.model,
-            host: widget.parent.node
-          };
-          return selectKernel(options);
-        }).then((kernelId: IKernel.IModel) => {
-          if (kernelId) {
-            session.changeKernel(kernelId);
-          } else {
-            session.kernel.shutdown();
+      }
+    },
+    {
+      id: 'console:execute',
+      handler: () => {
+        if (tracker.activeWidget) {
+          tracker.activeWidget.content.execute();
+        }
+      }
+    },
+    {
+      id: 'console:interrupt-kernel',
+      handler: () => {
+        if (tracker.activeWidget) {
+          let kernel = tracker.activeWidget.content.session.kernel;
+          if (kernel) {
+            kernel.interrupt();
           }
-        });
+        }
+      }
+    },
+    {
+      id: 'console:switch-kernel',
+      handler: () => {
+        if (tracker.activeWidget) {
+          let widget = tracker.activeWidget.content;
+          let session = widget.session;
+          let lang = '';
+          if (session.kernel) {
+            lang = specs.kernelspecs[session.kernel.name].spec.language;
+          }
+          manager.listRunning().then((sessions: ISession.IModel[]) => {
+            let options = {
+              name: widget.parent.title.text,
+              specs,
+              sessions,
+              preferredLanguage: lang,
+              kernel: session.kernel.model,
+              host: widget.parent.node
+            };
+            return selectKernel(options);
+          }).then((kernelId: IKernel.IModel) => {
+            if (kernelId) {
+              session.changeKernel(kernelId);
+            } else {
+              session.kernel.shutdown();
+            }
+          });
+        }
+      }
+    },
+    {
+      id: 'console:toggle-inspectors',
+      handler: () => {
+        if (tracker.activeWidget) {
+          tracker.activeWidget.toggleInspectors();
+        }
+      }
+    },
+    {
+      id: 'console:reorient-vertical',
+      handler: () => {
+        if (tracker.activeWidget) {
+          tracker.activeWidget.reorient('vertical');
+        }
+      }
+    },
+    {
+      id: 'console:reorient-horizontal',
+      handler: () => {
+        if (tracker.activeWidget) {
+          tracker.activeWidget.reorient('horizontal');
+        }
       }
     }
-  }
-
   ]);
-  app.palette.add([
-  {
-    command: 'console:clear',
-    category: 'Console',
-    text: 'Clear Cells'
-  },
-  {
-    command: 'console:execute',
-    category: 'Console',
-    text: 'Execute Cell'
-  },
-  {
-    command: 'console:interrupt-kernel',
-    category: 'Console',
-    text: 'Interrupt Kernel'
-  },
-  {
-    command: 'console:switch-kernel',
-    category: 'Console',
-    text: 'Switch Kernel'
-  }]);
 
- let newSubmenu = new Menu(newSubmenuItems);
+  app.palette.add([
+    {
+      command: 'console:clear',
+      category: 'Console',
+      text: 'Clear Cells'
+    },
+    {
+      command: 'console:execute',
+      category: 'Console',
+      text: 'Execute Cell'
+    },
+    {
+      command: 'console:interrupt-kernel',
+      category: 'Console',
+      text: 'Interrupt Kernel'
+    },
+    {
+      command: 'console:switch-kernel',
+      category: 'Console',
+      text: 'Switch Kernel'
+    },
+    {
+      command: 'console:toggle-inspectors',
+      category: 'Console',
+      text: 'Toggle Inspector'
+    },
+    {
+      command: 'console:reorient-vertical',
+      category: 'Console',
+      text: 'Position Inspector Vertically'
+    },
+    {
+      command: 'console:reorient-horizontal',
+      category: 'Console',
+      text: 'Position Inspector Horizontally'
+    }
+  ]);
+
+  let newSubmenu = new Menu(newSubmenuItems);
 
   let menu = new Menu ([
     new MenuItem ({
@@ -238,6 +274,12 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
       text: 'Switch Kernel',
       handler: () => {
         app.commands.execute('console:switch-kernel');
+      }
+    }),
+    new MenuItem ({
+      text: 'Toggle Inspector',
+      handler: () => {
+        app.commands.execute('console:toggle-inspectors');
       }
     })
   ]);

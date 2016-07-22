@@ -3,7 +3,7 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-.jp-Console-panel {
+.jp-ConsolePanel {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
