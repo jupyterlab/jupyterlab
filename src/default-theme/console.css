@@ -138,6 +138,11 @@
 }
 
 
+.jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-clear::before {
+   content: "\f05e";  /* ban */
+}
+
+
 .jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-back::before {
    content: "\f060";  /* arrow-left */
 }

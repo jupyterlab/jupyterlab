@@ -27,6 +27,11 @@ const CHILD_CLASS = 'jp-ConsoleInspector-child';
 
 
 /**
+ * The history clear button class name.
+ */
+const CLEAR_CLASS = 'jp-ConsoleInspector-clear';
+
+/**
  * The back button class name.
  */
 const BACK_CLASS = 'jp-ConsoleInspector-back';
@@ -89,14 +94,13 @@ class ConsoleInspector extends Panel {
       return;
     }
     this._remember = newValue;
+    this._clear();
     if (!this._remember) {
       this._toolbar.dispose();
-      this._history.forEach(widget => widget.dispose());
+      this._toolbar = null;
       this._history = null;
     } else {
       this._toolbar = this._createToolbar();
-      this._history = [];
-      this._index = -1;
       this.insertChild(0, this._toolbar);
     }
   }
@@ -138,6 +142,17 @@ class ConsoleInspector extends Panel {
   }
 
   /**
+   * Clear history.
+   */
+  private _clear(): void {
+    if (this._history) {
+      this._history.forEach(widget => widget.dispose());
+    }
+    this._history = [];
+    this._index = -1;
+  }
+
+  /**
    * Navigate forward in history.
    */
   private _forward(): void {
@@ -151,17 +166,25 @@ class ConsoleInspector extends Panel {
    */
   private _createToolbar(): NotebookToolbar {
     let toolbar = new NotebookToolbar();
+
+    let clear = new ToolbarButton({
+      className: CLEAR_CLASS,
+      onClick: () => this._clear(),
+      tooltip: 'Clear history.'
+    });
+    toolbar.add('clear', clear);
+
     let back = new ToolbarButton({
       className: BACK_CLASS,
       onClick: () => this._back(),
-      tooltip: 'Navigate back in history'
+      tooltip: 'Navigate back in history.'
     });
     toolbar.add('back', back);
 
     let forward = new ToolbarButton({
       className: FORWARD_CLASS,
       onClick: () => this._forward(),
-      tooltip: 'Navigate forward in history'
+      tooltip: 'Navigate forward in history.'
     });
     toolbar.add('forward', forward);
 
