@@ -4,7 +4,9 @@
 import * as marked
   from 'marked';
 
-import MarkdownIt = require('markdown-it');
+import {
+  MarkdownIt
+} from 'markdown-it';
 
 import {
   IRenderer
@@ -33,7 +35,7 @@ import {
 
 // Support GitHub flavored Markdown, leave sanitizing to external library.
 marked.setOptions({ gfm: true, sanitize: false, breaks: true });
-
+let mdit = MarkdownIt().use(require('markdown-it-mathjax'));
 
 /**
  * A widget for displaying HTML and rendering math.
@@ -213,5 +215,18 @@ class MarkdownRenderer implements IRenderer<Widget> {
     let html = marked(data['text']);
     let sanitized = defaultSanitizer.sanitize(replaceMath(html, data['math']));
     return new HTMLWidget(sanitized);
+  }
+}
+
+/**
+ * A renderer for Jupyter Markdown data based on markdown-it.
+ */
+export
+class MarkdownItRenderer implements IRenderer<Widget> {
+  mimetypes = ['text/markdown'];
+
+  render(mimetype: string, text: string): Widget {
+    let sanitizedhtml = defaultSanitizer.sanitize(mdit.render(text));
+    return new HTMLWidget(sanitizedhtml);
   }
 }
