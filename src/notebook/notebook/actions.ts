@@ -199,6 +199,8 @@ namespace NotebookActions {
     model.cells.endCompoundOperation();
 
     // Select the cell *after* the last selected.
+    // Note: The activeCellIndex is clamped to the available cells,
+    // so if the last cell is deleted the previous cell will be activated.
     index -= toDelete.length - 1;
     widget.activeCellIndex = index;
   }
