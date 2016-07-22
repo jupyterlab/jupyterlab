@@ -157,8 +157,8 @@ class ConsoleWidget extends Widget {
   /**
    * A signal emitted when the hint inspector value changes.
    */
-  get hintChanged(): ISignal<ConsoleWidget, Widget> {
-    return Private.hintChangedSignal.bind(this);
+  get hintsChanged(): ISignal<ConsoleWidget, Widget> {
+    return Private.hintsChangedSignal.bind(this);
   }
 
   /**
@@ -407,24 +407,24 @@ class ConsoleWidget extends Widget {
 
       // If widget has been disposed, bail.
       if (this.isDisposed) {
-        this.hintChanged.emit(null);
+        this.hintsChanged.emit(null);
         return;
       }
 
       // If a newer text change has created a pending request, bail.
       if (pendingInspect !== this._pendingInspect) {
-        this.hintChanged.emit(null);
+        this.hintsChanged.emit(null);
         return;
       }
 
       // Hint request failures or negative results fail silently.
       if (value.status !== 'ok' || !value.found) {
-        this.hintChanged.emit(null);
+        this.hintsChanged.emit(null);
         return;
       }
 
       let bundle = value.data as MimeMap<string>;
-      this.hintChanged.emit(this._rendermime.render(bundle));
+      this.hintsChanged.emit(this._rendermime.render(bundle));
     });
   }
 
@@ -533,7 +533,7 @@ namespace Private {
    * A signal emitted when the hint inspector value changes.
    */
   export
-  const hintChangedSignal = new Signal<ConsoleWidget, Widget>();
+  const hintsChangedSignal = new Signal<ConsoleWidget, Widget>();
 
   /**
    * Scroll an element into view if needed.

@@ -95,7 +95,7 @@ class ConsolePanel extends SplitPanel {
     this._inspectors.addChild(this._details);
 
     // Connect the console hints signal.
-    this._console.hintChanged.connect(this.onHintChanged, this);
+    this._console.hintsChanged.connect(this.onHintsChanged, this);
 
     // Connect the console details signal.
     this._console.detailsChanged.connect(this.onDetailsChanged, this);
@@ -238,7 +238,7 @@ class ConsolePanel extends SplitPanel {
    * This method may be reimplemented by subclasses that wish to change the
    * priority given to the display of different inspectors.
    */
-  protected onHintChanged(sender: any, content: Widget): void {
+  protected onHintsChanged(sender: any, content: Widget): void {
     this._hints.content = content;
     // If content exists and there are no visible details, show hints.
     if (content && this._details.content === null) {
