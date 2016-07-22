@@ -122,35 +122,55 @@ class ConsoleInspector extends Widget {
   }
 
   /**
+   * Navigate back in history.
+   */
+  private _back(): void {
+    if (this._history.length) {
+      this._navigateTo(Math.max(this._index - 1, 0));
+    }
+  }
+
+  /**
+   * Navigate forward in history.
+   */
+  private _forward(): void {
+    if (this._history.length) {
+      this._navigateTo(Math.min(this._index + 1, this._history.length - 1));
+    }
+  }
+
+  /**
    * Create a history toolbar.
    */
   private _createToolbar(): NotebookToolbar {
     let toolbar = new NotebookToolbar();
     let back = new ToolbarButton({
       className: BACK_CLASS,
-      onClick: () => {
-        this._index = Math.max(this._index - 1, 0);
-        this._content.hide();
-        this._content = this._history[this._index];
-        this._content.show();
-      },
+      onClick: () => this._back(),
       tooltip: 'Navigate back in history'
     });
     toolbar.add('back', back);
 
     let forward = new ToolbarButton({
       className: FORWARD_CLASS,
-      onClick: () => {
-        this._index = Math.min(this._index + 1, this._history.length - 1);
-        this._content.hide();
-        this._content = this._history[this._index];
-        this._content.show();
-      },
+      onClick: () => this._forward(),
       tooltip: 'Navigate forward in history'
     });
     toolbar.add('forward', forward);
 
     return toolbar;
+  }
+
+  /**
+   * Navigate to a known index in history.
+   */
+  private _navigateTo(index: number): void {
+    if (this._content) {
+      this._content.hide();
+    }
+    this._content = this._history[index];
+    this._index = index;
+    this._content.show();
   }
 
   private _content: Widget = null;
