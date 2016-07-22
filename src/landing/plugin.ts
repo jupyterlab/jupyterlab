@@ -44,9 +44,8 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
   dialog.appendChild(logo);
 
   let previewMessages = ["super alpha preview", "very alpha preview", "extremely alpha preview", "exceedingly alpha preview", "alpha alpha preview"];
-  let ranNum = Math.floor(Math.random()*5);
   let subtitle = document.createElement('span');
-  subtitle.textContent = previewMessages[ranNum];
+  subtitle.textContent = previewMessages[Math.floor(Math.random()*previewMessages.length)];
   subtitle.className = 'jp-Landing-subtitle';
   dialog.appendChild(subtitle);
 
