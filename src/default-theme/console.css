@@ -154,7 +154,7 @@
 
 
 .jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-bottom::before {
-   content: "\f0d7";  /* caret-down */
+   content: "\f103";  /* angle-double-down */
 }
 
 
@@ -165,7 +165,7 @@
 
 
 .jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-right::before {
-   content: "\f0da";  /* caret-right */
+   content: "\f101";  /* angle-double-right */
 }
 
 
