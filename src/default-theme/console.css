@@ -115,7 +115,26 @@
 
 .jp-ConsoleInspector {
   border: 1px solid #E0E0E0;
+}
+
+
+.jp-ConsoleInspector .jp-NBToolbar {
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid #E0E0E0;
+    height: 24px;
+}
+
+
+.jp-ConsoleInspector-child {
+  height: 100%;
   overflow: auto;
+}
+
+
+.jp-ConsoleInspector .jp-NBToolbar + .jp-ConsoleInspector-child {
+    height: calc(100% - 24px); /* Subtract the height of the toolbar. */
+    overflow: auto;
 }
 
 

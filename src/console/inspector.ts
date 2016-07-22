@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PanelLayout
+  Panel
 } from 'phosphor-panel';
 
 import {
@@ -19,6 +19,13 @@ import {
  */
 const INSPECTOR_CLASS = 'jp-ConsoleInspector';
 
+
+/**
+ * The class name added to inspector widgets.
+ */
+const CHILD_CLASS = 'jp-ConsoleInspector-child';
+
+
 /**
  * The back button class name.
  */
@@ -34,14 +41,13 @@ const FORWARD_CLASS = 'jp-ConsoleInspector-forward';
  * An inspector widget for a console.
  */
 export
-class ConsoleInspector extends Widget {
+class ConsoleInspector extends Panel {
   /**
    * Construct a console inspector widget.
    */
   constructor() {
     super();
     this.addClass(INSPECTOR_CLASS);
-    this.layout = new PanelLayout();
   }
 
   /**
@@ -63,8 +69,8 @@ class ConsoleInspector extends Widget {
     }
     this._content = newValue;
     if (this._content) {
-      let layout = this.layout as PanelLayout;
-      layout.addChild(this._content);
+      this._content.addClass(CHILD_CLASS);
+      this.addChild(this._content);
       if (this.remember) {
         this._history.push(newValue);
         this._index++;
@@ -91,7 +97,7 @@ class ConsoleInspector extends Widget {
       this._toolbar = this._createToolbar();
       this._history = [];
       this._index = -1;
-      (this.layout as PanelLayout).insertChild(0, this._toolbar);
+      this.insertChild(0, this._toolbar);
     }
   }
 
@@ -112,12 +118,13 @@ class ConsoleInspector extends Widget {
     if (this.isDisposed) {
       return;
     }
-
     if (this._history) {
       this._history.forEach(widget => widget.dispose());
       this._history = null;
     }
-
+    if (this._toolbar) {
+      this._toolbar.dispose();
+    }
     super.dispose();
   }
 

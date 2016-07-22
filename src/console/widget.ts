@@ -301,11 +301,54 @@ class ConsoleWidget extends Widget {
 
   /**
    * Handle a text changed signal from an editor.
+   *
+   * #### Notes
+   * Update the hints inspector based on a text change.
    */
   protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
-    if (change.newValue) {
-      this.updateHints(change);
+    let inspectorUpdate: ConsoleWidget.IInspectorUpdate = {
+      content: null,
+      type: 'hints'
+    };
+
+    // Clear hints if the new text value is empty.
+    if (!change.newValue) {
+      this.inspected.emit(inspectorUpdate);
+      return;
     }
+
+    let contents: KernelMessage.IInspectRequest = {
+      code: change.newValue,
+      cursor_pos: change.position,
+      detail_level: 0
+    };
+    let pendingInspect = ++this._pendingInspect;
+
+    this._session.kernel.inspect(contents).then(msg => {
+      let value = msg.content;
+
+      // If widget has been disposed, bail.
+      if (this.isDisposed) {
+        this.inspected.emit(inspectorUpdate);
+        return;
+      }
+
+      // If a newer text change has created a pending request, bail.
+      if (pendingInspect !== this._pendingInspect) {
+        this.inspected.emit(inspectorUpdate);
+        return;
+      }
+
+      // Hint request failures or negative results fail silently.
+      if (value.status !== 'ok' || !value.found) {
+        this.inspected.emit(inspectorUpdate);
+        return;
+      }
+
+      let bundle = value.data as MimeMap<string>;
+      inspectorUpdate.content = this._rendermime.render(bundle);
+      this.inspected.emit(inspectorUpdate);
+    });
   }
 
   /**
@@ -394,48 +437,6 @@ class ConsoleWidget extends Widget {
     }
 
     this.inspected.emit(inspectorUpdate);
-  }
-
-  /**
-   * Update the hints inspector based on a text change.
-   */
-  protected updateHints(change: ITextChange): void {
-    let contents: KernelMessage.IInspectRequest = {
-      code: change.newValue,
-      cursor_pos: change.position,
-      detail_level: 0
-    };
-    let pendingInspect = ++this._pendingInspect;
-    let inspectorUpdate: ConsoleWidget.IInspectorUpdate = {
-      content: null,
-      type: 'hints'
-    };
-
-    this._session.kernel.inspect(contents).then(msg => {
-      let value = msg.content;
-
-      // If widget has been disposed, bail.
-      if (this.isDisposed) {
-        this.inspected.emit(inspectorUpdate);
-        return;
-      }
-
-      // If a newer text change has created a pending request, bail.
-      if (pendingInspect !== this._pendingInspect) {
-        this.inspected.emit(inspectorUpdate);
-        return;
-      }
-
-      // Hint request failures or negative results fail silently.
-      if (value.status !== 'ok' || !value.found) {
-        this.inspected.emit(inspectorUpdate);
-        return;
-      }
-
-      let bundle = value.data as MimeMap<string>;
-      inspectorUpdate.content = this._rendermime.render(bundle);
-      this.inspected.emit(inspectorUpdate);
-    });
   }
 
   private _completion: CompletionWidget = null;
