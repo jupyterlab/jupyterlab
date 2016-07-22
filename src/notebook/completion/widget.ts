@@ -35,7 +35,7 @@ const ACTIVE_CLASS = 'jp-mod-active';
 /**
  * The class name added to a completion widget that is scrolled out of view.
  */
-const OUTOFVIEW_CLASS = 'jp-mod-outofview'
+const OUTOFVIEW_CLASS = 'jp-mod-outofview';
 
 /**
  * The minimum height of a completion widget.
@@ -423,7 +423,7 @@ class CompletionWidget extends Widget {
     node.style.maxHeight = `${maxHeight}px`;
 
     let border = parseInt(window.getComputedStyle(node).borderWidth, 10);
-    let left = coords.left + border
+    let left = coords.left + border;
     let rect = node.getBoundingClientRect();
     let top = availableHeight - rect.height;
     node.style.left = `${Math.floor(left)}px`;
