@@ -114,9 +114,13 @@
 
 
 .jp-ConsoleInspector {
-  background: #FFFFCA;
-  border: 1px solid #000000;
+  border: 1px solid #E0E0E0;
   overflow: auto;
+}
+
+
+.jp-ConsoleInspector.jp-ConsolePanel-hints {
+  background: #FFFFCA;
 }
 
 
