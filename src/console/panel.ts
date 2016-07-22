@@ -53,6 +53,11 @@ const CONSOLE_DETAILS = 'jp-ConsolePanel-details';
  */
 const CONSOLE_HINTS = 'jp-ConsolePanel-hints';
 
+/**
+ * The default size ratio between the console widget and inspectors.
+ */
+const DEFAULT_SIZES = [2, 1];
+
 
 /**
  * A panel which contains a side bar and a console.
@@ -114,7 +119,7 @@ class ConsolePanel extends SplitPanel {
       : SplitPanel.Horizontal;
     this.addChild(this._console);
     this.addChild(this._inspectors);
-    this.setSizes([2, 1]);
+    this.setSizes(DEFAULT_SIZES);
   }
 
   /**
@@ -177,8 +182,12 @@ class ConsolePanel extends SplitPanel {
       return;
     }
 
-    let isVertical = orientation === 'vertical';
+    this._orientation = orientation;
+    this._cachedSizes = null;
+
+    let isVertical = this._orientation === 'vertical';
     this.orientation = isVertical ? SplitPanel.Vertical : SplitPanel.Horizontal;
+    this.setSizes(DEFAULT_SIZES);
   }
 
   /**
