@@ -27,6 +27,11 @@
 }
 
 
+.jp-QuestionMark {
+  background-image: url(images/questionmark.svg);
+}
+
+
 .jp-JupyterIcon {
   background-image: url(images/jupyter.svg);
   background-size: 16px;
