@@ -10,6 +10,10 @@ import {
 } from 'phosphor-panel';
 
 import {
+  clearSignalData, ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -45,6 +49,15 @@ const BACK_CLASS = 'jp-ConsoleInspector-back';
  */
 const FORWARD_CLASS = 'jp-ConsoleInspector-forward';
 
+/**
+ * The orientation toggle bottom button class name.
+ */
+const BOTTOM_TOGGLE_CLASS = 'jp-ConsoleInspector-bottom';
+
+/**
+ * The orientation toggle right button class name.
+ */
+const RIGHT_TOGGLE_CLASS = 'jp-ConsoleInspector-right';
 
 /**
  * An inspector widget for a console.
@@ -57,6 +70,7 @@ class ConsoleInspector extends Panel {
   constructor() {
     super();
     this.addClass(INSPECTOR_CLASS);
+    this.update();
   }
 
   /**
@@ -88,6 +102,27 @@ class ConsoleInspector extends Panel {
   }
 
   /**
+   * The display orientation of the inspector.
+   */
+  get orientation(): ConsoleInspector.Orientation {
+    return this._orientation;
+  }
+  set orientation(newValue: ConsoleInspector.Orientation) {
+    if (newValue === this._orientation) {
+      return;
+    }
+    this._orientation = newValue;
+    this.update();
+  }
+
+  /**
+   * A signal emitted when an inspector's orientation is toggled.
+   */
+  get orientationToggled(): ISignal<ConsoleInspector, void> {
+    return Private.orientationToggledSignal.bind(this);
+  }
+
+  /**
    * A flag that indicates whether the inspector remembers history.
    */
   get remember(): boolean {
@@ -97,8 +132,11 @@ class ConsoleInspector extends Panel {
     if (newValue === this._remember) {
       return;
     }
-    this._remember = newValue;
     this._clear();
+    this._remember = newValue;
+    if (!this.remember) {
+      this._history = null;
+    }
     this.update();
   }
 
@@ -119,13 +157,18 @@ class ConsoleInspector extends Panel {
     if (this.isDisposed) {
       return;
     }
+
+    clearSignalData(this);
+
     if (this._history) {
       this._history.forEach(widget => widget.dispose());
       this._history = null;
     }
+
     if (this._toolbar) {
       this._toolbar.dispose();
     }
+
     super.dispose();
   }
 
@@ -135,15 +178,10 @@ class ConsoleInspector extends Panel {
   protected onUpdateRequest(msg: Message): void {
     if (this._toolbar) {
       this._toolbar.dispose();
-      this._toolbar = null;
     }
 
-    if (this._remember) {
-      this._toolbar = this._createToolbar();
-      this.insertChild(0, this._toolbar);
-    } else {
-      this._history = null;
-    }
+    this._toolbar = this._createToolbar();
+    this.insertChild(0, this._toolbar);
   }
 
   /**
@@ -180,6 +218,18 @@ class ConsoleInspector extends Panel {
    */
   private _createToolbar(): NotebookToolbar {
     let toolbar = new NotebookToolbar();
+
+    let toggle = new ToolbarButton({
+      className: this.orientation === 'vertical' ? RIGHT_TOGGLE_CLASS
+        : BOTTOM_TOGGLE_CLASS,
+      onClick: () => this.orientationToggled.emit(void 0),
+      tooltip: 'Toggle the inspector orientation.'
+    });
+    toolbar.add('toggle', toggle);
+
+    if (!this._remember) {
+      return toolbar;
+    }
 
     let clear = new ToolbarButton({
       className: CLEAR_CLASS,
@@ -220,7 +270,61 @@ class ConsoleInspector extends Panel {
   private _content: Widget = null;
   private _history: Widget[] = null;
   private _index: number = -1;
+  private _orientation: ConsoleInspector.Orientation = 'horizontal';
   private _rank: number = Infinity;
   private _remember: boolean = false;
   private _toolbar: NotebookToolbar = null;
+}
+
+
+/**
+ * A namespace for console inspector private data.
+ */
+namespace Private {
+  /**
+   * A signal emitted when an inspector's orientation is toggled.
+   */
+  export
+  const orientationToggledSignal = new Signal<ConsoleInspector, void>();
+
+  /**
+   * Scroll an element into view if needed.
+   *
+   * @param area - The scroll area element.
+   *
+   * @param elem - The element of interest.
+   */
+  export
+  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
+    let ar = area.getBoundingClientRect();
+    let er = elem.getBoundingClientRect();
+    if (er.top < ar.top - 10) {
+      area.scrollTop -= ar.top - er.top + 10;
+    } else if (er.bottom > ar.bottom + 10) {
+      area.scrollTop += er.bottom - ar.bottom + 10;
+    }
+  }
+
+  /**
+   * Jump to the bottom of a node.
+   *
+   * @param node - The scrollable element.
+   */
+  export
+  function scrollToBottom(node: HTMLElement): void {
+    node.scrollTop = node.scrollHeight;
+  }
+}
+
+
+/**
+ * A namespace for ConsoleInspector statics.
+ */
+export
+namespace ConsoleInspector {
+  /**
+   * The orientation options of a console inspector.
+   */
+  export
+  type Orientation = 'horizontal' | 'vertical';
 }

@@ -127,14 +127,8 @@
 
 
 .jp-ConsoleInspector-child {
-  height: 100%;
+  height: calc(100% - 24px); /* Subtract the height of the toolbar. */
   overflow: auto;
-}
-
-
-.jp-ConsoleInspector .jp-NBToolbar ~ .jp-ConsoleInspector-child {
-    height: calc(100% - 24px); /* Subtract the height of the toolbar. */
-    overflow: auto;
 }
 
 
@@ -150,6 +144,28 @@
 
 .jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-forward::before {
    content: "\f061";  /* arrow-right */
+}
+
+
+.jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-bottom {
+  position: absolute;
+  right: 0;
+}
+
+
+.jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-bottom::before {
+   content: "\f0d7";  /* caret-down */
+}
+
+
+.jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-right {
+  position: absolute;
+  right: 0;
+}
+
+
+.jp-ConsoleInspector .jp-NBToolbar-button.jp-ConsoleInspector-right::before {
+   content: "\f0da";  /* caret-right */
 }
 
 

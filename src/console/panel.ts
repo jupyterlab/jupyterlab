@@ -84,6 +84,15 @@ class ConsolePanel extends SplitPanel {
     // Create console inspector widgets and add them to the inspectors panel.
     (options.inspectors || ConsolePanel.defaultInspectors).forEach(value => {
       let inspector = value.widget || new ConsoleInspector();
+      inspector.orientation = this._orientation as ConsoleInspector.Orientation;
+      inspector.orientationToggled.connect(() => {
+        let orientation = this.reorient(
+          this._orientation === 'vertical' ? 'horizontal' : 'vertical'
+        );
+        Object.keys(this._inspectors).forEach(i => {
+          this._inspectors[i].orientation = orientation;
+        });
+      });
       inspector.rank = value.rank;
       inspector.remember = !!value.remember;
       inspector.title.closable = false;
@@ -148,9 +157,9 @@ class ConsolePanel extends SplitPanel {
    * `SplitPanel` is used because its `orientation` accessor uses 'vertical' and
    * 'horizontal' as its values instead of an enum.
    */
-  reorient(orientation: 'horizontal' | 'vertical'): void {
+  reorient(orientation: ConsolePanel.Orientation): ConsolePanel.Orientation {
     if (this._orientation === orientation) {
-      return;
+      return orientation;
     }
 
     this._orientation = orientation;
@@ -159,6 +168,7 @@ class ConsolePanel extends SplitPanel {
     let isVertical = this._orientation === 'vertical';
     this.orientation = isVertical ? SplitPanel.Vertical : SplitPanel.Horizontal;
     this.setSizes(DEFAULT_SIZES);
+    return orientation;
   }
 
   /**
@@ -244,7 +254,7 @@ class ConsolePanel extends SplitPanel {
   private _console: ConsoleWidget = null;
   private _inspectors: { [id: string]: ConsoleInspector } = Object.create(null);
   private _tabs: TabPanel = null;
-  private _orientation: 'horizontal' | 'vertical' = 'horizontal';
+  private _orientation: ConsolePanel.Orientation = 'horizontal';
 }
 
 
@@ -253,6 +263,12 @@ class ConsolePanel extends SplitPanel {
  */
 export
 namespace ConsolePanel {
+  /**
+   * The orientation options of a console panel.
+   */
+  export
+  type Orientation = 'horizontal' | 'vertical';
+
   /**
    * The definition of a console inspector.
    */
@@ -317,7 +333,7 @@ namespace ConsolePanel {
     /**
      * The orientation of the console panel.
      */
-    orientation?: 'horizontal' | 'vertical';
+    orientation?: Orientation;
 
     /**
      * The mime renderer for the console panel.
