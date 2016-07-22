@@ -125,7 +125,7 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
     }
   },
   {
-    id: 'console:dismiss-overlays',
+    id: 'console:dismiss-completion',
     handler: () => {
       if (tracker.activeWidget) {
         tracker.activeWidget.content.dismissCompletion();
@@ -180,32 +180,46 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
         });
       }
     }
+  },
+  {
+    id: 'console:toggle-inspectors',
+    handler: () => {
+      if (tracker.activeWidget) {
+        tracker.activeWidget.toggleInspectors();
+      }
+    }
   }
-
   ]);
-  app.palette.add([
-  {
-    command: 'console:clear',
-    category: 'Console',
-    text: 'Clear Cells'
-  },
-  {
-    command: 'console:execute',
-    category: 'Console',
-    text: 'Execute Cell'
-  },
-  {
-    command: 'console:interrupt-kernel',
-    category: 'Console',
-    text: 'Interrupt Kernel'
-  },
-  {
-    command: 'console:switch-kernel',
-    category: 'Console',
-    text: 'Switch Kernel'
-  }]);
 
- let newSubmenu = new Menu(newSubmenuItems);
+  app.palette.add([
+    {
+      command: 'console:clear',
+      category: 'Console',
+      text: 'Clear Cells'
+    },
+    {
+      command: 'console:execute',
+      category: 'Console',
+      text: 'Execute Cell'
+    },
+    {
+      command: 'console:interrupt-kernel',
+      category: 'Console',
+      text: 'Interrupt Kernel'
+    },
+    {
+      command: 'console:switch-kernel',
+      category: 'Console',
+      text: 'Switch Kernel'
+    },
+    {
+      command: 'console:toggle-inspectors',
+      category: 'Console',
+      text: 'Toggle Inspector'
+    }
+  ]);
+
+  let newSubmenu = new Menu(newSubmenuItems);
 
   let menu = new Menu ([
     new MenuItem ({

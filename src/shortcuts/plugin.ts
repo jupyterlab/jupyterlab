@@ -237,14 +237,19 @@ const SHORTCUTS = [
   },
   {
     command: 'console:execute',
-    selector: '.jp-Console .jp-CellEditor',
+    selector: '.jp-ConsolePanel',
     sequence: ['Shift Enter']
   },
   {
-    command: 'console:dismiss-overlays',
-    selector: '.jp-Console .jp-CellEditor',
+    command: 'console:dismiss-completion',
+    selector: '.jp-ConsolePanel',
     sequence: ['Escape']
   },
+  {
+    command: 'console:toggle-inspectors',
+    selector: '.jp-ConsolePanel',
+    sequence: ['Accel I']
+  }
 ];
 
 
