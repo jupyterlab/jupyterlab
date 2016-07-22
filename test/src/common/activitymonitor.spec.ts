@@ -66,7 +66,7 @@ describe('common/activitymonitor', () => {
         expect(called).to.be(false);
         setTimeout(() => {
           signal.emit(10);
-        }, 90);
+        }, 70);
         setTimeout(() => {
           expect(called).to.be(false);
         }, 100);
