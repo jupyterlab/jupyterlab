@@ -126,6 +126,7 @@ class MapWidget extends Widget {
    * A message handler invoked on a 'resize' message.
    */
   onResize(msg: ResizeMessage) {
+    this._sized = true;
     this._width = msg.width;
     this._height = msg.height;
     this._map.invalidateSize(true);
@@ -136,12 +137,9 @@ class MapWidget extends Widget {
    * Make the map fit the geojson layer bounds only once when all info is available.
    */
   private _fitLayerBounds() {
-    if (this._fitBounds && this._geojsonLayer && this._width && this._height) {
-      // We haven't fitted before, we have layer information, and the
-      // width and height have been updated from their initial falsey values to a
-      // positive size or to -1 (indicating we need to read the size from the DOM).
+    if (!this._fitted && this._sized && this._geojsonLayer) {
       this._map.fitBounds(this._geojsonLayer.getBounds());
-      this._fitBounds = false;
+      this._fitted = true;
     }
   }
 
@@ -152,9 +150,10 @@ class MapWidget extends Widget {
     this.update();
   }
 
-  private _fitBounds = true;
-  private _width = 0;
-  private _height = 0;
+  private _fitted = false;
+  private _sized = false;
+  private _width = -1;
+  private _height = -1;
   private _geojson: JSONValue = null;
   private _geojsonLayer: leaflet.GeoJSON;
   private _map: leaflet.Map;
