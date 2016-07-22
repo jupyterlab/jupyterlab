@@ -120,6 +120,16 @@ function startApp(session: ISession) {
       text: 'Toggle Inspector',
       shortcut: 'Accel I',
       handler: () => { consolePanel.toggleInspectors(); }
+    },
+    {
+      category: 'Console',
+      text: 'Position Inspector Vertically',
+      handler: () => { consolePanel.reorient('vertical'); }
+    },
+    {
+      category: 'Console',
+      text: 'Position Inspector Horizontally',
+      handler: () => { consolePanel.reorient('horizontal'); }
     }
   ];
   pModel.addItems(items);
