@@ -132,7 +132,7 @@
 }
 
 
-.jp-ConsoleInspector .jp-NBToolbar + .jp-ConsoleInspector-child {
+.jp-ConsoleInspector .jp-NBToolbar ~ .jp-ConsoleInspector-child {
     height: calc(100% - 24px); /* Subtract the height of the toolbar. */
     overflow: auto;
 }
