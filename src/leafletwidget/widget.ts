@@ -69,7 +69,6 @@ class MapWidget extends Widget {
       return map._size.clone();
     };
 
-    this.update();
     context.model.contentChanged.connect(() => {
       this.update();
     });
