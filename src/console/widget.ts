@@ -148,17 +148,10 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * A signal emitted when the details inspector value changes.
+   * A signal emitted when an inspector value is generated.
    */
-  get detailsChanged(): ISignal<ConsoleWidget, Widget> {
-    return Private.detailsChangedSignal.bind(this);
-  }
-
-  /**
-   * A signal emitted when the hint inspector value changes.
-   */
-  get hintsChanged(): ISignal<ConsoleWidget, Widget> {
-    return Private.hintsChangedSignal.bind(this);
+  get inspected(): ISignal<ConsoleWidget, ConsoleWidget.IInspectorUpdate> {
+    return Private.inspectedSignal.bind(this);
   }
 
   /**
@@ -198,6 +191,10 @@ class ConsoleWidget extends Widget {
     this.newPrompt();
     return prompt.execute(this._session.kernel).then(
       (value: KernelMessage.IExecuteReplyMsg) => {
+        if (!value) {
+          this.updateDetails(null);
+          return;
+        }
         if (value.content.status === 'ok') {
           let content = value.content as KernelMessage.IExecuteOkReply;
           this.updateDetails(content);
@@ -307,7 +304,7 @@ class ConsoleWidget extends Widget {
    */
   protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
     if (change.newValue) {
-      this.updateHint(change);
+      this.updateHints(change);
     }
   }
 
@@ -363,6 +360,9 @@ class ConsoleWidget extends Widget {
     // Jump to the bottom of the console.
     Private.scrollToBottom(this.node);
 
+    // Clear the hints inspector.
+    this.inspected.emit({ content: null, type: 'hints' });
+
     prompt.focus();
   }
 
@@ -375,56 +375,66 @@ class ConsoleWidget extends Widget {
    * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
   protected updateDetails(content: KernelMessage.IExecuteOkReply): void {
+    let inspectorUpdate: ConsoleWidget.IInspectorUpdate = {
+      content: null,
+      type: 'details'
+    };
+
     if (!content) {
-      this.detailsChanged.emit(null);
+      this.inspected.emit(inspectorUpdate);
       return;
     }
 
     let details = content.payload.filter(i => (i as any).source === 'page')[0];
     if (details) {
       let bundle = (details as any).data as MimeMap<string>;
-      this.detailsChanged.emit(this._rendermime.render(bundle));
+      inspectorUpdate.content = this._rendermime.render(bundle);
+      this.inspected.emit(inspectorUpdate);
       return;
     }
 
-
-    this.detailsChanged.emit(null);
+    this.inspected.emit(inspectorUpdate);
   }
 
   /**
    * Update the hints inspector based on a text change.
    */
-  protected updateHint(change: ITextChange): void {
+  protected updateHints(change: ITextChange): void {
     let contents: KernelMessage.IInspectRequest = {
       code: change.newValue,
       cursor_pos: change.position,
       detail_level: 0
     };
     let pendingInspect = ++this._pendingInspect;
+    let inspectorUpdate: ConsoleWidget.IInspectorUpdate = {
+      content: null,
+      type: 'hints'
+    };
 
     this._session.kernel.inspect(contents).then(msg => {
       let value = msg.content;
 
       // If widget has been disposed, bail.
       if (this.isDisposed) {
-        this.hintsChanged.emit(null);
+        this.inspected.emit(inspectorUpdate);
         return;
       }
 
       // If a newer text change has created a pending request, bail.
       if (pendingInspect !== this._pendingInspect) {
-        this.hintsChanged.emit(null);
+        this.inspected.emit(inspectorUpdate);
         return;
       }
 
       // Hint request failures or negative results fail silently.
       if (value.status !== 'ok' || !value.found) {
-        this.hintsChanged.emit(null);
+        this.inspected.emit(inspectorUpdate);
         return;
       }
 
       let bundle = value.data as MimeMap<string>;
-      this.hintsChanged.emit(this._rendermime.render(bundle));
+      inspectorUpdate.content = this._rendermime.render(bundle);
+      this.inspected.emit(inspectorUpdate);
     });
   }
 
@@ -487,6 +497,23 @@ namespace ConsoleWidget {
 
 
   /**
+   * An update value for console code inspectors.
+   */
+  export
+  interface IInspectorUpdate {
+    /**
+     * The content being sent to the inspector for display.
+     */
+    content: Widget;
+
+    /**
+     * The type of the inspector being updated.
+     */
+    type: string;
+  }
+
+
+  /**
    * The default implementation of an `IRenderer`.
    */
   export
@@ -524,16 +551,10 @@ namespace ConsoleWidget {
  */
 namespace Private {
   /**
-   * A signal emitted when the details inspector value changes.
+   * A signal emitted when an inspector value is generated.
    */
   export
-  const detailsChangedSignal = new Signal<ConsoleWidget, Widget>();
-
-  /**
-   * A signal emitted when the hint inspector value changes.
-   */
-  export
-  const hintsChangedSignal = new Signal<ConsoleWidget, Widget>();
+  const inspectedSignal = new Signal<ConsoleWidget, ConsoleWidget.IInspectorUpdate>();
 
   /**
    * Scroll an element into view if needed.

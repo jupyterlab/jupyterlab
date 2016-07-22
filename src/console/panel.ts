@@ -71,8 +71,8 @@ class ConsolePanel extends SplitPanel {
     super();
     this.addClass(PANEL_CLASS);
 
-    // Create the tab panel.
-    this._inspectors = new TabPanel();
+    // Create the inspectors tab panel.
+    this._tabs = new TabPanel();
 
     // Create console widget.
     this._console = new ConsoleWidget({
@@ -80,32 +80,29 @@ class ConsolePanel extends SplitPanel {
       rendermime: options.rendermime
     });
 
-    // Create console hints widget and add it to the tab panel.
-    this._hints = options.hints || new ConsoleInspector();
-    this._hints.title.closable = false;
-    this._hints.title.text = 'Hints';
-    this._hints.addClass(HINTS_CLASS);
-    this._inspectors.addChild(this._hints);
 
-    // Create console details widget and add it to the tab panel.
-    this._details = options.details || new ConsoleInspector();
-    this._details.title.closable = false;
-    this._details.title.text = 'Details';
-    this._hints.addClass(DETAILS_CLASS);
-    this._inspectors.addChild(this._details);
+    // Create console inspector widgets and add them to the inspectors panel.
+    (options.inspectors || ConsolePanel.defaultInspectors).forEach(value => {
+      let inspector = value.widget || new ConsoleInspector();
+      inspector.rank = value.rank;
+      inspector.title.closable = false;
+      inspector.title.text = value.name;
+      if (value.className) {
+        inspector.addClass(value.className);
+      }
+      this._inspectors[value.type] = inspector;
+      this._tabs.addChild(inspector);
+    });
 
-    // Connect the console hints signal.
-    this._console.hintsChanged.connect(this.onHintsChanged, this);
-
-    // Connect the console details signal.
-    this._console.detailsChanged.connect(this.onDetailsChanged, this);
+    // Connect the code inspected signal.
+    this._console.inspected.connect(this.onInspectorUpdate, this);
 
     // Add the panel contents.
     this._orientation = options.orientation || this._orientation;
     this.orientation = this._orientation === 'vertical' ? SplitPanel.Vertical
       : SplitPanel.Horizontal;
     this.addChild(this._console);
-    this.addChild(this._inspectors);
+    this.addChild(this._tabs);
     this.setSizes(DEFAULT_SIZES);
   }
 
@@ -120,16 +117,6 @@ class ConsolePanel extends SplitPanel {
   }
 
   /**
-   * The inspectors tabs used by the panel.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get inspectors(): TabPanel {
-    return this._inspectors;
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
@@ -137,17 +124,13 @@ class ConsolePanel extends SplitPanel {
       return;
     }
 
-    // Dispose console details widget.
-    this._details.dispose();
-    this._details = null;
-
-    // Dispose console hints widget.
-    this._hints.dispose();
-    this._hints = null;
+    // Dispose console inspectors.
+    Object.keys(this._inspectors).forEach(i => this._inspectors[i].dispose());
+    this._inspectors = null;
 
     // Dispose the inspector tabs.
-    this._inspectors.dispose();
-    this._inspectors = null;
+    this._tabs.dispose();
+    this._tabs = null;
 
     // Dispose console widget.
     this._console.dispose();
@@ -181,12 +164,12 @@ class ConsolePanel extends SplitPanel {
    * Toggle the inspectors open and closed.
    */
   toggleInspectors(): void {
-    if (this._inspectors.isHidden) {
-      this._inspectors.show();
+    if (this._tabs.isHidden) {
+      this._tabs.show();
       this.setSizes(this._cachedSizes);
       this._cachedSizes = null;
     } else {
-      this._inspectors.hide();
+      this._tabs.hide();
       this._cachedSizes = this.sizes();
     }
   }
@@ -216,41 +199,50 @@ class ConsolePanel extends SplitPanel {
   }
 
   /**
-   * Handle details inspector change signals.
-   *
-   * #### Notes
-   * This method may be reimplemented by subclasses that wish to change the
-   * priority given to the display of different inspectors.
+   * Handle inspector update signals.
    */
-  protected onDetailsChanged(sender: any, content: Widget): void {
-    this._details.content = content;
-    // If content exists, then user requested details always supersede
-    // automatically generated hints.
-    if (content) {
-      this._inspectors.currentWidget = this._details;
+  protected onInspectorUpdate(sender: any, args: ConsoleWidget.IInspectorUpdate): void {
+    let widget = this._inspectors[args.type];
+    if (!widget) {
+      return;
     }
-  }
 
-  /**
-   * Handle hint inspector change signals.
-   *
-   * #### Notes
-   * This method may be reimplemented by subclasses that wish to change the
-   * priority given to the display of different inspectors.
-   */
-  protected onHintsChanged(sender: any, content: Widget): void {
-    this._hints.content = content;
-    // If content exists and there are no visible details, show hints.
-    if (content && this._details.content === null) {
-      this._inspectors.currentWidget = this._hints;
+    // Update the content of the inspector widget.
+    widget.content = args.content;
+
+    let inspectors = this._inspectors;
+
+    // If any inspector with a higher rank has content, do not change focus.
+    if (args.content) {
+      for (let type in inspectors) {
+        let inspector = this._inspectors[type];
+        if (inspector.rank < widget.rank && inspector.content) {
+          return;
+        }
+      }
+      this._tabs.currentWidget = widget;
+      return;
+    }
+
+    // If the inspector was emptied, show the next best ranked inspector.
+    let lowest = Infinity;
+    widget = null;
+    for (let type in inspectors) {
+      let inspector = this._inspectors[type];
+      if (inspector.rank < lowest && inspector.content) {
+        lowest = inspector.rank;
+        widget = inspector;
+      }
+    }
+    if (widget) {
+      this._tabs.currentWidget = widget;
     }
   }
 
   private _cachedSizes: number[] = null;
   private _console: ConsoleWidget = null;
-  private _details: ConsoleInspector = null;
-  private _hints: ConsoleInspector = null;
-  private _inspectors: TabPanel = null;
+  private _inspectors: { [id: string]: ConsoleInspector } = Object.create(null);
+  private _tabs: TabPanel = null;
   private _orientation: 'horizontal' | 'vertical' = 'horizontal';
 }
 
@@ -261,19 +253,50 @@ class ConsolePanel extends SplitPanel {
 export
 namespace ConsolePanel {
   /**
+   * The definition of a console inspector.
+   */
+  export
+  interface IInspector {
+    /**
+     * The optional class name added to the inspector widget.
+     */
+    className?: string;
+
+    /**
+     * The display name of the inspector.
+     */
+    name: string;
+
+    /**
+     * The rank order of display priority for inspector updates. A lower rank
+     * denotes a higher display priority.
+     */
+    rank: number;
+
+    /**
+     * The type of the inspector.
+     */
+    type: string;
+
+    /**
+     * The optional console inspector widget instance.
+     */
+    widget?: ConsoleInspector;
+  }
+
+  /**
    * The initialization options for a console panel.
    */
   export
   interface IOptions {
     /**
-     * The details (pager) widget for a console panel.
+     * The list of available console inspectors for code introspection.
+     *
+     * #### Notes
+     * The order of items in the inspectors array is the order in which they
+     * will be rendered in the inspects tab panel.
      */
-    details?: ConsoleInspector;
-
-    /**
-     * The hints widget for a console panel.
-     */
-    hints?: ConsoleInspector;
+    inspectors?: IInspector[];
 
     /**
      * The orientation of the console panel.
@@ -290,4 +313,10 @@ namespace ConsolePanel {
      */
     session: ISession;
   }
+
+  export
+  const defaultInspectors: IInspector[] = [
+    { className: HINTS_CLASS, name: 'Hints', rank: 2, type: 'hints' },
+    { className: DETAILS_CLASS, name: 'Details', rank: 1, type: 'details' }
+  ];
 }

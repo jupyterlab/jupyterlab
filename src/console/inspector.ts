@@ -50,5 +50,16 @@ class ConsoleInspector extends Widget {
     }
   }
 
+  /**
+   * The display rank of the inspector.
+   */
+  get rank(): number {
+    return this._rank;
+  }
+  set rank(newValue: number) {
+    this._rank = newValue;
+  }
+
   private _content: Widget = null;
+  private _rank: number = Infinity;
 }
