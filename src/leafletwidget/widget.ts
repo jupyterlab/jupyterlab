@@ -137,6 +137,9 @@ class MapWidget extends Widget {
    */
   private _fitLayerBounds() {
     if (this._fitBounds && this._geojsonLayer && this._width && this._height) {
+      // We haven't fitted before, we have layer information, and the
+      // width and height have been updated from their initial falsey values to a
+      // positive size or to -1 (indicating we need to read the size from the DOM).
       this._map.fitBounds(this._geojsonLayer.getBounds());
       this._fitBounds = false;
     }
