@@ -9,10 +9,6 @@ import {
 } from '../../codemirror/widget';
 
 import {
-  Message
-} from 'phosphor-messaging';
-
-import {
   IChangedArgs
 } from 'phosphor-properties';
 
@@ -307,6 +303,10 @@ class CellEditorWidget extends CodeMirrorWidget {
     let ch = cursor.ch;
 
     if (event.keyCode === TAB) {
+      // If the tab is modified, ignore it.
+      if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+        return;
+      }
       return this.onTabEvent(event, ch, line);
     }
 
