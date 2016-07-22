@@ -200,8 +200,8 @@ class ConsoleWidget extends Widget {
     return prompt.execute(this._session.kernel).then(
       (value: KernelMessage.IExecuteReplyMsg) => {
         if (value.content.status === 'ok') {
-          let content = value.content as any;
-          this.updateDetails(content as KernelMessage.IExecuteOkReplyMsg);
+          let content = value.content as KernelMessage.IExecuteOkReply;
+          this.updateDetails(content);
         }
         Private.scrollToBottom(this.node);
       },
@@ -375,7 +375,7 @@ class ConsoleWidget extends Widget {
    * the kernel type definitions.
    * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
-  protected updateDetails(content: KernelMessage.IExecuteOkReplyMsg): void {
+  protected updateDetails(content: KernelMessage.IExecuteOkReply): void {
     if (!content) {
       this.detailsChanged.emit(null);
       return;
