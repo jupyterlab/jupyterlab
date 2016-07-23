@@ -63,8 +63,8 @@ class DocumentRegistry implements IDisposable {
    * an error will be thrown.
    * If `'*'` is given as a default extension, the factory will be registered
    * as the global default.
-   * If a factory is already registered as a default for a given extension or
-   * as the global default, this factory will override the existing default.
+   * If an extension or global default is already registered, this factory
+   * will override the existing default.
    */
   addWidgetFactory(factory: IWidgetFactory<Widget, IDocumentModel>, options: IWidgetFactoryOptions): IDisposable {
     let name = options.displayName;
@@ -215,28 +215,32 @@ class DocumentRegistry implements IDisposable {
    *
    * #### Notes
    * The first item in the list is considered the default. The returned list
-   * has factories in the following order:
+   * has widget factories in the following order:
    * - extension-specific default factory
-   * - extension-specific factories
-   * - last registered global default factory
-   * - all other global default factories
+   * - global default factory
+   * - all other extension-specific factories
+   * - all other global factories
    */
   listWidgetFactories(ext: string = '*'): string[] {
     let factories = new Set<string>();
+
+    // Start with the extension-specific default factory.
     if (ext.length > 1) {
       if (ext in this._defaultWidgetFactories) {
         factories.add(this._defaultWidgetFactories[ext]);
-      }
-
-      // Add the extension-specific factories in registration order.
-      if (ext in this._widgetFactoryExtensions) {
-        this._widgetFactoryExtensions[ext].forEach(n => { factories.add(n); });
       }
     }
 
     // Add the global default factory.
     if (this._defaultWidgetFactory) {
       factories.add(this._defaultWidgetFactory);
+    }
+
+      // Add the extension-specific factories in registration order.
+    if (ext.length > 1) {
+      if (ext in this._widgetFactoryExtensions) {
+        this._widgetFactoryExtensions[ext].forEach(n => { factories.add(n); });
+      }
     }
 
     // Add the rest of the global factories, in registration order.
