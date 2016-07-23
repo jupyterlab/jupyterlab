@@ -236,7 +236,7 @@ class DocumentRegistry implements IDisposable {
       factories.add(this._defaultWidgetFactory);
     }
 
-      // Add the extension-specific factories in registration order.
+    // Add the extension-specific factories in registration order.
     if (ext.length > 1) {
       if (ext in this._widgetFactoryExtensions) {
         this._widgetFactoryExtensions[ext].forEach(n => { factories.add(n); });
