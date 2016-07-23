@@ -41,7 +41,7 @@ class HTMLWidget extends Widget {
   constructor(html: string) {
     super();
     try {
-      var range = document.createRange();
+      let range = document.createRange();
       this.node.appendChild(range.createContextualFragment(html));
     } catch (error) {
       console.warn('Environment does not support Range ' +

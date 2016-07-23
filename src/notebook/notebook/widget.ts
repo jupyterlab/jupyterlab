@@ -754,10 +754,13 @@ class Notebook extends StaticNotebook {
         }
       }
     } else {
+      if (!this.hasClass(COMMAND_CLASS)) {
+        this.node.focus();
+      }
       this.addClass(COMMAND_CLASS);
       this.removeClass(EDIT_CLASS);
-      this.node.focus();
     }
+
     if (activeCell) {
       activeCell.addClass(ACTIVE_CLASS);
     }
