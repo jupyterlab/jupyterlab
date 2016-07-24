@@ -9,7 +9,7 @@ import {
 
 import {
   ICompletionRequest, ICoords, ITextChange
-} from '../../../../lib/notebook/cells/editor'
+} from '../../../../lib/notebook/cells/editor';
 
 
 describe('notebook/completion/model', () => {
@@ -204,8 +204,19 @@ describe('notebook/completion/model', () => {
           { raw: 'qux', text: '<mark>qux</mark>' },
           { raw: 'quux', text: '<mark>qu</mark>u<mark>x</mark>' }
         ];
-        model.options = ['qux', 'quux'];
+        model.options = ['foo', 'bar', 'baz', 'quux', 'qux'];
         model.query = 'qux';
+        expect(model.items).to.eql(want);
+      });
+
+      it('should break ties in score by locale sort', () => {
+        let model = new CompletionModel();
+        let want: ICompletionItem[] = [
+          { raw: 'quux', text: '<mark>qu</mark>ux' },
+          { raw: 'qux', text: '<mark>qu</mark>x' }
+        ];
+        model.options = ['foo', 'bar', 'baz', 'qux', 'quux'];
+        model.query = 'qu';
         expect(model.items).to.eql(want);
       });
 
