@@ -333,7 +333,7 @@ class CellEditorWidget extends CodeMirrorWidget {
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
     let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
-    let position = editor.getDoc().indexFromPos({ line, ch })
+    let position = editor.getDoc().indexFromPos({ line, ch });
 
     // A completion request signal should only be emitted if the current
     // character or a preceding character is not whitespace.
