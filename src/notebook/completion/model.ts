@@ -373,7 +373,7 @@ class CompletionModel implements ICompletionModel {
         });
       }
     }
-    return results.sort((a, b) => { return a.score - b.score; })
+    return results.sort(StringSearch.scoreCmp)
       .map(result => ({ text: result.text, raw: result.raw }));
   }
 
@@ -414,8 +414,7 @@ namespace Private {
  *
  * #### Notes
  * This functionality comes from phosphor-core and can be removed from this file
- * once newer versions of phosphor libraries are used throughout
- * jupyter-js-notebook.
+ * once the phosphor mono-repo is deployed.
  */
 namespace StringSearch {
   /**
@@ -474,6 +473,22 @@ namespace StringSearch {
       score += j * j;
     }
     return { score, indices };
+  }
+
+  /**
+   * A sort comparison function for item match scores.
+   *
+   * #### Notes
+   * This orders the items first based on score (lower is better), then
+   * by locale order of the item text.
+   */
+  export
+  function scoreCmp(a: ICompletionMatch, b: ICompletionMatch): number {
+    let delta = a.score - b.score;
+    if (delta !== 0) {
+      return delta;
+    }
+    return a.raw.localeCompare(b.raw);
   }
 
   /**
