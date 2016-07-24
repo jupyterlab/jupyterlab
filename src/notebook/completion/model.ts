@@ -413,8 +413,8 @@ namespace Private {
  * A namespace which holds string searching functionality.
  *
  * #### Notes
- * This functionality comes from phosphor-core and can be removed from this file
- * once the phosphor mono-repo is deployed.
+ * All of this functionality comes from phosphor-core and can be removed from
+ * this file once the phosphor mono-repo is deployed *except* `scoreCmp`.
  */
 namespace StringSearch {
   /**
