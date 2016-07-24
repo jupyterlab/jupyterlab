@@ -79,25 +79,72 @@ describe('common/activitymonitor', () => {
 
       it('should collapse during activity', (done) => {
         let called = false;
-        let monitor = new ActivityMonitor<TestObject, number>({ signal, timeout: 100 });
+        let timeout = 300;
+        let emission = -1;
+        let monitor = new ActivityMonitor<TestObject, number>({ signal, timeout });
+
         monitor.activityStopped.connect((sender, args) => {
+          emission = args.args;
+          called = true;
           expect(sender).to.be(monitor);
           expect(args.sender).to.be(testObj);
-          expect(args.args).to.be(10);
-          called = true;
         });
-        signal.emit(5);
+
+
+        let firstEmission = 5;
+        let secondEmission = 10;
+        let start = 0; // The start time in ms for each signal emitted.
+
+        let thirdPass = () => {
+          let now = (new Date()).getTime();
+          let delta = now - start;
+          if (delta > timeout) {
+            expect(called).to.be(true);
+            expect(emission).to.be(secondEmission);
+            done();
+            return;
+          }
+          throw new Error('Time traveled in the wrong direction!');
+        };
+
+        let secondPass = () => {
+          let now = (new Date()).getTime();
+          let delta = now - start;
+          if (delta > timeout) {
+            console.log('delta', delta);
+            expect(called).to.be(true);
+            expect(emission).to.be(secondEmission);
+            done();
+            return;
+          }
+          setTimeout(thirdPass, timeout);
+        };
+
+        let firstPass = () => {
+          let now = (new Date()).getTime();
+          let delta = now - start;
+          if (delta > timeout) {
+            expect(called).to.be(true);
+            expect(emission).to.be(firstEmission);
+            done();
+            return;
+          }
+          signal.emit(secondEmission);
+          // Restart the clock.
+          start = (new Date()).getTime();
+          setTimeout(secondPass, timeout - 100);
+        };
+
+        // The timing of setTimeout is *not* guaranteed and on overburdened
+        // systems, it can take longer than intended, so each pass must check
+        // the actual time elapsed if timing is an inherent part of its behavior
+        // as it is in this test.
+        signal.emit(firstEmission);
         expect(called).to.be(false);
-        setTimeout(() => {
-          signal.emit(10);
-        }, 70);
-        setTimeout(() => {
-          expect(called).to.be(false);
-        }, 100);
-        setTimeout(() => {
-          expect(called).to.be(true);
-          done();
-        }, 200);
+
+        // Start the clock.
+        start = (new Date()).getTime();
+        setTimeout(firstPass, timeout - 100);
       });
 
     });
