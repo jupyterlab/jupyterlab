@@ -838,10 +838,23 @@ class Notebook extends StaticNotebook {
    * Handle edge request signals from cells.
    */
   private _onEdgeRequest(widget: Widget, location: EdgeLocation): void {
+    let prev = this.activeCellIndex;
     if (location === 'top') {
       this.activeCellIndex--;
+      // Move the cursor to the first position on the last line.
+      if (this.activeCellIndex < prev) {
+        let doc = this.activeCell.editor.editor.getDoc();
+        doc.setCursor({
+          ch: 0,
+          line: doc.lastLine()
+        });
+      }
     } else {
       this.activeCellIndex++;
+      // Move the cursor to the first character.
+      if (this.activeCellIndex > prev) {
+        this.activeCell.editor.setCursorPosition(0);
+      }
     }
   }
 

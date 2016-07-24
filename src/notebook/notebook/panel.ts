@@ -22,10 +22,6 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  Message
-} from 'phosphor-messaging';
-
-import {
   Widget
 } from 'phosphor-widget';
 
