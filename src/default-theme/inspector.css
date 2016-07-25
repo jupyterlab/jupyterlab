@@ -116,11 +116,6 @@
 }
 
 
-.jp-InspectorItem.jp-ConsolePanel-hints {
-  background: #FFFFCA;
-}
-
-
 .jp-InspectorItem pre {
   font-size: 11px;
   margin: 0;
@@ -224,3 +219,13 @@
 
 
 .jp-InspectorItem pre .ansi-bright-white-bg { background-color: #FFFFFF; }
+
+
+/* default inspector items: hints */
+.jp-InspectorItem.jp-HintsInspectorItem {
+  background: #FFFFCA;
+}
+
+
+/* default inspector items: details */
+.jp-InspectorItem.jp-DetailsInspectorItem {}
