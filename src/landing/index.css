@@ -119,6 +119,8 @@
   background-repeat: no-repeat;
   clear: none;
   padding-top: 2px;
+  height: 12px;
+  width: 12px;
 }
 
 .jp-Landing-path {
