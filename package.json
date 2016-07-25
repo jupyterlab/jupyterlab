@@ -31,6 +31,7 @@
     "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
+    "phosphor-splitpanel": "^1.0.0-rc.1",
     "phosphor-tabs": "^1.0.0-rc.2",
     "phosphor-widget": "^1.0.0-rc.1",
     "sanitize-html": "^1.12.0",
