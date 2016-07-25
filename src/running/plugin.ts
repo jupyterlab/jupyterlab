@@ -38,5 +38,7 @@ function activateRunningSessions(app: Application, services: ServiceManager): vo
   running.terminalOpenRequested.connect((sender, model) => {
     console.log('requested terminal', model.name);
   });
-  app.shell.addToRightArea(running);
+  // Rank has been chosen somewhat arbitrarily to give priority to the running
+  // sessions widget in the sidebar.
+  app.shell.addToRightArea(running, { rank: 1 });
 }
