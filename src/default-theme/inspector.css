@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-Inspector .p-TabBar {
+  min-width: 300px;
   min-height: 24px;
   max-height: 24px;
   color: #777777;

@@ -10,12 +10,12 @@ import {
 } from './';
 
 import {
-  RenderMime
-} from '../rendermime';
-
-import {
   selectKernel
 } from '../docregistry';
+
+import {
+  RenderMime
+} from '../rendermime';
 
 import {
   WidgetTracker
@@ -26,16 +26,21 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
+  MenuItem, Menu
+} from 'phosphor-menus';
+
+import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  Inspector
+} from '../inspector';
 
 import {
   MainMenu
 } from '../mainmenu/plugin';
 
-import {
-  MenuItem, Menu
-} from 'phosphor-menus';
 
 /**
  * The console extension.
@@ -43,9 +48,10 @@ import {
 export
 const consoleExtension = {
   id: 'jupyter.extensions.console',
-  requires: [ServiceManager, RenderMime, MainMenu],
+  requires: [ServiceManager, RenderMime, MainMenu, Inspector],
   activate: activateConsole
 };
+
 
 /**
  * The class name for all main area landscape tab icons.
@@ -61,9 +67,11 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 /**
  * Activate the console extension.
  */
-function activateConsole(app: Application, services: ServiceManager, rendermime: RenderMime<Widget>, mainMenu: MainMenu): Promise<void> {
+function activateConsole(app: Application, services: ServiceManager, rendermime: RenderMime<Widget>, mainMenu: MainMenu, inspector: Inspector): Promise<void> {
   let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessions;
+
+  console.log('inspector', inspector);
 
   let newSubmenuItems : Array<MenuItem> = [];
 

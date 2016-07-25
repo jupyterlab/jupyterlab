@@ -22,6 +22,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  Inspector
+} from '../inspector';
+
+import {
   nbformat
 } from '../notebook';
 
@@ -72,7 +76,7 @@ const PROMPT_CLASS = 'jp-Console-prompt';
  * A widget containing a Jupyter console.
  */
 export
-class ConsoleWidget extends Widget {
+class ConsoleWidget extends Widget implements Inspector.IInspectable {
   /**
    * Construct a console widget.
    */
@@ -152,7 +156,7 @@ class ConsoleWidget extends Widget {
   /**
    * A signal emitted when an inspector value is generated.
    */
-  get inspected(): ISignal<ConsoleWidget, ConsoleWidget.IInspectorUpdate> {
+  get inspected(): ISignal<ConsoleWidget, Inspector.IInspectorUpdate> {
     return Private.inspectedSignal.bind(this);
   }
 
@@ -308,7 +312,7 @@ class ConsoleWidget extends Widget {
    * Update the hints inspector based on a text change.
    */
   protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
-    let inspectorUpdate: ConsoleWidget.IInspectorUpdate = {
+    let inspectorUpdate: Inspector.IInspectorUpdate = {
       content: null,
       type: 'hints'
     };
@@ -420,7 +424,7 @@ class ConsoleWidget extends Widget {
    * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
   protected updateDetails(content: KernelMessage.IExecuteOkReply): void {
-    let inspectorUpdate: ConsoleWidget.IInspectorUpdate = {
+    let inspectorUpdate: Inspector.IInspectorUpdate = {
       content: null,
       type: 'details'
     };
@@ -498,24 +502,6 @@ namespace ConsoleWidget {
     createPrompt(rendermime: RenderMime<Widget>): CodeCellWidget;
   }
 
-
-  /**
-   * An update value for console code inspectors.
-   */
-  export
-  interface IInspectorUpdate {
-    /**
-     * The content being sent to the inspector for display.
-     */
-    content: Widget;
-
-    /**
-     * The type of the inspector being updated.
-     */
-    type: string;
-  }
-
-
   /**
    * The default implementation of an `IRenderer`.
    */
@@ -557,7 +543,7 @@ namespace Private {
    * A signal emitted when an inspector value is generated.
    */
   export
-  const inspectedSignal = new Signal<ConsoleWidget, ConsoleWidget.IInspectorUpdate>();
+  const inspectedSignal = new Signal<ConsoleWidget, Inspector.IInspectorUpdate>();
 
   /**
    * Scroll an element into view if needed.
