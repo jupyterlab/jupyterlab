@@ -25,46 +25,46 @@ import {
 /**
  * The class name added to inspector widgets.
  */
-const INSPECTOR_CLASS = 'jp-ConsoleInspector';
+const INSPECTOR_CLASS = 'jp-Inspector';
 
 /**
  * The class name added to inspector widgets.
  */
-const CHILD_CLASS = 'jp-ConsoleInspector-child';
+const CHILD_CLASS = 'jp-Inspector-child';
 
 /**
  * The history clear button class name.
  */
-const CLEAR_CLASS = 'jp-ConsoleInspector-clear';
+const CLEAR_CLASS = 'jp-Inspector-clear';
 
 /**
  * The back button class name.
  */
-const BACK_CLASS = 'jp-ConsoleInspector-back';
+const BACK_CLASS = 'jp-Inspector-back';
 
 /**
  * The forward button class name.
  */
-const FORWARD_CLASS = 'jp-ConsoleInspector-forward';
+const FORWARD_CLASS = 'jp-Inspector-forward';
 
 /**
  * The orientation toggle bottom button class name.
  */
-const BOTTOM_TOGGLE_CLASS = 'jp-ConsoleInspector-bottom';
+const BOTTOM_TOGGLE_CLASS = 'jp-Inspector-bottom';
 
 /**
  * The orientation toggle right button class name.
  */
-const RIGHT_TOGGLE_CLASS = 'jp-ConsoleInspector-right';
+const RIGHT_TOGGLE_CLASS = 'jp-Inspector-right';
 
 
 /**
- * An inspector widget for a console.
+ * An code inspector widget.
  */
 export
-class ConsoleInspector extends Panel {
+class Inspector extends Panel {
   /**
-   * Construct a console inspector widget.
+   * Construct an inspector widget.
    */
   constructor() {
     super();
@@ -103,10 +103,10 @@ class ConsoleInspector extends Panel {
   /**
    * The display orientation of the inspector.
    */
-  get orientation(): ConsoleInspector.Orientation {
+  get orientation(): Inspector.Orientation {
     return this._orientation;
   }
-  set orientation(newValue: ConsoleInspector.Orientation) {
+  set orientation(newValue: Inspector.Orientation) {
     if (newValue === this._orientation) {
       return;
     }
@@ -117,7 +117,7 @@ class ConsoleInspector extends Panel {
   /**
    * A signal emitted when an inspector's orientation is toggled.
    */
-  get orientationToggled(): ISignal<ConsoleInspector, void> {
+  get orientationToggled(): ISignal<Inspector, void> {
     return Private.orientationToggledSignal.bind(this);
   }
 
@@ -269,7 +269,7 @@ class ConsoleInspector extends Panel {
   private _content: Widget = null;
   private _history: Widget[] = null;
   private _index: number = -1;
-  private _orientation: ConsoleInspector.Orientation = 'horizontal';
+  private _orientation: Inspector.Orientation = 'horizontal';
   private _rank: number = Infinity;
   private _remember: boolean = false;
   private _toolbar: NotebookToolbar = null;
@@ -277,14 +277,14 @@ class ConsoleInspector extends Panel {
 
 
 /**
- * A namespace for console inspector private data.
+ * A namespace for inspector private data.
  */
 namespace Private {
   /**
    * A signal emitted when an inspector's orientation is toggled.
    */
   export
-  const orientationToggledSignal = new Signal<ConsoleInspector, void>();
+  const orientationToggledSignal = new Signal<Inspector, void>();
 
   /**
    * Scroll an element into view if needed.
@@ -317,13 +317,29 @@ namespace Private {
 
 
 /**
- * A namespace for ConsoleInspector statics.
+ * A namespace for Inspector statics.
  */
 export
-namespace ConsoleInspector {
+namespace Inspector {
   /**
-   * The orientation options of a console inspector.
+   * The orientation options of am inspector.
    */
   export
   type Orientation = 'horizontal' | 'vertical';
+
+  /**
+   * An update value for code inspectors.
+   */
+  export
+  interface IInspectorUpdate {
+    /**
+     * The content being sent to the inspector for display.
+     */
+    content: Widget;
+
+    /**
+     * The type of the inspector being updated.
+     */
+    type: string;
+  }
 }

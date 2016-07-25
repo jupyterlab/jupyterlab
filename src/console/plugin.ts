@@ -180,30 +180,6 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
           });
         }
       }
-    },
-    {
-      id: 'console:toggle-inspectors',
-      handler: () => {
-        if (tracker.activeWidget) {
-          tracker.activeWidget.toggleInspectors();
-        }
-      }
-    },
-    {
-      id: 'console:reorient-vertical',
-      handler: () => {
-        if (tracker.activeWidget) {
-          tracker.activeWidget.reorient('vertical');
-        }
-      }
-    },
-    {
-      id: 'console:reorient-horizontal',
-      handler: () => {
-        if (tracker.activeWidget) {
-          tracker.activeWidget.reorient('horizontal');
-        }
-      }
     }
   ]);
 
@@ -227,21 +203,6 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
       command: 'console:switch-kernel',
       category: 'Console',
       text: 'Switch Kernel'
-    },
-    {
-      command: 'console:toggle-inspectors',
-      category: 'Console',
-      text: 'Toggle Inspector'
-    },
-    {
-      command: 'console:reorient-vertical',
-      category: 'Console',
-      text: 'Position Inspector Vertically'
-    },
-    {
-      command: 'console:reorient-horizontal',
-      category: 'Console',
-      text: 'Position Inspector Horizontally'
     }
   ]);
 
@@ -274,12 +235,6 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
       text: 'Switch Kernel',
       handler: () => {
         app.commands.execute('console:switch-kernel');
-      }
-    }),
-    new MenuItem ({
-      text: 'Toggle Inspector',
-      handler: () => {
-        app.commands.execute('console:toggle-inspectors');
       }
     })
   ]);
