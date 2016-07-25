@@ -31,7 +31,7 @@ import {
  */
 const SHORTCUTS = [
   {
-    command: 'command-palette:toggle',
+    command: 'command-palette:activate',
     selector: 'body',
     sequence: ['Accel Shift P']
   },
