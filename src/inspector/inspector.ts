@@ -14,6 +14,10 @@ import {
 } from 'phosphor-signaling';
 
 import {
+  TabPanel
+} from 'phosphor-tabs';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -23,52 +27,295 @@ import {
 
 
 /**
- * The class name added to inspector widgets.
+ * The class name added to inspector panels.
  */
-const INSPECTOR_CLASS = 'jp-Inspector';
+const PANEL_CLASS = 'jp-Inspector';
 
 /**
- * The class name added to inspector widgets.
+ * The class name added to inspector child item widgets.
  */
-const CHILD_CLASS = 'jp-Inspector-child';
+const ITEM_CLASS = 'jp-InspectorItem';
+
+/**
+ * The class name added to inspector child item widgets' content.
+ */
+const CONTENT_CLASS = 'jp-InspectorItem-content';
 
 /**
  * The history clear button class name.
  */
-const CLEAR_CLASS = 'jp-Inspector-clear';
+const CLEAR_CLASS = 'jp-InspectorItem-clear';
 
 /**
  * The back button class name.
  */
-const BACK_CLASS = 'jp-Inspector-back';
+const BACK_CLASS = 'jp-InspectorItem-back';
 
 /**
  * The forward button class name.
  */
-const FORWARD_CLASS = 'jp-Inspector-forward';
+const FORWARD_CLASS = 'jp-InspectorItem-forward';
 
 /**
  * The orientation toggle bottom button class name.
  */
-const BOTTOM_TOGGLE_CLASS = 'jp-Inspector-bottom';
+const BOTTOM_TOGGLE_CLASS = 'jp-InspectorItem-bottom';
 
 /**
  * The orientation toggle right button class name.
  */
-const RIGHT_TOGGLE_CLASS = 'jp-Inspector-right';
+const RIGHT_TOGGLE_CLASS = 'jp-InspectorItem-right';
 
 
 /**
- * An code inspector widget.
+ * A panel which contains a set of inspectors.
  */
 export
-class Inspector extends Panel {
+class Inspector extends TabPanel {
+  /**
+   * Construct an inspector.
+   */
+  constructor(options: Inspector.IOptions) {
+    super();
+    this.addClass(PANEL_CLASS);
+
+    // Create console inspector widgets and add them to the inspectors panel.
+    (options.items || []).forEach(value => {
+      let widget = value.widget || new InspectorItem();
+      widget.orientation = this._orientation as Inspector.Orientation;
+      widget.orientationToggled.connect(() => {
+        this.orientation = 'vertical' ? 'horizontal' : 'vertical';
+      });
+      widget.rank = value.rank;
+      widget.remember = !!value.remember;
+      widget.title.closable = false;
+      widget.title.text = value.name;
+      if (value.className) {
+        widget.addClass(value.className);
+      }
+      this._items[value.type] = widget;
+      this.addChild(widget);
+    });
+  }
+
+  /**
+   * Set the orientation of the inspector panel.
+   */
+  get orientation(): Inspector.Orientation {
+    return this._orientation;
+  }
+  set orientation(orientation: Inspector.Orientation) {
+    if (this._orientation === orientation) {
+      return;
+    }
+
+    this._orientation = orientation;
+    Object.keys(this._items).forEach(i => {
+      this._items[i].orientation = orientation;
+    });
+  }
+
+  /**
+   * Set the reference to the semantic parent of the inspector panel.
+   */
+  get reference(): Inspector.IInspectable {
+    return this._reference;
+  }
+  set reference(reference: Inspector.IInspectable) {
+    if (this._reference === reference) {
+      return;
+    }
+
+    // Disconnect old signal handler.
+    if (this.reference) {
+      this._reference.inspected.disconnect(this.onInspectorUpdate, this);
+    }
+
+    this._reference = reference;
+
+    // Connect new signal handler.
+    if (this.reference) {
+      this._reference.inspected.connect(this.onInspectorUpdate, this);
+    }
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    // Dispose the inspector child items.
+    Object.keys(this._items).forEach(i => this._items[i].dispose());
+    this._items = null;
+
+    // Disconnect from reference.
+    this.reference = null;
+
+    super.dispose();
+  }
+
+  /**
+   * Handle inspector update signals.
+   */
+  protected onInspectorUpdate(sender: any, args: Inspector.IInspectorUpdate): void {
+    let widget = this._items[args.type];
+    if (!widget) {
+      return;
+    }
+
+    // Update the content of the inspector widget.
+    widget.content = args.content;
+
+    let items = this._items;
+
+    // If any inspector with a higher rank has content, do not change focus.
+    if (args.content) {
+      for (let type in items) {
+        let inspector = this._items[type];
+        if (inspector.rank < widget.rank && inspector.content) {
+          return;
+        }
+      }
+      this.currentWidget = widget;
+      return;
+    }
+
+    // If the inspector was emptied, show the next best ranked inspector.
+    let lowest = Infinity;
+    widget = null;
+    for (let type in items) {
+      let inspector = this._items[type];
+      if (inspector.rank < lowest && inspector.content) {
+        lowest = inspector.rank;
+        widget = inspector;
+      }
+    }
+    if (widget) {
+      this.currentWidget = widget;
+    }
+  }
+
+  private _items: { [type: string]: InspectorItem } = Object.create(null);
+  private _orientation: Inspector.Orientation = 'horizontal';
+  private _reference: Inspector.IInspectable = null;
+}
+
+
+/**
+ * A namespace for Inspector statics.
+ */
+export
+namespace Inspector {
+  /**
+   * The orientation options of an inspector panel.
+   */
+  export
+  type Orientation = 'horizontal' | 'vertical';
+
+  /**
+   * The definition of an inspector.
+   */
+  export
+  interface IInspectable {
+    /**
+     * A signal emitted when an inspector value is generated.
+     */
+    inspected: ISignal<any, IInspectorUpdate>;
+  }
+
+  /**
+   * An update value for code inspectors.
+   */
+  export
+  interface IInspectorUpdate {
+    /**
+     * The content being sent to the inspector for display.
+     */
+    content: Widget;
+
+    /**
+     * The type of the inspector being updated.
+     */
+    type: string;
+  }
+
+  /**
+   * The definition of a child item of an inspector panel.
+   */
+  export
+  interface IInspectorItem {
+    /**
+     * The optional class name added to the inspector child widget.
+     */
+    className?: string;
+
+    /**
+     * The display name of the inspector child.
+     */
+    name: string;
+
+    /**
+     * The rank order of display priority for inspector updates. A lower rank
+     * denotes a higher display priority.
+     */
+    rank: number;
+
+    /**
+     * A flag that indicates whether the inspector remembers history.
+     *
+     * The default value is `false`.
+     */
+    remember?: boolean;
+
+    /**
+     * The type of the inspector.
+     */
+    type: string;
+
+    /**
+     * The optional console inspector widget instance.
+     */
+    widget?: InspectorItem;
+  }
+
+  /**
+   * The initialization options for a console panel.
+   */
+  export
+  interface IOptions {
+    /**
+     * The list of available child inspectors items for code introspection.
+     *
+     * #### Notes
+     * The order of items in the inspectors array is the order in which they
+     * will be rendered in the inspectors tab panel.
+     */
+    items?: IInspectorItem[];
+
+    /**
+     * The orientation of the inspector panel.
+     *
+     * The default value is `'horizontal'`.
+     */
+    orientation?: Orientation;
+  }
+}
+
+
+/**
+ * A code inspector child widget.
+ */
+export
+class InspectorItem extends Panel {
   /**
    * Construct an inspector widget.
    */
   constructor() {
     super();
-    this.addClass(INSPECTOR_CLASS);
+    this.addClass(ITEM_CLASS);
     this.update();
   }
 
@@ -91,7 +338,7 @@ class Inspector extends Panel {
     }
     this._content = newValue;
     if (this._content) {
-      this._content.addClass(CHILD_CLASS);
+      this._content.addClass(CONTENT_CLASS);
       this.addChild(this._content);
       if (this.remember) {
         this._history.push(newValue);
@@ -101,7 +348,7 @@ class Inspector extends Panel {
   }
 
   /**
-   * The display orientation of the inspector.
+   * The display orientation of the inspector widget.
    */
   get orientation(): Inspector.Orientation {
     return this._orientation;
@@ -115,9 +362,9 @@ class Inspector extends Panel {
   }
 
   /**
-   * A signal emitted when an inspector's orientation is toggled.
+   * A signal emitted when an inspector widget's orientation is toggled.
    */
-  get orientationToggled(): ISignal<Inspector, void> {
+  get orientationToggled(): ISignal<InspectorItem, void> {
     return Private.orientationToggledSignal.bind(this);
   }
 
@@ -284,62 +531,5 @@ namespace Private {
    * A signal emitted when an inspector's orientation is toggled.
    */
   export
-  const orientationToggledSignal = new Signal<Inspector, void>();
-
-  /**
-   * Scroll an element into view if needed.
-   *
-   * @param area - The scroll area element.
-   *
-   * @param elem - The element of interest.
-   */
-  export
-  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
-    let ar = area.getBoundingClientRect();
-    let er = elem.getBoundingClientRect();
-    if (er.top < ar.top - 10) {
-      area.scrollTop -= ar.top - er.top + 10;
-    } else if (er.bottom > ar.bottom + 10) {
-      area.scrollTop += er.bottom - ar.bottom + 10;
-    }
-  }
-
-  /**
-   * Jump to the bottom of a node.
-   *
-   * @param node - The scrollable element.
-   */
-  export
-  function scrollToBottom(node: HTMLElement): void {
-    node.scrollTop = node.scrollHeight;
-  }
-}
-
-
-/**
- * A namespace for Inspector statics.
- */
-export
-namespace Inspector {
-  /**
-   * The orientation options of am inspector.
-   */
-  export
-  type Orientation = 'horizontal' | 'vertical';
-
-  /**
-   * An update value for code inspectors.
-   */
-  export
-  interface IInspectorUpdate {
-    /**
-     * The content being sent to the inspector for display.
-     */
-    content: Widget;
-
-    /**
-     * The type of the inspector being updated.
-     */
-    type: string;
-  }
+  const orientationToggledSignal = new Signal<InspectorItem, void>();
 }
