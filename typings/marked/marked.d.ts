@@ -11,7 +11,7 @@ interface MarkedStatic {
      * @param callback Function called when the markdownString has been fully parsed when using async highlighting
      * @return String of compiled HTML
      */
-    (src: string, callback: Function): string;
+    (src: string, callback: (err: Error, content: string) => void): string;
 
     /**
      * Compiles markdown to HTML.
@@ -21,7 +21,7 @@ interface MarkedStatic {
      * @param callback Function called when the markdownString has been fully parsed when using async highlighting
      * @return String of compiled HTML
      */
-    (src: string, options?: MarkedOptions, callback?: Function): string;
+    (src: string, options?: MarkedOptions, callback?: (err: Error, content: string) => void): string;
 
     /**
      * @param src String of markdown source to be compiled

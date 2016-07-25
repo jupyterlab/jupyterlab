@@ -11,6 +11,7 @@
 @import url('~jupyterlab/lib/running/theme.css');
 
 @import './about.css';
+@import './codemirror.css';
 @import './commandpalette.css';
 @import './completion.css';
 @import './console.css';

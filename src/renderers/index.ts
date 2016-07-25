@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as CodeMirror
+  from 'codemirror';
+
+import 'codemirror/addon/runmode/runmode';
+
 import * as marked
   from 'marked';
-
-import {
-  IRenderer
-} from '../rendermime';
 
 import {
   escape_for_html, ansi_to_html
@@ -21,16 +22,60 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  typeset, removeMath, replaceMath
-} from './latex';
+  requireMode
+} from '../codemirror';
+
+import {
+  IRenderer
+} from '../rendermime';
 
 import {
   defaultSanitizer
 } from '../sanitizer';
 
+import {
+  typeset, removeMath, replaceMath
+} from './latex';
+
+
 
 // Support GitHub flavored Markdown, leave sanitizing to external library.
-marked.setOptions({ gfm: true, sanitize: false, breaks: true });
+marked.setOptions({
+  gfm: true,
+  sanitize: false,
+  breaks: true,
+  langPrefix: 'cm-s-default language-',
+  highlight: (code, lang, callback) => {
+    if (!lang) {
+        // no language, no highlight
+        if (callback) {
+            callback(null, code);
+            return;
+        } else {
+            return code;
+        }
+    }
+    requireMode(lang).then(spec => {
+      let el = document.createElement('div');
+      if (!spec) {
+          console.log(`No CodeMirror mode: ${lang}`);
+          callback(null, code);
+          return;
+      }
+      try {
+        CodeMirror.runMode(code, spec, el);
+        callback(null, el.innerHTML);
+      } catch (err) {
+        console.log(`Failed to highlight ${lang} code`, err);
+        callback(err, code);
+      }
+    }).catch(err => {
+      console.log(`No CodeMirror mode: ${lang}`);
+      console.log(`Require CodeMirror mode error: ${err}`);
+      callback(null, code);
+    });
+  }
+});
 
 
 /**
@@ -40,47 +85,51 @@ export
 class HTMLWidget extends Widget {
   constructor(html: string) {
     super();
+    this._html = html;
+  }
+
+  /**
+   * The html string associated with the widget.
+   */
+  get html(): string {
+    return this._html;
+  }
+  set html(value: string) {
+    if (value === this._html) {
+      return;
+    }
+    this._html = value;
+    this.update();
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  onAfterAttach(msg: Message): void {
+    this.update();
+  }
+
+  /**
+   * A message handler invoked on an `'update-request'` message.
+   */
+  onUpdateRequest(msg: Message): void {
+    if (!this.isAttached || !this._html) {
+      return;
+    }
     try {
       let range = document.createRange();
-      this.node.appendChild(range.createContextualFragment(html));
+      this.node.appendChild(range.createContextualFragment(this._html));
     } catch (error) {
       console.warn('Environment does not support Range ' +
                    'createContextualFragment, falling back on innerHTML');
-      this.node.innerHTML = html;
+      this.node.innerHTML = this._html;
     }
-  }
-
-  /**
-   * A message handler invoked on an `'after-attach'` message.
-   *
-   * ####Notes
-   * If the node is visible, it is typeset.
-   */
-  onAfterAttach(msg: Message) {
     typeset(this.node);
   }
+
+  private _html = '';
 }
 
-/**
- * A widget for displaying text and rendering math.
- */
-export
-class LatexWidget extends Widget {
-  constructor(text: string) {
-    super();
-    this.node.innerHTML = text;
-  }
-
-  /**
-   * A message handler invoked on an `'after-attach'` message.
-   *
-   * ####Notes
-   * If the node is visible, it is typeset.
-   */
-  onAfterAttach(msg: Message) {
-    typeset(this.node);
-  }
-}
 
 /**
  * A renderer for raw html.
@@ -194,7 +243,7 @@ class LatexRenderer implements IRenderer<Widget> {
   mimetypes = ['text/latex'];
 
   render(mimetype: string, data: string): Widget {
-    return new LatexWidget(data);
+    return new HTMLWidget(data);
   }
 }
 
@@ -208,8 +257,12 @@ class MarkdownRenderer implements IRenderer<Widget> {
 
   render(mimetype: string, text: string): Widget {
     let data = removeMath(text);
-    let html = marked(data['text']);
-    let sanitized = defaultSanitizer.sanitize(replaceMath(html, data['math']));
-    return new HTMLWidget(sanitized);
+    let widget = new HTMLWidget('');
+    marked(data['text'], (err, content) => {
+      content = replaceMath(content, data['math']);
+      let sanitized = defaultSanitizer.sanitize(content);
+      widget.html = sanitized;
+    });
+    return widget;
   }
 }
