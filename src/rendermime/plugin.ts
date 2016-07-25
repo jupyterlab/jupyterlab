@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  RenderMime, MimeMap, IRenderer
+  RenderMime
 } from './index';
 
 import {
@@ -32,7 +32,7 @@ const renderMimeProvider = {
       new LatexRenderer(),
       new TextRenderer()
     ];
-    let renderers: MimeMap<IRenderer<Widget>> = {};
+    let renderers: RenderMime.MimeMap<RenderMime.IRenderer<Widget>> = {};
     let order: string[] = [];
     for (let t of transformers) {
       for (let m of t.mimetypes) {
@@ -40,6 +40,6 @@ const renderMimeProvider = {
         order.push(m);
       }
     }
-    return new RenderMime<Widget>(renderers, order);
+    return new RenderMime<Widget>({ renderers, order });
   }
 };

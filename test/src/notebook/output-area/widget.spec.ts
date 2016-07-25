@@ -20,7 +20,7 @@ import {
 } from '../../../../lib/notebook/output-area';
 
 import {
-  MimeMap, RenderMime
+  RenderMime
 } from '../../../../lib/rendermime';
 
 import {
@@ -74,12 +74,8 @@ class CustomOutputWidget extends OutputWidget {
     return super.getBundle(output);
   }
 
-  convertBundle(bundle: nbformat.MimeBundle): MimeMap<string> {
+  convertBundle(bundle: nbformat.MimeBundle): RenderMime.MimeMap<string> {
     return super.convertBundle(bundle);
-  }
-
-  sanitize(map: MimeMap<string>): void {
-    super.sanitize(map);
   }
 }
 
@@ -225,16 +221,6 @@ describe('notebook/output-area/widget', () => {
         let widget = new OutputAreaWidget({ rendermime });
         widget.trusted = true;
         expect(widget.trusted).to.be(true);
-      });
-
-      it('should re-render the widgets', () => {
-        let widget = new OutputAreaWidget({ rendermime });
-        widget.model = new OutputAreaModel();
-        widget.model.add(DEFAULT_OUTPUTS[0]);
-        let child = widget.childAt(0);
-        let old = child.output;
-        widget.trusted = true;
-        expect(child.output).to.not.be(old);
       });
 
     });
@@ -430,13 +416,14 @@ describe('notebook/output-area/widget', () => {
 
     describe('#clear()', () => {
 
-      it('should clear the current output', () => {
+      it('should clear the current output', (done) => {
         let widget = new OutputWidget({ rendermime });
-        widget.render(DEFAULT_OUTPUTS[0], true);
-        let output = widget.output;
-        widget.clear();
-        expect(widget.output).to.not.be(output);
-        expect(widget.output).to.be.a(Widget);
+        widget.render(DEFAULT_OUTPUTS[0], true).then(() => {
+          let output = widget.output;
+          widget.clear();
+          expect(widget.output).to.not.be(output);
+          expect(widget.output).to.be.a(Widget);
+        }).then(done, done);
       });
 
     });
@@ -509,37 +496,6 @@ describe('notebook/output-area/widget', () => {
         let widget = new CustomOutputWidget({ rendermime });
         let map = widget.convertBundle(bundle);
         expect(map).to.eql({ 'text/plain': 'foo\nbar' });
-      });
-
-    });
-
-    describe('#sanitize()', () => {
-
-      it('should sanitize html input', () => {
-        let map: MimeMap<string> = {
-          'text/html': '<div>hello, 1 < 2</div>'
-        };
-        let widget = new CustomOutputWidget({ rendermime });
-        widget.sanitize(map);
-        expect(map['text/html']).to.be('<div>hello, 1 &lt; 2</div>');
-      });
-
-      it('should allow text/plain', () => {
-        let map: MimeMap<string> = {
-          'text/plain': '<div>hello, 1 < 2</div>'
-        };
-        let widget = new CustomOutputWidget({ rendermime });
-        widget.sanitize(map);
-        expect(map['text/plain']).to.be('<div>hello, 1 < 2</div>');
-      });
-
-      it('should disallow unknown mimetype', () => {
-        let map: MimeMap<string> = {
-          'foo/bar': '<div>hello, 1 < 2</div>'
-        };
-        let widget = new CustomOutputWidget({ rendermime });
-        widget.sanitize(map);
-        expect(map['foo/bar']).to.be(void 0);
       });
 
     });

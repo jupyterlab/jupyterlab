@@ -10,7 +10,7 @@ import {
 } from '../../codemirror';
 
 import {
-  RenderMime, MimeMap
+  RenderMime
 } from '../../rendermime';
 
 import {
@@ -662,14 +662,17 @@ class MarkdownCellWidget extends BaseCellWidget {
       let text = model && model.source || DEFAULT_MARKDOWN_TEXT;
       // Do not re-render if the text has not changed.
       if (text !== this._prev) {
-        let bundle: MimeMap<string> = { 'text/markdown': text };
+        let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
         this._markdownWidget.dispose();
-        this._markdownWidget = this._rendermime.render(bundle) || new Widget();
-        this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
-        (this.layout as PanelLayout).addChild(this._markdownWidget);
+        this._rendermime.render(bundle, this.trusted).then(widget => {
+          this._markdownWidget = widget || new Widget();
+          this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
+          (this.layout as PanelLayout).addChild(this._markdownWidget);
+        });
+      } else {
+        this._markdownWidget.show();
       }
       this._prev = text;
-      this._markdownWidget.show();
       this.toggleInput(false);
       this.addClass(RENDERED_CLASS);
     } else {
