@@ -16,6 +16,7 @@
 @import './console.css';
 @import './help.css';
 @import './images.css';
+@import './inspector.css';
 @import './markdownwidget.css';
 
 @import '../landing/index.css';
