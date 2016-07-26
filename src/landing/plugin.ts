@@ -108,8 +108,7 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
 
   let folderImage = document.createElement('span');
   folderImage.className = 'jp-Landing-folder';
-  folderImage.style.height = "12px";
-  folderImage.style.width = "12px";
+
 
   let path = document.createElement('span');
   path.textContent = 'home'
