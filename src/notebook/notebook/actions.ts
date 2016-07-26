@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  IKernel, KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -332,7 +332,7 @@ namespace NotebookActions {
 
     let promises: Promise<boolean>[] = [];
     for (let child of selected) {
-      promises.push(Private.runCell(child, kernel));
+      promises.push(Private.runCell(widget, child, kernel));
     }
     return Promise.all(promises).then(results => {
       for (let result of results) {
@@ -847,18 +847,25 @@ namespace Private {
    * Run a cell.
    */
   export
-  function runCell(widget: BaseCellWidget, kernel?: IKernel): Promise<boolean> {
-    switch (widget.model.type) {
+  function runCell(parent: Notebook, child: BaseCellWidget, kernel?: IKernel): Promise<boolean> {
+
+    switch (child.model.type) {
     case 'markdown':
-      (widget as MarkdownCellWidget).rendered = true;
+      (child as MarkdownCellWidget).rendered = true;
       break;
     case 'code':
       if (kernel) {
-        return (widget as CodeCellWidget).execute(kernel).then(reply => {
+        return (child as CodeCellWidget).execute(kernel).then(reply => {
+          if (!reply) {
+            parent.inspectionHandler.execute(null);
+          } else if (reply.content.status === 'ok') {
+            let content = reply.content as KernelMessage.IExecuteOkReply;
+            parent.inspectionHandler.execute(content);
+          }
           return reply ? reply.content.status === 'ok' : true;
         });
       }
-      (widget.model as CodeCellModel).executionCount = null;
+      (child.model as CodeCellModel).executionCount = null;
       break;
     default:
       break;

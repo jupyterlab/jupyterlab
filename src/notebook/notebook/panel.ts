@@ -104,6 +104,7 @@ class NotebookPanel extends Widget {
     this._completion.anchor = container.node;
     this._completion.attach(document.body);
 
+    // Set up the completion handler.
     this._completionHandler = new CellCompletionHandler(this._completion);
     this._completionHandler.activeCell = this._content.activeCell;
     this._content.activeCellChanged.connect((s, cell) => {
@@ -240,7 +241,9 @@ class NotebookPanel extends Widget {
    * #### Notes
    * The default implementation is a no-op.
    */
-  protected onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void { }
+  protected onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void {
+    // This is a no-op.
+  }
 
 
   /**
@@ -329,6 +332,7 @@ class NotebookPanel extends Widget {
       });
     });
     this._completionHandler.kernel = kernel;
+    this.content.inspectionHandler.kernel = kernel;
     this.kernelChanged.emit(kernel);
   }
 
@@ -346,13 +350,13 @@ class NotebookPanel extends Widget {
     }
   }
 
-  private _rendermime: RenderMime<Widget> = null;
-  private _context: IDocumentContext<INotebookModel> = null;
   private _clipboard: IClipboard = null;
-  private _content: Notebook = null;
-  private _renderer: NotebookPanel.IRenderer = null;
   private _completion: CompletionWidget = null;
   private _completionHandler: CellCompletionHandler = null;
+  private _content: Notebook = null;
+  private _context: IDocumentContext<INotebookModel> = null;
+  private _renderer: NotebookPanel.IRenderer = null;
+  private _rendermime: RenderMime<Widget> = null;
 }
 
 
