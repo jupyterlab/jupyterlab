@@ -526,7 +526,7 @@ function createDocumentMenu(context: IDocumentContext<IDocumentModel>): Menu {
       handler: () => { context.save(); }
     }),
     new MenuItem({
-      text: 'Save &As',
+      text: 'Save &As...',
       handler: () => { context.saveAs(); }
     }),
     new MenuItem({
@@ -534,7 +534,7 @@ function createDocumentMenu(context: IDocumentContext<IDocumentModel>): Menu {
       handler: () => { context.revert(); }
     }),
     new MenuItem({
-      text: 'Change &Kernel',
+      text: 'Change &Kernel...',
       handler: () => { selectKernelForContext(context); }
     })
   ];
