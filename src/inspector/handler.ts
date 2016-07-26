@@ -36,6 +36,13 @@ import {
 export
 class InspectionHandler implements IDisposable, Inspector.IInspectable {
   /**
+   * Construct a new inspection handler for a widget.
+   */
+  constructor(rendermime: RenderMime<Widget>) {
+    this._rendermime = rendermime;
+  }
+
+  /**
    * The cell widget used by the completion handler.
    */
   get activeCell(): BaseCellWidget {

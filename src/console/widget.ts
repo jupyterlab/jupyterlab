@@ -107,8 +107,13 @@ class ConsoleWidget extends Widget {
       completion.attach(document.body);
     }
 
+    // Set up the completion handler.
     this._completionHandler = new CellCompletionHandler(this._completion);
     this._completionHandler.kernel = this._session.kernel;
+
+    // Set up the inspection handler.
+    this._inspectionHandler = new InspectionHandler(this._rendermime);
+    this._inspectionHandler.kernel = this._session.kernel;
 
     // Create the banner.
     let banner = this._renderer.createBanner();
