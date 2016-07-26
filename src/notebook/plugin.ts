@@ -114,7 +114,7 @@ let currentApp : Application;
  */
 export
 const notebookHandlerExtension = {
-  id: 'jupyter.extensions.notebookHandler',
+  id: 'jupyter.extensions.notebook-handler',
   requires: [DocumentRegistry, ServiceManager, RenderMime, IClipboard, MainMenu],
   activate: activateNotebookHandler
 };
@@ -125,7 +125,7 @@ const notebookHandlerExtension = {
  */
 export
 const notebookTrackerProvider = {
-  id: 'jupyter.plugins.notebookTracker',
+  id: 'jupyter.plugins.notebook-tracker',
   provides: NotebookTracker,
   resolve: () => {
     return Private.notebookTracker;
