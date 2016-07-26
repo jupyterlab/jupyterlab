@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, SessionManager, IServiceManager, createServiceManager
+  IServiceManager, createServiceManager
 } from 'jupyter-js-services';
 
 import {
@@ -20,7 +20,6 @@ import {
 import {
   EditorWidgetFactory
 } from 'jupyterlab/lib/editorwidget/widget';
-
 
 import {
   showDialog, okButton
