@@ -10,7 +10,7 @@ import * as marked
   from 'marked';
 
 import {
-  ansi_to_html
+  ansi_to_html, escape_for_html
 } from 'ansi_up';
 
 import {
@@ -200,20 +200,21 @@ class TextRenderer implements RenderMime.IRenderer<Widget> {
    * Whether the input can safely sanitized for a given mimetype.
    */
   sanitizable(mimetype: string): boolean {
-    return true;
+    return false;
   }
 
   /**
    * Whether the input is safe without sanitization.
    */
   isSafe(mimetype: string): boolean {
-    return false;
+    return true;
   }
 
   /**
    * Transform the input bundle.
    */
   transform(mimetype: string, data: string): string {
+    data = escape_for_html(data);
     return `<pre>${ansi_to_html(data)}</pre>`;
   }
 
@@ -369,11 +370,39 @@ class PDFRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for LateX data.
  */
 export
-class LatexRenderer extends HTMLRenderer {
+class LatexRenderer implements RenderMime.IRenderer<Widget>  {
   /**
    * The mimetypes this renderer accepts.
    */
   mimetypes = ['text/latex'];
+
+  /**
+   * Whether the input can safely sanitized for a given mimetype.
+   */
+  sanitizable(mimetype: string): boolean {
+    return false;
+  }
+
+  /**
+   * Whether the input is safe without sanitization.
+   */
+  isSafe(mimetype: string): boolean {
+    return false;
+  }
+
+  /**
+   * Transform the input bundle.
+   */
+  transform(mimetype: string, data: string): string {
+    return data;
+  }
+
+  /**
+   * Render the transformed mime bundle.
+   */
+  render(mimetype: string, data: string): Widget {
+    return new HTMLWidget(data);
+  }
 }
 
 

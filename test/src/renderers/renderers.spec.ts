@@ -25,20 +25,20 @@ describe('renderers', () => {
 
     describe('#sanitizable()', () => {
 
-      it('should be `true`', () => {
+      it('should be `false`', () => {
         let t = new TextRenderer();
-        expect(t.sanitizable('text/plain')).to.be(true);
-        expect(t.sanitizable('application/vnd.jupyter.console-text')).to.be(true);
+        expect(t.sanitizable('text/plain')).to.be(false);
+        expect(t.sanitizable('application/vnd.jupyter.console-text')).to.be(false);
       });
 
     });
 
     describe('#isSafe()', () => {
 
-      it('should be `false`', () => {
+      it('should be `true`', () => {
         let t = new TextRenderer();
-        expect(t.isSafe('text/plain')).to.be(false);
-        expect(t.isSafe('application/vnd.jupyter.console-text')).to.be(false);
+        expect(t.isSafe('text/plain')).to.be(true);
+        expect(t.isSafe('application/vnd.jupyter.console-text')).to.be(true);
       });
 
     });
@@ -56,6 +56,13 @@ describe('renderers', () => {
         let text = 'There is no text but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
         text = t.transform('application/vnd.jupyter.console-text', text);
         expect(text).to.be('<pre>There is no text but <span style="color:rgb(0, 255, 0);background-color:rgb(187, 0, 0)">text</span>.\nWoo.</pre>');
+      });
+
+      it('should escape inline html', () => {
+        let t = new TextRenderer();
+        let text = 'There is no text <script>window.x=1</script> but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
+        text = t.transform('application/vnd.jupyter.console-text', text);
+        expect(text).to.be('<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span style="color:rgb(0, 255, 0);background-color:rgb(187, 0, 0)">text</span>.\nWoo.</pre>');
       });
 
     });
@@ -86,9 +93,9 @@ describe('renderers', () => {
 
     describe('#sanitizable()', () => {
 
-      it('should be `true`', () => {
+      it('should be `false`', () => {
         let t = new LatexRenderer();
-        expect(t.sanitizable('text/latex')).to.be(true);
+        expect(t.sanitizable('text/latex')).to.be(false);
       });
 
     });
