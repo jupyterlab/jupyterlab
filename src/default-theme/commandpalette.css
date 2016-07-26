@@ -73,6 +73,11 @@
   background: #2196F3;
 }
 
+.p-CommandPalette-header.p-mod-active {
+  color: rgba(255,255,255,0.7);
+  background: #2196F3;
+}
+
 
 .p-CommandPalette-command.p-mod-active .p-CommandPalette-commandCaption {
   color: inherit;
