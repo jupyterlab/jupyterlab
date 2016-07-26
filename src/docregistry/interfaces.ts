@@ -191,9 +191,9 @@ export interface IDocumentContext<T extends IDocumentModel> extends IDisposable 
   save(): Promise<void>;
 
   /**
-   * Save the document to a different path.
+   * Save the document to a different path chosen by the user.
    */
-  saveAs(path: string): Promise<void>;
+  saveAs(): Promise<void>;
 
   /**
    * Revert the document contents to disk contents.

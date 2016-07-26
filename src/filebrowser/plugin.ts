@@ -18,7 +18,7 @@ import {
 } from '../docmanager';
 
 import {
-  DocumentRegistry
+  DocumentRegistry, IDocumentContext, IDocumentModel, selectKernelForContext
 } from '../docregistry';
 
 import {
@@ -26,7 +26,7 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  Menu, MenuItem, IMenuItemOptions, MenuItemType
+  Menu, MenuItem
 } from 'phosphor-menus';
 
 import {
@@ -46,7 +46,7 @@ import {
 } from '../widgettracker';
 
 import {
-  MainMenu, mainMenuProvider
+  MainMenu
 } from '../mainmenu/plugin';
 
 
@@ -117,7 +117,7 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: Application, manager: ServiceManager, registry: DocumentRegistry, mainMenu: MainMenu): Promise<void> {
+function activateFileBrowser(app: Application, manager: ServiceManager, registry: DocumentRegistry, mainMenu: MainMenu): void {
   let id = 0;
 
   let tracker = new WidgetTracker<Widget>();
@@ -125,6 +125,8 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
   tracker.activeWidgetChanged.connect((sender, widget) => {
     activeWidget = widget;
   });
+
+  let docManager: DocumentManager;
 
   let opener: IWidgetOpener = {
     open: (widget) => {
@@ -134,11 +136,17 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
         tracker.addWidget(widget);
+        widget.node.addEventListener('contextmenu', (event: MouseEvent) => {
+          let context = docManager.contextForWidget(widget);
+          let menu = createDocumentMenu(context);
+          event.preventDefault();
+          menu.popup(event.clientX, event.clientY);
+        });
       }
     }
   };
 
-  let docManager = new DocumentManager({
+  docManager = new DocumentManager({
     registry,
     manager,
     opener
@@ -252,6 +260,30 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
     }
   ]);
 
+
+// Add the command for saving a document with a new name.
+  let saveDocumentAsId = 'file-operations:saveas';
+
+  app.commands.add([
+    {
+      id: saveDocumentAsId,
+      handler: () => {
+        if (activeWidget) {
+          let context = docManager.contextForWidget(activeWidget);
+          context.saveAs().then(() => { fbModel.refresh(); });
+        }
+      }
+    }
+  ]);
+  app.palette.add([
+    {
+      command: saveDocumentAsId,
+      category: 'File Operations',
+      text: 'Save As...',
+      caption: 'Save the current document as...'
+    }
+  ]);
+
   // Add the command for closing a document.
   let closeDocumentId = 'file-operations:close';
 
@@ -331,66 +363,67 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
 
 
 
-    // Adding Top Menu
-      let newSubMenu = new Menu ([
-        new MenuItem({
-          text: 'Notebook',
-          handler: () => {
-            app.commands.execute(newNotebookId);
-          }
-        }),
-        new MenuItem({
-          text: 'Text File',
-          handler: () => {
-            app.commands.execute(newTextFileId);
-          }
-        })
+  // Adding Top Menu
+  let newSubMenu = new Menu ([
+    new MenuItem({
+      text: 'Notebook',
+      handler: () => {
+        app.commands.execute(newNotebookId);
+      }
+    }),
+    new MenuItem({
+      text: 'Text File',
+      handler: () => {
+        app.commands.execute(newTextFileId);
+      }
+    })
 
-      ]);
+  ]);
 
+  let menu = new Menu ([
+    new MenuItem({
+      text: 'New',
+      submenu: newSubMenu
 
+    }),
+    new MenuItem({
+      text: 'Save Document',
+      handler: () => {
+        app.commands.execute(saveDocumentId);
+      }
+    }),
+    new MenuItem({
+      text: 'Save Document As...',
+      handler: () => {
+        app.commands.execute(saveDocumentAsId);
+      }
+    }),
+    new MenuItem({
+      text: 'Revert Document',
+      handler: () => {
+        app.commands.execute(revertDocumentId);
+      }
+    }),
+    new MenuItem({
+      text: 'Close Current',
+      handler: () => {
+        app.commands.execute(closeDocumentId);
+      }
+    }),
+    new MenuItem({
+      text: 'Close All',
+      handler: () => {
+        app.commands.execute(closeAllId);
+      }
+    }),
 
-      let menu = new Menu ([
-        new MenuItem({
-          text: 'New',
-          submenu: newSubMenu
+  ]);
 
-        }),
-        new MenuItem({
-          text: 'Save Document',
-          handler: () => {
-            app.commands.execute(saveDocumentId);
-          }
-        }),
-        new MenuItem({
-          text: 'Revert Document',
-          handler: () => {
-            app.commands.execute(revertDocumentId);
-          }
-        }),
-        new MenuItem({
-          text: 'Close Current',
-          handler: () => {
-            app.commands.execute(closeDocumentId);
-          }
-        }),
-        new MenuItem({
-          text: 'Close All',
-          handler: () => {
-            app.commands.execute(closeAllId);
-          }
-        }),
-
-      ]);
-
-      let fileMenu = new MenuItem({
-        text: 'File',
-        submenu: menu
-      });
-      mainMenu.addItem(fileMenu, {rank: 1});
-
-
-  return Promise.resolve(void 0);
+  let fileMenu = new MenuItem({
+    text: 'File',
+    submenu: menu
+  });
+  mainMenu.addItem(fileMenu, {rank: 1});
 
   function showBrowser(): void {
     app.shell.activateLeft(fbWidget.id);
@@ -478,6 +511,33 @@ function createMenu(fbWidget: FileBrowserWidget, openWith: MenuItem[]):  Menu {
       handler: () => { fbWidget.shutdownKernels(); }
     })
   );
+  return new Menu(items);
+}
+
+
+/**
+ * Create a context menu for a document widget.
+ */
+function createDocumentMenu(context: IDocumentContext<IDocumentModel>): Menu {
+  let items = [
+    new MenuItem({
+      text: '&Save',
+      icon: 'fa fa-save',
+      handler: () => { context.save(); }
+    }),
+    new MenuItem({
+      text: 'Save &As...',
+      handler: () => { context.saveAs(); }
+    }),
+    new MenuItem({
+      text: '&Revert',
+      handler: () => { context.revert(); }
+    }),
+    new MenuItem({
+      text: 'Change &Kernel...',
+      handler: () => { selectKernelForContext(context); }
+    })
+  ];
   return new Menu(items);
 }
 

@@ -373,7 +373,7 @@ describe('notebook/notebook/panel', () => {
       it('should be called when the path changes', () => {
         let panel = createPanel();
         panel.methods = [];
-        panel.context.saveAs('foo.ipynb');
+        panel.context.saveAs();
         expect(panel.methods).to.contain('onPathChanged');
       });
 
@@ -389,9 +389,9 @@ describe('notebook/notebook/panel', () => {
       it('should update the title text', () => {
         let panel = createPanel();
         panel.methods = [];
-        panel.context.saveAs('test/foo.ipynb');
+        panel.context.saveAs();
         expect(panel.methods).to.contain('onPathChanged');
-        expect(panel.title.text).to.be('foo.ipynb');
+        expect(panel.title.text).to.be('foo');
       });
 
     });
