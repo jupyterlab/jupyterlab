@@ -132,7 +132,7 @@ class Inspector extends TabPanel {
     }
 
     // Clear the inspector child items (but maintain history).
-    Object.keys(this._items).forEach(i => { this._items[i].content = null; });
+    Object.keys(this._items).forEach(i => this._items[i].content = null);
 
     this._reference = reference;
 
