@@ -18,10 +18,6 @@ import {
 } from '../cells/editor';
 
 import {
-  ICursorSpan
-} from './model';
-
-import {
   CompletionWidget
 } from './widget';
 
@@ -56,15 +52,18 @@ class CellCompletionHandler implements IDisposable {
     return this._activeCell;
   }
   set activeCell(newValue: BaseCellWidget) {
-    let editor: CellEditorWidget;
+    if (newValue === this._activeCell) {
+      return;
+    }
+
     if (this._activeCell && !this._activeCell.isDisposed) {
-      editor = this._activeCell.editor;
+      let editor = this._activeCell.editor;
       editor.textChanged.disconnect(this.onTextChanged, this);
       editor.completionRequested.disconnect(this.onCompletionRequested, this);
     }
     this._activeCell = newValue;
-    if (newValue) {
-      editor = newValue.editor;
+    if (this._activeCell) {
+      let editor = this._activeCell.editor;
       editor.textChanged.connect(this.onTextChanged, this);
       editor.completionRequested.connect(this.onCompletionRequested, this);
     }

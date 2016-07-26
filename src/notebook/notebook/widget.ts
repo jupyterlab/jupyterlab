@@ -6,14 +6,6 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  RenderMime
-} from '../../rendermime';
-
-import {
-  scrollIntoViewIfNeeded
-} from '../../utils';
-
-import {
   Message
 } from 'phosphor-messaging';
 
@@ -36,6 +28,18 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  InspectionHandler
+} from '../../inspector';
+
+import {
+  RenderMime
+} from '../../rendermime';
+
+import {
+  scrollIntoViewIfNeeded
+} from '../../utils';
 
 import {
   ICellModel, BaseCellWidget, MarkdownCellModel,
@@ -267,21 +271,27 @@ class StaticNotebook extends Widget {
    *
    * The default implementation is a no-op
    */
-  protected onCellInserted(index: number, cell: BaseCellWidget): void { }
+  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+    // This is a no-op.
+  }
 
   /**
    * Handle a cell being moved.
    *
    * The default implementation is a no-op
    */
-  protected onCellMoved(fromIndex: number, toIndex: number): void { }
+  protected onCellMoved(fromIndex: number, toIndex: number): void {
+    // This is a no-op.
+  }
 
   /**
    * Handle a cell being removed.
    *
    * The default implementation is a no-op
    */
-  protected onCellRemoved(cell: BaseCellWidget): void { }
+  protected onCellRemoved(cell: BaseCellWidget): void {
+    // This is a no-op.
+  }
 
   /**
    * Handle a new model on the widget.
@@ -519,7 +529,9 @@ namespace StaticNotebook {
      * #### Notes
      * The base implementation is a no-op.
      */
-    updateCell(cell: BaseCellWidget): void { }
+    updateCell(cell: BaseCellWidget): void {
+      // This is a no-op.
+    }
 
     /**
      * Get the preferred mimetype for code cells in the notebook.
@@ -547,6 +559,28 @@ namespace StaticNotebook {
  */
 export
 class Notebook extends StaticNotebook {
+  /**
+   * Construct a notebook widget.
+   */
+  constructor(options: StaticNotebook.IOptions) {
+    super(options);
+    // Set up the inspection handler.
+    this._inspectionHandler = new InspectionHandler(this.rendermime);
+    this.activeCellChanged.connect((s, cell) => {
+      this._inspectionHandler.activeCell = cell;
+    });
+  }
+
+  /**
+   * Get the inspection handler used by the console.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get inspectionHandler(): InspectionHandler {
+    return this._inspectionHandler;
+  }
+
   /**
    * A signal emitted when the state of the notebook changes.
    */
@@ -647,6 +681,8 @@ class Notebook extends StaticNotebook {
       return;
     }
     this._activeCell = null;
+    this._inspectionHandler.dispose();
+    this._inspectionHandler = null;
     super.dispose();
   }
 
@@ -933,9 +969,10 @@ class Notebook extends StaticNotebook {
     }
   }
 
-  private _mode: NotebookMode = 'command';
   private _activeCellIndex = -1;
   private _activeCell: BaseCellWidget = null;
+  private _inspectionHandler: InspectionHandler = null;
+  private _mode: NotebookMode = 'command';
 }
 
 
@@ -1023,6 +1060,8 @@ namespace Private {
      * This is a reimplementation of the base class method,
      * and is a no-op.
      */
-    protected onUpdateRequest(msg: Message): void { }
+    protected onUpdateRequest(msg: Message): void {
+      // This is a no-op.
+    }
   }
 }

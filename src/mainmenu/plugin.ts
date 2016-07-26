@@ -79,7 +79,7 @@ namespace MainMenu {
  */
 export
 const mainMenuExtension = {
-  id: 'jupyter.extensions.mainMenu',
+  id: 'jupyter.extensions.main-menu',
   activate: activateMainMenu
 };
 
@@ -89,7 +89,7 @@ const mainMenuExtension = {
  */
 export
 const mainMenuProvider = {
-  id: 'jupyter.services.mainMenu',
+  id: 'jupyter.services.main-menu',
   provides: MainMenu,
   resolve: () => {
     return Private.mainMenu;

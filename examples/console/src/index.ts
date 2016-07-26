@@ -114,22 +114,6 @@ function startApp(session: ISession) {
       text: 'Execute Prompt',
       shortcut: 'Shift Enter',
       handler: () => { consolePanel.content.execute(); }
-    },
-    {
-      category: 'Console',
-      text: 'Toggle Inspector',
-      shortcut: 'Accel I',
-      handler: () => { consolePanel.toggleInspectors(); }
-    },
-    {
-      category: 'Console',
-      text: 'Position Inspector Vertically',
-      handler: () => { consolePanel.reorient('vertical'); }
-    },
-    {
-      category: 'Console',
-      text: 'Position Inspector Horizontally',
-      handler: () => { consolePanel.reorient('horizontal'); }
     }
   ];
   pModel.addItems(items);
@@ -144,11 +128,6 @@ function startApp(session: ISession) {
       selector: '.jp-ConsolePanel',
       sequence: ['Shift Enter'],
       handler: () => { consolePanel.content.execute(); }
-    },
-    {
-      selector: '.jp-ConsolePanel',
-      sequence: ['Accel I'],
-      handler: () => { consolePanel.toggleInspectors(); }
     },
     {
       selector: 'body',

@@ -6,36 +6,41 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  ConsolePanel
-} from './';
-
-import {
-  RenderMime
-} from '../rendermime';
-
-import {
-  selectKernel
-} from '../docregistry';
-
-import {
-  WidgetTracker
-} from '../widgettracker';
-
-import {
   Application
 } from 'phosphide/lib/core/application';
+
+import {
+  MenuItem, Menu
+} from 'phosphor-menus';
 
 import {
   Widget
 } from 'phosphor-widget';
 
 import {
+  selectKernel
+} from '../docregistry';
+
+import {
+  Inspector
+} from '../inspector';
+
+import {
   MainMenu
 } from '../mainmenu/plugin';
 
 import {
-  MenuItem, Menu
-} from 'phosphor-menus';
+  RenderMime
+} from '../rendermime';
+
+import {
+  WidgetTracker
+} from '../widgettracker';
+
+import {
+  ConsolePanel
+} from './';
+
 
 /**
  * The console extension.
@@ -43,9 +48,10 @@ import {
 export
 const consoleExtension = {
   id: 'jupyter.extensions.console',
-  requires: [ServiceManager, RenderMime, MainMenu],
+  requires: [ServiceManager, RenderMime, MainMenu, Inspector],
   activate: activateConsole
 };
+
 
 /**
  * The class name for all main area landscape tab icons.
@@ -61,9 +67,14 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 /**
  * Activate the console extension.
  */
-function activateConsole(app: Application, services: ServiceManager, rendermime: RenderMime<Widget>, mainMenu: MainMenu): Promise<void> {
+function activateConsole(app: Application, services: ServiceManager, rendermime: RenderMime<Widget>, mainMenu: MainMenu, inspector: Inspector): Promise<void> {
   let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessions;
+
+  // Set the source of the code inspector to the current console.
+  tracker.activeWidgetChanged.connect((sender: any, panel: ConsolePanel) => {
+    inspector.source = panel.content.inspectionHandler;
+  });
 
   let newSubmenuItems : Array<MenuItem> = [];
 
@@ -180,30 +191,6 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
           });
         }
       }
-    },
-    {
-      id: 'console:toggle-inspectors',
-      handler: () => {
-        if (tracker.activeWidget) {
-          tracker.activeWidget.toggleInspectors();
-        }
-      }
-    },
-    {
-      id: 'console:reorient-vertical',
-      handler: () => {
-        if (tracker.activeWidget) {
-          tracker.activeWidget.reorient('vertical');
-        }
-      }
-    },
-    {
-      id: 'console:reorient-horizontal',
-      handler: () => {
-        if (tracker.activeWidget) {
-          tracker.activeWidget.reorient('horizontal');
-        }
-      }
     }
   ]);
 
@@ -227,21 +214,6 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
       command: 'console:switch-kernel',
       category: 'Console',
       text: 'Switch Kernel'
-    },
-    {
-      command: 'console:toggle-inspectors',
-      category: 'Console',
-      text: 'Toggle Inspector'
-    },
-    {
-      command: 'console:reorient-vertical',
-      category: 'Console',
-      text: 'Position Inspector Vertically'
-    },
-    {
-      command: 'console:reorient-horizontal',
-      category: 'Console',
-      text: 'Position Inspector Horizontally'
     }
   ]);
 
@@ -274,12 +246,6 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
       text: 'Switch Kernel',
       handler: () => {
         app.commands.execute('console:switch-kernel');
-      }
-    }),
-    new MenuItem ({
-      text: 'Toggle Inspector',
-      handler: () => {
-        app.commands.execute('console:toggle-inspectors');
       }
     })
   ]);
