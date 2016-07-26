@@ -160,8 +160,8 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
       type: 'hints'
     };
 
-    // Clear hints if the new text value is empty.
-    if (!change.newValue) {
+    // Clear hints if the new text value is empty or kernel is unavailable.
+    if (!change.newValue || !this._kernel) {
       this.inspected.emit(update);
       return;
     }
