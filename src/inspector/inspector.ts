@@ -131,6 +131,9 @@ class Inspector extends TabPanel {
       this._reference.inspected.disconnect(this.onInspectorUpdate, this);
     }
 
+    // Clear the inspector child items (but maintain history).
+    Object.keys(this._items).forEach(i => { this._items[i].content = null; });
+
     this._reference = reference;
 
     // Connect new signal handler.

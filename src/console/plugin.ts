@@ -71,7 +71,10 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
   let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessions;
 
-  console.log('inspector', inspector);
+  // Set the reference widget of the code inspector to the current console.
+  tracker.activeWidgetChanged.connect((sender: any, panel: ConsolePanel) => {
+    inspector.reference = panel.content;
+  });
 
   let newSubmenuItems : Array<MenuItem> = [];
 
@@ -104,6 +107,13 @@ function activateConsole(app: Application, services: ServiceManager, rendermime:
           panel.title.closable = true;
           app.shell.addToMainArea(panel);
           tracker.addWidget(panel);
+          // When the console is closed, make sure the inspector is no longer
+          // connected to it.
+          panel.disposed.connect(() => {
+            if (inspector.reference === panel.content) {
+              inspector.reference = null;
+            }
+          });
         });
       }
     }]);

@@ -229,4 +229,6 @@
 
 
 /* default inspector items: details */
-.jp-InspectorItem.jp-DetailsInspectorItem {}
+.jp-InspectorItem.jp-DetailsInspectorItem {
+  background: #FFFFFF;
+}
