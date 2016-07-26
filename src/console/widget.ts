@@ -14,7 +14,7 @@ import {
 } from 'phosphor-panel';
 
 import {
-  ISignal, Signal, clearSignalData
+  clearSignalData
 } from 'phosphor-signaling';
 
 import {
@@ -22,7 +22,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  Inspector
+  InspectionHandler
 } from '../inspector';
 
 import {
@@ -34,7 +34,7 @@ import {
 } from '../notebook/cells';
 
 import {
-  EdgeLocation, CellEditorWidget, ITextChange
+  EdgeLocation, CellEditorWidget
 } from '../notebook/cells/editor';
 
 import {
@@ -46,7 +46,7 @@ import {
 } from '../notebook/completion';
 
 import {
-  RenderMime, MimeMap
+  RenderMime
 } from '../rendermime';
 
 import {
@@ -76,7 +76,7 @@ const PROMPT_CLASS = 'jp-Console-prompt';
  * A widget containing a Jupyter console.
  */
 export
-class ConsoleWidget extends Widget implements Inspector.IInspectable {
+class ConsoleWidget extends Widget {
   /**
    * Construct a console widget.
    */
@@ -134,6 +134,16 @@ class ConsoleWidget extends Widget implements Inspector.IInspectable {
     });
   }
 
+  /**
+   * Get the inspection handler used by the console.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get inspectionHandler(): InspectionHandler {
+    return this._inspectionHandler;
+  }
+
   /*
    * The last cell in a console is always a `CodeCellWidget` prompt.
    */
@@ -154,13 +164,6 @@ class ConsoleWidget extends Widget implements Inspector.IInspectable {
   }
 
   /**
-   * A signal emitted when an inspector value is generated.
-   */
-  get inspected(): ISignal<ConsoleWidget, Inspector.IInspectorUpdate> {
-    return Private.inspectedSignal.bind(this);
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -174,6 +177,8 @@ class ConsoleWidget extends Widget implements Inspector.IInspectable {
     this._completionHandler = null;
     this._completion.dispose();
     this._completion = null;
+    this._inspectionHandler.dispose();
+    this._inspectionHandler = null;
     this._session.dispose();
     this._session = null;
     super.dispose();
@@ -186,7 +191,7 @@ class ConsoleWidget extends Widget implements Inspector.IInspectable {
     this.dismissCompletion();
 
     if (this._session.status === 'dead') {
-      this.updateDetails(null);
+      this._inspectionHandler.execute(null);
       return;
     }
 
@@ -198,12 +203,12 @@ class ConsoleWidget extends Widget implements Inspector.IInspectable {
     return prompt.execute(this._session.kernel).then(
       (value: KernelMessage.IExecuteReplyMsg) => {
         if (!value) {
-          this.updateDetails(null);
+          this._inspectionHandler.execute(null);
           return;
         }
         if (value.content.status === 'ok') {
           let content = value.content as KernelMessage.IExecuteOkReply;
-          this.updateDetails(content);
+          this._inspectionHandler.execute(content);
         }
         Private.scrollToBottom(this.node);
       },
@@ -306,58 +311,6 @@ class ConsoleWidget extends Widget implements Inspector.IInspectable {
   }
 
   /**
-   * Handle a text changed signal from an editor.
-   *
-   * #### Notes
-   * Update the hints inspector based on a text change.
-   */
-  protected onTextChange(editor: CellEditorWidget, change: ITextChange): void {
-    let inspectorUpdate: Inspector.IInspectorUpdate = {
-      content: null,
-      type: 'hints'
-    };
-
-    // Clear hints if the new text value is empty.
-    if (!change.newValue) {
-      this.inspected.emit(inspectorUpdate);
-      return;
-    }
-
-    let contents: KernelMessage.IInspectRequest = {
-      code: change.newValue,
-      cursor_pos: change.position,
-      detail_level: 0
-    };
-    let pendingInspect = ++this._pendingInspect;
-
-    this._session.kernel.inspect(contents).then(msg => {
-      let value = msg.content;
-
-      // If widget has been disposed, bail.
-      if (this.isDisposed) {
-        this.inspected.emit(inspectorUpdate);
-        return;
-      }
-
-      // If a newer text change has created a pending request, bail.
-      if (pendingInspect !== this._pendingInspect) {
-        this.inspected.emit(inspectorUpdate);
-        return;
-      }
-
-      // Hint request failures or negative results fail silently.
-      if (value.status !== 'ok' || !value.found) {
-        this.inspected.emit(inspectorUpdate);
-        return;
-      }
-
-      let bundle = value.data as MimeMap<string>;
-      inspectorUpdate.content = this._rendermime.render(bundle);
-      this.inspected.emit(inspectorUpdate);
-    });
-  }
-
-  /**
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -398,61 +351,28 @@ class ConsoleWidget extends Widget implements Inspector.IInspectable {
     prompt.addClass(PROMPT_CLASS);
     layout.addChild(prompt);
 
-    // Hook up completion, hints, and history handling.
+    // Hook up completion and history handling.
     let editor = prompt.editor;
-    editor.textChanged.connect(this.onTextChange, this);
     editor.edgeRequested.connect(this.onEdgeRequest, this);
 
     // Associate the new prompt with the completion handler.
     this._completionHandler.activeCell = prompt;
+    this._inspectionHandler.activeCell = prompt;
 
     // Jump to the bottom of the console.
     Private.scrollToBottom(this.node);
 
-    // Clear the hints inspector.
-    this.inspected.emit({ content: null, type: 'hints' });
-
     prompt.focus();
-  }
-
-  /**
-   * Update the details inspector based on a kernel response.
-   *
-   * #### Notes
-   * Payloads are deprecated and there are no official interfaces for them in
-   * the kernel type definitions.
-   * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
-   */
-  protected updateDetails(content: KernelMessage.IExecuteOkReply): void {
-    let inspectorUpdate: Inspector.IInspectorUpdate = {
-      content: null,
-      type: 'details'
-    };
-
-    if (!content) {
-      this.inspected.emit(inspectorUpdate);
-      return;
-    }
-
-    let details = content.payload.filter(i => (i as any).source === 'page')[0];
-    if (details) {
-      let bundle = (details as any).data as MimeMap<string>;
-      inspectorUpdate.content = this._rendermime.render(bundle);
-      this.inspected.emit(inspectorUpdate);
-      return;
-    }
-
-    this.inspected.emit(inspectorUpdate);
   }
 
   private _completion: CompletionWidget = null;
   private _completionHandler: CellCompletionHandler = null;
+  private _inspectionHandler: InspectionHandler = null;
   private _mimetype = 'text/x-ipython';
   private _rendermime: RenderMime<Widget> = null;
   private _renderer: ConsoleWidget.IRenderer = null;
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
-  private _pendingInspect = 0;
 }
 
 /**
@@ -539,12 +459,6 @@ namespace ConsoleWidget {
  * A namespace for console widget private data.
  */
 namespace Private {
-  /**
-   * A signal emitted when an inspector value is generated.
-   */
-  export
-  const inspectedSignal = new Signal<ConsoleWidget, Inspector.IInspectorUpdate>();
-
   /**
    * Scroll an element into view if needed.
    *
