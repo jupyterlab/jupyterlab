@@ -36,7 +36,7 @@
     "phosphor-widget": "^1.0.0-rc.1",
     "sanitize-html": "^1.12.0",
     "simulate-event": "^1.2.0",
-    "xterm": "^0.33.0"
+    "xterm": "^1.0.0"
   },
   "devDependencies": {
     "concurrently": "^2.0.0",
