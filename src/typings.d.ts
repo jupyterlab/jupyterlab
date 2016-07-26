@@ -11,3 +11,4 @@
 /// <reference path="../typings/marked/marked.d.ts"/>
 /// <reference path="../typings/leaflet/leaflet.d.ts"/>
 /// <reference path="../typings/d3-dsv/d3-dsv.d.ts"/>
+/// <reference path="../typings/vega-embed/vega-embed.d.ts"/>

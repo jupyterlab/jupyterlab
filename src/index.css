@@ -10,5 +10,6 @@
 @import './mainmenu/index.css';
 @import './notebook/completion/index.css';
 @import './terminal/index.css';
+@import './vegawidget/base.css';
 
 
