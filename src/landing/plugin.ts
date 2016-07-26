@@ -17,6 +17,10 @@ import {
   Widget
 } from 'phosphor-widget';
 
+import {
+  TabPanel
+} from 'phosphor-tabs';
+
 /**
  * The landing page extension.
  */
@@ -133,6 +137,14 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
     handler: () => {
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
+      }
+      let stack = widget.parent;
+      if (!stack) {
+        return;
+      }
+      let tabs = stack.parent;
+      if (tabs instanceof TabPanel) {
+        tabs.currentWidget = widget;
       }
       app.shell.activateMain(widget.id);
     }
