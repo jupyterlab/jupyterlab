@@ -23,6 +23,7 @@ Contents:
    documents.md
    notebook.md
    patterns.md
+   adding_content.md
    examples.md
    terminology.md
 
