@@ -117,7 +117,7 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: Application, manager: ServiceManager, registry: DocumentRegistry, mainMenu: MainMenu): Promise<void> {
+function activateFileBrowser(app: Application, manager: ServiceManager, registry: DocumentRegistry, mainMenu: MainMenu): void {
   let id = 0;
 
   let tracker = new WidgetTracker<Widget>();
@@ -252,6 +252,30 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
     }
   ]);
 
+
+// Add the command for saving a document with a new name.
+  let saveDocumentAsId = 'file-operations:saveas';
+
+  app.commands.add([
+    {
+      id: saveDocumentAsId,
+      handler: () => {
+        if (activeWidget) {
+          let context = docManager.contextForWidget(activeWidget);
+          context.saveAs().then(() => { fbModel.refresh(); });
+        }
+      }
+    }
+  ]);
+  app.palette.add([
+    {
+      command: saveDocumentAsId,
+      category: 'File Operations',
+      text: 'Save As...',
+      caption: 'Save the current document as...'
+    }
+  ]);
+
   // Add the command for closing a document.
   let closeDocumentId = 'file-operations:close';
 
@@ -331,66 +355,67 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
 
 
 
-    // Adding Top Menu
-      let newSubMenu = new Menu ([
-        new MenuItem({
-          text: 'Notebook',
-          handler: () => {
-            app.commands.execute(newNotebookId);
-          }
-        }),
-        new MenuItem({
-          text: 'Text File',
-          handler: () => {
-            app.commands.execute(newTextFileId);
-          }
-        })
+  // Adding Top Menu
+  let newSubMenu = new Menu ([
+    new MenuItem({
+      text: 'Notebook',
+      handler: () => {
+        app.commands.execute(newNotebookId);
+      }
+    }),
+    new MenuItem({
+      text: 'Text File',
+      handler: () => {
+        app.commands.execute(newTextFileId);
+      }
+    })
 
-      ]);
+  ]);
 
+  let menu = new Menu ([
+    new MenuItem({
+      text: 'New',
+      submenu: newSubMenu
 
+    }),
+    new MenuItem({
+      text: 'Save Document',
+      handler: () => {
+        app.commands.execute(saveDocumentId);
+      }
+    }),
+    new MenuItem({
+      text: 'Save Document As...',
+      handler: () => {
+        app.commands.execute(saveDocumentAsId);
+      }
+    }),
+    new MenuItem({
+      text: 'Revert Document',
+      handler: () => {
+        app.commands.execute(revertDocumentId);
+      }
+    }),
+    new MenuItem({
+      text: 'Close Current',
+      handler: () => {
+        app.commands.execute(closeDocumentId);
+      }
+    }),
+    new MenuItem({
+      text: 'Close All',
+      handler: () => {
+        app.commands.execute(closeAllId);
+      }
+    }),
 
-      let menu = new Menu ([
-        new MenuItem({
-          text: 'New',
-          submenu: newSubMenu
+  ]);
 
-        }),
-        new MenuItem({
-          text: 'Save Document',
-          handler: () => {
-            app.commands.execute(saveDocumentId);
-          }
-        }),
-        new MenuItem({
-          text: 'Revert Document',
-          handler: () => {
-            app.commands.execute(revertDocumentId);
-          }
-        }),
-        new MenuItem({
-          text: 'Close Current',
-          handler: () => {
-            app.commands.execute(closeDocumentId);
-          }
-        }),
-        new MenuItem({
-          text: 'Close All',
-          handler: () => {
-            app.commands.execute(closeAllId);
-          }
-        }),
-
-      ]);
-
-      let fileMenu = new MenuItem({
-        text: 'File',
-        submenu: menu
-      });
-      mainMenu.addItem(fileMenu, {rank: 1});
-
-
-  return Promise.resolve(void 0);
+  let fileMenu = new MenuItem({
+    text: 'File',
+    submenu: menu
+  });
+  mainMenu.addItem(fileMenu, {rank: 1});
 
   function showBrowser(): void {
     app.shell.activateLeft(fbWidget.id);

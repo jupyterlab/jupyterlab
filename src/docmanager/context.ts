@@ -170,10 +170,10 @@ class Context implements IDocumentContext<IDocumentModel> {
   }
 
   /**
-   * Save the document to a different path.
+   * Save the document to a different path chosen by the user.
    */
-  saveAs(path: string): Promise<void> {
-    return this._manager.saveAs(this._id, path);
+  saveAs(): Promise<void> {
+    return this._manager.saveAs(this._id);
   }
 
   /**
@@ -442,24 +442,30 @@ class ContextManager implements IDisposable {
   }
 
   /**
-   * Save a document to a new file name.
+   * Save a document to a new file path chosen by the user.
    *
    * This results in a new session.
    */
-  saveAs(id: string, newPath: string): Promise<void> {
+  saveAs(id: string): Promise<void> {
     let contextEx = this._contexts[id];
-    contextEx.path = newPath;
-    contextEx.context.pathChanged.emit(newPath);
-    if (contextEx.session) {
-      let options = {
-        notebook: { path: newPath },
-        kernel: { id: contextEx.session.id }
-      };
-      return this._startSession(id, options).then(() => {
-        return this.save(id);
-      });
-    }
-    return this.save(id);
+    return Private.saveAs(contextEx.path).then(newPath => {
+      if (!newPath) {
+        return;
+      }
+      contextEx.path = newPath;
+      contextEx.context.pathChanged.emit(newPath);
+      if (contextEx.session) {
+        let options = {
+          path: newPath,
+          kernelId: contextEx.session.kernel.id,
+          kernelName: contextEx.session.kernel.name
+        };
+        return this._startSession(id, options).then(() => {
+          return this.save(id);
+        });
+      }
+      return this.save(id);
+    });
   }
 
   /**
@@ -641,4 +647,22 @@ namespace Private {
    */
   export
   const populatedSignal = new Signal<Context, void>();
+
+  /**
+   * Get a new file path from the user.
+   */
+  export
+  function saveAs(path: string): Promise<string> {
+    let input = document.createElement('input');
+    input.value = path;
+    return showDialog({
+      title: 'Save File As..',
+      body: input,
+      okText: 'SAVE'
+    }).then(result => {
+      if (result.text === 'SAVE') {
+        return input.value;
+      }
+    });
+  }
 }
