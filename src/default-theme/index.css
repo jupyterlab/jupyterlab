@@ -19,6 +19,7 @@
 @import './images.css';
 @import './inspector.css';
 @import './markdownwidget.css';
+@import './rendermime.css';
 
 @import '../landing/index.css';
 

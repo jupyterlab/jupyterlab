@@ -34,6 +34,16 @@ import {
 } from './latex';
 
 
+/**
+ * The class name added to rendered widgets.
+ */
+const RENDERED_CLASS = 'jp-Rendered';
+
+/**
+ * The class name added to rendered html widgets.
+ */
+const RENDERED_HTML = 'jp-Rendered-html';
+
 
 // Support GitHub flavored Markdown, leave sanitizing to external library.
 marked.setOptions({
@@ -83,6 +93,8 @@ class HTMLWidget extends Widget {
    */
   constructor(html: string) {
     super();
+    this.addClass(RENDERED_HTML);
+    this.addClass(RENDERED_CLASS);
     try {
       let range = document.createRange();
       this.node.appendChild(range.createContextualFragment(html));
@@ -181,6 +193,7 @@ class ImageRenderer implements RenderMime.IRenderer<Widget> {
     let img = document.createElement('img');
     img.src = `data:${mimetype};base64,${data}`;
     w.node.appendChild(img);
+    w.addClass(RENDERED_CLASS);
     return w;
   }
 }
@@ -224,6 +237,7 @@ class TextRenderer implements RenderMime.IRenderer<Widget> {
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
     w.node.innerHTML = data;
+    w.addClass(RENDERED_CLASS);
     return w;
   }
 }
@@ -269,6 +283,7 @@ class JavascriptRenderer implements RenderMime.IRenderer<Widget> {
     s.type = mimetype;
     s.textContent = data;
     w.node.appendChild(s);
+    w.addClass(RENDERED_CLASS);
     return w;
   }
 }
@@ -315,6 +330,7 @@ class SVGRenderer implements RenderMime.IRenderer<Widget> {
     if (!svgElement) {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
     }
+    w.addClass(RENDERED_CLASS);
     return w;
   }
 }
@@ -361,6 +377,7 @@ class PDFRenderer implements RenderMime.IRenderer<Widget> {
     a.textContent = 'View PDF';
     a.href = 'data:application/pdf;base64,' + data;
     w.node.appendChild(a);
+    w.addClass(RENDERED_CLASS);
     return w;
   }
 }
