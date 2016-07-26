@@ -116,29 +116,31 @@ class Inspector extends TabPanel {
   }
 
   /**
-   * Set the reference to the semantic parent of the inspector panel.
+   * Set the source of events the inspector panel listens for.
    */
-  get reference(): Inspector.IInspectable {
-    return this._reference;
+  get source(): Inspector.IInspectable {
+    return this._source;
   }
-  set reference(reference: Inspector.IInspectable) {
-    if (this._reference === reference) {
+  set source(source: Inspector.IInspectable) {
+    if (this._source === source) {
       return;
     }
 
     // Disconnect old signal handler.
-    if (this.reference) {
-      this._reference.inspected.disconnect(this.onInspectorUpdate, this);
+    if (this.source) {
+      this._source.inspected.disconnect(this.onInspectorUpdate, this);
+      this._source.disposed.disconnect(this.onSourceDisposed, this);
     }
 
     // Clear the inspector child items (but maintain history).
     Object.keys(this._items).forEach(i => this._items[i].content = null);
 
-    this._reference = reference;
+    this._source = source;
 
     // Connect new signal handler.
-    if (this.reference) {
-      this._reference.inspected.connect(this.onInspectorUpdate, this);
+    if (this.source) {
+      this._source.inspected.connect(this.onInspectorUpdate, this);
+      this._source.disposed.connect(this.onSourceDisposed, this);
     }
   }
 
@@ -154,8 +156,8 @@ class Inspector extends TabPanel {
     Object.keys(this._items).forEach(i => this._items[i].dispose());
     this._items = null;
 
-    // Disconnect from reference.
-    this.reference = null;
+    // Disconnect from source.
+    this.source = null;
 
     super.dispose();
   }
@@ -201,9 +203,16 @@ class Inspector extends TabPanel {
     }
   }
 
+  /**
+   * Handle source disposed signals.
+   */
+  protected onSourceDisposed(sender: any, args: void): void {
+    this.source = null;
+  }
+
   private _items: { [type: string]: InspectorItem } = Object.create(null);
   private _orientation: Inspector.Orientation = 'horizontal';
-  private _reference: Inspector.IInspectable = null;
+  private _source: Inspector.IInspectable = null;
 }
 
 
@@ -223,6 +232,16 @@ namespace Inspector {
    */
   export
   interface IInspectable {
+    /**
+     * A signal emitted when inspector should clear all items with no history.
+     */
+    clearEphemeral: ISignal<any, void>;
+
+    /**
+     * A signal emitted when the handler is disposed.
+     */
+    disposed: ISignal<any, void>;
+
     /**
      * A signal emitted when an inspector value is generated.
      */
