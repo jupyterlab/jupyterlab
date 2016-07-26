@@ -186,7 +186,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   // Add a MainMenu notebook item
   let notebookMenu = new MenuItem({
     text: 'Notebook',
-    submenu: makeNbMenu()
+    submenu: makeNbMenu(app)
   });
 
   let menuOptions = {
@@ -735,7 +735,7 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
 /**
  * Creates a menu item for the notebook
  */
-function makeNbMenu() {
+function makeNbMenu(app: Application) {
   let settings = new Menu([
     new MenuItem({
       text: 'Toggle line numbers',
@@ -744,6 +744,12 @@ function makeNbMenu() {
   ]);
 
   let menu = new Menu([
+    new MenuItem({
+      text: 'New Notebook',
+      handler: () => {
+        app.commands.execute('file-operations:new-notebook');
+      }
+    }),
     new MenuItem({
       text: 'Undo',
       handler: undoHandler
