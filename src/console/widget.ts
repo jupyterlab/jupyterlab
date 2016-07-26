@@ -136,6 +136,7 @@ class ConsoleWidget extends Widget {
       this._history.dispose();
       this._history = new ConsoleHistory(kernel);
       this._completionHandler.kernel = kernel;
+      this._inspectionHandler.kernel = kernel;
     });
   }
 
