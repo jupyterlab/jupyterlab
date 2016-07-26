@@ -197,7 +197,7 @@ class ConsoleWidget extends Widget {
     this.dismissCompletion();
 
     if (this._session.status === 'dead') {
-      this._inspectionHandler.execute(null);
+      this._inspectionHandler.handleExecuteReply(null);
       return;
     }
 
@@ -209,12 +209,12 @@ class ConsoleWidget extends Widget {
     return prompt.execute(this._session.kernel).then(
       (value: KernelMessage.IExecuteReplyMsg) => {
         if (!value) {
-          this._inspectionHandler.execute(null);
+          this._inspectionHandler.handleExecuteReply(null);
           return;
         }
         if (value.content.status === 'ok') {
           let content = value.content as KernelMessage.IExecuteOkReply;
-          this._inspectionHandler.execute(content);
+          this._inspectionHandler.handleExecuteReply(content);
         }
         Private.scrollToBottom(this.node);
       },

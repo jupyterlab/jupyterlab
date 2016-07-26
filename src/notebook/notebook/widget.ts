@@ -559,6 +559,9 @@ namespace StaticNotebook {
  */
 export
 class Notebook extends StaticNotebook {
+  /**
+   * Construct a notebook widget.
+   */
   constructor(options: StaticNotebook.IOptions) {
     super(options);
     // Set up the inspection handler.
@@ -567,7 +570,6 @@ class Notebook extends StaticNotebook {
       this._inspectionHandler.activeCell = cell;
     });
   }
-
 
   /**
    * Get the inspection handler used by the console.

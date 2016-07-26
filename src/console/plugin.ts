@@ -6,22 +6,6 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  ConsolePanel
-} from './';
-
-import {
-  selectKernel
-} from '../docregistry';
-
-import {
-  RenderMime
-} from '../rendermime';
-
-import {
-  WidgetTracker
-} from '../widgettracker';
-
-import {
   Application
 } from 'phosphide/lib/core/application';
 
@@ -34,12 +18,28 @@ import {
 } from 'phosphor-widget';
 
 import {
+  selectKernel
+} from '../docregistry';
+
+import {
   Inspector
 } from '../inspector';
 
 import {
   MainMenu
 } from '../mainmenu/plugin';
+
+import {
+  RenderMime
+} from '../rendermime';
+
+import {
+  WidgetTracker
+} from '../widgettracker';
+
+import {
+  ConsolePanel
+} from './';
 
 
 /**

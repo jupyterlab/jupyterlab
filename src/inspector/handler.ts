@@ -18,10 +18,6 @@ import {
 } from 'phosphor-widget';
 
 import {
-  Inspector
-} from './';
-
-import {
   BaseCellWidget
 } from '../notebook/cells/widget';
 
@@ -32,6 +28,10 @@ import {
 import {
   RenderMime, MimeMap
 } from '../rendermime';
+
+import {
+  Inspector
+} from './';
 
 export
 class InspectionHandler implements IDisposable, Inspector.IInspectable {
@@ -126,7 +126,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
    * the kernel type definitions.
    * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
-  execute(content: KernelMessage.IExecuteOkReply): void {
+  handleExecuteReply(content: KernelMessage.IExecuteOkReply): void {
     let update: Inspector.IInspectorUpdate = {
       content: null,
       type: 'details'
@@ -230,5 +230,3 @@ namespace Private {
   export
   const inspectedSignal = new Signal<InspectionHandler, Inspector.IInspectorUpdate>();
 }
-
-// editor.textChanged.connect(this.onTextChange, this);

@@ -63,7 +63,7 @@ namespace Private {
       className: 'jp-DetailsInspectorItem',
       name: 'Details',
       rank: 1,
-      remember: true,
+      remembers: true,
       type: 'details'
     }
   ];

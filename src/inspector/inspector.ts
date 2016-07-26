@@ -79,7 +79,7 @@ class Inspector extends TabPanel {
     super();
     this.addClass(PANEL_CLASS);
 
-    // Create console inspector widgets and add them to the inspectors panel.
+    // Create inspector child items and add them to the inspectors panel.
     (options.items || []).forEach(value => {
       let widget = value.widget || new InspectorItem();
       widget.orientation = this._orientation as Inspector.Orientation;
@@ -87,7 +87,7 @@ class Inspector extends TabPanel {
         this.orientation = 'vertical' ? 'horizontal' : 'vertical';
       });
       widget.rank = value.rank;
-      widget.remember = !!value.remember;
+      widget.remembers = !!value.remembers;
       widget.title.closable = false;
       widget.title.text = value.name;
       if (value.className) {
@@ -290,7 +290,7 @@ namespace Inspector {
      *
      * The default value is `false`.
      */
-    remember?: boolean;
+    remembers?: boolean;
 
     /**
      * The type of the inspector.
@@ -298,13 +298,13 @@ namespace Inspector {
     type: string;
 
     /**
-     * The optional console inspector widget instance.
+     * The optional inspector child item instance.
      */
     widget?: InspectorItem;
   }
 
   /**
-   * The initialization options for a console panel.
+   * The initialization options for an inspector panel.
    */
   export
   interface IOptions {
@@ -358,7 +358,7 @@ class InspectorItem extends Panel {
       return;
     }
     if (this._content) {
-      if (this._remember) {
+      if (this._remembers) {
         this._content.hide();
       } else {
         this._content.dispose();
@@ -368,7 +368,7 @@ class InspectorItem extends Panel {
     if (this._content) {
       this._content.addClass(CONTENT_CLASS);
       this.addChild(this._content);
-      if (this.remember) {
+      if (this.remembers) {
         this._history.push(newValue);
         this._index++;
       }
@@ -399,16 +399,16 @@ class InspectorItem extends Panel {
   /**
    * A flag that indicates whether the inspector remembers history.
    */
-  get remember(): boolean {
-    return this._remember;
+  get remembers(): boolean {
+    return this._remembers;
   }
-  set remember(newValue: boolean) {
-    if (newValue === this._remember) {
+  set remembers(newValue: boolean) {
+    if (newValue === this._remembers) {
       return;
     }
     this._clear();
-    this._remember = newValue;
-    if (!this.remember) {
+    this._remembers = newValue;
+    if (!this._remembers) {
       this._history = null;
     }
     this.update();
@@ -503,7 +503,7 @@ class InspectorItem extends Panel {
       toolbar.add('toggle', toggle);
     }
 
-    if (!this._remember) {
+    if (!this._remembers) {
       return toolbar;
     }
 
@@ -548,7 +548,7 @@ class InspectorItem extends Panel {
   private _index: number = -1;
   private _orientation: Inspector.Orientation = 'horizontal';
   private _rank: number = Infinity;
-  private _remember: boolean = false;
+  private _remembers: boolean = false;
   private _toolbar: NotebookToolbar = null;
 }
 
