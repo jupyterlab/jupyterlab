@@ -30,6 +30,10 @@ import {
 } from '../docregistry';
 
 import {
+  Inspector
+} from '../inspector';
+
+import {
   RenderMime
 } from '../rendermime';
 
@@ -115,7 +119,13 @@ let currentApp : Application;
 export
 const notebookHandlerExtension = {
   id: 'jupyter.extensions.notebook-handler',
-  requires: [DocumentRegistry, ServiceManager, RenderMime, IClipboard, MainMenu],
+  requires: [
+    DocumentRegistry,
+    ServiceManager,
+    RenderMime, IClipboard,
+    MainMenu,
+    Inspector
+  ],
   activate: activateNotebookHandler
 };
 
@@ -136,7 +146,7 @@ const notebookTrackerProvider = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: ServiceManager, rendermime: RenderMime<Widget>, clipboard: IClipboard, mainMenu: MainMenu): void {
+function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: ServiceManager, rendermime: RenderMime<Widget>, clipboard: IClipboard, mainMenu: MainMenu, inspector: Inspector): void {
 
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard);
   let options: IWidgetFactoryOptions = {
@@ -181,6 +191,10 @@ function activateNotebookHandler(app: Application, registry: DocumentRegistry, s
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
     tracker.addWidget(widget);
+  });
+  // Set the source of the code inspector to the current console.
+  tracker.activeWidgetChanged.connect((sender: any, panel: NotebookPanel) => {
+    inspector.source = panel.content.inspectionHandler;
   });
 
   // Add a MainMenu notebook item
