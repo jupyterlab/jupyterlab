@@ -519,7 +519,9 @@ namespace StaticNotebook {
      * #### Notes
      * The base implementation is a no-op.
      */
-    updateCell(cell: BaseCellWidget): void { }
+    updateCell(cell: BaseCellWidget): void {
+      // This is a no-op.
+    }
 
     /**
      * Get the preferred mimetype for code cells in the notebook.
@@ -1023,6 +1025,8 @@ namespace Private {
      * This is a reimplementation of the base class method,
      * and is a no-op.
      */
-    protected onUpdateRequest(msg: Message): void { }
+    protected onUpdateRequest(msg: Message): void {
+      // This is a no-op.
+    }
   }
 }
