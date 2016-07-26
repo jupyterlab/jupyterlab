@@ -333,6 +333,12 @@ namespace Inspector {
 export
 class InspectorItem extends Panel {
   /**
+   * This flag is a temporary placeholder and will be removed when we switch to
+   * the phosphor mono-repo and have support for multiple inspector locations.
+   */
+  toggleEnabled = false;
+
+  /**
    * Construct an inspector widget.
    */
   constructor() {
@@ -487,13 +493,15 @@ class InspectorItem extends Panel {
   private _createToolbar(): NotebookToolbar {
     let toolbar = new NotebookToolbar();
 
-    let toggle = new ToolbarButton({
-      className: this.orientation === 'vertical' ? RIGHT_TOGGLE_CLASS
-        : BOTTOM_TOGGLE_CLASS,
-      onClick: () => this.orientationToggled.emit(void 0),
-      tooltip: 'Toggle the inspector orientation.'
-    });
-    toolbar.add('toggle', toggle);
+    if (this.toggleEnabled) {
+      let toggle = new ToolbarButton({
+        className: this.orientation === 'vertical' ? RIGHT_TOGGLE_CLASS
+          : BOTTOM_TOGGLE_CLASS,
+        onClick: () => this.orientationToggled.emit(void 0),
+        tooltip: 'Toggle the inspector orientation.'
+      });
+      toolbar.add('toggle', toggle);
+    }
 
     if (!this._remember) {
       return toolbar;
