@@ -77,7 +77,6 @@ marked.setOptions({
 /**
  * A widget for displaying HTML and rendering math.
  */
-export
 class HTMLWidget extends Widget {
   /**
    * Construct a new html widget.
@@ -215,7 +214,7 @@ class TextRenderer implements RenderMime.IRenderer<Widget> {
    * Transform the input bundle.
    */
   transform(mimetype: string, data: string): string {
-    return ansi_to_html(data);
+    return `<pre>${ansi_to_html(data)}</pre>`;
   }
 
   /**
@@ -223,9 +222,7 @@ class TextRenderer implements RenderMime.IRenderer<Widget> {
    */
   render(mimetype: string, data: string): Widget {
     let w = new Widget();
-    let el = document.createElement('pre');
-    el.innerHTML = data;
-    w.node.appendChild(el);
+    w.node.innerHTML = data;
     return w;
   }
 }
