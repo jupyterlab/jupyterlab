@@ -10,7 +10,7 @@ import {
 } from '../docregistry';
 
 import {
-  MarkdownWidgetFactory
+  MarkdownWidgetFactory, MarkdownItWidgetFactory
 } from './widget';
 
 /**
@@ -34,12 +34,33 @@ const markdownHandlerExtension = {
   activate: (app: Application, registry: DocumentRegistry) => {
     let options: IWidgetFactoryOptions = {
       fileExtensions: ['.md'],
-      displayName: 'Rendered Markdown',
+      displayName: 'Rendered Markdown (marked)',
       modelName: 'text',
       preferKernel: false,
       canStartKernel: false
     };
     let factory = new MarkdownWidgetFactory();
+    let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
+    factory.widgetCreated.connect((sender, widget) => {
+      widget.title.icon = icon;
+    });
+    registry.addWidgetFactory(factory, options);
+  }
+};
+
+export
+const markdownItHandlerExtension = {
+  id: 'jupyter.extensions.RenderedMarkdownIt',
+  requires: [DocumentRegistry],
+  activate: (app: Application, registry: DocumentRegistry) => {
+    let options: IWidgetFactoryOptions = {
+      fileExtensions: ['.md'],
+      displayName: 'Rendered Markdown (markdown-it)',
+      modelName: 'text',
+      preferKernel: false,
+      canStartKernel: false
+    };
+    let factory = new MarkdownItWidgetFactory();
     let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
     factory.widgetCreated.connect((sender, widget) => {
       widget.title.icon = icon;
