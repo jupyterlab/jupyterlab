@@ -18,7 +18,7 @@ import {
 } from '../docmanager';
 
 import {
-  DocumentRegistry
+  DocumentRegistry, IDocumentContext, IDocumentModel, selectKernelForContext
 } from '../docregistry';
 
 import {
@@ -26,7 +26,7 @@ import {
 } from 'phosphide/lib/core/application';
 
 import {
-  Menu, MenuItem, IMenuItemOptions, MenuItemType
+  Menu, MenuItem
 } from 'phosphor-menus';
 
 import {
@@ -46,7 +46,7 @@ import {
 } from '../widgettracker';
 
 import {
-  MainMenu, mainMenuProvider
+  MainMenu
 } from '../mainmenu/plugin';
 
 
@@ -126,6 +126,8 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
     activeWidget = widget;
   });
 
+  let docManager: DocumentManager;
+
   let opener: IWidgetOpener = {
     open: (widget) => {
       if (!widget.id) {
@@ -134,11 +136,17 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
         tracker.addWidget(widget);
+        widget.node.addEventListener('contextmenu', (event: MouseEvent) => {
+          let context = docManager.contextForWidget(widget);
+          let menu = createDocumentMenu(context);
+          event.preventDefault();
+          menu.popup(event.clientX, event.clientY);
+        });
       }
     }
   };
 
-  let docManager = new DocumentManager({
+  docManager = new DocumentManager({
     registry,
     manager,
     opener
@@ -503,6 +511,33 @@ function createMenu(fbWidget: FileBrowserWidget, openWith: MenuItem[]):  Menu {
       handler: () => { fbWidget.shutdownKernels(); }
     })
   );
+  return new Menu(items);
+}
+
+
+/**
+ * Create a context menu for a document widget.
+ */
+function createDocumentMenu(context: IDocumentContext<IDocumentModel>): Menu {
+  let items = [
+    new MenuItem({
+      text: '&Save',
+      icon: 'fa fa-save',
+      handler: () => { context.save(); }
+    }),
+    new MenuItem({
+      text: 'Save &As',
+      handler: () => { context.saveAs(); }
+    }),
+    new MenuItem({
+      text: '&Revert',
+      handler: () => { context.revert(); }
+    }),
+    new MenuItem({
+      text: 'Change &Kernel',
+      handler: () => { selectKernelForContext(context); }
+    })
+  ];
   return new Menu(items);
 }
 
