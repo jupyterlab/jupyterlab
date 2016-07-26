@@ -1,0 +1,17 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-VegaWidget, .jp-VegaLiteWidget {
+  padding: 8px;
+  overflow: auto;
+}
+
+.vega-embed svg, .vega-embed canvas {
+  border: 1px dotted gray;
+}
+
+.vega-embed .vega-actions a {
+  margin-right: 8px;
+}
