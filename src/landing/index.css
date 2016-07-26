@@ -20,10 +20,9 @@
 
 
 .jp-Landing-dialog {
-  padding-bottom: 20px;
+  padding-bottom: 12px;
   font-size: 16px;
   color: #757575;
-  background: #FAFAFA;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -31,52 +30,36 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  border: 1px solid #BDBDBD;
-  border-radius: 2px;
-  box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 7px 1px #BDBDBD;
 }
 
 
 .jp-Landing-logo {
-  flex: 0 0 40px;
+  flex: 0 0 50px;
   margin-left: auto;
   margin-right: auto;
   width: 100%;
   background-color: white;
-  background-size: 193px 40px;
+  background-size: 232px 50px;
   background-repeat: no-repeat;
-  background-position: center top;
-  padding-bottom: 4px;
+  background-position: center;
+  margin-top: 20px;
 
-}
-
-
-.jp-Landing-title {
-  padding-top: 20px;
-  background: white;
-  width: 100%;
 }
 
 .jp-Landing-subtitle {
-  font-size: 20px;
+  font-size: 16px;
   background-color: white;
   width: 100%;
-  padding-bottom: 2px;
-}
-
-.jp-Landing-subtext {
-  font-size: 12px;
-  color: #BABABA;
-  background-color: white;
-  border-bottom: 1px solid #BDBDBD;
-  width: 100%;
-  padding-bottom: 10px;
+  margin-top: 4px;
+  font-weight: 300;
 }
 
 .jp-Landing-header {
 
-  padding-top: 20px;
-  padding-bottom: 8px;
+  font-size: 14px;
+  padding-top: 16px;
+  padding-bottom: 4px;
 }
 
 
@@ -107,11 +90,9 @@
 
 }
 
-
 .jp-Landing-image:hover {
   cursor: pointer;
 }
-
 
 .jp-Landing-text {
   flex: 0 0 auto;
@@ -120,7 +101,39 @@
 }
 
 .jp-Landing-tour {
-    color: #f37a3c;
-    margin-top: 20px;
+    margin-top: 14px;
+    height: 14px;
+    width: 100%;
     cursor: pointer;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #EEEEEE;
+    background-position: top center;
+    background-repeat: no-repeat;
 }
+
+.jp-Landing-folder {
+  margin-right: 0;
+  float:left;
+  display: inline-block;
+  background-origin: content-box;
+  background-repeat: no-repeat;
+  clear: none;
+  padding-top: 2px;
+  height: 12px;
+  width: 12px;
+}
+
+.jp-Landing-path {
+    padding-left: 8px;
+    color: #9E9E9E;
+    font-size: 12px;
+}
+
+.jp-Landing-cwd {
+    float: left;
+    padding-top: 24px;
+    padding-left: 14px;
+    margin-right: auto;
+}
+
+
