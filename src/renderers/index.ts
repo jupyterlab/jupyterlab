@@ -115,6 +115,28 @@ class HTMLWidget extends Widget {
 
 
 /**
+ * A widget for displaying LaTeX output.
+ */
+class LatexWidget extends Widget {
+  /**
+   * Construct a new latex widget.
+   */
+  constructor(text: string) {
+    super();
+    this.node.textContent = text;
+    this.addClass(RENDERED_CLASS);
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  onAfterAttach(msg: Message): void {
+    typeset(this.node);
+  }
+}
+
+
+/**
  * A renderer for raw html.
  */
 export
@@ -404,7 +426,7 @@ class LatexRenderer implements RenderMime.IRenderer<Widget>  {
    * Whether the input is safe without sanitization.
    */
   isSafe(mimetype: string): boolean {
-    return false;
+    return true;
   }
 
   /**
@@ -418,7 +440,7 @@ class LatexRenderer implements RenderMime.IRenderer<Widget>  {
    * Render the transformed mime bundle.
    */
   render(mimetype: string, data: string): Widget {
-    return new HTMLWidget(data);
+    return new LatexWidget(data);
   }
 }
 

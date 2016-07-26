@@ -102,9 +102,9 @@ describe('renderers', () => {
 
     describe('#isSafe()', () => {
 
-      it('should be `false`', () => {
+      it('should be `true`', () => {
         let t = new LatexRenderer();
-        expect(t.isSafe('text/latex')).to.be(false);
+        expect(t.isSafe('text/latex')).to.be(true);
       });
 
     });
@@ -122,12 +122,13 @@ describe('renderers', () => {
 
     describe('#render()', () => {
 
-      it('should set the inner html of the widget', () => {
-        let mathJaxScript = '<script type="math/tex">\sum\limits_{i=0}^{\infty} \frac{1}{n^2}</script>';
+      it('should set the textContent of the widget', () => {
+        let mathJaxScript = '\sum\limits_{i=0}^{\infty} \frac{1}{n^2}';
         let t = new LatexRenderer();
         let widget = t.render('text/latex', mathJaxScript);
-        expect(widget.node.innerHTML).to.be(mathJaxScript);
+        expect(widget.node.textContent).to.be(mathJaxScript);
       });
+
     });
 
   });
