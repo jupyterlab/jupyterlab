@@ -101,9 +101,9 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     return Promise.resolve(void 0);
   }
 
-  saveAs(path: string): Promise<void> {
-    this._path = path;
-    this.pathChanged.emit(path);
+  saveAs(): Promise<void> {
+    this._path = 'foo';
+    this.pathChanged.emit(this._path);
     this.methods.push('saveAs');
     return Promise.resolve(void 0);
   }
