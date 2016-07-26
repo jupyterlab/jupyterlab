@@ -856,11 +856,11 @@ namespace Private {
     case 'code':
       if (kernel) {
         return (child as CodeCellWidget).execute(kernel).then(reply => {
-          if (!reply) {
-            parent.inspectionHandler.execute(null);
-          } else if (reply.content.status === 'ok') {
+          if (reply && reply.content.status === 'ok') {
             let content = reply.content as KernelMessage.IExecuteOkReply;
             parent.inspectionHandler.execute(content);
+          } else {
+            parent.inspectionHandler.execute(null);
           }
           return reply ? reply.content.status === 'ok' : true;
         });

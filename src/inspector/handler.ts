@@ -127,25 +127,25 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
    * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
   execute(content: KernelMessage.IExecuteOkReply): void {
-    let inspectorUpdate: Inspector.IInspectorUpdate = {
+    let update: Inspector.IInspectorUpdate = {
       content: null,
       type: 'details'
     };
 
-    if (!content) {
-      this.inspected.emit(inspectorUpdate);
+    if (!content || !content.payload || !content.payload.length) {
+      this.inspected.emit(update);
       return;
     }
 
     let details = content.payload.filter(i => (i as any).source === 'page')[0];
     if (details) {
       let bundle = (details as any).data as MimeMap<string>;
-      inspectorUpdate.content = this._rendermime.render(bundle);
-      this.inspected.emit(inspectorUpdate);
+      update.content = this._rendermime.render(bundle);
+      this.inspected.emit(update);
       return;
     }
 
-    this.inspected.emit(inspectorUpdate);
+    this.inspected.emit(update);
   }
 
   /**
