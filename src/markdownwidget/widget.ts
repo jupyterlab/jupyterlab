@@ -72,15 +72,21 @@ class MarkdownWidget extends Widget {
     let context = this._context;
     let model = context.model;
     let layout = this.layout as PanelLayout;
-    let widget = renderer.render({
+    renderer.transform({
       mimetype: 'text/markdown',
       source: model.toString(),
       resolver: context
+    }).then(source => {
+      let widget = renderer.render({
+        mimetype: 'text/markdown',
+        source,
+        resolver: context
+      });
+      if (layout.childCount()) {
+        layout.childAt(0).dispose();
+      }
+      layout.addChild(widget);
     });
-    if (layout.childCount()) {
-      layout.childAt(0).dispose();
-    }
-    layout.addChild(widget);
   }
 
   private _renderer: MarkdownRenderer = null;
