@@ -140,7 +140,7 @@ class LatexWidget extends Widget {
  * A renderer for raw html.
  */
 export
-class HTMLRenderer implements RenderMime.IRenderer<Widget> {
+class HTMLRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -180,7 +180,7 @@ class HTMLRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for `<img>` data.
  */
 export
-class ImageRenderer implements RenderMime.IRenderer<Widget> {
+class ImageRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -225,7 +225,7 @@ class ImageRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for plain text and Jupyter console text data.
  */
 export
-class TextRenderer implements RenderMime.IRenderer<Widget> {
+class TextRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -269,7 +269,7 @@ class TextRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for raw `<script>` data.
  */
 export
-class JavascriptRenderer implements RenderMime.IRenderer<Widget> {
+class JavascriptRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -315,7 +315,7 @@ class JavascriptRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for `<svg>` data.
  */
 export
-class SVGRenderer implements RenderMime.IRenderer<Widget> {
+class SVGRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -362,7 +362,7 @@ class SVGRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for PDF data.
  */
 export
-class PDFRenderer implements RenderMime.IRenderer<Widget> {
+class PDFRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -409,7 +409,7 @@ class PDFRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for LateX data.
  */
 export
-class LatexRenderer implements RenderMime.IRenderer<Widget>  {
+class LatexRenderer implements RenderMime.IRenderer  {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -449,7 +449,7 @@ class LatexRenderer implements RenderMime.IRenderer<Widget>  {
  * A renderer for Jupyter Markdown data.
  */
 export
-class MarkdownRenderer implements RenderMime.IRenderer<Widget> {
+class MarkdownRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */

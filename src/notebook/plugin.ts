@@ -146,7 +146,7 @@ const notebookTrackerProvider = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: ServiceManager, rendermime: RenderMime<Widget>, clipboard: IClipboard, mainMenu: MainMenu, inspector: Inspector): void {
+function activateNotebookHandler(app: Application, registry: DocumentRegistry, services: ServiceManager, rendermime: RenderMime, clipboard: IClipboard, mainMenu: MainMenu, inspector: Inspector): void {
 
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard);
   let options: IWidgetFactoryOptions = {

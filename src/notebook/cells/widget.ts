@@ -532,7 +532,7 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   private _renderer: CodeCellWidget.IRenderer;
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
   private _output: OutputAreaWidget = null;
   private _collapsedCursor: IMetadataCursor = null;
   private _scrolledCursor: IMetadataCursor = null;
@@ -559,7 +559,7 @@ namespace CodeCellWidget {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMime<Widget>;
+    rendermime: RenderMime;
   }
 
 
@@ -571,7 +571,7 @@ namespace CodeCellWidget {
     /**
      * Create a new output area for the widget.
      */
-    createOutputArea(rendermime: RenderMime<Widget>): OutputAreaWidget;
+    createOutputArea(rendermime: RenderMime): OutputAreaWidget;
   }
 
 
@@ -583,7 +583,7 @@ namespace CodeCellWidget {
     /**
      * Create an output area widget.
      */
-    createOutputArea(rendermime: RenderMime<Widget>): OutputAreaWidget {
+    createOutputArea(rendermime: RenderMime): OutputAreaWidget {
       return new OutputAreaWidget({ rendermime });
     }
   }
@@ -683,7 +683,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     super.onUpdateRequest(msg);
   }
 
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
   private _markdownWidget: Widget = null;
   private _rendered = true;
   private _prev = '';
@@ -710,7 +710,7 @@ namespace MarkdownCellWidget {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMime<Widget>;
+    rendermime: RenderMime;
   }
 }
 

@@ -14,10 +14,6 @@ import {
 } from 'phosphor-menus';
 
 import {
-  Widget
-} from 'phosphor-widget';
-
-import {
   selectKernel
 } from '../docregistry';
 
@@ -67,7 +63,7 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 /**
  * Activate the console extension.
  */
-function activateConsole(app: Application, services: ServiceManager, rendermime: RenderMime<Widget>, mainMenu: MainMenu, inspector: Inspector): Promise<void> {
+function activateConsole(app: Application, services: ServiceManager, rendermime: RenderMime, mainMenu: MainMenu, inspector: Inspector): Promise<void> {
   let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessions;
 

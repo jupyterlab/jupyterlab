@@ -22,16 +22,27 @@ import {
  * the mimetype in the `order` array.
  */
 export
-class RenderMime<T extends RenderMime.RenderedObject> {
+class RenderMime {
   /**
    * Construct a renderer.
    */
-  constructor(options: RenderMime.IOptions<T>) {
+  constructor(options: RenderMime.IOptions) {
     for (let mime in options.renderers) {
       this._renderers[mime] = options.renderers[mime];
     }
     this._order = options.order.slice();
     this._sanitizer = options.sanitizer || defaultSanitizer;
+    this._resolver = options.resolver || null;
+  }
+
+  /**
+   * The object used to resolve relative urls for the rendermime instance.
+   */
+  get resolver(): RenderMime.IResolver {
+    return this._resolver;
+  }
+  set resolver(value: RenderMime.IResolver) {
+    this._resolver = value;
   }
 
   /**
@@ -41,7 +52,7 @@ class RenderMime<T extends RenderMime.RenderedObject> {
    *
    * @param trusted - whether the bundle is trusted.
    */
-  render(bundle: RenderMime.MimeMap<string>, trusted=false): Promise<T> {
+  render(bundle: RenderMime.MimeMap<string>, trusted=false): Promise<Widget> {
     let mimetype = this.preferredMimetype(bundle, trusted);
     if (!mimetype) {
       return Promise.resolve(void 0);
@@ -52,7 +63,12 @@ class RenderMime<T extends RenderMime.RenderedObject> {
       if (!trusted && renderer.sanitizable(mimetype)) {
         content = this._sanitizer.sanitize(content);
       }
-      return renderer.render(content, content);
+      let widget = renderer.render(content, content);
+      let resolver = this.resolver;
+      if (resolver) {
+        resolver.resolveUrls(widget.node);
+      }
+      return widget;
     });
   }
 
@@ -81,8 +97,8 @@ class RenderMime<T extends RenderMime.RenderedObject> {
   /**
    * Clone the rendermime instance with shallow copies of data.
    */
-  clone(): RenderMime<T> {
-    return new RenderMime<T>({
+  clone(): RenderMime {
+    return new RenderMime({
       renderers: this._renderers,
       order: this.order,
       sanitizer: this._sanitizer
@@ -101,7 +117,7 @@ class RenderMime<T extends RenderMime.RenderedObject> {
    * Use the index of `.order.length` to add to the end of the render precedence list,
    * which would make the new renderer the last choice.
    */
-  addRenderer(mimetype: string, renderer: RenderMime.IRenderer<T>, index = 0): void {
+  addRenderer(mimetype: string, renderer: RenderMime.IRenderer, index = 0): void {
     this._renderers[mimetype] = renderer;
     this._order.splice(index, 0, mimetype);
   }
@@ -135,9 +151,10 @@ class RenderMime<T extends RenderMime.RenderedObject> {
     this._order = value.slice();
   }
 
-  private _renderers: RenderMime.MimeMap<RenderMime.IRenderer<T>> = Object.create(null);
+  private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
   private _order: string[];
   private _sanitizer: ISanitizer = null;
+  private _resolver: RenderMime.IResolver;
 }
 
 
@@ -150,11 +167,11 @@ namespace RenderMime {
    * The options used to initialize a rendermime instance.
    */
   export
-  interface IOptions<T extends RenderedObject> {
+  interface IOptions {
     /**
      * A map of mimetypes to renderers.
      */
-    renderers: MimeMap<IRenderer<T>>;
+    renderers: MimeMap<IRenderer>;
 
     /**
      * A list of mimetypes in order of precedence (earliest has precedence).
@@ -167,6 +184,13 @@ namespace RenderMime {
      * The default is a shared
      */
     sanitizer?: ISanitizer;
+
+    /**
+     * The initial resolver object.
+     *
+     * The default is `null`.
+     */
+    resolver?: IResolver;
   }
 
   /**
@@ -185,7 +209,7 @@ namespace RenderMime {
    * The interface for a renderer.
    */
   export
-  interface IRenderer<T extends RenderedObject> {
+  interface IRenderer {
     /**
      * The mimetypes this renderer accepts.
      */
@@ -217,6 +241,19 @@ namespace RenderMime {
      * It is assumed that the data has been run through [[transform]]
      * and has been sanitized if necessary.
      */
-    render(mimetype: string, data: string): T;
+    render(mimetype: string, data: string): Widget;
+  }
+
+  /**
+   * An object that resolves relative URLs.
+   */
+  export
+  interface IResolver {
+    /**
+     * Traverse the DOM hierarchy of a node, translating
+     * relative URLs.
+     */
+    resolveUrls(node: HTMLElement): void;
   }
 }
+

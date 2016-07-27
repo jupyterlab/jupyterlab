@@ -42,7 +42,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   /**
    * Construct a new inspection handler for a widget.
    */
-  constructor(rendermime: RenderMime<Widget>) {
+  constructor(rendermime: RenderMime) {
     this._rendermime = rendermime;
   }
 
@@ -212,7 +212,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   private _isDisposed = false;
   private _kernel: IKernel = null;
   private _pending = 0;
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
 }
 
 
