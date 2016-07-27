@@ -21,7 +21,6 @@ import {
 } from '../../../lib/docregistry';
 
 
-
 class WidgetFactory extends ABCWidgetFactory<Widget, IDocumentModel> {
 
   createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): Widget {
@@ -36,7 +35,6 @@ class WidgetExtension implements IWidgetExtension<Widget, IDocumentModel> {
      return new DisposableDelegate(null);
    }
 }
-
 
 
 describe('docregistry/registry', () => {
