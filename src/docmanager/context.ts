@@ -191,11 +191,10 @@ class Context implements IDocumentContext<IDocumentModel> {
   }
 
   /**
-   * Traverse the DOM hierarchy of a node, translating
-   * relative URLs.
+   * Resolve a url to a correct server path.
    */
-  resolveUrls(node: HTMLElement): void {
-    return this._manager.resolveUrls(this._id, node);
+  resolveUrl(url: string): string {
+    return this._manager.resolveUrl(this._id, url);
   }
 
   /**
@@ -536,21 +535,16 @@ class ContextManager implements IDisposable {
   }
 
   /**
-   * Traverse the DOM hierarchy of a node, translating
-   * relative URLs.
+   * Resolve a relative url to a correct server path.
    */
-  resolveUrls(id: string, node: HTMLElement): void {
+  resolveUrl(id: string, url: string): string {
+    if (url.indexOf('./')) {
+      return url;
+    }
     let contextEx = this._contexts[id];
     let cwd = ContentsManager.dirname(contextEx.path);
-    let imgs = node.getElementsByTagName('img');
-    for (let i = 0; i < imgs.length; i++) {
-      let img = imgs[i];
-      let source = img.getAttribute('src');
-      if (source.indexOf('./') !== -1) {
-        let path = ContentsManager.getAbsolutePath(source, cwd);
-        img.src = this._manager.contents.getDownloadUrl(path);
-      }
-    }
+    let path = ContentsManager.getAbsolutePath(url, cwd);
+    return this._manager.contents.getDownloadUrl(path);
   }
 
   /**

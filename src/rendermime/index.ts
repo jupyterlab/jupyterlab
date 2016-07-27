@@ -57,18 +57,19 @@ class RenderMime {
     if (!mimetype) {
       return Promise.resolve(void 0);
     }
+    let options = {
+      mimetype,
+      source: bundle[mimetype],
+      resolver: this._resolver
+    };
     let renderer = this._renderers[mimetype];
-    let transform = renderer.transform(mimetype, bundle[mimetype]);
+    let transform = renderer.transform(options);
     return Promise.resolve(transform).then(content => {
       if (!trusted && renderer.sanitizable(mimetype)) {
         content = this._sanitizer.sanitize(content);
       }
-      let widget = renderer.render(content, content);
-      let resolver = this.resolver;
-      if (resolver) {
-        resolver.resolveUrls(widget.node);
-      }
-      return widget;
+      options.source = content;
+      return renderer.render(options);
     });
   }
 
@@ -227,21 +228,43 @@ namespace RenderMime {
 
     /**
      * Transform the input bundle.
+     *
+     * @param options - The options used for transforming.
+     *
      */
-    transform(mimetype: string, data: string): string | Promise<string>;
+    transform(options: IRenderOptions): string | Promise<string>;
 
     /**
      * Render the transformed mime bundle.
      *
-     * @param mimetype - the mimetype for the data
-     *
-     * @param data - the data to render.
+     * @param options - The options used for rendering.
      *
      * #### Notes
      * It is assumed that the data has been run through [[transform]]
      * and has been sanitized if necessary.
      */
-    render(mimetype: string, data: string): Widget;
+    render(options: IRenderOptions): Widget;
+  }
+
+  /**
+   * The options used to transform or render mime data.
+   */
+  export
+  interface IRenderOptions {
+    /**
+     * The mimetype.
+     */
+    mimetype: string;
+
+    /**
+     * The source data.
+     */
+    source: string;
+
+    /**
+     * The url resolver.
+     */
+    resolver: IResolver;
   }
 
   /**
@@ -250,10 +273,8 @@ namespace RenderMime {
   export
   interface IResolver {
     /**
-     * Traverse the DOM hierarchy of a node, translating
-     * relative URLs.
+     * Resolve a url to a correct server path.
      */
-    resolveUrls(node: HTMLElement): void;
+    resolveUrl(url: string): string;
   }
 }
-

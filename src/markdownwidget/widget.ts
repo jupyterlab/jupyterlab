@@ -46,7 +46,7 @@ class MarkdownWidget extends Widget {
     this.layout = new PanelLayout();
     this.title.text = context.path.split('/').pop();
     this._renderer = new MarkdownRenderer();
-    this._model = context.model;
+    this._context = context;
 
     context.pathChanged.connect((c, path) => {
       this.title.text = path.split('/').pop();
@@ -69,9 +69,14 @@ class MarkdownWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     let renderer = this._renderer;
-    let model = this._model;
+    let context = this._context;
+    let model = context.model;
     let layout = this.layout as PanelLayout;
-    let widget = renderer.render('text/markdown', model.toString());
+    let widget = renderer.render({
+      mimetype: 'text/markdown',
+      source: model.toString(),
+      resolver: context
+    });
     if (layout.childCount()) {
       layout.childAt(0).dispose();
     }
@@ -79,7 +84,7 @@ class MarkdownWidget extends Widget {
   }
 
   private _renderer: MarkdownRenderer = null;
-  private _model: IDocumentModel = null;
+  private _context: IDocumentContext<IDocumentModel> = null;
 }
 
 

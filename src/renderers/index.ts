@@ -163,15 +163,17 @@ class HTMLRenderer implements RenderMime.IRenderer {
   /**
    * Transform the input bundle.
    */
-  transform(mimetype: string, data: string): string {
-    return data;
+  transform(options: RenderMime.IRenderOptions): string {
+    return options.source;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
-    return new HTMLWidget(data);
+  render(options: RenderMime.IRenderOptions): Widget {
+    let w = new HTMLWidget(options.source);
+    resolveUrls(w.node, options.resolver);
+    return w;
   }
 }
 
@@ -203,17 +205,17 @@ class ImageRenderer implements RenderMime.IRenderer {
   /**
    * Transform the input bundle.
    */
-  transform(mimetype: string, data: string): string {
-    return data;
+  transform(options: RenderMime.IRenderOptions): string {
+    return options.source;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
     let img = document.createElement('img');
-    img.src = `data:${mimetype};base64,${data}`;
+    img.src = `data:${options.mimetype};base64,${options.source}`;
     w.node.appendChild(img);
     w.addClass(RENDERED_CLASS);
     return w;
@@ -248,17 +250,17 @@ class TextRenderer implements RenderMime.IRenderer {
   /**
    * Transform the input bundle.
    */
-  transform(mimetype: string, data: string): string {
-    data = escape_for_html(data);
+  transform(options: RenderMime.IRenderOptions): string {
+    let data = escape_for_html(options.source);
     return `<pre>${ansi_to_html(data)}</pre>`;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
-    w.node.innerHTML = data;
+    w.node.innerHTML = options.source;
     w.addClass(RENDERED_CLASS);
     return w;
   }
@@ -292,18 +294,18 @@ class JavascriptRenderer implements RenderMime.IRenderer {
   /**
    * Transform the input bundle.
    */
-  transform(mimetype: string, data: string): string {
-    return data;
+  transform(options: RenderMime.IRenderOptions): string {
+    return options.source;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
     let s = document.createElement('script');
-    s.type = mimetype;
-    s.textContent = data;
+    s.type = options.mimetype;
+    s.textContent = options.source;
     w.node.appendChild(s);
     w.addClass(RENDERED_CLASS);
     return w;
@@ -338,20 +340,21 @@ class SVGRenderer implements RenderMime.IRenderer {
   /**
    * Transform the input bundle.
    */
-  transform(mimetype: string, data: string): string {
-    return data;
+  transform(options: RenderMime.IRenderOptions): string {
+    return options.source;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
-    w.node.innerHTML = data;
+    w.node.innerHTML = options.source;
     let svgElement = w.node.getElementsByTagName('svg')[0];
     if (!svgElement) {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
     }
+    resolveUrls(w.node, options.resolver);
     w.addClass(RENDERED_CLASS);
     return w;
   }
@@ -385,19 +388,19 @@ class PDFRenderer implements RenderMime.IRenderer {
   /**
    * Transform the input bundle.
    */
-  transform(mimetype: string, data: string): string {
-    return data;
+  transform(options: RenderMime.IRenderOptions): string {
+    return options.source;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
     let a = document.createElement('a');
     a.target = '_blank';
     a.textContent = 'View PDF';
-    a.href = 'data:application/pdf;base64,' + data;
+    a.href = 'data:application/pdf;base64,' + options.source;
     w.node.appendChild(a);
     w.addClass(RENDERED_CLASS);
     return w;
@@ -432,15 +435,15 @@ class LatexRenderer implements RenderMime.IRenderer  {
   /**
    * Transform the input bundle.
    */
-  transform(mimetype: string, data: string): string {
-    return data;
+  transform(options: RenderMime.IRenderOptions): string {
+    return options.source;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
-    return new LatexWidget(data);
+  render(options: RenderMime.IRenderOptions): Widget {
+    return new LatexWidget(options.source);
   }
 }
 
@@ -472,10 +475,29 @@ class MarkdownRenderer implements RenderMime.IRenderer {
   /**
    * Transform the input bundle.
    */
-  transform(mimetype: string, data: string): Promise<string> {
-    let parts = removeMath(data);
+  transform(options: RenderMime.IRenderOptions): Promise<string> {
+    let parts = removeMath(options.source);
+    let renderer = new marked.Renderer();
+    renderer.link = (href: string, title: string, text: string) => {
+      href = options.resolver.resolveUrl(href);
+      let out = '<a href="' + href + '"';
+      if (title) {
+        out += ' title="' + title + '"';
+      }
+      out += '>' + text + '</a>';
+      return out;
+    };
+    renderer.image = (href: string, title: string, text: string) => {
+      href = options.resolver.resolveUrl(href);
+      let out = '<img src="' + href + '" alt="' + text + '"';
+      if (title) {
+        out += ' title="' + title + '"';
+      }
+      out += '>';
+      return out;
+    };
     return new Promise<string>((resolve, reject) => {
-      marked(parts['text'], (err, content) => {
+      marked(parts['text'], { renderer }, (err, content) => {
         if (err) {
           reject(err);
         }
@@ -487,7 +509,31 @@ class MarkdownRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
-    return new HTMLWidget(data);
+  render(options: RenderMime.IRenderOptions): Widget {
+    return new HTMLWidget(options.source);
+  }
+}
+
+
+/**
+ * Resolve the relative urls in the image and anchor tags of a node tree.
+ *
+ * @param node - The head html element.
+ *
+ * @param resolver - A url resolver.
+ */
+export
+function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): void {
+  let imgs = node.getElementsByTagName('img');
+  for (let i = 0; i < imgs.length; i++) {
+    let img = imgs[i];
+    let source = img.getAttribute('src');
+    img.src = resolver.resolveUrl(source);
+  }
+  let anchors = node.getElementsByTagName('a');
+  for (let i = 0; i < anchors.length; i++) {
+    let anchor = anchors[i];
+    let href = anchor.getAttribute('href');
+    anchor.href = resolver.resolveUrl(href);
   }
 }

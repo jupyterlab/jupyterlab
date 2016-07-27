@@ -206,10 +206,9 @@ export interface IDocumentContext<T extends IDocumentModel> extends IDisposable 
   listSessions(): Promise<ISession.IModel[]>;
 
   /**
-   * Traverse the DOM hierarchy of a node, translating
-   * relative URLs.
+   * Resolve a url to a correct server path.
    */
-  resolveUrls(node: HTMLElement): void;
+  resolveUrl(url: string): string;
 
   /**
    * Add a sibling widget to the document manager.
