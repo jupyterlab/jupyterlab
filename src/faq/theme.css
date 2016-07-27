@@ -91,7 +91,7 @@ h1 span.long-faq {
     color: #2196F3;
 }
 
-.jp-QuestionMark {
+.jp-QuestionMark.jp-faq-QuestionMark {
   height: 49px;
   width: 49px;
 }

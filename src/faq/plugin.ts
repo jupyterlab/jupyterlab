@@ -59,7 +59,7 @@ function activateFAQ(app: Application): void {
   widget.node.appendChild(faq);
 
   let questionIcon = document.createElement('span');
-  questionIcon.className = 'jp-QuestionMark';
+  questionIcon.className = 'jp-QuestionMark jp-faq-QuestionMark';
   faq.appendChild(questionIcon);
 
   let faqHeader = document.createElement('h1');
