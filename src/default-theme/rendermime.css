@@ -1,0 +1,231 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-Rendered-html {
+  color: #000;
+  /* any extras will just be numbers: */
+}
+
+.jp-Rendered-html em {
+  font-style: italic;
+}
+
+.jp-Rendered-html strong {
+  font-weight: bold;
+}
+
+.jp-Rendered-html u {
+  text-decoration: underline;
+}
+
+.jp-Rendered-html :link {
+  text-decoration: underline;
+}
+
+.jp-Rendered-html :visited {
+  text-decoration: underline;
+}
+
+.jp-Rendered-html h1 {
+  font-size: 185.7%;
+  margin: 1.08em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+
+.jp-Rendered-html h2 {
+  font-size: 157.1%;
+  margin: 1.27em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+
+.jp-Rendered-html h3 {
+  font-size: 128.6%;
+  margin: 1.55em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+
+.jp-Rendered-html h4 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+
+.jp-Rendered-html h5 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+  font-style: italic;
+}
+
+.jp-Rendered-html h6 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+  font-style: italic;
+}
+
+.jp-Rendered-html h1:first-child {
+  margin-top: 0.538em;
+}
+
+.jp-Rendered-html h2:first-child {
+  margin-top: 0.636em;
+}
+
+.jp-Rendered-html h3:first-child {
+  margin-top: 0.777em;
+}
+
+.jp-Rendered-html h4:first-child {
+  margin-top: 1em;
+}
+
+.jp-Rendered-html h5:first-child {
+  margin-top: 1em;
+}
+
+.jp-Rendered-html h6:first-child {
+  margin-top: 1em;
+}
+
+.jp-Rendered-html ul:not(.list-inline),
+.jp-Rendered-html ol:not(.list-inline) {
+  padding-left: 2em;
+}
+
+.jp-Rendered-html ul {
+  list-style: disc;
+}
+
+.jp-Rendered-html ul ul {
+  list-style: square;
+}
+
+.jp-Rendered-html ul ul ul {
+  list-style: circle;
+}
+
+.jp-Rendered-html ol {
+  list-style: decimal;
+}
+
+.jp-Rendered-html ol ol {
+  list-style: upper-alpha;
+}
+
+.jp-Rendered-html ol ol ol {
+  list-style: lower-alpha;
+}
+
+.jp-Rendered-html ol ol ol ol {
+  list-style: lower-roman;
+}
+
+.jp-Rendered-html ol ol ol ol ol {
+  list-style: decimal;
+}
+
+.jp-Rendered-html * + ul {
+  margin-top: 1em;
+}
+
+.jp-Rendered-html * + ol {
+  margin-top: 1em;
+}
+
+.jp-Rendered-html hr {
+  color: black;
+  background-color: black;
+}
+
+.jp-Rendered-html pre {
+  margin: 1em 2em;
+}
+
+.jp-Rendered-html pre,
+.jp-Rendered-html code {
+  border: 0;
+  background-color: #fff;
+  color: #000;
+  font-size: 100%;
+  padding: 0px;
+}
+
+.jp-Rendered-html blockquote {
+  margin: 1em 2em;
+}
+
+.jp-Rendered-html table {
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+.jp-Rendered-html tr,
+.jp-Rendered-html th,
+.jp-Rendered-html td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  margin: 1em 2em;
+}
+
+.jp-Rendered-html td,
+.jp-Rendered-html th {
+  text-align: left;
+  vertical-align: middle;
+  padding: 4px;
+}
+
+.jp-Rendered-html th {
+  font-weight: bold;
+}
+
+.jp-Rendered-html * + table {
+  margin-top: 1em;
+}
+
+.jp-Rendered-html p {
+  text-align: left;
+}
+
+.jp-Rendered-html * + p {
+  margin-top: 1em;
+}
+
+.jp-Rendered-html img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.jp-Rendered-html * + img {
+  margin-top: 1em;
+}
+
+.jp-Rendered-html img,
+.jp-Rendered-html svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.jp-Rendered-html img.unconfined,
+.jp-Rendered-html svg.unconfined {
+  max-width: none;
+}
+
+.jp-Rendered-html .alert {
+  margin-bottom: initial;
+}
+
+.jp-Rendered-html * + .alert {
+  margin-top: 1em;
+}

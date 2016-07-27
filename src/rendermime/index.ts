@@ -1,31 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-/**
- * The interface for a renderer.
- */
-export
-interface IRenderer<T> {
-  /**
-   * The function that will render a mimebundle.
-   *
-   * @param mimetype - the mimetype for the data
-   * @param data - the data to render
-   */
-  render(mimetype: string, data: string): T;
+import {
+  Widget
+} from 'phosphor-widget';
 
-  /**
-   * The mimetypes this renderer accepts.
-   */
-  mimetypes: string[];
-}
-
-
-/**
- * A map of mimetypes to types.
- */
-export
-type MimeMap<T> = { [mimetype: string]: T };
+import {
+  ISanitizer, defaultSanitizer
+} from '../sanitizer';
 
 
 /**
@@ -40,42 +22,58 @@ type MimeMap<T> = { [mimetype: string]: T };
  * the mimetype in the `order` array.
  */
 export
-class RenderMime<T> {
+class RenderMime<T extends RenderMime.RenderedObject> {
   /**
    * Construct a renderer.
-   *
-   * @param renderers - a map of mimetypes to renderers.
-   * @param order - a list of mimetypes in order of precedence (earliest one has precedence).
    */
-  constructor(renderers: MimeMap<IRenderer<T>>, order: string[]) {
-    this._renderers = {};
-    for (let i in renderers) {
-      this._renderers[i] = renderers[i];
+  constructor(options: RenderMime.IOptions<T>) {
+    for (let mime in options.renderers) {
+      this._renderers[mime] = options.renderers[mime];
     }
-    this._order = order.slice();
+    this._order = options.order.slice();
+    this._sanitizer = options.sanitizer || defaultSanitizer;
   }
 
   /**
    * Render a mimebundle.
    *
    * @param bundle - the mimebundle to render.
+   *
+   * @param trusted - whether the bundle is trusted.
    */
-  render(bundle: MimeMap<string>): T {
-    let mimetype = this.preferredMimetype(bundle);
-    if (mimetype) {
-        return this._renderers[mimetype].render(mimetype, bundle[mimetype]);
+  render(bundle: RenderMime.MimeMap<string>, trusted=false): Promise<T> {
+    let mimetype = this.preferredMimetype(bundle, trusted);
+    if (!mimetype) {
+      return Promise.resolve(void 0);
     }
+    let renderer = this._renderers[mimetype];
+    let transform = renderer.transform(mimetype, bundle[mimetype]);
+    return Promise.resolve(transform).then(content => {
+      if (!trusted && renderer.sanitizable(mimetype)) {
+        content = this._sanitizer.sanitize(content);
+      }
+      return renderer.render(content, content);
+    });
   }
 
   /**
    * Find the preferred mimetype in a mimebundle.
    *
    * @param bundle - the mimebundle giving available mimetype content.
+   *
+   * @param trusted - whether the bundle is trusted.
+   *
+   * #### Notes
+   * If the bundle is not trusted, the highest preference
+   * mimetype that is sanitizable or safe will be chosen.
    */
-  preferredMimetype(bundle: MimeMap<string>): string {
+  preferredMimetype(bundle: RenderMime.MimeMap<string>, trusted=false): string {
     for (let m of this.order) {
       if (m in bundle) {
-        return m;
+        let renderer = this._renderers[m];
+        if (trusted || renderer.isSafe(m) || renderer.sanitizable(m)) {
+          return m;
+        }
       }
     }
   }
@@ -84,14 +82,11 @@ class RenderMime<T> {
    * Clone the rendermime instance with shallow copies of data.
    */
   clone(): RenderMime<T> {
-    return new RenderMime<T>(this._renderers, this.order);
-  }
-
-  /**
-   * Get a renderer by mimetype.
-   */
-  getRenderer(mimetype: string) {
-    return this._renderers[mimetype];
+    return new RenderMime<T>({
+      renderers: this._renderers,
+      order: this.order,
+      sanitizer: this._sanitizer
+    });
   }
 
   /**
@@ -106,9 +101,9 @@ class RenderMime<T> {
    * Use the index of `.order.length` to add to the end of the render precedence list,
    * which would make the new renderer the last choice.
    */
-  addRenderer(mimetype: string, renderer: IRenderer<T>, index = 0): void {
+  addRenderer(mimetype: string, renderer: RenderMime.IRenderer<T>, index = 0): void {
     this._renderers[mimetype] = renderer;
-    this._order.splice(index, 0, mimetype)
+    this._order.splice(index, 0, mimetype);
   }
 
   /**
@@ -140,6 +135,88 @@ class RenderMime<T> {
     this._order = value.slice();
   }
 
-  private _renderers: MimeMap<IRenderer<T>>;
+  private _renderers: RenderMime.MimeMap<RenderMime.IRenderer<T>> = Object.create(null);
   private _order: string[];
+  private _sanitizer: ISanitizer = null;
+}
+
+
+/**
+ * The namespace for RenderMime statics.
+ */
+export
+namespace RenderMime {
+  /**
+   * The options used to initialize a rendermime instance.
+   */
+  export
+  interface IOptions<T extends RenderedObject> {
+    /**
+     * A map of mimetypes to renderers.
+     */
+    renderers: MimeMap<IRenderer<T>>;
+
+    /**
+     * A list of mimetypes in order of precedence (earliest has precedence).
+     */
+    order: string[];
+
+    /**
+     * The sanitizer used to sanitize html inputs.
+     *
+     * The default is a shared
+     */
+    sanitizer?: ISanitizer;
+  }
+
+  /**
+   * Valid rendered object type.
+   */
+  export
+  type RenderedObject = HTMLElement | Widget;
+
+  /**
+   * A map of mimetypes to types.
+   */
+  export
+  type MimeMap<T> = { [mimetype: string]: T };
+
+  /**
+   * The interface for a renderer.
+   */
+  export
+  interface IRenderer<T extends RenderedObject> {
+    /**
+     * The mimetypes this renderer accepts.
+     */
+    mimetypes: string[];
+
+    /**
+     * Whether the input is safe without sanitization.
+     */
+    isSafe(mimetype: string): boolean;
+
+    /**
+     * Whether the input can safely sanitized for a given mimetype.
+     */
+    sanitizable(mimetype: string): boolean;
+
+    /**
+     * Transform the input bundle.
+     */
+    transform(mimetype: string, data: string): string | Promise<string>;
+
+    /**
+     * Render the transformed mime bundle.
+     *
+     * @param mimetype - the mimetype for the data
+     *
+     * @param data - the data to render.
+     *
+     * #### Notes
+     * It is assumed that the data has been run through [[transform]]
+     * and has been sanitized if necessary.
+     */
+    render(mimetype: string, data: string): T;
+  }
 }

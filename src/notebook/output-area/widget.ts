@@ -30,12 +30,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  RenderMime, MimeMap
+  RenderMime
 } from '../../rendermime';
-
-import {
-  defaultSanitizer
-} from '../../sanitizer';
 
 import {
   nbformat
@@ -138,19 +134,6 @@ const RESULT_CLASS = 'jp-Output-result';
 
 
 /**
- * A list of outputs considered safe.
- */
-const safeOutputs = ['text/plain', 'image/png', 'image/jpeg',
-                     'application/vnd.jupyter.console-text',
-                     'application/vnd.jupyter.console-stdin'];
-
-/**
- * A list of outputs that are sanitizable.
- */
-const sanitizable = ['text/svg', 'text/html', 'text/latex'];
-
-
-/**
  * An output area widget.
  *
  * #### Notes
@@ -172,6 +155,9 @@ class OutputAreaWidget extends Widget {
     this.layout = new PanelLayout();
   }
 
+  /**
+   * Create a mirrored output widget.
+   */
   mirror(): OutputAreaWidget {
     let rendermime = this._rendermime;
     let renderer = this._renderer;
@@ -716,21 +702,18 @@ class OutputWidget extends Widget {
    *
    * @param trusted - Whether the output is trusted.
    */
-  render(output: OutputAreaModel.Output, trusted?: boolean): void {
+  render(output: OutputAreaModel.Output, trusted=false): Promise<void> {
     // Handle an input request.
     if (output.output_type === 'input_request') {
       let child = new InputWidget(output as OutputAreaModel.IInputRequest);
       this.setOutput(child);
-      return;
+      return Promise.resolve(void 0);
     }
 
     // Extract the data from the output and sanitize if necessary.
     let rendermime = this._rendermime;
     let bundle = this.getBundle(output as nbformat.IOutput);
     let data = this.convertBundle(bundle);
-    if (!trusted) {
-      this.sanitize(data);
-    }
 
     // Clear the content.
     this.clear();
@@ -739,42 +722,43 @@ class OutputWidget extends Widget {
     let msg = 'Did not find renderer for output mimebundle.';
     if (!data) {
       console.log(msg);
-      return;
+      return Promise.resolve(void 0);
     }
 
     // Create the output result area.
-    let child = rendermime.render(data);
-    if (!child) {
-      console.log(msg);
-      console.log(data);
-      return;
-    }
-    this.setOutput(child);
-
-    // Add classes and output prompt as necessary.
-    switch (output.output_type) {
-    case 'execute_result':
-      child.addClass(EXECUTE_CLASS);
-      let count = (output as nbformat.IExecuteResult).execution_count;
-      this.prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
-      break;
-    case 'display_data':
-      child.addClass(DISPLAY_CLASS);
-      break;
-    case 'stream':
-      if ((output as nbformat.IStream).name === 'stdout') {
-        child.addClass(STDOUT_CLASS);
-      } else {
-        child.addClass(STDERR_CLASS);
+    return rendermime.render(data, trusted).then(child => {
+      if (!child) {
+        console.log(msg);
+        console.log(data);
+        return;
       }
-      break;
-    case 'error':
-      child.addClass(ERROR_CLASS);
-      break;
-    default:
-      console.error(`Unrecognized output type: ${output.output_type}`);
-      data = {};
-    }
+      this.setOutput(child);
+
+      // Add classes and output prompt as necessary.
+      switch (output.output_type) {
+      case 'execute_result':
+        child.addClass(EXECUTE_CLASS);
+        let count = (output as nbformat.IExecuteResult).execution_count;
+        this.prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
+        break;
+      case 'display_data':
+        child.addClass(DISPLAY_CLASS);
+        break;
+      case 'stream':
+        if ((output as nbformat.IStream).name === 'stdout') {
+          child.addClass(STDOUT_CLASS);
+        } else {
+          child.addClass(STDERR_CLASS);
+        }
+        break;
+      case 'error':
+        child.addClass(ERROR_CLASS);
+        break;
+      default:
+        console.error(`Unrecognized output type: ${output.output_type}`);
+        data = {};
+      }
+    });
   }
 
   /**
@@ -841,8 +825,8 @@ class OutputWidget extends Widget {
   /**
    * Convert a mime bundle to a mime map.
    */
-  protected convertBundle(bundle: nbformat.MimeBundle): MimeMap<string> {
-    let map: MimeMap<string> = Object.create(null);
+  protected convertBundle(bundle: nbformat.MimeBundle): RenderMime.MimeMap<string> {
+    let map: RenderMime.MimeMap<string> = Object.create(null);
     for (let mimeType in bundle) {
       let value = bundle[mimeType];
       if (Array.isArray(value)) {
@@ -852,34 +836,6 @@ class OutputWidget extends Widget {
       }
     }
     return map;
-  }
-
-  /**
-   * Sanitize a mime map.
-   *
-   * @params map - The map to sanitize.
-   */
-  protected sanitize(map: MimeMap<string>): void {
-    let keys = Object.keys(map);
-    for (let key of keys) {
-      if (safeOutputs.indexOf(key) !== -1) {
-        continue;
-      } else if (sanitizable.indexOf(key) !== -1) {
-        let out = map[key];
-        if (typeof out === 'string') {
-          map[key] = defaultSanitizer.sanitize(out);
-        } else {
-          let message = 'Ignoring unsanitized ' + key +
-            ' output; could not sanitize because output is not a string.';
-          console.log(message);
-          delete map[key];
-        }
-      } else {
-        // Don't display if we don't know how to sanitize it.
-        console.log('Ignoring untrusted ' + key + ' output.');
-        delete map[key];
-      }
-    }
   }
 
   private _rendermime: RenderMime<Widget> = null;

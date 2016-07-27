@@ -26,13 +26,17 @@ import {
 } from '../notebook/cells/editor';
 
 import {
-  RenderMime, MimeMap
+  RenderMime
 } from '../rendermime';
 
 import {
   Inspector
 } from './';
 
+
+/**
+ * An object that handles code inspection.
+ */
 export
 class InspectionHandler implements IDisposable, Inspector.IInspectable {
   /**
@@ -139,9 +143,11 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
 
     let details = content.payload.filter(i => (i as any).source === 'page')[0];
     if (details) {
-      let bundle = (details as any).data as MimeMap<string>;
-      update.content = this._rendermime.render(bundle);
-      this.inspected.emit(update);
+      let bundle = (details as any).data as RenderMime.MimeMap<string>;
+      this._rendermime.render(bundle, true).then(widget => {
+        update.content = widget;
+        this.inspected.emit(update);
+      });
       return;
     }
 
@@ -194,9 +200,11 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
         return;
       }
 
-      let bundle = value.data as MimeMap<string>;
-      update.content = this._rendermime.render(bundle);
-      this.inspected.emit(update);
+      let bundle = value.data as RenderMime.MimeMap<string>;
+      this._rendermime.render(bundle, true).then(widget => {
+        update.content = widget;
+        this.inspected.emit(update);
+      });
     });
   }
 

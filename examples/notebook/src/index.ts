@@ -19,7 +19,7 @@ import {
 } from 'jupyterlab/lib/docregistry';
 
 import {
-  RenderMime, IRenderer, MimeMap
+  RenderMime
 } from 'jupyterlab/lib/rendermime';
 
 import {
@@ -83,7 +83,7 @@ function createApp(manager: IServiceManager): void {
     new LatexRenderer(),
     new TextRenderer()
   ];
-  let renderers: MimeMap<IRenderer<Widget>> = {};
+  let renderers: RenderMime.MimeMap<RenderMime.IRenderer<Widget>> = {};
   let order: string[] = [];
   for (let t of transformers) {
     for (let m of t.mimetypes) {
@@ -91,7 +91,7 @@ function createApp(manager: IServiceManager): void {
       order.push(m);
     }
   }
-  let rendermime = new RenderMime<Widget>(renderers, order);
+  let rendermime = new RenderMime<Widget>({ renderers, order });
 
   let opener = {
     open: (widget: Widget) => {

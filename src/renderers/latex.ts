@@ -203,7 +203,7 @@ function processMath(i: number, j: number, preProcess: (input: string) => string
     j--;
   }
   blocks[i] = '@@' + math.length + '@@'; // replace the current block text with a unique tag to find later
-  if (preProcess){
+  if (preProcess) {
     block = preProcess(block);
   }
   math.push(block);

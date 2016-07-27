@@ -42,6 +42,8 @@ declare module CodeMirror {
     }
     var modeInfo: modeinfo[];
 
+    function runMode(code: string, mode: modespec, el: HTMLElement): void;
+
     var version: string;
 
     /** If you want to define extra methods in terms of the CodeMirror API, it is possible to use defineExtension.

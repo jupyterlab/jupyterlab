@@ -24,12 +24,16 @@ class Sanitizer implements ISanitizer {
   }
 
   private _options: sanitize.IOptions = {
-    allowedTags: sanitize.defaults.allowedTags.concat('h1', 'h2', 'img'),
+    allowedTags: sanitize.defaults.allowedTags.concat('svg', 'h1', 'h2', 'img', 'span'),
     allowedAttributes: {
       // Allow the "rel" attribute for <a> tags.
       'a': sanitize.defaults.allowedAttributes['a'].concat('rel'),
       // Allow the "src" attribute for <img> tags.
-      'img': ['src', 'height', 'width', 'alt']
+      'img': ['src', 'height', 'width', 'alt'],
+      // Allow "class" attribute for <code> tags.
+      'code': ['class'],
+      // Allow "class" attribute for <span> tags.
+      'span': ['class']
     },
     transformTags: {
       // Set the "rel" attribute for <a> tags to "nofollow".

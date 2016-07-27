@@ -10,7 +10,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  RenderMime, IRenderer, MimeMap
+  RenderMime
 } from 'jupyterlab/lib/rendermime';
 
 import {
@@ -74,7 +74,7 @@ function startApp(session: ISession) {
     new LatexRenderer(),
     new TextRenderer()
   ];
-  let renderers: MimeMap<IRenderer<Widget>> = {};
+  let renderers: RenderMime.MimeMap<RenderMime.IRenderer<Widget>> = {};
   let order: string[] = [];
   for (let t of transformers) {
     for (let m of t.mimetypes) {
@@ -82,7 +82,7 @@ function startApp(session: ISession) {
       order.push(m);
     }
   }
-  let rendermime = new RenderMime<Widget>(renderers, order);
+  let rendermime = new RenderMime<Widget>({ renderers, order });
 
   let consolePanel = new ConsolePanel({ session, rendermime });
   consolePanel.title.text = TITLE;
