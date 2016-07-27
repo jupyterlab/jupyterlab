@@ -252,6 +252,7 @@ interface IWidgetFactoryOptions {
    * Use "*" to denote all files. Specific file extensions must be preceded
    * with '.', like '.png', '.txt', etc. Entries in this attribute must also
    * be included in the fileExtensions attribute.
+   * The default is an empty array.
    *
    * **See also:** [[fileExtensions]].
    */
@@ -259,11 +260,15 @@ interface IWidgetFactoryOptions {
 
   /**
    * Whether the widgets prefer having a kernel started.
+   *
+   * The default is `false`.
    */
   preferKernel?: boolean;
 
   /**
    * Whether the widgets can start a kernel when opened.
+   *
+   * The default is `false`.
    */
   canStartKernel?: boolean;
 }
