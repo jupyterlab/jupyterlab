@@ -98,7 +98,8 @@ interface IDocumentModel extends IDisposable {
 /**
  * The document context object.
  */
-export interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
+export
+interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
   /**
    * A signal emitted when the kernel changes.
    */
@@ -296,7 +297,7 @@ interface IWidgetExtension<T extends Widget, U extends IDocumentModel> {
   /**
    * Create a new extension for a given widget.
    */
-   createNew(widget: T, context: IDocumentContext<U>): IDisposable;
+  createNew(widget: T, context: IDocumentContext<U>): IDisposable;
 }
 
 

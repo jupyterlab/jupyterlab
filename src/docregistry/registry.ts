@@ -47,6 +47,9 @@ class DocumentRegistry implements IDisposable {
       this._widgetFactories[widgetName].factory.dispose();
     }
     this._widgetFactories = null;
+    this._fileTypes = null;
+    this._creators = null;
+    this._extenders = null;
   }
 
   /**
@@ -59,23 +62,25 @@ class DocumentRegistry implements IDisposable {
    * @returns A disposable which will unregister the factory.
    *
    * #### Notes
-   * If a factory with the given `displayName` is already registered,
-   * an error will be thrown.
+   * If a factory with the given `'displayName'` is already registered,
+   * a warning will be logged, and this will be a no-op.
    * If `'*'` is given as a default extension, the factory will be registered
    * as the global default.
    * If an extension or global default is already registered, this factory
    * will override the existing default.
    */
   addWidgetFactory(factory: IWidgetFactory<Widget, IDocumentModel>, options: IWidgetFactoryOptions): IDisposable {
-    let name = options.displayName;
-    let exOpt = utils.copy(options) as Private.IWidgetFactoryEx;
+    let name = options.displayName.toLowerCase();
+    let exOpt = utils.copy(options) as Private.IWidgetFactoryRecord;
     exOpt.factory = factory;
     if (this._widgetFactories[name]) {
-      throw new Error(`Duplicate registered factory ${name}`);
+      console.warn(`Duplicate registered factory ${name}`);
+      return new DisposableDelegate(null);
     }
     this._widgetFactories[name] = exOpt;
     if (options.defaultFor) {
       for (let ext of options.defaultFor) {
+        ext = Private.normalizeExtension(ext);
         if (options.fileExtensions.indexOf(ext) === -1) {
           continue;
         }
@@ -88,6 +93,7 @@ class DocumentRegistry implements IDisposable {
     }
     // For convenience, store a mapping of ext -> name
     for (let ext of options.fileExtensions) {
+      ext = Private.normalizeExtension(ext);
       if (!this._widgetFactoryExtensions[ext]) {
         this._widgetFactoryExtensions[ext] = new Set<string>();
       }
@@ -120,13 +126,15 @@ class DocumentRegistry implements IDisposable {
    * @returns A disposable which will unregister the factory.
    *
    * #### Notes
-   * If a factory with the given `name` is already registered, an error
-   * will be thrown.
+   * If a factory with the given `name` is already registered, or
+   * the given factory is already registered, a warning will be logged
+   * and this will be a no-op.
    */
   addModelFactory(factory: IModelFactory): IDisposable {
-    let name = factory.name;
+    let name = factory.name.toLowerCase();
     if (this._modelFactories[name]) {
-      throw new Error(`Duplicate registered factory ${name}`);
+      console.warn(`Duplicate registered factory ${name}`);
+      return new DisposableDelegate(null);
     }
     this._modelFactories[name] = factory;
     return new DisposableDelegate(() => {
@@ -142,14 +150,24 @@ class DocumentRegistry implements IDisposable {
    * @param extension - A widget extension.
    *
    * @returns A disposable which will unregister the extension.
+   *
+   * #### Notes
+   * If the extension is already registered for the given
+   * widget name, a warning will be logged and this will be a no-op.
    */
   addWidgetExtension(widgetName: string, extension: IWidgetExtension<Widget, IDocumentModel>): IDisposable {
+    widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
       this._extenders[widgetName] = [];
     }
-    this._extenders[widgetName].push(extension);
+    let extenders = this._extenders[widgetName];
+    let index = extenders.indexOf(extension);
+    if (index !== -1) {
+      console.warn(`Duplicate registered extension for ${widgetName}`);
+      return new DisposableDelegate(null);
+    }
     return new DisposableDelegate(() => {
-      let index = this._extenders[widgetName].indexOf(extension);
+      index = this._extenders[widgetName].indexOf(extension);
       this._extenders[widgetName].splice(index, 1);
     });
   }
@@ -163,8 +181,17 @@ class DocumentRegistry implements IDisposable {
    *
    * #### Notes
    * These are used to populate the "Create New" dialog.
+   * If the file type with the same name is already registered, a warning will
+   * be logged and this will be a no-op.
    */
   addFileType(fileType: IFileType): IDisposable {
+    for (let fType of this._fileTypes) {
+      if (fType.name.toLowerCase() === fileType.name.toLowerCase()) {
+        console.warn(`Duplicate registered file types for ${fType.name}`);
+        return new DisposableDelegate(null);
+      }
+    }
+    fileType.extension = Private.normalizeExtension(fileType.extension);
     this._fileTypes.push(fileType);
     this._fileTypes.sort((a, b) => a.name.localeCompare(b.name));
     return new DisposableDelegate(() => {
@@ -183,10 +210,18 @@ class DocumentRegistry implements IDisposable {
    * @returns A disposable which will unregister the creator.
    *
    * #### Notes
+   * If a creator of the same name is already registered,
+   * a warning will be logged and this will be a no-op.
    * If `after` is not given or not already registered, it will be moved
    * to the end.
    */
   addCreator(creator: IFileCreator, after?: string): IDisposable {
+    for (let c of this._creators) {
+      if (c.name.toLowerCase() === creator.name.toLowerCase()) {
+        console.warn(`Duplicate registered file creator named ${creator.name}`);
+        return new DisposableDelegate(null);
+      }
+    }
     let added = false;
     if (after) {
       for (let existing of this._creators) {
@@ -223,6 +258,7 @@ class DocumentRegistry implements IDisposable {
    */
   listWidgetFactories(ext: string = '*'): string[] {
     let factories = new Set<string>();
+    ext = Private.normalizeExtension(ext);
 
     // Start with the extension-specific default factory.
     if (ext.length > 1) {
@@ -252,7 +288,8 @@ class DocumentRegistry implements IDisposable {
     // model factories are registered.
     let factoryList: string[] = [];
     factories.forEach(name => {
-      if (this._widgetFactories[name].modelName in this._modelFactories) {
+      if (this._widgetFactories[name].modelName.toLowerCase() in this._modelFactories) {
+        name = this._widgetFactories[name].displayName;
         factoryList.push(name);
       }
     });
@@ -302,6 +339,7 @@ class DocumentRegistry implements IDisposable {
    * Get a file type by name.
    */
   getFileType(name: string): IFileType {
+    name = name.toLowerCase();
     for (let i = 0; i < this._fileTypes.length; i++) {
       let fileType = this._fileTypes[i];
       if (fileType.name === name) {
@@ -314,9 +352,10 @@ class DocumentRegistry implements IDisposable {
    * Get a creator by name.
    */
   getCreator(name: string): IFileCreator {
+    name = name.toLowerCase();
     for (let i = 0; i < this._creators.length; i++) {
       let creator = this._creators[i];
-      if (creator.name === name) {
+      if (creator.name.toLowerCase() === name) {
         return creator;
       }
     }
@@ -332,6 +371,8 @@ class DocumentRegistry implements IDisposable {
    * @returns A kernel preference.
    */
   getKernelPreference(ext: string, widgetName: string): IKernelPreference {
+    ext = Private.normalizeExtension(ext);
+    widgetName = widgetName.toLowerCase();
     let widgetFactoryEx = this._getWidgetFactoryEx(widgetName);
     let modelFactory = this.getModelFactory(widgetName);
     let language = modelFactory.preferredLanguage(ext);
@@ -350,11 +391,12 @@ class DocumentRegistry implements IDisposable {
    * @returns A model factory instance.
    */
   getModelFactory(widgetName: string): IModelFactory {
+    widgetName = widgetName.toLowerCase();
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
     if (!wFactoryEx) {
       return;
     }
-    return this._modelFactories[wFactoryEx.modelName];
+    return this._modelFactories[wFactoryEx.modelName.toLowerCase()];
   }
 
   /**
@@ -365,6 +407,7 @@ class DocumentRegistry implements IDisposable {
    * @returns A widget factory instance.
    */
   getWidgetFactory(widgetName: string): IWidgetFactory<Widget, IDocumentModel> {
+    widgetName = widgetName.toLowerCase();
     return this._getWidgetFactoryEx(widgetName).factory;
   }
 
@@ -376,6 +419,7 @@ class DocumentRegistry implements IDisposable {
    * @returns A new array of widget extensions.
    */
   getWidgetExtensions(widgetName: string): IWidgetExtension<Widget, IDocumentModel>[] {
+    widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
       return [];
     }
@@ -385,8 +429,9 @@ class DocumentRegistry implements IDisposable {
   /**
    * Get the appropriate widget factory by name.
    */
-  private _getWidgetFactoryEx(widgetName: string): Private.IWidgetFactoryEx {
-    let options: Private.IWidgetFactoryEx;
+  private _getWidgetFactoryEx(widgetName: string): Private.IWidgetFactoryRecord {
+    widgetName = widgetName.toLowerCase();
+    let options: Private.IWidgetFactoryRecord;
     if (widgetName === 'default') {
       options = this._widgetFactories[this._defaultWidgetFactory];
     } else {
@@ -396,7 +441,7 @@ class DocumentRegistry implements IDisposable {
   }
 
   private _modelFactories: { [key: string]: IModelFactory } = Object.create(null);
-  private _widgetFactories: { [key: string]: Private.IWidgetFactoryEx } = Object.create(null);
+  private _widgetFactories: { [key: string]: Private.IWidgetFactoryRecord } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _widgetFactoryExtensions: {[key: string]: Set<string> } = Object.create(null);
@@ -411,10 +456,26 @@ class DocumentRegistry implements IDisposable {
  */
 namespace Private {
   /**
-   * An extended interface for a widget factory and its options.
+   * An record for a widget factory and its options.
    */
   export
-  interface IWidgetFactoryEx extends IWidgetFactoryOptions {
+  interface IWidgetFactoryRecord extends IWidgetFactoryOptions {
     factory: IWidgetFactory<Widget, IDocumentModel>;
+  }
+
+  /**
+   * Normalize a file extension to be of the type `'.foo'`.
+   *
+   * Adds a leading dot if not present and converts to lower case.
+   */
+  export
+  function normalizeExtension(extension: string): string {
+    if (extension === '*') {
+      return extension;
+    }
+    if (extension.indexOf('.') !== 0) {
+      extension = `.${extension}`;
+    }
+    return extension.toLowerCase();
   }
 }
