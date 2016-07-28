@@ -28,6 +28,10 @@ import {
 } from 'jupyterlab/lib/renderers';
 
 import {
+  defaultSanitizer
+} from 'jupyterlab/lib/sanitizer';
+
+import {
   CommandPalette, StandardPaletteModel, IStandardPaletteItemOptions
 } from 'phosphor-commandpalette';
 
@@ -83,7 +87,7 @@ function createApp(manager: IServiceManager): void {
     new LatexRenderer(),
     new TextRenderer()
   ];
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer<Widget>> = {};
+  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
   let order: string[] = [];
   for (let t of transformers) {
     for (let m of t.mimetypes) {
@@ -91,7 +95,8 @@ function createApp(manager: IServiceManager): void {
       order.push(m);
     }
   }
-  let rendermime = new RenderMime<Widget>({ renderers, order });
+  let sanitizer = defaultSanitizer;
+  let rendermime = new RenderMime({ renderers, order, sanitizer });
 
   let opener = {
     open: (widget: Widget) => {

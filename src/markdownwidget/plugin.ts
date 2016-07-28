@@ -33,7 +33,7 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
  */
 export
 const markdownHandlerExtension = {
-  id: 'jupyter.extensions.RenderedMarkdown',
+  id: 'jupyter.extensions.rendered-markdown',
   requires: [DocumentRegistry, RenderMime],
   activate: (app: Application, registry: DocumentRegistry, rendermime: RenderMime) => {
     let options: IWidgetFactoryOptions = {
