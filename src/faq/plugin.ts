@@ -59,11 +59,7 @@ function activateFAQ(app: Application): void {
   widget.node.appendChild(faq);
 
   let questionIcon = document.createElement('span');
-<<<<<<< HEAD
   questionIcon.className = 'jp-QuestionMark jp-FAQ-QuestionMark';
-=======
-  questionIcon.className = 'jp-QuestionMark jp-faq-QuestionMark';
->>>>>>> 19d5cd9... QuestionMark SVG has 2 classes in FAQ plugin
   faq.appendChild(questionIcon);
 
   let faqHeader = document.createElement('h1');
