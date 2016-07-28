@@ -91,7 +91,7 @@ class HTMLWidget extends Widget {
   /**
    * Construct a new html widget.
    */
-  constructor(html: string) {
+  constructor(html: string, resolver: RenderMime.IResolver) {
     super();
     this.addClass(RENDERED_HTML);
     this.addClass(RENDERED_CLASS);
@@ -103,6 +103,7 @@ class HTMLWidget extends Widget {
                    'createContextualFragment, falling back on innerHTML');
       this.node.innerHTML = html;
     }
+    resolveUrls(this.node, resolver);
   }
 
   /**
@@ -150,7 +151,7 @@ class HTMLRenderer implements RenderMime.IRenderer {
    * Whether the input can safely sanitized for a given mimetype.
    */
   sanitizable(mimetype: string): boolean {
-    return true;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
@@ -168,9 +169,7 @@ class HTMLRenderer implements RenderMime.IRenderer {
     if (options.sanitizer) {
       source = options.sanitizer.sanitize(source);
     }
-    let w = new HTMLWidget(source);
-    resolveUrls(w.node, options.resolver);
-    return w;
+    return new HTMLWidget(source, options.resolver);
   }
 }
 
@@ -196,7 +195,7 @@ class ImageRenderer implements RenderMime.IRenderer {
    * Whether the input is safe without sanitization.
    */
   isSafe(mimetype: string): boolean {
-    return true;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
@@ -234,7 +233,7 @@ class TextRenderer implements RenderMime.IRenderer {
    * Whether the input is safe without sanitization.
    */
   isSafe(mimetype: string): boolean {
-    return true;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
@@ -243,7 +242,9 @@ class TextRenderer implements RenderMime.IRenderer {
   render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
     let data = escape_for_html(options.source);
-    w.node.innerHTML = `<pre>${ansi_to_html(data)}</pre>`;
+    let pre = document.createElement('pre');
+    pre.innerHTML = ansi_to_html(data);
+    w.node.appendChild(pre);
     w.addClass(RENDERED_CLASS);
     return w;
   }
@@ -303,7 +304,7 @@ class SVGRenderer implements RenderMime.IRenderer {
    * Whether the input can safely sanitized for a given mimetype.
    */
   sanitizable(mimetype: string): boolean {
-    return true;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
@@ -395,7 +396,7 @@ class LatexRenderer implements RenderMime.IRenderer  {
    * Whether the input is safe without sanitization.
    */
   isSafe(mimetype: string): boolean {
-    return true;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
@@ -421,7 +422,7 @@ class MarkdownRenderer implements RenderMime.IRenderer {
    * Whether the input can safely sanitized for a given mimetype.
    */
   sanitizable(mimetype: string): boolean {
-    return true;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
@@ -436,38 +437,8 @@ class MarkdownRenderer implements RenderMime.IRenderer {
    */
   render(options: RenderMime.IRenderOptions): Promise<Widget> {
     let parts = removeMath(options.source);
-    let renderer = new marked.Renderer();
-    renderer.link = (href: string, title: string, text: string) => {
-      href = options.resolver.resolveUrl(href);
-      let out = '<a href="' + href + '"';
-      if (title) {
-        out += ' title="' + title + '"';
-      }
-      out += '>' + text + '</a>';
-      return out;
-    };
-    renderer.image = (href: string, title: string, text: string) => {
-      href = options.resolver.resolveUrl(href);
-      let out = '<img src="' + href + '" alt="' + text + '"';
-      if (title) {
-        out += ' title="' + title + '"';
-      }
-      out += '>';
-      return out;
-    };
-    let dummy = document.createElement('div');
-    // Catch-all.
-    renderer.paragraph = (text: string) => {
-      text = '<p>' + text + '</p>\n';
-      if (options.sanitizer) {
-        text = options.sanitizer.sanitize(text);
-      }
-      dummy.innerHTML = text;
-      resolveUrls(dummy, options.resolver);
-      return dummy.innerHTML;
-    };
     return new Promise<Widget>((resolve, reject) => {
-      marked(parts['text'], { renderer }, (err, content) => {
+      marked(parts['text'], (err, content) => {
         if (err) {
           reject(err);
         }
@@ -475,7 +446,7 @@ class MarkdownRenderer implements RenderMime.IRenderer {
         if (options.sanitizer) {
           content = options.sanitizer.sanitize(content);
         }
-        resolve(new HTMLWidget(content));
+        resolve(new HTMLWidget(content, options.resolver));
       });
     });
   }
