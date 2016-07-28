@@ -52,10 +52,10 @@ class RenderMime {
    *
    * @param trusted - whether the bundle is trusted.
    */
-  render(bundle: RenderMime.MimeMap<string>, trusted=false): Promise<Widget> {
+  render(bundle: RenderMime.MimeMap<string>, trusted=false): Widget {
     let mimetype = this.preferredMimetype(bundle, trusted);
     if (!mimetype) {
-      return Promise.resolve(void 0);
+      return void 0;
     }
     let options = {
       mimetype,
@@ -63,9 +63,7 @@ class RenderMime {
       resolver: this._resolver,
       sanitizer: trusted ? null : this._sanitizer
     };
-    let renderer = this._renderers[mimetype];
-    let render = renderer.render(options);
-    return Promise.resolve(render);
+    return this._renderers[mimetype].render(options);
   }
 
   /**
@@ -224,7 +222,7 @@ namespace RenderMime {
      *
      * @param options - The options used for rendering.
      */
-    render(options: IRenderOptions): Widget | Promise<Widget>;
+    render(options: IRenderOptions): Widget;
   }
 
   /**

@@ -17,7 +17,7 @@ declare module CodeMirror {
     // findMode* functions are from loading the codemirror/mode/meta module
     interface modespec {
       [ key: string ]: string;
-      name: string;
+      name?: string;
       mode: string;
       mime: string;
     }
@@ -42,7 +42,7 @@ declare module CodeMirror {
     }
     var modeInfo: modeinfo[];
 
-    function runMode(code: string, mode: modespec, el: HTMLElement): void;
+    function runMode(code: string, mode: modespec | string, el: HTMLElement): void;
 
     var version: string;
 

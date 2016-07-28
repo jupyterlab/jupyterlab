@@ -69,7 +69,7 @@ marked.setOptions({
           return;
       }
       try {
-        CodeMirror.runMode(code, spec, el);
+        CodeMirror.runMode(code, spec.mime, el);
         callback(null, el.innerHTML);
       } catch (err) {
         console.log(`Failed to highlight ${lang} code`, err);
@@ -91,19 +91,16 @@ class HTMLWidget extends Widget {
   /**
    * Construct a new html widget.
    */
-  constructor(html: string, resolver: RenderMime.IResolver) {
+  constructor(options: RenderMime.IRenderOptions) {
     super();
     this.addClass(RENDERED_HTML);
     this.addClass(RENDERED_CLASS);
-    try {
-      let range = document.createRange();
-      this.node.appendChild(range.createContextualFragment(html));
-    } catch (error) {
-      console.warn('Environment does not support Range ' +
-                   'createContextualFragment, falling back on innerHTML');
-      this.node.innerHTML = html;
+    let source = options.source;
+    if (options.sanitizer) {
+      source = options.sanitizer.sanitize(source);
     }
-    resolveUrls(this.node, resolver);
+    appendHtml(this.node, source);
+    resolveUrls(this.node, options.resolver);
   }
 
   /**
@@ -112,6 +109,51 @@ class HTMLWidget extends Widget {
   onAfterAttach(msg: Message): void {
     typeset(this.node);
   }
+}
+
+
+/**
+ * A widget for displaying Markdown.
+ */
+class MarkdownWidget extends Widget {
+  /**
+   * Construct a new markdown widget.
+   */
+  constructor(options: RenderMime.IRenderOptions) {
+    super();
+    this.addClass(RENDERED_HTML);
+    this.addClass(RENDERED_CLASS);
+    let parts = removeMath(options.source);
+    // Add the markdown content asynchronously.
+    marked(parts['text'], (err, content) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      content = replaceMath(content, parts['math']);
+      if (options.sanitizer) {
+        content = options.sanitizer.sanitize(content);
+      }
+      appendHtml(this.node, content);
+      resolveUrls(this.node, options.resolver);
+      this.fit();
+      if (this.isAttached) {
+        typeset(this.node);
+        this._rendered = true;
+      }
+    });
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  onAfterAttach(msg: Message): void {
+    if (this._rendered) {
+      typeset(this.node);
+    }
+  }
+
+  private _rendered = false;
 }
 
 
@@ -165,11 +207,7 @@ class HTMLRenderer implements RenderMime.IRenderer {
    * Render the transformed mime bundle.
    */
   render(options: RenderMime.IRenderOptions): Widget {
-    let source = options.source;
-    if (options.sanitizer) {
-      source = options.sanitizer.sanitize(source);
-    }
-    return new HTMLWidget(source, options.resolver);
+    return new HTMLWidget(options);
   }
 }
 
@@ -435,20 +473,8 @@ class MarkdownRenderer implements RenderMime.IRenderer {
   /**
    * Render the mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): Promise<Widget> {
-    let parts = removeMath(options.source);
-    return new Promise<Widget>((resolve, reject) => {
-      marked(parts['text'], (err, content) => {
-        if (err) {
-          reject(err);
-        }
-        content = replaceMath(content, parts['math']);
-        if (options.sanitizer) {
-          content = options.sanitizer.sanitize(content);
-        }
-        resolve(new HTMLWidget(content, options.resolver));
-      });
-    });
+  render(options: RenderMime.IRenderOptions): Widget {
+    return new MarkdownWidget(options);
   }
 }
 
@@ -477,5 +503,20 @@ function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): void {
     if (href) {
       anchor.href = resolver.resolveUrl(href);
     }
+  }
+}
+
+
+/**
+ * Append trusted html to a node.
+ */
+function appendHtml(node: HTMLElement, html: string): void {
+  try {
+    let range = document.createRange();
+    node.appendChild(range.createContextualFragment(html));
+  } catch (error) {
+    console.warn('Environment does not support Range ' +
+                 'createContextualFragment, falling back on innerHTML');
+    node.innerHTML = html;
   }
 }

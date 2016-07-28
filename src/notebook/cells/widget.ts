@@ -664,13 +664,10 @@ class MarkdownCellWidget extends BaseCellWidget {
       if (text !== this._prev) {
         let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
         this._markdownWidget.dispose();
-        this._rendermime.render(bundle, this.trusted).then(widget => {
-          this._markdownWidget = widget || new Widget();
-          this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
-          (this.layout as PanelLayout).addChild(this._markdownWidget);
-        }).catch(err => {
-          console.error(err);
-        });
+        let widget = this._rendermime.render(bundle, this.trusted);
+        this._markdownWidget = widget || new Widget();
+        this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
+        (this.layout as PanelLayout).addChild(this._markdownWidget);
       } else {
         this._markdownWidget.show();
       }

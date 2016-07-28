@@ -726,39 +726,38 @@ class OutputWidget extends Widget {
     }
 
     // Create the output result area.
-    return rendermime.render(data, trusted).then(child => {
-      if (!child) {
-        console.log(msg);
-        console.log(data);
-        return;
-      }
-      this.setOutput(child);
+    let child = rendermime.render(data, trusted);
+    if (!child) {
+      console.log(msg);
+      console.log(data);
+      return;
+    }
+    this.setOutput(child);
 
-      // Add classes and output prompt as necessary.
-      switch (output.output_type) {
-      case 'execute_result':
-        child.addClass(EXECUTE_CLASS);
-        let count = (output as nbformat.IExecuteResult).execution_count;
-        this.prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
-        break;
-      case 'display_data':
-        child.addClass(DISPLAY_CLASS);
-        break;
-      case 'stream':
-        if ((output as nbformat.IStream).name === 'stdout') {
-          child.addClass(STDOUT_CLASS);
-        } else {
-          child.addClass(STDERR_CLASS);
-        }
-        break;
-      case 'error':
-        child.addClass(ERROR_CLASS);
-        break;
-      default:
-        console.error(`Unrecognized output type: ${output.output_type}`);
-        data = {};
+    // Add classes and output prompt as necessary.
+    switch (output.output_type) {
+    case 'execute_result':
+      child.addClass(EXECUTE_CLASS);
+      let count = (output as nbformat.IExecuteResult).execution_count;
+      this.prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
+      break;
+    case 'display_data':
+      child.addClass(DISPLAY_CLASS);
+      break;
+    case 'stream':
+      if ((output as nbformat.IStream).name === 'stdout') {
+        child.addClass(STDOUT_CLASS);
+      } else {
+        child.addClass(STDERR_CLASS);
       }
-    });
+      break;
+    case 'error':
+      child.addClass(ERROR_CLASS);
+      break;
+    default:
+      console.error(`Unrecognized output type: ${output.output_type}`);
+      data = {};
+    }
   }
 
   /**
