@@ -2,6 +2,15 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+.jp-Completion {
+  background: #EEEEEE;
+  border: 1px solid #000000;
+  list-style-type: none;
+  overflow: auto;
+  padding: 0;
+}
+
+
 .jp-Completion-item {
   margin: 0;
   min-width: 150px;

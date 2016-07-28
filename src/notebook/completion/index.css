@@ -3,6 +3,13 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+.jp-Completion {
+  margin: 0;
+  position: absolute;
+  z-index: 10001;
+}
+
+
 .jp-Completion.jp-mod-outofview {
   display: none;
 }
