@@ -539,7 +539,7 @@ class ContextManager implements IDisposable {
    */
   resolveUrl(id: string, url: string): string {
     // TODO: use proper url parser here.
-    if (url.indexOf('http') === 0 || url.indexOf('data') === 0) {
+    if (url.indexOf(':') !== -1) {
       return url;
     }
     let contextEx = this._contexts[id];
