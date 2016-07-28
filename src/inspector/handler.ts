@@ -47,7 +47,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   }
 
   /**
-   * The cell widget used by the completion handler.
+   * The cell widget used by the inspection handler.
    */
   get activeCell(): BaseCellWidget {
     return this._activeCell;
