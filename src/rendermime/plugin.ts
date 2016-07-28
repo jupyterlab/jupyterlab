@@ -11,8 +11,9 @@ import {
 } from '../renderers';
 
 import {
-  Widget
-} from 'phosphor-widget';
+  defaultSanitizer
+} from '../sanitizer';
+
 
 
 /**
@@ -40,6 +41,6 @@ const renderMimeProvider = {
         order.push(m);
       }
     }
-    return new RenderMime({ renderers, order });
+    return new RenderMime({ renderers, order, sanitizer: defaultSanitizer });
   }
 };

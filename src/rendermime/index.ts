@@ -6,7 +6,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ISanitizer, defaultSanitizer
+  ISanitizer
 } from '../sanitizer';
 
 
@@ -31,7 +31,7 @@ class RenderMime {
       this._renderers[mime] = options.renderers[mime];
     }
     this._order = options.order.slice();
-    this._sanitizer = options.sanitizer || defaultSanitizer;
+    this._sanitizer = options.sanitizer;
     this._resolver = options.resolver || null;
   }
 
@@ -60,17 +60,12 @@ class RenderMime {
     let options = {
       mimetype,
       source: bundle[mimetype],
-      resolver: this._resolver
+      resolver: this._resolver,
+      sanitizer: trusted ? null : this._sanitizer
     };
     let renderer = this._renderers[mimetype];
-    let transform = renderer.transform(options);
-    return Promise.resolve(transform).then(content => {
-      if (!trusted && renderer.sanitizable(mimetype)) {
-        content = this._sanitizer.sanitize(content);
-      }
-      options.source = content;
-      return renderer.render(options);
-    });
+    let render = renderer.render(options);
+    return Promise.resolve(render);
   }
 
   /**
@@ -181,10 +176,8 @@ namespace RenderMime {
 
     /**
      * The sanitizer used to sanitize html inputs.
-     *
-     * The default is a shared
      */
-    sanitizer?: ISanitizer;
+    sanitizer: ISanitizer;
 
     /**
      * The initial resolver object.
@@ -227,23 +220,11 @@ namespace RenderMime {
     sanitizable(mimetype: string): boolean;
 
     /**
-     * Transform the input bundle.
-     *
-     * @param options - The options used for transforming.
-     *
-     */
-    transform(options: IRenderOptions): string | Promise<string>;
-
-    /**
      * Render the transformed mime bundle.
      *
      * @param options - The options used for rendering.
-     *
-     * #### Notes
-     * It is assumed that the data has been run through [[transform]]
-     * and has been sanitized if necessary.
      */
-    render(options: IRenderOptions): Widget;
+    render(options: IRenderOptions): Widget | Promise<Widget>;
   }
 
   /**
@@ -265,6 +246,13 @@ namespace RenderMime {
      * The url resolver.
      */
     resolver: IResolver;
+
+    /**
+     * An optional html santizer.
+     *
+     * If given, should be used to sanitize raw html.
+     */
+    sanitizer?: ISanitizer;
   }
 
   /**

@@ -668,6 +668,8 @@ class MarkdownCellWidget extends BaseCellWidget {
           this._markdownWidget = widget || new Widget();
           this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
           (this.layout as PanelLayout).addChild(this._markdownWidget);
+        }).catch(err => {
+          console.error(err);
         });
       } else {
         this._markdownWidget.show();

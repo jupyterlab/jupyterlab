@@ -161,17 +161,14 @@ class HTMLRenderer implements RenderMime.IRenderer {
   }
 
   /**
-   * Transform the input bundle.
-   */
-  transform(options: RenderMime.IRenderOptions): string {
-    return options.source;
-  }
-
-  /**
    * Render the transformed mime bundle.
    */
   render(options: RenderMime.IRenderOptions): Widget {
-    let w = new HTMLWidget(options.source);
+    let source = options.source;
+    if (options.sanitizer) {
+      source = options.sanitizer.sanitize(source);
+    }
+    let w = new HTMLWidget(source);
     resolveUrls(w.node, options.resolver);
     return w;
   }
@@ -200,13 +197,6 @@ class ImageRenderer implements RenderMime.IRenderer {
    */
   isSafe(mimetype: string): boolean {
     return true;
-  }
-
-  /**
-   * Transform the input bundle.
-   */
-  transform(options: RenderMime.IRenderOptions): string {
-    return options.source;
   }
 
   /**
@@ -248,19 +238,12 @@ class TextRenderer implements RenderMime.IRenderer {
   }
 
   /**
-   * Transform the input bundle.
-   */
-  transform(options: RenderMime.IRenderOptions): string {
-    let data = escape_for_html(options.source);
-    return `<pre>${ansi_to_html(data)}</pre>`;
-  }
-
-  /**
    * Render the transformed mime bundle.
    */
   render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
-    w.node.innerHTML = options.source;
+    let data = escape_for_html(options.source);
+    w.node.innerHTML = `<pre>${ansi_to_html(data)}</pre>`;
     w.addClass(RENDERED_CLASS);
     return w;
   }
@@ -289,13 +272,6 @@ class JavascriptRenderer implements RenderMime.IRenderer {
    */
   isSafe(mimetype: string): boolean {
     return false;
-  }
-
-  /**
-   * Transform the input bundle.
-   */
-  transform(options: RenderMime.IRenderOptions): string {
-    return options.source;
   }
 
   /**
@@ -338,18 +314,15 @@ class SVGRenderer implements RenderMime.IRenderer {
   }
 
   /**
-   * Transform the input bundle.
-   */
-  transform(options: RenderMime.IRenderOptions): string {
-    return options.source;
-  }
-
-  /**
    * Render the transformed mime bundle.
    */
   render(options: RenderMime.IRenderOptions): Widget {
+    let source = options.source;
+    if (options.sanitizer) {
+      source = options.sanitizer.sanitize(source);
+    }
     let w = new Widget();
-    w.node.innerHTML = options.source;
+    w.node.innerHTML = source;
     let svgElement = w.node.getElementsByTagName('svg')[0];
     if (!svgElement) {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
@@ -383,13 +356,6 @@ class PDFRenderer implements RenderMime.IRenderer {
    */
   isSafe(mimetype: string): boolean {
     return false;
-  }
-
-  /**
-   * Transform the input bundle.
-   */
-  transform(options: RenderMime.IRenderOptions): string {
-    return options.source;
   }
 
   /**
@@ -433,14 +399,7 @@ class LatexRenderer implements RenderMime.IRenderer  {
   }
 
   /**
-   * Transform the input bundle.
-   */
-  transform(options: RenderMime.IRenderOptions): string {
-    return options.source;
-  }
-
-  /**
-   * Render the transformed mime bundle.
+   * Render the mime bundle.
    */
   render(options: RenderMime.IRenderOptions): Widget {
     return new LatexWidget(options.source);
@@ -473,9 +432,9 @@ class MarkdownRenderer implements RenderMime.IRenderer {
   }
 
   /**
-   * Transform the input bundle.
+   * Render the mime bundle.
    */
-  transform(options: RenderMime.IRenderOptions): Promise<string> {
+  render(options: RenderMime.IRenderOptions): Promise<Widget> {
     let parts = removeMath(options.source);
     let renderer = new marked.Renderer();
     renderer.link = (href: string, title: string, text: string) => {
@@ -496,21 +455,18 @@ class MarkdownRenderer implements RenderMime.IRenderer {
       out += '>';
       return out;
     };
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<Widget>((resolve, reject) => {
       marked(parts['text'], { renderer }, (err, content) => {
         if (err) {
           reject(err);
         }
-        resolve(replaceMath(content, parts['math']));
+        content = replaceMath(content, parts['math']);
+        if (options.sanitizer) {
+          content = options.sanitizer.sanitize(content);
+        }
+        resolve(new HTMLWidget(content));
       });
     });
-  }
-
-  /**
-   * Render the transformed mime bundle.
-   */
-  render(options: RenderMime.IRenderOptions): Widget {
-    return new HTMLWidget(options.source);
   }
 }
 
