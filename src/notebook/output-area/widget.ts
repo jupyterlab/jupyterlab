@@ -702,12 +702,12 @@ class OutputWidget extends Widget {
    *
    * @param trusted - Whether the output is trusted.
    */
-  render(output: OutputAreaModel.Output, trusted=false): Promise<void> {
+  render(output: OutputAreaModel.Output, trusted=false): void {
     // Handle an input request.
     if (output.output_type === 'input_request') {
       let child = new InputWidget(output as OutputAreaModel.IInputRequest);
       this.setOutput(child);
-      return Promise.resolve(void 0);
+      return;
     }
 
     // Extract the data from the output and sanitize if necessary.
@@ -722,7 +722,7 @@ class OutputWidget extends Widget {
     let msg = 'Did not find renderer for output mimebundle.';
     if (!data) {
       console.log(msg);
-      return Promise.resolve(void 0);
+      return;
     }
 
     // Create the output result area.

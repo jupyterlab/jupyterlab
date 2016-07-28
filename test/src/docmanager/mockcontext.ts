@@ -118,6 +118,10 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     return Promise.resolve([] as ISession.IModel[]);
   }
 
+  resolveUrl(url: string): string {
+    return url;
+  }
+
   addSibling(widget: Widget): IDisposable {
     this.methods.push('addSibling');
     return void 0;

@@ -241,9 +241,9 @@ namespace RenderMime {
     source: string;
 
     /**
-     * The url resolver.
+     * An optional url resolver.
      */
-    resolver: IResolver;
+    resolver?: IResolver;
 
     /**
      * An optional html santizer.

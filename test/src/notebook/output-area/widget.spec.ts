@@ -416,14 +416,13 @@ describe('notebook/output-area/widget', () => {
 
     describe('#clear()', () => {
 
-      it('should clear the current output', (done) => {
+      it('should clear the current output', () => {
         let widget = new OutputWidget({ rendermime });
-        widget.render(DEFAULT_OUTPUTS[0], true).then(() => {
-          let output = widget.output;
-          widget.clear();
-          expect(widget.output).to.not.be(output);
-          expect(widget.output).to.be.a(Widget);
-        }).then(done, done);
+        widget.render(DEFAULT_OUTPUTS[0], true);
+        let output = widget.output;
+        widget.clear();
+        expect(widget.output).to.not.be(output);
+        expect(widget.output).to.be.a(Widget);
       });
 
     });

@@ -100,7 +100,9 @@ class HTMLWidget extends Widget {
       source = options.sanitizer.sanitize(source);
     }
     appendHtml(this.node, source);
-    resolveUrls(this.node, options.resolver);
+    if (options.resolver) {
+      resolveUrls(this.node, options.resolver);
+    }
   }
 
   /**
@@ -135,11 +137,13 @@ class MarkdownWidget extends Widget {
         content = options.sanitizer.sanitize(content);
       }
       appendHtml(this.node, content);
-      resolveUrls(this.node, options.resolver);
+      if (options.resolver) {
+        resolveUrls(this.node, options.resolver);
+      }
       this.fit();
+      this._rendered = true;
       if (this.isAttached) {
         typeset(this.node);
-        this._rendered = true;
       }
     });
   }
@@ -366,7 +370,9 @@ class SVGRenderer implements RenderMime.IRenderer {
     if (!svgElement) {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
     }
-    resolveUrls(w.node, options.resolver);
+    if (options.resolver) {
+      resolveUrls(w.node, options.resolver);
+    }
     w.addClass(RENDERED_CLASS);
     return w;
   }
