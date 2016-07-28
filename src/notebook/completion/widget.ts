@@ -422,8 +422,8 @@ class CompletionWidget extends Widget {
     }
     node.style.maxHeight = `${maxHeight}px`;
 
-    let border = parseInt(getComputedStyle(node).borderLeftWidth || '', 10);
-    let left = coords.left + border;
+    let borderLeftWidth = window.getComputedStyle(node).borderLeftWidth;
+    let left = coords.left + parseInt(borderLeftWidth || '', 10);
     let rect = node.getBoundingClientRect();
     let top = availableHeight - rect.height;
 
