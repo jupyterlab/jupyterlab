@@ -9,7 +9,7 @@
   margin: 10px 0 0 20px;
 }
 
-#FAQ-header {
+#faq-header {
   width: 412px;
   display: flex;
   margin: 65px auto 0 auto;
@@ -68,7 +68,7 @@ li>jp-FAQ-answer {
   text-decoration: none;
 }
 
-#FAQ-content {
+#faq-content {
   margin: 0 auto 60px auto;
   display: block;
   width: 94%;

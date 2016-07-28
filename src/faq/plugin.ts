@@ -30,19 +30,14 @@ const faqExtension = {
   activate: activateFAQ
 };
 
-var hasBeenAttatched = false;
-
 class FAQWidget extends Widget{
   protected onAfterAttach(msg: Message): void {
-    if (!hasBeenAttatched) {
-      $(document).ready(function() {
-        $('li.jp-FAQ-answer').addClass('jp-FAQ-hide');
-        $('li.jp-FAQ-question').click(function(){
-          $(this).data('clicked', false).next().slideToggle(200).siblings('li.jp-FAQ-answer').slideUp(200);
-        })
-      });
-      hasBeenAttatched = true;
-    }
+    $(document).ready(function() {
+      $('li.jp-FAQ-answer').addClass('jp-FAQ-hide');
+      $('li.jp-FAQ-question').click(function(){
+        $(this).data('clicked', false).next().slideToggle(200).siblings('li.jp-FAQ-answer').slideUp(200);
+      })
+    });
   }
 }
 
