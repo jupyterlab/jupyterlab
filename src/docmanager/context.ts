@@ -538,7 +538,8 @@ class ContextManager implements IDisposable {
    * Resolve a relative url to a correct server path.
    */
   resolveUrl(id: string, url: string): string {
-    if (url.indexOf('./')) {
+    // TODO: use proper url parser here.
+    if (url.indexOf('http') === 0) {
       return url;
     }
     let contextEx = this._contexts[id];
