@@ -455,6 +455,17 @@ class MarkdownRenderer implements RenderMime.IRenderer {
       out += '>';
       return out;
     };
+    let dummy = document.createElement('div');
+    // Catch-all.
+    renderer.paragraph = (text: string) => {
+      text = '<p>' + text + '</p>\n';
+      if (options.sanitizer) {
+        text = options.sanitizer.sanitize(text);
+      }
+      dummy.innerHTML = text;
+      resolveUrls(dummy, options.resolver);
+      return dummy.innerHTML;
+    };
     return new Promise<Widget>((resolve, reject) => {
       marked(parts['text'], { renderer }, (err, content) => {
         if (err) {
@@ -484,12 +495,16 @@ function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): void {
   for (let i = 0; i < imgs.length; i++) {
     let img = imgs[i];
     let source = img.getAttribute('src');
-    img.src = resolver.resolveUrl(source);
+    if (source) {
+      img.src = resolver.resolveUrl(source);
+    }
   }
   let anchors = node.getElementsByTagName('a');
   for (let i = 0; i < anchors.length; i++) {
     let anchor = anchors[i];
     let href = anchor.getAttribute('href');
-    anchor.href = resolver.resolveUrl(href);
+    if (href) {
+      anchor.href = resolver.resolveUrl(href);
+    }
   }
 }
