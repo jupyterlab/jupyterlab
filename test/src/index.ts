@@ -6,6 +6,7 @@ import './common/activitymonitor.spec';
 import './dialog/dialog.spec';
 
 import './docregistry/default.spec';
+import './docregistry/registry.spec';
 
 import './filebrowser/model.spec';
 

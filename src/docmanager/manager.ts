@@ -121,7 +121,7 @@ class DocumentManager implements IDisposable {
     if (widgetName === 'default') {
       widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path));
     }
-    let mFactory = registry.getModelFactory(widgetName);
+    let mFactory = registry.getModelFactoryFor(widgetName);
     if (!mFactory) {
       return;
     }
@@ -155,7 +155,7 @@ class DocumentManager implements IDisposable {
     if (widgetName === 'default') {
       widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path));
     }
-    let mFactory = registry.getModelFactory(widgetName);
+    let mFactory = registry.getModelFactoryFor(widgetName);
     if (!mFactory) {
       return;
     }

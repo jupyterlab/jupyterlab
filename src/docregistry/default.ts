@@ -4,6 +4,8 @@
 import * as CodeMirror
   from 'codemirror';
 
+import 'codemirror/mode/meta';
+
 import {
   IContents, IKernel
 } from 'jupyter-js-services';

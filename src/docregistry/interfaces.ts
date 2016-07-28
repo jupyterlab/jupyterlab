@@ -98,7 +98,8 @@ interface IDocumentModel extends IDisposable {
 /**
  * The document context object.
  */
-export interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
+export
+interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
   /**
    * A signal emitted when the kernel changes.
    */
@@ -251,6 +252,7 @@ interface IWidgetFactoryOptions {
    * Use "*" to denote all files. Specific file extensions must be preceded
    * with '.', like '.png', '.txt', etc. Entries in this attribute must also
    * be included in the fileExtensions attribute.
+   * The default is an empty array.
    *
    * **See also:** [[fileExtensions]].
    */
@@ -258,11 +260,15 @@ interface IWidgetFactoryOptions {
 
   /**
    * Whether the widgets prefer having a kernel started.
+   *
+   * The default is `false`.
    */
   preferKernel?: boolean;
 
   /**
    * Whether the widgets can start a kernel when opened.
+   *
+   * The default is `false`.
    */
   canStartKernel?: boolean;
 }
@@ -296,7 +302,7 @@ interface IWidgetExtension<T extends Widget, U extends IDocumentModel> {
   /**
    * Create a new extension for a given widget.
    */
-   createNew(widget: T, context: IDocumentContext<U>): IDisposable;
+  createNew(widget: T, context: IDocumentContext<U>): IDisposable;
 }
 
 
