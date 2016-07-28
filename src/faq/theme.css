@@ -1,37 +1,33 @@
-.faqsvg {
-    float: left;
-}
-
-.faqbody {
+.jp-FAQ-body {
   font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
 }
 
-.faqh1 {
+.jp-FAQ-h1 {
   font-size: 26px;
   font-weight: 300;
   color: #313940;
   margin: 10px 0 0 20px;
 }
 
-#faqheader {
+#FAQ-header {
   width: 412px;
   display: flex;
   margin: 65px auto 0 auto;
   text-align: center;
 }
 
-.faqh2 {
+.jp-FAQ-h2 {
   font-size: 14px;
   font-weight: 300;
   color: #9E9E9E;
   margin: 52px 0 0 0;
 }
 
-.faqul {
+.jp-FAQ-ul {
   margin: 0 0 0 0;
 }
 
-li.faqquestion {
+li.jp-FAQ-question {
   cursor: pointer;
   font-size: 20px;
   color: #616161;
@@ -41,7 +37,7 @@ li.faqquestion {
   margin: 28px 0 0 0;
 }
 
-li.faqanswer{
+li.jp-FAQ-answer{
   font-size: 15px;
   font-weight: 200;
   color: #9E9E9E;
@@ -52,27 +48,27 @@ li.faqanswer{
   margin: 28px 0 0 0;
 }
 
-li.faqquestion:hover {
+li.jp-FAQ-question:hover {
   color: #42A5F5;
   h1 {
     color: brown;
   }
 }
 
-li.faqquestion:focus{
+li.jp-FAQ-question:focus{
   color: #42A5F5;
 }
 
-.hide {
+.jp-FAQ-hide {
   display:none;
 }
 
-li>faqanswer {
+li>jp-FAQ-answer {
   color: #4A90E2;
   text-decoration: none;
 }
 
-#faqcontent {
+#FAQ-content {
   margin: 0 auto 60px auto;
   display: block;
   width: 94%;
@@ -80,18 +76,18 @@ li>faqanswer {
 
 }
 
-h1 span.long-faq {
+h1 span.jp-FAQ-title {
   color: #616161;
   display: block;
 }
 
-.faqa {
+.jp-FAQ-a {
     text-decoration: none;
     cursor: pointer;
     color: #2196F3;
 }
 
-.jp-QuestionMark.jp-faq-QuestionMark {
+.jp-QuestionMark.jp-FAQ-QuestionMark {
   height: 49px;
   width: 49px;
 }
