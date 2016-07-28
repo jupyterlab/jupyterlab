@@ -303,7 +303,7 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns The default widget factory name for the extension (if given) or the global default.
    */
-  defaultWidgetFactory(ext: string = '*') {
+  defaultWidgetFactory(ext: string = '*'): string {
     let widgets = this.listWidgetFactories(ext);
     return widgets ? widgets[0] : void 0;
   }
