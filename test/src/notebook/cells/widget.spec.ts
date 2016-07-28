@@ -133,7 +133,7 @@ class LogRenderer extends CodeCellWidget.Renderer {
     return super.createInputArea(editor);
   }
 
-  createOutputArea(rendermime: RenderMime<Widget>): OutputAreaWidget {
+  createOutputArea(rendermime: RenderMime): OutputAreaWidget {
     this.methods.push('createOutputArea');
     return super.createOutputArea(rendermime);
   }

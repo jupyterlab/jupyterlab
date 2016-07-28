@@ -6,7 +6,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ISanitizer, defaultSanitizer
+  ISanitizer
 } from '../sanitizer';
 
 
@@ -22,16 +22,27 @@ import {
  * the mimetype in the `order` array.
  */
 export
-class RenderMime<T extends RenderMime.RenderedObject> {
+class RenderMime {
   /**
    * Construct a renderer.
    */
-  constructor(options: RenderMime.IOptions<T>) {
+  constructor(options: RenderMime.IOptions) {
     for (let mime in options.renderers) {
       this._renderers[mime] = options.renderers[mime];
     }
     this._order = options.order.slice();
-    this._sanitizer = options.sanitizer || defaultSanitizer;
+    this._sanitizer = options.sanitizer;
+    this._resolver = options.resolver || null;
+  }
+
+  /**
+   * The object used to resolve relative urls for the rendermime instance.
+   */
+  get resolver(): RenderMime.IResolver {
+    return this._resolver;
+  }
+  set resolver(value: RenderMime.IResolver) {
+    this._resolver = value;
   }
 
   /**
@@ -41,19 +52,18 @@ class RenderMime<T extends RenderMime.RenderedObject> {
    *
    * @param trusted - whether the bundle is trusted.
    */
-  render(bundle: RenderMime.MimeMap<string>, trusted=false): Promise<T> {
+  render(bundle: RenderMime.MimeMap<string>, trusted=false): Widget {
     let mimetype = this.preferredMimetype(bundle, trusted);
     if (!mimetype) {
-      return Promise.resolve(void 0);
+      return void 0;
     }
-    let renderer = this._renderers[mimetype];
-    let transform = renderer.transform(mimetype, bundle[mimetype]);
-    return Promise.resolve(transform).then(content => {
-      if (!trusted && renderer.sanitizable(mimetype)) {
-        content = this._sanitizer.sanitize(content);
-      }
-      return renderer.render(content, content);
-    });
+    let options = {
+      mimetype,
+      source: bundle[mimetype],
+      resolver: this._resolver,
+      sanitizer: trusted ? null : this._sanitizer
+    };
+    return this._renderers[mimetype].render(options);
   }
 
   /**
@@ -81,8 +91,8 @@ class RenderMime<T extends RenderMime.RenderedObject> {
   /**
    * Clone the rendermime instance with shallow copies of data.
    */
-  clone(): RenderMime<T> {
-    return new RenderMime<T>({
+  clone(): RenderMime {
+    return new RenderMime({
       renderers: this._renderers,
       order: this.order,
       sanitizer: this._sanitizer
@@ -101,7 +111,7 @@ class RenderMime<T extends RenderMime.RenderedObject> {
    * Use the index of `.order.length` to add to the end of the render precedence list,
    * which would make the new renderer the last choice.
    */
-  addRenderer(mimetype: string, renderer: RenderMime.IRenderer<T>, index = 0): void {
+  addRenderer(mimetype: string, renderer: RenderMime.IRenderer, index = 0): void {
     this._renderers[mimetype] = renderer;
     this._order.splice(index, 0, mimetype);
   }
@@ -135,9 +145,10 @@ class RenderMime<T extends RenderMime.RenderedObject> {
     this._order = value.slice();
   }
 
-  private _renderers: RenderMime.MimeMap<RenderMime.IRenderer<T>> = Object.create(null);
+  private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
   private _order: string[];
   private _sanitizer: ISanitizer = null;
+  private _resolver: RenderMime.IResolver;
 }
 
 
@@ -150,11 +161,11 @@ namespace RenderMime {
    * The options used to initialize a rendermime instance.
    */
   export
-  interface IOptions<T extends RenderedObject> {
+  interface IOptions {
     /**
      * A map of mimetypes to renderers.
      */
-    renderers: MimeMap<IRenderer<T>>;
+    renderers: MimeMap<IRenderer>;
 
     /**
      * A list of mimetypes in order of precedence (earliest has precedence).
@@ -163,10 +174,15 @@ namespace RenderMime {
 
     /**
      * The sanitizer used to sanitize html inputs.
-     *
-     * The default is a shared
      */
-    sanitizer?: ISanitizer;
+    sanitizer: ISanitizer;
+
+    /**
+     * The initial resolver object.
+     *
+     * The default is `null`.
+     */
+    resolver?: IResolver;
   }
 
   /**
@@ -185,7 +201,7 @@ namespace RenderMime {
    * The interface for a renderer.
    */
   export
-  interface IRenderer<T extends RenderedObject> {
+  interface IRenderer {
     /**
      * The mimetypes this renderer accepts.
      */
@@ -202,21 +218,49 @@ namespace RenderMime {
     sanitizable(mimetype: string): boolean;
 
     /**
-     * Transform the input bundle.
-     */
-    transform(mimetype: string, data: string): string | Promise<string>;
-
-    /**
      * Render the transformed mime bundle.
      *
-     * @param mimetype - the mimetype for the data
-     *
-     * @param data - the data to render.
-     *
-     * #### Notes
-     * It is assumed that the data has been run through [[transform]]
-     * and has been sanitized if necessary.
+     * @param options - The options used for rendering.
      */
-    render(mimetype: string, data: string): T;
+    render(options: IRenderOptions): Widget;
+  }
+
+  /**
+   * The options used to transform or render mime data.
+   */
+  export
+  interface IRenderOptions {
+    /**
+     * The mimetype.
+     */
+    mimetype: string;
+
+    /**
+     * The source data.
+     */
+    source: string;
+
+    /**
+     * An optional url resolver.
+     */
+    resolver?: IResolver;
+
+    /**
+     * An optional html santizer.
+     *
+     * If given, should be used to sanitize raw html.
+     */
+    sanitizer?: ISanitizer;
+  }
+
+  /**
+   * An object that resolves relative URLs.
+   */
+  export
+  interface IResolver {
+    /**
+     * Resolve a url to a correct server path.
+     */
+    resolveUrl(url: string): string;
   }
 }

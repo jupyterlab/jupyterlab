@@ -208,7 +208,7 @@ class OutputAreaWidget extends Widget {
    * #### Notes
    * This is a read-only property.
    */
-  get rendermime(): RenderMime<Widget> {
+  get rendermime(): RenderMime {
     return this._rendermime;
   }
 
@@ -433,7 +433,7 @@ class OutputAreaWidget extends Widget {
   private _fixedHeight = false;
   private _collapsed = false;
   private _model: OutputAreaModel = null;
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
   private _renderer: OutputAreaWidget.IRenderer = null;
 }
 
@@ -451,7 +451,7 @@ namespace OutputAreaWidget {
     /**
      * The rendermime instance used by the widget.
      */
-    rendermime: RenderMime<Widget>;
+    rendermime: RenderMime;
 
     /**
      * The output widget renderer.
@@ -702,12 +702,12 @@ class OutputWidget extends Widget {
    *
    * @param trusted - Whether the output is trusted.
    */
-  render(output: OutputAreaModel.Output, trusted=false): Promise<void> {
+  render(output: OutputAreaModel.Output, trusted=false): void {
     // Handle an input request.
     if (output.output_type === 'input_request') {
       let child = new InputWidget(output as OutputAreaModel.IInputRequest);
       this.setOutput(child);
-      return Promise.resolve(void 0);
+      return;
     }
 
     // Extract the data from the output and sanitize if necessary.
@@ -722,43 +722,42 @@ class OutputWidget extends Widget {
     let msg = 'Did not find renderer for output mimebundle.';
     if (!data) {
       console.log(msg);
-      return Promise.resolve(void 0);
+      return;
     }
 
     // Create the output result area.
-    return rendermime.render(data, trusted).then(child => {
-      if (!child) {
-        console.log(msg);
-        console.log(data);
-        return;
-      }
-      this.setOutput(child);
+    let child = rendermime.render(data, trusted);
+    if (!child) {
+      console.log(msg);
+      console.log(data);
+      return;
+    }
+    this.setOutput(child);
 
-      // Add classes and output prompt as necessary.
-      switch (output.output_type) {
-      case 'execute_result':
-        child.addClass(EXECUTE_CLASS);
-        let count = (output as nbformat.IExecuteResult).execution_count;
-        this.prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
-        break;
-      case 'display_data':
-        child.addClass(DISPLAY_CLASS);
-        break;
-      case 'stream':
-        if ((output as nbformat.IStream).name === 'stdout') {
-          child.addClass(STDOUT_CLASS);
-        } else {
-          child.addClass(STDERR_CLASS);
-        }
-        break;
-      case 'error':
-        child.addClass(ERROR_CLASS);
-        break;
-      default:
-        console.error(`Unrecognized output type: ${output.output_type}`);
-        data = {};
+    // Add classes and output prompt as necessary.
+    switch (output.output_type) {
+    case 'execute_result':
+      child.addClass(EXECUTE_CLASS);
+      let count = (output as nbformat.IExecuteResult).execution_count;
+      this.prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
+      break;
+    case 'display_data':
+      child.addClass(DISPLAY_CLASS);
+      break;
+    case 'stream':
+      if ((output as nbformat.IStream).name === 'stdout') {
+        child.addClass(STDOUT_CLASS);
+      } else {
+        child.addClass(STDERR_CLASS);
       }
-    });
+      break;
+    case 'error':
+      child.addClass(ERROR_CLASS);
+      break;
+    default:
+      console.error(`Unrecognized output type: ${output.output_type}`);
+      data = {};
+    }
   }
 
   /**
@@ -838,7 +837,7 @@ class OutputWidget extends Widget {
     return map;
   }
 
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
   private _placeholder: Widget = null;
 }
 
@@ -939,7 +938,7 @@ namespace OutputWidget {
     /**
      * The rendermime instance used by the widget.
      */
-    rendermime: RenderMime<Widget>;
+    rendermime: RenderMime;
   }
 }
 

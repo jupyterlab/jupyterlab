@@ -11,8 +11,9 @@ import {
 } from '../renderers';
 
 import {
-  Widget
-} from 'phosphor-widget';
+  defaultSanitizer
+} from '../sanitizer';
+
 
 
 /**
@@ -32,7 +33,7 @@ const renderMimeProvider = {
       new LatexRenderer(),
       new TextRenderer()
     ];
-    let renderers: RenderMime.MimeMap<RenderMime.IRenderer<Widget>> = {};
+    let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
     let order: string[] = [];
     for (let t of transformers) {
       for (let m of t.mimetypes) {
@@ -40,6 +41,6 @@ const renderMimeProvider = {
         order.push(m);
       }
     }
-    return new RenderMime<Widget>({ renderers, order });
+    return new RenderMime({ renderers, order, sanitizer: defaultSanitizer });
   }
 };

@@ -69,7 +69,7 @@ marked.setOptions({
           return;
       }
       try {
-        CodeMirror.runMode(code, spec, el);
+        CodeMirror.runMode(code, spec.mime, el);
         callback(null, el.innerHTML);
       } catch (err) {
         console.log(`Failed to highlight ${lang} code`, err);
@@ -91,17 +91,17 @@ class HTMLWidget extends Widget {
   /**
    * Construct a new html widget.
    */
-  constructor(html: string) {
+  constructor(options: RenderMime.IRenderOptions) {
     super();
     this.addClass(RENDERED_HTML);
     this.addClass(RENDERED_CLASS);
-    try {
-      let range = document.createRange();
-      this.node.appendChild(range.createContextualFragment(html));
-    } catch (error) {
-      console.warn('Environment does not support Range ' +
-                   'createContextualFragment, falling back on innerHTML');
-      this.node.innerHTML = html;
+    let source = options.source;
+    if (options.sanitizer) {
+      source = options.sanitizer.sanitize(source);
+    }
+    appendHtml(this.node, source);
+    if (options.resolver) {
+      resolveUrls(this.node, options.resolver);
     }
   }
 
@@ -111,6 +111,53 @@ class HTMLWidget extends Widget {
   onAfterAttach(msg: Message): void {
     typeset(this.node);
   }
+}
+
+
+/**
+ * A widget for displaying Markdown.
+ */
+class MarkdownWidget extends Widget {
+  /**
+   * Construct a new markdown widget.
+   */
+  constructor(options: RenderMime.IRenderOptions) {
+    super();
+    this.addClass(RENDERED_HTML);
+    this.addClass(RENDERED_CLASS);
+    let parts = removeMath(options.source);
+    // Add the markdown content asynchronously.
+    marked(parts['text'], (err, content) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      content = replaceMath(content, parts['math']);
+      if (options.sanitizer) {
+        content = options.sanitizer.sanitize(content);
+      }
+      appendHtml(this.node, content);
+      if (options.resolver) {
+        resolveUrls(this.node, options.resolver);
+      }
+      this.fit();
+      this._rendered = true;
+      if (this.isAttached) {
+        typeset(this.node);
+      }
+    });
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  onAfterAttach(msg: Message): void {
+    if (this._rendered) {
+      typeset(this.node);
+    }
+  }
+
+  private _rendered = false;
 }
 
 
@@ -140,7 +187,7 @@ class LatexWidget extends Widget {
  * A renderer for raw html.
  */
 export
-class HTMLRenderer implements RenderMime.IRenderer<Widget> {
+class HTMLRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -150,7 +197,7 @@ class HTMLRenderer implements RenderMime.IRenderer<Widget> {
    * Whether the input can safely sanitized for a given mimetype.
    */
   sanitizable(mimetype: string): boolean {
-    return true;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
@@ -161,17 +208,10 @@ class HTMLRenderer implements RenderMime.IRenderer<Widget> {
   }
 
   /**
-   * Transform the input bundle.
-   */
-  transform(mimetype: string, data: string): string {
-    return data;
-  }
-
-  /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
-    return new HTMLWidget(data);
+  render(options: RenderMime.IRenderOptions): Widget {
+    return new HTMLWidget(options);
   }
 }
 
@@ -180,7 +220,7 @@ class HTMLRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for `<img>` data.
  */
 export
-class ImageRenderer implements RenderMime.IRenderer<Widget> {
+class ImageRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -197,23 +237,16 @@ class ImageRenderer implements RenderMime.IRenderer<Widget> {
    * Whether the input is safe without sanitization.
    */
   isSafe(mimetype: string): boolean {
-    return true;
-  }
-
-  /**
-   * Transform the input bundle.
-   */
-  transform(mimetype: string, data: string): string {
-    return data;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
     let img = document.createElement('img');
-    img.src = `data:${mimetype};base64,${data}`;
+    img.src = `data:${options.mimetype};base64,${options.source}`;
     w.node.appendChild(img);
     w.addClass(RENDERED_CLASS);
     return w;
@@ -225,7 +258,7 @@ class ImageRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for plain text and Jupyter console text data.
  */
 export
-class TextRenderer implements RenderMime.IRenderer<Widget> {
+class TextRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -242,23 +275,18 @@ class TextRenderer implements RenderMime.IRenderer<Widget> {
    * Whether the input is safe without sanitization.
    */
   isSafe(mimetype: string): boolean {
-    return true;
-  }
-
-  /**
-   * Transform the input bundle.
-   */
-  transform(mimetype: string, data: string): string {
-    data = escape_for_html(data);
-    return `<pre>${ansi_to_html(data)}</pre>`;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
-    w.node.innerHTML = data;
+    let data = escape_for_html(options.source);
+    let pre = document.createElement('pre');
+    pre.innerHTML = ansi_to_html(data);
+    w.node.appendChild(pre);
     w.addClass(RENDERED_CLASS);
     return w;
   }
@@ -269,7 +297,7 @@ class TextRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for raw `<script>` data.
  */
 export
-class JavascriptRenderer implements RenderMime.IRenderer<Widget> {
+class JavascriptRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -290,20 +318,13 @@ class JavascriptRenderer implements RenderMime.IRenderer<Widget> {
   }
 
   /**
-   * Transform the input bundle.
-   */
-  transform(mimetype: string, data: string): string {
-    return data;
-  }
-
-  /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
     let s = document.createElement('script');
-    s.type = mimetype;
-    s.textContent = data;
+    s.type = options.mimetype;
+    s.textContent = options.source;
     w.node.appendChild(s);
     w.addClass(RENDERED_CLASS);
     return w;
@@ -315,7 +336,7 @@ class JavascriptRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for `<svg>` data.
  */
 export
-class SVGRenderer implements RenderMime.IRenderer<Widget> {
+class SVGRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -325,7 +346,7 @@ class SVGRenderer implements RenderMime.IRenderer<Widget> {
    * Whether the input can safely sanitized for a given mimetype.
    */
   sanitizable(mimetype: string): boolean {
-    return true;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
@@ -336,21 +357,21 @@ class SVGRenderer implements RenderMime.IRenderer<Widget> {
   }
 
   /**
-   * Transform the input bundle.
-   */
-  transform(mimetype: string, data: string): string {
-    return data;
-  }
-
-  /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
+    let source = options.source;
+    if (options.sanitizer) {
+      source = options.sanitizer.sanitize(source);
+    }
     let w = new Widget();
-    w.node.innerHTML = data;
+    w.node.innerHTML = source;
     let svgElement = w.node.getElementsByTagName('svg')[0];
     if (!svgElement) {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
+    }
+    if (options.resolver) {
+      resolveUrls(w.node, options.resolver);
     }
     w.addClass(RENDERED_CLASS);
     return w;
@@ -362,7 +383,7 @@ class SVGRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for PDF data.
  */
 export
-class PDFRenderer implements RenderMime.IRenderer<Widget> {
+class PDFRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -383,21 +404,14 @@ class PDFRenderer implements RenderMime.IRenderer<Widget> {
   }
 
   /**
-   * Transform the input bundle.
-   */
-  transform(mimetype: string, data: string): string {
-    return data;
-  }
-
-  /**
    * Render the transformed mime bundle.
    */
-  render(mimetype: string, data: string): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     let w = new Widget();
     let a = document.createElement('a');
     a.target = '_blank';
     a.textContent = 'View PDF';
-    a.href = 'data:application/pdf;base64,' + data;
+    a.href = 'data:application/pdf;base64,' + options.source;
     w.node.appendChild(a);
     w.addClass(RENDERED_CLASS);
     return w;
@@ -409,7 +423,7 @@ class PDFRenderer implements RenderMime.IRenderer<Widget> {
  * A renderer for LateX data.
  */
 export
-class LatexRenderer implements RenderMime.IRenderer<Widget>  {
+class LatexRenderer implements RenderMime.IRenderer  {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -426,21 +440,14 @@ class LatexRenderer implements RenderMime.IRenderer<Widget>  {
    * Whether the input is safe without sanitization.
    */
   isSafe(mimetype: string): boolean {
-    return true;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
-   * Transform the input bundle.
+   * Render the mime bundle.
    */
-  transform(mimetype: string, data: string): string {
-    return data;
-  }
-
-  /**
-   * Render the transformed mime bundle.
-   */
-  render(mimetype: string, data: string): Widget {
-    return new LatexWidget(data);
+  render(options: RenderMime.IRenderOptions): Widget {
+    return new LatexWidget(options.source);
   }
 }
 
@@ -449,7 +456,7 @@ class LatexRenderer implements RenderMime.IRenderer<Widget>  {
  * A renderer for Jupyter Markdown data.
  */
 export
-class MarkdownRenderer implements RenderMime.IRenderer<Widget> {
+class MarkdownRenderer implements RenderMime.IRenderer {
   /**
    * The mimetypes this renderer accepts.
    */
@@ -459,7 +466,7 @@ class MarkdownRenderer implements RenderMime.IRenderer<Widget> {
    * Whether the input can safely sanitized for a given mimetype.
    */
   sanitizable(mimetype: string): boolean {
-    return true;
+    return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
   /**
@@ -470,24 +477,52 @@ class MarkdownRenderer implements RenderMime.IRenderer<Widget> {
   }
 
   /**
-   * Transform the input bundle.
+   * Render the mime bundle.
    */
-  transform(mimetype: string, data: string): Promise<string> {
-    let parts = removeMath(data);
-    return new Promise<string>((resolve, reject) => {
-      marked(parts['text'], (err, content) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(replaceMath(content, parts['math']));
-      });
-    });
+  render(options: RenderMime.IRenderOptions): Widget {
+    return new MarkdownWidget(options);
   }
+}
 
-  /**
-   * Render the transformed mime bundle.
-   */
-  render(mimetype: string, data: string): Widget {
-    return new HTMLWidget(data);
+
+/**
+ * Resolve the relative urls in the image and anchor tags of a node tree.
+ *
+ * @param node - The head html element.
+ *
+ * @param resolver - A url resolver.
+ */
+export
+function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): void {
+  let imgs = node.getElementsByTagName('img');
+  for (let i = 0; i < imgs.length; i++) {
+    let img = imgs[i];
+    let source = img.getAttribute('src');
+    if (source) {
+      img.src = resolver.resolveUrl(source);
+    }
+  }
+  let anchors = node.getElementsByTagName('a');
+  for (let i = 0; i < anchors.length; i++) {
+    let anchor = anchors[i];
+    let href = anchor.getAttribute('href');
+    if (href) {
+      anchor.href = resolver.resolveUrl(href);
+    }
+  }
+}
+
+
+/**
+ * Append trusted html to a node.
+ */
+function appendHtml(node: HTMLElement, html: string): void {
+  try {
+    let range = document.createRange();
+    node.appendChild(range.createContextualFragment(html));
+  } catch (error) {
+    console.warn('Environment does not support Range ' +
+                 'createContextualFragment, falling back on innerHTML');
+    node.innerHTML = html;
   }
 }

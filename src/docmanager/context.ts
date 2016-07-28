@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContents, IKernel, IServiceManager, ISession, utils
+  ContentsManager, IContents, IKernel, IServiceManager, ISession, utils
 } from 'jupyter-js-services';
 
 import {
@@ -188,6 +188,13 @@ class Context implements IDocumentContext<IDocumentModel> {
    */
   listSessions(): Promise<ISession.IModel[]> {
     return this._manager.listSessions();
+  }
+
+  /**
+   * Resolve a url to a correct server path.
+   */
+  resolveUrl(url: string): string {
+    return this._manager.resolveUrl(this._id, url);
   }
 
   /**
@@ -525,6 +532,20 @@ class ContextManager implements IDisposable {
    */
   listSessions(): Promise<ISession.IModel[]> {
     return this._manager.sessions.listRunning();
+  }
+
+  /**
+   * Resolve a relative url to a correct server path.
+   */
+  resolveUrl(id: string, url: string): string {
+    // TODO: use proper url parser here.
+    if (url.indexOf(':') !== -1) {
+      return url;
+    }
+    let contextEx = this._contexts[id];
+    let cwd = ContentsManager.dirname(contextEx.path);
+    let path = ContentsManager.getAbsolutePath(url, cwd);
+    return this._manager.contents.getDownloadUrl(path);
   }
 
   /**

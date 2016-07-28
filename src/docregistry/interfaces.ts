@@ -207,6 +207,11 @@ interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
   listSessions(): Promise<ISession.IModel[]>;
 
   /**
+   * Resolve a url to a correct server path.
+   */
+  resolveUrl(url: string): string;
+
+  /**
    * Add a sibling widget to the document manager.
    *
    * @param widget - The widget to add to the document manager.

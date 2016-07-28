@@ -46,7 +46,7 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    *
    * @param clipboard - The application clipboard.
    */
-  constructor(rendermime: RenderMime<Widget>, clipboard: IClipboard) {
+  constructor(rendermime: RenderMime, clipboard: IClipboard) {
     super();
     this._rendermime = rendermime;
     this._clipboard = clipboard;
@@ -83,6 +83,6 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     return panel;
   }
 
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
   private _clipboard: IClipboard = null;
 }

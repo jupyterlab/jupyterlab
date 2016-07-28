@@ -375,7 +375,7 @@ class ConsoleWidget extends Widget {
   private _completionHandler: CellCompletionHandler = null;
   private _inspectionHandler: InspectionHandler = null;
   private _mimetype = 'text/x-ipython';
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
   private _renderer: ConsoleWidget.IRenderer = null;
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
@@ -399,7 +399,7 @@ namespace ConsoleWidget {
     /**
      * The mime renderer for the console widget.
      */
-    rendermime: RenderMime<Widget>;
+    rendermime: RenderMime;
 
     /**
      * The renderer for a console widget.
@@ -425,7 +425,7 @@ namespace ConsoleWidget {
     /**
      * Create a new prompt widget.
      */
-    createPrompt(rendermime: RenderMime<Widget>): CodeCellWidget;
+    createPrompt(rendermime: RenderMime): CodeCellWidget;
   }
 
   /**
@@ -445,7 +445,7 @@ namespace ConsoleWidget {
     /**
      * Create a new prompt widget.
      */
-    createPrompt(rendermime: RenderMime<Widget>): CodeCellWidget {
+    createPrompt(rendermime: RenderMime): CodeCellWidget {
       let widget = new CodeCellWidget({ rendermime });
       widget.model = new CodeCellModel();
       return widget;

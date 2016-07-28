@@ -172,7 +172,7 @@ class StaticNotebook extends Widget {
    * #### Notes
    * This is a read-only property.
    */
-  get rendermime(): RenderMime<Widget> {
+  get rendermime(): RenderMime {
     return this._rendermime;
   }
 
@@ -424,7 +424,7 @@ class StaticNotebook extends Widget {
 
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
   private _renderer: StaticNotebook.IRenderer = null;
 }
 
@@ -442,7 +442,7 @@ namespace StaticNotebook {
     /**
      * The rendermime instance used by the widget.
      */
-    rendermime: RenderMime<Widget>;
+    rendermime: RenderMime;
 
     /**
      * The language preference for the model.
@@ -465,12 +465,12 @@ namespace StaticNotebook {
     /**
      * Create a new code cell widget.
      */
-    createCodeCell(model: ICodeCellModel, rendermime: RenderMime<Widget>): CodeCellWidget;
+    createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget;
 
     /**
      * Create a new markdown cell widget.
      */
-    createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime<Widget>): MarkdownCellWidget;
+    createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget;
 
     /**
      * Create a new raw cell widget.
@@ -499,7 +499,7 @@ namespace StaticNotebook {
     /**
      * Create a new code cell widget.
      */
-    createCodeCell(model: ICodeCellModel, rendermime: RenderMime<Widget>): CodeCellWidget {
+    createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget {
       let widget = new CodeCellWidget({ rendermime });
       widget.model = model;
       return widget;
@@ -508,7 +508,7 @@ namespace StaticNotebook {
     /**
      * Create a new markdown cell widget.
      */
-    createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime<Widget>): MarkdownCellWidget {
+    createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget {
       let widget = new MarkdownCellWidget({ rendermime });
       widget.model = model;
       return widget;

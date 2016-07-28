@@ -532,7 +532,7 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   private _renderer: CodeCellWidget.IRenderer;
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
   private _output: OutputAreaWidget = null;
   private _collapsedCursor: IMetadataCursor = null;
   private _scrolledCursor: IMetadataCursor = null;
@@ -559,7 +559,7 @@ namespace CodeCellWidget {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMime<Widget>;
+    rendermime: RenderMime;
   }
 
 
@@ -571,7 +571,7 @@ namespace CodeCellWidget {
     /**
      * Create a new output area for the widget.
      */
-    createOutputArea(rendermime: RenderMime<Widget>): OutputAreaWidget;
+    createOutputArea(rendermime: RenderMime): OutputAreaWidget;
   }
 
 
@@ -583,7 +583,7 @@ namespace CodeCellWidget {
     /**
      * Create an output area widget.
      */
-    createOutputArea(rendermime: RenderMime<Widget>): OutputAreaWidget {
+    createOutputArea(rendermime: RenderMime): OutputAreaWidget {
       return new OutputAreaWidget({ rendermime });
     }
   }
@@ -664,11 +664,10 @@ class MarkdownCellWidget extends BaseCellWidget {
       if (text !== this._prev) {
         let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
         this._markdownWidget.dispose();
-        this._rendermime.render(bundle, this.trusted).then(widget => {
-          this._markdownWidget = widget || new Widget();
-          this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
-          (this.layout as PanelLayout).addChild(this._markdownWidget);
-        });
+        let widget = this._rendermime.render(bundle, this.trusted);
+        this._markdownWidget = widget || new Widget();
+        this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
+        (this.layout as PanelLayout).addChild(this._markdownWidget);
       } else {
         this._markdownWidget.show();
       }
@@ -683,7 +682,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     super.onUpdateRequest(msg);
   }
 
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
   private _markdownWidget: Widget = null;
   private _rendered = true;
   private _prev = '';
@@ -710,7 +709,7 @@ namespace MarkdownCellWidget {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMime<Widget>;
+    rendermime: RenderMime;
   }
 }
 

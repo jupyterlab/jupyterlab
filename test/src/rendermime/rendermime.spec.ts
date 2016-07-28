@@ -16,6 +16,10 @@ import {
   RenderMime
 } from '../../../lib/rendermime';
 
+import {
+  defaultSanitizer
+} from '../../../lib/sanitizer';
+
 
 const TRANSFORMERS = [
   new JavascriptRenderer(),
@@ -30,8 +34,8 @@ const TRANSFORMERS = [
 
 
 export
-function defaultRenderMime(): RenderMime<Widget> {
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer<Widget>> = {};
+function defaultRenderMime(): RenderMime {
+  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
   let order: string[] = [];
   for (let t of TRANSFORMERS) {
     for (let m of t.mimetypes) {
@@ -39,11 +43,12 @@ function defaultRenderMime(): RenderMime<Widget> {
       order.push(m);
     }
   }
-  return new RenderMime<Widget>({ renderers, order });
+  let sanitizer = defaultSanitizer;
+  return new RenderMime({ renderers, order, sanitizer });
 }
 
 
-describe('jupyter-ui', () => {
+describe('rendermime/index', () => {
 
   describe('RenderMime', () => {
 
@@ -58,84 +63,69 @@ describe('jupyter-ui', () => {
 
     describe('#render()', () => {
 
-      it('should render a mimebundle', (done) => {
+      it('should render a mimebundle', () => {
         let r = defaultRenderMime();
-        r.render({ 'text/plain': 'foo' }).then(w => {
-          expect(w instanceof Widget).to.be(true);
-        }).then(done, done);
+        let w = r.render({ 'text/plain': 'foo' });
+        expect(w instanceof Widget).to.be(true);
       });
 
-      it('should return `undefined` for an unregistered mime type', (done) => {
+      it('should return `undefined` for an unregistered mime type', () => {
         let r = defaultRenderMime();
-        r.render({ 'text/fizz': 'buzz' }).then(value => {
-          expect(value).to.be(void 0);
-        }).then(done, done);
+        let value = r.render({ 'text/fizz': 'buzz' });
+        expect(value).to.be(void 0);
       });
 
-      it('should render with the mimetype of highest precidence', (done) => {
+      it('should render with the mimetype of highest precidence', () => {
         let bundle: RenderMime.MimeMap<string> = {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         };
         let r = defaultRenderMime();
-        r.render(bundle, true).then(w => {
-          let el = w.node.firstChild as HTMLElement;
-          expect(el.localName).to.be('h1');
-        }).then(done, done);
+        let w = r.render(bundle, true);
+        let el = w.node.firstChild as HTMLElement;
+        expect(el.localName).to.be('h1');
       });
 
-      it('should render the mimetype that is safe', (done) => {
+      it('should render the mimetype that is safe', () => {
         let bundle: RenderMime.MimeMap<string> = {
           'text/plain': 'foo',
           'text/javascript': 'window.x = 1',
           'image/png': 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
         };
         let r = defaultRenderMime();
-        r.render(bundle, false).then(w => {
-          let el = w.node.firstChild as HTMLElement;
-          expect(el.localName).to.be('img');
-        }).then(done, done);
+        let w = r.render(bundle, false);
+        let el = w.node.firstChild as HTMLElement;
+        expect(el.localName).to.be('img');
       });
 
-      it('should render the mimetype that is sanitizable', (done) => {
+      it('should render the mimetype that is sanitizable', () => {
         let bundle: RenderMime.MimeMap<string> = {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         };
         let r = defaultRenderMime();
-        r.render(bundle, false).then(w => {
-          let el = w.node.firstChild as HTMLElement;
-          expect(el.localName).to.be('h1');
-        }).then(done, done);
+        let w = r.render(bundle, false);
+        let el = w.node.firstChild as HTMLElement;
+        expect(el.localName).to.be('h1');
       });
 
-      it('should sanitize markdown', (done) => {
-        let md = require('../../../examples/filebrowser/sample.md');
-        let r = defaultRenderMime();
-        r.render({ 'text/markdown': md as string }).then(widget => {
-          expect(widget.node.innerHTML).to.be(`<h1>Title first level</h1>\n<h2>Title second Level</h2>\n<h3>Title third level</h3>\n<h4>h4</h4>\n<h5>h5</h5>\n<h6>h6</h6>\n<h1>h1</h1>\n<h2>h2</h2>\n<h3>h3</h3>\n<h4>h4</h4>\n<h5>h6</h5>\n<p>This is just a sample paragraph<br>You can look at different level of nested unorderd list ljbakjn arsvlasc asc asc awsc asc ascd ascd ascd asdc asc</p>\n<ul>\n<li>level 1<ul>\n<li>level 2</li>\n<li>level 2</li>\n<li>level 2<ul>\n<li>level 3</li>\n<li>level 3<ul>\n<li>level 4<ul>\n<li>level 5<ul>\n<li>level 6</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n<li>level 2</li>\n</ul>\n</li>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1<br>Ordered list</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1</li>\n</ol>\n</li>\n</ol>\n</li>\n</ol>\n</li>\n</ol>\n</li>\n<li>level 1</li>\n<li>level 1<br>some Horizontal line</li>\n</ul>\n<hr>\n<h2>and another one</h2>\n<p>Colons can be used to align columns.</p>\n<table>\n<thead>\n<tr>\n<th>Tables</th>\n<th>Are</th>\n<th>Cool</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>col 3 is</td>\n<td>right-aligned</td>\n<td>1600</td>\n</tr>\n<tr>\n<td>col 2 is</td>\n<td>centered</td>\n<td>12</td>\n</tr>\n<tr>\n<td>zebra stripes</td>\n<td>are neat</td>\n<td>1</td>\n</tr>\n</tbody>\n</table>\n<p>There must be at least 3 dashes separating each header cell.<br>The outer pipes (|) are optional, and you don\'t need to make the<br>raw Markdown line up prettily. You can also use inline Markdown.</p>\n`);
-        }).then(done, done);
-      });
-
-      it('should sanitize html', (done) => {
+      it('should sanitize html', () => {
         let bundle: RenderMime.MimeMap<string> = {
           'text/html': '<h1>foo <script>window.x=1></scrip></h1>'
         };
         let r = defaultRenderMime();
-        r.render(bundle).then(widget => {
-          expect(widget.node.innerHTML).to.be('<h1>foo </h1>');
-        }).then(done, done);
+        let widget = r.render(bundle);
+        expect(widget.node.innerHTML).to.be('<h1>foo </h1>');
       });
 
-      it('should sanitize svg', (done) => {
+      it('should sanitize svg', () => {
         let bundle: RenderMime.MimeMap<string> = {
           'image/svg+xml': '<svg><script>windox.x=1</script></svg>'
         };
         let r = defaultRenderMime();
-        r.render(bundle).then(widget => {
-          expect(widget.node.innerHTML.indexOf('svg')).to.not.be(-1);
-          expect(widget.node.innerHTML.indexOf('script')).to.be(-1);
-        }).then(done, done);
+        let widget = r.render(bundle);
+        expect(widget.node.innerHTML.indexOf('svg')).to.not.be(-1);
+        expect(widget.node.innerHTML.indexOf('script')).to.be(-1);
       });
 
     });

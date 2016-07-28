@@ -19,6 +19,10 @@ import {
 } from 'jupyterlab/lib/renderers';
 
 import {
+  defaultSanitizer
+} from 'jupyterlab/lib/sanitizer';
+
+import {
   CommandPalette, StandardPaletteModel, IStandardPaletteItemOptions
 } from 'phosphor-commandpalette';
 
@@ -29,10 +33,6 @@ import {
 import {
   SplitPanel
 } from 'phosphor-splitpanel';
-
-import {
-  Widget
-} from 'phosphor-widget';
 
 import 'jupyterlab/lib/console/base.css';
 import 'jupyterlab/lib/default-theme/completion.css';
@@ -74,7 +74,7 @@ function startApp(session: ISession) {
     new LatexRenderer(),
     new TextRenderer()
   ];
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer<Widget>> = {};
+  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
   let order: string[] = [];
   for (let t of transformers) {
     for (let m of t.mimetypes) {
@@ -82,7 +82,8 @@ function startApp(session: ISession) {
       order.push(m);
     }
   }
-  let rendermime = new RenderMime<Widget>({ renderers, order });
+  let sanitizer = defaultSanitizer;
+  let rendermime = new RenderMime({ renderers, order, sanitizer });
 
   let consolePanel = new ConsolePanel({ session, rendermime });
   consolePanel.title.text = TITLE;

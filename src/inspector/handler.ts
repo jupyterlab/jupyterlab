@@ -42,7 +42,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   /**
    * Construct a new inspection handler for a widget.
    */
-  constructor(rendermime: RenderMime<Widget>) {
+  constructor(rendermime: RenderMime) {
     this._rendermime = rendermime;
   }
 
@@ -144,10 +144,9 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     let details = content.payload.filter(i => (i as any).source === 'page')[0];
     if (details) {
       let bundle = (details as any).data as RenderMime.MimeMap<string>;
-      this._rendermime.render(bundle, true).then(widget => {
-        update.content = widget;
-        this.inspected.emit(update);
-      });
+      let widget = this._rendermime.render(bundle, true);
+      update.content = widget;
+      this.inspected.emit(update);
       return;
     }
 
@@ -201,10 +200,9 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
       }
 
       let bundle = value.data as RenderMime.MimeMap<string>;
-      this._rendermime.render(bundle, true).then(widget => {
-        update.content = widget;
-        this.inspected.emit(update);
-      });
+      let widget = this._rendermime.render(bundle, true);
+      update.content = widget;
+      this.inspected.emit(update);
     });
   }
 
@@ -212,7 +210,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   private _isDisposed = false;
   private _kernel: IKernel = null;
   private _pending = 0;
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
 }
 
 

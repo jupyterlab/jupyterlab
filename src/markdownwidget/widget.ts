@@ -22,8 +22,8 @@ import {
 } from '../docregistry';
 
 import {
-  MarkdownRenderer
-} from '../renderers';
+  RenderMime
+} from '../rendermime';
 
 
 /**
@@ -40,13 +40,14 @@ class MarkdownWidget extends Widget {
   /**
    * Construct a new markdown widget.
    */
-  constructor(context: IDocumentContext<IDocumentModel>) {
+  constructor(context: IDocumentContext<IDocumentModel>, rendermime: RenderMime) {
     super();
     this.addClass(MD_CLASS);
     this.layout = new PanelLayout();
     this.title.text = context.path.split('/').pop();
-    this._renderer = new MarkdownRenderer();
-    this._model = context.model;
+    this._rendermime = rendermime;
+    rendermime.resolver = context;
+    this._context = context;
 
     context.pathChanged.connect((c, path) => {
       this.title.text = path.split('/').pop();
@@ -68,18 +69,20 @@ class MarkdownWidget extends Widget {
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    let renderer = this._renderer;
-    let model = this._model;
+    let context = this._context;
+    let model = context.model;
     let layout = this.layout as PanelLayout;
-    let widget = renderer.render('text/markdown', model.toString());
+    let widget = this._rendermime.render({
+     'text/markdown': model.toString(),
+    });
     if (layout.childCount()) {
       layout.childAt(0).dispose();
     }
     layout.addChild(widget);
   }
 
-  private _renderer: MarkdownRenderer = null;
-  private _model: IDocumentModel = null;
+  private _rendermime: RenderMime = null;
+  private _context: IDocumentContext<IDocumentModel> = null;
 }
 
 
@@ -89,11 +92,21 @@ class MarkdownWidget extends Widget {
 export
 class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, IDocumentModel> {
   /**
+   * Construct a new markdown widget factory.
+   */
+  constructor(rendermime: RenderMime) {
+    super();
+    this._rendermime = rendermime;
+  }
+
+  /**
    * Create a new widget given a context.
    */
   createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): MarkdownWidget {
-    let widget = new MarkdownWidget(context);
+    let widget = new MarkdownWidget(context, this._rendermime.clone());
     this.widgetCreated.emit(widget);
     return widget;
   }
+
+  private _rendermime: RenderMime = null;
 }

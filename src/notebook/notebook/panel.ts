@@ -162,7 +162,7 @@ class NotebookPanel extends Widget {
    * #### Notes
    * This is a read-only property.
    */
-  get rendermime(): RenderMime<Widget> {
+  get rendermime(): RenderMime {
     return this._rendermime;
   }
 
@@ -210,6 +210,7 @@ class NotebookPanel extends Widget {
     }
     let oldValue = this._context;
     this._context = newValue;
+    this._rendermime.resolver = newValue;
     // Trigger private, protected, and public changes.
     this._onContextChanged(oldValue, newValue);
     this.onContextChanged(oldValue, newValue);
@@ -356,7 +357,7 @@ class NotebookPanel extends Widget {
   private _content: Notebook = null;
   private _context: IDocumentContext<INotebookModel> = null;
   private _renderer: NotebookPanel.IRenderer = null;
-  private _rendermime: RenderMime<Widget> = null;
+  private _rendermime: RenderMime = null;
 }
 
 
@@ -372,7 +373,7 @@ export namespace NotebookPanel {
     /**
      * The rendermime instance used by the panel.
      */
-    rendermime: RenderMime<Widget>;
+    rendermime: RenderMime;
 
     /**
      * The application clipboard.

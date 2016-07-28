@@ -10,6 +10,10 @@ import {
 } from '../docregistry';
 
 import {
+  RenderMime
+} from '../rendermime';
+
+import {
   MarkdownWidgetFactory
 } from './widget';
 
@@ -29,9 +33,9 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
  */
 export
 const markdownHandlerExtension = {
-  id: 'jupyter.extensions.RenderedMarkdown',
-  requires: [DocumentRegistry],
-  activate: (app: Application, registry: DocumentRegistry) => {
+  id: 'jupyter.extensions.rendered-markdown',
+  requires: [DocumentRegistry, RenderMime],
+  activate: (app: Application, registry: DocumentRegistry, rendermime: RenderMime) => {
     let options: IWidgetFactoryOptions = {
       fileExtensions: ['.md'],
       displayName: 'Rendered Markdown',
@@ -39,7 +43,7 @@ const markdownHandlerExtension = {
       preferKernel: false,
       canStartKernel: false
     };
-    let factory = new MarkdownWidgetFactory();
+    let factory = new MarkdownWidgetFactory(rendermime);
     let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
     factory.widgetCreated.connect((sender, widget) => {
       widget.title.icon = icon;
