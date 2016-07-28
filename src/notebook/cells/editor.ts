@@ -328,7 +328,14 @@ class CellEditorWidget extends CodeMirrorWidget {
    */
   protected onTabEvent(event: KeyboardEvent, ch: number, line: number): void {
     let editor = this.editor;
-    let currentValue = editor.getDoc().getValue();
+    let doc = editor.getDoc();
+
+    // If there is a text selection, no completion requests should be emitted.
+    if (doc.getSelection()) {
+      return;
+    }
+
+    let currentValue = doc.getValue();
     let currentLine = currentValue.split('\n')[line];
     let chHeight = editor.defaultTextHeight();
     let chWidth = editor.defaultCharWidth();
@@ -340,15 +347,18 @@ class CellEditorWidget extends CodeMirrorWidget {
     //
     // Otherwise, the default tab action of creating a tab character should be
     // allowed to propagate.
-    if (currentLine.substring(0, ch).match(/\S/)) {
-      let data = {
-        line, ch, chHeight, chWidth, coords, position, currentValue
-      };
-      this.completionRequested.emit(data as ICompletionRequest);
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
+    if (!currentLine.substring(0, ch).match(/\S/)) {
+      return;
     }
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    let data = {
+      line, ch, chHeight, chWidth, coords, position, currentValue
+    };
+    this.completionRequested.emit(data as ICompletionRequest);
   }
 
   private _model: ICellModel = null;
