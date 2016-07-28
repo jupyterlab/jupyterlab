@@ -460,7 +460,7 @@ class DocumentRegistry implements IDisposable {
  */
 namespace Private {
   /**
-   * An record for a widget factory and its options.
+   * A record for a widget factory and its options.
    */
   export
   interface IWidgetFactoryRecord extends IWidgetFactoryOptions {
