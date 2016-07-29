@@ -11,7 +11,7 @@ import {
 
 import {
   IObservableList, ListChangeType, IListChangedArgs, ObservableList
-} from 'phosphor-observablelist';
+} from '../../common/observablelist';
 
 
 /**

@@ -6,16 +6,16 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IObservableList, ListChangeType, IListChangedArgs
-} from 'phosphor-observablelist';
-
-import {
   IChangedArgs
 } from 'phosphor-properties';
 
 import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
+
+import {
+  IObservableList, ListChangeType, IListChangedArgs
+} from '../../common/observablelist';
 
 import {
   DocumentModel, IDocumentModel
