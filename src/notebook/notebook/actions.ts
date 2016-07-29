@@ -637,25 +637,25 @@ namespace NotebookActions {
     }
     let values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
     let model = widget.model;
-    let cells: ICellModel[] = [];
+    let newCells: ICellModel[] = [];
     widget.mode = 'command';
 
     for (let value of values) {
       switch (value.cell_type) {
       case 'code':
-        cells.push(model.factory.createCodeCell(value));
+        newCells.push(model.factory.createCodeCell(value));
         break;
       case 'markdown':
-        cells.push(model.factory.createMarkdownCell(value));
+        newCells.push(model.factory.createMarkdownCell(value));
         break;
       default:
-        cells.push(model.factory.createRawCell(value));
+        newCells.push(model.factory.createRawCell(value));
         break;
       }
     }
     let index = widget.activeCellIndex;
-    widget.model.cells.replace(index + 1, 0, cells);
-    widget.activeCellIndex += cells.length;
+    widget.model.cells.replace(index + 1, 0, newCells);
+    widget.activeCellIndex += newCells.length;
     Private.deselectCells(widget);
   }
 
