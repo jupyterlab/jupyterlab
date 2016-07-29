@@ -622,6 +622,8 @@ namespace NotebookActions {
    * @param clipboard - The clipboard object.
    *
    * #### Notes
+   * The cells are pasted below the active cell.
+   * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
    */
