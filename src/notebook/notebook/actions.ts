@@ -107,38 +107,38 @@ namespace NotebookActions {
     let toDelete: ICellModel[] = [];
     let model = widget.model;
     let cells = model.cells;
-    let index = widget.activeCellIndex;
     let primary = widget.activeCell;
+    let index = widget.activeCellIndex;
     let child: BaseCellWidget;
 
-    // Get the other cells to merge.
+    // Get the cells to merge.
     for (let i = 0; i < widget.childCount(); i++) {
-      if (i === index) {
-        continue;
-      }
       child = widget.childAt(i);
       if (widget.isSelected(child)) {
         toMerge.push(child.model.source);
-        toDelete.push(child.model);
+        if (i !== index) {
+          toDelete.push(child.model);
+        }
       }
     }
 
-    // Make sure there are cells to merge and select cells.
-    if (!toMerge.length) {
-      // Choose the cell after the active cell.
-      child = widget.childAt(index + 1);
-      if (!child) {
+    // Check for only a single cell selected.
+    if (toMerge.length === 1) {
+      // Bail if it is the last cell.
+      if (index === cells.length - 1) {
         return;
       }
-      toMerge.push(child.model.source);
-      toDelete.push(child.model);
+      // Otherwise merge with the next cell.
+      let cellModel = cells.get(index + 1);
+      toMerge.push(cellModel.source);
+      toDelete.push(cellModel);
     }
+
     Private.deselectCells(widget);
 
     // Create a new cell for the source to preserve history.
     let newModel = Private.cloneCell(model, primary.model);
-    newModel.source += '\n\n';
-    newModel.source += toMerge.join('\n\n');
+    newModel.source = toMerge.join('\n\n');
     if (newModel instanceof CodeCellModel) {
       newModel.outputs.clear();
     }

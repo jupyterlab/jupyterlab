@@ -154,11 +154,14 @@ describe('notebook/notebook/actions', () => {
       it('should merge the selected cells', () => {
         let source = widget.activeCell.model.source + '\n\n';
         let next = widget.childAt(1);
-        source += next.model.source;
         widget.select(next);
+        source += next.model.source + '\n\n';
+        next = widget.childAt(2);
+        widget.select(next);
+        source += next.model.source;
         let count = widget.childCount();
         NotebookActions.mergeCells(widget);
-        expect(widget.childCount()).to.be(count - 1);
+        expect(widget.childCount()).to.be(count - 2);
         expect(widget.activeCell.model.source).to.be(source);
       });
 
