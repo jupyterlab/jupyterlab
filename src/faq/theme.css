@@ -1,6 +1,11 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 .jp-FAQ-body {
-  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 }
+
 
 .jp-FAQ-h1 {
   font-size: 26px;
@@ -9,12 +14,14 @@
   margin: 10px 0 0 20px;
 }
 
+
 #faq-header {
   width: 412px;
   display: flex;
   margin: 65px auto 0 auto;
   text-align: center;
 }
+
 
 .jp-FAQ-h2 {
   font-size: 14px;
@@ -23,9 +30,11 @@
   margin: 52px 0 0 0;
 }
 
+
 .jp-FAQ-ul {
   margin: 0 0 0 0;
 }
+
 
 li.jp-FAQ-question {
   cursor: pointer;
@@ -36,6 +45,7 @@ li.jp-FAQ-question {
   list-style-type: none;
   margin: 28px 0 0 0;
 }
+
 
 li.jp-FAQ-answer{
   font-size: 15px;
@@ -48,44 +58,48 @@ li.jp-FAQ-answer{
   margin: 28px 0 0 0;
 }
 
+
 li.jp-FAQ-question:hover {
   color: #42A5F5;
-  h1 {
-    color: brown;
-  }
 }
+
 
 li.jp-FAQ-question:focus{
   color: #42A5F5;
 }
 
+
 .jp-FAQ-hide {
   display:none;
 }
+
 
 li>jp-FAQ-answer {
   color: #4A90E2;
   text-decoration: none;
 }
 
+
 #faq-content {
   margin: 0 auto 60px auto;
   display: block;
   width: 94%;
   max-width: 675px;
-
 }
+
 
 h1 span.jp-FAQ-title {
   color: #616161;
   display: block;
 }
 
+
 .jp-FAQ-a {
     text-decoration: none;
     cursor: pointer;
     color: #2196F3;
 }
+
 
 .jp-QuestionMark.jp-FAQ-QuestionMark {
   height: 49px;

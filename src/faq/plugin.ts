@@ -1,42 +1,44 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import $ = require('jquery');
+
 import {
   Application
 } from 'phosphide/lib/core/application';
 
 import {
-  Widget
-} from 'phosphor-widget';
-import {
   Message
 } from 'phosphor-messaging';
-import {
-  WidgetTracker
-} from '../widgettracker';
 
 import {
   TabPanel
 } from 'phosphor-tabs';
 
-import $ = require('jquery');
+import {
+  Widget
+} from 'phosphor-widget';
+
 
 /**
  * The faq page extension.
  */
 export
 const faqExtension = {
-  id: 'jupyter.extensions.FAQ',
+  id: 'jupyter.extensions.faq',
   activate: activateFAQ
 };
 
-class FAQWidget extends Widget{
+class FAQWidget extends Widget {
   protected onAfterAttach(msg: Message): void {
-    $(document).ready(function() {
-      $('li.jp-FAQ-answer').addClass('jp-FAQ-hide');
-      $('li.jp-FAQ-question').click(function(){
-        $(this).data('clicked', false).next().slideToggle(200).siblings('li.jp-FAQ-answer').slideUp(200);
-      })
+    let answerNodeList = this.node.querySelectorAll('li.jp-FAQ-answer');
+    let answerArray = Array.prototype.slice.call(answerNodeList);
+    for (let answerElement of answerArray) {
+      answerElement.className += ' jp-FAQ-hide';
+    }
+    $('li.jp-FAQ-question').click(function(){
+      $(this).data('clicked', false).next().slideToggle(200)
+      .siblings('li.jp-FAQ-answer').slideUp(200);
     });
   }
 }
@@ -87,7 +89,7 @@ function activateFAQ(app: Application): void {
   basicsQ1.textContent = 'What is JupyterLab?';
   let basicsQ1Ans = document.createElement('li');
   basicsQ1Ans.className = 'jp-FAQ-answer';
-  basicsQ1Ans.textContent = 'JupyterLab allows users to arrange multiple jupyter notebooks, '
+  basicsQ1Ans.textContent = 'JupyterLab allows users to arrange multiple Jupyter notebooks, '
    + 'text editors, terminals, output areas, etc. on a single page with multiple panels '
    + 'and tabs into one application. The codebase and UI of JupyterLab is based on a flexible '
    + 'plugin system that makes it easy to extend with new components.';
@@ -125,7 +127,7 @@ function activateFAQ(app: Application): void {
   basicsQ4.textContent = 'I’m confused with the interface. How do I navigate around JupyterLab?';
   let basicsQ4Ans = document.createElement('li');
   basicsQ4Ans.className = 'jp-FAQ-answer';
-  basicsQ4Ans.textContent = 'Checkout the Jupyter Lab tour ';
+  basicsQ4Ans.textContent = 'Check out the JupyterLab tour ';
   basicsQA.appendChild(basicsQ4);
   basicsQA.appendChild(basicsQ4Ans);
 
@@ -313,16 +315,12 @@ function activateFAQ(app: Application): void {
   developerQA.appendChild(developerQ3Ans);
   widget.node.style.overflowY = 'auto';
 
-  let tracker = new WidgetTracker<FAQWidget>();
-  let activeFAQ: FAQWidget;
-  tracker.activeWidgetChanged.connect((sender, widget) => {
-    activeFAQ = widget;
-  });
-
   app.commands.add([{
     id: commandId,
     handler: () => {
-      if (!widget.isAttached) app.shell.addToMainArea(widget);
+      if (!widget.isAttached) {
+        app.shell.addToMainArea(widget);
+      }
       let stack = widget.parent;
       if (!stack) {
         return;
