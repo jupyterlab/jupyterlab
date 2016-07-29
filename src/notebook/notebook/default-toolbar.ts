@@ -243,18 +243,28 @@ namespace ToolbarItems {
   function createKernelNameItem(panel: NotebookPanel): Widget {
     let widget = new Widget();
     widget.addClass(TOOLBAR_KERNEL);
-    widget.node.textContent = 'No Kernel!';
-    if (panel.kernel) {
-      panel.kernel.getKernelSpec().then(spec => {
-        widget.node.textContent = spec.display_name;
-      });
-    }
+    updateKernelNameItem(widget, panel.kernel);
     panel.kernelChanged.connect(() => {
-      panel.kernel.getKernelSpec().then(spec => {
-        widget.node.textContent = spec.display_name;
-      });
+      updateKernelNameItem(widget, panel.kernel);
     });
     return widget;
+  }
+
+  /**
+   * Update the text of the kernel name item.
+   */
+  function updateKernelNameItem(widget: Widget, kernel: IKernel): void {
+    widget.node.textContent = 'No Kernel!';
+    if (!kernel) {
+      return;
+    }
+    if (kernel.spec) {
+      widget.node.textContent = kernel.spec.display_name;
+    } else {
+      kernel.getKernelSpec().then(spec => {
+        widget.node.textContent = kernel.spec.display_name;
+      });
+    }
   }
 
   /**

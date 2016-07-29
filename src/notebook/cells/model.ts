@@ -245,7 +245,7 @@ class CellModel implements ICellModel {
     return {
       cell_type: this.type,
       source: this.source,
-      metadata: utils.copy(this._metadata)
+      metadata: utils.copy(this._metadata) as nbformat.IBaseCellMetadata
     };
   }
 
