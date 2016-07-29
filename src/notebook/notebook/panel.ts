@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  IKernel, KernelMessage
 } from 'jupyter-js-services';
 
 import {
@@ -294,6 +294,10 @@ class NotebookPanel extends Widget {
         oldValue.model.stateChanged.disconnect(this.onModelStateChanged, this);
       }
     }
+    if (!newValue) {
+      this._onKernelChanged(null, null);
+      return;
+    }
     let context = newValue;
     context.kernelChanged.connect(this._onKernelChanged, this);
     let oldKernel = oldValue ? oldValue.kernel : null;
@@ -317,24 +321,46 @@ class NotebookPanel extends Widget {
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(context: IDocumentContext<INotebookModel>, kernel: IKernel): void {
-    if (!this.model || !kernel) {
-      return;
-    }
-    kernel.kernelInfo().then(msg => {
-      let infoCursor = this.model.getMetadata('language_info');
-      infoCursor.setValue(msg.content.language_info);
-    });
-    kernel.getKernelSpec().then(spec => {
-      let specCursor = this.model.getMetadata('kernelspec');
-      specCursor.setValue({
-        name: kernel.name,
-        display_name: spec.display_name,
-        language: spec.language
-      });
-    });
     this._completionHandler.kernel = kernel;
     this.content.inspectionHandler.kernel = kernel;
     this.kernelChanged.emit(kernel);
+    if (!this.model || !kernel) {
+      return;
+    }
+    if (kernel.info) {
+      this._updateLanguage(kernel.info.language_info);
+    } else {
+      kernel.kernelInfo().then(msg => {
+        this._updateLanguage(msg.content.language_info);
+      });
+    }
+    if (kernel.spec) {
+      this._updateSpec(kernel);
+    } else {
+      kernel.getKernelSpec().then(spec => {
+        this._updateSpec(kernel);
+      });
+    }
+  }
+
+  /**
+   * Update the kernel language.
+   */
+  private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
+    let infoCursor = this.model.getMetadata('language_info');
+    infoCursor.setValue(language);
+  }
+
+  /**
+   * Update the kernel spec.
+   */
+  private _updateSpec(kernel: IKernel): void {
+    let specCursor = this.model.getMetadata('kernelspec');
+    specCursor.setValue({
+      name: kernel.name,
+      display_name: kernel.spec.display_name,
+      language: kernel.spec.language
+    });
   }
 
   /**

@@ -328,14 +328,13 @@ class ConsoleWidget extends Widget {
    * Initialize the banner and mimetype.
    */
   protected initialize(): void {
-    let layout = this.layout as PanelLayout;
-    let banner = layout.childAt(0) as RawCellWidget;
-    this._session.kernel.kernelInfo().then(msg => {
-      let info = msg.content;
-      banner.model.source = info.banner;
-      this._mimetype = mimetypeForLanguage(info.language_info);
-      this.prompt.mimetype = this._mimetype;
-    });
+    if (this._session.kernel.info) {
+      this._handleInfo(this._session.kernel.info);
+    } else {
+      this._session.kernel.kernelInfo().then(msg => {
+        this._handleInfo(msg.content);
+      });
+    }
   }
 
   /**
@@ -369,6 +368,17 @@ class ConsoleWidget extends Widget {
     Private.scrollToBottom(this.node);
 
     prompt.focus();
+  }
+
+  /**
+   * Update the console based on the kernel info.
+   */
+  private _handleInfo(info: KernelMessage.IInfoReply): void {
+    let layout = this.layout as PanelLayout;
+    let banner = layout.childAt(0) as RawCellWidget;
+    banner.model.source = info.banner;
+    this._mimetype = mimetypeForLanguage(info.language_info);
+    this.prompt.mimetype = this._mimetype;
   }
 
   private _completion: CompletionWidget = null;

@@ -128,7 +128,7 @@ class FileBrowserModel implements IDisposable {
       return Promise.resolve(void 0);
     }
     let oldValue = this.path;
-    let options = { content: true };
+    let options: IContents.IFetchOptions = { content: true };
     this._pendingPath = newValue;
     if (newValue === '.') {
       newValue = this.path;

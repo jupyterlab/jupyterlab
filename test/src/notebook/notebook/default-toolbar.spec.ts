@@ -294,10 +294,7 @@ describe('notebook/notebook/default-toolbar', () => {
       });
 
       it("should display `'No Kernel!'` if there is no kernel", () => {
-        let model = new NotebookModel();
-        model.fromJSON(DEFAULT_CONTENT);
-        context = new MockContext<NotebookModel>(model);
-        panel.context = context;
+        panel.context = null;
         let item = ToolbarItems.createKernelNameItem(panel);
         expect(item.node.textContent).to.be('No Kernel!');
       });
@@ -312,13 +309,12 @@ describe('notebook/notebook/default-toolbar', () => {
         });
       });
 
-      it('should handle a change in context', () => {
+      it('should handle a change in context', (done) => {
         let item = ToolbarItems.createKernelNameItem(panel);
-        let model = new NotebookModel();
-        model.fromJSON(DEFAULT_CONTENT);
-        context = new MockContext<NotebookModel>(model);
-        panel.context = context;
-        expect(item.node.textContent).to.be('No Kernel!');
+        panel.kernel.getKernelSpec().then(spec => {
+          panel.context = null;
+          expect(item.node.textContent).to.be('No Kernel!');
+        }).then(done, done);
       });
 
     });

@@ -462,7 +462,7 @@ class ContextManager implements IDisposable {
       contextEx.path = newPath;
       contextEx.context.pathChanged.emit(newPath);
       if (contextEx.session) {
-        let options = {
+        let options: ISession.IOptions = {
           path: newPath,
           kernelId: contextEx.session.kernel.id,
           kernelName: contextEx.session.kernel.name
@@ -538,8 +538,8 @@ class ContextManager implements IDisposable {
    * Resolve a relative url to a correct server path.
    */
   resolveUrl(id: string, url: string): string {
-    // TODO: use proper url parser here.
-    if (url.indexOf(':') !== -1) {
+    // Ignore urls that have a protocol.
+    if (utils.urlParse(url).protocol || url.indexOf('//') === 0) {
       return url;
     }
     let contextEx = this._contexts[id];
