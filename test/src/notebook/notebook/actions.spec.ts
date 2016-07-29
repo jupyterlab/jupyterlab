@@ -154,11 +154,14 @@ describe('notebook/notebook/actions', () => {
       it('should merge the selected cells', () => {
         let source = widget.activeCell.model.source + '\n\n';
         let next = widget.childAt(1);
-        source += next.model.source;
         widget.select(next);
+        source += next.model.source + '\n\n';
+        next = widget.childAt(2);
+        widget.select(next);
+        source += next.model.source;
         let count = widget.childCount();
         NotebookActions.mergeCells(widget);
-        expect(widget.childCount()).to.be(count - 1);
+        expect(widget.childCount()).to.be(count - 2);
         expect(widget.activeCell.model.source).to.be(source);
       });
 
@@ -875,6 +878,22 @@ describe('notebook/notebook/actions', () => {
         expect(widget.isSelected(last)).to.be(false);
       });
 
+      it('should deselect the current cell if the cell above is selected', () => {
+        NotebookActions.extendSelectionBelow(widget);
+        NotebookActions.extendSelectionBelow(widget);
+        let cell = widget.activeCell;
+        NotebookActions.extendSelectionAbove(widget);
+        expect(widget.isSelected(cell)).to.be(false);
+      });
+
+      it('should select only the first cell if we move from the second to first', () => {
+        NotebookActions.extendSelectionBelow(widget);
+        let cell = widget.activeCell;
+        NotebookActions.extendSelectionAbove(widget);
+        expect(widget.isSelected(cell)).to.be(false);
+        expect(widget.activeCellIndex).to.be(0);
+      });
+
       it('should activate the cell', () => {
         widget.activeCellIndex = 1;
         NotebookActions.extendSelectionAbove(widget);
@@ -909,6 +928,26 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.extendSelectionBelow(widget);
         expect(widget.activeCellIndex).to.be(last);
         expect(widget.isSelected(widget.childAt(0))).to.be(false);
+      });
+
+      it('should deselect the current cell if the cell below is selected', () => {
+        let last = widget.childCount() - 1;
+        widget.activeCellIndex = last;
+        NotebookActions.extendSelectionAbove(widget);
+        NotebookActions.extendSelectionAbove(widget);
+        let current = widget.activeCell;
+        NotebookActions.extendSelectionBelow(widget);
+        expect(widget.isSelected(current)).to.be(false);
+      });
+
+      it('should select only the last cell if we move from the second last to last', () => {
+        let last = widget.childCount() - 1;
+        widget.activeCellIndex = last;
+        NotebookActions.extendSelectionAbove(widget);
+        let current = widget.activeCell;
+        NotebookActions.extendSelectionBelow(widget);
+        expect(widget.isSelected(current)).to.be(false);
+        expect(widget.activeCellIndex).to.be(last);
       });
 
       it('should activate the cell', () => {
