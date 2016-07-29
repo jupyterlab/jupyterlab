@@ -652,7 +652,8 @@ namespace NotebookActions {
       }
     }
     let index = widget.activeCellIndex;
-    widget.model.cells.replace(index, 0, cells);
+    widget.model.cells.replace(index + 1, 0, cells);
+    widget.activeCellIndex += cells.length;
     Private.deselectCells(widget);
   }
 

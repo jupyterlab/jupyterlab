@@ -994,7 +994,8 @@ describe('notebook/notebook/actions', () => {
         widget.activeCellIndex = 1;
         NotebookActions.paste(widget, clipboard);
         expect(widget.childCount()).to.be(count);
-        expect(widget.childAt(1).model.source).to.be(source);
+        expect(widget.childAt(2).model.source).to.be(source);
+        expect(widget.activeCellIndex).to.be(3);
       });
 
       it('should be a no-op if there is no model', () => {
