@@ -622,6 +622,8 @@ namespace NotebookActions {
    * @param clipboard - The clipboard object.
    *
    * #### Notes
+   * The cells are pasted below the active cell.
+   * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
    */
@@ -652,7 +654,8 @@ namespace NotebookActions {
       }
     }
     let index = widget.activeCellIndex;
-    widget.model.cells.replace(index, 0, cells);
+    widget.model.cells.replace(index + 1, 0, cells);
+    widget.activeCellIndex += cells.length;
     Private.deselectCells(widget);
   }
 
