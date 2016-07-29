@@ -10,12 +10,12 @@ import {
 } from 'phosphor-disposable';
 
 import {
-  IListChangedArgs, IObservableList, ObservableList
-} from 'phosphor-observablelist';
-
-import {
   ISignal, Signal, clearSignalData
 } from 'phosphor-signaling';
+
+import {
+  IListChangedArgs, IObservableList, ObservableList
+} from '../../common/observablelist';
 
 import {
   nbformat

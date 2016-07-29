@@ -10,10 +10,6 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  IObservableList, IListChangedArgs, ListChangeType
-} from 'phosphor-observablelist';
-
-import {
   PanelLayout
 } from 'phosphor-panel';
 
@@ -28,6 +24,10 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  IObservableList, IListChangedArgs, ListChangeType
+} from '../../common/observablelist';
 
 import {
   InspectionHandler

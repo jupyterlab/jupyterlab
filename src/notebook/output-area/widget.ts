@@ -10,10 +10,6 @@ import {
 } from 'phosphor-dragdrop';
 
 import {
-  IListChangedArgs, ListChangeType
-} from 'phosphor-observablelist';
-
-import {
   Message
 } from 'phosphor-messaging';
 
@@ -28,6 +24,10 @@ import {
 import {
   Widget
 } from 'phosphor-widget';
+
+import {
+  IListChangedArgs, ListChangeType
+} from '../../common/observablelist';
 
 import {
   RenderMime

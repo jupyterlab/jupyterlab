@@ -27,7 +27,6 @@
     "phosphor-keymap": "^0.8.0",
     "phosphor-menus": "^1.0.0-rc.1",
     "phosphor-messaging": "^1.0.6",
-    "phosphor-observablelist": "^1.0.0-beta",
     "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",

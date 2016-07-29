@@ -9,7 +9,7 @@ import {
 
 import {
   ListChangeType
-} from 'phosphor-observablelist';
+} from '../../../../lib/common/observablelist';
 
 import {
   deepEqual
