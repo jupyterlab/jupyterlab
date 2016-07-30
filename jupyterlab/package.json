@@ -6,22 +6,23 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
+    "css-loader": "^0.23.1",
     "es6-promise": "^3.1.2",
+    "file-loader": "^0.8.5",
+    "find-imports": "^0.5.0",
     "font-awesome": "^4.6.1",
+    "json-loader": "^0.5.4",
     "jupyter-js-widgets-labextension": "^0.1.0",
     "jupyterlab": "file:../",
     "material-design-icons": "^2.2.3",
-    "phosphide": "^0.10.0"
-  },
-  "devDependencies": {
-    "css-loader": "^0.23.1",
-    "file-loader": "^0.8.5",
-    "json-loader": "^0.5.4",
-    "rimraf": "^2.5.0",
+    "phosphide": "^0.10.0",
     "style-loader": "^0.13.0",
     "typescript": "^1.7.5",
     "url-loader": "^0.5.7",
     "webpack": "^1.12.11"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.0"
   },
   "scripts": {
     "clean": "rimraf build",
