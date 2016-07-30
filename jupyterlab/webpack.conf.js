@@ -26,7 +26,7 @@ module.exports = {
   },
   output: {
     path: __dirname + '/build',
-    filename: "[name].bundle.js",
+    filename: '[name].bundle.js',
     publicPath: 'lab/'
   },
   node: {
