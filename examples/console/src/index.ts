@@ -6,7 +6,7 @@ import {
 } from 'jupyterlab/lib/console';
 
 import {
-  startNewSession, ISession
+  startNewSession, findSessionByPath, connectToSession, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -48,11 +48,24 @@ let TITLE = 'Console';
 
 
 function main(): void {
-  startNewSession({
-    path: 'fake_path',
-  }).then(session => {
-    startApp(session);
-  });
+  let foundPath = false;
+  window.location.search.substr(1).split("&").forEach(
+    function(item : string): void {
+      if (item.split("=")[0] === 'path') {
+      findSessionByPath(item.split("=")[1]).then(
+        model => { return connectToSession(model.id) }).then(
+        session => { startApp(session) });
+        foundPath = true;
+      }
+    }
+  )
+  if (!foundPath) {
+    startNewSession({
+      path: 'fake_path',
+    }).then(session => {
+      startApp(session);
+    });
+  }
 }
 
 
