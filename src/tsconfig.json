@@ -10,6 +10,7 @@
   },
   "files": [
     "application/index",
+    "index",
     "typings"
   ]
 }

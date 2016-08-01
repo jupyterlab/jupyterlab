@@ -11,6 +11,9 @@ import {
 
 export
 class JupyterLab extends Application<ApplicationShell> {
+  /**
+   * Create the application shell for the JupyterLab application.
+   */
   protected createShell(): ApplicationShell {
     return new ApplicationShell();
   }

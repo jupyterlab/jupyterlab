@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "jupyterlab-extension",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "JupyterLab extension",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -10,8 +10,7 @@
     "font-awesome": "^4.6.1",
     "jupyter-js-widgets-labextension": "^0.1.0",
     "jupyterlab": "file:../",
-    "material-design-icons": "^2.2.3",
-    "phosphide": "^0.10.0"
+    "material-design-icons": "^2.2.3"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
