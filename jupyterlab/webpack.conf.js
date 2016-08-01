@@ -5,28 +5,11 @@
 // See https://github.com/webpack/css-loader/issues/144
 require('es6-promise').polyfill();
 
-var webpack = require('webpack');
-var findImports = require('find-imports');
-
-
-// Get the list of vendor files.
-console.log('Finding vendored files...')
-var vendorFiles = findImports('../lib/**/*.js', { flatten: true });
-vendorFiles.push('xterm/src/xterm.css');
-console.log('Vendored files:\n', vendorFiles)
-
-// Build the bundles.
-console.log('\nBuilding webpack bundles...')
-
-
 module.exports = {
-  entry: {
-     main: './index.js',
-     vendor: vendorFiles
-  },
+  entry: './index.js',
   output: {
     path: __dirname + '/build',
-    filename: '[name].bundle.js',
+    filename: 'bundle.js',
     publicPath: 'lab/'
   },
   node: {
@@ -53,8 +36,5 @@ module.exports = {
   externals: {
     jquery: '$',
     'jquery-ui': '$'
-  },
-  plugins: [
-     new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
-  ]
+  }
 }
