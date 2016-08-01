@@ -299,10 +299,17 @@ class FileBrowserWidget extends Widget {
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    this.refresh();
-  }
+   protected onAfterAttach(msg: Message): void {
+     super.onAfterAttach(msg);
+     this.refresh();
+     let inputWrapper = document.body.querySelector('.p-CommandPalette-inputWrapper');
+     let searchIcon = document.createElement('i');
+     searchIcon.className = 'fa fa-search p-CommandPalette-searchIcon';
+     inputWrapper.appendChild(searchIcon);
+     let inputNode = document.body.querySelector('.p-CommandPalette-input') as HTMLInputElement;
+     inputNode.placeholder = "SEARCH";
+     console.log("yello");
+   }
 
   /**
    * A message handler invoked on an `'after-show'` message.
