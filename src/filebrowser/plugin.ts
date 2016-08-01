@@ -136,12 +136,6 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
         tracker.addWidget(widget);
-        widget.node.addEventListener('contextmenu', (event: MouseEvent) => {
-          let context = docManager.contextForWidget(widget);
-          let menu = createDocumentMenu(context);
-          event.preventDefault();
-          menu.popup(event.clientX, event.clientY);
-        });
       }
     }
   };
@@ -511,33 +505,6 @@ function createMenu(fbWidget: FileBrowserWidget, openWith: MenuItem[]):  Menu {
       handler: () => { fbWidget.shutdownKernels(); }
     })
   );
-  return new Menu(items);
-}
-
-
-/**
- * Create a context menu for a document widget.
- */
-function createDocumentMenu(context: IDocumentContext<IDocumentModel>): Menu {
-  let items = [
-    new MenuItem({
-      text: '&Save',
-      icon: 'fa fa-save',
-      handler: () => { context.save(); }
-    }),
-    new MenuItem({
-      text: 'Save &As...',
-      handler: () => { context.saveAs(); }
-    }),
-    new MenuItem({
-      text: '&Revert',
-      handler: () => { context.revert(); }
-    }),
-    new MenuItem({
-      text: 'Change &Kernel...',
-      handler: () => { selectKernelForContext(context); }
-    })
-  ];
   return new Menu(items);
 }
 
