@@ -60,7 +60,7 @@ interface ISideAreaOptions {
 
 
 /**
- *
+ * The application shell for JupyterLab.
  */
 export
 class ApplicationShell extends Widget {
