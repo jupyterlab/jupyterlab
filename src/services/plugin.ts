@@ -8,6 +8,10 @@ import {
   Token
 } from 'phosphor/lib/core/token';
 
+import {
+  JupyterLabPlugin
+} from '../application';
+
 
 /* tslint:disable */
 /**
@@ -29,10 +33,10 @@ interface IServiceManager extends services.IServiceManager { };
  * The default services provider.
  */
 export
-const servicesProvider = {
+const servicesProvider: JupyterLabPlugin<IServiceManager> = {
   id: 'jupyter.services.services',
   provides: IServiceManager,
-  resolve: () => {
+  activate: (): Promise<IServiceManager> => {
     return services.createServiceManager() as Promise<IServiceManager>;
   }
 };
