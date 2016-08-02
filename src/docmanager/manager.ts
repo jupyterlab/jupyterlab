@@ -7,20 +7,20 @@ import {
 
 import {
   IDisposable, DisposableDelegate
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
 
 import {
   Widget
-} from 'phosphor-widget';
-
-import {
-  IWidgetOpener
-} from '../filebrowser/browser';
+} from 'phosphor/lib/ui/widget';
 
 import {
   DocumentRegistry, IWidgetFactory, IWidgetFactoryOptions,
   IDocumentModel, IDocumentContext
 } from '../docregistry';
+
+import {
+  IWidgetOpener
+} from '../filebrowser/browser';
 
 import {
   ContextManager
