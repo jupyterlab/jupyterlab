@@ -1,20 +1,33 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as arrays
-  from 'phosphor-arrays';
+import {
+  indexOf, upperBound
+} from 'phosphor/lib/algorithm/searching';
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
+  Vector
+} from 'phosphor/lib/collections/vector';
 
 import {
-  MenuItem, MenuBar
-} from 'phosphor-menus';
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
+  Menu
+} from 'phosphor/lib/ui/menu';
+
+import {
+  MenuBar
+} from 'phosphor/lib/ui/menubar';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
+
+import {
+  JupyterLab, JupyterLabPlugin
+} from '../application';
 
 
 /**
@@ -35,19 +48,25 @@ const JUPYTER_ICON_CLASS = 'jp-JupyterIcon';
 export
 class MainMenu {
   /**
-   * Add a new menu item to the main menu.
+   * Add a new menu to the main menu bar.
    */
-  addItem(item: MenuItem, options: MainMenu.IAddMenuOptions = {}): void {
+  addMenu(menu: Menu, options: MainMenu.IAddMenuOptions = {}): void {
+    if (indexOf(Private.menuBar.menus, menu) > -1) {
+      return;
+    }
+
     let rank = 'rank' in options ? options.rank : 100;
-    let rankItem = { item, rank };
-    let index = arrays.upperBound(this._items, rankItem, Private.itemCmp);
-    arrays.insert(this._items, index, rankItem);
-    let items = Private.menuBar.items.slice();
-    arrays.insert(items, index, item);
-    Private.menuBar.items = items;
+    let rankItem = { menu, rank };
+    let index = upperBound(this._items, rankItem, Private.itemCmp);
+
+    // Upon disposal, remove the menu reference from the rank list.
+    menu.disposed.connect(() => this._items.remove(rankItem));
+
+    this._items.insert(index, rankItem);
+    Private.menuBar.insertMenu(index, menu);
   }
 
-  private _items: Private.IRankItem[] = [];
+  private _items = new Vector<Private.IRankItem>();
 }
 
 
@@ -70,43 +89,31 @@ namespace MainMenu {
 
 
 /**
- * The main menu extension.
- *
- * #### Notes
- * The main menu extension adds a menu bar to the top area
- * of the application shell.
- *
- */
-export
-const mainMenuExtension = {
-  id: 'jupyter.extensions.main-menu',
-  activate: activateMainMenu
-};
-
-
-/**
  * A service providing an interface to the main menu.
  */
 export
-const mainMenuProvider = {
+const mainMenuProvider: JupyterLabPlugin<MainMenu> = {
   id: 'jupyter.services.main-menu',
-  provides: MainMenu,
-  resolve: () => {
-    return Private.mainMenu;
-  }
+  provides: new Token<MainMenu>('jupyter.services.main-menu'),
+  activate: activateMainMenu
 };
 
 
 /**
  * Activate the main menu extension.
  */
-function activateMainMenu(app: Application): void {
+function activateMainMenu(lab: JupyterLab): MainMenu {
+  Private.menuBar = new MenuBar({ keymap: lab.keymap });
   Private.menuBar.id = 'jp-MainMenu';
+
   let logo = new Widget();
   logo.node.className = `${PORTRAIT_ICON_CLASS} ${JUPYTER_ICON_CLASS}`;
   logo.id = 'jp-MainLogo';
-  app.shell.addToTopArea(logo);
-  app.shell.addToTopArea(Private.menuBar);
+
+  lab.shell.addToTopArea(logo);
+  lab.shell.addToTopArea(Private.menuBar);
+
+  return Private.mainMenu;
 }
 
 
@@ -118,7 +125,7 @@ namespace Private {
    * The singleton menu bar instance.
    */
   export
-  const menuBar = new MenuBar();
+  let menuBar: MenuBar;
 
   /**
    * The singleton main menu instance.
@@ -135,7 +142,7 @@ namespace Private {
     /**
      * The menu for the item.
      */
-    item: MenuItem;
+    menu: Menu;
 
     /**
      * The sort rank of the menu.
@@ -144,10 +151,10 @@ namespace Private {
   }
 
   /**
-   * A less-than comparison function for menu rank items.
+   * A comparator function for menu rank items.
    */
   export
-  function itemCmp(first: IRankItem, second: IRankItem): boolean {
-    return first.rank < second.rank;
+  function itemCmp(first: IRankItem, second: IRankItem): number {
+    return first.rank - second.rank;
   }
 }
