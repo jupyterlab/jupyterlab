@@ -41,16 +41,47 @@ const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
 const JUPYTER_ICON_CLASS = 'jp-JupyterIcon';
 
 
+/* tslint:disable */
+/**
+ * The main menu token.
+ */
+export
+const IMainMenu = new Token<IMainMenu>('jupyter.services.main-menu');
+/* tslint:enable */
+
+
+/**
+ * The main menu interface.
+ */
+export
+interface IMainMenu {
+  /**
+   * Add a new menu to the main menu bar.
+   */
+  addMenu(menu: Menu, options: IAddMenuOptions): void;
+}
+
+
+/**
+ * The options used to add a menu to the main menu.
+ */
+export
+interface IAddMenuOptions {
+  /**
+   * The rank order of the menu among its siblings.
+   */
+  rank?: number;
+}
+
 
 /**
  * The main menu class.  It is intended to be used as a singleton.
  */
-export
-class MainMenu {
+class MainMenu implements IMainMenu {
   /**
    * Add a new menu to the main menu bar.
    */
-  addMenu(menu: Menu, options: MainMenu.IAddMenuOptions = {}): void {
+  addMenu(menu: Menu, options: IAddMenuOptions = {}): void {
     if (indexOf(Private.menuBar.menus, menu) > -1) {
       return;
     }
@@ -71,30 +102,12 @@ class MainMenu {
 
 
 /**
- * A namespace for MainMenu statics.
- */
-export
-namespace MainMenu {
-  /**
-   * The options used to add a menu to the main menu.
-   */
-  export
-  interface IAddMenuOptions {
-    /**
-     * The rank order of the menu among its siblings.
-     */
-    rank?: number;
-  }
-}
-
-
-/**
  * A service providing an interface to the main menu.
  */
 export
-const mainMenuProvider: JupyterLabPlugin<MainMenu> = {
+const mainMenuProvider: JupyterLabPlugin<IMainMenu> = {
   id: 'jupyter.services.main-menu',
-  provides: new Token<MainMenu>('jupyter.services.main-menu'),
+  provides: IMainMenu,
   activate: activateMainMenu
 };
 
@@ -102,16 +115,16 @@ const mainMenuProvider: JupyterLabPlugin<MainMenu> = {
 /**
  * Activate the main menu extension.
  */
-function activateMainMenu(lab: JupyterLab): MainMenu {
-  Private.menuBar = new MenuBar({ keymap: lab.keymap });
+function activateMainMenu(app: JupyterLab): IMainMenu {
+  Private.menuBar = new MenuBar({ keymap: app.keymap });
   Private.menuBar.id = 'jp-MainMenu';
 
   let logo = new Widget();
   logo.node.className = `${PORTRAIT_ICON_CLASS} ${JUPYTER_ICON_CLASS}`;
   logo.id = 'jp-MainLogo';
 
-  lab.shell.addToTopArea(logo);
-  lab.shell.addToTopArea(Private.menuBar);
+  app.shell.addToTopArea(logo);
+  app.shell.addToTopArea(Private.menuBar);
 
   return Private.mainMenu;
 }
