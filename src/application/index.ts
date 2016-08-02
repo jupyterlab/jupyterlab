@@ -9,6 +9,17 @@ import {
   ApplicationShell
 } from './shell';
 
+
+/**
+ * The type for all JupyterLab plugins.
+ */
+export
+type JupyterLabPlugin<T> = Application.IPlugin<JupyterLab, T>;
+
+
+/**
+ * JupyterLab is the main application class. It is instantiated once and shared.
+ */
 export
 class JupyterLab extends Application<ApplicationShell> {
   /**
