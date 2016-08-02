@@ -13,6 +13,7 @@
     "index",
     "main/plugin",
     "mainmenu/plugin",
-    "typings"
+    "services/plugin",
+    "typings.d.ts"
   ]
 }

@@ -18,7 +18,7 @@ lab.registerPlugins([
   // require('jupyterlab/lib/csvwidget/plugin').csvHandlerExtension,
   // require('jupyterlab/lib/editorwidget/plugin').editorHandlerExtension,
   // require('jupyterlab/lib/faq/plugin').faqExtension,
-  // require('jupyterlab/lib/filebrowser/plugin').fileBrowserExtension,
+  // require('jupyterlab/lib/filebrowser/plugin').fileBrowserProvider,
   // require('jupyterlab/lib/help/plugin').helpHandlerExtension,
   // require('jupyterlab/lib/imagewidget/plugin').imageHandlerExtension,
   // require('jupyterlab/lib/inspector/plugin').inspectorExtension,
@@ -29,6 +29,7 @@ lab.registerPlugins([
   // require('jupyterlab/lib/markdownwidget/plugin').markdownHandlerExtension,
   // require('jupyterlab/lib/notebook/plugin').notebookHandlerExtension,
   // require('jupyterlab/lib/running/plugin').runningSessionsExtension,
+  require('jupyterlab/lib/services/plugin').servicesProvider
   // require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
   // require('jupyterlab/lib/terminal/plugin').terminalExtension,
   // require('phosphide/lib/extensions/commandpalette').commandPaletteExtension,
@@ -36,11 +37,9 @@ lab.registerPlugins([
 
   // require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
   // require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
-  // require('jupyterlab/lib/filebrowser/plugin').fileBrowserProvider,
   // require('jupyterlab/lib/inspector/plugin').inspectorProvider,
   // require('jupyterlab/lib/notebook/plugin').notebookTrackerProvider,
-  // require('jupyterlab/lib/rendermime/plugin').renderMimeProvider,
-  // require('jupyterlab/lib/services/plugin').servicesProvider
+  // require('jupyterlab/lib/rendermime/plugin').renderMimeProvider
 ]);
 
 window.onload = function() { lab.start(); }

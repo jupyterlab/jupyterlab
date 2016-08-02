@@ -1,9 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as services
+from 'jupyter-js-services';
+
 import {
-  ServiceManager, createServiceManager
-} from 'jupyter-js-services';
+  Token
+} from 'phosphor/lib/core/token';
+
+
+/* tslint:disable */
+/**
+ * The default services provider token.
+ */
+export
+const IServiceManager = new Token<IServiceManager>('jupyter.services.services');
+/* tslint:enable */
+
+
+/**
+ * The service manager interface.
+ */
+export
+interface IServiceManager extends services.IServiceManager { };
 
 
 /**
@@ -12,8 +31,8 @@ import {
 export
 const servicesProvider = {
   id: 'jupyter.services.services',
-  provides: ServiceManager,
+  provides: IServiceManager,
   resolve: () => {
-    return createServiceManager() as Promise<ServiceManager>;
+    return services.createServiceManager() as Promise<IServiceManager>;
   }
 };
