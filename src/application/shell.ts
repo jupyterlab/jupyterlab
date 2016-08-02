@@ -46,6 +46,11 @@ import {
  */
 const APPLICATION_SHELL_CLASS = 'jp-ApplicationShell';
 
+/**
+ * The class name added to side bar instances.
+ */
+const SIDEBAR_CLASS = 'jp-SideBar';
+
 
 /**
  * The options for adding a widget to a side area of the shell.
@@ -88,7 +93,9 @@ class ApplicationShell extends Widget {
 
     topPanel.id = 'jp-top-panel';
     hsplitPanel.id = 'jp-main-split-panel';
+    leftHandler.sideBar.addClass(SIDEBAR_CLASS);
     leftHandler.sideBar.addClass('jp-mod-left');
+    rightHandler.sideBar.addClass(SIDEBAR_CLASS);
     rightHandler.sideBar.addClass('jp-mod-right');
     leftHandler.stackedPanel.id = 'jp-left-stack';
     rightHandler.stackedPanel.id = 'jp-right-stack';

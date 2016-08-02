@@ -1,0 +1,12 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-SideBar {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  list-style-type: none;
+}
