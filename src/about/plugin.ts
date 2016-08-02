@@ -3,15 +3,15 @@
 
 import {
   Application
-} from 'phosphide/lib/core/application';
+} from 'phosphor/lib/ui/application';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   TabPanel
-} from 'phosphor-tabs';
+} from 'phosphor/lib/ui/tabpanel';
 
 /**
  * The about page extension.
