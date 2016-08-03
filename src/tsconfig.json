@@ -17,6 +17,7 @@
     "main/plugin",
     "mainmenu/plugin",
     "services/plugin",
-    "typings.d.ts"
+    "typings.d.ts",
+    "utils"
   ]
 }
