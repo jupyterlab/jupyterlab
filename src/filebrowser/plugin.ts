@@ -6,6 +6,42 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
+
+import {
+  Token
+} from 'phosphor/lib/core/token';
+
+// import {
+//   Menu
+// } from 'phosphor/lib/ui/menu';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
+  JupyterLab, JupyterLabPlugin
+} from '../application';
+
+import {
+  DocumentManager
+} from '../docmanager';
+
+import {
+  DocumentRegistry
+} from '../docregistry';
+
+import {
+  IMainMenu
+} from '../mainmenu/plugin';
+
+import {
+  WidgetTracker
+} from '../widgettracker';
+
+import {
   IWidgetOpener, FileBrowserWidget
 } from './browser';
 
@@ -13,54 +49,66 @@ import {
   FileBrowserModel
 } from './model';
 
-import {
-  DocumentManager
-} from '../docmanager';
 
-import {
-  DocumentRegistry, IDocumentContext, IDocumentModel, selectKernelForContext
-} from '../docregistry';
+/* tslint:disable */
+/**
+ * The path tracker token.
+ */
+export
+const IPathTracker = new Token<IPathTracker>('jupyter.services.file-browser');
+/* tslint:enable */
 
-import {
-  Application
-} from 'phosphide/lib/core/application';
 
-import {
-  Menu, MenuItem
-} from 'phosphor-menus';
+/**
+ * An interface a file browser path tracker.
+ */
+export
+interface IPathTracker {
+  /**
+   * A signal emitted when the current path changes.
+   */
+  pathChanged: ISignal<IPathTracker, IPathChangedArgs>;
 
-import {
-  IChangedArgs
-} from 'phosphor-properties';
+  /**
+   * The current path of the filebrowser.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  path: string;
+}
 
-import {
-  ISignal, Signal
-} from 'phosphor-signaling';
 
-import {
-  Widget
-} from 'phosphor-widget';
+/**
+ * An arguments object for the `pathChanged` signal.
+ */
+export
+interface IPathChangedArgs {
+  /**
+   * The name of the attribute being changed.
+   */
+  name: string;
 
-import {
-  WidgetTracker
-} from '../widgettracker';
+  /**
+   * The old path value.
+   */
+  oldValue: string;
 
-import {
-  MainMenu
-} from '../mainmenu/plugin';
+  /**
+   * The new path value.
+   */
+  newValue: string;
+}
 
 
 /**
  * A class that tracks the current path of the file browser.
  */
-export
-class PathTracker {
+class PathTracker implements IPathTracker {
   /**
    * A signal emitted when the current path changes.
    */
-  get pathChanged(): ISignal<PathTracker, IChangedArgs<string>> {
-    return Private.pathChangedSignal.bind(this);
-  }
+  pathChanged: ISignal<IPathTracker, IPathChangedArgs>;
 
   /**
    * The current path of the filebrowser.
@@ -74,26 +122,18 @@ class PathTracker {
 }
 
 
+// Define the signals for the `PathTracker` class.
+defineSignal(PathTracker.prototype, 'commandChanged');
+
+
 /**
  * The default file browser provider.
  */
 export
-const fileBrowserProvider = {
-  id: 'jupyter.services.fileBrowser',
-  provides: PathTracker,
-  resolve: () => {
-    return Private.pathTracker;
-  }
-};
-
-
-/**
- * The default file browser extension.
- */
-export
-const fileBrowserExtension = {
-  id: 'jupyter.extensions.fileBrowser',
-  requires: [ServiceManager, DocumentRegistry, MainMenu],
+const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
+  id: 'jupyter.services.file-browser',
+  provides: IPathTracker,
+  requires: [ServiceManager, DocumentRegistry, IMainMenu],
   activate: activateFileBrowser
 };
 
@@ -101,35 +141,33 @@ const fileBrowserExtension = {
 /**
  * The class name for all main area portrait tab icons.
  */
-const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
+// const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
 
 /**
  * The class name for the notebook icon from the default theme.
  */
-const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
+// const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
 
 /**
  * The class name for the text editor icon from the default theme.
  */
-const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
+// const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 
 
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: Application, manager: ServiceManager, registry: DocumentRegistry, mainMenu: MainMenu): void {
+function activateFileBrowser(app: JupyterLab, manager: ServiceManager, registry: DocumentRegistry, mainMenu: IMainMenu): IPathTracker {
   let id = 0;
-
   let tracker = new WidgetTracker<Widget>();
   let activeWidget: Widget;
+
   tracker.activeWidgetChanged.connect((sender, widget) => {
     activeWidget = widget;
   });
 
-  let docManager: DocumentManager;
-
   let opener: IWidgetOpener = {
-    open: (widget) => {
+    open: widget => {
       if (!widget.id) {
         widget.id = `document-manager-${++id}`;
       }
@@ -139,12 +177,7 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
       }
     }
   };
-
-  docManager = new DocumentManager({
-    registry,
-    manager,
-    opener
-  });
+  let docManager = new DocumentManager({ registry, manager, opener });
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = Private.fbWidget = new FileBrowserWidget({
     model: fbModel,
@@ -159,354 +192,353 @@ function activateFileBrowser(app: Application, manager: ServiceManager, registry
   // Add a context menu to the dir listing.
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
   node.addEventListener('contextmenu', (event: MouseEvent) => {
-    event.preventDefault();
-    let x = event.clientX;
-    let y = event.clientY;
-    let path = fbWidget.pathForClick(event);
-    let ext = '.' + path.split('.').pop();
-    let widgetNames = registry.listWidgetFactories(ext);
-    let items: MenuItem[] = [];
-    if (widgetNames.length > 1) {
-      for (let widgetName of widgetNames) {
-        items.push(new MenuItem({
-          text: widgetName,
-          handler: () => {
-            fbWidget.openPath(path, widgetName);
-          }
-        }));
-      }
-    }
-    let menu = createMenu(fbWidget, items);
-    menu.popup(x, y);
+    // event.preventDefault();
+    // let x = event.clientX;
+    // let y = event.clientY;
+    // let path = fbWidget.pathForClick(event);
+    // let ext = '.' + path.split('.').pop();
+    // let widgetNames = registry.listWidgetFactories(ext);
+    // let items: MenuItem[] = [];
+    // if (widgetNames.length > 1) {
+    //   for (let widgetName of widgetNames) {
+    //     items.push(new MenuItem({
+    //       text: widgetName,
+    //       handler: () => {
+    //         fbWidget.openPath(path, widgetName);
+    //       }
+    //     }));
+    //   }
+    // }
+    // let menu = createMenu(fbWidget, items);
+    // menu.popup(x, y);
   });
 
-  // Add the command for a new items.
-  let newTextFileId = 'file-operations:new-text-file';
+//   // Add the command for a new items.
+//   let newTextFileId = 'file-operations:new-text-file';
 
-  app.commands.add([
-    {
-      id: newTextFileId,
-      handler: () => {
-        let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
-        fbWidget.createNew({ type: 'file' }).then(widget => widget.title.icon = icon);
-      }
-    }
-  ]);
+//   app.commands.add([
+//     {
+//       id: newTextFileId,
+//       handler: () => {
+//         let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
+//         fbWidget.createNew({ type: 'file' }).then(widget => widget.title.icon = icon);
+//       }
+//     }
+//   ]);
 
-  let newNotebookId = 'file-operations:new-notebook';
+//   let newNotebookId = 'file-operations:new-notebook';
 
-  app.commands.add([
-    {
-      id: newNotebookId,
-      handler: () => {
-        let icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
-        fbWidget.createNew({ type: 'notebook' }).then(widget => {
-          widget.title.icon = icon;
-        });
-      }
-    }
-  ]);
-
-
-  // Add the command for saving a document.
-  let saveDocumentId = 'file-operations:save';
-
-  app.commands.add([
-    {
-      id: saveDocumentId,
-      handler: () => {
-        if (activeWidget) {
-          let context = docManager.contextForWidget(activeWidget);
-          context.save();
-        }
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: saveDocumentId,
-      category: 'File Operations',
-      text: 'Save Document',
-      caption: 'Save the current document'
-    }
-  ]);
-
-  // Add the command for reverting a document.
-  let revertDocumentId = 'file-operations:revert';
-
-  app.commands.add([
-    {
-      id: revertDocumentId,
-      handler: () => {
-        if (activeWidget) {
-          let context = docManager.contextForWidget(activeWidget);
-          context.revert();
-        }
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: revertDocumentId,
-      category: 'File Operations',
-      text: 'Revert Document',
-      caption: 'Revert the current document'
-    }
-  ]);
+//   app.commands.add([
+//     {
+//       id: newNotebookId,
+//       handler: () => {
+//         let icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
+//         fbWidget.createNew({ type: 'notebook' }).then(widget => {
+//           widget.title.icon = icon;
+//         });
+//       }
+//     }
+//   ]);
 
 
-// Add the command for saving a document with a new name.
-  let saveDocumentAsId = 'file-operations:saveas';
+//   // Add the command for saving a document.
+//   let saveDocumentId = 'file-operations:save';
 
-  app.commands.add([
-    {
-      id: saveDocumentAsId,
-      handler: () => {
-        if (activeWidget) {
-          let context = docManager.contextForWidget(activeWidget);
-          context.saveAs().then(() => { fbModel.refresh(); });
-        }
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: saveDocumentAsId,
-      category: 'File Operations',
-      text: 'Save As...',
-      caption: 'Save the current document as...'
-    }
-  ]);
+//   app.commands.add([
+//     {
+//       id: saveDocumentId,
+//       handler: () => {
+//         if (activeWidget) {
+//           let context = docManager.contextForWidget(activeWidget);
+//           context.save();
+//         }
+//       }
+//     }
+//   ]);
+//   app.palette.add([
+//     {
+//       command: saveDocumentId,
+//       category: 'File Operations',
+//       text: 'Save Document',
+//       caption: 'Save the current document'
+//     }
+//   ]);
 
-  // Add the command for closing a document.
-  let closeDocumentId = 'file-operations:close';
+//   // Add the command for reverting a document.
+//   let revertDocumentId = 'file-operations:revert';
 
-  app.commands.add([
-    {
-      id: closeDocumentId,
-      handler: () => {
-        if (activeWidget) {
-          activeWidget.close();
-        }
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: closeDocumentId,
-      category: 'File Operations',
-      text: 'Close Document',
-      caption: 'Close the current document'
-    }
-  ]);
-
-  // Add the command for closing all documents.
-  let closeAllId = 'file-operations:close-all';
-
-  app.commands.add([
-    {
-      id: closeAllId,
-      handler: () => {
-        docManager.closeAll();
-      }
-    }
-  ]);
-  app.palette.add([
-    {
-      command: closeAllId,
-      category: 'File Operations',
-      text: 'Close All',
-      caption: 'Close all open documents'
-    }
-  ]);
-
-  app.palette.add([
-    {
-      command: newTextFileId,
-      category: 'File Operations',
-      text: 'New Text File',
-      caption: 'Create a new text file'
-    },
-    {
-      command: newNotebookId,
-      category: 'File Operations',
-      text: 'New Notebook',
-      caption: 'Create a new notebook'
-    }
-  ]);
-
-  app.commands.add([
-    {
-      id: 'file-browser:activate',
-      handler: showBrowser
-    },
-    {
-      id: 'file-browser:hide',
-      handler: hideBrowser
-    },
-    {
-      id: 'file-browser:toggle',
-      handler: toggleBrowser
-    }
-  ]);
-
-  fbWidget.title.text = 'Files';
-  fbWidget.id = 'file-browser';
-  app.shell.addToLeftArea(fbWidget, { rank: 40 });
-  showBrowser();
+//   app.commands.add([
+//     {
+//       id: revertDocumentId,
+//       handler: () => {
+//         if (activeWidget) {
+//           let context = docManager.contextForWidget(activeWidget);
+//           context.revert();
+//         }
+//       }
+//     }
+//   ]);
+//   app.palette.add([
+//     {
+//       command: revertDocumentId,
+//       category: 'File Operations',
+//       text: 'Revert Document',
+//       caption: 'Revert the current document'
+//     }
+//   ]);
 
 
+// // Add the command for saving a document with a new name.
+//   let saveDocumentAsId = 'file-operations:saveas';
 
-  // Adding Top Menu
-  let newSubMenu = new Menu ([
-    new MenuItem({
-      text: 'Notebook',
-      handler: () => {
-        app.commands.execute(newNotebookId);
-      }
-    }),
-    new MenuItem({
-      text: 'Text File',
-      handler: () => {
-        app.commands.execute(newTextFileId);
-      }
-    })
+//   app.commands.add([
+//     {
+//       id: saveDocumentAsId,
+//       handler: () => {
+//         if (activeWidget) {
+//           let context = docManager.contextForWidget(activeWidget);
+//           context.saveAs().then(() => { fbModel.refresh(); });
+//         }
+//       }
+//     }
+//   ]);
+//   app.palette.add([
+//     {
+//       command: saveDocumentAsId,
+//       category: 'File Operations',
+//       text: 'Save As...',
+//       caption: 'Save the current document as...'
+//     }
+//   ]);
 
-  ]);
+//   // Add the command for closing a document.
+//   let closeDocumentId = 'file-operations:close';
 
-  let menu = new Menu ([
-    new MenuItem({
-      text: 'New',
-      submenu: newSubMenu
+//   app.commands.add([
+//     {
+//       id: closeDocumentId,
+//       handler: () => {
+//         if (activeWidget) {
+//           activeWidget.close();
+//         }
+//       }
+//     }
+//   ]);
+//   app.palette.add([
+//     {
+//       command: closeDocumentId,
+//       category: 'File Operations',
+//       text: 'Close Document',
+//       caption: 'Close the current document'
+//     }
+//   ]);
 
-    }),
-    new MenuItem({
-      text: 'Save Document',
-      handler: () => {
-        app.commands.execute(saveDocumentId);
-      }
-    }),
-    new MenuItem({
-      text: 'Save Document As...',
-      handler: () => {
-        app.commands.execute(saveDocumentAsId);
-      }
-    }),
-    new MenuItem({
-      text: 'Revert Document',
-      handler: () => {
-        app.commands.execute(revertDocumentId);
-      }
-    }),
-    new MenuItem({
-      text: 'Close Current',
-      handler: () => {
-        app.commands.execute(closeDocumentId);
-      }
-    }),
-    new MenuItem({
-      text: 'Close All',
-      handler: () => {
-        app.commands.execute(closeAllId);
-      }
-    }),
+//   // Add the command for closing all documents.
+//   let closeAllId = 'file-operations:close-all';
 
-  ]);
+//   app.commands.add([
+//     {
+//       id: closeAllId,
+//       handler: () => {
+//         docManager.closeAll();
+//       }
+//     }
+//   ]);
+//   app.palette.add([
+//     {
+//       command: closeAllId,
+//       category: 'File Operations',
+//       text: 'Close All',
+//       caption: 'Close all open documents'
+//     }
+//   ]);
 
-  let fileMenu = new MenuItem({
-    text: 'File',
-    submenu: menu
-  });
-  mainMenu.addItem(fileMenu, {rank: 1});
+//   app.palette.add([
+//     {
+//       command: newTextFileId,
+//       category: 'File Operations',
+//       text: 'New Text File',
+//       caption: 'Create a new text file'
+//     },
+//     {
+//       command: newNotebookId,
+//       category: 'File Operations',
+//       text: 'New Notebook',
+//       caption: 'Create a new notebook'
+//     }
+//   ]);
 
-  function showBrowser(): void {
-    app.shell.activateLeft(fbWidget.id);
-  }
+//   app.commands.add([
+//     {
+//       id: 'file-browser:activate',
+//       handler: showBrowser
+//     },
+//     {
+//       id: 'file-browser:hide',
+//       handler: hideBrowser
+//     },
+//     {
+//       id: 'file-browser:toggle',
+//       handler: toggleBrowser
+//     }
+//   ]);
 
-  function hideBrowser(): void {
-    if (!fbWidget.isHidden) {
-      app.shell.collapseLeft();
-    }
-  }
+//   fbWidget.title.text = 'Files';
+//   fbWidget.id = 'file-browser';
+//   app.shell.addToLeftArea(fbWidget, { rank: 40 });
+//   showBrowser();
 
-  function toggleBrowser(): void {
-    if (fbWidget.isHidden) {
-      showBrowser();
-    } else {
-      hideBrowser();
-    }
-  }
+//   // Add top menu.
+//   let newSubMenu = new Menu ([
+//     new MenuItem({
+//       text: 'Notebook',
+//       handler: () => {
+//         app.commands.execute(newNotebookId);
+//       }
+//     }),
+//     new MenuItem({
+//       text: 'Text File',
+//       handler: () => {
+//         app.commands.execute(newTextFileId);
+//       }
+//     })
 
+//   ]);
+
+//   let menu = new Menu ([
+//     new MenuItem({
+//       text: 'New',
+//       submenu: newSubMenu
+
+//     }),
+//     new MenuItem({
+//       text: 'Save Document',
+//       handler: () => {
+//         app.commands.execute(saveDocumentId);
+//       }
+//     }),
+//     new MenuItem({
+//       text: 'Save Document As...',
+//       handler: () => {
+//         app.commands.execute(saveDocumentAsId);
+//       }
+//     }),
+//     new MenuItem({
+//       text: 'Revert Document',
+//       handler: () => {
+//         app.commands.execute(revertDocumentId);
+//       }
+//     }),
+//     new MenuItem({
+//       text: 'Close Current',
+//       handler: () => {
+//         app.commands.execute(closeDocumentId);
+//       }
+//     }),
+//     new MenuItem({
+//       text: 'Close All',
+//       handler: () => {
+//         app.commands.execute(closeAllId);
+//       }
+//     }),
+
+//   ]);
+
+//   let fileMenu = new MenuItem({
+//     text: 'File',
+//     submenu: menu
+//   });
+//   mainMenu.addItem(fileMenu, {rank: 1});
+
+//   function showBrowser(): void {
+//     app.shell.activateLeft(fbWidget.id);
+//   }
+
+//   function hideBrowser(): void {
+//     if (!fbWidget.isHidden) {
+//       app.shell.collapseLeft();
+//     }
+//   }
+
+//   function toggleBrowser(): void {
+//     if (fbWidget.isHidden) {
+//       showBrowser();
+//     } else {
+//       hideBrowser();
+//     }
+//   }
+
+  return Private.pathTracker;
 }
 
 
 /**
  * Create a context menu for the file browser listing.
  */
-function createMenu(fbWidget: FileBrowserWidget, openWith: MenuItem[]):  Menu {
-  let items = [
-    new MenuItem({
-      text: '&Open',
-      icon: 'fa fa-folder-open-o',
-      shortcut: 'Ctrl+O',
-      handler: () => { fbWidget.open(); }
-    })
-  ];
-  if (openWith.length) {
-    items.push(new MenuItem({
-      text: 'Open With...',
-      submenu: new Menu(openWith)
-    }));
-  }
-  items.push(
-    new MenuItem({
-      text: '&Rename',
-      icon: 'fa fa-edit',
-      shortcut: 'Ctrl+R',
-      handler: () => { fbWidget.rename(); }
-    }),
-    new MenuItem({
-      text: '&Delete',
-      icon: 'fa fa-remove',
-      shortcut: 'Ctrl+D',
-      handler: () => { fbWidget.delete(); }
-    }),
-    new MenuItem({
-      text: 'Duplicate',
-      icon: 'fa fa-copy',
-      handler: () => { fbWidget.duplicate(); }
-    }),
-    new MenuItem({
-      text: 'Cut',
-      icon: 'fa fa-cut',
-      shortcut: 'Ctrl+X',
-      handler: () => { fbWidget.cut(); }
-    }),
-    new MenuItem({
-      text: '&Copy',
-      icon: 'fa fa-copy',
-      shortcut: 'Ctrl+C',
-      handler: () => { fbWidget.copy(); }
-    }),
-    new MenuItem({
-      text: '&Paste',
-      icon: 'fa fa-paste',
-      shortcut: 'Ctrl+V',
-      handler: () => { fbWidget.paste(); }
-    }),
-    new MenuItem({
-      text: 'Download',
-      icon: 'fa fa-download',
-      handler: () => { fbWidget.download(); }
-    }),
-    new MenuItem({
-      text: 'Shutdown Kernel',
-      icon: 'fa fa-stop-circle-o',
-      handler: () => { fbWidget.shutdownKernels(); }
-    })
-  );
-  return new Menu(items);
-}
+// function createMenu(fbWidget: FileBrowserWidget, openWith: MenuItem[]):  Menu {
+//   let items = [
+//     new MenuItem({
+//       text: '&Open',
+//       icon: 'fa fa-folder-open-o',
+//       shortcut: 'Ctrl+O',
+//       handler: () => { fbWidget.open(); }
+//     })
+//   ];
+//   if (openWith.length) {
+//     items.push(new MenuItem({
+//       text: 'Open With...',
+//       submenu: new Menu(openWith)
+//     }));
+//   }
+//   items.push(
+//     new MenuItem({
+//       text: '&Rename',
+//       icon: 'fa fa-edit',
+//       shortcut: 'Ctrl+R',
+//       handler: () => { fbWidget.rename(); }
+//     }),
+//     new MenuItem({
+//       text: '&Delete',
+//       icon: 'fa fa-remove',
+//       shortcut: 'Ctrl+D',
+//       handler: () => { fbWidget.delete(); }
+//     }),
+//     new MenuItem({
+//       text: 'Duplicate',
+//       icon: 'fa fa-copy',
+//       handler: () => { fbWidget.duplicate(); }
+//     }),
+//     new MenuItem({
+//       text: 'Cut',
+//       icon: 'fa fa-cut',
+//       shortcut: 'Ctrl+X',
+//       handler: () => { fbWidget.cut(); }
+//     }),
+//     new MenuItem({
+//       text: '&Copy',
+//       icon: 'fa fa-copy',
+//       shortcut: 'Ctrl+C',
+//       handler: () => { fbWidget.copy(); }
+//     }),
+//     new MenuItem({
+//       text: '&Paste',
+//       icon: 'fa fa-paste',
+//       shortcut: 'Ctrl+V',
+//       handler: () => { fbWidget.paste(); }
+//     }),
+//     new MenuItem({
+//       text: 'Download',
+//       icon: 'fa fa-download',
+//       handler: () => { fbWidget.download(); }
+//     }),
+//     new MenuItem({
+//       text: 'Shutdown Kernel',
+//       icon: 'fa fa-stop-circle-o',
+//       handler: () => { fbWidget.shutdownKernels(); }
+//     })
+//   );
+//   return new Menu(items);
+// }
 
 
 /**
@@ -518,10 +550,4 @@ namespace Private {
 
   export
   const pathTracker = new PathTracker();
-
-  /**
-   * A signal emitted when the current working directory changes.
-   */
-  export
-  const pathChangedSignal = new Signal<PathTracker, IChangedArgs<string>>();
 }
