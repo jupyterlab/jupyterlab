@@ -202,8 +202,6 @@ class DirListing extends Widget {
     this._opener = options.opener;
     this._renderer = options.renderer || DirListing.defaultRenderer;
     let headerNode = utils.findElement(this.node, HEADER_CLASS);
-    console.log(1, this.node);
-    console.log(2, headerNode);
     this._renderer.populateHeaderNode(headerNode);
   }
 

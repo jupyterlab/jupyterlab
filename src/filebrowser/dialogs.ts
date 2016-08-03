@@ -96,7 +96,7 @@ class OpenWithHandler extends Widget {
    * Construct a new "open with" dialog.
    */
   constructor(path: string, manager: DocumentManager, sessions: ISession.IModel[], host?: HTMLElement) {
-    super();
+    super({ node: OpenWithHandler.createNode() });
     this._manager = manager;
     this._host = host;
     this._sessions = sessions;
@@ -209,7 +209,7 @@ class CreateNewHandler extends Widget {
    * Construct a new "create new" dialog.
    */
   constructor(model: FileBrowserModel, manager: DocumentManager, sessions: ISession.IModel[]) {
-    super();
+    super({ node: CreateNewHandler.createNode() });
     this._model = model;
     this._manager = manager;
     this._sessions = sessions;

@@ -81,12 +81,13 @@ body {
   border-right: 1px solid #BDBDBD;
 }
 
-.jp-SideBar {
-  min-width: 36px;
-  max-width: 36px;
-  font-size: 14px;
-  color: #777777;
+.jp-SideBar.p-TabBar {
   background: white;
+  color: #777777;
+  font-size: 14px;
+  max-width: 36px;
+  max-height: none;
+  height: 100%;
 }
 
 
@@ -97,11 +98,13 @@ body {
 
 .jp-SideBar.jp-mod-left {
   border-right: 1px solid #BDBDBD;
+  bottom: 0;
 }
 
 
 .jp-SideBar.jp-mod-right {
   border-left: 1px solid #BDBDBD;
+  bottom: 0;
 }
 
 
@@ -199,7 +202,6 @@ body {
 
 .p-TabBar-content {
   min-width: 0;
-  /* max-height: 27px; */
   padding-right: 1px;
 }
 
