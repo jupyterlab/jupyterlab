@@ -7,19 +7,15 @@ import {
 
 import {
   IDisposable
-} from 'phosphor-disposable';
-
-import {
-  IChangedArgs
-} from 'phosphor-properties';
+} from 'phosphor/lib/core/disposable';
 
 import {
   ISignal
-} from 'phosphor-signaling';
+} from 'phosphor/lib/core/signaling';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 
 /**
@@ -35,7 +31,7 @@ interface IDocumentModel extends IDisposable {
   /**
    * A signal emitted when the model state changes.
    */
-  stateChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
+  stateChanged: ISignal<IDocumentModel, IDocumentModelStateChange<any>>;
 
   /**
    * The dirty state of the model.
@@ -92,6 +88,23 @@ interface IDocumentModel extends IDisposable {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: any): void;
+}
+
+
+/**
+ * An arguments object for the `stateChanged` signal.
+ */
+export
+interface IDocumentModelStateChange<T> {
+  /**
+   * The old state value.
+   */
+  oldValue: T;
+
+  /**
+   * The new state value.
+   */
+  newValue: T;
 }
 
 
