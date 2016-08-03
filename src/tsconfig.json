@@ -10,6 +10,8 @@
   },
   "files": [
     "application/index",
+    "dialog/index",
+    "docregistry/plugin",
     "index",
     "main/plugin",
     "mainmenu/plugin",

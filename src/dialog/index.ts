@@ -276,6 +276,8 @@ function styleElements(element: HTMLElement): HTMLElement {
       child = wrapSelect(child as HTMLSelectElement);
       element.insertBefore(child, next);
       break;
+    default:
+      continue;
     }
   }
   return element;

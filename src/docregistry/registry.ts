@@ -130,7 +130,7 @@ interface IDocumentRegistry extends IDisposable {
    * - all other extension-specific factories
    * - all other global factories
    */
-  listWidgetFactories(ext: string = '*'): string[];
+  listWidgetFactories(ext: string): string[];
 
   /**
    * Return the name of the default widget factory for a given extension.
@@ -139,7 +139,7 @@ interface IDocumentRegistry extends IDisposable {
    *
    * @returns The default widget factory name for the extension (if given) or the global default.
    */
-  defaultWidgetFactory(ext: string = '*'): string;
+  defaultWidgetFactory(ext: string): string;
 
   /**
    * List the names of the registered model factories.

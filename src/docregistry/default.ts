@@ -11,7 +11,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  ISignal
+  defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -156,6 +156,10 @@ class DocumentModel implements IDocumentModel {
   private _isDisposed = false;
 }
 
+// Define the signals for the `DocumentModel` class.
+defineSignal(DocumentModel.prototype, 'contentChanged');
+defineSignal(DocumentModel.prototype, 'stateChanged');
+
 
 /**
  * An implementation of a model factory for text files.
@@ -274,9 +278,7 @@ abstract class ABCWidgetFactory<T extends Widget, U extends IDocumentModel> impl
   /**
    * A signal emitted when a widget is created.
    */
-  get widgetCreated(): ISignal<IWidgetFactory<T, U>, T> {
-    return Private.widgetCreatedSignal.bind(this);
-  }
+  widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
 
   /**
    * Get whether the model factory has been disposed.
@@ -304,25 +306,5 @@ abstract class ABCWidgetFactory<T extends Widget, U extends IDocumentModel> impl
 }
 
 
-/**
- * A private namespace for data.
- */
-namespace Private {
-  /**
-   * A signal emitted when a document content changes.
-   */
-  export
-  const contentChangedSignal = new Signal<IDocumentModel, void>();
-
-  /**
-   * A signal emitted when a widget is created.
-   */
-  export
-  const widgetCreatedSignal = new Signal<IWidgetFactory<Widget, IDocumentModel>, Widget>();
-
-  /**
-   * A signal emitted when a document dirty state changes.
-   */
-  export
-  const stateChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
-}
+// Define the signals for the `ABCWidgetFactory` class.
+defineSignal(ABCWidgetFactory.prototype, 'widgetCreated');
