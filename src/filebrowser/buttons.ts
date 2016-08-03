@@ -38,12 +38,12 @@ import {
 } from '../docregistry';
 
 import {
-  FileBrowserModel
-} from './model';
+  IWidgetOpener
+} from './browser';
 
 import {
-  IWidgetOpener
-} from './interfaces';
+  FileBrowserModel
+} from './model';
 
 import * as utils
   from './utils';
@@ -197,7 +197,9 @@ class FileButtons extends Widget {
     }
 
     // Create a new dropdown menu and snap the button geometry.
-    let dropdown = Private.createDropdownMenu(this, this._commands);
+    let commands = this._commands;
+    let keymap = this._keymap;
+    let dropdown = Private.createDropdownMenu(this, commands, keymap);
     let rect = button.getBoundingClientRect();
 
     // Mark the button as active.

@@ -20,7 +20,7 @@ import {
 
 import {
   IWidgetOpener
-} from '../filebrowser/interfaces';
+} from '../filebrowser';
 
 import {
   ContextManager

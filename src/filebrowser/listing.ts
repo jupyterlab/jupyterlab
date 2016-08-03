@@ -38,7 +38,7 @@ import {
 
 import {
   IWidgetOpener
-} from './interfaces';
+} from './browser';
 
 import {
   FileBrowserModel

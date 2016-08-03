@@ -38,10 +38,6 @@ import {
 } from './crumbs';
 
 import {
-  IWidgetOpener
-} from './interfaces';
-
-import {
   DirListing
 } from './listing';
 
@@ -73,6 +69,16 @@ const LISTING_CLASS = 'jp-FileBrowser-listing';
  * The duration of auto-refresh in ms.
  */
 const REFRESH_DURATION = 10000;
+
+
+/**
+ * An interface for a widget opener.
+ */
+export
+interface IWidgetOpener {
+  open(widget: Widget): void;
+}
+
 
 
 /**

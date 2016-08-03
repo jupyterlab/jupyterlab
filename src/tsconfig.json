@@ -13,6 +13,7 @@
     "dialog/index",
     "docmanager/index",
     "docregistry/plugin",
+    "filebrowser/plugin",
     "index",
     "main/plugin",
     "mainmenu/plugin",
