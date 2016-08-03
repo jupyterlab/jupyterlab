@@ -16,6 +16,7 @@ lab.registerPlugins([
   // require('jupyterlab/lib/about/plugin').aboutExtension,
   // require('jupyterlab/lib/console/plugin').consoleExtension,
   // require('jupyterlab/lib/csvwidget/plugin').csvHandlerExtension,
+  require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
   // require('jupyterlab/lib/editorwidget/plugin').editorHandlerExtension,
   // require('jupyterlab/lib/faq/plugin').faqExtension,
   // require('jupyterlab/lib/filebrowser/plugin').fileBrowserProvider,
@@ -36,7 +37,6 @@ lab.registerPlugins([
   // require('jupyter-js-widgets-labextension/lib/plugin').widgetManagerExtension,
 
   // require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
-  // require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
   // require('jupyterlab/lib/inspector/plugin').inspectorProvider,
   // require('jupyterlab/lib/notebook/plugin').notebookTrackerProvider,
   // require('jupyterlab/lib/rendermime/plugin').renderMimeProvider
