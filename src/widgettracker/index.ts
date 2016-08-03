@@ -2,20 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IDisposable, DisposableDelegate
-} from 'phosphor-disposable';
+  DisposableDelegate, IDisposable
+} from 'phosphor/lib/core/disposable';
 
 import {
-  ISignal, Signal
-} from 'phosphor-signaling';
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   TabPanel
-} from 'phosphor-tabs';
+} from 'phosphor/lib/ui/tabpanel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 
 /**
@@ -41,9 +41,7 @@ class WidgetTracker<T extends Widget> implements IDisposable {
   /**
    * A signal emitted when the active widget changes.
    */
-  get activeWidgetChanged(): ISignal<WidgetTracker<T>, T> {
-    return activeWidgetChangedSignal.bind(this);
-  }
+  activeWidgetChanged: ISignal<WidgetTracker<T>, T>;
 
   /**
    * Test whether the widget tracker has been disposed.
@@ -165,8 +163,5 @@ class WidgetTracker<T extends Widget> implements IDisposable {
   private _activeWidget: T = null;
 }
 
-
-/**
- * A signal emitted when the active widget changes.
- */
- const activeWidgetChangedSignal = new Signal<WidgetTracker<Widget>, Widget>();
+// Define the signals for the `WidgetTracker` class.
+defineSignal(WidgetTracker.prototype, 'activeWidgetChanged');
