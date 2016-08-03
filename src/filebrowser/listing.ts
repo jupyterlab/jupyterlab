@@ -9,6 +9,10 @@ import * as moment
   from 'moment';
 
 import {
+  find, findIndex
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -444,7 +448,7 @@ class DirListing extends Widget {
     if (selected.length === 1 || keepExisting) {
       // Select the next item.
       let name = selected[selected.length - 1];
-      index = arrays.findIndex(items, (value) => value.name === name);
+      index = findIndex(items, value => value.name === name);
       index += 1;
       if (index === this._items.length) {
         index = 0;
@@ -455,7 +459,7 @@ class DirListing extends Widget {
     } else {
       // Select the last selected item.
       let name = selected[selected.length - 1];
-      index = arrays.findIndex(items, (value) => value.name === name);
+      index = findIndex(items, value => value.name === name);
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
@@ -474,7 +478,7 @@ class DirListing extends Widget {
     if (selected.length === 1 || keepExisting) {
       // Select the previous item.
       let name = selected[0];
-      index = arrays.findIndex(items, (value) => value.name === name);
+      index = findIndex(items, value => value.name === name);
       index -= 1;
       if (index === -1) {
         index = this._items.length - 1;
@@ -485,7 +489,7 @@ class DirListing extends Widget {
     } else {
       // Select the first selected item.
       let name = selected[0];
-      index = arrays.findIndex(items, (value) => value.name === name);
+      index = findIndex(items, value => value.name === name);
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
@@ -842,7 +846,7 @@ class DirListing extends Widget {
 
     // Find a valid double click target.
     let target = event.target as HTMLElement;
-    let i = arrays.findIndex(this._items, node => node.contains(target));
+    let i = findIndex(this._items, node => node.contains(target));
     if (i === -1) {
       return;
     }
@@ -991,7 +995,7 @@ class DirListing extends Widget {
       selectedNames = [item.name];
     } else if (selectedNames.length === 1) {
       let name = selectedNames[0];
-      item = arrays.find(items, (value) => value.name === name);
+      item = find(items, value => value.name === name);
     }
 
     // Create the drag image.
@@ -1162,7 +1166,7 @@ class DirListing extends Widget {
   private _doRename(): Promise<string> {
     let items = this.sortedItems;
     let name = Object.keys(this._selection)[0];
-    let index = arrays.findIndex(items, (value) => value.name === name);
+    let index = findIndex(items, value => value.name === name);
     let row = this._items[index];
     let item = items[index];
     let nameNode = this.renderer.getNameNode(row);
