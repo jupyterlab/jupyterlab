@@ -26,7 +26,7 @@ import {
 } from '../dialog';
 
 import {
-  DocumentRegistry, IDocumentContext, IDocumentModel
+  IDocumentRegistry, IDocumentContext, IDocumentModel
 } from '../docregistry';
 
 import {
@@ -243,7 +243,7 @@ class DocumentWidgetManager {
 
   private _closeGuard = false;
   private _contextManager: ContextManager = null;
-  private _registry: DocumentRegistry = null;
+  private _registry: IDocumentRegistry = null;
   private _widgets: { [key: string]: Widget[] } = Object.create(null);
 }
 
@@ -261,7 +261,7 @@ namespace DocumentWidgetManager {
     /**
      * A document registry instance.
      */
-    registry: DocumentRegistry;
+    registry: IDocumentRegistry;
 
     /**
      * A context manager instance.

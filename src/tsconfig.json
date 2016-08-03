@@ -11,6 +11,7 @@
   "files": [
     "application/index",
     "dialog/index",
+    "docmanager/index",
     "docregistry/plugin",
     "index",
     "main/plugin",

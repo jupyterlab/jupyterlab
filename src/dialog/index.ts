@@ -277,7 +277,7 @@ function styleElements(element: HTMLElement): HTMLElement {
       element.insertBefore(child, next);
       break;
     default:
-      continue;
+      break;
     }
   }
   return element;
