@@ -3,7 +3,7 @@
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   okButton, showDialog
@@ -57,5 +57,5 @@ function showErrorMessage(host: Widget, title: string, error: Error): Promise<vo
     buttons: [okButton],
     okText: 'DISMISS'
   };
-  return showDialog(options).then(() => {});
+  return showDialog(options).then(() => { /* no-op */ });
 }
