@@ -8,20 +8,21 @@ import {
 import * as moment
   from 'moment';
 
-import * as arrays
-  from 'phosphor-arrays';
-
-import {
-  Drag, DropAction, DropActions, IDragEvent, MimeData
-} from 'phosphor-dragdrop';
-
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
+
+import {
+  MimeData
+} from 'phosphor/lib/core/mimedata';
+
+import {
+  Drag, IDragEvent
+} from 'phosphor/lib/dom/dragdrop';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   showDialog
@@ -32,12 +33,12 @@ import {
 } from '../docmanager';
 
 import {
-  FileBrowserModel
-} from './model';
+  IWidgetOpener
+} from './interfaces';
 
 import {
-  IWidgetOpener
-} from './browser';
+  FileBrowserModel
+} from './model';
 
 import * as utils
   from './utils';
@@ -557,6 +558,8 @@ class DirListing extends Widget {
     case 'p-drop':
       this._evtDrop(event as IDragEvent);
       break;
+    default:
+      break;
     }
   }
 
@@ -807,6 +810,8 @@ class DirListing extends Widget {
       event.stopPropagation();
       event.preventDefault();
       break;
+    default:
+      break;
     }
   }
 
@@ -916,8 +921,8 @@ class DirListing extends Widget {
     event.preventDefault();
     event.stopPropagation();
     clearTimeout(this._selectTimer);
-    if (event.proposedAction === DropAction.None) {
-      event.dropAction = DropAction.None;
+    if (event.proposedAction === 'none') {
+      event.dropAction = 'none';
       return;
     }
     if (!event.mimeData.hasData(utils.CONTENTS_MIME)) {
@@ -996,8 +1001,8 @@ class DirListing extends Widget {
     this._drag = new Drag({
       dragImage,
       mimeData: new MimeData(),
-      supportedActions: DropActions.Move,
-      proposedAction: DropAction.Move
+      supportedActions: 'move',
+      proposedAction: 'move'
     });
     this._drag.mimeData.setData(utils.CONTENTS_MIME, selectedNames);
     if (item && item.type !== 'directory') {
