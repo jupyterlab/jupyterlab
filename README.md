@@ -210,6 +210,7 @@ We publish an npm package, a Python source package, and a Python universal binar
 npm version patch
 git push origin master --tags
 npm publish
-python setup.py sdist upload
-python setup.py bdist_wheel --universal upload
+python setup.py sdist
+python setup.py bdist_wheel --universal
+twine upload dist/*
 ```
