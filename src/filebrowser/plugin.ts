@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ServiceManager
-} from 'jupyter-js-services';
-
-import {
   defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
@@ -30,12 +26,16 @@ import {
 } from '../docmanager';
 
 import {
-  DocumentRegistry
+  IDocumentRegistry
 } from '../docregistry';
 
 import {
   IMainMenu
 } from '../mainmenu/plugin';
+
+import {
+  IServiceManager
+} from '../services/plugin';
 
 import {
   WidgetTracker
@@ -133,7 +133,7 @@ export
 const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
   id: 'jupyter.services.file-browser',
   provides: IPathTracker,
-  requires: [ServiceManager, DocumentRegistry, IMainMenu],
+  requires: [IServiceManager, IDocumentRegistry, IMainMenu],
   activate: activateFileBrowser
 };
 
@@ -157,7 +157,7 @@ const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: JupyterLab, manager: ServiceManager, registry: DocumentRegistry, mainMenu: IMainMenu): IPathTracker {
+function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu): IPathTracker {
   let id = 0;
   let tracker = new WidgetTracker<Widget>();
   let activeWidget: Widget;
@@ -180,9 +180,11 @@ function activateFileBrowser(app: JupyterLab, manager: ServiceManager, registry:
   let docManager = new DocumentManager({ registry, manager, opener });
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = Private.fbWidget = new FileBrowserWidget({
-    model: fbModel,
+    commands: app.commands,
+    keymap: app.keymap,
     manager: docManager,
-    opener
+    model: fbModel,
+    opener: opener
   });
 
   fbModel.pathChanged.connect((sender, args) => {

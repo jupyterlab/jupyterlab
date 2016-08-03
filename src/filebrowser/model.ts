@@ -19,6 +19,28 @@ import {
 
 
 /**
+ * An arguments object for the file browser model change events.
+ */
+export
+interface IFileBrowserChangedArgs {
+  /**
+   * The name of the attribute being changed.
+   */
+  name: string;
+
+  /**
+   * The old state value.
+   */
+  oldValue: string;
+
+  /**
+   * The new state value.
+   */
+  newValue: string;
+}
+
+
+/**
  * An implementation of a file browser model.
  *
  * #### Notes
@@ -40,7 +62,7 @@ class FileBrowserModel implements IDisposable {
   /**
    * A signal emitted when the path changes.
    */
-  pathChanged: ISignal<FileBrowserModel, Private.IChangedArgs>;
+  pathChanged: ISignal<FileBrowserModel, IFileBrowserChangedArgs>;
 
   /**
    * Get the refreshed signal.
@@ -50,7 +72,7 @@ class FileBrowserModel implements IDisposable {
   /**
    * Get the file path changed signal.
    */
-  fileChanged: ISignal<FileBrowserModel, Private.IChangedArgs>;
+  fileChanged: ISignal<FileBrowserModel, IFileBrowserChangedArgs>;
 
   /**
    * Get the current path.
@@ -414,27 +436,6 @@ namespace FileBrowserModel {
  * The namespace for the file browser model private data.
  */
 namespace Private {
-  /**
-   * An arguments object for the file browser model change events.
-   */
-  export
-  interface IChangedArgs {
-    /**
-     * The name of the attribute being changed.
-     */
-    name: string;
-
-    /**
-     * The old state value.
-     */
-    oldValue: string;
-
-    /**
-     * The new state value.
-     */
-    newValue: string;
-  }
-
   /**
    * Parse the content of a `FileReader`.
    *
