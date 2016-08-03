@@ -97,6 +97,11 @@ interface IDocumentModel extends IDisposable {
 export
 interface IDocumentModelStateChange<T> {
   /**
+   * The name of the attribute being changed.
+   */
+  name: string;
+
+  /**
    * The old state value.
    */
   oldValue: T;

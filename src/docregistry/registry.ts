@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  utils
-} from 'jupyter-js-services';
-
-import {
   IDisposable, DisposableDelegate
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   IModelFactory, IWidgetFactory, IWidgetFactoryOptions,

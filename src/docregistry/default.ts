@@ -11,19 +11,16 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
-  ISignal, Signal
-} from 'phosphor-signaling';
+  ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
-  IDocumentModel, IWidgetFactory, IDocumentContext, IModelFactory
+  IDocumentModel, IDocumentContext, IDocumentModelStateChange, IModelFactory,
+  IWidgetFactory
 } from './index';
 
 
@@ -49,16 +46,12 @@ class DocumentModel implements IDocumentModel {
   /**
    * A signal emitted when the document content changes.
    */
-  get contentChanged(): ISignal<IDocumentModel, void> {
-    return Private.contentChangedSignal.bind(this);
-  }
+  contentChanged: ISignal<IDocumentModel, void>;
 
   /**
    * A signal emitted when the document state changes.
    */
-  get stateChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
-    return Private.stateChangedSignal.bind(this);
-  }
+  stateChanged: ISignal<IDocumentModel, IDocumentModelStateChange<any>>;
 
   /**
    * The dirty state of the document.
