@@ -93,12 +93,15 @@ class ApplicationShell extends Widget {
 
     topPanel.id = 'jp-top-panel';
     hsplitPanel.id = 'jp-main-split-panel';
+
     leftHandler.sideBar.addClass(SIDEBAR_CLASS);
     leftHandler.sideBar.addClass('jp-mod-left');
+    leftHandler.stackedPanel.id = 'jp-left-stack';
+
     rightHandler.sideBar.addClass(SIDEBAR_CLASS);
     rightHandler.sideBar.addClass('jp-mod-right');
-    leftHandler.stackedPanel.id = 'jp-left-stack';
     rightHandler.stackedPanel.id = 'jp-right-stack';
+
     dockPanel.id = 'jp-main-dock-panel';
 
     dockPanel.spacing = 8;

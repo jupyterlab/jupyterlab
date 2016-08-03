@@ -21,6 +21,7 @@
 @import './inspector.css';
 @import './markdownwidget.css';
 @import './rendermime.css';
+@import './shell.css';
 
 @import '../landing/index.css';
 
@@ -31,22 +32,6 @@ body {
   background: #E0E0E0;
   overflow: hidden;
   font-family: sans-serif;
-}
-
-
-.jp-ApplicationShell.p-Widget {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  font-size: 14px;
-}
-
-
-#jp-top-panel {
-  display: flex;
-  min-height: 24px;
 }
 
 
@@ -70,91 +55,6 @@ body {
 
 .jp-FileBrowser {
   min-width: 300px;
-}
-
-
-#jp-right-stack {
-  border-left: 1px solid #BDBDBD;
-}
-
-#jp-left-stack {
-  border-right: 1px solid #BDBDBD;
-}
-
-.jp-SideBar.p-TabBar {
-  background: white;
-  color: #777777;
-  font-size: 14px;
-  max-width: 36px;
-  max-height: none;
-  height: 100%;
-}
-
-
-.jp-SideBar.p-Widget {
-  overflow: visible;
-}
-
-
-.jp-SideBar.jp-mod-left {
-  border-right: 1px solid #BDBDBD;
-  bottom: 0;
-}
-
-
-.jp-SideBar.jp-mod-right {
-  border-left: 1px solid #BDBDBD;
-  bottom: 0;
-}
-
-
-.jp-SideBar-content {
-  height: 35px;
-  transform-origin: 0 0 0;
-}
-
-
-.jp-SideBar.jp-mod-left > .jp-SideBar-content {
-  flex-direction: row-reverse;
-  transform: rotate(-90deg) translateX(-100%);
-}
-
-
-.jp-SideBar.jp-mod-right > .jp-SideBar-content {
-  flex-direction: row;
-  transform: rotate(90deg) translateY(-100%);
-}
-
-
-.jp-SideBar-button {
-  padding: 0 18px;
-  line-height: 35px;
-}
-
-
-.jp-SideBar-button:hover:not(.p-mod-current) {
-  background: #FAFAFA;
-}
-
-
-.jp-SideBar-button.p-mod-current {
-  color: #2196F3;
-  background: #FAFAFA;
-}
-
-
-.jp-SideBar.jp-mod-left .jp-SideBar-button {
-  border-left: 1px solid #BDBDBD;
-}
-
-
-.jp-SideBar.jp-mod-right .jp-SideBar-button {
-  border-right: 1px solid #BDBDBD;
-}
-
-
-#jp-main-dock-panel {
-  padding: 8px;
 }
 
 
