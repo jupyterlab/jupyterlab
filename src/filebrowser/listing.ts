@@ -184,27 +184,14 @@ const FACTORY_MIME = 'application/x-phosphor-widget-factory';
 export
 class DirListing extends Widget {
   /**
-   * Create the DOM node for a dir listing.
-   */
-  static createNode(): HTMLElement {
-    let node = document.createElement('div');
-    let header = document.createElement('div');
-    let content = document.createElement('ul');
-    content.className = CONTENT_CLASS;
-    header.className = HEADER_CLASS;
-    node.appendChild(header);
-    node.appendChild(content);
-    node.tabIndex = 1;
-    return node;
-  }
-
-  /**
    * Construct a new file browser directory listing widget.
    *
    * @param model - The file browser view model.
    */
   constructor(options: DirListing.IOptions) {
-    super();
+    super({
+      node: (options.renderer || DirListing.defaultRenderer).createNode()
+    });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
     this._model.refreshed.connect(this._onModelRefreshed, this);
@@ -215,6 +202,8 @@ class DirListing extends Widget {
     this._opener = options.opener;
     this._renderer = options.renderer || DirListing.defaultRenderer;
     let headerNode = utils.findElement(this.node, HEADER_CLASS);
+    console.log(1, this.node);
+    console.log(2, headerNode);
     this._renderer.populateHeaderNode(headerNode);
   }
 
@@ -1326,6 +1315,11 @@ namespace DirListing {
   export
   interface IRenderer {
     /**
+     * Create the DOM node for a dir listing.
+     */
+    createNode(): HTMLElement;
+
+    /**
      * Populate and empty header node for a dir listing.
      *
      * @param node - The header node to populate.
@@ -1385,6 +1379,21 @@ namespace DirListing {
    */
   export
   class Renderer implements IRenderer {
+    /**
+     * Create the DOM node for a dir listing.
+     */
+    createNode(): HTMLElement {
+      let node = document.createElement('div');
+      let header = document.createElement('div');
+      let content = document.createElement('ul');
+      content.className = CONTENT_CLASS;
+      header.className = HEADER_CLASS;
+      node.appendChild(header);
+      node.appendChild(content);
+      node.tabIndex = 1;
+      return node;
+    }
+
     /**
      * Populate and empty header node for a dir listing.
      *

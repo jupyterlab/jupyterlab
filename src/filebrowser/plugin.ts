@@ -138,7 +138,8 @@ const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
   id: 'jupyter.services.file-browser',
   provides: IPathTracker,
   requires: [IServiceManager, IDocumentRegistry, IMainMenu],
-  activate: activateFileBrowser
+  activate: activateFileBrowser,
+  autoStart: true
 };
 
 
@@ -397,10 +398,10 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 //     }
 //   ]);
 
-//   fbWidget.title.text = 'Files';
-//   fbWidget.id = 'file-browser';
-//   app.shell.addToLeftArea(fbWidget, { rank: 40 });
-//   showBrowser();
+  fbWidget.title.label = 'Files';
+  fbWidget.id = 'file-browser';
+  app.shell.addToLeftArea(fbWidget, { rank: 40 });
+  showBrowser();
 
 //   // Add top menu.
 //   let newSubMenu = new Menu ([
@@ -464,23 +465,23 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 //   });
 //   mainMenu.addItem(fileMenu, {rank: 1});
 
-//   function showBrowser(): void {
-//     app.shell.activateLeft(fbWidget.id);
-//   }
+  function showBrowser(): void {
+    app.shell.activateLeft(fbWidget.id);
+  }
 
-//   function hideBrowser(): void {
-//     if (!fbWidget.isHidden) {
-//       app.shell.collapseLeft();
-//     }
-//   }
+  function hideBrowser(): void {
+    if (!fbWidget.isHidden) {
+      app.shell.collapseLeft();
+    }
+  }
 
-//   function toggleBrowser(): void {
-//     if (fbWidget.isHidden) {
-//       showBrowser();
-//     } else {
-//       hideBrowser();
-//     }
-//   }
+  function toggleBrowser(): void {
+    if (fbWidget.isHidden) {
+      showBrowser();
+    } else {
+      hideBrowser();
+    }
+  }
 
   return Private.pathTracker;
 }
