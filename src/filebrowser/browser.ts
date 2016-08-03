@@ -80,7 +80,6 @@ interface IWidgetOpener {
 }
 
 
-
 /**
  * A widget which hosts a file browser.
  *
@@ -98,8 +97,8 @@ class FileBrowserWidget extends Widget {
   constructor(options: FileBrowserWidget.IOptions) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
-    let commands = options.commands;
-    let keymap = options.keymap;
+    let commands = this._commands = options.commands;
+    let keymap = this._keymap = options.keymap;
     let manager = this._manager = options.manager;
     let model = this._model = options.model;
     let opener = this._opener = options.opener;
@@ -130,6 +129,26 @@ class FileBrowserWidget extends Widget {
     layout.addWidget(this._listing);
 
     this.layout = layout;
+  }
+
+  /**
+   * Get the command registry used by the file browser.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get commands(): CommandRegistry {
+    return this._commands;
+  }
+
+  /**
+   * Get the keymap manager used by the file browser.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get keymap(): Keymap {
+    return this._keymap;
   }
 
   /**
@@ -329,13 +348,15 @@ class FileBrowserWidget extends Widget {
     this._timeoutId = setTimeout(() => this.refresh(), REFRESH_DURATION);
   }
 
-  private _model: FileBrowserModel = null;
-  private _crumbs: BreadCrumbs = null;
   private _buttons: FileButtons = null;
+  private _commands: CommandRegistry = null;
+  private _crumbs: BreadCrumbs = null;
+  private _keymap: Keymap = null;
   private _listing: DirListing = null;
-  private _timeoutId = -1;
   private _manager: DocumentManager = null;
+  private _model: FileBrowserModel = null;
   private _opener: IWidgetOpener = null;
+  private _timeoutId = -1;
 }
 
 
