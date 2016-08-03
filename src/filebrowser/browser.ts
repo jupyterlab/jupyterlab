@@ -7,15 +7,23 @@ import {
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
+
+import {
+  CommandRegistry
+} from 'phosphor/lib/ui/commandregistry';
+
+import {
+  Keymap
+} from 'phosphor/lib/ui/keymap';
 
 import {
   PanelLayout
-} from 'phosphor-panel';
+} from 'phosphor/lib/ui/panel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   DocumentManager
@@ -28,6 +36,10 @@ import {
 import {
   BreadCrumbs
 } from './crumbs';
+
+import {
+  IWidgetOpener
+} from './interfaces';
 
 import {
   DirListing
@@ -64,15 +76,6 @@ const REFRESH_DURATION = 10000;
 
 
 /**
- * An interface for a widget opener.
- */
-export
-interface IWidgetOpener {
-  open(widget: Widget): void;
-}
-
-
-/**
  * A widget which hosts a file browser.
  *
  * The widget uses the Jupyter Contents API to retreive contents,
@@ -89,19 +92,19 @@ class FileBrowserWidget extends Widget {
   constructor(options: FileBrowserWidget.IOptions) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
-    let model = this._model = options.model;
+    let commands = options.commands;
+    let keymap = options.keymap;
     let manager = this._manager = options.manager;
+    let model = this._model = options.model;
     let opener = this._opener = options.opener;
+    let renderer = options.renderer;
 
     model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs({ model });
-    this._buttons = new FileButtons({ model, manager, opener });
-    this._listing = new DirListing({
-      model,
-      manager,
-      opener,
-      renderer: options.renderer
+    this._buttons = new FileButtons({
+      commands, keymap, manager, model, opener
     });
+    this._listing = new DirListing({ manager, model, opener, renderer });
 
     model.fileChanged.connect((fbModel, args) => {
       if (args.newValue) {
@@ -256,7 +259,7 @@ class FileBrowserWidget extends Widget {
    * Download the currently selected item(s).
    */
   download(): Promise<void> {
-    return this._listing.download().then(() => {return void 0});
+    return this._listing.download().then(() => { /* no-op */ });
   }
 
   /**
@@ -340,6 +343,16 @@ namespace FileBrowserWidget {
    */
   export
   interface IOptions {
+    /**
+     * The command registry for use with the file browser.
+     */
+    commands: CommandRegistry;
+
+    /**
+     * The keymap for use with the file browser.
+     */
+    keymap: Keymap;
+
     /**
      * A file browser model instance.
      */
