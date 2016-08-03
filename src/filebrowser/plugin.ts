@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  DisposableSet
+} from 'phosphor/lib/core/disposable';
+
+import {
   defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
@@ -9,9 +13,9 @@ import {
   Token
 } from 'phosphor/lib/core/token';
 
-// import {
-//   Menu
-// } from 'phosphor/lib/ui/menu';
+import {
+  Menu
+} from 'phosphor/lib/ui/menu';
 
 import {
   Widget
@@ -141,17 +145,17 @@ const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
 /**
  * The class name for all main area portrait tab icons.
  */
-// const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
+const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
 
 /**
  * The class name for the notebook icon from the default theme.
  */
-// const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
+const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
 
 /**
  * The class name for the text editor icon from the default theme.
  */
-// const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
+const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 
 
 /**
@@ -177,11 +181,12 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
       }
     }
   };
+  let { commands, keymap } = app;
   let docManager = new DocumentManager({ registry, manager, opener });
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = Private.fbWidget = new FileBrowserWidget({
-    commands: app.commands,
-    keymap: app.keymap,
+    commands: commands,
+    keymap: keymap,
     manager: docManager,
     model: fbModel,
     opener: opener
@@ -194,25 +199,32 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
   // Add a context menu to the dir listing.
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
   node.addEventListener('contextmenu', (event: MouseEvent) => {
-    // event.preventDefault();
-    // let x = event.clientX;
-    // let y = event.clientY;
-    // let path = fbWidget.pathForClick(event);
-    // let ext = '.' + path.split('.').pop();
-    // let widgetNames = registry.listWidgetFactories(ext);
-    // let items: MenuItem[] = [];
-    // if (widgetNames.length > 1) {
-    //   for (let widgetName of widgetNames) {
-    //     items.push(new MenuItem({
-    //       text: widgetName,
-    //       handler: () => {
-    //         fbWidget.openPath(path, widgetName);
-    //       }
-    //     }));
-    //   }
-    // }
-    // let menu = createMenu(fbWidget, items);
-    // menu.popup(x, y);
+    event.preventDefault();
+    let path = fbWidget.pathForClick(event);
+    let ext = '.' + path.split('.').pop();
+    let widgetNames = registry.listWidgetFactories(ext);
+    let prefix = `file-browser-contextmenu-${++Private.id}`;
+    let openWith: Menu = null;
+    if (widgetNames.length > 1) {
+      let disposables = new DisposableSet();
+      let command: string;
+
+      openWith = new Menu({ commands, keymap });
+      openWith.title.label = 'Open With...';
+      openWith.disposed.connect(() => disposables.dispose());
+
+      for (let widgetName of widgetNames) {
+        command = `${prefix}:${widgetName}`;
+        disposables.add(commands.addCommand(command, {
+          execute: () => fbWidget.openPath(path, widgetName),
+          label: widgetName
+        }));
+        openWith.addItem({ command });
+      }
+    }
+
+    let menu = createMenu(fbWidget, openWith);
+    menu.open(event.clientX, event.clientY);
   });
 
 //   // Add the command for a new items.
@@ -477,76 +489,119 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 /**
  * Create a context menu for the file browser listing.
  */
-// function createMenu(fbWidget: FileBrowserWidget, openWith: MenuItem[]):  Menu {
-//   let items = [
-//     new MenuItem({
-//       text: '&Open',
-//       icon: 'fa fa-folder-open-o',
-//       shortcut: 'Ctrl+O',
-//       handler: () => { fbWidget.open(); }
-//     })
-//   ];
-//   if (openWith.length) {
-//     items.push(new MenuItem({
-//       text: 'Open With...',
-//       submenu: new Menu(openWith)
-//     }));
-//   }
-//   items.push(
-//     new MenuItem({
-//       text: '&Rename',
-//       icon: 'fa fa-edit',
-//       shortcut: 'Ctrl+R',
-//       handler: () => { fbWidget.rename(); }
-//     }),
-//     new MenuItem({
-//       text: '&Delete',
-//       icon: 'fa fa-remove',
-//       shortcut: 'Ctrl+D',
-//       handler: () => { fbWidget.delete(); }
-//     }),
-//     new MenuItem({
-//       text: 'Duplicate',
-//       icon: 'fa fa-copy',
-//       handler: () => { fbWidget.duplicate(); }
-//     }),
-//     new MenuItem({
-//       text: 'Cut',
-//       icon: 'fa fa-cut',
-//       shortcut: 'Ctrl+X',
-//       handler: () => { fbWidget.cut(); }
-//     }),
-//     new MenuItem({
-//       text: '&Copy',
-//       icon: 'fa fa-copy',
-//       shortcut: 'Ctrl+C',
-//       handler: () => { fbWidget.copy(); }
-//     }),
-//     new MenuItem({
-//       text: '&Paste',
-//       icon: 'fa fa-paste',
-//       shortcut: 'Ctrl+V',
-//       handler: () => { fbWidget.paste(); }
-//     }),
-//     new MenuItem({
-//       text: 'Download',
-//       icon: 'fa fa-download',
-//       handler: () => { fbWidget.download(); }
-//     }),
-//     new MenuItem({
-//       text: 'Shutdown Kernel',
-//       icon: 'fa fa-stop-circle-o',
-//       handler: () => { fbWidget.shutdownKernels(); }
-//     })
-//   );
-//   return new Menu(items);
-// }
+function createMenu(fbWidget: FileBrowserWidget, openWith: Menu):  Menu {
+  let { commands, keymap } = fbWidget;
+  let menu = new Menu({ commands, keymap });
+  let prefix = `file-browser-${++Private.id}`;
+  let disposables = new DisposableSet();
+  let command: string;
+
+  // // Remove all the commands associated with this menu upon disposal.
+  menu.disposed.connect(() => disposables.dispose());
+
+  command = `${prefix}:open`;
+  disposables.add(commands.addCommand(command, {
+    execute: () => fbWidget.open(),
+    icon: 'fa fa-folder-open-o',
+    label: 'Open',
+    mnemonic: 0
+  }));
+  menu.addItem({ command });
+
+  if (openWith) {
+    menu.addItem({ type: 'submenu', menu: openWith });
+  }
+
+  command = `${prefix}:rename`;
+  disposables.add(commands.addCommand(command, {
+    execute: () => fbWidget.rename(),
+    icon: 'fa fa-edit',
+    label: 'Rename',
+    mnemonic: 0
+  }));
+  menu.addItem({ command });
+
+  command = `${prefix}:delete`;
+  disposables.add(commands.addCommand(command, {
+    execute: () => fbWidget.delete(),
+    icon: 'fa fa-remove',
+    label: 'Delete',
+    mnemonic: 0
+  }));
+  menu.addItem({ command });
+
+  command = `${prefix}:duplicate`;
+  disposables.add(commands.addCommand(command, {
+    execute: () => fbWidget.duplicate(),
+    icon: 'fa fa-copy',
+    label: 'Duplicate'
+  }));
+  menu.addItem({ command });
+
+  command = `${prefix}:cut`;
+  disposables.add(commands.addCommand(command, {
+    execute: () => fbWidget.cut(),
+    icon: 'fa fa-cut',
+    label: 'Cut'
+  }));
+  menu.addItem({ command });
+
+  command = `${prefix}:copy`;
+  disposables.add(commands.addCommand(command, {
+    execute: () => fbWidget.copy(),
+    icon: 'fa fa-copy',
+    label: 'Copy',
+    mnemonic: 0
+  }));
+  menu.addItem({ command });
+
+  command = `${prefix}:paste`;
+  disposables.add(commands.addCommand(command, {
+    execute: () => fbWidget.paste(),
+    icon: 'fa fa-paste',
+    label: 'Paste',
+    mnemonic: 0
+  }));
+  menu.addItem({ command });
+
+  command = `${prefix}:download`;
+  disposables.add(commands.addCommand(command, {
+    execute: () => fbWidget.download(),
+    icon: 'fa fa-download',
+    label: 'Download'
+  }));
+  menu.addItem({ command });
+
+  command = `${prefix}:shutdown`;
+  disposables.add(commands.addCommand(command, {
+    execute: () => fbWidget.shutdownKernels(),
+    icon: 'fa fa-stop-circle-o',
+    label: 'Shutdown Kernel'
+  }));
+  menu.addItem({ command });
+
+  return menu;
+}
 
 
 /**
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * The ID counter prefix for new commands.
+   *
+   * #### Notes
+   * Even though the commands are disposed when the dropdown menu is disposed,
+   * in order to guarantee there are no race conditions with other `FileButtons`
+   * instances, each set of commands is prefixed.
+   */
+  export
+  let id = 0;
+
+  /**
+   * The file browser widget instance.
+   */
   export
   var fbWidget: FileBrowserWidget;
 
