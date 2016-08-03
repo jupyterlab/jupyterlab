@@ -96,7 +96,9 @@ class DocumentWidgetManager {
       this._widgets[id] = [];
     }
     this._widgets[id].push(widget);
-    installMessageHook(widget, this.filterMessage);
+    installMessageHook(widget, (handler: IMessageHandler, msg: Message) => {
+      return this.filterMessage(handler, msg);
+    });
     widget.addClass(DOCUMENT_CLASS);
     widget.title.closable = true;
     widget.disposed.connect(() => {
