@@ -14,6 +14,7 @@
     "clipboard/index",
     "clipboard/plugin",
     "commandpalette/plugin",
+    "common/activitymonitor",
     "common/observablelist",
     "dialog/index",
     "docmanager/index",

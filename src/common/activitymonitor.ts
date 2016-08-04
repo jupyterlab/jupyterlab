@@ -3,11 +3,11 @@
 
 import {
   IDisposable
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
 
 import {
-  ISignal, Signal, clearSignalData
-} from 'phosphor-signaling';
+  clearSignalData, defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 
 /**
@@ -26,9 +26,7 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
   /**
    * A signal emitted when activity has ceased.
    */
-  get activityStopped(): ISignal<ActivityMonitor<Sender, Args>, ActivityMonitor.IArguments<Sender, Args>> {
-    return Private.activityStoppedSignal.bind(this);
-  }
+  activityStopped: ISignal<ActivityMonitor<Sender, Args>, ActivityMonitor.IArguments<Sender, Args>>;
 
   /**
    * The timeout associated with the monitor, in milliseconds.
@@ -86,6 +84,10 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
 }
 
 
+// Define the signals for the `ActivityMonitor` class.
+defineSignal(ActivityMonitor.prototype, 'activityStopped');
+
+
 /**
  * The namespace for `ActivityMonitor` statics.
  */
@@ -125,16 +127,4 @@ namespace ActivityMonitor {
      */
     args: Args;
   }
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * A signal emitted when activity has ceased.
-   */
-  export
-  const activityStoppedSignal = new Signal<ActivityMonitor<any, any>, ActivityMonitor.IArguments<any, any>>();
 }
