@@ -37,16 +37,16 @@ function generateClipboardEvent(node: HTMLElement, type='copy'): void {
   // http://stackoverflow.com/a/5210367
 
   // Identify selected text.
-  var sel = window.getSelection();
+  let sel = window.getSelection();
 
   // Save the current selection.
-  var savedRanges: any[] = [];
-  for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+  let savedRanges: any[] = [];
+  for (let i = 0, len = sel.rangeCount; i < len; ++i) {
     savedRanges[i] = sel.getRangeAt(i).cloneRange();
   }
 
   // Select the node content.
-  var range = document.createRange();
+  let range = document.createRange();
   range.selectNodeContents(node);
   sel.removeAllRanges();
   sel.addRange(range);
@@ -57,7 +57,7 @@ function generateClipboardEvent(node: HTMLElement, type='copy'): void {
   // Restore the previous selection.
   sel = window.getSelection();
   sel.removeAllRanges();
-  for (var i = 0, len = savedRanges.length; i < len; ++i) {
+  for (let i = 0, len = savedRanges.length; i < len; ++i) {
     sel.addRange(savedRanges[i]);
   }
 }
