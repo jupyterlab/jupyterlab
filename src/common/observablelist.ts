@@ -1,53 +1,56 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-/*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, PhosphorJS Contributors
-|
-| Distributed under the terms of the BSD 3-Clause License.
-|
-| The full license is in the file LICENSE, distributed with this software.
-|----------------------------------------------------------------------------*/
-'use strict';
-
-import * as arrays
-  from 'phosphor-arrays';
+import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
 
 import {
-  ISignal, Signal
-} from 'phosphor-signaling';
+  move
+} from 'phosphor/lib/algorithm/mutation';
+
+import {
+  indexOf
+} from 'phosphor/lib/algorithm/searching';
+
+import {
+  Vector
+} from 'phosphor/lib/collections/vector';
+
+import {
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 
 /**
- * An enum of the change types which occur on an observable list.
+ * The change types which occur on an observable list.
  */
 export
-enum ListChangeType {
+type ListChangeType =
   /**
    * An item was added to the list.
    */
-  Add,
+  'add' |
 
   /**
    * An item was moved in the list.
    */
-  Move,
+  'move' |
 
   /**
    * An item was removed from the list.
    */
-  Remove,
+  'remove' |
 
   /**
    * Items were replaced in the list.
    */
-  Replace,
+  'replace' |
 
   /**
    * An item was set in the list.
    */
-  Set,
-}
+  'set';
 
 
 /**
@@ -290,19 +293,12 @@ interface IObservableList<T> {
 export
 class ObservableList<T> implements IObservableList<T> {
   /**
-   * A signal emitted when the list has changed.
-   *
-   * **See also:** [[changed]]
-   */
-  static changedSignal = new Signal<ObservableList<any>, IListChangedArgs<any>>();
-
-  /**
    * Construct a new observable list.
    *
    * @param items - The initial items for the list.
    */
   constructor(items?: T[]) {
-    this.internal = items ? items.slice() : [];
+    this.internal = new Vector<T>(items);
   }
 
   /**
@@ -311,9 +307,7 @@ class ObservableList<T> implements IObservableList<T> {
    * #### Notes
    * This is a pure delegate to the [[changedSignal]].
    */
-  get changed(): ISignal<ObservableList<T>, IListChangedArgs<T>> {
-    return ObservableList.changedSignal.bind(this);
-  }
+  changed: ISignal<ObservableList<T>, IListChangedArgs<T>>;
 
   /**
    * The number of items in the list.
@@ -335,7 +329,7 @@ class ObservableList<T> implements IObservableList<T> {
    *   index is out of range.
    */
   get(index: number): T {
-    return this.internal[this._norm(index)];
+    return this.internal.at(this._norm(index));
   }
 
   /**
@@ -346,7 +340,7 @@ class ObservableList<T> implements IObservableList<T> {
    * @returns `true` if the list contains the item, `false` otherwise.
    */
   contains(item: T): boolean {
-    return this.internal.indexOf(item) !== -1;
+    return indexOf(this.internal, item) !== -1;
   }
 
   /**
@@ -358,7 +352,7 @@ class ObservableList<T> implements IObservableList<T> {
    *   not contained in the list.
    */
   indexOf(item: T): number {
-    return this.internal.indexOf(item);
+    return indexOf(this.internal, item);
   }
 
   /**
@@ -377,7 +371,7 @@ class ObservableList<T> implements IObservableList<T> {
    * @returns A new array containing the specified range of items.
    */
   slice(start?: number, end?: number): T[] {
-    return this.internal.slice(start, end);
+    return toArray(this.internal).slice(start, end);
   }
 
   /**
@@ -393,7 +387,9 @@ class ObservableList<T> implements IObservableList<T> {
    */
   set(index: number, item: T): T {
     let i = this._norm(index);
-    if (!this._check(i)) return void 0;
+    if (!this._check(i)) {
+      return void 0;
+    }
     return this.setItem(i, item);
   }
 
@@ -450,9 +446,13 @@ class ObservableList<T> implements IObservableList<T> {
    */
   move(fromIndex: number, toIndex: number): boolean {
     let i = this._norm(fromIndex);
-    if (!this._check(i)) return false;
+    if (!this._check(i)) {
+      return false;
+    }
     let j = this._norm(toIndex);
-    if (!this._check(j)) return false;
+    if (!this._check(j)) {
+      return false;
+    }
     return this.moveItem(i, j);
   }
 
@@ -465,8 +465,10 @@ class ObservableList<T> implements IObservableList<T> {
    *   not contained in the list.
    */
   remove(item: T): number {
-    let i = this.internal.indexOf(item);
-    if (i !== -1) this.removeItem(i);
+    let i = indexOf(this.internal, item);
+    if (i !== -1) {
+      this.removeItem(i);
+    }
     return i;
   }
 
@@ -481,7 +483,9 @@ class ObservableList<T> implements IObservableList<T> {
    */
   removeAt(index: number): T {
     let i = this._norm(index);
-    if (!this._check(i)) return void 0;
+    if (!this._check(i)) {
+      return void 0;
+    }
     return this.removeItem(i);
   }
 
@@ -521,7 +525,7 @@ class ObservableList<T> implements IObservableList<T> {
    * #### Notes
    * Subclasses may access this array directly as needed.
    */
-  protected internal: T[];
+  protected internal: Vector<T>;
 
   /**
    * Add an item to the list at the specified index.
@@ -537,15 +541,15 @@ class ObservableList<T> implements IObservableList<T> {
    * This may be reimplemented by subclasses to customize the behavior.
    */
   protected addItem(index: number, item: T): number {
-    let i = arrays.insert(this.internal, index, item);
+    this.internal.insert(index, item);
     this.changed.emit({
-      type: ListChangeType.Add,
-      newIndex: i,
+      type: 'add',
+      newIndex: index,
       newValue: item,
       oldIndex: -1,
       oldValue: void 0,
     });
-    return i;
+    return index;
   }
 
   /**
@@ -563,16 +567,18 @@ class ObservableList<T> implements IObservableList<T> {
    * This may be reimplemented by subclasses to customize the behavior.
    */
   protected moveItem(fromIndex: number, toIndex: number): boolean {
-    if (!arrays.move(this.internal, fromIndex, toIndex)) {
-      return false;
+    let before = this.internal.at(toIndex);
+    move(this.internal, fromIndex, toIndex);
+    let after = this.internal.at(toIndex);
+    if (before === after) {
+      return;
     }
-    let item = this.internal[toIndex];
     this.changed.emit({
-      type: ListChangeType.Move,
+      type: 'move',
       newIndex: toIndex,
-      newValue: item,
+      newValue: after,
       oldIndex: fromIndex,
-      oldValue: item,
+      oldValue: after,
     });
     return true;
   }
@@ -589,9 +595,9 @@ class ObservableList<T> implements IObservableList<T> {
    * This may be reimplemented by subclasses to customize the behavior.
    */
   protected removeItem(index: number): T {
-    let item = arrays.removeAt(this.internal, index);
+    let item = this.internal.removeAt(index);
     this.changed.emit({
-      type: ListChangeType.Remove,
+      type: 'remove',
       newIndex: -1,
       newValue: void 0,
       oldIndex: index,
@@ -617,9 +623,14 @@ class ObservableList<T> implements IObservableList<T> {
    * This may be reimplemented by subclasses to customize the behavior.
    */
   protected replaceItems(index: number, count: number, items: T[]): T[] {
-    let old = this.internal.splice(index, count, ...items);
+    let i = index;
+    let old = items.map(item => {
+      let removed = this.internal.at(i);
+      this.internal.set(i++, item);
+      return removed;
+    });
     this.changed.emit({
-      type: ListChangeType.Replace,
+      type: 'replace',
       newIndex: index,
       newValue: items,
       oldIndex: index,
@@ -642,10 +653,10 @@ class ObservableList<T> implements IObservableList<T> {
    * This may be reimplemented by subclasses to customize the behavior.
    */
   protected setItem(index: number, item: T): T {
-    let old = this.internal[index];
-    this.internal[index] = item;
+    let old = this.internal.at(index);
+    this.internal.set(index, item);
     this.changed.emit({
-      type: ListChangeType.Set,
+      type: 'set',
       newIndex: index,
       newValue: item,
       oldIndex: index,
@@ -682,3 +693,7 @@ class ObservableList<T> implements IObservableList<T> {
     return Math.max(0, Math.min(Math.floor(c), this.internal.length));
   }
 }
+
+
+// Define the signals for the `ObservableList` class.
+defineSignal(ObservableList.prototype, 'changed');
