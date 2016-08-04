@@ -10,6 +10,7 @@
   },
   "files": [
     "application/index",
+    "commandpalette/plugin",
     "dialog/index",
     "docmanager/index",
     "docregistry/plugin",

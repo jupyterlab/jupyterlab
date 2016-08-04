@@ -14,6 +14,7 @@ var lab = new JupyterLab();
 
 lab.registerPlugins([
   // require('jupyterlab/lib/about/plugin').aboutExtension,
+  require('jupyterlab/lib/commandpalette/plugin').commandPaletteExtension,
   // require('jupyterlab/lib/console/plugin').consoleExtension,
   // require('jupyterlab/lib/csvwidget/plugin').csvHandlerExtension,
   require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
@@ -33,7 +34,6 @@ lab.registerPlugins([
   require('jupyterlab/lib/services/plugin').servicesProvider
   // require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
   // require('jupyterlab/lib/terminal/plugin').terminalExtension,
-  // require('phosphide/lib/extensions/commandpalette').commandPaletteExtension,
   // require('jupyter-js-widgets-labextension/lib/plugin').widgetManagerExtension,
 
   // require('jupyterlab/lib/clipboard/plugin').clipboardProvider,

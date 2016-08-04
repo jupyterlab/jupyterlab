@@ -31,7 +31,8 @@ const ICommandPalette = new Token<ICommandPalette>('jupyter.services.commandpale
 export
 const commandPaletteExtension: JupyterLabPlugin<ICommandPalette> = {
   id: 'jupyter.services.commandpalette',
-  activate: activateCommandPalette
+  activate: activateCommandPalette,
+  autoStart: true
 };
 
 export
@@ -39,14 +40,14 @@ interface ICommandPalette extends CommandPalette {}
 
 
 /**
- *
+ * Activate the command palette.
  */
 function activateCommandPalette(app: JupyterLab): ICommandPalette {
   const { commands, keymap } = app;
   const palette = new CommandPalette({ commands, keymap });
 
   /**
-   * Activate the command palette (used as a command).
+   * Activate the command palette within the app shell (used as a command).
    */
   function activatePalette(): void {
     app.shell.activateLeft(palette.id);
@@ -55,7 +56,7 @@ function activateCommandPalette(app: JupyterLab): ICommandPalette {
   }
 
   /**
-   * Hide the command palette (used as a command).
+   * Hide the command palette within the app shell (used as a command).
    */
   function hidePalette(): void {
     if (!palette.isHidden) {
@@ -64,7 +65,7 @@ function activateCommandPalette(app: JupyterLab): ICommandPalette {
   }
 
   /**
-   * Toggle the command palette (used as a command).
+   * Toggle the command palette within the app shell (used as a command).
    */
   function togglePalette(): void {
     if (palette.isHidden) {
