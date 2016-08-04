@@ -11,6 +11,8 @@
   "files": [
     "about/plugin",
     "application/index",
+    "clipboard/index",
+    "clipboard/plugin",
     "commandpalette/plugin",
     "dialog/index",
     "docmanager/index",
