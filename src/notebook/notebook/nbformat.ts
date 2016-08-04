@@ -7,7 +7,7 @@
 
 import {
   JSONObject
-} from '../common/json';
+} from 'phosphor/lib/algorithm/json';
 
 
 /**
@@ -82,6 +82,7 @@ namespace nbformat {
   type multilineString = string | string[];
 
 
+  /* tslint:disable */
   /**
    * A mime-type keyed dictionary of data.
    */
@@ -90,6 +91,7 @@ namespace nbformat {
     [key: string]: multilineString;
     'application/json'?: any;
   }
+  /* tslint:enable */
 
 
   /**
