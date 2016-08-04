@@ -10,7 +10,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  IObservableList, ListChangeType, IListChangedArgs, ObservableList
+  IObservableList, IListChangedArgs, ObservableList
 } from '../../common/observablelist';
 
 
@@ -176,21 +176,21 @@ class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> impl
   private _undoChange(change: IListChangedArgs<any>): void {
     let value: T;
     switch (change.type) {
-    case ListChangeType.Add:
+    case 'add':
       this.removeAt(change.newIndex);
       break;
-    case ListChangeType.Set:
+    case 'set':
       value = this._createValue(change.oldValue as any);
       this.set(change.oldIndex, value);
       break;
-    case ListChangeType.Remove:
+    case 'remove':
       value = this._createValue(change.oldValue as any);
       this.insert(change.oldIndex, value);
       break;
-    case ListChangeType.Move:
+    case 'move':
       this.move(change.newIndex, change.oldIndex);
       break;
-    case ListChangeType.Replace:
+    case 'replace':
       let len = (change.newValue as any[]).length;
       let values = this._createValues(change.oldValue as any[]);
       this.replace(change.oldIndex, len, values);
@@ -206,21 +206,21 @@ class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> impl
   private _redoChange(change: IListChangedArgs<any>): void {
     let value: T;
     switch (change.type) {
-    case ListChangeType.Add:
+    case 'add':
       value = this._createValue(change.newValue as any);
       this.insert(change.newIndex, value);
       break;
-    case ListChangeType.Set:
+    case 'set':
       value = this._createValue(change.newValue as any);
       this.set(change.newIndex, value);
       break;
-    case ListChangeType.Remove:
+    case 'remove':
       this.removeAt(change.oldIndex);
       break;
-    case ListChangeType.Move:
+    case 'move':
       this.move(change.oldIndex, change.newIndex);
       break;
-    case ListChangeType.Replace:
+    case 'replace':
       let len = (change.oldValue as any[]).length;
       let cells = this._createValues(change.newValue as any[]);
       this.replace(change.oldIndex, len, cells);
@@ -253,15 +253,15 @@ class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> impl
    * Copy a change as JSON.
    */
   private _copyChange(change: IListChangedArgs<T>): IListChangedArgs<any> {
-    if (change.type === ListChangeType.Replace) {
+    if (change.type === 'replace') {
       return this._copyReplace(change);
     }
     let oldValue: any = null;
     let newValue: any = null;
     switch (change.type) {
-    case ListChangeType.Add:
-    case ListChangeType.Set:
-    case ListChangeType.Remove:
+    case 'add':
+    case 'set':
+    case 'remove':
       if (change.oldValue) {
         oldValue = (change.oldValue as T).toJSON();
       }
@@ -269,7 +269,7 @@ class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> impl
         newValue = (change.newValue as T).toJSON();
       }
       break;
-    case ListChangeType.Move:
+    case 'move':
       // Only need the indices.
       break;
     default:
@@ -297,7 +297,7 @@ class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> impl
       newValue.push(value.toJSON());
     }
     return {
-      type: ListChangeType.Replace,
+      type: 'replace',
       oldIndex: change.oldIndex,
       newIndex: change.newIndex,
       oldValue,

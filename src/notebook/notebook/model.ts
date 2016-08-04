@@ -14,7 +14,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  IObservableList, ListChangeType, IListChangedArgs
+  IObservableList, IListChangedArgs
 } from '../../common/observablelist';
 
 import {
@@ -411,14 +411,14 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   private _onCellsChanged(list: IObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
     let cell: ICellModel;
     switch (change.type) {
-    case ListChangeType.Add:
+    case 'add':
       cell = change.newValue as ICellModel;
       cell.contentChanged.connect(this._onCellChanged, this);
       break;
-    case ListChangeType.Remove:
+    case 'remove':
       (change.oldValue as ICellModel).dispose();
       break;
-    case ListChangeType.Replace:
+    case 'replace':
       let newValues = change.newValue as ICellModel[];
       for (cell of newValues) {
         cell.contentChanged.connect(this._onCellChanged, this);
@@ -428,7 +428,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         cell.dispose();
       }
       break;
-    case ListChangeType.Set:
+    case 'set':
       cell = change.newValue as ICellModel;
       cell.contentChanged.connect(this._onCellChanged, this);
       if (change.oldValue) {

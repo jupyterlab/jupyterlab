@@ -26,7 +26,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IObservableList, IListChangedArgs, ListChangeType
+  IObservableList, IListChangedArgs
 } from '../../common/observablelist';
 
 import {
@@ -326,16 +326,16 @@ class StaticNotebook extends Widget {
    */
   private _onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
     switch (args.type) {
-    case ListChangeType.Add:
+    case 'add':
       this._insertCell(args.newIndex, args.newValue as ICellModel);
       break;
-    case ListChangeType.Move:
+    case 'move':
       this._moveCell(args.newIndex, args.oldIndex);
       break;
-    case ListChangeType.Remove:
+    case 'remove':
       this._removeCell(args.oldIndex);
       break;
-    case ListChangeType.Replace:
+    case 'replace':
       // TODO: reuse existing cell widgets if possible.
       let oldValues = args.oldValue as ICellModel[];
       for (let i = 0; i < oldValues.length; i++) {
@@ -346,7 +346,7 @@ class StaticNotebook extends Widget {
         this._insertCell(args.newIndex, newValues[i - 1]);
       }
       break;
-    case ListChangeType.Set:
+    case 'set':
       // TODO: reuse existing widget if possible.
       this._removeCell(args.newIndex);
       this._insertCell(args.newIndex, args.newValue as ICellModel);

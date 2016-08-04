@@ -26,7 +26,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IListChangedArgs, ListChangeType
+  IListChangedArgs
 } from '../../common/observablelist';
 
 import {
@@ -399,11 +399,11 @@ class OutputAreaWidget extends Widget {
    */
   private _onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
     switch (args.type) {
-    case ListChangeType.Add:
+    case 'add':
       // Children are always added at the end.
       this._addChild();
       break;
-    case ListChangeType.Replace:
+    case 'replace':
       // Only "clear" is supported by the model.
       // When an output area is cleared and then quickly replaced with new
       // content (as happens with @interact in widgets, for example), the
@@ -420,7 +420,7 @@ class OutputAreaWidget extends Widget {
         this._removeChild(args.oldIndex);
       }
       break;
-    case ListChangeType.Set:
+    case 'set':
       this._updateChild(args.newIndex);
       break;
     default:

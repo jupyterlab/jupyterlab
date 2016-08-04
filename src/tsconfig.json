@@ -14,6 +14,7 @@
     "clipboard/index",
     "clipboard/plugin",
     "commandpalette/plugin",
+    "common/observablelist",
     "dialog/index",
     "docmanager/index",
     "docregistry/plugin",
