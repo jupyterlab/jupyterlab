@@ -9,6 +9,7 @@
     "outDir": "../lib"
   },
   "files": [
+    "about/plugin",
     "application/index",
     "commandpalette/plugin",
     "dialog/index",

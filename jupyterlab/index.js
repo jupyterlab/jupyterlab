@@ -13,7 +13,7 @@ require('jupyterlab/lib/default-theme/index.css');
 var lab = new JupyterLab();
 
 lab.registerPlugins([
-  // require('jupyterlab/lib/about/plugin').aboutExtension,
+  require('jupyterlab/lib/about/plugin').aboutExtension,
   require('jupyterlab/lib/commandpalette/plugin').commandPaletteExtension,
   // require('jupyterlab/lib/console/plugin').consoleExtension,
   // require('jupyterlab/lib/csvwidget/plugin').csvHandlerExtension,

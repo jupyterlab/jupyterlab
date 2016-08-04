@@ -31,6 +31,7 @@ const ICommandPalette = new Token<ICommandPalette>('jupyter.services.commandpale
 export
 const commandPaletteExtension: JupyterLabPlugin<ICommandPalette> = {
   id: 'jupyter.services.commandpalette',
+  provides: ICommandPalette,
   activate: activateCommandPalette,
   autoStart: true
 };
