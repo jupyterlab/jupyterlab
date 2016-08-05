@@ -84,6 +84,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   let category = 'Console';
   let menu = new Menu({ commands, keymap });
   let submenu: Menu = null;
+  let command: string;
 
   // Set the source of the code inspector to the current console.
   tracker.activeWidgetChanged.connect((sender: any, panel: ConsolePanel) => {
@@ -110,14 +111,13 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   }
 
   for (let displayName of displayNames) {
-    let command = `console:create-${displayNameMap[displayName]}`;
+    command = `console:create-${displayNameMap[displayName]}`;
     commands.addCommand(command, {
       label: `${displayName} console`,
       execute: () => {
-        manager.startNew({
-          path: `Console-${count++}`,
-          kernelName: `${displayNameMap[displayName]}`
-        }).then(session => {
+        let path = `Console-${count++}`;
+        let kernelName = `${displayNameMap[displayName]}`;
+        manager.startNew({ path, kernelName }).then(session => {
           let panel = new ConsolePanel({
             session, rendermime: rendermime.clone()
           });
@@ -134,134 +134,92 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     submenu.addItem({ command });
   }
 
-  // app.commands.add([
-  //   {
-  //     id: 'console:clear',
-  //     handler: () => {
-  //       if (tracker.activeWidget) {
-  //         tracker.activeWidget.content.clear();
-  //       }
-  //     }
-  //   },
-  //   {
-  //     id: 'console:dismiss-completion',
-  //     handler: () => {
-  //       if (tracker.activeWidget) {
-  //         tracker.activeWidget.content.dismissCompletion();
-  //       }
-  //     }
-  //   },
-  //   {
-  //     id: 'console:execute',
-  //     handler: () => {
-  //       if (tracker.activeWidget) {
-  //         tracker.activeWidget.content.execute();
-  //       }
-  //     }
-  //   },
-  //   {
-  //     id: 'console:interrupt-kernel',
-  //     handler: () => {
-  //       if (tracker.activeWidget) {
-  //         let kernel = tracker.activeWidget.content.session.kernel;
-  //         if (kernel) {
-  //           kernel.interrupt();
-  //         }
-  //       }
-  //     }
-  //   },
-  //   {
-  //     id: 'console:switch-kernel',
-  //     handler: () => {
-  //       if (tracker.activeWidget) {
-  //         let widget = tracker.activeWidget.content;
-  //         let session = widget.session;
-  //         let lang = '';
-  //         if (session.kernel) {
-  //           lang = specs.kernelspecs[session.kernel.name].spec.language;
-  //         }
-  //         manager.listRunning().then((sessions: ISession.IModel[]) => {
-  //           let options = {
-  //             name: widget.parent.title.text,
-  //             specs,
-  //             sessions,
-  //             preferredLanguage: lang,
-  //             kernel: session.kernel.model,
-  //             host: widget.parent.node
-  //           };
-  //           return selectKernel(options);
-  //         }).then((kernelId: IKernel.IModel) => {
-  //           if (kernelId) {
-  //             session.changeKernel(kernelId);
-  //           } else {
-  //             session.kernel.shutdown();
-  //           }
-  //         });
-  //       }
-  //     }
-  //   }
-  // ]);
+  command = 'console:clear';
+  commands.addCommand(command, {
+    label: 'Clear Cells',
+    execute: () => {
+      if (tracker.activeWidget) {
+        tracker.activeWidget.content.clear();
+      }
+    }
+  });
+  palette.addItem({ command, category });
+  menu.addItem({ command });
 
-  // app.palette.add([
-  //   {
-  //     command: 'console:clear',
-  //     category: 'Console',
-  //     text: 'Clear Cells'
-  //   },
-  //   {
-  //     command: 'console:execute',
-  //     category: 'Console',
-  //     text: 'Execute Cell'
-  //   },
-  //   {
-  //     command: 'console:interrupt-kernel',
-  //     category: 'Console',
-  //     text: 'Interrupt Kernel'
-  //   },
-  //   {
-  //     command: 'console:switch-kernel',
-  //     category: 'Console',
-  //     text: 'Switch Kernel'
-  //   }
-  // ]);
 
-  // let newSubmenu = new Menu(newSubmenuItems);
+  command = 'console:clear';
+  commands.addCommand(command, {
+    execute: () => {
+      if (tracker.activeWidget) {
+        tracker.activeWidget.content.dismissCompletion();
+      }
+    }
+  });
 
-  // let menu = new Menu([
-  //   new MenuItem ({
-  //     text: 'New',
-  //     submenu: newSubmenu
-  //   }),
-  //   new MenuItem ({
-  //     text: 'Clear Cells',
-  //     handler: () => {
-  //       app.commands.execute('console:clear');
-  //     }
-  //   }),
-  //   new MenuItem ({
-  //     text: 'Execute Cell',
-  //     handler: () => {
-  //       app.commands.execute('console:execute');
-  //     }
-  //   }),
-  //   new MenuItem ({
-  //     text: 'Interrupt Kernel',
-  //     handler: () => {
-  //       app.commands.execute('console:interrupt-kernel');
-  //     }
-  //   }),
-  //   new MenuItem ({
-  //     text: 'Switch Kernel',
-  //     handler: () => {
-  //       app.commands.execute('console:switch-kernel');
-  //     }
-  //   })
-  // ]);
 
-  // let consoleMenu = new MenuItem ({
-  //   text: 'Console',
-  //   submenu: menu
-  // });
+  command = 'console:execute';
+  commands.addCommand(command, {
+    label: 'Execute Cell',
+    execute: () => {
+      if (tracker.activeWidget) {
+        tracker.activeWidget.content.execute();
+      }
+    }
+  });
+  palette.addItem({ command, category });
+  menu.addItem({ command });
 
-  // mainMenu.addItem(consoleMenu, {rank: 50});
+
+  command = 'console:interrupt-kernel';
+  commands.addCommand(command, {
+    label: 'Interrupt Kernel',
+    execute: () => {
+      if (tracker.activeWidget) {
+        let kernel = tracker.activeWidget.content.session.kernel;
+        if (kernel) {
+          kernel.interrupt();
+        }
+      }
+    }
+  });
+  palette.addItem({ command, category });
+  menu.addItem({ command });
+
+
+  command = 'console:switch-kernel';
+  commands.addCommand(command, {
+    label: 'Switch Kernel',
+    execute: () => {
+      if (!tracker.activeWidget) {
+        return;
+      }
+      let widget = tracker.activeWidget.content;
+      let session = widget.session;
+      let lang = '';
+      if (session.kernel) {
+        lang = specs.kernelspecs[session.kernel.name].spec.language;
+      }
+      manager.listRunning().then((sessions: ISession.IModel[]) => {
+        let options = {
+          name: widget.parent.title.label,
+          specs,
+          sessions,
+          preferredLanguage: lang,
+          kernel: session.kernel.model,
+          host: widget.parent.node
+        };
+        return selectKernel(options);
+      }).then((kernelId: IKernel.IModel) => {
+        if (kernelId) {
+          session.changeKernel(kernelId);
+        } else {
+          session.kernel.shutdown();
+        }
+      });
+    }
+  });
+  palette.addItem({ command, category });
+  menu.addItem({ command });
+
+  mainMenu.addMenu(menu, {rank: 50});
 }
