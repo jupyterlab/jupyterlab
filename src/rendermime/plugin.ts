@@ -47,6 +47,7 @@ const renderMimeProvider: JupyterLabPlugin<IRenderMime> = {
   id: 'jupyter.services.rendermime',
   provides: IRenderMime,
   activate: (): IRenderMime => {
+    let sanitizer = defaultSanitizer;
     const transformers = [
       new JavascriptRenderer(),
       new MarkdownRenderer(),
@@ -64,6 +65,6 @@ const renderMimeProvider: JupyterLabPlugin<IRenderMime> = {
         order.push(m);
       }
     }
-    return new RenderMime({ renderers, order, sanitizer: defaultSanitizer });
+    return new RenderMime({ renderers, order, sanitizer });
   }
 };
