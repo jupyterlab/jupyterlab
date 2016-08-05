@@ -45,11 +45,14 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    * @param rendermime - The rendermime instance.
    *
    * @param clipboard - The application clipboard.
+   * 
+   * @param renderer - The notebook panel renderer.
    */
-  constructor(rendermime: RenderMime, clipboard: IClipboard) {
+  constructor(rendermime: RenderMime, clipboard: IClipboard, renderer: NotebookPanel.IRenderer) {
     super();
     this._rendermime = rendermime;
     this._clipboard = clipboard;
+    this._renderer = renderer;
   }
 
   /**
@@ -76,7 +79,11 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     if (kernel) {
       context.changeKernel(kernel);
     }
-    let panel = new NotebookPanel({ rendermime, clipboard: this._clipboard });
+    let panel = new NotebookPanel({ 
+      rendermime, 
+      clipboard: this._clipboard,
+      renderer: this._renderer
+    });
     panel.context = context;
     ToolbarItems.populateDefaults(panel);
     this.widgetCreated.emit(panel);
@@ -85,4 +92,5 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
 
   private _rendermime: RenderMime = null;
   private _clipboard: IClipboard = null;
+  private _renderer: NotebookPanel.IRenderer = null;
 }

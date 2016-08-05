@@ -131,7 +131,7 @@ class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this._rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
-    this._renderer = options.renderer || StaticNotebook.defaultRenderer;
+    this._renderer = options.renderer;
   }
 
   /**
@@ -459,7 +459,7 @@ namespace StaticNotebook {
      *
      * The default is a shared renderer instance.
      */
-    renderer?: IRenderer;
+    renderer: IRenderer;
   }
 
   /**
@@ -500,33 +500,21 @@ namespace StaticNotebook {
    * The default implementation of an `IRenderer`.
    */
   export
-  class Renderer implements IRenderer {
+  abstract class Renderer implements IRenderer {
     /**
      * Create a new code cell widget.
      */
-    createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget {
-      let widget = new CodeCellWidget({ rendermime });
-      widget.model = model;
-      return widget;
-    }
+    abstract createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget;
 
     /**
      * Create a new markdown cell widget.
      */
-    createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget {
-      let widget = new MarkdownCellWidget({ rendermime });
-      widget.model = model;
-      return widget;
-    }
+    abstract createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget;
 
     /**
      * Create a new raw cell widget.
      */
-    createRawCell(model: IRawCellModel): RawCellWidget {
-      let widget = new RawCellWidget();
-      widget.model = model;
-      return widget;
-    }
+    abstract createRawCell(model: IRawCellModel): RawCellWidget;
 
     /**
      * Update a cell widget.
@@ -550,12 +538,6 @@ namespace StaticNotebook {
       return mimetypeForLanguage(info as KernelMessage.ILanguageInfo);
     }
   }
-
-  /**
-   * The default `IRenderer` instance.
-   */
-  export
-  const defaultRenderer = new Renderer();
 }
 
 
@@ -878,11 +860,8 @@ class Notebook extends StaticNotebook {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
       if (this.activeCellIndex < prev) {
-        let doc = this.activeCell.editor.editor.getDoc();
-        doc.setCursor({
-          ch: 0,
-          line: doc.lastLine()
-        });
+        let lastLine = this.activeCell.editor.getLastLine()
+        this.activeCell.editor.setCursor(lastLine, 0)
       }
     } else {
       this.activeCellIndex++;
@@ -997,13 +976,8 @@ namespace Notebook {
    * The default implementation of an `IRenderer`.
    */
   export
-  class Renderer extends StaticNotebook.Renderer { }
+  abstract class Renderer extends StaticNotebook.Renderer { }
 
-  /**
-   * The default `IRenderer` instance.
-   */
-  export
-  const defaultRenderer = new Renderer();
 }
 
 

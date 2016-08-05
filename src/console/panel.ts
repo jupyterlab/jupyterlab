@@ -47,7 +47,8 @@ class ConsolePanel extends Panel {
     // Create console widget.
     this._console = options.console || new ConsoleWidget({
       session: options.session,
-      rendermime: options.rendermime
+      rendermime: options.rendermime,
+      renderer: options.renderer
     });
     this.addWidget(this._console);
   }
@@ -129,6 +130,11 @@ namespace ConsolePanel {
      * The mime renderer for the console panel.
      */
     rendermime: IRenderMime;
+
+    /**
+     * The renderer for a console widget.
+     */
+    renderer?: ConsoleWidget.IRenderer;
 
     /**
      * The session for the console panel.

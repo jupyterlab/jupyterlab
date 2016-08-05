@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  CellEditorWidget, ITextChange, ICompletionRequest
+  ICellEditorWidget, ITextChange, ICompletionRequest
 } from '../cells/editor';
 
 import {
@@ -140,7 +140,7 @@ class CellCompletionHandler implements IDisposable {
   /**
    * Handle a text changed signal from an editor.
    */
-  protected onTextChanged(editor: CellEditorWidget, change: ITextChange): void {
+  protected onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
     if (!this._completion.model) {
       return;
     }
@@ -150,7 +150,7 @@ class CellCompletionHandler implements IDisposable {
   /**
    * Handle a completion requested signal from an editor.
    */
-  protected onCompletionRequested(editor: CellEditorWidget, request: ICompletionRequest): void {
+  protected onCompletionRequested(editor: ICellEditorWidget, request: ICompletionRequest): void {
     if (!this.kernel || !this._completion.model) {
       return;
     }

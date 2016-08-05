@@ -34,7 +34,7 @@ import {
 } from '../notebook/cells';
 
 import {
-  EdgeLocation, CellEditorWidget
+  EdgeLocation, ICellEditorWidget
 } from '../notebook/cells/editor';
 
 import {
@@ -85,7 +85,7 @@ class ConsoleWidget extends Widget {
     let layout = new PanelLayout();
 
     this.layout = layout;
-    this._renderer = options.renderer || ConsoleWidget.defaultRenderer;
+    this._renderer = options.renderer;
     this._rendermime = options.rendermime;
     this._session = options.session;
 
@@ -294,7 +294,7 @@ class ConsoleWidget extends Widget {
   /**
    * Handle an edge requested signal.
    */
-  protected onEdgeRequest(editor: CellEditorWidget, location: EdgeLocation): void {
+  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): void {
     let prompt = this.prompt;
     if (location === 'top') {
       this._history.back().then(value => {
@@ -412,7 +412,7 @@ namespace ConsoleWidget {
     /**
      * The renderer for a console widget.
      */
-    renderer?: IRenderer;
+    renderer: IRenderer;
 
     /**
      * The session for the console widget.
@@ -440,32 +440,17 @@ namespace ConsoleWidget {
    * The default implementation of an `IRenderer`.
    */
   export
-  class Renderer implements IRenderer {
+  abstract class Renderer implements IRenderer {
     /**
      * Create a new banner widget.
      */
-    createBanner(): RawCellWidget {
-      let widget = new RawCellWidget();
-      widget.model = new RawCellModel();
-      return widget;
-    }
+    abstract createBanner(): RawCellWidget;
 
     /**
      * Create a new prompt widget.
      */
-    createPrompt(rendermime: IRenderMime): CodeCellWidget {
-      let widget = new CodeCellWidget({ rendermime });
-      widget.model = new CodeCellModel();
-      return widget;
-    }
+    abstract createPrompt(rendermime: IRenderMime): CodeCellWidget;
   }
-
-
-  /**
-   * The default `IRenderer` instance.
-   */
-  export
-  const defaultRenderer = new Renderer();
 }
 
 

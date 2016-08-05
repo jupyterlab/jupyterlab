@@ -42,7 +42,7 @@ import {
 } from '../output-area';
 
 import {
-  CellEditorWidget
+  ICellEditorWidget
 } from './editor';
 
 import {
@@ -120,28 +120,13 @@ class BaseCellWidget extends Widget {
   /**
    * Construct a new base cell widget.
    */
-  constructor(options: BaseCellWidget.IOptions = {}) {
+  constructor(options:BaseCellWidget.IOptions) {
     super();
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
 
-    let renderer = options.renderer || BaseCellWidget.defaultRenderer;
-    this._editor = renderer.createCellEditor({
-      indentUnit: 4,
-      readOnly: false,
-      theme: 'default',
-      extraKeys: {
-        'Cmd-Right': 'goLineRight',
-        'End': 'goLineRight',
-        'Cmd-Left': 'goLineLeft',
-        'Tab': 'indentMore',
-        'Shift-Tab' : 'indentLess',
-        'Cmd-Alt-[' : 'indentAuto',
-        'Ctrl-Alt-[' : 'indentAuto',
-        'Cmd-/' : 'toggleComment',
-        'Ctrl-/' : 'toggleComment',
-      }
-    });
+    let renderer = options.renderer;
+    this._editor = renderer.createCellEditor();
     this._input = renderer.createInputArea(this._editor);
 
     (this.layout as PanelLayout).addWidget(this._input);
@@ -177,7 +162,7 @@ class BaseCellWidget extends Widget {
    * #### Notes
    * This is a ready-only property.
    */
-  get editor(): CellEditorWidget {
+  get editor(): ICellEditorWidget {
     return this._editor;
   }
 
@@ -195,7 +180,7 @@ class BaseCellWidget extends Widget {
       return;
     }
     this._mimetype = value;
-    loadModeByMIME(this.editor.editor, value);
+    this.editor.setMimeType(value);
   }
 
   /**
@@ -230,7 +215,7 @@ class BaseCellWidget extends Widget {
    * Focus the widget.
    */
   focus(): void {
-    this.editor.editor.focus();
+    this.editor.focus();
   }
 
   /**
@@ -282,8 +267,7 @@ class BaseCellWidget extends Widget {
       return;
     }
     // Handle read only state.
-    let option = this._readOnly ? 'nocursor' : false;
-    this.editor.editor.setOption('readOnly', option);
+    this._editor.setReadOnly(this._readOnly);
     this.toggleClass(READONLY_CLASS, this._readOnly);
   }
 
@@ -332,7 +316,7 @@ class BaseCellWidget extends Widget {
 
     // Reset the editor model and set its mode to be the default MIME type.
     this._editor.model = this._model;
-    loadModeByMIME(this._editor.editor, this._mimetype);
+    this._editor.setMimeType(this._mimetype)
 
     // Handle trusted cursor.
     this._trustedCursor = this._model.getMetadata('trusted');
@@ -344,7 +328,7 @@ class BaseCellWidget extends Widget {
   }
 
   private _input: InputAreaWidget = null;
-  private _editor: CellEditorWidget = null;
+  private _editor: ICellEditorWidget = null;
   private _model: ICellModel = null;
   private _mimetype = 'text/plain';
   private _readOnly = false;
@@ -372,7 +356,7 @@ namespace BaseCellWidget {
      *
      * The default is a shared renderer instance.
      */
-    renderer?: IRenderer;
+    renderer: IRenderer;
   }
 
   /**
@@ -383,12 +367,12 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(options?: CodeMirror.EditorConfiguration): CellEditorWidget;
+    createCellEditor(): ICellEditorWidget;
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(editor: CellEditorWidget): InputAreaWidget;
+    createInputArea(editor: ICellEditorWidget): InputAreaWidget;
   }
 
 
@@ -396,28 +380,20 @@ namespace BaseCellWidget {
    * The default implementation of an `IRenderer`.
    */
   export
-  class Renderer implements IRenderer {
+  abstract class Renderer implements IRenderer {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(options?: CodeMirror.EditorConfiguration): CellEditorWidget {
-      return new CellEditorWidget(options);
-    }
+    abstract createCellEditor(): ICellEditorWidget;
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(editor: CellEditorWidget): InputAreaWidget {
+    createInputArea(editor: ICellEditorWidget): InputAreaWidget {
       return new InputAreaWidget(editor);
     }
   }
 
-
-  /**
-   * The default `IRenderer` instance.
-   */
-  export
-  const defaultRenderer = new Renderer();
 }
 
 /**
@@ -430,11 +406,9 @@ class CodeCellWidget extends BaseCellWidget {
    */
   constructor(options: CodeCellWidget.IOptions) {
     super(options);
-    this.editor.editor.setOption('matchBrackets', true);
-    this.editor.editor.setOption('autoCloseBrackets', true);
     this.addClass(CODE_CELL_CLASS);
     this._rendermime = options.rendermime;
-    this._renderer = options.renderer || CodeCellWidget.defaultRenderer;
+    this._renderer = options.renderer;
   }
 
   /**
@@ -565,7 +539,7 @@ namespace CodeCellWidget {
      *
      * The default is a shared renderer instance.
      */
-    renderer?: IRenderer;
+    renderer: IRenderer;
 
     /**
      * The mime renderer for the cell widget.
@@ -590,7 +564,7 @@ namespace CodeCellWidget {
    * The default implementation of an `IRenderer`.
    */
   export
-  class Renderer extends BaseCellWidget.Renderer implements IRenderer {
+  abstract class Renderer extends BaseCellWidget.Renderer implements IRenderer {
     /**
      * Create an output area widget.
      */
@@ -598,12 +572,6 @@ namespace CodeCellWidget {
       return new OutputAreaWidget({ rendermime });
     }
   }
-
-  /**
-   * The default `IRenderer` instance.
-   */
-  export
-  const defaultRenderer = new Renderer();
 }
 
 
@@ -629,9 +597,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     this._rendermime = options.rendermime;
     this._markdownWidget = new Widget();
     this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
-    (this.layout as PanelLayout).addWidget(this._markdownWidget);
-    // Turn on line wrapping for markdown cells.
-    this.editor.editor.setOption('lineWrapping', true);
+    (this.layout as PanelLayout).addChild(this._markdownWidget);
   }
 
   /**
@@ -715,7 +681,7 @@ namespace MarkdownCellWidget {
      *
      * The default is a shared renderer instance.
      */
-    renderer?: BaseCellWidget.IRenderer;
+    renderer: BaseCellWidget.IRenderer;
 
     /**
      * The mime renderer for the cell widget.
@@ -733,11 +699,9 @@ class RawCellWidget extends BaseCellWidget {
   /**
    * Construct a raw cell widget.
    */
-  constructor(options: BaseCellWidget.IOptions = {}) {
+  constructor(options: BaseCellWidget.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
-    // Turn on line wrapping for raw cells.
-    this.editor.editor.setOption('lineWrapping', true);
   }
 
   /**
@@ -755,7 +719,7 @@ class InputAreaWidget extends Widget {
   /**
    * Construct an input area widget.
    */
-  constructor(editor: CellEditorWidget) {
+  constructor(editor: ICellEditorWidget) {
     super();
     this.addClass(INPUT_CLASS);
     editor.addClass(EDITOR_CLASS);
