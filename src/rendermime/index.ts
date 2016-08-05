@@ -11,6 +11,73 @@ import {
 
 
 /**
+ * The rendermime interface.
+ */
+export
+interface IRenderMime {
+  /**
+   * The ordered list of mimetypes.
+   *
+   * #### Notes
+   * These mimetypes are searched from beginning to end, and the first matching
+   * mimetype is used.
+   */
+  order: string[];
+
+  /**
+   * The object used to resolve relative urls for the rendermime instance.
+   */
+  resolver: RenderMime.IResolver;
+
+  /**
+   * Render a mimebundle.
+   *
+   * @param bundle - the mimebundle to render.
+   *
+   * @param trusted - whether the bundle is trusted.
+   */
+  render(bundle: RenderMime.MimeMap<string>, trusted: boolean): Widget;
+
+  /**
+   * Find the preferred mimetype in a mimebundle.
+   *
+   * @param bundle - the mimebundle giving available mimetype content.
+   *
+   * @param trusted - whether the bundle is trusted.
+   *
+   * #### Notes
+   * If the bundle is not trusted, the highest preference
+   * mimetype that is sanitizable or safe will be chosen.
+   */
+  preferredMimetype(bundle: RenderMime.MimeMap<string>, trusted: boolean): string;
+
+  /**
+   * Clone the rendermime instance with shallow copies of data.
+   */
+  clone(): IRenderMime;
+
+  /**
+   * Add a renderer by mimetype.
+   *
+   * @param mimetype - The mimetype of the renderer.
+   * @param renderer - The renderer instance.
+   * @param index - The optional order index.
+   *
+   * ####Notes
+   * Negative indices count from the end, so -1 refers to the penultimate index.
+   * Use the index of `.order.length` to add to the end of the render precedence list,
+   * which would make the new renderer the last choice.
+   */
+  addRenderer(mimetype: string, renderer: RenderMime.IRenderer, index: number): void;
+
+  /**
+   * Remove a renderer by mimetype.
+   */
+  removeRenderer(mimetype: string): void;
+}
+
+
+/**
  * A composite renderer.
  *
  * #### Notes
@@ -22,7 +89,7 @@ import {
  * the mimetype in the `order` array.
  */
 export
-class RenderMime {
+class RenderMime implements IRenderMime {
   /**
    * Construct a renderer.
    */
@@ -33,6 +100,20 @@ class RenderMime {
     this._order = options.order.slice();
     this._sanitizer = options.sanitizer;
     this._resolver = options.resolver || null;
+  }
+
+  /**
+   * The ordered list of mimetypes.
+   *
+   * #### Notes
+   * These mimetypes are searched from beginning to end, and the first matching
+   * mimetype is used.
+   */
+  get order(): string[] {
+    return this._order.slice();
+  }
+  set order(value: string[]) {
+    this._order = value.slice();
   }
 
   /**
@@ -125,24 +206,6 @@ class RenderMime {
     if (index !== -1) {
       this._order.splice(index, 1);
     }
-  }
-
-  /**
-   * Get the ordered list of mimetypes.
-   *
-   * #### Notes
-   * These mimetypes are searched from beginning to end, and the first matching
-   * mimetype is used.
-   */
-  get order() {
-    return this._order.slice();
-  }
-
-  /**
-   * Set the ordered list of mimetypes.
-   */
-  set order(value: string[]) {
-    this._order = value.slice();
   }
 
   private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
