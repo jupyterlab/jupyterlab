@@ -6,20 +6,20 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  MimeData as IClipboard
+} from 'phosphor/lib/core/mimedata';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   ABCWidgetFactory, IDocumentContext
 } from '../../docregistry';
 
 import {
   RenderMime
 } from '../../rendermime';
-
-import {
-  MimeData as IClipboard
-} from 'phosphor-dragdrop';
-
-import {
-  Widget
-} from 'phosphor-widget';
 
 import {
   ToolbarItems
