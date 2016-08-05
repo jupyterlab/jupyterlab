@@ -59,7 +59,8 @@ const consoleExtension: JupyterLabPlugin<void> = {
     IInspector,
     ICommandPalette
   ],
-  activate: activateConsole
+  activate: activateConsole,
+  autoStart: true
 };
 
 
@@ -147,7 +148,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
 
-  command = 'console:clear';
+  command = 'console:dismiss-completion';
   commands.addCommand(command, {
     execute: () => {
       if (tracker.activeWidget) {
