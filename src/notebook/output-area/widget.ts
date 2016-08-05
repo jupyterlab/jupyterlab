@@ -6,24 +6,28 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  Drag, DropAction, DropActions, MimeData
-} from 'phosphor-dragdrop';
+  Message
+} from 'phosphor/lib/core/messaging';
 
 import {
-  Message
-} from 'phosphor-messaging';
+  MimeData
+} from 'phosphor/lib/core/mimedata';
+
+import {
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
+
+import {
+  Drag, DropAction
+} from 'phosphor/lib/dom/dragdrop';
 
 import {
   PanelLayout
-} from 'phosphor-panel';
-
-import {
-  ISignal, Signal
-} from 'phosphor-signaling';
+} from 'phosphor/lib/ui/panel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   IListChangedArgs
@@ -164,7 +168,7 @@ class OutputAreaWidget extends Widget {
     let widget = new OutputAreaWidget({ rendermime, renderer });
     widget.model = this._model;
     widget.trusted = this._trusted;
-    widget.title.text = 'Mirrored Output';
+    widget.title.label = 'Mirrored Output';
     widget.title.closable = true;
     widget.addClass(MIRRORED_OUTPUT_AREA_CLASS);
     return widget;
@@ -173,16 +177,12 @@ class OutputAreaWidget extends Widget {
   /**
    * A signal emitted when the widget's model changes.
    */
-  get modelChanged(): ISignal<OutputAreaWidget, void> {
-     return Private.modelChangedSignal.bind(this);
-  }
+  modelChanged: ISignal<OutputAreaWidget, void>;
 
   /**
    * A signal emitted when the widget's model is disposed.
    */
-  get modelDisposed(): ISignal<OutputAreaWidget, void> {
-     return Private.modelDisposedSignal.bind(this);
-  }
+  modelDisposed: ISignal<OutputAreaWidget, void>;
 
   /**
    * The model for the widget.
@@ -235,7 +235,7 @@ class OutputAreaWidget extends Widget {
     this._trusted = value;
     // Trigger a update of the child widgets.
     let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.childCount(); i++) {
+    for (let i = 0; i < layout.widgets.length; i++) {
       this._updateChild(i);
     }
   }
@@ -287,7 +287,7 @@ class OutputAreaWidget extends Widget {
    */
   childAt(index: number): OutputWidget {
     let layout = this.layout as PanelLayout;
-    return layout.childAt(index) as OutputWidget;
+    return layout.widgets.at(index) as OutputWidget;
   }
 
   /**
@@ -295,7 +295,7 @@ class OutputAreaWidget extends Widget {
    */
   childCount(): number {
     let layout = this.layout as PanelLayout;
-    return layout.childCount();
+    return layout.widgets.length;
   }
 
   /**
@@ -322,7 +322,9 @@ class OutputAreaWidget extends Widget {
    * internally and before the `modelChanged` signal is emitted.
    * The default implementation is a no-op.
    */
-  protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void { }
+  protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
+    // no-op
+  }
 
   /**
    * Handle a change to the model.
@@ -336,7 +338,7 @@ class OutputAreaWidget extends Widget {
 
     let start = newValue ? newValue.length : 0;
     // Clear unnecessary child widgets.
-    for (let i = start; i < layout.childCount(); i++) {
+    for (let i = start; i < layout.widgets.length; i++) {
       this._removeChild(i);
     }
     if (!newValue) {
@@ -347,11 +349,11 @@ class OutputAreaWidget extends Widget {
     newValue.disposed.connect(this._onModelDisposed, this);
 
     // Reuse existing child widgets.
-    for (let i = 0; i < layout.childCount(); i++) {
+    for (let i = 0; i < layout.widgets.length; i++) {
       this._updateChild(i);
     }
     // Add new widgets as necessary.
-    for (let i = layout.childCount(); i < newValue.length; i++) {
+    for (let i = layout.widgets.length; i < newValue.length; i++) {
       this._addChild();
     }
   }
@@ -359,7 +361,9 @@ class OutputAreaWidget extends Widget {
   /**
    * Handle a model disposal.
    */
-  protected onModelDisposed(oldValue: OutputAreaModel, newValue: OutputAreaModel): void { }
+  protected onModelDisposed(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
+    // no-op
+  }
 
   private _onModelDisposed(): void {
     this.modelDisposed.emit(void 0);
@@ -372,8 +376,8 @@ class OutputAreaWidget extends Widget {
   private _addChild(): void {
     let widget = this._renderer.createOutput({ rendermime: this.rendermime });
     let layout = this.layout as PanelLayout;
-    layout.addChild(widget);
-    this._updateChild(layout.childCount() - 1);
+    layout.addWidget(widget);
+    this._updateChild(layout.widgets.length - 1);
   }
 
   /**
@@ -381,7 +385,7 @@ class OutputAreaWidget extends Widget {
    */
   private _removeChild(index: number): void {
     let layout = this.layout as PanelLayout;
-    layout.childAt(index).dispose();
+    layout.widgets.at(index).dispose();
   }
 
   /**
@@ -389,7 +393,7 @@ class OutputAreaWidget extends Widget {
    */
   private _updateChild(index: number): void {
     let layout = this.layout as PanelLayout;
-    let widget = layout.childAt(index) as OutputWidget;
+    let widget = layout.widgets.at(index) as OutputWidget;
     let output = this._model.get(index);
     widget.render(output, this._trusted);
   }
@@ -524,6 +528,8 @@ class OutputGutter extends Widget {
     case 'mousemove':
       this._evtMousemove(event as MouseEvent);
       break;
+    default:
+      break;
     }
   }
 
@@ -599,8 +605,8 @@ class OutputGutter extends Widget {
     // Set up the drag event.
     this._drag = new Drag({
       mimeData: new MimeData(),
-      supportedActions: DropActions.Copy,
-      proposedAction: DropAction.Copy
+      supportedActions: 'copy',
+      proposedAction: 'copy'
     });
 
     this._drag.mimeData.setData(FACTORY_MIME, () => {
@@ -651,8 +657,8 @@ class OutputWidget extends Widget {
     this.addClass(OUTPUT_CLASS);
     prompt.addClass(PROMPT_CLASS);
     this._placeholder.addClass(RESULT_CLASS);
-    layout.addChild(prompt);
-    layout.addChild(this._placeholder);
+    layout.addWidget(prompt);
+    layout.addWidget(this._placeholder);
     this._rendermime = options.rendermime;
   }
 
@@ -664,7 +670,7 @@ class OutputWidget extends Widget {
    */
   get prompt(): Widget {
     let layout = this.layout as PanelLayout;
-    return layout.childAt(0);
+    return layout.widgets.at(0);
   }
 
   /**
@@ -675,7 +681,7 @@ class OutputWidget extends Widget {
    */
   get output(): Widget {
     let layout = this.layout as PanelLayout;
-    return layout.childAt(1);
+    return layout.widgets.at(1);
   }
 
   /**
@@ -778,10 +784,10 @@ class OutputWidget extends Widget {
       }
     }
     if (value) {
-      layout.addChild(value);
+      layout.addWidget(value);
       value.addClass(RESULT_CLASS);
     } else {
-      layout.addChild(this._placeholder);
+      layout.addWidget(this._placeholder);
     }
   }
 
@@ -942,20 +948,6 @@ namespace OutputWidget {
   }
 }
 
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * A signal emitted when the widget's model changes.
-   */
-  export
-  const modelChangedSignal = new Signal<OutputAreaWidget, void>();
-
-  /**
-   * A signal emitted when the widget's model is disposed.
-   */
-  export
-  const modelDisposedSignal = new Signal<OutputAreaWidget, void>();
-}
+// Define the signals for the `OutputWidget` class.
+defineSignal(OutputWidget.prototype, 'modelChanged');
+defineSignal(OutputWidget.prototype, 'modelDisposed');
