@@ -32,7 +32,7 @@ lab.registerPlugins([
   require('jupyterlab/lib/mainmenu/plugin').mainMenuProvider,
   // require('jupyterlab/lib/markdownwidget/plugin').markdownHandlerExtension,
   // require('jupyterlab/lib/notebook/plugin').notebookHandlerExtension,
-  // require('jupyterlab/lib/rendermime/plugin').renderMimeProvider
+  require('jupyterlab/lib/rendermime/plugin').renderMimeProvider,
   // require('jupyterlab/lib/running/plugin').runningSessionsExtension,
   require('jupyterlab/lib/services/plugin').servicesProvider
   // require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,

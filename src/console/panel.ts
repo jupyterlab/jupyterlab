@@ -7,11 +7,11 @@ import {
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
   Panel
-} from 'phosphor-panel';
+} from 'phosphor/lib/ui/panel';
 
 import {
   showDialog
@@ -49,7 +49,7 @@ class ConsolePanel extends Panel {
       session: options.session,
       rendermime: options.rendermime
     });
-    this.addChild(this._console);
+    this.addWidget(this._console);
   }
 
   /**

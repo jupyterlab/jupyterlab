@@ -13,6 +13,7 @@
     "application/index",
     "clipboard/index",
     "clipboard/plugin",
+    "console/index",
     "commandpalette/plugin",
     "common/activitymonitor",
     "common/observablelist",

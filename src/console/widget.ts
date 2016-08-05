@@ -6,20 +6,20 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  clearSignalData
+} from 'phosphor/lib/core/signaling';
+
+import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
   PanelLayout
-} from 'phosphor-panel';
-
-import {
-  clearSignalData
-} from 'phosphor-signaling';
+} from 'phosphor/lib/ui/panel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   InspectionHandler
@@ -27,7 +27,7 @@ import {
 
 import {
   nbformat
-} from '../notebook';
+} from '../notebook/notebook/nbformat';
 
 import {
   CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
@@ -52,8 +52,6 @@ import {
 import {
   ConsoleHistory, IConsoleHistory
 } from './history';
-
-
 
 
 /**
@@ -104,7 +102,7 @@ class ConsoleWidget extends Widget {
 
     // Because a completion widget may be passed in, check if it is attached.
     if (!completion.isAttached) {
-      completion.attach(document.body);
+      Widget.attach(completion, document.body);
     }
 
     // Set up the completion handler.
@@ -120,7 +118,7 @@ class ConsoleWidget extends Widget {
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     banner.model.source = '...';
-    layout.addChild(banner);
+    layout.addWidget(banner);
 
     // Set the banner text and the mimetype.
     this.initialize();
@@ -155,8 +153,8 @@ class ConsoleWidget extends Widget {
    */
   get prompt(): CodeCellWidget {
     let layout = this.layout as PanelLayout;
-    let last = layout.childCount() - 1;
-    return last > 0 ? layout.childAt(last) as CodeCellWidget : null;
+    let last = layout.widgets.length - 1;
+    return last > 0 ? layout.widgets.at(last) as CodeCellWidget : null;
   }
 
   /**
@@ -245,8 +243,8 @@ class ConsoleWidget extends Widget {
   serialize(): nbformat.ICodeCell[] {
     let output: nbformat.ICodeCell[] = [];
     let layout = this.layout as PanelLayout;
-    for (let i = 1; i < layout.childCount(); i++) {
-      let widget = layout.childAt(i) as CodeCellWidget;
+    for (let i = 1; i < layout.widgets.length; i++) {
+      let widget = layout.widgets.at(i) as CodeCellWidget;
       output.push(widget.model.toJSON());
     }
     return output;
@@ -354,7 +352,7 @@ class ConsoleWidget extends Widget {
     prompt = this._renderer.createPrompt(this._rendermime);
     prompt.mimetype = this._mimetype;
     prompt.addClass(PROMPT_CLASS);
-    layout.addChild(prompt);
+    layout.addWidget(prompt);
 
     // Hook up completion and history handling.
     let editor = prompt.editor;
@@ -375,7 +373,7 @@ class ConsoleWidget extends Widget {
    */
   private _handleInfo(info: KernelMessage.IInfoReply): void {
     let layout = this.layout as PanelLayout;
-    let banner = layout.childAt(0) as RawCellWidget;
+    let banner = layout.widgets.at(0) as RawCellWidget;
     banner.model.source = info.banner;
     this._mimetype = mimetypeForLanguage(info.language_info);
     this.prompt.mimetype = this._mimetype;
