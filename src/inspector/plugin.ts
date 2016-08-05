@@ -65,13 +65,13 @@ namespace Private {
     {
       className: 'jp-HintsInspectorItem',
       name: 'Hints',
-      rank: 2,
+      rank: 20,
       type: 'hints'
     },
     {
       className: 'jp-DetailsInspectorItem',
       name: 'Details',
-      rank: 1,
+      rank: 10,
       remembers: true,
       type: 'details'
     }

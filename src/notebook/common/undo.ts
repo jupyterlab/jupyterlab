@@ -3,11 +3,11 @@
 
 import {
   IDisposable
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
 
 import {
   clearSignalData
-} from 'phosphor-signaling';
+} from 'phosphor/lib/core/signaling';
 
 import {
   IObservableList, IListChangedArgs, ObservableList
@@ -15,10 +15,10 @@ import {
 
 
 /**
- * An object which is JSON-able.
+ * An object which can be serialized to JSON.
  */
 export
-interface IJSONable {
+interface ISerializable {
   /**
    * Convert the object to JSON.
    */
@@ -30,7 +30,7 @@ interface IJSONable {
  * An observable list that supports undo/redo.
  */
 export
-class ObservableUndoableList<T extends IJSONable> extends ObservableList<T> implements IDisposable {
+class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> implements IDisposable {
   /**
    * Construct a new undoable observable list.
    */
