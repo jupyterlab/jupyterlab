@@ -6,12 +6,12 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
+  deepEqual
+} from 'phosphor/lib/algorithm/json';
 
 import {
-  ISignal, Signal, clearSignalData
-} from 'phosphor-signaling';
+  clearSignalData, defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   IObservableList, IListChangedArgs
@@ -27,8 +27,8 @@ import {
 } from '../cells/model';
 
 import {
-  deepEqual
-} from '../common/json';
+  IChangedArgs
+} from '../../common/interfaces';
 
 import {
   IMetadataCursor, MetadataCursor
@@ -48,11 +48,6 @@ import {
  */
 export
 interface INotebookModel extends IDocumentModel {
-  /**
-   * A signal emitted when a model state changes.
-   */
-  stateChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
-
   /**
    * A signal emitted when a metadata field changes.
    */
@@ -175,9 +170,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * A signal emitted when a metadata field changes.
    */
-  get metadataChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
-    return Private.metadataChangedSignal.bind(this);
-  }
+  metadataChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
 
   /**
    * Get the observable list of notebook cells.
@@ -463,6 +456,10 @@ class NotebookModel extends DocumentModel implements INotebookModel {
 }
 
 
+// Define the signals for the `NotebookModel` class.
+defineSignal(NotebookModel.prototype, 'metadataChanged');
+
+
 /**
  * The namespace for the `NotebookModel` class statics.
  */
@@ -540,12 +537,6 @@ namespace NotebookModel {
  * A private namespace for notebook model data.
  */
 namespace Private {
-  /**
-   * A signal emitted when a metadata field changes.
-   */
-  export
-  const metadataChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
-
   /**
    * Create the default metadata for the notebook.
    */
