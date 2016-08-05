@@ -2,46 +2,54 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
+  Token
+} from 'phosphor/lib/core/token';
 
 import {
-  Inspector
+  JupyterLab, JupyterLabPlugin
+} from '../application';
+
+import {
+  IInspector as IBaseInspector, Inspector
 } from './';
 
 
+export
+interface IInspector extends IBaseInspector {}
+
+/* tslint:disable */
 /**
- * The code inspector extension.
+ * The inspector panel token.
  */
 export
-const inspectorExtension = {
-  id: 'jupyter.extensions.inspector',
-  activate: activateInspector
-};
+const IInspector = new Token<IInspector>('jupyter.services.inspector');
+/* tslint:enable */
 
 
 /**
- * A service providing an interface to the code inspector.
+ * A service providing an inspector panel.
  */
 export
-const inspectorProvider = {
+const inspectorProvider: JupyterLabPlugin<IInspector> = {
   id: 'jupyter.services.inspector',
-  provides: Inspector,
-  resolve: () => { return Private.inspector; }
+  provides: IInspector,
+  activate: activateInspector
 };
 
 
 /**
  * Activate the console extension.
  */
-function activateInspector(app: Application): Promise<void> {
-  let inspector = Private.inspector;
+function activateInspector(app: JupyterLab): IInspector {
+  let inspector = new Inspector({ items: Private.defaultInspectorItems });
   inspector.id = 'jp-inspector';
-  inspector.title.text = 'Inspector';
+  inspector.title.label = 'Inspector';
+
   // Rank has been chosen somewhat arbitrarily to guarantee the inspector is
   // at least not the first item in the application sidebar.
-  app.shell.addToRightArea(inspector, { rank: 3 });
-  return Promise.resolve(void 0);
+  app.shell.addToRightArea(inspector, { rank: 20 });
+
+  return inspector;
 }
 
 
@@ -52,6 +60,7 @@ namespace Private {
   /**
    * The default set of inspector items added to the inspector panel.
    */
+  export
   const defaultInspectorItems: Inspector.IInspectorItem[] = [
     {
       className: 'jp-HintsInspectorItem',
@@ -67,10 +76,4 @@ namespace Private {
       type: 'details'
     }
   ];
-
-  /**
-   * The default singleton instance of the code inspector.
-   */
-  export
-  const inspector = new Inspector({ items: defaultInspectorItems });
 }
