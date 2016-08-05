@@ -18,7 +18,7 @@ import {
 } from '../dialog';
 
 import {
-  RenderMime
+  IRenderMime
 } from '../rendermime';
 
 import {
@@ -128,7 +128,7 @@ namespace ConsolePanel {
     /**
      * The mime renderer for the console panel.
      */
-    rendermime: RenderMime;
+    rendermime: IRenderMime;
 
     /**
      * The session for the console panel.

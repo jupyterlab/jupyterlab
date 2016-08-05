@@ -46,7 +46,7 @@ import {
 } from '../notebook/completion';
 
 import {
-  RenderMime
+  IRenderMime
 } from '../rendermime';
 
 import {
@@ -383,7 +383,7 @@ class ConsoleWidget extends Widget {
   private _completionHandler: CellCompletionHandler = null;
   private _inspectionHandler: InspectionHandler = null;
   private _mimetype = 'text/x-ipython';
-  private _rendermime: RenderMime = null;
+  private _rendermime: IRenderMime = null;
   private _renderer: ConsoleWidget.IRenderer = null;
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
@@ -407,7 +407,7 @@ namespace ConsoleWidget {
     /**
      * The mime renderer for the console widget.
      */
-    rendermime: RenderMime;
+    rendermime: IRenderMime;
 
     /**
      * The renderer for a console widget.
@@ -433,7 +433,7 @@ namespace ConsoleWidget {
     /**
      * Create a new prompt widget.
      */
-    createPrompt(rendermime: RenderMime): CodeCellWidget;
+    createPrompt(rendermime: IRenderMime): CodeCellWidget;
   }
 
   /**
@@ -453,7 +453,7 @@ namespace ConsoleWidget {
     /**
      * Create a new prompt widget.
      */
-    createPrompt(rendermime: RenderMime): CodeCellWidget {
+    createPrompt(rendermime: IRenderMime): CodeCellWidget {
       let widget = new CodeCellWidget({ rendermime });
       widget.model = new CodeCellModel();
       return widget;
