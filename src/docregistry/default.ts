@@ -19,7 +19,11 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IDocumentModel, IDocumentContext, IDocumentModelStateChange, IModelFactory,
+  IChangedArgs
+} from '../common/interfaces';
+
+import {
+  IDocumentModel, IDocumentContext, IModelFactory,
   IWidgetFactory
 } from './index';
 
@@ -37,13 +41,6 @@ class DocumentModel implements IDocumentModel {
   }
 
   /**
-   * Get whether the model factory has been disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * A signal emitted when the document content changes.
    */
   contentChanged: ISignal<IDocumentModel, void>;
@@ -51,7 +48,14 @@ class DocumentModel implements IDocumentModel {
   /**
    * A signal emitted when the document state changes.
    */
-  stateChanged: ISignal<IDocumentModel, IDocumentModelStateChange<any>>;
+  stateChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
+
+  /**
+   * Get whether the model factory has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
 
   /**
    * The dirty state of the document.

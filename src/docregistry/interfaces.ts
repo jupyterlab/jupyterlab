@@ -17,6 +17,10 @@ import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
+import {
+  IChangedArgs
+} from '../common/interfaces';
+
 
 /**
  * The interface for a document model.
@@ -31,7 +35,7 @@ interface IDocumentModel extends IDisposable {
   /**
    * A signal emitted when the model state changes.
    */
-  stateChanged: ISignal<IDocumentModel, IDocumentModelStateChange<any>>;
+  stateChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
 
   /**
    * The dirty state of the model.
@@ -88,28 +92,6 @@ interface IDocumentModel extends IDisposable {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: any): void;
-}
-
-
-/**
- * An arguments object for the `stateChanged` signal.
- */
-export
-interface IDocumentModelStateChange<T> {
-  /**
-   * The name of the attribute being changed.
-   */
-  name: string;
-
-  /**
-   * The old state value.
-   */
-  oldValue: T;
-
-  /**
-   * The new state value.
-   */
-  newValue: T;
 }
 
 
