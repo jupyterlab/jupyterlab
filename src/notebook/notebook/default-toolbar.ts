@@ -7,11 +7,15 @@ import {
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   restartKernel
 } from '../../docregistry';
+
+import {
+  NotebookActions
+} from './actions';
 
 import {
   nbformat
@@ -22,16 +26,12 @@ import {
 } from './panel';
 
 import {
-  Notebook
-} from './widget';
-
-import {
   ToolbarButton
 } from './toolbar';
 
 import {
-  NotebookActions
-} from './actions';
+  Notebook
+} from './widget';
 
 
 /**
