@@ -17,27 +17,10 @@ import {
   clearSignalData, defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
+import {
+  IChangedArgs
+} from '../common/interfaces';
 
-/**
- * An arguments object for the file browser model change events.
- */
-export
-interface IFileBrowserChangedArgs {
-  /**
-   * The name of the attribute being changed.
-   */
-  name: string;
-
-  /**
-   * The old state value.
-   */
-  oldValue: string;
-
-  /**
-   * The new state value.
-   */
-  newValue: string;
-}
 
 
 /**
@@ -62,7 +45,7 @@ class FileBrowserModel implements IDisposable {
   /**
    * A signal emitted when the path changes.
    */
-  pathChanged: ISignal<FileBrowserModel, IFileBrowserChangedArgs>;
+  pathChanged: ISignal<FileBrowserModel, IChangedArgs<string>>;
 
   /**
    * Get the refreshed signal.
@@ -72,7 +55,7 @@ class FileBrowserModel implements IDisposable {
   /**
    * Get the file path changed signal.
    */
-  fileChanged: ISignal<FileBrowserModel, IFileBrowserChangedArgs>;
+  fileChanged: ISignal<FileBrowserModel, IChangedArgs<string>>;
 
   /**
    * Get the current path.
