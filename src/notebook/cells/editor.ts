@@ -135,5 +135,6 @@ export interface ICellEditorWidget extends Widget {
   setCursor(line:number, character:number): void
 
   focus(): void
+  hasFocus(): boolean
 
 }

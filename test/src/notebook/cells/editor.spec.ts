@@ -15,8 +15,12 @@ import {
 } from '../../../../lib/notebook/cells';
 
 import {
-  CellEditorWidget, ITextChange, ICompletionRequest, EdgeLocation
+  ITextChange, ICompletionRequest, EdgeLocation
 } from '../../../../lib/notebook/cells/editor';
+
+import {
+  CellEditorWidget
+} from '../../../../lib/notebook/codemirror/cells/editor';
 
 
 const UP_ARROW = 38;

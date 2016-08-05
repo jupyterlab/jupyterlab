@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+    ICellEditorWidget
+} from '../../cells/editor';
+
+import {
     CodeCellWidget
 } from '../../cells/widget';
 
@@ -40,7 +44,7 @@ export class CodeMirrorRenderer extends CodeCellWidget.Renderer {
         this._editorInitializer = options.editorInitializer || this._editorInitializer
     }
 
-    createCellEditor(): CellEditorWidget {
+    createCellEditor(): ICellEditorWidget {
         const widget = new CellEditorWidget(this._editorConfiguration);
         this._editorInitializer(widget);
         return widget;

@@ -16,12 +16,16 @@ import {
 } from '../../../../lib/notebook/cells';
 
 import {
-  ICompletionRequest, CellEditorWidget, ITextChange
+  ICompletionRequest, ICellEditorWidget, ITextChange
 } from '../../../../lib/notebook/cells/editor';
 
 import {
   CompletionWidget, CellCompletionHandler, CompletionModel, ICompletionPatch
 } from '../../../../lib/notebook/completion';
+
+import {
+  defaultCodeMirrorRenderer
+} from '../../../../lib/notebook/codemirror/cells/widget';
 
 
 class TestCompletionModel extends CompletionModel {
@@ -53,12 +57,12 @@ class TestCompletionHandler extends CellCompletionHandler {
     this.methods.push('onReply');
   }
 
-  onTextChanged(editor: CellEditorWidget, change: ITextChange): void {
+  onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
     super.onTextChanged(editor, change);
     this.methods.push('onTextChanged');
   }
 
-  onCompletionRequested(editor: CellEditorWidget, request: ICompletionRequest): void {
+  onCompletionRequested(editor: ICellEditorWidget, request: ICompletionRequest): void {
     super.onCompletionRequested(editor, request);
     this.methods.push('onCompletionRequested');
   }
@@ -111,7 +115,7 @@ describe('notebook/completion/handler', () => {
 
       it('should be settable', () => {
         let handler = new CellCompletionHandler(new CompletionWidget());
-        let cell = new BaseCellWidget();
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
         expect(handler.activeCell).to.be(null);
         handler.activeCell = cell;
         expect(handler.activeCell).to.be.a(BaseCellWidget);
@@ -120,8 +124,8 @@ describe('notebook/completion/handler', () => {
 
       it('should be resettable', () => {
         let handler = new CellCompletionHandler(new CompletionWidget());
-        let one = new BaseCellWidget();
-        let two = new BaseCellWidget();
+        let one = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
+        let two = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
         expect(handler.activeCell).to.be(null);
         handler.activeCell = one;
         expect(handler.activeCell).to.be.a(BaseCellWidget);
@@ -311,7 +315,7 @@ describe('notebook/completion/handler', () => {
           oldValue: 'fo',
           newValue: 'foo'
         };
-        let cell = new BaseCellWidget();
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onTextChanged');
@@ -334,7 +338,7 @@ describe('notebook/completion/handler', () => {
           oldValue: 'fo',
           newValue: 'foo'
         };
-        let cell = new BaseCellWidget();
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
         let model = completion.model as TestCompletionModel;
 
         handler.activeCell = cell;
@@ -358,7 +362,7 @@ describe('notebook/completion/handler', () => {
           position: 0,
           currentValue: 'foo'
         };
-        let cell = new BaseCellWidget();
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onCompletionRequested');
@@ -380,7 +384,7 @@ describe('notebook/completion/handler', () => {
           position: 0,
           currentValue: 'foo'
         };
-        let cell = new BaseCellWidget();
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
         let model = completion.model as TestCompletionModel;
 
         handler.kernel = new MockKernel();
@@ -410,7 +414,7 @@ describe('notebook/completion/handler', () => {
         let handler = new TestCompletionHandler(completion);
         let model = completion.model as TestCompletionModel;
 
-        handler.activeCell = new BaseCellWidget();
+        handler.activeCell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
         expect(model.methods).to.not.contain('createPatch');
         completion.selected.emit('foo');
         expect(model.methods).to.contain('createPatch');
@@ -421,7 +425,7 @@ describe('notebook/completion/handler', () => {
         let patch = 'foobar';
         let completion = new CompletionWidget({ model });
         let handler = new TestCompletionHandler(completion);
-        let cell = new BaseCellWidget();
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,

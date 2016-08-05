@@ -148,6 +148,10 @@ class CellEditorWidget extends CodeMirrorWidget implements ICellEditorWidget {
       this.editor.focus()
   }
 
+  hasFocus(): boolean {
+      return this.editor.hasFocus()
+  }
+
   getLastLine(): number {
     return this.editor.getDoc().lastLine()
   }
