@@ -19,7 +19,7 @@ import {
  * The clipboard token.
  */
 export
-const IClipboard = new Token<IClipboard>('jupyter.services.main-menu');
+const IClipboard = new Token<IClipboard>('jupyter.services.clipboard');
 /* tslint:enable */
 
 
