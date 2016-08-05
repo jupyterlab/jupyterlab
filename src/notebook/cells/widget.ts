@@ -6,6 +6,22 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
+
+import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
+  PanelLayout
+} from 'phosphor/lib/ui/panel';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   loadModeByMIME
 } from '../../codemirror';
 
@@ -14,39 +30,20 @@ import {
 } from '../../rendermime';
 
 import {
-  Message
-} from 'phosphor-messaging';
-
-import {
-  PanelLayout
-} from 'phosphor-panel';
-
-import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
-  ISignal, Signal
-} from 'phosphor-signaling';
-
-import {
-  Widget
-} from 'phosphor-widget';
+  IMetadataCursor
+} from '../common/metadata';
 
 import {
   OutputAreaWidget
 } from '../output-area';
 
 import {
-  IMetadataCursor
-} from '../common/metadata';
-
-import {
   CellEditorWidget
 } from './editor';
 
 import {
-  ICellModel, ICodeCellModel, IMarkdownCellModel, IRawCellModel
+  ICellModel, ICellModelChanged, ICodeCellModel,
+  IMarkdownCellModel, IRawCellModel
 } from './model';
 
 
@@ -143,8 +140,13 @@ class BaseCellWidget extends Widget {
     });
     this._input = renderer.createInputArea(this._editor);
 
-    (this.layout as PanelLayout).addChild(this._input);
+    (this.layout as PanelLayout).addWidget(this._input);
   }
+
+  /**
+   * A signal emitted when the model of the cell changes.
+   */
+  modelChanged: ISignal<BaseCellWidget, void>;
 
   /**
    * The model used by the widget.
@@ -163,13 +165,6 @@ class BaseCellWidget extends Widget {
     this._onModelChanged(oldValue, newValue);
     this.onModelChanged(oldValue, newValue);
     this.modelChanged.emit(void 0);
-  }
-
-  /**
-   * A signal emitted when the model of the cell changes.
-   */
-  get modelChanged(): ISignal<BaseCellWidget, void> {
-    return Private.modelChangedSignal.bind(this);
   }
 
   /**
@@ -294,13 +289,14 @@ class BaseCellWidget extends Widget {
    * #### Notes
    * Subclasses may reimplement this method as needed.
    */
-  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: ICellModelChanged): void {
+    // no-op
   }
 
   /**
    * Handle changes in the model.
    */
-  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onMetadataChanged(model: ICellModel, args: ICellModelChanged): void {
     switch (args.name) {
       case 'trusted':
         this._trusted = !!this._trustedCursor.getValue();
@@ -319,7 +315,9 @@ class BaseCellWidget extends Widget {
    * internally and before the `modelChanged` signal is emitted.
    * The default implementation is a no-op.
    */
-  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void { }
+  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
+    // no-op
+  }
 
   private _onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
     // If the model is being replaced, disconnect the old signal handler.
@@ -349,6 +347,10 @@ class BaseCellWidget extends Widget {
   private _trustedCursor: IMetadataCursor = null;
   private _trusted = false;
 }
+
+
+// Define the signals for the `BaseCellWidget` class.
+defineSignal(BaseCellWidget.prototype, 'modelChanged');
 
 
 /**
@@ -492,7 +494,7 @@ class CodeCellWidget extends BaseCellWidget {
 
     if (!this._output) {
       this._output = renderer.createOutputArea(this._rendermime);
-      (this.layout as PanelLayout).addChild(this._output);
+      (this.layout as PanelLayout).addWidget(this._output);
     }
 
     this._output.model = model.outputs;
@@ -505,7 +507,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the model.
    */
-  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: ICellModelChanged): void {
     switch (args.name) {
     case 'executionCount':
       this.setPrompt(`${(model as ICodeCellModel).executionCount}`);
@@ -519,7 +521,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onMetadataChanged(model: ICellModel, args: ICellModelChanged): void {
     switch (args.name) {
     case 'collapsed':
     case 'scrolled':
@@ -618,7 +620,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     this._rendermime = options.rendermime;
     this._markdownWidget = new Widget();
     this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
-    (this.layout as PanelLayout).addChild(this._markdownWidget);
+    (this.layout as PanelLayout).addWidget(this._markdownWidget);
     // Turn on line wrapping for markdown cells.
     this.editor.editor.setOption('lineWrapping', true);
   }
@@ -667,7 +669,7 @@ class MarkdownCellWidget extends BaseCellWidget {
         let widget = this._rendermime.render(bundle, this.trusted);
         this._markdownWidget = widget || new Widget();
         this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
-        (this.layout as PanelLayout).addChild(this._markdownWidget);
+        (this.layout as PanelLayout).addWidget(this._markdownWidget);
       } else {
         this._markdownWidget.show();
       }
@@ -752,31 +754,19 @@ class InputAreaWidget extends Widget {
     let prompt = new Widget();
     prompt.addClass(PROMPT_CLASS);
     let layout = this.layout as PanelLayout;
-    layout.addChild(prompt);
-    layout.addChild(editor);
+    layout.addWidget(prompt);
+    layout.addWidget(editor);
   }
 
   /**
    * Set the prompt of the input area.
    */
   setPrompt(value: string): void {
-    let prompt = (this.layout as PanelLayout).childAt(0);
+    let prompt = (this.layout as PanelLayout).widgets.at(0);
     if (value === 'null') {
       value = ' ';
     }
     let text = `In [${value || ' '}]:`;
     prompt.node.textContent = text;
   }
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * A signal emitted when the model changes on a cell widget.
-   */
-  export
-  const modelChangedSignal = new Signal<BaseCellWidget, void>();
 }
