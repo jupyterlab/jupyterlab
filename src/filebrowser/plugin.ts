@@ -26,6 +26,14 @@ import {
 } from '../application';
 
 import {
+  ICommandPalette
+} from '../commandpalette/plugin';
+
+import {
+  IChangedArgs
+} from '../common/interfaces';
+
+import {
   DocumentManager
 } from '../docmanager';
 
@@ -71,7 +79,7 @@ interface IPathTracker {
   /**
    * A signal emitted when the current path changes.
    */
-  pathChanged: ISignal<IPathTracker, IPathChangedArgs>;
+  pathChanged: ISignal<IPathTracker, IChangedArgs<string>>;
 
   /**
    * The current path of the filebrowser.
@@ -84,35 +92,13 @@ interface IPathTracker {
 
 
 /**
- * An arguments object for the `pathChanged` signal.
- */
-export
-interface IPathChangedArgs {
-  /**
-   * The name of the attribute being changed.
-   */
-  name: string;
-
-  /**
-   * The old path value.
-   */
-  oldValue: string;
-
-  /**
-   * The new path value.
-   */
-  newValue: string;
-}
-
-
-/**
  * A class that tracks the current path of the file browser.
  */
 class PathTracker implements IPathTracker {
   /**
    * A signal emitted when the current path changes.
    */
-  pathChanged: ISignal<IPathTracker, IPathChangedArgs>;
+  pathChanged: ISignal<IPathTracker, IChangedArgs<string>>;
 
   /**
    * The current path of the filebrowser.
@@ -137,7 +123,7 @@ export
 const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
   id: 'jupyter.services.file-browser',
   provides: IPathTracker,
-  requires: [IServiceManager, IDocumentRegistry, IMainMenu],
+  requires: [IServiceManager, IDocumentRegistry, IMainMenu, ICommandPalette],
   activate: activateFileBrowser,
   autoStart: true
 };
@@ -162,7 +148,7 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu): IPathTracker {
+function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IPathTracker {
   let id = 0;
   let tracker = new WidgetTracker<Widget>();
   let activeWidget: Widget;
