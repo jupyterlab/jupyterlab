@@ -108,7 +108,7 @@ const cmdIds = {
 
 /* tslint:disable */
 /**
- * The clipboard token.
+ * The notebook tracker token.
  */
 export
 const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebook-handler');
