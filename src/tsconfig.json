@@ -21,8 +21,12 @@
     "docregistry/plugin",
     "filebrowser/plugin",
     "index",
+    "inspector/plugin",
     "main/plugin",
     "mainmenu/plugin",
+    "notebook/cells/index",
+    "notebook/completion/index",
+    "rendermime/plugin",
     "services/plugin",
     "typings.d.ts",
     "utils"
