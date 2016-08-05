@@ -25,7 +25,7 @@
     "inspector/plugin",
     "main/plugin",
     "mainmenu/plugin",
-    "notebook/index",
+    "notebook/plugin",
     "notebook/typings.d.ts",
     "rendermime/plugin",
     "services/plugin",
