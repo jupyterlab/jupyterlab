@@ -9,8 +9,8 @@
     "outDir": "../lib"
   },
   "files": [
-    "../typings/term.js.d.ts",
-    "../typings/es6-promise.d.ts",
+    "../../typings/xterm/xterm.d.ts",
+    "../../typings/es6-promise/es6-promise.d.ts",
     "index.ts"
   ]
 }
