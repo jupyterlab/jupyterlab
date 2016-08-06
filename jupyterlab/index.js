@@ -33,9 +33,9 @@ lab.registerPlugins([
   require('jupyterlab/lib/notebook/plugin').notebookTrackerProvider,
   require('jupyterlab/lib/rendermime/plugin').renderMimeProvider,
   // require('jupyterlab/lib/running/plugin').runningSessionsExtension,
-  require('jupyterlab/lib/services/plugin').servicesProvider
+  require('jupyterlab/lib/services/plugin').servicesProvider,
   // require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
-  // require('jupyterlab/lib/terminal/plugin').terminalExtension,
+  require('jupyterlab/lib/terminal/plugin').terminalExtension
 
 
   // require('jupyter-js-widgets-labextension/lib/plugin').widgetManagerExtension,

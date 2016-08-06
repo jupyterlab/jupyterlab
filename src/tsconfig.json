@@ -29,6 +29,7 @@
     "notebook/typings.d.ts",
     "rendermime/plugin",
     "services/plugin",
+    "terminal/plugin",
     "typings.d.ts",
     "utils"
   ]
