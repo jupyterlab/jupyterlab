@@ -6,16 +6,16 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IBoxSizing, boxSizing
-} from 'phosphor-domutil';
+  Message, sendMessage
+} from 'phosphor/lib/core/messaging';
 
 import {
-  Message, sendMessage
-} from 'phosphor-messaging';
+  boxSizing, IBoxSizing
+} from 'phosphor/lib/dom/sizing';
 
 import {
   ResizeMessage, Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import * as Xterm
   from 'xterm';
@@ -68,7 +68,7 @@ class TerminalWidget extends Widget {
     this.background = options.background || 'black';
     this.color = options.color || 'white';
     this.id = `jp-TerminalWidget-${Private.id++}`;
-    this.title.text = 'Terminal';
+    this.title.label = 'Terminal';
     Xterm.brokenBold = true;
   }
 
@@ -84,7 +84,7 @@ class TerminalWidget extends Widget {
     }
     this._session = value;
     this._session.messageReceived.connect(this._onMessage, this);
-    this.title.text = `Terminal ${this._session.name}`;
+    this.title.label = `Terminal ${this._session.name}`;
     this._resizeTerminal(-1, -1);
   }
 
@@ -205,6 +205,8 @@ class TerminalWidget extends Widget {
       case 'fit-request':
         this.onFitRequest(msg);
         break;
+      default:
+        break;
     }
   }
 
@@ -280,7 +282,7 @@ class TerminalWidget extends Widget {
     });
 
     this._term.on('title', (title: string) => {
-        this.title.text = title;
+        this.title.label = title;
     });
   }
 
@@ -294,6 +296,8 @@ class TerminalWidget extends Widget {
       break;
     case 'disconnect':
       this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
+      break;
+    default:
       break;
     }
   }
@@ -457,5 +461,5 @@ namespace Private {
    * An incrementing counter for ids.
    */
   export
-  var id = 0;
+  let id = 0;
 }
