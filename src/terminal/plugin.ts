@@ -68,20 +68,6 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   };
 
   commands.addCommand(newTerminalId, {
-    execute: () => {
-      let term = new TerminalWidget(options);
-      term.title.closable = true;
-      term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
-      app.shell.addToMainArea(term);
-      tracker.addWidget(term);
-      services.terminals.create().then(session => {
-        term.session = session;
-        // Trigger an update of the running kernels.
-        services.terminals.listRunning();
-      });
-    }
-  });
-  commands.addCommand(newTerminalId, {
     label: 'New Terminal',
     caption: 'Start a new terminal session',
     execute: () => {
