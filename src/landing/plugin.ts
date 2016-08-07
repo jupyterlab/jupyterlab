@@ -2,40 +2,44 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ServiceManager
-} from 'jupyter-js-services';
-
-import {
-  PathTracker
-} from '../filebrowser/plugin';
-
-import {
-  Application
-} from 'phosphide/lib/core/application';
-
-import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   TabPanel
-} from 'phosphor-tabs';
+} from 'phosphor/lib/ui/tabpanel';
+
+import {
+  JupyterLab, JupyterLabPlugin
+} from '../application';
+
+import {
+  ICommandPalette
+} from '../commandpalette/plugin';
+
+import {
+  IPathTracker
+} from '../filebrowser/plugin';
+
+import {
+  IServiceManager
+} from '../services/plugin';
 
 /**
  * The landing page extension.
  */
 export
-const landingExtension = {
+const landingExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.landing',
-  requires: [ServiceManager, PathTracker],
+  requires: [IServiceManager, IPathTracker, ICommandPalette],
   activate: activateLanding
 };
 
 
-function activateLanding(app: Application, services: ServiceManager, pathTracker: PathTracker): void {
+function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): void {
   let widget = new Widget();
   widget.id = 'landing-jupyterlab';
-  widget.title.text = 'Launcher';
+  widget.title.label = 'Launcher';
   widget.title.closable = true;
   widget.addClass('jp-Landing');
 
@@ -47,17 +51,18 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
   logo.className = 'jp-ImageJupyterLab jp-Landing-logo';
   dialog.appendChild(logo);
 
-  let previewMessages = ["super alpha preview", "very alpha preview", "extremely alpha preview", "exceedingly alpha preview", "alpha alpha preview"];
+  let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
   let subtitle = document.createElement('span');
-  subtitle.textContent = previewMessages[Math.floor(Math.random()*previewMessages.length)];
+  let index = Math.floor(Math.random() * previewMessages.length);
+  subtitle.textContent = previewMessages[index];
   subtitle.className = 'jp-Landing-subtitle';
   dialog.appendChild(subtitle);
 
-  let tour = document.createElement('span')
+  let tour = document.createElement('span');
   tour.className = 'jp-Landing-tour';
   dialog.appendChild(tour);
   tour.addEventListener('click', () => {
-    app.commands.execute('about-jupyterlab:show');
+    app.commands.execute('about-jupyterlab:show', void 0);
   });
 
   let header = document.createElement('span');
@@ -88,22 +93,22 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
 
   let img = body.getElementsByClassName('jp-ImageNotebook')[0];
   img.addEventListener('click', () => {
-    app.commands.execute('file-operations:new-notebook');
+    app.commands.execute('file-operations:new-notebook', void 0);
   });
 
   img = body.getElementsByClassName('jp-ImageConsole')[0];
   img.addEventListener('click', () => {
-    app.commands.execute(`console:create-${services.kernelspecs.default}`);
+    app.commands.execute(`console:create-${services.kernelspecs.default}`, void 0);
   });
 
   img = body.getElementsByClassName('jp-ImageTextEditor')[0];
   img.addEventListener('click', () => {
-    app.commands.execute('file-operations:new-text-file');
+    app.commands.execute('file-operations:new-text-file', void 0);
   });
 
   img = body.getElementsByClassName('jp-ImageTerminal')[0];
   img.addEventListener('click', () => {
-    app.commands.execute('terminal:create-new');
+    app.commands.execute('terminal:create-new', void 0);
   });
 
   let cwd = document.createElement('div');
@@ -115,15 +120,15 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
 
 
   let path = document.createElement('span');
-  path.textContent = 'home'
+  path.textContent = 'home';
   pathTracker.pathChanged.connect(() => {
     if (pathTracker.path.length > 0) {
-      path.textContent = 'home > '
-      var path2 = pathTracker.path;
-      path2 = path2.replace("/"," > ");
+      path.textContent = 'home > ';
+      let path2 = pathTracker.path;
+      path2 = path2.replace('/', ' > ');
       path.textContent += path2;
     } else {
-      path.textContent = "home";
+      path.textContent = 'home';
     }
   });
   path.className = 'jp-Landing-path';
@@ -132,9 +137,8 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
   cwd.appendChild(path);
   dialog.appendChild(cwd);
 
-  app.commands.add([{
-    id: 'jupyterlab-launcher:show',
-    handler: () => {
+  app.commands.addCommand('jupyterlab-launcher:show', {
+    execute: () => {
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
       }
@@ -148,13 +152,12 @@ function activateLanding(app: Application, services: ServiceManager, pathTracker
       }
       app.shell.activateMain(widget.id);
     }
-  }]);
+  });
 
-  app.palette.add([{
+  palette.addItem({
     command: 'jupyterlab-launcher:show',
-    text: 'JupyterLab Launcher',
     category: 'Help'
-  }]);
+  });
 
   app.shell.addToMainArea(widget);
 }
