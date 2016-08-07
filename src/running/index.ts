@@ -6,20 +6,20 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  hitTest
-} from 'phosphor-domutil';
-
-import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
-  ISignal, Signal
-} from 'phosphor-signaling';
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
+
+import {
+  hitTest
+} from 'phosphor/lib/dom/query';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   hitTestNodes, findElement
@@ -123,33 +123,13 @@ const REFRESH_DURATION = 10000;
 export
 class RunningSessions extends Widget {
   /**
-   * Create the node for the running widget.
-   */
-  static createNode(): HTMLElement {
-    let node = document.createElement('div');
-    let header = document.createElement('div');
-    header.className = HEADER_CLASS;
-    let terminals = document.createElement('div');
-    terminals.className = `${SECTION_CLASS} ${TERMINALS_CLASS}`;
-    let sessions = document.createElement('div');
-    sessions.className = `${SECTION_CLASS} ${SESSIONS_CLASS}`;
-
-    let refresh = document.createElement('button');
-    refresh.className = REFRESH_CLASS;
-    header.appendChild(refresh);
-
-    node.appendChild(header);
-    node.appendChild(terminals);
-    node.appendChild(sessions);
-    return node;
-  }
-
-  /**
    * Construct a new running widget.
    */
   constructor(options: RunningSessions.IOptions) {
-    super();
-    this._manager = options.manager;
+    super({
+      node: (options.renderer || RunningSessions.defaultRenderer).createNode()
+    });
+    let manager = this._manager = options.manager;
     this._renderer = options.renderer || RunningSessions.defaultRenderer;
     this.addClass(RUNNING_CLASS);
 
@@ -177,23 +157,19 @@ class RunningSessions extends Widget {
     sessionContainer.appendChild(sessionList);
     sessionNode.appendChild(sessionContainer);
 
-    this._manager.terminals.runningChanged.connect(this._onTerminalsChanged, this);
-    this._manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
+    manager.terminals.runningChanged.connect(this._onTerminalsChanged, this);
+    manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
   }
 
   /**
    * A signal emitted when a kernel session open is requested.
    */
-  get sessionOpenRequested(): ISignal<RunningSessions, ISession.IModel> {
-    return Private.sessionOpenRequestedSignal.bind(this);
-  }
+  sessionOpenRequested: ISignal<RunningSessions, ISession.IModel>;
 
   /**
    * A signal emitted when a terminal session open is requested.
    */
-  get terminalOpenRequested(): ISignal<RunningSessions, ITerminalSession.IModel> {
-    return Private.terminalOpenRequestedSignal.bind(this);
-  }
+  terminalOpenRequested: ISignal<RunningSessions, ITerminalSession.IModel>;
 
   /**
    * The renderer used by the running sessions widget.
@@ -407,6 +383,11 @@ class RunningSessions extends Widget {
 }
 
 
+// Define the signals for the `RunningSessions` class.
+defineSignal(RunningSessions.prototype, 'sessionOpenRequested');
+defineSignal(RunningSessions.prototype, 'terminalOpenRequested');
+
+
 /**
  * The namespace for the `RunningSessions` class statics.
  */
@@ -431,10 +412,15 @@ namespace RunningSessions {
   }
 
   /**
-   * A renderer for use with a menu.
+   * A renderer for use with a running sessions widget.
    */
   export
   interface IRenderer {
+    /**
+     * Create the root node for the running sessions widget.
+     */
+    createNode(): HTMLElement;
+
     /**
      * Create a fully populated header node for the terminals section.
      *
@@ -534,6 +520,28 @@ namespace RunningSessions {
    */
   export
   class Renderer implements IRenderer {
+    /**
+     * Create the root node for the running sessions widget.
+     */
+    createNode(): HTMLElement {
+      let node = document.createElement('div');
+      let header = document.createElement('div');
+      header.className = HEADER_CLASS;
+      let terminals = document.createElement('div');
+      terminals.className = `${SECTION_CLASS} ${TERMINALS_CLASS}`;
+      let sessions = document.createElement('div');
+      sessions.className = `${SECTION_CLASS} ${SESSIONS_CLASS}`;
+
+      let refresh = document.createElement('button');
+      refresh.className = REFRESH_CLASS;
+      header.appendChild(refresh);
+
+      node.appendChild(header);
+      node.appendChild(terminals);
+      node.appendChild(sessions);
+      return node;
+    }
+
     /**
      * Create a fully populated header node for the terminals section.
      *
@@ -689,22 +697,4 @@ namespace RunningSessions {
    */
   export
   const defaultRenderer = new Renderer();
-}
-
-
-/**
- * The namespace for the private module data.
- */
-namespace Private {
-  /**
-   * A signal emitted when a kernel session open is requested.
-   */
-  export
-  const sessionOpenRequestedSignal = new Signal<RunningSessions, ISession.IModel>();
-
-  /**
-   * A signal emitted when a terminal session open is requested.
-   */
-  export
-  const terminalOpenRequestedSignal = new Signal<RunningSessions, ITerminalSession.IModel>();
 }
