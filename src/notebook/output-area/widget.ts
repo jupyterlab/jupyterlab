@@ -948,6 +948,6 @@ namespace OutputWidget {
   }
 }
 
-// Define the signals for the `OutputWidget` class.
-defineSignal(OutputWidget.prototype, 'modelChanged');
-defineSignal(OutputWidget.prototype, 'modelDisposed');
+// Define the signals for the `OutputAreaWidget` class.
+defineSignal(OutputAreaWidget.prototype, 'modelChanged');
+defineSignal(OutputAreaWidget.prototype, 'modelDisposed');

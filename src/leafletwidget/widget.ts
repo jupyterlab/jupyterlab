@@ -6,20 +6,21 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  deepEqual, JSONValue
+} from 'phosphor/lib/algorithm/json';
+
+import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
   Widget, ResizeMessage
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   ABCWidgetFactory, IDocumentModel, IDocumentContext
 } from '../docregistry';
 
-import {
-  deepEqual, JSONValue
-} from '../notebook/common/json';
 
 import leaflet = require('leaflet');
 
@@ -95,7 +96,7 @@ class MapWidget extends Widget {
    * Handle `update-request` messages for the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    this.title.text = this._context.path.split('/').pop();
+    this.title.label = this._context.path.split('/').pop();
     if (!this.isAttached) {
       return;
     }
