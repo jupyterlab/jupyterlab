@@ -623,12 +623,15 @@ class ObservableList<T> implements IObservableList<T> {
    * This may be reimplemented by subclasses to customize the behavior.
    */
   protected replaceItems(index: number, count: number, items: T[]): T[] {
-    let i = index;
-    let old = items.map(item => {
-      let removed = this.internal.at(i);
-      this.internal.set(i++, item);
-      return removed;
-    });
+    let old: T[] = [];
+    while (count-- > 0) {
+      old.push(this.internal.removeAt(index));
+    }
+
+    while (items.length) {
+      this.internal.insert(index++, items.shift());
+    }
+
     this.changed.emit({
       type: 'replace',
       newIndex: index,
