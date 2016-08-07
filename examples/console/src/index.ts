@@ -23,16 +23,24 @@ import {
 } from 'jupyterlab/lib/sanitizer';
 
 import {
-  CommandPalette, StandardPaletteModel, IStandardPaletteItemOptions
-} from 'phosphor-commandpalette';
+  CommandRegistry
+} from 'phosphor/lib/ui/commandregistry';
 
 import {
-  KeymapManager
-} from 'phosphor-keymap';
+  CommandPalette
+} from 'phosphor/lib/ui/commandpalette';
+
+import {
+  Keymap
+} from 'phosphor/lib/ui/keymap';
 
 import {
   SplitPanel
-} from 'phosphor-splitpanel';
+} from 'phosphor/lib/ui/splitpanel';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
 
 import 'jupyterlab/lib/console/base.css';
 import 'jupyterlab/lib/default-theme/completion.css';
@@ -75,7 +83,8 @@ function main(): void {
 
 function startApp(session: ISession) {
   // Initialize the keymap manager with the bindings.
-  let keymap = new KeymapManager();
+  let commands = new CommandRegistry();
+  let keymap = new Keymap({ commands });
 
   // Setup the keydown listener for the document.
   document.addEventListener('keydown', event => {
@@ -103,57 +112,53 @@ function startApp(session: ISession) {
   let rendermime = new RenderMime({ renderers, order, sanitizer });
 
   let consolePanel = new ConsolePanel({ session, rendermime });
-  consolePanel.title.text = TITLE;
+  consolePanel.title.label = TITLE;
 
-  let pModel = new StandardPaletteModel();
-  let palette = new CommandPalette();
-  palette.model = pModel;
+  let palette = new CommandPalette({ commands, keymap });
 
   let panel = new SplitPanel();
   panel.id = 'main';
-  panel.orientation = SplitPanel.Horizontal;
+  panel.orientation = 'horizontal';
   panel.spacing = 0;
   SplitPanel.setStretch(palette, 0);
   SplitPanel.setStretch(consolePanel, 1);
-  panel.attach(document.body);
-  panel.addChild(palette);
-  panel.addChild(consolePanel);
+  Widget.attach(panel, document.body);
+  panel.addWidget(palette);
+  panel.addWidget(consolePanel);
   window.onresize = () => { panel.update(); };
 
-  let items: IStandardPaletteItemOptions[] = [
-    {
-      category: 'Console',
-      text: 'Clear',
-      shortcut: 'Accel R',
-      handler: () => { consolePanel.content.clear(); }
-    },
-    {
-      category: 'Console',
-      text: 'Execute Prompt',
-      shortcut: 'Shift Enter',
-      handler: () => { consolePanel.content.execute(); }
-    }
-  ];
-  pModel.addItems(items);
+  commands.addCommand('console-clear', {
+    label: 'Clear',
+    execute: () => { consolePanel.content.clear(); }
+  });
+  commands.addCommand('console-execute', {
+    label: 'Execute Prompt',
+    execute: () => { consolePanel.content.execute(); }
+  });
+  commands.addCommand('console-dismiss-completion', {
+    execute: () => { consolePanel.content.dismissCompletion(); }
+  });
+  palette.addItem({ command: 'console-clear', category: 'Console' });
+  palette.addItem({ command: 'console-execute', category: 'Console' });
 
   let bindings = [
     {
       selector: '.jp-ConsolePanel',
-      sequence: ['Accel R'],
-      handler: () => { consolePanel.content.clear(); }
+      keys: ['Accel R'],
+      command: 'console-clear'
     },
     {
       selector: '.jp-ConsolePanel',
-      sequence: ['Shift Enter'],
-      handler: () => { consolePanel.content.execute(); }
+      keys: ['Shift Enter'],
+      command: 'console-execute'
     },
     {
       selector: 'body',
-      sequence: ['Escape'],
-      handler: () => { consolePanel.content.dismissCompletion(); }
+      keys: ['Escape'],
+      command: 'console-dismiss-completion'
     }
   ];
-  keymap.add(bindings);
+  bindings.forEach(binding => keymap.addBinding(binding));
 }
 
 window.onload = main;
