@@ -69,7 +69,7 @@ def main(argv):
 
     handlers = [
         (r"/", MainPageHandler, {'base_url': base_url, 'ws_url': ws_url}),
-        (r'/(.*)', tornado.web.StaticFileHandler, {'path': '.'}),
+        (r'/lab/(.*)', tornado.web.StaticFileHandler, {'path': 'build/'}),
     ]
 
     app = tornado.web.Application(handlers, static_path='build',
