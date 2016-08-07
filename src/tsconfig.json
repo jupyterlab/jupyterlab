@@ -33,6 +33,7 @@
     "notebook/plugin",
     "notebook/typings.d.ts",
     "rendermime/plugin",
+    "running/plugin",
     "services/plugin",
     "shortcuts/plugin",
     "terminal/plugin",

@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ServiceManager
-} from 'jupyter-js-services';
+  JupyterLab, JupyterLabPlugin
+} from '../application';
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
+  IServiceManager
+} from '../services/plugin';
 
 import {
   RunningSessions
@@ -18,18 +18,18 @@ import {
  * The default running sessions extension.
  */
 export
-const runningSessionsExtension = {
+const runningSessionsExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.running-sessions',
-  requires: [ServiceManager],
+  requires: [IServiceManager],
   activate: activateRunningSessions
 };
 
 
 
-function activateRunningSessions(app: Application, services: ServiceManager): void {
+function activateRunningSessions(app: JupyterLab, services: IServiceManager): void {
   let running = new RunningSessions({ manager: services });
   running.id = 'jp-running-sessions';
-  running.title.text = 'Running';
+  running.title.label = 'Running';
 
   // TODO: replace these with execute calls in new phosphor.
   running.sessionOpenRequested.connect((sender, model) => {
