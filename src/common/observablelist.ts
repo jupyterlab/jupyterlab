@@ -628,13 +628,14 @@ class ObservableList<T> implements IObservableList<T> {
       old.push(this.internal.removeAt(index));
     }
 
+    let i =  index;
     while (items.length) {
-      this.internal.insert(index++, items.shift());
+      this.internal.insert(i++, items.shift());
     }
 
     this.changed.emit({
       type: 'replace',
-      newIndex: index,
+      newIndex: i,
       newValue: items,
       oldIndex: index,
       oldValue: old,
