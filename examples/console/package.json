@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "jupyter-js-services": "^0.17.0",
-    "jupyterlab": "file:../.."
+    "jupyterlab": "file:../..",
+    "phosphor": "^0.6.0"
   },
   "devDependencies": {
     "concurrently": "^2.0.0",
