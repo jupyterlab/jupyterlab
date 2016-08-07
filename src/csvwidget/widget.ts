@@ -7,11 +7,11 @@ import {
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   ABCWidgetFactory, IDocumentModel, IDocumentContext
@@ -71,7 +71,7 @@ class CSVWidget extends Widget {
    * Handle `update-request` messages for the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    this.title.text = this._context.path.split('/').pop();
+    this.title.label = this._context.path.split('/').pop();
     let cm = this._context.contentsModel;
     if (cm === null) {
       return;

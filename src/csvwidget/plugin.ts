@@ -2,15 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
+  JupyterLab, JupyterLabPlugin
+} from '../application';
 
 import {
-  DocumentRegistry
+  IDocumentRegistry
 } from '../docregistry';
 
 import {
-  CSVWidget, CSVWidgetFactory
+  CSVWidgetFactory
 } from './widget';
 
 
@@ -24,26 +24,26 @@ const EXTENSIONS = ['.csv'];
  * The table file handler extension.
  */
 export
-const csvHandlerExtension = {
+const csvHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.csvHandler',
-  requires: [DocumentRegistry],
-  activate: activateCSVWidget
+  requires: [IDocumentRegistry],
+  activate: activateCSVWidget,
+  autoStart: true
 };
 
 
 /**
  * Activate the table widget extension.
  */
-function activateCSVWidget(app: Application, registry: DocumentRegistry): void {
-    let options = {
-      fileExtensions: EXTENSIONS,
-      defaultFor: EXTENSIONS,
-      displayName: 'Table',
-      modelName: 'text',
-      preferKernel: false,
-      canStartKernel: false
-    };
+function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry): void {
+  let options = {
+    fileExtensions: EXTENSIONS,
+    defaultFor: EXTENSIONS,
+    displayName: 'Table',
+    modelName: 'text',
+    preferKernel: false,
+    canStartKernel: false
+  };
 
-    registry.addWidgetFactory(new CSVWidgetFactory(), options);
-
+  registry.addWidgetFactory(new CSVWidgetFactory(), options);
 }
