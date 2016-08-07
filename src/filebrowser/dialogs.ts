@@ -79,24 +79,10 @@ function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host
  */
 class OpenWithHandler extends Widget {
   /**
-   * Create the node for an open with handler.
-   */
-  static createNode(): HTMLElement {
-    let body = document.createElement('div');
-    let name = document.createElement('span');
-    let widgetDropdown = document.createElement('select');
-    let kernelDropdown = document.createElement('select');
-    body.appendChild(name);
-    body.appendChild(widgetDropdown);
-    body.appendChild(kernelDropdown);
-    return body;
-  }
-
-  /**
    * Construct a new "open with" dialog.
    */
   constructor(path: string, manager: DocumentManager, sessions: ISession.IModel[], host?: HTMLElement) {
-    super({ node: OpenWithHandler.createNode() });
+    super({ node: Private.createOpenWithNode() });
     this._manager = manager;
     this._host = host;
     this._sessions = sessions;
@@ -175,7 +161,7 @@ class OpenWithHandler extends Widget {
     let preference = this._manager.registry.getKernelPreference(
       this._ext, widgetName
     );
-    updateKernels(preference, this.kernelDropdown, this._manager.kernelspecs, this._sessions);
+    Private.updateKernels(preference, this.kernelDropdown, this._manager.kernelspecs, this._sessions);
   }
 
   private _ext = '';
@@ -190,26 +176,10 @@ class OpenWithHandler extends Widget {
  */
 class CreateNewHandler extends Widget {
   /**
-   * Create the node for a create new handler.
-   */
-  static createNode(): HTMLElement {
-    let body = document.createElement('div');
-    let name = document.createElement('input');
-    let fileTypeDropdown = document.createElement('select');
-    let widgetDropdown = document.createElement('select');
-    let kernelDropdown = document.createElement('select');
-    body.appendChild(name);
-    body.appendChild(fileTypeDropdown);
-    body.appendChild(widgetDropdown);
-    body.appendChild(kernelDropdown);
-    return body;
-  }
-
-  /**
    * Construct a new "create new" dialog.
    */
   constructor(model: FileBrowserModel, manager: DocumentManager, sessions: ISession.IModel[]) {
-    super({ node: CreateNewHandler.createNode() });
+    super({ node: Private.createCreateNewNode() });
     this._model = model;
     this._manager = manager;
     this._sessions = sessions;
@@ -382,7 +352,7 @@ class CreateNewHandler extends Widget {
     let ext = this.ext;
     let widgetName = this.widgetDropdown.value;
     let preference = this._manager.registry.getKernelPreference(ext, widgetName);
-    updateKernels(preference, this.kernelDropdown, this._manager.kernelspecs, this._sessions);
+    Private.updateKernels(preference, this.kernelDropdown, this._manager.kernelspecs, this._sessions);
   }
 
   private _model: FileBrowserModel = null;
@@ -395,21 +365,59 @@ class CreateNewHandler extends Widget {
 
 
 /**
- * Update a kernel listing based on a kernel preference.
+ * A namespace for private data.
  */
-function updateKernels(preference: IKernelPreference, node: HTMLSelectElement, specs: IKernel.ISpecModels, running: ISession.IModel[]): void {
-  if (!preference.canStartKernel) {
-    while (node.firstChild) {
-      node.removeChild(node.firstChild);
-    }
-    node.disabled = true;
-    return;
+namespace Private {
+  /**
+   * Create the node for an open with handler.
+   */
+  export
+  function createOpenWithNode(): HTMLElement {
+    let body = document.createElement('div');
+    let name = document.createElement('span');
+    let widgetDropdown = document.createElement('select');
+    let kernelDropdown = document.createElement('select');
+    body.appendChild(name);
+    body.appendChild(widgetDropdown);
+    body.appendChild(kernelDropdown);
+    return body;
   }
-  let lang = preference.language;
-  node.disabled = false;
-  populateKernels(node, specs, running, lang);
-  // Select the "null" valued kernel if we do not prefer a kernel.
-  if (!preference.preferKernel) {
-    node.value = 'null';
+
+  /**
+   * Create the node for a create new handler.
+   */
+  export
+  function createCreateNewNode(): HTMLElement {
+    let body = document.createElement('div');
+    let name = document.createElement('input');
+    let fileTypeDropdown = document.createElement('select');
+    let widgetDropdown = document.createElement('select');
+    let kernelDropdown = document.createElement('select');
+    body.appendChild(name);
+    body.appendChild(fileTypeDropdown);
+    body.appendChild(widgetDropdown);
+    body.appendChild(kernelDropdown);
+    return body;
+  }
+
+  /**
+   * Update a kernel listing based on a kernel preference.
+   */
+  export
+  function updateKernels(preference: IKernelPreference, node: HTMLSelectElement, specs: IKernel.ISpecModels, running: ISession.IModel[]): void {
+    if (!preference.canStartKernel) {
+      while (node.firstChild) {
+        node.removeChild(node.firstChild);
+      }
+      node.disabled = true;
+      return;
+    }
+    let lang = preference.language;
+    node.disabled = false;
+    populateKernels(node, specs, running, lang);
+    // Select the "null" valued kernel if we do not prefer a kernel.
+    if (!preference.preferKernel) {
+      node.value = 'null';
+    }
   }
 }

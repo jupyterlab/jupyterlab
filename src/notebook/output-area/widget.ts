@@ -853,23 +853,10 @@ class OutputWidget extends Widget {
  */
  class InputWidget extends Widget {
   /**
-   * Create the node for an InputWidget.
-   */
-  static createNode(): HTMLElement {
-    let node = document.createElement('div');
-    let prompt = document.createElement('span');
-    prompt.className = STDIN_PROMPT_CLASS;
-    let input = document.createElement('input');
-    input.className = STDIN_INPUT_CLASS;
-    node.appendChild(prompt);
-    node.appendChild(input);
-    return node;
-  }
-  /**
    * Construct a new input widget.
    */
   constructor(request: OutputAreaModel.IInputRequest) {
-    super();
+    super({ node: Private.createInputWidgetNode() });
     this.addClass(STDIN_CLASS);
     let text = this.node.firstChild as HTMLElement;
     text.textContent = request.prompt;
@@ -951,3 +938,24 @@ namespace OutputWidget {
 // Define the signals for the `OutputAreaWidget` class.
 defineSignal(OutputAreaWidget.prototype, 'modelChanged');
 defineSignal(OutputAreaWidget.prototype, 'modelDisposed');
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Create the node for an InputWidget.
+   */
+  export
+  function createInputWidgetNode(): HTMLElement {
+    let node = document.createElement('div');
+    let prompt = document.createElement('span');
+    prompt.className = STDIN_PROMPT_CLASS;
+    let input = document.createElement('input');
+    input.className = STDIN_INPUT_CLASS;
+    node.appendChild(prompt);
+    node.appendChild(input);
+    return node;
+  }
+}
