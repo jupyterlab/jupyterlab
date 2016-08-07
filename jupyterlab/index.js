@@ -23,7 +23,7 @@ lab.registerPlugins([
   require('jupyterlab/lib/faq/plugin').faqExtension,
   require('jupyterlab/lib/filebrowser/plugin').fileBrowserProvider,
   require('jupyterlab/lib/help/plugin').helpHandlerExtension,
-  // require('jupyterlab/lib/imagewidget/plugin').imageHandlerExtension,
+  require('jupyterlab/lib/imagewidget/plugin').imageHandlerExtension,
   require('jupyterlab/lib/inspector/plugin').inspectorProvider,
   // require('jupyterlab/lib/leafletwidget/plugin').mapHandlerExtension,
   require('jupyterlab/lib/landing/plugin').landingExtension,

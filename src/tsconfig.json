@@ -25,6 +25,7 @@
     "faq/plugin",
     "filebrowser/plugin",
     "help/plugin",
+    "imagewidget/plugin",
     "index",
     "inspector/plugin",
     "landing/plugin",
