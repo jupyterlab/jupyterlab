@@ -105,17 +105,10 @@ class NotebookToolbar extends Widget {
 export
 class ToolbarButton extends Widget {
   /**
-   * Create the node for the toolbar button.
-   */
-  static createNode(): HTMLElement {
-    return document.createElement('span');
-  }
-
-  /**
    * Construct a new toolbar button.
    */
   constructor(options: ToolbarButton.IOptions = {}) {
-    super();
+    super({ node: Private.createNode() });
     options = options || {};
     this.addClass(TOOLBAR_BUTTON);
     this._onClick = options.onClick;
@@ -224,4 +217,12 @@ namespace Private {
    */
   export
   const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
+
+  /**
+   * Create the node for the toolbar button.
+   */
+  export
+  function createNode(): HTMLElement {
+    return document.createElement('span');
+  }
 }
