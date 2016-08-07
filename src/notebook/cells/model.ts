@@ -18,6 +18,10 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  IChangedArgs
+} from '../../common/interfaces';
+
+import {
   IMetadataCursor, MetadataCursor
 } from '../common/metadata';
 
@@ -28,28 +32,6 @@ import {
 import {
   OutputAreaModel
 } from '../output-area';
-
-
-/**
- * The definition for cell model changes.
- */
-export
-interface ICellModelChanged {
-  /**
-   * The name of the changed attribute.
-   */
-  name: string;
-
-  /**
-   * The old value of the changed attribute.
-   */
-  oldValue: any;
-
-  /**
-   * The new value of the changed attribute.
-   */
-  newValue: any;
-}
 
 
 /**
@@ -73,12 +55,12 @@ interface ICellModel extends IDisposable {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<ICellModel, ICellModelChanged>;
+  metadataChanged: ISignal<ICellModel, IChangedArgs<any>>;
 
   /**
    * A signal emitted when a model state changes.
    */
-  stateChanged: ISignal<ICellModel, ICellModelChanged>;
+  stateChanged: ISignal<ICellModel, IChangedArgs<any>>;
 
   /**
    * The input content of the cell.
@@ -201,12 +183,12 @@ class CellModel implements ICellModel {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<ICellModel, ICellModelChanged>;
+  metadataChanged: ISignal<ICellModel, IChangedArgs<any>>;
 
   /**
    * A signal emitted when a model state changes.
    */
-  stateChanged: ISignal<ICellModel, ICellModelChanged>;
+  stateChanged: ISignal<ICellModel, IChangedArgs<any>>;
 
   /**
    * The input content of the cell.

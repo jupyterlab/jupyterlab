@@ -17,7 +17,11 @@ import {
 } from '../../codemirror/widget';
 
 import {
-  ICellModel, ICellModelChanged
+  IChangedArgs
+} from '../../common/interfaces';
+
+import {
+  ICellModel,
 } from './model';
 
 
@@ -242,7 +246,7 @@ class CellEditorWidget extends CodeMirrorWidget {
   /**
    * Handle changes in the model state.
    */
-  protected onModelStateChanged(model: ICellModel, args: ICellModelChanged): void {
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'source':
       let doc = this.editor.getDoc();
