@@ -2,20 +2,21 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
+  JupyterLab, JupyterLabPlugin
+} from '../application';
 
 import {
-  DocumentRegistry, IWidgetFactoryOptions
+  IDocumentRegistry, IWidgetFactoryOptions
 } from '../docregistry';
 
 import {
-  RenderMime
-} from '../rendermime';
+  IRenderMime
+} from '../rendermime/plugin';
 
 import {
   MarkdownWidgetFactory
 } from './widget';
+
 
 /**
  * The class name for all main area portrait tab icons.
@@ -29,13 +30,13 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 
 
 /**
- * The editor handler extension.
+ * The markdown handler extension.
  */
 export
-const markdownHandlerExtension = {
+const markdownHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.rendered-markdown',
-  requires: [DocumentRegistry, RenderMime],
-  activate: (app: Application, registry: DocumentRegistry, rendermime: RenderMime) => {
+  requires: [IDocumentRegistry, IRenderMime],
+  activate: (app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime) => {
     let options: IWidgetFactoryOptions = {
       fileExtensions: ['.md'],
       displayName: 'Rendered Markdown',

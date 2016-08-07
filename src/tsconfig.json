@@ -30,6 +30,7 @@
     "landing/plugin",
     "main/plugin",
     "mainmenu/plugin",
+    "markdownwidget/plugin",
     "notebook/plugin",
     "notebook/typings.d.ts",
     "rendermime/plugin",
