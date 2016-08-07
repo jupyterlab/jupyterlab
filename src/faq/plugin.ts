@@ -4,32 +4,45 @@
 import $ = require('jquery');
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
-
-import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
   TabPanel
-} from 'phosphor-tabs';
+} from 'phosphor/lib/ui/tabpanel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
+
+import {
+  JupyterLab, JupyterLabPlugin
+} from '../application';
+
+import {
+  ICommandPalette
+} from '../commandpalette/plugin';
 
 
 /**
  * The faq page extension.
  */
 export
-const faqExtension = {
+const faqExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.faq',
-  activate: activateFAQ
+  requires: [ICommandPalette],
+  activate: activateFAQ,
+  autoStart: true
 };
 
+
+/**
+ * A widget that displays FAQ information.
+ */
 class FAQWidget extends Widget {
+  /**
+   * A handler for `after-attach` messages.
+   */
   protected onAfterAttach(msg: Message): void {
     let answerNodeList = this.node.querySelectorAll('li.jp-FAQ-answer');
     let answerArray = Array.prototype.slice.call(answerNodeList);
@@ -43,11 +56,15 @@ class FAQWidget extends Widget {
   }
 }
 
-function activateFAQ(app: Application): void {
+
+/**
+ * Activate the faq plugin.
+ */
+function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
   let widget = new FAQWidget();
   let commandId = 'faq-jupyterlab:show';
   widget.id = 'faq-jupyterlab';
-  widget.title.text = 'FAQ';
+  widget.title.label = 'FAQ';
   widget.title.closable = true;
 
   // Create Frequently Asked Questions Header Section.
@@ -137,7 +154,7 @@ function activateFAQ(app: Application): void {
   let tourButtonText = document.createTextNode('here');
   tourButton.appendChild(tourButtonText);
   tourButton.addEventListener('click', () => {
-    app.commands.execute('about-jupyterlab:show');
+    app.commands.execute('about-jupyterlab:show', void 0);
   });
 
   // Finish the rest of the answer.
@@ -315,9 +332,8 @@ function activateFAQ(app: Application): void {
   developerQA.appendChild(developerQ3Ans);
   widget.node.style.overflowY = 'auto';
 
-  app.commands.add([{
-    id: commandId,
-    handler: () => {
+  app.commands.addCommand(commandId, {
+    execute: () => {
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
       }
@@ -330,12 +346,7 @@ function activateFAQ(app: Application): void {
         tabs.currentWidget = widget;
       }
     }
-  }]);
+  });
 
-  app.palette.add([{
-    command: commandId,
-    text: 'FAQ',
-    category: 'Help',
-    caption: 'Frequently Asked Questions'
-  }]);
+  palette.addItem({ command: commandId, category: 'Help' });
 }

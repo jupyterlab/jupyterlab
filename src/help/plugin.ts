@@ -2,25 +2,28 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
-
-import {
-  MenuItem, Menu
-} from 'phosphor-menus';
+  Menu
+} from 'phosphor/lib/ui/menu';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
+
+import {
+  JupyterLab, JupyterLabPlugin
+} from '../application';
+
+import {
+  ICommandPalette
+} from '../commandpalette/plugin';
 
 import {
   IFrame
 } from '../iframe';
 
 import {
-  MainMenu
+  IMainMenu
 } from '../mainmenu/plugin';
-
 
 
 /**
@@ -92,9 +95,9 @@ const COMMANDS = [
  * The help handler extension.
  */
 export
-const helpHandlerExtension = {
+const helpHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.help-handler',
-  requires: [MainMenu],
+  requires: [IMainMenu, ICommandPalette],
   activate: activateHelpHandler
 };
 
@@ -106,133 +109,37 @@ const helpHandlerExtension = {
  *
  * returns A promise that resolves when the extension is activated.
  */
-function activateHelpHandler(app: Application, mainMenu: MainMenu): Promise<void> {
+function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette): Promise<void> {
   let iframe = new IFrame();
   iframe.addClass(HELP_CLASS);
-  iframe.title.text = 'Help';
+  iframe.title.label = 'Help';
   iframe.id = 'help-doc';
 
-  let helpCommandItems = COMMANDS.map(command => {
-    return {
-      id: command.id,
-      handler: () => {
-        Private.attachHelp(app, iframe);
-        Private.showHelp(app, iframe);
-        iframe.loadURL(command.url);
-      }
-    };
-  });
-
-  app.commands.add(helpCommandItems);
-
-  app.commands.add([
-    {
-      id: 'help-doc:activate',
-      handler: () => { Private.showHelp(app, iframe); }
-    },
-    {
-      id: 'help-doc:hide',
-      handler: () => { Private.hideHelp(app, iframe); }
-    },
-    {
-      id: 'help-doc:toggle',
-      handler: () => { Private.toggleHelp(app, iframe); }
+  COMMANDS.forEach(command => app.commands.addCommand(command.id, {
+    execute: () => {
+      Private.attachHelp(app, iframe);
+      Private.showHelp(app, iframe);
+      iframe.loadURL(command.url);
     }
-  ]);
+  }));
 
-  let helpPaletteItems = COMMANDS.map(command => {
-    return {
-      command: command.id,
-      text: command.text,
-      caption: `Open ${command.text}`,
-      category: 'Help'
-    };
+  app.commands.addCommand('help-doc:activate', {
+    execute: () => { Private.showHelp(app, iframe); }
+  });
+  app.commands.addCommand('help-doc:hide', {
+    execute: () => { Private.hideHelp(app, iframe); }
+  });
+  app.commands.addCommand('help-doc:toggle', {
+    execute: () => { Private.toggleHelp(app, iframe); }
   });
 
-  app.palette.add(helpPaletteItems);
+  COMMANDS.forEach(item => palette.addItem({
+    command: item.id,
+    category: 'Help'
+  }));
 
-  let menu = new Menu([
-    new MenuItem({
-      text: 'About JupyterLab',
-      handler: () => {
-        app.commands.execute('about-jupyterlab:show');
-      }
-    }),
-    new MenuItem({
-      text: 'Frequently Asked Questions',
-      handler: () => {
-        app.commands.execute('faq-jupyterlab:show');
-      }
-    }),
-    new MenuItem({
-      text: 'Notebook Tutorial',
-      handler: () => {
-        app.commands.execute('help-doc:notebook-tutorial');
-      }
-    }),
-    new MenuItem({
-      type: MenuItem.Separator
-    }),
-    new MenuItem({
-      text: 'IPython Reference',
-      handler: () => {
-        app.commands.execute('help-doc:ipython-reference');
-      }
-    }),
-    new MenuItem({
-      text: 'Markdown Reference',
-      handler: () => {
-        app.commands.execute('help-doc:markdown-reference');
-      }
-    }),
-    new MenuItem({
-      text: 'Matplotlib Reference',
-      handler: () => {
-        app.commands.execute('help-doc:mathplotlib-reference');
-      }
-    }),
-    new MenuItem({
-      text: 'Numpy Reference',
-      handler: () => {
-        app.commands.execute('help-doc:numpy-reference');
-      }
-    }),
-    new MenuItem({
-      text: 'Pandas Reference',
-      handler: () => {
-        app.commands.execute('help-doc:pandas-reference');
-      }
-    }),
-    new MenuItem({
-      text: 'Python Reference',
-      handler: () => {
-        app.commands.execute('help-doc:python-reference');
-      }
-    }),
-    new MenuItem({
-      text: 'Scipy Lecture Notes',
-      handler: () => {
-        app.commands.execute('help-doc:scipy-lecture-notes');
-      }
-    }),
-    new MenuItem({
-      text: 'Scipy Reference',
-      handler: () => {
-        app.commands.execute('help-doc:scipy-reference');
-      }
-    }),
-    new MenuItem({
-      text: 'SymPy Reference',
-      handler: () => {
-        app.commands.execute('help-doc:sympy-reference');
-      }
-    })
-  ]);
-
-
-  let helpMenu = new MenuItem({ text: 'Help', submenu: menu });
-
-  mainMenu.addItem(helpMenu);
+  let menu = Private.createMenu(app);
+  mainMenu.addMenu(menu, {});
 
   return Promise.resolve(void 0);
 }
@@ -243,10 +150,25 @@ function activateHelpHandler(app: Application, mainMenu: MainMenu): Promise<void
  */
 namespace Private {
   /**
+   * Creates a menu for the help plugin.
+   */
+  export
+  function createMenu(app: JupyterLab): Menu {
+    let { commands, keymap } = app;
+    let menu = new Menu({ commands, keymap });
+    menu.title.label = 'Help';
+    menu.addItem({ command: 'about-jupyterlab:show' });
+    menu.addItem({ command: 'faq-jupyterlab:show' });
+
+    COMMANDS.forEach(item => menu.addItem({ command: item.id }));
+    return menu;
+  }
+
+  /**
    * Attach the help iframe widget to the application shell.
    */
   export
-  function attachHelp(app: Application, iframe: Widget): void {
+  function attachHelp(app: JupyterLab, iframe: Widget): void {
     if (!iframe.isAttached) {
       app.shell.addToRightArea(iframe);
     }
@@ -256,7 +178,7 @@ namespace Private {
    * Show the help widget.
    */
   export
-  function showHelp(app: Application, iframe: Widget): void {
+  function showHelp(app: JupyterLab, iframe: Widget): void {
     app.shell.activateRight(iframe.id);
   }
 
@@ -264,7 +186,7 @@ namespace Private {
    * Hide the help widget.
    */
   export
-  function hideHelp(app: Application, iframe: Widget): void {
+  function hideHelp(app: JupyterLab, iframe: Widget): void {
     if (!iframe.isHidden) {
       app.shell.collapseRight();
     }
@@ -274,7 +196,7 @@ namespace Private {
    * Toggle whether the help widget is shown or hidden.
    */
   export
-  function toggleHelp(app: Application, iframe: Widget): void {
+  function toggleHelp(app: JupyterLab, iframe: Widget): void {
     if (iframe.isHidden) {
       showHelp(app, iframe);
     } else {
