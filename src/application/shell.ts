@@ -68,7 +68,7 @@ interface ISideAreaOptions {
  * The application shell for JupyterLab.
  */
 export
-class ApplicationShell extends BoxPanel {
+class ApplicationShell extends Panel {
   /**
    * Construct a new application shell.
    */
@@ -76,8 +76,6 @@ class ApplicationShell extends BoxPanel {
     super();
     this.addClass(APPLICATION_SHELL_CLASS);
     this.id = 'main';
-    this.direction = 'top-to-bottom';
-    this.spacing = 0;
 
     let topPanel = this._topPanel = new Panel();
     let hboxPanel = this._hboxPanel = new BoxPanel();
@@ -122,13 +120,8 @@ class ApplicationShell extends BoxPanel {
     hboxPanel.addWidget(hsplitPanel);
     hboxPanel.addWidget(rightHandler.sideBar);
 
-    BoxPanel.setStretch(this, 1);
-    BoxPanel.setStretch(topPanel, 0);
-    BoxPanel.setStretch(hboxPanel, 1);
-
     this.addWidget(topPanel);
     this.addWidget(hboxPanel);
-    this.update();
   }
 
   /**

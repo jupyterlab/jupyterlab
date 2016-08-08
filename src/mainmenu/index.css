@@ -10,11 +10,8 @@
 #jp-top-panel.p-Widget.p-Panel {
    border-bottom: 1px solid #BDBDBD;
    background: white;
-   top: 0px;
-   left: 0px;
    min-height: 28px;
    max-height: 28px;
-   position: absolute;
 }
 
 .p-MenuBar .p-MenuBar-item {

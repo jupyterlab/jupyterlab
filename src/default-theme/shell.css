@@ -4,23 +4,45 @@
 |----------------------------------------------------------------------------*/
 
 #main {
-  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
   font-size: 14px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+
+
+#jp-main-content-panel {
+  display: flex;
+  flex: 1 1 auto;
 }
 
 
 #jp-top-panel {
   display: flex;
+  flex: 0 0 auto;
   min-height: 24px;
 }
 
 
+#jp-main-split-panel {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+
 #jp-left-stack, #jp-right-stack {
+  display: flex;
   border-right: 1px solid #BDBDBD;
+  flex: 1 1 auto;
 }
 
 
 #jp-left-stack > .p-Widget, #jp-right-stack > .p-Widget {
+  flex: 1 1 auto;
   min-width: 300px;
 }
 
@@ -29,6 +51,7 @@
   background: white;
   color: #777777;
   font-size: 14px;
+  min-width: 36px;
   max-width: 36px;
   max-height: none;
   overflow: visible;
