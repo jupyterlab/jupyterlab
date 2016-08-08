@@ -45,6 +45,11 @@ body {
 }
 
 
+.p-Widget.p-mod-hidden {
+  background: none;
+}
+
+
 .jp-Document {
   min-width: 120px;
   min-height: 120px;
