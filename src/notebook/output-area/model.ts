@@ -124,7 +124,7 @@ class OutputAreaModel implements IDisposable {
       // This also replaces the metadata of the last item.
       let text = value.text as string;
       value.text = lastOutput.text as string + text;
-      this._list.set(index, output);
+      this._list.set(index, value);
       return index;
     } else {
       switch (value.output_type) {
