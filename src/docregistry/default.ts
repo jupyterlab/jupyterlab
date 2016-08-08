@@ -11,19 +11,20 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
-  ISignal, Signal
-} from 'phosphor-signaling';
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
-  IDocumentModel, IWidgetFactory, IDocumentContext, IModelFactory
+  IChangedArgs
+} from '../common/interfaces';
+
+import {
+  IDocumentModel, IDocumentContext, IModelFactory,
+  IWidgetFactory
 } from './index';
 
 
@@ -40,24 +41,20 @@ class DocumentModel implements IDocumentModel {
   }
 
   /**
-   * Get whether the model factory has been disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * A signal emitted when the document content changes.
    */
-  get contentChanged(): ISignal<IDocumentModel, void> {
-    return Private.contentChangedSignal.bind(this);
-  }
+  contentChanged: ISignal<IDocumentModel, void>;
 
   /**
    * A signal emitted when the document state changes.
    */
-  get stateChanged(): ISignal<IDocumentModel, IChangedArgs<any>> {
-    return Private.stateChangedSignal.bind(this);
+  stateChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
+
+  /**
+   * Get whether the model factory has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
   }
 
   /**
@@ -162,6 +159,10 @@ class DocumentModel implements IDocumentModel {
   private _readOnly = false;
   private _isDisposed = false;
 }
+
+// Define the signals for the `DocumentModel` class.
+defineSignal(DocumentModel.prototype, 'contentChanged');
+defineSignal(DocumentModel.prototype, 'stateChanged');
 
 
 /**
@@ -281,9 +282,7 @@ abstract class ABCWidgetFactory<T extends Widget, U extends IDocumentModel> impl
   /**
    * A signal emitted when a widget is created.
    */
-  get widgetCreated(): ISignal<IWidgetFactory<T, U>, T> {
-    return Private.widgetCreatedSignal.bind(this);
-  }
+  widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
 
   /**
    * Get whether the model factory has been disposed.
@@ -311,25 +310,5 @@ abstract class ABCWidgetFactory<T extends Widget, U extends IDocumentModel> impl
 }
 
 
-/**
- * A private namespace for data.
- */
-namespace Private {
-  /**
-   * A signal emitted when a document content changes.
-   */
-  export
-  const contentChangedSignal = new Signal<IDocumentModel, void>();
-
-  /**
-   * A signal emitted when a widget is created.
-   */
-  export
-  const widgetCreatedSignal = new Signal<IWidgetFactory<Widget, IDocumentModel>, Widget>();
-
-  /**
-   * A signal emitted when a document dirty state changes.
-   */
-  export
-  const stateChangedSignal = new Signal<IDocumentModel, IChangedArgs<any>>();
-}
+// Define the signals for the `ABCWidgetFactory` class.
+defineSignal(ABCWidgetFactory.prototype, 'widgetCreated');

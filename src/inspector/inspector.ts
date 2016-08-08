@@ -3,23 +3,23 @@
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
+
+import {
+  clearSignalData, defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   Panel
-} from 'phosphor-panel';
-
-import {
-  ISignal, Signal, clearSignalData
-} from 'phosphor-signaling';
+} from 'phosphor/lib/ui/panel';
 
 import {
   TabPanel
-} from 'phosphor-tabs';
+} from 'phosphor/lib/ui/tabpanel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   NotebookToolbar, ToolbarButton
@@ -68,10 +68,27 @@ const RIGHT_TOGGLE_CLASS = 'jp-InspectorItem-right';
 
 
 /**
+ * An interface for an inspector panel.
+ */
+export
+interface IInspector {
+  /**
+   * The orientation of the inspector panel.
+   */
+  orientation: Inspector.Orientation;
+
+  /**
+   * The source of events the inspector panel listens for.
+   */
+  source: Inspector.IInspectable;
+}
+
+
+/**
  * A panel which contains a set of inspectors.
  */
 export
-class Inspector extends TabPanel {
+class Inspector extends TabPanel implements IInspector {
   /**
    * Construct an inspector.
    */
@@ -89,17 +106,17 @@ class Inspector extends TabPanel {
       widget.rank = value.rank;
       widget.remembers = !!value.remembers;
       widget.title.closable = false;
-      widget.title.text = value.name;
+      widget.title.label = value.name;
       if (value.className) {
         widget.addClass(value.className);
       }
       this._items[value.type] = widget;
-      this.addChild(widget);
+      this.addWidget(widget);
     });
   }
 
   /**
-   * Set the orientation of the inspector panel.
+   * The orientation of the inspector panel.
    */
   get orientation(): Inspector.Orientation {
     return this._orientation;
@@ -116,7 +133,7 @@ class Inspector extends TabPanel {
   }
 
   /**
-   * Set the source of events the inspector panel listens for.
+   * The source of events the inspector panel listens for.
    */
   get source(): Inspector.IInspectable {
     return this._source;
@@ -233,14 +250,14 @@ namespace Inspector {
   export
   interface IInspectable {
     /**
-     * A signal emitted when inspector should clear all items with no history.
-     */
-    clearEphemeral: ISignal<any, void>;
-
-    /**
      * A signal emitted when the handler is disposed.
      */
     disposed: ISignal<any, void>;
+
+    /**
+     * A signal emitted when inspector should clear all items with no history.
+     */
+    ephemeralCleared: ISignal<any, void>;
 
     /**
      * A signal emitted when an inspector value is generated.
@@ -348,6 +365,11 @@ class InspectorItem extends Panel {
   }
 
   /**
+   * A signal emitted when an inspector widget's orientation is toggled.
+   */
+  orientationToggled: ISignal<InspectorItem, void>;
+
+  /**
    * The text of the inspector.
    */
   get content(): Widget {
@@ -367,7 +389,7 @@ class InspectorItem extends Panel {
     this._content = newValue;
     if (this._content) {
       this._content.addClass(CONTENT_CLASS);
-      this.addChild(this._content);
+      this.addWidget(this._content);
       if (this.remembers) {
         this._history.push(newValue);
         this._index++;
@@ -387,13 +409,6 @@ class InspectorItem extends Panel {
     }
     this._orientation = newValue;
     this.update();
-  }
-
-  /**
-   * A signal emitted when an inspector widget's orientation is toggled.
-   */
-  get orientationToggled(): ISignal<InspectorItem, void> {
-    return Private.orientationToggledSignal.bind(this);
   }
 
   /**
@@ -455,7 +470,7 @@ class InspectorItem extends Panel {
     }
 
     this._toolbar = this._createToolbar();
-    this.insertChild(0, this._toolbar);
+    this.insertWidget(0, this._toolbar);
   }
 
   /**
@@ -553,13 +568,5 @@ class InspectorItem extends Panel {
 }
 
 
-/**
- * A namespace for inspector private data.
- */
-namespace Private {
-  /**
-   * A signal emitted when an inspector's orientation is toggled.
-   */
-  export
-  const orientationToggledSignal = new Signal<InspectorItem, void>();
-}
+// Define the signals for the `InspectorItem` class.
+defineSignal(InspectorItem.prototype, 'orientationToggled');

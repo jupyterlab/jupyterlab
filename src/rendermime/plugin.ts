@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  RenderMime
-} from './index';
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
+  JupyterLabPlugin
+} from '../application';
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
@@ -14,16 +18,36 @@ import {
   defaultSanitizer
 } from '../sanitizer';
 
+import {
+  IRenderMime as IBaseRenderMime, RenderMime
+} from './index';
+
+
+/* tslint:disable */
+/**
+ * The rendermime token.
+ */
+export
+const IRenderMime = new Token<IRenderMime>('jupyter.services.rendermime');
+/* tslint:enable */
+
+
+/**
+ * The rendermime interface.
+ */
+export
+interface IRenderMime extends IBaseRenderMime {}
 
 
 /**
  * The default rendermime provider.
  */
 export
-const renderMimeProvider = {
+const renderMimeProvider: JupyterLabPlugin<IRenderMime> = {
   id: 'jupyter.services.rendermime',
-  provides: RenderMime,
-  resolve: () => {
+  provides: IRenderMime,
+  activate: (): IRenderMime => {
+    let sanitizer = defaultSanitizer;
     const transformers = [
       new JavascriptRenderer(),
       new MarkdownRenderer(),
@@ -41,6 +65,6 @@ const renderMimeProvider = {
         order.push(m);
       }
     }
-    return new RenderMime({ renderers, order, sanitizer: defaultSanitizer });
+    return new RenderMime({ renderers, order, sanitizer });
   }
 };

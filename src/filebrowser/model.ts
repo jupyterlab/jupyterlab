@@ -6,20 +6,21 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  deepEqual
+} from 'phosphor/lib/algorithm/json';
+
+import {
   IDisposable
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
+
+import {
+  clearSignalData, defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   IChangedArgs
-} from 'phosphor-properties';
+} from '../common/interfaces';
 
-import {
-  ISignal, Signal, clearSignalData
-} from 'phosphor-signaling';
-
-import {
-  deepEqual
-} from '../notebook/common/json';
 
 
 /**
@@ -44,23 +45,17 @@ class FileBrowserModel implements IDisposable {
   /**
    * A signal emitted when the path changes.
    */
-  get pathChanged(): ISignal<FileBrowserModel, IChangedArgs<string>> {
-    return Private.pathChangedSignal.bind(this);
-  }
+  pathChanged: ISignal<FileBrowserModel, IChangedArgs<string>>;
 
   /**
    * Get the refreshed signal.
    */
-  get refreshed(): ISignal<FileBrowserModel, void> {
-    return Private.refreshedSignal.bind(this);
-  }
+  refreshed: ISignal<FileBrowserModel, void>;
 
   /**
    * Get the file path changed signal.
    */
-  get fileChanged(): ISignal<FileBrowserModel, IChangedArgs<string>> {
-    return Private.fileChangedSignal.bind(this);
-  }
+  fileChanged: ISignal<FileBrowserModel, IChangedArgs<string>>;
 
   /**
    * Get the current path.
@@ -397,6 +392,11 @@ class FileBrowserModel implements IDisposable {
 }
 
 
+// Define the signals for the `FileBrowserModel` class.
+defineSignal(FileBrowserModel.prototype, 'pathChanged');
+defineSignal(FileBrowserModel.prototype, 'refreshed');
+defineSignal(FileBrowserModel.prototype, 'fileChanged');
+
 /**
  * The namespace for the `FileBrowserModel` class statics.
  */
@@ -419,24 +419,6 @@ namespace FileBrowserModel {
  * The namespace for the file browser model private data.
  */
 namespace Private {
-  /**
-   * A signal emitted when a model refresh occurs.
-   */
-  export
-  const refreshedSignal = new Signal<FileBrowserModel, void>();
-
-  /**
-   * A signal emitted when the a file changes path.
-   */
-  export
-  const fileChangedSignal = new Signal<FileBrowserModel, IChangedArgs<string>>();
-
-  /**
-   * A signal emitted when the path changes.
-   */
-  export
-  const pathChangedSignal = new Signal<FileBrowserModel, IChangedArgs<string>> ();
-
   /**
    * Parse the content of a `FileReader`.
    *

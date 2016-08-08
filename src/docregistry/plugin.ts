@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  DocumentRegistry, TextModelFactory, Base64ModelFactory
+  JupyterLabPlugin
+} from '../application';
+
+import {
+  DocumentRegistry, IDocumentRegistry, TextModelFactory, Base64ModelFactory
 } from './index';
 
 
@@ -10,10 +14,10 @@ import {
  * The default document registry provider.
  */
 export
-const docRegistryProvider = {
+const docRegistryProvider: JupyterLabPlugin<IDocumentRegistry> = {
   id: 'jupyter.services.document-registry',
-  provides: DocumentRegistry,
-  resolve: () => {
+  provides: IDocumentRegistry,
+  activate: (): IDocumentRegistry => {
     let registry = new DocumentRegistry();
     registry.addModelFactory(new TextModelFactory());
     registry.addModelFactory(new Base64ModelFactory());

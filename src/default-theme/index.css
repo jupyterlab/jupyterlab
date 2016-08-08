@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+@import url('~phosphor/styles/base.css');
 @import url('~jupyterlab/lib/console/base.css');
 @import url('~jupyterlab/lib/notebook/index.css');
 @import url('~jupyterlab/lib/notebook/theme.css');
@@ -20,32 +21,32 @@
 @import './inspector.css';
 @import './markdownwidget.css';
 @import './rendermime.css';
+@import './shell.css';
 
 @import '../landing/index.css';
 
 
 body {
-  margin: 0;
-  padding: 0;
   background: #E0E0E0;
-  overflow: hidden;
   font-family: sans-serif;
-}
-
-
-.p-ApplicationShell.p-Widget {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  font-size: 14px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 
-#p-top-panel {
-  display: flex;
-  min-height: 24px;
+.p-Widget {
+  background: white;
+}
+
+
+.p-Widget.p-mod-hidden {
+  background: none;
 }
 
 
@@ -66,100 +67,12 @@ body {
 }
 
 
-
-.jp-FileBrowser {
-  min-width: 300px;
-}
-
-
-#p-right-stack {
-  border-left: 1px solid #BDBDBD;
-}
-
-#p-left-stack {
-  border-right: 1px solid #BDBDBD;
-}
-
-.p-SideBar {
-  min-width: 36px;
-  max-width: 36px;
-  font-size: 14px;
-  color: #777777;
-  background: white;
-}
-
-
-.p-SideBar.p-Widget {
-  overflow: visible;
-}
-
-
-.p-SideBar.p-mod-left {
-  border-right: 1px solid #BDBDBD;
-}
-
-
-.p-SideBar.p-mod-right {
-  border-left: 1px solid #BDBDBD;
-}
-
-
-.p-SideBar-content {
-  height: 35px;
-  transform-origin: 0 0 0;
-}
-
-
-.p-SideBar.p-mod-left > .p-SideBar-content {
-  flex-direction: row-reverse;
-  transform: rotate(-90deg) translateX(-100%);
-}
-
-
-.p-SideBar.p-mod-right > .p-SideBar-content {
-  flex-direction: row;
-  transform: rotate(90deg) translateY(-100%);
-}
-
-
-.p-SideBar-button {
-  padding: 0 18px;
-  line-height: 35px;
-}
-
-
-.p-SideBar-button:hover:not(.p-mod-current) {
-  background: #FAFAFA;
-}
-
-
-.p-SideBar-button.p-mod-current {
-  color: #2196F3;
-  background: #FAFAFA;
-}
-
-
-.p-SideBar.p-mod-left .p-SideBar-button {
-  border-left: 1px solid #BDBDBD;
-}
-
-
-.p-SideBar.p-mod-right .p-SideBar-button {
-  border-right: 1px solid #BDBDBD;
-}
-
-
-#p-main-dock-panel {
-  padding: 8px;
-}
-
-
-.p-DockTabPanel {
+.p-DockPanel-tabPanel {
   border-top: none;
 }
 
 
-.p-DockTabPanel > .p-StackedPanel {
+.p-DockPanel-tabPanel > .p-StackedPanel {
   background: white;
   border-left: 1px solid #BDBDBD;
   border-right: 1px solid #BDBDBD;
@@ -183,10 +96,43 @@ body {
 
 
 .p-TabBar {
+  overflow: visible;
   min-height: 24px;
   max-height: 24px;
   color: #777777;
   font-size: 13px;
+}
+
+
+.p-TabBar.p-mod-horizontal {
+  min-height: 24px;
+  max-height: 24px;
+}
+
+
+.p-TabBar.p-mod-vertical {
+  min-width: 24px;
+  max-width: 24px;
+}
+
+
+.p-TabBar.p-mod-top {
+  border-bottom: 1px solid #C0C0C0;
+}
+
+
+.p-TabBar.p-mod-bottom {
+  border-top: 1px solid #C0C0C0;
+}
+
+
+.p-TabBar.p-mod-left {
+  border-right: 1px solid #C0C0C0;
+}
+
+
+.p-TabBar.p-mod-right {
+  border-left: 1px solid #C0C0C0;
 }
 
 
@@ -198,15 +144,18 @@ body {
 
 .p-TabBar-content {
   min-width: 0;
-  /* max-height: 27px; */
+  min-height: 0;
   padding-right: 1px;
 }
 
 
-/* increase specificity to override default */
-.p-TabBar > .p-TabBar-footer {
-  flex: 0 0 1px;
-  background: #BDBDBD;
+.p-TabBar.p-mod-top > .p-TabBar-content {
+  align-items: flex-end;
+}
+
+
+.p-TabBar.p-mod-bottom > .p-TabBar-content {
+  align-items: flex-start;
 }
 
 
@@ -237,10 +186,90 @@ body {
 }
 
 
+.p-TabBar.p-mod-top .p-TabBar-tab,
+.p-TabBar.p-mod-bottom .p-TabBar-tab {
+  flex: 0 1 125px;
+  min-height: 20px;
+  max-height: 20px;
+  min-width: 35px;
+  margin-left: -1px;
+  line-height: 20px;
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab {
+  border-bottom: none;
+}
+
+
+.p-TabBar.p-mod-bottom .p-TabBar-tab {
+  border-top: none;
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab:first-child,
+.p-TabBar.p-mod-bottom .p-TabBar-tab:first-child {
+  margin-left: 0;
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
+.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+  min-height: 23px;
+  max-height: 23px;
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current {
+  transform: translateY(1px);
+}
+
+
+.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+  transform: translateY(-1px);
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab,
+.p-TabBar.p-mod-right .p-TabBar-tab {
+  flex: 0 1 40px;
+  margin-top: -1px;
+  line-height: 40px;
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab {
+  border-right: none;
+}
+
+
+.p-TabBar.p-mod-right .p-TabBar-tab {
+  border-left: none;
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab:first-child,
+.p-TabBar.p-mod-right .p-TabBar-tab:first-child {
+  margin-top: 0;
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab.p-mod-current,
+.p-TabBar.p-mod-right .p-TabBar-tab.p-mod-current {
+  min-width: 80px;
+  max-width: 80px;
+}
+
+
+.p-TabBar.p-mod-right .p-TabBar-tab.p-mod-current {
+  transform: translateX(-1px);
+}
+
+
 .p-TabBar-tabIcon,
-.p-TabBar-tabText,
+.p-TabBar-tabLabel,
 .p-TabBar-tabCloseIcon {
-  line-height: 24px;
+  display: inline-block;
 }
 
 
@@ -250,8 +279,9 @@ body {
 
 
 .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
+  content: '\f00d';
   font-family: FontAwesome;
-  content: '\f00d'; /* close */
+  font-size: 10px;
 }
 
 
@@ -259,6 +289,34 @@ body {
   font-family: FontAwesome;
   content: '\f111'; /* circle */
   font-size: 10px;
+}
+
+
+.p-TabPanel-stackedPanel {
+  padding: 10px;
+  background: white;
+  border: 1px solid #C0C0C0;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+
+.p-TabPanel.p-mod-top-to-bottom > .p-TabPanel-stackedPanel {
+  border-top: none;
+}
+
+
+.p-TabPanel.p-mod-bottom-to-top > .p-TabPanel-stackedPanel {
+  border-bottom: none;
+}
+
+
+.p-TabPanel.p-mod-left-to-right > .p-TabPanel-stackedPanel {
+  border-left: none;
+}
+
+
+.p-TabPanel.p-mod-right-to-left > .p-TabPanel-stackedPanel {
+  border-right: none;
 }
 
 
@@ -349,7 +407,7 @@ body {
 }
 
 
-.p-Menu-itemText {
+.p-Menu-itemLabel {
   padding: 4px 35px 4px 2px;
 }
 
@@ -365,13 +423,13 @@ body {
 }
 
 
-.p-Menu-item.p-type-separator > span {
+.p-Menu-item.p-type-separator > div {
   padding: 0;
   height: 9px;
 }
 
 
-.p-Menu-item.p-type-separator > span::after {
+.p-Menu-item.p-type-separator > div::after {
   content: '';
   display: block;
   position: relative;
@@ -393,6 +451,11 @@ body {
 
 .p-Menu-item.p-type-submenu > .p-Menu-itemSubmenuIcon::before {
   content: '\f0da';
+}
+
+
+.p-MenuBar-itemMnemonic {
+  text-decoration: underline;
 }
 
 

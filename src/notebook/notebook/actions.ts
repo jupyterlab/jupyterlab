@@ -7,7 +7,7 @@ import {
 
 import {
   MimeData as IClipboard
-} from 'phosphor-dragdrop';
+} from 'phosphor/lib/core/mimedata';
 
 import {
   ICellModel, CodeCellModel,

@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  utils
-} from 'jupyter-js-services';
+  IDisposable, DisposableDelegate
+} from 'phosphor/lib/core/disposable';
 
 import {
-  IDisposable, DisposableDelegate
-} from 'phosphor-disposable';
+  Token
+} from 'phosphor/lib/core/token';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   IModelFactory, IWidgetFactory, IWidgetFactoryOptions,
@@ -20,11 +20,203 @@ import {
 } from './interfaces';
 
 
+/* tslint:disable */
+/**
+ * The document registry token.
+ */
+export
+const IDocumentRegistry = new Token<IDocumentRegistry>('jupyter.services.document-registry');
+/* tslint:enable */
+
+
+/**
+ * An interface for document registries.
+ */
+export
+interface IDocumentRegistry extends IDisposable {
+  /**
+   * Add a widget factory to the registry.
+   *
+   * @param factory - The factory instance to register.
+   *
+   * @param options - The options used to register the factory.
+   *
+   * @returns A disposable which will unregister the factory.
+   *
+   * #### Notes
+   * If a factory with the given `'displayName'` is already registered,
+   * a warning will be logged, and this will be a no-op.
+   * If `'*'` is given as a default extension, the factory will be registered
+   * as the global default.
+   * If an extension or global default is already registered, this factory
+   * will override the existing default.
+   */
+  addWidgetFactory(factory: IWidgetFactory<Widget, IDocumentModel>, options: IWidgetFactoryOptions): IDisposable;
+
+  /**
+   * Add a model factory to the registry.
+   *
+   * @param factory - The factory instance.
+   *
+   * @returns A disposable which will unregister the factory.
+   *
+   * #### Notes
+   * If a factory with the given `name` is already registered, or
+   * the given factory is already registered, a warning will be logged
+   * and this will be a no-op.
+   */
+  addModelFactory(factory: IModelFactory): IDisposable;
+
+  /**
+   * Add a widget extension to the registry.
+   *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @param extension - A widget extension.
+   *
+   * @returns A disposable which will unregister the extension.
+   *
+   * #### Notes
+   * If the extension is already registered for the given
+   * widget name, a warning will be logged and this will be a no-op.
+   */
+  addWidgetExtension(widgetName: string, extension: IWidgetExtension<Widget, IDocumentModel>): IDisposable;
+
+  /**
+   * Add a file type to the document registry.
+   *
+   * @params fileType - The file type object to register.
+   *
+   * @returns A disposable which will unregister the command.
+   *
+   * #### Notes
+   * These are used to populate the "Create New" dialog.
+   * If the file type with the same name is already registered, a warning will
+   * be logged and this will be a no-op.
+   */
+  addFileType(fileType: IFileType): IDisposable;
+
+  /**
+   * Add a creator to the registry.
+   *
+   * @params creator - The file creator object to register.
+   *
+   * @params after - The optional item name to insert after.
+   *
+   * @returns A disposable which will unregister the creator.
+   *
+   * #### Notes
+   * If a creator of the same name is already registered,
+   * a warning will be logged and this will be a no-op.
+   * If `after` is not given or not already registered, it will be moved
+   * to the end.
+   */
+  addCreator(creator: IFileCreator, after?: string): IDisposable;
+
+  /**
+   * List the names of the valid registered widget factories.
+   *
+   * @param ext - An optional file extension to filter the results.
+   *
+   * @returns A new array of registered widget factory names.
+   *
+   * #### Notes
+   * Only the widget factories whose associated model factory have
+   * been registered will be returned.
+   * The first item in the list is considered the default. The returned list
+   * has widget factories in the following order:
+   * - extension-specific default factory
+   * - global default factory
+   * - all other extension-specific factories
+   * - all other global factories
+   */
+  listWidgetFactories(ext: string): string[];
+
+  /**
+   * Return the name of the default widget factory for a given extension.
+   *
+   * @param ext - An optional file extension.
+   *
+   * @returns The default widget factory name for the extension (if given) or the global default.
+   */
+  defaultWidgetFactory(ext: string): string;
+
+  /**
+   * List the names of the registered model factories.
+   *
+   * @returns A new array of registered model factory names.
+   */
+  listModelFactories(): string[];
+
+  /**
+   * Get a list of file types that have been registered.
+   *
+   * @returns A new array of registered file type objects.
+   */
+  listFileTypes(): IFileType[];
+
+  /**
+   * Get an ordered list of the file creators that have been registered.
+   *
+   * @returns A new array of registered file creator objects.
+   */
+  listCreators(): IFileCreator[];
+
+  /**
+   * Get a file type by name.
+   */
+  getFileType(name: string): IFileType;
+
+  /**
+   * Get a creator by name.
+   */
+  getCreator(name: string): IFileCreator;
+
+  /**
+   * Get a kernel preference.
+   *
+   * @param ext - The file extension.
+   *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @returns A kernel preference.
+   */
+  getKernelPreference(ext: string, widgetName: string): IKernelPreference;
+
+  /**
+   * Get the model factory registered for a given widget factory.
+   *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @returns A model factory instance.
+   */
+  getModelFactoryFor(widgetName: string): IModelFactory;
+
+  /**
+   * Get a widget factory by name.
+   *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @returns A widget factory instance.
+   */
+  getWidgetFactory(widgetName: string): IWidgetFactory<Widget, IDocumentModel>;
+
+  /**
+   * Get the registered extensions for a given widget.
+   *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @returns A new array of widget extensions.
+   */
+  getWidgetExtensions(widgetName: string): IWidgetExtension<Widget, IDocumentModel>[];
+}
+
+
 /**
  * The document registry.
  */
 export
-class DocumentRegistry implements IDisposable {
+class DocumentRegistry implements IDocumentRegistry {
   /**
    * Get whether the document registry has been disposed.
    */
@@ -342,7 +534,7 @@ class DocumentRegistry implements IDisposable {
     name = name.toLowerCase();
     for (let i = 0; i < this._fileTypes.length; i++) {
       let fileType = this._fileTypes[i];
-      if (fileType.name === name) {
+      if (fileType.name.toLowerCase() === name) {
         return fileType;
       }
     }

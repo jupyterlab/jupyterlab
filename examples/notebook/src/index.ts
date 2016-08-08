@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  NotebookPanel, trustNotebook, NotebookWidgetFactory,
+  NotebookPanel, NotebookWidgetFactory,
   NotebookModelFactory, NotebookActions
 } from 'jupyterlab/lib/notebook';
 
@@ -32,33 +32,56 @@ import {
 } from 'jupyterlab/lib/sanitizer';
 
 import {
-  CommandPalette, StandardPaletteModel, IStandardPaletteItemOptions
-} from 'phosphor-commandpalette';
-
-import {
   MimeData
-} from 'phosphor-dragdrop';
+} from 'phosphor/lib/core/mimedata';
 
 import {
-  KeymapManager
-} from 'phosphor-keymap';
+  CommandRegistry
+} from 'phosphor/lib/ui/commandregistry';
+
+import {
+  CommandPalette
+} from 'phosphor/lib/ui/commandpalette';
+
+import {
+  Keymap
+} from 'phosphor/lib/ui/keymap';
 
 import {
   SplitPanel
-} from 'phosphor-splitpanel';
+} from 'phosphor/lib/ui/splitpanel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
-import 'jupyterlab/lib/dialog/index.css';
-import 'jupyterlab/lib/dialog/theme.css';
-import 'jupyterlab/lib/iframe/index.css';
-import 'jupyterlab/lib/notebook/index.css';
-import 'jupyterlab/lib/notebook/theme.css';
-import 'jupyterlab/lib/notebook/completion/index.css';
+import 'jupyterlab/lib/default-theme/index.css';
+
 
 let NOTEBOOK = 'test.ipynb';
+
+
+/**
+ * The map of command ids used by the notebook.
+ */
+const cmdIds = {
+  save: 'notebook:save',
+  interrupt: 'notebook:interrupt-kernel',
+  restart: 'notebook:restart-kernel',
+  switchKernel: 'notebook:switch-kernel',
+  runAndAdvance: 'notebook-cells:run-and-advance',
+  deleteCell: 'notebook-cells:delete',
+  selectAbove: 'notebook-cells:select-above',
+  selectBelow: 'notebook-cells:select-below',
+  extendAbove: 'notebook-cells:extend-above',
+  extendBelow: 'notebook-cells:extend-below',
+  editMode: 'notebook:edit-mode',
+  merge: 'notebook-cells:merge',
+  split: 'notebook-cells:split',
+  commandMode: 'notebook:command-mode',
+  undo: 'notebook-cells:undo',
+  redo: 'notebook-cells:redo'
+};
 
 
 function main(): void {
@@ -70,7 +93,8 @@ function main(): void {
 
 function createApp(manager: IServiceManager): void {
   // Initialize the keymap manager with the bindings.
-  let keymap = new KeymapManager();
+  let commands = new CommandRegistry();
+  let keymap = new Keymap({ commands });
   let useCapture = true;
 
   // Setup the keydown listener for the document.
@@ -124,385 +148,192 @@ function createApp(manager: IServiceManager): void {
   });
 
   let nbWidget = docManager.open(NOTEBOOK) as NotebookPanel;
-  let pModel = new StandardPaletteModel();
-  let palette = new CommandPalette();
-  palette.model = pModel;
+  let palette = new CommandPalette({ commands, keymap });
 
   let panel = new SplitPanel();
   panel.id = 'main';
-  panel.orientation = SplitPanel.Horizontal;
+  panel.orientation = 'horizontal';
   panel.spacing = 0;
   SplitPanel.setStretch(palette, 0);
-  panel.attach(document.body);
-  panel.addChild(palette);
-  panel.addChild(nbWidget);
+  panel.addWidget(palette);
+  panel.addWidget(nbWidget);
+  Widget.attach(panel, document.body);
+
   SplitPanel.setStretch(nbWidget, 1);
   window.onresize = () => panel.update();
 
-  let saveHandler = () => nbWidget.context.save();
-  let interruptHandler = () => {
-    if (nbWidget.context.kernel) {
-      nbWidget.context.kernel.interrupt();
+  commands.addCommand(cmdIds.save, {
+    label: 'Save',
+    execute: () => nbWidget.context.save()
+  });
+  commands.addCommand(cmdIds.interrupt, {
+    label: 'Interrupt',
+    execute: () => {
+      if (nbWidget.context.kernel) {
+        nbWidget.context.kernel.interrupt();
+      }
     }
-  };
-  let restartHandler = () => {
-    restartKernel(nbWidget.kernel, nbWidget.node);
-  };
-  let switchHandler = () => {
-    selectKernelForContext(nbWidget.context, nbWidget.node);
-  };
-  let runAdvanceHandler = () => {
-    NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.kernel);
-  };
-  let editHandler = () => { nbWidget.content.mode = 'edit'; };
-  let commandHandler = () => { nbWidget.content.mode = 'command'; };
-  let codeHandler = () => {
-    NotebookActions.changeCellType(nbWidget.content, 'code');
-  };
-  let markdownHandler = () => {
-    NotebookActions.changeCellType(nbWidget.content, 'markdown');
-  };
-  let rawHandler = () => {
-    NotebookActions.changeCellType(nbWidget.content, 'raw');
-  };
-  let selectBelowHandler = () => {
-    NotebookActions.selectBelow(nbWidget.content);
-  };
-  let selectAboveHandler = () => {
-    NotebookActions.selectAbove(nbWidget.content);
-  };
-  let cutHandler = () => {
-    NotebookActions.cut(nbWidget.content, nbWidget.clipboard);
-  };
-  let copyHandler = () => {
-    NotebookActions.copy(nbWidget.content, nbWidget.clipboard);
-  };
-  let pasteHandler = () => {
-    NotebookActions.paste(nbWidget.content, nbWidget.clipboard);
-  };
-  let deleteHandler = () => {
-    NotebookActions.deleteCells(nbWidget.content);
-  };
-  let insertAboveHandler = () => {
-    NotebookActions.insertAbove(nbWidget.content);
-  };
-  let insertBelowHandler = () => {
-    NotebookActions.insertBelow(nbWidget.content);
-  };
-  let extendAboveHandler = () => {
-    NotebookActions.extendSelectionAbove(nbWidget.content);
-  };
-  let extendBelowHandler = () => {
-    NotebookActions.extendSelectionBelow(nbWidget.content);
-  };
-  let mergeHandler = () => {
-    NotebookActions.mergeCells(nbWidget.content);
-  };
-  let splitHandler = () => {
-    NotebookActions.splitCell(nbWidget.content);
-  };
-  let undoHandler = () => {
-    nbWidget.content.mode = 'command';
-    nbWidget.model.cells.undo();
-  };
-  let redoHandler = () => {
-    nbWidget.content.mode = 'command';
-    nbWidget.model.cells.redo();
-  };
+  });
+  commands.addCommand(cmdIds.restart, {
+    label: 'Restart Kernel',
+    execute: () => restartKernel(nbWidget.kernel, nbWidget.node)
+  });
+  commands.addCommand(cmdIds.switchKernel, {
+    label: 'Switch Kernel',
+    execute: () => selectKernelForContext(nbWidget.context, nbWidget.node)
+  });
+  commands.addCommand(cmdIds.runAndAdvance, {
+    label: 'Run and Advance',
+    execute: () => {
+      NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.kernel);
+    }
+  });
+  commands.addCommand(cmdIds.editMode, {
+    label: 'Edit Mode',
+    execute: () => { nbWidget.content.mode = 'edit'; }
+  });
+  commands.addCommand(cmdIds.commandMode, {
+    label: 'Command Mode',
+    execute: () => { nbWidget.content.mode = 'command'; }
+  });
+  commands.addCommand(cmdIds.selectBelow, {
+    label: 'Select Below',
+    execute: () => NotebookActions.selectBelow(nbWidget.content)
+  });
+  commands.addCommand(cmdIds.selectAbove, {
+    label: 'Select Above',
+    execute: () => NotebookActions.selectAbove(nbWidget.content)
+  });
+  commands.addCommand(cmdIds.extendAbove, {
+    label: 'Extend Above',
+    execute: () => NotebookActions.extendSelectionAbove(nbWidget.content)
+  });
+  commands.addCommand(cmdIds.extendBelow, {
+    label: 'Extend Below',
+    execute: () => NotebookActions.extendSelectionBelow(nbWidget.content)
+  });
+  commands.addCommand(cmdIds.merge, {
+    label: 'Merge Cells',
+    execute: () => NotebookActions.mergeCells(nbWidget.content)
+  });
+  commands.addCommand(cmdIds.split, {
+    label: 'Split Cell',
+    execute: () => NotebookActions.splitCell(nbWidget.content)
+  });
+  commands.addCommand(cmdIds.undo, {
+    label: 'Undo',
+    execute: () => NotebookActions.undo(nbWidget.content)
+  });
+  commands.addCommand(cmdIds.redo, {
+    label: 'Redo',
+    execute: () => NotebookActions.redo(nbWidget.content)
+  });
 
-  let items: IStandardPaletteItemOptions[] = [
-  {
-    category: 'Notebook',
-    text: 'Save',
-    shortcut: 'Accel S',
-    handler: saveHandler
-  },
-  {
-    category: 'Notebook',
-    text: 'Interrupt Kernel',
-    shortcut: 'I I',
-    handler: interruptHandler
-  },
-  {
-    category: 'Notebook',
-    text: 'Restart Kernel',
-    shortcut: '0 0',
-    handler: restartHandler
-  },
-  {
-    category: 'Notebook',
-    text: 'Switch Kernel',
-    handler: switchHandler
-  },
-  {
-    category: 'Notebook',
-    text: 'Trust Notebook',
-    handler: () => {
-      trustNotebook(nbWidget.model, nbWidget.node);
-    }
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Run and Advance',
-    shortcut: 'Shift Enter',
-    handler: runAdvanceHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Run Selected',
-    handler: () => {
-      NotebookActions.run(nbWidget.content, nbWidget.context.kernel); }
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Run and Insert Below',
-    handler: () => {
-      NotebookActions.runAndInsert(nbWidget.content, nbWidget.context.kernel);
-    }
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'To Edit Mode',
-    handler: editHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'To Command Mode',
-    handler: commandHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Cut Selected',
-    shortcut: 'X',
-    handler: cutHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Copy Selected',
-    shortcut: 'C',
-    handler: copyHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Paste',
-    shortcut: 'V',
-    handler: pasteHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Delete Selected',
-    shortcut: 'D D',
-    handler: deleteHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Insert Above',
-    shortcut: 'A',
-    handler: insertAboveHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Insert Below',
-    shortcut: 'B',
-    handler: insertBelowHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Extend Selection Above',
-    shortcut: 'Shift J',
-    handler: extendAboveHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Extend Selection Below',
-    shortcut: 'Shift K',
-    handler: extendBelowHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Merge Selected',
-    shortcut: 'Shift M',
-    handler: mergeHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Split Cell',
-    shortcut: 'Control Shift Minus',
-    handler: splitHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'To Code Type',
-    shortcut: 'E',
-    handler: codeHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'To Markdown Type',
-    shortcut: 'M',
-    handler: markdownHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'To Raw Type',
-    shortcut: 'R',
-    handler: rawHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Select Above',
-    shortcut: 'ArrowUp',
-    handler: selectAboveHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Select Below',
-    shortcut: 'ArrowDown',
-    handler: selectBelowHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Undo Cell Action',
-    shortcut: 'Z',
-    handler: undoHandler
-  },
-  {
-    category: 'Notebook Cell',
-    text: 'Redo Cell Action',
-    shortcut: 'Y',
-    handler: redoHandler
-  },
-  ];
-  pModel.addItems(items);
+  let category = 'Notebook Operations';
+  [
+    cmdIds.interrupt,
+    cmdIds.restart,
+    cmdIds.editMode,
+    cmdIds.commandMode,
+    cmdIds.switchKernel
+  ].forEach(command => palette.addItem({ command, category }));
+
+  category = 'Notebook Cell Operations';
+  [
+    cmdIds.runAndAdvance,
+    cmdIds.split,
+    cmdIds.merge,
+    cmdIds.selectAbove,
+    cmdIds.selectBelow,
+    cmdIds.extendAbove,
+    cmdIds.extendBelow,
+    cmdIds.undo,
+    cmdIds.redo
+  ].forEach(command => palette.addItem({ command, category }));
 
   let bindings = [
   {
     selector: '.jp-Notebook',
-    sequence: ['Shift Enter'],
-    handler: runAdvanceHandler
+    keys: ['Shift Enter'],
+    command: cmdIds.runAndAdvance
   },
   {
     selector: '.jp-Notebook',
-    sequence: ['Accel S'],
-    handler: saveHandler
+    keys: ['Accel S'],
+    command: cmdIds.save
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['I', 'I'],
-    handler: interruptHandler
+    keys: ['I', 'I'],
+    command: cmdIds.interrupt
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['0', '0'],
-    handler: restartHandler
+    keys: ['0', '0'],
+    command: cmdIds.restart
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Enter'],
-    handler: editHandler
+    keys: ['Enter'],
+    command: cmdIds.editMode
   },
   {
     selector: '.jp-Notebook.jp-mod-editMode',
-    sequence: ['Escape'],
-    handler: commandHandler
+    keys: ['Escape'],
+    command: cmdIds.commandMode
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['E'],
-    handler: codeHandler
-  },
-  {
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['M'],
-    handler: markdownHandler
-  },
-  {
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['R'],
-    handler: rawHandler
-  },
-  {
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['X'],
-    handler: cutHandler
-  },
-  {
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['C'],
-    handler: copyHandler
-  },
-  {
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['V'],
-    handler: pasteHandler
-  },
-  {
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['D', 'D'],
-    handler: deleteHandler
-  },
-  {
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Shift M'],
-    handler: mergeHandler
+    keys: ['Shift M'],
+    command: cmdIds.merge
   },
   {
     selector: '.jp-Notebook.jp-mod-editMode',
-    sequence: ['Ctrl Shift -'],
-    handler: splitHandler
+    keys: ['Ctrl Shift -'],
+    command: cmdIds.split
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['A'],
-    handler: insertAboveHandler
+    keys: ['J'],
+    command: cmdIds.selectBelow
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['B'],
-    handler: insertBelowHandler
+    keys: ['ArrowDown'],
+    command: cmdIds.selectBelow
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['J'],
-    handler: selectBelowHandler
+    keys: ['K'],
+    command: cmdIds.selectAbove
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['ArrowDown'],
-    handler: selectBelowHandler
+    keys: ['ArrowUp'],
+    command: cmdIds.selectAbove
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['K'],
-    handler: selectAboveHandler
+    keys: ['Shift K'],
+    command: cmdIds.extendAbove
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['ArrowUp'],
-    handler: selectAboveHandler
+    keys: ['Shift J'],
+    command: cmdIds.extendBelow
   },
   {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Shift K'],
-    handler: extendAboveHandler
-  },
-  {
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Shift J'],
-    handler: extendBelowHandler
-  },
-  {
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Z'],
-    handler: undoHandler
+    keys: ['Z'],
+    command: cmdIds.undo
   },
     {
     selector: '.jp-Notebook.jp-mod-commandMode',
-    sequence: ['Y'],
-    handler: redoHandler
+    keys: ['Y'],
+    command: cmdIds.redo
   }
   ];
-  keymap.add(bindings);
+  bindings.map(binding => keymap.addBinding(binding));
 }
 
 window.onload = main;

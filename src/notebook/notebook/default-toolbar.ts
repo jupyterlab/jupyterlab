@@ -7,11 +7,15 @@ import {
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   restartKernel
 } from '../../docregistry';
+
+import {
+  NotebookActions
+} from './actions';
 
 import {
   nbformat
@@ -22,16 +26,12 @@ import {
 } from './panel';
 
 import {
-  Notebook
-} from './widget';
-
-import {
   ToolbarButton
 } from './toolbar';
 
 import {
-  NotebookActions
-} from './actions';
+  Notebook
+} from './widget';
 
 
 /**
@@ -307,27 +307,10 @@ namespace ToolbarItems {
  */
 class CellTypeSwitcher extends Widget {
   /**
-   * Create the node for the cell type switcher.
-   */
-  static createNode(): HTMLElement {
-    let div = document.createElement('div');
-    let select = document.createElement('select');
-    for (let t of ['Code', 'Markdown', 'Raw']) {
-      let option = document.createElement('option');
-      option.value = t.toLowerCase();
-      option.textContent = t;
-      select.appendChild(option);
-    }
-    select.className = TOOLBAR_CELLTYPE_DROPDOWN;
-    div.appendChild(select);
-    return div;
-  }
-
-  /**
    * Construct a new cell type switcher.
    */
   constructor(widget: Notebook) {
-    super();
+    super({ node: createCellTypeSwitcherNode() });
     this.addClass(TOOLBAR_CELLTYPE);
 
     let select = this.node.firstChild as HTMLSelectElement;
@@ -390,6 +373,24 @@ class CellTypeSwitcher extends Widget {
 
   private _changeGuard = false;
   private _wildCard: HTMLOptionElement = null;
+}
+
+
+/**
+ * Create the node for the cell type switcher.
+ */
+function createCellTypeSwitcherNode(): HTMLElement {
+  let div = document.createElement('div');
+  let select = document.createElement('select');
+  for (let t of ['Code', 'Markdown', 'Raw']) {
+    let option = document.createElement('option');
+    option.value = t.toLowerCase();
+    option.textContent = t;
+    select.appendChild(option);
+  }
+  select.className = TOOLBAR_CELLTYPE_DROPDOWN;
+  div.appendChild(select);
+  return div;
 }
 
 

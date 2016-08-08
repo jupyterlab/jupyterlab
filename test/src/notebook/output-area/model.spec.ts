@@ -8,12 +8,8 @@ import {
 } from 'jupyter-js-services/lib/mockkernel';
 
 import {
-  ListChangeType
-} from '../../../../lib/common/observablelist';
-
-import {
   deepEqual
-} from '../../../../lib/notebook/common/json';
+} from 'phosphor/lib/algorithm/json';
 
 import {
   OutputAreaModel
@@ -93,7 +89,7 @@ describe('notebook/output-area/model', () => {
         let called = false;
         model.changed.connect((sender, args) => {
           expect(sender).to.be(model);
-          expect(args.type).to.be(ListChangeType.Add);
+          expect(args.type).to.be('add');
           expect(args.oldIndex).to.be(-1);
           expect(args.newIndex).to.be(0);
           expect(args.oldValue).to.be(void 0);

@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IKernel, KernelMessage
+} from 'jupyter-js-services';
+
+import {
   IDisposable
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
 
 import {
   clearSignalData
-} from 'phosphor-signaling';
-
-import {
-  IKernel, KernelMessage
-} from 'jupyter-js-services';
+} from 'phosphor/lib/core/signaling';
 
 
 /**

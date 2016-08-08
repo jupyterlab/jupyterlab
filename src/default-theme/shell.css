@@ -1,0 +1,154 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+#main {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+
+
+#jp-main-content-panel {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+
+#jp-top-panel {
+  display: flex;
+  flex: 0 0 auto;
+  min-height: 24px;
+}
+
+
+#jp-main-split-panel {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+
+#jp-left-stack, #jp-right-stack {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+
+#jp-left-stack > .p-Widget, #jp-right-stack > .p-Widget {
+  flex: 1 1 auto;
+  min-width: 300px;
+}
+
+
+.jp-SideBar.p-TabBar.jp-mod-right, .jp-SideBar.p-TabBar.jp-mod-left {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  list-style-type: none;
+  max-height: none;
+  color: #777777;
+  font-size: 14px;
+  min-width: 36px;
+  max-width: 36px;
+  overflow: visible;
+}
+
+
+.jp-SideBar.p-Widget {
+  overflow: visible;
+}
+
+
+.jp-SideBar.jp-mod-left .p-TabBar-content,
+.jp-SideBar.jp-mod-right .p-TabBar-content {
+  display: flex;
+  list-style: none;
+  height: 100%;
+  line-height: 35px;
+  background: #EEEEEE;
+  border: none;
+  border-top: 1px solid #BDBDBD;
+  margin-top: 1px;
+}
+
+
+.jp-SideBar.jp-mod-left .p-TabBar-content {
+  flex-direction: column;
+  border-right: 1px solid #BDBDBD;
+  margin-right: 1px;
+}
+
+
+.jp-SideBar.jp-mod-right .p-TabBar-content {
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  border-left: 1px solid #BDBDBD;
+  margin-left: 1px;
+}
+
+
+.jp-SideBar .p-TabBar-tab,
+.jp-SideBar .p-TabBar-tab.p-mod-current {
+  font-size: 13px;
+  width: 100px;
+  margin-bottom: 32px;
+  margin-top: 33px;
+  min-height: 35px;
+  max-height: 35px;
+  line-height: 35px;
+  text-align: center;
+  border: none;
+}
+
+
+.jp-SideBar .p-TabBar-tab.p-mod-current {
+  background: #EEEEEE;
+  color: #2196F3;
+}
+
+
+.jp-SideBar.jp-mod-left .p-TabBar-tab {
+  transform: rotate(-90deg) translateY(-100%);
+  border-left: 1px solid #BDBDBD;
+}
+
+
+.jp-SideBar.jp-mod-right .p-TabBar-tab {
+  transform: rotate(90deg) translateY(90%);
+  border-right: 1px solid #BDBDBD;
+}
+
+
+/*.jp-SideBar-button {
+  padding: 0 18px;
+  line-height: 35px;
+}
+
+
+.jp-SideBar-button:hover:not(.p-mod-current) {
+  background: #FAFAFA;
+}
+
+
+.jp-SideBar-button.p-mod-current {
+  color: #2196F3;
+  background: #FAFAFA;
+}
+
+
+.jp-SideBar.jp-mod-left .jp-SideBar-button {
+  border-left: 1px solid #BDBDBD;
+}
+
+
+.jp-SideBar.jp-mod-right .jp-SideBar-button {
+  border-right: 1px solid #BDBDBD;
+}
+*/

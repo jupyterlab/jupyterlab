@@ -3,19 +3,19 @@
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
-  Property
-} from 'phosphor-properties';
+  AttachedProperty
+} from 'phosphor/lib/core/properties';
 
 import {
   PanelLayout
-} from 'phosphor-panel';
+} from 'phosphor/lib/ui/panel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 /**
  * The class name added to notebook toolbars.
@@ -75,9 +75,9 @@ class NotebookToolbar extends Widget {
     let layout = this.layout as PanelLayout;
     let index = names.indexOf(after);
     if (index === -1) {
-      layout.addChild(widget);
+      layout.addWidget(widget);
     } else {
-      layout.insertChild(index + 1, widget);
+      layout.insertWidget(index + 1, widget);
     }
     Private.nameProperty.set(widget, name);
   }
@@ -90,8 +90,8 @@ class NotebookToolbar extends Widget {
   list(): string[] {
     let names: string[] = [];
     let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.childCount(); i++) {
-      let widget = layout.childAt(i);
+    for (let i = 0; i < layout.widgets.length; i++) {
+      let widget = layout.widgets.at(i);
       names.push(Private.nameProperty.get(widget));
     }
     return names;
@@ -105,17 +105,10 @@ class NotebookToolbar extends Widget {
 export
 class ToolbarButton extends Widget {
   /**
-   * Create the node for the toolbar button.
-   */
-  static createNode(): HTMLElement {
-    return document.createElement('span');
-  }
-
-  /**
    * Construct a new toolbar button.
    */
   constructor(options: ToolbarButton.IOptions = {}) {
-    super();
+    super({ node: Private.createNode() });
     options = options || {};
     this.addClass(TOOLBAR_BUTTON);
     this._onClick = options.onClick;
@@ -223,7 +216,13 @@ namespace Private {
    * An attached property for the name of a toolbar item.
    */
   export
-  const nameProperty = new Property<Widget, string>({
-    name: 'name',
-  });
+  const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
+
+  /**
+   * Create the node for the toolbar button.
+   */
+  export
+  function createNode(): HTMLElement {
+    return document.createElement('span');
+  }
 }

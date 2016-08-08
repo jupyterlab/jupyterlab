@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  DropAction, IDragEvent
-} from 'phosphor-dragdrop';
+  IDragEvent
+} from 'phosphor/lib/dom/dragdrop';
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   showDialog
@@ -89,6 +89,8 @@ class BreadCrumbs extends Widget {
     case 'p-drop':
       this._evtDrop(event as IDragEvent);
       break;
+    default:
+      return;
     }
   }
 
@@ -176,7 +178,9 @@ class BreadCrumbs extends Widget {
     event.preventDefault();
     event.stopPropagation();
     let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
-    if (dropTarget) dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    if (dropTarget) {
+      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    }
   }
 
   /**
@@ -187,9 +191,13 @@ class BreadCrumbs extends Widget {
     event.stopPropagation();
     event.dropAction = event.proposedAction;
     let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
-    if (dropTarget) dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    if (dropTarget) {
+      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+    }
     let index = utils.hitTestNodes(this._crumbs, event.clientX, event.clientY);
-    if (index !== -1) this._crumbs[index].classList.add(utils.DROP_TARGET_CLASS);
+    if (index !== -1) {
+      this._crumbs[index].classList.add(utils.DROP_TARGET_CLASS);
+    }
   }
 
   /**
@@ -198,8 +206,8 @@ class BreadCrumbs extends Widget {
   private _evtDrop(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    if (event.proposedAction === DropAction.None) {
-      event.dropAction = DropAction.None;
+    if (event.proposedAction === 'none') {
+      event.dropAction = 'none';
       return;
     }
     if (!event.mimeData.hasData(utils.CONTENTS_MIME)) {

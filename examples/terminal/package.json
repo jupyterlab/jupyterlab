@@ -4,15 +4,13 @@
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules",
-    "postinstall": "npm dedupe",
     "update": "rimraf node_modules/jupyterlab && npm install",
     "watch": "watch 'npm run update && npm run build' ../../src src --wait 10"
   },
   "dependencies": {
-    "jupyter-js-services": "^0.17.0",
+    "jupyter-js-services": "^0.18.0",
     "jupyterlab": "file:../..",
-    "phosphor-dockpanel": "^0.9.7",
-    "url-loader": "^0.5.7",
+    "phosphor": "^0.6.0",
     "xterm": "^1.0.0"
   },
   "devDependencies": {
@@ -21,6 +19,7 @@
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
     "typescript": "^1.8.10",
+    "url-loader": "^0.5.7",
     "watch": "^0.18.0",
     "webpack": "^1.13.0"
   }

@@ -7,15 +7,23 @@ import {
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
+
+import {
+  CommandRegistry
+} from 'phosphor/lib/ui/commandregistry';
+
+import {
+  Keymap
+} from 'phosphor/lib/ui/keymap';
 
 import {
   PanelLayout
-} from 'phosphor-panel';
+} from 'phosphor/lib/ui/panel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   DocumentManager
@@ -89,19 +97,19 @@ class FileBrowserWidget extends Widget {
   constructor(options: FileBrowserWidget.IOptions) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
-    let model = this._model = options.model;
+    let commands = this._commands = options.commands;
+    let keymap = this._keymap = options.keymap;
     let manager = this._manager = options.manager;
+    let model = this._model = options.model;
     let opener = this._opener = options.opener;
+    let renderer = options.renderer;
 
     model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs({ model });
-    this._buttons = new FileButtons({ model, manager, opener });
-    this._listing = new DirListing({
-      model,
-      manager,
-      opener,
-      renderer: options.renderer
+    this._buttons = new FileButtons({
+      commands, keymap, manager, model, opener
     });
+    this._listing = new DirListing({ manager, model, opener, renderer });
 
     model.fileChanged.connect((fbModel, args) => {
       if (args.newValue) {
@@ -116,11 +124,31 @@ class FileBrowserWidget extends Widget {
     this._listing.addClass(LISTING_CLASS);
 
     let layout = new PanelLayout();
-    layout.addChild(this._buttons);
-    layout.addChild(this._crumbs);
-    layout.addChild(this._listing);
+    layout.addWidget(this._buttons);
+    layout.addWidget(this._crumbs);
+    layout.addWidget(this._listing);
 
     this.layout = layout;
+  }
+
+  /**
+   * Get the command registry used by the file browser.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get commands(): CommandRegistry {
+    return this._commands;
+  }
+
+  /**
+   * Get the keymap manager used by the file browser.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get keymap(): Keymap {
+    return this._keymap;
   }
 
   /**
@@ -256,7 +284,7 @@ class FileBrowserWidget extends Widget {
    * Download the currently selected item(s).
    */
   download(): Promise<void> {
-    return this._listing.download().then(() => {return void 0});
+    return this._listing.download().then(() => { /* no-op */ });
   }
 
   /**
@@ -320,13 +348,15 @@ class FileBrowserWidget extends Widget {
     this._timeoutId = setTimeout(() => this.refresh(), REFRESH_DURATION);
   }
 
-  private _model: FileBrowserModel = null;
-  private _crumbs: BreadCrumbs = null;
   private _buttons: FileButtons = null;
+  private _commands: CommandRegistry = null;
+  private _crumbs: BreadCrumbs = null;
+  private _keymap: Keymap = null;
   private _listing: DirListing = null;
-  private _timeoutId = -1;
   private _manager: DocumentManager = null;
+  private _model: FileBrowserModel = null;
   private _opener: IWidgetOpener = null;
+  private _timeoutId = -1;
 }
 
 
@@ -340,6 +370,16 @@ namespace FileBrowserWidget {
    */
   export
   interface IOptions {
+    /**
+     * The command registry for use with the file browser.
+     */
+    commands: CommandRegistry;
+
+    /**
+     * The keymap for use with the file browser.
+     */
+    keymap: Keymap;
+
     /**
      * A file browser model instance.
      */

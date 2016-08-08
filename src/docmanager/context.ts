@@ -7,15 +7,15 @@ import {
 
 import {
   IDisposable
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
 
 import {
-  ISignal, Signal
-} from 'phosphor-signaling';
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   showDialog, okButton
@@ -41,30 +41,22 @@ class Context implements IDocumentContext<IDocumentModel> {
   /**
    * A signal emitted when the kernel changes.
    */
-  get kernelChanged(): ISignal<Context, IKernel> {
-    return Private.kernelChangedSignal.bind(this);
-  }
+  kernelChanged: ISignal<Context, IKernel>;
 
   /**
    * A signal emitted when the path changes.
    */
-  get pathChanged(): ISignal<Context, string> {
-    return Private.pathChangedSignal.bind(this);
-  }
+  pathChanged: ISignal<Context, string>;
 
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  get contentsModelChanged(): ISignal<Context, IContents.IModel> {
-    return Private.contentsModelChangedSignal.bind(this);
-  }
+  contentsModelChanged: ISignal<Context, IContents.IModel>;
 
   /**
    * A signal emitted when the context is fully populated for the first time.
    */
-  get populated(): ISignal<IDocumentContext<IDocumentModel>, void> {
-    return Private.populatedSignal.bind(this);
-  }
+  populated: ISignal<IDocumentContext<IDocumentModel>, void>;
 
   /**
    * The unique id of the context.
@@ -215,6 +207,13 @@ class Context implements IDocumentContext<IDocumentModel> {
   private _id = '';
   private _manager: ContextManager = null;
 }
+
+
+// Define the signals for the `Context` class.
+defineSignal(Context.prototype, 'kernelChanged');
+defineSignal(Context.prototype, 'pathChanged');
+defineSignal(Context.prototype, 'contentsModelChanged');
+defineSignal(Context.prototype, 'populated');
 
 
 /**
@@ -644,30 +643,6 @@ namespace Private {
     modelName: string;
     isPopulated: boolean;
   }
-
-  /**
-   * A signal emitted when the kernel changes.
-   */
-  export
-  const kernelChangedSignal = new Signal<Context, IKernel>();
-
-  /**
-   * A signal emitted when the path changes.
-   */
-  export
-  const pathChangedSignal = new Signal<Context, string>();
-
-  /**
-   * A signal emitted when the contentsModel changes.
-   */
-  export
-  const contentsModelChangedSignal = new Signal<Context, IContents.IModel>();
-
-  /**
-   * A signal emitted when the context is fully populated for the first time.
-   */
-  export
-  const populatedSignal = new Signal<Context, void>();
 
   /**
    * Get a new file path from the user.

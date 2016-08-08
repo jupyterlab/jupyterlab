@@ -6,15 +6,18 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  DockPanel
-} from 'phosphor-dockpanel';
-
-import {
   TerminalWidget
 } from 'jupyterlab/lib/terminal';
 
-import 'jupyterlab/lib/index.css';
-import 'jupyterlab/lib/theme.css';
+import {
+  DockPanel
+} from 'phosphor/lib/ui/dockpanel';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import 'jupyterlab/lib/default-theme/index.css';
 
 
 function main(): void {
@@ -33,10 +36,10 @@ function main(): void {
   term1.title.closable = true;
   term2.title.closable = true;
   let dock = new DockPanel();
-  dock.insertTabBefore(term1);
-  dock.insertTabBefore(term2);
+  dock.addWidget(term1);
+  dock.addWidget(term2, { mode: 'tab-before' });
 
-  dock.attach(document.body);
+  Widget.attach(dock, document.body);
   dock.id = 'main';
 
   window.onresize = () => dock.fit();

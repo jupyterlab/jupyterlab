@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import {
+  ansi_to_html, escape_for_html
+} from 'ansi_up';
+
 import * as CodeMirror
   from 'codemirror';
 
@@ -10,16 +14,12 @@ import * as marked
   from 'marked';
 
 import {
-  ansi_to_html, escape_for_html
-} from 'ansi_up';
+  Message
+} from 'phosphor/lib/core/messaging';
 
 import {
   Widget
-} from 'phosphor-widget';
-
-import {
-  Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/ui/widget';
 
 import {
   requireMode

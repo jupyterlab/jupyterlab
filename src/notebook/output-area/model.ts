@@ -7,11 +7,11 @@ import {
 
 import {
   IDisposable
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
 
 import {
-  ISignal, Signal, clearSignalData
-} from 'phosphor-signaling';
+  clearSignalData, defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   IListChangedArgs, IObservableList, ObservableList
@@ -38,16 +38,12 @@ class OutputAreaModel implements IDisposable {
   /**
    * A signal emitted when the model changes.
    */
-  get changed(): ISignal<OutputAreaModel, IListChangedArgs<OutputAreaModel.Output>> {
-    return Private.changedSignal.bind(this);
-  }
+  changed: ISignal<OutputAreaModel, IListChangedArgs<OutputAreaModel.Output>>;
 
   /**
    * A signal emitted when the model is disposed.
    */
-  get disposed(): ISignal<OutputAreaModel, void> {
-    return Private.disposedSignal.bind(this);
-  }
+  disposed: ISignal<OutputAreaModel, void>;
 
   /**
    * Get the length of the items in the model.
@@ -128,7 +124,7 @@ class OutputAreaModel implements IDisposable {
       // This also replaces the metadata of the last item.
       let text = value.text as string;
       value.text = lastOutput.text as string + text;
-      this._list.set(index, output);
+      this._list.set(index, value);
       return index;
     } else {
       switch (value.output_type) {
@@ -255,19 +251,6 @@ namespace OutputAreaModel {
 }
 
 
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * A signal emitted when the model changes.
-   */
-  export
-  const changedSignal = new Signal<OutputAreaModel, IListChangedArgs<OutputAreaModel.Output>>();
-
-  /**
-   * A signal emitted when the model is disposed.
-   */
-  export
-  const disposedSignal = new Signal<OutputAreaModel, void>();
-}
+// Define the signals for the `OutputAreaModel` class.
+defineSignal(OutputAreaModel.prototype, 'changed');
+defineSignal(OutputAreaModel.prototype, 'disposed');

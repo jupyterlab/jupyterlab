@@ -7,20 +7,20 @@ import {
 
 import {
   IDisposable, DisposableDelegate
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
+
+import {
+  IDocumentRegistry, IWidgetFactory, IWidgetFactoryOptions,
+  IDocumentModel, IDocumentContext
+} from '../docregistry';
 
 import {
   IWidgetOpener
-} from '../filebrowser/browser';
-
-import {
-  DocumentRegistry, IWidgetFactory, IWidgetFactoryOptions,
-  IDocumentModel, IDocumentContext
-} from '../docregistry';
+} from '../filebrowser';
 
 import {
   ContextManager
@@ -82,7 +82,7 @@ class DocumentManager implements IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  get registry(): DocumentRegistry {
+  get registry(): IDocumentRegistry {
     return this._registry;
   }
 
@@ -247,7 +247,7 @@ class DocumentManager implements IDisposable {
   private _serviceManager: IServiceManager = null;
   private _contextManager: ContextManager = null;
   private _widgetManager: DocumentWidgetManager = null;
-  private _registry: DocumentRegistry = null;
+  private _registry: IDocumentRegistry = null;
 }
 
 
@@ -264,7 +264,7 @@ namespace DocumentManager {
     /**
      * A document registry instance.
      */
-    registry: DocumentRegistry;
+    registry: IDocumentRegistry;
 
     /**
      * A service manager instance.

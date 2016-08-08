@@ -3,11 +3,11 @@
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 
 /**
- * The class name added to an IFrame widget. 
+ * The class name added to an IFrame widget.
  */
 const IFRAME_CLASS = 'jp-IFrame';
 
@@ -18,22 +18,10 @@ const IFRAME_CLASS = 'jp-IFrame';
 export
 class IFrame extends Widget {
   /**
-   * Create the main content node of an iframe widget.
-   */
-  static createNode(): HTMLElement {
-    let node = document.createElement('div');
-    let iframe = document.createElement('iframe');
-    iframe.style.height = '100%';
-    iframe.style.width = '100%';
-    node.appendChild(iframe);
-    return node;
-  }
-
-  /**
    * Create a new iframe widget.
    */
   constructor() {
-    super();
+    super({ node: Private.createNode() });
     this.addClass(IFRAME_CLASS);
   }
 
@@ -44,5 +32,24 @@ class IFrame extends Widget {
    */
   loadURL(url: string): void {
     this.node.querySelector('iframe').setAttribute('src', url);
+  }
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Create the main content node of an iframe widget.
+   */
+  export
+  function createNode(): HTMLElement {
+    let node = document.createElement('div');
+    let iframe = document.createElement('iframe');
+    iframe.style.height = '100%';
+    iframe.style.width = '100%';
+    node.appendChild(iframe);
+    return node;
   }
 }

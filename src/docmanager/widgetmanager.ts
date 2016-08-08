@@ -7,26 +7,26 @@ import {
 
 import {
   DisposableSet
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
 
 import {
-  IMessageHandler, Message, installMessageFilter
-} from 'phosphor-messaging';
+  IMessageHandler, Message, installMessageHook
+} from 'phosphor/lib/core/messaging';
 
 import {
-  Property
-} from 'phosphor-properties';
+  AttachedProperty
+} from 'phosphor/lib/core/properties';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   showDialog
 } from '../dialog';
 
 import {
-  DocumentRegistry, IDocumentContext, IDocumentModel
+  IDocumentRegistry, IDocumentContext, IDocumentModel
 } from '../docregistry';
 
 import {
@@ -88,7 +88,7 @@ class DocumentWidgetManager {
   }
 
   /**
-   * Install the message filter for the widget and add to list
+   * Install the message hook for the widget and add to list
    * of known widgets.
    */
   adoptWidget(id: string, widget: Widget): void {
@@ -96,7 +96,9 @@ class DocumentWidgetManager {
       this._widgets[id] = [];
     }
     this._widgets[id].push(widget);
-    installMessageFilter(widget, this);
+    installMessageHook(widget, (handler: IMessageHandler, msg: Message) => {
+      return this.filterMessage(handler, msg);
+    });
     widget.addClass(DOCUMENT_CLASS);
     widget.title.closable = true;
     widget.disposed.connect(() => {
@@ -184,18 +186,18 @@ class DocumentWidgetManager {
    *
    * @param msg - The message dispatched to the handler.
    *
-   * @returns `true` if the message should be filtered, of `false`
+   * @returns `false` if the message should be filtered, of `true`
    *   if the message should be dispatched to the handler as normal.
    */
-  filterMessage(handler: IMessageHandler, msg: Message): boolean {
+  protected filterMessage(handler: IMessageHandler, msg: Message): boolean {
     if (msg.type === 'close-request') {
       if (this._closeGuard) {
-        return false;
+        return true;
       }
       this.onClose(handler as Widget);
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   /**
@@ -227,9 +229,10 @@ class DocumentWidgetManager {
     if (!model.dirty || widgets.length > 1) {
       return Promise.resolve(true);
     }
+    let fileName = widget.title.label;
     return showDialog({
       title: 'Close without saving?',
-      body: `File "${widget.title.text}" has unsaved changes, close without saving?`
+      body: `File "${fileName}" has unsaved changes, close without saving?`
     }).then(value => {
       if (value && value.text === 'OK') {
         return true;
@@ -240,7 +243,7 @@ class DocumentWidgetManager {
 
   private _closeGuard = false;
   private _contextManager: ContextManager = null;
-  private _registry: DocumentRegistry = null;
+  private _registry: IDocumentRegistry = null;
   private _widgets: { [key: string]: Widget[] } = Object.create(null);
 }
 
@@ -258,7 +261,7 @@ namespace DocumentWidgetManager {
     /**
      * A document registry instance.
      */
-    registry: DocumentRegistry;
+    registry: IDocumentRegistry;
 
     /**
      * A context manager instance.
@@ -276,7 +279,7 @@ namespace Private {
    * A private attached property for a widget context id.
    */
   export
-  const idProperty = new Property<Widget, string>({
+  const idProperty = new AttachedProperty<Widget, string>({
     name: 'id'
   });
 
@@ -284,7 +287,7 @@ namespace Private {
    * A private attached property for a widget factory name.
    */
   export
-  const nameProperty = new Property<Widget, string>({
+  const nameProperty = new AttachedProperty<Widget, string>({
     name: 'name'
   });
 }

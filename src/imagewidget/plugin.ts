@@ -2,11 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
+  JupyterLab, JupyterLabPlugin
+} from '../application';
 
 import {
-  DocumentRegistry
+  ICommandPalette
+} from '../commandpalette/plugin';
+
+import {
+  IDocumentRegistry
 } from '../docregistry';
 
 import {
@@ -29,24 +33,23 @@ const EXTENSIONS = ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico',
  * The image file handler extension.
  */
 export
-const imageHandlerExtension = {
-  id: 'jupyter.extensions.imageHandler',
-  requires: [DocumentRegistry],
-  activate: activateImageWidget
+const imageHandlerExtension: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.image-handler',
+  requires: [IDocumentRegistry, ICommandPalette],
+  activate: activateImageWidget,
+  autoStart: true
 };
 
 
 /**
  * Activate the image widget extension.
  */
-function activateImageWidget(app: Application, registry: DocumentRegistry): void {
-    let zoomInImage = 'ImageWidget:zoomIn';
-    let zoomOutImage = 'ImageWidget:zoomOut';
-    let resetZoomImage = 'ImageWidget:resetZoom';
+function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette): void {
+    let zoomInImage = 'image-widget:zoom-in';
+    let zoomOutImage = 'image-widget:zoom-out';
+    let resetZoomImage = 'image-widget:reset-zoom';
     let tracker = new WidgetTracker<ImageWidget>();
-
     let image = new ImageWidgetFactory();
-
     let options = {
       fileExtensions: EXTENSIONS,
       displayName: 'Image',
@@ -62,37 +65,22 @@ function activateImageWidget(app: Application, registry: DocumentRegistry): void
       tracker.addWidget(newWidget);
     });
 
-    app.commands.add([
-      {
-        id: zoomInImage,
-        handler: zoomIn
-      },
-      {
-        id: zoomOutImage,
-        handler: zoomOut
-      },
-      {
-        id: resetZoomImage,
-        handler: resetZoom
-      }
-    ]);
-    app.palette.add([
-      {
-        command: zoomInImage,
-        category: 'Image Widget',
-        text: 'Zoom In',
-      },
-      {
-        command: zoomOutImage,
-        category: 'Image Widget',
-        text: 'Zoom Out',
-      },
-      {
-        command: resetZoomImage,
-        category: 'Image Widget',
-        text: 'Reset Zoom',
-      },
-    ]);
+    app.commands.addCommand(zoomInImage, {
+      execute: zoomIn,
+      label: 'Zoom In'
+    });
+    app.commands.addCommand(zoomOutImage, {
+      execute: zoomOut,
+      label: 'Zoom Out'
+    });
+    app.commands.addCommand(resetZoomImage, {
+      execute: resetZoom,
+      label: 'Reset Zoom'
+    });
+
+    let category = 'Image Widget';
+    [zoomInImage, zoomOutImage, resetZoomImage]
+      .forEach(command => palette.addItem({ command, category }));
 
     function zoomIn(): void {
       if (!tracker.activeWidget) {

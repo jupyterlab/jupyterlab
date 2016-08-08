@@ -3,15 +3,15 @@
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
-  ISignal, Signal
-} from 'phosphor-signaling';
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   ICompletionModel, ICompletionItem
@@ -59,18 +59,10 @@ const USE_CAPTURE = true;
 export
 class CompletionWidget extends Widget {
   /**
-   * Create the DOM node for a text completion menu.
-   */
-  static createNode(): HTMLElement {
-    let node = document.createElement('ul');
-    return node;
-  }
-
-  /**
    * Construct a text completion menu widget.
    */
   constructor(options: CompletionWidget.IOptions = {}) {
-    super();
+    super({ node: document.createElement('ul') });
     this._renderer = options.renderer || CompletionWidget.defaultRenderer;
     this.anchor = options.anchor || null;
     this.model = options.model || null;
@@ -80,13 +72,10 @@ class CompletionWidget extends Widget {
     this.hide();
   }
 
-
   /**
    * A signal emitted when a selection is made from the completion menu.
    */
-  get selected(): ISignal<CompletionWidget, string> {
-    return Private.selectedSignal.bind(this);
-  }
+  selected: ISignal<CompletionWidget, string>;
 
   /**
    * A signal emitted when the completion widget's visibility changes.
@@ -95,9 +84,7 @@ class CompletionWidget extends Widget {
    * This signal is useful when there are multiple floating widgets that may
    * contend with the same space and ought to be mutually exclusive.
    */
-  get visibilityChanged(): ISignal<CompletionWidget, void> {
-    return Private.visibilityChangedSignal.bind(this);
-  }
+  visibilityChanged: ISignal<CompletionWidget, void>;
 
   /**
    * The model used by the completion widget.
@@ -458,6 +445,11 @@ class CompletionWidget extends Widget {
 }
 
 
+// Define the signals for the `CompletionWidget` class.
+defineSignal(CompletionWidget.prototype, 'selected');
+defineSignal(CompletionWidget.prototype, 'visibilityChanged');
+
+
 export
 namespace CompletionWidget {
   /**
@@ -530,18 +522,6 @@ namespace CompletionWidget {
  * A namespace for completion widget private data.
  */
 namespace Private {
-  /**
-   * A signal emitted when state of the completion menu changes.
-   */
-  export
-  const selectedSignal = new Signal<CompletionWidget, string>();
-
-  /**
-   * A signal emitted when the completion widget's visibility changes.
-   */
-  export
-  const visibilityChangedSignal = new Signal<CompletionWidget, void>();
-
   /**
    * Returns the common subset string that a list of strings shares.
    */

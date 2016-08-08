@@ -5,24 +5,24 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
+
+import {
   CodeMirrorWidget
 } from '../../codemirror/widget';
 
 import {
   IChangedArgs
-} from 'phosphor-properties';
+} from '../../common/interfaces';
 
 import {
-  ISignal, Signal
-} from 'phosphor-signaling';
-
-import {
-  ICellModel
+  ICellModel,
 } from './model';
-
-import {
-  JSONObject
-} from '../common/json';
 
 
 /**
@@ -165,25 +165,19 @@ class CellEditorWidget extends CodeMirrorWidget {
   }
 
   /**
+   * A signal emitted when a tab (text) completion is requested.
+   */
+  completionRequested: ISignal<CellEditorWidget, ICompletionRequest>;
+
+  /**
    * A signal emitted when either the top or bottom edge is requested.
    */
-  get edgeRequested(): ISignal<CellEditorWidget, EdgeLocation> {
-    return Private.edgeRequestedSignal.bind(this);
-  }
+  edgeRequested: ISignal<CellEditorWidget, EdgeLocation>;
 
   /**
    * A signal emitted when a text change is completed.
    */
-  get textChanged(): ISignal<CellEditorWidget, ITextChange> {
-    return Private.textChangedSignal.bind(this);
-  }
-
-  /**
-   * A signal emitted when a tab (text) completion is requested.
-   */
-  get completionRequested(): ISignal<CellEditorWidget, ICompletionRequest> {
-    return Private.completionRequestedSignal.bind(this);
-  }
+  textChanged: ISignal<CellEditorWidget, ITextChange>;
 
   /**
    * The cell model used by the editor.
@@ -364,26 +358,7 @@ class CellEditorWidget extends CodeMirrorWidget {
   private _model: ICellModel = null;
 }
 
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * A signal emitted when either the top or bottom edge is requested.
-   */
-  export
-  const edgeRequestedSignal = new Signal<CellEditorWidget, EdgeLocation>();
-
-  /**
-   * A signal emitted when a text change is completed.
-   */
-  export
-  const textChangedSignal = new Signal<CellEditorWidget, ITextChange>();
-
-  /**
-   * A signal emitted when a tab (text) completion is requested.
-   */
-  export
-  const completionRequestedSignal = new Signal<CellEditorWidget, ICompletionRequest>();
-}
+// Define the signals for the `CellEditorWidget` class.
+defineSignal(CellEditorWidget.prototype, 'completionRequested');
+defineSignal(CellEditorWidget.prototype, 'edgeRequested');
+defineSignal(CellEditorWidget.prototype, 'textChanged');

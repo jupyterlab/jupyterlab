@@ -7,15 +7,15 @@ import {
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
   PanelLayout
-} from 'phosphor-panel';
+} from 'phosphor/lib/ui/panel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   IDocumentModel, IDocumentContext, ABCWidgetFactory
@@ -44,18 +44,16 @@ class MarkdownWidget extends Widget {
     super();
     this.addClass(MD_CLASS);
     this.layout = new PanelLayout();
-    this.title.text = context.path.split('/').pop();
+    this.title.label = context.path.split('/').pop();
     this._rendermime = rendermime;
     rendermime.resolver = context;
     this._context = context;
 
     context.pathChanged.connect((c, path) => {
-      this.title.text = path.split('/').pop();
+      this.title.label = path.split('/').pop();
     });
 
-    context.model.contentChanged.connect(() => {
-      this.update();
-    });
+    context.model.contentChanged.connect(() => this.update());
   }
 
   /**
@@ -72,13 +70,11 @@ class MarkdownWidget extends Widget {
     let context = this._context;
     let model = context.model;
     let layout = this.layout as PanelLayout;
-    let widget = this._rendermime.render({
-     'text/markdown': model.toString(),
-    });
-    if (layout.childCount()) {
-      layout.childAt(0).dispose();
+    let widget = this._rendermime.render({ 'text/markdown': model.toString() });
+    if (layout.widgets.length) {
+      layout.widgets.at(0).dispose();
     }
-    layout.addChild(widget);
+    layout.addWidget(widget);
   }
 
   private _rendermime: RenderMime = null;

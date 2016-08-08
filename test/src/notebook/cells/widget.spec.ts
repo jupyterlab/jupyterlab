@@ -9,15 +9,11 @@ import {
 
 import {
   Message, sendMessage
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
-  Widget
-} from 'phosphor-widget';
+  Widget, WidgetMessage
+} from 'phosphor/lib/ui/widget';
 
 import {
   RenderMime
@@ -66,7 +62,7 @@ class LogBaseCell extends BaseCellWidget {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onMetadataChanged(model: ICellModel, args: any): void {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
   }
@@ -76,7 +72,7 @@ class LogBaseCell extends BaseCellWidget {
     this.methods.push('onModelChanged');
   }
 
-  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: any): void {
     super.onModelStateChanged(model, args);
     this.methods.push('onModelStateChanged');
   }
@@ -92,7 +88,7 @@ class LogCodeCell extends CodeCellWidget {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onMetadataChanged(model: ICellModel, args: any): void {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
   }
@@ -102,7 +98,7 @@ class LogCodeCell extends CodeCellWidget {
     this.methods.push('onModelChanged');
   }
 
-  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: any): void {
     super.onModelStateChanged(model, args);
     this.methods.push('onModelStateChanged');
   }
@@ -316,7 +312,7 @@ describe('notebook/cells/widget', () => {
 
       it('should focus the cell editor', () => {
         let widget = new BaseCellWidget();
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         expect(widget.editor.editor.hasFocus()).to.be(false);
         widget.focus();
         expect(widget.editor.editor.hasFocus()).to.be(true);
@@ -343,7 +339,7 @@ describe('notebook/cells/widget', () => {
       it('should toggle whether the input is shown', () => {
         let widget = new BaseCellWidget();
         let input = widget.node.getElementsByClassName(INPUT_CLASS)[0];
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         expect(window.getComputedStyle(input).display).to.not.be('none');
         widget.toggleInput(false);
         expect(window.getComputedStyle(input).display).to.be('none');
@@ -375,7 +371,7 @@ describe('notebook/cells/widget', () => {
       it('should run when widget is attached', () => {
         let widget = new LogBaseCell();
         expect(widget.methods).to.not.contain('onAfterAttach');
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         expect(widget.methods).to.contain('onAfterAttach');
         widget.dispose();
       });
@@ -387,7 +383,7 @@ describe('notebook/cells/widget', () => {
       it('should update the widget', () => {
         let widget = new LogBaseCell();
         expect(widget.methods).to.not.contain('onUpdateRequest');
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 
@@ -554,7 +550,7 @@ describe('notebook/cells/widget', () => {
       it('should update the widget', () => {
         let widget = new LogCodeCell({ rendermime });
         expect(widget.methods).to.not.contain('onUpdateRequest');
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 
@@ -669,7 +665,7 @@ describe('notebook/cells/widget', () => {
 
       it('should default to true', (done) => {
         let widget = new MarkdownCellWidget({ rendermime });
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         expect(widget.rendered).to.be(true);
         requestAnimationFrame(() => {
           expect(widget.node.classList.contains(RENDERED_CLASS)).to.be(true);
@@ -680,7 +676,7 @@ describe('notebook/cells/widget', () => {
 
       it('should unrender the widget', (done) => {
         let widget = new MarkdownCellWidget({ rendermime });
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         widget.rendered = false;
         requestAnimationFrame(() => {
           expect(widget.node.classList.contains(RENDERED_CLASS)).to.be(false);
@@ -691,7 +687,7 @@ describe('notebook/cells/widget', () => {
 
       it('should ignore being set to the same value', (done) => {
         let widget = new LogMarkdownCell({ rendermime });
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         widget.rendered = false;
         widget.rendered = false;
         requestAnimationFrame(() => {
@@ -727,7 +723,7 @@ describe('notebook/cells/widget', () => {
       it('should update the widget', () => {
         let widget = new LogMarkdownCell({ rendermime });
         expect(widget.methods).to.not.contain('onUpdateRequest');
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 

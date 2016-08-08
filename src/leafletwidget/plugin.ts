@@ -2,15 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
-
-import {
-  DocumentRegistry
+  IDocumentRegistry
 } from '../docregistry';
 
 import {
-  MapWidget, MapWidgetFactory
+  JupyterLab, JupyterLabPlugin
+} from '../application';
+
+import {
+  MapWidgetFactory
 } from './widget';
 
 import 'leaflet/dist/leaflet.css';
@@ -26,17 +26,18 @@ const EXTENSIONS = ['.geojson'];
  * The geojson file handler extension.
  */
 export
-const mapHandlerExtension = {
+const mapHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.mapHandler',
-  requires: [DocumentRegistry],
-  activate: activateMapWidget
+  requires: [IDocumentRegistry],
+  activate: activateMapWidget,
+  autoStart: true
 };
 
 
 /**
  * Activate the map widget extension.
  */
-function activateMapWidget(app: Application, registry: DocumentRegistry): void {
+function activateMapWidget(app: JupyterLab, registry: IDocumentRegistry): void {
     let options = {
       fileExtensions: EXTENSIONS,
       displayName: 'Map',

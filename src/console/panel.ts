@@ -7,18 +7,18 @@ import {
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
   Panel
-} from 'phosphor-panel';
+} from 'phosphor/lib/ui/panel';
 
 import {
   showDialog
 } from '../dialog';
 
 import {
-  RenderMime
+  IRenderMime
 } from '../rendermime';
 
 import {
@@ -49,7 +49,7 @@ class ConsolePanel extends Panel {
       session: options.session,
       rendermime: options.rendermime
     });
-    this.addChild(this._console);
+    this.addWidget(this._console);
   }
 
   /**
@@ -128,7 +128,7 @@ namespace ConsolePanel {
     /**
      * The mime renderer for the console panel.
      */
-    rendermime: RenderMime;
+    rendermime: IRenderMime;
 
     /**
      * The session for the console panel.

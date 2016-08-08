@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   LatexRenderer, PDFRenderer, JavascriptRenderer,
   SVGRenderer, MarkdownRenderer, TextRenderer, HTMLRenderer, ImageRenderer
 } from '../../../lib/renderers';
@@ -207,7 +211,7 @@ describe('renderers', () => {
         // Ensure script has not been run yet
         expect((window as any).x).to.be(void 0);
         // Put it on the DOM
-        w.attach(document.body);
+        Widget.attach(w, document.body);
         // Should be evaluated now
         expect((window as any).x).to.be(1);
         w.dispose();
@@ -379,7 +383,7 @@ describe('renderers', () => {
         let t = new HTMLRenderer();
         let w = t.render({ mimetype: 'text/html', source });
         expect((window as any).y).to.be(void 0);
-        w.attach(document.body);
+        Widget.attach(w, document.body);
         expect((window as any).y).to.be(3);
         w.dispose();
       });

@@ -7,15 +7,15 @@ import {
 
 import {
   IDisposable
-} from 'phosphor-disposable';
-
-import {
-  BaseCellWidget
-} from '../cells/widget';
+} from 'phosphor/lib/core/disposable';
 
 import {
   CellEditorWidget, ITextChange, ICompletionRequest
 } from '../cells/editor';
+
+import {
+  BaseCellWidget
+} from '../cells/widget';
 
 import {
   CompletionWidget

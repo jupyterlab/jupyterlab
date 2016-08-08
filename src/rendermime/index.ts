@@ -3,11 +3,18 @@
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   ISanitizer
 } from '../sanitizer';
+
+
+/**
+ * The rendermime interface.
+ */
+export
+interface IRenderMime extends RenderMime {}
 
 
 /**
@@ -33,6 +40,20 @@ class RenderMime {
     this._order = options.order.slice();
     this._sanitizer = options.sanitizer;
     this._resolver = options.resolver || null;
+  }
+
+  /**
+   * The ordered list of mimetypes.
+   *
+   * #### Notes
+   * These mimetypes are searched from beginning to end, and the first matching
+   * mimetype is used.
+   */
+  get order(): string[] {
+    return this._order.slice();
+  }
+  set order(value: string[]) {
+    this._order = value.slice();
   }
 
   /**
@@ -91,7 +112,7 @@ class RenderMime {
   /**
    * Clone the rendermime instance with shallow copies of data.
    */
-  clone(): RenderMime {
+  clone(): IRenderMime {
     return new RenderMime({
       renderers: this._renderers,
       order: this.order,
@@ -125,24 +146,6 @@ class RenderMime {
     if (index !== -1) {
       this._order.splice(index, 1);
     }
-  }
-
-  /**
-   * Get the ordered list of mimetypes.
-   *
-   * #### Notes
-   * These mimetypes are searched from beginning to end, and the first matching
-   * mimetype is used.
-   */
-  get order() {
-    return this._order.slice();
-  }
-
-  /**
-   * Set the ordered list of mimetypes.
-   */
-  set order(value: string[]) {
-    this._order = value.slice();
   }
 
   private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
