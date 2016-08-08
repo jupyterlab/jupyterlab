@@ -18,7 +18,7 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  Drag, DropAction
+  Drag
 } from 'phosphor/lib/dom/dragdrop';
 
 import {
@@ -54,7 +54,7 @@ const DRAG_THRESHOLD = 5;
 /**
  * The factory MIME type supported by phosphor dock panels.
  */
-const FACTORY_MIME = 'application/x-phosphor-widget-factory';
+const FACTORY_MIME = 'application/vnd.phosphor.widget-factory';
 
 /**
  * The class name added to an output area widget.
@@ -417,7 +417,12 @@ class OutputAreaWidget extends Widget {
       let rect = this.node.getBoundingClientRect();
       let oldHeight = this.node.style.minHeight;
       this.node.style.minHeight = `${rect.height}px`;
-      setTimeout(() => { this.node.style.minHeight = oldHeight; }, 50);
+      setTimeout(() => {
+        if (this.isDisposed) {
+          return;
+        }
+        this.node.style.minHeight = oldHeight;
+      }, 50);
 
       let oldValues = args.oldValue as nbformat.IOutput[];
       for (let i = args.oldIndex; i < oldValues.length; i++) {
