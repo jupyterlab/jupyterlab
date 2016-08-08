@@ -29,7 +29,8 @@ export
 const mapHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.mapHandler',
   requires: [IDocumentRegistry],
-  activate: activateMapWidget
+  activate: activateMapWidget,
+  autoStart: true
 };
 
 

@@ -261,5 +261,6 @@ const shortcutsExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.shortcuts',
   activate: (app: JupyterLab): void => {
     SHORTCUTS.forEach(shortcut => app.keymap.addBinding(shortcut));
-  }
+  },
+  autoStart: true
 };

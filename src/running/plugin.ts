@@ -21,7 +21,8 @@ export
 const runningSessionsExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.running-sessions',
   requires: [IServiceManager],
-  activate: activateRunningSessions
+  activate: activateRunningSessions,
+  autoStart: true
 };
 
 
