@@ -219,6 +219,7 @@ function createApp(manager: IServiceManager): void {
   menu.addItem({ command: 'file-rename' });
   menu.addItem({ command: 'file-remove' });
   menu.addItem({ command: 'file-duplicate' });
+  menu.addItem({ command: 'file-delete' });
   menu.addItem({ command: 'file-cut' });
   menu.addItem({ command: 'file-copy' });
   menu.addItem({ command: 'file-paste' });
