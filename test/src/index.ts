@@ -39,3 +39,5 @@ import './notebook/notebook/widgetfactory.spec';
 
 import './notebook/output-area/model.spec';
 import './notebook/output-area/widget.spec';
+
+import 'phosphor/styles/base.css';
