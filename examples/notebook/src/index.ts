@@ -155,9 +155,10 @@ function createApp(manager: IServiceManager): void {
   panel.orientation = 'horizontal';
   panel.spacing = 0;
   SplitPanel.setStretch(palette, 0);
-  Widget.attach(panel, document.body);
   panel.addWidget(palette);
   panel.addWidget(nbWidget);
+  Widget.attach(panel, document.body);
+
   SplitPanel.setStretch(nbWidget, 1);
   window.onresize = () => panel.update();
 

@@ -186,18 +186,18 @@ class DocumentWidgetManager {
    *
    * @param msg - The message dispatched to the handler.
    *
-   * @returns `true` if the message should be filtered, of `false`
+   * @returns `false` if the message should be filtered, of `true`
    *   if the message should be dispatched to the handler as normal.
    */
   protected filterMessage(handler: IMessageHandler, msg: Message): boolean {
     if (msg.type === 'close-request') {
       if (this._closeGuard) {
-        return false;
+        return true;
       }
       this.onClose(handler as Widget);
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   /**
