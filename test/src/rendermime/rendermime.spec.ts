@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   LatexRenderer, PDFRenderer, JavascriptRenderer,
