@@ -5,11 +5,15 @@ import expect = require('expect.js');
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
 
 import {
   IChangedArgs
-} from 'phosphor-properties';
+} from '../../../../lib/common/interfaces';
 
 import {
   simulate
@@ -665,7 +669,7 @@ describe('notebook/notebook/widget', () => {
       it('should deselect all cells if switching to edit mode', (done) => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
           for (let i = 0; i < widget.childCount(); i++) {
             let cell = widget.childAt(i);
@@ -842,7 +846,7 @@ describe('notebook/notebook/widget', () => {
       beforeEach((done) => {
         widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         requestAnimationFrame(() => { done(); });
       });
 
@@ -938,7 +942,7 @@ describe('notebook/notebook/widget', () => {
       it('should add event listeners', (done) => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         let child = widget.childAt(0);
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onAfterAttach');
@@ -956,7 +960,7 @@ describe('notebook/notebook/widget', () => {
       it('should post an update request', (done) => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onAfterAttach');
           requestAnimationFrame(() => {
@@ -974,10 +978,10 @@ describe('notebook/notebook/widget', () => {
       it('should remove event listeners', (done) => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         let child = widget.childAt(0);
         requestAnimationFrame(() => {
-          widget.detach();
+          Widget.detach(widget);
           expect(widget.methods).to.contain('onBeforeDetach');
           widget.events = [];
           simulate(widget.node, 'click');
@@ -1000,7 +1004,7 @@ describe('notebook/notebook/widget', () => {
       beforeEach((done) => {
         widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         requestAnimationFrame(() => {  done(); });
       });
 

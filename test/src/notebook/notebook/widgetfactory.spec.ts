@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   MimeData
-} from 'phosphor-dragdrop';
+} from 'phosphor/lib/core/mimedata';
 
 import {
   NotebookModel

@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   sendMessage, Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
-  Widget
-} from 'phosphor-widget';
+  Widget, WidgetMessage
+} from 'phosphor/lib/ui/widget';
 
 import {
   simulate
@@ -17,7 +17,7 @@ import {
 
 import {
   ICompletionRequest, ICoords
-} from '../../../../lib/notebook/cells/editor'
+} from '../../../../lib/notebook/cells/editor';
 
 import {
   CompletionWidget, CompletionModel, ICompletionItem
@@ -68,15 +68,6 @@ describe('notebook/completion/widget', () => {
 
   describe('CompletionWidget', () => {
 
-    describe('.createNode()', () => {
-
-      it('should create node for a completion widget', () => {
-        let node = CompletionWidget.createNode();
-        expect(node.tagName.toLowerCase()).to.be('ul');
-      });
-
-    });
-
     describe('#constructor()', () => {
 
       it('should create a completion widget', () => {
@@ -103,7 +94,7 @@ describe('notebook/completion/widget', () => {
 
         let widget = new CompletionWidget(options);
         expect(widget).to.be.a(CompletionWidget);
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
 
         let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
         expect(items).to.have.length(2);
@@ -123,13 +114,13 @@ describe('notebook/completion/widget', () => {
         let value = '';
         let listener = (sender: any, selected: string) => { value = selected; };
         options.model.options = ['foo', 'bar'];
-        anchor.attach(document.body);
+        Widget.attach(anchor, document.body);
 
         let widget = new CompletionWidget(options);
 
         widget.selected.connect(listener);
-        widget.attach(document.body);
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        Widget.attach(widget, document.body);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(value).to.be('');
         simulate(anchor.node, 'keydown', { keyCode: 13 }); // Enter
         expect(value).to.be('foo');
@@ -150,14 +141,14 @@ describe('notebook/completion/widget', () => {
         let called = false;
         let listener = () => { called = true; };
         options.model.options = ['foo', 'bar'];
-        anchor.attach(document.body);
+        Widget.attach(anchor, document.body);
 
         let widget = new CompletionWidget(options);
 
         widget.visibilityChanged.connect(listener);
         expect(called).to.be(false);
-        widget.attach(document.body);
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        Widget.attach(widget, document.body);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(called).to.be(true);
         widget.dispose();
         anchor.dispose();
@@ -247,16 +238,16 @@ describe('notebook/completion/widget', () => {
           model, anchor: anchor.node
         };
         model.options = ['foo', 'bar'];
-        anchor.attach(document.body);
+        Widget.attach(anchor, document.body);
 
         let widget = new CompletionWidget(options);
 
-        widget.attach(document.body);
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        Widget.attach(widget, document.body);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.isHidden).to.be(false);
         expect(model.options).to.be.ok();
         widget.reset();
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.isHidden).to.be(true);
         expect(model.options).to.not.be.ok();
         widget.dispose();
@@ -269,7 +260,7 @@ describe('notebook/completion/widget', () => {
 
       it('should handle document keydown and mousedown events', () => {
         let widget = new LogWidget();
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         ['keydown', 'mousedown'].forEach(type => {
           simulate(document, type);
           expect(widget.events).to.contain(type);
@@ -280,7 +271,7 @@ describe('notebook/completion/widget', () => {
       it('should handle anchor element scroll events', () => {
         let anchor = new Widget();
         let widget = new LogWidget({ anchor: anchor.node });
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         simulate(anchor.node, 'scroll');
         expect(widget.events).to.contain('scroll');
         widget.dispose();
@@ -295,16 +286,16 @@ describe('notebook/completion/widget', () => {
             model, anchor: anchor.node
           };
           model.options = ['foo', 'bar'];
-          anchor.attach(document.body);
+          Widget.attach(anchor, document.body);
 
           let widget = new CompletionWidget(options);
 
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          Widget.attach(widget, document.body);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(widget.isHidden).to.be(false);
           expect(model.options).to.be.ok();
           simulate(document.body, 'keydown', { keyCode: 70 }); // F
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(widget.isHidden).to.be(true);
           expect(model.options).to.not.be.ok();
           widget.dispose();
@@ -322,13 +313,13 @@ describe('notebook/completion/widget', () => {
             value = selected;
           };
           model.options = ['foo', 'bar', 'baz'];
-          anchor.attach(document.body);
+          Widget.attach(anchor, document.body);
 
           let widget = new CompletionWidget(options);
 
           widget.selected.connect(listener);
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          Widget.attach(widget, document.body);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(value).to.be('');
           simulate(anchor.node, 'keydown', { keyCode: 13 }); // Enter
           expect(value).to.be('foo');
@@ -343,14 +334,14 @@ describe('notebook/completion/widget', () => {
             model, anchor: anchor.node
           };
           model.options = ['foo', 'bar', 'baz'];
-          anchor.attach(document.body);
+          Widget.attach(anchor, document.body);
 
           let widget = new CompletionWidget(options);
           let target = document.createElement('div');
 
           anchor.node.appendChild(target);
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          Widget.attach(widget, document.body);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
 
           let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
 
@@ -380,12 +371,12 @@ describe('notebook/completion/widget', () => {
             model, anchor: anchor.node
           };
           model.options = ['foo', 'bar', 'baz'];
-          anchor.attach(document.body);
+          Widget.attach(anchor, document.body);
 
           let widget = new CompletionWidget(options);
 
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          Widget.attach(widget, document.body);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
 
           let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
 
@@ -419,19 +410,19 @@ describe('notebook/completion/widget', () => {
             value = selected;
           };
           model.options = ['foo', 'four', 'foz'];
-          anchor.attach(document.body);
+          Widget.attach(anchor, document.body);
 
           let widget = new CompletionWidget(options);
 
           widget.selected.connect(listener);
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          Widget.attach(widget, document.body);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
 
           let marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
           expect(marked).to.be.empty();
           expect(value).to.be('');
           simulate(anchor.node, 'keydown', { keyCode: 9 });  // Tab
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
           marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
           expect(value).to.be('fo');
           expect(marked).to.have.length(3);
@@ -460,13 +451,13 @@ describe('notebook/completion/widget', () => {
           };
           model.options = ['foo', 'bar', 'baz'];
           model.query = 'b';
-          anchor.attach(document.body);
+          Widget.attach(anchor, document.body);
 
           let widget = new CompletionWidget(options);
 
           widget.selected.connect(listener);
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          Widget.attach(widget, document.body);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
 
           let item = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`)[1];
 
@@ -488,13 +479,13 @@ describe('notebook/completion/widget', () => {
             value = selected;
           };
           model.options = ['foo', 'bar'];
-          anchor.attach(document.body);
+          Widget.attach(anchor, document.body);
 
           let widget = new CompletionWidget(options);
 
           widget.selected.connect(listener);
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          Widget.attach(widget, document.body);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(value).to.be('');
           simulate(widget.node, 'mousedown', { button: 1 });
           expect(value).to.be('');
@@ -513,13 +504,13 @@ describe('notebook/completion/widget', () => {
             value = selected;
           };
           model.options = ['foo', 'bar'];
-          anchor.attach(document.body);
+          Widget.attach(anchor, document.body);
 
           let widget = new CompletionWidget(options);
 
           widget.selected.connect(listener);
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          Widget.attach(widget, document.body);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(value).to.be('');
           simulate(widget.node, 'mousedown');
           expect(value).to.be('');
@@ -538,16 +529,16 @@ describe('notebook/completion/widget', () => {
             value = selected;
           };
           model.options = ['foo', 'bar'];
-          anchor.attach(document.body);
+          Widget.attach(anchor, document.body);
 
           let widget = new CompletionWidget(options);
 
           widget.selected.connect(listener);
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          Widget.attach(widget, document.body);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(widget.isHidden).to.be(false);
           simulate(anchor.node, 'mousedown');
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(widget.isHidden).to.be(true);
           widget.dispose();
           anchor.dispose();
@@ -577,15 +568,15 @@ describe('notebook/completion/widget', () => {
           anchor.style.height = '1000px';
           anchor.style.overflow = 'auto';
 
-          container.attach(anchor);
+          Widget.attach(container, anchor);
           container.node.style.height = '5000px';
           anchor.scrollTop = 0;
           model.original = request;
           model.options = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
           let widget = new CompletionWidget(options);
-          widget.attach(document.body);
-          sendMessage(widget, Widget.MsgUpdateRequest);
+          Widget.attach(widget, document.body);
+          sendMessage(widget, WidgetMessage.UpdateRequest);
 
           let top = parseInt(window.getComputedStyle(widget.node).top, 10);
           let offset = 200;
@@ -624,16 +615,16 @@ describe('notebook/completion/widget', () => {
         let options: CompletionWidget.IOptions = { model, anchor: anchor.node };
         let listener = (sender: any, selected: string) => { value = selected; };
 
-        anchor.attach(document.body);
+        Widget.attach(anchor, document.body);
         model.original = request;
         model.options = ['foo'];
 
         let widget = new CompletionWidget(options);
         widget.selected.connect(listener);
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
 
         expect(value).to.be('');
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(value).to.be('foo');
         widget.dispose();
         anchor.dispose();
@@ -641,7 +632,7 @@ describe('notebook/completion/widget', () => {
 
       it('should do nothing if a model does not exist', () => {
         let widget = new LogWidget();
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 
@@ -659,15 +650,15 @@ describe('notebook/completion/widget', () => {
         };
         let options: CompletionWidget.IOptions = { model, anchor: anchor.node };
 
-        anchor.attach(document.body);
+        Widget.attach(anchor, document.body);
         model.original = request;
         model.options = ['foo', 'bar', 'baz'];
 
         let widget = new CompletionWidget(options);
         widget.hide();
         expect(widget.isHidden).to.be(true);
-        widget.attach(document.body);
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        Widget.attach(widget, document.body);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.isVisible).to.be(true);
         widget.dispose();
         anchor.dispose();

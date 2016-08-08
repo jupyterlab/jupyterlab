@@ -4,28 +4,20 @@
 import expect = require('expect.js');
 
 import {
-  IKernel
-} from 'jupyter-js-services';
-
-import {
   MockKernel
 } from 'jupyter-js-services/lib/mockkernel';
 
 import {
   MimeData
-} from 'phosphor-dragdrop';
+} from 'phosphor/lib/core/mimedata';
 
 import {
   IChangedArgs
-} from 'phosphor-properties';
+} from '../../../../lib/common/interfaces';
 
 import {
   IDocumentContext
 } from '../../../../lib/docregistry';
-
-import {
-  CellEditorWidget, ITextChange, ICompletionRequest
-} from '../../../../lib/notebook/cells/editor';
 
 import {
   CompletionWidget
@@ -386,12 +378,12 @@ describe('notebook/notebook/panel', () => {
         expect(panel.methods).to.contain('onPathChanged');
       });
 
-      it('should update the title text', () => {
+      it('should update the title label', () => {
         let panel = createPanel();
         panel.methods = [];
         panel.context.saveAs();
         expect(panel.methods).to.contain('onPathChanged');
-        expect(panel.title.text).to.be('foo');
+        expect(panel.title.label).to.be('foo');
       });
 
     });

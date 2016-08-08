@@ -13,7 +13,7 @@ import {
 
 import {
   MimeData
-} from 'phosphor-dragdrop';
+} from 'phosphor/lib/core/mimedata';
 
 import {
   CodeCellWidget, MarkdownCellWidget, RawCellWidget

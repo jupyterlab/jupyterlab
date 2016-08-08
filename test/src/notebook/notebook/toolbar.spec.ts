@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   Message
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   simulate
@@ -119,15 +119,6 @@ describe('notebook/notebook/toolbar', () => {
 
   describe('ToolbarButton', () => {
 
-    describe('#createNode()', () => {
-
-      it('should create a node for the toolbar button', () => {
-        let node = ToolbarButton.createNode();
-        expect(node.localName).to.be('span');
-      });
-
-    });
-
     describe('#constructor()', () => {
 
       it('should accept no arguments', () => {
@@ -173,7 +164,7 @@ describe('notebook/notebook/toolbar', () => {
           let button = new ToolbarButton({
             onClick: () => { called = true; },
           });
-          button.attach(document.body);
+          Widget.attach(button, document.body);
           requestAnimationFrame(() => {
             simulate(button.node, 'click');
             expect(called).to.be(true);
@@ -187,7 +178,7 @@ describe('notebook/notebook/toolbar', () => {
 
         it('should add the `jp-mod-pressed` class', (done) => {
           let button = new ToolbarButton();
-          button.attach(document.body);
+          Widget.attach(button, document.body);
           requestAnimationFrame(() => {
             simulate(button.node, 'mousedown');
             expect(button.hasClass('jp-mod-pressed')).to.be(true);
@@ -201,7 +192,7 @@ describe('notebook/notebook/toolbar', () => {
 
         it('should remove the `jp-mod-pressed` class', (done) => {
           let button = new ToolbarButton();
-          button.attach(document.body);
+          Widget.attach(button, document.body);
           requestAnimationFrame(() => {
             simulate(button.node, 'mousedown');
             simulate(button.node, 'mouseup');
@@ -216,7 +207,7 @@ describe('notebook/notebook/toolbar', () => {
 
         it('should remove the `jp-mod-pressed` class', (done) => {
           let button = new ToolbarButton();
-          button.attach(document.body);
+          Widget.attach(button, document.body);
           requestAnimationFrame(() => {
             simulate(button.node, 'mousedown');
             simulate(button.node, 'mouseout');
@@ -233,7 +224,7 @@ describe('notebook/notebook/toolbar', () => {
 
       it('should add event listeners to the node', () => {
         let button = new LogToolbarButton();
-        button.attach(document.body);
+        Widget.attach(button, document.body);
         expect(button.methods).to.contain('onAfterAttach');
         simulate(button.node, 'mousedown');
         simulate(button.node, 'mouseup');
@@ -249,9 +240,9 @@ describe('notebook/notebook/toolbar', () => {
 
       it('should remove event listeners from the node', (done) => {
         let button = new LogToolbarButton();
-        button.attach(document.body);
+        Widget.attach(button, document.body);
         requestAnimationFrame(() => {
-          button.detach();
+          Widget.detach(button);
           expect(button.methods).to.contain('onBeforeDetach');
           simulate(button.node, 'mousedown');
           simulate(button.node, 'mouseup');

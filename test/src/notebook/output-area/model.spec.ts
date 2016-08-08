@@ -9,7 +9,7 @@ import {
 
 import {
   deepEqual
-} from '../../../../lib/notebook/common/json';
+} from 'phosphor/lib/algorithm/json';
 
 import {
   OutputAreaModel

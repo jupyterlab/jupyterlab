@@ -5,7 +5,11 @@ import expect = require('expect.js');
 
 import {
   MimeData
-} from 'phosphor-dragdrop';
+} from 'phosphor/lib/core/mimedata';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
 
 import {
  CodeCellWidget, MarkdownCellWidget
@@ -34,10 +38,6 @@ import {
 import {
   defaultRenderMime
 } from '../../rendermime/rendermime.spec';
-
-import {
-  acceptDialog
-} from '../../utils';
 
 import {
   DEFAULT_CONTENT
@@ -77,7 +77,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should save when clicked', () => {
         let button = ToolbarItems.createSaveButton(panel);
-        button.attach(document.body);
+        Widget.attach(button, document.body);
         button.node.click();
         expect(context.methods).to.contain('save');
         button.dispose();
@@ -94,7 +94,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should insert below when clicked', () => {
         let button = ToolbarItems.createInsertButton(panel);
-        button.attach(document.body);
+        Widget.attach(button, document.body);
         button.node.click();
         expect(panel.content.activeCellIndex).to.be(1);
         expect(panel.content.activeCell).to.be.a(CodeCellWidget);
@@ -113,7 +113,7 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should cut when clicked', () => {
         let button = ToolbarItems.createCutButton(panel);
         let count = panel.content.childCount();
-        button.attach(document.body);
+        Widget.attach(button, document.body);
         button.node.click();
         expect(panel.content.childCount()).to.be(count - 1);
         expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
@@ -132,7 +132,7 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should copy when clicked', () => {
         let button = ToolbarItems.createCopyButton(panel);
         let count = panel.content.childCount();
-        button.attach(document.body);
+        Widget.attach(button, document.body);
         button.node.click();
         expect(panel.content.childCount()).to.be(count);
         expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
@@ -148,17 +148,20 @@ describe('notebook/notebook/default-toolbar', () => {
 
     describe('#createPasteButton()', () => {
 
-      it('should paste when clicked', () => {
+      it('should paste when clicked', (done) => {
         let button = ToolbarItems.createPasteButton(panel);
         let count = panel.content.childCount();
-        button.attach(document.body);
+        Widget.attach(button, document.body);
         NotebookActions.copy(panel.content, clipboard);
         button.node.click();
-        expect(panel.content.childCount()).to.be(count + 1);
-        button.dispose();
+        requestAnimationFrame(() => {
+          expect(panel.content.childCount()).to.be(count + 1);
+          button.dispose();
+          done();
+        });
       });
 
-      it("should have the `'jp-NBToolbar-paste'` class", () => {
+      it('should have the `\'jp-NBToolbar-paste\'` class', () => {
         let button = ToolbarItems.createPasteButton(panel);
         expect(button.hasClass('jp-NBToolbar-paste')).to.be(true);
       });
@@ -176,7 +179,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
         next.rendered = false;
-        button.attach(document.body);
+        Widget.attach(button, document.body);
         panel.kernel.statusChanged.connect((sender, status) => {
           if (status === 'idle') {
             expect(cell.model.outputs.length).to.be.above(0);
@@ -199,7 +202,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should interrupt the kernel when clicked', (done) => {
         let button = ToolbarItems.createInterruptButton(panel);
-        button.attach(document.body);
+        Widget.attach(button, document.body);
         button.node.click();
         expect(panel.context.kernel.status).to.be('busy');
         panel.kernel.statusChanged.connect((sender, status) => {
@@ -218,21 +221,6 @@ describe('notebook/notebook/default-toolbar', () => {
     });
 
     describe('#createRestartButton()', () => {
-
-      // it('should restart the kernel when the dialog is accepted', (done) => {
-      //   let button = ToolbarItems.createRestartButton(panel);
-      //   panel.attach(document.body);
-      //   button.attach(document.body);
-      //   panel.kernel.statusChanged.connect((sender, status) => {
-      //     if (status === 'restarting') {
-      //       panel.dispose();
-      //       button.dispose();
-      //       done();
-      //     }
-      //   });
-      //   button.node.click();
-      //   acceptDialog(panel.node);
-      // });
 
       it("should have the `'jp-NBToolbar-restart'` class", () => {
         let button = ToolbarItems.createRestartButton(panel);
