@@ -534,7 +534,7 @@ class DocumentRegistry implements IDocumentRegistry {
     name = name.toLowerCase();
     for (let i = 0; i < this._fileTypes.length; i++) {
       let fileType = this._fileTypes[i];
-      if (fileType.name === name) {
+      if (fileType.name.toLowerCase() === name) {
         return fileType;
       }
     }

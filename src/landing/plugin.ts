@@ -32,7 +32,8 @@ export
 const landingExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.landing',
   requires: [IServiceManager, IPathTracker, ICommandPalette],
-  activate: activateLanding
+  activate: activateLanding,
+  autoStart: true
 };
 
 
@@ -138,6 +139,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
   dialog.appendChild(cwd);
 
   app.commands.addCommand('jupyterlab-launcher:show', {
+    label: 'Show Launcher',
     execute: () => {
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
