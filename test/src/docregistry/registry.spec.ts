@@ -9,11 +9,11 @@ import {
 
 import {
   DisposableDelegate, IDisposable
-} from 'phosphor-disposable';
+} from 'phosphor/lib/core/disposable';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   ABCWidgetFactory, Base64ModelFactory, DocumentRegistry,
