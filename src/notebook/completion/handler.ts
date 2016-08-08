@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  ICellEditorWidget, ITextChange, ICompletionRequest
+  isCellEditorWidgetExtension, ICellEditorWidgetExtension, ITextChange, ICompletionRequest
 } from '../cells/editor';
 
 import {
@@ -56,14 +56,14 @@ class CellCompletionHandler implements IDisposable {
       return;
     }
 
-    if (this._activeCell && !this._activeCell.isDisposed) {
-      let editor = this._activeCell.editor;
+    if (this._activeCell && !this._activeCell.isDisposed && isCellEditorWidgetExtension(this._activeCell.editor)) {
+      const editor = <ICellEditorWidgetExtension>this._activeCell.editor;
       editor.textChanged.disconnect(this.onTextChanged, this);
       editor.completionRequested.disconnect(this.onCompletionRequested, this);
     }
     this._activeCell = newValue;
-    if (this._activeCell) {
-      let editor = this._activeCell.editor;
+    if (this._activeCell && isCellEditorWidgetExtension(this._activeCell.editor)) {
+      const editor = <ICellEditorWidgetExtension>this._activeCell.editor;
       editor.textChanged.connect(this.onTextChanged, this);
       editor.completionRequested.connect(this.onCompletionRequested, this);
     }
@@ -140,7 +140,7 @@ class CellCompletionHandler implements IDisposable {
   /**
    * Handle a text changed signal from an editor.
    */
-  protected onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
+  protected onTextChanged(editor: ICellEditorWidgetExtension, change: ITextChange): void {
     if (!this._completion.model) {
       return;
     }
@@ -150,7 +150,7 @@ class CellCompletionHandler implements IDisposable {
   /**
    * Handle a completion requested signal from an editor.
    */
-  protected onCompletionRequested(editor: ICellEditorWidget, request: ICompletionRequest): void {
+  protected onCompletionRequested(editor: ICellEditorWidgetExtension, request: ICompletionRequest): void {
     if (!this.kernel || !this._completion.model) {
       return;
     }

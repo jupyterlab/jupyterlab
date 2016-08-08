@@ -26,6 +26,27 @@ import {
  */
 export type EdgeLocation = 'top' | 'bottom';
 
+export
+interface ICellEditorWidget extends Widget {
+
+  model: ICellModel;
+  edgeRequested: ISignal<ICellEditorWidget, EdgeLocation>;
+  lineNumbers: boolean;
+
+  setMimeType(mimeType: string): void;
+  setReadOnly(readOnly: boolean): void;
+
+  getLastLine(): number;
+
+  getCursorPosition(): number;
+  setCursorPosition(cursorPosition:number): void;
+  setCursor(line:number, character:number): void;
+
+  focus(): void;
+  hasFocus(): boolean;
+
+}
+
 /**
  * An interface describing editor state coordinates.
  */
@@ -105,7 +126,6 @@ interface ITextChange extends IEditorState {
   newValue: string;
 }
 
-
 /**
  * An interface describing completion requests.
  */
@@ -117,24 +137,16 @@ interface ICompletionRequest extends IEditorState {
   currentValue: string;
 }
 
-export interface ICellEditorWidget extends Widget {
-
-  model: ICellModel
-  edgeRequested: ISignal<ICellEditorWidget, EdgeLocation>
-  textChanged: ISignal<ICellEditorWidget, ITextChange>
-  completionRequested: ISignal<ICellEditorWidget, ICompletionRequest>
-  lineNumbers: boolean
-
-  setMimeType(mimeType: string): void
-  setReadOnly(readOnly: boolean): void
-
-  getLastLine(): number
-
-  getCursorPosition(): number
-  setCursorPosition(cursorPosition:number): void
-  setCursor(line:number, character:number): void
-
-  focus(): void
-  hasFocus(): boolean
-
+export
+interface ICellEditorWidgetExtension extends ICellEditorWidget {
+  textChanged: ISignal<ICellEditorWidgetExtension, ITextChange>;
+  completionRequested: ISignal<ICellEditorWidgetExtension, ICompletionRequest>;
 }
+
+export
+function isCellEditorWidgetExtension(widget:ICellEditorWidget): widget is ICellEditorWidgetExtension {
+  const widgetExtension = widget as ICellEditorWidgetExtension
+  return widgetExtension 
+    && (typeof widgetExtension.textChanged !== 'undefined')
+    && (typeof widgetExtension.completionRequested !== 'undefined')
+} 
