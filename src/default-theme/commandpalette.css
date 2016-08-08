@@ -15,7 +15,7 @@
 }
 
 
-.p-CommandPalette-inputWrapper {
+.p-CommandPalette-wrapper {
   padding: 4px 6px;
   margin: 4px;
   background: white;
@@ -43,7 +43,7 @@
 }
 
 
-.p-CommandPalette-command {
+.p-CommandPalette-item {
   padding: 4px 12px;
   font-size: 13px;
   font-weight: 500;
@@ -57,7 +57,7 @@
 
 
 .p-CommandPalette-header:hover:not(.p-mod-active),
-.p-CommandPalette-command:hover:not(.p-mod-active) {
+.p-CommandPalette-item:hover:not(.p-mod-active) {
   background: #EEEEEE;
 }
 
@@ -68,7 +68,7 @@
 }
 
 
-.p-CommandPalette-command.p-mod-active {
+.p-CommandPalette-item.p-mod-active {
   color: rgba(255,255,255,0.7);
   background: #2196F3;
 }
@@ -79,18 +79,18 @@
 }
 
 
-.p-CommandPalette-command.p-mod-active .p-CommandPalette-commandCaption {
+.p-CommandPalette-item.p-mod-active .p-CommandPalette-itemCaption {
   color: inherit;
 }
 
 
-.p-CommandPalette-command.p-mod-active mark {
+.p-CommandPalette-item.p-mod-active mark {
     background: inherit;
     color: white;
 }
 
 
-.p-CommandPalette-command mark {
+.p-CommandPalette-item mark {
     background: inherit;
     color: #757575;
 }
