@@ -42,7 +42,9 @@ import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
+import 'phosphor/styles/base.css';
 import 'jupyterlab/lib/console/base.css';
+import 'jupyterlab/lib/default-theme/commandpalette.css';
 import 'jupyterlab/lib/default-theme/completion.css';
 import 'jupyterlab/lib/default-theme/console.css';
 import 'jupyterlab/lib/dialog/index.css';

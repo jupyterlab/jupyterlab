@@ -241,7 +241,10 @@ class SideBarHandler {
    */
   constructor(side: string) {
     this._side = side;
-    this._sideBar = new TabBar();
+    this._sideBar = new TabBar({
+      orientation: 'vertical',
+      allowDeselect: true
+    });
     this._stackedPanel = new StackedPanel();
     this._sideBar.hide();
     this._stackedPanel.hide();
