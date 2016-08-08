@@ -55,12 +55,8 @@ import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
-import 'jupyterlab/lib/dialog/index.css';
-import 'jupyterlab/lib/dialog/theme.css';
-import 'jupyterlab/lib/iframe/index.css';
-import 'jupyterlab/lib/notebook/index.css';
-import 'jupyterlab/lib/notebook/theme.css';
-import 'jupyterlab/lib/notebook/completion/index.css';
+import 'jupyterlab/lib/default-theme/index.css';
+
 
 let NOTEBOOK = 'test.ipynb';
 
