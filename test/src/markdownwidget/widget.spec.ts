@@ -5,15 +5,16 @@ import expect = require('expect.js');
 
 import {
   Message, sendMessage
-} from 'phosphor-messaging';
+} from 'phosphor/lib/core/messaging';
 
-import {
-  Widget
-} from 'phosphor-widget';
 
 import {
   PanelLayout
-} from 'phosphor-panel';
+} from 'phosphor/lib/ui/panel';
+
+import {
+  Widget, WidgetMessage
+} from 'phosphor/lib/ui/widget';
 
 import {
   MarkdownWidget, MarkdownWidgetFactory
@@ -85,7 +86,7 @@ describe('markdownwidget/widget', () => {
         let context = new MockContext(new DocumentModel());
         let widget = new LogWidget(context, RENDERMIME);
         expect(widget.methods).to.not.contain('onAfterAttach');
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         expect(widget.methods).to.contain('onAfterAttach');
         widget.dispose();
       });
@@ -99,7 +100,7 @@ describe('markdownwidget/widget', () => {
         let widget = new LogWidget(context, RENDERMIME);
         expect(widget.methods).to.not.contain('onUpdateRequest');
         context.model.contentChanged.emit(void 0);
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         widget.dispose();
       });
@@ -108,17 +109,17 @@ describe('markdownwidget/widget', () => {
         let context = new MockContext(new DocumentModel());
         let widget = new LogWidget(context, RENDERMIME);
         context.model.contentChanged.emit(void 0);
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
 
         let layout = widget.layout as PanelLayout;
-        let oldChild = layout.childAt(0);
+        let oldChild = layout.widgets.at(0);
 
-        sendMessage(widget, Widget.MsgUpdateRequest);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
 
-        let newChild = layout.childAt(0);
+        let newChild = layout.widgets.at(0);
 
         expect(oldChild).to.not.be(newChild);
-        expect(layout.childCount()).to.be(1);
+        expect(layout.widgets.length).to.be(1);
         widget.dispose();
       });
 
