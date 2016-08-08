@@ -36,7 +36,6 @@
 
 #jp-left-stack, #jp-right-stack {
   display: flex;
-  border-right: 1px solid #BDBDBD;
   flex: 1 1 auto;
 }
 
@@ -54,7 +53,6 @@
   align-items: stretch;
   list-style-type: none;
   max-height: none;
-  background: white;
   color: #777777;
   font-size: 14px;
   min-width: 36px;
@@ -68,41 +66,63 @@
 }
 
 
-.jp-SideBar.jp-mod-left,
-.jp-SideBar.jp-mod-right {
-  border-left: 1px solid #BDBDBD;
-  bottom: 0;
-}
-
-
 .jp-SideBar.jp-mod-left .p-TabBar-content,
 .jp-SideBar.jp-mod-right .p-TabBar-content {
   display: flex;
   list-style: none;
-  height: 35px;
+  height: 100%;
   line-height: 35px;
+  background: #EEEEEE;
+  border: none;
+  border-top: 1px solid #BDBDBD;
+  margin-top: 1px;
 }
 
 
 .jp-SideBar.jp-mod-left .p-TabBar-content {
   flex-direction: column;
+  border-right: 1px solid #BDBDBD;
+  margin-right: 1px;
 }
 
 
 .jp-SideBar.jp-mod-right .p-TabBar-content {
   flex-direction: column-reverse;
+  justify-content: flex-end;
+  border-left: 1px solid #BDBDBD;
+  margin-left: 1px;
+}
+
+
+.jp-SideBar .p-TabBar-tab,
+.jp-SideBar .p-TabBar-tab.p-mod-current {
+  font-size: 13px;
+  width: 100px;
+  margin-bottom: 32px;
+  margin-top: 33px;
+  min-height: 35px;
+  max-height: 35px;
+  line-height: 35px;
+  text-align: center;
+  border: none;
+}
+
+
+.jp-SideBar .p-TabBar-tab.p-mod-current {
+  background: #EEEEEE;
+  color: #2196F3;
 }
 
 
 .jp-SideBar.jp-mod-left .p-TabBar-tab {
-  padding: 18px 0;
-  transform: rotate(-90deg);
+  transform: rotate(-90deg) translateY(-100%);
+  border-left: 1px solid #BDBDBD;
 }
 
 
 .jp-SideBar.jp-mod-right .p-TabBar-tab {
-  padding: 18px 0;
-  transform: rotate(90deg);
+  transform: rotate(90deg) translateY(90%);
+  border-right: 1px solid #BDBDBD;
 }
 
 

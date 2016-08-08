@@ -13,7 +13,7 @@
     "es6-promise": "^3.2.1",
     "jquery": "^2.2.0",
     "jquery-ui": "^1.10.5 <1.12",
-    "jupyter-js-services": "git+https://github.com/afshin/jupyter-js-services.git#0e41d861b6c5f7a1a89235a34fb75a6122769b5b",
+    "jupyter-js-services": "^0.18.0",
     "leaflet": "^0.7.7",
     "marked": "^0.3.5",
     "moment": "^2.11.2",
