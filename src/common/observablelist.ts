@@ -634,8 +634,6 @@ class ObservableList<T> implements IObservableList<T> {
     while (j < len) {
       this.internal.insert(i++, items[j++]);
     }
-    console.log('items', items);
-    console.log('old', old);
     this.changed.emit({
       type: 'replace',
       newIndex: index,
