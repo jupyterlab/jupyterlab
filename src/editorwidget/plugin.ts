@@ -266,6 +266,9 @@ function createMenu(app: JupyterLab, tracker: WidgetTracker<EditorWidget>): Menu
   settings.addItem({ command: cmdIds.vimMode });
 
   commands.addCommand(cmdIds.changeTheme, {
+    label: args => {
+      return args['theme'] as string;
+    },
     execute: args => {
       let editors = tracker.widgets;
       let name: string = args['theme'] as string || 'default';
