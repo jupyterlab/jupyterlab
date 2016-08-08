@@ -50,5 +50,6 @@ const markdownHandlerExtension: JupyterLabPlugin<void> = {
       widget.title.icon = icon;
     });
     registry.addWidgetFactory(factory, options);
-  }
+  },
+  autoStart: true
 };

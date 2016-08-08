@@ -36,7 +36,8 @@ export
 const imageHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.image-handler',
   requires: [IDocumentRegistry, ICommandPalette],
-  activate: activateImageWidget
+  activate: activateImageWidget,
+  autoStart: true
 };
 
 
