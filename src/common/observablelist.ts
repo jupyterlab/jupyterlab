@@ -629,7 +629,6 @@ class ObservableList<T> implements IObservableList<T> {
       this.internal.set(i++, item);
       return removed;
     });
-    old.length = count;
     this.changed.emit({
       type: 'replace',
       newIndex: index,
