@@ -47,13 +47,18 @@
 }
 
 
-.jp-SideBar.p-TabBar {
+.jp-SideBar.p-TabBar.jp-mod-right, .jp-SideBar.p-TabBar.jp-mod-left {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  list-style-type: none;
+  max-height: none;
   background: white;
   color: #777777;
   font-size: 14px;
   min-width: 36px;
   max-width: 36px;
-  max-height: none;
   overflow: visible;
 }
 

@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 @import url('~phosphor/styles/base.css');
-@import url('~jupyterlab/lib/application/base.css');
 @import url('~jupyterlab/lib/console/base.css');
 @import url('~jupyterlab/lib/notebook/index.css');
 @import url('~jupyterlab/lib/notebook/theme.css');
