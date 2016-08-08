@@ -464,7 +464,7 @@ namespace Private {
     for (let creator of creators) {
       let fileType = registry.getFileType(creator.fileType);
 
-      command = `${prefix}:new-${fileType}`;
+      command = `${prefix}:new-${creator.name}`;
       disposables.add(commands.addCommand(command, {
         execute: () => {
           let widgetName = creator.widgetName || 'default';
@@ -475,7 +475,6 @@ namespace Private {
       }));
       menu.addItem({ command });
     }
-
     return menu;
   }
 
