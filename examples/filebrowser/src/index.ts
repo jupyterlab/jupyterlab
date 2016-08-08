@@ -26,24 +26,28 @@ import {
 } from 'jupyterlab/lib/dialog';
 
 import {
+  CommandRegistry
+} from 'phosphor/lib/ui/commandregistry';
+
+import {
   DockPanel
-} from 'phosphor-dockpanel';
+} from 'phosphor/lib/ui/dockpanel';
 
 import {
-  KeymapManager
-} from 'phosphor-keymap';
+  Keymap
+} from 'phosphor/lib/ui/keymap';
 
 import {
-  Menu, MenuItem
-} from 'phosphor-menus';
+  Menu
+} from 'phosphor/lib/ui/menu';
 
 import {
   SplitPanel
-} from 'phosphor-splitpanel';
+} from 'phosphor/lib/ui/splitpanel';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import 'jupyterlab/lib/index.css';
 import 'jupyterlab/lib/theme.css';
@@ -63,10 +67,10 @@ function createApp(manager: IServiceManager): void {
   let opener = {
     open: (widget: Widget) => {
       if (widgets.indexOf(widget) === -1) {
-        dock.insertTabAfter(widget);
+        dock.addWidget(widget, { mode: 'tab-after' });
         widgets.push(widget);
       }
-      dock.selectWidget(widget);
+      dock.activateWidget(widget);
       activeWidget = widget;
       widget.disposed.connect((w: Widget) => {
         let index = widgets.indexOf(w);
@@ -93,8 +97,13 @@ function createApp(manager: IServiceManager): void {
     canStartKernel: true
   });
 
+  let commands = new CommandRegistry();
+  let keymap = new Keymap({ commands });
+
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowserWidget({
+    commands,
+    keymap,
     model: fbModel,
     manager: docManager,
     opener
@@ -102,10 +111,10 @@ function createApp(manager: IServiceManager): void {
 
   let panel = new SplitPanel();
   panel.id = 'main';
-  panel.addChild(fbWidget);
+  panel.addWidget(fbWidget);
   SplitPanel.setStretch(fbWidget, 0);
   let dock = new DockPanel();
-  panel.addChild(dock);
+  panel.addWidget(dock);
   SplitPanel.setStretch(dock, 1);
   dock.spacing = 8;
 
@@ -119,106 +128,104 @@ function createApp(manager: IServiceManager): void {
     }
   });
 
-  let keymapManager = new KeymapManager();
-  keymapManager.add([{
-    sequence: ['Enter'],
-    selector: '.jp-DirListing',
-    handler: () => {
-      fbWidget.open();
-    }
-  }, {
-    sequence: ['Ctrl N'], // Add emacs keybinding for select next.
-    selector: '.jp-DirListing',
-    handler: () => {
-      fbWidget.selectNext();
-    }
-  }, {
-    sequence: ['Ctrl P'], // Add emacs keybinding for select previous.
-    selector: '.jp-DirListing',
-    handler: () => {
-      fbWidget.selectPrevious();
-    }
-  }, {
-    sequence: ['Accel S'],
-    selector: '.jp-CodeMirrorWidget',
-    handler: () => {
+  commands.addCommand('file-open', {
+    label: 'Open',
+    icon: 'fa fa-folder-open-o',
+    mnemonic: 0,
+    execute: () => { fbWidget.open(); }
+  });
+  commands.addCommand('file-rename', {
+    label: 'Rename',
+    icon: 'fa fa-edit',
+    mnemonic: 0,
+    execute: () => { fbWidget.rename(); }
+  });
+  commands.addCommand('file-save', {
+    execute: () => {
       let context = docManager.contextForWidget(activeWidget);
       context.save();
     }
-  }]);
-
-  window.addEventListener('keydown', (event) => {
-    keymapManager.processKeydownEvent(event);
+  });
+  commands.addCommand('file-cut', {
+    label: 'Cut',
+    icon: 'fa fa-cut',
+    execute: () => { fbWidget.cut(); }
+  });
+  commands.addCommand('file-copy', {
+    label: 'Copy',
+    icon: 'fa fa-copy',
+    mnemonic: 0,
+    execute: () => { fbWidget.copy(); }
+  });
+  commands.addCommand('file-delete', {
+    label: 'Delete',
+    icon: 'fa fa-remove',
+    mnemonic: 0,
+    execute: () => { fbWidget.delete(); }
+  });
+  commands.addCommand('file-duplicate', {
+    label: 'Duplicate',
+    icon: 'fa fa-copy',
+    mnemonic: 0,
+    execute: () => { fbWidget.duplicate(); }
+  });
+  commands.addCommand('file-paste', {
+    label: 'Paste',
+    icon: 'fa fa-paste',
+    mnemonic: 0,
+    execute: () => { fbWidget.paste(); }
+  });
+  commands.addCommand('file-download', {
+    label: 'Download',
+    icon: 'fa fa-download',
+    execute: () => { fbWidget.download(); }
+  });
+  commands.addCommand('file-shutdown-kernel', {
+    label: 'Shutdown Kernel',
+    icon: 'fa fa-stop-circle-o',
+    execute: () => { fbWidget.shutdownKernels(); }
+  });
+  commands.addCommand('file-dialog-demo', {
+    label: 'Dialog Demo',
+    execute: () => { dialogDemo(); }
+  });
+  commands.addCommand('file-info-demo', {
+    label: 'Info Demo',
+    execute: () => {
+      let msg = 'The quick brown fox jumped over the lazy dog';
+      showDialog({
+        title: 'Cool Title',
+        body: msg,
+        buttons: [okButton]
+      });
+    }
   });
 
-  let contextMenu = new Menu([
-    new MenuItem({
-      text: '&Open',
-      icon: 'fa fa-folder-open-o',
-      shortcut: 'Ctrl+O',
-      handler: () => { fbWidget.open(); }
-    }),
-    new MenuItem({
-      text: '&Rename',
-      icon: 'fa fa-edit',
-      shortcut: 'Ctrl+R',
-      handler: () => { fbWidget.rename(); }
-    }),
-    new MenuItem({
-      text: '&Delete',
-      icon: 'fa fa-remove',
-      shortcut: 'Ctrl+D',
-      handler: () => { fbWidget.delete(); }
-    }),
-    new MenuItem({
-      text: 'Duplicate',
-      icon: 'fa fa-copy',
-      handler: () => { fbWidget.duplicate(); }
-    }),
-    new MenuItem({
-      text: 'Cut',
-      icon: 'fa fa-cut',
-      shortcut: 'Ctrl+X',
-      handler: () => { fbWidget.cut(); }
-    }),
-    new MenuItem({
-      text: '&Copy',
-      icon: 'fa fa-copy',
-      shortcut: 'Ctrl+C',
-      handler: () => { fbWidget.copy(); }
-    }),
-    new MenuItem({
-      text: '&Paste',
-      icon: 'fa fa-paste',
-      shortcut: 'Ctrl+V',
-      handler: () => { fbWidget.paste(); }
-    }),
-    new MenuItem({
-      text: 'Download',
-      icon: 'fa fa-download',
-      handler: () => { fbWidget.download(); }
-    }),
-    new MenuItem({
-      text: 'Shutdown Kernel',
-      icon: 'fa fa-stop-circle-o',
-      handler: () => { fbWidget.shutdownKernels(); }
-    }),
-    new MenuItem({
-      text: 'Dialog Demo',
-      handler: () => { dialogDemo(); }
-    }),
-    new MenuItem({
-      text: 'Info Demo',
-      handler: () => {
-        let msg = 'The quick brown fox jumped over the lazy dog';
-        showDialog({
-          title: 'Cool Title',
-          body: msg,
-          buttons: [okButton]
-        });
-      }
-    })
-  ]);
+  keymap.addBinding({
+    keys: ['Enter'],
+    selector: '.jp-DirListing',
+    command: 'file-open'
+  });
+  keymap.addBinding({
+    keys: ['Accel S'],
+    selector: '.jp-CodeMirrorWidget',
+    command: 'file-save'
+  });
+  window.addEventListener('keydown', (event) => {
+    keymap.processKeydownEvent(event);
+  });
+
+  let menu = new Menu({ commands, keymap });
+  menu.addItem({ command: 'file-open' });
+  menu.addItem({ command: 'file-rename' });
+  menu.addItem({ command: 'file-remove' });
+  menu.addItem({ command: 'file-duplicate' });
+  menu.addItem({ command: 'file-cut' });
+  menu.addItem({ command: 'file-copy' });
+  menu.addItem({ command: 'file-paste' });
+  menu.addItem({ command: 'file-shutdown-kernel' });
+  menu.addItem({ command: 'file-dialog-demo' });
+  menu.addItem({ command: 'file-info-demo' });
 
   // Add a context menu to the dir listing.
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
@@ -226,10 +233,10 @@ function createApp(manager: IServiceManager): void {
     event.preventDefault();
     let x = event.clientX;
     let y = event.clientY;
-    contextMenu.popup(x, y);
+    menu.open(x, y);
   });
 
-  panel.attach(document.body);
+  Widget.attach(panel, document.body);
 
   window.onresize = () => panel.update();
 }
