@@ -2,12 +2,9 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-.jp-ApplicationShell.p-Widget {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+
+#main {
+  flex: 1 1 auto;
   font-size: 14px;
 }
 
@@ -18,18 +15,13 @@
 }
 
 
-#jp-left-stack {
+#jp-left-stack, #jp-right-stack {
   border-right: 1px solid #BDBDBD;
 }
 
 
-#jp-right-stack {
-  border-left: 1px solid #BDBDBD;
-}
-
-
-#jp-main-dock-panel {
-  padding: 8px;
+#jp-left-stack > .p-Widget, #jp-right-stack > .p-Widget {
+  min-width: 300px;
 }
 
 
@@ -39,7 +31,7 @@
   font-size: 14px;
   max-width: 36px;
   max-height: none;
-  height: 100%;
+  overflow: visible;
 }
 
 

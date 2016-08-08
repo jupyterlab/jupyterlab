@@ -28,11 +28,19 @@
 
 
 body {
+  background: #E0E0E0;
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   margin: 0;
   padding: 0;
-  background: #E0E0E0;
   overflow: hidden;
-  font-family: sans-serif;
 }
 
 
@@ -55,12 +63,6 @@ body {
 
 .jp-Notebook {
   flex: 1 1 auto;
-}
-
-
-
-.jp-FileBrowser {
-  min-width: 300px;
 }
 
 

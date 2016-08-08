@@ -68,30 +68,27 @@ interface ISideAreaOptions {
  * The application shell for JupyterLab.
  */
 export
-class ApplicationShell extends Widget {
+class ApplicationShell extends BoxPanel {
   /**
    * Construct a new application shell.
    */
   constructor() {
     super();
     this.addClass(APPLICATION_SHELL_CLASS);
+    this.id = 'main';
+    this.direction = 'top-to-bottom';
+    this.spacing = 0;
 
-    let topPanel = new Panel();
-    let hboxPanel = new BoxPanel();
-    let dockPanel = new DockPanel();
-    let hsplitPanel = new SplitPanel();
-    let leftHandler = new SideBarHandler('left');
-    let rightHandler = new SideBarHandler('right');
-    let rootLayout = new BoxLayout();
-
-    this._topPanel = topPanel;
-    this._hboxPanel = hboxPanel;
-    this._dockPanel = dockPanel;
-    this._hsplitPanel = hsplitPanel;
-    this._leftHandler = leftHandler;
-    this._rightHandler = rightHandler;
+    let topPanel = this._topPanel = new Panel();
+    let hboxPanel = this._hboxPanel = new BoxPanel();
+    let dockPanel = this._dockPanel = new DockPanel();
+    let hsplitPanel = this._hsplitPanel = new SplitPanel();
+    let leftHandler = this._leftHandler = new SideBarHandler('left');
+    let rightHandler = this._rightHandler = new SideBarHandler('right');
 
     topPanel.id = 'jp-top-panel';
+    hboxPanel.id = 'jp-main-content-panel';
+    dockPanel.id = 'jp-main-dock-panel';
     hsplitPanel.id = 'jp-main-split-panel';
 
     leftHandler.sideBar.addClass(SIDEBAR_CLASS);
@@ -102,42 +99,36 @@ class ApplicationShell extends Widget {
     rightHandler.sideBar.addClass('jp-mod-right');
     rightHandler.stackedPanel.id = 'jp-right-stack';
 
-    dockPanel.id = 'jp-main-dock-panel';
-
+    hboxPanel.spacing = 0;
     dockPanel.spacing = 8;
-
-    hsplitPanel.orientation = 'horizontal';
     hsplitPanel.spacing = 1;
+
+    hboxPanel.direction = 'left-to-right';
+    hsplitPanel.orientation = 'horizontal';
 
     SplitPanel.setStretch(leftHandler.stackedPanel, 0);
     SplitPanel.setStretch(dockPanel, 1);
     SplitPanel.setStretch(rightHandler.stackedPanel, 0);
 
-    hsplitPanel.addWidget(leftHandler.stackedPanel);
-    hsplitPanel.addWidget(dockPanel);
-    hsplitPanel.addWidget(rightHandler.stackedPanel);
-
-    hboxPanel.direction = 'left-to-right';
-    hboxPanel.spacing = 0;
-
     BoxPanel.setStretch(leftHandler.sideBar, 0);
     BoxPanel.setStretch(hsplitPanel, 1);
     BoxPanel.setStretch(rightHandler.sideBar, 0);
+
+    hsplitPanel.addWidget(leftHandler.stackedPanel);
+    hsplitPanel.addWidget(dockPanel);
+    hsplitPanel.addWidget(rightHandler.stackedPanel);
 
     hboxPanel.addWidget(leftHandler.sideBar);
     hboxPanel.addWidget(hsplitPanel);
     hboxPanel.addWidget(rightHandler.sideBar);
 
-    rootLayout.direction = 'top-to-bottom';
-    rootLayout.spacing = 0;
+    BoxPanel.setStretch(this, 1);
+    BoxPanel.setStretch(topPanel, 0);
+    BoxPanel.setStretch(hboxPanel, 1);
 
-    BoxLayout.setStretch(topPanel, 0);
-    BoxLayout.setStretch(hboxPanel, 1);
-
-    rootLayout.addWidget(topPanel);
-    rootLayout.addWidget(hboxPanel);
-
-    this.layout = rootLayout;
+    this.addWidget(topPanel);
+    this.addWidget(hboxPanel);
+    this.update();
   }
 
   /**
@@ -241,10 +232,7 @@ class SideBarHandler {
    */
   constructor(side: string) {
     this._side = side;
-    this._sideBar = new TabBar({
-      orientation: 'vertical',
-      allowDeselect: true
-    });
+    this._sideBar = new TabBar({ allowDeselect: true });
     this._stackedPanel = new StackedPanel();
     this._sideBar.hide();
     this._stackedPanel.hide();
