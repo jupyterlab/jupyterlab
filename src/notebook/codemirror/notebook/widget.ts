@@ -17,36 +17,37 @@ import {
   Notebook
 } from '../../notebook/widget';
 
-import * as cells
-from '../cells/widget';
+import {
+  CodeMirrorCodeCellWidgetRenderer, defaultCodeMirrorCodeCellWidgetRenderer
+} from '../cells/widget';
 
-export const defaultCodeCellRenderer = new cells.CodeMirrorRenderer({
+export const defaultCodeMirrorCodeCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
   editorInitializer: (editor) => {
     editor.editor.setOption('matchBrackets', true);
     editor.editor.setOption('autoCloseBrackets', true);
   }
 });
 
-export const defaultMarkdownCellRenderer = new cells.CodeMirrorRenderer({
+export const defaultCodeMirrorMarkdownCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
   editorInitializer: (editor) => {
     // Turn on line wrapping for markdown cells.
     editor.editor.setOption('lineWrapping', true);
   }
 });
 
-export const defaultRawCellRenderer = new cells.CodeMirrorRenderer({
+export const defaultCodeMirrorRawCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
   editorInitializer: (editor) => {
     // Turn on line wrapping for markdown cells.
     editor.editor.setOption('lineWrapping', true);
   }
 });
 
-export class CodeMirrorRenderer extends Notebook.Renderer {
+export class CodeMirrorNotebookRenderer extends Notebook.Renderer {
 
   createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget {
     const widget = new CodeCellWidget({
       rendermime,
-      renderer: defaultCodeCellRenderer
+      renderer: defaultCodeMirrorCodeCellRenderer
     });
     widget.model = model;
     return widget;
@@ -55,7 +56,7 @@ export class CodeMirrorRenderer extends Notebook.Renderer {
   createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget {
     const widget = new MarkdownCellWidget({
       rendermime,
-      renderer: defaultMarkdownCellRenderer
+      renderer: defaultCodeMirrorMarkdownCellRenderer
     });
     widget.model = model;
     return widget;
@@ -63,7 +64,7 @@ export class CodeMirrorRenderer extends Notebook.Renderer {
 
   createRawCell(model: IRawCellModel): RawCellWidget {
     const widget = new RawCellWidget({
-      renderer: defaultRawCellRenderer
+      renderer: defaultCodeMirrorRawCellRenderer
     });
     widget.model = model;
     return widget;
@@ -71,4 +72,4 @@ export class CodeMirrorRenderer extends Notebook.Renderer {
 
 }
 
-export const defaultCodeMirrorRenderer = new CodeMirrorRenderer();
+export const defaultCodeMirrorNotebookRenderer = new CodeMirrorNotebookRenderer();

@@ -10,7 +10,7 @@ import {
 } from '../../cells/widget';
 
 import {
-    CellEditorWidget
+    CodeMirrorCellEditorWidget
 } from './editor';
 
 export const defaultEditorConfiguration: CodeMirror.EditorConfiguration = {
@@ -30,14 +30,14 @@ export const defaultEditorConfiguration: CodeMirror.EditorConfiguration = {
     }
 };
 
-export class CodeMirrorRenderer extends CodeCellWidget.Renderer {
+export class CodeMirrorCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
 
     private _editorConfiguration: CodeMirror.EditorConfiguration = defaultEditorConfiguration;
-    private _editorInitializer: (editor: CellEditorWidget) => void = editor => {};
+    private _editorInitializer: (editor: CodeMirrorCellEditorWidget) => void = editor => {};
 
     constructor(options: {
         editorConfiguration?: CodeMirror.EditorConfiguration,
-        editorInitializer?: (editor: CellEditorWidget) => void
+        editorInitializer?: (editor: CodeMirrorCellEditorWidget) => void
     } = {}) {
         super();
         this._editorConfiguration = options.editorConfiguration || this._editorConfiguration
@@ -45,11 +45,11 @@ export class CodeMirrorRenderer extends CodeCellWidget.Renderer {
     }
 
     createCellEditor(): ICellEditorWidget {
-        const widget = new CellEditorWidget(this._editorConfiguration);
+        const widget = new CodeMirrorCellEditorWidget(this._editorConfiguration);
         this._editorInitializer(widget);
         return widget;
     }
 
 }
 
-export const defaultCodeMirrorRenderer = new CodeMirrorRenderer();
+export const defaultCodeMirrorCodeCellWidgetRenderer = new CodeMirrorCodeCellWidgetRenderer();

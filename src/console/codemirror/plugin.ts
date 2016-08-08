@@ -6,13 +6,13 @@ import {
 } from '../widget';
 
 import {
-  defaultCodeMirrorRenderer, CodeMirrorRenderer
+  defaultCodeMirrorConsoleRenderer, CodeMirrorConsoleRenderer
 } from './widget';
 
 export const rendererProvider = {
   id: 'jupyter.services.console.codemirror.renderer',
   provides: ConsoleWidget.Renderer,
   resolve: () => {
-    return defaultCodeMirrorRenderer
+    return defaultCodeMirrorConsoleRenderer
   }
 };

@@ -13,18 +13,19 @@ import {
     NotebookPanel
 } from '../../notebook/panel';
 
-import * as widget
-from './widget';
+import {
+    defaultCodeMirrorNotebookRenderer
+} from './widget';
 
-export class CodeMirrorRenderer extends NotebookPanel.Renderer {
+export class CodeMirrorNotebookPanelRenderer extends NotebookPanel.Renderer {
 
     createContent(rendermime: RenderMime): Notebook  {
         return new Notebook({
             rendermime,
-            renderer: widget.defaultCodeMirrorRenderer
+            renderer: defaultCodeMirrorNotebookRenderer
         });
     }
 
 }
 
-export const defaultCodeMirrorRenderer = new CodeMirrorRenderer()
+export const defaultCodeMirrorNotebookPanelRenderer = new CodeMirrorNotebookPanelRenderer()

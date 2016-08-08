@@ -29,7 +29,7 @@ import {
 } from '../../cells/model';
 
 import {
-  ICellEditorWidget, EdgeLocation, ITextChange, ICompletionRequest, ICoords
+  ICellEditorWidget, ICellEditorWidgetExtension, EdgeLocation, ITextChange, ICompletionRequest, ICoords
 } from '../../cells/editor'
 
 /**
@@ -57,7 +57,7 @@ const CELL_EDITOR_CLASS = 'jp-CellEditor';
  * A widget for a cell editor.
  */
 export
-class CellEditorWidget extends CodeMirrorWidget implements ICellEditorWidget {
+class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditorWidgetExtension {
   /**
    * Construct a new cell editor widget.
    */

@@ -16,7 +16,7 @@ import {
 } from '../../../../lib/notebook/cells';
 
 import {
-  ICompletionRequest, ICellEditorWidget, ITextChange
+  ICompletionRequest, ICellEditorWidgetExtension, ITextChange
 } from '../../../../lib/notebook/cells/editor';
 
 import {
@@ -24,7 +24,7 @@ import {
 } from '../../../../lib/notebook/completion';
 
 import {
-  defaultCodeMirrorRenderer
+  defaultCodeMirrorCodeCellWidgetRenderer
 } from '../../../../lib/notebook/codemirror/cells/widget';
 
 
@@ -57,12 +57,12 @@ class TestCompletionHandler extends CellCompletionHandler {
     this.methods.push('onReply');
   }
 
-  onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
+  onTextChanged(editor: ICellEditorWidgetExtension, change: ITextChange): void {
     super.onTextChanged(editor, change);
     this.methods.push('onTextChanged');
   }
 
-  onCompletionRequested(editor: ICellEditorWidget, request: ICompletionRequest): void {
+  onCompletionRequested(editor: ICellEditorWidgetExtension, request: ICompletionRequest): void {
     super.onCompletionRequested(editor, request);
     this.methods.push('onCompletionRequested');
   }
@@ -115,7 +115,7 @@ describe('notebook/completion/handler', () => {
 
       it('should be settable', () => {
         let handler = new CellCompletionHandler(new CompletionWidget());
-        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorCodeCellWidgetRenderer});
         expect(handler.activeCell).to.be(null);
         handler.activeCell = cell;
         expect(handler.activeCell).to.be.a(BaseCellWidget);
@@ -124,8 +124,8 @@ describe('notebook/completion/handler', () => {
 
       it('should be resettable', () => {
         let handler = new CellCompletionHandler(new CompletionWidget());
-        let one = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
-        let two = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
+        let one = new BaseCellWidget({renderer:defaultCodeMirrorCodeCellWidgetRenderer});
+        let two = new BaseCellWidget({renderer:defaultCodeMirrorCodeCellWidgetRenderer});
         expect(handler.activeCell).to.be(null);
         handler.activeCell = one;
         expect(handler.activeCell).to.be.a(BaseCellWidget);
@@ -315,11 +315,11 @@ describe('notebook/completion/handler', () => {
           oldValue: 'fo',
           newValue: 'foo'
         };
-        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorCodeCellWidgetRenderer});
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onTextChanged');
-        cell.editor.textChanged.emit(change);
+        (cell.editor as ICellEditorWidgetExtension).textChanged.emit(change);
         expect(handler.methods).to.contain('onTextChanged');
       });
 
@@ -338,12 +338,12 @@ describe('notebook/completion/handler', () => {
           oldValue: 'fo',
           newValue: 'foo'
         };
-        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorCodeCellWidgetRenderer});
         let model = completion.model as TestCompletionModel;
 
         handler.activeCell = cell;
         expect(model.methods).to.not.contain('handleTextChange');
-        cell.editor.textChanged.emit(change);
+        (cell.editor as ICellEditorWidgetExtension).textChanged.emit(change);
         expect(model.methods).to.contain('handleTextChange');
       });
 
@@ -362,11 +362,11 @@ describe('notebook/completion/handler', () => {
           position: 0,
           currentValue: 'foo'
         };
-        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorCodeCellWidgetRenderer});
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onCompletionRequested');
-        cell.editor.completionRequested.emit(request);
+        (cell.editor as ICellEditorWidgetExtension).completionRequested.emit(request);
         expect(handler.methods).to.contain('onCompletionRequested');
       });
 
@@ -384,13 +384,13 @@ describe('notebook/completion/handler', () => {
           position: 0,
           currentValue: 'foo'
         };
-        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorCodeCellWidgetRenderer});
         let model = completion.model as TestCompletionModel;
 
         handler.kernel = new MockKernel();
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('makeRequest');
-        cell.editor.completionRequested.emit(request);
+        (cell.editor as ICellEditorWidgetExtension).completionRequested.emit(request);
         expect(handler.methods).to.contain('makeRequest');
       });
 
@@ -414,7 +414,7 @@ describe('notebook/completion/handler', () => {
         let handler = new TestCompletionHandler(completion);
         let model = completion.model as TestCompletionModel;
 
-        handler.activeCell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
+        handler.activeCell = new BaseCellWidget({renderer:defaultCodeMirrorCodeCellWidgetRenderer});
         expect(model.methods).to.not.contain('createPatch');
         completion.selected.emit('foo');
         expect(model.methods).to.contain('createPatch');
@@ -425,7 +425,7 @@ describe('notebook/completion/handler', () => {
         let patch = 'foobar';
         let completion = new CompletionWidget({ model });
         let handler = new TestCompletionHandler(completion);
-        let cell = new BaseCellWidget({renderer:defaultCodeMirrorRenderer});
+        let cell = new BaseCellWidget({renderer:defaultCodeMirrorCodeCellWidgetRenderer});
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,

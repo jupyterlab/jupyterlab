@@ -14,18 +14,18 @@ import {
 } from '../../notebook/cells/widget';
 
 import {
-    defaultCodeCellRenderer, defaultRawCellRenderer
+    defaultCodeMirrorCodeCellRenderer, defaultCodeMirrorRawCellRenderer
 } from '../../notebook/codemirror/notebook/widget';
 
 import {
     ConsoleWidget
 } from '../widget';
 
-export class CodeMirrorRenderer extends ConsoleWidget.Renderer {
+export class CodeMirrorConsoleRenderer extends ConsoleWidget.Renderer {
 
     createBanner(): RawCellWidget {
         let widget = new RawCellWidget({
-            renderer: defaultRawCellRenderer
+            renderer: defaultCodeMirrorRawCellRenderer
         });
         widget.model = new RawCellModel();
         return widget;
@@ -34,7 +34,7 @@ export class CodeMirrorRenderer extends ConsoleWidget.Renderer {
     createPrompt(rendermime: RenderMime): CodeCellWidget {
         let widget = new CodeCellWidget({
             rendermime,
-            renderer: defaultCodeCellRenderer
+            renderer: defaultCodeMirrorCodeCellRenderer
         });
         widget.model = new CodeCellModel();
         return widget;
@@ -42,4 +42,4 @@ export class CodeMirrorRenderer extends ConsoleWidget.Renderer {
 
 }
 
-export const defaultCodeMirrorRenderer = new CodeMirrorRenderer();
+export const defaultCodeMirrorConsoleRenderer = new CodeMirrorConsoleRenderer();

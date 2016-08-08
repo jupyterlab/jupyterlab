@@ -6,13 +6,13 @@ import {
 } from '../notebook/panel';
 
 import {
-  defaultCodeMirrorRenderer, CodeMirrorRenderer
+  defaultCodeMirrorNotebookPanelRenderer, CodeMirrorNotebookPanelRenderer
 } from './notebook/panel';
 
 export const rendererProvider = {
   id: 'jupyter.services.notebook.codemirror.renderer',
   provides: NotebookPanel.Renderer,
   resolve: () => {
-    return defaultCodeMirrorRenderer
+    return defaultCodeMirrorNotebookPanelRenderer
   }
 };

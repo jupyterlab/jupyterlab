@@ -40,7 +40,7 @@ import {
 } from '../utils';
 
 import {
-  defaultCodeMirrorRenderer
+  defaultCodeMirrorNotebookRenderer
 } from '../../../../lib/notebook/codemirror/notebook/widget';
 
 
@@ -57,7 +57,7 @@ describe('notebook/notebook/actions', () => {
     beforeEach(() => {
       widget = new Notebook({ 
         rendermime: defaultRenderMime(),
-        renderer:defaultCodeMirrorRenderer
+        renderer:defaultCodeMirrorNotebookRenderer
       });
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);
