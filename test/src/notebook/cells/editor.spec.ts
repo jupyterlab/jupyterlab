@@ -7,10 +7,6 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
-  IChangedArgs
-} from 'phosphor-properties';
-
-import {
   generate
 } from 'simulate-event';
 
@@ -33,7 +29,7 @@ const TAB = 9;
 class LogEditorWidget extends CellEditorWidget {
   methods: string[] = [];
 
-  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onModelStateChanged(model: ICellModel, args: any): void {
     super.onModelStateChanged(model, args);
     this.methods.push('onModelStateChanged');
   }

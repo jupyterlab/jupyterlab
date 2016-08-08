@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   IChangedArgs
-} from 'phosphor-properties';
+} from '../../../../lib/common/interfaces';
 
 import {
   nbformat
