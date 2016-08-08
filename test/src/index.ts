@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import './common/activitymonitor.spec';
+import './common/observablelist.spec';
 
 import './dialog/dialog.spec';
 
