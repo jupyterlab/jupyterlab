@@ -229,7 +229,11 @@ class SideBarHandler {
    */
   constructor(side: string) {
     this._side = side;
-    this._sideBar = new TabBar({ allowDeselect: true });
+    this._sideBar = new TabBar({
+      insertBehavior: 'none',
+      removeBehavior: 'none',
+      allowDeselect: true
+    });
     this._stackedPanel = new StackedPanel();
     this._sideBar.hide();
     this._stackedPanel.hide();
