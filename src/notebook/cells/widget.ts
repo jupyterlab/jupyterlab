@@ -470,7 +470,12 @@ class CodeCellWidget extends BaseCellWidget {
     this.trusted = true;
     let outputs = model.outputs;
     return outputs.execute(code, kernel).then(reply => {
-      model.executionCount = reply.content.execution_count;
+      if (reply.content.status === 'aborted') {
+        model.executionCount = null;
+        this.setPrompt(' ');
+      } else {
+        model.executionCount = reply.content.execution_count;
+      }
       return reply;
     });
   }
