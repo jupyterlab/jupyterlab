@@ -105,6 +105,22 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
     return Promise.resolve(void 0);
   }
 
+  createCheckpoint(): Promise<IContents.ICheckpointModel> {
+    return Promise.resolve(void 0);
+  }
+
+  deleteCheckpoint(checkpointID: string): Promise<void> {
+    return Promise.resolve(void 0);
+  }
+
+  restoreCheckpoint(checkpointID?: string): Promise<void> {
+    return Promise.resolve(void 0);
+  }
+
+  listCheckpoints(): Promise<IContents.ICheckpointModel[]> {
+    return Promise.resolve([]);
+  }
+
   listSessions(): Promise<ISession.IModel[]> {
     this.methods.push('listSessions');
     return Promise.resolve([] as ISession.IModel[]);
