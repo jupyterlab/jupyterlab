@@ -10,10 +10,6 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
-} from '../commandpalette/plugin';
-
-import {
   html
 } from './html';
 
@@ -25,12 +21,11 @@ export
 const aboutExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.about',
   activate: activateAbout,
-  autoStart: true,
-  requires: [ICommandPalette]
+  autoStart: true
 };
 
 
-function activateAbout(app: JupyterLab, palette: ICommandPalette): void {
+function activateAbout(app: JupyterLab): void {
   let widget = new Widget();
   widget.id = 'about-jupyterlab';
   widget.title.label = 'About';
@@ -49,5 +44,5 @@ function activateAbout(app: JupyterLab, palette: ICommandPalette): void {
       }
     }
   });
-  palette.addItem({ command, category: 'Help' });
+  app.palette.addItem({ command, category: 'Help' });
 }
