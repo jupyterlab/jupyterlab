@@ -6,10 +6,6 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
-} from '../commandpalette/plugin';
-
-import {
   IDocumentRegistry
 } from '../docregistry';
 
@@ -35,7 +31,7 @@ const EXTENSIONS = ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico',
 export
 const imageHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.image-handler',
-  requires: [IDocumentRegistry, ICommandPalette],
+  requires: [IDocumentRegistry],
   activate: activateImageWidget,
   autoStart: true
 };
@@ -44,7 +40,7 @@ const imageHandlerExtension: JupyterLabPlugin<void> = {
 /**
  * Activate the image widget extension.
  */
-function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette): void {
+function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry): void {
     let zoomInImage = 'image-widget:zoom-in';
     let zoomOutImage = 'image-widget:zoom-out';
     let resetZoomImage = 'image-widget:reset-zoom';
@@ -80,7 +76,7 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
 
     let category = 'Image Widget';
     [zoomInImage, zoomOutImage, resetZoomImage]
-      .forEach(command => palette.addItem({ command, category }));
+      .forEach(command => app.palette.addItem({ command, category }));
 
     function zoomIn(): void {
       if (!tracker.activeWidget) {
