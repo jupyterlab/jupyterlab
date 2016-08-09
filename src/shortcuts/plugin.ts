@@ -131,9 +131,19 @@ const SHORTCUTS = [
     keys: ['ArrowUp'],
   },
   {
+    command: 'notebook-cells:select-above',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['K'],
+  },
+  {
     command: 'notebook-cells:select-below',
     selector: '.jp-Notebook.jp-mod-commandMode',
     keys: ['ArrowDown'],
+  },
+  {
+    command: 'notebook-cells:select-below',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['J'],
   },
   {
     command: 'notebook-cells:extend-above',
@@ -141,9 +151,19 @@ const SHORTCUTS = [
     keys: ['Shift ArrowUp'],
   },
   {
+    command: 'notebook-cells:extend-above',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Shift K'],
+  },
+  {
     command: 'notebook-cells:extend-below',
     selector: '.jp-Notebook.jp-mod-commandMode',
     keys: ['Shift ArrowDown'],
+  },
+  {
+    command: 'notebook-cells:extend-below',
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Shift J'],
   },
   {
     command: 'notebook-cells:undo',
@@ -234,6 +254,11 @@ const SHORTCUTS = [
     command: 'notebook:command-mode',
     selector: '.jp-Notebook.jp-mod-editMode',
     keys: ['Escape']
+  },
+  {
+    command: 'notebook:command-mode',
+    selector: '.jp-Notebook.jp-mod-editMode',
+    keys: ['Ctrl M']
   },
   {
     command: 'console:execute',
