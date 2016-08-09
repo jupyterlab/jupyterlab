@@ -9,7 +9,7 @@ import {
 } from 'phosphor/lib/collections/vector';
 
 import {
-  BoxLayout, BoxPanel
+  BoxPanel
 } from 'phosphor/lib/ui/boxpanel';
 
 import {
@@ -173,35 +173,39 @@ class ApplicationShell extends Panel {
   }
 
   /**
-   *
+   * Activate a widget in the left area.
    */
   activateLeft(id: string): void {
     this._leftHandler.activate(id);
   }
 
   /**
-   *
+   * Activate a widget in the right area.
    */
   activateRight(id: string): void {
     this._rightHandler.activate(id);
   }
 
   /**
-   *
+   * Activate a widget in the main area.
    */
   activateMain(id: string): void {
-    // TODO
+    let dock = this._dockPanel;
+    let widget = find(dock.widgets, value => value.id === id);
+    if (widget) {
+      dock.activateWidget(widget);
+    }
   }
 
   /**
-   *
+   * Collapse the left area.
    */
   collapseLeft(): void {
     this._leftHandler.collapse();
   }
 
   /**
-   *
+   * Collapse the right area.
    */
   collapseRight(): void {
     this._rightHandler.collapse();

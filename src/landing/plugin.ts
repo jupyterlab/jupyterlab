@@ -6,10 +6,6 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  TabPanel
-} from 'phosphor/lib/ui/tabpanel';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -143,16 +139,9 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
     execute: () => {
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
+      } else {
+        app.shell.activateMain(widget.id);
       }
-      let stack = widget.parent;
-      if (!stack) {
-        return;
-      }
-      let tabs = stack.parent;
-      if (tabs instanceof TabPanel) {
-        tabs.currentWidget = widget;
-      }
-      app.shell.activateMain(widget.id);
     }
   });
 

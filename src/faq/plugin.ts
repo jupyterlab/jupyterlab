@@ -8,10 +8,6 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  TabPanel
-} from 'phosphor/lib/ui/tabpanel';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -336,14 +332,8 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
     execute: () => {
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
-      }
-      let stack = widget.parent;
-      if (!stack) {
-        return;
-      }
-      let tabs = stack.parent;
-      if (tabs instanceof TabPanel) {
-        tabs.currentWidget = widget;
+      } else {
+        app.shell.activateMain(widget.id);
       }
     }
   });
