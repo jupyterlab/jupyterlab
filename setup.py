@@ -8,6 +8,7 @@ from setuptools import setup, find_packages, Command
 from setuptools.command.sdist import sdist
 from setuptools.command.build_py import build_py
 from setuptools.command.egg_info import egg_info
+from setuptools.command.bdist_egg import bdist_egg
 from subprocess import check_call
 import os
 import sys
@@ -58,10 +59,21 @@ def js_prerelease(command, strict=False):
             command.run(self)
     return DecoratedCommand
 
+
 def update_package_data(distribution):
     """update build_py options to get package_data changes"""
     build_py = distribution.get_command_obj('build_py')
     build_py.finalize_options()
+
+
+class bdist_egg_disabled(bdist_egg):
+    """Disabled version of bdist_egg
+
+    Prevents setup.py install performing setuptools' default easy_install,
+    which it should never ever do.
+    """
+    def run(self):
+        sys.exit("Aborting implicit building of eggs. Use `pip install .` to install from source.")
 
 
 class NPM(Command):
@@ -134,6 +146,7 @@ setup_args = {
         'egg_info': js_prerelease(egg_info),
         'sdist': js_prerelease(sdist, strict=True),
         'jsdeps': NPM,
+        'bdist_egg': bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled,
     },
     'entry_points': {
         'console_scripts': [
