@@ -223,12 +223,13 @@
 
 
 /* default inspector items: hints */
-.jp-InspectorItem.jp-HintsInspectorItem {
+.jp-InspectorItem.jp-HintsInspectorItem.p-Widget,
+.jp-InspectorItem.jp-HintsInspectorItem.p-Widget .p-Widget {
   background: #FFFFCA;
 }
 
 
 /* default inspector items: details */
-.jp-InspectorItem.jp-DetailsInspectorItem {
+.jp-InspectorItem.jp-DetailsInspectorItem.p-Widget .p-Widget {
   background: #FFFFFF;
 }
