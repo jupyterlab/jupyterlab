@@ -14,10 +14,6 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
-} from '../commandpalette/plugin';
-
-import {
   selectKernel
 } from '../docregistry';
 
@@ -56,8 +52,7 @@ const consoleExtension: JupyterLabPlugin<void> = {
     IServiceManager,
     IRenderMime,
     IMainMenu,
-    IInspector,
-    ICommandPalette
+    IInspector
   ],
   activate: activateConsole,
   autoStart: true
@@ -78,10 +73,10 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette): void {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector): void {
   let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessions;
-  let { commands, keymap } = app;
+  let { commands, keymap, palette } = app;
   let category = 'Console';
   let menu = new Menu({ commands, keymap });
   let submenu: Menu = null;
