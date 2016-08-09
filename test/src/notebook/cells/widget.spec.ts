@@ -368,7 +368,7 @@ describe('notebook/cells/widget', () => {
         let widget = new BaseCellWidget({
           renderer: defaultCodeMirrorCodeCellWidgetRenderer
         });
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         expect(widget.editor.hasFocus()).to.be(false);
         widget.focus();
         expect(widget.editor.hasFocus()).to.be(true);
@@ -723,7 +723,7 @@ describe('notebook/cells/widget', () => {
 
       it('should default to true', (done) => {
         let widget = new MarkdownCellWidget({ rendermime, renderer: defaultCodeMirrorMarkdownCellRenderer });
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         expect(widget.rendered).to.be(true);
         requestAnimationFrame(() => {
           expect(widget.node.classList.contains(RENDERED_CLASS)).to.be(true);
@@ -734,7 +734,7 @@ describe('notebook/cells/widget', () => {
 
       it('should unrender the widget', (done) => {
         let widget = new MarkdownCellWidget({ rendermime, renderer: defaultCodeMirrorMarkdownCellRenderer });
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         widget.rendered = false;
         requestAnimationFrame(() => {
           expect(widget.node.classList.contains(RENDERED_CLASS)).to.be(false);
@@ -745,7 +745,7 @@ describe('notebook/cells/widget', () => {
 
       it('should ignore being set to the same value', (done) => {
         let widget = new LogMarkdownCell({ rendermime, renderer: defaultCodeMirrorMarkdownCellRenderer });
-        widget.attach(document.body);
+        Widget.attach(widget, document.body);
         widget.rendered = false;
         widget.rendered = false;
         requestAnimationFrame(() => {
