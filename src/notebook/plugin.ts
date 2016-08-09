@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
+  CommandPalette
+} from 'phosphor/lib/ui/commandpalette';
+
+import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -16,10 +20,6 @@ import {
 import {
   IClipboard
 } from '../clipboard/plugin';
-
-import {
-  ICommandPalette
-} from '../commandpalette/plugin';
 
 import {
   IMainMenu
@@ -135,7 +135,6 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
     IRenderMime,
     IClipboard,
     IMainMenu,
-    ICommandPalette,
     IInspector
   ],
   activate: activateNotebookHandler,
@@ -146,7 +145,7 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, inspector: IInspector): INotebookTracker {
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard);
   let options: IWidgetFactoryOptions = {
     fileExtensions: ['.ipynb'],
@@ -189,7 +188,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   let tracker = Private.notebookTracker;
 
   addCommands(app, tracker);
-  populatePalette(palette);
+  populatePalette(app.palette);
 
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
@@ -561,7 +560,7 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
 /**
  * Populate the application's command palette with notebook commands.
  */
-function populatePalette(palette: ICommandPalette): void {
+function populatePalette(palette: CommandPalette): void {
   let category = 'Notebook Operations';
   [
     cmdIds.interrupt,
