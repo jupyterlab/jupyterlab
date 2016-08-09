@@ -95,7 +95,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   let manager = services.sessions;
   let { commands, keymap } = app;
   let category = 'Console';
+
   let menu = new Menu({ commands, keymap });
+  menu.title.label = 'Console';
+
   let submenu: Menu = null;
   let command: string;
 
