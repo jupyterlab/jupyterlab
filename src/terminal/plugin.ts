@@ -10,10 +10,6 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
-} from '../commandpalette/plugin';
-
-import {
   IMainMenu
 } from '../mainmenu/plugin';
 
@@ -36,7 +32,7 @@ import {
 export
 const terminalExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.terminal',
-  requires: [IServiceManager, IMainMenu, ICommandPalette],
+  requires: [IServiceManager, IMainMenu],
   activate: activateTerminal,
   autoStart: true
 };
@@ -52,9 +48,9 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
 const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
 
 
-function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette): void {
+function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu): void {
 
-  let { commands, keymap } = app;
+  let { commands, keymap, palette } = app;
   let newTerminalId = 'terminal:create-new';
   let increaseTerminalFontSize = 'terminal:increase-font';
   let decreaseTerminalFontSize = 'terminal:decrease-font';
