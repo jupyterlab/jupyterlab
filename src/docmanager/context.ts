@@ -176,6 +176,34 @@ class Context implements IDocumentContext<IDocumentModel> {
   }
 
   /**
+   * Create a checkpoint for the file.
+   */
+  createCheckpoint(): Promise<IContents.ICheckpointModel> {
+    return this._manager.createCheckpoint(this._id);
+  }
+
+  /**
+   * Delete a checkpoint for the file.
+   */
+  deleteCheckpoint(checkpointID: string): Promise<void> {
+    return this._manager.deleteCheckpoint(this.id, checkpointID);
+  }
+
+  /**
+   * Restore the file to a known checkpoint state.
+   */
+  restoreCheckpoint(checkpointID?: string): Promise<void> {
+    return this._manager.restoreCheckpoint(this.id, checkpointID);
+  }
+
+  /**
+   * List available checkpoints for the file.
+   */
+  listCheckpoints(): Promise<IContents.ICheckpointModel[]> {
+    return this._manager.listCheckpoints(this.id);
+  }
+
+  /**
    * Get the list of running sessions.
    */
   listSessions(): Promise<ISession.IModel[]> {
@@ -353,7 +381,6 @@ class ContextManager implements IDisposable {
    *
    * @param options - If given, change the kernel (starting a session
    * if necessary). If falsey, shut down any existing session and return
-   * a void promise.
    */
   changeKernel(id: string, options: IKernel.IModel): Promise<IKernel> {
     let contextEx = this._contexts[id];
@@ -524,6 +551,47 @@ class ContextManager implements IDisposable {
     }
     contextEx.isPopulated = true;
     this._contexts[id].context.populated.emit(void 0);
+  }
+
+  /**
+   * Create a checkpoint for a file.
+   */
+  createCheckpoint(id: string): Promise<IContents.ICheckpointModel> {
+    let path = this._contexts[id].path;
+    return this._manager.contents.createCheckpoint(path);
+  }
+
+  /**
+   * Delete a checkpoint for a file.
+   */
+  deleteCheckpoint(id: string, checkpointID: string): Promise<void> {
+    let path = this._contexts[id].path;
+    return this._manager.contents.deleteCheckpoint(path, checkpointID);
+  }
+
+  /**
+   * Restore a file to a known checkpoint state.
+   */
+  restoreCheckpoint(id: string, checkpointID?: string): Promise<void> {
+    let path = this._contexts[id].path;
+    if (checkpointID) {
+      return this._manager.contents.restoreCheckpoint(path, checkpointID);
+    }
+    return this.listCheckpoints(id).then(checkpoints => {
+      if (!checkpoints.length) {
+        return;
+      }
+      checkpointID = checkpoints[checkpoints.length - 1].id;
+      return this._manager.contents.restoreCheckpoint(path, checkpointID);
+    });
+  }
+
+  /**
+   * List available checkpoints for a file.
+   */
+  listCheckpoints(id: string): Promise<IContents.ICheckpointModel[]> {
+    let path = this._contexts[id].path;
+    return this._manager.contents.listCheckpoints(path);
   }
 
   /**

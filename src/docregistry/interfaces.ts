@@ -202,6 +202,41 @@ interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
   revert(): Promise<void>;
 
   /**
+   * Create a checkpoint for the file.
+   *
+   * @returns A promise which resolves with the new checkpoint model when the
+   *   checkpoint is created.
+   */
+  createCheckpoint(): Promise<IContents.ICheckpointModel>;
+
+  /**
+   * Delete a checkpoint for the file.
+   *
+   * @param checkpointID - The id of the checkpoint to delete.
+   *
+   * @returns A promise which resolves when the checkpoint is deleted.
+   */
+  deleteCheckpoint(checkpointID: string): Promise<void>;
+
+  /**
+   * Restore the file to a known checkpoint state.
+   *
+   * @param checkpointID - The optional id of the checkpoint to restore,
+   *   defaults to the most recent checkpoint.
+   *
+   * @returns A promise which resolves when the checkpoint is restored.
+   */
+  restoreCheckpoint(checkpointID?: string): Promise<void>;
+
+  /**
+   * List available checkpoints for the file.
+   *
+   * @returns A promise which resolves with a list of checkpoint models for
+   *    the file.
+   */
+  listCheckpoints(): Promise<IContents.ICheckpointModel[]>;
+
+  /**
    * Get the list of running sessions.
    */
   listSessions(): Promise<ISession.IModel[]>;
