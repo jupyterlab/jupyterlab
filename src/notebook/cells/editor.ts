@@ -7,11 +7,11 @@ import {
 
 import {
   ISignal
-} from 'phosphor-signaling';
+} from 'phosphor/lib/core/signaling';
 
 import {
   Widget
-} from 'phosphor-widget';
+} from 'phosphor/lib/ui/widget';
 
 import {
   IChangedArgs

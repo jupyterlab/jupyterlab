@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   IKernel, ISession
 } from 'jupyter-js-services';
 
@@ -45,6 +49,14 @@ import {
   ConsolePanel, ConsoleWidget
 } from './';
 
+/* tslint:disable */
+/**
+ * The console renderer token.
+ */
+export
+const IConsoleRenderer = new Token<ConsoleWidget.IRenderer>('jupyter.services.console.renderer');
+/* tslint:enable */
+
 /**
  * The console extension.
  */
@@ -57,7 +69,7 @@ const consoleExtension: JupyterLabPlugin<void> = {
     IMainMenu,
     IInspector,
     ICommandPalette,
-    ConsoleWidget.IRenderer
+    IConsoleRenderer
   ],
   activate: activateConsole,
   autoStart: true

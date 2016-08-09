@@ -75,7 +75,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     this._activeCell = newValue;
     if (this._activeCell) {
       // Clear ephemeral inspectors in preparation for a new editor.
-      this.clearEphemeral.emit(void 0);
+      this.ephemeralCleared.emit(void 0);
       if (isCellEditorWidgetExtension(this._activeCell.editor)) {
         const editor = <ICellEditorWidgetExtension>this._activeCell.editor;
         editor.textChanged.connect(this.onTextChanged, this);

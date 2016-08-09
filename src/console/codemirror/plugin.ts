@@ -9,10 +9,20 @@ import {
   defaultCodeMirrorConsoleRenderer, CodeMirrorConsoleRenderer
 } from './widget';
 
-export const rendererProvider = {
+import {
+  IConsoleRenderer
+} from '../plugin'
+
+import {
+  JupyterLab, JupyterLabPlugin
+} from '../../application';
+
+/**
+ * The code mirror console renderer provider.
+ */
+export
+const rendererProvider: JupyterLabPlugin<ConsoleWidget.IRenderer> = {
   id: 'jupyter.services.console.codemirror.renderer',
-  provides: ConsoleWidget.Renderer,
-  resolve: () => {
-    return defaultCodeMirrorConsoleRenderer
-  }
+  provides: IConsoleRenderer,
+  activate: () => defaultCodeMirrorConsoleRenderer
 };

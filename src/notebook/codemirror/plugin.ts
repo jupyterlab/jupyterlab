@@ -9,10 +9,16 @@ import {
   defaultCodeMirrorNotebookPanelRenderer, CodeMirrorNotebookPanelRenderer
 } from './notebook/panel';
 
-export const rendererProvider = {
+import {
+  JupyterLab, JupyterLabPlugin
+} from '../../application';
+
+import {
+  INotebookRenderer
+} from '../plugin';
+
+export const rendererProvider: JupyterLabPlugin<NotebookPanel.IRenderer> = {
   id: 'jupyter.services.notebook.codemirror.renderer',
-  provides: NotebookPanel.Renderer,
-  resolve: () => {
-    return defaultCodeMirrorNotebookPanelRenderer
-  }
+  provides: INotebookRenderer,
+  activate: () => defaultCodeMirrorNotebookPanelRenderer
 };

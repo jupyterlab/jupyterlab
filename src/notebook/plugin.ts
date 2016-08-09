@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -102,6 +106,13 @@ const cmdIds = {
   markdown6: 'notebook-cells:markdown-header6',
 };
 
+/* tslint:disable */
+/**
+ * The notebook renderer token.
+ */
+export
+const INotebookRenderer = new Token<NotebookPanel.IRenderer>('jupyter.services.notebook.renderer');
+/* tslint:enable */
 
 /**
  * The notebook widget tracker provider.
@@ -118,7 +129,7 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
     IMainMenu,
     ICommandPalette,
     IInspector,
-    NotebookPanel.IRenderer
+    INotebookRenderer
   ],
   activate: activateNotebookHandler,
   autoStart: true

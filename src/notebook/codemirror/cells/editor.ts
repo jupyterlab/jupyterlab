@@ -18,11 +18,7 @@ import {
 
 import {
   IChangedArgs
-} from 'phosphor-properties';
-
-import {
-  ISignal, Signal
-} from 'phosphor-signaling';
+} from '../../../common/interfaces';
 
 import {
   ICellModel
@@ -76,17 +72,17 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
   /**
    * A signal emitted when a tab (text) completion is requested.
    */
-  completionRequested: ISignal<CellEditorWidget, ICompletionRequest>;
+  completionRequested: ISignal<ICellEditorWidgetExtension, ICompletionRequest>;
 
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
-  edgeRequested: ISignal<CellEditorWidget, EdgeLocation>;
+  edgeRequested: ISignal<ICellEditorWidgetExtension, EdgeLocation>;
 
   /**
    * A signal emitted when a text change is completed.
    */
-  textChanged: ISignal<CellEditorWidget, ITextChange>;
+  textChanged: ISignal<ICellEditorWidgetExtension, ITextChange>;
 
   /**
    * The cell model used by the editor.
@@ -296,7 +292,7 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
   private _model: ICellModel = null;
 }
 
-// Define the signals for the `CellEditorWidget` class.
-defineSignal(CellEditorWidget.prototype, 'completionRequested');
-defineSignal(CellEditorWidget.prototype, 'edgeRequested');
-defineSignal(CellEditorWidget.prototype, 'textChanged');
+// Define the signals for the `CodeMirrorCellEditorWidget` class.
+defineSignal(CodeMirrorCellEditorWidget.prototype, 'completionRequested');
+defineSignal(CodeMirrorCellEditorWidget.prototype, 'edgeRequested');
+defineSignal(CodeMirrorCellEditorWidget.prototype, 'textChanged');
