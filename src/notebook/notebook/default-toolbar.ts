@@ -405,22 +405,25 @@ class KernelIndicator extends Widget {
     super();
     this.addClass(TOOLBAR_INDICATOR);
     if (panel.kernel) {
-      this._handleStatus(panel.kernel, panel.kernel.status);
+      this._handleStatus(panel.kernel);
       panel.kernel.statusChanged.connect(this._handleStatus, this);
     } else {
       this.addClass(TOOLBAR_BUSY);
       this.node.title = 'No Kernel!';
     }
     panel.kernelChanged.connect((c, kernel) => {
-      this._handleStatus(kernel, kernel.status);
-      kernel.statusChanged.connect(this._handleStatus, this);
+      this._handleStatus(kernel);
+      if (kernel) {
+        kernel.statusChanged.connect(this._handleStatus, this);
+      }
     });
   }
 
   /**
    * Handle a status on a kernel.
    */
-  private _handleStatus(kernel: IKernel, status: IKernel.Status) {
+  private _handleStatus(kernel: IKernel) {
+    status = kernel ? kernel.status : 'unknown';
     this.toggleClass(TOOLBAR_BUSY, status !== 'idle');
     let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
     this.node.title = title;
