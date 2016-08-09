@@ -6,28 +6,12 @@ import {
 } from 'phosphor/lib/core/mimedata';
 
 import {
-  Token
-} from 'phosphor/lib/core/token';
-
-import {
   JupyterLabPlugin
 } from '../application';
 
-
-/* tslint:disable */
-/**
- * The clipboard token.
- */
-export
-const IClipboard = new Token<IClipboard>('jupyter.services.clipboard');
-/* tslint:enable */
-
-
-/**
- * The clipboard interface.
- */
-export
-interface IClipboard extends MimeData {}
+import {
+  IClipboard
+} from './';
 
 
 /**

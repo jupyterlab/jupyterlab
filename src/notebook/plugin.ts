@@ -15,7 +15,7 @@ import {
 
 import {
   IClipboard
-} from '../clipboard/plugin';
+} from '../clipboard';
 
 import {
   ICommandPalette
