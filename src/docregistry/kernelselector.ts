@@ -106,7 +106,9 @@ function selectKernelForContext(context: IDocumentContext<IDocumentModel>, host?
     };
     return selectKernel(options);
   }).then(kernel => {
-    context.changeKernel(kernel);
+    if (kernel) {
+      context.changeKernel(kernel);
+    }
   });
 }
 

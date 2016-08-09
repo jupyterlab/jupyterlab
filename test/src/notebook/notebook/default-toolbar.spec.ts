@@ -347,6 +347,14 @@ describe('notebook/notebook/default-toolbar', () => {
         });
       });
 
+      it('should handle a null kernel', (done) => {
+        let item = ToolbarItems.createKernelStatusItem(panel);
+        panel.context.changeKernel(void 0).then(() => {
+          expect(item.node.title).to.be('No Kernel!');
+          expect(item.hasClass('jp-mod-busy')).to.be(true);
+        }).then(done, done);
+      });
+
       it('should handle a change to the context', (done) => {
         let item = ToolbarItems.createKernelStatusItem(panel);
         let model = new NotebookModel();

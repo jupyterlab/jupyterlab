@@ -412,8 +412,13 @@ class KernelIndicator extends Widget {
       this.node.title = 'No Kernel!';
     }
     panel.kernelChanged.connect((c, kernel) => {
-      this._handleStatus(kernel, kernel.status);
-      kernel.statusChanged.connect(this._handleStatus, this);
+      if (kernel) {
+        this._handleStatus(kernel, kernel.status);
+        kernel.statusChanged.connect(this._handleStatus, this);
+      } else {
+        this.node.title = 'No Kernel!';
+        this.addClass(TOOLBAR_BUSY);
+      }
     });
   }
 

@@ -82,7 +82,11 @@ class MockContext<T extends IDocumentModel> implements IDocumentContext<T> {
   }
 
   changeKernel(options: IKernel.IModel): Promise<IKernel> {
-    this._kernel = new MockKernel(options);
+    if (!options) {
+      this._kernel = null;
+    } else {
+      this._kernel = new MockKernel(options);
+    }
     this.kernelChanged.emit(this._kernel);
     this.methods.push('changeKernel');
     return Promise.resolve(this._kernel);
