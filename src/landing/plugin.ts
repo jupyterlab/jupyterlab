@@ -10,10 +10,6 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
-} from '../commandpalette/plugin';
-
-import {
   IPathTracker
 } from '../filebrowser/plugin';
 
@@ -27,13 +23,13 @@ import {
 export
 const landingExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.landing',
-  requires: [IServiceManager, IPathTracker, ICommandPalette],
+  requires: [IServiceManager, IPathTracker],
   activate: activateLanding,
   autoStart: true
 };
 
 
-function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): void {
+function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker): void {
   let widget = new Widget();
   widget.id = 'landing-jupyterlab';
   widget.title.label = 'Launcher';
@@ -145,7 +141,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
     }
   });
 
-  palette.addItem({
+  app.palette.addItem({
     command: 'jupyterlab-launcher:show',
     category: 'Help'
   });

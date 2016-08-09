@@ -22,10 +22,6 @@ import {
 } from './widget';
 
 import {
-  ICommandPalette
-} from '../commandpalette/plugin';
-
-import {
   IMainMenu
 } from '../mainmenu/plugin';
 
@@ -84,7 +80,7 @@ const IEditorTracker = new Token<IEditorTracker>('jupyter.services.editor-tracke
 export
 const editorHandlerExtension: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.extensions.editor-handler',
-  requires: [IDocumentRegistry, IMainMenu, ICommandPalette],
+  requires: [IDocumentRegistry, IMainMenu],
   provides: IEditorTracker,
   activate: activateEditorHandler,
   autoStart: true
@@ -108,15 +104,14 @@ const cmdIds = {
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IEditorTracker {
+function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu): IEditorTracker {
   let tracker = new WidgetTracker<EditorWidget>();
   let widgetFactory = new EditorWidgetFactory();
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
     tracker.addWidget(widget);
   });
-  registry.addWidgetFactory(widgetFactory,
-  {
+  registry.addWidgetFactory(widgetFactory, {
     fileExtensions: ['*'],
     displayName: 'Editor',
     modelName: 'text',
@@ -125,8 +120,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     canStartKernel: false
   });
 
-  mainMenu.addMenu(createMenu(app, tracker), {rank: 30});
-
+  mainMenu.addMenu(createMenu(app, tracker), { rank: 30 });
   addCommands(app, tracker);
 
   [
@@ -135,8 +129,8 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     cmdIds.matchBrackets,
     cmdIds.defaultMode,
     cmdIds.vimMode,
-    cmdIds.closeAll,
-  ].forEach(command => palette.addItem({ command, category: 'Editor' }));
+    cmdIds.closeAll
+  ].forEach(command => app.palette.addItem({ command, category: 'Editor' }));
 
   return tracker;
 }

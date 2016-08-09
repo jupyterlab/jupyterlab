@@ -14,10 +14,6 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
-} from '../commandpalette/plugin';
-
-import {
   IFrame
 } from '../iframe';
 
@@ -97,7 +93,7 @@ const COMMANDS = [
 export
 const helpHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.help-handler',
-  requires: [IMainMenu, ICommandPalette],
+  requires: [IMainMenu],
   activate: activateHelpHandler
 };
 
@@ -109,7 +105,7 @@ const helpHandlerExtension: JupyterLabPlugin<void> = {
  *
  * returns A promise that resolves when the extension is activated.
  */
-function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette): Promise<void> {
+function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu): Promise<void> {
   let iframe = new IFrame();
   iframe.addClass(HELP_CLASS);
   iframe.title.label = 'Help';
@@ -133,7 +129,7 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     execute: () => { Private.toggleHelp(app, iframe); }
   });
 
-  COMMANDS.forEach(item => palette.addItem({
+  COMMANDS.forEach(item => app.palette.addItem({
     command: item.id,
     category: 'Help'
   }));

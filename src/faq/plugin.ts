@@ -15,10 +15,6 @@ import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
-import {
-  ICommandPalette
-} from '../commandpalette/plugin';
-
 
 /**
  * The faq page extension.
@@ -26,7 +22,6 @@ import {
 export
 const faqExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.faq',
-  requires: [ICommandPalette],
   activate: activateFAQ,
   autoStart: true
 };
@@ -56,7 +51,7 @@ class FAQWidget extends Widget {
 /**
  * Activate the faq plugin.
  */
-function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
+function activateFAQ(app: JupyterLab): void {
   let widget = new FAQWidget();
   let commandId = 'faq-jupyterlab:show';
   widget.id = 'faq-jupyterlab';
@@ -338,5 +333,5 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
     }
   });
 
-  palette.addItem({ command: commandId, category: 'Help' });
+  app.palette.addItem({ command: commandId, category: 'Help' });
 }
