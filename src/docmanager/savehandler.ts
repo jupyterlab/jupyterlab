@@ -6,6 +6,14 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  IDisposable
+} from 'phosphor/lib/core/disposable';
+
+import {
+  clearSignalData
+} from 'phosphor/lib/core/signaling';
+
+import {
 okButton, cancelButton, showDialog
 } from '../dialog';
 
@@ -21,7 +29,7 @@ import {
  * Implements https://github.com/ipython/ipython/wiki/IPEP-15:-Autosaving-the-IPython-Notebook.
  */
 export
-class SaveHandler {
+class SaveHandler implements IDisposable {
   /**
    * Construct a new save handler.
    */
@@ -30,21 +38,59 @@ class SaveHandler {
     this._context = options.context;
     this._minInterval = options.saveInterval || 120;
     this._interval = this._minInterval;
+    // Restart the timer when the contents model is updated.
+    this._context.contentsModelChanged.connect(() => {
+      this._setTimer();
+    });
+  }
+
+  /**
+   * Get whether the save handler is disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get isDisposed(): boolean {
+    return this._context === null;
+  }
+
+  /**
+   * Dispose of the resources used by the save handler.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    clearTimeout(this._autosaveTimer);
+    this._context = null;
+    clearSignalData(this);
   }
 
   /**
    * Start the autosaver.
    */
   start(): void {
-    clearTimeout(this._autosaveTimer);
-    setTimeout(() => this._save(), this._interval * 1000);
+    this._stopped = false;
+    this._setTimer();
   }
 
   /**
    * Stop the autosaver.
    */
   stop(): void {
+    this._stopped = true;
     clearTimeout(this._autosaveTimer);
+  }
+
+  /**
+   * Set the timer.
+   */
+  private _setTimer(): void {
+    clearTimeout(this._autosaveTimer);
+    if (this._stopped) {
+      return;
+    }
+    setTimeout(() => this._save(), this._interval * 1000);
   }
 
   /**
@@ -52,10 +98,11 @@ class SaveHandler {
    */
   private _save(): void {
     let context = this._context;
+    // Trigger the next update.
+    this._setTimer();
+
     // Bail if the model is not dirty or it is read only.
-    if (!this._context.model.dirty || this._context.model.readOnly) {
-      // Trigger the next update.
-      this.start();
+    if (!context.model.dirty || context.model.readOnly) {
       return;
     }
 
@@ -65,8 +112,6 @@ class SaveHandler {
         return this._timeConflict(model.last_modified);
       }
       return this._finishSave();
-    }).then(() => {
-      this.start();
     }).catch(err => {
       console.error('Error in Auto-Save', err);
     });
@@ -106,6 +151,8 @@ class SaveHandler {
       let duration = new Date().getTime() - start;
       // New save interval: higher of 10x save duration or min interval.
       this._interval = Math.max(10 * duration, this._minInterval);
+      // Restart the update to pick up the new interval.
+      this._setTimer();
     });
   }
 
@@ -114,6 +161,7 @@ class SaveHandler {
   private _interval = -1;
   private _context: IDocumentContext<IDocumentModel> = null;
   private _services: IServiceManager = null;
+  private _stopped = false;
 }
 
 

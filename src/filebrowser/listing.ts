@@ -5,9 +5,6 @@ import {
   IContents
 } from 'jupyter-js-services';
 
-import * as moment
-  from 'moment';
-
 import {
   find, findIndex
 } from 'phosphor/lib/algorithm/searching';
@@ -27,6 +24,10 @@ import {
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
+import {
+  humanTime, dateTime
+} from '../common/dates';
 
 import {
   showDialog
@@ -1504,9 +1505,8 @@ namespace DirListing {
       let modText = '';
       let modTitle = '';
       if (model.last_modified) {
-        let time = moment(model.last_modified).fromNow();
-        modText = time === 'a few seconds ago' ? 'seconds ago' : time;
-        modTitle = moment(model.last_modified).format('YYYY-MM-DD HH:mm');
+        modText = humanTime(model.last_modified);
+        modTitle = dateTime(model.last_modified);
       }
 
       text.textContent = model.name;

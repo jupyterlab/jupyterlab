@@ -25,6 +25,10 @@ import {
   IDocumentContext, IDocumentModel, IModelFactory
 } from '../docregistry';
 
+import {
+  SaveHandler
+} from './savehandler';
+
 
 /**
  * An implementation of a document context.
@@ -130,7 +134,7 @@ class Context implements IDocumentContext<IDocumentModel> {
   }
 
   /**
-   * Test whether the context has been disposed.
+   * Test whether the context has been disposed (read-only).
    */
   get isDisposed(): boolean {
     return this._manager === null;
@@ -276,6 +280,7 @@ class ContextManager implements IDisposable {
       let contextEx = this._contexts[id];
       contextEx.context.dispose();
       contextEx.model.dispose();
+      contextEx.saveHandler.dispose();
       let session = contextEx.session;
       if (session) {
         session.dispose();
@@ -290,6 +295,8 @@ class ContextManager implements IDisposable {
    */
   createNew(path: string, model: IDocumentModel, factory: IModelFactory): string {
     let context = new Context(this);
+    let saveHandler = new SaveHandler({ context, services: this._manager });
+    saveHandler.start();
     let id = context.id;
     this._contexts[id] = {
       context,
@@ -300,7 +307,8 @@ class ContextManager implements IDisposable {
       fileFormat: factory.fileFormat,
       contentsModel: null,
       session: null,
-      isPopulated: false
+      isPopulated: false,
+      saveHandler
     };
     return id;
   }
@@ -710,6 +718,7 @@ namespace Private {
     contentsModel: IContents.IModel;
     modelName: string;
     isPopulated: boolean;
+    saveHandler: SaveHandler;
   }
 
   /**

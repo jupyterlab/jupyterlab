@@ -95,7 +95,6 @@ const editorHandlerExtension: JupyterLabPlugin<IEditorTracker> = {
  * The map of command ids used by the editor.
  */
 const cmdIds = {
-  saveFile: 'editor:save-file',
   lineNumbers: 'editor:line-numbers',
   lineWrap: 'editor:line-wrap',
   matchBrackets: 'editor:match-brackets',
@@ -131,7 +130,6 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
   addCommands(app, tracker);
 
   [
-    cmdIds.saveFile,
     cmdIds.lineNumbers,
     cmdIds.lineWrap,
     cmdIds.matchBrackets,
@@ -148,12 +146,6 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
  * Add the editor commands to the application's command registry.
  */
 function addCommands(app: JupyterLab, tracker: WidgetTracker<EditorWidget>): void {
-  app.commands.addCommand(cmdIds.saveFile, {
-    execute: () => {
-      app.commands.execute('file-operations:save', void 0);
-    },
-    label: 'Save File'
-  });
   app.commands.addCommand(cmdIds.lineNumbers, {
     execute: () => { toggleLineNums(tracker); },
     label: 'Toggle Line Numbers',
@@ -289,7 +281,6 @@ function createMenu(app: JupyterLab, tracker: WidgetTracker<EditorWidget>): Menu
 
   menu.addItem({ command: 'file-operations:new-text-file' });
   menu.addItem({ command: 'file-operations:save' });
-  menu.addItem({ command: cmdIds.saveFile });
   menu.addItem({ command: cmdIds.closeAll });
   menu.addItem({ type: 'separator' });
   menu.addItem({ type: 'submenu', menu: settings });

@@ -112,8 +112,12 @@ namespace ToolbarItems {
   function createSaveButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_SAVE,
-      onClick: () => { panel.context.save();  },
-      tooltip: 'Save the notebook contents'
+      onClick: () => {
+        panel.context.save().then(() => {
+          return panel.context.createCheckpoint();
+        });
+      },
+      tooltip: 'Save the notebook contents and create checkpoint'
     });
   }
 

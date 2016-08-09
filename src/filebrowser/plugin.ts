@@ -111,7 +111,7 @@ const cmdIds = {
   newText: 'file-operations:new-text-file',
   newNotebook: 'file-operations:new-notebook',
   save: 'file-operations:save',
-  revert: 'file-operations:revert',
+  restoreCheckpoint: 'file-operations:restore-checkpoint',
   saveAs: 'file-operations:saveAs',
   close: 'file-operations:close',
   closeAll: 'file-operations:closeAll',
@@ -188,7 +188,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     cmdIds.newText,
     cmdIds.newNotebook,
     cmdIds.save,
-    cmdIds.revert,
+    cmdIds.restoreCheckpoint,
     cmdIds.saveAs,
     cmdIds.close,
     cmdIds.closeAll,
@@ -222,29 +222,40 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<Widget>, fbWidget: 
   });
   commands.addCommand(cmdIds.save, {
     label: 'Save',
+    caption: 'Save and create checkpoint',
     execute: () => {
       if (tracker.activeWidget) {
         let context = docManager.contextForWidget(tracker.activeWidget);
-        context.save();
+        return context.save().then(() => {
+          return context.createCheckpoint();
+        });
       }
     }
   });
-  commands.addCommand(cmdIds.revert, {
-    label: 'Revert',
+  commands.addCommand(cmdIds.restoreCheckpoint, {
+    label: 'Restore to checkpoint',
+    caption: 'Restore contents to previous checkpoint',
     execute: () => {
       if (tracker.activeWidget) {
         let context = docManager.contextForWidget(tracker.activeWidget);
-        context.revert();
+        context.restoreCheckpoint().then(() => {
+          context.revert();
+        });
       }
     }
   });
   commands.addCommand(cmdIds.saveAs, {
     label: 'Save As...',
+    caption: 'Save with new path and create checkpoint',
     execute: () => {
       if (tracker.activeWidget) {
-         let context = docManager.contextForWidget(tracker.activeWidget);
-         context.saveAs().then(() => { fbModel.refresh(); });
-       }
+        let context = docManager.contextForWidget(tracker.activeWidget);
+        return context.saveAs().then(() => {
+          return context.createCheckpoint();
+        }).then(() => {
+          return fbModel.refresh();
+        });
+      }
     }
   });
   commands.addCommand(cmdIds.close, {
@@ -297,7 +308,7 @@ function createMenu(app: JupyterLab): Menu {
     cmdIds.newText,
     cmdIds.newNotebook,
     cmdIds.save,
-    cmdIds.revert,
+    cmdIds.restoreCheckpoint,
     cmdIds.saveAs,
     cmdIds.close,
     cmdIds.closeAll,
