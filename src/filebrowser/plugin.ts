@@ -233,7 +233,7 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<Widget>, fbWidget: 
     }
   });
   commands.addCommand(cmdIds.restoreCheckpoint, {
-    label: 'Restore to checkpoint',
+    label: 'Restore to Checkpoint',
     caption: 'Restore contents to previous checkpoint',
     execute: () => {
       if (tracker.activeWidget) {
