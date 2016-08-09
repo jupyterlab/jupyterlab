@@ -422,7 +422,7 @@ class KernelIndicator extends Widget {
   /**
    * Handle a status on a kernel.
    */
-  private _handleStatus(kernel: IKernel) {
+  private _handleStatus(kernel: IKernel): void {
     let status = kernel ? kernel.status : 'unknown';
     this.toggleClass(TOOLBAR_BUSY, status !== 'idle');
     let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
