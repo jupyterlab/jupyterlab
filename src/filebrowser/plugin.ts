@@ -26,10 +26,6 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
-} from '../commandpalette/plugin';
-
-import {
   IChangedArgs
 } from '../common/interfaces';
 
@@ -98,7 +94,7 @@ export
 const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
   id: 'jupyter.services.file-browser',
   provides: IPathTracker,
-  requires: [IServiceManager, IDocumentRegistry, IMainMenu, ICommandPalette],
+  requires: [IServiceManager, IDocumentRegistry, IMainMenu],
   activate: activateFileBrowser,
   autoStart: true
 };
@@ -124,7 +120,7 @@ const cmdIds = {
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IPathTracker {
+function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu): IPathTracker {
   let id = 0;
   let tracker = new WidgetTracker<Widget>();
 
@@ -192,7 +188,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     cmdIds.saveAs,
     cmdIds.close,
     cmdIds.closeAll,
-  ].forEach(command => palette.addItem({ command, category }));
+  ].forEach(command => app.palette.addItem({ command, category }));
 
   mainMenu.addMenu(createMenu(app), {rank: 1});
 
