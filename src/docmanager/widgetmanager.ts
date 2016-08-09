@@ -6,7 +6,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  DisposableSet
+  DisposableSet, IDisposable
 } from 'phosphor/lib/core/disposable';
 
 import {
@@ -18,8 +18,16 @@ import {
 } from 'phosphor/lib/core/properties';
 
 import {
+  clearSignalData
+} from 'phosphor/lib/core/signaling';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
+import {
+  dateTime
+} from '../common/dates';
 
 import {
   showDialog
@@ -44,7 +52,7 @@ const DOCUMENT_CLASS = 'jp-Document';
  * A class that maintains the lifecyle of file-backed widgets.
  */
 export
-class DocumentWidgetManager {
+class DocumentWidgetManager implements IDisposable {
   /**
    * Construct a new document widget manager.
    */
@@ -54,9 +62,19 @@ class DocumentWidgetManager {
   }
 
   /**
+   * Test whether the context has been disposed (read-only).
+   */
+  get isDisposed(): boolean {
+    return this._registry === null;
+  }
+
+  /**
    * Dispose of the resources used by the widget manager.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     this._registry = null;
     this._contextManager = null;
     for (let id in this._widgets) {
@@ -64,6 +82,7 @@ class DocumentWidgetManager {
         widget.dispose();
       }
     }
+    clearSignalData(this);
   }
 
   /**
@@ -84,6 +103,13 @@ class DocumentWidgetManager {
       disposables.dispose();
     });
     this.adoptWidget(id, widget);
+    this.setCaption(widget);
+    context.contentsModelChanged.connect(() => {
+      this.setCaption(widget);
+    });
+    context.populated.connect(() => {
+      this.setCaption(widget);
+    });
     return widget;
   }
 
@@ -198,6 +224,28 @@ class DocumentWidgetManager {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Set the caption for widget title.
+   */
+  protected setCaption(widget: Widget): void {
+    let context = this.contextForWidget(widget);
+    let model = context.contentsModel;
+    if (!model) {
+      widget.title.caption = '';
+      return;
+    }
+    context.listCheckpoints().then(checkpoints => {
+      let last = checkpoints[checkpoints.length - 1];
+      let checkpoint = last ? dateTime(last.last_modified) : 'None';
+      widget.title.caption = (
+        `Name: ${model.name}\n` +
+        `Path: ${model.path}\n` +
+        `Last Saved: ${dateTime(model.last_modified)}\n` +
+        `Last Checkpoint: ${checkpoint}`
+      );
+    });
   }
 
   /**

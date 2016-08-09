@@ -132,9 +132,17 @@ class DocumentManager implements IDisposable {
     }
     let lang = mFactory.preferredLanguage(path);
     let model = mFactory.createNew(lang);
-    id = this._contextManager.createNew(path, model, mFactory);
+    let ctxManager = this._contextManager;
+    id = ctxManager.createNew(path, model, mFactory);
     // Load the contents from disk.
-    this._contextManager.revert(id).then(() => {
+    // Create a checkpoint if none exists.
+    ctxManager.listCheckpoints(id).then(checkpoints => {
+      if (!checkpoints) {
+        return ctxManager.createCheckpoint(id);
+      }
+    }).then(() => {
+      return ctxManager.revert(id);
+    }).then(() => {
       model.dirty = false;
       this._contextManager.finalize(id);
     });
@@ -161,10 +169,13 @@ class DocumentManager implements IDisposable {
     }
     let lang = mFactory.preferredLanguage(path);
     let model = mFactory.createNew(lang);
-    let id = this._contextManager.createNew(path, model, mFactory);
-    this._contextManager.save(id).then(() => {
+    let ctxManager = this._contextManager;
+    let id = ctxManager.createNew(path, model, mFactory);
+    ctxManager.save(id).then(() => {
+      return ctxManager.createCheckpoint(id);
+    }).then(() => {
       model.dirty = false;
-      this._contextManager.finalize(id);
+      ctxManager.finalize(id);
     });
     return this._widgetManager.createWidget(widgetName, id, kernel);
   }

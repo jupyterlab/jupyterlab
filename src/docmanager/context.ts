@@ -25,6 +25,10 @@ import {
   IDocumentContext, IDocumentModel, IModelFactory
 } from '../docregistry';
 
+import {
+  SaveHandler
+} from './savehandler';
+
 
 /**
  * An implementation of a document context.
@@ -130,7 +134,7 @@ class Context implements IDocumentContext<IDocumentModel> {
   }
 
   /**
-   * Test whether the context has been disposed.
+   * Test whether the context has been disposed (read-only).
    */
   get isDisposed(): boolean {
     return this._manager === null;
@@ -173,6 +177,34 @@ class Context implements IDocumentContext<IDocumentModel> {
    */
   revert(): Promise<void> {
     return this._manager.revert(this._id);
+  }
+
+  /**
+   * Create a checkpoint for the file.
+   */
+  createCheckpoint(): Promise<IContents.ICheckpointModel> {
+    return this._manager.createCheckpoint(this._id);
+  }
+
+  /**
+   * Delete a checkpoint for the file.
+   */
+  deleteCheckpoint(checkpointID: string): Promise<void> {
+    return this._manager.deleteCheckpoint(this.id, checkpointID);
+  }
+
+  /**
+   * Restore the file to a known checkpoint state.
+   */
+  restoreCheckpoint(checkpointID?: string): Promise<void> {
+    return this._manager.restoreCheckpoint(this.id, checkpointID);
+  }
+
+  /**
+   * List available checkpoints for the file.
+   */
+  listCheckpoints(): Promise<IContents.ICheckpointModel[]> {
+    return this._manager.listCheckpoints(this.id);
   }
 
   /**
@@ -248,6 +280,7 @@ class ContextManager implements IDisposable {
       let contextEx = this._contexts[id];
       contextEx.context.dispose();
       contextEx.model.dispose();
+      contextEx.saveHandler.dispose();
       let session = contextEx.session;
       if (session) {
         session.dispose();
@@ -262,6 +295,8 @@ class ContextManager implements IDisposable {
    */
   createNew(path: string, model: IDocumentModel, factory: IModelFactory): string {
     let context = new Context(this);
+    let saveHandler = new SaveHandler({ context, services: this._manager });
+    saveHandler.start();
     let id = context.id;
     this._contexts[id] = {
       context,
@@ -272,7 +307,8 @@ class ContextManager implements IDisposable {
       fileFormat: factory.fileFormat,
       contentsModel: null,
       session: null,
-      isPopulated: false
+      isPopulated: false,
+      saveHandler
     };
     return id;
   }
@@ -353,7 +389,6 @@ class ContextManager implements IDisposable {
    *
    * @param options - If given, change the kernel (starting a session
    * if necessary). If falsey, shut down any existing session and return
-   * a void promise.
    */
   changeKernel(id: string, options: IKernel.IModel): Promise<IKernel> {
     let contextEx = this._contexts[id];
@@ -527,6 +562,47 @@ class ContextManager implements IDisposable {
   }
 
   /**
+   * Create a checkpoint for a file.
+   */
+  createCheckpoint(id: string): Promise<IContents.ICheckpointModel> {
+    let path = this._contexts[id].path;
+    return this._manager.contents.createCheckpoint(path);
+  }
+
+  /**
+   * Delete a checkpoint for a file.
+   */
+  deleteCheckpoint(id: string, checkpointID: string): Promise<void> {
+    let path = this._contexts[id].path;
+    return this._manager.contents.deleteCheckpoint(path, checkpointID);
+  }
+
+  /**
+   * Restore a file to a known checkpoint state.
+   */
+  restoreCheckpoint(id: string, checkpointID?: string): Promise<void> {
+    let path = this._contexts[id].path;
+    if (checkpointID) {
+      return this._manager.contents.restoreCheckpoint(path, checkpointID);
+    }
+    return this.listCheckpoints(id).then(checkpoints => {
+      if (!checkpoints.length) {
+        return;
+      }
+      checkpointID = checkpoints[checkpoints.length - 1].id;
+      return this._manager.contents.restoreCheckpoint(path, checkpointID);
+    });
+  }
+
+  /**
+   * List available checkpoints for a file.
+   */
+  listCheckpoints(id: string): Promise<IContents.ICheckpointModel[]> {
+    let path = this._contexts[id].path;
+    return this._manager.contents.listCheckpoints(path);
+  }
+
+  /**
    * Get the list of running sessions.
    */
   listSessions(): Promise<ISession.IModel[]> {
@@ -642,6 +718,7 @@ namespace Private {
     contentsModel: IContents.IModel;
     modelName: string;
     isPopulated: boolean;
+    saveHandler: SaveHandler;
   }
 
   /**
