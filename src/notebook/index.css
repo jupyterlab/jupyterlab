@@ -38,6 +38,11 @@
 }
 
 
+.jp-ExecutedCell {
+  border-left: 2px solid purple !important;
+}
+
+
 .jp-MarkdownCell-content.p-Widget {
   padding: 7px;
   user-select: text;

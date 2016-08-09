@@ -107,6 +107,16 @@ const RAW_CELL_CLASS = 'jp-RawCell';
 const RENDERED_CLASS = 'jp-mod-rendered';
 
 /**
+ * The class name addded to the cell after it has been executed.
+ */
+const CELL_EXECUTED_CLASS = 'jp-ExecutedCell';
+
+/**
+ * The class name given to a newly edited cell.
+ */
+const CELL_NEWLY_EDITED_CLASS = 'jp-NewlyEdited';
+
+/**
  * The text applied to an empty markdown cell.
  */
 const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
@@ -468,6 +478,8 @@ class CodeCellWidget extends BaseCellWidget {
     model.executionCount = null;
     this.setPrompt('*');
     this.trusted = true;
+    this.editor.addClass(CELL_EXECUTED_CLASS);
+    this.editor.removeClass(CELL_NEWLY_EDITED_CLASS);
     let outputs = model.outputs;
     return outputs.execute(code, kernel).then(reply => {
       model.executionCount = reply.content.execution_count;

@@ -53,6 +53,16 @@ const CELL_EDITOR_CLASS = 'jp-CellEditor';
 
 
 /**
+ * The class name addded to the cell after it has been executed.
+ */
+const CELL_EXECUTED_CLASS = 'jp-ExecutedCell';
+
+/**
+ * The class name given to a newly edited cell.
+ */
+const CELL_NEWLY_EDITED_CLASS = 'jp-NewlyEdited';
+
+/**
  * An interface describing editor state coordinates.
  */
 export
@@ -282,6 +292,8 @@ class CellEditorWidget extends CodeMirrorWidget {
     let chWidth = editor.defaultCharWidth();
     let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
     let position = editor.getDoc().indexFromPos({ line, ch });
+    this.addClass(CELL_NEWLY_EDITED_CLASS);
+    this.removeClass(CELL_EXECUTED_CLASS);
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, position, oldValue, newValue
     });
