@@ -154,12 +154,12 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
   node.addEventListener('contextmenu', (event: MouseEvent) => {
     event.preventDefault();
-    let path = fbWidget.pathForClick(event);
+    let path = fbWidget.pathForClick(event) || '';
     let ext = '.' + path.split('.').pop();
     let widgetNames = registry.listWidgetFactories(ext);
     let prefix = `file-browser-contextmenu-${++Private.id}`;
     let openWith: Menu = null;
-    if (widgetNames.length > 1) {
+    if (path && widgetNames.length > 1) {
       let disposables = new DisposableSet();
       let command: string;
 
