@@ -19,7 +19,7 @@ lab.registerPlugins([
   require('jupyterlab/lib/console/plugin').consoleExtension,
   require('jupyterlab/lib/csvwidget/plugin').csvHandlerExtension,
   require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
-  require('jupyterlab/lib/editorwidget/plugin').editorHandlerExtension,
+  require('jupyterlab/lib/editorwidget/plugin').editorHandlerProvider,
   require('jupyterlab/lib/faq/plugin').faqExtension,
   require('jupyterlab/lib/filebrowser/plugin').fileBrowserProvider,
   require('jupyterlab/lib/help/plugin').helpHandlerExtension,
