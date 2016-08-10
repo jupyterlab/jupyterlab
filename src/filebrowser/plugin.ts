@@ -70,6 +70,7 @@ const cmdIds = {
   saveAs: 'file-operations:saveAs',
   close: 'file-operations:close',
   closeAll: 'file-operations:closeAll',
+  open: 'file-operations:open',
   showBrowser: 'file-browser:activate',
   hideBrowser: 'file-browser:hide',
   toggleBrowser: 'file-browser:toggle'
@@ -92,6 +93,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
         app.shell.addToMainArea(widget);
         tracker.addWidget(widget);
       }
+      app.shell.activateMain(widget.id);
     }
   };
   let { commands, keymap } = app;
@@ -211,6 +213,12 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<Widget>, fbWidget: 
           return fbModel.refresh();
         });
       }
+    }
+  });
+  commands.addCommand(cmdIds.open, {
+    execute: args => {
+      let path = args['path'] as string;
+      fbWidget.openPath(path);
     }
   });
   commands.addCommand(cmdIds.close, {
