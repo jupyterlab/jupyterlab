@@ -65,7 +65,6 @@ Fork the JupyterLab repo using the GitHub UI. Clone the repo and build using the
 ```bash
 git clone https://github.com/<your-github-username>/jupyterlab.git
 cd jupyterlab
-npm install
 pip install -e . # will take a long time to build everything
 jupyter serverextension enable --py jupyterlab
 ```
@@ -145,8 +144,15 @@ npm install --save jupyterlab
 git clone https://github.com/jupyter/jupyterlab.git
 cd jupyterlab
 npm install
-npm run build:all
+npm run build
+cd jupyterlab  # into the server extension
+npm install
+npm run build
 ```
+
+Note: If using an earlier version of node (<4), it is advised that you
+run `npm dedupe` after `npm install`, since older versions of node
+did install dependencies maximally flat, which can cause version conflicts.
 
 **Rebuild**
 
