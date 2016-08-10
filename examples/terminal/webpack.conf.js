@@ -10,7 +10,7 @@ module.exports = {
     fs: "empty"
   },
   bail: true,
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   module: {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
