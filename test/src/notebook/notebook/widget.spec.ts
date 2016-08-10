@@ -41,16 +41,17 @@ import {
 } from '../utils';
 
 import {
-  defaultCodeMirrorNotebookRenderer, CodeMirrorNotebookRenderer
+  CodeMirrorNotebookRenderer
 } from '../../../../lib/notebook/codemirror/notebook/widget';
 
 
 const rendermime = defaultRenderMime();
+const renderer = CodeMirrorNotebookRenderer.defaultRenderer;
 
 
 function createWidget(): LogStaticNotebook {
   let model = new NotebookModel();
-  let widget = new LogStaticNotebook({ rendermime, renderer: defaultCodeMirrorNotebookRenderer });
+  let widget = new LogStaticNotebook({ rendermime, renderer });
   widget.model = model;
   return widget;
 }
@@ -137,7 +138,7 @@ class LogNotebook extends Notebook {
 
 function createActiveWidget(): LogNotebook {
   let model = new NotebookModel();
-  let widget = new LogNotebook({ rendermime, renderer: defaultCodeMirrorNotebookRenderer });
+  let widget = new LogNotebook({ rendermime, renderer });
   widget.model = model;
   return widget;
 }
@@ -150,12 +151,12 @@ describe('notebook/notebook/widget', () => {
     describe('#constructor()', () => {
 
       it('should create a notebook widget', () => {
-        let widget = new StaticNotebook({ rendermime, renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime, renderer });
         expect(widget).to.be.a(StaticNotebook);
       });
 
       it('should add the `jp-Notebook` class', () => {
-        let widget = new StaticNotebook({ rendermime, renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime, renderer });
         expect(widget.hasClass('jp-Notebook')).to.be(true);
       });
 
@@ -170,7 +171,7 @@ describe('notebook/notebook/widget', () => {
     describe('#modelChanged', () => {
 
       it('should be emitted when the model changes', () => {
-        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer });
         let model = new NotebookModel();
         let called = false;
         widget.modelChanged.connect((sender, args) => {
@@ -187,7 +188,7 @@ describe('notebook/notebook/widget', () => {
     describe('#modelContentChanged', () => {
 
       it('should be emitted when a cell is added', () => {
-        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer });
         widget.model = new NotebookModel();
         let called = false;
         widget.modelContentChanged.connect(() => { called = true; });
@@ -197,7 +198,7 @@ describe('notebook/notebook/widget', () => {
       });
 
       it('should be emitted when metadata is set', () => {
-        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer });
         widget.model = new NotebookModel();
         let called = false;
         widget.modelContentChanged.connect(() => { called = true; });
@@ -211,19 +212,19 @@ describe('notebook/notebook/widget', () => {
     describe('#model', () => {
 
       it('should get the model for the widget', () => {
-        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer });
         expect(widget.model).to.be(null);
       });
 
       it('should set the model for the widget', () => {
-        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer });
         let model = new NotebookModel();
         widget.model = model;
         expect(widget.model).to.be(model);
       });
 
       it('should emit the `modelChanged` signal', () => {
-        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer });
         let model = new NotebookModel();
         widget.model = model;
         let called = false;
@@ -233,7 +234,7 @@ describe('notebook/notebook/widget', () => {
       });
 
       it('should be a no-op if the value does not change', () => {
-        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime: defaultRenderMime(), renderer });
         let model = new NotebookModel();
         widget.model = model;
         let called = false;
@@ -243,7 +244,7 @@ describe('notebook/notebook/widget', () => {
       });
 
       it('should add the model cells to the layout', () => {
-        let widget = new LogStaticNotebook({ rendermime: defaultRenderMime(), renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new LogStaticNotebook({ rendermime: defaultRenderMime(), renderer });
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
         widget.model = model;
@@ -251,7 +252,7 @@ describe('notebook/notebook/widget', () => {
       });
 
       it('should set the mime types of the cell widgets', () => {
-        let widget = new LogStaticNotebook({ rendermime: defaultRenderMime(), renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new LogStaticNotebook({ rendermime: defaultRenderMime(), renderer });
         let model = new NotebookModel();
         let cursor = model.getMetadata('language_info');
         cursor.setValue({ name: 'python', codemirror_mode: 'python' });
@@ -315,7 +316,7 @@ describe('notebook/notebook/widget', () => {
     describe('#rendermime', () => {
 
       it('should be the rendermime instance used by the widget', () => {
-        let widget = new StaticNotebook({ rendermime, renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime, renderer });
         expect(widget.rendermime).to.be(rendermime);
       });
 
@@ -329,8 +330,8 @@ describe('notebook/notebook/widget', () => {
     describe('#renderer', () => {
 
       it('should be the cell widget renderer used by the widget', () => {
-        let widget = new StaticNotebook({ rendermime, renderer: defaultCodeMirrorNotebookRenderer });
-        expect(widget.renderer).to.be(defaultCodeMirrorNotebookRenderer);
+        let widget = new StaticNotebook({ rendermime, renderer });
+        expect(widget.renderer).to.be(CodeMirrorNotebookRenderer.defaultRenderer);
       });
 
       it('should be read-only', () => {
@@ -343,12 +344,12 @@ describe('notebook/notebook/widget', () => {
     describe('#codeMimetype', () => {
 
       it('should get the mime type for code cells', () => {
-        let widget = new StaticNotebook({ rendermime, renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new StaticNotebook({ rendermime, renderer });
         expect(widget.codeMimetype).to.be('text/plain');
       });
 
       it('should be set from language metadata', () => {
-        let widget = new LogStaticNotebook({ rendermime: defaultRenderMime(), renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new LogStaticNotebook({ rendermime: defaultRenderMime(), renderer });
         let model = new NotebookModel();
         let cursor = model.getMetadata('language_info');
         cursor.setValue({ name: 'python', codemirror_mode: 'python' });
@@ -408,7 +409,7 @@ describe('notebook/notebook/widget', () => {
     describe('#onModelChanged()', () => {
 
       it('should be called when the model changes', () => {
-        let widget = new LogStaticNotebook({ rendermime, renderer: defaultCodeMirrorNotebookRenderer });
+        let widget = new LogStaticNotebook({ rendermime, renderer });
         widget.model = new NotebookModel();
         expect(widget.methods).to.contain('onModelChanged');
       });
@@ -546,7 +547,7 @@ describe('notebook/notebook/widget', () => {
     describe('.defaultRenderer', () => {
 
       it('should be an instance of `StaticNotebook.Renderer', () => {
-        expect(defaultCodeMirrorNotebookRenderer).to.be.a(StaticNotebook.Renderer);
+        expect(CodeMirrorNotebookRenderer.defaultRenderer).to.be.a(StaticNotebook.Renderer);
       });
 
     });
