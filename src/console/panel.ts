@@ -79,6 +79,13 @@ class ConsolePanel extends Panel {
   }
 
   /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.content.prompt.editor.focus();
+  }
+
+  /**
    * Handle `'close-request'` messages.
    */
   protected onCloseRequest(msg: Message): void {
