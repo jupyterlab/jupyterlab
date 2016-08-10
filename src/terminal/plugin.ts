@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -59,6 +63,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   let increaseTerminalFontSize = 'terminal:increase-font';
   let decreaseTerminalFontSize = 'terminal:decrease-font';
   let toggleTerminalTheme = 'terminal:toggle-theme';
+  let openTerminalId = 'terminal:open';
 
   let tracker = new WidgetTracker<TerminalWidget>();
   let options = {
@@ -70,13 +75,14 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   commands.addCommand(newTerminalId, {
     label: 'New Terminal',
     caption: 'Start a new terminal session',
-    execute: () => {
+    execute: args => {
+      let name = args ? args['name'] as string : '';
       let term = new TerminalWidget(options);
       term.title.closable = true;
       term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
       app.shell.addToMainArea(term);
       tracker.addWidget(term);
-      services.terminals.create().then(session => {
+      services.terminals.create({ name }).then(session => {
         term.session = session;
         // Trigger an update of the running kernels.
         services.terminals.listRunning();
@@ -124,6 +130,19 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
           widgets[i].background = options.background;
           widgets[i].color = options.color;
         }
+      }
+    }
+  });
+  commands.addCommand(openTerminalId, {
+    execute: args => {
+      let name = args['name'] as string;
+      // Check for a running terminal with the given name.
+      let widget = find(tracker.widgets, value => value.session.name === name);
+      if (widget) {
+        app.shell.activateMain(widget.id);
+      } else {
+        // Otherwise, create a new terminal with a given name.
+        commands.execute(newTerminalId, { name });
       }
     }
   });

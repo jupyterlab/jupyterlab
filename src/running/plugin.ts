@@ -32,12 +32,11 @@ function activateRunningSessions(app: JupyterLab, services: IServiceManager): vo
   running.id = 'jp-running-sessions';
   running.title.label = 'Running';
 
-  // TODO: replace these with execute calls in new phosphor.
   running.sessionOpenRequested.connect((sender, model) => {
-    console.log('requested session', model.notebook.path);
+    app.commands.execute('file-operations:open', { path: model.notebook.path });
   });
   running.terminalOpenRequested.connect((sender, model) => {
-    console.log('requested terminal', model.name);
+    app.commands.execute('terminal:open', { name: model.name });
   });
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
