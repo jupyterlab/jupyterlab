@@ -35,9 +35,9 @@ interface ICommandPalette {
   inputNode: HTMLInputElement;
 
   /**
-   * Add a command item to the command palette.
+   * Add a single command item or a list of items to the command palette.
    *
-   * @param options - The options for creating the command item.
+   * @param options - The options for creating the command item(s).
    *
    * @returns A disposable that will remove the item from the palette.
    */
@@ -52,9 +52,9 @@ interface ICommandPalette {
 export
 class Palette extends CommandPalette {
   /**
-   * Add a command item to the command palette.
+   * Add a single command item or a list of items to the command palette.
    *
-   * @param options - The options for creating the command item.
+   * @param options - The options for creating the command item(s).
    *
    * @returns A disposable that will remove the item from the palette.
    */
