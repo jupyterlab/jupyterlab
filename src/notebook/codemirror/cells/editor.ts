@@ -25,7 +25,7 @@ import {
 } from '../../cells/model';
 
 import {
-  ICellEditorWidget, ICellEditorWidgetExtension, EdgeLocation, ITextChange, ICompletionRequest, ICoords
+  ICellEditorWidget, EdgeLocation, ITextChange, ICompletionRequest, ICoords
 } from '../../cells/editor'
 
 /**
@@ -48,12 +48,11 @@ const TAB = 9;
  */
 const CELL_EDITOR_CLASS = 'jp-CellEditor';
 
-
 /**
- * A widget for a cell editor.
+ * A code mirror widget for a cell editor.
  */
 export
-class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditorWidgetExtension {
+class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditorWidget {
   /**
    * Construct a new cell editor widget.
    */
@@ -72,17 +71,17 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
   /**
    * A signal emitted when a tab (text) completion is requested.
    */
-  completionRequested: ISignal<ICellEditorWidgetExtension, ICompletionRequest>;
+  completionRequested: ISignal<ICellEditorWidget, ICompletionRequest>;
 
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
-  edgeRequested: ISignal<ICellEditorWidgetExtension, EdgeLocation>;
+  edgeRequested: ISignal<ICellEditorWidget, EdgeLocation>;
 
   /**
    * A signal emitted when a text change is completed.
    */
-  textChanged: ISignal<ICellEditorWidgetExtension, ITextChange>;
+  textChanged: ISignal<ICellEditorWidget, ITextChange>;
 
   /**
    * The cell model used by the editor.
@@ -131,25 +130,40 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
     super.dispose();
   }
 
+  /**
+   * Change the mode for an editor based on the given mime type.
+   */
   setMimeType(mimeType:string): void {
     loadModeByMIME(this.editor, mimeType);
   }
 
+  /**
+   * Set whether the editor is read only.
+   */
   setReadOnly(readOnly:boolean): void {
     let option = readOnly ? 'nocursor' : false;
     this.editor.setOption('readOnly', option);
   }
 
+  /**
+   * Brings browser focus to the editor text
+   */
   focus(): void {
-      this.editor.focus()
+      this.editor.focus();
   }
 
+  /**
+   * Returns true if this editor has keyboard focus.
+   */
   hasFocus(): boolean {
-      return this.editor.hasFocus()
+      return this.editor.hasFocus();
   }
 
+  /**
+   * Returns a zero-based last line number.
+   */
   getLastLine(): number {
-    return this.editor.getDoc().lastLine()
+    return this.editor.getDoc().lastLine();
   }
 
   /**
@@ -169,6 +183,11 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
     doc.setCursor(doc.posFromIndex(position));
   }
 
+  /**
+   * Set the position of the cursor.
+   * @param line a zero-based line number
+   * @param character a zero-based character number
+   */
   setCursor(line:number, character:number): void {
     let doc = this.editor.getDoc();
     doc.setCursor({

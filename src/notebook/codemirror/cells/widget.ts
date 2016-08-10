@@ -2,54 +2,73 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-    ICellEditorWidget
+  ICellEditorWidget
 } from '../../cells/editor';
 
 import {
-    CodeCellWidget
+  CodeCellWidget
 } from '../../cells/widget';
 
 import {
-    CodeMirrorCellEditorWidget
+  CodeMirrorCellEditorWidget
 } from './editor';
 
-export const defaultEditorConfiguration: CodeMirror.EditorConfiguration = {
-    indentUnit: 4,
-    readOnly: false,
-    theme: 'default',
-    extraKeys: {
-        'Cmd-Right': 'goLineRight',
-        'End': 'goLineRight',
-        'Cmd-Left': 'goLineLeft',
-        'Tab': 'indentMore',
-        'Shift-Tab': 'indentLess',
-        'Cmd-Alt-[': 'indentAuto',
-        'Ctrl-Alt-[': 'indentAuto',
-        'Cmd-/': 'toggleComment',
-        'Ctrl-/': 'toggleComment',
-    }
+/**
+ * A default code mirror configuration for a cell editor.
+ */
+export 
+const defaultEditorConfiguration: CodeMirror.EditorConfiguration = {
+  indentUnit: 4,
+  readOnly: false,
+  theme: 'default',
+  extraKeys: {
+    'Cmd-Right': 'goLineRight',
+    'End': 'goLineRight',
+    'Cmd-Left': 'goLineLeft',
+    'Tab': 'indentMore',
+    'Shift-Tab': 'indentLess',
+    'Cmd-Alt-[': 'indentAuto',
+    'Ctrl-Alt-[': 'indentAuto',
+    'Cmd-/': 'toggleComment',
+    'Ctrl-/': 'toggleComment',
+  }
 };
 
-export class CodeMirrorCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
+/**
+ * A code mirror renderer for a code cell widget.
+ */
+export 
+class CodeMirrorCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
+  /**
+   * Construct a code mirror renderer for a code cell widget.
+   * @param editorConfiguration a code mirror editor configuration
+   * @param editorInitializer a code cell widget initializer
+   */
+  constructor(options: {
+    editorConfiguration?: CodeMirror.EditorConfiguration,
+    editorInitializer?: (editor: CodeMirrorCellEditorWidget) => void
+  } = {}) {
+    super();
+    this._editorConfiguration = options.editorConfiguration || this._editorConfiguration
+    this._editorInitializer = options.editorInitializer || this._editorInitializer
+  }
 
-    private _editorConfiguration: CodeMirror.EditorConfiguration = defaultEditorConfiguration;
-    private _editorInitializer: (editor: CodeMirrorCellEditorWidget) => void = editor => {};
+  /**
+   * Construct a code cell widget.
+   */
+  createCellEditor(): ICellEditorWidget {
+    const widget = new CodeMirrorCellEditorWidget(this._editorConfiguration);
+    this._editorInitializer(widget);
+    return widget;
+  }
 
-    constructor(options: {
-        editorConfiguration?: CodeMirror.EditorConfiguration,
-        editorInitializer?: (editor: CodeMirrorCellEditorWidget) => void
-    } = {}) {
-        super();
-        this._editorConfiguration = options.editorConfiguration || this._editorConfiguration
-        this._editorInitializer = options.editorInitializer || this._editorInitializer
-    }
-
-    createCellEditor(): ICellEditorWidget {
-        const widget = new CodeMirrorCellEditorWidget(this._editorConfiguration);
-        this._editorInitializer(widget);
-        return widget;
-    }
+  private _editorConfiguration: CodeMirror.EditorConfiguration = defaultEditorConfiguration;
+  private _editorInitializer: (editor: CodeMirrorCellEditorWidget) => void = editor => { };
 
 }
 
-export const defaultCodeMirrorCodeCellWidgetRenderer = new CodeMirrorCodeCellWidgetRenderer();
+/**
+ * A default code mirror renderer for a code cell widget.
+ */
+export
+const defaultCodeMirrorCodeCellWidgetRenderer = new CodeMirrorCodeCellWidgetRenderer();

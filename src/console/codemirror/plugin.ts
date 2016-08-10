@@ -18,7 +18,7 @@ import {
 } from '../../application';
 
 /**
- * The code mirror console renderer provider.
+ * The provider for a console's code mirror renderer.
  */
 export
 const rendererProvider: JupyterLabPlugin<ConsoleWidget.IRenderer> = {

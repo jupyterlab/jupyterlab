@@ -2,30 +2,41 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-    RenderMime
+  RenderMime
 } from '../../../rendermime';
 
 import {
-    Notebook
+  Notebook
 } from '../../notebook/widget';
 
 import {
-    NotebookPanel
+  NotebookPanel
 } from '../../notebook/panel';
 
 import {
-    defaultCodeMirrorNotebookRenderer
+  defaultCodeMirrorNotebookRenderer
 } from './widget';
 
-export class CodeMirrorNotebookPanelRenderer extends NotebookPanel.Renderer {
+/**
+ * A code mirror renderer for a notebook panel.
+ */
+export
+class CodeMirrorNotebookPanelRenderer extends NotebookPanel.Renderer {
 
-    createContent(rendermime: RenderMime): Notebook  {
-        return new Notebook({
-            rendermime,
-            renderer: defaultCodeMirrorNotebookRenderer
-        });
-    }
+  /**
+   * Create a notebook.
+   */
+  createContent(rendermime: RenderMime): Notebook {
+    return new Notebook({
+      rendermime,
+      renderer: defaultCodeMirrorNotebookRenderer
+    });
+  }
 
 }
 
-export const defaultCodeMirrorNotebookPanelRenderer = new CodeMirrorNotebookPanelRenderer()
+/**
+ * A default code mirror renderer for a notebook panel.
+ */
+export
+const defaultCodeMirrorNotebookPanelRenderer = new CodeMirrorNotebookPanelRenderer()

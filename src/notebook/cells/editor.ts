@@ -26,27 +26,6 @@ import {
  */
 export type EdgeLocation = 'top' | 'bottom';
 
-export
-interface ICellEditorWidget extends Widget {
-
-  model: ICellModel;
-  edgeRequested: ISignal<ICellEditorWidget, EdgeLocation>;
-  lineNumbers: boolean;
-
-  setMimeType(mimeType: string): void;
-  setReadOnly(readOnly: boolean): void;
-
-  getLastLine(): number;
-
-  getCursorPosition(): number;
-  setCursorPosition(cursorPosition:number): void;
-  setCursor(line:number, character:number): void;
-
-  focus(): void;
-  hasFocus(): boolean;
-
-}
-
 /**
  * An interface describing editor state coordinates.
  */
@@ -137,16 +116,78 @@ interface ICompletionRequest extends IEditorState {
   currentValue: string;
 }
 
+/**
+ * A widget for a cell editor.
+ */
 export
-interface ICellEditorWidgetExtension extends ICellEditorWidget {
-  textChanged: ISignal<ICellEditorWidgetExtension, ITextChange>;
-  completionRequested: ISignal<ICellEditorWidgetExtension, ICompletionRequest>;
-}
+interface ICellEditorWidget extends Widget {
 
-export
-function isCellEditorWidgetExtension(widget:ICellEditorWidget): widget is ICellEditorWidgetExtension {
-  const widgetExtension = widget as ICellEditorWidgetExtension
-  return widgetExtension 
-    && (typeof widgetExtension.textChanged !== 'undefined')
-    && (typeof widgetExtension.completionRequested !== 'undefined')
-} 
+  /**
+   * The cell model used by the editor.
+   */
+  model: ICellModel;
+
+  /**
+   * A signal emitted when either the top or bottom edge is requested.
+   */
+  edgeRequested: ISignal<ICellEditorWidget, EdgeLocation>;
+
+  /**
+   * A signal emitted when a text change is completed.
+   */
+  textChanged: ISignal<ICellEditorWidget, ITextChange>;
+  
+  /**
+   * A signal emitted when a completion is requested.
+   */
+  completionRequested: ISignal<ICellEditorWidget, ICompletionRequest>;
+
+  /**
+   * The line numbers state of the editor.
+   */
+  lineNumbers: boolean;
+
+  /**
+   * Change the mime type for an editor.
+   */
+  setMimeType(mimeType: string): void;
+
+  /**
+   * Set whether the editor is read only.
+   */
+  setReadOnly(readOnly: boolean): void;
+
+  /**
+   * Brings browser focus to the editor text
+   */
+  focus(): void;
+
+  /**
+   * Returns true if this editor has keyboard focus.
+   */
+  hasFocus(): boolean;
+
+  /**
+   * Returns a zero-based last line number.
+   */
+  getLastLine(): number;
+
+  /**
+   * Returns the position of the cursor.
+   */
+  getCursorPosition(): number;
+
+  /**
+   * Set the position of the cursor.
+   * @param position a new cursor's position
+   */
+  setCursorPosition(cursorPosition:number): void;
+
+  /**
+   * Set the position of the cursor.
+   * @param line a zero-based line number
+   * @param character a zero-based character number
+   */
+  setCursor(line:number, character:number): void;
+
+}

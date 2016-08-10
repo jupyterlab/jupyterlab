@@ -16,7 +16,7 @@ import {
 } from '../../../../lib/notebook/cells';
 
 import {
-  ICompletionRequest, ICellEditorWidgetExtension, ITextChange
+  ICompletionRequest, ICellEditorWidget, ITextChange
 } from '../../../../lib/notebook/cells/editor';
 
 import {
@@ -57,12 +57,12 @@ class TestCompletionHandler extends CellCompletionHandler {
     this.methods.push('onReply');
   }
 
-  onTextChanged(editor: ICellEditorWidgetExtension, change: ITextChange): void {
+  onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
     super.onTextChanged(editor, change);
     this.methods.push('onTextChanged');
   }
 
-  onCompletionRequested(editor: ICellEditorWidgetExtension, request: ICompletionRequest): void {
+  onCompletionRequested(editor: ICellEditorWidget, request: ICompletionRequest): void {
     super.onCompletionRequested(editor, request);
     this.methods.push('onCompletionRequested');
   }
@@ -319,7 +319,7 @@ describe('notebook/completion/handler', () => {
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onTextChanged');
-        (cell.editor as ICellEditorWidgetExtension).textChanged.emit(change);
+        cell.editor.textChanged.emit(change);
         expect(handler.methods).to.contain('onTextChanged');
       });
 
@@ -343,7 +343,7 @@ describe('notebook/completion/handler', () => {
 
         handler.activeCell = cell;
         expect(model.methods).to.not.contain('handleTextChange');
-        (cell.editor as ICellEditorWidgetExtension).textChanged.emit(change);
+        cell.editor.textChanged.emit(change);
         expect(model.methods).to.contain('handleTextChange');
       });
 
@@ -366,7 +366,7 @@ describe('notebook/completion/handler', () => {
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onCompletionRequested');
-        (cell.editor as ICellEditorWidgetExtension).completionRequested.emit(request);
+        cell.editor.completionRequested.emit(request);
         expect(handler.methods).to.contain('onCompletionRequested');
       });
 
@@ -390,7 +390,7 @@ describe('notebook/completion/handler', () => {
         handler.kernel = new MockKernel();
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('makeRequest');
-        (cell.editor as ICellEditorWidgetExtension).completionRequested.emit(request);
+        cell.editor.completionRequested.emit(request);
         expect(handler.methods).to.contain('makeRequest');
       });
 

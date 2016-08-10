@@ -435,22 +435,6 @@ namespace ConsoleWidget {
      */
     createPrompt(rendermime: IRenderMime): CodeCellWidget;
   }
-
-  /**
-   * The default implementation of an `IRenderer`.
-   */
-  export
-  abstract class Renderer implements IRenderer {
-    /**
-     * Create a new banner widget.
-     */
-    abstract createBanner(): RawCellWidget;
-
-    /**
-     * Create a new prompt widget.
-     */
-    abstract createPrompt(rendermime: IRenderMime): CodeCellWidget;
-  }
 }
 
 

@@ -2,44 +2,58 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-    RenderMime
+  RenderMime
 } from '../../rendermime';
 
 import {
-    CodeCellModel, RawCellModel
+  CodeCellModel, RawCellModel
 } from '../../notebook/cells/model';
 
 import {
-    CodeCellWidget, RawCellWidget
+  CodeCellWidget, RawCellWidget
 } from '../../notebook/cells/widget';
 
 import {
-    defaultCodeMirrorCodeCellRenderer, defaultCodeMirrorRawCellRenderer
+  defaultCodeMirrorCodeCellRenderer, defaultCodeMirrorRawCellRenderer
 } from '../../notebook/codemirror/notebook/widget';
 
 import {
-    ConsoleWidget
+  ConsoleWidget
 } from '../widget';
 
-export class CodeMirrorConsoleRenderer extends ConsoleWidget.Renderer {
+/**
+ * A code mirror renderer for a console.
+ */
+export
+class CodeMirrorConsoleRenderer implements ConsoleWidget.IRenderer {
 
-    createBanner(): RawCellWidget {
-        let widget = new RawCellWidget({
-            renderer: defaultCodeMirrorRawCellRenderer
-        });
-        widget.model = new RawCellModel();
-        return widget;
-    }
+  /**
+   * Create a new banner widget.
+   */
+  createBanner(): RawCellWidget {
+    let widget = new RawCellWidget({
+      renderer: defaultCodeMirrorRawCellRenderer
+    });
+    widget.model = new RawCellModel();
+    return widget;
+  }
 
-    createPrompt(rendermime: RenderMime): CodeCellWidget {
-        let widget = new CodeCellWidget({
-            rendermime,
-            renderer: defaultCodeMirrorCodeCellRenderer
-        });
-        widget.model = new CodeCellModel();
-        return widget;
-    }
+  /**
+  * Create a new prompt widget.
+  */
+  createPrompt(rendermime: RenderMime): CodeCellWidget {
+    let widget = new CodeCellWidget({
+      rendermime,
+      renderer: defaultCodeMirrorCodeCellRenderer
+    });
+    widget.model = new CodeCellModel();
+    return widget;
+  }
 
 }
 
-export const defaultCodeMirrorConsoleRenderer = new CodeMirrorConsoleRenderer();
+/**
+ * A default code mirror renderer for a console.
+ */
+export
+const defaultCodeMirrorConsoleRenderer = new CodeMirrorConsoleRenderer();
