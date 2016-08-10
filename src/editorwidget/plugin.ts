@@ -23,7 +23,7 @@ import {
 
 import {
   IMainMenu
-} from '../mainmenu/plugin';
+} from '../mainmenu';
 
 import {
   WidgetTracker

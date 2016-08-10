@@ -31,7 +31,7 @@ import {
 
 import {
   IMainMenu
-} from '../mainmenu/plugin';
+} from '../mainmenu';
 
 import {
   IServiceManager
