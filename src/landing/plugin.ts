@@ -11,15 +11,15 @@ import {
 
 import {
   ICommandPalette
-} from '../commandpalette/plugin';
+} from '../commandpalette';
 
 import {
   IPathTracker
-} from '../filebrowser/plugin';
+} from '../filebrowser';
 
 import {
   IServiceManager
-} from '../services/plugin';
+} from '../services';
 
 /**
  * The landing page extension.

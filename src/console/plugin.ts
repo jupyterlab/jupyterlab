@@ -15,7 +15,7 @@ import {
 
 import {
   ICommandPalette
-} from '../commandpalette/plugin';
+} from '../commandpalette';
 
 import {
   selectKernel
@@ -23,19 +23,19 @@ import {
 
 import {
   IInspector
-} from '../inspector/plugin';
+} from '../inspector';
 
 import {
   IMainMenu
-} from '../mainmenu/plugin';
+} from '../mainmenu';
 
 import {
   IRenderMime
-} from '../rendermime/plugin';
+} from '../rendermime';
 
 import {
   IServiceManager
-} from '../services/plugin';
+} from '../services';
 
 import {
   WidgetTracker
@@ -91,6 +91,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   tracker.activeWidgetChanged.connect((sender: any, panel: ConsolePanel) => {
     inspector.source = panel.content.inspectionHandler;
   });
+
+  // Set the main menu title.
+  menu.title.label = 'Console';
 
   // Add the ability to create new consoles for each kernel.
   let specs = services.kernelspecs;

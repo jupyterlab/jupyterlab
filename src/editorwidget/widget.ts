@@ -11,6 +11,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   loadModeByFileName
 } from '../codemirror';
 
@@ -22,6 +26,10 @@ import {
   ABCWidgetFactory, IDocumentModel, IDocumentContext
 } from '../docregistry';
 
+import {
+  WidgetTracker
+} from '../widgettracker';
+
 
 /**
  * The class name added to a dirty widget.
@@ -32,6 +40,22 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * The class name added to a jupyter code mirror widget.
  */
 const EDITOR_CLASS = 'jp-EditorWidget';
+
+
+/**
+ * A class that tracks editor widgets.
+ */
+export
+interface IEditorTracker extends WidgetTracker<EditorWidget> {}
+
+
+/* tslint:disable */
+/**
+ * The editor tracker token.
+ */
+export
+const IEditorTracker = new Token<IEditorTracker>('jupyter.services.editor-tracker');
+/* tslint:enable */
 
 
 /**

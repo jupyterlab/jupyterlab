@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   Panel
 } from 'phosphor/lib/ui/panel';
 
@@ -65,6 +69,15 @@ const BOTTOM_TOGGLE_CLASS = 'jp-InspectorItem-bottom';
  * The orientation toggle right button class name.
  */
 const RIGHT_TOGGLE_CLASS = 'jp-InspectorItem-right';
+
+
+/* tslint:disable */
+/**
+ * The inspector panel token.
+ */
+export
+const IInspector = new Token<IInspector>('jupyter.services.inspector');
+/* tslint:enable */
 
 
 /**

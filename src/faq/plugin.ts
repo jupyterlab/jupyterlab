@@ -17,7 +17,7 @@ import {
 
 import {
   ICommandPalette
-} from '../commandpalette/plugin';
+} from '../commandpalette';
 
 
 /**

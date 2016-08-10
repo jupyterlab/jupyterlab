@@ -11,15 +11,15 @@ import {
 
 import {
   ICommandPalette
-} from '../commandpalette/plugin';
+} from '../commandpalette';
 
 import {
   IMainMenu
-} from '../mainmenu/plugin';
+} from '../mainmenu';
 
 import {
   IServiceManager
-} from '../services/plugin';
+} from '../services';
 
 import {
   WidgetTracker

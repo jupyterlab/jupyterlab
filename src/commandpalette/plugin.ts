@@ -4,10 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  Token
-} from 'phosphor/lib/core/token';
-
-import {
   CommandPalette
 } from 'phosphor/lib/ui/commandpalette';
 
@@ -15,29 +11,22 @@ import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
+import {
+  ICommandPalette
+} from './';
 
-/* tslint:disable */
-/**
- * The command palette token.
- */
-export
-const ICommandPalette = new Token<ICommandPalette>('jupyter.services.commandpalette');
-/* tslint:enable */
 
 
 /**
  * The default commmand palette extension.
  */
 export
-const commandPaletteExtension: JupyterLabPlugin<ICommandPalette> = {
+const commandPaletteProvider: JupyterLabPlugin<ICommandPalette> = {
   id: 'jupyter.services.commandpalette',
   provides: ICommandPalette,
   activate: activateCommandPalette,
   autoStart: true
 };
-
-export
-interface ICommandPalette extends CommandPalette {}
 
 
 /**

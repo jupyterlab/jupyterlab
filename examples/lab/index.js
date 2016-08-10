@@ -14,10 +14,10 @@ var lab = new JupyterLab();
 lab.registerPlugins([
   require('jupyterlab/lib/about/plugin').aboutExtension,
   require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
-  require('jupyterlab/lib/commandpalette/plugin').commandPaletteExtension,
+  require('jupyterlab/lib/commandpalette/plugin').commandPaletteProvider,
   require('jupyterlab/lib/console/plugin').consoleExtension,
   require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
-  require('jupyterlab/lib/editorwidget/plugin').editorHandlerExtension,
+  require('jupyterlab/lib/editorwidget/plugin').editorHandlerProvider,
   require('jupyterlab/lib/faq/plugin').faqExtension,
   require('jupyterlab/lib/filebrowser/plugin').fileBrowserProvider,
   require('jupyterlab/lib/help/plugin').helpHandlerExtension,

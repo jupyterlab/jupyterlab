@@ -2,28 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from 'phosphor/lib/core/token';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
-  IInspector as IBaseInspector, Inspector
+  IInspector, Inspector
 } from './';
 
-
-export
-interface IInspector extends IBaseInspector {}
-
-/* tslint:disable */
-/**
- * The inspector panel token.
- */
-export
-const IInspector = new Token<IInspector>('jupyter.services.inspector');
-/* tslint:enable */
 
 
 /**

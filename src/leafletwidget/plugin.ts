@@ -27,7 +27,7 @@ const EXTENSIONS = ['.geojson'];
  */
 export
 const mapHandlerExtension: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.mapHandler',
+  id: 'jupyter.extensions.map-handler',
   requires: [IDocumentRegistry],
   activate: activateMapWidget,
   autoStart: true

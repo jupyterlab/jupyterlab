@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from 'phosphor/lib/core/token';
-
-import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -23,15 +19,19 @@ import {
 
 import {
   ICommandPalette
-} from '../commandpalette/plugin';
+} from '../commandpalette';
 
 import {
   IMainMenu
-} from '../mainmenu/plugin';
+} from '../mainmenu';
 
 import {
   WidgetTracker
 } from '../widgettracker';
+
+import {
+  IEditorTracker
+} from './index';
 
 import 'codemirror/theme/material.css';
 import 'codemirror/theme/zenburn.css';
@@ -63,27 +63,11 @@ const EDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 
 
 /**
- * A class that tracks editor widgets.
- */
-export
-interface IEditorTracker extends WidgetTracker<EditorWidget> { }
-
-
-/* tslint:disable */
-/**
- * The editor tracker token.
- */
-export
-const IEditorTracker = new Token<IEditorTracker>('jupyter.services.editor-tracker');
-/* tslint:enable */
-
-
-/**
  * The editor handler extension.
  */
 export
-const editorHandlerExtension: JupyterLabPlugin<IEditorTracker> = {
-  id: 'jupyter.extensions.editor-handler',
+const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
+  id: 'jupyter.services.editor-handler',
   requires: [IDocumentRegistry, IMainMenu, ICommandPalette],
   provides: IEditorTracker,
   activate: activateEditorHandler,
