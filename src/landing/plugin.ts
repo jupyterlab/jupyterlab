@@ -15,7 +15,7 @@ import {
 
 import {
   IPathTracker
-} from '../filebrowser/plugin';
+} from '../filebrowser';
 
 import {
   IServiceManager

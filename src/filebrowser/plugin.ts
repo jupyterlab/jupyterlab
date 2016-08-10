@@ -6,14 +6,6 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  ISignal
-} from 'phosphor/lib/core/signaling';
-
-import {
-  Token
-} from 'phosphor/lib/core/token';
-
-import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -28,10 +20,6 @@ import {
 import {
   ICommandPalette
 } from '../commandpalette';
-
-import {
-  IChangedArgs
-} from '../common/interfaces';
 
 import {
   DocumentManager
@@ -54,41 +42,8 @@ import {
 } from '../widgettracker';
 
 import {
-  IWidgetOpener, FileBrowserWidget
-} from './browser';
-
-import {
-  FileBrowserModel
-} from './model';
-
-
-/* tslint:disable */
-/**
- * The path tracker token.
- */
-export
-const IPathTracker = new Token<IPathTracker>('jupyter.services.file-browser');
-/* tslint:enable */
-
-
-/**
- * An interface a file browser path tracker.
- */
-export
-interface IPathTracker {
-  /**
-   * A signal emitted when the current path changes.
-   */
-  pathChanged: ISignal<IPathTracker, IChangedArgs<string>>;
-
-  /**
-   * The current path of the filebrowser.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  path: string;
-}
+  FileBrowserModel, FileBrowserWidget, IPathTracker, IWidgetOpener
+} from './';
 
 
 /**
