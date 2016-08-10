@@ -130,8 +130,8 @@ function startApp(session: ISession) {
   commands.addCommand('console-dismiss-completion', {
     execute: () => { consolePanel.content.dismissCompletion(); }
   });
-  palette.add({ command: 'console-clear', category: 'Console' });
-  palette.add({ command: 'console-execute', category: 'Console' });
+  palette.addItem({ command: 'console-clear', category: 'Console' });
+  palette.addItem({ command: 'console-execute', category: 'Console' });
 
   let bindings = [
     {
