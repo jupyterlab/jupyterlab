@@ -19,7 +19,7 @@ import {
 
 import {
   IServiceManager
-} from '../services/plugin';
+} from '../services';
 
 /**
  * The landing page extension.

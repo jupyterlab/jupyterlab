@@ -36,7 +36,7 @@ import {
 
 import {
   IServiceManager
-} from '../services/plugin';
+} from '../services';
 
 import {
   WidgetTracker
