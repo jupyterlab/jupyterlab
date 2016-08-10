@@ -10,12 +10,17 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  scrollIntoViewIfNeeded
+} from 'phosphor/lib/dom/query';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
   ICompletionModel, ICompletionItem
 } from './model';
+
 
 /**
  * The class name added to completion menu widgets.
@@ -278,7 +283,7 @@ class CompletionWidget extends Widget {
     }
     active = items[this._activeIndex] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
-    Private.scrollIfNeeded(this.node, active);
+    scrollIntoViewIfNeeded(this.node, active);
   }
 
   /**
@@ -567,23 +572,5 @@ namespace Private {
       event.ctrlKey ||
       event.shiftKey ||
       event.metaKey;
-  }
-
-  /**
-   * Scroll an element into view if needed.
-   *
-   * @param area - The scroll area element.
-   *
-   * @param elem - The element of interest.
-   */
-  export
-  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
-    let ar = area.getBoundingClientRect();
-    let er = elem.getBoundingClientRect();
-    if (er.top < ar.top - 10) {
-      area.scrollTop -= ar.top - er.top + 10;
-    } else if (er.bottom > ar.bottom + 10) {
-      area.scrollTop += er.bottom - ar.bottom + 10;
-    }
   }
 }

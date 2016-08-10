@@ -22,6 +22,10 @@ import {
 } from 'phosphor/lib/dom/dragdrop';
 
 import {
+  scrollIntoViewIfNeeded
+} from 'phosphor/lib/dom/query';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -1207,7 +1211,7 @@ class DirListing extends Widget {
     }
     let name = items[index].name;
     this._selection[name] = true;
-    Private.scrollIfNeeded(this.contentNode, this._items[index]);
+    scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
     this._isCut = false;
   }
 
@@ -1636,23 +1640,5 @@ namespace Private {
       output.reverse();
     }
     return output;
-  }
-
-  /**
-   * Scroll an element into view if needed.
-   *
-   * @param area - The scroll area element.
-   *
-   * @param elem - The element of interest.
-   */
-  export
-  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
-    let ar = area.getBoundingClientRect();
-    let er = elem.getBoundingClientRect();
-    if (er.top < ar.top) {
-      area.scrollTop -= ar.top - er.top;
-    } else if (er.bottom > ar.bottom) {
-      area.scrollTop += er.bottom - ar.bottom;
-    }
   }
 }

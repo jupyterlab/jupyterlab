@@ -18,6 +18,10 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
+  scrollIntoViewIfNeeded
+} from 'phosphor/lib/dom/query';
+
+import {
   PanelLayout
 } from 'phosphor/lib/ui/panel';
 
@@ -323,7 +327,7 @@ class ConsoleWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     let prompt = this.prompt;
-    Private.scrollIfNeeded(this.parent.node, prompt.node);
+    scrollIntoViewIfNeeded(this.parent.node, prompt.node);
   }
 
   /**
@@ -454,24 +458,6 @@ namespace ConsoleWidget {
  * A namespace for console widget private data.
  */
 namespace Private {
-  /**
-   * Scroll an element into view if needed.
-   *
-   * @param area - The scroll area element.
-   *
-   * @param elem - The element of interest.
-   */
-  export
-  function scrollIfNeeded(area: HTMLElement, elem: HTMLElement): void {
-    let ar = area.getBoundingClientRect();
-    let er = elem.getBoundingClientRect();
-    if (er.top < ar.top - 10) {
-      area.scrollTop -= ar.top - er.top + 10;
-    } else if (er.bottom > ar.bottom + 10) {
-      area.scrollTop += er.bottom - ar.bottom + 10;
-    }
-  }
-
   /**
    * Jump to the bottom of a node.
    *
