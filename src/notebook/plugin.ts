@@ -31,7 +31,7 @@ import {
 
 import {
   IInspector
-} from '../inspector/plugin';
+} from '../inspector';
 
 import {
   IRenderMime
