@@ -364,16 +364,15 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
-    return run(widget, kernel).then(result => {
-      let model = widget.model;
-      if (widget.activeCellIndex === widget.childCount() - 1) {
-        let cell = model.factory.createCodeCell();
-        model.cells.add(cell);
-        widget.mode = 'edit';
-      }
-      widget.activeCellIndex++;
-      return result;
-    });
+    let promise = run(widget, kernel);
+    let model = widget.model;
+    if (widget.activeCellIndex === widget.childCount() - 1) {
+      let cell = model.factory.createCodeCell();
+      model.cells.add(cell);
+      widget.mode = 'edit';
+    }
+    widget.activeCellIndex++;
+    return promise;
   }
 
   /**
@@ -395,14 +394,13 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
-    return run(widget, kernel).then(result => {
-      let model = widget.model;
-      let cell = model.factory.createCodeCell();
-      model.cells.insert(widget.activeCellIndex + 1, cell);
-      widget.activeCellIndex++;
-      widget.mode = 'edit';
-      return result;
-    });
+    let promise = run(widget, kernel);
+    let model = widget.model;
+    let cell = model.factory.createCodeCell();
+    model.cells.insert(widget.activeCellIndex + 1, cell);
+    widget.activeCellIndex++;
+    widget.mode = 'edit';
+    return promise;
   }
 
   /**
