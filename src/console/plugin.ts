@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from 'phosphor/lib/core/token';
-
-import {
   IKernel, ISession
 } from 'jupyter-js-services';
 
@@ -49,13 +45,6 @@ import {
   ConsolePanel, ConsoleWidget
 } from './';
 
-/* tslint:disable */
-/**
- * The console renderer token.
- */
-export
-const IConsoleRenderer = new Token<ConsoleWidget.IRenderer>('jupyter.services.console.renderer');
-/* tslint:enable */
 
 /**
  * The console extension.
@@ -69,7 +58,7 @@ const consoleExtension: JupyterLabPlugin<void> = {
     IMainMenu,
     IInspector,
     ICommandPalette,
-    IConsoleRenderer
+    ConsoleWidget.IRenderer
   ],
   activate: activateConsole,
   autoStart: true
@@ -90,7 +79,7 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, renderer:ConsoleWidget.IRenderer): void {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, renderer: ConsoleWidget.IRenderer): void {
   let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessions;
   let { commands, keymap } = app;
@@ -138,7 +127,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         let kernelName = `${displayNameMap[displayName]}`;
         manager.startNew({ path, kernelName }).then(session => {
           let panel = new ConsolePanel({
-            session, 
+            session,
             rendermime: rendermime.clone(),
             renderer: renderer
           });

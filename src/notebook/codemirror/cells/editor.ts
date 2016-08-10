@@ -26,7 +26,8 @@ import {
 
 import {
   ICellEditorWidget, EdgeLocation, ITextChange, ICompletionRequest, ICoords
-} from '../../cells/editor'
+} from '../../cells/editor';
+
 
 /**
  * The key code for the up arrow key.
@@ -47,6 +48,7 @@ const TAB = 9;
  * The class name added to cell editor widget nodes.
  */
 const CELL_EDITOR_CLASS = 'jp-CellEditor';
+
 
 /**
  * A code mirror widget for a cell editor.
@@ -133,30 +135,30 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
   /**
    * Change the mode for an editor based on the given mime type.
    */
-  setMimeType(mimeType:string): void {
+  setMimeType(mimeType: string): void {
     loadModeByMIME(this.editor, mimeType);
   }
 
   /**
    * Set whether the editor is read only.
    */
-  setReadOnly(readOnly:boolean): void {
+  setReadOnly(readOnly: boolean): void {
     let option = readOnly ? 'nocursor' : false;
     this.editor.setOption('readOnly', option);
   }
 
   /**
-   * Brings browser focus to the editor text
+   * Give keyboard focus to the cell editor.
    */
   focus(): void {
-      this.editor.focus();
+    this.editor.focus();
   }
 
   /**
-   * Returns true if this editor has keyboard focus.
+   * Test whether the editor has keyboard focus.
    */
   hasFocus(): boolean {
-      return this.editor.hasFocus();
+    return this.editor.hasFocus();
   }
 
   /**
@@ -176,7 +178,9 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
   }
 
   /**
-   * Set the current cursor position of the editor.
+   * Set the position of the cursor.
+   *
+   * @param position - A new cursor's position.
    */
   setCursorPosition(position: number): void {
     let doc = this.editor.getDoc();
@@ -185,10 +189,12 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
 
   /**
    * Set the position of the cursor.
-   * @param line a zero-based line number
-   * @param character a zero-based character number
+   *
+   * @param line - A zero-based line number.
+   *
+   * @param character - A zero-based character number.
    */
-  setCursor(line:number, character:number): void {
+  setCursor(line: number, character: number): void {
     let doc = this.editor.getDoc();
     doc.setCursor({
       line: line,
@@ -310,6 +316,7 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
 
   private _model: ICellModel = null;
 }
+
 
 // Define the signals for the `CodeMirrorCellEditorWidget` class.
 defineSignal(CodeMirrorCellEditorWidget.prototype, 'completionRequested');

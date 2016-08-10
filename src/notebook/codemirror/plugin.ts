@@ -6,16 +6,12 @@ import {
 } from '../notebook/panel';
 
 import {
-  defaultCodeMirrorNotebookPanelRenderer, CodeMirrorNotebookPanelRenderer
+  CodeMirrorNotebookPanelRenderer
 } from './notebook/panel';
 
 import {
-  JupyterLab, JupyterLabPlugin
+  JupyterLabPlugin
 } from '../../application';
-
-import {
-  INotebookRenderer
-} from '../plugin';
 
 /**
  * The provider for a notebook's code mirror renderer.
@@ -23,6 +19,6 @@ import {
 export
 const rendererProvider: JupyterLabPlugin<NotebookPanel.IRenderer> = {
   id: 'jupyter.services.notebook.codemirror.renderer',
-  provides: INotebookRenderer,
-  activate: () => defaultCodeMirrorNotebookPanelRenderer
+  provides: NotebookPanel.IRenderer,
+  activate: () => CodeMirrorNotebookPanelRenderer.defaultRenderer
 };

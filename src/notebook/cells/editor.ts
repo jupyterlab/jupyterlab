@@ -14,17 +14,15 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IChangedArgs
-} from '../../common/interfaces';
-
-import {
   ICellModel,
 } from './model';
+
 
 /**
  * The location of requested edges.
  */
 export type EdgeLocation = 'top' | 'bottom';
+
 
 /**
  * An interface describing editor state coordinates.
@@ -51,6 +49,7 @@ interface ICoords extends JSONObject {
    */
   bottom: number;
 }
+
 
 /**
  * An interface describing the state of the editor in an event.
@@ -105,6 +104,7 @@ interface ITextChange extends IEditorState {
   newValue: string;
 }
 
+
 /**
  * An interface describing completion requests.
  */
@@ -116,12 +116,12 @@ interface ICompletionRequest extends IEditorState {
   currentValue: string;
 }
 
+
 /**
  * A widget for a cell editor.
  */
 export
 interface ICellEditorWidget extends Widget {
-
   /**
    * The cell model used by the editor.
    */
@@ -136,7 +136,7 @@ interface ICellEditorWidget extends Widget {
    * A signal emitted when a text change is completed.
    */
   textChanged: ISignal<ICellEditorWidget, ITextChange>;
-  
+
   /**
    * A signal emitted when a completion is requested.
    */
@@ -158,12 +158,12 @@ interface ICellEditorWidget extends Widget {
   setReadOnly(readOnly: boolean): void;
 
   /**
-   * Brings browser focus to the editor text
+   * Give keyboard focus to the cell editor.
    */
   focus(): void;
 
   /**
-   * Returns true if this editor has keyboard focus.
+   * Test whether the editor has keyboard focus.
    */
   hasFocus(): boolean;
 
@@ -179,15 +179,17 @@ interface ICellEditorWidget extends Widget {
 
   /**
    * Set the position of the cursor.
-   * @param position a new cursor's position
+   *
+   * @param position - A new cursor's position.
    */
-  setCursorPosition(cursorPosition:number): void;
+  setCursorPosition(cursorPosition: number): void;
 
   /**
    * Set the position of the cursor.
-   * @param line a zero-based line number
-   * @param character a zero-based character number
+   *
+   * @param line - A zero-based line number.
+   *
+   * @param character - A zero-based character number.
    */
-  setCursor(line:number, character:number): void;
-
+  setCursor(line: number, character: number): void;
 }

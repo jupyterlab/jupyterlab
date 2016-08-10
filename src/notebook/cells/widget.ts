@@ -22,10 +22,6 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  loadModeByMIME
-} from '../../codemirror';
-
-import {
   IChangedArgs
 } from '../../common/interfaces';
 
@@ -120,7 +116,7 @@ class BaseCellWidget extends Widget {
   /**
    * Construct a new base cell widget.
    */
-  constructor(options:BaseCellWidget.IOptions) {
+  constructor(options: BaseCellWidget.IOptions) {
     super();
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
@@ -316,7 +312,7 @@ class BaseCellWidget extends Widget {
 
     // Reset the editor model and set its mode to be the default MIME type.
     this._editor.model = this._model;
-    this._editor.setMimeType(this._mimetype)
+    this._editor.setMimeType(this._mimetype);
 
     // Handle trusted cursor.
     this._trustedCursor = this._model.getMetadata('trusted');
@@ -375,7 +371,6 @@ namespace BaseCellWidget {
     createInputArea(editor: ICellEditorWidget): InputAreaWidget;
   }
 
-
   /**
    * The default implementation of an `IRenderer`.
    */
@@ -393,8 +388,8 @@ namespace BaseCellWidget {
       return new InputAreaWidget(editor);
     }
   }
-
 }
+
 
 /**
  * A widget for a code cell.
@@ -547,7 +542,6 @@ namespace CodeCellWidget {
     rendermime: RenderMime;
   }
 
-
   /**
    * A renderer for creating code cell widgets.
    */
@@ -558,7 +552,6 @@ namespace CodeCellWidget {
      */
     createOutputArea(rendermime: RenderMime): OutputAreaWidget;
   }
-
 
   /**
    * The default implementation of an `IRenderer`.

@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -30,7 +34,7 @@ import {
 } from '../notebook/notebook/nbformat';
 
 import {
-  CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
+  CodeCellWidget, RawCellWidget
 } from '../notebook/cells';
 
 import {
@@ -435,6 +439,14 @@ namespace ConsoleWidget {
      */
     createPrompt(rendermime: IRenderMime): CodeCellWidget;
   }
+
+  /* tslint:disable */
+  /**
+   * The console renderer token.
+   */
+  export
+  const IRenderer = new Token<IRenderer>('jupyter.services.console.renderer');
+  /* tslint:enable */
 }
 
 
