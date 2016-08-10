@@ -2,14 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Menu
-} from 'phosphor/lib/ui/menu';
-
-import {
-  MenuBar
-} from 'phosphor/lib/ui/menubar';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -48,58 +40,15 @@ const mainMenuProvider: JupyterLabPlugin<IMainMenu> = {
  * Activate the main menu extension.
  */
 function activateMainMenu(app: JupyterLab): IMainMenu {
-  Private.menuBar = new MenuBar({ keymap: app.keymap });
-  Private.menuBar.id = 'jp-MainMenu';
+  let menu = new MainMenu({ keymap: app.keymap });
+  menu.id = 'jp-MainMenu';
 
   let logo = new Widget();
   logo.node.className = `${PORTRAIT_ICON_CLASS} ${JUPYTER_ICON_CLASS}`;
   logo.id = 'jp-MainLogo';
 
   app.shell.addToTopArea(logo);
-  app.shell.addToTopArea(Private.menuBar);
+  app.shell.addToTopArea(menu);
 
-  return Private.mainMenu;
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * The singleton menu bar instance.
-   */
-  export
-  let menuBar: MenuBar;
-
-  /**
-   * The singleton main menu instance.
-   */
-  export
-  const mainMenu = new MainMenu();
-
-
-  /**
-   * An object which holds a menu and its sort rank.
-   */
-  export
-  interface IRankItem {
-    /**
-     * The menu for the item.
-     */
-    menu: Menu;
-
-    /**
-     * The sort rank of the menu.
-     */
-    rank: number;
-  }
-
-  /**
-   * A comparator function for menu rank items.
-   */
-  export
-  function itemCmp(first: IRankItem, second: IRankItem): number {
-    return first.rank - second.rank;
-  }
+  return menu;
 }
