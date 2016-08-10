@@ -15,6 +15,10 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
+
+import {
   loadModeByFileName
 } from '../codemirror';
 
@@ -25,10 +29,6 @@ import {
 import {
   ABCWidgetFactory, IDocumentModel, IDocumentContext
 } from '../docregistry';
-
-import {
-  WidgetTracker
-} from '../widgettracker';
 
 
 /**
@@ -46,7 +46,7 @@ const EDITOR_CLASS = 'jp-EditorWidget';
  * A class that tracks editor widgets.
  */
 export
-interface IEditorTracker extends WidgetTracker<EditorWidget> {}
+interface IEditorTracker extends FocusTracker<EditorWidget> {}
 
 
 /* tslint:disable */

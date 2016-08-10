@@ -2,6 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
+
+import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -24,10 +32,6 @@ import {
 import {
   IMainMenu
 } from '../mainmenu';
-
-import {
-  WidgetTracker
-} from '../widgettracker';
 
 import {
   IEditorTracker
@@ -93,11 +97,11 @@ const cmdIds = {
  * Sets up the editor widget
  */
 function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IEditorTracker {
-  let tracker = new WidgetTracker<EditorWidget>();
+  let tracker = new FocusTracker<EditorWidget>();
   let widgetFactory = new EditorWidgetFactory();
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
-    tracker.addWidget(widget);
+    tracker.add(widget);
   });
   registry.addWidgetFactory(widgetFactory,
   {
@@ -129,7 +133,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
 /**
  * Add the editor commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, tracker: WidgetTracker<EditorWidget>): void {
+function addCommands(app: JupyterLab, tracker: IEditorTracker): void {
   app.commands.addCommand(cmdIds.lineNumbers, {
     execute: () => { toggleLineNums(tracker); },
     label: 'Toggle Line Numbers',
@@ -160,9 +164,9 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<EditorWidget>): voi
 /**
  * Toggle editor line numbers
  */
-function toggleLineNums(tracker: WidgetTracker<EditorWidget>) {
-  if (tracker.activeWidget) {
-    let editor = tracker.activeWidget.editor;
+function toggleLineNums(tracker: IEditorTracker) {
+  if (tracker.currentWidget) {
+    let editor = tracker.currentWidget.editor;
     editor.setOption('lineNumbers', !editor.getOption('lineNumbers'));
   }
 }
@@ -170,9 +174,9 @@ function toggleLineNums(tracker: WidgetTracker<EditorWidget>) {
 /**
  * Toggle editor line wrap
  */
-function toggleLineWrap(tracker: WidgetTracker<EditorWidget>) {
-  if (tracker.activeWidget) {
-    let editor = tracker.activeWidget.editor;
+function toggleLineWrap(tracker: IEditorTracker) {
+  if (tracker.currentWidget) {
+    let editor = tracker.currentWidget.editor;
     editor.setOption('lineWrapping', !editor.getOption('lineWrapping'));
   }
 }
@@ -180,9 +184,9 @@ function toggleLineWrap(tracker: WidgetTracker<EditorWidget>) {
 /**
  * Toggle editor matching brackets
  */
-function toggleMatchBrackets(tracker: WidgetTracker<EditorWidget>) {
-  if (tracker.activeWidget) {
-    let editor = tracker.activeWidget.editor;
+function toggleMatchBrackets(tracker: IEditorTracker) {
+  if (tracker.currentWidget) {
+    let editor = tracker.currentWidget.editor;
     editor.setOption('matchBrackets', !editor.getOption('matchBrackets'));
   }
 }
@@ -190,42 +194,35 @@ function toggleMatchBrackets(tracker: WidgetTracker<EditorWidget>) {
 /**
  * Turns on the editor's vim mode
  */
-function toggleVim(tracker: WidgetTracker<EditorWidget>) {
-  let editors = tracker.widgets;
-  for (let i = 0; i < editors.length; i++) {
-    editors[i].editor.setOption('keyMap', 'vim');
-  }
+function toggleVim(tracker: IEditorTracker) {
+  each(tracker.widgets, widget => {
+    widget.editor.setOption('keyMap', 'vim');
+  });
 }
 
 /**
  * Sets the editor to default editing mode
  */
-function toggleDefault(tracker: WidgetTracker<EditorWidget>) {
-  if (tracker.activeWidget) {
-    let editors = tracker.widgets;
-    for (let i = 0; i < editors.length; i++) {
-      editors[i].editor.setOption('keyMap', 'default');
-    }
-  }
+function toggleDefault(tracker: IEditorTracker) {
+  each(tracker.widgets, widget => {
+    widget.editor.setOption('keyMap', 'default');
+  });
 }
 
 /**
  * Close all currently open text editor files
  */
-function closeAllFiles(tracker: WidgetTracker<EditorWidget>) {
-  if (tracker.activeWidget) {
-    let editors = tracker.widgets;
-    for (let i = 0; i < editors.length; i++) {
-      editors[i].close();
-    }
-  }
+function closeAllFiles(tracker: IEditorTracker) {
+  each(tracker.widgets, widget => {
+    widget.close();
+  });
 }
 
 
 /**
  * Create a menu for the editor.
  */
-function createMenu(app: JupyterLab, tracker: WidgetTracker<EditorWidget>): Menu {
+function createMenu(app: JupyterLab, tracker: IEditorTracker): Menu {
   let { commands, keymap } = app;
   let settings = new Menu({ commands, keymap });
   let theme = new Menu({ commands, keymap });
@@ -246,11 +243,10 @@ function createMenu(app: JupyterLab, tracker: WidgetTracker<EditorWidget>): Menu
       return args['theme'] as string;
     },
     execute: args => {
-      let editors = tracker.widgets;
       let name: string = args['theme'] as string || 'default';
-      for (let i = 0; i < editors.length; i++) {
-        editors[i].editor.setOption('theme', name);
-      }
+      each(tracker.widgets, widget => {
+        widget.editor.setOption('theme', name);
+      });
     }
   });
 
