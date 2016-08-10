@@ -133,7 +133,7 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     execute: () => { Private.toggleHelp(app, iframe); }
   });
 
-  COMMANDS.forEach(item => palette.addItem({
+  COMMANDS.forEach(item => palette.add({
     command: item.id,
     category: 'Help'
   }));

@@ -140,7 +140,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         });
       }
     });
-    palette.addItem({ command, category });
+    palette.add({ command, category });
     submenu.addItem({ command });
   }
 
@@ -153,7 +153,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       }
     }
   });
-  palette.addItem({ command, category });
+  palette.add({ command, category });
   menu.addItem({ command });
 
 
@@ -176,7 +176,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       }
     }
   });
-  palette.addItem({ command, category });
+  palette.add({ command, category });
   menu.addItem({ command });
 
 
@@ -192,7 +192,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       }
     }
   });
-  palette.addItem({ command, category });
+  palette.add({ command, category });
   menu.addItem({ command });
 
 
@@ -228,7 +228,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       });
     }
   });
-  palette.addItem({ command, category });
+  palette.add({ command, category });
   menu.addItem({ command });
 
   mainMenu.addMenu(menu, {rank: 50});

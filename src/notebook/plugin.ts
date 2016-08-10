@@ -556,7 +556,7 @@ function populatePalette(palette: ICommandPalette): void {
     cmdIds.editMode,
     cmdIds.commandMode,
     cmdIds.switchKernel
-  ].forEach(command => palette.addItem({ command, category }));
+  ].forEach(command => palette.add({ command, category }));
 
   category = 'Notebook Cell Operations';
   [
@@ -588,7 +588,7 @@ function populatePalette(palette: ICommandPalette): void {
     cmdIds.markdown4,
     cmdIds.markdown5,
     cmdIds.markdown6
-  ].forEach(command => palette.addItem({ command, category }));
+  ].forEach(command => palette.add({ command, category }));
 }
 
 /**

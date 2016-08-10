@@ -241,7 +241,7 @@ function createApp(manager: IServiceManager): void {
     cmdIds.editMode,
     cmdIds.commandMode,
     cmdIds.switchKernel
-  ].forEach(command => palette.addItem({ command, category }));
+  ].forEach(command => palette.add({ command, category }));
 
   category = 'Notebook Cell Operations';
   [
@@ -254,7 +254,7 @@ function createApp(manager: IServiceManager): void {
     cmdIds.extendBelow,
     cmdIds.undo,
     cmdIds.redo
-  ].forEach(command => palette.addItem({ command, category }));
+  ].forEach(command => palette.add({ command, category }));
 
   let bindings = [
   {
