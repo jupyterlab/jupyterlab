@@ -7,7 +7,7 @@ module.exports = {
     publicPath: './build/'
   },
   debug: true,
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   module: {
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
