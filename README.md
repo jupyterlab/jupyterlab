@@ -152,7 +152,7 @@ npm run build
 
 Note: If using an earlier version of node (<4), it is advised that you
 run `npm dedupe` after `npm install`, since older versions of node
-did install dependencies maximally flat, which can cause version conflicts.
+did not install dependencies maximally flat, which can cause version conflicts.
 
 **Rebuild**
 
