@@ -93,6 +93,13 @@ class ImageWidget extends Widget {
     this.node.querySelector('img').setAttribute('src', src);
   }
 
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.focus();
+  }
+
   private _context: IDocumentContext<IDocumentModel>;
   private _scale = 1;
 }
