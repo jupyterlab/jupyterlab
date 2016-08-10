@@ -4,20 +4,20 @@
 # Distributed under the terms of the Modified BSD License.
 
 from __future__ import print_function
+from distutils.version import LooseVersion
 from setuptools import setup, find_packages, Command
 from setuptools.command.sdist import sdist
 from setuptools.command.build_py import build_py
 from setuptools.command.egg_info import egg_info
 from setuptools.command.bdist_egg import bdist_egg
-from subprocess import check_call
+from subprocess import check_call, check_output
 import os
 import sys
-import platform
-import shutil
 
 here = os.path.dirname(os.path.abspath(__file__))
 extension_root = os.path.join(here, 'jupyterlab')
 is_repo = os.path.exists(os.path.join(here, '.git'))
+
 
 def run(cmd, cwd=None):
     """Run a command
@@ -33,6 +33,7 @@ log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 
 LONG_DESCRIPTION = 'This is a very early pre-alpha developer preview. It is not ready for general usage yet.'
+
 
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
@@ -105,12 +106,24 @@ class NPM(Command):
         has_npm = self.has_npm()
         if not has_npm:
             log.error("`npm` unavailable.  If you're running this command using sudo, make sure `npm` is available to sudo")
+            return
         if not os.path.exists(self.node_modules):
             log.info("Installing build dependencies with npm.  This may take a while...")
             run('npm install', cwd=here)
         if not os.path.exists(self.jlab_node_modules):
             log.info("Installing extension build dependencies with npm.  This may take a while...")
             run('npm install', cwd=extension_root)
+        # run dedupe if necessary
+        shell = (sys.platform == 'win32')
+        version = check_output(['npm', '--version'], shell=shell).decode('utf-8')
+        if LooseVersion(version) < LooseVersion('3.0'):
+            try:
+                run(['npm', 'dedupe'], cwd=here)
+                run(['npm', 'dedupe'], cwd=extension_root)
+            except Exception as e:
+                print("Failed to run `npm dedupe`: %s" % e, file=sys.stderr)
+                print("Please install npm v3+ to build a development version of the notebook.")
+                raise
         run('npm run build:serverextension')
 
         for t in self.targets:
