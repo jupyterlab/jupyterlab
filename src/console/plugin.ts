@@ -92,6 +92,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     inspector.source = panel.content.inspectionHandler;
   });
 
+  // Set the main menu title.
+  menu.title.label = 'Console';
+
   // Add the ability to create new consoles for each kernel.
   let specs = services.kernelspecs;
   let displayNameMap: { [key: string]: string } = Object.create(null);
