@@ -2,8 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   find
 } from 'phosphor/lib/algorithm/searching';
+
+import {
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
 
 import {
   Menu
@@ -24,10 +32,6 @@ import {
 import {
   IServiceManager
 } from '../services';
-
-import {
-  WidgetTracker
-} from '../widgettracker';
 
 import {
   TerminalWidget
@@ -65,7 +69,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   let toggleTerminalTheme = 'terminal:toggle-theme';
   let openTerminalId = 'terminal:open';
 
-  let tracker = new WidgetTracker<TerminalWidget>();
+  let tracker = new FocusTracker<TerminalWidget>();
   let options = {
     background: 'black',
     color: 'white',
@@ -81,7 +85,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       term.title.closable = true;
       term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
       app.shell.addToMainArea(term);
-      tracker.addWidget(term);
+      tracker.add(term);
       services.terminals.create({ name }).then(session => {
         term.session = session;
         // Trigger an update of the running kernels.
@@ -92,24 +96,22 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   commands.addCommand(increaseTerminalFontSize, {
     label: 'Increase Terminal Font Size',
     execute: () => {
-      if (!tracker.isDisposed && options.fontSize < 72) {
-        let widgets = tracker.widgets;
+      if (options.fontSize < 72) {
         options.fontSize++;
-        for (let i = 0; i < widgets.length; i++) {
-          widgets[i].fontSize = options.fontSize;
-        }
+        each(tracker.widgets, widget => {
+          widget.fontSize = options.fontSize;
+        });
       }
     }
   });
   commands.addCommand(decreaseTerminalFontSize, {
     label: 'Decrease Terminal Font Size',
     execute: () => {
-      if (!tracker.isDisposed && options.fontSize > 9) {
-        let widgets = tracker.widgets;
+      if (options.fontSize > 9) {
         options.fontSize--;
-        for (let i = 0; i < widgets.length; i++) {
-          widgets[i].fontSize = options.fontSize;
-        }
+        each(tracker.widgets, widget => {
+          widget.fontSize = options.fontSize;
+        });
       }
     }
   });
@@ -117,20 +119,17 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     label: 'Toggle Terminal Theme',
     caption: 'Switch Terminal Background and Font Colors',
     execute: () => {
-      if (!tracker.isDisposed) {
-        let widgets = tracker.widgets;
-        if (options.background === 'black') {
-          options.background = 'white';
-          options.color = 'black';
-        } else {
-          options.background = 'black';
-          options.color = 'white';
-        }
-        for (let i = 0; i < widgets.length; i++) {
-          widgets[i].background = options.background;
-          widgets[i].color = options.color;
-        }
+      if (options.background === 'black') {
+        options.background = 'white';
+        options.color = 'black';
+      } else {
+        options.background = 'black';
+        options.color = 'white';
       }
+      each(tracker.widgets, widget => {
+        widget.background = options.background;
+        widget.color = options.color;
+      });
     }
   });
   commands.addCommand(openTerminalId, {

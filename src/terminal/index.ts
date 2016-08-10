@@ -226,7 +226,6 @@ class TerminalWidget extends Widget {
     if (this._dirty) {
       this._snapTermSizing();
     }
-    this._term.focus();
   }
 
   /**
@@ -263,6 +262,13 @@ class TerminalWidget extends Widget {
   protected onFitRequest(msg: Message): void {
     let resize = ResizeMessage.UnknownSize;
     sendMessage(this, resize);
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._term.focus();
   }
 
   /**
