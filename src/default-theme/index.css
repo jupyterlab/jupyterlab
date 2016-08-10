@@ -45,11 +45,6 @@ body {
 }
 
 
-.p-Widget.p-mod-hidden {
-  background: none;
-}
-
-
 .p-TabBar-tab.jp-mod-current {
   border-top: 1px solid #2196F3;
 }
