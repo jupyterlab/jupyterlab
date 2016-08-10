@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
   MimeData as IClipboard
 } from 'phosphor/lib/core/mimedata';
 
@@ -234,6 +238,16 @@ class NotebookPanel extends Widget {
     this._completion = null;
     this._renderer = null;
     super.dispose();
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    let cell = this.content.activeCell;
+    if (cell) {
+      cell.activate();
+    }
   }
 
   /**

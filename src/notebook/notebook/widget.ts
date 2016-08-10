@@ -710,6 +710,15 @@ class Notebook extends StaticNotebook {
   }
 
   /**
+   * Scroll so that the active cell is visible in the parent widget.
+   */
+  scrollToActiveCell() {
+    if (this.parent && this.activeCell) {
+      scrollIntoViewIfNeeded(this.parent.node, this.activeCell.node);
+    }
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -756,6 +765,13 @@ class Notebook extends StaticNotebook {
   }
 
   /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.update();
+  }
+
+  /**
    * Handle `update-request` messages sent to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -765,13 +781,13 @@ class Notebook extends StaticNotebook {
       this.addClass(EDIT_CLASS);
       this.removeClass(COMMAND_CLASS);
       if (activeCell) {
-        activeCell.focus();
+        activeCell.activate();
         if (activeCell instanceof MarkdownCellWidget) {
           activeCell.rendered = false;
         }
       }
     } else {
-      if (!this.hasClass(COMMAND_CLASS)) {
+      if (!this.node.contains(document.activeElement)) {
         this.node.focus();
       }
       this.addClass(COMMAND_CLASS);
@@ -831,15 +847,6 @@ class Notebook extends StaticNotebook {
       this.selectionChanged.emit(void 0);
     }
     this.update();
-  }
-
-  /**
-   * Scroll so that the active cell is visible in the parent widget.
-   */
-  scrollToActiveCell() {
-    if (this.parent && this.activeCell) {
-      scrollIntoViewIfNeeded(this.parent.node, this.activeCell.node);
-    }
   }
 
   /**

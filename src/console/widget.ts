@@ -269,7 +269,7 @@ class ConsoleWidget extends Widget {
     case 'click':
       let prompt = this.prompt;
       if (prompt) {
-        prompt.focus();
+        prompt.activate();
       }
       break;
     default:
@@ -284,7 +284,7 @@ class ConsoleWidget extends Widget {
     this.node.addEventListener('click', this);
     let prompt = this.prompt;
     if (prompt) {
-      prompt.focus();
+      prompt.activate();
     }
   }
 
@@ -369,7 +369,7 @@ class ConsoleWidget extends Widget {
     // Jump to the bottom of the console.
     Private.scrollToBottom(this.node);
 
-    prompt.focus();
+    prompt.activate();
   }
 
   /**

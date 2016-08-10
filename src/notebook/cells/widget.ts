@@ -208,13 +208,6 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Focus the widget.
-   */
-  focus(): void {
-    this.editor.focus();
-  }
-
-  /**
    * Set the prompt for the widget.
    */
   setPrompt(value: string): void {
@@ -227,7 +220,7 @@ class BaseCellWidget extends Widget {
   toggleInput(value: boolean): void {
     if (value) {
       this._input.show();
-      this.focus();
+      this.activate();
     } else {
       this._input.hide();
     }
@@ -253,6 +246,13 @@ class BaseCellWidget extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.update();
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._editor.activate();
   }
 
   /**
