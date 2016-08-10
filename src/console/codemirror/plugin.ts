@@ -2,20 +2,17 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JupyterLabPlugin
+} from '../../application';
+
+import {
   ConsoleWidget
 } from '../widget';
 
 import {
-  defaultCodeMirrorConsoleRenderer, CodeMirrorConsoleRenderer
+  CodeMirrorConsoleRenderer
 } from './widget';
 
-import {
-  IConsoleRenderer
-} from '../plugin'
-
-import {
-  JupyterLab, JupyterLabPlugin
-} from '../../application';
 
 /**
  * The provider for a console's code mirror renderer.
@@ -23,6 +20,6 @@ import {
 export
 const rendererProvider: JupyterLabPlugin<ConsoleWidget.IRenderer> = {
   id: 'jupyter.services.console.codemirror.renderer',
-  provides: IConsoleRenderer,
-  activate: () => defaultCodeMirrorConsoleRenderer
+  provides: ConsoleWidget.IRenderer,
+  activate: () => CodeMirrorConsoleRenderer.defaultRenderer
 };

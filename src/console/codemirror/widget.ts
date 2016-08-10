@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  RenderMime
-} from '../../rendermime';
-
-import {
   CodeCellModel, RawCellModel
 } from '../../notebook/cells/model';
 
@@ -14,46 +10,56 @@ import {
 } from '../../notebook/cells/widget';
 
 import {
-  defaultCodeMirrorCodeCellRenderer, defaultCodeMirrorRawCellRenderer
+  CodeMirrorNotebookRenderer
 } from '../../notebook/codemirror/notebook/widget';
+
+import {
+  RenderMime
+} from '../../rendermime';
 
 import {
   ConsoleWidget
 } from '../widget';
+
 
 /**
  * A code mirror renderer for a console.
  */
 export
 class CodeMirrorConsoleRenderer implements ConsoleWidget.IRenderer {
-
   /**
    * Create a new banner widget.
    */
   createBanner(): RawCellWidget {
     let widget = new RawCellWidget({
-      renderer: defaultCodeMirrorRawCellRenderer
+      renderer: CodeMirrorNotebookRenderer.defaultRawCellRenderer
     });
     widget.model = new RawCellModel();
     return widget;
   }
 
   /**
-  * Create a new prompt widget.
-  */
+   * Create a new prompt widget.
+   */
   createPrompt(rendermime: RenderMime): CodeCellWidget {
     let widget = new CodeCellWidget({
       rendermime,
-      renderer: defaultCodeMirrorCodeCellRenderer
+      renderer: CodeMirrorNotebookRenderer.defaultCodeCellRenderer
     });
     widget.model = new CodeCellModel();
     return widget;
   }
-
 }
 
+
 /**
- * A default code mirror renderer for a console.
+ * A namespace for `CodeMirrorConsoleRenderer` statics.
  */
 export
-const defaultCodeMirrorConsoleRenderer = new CodeMirrorConsoleRenderer();
+namespace CodeMirrorConsoleRenderer {
+  /**
+   * A default code mirror renderer for a console.
+   */
+  export
+  const defaultRenderer = new CodeMirrorConsoleRenderer();
+}

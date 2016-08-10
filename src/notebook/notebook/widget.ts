@@ -860,8 +860,8 @@ class Notebook extends StaticNotebook {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
       if (this.activeCellIndex < prev) {
-        let lastLine = this.activeCell.editor.getLastLine()
-        this.activeCell.editor.setCursor(lastLine, 0)
+        let lastLine = this.activeCell.editor.getLastLine();
+        this.activeCell.editor.setCursor(lastLine, 0);
       }
     } else {
       this.activeCellIndex++;

@@ -14,29 +14,34 @@ import {
 } from '../../notebook/panel';
 
 import {
-  defaultCodeMirrorNotebookRenderer
+  CodeMirrorNotebookRenderer
 } from './widget';
+
 
 /**
  * A code mirror renderer for a notebook panel.
  */
 export
 class CodeMirrorNotebookPanelRenderer extends NotebookPanel.Renderer {
-
   /**
    * Create a notebook.
    */
   createContent(rendermime: RenderMime): Notebook {
     return new Notebook({
       rendermime,
-      renderer: defaultCodeMirrorNotebookRenderer
+      renderer: CodeMirrorNotebookRenderer.defaultRenderer
     });
   }
-
 }
 
+
 /**
- * A default code mirror renderer for a notebook panel.
+ * A namespace for `CodeMirrorNotebookPanelRenderer` statics.
  */
-export
-const defaultCodeMirrorNotebookPanelRenderer = new CodeMirrorNotebookPanelRenderer()
+export namespace CodeMirrorNotebookPanelRenderer {
+  /**
+   * A default code mirror renderer for a notebook panel.
+   */
+  export
+  const defaultRenderer = new CodeMirrorNotebookPanelRenderer();
+}

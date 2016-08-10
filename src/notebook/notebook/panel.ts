@@ -14,6 +14,10 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   Panel, PanelLayout
 } from 'phosphor/lib/ui/panel';
 
@@ -461,4 +465,12 @@ export namespace NotebookPanel {
       return new CompletionWidget({ model });
     }
   }
+
+  /* tslint:disable */
+  /**
+   * The notebook renderer token.
+   */
+  export
+  const IRenderer = new Token<IRenderer>('jupyter.services.notebook.renderer');
+  /* tslint:enable */
 }

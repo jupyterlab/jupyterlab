@@ -63,7 +63,7 @@ class CellCompletionHandler implements IDisposable {
     }
     this._activeCell = newValue;
     if (this._activeCell) {
-      const editor = <ICellEditorWidget>this._activeCell.editor;
+      const editor = this._activeCell.editor as ICellEditorWidget;
       editor.textChanged.connect(this.onTextChanged, this);
       editor.completionRequested.connect(this.onCompletionRequested, this);
     }

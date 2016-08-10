@@ -45,7 +45,7 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    * @param rendermime - The rendermime instance.
    *
    * @param clipboard - The application clipboard.
-   * 
+   *
    * @param renderer - The notebook panel renderer.
    */
   constructor(rendermime: RenderMime, clipboard: IClipboard, renderer: NotebookPanel.IRenderer) {
@@ -79,8 +79,8 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     if (kernel) {
       context.changeKernel(kernel);
     }
-    let panel = new NotebookPanel({ 
-      rendermime, 
+    let panel = new NotebookPanel({
+      rendermime,
       clipboard: this._clipboard,
       renderer: this._renderer
     });
