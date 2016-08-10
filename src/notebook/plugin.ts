@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from 'phosphor/lib/core/token';
-
-import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -26,7 +22,8 @@ import {
 } from '../mainmenu';
 
 import {
-  IDocumentRegistry, restartKernel, selectKernelForContext, IWidgetFactoryOptions
+  IDocumentRegistry, IWidgetFactoryOptions,
+  restartKernel, selectKernelForContext
 } from '../docregistry';
 
 import {
@@ -46,7 +43,8 @@ import {
 } from '../widgettracker';
 
 import {
-  NotebookPanel, NotebookModelFactory, NotebookWidgetFactory, NotebookActions
+  INotebookTracker, NotebookPanel, NotebookModelFactory,
+  NotebookWidgetFactory, NotebookActions
 } from './index';
 
 
@@ -59,7 +57,6 @@ const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
  * The class name for the notebook icon from the default theme.
  */
 const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
-
 
 /**
  * The map of command ids used by the notebook.
@@ -104,22 +101,6 @@ const cmdIds = {
   markdown5: 'notebook-cells:markdown-header5',
   markdown6: 'notebook-cells:markdown-header6',
 };
-
-
-/* tslint:disable */
-/**
- * The notebook tracker token.
- */
-export
-const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebook-handler');
-/* tslint:enable */
-
-
-/**
- * A class that tracks notebook widgets.
- */
-export
-interface INotebookTracker extends WidgetTracker<NotebookPanel> { }
 
 
 /**
