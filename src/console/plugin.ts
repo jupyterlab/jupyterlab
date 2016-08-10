@@ -31,7 +31,7 @@ import {
 
 import {
   IRenderMime
-} from '../rendermime/plugin';
+} from '../rendermime';
 
 import {
   IServiceManager

@@ -2,12 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
   ISanitizer
 } from '../sanitizer';
+
+
+/* tslint:disable */
+/**
+ * The rendermime token.
+ */
+export
+const IRenderMime = new Token<IRenderMime>('jupyter.services.rendermime');
+/* tslint:enable */
 
 
 /**
