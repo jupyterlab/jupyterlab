@@ -43,6 +43,10 @@ import {
   DEFAULT_CONTENT
 } from '../utils';
 
+import {
+  CodeMirrorNotebookPanelRenderer
+} from '../../../../lib/notebook/codemirror/notebook/panel';
+
 
 /**
  * Default data.
@@ -57,9 +61,10 @@ describe('notebook/notebook/default-toolbar', () => {
 
     let panel: NotebookPanel;
     let context: MockContext<NotebookModel>;
+    const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
 
     beforeEach((done) => {
-      panel = new NotebookPanel({ rendermime, clipboard });
+      panel = new NotebookPanel({ rendermime, clipboard, renderer });
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);
       context = new MockContext<NotebookModel>(model);

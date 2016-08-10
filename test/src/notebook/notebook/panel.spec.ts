@@ -20,6 +20,10 @@ import {
 } from '../../../../lib/docregistry';
 
 import {
+  ICellEditorWidget, ITextChange, ICompletionRequest
+} from '../../../../lib/notebook/cells/editor';
+
+import {
   CompletionWidget
 } from '../../../../lib/notebook/completion';
 
@@ -51,12 +55,17 @@ import {
   DEFAULT_CONTENT
 } from '../utils';
 
+import {
+  CodeMirrorNotebookPanelRenderer
+} from '../../../../lib/notebook/codemirror/notebook/panel';
+
 
 /**
  * Default data.
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
+const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
 
 
 class LogNotebookPanel extends NotebookPanel {
@@ -86,7 +95,7 @@ class LogNotebookPanel extends NotebookPanel {
 
 
 function createPanel(): LogNotebookPanel {
-  let panel = new LogNotebookPanel({ rendermime, clipboard });
+  let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
   let model = new NotebookModel();
   model.fromJSON(DEFAULT_CONTENT);
   let context = new MockContext<NotebookModel>(model);
@@ -102,15 +111,15 @@ describe('notebook/notebook/panel', () => {
     describe('#constructor()', () => {
 
       it('should create a notebook panel', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer});
         expect(panel).to.be.a(NotebookPanel);
       });
 
 
       it('should accept an optional render', () => {
-        let renderer = new NotebookPanel.Renderer();
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(panel.renderer).to.be(renderer);
+        let newRenderer = new CodeMirrorNotebookPanelRenderer();
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer: newRenderer});
+        expect(panel.renderer).to.be(newRenderer);
       });
 
     });
@@ -118,7 +127,7 @@ describe('notebook/notebook/panel', () => {
     describe('#contextChanged', () => {
 
       it('should be emitted when the context on the panel changes', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         let called = false;
         let model = new NotebookModel();
         let context = new MockContext<INotebookModel>(model);
@@ -132,7 +141,7 @@ describe('notebook/notebook/panel', () => {
       });
 
       it('should not be emitted if the context does not change', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         let called = false;
         let model = new NotebookModel();
         let context = new MockContext<INotebookModel>(model);
@@ -163,12 +172,12 @@ describe('notebook/notebook/panel', () => {
     describe('#toolbar', () => {
 
       it('should be the toolbar used by the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.toolbar).to.be.a(NotebookToolbar);
       });
 
       it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(() => { panel.toolbar = null; }).to.throwError();
       });
 
@@ -177,12 +186,12 @@ describe('notebook/notebook/panel', () => {
     describe('#content', () => {
 
       it('should be the content area used by the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.content).to.be.a(Notebook);
       });
 
       it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(() => { panel.content = null; }).to.throwError();
       });
 
@@ -198,7 +207,7 @@ describe('notebook/notebook/panel', () => {
       });
 
       it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(() => { panel.kernel = null; }).to.throwError();
       });
 
@@ -207,12 +216,12 @@ describe('notebook/notebook/panel', () => {
     describe('#rendermime', () => {
 
       it('should be the rendermime instance used by the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.rendermime).to.be(rendermime);
       });
 
       it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(() => { panel.rendermime = null; }).to.throwError();
       });
 
@@ -221,13 +230,13 @@ describe('notebook/notebook/panel', () => {
     describe('#renderer', () => {
 
       it('should be the renderer used by the widget', () => {
-        let renderer = new NotebookPanel.Renderer();
+        let renderer = new CodeMirrorNotebookPanelRenderer();
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.renderer).to.be(renderer);
       });
 
       it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(() => { panel.renderer = null; });
       });
 
@@ -236,12 +245,12 @@ describe('notebook/notebook/panel', () => {
     describe('#clipboard', () => {
 
       it('should be the clipboard instance used by the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.clipboard).to.be(clipboard);
       });
 
       it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(() => { panel.clipboard = null; }).to.throwError();
       });
 
@@ -250,7 +259,7 @@ describe('notebook/notebook/panel', () => {
     describe('#model', () => {
 
       it('should be the model for the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.model).to.be(null);
         let model = new NotebookModel();
         let context = new MockContext<NotebookModel>(model);
@@ -260,7 +269,7 @@ describe('notebook/notebook/panel', () => {
       });
 
       it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(() => { panel.model = null; }).to.throwError();
       });
 
@@ -269,12 +278,12 @@ describe('notebook/notebook/panel', () => {
     describe('#context', () => {
 
       it('should get the document context for the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.context).to.be(null);
       });
 
       it('should set the document context for the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         let model = new NotebookModel();
         let context = new MockContext<NotebookModel>(model);
         panel.context = context;
@@ -282,7 +291,7 @@ describe('notebook/notebook/panel', () => {
       });
 
       it('should emit the `contextChanged` signal', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         let called = false;
         let model = new NotebookModel();
         let context = new MockContext<NotebookModel>(model);
@@ -296,7 +305,7 @@ describe('notebook/notebook/panel', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources used by the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         let model = new NotebookModel();
         let context = new MockContext<NotebookModel>(model);
         panel.context = context;
@@ -305,7 +314,7 @@ describe('notebook/notebook/panel', () => {
       });
 
       it('should be safe to call more than once', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard });
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         panel.dispose();
         panel.dispose();
         expect(panel.isDisposed).to.be(true);
@@ -316,7 +325,7 @@ describe('notebook/notebook/panel', () => {
     describe('#onContextChanged()', () => {
 
       it('should be called when the context changes', () => {
-        let panel = new LogNotebookPanel({ rendermime, clipboard });
+        let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
         let model = new NotebookModel();
         let context = new MockContext<NotebookModel>(model);
         panel.methods = [];
@@ -329,7 +338,7 @@ describe('notebook/notebook/panel', () => {
     describe('#onPopulated()', () => {
 
       it('should initialize the model state', () => {
-        let panel = new LogNotebookPanel({ rendermime, clipboard });
+        let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.cells.canUndo).to.be(true);
@@ -370,7 +379,7 @@ describe('notebook/notebook/panel', () => {
       });
 
       it('should be called when the context changes', () => {
-        let panel = new LogNotebookPanel({ rendermime, clipboard });
+        let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
         let model = new NotebookModel();
         let context = new MockContext<NotebookModel>(model);
         panel.methods = [];
@@ -393,8 +402,8 @@ describe('notebook/notebook/panel', () => {
       describe('#createContent()', () => {
 
         it('should create a notebook widget', () => {
-          let renderer = new NotebookPanel.Renderer();
-          expect(renderer.createContent({ rendermime })).to.be.a(Notebook);
+          let renderer = new CodeMirrorNotebookPanelRenderer();
+          expect(renderer.createContent(rendermime)).to.be.a(Notebook);
         });
 
       });
@@ -402,7 +411,7 @@ describe('notebook/notebook/panel', () => {
       describe('#createToolbar()', () => {
 
         it('should create a notebook toolbar', () => {
-          let renderer = new NotebookPanel.Renderer();
+          let renderer = new CodeMirrorNotebookPanelRenderer();
           expect(renderer.createToolbar()).to.be.a(NotebookToolbar);
         });
 
@@ -411,7 +420,7 @@ describe('notebook/notebook/panel', () => {
       describe('#createCompletion()', () => {
 
         it('should create a completion widget', () => {
-          let renderer = new NotebookPanel.Renderer();
+          let renderer = new CodeMirrorNotebookPanelRenderer();
           expect(renderer.createCompletion()).to.be.a(CompletionWidget);
         });
 
@@ -422,7 +431,7 @@ describe('notebook/notebook/panel', () => {
     describe('.defaultRenderer', () => {
 
       it('should be an instance of a `Renderer`', () => {
-        expect(NotebookPanel.defaultRenderer).to.be.a(NotebookPanel.Renderer);
+        expect(CodeMirrorNotebookPanelRenderer.defaultRenderer).to.be.a(NotebookPanel.Renderer);
       });
 
     });

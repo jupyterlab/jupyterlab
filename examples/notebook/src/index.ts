@@ -7,6 +7,10 @@ import {
 } from 'jupyterlab/lib/notebook';
 
 import {
+  CodeMirrorNotebookPanelRenderer
+} from 'jupyterlab/lib/notebook/codemirror/notebook/panel';
+
+import {
   IServiceManager, createServiceManager
 } from 'jupyter-js-services';
 
@@ -136,7 +140,8 @@ function createApp(manager: IServiceManager): void {
   });
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
-  let wFactory = new NotebookWidgetFactory(rendermime, clipboard);
+  let renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
+  let wFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory, {
     displayName: 'Notebook',

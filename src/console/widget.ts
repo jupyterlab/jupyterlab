@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -30,11 +34,11 @@ import {
 } from '../notebook/notebook/nbformat';
 
 import {
-  CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
+  CodeCellWidget, RawCellWidget
 } from '../notebook/cells';
 
 import {
-  EdgeLocation, CellEditorWidget
+  EdgeLocation, ICellEditorWidget
 } from '../notebook/cells/editor';
 
 import {
@@ -85,7 +89,7 @@ class ConsoleWidget extends Widget {
     let layout = new PanelLayout();
 
     this.layout = layout;
-    this._renderer = options.renderer || ConsoleWidget.defaultRenderer;
+    this._renderer = options.renderer;
     this._rendermime = options.rendermime;
     this._session = options.session;
 
@@ -294,7 +298,7 @@ class ConsoleWidget extends Widget {
   /**
    * Handle an edge requested signal.
    */
-  protected onEdgeRequest(editor: CellEditorWidget, location: EdgeLocation): void {
+  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): void {
     let prompt = this.prompt;
     if (location === 'top') {
       this._history.back().then(value => {
@@ -412,7 +416,7 @@ namespace ConsoleWidget {
     /**
      * The renderer for a console widget.
      */
-    renderer?: IRenderer;
+    renderer: IRenderer;
 
     /**
      * The session for the console widget.
@@ -436,36 +440,13 @@ namespace ConsoleWidget {
     createPrompt(rendermime: IRenderMime): CodeCellWidget;
   }
 
+  /* tslint:disable */
   /**
-   * The default implementation of an `IRenderer`.
+   * The console renderer token.
    */
   export
-  class Renderer implements IRenderer {
-    /**
-     * Create a new banner widget.
-     */
-    createBanner(): RawCellWidget {
-      let widget = new RawCellWidget();
-      widget.model = new RawCellModel();
-      return widget;
-    }
-
-    /**
-     * Create a new prompt widget.
-     */
-    createPrompt(rendermime: IRenderMime): CodeCellWidget {
-      let widget = new CodeCellWidget({ rendermime });
-      widget.model = new CodeCellModel();
-      return widget;
-    }
-  }
-
-
-  /**
-   * The default `IRenderer` instance.
-   */
-  export
-  const defaultRenderer = new Renderer();
+  const IRenderer = new Token<IRenderer>('jupyter.services.console.renderer');
+  /* tslint:enable */
 }
 
 

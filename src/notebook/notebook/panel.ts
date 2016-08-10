@@ -14,6 +14,10 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   Panel, PanelLayout
 } from 'phosphor/lib/ui/panel';
 
@@ -83,11 +87,11 @@ class NotebookPanel extends Widget {
     this.addClass(NB_PANEL);
     this._rendermime = options.rendermime;
     this._clipboard = options.clipboard;
-    this._renderer = options.renderer || NotebookPanel.defaultRenderer;
+    this._renderer = options.renderer;
 
     this.layout = new PanelLayout();
     let rendermime = this._rendermime;
-    this._content = this._renderer.createContent({ rendermime });
+    this._content = this._renderer.createContent(rendermime);
     let toolbar = this._renderer.createToolbar();
 
     let container = new Panel();
@@ -412,7 +416,7 @@ export namespace NotebookPanel {
      *
      * The default is a shared `IRenderer` instance.
      */
-    renderer?: IRenderer;
+    renderer: IRenderer;
   }
 
   /**
@@ -423,7 +427,7 @@ export namespace NotebookPanel {
     /**
      * Create a new content area for the panel.
      */
-    createContent(options: Notebook.IOptions): Notebook;
+    createContent(rendermime: RenderMime): Notebook;
 
     /**
      * Create a new toolbar for the panel.
@@ -440,13 +444,11 @@ export namespace NotebookPanel {
    * The default implementation of an `IRenderer`.
    */
   export
-  class Renderer implements IRenderer {
+  abstract class Renderer implements IRenderer {
     /**
      * Create a new content area for the panel.
      */
-    createContent(options: Notebook.IOptions): Notebook {
-      return new Notebook(options);
-    }
+    abstract createContent(rendermime: RenderMime): Notebook;
 
     /**
      * Create a new toolbar for the panel.
@@ -464,9 +466,11 @@ export namespace NotebookPanel {
     }
   }
 
+  /* tslint:disable */
   /**
-   * The shared default instance of a `Renderer`.
+   * The notebook renderer token.
    */
-   export
-   const defaultRenderer = new Renderer();
+  export
+  const IRenderer = new Token<IRenderer>('jupyter.services.notebook.renderer');
+  /* tslint:enable */
 }

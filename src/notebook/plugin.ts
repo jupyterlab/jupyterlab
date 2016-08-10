@@ -117,7 +117,8 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
     IClipboard,
     IMainMenu,
     ICommandPalette,
-    IInspector
+    IInspector,
+    NotebookPanel.IRenderer
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -127,8 +128,8 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector): INotebookTracker {
-  let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard);
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer): INotebookTracker {
+  let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
   let options: IWidgetFactoryOptions = {
     fileExtensions: ['.ipynb'],
     displayName: 'Notebook',

@@ -42,7 +42,7 @@ import {
 } from '../widgettracker';
 
 import {
-  ConsolePanel
+  ConsolePanel, ConsoleWidget
 } from './';
 
 
@@ -57,7 +57,8 @@ const consoleExtension: JupyterLabPlugin<void> = {
     IRenderMime,
     IMainMenu,
     IInspector,
-    ICommandPalette
+    ICommandPalette,
+    ConsoleWidget.IRenderer
   ],
   activate: activateConsole,
   autoStart: true
@@ -78,12 +79,15 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette): void {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, renderer: ConsoleWidget.IRenderer): void {
   let tracker = new WidgetTracker<ConsolePanel>();
   let manager = services.sessions;
   let { commands, keymap } = app;
   let category = 'Console';
+
   let menu = new Menu({ commands, keymap });
+  menu.title.label = 'Console';
+
   let submenu: Menu = null;
   let command: string;
 
@@ -123,7 +127,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         let kernelName = `${displayNameMap[displayName]}`;
         manager.startNew({ path, kernelName }).then(session => {
           let panel = new ConsolePanel({
-            session, rendermime: rendermime.clone()
+            session,
+            rendermime: rendermime.clone(),
+            renderer: renderer
           });
           panel.id = `console-${count}`;
           panel.title.label = `${displayName} (${count})`;

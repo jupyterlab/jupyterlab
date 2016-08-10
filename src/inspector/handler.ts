@@ -14,7 +14,7 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  CellEditorWidget, ITextChange
+  ICellEditorWidget, ITextChange
 } from '../notebook/cells/editor';
 
 import {
@@ -69,13 +69,15 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     }
 
     if (this._activeCell && !this._activeCell.isDisposed) {
-      this._activeCell.editor.textChanged.disconnect(this.onTextChanged, this);
+      const editor = this._activeCell.editor;
+      editor.textChanged.disconnect(this.onTextChanged, this);
     }
     this._activeCell = newValue;
     if (this._activeCell) {
       // Clear ephemeral inspectors in preparation for a new editor.
       this.ephemeralCleared.emit(void 0);
-      this._activeCell.editor.textChanged.connect(this.onTextChanged, this);
+      const editor = this._activeCell.editor;
+      editor.textChanged.connect(this.onTextChanged, this);
     }
   }
 
@@ -149,7 +151,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
    * #### Notes
    * Update the hints inspector based on a text change.
    */
-  protected onTextChanged(editor: CellEditorWidget, change: ITextChange): void {
+  protected onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
     let update: Inspector.IInspectorUpdate = {
       content: null,
       type: 'hints'
