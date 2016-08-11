@@ -93,8 +93,7 @@ function activateCommandPalette(app: JupyterLab): ICommandPalette {
    */
   function activatePalette(): void {
     app.shell.activateLeft(palette.id);
-    palette.inputNode.focus();
-    palette.inputNode.select();
+    palette.activate();
   }
 
   /**
