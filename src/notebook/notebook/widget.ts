@@ -127,7 +127,6 @@ class StaticNotebook extends Widget {
    */
   constructor(options: StaticNotebook.IOptions) {
     super();
-    this.node.tabIndex = -1;  // Allow the widget to take focus.
     this.addClass(NB_CLASS);
     this._rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
@@ -224,14 +223,6 @@ class StaticNotebook extends Widget {
     this._rendermime = null;
     this._renderer = null;
     super.dispose();
-  }
-
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this.node.focus();
-    this.update();
   }
 
   /**
@@ -559,6 +550,7 @@ class Notebook extends StaticNotebook {
    */
   constructor(options: StaticNotebook.IOptions) {
     super(options);
+    this.node.tabIndex = -1;  // Allow the widget to take focus.
     // Set up the inspection handler.
     this._inspectionHandler = new InspectionHandler(this.rendermime);
     this.activeCellChanged.connect((s, cell) => {
@@ -607,6 +599,11 @@ class Notebook extends StaticNotebook {
     }
     let oldValue = this._mode;
     this._mode = newValue;
+    this.stateChanged.emit({ name: 'mode', oldValue, newValue });
+    let activeCell = this.activeCell;
+    if (!activeCell) {
+      return;
+    }
     // Edit mode deselects all cells.
     if (newValue === 'edit') {
       let layout = this.layout as PanelLayout;
@@ -614,19 +611,16 @@ class Notebook extends StaticNotebook {
         let widget = layout.widgets.at(i) as BaseCellWidget;
         this.deselect(widget);
       }
-      let activeCell = this.activeCell;
-      if (activeCell) {
-        activeCell.activate();
-      }
+      activeCell.activate();
       if (activeCell instanceof MarkdownCellWidget) {
         activeCell.rendered = false;
       }
     } else {
-      if (this.node.contains(document.activeElement)) {
+      // Take focus if the active cell is focused.
+      if (activeCell.editor.hasFocus()) {
         this.node.focus();
       }
     }
-    this.stateChanged.emit({ name: 'mode', oldValue, newValue });
     this.update();
   }
 
@@ -752,14 +746,14 @@ class Notebook extends StaticNotebook {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
+    case 'mousedown':
+      this._evtMouseDown(event as MouseEvent);
       break;
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
     case 'focus':
-      this._evtFocus(event as FocusEvent);
+      this._evtFocus(event as MouseEvent);
       break;
     default:
       break;
@@ -771,7 +765,7 @@ class Notebook extends StaticNotebook {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this.node.addEventListener('click', this);
+    this.node.addEventListener('mousedown', this);
     this.node.addEventListener('dblclick', this);
     this.node.addEventListener('focus', this, true);
     this.update();
@@ -781,9 +775,21 @@ class Notebook extends StaticNotebook {
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
+    this.node.removeEventListener('mousedown', this);
     this.node.removeEventListener('dblclick', this);
     this.node.removeEventListener('focus', this, true);
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    if (this.mode === 'command') {
+      this.node.focus();
+    } else {
+      this.activeCell.activate();
+    }
+    this.update();
   }
 
   /**
@@ -917,18 +923,38 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle `click` events for the widget.
+   * Handle `mousedown` events for the widget.
    */
-  private _evtClick(event: MouseEvent): void {
-    let model = this.model;
-    if (!model || model.readOnly) {
-      return;
+  private _evtMouseDown(event: MouseEvent): void {
+    let target = event.target as HTMLElement;
+    let i = this._findCell(target);
+    if (i !== -1) {
+      let widget = this.childAt(i);
+      if (!widget.editor.node.contains(target)) {
+        this.mode = 'command';
+      }
+      this.activeCellIndex = i;
     }
-    let i = this._findCell(event.target as HTMLElement);
-    if (i === -1) {
-      return;
+    this.update();
+  }
+
+  /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocus(event: MouseEvent): void {
+    let target = event.target as HTMLElement;
+    let i = this._findCell(target);
+    if (i !== -1) {
+      let widget = this.childAt(i);
+      if (widget.editor.node.contains(target)) {
+        this.mode = 'edit';
+      } else {
+        this.mode = 'command';
+      }
+    } else {
+      this.mode = 'command';
     }
-    this.activeCellIndex = i;
+    this.update();
   }
 
   /**
@@ -949,24 +975,6 @@ class Notebook extends StaticNotebook {
     if (cell.type === 'markdown') {
       widget.rendered = false;
       return;
-    }
-  }
-
-  /**
-   * Handle `focus` events for the widget.
-   */
-  private _evtFocus(event: FocusEvent): void {
-    let i = this._findCell(event.target as HTMLElement);
-    if (i === -1) {
-      this.mode = 'command';
-      return;
-    }
-    this.activeCellIndex = i;
-    let widget = this.childAt(i);
-    if (widget.editor.node.contains(event.target as HTMLElement)) {
-      this.mode = 'edit';
-    } else {
-      this.mode = 'command';
     }
   }
 
