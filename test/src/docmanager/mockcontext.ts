@@ -151,4 +151,4 @@ defineSignal(MockContext.prototype, 'kernelChanged');
 defineSignal(MockContext.prototype, 'pathChanged');
 defineSignal(MockContext.prototype, 'contentsModelChanged');
 defineSignal(MockContext.prototype, 'populated');
-defineSignal(Context.prototype, 'disposed');
+defineSignal(MockContext.prototype, 'disposed');
