@@ -86,7 +86,8 @@
     "lib/**/*.d.ts",
     "lib/**/*.js",
     "lib/**/*.svg",
-    "lib/**/*.gif"
+    "lib/**/*.gif",
+    "scripts/dedupe.js"
   ],
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
