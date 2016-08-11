@@ -204,8 +204,9 @@ Note: "requirejs" must be included in a global context (usually as a
 
 ## Publishing packages for a JupyterLab release
 
-We publish an npm package, a Python source package, and a Python universal binary wheel.  See the Python docs on [package uploading](https://packaging.python.org/distributing/#uploading-your-project-to-pypi) for
-twine setup instructions and for why twine is the recommended method.
+We publish an npm package, a Python source package, and a Python universal binary wheel.  
+See the Python docs on [package uploading](https://packaging.python.org/distributing/#uploading-your-project-to-pypi) 
+for twine setup instructions and for why twine is the recommended method.
 
 ```bash
 npm version patch
