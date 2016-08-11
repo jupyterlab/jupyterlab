@@ -26,7 +26,7 @@
     "update": "rimraf node_modules/jupyterlab && npm install",
     "build": "npm run update && npm run build:extension",
     "build:extension": "webpack --config webpack.conf.js",
-    "postinstall": "npm dedupe",
+    "postinstall": "node ../scripts/dedupe.js",
     "test": "echo 'no tests specified'"
   },
   "author": "Project Jupyter",
