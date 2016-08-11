@@ -82,7 +82,7 @@ class ConsolePanel extends Panel {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.content.prompt.activate();
+    this.content.activate();
   }
 
   /**

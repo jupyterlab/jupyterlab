@@ -255,44 +255,10 @@ class ConsoleWidget extends Widget {
   }
 
   /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
+   * Handle `'activate-request'` messages.
    */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'click':
-      let prompt = this.prompt;
-      if (prompt) {
-        prompt.activate();
-      }
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle `after_attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
-    let prompt = this.prompt;
-    if (prompt) {
-      prompt.activate();
-    }
-  }
-
-  /**
-   * Handle `before_detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
+  protected onActivateRequest(msg: Message): void {
+    this.prompt.activate();
   }
 
   /**
@@ -368,7 +334,6 @@ class ConsoleWidget extends Widget {
 
     // Jump to the bottom of the console.
     Private.scrollToBottom(this.node);
-
     prompt.activate();
   }
 
