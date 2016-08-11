@@ -25,7 +25,7 @@ import {
  * A thin wrapper around the `CommandPalette` class to conform with the
  * JupyterLab interface for the application-wide command palette.
  */
-class Palette {
+class Palette implements ICommandPalette {
   /**
    * Create a palette instance.
    */
@@ -44,6 +44,14 @@ class Palette {
   }
 
   /**
+   * Activate the command palette for user input.
+   */
+  activate(): void {
+    this._palette.inputNode.focus();
+    this._palette.inputNode.select();
+  }
+
+  /**
    * Add a command item to the command palette.
    *
    * @param options - The options for creating the command item(s).
@@ -53,14 +61,6 @@ class Palette {
   addItem(options: IPaletteItem): IDisposable {
     let item = this._palette.addItem(options as CommandPalette.IItemOptions);
     return new DisposableDelegate(() => this._palette.removeItem(item));
-  }
-
-  /**
-   * Focus the search input node of the command palette.
-   */
-  focus(): void {
-    this._palette.inputNode.focus();
-    this._palette.inputNode.select();
   }
 
   private _palette: CommandPalette = null;
