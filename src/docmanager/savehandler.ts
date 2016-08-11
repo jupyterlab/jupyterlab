@@ -164,7 +164,6 @@ class SaveHandler implements IDisposable {
   private _context: IDocumentContext<IDocumentModel> = null;
   private _services: IServiceManager = null;
   private _stopped = false;
-  private _path = '';
 }
 
 
