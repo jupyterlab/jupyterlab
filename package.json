@@ -19,6 +19,7 @@
     "moment": "^2.11.2",
     "phosphor": "^0.6.0",
     "sanitize-html": "^1.12.0",
+    "semver": "^5.3.0",
     "simulate-event": "^1.2.0",
     "xterm": "^1.0.0"
   },
@@ -57,7 +58,7 @@
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
     "clean:examples": "node scripts/cleanexamples.js",
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
-    "postinstall": "npm dedupe",
+    "postinstall": "node scripts/dedupe.js",
     "prepublish": "npm run build",
     "test": "npm run test:firefox",
     "test:chrome": "npm run build:test && karma start --browsers=Chrome test/karma.conf.js",
@@ -85,7 +86,8 @@
     "lib/**/*.d.ts",
     "lib/**/*.js",
     "lib/**/*.svg",
-    "lib/**/*.gif"
+    "lib/**/*.gif",
+    "scripts/dedupe.js"
   ],
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
