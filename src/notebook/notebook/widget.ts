@@ -784,11 +784,7 @@ class Notebook extends StaticNotebook {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    if (this.mode === 'command') {
-      this.node.focus();
-    } else {
-      this.activeCell.activate();
-    }
+    this.node.focus();
     this.update();
   }
 
@@ -926,6 +922,9 @@ class Notebook extends StaticNotebook {
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
+    if (!this.model || this.model.readOnly) {
+      return;
+    }
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
