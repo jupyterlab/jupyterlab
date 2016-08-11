@@ -227,6 +227,14 @@ class StaticNotebook extends Widget {
   }
 
   /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.focus();
+    this.update();
+  }
+
+  /**
    * Handle a new model.
    *
    * #### Notes
@@ -606,6 +614,13 @@ class Notebook extends StaticNotebook {
         let widget = layout.widgets.at(i) as BaseCellWidget;
         this.deselect(widget);
       }
+      let activeCell = this.activeCell;
+      if (activeCell) {
+        activeCell.activate();
+      }
+      if (activeCell instanceof MarkdownCellWidget) {
+        activeCell.rendered = false;
+      }
     }
     this.stateChanged.emit({ name: 'mode', oldValue, newValue });
     this.update();
@@ -639,6 +654,9 @@ class Notebook extends StaticNotebook {
     }
     if (newValue === oldValue) {
       return;
+    }
+    if (this.mode === 'edit' && this.activeCell) {
+      this.activeCell.activate();
     }
     this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
     this.update();
@@ -765,9 +783,10 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle `'activate-request'` messages.
+   * Handle `'deactivate-request'` messages.
    */
-  protected onActivateRequest(msg: Message): void {
+  protected onDeactivateRequest(msg: Message): void {
+    this.mode = 'command';
     this.update();
   }
 
@@ -780,20 +799,10 @@ class Notebook extends StaticNotebook {
     if (this.mode === 'edit') {
       this.addClass(EDIT_CLASS);
       this.removeClass(COMMAND_CLASS);
-      if (activeCell) {
-        activeCell.activate();
-        if (activeCell instanceof MarkdownCellWidget) {
-          activeCell.rendered = false;
-        }
-      }
     } else {
-      if (!this.node.contains(document.activeElement)) {
-        this.node.focus();
-      }
       this.addClass(COMMAND_CLASS);
       this.removeClass(EDIT_CLASS);
     }
-
     if (activeCell) {
       activeCell.addClass(ACTIVE_CLASS);
     }
@@ -943,15 +952,17 @@ class Notebook extends StaticNotebook {
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: FocusEvent): void {
-    this.mode = 'command';
     let i = this._findCell(event.target as HTMLElement);
     if (i === -1) {
+      this.mode = 'command';
       return;
     }
     this.activeCellIndex = i;
     let widget = this.childAt(i);
     if (widget.editor.node.contains(event.target as HTMLElement)) {
       this.mode = 'edit';
+    } else {
+      this.mode = 'command';
     }
   }
 

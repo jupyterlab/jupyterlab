@@ -244,10 +244,14 @@ class NotebookPanel extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    let cell = this.content.activeCell;
-    if (cell) {
-      cell.activate();
-    }
+    this.content.activate();
+  }
+
+  /**
+   * Handle `'deactivate-request'` messages.
+   */
+  protected onDeactivateRequest(msg: Message): void {
+    this.content.deactivate();
   }
 
   /**
