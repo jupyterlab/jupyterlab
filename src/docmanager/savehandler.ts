@@ -100,11 +100,6 @@ class SaveHandler implements IDisposable {
   private _save(): void {
     let context = this._context;
 
-    // Bail if the context is disposed.
-    if (context.isDisposed) {
-      return;
-    }
-
     // Trigger the next update.
     this._setTimer();
 
@@ -169,6 +164,7 @@ class SaveHandler implements IDisposable {
   private _context: IDocumentContext<IDocumentModel> = null;
   private _services: IServiceManager = null;
   private _stopped = false;
+  private _path = '';
 }
 
 
