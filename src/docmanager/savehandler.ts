@@ -62,6 +62,7 @@ class SaveHandler implements IDisposable {
       return;
     }
     clearTimeout(this._autosaveTimer);
+    this._stopped = true;
     this._context = null;
     clearSignalData(this);
   }
