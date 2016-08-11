@@ -178,7 +178,11 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   // Set the source of the code inspector to the current console.
   tracker.currentChanged.connect((sender, args) => {
-    inspector.source = args.newValue.content.inspectionHandler;
+    if (args.newValue) {
+      inspector.source = args.newValue.content.inspectionHandler;
+    } else {
+      inspector.source = null;
+    }
   });
 
   // Add main menu notebook menu.

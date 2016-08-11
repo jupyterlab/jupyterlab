@@ -93,7 +93,11 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   // Set the source of the code inspector to the current console.
   tracker.currentChanged.connect((sender, args) => {
-    inspector.source = args.newValue.content.inspectionHandler;
+    if (args.newValue) {
+      inspector.source = args.newValue.content.inspectionHandler;
+    } else {
+      inspector.source = null;
+    }
   });
 
   // Set the main menu title.
