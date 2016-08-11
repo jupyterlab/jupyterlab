@@ -8,6 +8,4 @@ var version = childProcess.execSync('npm --version', { encoding: 'utf8' });
 
 if (semver.lt(version, required)) {
   childProcess.execSync('npm dedupe', { stdio: [0, 1, 2] });
-} else {
-  console.log('\n********\nNo need to dedupe.');
 }
