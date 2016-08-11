@@ -75,6 +75,11 @@ class LogBaseCell extends BaseCellWidget {
     this.methods.push('onAfterAttach');
   }
 
+  protected onActivateRequest(msg: Message): void {
+    super.onActivateRequest(msg);
+    this.methods.push('onActivateRequest');
+  }
+
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
@@ -362,17 +367,21 @@ describe('notebook/cells/widget', () => {
 
     });
 
-    describe('#focus()', () => {
+    describe('#onActivateRequest()', () => {
 
-      it('should focus the cell editor', () => {
-        let widget = new BaseCellWidget({
-          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
-        });
+      it('should focus the cell editor', (done) => {
+        let widget = new LogBaseCell();
         Widget.attach(widget, document.body);
         expect(widget.editor.hasFocus()).to.be(false);
-        widget.focus();
-        expect(widget.editor.hasFocus()).to.be(true);
-        widget.dispose();
+        widget.activate();
+        requestAnimationFrame(() => {
+          expect(widget.methods).to.contain('onActivateRequest');
+          requestAnimationFrame(() => {
+            expect(widget.editor.hasFocus()).to.be(true);
+            widget.dispose();
+            done();
+          });
+        });
       });
 
     });
