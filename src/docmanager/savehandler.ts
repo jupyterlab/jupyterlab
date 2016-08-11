@@ -99,6 +99,12 @@ class SaveHandler implements IDisposable {
    */
   private _save(): void {
     let context = this._context;
+
+    // Bail if the context is disposed.
+    if (context.isDisposed) {
+      return;
+    }
+
     // Trigger the next update.
     this._setTimer();
 
