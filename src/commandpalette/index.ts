@@ -50,7 +50,7 @@ interface ICommandPalette {
   /**
    * Add a command item to the command palette.
    *
-   * @param options - The options for creating the command item(s).
+   * @param options - The options for creating the command item.
    *
    * @returns A disposable that will remove the item from the palette.
    */
