@@ -930,9 +930,11 @@ class Notebook extends StaticNotebook {
     let i = this._findCell(target);
     if (i !== -1) {
       let widget = this.childAt(i);
+      // Event is on a cell but not in its editor, switch to command mode.
       if (!widget.editor.node.contains(target)) {
         this.mode = 'command';
       }
+      // Set the cell as the active one.
       this.activeCellIndex = i;
     }
     this.update();
@@ -946,12 +948,16 @@ class Notebook extends StaticNotebook {
     let i = this._findCell(target);
     if (i !== -1) {
       let widget = this.childAt(i);
+      // If the editor has focus, ensure edit mode.
       if (widget.editor.node.contains(target)) {
         this.mode = 'edit';
+      // Otherwise, another control within the cell has focus,
+      // ensure command mode.
       } else {
         this.mode = 'command';
       }
     } else {
+      // No cell has focus, ensure command mode.
       this.mode = 'command';
     }
     this.update();
