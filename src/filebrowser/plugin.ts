@@ -147,7 +147,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     cmdIds.saveAs,
     cmdIds.close,
     cmdIds.closeAll,
-  ].forEach(command => palette.add({ command, category }));
+  ].forEach(command => palette.addItem({ command, category }));
 
   mainMenu.addMenu(createMenu(app), {rank: 1});
 

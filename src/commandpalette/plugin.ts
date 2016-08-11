@@ -4,6 +4,10 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  CommandPalette
+} from 'phosphor/lib/ui/commandpalette';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -29,7 +33,10 @@ const commandPaletteProvider: JupyterLabPlugin<ICommandPalette> = {
  */
 function activateCommandPalette(app: JupyterLab): ICommandPalette {
   const { commands, keymap } = app;
-  const palette = new Palette({ commands, keymap });
+  const palette = new CommandPalette({ commands, keymap });
+
+  palette.id = 'command-palette';
+  palette.title.label = 'Commands';
 
   /**
    * Activate the command palette within the app shell (used as a command).
@@ -60,9 +67,6 @@ function activateCommandPalette(app: JupyterLab): ICommandPalette {
     }
   }
 
-  palette.id = 'command-palette';
-  palette.title.label = 'Commands';
-
   app.commands.addCommand('command-palette:activate', {
     execute: activatePalette,
     label: 'Activate Command Palette'
@@ -78,5 +82,5 @@ function activateCommandPalette(app: JupyterLab): ICommandPalette {
 
   app.shell.addToLeftArea(palette);
 
-  return palette;
+  return new Palette(palette);
 }

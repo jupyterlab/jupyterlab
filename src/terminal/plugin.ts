@@ -134,7 +134,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     increaseTerminalFontSize,
     decreaseTerminalFontSize,
     toggleTerminalTheme
-  ].forEach(command => palette.add({ command, category }));
+  ].forEach(command => palette.addItem({ command, category }));
 
   let menu = new Menu({ commands, keymap });
   menu.title.label = 'Terminal';

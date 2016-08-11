@@ -49,5 +49,5 @@ function activateAbout(app: JupyterLab, palette: ICommandPalette): void {
       }
     }
   });
-  palette.add({ command, category: 'Help' });
+  palette.addItem({ command, category: 'Help' });
 }

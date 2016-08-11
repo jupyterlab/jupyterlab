@@ -24,24 +24,26 @@ export
 const ICommandPalette = new Token<ICommandPalette>('jupyter.services.commandpalette');
 /* tslint:enable */
 
+
+export
+interface IPaletteItem extends CommandPalette.IItemOptions {}
+
+
 export
 interface ICommandPalette {
   /**
-   * Get the command palette input node.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * The placeholder text of the command palette's search input.
    */
-  inputNode: HTMLInputElement;
+  placeholder: string;
 
   /**
-   * Add a single command item or a list of items to the command palette.
+   * Add a command item to the command palette.
    *
    * @param options - The options for creating the command item(s).
    *
    * @returns A disposable that will remove the item from the palette.
    */
-  add(options: CommandPalette.IItemOptions | CommandPalette.IItemOptions[]): IDisposable;
+  addItem(options: IPaletteItem): IDisposable;
 }
 
 
@@ -50,23 +52,36 @@ interface ICommandPalette {
  * JupyterLab interface for the application-wide command palette.
  */
 export
-class Palette extends CommandPalette {
+class Palette {
+  constructor(palette: CommandPalette) {
+    this._palette = palette;
+  }
+
   /**
-   * Add a single command item or a list of items to the command palette.
+   * Add a command item to the command palette.
    *
    * @param options - The options for creating the command item(s).
    *
    * @returns A disposable that will remove the item from the palette.
    */
-  add(options: CommandPalette.IItemOptions | CommandPalette.IItemOptions[]): IDisposable {
-    if (Array.isArray(options)) {
-      let items = options.map(item => super.addItem(item));
-      return new DisposableDelegate(() => {
-        items.forEach(item => super.removeItem(item));
-      });
-    }
-
-    let item = super.addItem(options as CommandPalette.IItemOptions);
-    return new DisposableDelegate(() => this.removeItem(item));
+  set placeholder(placeholder: string) {
+    this._palette.inputNode.placeholder = placeholder;
   }
+  get placeholder(): string {
+    return this._palette.inputNode.placeholder;
+  }
+
+  /**
+   * Add a command item to the command palette.
+   *
+   * @param options - The options for creating the command item(s).
+   *
+   * @returns A disposable that will remove the item from the palette.
+   */
+  addItem(options: IPaletteItem): IDisposable {
+    let item = this._palette.addItem(options as CommandPalette.IItemOptions);
+    return new DisposableDelegate(() => this._palette.removeItem(item));
+  }
+
+  private _palette: CommandPalette = null;
 }

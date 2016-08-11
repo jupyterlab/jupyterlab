@@ -80,7 +80,7 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
 
     let category = 'Image Widget';
     [zoomInImage, zoomOutImage, resetZoomImage]
-      .forEach(command => palette.add({ command, category }));
+      .forEach(command => palette.addItem({ command, category }));
 
     function zoomIn(): void {
       if (!tracker.activeWidget) {

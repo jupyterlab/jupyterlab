@@ -338,5 +338,5 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
     }
   });
 
-  palette.add({ command: commandId, category: 'Help' });
+  palette.addItem({ command: commandId, category: 'Help' });
 }

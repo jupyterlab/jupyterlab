@@ -145,7 +145,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
     }
   });
 
-  palette.add({
+  palette.addItem({
     command: 'jupyterlab-launcher:show',
     category: 'Help'
   });
