@@ -45,8 +45,8 @@ body {
 }
 
 
-.p-Widget.p-mod-hidden {
-  background: none;
+.p-mod-hidden {
+  display: none !important;
 }
 
 
