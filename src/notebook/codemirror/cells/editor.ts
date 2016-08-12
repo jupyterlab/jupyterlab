@@ -148,13 +148,6 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
   }
 
   /**
-   * Give keyboard focus to the cell editor.
-   */
-  focus(): void {
-    this.editor.focus();
-  }
-
-  /**
    * Test whether the editor has keyboard focus.
    */
   hasFocus(): boolean {

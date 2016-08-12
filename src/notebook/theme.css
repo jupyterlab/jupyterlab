@@ -18,6 +18,8 @@
 
 
 .p-Widget.jp-Notebook-container {
+  display: flex;
+  flex-direction: column;
   overflow: auto;
   padding-left: 10px;
   padding-right: 10px;

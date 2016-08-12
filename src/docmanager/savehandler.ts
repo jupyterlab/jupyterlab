@@ -90,7 +90,9 @@ class SaveHandler implements IDisposable {
     if (this._stopped) {
       return;
     }
-    setTimeout(() => this._save(), this._interval * 1000);
+    this._autosaveTimer = setTimeout(() => {
+      this._save();
+    }, this._interval * 1000);
   }
 
   /**
@@ -98,6 +100,7 @@ class SaveHandler implements IDisposable {
    */
   private _save(): void {
     let context = this._context;
+
     // Trigger the next update.
     this._setTimer();
 

@@ -17,6 +17,10 @@ import {
 } from 'phosphor/lib/ui/dockpanel';
 
 import {
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
+
+import {
   Panel
 } from 'phosphor/lib/ui/panel';
 
@@ -50,6 +54,11 @@ const APPLICATION_SHELL_CLASS = 'jp-ApplicationShell';
  * The class name added to side bar instances.
  */
 const SIDEBAR_CLASS = 'jp-SideBar';
+
+/**
+ * The class name added to the current widget's title.
+ */
+const CURRENT_CLASS = 'jp-mod-current';
 
 
 /**
@@ -122,6 +131,18 @@ class ApplicationShell extends Panel {
 
     this.addWidget(topPanel);
     this.addWidget(hboxPanel);
+
+    this._tracker = new FocusTracker<Widget>();
+    this._tracker.currentChanged.connect((sender, args) => {
+      if (args.newValue) {
+        args.newValue.title.className += ` ${CURRENT_CLASS}`;
+      }
+      if (args.oldValue) {
+        args.oldValue.deactivate();
+        let title = args.oldValue.title;
+        title.className = title.className.replace(CURRENT_CLASS, '');
+      }
+    });
   }
 
   /**
@@ -170,6 +191,7 @@ class ApplicationShell extends Panel {
       return;
     }
     this._dockPanel.addWidget(widget, { mode: 'tab-after' });
+    this._tracker.add(widget);
   }
 
   /**
@@ -217,6 +239,7 @@ class ApplicationShell extends Panel {
   private _hsplitPanel: SplitPanel;
   private _leftHandler: SideBarHandler;
   private _rightHandler: SideBarHandler;
+  private _tracker: FocusTracker<Widget>;
 }
 
 

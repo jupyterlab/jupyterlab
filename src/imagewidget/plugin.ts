@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -12,10 +16,6 @@ import {
 import {
   IDocumentRegistry
 } from '../docregistry';
-
-import {
-  WidgetTracker
-} from '../widgettracker';
 
 import {
   ImageWidget, ImageWidgetFactory
@@ -48,7 +48,7 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
     let zoomInImage = 'image-widget:zoom-in';
     let zoomOutImage = 'image-widget:zoom-out';
     let resetZoomImage = 'image-widget:reset-zoom';
-    let tracker = new WidgetTracker<ImageWidget>();
+    let tracker = new FocusTracker<ImageWidget>();
     let image = new ImageWidgetFactory();
     let options = {
       fileExtensions: EXTENSIONS,
@@ -62,7 +62,7 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
     registry.addWidgetFactory(image, options);
 
     image.widgetCreated.connect((sender, newWidget) => {
-      tracker.addWidget(newWidget);
+      tracker.add(newWidget);
     });
 
     app.commands.addCommand(zoomInImage, {
@@ -83,10 +83,10 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
       .forEach(command => palette.addItem({ command, category }));
 
     function zoomIn(): void {
-      if (!tracker.activeWidget) {
+      if (!tracker.currentWidget) {
         return;
       }
-      let widget = tracker.activeWidget;
+      let widget = tracker.currentWidget;
       if (widget.scale > 1) {
         widget.scale += .5;
       } else {
@@ -95,10 +95,10 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
     }
 
     function zoomOut(): void {
-      if (!tracker.activeWidget) {
+      if (!tracker.currentWidget) {
         return;
       }
-      let widget = tracker.activeWidget;
+      let widget = tracker.currentWidget;
       if (widget.scale > 1) {
         widget.scale -= .5;
       } else {
@@ -107,10 +107,10 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
     }
 
     function resetZoom(): void {
-      if (!tracker.activeWidget) {
+      if (!tracker.currentWidget) {
         return;
       }
-      let widget = tracker.activeWidget;
+      let widget = tracker.currentWidget;
       widget.scale = 1;
     }
 }

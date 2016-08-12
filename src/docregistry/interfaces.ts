@@ -121,6 +121,11 @@ interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
   populated: ISignal<IDocumentContext<T>, void>;
 
   /**
+   * A signal emitted when the context is disposed.
+   */
+  disposed: ISignal<IDocumentContext<T>, void>;
+
+  /**
    * The unique id of the context.
    *
    * #### Notes

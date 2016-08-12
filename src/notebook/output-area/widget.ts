@@ -907,8 +907,15 @@ class OutputWidget extends Widget {
    * Handle `after-attach` messages sent to the widget.
    */
   protected onAfterAttach(msg: Message): void {
-    this._input.focus();
     this._input.addEventListener('keydown', this);
+    this.update();
+  }
+
+  /**
+   * Handle `update-request` messages sent to the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this._input.focus();
   }
 
   /**

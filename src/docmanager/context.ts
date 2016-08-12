@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  defineSignal, ISignal
+  clearSignalData, defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -61,6 +61,11 @@ class Context implements IDocumentContext<IDocumentModel> {
    * A signal emitted when the context is fully populated for the first time.
    */
   populated: ISignal<IDocumentContext<IDocumentModel>, void>;
+
+  /**
+   * A signal emitted when the context is disposed.
+   */
+  disposed: ISignal<IDocumentContext<IDocumentModel>, void>;
 
   /**
    * The unique id of the context.
@@ -147,8 +152,10 @@ class Context implements IDocumentContext<IDocumentModel> {
     if (this.isDisposed) {
       return;
     }
+    this.disposed.emit(void 0);
+    clearSignalData(this);
+    this._manager.removeContext(this.id);
     this._manager = null;
-    this._id = '';
   }
 
   /**
@@ -246,6 +253,7 @@ defineSignal(Context.prototype, 'kernelChanged');
 defineSignal(Context.prototype, 'pathChanged');
 defineSignal(Context.prototype, 'contentsModelChanged');
 defineSignal(Context.prototype, 'populated');
+defineSignal(Context.prototype, 'disposed');
 
 
 /**
@@ -277,14 +285,7 @@ class ContextManager implements IDisposable {
     }
     this._manager = null;
     for (let id in this._contexts) {
-      let contextEx = this._contexts[id];
-      contextEx.context.dispose();
-      contextEx.model.dispose();
-      contextEx.saveHandler.dispose();
-      let session = contextEx.session;
-      if (session) {
-        session.dispose();
-      }
+      this._contexts[id].context.dispose();
     }
     this._contexts = null;
     this._opener = null;
@@ -353,12 +354,20 @@ class ContextManager implements IDisposable {
   }
 
   /**
-   * Remove a context.
+   * Remove a context that has been disposed.
+   *
+   * #### Notes
+   * This is called when a context is disposed,
+   * and should not be called by user code.
    */
   removeContext(id: string): void {
     let contextEx = this._contexts[id];
     contextEx.model.dispose();
-    contextEx.context.dispose();
+    contextEx.saveHandler.dispose();
+    let session = contextEx.session;
+    if (session) {
+      session.dispose();
+    }
     delete this._contexts[id];
   }
 

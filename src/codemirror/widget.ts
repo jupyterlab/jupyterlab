@@ -90,6 +90,13 @@ class CodeMirrorWidget extends Widget {
     this._needsRefresh = false;
   }
 
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._editor.focus();
+  }
+
   private _editor: CodeMirror.Editor = null;
   private _needsRefresh = true;
 }

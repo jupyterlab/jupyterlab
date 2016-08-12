@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
+
+import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -37,10 +41,6 @@ import {
 import {
   IServiceManager
 } from '../services';
-
-import {
-  WidgetTracker
-} from '../widgettracker';
 
 import {
   INotebookTracker, NotebookPanel, NotebookModelFactory,
@@ -130,6 +130,7 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
  */
 function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer): INotebookTracker {
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
+  let tracker = new FocusTracker<NotebookPanel>();
   let options: IWidgetFactoryOptions = {
     fileExtensions: ['.ipynb'],
     displayName: 'Notebook',
@@ -167,20 +168,21 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     });
   }
 
-  // Track the current active notebook.
-  let tracker = Private.notebookTracker;
-
   addCommands(app, tracker);
   populatePalette(palette);
 
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
-    tracker.addWidget(widget);
+    tracker.add(widget);
   });
 
   // Set the source of the code inspector to the current console.
-  tracker.activeWidgetChanged.connect((sender: any, panel: NotebookPanel) => {
-    inspector.source = panel.content.inspectionHandler;
+  tracker.currentChanged.connect((sender, args) => {
+    if (args.newValue) {
+      inspector.source = args.newValue.content.inspectionHandler;
+    } else {
+      inspector.source = null;
+    }
   });
 
   // Add main menu notebook menu.
@@ -192,14 +194,14 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 /**
  * Add the notebook commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): void {
+function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
   let commands = app.commands;
 
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run Cell(s) and Advance',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         let content = nbWidget.content;
         NotebookActions.runAndAdvance(content, nbWidget.context.kernel);
       }
@@ -208,8 +210,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.run, {
     label: 'Run Cell(s)',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.run(nbWidget.content, nbWidget.context.kernel);
       }
     }
@@ -217,8 +219,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.runAndInsert, {
     label: 'Run Cell(s) and Insert',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.runAndInsert(nbWidget.content, nbWidget.context.kernel);
       }
     }
@@ -226,8 +228,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.runAll, {
     label: 'Run All Cells',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.runAll(nbWidget.content, nbWidget.context.kernel);
       }
     }
@@ -235,8 +237,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.restart, {
     label: 'Restart Kernel',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         restartKernel(nbWidget.kernel, nbWidget.node);
       }
     }
@@ -244,8 +246,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.restartClear, {
     label: 'Restart Kernel & Clear Outputs',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         let promise = restartKernel(nbWidget.kernel, nbWidget.node);
         promise.then(result => {
           if (result) {
@@ -258,8 +260,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.restartRunAll, {
     label: 'Restart Kernel & Run All',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         let promise = restartKernel(nbWidget.kernel, nbWidget.node);
         promise.then(result => {
           NotebookActions.runAll(nbWidget.content, nbWidget.context.kernel);
@@ -270,8 +272,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.clearAllOutputs, {
     label: 'Clear All Outputs',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.clearAllOutputs(nbWidget.content);
       }
     }
@@ -279,8 +281,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.clearOutputs, {
     label: 'Clear Output(s)',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.clearOutputs(nbWidget.content);
       }
     }
@@ -288,8 +290,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.interrupt, {
     label: 'Interrupt Kernel',
     execute: () => {
-      if (tracker.activeWidget) {
-        let kernel = tracker.activeWidget.context.kernel;
+      if (tracker.currentWidget) {
+        let kernel = tracker.currentWidget.context.kernel;
         if (kernel) {
           kernel.interrupt();
         }
@@ -299,8 +301,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.toCode, {
     label: 'Convert to Code',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.changeCellType(nbWidget.content, 'code');
       }
     }
@@ -308,8 +310,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.toMarkdown, {
     label: 'Convert to Markdown',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.changeCellType(nbWidget.content, 'markdown');
       }
     }
@@ -317,8 +319,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.toRaw, {
     label: 'Convert to Raw',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.changeCellType(nbWidget.content, 'raw');
       }
     }
@@ -326,8 +328,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.cut, {
     label: 'Cut Cell(s)',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.cut(nbWidget.content, nbWidget.clipboard);
       }
     }
@@ -335,8 +337,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.copy, {
     label: 'Copy Cell(s)',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.copy(nbWidget.content, nbWidget.clipboard);
       }
     }
@@ -344,8 +346,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.paste, {
     label: 'Paste Cell(s)',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.paste(nbWidget.content, nbWidget.clipboard);
       }
     }
@@ -353,8 +355,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.deleteCell, {
     label: 'Delete Cell(s)',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.deleteCells(nbWidget.content);
       }
     }
@@ -362,8 +364,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.split, {
     label: 'Split Cell',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.splitCell(nbWidget.content);
       }
     }
@@ -371,8 +373,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.merge, {
     label: 'Merge Selected Cell(s)',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.mergeCells(nbWidget.content);
       }
     }
@@ -380,8 +382,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.insertAbove, {
     label: 'Insert Cell Above',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.insertAbove(nbWidget.content);
       }
     }
@@ -389,8 +391,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.insertBelow, {
     label: 'Insert Cell Below',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.insertBelow(nbWidget.content);
       }
     }
@@ -398,8 +400,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.selectAbove, {
     label: 'Select Cell Above',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.selectAbove(nbWidget.content);
       }
     }
@@ -407,8 +409,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.selectBelow, {
     label: 'Select Cell Below',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.selectBelow(nbWidget.content);
       }
     }
@@ -416,8 +418,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.extendAbove, {
     label: 'Extend Selection Above',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.extendSelectionAbove(nbWidget.content);
       }
     }
@@ -425,8 +427,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.extendBelow, {
     label: 'Extend Selection Below',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.extendSelectionBelow(nbWidget.content);
       }
     }
@@ -434,8 +436,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.toggleLines, {
     label: 'Toggle Line Numbers',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.toggleLineNumbers(nbWidget.content);
       }
     }
@@ -443,8 +445,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.toggleAllLines, {
     label: 'Toggle All Line Numbers',
     execute: () => {
-      if (tracker.activeWidget) {
-        let nbWidget = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
         NotebookActions.toggleAllLineNumbers(nbWidget.content);
       }
     }
@@ -452,40 +454,40 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.commandMode, {
     label: 'To Command Mode',
     execute: () => {
-      if (tracker.activeWidget) {
-        tracker.activeWidget.content.mode = 'command';
+      if (tracker.currentWidget) {
+        tracker.currentWidget.content.mode = 'command';
       }
     }
   });
   commands.addCommand(cmdIds.editMode, {
     label: 'To Edit Mode',
     execute: () => {
-      if (tracker.activeWidget) {
-        tracker.activeWidget.content.mode = 'edit';
+      if (tracker.currentWidget) {
+        tracker.currentWidget.content.mode = 'edit';
       }
     }
   });
   commands.addCommand(cmdIds.undo, {
     label: 'Undo Cell Operation',
     execute: () => {
-      if (tracker.activeWidget) {
-        NotebookActions.undo(tracker.activeWidget.content);
+      if (tracker.currentWidget) {
+        NotebookActions.undo(tracker.currentWidget.content);
       }
     }
   });
   commands.addCommand(cmdIds.redo, {
     label: 'Redo Cell Operation',
     execute: () => {
-      if (tracker.activeWidget) {
-        NotebookActions.redo(tracker.activeWidget.content);
+      if (tracker.currentWidget) {
+        NotebookActions.redo(tracker.currentWidget.content);
       }
     }
   });
   commands.addCommand(cmdIds.switchKernel, {
     label: 'Switch Kernel',
     execute: () => {
-      if (tracker.activeWidget) {
-        let { context, node } = tracker.activeWidget;
+      if (tracker.currentWidget) {
+        let { context, node } = tracker.currentWidget;
         selectKernelForContext(context, node);
       }
     }
@@ -493,48 +495,48 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<NotebookPanel>): vo
   commands.addCommand(cmdIds.markdown1, {
     label: 'Markdown Header 1',
     execute: () => {
-      if (tracker.activeWidget) {
-        NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 1);
+      if (tracker.currentWidget) {
+        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 1);
       }
     }
   });
   commands.addCommand(cmdIds.markdown2, {
     label: 'Markdown Header 2',
     execute: () => {
-      if (tracker.activeWidget) {
-        NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 2);
+      if (tracker.currentWidget) {
+        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 2);
       }
     }
   });
   commands.addCommand(cmdIds.markdown3, {
     label: 'Markdown Header 3',
     execute: () => {
-      if (tracker.activeWidget) {
-        NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 3);
+      if (tracker.currentWidget) {
+        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 3);
       }
     }
   });
   commands.addCommand(cmdIds.markdown4, {
     label: 'Markdown Header 4',
     execute: () => {
-      if (tracker.activeWidget) {
-        NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 4);
+      if (tracker.currentWidget) {
+        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 4);
       }
     }
   });
   commands.addCommand(cmdIds.markdown5, {
     label: 'Markdown Header 5',
     execute: () => {
-      if (tracker.activeWidget) {
-        NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 5);
+      if (tracker.currentWidget) {
+        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 5);
       }
     }
   });
   commands.addCommand(cmdIds.markdown6, {
     label: 'Markdown Header 6',
     execute: () => {
-      if (tracker.activeWidget) {
-        NotebookActions.setMarkdownHeader(tracker.activeWidget.content, 6);
+      if (tracker.currentWidget) {
+        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 6);
       }
     }
   });
@@ -616,15 +618,4 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ type: 'submenu', menu: settings });
 
   return menu;
-}
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * A singleton instance of a notebook tracker.
-   */
-  export
-  const notebookTracker = new WidgetTracker<NotebookPanel>();
 }

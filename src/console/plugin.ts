@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
+
+import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -36,10 +40,6 @@ import {
 import {
   IServiceManager
 } from '../services';
-
-import {
-  WidgetTracker
-} from '../widgettracker';
 
 import {
   ConsolePanel, ConsoleWidget
@@ -80,7 +80,7 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
  * Activate the console extension.
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, renderer: ConsoleWidget.IRenderer): void {
-  let tracker = new WidgetTracker<ConsolePanel>();
+  let tracker = new FocusTracker<ConsolePanel>();
   let manager = services.sessions;
   let { commands, keymap } = app;
   let category = 'Console';
@@ -92,8 +92,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   let command: string;
 
   // Set the source of the code inspector to the current console.
-  tracker.activeWidgetChanged.connect((sender: any, panel: ConsolePanel) => {
-    inspector.source = panel.content.inspectionHandler;
+  tracker.currentChanged.connect((sender, args) => {
+    if (args.newValue) {
+      inspector.source = args.newValue.content.inspectionHandler;
+    } else {
+      inspector.source = null;
+    }
   });
 
   // Set the main menu title.
@@ -136,7 +140,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
           panel.title.closable = true;
           app.shell.addToMainArea(panel);
-          tracker.addWidget(panel);
+          tracker.add(panel);
         });
       }
     });
@@ -148,8 +152,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Clear Cells',
     execute: () => {
-      if (tracker.activeWidget) {
-        tracker.activeWidget.content.clear();
+      if (tracker.currentWidget) {
+        tracker.currentWidget.content.clear();
       }
     }
   });
@@ -160,8 +164,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = 'console:dismiss-completion';
   commands.addCommand(command, {
     execute: () => {
-      if (tracker.activeWidget) {
-        tracker.activeWidget.content.dismissCompletion();
+      if (tracker.currentWidget) {
+        tracker.currentWidget.content.dismissCompletion();
       }
     }
   });
@@ -171,8 +175,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Execute Cell',
     execute: () => {
-      if (tracker.activeWidget) {
-        tracker.activeWidget.content.execute();
+      if (tracker.currentWidget) {
+        tracker.currentWidget.content.execute();
       }
     }
   });
@@ -184,8 +188,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Interrupt Kernel',
     execute: () => {
-      if (tracker.activeWidget) {
-        let kernel = tracker.activeWidget.content.session.kernel;
+      if (tracker.currentWidget) {
+        let kernel = tracker.currentWidget.content.session.kernel;
         if (kernel) {
           kernel.interrupt();
         }
@@ -200,10 +204,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Switch Kernel',
     execute: () => {
-      if (!tracker.activeWidget) {
+      if (!tracker.currentWidget) {
         return;
       }
-      let widget = tracker.activeWidget.content;
+      let widget = tracker.currentWidget.content;
       let session = widget.session;
       let lang = '';
       if (session.kernel) {

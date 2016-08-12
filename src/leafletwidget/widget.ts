@@ -93,7 +93,7 @@ class MapWidget extends Widget {
   }
 
   /**
-   * Handle `update-request` messages for the widget.
+   * A message handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
     this.title.label = this._context.path.split('/').pop();
@@ -124,9 +124,23 @@ class MapWidget extends Widget {
   }
 
   /**
-   * A message handler invoked on a 'resize' message.
+   * A message handler invoked on an `'after-attach'` message.
    */
-  onResize(msg: ResizeMessage) {
+  protected onAfterAttach(msg: Message): void {
+    this.update();
+  }
+
+  /**
+   * A message handler invoked on an `'activate-request'` message.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.focus();
+  }
+
+  /**
+   * A message handler invoked on a `'resize'` message.
+   */
+  protected onResize(msg: ResizeMessage) {
     this._sized = true;
     this._width = msg.width;
     this._height = msg.height;
@@ -142,13 +156,6 @@ class MapWidget extends Widget {
       this._map.fitBounds(this._geojsonLayer.getBounds());
       this._fitted = true;
     }
-  }
-
-  /**
-   * A message handler after the widget is attached to the DOM.
-   */
-  onAfterAttach() {
-    this.update();
   }
 
   private _fitted = false;

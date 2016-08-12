@@ -133,7 +133,8 @@ class DocumentWidgetManager implements IDisposable {
       this._widgets[id].splice(index, 1);
       // Dispose of the context if this is the last widget using it.
       if (!this._widgets[id].length) {
-        this._contextManager.removeContext(id);
+        let context = this._contextManager.getContext(id);
+        context.dispose();
       }
     });
     Private.idProperty.set(widget, id);

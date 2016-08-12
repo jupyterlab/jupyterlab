@@ -2,8 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   DisposableSet
 } from 'phosphor/lib/core/disposable';
+
+import {
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
 
 import {
   Menu
@@ -36,10 +44,6 @@ import {
 import {
   IServiceManager
 } from '../services';
-
-import {
-  WidgetTracker
-} from '../widgettracker';
 
 import {
   FileBrowserModel, FileBrowserWidget, IPathTracker, IWidgetOpener
@@ -82,7 +86,7 @@ const cmdIds = {
  */
 function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IPathTracker {
   let id = 0;
-  let tracker = new WidgetTracker<Widget>();
+  let tracker = new FocusTracker<Widget>();
 
   let opener: IWidgetOpener = {
     open: widget => {
@@ -91,7 +95,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
       }
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
-        tracker.addWidget(widget);
+        tracker.add(widget);
       }
       app.shell.activateMain(widget.id);
     }
@@ -165,7 +169,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 /**
  * Add the filebrowser commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, tracker: WidgetTracker<Widget>, fbWidget: FileBrowserWidget, docManager: DocumentManager): void {
+function addCommands(app: JupyterLab, tracker: FocusTracker<Widget>, fbWidget: FileBrowserWidget, docManager: DocumentManager): void {
   let commands = app.commands;
   let fbModel = fbWidget.model;
 
@@ -181,8 +185,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<Widget>, fbWidget: 
     label: 'Save',
     caption: 'Save and create checkpoint',
     execute: () => {
-      if (tracker.activeWidget) {
-        let context = docManager.contextForWidget(tracker.activeWidget);
+      if (tracker.currentWidget) {
+        let context = docManager.contextForWidget(tracker.currentWidget);
         return context.save().then(() => {
           return context.createCheckpoint();
         });
@@ -193,8 +197,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<Widget>, fbWidget: 
     label: 'Revert to Checkpoint',
     caption: 'Revert contents to previous checkpoint',
     execute: () => {
-      if (tracker.activeWidget) {
-        let context = docManager.contextForWidget(tracker.activeWidget);
+      if (tracker.currentWidget) {
+        let context = docManager.contextForWidget(tracker.currentWidget);
         context.restoreCheckpoint().then(() => {
           context.revert();
         });
@@ -205,8 +209,8 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<Widget>, fbWidget: 
     label: 'Save As...',
     caption: 'Save with new path and create checkpoint',
     execute: () => {
-      if (tracker.activeWidget) {
-        let context = docManager.contextForWidget(tracker.activeWidget);
+      if (tracker.currentWidget) {
+        let context = docManager.contextForWidget(tracker.currentWidget);
         return context.saveAs().then(() => {
           return context.createCheckpoint();
         }).then(() => {
@@ -224,17 +228,15 @@ function addCommands(app: JupyterLab, tracker: WidgetTracker<Widget>, fbWidget: 
   commands.addCommand(cmdIds.close, {
     label: 'Close',
     execute: () => {
-      if (tracker.activeWidget) {
-        tracker.activeWidget.close();
+      if (tracker.currentWidget) {
+        tracker.currentWidget.close();
       }
     }
   });
   commands.addCommand(cmdIds.closeAll, {
     label: 'Close All',
     execute: () => {
-      for (let widget of tracker.widgets) {
-        widget.close();
-      }
+      each(tracker.widgets, widget => widget.close());
     }
   });
   commands.addCommand(cmdIds.showBrowser, {

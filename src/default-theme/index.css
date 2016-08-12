@@ -50,6 +50,11 @@ body {
 }
 
 
+.p-TabBar-tab.jp-mod-current {
+  border-top: 1px solid #2196F3;
+}
+
+
 .jp-Document {
   min-width: 120px;
   min-height: 120px;
@@ -177,7 +182,6 @@ body {
   min-height: 24px;
   max-height: 24px;
   background: #FFFFFF;
-  border-top: 1px solid #2196F3;
 }
 
 

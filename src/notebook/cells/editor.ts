@@ -158,11 +158,6 @@ interface ICellEditorWidget extends Widget {
   setReadOnly(readOnly: boolean): void;
 
   /**
-   * Give keyboard focus to the cell editor.
-   */
-  focus(): void;
-
-  /**
    * Test whether the editor has keyboard focus.
    */
   hasFocus(): boolean;
