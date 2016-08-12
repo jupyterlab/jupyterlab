@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  findIndex
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -265,8 +269,9 @@ class ContextManager implements IDisposable {
    * Construct a new context manager.
    */
   constructor(options: ContextManager.IOptions) {
-    this._manager = options.manager;
+    let manager = this._manager = options.manager;
     this._opener = options.opener;
+    manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
   }
 
   /**
@@ -679,6 +684,25 @@ class ContextManager implements IDisposable {
       mimetype: model.mimetype,
       format: model.format
     };
+  }
+
+  /**
+   * Handle a change to the running sessions.
+   */
+  private _onSessionsChanged(sender: ISession.IManager, models: ISession.IModel[]): void {
+    for (let id in this._contexts) {
+      let contextEx = this._contexts[id];
+      let session = contextEx.session;
+      if (!session) {
+        continue;
+      }
+      let index = findIndex(models, model => model.id === session.id);
+      if (index === -1) {
+        session.dispose();
+        contextEx.session = null;
+        contextEx.context.kernelChanged.emit(null);
+      }
+    }
   }
 
   private _manager: IServiceManager = null;
