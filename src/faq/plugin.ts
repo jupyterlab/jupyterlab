@@ -329,6 +329,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
   widget.node.style.overflowY = 'auto';
 
   app.commands.addCommand(commandId, {
+    label: 'Frequently Asked Questions',
     execute: () => {
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
