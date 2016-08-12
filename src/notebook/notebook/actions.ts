@@ -335,7 +335,8 @@ namespace NotebookActions {
       promises.push(Private.runCell(widget, child, kernel));
     }
     return Promise.all(promises).then(results => {
-      widget.activate();
+      // Post an update request.
+      widget.update();
       for (let result of results) {
         if (!result) {
           return false;

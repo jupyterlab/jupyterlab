@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -600,6 +604,8 @@ class Notebook extends StaticNotebook {
     return this._mode;
   }
   set mode(newValue: NotebookMode) {
+    // Always post an update request.
+    this.update();
     if (newValue === this._mode) {
       return;
     }
@@ -617,17 +623,10 @@ class Notebook extends StaticNotebook {
         let widget = layout.widgets.at(i) as BaseCellWidget;
         this.deselect(widget);
       }
-      activeCell.activate();
       if (activeCell instanceof MarkdownCellWidget) {
         activeCell.rendered = false;
       }
-    } else {
-      // Take focus if the active cell is focused.
-      if (activeCell.editor.hasFocus()) {
-        this.node.focus();
-      }
     }
-    this.update();
   }
 
   /**
@@ -643,6 +642,8 @@ class Notebook extends StaticNotebook {
     return this.model.cells.length ? this._activeCellIndex : -1;
   }
   set activeCellIndex(newValue: number) {
+    // Always post an update request.
+    this.update();
     let oldValue = this._activeCellIndex;
     if (!this.model || !this.model.cells.length) {
       newValue = -1;
@@ -659,11 +660,7 @@ class Notebook extends StaticNotebook {
     if (newValue === oldValue) {
       return;
     }
-    if (this.mode === 'edit' && this.activeCell) {
-      this.activeCell.activate();
-    }
     this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
-    this.update();
   }
 
   /**
@@ -751,6 +748,9 @@ class Notebook extends StaticNotebook {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
+    if (!this.model || this.model.readOnly) {
+      return;
+    }
     switch (event.type) {
     case 'mousedown':
       this._evtMouseDown(event as MouseEvent);
@@ -774,7 +774,6 @@ class Notebook extends StaticNotebook {
     this.node.addEventListener('mousedown', this);
     this.node.addEventListener('dblclick', this);
     this.node.addEventListener('focus', this, true);
-    this.update();
   }
 
   /**
@@ -790,7 +789,7 @@ class Notebook extends StaticNotebook {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.node.focus();
+    this._isActive = true;
     this.update();
   }
 
@@ -798,16 +797,36 @@ class Notebook extends StaticNotebook {
    * Handle `'deactivate-request'` messages.
    */
   protected onDeactivateRequest(msg: Message): void {
+    this._isActive = false;
     this.mode = 'command';
-    this.update();
   }
 
   /**
    * Handle `update-request` messages sent to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    // Set the appropriate classes on the cells.
     let activeCell = this.activeCell;
+    // Ensure we have the correct focus.
+    if (this._isActive) {
+      if (this.mode === 'edit' && activeCell) {
+        activeCell.editor.activate();
+      } else {
+        // Focus the node if nothing is focused internally.
+        if (!this.node.contains(document.activeElement)) {
+          this.node.focus();
+        } else {
+          // If an editor currently has focus, focus the node.
+          // Otherwise, another input field has focus and should keep it.
+          let w = find(this.layout, widget => {
+            return (widget as BaseCellWidget).editor.hasFocus();
+          });
+          if (w) {
+            this.node.focus();
+          }
+        }
+      }
+    }
+    // Set the appropriate classes on the cells.
     if (this.mode === 'edit') {
       this.addClass(EDIT_CLASS);
       this.removeClass(COMMAND_CLASS);
@@ -846,7 +865,6 @@ class Notebook extends StaticNotebook {
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // Trigger an update of the active cell.
     this.activeCellIndex = this.activeCellIndex;
-    this.update();
   }
 
   /**
@@ -867,7 +885,6 @@ class Notebook extends StaticNotebook {
     if (this.isSelected(cell)) {
       this.selectionChanged.emit(void 0);
     }
-    this.update();
   }
 
   /**
@@ -928,9 +945,7 @@ class Notebook extends StaticNotebook {
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
-    if (!this.model || this.model.readOnly) {
-      return;
-    }
+    this._isActive = true;
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
@@ -940,15 +955,16 @@ class Notebook extends StaticNotebook {
         this.mode = 'command';
       }
       // Set the cell as the active one.
+      // This must be done *after* setting the mode above.
       this.activeCellIndex = i;
     }
-    this.update();
   }
 
   /**
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: MouseEvent): void {
+    this._isActive = true;
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
@@ -965,13 +981,13 @@ class Notebook extends StaticNotebook {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
     }
-    this.update();
   }
 
   /**
    * Handle `dblclick` events for the widget.
    */
   private _evtDblClick(event: MouseEvent): void {
+    this._isActive = true;
     let model = this.model;
     if (!model || model.readOnly) {
       return;
@@ -996,6 +1012,7 @@ class Notebook extends StaticNotebook {
   private _activeCell: BaseCellWidget = null;
   private _inspectionHandler: InspectionHandler = null;
   private _mode: NotebookMode = 'command';
+  private _isActive = false;
 }
 
 
