@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-#main:not(.p-mod-hidden) {
+#main {
   display: flex;
   flex-direction: column;
   font-size: 14px;
@@ -15,26 +15,26 @@
 }
 
 
-#jp-main-content-panel:not(.p-mod-hidden) {
+#jp-main-content-panel {
   display: flex;
   flex: 1 1 auto;
 }
 
 
-#jp-top-panel:not(.p-mod-hidden) {
+#jp-top-panel {
   display: flex;
   flex: 0 0 auto;
   min-height: 24px;
 }
 
 
-#jp-main-split-panel:not(.p-mod-hidden) {
+#jp-main-split-panel {
   display: flex;
   flex: 1 1 auto;
 }
 
 
-#jp-left-stack, #jp-right-stack:not(.p-mod-hidden) {
+#jp-left-stack, #jp-right-stack {
   display: flex;
   flex: 1 1 auto;
 }
