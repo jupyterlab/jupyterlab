@@ -212,8 +212,8 @@ for twine setup instructions and for why twine is the recommended method.
 npm version patch
 git push origin master --tags
 npm publish
+rm -rf dist
 python setup.py sdist
 python setup.py bdist_wheel --universal
-rm -rf dist
 twine upload dist/*
 ```
