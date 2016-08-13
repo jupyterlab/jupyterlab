@@ -19,7 +19,7 @@ Contents:
    :maxdepth: 2
 
    repo.md
-   extensions.md
+   plugins.md
    documents.md
    notebook.md
    patterns.md
