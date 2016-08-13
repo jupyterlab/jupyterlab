@@ -803,7 +803,7 @@ describe('notebook/cells/widget', () => {
     describe('#constructor()', () => {
 
       it('should create a raw cell widget', () => {
-        let widget = new RawCellWidget({renderer:CodeMirrorNotebookRenderer.defaultRawCellRenderer});
+        let widget = new RawCellWidget({renderer: CodeMirrorNotebookRenderer.defaultRawCellRenderer});
         expect(widget).to.be.a(RawCellWidget);
       });
 
