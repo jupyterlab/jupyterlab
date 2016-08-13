@@ -201,16 +201,6 @@ const SHORTCUTS = [
     keys: ['B']
   },
   {
-    command: 'notebook-cells:select-previous',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['ArrowUp']
-  },
-  {
-    command: 'notebook-cells:select-next',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['ArrowDown']
-  },
-  {
     command: 'notebook-cells:toggle-line-numbers',
     selector: '.jp-Notebook.jp-mod-commandMode',
     keys: ['L']
