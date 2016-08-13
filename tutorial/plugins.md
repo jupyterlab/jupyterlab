@@ -37,8 +37,8 @@ interactive kernel console sessions.
 - [Clipboard](http://jupyter.org/jupyterlab/modules/_clipboard_plugin_.html#clipboardprovider) - The application-wide clipboard for arbitrary MIME data.
 
 ## Application Object
-The JupyterLab application object is given to each plugin in its activation
-function.  The Application object has a:
+The JupyterLab [Application](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html) object is given to each plugin in 
+its `activate()` function.  The Application object has a:
 - [commands](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html#commands) - used to add and execute commands in the application. 
 - [keymap](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html#keymap) - used to add keyboard shortcuts to the application.
 - [shell](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html#shell) - a JupyterLab shell instance.
