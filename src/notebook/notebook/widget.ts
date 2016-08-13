@@ -809,7 +809,6 @@ class Notebook extends StaticNotebook {
     let activeCell = this.activeCell;
     // Ensure we have the correct focus.
     if (this._isActive) {
-      console.log(this.mode, activeCell);
       if (this.mode === 'edit' && activeCell) {
         activeCell.editor.activate();
       } else {
@@ -967,7 +966,6 @@ class Notebook extends StaticNotebook {
    */
   private _evtFocus(event: MouseEvent): void {
     this._isActive = true;
-    console.log(event);
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
