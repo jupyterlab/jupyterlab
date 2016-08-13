@@ -704,13 +704,19 @@ describe('notebook/notebook/widget', () => {
         });
       });
 
-      it('should activate if switching to edit mode', (done) => {
+      it('should focus the cell if switching to edit mode', (done) => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
         widget.mode = 'edit';
+        let cell = widget.childAt(widget.activeCellIndex);
+        // Wait for update-request.
         requestAnimationFrame(() => {
+          // Notebook activates the editor.
           expect(widget.methods).to.contain('onActivateRequest');
-          done();
+          requestAnimationFrame(() => {
+            expect(cell.node.contains(document.activeElement)).to.be(true);
+            done();
+          });
         });
       });
 
