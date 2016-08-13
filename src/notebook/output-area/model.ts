@@ -177,6 +177,9 @@ class OutputAreaModel implements IDisposable {
           model.output_type = msgType;
           this.add(model);
           break;
+        case 'clear_output':
+          this.clear(true);
+          break;
         default:
           break;
         }
