@@ -626,7 +626,7 @@ class Notebook extends StaticNotebook {
       if (activeCell instanceof MarkdownCellWidget) {
         activeCell.rendered = false;
       }
-      this._isActive = true;
+      this.activate();
     }
   }
 
@@ -946,7 +946,7 @@ class Notebook extends StaticNotebook {
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
-    this._isActive = true;
+    this.activate();
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
@@ -965,7 +965,7 @@ class Notebook extends StaticNotebook {
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: MouseEvent): void {
-    this._isActive = true;
+    this.activate();
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
@@ -989,7 +989,7 @@ class Notebook extends StaticNotebook {
    * Handle `dblclick` events for the widget.
    */
   private _evtDblClick(event: MouseEvent): void {
-    this._isActive = true;
+    this.activate();
     let model = this.model;
     if (!model || model.readOnly) {
       return;
