@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/searching';
 
 import {
-  Message
+  sendMessage, Message
 } from 'phosphor/lib/core/messaging';
 
 import {
@@ -30,7 +30,7 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  Widget
+  Widget, WidgetMessage
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -626,7 +626,9 @@ class Notebook extends StaticNotebook {
       if (activeCell instanceof MarkdownCellWidget) {
         activeCell.rendered = false;
       }
-      this.activate();
+      if (!this._isActive) {
+        sendMessage(this, WidgetMessage.ActivateRequest);
+      }
     }
   }
 
@@ -946,7 +948,9 @@ class Notebook extends StaticNotebook {
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
-    this.activate();
+    if (!this._isActive) {
+      sendMessage(this, WidgetMessage.ActivateRequest);
+    }
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
@@ -965,7 +969,9 @@ class Notebook extends StaticNotebook {
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: MouseEvent): void {
-    this.activate();
+    if (!this._isActive) {
+      sendMessage(this, WidgetMessage.ActivateRequest);
+    }
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
@@ -989,7 +995,9 @@ class Notebook extends StaticNotebook {
    * Handle `dblclick` events for the widget.
    */
   private _evtDblClick(event: MouseEvent): void {
-    this.activate();
+    if (!this._isActive) {
+      sendMessage(this, WidgetMessage.ActivateRequest);
+    }
     let model = this.model;
     if (!model || model.readOnly) {
       return;
