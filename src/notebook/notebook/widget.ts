@@ -626,6 +626,7 @@ class Notebook extends StaticNotebook {
       if (activeCell instanceof MarkdownCellWidget) {
         activeCell.rendered = false;
       }
+      this._isActive = true;
     }
   }
 
