@@ -371,9 +371,11 @@ namespace NotebookActions {
     if (widget.activeCellIndex === widget.childCount() - 1) {
       let cell = model.factory.createCodeCell();
       model.cells.add(cell);
+      widget.activeCellIndex++;
       widget.mode = 'edit';
+    } else {
+      widget.activeCellIndex++;
     }
-    widget.activeCellIndex++;
     return promise;
   }
 
