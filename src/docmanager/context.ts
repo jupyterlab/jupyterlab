@@ -373,7 +373,9 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
    */
   addSibling(widget: Widget): IDisposable {
     let opener = this._opener;
-    opener(widget);
+    if (opener) {
+      opener(widget);
+    }
     return new DisposableDelegate(() => {
       widget.close();
     });
@@ -483,11 +485,6 @@ export namespace Context {
     manager: IServiceManager;
 
     /**
-     * A callback for opening sibling widgets.
-     */
-    opener: (widget: Widget) => void;
-
-    /**
      * The model factory used to create the model.
      */
     factory: IModelFactory<T>;
@@ -496,6 +493,11 @@ export namespace Context {
      * The initial path of the file.
      */
     path: string;
+
+    /**
+     * An optional callback for opening sibling widgets.
+     */
+    opener?: (widget: Widget) => void;
   }
 }
 
