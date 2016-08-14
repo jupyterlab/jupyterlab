@@ -207,7 +207,9 @@ class DocumentManager implements IDisposable {
       widgetName = this._registry.defaultWidgetFactory(ContentsManager.extname(path));
     }
     let context = this._contextForPath(path);
-    return this._widgetManager.findWidget(context, widgetName);
+    if (context) {
+      return this._widgetManager.findWidget(context, widgetName);
+    }
   }
 
   /**
