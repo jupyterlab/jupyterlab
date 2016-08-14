@@ -126,14 +126,6 @@ interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
   disposed: ISignal<IDocumentContext<T>, void>;
 
   /**
-   * The unique id of the context.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  id: string;
-
-  /**
    * Get the model associated with the document.
    *
    * #### Notes
@@ -355,7 +347,7 @@ interface IWidgetExtension<T extends Widget, U extends IDocumentModel> {
  * The interface for a model factory.
  */
 export
-interface IModelFactory extends IDisposable {
+interface IModelFactory<T extends IDocumentModel> extends IDisposable {
   /**
    * The name of the model.
    *
@@ -386,7 +378,7 @@ interface IModelFactory extends IDisposable {
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): IDocumentModel;
+  createNew(languagePreference?: string): T;
 
   /**
    * Get the preferred kernel language given an extension.
