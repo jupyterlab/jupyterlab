@@ -105,6 +105,12 @@ const SELECTED_CLASS = 'jp-mod-selected';
 const OTHER_SELECTED_CLASS = 'jp-mod-multiSelected';
 
 /**
+ * The class name added to unconfined images.
+ */
+const UNCONFINED_CLASS = 'jp-mod-unconfined';
+
+
+/**
  * The interactivity modes for the notebook.
  */
 export
@@ -970,7 +976,8 @@ class Notebook extends StaticNotebook {
     if (!model || model.readOnly) {
       return;
     }
-    let i = this._findCell(event.target as HTMLElement);
+    let target = event.target as HTMLElement;
+    let i = this._findCell(target);
     if (i === -1) {
       return;
     }
@@ -980,6 +987,8 @@ class Notebook extends StaticNotebook {
     if (cell.type === 'markdown') {
       widget.rendered = false;
       return;
+    } else if (target.localName === 'img') {
+      target.classList.toggle(UNCONFINED_CLASS);
     }
   }
 

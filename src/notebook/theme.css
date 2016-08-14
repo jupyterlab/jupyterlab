@@ -85,6 +85,17 @@
 }
 
 
+.jp-Output-executeResult img {
+  max-width: 100%;
+  height: auto;
+}
+
+
+img.jp-mod-unconfined {
+  max-width: none;
+}
+
+
 .jp-Output-prompt {
   color: #D84315;
   font-family: monospace;
