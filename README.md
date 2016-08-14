@@ -1,5 +1,7 @@
 # [JupyterLab](http://jupyter.github.io/jupyterlab/)
 
+[![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/jupyter/jupyterlab/lab)
+
 An extensible computational environment for Jupyter.
 
 **JupyterLab is a very early developer preview, and is not suitable for
