@@ -178,7 +178,7 @@ class OutputAreaModel implements IDisposable {
           this.add(model);
           break;
         case 'clear_output':
-          this.clear(true);
+          this.clear((msg as KernelMessage.IClearOutputMsg).content.wait);
           break;
         default:
           break;
