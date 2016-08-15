@@ -58,7 +58,6 @@ the browser.
 
 - Jupyter notebook version 4.2 or later
 - NodeJS (preferably version 5 or later) and npm
-- Optionally (if you plan to use ipython widgets in the notebook): ipywidgets dev master installed from https://github.com/ipython/ipywidgets
 
 #### Installation
 
