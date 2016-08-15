@@ -205,7 +205,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
    * Set the path of the context.
    *
    * #### Notes
-   * This should only be called by the document manager.
+   * This is not intended to be called by the user.
    * It is assumed that the file has been renamed on the
    * contents manager outside of this operation.
    */
