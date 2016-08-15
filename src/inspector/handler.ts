@@ -14,7 +14,11 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  ICellEditorWidget, ITextChange
+  ITextChange
+} from '../editorwidget/view';
+
+import {
+  ICellEditorWidget
 } from '../notebook/cells/editor';
 
 import {
@@ -70,14 +74,14 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
 
     if (this._activeCell && !this._activeCell.isDisposed) {
       const editor = this._activeCell.editor;
-      editor.textChanged.disconnect(this.onTextChanged, this);
+      editor.contentChanged.disconnect(this.onTextChanged, this);
     }
     this._activeCell = newValue;
     if (this._activeCell) {
       // Clear ephemeral inspectors in preparation for a new editor.
       this.ephemeralCleared.emit(void 0);
       const editor = this._activeCell.editor;
-      editor.textChanged.connect(this.onTextChanged, this);
+      editor.contentChanged.connect(this.onTextChanged, this);
     }
   }
 

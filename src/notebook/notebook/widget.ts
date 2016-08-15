@@ -61,8 +61,12 @@ import {
 } from '../common/mimetype';
 
 import {
-  EdgeLocation
+  ICellEditorWidget
 } from '../cells/editor';
+
+import {
+  EdgeLocation 
+} from '../cells/view';
 
 import {
   INotebookModel
@@ -902,7 +906,7 @@ class Notebook extends StaticNotebook {
   /**
    * Handle edge request signals from cells.
    */
-  private _onEdgeRequest(widget: Widget, location: EdgeLocation): void {
+  private _onEdgeRequest(view: ICellEditorWidget, location: EdgeLocation): void {
     let prev = this.activeCellIndex;
     if (location === 'top') {
       this.activeCellIndex--;

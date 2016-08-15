@@ -42,6 +42,10 @@ import {
 } from './editor';
 
 import {
+  CellEditorPresenter
+} from './presenter';
+
+import {
   ICellModel, ICodeCellModel,
   IMarkdownCellModel, IRawCellModel
 } from './model';
@@ -106,7 +110,6 @@ const RENDERED_CLASS = 'jp-mod-rendered';
  * The text applied to an empty markdown cell.
  */
 const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
-
 
 /**
  * A base cell widget.
@@ -310,7 +313,7 @@ class BaseCellWidget extends Widget {
     }
 
     // Reset the editor model and set its mode to be the default MIME type.
-    this._editor.model = this._model;
+    this._editor.presenter.model = this._model;
     this._editor.setMimeType(this._mimetype);
 
     // Handle trusted cursor.

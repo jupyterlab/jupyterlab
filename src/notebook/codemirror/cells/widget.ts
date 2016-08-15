@@ -10,6 +10,10 @@ import {
 } from '../../cells/widget';
 
 import {
+  CellEditorPresenter
+} from '../../cells/presenter';
+
+import {
   CodeMirrorCellEditorWidget
 } from './editor';
 
@@ -88,6 +92,14 @@ namespace CodeMirrorCodeCellWidgetRenderer {
       'Ctrl-/': 'toggleComment',
     }
   };
+
+ /**
+   * A default code mirror cell editor initializer.
+   */
+  export
+  const defaulEditorInitializer: (editor: CodeMirrorCellEditorWidget) => void = (editor)=> {
+    editor.presenter = new CellEditorPresenter(editor); 
+  }
 
   /**
    * A default code mirror renderer for a code cell widget.

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as CodeMirror
-  from 'codemirror';
+from 'codemirror';
 
 import 'codemirror/mode/meta';
 
@@ -14,12 +14,18 @@ import {
   ResizeMessage, Widget
 } from 'phosphor/lib/ui/widget';
 
+import {
+  EditorWidget
+} from '../editorwidget/widget'
+
+import {
+  ICoords, IEditorState, ITextChange
+} from '../editorwidget/view'
 
 /**
  * The class name added to CodeMirrorWidget instances.
  */
 const EDITOR_CLASS = 'jp-CodeMirrorWidget';
-
 
 /**
  * The name of the default CodeMirror theme
@@ -31,16 +37,53 @@ const DEFAULT_CODEMIRROR_THEME = 'jupyter';
  * A widget which hosts a CodeMirror editor.
  */
 export
-class CodeMirrorWidget extends Widget {
+class CodeMirrorEditorWidget extends EditorWidget {
 
   /**
-   * Construct a CodeMirror widget.
+   * Construct a CodeMirror editor widget.
    */
   constructor(options: CodeMirror.EditorConfiguration = {}) {
     super();
     this.addClass(EDITOR_CLASS);
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
     this._editor = CodeMirror(this.node, options);
+
+    const doc = this._editor.getDoc();
+    CodeMirror.on(doc, 'change', (instance, change) => {
+      this.onDocChange(instance, change);
+    });
+  }
+
+  /**
+   * Handle change events from the document.
+   */
+  protected onDocChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
+    if (change.origin === 'setValue') {
+      return;
+    }
+    const cursor = doc.getCursor();
+    const textChange = <ITextChange>this.getEditorState(cursor.line, cursor.ch);
+    textChange.newValue = doc.getValue();
+    this.contentChanged.emit(textChange);
+  }
+
+  protected getEditorState(line: number, ch: number): IEditorState {
+    const editor = this.editor;
+    return {
+      line, ch,
+      chHeight: editor.defaultTextHeight(),
+      chWidth: editor.defaultCharWidth(),
+      coords: <ICoords>editor.charCoords({ line, ch }, 'page'),
+      position: editor.getDoc().indexFromPos({ line, ch })
+    }
+  }
+
+  getValue(): string {
+    return this.editor.getDoc().getValue();
+  }
+
+  setValue(value: string) {
+    this.editor.getDoc().setValue(value);
   }
 
   /**
@@ -57,9 +100,9 @@ class CodeMirrorWidget extends Widget {
    * #### Notes
    * This is a ready-only property.
    */
-   get editor(): CodeMirror.Editor {
-     return this._editor;
-   }
+  get editor(): CodeMirror.Editor {
+    return this._editor;
+  }
 
   /**
    * A message handler invoked on an `'after-attach'` message.

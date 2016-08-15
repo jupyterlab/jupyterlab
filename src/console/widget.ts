@@ -42,8 +42,12 @@ import {
 } from '../notebook/cells';
 
 import {
-  EdgeLocation, ICellEditorWidget
+  ICellEditorWidget
 } from '../notebook/cells/editor';
+
+import {
+  EdgeLocation
+} from '../notebook/cells/view';
 
 import {
   mimetypeForLanguage
