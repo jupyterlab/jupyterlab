@@ -207,7 +207,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
    * #### Notes
    * This is not intended to be called by the user.
    * It is assumed that the file has been renamed on the
-   * contents manager outside of this operation.
+   * contents manager prior to this operation.
    */
   setPath(value: string): void {
     this._path = value;
