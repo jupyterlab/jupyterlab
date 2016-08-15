@@ -432,6 +432,7 @@ class CodeCellWidget extends BaseCellWidget {
     let code = model.source;
     if (!code.trim()) {
       model.executionCount = null;
+      model.outputs.clear();
       return Promise.resolve(null);
     }
     model.executionCount = null;
