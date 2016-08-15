@@ -205,7 +205,7 @@ Note: "requirejs" must be included in a global context (usually as a
 
 ## Publishing packages for a JupyterLab release
 
-We publish an npm package, a Python source package, and a Python universal binary wheel.  
+We publish an npm package, a Python source package, and a Python universal binary wheel.  We also publish a conda package on conda-forge (see below).
 See the Python docs on [package uploading](https://packaging.python.org/distributing/#uploading-your-project-to-pypi) 
 for twine setup instructions and for why twine is the recommended method.
 
@@ -217,4 +217,11 @@ rm -rf dist
 python setup.py sdist
 python setup.py bdist_wheel --universal
 twine upload dist/*
+md5 dist/*.tar.gz  # get the md5 hash for conda-forge install
 ```
+
+Publish on conda-forge
+
+- Fork https://github.com/conda-forge/jupyterlab-feedstock
+- Create a PR with the version bump
+- Update `recipe/meta.yaml` with the new version and md5
