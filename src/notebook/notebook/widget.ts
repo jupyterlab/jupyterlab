@@ -726,11 +726,11 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Scroll so that the active cell is visible in the parent widget.
+   * Scroll so that the active cell is visible.
    */
   scrollToActiveCell() {
-    if (this.parent && this.activeCell) {
-      scrollIntoViewIfNeeded(this.parent.node, this.activeCell.node);
+    if (this.activeCell) {
+      scrollIntoViewIfNeeded(this.node, this.activeCell.node);
     }
   }
 
