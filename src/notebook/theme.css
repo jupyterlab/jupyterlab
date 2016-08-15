@@ -9,6 +9,7 @@
   min-width: 50px;
   min-height: 50px;
   outline: none;
+  overflow: auto;
 }
 
 
@@ -20,7 +21,6 @@
 .p-Widget.jp-Notebook-container {
   display: flex;
   flex-direction: column;
-  overflow: auto;
   padding-left: 10px;
   padding-right: 10px;
   padding-bottom: 20px;
