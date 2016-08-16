@@ -900,9 +900,9 @@ namespace Private {
       if (replace) {
         child.model.source = text;
       } else {
+        // Create a new code cell and add as the next cell.
         let cell = parent.model.factory.createCodeCell();
         cell.source = text;
-        // Add the child as the next cell
         let cells = parent.model.cells;
         for (let i = 0; i < cells.length; i++) {
           let widget = parent.childAt(i);
