@@ -709,12 +709,12 @@ describe('notebook/notebook/widget', () => {
         Widget.attach(widget, document.body);
         widget.mode = 'edit';
         let cell = widget.childAt(widget.activeCellIndex);
-        // Notebook activates cell.
+        // Wait for update-request.
         requestAnimationFrame(() => {
-          // Cell activates editor.
+          // Notebook activates the editor.
+          expect(widget.methods).to.contain('onActivateRequest');
           requestAnimationFrame(() => {
             expect(cell.node.contains(document.activeElement)).to.be(true);
-            widget.dispose();
             done();
           });
         });
@@ -1044,13 +1044,16 @@ describe('notebook/notebook/widget', () => {
 
     describe('#onActivateRequest()', () => {
 
-      it('should focus the node', () => {
+      it('should focus the node after an update', (done) => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
         sendMessage(widget, WidgetMessage.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
-        expect(document.activeElement).to.be(widget.node);
-        widget.dispose();
+        requestAnimationFrame(() => {
+          expect(document.activeElement).to.be(widget.node);
+          widget.dispose();
+          done();
+        });
       });
 
       it('should post an `update-request', (done) => {

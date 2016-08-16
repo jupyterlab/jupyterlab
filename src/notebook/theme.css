@@ -33,7 +33,7 @@
   font-family: monospace;
   padding: 0.4em;
   text-align: right;
-  line-height: 20px;
+  line-height: 1.2em;
   font-size: 14px;
 }
 
@@ -44,12 +44,11 @@
 }
 
 
-.jp-CellEditor {
+.jp-CellEditor.p-Widget {
   border: 1px solid #cfcfcf;
   border-radius: 2px;
   background: #f7f7f7;
   line-height: 1.2em;
-  padding: 4px;
 }
 
 
@@ -59,12 +58,12 @@
 
 
 .jp-MarkdownCell.jp-mod-rendered {
-  padding-left: 100px;
+  padding-left: 90px;
 }
 
 
 .jp-MarkdownCell-renderer {
-  padding-left: 4px;
+  padding: 0.5em 0.5em 0.5em 0.4em;
 }
 
 

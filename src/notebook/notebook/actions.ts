@@ -335,7 +335,8 @@ namespace NotebookActions {
       promises.push(Private.runCell(widget, child, kernel));
     }
     return Promise.all(promises).then(results => {
-      widget.activate();
+      // Post an update request.
+      widget.update();
       for (let result of results) {
         if (!result) {
           return false;
@@ -370,9 +371,11 @@ namespace NotebookActions {
     if (widget.activeCellIndex === widget.childCount() - 1) {
       let cell = model.factory.createCodeCell();
       model.cells.add(cell);
+      widget.activeCellIndex++;
       widget.mode = 'edit';
+    } else {
+      widget.activeCellIndex++;
     }
-    widget.activeCellIndex++;
     return promise;
   }
 
