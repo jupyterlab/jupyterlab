@@ -34,7 +34,7 @@ class SaveHandler implements IDisposable {
    * Construct a new save handler.
    */
   constructor(options: SaveHandler.IOptions) {
-    this._services = options.services;
+    this._manager = options.manager;
     this._context = options.context;
     this._minInterval = options.saveInterval || 120;
     this._interval = this._minInterval;
@@ -110,7 +110,7 @@ class SaveHandler implements IDisposable {
     }
 
     // Make sure the file has not changed on disk.
-    this._services.contents.get(context.path).then(model => {
+    this._manager.contents.get(context.path).then(model => {
       if (model.last_modified !== context.contentsModel.last_modified) {
         return this._timeConflict(model.last_modified);
       }
@@ -163,7 +163,7 @@ class SaveHandler implements IDisposable {
   private _minInterval = -1;
   private _interval = -1;
   private _context: IDocumentContext<IDocumentModel> = null;
-  private _services: IServiceManager = null;
+  private _manager: IServiceManager = null;
   private _stopped = false;
 }
 
@@ -186,7 +186,7 @@ namespace SaveHandler {
     /**
      * The service manager to use for checking last saved.
      */
-    services: IServiceManager;
+    manager: IServiceManager;
 
     /**
      * The minimum save interval in seconds (default is two minutes).

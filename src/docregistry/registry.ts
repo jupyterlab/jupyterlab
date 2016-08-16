@@ -65,7 +65,7 @@ interface IDocumentRegistry extends IDisposable {
    * the given factory is already registered, a warning will be logged
    * and this will be a no-op.
    */
-  addModelFactory(factory: IModelFactory): IDisposable;
+  addModelFactory(factory: IModelFactory<IDocumentModel>): IDisposable;
 
   /**
    * Add a widget extension to the registry.
@@ -190,7 +190,7 @@ interface IDocumentRegistry extends IDisposable {
    *
    * @returns A model factory instance.
    */
-  getModelFactoryFor(widgetName: string): IModelFactory;
+  getModelFactoryFor(widgetName: string): IModelFactory<IDocumentModel>;
 
   /**
    * Get a widget factory by name.
@@ -317,7 +317,7 @@ class DocumentRegistry implements IDocumentRegistry {
    * the given factory is already registered, a warning will be logged
    * and this will be a no-op.
    */
-  addModelFactory(factory: IModelFactory): IDisposable {
+  addModelFactory(factory: IModelFactory<IDocumentModel>): IDisposable {
     let name = factory.name.toLowerCase();
     if (this._modelFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
@@ -585,7 +585,7 @@ class DocumentRegistry implements IDocumentRegistry {
    *
    * @returns A model factory instance.
    */
-  getModelFactoryFor(widgetName: string): IModelFactory {
+  getModelFactoryFor(widgetName: string): IModelFactory<IDocumentModel> {
     widgetName = widgetName.toLowerCase();
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
     if (!wFactoryEx) {
@@ -636,7 +636,7 @@ class DocumentRegistry implements IDocumentRegistry {
     return options;
   }
 
-  private _modelFactories: { [key: string]: IModelFactory } = Object.create(null);
+  private _modelFactories: { [key: string]: IModelFactory<IDocumentModel> } = Object.create(null);
   private _widgetFactories: { [key: string]: Private.IWidgetFactoryRecord } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);

@@ -18,7 +18,7 @@ import {
  * A model factory for notebooks.
  */
 export
-class NotebookModelFactory implements IModelFactory {
+class NotebookModelFactory implements IModelFactory<INotebookModel> {
   /**
    * The name of the model.
    *

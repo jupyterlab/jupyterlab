@@ -169,7 +169,7 @@ defineSignal(DocumentModel.prototype, 'stateChanged');
  * An implementation of a model factory for text files.
  */
 export
-class TextModelFactory implements IModelFactory {
+class TextModelFactory implements IModelFactory<IDocumentModel> {
   /**
    * The name of the model type.
    *

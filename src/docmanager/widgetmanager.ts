@@ -6,6 +6,18 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
+  Vector
+} from 'phosphor/lib/collections/vector';
+
+import {
   DisposableSet, IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -37,10 +49,6 @@ import {
   IDocumentRegistry, IDocumentContext, IDocumentModel
 } from '../docregistry';
 
-import {
-  ContextManager
-} from './context';
-
 
 /**
  * The class name added to document widgets.
@@ -57,7 +65,6 @@ class DocumentWidgetManager implements IDisposable {
    * Construct a new document widget manager.
    */
   constructor(options: DocumentWidgetManager.IOptions) {
-    this._contextManager = options.contextManager;
     this._registry = options.registry;
   }
 
@@ -76,21 +83,14 @@ class DocumentWidgetManager implements IDisposable {
       return;
     }
     this._registry = null;
-    this._contextManager = null;
-    for (let id in this._widgets) {
-      for (let widget of this._widgets[id]) {
-        widget.dispose();
-      }
-    }
     clearSignalData(this);
   }
 
   /**
    * Create a widget for a document and handle its lifecycle.
    */
-  createWidget(name: string, id: string, kernel?: IKernel.IModel): Widget {
+  createWidget(name: string, context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): Widget {
     let factory = this._registry.getWidgetFactory(name);
-    let context = this._contextManager.getContext(id);
     let widget = factory.createNew(context, kernel);
     Private.nameProperty.set(widget, name);
 
@@ -102,7 +102,7 @@ class DocumentWidgetManager implements IDisposable {
     widget.disposed.connect(() => {
       disposables.dispose();
     });
-    this.adoptWidget(id, widget);
+    this.adoptWidget(context, widget);
     this.setCaption(widget);
     context.contentsModelChanged.connect(() => {
       this.setCaption(widget);
@@ -117,54 +117,47 @@ class DocumentWidgetManager implements IDisposable {
    * Install the message hook for the widget and add to list
    * of known widgets.
    */
-  adoptWidget(id: string, widget: Widget): void {
-    if (!(id in this._widgets)) {
-      this._widgets[id] = [];
-    }
-    this._widgets[id].push(widget);
+  adoptWidget(context: IDocumentContext<IDocumentModel>, widget: Widget): void {
+    let widgets = Private.widgetsProperty.get(context);
+    widgets.pushBack(widget);
     installMessageHook(widget, (handler: IMessageHandler, msg: Message) => {
       return this.filterMessage(handler, msg);
     });
     widget.addClass(DOCUMENT_CLASS);
     widget.title.closable = true;
     widget.disposed.connect(() => {
-      // Remove the widget from the widget registry.
-      let index = this._widgets[id].indexOf(widget);
-      this._widgets[id].splice(index, 1);
+      // Remove the widget.
+      widgets.remove(widget);
       // Dispose of the context if this is the last widget using it.
-      if (!this._widgets[id].length) {
-        let context = this._contextManager.getContext(id);
+      if (!widgets.length) {
         context.dispose();
       }
     });
-    Private.idProperty.set(widget, id);
+    Private.contextProperty.set(widget, context);
   }
 
   /**
-   * See if a widget already exists for the given path and widget name.
+   * See if a widget already exists for the given context and widget name.
    *
    * #### Notes
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
-  findWidget(path: string, widgetName: string): Widget {
-    let ids = this._contextManager.getIdsForPath(path);
-    for (let id of ids) {
-      for (let widget of this._widgets[id]) {
-        let name = Private.nameProperty.get(widget);
-        if (name === widgetName) {
-          return widget;
-        }
+  findWidget(context: IDocumentContext<IDocumentModel>, widgetName: string): Widget {
+    let widgets = Private.widgetsProperty.get(context);
+    return find(widgets, widget => {
+      let name = Private.nameProperty.get(widget);
+      if (name === widgetName) {
+        return true;
       }
-    }
+    });
   }
 
   /**
    * Get the document context for a widget.
    */
   contextForWidget(widget: Widget): IDocumentContext<IDocumentModel> {
-    let id = Private.idProperty.get(widget);
-    return this._contextManager.getContext(id);
+    return Private.contextProperty.get(widget);
   }
 
   /**
@@ -175,35 +168,21 @@ class DocumentWidgetManager implements IDisposable {
    * as this widget.
    */
   clone(widget: Widget): Widget {
-    let id = Private.idProperty.get(widget);
+    let context = Private.contextProperty.get(widget);
     let name = Private.nameProperty.get(widget);
-    let newWidget = this.createWidget(name, id);
-    this.adoptWidget(id, newWidget);
+    let newWidget = this.createWidget(name, context);
+    this.adoptWidget(context, newWidget);
     return widget;
   }
 
   /**
-   * Close the widgets associated with a given path.
+   * Get the widgets associated with a given context.
    */
-  closeFile(path: string): void {
-    let ids = this._contextManager.getIdsForPath(path);
-    for (let id of ids) {
-      let widgets: Widget[] = this._widgets[id] || [];
-      for (let w of widgets) {
-        w.close();
-      }
-    }
-  }
-
-  /**
-   * Close all of the open documents.
-   */
-  closeAll(): void {
-    for (let id in this._widgets) {
-      for (let w of this._widgets[id]) {
-        w.close();
-      }
-    }
+  close(context: IDocumentContext<IDocumentModel>): void {
+    let widgets = Private.widgetsProperty.get(context);
+    each(widgets, widget => {
+      widget.close();
+    });
   }
 
   /**
@@ -231,7 +210,7 @@ class DocumentWidgetManager implements IDisposable {
    * Set the caption for widget title.
    */
   protected setCaption(widget: Widget): void {
-    let context = this.contextForWidget(widget);
+    let context = Private.contextProperty.get(widget);
     let model = context.contentsModel;
     if (!model) {
       widget.title.caption = '';
@@ -272,9 +251,9 @@ class DocumentWidgetManager implements IDisposable {
    */
   private _maybeClose(widget: Widget): Promise<boolean> {
     // Bail if the model is not dirty or other widgets are using the model.
-    let id = Private.idProperty.get(widget);
-    let widgets = this._widgets[id];
-    let model = this._contextManager.getModel(id);
+    let context = Private.contextProperty.get(widget);
+    let widgets = Private.widgetsProperty.get(context);
+    let model = context.model;
     if (!model.dirty || widgets.length > 1) {
       return Promise.resolve(true);
     }
@@ -291,9 +270,7 @@ class DocumentWidgetManager implements IDisposable {
   }
 
   private _closeGuard = false;
-  private _contextManager: ContextManager = null;
   private _registry: IDocumentRegistry = null;
-  private _widgets: { [key: string]: Widget[] } = Object.create(null);
 }
 
 
@@ -311,11 +288,6 @@ namespace DocumentWidgetManager {
      * A document registry instance.
      */
     registry: IDocumentRegistry;
-
-    /**
-     * A context manager instance.
-     */
-    contextManager: ContextManager;
   }
 }
 
@@ -325,11 +297,11 @@ namespace DocumentWidgetManager {
  */
 namespace Private {
   /**
-   * A private attached property for a widget context id.
+   * A private attached property for a widget context.
    */
   export
-  const idProperty = new AttachedProperty<Widget, string>({
-    name: 'id'
+  const contextProperty = new AttachedProperty<Widget, IDocumentContext<IDocumentModel>>({
+    name: 'context'
   });
 
   /**
@@ -338,5 +310,16 @@ namespace Private {
   export
   const nameProperty = new AttachedProperty<Widget, string>({
     name: 'name'
+  });
+
+  /**
+   * A private attached property for the widgets associated with a context.
+   */
+  export
+  const widgetsProperty = new AttachedProperty<IDocumentContext<IDocumentModel>, Vector<Widget>>({
+    name: 'widgets',
+    create: () => {
+      return new Vector<Widget>();
+    }
   });
 }
