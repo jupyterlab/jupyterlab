@@ -131,5 +131,7 @@ function activateCommandPalette(app: JupyterLab): ICommandPalette {
 
   app.shell.addToLeftArea(palette);
 
-  return new Palette(palette);
+  let palette2 = new Palette(palette);
+  palette2.placeholder = "SEARCH";
+  return palette2;
 }
