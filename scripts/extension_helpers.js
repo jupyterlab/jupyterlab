@@ -43,6 +43,8 @@ var path = require('path');
 // The "always ignore" externals used by JupyterLab, Phosphor and friends
 var DEFAULT_EXTERNALS = [
     function(context, request, callback) {
+      // Replace this with a call to a function that handles *all*
+      // permuations.
       var regex = /^phosphor\/lib\/([a-z]+)\/([a-z]+)$/;
       if(regex.test(request)) {
           var matches = regex.exec(request)

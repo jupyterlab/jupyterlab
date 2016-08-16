@@ -23,6 +23,7 @@ var loaders = [
 
 
 module.exports = [
+// Application bundle
 {
   entry: './index.js',
   output: {
@@ -41,7 +42,7 @@ module.exports = [
   },
   externals: helpers.DEFAULT_EXTERNALS
 },
-// Codemirror umd bundle
+// Codemirror bundle
 {
    entry: 'codemirror',
    output: {
@@ -55,11 +56,11 @@ module.exports = [
    bail: true,
    devtool: 'source-map'
 },
-// Jupyter-js-services umd bundle
+// Jupyter-js-services bundle
 {
     entry: 'jupyter-js-services',
     output: {
-        filename: 'jupyter-js-services.bundle.js',
+        filename: 'services.bundle.js',
         path: './build',
         library: ['jupyter', 'services'],
     },
@@ -69,9 +70,9 @@ module.exports = [
     bail: true,
     devtool: 'source-map'
 },
-// Phosphor umd bundle.
+// Phosphor bundle
 {
-    entry: 'phosphor',
+    entry: './phosphor-shim.js',
     output: {
         filename: 'phosphor.bundle.js',
         path: './build',

@@ -17,7 +17,7 @@
     "leaflet": "^0.7.7",
     "marked": "^0.3.5",
     "moment": "^2.11.2",
-    "phosphor": "file:../../phosphor",
+    "phosphor": "^0.6.1",
     "sanitize-html": "^1.12.0",
     "semver": "^5.3.0",
     "simulate-event": "^1.2.0",

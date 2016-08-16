@@ -27,8 +27,12 @@ Distributed under the terms of the Modified BSD License.
   "notebookPath": "{{notebook_path | urlencode}}"
 }</script>
 <script src="{{static_prefix}}/phosphor.bundle.js" type="text/javascript" charset="utf-8"></script>
-<script src="{{static_prefix}}/jupyter-js-services.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+  console.log(phosphor);
+</script>
+<script src="{{static_prefix}}/services.bundle.js" type="text/javascript" charset="utf-8"></script>
 <script src="{{static_prefix}}/codemirror.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script src="{{static_prefix}}/lab.bundle.js" type="text/javascript" charset="utf-8"></script>
 <script src="{{static_prefix}}/bundle.js" type="text/javascript" charset="utf-8"></script>
 </body>
 
