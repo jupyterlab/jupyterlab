@@ -8,24 +8,26 @@
   background: #FAFAFA;
 }
 
-
-.p-CommandPalette-search {
-  padding: 8px;
-}
-
-
 .p-CommandPalette-wrapper {
-  padding: 4px 6px;
+  padding: 14px 12px;
   background: white;
-  border: 1px solid #E0E0E0;
+  border-bottom: 2px solid #E0E0E0;
+  overflow: overlay;
 }
 
+.p-CommandPalette-wrapper::after {
+    font-family: FontAwesome;
+    content: "\f002"; /* search */
+    color: #2196F3;
+}
 
 .p-CommandPalette-input {
-  width: 100%;
+  width: calc(100% - 18px);
+  float: left;
   border: none;
   outline: none;
   font-size: 16px;
+  padding: 0;
 }
 
 
