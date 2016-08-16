@@ -904,13 +904,8 @@ namespace Private {
         let cell = parent.model.factory.createCodeCell();
         cell.source = text;
         let cells = parent.model.cells;
-        for (let i = 0; i < cells.length; i++) {
-          let widget = parent.childAt(i);
-          if (widget === child) {
-            cells.insert(i + 1, cell);
-            break;
-          }
-        }
+        let i = cells.indexOf(child.model);
+        cells.insert(i + 1, cell);
       }
     }
   }

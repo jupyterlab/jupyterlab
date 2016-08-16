@@ -228,6 +228,7 @@ class ConsoleWidget extends Widget {
             })[0];
             if (setNextInput) {
               let text = (setNextInput as any).text;
+              // Ignore the `replace` value and always set the next prompt.
               this.prompt.model.source = text;
             }
           }
