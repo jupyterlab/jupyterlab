@@ -1,6 +1,7 @@
-
 var path = require('path');
 var fs = require('fs');
+var walkSync = require('walk-sync');
+
 
 /**
  * Generate a shim for a library that does not have top level indexes.
@@ -9,56 +10,36 @@ var fs = require('fs');
  *
  * @param sourceFolder (string) - The source folder (default is `/lib`).
  *
- * @returns The code for a shim module.
+ * @returns A promise that resolves when the file is created.
  */
 function shimmer(modName, sourceFolder) {
   var modPath = require.resolve(modName + '/package.json');
   sourceFolder = sourceFolder || 'lib';
   modPath = path.join(path.dirname(modPath), sourceFolder);
-  var paths = [];
-  var dirNames = [];
+  var entries = walkSync.entries(modPath);
+  var lines = ['var ' + modName + ' = {}'];
 
-  var walk = require('walk');
-  var walker = walk.walk(modPath);
-  var fullPath;
-  var lines = [];
-
-  walker.on("file", function (root, fileStats, next) {
-    if (path.extname(fileStats.name) !== '.js') {
-      next();
-      return;
+  for (var i = 0; i < entries.length; i++) {
+    var entry = entries[i];
+    var basePath  = path.join(entry.basePath, entry.relativePath);
+    var entryPath = path.relative(modPath, basePath);
+    if (entry.isDirectory()) {
+      var parts = entryPath.split('/');
+      lines.push(modName + '["' + parts.join('"]["') + '"] = {};')
+    } else if (path.extname(entryPath) === '.js') {
+      entryPath = entryPath.replace('.js', '');
+      if (path.basename(entryPath) === 'index') {
+        entryPath = path.dirname(entryPath);
+      }
+      parts = entryPath.split('/');
+      if (parts[0]) {
+       lines.push(modName + '["' + parts.join('"]["') + '"] = require("' + path.join(modName, sourceFolder, entryPath) + '");');
+      }
     }
-    fullPath = path.join(root, fileStats.name.replace('.js', ''));
-    paths.push(path.relative(modPath, fullPath));
-    next();
-  });
-
-  walker.on("directory", function (root, dirStats, next) {
-    fullPath = path.join(root, dirStats.name)
-    dirNames.push(path.relative(modPath, fullPath));
-    next();
-  });
-
-   walker.on("end", function () {
-    // Lets write the code.
-    lines.push('var ' + modName + ' = { };');
-    for (var i = 0; i < dirNames.length; i++) {
-      lines.push(modName + '["' + dirNames[i] + '"] = {};')
-    }
-    for (var i = 0; i < paths.length; i++) {
-      parts = paths[i].split('/');
-      lines.push(modName + '["' + parts[0] + '"]["' + parts[1] + '"] = require("' + path.join(modName, sourceFolder, paths[i]) + '");')
-    }
-    lines.push('module.exports = ' + modName + ';');
-    var code = lines.join('\n');
-    fs.writeFile(modName + '-shim.js', code, function(err) {
-        if (err) {
-            return console.log(err);
-        }
-        console.log("The file was saved!");
-    }); 
-  });
+  }
+  lines.push('module.exports = ' + modName + ';');
+  return lines.join('\n');
 }
 
 
-shimmer('phosphor');
+module.exports = shimmer;

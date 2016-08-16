@@ -45,10 +45,16 @@ var DEFAULT_EXTERNALS = [
     function(context, request, callback) {
       // Replace this with a call to a function that handles *all*
       // permuations.
-      var regex = /^phosphor\/lib\/([a-z]+)\/([a-z]+)$/;
+      var regex = /^phosphor\/lib\/([a-z\/]+)$/;
       if(regex.test(request)) {
-          var matches = regex.exec(request)
-          var lib = 'var phosphor.' + matches[1] + '.' + matches[2];
+          var matches = regex.exec(request).slice(1);
+          var lib = 'var phosphor.' + matches.join('.');
+          return callback(null, lib);
+      }
+      regex = /^jupyterlab\/lib\/([a-z\/]+)$/;
+      if(regex.test(request)) {
+          var matches = regex.exec(request).slice(1);
+          var lib = 'var jupyter.lab.' + matches.join('.');
           return callback(null, lib);
       }
       callback();

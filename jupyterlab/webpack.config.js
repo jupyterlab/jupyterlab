@@ -5,7 +5,13 @@
 // See https://github.com/webpack/css-loader/issues/144
 require('es6-promise').polyfill();
 
+var fs = require('fs');
 var helpers = require('jupyterlab/scripts/extension_helpers');
+var shimmer = require('./shim-maker');
+
+// Create the phosphor and jupyterlab shims.
+fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor'));
+fs.writeFileSync('./build/jupyterlab-shim.js', shimmer('jupyterlab'));
 
 var loaders = [
   { test: /\.css$/, loader: 'style-loader!css-loader' },
@@ -72,11 +78,25 @@ module.exports = [
 },
 // Phosphor bundle
 {
-    entry: './phosphor-shim.js',
+    entry: './build/phosphor-shim.js',
     output: {
         filename: 'phosphor.bundle.js',
         path: './build',
         library: 'phosphor',
+    },
+    bail: true,
+    devtool: 'source-map'
+},
+// JupyterLab bundle
+{
+    entry: './build/jupyterlab-shim.js',
+    output: {
+        filename: 'jupyterlab.bundle.js',
+        path: './build',
+        library: ['jupyter', 'lab'],
+    },
+    module: {
+      loaders: loaders
     },
     bail: true,
     devtool: 'source-map'
