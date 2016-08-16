@@ -2,28 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
-} from 'jupyter-js-services';
+  Token
+} from 'phosphor/lib/core/token';
 
 import {
-  MimeData as IClipboard
-} from 'phosphor/lib/core/mimedata';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
 
 import {
   ABCWidgetFactory, IDocumentContext
 } from '../../docregistry';
-
-import {
-  RenderMime
-} from '../../rendermime';
-
-import {
-  ToolbarItems
-} from './default-toolbar';
 
 import {
   INotebookModel
@@ -32,66 +20,28 @@ import {
 import {
   NotebookPanel
 } from './panel';
+/* tslint:enable */
 
+/**
+ * A class that tracks notebook widgets.
+ */
+export
+interface INotebookTracker extends FocusTracker<NotebookPanel> {}
+
+/* tslint:disable */
+/**
+ * The notebook tracker token.
+ */
+export
+const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebook-handler');
 
 /**
  * A widget factory for notebook panels.
  */
 export
-class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookModel> {
-  /**
-   * Construct a new notebook widget factory.
-   *
-   * @param rendermime - The rendermime instance.
-   *
-   * @param clipboard - The application clipboard.
-   *
-   * @param renderer - The notebook panel renderer.
-   */
-  constructor(rendermime: RenderMime, clipboard: IClipboard, renderer: NotebookPanel.IRenderer) {
-    super();
-    this._rendermime = rendermime;
-    this._clipboard = clipboard;
-    this._renderer = renderer;
-  }
-
-  /**
-   * Dispose of the resources used by the factory.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._rendermime = null;
-    this._clipboard = null;
-    super.dispose();
-  }
-
-  /**
-   * Create a new widget.
-   *
-   * #### Notes
-   * The factory will start the appropriate kernel and populate
-   * the default toolbar items using `ToolbarItems.populateDefaults`.
-   */
-  createNew(context: IDocumentContext<INotebookModel>, kernel?: IKernel.IModel): NotebookPanel {
-    let rendermime = this._rendermime.clone();
-    if (kernel) {
-      context.changeKernel(kernel);
-    }
-    let panel = new NotebookPanel({
-      rendermime,
-      clipboard: this._clipboard,
-      renderer: this._renderer
-    });
-    panel.context = context;
-    ToolbarItems.populateDefaults(panel);
-    this.widgetCreated.emit(panel);
-    console.log(panel.content.childAt(0).editor);
-    return panel;
-  }
-
-  private _rendermime: RenderMime = null;
-  private _clipboard: IClipboard = null;
-  private _renderer: NotebookPanel.IRenderer = null;
+interface NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookModel> {
+  tracker:INotebookTracker
 }
+
+export
+const NotebookWidgetFactory = new Token<NotebookWidgetFactory>('jupyter.services.notebook.factory');

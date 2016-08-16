@@ -73,6 +73,14 @@ namespace EditorWidget {
   export
   interface Tracker extends FocusTracker<EditorWidget> { }
 
+  /* tslint:disable */
+  /**
+   * The editor tracker token.
+   */
+  export
+  const Tracker = new Token<Tracker>('jupyter.services.editor-tracker');
+  /* tslint:enable */
+
   export
   abstract class Factory extends ABCWidgetFactory<EditorWidget, IDocumentModel> {
     tracker: Tracker
@@ -82,13 +90,5 @@ namespace EditorWidget {
 
   export
   const IFactory = new Token<Factory>('jupyter.services.editor.factory');
-
-  /* tslint:disable */
-  /**
-   * The editor tracker token.
-   */
-  export
-  const Tracker = new Token<Tracker>('jupyter.services.editor-tracker');
-  /* tslint:enable */
 
 }
