@@ -176,7 +176,7 @@ class DocumentWidgetManager implements IDisposable {
   }
 
   /**
-   * Get the widgets associated with a given context.
+   * Close the widgets associated with a given context.
    */
   close(context: IDocumentContext<IDocumentModel>): void {
     let widgets = Private.widgetsProperty.get(context);
