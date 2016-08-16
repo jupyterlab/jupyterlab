@@ -905,7 +905,11 @@ namespace Private {
         cell.source = text;
         let cells = parent.model.cells;
         let i = cells.indexOf(child.model);
-        cells.insert(i + 1, cell);
+        if (i === -1) {
+          cells.add(cell);
+        } else {
+          cells.insert(i + 1, cell);
+        }
       }
     }
   }
