@@ -17,7 +17,7 @@
 
 .p-CommandPalette-wrapper::after {
     font-family: FontAwesome;
-    content: "\f002";
+    content: "\f002"; /* search */
     color: #2196F3;
 }
 
