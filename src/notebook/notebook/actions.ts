@@ -865,6 +865,9 @@ namespace Private {
           if (reply && reply.content.status === 'ok') {
             let content = reply.content as KernelMessage.IExecuteOkReply;
             parent.inspectionHandler.handleExecuteReply(content);
+            if (content.payload) {
+              handlePayload(content, parent, child);
+            }
           } else {
             parent.inspectionHandler.handleExecuteReply(null);
           }
@@ -877,6 +880,39 @@ namespace Private {
       break;
     }
     return Promise.resolve(true);
+  }
+
+  /**
+   * Handle payloads from an execute reply.
+   *
+   * #### Notes
+   * Payloads are deprecated and there are no official interfaces for them in
+   * the kernel type definitions.
+   * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
+   */
+  function handlePayload(content: KernelMessage.IExecuteOkReply, parent: Notebook, child: BaseCellWidget) {
+    let setNextInput = content.payload.filter(i => {
+      return (i as any).source === 'set_next_input';
+    })[0];
+    if (setNextInput) {
+      let text = (setNextInput as any).text;
+      let replace = (setNextInput as any).replace;
+      if (replace) {
+        child.model.source = text;
+      } else {
+        let cell = parent.model.factory.createCodeCell();
+        cell.source = text;
+        // Add the child as the next cell
+        let cells = parent.model.cells;
+        for (let i = 0; i < cells.length; i++) {
+          let widget = parent.childAt(i);
+          if (widget === child) {
+            cells.insert(i + 1, cell);
+            break;
+          }
+        }
+      }
+    }
   }
 
   /**
