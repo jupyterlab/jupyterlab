@@ -47,7 +47,6 @@ module.exports = [
    output: {
       filename: 'codemirror.bundle.js',
       path: './build',
-      libraryTarget: 'umd',
       library: 'codemirror'
    },
    module: {
@@ -63,7 +62,6 @@ module.exports = [
         filename: 'jupyter-js-services.bundle.js',
         path: './build',
         library: ['jupyter', 'services'],
-        libraryTarget: 'umd',
     },
     module: {
       loaders: loaders
@@ -73,11 +71,11 @@ module.exports = [
 },
 // Phosphor umd bundle.
 {
-    entry: 'phosphor/lib',
+    entry: 'phosphor',
     output: {
         filename: 'phosphor.bundle.js',
         path: './build',
-        libraryTarget: 'this'
+        library: 'phosphor',
     },
     bail: true,
     devtool: 'source-map'

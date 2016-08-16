@@ -43,16 +43,16 @@ var path = require('path');
 // The "always ignore" externals used by JupyterLab, Phosphor and friends
 var DEFAULT_EXTERNALS = [
     function(context, request, callback) {
-      var regex = /phosphor\/lib\/([a-z]+)\/.*$/
+      var regex = /^phosphor\/lib\/([a-z]+)\/([a-z]+)$/;
       if(regex.test(request)) {
           var matches = regex.exec(request)
-          var lib = 'this phosphor/lib/' + matches[1];
+          var lib = 'var phosphor.' + matches[1] + '.' + matches[2];
           return callback(null, lib);
       }
       callback();
     },
     {
-      'jupyter-js-services': 'umd jupyter-js-services',
+      'jupyter-js-services': 'jupyter.services',
       'codemirror': 'codemirror',
       'codemirror/lib/codemirror': 'codemirror',
       '../lib/codemirror': 'codemirror',
