@@ -129,9 +129,9 @@ function activateCommandPalette(app: JupyterLab): ICommandPalette {
     label: 'Toggle Command Palette'
   });
 
+  palette.inputNode.placeholder = "SEARCH";
+
   app.shell.addToLeftArea(palette);
 
-  let palette2 = new Palette(palette);
-  palette2.placeholder = "SEARCH";
-  return palette2;
+  return new Palette(palette);
 }
