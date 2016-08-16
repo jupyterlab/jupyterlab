@@ -440,7 +440,8 @@ class CodeCellWidget extends BaseCellWidget {
     this.trusted = true;
     let outputs = model.outputs;
     return outputs.execute(code, kernel).then(reply => {
-      if (reply.content.status === 'aborted') {
+      let status = reply.content.status;
+      if (status === 'aborted') {
         model.executionCount = null;
         this.setPrompt(' ');
       } else {
