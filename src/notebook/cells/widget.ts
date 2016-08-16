@@ -440,11 +440,33 @@ class CodeCellWidget extends BaseCellWidget {
     this.trusted = true;
     let outputs = model.outputs;
     return outputs.execute(code, kernel).then(reply => {
-      if (reply.content.status === 'aborted') {
+      let status = reply.content.status;
+      if (status === 'aborted') {
         model.executionCount = null;
         this.setPrompt(' ');
       } else {
         model.executionCount = reply.content.execution_count;
+      }
+      // Handle `set_next_input` payload.
+      // Payloads are deprecated and there are no official interfaces for
+      // them in the kernel type definitions.
+      // See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
+      if (status === 'ok') {
+        let content = reply.content as KernelMessage.IExecuteOkReply;
+        if (content && content.payload) {
+          let setNextInput = content.payload.filter(i => {
+            return (i as any).source === 'set_next_input';
+          })[0];
+          if (setNextInput) {
+            let text = (setNextInput as any).text;
+            let replace = (setNextInput as any).replace;
+            if (replace) {
+              model.source = text;
+            } else {
+              console.error('Replacing next input not supported');
+            }
+          }
+        }
       }
       return reply;
     });
