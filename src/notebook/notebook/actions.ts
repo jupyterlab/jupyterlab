@@ -865,7 +865,7 @@ namespace Private {
           if (reply && reply.content.status === 'ok') {
             let content = reply.content as KernelMessage.IExecuteOkReply;
             parent.inspectionHandler.handleExecuteReply(content);
-            if (content.payload) {
+            if (content.payload && content.payload.length) {
               handlePayload(content, parent, child);
             }
           } else {

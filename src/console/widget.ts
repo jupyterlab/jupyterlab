@@ -222,7 +222,7 @@ class ConsoleWidget extends Widget {
           let content = value.content as KernelMessage.IExecuteOkReply;
           this._inspectionHandler.handleExecuteReply(content);
           // Use deprecated payloads for backwards compatibility.
-          if (content.payload) {
+          if (content.payload && content.payload.length) {
             let setNextInput = content.payload.filter(i => {
               return (i as any).source === 'set_next_input';
             })[0];
