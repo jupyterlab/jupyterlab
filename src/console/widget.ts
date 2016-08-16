@@ -221,6 +221,16 @@ class ConsoleWidget extends Widget {
         if (value.content.status === 'ok') {
           let content = value.content as KernelMessage.IExecuteOkReply;
           this._inspectionHandler.handleExecuteReply(content);
+          // Use deprecated payloads for backwards compatibility.
+          if (content.payload) {
+            let setNextInput = content.payload.filter(i => {
+              return (i as any).source === 'set_next_input';
+            })[0];
+            if (setNextInput) {
+              let text = (setNextInput as any).text;
+              this.prompt.model.source = text;
+            }
+          }
         }
         Private.scrollToBottom(this.node);
       },
