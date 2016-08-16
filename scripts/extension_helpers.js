@@ -42,11 +42,24 @@ var path = require('path');
 
 // The "always ignore" externals used by JupyterLab, Phosphor and friends
 var DEFAULT_EXTERNALS = [
-    function(context, request, callback){
-      console.log('TODO: Phosphor external rewriter...');
+    function(context, request, callback) {
+      var regex = /phosphor\/lib\/([a-z]+)\/.*$/
+      if(regex.test(request)) {
+          var matches = regex.exec(request)
+          var lib = 'this phosphor/lib/' + matches[1];
+          return callback(null, lib);
+      }
+      callback();
     },
-    'jupyter-js-services',
-    /codemirror/
+    {
+      'jupyter-js-services': 'umd jupyter-js-services',
+      'codemirror': 'codemirror',
+      'codemirror/lib/codemirror': 'codemirror',
+      '../lib/codemirror': 'codemirror',
+      '../../lib/codemirror': 'codemirror',
+      'jquery': '$',
+      'jquery-ui': '$'
+    }
   ];
 
 
@@ -137,5 +150,6 @@ function upstream_externals(_require) {
 
 module.exports = {
   upstream_externals: upstream_externals,
-  validate_extension: validate_extension
+  validate_extension: validate_extension,
+  DEFAULT_EXTERNALS: DEFAULT_EXTERNALS
 };

@@ -5,7 +5,25 @@
 // See https://github.com/webpack/css-loader/issues/144
 require('es6-promise').polyfill();
 
-module.exports = {
+var helpers = require('jupyterlab/scripts/extension_helpers');
+
+var loaders = [
+  { test: /\.css$/, loader: 'style-loader!css-loader' },
+  { test: /\.json$/, loader: 'json-loader' },
+  { test: /\.html$/, loader: 'file-loader' },
+  // jquery-ui loads some images
+  { test: /\.(jpg|png|gif)$/, loader: 'file-loader' },
+  // required to load font-awesome
+  { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
+  { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
+  { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
+  { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
+  { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' }
+]
+
+
+module.exports = [
+{
   entry: './index.js',
   output: {
     path: __dirname + '/build',
@@ -19,22 +37,49 @@ module.exports = {
   bail: true,
   devtool: 'source-map',
   module: {
-    loaders: [
-      { test: /\.css$/, loader: 'style-loader!css-loader' },
-      { test: /\.json$/, loader: 'json-loader' },
-      { test: /\.html$/, loader: 'file-loader' },
-      // jquery-ui loads some images
-      { test: /\.(jpg|png|gif)$/, loader: 'file-loader' },
-      // required to load font-awesome
-      { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
-      { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
-      { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
-      { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
-      { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' }
-    ]
+    loaders: loaders
   },
-  externals: {
-    jquery: '$',
-    'jquery-ui': '$'
-  }
+  externals: helpers.DEFAULT_EXTERNALS
+},
+// Codemirror umd bundle
+{
+   entry: 'codemirror',
+   output: {
+      filename: 'codemirror.bundle.js',
+      path: './build',
+      libraryTarget: 'umd',
+      library: 'codemirror'
+   },
+   module: {
+    loaders: loaders
+   },
+   bail: true,
+   devtool: 'source-map'
+},
+// Jupyter-js-services umd bundle
+{
+    entry: 'jupyter-js-services',
+    output: {
+        filename: 'jupyter-js-services.bundle.js',
+        path: './build',
+        library: ['jupyter', 'services'],
+        libraryTarget: 'umd',
+    },
+    module: {
+      loaders: loaders
+    },
+    bail: true,
+    devtool: 'source-map'
+},
+// Phosphor umd bundle.
+{
+    entry: 'phosphor/lib',
+    output: {
+        filename: 'phosphor.bundle.js',
+        path: './build',
+        libraryTarget: 'this'
+    },
+    bail: true,
+    devtool: 'source-map'
 }
+]
