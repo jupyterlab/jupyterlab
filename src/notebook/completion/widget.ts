@@ -312,6 +312,12 @@ class CompletionWidget extends Widget {
             event.stopImmediatePropagation();
             this._selectActive();
             return;
+          case 27: // Esc key
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            this.reset();
+            return;
           case 38: // Up arrow key
           case 40: // Down arrow key
             event.preventDefault();
