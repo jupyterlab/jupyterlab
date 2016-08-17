@@ -1,16 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import{
+import {
   defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import * as CodeMirror
   from 'codemirror';
-
-import {
-  loadModeByMIME
-} from '../../../codemirror';
 
 import {
   CodeMirrorEditorWidget
@@ -25,17 +21,8 @@ import {
 } from '../../cells/model';
 
 import {
-  ICellEditorWidget
+  CellEditorWidget, ICellEditorPresenter, EdgeLocation, ICellEditorView
 } from '../../cells/editor';
-
-import {
-  EdgeLocation, ICompletionRequest
-} from '../../cells/view';
-
-import {
-  ICellEditorPresenter
-} from '../../cells/presenter';
-
 
 /**
  * The key code for the up arrow key.
@@ -48,21 +35,16 @@ const UP_ARROW = 38;
 const DOWN_ARROW = 40;
 
 /**
- * The key code for the tab key.
- */
-const TAB = 9;
-
-/**
  * The class name added to cell editor widget nodes.
  */
 const CELL_EDITOR_CLASS = 'jp-CellEditor';
-
 
 /**
  * A code mirror widget for a cell editor.
  */
 export
-class CodeMirrorCellEditorWidget extends CodeMirrorEditorWidget implements ICellEditorWidget {
+class CodeMirrorCellEditorWidget extends CodeMirrorEditorWidget implements CellEditorWidget {
+  
   /**
    * Construct a new cell editor widget.
    */
@@ -75,18 +57,19 @@ class CodeMirrorCellEditorWidget extends CodeMirrorEditorWidget implements ICell
     });
   }
 
-  presenter:ICellEditorPresenter
-
   /**
-   * A signal emitted when a tab (text) completion is requested.
+   * A presenter associated with this editor cell widget.
    */
-  completionRequested: ISignal<ICellEditorWidget, ICompletionRequest>;
+  presenter:ICellEditorPresenter
 
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
-  edgeRequested: ISignal<ICellEditorWidget, EdgeLocation>;
+  edgeRequested: ISignal<ICellEditorView, EdgeLocation>;
 
+  /**
+   * Disposes this editor cell widget.
+   */
   dispose() {
     if (this.isDisposed) {
       return;
@@ -105,149 +88,35 @@ class CodeMirrorCellEditorWidget extends CodeMirrorEditorWidget implements ICell
   }
 
   /**
-   * The line numbers state of the editor.
-   */
-  get lineNumbers(): boolean {
-    return this.editor.getOption('lineNumbers');
-  }
-  set lineNumbers(value: boolean) {
-    this.editor.setOption('lineNumbers', value);
-  }
-
-  /**
-   * Change the mode for an editor based on the given mime type.
-   */
-  setMimeType(mimeType: string): void {
-    loadModeByMIME(this.editor, mimeType);
-  }
-
-  /**
-   * Set whether the editor is read only.
-   */
-  setReadOnly(readOnly: boolean): void {
-    let option = readOnly ? 'nocursor' : false;
-    this.editor.setOption('readOnly', option);
-  }
-
-  /**
-   * Test whether the editor has keyboard focus.
-   */
-  hasFocus(): boolean {
-    return this.editor.hasFocus();
-  }
-
-  /**
-   * Returns a zero-based last line number.
-   */
-  getLastLine(): number {
-    return this.editor.getDoc().lastLine();
-  }
-
-  /**
-   * Get the current cursor position of the editor.
-   */
-  getCursorPosition(): number {
-    let doc = this.editor.getDoc();
-    let position = doc.getCursor();
-    return doc.indexFromPos(position);
-  }
-
-  /**
-   * Set the position of the cursor.
-   *
-   * @param position - A new cursor's position.
-   */
-  setCursorPosition(position: number): void {
-    let doc = this.editor.getDoc();
-    doc.setCursor(doc.posFromIndex(position));
-  }
-
-  /**
-   * Set the position of the cursor.
-   *
-   * @param line - A zero-based line number.
-   *
-   * @param character - A zero-based character number.
-   */
-  setCursor(line: number, character: number): void {
-    let doc = this.editor.getDoc();
-    doc.setCursor({
-      line: line,
-      ch: character
-    });
-  }
-
-  /**
    * Handle keydown events from the editor.
    */
   protected onEditorKeydown(editor: CodeMirror.Editor, event: KeyboardEvent): void {
-    let doc = editor.getDoc();
-    let cursor = doc.getCursor();
-    let line = cursor.line;
-    let ch = cursor.ch;
-
-    if (event.keyCode === TAB) {
-      // If the tab is modified, ignore it.
-      if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
-        return;
-      }
-      return this.onTabEvent(event, ch, line);
-    }
-
-    if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
-        if (!event.shiftKey) {
-          this.edgeRequested.emit('top');
-        }
-        return;
-    }
-
-    let lastLine = doc.lastLine();
-    let lastCh = doc.getLineHandle(lastLine).text.length;
-    if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
-      if (!event.shiftKey) {
-        this.edgeRequested.emit('bottom');
-      }
-      return;
+    const edgeLocation = this.getEdgeLocation(editor, event);
+    if (edgeLocation) {
+      this.edgeRequested.emit(edgeLocation);
     }
   }
 
   /**
-   * Handle a tab key press.
+   * Computes an edge location.
    */
-  protected onTabEvent(event: KeyboardEvent, ch: number, line: number): void {
-    const editor = this.editor;
+  protected getEdgeLocation(editor: CodeMirror.Editor, event: KeyboardEvent): EdgeLocation {
     const doc = editor.getDoc();
-
-    // If there is a text selection, no completion requests should be emitted.
-    if (doc.getSelection()) {
-      return;
+    const cursor = doc.getCursor();
+    const line = cursor.line;
+    const ch = cursor.ch;
+    if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
+      return 'top';
     }
-
-    const currentValue = doc.getValue();
-    const currentLine = currentValue.split('\n')[line];
-
-    // A completion request signal should only be emitted if the current
-    // character or a preceding character is not whitespace.
-    //
-    // Otherwise, the default tab action of creating a tab character should be
-    // allowed to propagate.
-    if (!currentLine.substring(0, ch).match(/\S/)) {
-      return;
+    const lastLine = doc.lastLine();
+    const lastCh = doc.getLineHandle(lastLine).text.length;
+    if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
+      return 'bottom';
     }
-
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-
-    const completionRequest = <ICompletionRequest>this.getEditorState(line, ch);
-    completionRequest.currentValue = currentValue;
-    this.completionRequested.emit(completionRequest);
+    return null;
   }
 
 }
 
-
 // Define the signals for the `CodeMirrorCellEditorWidget` class.
-defineSignal(CodeMirrorCellEditorWidget.prototype, 'completionRequested');
 defineSignal(CodeMirrorCellEditorWidget.prototype, 'edgeRequested');
-defineSignal(CodeMirrorCellEditorWidget.prototype, 'textChanged');

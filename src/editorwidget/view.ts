@@ -2,92 +2,116 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IDisposable
-} from 'phosphor/lib/core/disposable';
-
-import {
-  ISignal
+    ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
-  JSONObject
-} from 'phosphor/lib/algorithm/json';
+  IDisposable
+} from 'phosphor/lib/core/disposable';
 
 /**
- * An interface describing editor state coordinates.
+ * A zero-based position in the editor.
  */
 export
-interface ICoords extends JSONObject {
-  /**
-   * The left coordinate value.
-   */
-  left: number;
-
-  /**
-   * The right coordinate value.
-   */
-  right: number;
-
-  /**
-   * The top coordinate value.
-   */
-  top: number;
-
-  /**
-   * The bottom coordinate value.
-   */
-  bottom: number;
+interface IPosition {
+  line: number,
+  column: number
 }
 
 /**
- * An interface describing the state of the editor in an event.
+ * Configuration options for the editor.
  */
 export
-interface IEditorState extends JSONObject {
-  /**
-   * The character number of the editor cursor within a line.
-   */
-  ch: number;
+interface IEditorConfiguration extends IDisposable {
 
   /**
-   * The height of a character in the editor.
+   * A signal emitted when this configuration changed.
    */
-  chHeight: number;
+  configurationChanged: ISignal<IEditorConfiguration, void>;
 
   /**
-   * The width of a character in the editor.
+   * Control the rendering of line numbers.
    */
-  chWidth: number;
+  lineNumbers?: boolean;
 
   /**
-   * The line number of the editor cursor.
+   * The font size.
    */
-  line: number;
+  fontSize?: number;
 
   /**
-   * The coordinate position of the cursor.
+   * The line height.
    */
-  coords: ICoords;
+  lineHeight?: number;
 
   /**
-   * The cursor position of the request, including line breaks.
+   * Should the editor be read only.
    */
-  position: number;
-  
+  readOnly?: boolean;
+
 }
-
 
 /**
- * An interface describing editor text changes.
+ * An editor model.
  */
 export
-interface ITextChange extends IEditorState {
+interface IEditorModel extends IDisposable {
+
   /**
-   * The new value of the editor text.
+   * A signal emitted when a uri of this model changed.
    */
-  newValue: string;
+  uriChanged: ISignal<IEditorModel, void>;
+
+  /**
+   * A signal emitted when a content of this model changed.
+   */
+  contentChanged: ISignal<IEditorModel, void>;
+
+  /**
+   * A path associated with this editor model.
+   */
+  uri:string
+
+  /**
+   * Get the text stored in this model.
+   */
+  getValue(): string;
+
+  /**
+   * Replace the entire text contained in this model.
+   */
+  setValue(value: string): void;
+
+  /**
+   * Change the mime type for this model.
+   */
+  setMimeType(mimeType: string): void;
+
+  /**
+   * Get the number of lines in the model.
+   */
+  getLineCount(): number;
+
+  /**
+   * Returns a last line number.
+   */
+  getLastLine(): number;
+
+  /**
+   * Find an offset fot the given position.
+   */
+  getOffsetAt(position: IPosition): number;
+
+  /**
+   * Find a position fot the given offset.
+   */
+  getPositionAt(offset: number): IPosition;
+
 }
 
+/**
+ * An editor.
+ */
 export
 interface IEditorView extends IDisposable {
 
@@ -97,12 +121,38 @@ interface IEditorView extends IDisposable {
   closed: ISignal<IEditorView, void>;
 
   /**
-   * A signal emitted when a content of an editor changed.
+   * A cursor position for this editor.
    */
-  contentChanged: ISignal<IEditorView, ITextChange>;
+  position:IPosition;
 
-  // TODO rename to getContent / setContent
-  getValue(): string;
-  setValue(value: string): void;
+  /**
+   * Returns a model for this editor.
+   */
+  getModel(): IEditorModel;
+
+  /**
+   * Returns a configuration for this editor.
+   */
+  getConfiguration(): IEditorConfiguration;
+
+  /**
+   * Return a left offset for the given position.
+   */
+  getLeftOffset(position: IPosition): number;
+
+  /**
+   * Return a top offset fot the given position.
+   */
+  getTopOffset(position: IPosition): number;
+
+  /**
+   * Test whether the editor has keyboard focus.
+   */
+  hasFocus(): boolean;
+
+  /**
+   * Brings browser focus to this editor text.
+   */
+  focus(): void;
 
 }

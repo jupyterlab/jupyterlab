@@ -100,12 +100,12 @@ describe('notebook/cells/editor', () => {
     describe('#lineNumbers', () => {
 
       it('should get the line numbers state of the editor', () => {
-        let widget = new CodeMirrorCellEditorWidget(new CellModel());
+        let widget = new CodeMirrorCellEditorWidget();
         expect(widget.lineNumbers).to.be(widget.editor.getOption('lineNumbers'));
       });
 
       it('should set the line numbers state of the editor', () => {
-        let widget = new CodeMirrorCellEditorWidget(new CellModel());
+        let widget = new CodeMirrorCellEditorWidget();
         widget.lineNumbers = !widget.lineNumbers;
         expect(widget.lineNumbers).to.be(widget.editor.getOption('lineNumbers'));
       });
@@ -115,7 +115,7 @@ describe('notebook/cells/editor', () => {
     describe('#edgeRequested', () => {
 
       it('should emit a signal when the top edge is requested', () => {
-        let widget = new CodeMirrorCellEditorWidget(new CellModel());
+        let widget = new CodeMirrorCellEditorWidget();
         let edge: EdgeLocation = null;
         let event = generate('keydown', { keyCode: UP_ARROW });
         let listener = (sender: any, args: EdgeLocation) => { edge = args; }
@@ -126,7 +126,7 @@ describe('notebook/cells/editor', () => {
       });
 
       it('should emit a signal when the bottom edge is requested', () => {
-        let widget = new CodeMirrorCellEditorWidget(new CellModel());
+        let widget = new CodeMirrorCellEditorWidget();
         let edge: EdgeLocation = null;
         let event = generate('keydown', { keyCode: DOWN_ARROW });
         let listener = (sender: any, args: EdgeLocation) => { edge = args; }
@@ -138,13 +138,14 @@ describe('notebook/cells/editor', () => {
 
     });
 
-    describe('#textChanged', () => {
+    describe('#contentChanged', () => {
 
       it('should emit a signal when editor text is changed', () => {
         let widget = new CodeMirrorCellEditorWidget();
+        widget.presenter = new CellEditorPresenter(widget);
         widget.presenter.model = new CellModel();
         let doc = widget.editor.getDoc();
-        let want = { oldValue: '', newValue: 'foo' };
+        let want = { newValue: 'foo' };
         let fromPos = { line: 0, ch: 0 };
         let toPos = { line: 0, ch: 0 };
         let change: ITextChange = null;
@@ -169,6 +170,7 @@ describe('notebook/cells/editor', () => {
 
       it('should emit a signal when the user requests a tab completion', () => {
         let widget = new CodeMirrorCellEditorWidget();
+        widget.presenter = new CellEditorPresenter(widget);
         widget.presenter.model = new CellModel();
         let doc = widget.editor.getDoc();
         let want = { currentValue: 'foo', line: 0, ch: 3 };
@@ -197,6 +199,7 @@ describe('notebook/cells/editor', () => {
       it('should be settable', () => {
         let model = new CellModel();
         let widget = new CodeMirrorCellEditorWidget();
+        widget.presenter = new CellEditorPresenter(widget);
         expect(widget.presenter.model).to.be(null);
         widget.presenter.model = model;
         expect(widget.presenter.model).to.be(model);
@@ -205,6 +208,7 @@ describe('notebook/cells/editor', () => {
       it('should be safe to set multiple times', () => {
         let model = new CellModel();
         let widget = new CodeMirrorCellEditorWidget();
+        widget.presenter = new CellEditorPresenter(widget);
         widget.presenter.model = new CellModel();
         widget.presenter.model = model;
         expect(widget.presenter.model).to.be(model);
@@ -212,6 +216,7 @@ describe('notebook/cells/editor', () => {
 
       it('should empty the code mirror if set to null', () => {
         let widget = new CodeMirrorCellEditorWidget();
+        widget.presenter = new CellEditorPresenter(widget);
         widget.presenter.model = new CellModel();
         widget.presenter.model.source = 'foo';
         expect(widget.editor.getDoc().getValue()).to.be('foo');
@@ -225,6 +230,7 @@ describe('notebook/cells/editor', () => {
 
       it('should dispose of the resources held by the widget', () => {
         let widget = new CodeMirrorCellEditorWidget();
+        widget.presenter = new CellEditorPresenter(widget);
         widget.presenter.model = new CellModel();
         expect(widget.presenter.model).to.be.ok();
         widget.dispose();
@@ -238,6 +244,7 @@ describe('notebook/cells/editor', () => {
 
       it('should return the cursor position of the editor', () => {
         let widget = new CodeMirrorCellEditorWidget();
+        widget.presenter = new CellEditorPresenter(widget);
         widget.presenter.model = new CellModel();
         let doc = widget.editor.getDoc();
         let fromPos = { line: 0, ch: 0 };
@@ -254,6 +261,7 @@ describe('notebook/cells/editor', () => {
 
       it('should set the cursor position of the editor', () => {
         let widget = new CodeMirrorCellEditorWidget();
+        widget.presenter = new CellEditorPresenter(widget);
         widget.presenter.model = new CellModel();
         expect(widget.getCursorPosition()).to.be(0);
         widget.presenter.model.source = 'foo';

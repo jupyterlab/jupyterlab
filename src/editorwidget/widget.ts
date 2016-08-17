@@ -2,19 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ISignal, defineSignal
-} from 'phosphor/lib/core/signaling';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
-  Message
-} from 'phosphor/lib/core/messaging';
-
-import {
-  IEditorView, ITextChange
+  IEditorView
 } from './view';
 
 import {
@@ -41,28 +33,14 @@ import {
   FocusTracker
 } from 'phosphor/lib/ui/focustracker';
 
+export *  from './view'; 
+
+/**
+ * An editor widget.
+ */
 export
-interface IEditorWidget extends Widget, IEditorView {
+interface EditorWidget extends Widget, IEditorView {
 }
-
-export
-abstract class EditorWidget extends Widget implements IEditorWidget {
-
-  closed: ISignal<IEditorView, void>;
-  contentChanged: ISignal<IEditorView, ITextChange>;
-
-  abstract getValue(): string;
-  abstract setValue(value: string): void;
-
-  protected onCloseRequest(msg: Message): void {
-    this.closed.emit(void 0);
-    super.onCloseRequest(msg);
-  }
-
-}
-
-defineSignal(EditorWidget.prototype, 'closed');
-defineSignal(EditorWidget.prototype, 'contentChanged');
 
 export
 namespace EditorWidget {
@@ -81,10 +59,22 @@ namespace EditorWidget {
   const Tracker = new Token<Tracker>('jupyter.services.editor-tracker');
   /* tslint:enable */
 
+  /*
+   * An editor widget factory. 
+   */
   export
   abstract class Factory extends ABCWidgetFactory<EditorWidget, IDocumentModel> {
+    /**
+     * An editor tracker for editors bcreated by this factory.
+     */
     tracker: Tracker
+    /**
+     * Registers commands for editors created by this factory. 
+     */
     abstract registerCommands(category?: string): void;
+    /**
+     * Registers menu items for editors created by this factory.
+     */
     abstract registerMenuItems(menu: Menu): void;
   }
 

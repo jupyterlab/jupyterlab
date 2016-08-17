@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ICellEditorWidget
+  CellEditorWidget
 } from '../../cells/editor';
 
 import {
@@ -16,6 +16,10 @@ import {
 import {
   CodeMirrorCellEditorWidget
 } from './editor';
+
+import {
+  CompletableCodeMirrorCellEditorWidget
+} from '../completion/editor';
 
 
 /**
@@ -37,16 +41,16 @@ class CodeMirrorCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
   }
 
   /**
-   * Construct a code cell widget.
+   * Construct a completable code mirro cell editor widget.
    */
-  createCellEditor(): ICellEditorWidget {
-    const widget = new CodeMirrorCellEditorWidget(this._editorConfiguration);
+  createCellEditor(): CellEditorWidget {
+    const widget = new CompletableCodeMirrorCellEditorWidget(this._editorConfiguration);
     this._editorInitializer(widget);
     return widget;
   }
 
   private _editorConfiguration: CodeMirror.EditorConfiguration = null;
-  private _editorInitializer: (editor: CodeMirrorCellEditorWidget) => void = null;
+  private _editorInitializer: (editor: CompletableCodeMirrorCellEditorWidget) => void = null;
 }
 
 

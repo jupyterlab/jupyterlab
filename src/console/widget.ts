@@ -42,12 +42,8 @@ import {
 } from '../notebook/cells';
 
 import {
-  ICellEditorWidget
-} from '../notebook/cells/editor';
-
-import {
-  EdgeLocation
-} from '../notebook/cells/view';
+  CellEditorWidget,EdgeLocation
+} from '../notebook/cells/editor';;
 
 import {
   mimetypeForLanguage
@@ -284,7 +280,7 @@ class ConsoleWidget extends Widget {
   /**
    * Handle an edge requested signal.
    */
-  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): void {
+  protected onEdgeRequest(editor: CellEditorWidget, location: EdgeLocation): void {
     let prompt = this.prompt;
     if (location === 'top') {
       this._history.back().then(value => {
@@ -292,14 +288,17 @@ class ConsoleWidget extends Widget {
           return;
         }
         prompt.model.source = value;
-        prompt.editor.setCursorPosition(0);
+        prompt.editor.position = {
+          line: 0,
+          column: 0
+        };
       });
     } else {
       this._history.forward().then(value => {
         // If at the bottom end of history, then clear the prompt.
         let text = value || '';
         prompt.model.source = text;
-        prompt.editor.setCursorPosition(text.length);
+        prompt.editor.position = prompt.editor.getModel().getPositionAt(text.length);
       });
     }
   }
@@ -350,7 +349,7 @@ class ConsoleWidget extends Widget {
 
     // Associate the new prompt with the completion handler.
     this._completionHandler.activeCell = prompt;
-    this._inspectionHandler.activeCell = prompt;
+    this._inspectionHandler.activeEditor = prompt.editor;
 
     // Jump to the bottom of the console.
     Private.scrollToBottom(this.node);

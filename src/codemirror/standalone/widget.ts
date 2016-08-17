@@ -17,12 +17,20 @@ import {
   IStandaloneEditorPresenter
 } from '../../editorwidget/standalone/presenter';
 
-
+/**
+ * A standalone code mirror editor widget. 
+ */
 export
 class CodeMirroStandaloneEditorWidget extends CodeMirrorEditorWidget implements IStandalonEditorView {
 
+  /**
+   * An associated presenter.
+   */
   presenter:IStandaloneEditorPresenter
 
+  /**
+   * Disposes this widget.
+   */
   dispose() {
     if (this.isDisposed) {
       return;
@@ -35,11 +43,11 @@ class CodeMirroStandaloneEditorWidget extends CodeMirrorEditorWidget implements 
     }
   }
 
-  setPath(path: string) {
-    loadModeByFileName(this.editor, path);
-  }
-
+  /**
+   * Mark this editor as dirty.
+   */
   setDirty(dirty: boolean) {
+      // do nothing
   }
 
 }

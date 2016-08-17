@@ -2,21 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ICellEditorView
-} from './view';
-
-import {
-  ICellEditorPresenter
+  ICellEditorView, ICellEditorPresenter
 } from './presenter';
 
 import {
   EditorWidget
 } from '../../editorWidget/widget';
 
+export * from './presenter';
+
 /**
- * A widget for a cell editor.
+ * A cell editor widget.
  */
 export
-interface ICellEditorWidget extends EditorWidget, ICellEditorView {
+interface CellEditorWidget extends EditorWidget, ICellEditorView {
   presenter:ICellEditorPresenter
 }

@@ -14,16 +14,8 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  ITextChange
+  IEditorView, IEditorModel
 } from '../editorwidget/view';
-
-import {
-  ICellEditorWidget
-} from '../notebook/cells/editor';
-
-import {
-  BaseCellWidget
-} from '../notebook/cells/widget';
 
 import {
   RenderMime
@@ -64,24 +56,24 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   /**
    * The cell widget used by the inspection handler.
    */
-  get activeCell(): BaseCellWidget {
-    return this._activeCell;
+  get activeEditor(): IEditorView {
+    return this._activeEditor;
   }
-  set activeCell(newValue: BaseCellWidget) {
-    if (newValue === this._activeCell) {
+  set activeCell(newValue: IEditorView) {
+    if (newValue === this._activeEditor) {
       return;
     }
 
-    if (this._activeCell && !this._activeCell.isDisposed) {
-      const editor = this._activeCell.editor;
-      editor.contentChanged.disconnect(this.onTextChanged, this);
+    if (this._activeEditor && !this._activeEditor.isDisposed) {
+      const editor = this._activeEditor;
+      editor.getModel().contentChanged.disconnect(this.onTextChanged, this);
     }
-    this._activeCell = newValue;
-    if (this._activeCell) {
+    this._activeEditor = newValue;
+    if (this._activeEditor) {
       // Clear ephemeral inspectors in preparation for a new editor.
       this.ephemeralCleared.emit(void 0);
-      const editor = this._activeCell.editor;
-      editor.contentChanged.connect(this.onTextChanged, this);
+      const editor = this._activeEditor;
+      editor.getModel().contentChanged.connect(this.onTextChanged, this);
     }
   }
 
@@ -113,7 +105,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
       return;
     }
     this._isDisposed = true;
-    this._activeCell = null;
+    this._activeEditor = null;
     this.disposed.emit(void 0);
     clearSignalData(this);
   }
@@ -155,21 +147,21 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
    * #### Notes
    * Update the hints inspector based on a text change.
    */
-  protected onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
+  protected onTextChanged(model: IEditorModel): void {
     let update: Inspector.IInspectorUpdate = {
       content: null,
       type: 'hints'
     };
 
     // Clear hints if the new text value is empty or kernel is unavailable.
-    if (!change.newValue || !this._kernel) {
+    if (!model.getValue() || !this._kernel) {
       this.inspected.emit(update);
       return;
     }
 
     let contents: KernelMessage.IInspectRequest = {
-      code: change.newValue,
-      cursor_pos: change.position,
+      code: model.getValue(),
+      cursor_pos: model.getOffsetAt(this._activeEditor.position),
       detail_level: 0
     };
     let pending = ++this._pending;
@@ -202,7 +194,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     });
   }
 
-  private _activeCell: BaseCellWidget = null;
+  private _activeEditor: IEditorView = null;
   private _isDisposed = false;
   private _kernel: IKernel = null;
   private _pending = 0;
