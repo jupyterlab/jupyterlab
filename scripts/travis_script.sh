@@ -3,7 +3,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-set -e
+set -ex
 export DISPLAY=:99.0
 sh -e /etc/init.d/xvfb start || true
 
