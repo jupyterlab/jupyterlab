@@ -2,6 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 var path = require('path');
+var findImports = require('find-imports');
+
+// Get the list of vendor files.
+var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
+var CODEMIRROR_FILES = VENDOR_FILES.filter(function(importPath) {
+  return importPath.indexOf('codemirror') !== -1;
+});
+var codemirrorPaths = CODEMIRROR_FILES.map(function(importPath) {
+  return importPath.replace('.js', '');
+});
+VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
+  return (importPath.indexOf('codemirror') === -1 && 
+          importPath.indexOf('phosphor') === -1);
+});
 
 /*
   Helper scripts to be used by extension authors (and extension extenders) in a
@@ -55,10 +69,6 @@ var BASE_EXTERNALS = [
     },
     {
       'jupyter-js-services': 'jupyter.services',
-      'codemirror': 'codemirror',
-      'codemirror/lib/codemirror': 'codemirror',
-      '../lib/codemirror': 'codemirror',
-      '../../lib/codemirror': 'codemirror',
       'jquery': '$',
       'jquery-ui': '$'
     }
@@ -71,12 +81,19 @@ var DEFAULT_EXTERNALS = BASE_EXTERNALS + [
       // JupyterLab imports get mangled to use the external bundle.
       regex = /^jupyterlab\/lib\/([a-z\/]+)$/;
       if(regex.test(request)) {
-          console.log(request);
           var matches = regex.exec(request)[1];
           var lib = 'var jupyterlab.' + matches.split('/').join('.');
           return callback(null, lib);
       }
+      if (codemirrorPaths.indexOf(request) !== -1) {
+        return callback(null, 'var CodeMirror');
+      }
       callback();
+    },
+    {
+      'codemirror': 'CodeMirror',
+      '../lib/codemirror': 'CodeMirror',
+      '../../lib/codemirror': 'CodeMirror',
     }
 ]
 
@@ -170,5 +187,7 @@ function upstream_externals(_require) {
 module.exports = {
   upstream_externals: upstream_externals,
   validate_extension: validate_extension,
-  BASE_EXTERNALS: BASE_EXTERNALS
+  BASE_EXTERNALS: BASE_EXTERNALS,
+  CODEMIRROR_FILES: CODEMIRROR_FILES,
+  VENDOR_FILES: VENDOR_FILES
 };

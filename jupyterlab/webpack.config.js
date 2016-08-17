@@ -6,9 +6,14 @@
 require('es6-promise').polyfill();
 
 var fs = require('fs');
+var webpack = require("webpack");
+var ExtractTextPlugin = require("extract-text-webpack-plugin");
 var helpers = require('jupyterlab/scripts/extension_helpers');
 var shimmer = require('./shim-maker');
-var webpack = require("webpack");
+
+// Get the CodeMirror files to create external bundle.
+var CodeMirrorFiles = helpers.CODEMIRROR_FILES;
+CodeMirrorFiles.push('codemirror/lib/codemirror.js');
 
 // Create the Phosphor and JupyterLab shims.
 try {
@@ -16,12 +21,13 @@ try {
 } catch(err) {
   // Already exists
 }
+
 fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor', 'lib'));
 var jlabShim = shimmer('jupyterlab', 'lib', /.*index\.js$/);
 fs.writeFileSync('./build/jupyterlab-shim.js', jlabShim);
 
 var loaders = [
-  { test: /\.css$/, loader: 'style-loader!css-loader' },
+  { test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader") },
   { test: /\.json$/, loader: 'json-loader' },
   { test: /\.html$/, loader: 'file-loader' },
   // jquery-ui loads some images
@@ -31,7 +37,7 @@ var loaders = [
   { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
   { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
   { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
-  { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' }
+  { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' },
 ]
 
 
@@ -40,12 +46,14 @@ module.exports = [
 {
   entry: {
     'main': './index.js',
-    'jupyterlab': './build/jupyterlab-shim.js'
+    'jupyterlab': './build/jupyterlab-shim.js',
+    'CodeMirror': CodeMirrorFiles,
+    'vendor': helpers.VENDOR_FILES
   },
   output: {
     path: __dirname + '/build',
     filename: '[name].bundle.js',
-    publicPath: 'lab/',
+    publicPath: './',
     library: '[name]'
   },
   node: {
@@ -58,23 +66,23 @@ module.exports = [
     loaders: loaders
   },
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin("jupyterlab", "jupyterlab.bundle.js")
+    new webpack.optimize.CommonsChunkPlugin({
+      name: "jupyterlab",
+      filename: "jupyterlab.bundle.js",
+      chunks: ['main']
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: "vendor",
+      filename: "vendor.bundle.js"
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: "CodeMirror",
+      filename: "CodeMirror.bundle.js",
+      chunks: ['jupyterlab']
+    }),
+    new ExtractTextPlugin("[name].css")
   ],
   externals: helpers.BASE_EXTERNALS
-},
-// Codemirror bundle
-{
-   entry: 'codemirror',
-   output: {
-      filename: 'codemirror.bundle.js',
-      path: './build',
-      library: 'codemirror'
-   },
-   module: {
-    loaders: loaders
-   },
-   bail: true,
-   devtool: 'source-map'
 },
 // Jupyter-js-services bundle
 {
