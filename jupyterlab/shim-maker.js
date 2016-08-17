@@ -12,7 +12,8 @@ var fs = require('fs');
  *
  * @param sourceFolder (string) - The source folder.
  *
- * @param indexOnly (boolean) - Whether to only shim index files.
+ * @param regex - A regular expresion used to match files - the default
+ *  is all `.js` files.
  *
  * @returns A promise that resolves when the file is created.
  */
@@ -24,7 +25,7 @@ function shimmer(modName, sourceFolder, regex) {
   var lines = ['var ' + modName + ' = {}'];
 
   var entries = fs.readdirSync(modPath);
-  // Algorithm: 
+  // Algorithm:
   // search for index.js file
   // if one exists, use it, otherwise use an empty object to initialize
   // then, for each, if it is a directory, recurse-and-add
@@ -74,7 +75,7 @@ function getLines(modName, sourceFolder, basePath, currentPath, regex) {
       entry = entry.replace(path.extname(entry), '');
       var entryParts = parts.slice();
       entryParts.push(entry);
-      if (!entryParts[0]) { 
+      if (!entryParts[0]) {
         entryParts = entryParts.slice(1);
       }
       lines.push(modName + '["' + entryParts.join('"]["') + '"] = require("' + path.join(modPath, entry) + '");');
