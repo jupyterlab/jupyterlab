@@ -7,6 +7,10 @@ set -e
 export DISPLAY=:99.0
 sh -e /etc/init.d/xvfb start || true
 
+# Install in-place and install the server extension
+pip install -e .
+jupyter serverextension enable --py jupyterlab
+
 npm run clean
 npm run build
 npm test

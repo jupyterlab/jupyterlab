@@ -12,9 +12,5 @@ conda update -q conda
 conda info -a
 conda install jupyter
 
-# Install in-place and install the server extension
-pip install -e .
-jupyter serverextension enable --py jupyterlab
-
 # create jupyter base dir (needed for config retreival)
 mkdir ~/.jupyter
