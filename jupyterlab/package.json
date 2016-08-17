@@ -21,7 +21,6 @@
     "style-loader": "^0.13.0",
     "typescript": "^1.7.5",
     "url-loader": "^0.5.7",
-    "walk-sync": "^0.3.1",
     "webpack": "^1.12.11"
   },
   "scripts": {
