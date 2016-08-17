@@ -10,8 +10,9 @@ var helpers = require('jupyterlab/scripts/extension_helpers');
 var shimmer = require('./shim-maker');
 
 // Create the phosphor and jupyterlab shims.
-fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor'));
-fs.writeFileSync('./build/jupyterlab-shim.js', shimmer('jupyterlab'));
+fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor', 'lib'));
+var jlabShim = shimmer('jupyterlab', 'lib', true);
+fs.writeFileSync('./build/jupyterlab-shim.js', jlabShim);
 
 var loaders = [
   { test: /\.css$/, loader: 'style-loader!css-loader' },

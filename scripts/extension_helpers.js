@@ -47,14 +47,14 @@ var DEFAULT_EXTERNALS = [
       // permuations.
       var regex = /^phosphor\/lib\/([a-z\/]+)$/;
       if(regex.test(request)) {
-          var matches = regex.exec(request).slice(1);
-          var lib = 'var phosphor.' + matches.join('.');
+          var matches = regex.exec(request)[1];
+          var lib = 'var phosphor.' + matches.split('/').join('.');
           return callback(null, lib);
       }
       regex = /^jupyterlab\/lib\/([a-z\/]+)$/;
       if(regex.test(request)) {
-          var matches = regex.exec(request).slice(1);
-          var lib = 'var jupyter.lab.' + matches.join('.');
+          var matches = regex.exec(request)[1];
+          var lib = 'var jupyter.lab.' + matches.split('/').join('.');
           return callback(null, lib);
       }
       callback();

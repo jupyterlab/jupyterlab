@@ -8,13 +8,17 @@ var walkSync = require('walk-sync');
  *
  * @param modName (string) - The name of the module to shim.
  *
- * @param sourceFolder (string) - The source folder (default is `/lib`).
+ * @param sourceFolder (string) - The source folder.
+ *
+ * @param indexOnly (boolean) - Whether to only shim index files.
+ *  (default is False).
  *
  * @returns A promise that resolves when the file is created.
  */
-function shimmer(modName, sourceFolder) {
+function shimmer(modName, sourceFolder, indexOnly) {
   var modPath = require.resolve(modName + '/package.json');
   sourceFolder = sourceFolder || 'lib';
+  indexOnly = !!indexOnly;
   modPath = path.join(path.dirname(modPath), sourceFolder);
   var entries = walkSync.entries(modPath);
   var lines = ['var ' + modName + ' = {}'];
@@ -30,6 +34,8 @@ function shimmer(modName, sourceFolder) {
       entryPath = entryPath.replace('.js', '');
       if (path.basename(entryPath) === 'index') {
         entryPath = path.dirname(entryPath);
+      } else if (indexOnly) {
+        continue;
       }
       parts = entryPath.split('/');
       if (parts[0]) {
@@ -37,7 +43,7 @@ function shimmer(modName, sourceFolder) {
       }
     }
   }
-  lines.push('module.exports = ' + modName + ';');
+  lines.push('module.exports = ' + modName + ';')
   return lines.join('\n');
 }
 
