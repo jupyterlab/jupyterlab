@@ -15,3 +15,13 @@ export PATH="$HOME/miniconda/bin:$PATH"
 npm run build:examples
 npm run docs
 cp jupyter-plugins-demo.gif docs
+
+
+# Make sure we can start and kill the lab server
+jupyter lab --no-browser &
+TASK_PID=$!
+# Make sure the task is running
+ps -p $TASK_PID || exit 1
+sleep 5
+kill $TASK_PID
+wait $TASK_PID

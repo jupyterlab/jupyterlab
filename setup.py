@@ -85,8 +85,14 @@ class NPM(Command):
     jlab_node_modules = os.path.join(extension_root, 'node_modules')
 
     targets = [
-        os.path.join(here, 'jupyterlab', 'build', 'bundle.js'),
+        'vendor.css', 'CodeMirror.css', 'main.css',
+        'phosphor.bundle.js', 'services.bundle.js',
+        'vendor.bundle.js', 'CodeMirror.bundle.js',
+        'main.bundle.js'
     ]
+
+    def get_target_path(self, target):
+        return os.path.join(here, 'jupyterlab', 'build', target)
 
     def initialize_options(self):
         pass
@@ -114,6 +120,7 @@ class NPM(Command):
         run('npm run build:serverextension')
 
         for t in self.targets:
+            t = self.get_target_path(t)
             if not os.path.exists(t):
                 msg = 'Missing file: %s' % t
                 if not has_npm:
