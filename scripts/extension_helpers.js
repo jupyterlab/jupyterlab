@@ -56,11 +56,12 @@ VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
 */
 
 
-// The base externals for JupyterLab itself
-
+/**
+ * Create the base Webpack `externals` config for JupyterLab itself.
+ */
 
 /**
- * A function that mangles phosphor imports.
+ * A function that mangles phosphor imports for a Webpack `externals` config.
  */
 function phosphorExternals(context, request, callback) {
     // All phosphor imports get mangled to use the external bundle.
@@ -72,8 +73,6 @@ function phosphorExternals(context, request, callback) {
     }
     callback();
 }
-
-
 var BASE_EXTERNALS = [
   phosphorExternals,
   {
@@ -84,9 +83,13 @@ var BASE_EXTERNALS = [
 ];
 
 
-// Downstream extensions should exclude JupyterLab itself as well.
+/**
+ * The default Webpack `externals` config that should be applied to
+ * extensions of JupyterLab.
+ */
 var DEFAULT_EXTERNALS = BASE_EXTERNALS + [
     function(context, request, callback) {
+      // TODO: add `index` to directory imports
       // JupyterLab imports get mangled to use the external bundle.
       var regex = /^jupyterlab\/lib\/([\w\/]+)$/;
       if(regex.test(request)) {
