@@ -42,7 +42,7 @@ var loaders = [
 
 
 module.exports = [
-// Application bundle
+// Application bundles
 {
   entry: {
     'main': './index.js',
