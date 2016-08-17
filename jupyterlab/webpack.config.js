@@ -16,12 +16,12 @@ var CodeMirrorFiles = helpers.CODEMIRROR_FILES;
 CodeMirrorFiles.push('codemirror/lib/codemirror.js');
 
 // Create the Phosphor and JupyterLab shims.
+// First make sure the build folder exists.
 try {
   fs.mkdirSync('./build')
 } catch(err) {
   // Already exists
 }
-
 fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor', 'lib'));
 var jlabShim = shimmer('jupyterlab', 'lib', /.*index\.js$/);
 fs.writeFileSync('./build/jupyterlab-shim.js', jlabShim);
