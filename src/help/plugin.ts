@@ -98,7 +98,8 @@ export
 const helpHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.help-handler',
   requires: [IMainMenu, ICommandPalette],
-  activate: activateHelpHandler
+  activate: activateHelpHandler,
+  autoStart: true
 };
 
 
@@ -116,6 +117,7 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
   iframe.id = 'help-doc';
 
   COMMANDS.forEach(command => app.commands.addCommand(command.id, {
+    label: command.text,
     execute: () => {
       Private.attachHelp(app, iframe);
       Private.showHelp(app, iframe);
