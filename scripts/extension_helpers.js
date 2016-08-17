@@ -13,8 +13,9 @@ var codemirrorPaths = CODEMIRROR_FILES.map(function(importPath) {
   return importPath.replace('.js', '');
 });
 VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
-  return (importPath.indexOf('codemirror') === -1 && 
-          importPath.indexOf('phosphor') === -1);
+  return (importPath.indexOf('codemirror') !== 0 &&
+          importPath.indexOf('phosphor') !== 0 &&
+          importPath.indexOf('jupyter-js-services') !== 0);
 });
 
 /*
@@ -55,36 +56,46 @@ VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
 */
 
 
-// The "always ignore" externals used by JupyterLab, Phosphor and friends
-var BASE_EXTERNALS = [
-    function(context, request, callback) {
-      // All phosphor imports get mangled to use the external bundle.
-      var regex = /^phosphor\/lib\/([a-z\/]+)$/;
-      if(regex.test(request)) {
-          var matches = regex.exec(request)[1];
-          var lib = 'var phosphor.' + matches.split('/').join('.');
-          return callback(null, lib);
-      }
-      callback();
-    },
-    {
-      'jupyter-js-services': 'jupyter.services',
-      'jquery': '$',
-      'jquery-ui': '$'
+// The base externals for JupyterLab itself
+
+
+/**
+ * A function that mangles phosphor imports.
+ */
+function phosphorExternals(context, request, callback) {
+    // All phosphor imports get mangled to use the external bundle.
+    var regex = /^phosphor\/lib\/([\w\/]+)$/;
+    if(regex.test(request)) {
+        var matches = regex.exec(request)[1];
+        var lib = 'var phosphor.' + matches.split('/').join('.');
+        return callback(null, lib);
     }
-  ];
+    callback();
+}
+
+
+var BASE_EXTERNALS = [
+  phosphorExternals,
+  {
+    'jupyter-js-services': 'jupyter.services',
+    'jquery': '$',
+    'jquery-ui': '$'
+  }
+];
 
 
 // Downstream extensions should exclude JupyterLab itself as well.
 var DEFAULT_EXTERNALS = BASE_EXTERNALS + [
     function(context, request, callback) {
       // JupyterLab imports get mangled to use the external bundle.
-      regex = /^jupyterlab\/lib\/([a-z\/]+)$/;
+      var regex = /^jupyterlab\/lib\/([\w\/]+)$/;
       if(regex.test(request)) {
           var matches = regex.exec(request)[1];
           var lib = 'var jupyterlab.' + matches.split('/').join('.');
           return callback(null, lib);
       }
+
+      // CodeMirror imports just use the external bundle.
       if (codemirrorPaths.indexOf(request) !== -1) {
         return callback(null, 'var CodeMirror');
       }
@@ -187,6 +198,7 @@ function upstream_externals(_require) {
 module.exports = {
   upstream_externals: upstream_externals,
   validate_extension: validate_extension,
+  phosphorExternals: phosphorExternals,
   BASE_EXTERNALS: BASE_EXTERNALS,
   CODEMIRROR_FILES: CODEMIRROR_FILES,
   VENDOR_FILES: VENDOR_FILES

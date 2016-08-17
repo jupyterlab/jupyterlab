@@ -20,7 +20,9 @@ CodeMirrorFiles.push('codemirror/lib/codemirror.js');
 try {
   fs.mkdirSync('./build')
 } catch(err) {
-  // Already exists
+  if (err.code !== 'EEXIST') {
+    throw e;
+  }
 }
 fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor', 'lib'));
 var jlabShim = shimmer('jupyterlab', 'lib', /.*index\.js$/);
@@ -96,7 +98,8 @@ module.exports = [
       loaders: loaders
     },
     bail: true,
-    devtool: 'source-map'
+    devtool: 'source-map',
+    externals: helpers.phosphorExternals
 },
 // Phosphor bundle
 {
