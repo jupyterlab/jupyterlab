@@ -76,6 +76,11 @@ class bdist_egg_disabled(bdist_egg):
         sys.exit("Aborting implicit building of eggs. Use `pip install .` to install from source.")
 
 
+
+def get_target_path(target):
+    return os.path.join(here, 'jupyterlab', 'build', target)
+
+
 class NPM(Command):
     description = 'install package.json dependencies using npm'
 
@@ -84,15 +89,12 @@ class NPM(Command):
     node_modules = os.path.join(here, 'node_modules')
     jlab_node_modules = os.path.join(extension_root, 'node_modules')
 
-    targets = [
+    targets = map(get_target_path, [
         'vendor.css', 'CodeMirror.css', 'main.css',
         'phosphor.bundle.js', 'services.bundle.js',
         'vendor.bundle.js', 'CodeMirror.bundle.js',
         'main.bundle.js'
-    ]
-
-    def get_target_path(self, target):
-        return os.path.join(here, 'jupyterlab', 'build', target)
+    ])
 
     def initialize_options(self):
         pass
@@ -120,7 +122,6 @@ class NPM(Command):
         run('npm run build:serverextension')
 
         for t in self.targets:
-            t = self.get_target_path(t)
             if not os.path.exists(t):
                 msg = 'Missing file: %s' % t
                 if not has_npm:
