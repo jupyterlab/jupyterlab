@@ -9,7 +9,7 @@ var fs = require('fs');
 var helpers = require('jupyterlab/scripts/extension_helpers');
 var shimmer = require('./shim-maker');
 
-// Create the phosphor and jupyterlab shims.
+// Create the Phosphor and JupyterLab shims.
 fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor', 'lib'));
 var jlabShim = shimmer('jupyterlab', 'lib', true);
 fs.writeFileSync('./build/jupyterlab-shim.js', jlabShim);

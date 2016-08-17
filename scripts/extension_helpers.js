@@ -54,14 +54,15 @@ var JLAB_FOLDERS = JLAB_ENTRIES.map(function (entry) {
 // The "always ignore" externals used by JupyterLab, Phosphor and friends
 var DEFAULT_EXTERNALS = [
     function(context, request, callback) {
-      // Replace this with a call to a function that handles *all*
-      // permuations.
+      // All phosphor imports get mangled to use the external bundle
       var regex = /^phosphor\/lib\/([a-z\/]+)$/;
       if(regex.test(request)) {
           var matches = regex.exec(request)[1];
           var lib = 'var phosphor.' + matches.split('/').join('.');
           return callback(null, lib);
       }
+      // Imports from JupyterLab index files get mangled to use the
+      // external bundle
       if (JLAB_FOLDERS.indexOf(request + '/') !== -1) {
         regex = /^jupyterlab\/lib\/([a-z\/]+)$/;
         var matches = regex.exec(request)[1];
