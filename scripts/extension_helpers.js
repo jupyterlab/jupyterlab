@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 var path = require('path');
-var walkSync = require('walk-sync');
 
 /*
   Helper scripts to be used by extension authors (and extension extenders) in a
@@ -41,33 +40,16 @@ var walkSync = require('walk-sync');
     }];
 */
 
-// Get the directories for JupyterLab
-var JLAB_ENTRIES = walkSync.entries(path.dirname(require.resolve('jupyterlab')));
-JLAB_ENTRIES = JLAB_ENTRIES.filter(function (entry) {
-  return path.basename(entry.relativePath) === 'index.js';
-});
-var JLAB_FOLDERS = JLAB_ENTRIES.map(function (entry) {
-  return path.join('jupyterlab', 'lib', path.dirname(entry.relativePath));
-});
-
 
 // The "always ignore" externals used by JupyterLab, Phosphor and friends
-var DEFAULT_EXTERNALS = [
+var BASE_EXTERNALS = [
     function(context, request, callback) {
-      // All phosphor imports get mangled to use the external bundle
+      // All phosphor imports get mangled to use the external bundle.
       var regex = /^phosphor\/lib\/([a-z\/]+)$/;
       if(regex.test(request)) {
           var matches = regex.exec(request)[1];
           var lib = 'var phosphor.' + matches.split('/').join('.');
           return callback(null, lib);
-      }
-      // Imports from JupyterLab index files get mangled to use the
-      // external bundle
-      if (JLAB_FOLDERS.indexOf(request + '/') !== -1) {
-        regex = /^jupyterlab\/lib\/([a-z\/]+)$/;
-        var matches = regex.exec(request)[1];
-        var lib = 'var jupyter.lab.' + matches.split('/').join('.');
-        return callback(null, lib);
       }
       callback();
     },
@@ -81,6 +63,23 @@ var DEFAULT_EXTERNALS = [
       'jquery-ui': '$'
     }
   ];
+
+
+// Downstream extensions should exclude JupyterLab itself as well.
+var DEFAULT_EXTERNALS = BASE_EXTERNALS + [
+    function(context, request, callback) {
+      // JupyterLab imports get mangled to use the external bundle.
+      regex = /^jupyterlab\/lib\/([a-z\/]+)$/;
+      if(regex.test(request)) {
+          console.log(request);
+          var matches = regex.exec(request)[1];
+          var lib = 'var jupyterlab.' + matches.split('/').join('.');
+          return callback(null, lib);
+      }
+      callback();
+    }
+]
+
 
 
 // determine whether the package JSON contains a JupyterLab extension
@@ -171,5 +170,5 @@ function upstream_externals(_require) {
 module.exports = {
   upstream_externals: upstream_externals,
   validate_extension: validate_extension,
-  DEFAULT_EXTERNALS: DEFAULT_EXTERNALS
+  BASE_EXTERNALS: BASE_EXTERNALS
 };

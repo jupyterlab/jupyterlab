@@ -8,10 +8,16 @@ require('es6-promise').polyfill();
 var fs = require('fs');
 var helpers = require('jupyterlab/scripts/extension_helpers');
 var shimmer = require('./shim-maker');
+var webpack = require("webpack");
 
 // Create the Phosphor and JupyterLab shims.
+try {
+  fs.mkdirSync('./build')
+} catch(err) {
+  // Already exists
+}
 fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor', 'lib'));
-var jlabShim = shimmer('jupyterlab', 'lib', true);
+var jlabShim = shimmer('jupyterlab', 'lib', /.*index\.js$/);
 fs.writeFileSync('./build/jupyterlab-shim.js', jlabShim);
 
 var loaders = [
@@ -32,11 +38,15 @@ var loaders = [
 module.exports = [
 // Application bundle
 {
-  entry: './index.js',
+  entry: {
+    'main': './index.js',
+    'jupyterlab': './build/jupyterlab-shim.js'
+  },
   output: {
     path: __dirname + '/build',
-    filename: 'bundle.js',
-    publicPath: 'lab/'
+    filename: '[name].bundle.js',
+    publicPath: 'lab/',
+    library: '[name]'
   },
   node: {
     fs: 'empty'
@@ -47,7 +57,10 @@ module.exports = [
   module: {
     loaders: loaders
   },
-  externals: helpers.DEFAULT_EXTERNALS
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin("jupyterlab", "jupyterlab.bundle.js")
+  ],
+  externals: helpers.BASE_EXTERNALS
 },
 // Codemirror bundle
 {
@@ -84,20 +97,6 @@ module.exports = [
         filename: 'phosphor.bundle.js',
         path: './build',
         library: 'phosphor',
-    },
-    bail: true,
-    devtool: 'source-map'
-},
-// JupyterLab bundle
-{
-    entry: './build/jupyterlab-shim.js',
-    output: {
-        filename: 'jupyterlab.bundle.js',
-        path: './build',
-        library: ['jupyter', 'lab'],
-    },
-    module: {
-      loaders: loaders
     },
     bail: true,
     devtool: 'source-map'
