@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 var path = require('path');
+var walkSync = require('walk-sync');
 
 /*
   Helper scripts to be used by extension authors (and extension extenders) in a
@@ -40,6 +41,16 @@ var path = require('path');
     }];
 */
 
+// Get the directories for JupyterLab
+var JLAB_ENTRIES = walkSync.entries(path.dirname(require.resolve('jupyterlab')));
+JLAB_ENTRIES = JLAB_ENTRIES.filter(function (entry) {
+  return path.basename(entry.relativePath) === 'index.js';
+});
+var JLAB_FOLDERS = JLAB_ENTRIES.map(function (entry) {
+  return path.join('jupyterlab', 'lib', path.dirname(entry.relativePath));
+});
+
+
 // The "always ignore" externals used by JupyterLab, Phosphor and friends
 var DEFAULT_EXTERNALS = [
     function(context, request, callback) {
@@ -51,11 +62,11 @@ var DEFAULT_EXTERNALS = [
           var lib = 'var phosphor.' + matches.split('/').join('.');
           return callback(null, lib);
       }
-      regex = /^jupyterlab\/lib\/([a-z\/]+)$/;
-      if(regex.test(request)) {
-          var matches = regex.exec(request)[1];
-          var lib = 'var jupyter.lab.' + matches.split('/').join('.');
-          return callback(null, lib);
+      if (JLAB_FOLDERS.indexOf(request + '/') !== -1) {
+        regex = /^jupyterlab\/lib\/([a-z\/]+)$/;
+        var matches = regex.exec(request)[1];
+        var lib = 'var jupyter.lab.' + matches.split('/').join('.');
+        return callback(null, lib);
       }
       callback();
     },
