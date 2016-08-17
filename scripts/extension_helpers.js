@@ -2,6 +2,21 @@
 // Distributed under the terms of the Modified BSD License.
 
 var path = require('path');
+var findImports = require('find-imports');
+
+// Get the list of vendor files.
+var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
+var CODEMIRROR_FILES = VENDOR_FILES.filter(function(importPath) {
+  return importPath.indexOf('codemirror') !== -1;
+});
+var codemirrorPaths = CODEMIRROR_FILES.map(function(importPath) {
+  return importPath.replace('.js', '');
+});
+VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
+  return (importPath.indexOf('codemirror') !== 0 &&
+          importPath.indexOf('phosphor') !== 0 &&
+          importPath.indexOf('jupyter-js-services') !== 0);
+});
 
 /*
   Helper scripts to be used by extension authors (and extension extenders) in a
@@ -40,14 +55,59 @@ var path = require('path');
     }];
 */
 
-// The "always ignore" externals used by JupyterLab, Phosphor and friends
-var DEFAULT_EXTERNALS = [
-    function(context, request, callback){
-      console.log('TODO: Phosphor external rewriter...');
+
+// The base externals for JupyterLab itself
+
+
+/**
+ * A function that mangles phosphor imports.
+ */
+function phosphorExternals(context, request, callback) {
+    // All phosphor imports get mangled to use the external bundle.
+    var regex = /^phosphor\/lib\/([\w\/]+)$/;
+    if(regex.test(request)) {
+        var matches = regex.exec(request)[1];
+        var lib = 'var phosphor.' + matches.split('/').join('.');
+        return callback(null, lib);
+    }
+    callback();
+}
+
+
+var BASE_EXTERNALS = [
+  phosphorExternals,
+  {
+    'jupyter-js-services': 'jupyter.services',
+    'jquery': '$',
+    'jquery-ui': '$'
+  }
+];
+
+
+// Downstream extensions should exclude JupyterLab itself as well.
+var DEFAULT_EXTERNALS = BASE_EXTERNALS + [
+    function(context, request, callback) {
+      // JupyterLab imports get mangled to use the external bundle.
+      var regex = /^jupyterlab\/lib\/([\w\/]+)$/;
+      if(regex.test(request)) {
+          var matches = regex.exec(request)[1];
+          var lib = 'var jupyterlab.' + matches.split('/').join('.');
+          return callback(null, lib);
+      }
+
+      // CodeMirror imports just use the external bundle.
+      if (codemirrorPaths.indexOf(request) !== -1) {
+        return callback(null, 'var CodeMirror');
+      }
+      callback();
     },
-    'jupyter-js-services',
-    /codemirror/
-  ];
+    {
+      'codemirror': 'CodeMirror',
+      '../lib/codemirror': 'CodeMirror',
+      '../../lib/codemirror': 'CodeMirror',
+    }
+]
+
 
 
 // determine whether the package JSON contains a JupyterLab extension
@@ -137,5 +197,9 @@ function upstream_externals(_require) {
 
 module.exports = {
   upstream_externals: upstream_externals,
-  validate_extension: validate_extension
+  validate_extension: validate_extension,
+  phosphorExternals: phosphorExternals,
+  BASE_EXTERNALS: BASE_EXTERNALS,
+  CODEMIRROR_FILES: CODEMIRROR_FILES,
+  VENDOR_FILES: VENDOR_FILES
 };

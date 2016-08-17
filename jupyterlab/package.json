@@ -13,7 +13,9 @@
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
+    "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.8.5",
+    "find-imports": "^0.5.0",
     "json-loader": "^0.5.4",
     "rimraf": "^2.5.0",
     "style-loader": "^0.13.0",
@@ -25,7 +27,7 @@
     "clean": "rimraf build",
     "update": "rimraf node_modules/jupyterlab && npm install",
     "build": "npm run update && npm run build:extension",
-    "build:extension": "webpack --config webpack.conf.js",
+    "build:extension": "webpack",
     "postinstall": "node ../scripts/dedupe.js",
     "test": "echo 'no tests specified'"
   },

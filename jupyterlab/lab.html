@@ -15,6 +15,9 @@ Distributed under the terms of the Modified BSD License.
     {% endif %}
     <script src="{{static_url("components/jquery/jquery.min.js") }}" type="text/javascript" charset="utf-8"></script> <!-- window.$ -->
     <script src="{{static_url("components/jquery-ui/ui/minified/jquery-ui.min.js") }}" type="text/javascript" charset="utf-8"></script> <!-- extends window.$ -->
+    <link href="{{static_prefix}}/vendor.css" rel="stylesheet">
+    <link href="{{static_prefix}}/CodeMirror.css" rel="stylesheet">
+    <link href="{{static_prefix}}/main.css" rel="stylesheet">
 </head>
 
 
@@ -26,8 +29,13 @@ Distributed under the terms of the Modified BSD License.
   "wsUrl": "{{ws_url| urlencode}}",
   "notebookPath": "{{notebook_path | urlencode}}"
 }</script>
-<script src="{{static_prefix}}/bundle.js" type="text/javascript" charset="utf-8"></script>
 
+<script src="{{static_prefix}}/phosphor.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script src="{{static_prefix}}/services.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script src="{{static_prefix}}/vendor.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script src="{{static_prefix}}/CodeMirror.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script src="{{static_prefix}}/jupyterlab.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script src="{{static_prefix}}/main.bundle.js" type="text/javascript" charset="utf-8"></script>
 </body>
 
 </html>
