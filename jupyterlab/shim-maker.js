@@ -25,13 +25,16 @@ function shimmer(modName, sourceFolder, regex) {
   // search for index.js file
   // if one exists, use it, otherwise use an empty object to initialize
   // then, for each, if it is a directory, recurse-and-add
-  // if it is a file that matches our regex.
+  // if it is a file that matches our regex, add it
   var lines = getLines(modName, sourceFolder, modPath, modPath, regex);
   lines.push('module.exports = ' + modName);
   return lines.join('\n');
 }
 
 
+/**
+ * Get the appropriate shim lines for the items in a folder.
+ */
 function getLines(modName, sourceFolder, basePath, currentPath, regex) {
   var lines = [];
   var entries = fs.readdirSync(currentPath);

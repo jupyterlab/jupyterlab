@@ -7,7 +7,7 @@ set -ex
 export DISPLAY=:99.0
 sh -e /etc/init.d/xvfb start || true
 
-# Install in-place and install the server extension
+# Install in-place and enable the server extension
 export PATH="$HOME/miniconda/bin:$PATH"
 pip install -v -e .
 jupyter serverextension enable --py jupyterlab
