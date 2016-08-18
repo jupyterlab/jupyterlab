@@ -23,7 +23,7 @@ var codemirrorPaths = CODEMIRROR_FILES.map(function(importPath) {
 codeMirrorPaths = codemirrorPaths.concat(['codemirror', '../lib/codemirror', '../../lib/codemirror']);
 
 
-/*
+/**
   Helper scripts to be used by extension authors (and extension extenders) in a
   webpack.config.json to create builds that do not include upstream extensions.
 
@@ -196,5 +196,5 @@ module.exports = {
   validate_extension: validate_extension,
   DEFAULT_EXTERNALS: DEFAULT_EXTERNALS,
   CODEMIRROR_FILES: CODEMIRROR_FILES,
-  VENDOR_FILES: VENDOR_FILES,
+  VENDOR_FILES: VENDOR_FILES
 };

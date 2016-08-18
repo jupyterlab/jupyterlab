@@ -8,10 +8,11 @@ require('es6-promise').polyfill();
 var fs = require('fs');
 var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var shimmer = require('./shim-maker');
+
 
 console.log('Generating config...');
 var helpers = require('jupyterlab/scripts/extension_helpers');
-var shimmer = require('./shim-maker');
 
 // Create the Phosphor and JupyterLab shims.
 // First make sure the build folder exists.
