@@ -27,6 +27,7 @@ try {
 fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor'));
 fs.writeFileSync('./build/jupyterlab-shim.js', shimmer('jupyterlab'));
 
+// The default `module.loaders` config.
 var loaders = [
   { test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader") },
   { test: /\.json$/, loader: 'json-loader' },
@@ -42,6 +43,7 @@ var loaders = [
 ]
 
 
+// The actual Webpack parallel configurations.
 module.exports = [
 // Application bundles
 {

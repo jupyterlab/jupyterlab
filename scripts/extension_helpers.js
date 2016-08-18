@@ -7,19 +7,21 @@ var findImports = require('find-imports');
 // Get the list of vendor files.
 var jlabPath = path.dirname(require.resolve('jupyterlab/package.json'));
 var VENDOR_FILES = findImports(jlabPath + '/lib/**/*.js', { flatten: true });
+VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
+  return (importPath.indexOf('codemirror') !== 0 &&
+          importPath.indexOf('phosphor') !== 0 &&
+          importPath.indexOf('jupyter-js-services') !== 0);
+});
+
+// Get the list of codemirror files.
 var CODEMIRROR_FILES = VENDOR_FILES.filter(function(importPath) {
   return importPath.indexOf('codemirror') !== -1;
 });
 var codemirrorPaths = CODEMIRROR_FILES.map(function(importPath) {
   return importPath.replace('.js', '');
 });
-codemirrorPaths.concat(['codemirror', '../lib/codemirror', '../../lib/codemirror']);
+codeMirrorPaths = codemirrorPaths.concat(['codemirror', '../lib/codemirror', '../../lib/codemirror']);
 
-VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
-  return (importPath.indexOf('codemirror') !== 0 &&
-          importPath.indexOf('phosphor') !== 0 &&
-          importPath.indexOf('jupyter-js-services') !== 0);
-});
 
 /*
   Helper scripts to be used by extension authors (and extension extenders) in a
@@ -60,10 +62,6 @@ VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
 
 
 /**
- * Create the base Webpack `externals` config for JupyterLab itself.
- */
-
-/**
  * A function that mangles phosphor imports for a Webpack `externals` config.
  */
 function phosphorExternals(context, request, callback) {
@@ -78,6 +76,10 @@ function phosphorExternals(context, request, callback) {
     }
     callback();
 }
+
+/**
+ * The base Webpack `externals` config for JupyterLab itself.
+ */
 var BASE_EXTERNALS = [
   phosphorExternals,
   function(context, request, callback) {
@@ -113,7 +115,6 @@ var DEFAULT_EXTERNALS = BASE_EXTERNALS + [
     callback();
   }
 ]
-
 
 
 // determine whether the package JSON contains a JupyterLab extension
