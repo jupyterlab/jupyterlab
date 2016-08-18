@@ -6,14 +6,12 @@
 require('es6-promise').polyfill();
 
 var fs = require('fs');
-var webpack = require("webpack");
-var ExtractTextPlugin = require("extract-text-webpack-plugin");
-var helpers = require('jupyterlab/scripts/extension_helpers');
-var shimmer = require('./shim-maker');
+var webpack = require('webpack');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-// Get the CodeMirror files to create external bundle.
-var CodeMirrorFiles = helpers.CODEMIRROR_FILES;
-CodeMirrorFiles.push('codemirror/lib/codemirror.js');
+
+console.log('Generating config...');
+var helpers = require('jupyterlab/scripts/extension_helpers');
 
 // Create the Phosphor and JupyterLab shims.
 // First make sure the build folder exists.
@@ -24,12 +22,12 @@ try {
     throw e;
   }
 }
-fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor', 'lib'));
-var jlabShim = shimmer('jupyterlab', 'lib', /.*index\.js$/);
-fs.writeFileSync('./build/jupyterlab-shim.js', jlabShim);
+fs.writeFileSync('./build/phosphor-shim.js', helpers.createShim('phosphor'));
+fs.writeFileSync('./build/jupyterlab-shim.js', helpers.createShim('jupyterlab'));
 
+// The default `module.loaders` config.
 var loaders = [
-  { test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader") },
+  { test: /\.css$/, loader: ExtractTextPlugin.extract('style-loader', 'css-loader') },
   { test: /\.json$/, loader: 'json-loader' },
   { test: /\.html$/, loader: 'file-loader' },
   // jquery-ui loads some images
@@ -43,20 +41,19 @@ var loaders = [
 ]
 
 
+// The parallel Webpack build configurations.
 module.exports = [
 // Application bundles
 {
   entry: {
-    'main': './index.js',
-    'jupyterlab': './build/jupyterlab-shim.js',
-    'CodeMirror': CodeMirrorFiles,
-    'vendor': helpers.VENDOR_FILES
+    main: './index.js',
+    plugins: './plugins.js',
   },
   output: {
-    path: __dirname + '/build',
+    path: './build',
     filename: '[name].bundle.js',
     publicPath: './',
-    library: '[name]'
+    library: ['jupyter', '[name]']
   },
   node: {
     fs: 'empty'
@@ -68,48 +65,80 @@ module.exports = [
     loaders: loaders
   },
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin({
-      name: "jupyterlab",
-      filename: "jupyterlab.bundle.js",
-      chunks: ['main']
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: "vendor",
-      filename: "vendor.bundle.js"
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: "CodeMirror",
-      filename: "CodeMirror.bundle.js",
-      chunks: ['jupyterlab']
-    }),
+    new ExtractTextPlugin('[name].css')
+  ],
+  externals: helpers.DEFAULT_EXTERNALS
+},
+// JupyterLab bundles
+{
+  entry: {
+    lab: './build/jupyterlab-shim.js',
+    vendor: helpers.VENDOR_FILES
+  },
+  output: {
+      filename: 'lab.bundle.js',
+      path: './build',
+      publicPath: './',
+      library: ['jupyter', '[name]']
+  },
+  module: {
+    loaders: loaders
+  },
+  plugins: [
+    new ExtractTextPlugin("[name].css"),
+    new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.bundle.js")
+  ],
+  bail: true,
+  devtool: 'source-map',
+  externals: helpers.BASE_EXTERNALS.concat([
+    {  'jupyter-js-services': 'jupyter.services' } ])
+},
+// CodeMirror bundle
+{
+  entry: {
+    'codemirror': helpers.CODEMIRROR_FILES
+  },
+  output: {
+      filename: 'codemirror.bundle.js',
+      path: './build',
+      publicPath: './',
+      library: ['jupyter', 'CodeMirror'],
+  },
+  module: {
+    loaders: loaders
+  },
+  plugins: [
     new ExtractTextPlugin("[name].css")
   ],
-  externals: helpers.BASE_EXTERNALS
+  bail: true,
+  devtool: 'source-map'
 },
 // Jupyter-js-services bundle
 {
-    entry: 'jupyter-js-services',
-    output: {
-        filename: 'services.bundle.js',
-        path: './build',
-        library: ['jupyter', 'services'],
-    },
-    module: {
-      loaders: loaders
-    },
-    bail: true,
-    devtool: 'source-map',
-    externals: helpers.phosphorExternals
+  entry: 'jupyter-js-services',
+  output: {
+      filename: 'services.bundle.js',
+      path: './build',
+      publicPath: './',
+      library: ['jupyter', 'services'],
+  },
+  module: {
+    loaders: loaders
+  },
+  bail: true,
+  devtool: 'source-map',
+  externals: helpers.BASE_EXTERNALS
 },
 // Phosphor bundle
 {
-    entry: './build/phosphor-shim.js',
-    output: {
-        filename: 'phosphor.bundle.js',
-        path: './build',
-        library: 'phosphor',
-    },
-    bail: true,
-    devtool: 'source-map'
+  entry: './build/phosphor-shim.js',
+  output: {
+      filename: 'phosphor.bundle.js',
+      path: './build',
+      publicPath: './',
+      library: ['jupyter', 'phosphor']
+  },
+  bail: true,
+  devtool: 'source-map'
 }
 ]
