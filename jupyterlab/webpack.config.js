@@ -74,6 +74,7 @@ module.exports = [
   entry: {
     lab: './build/jupyterlab-shim.js',
     services: ['jupyter-js-services'],
+    phosphor: ['./build/phosphor-shim.js'],
     codemirror: helpers.CODEMIRROR_FILES,
     vendor: helpers.VENDOR_FILES
   },
@@ -88,6 +89,11 @@ module.exports = [
   },
   plugins: [
     new ExtractTextPlugin('[name].css'),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'phosphor',
+      filename: 'phosphor.bundle.js',
+      chunks: ['lab', 'services']
+    }),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'services',
       filename: 'services.bundle.js',
@@ -104,19 +110,5 @@ module.exports = [
   bail: true,
   devtool: 'source-map',
   externals: helpers.BASE_EXTERNALS
-},
-// Phosphor bundle
-{
-  entry: {
-    phosphor: './build/phosphor-shim.js'
-  },
-  output: {
-      filename: '[name].bundle.js',
-      path: './build',
-      publicPath: './',
-      library: ['jupyter', '[name]']
-  },
-  bail: true,
-  devtool: 'source-map'
 }
 ]

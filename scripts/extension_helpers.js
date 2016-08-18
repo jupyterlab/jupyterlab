@@ -62,34 +62,15 @@ codeMirrorPaths = codemirrorPaths.concat(['codemirror', '../lib/codemirror', '..
 
 
 /**
- * The Webpack `externals` config for JupyterLab itself.
- */
-var BASE_EXTERNALS = [
-  function(context, request, callback) {
-    // All phosphor imports get mangled to use the external bundle.
-    var regex = /^phosphor\/lib\/[\w\/]+$/;
-    if(regex.test(request)) {
-        var path = require.resolve(request);
-        var index = path.indexOf('phosphor/lib');
-        path = path.slice(index + 'phosphor/lib/'.length);
-        var lib = 'var jupyter.phosphor["' + path + '"]';
-        return callback(null, lib);
-    }
-    callback();
-  },
-  {
-    'jquery': '$',
-    'jquery-ui': '$'
-  }
-];
-
-
-/**
  * The default Webpack `externals` config that should be applied to
  * extensions of JupyterLab.
  */
-var EXTENSION_EXTERNALS = BASE_EXTERNALS.concat([
-  { 'jupyter-js-services': 'jupyter.services' },
+var DEFAULT_EXTERNALS = [
+  {
+    'jupyter-js-services': 'jupyter.services',
+    'jquery': '$',
+    'jquery-ui': '$'
+  },
   function(context, request, callback) {
     // JupyterLab imports get mangled to use the external bundle.
     var regex = /^jupyterlab\/lib\/([\w\.\/]+)$/;
@@ -105,6 +86,16 @@ var EXTENSION_EXTERNALS = BASE_EXTERNALS.concat([
       return callback(null, lib);
     }
 
+    // All phosphor imports get mangled to use the external bundle.
+    var regex = /^phosphor\/lib\/[\w\/]+$/;
+    if(regex.test(request)) {
+        var path = require.resolve(request);
+        var index = path.indexOf('phosphor/lib');
+        path = path.slice(index + 'phosphor/lib/'.length);
+        var lib = 'var jupyter.phosphor["' + path + '"]';
+        return callback(null, lib);
+    }
+
     // CodeMirror imports just use the external bundle.
     if (codemirrorPaths.indexOf(request) !== -1) {
       return callback(null, 'var jupyter.CodeMirror');
@@ -112,7 +103,7 @@ var EXTENSION_EXTERNALS = BASE_EXTERNALS.concat([
 
     callback();
   }
-]);
+];
 
 
 // determine whether the package JSON contains a JupyterLab extension
@@ -203,8 +194,7 @@ function upstream_externals(_require) {
 module.exports = {
   upstream_externals: upstream_externals,
   validate_extension: validate_extension,
-  BASE_EXTERNALS: BASE_EXTERNALS,
-  EXTENSION_EXTERNALS: EXTENSION_EXTERNALS,
+  DEFAULT_EXTERNALS: DEFAULT_EXTERNALS,
   CODEMIRROR_FILES: CODEMIRROR_FILES,
   VENDOR_FILES: VENDOR_FILES,
 };
