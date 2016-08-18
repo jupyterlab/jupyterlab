@@ -3,26 +3,36 @@
 
 export
 const html = `
-  <style>
-      kbd
-    {
-      -moz-border-radius:3px;
-      -moz-box-shadow:0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
-      -webkit-border-radius:3px;
-      -webkit-box-shadow:0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
-      background-color:#f7f7f7;
-      border:1px solid #ccc;
-      border-radius:3px;
-      box-shadow:0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
-      color:#333;
-      display:inline-block;
-      font-family:Helvetica,Arial,sans-serif;
-      font-size:11px;
-      line-height:1.4;
-      margin:0 .1em;
-      padding:.1em .6em;
-      text-shadow:0 1px 0 #fff;
-    }
-  </style>
-  <kbd>Shift</kbd>+<kbd>Enter</kbd>
+  <table class="jp-KeyboardShortcuts-table">
+
+    <tr>
+    <h3>Console<h3>
+    </tr>
+    <tr>
+      <td><div class="jp-KeyboardShortcuts-key">⇧Enter</div></td>
+      <td>Execute Cell</td>
+    </tr>
+
+    <tr>
+    <h3>File Operations<h3>
+    </tr>
+    <tr>
+      <td><div class="jp-KeyboardShortcuts-key">^Q</div></td>
+      <td>Close</td>
+    </tr>
+    <tr>
+      <td><div class="jp-KeyboardShortcuts-key">^O</div></td>
+      <td>New File</td>
+    </tr>
+    <tr>
+      <td><div class="jp-KeyboardShortcuts-key">^⇧N</div></td>
+      <td>New Notebook</td>
+    </tr>
+    <tr>
+      <td><div class="jp-KeyboardShortcuts-key">⌘S</div></td>
+      <td>Save</td>
+    </tr>
+
+  </table>
+
 `;
