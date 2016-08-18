@@ -115,7 +115,7 @@ class RenderMime {
     for (let m of this.order) {
       if (m in bundle) {
         let renderer = this._renderers[m];
-        if (trusted || renderer.isSafe(m) || renderer.sanitizable(m)) {
+        if (trusted || renderer.isSafe(m) || renderer.isSanitizable(m)) {
           return m;
         }
       }
@@ -231,7 +231,7 @@ namespace RenderMime {
     /**
      * Whether the input can safely sanitized for a given mimetype.
      */
-    sanitizable(mimetype: string): boolean;
+    isSanitizable(mimetype: string): boolean;
 
     /**
      * Render the transformed mime bundle.
