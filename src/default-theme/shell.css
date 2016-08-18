@@ -16,6 +16,7 @@
 
 
 #jp-main-content-panel {
+  padding: 8px;
   display: flex;
   flex: 1 1 auto;
 }
@@ -46,6 +47,15 @@
 }
 
 
+#p-right-stack {
+  border-left: 1px solid #BDBDBD;
+}
+
+#p-left-stack {
+  border-right: 1px solid #BDBDBD;
+}
+
+
 .jp-SideBar.p-TabBar.jp-mod-right, .jp-SideBar.p-TabBar.jp-mod-left {
   margin: 0;
   padding: 0;
@@ -54,10 +64,21 @@
   list-style-type: none;
   max-height: none;
   color: #777777;
+  background: white;
   font-size: 14px;
   min-width: 36px;
   max-width: 36px;
   overflow: visible;
+}
+
+
+.p-SideBar.p-TabBar.p-mod-left {
+  border-right: 1px solid #BDBDBD;
+}
+
+
+.p-SideBar.p-TabBar.p-mod-right {
+  border-left: 1px solid #BDBDBD;
 }
 
 
@@ -108,9 +129,14 @@
 }
 
 
+.jp-SideBar .p-TabBar-tab:hover:not(.p-mod-current) {
+  background: #FAFAFA;
+}
+
+
 .jp-SideBar .p-TabBar-tab.p-mod-current {
-  background: #EEEEEE;
   color: #2196F3;
+  background: #FAFAFA;
 }
 
 
