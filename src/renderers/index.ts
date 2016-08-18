@@ -196,7 +196,7 @@ class HTMLRenderer implements RenderMime.IRenderer {
   /**
    * Whether the input can safely sanitized for a given mimetype.
    */
-  sanitizable(mimetype: string): boolean {
+  isSanitizable(mimetype: string): boolean {
     return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
@@ -229,7 +229,7 @@ class ImageRenderer implements RenderMime.IRenderer {
   /**
    * Whether the input can safely sanitized for a given mimetype.
    */
-  sanitizable(mimetype: string): boolean {
+  isSanitizable(mimetype: string): boolean {
     return false;
   }
 
@@ -267,7 +267,7 @@ class TextRenderer implements RenderMime.IRenderer {
   /**
    * Whether the input can safely sanitized for a given mimetype.
    */
-  sanitizable(mimetype: string): boolean {
+  isSanitizable(mimetype: string): boolean {
     return false;
   }
 
@@ -306,7 +306,7 @@ class JavascriptRenderer implements RenderMime.IRenderer {
   /**
    * Whether the input can safely sanitized for a given mimetype.
    */
-  sanitizable(mimetype: string): boolean {
+  isSanitizable(mimetype: string): boolean {
     return false;
   }
 
@@ -345,7 +345,7 @@ class SVGRenderer implements RenderMime.IRenderer {
   /**
    * Whether the input can safely sanitized for a given mimetype.
    */
-  sanitizable(mimetype: string): boolean {
+  isSanitizable(mimetype: string): boolean {
     return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
@@ -392,7 +392,7 @@ class PDFRenderer implements RenderMime.IRenderer {
   /**
    * Whether the input can safely sanitized for a given mimetype.
    */
-  sanitizable(mimetype: string): boolean {
+  isSanitizable(mimetype: string): boolean {
     return false;
   }
 
@@ -432,7 +432,7 @@ class LatexRenderer implements RenderMime.IRenderer  {
   /**
    * Whether the input can safely sanitized for a given mimetype.
    */
-  sanitizable(mimetype: string): boolean {
+  isSanitizable(mimetype: string): boolean {
     return false;
   }
 
@@ -465,7 +465,7 @@ class MarkdownRenderer implements RenderMime.IRenderer {
   /**
    * Whether the input can safely sanitized for a given mimetype.
    */
-  sanitizable(mimetype: string): boolean {
+  isSanitizable(mimetype: string): boolean {
     return this.mimetypes.indexOf(mimetype) !== -1;
   }
 
