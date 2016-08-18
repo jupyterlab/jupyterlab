@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-jupyter.plugins = [
+module.exports = [
   require('jupyterlab/lib/about/plugin').aboutExtension,
   require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
   require('jupyterlab/lib/commandpalette/plugin').commandPaletteProvider,

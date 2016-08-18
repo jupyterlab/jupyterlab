@@ -4,19 +4,18 @@
 var path = require('path');
 var findImports = require('find-imports');
 
-// Get the list of vendor files.
-var jlabPath = path.dirname(require.resolve('jupyterlab/package.json'));
-var VENDOR_FILES = findImports(jlabPath + '/lib/**/*.js', { flatten: true });
+// Get the list of vendor files, with CodeMirror files being separate.
+var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
+var CODEMIRROR_FILES = VENDOR_FILES.filter(function(importPath) {
+  return importPath.indexOf('codemirror') !== -1;
+});
 VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
   return (importPath.indexOf('codemirror') !== 0 &&
           importPath.indexOf('phosphor') !== 0 &&
           importPath.indexOf('jupyter-js-services') !== 0);
 });
 
-// Get the list of codemirror files.
-var CODEMIRROR_FILES = VENDOR_FILES.filter(function(importPath) {
-  return importPath.indexOf('codemirror') !== -1;
-});
+// Get the list of codemirror imports.
 var codemirrorPaths = CODEMIRROR_FILES.map(function(importPath) {
   return importPath.replace('.js', '');
 });
@@ -101,12 +100,16 @@ var BASE_EXTERNALS = [
  * The default Webpack `externals` config that should be applied to
  * extensions of JupyterLab.
  */
-var DEFAULT_EXTERNALS = BASE_EXTERNALS + [
+var DEFAULT_EXTERNALS = BASE_EXTERNALS.concat([
   function(context, request, callback) {
     // JupyterLab imports get mangled to use the external bundle.
     var regex = /^jupyterlab\/lib\/([\w\.\/]+)$/;
     if(regex.test(request)) {
-      var path = require.resolve(request).replace('.js', '');
+      try {
+        var path = require.resolve(request).replace('.js', '');
+      } catch(err) {
+        return callback();
+      }
       var index = path.indexOf('jupyterlab/lib');
       path = path.slice(index + 'jupyterlab/lib/'.length);
       var lib = 'var jupyter.lab.' + path.split('/').join('.');
@@ -114,7 +117,8 @@ var DEFAULT_EXTERNALS = BASE_EXTERNALS + [
     }
     callback();
   }
-]
+]);
+var DEFAULT_EXTERNALS = DEFAULT_EXTERNALS.concat(VENDOR_FILES);
 
 
 // determine whether the package JSON contains a JupyterLab extension
@@ -208,5 +212,6 @@ module.exports = {
   phosphorExternals: phosphorExternals,
   BASE_EXTERNALS: BASE_EXTERNALS,
   CODEMIRROR_FILES: CODEMIRROR_FILES,
-  VENDOR_FILES: VENDOR_FILES
+  VENDOR_FILES: VENDOR_FILES,
+  DEFAULT_EXTERNALS: DEFAULT_EXTERNALS
 };

@@ -8,6 +8,8 @@ require('es6-promise').polyfill();
 var fs = require('fs');
 var webpack = require("webpack");
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
+
+console.log('Generating config...');
 var helpers = require('jupyterlab/scripts/extension_helpers');
 var shimmer = require('./shim-maker');
 
@@ -48,15 +50,14 @@ module.exports = [
 // Application bundles
 {
   entry: {
-    'main': './index.js',
-    'plugins': './plugins.js',
-    'vendor': helpers.VENDOR_FILES
+    main: './index.js',
+    plugins: './plugins.js',
   },
   output: {
     path: './build',
     filename: '[name].bundle.js',
     publicPath: './',
-    library: '[name]'
+    library: ['jupyter', '[name]']
   },
   node: {
     fs: 'empty'
@@ -68,28 +69,28 @@ module.exports = [
     loaders: loaders
   },
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin({
-      name: "vendor",
-      filename: "vendor.bundle.js"
-    }),
     new ExtractTextPlugin("[name].css")
   ],
   externals: helpers.DEFAULT_EXTERNALS
 },
-// JupyterLab bundle
+// JupyterLab bundles
 {
-  entry: './build/jupyterlab-shim.js',
+  entry: {
+    lab: './build/jupyterlab-shim.js',
+    vendor: helpers.VENDOR_FILES
+  },
   output: {
       filename: 'lab.bundle.js',
       path: './build',
       publicPath: './',
-      library: ['jupyter', 'lab'],
+      library: ['jupyter', '[name]']
   },
   module: {
     loaders: loaders
   },
   plugins: [
-    new ExtractTextPlugin("lab.css")
+    new ExtractTextPlugin("[name].css"),
+    new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.bundle.js")
   ],
   bail: true,
   devtool: 'source-map',
@@ -110,7 +111,7 @@ module.exports = [
     loaders: loaders
   },
   plugins: [
-    new ExtractTextPlugin("codemirror.css")
+    new ExtractTextPlugin("[name].css")
   ],
   bail: true,
   devtool: 'source-map'
