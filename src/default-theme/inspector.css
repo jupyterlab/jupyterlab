@@ -11,20 +11,9 @@
 }
 
 
-.jp-Inspector .p-TabBar > .p-TabBar-header {
-  flex: 0 0 1px;
-}
-
-
 .jp-Inspector .p-TabBar-content {
   min-width: 0;
   padding-right: 1px;
-}
-
-
-.jp-Inspector .p-TabBar > .p-TabBar-footer {
-  flex: 0 0 1px;
-  background: #BDBDBD;
 }
 
 

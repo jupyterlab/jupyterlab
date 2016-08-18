@@ -124,31 +124,3 @@
   transform: rotate(90deg) translateY(90%);
   border-right: 1px solid #BDBDBD;
 }
-
-
-/*.jp-SideBar-button {
-  padding: 0 18px;
-  line-height: 35px;
-}
-
-
-.jp-SideBar-button:hover:not(.p-mod-current) {
-  background: #FAFAFA;
-}
-
-
-.jp-SideBar-button.p-mod-current {
-  color: #2196F3;
-  background: #FAFAFA;
-}
-
-
-.jp-SideBar.jp-mod-left .jp-SideBar-button {
-  border-left: 1px solid #BDBDBD;
-}
-
-
-.jp-SideBar.jp-mod-right .jp-SideBar-button {
-  border-right: 1px solid #BDBDBD;
-}
-*/

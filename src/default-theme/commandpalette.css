@@ -8,12 +8,19 @@
   background: #FAFAFA;
 }
 
+
+.p-CommandPalette-search {
+  padding: 8px;
+}
+
+
 .p-CommandPalette-wrapper {
   padding: 14px 12px;
   background: white;
   border-bottom: 2px solid #E0E0E0;
   overflow: overlay;
 }
+
 
 .p-CommandPalette-wrapper::after {
     font-family: FontAwesome;
