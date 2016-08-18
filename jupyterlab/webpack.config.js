@@ -88,7 +88,6 @@ module.exports = [
   },
   plugins: [
     new ExtractTextPlugin('[name].css'),
-    // These must be loaded in the reverse order that they are created.
     new webpack.optimize.CommonsChunkPlugin({
       name: 'services',
       filename: 'services.bundle.js',
@@ -99,11 +98,8 @@ module.exports = [
       filename: 'codemirror.bundle.js',
       chunks: ['lab']
     }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      filename: 'vendor.bundle.js',
-      chunks: ['lab']
-    })
+    // This becomes the entry point and must be loaded first.
+    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
   ],
   bail: true,
   devtool: 'source-map',
