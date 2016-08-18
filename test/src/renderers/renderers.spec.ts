@@ -34,12 +34,12 @@ describe('renderers', () => {
 
     });
 
-    describe('#sanitizable()', () => {
+    describe('#isSanitizable()', () => {
 
       it('should be `false`', () => {
         let t = new TextRenderer();
-        expect(t.sanitizable('text/plain')).to.be(false);
-        expect(t.sanitizable('application/vnd.jupyter.console-text')).to.be(false);
+        expect(t.isSanitizable('text/plain')).to.be(false);
+        expect(t.isSanitizable('application/vnd.jupyter.console-text')).to.be(false);
       });
 
     });
@@ -95,11 +95,11 @@ describe('renderers', () => {
 
     });
 
-    describe('#sanitizable()', () => {
+    describe('#isSanitizable()', () => {
 
       it('should be `false`', () => {
         let t = new LatexRenderer();
-        expect(t.sanitizable('text/latex')).to.be(false);
+        expect(t.isSanitizable('text/latex')).to.be(false);
       });
 
     });
@@ -137,11 +137,11 @@ describe('renderers', () => {
 
     });
 
-    describe('#sanitizable()', () => {
+    describe('#isSanitizable()', () => {
 
       it('should be `false`', () => {
         let t = new PDFRenderer();
-        expect(t.sanitizable('application/pdf')).to.be(false);
+        expect(t.isSanitizable('application/pdf')).to.be(false);
       });
 
     });
@@ -180,11 +180,11 @@ describe('renderers', () => {
 
     });
 
-    describe('#sanitizable()', () => {
+    describe('#isSanitizable()', () => {
 
       it('should be `false`', () => {
         let t = new JavascriptRenderer();
-        expect(t.sanitizable('text/javascript')).to.be(false);
+        expect(t.isSanitizable('text/javascript')).to.be(false);
       });
 
     });
@@ -232,11 +232,11 @@ describe('renderers', () => {
 
     });
 
-    describe('#sanitizable()', () => {
+    describe('#isSanitizable()', () => {
 
       it('should be `true`', () => {
         let t = new SVGRenderer();
-        expect(t.sanitizable('image/svg+xml')).to.be(true);
+        expect(t.isSanitizable('image/svg+xml')).to.be(true);
       });
 
     });
@@ -284,11 +284,11 @@ describe('renderers', () => {
 
     });
 
-    describe('#sanitizable()', () => {
+    describe('#isSanitizable()', () => {
 
       it('should be `true`', () => {
         let t = new MarkdownRenderer();
-        expect(t.sanitizable('text/markdown')).to.be(true);
+        expect(t.isSanitizable('text/markdown')).to.be(true);
       });
 
     });
@@ -351,11 +351,11 @@ describe('renderers', () => {
 
     });
 
-    describe('#sanitizable()', () => {
+    describe('#isSanitizable()', () => {
 
       it('should be `true`', () => {
         let t = new HTMLRenderer();
-        expect(t.sanitizable('text/html')).to.be(true);
+        expect(t.isSanitizable('text/html')).to.be(true);
       });
 
     });
@@ -412,11 +412,11 @@ describe('renderers', () => {
 
     });
 
-    describe('#sanitizable()', () => {
+    describe('#isSanitizable()', () => {
 
       it('should be `false`', () => {
         let t = new ImageRenderer();
-        expect(t.sanitizable('image/png')).to.be(false);
+        expect(t.isSanitizable('image/png')).to.be(false);
       });
 
     });
