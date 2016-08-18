@@ -41,10 +41,27 @@
   padding-right: 0px;
 }
 
+
 .jp-Landing-tour {
   background-image: url(images/tour.svg);
 }
 
+
 .jp-Landing-folder {
   background-image: url(images/landingfolder.svg);
+}
+
+
+.jp-MainAreaLandscapeIcon {
+  background-repeat: no-repeat;
+  margin-right: 2px;
+  width: 22px;
+}
+
+
+.jp-MainAreaPortraitIcon {
+  background-position: 0 1px;
+  background-repeat: no-repeat;
+  margin-right: 0;
+  width: 20px;
 }

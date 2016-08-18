@@ -5,4 +5,5 @@
 .jp-MarkdownWidget {
   border-top: 1px solid #E0E0E0;
   padding: 14px;
+  overflow: auto;
 }

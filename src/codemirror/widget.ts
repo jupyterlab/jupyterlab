@@ -6,8 +6,6 @@ import * as CodeMirror
 
 import 'codemirror/mode/meta';
 
-import 'codemirror/lib/codemirror.css';
-
 import {
   Message
 } from 'phosphor/lib/core/messaging';

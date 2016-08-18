@@ -2,3 +2,18 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+@import url('~codemirror/lib/codemirror.css');
+
+@import url('~codemirror/theme/material.css');
+@import url('~codemirror/theme/zenburn.css');
+@import url('~codemirror/theme/abcdef.css');
+@import url('~codemirror/theme/base16-light.css');
+@import url('~codemirror/theme/base16-dark.css');
+@import url('~codemirror/theme/dracula.css');
+@import url('~codemirror/theme/hopscotch.css');
+@import url('~codemirror/theme/mbo.css');
+@import url('~codemirror/theme/mdn-like.css');
+@import url('~codemirror/theme/seti.css');
+@import url('~codemirror/theme/the-matrix.css');
+@import url('~codemirror/theme/xq-light.css');
