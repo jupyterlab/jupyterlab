@@ -9,6 +9,7 @@ var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
 var CODEMIRROR_FILES = VENDOR_FILES.filter(function(importPath) {
   return importPath.indexOf('codemirror') !== -1;
 });
+CODEMIRROR_FILES.push('codemirror/lib/codemirror.js');
 VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
   return (importPath.indexOf('codemirror') !== 0 &&
           importPath.indexOf('phosphor') !== 0 &&
@@ -61,9 +62,10 @@ codeMirrorPaths = codemirrorPaths.concat(['codemirror', '../lib/codemirror', '..
 
 
 /**
- * A function that mangles phosphor imports for a Webpack `externals` config.
+ * The Webpack `externals` config for JupyterLab itself.
  */
-function phosphorExternals(context, request, callback) {
+var BASE_EXTERNALS = [
+  function(context, request, callback) {
     // All phosphor imports get mangled to use the external bundle.
     var regex = /^phosphor\/lib\/[\w\/]+$/;
     if(regex.test(request)) {
@@ -74,22 +76,8 @@ function phosphorExternals(context, request, callback) {
         return callback(null, lib);
     }
     callback();
-}
-
-/**
- * The base Webpack `externals` config for JupyterLab itself.
- */
-var BASE_EXTERNALS = [
-  phosphorExternals,
-  function(context, request, callback) {
-    // CodeMirror imports just use the external bundle.
-    if (codemirrorPaths.indexOf(request) !== -1) {
-      return callback(null, 'var jupyter.CodeMirror');
-    }
-    callback();
   },
   {
-    'jupyter-js-services': 'jupyter.services',
     'jquery': '$',
     'jquery-ui': '$'
   }
@@ -100,7 +88,8 @@ var BASE_EXTERNALS = [
  * The default Webpack `externals` config that should be applied to
  * extensions of JupyterLab.
  */
-var DEFAULT_EXTERNALS = BASE_EXTERNALS.concat([
+var EXTENSION_EXTERNALS = BASE_EXTERNALS.concat([
+  { 'jupyter-js-services': 'jupyter.services' },
   function(context, request, callback) {
     // JupyterLab imports get mangled to use the external bundle.
     var regex = /^jupyterlab\/lib\/([\w\.\/]+)$/;
@@ -115,10 +104,15 @@ var DEFAULT_EXTERNALS = BASE_EXTERNALS.concat([
       var lib = 'var jupyter.lab.' + path.split('/').join('.');
       return callback(null, lib);
     }
+
+    // CodeMirror imports just use the external bundle.
+    if (codemirrorPaths.indexOf(request) !== -1) {
+      return callback(null, 'var jupyter.CodeMirror');
+    }
+
     callback();
   }
 ]);
-var DEFAULT_EXTERNALS = DEFAULT_EXTERNALS.concat(VENDOR_FILES);
 
 
 // determine whether the package JSON contains a JupyterLab extension
@@ -209,9 +203,8 @@ function upstream_externals(_require) {
 module.exports = {
   upstream_externals: upstream_externals,
   validate_extension: validate_extension,
-  phosphorExternals: phosphorExternals,
   BASE_EXTERNALS: BASE_EXTERNALS,
+  EXTENSION_EXTERNALS: EXTENSION_EXTERNALS,
   CODEMIRROR_FILES: CODEMIRROR_FILES,
   VENDOR_FILES: VENDOR_FILES,
-  DEFAULT_EXTERNALS: DEFAULT_EXTERNALS
 };
