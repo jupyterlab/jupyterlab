@@ -5,13 +5,16 @@ var path = require('path');
 var findImports = require('find-imports');
 
 // Get the list of vendor files.
-var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
+var jlabPath = path.dirname(require.resolve('jupyterlab/package.json'));
+var VENDOR_FILES = findImports(jlabPath + '/lib/**/*.js', { flatten: true });
 var CODEMIRROR_FILES = VENDOR_FILES.filter(function(importPath) {
   return importPath.indexOf('codemirror') !== -1;
 });
 var codemirrorPaths = CODEMIRROR_FILES.map(function(importPath) {
   return importPath.replace('.js', '');
 });
+codemirrorPaths.concat(['codemirror', '../lib/codemirror', '../../lib/codemirror']);
+
 VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
   return (importPath.indexOf('codemirror') !== 0 &&
           importPath.indexOf('phosphor') !== 0 &&
@@ -65,16 +68,25 @@ VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
  */
 function phosphorExternals(context, request, callback) {
     // All phosphor imports get mangled to use the external bundle.
-    var regex = /^phosphor\/lib\/([\w\/]+)$/;
+    var regex = /^phosphor\/lib\/[\w\/]+$/;
     if(regex.test(request)) {
-        var matches = regex.exec(request)[1];
-        var lib = 'var phosphor.' + matches.split('/').join('.');
+        var path = require.resolve(request).replace('.js', '');
+        var index = path.indexOf('phosphor/lib');
+        path = path.slice(index + 'phosphor/lib/'.length);
+        var lib = 'var jupyter.phosphor.' + path.split('/').join('.');
         return callback(null, lib);
     }
     callback();
 }
 var BASE_EXTERNALS = [
   phosphorExternals,
+  function(context, request, callback) {
+    // CodeMirror imports just use the external bundle.
+    if (codemirrorPaths.indexOf(request) !== -1) {
+      return callback(null, 'var jupyter.CodeMirror');
+    }
+    callback();
+  },
   {
     'jupyter-js-services': 'jupyter.services',
     'jquery': '$',
@@ -88,27 +100,18 @@ var BASE_EXTERNALS = [
  * extensions of JupyterLab.
  */
 var DEFAULT_EXTERNALS = BASE_EXTERNALS + [
-    function(context, request, callback) {
-      // TODO: add `index` to directory imports
-      // JupyterLab imports get mangled to use the external bundle.
-      var regex = /^jupyterlab\/lib\/([\w\/]+)$/;
-      if(regex.test(request)) {
-          var matches = regex.exec(request)[1];
-          var lib = 'var jupyterlab.' + matches.split('/').join('.');
-          return callback(null, lib);
-      }
-
-      // CodeMirror imports just use the external bundle.
-      if (codemirrorPaths.indexOf(request) !== -1) {
-        return callback(null, 'var CodeMirror');
-      }
-      callback();
-    },
-    {
-      'codemirror': 'CodeMirror',
-      '../lib/codemirror': 'CodeMirror',
-      '../../lib/codemirror': 'CodeMirror',
+  function(context, request, callback) {
+    // JupyterLab imports get mangled to use the external bundle.
+    var regex = /^jupyterlab\/lib\/([\w\.\/]+)$/;
+    if(regex.test(request)) {
+      var path = require.resolve(request).replace('.js', '');
+      var index = path.indexOf('jupyterlab/lib');
+      path = path.slice(index + 'jupyterlab/lib/'.length);
+      var lib = 'var jupyter.lab.' + path.split('/').join('.');
+      return callback(null, lib);
     }
+    callback();
+  }
 ]
 
 
