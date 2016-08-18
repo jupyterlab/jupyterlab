@@ -42,7 +42,7 @@ const RENDERED_CLASS = 'jp-Rendered';
 /**
  * The class name added to rendered html widgets.
  */
-const RENDERED_HTML = 'jp-Rendered-html';
+const RENDERED_HTML = 'jp-mod-renderedHTML';
 
 
 // Support GitHub flavored Markdown, leave sanitizing to external library.
