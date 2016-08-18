@@ -73,7 +73,7 @@ module.exports = [
 {
   entry: {
     lab: './build/jupyterlab-shim.js',
-    services: 'jupyter-js-services',
+    services: ['jupyter-js-services'],
     codemirror: helpers.CODEMIRROR_FILES,
     vendor: helpers.VENDOR_FILES
   },
