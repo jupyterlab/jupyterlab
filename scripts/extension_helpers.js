@@ -69,10 +69,10 @@ var BASE_EXTERNALS = [
     // All phosphor imports get mangled to use the external bundle.
     var regex = /^phosphor\/lib\/[\w\/]+$/;
     if(regex.test(request)) {
-        var path = require.resolve(request).replace('.js', '');
+        var path = require.resolve(request);
         var index = path.indexOf('phosphor/lib');
         path = path.slice(index + 'phosphor/lib/'.length);
-        var lib = 'var jupyter.phosphor.' + path.split('/').join('.');
+        var lib = 'var jupyter.phosphor["' + path + '"]';
         return callback(null, lib);
     }
     callback();
@@ -95,13 +95,13 @@ var EXTENSION_EXTERNALS = BASE_EXTERNALS.concat([
     var regex = /^jupyterlab\/lib\/([\w\.\/]+)$/;
     if(regex.test(request)) {
       try {
-        var path = require.resolve(request).replace('.js', '');
+        var path = require.resolve(request);
       } catch(err) {
         return callback();
       }
       var index = path.indexOf('jupyterlab/lib');
       path = path.slice(index + 'jupyterlab/lib/'.length);
-      var lib = 'var jupyter.lab.' + path.split('/').join('.');
+      var lib = 'var jupyter.lab["' + path + '"]';
       return callback(null, lib);
     }
 
