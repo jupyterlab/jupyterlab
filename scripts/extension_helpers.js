@@ -3,6 +3,8 @@
 
 var path = require('path');
 var findImports = require('find-imports');
+var walkSync = require('walk-sync');
+
 
 // Get the list of vendor files, with CodeMirror files being separate.
 var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
@@ -56,9 +58,35 @@ codeMirrorPaths = codemirrorPaths.concat(['codemirror', '../lib/codemirror', '..
         path: '../pythonpkg/static',
         libraryTarget: 'this'
       },
-      externals: jlab_helpers.upstream_externals(require)
+      externals: jlab_helpers.upstreamExternals(require)
     }];
 */
+
+
+/**
+ * Parse a Webpack request to a module that has been shimmed.
+ *
+ * @params basePath (string) - The base import path with a trailing slash.
+ *
+ * @param outName (string) - The name of the output variable.
+ *
+ * @param request (string) - The Webpack request path.
+ *
+ * @returns An appropriate mangled Webpack import line or `undefined`.
+ */
+function parseShimmed(basePath, outName, request) {
+  var regex = new RegExp("/^" + basePath + '[\w\.\/]+$/');
+  if (regex.test(request)) {
+    try {
+      var path = require.resolve(request);
+    } catch (err) {
+      return;
+    }
+    var index = path.indexOf(basePath);
+    path = path.slice(index + basePath.length);
+    return 'var ' + outName + '["' + path + '"]';
+  }
+}
 
 
 /**
@@ -73,27 +101,16 @@ var DEFAULT_EXTERNALS = [
   },
   function(context, request, callback) {
     // JupyterLab imports get mangled to use the external bundle.
-    var regex = /^jupyterlab\/lib\/([\w\.\/]+)$/;
-    if(regex.test(request)) {
-      try {
-        var path = require.resolve(request);
-      } catch(err) {
-        return callback();
-      }
-      var index = path.indexOf('jupyterlab/lib');
-      path = path.slice(index + 'jupyterlab/lib/'.length);
-      var lib = 'var jupyter.lab["' + path + '"]';
-      return callback(null, lib);
+    var lib = parseShimmed('jupyterlab/lib/', 'jupyter.lib', request);
+    if (lib) {
+      callback(null, lib);
     }
 
     // All phosphor imports get mangled to use the external bundle.
+    lib = parseShimmed('phosphor/lib/', 'jupyter.phosphor', request);
     var regex = /^phosphor\/lib\/[\w\/]+$/;
-    if(regex.test(request)) {
-        var path = require.resolve(request);
-        var index = path.indexOf('phosphor/lib');
-        path = path.slice(index + 'phosphor/lib/'.length);
-        var lib = 'var jupyter.phosphor["' + path + '"]';
-        return callback(null, lib);
+    if (lib) {
+      return callback(null, lib);
     }
 
     // CodeMirror imports just use the external bundle.
@@ -106,8 +123,45 @@ var DEFAULT_EXTERNALS = [
 ];
 
 
+/**
+ * Create a shim to export all of a library's modules to a namespaced object.
+ *
+ * @param modName (string) - The name of the module to shim.
+ *
+ * @param sourceFolder (string) - The source folder (defaults to `lib`).
+ *
+ * @returns The code used to export the entire package.
+ */
+function createShim(modName, sourceFolder) {
+  var dirs = [];
+  var files = [];
+  var lines = ['var ' + modName + ' = {};'];
+
+  // Find the path to the module.
+  var modPath = require.resolve(modName + '/package.json');
+  sourceFolder = sourceFolder || 'lib';
+  modPath = path.join(path.dirname(modPath), sourceFolder);
+
+  // Walk through the source tree.
+  var entries = walkSync.entries(modPath, {
+    directories: false,
+    globs: ['**/*.js', '**/*.css']
+  });
+  for (var i = 0; i < entries.length; i++) {
+    // Get the relative path to the entry.
+    var entryPath = entries[i].relativePath;
+    // Add an entries for each file.
+    lines.push(modName + '["' + entryPath + '"] = require("' + path.join(modName, sourceFolder, entryPath) + '");');
+  }
+  lines.push('module.exports = ' + modName + ';');
+
+  return lines.join('\n');
+}
+
+
+
 // determine whether the package JSON contains a JupyterLab extension
-function validate_extension(pkg){
+function validateExtension(pkg){
   try {
     // for now, just try to load the key... could check whether file exists?
     pkg['jupyter']['lab']['main']
@@ -118,7 +172,7 @@ function validate_extension(pkg){
 }
 
 // the publicly exposed function
-function upstream_externals(_require) {
+function upstreamExternals(_require) {
   // remember which packages we have seen
   var _seen = {},
     // load the user's package.json
@@ -157,7 +211,7 @@ function upstream_externals(_require) {
     // only visit each named package once
     _seen[pkg['name']] = true;
 
-    if (!validate_extension(pkg)) {
+    if (!validateExtension(pkg)) {
       if (!_is_user_pkg(pkg)) {
         return [];
       } else {
@@ -192,8 +246,10 @@ function upstream_externals(_require) {
 }
 
 module.exports = {
-  upstream_externals: upstream_externals,
-  validate_extension: validate_extension,
+  upstreamExternals: upstreamExternals,
+  validateExtension: validateExtension,
+  createShim: createShim,
+  parseShimmed: parseShimmed,
   DEFAULT_EXTERNALS: DEFAULT_EXTERNALS,
   CODEMIRROR_FILES: CODEMIRROR_FILES,
   VENDOR_FILES: VENDOR_FILES

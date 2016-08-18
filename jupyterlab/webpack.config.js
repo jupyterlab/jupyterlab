@@ -8,7 +8,6 @@ require('es6-promise').polyfill();
 var fs = require('fs');
 var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var shimmer = require('./shim-maker');
 
 
 console.log('Generating config...');
@@ -23,8 +22,8 @@ try {
     throw e;
   }
 }
-fs.writeFileSync('./build/phosphor-shim.js', shimmer('phosphor'));
-fs.writeFileSync('./build/jupyterlab-shim.js', shimmer('jupyterlab'));
+fs.writeFileSync('./build/phosphor-shim.js', helpers.createShim('phosphor'));
+fs.writeFileSync('./build/jupyterlab-shim.js', helpers.createShim('jupyterlab'));
 
 // The default `module.loaders` config.
 var loaders = [

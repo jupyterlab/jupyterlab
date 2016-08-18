@@ -15,13 +15,11 @@
     "css-loader": "^0.23.1",
     "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.8.5",
-    "find-imports": "^0.5.0",
     "json-loader": "^0.5.4",
     "rimraf": "^2.5.0",
     "style-loader": "^0.13.0",
     "typescript": "^1.7.5",
     "url-loader": "^0.5.7",
-    "walk-sync": "^0.3.1",
     "webpack": "^1.12.11"
   },
   "scripts": {
