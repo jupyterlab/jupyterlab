@@ -216,3 +216,10 @@
   color: #757575;
   transform: translateX(-40%) translateY(-58%);
 }
+
+
+.jp-Document {
+  min-width: 120px;
+  min-height: 120px;
+  outline: none;
+}
