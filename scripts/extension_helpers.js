@@ -124,7 +124,7 @@ var DEFAULT_EXTERNALS = BASE_EXTERNALS.concat([
   },
   function(context, request, callback) {
     // JupyterLab imports get mangled to use the external bundle.
-    var lib = parseShimmed('jupyterlab/lib/', 'jupyter.lib', request);
+    var lib = parseShimmed('jupyterlab/lib/', 'jupyter.lab', request);
     if (lib) {
       return callback(null, lib);
     }
