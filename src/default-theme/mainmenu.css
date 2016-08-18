@@ -3,11 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-#jp-MainMenu.p-Widget.p-MenuBar {
+#jp-MainMenu.p-MenuBar {
    background: white;
 }
 
-#jp-top-panel.p-Widget.p-Panel {
+#jp-top-panel.p-Panel {
    border-bottom: 1px solid #BDBDBD;
    background: white;
    min-height: 28px;

@@ -37,18 +37,6 @@ import {
   IEditorTracker
 } from './index';
 
-import 'codemirror/theme/material.css';
-import 'codemirror/theme/zenburn.css';
-import 'codemirror/theme/abcdef.css';
-import 'codemirror/theme/base16-light.css';
-import 'codemirror/theme/base16-dark.css';
-import 'codemirror/theme/dracula.css';
-import 'codemirror/theme/hopscotch.css';
-import 'codemirror/theme/mbo.css';
-import 'codemirror/theme/mdn-like.css';
-import 'codemirror/theme/seti.css';
-import 'codemirror/theme/the-matrix.css';
-import 'codemirror/theme/xq-light.css';
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/comment/comment.js';
