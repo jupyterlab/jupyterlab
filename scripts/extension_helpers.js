@@ -75,7 +75,7 @@ codeMirrorPaths = codemirrorPaths.concat(['codemirror', '../lib/codemirror', '..
  * @returns An appropriate mangled Webpack import line or `undefined`.
  */
 function parseShimmed(basePath, outName, request) {
-  var regex = new RegExp("/^" + basePath + '[\w\.\/]+$/');
+  var regex = new RegExp("^" + basePath + '[\\w\.\\/-]+$');
   if (regex.test(request)) {
     try {
       var path = require.resolve(request);
@@ -90,25 +90,16 @@ function parseShimmed(basePath, outName, request) {
 
 
 /**
- * The default Webpack `externals` config that should be applied to
- * extensions of JupyterLab.
+ * The base Webpack `externals` config.
  */
-var DEFAULT_EXTERNALS = [
+var BASE_EXTERNALS = [
   {
-    'jupyter-js-services': 'jupyter.services',
     'jquery': '$',
     'jquery-ui': '$'
   },
   function(context, request, callback) {
-    // JupyterLab imports get mangled to use the external bundle.
-    var lib = parseShimmed('jupyterlab/lib/', 'jupyter.lib', request);
-    if (lib) {
-      callback(null, lib);
-    }
-
     // All phosphor imports get mangled to use the external bundle.
     lib = parseShimmed('phosphor/lib/', 'jupyter.phosphor', request);
-    var regex = /^phosphor\/lib\/[\w\/]+$/;
     if (lib) {
       return callback(null, lib);
     }
@@ -121,6 +112,25 @@ var DEFAULT_EXTERNALS = [
     callback();
   }
 ];
+
+
+/**
+ * The default Webpack `externals` config that should be applied to
+ * extensions of JupyterLab.
+ */
+var DEFAULT_EXTERNALS = BASE_EXTERNALS.concat([
+  {
+    'jupyter-js-services': 'jupyter.services',
+  },
+  function(context, request, callback) {
+    // JupyterLab imports get mangled to use the external bundle.
+    var lib = parseShimmed('jupyterlab/lib/', 'jupyter.lib', request);
+    if (lib) {
+      return callback(null, lib);
+    }
+    callback();
+  }
+]);
 
 
 /**
@@ -250,6 +260,7 @@ module.exports = {
   validateExtension: validateExtension,
   createShim: createShim,
   parseShimmed: parseShimmed,
+  BASE_EXTERNALS: BASE_EXTERNALS,
   DEFAULT_EXTERNALS: DEFAULT_EXTERNALS,
   CODEMIRROR_FILES: CODEMIRROR_FILES,
   VENDOR_FILES: VENDOR_FILES

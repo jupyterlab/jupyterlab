@@ -41,7 +41,7 @@ var loaders = [
 ]
 
 
-// The actual Webpack parallel configurations.
+// The parallel Webpack build configurations.
 module.exports = [
 // Application bundles
 {
@@ -67,19 +67,16 @@ module.exports = [
   plugins: [
     new ExtractTextPlugin('[name].css')
   ],
-  externals: helpers.EXTENSION_EXTERNALS
+  externals: helpers.DEFAULT_EXTERNALS
 },
 // JupyterLab bundles
 {
   entry: {
     lab: './build/jupyterlab-shim.js',
-    services: ['jupyter-js-services'],
-    phosphor: ['./build/phosphor-shim.js'],
-    codemirror: helpers.CODEMIRROR_FILES,
     vendor: helpers.VENDOR_FILES
   },
   output: {
-      filename: '[name].bundle.js',
+      filename: 'lab.bundle.js',
       path: './build',
       publicPath: './',
       library: ['jupyter', '[name]']
@@ -88,27 +85,60 @@ module.exports = [
     loaders: loaders
   },
   plugins: [
-    new ExtractTextPlugin('[name].css'),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'phosphor',
-      filename: 'phosphor.bundle.js',
-      chunks: ['lab', 'services']
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'services',
-      filename: 'services.bundle.js',
-      chunks: ['lab']
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'codemirror',
-      filename: 'codemirror.bundle.js',
-      chunks: ['lab']
-    }),
-    // This becomes the entry point and must be loaded first.
-    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
+    new ExtractTextPlugin("[name].css"),
+    new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.bundle.js")
   ],
   bail: true,
   devtool: 'source-map',
+  externals: helpers.BASE_EXTERNALS.concat([
+    {  'jupyter-js-services': 'jupyter.services' } ])
+},
+// CodeMirror bundle
+{
+  entry: {
+    'codemirror': helpers.CODEMIRROR_FILES
+  },
+  output: {
+      filename: 'codemirror.bundle.js',
+      path: './build',
+      publicPath: './',
+      library: ['jupyter', 'CodeMirror'],
+  },
+  module: {
+    loaders: loaders
+  },
+  plugins: [
+    new ExtractTextPlugin("[name].css")
+  ],
+  bail: true,
+  devtool: 'source-map'
+},
+// Jupyter-js-services bundle
+{
+  entry: 'jupyter-js-services',
+  output: {
+      filename: 'services.bundle.js',
+      path: './build',
+      publicPath: './',
+      library: ['jupyter', 'services'],
+  },
+  module: {
+    loaders: loaders
+  },
+  bail: true,
+  devtool: 'source-map',
   externals: helpers.BASE_EXTERNALS
+},
+// Phosphor bundle
+{
+  entry: './build/phosphor-shim.js',
+  output: {
+      filename: 'phosphor.bundle.js',
+      path: './build',
+      publicPath: './',
+      library: ['jupyter', 'phosphor']
+  },
+  bail: true,
+  devtool: 'source-map'
 }
 ]
