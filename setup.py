@@ -90,10 +90,14 @@ class NPM(Command):
     jlab_node_modules = os.path.join(extension_root, 'node_modules')
 
     targets = map(get_target_path, [
-        'vendor.css', 'CodeMirror.css', 'main.css',
-        'phosphor.bundle.js', 'services.bundle.js',
-        'vendor.bundle.js', 'CodeMirror.bundle.js',
-        'main.bundle.js'
+        'codemirror.css', 'lab.css',
+        'main.css', 'vendor.css',
+        'codemirror.bundle.js', 'lab.bundle.js',
+        'main.bundle.js', 'phosphor.bundle.js',
+        'services.bundle.js', 'vendor.bundle.js',
+        'codemirror.bundle.js.map', 'lab.bundle.js.map',
+        'main.bundle.js.map', 'phosphor.bundle.js.map',
+        'services.bundle.js.map', 'vendor.bundle.js.map'
     ])
 
     def initialize_options(self):
