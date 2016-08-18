@@ -49,6 +49,7 @@ module.exports = [
 {
   entry: {
     'main': './index.js',
+    'plugins': './plugins.js',
     'vendor': helpers.VENDOR_FILES
   },
   output: {
