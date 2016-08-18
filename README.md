@@ -28,7 +28,7 @@ From the command line:
 
 ```bash
 pip install jupyterlab
-jupyter serverextension enable --py jupyterlab
+jupyter serverextension enable --py jupyterlab --sys-prefix
 ```
 
 Start up JupyterLab:
