@@ -78,7 +78,7 @@ module.exports = [
     vendor: helpers.VENDOR_FILES
   },
   output: {
-      filename: 'lab.bundle.js',
+      filename: '[name].bundle.js',
       path: './build',
       publicPath: './',
       library: ['jupyter', '[name]']
@@ -107,12 +107,14 @@ module.exports = [
 },
 // Phosphor bundle
 {
-  entry: './build/phosphor-shim.js',
+  entry: {
+    phosphor: './build/phosphor-shim.js'
+  },
   output: {
-      filename: 'phosphor.bundle.js',
+      filename: '[name].bundle.js',
       path: './build',
       publicPath: './',
-      library: ['jupyter', 'phosphor']
+      library: ['jupyter', '[name]']
   },
   bail: true,
   devtool: 'source-map'
