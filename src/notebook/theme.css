@@ -181,15 +181,16 @@ img.jp-mod-unconfined {
     padding-left: 8px;
     padding-right: 8px;
     vertical-align: middle;
-    font-size: 14px;
+    font-size: 16px;
     color: #616161;
     line-height: 23px;
+    height: 23px;
 }
 
 
 .jp-NBToolbar-item.jp-NBToolbar-button,
 .jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
-    font-family: FontAwesome;
+  font-family: 'Material Icons';
     text-align: center;
     display: inline-block;
 }
@@ -235,52 +236,52 @@ img.jp-mod-unconfined {
 
 
 .jp-NBToolbar-button.jp-NBToolbar-save::before {
-   content: "\f0c7";  /* Save */
+   content: "\E161";  /* Save */
 }
 
 
 .jp-NBToolbar-button.jp-NBToolbar-insert::before {
-   content: "\f067";  /* Plus */
+   content: "\E145";  /* Plus */
 }
 
 
 .jp-NBToolbar-button.jp-NBToolbar-cut::before {
-   content: "\f0c4";  /* Cut */
+   content: "\E14E";  /* Cut */
 }
 
 
 .jp-NBToolbar-button.jp-NBToolbar-copy::before {
-   content: "\f0c5";  /* Copy */
+   content: "\E14D";  /* Copy */
 }
 
 
 .jp-NBToolbar-button.jp-NBToolbar-paste::before {
-   content: "\f0ea";  /* Paste */
+   content: "\E14F";  /* Paste */
 }
 
 
 .jp-NBToolbar-button.jp-NBToolbar-run::before {
-   content: "\f051";  /* Step-forward */
+   content: "\E154";  /* Step-forward */
 }
 
 
 .jp-NBToolbar-button.jp-NBToolbar-interrupt::before {
-   content: "\f04d";  /* Stop */
+   content: "\E14B";  /* Stop */
 }
 
 
 .jp-NBToolbar-button.jp-NBToolbar-restart::before {
-   content: "\f01e";  /* Rotate-right */
+   content: "\E41A";  /* Rotate-right */
 }
 
 
 .jp-NBToolbar-item.jp-NBToolbar-kernelIndicator::before {
-    content: "\f10c";  /* Circle-o */
+    content: "\E40C";  /* Circle-o */
 }
 
 
 .jp-NBToolbar-item.jp-NBToolbar-kernelIndicator.jp-mod-busy::before {
-    content: "\f111";  /* Circle */
+    content: "\E3FA";  /* Circle */
 }
 
 
