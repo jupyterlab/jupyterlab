@@ -45,6 +45,8 @@
 
 .p-Menu-itemLabel {
   padding: 4px 35px 4px 2px;
+  font-size: 13px;
+  color: #777777;
 }
 
 
@@ -112,7 +114,7 @@
 
 
 .p-MenuBar-item {
-  padding: 4px 8px;
+  padding: 6px 8px;
   border-left: 1px solid transparent;
   border-right: 1px solid transparent;
 }
@@ -142,6 +144,11 @@
   padding: 0;
   border: none;
   border-left: 1px solid #DDDDDD;
+}
+
+
+.p-MenuBar-item.p-mod-active > .p-MenuBar-itemText {
+  color: #2196F3;
 }
 
 
@@ -215,17 +222,10 @@
   padding: 0px 10px;
   background: #E5E5E5;
   border: 1px solid #C0C0C0;
-  font: 12px Helvetica, Arial, sans-serif;
 }
 
 
-.p-TabBar-tab.p-mod-current {
-  border-top: 1px solid #2196F3;
-  background: white;
-}
-
-
-.p-TabBar-tab:hover:not(.p-mod-current) {
+.p-TabBar.p-mod-top .p-TabBar-tab:hover:not(.p-mod-current) {
   background: #FAFAFA;
 }
 

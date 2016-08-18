@@ -29,6 +29,14 @@
 }
 
 
+#jp-top-panel.p-Panel {
+   border-bottom: 1px solid #BDBDBD;
+   background: #EEEEEE;
+   min-height: 28px;
+   max-height: 28px;
+}
+
+
 #jp-main-split-panel {
   display: flex;
   flex: 1 1 auto;
@@ -53,6 +61,12 @@
 
 #p-left-stack {
   border-right: 1px solid #BDBDBD;
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab.jp-mod-current {
+  border-top: 1px solid #2196F3;
+  background: white;
 }
 
 

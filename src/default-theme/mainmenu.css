@@ -4,12 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 #jp-MainMenu.p-MenuBar {
-   background: white;
+   background: #EEEEEE;
 }
 
-#jp-top-panel.p-Panel {
-   border-bottom: 1px solid #BDBDBD;
-   background: white;
-   min-height: 28px;
-   max-height: 28px;
-}
