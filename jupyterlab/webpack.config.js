@@ -8,10 +8,14 @@ require('es6-promise').polyfill();
 var fs = require('fs');
 var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var findImports = require('find-imports');
+var helpers = require('jupyterlab/scripts/extension_helpers');
 
 
 console.log('Generating config...');
-var helpers = require('jupyterlab/scripts/extension_helpers');
+
+// Get the list of vendor files.
+var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
 
 // Create the Phosphor and JupyterLab shims.
 // First make sure the build folder exists.
@@ -24,7 +28,6 @@ try {
 }
 fs.writeFileSync('./build/phosphor-shim.js', helpers.createShim('phosphor'));
 fs.writeFileSync('./build/jupyterlab-shim.js', helpers.createShim('jupyterlab'));
-
 
 // The default `module.loaders` config.
 var loaders = [
@@ -40,6 +43,9 @@ var loaders = [
   { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
   { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' },
 ]
+
+
+console.log('Generating bundles...');
 
 
 // The parallel Webpack build configurations.
@@ -74,10 +80,10 @@ module.exports = [
 {
   entry: {
     lab: './build/jupyterlab-shim.js',
-    vendor: helpers.VENDOR_FILES
+    vendor: VENDOR_FILES
   },
   output: {
-      filename: 'lab.bundle.js',
+      filename: '[name].bundle.js',
       path: './build',
       publicPath: './',
       library: ['jupyter', '[name]']
@@ -86,8 +92,8 @@ module.exports = [
     loaders: loaders
   },
   plugins: [
-    new ExtractTextPlugin("[name].css"),
-    new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.bundle.js")
+    new ExtractTextPlugin('[name].css'),
+    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
   ],
   bail: true,
   devtool: 'source-map',
@@ -100,7 +106,7 @@ module.exports = [
     'codemirror': ['codemirror/lib/codemirror.css', 'codemirror']
   },
   output: {
-      filename: 'codemirror.bundle.js',
+      filename: '[name].bundle.js',
       path: './build',
       publicPath: './',
       library: 'CodeMirror'
@@ -109,7 +115,7 @@ module.exports = [
     loaders: loaders
   },
   plugins: [
-    new ExtractTextPlugin("[name].css")
+    new ExtractTextPlugin('[name].css')
   ],
   bail: true,
   devtool: 'source-map'

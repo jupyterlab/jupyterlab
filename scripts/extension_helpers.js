@@ -2,16 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 var path = require('path');
-var findImports = require('find-imports');
 var walkSync = require('walk-sync');
-
-
-// Get the list of vendor files, with CodeMirror files being separate.
-var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
-VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
-  return (importPath.lastIndexOf('phosphor', 0) !== 0 &&
-          importPath.lastIndexOf('jupyter-js-services', 0) !== 0);
-});
 
 
 /**
@@ -87,13 +78,13 @@ var BASE_EXTERNALS = [
     'jquery-ui': '$'
   },
   function(context, request, callback) {
-    // All phosphor imports get mangled to use the external bundle.
+    // All phosphor imports get mangled to use an external bundle.
     lib = parseShimmed('phosphor/lib/', 'jupyter.phosphor', request);
     if (lib) {
       return callback(null, lib);
     }
 
-    // CodeMirror imports use the external bundle.
+    // CodeMirror imports get mangled to use an external bundle.
     var codeMirrorPaths = [
       'codemirror/mode/meta',
       'codemirror', '../lib/codemirror',  '../../lib/codemirror',
@@ -117,7 +108,7 @@ var DEFAULT_EXTERNALS = BASE_EXTERNALS.concat([
     'jupyter-js-services': 'jupyter.services',
   },
   function(context, request, callback) {
-    // JupyterLab imports get mangled to use the external bundle.
+    // JupyterLab imports get mangled to use an external bundle.
     var lib = parseShimmed('jupyterlab/lib/', 'jupyter.lab', request);
     if (lib) {
       return callback(null, lib);
@@ -256,5 +247,4 @@ module.exports = {
   parseShimmed: parseShimmed,
   BASE_EXTERNALS: BASE_EXTERNALS,
   DEFAULT_EXTERNALS: DEFAULT_EXTERNALS,
-  VENDOR_FILES: VENDOR_FILES
 };
