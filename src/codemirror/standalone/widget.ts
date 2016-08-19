@@ -22,7 +22,7 @@ class CodeMirroStandaloneEditorWidget extends CodeMirrorEditorWidget implements 
   /**
    * An associated presenter.
    */
-  presenter:IStandaloneEditorPresenter
+  presenter:IStandaloneEditorPresenter;
 
   /**
    * Disposes this widget.
@@ -35,7 +35,7 @@ class CodeMirroStandaloneEditorWidget extends CodeMirrorEditorWidget implements 
 
     if (this.presenter) {
       this.presenter.dispose();
-      this.presenter = null
+      this.presenter = null;
     }
   }
 
