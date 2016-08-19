@@ -110,10 +110,11 @@ class FileBrowserWidget extends Widget {
 
     model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs({ model });
-    this._buttons = new FileButtons({
-      commands, keymap, manager, model, opener
-    });
     this._listing = new DirListing({ manager, model, opener, renderer });
+    let listings = this._listing;
+    this._buttons = new FileButtons({
+      commands, keymap, manager, model, opener, listings
+    });
 
     model.fileChanged.connect((fbModel, args) => {
       let oldPath = args.oldValue && args.oldValue.path || null;

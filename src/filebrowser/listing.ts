@@ -1187,6 +1187,15 @@ class DirListing extends Widget {
   }
 
   /**
+   * Select a given item by name.
+   */
+  public selectItemByName(name: string): Promise<void> {
+    this._selection = Object.create(null);
+    this._selection[name] = true;
+    return this._model.refresh();
+  }
+
+  /**
    * Handle the `refreshed` signal from the model.
    */
   private _onModelRefreshed(): void {
