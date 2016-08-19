@@ -19,11 +19,12 @@ try {
   fs.mkdirSync('./build')
 } catch(err) {
   if (err.code !== 'EEXIST') {
-    throw e;
+    throw err;
   }
 }
 fs.writeFileSync('./build/phosphor-shim.js', helpers.createShim('phosphor'));
 fs.writeFileSync('./build/jupyterlab-shim.js', helpers.createShim('jupyterlab'));
+
 
 // The default `module.loaders` config.
 var loaders = [
@@ -96,13 +97,13 @@ module.exports = [
 // CodeMirror bundle
 {
   entry: {
-    'codemirror': helpers.CODEMIRROR_FILES
+    'codemirror': ['codemirror/lib/codemirror.css', 'codemirror']
   },
   output: {
       filename: 'codemirror.bundle.js',
       path: './build',
       publicPath: './',
-      library: ['jupyter', 'CodeMirror'],
+      library: 'CodeMirror'
   },
   module: {
     loaders: loaders

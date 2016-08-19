@@ -8,21 +8,10 @@ var walkSync = require('walk-sync');
 
 // Get the list of vendor files, with CodeMirror files being separate.
 var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
-var CODEMIRROR_FILES = VENDOR_FILES.filter(function(importPath) {
-  return importPath.indexOf('codemirror') !== -1;
-});
-CODEMIRROR_FILES.push('codemirror/lib/codemirror.js');
 VENDOR_FILES = VENDOR_FILES.filter(function (importPath) {
-  return (importPath.indexOf('codemirror') !== 0 &&
-          importPath.indexOf('phosphor') !== 0 &&
-          importPath.indexOf('jupyter-js-services') !== 0);
+  return (importPath.lastIndexOf('phosphor', 0) !== 0 &&
+          importPath.lastIndexOf('jupyter-js-services', 0) !== 0);
 });
-
-// Get the list of codemirror imports.
-var codemirrorPaths = CODEMIRROR_FILES.map(function(importPath) {
-  return importPath.replace('.js', '');
-});
-codeMirrorPaths = codemirrorPaths.concat(['codemirror', '../lib/codemirror', '../../lib/codemirror']);
 
 
 /**
@@ -66,7 +55,7 @@ codeMirrorPaths = codemirrorPaths.concat(['codemirror', '../lib/codemirror', '..
 /**
  * Parse a Webpack request to a module that has been shimmed.
  *
- * @params basePath (string) - The base import path with a trailing slash.
+ * @param basePath (string) - The base import path with a trailing slash.
  *
  * @param outName (string) - The name of the output variable.
  *
@@ -104,9 +93,14 @@ var BASE_EXTERNALS = [
       return callback(null, lib);
     }
 
-    // CodeMirror imports just use the external bundle.
-    if (codemirrorPaths.indexOf(request) !== -1) {
-      return callback(null, 'var jupyter.CodeMirror');
+    // CodeMirror imports use the external bundle.
+    var codeMirrorPaths = [
+      'codemirror/mode/meta',
+      'codemirror', '../lib/codemirror',  '../../lib/codemirror',
+      'codemirror/lib/codemirror.css'
+    ];
+    if (codeMirrorPaths.indexOf(request) !== -1) {
+      return callback(null, 'var CodeMirror');
     }
 
     callback();
@@ -262,6 +256,5 @@ module.exports = {
   parseShimmed: parseShimmed,
   BASE_EXTERNALS: BASE_EXTERNALS,
   DEFAULT_EXTERNALS: DEFAULT_EXTERNALS,
-  CODEMIRROR_FILES: CODEMIRROR_FILES,
   VENDOR_FILES: VENDOR_FILES
 };
