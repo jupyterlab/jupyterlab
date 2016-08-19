@@ -19,6 +19,47 @@ interface IPosition {
 }
 
 /**
+ * Utility functions for a position.
+ */
+export
+namespace IPosition {
+
+  /**
+   * Creates a new position.
+   */
+  export
+  function create(line: number, column: number) {
+    return { line, column }
+  }
+
+  /**
+   * Returns true if given positions equals; otherwise false. 
+   */
+  export
+  function equals(left:IPosition, right:IPosition): boolean {
+    if (left === null) {
+      return right === null;  
+    }
+    return left.line === left.line && left.column === left.column;
+  }
+
+  /**
+   * A start position.
+   */
+  export
+  const startPosition:IPosition = IPosition.create(0, 0);
+
+  /**
+   * Tests whether the given position is the start position.
+   */
+  export
+  function isStartPosition(position:IPosition) {
+    return IPosition.equals(position, this.startPosition);
+  }
+
+}
+
+/**
  * Configuration options for the editor.
  */
 export
@@ -98,6 +139,11 @@ interface IEditorModel extends IDisposable {
   getLastLine(): number;
 
   /**
+   * Returns a content for the given line number.
+   */
+  getLineContent(line:number): string;
+
+  /**
    * Find an offset fot the given position.
    */
   getOffsetAt(position: IPosition): number;
@@ -106,6 +152,33 @@ interface IEditorModel extends IDisposable {
    * Find a position fot the given offset.
    */
   getPositionAt(offset: number): IPosition;
+
+}
+
+/**
+ * Utility functions for a model.
+ */
+export
+namespace IEditorModel {
+
+  /**
+   * Returns an end position of the given model.
+   */
+  export
+  function getEndPosition(model:IEditorModel): IPosition {
+    const lastLine = model.getLastLine();
+    const lastColumn = model.getLineContent(lastLine).length;
+    return IPosition.create(lastLine, lastColumn);
+  }
+
+  /**
+   * Tests whether the given position is an end position of the given model.
+   */
+  export
+  function isEndPosition(model:IEditorModel, position:IPosition): boolean {
+    const endPosition = getEndPosition(model);
+    return IPosition.equals(endPosition, position);
+  }
 
 }
 
@@ -154,5 +227,31 @@ interface IEditorView extends IDisposable {
    * Brings browser focus to this editor text.
    */
   focus(): void;
+
+}
+
+/**
+ * Utility functions for an editor.
+ */
+export
+namespace IEditorView {
+
+  /**
+   * Tests whether a cursor at the start position. 
+   */
+  export
+  function isAtStartPositoin(editor:IEditorView): boolean {
+    const position = editor.position;
+    return IPosition.isStartPosition(position);
+  }
+
+  /**
+   * Tests whether a cursor at the end position.
+   */
+  export
+  function isAtEndPosition(editor:IEditorView): boolean {
+    const position = editor.position;
+    return IEditorModel.isEndPosition(editor.getModel(), position);
+  }
 
 }

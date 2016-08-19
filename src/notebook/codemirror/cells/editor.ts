@@ -91,29 +91,12 @@ class CodeMirrorCellEditorWidget extends CodeMirrorEditorWidget implements CellE
    * Handle keydown events from the editor.
    */
   protected onEditorKeydown(editor: CodeMirror.Editor, event: KeyboardEvent): void {
-    const edgeLocation = this.getEdgeLocation(editor, event);
-    if (edgeLocation) {
-      this.edgeRequested.emit(edgeLocation);
+    if (event.keyCode === UP_ARROW) {
+      this.presenter.onPositionUp(this);
     }
-  }
-
-  /**
-   * Computes an edge location.
-   */
-  protected getEdgeLocation(editor: CodeMirror.Editor, event: KeyboardEvent): EdgeLocation {
-    const doc = editor.getDoc();
-    const cursor = doc.getCursor();
-    const line = cursor.line;
-    const ch = cursor.ch;
-    if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
-      return 'top';
+    if (event.keyCode === DOWN_ARROW) {
+      this.presenter.onPositionDown(this);
     }
-    const lastLine = doc.lastLine();
-    const lastCh = doc.getLineHandle(lastLine).text.length;
-    if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
-      return 'bottom';
-    }
-    return null;
   }
 
 }

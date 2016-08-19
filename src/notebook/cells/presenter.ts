@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ICellEditorView, IEditorModel
+  ICellEditorView, IEditorModel, IPosition, IEditorView
 } from './view';
 
 import {
@@ -28,6 +28,16 @@ interface ICellEditorPresenter extends IDisposable {
    * A cell model associated with thie presenter.
    */
   model:ICellModel
+
+  /**
+   * Handles moving a cursor up.
+   */
+  onPositionUp(editorView:ICellEditorView): void;
+
+  /**
+   * Handles moving a cursor down.
+   */
+  onPositionDown(editorView:ICellEditorView): void;
 }
 
 /**
@@ -45,14 +55,32 @@ class CellEditorPresenter implements ICellEditorPresenter {
    * Constructs a presenter.
    */
   constructor(private _editorView: ICellEditorView) {
-    this._editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this)
+    this.editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this)
   }
 
-/**
+  /**
    * Handles editor model content changed events.
    */
   protected onEditorModelContentChanged(model: IEditorModel) {
     this.updateCellModel(model);
+  }
+
+  /**
+   * Handles moving a cursor up.
+   */
+  onPositionUp(editorView:ICellEditorView) {
+    if (IEditorView.isAtStartPositoin(editorView)) {
+      this.editorView.edgeRequested.emit('top');
+    }
+  }
+
+  /**
+   * Handles moving a cursor down.
+   */
+  onPositionDown(editorView:ICellEditorView) {
+    if (IEditorView.isAtEndPosition(editorView)) {
+      this.editorView.edgeRequested.emit('bottom');
+    }
   }
 
   dispose() {
@@ -61,10 +89,12 @@ class CellEditorPresenter implements ICellEditorPresenter {
     }
     this.isDisposed = true;
 
-    this._editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
-    this._editorView = null;
+    this.editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
+    this.editorView.dispose();
 
-    this.disconnect(this._model);
+    this.disconnect(this.model);
+
+    this._editorView = null;
     this._model = null;
   }
 
@@ -81,12 +111,13 @@ class CellEditorPresenter implements ICellEditorPresenter {
   get model(): ICellModel {
     return this._model;
   }
+
   set model(model: ICellModel) {
     if (!model && !this._model || model === this._model) {
       return;
     }
 
-    this.disconnect(model);
+    this.disconnect(this._model);
     
     this._model = model;
     this.updateEditorModel(model);
@@ -126,7 +157,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
    */
   protected updateEditorModel(model: ICellModel) {
     const newVlaue = model ? model.source : '';
-    const editorModel = this._editorView.getModel();
+    const editorModel = this.editorView.getModel();
     const oldValue = editorModel.getValue();
     if (oldValue !== newVlaue) {
       editorModel.setValue(newVlaue);
@@ -138,9 +169,9 @@ class CellEditorPresenter implements ICellEditorPresenter {
    */
   protected updateCellModel(model: IEditorModel) {
     const newValue = model.getValue();
-    const oldValue = this._model.source;
+    const oldValue = this.model.source;
     if (oldValue !== newValue) {
-      this._model.source = newValue;
+      this.model.source = newValue;
     }
   }
 

@@ -24,7 +24,7 @@ import {
 
 import {
   EditorWidget, IEditorView, IEditorModel, IEditorConfiguration, IPosition
-} from '../editorwidget/widget'
+} from '../editorwidget/widget';
 
 /**
  * The class name added to CodeMirrorWidget instances.
@@ -52,7 +52,7 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
     this._editor = CodeMirror(this.node, options);
 
-    const doc = this._editor.getDoc();
+    const doc = this.editor.getDoc();
     CodeMirror.on(doc, 'change', (instance, change) => {
       this.onDocChange(instance, change);
     });
@@ -206,6 +206,13 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
   }
 
   /**
+   * Returns a content for the given line number.
+   */
+  getLineContent(line:number): string {
+    return this.editor.getDoc().getLineHandle(line).text;
+  }
+
+  /**
    * Find an offset fot the given position.
    */
   getOffsetAt(position: IPosition): number {
@@ -225,18 +232,18 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
    * A cursor position for this editor.
    */
   get position(): IPosition {
-      const cursor = this._editor.getDoc().getCursor();
-      return {
-          line: cursor.line,
-          column: cursor.ch
-      };
+    const cursor = this.editor.getDoc().getCursor();
+    return {
+        line: cursor.line,
+        column: cursor.ch
+    };
   }
 
   set position(position: IPosition) {
-      this._editor.getDoc().setCursor({
-          line: position.line,
-          ch: position.column
-      });
+    this.editor.getDoc().setCursor({
+        line: position.line,
+        ch: position.column
+    });
   }
 
   /**
@@ -308,7 +315,7 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
       this._needsRefresh = true;
       return;
     }
-    this._editor.refresh();
+    this.editor.refresh();
     this._needsRefresh = false;
   }
 
@@ -317,7 +324,7 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
    */
   protected onAfterShow(msg: Message): void {
     if (this._needsRefresh) {
-      this._editor.refresh();
+      this.editor.refresh();
       this._needsRefresh = false;
     }
   }
@@ -327,9 +334,9 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
    */
   protected onResize(msg: ResizeMessage): void {
     if (msg.width < 0 || msg.height < 0) {
-      this._editor.refresh();
+      this.editor.refresh();
     } else {
-      this._editor.setSize(msg.width, msg.height);
+      this.editor.setSize(msg.width, msg.height);
     }
     this._needsRefresh = false;
   }
@@ -338,7 +345,7 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._editor.focus();
+    this.editor.focus();
   }
 
   /**
