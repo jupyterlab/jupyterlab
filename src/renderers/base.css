@@ -4,34 +4,34 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-mod-renderedHTML .MathJax_Display {
+.jp-RenderedHTML .MathJax_Display {
   margin: 0;
 }
 
 
-.jp-mod-renderedHTML {
+.jp-RenderedHTML {
   color: black;
   font-size: 14px;
   line-height: 20px;
 }
 
-.jp-mod-renderedHTML em {
+.jp-RenderedHTML em {
   font-style: italic;
 }
 
-.jp-mod-renderedHTML strong {
+.jp-RenderedHTML strong {
   font-weight: bold;
 }
 
-.jp-mod-renderedHTML u {
+.jp-RenderedHTML u {
   text-decoration: underline;
 }
 
-.jp-mod-renderedHTML :link {
+.jp-RenderedHTML :link {
   text-decoration: underline;
 }
 
-.jp-mod-renderedHTML :visited {
+.jp-RenderedHTML :visited {
   text-decoration: underline;
 }
 
@@ -40,43 +40,35 @@ font-size = 26, 22, 18, 14, 12, 12
 margin-top = 14, 14, 14, 14, 8, 8
 */
 
-.jp-mod-renderedHTML h1 {
+.jp-RenderedHTML h1 {
   font-size: 185.7%;
   margin: 1.08em 0 0 0;
   font-weight: bold;
   line-height: 1.0;
 }
 
-.jp-mod-renderedHTML h2 {
+.jp-RenderedHTML h2 {
   font-size: 157.1%;
   margin: 1.27em 0 0 0;
   font-weight: bold;
   line-height: 1.0;
 }
 
-.jp-mod-renderedHTML h3 {
+.jp-RenderedHTML h3 {
   font-size: 128.6%;
   margin: 1.55em 0 0 0;
   font-weight: bold;
   line-height: 1.0;
 }
 
-.jp-mod-renderedHTML h4 {
+.jp-RenderedHTML h4 {
   font-size: 100%;
   margin: 2em 0 0 0;
   font-weight: bold;
   line-height: 1.0;
 }
 
-.jp-mod-renderedHTML h5 {
-  font-size: 100%;
-  margin: 2em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
-  font-style: italic;
-}
-
-.jp-mod-renderedHTML h6 {
+.jp-RenderedHTML h5 {
   font-size: 100%;
   margin: 2em 0 0 0;
   font-weight: bold;
@@ -84,88 +76,96 @@ margin-top = 14, 14, 14, 14, 8, 8
   font-style: italic;
 }
 
-.jp-mod-renderedHTML h1:first-child {
+.jp-RenderedHTML h6 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+  font-style: italic;
+}
+
+.jp-RenderedHTML h1:first-child {
   margin-top: 0.538em;
 }
 
-.jp-mod-renderedHTML h2:first-child {
+.jp-RenderedHTML h2:first-child {
   margin-top: 0.636em;
 }
 
-.jp-mod-renderedHTML h3:first-child {
+.jp-RenderedHTML h3:first-child {
   margin-top: 0.777em;
 }
 
-.jp-mod-renderedHTML h4:first-child {
+.jp-RenderedHTML h4:first-child {
   margin-top: 1em;
 }
 
-.jp-mod-renderedHTML h5:first-child {
+.jp-RenderedHTML h5:first-child {
   margin-top: 1em;
 }
 
-.jp-mod-renderedHTML h6:first-child {
+.jp-RenderedHTML h6:first-child {
   margin-top: 1em;
 }
 
-.jp-mod-renderedHTML ul:not(.list-inline),
-.jp-mod-renderedHTML ol:not(.list-inline) {
+.jp-RenderedHTML ul:not(.list-inline),
+.jp-RenderedHTML ol:not(.list-inline) {
   padding-left: 2em;
 }
 
-.jp-mod-renderedHTML ul {
+.jp-RenderedHTML ul {
   list-style: disc;
 }
 
-.jp-mod-renderedHTML ul ul {
+.jp-RenderedHTML ul ul {
   list-style: square;
 }
 
-.jp-mod-renderedHTML ul ul ul {
+.jp-RenderedHTML ul ul ul {
   list-style: circle;
 }
 
-.jp-mod-renderedHTML ol {
+.jp-RenderedHTML ol {
   list-style: decimal;
 }
 
-.jp-mod-renderedHTML ol ol {
+.jp-RenderedHTML ol ol {
   list-style: upper-alpha;
 }
 
-.jp-mod-renderedHTML ol ol ol {
+.jp-RenderedHTML ol ol ol {
   list-style: lower-alpha;
 }
 
-.jp-mod-renderedHTML ol ol ol ol {
+.jp-RenderedHTML ol ol ol ol {
   list-style: lower-roman;
 }
 
-.jp-mod-renderedHTML ol ol ol ol ol {
+.jp-RenderedHTML ol ol ol ol ol {
   list-style: decimal;
 }
 
-.jp-mod-renderedHTML * + ul {
+.jp-RenderedHTML * + ul {
   margin-top: 1em;
 }
 
-.jp-mod-renderedHTML * + ol {
+.jp-RenderedHTML * + ol {
   margin-top: 1em;
 }
 
-.jp-mod-renderedHTML hr {
+.jp-RenderedHTML hr {
   color: black;
   background-color: black;
   margin-top: 1em;
   margin-bottom: 1em;
 }
 
-.jp-mod-renderedHTML pre {
+.jp-RenderedHTML pre {
   margin: 1em 2em;
 }
 
-.jp-mod-renderedHTML pre,
-.jp-mod-renderedHTML code {
+.jp-RenderedHTML pre,
+.jp-RenderedHTML code {
   border: 0;
   background-color: white;
   color: black;
@@ -173,79 +173,79 @@ margin-top = 14, 14, 14, 14, 8, 8
   padding: 0px;
 }
 
-.jp-mod-renderedHTML blockquote {
+.jp-RenderedHTML blockquote {
   margin: 1em 2em;
 }
 
-.jp-mod-renderedHTML table {
+.jp-RenderedHTML table {
   margin-left: auto;
   margin-right: auto;
   border: 1px solid black;
   border-collapse: collapse;
 }
 
-.jp-mod-renderedHTML tr,
-.jp-mod-renderedHTML th,
-.jp-mod-renderedHTML td {
+.jp-RenderedHTML tr,
+.jp-RenderedHTML th,
+.jp-RenderedHTML td {
   border: 1px solid black;
   border-collapse: collapse;
   margin: 1em 2em;
 }
 
-.jp-mod-renderedHTML td,
-.jp-mod-renderedHTML th {
+.jp-RenderedHTML td,
+.jp-RenderedHTML th {
   text-align: left;
   vertical-align: middle;
   padding: 4px;
 }
 
-.jp-mod-renderedHTML th {
+.jp-RenderedHTML th {
   font-weight: bold;
 }
 
-.jp-mod-renderedHTML * + table {
+.jp-RenderedHTML * + table {
   margin-top: 1em;
 }
 
-.jp-mod-renderedHTML p {
+.jp-RenderedHTML p {
   text-align: left;
   margin: 0px;
 }
 
-.jp-mod-renderedHTML * + p {
+.jp-RenderedHTML * + p {
   margin-top: 1em;
 }
 
-.jp-mod-renderedHTML img {
+.jp-RenderedHTML img {
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
-.jp-mod-renderedHTML * + img {
+.jp-RenderedHTML * + img {
   margin-top: 1em;
 }
 
-.jp-mod-renderedHTML img,
-.jp-mod-renderedHTML svg {
+.jp-RenderedHTML img,
+.jp-RenderedHTML svg {
   max-width: 100%;
   height: auto;
 }
 
-.jp-mod-renderedHTML img.unconfined,
-.jp-mod-renderedHTML svg.unconfined {
+.jp-RenderedHTML img.unconfined,
+.jp-RenderedHTML svg.unconfined {
   max-width: none;
 }
 
-.jp-mod-renderedHTML .alert {
+.jp-RenderedHTML .alert {
   margin-bottom: initial;
 }
 
-.jp-mod-renderedHTML * + .alert {
+.jp-RenderedHTML * + .alert {
   margin-top: 1em;
 }
 
-.jp-mod-renderedHTML blockquote {
+.jp-RenderedHTML blockquote {
   margin: 1em 2em;
   padding: 0 1em;
   border-left: 5px solid black;
