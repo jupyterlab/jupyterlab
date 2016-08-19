@@ -6,7 +6,6 @@
 #main {
   display: flex;
   flex-direction: column;
-  font-size: 14px;
   position: absolute;
   left: 0;
   top: 0;
@@ -30,7 +29,7 @@
 
 #jp-top-panel.p-Panel {
    border-bottom: 1px solid #BDBDBD;
-   background: #EEEEEE;
+   background: white;
    min-height: 28px;
    max-height: 28px;
 }

@@ -57,6 +57,8 @@
 
 .p-Menu-itemShortcut {
   padding: 4px 0px;
+  font-size: 13px;
+  color: #777777;
 }
 
 
@@ -102,14 +104,14 @@
 |----------------------------------------------------------------------------*/
 .p-MenuBar {
   padding-left: 5px;
-  background: #FAFAFA;
+  background: white;
   color: rgba(0, 0, 0, 0.87);
   font: 14px;
 }
 
 
 .p-MenuBar-menu {
-  transform: translateY(-1px);
+  transform: translateY(-3px);
 }
 
 
@@ -147,13 +149,19 @@
 }
 
 
-.p-MenuBar-item.p-mod-active > .p-MenuBar-itemText {
+.p-MenuBar-item.p-mod-active > .p-MenuBar-itemLabel {
   color: #2196F3;
 }
 
 
 .p-MenuBar-itemMnemonic {
   text-decoration: underline;
+}
+
+
+.p-MenuBar-itemLabel {
+  font-size: 13px;
+  color: #777777
 }
 
 
