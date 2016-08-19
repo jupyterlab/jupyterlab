@@ -16,7 +16,12 @@
 
 #jp-main-content-panel {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
+}
+
+
+#jp-main-dock-panel {
+  padding: 8px;
 }
 
 
@@ -37,27 +42,27 @@
 
 #jp-main-split-panel {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
 }
 
 
 #jp-left-stack, #jp-right-stack {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
 }
 
 
 #jp-left-stack > .p-Widget, #jp-right-stack > .p-Widget {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 300px;
 }
 
 
-#p-right-stack {
+#jp-right-stack {
   border-left: 1px solid #BDBDBD;
 }
 
-#p-left-stack {
+#jp-left-stack {
   border-right: 1px solid #BDBDBD;
 }
 
