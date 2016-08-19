@@ -91,7 +91,7 @@ class DefaultStandaloneEditorWidgetDecorator<T extends StandaloneEditorWidget> e
   }
 
   /**
-   * * Updates a title styles of the decorated editor widget.
+   * Updates a title styles of the decorated editor widget.
    */
   protected updateTitleStyles(dirty:boolean) {
     if (dirty) {

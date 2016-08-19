@@ -35,11 +35,6 @@ const UP_ARROW = 38;
 const DOWN_ARROW = 40;
 
 /**
- * The class name added to cell editor widget nodes.
- */
-const CELL_EDITOR_CLASS = 'jp-CellEditor';
-
-/**
  * A code mirror widget for a cell editor.
  */
 export
@@ -50,8 +45,6 @@ class CodeMirrorCellEditorWidget extends CodeMirrorEditorWidget implements CellE
    */
   constructor(options: CodeMirror.EditorConfiguration = {}) {
     super(options);
-    this.addClass(CELL_EDITOR_CLASS);
-
     CodeMirror.on(this.editor, 'keydown', (instance, evt) => {
       this.onEditorKeydown(instance, evt);
     });

@@ -40,3 +40,30 @@ export
 class CellEditorWidgetDecorator<T extends CellEditorWidget> extends CellEditorViewDecorator<T> {
 
 }
+
+/**
+ * The class name added to cell editor widget nodes.
+ */
+const CELL_EDITOR_CLASS = 'jp-CellEditor';
+
+/**
+ * A default cell editor widget decorator.
+ */
+export
+class DefaultCellEditorWidgetDecorator<T extends CellEditorWidget> extends CellEditorWidgetDecorator<T> {
+
+  /**
+   * Decorates an underlying widget.
+   */
+  protected addDecoration() {
+    this.editor.addClass(CELL_EDITOR_CLASS);
+  }
+
+  /**
+   * Removes decorations from an underlying widget.
+   */
+  protected removeDecorations() {
+    this.editor.removeClass(CELL_EDITOR_CLASS);
+  }
+
+}
