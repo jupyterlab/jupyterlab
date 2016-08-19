@@ -34,7 +34,7 @@ import {
  */
 export
 const notebookFactoryProvider: JupyterLabPlugin<NotebookWidgetFactory> = {
-  id: 'jupyter.services.editor.codemirror.factory',
+  id: 'jupyter.services.notebook.default.factory',
   requires: [
     IRenderMime,
     IClipboard,
