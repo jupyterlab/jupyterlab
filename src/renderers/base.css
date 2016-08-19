@@ -3,9 +3,16 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+
+.jp-mod-renderedHTML .MathJax_Display {
+  margin: 0;
+}
+
+
 .jp-mod-renderedHTML {
-  color: #000;
-  /* any extras will just be numbers: */
+  color: black;
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .jp-mod-renderedHTML em {
@@ -27,6 +34,11 @@
 .jp-mod-renderedHTML :visited {
   text-decoration: underline;
 }
+
+/*For a 14px base font size this goes as:
+font-size = 26, 22, 18, 14, 12, 12
+margin-top = 14, 14, 14, 14, 8, 8
+*/
 
 .jp-mod-renderedHTML h1 {
   font-size: 185.7%;
@@ -144,6 +156,8 @@
 .jp-mod-renderedHTML hr {
   color: black;
   background-color: black;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 .jp-mod-renderedHTML pre {
@@ -153,8 +167,8 @@
 .jp-mod-renderedHTML pre,
 .jp-mod-renderedHTML code {
   border: 0;
-  background-color: #fff;
-  color: #000;
+  background-color: white;
+  color: black;
   font-size: 100%;
   padding: 0px;
 }
@@ -195,6 +209,7 @@
 
 .jp-mod-renderedHTML p {
   text-align: left;
+  margin: 0px;
 }
 
 .jp-mod-renderedHTML * + p {
@@ -228,4 +243,10 @@
 
 .jp-mod-renderedHTML * + .alert {
   margin-top: 1em;
+}
+
+.jp-mod-renderedHTML blockquote {
+  margin: 1em 2em;
+  padding: 0 1em;
+  border-left: 5px solid black;
 }

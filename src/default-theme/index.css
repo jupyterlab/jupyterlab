@@ -11,6 +11,7 @@
 @import '../iframe/base.css';
 @import '../notebook/base.css';
 @import '../running/base.css';
+@import '../renderers/base.css';
 
 @import './theme.css';
 
@@ -36,3 +37,4 @@
 @import './running.css';
 @import './shell.css';
 @import './terminal.css';
+@import './renderers.css';
