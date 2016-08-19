@@ -16,7 +16,6 @@
 
 
 #jp-main-content-panel {
-  padding: 8px;
   display: flex;
   flex: 1 1 auto;
 }
@@ -80,13 +79,14 @@
   color: #777777;
   background: white;
   font-size: 14px;
-  min-width: 36px;
-  max-width: 36px;
+  min-width: 38px;
+  max-width: 38px;
   overflow: visible;
 }
 
 
 .p-SideBar.p-TabBar.p-mod-left {
+  margin-left: 2px;
   border-right: 1px solid #BDBDBD;
 }
 
@@ -105,19 +105,15 @@
 .jp-SideBar.jp-mod-right .p-TabBar-content {
   display: flex;
   list-style: none;
-  height: 100%;
-  line-height: 35px;
-  background: #EEEEEE;
+  background: #E5E5E5;
   border: none;
   border-top: 1px solid #BDBDBD;
-  margin-top: 1px;
 }
 
 
 .jp-SideBar.jp-mod-left .p-TabBar-content {
   flex-direction: column;
-  border-right: 1px solid #BDBDBD;
-  margin-right: 1px;
+  border: 1px solid #BDBDBD;
 }
 
 
@@ -131,15 +127,14 @@
 
 .jp-SideBar .p-TabBar-tab,
 .jp-SideBar .p-TabBar-tab.p-mod-current {
-  font-size: 13px;
-  width: 100px;
-  margin-bottom: 32px;
-  margin-top: 33px;
-  min-height: 35px;
-  max-height: 35px;
-  line-height: 35px;
-  text-align: center;
-  border: none;
+    font-size: 13px;
+    width: 100px;
+    margin-bottom: 32px;
+    margin-top: 32px;
+    min-height: 36px;
+    max-height: 36px;
+    text-align: center;
+    border: none;
 }
 
 
@@ -155,8 +150,10 @@
 
 
 .jp-SideBar.jp-mod-left .p-TabBar-tab {
-  transform: rotate(-90deg) translateY(-100%);
+  transform: rotate(-90deg) translateY(-92%);
   border-left: 1px solid #BDBDBD;
+  margin-left: 2px;
+  padding: 6px 0px
 }
 
 
