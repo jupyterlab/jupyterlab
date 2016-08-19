@@ -44,27 +44,30 @@ var walkSync = require('walk-sync');
 
 
 /**
- * Parse a Webpack request to a module that has been shimmed.
+ * Create a Webpack `externals` function for a shimmed external package.
  *
- * @param basePath (string) - The base import path with a trailing slash.
+ * @param pkgName (string) - The name of the package
  *
- * @param outName (string) - The name of the output variable.
- *
- * @param request (string) - The Webpack request path.
- *
- * @returns An appropriate mangled Webpack import line or `undefined`.
+ * @returns A function to be used as part of a WebPack config.
  */
-function parseShimmed(basePath, outName, request) {
-  var regex = new RegExp("^" + basePath + '[\\w\.\\/-]+$');
-  if (regex.test(request)) {
-    try {
-      var path = require.resolve(request);
-    } catch (err) {
-      return;
+function createShimHandler(pkgName) {
+  return function(context, request, callback) {
+    var regex = new RegExp("^" + pkgName + '[\/\\w\.\\/-]+$');
+    if (regex.test(request)) {
+      try {
+        var path = require.resolve(request);
+      } catch (err) {
+        return callback(err);
+      }
+      var index = path.indexOf(request);
+      path = path.slice(index + pkgName.length);
+      if (path.indexOf('/') === 0) {
+        path = path.slice(1);
+      }
+      path = 'var jupyter.externals["' + pkgName + '"]["' + path + '"]';
+      return callback(null, path);
     }
-    var index = path.indexOf(basePath);
-    path = path.slice(index + basePath.length);
-    return 'var ' + outName + '["' + path + '"]';
+    callback();
   }
 }
 
@@ -77,13 +80,8 @@ var BASE_EXTERNALS = [
     'jquery': '$',
     'jquery-ui': '$'
   },
+  createShimHandler('phosphor'),
   function(context, request, callback) {
-    // All phosphor imports get mangled to use an external bundle.
-    var lib = parseShimmed('phosphor/lib/', 'jupyter.externals["phosphor"]', request);
-    if (lib) {
-      return callback(null, lib);
-    }
-
     // CodeMirror imports get mangled to use an external bundle.
     var codeMirrorPaths = [
       'codemirror/mode/meta',
@@ -93,28 +91,18 @@ var BASE_EXTERNALS = [
     if (codeMirrorPaths.indexOf(request) !== -1) {
       return callback(null, 'var jupyter.externals.codemirror');
     }
-
     callback();
   }
 ];
 
 
 /**
- * The default Webpack `externals` config that should be applied to
- * extensions of JupyterLab.
+ * The base Webpack `externals` config that should be applied to extensions of
+ * JupyterLab.
  */
-var DEFAULT_EXTERNALS = BASE_EXTERNALS.concat([
-  {
-    'jupyter-js-services': 'jupyter.externals["jupyter-js-services"]',
-  },
-  function(context, request, callback) {
-    // JupyterLab imports get mangled to use an external bundle.
-    var lib = parseShimmed('jupyterlab/lib/', 'jupyter.externals.jupyterlab', request);
-    if (lib) {
-      return callback(null, lib);
-    }
-    callback();
-  }
+var EXTENSION_EXTERNALS = BASE_EXTERNALS.concat([
+  createShimHandler('jupyter-js-services'),
+  createShimHandler('jupyterlab')
 ]);
 
 
@@ -144,9 +132,9 @@ function createShim(modName, sourceFolder) {
   });
   for (var i = 0; i < entries.length; i++) {
     // Get the relative path to the entry.
-    var entryPath = entries[i].relativePath;
+    var entryPath = path.join(sourceFolder, entries[i].relativePath);
     // Add an entries for each file.
-    lines.push('shim["' + entryPath + '"] = require("' + path.join(modName, sourceFolder, entryPath) + '");');
+    lines.push('shim["' + entryPath + '"] = require("' + path.join(modName, entryPath) + '");');
   }
   lines.push('module.exports = shim;');
 
@@ -244,7 +232,7 @@ module.exports = {
   upstreamExternals: upstreamExternals,
   validateExtension: validateExtension,
   createShim: createShim,
-  parseShimmed: parseShimmed,
+  createShimHandler: createShimHandler,
   BASE_EXTERNALS: BASE_EXTERNALS,
-  DEFAULT_EXTERNALS: DEFAULT_EXTERNALS,
+  EXTENSION_EXTERNALS: EXTENSION_EXTERNALS
 };

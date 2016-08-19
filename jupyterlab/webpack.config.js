@@ -17,7 +17,7 @@ console.log('Generating config...');
 // Get the list of vendor files.
 var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
 
-// Create the Phosphor and JupyterLab shims.
+// Create the external library shims.
 // First make sure the build folder exists.
 try {
   fs.mkdirSync('./build')
@@ -26,8 +26,11 @@ try {
     throw err;
   }
 }
-fs.writeFileSync('./build/phosphor-shim.js', helpers.createShim('phosphor'));
-fs.writeFileSync('./build/jupyterlab-shim.js', helpers.createShim('jupyterlab'));
+for (var lib of ['phosphor', 'jupyterlab', 'jupyter-js-services']) {
+  var shim = helpers.createShim(lib);
+  fs.writeFileSync('./build/' + lib + '-shim.js', shim);
+}
+
 
 // The default `module.loaders` config.
 var loaders = [
@@ -74,7 +77,7 @@ module.exports = [
   plugins: [
     new ExtractTextPlugin('[name].css')
   ],
-  externals: helpers.DEFAULT_EXTERNALS
+  externals: helpers.EXTENSION_EXTERNALS
 },
 // JupyterLab bundles
 {
@@ -98,7 +101,8 @@ module.exports = [
   bail: true,
   devtool: 'source-map',
   externals: helpers.BASE_EXTERNALS.concat([
-    {  'jupyter-js-services': 'jupyter.externals["jupyter-js-services"]' } ])
+    helpers.createShimHandler('jupyter-js-services')
+  ])
 },
 // CodeMirror bundle
 {
@@ -122,9 +126,9 @@ module.exports = [
 },
 // Jupyter-js-services bundle
 {
-  entry: 'jupyter-js-services',
+  entry: './build/jupyter-js-services-shim.js',
   output: {
-      filename: 'services.bundle.js',
+      filename: 'jupyter-js-services.bundle.js',
       path: './build',
       publicPath: './',
       library: ['jupyter', 'externals', 'jupyter-js-services'],
