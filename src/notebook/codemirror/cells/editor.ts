@@ -86,8 +86,7 @@ class CodeMirrorCellEditorWidget extends CodeMirrorEditorWidget implements CellE
   protected onEditorKeydown(editor: CodeMirror.Editor, event: KeyboardEvent): void {
     if (event.keyCode === UP_ARROW) {
       this.presenter.onPositionUp(this);
-    }
-    if (event.keyCode === DOWN_ARROW) {
+    } else if (event.keyCode === DOWN_ARROW) {
       this.presenter.onPositionDown(this);
     }
   }
