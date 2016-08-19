@@ -106,8 +106,7 @@ namespace CodeMirrorCodeCellWidgetRenderer {
    */
   export
   const defaulEditorInitializer: (editor: CodeMirrorCellEditorWidget) => void = (editor)=> {
-    const decorator = new DefaultCellEditorWidgetDecorator(editor);
-    editor.presenter = new CellEditorPresenter(decorator); 
+    CellEditorWidget.defaulEditorInitializer(editor);
   }
 
   /**

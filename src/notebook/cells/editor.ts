@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ICellEditorView, ICellEditorPresenter
+  ICellEditorView, ICellEditorPresenter, CellEditorPresenter
 } from './presenter';
+
+import {
+  DefaultCellEditorWidgetDecorator
+} from './decorator';
 
 import {
   EditorWidget
@@ -17,4 +21,21 @@ export * from './presenter';
 export
 interface CellEditorWidget extends EditorWidget, ICellEditorView {
   presenter:ICellEditorPresenter
+}
+
+/**
+ * Utilities for a cell editor widget.
+ */
+export
+namespace CellEditorWidget {
+
+  /**
+   * A default cell editor widget initializer.
+   */
+  export
+  const defaulEditorInitializer: (editor: CellEditorWidget) => void=(editor)=> {
+    const decorator = new DefaultCellEditorWidgetDecorator(editor);
+    editor.presenter = new CellEditorPresenter(decorator);
+  }
+
 }
