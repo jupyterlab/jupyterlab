@@ -89,8 +89,17 @@
     "lib/**/*.svg",
     "lib/**/*.gif",
     "scripts/dedupe.js",
-    "scripts/extension_helpers.js"
+    "scripts/extension_helpers.js",
+    "scripts/externals.js"
   ],
+  "jupyter": {
+    "lab": {
+      "externals": {
+        "module": "./scripts/externals",
+        "name": "EXTERNALS"
+      }
+    }
+  },
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
   "bugs": {

@@ -4,7 +4,6 @@
 var path = require('path');
 var walkSync = require('walk-sync');
 
-
 /**
   Helper scripts to be used by extension authors (and extension extenders) in a
   webpack.config.json to create builds that do not include upstream extensions.
@@ -52,6 +51,8 @@ var walkSync = require('walk-sync');
  */
 function createShimHandler(pkgName) {
   return function(context, request, callback) {
+    // TODO: better path regex, probably only looking for .js or .css
+    // since that is all we save
     var regex = new RegExp("^" + pkgName + '[\/\\w\.\\/-]+$');
     if (regex.test(request)) {
       try {
@@ -64,46 +65,12 @@ function createShimHandler(pkgName) {
       if (path.indexOf('/') === 0) {
         path = path.slice(1);
       }
-      path = 'var jupyter.externals["' + pkgName + '"]["' + path + '"]';
-      return callback(null, path);
+      var shim = 'var jupyter.externals["' + pkgName + '"]["' + path + '"]';
+      return callback(null, shim);
     }
     callback();
   }
 }
-
-
-/**
- * The base Webpack `externals` config.
- */
-var BASE_EXTERNALS = [
-  {
-    'jquery': '$',
-    'jquery-ui': '$'
-  },
-  createShimHandler('phosphor'),
-  function(context, request, callback) {
-    // CodeMirror imports get mangled to use an external bundle.
-    var codeMirrorPaths = [
-      'codemirror/mode/meta',
-      'codemirror', '../lib/codemirror',  '../../lib/codemirror',
-      'codemirror/lib/codemirror.css'
-    ];
-    if (codeMirrorPaths.indexOf(request) !== -1) {
-      return callback(null, 'var jupyter.externals.codemirror');
-    }
-    callback();
-  }
-];
-
-
-/**
- * The base Webpack `externals` config that should be applied to extensions of
- * JupyterLab.
- */
-var EXTENSION_EXTERNALS = BASE_EXTERNALS.concat([
-  createShimHandler('jupyter-js-services'),
-  createShimHandler('jupyterlab')
-]);
 
 
 /**
@@ -142,9 +109,14 @@ function createShim(modName, sourceFolder) {
 }
 
 
-
-// determine whether the package JSON contains a JupyterLab extension
-function validateExtension(pkg){
+/**
+ * Determine whether a package is a JupyterLab extension.
+ *
+ * @param pkg (string) - The package.json object.
+ *
+ * @returns true if the package is a JupyterLab extension.
+ */
+function isLabExtension(pkg){
   try {
     // for now, just try to load the key... could check whether file exists?
     pkg['jupyter']['lab']['main']
@@ -154,85 +126,118 @@ function validateExtension(pkg){
   }
 }
 
-// the publicly exposed function
+/**
+ * Recurse through dependencies, collecting all external functions.
+ *
+ * @param function - the environment require function.
+ *
+ * @returns an externals object to be used in a Webpack config.
+ *
+ * #### Notes
+ * A sample Webpack config will look like
+ *
+    var jlab_helpers = require('jupyterlab/scripts/extension_helpers');
+
+    module.exports = [{
+      entry: './src/lab/extension.js',
+      output: {
+        filename: 'lab-extension.js',
+        path: '../pythonpkg/static',
+        libraryTarget: 'this'
+      },
+      externals: jlab_helpers.upstreamExternals(require)
+    }];
+ */
 function upstreamExternals(_require) {
+  // Parse the externals of this package.
+
   // remember which packages we have seen
-  var _seen = {},
-    // load the user's package.json
-    _user_pkg = _require('./package.json');
+  var _seen = {};
 
-
-  // check for whether this is the root package
-  function _is_user_pkg(pkg) {
-    return _user_pkg['name'] === pkg['name'];
-  }
-
-
-  // use the provided scoped _require and the current nested location
-  // in the `node_modules` hierarchy to resolve down to the list of externals
+  /**
+   * Load the externals from a JupyterLab extension package.
+   *
+   * @param pkg_path (string) - the path on the filesystem to the package.
+   *
+   * @param pkg (object) - the package.json object.
+   *
+   * @returns the externals this package provides, including itself.
+   *
+   * #### Notes
+   * An extension itself is always an external. Other externals provided
+   * by the package may be specified in package.json jupyter.lab.externals
+   * object:
+   *
+   * {module: "module-exporting-externals"}
+   *
+   * or
+   *
+   * {module: "module-exporting-externals", name: "exported-object"}
+   */
   function _load_externals(pkg_path, pkg) {
-    var pkg_externals = [pkg['name']];
-
-    try {
-      pkg_externals = pkg_externals.concat(_require(
-        pkg_path + '/' + pkg['jupyter']['lab']['externals']));
-    } catch (err) {
-      // not really worth adding any output here... usually, just the name will
-      // suffice
+    // the package itself is always an external
+    // the extension may provide other externals too.
+    var externals = pkg.jupyter.lab.externals;
+    var pkgExternals;
+    if (externals) {
+      try {
+        var externalModule = _require(pkg_path + '/' + externals['module']);
+        if (externals['name']) {
+          pkgExternals = externalModule[externals['name']];
+        } else {
+          pkgExternals = externalModule;
+        }
+      } catch (err) {
+        console.error('Error importing externals for ' + pkg.name);
+      }
     }
-    return pkg_externals || [];
+
+    return pkgExternals || [];
   }
 
 
   // return an array of strings, functions or regexen that can be deferenced by
   // webpack `externals` config directive
   // https://webpack.github.io/docs/configuration.html#externals
-  function _find_externals(pkg_path) {
-    var pkg = _require(pkg_path + '/package.json'),
-      lab_config;
+  function _find_externals(pkg_path, root) {
+    var pkg = _require(pkg_path + '/package.json');
+    var pkgName = pkg['name'];
+    var lab_config;
 
     // only visit each named package once
-    _seen[pkg['name']] = true;
+    _seen[pkgName] = true;
 
-    if (!validateExtension(pkg)) {
-      if (!_is_user_pkg(pkg)) {
-        return [];
-      } else {
-        throw Error(
-          pkg['name'] + ' does not contain a jupyter configuration. ' +
-          ' Please see TODO: where?'
-        );
-      }
+    if (!isLabExtension(pkg)) {
+      return [];
     }
 
-    console.info("Inspecting", pkg['name'],
-                 "for upstream JupyterLab extensions...");
+    console.info("Inspecting " + pkgName + " for externals it provides...");
 
-    // ok, actually start building the externals. If it is the user package,
-    // it SHOULDN'T be an external, as this is what the user will use for their
-    // build... otherwise, load the externals, which is probably
-    var externals = _is_user_pkg(pkg) ?
-      DEFAULT_EXTERNALS :
-      _load_externals(pkg_path, pkg, _require);
+    var externals = _load_externals(pkg_path, pkg, _require);
+    if (!root) {
+      externals.push(createShimHandler(pkg['name']));
+    }
 
-    // Recurse through the dependencies, and collect anything that has
-    // a JupyterLab config
+    // Recurse through the dependencies, and collect externals
+    // for JupyterLab extensions
     return Object.keys(pkg['dependencies'])
-      .filter(function(key){ return !_seen[key]; })
-      .reduce(function(externals, dep_name){
+      .filter(function(depName){ return !_seen[depName]; })
+      .reduce(function(externals, depName){
         return externals.concat(
-          _find_externals(pkg_path + '/node_modules/' + dep_name));
+          // We assume the node_modules is flat
+          // TODO: actually change directory before doing _find_externals?
+          _find_externals(depName));
       }, externals);
   }
 
-  return _find_externals(".");
+  var externals = _find_externals(".", true);
+  console.log(externals);
+  return externals;
 }
 
 module.exports = {
   upstreamExternals: upstreamExternals,
-  validateExtension: validateExtension,
+  validateExtension: isLabExtension,
   createShim: createShim,
   createShimHandler: createShimHandler,
-  BASE_EXTERNALS: BASE_EXTERNALS,
-  EXTENSION_EXTERNALS: EXTENSION_EXTERNALS
 };

@@ -10,7 +10,7 @@ var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var findImports = require('find-imports');
 var helpers = require('jupyterlab/scripts/extension_helpers');
-
+var externals = require('jupyterlab/scripts/externals');
 
 console.log('Generating config...');
 
@@ -77,7 +77,7 @@ module.exports = [
   plugins: [
     new ExtractTextPlugin('[name].css')
   ],
-  externals: helpers.EXTENSION_EXTERNALS
+  externals: externals.EXTERNALS
 },
 // JupyterLab bundles
 {
@@ -100,7 +100,7 @@ module.exports = [
   ],
   bail: true,
   devtool: 'source-map',
-  externals: helpers.BASE_EXTERNALS.concat([
+  externals: externals.BASE_EXTERNALS.concat([
     helpers.createShimHandler('jupyter-js-services')
   ])
 },
@@ -138,7 +138,7 @@ module.exports = [
   },
   bail: true,
   devtool: 'source-map',
-  externals: helpers.BASE_EXTERNALS
+  externals: externals.BASE_EXTERNALS
 },
 // Phosphor bundle
 {
