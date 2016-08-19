@@ -170,7 +170,6 @@
 |----------------------------------------------------------------------------*/
 .p-TabBar {
   overflow: visible;
-  min-height: 24px;
   color: #777777;
   font-size: 13px;
 }
@@ -187,29 +186,28 @@
 
 
 .p-TabBar.p-mod-top {
-  border-bottom: 1px solid #C0C0C0;
+  border-bottom: 1px solid #BDBDBD;
 }
 
 
 .p-TabBar.p-mod-bottom {
-  border-top: 1px solid #C0C0C0;
+  border-top: 1px solid #BDBDBD;
 }
 
 
 .p-TabBar.p-mod-left {
-  border-right: 1px solid #C0C0C0;
+  border-right: 1px solid #BDBDBD;
 }
 
 
 .p-TabBar.p-mod-right {
-  border-left: 1px solid #C0C0C0;
+  border-left: 1px solid #BDBDBD;
 }
 
 
 .p-TabBar-content {
   min-width: 0;
   min-height: 0;
-  padding-right: 1px;
 }
 
 
@@ -225,27 +223,28 @@
 
 .p-TabBar-tab {
   padding: 0px 10px;
-  background: #E5E5E5;
-  border: 1px solid #C0C0C0;
+  background: #EEEEEE;
+  border: 1px solid #BDBDBD;
 }
 
 
-.p-TabBar.p-mod-top .p-TabBar-tab:hover:not(.p-mod-current) {
+.p-TabBar-tab.p-mod-current {
+  background: white;
+}
+
+
+.p-TabBar-tab:hover:not(.p-mod-current) {
   background: #FAFAFA;
 }
 
 
 .p-TabBar.p-mod-top .p-TabBar-tab,
 .p-TabBar.p-mod-bottom .p-TabBar-tab {
-  flex: 0 1 124px;
-  min-height: 23px;
+  flex: 0 1 125px;
+  min-height: 20px;
   min-width: 35px;
   margin-left: -1px;
   line-height: 20px;
-  padding: 0px 7px;
-  background: #EEEEEE;
-  border: 1px solid #BDBDBD;
-  border-bottom: none;
 }
 
 
@@ -267,9 +266,18 @@
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  min-height: 24px;
+  min-height: 23px;
+}
+
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current {
   transform: translateY(1px);
-  background: white;
+}
+
+
+.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+  transform: translateY(-1px);
 }
 
 
@@ -313,7 +321,6 @@
 .p-TabBar-tabLabel,
 .p-TabBar-tabCloseIcon {
   display: inline-block;
-  line-height: 24px;
 }
 
 
