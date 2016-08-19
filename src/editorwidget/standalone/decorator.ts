@@ -34,12 +34,12 @@ class StandaloneEditorWidgetDecorator<T extends StandaloneEditorWidget> extends 
 }
 
 /**
-  * The class name added to a jupyter code mirror widget.
+  * The class name added to a standalone editor widget.
   */
 const EDITOR_CLASS = 'jp-EditorWidget';
 
 /**
- * The class name added to a dirty widget.
+ * The class name added to a dirty standalone editor widget.
  */
 const DIRTY_CLASS = 'jp-mod-dirty';
 
