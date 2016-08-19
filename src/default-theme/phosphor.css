@@ -249,7 +249,6 @@
   padding: 0px 7px;
   background: #EEEEEE;
   border: 1px solid #BDBDBD;
-  transform: translateY(-1px);
   border-bottom: none;
 }
 
@@ -272,18 +271,11 @@
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  min-height: 23px;
-  max-height: 23px;
-}
-
-
-.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current {
+  min-height: 24px;
+  max-height: 24px;
   transform: translateY(1px);
-}
-
-
-.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  transform: translateY(-1px);
+  background: white;
+  min-height: 24px;
 }
 
 

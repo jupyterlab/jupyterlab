@@ -67,6 +67,11 @@
 }
 
 
+#jp-main-dock-panel .p-TabBar-tab.jp-mod-current {
+  border-top: 1px solid #2196F3;
+}
+
+
 .jp-SideBar.p-TabBar {
   color: #777777;
   background: white;
