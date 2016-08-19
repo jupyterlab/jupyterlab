@@ -42,6 +42,8 @@ class EditorViewDecorator<T extends IEditorView> implements IEditorView, IDispos
     }
     this.isDisposed = true;
     this.removeDecorations();
+    this._editor.dispose();
+    this._editor = null;
   }
 
   /**
