@@ -11,7 +11,7 @@ export * from '../view';
  * A standalone editor used to display the whole document.
  */
 export
-interface IStandalonEditorView extends IEditorView {
+interface IStandaloneEditorView extends IEditorView {
 
     /**
      * Marks this editor as dirty.

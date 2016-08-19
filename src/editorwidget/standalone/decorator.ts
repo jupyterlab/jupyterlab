@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  StandaloneEditorWidget, IStandalonEditorView, IEditorModel
+  StandaloneEditorWidget, IStandaloneEditorView, IEditorModel
 } from './widget'
 
 import {
@@ -15,7 +15,7 @@ export * from './widget';
  * A standalone editor view decorator.
  */
 export
-class StandaloneEditorViewDecorator<T extends IStandalonEditorView> extends EditorViewDecorator<T> implements IStandalonEditorView {
+class StandaloneEditorViewDecorator<T extends IStandaloneEditorView> extends EditorViewDecorator<T> implements IStandaloneEditorView {
   
   // --- Delegate methods ---
 

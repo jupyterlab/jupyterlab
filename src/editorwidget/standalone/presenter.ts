@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  IStandalonEditorView, IEditorModel
+  IStandaloneEditorView, IEditorModel
 } from './view';
 
 import {
@@ -44,7 +44,7 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
   /**
    * Constructs a presenter.
    */
-  constructor(private _editorView: IStandalonEditorView) {
+  constructor(private _editorView: IStandaloneEditorView) {
       this._editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this);
   }
 
@@ -65,6 +65,7 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
     this.isDisposed = true;
 
     this._editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
+    this._editorView.dispose();
     this._editorView = null;
     
     this.disconnect(this._context);
@@ -74,7 +75,7 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
   /**
    * Returns an associated standalone editor view.
    */
-  get editorView(): IStandalonEditorView {
+  get editorView(): IStandaloneEditorView {
     return this._editorView;
   }
 
@@ -149,10 +150,10 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
    * Updates an editor model.
    */
   protected updateEditorModel(model: IDocumentModel) {
-    const oldValue = this._editorView.getModel().getValue();
+    const oldValue = this.editorView.getModel().getValue();
     const newValue = model ? model.toString() : '';
     if (oldValue !== newValue) {
-      this._editorView.getModel().setValue(newValue);
+      this.editorView.getModel().setValue(newValue);
     }
   }
 
@@ -163,7 +164,7 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
     const newValue = model.getValue();
     const oldValue = this.context.model.toString();
     if (oldValue !== newValue) {
-      this._context.model.fromString(newValue);
+      this.context.model.fromString(newValue);
     }
   }
 
@@ -171,14 +172,14 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
    * Updates an uri.
    */
   protected updateUri(uri: string): void {
-    this._editorView.getModel().uri = uri;
+    this.editorView.getModel().uri = uri;
   }
 
   /**
    * Updates dirty state.
    */
   protected updateDirty(model: IDocumentModel): void {
-    this._editorView.setDirty(model.dirty)
+    this.editorView.setDirty(model.dirty)
   }
 
   private _context: IDocumentContext<IDocumentModel>;

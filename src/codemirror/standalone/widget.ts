@@ -10,18 +10,14 @@ import {
 } from '../widget';
 
 import {
-  IStandalonEditorView
-} from '../../editorwidget/standalone/view';
-
-import {
-  IStandaloneEditorPresenter
+  IStandaloneEditorPresenter, IStandaloneEditorView
 } from '../../editorwidget/standalone/presenter';
 
 /**
  * A standalone code mirror editor widget. 
  */
 export
-class CodeMirroStandaloneEditorWidget extends CodeMirrorEditorWidget implements IStandalonEditorView {
+class CodeMirroStandaloneEditorWidget extends CodeMirrorEditorWidget implements IStandaloneEditorView {
 
   /**
    * An associated presenter.

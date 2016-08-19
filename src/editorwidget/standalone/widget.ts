@@ -6,11 +6,7 @@ import {
 } from '../widget';
 
 import {
-  IStandalonEditorView
-} from './view';
-
-import {
-  IStandaloneEditorPresenter
+  IStandaloneEditorPresenter, IStandaloneEditorView
 } from './presenter';
 
 export * from './view';
@@ -19,6 +15,6 @@ export * from './view';
  * A standalone editor widget.
  */
 export
-interface StandaloneEditorWidget extends EditorWidget, IStandalonEditorView {
+interface StandaloneEditorWidget extends EditorWidget, IStandaloneEditorView {
   presenter:IStandaloneEditorPresenter
 }
