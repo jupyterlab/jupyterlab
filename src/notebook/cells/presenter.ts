@@ -17,6 +17,10 @@ import {
   IChangedArgs
 } from '../../common/interfaces';
 
+import {
+  PropertyObserver
+} from '../../editorwidget/utils/utils';
+
 export * from './view';
 
 /**
@@ -54,8 +58,41 @@ class CellEditorPresenter implements ICellEditorPresenter {
   /**
    * Constructs a presenter.
    */
-  constructor(private _editorView: ICellEditorView) {
-    this.editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this)
+  constructor(editorView: ICellEditorView) {
+    this._modelObserver.connect = (model) => this.connectToCellModel(model);
+    this._modelObserver.onChanged = (model) => this.onCellModelChanged(model);
+    this._modelObserver.disconnect = (model) => this.disconnectFromCellModel(model);
+
+    this._editorViewObserver.connect = (editorView) => this.connectToEditorView(editorView);
+    this._editorViewObserver.disconnect = (editorView) => this.disconnectFromEditorView(editorView);
+    this._editorViewObserver.property = editorView;
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this.isDisposed = true;
+
+    this._editorViewObserver.dispose();
+    this._editorViewObserver = null;
+    
+    this._modelObserver.dispose();
+    this._modelObserver = null;
+  }
+
+  /**
+   * Connects this presenter to the given editor view.
+   */
+  protected connectToEditorView(editorView: ICellEditorView) {
+      editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this);
+  }
+
+  /**
+   * Disconnect this presenter from the given editor view.
+   */
+  protected disconnectFromEditorView(editorView: ICellEditorView) {
+      editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
   }
 
   /**
@@ -83,61 +120,44 @@ class CellEditorPresenter implements ICellEditorPresenter {
     }
   }
 
-  dispose() {
-    if (this.isDisposed) {
-      return;
-    }
-    this.isDisposed = true;
-
-    this.editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
-    this.editorView.dispose();
-
-    this.disconnect(this.model);
-
-    this._editorView = null;
-    this._model = null;
-  }
-
   /**
    * Returns an associated cell editor view.
    */
   get editorView(): ICellEditorView {
-    return this._editorView;
+    return this._editorViewObserver.property;
   }
 
   /**
    * The cell model used by the editor.
    */
   get model(): ICellModel {
-    return this._model;
+    return this._modelObserver.property;
   }
 
   set model(model: ICellModel) {
-    if (!model && !this._model || model === this._model) {
-      return;
-    }
-
-    this.disconnect(this._model);
-    
-    this._model = model;
-    this.updateEditorModel(model);
-
-    this.connect(model)
+    this._modelObserver.property = model;
   }
 
   /**
    * Connects this presenter to the given cell model.
    */
-  protected connect(model: ICellModel) {
+  protected connectToCellModel(model: ICellModel) {
     if (model) {
       model.stateChanged.connect(this.onModelStateChanged, this);
     }
+  }
+
+  /** 
+   * Handles changes of a cell model. 
+   */
+  protected onCellModelChanged(model: ICellModel) {
+    this.updateEditorModel(model);
   }
   
   /**
    * Disconnects this presenter from the given cell model.
    */
-  protected disconnect(model: ICellModel) {
+  protected disconnectFromCellModel(model: ICellModel) {
     if (model) {
       model.stateChanged.disconnect(this.onModelStateChanged, this);
     }
@@ -175,6 +195,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
     }
   }
 
-  private _model: ICellModel = null;
+  private _modelObserver = new PropertyObserver<ICellModel>();
+  private _editorViewObserver = new PropertyObserver<ICellEditorView>();
 
 }

@@ -17,6 +17,10 @@ import {
   IChangedArgs
 } from '../../common/interfaces';
 
+import {
+  PropertyObserver
+} from '../utils/utils';
+
 export * from './view';
 
 /**
@@ -44,15 +48,14 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
   /**
    * Constructs a presenter.
    */
-  constructor(private _editorView: IStandaloneEditorView) {
-      this._editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this);
-  }
+  constructor(editorView:IStandaloneEditorView) {
+    this._contextObserver.connect = (context) => this.connectToDocumentContext(context);
+    this._contextObserver.onChanged = (context) => this.onDocumentContextChanged(context);
+    this._contextObserver.disconnect = (context) => this.disconnectFromDocumentContext(context);
 
-  /**
-   * Handles editor model content changed events.
-   */
-  protected onEditorModelContentChanged(model: IEditorModel) {
-    this.updateDocumentModel(model);
+    this._editorViewObserver.connect = (editorView) => this.connectToEditorView(editorView);
+    this._editorViewObserver.disconnect = (editorView) => this.disconnectFromEditorView(editorView);
+    this._editorViewObserver.property = editorView;
   }
 
   /**
@@ -64,47 +67,56 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
     }
     this.isDisposed = true;
 
-    this._editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
-    this._editorView.dispose();
-    this._editorView = null;
+    this._editorViewObserver.dispose();
+    this._editorViewObserver = null;
     
-    this.disconnect(this._context);
-    this._context = null;
+    this._contextObserver.dispose();
+    this._contextObserver = null;
   }
 
   /**
    * Returns an associated standalone editor view.
    */
   get editorView(): IStandaloneEditorView {
-    return this._editorView;
+    return this._editorViewObserver.property;
+  }
+
+  /**
+   * Connects this presenter to the given editor view.
+   */
+  protected connectToEditorView(editorView: IStandaloneEditorView) {
+      editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this);
+  }
+
+  /**
+   * Disconnect this presenter from the given editor view.
+   */
+  protected disconnectFromEditorView(editorView: IStandaloneEditorView) {
+      editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
+  }
+
+  /**
+   * Handles editor model content changed events.
+   */
+  protected onEditorModelContentChanged(model: IEditorModel) {
+    this.updateDocumentModel(model);
   }
 
   /**
    * A document context
    */
   get context(): IDocumentContext<IDocumentModel> {
-    return this._context;
+    return this._contextObserver.property;
   }
-  set context(context: IDocumentContext<IDocumentModel>) {
-    this.disconnect(this._context);
-    
-    this._context = context;
-    
-    if (context) {
-      this.updateUri(context.path);
-      this.updateEditorModel(context.model)
-    } else {
-      this.updateUri('');
-      this.updateEditorModel(null)
-    }
 
-    this.connect(context);
+  set context(context: IDocumentContext<IDocumentModel>) {
+    this._contextObserver.property = context;
   }
 
   /**
    * Connects this presenter to the given document context.
    */
-  protected connect(context: IDocumentContext<IDocumentModel>) {
+  protected connectToDocumentContext(context: IDocumentContext<IDocumentModel>) {
       if (context) {
         context.model.contentChanged.connect(this.onModelContentChanged, this);
         context.pathChanged.connect(this.onPathChanged, this);
@@ -112,10 +124,23 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
       }
   }
 
+  /** 
+   * Handles changes of a document context. 
+   */
+  protected onDocumentContextChanged(context: IDocumentContext<IDocumentModel>) {
+    if (context) {
+      this.updateUri(context.path);
+      this.updateEditorModel(context.model)
+    } else {
+      this.updateUri('');
+      this.updateEditorModel(null)
+    }
+  }
+
   /**
    * Disconnects this presenter from the given document context.
    */
-  protected disconnect(context: IDocumentContext<IDocumentModel>) {
+  protected disconnectFromDocumentContext(context: IDocumentContext<IDocumentModel>) {
       if (context) {
         context.model.contentChanged.disconnect(this.onModelContentChanged, this);
         context.pathChanged.disconnect(this.onPathChanged, this);
@@ -182,6 +207,7 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
     this.editorView.setDirty(model.dirty)
   }
 
-  private _context: IDocumentContext<IDocumentModel>;
+  private _editorViewObserver = new PropertyObserver<IStandaloneEditorView>();
+  private _contextObserver = new PropertyObserver<IDocumentContext<IDocumentModel>>();
 
 }
