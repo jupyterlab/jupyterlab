@@ -117,11 +117,9 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
    * Connects this presenter to the given document context.
    */
   protected connectToDocumentContext(context: IDocumentContext<IDocumentModel>) {
-      if (context) {
-        context.model.contentChanged.connect(this.onModelContentChanged, this);
-        context.pathChanged.connect(this.onPathChanged, this);
-        context.model.stateChanged.connect(this.onModelStateChanged, this);
-      }
+      context.model.contentChanged.connect(this.onModelContentChanged, this);
+      context.pathChanged.connect(this.onPathChanged, this);
+      context.model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /** 
@@ -141,11 +139,9 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
    * Disconnects this presenter from the given document context.
    */
   protected disconnectFromDocumentContext(context: IDocumentContext<IDocumentModel>) {
-      if (context) {
-        context.model.contentChanged.disconnect(this.onModelContentChanged, this);
-        context.pathChanged.disconnect(this.onPathChanged, this);
-        context.model.stateChanged.connect(this.onModelStateChanged, this);
-      }
+      context.model.contentChanged.disconnect(this.onModelContentChanged, this);
+      context.pathChanged.disconnect(this.onPathChanged, this);
+      context.model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /**

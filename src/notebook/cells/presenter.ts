@@ -107,7 +107,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
    */
   onPositionUp(editorView:ICellEditorView) {
     if (IEditorView.isAtStartPositoin(editorView)) {
-      this.editorView.edgeRequested.emit('top');
+      editorView.edgeRequested.emit('top');
     }
   }
 
@@ -116,7 +116,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
    */
   onPositionDown(editorView:ICellEditorView) {
     if (IEditorView.isAtEndPosition(editorView)) {
-      this.editorView.edgeRequested.emit('bottom');
+      editorView.edgeRequested.emit('bottom');
     }
   }
 
@@ -142,9 +142,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
    * Connects this presenter to the given cell model.
    */
   protected connectToCellModel(model: ICellModel) {
-    if (model) {
-      model.stateChanged.connect(this.onModelStateChanged, this);
-    }
+    model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /** 
@@ -158,9 +156,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
    * Disconnects this presenter from the given cell model.
    */
   protected disconnectFromCellModel(model: ICellModel) {
-    if (model) {
-      model.stateChanged.disconnect(this.onModelStateChanged, this);
-    }
+    model.stateChanged.disconnect(this.onModelStateChanged, this);
   }
 
   /**
