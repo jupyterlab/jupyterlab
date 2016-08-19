@@ -3,20 +3,12 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-#main {
-  display: flex;
-  flex-direction: column;
+.jp-ApplicationShell {
   position: absolute;
-  left: 0;
   top: 0;
-  bottom: 0;
+  left: 0;
   right: 0;
-}
-
-
-#jp-main-content-panel {
-  display: flex;
-  flex: 0 1 auto;
+  bottom: 0;
 }
 
 
@@ -26,34 +18,13 @@
 
 
 #jp-top-panel {
+  border-bottom: 1px solid #BDBDBD;
+  background: white;
   display: flex;
-  flex: 0 0 auto;
-  min-height: 24px;
-}
-
-
-#jp-top-panel.p-Panel {
-   border-bottom: 1px solid #BDBDBD;
-   background: white;
-   min-height: 28px;
-   max-height: 28px;
-}
-
-
-#jp-main-split-panel {
-  display: flex;
-  flex: 0 1 auto;
-}
-
-
-#jp-left-stack, #jp-right-stack {
-  display: flex;
-  flex: 0 1 auto;
 }
 
 
 #jp-left-stack > .p-Widget, #jp-right-stack > .p-Widget {
-  flex: 0 1 auto;
   min-width: 300px;
 }
 
@@ -78,7 +49,6 @@
   font-size: 14px;
   min-width: 36px;
   max-width: 36px;
-  min-height: 500px;
   overflow: visible;
   display: block;
 }
