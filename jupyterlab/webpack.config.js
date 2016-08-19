@@ -8,22 +8,29 @@ require('es6-promise').polyfill();
 var fs = require('fs');
 var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var findImports = require('find-imports');
+var helpers = require('jupyterlab/scripts/extension_helpers');
 
 
 console.log('Generating config...');
-var helpers = require('jupyterlab/scripts/extension_helpers');
 
-// Create the Phosphor and JupyterLab shims.
+// Get the list of vendor files.
+var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
+
+// Create the external library shims.
 // First make sure the build folder exists.
 try {
   fs.mkdirSync('./build')
 } catch(err) {
   if (err.code !== 'EEXIST') {
-    throw e;
+    throw err;
   }
 }
-fs.writeFileSync('./build/phosphor-shim.js', helpers.createShim('phosphor'));
-fs.writeFileSync('./build/jupyterlab-shim.js', helpers.createShim('jupyterlab'));
+for (var lib of ['phosphor', 'jupyterlab', 'jupyter-js-services']) {
+  var shim = helpers.createShim(lib);
+  fs.writeFileSync('./build/' + lib + '-shim.js', shim);
+}
+
 
 // The default `module.loaders` config.
 var loaders = [
@@ -41,6 +48,9 @@ var loaders = [
 ]
 
 
+console.log('Generating bundles...');
+
+
 // The parallel Webpack build configurations.
 module.exports = [
 // Application bundles
@@ -53,7 +63,7 @@ module.exports = [
     path: './build',
     filename: '[name].bundle.js',
     publicPath: './',
-    library: ['jupyter', '[name]']
+    library: ['jupyter', 'application', '[name]']
   },
   node: {
     fs: 'empty'
@@ -67,60 +77,61 @@ module.exports = [
   plugins: [
     new ExtractTextPlugin('[name].css')
   ],
-  externals: helpers.DEFAULT_EXTERNALS
+  externals: helpers.EXTENSION_EXTERNALS
 },
 // JupyterLab bundles
 {
   entry: {
-    lab: './build/jupyterlab-shim.js',
-    vendor: helpers.VENDOR_FILES
+    jupyterlab: './build/jupyterlab-shim.js',
+    vendor: VENDOR_FILES
   },
   output: {
-      filename: 'lab.bundle.js',
+      filename: 'jupyterlab.bundle.js',
       path: './build',
       publicPath: './',
-      library: ['jupyter', '[name]']
+      library: ['jupyter', 'externals', 'jupyterlab']
   },
   module: {
     loaders: loaders
   },
   plugins: [
-    new ExtractTextPlugin("[name].css"),
-    new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.bundle.js")
+    new ExtractTextPlugin('[name].css'),
+    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
   ],
   bail: true,
   devtool: 'source-map',
   externals: helpers.BASE_EXTERNALS.concat([
-    {  'jupyter-js-services': 'jupyter.services' } ])
+    helpers.createShimHandler('jupyter-js-services')
+  ])
 },
 // CodeMirror bundle
 {
   entry: {
-    'codemirror': helpers.CODEMIRROR_FILES
+    'codemirror': ['codemirror/lib/codemirror.css', 'codemirror']
   },
   output: {
-      filename: 'codemirror.bundle.js',
+      filename: '[name].bundle.js',
       path: './build',
       publicPath: './',
-      library: ['jupyter', 'CodeMirror'],
+      library: ['jupyter', 'externals', 'codemirror']
   },
   module: {
     loaders: loaders
   },
   plugins: [
-    new ExtractTextPlugin("[name].css")
+    new ExtractTextPlugin('[name].css')
   ],
   bail: true,
   devtool: 'source-map'
 },
 // Jupyter-js-services bundle
 {
-  entry: 'jupyter-js-services',
+  entry: './build/jupyter-js-services-shim.js',
   output: {
-      filename: 'services.bundle.js',
+      filename: 'jupyter-js-services.bundle.js',
       path: './build',
       publicPath: './',
-      library: ['jupyter', 'services'],
+      library: ['jupyter', 'externals', 'jupyter-js-services'],
   },
   module: {
     loaders: loaders
@@ -136,7 +147,7 @@ module.exports = [
       filename: 'phosphor.bundle.js',
       path: './build',
       publicPath: './',
-      library: ['jupyter', 'phosphor']
+      library: ['jupyter', 'externals', 'phosphor']
   },
   bail: true,
   devtool: 'source-map'

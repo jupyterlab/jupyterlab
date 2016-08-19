@@ -86,8 +86,8 @@ class NPM(Command):
 
     # Representative files that should exist after a successful build
     targets = [
-        os.path.join(here, 'jupyterlab', 'build', 'lab.css'),
-        os.path.join(here, 'jupyterlab', 'build', 'lab.bundle.js'),
+        os.path.join(here, 'jupyterlab', 'build', 'jupyterlab.css'),
+        os.path.join(here, 'jupyterlab', 'build', 'jupyterlab.bundle.js'),
     ]
 
     def initialize_options(self):

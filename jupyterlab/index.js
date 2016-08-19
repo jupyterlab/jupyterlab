@@ -12,6 +12,8 @@ require('jupyterlab/lib/default-theme/index.css');
 
 var lab = new JupyterLab();
 
-lab.registerPlugins(jupyter.plugins);
+lab.registerPlugins(jupyter.application.plugins);
 
 window.onload = function() { lab.start(); }
+
+module.exports = lab;
