@@ -171,7 +171,6 @@
 .p-TabBar {
   overflow: visible;
   min-height: 24px;
-  max-height: 24px;
   color: #777777;
   font-size: 13px;
 }
@@ -179,13 +178,11 @@
 
 .p-TabBar.p-mod-horizontal {
   min-height: 24px;
-  max-height: 24px;
 }
 
 
 .p-TabBar.p-mod-vertical {
   min-width: 80px;
-  max-width: 80px;
 }
 
 
@@ -242,7 +239,6 @@
 .p-TabBar.p-mod-bottom .p-TabBar-tab {
   flex: 0 1 124px;
   min-height: 23px;
-  max-height: 23px;
   min-width: 35px;
   margin-left: -1px;
   line-height: 20px;
@@ -272,7 +268,6 @@
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
   min-height: 24px;
-  max-height: 24px;
   transform: translateY(1px);
   background: white;
 }

@@ -9,7 +9,7 @@ import {
 } from 'phosphor/lib/collections/vector';
 
 import {
-  BoxPanel
+  BoxLayout, BoxPanel
 } from 'phosphor/lib/ui/boxpanel';
 
 import {
@@ -77,7 +77,7 @@ interface ISideAreaOptions {
  * The application shell for JupyterLab.
  */
 export
-class ApplicationShell extends Panel {
+class ApplicationShell extends Widget {
   /**
    * Construct a new application shell.
    */
@@ -92,6 +92,7 @@ class ApplicationShell extends Panel {
     let hsplitPanel = this._hsplitPanel = new SplitPanel();
     let leftHandler = this._leftHandler = new SideBarHandler('left');
     let rightHandler = this._rightHandler = new SideBarHandler('right');
+    let rootLayout = new BoxLayout();
 
     topPanel.id = 'jp-top-panel';
     hboxPanel.id = 'jp-main-content-panel';
@@ -129,8 +130,16 @@ class ApplicationShell extends Panel {
     hboxPanel.addWidget(hsplitPanel);
     hboxPanel.addWidget(rightHandler.sideBar);
 
-    this.addWidget(topPanel);
-    this.addWidget(hboxPanel);
+    rootLayout.direction = 'top-to-bottom';
+    rootLayout.spacing = 0; // TODO make this configurable?
+
+    BoxLayout.setStretch(topPanel, 0);
+    BoxLayout.setStretch(hboxPanel, 1);
+
+    rootLayout.addWidget(topPanel);
+    rootLayout.addWidget(hboxPanel);
+
+    this.layout = rootLayout;
 
     this._tracker = new FocusTracker<Widget>();
     this._tracker.currentChanged.connect((sender, args) => {
