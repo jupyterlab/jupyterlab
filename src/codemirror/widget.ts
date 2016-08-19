@@ -113,6 +113,7 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
   get lineNumbers(): boolean {
     return this.editor.getOption('lineNumbers');
   }
+
   set lineNumbers(value: boolean) {
     this.editor.setOption('lineNumbers', value);
     this.configurationChanged.emit(void 0);
@@ -124,6 +125,7 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
   get fontSize(): number {
     return this.editor.defaultTextHeight(); 
   }
+
   set fontSize(fontSize:number) {
     throw new Error('TODO: Not implemented yet')
   }
@@ -134,6 +136,7 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
   get readOnly(): boolean {
     return this.editor.getOption('readOnly') === 'nocursor';
   }
+
   set readOnly(readOnly:boolean) {
     let option = readOnly ? 'nocursor' : false;
     this.editor.setOption('readOnly', option);
@@ -146,6 +149,7 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
   get lineHeight(): number {
     return this.editor.defaultTextHeight();
   }
+
   set lineHeight(lineHeight:number) {
     throw new Error('TODO: Not implemented yet')
   }

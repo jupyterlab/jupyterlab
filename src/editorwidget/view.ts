@@ -73,22 +73,22 @@ interface IEditorConfiguration extends IDisposable {
   /**
    * Control the rendering of line numbers.
    */
-  lineNumbers?: boolean;
+  lineNumbers: boolean;
 
   /**
    * The font size.
    */
-  fontSize?: number;
+  fontSize: number;
 
   /**
    * The line height.
    */
-  lineHeight?: number;
+  lineHeight: number;
 
   /**
    * Should the editor be read only.
    */
-  readOnly?: boolean;
+  readOnly: boolean;
 
 }
 
