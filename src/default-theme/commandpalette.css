@@ -10,12 +10,12 @@
 
 
 .p-CommandPalette-search {
-  padding: 8px;
+  padding: 4px;
 }
 
 
 .p-CommandPalette-wrapper {
-  padding: 14px 12px;
+  padding: 4px 4px;
   background: white;
   border-bottom: 2px solid #E0E0E0;
   overflow: overlay;
