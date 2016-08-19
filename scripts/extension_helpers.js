@@ -79,7 +79,7 @@ var BASE_EXTERNALS = [
   },
   function(context, request, callback) {
     // All phosphor imports get mangled to use an external bundle.
-    lib = parseShimmed('phosphor/lib/', 'jupyter.phosphor', request);
+    var lib = parseShimmed('phosphor/lib/', 'jupyter.externals["phosphor"]', request);
     if (lib) {
       return callback(null, lib);
     }
@@ -91,7 +91,7 @@ var BASE_EXTERNALS = [
       'codemirror/lib/codemirror.css'
     ];
     if (codeMirrorPaths.indexOf(request) !== -1) {
-      return callback(null, 'var CodeMirror');
+      return callback(null, 'var jupyter.externals.codemirror');
     }
 
     callback();
@@ -105,7 +105,7 @@ var BASE_EXTERNALS = [
  */
 var DEFAULT_EXTERNALS = BASE_EXTERNALS.concat([
   {
-    'jupyter-js-services': 'jupyter.services',
+    'jupyter-js-services': 'jupyter.externals["jupyter-js-services"]',
   },
   function(context, request, callback) {
     // JupyterLab imports get mangled to use an external bundle.
@@ -130,7 +130,7 @@ var DEFAULT_EXTERNALS = BASE_EXTERNALS.concat([
 function createShim(modName, sourceFolder) {
   var dirs = [];
   var files = [];
-  var lines = ['var ' + modName + ' = {};'];
+  var lines = ['var shim = {};'];
 
   // Find the path to the module.
   var modPath = require.resolve(modName + '/package.json');
@@ -146,9 +146,9 @@ function createShim(modName, sourceFolder) {
     // Get the relative path to the entry.
     var entryPath = entries[i].relativePath;
     // Add an entries for each file.
-    lines.push(modName + '["' + entryPath + '"] = require("' + path.join(modName, sourceFolder, entryPath) + '");');
+    lines.push('shim["' + entryPath + '"] = require("' + path.join(modName, sourceFolder, entryPath) + '");');
   }
-  lines.push('module.exports = ' + modName + ';');
+  lines.push('module.exports = shim;');
 
   return lines.join('\n');
 }

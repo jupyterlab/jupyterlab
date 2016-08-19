@@ -98,7 +98,7 @@ module.exports = [
   bail: true,
   devtool: 'source-map',
   externals: helpers.BASE_EXTERNALS.concat([
-    {  'jupyter-js-services': 'jupyter.services' } ])
+    {  'jupyter-js-services': 'jupyter.externals["jupyter-js-services"]' } ])
 },
 // CodeMirror bundle
 {
@@ -109,7 +109,7 @@ module.exports = [
       filename: '[name].bundle.js',
       path: './build',
       publicPath: './',
-      library: 'CodeMirror'
+      library: ['jupyter', 'externals', 'codemirror']
   },
   module: {
     loaders: loaders
@@ -127,7 +127,7 @@ module.exports = [
       filename: 'services.bundle.js',
       path: './build',
       publicPath: './',
-      library: ['jupyter', 'services'],
+      library: ['jupyter', 'externals', 'jupyter-js-services'],
   },
   module: {
     loaders: loaders
@@ -143,7 +143,7 @@ module.exports = [
       filename: 'phosphor.bundle.js',
       path: './build',
       publicPath: './',
-      library: ['jupyter', 'phosphor']
+      library: ['jupyter', 'externals', 'phosphor']
   },
   bail: true,
   devtool: 'source-map'
