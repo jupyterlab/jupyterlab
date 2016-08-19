@@ -60,7 +60,7 @@ module.exports = [
     path: './build',
     filename: '[name].bundle.js',
     publicPath: './',
-    library: ['jupyter', '[name]']
+    library: ['jupyter', 'application', '[name]']
   },
   node: {
     fs: 'empty'
@@ -79,14 +79,14 @@ module.exports = [
 // JupyterLab bundles
 {
   entry: {
-    lab: './build/jupyterlab-shim.js',
+    jupyterlab: './build/jupyterlab-shim.js',
     vendor: VENDOR_FILES
   },
   output: {
-      filename: '[name].bundle.js',
+      filename: 'jupyterlab.bundle.js',
       path: './build',
       publicPath: './',
-      library: ['jupyter', '[name]']
+      library: ['jupyter', 'externals', 'jupyterlab']
   },
   module: {
     loaders: loaders
