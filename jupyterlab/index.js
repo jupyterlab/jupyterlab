@@ -15,3 +15,5 @@ var lab = new JupyterLab();
 lab.registerPlugins(jupyter.application.plugins);
 
 window.onload = function() { lab.start(); }
+
+module.exports = lab;
