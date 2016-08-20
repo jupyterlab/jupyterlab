@@ -100,9 +100,7 @@ module.exports = [
   ],
   bail: true,
   devtool: 'source-map',
-  externals: externals.BASE_EXTERNALS.concat([
-    helpers.createShimHandler('jupyter-js-services')
-  ])
+  externals: externals.EXTERNALS
 },
 // CodeMirror bundle
 {

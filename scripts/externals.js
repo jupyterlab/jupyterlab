@@ -4,7 +4,8 @@
 var helpers = require('./extension_helpers');
 
 /**
- * The base Webpack `externals` config.
+ * The externals provided to libraries
+ * this package builds (like jupyter-js-widgets).
  */
 var BASE_EXTERNALS = [
   {
@@ -28,8 +29,7 @@ var BASE_EXTERNALS = [
 
 
 /**
- * The base Webpack `externals` config that should be applied to extensions of
- * JupyterLab.
+ * The externals that this package provides.
  */
 var EXTERNALS = BASE_EXTERNALS.concat([
   helpers.createShimHandler('jupyter-js-services')
