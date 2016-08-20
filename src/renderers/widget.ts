@@ -36,6 +36,11 @@ import {
 
 
 /*
+ * The class name added to common rendered HTML. 
+ */
+const HTML_COMMON_CLASS = 'jp-RenderedHTMLCommon';
+
+/*
  * The class name added to rendered HTML. 
  */
 const HTML_CLASS = 'jp-RenderedHTML';
@@ -115,16 +120,29 @@ marked.setOptions({
 });
 
 
+/*
+ * A widget for displaying any widget whoes representation is rendered HTML
+ * */
+export
+class RenderedHTMLCommon extends Widget {
+  /* Construct a new rendered HTML common widget.*/
+  constructor(options: RenderMime.IRenderOptions) {
+    super();
+    this.addClass(HTML_COMMON_CLASS);
+  }
+}
+
+
 /**
  * A widget for displaying HTML and rendering math.
  */
 export
-class RenderedHTML extends Widget {
+class RenderedHTML extends RenderedHTMLCommon {
   /**
    * Construct a new html widget.
    */
   constructor(options: RenderMime.IRenderOptions) {
-    super();
+    super(options);
     this.addClass(HTML_CLASS);
     let source = options.source;
     if (options.sanitizer) {
@@ -146,17 +164,16 @@ class RenderedHTML extends Widget {
 
 
 /**
- * A widget for displaying Markdown.
+ * A widget for displaying Markdown with embeded latex.
  */
 export
-class RenderedMarkdown extends Widget {
+class RenderedMarkdown extends RenderedHTMLCommon {
   /**
    * Construct a new markdown widget.
    */
   constructor(options: RenderMime.IRenderOptions) {
-    super();
+    super(options);
     this.addClass(MARKDOWN_CLASS);
-    this.addClass(HTML_CLASS);
     let parts = removeMath(options.source);
     // Add the markdown content asynchronously.
     marked(parts['text'], (err, content) => {

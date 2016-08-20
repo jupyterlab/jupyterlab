@@ -4,34 +4,34 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-RenderedHTML .MathJax_Display {
+.jp-RenderedHTMLCommon .MathJax_Display {
   margin: 0;
 }
 
 
-.jp-RenderedHTML {
+.jp-RenderedHTMLCommon {
   color: black;
   font-size: 14px;
   line-height: 20px;
 }
 
-.jp-RenderedHTML em {
+.jp-RenderedHTMLCommon em {
   font-style: italic;
 }
 
-.jp-RenderedHTML strong {
+.jp-RenderedHTMLCommon strong {
   font-weight: bold;
 }
 
-.jp-RenderedHTML u {
+.jp-RenderedHTMLCommon u {
   text-decoration: underline;
 }
 
-.jp-RenderedHTML :link {
+.jp-RenderedHTMLCommon :link {
   text-decoration: underline;
 }
 
-.jp-RenderedHTML :visited {
+.jp-RenderedHTMLCommon :visited {
   text-decoration: underline;
 }
 
@@ -40,43 +40,35 @@ font-size = 26, 22, 18, 14, 12, 12
 margin-top = 14, 14, 14, 14, 8, 8
 */
 
-.jp-RenderedHTML h1 {
+.jp-RenderedHTMLCommon h1 {
   font-size: 185.7%;
   margin: 1.08em 0 0 0;
   font-weight: bold;
   line-height: 1.0;
 }
 
-.jp-RenderedHTML h2 {
+.jp-RenderedHTMLCommon h2 {
   font-size: 157.1%;
   margin: 1.27em 0 0 0;
   font-weight: bold;
   line-height: 1.0;
 }
 
-.jp-RenderedHTML h3 {
+.jp-RenderedHTMLCommon h3 {
   font-size: 128.6%;
   margin: 1.55em 0 0 0;
   font-weight: bold;
   line-height: 1.0;
 }
 
-.jp-RenderedHTML h4 {
+.jp-RenderedHTMLCommon h4 {
   font-size: 100%;
   margin: 2em 0 0 0;
   font-weight: bold;
   line-height: 1.0;
 }
 
-.jp-RenderedHTML h5 {
-  font-size: 100%;
-  margin: 2em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
-  font-style: italic;
-}
-
-.jp-RenderedHTML h6 {
+.jp-RenderedHTMLCommon h5 {
   font-size: 100%;
   margin: 2em 0 0 0;
   font-weight: bold;
@@ -84,88 +76,96 @@ margin-top = 14, 14, 14, 14, 8, 8
   font-style: italic;
 }
 
-.jp-RenderedHTML h1:first-child {
+.jp-RenderedHTMLCommon h6 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+  font-style: italic;
+}
+
+.jp-RenderedHTMLCommon h1:first-child {
   margin-top: 0.538em;
 }
 
-.jp-RenderedHTML h2:first-child {
+.jp-RenderedHTMLCommon h2:first-child {
   margin-top: 0.636em;
 }
 
-.jp-RenderedHTML h3:first-child {
+.jp-RenderedHTMLCommon h3:first-child {
   margin-top: 0.777em;
 }
 
-.jp-RenderedHTML h4:first-child {
+.jp-RenderedHTMLCommon h4:first-child {
   margin-top: 1em;
 }
 
-.jp-RenderedHTML h5:first-child {
+.jp-RenderedHTMLCommon h5:first-child {
   margin-top: 1em;
 }
 
-.jp-RenderedHTML h6:first-child {
+.jp-RenderedHTMLCommon h6:first-child {
   margin-top: 1em;
 }
 
-.jp-RenderedHTML ul:not(.list-inline),
-.jp-RenderedHTML ol:not(.list-inline) {
+.jp-RenderedHTMLCommon ul:not(.list-inline),
+.jp-RenderedHTMLCommon ol:not(.list-inline) {
   padding-left: 2em;
 }
 
-.jp-RenderedHTML ul {
+.jp-RenderedHTMLCommon ul {
   list-style: disc;
 }
 
-.jp-RenderedHTML ul ul {
+.jp-RenderedHTMLCommon ul ul {
   list-style: square;
 }
 
-.jp-RenderedHTML ul ul ul {
+.jp-RenderedHTMLCommon ul ul ul {
   list-style: circle;
 }
 
-.jp-RenderedHTML ol {
+.jp-RenderedHTMLCommon ol {
   list-style: decimal;
 }
 
-.jp-RenderedHTML ol ol {
+.jp-RenderedHTMLCommon ol ol {
   list-style: upper-alpha;
 }
 
-.jp-RenderedHTML ol ol ol {
+.jp-RenderedHTMLCommon ol ol ol {
   list-style: lower-alpha;
 }
 
-.jp-RenderedHTML ol ol ol ol {
+.jp-RenderedHTMLCommon ol ol ol ol {
   list-style: lower-roman;
 }
 
-.jp-RenderedHTML ol ol ol ol ol {
+.jp-RenderedHTMLCommon ol ol ol ol ol {
   list-style: decimal;
 }
 
-.jp-RenderedHTML * + ul {
+.jp-RenderedHTMLCommon * + ul {
   margin-top: 1em;
 }
 
-.jp-RenderedHTML * + ol {
+.jp-RenderedHTMLCommon * + ol {
   margin-top: 1em;
 }
 
-.jp-RenderedHTML hr {
+.jp-RenderedHTMLCommon hr {
   color: black;
   background-color: black;
   margin-top: 1em;
   margin-bottom: 1em;
 }
 
-.jp-RenderedHTML pre {
+.jp-RenderedHTMLCommon pre {
   margin: 1em 2em;
 }
 
-.jp-RenderedHTML pre,
-.jp-RenderedHTML code {
+.jp-RenderedHTMLCommon pre,
+.jp-RenderedHTMLCommon code {
   border: 0;
   background-color: white;
   color: black;
@@ -173,79 +173,79 @@ margin-top = 14, 14, 14, 14, 8, 8
   padding: 0px;
 }
 
-.jp-RenderedHTML blockquote {
+.jp-RenderedHTMLCommon blockquote {
   margin: 1em 2em;
 }
 
-.jp-RenderedHTML table {
+.jp-RenderedHTMLCommon table {
   margin-left: auto;
   margin-right: auto;
   border: 1px solid black;
   border-collapse: collapse;
 }
 
-.jp-RenderedHTML tr,
-.jp-RenderedHTML th,
-.jp-RenderedHTML td {
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td {
   border: 1px solid black;
   border-collapse: collapse;
   margin: 1em 2em;
 }
 
-.jp-RenderedHTML td,
-.jp-RenderedHTML th {
+.jp-RenderedHTMLCommon td,
+.jp-RenderedHTMLCommon th {
   text-align: left;
   vertical-align: middle;
   padding: 4px;
 }
 
-.jp-RenderedHTML th {
+.jp-RenderedHTMLCommon th {
   font-weight: bold;
 }
 
-.jp-RenderedHTML * + table {
+.jp-RenderedHTMLCommon * + table {
   margin-top: 1em;
 }
 
-.jp-RenderedHTML p {
+.jp-RenderedHTMLCommon p {
   text-align: left;
   margin: 0px;
 }
 
-.jp-RenderedHTML * + p {
+.jp-RenderedHTMLCommon * + p {
   margin-top: 1em;
 }
 
-.jp-RenderedHTML img {
+.jp-RenderedHTMLCommon img {
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
-.jp-RenderedHTML * + img {
+.jp-RenderedHTMLCommon * + img {
   margin-top: 1em;
 }
 
-.jp-RenderedHTML img,
-.jp-RenderedHTML svg {
+.jp-RenderedHTMLCommon img,
+.jp-RenderedHTMLCommon svg {
   max-width: 100%;
   height: auto;
 }
 
-.jp-RenderedHTML img.unconfined,
-.jp-RenderedHTML svg.unconfined {
+.jp-RenderedHTMLCommon img.unconfined,
+.jp-RenderedHTMLCommon svg.unconfined {
   max-width: none;
 }
 
-.jp-RenderedHTML .alert {
+.jp-RenderedHTMLCommon .alert {
   margin-bottom: initial;
 }
 
-.jp-RenderedHTML * + .alert {
+.jp-RenderedHTMLCommon * + .alert {
   margin-top: 1em;
 }
 
-.jp-RenderedHTML blockquote {
+.jp-RenderedHTMLCommon blockquote {
   margin: 1em 2em;
   padding: 0 1em;
   border-left: 5px solid black;
