@@ -41,6 +41,21 @@ var walkSync = require('walk-sync');
     }];
 */
 
+/**
+ * Determine if a string starts with another.
+ *
+ * @param str (string) - the string possibly starting with the substring.
+ *
+ * @param query (string) - the substring whose presence we are testing.
+ *
+ * @returns true if str starts with query
+ *
+ * #### Notes
+ * This is a cross-browser version of String.prototype.startsWith
+ */
+function startsWith(str, query) {
+  return str.lastIndexOf(query, 0) === 0;
+}
 
 /**
  * Create a Webpack `externals` function for a shimmed external package.
@@ -53,8 +68,7 @@ function createShimHandler(pkgName) {
   return function(context, request, callback) {
     // TODO: better path regex, probably only looking for .js or .css
     // since that is all we save
-    var regex = new RegExp("^" + pkgName + '[\/\\w\.\\/-]+$');
-    if (regex.test(request)) {
+    if (startsWith(request, pkgName)) {
       try {
         var path = require.resolve(request);
       } catch (err) {
@@ -66,6 +80,7 @@ function createShimHandler(pkgName) {
         path = path.slice(1);
       }
       var shim = 'var jupyter.externals["' + pkgName + '"]["' + path + '"]';
+      // console.info(request + ' translated to '+shim);
       return callback(null, shim);
     }
     callback();
