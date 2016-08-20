@@ -146,6 +146,8 @@ function isLabExtension(pkg){
  *
  * @param function - the environment require function.
  *
+ * @param onlyUpstream - if true, do not return externals provided by this package
+ *
  * @returns an externals object to be used in a Webpack config.
  *
  * #### Notes
@@ -163,7 +165,7 @@ function isLabExtension(pkg){
       externals: jlab_helpers.upstreamExternals(require)
     }];
  */
-function upstreamExternals(_require) {
+function upstreamExternals(_require, onlyUpstream) {
   // Parse the externals of this package.
 
   // remember which packages we have seen
@@ -220,6 +222,7 @@ function upstreamExternals(_require) {
     var pkg = _require(pkg_path + '/package.json');
     var pkgName = pkg['name'];
     var lab_config;
+    var externals = [];
 
     // only visit each named package once
     _seen[pkgName] = true;
@@ -230,7 +233,9 @@ function upstreamExternals(_require) {
 
     console.info("Inspecting " + pkgName + " for externals it provides...");
 
-    var externals = _load_externals(pkg_path, pkg, _require);
+    if (!(root && onlyUpstream)) {
+      externals.push.apply(externals, _load_externals(pkg_path, pkg, _require));
+    }
     if (!root) {
       externals.push(createShimHandler(pkg['name']));
     }
