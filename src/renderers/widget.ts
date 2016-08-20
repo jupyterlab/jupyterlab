@@ -352,16 +352,3 @@ function appendHtml(node: HTMLElement, html: string): void {
     node.innerHTML = html;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
