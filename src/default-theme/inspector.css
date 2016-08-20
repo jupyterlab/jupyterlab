@@ -5,14 +5,8 @@
 .jp-Inspector .p-TabBar {
   min-width: 300px;
   min-height: 24px;
-  max-height: 24px;
   color: #777777;
   font-size: 13px;
-}
-
-
-.jp-Inspector .p-TabBar > .p-TabBar-header {
-  flex: 0 0 1px;
 }
 
 
@@ -22,16 +16,9 @@
 }
 
 
-.jp-Inspector .p-TabBar > .p-TabBar-footer {
-  flex: 0 0 1px;
-  background: #BDBDBD;
-}
-
-
 .jp-Inspector .p-TabBar-tab {
   flex-basis: 144px;
   min-height: 23px;
-  max-height: 23px;
   min-width: 35px;
   padding: 0px 7px;
   background: #EEEEEE;
@@ -44,7 +31,6 @@
 
 .jp-Inspector .p-TabBar-tab.p-mod-current {
   min-height: 24px;
-  max-height: 24px;
   background: #FFFFFF;
   border-top: 1px solid #2196F3;
 }

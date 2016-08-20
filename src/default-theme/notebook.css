@@ -51,6 +51,11 @@
 }
 
 
+.jp-CellEditor .CodeMirror-lines {
+    padding: 0.4em;
+}
+
+
 .jp-MarkdownCell {
   outline: 0;
 }

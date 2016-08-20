@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 @import url('~phosphor/styles/base.css');
+@import './phosphor.css';
 
 @import '../console/base.css';
 @import '../dialog/base.css';

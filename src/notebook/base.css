@@ -9,12 +9,12 @@
 }
 
 
-.p-Widget.jp-NBToolbar {
+.jp-NBToolbar {
   flex: 0 0 auto;
 }
 
 
-.p-Widget.jp-Notebook-container {
+.jp-Notebook-container {
   flex: 1 1 auto;
 }
 
@@ -37,7 +37,7 @@
 }
 
 
-.jp-MarkdownCell-content.p-Widget {
+.jp-MarkdownCell-content {
   padding: 7px;
   user-select: text;
   -moz-user-select: text;
@@ -46,43 +46,35 @@
 }
 
 
-.jp-MarkdownCell-content.p-Widget h1 {
+.jp-MarkdownCell-content h1 {
   font-size: 26px;
   line-height: 1.0;
   margin: 14px 0 0 0;
 }
 
 
-.jp-MarkdownCell-content.p-Widget h2 {
+.jp-MarkdownCell-content h2 {
   font-size: 22px;
   line-height: 1.0;
   margin: 14px 0 0 0;
 }
 
 
-.jp-MarkdownCell-content.p-Widget h3 {
+.jp-MarkdownCell-content h3 {
   font-size: 18px;
   line-height: 1.0;
   margin: 14px 0 0 0;
 }
 
 
-.jp-MarkdownCell-content.p-Widget h4 {
+.jp-MarkdownCell-content h4 {
   font-size: 14px;
   line-height: 1.0;
   margin: 14px 0 0 0;
 }
 
 
-.jp-MarkdownCell-content.p-Widget h5 {
-  font-size: 14px;
-  font-style: italic;
-  line-height: 1.0;
-  margin: 14px 0 0 0;
-}
-
-
-.jp-MarkdownCell-content.p-Widget h6 {
+.jp-MarkdownCell-content h5 {
   font-size: 14px;
   font-style: italic;
   line-height: 1.0;
@@ -90,20 +82,28 @@
 }
 
 
-.jp-MarkdownCell-content.p-Widget p {
+.jp-MarkdownCell-content h6 {
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.0;
+  margin: 14px 0 0 0;
+}
+
+
+.jp-MarkdownCell-content p {
   font-size: 14px;
   line-height: 20px;
   margin: 0 0 0 0;
 }
 
 
-.jp-MarkdownCell-content.p-Widget li {
+.jp-MarkdownCell-content li {
   line-height: 20px;
   margin: 14px 0 0 0;
 }
 
 
-.jp-Output-result.p-Widget {
+.jp-Output-result {
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;

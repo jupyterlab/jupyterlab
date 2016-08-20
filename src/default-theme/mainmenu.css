@@ -3,26 +3,4 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-#jp-MainMenu.p-MenuBar {
-   background: white;
-}
 
-#jp-top-panel.p-Panel {
-   border-bottom: 1px solid #BDBDBD;
-   background: white;
-   min-height: 28px;
-   max-height: 28px;
-}
-
-.p-MenuBar .p-MenuBar-item {
-  padding: 6px 8px;
-}
-
-.p-MenuBar-itemText {
-  font-size: 13px;
-  color: #777777;
-}
-
-.p-MenuBar-item.p-mod-active > .p-MenuBar-itemText {
-  color: #2196F3;
-}
