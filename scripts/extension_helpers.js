@@ -191,8 +191,6 @@ function upstreamExternals(_require, onlyUpstream) {
    * {module: "module-exporting-externals", name: "exported-object"}
    */
   function _load_externals(pkg_path, pkg) {
-    // the package itself is always an external
-    // the extension may provide other externals too.
     var externals = pkg.jupyter.lab.externals;
     if (externals) {
       try {
@@ -259,7 +257,7 @@ function upstreamExternals(_require, onlyUpstream) {
 
 module.exports = {
   upstreamExternals: upstreamExternals,
-  validateExtension: isLabExtension,
+  isLabExtension: isLabExtension,
   createShim: createShim,
   createShimHandler: createShimHandler,
 };
