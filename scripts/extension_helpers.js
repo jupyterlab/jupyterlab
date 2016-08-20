@@ -161,12 +161,11 @@ function upstreamExternals(_require) {
    *
    * @param pkg (object) - the package.json object.
    *
-   * @returns the externals this package provides, including itself.
+   * @returns an array containing the externals this package provides, excluding itself.
    *
    * #### Notes
-   * An extension itself is always an external. Other externals provided
-   * by the package may be specified in package.json jupyter.lab.externals
-   * object:
+   * This returns an array containing the externals referred to in the
+   * package.json jupyter.lab.externals object:
    *
    * {module: "module-exporting-externals"}
    *
@@ -178,7 +177,6 @@ function upstreamExternals(_require) {
     // the package itself is always an external
     // the extension may provide other externals too.
     var externals = pkg.jupyter.lab.externals;
-    var pkgExternals;
     if (externals) {
       try {
         var externalModule = _require(pkg_path + '/' + externals['module']);
@@ -191,8 +189,12 @@ function upstreamExternals(_require) {
         console.error('Error importing externals for ' + pkg.name);
       }
     }
+    pkgExternals = pkgExternals || [];
+    if (!Array.isArray(pkgExternals)) {
+      pkgExternals = [pkgExternals];
+    }
 
-    return pkgExternals || [];
+    return pkgExternals;
   }
 
 
