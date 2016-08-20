@@ -15,6 +15,7 @@
     "jquery-ui": "^1.10.5 <1.12",
     "jupyter-js-services": "^0.18.0",
     "leaflet": "^0.7.7",
+    "less": "^2.7.1",
     "marked": "^0.3.5",
     "moment": "^2.11.2",
     "phosphor": "^0.6.1",
