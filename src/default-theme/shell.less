@@ -3,13 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-ApplicationShell {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
+/*-----------------------------------------------------------------------------
+| Shell
+|----------------------------------------------------------------------------*/
 
 
 #jp-main-dock-panel {
@@ -19,20 +15,13 @@
 
 #jp-top-panel {
   border-bottom: 1px solid #BDBDBD;
-  background: white;
-  display: flex;
-  min-height: 28px;
-}
-
-
-#jp-left-stack > .p-Widget, #jp-right-stack > .p-Widget {
-  min-width: 300px;
 }
 
 
 #jp-right-stack {
   border-left: 1px solid #BDBDBD;
 }
+
 
 #jp-left-stack {
   border-right: 1px solid #BDBDBD;
@@ -47,11 +36,6 @@
 .jp-SideBar.p-TabBar {
   color: #777777;
   background: white;
-  font-size: 14px;
-  min-width: 36px;
-  max-width: 36px;
-  overflow: visible;
-  display: block;
 }
 
 
@@ -65,40 +49,8 @@
 }
 
 
-.jp-SideBar .p-TabBar-content,
-.jp-SideBar .p-TabBar-content {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: stretch;
-  list-style-type: none;
-  height: 35px;
-  transform-origin: 0 0 0;
-}
-
-
-.jp-SideBar.jp-mod-left .p-TabBar-content {
-  flex-direction: row-reverse;
-  transform: rotate(-90deg) translateX(-100%);
-}
-
-
-.jp-SideBar.jp-mod-right .p-TabBar-content {
-  flex-direction: row;
-  transform: rotate(90deg) translateY(-100%);
-}
-
-
 .jp-SideBar .p-TabBar-tab {
-  padding: 0 18px;
   background: white;
-  border: none;
-  overflow: visible;
-}
-
-
-.jp-SideBar .p-TabBar-tabLabel {
-  line-height: 35px;
 }
 
 
