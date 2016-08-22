@@ -80,7 +80,6 @@ function createShimHandler(pkgName) {
         path = path.slice(1);
       }
       var shim = 'var jupyter.externals["' + pkgName + '"]["' + path + '"]';
-      // console.info(request + ' translated to '+shim);
       return callback(null, shim);
     }
     callback();
