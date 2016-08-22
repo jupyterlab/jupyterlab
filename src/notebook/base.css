@@ -36,74 +36,11 @@
   flex-shrink: 1;
 }
 
-
 .jp-MarkdownCell-content {
-  padding: 7px;
-  user-select: text;
-  -moz-user-select: text;
-  -webkit-user-select: text;
-  -ms-user-select: text;
+  padding: 0.5em;
 }
 
-
-.jp-MarkdownCell-content h1 {
-  font-size: 26px;
-  line-height: 1.0;
-  margin: 14px 0 0 0;
-}
-
-
-.jp-MarkdownCell-content h2 {
-  font-size: 22px;
-  line-height: 1.0;
-  margin: 14px 0 0 0;
-}
-
-
-.jp-MarkdownCell-content h3 {
-  font-size: 18px;
-  line-height: 1.0;
-  margin: 14px 0 0 0;
-}
-
-
-.jp-MarkdownCell-content h4 {
-  font-size: 14px;
-  line-height: 1.0;
-  margin: 14px 0 0 0;
-}
-
-
-.jp-MarkdownCell-content h5 {
-  font-size: 14px;
-  font-style: italic;
-  line-height: 1.0;
-  margin: 14px 0 0 0;
-}
-
-
-.jp-MarkdownCell-content h6 {
-  font-size: 14px;
-  font-style: italic;
-  line-height: 1.0;
-  margin: 14px 0 0 0;
-}
-
-
-.jp-MarkdownCell-content p {
-  font-size: 14px;
-  line-height: 20px;
-  margin: 0 0 0 0;
-}
-
-
-.jp-MarkdownCell-content li {
-  line-height: 20px;
-  margin: 14px 0 0 0;
-}
-
-
-.jp-Output-result {
+.jp-Output-result.p-Widget {
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;
