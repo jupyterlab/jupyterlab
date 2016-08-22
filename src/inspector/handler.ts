@@ -54,12 +54,12 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   inspected: ISignal<InspectionHandler, Inspector.IInspectorUpdate>;
 
   /**
-   * The cell widget used by the inspection handler.
+   * The editor view used by the inspection handler.
    */
   get activeEditor(): IEditorView {
     return this._activeEditor;
   }
-  set activeCell(newValue: IEditorView) {
+  set activeEditor(newValue: IEditorView) {
     if (newValue === this._activeEditor) {
       return;
     }

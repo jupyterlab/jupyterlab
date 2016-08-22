@@ -564,7 +564,9 @@ class Notebook extends StaticNotebook {
     // Set up the inspection handler.
     this._inspectionHandler = new InspectionHandler(this.rendermime);
     this.activeCellChanged.connect((s, cell) => {
-      this._inspectionHandler.activeEditor = cell.editor;
+      if (cell) {
+        this._inspectionHandler.activeEditor = cell.editor;
+      }
     });
   }
 
