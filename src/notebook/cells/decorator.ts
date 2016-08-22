@@ -53,17 +53,10 @@ export
 class DefaultCellEditorWidgetDecorator<T extends CellEditorWidget> extends CellEditorWidgetDecorator<T> {
 
   /**
-   * Decorates an underlying widget.
+   * Decorates the given editor.
    */
-  protected addDecorations() {
-    this.editor.addClass(CELL_EDITOR_CLASS);
-  }
-
-  /**
-   * Removes decorations from an underlying widget.
-   */
-  protected removeDecorations() {
-    this.editor.removeClass(CELL_EDITOR_CLASS);
+  protected decorate(editor:T) {
+    editor.addClass(CELL_EDITOR_CLASS);
   }
 
 }

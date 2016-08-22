@@ -50,22 +50,26 @@ export
 class DefaultStandaloneEditorWidgetDecorator<T extends StandaloneEditorWidget> extends StandaloneEditorWidgetDecorator<T> {
 
   /**
-   * Decorates an underlying widget.
+   * Connects a decorator to the given editor.
    */
-  protected addDecorations() {
-    this.editor.addClass(EDITOR_CLASS);
-    
-    this.updateTitleLabel(this.editor.getModel().uri);
-    this.editor.getModel().uriChanged.connect(this.onModelUriChanged, this);
+  protected connect(editor:T) {
+    editor.getModel().uriChanged.connect(this.onModelUriChanged, this);
   }
 
   /**
-   * Removes decorations from an underlying widget.
+   * Disconnects a decorator from the given editor.
    */
-  protected removeDecorations() {
-    this.editor.removeClass(EDITOR_CLASS);
-    this.editor.getModel().uriChanged.disconnect(this.onModelUriChanged, this);
-  }  
+  protected disconnect(editor:T) {
+    editor.getModel().uriChanged.disconnect(this.onModelUriChanged, this);
+  }
+
+  /**
+   * Decorates the given editor.
+   */
+  protected decorate(editor:T) {
+    editor.addClass(EDITOR_CLASS);
+    this.updateTitleLabel(editor.getModel().uri);
+  }
 
   /**
    * Handles model uri changed events.

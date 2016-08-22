@@ -13,6 +13,10 @@ import {
   EditorWidget, IEditorView, IPosition, IEditorModel, IEditorConfiguration
 } from './widget';
 
+import {
+  PropertyObserver
+} from './utils/utils';
+
 export * from './widget';
 
 /**
@@ -29,8 +33,11 @@ class EditorViewDecorator<T extends IEditorView> implements IEditorView, IDispos
   /**
    * Constructs a new decorator.
    */
-  constructor(private _editor:T) {
-    this.addDecorations();
+  constructor(editor:T) {
+    this._editorObserver.connect = (editor)=>this.connect(editor);
+    this._editorObserver.disconnect = (editor)=>this.disconnect(editor);
+    this._editorObserver.onChanged = (editor)=>this.decorate(editor);
+    this._editorObserver.property = editor;
   }
 
   /**
@@ -41,71 +48,81 @@ class EditorViewDecorator<T extends IEditorView> implements IEditorView, IDispos
       return;
     }
     this.isDisposed = true;
-    this.removeDecorations();
-    this._editor.dispose();
-    this._editor = null;
+    this._editorObserver.dispose();
+    this._editorObserver = null;
   }
 
   /**
-   * A client should override this method to add decorations.
+   * Connects a decorator to the given editor.
    */
-  protected addDecorations() {
+  protected connect(editor:T) {
+    // do nothing
   }
 
   /**
-   * A client should override this method to remove decorations.
+   * Decorates the given editor.
    */
-  protected removeDecorations() {
+  protected decorate(editor:T) {
+    // do nothing
+  }
+
+  /**
+   * Disconnects a decorator from the given editor.
+   */
+  protected disconnect(editor:T) {
+    // do nothing
   }
 
   /**
    * Returns an underlying editor.
    */
   get editor(): T {
-    return this._editor;
+    return this._editorObserver.property;
   }
 
   // --- Delegate methods ---
 
   get closed(): ISignal<IEditorView, void> {
-    return this._editor.closed;
+    return this.editor.closed;
   }
 
   set closed(closed:ISignal<IEditorView, void>) {
-    this._editor.closed = closed;
+    this.editor.closed = closed;
   }
 
   get position(): IPosition {
-    return this._editor.position;
+    return this.editor.position;
   }
 
   set position(position:IPosition) {
-    this._editor.position = position;
+    this.editor.position = position;
   }
 
   getModel(): IEditorModel {
-    return this._editor.getModel();
+    return this.editor.getModel();
   }
 
   getConfiguration(): IEditorConfiguration {
-    return this._editor.getConfiguration();
+    return this.editor.getConfiguration();
   }
 
   getLeftOffset(position: IPosition): number {
-    return this._editor.getLeftOffset(position);
+    return this.editor.getLeftOffset(position);
   }
 
   getTopOffset(position: IPosition): number {
-    return this._editor.getTopOffset(position);
+    return this.editor.getTopOffset(position);
   }
 
   hasFocus(): boolean {
-    return this._editor.hasFocus();
+    return this.editor.hasFocus();
   }
 
   focus() {
-    return this._editor.focus();
+    return this.editor.focus();
   }
+
+  private _editorObserver = new PropertyObserver<T>();
 
 }
 
