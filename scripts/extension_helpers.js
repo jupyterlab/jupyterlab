@@ -251,7 +251,6 @@ function upstreamExternals(_require, onlyUpstream) {
   }
 
   var externals = _find_externals(".", true);
-  console.log(externals);
   return externals;
 }
 
