@@ -59,6 +59,7 @@ import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
+import 'jupyterlab/lib/basestyle/index.css';
 import 'jupyterlab/lib/default-theme/index.css';
 
 
