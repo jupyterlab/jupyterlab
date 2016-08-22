@@ -52,7 +52,7 @@ class DefaultStandaloneEditorWidgetDecorator<T extends StandaloneEditorWidget> e
   /**
    * Decorates an underlying widget.
    */
-  protected addDecoration() {
+  protected addDecorations() {
     this.editor.addClass(EDITOR_CLASS);
     
     this.updateTitleLabel(this.editor.getModel().uri);

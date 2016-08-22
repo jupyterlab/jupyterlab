@@ -53,7 +53,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
   /**
    * Tests whether this presenter is disposed.
    */
-  isDisposed: boolean;
+  isDisposed:boolean = false;
 
   /**
    * Constructs a presenter.

@@ -14,7 +14,7 @@ class PropertyObserver<T> implements IDisposable {
   /**
    * Tests whether this observer is disposed.
    */
-  isDisposed:boolean;
+  isDisposed:boolean = false;
 
   /**
    * Callback to connect to a property. 

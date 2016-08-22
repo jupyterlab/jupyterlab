@@ -55,7 +55,7 @@ class DefaultCellEditorWidgetDecorator<T extends CellEditorWidget> extends CellE
   /**
    * Decorates an underlying widget.
    */
-  protected addDecoration() {
+  protected addDecorations() {
     this.editor.addClass(CELL_EDITOR_CLASS);
   }
 

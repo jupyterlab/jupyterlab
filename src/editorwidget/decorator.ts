@@ -24,7 +24,7 @@ class EditorViewDecorator<T extends IEditorView> implements IEditorView, IDispos
   /**
    * Test whether this decorator is disposed.
    */
-  isDisposed:boolean = true;
+  isDisposed:boolean = false;
 
   /**
    * Constructs a new decorator.
