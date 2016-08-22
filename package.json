@@ -51,7 +51,7 @@
     "webpack": "^1.12.11"
   },
   "scripts": {
-    "build": "npm run build:src",
+    "build": "npm run build:css && npm run build:src",
     "build:all": "npm run build:css && npm run build:src && npm run build:serverextension",
     "build:examples": "node scripts/buildexamples.js",
     "build:src": "tsc --project src && node scripts/copyfiles.js",
