@@ -21,7 +21,7 @@ var BASE_EXTERNALS = [
       'codemirror/lib/codemirror.css'
     ];
     if (codeMirrorPaths.indexOf(request) !== -1) {
-      return callback(null, 'var jupyter.externals.codemirror');
+      return callback(null, 'amd codemirror');
     }
     callback();
   }

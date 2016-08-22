@@ -79,7 +79,7 @@ function createShimHandler(pkgName) {
       if (path.indexOf('/') === 0) {
         path = path.slice(1);
       }
-      var shim = 'var jupyter.externals["' + pkgName + '"]["' + path + '"]';
+      var shim = 'amd ' + pkgName + '/' + path;
       return callback(null, shim);
     }
     callback();
@@ -99,7 +99,7 @@ function createShimHandler(pkgName) {
 function createShim(modName, sourceFolder) {
   var dirs = [];
   var files = [];
-  var lines = ['var shim = {};'];
+  var lines = [];
 
   // Find the path to the module.
   var modPath = require.resolve(modName + '/package.json');
@@ -115,9 +115,10 @@ function createShim(modName, sourceFolder) {
     // Get the relative path to the entry.
     var entryPath = path.posix.join(sourceFolder, entries[i].relativePath);
     // Add an entries for each file.
-    lines.push('shim["' + entryPath + '"] = require("' + path.posix.join(modName, entryPath) + '");');
+    // lines.push('shim["' + entryPath + '"] = require("' + path.posix.join(modName, entryPath) + '");');
+    // Add an entries for each file.
+    lines.push('window.define("' + entryPath + '", function() { return require("' + entryPath + '")});');
   }
-  lines.push('module.exports = shim;');
 
   return lines.join('\n');
 }

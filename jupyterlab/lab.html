@@ -14,7 +14,8 @@ Distributed under the terms of the Modified BSD License.
     <script type="text/javascript" src="{{mathjax_url}}?config={{mathjax_config}}&amp;delayStartupUntil=configured" charset="utf-8"></script>
     {% endif %}
     <script src="{{static_url("components/jquery/jquery.min.js") }}" type="text/javascript" charset="utf-8"></script> <!-- window.$ -->
-    <script src="{{static_url("components/jquery-ui/ui/minified/jquery-ui.min.js") }}" type="text/javascript" charset="utf-8"></script> <!-- extends window.$ -->
+    <script src="{{static_url("components/jquery-ui/ui/minified/jquery-ui.min.js") }}" type="text/javascript" charset="utf-8"></script> 
+    <script src="{{static_url("components/requirejs/require.js") }}" type="text/javascript" charset="utf-8"></script><!-- extends window.$ -->
     <link href="{{static_prefix}}/vendor.css" rel="stylesheet">
     <link href="{{static_prefix}}/codemirror.css" rel="stylesheet">
     <link href="{{static_prefix}}/jupyterlab.css" rel="stylesheet">
@@ -31,16 +32,12 @@ Distributed under the terms of the Modified BSD License.
   "notebookPath": "{{notebook_path | urlencode}}"
 }</script>
 
-<script src="{{static_prefix}}/codemirror.bundle.js" type="text/javascript" charset="utf-8"></script>
-<script src="{{static_prefix}}/phosphor.bundle.js" type="text/javascript" charset="utf-8"></script>
-<script src="{{static_prefix}}/jupyter-js-services.bundle.js" type="text/javascript" charset="utf-8"></script>
-<script src="{{static_prefix}}/vendor.bundle.js" type="text/javascript" charset="utf-8"></script>
-<script src="{{static_prefix}}/jupyterlab.bundle.js" type="text/javascript" charset="utf-8"></script>
-<script src="{{static_prefix}}/plugins.bundle.js" type="text/javascript" charset="utf-8"></script>
-
-<!-- TODO: Insert third party plugins here using template -->
-
-<script src="{{static_prefix}}/main.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script> 
+// Assemble the pieces here
+require(['lab/phosphor.bundle'], function(phosphor) {
+  console.log('hello', phosphor);
+});
+</script>
 </body>
 
 </html>
