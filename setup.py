@@ -113,7 +113,7 @@ class NPM(Command):
         if not os.path.exists(self.jlab_node_modules):
             log.info("Installing extension build dependencies with npm.  This may take a while...")
             run('npm install', cwd=extension_root)
-        run('npm run build:serverextension')
+        run('npm run build:all')
 
         for t in self.targets:
             if not os.path.exists(t):
