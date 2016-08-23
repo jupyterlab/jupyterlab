@@ -71,6 +71,9 @@ pip install -e . # will take a long time to build everything
 jupyter serverextension enable --py jupyterlab
 ```
 
+Note: At times, it may be necessary to clean your local repo with the 
+command ``git clean -fdx``.
+
 ### Run JupyterLab
 
 Start JupyterLab:
