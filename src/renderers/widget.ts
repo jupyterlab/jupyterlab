@@ -85,8 +85,8 @@ const PDF_CLASS = 'jp-RenderedPDF';
 marked.setOptions({
   gfm: true,
   sanitize: false,
-  breaks: true,
-  langPrefix: 'cm-s-default language-',
+  tables: true,
+  langPrefix: 'cm-s-ipython language-', // Use the ipython CM theme we offer
   highlight: (code, lang, callback) => {
     if (!lang) {
         // no language, no highlight
