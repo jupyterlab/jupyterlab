@@ -104,7 +104,7 @@ function createShim(modName, sourceFolder) {
   // Find the path to the module.
   var modPath = require.resolve(modName + '/package.json');
   sourceFolder = sourceFolder || 'lib';
-  modPath = path.join(path.dirname(modPath), sourceFolder);
+  modPath = path.posix.join(path.dirname(modPath), sourceFolder);
 
   // Walk through the source tree.
   var entries = walkSync.entries(modPath, {
@@ -113,9 +113,9 @@ function createShim(modName, sourceFolder) {
   });
   for (var i = 0; i < entries.length; i++) {
     // Get the relative path to the entry.
-    var entryPath = path.join(sourceFolder, entries[i].relativePath);
+    var entryPath = path.posix.join(sourceFolder, entries[i].relativePath);
     // Add an entries for each file.
-    lines.push('shim["' + entryPath + '"] = require("' + path.join(modName, entryPath) + '");');
+    lines.push('shim["' + entryPath + '"] = require("' + path.posix.join(modName, entryPath) + '");');
   }
   lines.push('module.exports = shim;');
 
