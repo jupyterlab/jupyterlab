@@ -97,7 +97,7 @@ class ConsoleHistory implements IConsoleHistory {
       return;
     }
 
-    this._kernel.history(Private.initialRequest).then(v => this._populate(v));
+    this._kernel.history(Private.initialRequest).then(v => this.onHistory(v));
   }
 
   /**
@@ -155,7 +155,7 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   /**
-   * Populate the history collection.
+   * Populate the history collection on history reply from a kernel.
    *
    * @param value The kernel message history reply.
    *
@@ -164,7 +164,7 @@ class ConsoleHistory implements IConsoleHistory {
    * [session: number, line: number, input: string]
    * Contiguous duplicates are stripped out of the API response.
    */
-  private _populate(value: KernelMessage.IHistoryReplyMsg): void {
+  protected onHistory(value: KernelMessage.IHistoryReplyMsg): void {
     this._history = [];
     let last = '';
     let current = '';
