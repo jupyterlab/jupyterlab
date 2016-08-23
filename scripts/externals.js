@@ -20,9 +20,9 @@ var BASE_EXTERNALS = [
       'codemirror', '../lib/codemirror',  '../../lib/codemirror',
       'codemirror/lib/codemirror.css'
     ];
-    if (codeMirrorPaths.indexOf(request) !== -1) {
-      return callback(null, 'amd codemirror');
-    }
+    // if (codeMirrorPaths.indexOf(request) !== -1) {
+    //   return callback(null, 'amd codemirror');
+    // }
     callback();
   }
 ];

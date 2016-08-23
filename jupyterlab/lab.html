@@ -16,7 +16,6 @@ Distributed under the terms of the Modified BSD License.
     <script src="{{static_url("components/jquery/jquery.min.js") }}" type="text/javascript" charset="utf-8"></script> <!-- window.$ -->
     <script src="{{static_url("components/jquery-ui/ui/minified/jquery-ui.min.js") }}" type="text/javascript" charset="utf-8"></script> 
     <script src="{{static_url("components/requirejs/require.js") }}" type="text/javascript" charset="utf-8"></script><!-- extends window.$ -->
-    <link href="{{static_prefix}}/vendor.css" rel="stylesheet">
     <link href="{{static_prefix}}/codemirror.css" rel="stylesheet">
     <link href="{{static_prefix}}/jupyterlab.css" rel="stylesheet">
     <link href="{{static_prefix}}/main.css" rel="stylesheet">
@@ -33,9 +32,23 @@ Distributed under the terms of the Modified BSD License.
 }</script>
 
 <script> 
+requirejs.config({
+  baseUrl: 'lab',
+});
+
+ define("$", function () {
+    return window.$;
+});
+
+
 // Assemble the pieces here
-require(['lab/phosphor.bundle'], function(phosphor) {
-  console.log('hello', phosphor);
+require(['phosphor.bundle'], function (phosphor, codemirror) {
+  require(['jupyter-js-services.bundle', 'vendor.bundle'], function(services) {
+    console.log('hello', services);
+    require(['jupyterlab.bundle'], function(lab) {
+      console.log('hello', lab);
+    });
+  });
 });
 </script>
 </body>
