@@ -62,8 +62,8 @@ module.exports = [
   output: {
     path: './build',
     filename: '[name].bundle.js',
-    publicPath: './',
-    library: ['jupyter', 'application', '[name]']
+    libraryTarget: 'amd',
+    publicPath: './'
   },
   node: {
     fs: 'empty'
@@ -88,8 +88,8 @@ module.exports = [
   output: {
       filename: 'jupyterlab.bundle.js',
       path: './build',
-      publicPath: './',
-      library: ['jupyter', 'externals', 'jupyterlab']
+      libraryTarget: 'amd',
+      publicPath: './'
   },
   module: {
     loaders: loaders
@@ -110,8 +110,8 @@ module.exports = [
   output: {
       filename: '[name].bundle.js',
       path: './build',
-      publicPath: './',
-      library: ['jupyter', 'externals', 'codemirror']
+      libraryTarget: 'amd',
+      publicPath: './'
   },
   module: {
     loaders: loaders
@@ -128,8 +128,8 @@ module.exports = [
   output: {
       filename: 'jupyter-js-services.bundle.js',
       path: './build',
-      publicPath: './',
-      library: ['jupyter', 'externals', 'jupyter-js-services'],
+      libraryTarget: 'amd',
+      publicPath: './'
   },
   module: {
     loaders: loaders
@@ -144,8 +144,8 @@ module.exports = [
   output: {
       filename: 'phosphor.bundle.js',
       path: './build',
-      publicPath: './',
-      library: ['jupyter', 'externals', 'phosphor']
+      libraryTarget: 'amd',
+      publicPath: './'
   },
   bail: true,
   devtool: 'source-map'
