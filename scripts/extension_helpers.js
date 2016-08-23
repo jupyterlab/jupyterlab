@@ -70,16 +70,20 @@ function createShimHandler(pkgName) {
     // since that is all we save
     if (startsWith(request, pkgName)) {
       try {
-        var path = require.resolve(request);
+        var modPath = require.resolve(request);
       } catch (err) {
         return callback(err);
       }
-      var index = path.indexOf(request);
-      path = path.slice(index + pkgName.length);
-      if (path.indexOf('/') === 0) {
-        path = path.slice(1);
+      var sep = path.posix.sep;
+      if (path.sep !== sep) {
+        modPath = modPath.split(path.sep).join(sep);
       }
-      var shim = 'var jupyter.externals["' + pkgName + '"]["' + path + '"]';
+      var index = modPath.indexOf(request);
+      modPath = modPath.slice(index + pkgName.length);
+      if (modPath.indexOf(sep) === 0) {
+        modPath = modPath.slice(1);
+      }
+      var shim = 'var jupyter.externals["' + pkgName + '"]["' + modPath + '"]';
       return callback(null, shim);
     }
     callback();
