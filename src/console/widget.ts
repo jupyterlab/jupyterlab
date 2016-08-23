@@ -97,7 +97,7 @@ class ConsoleWidget extends Widget {
     this._rendermime = options.rendermime;
     this._session = options.session;
 
-    this._history = new ConsoleHistory(this._session.kernel);
+    this._history = new ConsoleHistory({ kernel: this._session.kernel });
 
     // Instantiate tab completion widget.
     let completion = options.completion || new CompletionWidget({

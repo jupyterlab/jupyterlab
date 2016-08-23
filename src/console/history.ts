@@ -62,10 +62,10 @@ class ConsoleHistory implements IConsoleHistory {
   /**
    * Construct a new console history object.
    */
-  constructor(kernel: IKernel) {
+  constructor(options?: ConsoleHistory.IOptions) {
     this._history = [];
-    if (kernel) {
-      this.kernel = kernel;
+    if (options.kernel) {
+      this.kernel = options.kernel;
     }
   }
 
@@ -181,6 +181,24 @@ class ConsoleHistory implements IConsoleHistory {
   private _cursor = 0;
   private _history: string[] = null;
   private _kernel: IKernel = null;
+}
+
+
+/**
+ * A namespace for ConsoleHistory statics.
+ */
+export
+namespace ConsoleHistory {
+  /**
+   * The initialization options for a console history object.
+   */
+  export
+  interface IOptions {
+    /**
+     * The kernel instance to query for history.
+     */
+    kernel?: IKernel;
+  }
 }
 
 
