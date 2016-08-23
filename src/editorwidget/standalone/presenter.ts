@@ -174,8 +174,15 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
     const oldValue = this.editorView.getModel().getValue();
     const newValue = model ? model.toString() : '';
     if (oldValue !== newValue) {
-      this.editorView.getModel().setValue(newValue);
+      this.performEditorModelUpdate(newValue);
     }
+  }
+
+  /**
+   * Performs editor model update.
+   */
+  protected performEditorModelUpdate(value:string) {
+    this.editorView.getModel().setValue(value);
   }
 
   /**
@@ -185,15 +192,30 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
     const newValue = model.getValue();
     const oldValue = this.context.model.toString();
     if (oldValue !== newValue) {
-      this.context.model.fromString(newValue);
+      this.performDocumentModelUpdate(newValue);
     }
+  }
+
+  /**
+   * Performs document model update.
+   */
+  protected performDocumentModelUpdate(value:string) {
+    this.context.model.fromString(value);
   }
 
   /**
    * Updates an uri.
    */
-  protected updateUri(uri: string): void {
+  protected updateUri(path: string): void {
+    const uri = this.createUri(path);
     this.editorView.getModel().uri = uri;
+  }
+
+  /**
+   * Create a model uri from the given path.
+   */
+  protected createUri(path:string) {
+    return path;
   }
 
   /**
