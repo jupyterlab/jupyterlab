@@ -50,3 +50,9 @@ CodeMirror.defineMode('ipythongfm', (config: CodeMirror.EditorConfiguration, mod
 }, 'gfm');
 
 CodeMirror.defineMIME('text/x-ipythongfm', 'ipythongfm');
+CodeMirror.modeInfo.push({
+  ext: [],
+  mime: 'text/x-ipythongfm',
+  mode: 'ipythongfm',
+  name: 'ipythongfm'
+});
