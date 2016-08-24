@@ -19,3 +19,19 @@ interface IStandaloneEditorView extends IEditorView {
     setDirty(dirty: boolean): void;
 
 }
+
+/**
+ * Utilities for a standalone editor view.
+ */
+export
+namespace IStandaloneEditorView {
+
+  /**
+   * Tests whether the given editor view is standalone.
+   */
+  export
+  function is(editorView:any): editorView is IStandaloneEditorView {
+    return IEditorView.is(editorView) && editorView.setDirty !== undefined;
+  }
+
+}

@@ -237,6 +237,18 @@ export
 namespace IEditorView {
 
   /**
+   * Tests whether the given widget is an editor widget.
+   */
+  export
+  function is(editorView:any): editorView is IEditorView {
+    return editorView &&
+      editorView.closed !== undefined &&
+      editorView.position !== undefined &&
+      editorView.getModel !== undefined &&
+      editorView.getConfiguration !== undefined;
+  }
+
+  /**
    * Tests whether a cursor at the start position. 
    */
   export

@@ -13,25 +13,22 @@ import {
 } from '../../../codemirror/widget';
 
 import {
-  IChangedArgs
-} from '../../../common/interfaces';
-
-import {
-  ICellModel
-} from '../../cells/model';
-
-import {
   CellEditorWidget, ICellEditorPresenter, EdgeLocation, ICellEditorView
 } from '../../cells/editor';
+
+export * from '../../../codemirror/widget';
+export * from '../../cells/editor';
 
 /**
  * The key code for the up arrow key.
  */
+export
 const UP_ARROW = 38;
 
 /**
  * The key code for the down arrow key.
  */
+export
 const DOWN_ARROW = 40;
 
 /**

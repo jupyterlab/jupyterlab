@@ -11,29 +11,33 @@ import {
 } from '../cells/editor';
 
 import {
-  ICompletableEditorView, ITextChange, ICompletionRequest, ICoords
-} from '../../completion/view';
+  CompletableEditorWidget, ITextChange, ICompletionRequest, ICoords
+} from '../../completion/editor';
+
+export * from '../cells/editor';
+export * from '../../completion/view';
 
 /**
  * The key code for the tab key.
  */
+export
 const TAB = 9;
 
 /**
  * A completable code mirror widget for a cell editor.
  */
 export
-class CompletableCodeMirrorCellEditorWidget extends CodeMirrorCellEditorWidget implements ICompletableEditorView {
+class CompletableCodeMirrorCellEditorWidget extends CodeMirrorCellEditorWidget implements CompletableEditorWidget {
 
   /**
    * A signal emitted when a tab (text) completion is requested.
    */
-  completionRequested: ISignal<ICompletableEditorView, ICompletionRequest>;
+  completionRequested: ISignal<CompletableEditorWidget, ICompletionRequest>;
 
   /**
    * A signal emitted when a text change is completed.
    */
-  textChanged: ISignal<ICompletableEditorView, ITextChange>;
+  textChanged: ISignal<CompletableEditorWidget, ITextChange>;
 
   /**
    * Handle change events from the document.

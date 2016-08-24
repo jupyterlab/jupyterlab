@@ -13,6 +13,8 @@ import {
   IEditorView
 } from '../../editorwidget/view';
 
+export * from '../../editorwidget/view';
+
 /**
  * An interface describing editor state coordinates.
  */
@@ -120,4 +122,23 @@ interface ICompletableEditorView extends IEditorView {
    * A signal emitted when a completion is requested.
    */
   completionRequested: ISignal<ICompletableEditorView, ICompletionRequest>;
+
+}
+
+/**
+ * Utilities for a completable editor widget.
+ */
+export
+namespace ICompletableEditorView {
+
+  /**
+   * Tests whether the given widget is an editor widget.
+   */
+  export
+  function is(editorView:any): editorView is ICompletableEditorView {
+    return IEditorView.is(editorView) &&
+      editorView.textChanged !== undefined &&
+      editorView.completionRequested !== undefined;
+  }
+
 }

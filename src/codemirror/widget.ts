@@ -26,6 +26,8 @@ import {
   EditorWidget, IEditorView, IEditorModel, IEditorConfiguration, IPosition
 } from '../editorwidget/widget';
 
+export * from '../editorwidget/widget';
+
 /**
  * The class name added to CodeMirrorWidget instances.
  */

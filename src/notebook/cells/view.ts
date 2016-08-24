@@ -28,3 +28,19 @@ interface ICellEditorView extends IEditorView {
   edgeRequested: ISignal<ICellEditorView, EdgeLocation>;
 
 }
+
+/**
+ * Utilities for a cell editor view.
+ */
+export
+namespace ICellEditorView {
+
+  /**
+   * Tests whether the given editor view is a cell editor view.
+   */
+  export
+  function is(editorView:any): editorView is ICellEditorView {
+    return IEditorView.is(editorView) && editorView.edgeRequested !== undefined;
+  }
+
+}

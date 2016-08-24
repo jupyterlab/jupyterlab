@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   ICellEditorView, ICellEditorPresenter, CellEditorPresenter
 } from './presenter';
 
@@ -28,6 +32,16 @@ interface CellEditorWidget extends EditorWidget, ICellEditorView {
  */
 export
 namespace CellEditorWidget {
+
+  /**
+   * Tests whether the given widget is a cell editor widget.
+   */
+  export
+  function is(widget:Widget|CellEditorWidget): widget is CellEditorWidget {
+    return EditorWidget.is(widget) &&
+      ICellEditorView.is(widget) && 
+      widget.presenter !== undefined;
+  }
 
   /**
    * A default cell editor widget initializer.
