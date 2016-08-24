@@ -55,9 +55,5 @@ module.exports = {
   plugins: [
     new ExtractTextPlugin('[name].css'),
     new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
-  ],
-  externals: {
-    jquery: '$',
-    'jquery-ui': '$'
-  }
+  ]
 }
