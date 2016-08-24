@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   EditorWidget
 } from '../editorwidget/widget';
 
@@ -49,9 +53,30 @@ import {
   DEFAULT_CODEMIRROR_THEME
 } from './widget';
 
+import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/comment/comment.js';
+import 'codemirror/keymap/vim.js';
+
 /**
- * The map of command ids used by the code mirror editor.
+ * The theme property name.
  */
+const THEME_PROPERTY = 'theme';
+
+/**
+ * The available CodeMirror themes.
+ */
+export
+const THEMES = [
+  DEFAULT_CODEMIRROR_THEME, 'default', 'abcdef', 'base16-dark', 'base16-light',
+  'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix', 
+  'xq-light', 'zenburn'
+];
+
+/**
+ * The map of command ids used by the CodeMirror editor.
+ */
+export
 const COMMANDS = {
   lineNumbers: 'codeMirrorEditor:line-numbers',
   lineWrap: 'codeMirrorEditor:line-wrap',
@@ -124,27 +149,27 @@ class CodeMirrorEditorWidgetFactory extends EditorWidget.Factory {
   registerMenuItems(menu: Menu) {
     const { commands, keymap } = this._app;
 
-    const settings = new Menu({ commands, keymap });
-    settings.title.label = 'Settings';
-    settings.addItem({ command: COMMANDS.lineNumbers });
-    settings.addItem({ command: COMMANDS.lineWrap });
-    settings.addItem({ command: COMMANDS.matchBrackets });
-    settings.addItem({ command: COMMANDS.defaultMode });
-    settings.addItem({ command: COMMANDS.vimMode });
+    const settingsMenu = new Menu({ commands, keymap });
+    settingsMenu.title.label = 'Settings';
+    settingsMenu.addItem({ command: COMMANDS.lineNumbers });
+    settingsMenu.addItem({ command: COMMANDS.lineWrap });
+    settingsMenu.addItem({ command: COMMANDS.matchBrackets });
+    settingsMenu.addItem({ command: COMMANDS.defaultMode });
+    settingsMenu.addItem({ command: COMMANDS.vimMode });
 
-    const theme = new Menu({ commands, keymap });
-    theme.title.label = 'Theme';
-    [
-      'default', 'abcdef', 'base16-dark', 'base16-light', 'hopscotch',
-      'material', 'mbo', 'mdn-like', 'seti', 'the-matrix', 'default',
-      'xq-light', 'zenburn'
-    ].forEach(name => theme.addItem({
-      command: 'editor:change-theme',
-      args: { theme: name }
-    }));
+    const themeMenu = new Menu({ commands, keymap });
+    themeMenu.title.label = 'Theme';
+    for (const theme of THEMES) {
+      const args:JSONObject = {};
+      args[THEME_PROPERTY] = theme;
+      themeMenu.addItem({
+        command: COMMANDS.changeTheme,
+        args
+      });
+    }
 
-    menu.addItem({ type: 'submenu', menu: settings });
-    menu.addItem({ type: 'submenu', menu: theme });
+    menu.addItem({ type: 'submenu', menu: settingsMenu });
+    menu.addItem({ type: 'submenu', menu: themeMenu });
   }
 
   /**
@@ -160,7 +185,7 @@ class CodeMirrorEditorWidgetFactory extends EditorWidget.Factory {
     this.registerCommand({
       id: COMMANDS.lineWrap,
       execute: () => { this.toggleLineWrap(); },
-      label: 'Toggle Line Numbers',
+      label: 'Toggle Line Wrap',
       category
     })
     this.registerCommand({
@@ -177,19 +202,19 @@ class CodeMirrorEditorWidgetFactory extends EditorWidget.Factory {
     })
     this.registerCommand({
       id: COMMANDS.vimMode,
-      execute: () => { this.toggleDefault(); },
+      execute: () => { this.toggleVim(); },
       label: 'Vim Mode',
       category
     })
 
     this._app.commands.addCommand(COMMANDS.changeTheme, {
       label: args => {
-        return args['theme'] as string;
+        return args[THEME_PROPERTY] as string;
       },
       execute: args => {
-        const name: string = args['theme'] as string || 'default';
+        const name: string = args[THEME_PROPERTY] as string || DEFAULT_CODEMIRROR_THEME;
         each(this.tracker.widgets, widget => {
-          widget.editor.setOption('theme', name);
+          widget.editor.setOption(THEME_PROPERTY, name);
         });
       }
     });
@@ -220,8 +245,8 @@ class CodeMirrorEditorWidgetFactory extends EditorWidget.Factory {
   toggleLineNums() {
     const widget = this.tracker.currentWidget;
     if (widget) {
-      const editor = widget.editor;
-      editor.setOption('lineNumbers', !editor.getOption('lineNumbers'));
+      const lineNumbers = widget.getConfiguration().lineNumbers; 
+      widget.getConfiguration().lineNumbers = !lineNumbers;
     }
   }
 

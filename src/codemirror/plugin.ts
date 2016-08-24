@@ -17,11 +17,6 @@ import {
   CodeMirrorEditorWidgetFactory
 } from './factory';
 
-import 'codemirror/addon/edit/matchbrackets.js';
-import 'codemirror/addon/edit/closebrackets.js';
-import 'codemirror/addon/comment/comment.js';
-import 'codemirror/keymap/vim.js';
-
 /**
  * The provider for a code mirror editor factory.
  */

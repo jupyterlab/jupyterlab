@@ -33,8 +33,8 @@ export * from '../editorwidget/widget';
  */
 const EDITOR_CLASS = 'jp-CodeMirrorWidget';
 
-/**
- * The name of the default CodeMirror theme
+/** 
+ * The name of the default CodeMirror theme.
  */
 export
 const DEFAULT_CODEMIRROR_THEME = 'jupyter';
