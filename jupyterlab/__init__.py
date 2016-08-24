@@ -38,7 +38,7 @@ class LabHandler(IPythonHandler):
     def get(self):
         self.write(self.render_template('lab.html',
             static_prefix=ujoin(self.application.settings['base_url'], PREFIX),
-            page_title='Pre-Alpha Jupyter Lab Demo',
+            page_title='JupyterLab Alpha Preview',
             terminals_available=self.settings['terminals_available'],
             mathjax_url=self.mathjax_url,
             mathjax_config='TeX-AMS_HTML-full,Safe',
