@@ -31,7 +31,7 @@ interface IStandaloneEditorPresenter extends IDisposable {
   /**
    * A document context associated with this presenter. 
    */
-  context:IDocumentContext<IDocumentModel>
+  context: IDocumentContext<IDocumentModel>
 }
 
 /**
@@ -43,12 +43,12 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
   /**
    * Tests whether this presenter is disposed.
    */
-  isDisposed:boolean = false;
+  isDisposed: boolean = false;
 
   /**
    * Constructs a presenter.
    */
-  constructor(editorView:IStandaloneEditorView) {
+  constructor(editorView: IStandaloneEditorView) {
     this._contextObserver.connect = (context) => this.connectToDocumentContext(context);
     this._contextObserver.onChanged = (context) => this.onDocumentContextChanged(context);
     this._contextObserver.disconnect = (context) => this.disconnectFromDocumentContext(context);
@@ -69,7 +69,7 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
 
     this._editorViewObserver.dispose();
     this._editorViewObserver = null;
-    
+
     this._contextObserver.dispose();
     this._contextObserver = null;
   }
@@ -85,14 +85,14 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
    * Connects this presenter to the given editor view.
    */
   protected connectToEditorView(editorView: IStandaloneEditorView) {
-      editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this);
+    editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this);
   }
 
   /**
    * Disconnect this presenter from the given editor view.
    */
   protected disconnectFromEditorView(editorView: IStandaloneEditorView) {
-      editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
+    editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
   }
 
   /**
@@ -117,9 +117,9 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
    * Connects this presenter to the given document context.
    */
   protected connectToDocumentContext(context: IDocumentContext<IDocumentModel>) {
-      context.model.contentChanged.connect(this.onModelContentChanged, this);
-      context.pathChanged.connect(this.onPathChanged, this);
-      context.model.stateChanged.connect(this.onModelStateChanged, this);
+    context.model.contentChanged.connect(this.onModelContentChanged, this);
+    context.pathChanged.connect(this.onPathChanged, this);
+    context.model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /** 
@@ -127,10 +127,10 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
    */
   protected onDocumentContextChanged(context: IDocumentContext<IDocumentModel>) {
     if (context) {
-      this.updateUri(context.path);
+      this.updatePath(context.path);
       this.updateEditorModel(context.model)
     } else {
-      this.updateUri('');
+      this.updatePath('');
       this.updateEditorModel(null)
     }
   }
@@ -139,16 +139,16 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
    * Disconnects this presenter from the given document context.
    */
   protected disconnectFromDocumentContext(context: IDocumentContext<IDocumentModel>) {
-      context.model.contentChanged.disconnect(this.onModelContentChanged, this);
-      context.pathChanged.disconnect(this.onPathChanged, this);
-      context.model.stateChanged.connect(this.onModelStateChanged, this);
+    context.model.contentChanged.disconnect(this.onModelContentChanged, this);
+    context.pathChanged.disconnect(this.onPathChanged, this);
+    context.model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /**
    * Handles path changed events.
    */
   protected onPathChanged(context: IDocumentContext<IDocumentModel>) {
-    this.updateUri(context.path);
+    this.updatePath(context.path);
   }
 
   /**
@@ -171,8 +171,8 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
    * Updates an editor model.
    */
   protected updateEditorModel(model: IDocumentModel) {
-    const oldValue = this.editorView.getModel().getValue();
     const newValue = model ? model.toString() : '';
+    const oldValue = this.editorView.getModel().getValue();
     if (oldValue !== newValue) {
       this.performEditorModelUpdate(newValue);
     }
@@ -181,7 +181,7 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
   /**
    * Performs editor model update.
    */
-  protected performEditorModelUpdate(value:string) {
+  protected performEditorModelUpdate(value: string) {
     this.editorView.getModel().setValue(value);
   }
 
@@ -199,22 +199,29 @@ class StandaloneEditorPresenter implements IStandaloneEditorPresenter {
   /**
    * Performs document model update.
    */
-  protected performDocumentModelUpdate(value:string) {
+  protected performDocumentModelUpdate(value: string) {
     this.context.model.fromString(value);
   }
 
   /**
-   * Updates an uri.
+   * Updates a path.
    */
-  protected updateUri(path: string): void {
-    const uri = this.createUri(path);
-    this.editorView.getModel().uri = uri;
+  protected updatePath(path: string): void {
+    const modelUri = this.createEditorModelUri(path);
+    this.performEditorModelUriUpdate(modelUri);
   }
 
   /**
-   * Create a model uri from the given path.
+   * Performs editor model uri update.
    */
-  protected createUri(path:string) {
+  protected performEditorModelUriUpdate(modelUri: string) {
+    this.editorView.getModel().uri = modelUri;
+  }
+
+  /**
+   * Creates an editor model uri from the given path.
+   */
+  protected createEditorModelUri(path: string) {
     return path;
   }
 

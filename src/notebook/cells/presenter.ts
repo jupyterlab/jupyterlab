@@ -31,17 +31,17 @@ interface ICellEditorPresenter extends IDisposable {
   /**
    * A cell model associated with thie presenter.
    */
-  model:ICellModel
+  model: ICellModel
 
   /**
    * Handles moving a cursor up.
    */
-  onPositionUp(editorView:ICellEditorView): void;
+  onPositionUp(editorView: ICellEditorView): void;
 
   /**
    * Handles moving a cursor down.
    */
-  onPositionDown(editorView:ICellEditorView): void;
+  onPositionDown(editorView: ICellEditorView): void;
 }
 
 /**
@@ -53,7 +53,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
   /**
    * Tests whether this presenter is disposed.
    */
-  isDisposed:boolean = false;
+  isDisposed: boolean = false;
 
   /**
    * Constructs a presenter.
@@ -76,7 +76,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
 
     this._editorViewObserver.dispose();
     this._editorViewObserver = null;
-    
+
     this._modelObserver.dispose();
     this._modelObserver = null;
   }
@@ -85,14 +85,14 @@ class CellEditorPresenter implements ICellEditorPresenter {
    * Connects this presenter to the given editor view.
    */
   protected connectToEditorView(editorView: ICellEditorView) {
-      editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this);
+    editorView.getModel().contentChanged.connect(this.onEditorModelContentChanged, this);
   }
 
   /**
    * Disconnect this presenter from the given editor view.
    */
   protected disconnectFromEditorView(editorView: ICellEditorView) {
-      editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
+    editorView.getModel().contentChanged.disconnect(this.onEditorModelContentChanged, this);
   }
 
   /**
@@ -105,7 +105,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
   /**
    * Handles moving a cursor up.
    */
-  onPositionUp(editorView:ICellEditorView) {
+  onPositionUp(editorView: ICellEditorView) {
     if (IEditorView.isAtStartPositoin(editorView)) {
       editorView.edgeRequested.emit('top');
     }
@@ -114,7 +114,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
   /**
    * Handles moving a cursor down.
    */
-  onPositionDown(editorView:ICellEditorView) {
+  onPositionDown(editorView: ICellEditorView) {
     if (IEditorView.isAtEndPosition(editorView)) {
       editorView.edgeRequested.emit('bottom');
     }
@@ -151,7 +151,7 @@ class CellEditorPresenter implements ICellEditorPresenter {
   protected onCellModelChanged(model: ICellModel) {
     this.updateEditorModel(model);
   }
-  
+
   /**
    * Disconnects this presenter from the given cell model.
    */
@@ -173,11 +173,17 @@ class CellEditorPresenter implements ICellEditorPresenter {
    */
   protected updateEditorModel(model: ICellModel) {
     const newVlaue = model ? model.source : '';
-    const editorModel = this.editorView.getModel();
-    const oldValue = editorModel.getValue();
+    const oldValue = this.editorView.getModel().getValue();
     if (oldValue !== newVlaue) {
-      editorModel.setValue(newVlaue);
+      this.performEditorModelUpdate(newVlaue);
     }
+  }
+
+  /**
+   * Performs editor model update.
+   */
+  protected performEditorModelUpdate(value: string) {
+    this.editorView.getModel().setValue(value);
   }
 
   /**
@@ -187,8 +193,15 @@ class CellEditorPresenter implements ICellEditorPresenter {
     const newValue = model.getValue();
     const oldValue = this.model.source;
     if (oldValue !== newValue) {
-      this.model.source = newValue;
+      this.performDocumentModelUpdate(newValue);
     }
+  }
+
+  /**
+   * Performs document model update.
+   */
+  protected performDocumentModelUpdate(value: string) {
+    this.model.source = value;
   }
 
   private _modelObserver = new PropertyObserver<ICellModel>();
