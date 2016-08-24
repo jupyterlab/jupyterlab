@@ -22,7 +22,7 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  Panel, PanelLayout
+  PanelLayout
 } from 'phosphor/lib/ui/panel';
 
 import {
@@ -64,11 +64,6 @@ import {
 const NB_PANEL = 'jp-Notebook-panel';
 
 /**
- * The class name added to notebook container widgets.
- */
-const NB_CONTAINER = 'jp-Notebook-container';
-
-/**
  * The class name added to a dirty widget.
  */
 const DIRTY_CLASS = 'jp-mod-dirty';
@@ -98,18 +93,14 @@ class NotebookPanel extends Widget {
     this._content = this._renderer.createContent(rendermime);
     let toolbar = this._renderer.createToolbar();
 
-    let container = new Panel();
-    container.addClass(NB_CONTAINER);
-    container.addWidget(this._content);
-
     let layout = this.layout as PanelLayout;
     layout.addWidget(toolbar);
-    layout.addWidget(container);
+    layout.addWidget(this._content);
 
     this._completion = this._renderer.createCompletion();
     // The completion widget's anchor node is the node whose scrollTop is
     // pegged to the completion widget's position.
-    this._completion.anchor = container.node;
+    this._completion.anchor = this._content.node;
     Widget.attach(this._completion, document.body);
 
     // Set up the completion handler.
