@@ -89,7 +89,12 @@ namespace EditorWidget {
     abstract registerMenuItems(menu: Menu): void;
   }
 
+  /* tslint:disable */
+  /**
+   * The editow widget factory token.
+   */
   export
   const IFactory = new Token<Factory>('jupyter.services.editor.factory');
+  /* tslint:enable */
 
 }

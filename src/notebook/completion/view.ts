@@ -126,13 +126,13 @@ interface ICompletableEditorView extends IEditorView {
 }
 
 /**
- * Utilities for a completable editor widget.
+ * Utilities for a completable editor view.
  */
 export
 namespace ICompletableEditorView {
 
   /**
-   * Tests whether the given widget is an editor widget.
+   * Tests whether the given view is an completable editor view.
    */
   export
   function is(editorView:any): editorView is ICompletableEditorView {

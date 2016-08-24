@@ -20,7 +20,6 @@ import {
 import {
   NotebookPanel
 } from './panel';
-/* tslint:enable */
 
 /**
  * A class that tracks notebook widgets.
@@ -34,6 +33,7 @@ interface INotebookTracker extends FocusTracker<NotebookPanel> {}
  */
 export
 const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebook-handler');
+/* tslint:enable */
 
 /**
  * A widget factory for notebook panels.
@@ -43,5 +43,10 @@ interface NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INoteboo
   tracker:INotebookTracker
 }
 
+/* tslint:disable */
+/**
+ * The notebook widget factory token.
+ */
 export
 const NotebookWidgetFactory = new Token<NotebookWidgetFactory>('jupyter.services.notebook.factory');
+/* tslint:enable */

@@ -109,7 +109,7 @@ interface IEditorModel extends IDisposable {
   contentChanged: ISignal<IEditorModel, void>;
 
   /**
-   * A path associated with this editor model.
+   * An uri associated with this model.
    */
   uri:string
 
