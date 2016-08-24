@@ -15,7 +15,7 @@ import {
 
 import {
   EditorWidget
-} from '../../editorWidget/widget';
+} from '../../editorwidget/widget';
 
 export * from './presenter';
 
