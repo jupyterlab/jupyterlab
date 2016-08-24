@@ -218,12 +218,14 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.mergeCells(widget);
         cell = widget.activeCell as MarkdownCellWidget;
         expect(cell.rendered).to.be(false);
+        expect(widget.mode).to.be('command');
       });
 
       it('should preserve the cell type of the active cell', () => {
         NotebookActions.changeCellType(widget, 'raw');
         NotebookActions.mergeCells(widget);
         expect(widget.activeCell).to.be.a(RawCellWidget);
+        expect(widget.mode).to.be('command');
       });
 
     });

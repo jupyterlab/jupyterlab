@@ -220,7 +220,6 @@ class BaseCellWidget extends Widget {
   toggleInput(value: boolean): void {
     if (value) {
       this._input.show();
-      this.activate();
     } else {
       this._input.hide();
     }

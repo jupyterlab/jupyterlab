@@ -1012,6 +1012,7 @@ class Notebook extends StaticNotebook {
     let widget = layout.widgets.at(i) as MarkdownCellWidget;
     if (cell.type === 'markdown') {
       widget.rendered = false;
+      widget.activate();
       return;
     } else if (target.localName === 'img') {
       target.classList.toggle(UNCONFINED_CLASS);
