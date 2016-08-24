@@ -43,7 +43,9 @@
     "mocha": "^2.3.4",
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.0",
+    "source-map-loader": "^0.1.5",
     "style-loader": "^0.13.0",
+    "ts-loader": "^0.8.2",
     "typedoc": "^0.4.2",
     "typescript": "^1.8.0",
     "url-loader": "^0.5.7",
@@ -73,7 +75,8 @@
     "test:ie": "npm run build:test && karma start --browsers=IE test/karma.conf.js",
     "watch": "watch \"npm run build:all\" src --wait 10",
     "watch:src": "watch \"npm run build\" src --wait 10",
-    "watch:test": "watch \"npm run build && npm test\" src test/src --wait 10"
+    "watch:test": "watch \"npm run build && npm test\" src test/src --wait 10",
+    "watch:buildTest":  "watch 'npm run build && npm run build:test' src test/src --wait 10"
   },
   "repository": {
     "type": "git",

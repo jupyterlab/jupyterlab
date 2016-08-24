@@ -797,7 +797,7 @@ namespace NotebookActions {
     const lineNumbers = configuration.lineNumbers;
     for (let i = 0; i < widget.childCount(); i++) {
       const cell = widget.childAt(i);
-      configuration.lineNumbers = !lineNumbers;
+      cell.editor.getConfiguration().lineNumbers = !lineNumbers;
     }
   }
 

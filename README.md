@@ -94,6 +94,31 @@ jupyter lab --debug
 npm test
 ```
 
+### Debug tests
+
+```base
+npm run test:debug
+```
+
+To have incremental build on each change, run in another terminal:
+
+```base
+npm run watch:buildTest
+```
+
+#### Debugging with Chrome Developer Tools
+
+Go to the launched Chrome and use Developer Tools for debugging.
+
+### Debugging with VSCode
+
+- Install vscode-chrome-debug extension: https://github.com/Microsoft/vscode-chrome-debug
+- In a terminal, launch Chrome with remote debugging enabled: `/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222`
+- Open the page to debug in the launched Chrome, usually it is `http://localhost:9876/debug.html`
+- Open `http://localhost:9222` in another browser and check that the page to debug displayed first
+- Launch `Attach to Chrome` configuation from VSCode
+- Refresh the page in Chrome with remote debugging enabled to run tests
+
 ### Build and run the stand-alone examples
 
 To install and build the examples in the `examples` directory:

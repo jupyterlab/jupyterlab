@@ -10,6 +10,10 @@ import {
 } from '../../cells/model';
 
 import {
+  CellEditorWidget
+} from '../../cells/editor';
+
+import {
   CodeCellWidget, MarkdownCellWidget, RawCellWidget
 } from '../../cells/widget';
 
@@ -77,6 +81,7 @@ namespace CodeMirrorNotebookRenderer {
     editorInitializer: (editor) => {
       editor.editor.setOption('matchBrackets', true);
       editor.editor.setOption('autoCloseBrackets', true);
+      CellEditorWidget.defaulEditorInitializer(editor);
     }
   });
 
@@ -88,6 +93,7 @@ namespace CodeMirrorNotebookRenderer {
     editorInitializer: (editor) => {
       // Turn on line wrapping for markdown cells.
       editor.editor.setOption('lineWrapping', true);
+      CellEditorWidget.defaulEditorInitializer(editor);
     }
   });
 
@@ -99,6 +105,7 @@ namespace CodeMirrorNotebookRenderer {
     editorInitializer: (editor) => {
       // Turn on line wrapping for markdown cells.
       editor.editor.setOption('lineWrapping', true);
+      CellEditorWidget.defaulEditorInitializer(editor);
     }
   });
 

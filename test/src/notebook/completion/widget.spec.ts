@@ -16,12 +16,8 @@ import {
 } from 'simulate-event';
 
 import {
-  ICompletionRequest
-} from '../../../../lib/notebook/cells/view';
-
-import {
-  ICoords
-} from '../../../../lib/editorwidget/view';
+  ICompletionRequest, ICoords
+} from '../../../../lib/notebook/completion/view';
 
 
 import {

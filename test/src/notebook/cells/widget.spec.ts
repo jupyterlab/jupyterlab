@@ -26,7 +26,7 @@ import {
 } from '../../../../lib/notebook/cells';
 
 import {
-  CodeMirrorCellEditorWidget
+  CodeMirrorCellEditorWidget, CellEditorWidget
 } from '../../../../lib/notebook/codemirror/cells/editor';
 
 import {
@@ -40,11 +40,6 @@ import {
 import {
   OutputAreaWidget
 } from '../../../../lib/notebook/output-area';
-
-import {
-  ICellEditorWidget
-} from '../../../../lib/notebook/cells/editor';
-
 
 import {
   defaultRenderMime
@@ -142,12 +137,12 @@ class LogMarkdownCell extends MarkdownCellWidget {
 class LogRenderer extends CodeMirrorCodeCellWidgetRenderer {
   methods: string[] = [];
 
-  createCellEditor(): ICellEditorWidget {
+  createCellEditor(): CellEditorWidget {
     this.methods.push('createCellEditor');
     return super.createCellEditor();
   }
 
-  createInputArea(editor: ICellEditorWidget): InputAreaWidget {
+  createInputArea(editor: CellEditorWidget): InputAreaWidget {
     this.methods.push('createInputArea');
     return super.createInputArea(editor);
   }

@@ -20,16 +20,9 @@ import {
 } from '../../../../lib/docregistry';
 
 import {
-  ICellEditorWidget
-} from '../../../../lib/notebook/cells/editor';
-
-import {
-  ICompletionRequest
-} from '../../../../lib/notebook/cells/view';
-
-import {
-  ITextChange
-} from '../../../../lib/editorwidget/view';
+  CompletableEditorWidget,
+  ICompletionRequest, ITextChange
+} from '../../../../lib/notebook/completion/editor';
 
 import {
   CompletionWidget

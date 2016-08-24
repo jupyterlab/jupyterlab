@@ -48,7 +48,7 @@ class CompletableCodeMirrorCellEditorWidget extends CodeMirrorCellEditorWidget i
       const editor = this.editor;
       const oldValue = model.source;
       const newValue = doc.getValue();
-      if (oldValue !== newValue) {
+      if (oldValue === newValue) {
         return;
       }
 

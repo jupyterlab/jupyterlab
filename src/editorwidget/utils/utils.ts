@@ -89,6 +89,6 @@ class PropertyObserver<T> implements IDisposable {
     }
   }
   
-  private _property:T;
+  private _property:T = null;
 
 }

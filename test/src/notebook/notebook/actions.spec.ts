@@ -16,6 +16,10 @@ import {
 } from 'phosphor/lib/core/mimedata';
 
 import {
+  IPosition
+} from '../../../../lib/notebook/cells/view';
+
+import {
   CodeCellWidget, MarkdownCellWidget, RawCellWidget
 } from '../../../../lib/notebook/cells/widget';
 
@@ -80,7 +84,7 @@ describe('notebook/notebook/actions', () => {
         let source = 'thisisasamplestringwithnospaces';
         cell.model.source = source;
         let index = widget.activeCellIndex;
-        cell.editor.setCursorPosition(10);
+        cell.editor.position = IPosition.create(0, 10);
         NotebookActions.splitCell(widget);
         let cells = widget.model.cells;
         let newSource = cells.get(index).source + cells.get(index + 1).source;
@@ -91,7 +95,7 @@ describe('notebook/notebook/actions', () => {
         let cell = widget.activeCell;
         let source = 'this\n\n   is a test';
         cell.model.source = source;
-        cell.editor.setCursorPosition(4);
+        cell.editor.position = IPosition.create(0, 4);
         NotebookActions.splitCell(widget);
         expect(widget.activeCell.model.source).to.be('is a test');
       });
@@ -1221,19 +1225,19 @@ describe('notebook/notebook/actions', () => {
     describe('#toggleLineNumbers()', () => {
 
       it('should toggle line numbers on the selected cells', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getConfiguration().lineNumbers;
         NotebookActions.toggleLineNumbers(widget);
-        expect(widget.activeCell.editor.lineNumbers).to.be(!state);
+        expect(widget.activeCell.editor.getConfiguration().lineNumbers).to.be(!state);
       });
 
       it('should be based on the state of the active cell', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getConfiguration().lineNumbers;
         let next = widget.childAt(1);
-        next.editor.lineNumbers = !state;
+        next.editor.getConfiguration().lineNumbers = !state;
         widget.select(next);
         NotebookActions.toggleLineNumbers(widget);
-        expect(widget.childAt(0).editor.lineNumbers).to.be(!state);
-        expect(widget.childAt(1).editor.lineNumbers).to.be(!state);
+        expect(widget.childAt(0).editor.getConfiguration().lineNumbers).to.be(!state);
+        expect(widget.childAt(1).editor.getConfiguration().lineNumbers).to.be(!state);
       });
 
       it('should preserve the widget mode', () => {
@@ -1255,21 +1259,21 @@ describe('notebook/notebook/actions', () => {
     describe('#toggleAllLineNumbers()', () => {
 
       it('should toggle line numbers on all cells', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        const state = widget.activeCell.editor.getConfiguration().lineNumbers;
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.childCount(); i++) {
-          expect(widget.childAt(i).editor.lineNumbers).to.be(!state);
+          expect(widget.childAt(i).editor.getConfiguration().lineNumbers).to.be(!state);
         }
       });
 
       it('should be based on the state of the active cell', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getConfiguration().lineNumbers;
         for (let i = 1; i < widget.childCount(); i++) {
-          widget.childAt(i).editor.lineNumbers = !state;
+          widget.childAt(i).editor.getConfiguration().lineNumbers = !state;
         }
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.childCount(); i++) {
-          expect(widget.childAt(i).editor.lineNumbers).to.be(!state);
+          expect(widget.childAt(i).editor.getConfiguration().lineNumbers).to.be(!state);
         }
       });
 
