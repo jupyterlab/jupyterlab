@@ -24,7 +24,7 @@ import {
 } from '../utils';
 
 
-describe('notebook/notebook', () => {
+describe('notebook/notebook/model', () => {
 
   describe('NotebookModel', () => {
 
@@ -150,11 +150,14 @@ describe('notebook/notebook', () => {
           expect(cell.isDisposed).to.be(true);
         });
 
-        it('should add a new code cell when cells are cleared', () => {
+        it('should add a new code cell when cells are cleared', (done) => {
           let model = new NotebookModel();
           model.cells.clear();
-          expect(model.cells.length).to.be(1);
-          expect(model.cells.get(0)).to.be.a(CodeCellModel);
+          requestAnimationFrame(() => {
+            expect(model.cells.length).to.be(1);
+            expect(model.cells.get(0)).to.be.a(CodeCellModel);
+            done();
+          });
         });
 
       });

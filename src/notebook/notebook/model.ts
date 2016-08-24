@@ -433,7 +433,13 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     }
     // Add code cell if there are no cells remaining.
     if (!this._cells.length) {
-      this._cells.add(this._factory.createCodeCell());
+      // Add the cell in a new context to avoid triggering another
+      // cell changed event during the handling of this signal.
+      requestAnimationFrame(() => {
+        if (!this._cells.length) {
+          this._cells.add(this._factory.createCodeCell());
+        }
+      });
     }
     this.contentChanged.emit(void 0);
     this.dirty = true;
