@@ -98,7 +98,7 @@ const SHORTCUTS = [
   {
     command: 'notebook-cells:to-code',
     selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['E']
+    keys: ['Y']
   },
   {
     command: 'notebook-cells:to-markdown',
@@ -173,7 +173,7 @@ const SHORTCUTS = [
   {
     command: 'notebook-cells:redo',
     selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['Y'],
+    keys: ['Shift Z'],
   },
   {
     command: 'notebook-cells:cut',
