@@ -174,7 +174,8 @@ namespace Private {
     menu.title.label = 'Help';
     menu.addItem({ command: 'about-jupyterlab:show' });
     menu.addItem({ command: 'faq-jupyterlab:show' });
-    menu.addItem({ command: 'classic-notebook:open'})
+    menu.addItem({ command: 'classic-notebook:open'});
+    menu.addItem({ command: 'keyboard-shortcuts-jupyterlab:show'});
 
     COMMANDS.forEach(item => menu.addItem({ command: item.id }));
     return menu;
