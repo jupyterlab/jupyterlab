@@ -264,13 +264,17 @@ describe('notebook/notebook/actions', () => {
         expect(widget.activeCellIndex).to.be(widget.childCount() - 1);
       });
 
-      it('should add a code cell if all cells are deleted', () => {
+      it('should add a code cell if all cells are deleted', (done) => {
         for (let i = 0; i < widget.childCount(); i++) {
           widget.select(widget.childAt(i));
         }
         NotebookActions.deleteCells(widget);
-        expect(widget.childCount()).to.be(1);
-        expect(widget.activeCell).to.be.a(CodeCellWidget);
+        requestAnimationFrame(() => {
+          expect(widget.childCount()).to.be(1);
+          expect(widget.activeCell).to.be.a(CodeCellWidget);
+          done();
+        });
+
       });
 
       it('should be undo-able', () => {

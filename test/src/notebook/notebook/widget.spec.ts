@@ -284,11 +284,14 @@ describe('notebook/notebook/widget', () => {
           widget.dispose();
         });
 
-        it('should handle changes to the model cell list', () => {
+        it('should handle changes to the model cell list', (done) => {
           widget = createWidget();
           widget.model.cells.clear();
           // The model should add a single code cell.
-          expect(widget.childCount()).to.be(1);
+          requestAnimationFrame(() => {
+            expect(widget.childCount()).to.be(1);
+            done();
+          });
         });
 
         it('should handle a remove', () => {
