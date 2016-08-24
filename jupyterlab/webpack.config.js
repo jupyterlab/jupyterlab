@@ -17,7 +17,6 @@ var VENDOR_FILES = findImports('../lib/**/*.js', { flatten: true });
 
 console.log('Generating bundles...');
 
-
 module.exports = {
   entry: {
     jupyterlab: './index.js',
@@ -26,7 +25,7 @@ module.exports = {
   output: {
     path: __dirname + '/build',
     filename: '[name].bundle.js',
-    publicPath: './'
+    publicPath: './lab/'
   },
   node: {
     fs: 'empty'
@@ -37,7 +36,9 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.css$/,
-        loader: ExtractTextPlugin.extract('style-loader', 'css-loader')
+        loader: ExtractTextPlugin.extract("style-loader", "css-loader", {
+          publicPath: './'
+        })
       },
       { test: /\.json$/, loader: 'json-loader' },
       { test: /\.html$/, loader: 'file-loader' },
