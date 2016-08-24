@@ -90,6 +90,7 @@ marked.setOptions({
   gfm: true,
   sanitize: false,
   tables: true,
+  // breaks: true; We can't use GFM breaks as it causes problems with HTML tables
   langPrefix: `cm-s-${DEFAULT_CODEMIRROR_THEME} language-`,
   highlight: (code, lang, callback) => {
     if (!lang) {
