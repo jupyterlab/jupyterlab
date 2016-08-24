@@ -264,6 +264,21 @@ const SHORTCUTS = [
     command: 'console:toggle-inspectors',
     selector: '.jp-ConsolePanel',
     keys: ['Accel I']
+  },
+  {
+    command: 'image-widget:zoom-in',
+    selector: '.jp-ImageWidget',
+    keys: ['=']
+  },
+  {
+    command: 'image-widget:zoom-out',
+    selector: '.jp-ImageWidget',
+    keys: ['-']
+  },
+  {
+    command: 'image-widget:reset-zoom',
+    selector: '.jp-ImageWidget',
+    keys: ['0']
   }
 ];
 
