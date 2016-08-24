@@ -22,7 +22,7 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  Panel, PanelLayout
+  PanelLayout
 } from 'phosphor/lib/ui/panel';
 
 import {
