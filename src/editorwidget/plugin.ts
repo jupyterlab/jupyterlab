@@ -37,6 +37,10 @@ import {
   IEditorTracker
 } from './index';
 
+import {
+  DEFAULT_CODEMIRROR_THEME
+} from '../codemirror/widget';
+
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/comment/comment.js';
@@ -231,7 +235,7 @@ function createMenu(app: JupyterLab, tracker: IEditorTracker): Menu {
       return args['theme'] as string;
     },
     execute: args => {
-      let name: string = args['theme'] as string || 'default';
+      let name: string = args['theme'] as string || DEFAULT_CODEMIRROR_THEME;
       each(tracker.widgets, widget => {
         widget.editor.setOption('theme', name);
       });
@@ -239,8 +243,8 @@ function createMenu(app: JupyterLab, tracker: IEditorTracker): Menu {
   });
 
   [
-   'default', 'abcdef', 'base16-dark', 'base16-light', 'hopscotch',
-   'material', 'mbo', 'mdn-like', 'seti', 'the-matrix', 'default',
+   'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
+   'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix', 
    'xq-light', 'zenburn'
   ].forEach(name => theme.addItem({
     command: 'editor:change-theme',

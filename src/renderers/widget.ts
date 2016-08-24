@@ -15,6 +15,10 @@ import {
   requireMode
 } from '../codemirror';
 
+import {
+  DEFAULT_CODEMIRROR_THEME
+} from '../codemirror/widget';
+
 import * as marked
   from 'marked';
 
@@ -86,7 +90,7 @@ marked.setOptions({
   gfm: true,
   sanitize: false,
   tables: true,
-  langPrefix: 'cm-s-ipython language-', // Use the ipython CM theme we offer
+  langPrefix: `cm-s-${DEFAULT_CODEMIRROR_THEME} language-`,
   highlight: (code, lang, callback) => {
     if (!lang) {
         // no language, no highlight

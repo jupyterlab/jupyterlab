@@ -72,9 +72,10 @@ namespace CodeMirrorCodeCellWidgetRenderer {
    */
   export
   const defaultEditorConfiguration: CodeMirror.EditorConfiguration = {
+    // Default value of the theme is set in the parent constructor,
+    // but could be overridden here
     indentUnit: 4,
     readOnly: false,
-    theme: 'default',
     extraKeys: {
       'Cmd-Right': 'goLineRight',
       'End': 'goLineRight',
