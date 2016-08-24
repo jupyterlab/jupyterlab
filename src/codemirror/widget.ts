@@ -22,6 +22,12 @@ const EDITOR_CLASS = 'jp-CodeMirrorWidget';
 
 
 /**
+ * The name of the default CodeMirror theme
+ */
+export
+const DEFAULT_CODEMIRROR_THEME = 'jupyter';
+
+/**
  * A widget which hosts a CodeMirror editor.
  */
 export
@@ -30,9 +36,10 @@ class CodeMirrorWidget extends Widget {
   /**
    * Construct a CodeMirror widget.
    */
-  constructor(options?: CodeMirror.EditorConfiguration) {
+  constructor(options: CodeMirror.EditorConfiguration = {}) {
     super();
     this.addClass(EDITOR_CLASS);
+    options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
     this._editor = CodeMirror(this.node, options);
   }
 

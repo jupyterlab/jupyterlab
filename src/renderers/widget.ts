@@ -15,6 +15,10 @@ import {
   requireMode
 } from '../codemirror';
 
+import {
+  DEFAULT_CODEMIRROR_THEME
+} from '../codemirror/widget';
+
 import * as marked
   from 'marked';
 
@@ -85,8 +89,9 @@ const PDF_CLASS = 'jp-RenderedPDF';
 marked.setOptions({
   gfm: true,
   sanitize: false,
-  breaks: true,
-  langPrefix: 'cm-s-default language-',
+  tables: true,
+  // breaks: true; We can't use GFM breaks as it causes problems with HTML tables
+  langPrefix: `cm-s-${DEFAULT_CODEMIRROR_THEME} language-`,
   highlight: (code, lang, callback) => {
     if (!lang) {
         // no language, no highlight
