@@ -16,6 +16,7 @@
 /*-----------------------------------------------------------------------------
 | Menu
 |----------------------------------------------------------------------------*/
+
 .p-Menu {
   z-index: 10000;
   padding: 3px 0px;
@@ -102,6 +103,7 @@
 /*-----------------------------------------------------------------------------
 | MenuBar
 |----------------------------------------------------------------------------*/
+
 .p-MenuBar {
   padding-left: 5px;
   background: white;
@@ -168,6 +170,7 @@
 /*-----------------------------------------------------------------------------
 | TabBar
 |----------------------------------------------------------------------------*/
+
 .p-TabBar {
   overflow: visible;
   color: #777777;
@@ -356,9 +359,10 @@
 
 
 .p-TabPanel-stackedPanel {
-  padding: 10px;
+  padding: 0px;
   background: white;
   border: 1px solid #C0C0C0;
+  // This shadow requires a bottom/right padding on the .p-DockPanel-tabPanel
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -386,7 +390,9 @@
 /*-----------------------------------------------------------------------------
 | DockPanel
 |----------------------------------------------------------------------------*/
+
 .p-DockPanel-tabPanel {
+  // This padding is needed to shwo the shadow on .p-TabPanel-stackedPanel
   padding-right: 2px;
   padding-bottom: 2px;
   border-top: none;
@@ -394,7 +400,7 @@
 
 
 .p-DockPanel-tabPanel > .p-StackedPanel {
-  padding: 10px;
+  padding: 0px;
   background: white;
   border-left: 1px solid #BDBDBD;
   border-right: 1px solid #BDBDBD;
