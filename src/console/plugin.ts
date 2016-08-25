@@ -144,10 +144,11 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         count++;
         let file = `console-${count}`;
         let path = `${pathTracker.path}/${file}.${FILE_EXTENSION}`;
+        let cwd = pathTracker.path;
         let label = `Console ${count}`;
         let kernelName = `${displayNameMap[displayName]}`;
         let captionOptions: Private.ICaptionOptions = {
-          label, path, displayName,
+          label, cwd, displayName,
           opened: new Date()
         };
         manager.startNew({ path, kernelName }).then(session => {
@@ -286,9 +287,9 @@ namespace Private {
     executed?: Date;
 
     /**
-     * The path of the console file on the server.
+     * The current working directory that the console was opened in.
      */
-    path: string;
+    cwd: string;
 
     /**
      * The label of the console (as displayed in tabs).
@@ -306,10 +307,10 @@ namespace Private {
    */
   export
   function caption(options: ICaptionOptions): string {
-    let { label, path, displayName, opened, executed } = options;
+    let { label, cwd, displayName, opened, executed } = options;
     let caption = (
       `Name: ${label}\n` +
-      `Path: ${path}\n` +
+      `Directory: ${cwd || '/'}\n` +
       `Kernel: ${displayName}\n` +
       `Opened: ${dateTime(opened.toISOString())}`
     );
