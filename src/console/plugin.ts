@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, ISession
+  ContentsManager, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -22,8 +22,16 @@ import {
 } from '../commandpalette';
 
 import {
+  dateTime
+} from '../common/dates';
+
+import {
   selectKernel
 } from '../docregistry';
+
+import {
+  IPathTracker
+} from '../filebrowser';
 
 import {
   IInspector
@@ -58,6 +66,7 @@ const consoleExtension: JupyterLabPlugin<void> = {
     IMainMenu,
     IInspector,
     ICommandPalette,
+    IPathTracker,
     ConsoleWidget.IRenderer
   ],
   activate: activateConsole,
@@ -75,11 +84,16 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
  */
 const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 
+/**
+ * The file extension for consoles.
+ */
+const FILE_EXTENSION = 'jpcon';
+
 
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, renderer: ConsoleWidget.IRenderer): void {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleWidget.IRenderer): void {
   let tracker = new FocusTracker<ConsolePanel>();
   let manager = services.sessions;
   let { commands, keymap } = app;
@@ -127,20 +141,32 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     commands.addCommand(command, {
       label: `${displayName} console`,
       execute: () => {
-        let path = `Console-${count++}`;
+        count++;
+        let file = `console-${count}`;
+        let path = `${pathTracker.path}/${file}.${FILE_EXTENSION}`;
+        let label = `Console ${count}`;
         let kernelName = `${displayNameMap[displayName]}`;
+        let captionOptions: Private.ICaptionOptions = {
+          label, displayName, path,
+          opened: new Date()
+        };
         manager.startNew({ path, kernelName }).then(session => {
           let panel = new ConsolePanel({
             session,
             rendermime: rendermime.clone(),
             renderer: renderer
           });
-          panel.id = `console-${count}`;
-          panel.title.label = `${displayName} (${count})`;
+          panel.id = file;
+          panel.title.label = label;
+          panel.title.caption = Private.caption(captionOptions);
           panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
           panel.title.closable = true;
           app.shell.addToMainArea(panel);
           tracker.add(panel);
+          panel.content.executed.connect((sender, executed) => {
+            captionOptions.executed = executed;
+            panel.title.caption = Private.caption(captionOptions);
+          });
         });
       }
     });
@@ -236,4 +262,63 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
   mainMenu.addMenu(menu, {rank: 50});
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * An interface for caption options.
+   */
+  export
+  interface ICaptionOptions {
+    /**
+     * The time when the console was opened.
+     */
+    opened: Date;
+
+    /**
+     * The time when the console last executed its prompt.
+     */
+    executed?: Date;
+
+    /**
+     * The path to the file backing the console.
+     *
+     * #### Notes
+     * Currently, the actual file does not exist, but the directory is the
+     * current working directory at the time the console was opened.
+     */
+    path: string;
+
+    /**
+     * The label of the console (as displayed in tabs).
+     */
+    label: string;
+
+    /**
+     * The display name of the console's kernel.
+     */
+    displayName: string;
+  }
+
+  /**
+   * Generate a caption for a console's title.
+   */
+  export
+  function caption(options: ICaptionOptions): string {
+    let { label, path, displayName, opened, executed } = options;
+    let caption = (
+      `Name: ${label}\n` +
+      `Directory: ${ContentsManager.dirname(path)}\n` +
+      `Kernel: ${displayName}\n` +
+      `Opened: ${dateTime(opened.toISOString())}`
+    );
+    if (executed) {
+      caption += `\nLast Execution: ${dateTime(executed.toISOString())}`;
+    }
+    return caption;
+  }
 }
