@@ -464,6 +464,9 @@ namespace Private {
     return widget.model.refresh();
   }
 
+  /**
+   * Calls createNewFolder and selects that folder to be renamed.
+   */
   export
   function createAndRename(widget: FileButtons): void {
     let prom = createNewFolder(widget);

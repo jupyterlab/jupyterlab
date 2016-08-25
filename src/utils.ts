@@ -25,12 +25,6 @@ function hitTestNodes(nodes: HTMLElement[] | NodeList, x: number, y: number): nu
  */
 export
 function findElement(parent: HTMLElement, className: string): HTMLElement {
-  if (parent === undefined) {
-    // console.log('fuck me in half ' + className);
-  }
-  else {
-    // console.log('who do u think u r ' + className);
-  }
   let elements = parent.getElementsByClassName(className);
   if (elements.length) {
     return elements[0] as HTMLElement;
