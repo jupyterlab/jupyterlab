@@ -110,7 +110,7 @@ npm run watch:buildTest
 
 Go to the launched Chrome and use Developer Tools for debugging.
 
-### Debugging with VSCode
+#### Debugging with VSCode
 
 - Install vscode-chrome-debug extension: https://github.com/Microsoft/vscode-chrome-debug
 - In a terminal, launch Chrome with remote debugging enabled: `/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222`

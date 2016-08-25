@@ -18,8 +18,8 @@ import {
 } from 'jupyterlab/lib/docregistry';
 
 import {
-  EditorWidgetFactory
-} from 'jupyterlab/lib/editorwidget/widget';
+  CodeMirrorEditorWidgetFactory as EditorWidgetFactory
+} from 'jupyterlab/lib/codemirror/factory';
 
 import {
   showDialog, okButton
@@ -87,7 +87,7 @@ function createApp(manager: IServiceManager): void {
     opener
   });
   let mFactory = new TextModelFactory();
-  let wFactory = new EditorWidgetFactory();
+  let wFactory = new EditorWidgetFactory(null, null);
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory, {
     displayName: 'Editor',
