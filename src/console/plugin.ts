@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, ISession
+  ContentsManager, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -144,11 +144,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         count++;
         let file = `console-${count}`;
         let path = `${pathTracker.path}/${file}.${FILE_EXTENSION}`;
-        let cwd = pathTracker.path;
         let label = `Console ${count}`;
         let kernelName = `${displayNameMap[displayName]}`;
         let captionOptions: Private.ICaptionOptions = {
-          label, cwd, displayName,
+          label, displayName, path,
           opened: new Date()
         };
         manager.startNew({ path, kernelName }).then(session => {
@@ -157,10 +156,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
             rendermime: rendermime.clone(),
             renderer: renderer
           });
-          let caption = Private.caption(captionOptions);
           panel.id = file;
           panel.title.label = label;
-          panel.title.caption = caption;
+          panel.title.caption = Private.caption(captionOptions);
           panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
           panel.title.closable = true;
           app.shell.addToMainArea(panel);
@@ -287,9 +285,13 @@ namespace Private {
     executed?: Date;
 
     /**
-     * The current working directory that the console was opened in.
+     * The path to the file backing the console.
+     *
+     * #### Notes
+     * Currently, the actual file does not exist, but the directory is the
+     * current working directory at the time the console was opened.
      */
-    cwd: string;
+    path: string;
 
     /**
      * The label of the console (as displayed in tabs).
@@ -307,10 +309,10 @@ namespace Private {
    */
   export
   function caption(options: ICaptionOptions): string {
-    let { label, cwd, displayName, opened, executed } = options;
+    let { label, path, displayName, opened, executed } = options;
     let caption = (
       `Name: ${label}\n` +
-      `Directory: ${cwd || '/'}\n` +
+      `Directory: ${ContentsManager.dirname(path)}\n` +
       `Kernel: ${displayName}\n` +
       `Opened: ${dateTime(opened.toISOString())}`
     );
