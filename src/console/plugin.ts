@@ -164,6 +164,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           panel.title.closable = true;
           app.shell.addToMainArea(panel);
           tracker.add(panel);
+          panel.content.executed.connect((sender, executed) => {
+            captionOptions.executed = executed;
+            panel.title.caption = Private.caption(captionOptions);
+          });
         });
       }
     });
