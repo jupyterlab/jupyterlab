@@ -45,11 +45,6 @@
 }
 
 
-.jp-CellEditor .CodeMirror-lines {
-    padding: 0.4em;
-}
-
-
 .jp-MarkdownCell {
   outline: 0;
 }
@@ -317,6 +312,23 @@ img.jp-mod-unconfined {
 }
 
 
+.jp-CellEditor > .CodeMirror pre {
+  /* In CM3 this went to 4px from 0 in CM2. We need the 0 value because of how we size */
+  /* .CodeMirror-lines */
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+
+/* This causes https://github.com/jupyter/jupyterlab/issues/522 */
+.jp-CellEditor .CodeMirror-lines {
+  padding: 0.4em;
+}
+
+
+/* The following selectors never apply since .CodeMirror is the only child of .jp-CellEditor */
+
 .jp-CellEditor > .CodeMirror-scroll {
   /*  The CodeMirror docs are a bit fuzzy on if overflow-y should be hidden or visible.*/
   /*  We have found that if it is visible, vertical scrollbars appear with font size changes.*/
@@ -340,13 +352,4 @@ img.jp-mod-unconfined {
 .jp-CellEditor > .CodeMirror-gutters {
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
-}
-
-
-.jp-CellEditor > .CodeMirror pre {
-  /* In CM3 this went to 4px from 0 in CM2. We need the 0 value because of how we size */
-  /* .CodeMirror-lines */
-  padding: 0;
-  border: 0;
-  border-radius: 0;
 }
