@@ -76,12 +76,12 @@ namespace CodeMirrorCodeCellWidgetRenderer {
     editorConfiguration?: CodeMirror.EditorConfiguration;
 
     /**
-     * A code mirror editor widget decorator provider.
+     * A code mirror cell editor widget decorator provider.
      */
     decoratorProvider?: (editor: CodeMirrorCellEditorWidget) => ICellEditorView;
 
     /**
-     * A cell editor view presenter provider.
+     * A code mirror cell editor widget presenter provider.
      */
     presenterProvider?: (decorator: ICellEditorView, editor: CodeMirrorCellEditorWidget) => ICellEditorPresenter;
   }
