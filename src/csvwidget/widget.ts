@@ -17,9 +17,7 @@ import {
   ABCWidgetFactory, IDocumentModel, IDocumentContext
 } from '../docregistry';
 
-import {
-  csvParse
-} from 'd3-dsv';
+import * as d3Dsv from 'd3-dsv';
 
 
 /**
@@ -84,7 +82,7 @@ class CSVWidget extends Widget {
    * Render an html table from a csv string.
    */
   renderTable(content: string) {
-    let parsed = csvParse(content);
+    let parsed = d3Dsv.dsvFormat(",").parse(content);
     let table = document.createElement('table');
     let header = document.createElement('tr');
     for (let name of parsed.columns) {
