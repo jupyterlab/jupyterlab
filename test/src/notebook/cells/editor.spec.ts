@@ -133,31 +133,15 @@ describe('notebook/cells/editor', () => {
         };
         widget.textChanged.connect(listener);
 
-        // CodeMirrorCellEditorWidget suppresses signals when the code mirror instance's
-        // content is changed programmatically via the `setValue` method, so
-        // for this test, the `replaceRange` method is being used to generate
-        // the text change.
+        // CodeMirrorCellEditorWidget suppresses signals when the code mirror
+        // instance's content is changed programmatically via the `setValue`
+        // method, so for this test, the `replaceRange` method is being used to
+        // generate the text change.
         expect(change).to.not.be.ok();
         doc.replaceRange(want.newValue, fromPos, toPos);
         expect(change).to.be.ok();
         expect(change.oldValue).to.equal(want.oldValue);
         expect(change.newValue).to.equal(want.newValue);
-      });
-
-      it('should not emit a signal if editor text already matches model', () => {
-        let widget = new CodeMirrorCellEditorWidget();
-        widget.model = new CellModel();
-        let doc = widget.editor.getDoc();
-        let fromPos = { line: 0, ch: 0 };
-        let toPos = { line: 0, ch: 3 };
-        let called = false;
-        let listener = (sender: any, args: ITextChange) => { called = true; };
-        widget.model.source = 'foo';
-        widget.textChanged.connect(listener);
-
-        expect(called).to.be(false);
-        doc.replaceRange('foo', fromPos, toPos);
-        expect(called).to.be(false);
       });
 
     });
