@@ -42,12 +42,19 @@ namespace StandaloneEditorWidget {
   }
 
   /**
-   * A default standalone editor widget initializer.
+   * A default standalone editor decorator provider.
    */
   export
-  const defaulEditorInitializer: (editor: StandaloneEditorWidget) => void=(editor)=> {
-    const decorator = new DefaultStandaloneEditorWidgetDecorator(editor);
-    editor.presenter = new StandaloneEditorPresenter(decorator);
+  const defaultDecoratorProvider: (editor: StandaloneEditorWidget) => IStandaloneEditorView = (editor) => {
+    return new DefaultStandaloneEditorWidgetDecorator(editor);
+  }
+
+  /**
+   * A default standalone editor presenter provider.
+   */
+  export
+  const defaultPresenterProvider: (view: IStandaloneEditorView) => IStandaloneEditorPresenter = (view) => {
+    return new StandaloneEditorPresenter(view);
   }
 
 }

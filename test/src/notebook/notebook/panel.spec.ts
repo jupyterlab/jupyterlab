@@ -118,7 +118,7 @@ describe('notebook/notebook/panel', () => {
 
 
       it('should accept an optional render', () => {
-        let newRenderer = new CodeMirrorNotebookPanelRenderer();
+        let newRenderer = new NotebookPanel.Renderer(CodeMirrorNotebookPanelRenderer.defaultOptions);
         let panel = new NotebookPanel({ rendermime, clipboard, renderer: newRenderer});
         expect(panel.renderer).to.be(newRenderer);
       });
@@ -231,7 +231,7 @@ describe('notebook/notebook/panel', () => {
     describe('#renderer', () => {
 
       it('should be the renderer used by the widget', () => {
-        let renderer = new CodeMirrorNotebookPanelRenderer();
+        let renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.renderer).to.be(renderer);
       });
@@ -403,7 +403,7 @@ describe('notebook/notebook/panel', () => {
       describe('#createContent()', () => {
 
         it('should create a notebook widget', () => {
-          let renderer = new CodeMirrorNotebookPanelRenderer();
+          let renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
           expect(renderer.createContent(rendermime)).to.be.a(Notebook);
         });
 
@@ -412,7 +412,7 @@ describe('notebook/notebook/panel', () => {
       describe('#createToolbar()', () => {
 
         it('should create a notebook toolbar', () => {
-          let renderer = new CodeMirrorNotebookPanelRenderer();
+          let renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
           expect(renderer.createToolbar()).to.be.a(NotebookToolbar);
         });
 
@@ -421,7 +421,7 @@ describe('notebook/notebook/panel', () => {
       describe('#createCompletion()', () => {
 
         it('should create a completion widget', () => {
-          let renderer = new CodeMirrorNotebookPanelRenderer();
+          let renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
           expect(renderer.createCompletion()).to.be.a(CompletionWidget);
         });
 

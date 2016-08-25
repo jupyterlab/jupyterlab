@@ -44,12 +44,19 @@ namespace CellEditorWidget {
   }
 
   /**
-   * A default cell editor widget initializer.
+   * A default cell editor decorator provider.
    */
   export
-  const defaulEditorInitializer: (editor: CellEditorWidget) => void=(editor)=> {
-    const decorator = new DefaultCellEditorWidgetDecorator(editor);
-    editor.presenter = new CellEditorPresenter(decorator);
+  const defaultDecoratorProvider: (editor: CellEditorWidget) => ICellEditorView=(editor)=> {
+    return new DefaultCellEditorWidgetDecorator(editor);
+  }
+
+  /**
+   * A default cell editor presenter provider.
+   */
+  export
+  const defaulPresenterProvider: (view: ICellEditorView) => ICellEditorPresenter=(view)=> {
+    return new CellEditorPresenter(view);
   }
 
 }

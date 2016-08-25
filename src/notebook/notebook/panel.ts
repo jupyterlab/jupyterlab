@@ -54,7 +54,7 @@ import {
 } from './toolbar';
 
 import {
-  Notebook
+  Notebook, StaticNotebook
 } from './widget';
 
 
@@ -460,11 +460,23 @@ export namespace NotebookPanel {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer implements IRenderer {
+  class Renderer implements IRenderer {
+
+    /**
+     * Creates a renderer.
+     */
+    constructor(private _options: NotebookPanelRenderer.IOptions) {
+    }
+
     /**
      * Create a new content area for the panel.
      */
-    abstract createContent(rendermime: RenderMime): Notebook;
+    createContent(rendermime: RenderMime): Notebook {
+      return new Notebook({
+        rendermime,
+        renderer: this._options.renderer
+      });
+    }
 
     /**
      * Create a new toolbar for the panel.
@@ -489,4 +501,23 @@ export namespace NotebookPanel {
   export
   const IRenderer = new Token<IRenderer>('jupyter.services.notebook.renderer');
   /* tslint:enable */
+}
+
+/**
+ * Utilities for a notebook panel renderer.
+ */
+export
+namespace NotebookPanelRenderer {
+
+  /**
+   * An options for a notebook panel renderer.
+   */
+  export
+  interface IOptions {
+    /**
+     * A static notebook renderer.
+     */
+    renderer: StaticNotebook.IRenderer
+  }
+
 }

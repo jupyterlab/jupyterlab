@@ -135,7 +135,8 @@ class CodeMirrorEditorWidgetFactory extends EditorWidget.Factory {
       lineNumbers: true,
       lineWrapping: true,
     });
-    StandaloneEditorWidget.defaulEditorInitializer(editor);
+    const decorator = StandaloneEditorWidget.defaultDecoratorProvider(editor);
+    editor.presenter = StandaloneEditorWidget.defaultPresenterProvider(decorator);
     editor.presenter.context = context;
     
     this.widgetCreated.emit(editor);

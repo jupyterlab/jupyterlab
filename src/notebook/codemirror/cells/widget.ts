@@ -10,7 +10,7 @@ import {
 } from '../../cells/widget';
 
 import {
-  CellEditorPresenter
+  CellEditorPresenter, ICellEditorView, ICellEditorPresenter
 } from '../../cells/presenter';
 
 import {
@@ -33,15 +33,15 @@ export
 class CodeMirrorCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
   /**
    * Construct a code mirror renderer for a code cell widget.
-   * @param editorConfiguration a code mirror editor configuration
-   * @param editorInitializer a code cell widget initializer
    */
   constructor(options: CodeMirrorCodeCellWidgetRenderer.IOptions = {}) {
     super();
     this._editorConfiguration = (options.editorConfiguration ||
       CodeMirrorCodeCellWidgetRenderer.defaultEditorConfiguration);
-    this._editorInitializer = (options.editorInitializer ||
-      CellEditorWidget.defaulEditorInitializer);
+    this._decoratorProvider = (options.decoratorProvider ||
+      CellEditorWidget.defaultDecoratorProvider);
+    this._presenterProvider = (options.presenterProvider ||
+      CellEditorWidget.defaulPresenterProvider);
   }
 
   /**
@@ -49,12 +49,14 @@ class CodeMirrorCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
    */
   createCellEditor(): CellEditorWidget {
     const widget = new CompletableCodeMirrorCellEditorWidget(this._editorConfiguration);
-    this._editorInitializer(widget);
+    const decorator = this._decoratorProvider(widget);
+    widget.presenter = this._presenterProvider(decorator, widget);
     return widget;
   }
 
   private _editorConfiguration: CodeMirror.EditorConfiguration = null;
-  private _editorInitializer: (editor: CompletableCodeMirrorCellEditorWidget) => void = null;
+  private _decoratorProvider: (editor: CodeMirrorCellEditorWidget) => ICellEditorView = null;
+  private _presenterProvider: (decorator: ICellEditorView, editor: CodeMirrorCellEditorWidget) => ICellEditorPresenter = null;
 }
 
 
@@ -74,9 +76,14 @@ namespace CodeMirrorCodeCellWidgetRenderer {
     editorConfiguration?: CodeMirror.EditorConfiguration;
 
     /**
-     * A code cell widget initializer function.
+     * A code mirror editor widget decorator provider.
      */
-    editorInitializer?: (editor: CodeMirrorCellEditorWidget) => void;
+    decoratorProvider?: (editor: CodeMirrorCellEditorWidget) => ICellEditorView;
+
+    /**
+     * A cell editor view presenter provider.
+     */
+    presenterProvider?: (decorator: ICellEditorView, editor: CodeMirrorCellEditorWidget) => ICellEditorPresenter;
   }
 
   /**
