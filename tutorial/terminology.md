@@ -7,10 +7,7 @@ to help smooth the learning the components.
 ## Terms
 
 - Application
-- Extension
-- Phosphide
+- Plugin
 - Phosphor
-- Provider: see Service Provider
-- Service Provider
 - Standalone example
 - TypeScript

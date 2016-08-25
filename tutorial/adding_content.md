@@ -12,7 +12,7 @@ files: `npm install -g tsd`.
 - Add a reference to the new library in `src/typings.d.ts`.
 - Create a folder in `src` for the plugin.
 - Add  `widget.ts` and `plugin.ts` files.
-- Optionally, add the plugin to default themes (e.g. `src/default-themes/leaflet.css`), and import that theme in `src/default-themes/index.css`.
+- Optionally, add the plugin to default themes (e.g. `src/default-themes/leaflet.less`), and import that theme in `src/default-themes/index.less`.
 - The `widget.ts` file should have the core logic for the plugin.  In
 this case, it should create a widget and widget factory for rendering geojson 
 files (see [Documents](./documents)).

@@ -91,3 +91,11 @@ the model cannot be provided in the constructor is the initialization
 required for a model may have to call methods that are subclassed.
 The subclassed methods would be called before the subclass constructor has
 finished evaluating, resulting in undefined state.
+
+
+## Data Structures
+
+Prefer to use Phosphor [Phosphor `Vector`](http://phosphorjs.github.io/phosphor/api/classes/_collections_vector_.vector.html) over JavaScript `Array` for internal use,
+and expose Vectors as ISequences for external use.  This allows us to use
+the Phosphor algorithms which provide advanced functionality over what is
+offered by the native Arrays.
