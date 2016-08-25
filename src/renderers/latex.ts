@@ -173,7 +173,15 @@ function init() {
     displayAlign: 'center',
     CommonHTML: {
        linebreaks: { automatic: true }
-     }
+     },
+    'HTML-CSS': {
+        availableFonts: [],
+        imageFont: null,
+        preferredFont: null,
+        webFont: 'STIX-Web',
+        styles: {'.MathJax_Display': {'margin': 0}},
+        linebreaks: { automatic: true }
+    },
   });
   MathJax.Hub.Configured();
 }
