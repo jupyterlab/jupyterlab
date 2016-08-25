@@ -6,7 +6,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  clearSignalData
+  clearSignalData, defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -147,6 +147,12 @@ class ConsoleWidget extends Widget {
   }
 
   /**
+   * A signal emitted when the console executes its prompt.
+   */
+  executed: ISignal<ConsoleWidget, Date>;
+
+
+  /**
    * Get the inspection handler used by the console.
    *
    * #### Notes
@@ -214,6 +220,7 @@ class ConsoleWidget extends Widget {
     this.newPrompt();
     return prompt.execute(this._session.kernel).then(
       (value: KernelMessage.IExecuteReplyMsg) => {
+        this.executed.emit(new Date());
         if (!value) {
           this._inspectionHandler.handleExecuteReply(null);
           return;
@@ -372,6 +379,11 @@ class ConsoleWidget extends Widget {
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
 }
+
+
+// Define the signals for the `ConsoleWidget` class.
+defineSignal(ConsoleWidget.prototype, 'executed');
+
 
 /**
  * A namespace for ConsoleWidget statics.
