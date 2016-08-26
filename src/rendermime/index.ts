@@ -228,7 +228,8 @@ namespace RenderMime {
      *
      * #### Notes
      * A `safe` output is one that cannot pose a security threat
-     * when added to the DOM, for example when it is set as `.textContent`.
+     * when added to the DOM, for example when text is added with
+     * `.textContent`.
      */
     isSafe(mimetype: string): boolean;
 
@@ -238,7 +239,8 @@ namespace RenderMime {
      * #### Notes
      * A `santizable` output is one that could pose a security threat
      * if not properly sanitized, but can be passed through an html sanitizer
-     * to render it safe.
+     * to render it safe.  These are typically added to the DOM using
+     * `.innerHTML` or equivalent.
      */
     isSanitizable(mimetype: string): boolean;
 
