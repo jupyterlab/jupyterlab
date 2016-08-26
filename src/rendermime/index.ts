@@ -225,11 +225,20 @@ namespace RenderMime {
 
     /**
      * Whether the input is safe without sanitization.
+     *
+     * #### Notes
+     * A `safe` output is one that cannot pose a security threat
+     * when added to the DOM, for example when it is set as `.textContent`.
      */
     isSafe(mimetype: string): boolean;
 
     /**
      * Whether the input can safely sanitized for a given mimetype.
+     *
+     * #### Notes
+     * A `santizable` output is one that could pose a security threat
+     * if not properly sanitized, but can be passed through an html sanitizer
+     * to render it safe.
      */
     isSanitizable(mimetype: string): boolean;
 
