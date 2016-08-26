@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
+
+import {
   Panel
 } from 'phosphor/lib/ui/panel';
 
@@ -54,6 +58,11 @@ class ConsolePanel extends Panel {
   }
 
   /**
+   * A signal emitted when the console panel has been activated.
+   */
+  activated: ISignal<ConsolePanel, void>;
+
+  /**
    * The console widget used by the panel.
    *
    * #### Notes
@@ -83,6 +92,7 @@ class ConsolePanel extends Panel {
    */
   protected onActivateRequest(msg: Message): void {
     this.content.activate();
+    this.activated.emit(void 0);
   }
 
   /**
@@ -111,6 +121,10 @@ class ConsolePanel extends Panel {
 
   private _console: ConsoleWidget = null;
 }
+
+
+// Define the signals for the `ConsolePanel` class.
+defineSignal(ConsolePanel.prototype, 'activated');
 
 
 /**
