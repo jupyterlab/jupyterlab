@@ -413,8 +413,9 @@ describe('notebook/completion/handler', () => {
         });
         let handler = new TestCompletionHandler(completion);
         let model = completion.model as TestCompletionModel;
+        let renderer = CodeMirrorCodeCellWidgetRenderer.defaultRenderer;
 
-        handler.activeCell = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
+        handler.activeCell = new BaseCellWidget({ renderer });
         expect(model.methods).to.not.contain('createPatch');
         completion.selected.emit('foo');
         expect(model.methods).to.contain('createPatch');
@@ -425,7 +426,8 @@ describe('notebook/completion/handler', () => {
         let patch = 'foobar';
         let completion = new CompletionWidget({ model });
         let handler = new TestCompletionHandler(completion);
-        let cell = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
+        let renderer = CodeMirrorCodeCellWidgetRenderer.defaultRenderer;
+        let cell = new BaseCellWidget({ renderer });
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -437,10 +439,10 @@ describe('notebook/completion/handler', () => {
         };
 
         cell.model = new CellModel();
-        model.original = request;
-        model.cursor = { start: 0, end: 3 };
         handler.activeCell = cell;
         handler.activeCell.model.source = request.currentValue;
+        model.original = request;
+        model.cursor = { start: 0, end: 3 };
         completion.selected.emit(patch);
         expect(handler.activeCell.model.source).to.equal(patch);
       });

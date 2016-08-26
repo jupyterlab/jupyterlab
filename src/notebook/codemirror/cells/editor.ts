@@ -215,18 +215,10 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
    * Handle change events from the document.
    */
   protected onDocChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange): void {
-    if (change.origin === 'setValue') {
-      return;
-    }
     let model = this.model;
     let editor = this.editor;
     let oldValue = model.source;
     let newValue = doc.getValue();
-    if (oldValue === newValue) {
-      return;
-    }
-    model.source = newValue;
-
     let cursor = doc.getCursor();
     let line = cursor.line;
     let ch = cursor.ch;
@@ -234,6 +226,8 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
     let chWidth = editor.defaultCharWidth();
     let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
     let position = editor.getDoc().indexFromPos({ line, ch });
+
+    model.source = newValue;
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, position, oldValue, newValue
     });
