@@ -112,6 +112,11 @@ class NotebookPanel extends Widget {
   }
 
   /**
+   * A signal emitted when the panel has been activated.
+   */
+  activated: ISignal<NotebookPanel, void>;
+
+  /**
    * A signal emitted when the panel context changes.
    */
   contextChanged: ISignal<NotebookPanel, void>;
@@ -236,6 +241,7 @@ class NotebookPanel extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     this.content.activate();
+    this.activated.emit(void 0);
   }
 
   /**
@@ -397,6 +403,7 @@ class NotebookPanel extends Widget {
 
 
 // Define the signals for the `NotebookPanel` class.
+defineSignal(NotebookPanel.prototype, 'activated');
 defineSignal(NotebookPanel.prototype, 'contextChanged');
 defineSignal(NotebookPanel.prototype, 'kernelChanged');
 
