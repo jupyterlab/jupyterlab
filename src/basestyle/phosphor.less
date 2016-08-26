@@ -4,6 +4,8 @@
 |----------------------------------------------------------------------------*/
 
 
+@import './variables.less';
+
 /*-----------------------------------------------------------------------------
 | General
 |----------------------------------------------------------------------------*/
@@ -16,6 +18,7 @@
 /*-----------------------------------------------------------------------------
 | Menu
 |----------------------------------------------------------------------------*/
+
 .p-Menu {
   z-index: 10000;
   padding: 3px 0px;
@@ -102,6 +105,7 @@
 /*-----------------------------------------------------------------------------
 | MenuBar
 |----------------------------------------------------------------------------*/
+
 .p-MenuBar {
   padding-left: 5px;
   background: white;
@@ -168,15 +172,16 @@
 /*-----------------------------------------------------------------------------
 | TabBar
 |----------------------------------------------------------------------------*/
+
 .p-TabBar {
   overflow: visible;
   color: #777777;
-  font-size: 13px;
+  font-size: @jp-ui-font-size;
 }
 
 
 .p-TabBar.p-mod-horizontal {
-  min-height: 24px;
+  min-height: @jp-tab-height;
 }
 
 
@@ -186,22 +191,22 @@
 
 
 .p-TabBar.p-mod-top {
-  border-bottom: 1px solid #BDBDBD;
+  border-bottom: @jp-tab-border-width solid #BDBDBD;
 }
 
 
 .p-TabBar.p-mod-bottom {
-  border-top: 1px solid #BDBDBD;
+  border-top: @jp-tab-border-width solid #BDBDBD;
 }
 
 
 .p-TabBar.p-mod-left {
-  border-right: 1px solid #BDBDBD;
+  border-right: @jp-tab-border-width solid #BDBDBD;
 }
 
 
 .p-TabBar.p-mod-right {
-  border-left: 1px solid #BDBDBD;
+  border-left: @jp-tab-border-width solid #BDBDBD;
 }
 
 
@@ -224,7 +229,7 @@
 .p-TabBar-tab {
   padding: 0px 10px;
   background: #EEEEEE;
-  border: 1px solid #BDBDBD;
+  border: @jp-tab-border-width solid #BDBDBD;
 }
 
 
@@ -240,11 +245,11 @@
 
 .p-TabBar.p-mod-top .p-TabBar-tab,
 .p-TabBar.p-mod-bottom .p-TabBar-tab {
-  flex: 0 1 125px;
-  min-height: 20px;
+  flex: 0 1 @jp-tab-width;
+  min-height: @jp-tab-height - 2*@jp-tab-border-width;
   min-width: 35px;
-  margin-left: -1px;
-  line-height: 20px;
+  margin-left: -1*@jp-tab-border-width;
+  line-height: @jp-tab-height - 3*@jp-tab-border-width;
 }
 
 
@@ -266,18 +271,18 @@
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  min-height: 23px;
+  min-height: @jp-tab-height - @jp-tab-border-width;
 }
 
 
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current {
-  transform: translateY(1px);
+  transform: translateY(@jp-tab-border-width);
 }
 
 
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  transform: translateY(-1px);
+  transform: translateY(-1*@jp-tab-border-width);
 }
 
 
@@ -343,22 +348,24 @@
 
 
 .p-TabBar-tab.p-mod-drag-image {
-  min-height: 24px;
-  min-width: 124px;
+  min-height: @jp-tab-height;
+  min-width: @jp-tab-width;
+  line-height: @jp-tab-height;
   color: #777777;
   background: white;
-  border: 1px solid #BDBDBD;
-  border-top: 1px solid #2196F3;
-  font-size: 14px;
+  border: @jp-tab-border-width solid #BDBDBD;
+  border-top: @jp-tab-border-width solid #2196F3;
+  font-size: @jp-ui-font-size;
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   transform: translateX(-40%) translateY(-58%);
 }
 
 
 .p-TabPanel-stackedPanel {
-  padding: 10px;
+  padding: 0px;
   background: white;
-  border: 1px solid #C0C0C0;
+  border: @jp-tab-border-width solid #C0C0C0;
+  // This shadow requires a bottom/right padding on the .p-DockPanel-tabPanel
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -386,7 +393,9 @@
 /*-----------------------------------------------------------------------------
 | DockPanel
 |----------------------------------------------------------------------------*/
+
 .p-DockPanel-tabPanel {
+  // This padding is needed to show the shadow on .p-TabPanel-stackedPanel
   padding-right: 2px;
   padding-bottom: 2px;
   border-top: none;
@@ -394,7 +403,7 @@
 
 
 .p-DockPanel-tabPanel > .p-StackedPanel {
-  padding: 10px;
+  padding: 0px;
   background: white;
   border-left: 1px solid #BDBDBD;
   border-right: 1px solid #BDBDBD;
