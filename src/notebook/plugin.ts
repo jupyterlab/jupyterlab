@@ -173,16 +173,11 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
+    // Set the source of the code inspector to the current notebook.
+    widget.activated.connect(() => {
+      inspector.source = widget.content.inspectionHandler;
+    });
     tracker.add(widget);
-  });
-
-  // Set the source of the code inspector to the current console.
-  tracker.currentChanged.connect((sender, args) => {
-    if (args.newValue) {
-      inspector.source = args.newValue.content.inspectionHandler;
-    } else {
-      inspector.source = null;
-    }
   });
 
   // Add main menu notebook menu.
