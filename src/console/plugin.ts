@@ -105,15 +105,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   let submenu: Menu = null;
   let command: string;
 
-  // Set the source of the code inspector to the current console.
-  tracker.currentChanged.connect((sender, args) => {
-    if (args.newValue) {
-      inspector.source = args.newValue.content.inspectionHandler;
-    } else {
-      inspector.source = null;
-    }
-  });
-
   // Set the main menu title.
   menu.title.label = 'Console';
 
@@ -163,9 +154,14 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           panel.title.closable = true;
           app.shell.addToMainArea(panel);
           tracker.add(panel);
+          // Update the caption of the tab with the last execution time.
           panel.content.executed.connect((sender, executed) => {
             captionOptions.executed = executed;
             panel.title.caption = Private.caption(captionOptions);
+          });
+          // Set the source of the code inspector to the current console.
+          panel.activated.connect(() => {
+            inspector.source = panel.content.inspectionHandler;
           });
         });
       }
