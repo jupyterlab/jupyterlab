@@ -153,7 +153,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
           panel.title.closable = true;
           app.shell.addToMainArea(panel);
-          tracker.add(panel);
           // Update the caption of the tab with the last execution time.
           panel.content.executed.connect((sender, executed) => {
             captionOptions.executed = executed;
@@ -163,6 +162,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           panel.activated.connect(() => {
             inspector.source = panel.content.inspectionHandler;
           });
+          tracker.add(panel);
         });
       }
     });
