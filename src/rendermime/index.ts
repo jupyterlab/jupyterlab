@@ -43,7 +43,7 @@ interface IRenderMime extends RenderMime {}
  *
  * Untrusted bundles are handled differently from trusted ones.  Untrusted
  * bundles will only render outputs that can be rendered "safely"
- * (see [[RenderMime.IRenderer.isSafe]]) or can  be "santized"
+ * (see [[RenderMime.IRenderer.isSafe]]) or can be "santized"
  * (see [[RenderMime.IRenderer.isSanitizable]]).
  */
 export
@@ -92,7 +92,7 @@ class RenderMime {
    * @param trusted - whether the bundle is trusted.
    *
    * #### Notes
-   * We select the preferred mimetype to bundle based on whether the output is
+   * We select the preferred mimetype in bundle based on whether the output is
    * trusted (see [[preferredMimetype]]), and then pass a sanitizer to the
    * renderer if the output should be sanitized.
    */
