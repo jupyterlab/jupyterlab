@@ -5,7 +5,7 @@ CSS for JupyterLab.
 
 ## Less
 
-For now we are using [Less]() as a CSS preprocessor. We are actively
+For now we are using [Less](http://lesscss.org/) as a CSS preprocessor. We are actively
 investigating other preprocessors, but are using Less for now because:
 
 * It is familiar as we are using it in the classic notebook.
