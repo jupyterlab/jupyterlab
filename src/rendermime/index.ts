@@ -35,11 +35,16 @@ interface IRenderMime extends RenderMime {}
  *
  * #### Notes
  * When rendering a mimebundle, a mimetype is selected from the mimetypes by
- * searching through the `this.order` list. The first mimetype found in the bundle
- * determines the renderer that will be used.
+ * searching through the `this.order` list. The first mimetype found in the
+ * bundle determines the renderer that will be used.
  *
- * You can add a renderer by adding it to the `renderers` object and registering
- * the mimetype in the `order` array.
+ * You can add a renderer by adding it to the `renderers` object and
+ * registering the mimetype in the `order` array.
+ *
+ * Untrusted bundles are handled differently from trusted ones.  Untrusted
+ * bundles will only render outputs that can be rendered "safely"
+ * (see [[RenderMime.IRenderer.isSafe]]) or can be "sanitized"
+ * (see [[RenderMime.IRenderer.isSanitizable]]).
  */
 export
 class RenderMime {
@@ -85,6 +90,11 @@ class RenderMime {
    * @param bundle - the mimebundle to render.
    *
    * @param trusted - whether the bundle is trusted.
+   *
+   * #### Notes
+   * We select the preferred mimetype in bundle based on whether the output is
+   * trusted (see [[preferredMimetype]]), and then pass a sanitizer to the
+   * renderer if the output should be sanitized.
    */
   render(bundle: RenderMime.MimeMap<string>, trusted=false): Widget {
     let mimetype = this.preferredMimetype(bundle, trusted);
@@ -108,8 +118,9 @@ class RenderMime {
    * @param trusted - whether the bundle is trusted.
    *
    * #### Notes
-   * If the bundle is not trusted, the highest preference
-   * mimetype that is sanitizable or safe will be chosen.
+   * For untrusted bundles, only select mimetypes that can be rendered
+   * "safely"  (see [[RenderMime.IRenderer.isSafe]]) or can  be "sanitized"
+   * (see [[RenderMime.IRenderer.isSanitizable]]).
    */
   preferredMimetype(bundle: RenderMime.MimeMap<string>, trusted=false): string {
     for (let m of this.order) {
@@ -225,11 +236,22 @@ namespace RenderMime {
 
     /**
      * Whether the input is safe without sanitization.
+     *
+     * #### Notes
+     * A `safe` output is one that cannot pose a security threat
+     * when added to the DOM, for example when text is added with
+     * `.textContent`.
      */
     isSafe(mimetype: string): boolean;
 
     /**
      * Whether the input can safely sanitized for a given mimetype.
+     *
+     * #### Notes
+     * A `sanitizable` output is one that could pose a security threat
+     * if not properly sanitized, but can be passed through an html sanitizer
+     * to render it safe.  These are typically added to the DOM using
+     * `.innerHTML` or equivalent.
      */
     isSanitizable(mimetype: string): boolean;
 
@@ -262,7 +284,7 @@ namespace RenderMime {
     resolver?: IResolver;
 
     /**
-     * An optional html santizer.
+     * An optional html sanitizer.
      *
      * If given, should be used to sanitize raw html.
      */
