@@ -43,7 +43,7 @@ interface IRenderMime extends RenderMime {}
  *
  * Untrusted bundles are handled differently from trusted ones.  Untrusted
  * bundles will only render outputs that can be rendered "safely"
- * (see [[RenderMime.IRenderer.isSafe]]) or can be "santized"
+ * (see [[RenderMime.IRenderer.isSafe]]) or can be "sanitized"
  * (see [[RenderMime.IRenderer.isSanitizable]]).
  */
 export
@@ -119,7 +119,7 @@ class RenderMime {
    *
    * #### Notes
    * For untrusted bundles, only select mimetypes that can be rendered
-   * "safely"  (see [[RenderMime.IRenderer.isSafe]]) or can  be "santized"
+   * "safely"  (see [[RenderMime.IRenderer.isSafe]]) or can  be "sanitized"
    * (see [[RenderMime.IRenderer.isSanitizable]]).
    */
   preferredMimetype(bundle: RenderMime.MimeMap<string>, trusted=false): string {
@@ -248,7 +248,7 @@ namespace RenderMime {
      * Whether the input can safely sanitized for a given mimetype.
      *
      * #### Notes
-     * A `santizable` output is one that could pose a security threat
+     * A `sanitizable` output is one that could pose a security threat
      * if not properly sanitized, but can be passed through an html sanitizer
      * to render it safe.  These are typically added to the DOM using
      * `.innerHTML` or equivalent.
@@ -284,7 +284,7 @@ namespace RenderMime {
     resolver?: IResolver;
 
     /**
-     * An optional html santizer.
+     * An optional html sanitizer.
      *
      * If given, should be used to sanitize raw html.
      */
