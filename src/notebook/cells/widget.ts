@@ -175,7 +175,7 @@ class BaseCellWidget extends Widget {
       return;
     }
     this._mimetype = value;
-    this.editor.getModel().setMimeType(value);
+    this.editor.getModel().mimeType = value;
   }
 
   /**
@@ -309,8 +309,8 @@ class BaseCellWidget extends Widget {
     }
 
     // Reset the editor model and set its mode to be the default MIME type.
+    this._editor.getModel().mimeType = this._mimetype;
     this._editor.presenter.model = this._model;
-    this._editor.getModel().setMimeType(this._mimetype);
 
     // Handle trusted cursor.
     this._trustedCursor = this._model.getMetadata('trusted');

@@ -76,6 +76,11 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
   contentChanged: ISignal<IEditorModel, void>;
 
   /**
+   * A signal emitted when a mime type of this model changed.
+   */
+  mimeTypeChanged: ISignal<IEditorModel, void>;
+
+  /**
    * A signal emitted when this configuration changed.
    */
   configurationChanged: ISignal<IEditorConfiguration, void>;
@@ -172,8 +177,23 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
 
   set uri(uri:string) {
     this._uri = uri;
-    loadModeByFileName(this.editor, this._uri);
+    loadModeByFileName(this.editor, this._uri).then((mimeType)=> {
+      this.mimeTypeChanged.emit(void 0);
+    });
     this.uriChanged.emit(void 0);
+  }
+
+  /**
+   * A mime type for this editor model.
+   */
+  get mimeType(): string {
+    return this.editor.getOption('mode');
+  }
+
+  set mimeType(mimeType:string) {
+    loadModeByMIME(this.editor, mimeType).then((mimeType)=> {
+      this.mimeTypeChanged.emit(void 0);
+    });
   }
 
   /**
@@ -188,13 +208,6 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
    */
   setValue(value: string) {
     this.editor.getDoc().setValue(value);
-  }
-
-  /**
-   * Change the mode for an editor based on the given mime type.
-   */
-  setMimeType(mimeType: string): void {
-    loadModeByMIME(this.editor, mimeType);
   }
 
   /**
@@ -371,4 +384,5 @@ class CodeMirrorEditorWidget extends Widget implements EditorWidget, IEditorMode
 defineSignal(CodeMirrorEditorWidget.prototype, 'closed');
 defineSignal(CodeMirrorEditorWidget.prototype, 'uriChanged');
 defineSignal(CodeMirrorEditorWidget.prototype, 'contentChanged');
+defineSignal(CodeMirrorEditorWidget.prototype, 'mimeTypeChanged');
 defineSignal(CodeMirrorEditorWidget.prototype, 'configurationChanged');

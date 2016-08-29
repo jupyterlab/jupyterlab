@@ -19,8 +19,8 @@ import 'codemirror/mode/markdown/markdown';
  * Load a codemirror mode by file name.
  */
 export
-function loadModeByFileName(editor: CodeMirror.Editor, filename: string): void {
-  loadInfo(editor, CodeMirror.findModeByFileName(filename));
+function loadModeByFileName(editor: CodeMirror.Editor, filename: string): Promise<string> {
+  return loadInfo(editor, CodeMirror.findModeByFileName(filename));
 }
 
 
@@ -28,8 +28,8 @@ function loadModeByFileName(editor: CodeMirror.Editor, filename: string): void {
  * Load a codemirror mode by mime type.
  */
 export
-function loadModeByMIME(editor: CodeMirror.Editor, mimetype: string): void {
-  loadInfo(editor, CodeMirror.findModeByMIME(mimetype));
+function loadModeByMIME(editor: CodeMirror.Editor, mimetype: string): Promise<string> {
+  return loadInfo(editor, CodeMirror.findModeByMIME(mimetype));
 }
 
 
@@ -37,8 +37,8 @@ function loadModeByMIME(editor: CodeMirror.Editor, mimetype: string): void {
  * Load a codemirror mode by mode name.
  */
 export
-function loadModeByName(editor: CodeMirror.Editor, mode: string): void {
-  loadInfo(editor, CodeMirror.findModeByName(mode));
+function loadModeByName(editor: CodeMirror.Editor, mode: string): Promise<string> {
+  return loadInfo(editor, CodeMirror.findModeByName(mode));
 }
 
 
@@ -74,16 +74,17 @@ function requireMode(mode: string | CodeMirror.modespec): Promise<CodeMirror.mod
   });
 }
 
-
 /**
  * Load a CodeMirror mode based on a mode spec.
  */
-function loadInfo(editor: CodeMirror.Editor, info: CodeMirror.modespec): void {
+function loadInfo(editor: CodeMirror.Editor, info: CodeMirror.modespec): Promise<string> {
   if (!info) {
     editor.setOption('mode', 'null');
-    return;
+    return Promise.resolve(null);
   }
-  requireMode(info).then(() => {
-    editor.setOption('mode', info.mime);
+  return requireMode(info).then(() => {
+    const mimeType = info.mime;
+    editor.setOption('mode', mimeType);
+    return Promise.resolve(mimeType)
   });
 }

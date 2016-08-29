@@ -109,9 +109,19 @@ interface IEditorModel extends IDisposable {
   contentChanged: ISignal<IEditorModel, void>;
 
   /**
+   * A signal emitted when a mime type of this model changed.
+   */
+  mimeTypeChanged: ISignal<IEditorModel, void>;
+
+  /**
    * An uri associated with this model.
    */
-  uri:string
+  uri:string;
+
+  /**
+   * A mime type for this model.
+   */
+  mimeType:string;
 
   /**
    * Get the text stored in this model.
@@ -122,11 +132,6 @@ interface IEditorModel extends IDisposable {
    * Replace the entire text contained in this model.
    */
   setValue(value: string): void;
-
-  /**
-   * Change the mime type for this model.
-   */
-  setMimeType(mimeType: string): void;
 
   /**
    * Get the number of lines in the model.
