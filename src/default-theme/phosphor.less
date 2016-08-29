@@ -1,0 +1,169 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+@import './variables.less';
+
+/*-----------------------------------------------------------------------------
+| General
+|----------------------------------------------------------------------------*/
+
+
+/*-----------------------------------------------------------------------------
+| Menu
+|----------------------------------------------------------------------------*/
+
+.p-Menu {
+  border-color: #C0C0C0;
+}
+
+
+.p-Menu-item.p-mod-active {
+  background: #E5E5E5;
+}
+
+
+.p-Menu-itemLabel {
+  color: #777777;
+}
+
+
+.p-Menu-itemMnemonic {
+  text-decoration: underline;
+}
+
+
+.p-Menu-itemShortcut {
+  color: #777777;
+}
+
+
+// .p-Menu-item.p-type-separator > div::after {
+//   border-top-color: #DDDDDD;
+// }
+
+.p-Menu-item.p-type-separator {
+    border-top: 1px solid #DDD;
+}
+
+
+/*-----------------------------------------------------------------------------
+| MenuBar
+|----------------------------------------------------------------------------*/
+
+
+.p-MenuBar-item.p-mod-active {
+  background: #E5E5E5;
+}
+
+
+.p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
+  border-left-color: #C0C0C0;
+  border-right-color: #C0C0C0;
+}
+
+
+.p-MenuBar-item.p-type-separator {
+  border-left-color: #DDDDDD;
+}
+
+
+.p-MenuBar-item.p-mod-active > .p-MenuBar-itemLabel {
+  color: #2196F3;
+}
+
+
+.p-MenuBar-itemLabel {
+  color: #777777
+}
+
+
+/*-----------------------------------------------------------------------------
+| TabBar
+|----------------------------------------------------------------------------*/
+
+.p-TabBar {
+  color: #777777;
+}
+
+
+.p-TabBar.p-mod-horizontal {
+  min-height: @jp-tab-height;
+}
+
+
+.p-TabBar.p-mod-vertical {
+  min-width: 80px;
+}
+
+
+.p-TabBar.p-mod-top {
+  border-bottom-color: #BDBDBD;
+}
+
+
+.p-TabBar.p-mod-bottom {
+  border-top-color: #BDBDBD;
+}
+
+
+.p-TabBar.p-mod-left {
+  border-right-color: #BDBDBD;
+}
+
+
+.p-TabBar.p-mod-right {
+  border-left-color: #BDBDBD;
+}
+
+
+.p-TabBar-tab {
+  background: #EEEEEE;
+  border-color: #BDBDBD;
+}
+
+
+.p-TabBar-tab.p-mod-current {
+  background: white;
+}
+
+
+.p-TabBar-tab:hover:not(.p-mod-current) {
+  background: #FAFAFA;
+}
+
+
+.p-TabBar-tab.p-mod-drag-image {
+  color: #777777;
+  background: white;
+  border-color: #BDBDBD;
+  border-top-color: #2196F3;
+  font-size: @jp-ui-font-size;
+}
+
+
+.p-TabPanel-stackedPanel {
+  background: white;
+  border-color: #C0C0C0;
+}
+
+
+/*-----------------------------------------------------------------------------
+| DockPanel
+|----------------------------------------------------------------------------*/
+
+
+.p-DockPanel-tabPanel > .p-StackedPanel {
+  background: white;
+  border-left-color: #BDBDBD;
+  border-right-color: #BDBDBD;
+  border-bottom-color: #BDBDBD;
+}
+
+
+.p-DockPanel-overlay {
+  background: rgba(33, 150, 243, 0.1);
+  border-color: #2196F3;
+}

@@ -21,17 +21,25 @@
 
 .p-Menu {
   z-index: 10000;
-  padding: 3px 0px;
+  padding: 4px 0px;
   background: white;
   color: rgba(0, 0, 0, 0.87);
-  border: 1px solid #C0C0C0;
-  font: 14px;
+  border: 1px solid black;
+  font-size: @jp-ui-font-size;
   box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
 }
 
 
+.p-Menu-item {
+  min-height: 24px;
+  max-height: 24px;
+  padding: 0px;
+  line-height: 24px;
+}
+
+
 .p-Menu-item.p-mod-active {
-  background: #E5E5E5;
+  background: grey;
 }
 
 
@@ -42,14 +50,14 @@
 
 .p-Menu-itemIcon {
   width: 21px;
-  padding: 4px 2px;
+  padding: 0px 2px 0px 4px;
+
 }
 
 
 .p-Menu-itemLabel {
-  padding: 4px 35px 4px 2px;
-  font-size: 13px;
-  color: #777777;
+  padding: 0px 32px 0px 2px;
+  color: black;
 }
 
 
@@ -59,15 +67,14 @@
 
 
 .p-Menu-itemShortcut {
-  padding: 4px 0px;
-  font-size: 13px;
-  color: #777777;
+  padding: 0px;
+  color: black;
 }
 
 
 .p-Menu-itemSubmenuIcon {
   width: 16px;
-  padding: 4px 0px;
+  padding: 0px 4px 0px 0px;
 }
 
 
@@ -82,9 +89,8 @@
   display: block;
   position: relative;
   top: 4px;
-  border-top: 1px solid #DDDDDD;
+  border-top: 1px solid black;
 }
-
 
 .p-Menu-itemIcon::before,
 .p-Menu-itemSubmenuIcon::before {
@@ -110,32 +116,33 @@
   padding-left: 5px;
   background: white;
   color: rgba(0, 0, 0, 0.87);
-  font: 14px;
+  font-size: @jp-ui-font-size;
 }
 
 
 .p-MenuBar-menu {
-  transform: translateY(-3px);
+  transform: translateY(0px);
 }
 
 
 .p-MenuBar-item {
-  padding: 6px 8px;
+  padding: 0px 8px;
   border-left: 1px solid transparent;
   border-right: 1px solid transparent;
+  line-height: 27px;
 }
 
 
 .p-MenuBar-item.p-mod-active {
-  background: #E5E5E5;
+  background: grey;
 }
 
 
 .p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
   z-index: 10001;
   background: white;
-  border-left: 1px solid #C0C0C0;
-  border-right: 1px solid #C0C0C0;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
   box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -149,12 +156,12 @@
   margin: 2px;
   padding: 0;
   border: none;
-  border-left: 1px solid #DDDDDD;
+  border-left: 1px solid black;
 }
 
 
 .p-MenuBar-item.p-mod-active > .p-MenuBar-itemLabel {
-  color: #2196F3;
+  color: black;
 }
 
 
@@ -164,8 +171,8 @@
 
 
 .p-MenuBar-itemLabel {
-  font-size: 13px;
-  color: #777777
+  font-size: @jp-ui-font-size;
+  color: black;
 }
 
 
@@ -175,7 +182,7 @@
 
 .p-TabBar {
   overflow: visible;
-  color: #777777;
+  color: black;
   font-size: @jp-ui-font-size;
 }
 
@@ -191,22 +198,22 @@
 
 
 .p-TabBar.p-mod-top {
-  border-bottom: @jp-tab-border-width solid #BDBDBD;
+  border-bottom: @jp-tab-border-width solid black;
 }
 
 
 .p-TabBar.p-mod-bottom {
-  border-top: @jp-tab-border-width solid #BDBDBD;
+  border-top: @jp-tab-border-width solid black;
 }
 
 
 .p-TabBar.p-mod-left {
-  border-right: @jp-tab-border-width solid #BDBDBD;
+  border-right: @jp-tab-border-width solid black;
 }
 
 
 .p-TabBar.p-mod-right {
-  border-left: @jp-tab-border-width solid #BDBDBD;
+  border-left: @jp-tab-border-width solid black;
 }
 
 
@@ -228,8 +235,8 @@
 
 .p-TabBar-tab {
   padding: 0px 10px;
-  background: #EEEEEE;
-  border: @jp-tab-border-width solid #BDBDBD;
+  background: white;
+  border: @jp-tab-border-width solid black;
 }
 
 
@@ -239,17 +246,17 @@
 
 
 .p-TabBar-tab:hover:not(.p-mod-current) {
-  background: #FAFAFA;
+  background: grey;
 }
 
 
 .p-TabBar.p-mod-top .p-TabBar-tab,
 .p-TabBar.p-mod-bottom .p-TabBar-tab {
   flex: 0 1 @jp-tab-width;
-  min-height: @jp-tab-height - 2*@jp-tab-border-width;
+  min-height: (@jp-tab-height - 2*@jp-tab-border-width);
   min-width: 35px;
-  margin-left: -1*@jp-tab-border-width;
-  line-height: @jp-tab-height - 3*@jp-tab-border-width;
+  margin-left: (-1*@jp-tab-border-width);
+  line-height: (@jp-tab-height - 3*@jp-tab-border-width);
 }
 
 
@@ -271,7 +278,7 @@
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  min-height: @jp-tab-height - @jp-tab-border-width;
+  min-height: (@jp-tab-height - @jp-tab-border-width);
 }
 
 
@@ -351,10 +358,10 @@
   min-height: @jp-tab-height;
   min-width: @jp-tab-width;
   line-height: @jp-tab-height;
-  color: #777777;
+  color: black;
   background: white;
-  border: @jp-tab-border-width solid #BDBDBD;
-  border-top: @jp-tab-border-width solid #2196F3;
+  border: @jp-tab-border-width solid black;
+  border-top: @jp-tab-border-width solid black;
   font-size: @jp-ui-font-size;
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   transform: translateX(-40%) translateY(-58%);
@@ -364,7 +371,7 @@
 .p-TabPanel-stackedPanel {
   padding: 0px;
   background: white;
-  border: @jp-tab-border-width solid #C0C0C0;
+  border: @jp-tab-border-width solid black;
   // This shadow requires a bottom/right padding on the .p-DockPanel-tabPanel
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
@@ -394,26 +401,18 @@
 | DockPanel
 |----------------------------------------------------------------------------*/
 
-.p-DockPanel-tabPanel {
-  // This padding is needed to show the shadow on .p-TabPanel-stackedPanel
-  padding-right: 2px;
-  padding-bottom: 2px;
-  border-top: none;
-}
-
 
 .p-DockPanel-tabPanel > .p-StackedPanel {
-  padding: 0px;
   background: white;
-  border-left: 1px solid #BDBDBD;
-  border-right: 1px solid #BDBDBD;
-  border-bottom: 1px solid #BDBDBD;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
 }
 
 
 .p-DockPanel-overlay {
   background: rgba(33, 150, 243, 0.1);
-  border: 1px dashed #2196F3;
+  border: 1px dashed grey;
   transition-property: top, left, right, bottom;
   transition-duration: 150ms;
   transition-timing-function: ease;
