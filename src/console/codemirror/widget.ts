@@ -76,6 +76,9 @@ namespace CodeMirrorConsoleRenderer {
     editorInitializer: (editor) => {
       editor.editor.setOption('matchBrackets', false);
       editor.editor.setOption('autoCloseBrackets', false);
+      editor.editor.setOption('extraKeys', {
+        Enter: function() { /* no-op */ }
+      });
     }
   });
 }

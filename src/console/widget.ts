@@ -359,7 +359,6 @@ class ConsoleWidget extends Widget {
   private _shouldExecute(): Promise<boolean> {
     let prompt = this.prompt;
     let code = prompt.model.source;
-    code = code.slice(0, code.lastIndexOf('\n'));
     return new Promise<boolean>((resolve, reject) => {
       // Allow 250 ms for the response.
       let timer = setTimeout(() => {
