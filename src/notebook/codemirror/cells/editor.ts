@@ -251,14 +251,18 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
     }
 
     if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
-      this.edgeRequested.emit('top');
-      return;
+        if (!event.shiftKey) {
+          this.edgeRequested.emit('top');
+        }
+        return;
     }
 
     let lastLine = doc.lastLine();
     let lastCh = doc.getLineHandle(lastLine).text.length;
     if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
-      this.edgeRequested.emit('bottom');
+      if (!event.shiftKey) {
+        this.edgeRequested.emit('bottom');
+      }
       return;
     }
   }
