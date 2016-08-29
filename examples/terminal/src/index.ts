@@ -19,20 +19,21 @@ import {
 
 import 'jupyterlab/lib/basestyle/index.css';
 import 'jupyterlab/lib/default-theme/index.css';
+import '../index.css';
 
 
 function main(): void {
-  let term1 = new TerminalWidget({ background: 'black',
-                                  color: 'white'});
-  let term2 = new TerminalWidget({ background: 'white',
-                                  color: 'black'});
+  let term1 = new TerminalWidget({
+    background: 'black',
+    color: 'white'
+  });
+  let term2 = new TerminalWidget({
+    background: 'white',
+    color: 'black'
+  });
 
-  createTerminalSession().then(session => {
-    term1.session = session;
-  });
-  createTerminalSession().then(session => {
-    term2.session = session;
-  });
+  createTerminalSession().then(session => term1.session = session);
+  createTerminalSession().then(session => term2.session = session);
 
   term1.title.closable = true;
   term2.title.closable = true;
