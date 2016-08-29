@@ -42,6 +42,7 @@ class SaveHandler implements IDisposable {
     this._context.contentsModelChanged.connect(() => {
       this._setTimer();
     });
+    this._context.disposed.connect(this.dispose, this);
   }
 
   /**
@@ -104,8 +105,9 @@ class SaveHandler implements IDisposable {
     // Trigger the next update.
     this._setTimer();
 
-    // Bail if the model is not dirty or it is read only.
-    if (!context.model.dirty || context.model.readOnly) {
+    // Bail if the model is not dirty or it is read only, or the dialog
+    // is already showing.
+    if (!context.model.dirty || context.model.readOnly || this._inDialog) {
       return;
     }
 
@@ -133,10 +135,12 @@ class SaveHandler implements IDisposable {
                `opened or saved it. ` +
                `Do you want to overwrite the file on disk with the version ` +
                ` open here, or load the version on disk (revert)?`;
+    this._inDialog = true;
     return showDialog({
       title: 'File Changed', body, okText: 'OVERWRITE',
       buttons: [cancelButton, { text: 'REVERT' }, okButton]
     }).then(result => {
+      this._inDialog = false;
       if (result.text === 'OVERWRITE') {
         return this._finishSave();
       } else if (result.text === 'REVERT') {
@@ -165,6 +169,7 @@ class SaveHandler implements IDisposable {
   private _context: IDocumentContext<IDocumentModel> = null;
   private _manager: IServiceManager = null;
   private _stopped = false;
+  private _inDialog = false;
 }
 
 
