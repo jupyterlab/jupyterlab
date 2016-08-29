@@ -256,6 +256,16 @@ const SHORTCUTS = [
     keys: ['Enter']
   },
   {
+    command: 'console:execute-forced',
+    selector: '.jp-ConsolePanel',
+    keys: ['Shift Enter']
+  },
+  {
+    command: 'console:linebreak',
+    selector: '.jp-ConsolePanel',
+    keys: ['Ctrl Enter']
+  },
+  {
     command: 'console:dismiss-completion',
     selector: '.jp-ConsolePanel',
     keys: ['Escape']

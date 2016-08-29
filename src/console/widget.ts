@@ -204,8 +204,11 @@ class ConsoleWidget extends Widget {
 
   /**
    * Execute the current prompt.
+   *
+   * @param force - Whether to force execution without checking code
+   *    completeness.
    */
-  execute(): Promise<void> {
+  execute(force=false): Promise<void> {
     this.dismissCompletion();
 
     if (this._session.status === 'dead') {
@@ -215,17 +218,22 @@ class ConsoleWidget extends Widget {
 
     let prompt = this.prompt;
     prompt.trusted = true;
+    if (force) {
+      return this._execute();
+    }
+
     // Check for code completeness.
     let code = prompt.model.source;
     code = code.slice(0, code.lastIndexOf('\n'));
     return this._session.kernel.isComplete({ code })
     .then(isComplete => {
       switch (isComplete.content.status) {
-      case 'complete':
-        return this._execute();
       case 'incomplete':
         prompt.model.source = code + '\n' + isComplete.content.indent;
         prompt.editor.setCursorPosition(prompt.model.source.length);
+        break;
+      default:
+        return this._execute();
       }
     });
   }
@@ -238,6 +246,16 @@ class ConsoleWidget extends Widget {
       this.prompt.dispose();
     }
     this.newPrompt();
+  }
+
+  /**
+   * Insert a line break in the prompt.
+   */
+  insertLinebreak(): void {
+    let prompt = this.prompt;
+    let model = prompt.model;
+    model.source += '\n';
+    prompt.editor.setCursorPosition(model.source.length);
   }
 
   /**
