@@ -158,10 +158,13 @@ describe('renderers', () => {
     describe('#render()', () => {
 
       it('should render the correct HTML', () => {
-        let source = "I don't have a b64'd PDF";
+        let source = 'test';
         let t = new PDFRenderer();
         let w = t.render({ mimetype: 'application/pdf', source });
-        expect(w.node.innerHTML.indexOf('data:application/pdf')).to.not.be(-1);
+        let node = w.node.firstChild as HTMLAnchorElement;
+        expect(node.localName).to.be('a');
+        expect(node.target).to.be('_blank');
+        expect(node.href).to.be('data:application/pdf;base64,test');
       });
 
     });
