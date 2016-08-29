@@ -222,17 +222,9 @@ class ConsoleWidget extends Widget {
       return this._execute();
     }
 
-    // Check for code completeness.
-    let code = prompt.model.source;
-    code = code.slice(0, code.lastIndexOf('\n'));
-    return this._session.kernel.isComplete({ code })
-    .then(isComplete => {
-      switch (isComplete.content.status) {
-      case 'incomplete':
-        prompt.model.source = code + '\n' + isComplete.content.indent;
-        prompt.editor.setCursorPosition(prompt.model.source.length);
-        break;
-      default:
+    // Check whether we should execute
+    return this._shouldExecute().then(value => {
+      if (value) {
         return this._execute();
       }
     });
@@ -359,6 +351,33 @@ class ConsoleWidget extends Widget {
     // Jump to the bottom of the console.
     Private.scrollToBottom(this.node);
     prompt.activate();
+  }
+
+  /**
+   * Test whether we should execute the prompt.
+   */
+  private _shouldExecute(): Promise<boolean> {
+    let prompt = this.prompt;
+    let code = prompt.model.source;
+    code = code.slice(0, code.lastIndexOf('\n'));
+    return new Promise<boolean>((resolve, reject) => {
+      // Allow 250 ms for the response
+      let timer = setTimeout(() => {
+        resolve(true);
+      }, 250);
+      this._session.kernel.isComplete({ code }).then(isComplete => {
+        clearTimeout(timer);
+        if (isComplete.content.status === 'incomplete') {
+          prompt.model.source = code + '\n' + isComplete.content.indent;
+          prompt.editor.setCursorPosition(prompt.model.source.length);
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      }).catch(() => {
+        resolve(true);
+      });
+    });
   }
 
   /**
