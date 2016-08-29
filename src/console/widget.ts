@@ -222,7 +222,7 @@ class ConsoleWidget extends Widget {
       return this._execute();
     }
 
-    // Check whether we should execute
+    // Check whether we should execute.
     return this._shouldExecute().then(value => {
       if (value) {
         return this._execute();
@@ -361,7 +361,7 @@ class ConsoleWidget extends Widget {
     let code = prompt.model.source;
     code = code.slice(0, code.lastIndexOf('\n'));
     return new Promise<boolean>((resolve, reject) => {
-      // Allow 250 ms for the response
+      // Allow 250 ms for the response.
       let timer = setTimeout(() => {
         resolve(true);
       }, 250);
