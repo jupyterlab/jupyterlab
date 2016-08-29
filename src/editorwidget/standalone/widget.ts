@@ -38,7 +38,7 @@ namespace StandaloneEditorWidget {
    */
   export
   function is(widget:Widget|StandaloneEditorWidget): widget is StandaloneEditorWidget {
-    return IStandaloneEditorView.is(widget) && widget.presenter !== undefined;
+    return IStandaloneEditorView.is(widget) && ('presenter' in widget);
   }
 
   /**

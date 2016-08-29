@@ -172,10 +172,10 @@ class CellEditorPresenter implements ICellEditorPresenter {
    * Updates an editor model.
    */
   protected updateEditorModel(model: ICellModel) {
-    const newVlaue = model ? model.source : '';
+    const newValue = model ? model.source : '';
     const oldValue = this.editorView.getModel().getValue();
-    if (oldValue !== newVlaue) {
-      this.performEditorModelUpdate(newVlaue);
+    if (oldValue !== newValue) {
+      this.performEditorModelUpdate(newValue);
     }
   }
 

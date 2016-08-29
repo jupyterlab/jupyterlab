@@ -137,8 +137,8 @@ namespace ICompletableEditorView {
   export
   function is(editorView:any): editorView is ICompletableEditorView {
     return IEditorView.is(editorView) &&
-      editorView.textChanged !== undefined &&
-      editorView.completionRequested !== undefined;
+      ('textChanged' in editorView) &&
+      ('completionRequested' in editorView);
   }
 
 }

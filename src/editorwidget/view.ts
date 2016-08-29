@@ -247,8 +247,8 @@ namespace IEditorView {
   export
   function is(editorView:any): editorView is IEditorView {
     return editorView &&
-      editorView.closed !== undefined &&
-      editorView.position !== undefined &&
+      ('closed' in editorView) &&
+      ('position' in editorView) &&
       editorView.getModel !== undefined &&
       editorView.getConfiguration !== undefined;
   }

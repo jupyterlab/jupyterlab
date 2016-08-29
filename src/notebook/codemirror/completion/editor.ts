@@ -43,27 +43,23 @@ class CompletableCodeMirrorCellEditorWidget extends CodeMirrorCellEditorWidget i
    * Handle change events from the document.
    */
   protected onDocChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange): void {
-    if (change.origin !== 'setValue') {
-      const model = this.presenter.model;
-      const editor = this.editor;
-      const oldValue = model.source;
-      const newValue = doc.getValue();
-      if (oldValue === newValue) {
-        return;
-      }
-
-      const cursor = doc.getCursor();
-      const line = cursor.line;
-      const ch = cursor.ch;
-      const chHeight = editor.defaultTextHeight();
-      const chWidth = editor.defaultCharWidth();
-      const coords = editor.charCoords({ line, ch }, 'page') as ICoords;
-      const position = editor.getDoc().indexFromPos({ line, ch });
-      this.textChanged.emit({
-        line, ch, chHeight, chWidth, coords, position, oldValue, newValue
-      });
-    }
     super.onDocChange(doc, change);
+
+    let model = this.presenter.model;
+    let editor = this.editor;
+    let oldValue = model ? model.source : null;
+    let newValue = doc.getValue();
+    let cursor = doc.getCursor();
+    let line = cursor.line;
+    let ch = cursor.ch;
+    let chHeight = editor.defaultTextHeight();
+    let chWidth = editor.defaultCharWidth();
+    let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
+    let position = editor.getDoc().indexFromPos({ line, ch });
+
+    this.textChanged.emit({
+      line, ch, chHeight, chWidth, coords, position, oldValue, newValue
+    });
   }
 
   /**

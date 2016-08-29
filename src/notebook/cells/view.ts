@@ -40,7 +40,7 @@ namespace ICellEditorView {
    */
   export
   function is(editorView:any): editorView is ICellEditorView {
-    return IEditorView.is(editorView) && editorView.edgeRequested !== undefined;
+    return IEditorView.is(editorView) && ('edgeRequested' in editorView);
   }
 
 }
