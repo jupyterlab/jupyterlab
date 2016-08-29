@@ -250,16 +250,23 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
       return this.onTabEvent(event, ch, line);
     }
 
-    if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
-      this.edgeRequested.emit('top');
-      return;
+    // If the shift key is pressed, don't move to top cell
+    if (event.shiftKey === false) {
+      if (line === 0 && ch === 0 && event.keyCode === UP_ARROW) {
+        this.edgeRequested.emit('top');
+        return;
+      }
     }
 
     let lastLine = doc.lastLine();
     let lastCh = doc.getLineHandle(lastLine).text.length;
-    if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
-      this.edgeRequested.emit('bottom');
-      return;
+    
+    // If the shift key is pressed, don't move to bottom cell
+    if (event.shiftKey === false) {
+      if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
+        this.edgeRequested.emit('bottom');
+        return;
+      }
     }
   }
 
