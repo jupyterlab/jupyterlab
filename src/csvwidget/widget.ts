@@ -144,6 +144,13 @@ class CSVWidget extends Widget {
     this._table.node.appendChild(table);
   }
 
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.focus();
+  }
+
   private _context: IDocumentContext<IDocumentModel>;
   private delimiter: string = ",";
   private _toolbar: Widget = null;
