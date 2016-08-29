@@ -6,7 +6,7 @@
     "clean": "rimraf build && rimraf node_modules",
     "postinstall": "node ../../scripts/dedupe.js",
     "update": "rimraf node_modules/jupyterlab && npm install",
-    "watch": "watch 'npm run update && npm run build' ../../src --wait 10"
+    "watch": "watch \"npm run update && npm run build\" ../../src --wait 10"
   },
   "dependencies": {
     "es6-promise": "^3.1.2",
