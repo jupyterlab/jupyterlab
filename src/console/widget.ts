@@ -215,35 +215,19 @@ class ConsoleWidget extends Widget {
 
     let prompt = this.prompt;
     prompt.trusted = true;
-    this._history.push(prompt.model.source);
-    // Create a new prompt before kernel execution to allow typeahead.
-    this.newPrompt();
-    return prompt.execute(this._session.kernel).then(
-      (value: KernelMessage.IExecuteReplyMsg) => {
-        this.executed.emit(new Date());
-        if (!value) {
-          this._inspectionHandler.handleExecuteReply(null);
-          return;
-        }
-        if (value.content.status === 'ok') {
-          let content = value.content as KernelMessage.IExecuteOkReply;
-          this._inspectionHandler.handleExecuteReply(content);
-          // Use deprecated payloads for backwards compatibility.
-          if (content.payload && content.payload.length) {
-            let setNextInput = content.payload.filter(i => {
-              return (i as any).source === 'set_next_input';
-            })[0];
-            if (setNextInput) {
-              let text = (setNextInput as any).text;
-              // Ignore the `replace` value and always set the next prompt.
-              this.prompt.model.source = text;
-            }
-          }
-        }
-        Private.scrollToBottom(this.node);
-      },
-      () => { Private.scrollToBottom(this.node); }
-    );
+    // Check for code completeness.
+    let code = prompt.model.source;
+    code = code.slice(0, code.lastIndexOf('\n'));
+    return this._session.kernel.isComplete({ code })
+    .then(isComplete => {
+      switch (isComplete.content.status) {
+      case 'complete':
+        return this._execute();
+      case 'incomplete':
+        prompt.model.source = code + '\n' + isComplete.content.indent;
+        prompt.editor.setCursorPosition(prompt.model.source.length);
+      }
+    });
   }
 
   /**
@@ -357,6 +341,42 @@ class ConsoleWidget extends Widget {
     // Jump to the bottom of the console.
     Private.scrollToBottom(this.node);
     prompt.activate();
+  }
+
+  /**
+   * Execute the code in the current prompt.
+   */
+  private _execute(): Promise<void> {
+    let prompt = this.prompt;
+    this._history.push(prompt.model.source);
+    // Create a new prompt before kernel execution to allow typeahead.
+    this.newPrompt();
+    return prompt.execute(this._session.kernel).then(
+    (value: KernelMessage.IExecuteReplyMsg) => {
+      this.executed.emit(new Date());
+      if (!value) {
+        this._inspectionHandler.handleExecuteReply(null);
+        return;
+      }
+      if (value.content.status === 'ok') {
+        let content = value.content as KernelMessage.IExecuteOkReply;
+        this._inspectionHandler.handleExecuteReply(content);
+        // Use deprecated payloads for backwards compatibility.
+        if (content.payload && content.payload.length) {
+          let setNextInput = content.payload.filter(i => {
+            return (i as any).source === 'set_next_input';
+          })[0];
+          if (setNextInput) {
+            let text = (setNextInput as any).text;
+            // Ignore the `replace` value and always set the next prompt.
+            this.prompt.model.source = text;
+          }
+        }
+      }
+      Private.scrollToBottom(this.node);
+    },
+      () => { Private.scrollToBottom(this.node); }
+    );
   }
 
   /**

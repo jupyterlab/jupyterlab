@@ -253,7 +253,7 @@ const SHORTCUTS = [
   {
     command: 'console:execute',
     selector: '.jp-ConsolePanel',
-    keys: ['Shift Enter']
+    keys: ['Enter']
   },
   {
     command: 'console:dismiss-completion',

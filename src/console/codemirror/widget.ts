@@ -10,6 +10,10 @@ import {
 } from '../../notebook/cells/widget';
 
 import {
+  CodeMirrorCodeCellWidgetRenderer
+} from '../../notebook/codemirror/cells/widget';
+
+import {
   CodeMirrorNotebookRenderer
 } from '../../notebook/codemirror/notebook/widget';
 
@@ -44,7 +48,7 @@ class CodeMirrorConsoleRenderer implements ConsoleWidget.IRenderer {
   createPrompt(rendermime: RenderMime): CodeCellWidget {
     let widget = new CodeCellWidget({
       rendermime,
-      renderer: CodeMirrorNotebookRenderer.defaultCodeCellRenderer
+      renderer: CodeMirrorConsoleRenderer.defaultCodeCellRenderer
     });
     widget.model = new CodeCellModel();
     return widget;
@@ -62,4 +66,16 @@ namespace CodeMirrorConsoleRenderer {
    */
   export
   const defaultRenderer = new CodeMirrorConsoleRenderer();
+
+
+  /**
+   * A default code mirror renderer for a code cell editor.
+   */
+  export
+  const defaultCodeCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
+    editorInitializer: (editor) => {
+      editor.editor.setOption('matchBrackets', false);
+      editor.editor.setOption('autoCloseBrackets', false);
+    }
+  });
 }
