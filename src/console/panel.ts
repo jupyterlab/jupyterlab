@@ -155,7 +155,7 @@ namespace ConsolePanel {
     /**
      * The renderer for a console widget.
      */
-    renderer?: ConsoleWidget.IRenderer;
+    renderer: ConsoleWidget.IRenderer;
 
     /**
      * The session for the console panel.

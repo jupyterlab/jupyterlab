@@ -6,6 +6,10 @@ import {
 } from 'jupyterlab/lib/console';
 
 import {
+  CodeMirrorConsoleRenderer
+} from 'jupyterlab/lib/console/codemirror/widget';
+
+import {
   startNewSession, findSessionByPath, connectToSession, ISession
 } from 'jupyter-js-services';
 
@@ -103,8 +107,9 @@ function startApp(session: ISession) {
   }
   let sanitizer = defaultSanitizer;
   let rendermime = new RenderMime({ renderers, order, sanitizer });
+  let renderer = CodeMirrorConsoleRenderer.defaultRenderer;
 
-  let consolePanel = new ConsolePanel({ session, rendermime });
+  let consolePanel = new ConsolePanel({ session, renderer, rendermime });
   consolePanel.title.label = TITLE;
 
   let palette = new CommandPalette({ commands, keymap });
