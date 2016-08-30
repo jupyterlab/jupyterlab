@@ -319,7 +319,7 @@ namespace Private {
       `Name: ${label}\n` +
       `Directory: ${ContentsManager.dirname(path)}\n` +
       `Kernel: ${displayName}\n` +
-      `Opened: ${dateTime(opened.toISOString())}`
+      `Connected: ${dateTime(opened.toISOString())}`
     );
     if (executed) {
       caption += `\nLast Execution: ${dateTime(executed.toISOString())}`;
