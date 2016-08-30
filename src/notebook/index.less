@@ -3,6 +3,12 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+
+@import './completion.less';
+@import './highlight.less';
+
+
 .jp-Notebook {
   padding-left: 4px;
   padding-right: 4px;
@@ -16,11 +22,21 @@
 
 
 .jp-Notebook-panel {
+  display: flex;
+  flex-direction: column;
   height: 100%;
 }
 
 
+.jp-InputArea {
+  display: flex;
+  flex-direction: row;
+}
+
+
 .jp-InputArea-prompt {
+  flex-grow: 0;
+  flex-shrink: 0;
   flex-basis: 90px;
   color: #303F9F;
   font-family: monospace;
@@ -32,6 +48,8 @@
 
 
 .jp-InputArea-editor {
+  flex-grow: 1;
+  flex-shrink: 1;
   height: auto;
   min-height: 2em;
 }
@@ -57,6 +75,11 @@
 
 .jp-MarkdownCell-renderer {
   padding: 0.5em 0.5em 0.5em 0.4em;
+}
+
+
+.jp-MarkdownCell-content {
+  padding: 0.5em;
 }
 
 
@@ -102,6 +125,22 @@ img.jp-mod-unconfined {
 
 .jp-Output-result {
   padding: 0.4em;
+  user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+}
+
+
+.p-Widget.jp-Output-result {
+  overflow: auto;
+}
+
+
+/* If we have two nested output areas (for example, as with output widgets),
+   then the inner output looks weird with a prompt, so we hide it. */
+.jp-Output .jp-Output .jp-Output-prompt {
+  display: none;
 }
 
 
@@ -186,29 +225,30 @@ img.jp-mod-unconfined {
 
 
 .jp-NBToolbar {
-    display: flex;
-    flex-direction: row;
-    border-bottom: 1px solid #E0E0E0;
-    height: 24px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid #E0E0E0;
+  height: 24px;
 }
 
 
 .jp-NBToolbar > .jp-NBToolbar-item {
-    flex: 0 0 auto;
-    padding-left: 8px;
-    padding-right: 8px;
-    vertical-align: middle;
-    font-size: 14px;
-    color: #616161;
-    line-height: 23px;
+  flex: 0 0 auto;
+  padding-left: 8px;
+  padding-right: 8px;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #616161;
+  line-height: 23px;
 }
 
 
 .jp-NBToolbar-item.jp-NBToolbar-button,
 .jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
-    font-family: FontAwesome;
-    text-align: center;
-    display: inline-block;
+  font-family: FontAwesome;
+  text-align: center;
+  display: inline-block;
 }
 
 

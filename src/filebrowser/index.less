@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-FileBrowser {
+  display: flex;
+  flex-direction: column;
   color: #757575;
   background: #FAFAFA;
   font-size: 13px;
@@ -11,6 +13,7 @@
 
 .jp-BreadCrumbs {
   margin: 4px 12px;
+  flex: 0 0 auto;
 }
 
 
@@ -35,6 +38,13 @@
 }
 
 
+.jp-FileButtons-buttonContent {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+
 .jp-FileButtons-button {
   flex: 1 1 auto;
   max-width: 100px;
@@ -46,6 +56,12 @@
   outline: 0;
   padding-top: 8px;
   padding-bottom: 8px;
+}
+
+
+.jp-FileButtons-buttonIcon {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 
@@ -75,11 +91,18 @@
 
 
 .jp-DirListing {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
   outline: 0;
 }
 
 
 .jp-DirListing-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
   margin-bottom: 4px;
   border-top: 1px solid #E0E0E0;
   border-bottom: 1px solid #E0E0E0;
@@ -136,12 +159,18 @@
 }
 
 /* increase specificity to override bundled default */
-/*.jp-DirListing > .jp-DirListing-content {
-  padding: 0px;
-}*/
+.jp-DirListing-content {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  overflow: auto;
+}
 
 
 .jp-DirListing-item {
+  display: flex;
+  flex-direction: row;
   padding: 4px 12px;
 }
 

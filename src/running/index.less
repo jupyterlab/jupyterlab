@@ -4,6 +4,8 @@
 |----------------------------------------------------------------------------*/
 
 .jp-RunningSessions {
+  display: flex;
+  flex-direction: column;
   min-width: 300px;
   color: #757575;
   background: #FAFAFA;
@@ -12,11 +14,15 @@
 
 
 .jp-RunningSessions-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
   border-bottom: 1px solid #E0E0E0;
 }
 
 
 .jp-RunningSessions-headerTitle {
+  flex: 1 1 auto;
   padding: 6px;
   font-size: 12px;
   vertical-align: middle;
@@ -37,6 +43,13 @@
 }
 
 
+.jp-RunningSessions-section {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+}
+
+
 .jp-RunningSessions-headerRefresh:before {
   font-family: FontAwesome;
   content: '\f021'; /* refresh */
@@ -52,6 +65,7 @@
 
 
 .jp-RunningSessions-sectionHeader {
+  flex: 0 0 auto;
   margin: 4px 0px;
   padding: 4px 12px;
   font-size: 11px;
@@ -62,7 +76,24 @@
 }
 
 
+.jp-RunningSessions-sectionContainer {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+
+.jp-RunningSessions-sectionList {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+
 .jp-RunningSessions-item {
+  display: flex;
+  flex-direction: row;
   padding: 3px 12px;
   font-size: 13px;
   font-weight: 500;
@@ -76,6 +107,7 @@
 
 
 .jp-RunningSessions-itemIcon {
+  flex: 0 0 auto;
   padding: 1px 4px;
   font-size: 14px;
   font-family: FontAwesome;
@@ -100,16 +132,19 @@
 }
 
 .jp-RunningSessions-itemLabel {
+  flex: 1 1 auto;
   padding: 1px;
 }
 
 .jp-RunningSessions-itemKernelName {
+  flex: 0 0 auto;
   padding: 1px;
   margin-right: 7px;
 }
 
 
 .jp-RunningSessions-itemShutdown {
+  flex: 0 0 auto;
   padding: 1px 4px;
   color: #ffffff;
   background: #f0ad4e;
