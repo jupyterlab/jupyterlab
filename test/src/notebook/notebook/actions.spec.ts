@@ -1216,10 +1216,6 @@ describe('notebook/notebook/actions', () => {
         expect(widget.childCount()).to.be(count);
       });
 
-      it('should deactivate the cells', () => {
-
-      });
-
     });
 
     describe('#toggleLineNumbers()', () => {
