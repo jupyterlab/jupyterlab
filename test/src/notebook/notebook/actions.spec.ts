@@ -970,6 +970,74 @@ describe('notebook/notebook/actions', () => {
 
     });
 
+    describe('#moveUp()', () => {
+
+      it('should move the selected cells up', () => {
+        widget.activeCellIndex = 2;
+        NotebookActions.extendSelectionAbove(widget);
+        NotebookActions.moveUp(widget);
+        expect(widget.isSelected(widget.childAt(0))).to.be(true);
+        expect(widget.isSelected(widget.childAt(1))).to.be(true);
+        expect(widget.isSelected(widget.childAt(2))).to.be(false);
+        expect(widget.activeCellIndex).to.be(0);
+      });
+
+      it('should be a no-op if there is no model', () => {
+        widget.model = null;
+        NotebookActions.moveUp(widget);
+        expect(widget.activeCellIndex).to.be(-1);
+      });
+
+      it('should not wrap around to the bottom', () => {
+        expect(widget.activeCellIndex).to.be(0);
+        NotebookActions.moveUp(widget);
+        expect(widget.activeCellIndex).to.be(0);
+      });
+
+      it('should be undo-able', () => {
+        widget.activeCellIndex++;
+        let source = widget.activeCell.model.source;
+        NotebookActions.moveUp(widget);
+        expect(widget.model.cells.get(0).source).to.be(source);
+        NotebookActions.undo(widget);
+        expect(widget.model.cells.get(1).source).to.be(source);
+      });
+
+    });
+
+    describe('#moveDown()', () => {
+
+      it('should move the selected cells down', () => {
+        NotebookActions.extendSelectionBelow(widget);
+        NotebookActions.moveDown(widget);
+        expect(widget.isSelected(widget.childAt(0))).to.be(false);
+        expect(widget.isSelected(widget.childAt(1))).to.be(true);
+        expect(widget.isSelected(widget.childAt(2))).to.be(true);
+        expect(widget.activeCellIndex).to.be(2);
+      });
+
+      it('should be a no-op if there is no model', () => {
+        widget.model = null;
+        NotebookActions.moveUp(widget);
+        expect(widget.activeCellIndex).to.be(-1);
+      });
+
+      it('should not wrap around to the top', () => {
+        widget.activeCellIndex = widget.childCount() - 1;
+        NotebookActions.moveDown(widget);
+        expect(widget.activeCellIndex).to.be(widget.childCount() - 1);
+      });
+
+      it('should be undo-able', () => {
+        let source = widget.activeCell.model.source;
+        NotebookActions.moveDown(widget);
+        expect(widget.model.cells.get(1).source).to.be(source);
+        NotebookActions.undo(widget);
+        expect(widget.model.cells.get(0).source).to.be(source);
+      });
+
+    });
+
     describe('#copy()', () => {
 
       it('should copy the selected cells to a clipboard', () => {
@@ -1146,6 +1214,10 @@ describe('notebook/notebook/actions', () => {
         let count = widget.childCount();
         NotebookActions.redo(widget);
         expect(widget.childCount()).to.be(count);
+      });
+
+      it('should deactivate the cells', () => {
+
       });
 
     });
