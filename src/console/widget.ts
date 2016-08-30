@@ -358,7 +358,7 @@ class ConsoleWidget extends Widget {
    */
   private _shouldExecute(): Promise<boolean> {
     let prompt = this.prompt;
-    let code = prompt.model.source;
+    let code = prompt.model.source + '\n';
     return new Promise<boolean>((resolve, reject) => {
       // Allow 250 ms for the response.
       let timer = setTimeout(() => {
@@ -367,7 +367,7 @@ class ConsoleWidget extends Widget {
       this._session.kernel.isComplete({ code }).then(isComplete => {
         clearTimeout(timer);
         if (isComplete.content.status === 'incomplete') {
-          prompt.model.source = code + '\n' + isComplete.content.indent;
+          prompt.model.source = code + isComplete.content.indent;
           prompt.editor.setCursorPosition(prompt.model.source.length);
           resolve(false);
         } else {
