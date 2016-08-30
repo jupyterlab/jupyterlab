@@ -84,6 +84,8 @@
 .p-TabBar.p-mod-bottom .p-TabBar-tab {
   flex: 0 1 var(--jp-horizontal-tab-width);
   min-height: calc(var(--jp-horizontal-tab-height) - 2*var(--jp-border-width));
+  // For some reason Firefox needs us to give a max-height as well...
+  max-height: calc(var(--jp-horizontal-tab-height) - 2*var(--jp-border-width));
   min-width: 35px;
   margin-left: calc(-1*var(--jp-border-width));
   line-height: calc(var(--jp-horizontal-tab-height) - 3*var(--jp-border-width));
