@@ -2,18 +2,20 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+
 .jp-FileBrowser {
   display: flex;
   flex-direction: column;
   color: var(--jp-ui-font-color);
   background: #FAFAFA;
-  font-size: 13px;
+  font-size: var(--jp-ui-fontSize);
 }
 
 
 .jp-BreadCrumbs {
-  margin: 4px 12px;
   flex: 0 0 auto;
+  margin: 4px 12px;
 }
 
 
@@ -34,6 +36,9 @@
 
 
 .jp-FileButtons {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;  
   border-bottom: var(--jp-border-width) solid var(--jp-secondary-border-color);
 }
 
@@ -52,7 +57,7 @@
   color: var(--jp-ui-font-color);
   background: #FAFAFA;
   border: none;
-  font-size: 14px;
+  font-size: var(--jp-ui-icon-fontSize);
   outline: 0;
   padding-top: 8px;
   padding-bottom: 8px;
