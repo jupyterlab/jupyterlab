@@ -148,6 +148,47 @@ describe('console/history', () => {
 
     });
 
+    describe('#forward()', () => {
+
+      it('should return void promise if no forward history exists', (done) => {
+        let history = new ConsoleHistory();
+        history.forward().then(result => {
+          expect(result).to.be(void 0);
+          done();
+        });
+      });
+
+      it('should return next items if they exist', (done) => {
+        let history = new TestHistory({
+          kernel: new MockKernel({ name: 'python' })
+        });
+        history.onHistory(mockHistory);
+        Promise.all([history.back(), history.back()]).then(() => {
+          history.forward().then(result => {
+            let index = mockHistory.content.history.length - 1;
+            let last = (mockHistory.content.history[index] as any)[2];
+            expect(result).to.be(last);
+            done();
+          });
+        });
+      });
+
+    });
+
+    describe('#push()', () => {
+
+      it('should allow addition of history items', (done) => {
+        let history = new ConsoleHistory();
+        let item = 'foo';
+        history.push(item);
+        history.back().then(result => {
+          expect(result).to.be(item);
+          done();
+        });
+      });
+
+    });
+
   });
 
 });
