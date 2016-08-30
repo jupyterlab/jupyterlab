@@ -22,11 +22,13 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
     compilation.chunks.forEach(function(chunk) {
       // Explore each module within the chunk (built inputs):
       chunk.modules.forEach(function(module) {
-        if (!module.getAllModuleDependencies) {
-          return;
+        var deps = [];
+        if (module.getAllModuleDependencies) {
+          deps = module.getAllModuleDependencies();
         }
+        // TODO: handle context dependencies
         var source = module.source().source();
-        for (var dep of module.getAllModuleDependencies()) {
+        for (var dep of deps) {
           var id = dep.id;
           var request = dep.request;
           // TODO: Mangle the request using package.json

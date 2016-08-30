@@ -28,6 +28,7 @@
     "update": "rimraf node_modules/jupyterlab && npm install",
     "build": "npm run update && npm run build:extension",
     "build:extension": "webpack",
+    "webpack:debug": "node-debug webpack",
     "postinstall": "node ../scripts/dedupe.js",
     "test": "echo 'no tests specified'"
   },
