@@ -68,7 +68,7 @@ class ConsoleHistory implements IConsoleHistory {
    */
   constructor(options?: ConsoleHistory.IOptions) {
     this._history = new Vector<string>();
-    if (options.kernel) {
+    if (options && options.kernel) {
       this.kernel = options.kernel;
     }
   }
