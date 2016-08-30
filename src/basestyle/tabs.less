@@ -1,0 +1,220 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.p-TabBar {
+  overflow: visible;
+  color: #777777;
+  font-size: @jp-ui-font-size;
+}
+
+
+.p-TabBar.p-mod-horizontal {
+  min-height: @jp-tab-height;
+}
+
+
+.p-TabBar.p-mod-vertical {
+  min-width: 80px;
+}
+
+
+.p-TabBar.p-mod-top {
+  border-bottom: @jp-tab-border-width solid #BDBDBD;
+}
+
+
+.p-TabBar.p-mod-bottom {
+  border-top: @jp-tab-border-width solid #BDBDBD;
+}
+
+
+.p-TabBar.p-mod-left {
+  border-right: @jp-tab-border-width solid #BDBDBD;
+}
+
+
+.p-TabBar.p-mod-right {
+  border-left: @jp-tab-border-width solid #BDBDBD;
+}
+
+
+.p-TabBar-content {
+  min-width: 0;
+  min-height: 0;
+}
+
+
+.p-TabBar.p-mod-top > .p-TabBar-content {
+  align-items: flex-end;
+}
+
+
+.p-TabBar.p-mod-bottom > .p-TabBar-content {
+  align-items: flex-start;
+}
+
+
+.p-TabBar-tab {
+  padding: 0px 10px;
+  background: #EEEEEE;
+  border: @jp-tab-border-width solid #BDBDBD;
+}
+
+
+.p-TabBar-tab.p-mod-current {
+  background: white;
+}
+
+
+.p-TabBar-tab:hover:not(.p-mod-current) {
+  background: #FAFAFA;
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab,
+.p-TabBar.p-mod-bottom .p-TabBar-tab {
+  flex: 0 1 @jp-tab-width;
+  min-height: (@jp-tab-height - 2*@jp-tab-border-width);
+  min-width: 35px;
+  margin-left: (-1*@jp-tab-border-width);
+  line-height: (@jp-tab-height - 3*@jp-tab-border-width);
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab {
+  border-bottom: none;
+}
+
+
+.p-TabBar.p-mod-bottom .p-TabBar-tab {
+  border-top: none;
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab:first-child,
+.p-TabBar.p-mod-bottom .p-TabBar-tab:first-child {
+  margin-left: 0;
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
+.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+  min-height: (@jp-tab-height - @jp-tab-border-width);
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current {
+  transform: translateY(@jp-tab-border-width);
+}
+
+
+.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+  transform: translateY(-1*@jp-tab-border-width);
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab,
+.p-TabBar.p-mod-right .p-TabBar-tab {
+  flex: 0 1 40px;
+  margin-top: -1px;
+  line-height: 40px;
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab {
+  border-right: none;
+}
+
+
+.p-TabBar.p-mod-right .p-TabBar-tab {
+  border-left: none;
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab:first-child,
+.p-TabBar.p-mod-right .p-TabBar-tab:first-child {
+  margin-top: 0;
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab.p-mod-current,
+.p-TabBar.p-mod-right .p-TabBar-tab.p-mod-current {
+  min-width: 80px;
+  max-width: 80px;
+}
+
+
+.p-TabBar.p-mod-right .p-TabBar-tab.p-mod-current {
+  transform: translateX(-1px);
+}
+
+
+.p-TabBar-tabIcon,
+.p-TabBar-tabLabel,
+.p-TabBar-tabCloseIcon {
+  display: inline-block;
+}
+
+
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
+  margin-left: 4px;
+}
+
+
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
+  content: '\f00d';  /* close */
+  font-family: FontAwesome;
+}
+
+
+.p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon:before {
+  font-family: FontAwesome;
+  content: '\f111'; /* circle */
+  font-size: 10px;
+}
+
+
+.p-TabBar-tab.p-mod-drag-image {
+  min-height: @jp-tab-height;
+  min-width: @jp-tab-width;
+  line-height: @jp-tab-height;
+  color: #777777;
+  background: white;
+  border: @jp-tab-border-width solid #BDBDBD;
+  border-top: @jp-tab-border-width solid #2196F3;
+  font-size: @jp-ui-font-size;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  transform: translateX(-40%) translateY(-58%);
+}
+
+
+.p-TabPanel-stackedPanel {
+  padding: 0px;
+  background: white;
+  border: @jp-tab-border-width solid #C0C0C0;
+  // This shadow requires a bottom/right padding on the .p-DockPanel-tabPanel
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+
+.p-TabPanel.p-mod-top-to-bottom > .p-TabPanel-stackedPanel {
+  border-top: none;
+}
+
+
+.p-TabPanel.p-mod-bottom-to-top > .p-TabPanel-stackedPanel {
+  border-bottom: none;
+}
+
+
+.p-TabPanel.p-mod-left-to-right > .p-TabPanel-stackedPanel {
+  border-left: none;
+}
+
+
+.p-TabPanel.p-mod-right-to-left > .p-TabPanel-stackedPanel {
+  border-right: none;
+}

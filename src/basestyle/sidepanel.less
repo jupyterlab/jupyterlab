@@ -3,69 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-/*-----------------------------------------------------------------------------
-| General
-|----------------------------------------------------------------------------*/
-
-
-body {
-  margin: 0;
-  padding: 0;
-  background: white;
-  overflow: hidden;
-  font-family: sans-serif;
-}
-
-
-/*-----------------------------------------------------------------------------
-| Shell
-|----------------------------------------------------------------------------*/
-
-
-.jp-ApplicationShell {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-
-#jp-main-dock-panel {
-  padding: 8px;
-}
-
-
-#jp-top-panel {
-  border-bottom: 1px solid black;
-  background: white;
-  display: flex;
-  min-height: 28px;
-}
-
-
-#jp-left-stack > .p-Widget, #jp-right-stack > .p-Widget {
-  min-width: 300px;
-}
-
-
-#jp-right-stack {
-  border-left: 1px solid black;
-}
-
-
-#jp-left-stack {
-  border-right: 1px solid black;
-}
-
-
-#jp-main-dock-panel .p-TabBar-tab.jp-mod-current {
-  border-top: 1px solid black;
-}
-
 
 .jp-SideBar.p-TabBar {
-  color: black;
+  color: #777777;
   background: white;
   font-size: 14px;
   min-width: 36px;
@@ -76,12 +16,12 @@ body {
 
 
 .jp-SideBar.p-TabBar.jp-mod-left {
-  border-right: 1px solid black;
+  border-right: 1px solid #BDBDBD;
 }
 
 
 .jp-SideBar.p-TabBar.jp-mod-right {
-  border-left: 1px solid black;
+  border-left: 1px solid #BDBDBD;
 }
 
 
@@ -123,21 +63,36 @@ body {
 
 
 .jp-SideBar .p-TabBar-tab:hover:not(.p-mod-current) {
-  background: white;
+  background: #FAFAFA;
 }
 
 
 .jp-SideBar .p-TabBar-tab.p-mod-current {
-  color: black;
-  background: white;
+  color: #2196F3;
+  background: #FAFAFA;
 }
 
 
 .jp-SideBar.jp-mod-left .p-TabBar-tab {
-  border-left: 1px solid black;
+  border-left: 1px solid #BDBDBD;
 }
 
 
 .jp-SideBar.jp-mod-right .p-TabBar-tab {
-  border-right: 1px solid black;
+  border-right: 1px solid #BDBDBD;
+}
+
+
+#jp-left-stack > .p-Widget, #jp-right-stack > .p-Widget {
+  min-width: 300px;
+}
+
+
+#jp-right-stack {
+  border-left: 1px solid #BDBDBD;
+}
+
+
+#jp-left-stack {
+  border-right: 1px solid #BDBDBD;
 }
