@@ -249,6 +249,52 @@ namespace NotebookActions {
   }
 
   /**
+   * Move the selected cell(s) down.
+   *
+   * @param widget = The target notebook widget.
+   */
+  export
+  function moveDown(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let cells = widget.model.cells;
+    cells.beginCompoundOperation();
+    for (let i = cells.length - 2; i > 0; i--) {
+      if (widget.isSelected(widget.childAt(i))) {
+        if (!widget.isSelected(widget.childAt(i + 1))) {
+          cells.move(i, i + 1);
+          widget.select(widget.childAt(i + 1));
+        }
+      }
+    }
+    cells.endCompoundOperation();
+  }
+
+  /**
+   * Move the selected cell(s) up.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function moveUp(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let cells = widget.model.cells;
+    cells.beginCompoundOperation();
+    for (let i = 1; i < cells.length; i++) {
+      if (widget.isSelected(widget.childAt(i))) {
+        if (!widget.isSelected(widget.childAt(i - 1))) {
+          cells.move(i, i - 1);
+          widget.select(widget.childAt(i - 1));
+        }
+      }
+    }
+    cells.endCompoundOperation();
+  }
+
+  /**
    * Change the selected cell type(s).
    *
    * @param widget - The target notebook widget.
