@@ -162,6 +162,15 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           panel.activated.connect(() => {
             inspector.source = panel.content.inspectionHandler;
           });
+          // Update the caption of the tab when the kernel changes.
+          panel.content.session.kernelChanged.connect(() => {
+            let name = panel.content.session.kernel.name;
+            name = specs.kernelspecs[name].spec.display_name;
+            captionOptions.displayName = name;
+            captionOptions.opened = new Date();
+            captionOptions.executed = null;
+            panel.title.caption = Private.caption(captionOptions);
+          });
           tracker.add(panel);
         });
       }
