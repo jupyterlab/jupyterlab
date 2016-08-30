@@ -139,7 +139,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         let kernelName = `${displayNameMap[displayName]}`;
         let captionOptions: Private.ICaptionOptions = {
           label, displayName, path,
-          opened: new Date()
+          connected: new Date()
         };
         manager.startNew({ path, kernelName }).then(session => {
           let panel = new ConsolePanel({
@@ -161,6 +161,15 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           // Set the source of the code inspector to the current console.
           panel.activated.connect(() => {
             inspector.source = panel.content.inspectionHandler;
+          });
+          // Update the caption of the tab when the kernel changes.
+          panel.content.session.kernelChanged.connect(() => {
+            let name = panel.content.session.kernel.name;
+            name = specs.kernelspecs[name].spec.display_name;
+            captionOptions.displayName = name;
+            captionOptions.connected = new Date();
+            captionOptions.executed = null;
+            panel.title.caption = Private.caption(captionOptions);
           });
           tracker.add(panel);
         });
@@ -271,9 +280,9 @@ namespace Private {
   export
   interface ICaptionOptions {
     /**
-     * The time when the console was opened.
+     * The time when the console connected to the current kernel.
      */
-    opened: Date;
+    connected: Date;
 
     /**
      * The time when the console last executed its prompt.
@@ -305,12 +314,12 @@ namespace Private {
    */
   export
   function caption(options: ICaptionOptions): string {
-    let { label, path, displayName, opened, executed } = options;
+    let { label, path, displayName, connected, executed } = options;
     let caption = (
       `Name: ${label}\n` +
       `Directory: ${ContentsManager.dirname(path)}\n` +
       `Kernel: ${displayName}\n` +
-      `Opened: ${dateTime(opened.toISOString())}`
+      `Connected: ${dateTime(connected.toISOString())}`
     );
     if (executed) {
       caption += `\nLast Execution: ${dateTime(executed.toISOString())}`;
