@@ -5,7 +5,7 @@
 .jp-FileBrowser {
   display: flex;
   flex-direction: column;
-  color: #757575;
+  color: var(--jp-ui-font-color);
   background: #FAFAFA;
   font-size: 13px;
 }
@@ -34,7 +34,7 @@
 
 
 .jp-FileButtons {
-  border-bottom: 1px solid #E0E0E0;
+  border-bottom: var(--jp-border-width) solid var(--jp-secondary-border-color);
 }
 
 
@@ -49,7 +49,7 @@
   flex: 1 1 auto;
   max-width: 100px;
   padding: 4px 6px;
-  color: #757575;
+  color: var(--jp-ui-font-color);
   background: #FAFAFA;
   border: none;
   font-size: 14px;
@@ -80,7 +80,7 @@
 .jp-FileButtons-button:active,
 .jp-FileButtons-button.jp-id-create.jp-mod-active {
   background: #EEEEEE;
-  border-color: #BDBDBD;
+  border-color: var(--jp-primary-border-color);
   z-index: 1; /* raise overlapping border */
 }
 
@@ -104,8 +104,8 @@
   flex-direction: row;
   overflow: hidden;
   margin-bottom: 4px;
-  border-top: 1px solid #E0E0E0;
-  border-bottom: 1px solid #E0E0E0;
+  border-top: var(--jp-border-width) solid var(--jp-secondary-border-color);
+  border-bottom: var(--jp-border-width) solid var(--jp-secondary-border-color);
 }
 
 
@@ -127,7 +127,7 @@
 
 .jp-DirListing-headerItem.jp-id-modified {
   flex: 0 0 112px;
-  border-left: 1px solid #E0E0E0;
+  border-left: var(--jp-border-width) solid var(--jp-secondary-border-color);
   text-align: right;
 }
 
@@ -177,7 +177,7 @@
 
 .jp-DirListing-item.jp-mod-selected {
   color: white;
-  background: #2196F3;
+  background: var(--jp-primary-color);
 }
 
 
@@ -242,7 +242,7 @@
   background-color: #FFFFFF;
   box-shadow: 5px 5px 10px rgba(46,46,46,0.5);
   border-radius: 3px;
-  color: #757575;
+  color: var(--jp-ui-font-color);
   transform: translateX(-40%) translateY(-58%);
 }
 

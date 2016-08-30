@@ -5,14 +5,20 @@
 
 
 .p-TabBar {
+  --jp-horizontal-tab-height: 24px;
+  --jp-horizontal-tab-width: 144px;
+}
+
+
+.p-TabBar {
   overflow: visible;
-  color: #777777;
-  font-size: @jp-ui-font-size;
+  color: var(--jp-ui-font-color);
+  font-size: var(--jp-ui-fontSize);
 }
 
 
 .p-TabBar.p-mod-horizontal {
-  min-height: @jp-tab-height;
+  min-height: var(--jp-horizontal-tab-height);
 }
 
 
@@ -22,22 +28,22 @@
 
 
 .p-TabBar.p-mod-top {
-  border-bottom: @jp-tab-border-width solid #BDBDBD;
+  border-bottom: var(--jp-border-width) solid var(--jp-primary-border-color);
 }
 
 
 .p-TabBar.p-mod-bottom {
-  border-top: @jp-tab-border-width solid #BDBDBD;
+  border-top: var(--jp-border-width) solid var(--jp-primary-border-color);
 }
 
 
 .p-TabBar.p-mod-left {
-  border-right: @jp-tab-border-width solid #BDBDBD;
+  border-right: var(--jp-border-width) solid var(--jp-primary-border-color);
 }
 
 
 .p-TabBar.p-mod-right {
-  border-left: @jp-tab-border-width solid #BDBDBD;
+  border-left: var(--jp-border-width) solid var(--jp-primary-border-color);
 }
 
 
@@ -60,7 +66,7 @@
 .p-TabBar-tab {
   padding: 0px 10px;
   background: #EEEEEE;
-  border: @jp-tab-border-width solid #BDBDBD;
+  border: var(--jp-border-width) solid var(--jp-primary-border-color);
 }
 
 
@@ -76,11 +82,11 @@
 
 .p-TabBar.p-mod-top .p-TabBar-tab,
 .p-TabBar.p-mod-bottom .p-TabBar-tab {
-  flex: 0 1 @jp-tab-width;
-  min-height: (@jp-tab-height - 2*@jp-tab-border-width);
+  flex: 0 1 var(--jp-horizontal-tab-width);
+  min-height: calc(var(--jp-horizontal-tab-height) - 2*var(--jp-border-width));
   min-width: 35px;
-  margin-left: (-1*@jp-tab-border-width);
-  line-height: (@jp-tab-height - 3*@jp-tab-border-width);
+  margin-left: calc(-1*var(--jp-border-width));
+  line-height: calc(var(--jp-horizontal-tab-height) - 3*var(--jp-border-width));
 }
 
 
@@ -102,17 +108,17 @@
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  min-height: (@jp-tab-height - @jp-tab-border-width);
+  min-height: calc(var(--jp-horizontal-tab-height) - var(--jp-border-width));
 }
 
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current {
-  transform: translateY(@jp-tab-border-width);
+  transform: translateY(var(--jp-border-width));
 }
 
 
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  transform: translateY(-1*@jp-tab-border-width);
+  transform: translateY(-1*var(--jp-border-width));
 }
 
 
@@ -178,14 +184,14 @@
 
 
 .p-TabBar-tab.p-mod-drag-image {
-  min-height: @jp-tab-height;
-  min-width: @jp-tab-width;
-  line-height: @jp-tab-height;
-  color: #777777;
+  min-height: var(--jp-horizontal-tab-height);
+  min-width: var(--jp-horizontal-tab-width);
+  line-height: var(--jp-horizontal-tab-height);
+  color: var(--jp-ui-font-color);
   background: white;
-  border: @jp-tab-border-width solid #BDBDBD;
-  border-top: @jp-tab-border-width solid #2196F3;
-  font-size: @jp-ui-font-size;
+  border: var(--jp-border-width) solid var(--jp-primary-border-color);
+  border-top: var(--jp-border-width) solid var(--jp-primary-color);
+  font-size: var(--jp-ui-fontSize);
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   transform: translateX(-40%) translateY(-58%);
 }
@@ -194,7 +200,7 @@
 .p-TabPanel-stackedPanel {
   padding: 0px;
   background: white;
-  border: @jp-tab-border-width solid #C0C0C0;
+  border: var(--jp-border-width) solid #C0C0C0;
   // This shadow requires a bottom/right padding on the .p-DockPanel-tabPanel
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }

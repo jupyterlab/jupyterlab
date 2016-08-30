@@ -5,22 +5,23 @@
 
 @import '../basestyle/materialcolors.less';
 
-@jp-border-width: 1px;
+:root {
+  --jp-border-width: 1px;
+  
+  --jp-primary-border-color: var(--md-grey-400);
+  --jp-secondary-border-color: var(--md-grey-300);
 
-@jp-tab-border-width: @jp-border-width;
-@jp-tab-height: 24px;
-@jp-tab-width: 144px;
+  --jp-ui-fontSize: 13px;
+  --jp-ui-icon-fontSize: 14px;
+  --jp-ui-font-color: var(--md-grey-700);
 
-@jp-ui-font-size: 13px;
-@jp-ui-icon-size: 14px;
-@jp-content-font-size: 14px;
+  --jp-content-fontSize: 14px;
+  --jp-content-font-color: black;
 
-@jp-primary-border-color: @md-grey-500;
-@jp-secondary-border-color: @md-grey-300;
+  --jp-primary-color: var(--md-blue-500);
+  --jp-secondary-color: var(--md-orange-500);
+  --jp-primary-layout-color: white;
+  --jp-secondary-layout-color: var(--md-grey-500);
 
-@jp-primary-font-color: @md-grey-700;
-
-@jp-dockarea-background: @md-grey-200;
-
-
-
+  --jp-dockarea-background: var(--md-grey-300);
+}

@@ -1,559 +1,279 @@
-// ==========================================================================
-//
-// Name:        UI Color Palette
-// Description: The color palette of material design.
-// Version:     2.3.1
-//
-// Author:      Denis Malinochkin
-// Git:         https://github.com/mrmlnc/material-color
-//
-// twitter:     @mrmlnc
-//
-// ==========================================================================
-
-
-//
-// List of base colors
-//
-
-// @md-red
-// @md-pink
-// @md-purple
-// @md-deep-purple
-// @md-indigo
-// @md-blue
-// @md-light-blue
-// @md-cyan
-// @md-teal
-// @md-green
-// @md-light-green
-// @md-lime
-// @md-yellow
-// @md-amber
-// @md-orange
-// @md-deep-orange
-// @md-brown
-// @md-grey
-// @md-blue-grey
-// @md-black
-// @md-white
-
-
-//
-// Red
-//
-
-@md-red-list: #ffebee, #ffcdd2, #ef9a9a, #e57373, #ef5350,
-               #f44336, #e53935, #d32f2f, #c62828, #b71c1c,
-               #ff8a80, #ff5252, #ff1744, #d50000;
-
-@md-red:      extract(@md-red-list, 6);
-
-@md-red-50:   extract(@md-red-list, 1);
-@md-red-100:  extract(@md-red-list, 2);
-@md-red-200:  extract(@md-red-list, 3);
-@md-red-300:  extract(@md-red-list, 4);
-@md-red-400:  extract(@md-red-list, 5);
-@md-red-500:  extract(@md-red-list, 6);
-@md-red-600:  extract(@md-red-list, 7);
-@md-red-700:  extract(@md-red-list, 8);
-@md-red-800:  extract(@md-red-list, 9);
-@md-red-900:  extract(@md-red-list, 10);
-@md-red-A100: extract(@md-red-list, 11);
-@md-red-A200: extract(@md-red-list, 12);
-@md-red-A400: extract(@md-red-list, 13);
-@md-red-A700: extract(@md-red-list, 14);
-
-
-//
-// Pink
-//
-
-@md-pink-list: #fce4ec, #f8bbd0, #f48fb1, #f06292, #ec407a,
-                #e91e63, #d81b60, #c2185b, #ad1457, #880e4f,
-                #ff80ab, #ff4081, #f50057, #c51162;
-
-@md-pink:      extract(@md-pink-list, 6);
-
-@md-pink-50:   extract(@md-pink-list, 1);
-@md-pink-100:  extract(@md-pink-list, 2);
-@md-pink-200:  extract(@md-pink-list, 3);
-@md-pink-300:  extract(@md-pink-list, 4);
-@md-pink-400:  extract(@md-pink-list, 5);
-@md-pink-500:  extract(@md-pink-list, 6);
-@md-pink-600:  extract(@md-pink-list, 7);
-@md-pink-700:  extract(@md-pink-list, 8);
-@md-pink-800:  extract(@md-pink-list, 9);
-@md-pink-900:  extract(@md-pink-list, 10);
-@md-pink-A100: extract(@md-pink-list, 11);
-@md-pink-A200: extract(@md-pink-list, 12);
-@md-pink-A400: extract(@md-pink-list, 13);
-@md-pink-A700: extract(@md-pink-list, 14);
-
-
-//
-// Purple
-//
-
-@md-purple-list: #f3e5f5, #e1bee7, #ce93d8, #ba68c8, #ab47bc,
-                  #9c27b0, #8e24aa, #7b1fa2, #6a1b9a, #4a148c,
-                  #ea80fc, #e040fb, #d500f9, #aa00ff;
-
-@md-purple:      extract(@md-purple-list, 6);
-
-@md-purple-50:   extract(@md-purple-list, 1);
-@md-purple-100:  extract(@md-purple-list, 2);
-@md-purple-200:  extract(@md-purple-list, 3);
-@md-purple-300:  extract(@md-purple-list, 4);
-@md-purple-400:  extract(@md-purple-list, 5);
-@md-purple-500:  extract(@md-purple-list, 6);
-@md-purple-600:  extract(@md-purple-list, 7);
-@md-purple-700:  extract(@md-purple-list, 8);
-@md-purple-800:  extract(@md-purple-list, 9);
-@md-purple-900:  extract(@md-purple-list, 10);
-@md-purple-A100: extract(@md-purple-list, 11);
-@md-purple-A200: extract(@md-purple-list, 12);
-@md-purple-A400: extract(@md-purple-list, 13);
-@md-purple-A700: extract(@md-purple-list, 14);
-
-
-//
-// Deep Purple
-//
-@md-deep-purple-list: #ede7f6, #d1c4e9, #b39ddb, #9575cd, #7e57c2,
-                       #673ab7, #5e35b1, #512da8, #4527a0, #311b92,
-                       #b388ff, #7c4dff, #651fff, #6200ea;
-
-@md-deep-purple:      extract(@md-deep-purple-list, 6);
-
-@md-deep-purple-50:   extract(@md-deep-purple-list, 1);
-@md-deep-purple-100:  extract(@md-deep-purple-list, 2);
-@md-deep-purple-200:  extract(@md-deep-purple-list, 3);
-@md-deep-purple-300:  extract(@md-deep-purple-list, 4);
-@md-deep-purple-400:  extract(@md-deep-purple-list, 5);
-@md-deep-purple-500:  extract(@md-deep-purple-list, 6);
-@md-deep-purple-600:  extract(@md-deep-purple-list, 7);
-@md-deep-purple-700:  extract(@md-deep-purple-list, 8);
-@md-deep-purple-800:  extract(@md-deep-purple-list, 9);
-@md-deep-purple-900:  extract(@md-deep-purple-list, 10);
-@md-deep-purple-A100: extract(@md-deep-purple-list, 11);
-@md-deep-purple-A200: extract(@md-deep-purple-list, 12);
-@md-deep-purple-A400: extract(@md-deep-purple-list, 13);
-@md-deep-purple-A700: extract(@md-deep-purple-list, 14);
-
-
-//
-// Indigo
-//
-
-@md-indigo-list:  #e8eaf6, #c5cae9, #9fa8da, #7986cb, #5c6bc0,
-                   #3f51b5, #3949ab, #303f9f, #283593, #1a237e,
-                   #8c9eff, #536dfe, #3d5afe, #304ffe;
-
-@md-indigo:       extract(@md-indigo-list, 6);
-
-@md-indigo-50:    extract(@md-indigo-list, 1);
-@md-indigo-100:   extract(@md-indigo-list, 2);
-@md-indigo-200:   extract(@md-indigo-list, 3);
-@md-indigo-300:   extract(@md-indigo-list, 4);
-@md-indigo-400:   extract(@md-indigo-list, 5);
-@md-indigo-500:   extract(@md-indigo-list, 6);
-@md-indigo-600:   extract(@md-indigo-list, 7);
-@md-indigo-700:   extract(@md-indigo-list, 8);
-@md-indigo-800:   extract(@md-indigo-list, 9);
-@md-indigo-900:   extract(@md-indigo-list, 10);
-@md-indigo-A100:  extract(@md-indigo-list, 11);
-@md-indigo-A200:  extract(@md-indigo-list, 12);
-@md-indigo-A400:  extract(@md-indigo-list, 13);
-@md-indigo-A700:  extract(@md-indigo-list, 14);
-
-
-//
-// Blue
-//
-
-@md-blue-list:  #e3f2fd, #bbdefb, #90caf9, #64b5f6, #42a5f5,
-                 #2196f3, #1e88e5, #1976d2, #1565c0, #0d47a1,
-                 #82b1ff, #448aff, #2979ff, #2962ff;
-
-@md-blue:       extract(@md-blue-list, 6);
-
-@md-blue-50:    extract(@md-blue-list, 1);
-@md-blue-100:   extract(@md-blue-list, 2);
-@md-blue-200:   extract(@md-blue-list, 3);
-@md-blue-300:   extract(@md-blue-list, 4);
-@md-blue-400:   extract(@md-blue-list, 5);
-@md-blue-500:   extract(@md-blue-list, 6);
-@md-blue-600:   extract(@md-blue-list, 7);
-@md-blue-700:   extract(@md-blue-list, 8);
-@md-blue-800:   extract(@md-blue-list, 9);
-@md-blue-900:   extract(@md-blue-list, 10);
-@md-blue-A100:  extract(@md-blue-list, 11);
-@md-blue-A200:  extract(@md-blue-list, 12);
-@md-blue-A400:  extract(@md-blue-list, 13);
-@md-blue-A700:  extract(@md-blue-list, 14);
-
-
-//
-// Light Blue
-//
-
-@md-light-blue-list: #e1f5fe, #b3e5fc, #81d4fa, #4fc3f7, #29b6f6,
-                      #03a9f4, #039be5, #0288d1, #0277bd, #01579b,
-                      #80d8ff, #40c4ff, #00b0ff, #0091ea;
-
-@md-light-blue:      extract(@md-light-blue-list, 6);
-
-@md-light-blue-50:   extract(@md-light-blue-list, 1);
-@md-light-blue-100:  extract(@md-light-blue-list, 2);
-@md-light-blue-200:  extract(@md-light-blue-list, 3);
-@md-light-blue-300:  extract(@md-light-blue-list, 4);
-@md-light-blue-400:  extract(@md-light-blue-list, 5);
-@md-light-blue-500:  extract(@md-light-blue-list, 6);
-@md-light-blue-600:  extract(@md-light-blue-list, 7);
-@md-light-blue-700:  extract(@md-light-blue-list, 8);
-@md-light-blue-800:  extract(@md-light-blue-list, 9);
-@md-light-blue-900:  extract(@md-light-blue-list, 10);
-@md-light-blue-A100: extract(@md-light-blue-list, 11);
-@md-light-blue-A200: extract(@md-light-blue-list, 12);
-@md-light-blue-A400: extract(@md-light-blue-list, 13);
-@md-light-blue-A700: extract(@md-light-blue-list, 14);
-
-
-//
-// Cyan
-//
-
-@md-cyan-list: #e0f7fa, #b2ebf2, #80deea, #4dd0e1, #26c6da,
-                #00bcd4, #00acc1, #0097a7, #00838f, #006064,
-                #84ffff, #18ffff, #00e5ff, #00b8d4;
-
-@md-cyan:      extract(@md-cyan-list, 6);
-
-@md-cyan-50:   extract(@md-cyan-list, 1);
-@md-cyan-100:  extract(@md-cyan-list, 2);
-@md-cyan-200:  extract(@md-cyan-list, 3);
-@md-cyan-300:  extract(@md-cyan-list, 4);
-@md-cyan-400:  extract(@md-cyan-list, 5);
-@md-cyan-500:  extract(@md-cyan-list, 6);
-@md-cyan-600:  extract(@md-cyan-list, 7);
-@md-cyan-700:  extract(@md-cyan-list, 8);
-@md-cyan-800:  extract(@md-cyan-list, 9);
-@md-cyan-900:  extract(@md-cyan-list, 10);
-@md-cyan-A100: extract(@md-cyan-list, 11);
-@md-cyan-A200: extract(@md-cyan-list, 12);
-@md-cyan-A400: extract(@md-cyan-list, 13);
-@md-cyan-A700: extract(@md-cyan-list, 14);
-
-
-//
-// Teal
-//
-
-@md-teal-list: #e0f2f1, #b2dfdb, #80cbc4, #4db6ac, #26a69a,
-                #009688, #00897b, #00796b, #00695c, #004d40,
-                #a7ffeb, #64ffda, #1de9b6, #00bfa5;
-
-@md-teal:      extract(@md-teal-list, 6);
-
-@md-teal-50:   extract(@md-teal-list, 1);
-@md-teal-100:  extract(@md-teal-list, 2);
-@md-teal-200:  extract(@md-teal-list, 3);
-@md-teal-300:  extract(@md-teal-list, 4);
-@md-teal-400:  extract(@md-teal-list, 5);
-@md-teal-500:  extract(@md-teal-list, 6);
-@md-teal-600:  extract(@md-teal-list, 7);
-@md-teal-700:  extract(@md-teal-list, 8);
-@md-teal-800:  extract(@md-teal-list, 9);
-@md-teal-900:  extract(@md-teal-list, 10);
-@md-teal-A100: extract(@md-teal-list, 11);
-@md-teal-A200: extract(@md-teal-list, 12);
-@md-teal-A400: extract(@md-teal-list, 13);
-@md-teal-A700: extract(@md-teal-list, 14);
-
-
-//
-// Green
-//
-
-@md-green-list: #e8f5e9, #c8e6c9, #a5d6a7, #81c784, #66bb6a,
-                 #4caf50, #43a047, #388e3c, #2e7d32, #1b5e20,
-                 #b9f6ca, #69f0ae, #00e676, #00c853;
-
-@md-green:      extract(@md-green-list, 6);
-
-@md-green-50:   extract(@md-green-list, 1);
-@md-green-100:  extract(@md-green-list, 2);
-@md-green-200:  extract(@md-green-list, 3);
-@md-green-300:  extract(@md-green-list, 4);
-@md-green-400:  extract(@md-green-list, 5);
-@md-green-500:  extract(@md-green-list, 6);
-@md-green-600:  extract(@md-green-list, 7);
-@md-green-700:  extract(@md-green-list, 8);
-@md-green-800:  extract(@md-green-list, 9);
-@md-green-900:  extract(@md-green-list, 10);
-@md-green-A100: extract(@md-green-list, 11);
-@md-green-A200: extract(@md-green-list, 12);
-@md-green-A400: extract(@md-green-list, 13);
-@md-green-A700: extract(@md-green-list, 14);
-
-
-//
-// Light Green
-//
-
-@md-light-green-list: #f1f8e9, #dcedc8, #c5e1a5, #aed581, #9ccc65,
-                       #8bc34a, #7cb342, #689f38, #558b2f, #33691e,
-                       #ccff90, #b2ff59, #76ff03, #64dd17;
-
-@md-light-green:      extract(@md-light-green-list, 6);
-
-@md-light-green-50:   extract(@md-light-green-list, 1);
-@md-light-green-100:  extract(@md-light-green-list, 2);
-@md-light-green-200:  extract(@md-light-green-list, 3);
-@md-light-green-300:  extract(@md-light-green-list, 4);
-@md-light-green-400:  extract(@md-light-green-list, 5);
-@md-light-green-500:  extract(@md-light-green-list, 6);
-@md-light-green-600:  extract(@md-light-green-list, 7);
-@md-light-green-700:  extract(@md-light-green-list, 8);
-@md-light-green-800:  extract(@md-light-green-list, 9);
-@md-light-green-900:  extract(@md-light-green-list, 10);
-@md-light-green-A100: extract(@md-light-green-list, 11);
-@md-light-green-A200: extract(@md-light-green-list, 12);
-@md-light-green-A400: extract(@md-light-green-list, 13);
-@md-light-green-A700: extract(@md-light-green-list, 14);
-
-
-//
-// Lime
-//
-@md-lime-list: #f9fbe7, #f0f4c3, #e6ee9c, #dce775, #d4e157,
-                #cddc39, #c0ca33, #afb42b, #9e9d24, #827717,
-                #f4ff81, #eeff41, #c6ff00, #aeea00;
-
-@md-lime:      extract(@md-lime-list, 6);
-
-@md-lime-50:   extract(@md-lime-list, 1);
-@md-lime-100:  extract(@md-lime-list, 2);
-@md-lime-200:  extract(@md-lime-list, 3);
-@md-lime-300:  extract(@md-lime-list, 4);
-@md-lime-400:  extract(@md-lime-list, 5);
-@md-lime-500:  extract(@md-lime-list, 6);
-@md-lime-600:  extract(@md-lime-list, 7);
-@md-lime-700:  extract(@md-lime-list, 8);
-@md-lime-800:  extract(@md-lime-list, 9);
-@md-lime-900:  extract(@md-lime-list, 10);
-@md-lime-A100: extract(@md-lime-list, 11);
-@md-lime-A200: extract(@md-lime-list, 12);
-@md-lime-A400: extract(@md-lime-list, 13);
-@md-lime-A700: extract(@md-lime-list, 14);
-
-
-//
-// Yellow
-//
-
-@md-yellow-list: #fffde7, #fff9c4, #fff59d, #fff176, #ffee58,
-                  #ffeb3b, #fdd835, #fbc02d, #f9a825, #f57f17,
-                  #ffff8d, #ffff00, #ffea00, #ffd600;
-
-@md-yellow:      extract(@md-yellow-list, 6);
-
-@md-yellow-50:   extract(@md-yellow-list, 1);
-@md-yellow-100:  extract(@md-yellow-list, 2);
-@md-yellow-200:  extract(@md-yellow-list, 3);
-@md-yellow-300:  extract(@md-yellow-list, 4);
-@md-yellow-400:  extract(@md-yellow-list, 5);
-@md-yellow-500:  extract(@md-yellow-list, 6);
-@md-yellow-600:  extract(@md-yellow-list, 7);
-@md-yellow-700:  extract(@md-yellow-list, 8);
-@md-yellow-800:  extract(@md-yellow-list, 9);
-@md-yellow-900:  extract(@md-yellow-list, 10);
-@md-yellow-A100: extract(@md-yellow-list, 11);
-@md-yellow-A200: extract(@md-yellow-list, 12);
-@md-yellow-A400: extract(@md-yellow-list, 13);
-@md-yellow-A700: extract(@md-yellow-list, 14);
-
-
-//
-// Amber
-//
-
-@md-amber-list: #fff8e1, #ffecb3, #ffe082, #ffd54f, #ffca28,
-                 #ffc107, #ffb300, #ffa000, #ff8f00, #ff6f00,
-                 #ffe57f, #ffd740, #ffc400, #ffab00;
-
-@md-amber:      extract(@md-amber-list, 6);
-
-@md-amber-50:   extract(@md-amber-list, 1);
-@md-amber-100:  extract(@md-amber-list, 2);
-@md-amber-200:  extract(@md-amber-list, 3);
-@md-amber-300:  extract(@md-amber-list, 4);
-@md-amber-400:  extract(@md-amber-list, 5);
-@md-amber-500:  extract(@md-amber-list, 6);
-@md-amber-600:  extract(@md-amber-list, 7);
-@md-amber-700:  extract(@md-amber-list, 8);
-@md-amber-800:  extract(@md-amber-list, 9);
-@md-amber-900:  extract(@md-amber-list, 10);
-@md-amber-A100: extract(@md-amber-list, 11);
-@md-amber-A200: extract(@md-amber-list, 12);
-@md-amber-A400: extract(@md-amber-list, 13);
-@md-amber-A700: extract(@md-amber-list, 14);
-
-
-//
-// Orange
-//
-
-@md-orange-list: #fff3e0, #ffe0b2, #ffcc80, #ffb74d, #ffa726,
-                  #ff9800, #fb8c00, #f57c00, #ef6c00, #e65100,
-                  #ffd180, #ffab40, #ff9100, #ff6d00;
-
-@md-orange:      extract(@md-orange-list, 6);
-
-@md-orange-50:   extract(@md-orange-list, 1);
-@md-orange-100:  extract(@md-orange-list, 2);
-@md-orange-200:  extract(@md-orange-list, 3);
-@md-orange-300:  extract(@md-orange-list, 4);
-@md-orange-400:  extract(@md-orange-list, 5);
-@md-orange-500:  extract(@md-orange-list, 6);
-@md-orange-600:  extract(@md-orange-list, 7);
-@md-orange-700:  extract(@md-orange-list, 8);
-@md-orange-800:  extract(@md-orange-list, 9);
-@md-orange-900:  extract(@md-orange-list, 10);
-@md-orange-A100: extract(@md-orange-list, 11);
-@md-orange-A200: extract(@md-orange-list, 12);
-@md-orange-A400: extract(@md-orange-list, 13);
-@md-orange-A700: extract(@md-orange-list, 14);
-
-
-//
-// Deep Orange
-//
-
-@md-deep-orange-list: #fbe9e7, #ffccbc, #ffab91, #ff8a65, #ff7043,
-                       #ff5722, #f4511e, #e64a19, #d84315, #bf360c,
-                       #ff9e80, #ff6e40, #ff3d00, #dd2c00;
-
-@md-deep-orange:      extract(@md-deep-orange-list, 6);
-
-@md-deep-orange-50:   extract(@md-deep-orange-list, 1);
-@md-deep-orange-100:  extract(@md-deep-orange-list, 2);
-@md-deep-orange-200:  extract(@md-deep-orange-list, 3);
-@md-deep-orange-300:  extract(@md-deep-orange-list, 4);
-@md-deep-orange-400:  extract(@md-deep-orange-list, 5);
-@md-deep-orange-500:  extract(@md-deep-orange-list, 6);
-@md-deep-orange-600:  extract(@md-deep-orange-list, 7);
-@md-deep-orange-700:  extract(@md-deep-orange-list, 8);
-@md-deep-orange-800:  extract(@md-deep-orange-list, 9);
-@md-deep-orange-900:  extract(@md-deep-orange-list, 10);
-@md-deep-orange-A100: extract(@md-deep-orange-list, 11);
-@md-deep-orange-A200: extract(@md-deep-orange-list, 12);
-@md-deep-orange-A400: extract(@md-deep-orange-list, 13);
-@md-deep-orange-A700: extract(@md-deep-orange-list, 14);
-
-
-//
-// Brown
-//
-
-@md-brown-list: #efebe9, #d7ccc8, #bcaaa4, #a1887f, #8d6e63,
-                 #795548, #6d4c41, #5d4037, #4e342e, #3e2723;
-
-@md-brown:      extract(@md-brown-list, 6);
-
-@md-brown-50:   extract(@md-brown-list, 1);
-@md-brown-100:  extract(@md-brown-list, 2);
-@md-brown-200:  extract(@md-brown-list, 3);
-@md-brown-300:  extract(@md-brown-list, 4);
-@md-brown-400:  extract(@md-brown-list, 5);
-@md-brown-500:  extract(@md-brown-list, 6);
-@md-brown-600:  extract(@md-brown-list, 7);
-@md-brown-700:  extract(@md-brown-list, 8);
-@md-brown-800:  extract(@md-brown-list, 9);
-@md-brown-900:  extract(@md-brown-list, 10);
-
-
-//
-// Grey
-//
-
-@md-grey-list: #fafafa, #f5f5f5, #eeeeee, #e0e0e0, #bdbdbd,
-                #9e9e9e, #757575, #616161, #424242, #212121;
-
-@md-grey:      extract(@md-grey-list, 6);
-
-@md-grey-50:   extract(@md-grey-list, 1);
-@md-grey-100:  extract(@md-grey-list, 2);
-@md-grey-200:  extract(@md-grey-list, 3);
-@md-grey-300:  extract(@md-grey-list, 4);
-@md-grey-400:  extract(@md-grey-list, 5);
-@md-grey-500:  extract(@md-grey-list, 6);
-@md-grey-600:  extract(@md-grey-list, 7);
-@md-grey-700:  extract(@md-grey-list, 8);
-@md-grey-800:  extract(@md-grey-list, 9);
-@md-grey-900:  extract(@md-grey-list, 10);
-
-
-//
-// Blue Grey
-//
-
-@md-blue-grey-list: #eceff1, #cfd8dc, #b0bec5, #90a4ae, #78909c,
-                     #607d8b, #546e7a, #455a64, #37474f, #263238;
-
-@md-blue-grey:      extract(@md-blue-grey-list, 6);
-
-@md-blue-grey-50:   extract(@md-blue-grey-list, 1);
-@md-blue-grey-100:  extract(@md-blue-grey-list, 2);
-@md-blue-grey-200:  extract(@md-blue-grey-list, 3);
-@md-blue-grey-300:  extract(@md-blue-grey-list, 4);
-@md-blue-grey-400:  extract(@md-blue-grey-list, 5);
-@md-blue-grey-500:  extract(@md-blue-grey-list, 6);
-@md-blue-grey-600:  extract(@md-blue-grey-list, 7);
-@md-blue-grey-700:  extract(@md-blue-grey-list, 8);
-@md-blue-grey-800:  extract(@md-blue-grey-list, 9);
-@md-blue-grey-900:  extract(@md-blue-grey-list, 10);
-
-
-//
-// Black
-//
-@md-black-list: #000;
-
-@md-black:      extract(@md-blue-grey-list, 1);
-
-
-//
-// White
-//
-
-@md-white-list: #fff;
-
-@md-white:      extract(@md-blue-grey-list, 1);
-
-
-//
-// List of all color names
-//
-@md-list-all: red, pink, purple, deep-purple, indigo, blue, light-blue, cyan,
-               teal, green, light-green, lime, yellow, amber, orange,
-               deep-orange, brown, grey, blue-grey, black, white;
-
-
-//
-// Typography
-//
-
-@md-ui-display-4: @md-grey-600;
-@md-ui-display-3: @md-grey-600;
-@md-ui-display-2: @md-grey-600;
-@md-ui-display-1: @md-grey-600;
-@md-ui-headline:  @md-grey-900;
-@md-ui-title:     @md-grey-900;
-@md-ui-subhead-1: @md-grey-900;
-@md-ui-body-2:    @md-grey-900;
-@md-ui-body-1:    @md-grey-900;
-@md-ui-caption:   @md-grey-600;
-@md-ui-menu:      @md-grey-900;
-@md-ui-button:    @md-grey-900;
+/**
+ * google-material-color v1.2.6
+ * https://github.com/danlevan/google-material-color
+ */
+:root { 
+  --md-red-50: #FFEBEE;
+  --md-red-100: #FFCDD2;
+  --md-red-200: #EF9A9A;
+  --md-red-300: #E57373;
+  --md-red-400: #EF5350;
+  --md-red-500: #F44336;
+  --md-red-600: #E53935;
+  --md-red-700: #D32F2F;
+  --md-red-800: #C62828;
+  --md-red-900: #B71C1C;
+  --md-red-A100: #FF8A80;
+  --md-red-A200: #FF5252;
+  --md-red-A400: #FF1744;
+  --md-red-A700: #D50000;
+
+  --md-pink-50: #FCE4EC;
+  --md-pink-100: #F8BBD0;
+  --md-pink-200: #F48FB1;
+  --md-pink-300: #F06292;
+  --md-pink-400: #EC407A;
+  --md-pink-500: #E91E63;
+  --md-pink-600: #D81B60;
+  --md-pink-700: #C2185B;
+  --md-pink-800: #AD1457;
+  --md-pink-900: #880E4F;
+  --md-pink-A100: #FF80AB;
+  --md-pink-A200: #FF4081;
+  --md-pink-A400: #F50057;
+  --md-pink-A700: #C51162;
+
+  --md-purple-50: #F3E5F5;
+  --md-purple-100: #E1BEE7;
+  --md-purple-200: #CE93D8;
+  --md-purple-300: #BA68C8;
+  --md-purple-400: #AB47BC;
+  --md-purple-500: #9C27B0;
+  --md-purple-600: #8E24AA;
+  --md-purple-700: #7B1FA2;
+  --md-purple-800: #6A1B9A;
+  --md-purple-900: #4A148C;
+  --md-purple-A100: #EA80FC;
+  --md-purple-A200: #E040FB;
+  --md-purple-A400: #D500F9;
+  --md-purple-A700: #AA00FF;
+
+  --md-deep-purple-50: #EDE7F6;
+  --md-deep-purple-100: #D1C4E9;
+  --md-deep-purple-200: #B39DDB;
+  --md-deep-purple-300: #9575CD;
+  --md-deep-purple-400: #7E57C2;
+  --md-deep-purple-500: #673AB7;
+  --md-deep-purple-600: #5E35B1;
+  --md-deep-purple-700: #512DA8;
+  --md-deep-purple-800: #4527A0;
+  --md-deep-purple-900: #311B92;
+  --md-deep-purple-A100: #B388FF;
+  --md-deep-purple-A200: #7C4DFF;
+  --md-deep-purple-A400: #651FFF;
+  --md-deep-purple-A700: #6200EA;
+
+  --md-indigo-50: #E8EAF6;
+  --md-indigo-100: #C5CAE9;
+  --md-indigo-200: #9FA8DA;
+  --md-indigo-300: #7986CB;
+  --md-indigo-400: #5C6BC0;
+  --md-indigo-500: #3F51B5;
+  --md-indigo-600: #3949AB;
+  --md-indigo-700: #303F9F;
+  --md-indigo-800: #283593;
+  --md-indigo-900: #1A237E;
+  --md-indigo-A100: #8C9EFF;
+  --md-indigo-A200: #536DFE;
+  --md-indigo-A400: #3D5AFE;
+  --md-indigo-A700: #304FFE;
+
+  --md-blue-50: #E3F2FD;
+  --md-blue-100: #BBDEFB;
+  --md-blue-200: #90CAF9;
+  --md-blue-300: #64B5F6;
+  --md-blue-400: #42A5F5;
+  --md-blue-500: #2196F3;
+  --md-blue-600: #1E88E5;
+  --md-blue-700: #1976D2;
+  --md-blue-800: #1565C0;
+  --md-blue-900: #0D47A1;
+  --md-blue-A100: #82B1FF;
+  --md-blue-A200: #448AFF;
+  --md-blue-A400: #2979FF;
+  --md-blue-A700: #2962FF;
+
+  --md-light-blue-50: #E1F5FE;
+  --md-light-blue-100: #B3E5FC;
+  --md-light-blue-200: #81D4FA;
+  --md-light-blue-300: #4FC3F7;
+  --md-light-blue-400: #29B6F6;
+  --md-light-blue-500: #03A9F4;
+  --md-light-blue-600: #039BE5;
+  --md-light-blue-700: #0288D1;
+  --md-light-blue-800: #0277BD;
+  --md-light-blue-900: #01579B;
+  --md-light-blue-A100: #80D8FF;
+  --md-light-blue-A200: #40C4FF;
+  --md-light-blue-A400: #00B0FF;
+  --md-light-blue-A700: #0091EA;
+
+  --md-cyan-50: #E0F7FA;
+  --md-cyan-100: #B2EBF2;
+  --md-cyan-200: #80DEEA;
+  --md-cyan-300: #4DD0E1;
+  --md-cyan-400: #26C6DA;
+  --md-cyan-500: #00BCD4;
+  --md-cyan-600: #00ACC1;
+  --md-cyan-700: #0097A7;
+  --md-cyan-800: #00838F;
+  --md-cyan-900: #006064;
+  --md-cyan-A100: #84FFFF;
+  --md-cyan-A200: #18FFFF;
+  --md-cyan-A400: #00E5FF;
+  --md-cyan-A700: #00B8D4;
+
+  --md-teal-50: #E0F2F1;
+  --md-teal-100: #B2DFDB;
+  --md-teal-200: #80CBC4;
+  --md-teal-300: #4DB6AC;
+  --md-teal-400: #26A69A;
+  --md-teal-500: #009688;
+  --md-teal-600: #00897B;
+  --md-teal-700: #00796B;
+  --md-teal-800: #00695C;
+  --md-teal-900: #004D40;
+  --md-teal-A100: #A7FFEB;
+  --md-teal-A200: #64FFDA;
+  --md-teal-A400: #1DE9B6;
+  --md-teal-A700: #00BFA5;
+
+  --md-green-50: #E8F5E9;
+  --md-green-100: #C8E6C9;
+  --md-green-200: #A5D6A7;
+  --md-green-300: #81C784;
+  --md-green-400: #66BB6A;
+  --md-green-500: #4CAF50;
+  --md-green-600: #43A047;
+  --md-green-700: #388E3C;
+  --md-green-800: #2E7D32;
+  --md-green-900: #1B5E20;
+  --md-green-A100: #B9F6CA;
+  --md-green-A200: #69F0AE;
+  --md-green-A400: #00E676;
+  --md-green-A700: #00C853;
+
+  --md-light-green-50: #F1F8E9;
+  --md-light-green-100: #DCEDC8;
+  --md-light-green-200: #C5E1A5;
+  --md-light-green-300: #AED581;
+  --md-light-green-400: #9CCC65;
+  --md-light-green-500: #8BC34A;
+  --md-light-green-600: #7CB342;
+  --md-light-green-700: #689F38;
+  --md-light-green-800: #558B2F;
+  --md-light-green-900: #33691E;
+  --md-light-green-A100: #CCFF90;
+  --md-light-green-A200: #B2FF59;
+  --md-light-green-A400: #76FF03;
+  --md-light-green-A700: #64DD17;
+
+  --md-lime-50: #F9FBE7;
+  --md-lime-100: #F0F4C3;
+  --md-lime-200: #E6EE9C;
+  --md-lime-300: #DCE775;
+  --md-lime-400: #D4E157;
+  --md-lime-500: #CDDC39;
+  --md-lime-600: #C0CA33;
+  --md-lime-700: #AFB42B;
+  --md-lime-800: #9E9D24;
+  --md-lime-900: #827717;
+  --md-lime-A100: #F4FF81;
+  --md-lime-A200: #EEFF41;
+  --md-lime-A400: #C6FF00;
+  --md-lime-A700: #AEEA00;
+
+  --md-yellow-50: #FFFDE7;
+  --md-yellow-100: #FFF9C4;
+  --md-yellow-200: #FFF59D;
+  --md-yellow-300: #FFF176;
+  --md-yellow-400: #FFEE58;
+  --md-yellow-500: #FFEB3B;
+  --md-yellow-600: #FDD835;
+  --md-yellow-700: #FBC02D;
+  --md-yellow-800: #F9A825;
+  --md-yellow-900: #F57F17;
+  --md-yellow-A100: #FFFF8D;
+  --md-yellow-A200: #FFFF00;
+  --md-yellow-A400: #FFEA00;
+  --md-yellow-A700: #FFD600;
+
+  --md-amber-50: #FFF8E1;
+  --md-amber-100: #FFECB3;
+  --md-amber-200: #FFE082;
+  --md-amber-300: #FFD54F;
+  --md-amber-400: #FFCA28;
+  --md-amber-500: #FFC107;
+  --md-amber-600: #FFB300;
+  --md-amber-700: #FFA000;
+  --md-amber-800: #FF8F00;
+  --md-amber-900: #FF6F00;
+  --md-amber-A100: #FFE57F;
+  --md-amber-A200: #FFD740;
+  --md-amber-A400: #FFC400;
+  --md-amber-A700: #FFAB00;
+
+  --md-orange-50: #FFF3E0;
+  --md-orange-100: #FFE0B2;
+  --md-orange-200: #FFCC80;
+  --md-orange-300: #FFB74D;
+  --md-orange-400: #FFA726;
+  --md-orange-500: #FF9800;
+  --md-orange-600: #FB8C00;
+  --md-orange-700: #F57C00;
+  --md-orange-800: #EF6C00;
+  --md-orange-900: #E65100;
+  --md-orange-A100: #FFD180;
+  --md-orange-A200: #FFAB40;
+  --md-orange-A400: #FF9100;
+  --md-orange-A700: #FF6D00;
+
+  --md-deep-orange-50: #FBE9E7;
+  --md-deep-orange-100: #FFCCBC;
+  --md-deep-orange-200: #FFAB91;
+  --md-deep-orange-300: #FF8A65;
+  --md-deep-orange-400: #FF7043;
+  --md-deep-orange-500: #FF5722;
+  --md-deep-orange-600: #F4511E;
+  --md-deep-orange-700: #E64A19;
+  --md-deep-orange-800: #D84315;
+  --md-deep-orange-900: #BF360C;
+  --md-deep-orange-A100: #FF9E80;
+  --md-deep-orange-A200: #FF6E40;
+  --md-deep-orange-A400: #FF3D00;
+  --md-deep-orange-A700: #DD2C00;
+
+  --md-brown-50: #EFEBE9;
+  --md-brown-100: #D7CCC8;
+  --md-brown-200: #BCAAA4;
+  --md-brown-300: #A1887F;
+  --md-brown-400: #8D6E63;
+  --md-brown-500: #795548;
+  --md-brown-600: #6D4C41;
+  --md-brown-700: #5D4037;
+  --md-brown-800: #4E342E;
+  --md-brown-900: #3E2723;
+
+  --md-grey-50: #FAFAFA;
+  --md-grey-100: #F5F5F5;
+  --md-grey-200: #EEEEEE;
+  --md-grey-300: #E0E0E0;
+  --md-grey-400: #BDBDBD;
+  --md-grey-500: #9E9E9E;
+  --md-grey-600: #757575;
+  --md-grey-700: #616161;
+  --md-grey-800: #424242;
+  --md-grey-900: #212121;
+
+  --md-blue-grey-50: #ECEFF1;
+  --md-blue-grey-100: #CFD8DC;
+  --md-blue-grey-200: #B0BEC5;
+  --md-blue-grey-300: #90A4AE;
+  --md-blue-grey-400: #78909C;
+  --md-blue-grey-500: #607D8B;
+  --md-blue-grey-600: #546E7A;
+  --md-blue-grey-700: #455A64;
+  --md-blue-grey-800: #37474F;
+  --md-blue-grey-900: #263238;
+
+}

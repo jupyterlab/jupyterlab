@@ -4,13 +4,13 @@
 |----------------------------------------------------------------------------*/
 .p-CommandPalette {
   padding-bottom: 0px;
-  color: #757575;
+  color: var(--jp-ui-font-color);
   background: #FAFAFA;
 }
 
 
 .p-CommandPalette-search {
-  border-bottom: solid 2px #e0e0e0;
+  border-bottom: solid 2px var(--jp-secondary-border-color);
 }
 
 
@@ -24,7 +24,7 @@
 .p-CommandPalette-wrapper::after {
     font-family: FontAwesome;
     content: "\f002"; /* search */
-    color: #2196F3;
+    color: var(--jp-primary-color);
 }
 
 .p-CommandPalette-input {
@@ -39,13 +39,13 @@
 
 .p-CommandPalette-header {
   padding: 10px 0 4px 8px;
-  color: #757575;
+  color: var(--jp-ui-font-color);
   font-size: 12px;
   font-weight: 600;
   background: #fafafa;
   cursor: pointer;
   text-transform: uppercase;
-  border-bottom: solid 1px #e0e0e0;
+  border-bottom: solid 1px var(--jp-secondary-border-color);
   letter-spacing: 2px;
 }
 
@@ -70,7 +70,7 @@
 
 .p-CommandPalette-item {
   padding: 4px 8px;
-  color: #757575;
+  color: var(--jp-ui-font-color);
   font-size: 13px;
   font-weight: 500;
 }

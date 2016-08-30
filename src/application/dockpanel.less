@@ -6,15 +6,15 @@
 
 .p-DockPanel-tabPanel > .p-StackedPanel {
   background: white;
-  border-left: 1px solid #BDBDBD;
-  border-right: 1px solid #BDBDBD;
-  border-bottom: 1px solid #BDBDBD;
+  border-left: var(--jp-border-width) solid var(--jp-primary-border-color);
+  border-right: var(--jp-border-width) solid var(--jp-primary-border-color);
+  border-bottom: var(--jp-border-width) solid var(--jp-primary-border-color);
 }
 
 
 .p-DockPanel-overlay {
   background: rgba(33, 150, 243, 0.1);
-  border: 1px dashed #2196F3;
+  border: var(--jp-border-width) dashed var(--jp-primary-color);
   transition-property: top, left, right, bottom;
   transition-duration: 150ms;
   transition-timing-function: ease;
@@ -31,7 +31,7 @@
 
 
 #jp-main-dock-panel .p-TabBar-tab.jp-mod-current {
-  border-top: 1px solid #2196F3;
+  border-top: var(--jp-border-width) solid var(--jp-primary-color);
 }
 
 

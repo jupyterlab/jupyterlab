@@ -56,7 +56,7 @@
 
 
 .jp-CellEditor {
-  border: 1px solid #cfcfcf;
+  border: var(--jp-border-width) solid #cfcfcf;
   border-radius: 2px;
   background: #f7f7f7;
   line-height: 1.2em;
@@ -167,7 +167,7 @@ img.jp-mod-unconfined {
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
   border-color: #ABABAB;
-  border-left-width: 1px;
+  border-left-width: var(--jp-border-width);
   background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
 }
 
@@ -184,7 +184,7 @@ img.jp-mod-unconfined {
 
 .jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
   border-color: #66BB6A;
-  border-left-width: 1px;
+  border-left-width: var(--jp-border-width);
   background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
 }
 
@@ -205,7 +205,7 @@ img.jp-mod-unconfined {
   padding-bottom: 5px;
   padding-left: 5px;
   padding-right: 5px;
-  border-width: 1px;
+  border-width: var(--jp-border-width);
   border-style: solid;
   border-color: transparent;
   outline: none;
@@ -215,7 +215,7 @@ img.jp-mod-unconfined {
 .jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
   padding-left: 5px;
   padding-right: 5px;
-  border-width: 1px;
+  border-width: var(--jp-border-width);
   border-style: solid;
   border-color: transparent;
   outline: none;
@@ -225,10 +225,11 @@ img.jp-mod-unconfined {
 
 
 .jp-NBToolbar {
+  color: var(--jp-ui-font-color);
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  border-bottom: 1px solid #E0E0E0;
+  border-bottom: var(--jp-border-width) solid var(--jp-secondary-border-color);
   height: 24px;
 }
 
@@ -239,7 +240,6 @@ img.jp-mod-unconfined {
   padding-right: 8px;
   vertical-align: middle;
   font-size: 14px;
-  color: #616161;
   line-height: 23px;
 }
 
@@ -257,13 +257,12 @@ img.jp-mod-unconfined {
 }
 
 .jp-NBToolbar-cellType .jp-NBToolbar-cellTypeDropdown {
-    border: 1px solid #BDBDBD;
+    border: var(--jp-border-width) solid var(--jp-primary-border-color);
     border-radius: 0;
     outline: none;
     width: 100%;
     font-size: 14px;
     line-height: 23px;
-    color: #616161;
 }
 
 
