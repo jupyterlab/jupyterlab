@@ -215,6 +215,30 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
 
+  command = 'console:execute-forced';
+  commands.addCommand(command, {
+    label: 'Execute Cell (forced)',
+    execute: () => {
+      if (tracker.currentWidget) {
+        tracker.currentWidget.content.execute(true);
+      }
+    }
+  });
+  palette.addItem({ command, category });
+  menu.addItem({ command });
+
+  command = 'console:linebreak';
+  commands.addCommand(command, {
+    label: 'Insert Line Break',
+    execute: () => {
+      if (tracker.currentWidget) {
+        tracker.currentWidget.content.insertLinebreak();
+      }
+    }
+  });
+  palette.addItem({ command, category });
+  menu.addItem({ command });
+
   command = 'console:interrupt-kernel';
   commands.addCommand(command, {
     label: 'Interrupt Kernel',

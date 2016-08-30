@@ -204,8 +204,11 @@ class ConsoleWidget extends Widget {
 
   /**
    * Execute the current prompt.
+   *
+   * @param force - Whether to force execution without checking code
+   *    completeness.
    */
-  execute(): Promise<void> {
+  execute(force=false): Promise<void> {
     this.dismissCompletion();
 
     if (this._session.status === 'dead') {
@@ -215,35 +218,16 @@ class ConsoleWidget extends Widget {
 
     let prompt = this.prompt;
     prompt.trusted = true;
-    this._history.push(prompt.model.source);
-    // Create a new prompt before kernel execution to allow typeahead.
-    this.newPrompt();
-    return prompt.execute(this._session.kernel).then(
-      (value: KernelMessage.IExecuteReplyMsg) => {
-        this.executed.emit(new Date());
-        if (!value) {
-          this._inspectionHandler.handleExecuteReply(null);
-          return;
-        }
-        if (value.content.status === 'ok') {
-          let content = value.content as KernelMessage.IExecuteOkReply;
-          this._inspectionHandler.handleExecuteReply(content);
-          // Use deprecated payloads for backwards compatibility.
-          if (content.payload && content.payload.length) {
-            let setNextInput = content.payload.filter(i => {
-              return (i as any).source === 'set_next_input';
-            })[0];
-            if (setNextInput) {
-              let text = (setNextInput as any).text;
-              // Ignore the `replace` value and always set the next prompt.
-              this.prompt.model.source = text;
-            }
-          }
-        }
-        Private.scrollToBottom(this.node);
-      },
-      () => { Private.scrollToBottom(this.node); }
-    );
+    if (force) {
+      return this._execute();
+    }
+
+    // Check whether we should execute.
+    return this._shouldExecute().then(value => {
+      if (value) {
+        return this._execute();
+      }
+    });
   }
 
   /**
@@ -254,6 +238,16 @@ class ConsoleWidget extends Widget {
       this.prompt.dispose();
     }
     this.newPrompt();
+  }
+
+  /**
+   * Insert a line break in the prompt.
+   */
+  insertLinebreak(): void {
+    let prompt = this.prompt;
+    let model = prompt.model;
+    model.source += '\n';
+    prompt.editor.setCursorPosition(model.source.length);
   }
 
   /**
@@ -357,6 +351,68 @@ class ConsoleWidget extends Widget {
     // Jump to the bottom of the console.
     Private.scrollToBottom(this.node);
     prompt.activate();
+  }
+
+  /**
+   * Test whether we should execute the prompt.
+   */
+  private _shouldExecute(): Promise<boolean> {
+    let prompt = this.prompt;
+    let code = prompt.model.source + '\n';
+    return new Promise<boolean>((resolve, reject) => {
+      // Allow 250 ms for the response.
+      let timer = setTimeout(() => {
+        resolve(true);
+      }, 250);
+      this._session.kernel.isComplete({ code }).then(isComplete => {
+        clearTimeout(timer);
+        if (isComplete.content.status === 'incomplete') {
+          prompt.model.source = code + isComplete.content.indent;
+          prompt.editor.setCursorPosition(prompt.model.source.length);
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      }).catch(() => {
+        resolve(true);
+      });
+    });
+  }
+
+  /**
+   * Execute the code in the current prompt.
+   */
+  private _execute(): Promise<void> {
+    let prompt = this.prompt;
+    this._history.push(prompt.model.source);
+    // Create a new prompt before kernel execution to allow typeahead.
+    this.newPrompt();
+    return prompt.execute(this._session.kernel).then(
+    (value: KernelMessage.IExecuteReplyMsg) => {
+      this.executed.emit(new Date());
+      if (!value) {
+        this._inspectionHandler.handleExecuteReply(null);
+        return;
+      }
+      if (value.content.status === 'ok') {
+        let content = value.content as KernelMessage.IExecuteOkReply;
+        this._inspectionHandler.handleExecuteReply(content);
+        // Use deprecated payloads for backwards compatibility.
+        if (content.payload && content.payload.length) {
+          let setNextInput = content.payload.filter(i => {
+            return (i as any).source === 'set_next_input';
+          })[0];
+          if (setNextInput) {
+            let text = (setNextInput as any).text;
+            // Ignore the `replace` value and always set the next prompt.
+            this.prompt.model.source = text;
+          }
+        }
+      }
+      Private.scrollToBottom(this.node);
+    },
+      () => { Private.scrollToBottom(this.node); }
+    );
   }
 
   /**
