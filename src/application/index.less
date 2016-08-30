@@ -1,0 +1,48 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+@import url('~phosphor/styles/base.css');
+
+
+/*-----------------------------------------------------------------------------
+| General
+|----------------------------------------------------------------------------*/
+
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #E0E0E0;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+
+.jp-ApplicationShell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+
+.p-mod-hidden {
+  display: none !important;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Import children style files
+|----------------------------------------------------------------------------*/
+
+
+@import './dockpanel.less';
+@import './menus.less';
+@import './sidepanel.less';
+@import './tabs.less';
+
+

@@ -8,10 +8,13 @@
 @import './variables.less';
 
 // Base styles
-@import '../basestyle/index.css'
+@import '../basestyle/materialcolors.css'
 
-// Specific plugins
-@import './about.less';
+// Main application (1st)
+@import './application/index.less';
+
+// Individual plugins
+@import './about/index.less';
 @import './codemirror.less';
 @import './commandpalette.less';
 @import './completion.less';
