@@ -28,18 +28,8 @@ Distributed under the terms of the Modified BSD License.
 }</script>
 
 <script type="text/javascript">
-define('jupyterlab', function() {
-  return {
-        load : function(name, req, onLoad, config){
-            var modules = Object.keys(requirejs.s.contexts['_'].registry);
-            console.log(modules);
-            console.log(name, req, onLoad, config);
-        }
-    };
-});
-
-require(['lab/custom.bundle'], function() {
-  console.log('Bundle loaded');
+require(['lab/custom.bundle', 'lab/loader.bundle'], function() {
+  console.log('Bundles loaded');
   require(['jupyterlab-extension:0.1.0/index.js'], function() {
     console.log('page loaded');
   });

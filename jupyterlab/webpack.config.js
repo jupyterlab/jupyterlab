@@ -190,7 +190,7 @@ function findImport(request, issuer) {
 }
 
 
-module.exports = {
+module.exports = [{
   entry: {
     jupyterlab: './index.js'
   },
@@ -228,4 +228,23 @@ module.exports = {
     new ExtractTextPlugin('[name].css'),
     new JupyterLabPlugin()
   ]
+},
+{
+  entry: {
+    loader: './loader'
+  },
+  output: {
+    path: __dirname + '/build',
+    filename: '[name].bundle.js',
+    publicPath: './lab',
+    library: 'jupyterlab',
+    libraryTarget: 'amd'
+  },
+  node: {
+    fs: 'empty'
+  },
+  debug: true,
+  bail: true,
+  devtool: 'source-map'
 }
+];
