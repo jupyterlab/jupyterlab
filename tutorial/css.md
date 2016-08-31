@@ -76,7 +76,7 @@ class name that gives a semantic naming of the component, such as:
 Thus, the general naming of CSS classes is of the form
 `jp-WidgetName-semanticChild`.
 
-Forth, some CSS classes are used to modify the state of a widget:
+Fourth, some CSS classes are used to modify the state of a widget:
 
 * `jp-mod-active`: applied to elements in the active state
 * `jp-mod-hover`: applied to elements in the hover state
