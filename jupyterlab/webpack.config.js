@@ -30,6 +30,7 @@ function JupyterLabPlugin(options) {
 JupyterLabPlugin.prototype.apply = function(compiler) {
   compiler.plugin('emit', function(compilation, callback) {
     var sources = [];
+    var modules = [];
 
     // Explore each chunk (build output):
     compilation.chunks.forEach(function(chunk) {
@@ -42,7 +43,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 
         if (!module.context) {
           // TODO: What are these?
-          debugger;
+          return;
         }
 
         var modRequest = module.request;
@@ -90,23 +91,42 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           request = 'require("jupyterlab!' + request + '")';
           source = source.split(search).join(request);
         }
-        var header = 'define("' + findName(modRequest);
+        var modPath = findName(modRequest);
+        modules.push(modPath);
+        var header = 'define("' + modPath;
         header += '", function (require, exports, module) {\n'
-        source = header + source + '\n}),\n';
+        // Combine with indent.
+        source = header + source.split('\n').join('\n  ') + '\n})'
         sources.push(source);
       });
     });
 
+    // Assemble the r.js bundle.
+    // TODO: Add config for dynamic modules.
+    // var code = 'require.config({ baseUrl: "'
+    //code += compilation.outputOptions.publicPath + '" }),\n\n'
+    //code += sources.join(',\n\n');
+
+    var code = sources.join(',\n\n');
+
     // Insert this list into the Webpack build as a new file asset:
     compilation.assets['custom.bundle.js'] = {
       source: function() {
-        return sources.join('\n\n');
+        return code;
       },
       size: function() {
-        return sources.join('\n\n').length;
+        return code.length;
       }
     };
 
+    compilation.assets['custom.manifest.txt'] = {
+      source: function() {
+        return modules.join('\n');
+      },
+      size: function() {
+        return modules.join('\n').length;
+      }
+    }
     callback();
   });
 };
