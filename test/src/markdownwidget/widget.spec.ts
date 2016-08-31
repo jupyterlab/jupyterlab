@@ -7,7 +7,6 @@ import {
   Message, sendMessage
 } from 'phosphor/lib/core/messaging';
 
-
 import {
   PanelLayout
 } from 'phosphor/lib/ui/panel';
@@ -33,6 +32,9 @@ import {
 } from '../rendermime/rendermime.spec';
 
 
+const RENDERMIME = defaultRenderMime();
+
+
 class LogWidget extends MarkdownWidget {
   methods: string[] = [];
 
@@ -45,11 +47,7 @@ class LogWidget extends MarkdownWidget {
     super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
   }
-
 }
-
-
-const RENDERMIME = defaultRenderMime();
 
 
 describe('markdownwidget/widget', () => {

@@ -4,6 +4,8 @@
 import './common/activitymonitor.spec';
 import './common/observablelist.spec';
 
+import './console/history.spec';
+
 import './dialog/dialog.spec';
 
 import './docregistry/default.spec';
