@@ -5,6 +5,10 @@ import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
+import {
+  ICommandPalette
+} from '../commandpalette';
+
 
 /**
  * The main extension.
@@ -12,7 +16,18 @@ import {
 export
 const mainExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
-  activate: (app: JupyterLab) => {
+  requires: [ICommandPalette],
+  activate: (app: JupyterLab, palette: ICommandPalette) => {
+    let commandId = 'main-jupyterlab:closeAll';
+    app.commands.addCommand(commandId, {
+      label: 'Close All Widgets',
+      execute: () => {
+        app.shell.closeAll();
+      }
+    });
+
+    palette.addItem({ command: commandId, category: 'Dock Panel' });
+
     const message = 'Are you sure you want to exit JupyterLab?\n' +
                     'Any unsaved changes will be lost.';
 
