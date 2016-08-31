@@ -13,12 +13,10 @@ console.log('Generating bundles...');
 
 
 function JupyterLabPlugin(options) {
-  options = options || {};
-  this.externals = options.externals || [];
+  this.options = options || {};
 }
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
-  var externals = this.externals;
   compiler.plugin('emit', function(compilation, callback) {
     var sources = [];
 
@@ -30,7 +28,8 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         if (module.getAllModuleDependencies) {
           deps = module.getAllModuleDependencies();
         }
-        if (!module.request) {
+        var modRequest = module.request;
+        if (!modRequest) {
           console.log('skipped module', module.request);
           return;
         }
@@ -41,10 +40,19 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           return;
         }
 
-        // Look for named externals
-        var rootPackage = getPackage(module.request);
-        if (externals.indexOf(rootPackage.name) !== -1) {
-          console.log('skipping named external', module.request);
+        // Skip modules handled by the extract text plugin.
+        if (module.request.indexOf('extract-text-webpack-plugin') !== -1) {
+          return;
+        }
+
+        // Look for loaders
+        if (module.loaders.length) {
+          modRequest = modRequest.slice(modRequest.lastIndexOf('!') + 1);
+          return;
+        }
+
+        if (modRequest.indexOf('WritableStream.js') !== -1) {
+          debugger;
           return;
         }
 
@@ -53,16 +61,25 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         for (var dep of deps) {
           var id = dep.id;
           var request = dep.request;
-          if (!request || request.indexOf('!') !== -1) {
-            console.log('skipped dep', request);
+          var search = '__webpack_require__(' + id + ')';
+          if (!request) {
+            source = source.split(search).join('UNDEFINED');
             continue;
+          }
+          if (request.indexOf('extract-text-webpack-plugin') !== -1) {
+            source = source.replace(search + ';\n', '');
+            continue;
+          }
+          if (dep.loaders.length) {
+            request = request.slice(request.lastIndexOf('!') + 1);
           }
           request = (
             'require("jupyterlab!' + findImport(request, dep.issuer) + '")'
           );
-          source = source.replace('__webpack_require__(' + id + ')', request);
+          // Replace all instances.
+          source = source.split(search).join(request);
         }
-        var header = 'define("' + findName(module.request);
+        var header = 'define("' + findName(modRequest);
         header += '", function (require, exports, module) {\n'
         source = header + source + '\n}),\n';
         sources.push(source);
@@ -178,16 +195,6 @@ module.exports = {
   },
   plugins: [
     new ExtractTextPlugin('[name].css'),
-    new JupyterLabPlugin({
-      externals: ['codemirror']
-    })
-  ],
-  externals: [
-    function(context, request, callback) {
-      if (request === 'codemirror' || request.indexOf('codemirror/') === 0) {
-        return callback(null, "amd jupyterlab!" + request);
-      }
-      callback();
-    },
+    new JupyterLabPlugin()
   ]
 }
