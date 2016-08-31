@@ -57,14 +57,9 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
             console.log('skipped dep', request);
             continue;
           }
-          var package = getPackage(request);
-          if (externals.indexOf(package.name) !== -1) {
-            request = 'require("' + request + '")';
-          } else {
-            request = (
-              'require("jupyterlab!' + findImport(request, dep.issuer) + '")'
-            );
-          }
+          request = (
+            'require("jupyterlab!' + findImport(request, dep.issuer) + '")'
+          );
           source = source.replace('__webpack_require__(' + id + ')', request);
         }
         var header = 'define("' + findName(module.request);
