@@ -17,15 +17,32 @@ import {
   ABCWidgetFactory, IDocumentModel, IDocumentContext
 } from '../docregistry';
 
+import * as d3Dsv from 'd3-dsv';
+
 import {
-  csvParse
-} from 'd3-dsv';
+  PanelLayout
+} from 'phosphor/lib/ui/panel';
 
 
 /**
  * The class name added to a csv widget.
  */
 const CSV_CLASS = 'jp-CSVWidget';
+
+/**
+ * The class name added to a csv toolbar widget.
+ */
+const CSV_TOOLBAR_CLASS = 'jp-CSVWidget-toolbar';
+
+/**
+ * The class name added to a csv toolbar's dropdown element.
+ */
+const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVWidget-toolbarDropdown';
+
+/**
+ * The class name added to a csv table widget.
+ */
+const CSV_TABLE_CLASS = 'jp-CSVWidget-table';
 
 
 /**
@@ -42,6 +59,19 @@ class CSVWidget extends Widget {
     this.node.tabIndex = -1;
     this.addClass(CSV_CLASS);
 
+    this.layout = new PanelLayout();
+    this._toolbar = new Widget({ node: createDelimiterSwitcherNode() });
+    this._toolbar.addClass(CSV_TOOLBAR_CLASS);
+    this._table = new Widget();
+    this._table.addClass(CSV_TABLE_CLASS);
+
+    let layout = this.layout as PanelLayout;
+    layout.addWidget(this._toolbar);
+    layout.addWidget(this._table);
+
+    let select = this._toolbar.node.getElementsByClassName(
+      CSV_TOOLBAR_DROPDOWN_CLASS)[0] as HTMLSelectElement;
+
     if (context.model.toString()) {
       this.update();
     }
@@ -52,6 +82,13 @@ class CSVWidget extends Widget {
       this.update();
     });
     context.contentsModelChanged.connect(() => {
+      this.update();
+    });
+
+    // Change delimiter on a change in the dropdown.
+    select.addEventListener('change', event => {
+      let value = select.value as string;
+      this.delimiter = select.value;
       this.update();
     });
   }
@@ -77,14 +114,15 @@ class CSVWidget extends Widget {
       return;
     }
     let content = this._context.model.toString();
-    this.renderTable(content);
+    let delimiter = this.delimiter as string;
+    this.renderTable(content, delimiter);
   }
 
   /**
    * Render an html table from a csv string.
    */
-  renderTable(content: string) {
-    let parsed = csvParse(content);
+  renderTable(content: string, delimiter: string) {
+    let parsed = d3Dsv.dsvFormat(delimiter).parse(content);
     let table = document.createElement('table');
     let header = document.createElement('tr');
     for (let name of parsed.columns) {
@@ -102,11 +140,46 @@ class CSVWidget extends Widget {
       }
       table.appendChild(tr);
     }
-    this.node.textContent = '';
-    this.node.appendChild(table);
+    this._table.node.textContent = '';
+    this._table.node.appendChild(table);
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.focus();
   }
 
   private _context: IDocumentContext<IDocumentModel>;
+  private delimiter: string = ",";
+  private _toolbar: Widget = null;
+  private _table: Widget = null;
+}
+
+
+/**
+ * Create the node for the delimiter switcher.
+ */
+function createDelimiterSwitcherNode(): HTMLElement {
+  let div = document.createElement('div');
+  let label = document.createElement('span');
+  label.textContent = 'Delimiter:';
+  let select = document.createElement('select');
+  for (let delim of [',', ';', '\t']) {
+    let option = document.createElement('option');
+    option.value = delim;
+    if (delim === '\t') {
+      option.textContent = '\\t';
+    } else {
+      option.textContent = delim;
+    }
+    select.appendChild(option);
+  }
+  select.className = CSV_TOOLBAR_DROPDOWN_CLASS;
+  div.appendChild(label);
+  div.appendChild(select);
+  return div;
 }
 
 
