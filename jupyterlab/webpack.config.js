@@ -12,9 +12,13 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 console.log('Generating bundles...');
 
 
-function JupyterLabPlugin(options) {}
+function JupyterLabPlugin(options) {
+  options = options || {};
+  this.externals = options.externals || [];
+}
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
+  var externals = this.externals;
   compiler.plugin('emit', function(compilation, callback) {
     var sources = [];
 
@@ -30,6 +34,20 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           console.log('skipped module', module.request);
           return;
         }
+
+        // Look for explicit external
+        if (module.external) {
+          console.log('skipping external', module.request);
+          return;
+        }
+
+        // Look for named externals
+        var rootPackage = getPackage(module.request);
+        if (externals.indexOf(rootPackage.name) !== -1) {
+          console.log('skipping named external', module.request);
+          return;
+        }
+
         // TODO: handle context dependencies
         var source = module.source().source();
         for (var dep of deps) {
@@ -39,7 +57,14 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
             console.log('skipped dep', request);
             continue;
           }
-          request = 'require("jupyterlab!' + findImport(request, dep.issuer) + '")';
+          var package = getPackage(request);
+          if (externals.indexOf(package.name) !== -1) {
+            request = 'require("' + request + '")';
+          } else {
+            request = (
+              'require("jupyterlab!' + findImport(request, dep.issuer) + '")'
+            );
+          }
           source = source.replace('__webpack_require__(' + id + ')', request);
         }
         var header = 'define("' + findName(module.request);
@@ -66,22 +91,31 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 
 // From a request - find its package root.
 function findRoot(request) {
-  while (true) {
+  if (path.extname(request)) {
     request = path.dirname(request);
+  }
+  while (true) {
     try {
       require.resolve(path.join(request, 'package.json'));
       return request;
     } catch (err) {
-      // no-op
+      request = path.dirname(request);
     }
   }
+}
+
+
+// Get the package.json associated with a file.
+function getPackage(request) {
+  var rootPath = findRoot(request);
+  return require(path.join(rootPath, 'package.json'));
 }
 
 
 // From a request - find a version-mangled define name.
 function findName(request) {
   var rootPath = findRoot(request);
-  var package = require(path.join(rootPath, 'package.json'));
+  var package = getPackage(rootPath);
   var modPath = request.slice(rootPath.length + 1);
   var name = package.name + ':' + package.version;
   if (modPath) {
@@ -94,18 +128,17 @@ function findName(request) {
 // From a request - find its semver-mangled import path.
 function findImport(request, issuer) {
   var rootPath = findRoot(request);
-  var rootPackage = require(path.join(rootPath, 'package.json'));
+  var rootPackage = getPackage(rootPath);
   var issuerPath = findRoot(issuer);
-  var issuerPackage = require(path.join(issuerPath, 'package.json'));
+  var issuerPackage = getPackage(issuer);
   var modPath = request.slice(rootPath.length + 1);
   var name = rootPackage.name;
   var semver = issuerPackage.dependencies[name] || rootPackage.version;
   if (semver.indexOf('file:') === 0) {
     var sourcePath = path.resolve(issuerPath, semver.slice('file:'.length));
-    var sourcePackage = require(path.join(sourcePath, 'package.json'));
+    var sourcePackage = getPackage(sourcePath);
     semver = sourcePackage.version;
   }
-  name += ':' + semver;
   if (modPath) {
     name += '/' + modPath;
   }
@@ -149,6 +182,16 @@ module.exports = {
   },
   plugins: [
     new ExtractTextPlugin('[name].css'),
-    new JupyterLabPlugin()
+    new JupyterLabPlugin({
+      externals: ['codemirror']
+    })
+  ],
+  externals: [
+    function(context, request, callback) {
+      if (request === 'codemirror' || request.indexOf('codemirror/') === 0) {
+        return callback(null, "amd " + request);
+      }
+      callback();
+    },
   ]
 }
