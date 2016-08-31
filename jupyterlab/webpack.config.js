@@ -6,6 +6,7 @@
 require('es6-promise').polyfill();
 
 var webpack = require('webpack');
+var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 console.log('Generating bundles...');
@@ -15,8 +16,7 @@ function JupyterLabPlugin(options) {}
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
   compiler.plugin('emit', function(compilation, callback) {
-    // Create a header string for the generated file:
-    var modlist = ['In this build:\n\n'];
+    var sources = [];
 
     // Explore each chunk (build output):
     compilation.chunks.forEach(function(chunk) {
@@ -26,36 +26,90 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         if (module.getAllModuleDependencies) {
           deps = module.getAllModuleDependencies();
         }
+        if (!module.request) {
+          console.log('skipped module', module.request);
+          return;
+        }
         // TODO: handle context dependencies
         var source = module.source().source();
         for (var dep of deps) {
           var id = dep.id;
           var request = dep.request;
-          // TODO: Mangle the request using package.json
-          var path = 'require("' + request + '")';
-          source = source.replace('__webpack_require__(' + id + ')', path);
+          if (!request || request.indexOf('!') !== -1) {
+            console.log('skipped', request);
+            continue;
+          }
+          request = 'require("jupyterlab!' + findImport(request, dep.issuer) + '")';
+          source = source.replace('__webpack_require__(' + id + ')', request);
         }
-        var name = module.request;
-        // TODO: Mangle the request using package.json
-        var header = 'define("' + name + '", function (require, exports, module) {\n'
+        var header = 'define("' + findName(module.request);
+        header += '", function (require, exports, module) {\n'
         source = header + source + '\n}),\n';
-        modlist.push(source);
+        sources.push(source);
       });
     });
 
     // Insert this list into the Webpack build as a new file asset:
-    compilation.assets['modlist.md'] = {
+    compilation.assets['custom.bundle.js'] = {
       source: function() {
-        return modlist.join('\n\n');
+        return sources.join('\n\n');
       },
       size: function() {
-        return modlist.join('\n\n').length;
+        return sources.join('\n\n').length;
       }
     };
 
     callback();
   });
 };
+
+
+// From a request - find its package root.
+function findRoot(request) {
+  while (true) {
+    request = path.dirname(request);
+    try {
+      require.resolve(path.join(request, 'package.json'));
+      return request;
+    } catch (err) {
+      // no-op
+    }
+  }
+}
+
+
+// From a request - find a version-mangled define name.
+function findName(request) {
+  var rootPath = findRoot(request);
+  var package = require(path.join(rootPath, 'package.json'));
+  var modPath = request.slice(rootPath.length + 1);
+  var name = package.name;
+  if (modPath) {
+    return name + '@' + package.version + '/' + modPath;
+  }
+  return name + '@' + package.version;
+}
+
+
+// From a request - find its semver-mangled import path.
+function findImport(request, issuer) {
+  // Walk up to look for an explicit version, then look in the issuer
+  var rootPath = findRoot(request);
+  var rootPackage = require(path.join(rootPath, 'package.json'));
+  var issuerPath = findRoot(issuer);
+  var issuerPackage = require(path.join(issuerPath, 'package.json'));
+  var modPath = request.slice(rootPath.length + 1);
+  var name = rootPackage.name;
+  try {
+    var semver = issuerPackage.dependencies[name]
+    if (modPath) {
+      return name + semver + '/' + modPath;
+    }
+    return name + semver;
+  } catch (err) {
+    return name;
+  }
+}
 
 
 module.exports = {
