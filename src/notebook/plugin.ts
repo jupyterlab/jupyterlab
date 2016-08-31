@@ -78,6 +78,8 @@ const cmdIds = {
   cut: 'notebook-cells:cut',
   copy: 'notebook-cells:copy',
   paste: 'notebook-cells:paste',
+  moveUp: 'notebook-cells:move-up',
+  moveDown: 'notebook-cells:move-down',
   clearOutputs: 'notebook-cells:clear-output',
   deleteCell: 'notebook-cells:delete',
   insertAbove: 'notebook-cells:insert-above',
@@ -428,6 +430,24 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
       }
     }
   });
+  commands.addCommand(cmdIds.moveUp, {
+    label: 'Move Cell(s) Up',
+    execute: () => {
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
+        NotebookActions.moveUp(nbWidget.content);
+      }
+    }
+  });
+  commands.addCommand(cmdIds.moveDown, {
+    label: 'Move Cell(s) Down',
+    execute: () => {
+      if (tracker.currentWidget) {
+        let nbWidget = tracker.currentWidget;
+        NotebookActions.moveDown(nbWidget.content);
+      }
+    }
+  });
   commands.addCommand(cmdIds.toggleLines, {
     label: 'Toggle Line Numbers',
     execute: () => {
@@ -576,6 +596,8 @@ function populatePalette(palette: ICommandPalette): void {
     cmdIds.selectBelow,
     cmdIds.extendAbove,
     cmdIds.extendBelow,
+    cmdIds.moveDown,
+    cmdIds.moveUp,
     cmdIds.toggleLines,
     cmdIds.undo,
     cmdIds.redo,

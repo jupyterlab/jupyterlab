@@ -249,6 +249,60 @@ namespace NotebookActions {
   }
 
   /**
+   * Move the selected cell(s) down.
+   *
+   * @param widget = The target notebook widget.
+   */
+  export
+  function moveDown(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let cells = widget.model.cells;
+    cells.beginCompoundOperation();
+    for (let i = cells.length - 2; i > -1; i--) {
+      if (widget.isSelected(widget.childAt(i))) {
+        if (!widget.isSelected(widget.childAt(i + 1))) {
+          cells.move(i, i + 1);
+          if (widget.activeCellIndex === i) {
+            widget.activeCellIndex++;
+          }
+          widget.select(widget.childAt(i + 1));
+          widget.deselect(widget.childAt(i));
+        }
+      }
+    }
+    cells.endCompoundOperation();
+  }
+
+  /**
+   * Move the selected cell(s) up.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function moveUp(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let cells = widget.model.cells;
+    cells.beginCompoundOperation();
+    for (let i = 1; i < cells.length; i++) {
+      if (widget.isSelected(widget.childAt(i))) {
+        if (!widget.isSelected(widget.childAt(i - 1))) {
+          cells.move(i, i - 1);
+          if (widget.activeCellIndex === i) {
+            widget.activeCellIndex--;
+          }
+          widget.select(widget.childAt(i - 1));
+          widget.deselect(widget.childAt(i));
+        }
+      }
+    }
+    cells.endCompoundOperation();
+  }
+
+  /**
    * Change the selected cell type(s).
    *
    * @param widget - The target notebook widget.
@@ -680,6 +734,7 @@ namespace NotebookActions {
     }
     widget.mode = 'command';
     widget.model.cells.undo();
+    Private.deselectCells(widget);
   }
 
   /**
@@ -697,6 +752,7 @@ namespace NotebookActions {
     }
     widget.mode = 'command';
     widget.model.cells.redo();
+    Private.deselectCells(widget);
   }
 
   /**
@@ -835,6 +891,8 @@ namespace Private {
       let child = widget.childAt(i);
       widget.deselect(child);
     }
+    // Make sure we have a valid active cell.
+    widget.activeCellIndex = widget.activeCellIndex;
   }
 
   /**
