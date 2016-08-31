@@ -139,6 +139,7 @@ function findImport(request, issuer) {
     var sourcePackage = getPackage(sourcePath);
     semver = sourcePackage.version;
   }
+  name += ':' + semver;
   if (modPath) {
     name += '/' + modPath;
   }
