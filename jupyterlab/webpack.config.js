@@ -12,6 +12,17 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 console.log('Generating bundles...');
 
 
+/**
+  Overall todos:
+  - Get the same content in this bundle as the existing one
+  - Create a sibling bundle with the same content as the existing one
+  - Create the other build artifacts
+  - Dynamically require the other bundles/artifacts by mangled name
+  - Make sure we are in an r.js bundle format
+  - Create a manifest file with the modules so it can be used to create
+    bundle config.
+**/
+
 function JupyterLabPlugin(options) {
   this.options = options || {};
 }
@@ -28,9 +39,16 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         if (module.getAllModuleDependencies) {
           deps = module.getAllModuleDependencies();
         }
+
+        if (!module.context) {
+          // TODO: What are these?
+          debugger;
+        }
+
         var modRequest = module.request;
         if (!modRequest) {
-          console.log('skipped module', module.request);
+          // TODO: These are the extra bundles.
+          console.log('skipped module', module.context);
           return;
         }
 
@@ -51,18 +69,13 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           return;
         }
 
-        if (modRequest.indexOf('WritableStream.js') !== -1) {
-          debugger;
-          return;
-        }
-
-        // TODO: handle context dependencies
         var source = module.source().source();
         for (var dep of deps) {
           var id = dep.id;
           var request = dep.request;
           var search = '__webpack_require__(' + id + ')';
           if (!request) {
+            // TODO: better discrimination of these.
             source = source.split(search).join('UNDEFINED');
             continue;
           }
@@ -73,10 +86,8 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           if (dep.loaders.length) {
             request = request.slice(request.lastIndexOf('!') + 1);
           }
-          request = (
-            'require("jupyterlab!' + findImport(request, dep.issuer) + '")'
-          );
-          // Replace all instances.
+          request = findImport(request, dep.issuer);
+          request = 'require("jupyterlab!' + request + '")';
           source = source.split(search).join(request);
         }
         var header = 'define("' + findName(modRequest);
