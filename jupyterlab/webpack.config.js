@@ -36,7 +36,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           var id = dep.id;
           var request = dep.request;
           if (!request || request.indexOf('!') !== -1) {
-            console.log('skipped', request);
+            console.log('skipped dep', request);
             continue;
           }
           request = 'require("jupyterlab!' + findImport(request, dep.issuer) + '")';
@@ -83,32 +83,33 @@ function findName(request) {
   var rootPath = findRoot(request);
   var package = require(path.join(rootPath, 'package.json'));
   var modPath = request.slice(rootPath.length + 1);
-  var name = package.name;
+  var name = package.name + ':' + package.version;
   if (modPath) {
-    return name + '@' + package.version + '/' + modPath;
+    name += '/' + modPath;
   }
-  return name + '@' + package.version;
+  return name;
 }
 
 
 // From a request - find its semver-mangled import path.
 function findImport(request, issuer) {
-  // Walk up to look for an explicit version, then look in the issuer
   var rootPath = findRoot(request);
   var rootPackage = require(path.join(rootPath, 'package.json'));
   var issuerPath = findRoot(issuer);
   var issuerPackage = require(path.join(issuerPath, 'package.json'));
   var modPath = request.slice(rootPath.length + 1);
   var name = rootPackage.name;
-  try {
-    var semver = issuerPackage.dependencies[name]
-    if (modPath) {
-      return name + semver + '/' + modPath;
-    }
-    return name + semver;
-  } catch (err) {
-    return name;
+  var semver = issuerPackage.dependencies[name] || rootPackage.version;
+  if (semver.indexOf('file:') === 0) {
+    var sourcePath = path.resolve(issuerPath, semver.slice('file:'.length));
+    var sourcePackage = require(path.join(sourcePath, 'package.json'));
+    semver = sourcePackage.version;
   }
+  name += ':' + semver;
+  if (modPath) {
+    name += '/' + modPath;
+  }
+  return name;
 }
 
 
