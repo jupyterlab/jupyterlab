@@ -190,7 +190,7 @@ module.exports = {
   externals: [
     function(context, request, callback) {
       if (request === 'codemirror' || request.indexOf('codemirror/') === 0) {
-        return callback(null, "amd " + request);
+        return callback(null, "amd jupyterlab!" + request);
       }
       callback();
     },

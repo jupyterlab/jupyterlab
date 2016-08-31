@@ -68,8 +68,7 @@ function requireMode(mode: string | CodeMirror.modespec): Promise<CodeMirror.mod
 
   // Fetch the mode asynchronously.
   return new Promise<CodeMirror.modespec>((resolve, reject) => {
-    let path = `codemirror/mode/${info.mode}/${info.mode}`;
-    (window as any).require([path], () => {
+    require([`codemirror/mode/${info.mode}/${info.mode}`], () => {
       resolve(info);
     });
   });
