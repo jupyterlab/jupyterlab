@@ -18,10 +18,6 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  scrollIntoViewIfNeeded
-} from 'phosphor/lib/dom/query';
-
-import {
   Panel, PanelLayout
 } from 'phosphor/lib/ui/panel';
 
@@ -81,6 +77,10 @@ const BANNER_CLASS = 'jp-Console-banner';
  */
 const PROMPT_CLASS = 'jp-Console-prompt';
 
+/**
+ * The class name of the panel that holds cell content.
+ */
+const CONTENT_CLASS = 'jp-Console-content';
 
 /**
  * The class name of the panel that holds prompts.
@@ -104,6 +104,7 @@ class ConsoleWidget extends SplitPanel {
     this.orientation = 'vertical';
     this._content = new Panel();
     this._input = new Panel();
+    this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);
 
     // Insert the content and input panes into the split panel.
@@ -324,8 +325,7 @@ class ConsoleWidget extends SplitPanel {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    let prompt = this.prompt;
-    scrollIntoViewIfNeeded(this.parent.node, prompt.node);
+    Private.scrollToBottom(this._content.node);
   }
 
   /**
@@ -369,9 +369,8 @@ class ConsoleWidget extends SplitPanel {
     this._completionHandler.activeCell = prompt;
     this._inspectionHandler.activeCell = prompt;
 
-    // Jump to the bottom of the console.
-    Private.scrollToBottom(this.node);
     prompt.activate();
+    this.update();
   }
 
   /**
