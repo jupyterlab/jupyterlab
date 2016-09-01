@@ -23,7 +23,7 @@ import {
 } from '../codemirror';
 
 import {
-  CodeMirrorWidget
+  CodeMirrorWidget, DEFAULT_CODEMIRROR_THEME
 } from '../codemirror/widget';
 
 import {
@@ -72,7 +72,7 @@ class EditorWidget extends CodeMirrorWidget {
         'Tab': 'indentMore',
       },
       indentUnit: 4,
-      theme: 'jupyter',
+      theme: DEFAULT_CODEMIRROR_THEME,
       lineNumbers: true,
       lineWrapping: true,
     });
