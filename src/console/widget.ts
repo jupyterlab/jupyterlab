@@ -429,9 +429,9 @@ class ConsoleWidget extends SplitPanel {
           }
         }
       }
-      Private.scrollToBottom(this.node);
+      this.update();
     },
-      () => { Private.scrollToBottom(this.node); }
+      () => this.update()
     );
   }
 
