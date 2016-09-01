@@ -42,7 +42,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         }
 
         if (!module.context) {
-          // TODO: What are these?
+          // These were ignored by WebPack
           return;
         }
 
@@ -67,7 +67,6 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         // Look for loaders
         if (module.loaders.length) {
           modRequest = modRequest.slice(modRequest.lastIndexOf('!') + 1);
-          return;
         }
 
         var source = module.source().source();
@@ -76,7 +75,6 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           var request = dep.request;
           var search = '__webpack_require__(' + id + ')';
           if (!request) {
-            // TODO: better discrimination of these.
             source = source.split(search).join('UNDEFINED');
             continue;
           }
