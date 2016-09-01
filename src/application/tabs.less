@@ -12,7 +12,7 @@
 
 .p-TabBar {
   overflow: visible;
-  color: var(--jp-ui-font-color);
+  color: var(--jp-1st-ui-font-color);
   font-size: var(--jp-ui-fontSize);
 }
 
@@ -28,22 +28,22 @@
 
 
 .p-TabBar.p-mod-top {
-  border-bottom: var(--jp-border-width) solid var(--jp-primary-border-color);
+  border-bottom: var(--jp-borderWidth) solid var(--jp-1st-borderColor);
 }
 
 
 .p-TabBar.p-mod-bottom {
-  border-top: var(--jp-border-width) solid var(--jp-primary-border-color);
+  border-top: var(--jp-borderWidth) solid var(--jp-1st-borderColor);
 }
 
 
 .p-TabBar.p-mod-left {
-  border-right: var(--jp-border-width) solid var(--jp-primary-border-color);
+  border-right: var(--jp-borderWidth) solid var(--jp-1st-borderColor);
 }
 
 
 .p-TabBar.p-mod-right {
-  border-left: var(--jp-border-width) solid var(--jp-primary-border-color);
+  border-left: var(--jp-borderWidth) solid var(--jp-1st-borderColor);
 }
 
 
@@ -66,7 +66,7 @@
 .p-TabBar-tab {
   padding: 0px 10px;
   background: #EEEEEE;
-  border: var(--jp-border-width) solid var(--jp-primary-border-color);
+  border: var(--jp-borderWidth) solid var(--jp-1st-borderColor);
 }
 
 
@@ -83,12 +83,12 @@
 .p-TabBar.p-mod-top .p-TabBar-tab,
 .p-TabBar.p-mod-bottom .p-TabBar-tab {
   flex: 0 1 var(--jp-horizontal-tab-width);
-  min-height: calc(var(--jp-horizontal-tab-height) - 2*var(--jp-border-width));
+  min-height: calc(var(--jp-horizontal-tab-height) - 2*var(--jp-borderWidth));
   // For some reason Firefox needs us to give a max-height as well...
-  max-height: calc(var(--jp-horizontal-tab-height) - 2*var(--jp-border-width));
+  max-height: calc(var(--jp-horizontal-tab-height) - 2*var(--jp-borderWidth));
   min-width: 35px;
-  margin-left: calc(-1*var(--jp-border-width));
-  line-height: calc(var(--jp-horizontal-tab-height) - 3*var(--jp-border-width));
+  margin-left: calc(-1*var(--jp-borderWidth));
+  line-height: calc(var(--jp-horizontal-tab-height) - 3*var(--jp-borderWidth));
 }
 
 
@@ -110,17 +110,17 @@
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  min-height: calc(var(--jp-horizontal-tab-height) - var(--jp-border-width));
+  min-height: calc(var(--jp-horizontal-tab-height) - var(--jp-borderWidth));
 }
 
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current {
-  transform: translateY(var(--jp-border-width));
+  transform: translateY(var(--jp-borderWidth));
 }
 
 
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  transform: translateY(-1*var(--jp-border-width));
+  transform: translateY(-1*var(--jp-borderWidth));
 }
 
 
@@ -189,10 +189,10 @@
   min-height: var(--jp-horizontal-tab-height);
   min-width: var(--jp-horizontal-tab-width);
   line-height: var(--jp-horizontal-tab-height);
-  color: var(--jp-ui-font-color);
+  color: var(--jp-1st-ui-font-color);
   background: white;
-  border: var(--jp-border-width) solid var(--jp-primary-border-color);
-  border-top: var(--jp-border-width) solid var(--jp-primary-color);
+  border: var(--jp-borderWidth) solid var(--jp-1st-borderColor);
+  border-top: var(--jp-borderWidth) solid var(--jp-1st-branch-color);
   font-size: var(--jp-ui-fontSize);
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   transform: translateX(-40%) translateY(-58%);
@@ -202,7 +202,7 @@
 .p-TabPanel-stackedPanel {
   padding: 0px;
   background: white;
-  border: var(--jp-border-width) solid #C0C0C0;
+  border: var(--jp-borderWidth) solid #C0C0C0;
   // This shadow requires a bottom/right padding on the .p-DockPanel-tabPanel
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }

@@ -6,22 +6,81 @@
 @import '../basestyle/materialcolors.less';
 
 :root {
-  --jp-border-width: 1px;
-  
-  --jp-primary-border-color: var(--md-grey-400);
-  --jp-secondary-border-color: var(--md-grey-300);
+
+  // Borders
+
+  --jp-borderWidth: 1px;
+  --jp-0th-borderColor: var(--md-grey-500);  
+  --jp-1st-borderColor: var(--md-grey-400);
+  --jp-2nd-borderColor: var(--md-grey-300);
+  --jp-3rd-borderColor: var(--md-grey-200);
+
+  // UI Fonts
 
   --jp-ui-fontSize: 13px;
   --jp-ui-icon-fontSize: 14px;
-  --jp-ui-font-color: var(--md-grey-700);
+  --jp-0th-ui-font-color: black;
+  --jp-1st-ui-font-color: var(--md-grey-800);
+  --jp-2nd-ui-font-color: var(--md-grey-700);
+  --jp-3rd-ui-font-color: var(--md-grey-500);
+  --jp-inverse-0th-ui-font-color: white;
+  --jp-inverse-1st-ui-font-color: white;
+  --jp-inverse-2nd-ui-font-color: var(--md-grey-50);
+  --jp-inverse-3rd-ui-font-color: var(--md-grey-100);
+
+  // Content Fonts
 
   --jp-content-fontSize: 14px;
-  --jp-content-font-color: black;
+  --jp-0th-content-font-color: black;
+  --jp-1st-content-font-color: black;
+  --jp-2nd-content-font-color: var(--md-grey-700);
+  --jp-3rd-content-font-color: var(--md-grey-500);
+  --jp-inverse-0th-content-font-color: white;
+  --jp-inverse-1st-content-font-color: white;
+  --jp-inverse-2nd-content-font-color: var(--md-grey-50);
+  --jp-inverse-3rd-content-font-color: var(--md-grey-100);
 
-  --jp-primary-color: var(--md-blue-500);
-  --jp-secondary-color: var(--md-orange-500);
-  --jp-primary-layout-color: white;
-  --jp-secondary-layout-color: var(--md-grey-500);
+  // Layout
 
-  --jp-dockarea-background: var(--md-grey-300);
+  --jp-0th-layout-color: white;  
+  --jp-1st-layout-color: white;
+  --jp-2nd-layout-color: var(--md-grey-100);
+  --jp-3rd-layout-color: var(--md-grey-200);
+
+  // Brand/accent
+
+  --jp-0th-brand-color: var(--md-blue-700);
+  --jp-1st-brand-color: var(--md-blue-500);
+  --jp-2nd-brand-color: var(--md-blue-300);
+  --jp-3rd-brand-color: var(--md-blue-100);
+  --jp-0th-accent-color: var(--md-orange-700);
+  --jp-1st-accent-color: var(--md-orange-500);
+  --jp-2nd-accent-color: var(--md-orange-300);
+  --jp-3rd-accent-color: var(--md-orange-100);
+
+  // Menus
+  --jp-menu-font-color: var(--jp-1st-ui-font-color);
+  --jp-menu-color: var(--jp-1st-layout-color);
+  --jp-menu-border-color: var(--jp-1st-borderColor);
+  --jp-menu-hover-color: var(--jp-2nd-layout-color);
+
+  // Tabs
+  --jp-tab-selected-color: var(--jp-1st-layout-color);
+  --jp-tab-unselected-color: var(--jp-2nd-layout-color);
+  --jp-tab-hover-color: var(--jp-1st-layout-color);
+
+  // DockPanel
+  --jp-dockpanel-background: var(--jp-3rd-layout-color);
+  --jp-dockpanel-content-color: var(--jp-1st-layout-color);
+  --jp-dockpanel-borderColor: var(--jp-1st-borderColor);
+  --jp-dockpanel-tab-selected-color: var(--jp-tab-selected-color);
+  --jp-dockpanel-tab-unselected-color: var(--jp-tab-unselected-color);
+  --jp-dockpanel-tab-hover-color: var(--jp-tab-hover-color);
+
+  // SidePanel
+  --jp-sidepanel-background: var(--jp-1st-layout-color);
+  --jp-sidepanel-tab-selected-color: var(--jp-tab-selected-color);
+  --jp-sidepanel-tab-unselected-color: var(--jp-tab-unselected-color);
+  --jp-sidepanel-tab-hover-color: var(--jp-tab-hover-color);
+
 }
