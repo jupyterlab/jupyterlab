@@ -22,8 +22,12 @@ import {
 } from 'phosphor/lib/dom/query';
 
 import {
-  PanelLayout
+  Panel, PanelLayout
 } from 'phosphor/lib/ui/panel';
+
+import {
+  SplitPanel
+} from 'phosphor/lib/ui/splitpanel';
 
 import {
   Widget
@@ -79,10 +83,16 @@ const PROMPT_CLASS = 'jp-Console-prompt';
 
 
 /**
+ * The class name of the panel that holds prompts.
+ */
+const INPUT_CLASS = 'jp-Console-input';
+
+
+/**
  * A widget containing a Jupyter console.
  */
 export
-class ConsoleWidget extends Widget {
+class ConsoleWidget extends SplitPanel {
   /**
    * Construct a console widget.
    */
@@ -90,13 +100,21 @@ class ConsoleWidget extends Widget {
     super();
     this.addClass(CONSOLE_CLASS);
 
-    let layout = new PanelLayout();
+    // Create the panels that holds the content and input.
+    this.orientation = 'vertical';
+    this._content = new Panel();
+    this._input = new Panel();
+    this._input.addClass(INPUT_CLASS);
 
-    this.layout = layout;
+    // Insert the content and input panes into the split panel.
+    this.addWidget(this._content);
+    this.addWidget(this._input);
+    SplitPanel.setStretch(this._content, 1);
+    SplitPanel.setStretch(this._input, 0);
+
     this._renderer = options.renderer;
     this._rendermime = options.rendermime;
     this._session = options.session;
-
     this._history = new ConsoleHistory({ kernel: this._session.kernel });
 
     // Instantiate tab completion widget.
@@ -126,7 +144,9 @@ class ConsoleWidget extends Widget {
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     banner.model.source = '...';
-    layout.addWidget(banner);
+
+    // Add the banner to the content pane.
+    this._content.addWidget(banner);
 
     // Set the banner text and the mimetype.
     this.initialize();
@@ -166,9 +186,8 @@ class ConsoleWidget extends Widget {
    * The last cell in a console is always a `CodeCellWidget` prompt.
    */
   get prompt(): CodeCellWidget {
-    let layout = this.layout as PanelLayout;
-    let last = layout.widgets.length - 1;
-    return last > 0 ? layout.widgets.at(last) as CodeCellWidget : null;
+    let inputLayout = (this._input.layout as PanelLayout);
+    return inputLayout.widgets.at(0) as CodeCellWidget || null;
   }
 
   /**
@@ -262,11 +281,12 @@ class ConsoleWidget extends Widget {
    */
   serialize(): nbformat.ICodeCell[] {
     let output: nbformat.ICodeCell[] = [];
-    let layout = this.layout as PanelLayout;
+    let layout = this._content.layout as PanelLayout;
     for (let i = 1; i < layout.widgets.length; i++) {
       let widget = layout.widgets.at(i) as CodeCellWidget;
       output.push(widget.model.toJSON());
     }
+    output.push(this.prompt.model.toJSON());
     return output;
   }
 
@@ -331,14 +351,15 @@ class ConsoleWidget extends Widget {
       prompt.readOnly = true;
       prompt.removeClass(PROMPT_CLASS);
       clearSignalData(prompt.editor);
+      (this._input.layout as PanelLayout).removeWidgetAt(0);
+      this._content.addWidget(prompt);
     }
 
-    // Create the new prompt and add to layout.
-    let layout = this.layout as PanelLayout;
+    // Create the new prompt.
     prompt = this._renderer.createPrompt(this._rendermime);
     prompt.mimetype = this._mimetype;
     prompt.addClass(PROMPT_CLASS);
-    layout.addWidget(prompt);
+    this._input.addWidget(prompt);
 
     // Hook up completion and history handling.
     let editor = prompt.editor;
@@ -419,7 +440,7 @@ class ConsoleWidget extends Widget {
    * Update the console based on the kernel info.
    */
   private _handleInfo(info: KernelMessage.IInfoReply): void {
-    let layout = this.layout as PanelLayout;
+    let layout = this._content.layout as PanelLayout;
     let banner = layout.widgets.at(0) as RawCellWidget;
     banner.model.source = info.banner;
     this._mimetype = mimetypeForLanguage(info.language_info);
@@ -428,6 +449,8 @@ class ConsoleWidget extends Widget {
 
   private _completion: CompletionWidget = null;
   private _completionHandler: CellCompletionHandler = null;
+  private _content: Panel = null;
+  private _input: Panel = null;
   private _inspectionHandler: InspectionHandler = null;
   private _mimetype = 'text/x-ipython';
   private _rendermime: IRenderMime = null;
