@@ -73,7 +73,7 @@ const cmdIds = {
   restoreCheckpoint: 'file-operations:restore-checkpoint',
   saveAs: 'file-operations:saveAs',
   close: 'file-operations:close',
-  closeAll: 'file-operations:closeAll',
+  closeAllFiles: 'file-operations:closeAllFiles',
   open: 'file-operations:open',
   showBrowser: 'file-browser:activate',
   hideBrowser: 'file-browser:hide',
@@ -152,7 +152,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     cmdIds.restoreCheckpoint,
     cmdIds.saveAs,
     cmdIds.close,
-    cmdIds.closeAll,
+    cmdIds.closeAllFiles,
   ].forEach(command => palette.addItem({ command, category }));
 
   mainMenu.addMenu(createMenu(app), {rank: 1});
@@ -233,7 +233,7 @@ function addCommands(app: JupyterLab, tracker: FocusTracker<Widget>, fbWidget: F
       }
     }
   });
-  commands.addCommand(cmdIds.closeAll, {
+  commands.addCommand(cmdIds.closeAllFiles, {
     label: 'Close All',
     execute: () => {
       each(tracker.widgets, widget => widget.close());
@@ -276,7 +276,7 @@ function createMenu(app: JupyterLab): Menu {
     cmdIds.restoreCheckpoint,
     cmdIds.saveAs,
     cmdIds.close,
-    cmdIds.closeAll,
+    cmdIds.closeAllFiles,
   ].forEach(command => menu.addItem({ command }));
 
   return menu;

@@ -21,6 +21,10 @@ import {
 } from 'phosphor/lib/ui/focustracker';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   Panel
 } from 'phosphor/lib/ui/panel';
 
@@ -240,6 +244,15 @@ class ApplicationShell extends Widget {
    */
   collapseRight(): void {
     this._rightHandler.collapse();
+  }
+
+  /**
+   * Close all tracked widgets.
+   */
+  closeAll(): void {
+    each(this._tracker.widgets, widget => {
+      widget.close();
+    });
   }
 
   private _topPanel: Panel;
