@@ -111,6 +111,7 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
 
     this._model = model;
     doc.setValue(this._model.source || '');
+    doc.clearHistory();
     this._model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
