@@ -1,14 +1,17 @@
 
 var semver = require('semver');
+window.loading = [];
+window.loaded = [];
+window.pending = [];
 
 function loadWithSemver(name, req, onLoad, config) {
     var modules = Object.keys(requirejs.s.contexts['_'].registry);
     // Get the package name, semver string, and module name.
-    var parts = name.match(/(^.*?):(.*?)(\/.*$)/);
+    var parts = name.match(/(^.*?)@(.*?)(\/.*$)/);
     var matches = [];
     var versions = [];
     for (var mod of modules) {
-      var modParts = mod.match(/(^.*?):(.*?)(\/.*$)/);
+      var modParts = mod.match(/(^.*?)@(.*?)(\/.*$)/);
       if (!modParts) {
         continue;
       }
@@ -25,9 +28,19 @@ function loadWithSemver(name, req, onLoad, config) {
     var index = 0;
     if (matches.length > 1) {
       var best = semver.maxSatisfying(versions, parts[2]);
+      if (!best) {
+        onLoad.error('No module found satisying: ' + name);
+        return;
+      }
       index = versions.indexOf(best);
     }
+    loading.push(matches[index]);
+    pending.push(matches[index]);
+    console.log('loading', loading.length, matches[index]);
     requirejs([matches[index]], function(mod) {
+      loaded.push(matches[index]);
+      pending.splice(pending.indexOf(matches[index]), 1);
+      console.log('loaded', loaded.length, 'of', loading.length, matches[index]);
       onLoad(mod);
     });
 };

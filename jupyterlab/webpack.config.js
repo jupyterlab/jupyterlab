@@ -8,6 +8,8 @@ require('es6-promise').polyfill();
 var webpack = require('webpack');
 var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var nodeExternals = require('webpack-node-externals');
+
 
 console.log('Generating bundles...');
 
@@ -69,6 +71,8 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           modRequest = modRequest.slice(modRequest.lastIndexOf('!') + 1);
         }
 
+
+        var modPackage = getPackage(modRequest);
         var source = module.source().source();
         for (var dep of deps) {
           var id = dep.id;
@@ -85,16 +89,27 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           if (dep.loaders.length) {
             request = request.slice(request.lastIndexOf('!') + 1);
           }
+
+          var depPackage = getPackage(request);
+          if (dep.issuer.indexOf('htmlparser') !== -1) {
+            console.log(request);
+            debugger;
+          }
           request = findImport(request, dep.issuer);
           request = 'require("jupyterlab!' + request + '")';
+          if (id === module.id) {
+            // Circular reference, use `exports` explicitly.
+            request = 'exports';
+          }
           source = source.split(search).join(request);
         }
+        source = source.replace('__webpack_require__', 'null');
         var modPath = findName(modRequest);
         modules.push(modPath);
         var header = 'define("' + modPath;
         header += '", function (require, exports, module) {\n'
         // Combine with indent.
-        source = header + source.split('\n').join('\n  ') + '\n})'
+        source = header + source.split('\n').join('\n  ') + '\n})';
         sources.push(source);
       });
     });
@@ -158,7 +173,7 @@ function findName(request) {
   var rootPath = findRoot(request);
   var package = getPackage(rootPath);
   var modPath = request.slice(rootPath.length + 1);
-  var name = package.name + ':' + package.version;
+  var name = package.name + '@' + package.version;
   if (modPath) {
     name += '/' + modPath;
   }
@@ -180,7 +195,7 @@ function findImport(request, issuer) {
     var sourcePackage = getPackage(sourcePath);
     semver = sourcePackage.version;
   }
-  name += ':' + semver;
+  name += '@' + semver;
   if (modPath) {
     name += '/' + modPath;
   }
@@ -198,10 +213,11 @@ module.exports = [{
     publicPath: './lab/'
   },
   node: {
-    fs: 'empty'
+    fs: 'empty',
   },
   debug: true,
   bail: true,
+  target: 'node',
   devtool: 'source-map',
   module: {
     loaders: [
@@ -224,8 +240,8 @@ module.exports = [{
   },
   plugins: [
     new ExtractTextPlugin('[name].css'),
-    new JupyterLabPlugin()
-  ]
+  ],
+  externals: [nodeExternals()]
 },
 {
   entry: {
