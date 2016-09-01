@@ -26,7 +26,7 @@ const mainExtension: JupyterLabPlugin<void> = {
       }
     });
 
-    palette.addItem({ command: commandId, category: 'Dock Panel' });
+    palette.addItem({ command: commandId, category: 'Main Area' });
 
     const message = 'Are you sure you want to exit JupyterLab?\n' +
                     'Any unsaved changes will be lost.';
