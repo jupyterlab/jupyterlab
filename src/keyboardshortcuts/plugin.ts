@@ -14,6 +14,10 @@ import {
 } from '../commandpalette';
 
 import {
+  CommandPalette
+} from 'phosphor/lib/ui/commandpalette';
+
+import {
   html
 } from './html';
 
@@ -37,6 +41,22 @@ function activateKeyBoardShortcuts(app: JupyterLab, palette: ICommandPalette): v
   widget.title.closable = true;
   widget.node.innerHTML = html;
   widget.node.style.overflowY = 'auto';
+
+  console.log("logging app.keymap..");
+  console.log(app.keymap);
+  console.log("logging app.commands..");
+  console.log(app.commands);
+
+  //gets keyboard shortcut
+  console.log(app.keymap["_bindings"]["_array"].length)
+  console.log(app.keymap["_bindings"]["_array"][0]["_keys"][0])
+
+  //gets command ID (text)
+  console.log(app.keymap["_bindings"]["_array"][0]["_command"]);
+
+  //gets human readable text
+  console.log(app.commands["_commands"]['about-jupyterlab:show'].label('about-jupyterlab:show', null));
+
 
   let command = 'keyboard-shortcuts-jupyterlab:show';
   app.commands.addCommand(command, {
