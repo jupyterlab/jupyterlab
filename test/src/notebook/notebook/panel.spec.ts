@@ -174,7 +174,7 @@ describe('notebook/notebook/panel', () => {
 
       it('should be read-only', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.toolbar = null; }).to.throwError();
+        expect(() => { (panel as any).toolbar = null; }).to.throwError();
       });
 
     });
@@ -188,7 +188,7 @@ describe('notebook/notebook/panel', () => {
 
       it('should be read-only', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.content = null; }).to.throwError();
+        expect(() => { (panel as any).content = null; }).to.throwError();
       });
 
     });
@@ -204,7 +204,7 @@ describe('notebook/notebook/panel', () => {
 
       it('should be read-only', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.kernel = null; }).to.throwError();
+        expect(() => { (panel as any).kernel = null; }).to.throwError();
       });
 
     });
@@ -218,7 +218,7 @@ describe('notebook/notebook/panel', () => {
 
       it('should be read-only', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.rendermime = null; }).to.throwError();
+        expect(() => { (panel as any).rendermime = null; }).to.throwError();
       });
 
     });
@@ -233,7 +233,7 @@ describe('notebook/notebook/panel', () => {
 
       it('should be read-only', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.renderer = null; });
+        expect(() => { (panel as any).renderer = null; });
       });
 
     });
@@ -247,7 +247,7 @@ describe('notebook/notebook/panel', () => {
 
       it('should be read-only', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.clipboard = null; }).to.throwError();
+        expect(() => { (panel as any).clipboard = null; }).to.throwError();
       });
 
     });
@@ -266,7 +266,7 @@ describe('notebook/notebook/panel', () => {
 
       it('should be read-only', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.model = null; }).to.throwError();
+        expect(() => { (panel as any).model = null; }).to.throwError();
       });
 
     });

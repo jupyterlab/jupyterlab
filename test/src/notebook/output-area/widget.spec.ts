@@ -190,7 +190,7 @@ describe('notebook/output-area/widget', () => {
 
       it('should be read-only', () => {
         let widget = new OutputAreaWidget({ rendermime });
-        expect(() => { widget.rendermime = null; }).to.throwError();
+        expect(() => { (widget as any).rendermime = null; }).to.throwError();
       });
 
     });
@@ -205,7 +205,7 @@ describe('notebook/output-area/widget', () => {
 
       it('should be read-only', () => {
         let widget = new OutputAreaWidget({ rendermime });
-        expect(() => { widget.renderer = null; }).to.throwError();
+        expect(() => { (widget as any).renderer = null; }).to.throwError();
       });
 
     });
@@ -395,7 +395,7 @@ describe('notebook/output-area/widget', () => {
 
       it('should be read-only', () => {
         let widget = new OutputWidget({ rendermime });
-        expect(() => { widget.prompt = null; }).to.throwError();
+        expect(() => { (widget as any).prompt = null; }).to.throwError();
       });
 
     });
@@ -409,7 +409,7 @@ describe('notebook/output-area/widget', () => {
 
       it('should be read-only', () => {
         let widget = new OutputWidget({ rendermime });
-        expect(() => { widget.output = null; }).to.throwError();
+        expect(() => { (widget as any).output = null; }).to.throwError();
       });
 
     });

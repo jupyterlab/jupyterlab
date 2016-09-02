@@ -113,7 +113,7 @@ describe('notebook/output-area/model', () => {
 
       it('should be read-only', () => {
         let model = new OutputAreaModel();
-        expect(() => { model.length = 0; }).to.throwError();
+        expect(() => { (model as any).length = 0; }).to.throwError();
       });
 
     });
@@ -129,7 +129,7 @@ describe('notebook/output-area/model', () => {
 
       it('should be read-only', () => {
         let model = new OutputAreaModel();
-        expect(() => { model.isDisposed = true; }).to.throwError();
+        expect(() => { (model as any).isDisposed = true; }).to.throwError();
       });
 
     });

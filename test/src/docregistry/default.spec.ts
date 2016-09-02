@@ -44,7 +44,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let factory = new WidgetFactory();
-        expect(() => { factory.isDisposed = false; }).to.throwError();
+        expect(() => { (factory as any).isDisposed = false; }).to.throwError();
       });
 
     });
@@ -91,7 +91,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let factory = new Base64ModelFactory();
-        expect(() => { factory.name = ''; }).to.throwError();
+        expect(() => { (factory as any).name = ''; }).to.throwError();
       });
 
     });
@@ -105,7 +105,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let factory = new Base64ModelFactory();
-        expect(() => { factory.fileType = 'file'; }).to.throwError();
+        expect(() => { (factory as any).fileType = 'file'; }).to.throwError();
       });
 
     });
@@ -119,7 +119,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let factory = new Base64ModelFactory();
-        expect(() => { factory.fileFormat = 'base64'; }).to.throwError();
+        expect(() => { (factory as any).fileFormat = 'base64'; }).to.throwError();
       });
 
     });
@@ -153,7 +153,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let model = new DocumentModel();
-        expect(() => { model.isDisposed = false; }).to.throwError();
+        expect(() => { (model as any).isDisposed = false; }).to.throwError();
       });
 
     });
@@ -279,7 +279,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let model = new DocumentModel();
-        expect(() => { model.defaultKernelName = ''; }).to.throwError();
+        expect(() => { (model as any).defaultKernelName = ''; }).to.throwError();
       });
 
     });
@@ -298,7 +298,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let model = new DocumentModel();
-        expect(() => { model.defaultKernelLanguage = ''; }).to.throwError();
+        expect(() => { (model as any).defaultKernelLanguage = ''; }).to.throwError();
       });
 
     });
@@ -371,7 +371,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let factory = new TextModelFactory();
-        expect(() => { factory.name = ''; }).to.throwError();
+        expect(() => { (factory as any).name = ''; }).to.throwError();
       });
 
     });
@@ -385,7 +385,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let factory = new TextModelFactory();
-        expect(() => { factory.fileType = 'file'; }).to.throwError();
+        expect(() => { (factory as any).fileType = 'file'; }).to.throwError();
       });
 
     });
@@ -399,7 +399,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let factory = new TextModelFactory();
-        expect(() => { factory.fileFormat = 'text'; }).to.throwError();
+        expect(() => { (factory as any).fileFormat = 'text'; }).to.throwError();
       });
 
     });
@@ -415,7 +415,7 @@ describe('docmanager/default', () => {
 
       it('should be read-only', () => {
         let factory = new TextModelFactory();
-        expect(() => { factory.isDisposed = false; }).to.throwError();
+        expect(() => { (factory as any).isDisposed = false; }).to.throwError();
       });
 
     });
