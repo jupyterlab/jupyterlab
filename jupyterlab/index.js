@@ -40,8 +40,6 @@ lab.registerPlugins([
   require('jupyterlab/lib/services/plugin').servicesProvider,
   require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
   require('jupyterlab/lib/terminal/plugin').terminalExtension,
-  require('jupyterlab/lib/notebook/codemirror/plugin').rendererProvider,
-  require('jupyterlab/lib/console/codemirror/plugin').rendererProvider,
   require('jupyterlab/lib/codemirror/plugin').editorFactoryProvider,
   require('jupyterlab/lib/notebook/default/plugin').notebookFactoryProvider
 
