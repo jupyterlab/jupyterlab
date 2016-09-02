@@ -63,7 +63,7 @@
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
     "clean:all": "npm run clean && cd jupyterlab && npm run clean && cd ..",
     "clean:examples": "node scripts/cleanexamples.js",
-    "reset": "npm run clean:all && rimraf jupyterlab/node_modules && rimraf node_modules && npm install && npm run build:all",
+    "clean:slate": "npm run clean:all && rimraf jupyterlab/node_modules && rimraf node_modules && npm install",
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
     "postinstall": "node scripts/dedupe.js",
     "prepublish": "npm run build",
