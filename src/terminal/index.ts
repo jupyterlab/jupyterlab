@@ -69,7 +69,7 @@ class TerminalWidget extends Widget {
     this.color = options.color || 'white';
     this.id = `jp-TerminalWidget-${Private.id++}`;
     this.title.label = 'Terminal';
-    Xterm.brokenBold = true;
+    (Xterm as any).brokenBold = true;
   }
 
   /**
