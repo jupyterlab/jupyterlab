@@ -121,7 +121,7 @@ describe('notebook/notebook/model', () => {
 
       it('should be read-only', () => {
         let model = new NotebookModel();
-        expect(() => { model.cells = null; }).to.throwError();
+        expect(() => { (model as any).cells = null; }).to.throwError();
       });
 
       context('cells `changed` signal', () => {
@@ -204,7 +204,7 @@ describe('notebook/notebook/model', () => {
 
       it('should be read-only', () => {
         let model = new NotebookModel();
-        expect(() => { model.factory = null; }).to.throwError();
+        expect(() => { (model as any).factory = null; }).to.throwError();
       });
 
       context('createCodeCell()', () => {
@@ -297,7 +297,7 @@ describe('notebook/notebook/model', () => {
 
       it('should be read-only', () => {
         let model = new NotebookModel();
-        expect(() => { model.nbformat = 0; }).to.throwError();
+        expect(() => { (model as any).nbformat = 0; }).to.throwError();
       });
 
     });
@@ -312,7 +312,7 @@ describe('notebook/notebook/model', () => {
 
       it('should be read-only', () => {
         let model = new NotebookModel();
-        expect(() => { model.nbformatMinor = 0; }).to.throwError();
+        expect(() => { (model as any).nbformatMinor = 0; }).to.throwError();
       });
 
     });
@@ -332,7 +332,7 @@ describe('notebook/notebook/model', () => {
 
       it('should be read-only', () => {
         let model = new NotebookModel();
-        expect(() => { model.defaultKernelName = ''; }).to.throwError();
+        expect(() => { (model as any).defaultKernelName = ''; }).to.throwError();
       });
 
     });
@@ -357,7 +357,7 @@ describe('notebook/notebook/model', () => {
 
       it('should be read-only', () => {
         let model = new NotebookModel();
-        expect(() => { model.defaultKernelLanguage = ''; }).to.throwError();
+        expect(() => { (model as any).defaultKernelLanguage = ''; }).to.throwError();
       });
 
     });

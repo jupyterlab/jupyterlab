@@ -61,7 +61,7 @@ describe('notebook/notebook/widgetfactory', () => {
 
       it('should be read-only', () => {
         let factory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
-        expect(() => { factory.isDisposed = false; }).to.throwError();
+        expect(() => { (factory as any).isDisposed = false; }).to.throwError();
       });
 
     });

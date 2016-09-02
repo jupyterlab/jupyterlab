@@ -245,7 +245,7 @@ describe('notebook/cells/widget', () => {
         let widget = new BaseCellWidget({
           renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
         });
-        expect(() => { widget.editor = null; }).to.throwError();
+        expect(() => { (widget as any).editor = null; }).to.throwError();
       });
 
     });

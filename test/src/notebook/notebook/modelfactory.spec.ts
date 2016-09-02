@@ -25,7 +25,7 @@ describe('notebook/notebook/modelfactory', () => {
 
       it('should be read-only', () => {
         let factory = new NotebookModelFactory();
-        expect(() => { factory.name = ''; }).to.throwError();
+        expect(() => { (factory as any).name = ''; }).to.throwError();
       });
 
     });
@@ -39,7 +39,7 @@ describe('notebook/notebook/modelfactory', () => {
 
       it('should be read-only', () => {
         let factory = new NotebookModelFactory();
-        expect(() => { factory.fileType = 'notebook'; }).to.throwError();
+        expect(() => { (factory as any).fileType = 'notebook'; }).to.throwError();
       });
 
     });
@@ -53,7 +53,7 @@ describe('notebook/notebook/modelfactory', () => {
 
       it('should be read-only', () => {
         let factory = new NotebookModelFactory();
-        expect(() => { factory.fileFormat = 'json'; }).to.throwError();
+        expect(() => { (factory as any).fileFormat = 'json'; }).to.throwError();
       });
 
     });
@@ -69,7 +69,7 @@ describe('notebook/notebook/modelfactory', () => {
 
       it('should be read-only', () => {
         let factory = new NotebookModelFactory();
-        expect(() => { factory.isDisposed = false; }).to.throwError();
+        expect(() => { (factory as any).isDisposed = false; }).to.throwError();
       });
 
     });
