@@ -8,6 +8,7 @@ require('es6-promise').polyfill();
 var webpack = require('webpack');
 var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var MemoryFS = require("memory-fs");
 
 
 console.log('Generating bundles...');
@@ -26,9 +27,21 @@ console.log('Generating bundles...');
 
 function JupyterLabPlugin(options) {
   this.options = options || {};
+  // Known libraries that are not able to be AMD-wrapped
+  // See https://github.com/requirejs/r.js/blob/master/README.md#convert-commonjs-modules
+  this.unwrappable = this.options.unwrappable || [];
+  this.unwrappable.push('htmlparser2');
 }
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
+  // Add our externals to the list of externals;
+  var externals = compiler.options.externals || [];
+  if (!Array.isArray(externals)) {
+    externals = [externals];
+  }
+  compiler.options.externals = externals.concat(this.unwrappable);
+  unwrappable = this.unwrappable;
+
   compiler.plugin('emit', function(compilation, callback) {
     var sources = [];
     var modules = [];
@@ -85,8 +98,8 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
             source = source.replace(search + ';\n', '');
             continue;
           }
-          if (request.indexOf('htmlparser2') !== -1) {
-            debugger;
+          if (!path.extname(request)) {
+            request = require.resolve(request);
           }
           if (dep.loaders && dep.loaders.length) {
             request = request.slice(request.lastIndexOf('!') + 1);
@@ -116,29 +129,68 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
     //code += compilation.outputOptions.publicPath + '" }),\n\n'
     //code += sources.join(',\n\n');
 
-    var code = sources.join(',\n\n');
 
-    // Insert this list into the Webpack build as a new file asset:
-    compilation.assets['custom.bundle.js'] = {
-      source: function() {
-        return code;
-      },
-      size: function() {
-        return code.length;
-      }
-    };
-
-    compilation.assets['custom.manifest.txt'] = {
-      source: function() {
-        return modules.join('\n');
-      },
-      size: function() {
-        return modules.join('\n').length;
-      }
+    var promises = [];
+    for (var name of unwrappable) {
+      promises.push(createUnwrappable(name, compilation));
     }
-    callback();
+    Promise.all(promises).then(function(outputs) {
+      sources = sources.concat(outputs);
+      var code = sources.join(',\n\n');
+
+      // Insert this list into the Webpack build as a new file asset:
+      compilation.assets['custom.bundle.js'] = {
+        source: function() {
+          return code;
+        },
+        size: function() {
+          return code.length;
+        }
+      };
+
+      compilation.assets['custom.manifest.txt'] = {
+        source: function() {
+          return modules.join('\n');
+        },
+        size: function() {
+          return modules.join('\n').length;
+        }
+      }
+
+      callback();
+    });
   });
 };
+
+
+// Create a shim for an unwrappable module.
+function createUnwrappable(name, compilation) {
+  var modPath = require.resolve(name);
+  var library = findName(modPath);
+  var options = {
+    entry: [name],
+    output: {
+      path: '/build',
+      filename: 'out.js',
+      publicPath: './lab',
+      library: library,
+      libraryTarget: 'amd'
+    }
+  }
+  var mem = new MemoryFS();
+  options.module = compilation.options.module;
+  var compiler = webpack(options);
+  compiler.context = name;
+  compiler.outputFileSystem = mem;
+
+  return new Promise(function (resolve, reject) {
+    compiler.run(function(err, stats) {
+      var fileContent = mem.readFileSync('/build/out.js', 'utf8');
+      resolve(fileContent);
+    });
+  });
+}
+
 
 
 // From a request - find its package root.
@@ -237,7 +289,6 @@ module.exports = [{
     new ExtractTextPlugin('[name].css'),
     new JupyterLabPlugin()
   ],
-  externals: ['htmlparser2']
 },
 {
   entry: {
@@ -256,42 +307,5 @@ module.exports = [{
   debug: true,
   bail: true,
   devtool: 'source-map'
-},
-{
-  entry: {
-    htmlparser2: ['htmlparser2']
-  },
-  output: {
-    path: __dirname + '/build',
-    filename: '[name].bundle.js',
-    publicPath: './lab',
-    library: 'htmlparser2@3.9.1',
-    libraryTarget: 'amd'
-  },
-  node: {
-    fs: 'empty'
-  },
-  debug: true,
-  bail: true,
-  devtool: 'source-map',
-  module: {
-  loaders: [
-    { test: /\.css$/,
-      loader: ExtractTextPlugin.extract("style-loader", "css-loader", {
-        publicPath: './'
-      })
-    },
-    { test: /\.json$/, loader: 'json-loader' },
-    { test: /\.html$/, loader: 'file-loader' },
-    // jquery-ui loads some images
-    { test: /\.(jpg|png|gif)$/, loader: 'file-loader' },
-    // required to load font-awesome
-    { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
-    { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
-    { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
-    { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
-    { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' }
-  ]
-  },
 }
 ];

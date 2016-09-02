@@ -31,7 +31,7 @@ Distributed under the terms of the Modified BSD License.
 requirejs.config({
     waitSeconds: 20,
 });
-require(['lab/custom.bundle', 'lab/loader.bundle', 'lab/htmlparser2.bundle'], function() {
+require(['lab/custom.bundle', 'lab/loader.bundle'], function() {
   console.log('Bundles loaded');
   require(['jupyterlab-extension@0.1.0/index.js'], function() {
     console.log('page loaded');

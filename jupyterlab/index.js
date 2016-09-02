@@ -44,4 +44,4 @@ lab.registerPlugins([
   // require('jupyter-js-widgets-labextension/lib/plugin').widgetManagerExtension,
 ]);
 
-window.onload = function() { lab.start(); }
+lab.start();
