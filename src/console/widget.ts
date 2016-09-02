@@ -247,7 +247,7 @@ class ConsoleWidget extends Widget {
     let prompt = this.prompt;
     let model = prompt.model;
     model.source += '\n';
-    prompt.editor.setCursorPosition(model.source.length);
+    prompt.editor.position = prompt.editor.getModel().getPositionAt(model.source.length); 
   }
 
   /**
@@ -371,7 +371,7 @@ class ConsoleWidget extends Widget {
         clearTimeout(timer);
         if (isComplete.content.status === 'incomplete') {
           prompt.model.source = code + isComplete.content.indent;
-          prompt.editor.setCursorPosition(prompt.model.source.length);
+          prompt.editor.position = prompt.editor.getModel().getPositionAt(prompt.model.source.length);
           resolve(false);
         } else {
           resolve(true);
