@@ -65,27 +65,27 @@ import {
 /**
  * The class name added to console widgets.
  */
-const CONSOLE_CLASS = 'jp-Console';
+const CONSOLE_CLASS = 'jp-ConsoleContent';
 
 /**
  * The class name added to the console banner.
  */
-const BANNER_CLASS = 'jp-Console-banner';
+const BANNER_CLASS = 'jp-ConsoleContent-banner';
 
 /**
  * The class name of the active prompt
  */
-const PROMPT_CLASS = 'jp-Console-prompt';
+const PROMPT_CLASS = 'jp-ConsoleContent-prompt';
 
 /**
  * The class name of the panel that holds cell content.
  */
-const CONTENT_CLASS = 'jp-Console-content';
+const CONTENT_CLASS = 'jp-ConsoleContent-content';
 
 /**
  * The class name of the panel that holds prompts.
  */
-const INPUT_CLASS = 'jp-Console-input';
+const INPUT_CLASS = 'jp-ConsoleContent-input';
 
 /**
  * The timeout in ms for execution requests to the kernel.
@@ -106,7 +106,10 @@ class ConsoleContent extends SplitPanel {
    * Construct a console widget.
    */
   constructor(options: ConsoleContent.IOptions) {
-    super({ orientation: options.orientation || 'vertical' });
+    super({
+      orientation: options.orientation || 'vertical',
+      spacing: 2
+    });
     this.addClass(CONSOLE_CLASS);
 
     // Create the panels that holds the content and input.
@@ -353,14 +356,16 @@ class ConsoleContent extends SplitPanel {
    * Make a new prompt.
    */
   protected newPrompt(): void {
-    // Make the previous editor read-only and clear its signals.
     let prompt = this.prompt;
+    let content = this._content;
+    let input = this._input;
+
+    // Make the last prompt read-only, clear its signals, and move to content.
     if (prompt) {
       prompt.readOnly = true;
       prompt.removeClass(PROMPT_CLASS);
       clearSignalData(prompt.editor);
-      (this._input.layout as PanelLayout).removeWidgetAt(0);
-      this._content.addWidget(prompt);
+      content.addWidget((input.layout as PanelLayout).removeWidgetAt(0));
     }
 
     // Create the new prompt.
