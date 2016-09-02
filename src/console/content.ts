@@ -89,14 +89,18 @@ const INPUT_CLASS = 'jp-Console-input';
 
 
 /**
- * A widget containing a Jupyter console.
+ * A widget containing a Jupyter console's content.
+ *
+ * #### Notes
+ * The ConsoleContent class is intended to be used within a ConsolePanel
+ * instance. Under most circumstances, it is not instantiated by user code.
  */
 export
-class ConsoleWidget extends SplitPanel {
+class ConsoleContent extends SplitPanel {
   /**
    * Construct a console widget.
    */
-  constructor(options: ConsoleWidget.IOptions) {
+  constructor(options: ConsoleContent.IOptions) {
     super();
     this.addClass(CONSOLE_CLASS);
 
@@ -170,7 +174,7 @@ class ConsoleWidget extends SplitPanel {
   /**
    * A signal emitted when the console executes its prompt.
    */
-  executed: ISignal<ConsoleWidget, Date>;
+  executed: ISignal<ConsoleContent, Date>;
 
 
   /**
@@ -226,7 +230,7 @@ class ConsoleWidget extends SplitPanel {
    * Execute the current prompt.
    *
    * @param force - Whether to force execution without checking code
-   *    completeness.
+   * completeness.
    */
   execute(force=false): Promise<void> {
     this.dismissCompletion();
@@ -453,21 +457,21 @@ class ConsoleWidget extends SplitPanel {
   private _inspectionHandler: InspectionHandler = null;
   private _mimetype = 'text/x-ipython';
   private _rendermime: IRenderMime = null;
-  private _renderer: ConsoleWidget.IRenderer = null;
+  private _renderer: ConsoleContent.IRenderer = null;
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
 }
 
 
-// Define the signals for the `ConsoleWidget` class.
-defineSignal(ConsoleWidget.prototype, 'executed');
+// Define the signals for the `ConsoleContent` class.
+defineSignal(ConsoleContent.prototype, 'executed');
 
 
 /**
- * A namespace for ConsoleWidget statics.
+ * A namespace for ConsoleContent statics.
  */
 export
-namespace ConsoleWidget {
+namespace ConsoleContent {
   /**
    * The initialization options for a console widget.
    */

@@ -22,15 +22,15 @@ import {
 } from '../../rendermime';
 
 import {
-  ConsoleWidget
-} from '../widget';
+  ConsoleContent
+} from '../content';
 
 
 /**
  * A code mirror renderer for a console.
  */
 export
-class CodeMirrorConsoleRenderer implements ConsoleWidget.IRenderer {
+class CodeMirrorConsoleRenderer implements ConsoleContent.IRenderer {
   /**
    * Create a new banner widget.
    */
