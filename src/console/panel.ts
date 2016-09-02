@@ -88,6 +88,17 @@ class ConsolePanel extends Panel {
   }
 
   /**
+   * Toggle the console prompt orientation between vertical and horizontal.
+   */
+  toggleOrientation(): void {
+    let content = this._content;
+    let old = content.orientation;
+    content.orientation = old === 'vertical' ? 'horizontal' : 'vertical';
+    content.setRelativeSizes([1, 0]);
+    content.activate();
+  }
+
+  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
