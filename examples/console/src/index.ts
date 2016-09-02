@@ -165,12 +165,7 @@ function startApp(session: ISession) {
   command = 'console:toggle';
   commands.addCommand(command, {
     label: 'Toggle Console Orientation',
-    execute: () => {
-      let content = consolePanel.content;
-      let old = content.orientation;
-      content.orientation = old === 'vertical' ? 'horizontal' : 'vertical';
-      consolePanel.activate();
-    }
+    execute: () => consolePanel.toggleOrientation()
   });
   palette.addItem({ command, category });
 }
