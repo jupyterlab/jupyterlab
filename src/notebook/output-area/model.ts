@@ -167,14 +167,14 @@ class OutputAreaModel implements IDisposable {
       let future = kernel.execute(content);
       // Handle published messages.
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-        let msgType = msg.header.msg_type as nbformat.OutputType;
+        let msgType = msg.header.msg_type;
         switch (msgType) {
         case 'execute_result':
         case 'display_data':
         case 'stream':
         case 'error':
           let model = msg.content as nbformat.IOutput;
-          model.output_type = msgType;
+          model.output_type = msgType as nbformat.OutputType;
           this.add(model);
           break;
         case 'clear_output':
