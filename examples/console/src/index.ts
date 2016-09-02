@@ -124,7 +124,7 @@ function startApp(session: ISession) {
   Widget.attach(panel, document.body);
   panel.addWidget(palette);
   panel.addWidget(consolePanel);
-  window.onresize = () => { panel.update(); };
+  window.onresize = () => panel.update();
 
   let selector = '.jp-ConsolePanel';
   let category = 'Console';
@@ -161,6 +161,18 @@ function startApp(session: ISession) {
   });
   palette.addItem({ command, category });
   keymap.addBinding({ command,  selector,  keys: ['Ctrl Enter'] });
+
+  command = 'console:toggle';
+  commands.addCommand(command, {
+    label: 'Toggle Console Orientation',
+    execute: () => {
+      let content = consolePanel.content;
+      let old = content.orientation;
+      content.orientation = old === 'vertical' ? 'horizontal' : 'vertical';
+      consolePanel.activate();
+    }
+  });
+  palette.addItem({ command, category });
 }
 
 window.onload = main;
