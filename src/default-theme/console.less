@@ -2,59 +2,73 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-.jp-Console {
+.jp-ConsoleContent {
   height: 100%;
-  padding: 0 10px 20px 10px;
+  padding: 0;
+  border: 1px solid #C9C9C9;
 }
 
 
-.jp-Console-input {
+.jp-ConsoleContent .p-SplitPanel-handle {
+  height: 2px;
+  background-color: #C9C9C9;
+}
+
+
+.jp-ConsoleContent-input {
+  margin: 5px;
   min-width: 150px;
-  min-height: 35px;
+  min-height: 45px;
 }
 
 
-.jp-Console .jp-Cell {
+.jp-ConsoleContent .jp-Cell {
   padding-top: 0;
   padding-bottom: 0;
 }
 
 
-.jp-Console .jp-InputArea-editor.jp-CellEditor {
+.jp-ConsoleContent .jp-InputArea-editor.jp-CellEditor {
   background: transparent;
   border-color: transparent;
   overflow: auto;
 }
 
 
-.jp-Console-prompt.jp-Cell {
+.jp-ConsoleContent-content {
+  background-color: #F5F5F5;
+}
+
+
+.jp-ConsoleContent-prompt.jp-Cell {
   background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
   border-color: #66BB6A;
   border-left-width: 1px;
+  height: calc(100% - 10px); /* Account for the 10px margins. */
+  min-height: calc(100% - 10px); /* Account for the 10px margins. */
+  width: calc(100% - 10px); /* Account for the 10px margins. */
+}
+
+
+.jp-ConsoleContent-prompt .jp-InputArea {
   height: 100%;
   min-height: 100%;
 }
 
 
-.jp-Console-prompt .jp-InputArea {
-  height: 100%;
-  min-height: 100%;
-}
-
-
-.jp-Console-prompt .jp-InputArea-prompt {
+.jp-ConsoleContent-prompt .jp-InputArea-prompt {
   flex-basis: auto;
   text-align: left;
 }
 
 
-.jp-Console .jp-Output-prompt {
+.jp-ConsoleContent .jp-Output-prompt {
   flex-basis: auto;
   text-align: left;
 }
 
 
-.jp-Console .jp-Output pre {
+.jp-ConsoleContent .jp-Output pre {
   border: none;
   margin: 1px 0 0 5px;
   overflow-x: auto;
@@ -65,6 +79,6 @@
 }
 
 
-.jp-Console .jp-Console-banner .jp-InputArea-prompt {
+.jp-ConsoleContent .jp-ConsoleContent-banner .jp-InputArea-prompt {
   display: none;
 }
