@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  getBaseUrl
+} from 'jupyter-js-services/lib/utils';
+
+import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -140,6 +144,15 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     category: 'Help'
   }));
 
+  let openLegacyNotebookId = 'legacy-notebook:open';
+  app.commands.addCommand(openLegacyNotebookId, {
+    label: 'Legacy Jupyter Notebook',
+    execute: () => {
+      window.open(getBaseUrl()+'tree');
+    }
+  });
+  palette.addItem({ command: openLegacyNotebookId, category: 'Help'});
+
   let menu = Private.createMenu(app);
   mainMenu.addMenu(menu, {});
 
@@ -161,6 +174,7 @@ namespace Private {
     menu.title.label = 'Help';
     menu.addItem({ command: 'about-jupyterlab:show' });
     menu.addItem({ command: 'faq-jupyterlab:show' });
+    menu.addItem({ command: 'legacy-notebook:open'})
 
     COMMANDS.forEach(item => menu.addItem({ command: item.id }));
     return menu;
