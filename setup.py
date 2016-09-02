@@ -32,7 +32,8 @@ from distutils import log
 log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 
-LONG_DESCRIPTION = 'This is a very early pre-alpha developer preview. It is not ready for general usage yet.'
+DESCRIPTION = 'An alpha preview of the JupyterLab notebook server extension.'
+LONG_DESCRIPTION = 'This is an alpha preview of JupyterLab. It is not ready for general usage yet. Development happens on https://github.com/jupyter/jupyterlab, with chat on https://gitter.im/jupyter/jupyterlab.'
 
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
@@ -132,7 +133,7 @@ with open(os.path.join(here, 'package.json')) as f:
 setup_args = {
     'name': 'jupyterlab',
     'version': packagejson['version'],
-    'description': 'A pre-alpha Jupyter lab environment notebook server extension.',
+    'description': DESCRIPTION,
     'long_description': LONG_DESCRIPTION,
     'License': 'BSD',
     'include_package_data': True,
@@ -157,7 +158,7 @@ setup_args = {
     },
     'author': 'Jupyter Development Team',
     'author_email': 'jupyter@googlegroups.com',
-    'url': 'http://jupyter.org',
+    'url': 'https://github.com/jupyter/jupyterlab',
     'keywords': ['ipython', 'jupyter', 'Web'],
     'classifiers': [
         'Development Status :: 2 - Pre-Alpha',
