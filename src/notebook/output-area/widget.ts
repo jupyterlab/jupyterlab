@@ -415,13 +415,15 @@ class OutputAreaWidget extends Widget {
       // We introduce a small delay in the minimum height
       // to prevent this jitter.
       let rect = this.node.getBoundingClientRect();
-      let oldHeight = this.node.style.minHeight;
       this.node.style.minHeight = `${rect.height}px`;
-      setTimeout(() => {
+      if (this._minHeightTimeout) {
+        clearTimeout(this._minHeightTimeout);
+      }
+      this._minHeightTimeout = setTimeout(() => {
         if (this.isDisposed) {
           return;
         }
-        this.node.style.minHeight = oldHeight;
+        this.node.style.minHeight = '';
       }, 50);
 
       let oldValues = args.oldValue as nbformat.IOutput[];
@@ -441,6 +443,7 @@ class OutputAreaWidget extends Widget {
   private _trusted = false;
   private _fixedHeight = false;
   private _collapsed = false;
+  private _minHeightTimeout: number = null;
   private _model: OutputAreaModel = null;
   private _rendermime: RenderMime = null;
   private _renderer: OutputAreaWidget.IRenderer = null;
