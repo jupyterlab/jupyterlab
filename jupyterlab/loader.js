@@ -7,13 +7,19 @@ window.pending = [];
 function loadWithSemver(name, req, onLoad, config) {
     var modules = Object.keys(requirejs.s.contexts['_'].registry);
     // Get the package name, semver string, and module name.
-    var parts = name.match(/(^.*?)@(.*?)(\/.*$)/);
+    var parts = name.match(/(^.*?)@(.*?)(\/.*$)/) || name.match(/(^.*?)@(.*?)$/);
+    if (parts.length === 2) {
+      parts.push('');
+    }
     var matches = [];
     var versions = [];
     for (var mod of modules) {
-      var modParts = mod.match(/(^.*?)@(.*?)(\/.*$)/);
+      var modParts = mod.match(/(^.*?)@(.*?)(\/.*$)/) || mod.match(/(^.*?)@(.*?)$/);
       if (!modParts) {
         continue;
+      }
+      if (modParts.length === 2) {
+        modParts.push('');
       }
       if (modParts[1] === parts[1] && modParts[3] === parts[3]) {
         matches.push(mod);
@@ -33,6 +39,9 @@ function loadWithSemver(name, req, onLoad, config) {
         return;
       }
       index = versions.indexOf(best);
+    }
+    if (pending.indexOf(matches[index]) !== -1) {
+      console.log('duplicate', matches[index]);
     }
     loading.push(matches[index]);
     pending.push(matches[index]);

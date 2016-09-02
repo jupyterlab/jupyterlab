@@ -1,0 +1,52 @@
+<!--
+Copyright (c) Jupyter Development Team.
+Distributed under the terms of the Modified BSD License.
+-->
+
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="node_modules/requirejs/require.js" type="text/javascript" charset="utf-8"></script>
+</head>
+
+<body>
+
+<script type="text/javascript">
+define('b', function(require, exports, module) {
+    //If "a" has used exports, then we have a real
+    //object reference here. However, we cannot use
+    //any of "a"'s properties until after "b" returns a value.
+    var a = require("a");
+    console.log('in b', a.foo);
+
+    exports.foo = function () {
+        console.log('got', a.foo());
+        return 'hi from a';
+    };
+});
+
+define('a', function(require, exports, module) {
+    //If "a" has used exports, then we have a real
+    //object reference here. However, we cannot use
+    //any of "a"'s properties until after "b" returns a value.
+    var b = require("b");
+
+    console.log('in a', b.foo);
+
+    exports.foo = function () {
+        return 'hi from b';
+    };
+});
+
+
+require(['a', 'b'], function(a, b) {
+  console.log(b.foo());
+})
+
+
+</script>
+</body>
+
+</html>

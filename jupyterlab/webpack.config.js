@@ -8,7 +8,6 @@ require('es6-promise').polyfill();
 var webpack = require('webpack');
 var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var nodeExternals = require('webpack-node-externals');
 
 
 console.log('Generating bundles...');
@@ -86,14 +85,11 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
             source = source.replace(search + ';\n', '');
             continue;
           }
-          if (dep.loaders.length) {
-            request = request.slice(request.lastIndexOf('!') + 1);
-          }
-
-          var depPackage = getPackage(request);
-          if (dep.issuer.indexOf('htmlparser') !== -1) {
-            console.log(request);
+          if (request.indexOf('htmlparser2') !== -1) {
             debugger;
+          }
+          if (dep.loaders && dep.loaders.length) {
+            request = request.slice(request.lastIndexOf('!') + 1);
           }
           request = findImport(request, dep.issuer);
           request = 'require("jupyterlab!' + request + '")';
@@ -217,7 +213,6 @@ module.exports = [{
   },
   debug: true,
   bail: true,
-  target: 'node',
   devtool: 'source-map',
   module: {
     loaders: [
@@ -240,8 +235,9 @@ module.exports = [{
   },
   plugins: [
     new ExtractTextPlugin('[name].css'),
+    new JupyterLabPlugin()
   ],
-  externals: [nodeExternals()]
+  externals: ['htmlparser2']
 },
 {
   entry: {
@@ -260,5 +256,42 @@ module.exports = [{
   debug: true,
   bail: true,
   devtool: 'source-map'
+},
+{
+  entry: {
+    htmlparser2: ['htmlparser2']
+  },
+  output: {
+    path: __dirname + '/build',
+    filename: '[name].bundle.js',
+    publicPath: './lab',
+    library: 'htmlparser2@3.9.1',
+    libraryTarget: 'amd'
+  },
+  node: {
+    fs: 'empty'
+  },
+  debug: true,
+  bail: true,
+  devtool: 'source-map',
+  module: {
+  loaders: [
+    { test: /\.css$/,
+      loader: ExtractTextPlugin.extract("style-loader", "css-loader", {
+        publicPath: './'
+      })
+    },
+    { test: /\.json$/, loader: 'json-loader' },
+    { test: /\.html$/, loader: 'file-loader' },
+    // jquery-ui loads some images
+    { test: /\.(jpg|png|gif)$/, loader: 'file-loader' },
+    // required to load font-awesome
+    { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
+    { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
+    { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
+    { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
+    { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' }
+  ]
+  },
 }
 ];
