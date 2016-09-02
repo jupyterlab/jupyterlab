@@ -3,13 +3,11 @@
 
 import {
   StandaloneEditorWidget, IStandaloneEditorView, IEditorModel
-} from './widget'
+} from './widget';
 
 import {
   EditorViewDecorator, EditorWidgetDecorator, EditorWidget
-} from '../decorator'
-
-export * from './widget';
+} from '../decorator';
 
 /**
  * A standalone editor view decorator.

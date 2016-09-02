@@ -10,7 +10,11 @@ import {
 } from '../editorwidget/widget';
 
 import {
-  DefaultStandaloneEditorWidgetDecorator, StandaloneEditorWidget
+  StandaloneEditorWidget
+} from '../editorwidget/standalone/widget';
+
+import {
+  DefaultStandaloneEditorWidgetDecorator
 } from '../editorwidget/standalone/decorator';
 
 import {
