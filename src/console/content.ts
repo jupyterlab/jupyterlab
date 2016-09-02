@@ -101,11 +101,10 @@ class ConsoleContent extends SplitPanel {
    * Construct a console widget.
    */
   constructor(options: ConsoleContent.IOptions) {
-    super();
+    super({ orientation: options.orientation || 'vertical' });
     this.addClass(CONSOLE_CLASS);
 
     // Create the panels that holds the content and input.
-    this.orientation = 'vertical';
     this._content = new Panel();
     this._input = new Panel();
     this._content.addClass(CONTENT_CLASS);
@@ -473,27 +472,36 @@ defineSignal(ConsoleContent.prototype, 'executed');
 export
 namespace ConsoleContent {
   /**
-   * The initialization options for a console widget.
+   * The initialization options for a console content widget.
    */
   export
   interface IOptions {
     /**
-     * The completion widget for a console widget.
+     * The completion widget for a console content widget.
      */
     completion?: CompletionWidget;
 
     /**
-     * The mime renderer for the console widget.
+     * The orientation of the console content.
+     *
+     * #### Notes
+     * This setting indicates how the prompt and output are separated. The
+     * default value is `'vertical'`.
      */
-    rendermime: IRenderMime;
+    orientation?: 'horizontal' | 'vertical';
 
     /**
-     * The renderer for a console widget.
+     * The renderer for a console content widget.
      */
     renderer: IRenderer;
 
     /**
-     * The session for the console widget.
+     * The mime renderer for the console content widget.
+     */
+    rendermime: IRenderMime;
+
+    /**
+     * The session for the console content widget.
      */
     session: ISession;
   }
