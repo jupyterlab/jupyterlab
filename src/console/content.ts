@@ -87,6 +87,11 @@ const CONTENT_CLASS = 'jp-Console-content';
  */
 const INPUT_CLASS = 'jp-Console-input';
 
+/**
+ * The timeout in ms for execution requests to the kernel.
+ */
+const EXECUTION_TIMEOUT = 250;
+
 
 /**
  * A widget containing a Jupyter console's content.
@@ -328,6 +333,7 @@ class ConsoleContent extends SplitPanel {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
     Private.scrollToBottom(this._content.node);
   }
 
@@ -335,13 +341,12 @@ class ConsoleContent extends SplitPanel {
    * Initialize the banner and mimetype.
    */
   protected initialize(): void {
-    if (this._session.kernel.info) {
+    let session = this._session;
+    if (session.kernel.info) {
       this._handleInfo(this._session.kernel.info);
-    } else {
-      this._session.kernel.kernelInfo().then(msg => {
-        this._handleInfo(msg.content);
-      });
+      return;
     }
+    session.kernel.kernelInfo().then(msg => this._handleInfo(msg.content));
   }
 
   /**
@@ -368,7 +373,7 @@ class ConsoleContent extends SplitPanel {
     let editor = prompt.editor;
     editor.edgeRequested.connect(this.onEdgeRequest, this);
 
-    // Associate the new prompt with the completion handler.
+    // Associate the new prompt with the completion and inspection handlers.
     this._completionHandler.activeCell = prompt;
     this._inspectionHandler.activeCell = prompt;
 
@@ -383,22 +388,17 @@ class ConsoleContent extends SplitPanel {
     let prompt = this.prompt;
     let code = prompt.model.source + '\n';
     return new Promise<boolean>((resolve, reject) => {
-      // Allow 250 ms for the response.
-      let timer = setTimeout(() => {
-        resolve(true);
-      }, 250);
+      let timer = setTimeout(() => resolve(true), EXECUTION_TIMEOUT);
       this._session.kernel.isComplete({ code }).then(isComplete => {
         clearTimeout(timer);
-        if (isComplete.content.status === 'incomplete') {
-          prompt.model.source = code + isComplete.content.indent;
-          prompt.editor.setCursorPosition(prompt.model.source.length);
-          resolve(false);
-        } else {
+        if (isComplete.content.status !== 'incomplete') {
           resolve(true);
+          return;
         }
-      }).catch(() => {
-        resolve(true);
-      });
+        prompt.model.source = code + isComplete.content.indent;
+        prompt.editor.setCursorPosition(prompt.model.source.length);
+        resolve(false);
+      }).catch(() => resolve(true));
     });
   }
 
@@ -410,8 +410,7 @@ class ConsoleContent extends SplitPanel {
     this._history.push(prompt.model.source);
     // Create a new prompt before kernel execution to allow typeahead.
     this.newPrompt();
-    return prompt.execute(this._session.kernel).then(
-    (value: KernelMessage.IExecuteReplyMsg) => {
+    let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       this.executed.emit(new Date());
       if (!value) {
         this._inspectionHandler.handleExecuteReply(null);
@@ -433,9 +432,9 @@ class ConsoleContent extends SplitPanel {
         }
       }
       this.update();
-    },
-      () => this.update()
-    );
+    };
+    let onFailure = () => this.update();
+    return prompt.execute(this._session.kernel).then(onSuccess, onFailure);
   }
 
   /**
