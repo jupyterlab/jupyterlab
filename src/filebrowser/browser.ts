@@ -283,8 +283,8 @@ class FileBrowserWidget extends Widget {
   /**
    * Download the currently selected item(s).
    */
-  download(): Promise<void> {
-    return this._listing.download().then(() => { /* no-op */ });
+  download(): void {
+    this._listing.download();
   }
 
   /**
