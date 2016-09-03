@@ -37,7 +37,6 @@
 
 
 li.jp-FAQ-question {
-  cursor: pointer;
   font-size: 20px;
   color: #616161;
   font-weight: 400;
@@ -59,18 +58,19 @@ li.jp-FAQ-answer{
 }
 
 
-li.jp-FAQ-question:hover {
+// toc refers to Table of Contents.
+li.jp-FAQ-toc {
+  cursor: pointer;
+}
+
+
+li.jp-FAQ-toc:hover {
   color: #42A5F5;
 }
 
 
-li.jp-FAQ-question:focus{
+li.jp-FAQ-toc:focus{
   color: #42A5F5;
-}
-
-
-.jp-FAQ-hide {
-  display:none;
 }
 
 
@@ -80,11 +80,16 @@ li>jp-FAQ-answer {
 }
 
 
-#faq-content {
+.jp-FAQ-content {
   margin: 0 auto 60px auto;
   display: block;
   width: 94%;
   max-width: 675px;
+}
+
+
+#faq-questionList {
+
 }
 
 
