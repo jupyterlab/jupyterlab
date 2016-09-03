@@ -15,186 +15,56 @@ console.log('Generating bundles...');
 
 
 /**
-  Overall todos:
-  - Get the same content in this bundle as the existing one
-  - Create a sibling bundle with the same content as the existing one
-  - Create the other build artifacts
-  - Dynamically require the other bundles/artifacts by mangled name
-  - Make sure we are in an r.js bundle format
-  - Create a manifest file with the modules so it can be used to create
-    bundle config.
-
-  - We can use the other `compilation.assets` directly, we don't need to
-  - do anything special to those modules, we just need a way to load them
-**/
+  TODOs
+  - Plug in the the module generation phase and create the headers
+  - Extract the css
+  - Handle the context functions
+  - Handle the bundles
+  - Strip out the overall header
+  - Create the custom loader
+*/
 
 function JupyterLabPlugin(options) {
-  this.options = options || {};
-  // Known libraries that are not able to be AMD-wrapped
-  // See https://github.com/requirejs/r.js/blob/master/README.md#convert-commonjs-modules
-  this.unwrappable = this.options.unwrappable || [];
-  this.unwrappable.push('htmlparser2');
+  options = this.options = options || {};
+  this.name = options.name || 'jupyter';
 }
+
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
-  // Add our externals to the list of externals;
-  var externals = compiler.options.externals || [];
-  if (!Array.isArray(externals)) {
-    externals = [externals];
-  }
-  compiler.options.externals = externals.concat(this.unwrappable);
-  unwrappable = this.unwrappable;
+  var pluginName = this.name;
+  var requireName = '__' + this.name + '_require__';
+  var defineName = '__' + this.name + 'Define';
+  var jsonpName = '__' + this.name + 'Jsonp';
 
-  compiler.plugin('emit', function(compilation, callback) {
-    var sources = [];
-    var modules = [];
+  compiler.plugin('compilation', function(compilation) {
 
-    // Explore each chunk (build output):
-    compilation.chunks.forEach(function(chunk) {
-      // Explore each module within the chunk (built inputs):
-      chunk.modules.forEach(function(module) {
-        var deps = [];
-        if (module.getAllModuleDependencies) {
-          deps = module.getAllModuleDependencies();
-        }
-
-        if (!module.context) {
-          // These were ignored by WebPack
-          return;
-        }
-
-        var modRequest = module.request;
-        if (!modRequest) {
-          // TODO: These are the extra bundles.
-          console.log('skipped module', module.context);
-          return;
-        }
-
-        // Look for explicit external
-        if (module.external) {
-          console.log('skipping external', module.request);
-          return;
-        }
-
-        // Skip modules handled by the extract text plugin.
-        if (module.request.indexOf('extract-text-webpack-plugin') !== -1) {
-          return;
-        }
-
-        // Look for loaders
-        if (module.loaders.length) {
-          modRequest = modRequest.slice(modRequest.lastIndexOf('!') + 1);
-        }
-
-
-        var modPackage = getPackage(modRequest);
-        var source = module.source().source();
-        for (var dep of deps) {
-          var id = dep.id;
-          var request = dep.request;
-          var search = '__webpack_require__(' + id + ')';
-          if (!request) {
-            source = source.split(search).join('UNDEFINED');
-            continue;
+    // Mangle all of the module ids
+    compilation.plugin('before-module-ids', function(modules) {
+      modules.forEach(function(module) {
+        if (module.id === null) {
+          if (!module.userRequest) {
+            module.id = 'ignored';
+            module.defineName = 'ignored';
+            return;
           }
-          if (request.indexOf('extract-text-webpack-plugin') !== -1) {
-            source = source.replace(search + ';\n', '');
-            continue;
-          }
-          if (!path.extname(request)) {
-            request = require.resolve(request);
-          }
-          if (dep.loaders && dep.loaders.length) {
-            request = request.slice(request.lastIndexOf('!') + 1);
-          }
-          request = findImport(request, dep.issuer);
-          request = 'require("jupyterlab!' + request + '")';
-          if (id === module.id) {
-            // Circular reference, use `exports` explicitly.
-            request = 'exports';
-          }
-          source = source.split(search).join(request);
+          var issuer = module.issuer || module.userRequest;
+          module.id = findImport(module.userRequest, issuer);
+          module[defineName] = findName(module.userRequest);
         }
-        source = source.replace('__webpack_require__', 'null');
-        var modPath = findName(modRequest);
-        modules.push(modPath);
-        var header = 'define("' + modPath;
-        header += '", function (require, exports, module) {\n'
-        // Combine with indent.
-        source = header + source.split('\n').join('\n  ') + '\n})';
-        sources.push(source);
-      });
+      })
     });
 
-    // Assemble the r.js bundle.
-    // TODO: Add config for dynamic modules.
-    // var code = 'require.config({ baseUrl: "'
-    //code += compilation.outputOptions.publicPath + '" }),\n\n'
-    //code += sources.join(',\n\n');
-
-
-    var promises = [];
-    for (var name of unwrappable) {
-      promises.push(createUnwrappable(name, compilation));
-    }
-    Promise.all(promises).then(function(outputs) {
-      sources = sources.concat(outputs);
-      var code = sources.join(',\n\n');
-
-      // Insert this list into the Webpack build as a new file asset:
-      debugger;
-      compilation.assets['custom.bundle.js'] = {
-        source: function() {
-          return code;
-        },
-        size: function() {
-          return code.length;
-        }
-      };
-
-      compilation.assets['custom.manifest.txt'] = {
-        source: function() {
-          return modules.join('\n');
-        },
-        size: function() {
-          return modules.join('\n').length;
-        }
-      }
-
-      callback();
+    // Mangle all of the chunk ids
+    compilation.plugin('before-chunk-ids', function(chunks) {
+      chunks.forEach(function(chunk) {
+        // TODO
+        //chunk.id = chunk.id ||  getChunkId(compilation, chunk);
+      })
     });
+
   });
+
 };
-
-
-// Create a shim for an unwrappable module.
-function createUnwrappable(name, compilation) {
-  var modPath = require.resolve(name);
-  var library = findName(modPath);
-  var options = {
-    entry: [name],
-    output: {
-      path: '/build',
-      filename: 'out.js',
-      publicPath: compilation.options.output.publicPath,
-      library: library,
-      libraryTarget: 'amd'
-    }
-  }
-  var mem = new MemoryFS();
-  options.module = compilation.options.module;
-  var compiler = webpack(options);
-  compiler.context = name;
-  compiler.outputFileSystem = mem;
-
-  return new Promise(function (resolve, reject) {
-    compiler.run(function(err, stats) {
-      var fileContent = mem.readFileSync('/build/out.js', 'utf8');
-      resolve(fileContent);
-    });
-  });
-}
-
 
 
 // From a request - find its package root.
@@ -204,11 +74,15 @@ function findRoot(request) {
   }
   while (true) {
     try {
-      require.resolve(path.join(request, 'package.json'));
-      return request;
+      var pkgPath = require.resolve(path.join(request, 'package.json'));
+      var pkg = require(pkgPath);
+      if (!pkg.private) {
+        return request;
+      }
     } catch (err) {
-      request = path.dirname(request);
+      // no-op
     }
+    request = path.dirname(request);
   }
 }
 
@@ -242,6 +116,9 @@ function findImport(request, issuer) {
   var modPath = request.slice(rootPath.length + 1);
   var name = rootPackage.name;
   var semver = issuerPackage.dependencies[name] || rootPackage.version;
+  if (!semver) {
+    debugger;
+  }
   if (semver.indexOf('file:') === 0) {
     var sourcePath = path.resolve(issuerPath, semver.slice('file:'.length));
     var sourcePackage = getPackage(sourcePath);
@@ -272,10 +149,7 @@ module.exports = [{
   devtool: 'source-map',
   module: {
     loaders: [
-      { test: /\.css$/,
-        loader: ExtractTextPlugin.extract("style-loader", "css-loader", {
-          publicPath: './'
-        })
+      { test: /\.css$/, loader: 'style-loader!css-loader'
       },
       { test: /\.json$/, loader: 'json-loader' },
       { test: /\.html$/, loader: 'file-loader' },
@@ -290,7 +164,6 @@ module.exports = [{
     ]
   },
   plugins: [
-    new ExtractTextPlugin('[name].css'),
     new JupyterLabPlugin()
   ],
 },
