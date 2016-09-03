@@ -23,6 +23,9 @@ console.log('Generating bundles...');
   - Make sure we are in an r.js bundle format
   - Create a manifest file with the modules so it can be used to create
     bundle config.
+
+  - We can use the other `compilation.assets` directly, we don't need to
+  - do anything special to those modules, we just need a way to load them
 **/
 
 function JupyterLabPlugin(options) {
@@ -139,6 +142,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
       var code = sources.join(',\n\n');
 
       // Insert this list into the Webpack build as a new file asset:
+      debugger;
       compilation.assets['custom.bundle.js'] = {
         source: function() {
           return code;
@@ -172,7 +176,7 @@ function createUnwrappable(name, compilation) {
     output: {
       path: '/build',
       filename: 'out.js',
-      publicPath: './lab',
+      publicPath: compilation.options.output.publicPath,
       library: library,
       libraryTarget: 'amd'
     }

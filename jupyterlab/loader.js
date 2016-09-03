@@ -13,6 +13,7 @@ function loadWithSemver(name, req, onLoad, config) {
     }
     var matches = [];
     var versions = [];
+    // TODO: explicit loop and check other files
     for (var mod of modules) {
       var modParts = mod.match(/(^.*?)@(.*?)(\/.*$)/) || mod.match(/(^.*?)@(.*?)$/);
       if (!modParts) {
