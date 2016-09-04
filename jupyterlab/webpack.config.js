@@ -30,26 +30,35 @@ function JupyterLabPlugin(options) {
 }
 
 
+var ConcatSource = require("webpack-sources").ConcatSource;
+
+
+// Notes
+// We can't replace __webpack_require__ during compilation because
+//  it is hard-coded in several places
+
+
 JupyterLabPlugin.prototype.apply = function(compiler) {
   var pluginName = this.name;
   var requireName = '__' + this.name + '_require__';
-  var defineName = '__' + this.name + 'Define';
-  var jsonpName = '__' + this.name + 'Jsonp';
+  var defineName = this.name + 'Define';
+  var jsonpName = this.name + 'Jsonp';
 
   compiler.plugin('compilation', function(compilation) {
 
     // Mangle all of the module ids
     compilation.plugin('before-module-ids', function(modules) {
       modules.forEach(function(module) {
-        if (module.id === null) {
+        if (module.id === null || module.id === 0) {
           if (!module.userRequest) {
+            // TODO: handle this - it can be a context module or a
+            // truly ignored function
             module.id = 'ignored';
             module.defineName = 'ignored';
             return;
           }
           var issuer = module.issuer || module.userRequest;
           module.id = findImport(module.userRequest, issuer);
-          module[defineName] = findName(module.userRequest);
         }
       })
     });
@@ -60,6 +69,25 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         // TODO
         //chunk.id = chunk.id ||  getChunkId(compilation, chunk);
       })
+    });
+
+    // Hook into the module rendering.
+    compilation.moduleTemplate.plugin('render', function(moduleSource, module) {
+      if (module.id === 'ignored') {
+        return moduleSource;
+      }
+      // Modeled after WebPack's FunctionModuleTemplatePlugin.
+      var source = new ConcatSource();
+      var defaultArguments = ["module", "exports"];
+      if((module.arguments && module.arguments.length !== 0) || module.hasDependencies()) {
+        defaultArguments.push(requireName);
+      }
+      var name = findName(module.userRequest);
+      source.add('/** START DEFINE BLOCK **/ ' + defineName + '("' + name + '", function(' + defaultArguments.concat(module.arguments || []).join(", ") + ") {\n\n");
+      if(module.strict) source.add("\"use strict\";\n");
+      source.add(moduleSource);
+      source.add("})\n\n/** END DEFINE BLOCK  **/");
+      return source;
     });
 
   });
