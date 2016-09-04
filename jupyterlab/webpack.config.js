@@ -16,12 +16,12 @@ console.log('Generating bundles...');
 
 /**
   TODOs
-  - Plug in the the module generation phase and create the headers
   - Extract the css
   - Handle the context functions
   - Handle the bundles
-  - Strip out the overall header
+  - Strip out the overall header and the text between our markers
   - Create the custom loader
+  - Create a manifest with each module and its dependencies
 */
 
 function JupyterLabPlugin(options) {
@@ -40,25 +40,17 @@ var ConcatSource = require("webpack-sources").ConcatSource;
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
   var pluginName = this.name;
-  var requireName = '__' + this.name + '_require__';
-  var defineName = this.name + 'Define';
-  var jsonpName = this.name + 'Jsonp';
+  var requireName = '__' + pluginName + '_require__';
+  var defineName = pluginName + 'Define';
+  var jsonpName = pluginName + 'Jsonp';
 
   compiler.plugin('compilation', function(compilation) {
 
-    // Mangle all of the module ids
+    // Set of the module ids to use the semver-mangled require.
     compilation.plugin('before-module-ids', function(modules) {
       modules.forEach(function(module) {
         if (module.id === null || module.id === 0) {
-          if (!module.userRequest) {
-            // TODO: handle this - it can be a context module or a
-            // truly ignored function
-            module.id = 'ignored';
-            module.defineName = 'ignored';
-            return;
-          }
-          var issuer = module.issuer || module.userRequest;
-          module.id = findImport(module.userRequest, issuer);
+          module.id = getRequireName(module);
         }
       })
     });
@@ -73,20 +65,18 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 
     // Hook into the module rendering.
     compilation.moduleTemplate.plugin('render', function(moduleSource, module) {
-      if (module.id === 'ignored') {
-        return moduleSource;
-      }
       // Modeled after WebPack's FunctionModuleTemplatePlugin.
       var source = new ConcatSource();
       var defaultArguments = ["module", "exports"];
       if((module.arguments && module.arguments.length !== 0) || module.hasDependencies()) {
-        defaultArguments.push(requireName);
+        defaultArguments.push('__webpack_require__');
       }
-      var name = findName(module.userRequest);
-      source.add('/** START DEFINE BLOCK **/ ' + defineName + '("' + name + '", function(' + defaultArguments.concat(module.arguments || []).join(", ") + ") {\n\n");
+      var name = getDefineName(module);
+      source.add('/** START DEFINE BLOCK FOR ' + name + ' **/\n');
+      source.add(defineName + '("' + name + '", function(' + defaultArguments.concat(module.arguments || []).join(", ") + ") {\n\n");
       if(module.strict) source.add("\"use strict\";\n");
       source.add(moduleSource);
-      source.add("})\n\n/** END DEFINE BLOCK  **/");
+      source.add('\n\n})\n/** END DEFINE BLOCK FOR ' + name + ' **/\n');
       return source;
     });
 
@@ -97,6 +87,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 
 // From a request - find its package root.
 function findRoot(request) {
+  var orig = request;
   if (path.extname(request)) {
     request = path.dirname(request);
   }
@@ -104,13 +95,18 @@ function findRoot(request) {
     try {
       var pkgPath = require.resolve(path.join(request, 'package.json'));
       var pkg = require(pkgPath);
-      if (!pkg.private) {
+      // Use public packages except for the local package.
+      if (!pkg.private || request === process.cwd()) {
         return request;
       }
     } catch (err) {
       // no-op
     }
+    var prev = request;
     request = path.dirname(request);
+    if (request === prev) {
+      throw Error('Could not find package for ' + orig);
+    }
   }
 }
 
@@ -122,8 +118,12 @@ function getPackage(request) {
 }
 
 
-// From a request - find a version-mangled define name.
-function findName(request) {
+// From a Webpack module object - find a version-mangled define name.
+function getDefineName(module) {
+  if (module.id === '__ignored__') {
+    return module.id;
+  }
+  var request = module.userRequest || module.context;
   var rootPath = findRoot(request);
   var package = getPackage(rootPath);
   var modPath = request.slice(rootPath.length + 1);
@@ -135,8 +135,13 @@ function findName(request) {
 }
 
 
-// From a request - find its semver-mangled import path.
-function findImport(request, issuer) {
+// From a WebPack module object - find its semver-mangled require name.
+function getRequireName(module) {
+  if (!module.context) {
+    return '__ignored__';
+  }
+  var issuer = module.issuer || module.userRequest;
+  var request = module.userRequest || module.context;
   var rootPath = findRoot(request);
   var rootPackage = getPackage(rootPath);
   var issuerPath = findRoot(issuer);
@@ -144,19 +149,20 @@ function findImport(request, issuer) {
   var modPath = request.slice(rootPath.length + 1);
   var name = rootPackage.name;
   var semver = issuerPackage.dependencies[name] || rootPackage.version;
-  if (!semver) {
-    debugger;
-  }
-  if (semver.indexOf('file:') === 0) {
+  if (issuerPackage.name === rootPackage.name) {
+    // Allow patch version increments of itself.
+    semver = '~' + rootPackage.version;
+  } else if (semver.indexOf('file:') === 0) {
     var sourcePath = path.resolve(issuerPath, semver.slice('file:'.length));
     var sourcePackage = getPackage(sourcePath);
-    semver = sourcePackage.version;
+    // Allow patch version increments of local packages.
+    semver = '~' + sourcePackage.version;
   }
-  name += '@' + semver;
+  var id = name + '@' + semver;
   if (modPath) {
-    name += '/' + modPath;
+    id += '/' + modPath;
   }
-  return name;
+  return id;
 }
 
 
