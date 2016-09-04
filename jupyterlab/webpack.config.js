@@ -48,13 +48,15 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
   var requireName = '__' + pluginName + '_require__';
   var defineName = pluginName + 'Define';
   var jsonpName = pluginName + 'Jsonp';
+  var publicPath = compiler.options.output.publicPath;
 
   compiler.plugin('emit', function(compilation, callback) {
-    var sources = [];
-    var manifest = {};
 
     // Explore each chunk (build output):
     compilation.chunks.forEach(function(chunk) {
+
+      var sources = [];
+      var manifest = {};
 
       // Explore each module within the chunk (built inputs):
       chunk.modules.forEach(function(module) {
@@ -64,33 +66,39 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           return;
         }
 
-        if (!module.userRequest) {
-          // TODO: These are the extra bundles.
-          console.log('skipped context module', module.context);
-          return;
-        }
-
-        // Look for explicit external
+        // We don't allow externals.
         if (module.external) {
-          console.log('skipping external', module.request);
-          return;
+          throw Error('Cannot use externals:', module.userRequest);
         }
 
-        // Skip modules handled by the extract text plugin.
-        if (module.request.indexOf('extract-text-webpack-plugin') !== -1) {
-          return;
-        }
-
-        // Parse the source code.
-        var source = module.source().source();
         var deps = [];
-        for (var dep of module.getAllModuleDependencies()) {
-          var target = '__webpack_require__(' + dep.id + ')';
-          var name = getRequireName(dep);
-          var replacer = '__webpack_require__("' + name + '")';
-          source = source.split(target).join(replacer);
-          deps.push(name);
+        var source = module.source().source();
+
+        if (!module.userRequest) {
+          source = createContextModule(module);
+          source = source.split('webpackContext').join(pluginName + 'Context');
+          for (var dep of module.dependencies) {
+            deps.push(getRequireName(dep));
+          }
+        } else {
+          // Parse the source code.
+          for (var dep of module.getAllModuleDependencies()) {
+            var target = '__webpack_require__(' + dep.id + ')';
+            var name = getRequireName(dep);
+            var replacer = '__webpack_require__("' + name + '")';
+            source = source.split(target).join(replacer);
+            if (dep.id !== module.id) {
+              deps.push(name);
+            }
+          }
         }
+
+        // Handle public requires.
+        var requireP = '__webpack_require__.p';
+        var newRequireP = '"' + publicPath + '"';
+        source = source.split(requireP).join(newRequireP);
+
+        // Replace the require name with the custom one.
         source = source.split('__webpack_require__').join(requireName);
 
         // Add our wrapper.
@@ -99,36 +107,36 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         var header = defineName + '("' + modName;
         header += '", function (module, exports, ' + requireName + ') {\n';
         // Combine with indent.
-        source = header + source.split('\n').join('\n  ') + '\n})';
+        source = header + source.split('\n').join('\n\t') + '\n})';
         sources.push(source);
       });
+
+      var code = sources.join(',\n\n');
+
+      // Insert this list into the Webpack build as a new file asset:
+      var chunkName = chunk.name || chunk.hash.slice(0, 20);
+      compilation.assets[chunkName + '.custom.bundle.js'] = {
+        source: function() {
+          return code;
+        },
+        size: function() {
+          return code.length;
+        }
+      };
+
+      compilation.assets[chunkName + '.manifest.txt'] = {
+        source: function() {
+          return JSON.stringify(manifest);
+        },
+        size: function() {
+          return JSON.stringify(manifest).length;
+        }
+      }
     });
-
-    var code = sources.join(',\n\n');
-
-    // Insert this list into the Webpack build as a new file asset:
-    compilation.assets['custom.bundle.js'] = {
-      source: function() {
-        return code;
-      },
-      size: function() {
-        return code.length;
-      }
-    };
-
-    compilation.assets['custom.manifest.txt'] = {
-      source: function() {
-        return JSON.stringify(manifest);
-      },
-      size: function() {
-        return JSON.stringify(manifest).length;
-      }
-    }
 
     callback();
   });
 };
-
 
 
 // From a request - find its package root.
@@ -212,6 +220,49 @@ function getRequireName(module) {
 }
 
 
+// Create our own mangled context module source.
+function createContextModule(module) {
+  // Modeled after Webpack's ContextModule.js.
+  var str;
+  if (module.dependencies && module.dependencies.length > 0) {
+    var map = {};
+    module.dependencies.slice().sort(function(a, b) {
+      if(a.userRequest === b.userRequest) return 0;
+      return a.userRequest < b.userRequest ? -1 : 1;
+    }).forEach(function(dep) {
+      if (dep.module)
+        map[dep.userRequest] = getRequireName(dep.module);
+    });
+    str = [
+      "\tvar map = ", JSON.stringify(map, null, "\t"), ";\n",
+      "function webpackContext(req) {\n",
+      "\treturn __webpack_require__(webpackContextResolve(req));\n",
+      "};\n",
+      "function webpackContextResolve(req) {\n",
+      "\treturn map[req] || (function() { throw new Error(\"Cannot find module '\" + req + \"'.\") }());\n",
+      "};\n",
+      "webpackContext.keys = function webpackContextKeys() {\n",
+      "\treturn Object.keys(map);\n",
+      "};\n",
+      "webpackContext.resolve = webpackContextResolve;\n",
+      "module.exports = webpackContext;\n",
+      "webpackContext.id = \"" + getDefineName(module) + "\";\n"
+    ];
+  } else {
+    str = [
+      "\tfunction webpackContext(req) {\n",
+      "\tthrow new Error(\"Cannot find module '\" + req + \"'.\");\n",
+      "}\n",
+      "webpackContext.keys = function() { return []; };\n",
+      "webpackContext.resolve = webpackContext;\n",
+      "module.exports = webpackContext;\n",
+      "webpackContext.id = \"" + getDefineName(module) + "\";\n"
+    ];
+  }
+  return str.join('\t');
+}
+
+
 module.exports = [{
   entry: {
     jupyterlab: './index.js'
@@ -219,6 +270,7 @@ module.exports = [{
   output: {
     path: __dirname + '/build',
     filename: '[name].bundle.js',
+    chunkFilename: '[chunkhash].bundle.js',
     publicPath: './lab/'
   },
   node: {
