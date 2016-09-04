@@ -17,7 +17,7 @@ console.log('Generating bundles...');
   TODOs
   - Add our headers and marker text
   - Handle the context functions
-  - Handle the bundles
+  - Handle the other bundles
   - Create the custom loader
   - Create a manifest with each module and its dependencies
 */
@@ -51,10 +51,11 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 
   compiler.plugin('emit', function(compilation, callback) {
     var sources = [];
-    var modules = [];
+    var manifest = {};
 
     // Explore each chunk (build output):
     compilation.chunks.forEach(function(chunk) {
+
       // Explore each module within the chunk (built inputs):
       chunk.modules.forEach(function(module) {
 
@@ -63,8 +64,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           return;
         }
 
-        var modRequest = module.userRequest;
-        if (!modRequest) {
+        if (!module.userRequest) {
           // TODO: These are the extra bundles.
           console.log('skipped context module', module.context);
           return;
@@ -81,40 +81,23 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           return;
         }
 
-        // Look for loaders
-        if (module.loaders.length) {
-          modRequest = modRequest.slice(modRequest.lastIndexOf('!') + 1);
-        }
-
-        var modPackage = getPackage(modRequest);
+        // Parse the source code.
         var source = module.source().source();
+        var deps = [];
         for (var dep of module.getAllModuleDependencies()) {
-          var id = dep.id;
-          var request = dep.request;
-          var search = '__webpack_require__(' + id + ')';
-          if (!request) {
-            source = source.split(search).join('UNDEFINED');
-            continue;
-          }
-          if (request.indexOf('extract-text-webpack-plugin') !== -1) {
-            source = source.replace(search + ';\n', '');
-            continue;
-          }
-          if (!path.extname(request)) {
-            request = require.resolve(request);
-          }
-          if (dep.loaders && dep.loaders.length) {
-            request = request.slice(request.lastIndexOf('!') + 1);
-          }
-          request = getRequireName(dep);
-          request = '__webpack_require__("' + request + '")';
-          source = source.split(search).join(request);
+          var target = '__webpack_require__(' + dep.id + ')';
+          var name = getRequireName(dep);
+          var replacer = '__webpack_require__("' + name + '")';
+          source = source.split(target).join(replacer);
+          deps.push(name);
         }
-        //source = source.replace('__webpack_require__', 'null');
-        var defineName = getDefineName(module);
-        modules.push(defineName);
-        var header = 'define("' + defineName;
-        header += '", function (require, exports, module) {\n'
+        source = source.split('__webpack_require__').join(requireName);
+
+        // Add our wrapper.
+        var modName = getDefineName(module);
+        manifest[modName] = deps;
+        var header = defineName + '("' + modName;
+        header += '", function (module, exports, ' + requireName + ') {\n';
         // Combine with indent.
         source = header + source.split('\n').join('\n  ') + '\n})';
         sources.push(source);
@@ -135,10 +118,10 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 
     compilation.assets['custom.manifest.txt'] = {
       source: function() {
-        return modules.join('\n');
+        return JSON.stringify(manifest);
       },
       size: function() {
-        return modules.join('\n').length;
+        return JSON.stringify(manifest).length;
       }
     }
 
