@@ -74,7 +74,12 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         var deps = [];
         var source = module.source().source();
 
+        if (source.indexOf('__webpack_require__.e') !== -1) {
+          debugger;
+        }
+
         if (!module.userRequest) {
+          source = handleContextModule(module, manifest);
           source = createContextModule(module);
           source = source.split('webpackContext').join(pluginName + 'Context');
           for (var dep of module.dependencies) {
