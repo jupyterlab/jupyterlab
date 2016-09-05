@@ -20,6 +20,8 @@ console.log('Generating bundles...');
   - Handle the other bundles
   - Create the custom loader
   - Create a manifest with each module and its dependencies
+  - Handle source maps - preserve the relative original lines of text so we
+    can easily generate a source map for the start of each line
 */
 
 function JupyterLabPlugin(options) {
@@ -45,8 +47,6 @@ function JupyterLabPlugin(options) {
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
   var pluginName = this.name;
-  var requireName = '__' + pluginName + '_require__';
-  var defineName = pluginName + 'Define';
   var publicPath = compiler.options.output.publicPath;
 
   compiler.plugin('emit', function(compilation, callback) {
@@ -65,46 +65,8 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           throw Error('Cannot use externals:', module.userRequest);
         }
 
-        var source = module.source().source();
-
-        // Regular modules.
-        if (module.userRequest) {
-          // Handle ensure blocks with and without inline comments.
-          source = handleEnsure(
-            source, publicPath, /__webpack_require__.e.*?\*\/\((\d+)/
-          );
-          source = handleEnsure(
-            source, publicPath, /__webpack_require__.e\((\d+)/
-          );
-
-          // Replace the require statements with the semver-mangled name.
-          for (var dep of module.getAllModuleDependencies()) {
-            var target = '__webpack_require__(' + dep.id + ')';
-            var name = getRequireName(dep);
-            var replacer = '__webpack_require__("' + name + '")';
-            source = source.split(target).join(replacer);
-          }
-        // Context modules.
-        } else if (module.context) {
-          source = createContextModule(module);
-          source = source.split('webpackContext').join(pluginName + 'Context');
-        }
-
-        // Handle public requires.
-        var requireP = '__webpack_require__.p';
-        var newRequireP = '"' + publicPath + '"';
-        source = source.split(requireP).join(newRequireP);
-
-        // Replace the require name with the custom one.
-        source = source.split('__webpack_require__').join(requireName);
-
-        // Create our header with a version-mangled defined name.
-        var modName = getDefineName(module);
-        var header = defineName + '("' + modName;
-        header += '", function (module, exports, ' + requireName + ') {\n';
-
-        // Combine code indent.
-        source = header + source.split('\n').join('\n\t') + '\n})';
+        // Parse each module.
+        var source = parseModule(module, pluginName, publicPath);
         sources.push(source);
 
         // Add dependencies to the manifest.
@@ -114,7 +76,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
             deps.push(getRequireName(dep));
           }
         }
-        manifest[modName] = deps;
+        manifest[getDefineName(module)] = deps;
       });
 
       var code = sources.join(',\n\n');
@@ -233,11 +195,14 @@ function createContextModule(module) {
   if (module.dependencies && module.dependencies.length > 0) {
     var map = {};
     module.dependencies.slice().sort(function(a, b) {
-      if(a.userRequest === b.userRequest) return 0;
+      if (a.userRequest === b.userRequest) {
+        return 0;
+      }
       return a.userRequest < b.userRequest ? -1 : 1;
     }).forEach(function(dep) {
-      if (dep.module)
+      if (dep.module) {
         map[dep.userRequest] = getRequireName(dep.module);
+      }
     });
     str = [
       "\tvar map = ", JSON.stringify(map, null, "\t"), ";\n",
@@ -266,6 +231,52 @@ function createContextModule(module) {
     ];
   }
   return str.join('\t');
+}
+
+
+// Parse a module.
+function parseModule(module, pluginName, publicPath) {
+  var requireName = '__' + pluginName + '_require__';
+  var defineName = pluginName + 'Define';
+  var source = module.source().source();
+
+  // Regular modules.
+  if (module.userRequest) {
+    // Handle ensure blocks with and without inline comments.
+    source = handleEnsure(
+      source, publicPath, /__webpack_require__.e\/\*.*?\*\/\((\d+)/
+    );
+    source = handleEnsure(
+      source, publicPath, /__webpack_require__.e\((\d+)/
+    );
+
+    // Replace the require statements with the semver-mangled name.
+    for (var dep of module.getAllModuleDependencies()) {
+      var target = '__webpack_require__(' + dep.id + ')';
+      var name = getRequireName(dep);
+      var replacer = '__webpack_require__("' + name + '")';
+      source = source.split(target).join(replacer);
+    }
+  // Context modules.
+  } else if (module.context) {
+    source = createContextModule(module);
+    source = source.split('webpackContext').join(pluginName + 'Context');
+  }
+
+  // Handle public requires.
+  var requireP = '__webpack_require__.p';
+  var newRequireP = '"' + publicPath + '"';
+  source = source.split(requireP).join(newRequireP);
+
+  // Replace the require name with the custom one.
+  source = source.split('__webpack_require__').join(requireName);
+
+  // Create our header with a version-mangled defined name.
+  var header = defineName + '("' + getDefineName(module);
+  header += '", function (module, exports, ' + requireName + ') {\n';
+
+  // Combine code indent.
+  return header + source.split('\n').join('\n\t') + '\n})';
 }
 
 
