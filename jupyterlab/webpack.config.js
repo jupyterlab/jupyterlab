@@ -47,7 +47,6 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
   var pluginName = this.name;
   var requireName = '__' + pluginName + '_require__';
   var defineName = pluginName + 'Define';
-  var jsonpName = pluginName + 'Jsonp';
   var publicPath = compiler.options.output.publicPath;
 
   compiler.plugin('emit', function(compilation, callback) {
@@ -61,41 +60,34 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
       // Explore each module within the chunk (built inputs):
       chunk.modules.forEach(function(module) {
 
-        if (!module.context) {
-          // These were ignored by WebPack
-          return;
-        }
-
         // We don't allow externals.
         if (module.external) {
           throw Error('Cannot use externals:', module.userRequest);
         }
 
-        var deps = [];
         var source = module.source().source();
 
-        if (source.indexOf('__webpack_require__.e') !== -1) {
-          debugger;
-        }
+        // Regular modules.
+        if (module.userRequest) {
+          // Handle ensure blocks with and without inline comments.
+          source = handleEnsure(
+            source, publicPath, /__webpack_require__.e.*?\*\/\((\d+)/
+          );
+          source = handleEnsure(
+            source, publicPath, /__webpack_require__.e\((\d+)/
+          );
 
-        if (!module.userRequest) {
-          source = handleContextModule(module, manifest);
-          source = createContextModule(module);
-          source = source.split('webpackContext').join(pluginName + 'Context');
-          for (var dep of module.dependencies) {
-            deps.push(getRequireName(dep));
-          }
-        } else {
-          // Parse the source code.
+          // Replace the require statements with the semver-mangled name.
           for (var dep of module.getAllModuleDependencies()) {
             var target = '__webpack_require__(' + dep.id + ')';
             var name = getRequireName(dep);
             var replacer = '__webpack_require__("' + name + '")';
             source = source.split(target).join(replacer);
-            if (dep.id !== module.id) {
-              deps.push(name);
-            }
           }
+        // Context modules.
+        } else if (module.context) {
+          source = createContextModule(module);
+          source = source.split('webpackContext').join(pluginName + 'Context');
         }
 
         // Handle public requires.
@@ -106,20 +98,29 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         // Replace the require name with the custom one.
         source = source.split('__webpack_require__').join(requireName);
 
-        // Add our wrapper.
+        // Create our header with a version-mangled defined name.
         var modName = getDefineName(module);
-        manifest[modName] = deps;
         var header = defineName + '("' + modName;
         header += '", function (module, exports, ' + requireName + ') {\n';
-        // Combine with indent.
+
+        // Combine code indent.
         source = header + source.split('\n').join('\n\t') + '\n})';
         sources.push(source);
+
+        // Add dependencies to the manifest.
+        var deps = [];
+        for (var dep of module.dependencies) {
+          if (dep.id && dep.id !== module.id) {
+            deps.push(getRequireName(dep));
+          }
+        }
+        manifest[modName] = deps;
       });
 
       var code = sources.join(',\n\n');
 
       // Insert this list into the Webpack build as a new file asset:
-      var chunkName = chunk.name || chunk.hash.slice(0, 20);
+      var chunkName = chunk.name || chunk.id;
       compilation.assets[chunkName + '.custom.bundle.js'] = {
         source: function() {
           return code;
@@ -179,8 +180,8 @@ function getPackage(request) {
 
 // From a Webpack module object - find a version-mangled define name.
 function getDefineName(module) {
-  if (module.id === '__ignored__') {
-    return module.id;
+  if (!module.context) {
+    return '__ignored__';
   }
   var request = module.userRequest || module.context;
   var rootPath = findRoot(request);
@@ -265,6 +266,19 @@ function createContextModule(module) {
     ];
   }
   return str.join('\t');
+}
+
+
+// Handle an ensure block.
+function handleEnsure(source, publicPath, regex) {
+  while (regex.test(source)) {
+    var match = source.match(regex);
+    var chunkId = match[1];
+    var replacement = ('__webpack_require__.e("' + publicPath +
+            chunkId + '"');
+    source = source.replace(regex, replacement);
+  }
+  return source;
 }
 
 
