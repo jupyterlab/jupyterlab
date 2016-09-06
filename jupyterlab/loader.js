@@ -131,6 +131,9 @@ function findModuleId(name) {
   var modules = Object.keys(registered);
   // Get the package name, semver string, and module name.
   var parts = name.match(/(^.*?)@(.*?)(\/.*$)/) || name.match(/(^.*?)@(.*?)$/);
+  if (!parts) {
+    throw Error('Invalid module name ' + name);
+  }
   if (parts.length === 2) {
     parts.push('');
   }
