@@ -25,7 +25,7 @@ function jupyterDefine(name, callback) {
 }
 
 
-// Require a jupyter module.
+// Require a jupyter module that has already been loaded.
 function jupyterRequire(moduleRequest) {
   // Check if module is in cache
   var moduleId = findModuleId(moduleRequest)
@@ -53,30 +53,38 @@ function jupyterRequire(moduleRequest) {
 // Ensure a jupyter bundle is loaded on a page.
 function jupyterEnsure(path, callback) {
   // "0" is the signal for "already loaded"
-  if(installedChunks[path] === 0)
+  if (installedChunks[path] === 0) {
     return callback.call(null, jupyterRequire);
+  }
 
   // an array means "currently loading".
-  if(installedChunks[path] !== undefined) {
+  if (Array.isArray(installedChunks[path])) {
     installedChunks[path].push(callback);
-  } else {
-    // start chunk loading
-    installedChunks[path] = [callback];
-    var head = document.getElementsByTagName('head')[0];
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.charset = 'utf-8';
-    script.async = true;
-    script.src = path;
-    head.appendChild(script);
+    return;
   }
+
+  // start chunk loading
+  installedChunks[path] = [callback];
+  var head = document.getElementsByTagName('head')[0];
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.charset = 'utf-8';
+  script.async = true;
+  script.onload = function() {
+    var callbacks = installedChunks[path];
+    while(callbacks.length)
+      callbacks.shift().call(null, jupyterRequire);
+    installedChunks[path] = 0;
+  }
+  head.appendChild(script);
+  script.src = path;
 }
 
 
 // Find a module matching a given module request.
-function findModuleId(moduleRequest) {
-  if (lookupCache[moduleRequest]) {
-    return lookupCache[moduleRequest];
+function findModuleId(name) {
+  if (lookupCache[name]) {
+    return lookupCache[name];
   }
   var modules = Object.keys(registered);
   // Get the package name, semver string, and module name.
@@ -113,14 +121,13 @@ function findModuleId(moduleRequest) {
     }
     index = versions.indexOf(best);
   }
-  lookupCache[moduleRequest] = matches[index];
+  lookupCache[name] = matches[index];
   return matches[index];
 }
-
 
 // Add the functions to window.
 jupyterRequire.e = jupyterEnsure;
 
-exports.jupyterDefine = jupyterDefine;
-exports.jupyterRequire = jupyterRequire;
-exports.jupyterEnsure = jupyterEnsure;
+window.jupyterDefine = jupyterDefine;
+window.jupyterRequire = jupyterRequire;
+window.jupyterEnsure = jupyterEnsure;

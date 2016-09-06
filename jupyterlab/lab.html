@@ -14,7 +14,7 @@ Distributed under the terms of the Modified BSD License.
     <script type="text/javascript" src="{{mathjax_url}}?config={{mathjax_config}}&amp;delayStartupUntil=configured" charset="utf-8"></script>
     {% endif %}
     <link href="{{static_prefix}}/jupyterlab.css" rel="stylesheet">
-    <script src="{{static_url("components/requirejs/require.js") }}" type="text/javascript" charset="utf-8"></script>
+    
 </head>
 
 
@@ -26,16 +26,11 @@ Distributed under the terms of the Modified BSD License.
   "wsUrl": "{{ws_url| urlencode}}",
   "notebookPath": "{{notebook_path | urlencode}}"
 }</script>
-
-<script type="text/javascript">
-requirejs.config({
-    waitSeconds: 20,
-});
-require(['lab/custom.bundle', 'lab/loader.bundle'], function() {
-  console.log('Bundles loaded');
-  require(['jupyterlab-extension@0.1.0/index.js'], function() {
-    console.log('page loaded');
-  });
+<script src="{{static_prefix}}/loader.bundle.js" type="text/javascript" charset="utf-8"></script>
+<script>
+jupyterEnsure('lab/custom.jupyterlab.bundle.js', function(requireFunc) {
+  console.log('bundle loaded', requireFunc);
+  jupyterRequire("jupyterlab-extension@0.1.0/index.js");
 });
 </script>
 </body>
