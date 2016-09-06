@@ -30,19 +30,16 @@ Distributed under the terms of the Modified BSD License.
 }</script>
 <script src="{{static_prefix}}/loader.bundle.js" type="text/javascript" charset="utf-8"></script>
 <script>
-// TODO: add an ensure-all that makes sure all of the bundles are loaded.
-// The template uses ensureAll and then requires the extension points in
-// order.  
-// TODO: create a top-level manifest that has the entry point define name.
-// The template uses those names to assemble the plugins.
-jupyter.ensure('lab/main.bundle.js', function(requireFunc) {
-  jupyter.ensure('lab/extensions.bundle.js', function(requireFunc) {
-    var lab = requireFunc("jupyterlab-extension@0.1.0/index.js");
-    jupyter.lab = lab;
-    var plugins = requireFunc('jupyterlab-extension@0.1.0/extensions.js');
-    lab.registerPlugins(plugins);
-    lab.start();
-  });
+// TODO: The server inserts the paths to the bundles
+// and uses the "entry" points from the manifest files to assemble
+// the plugins.
+jupyter.requireBundles(['lab/main.bundle.js', 'lab/extensions.bundle.js']).then(function(require) {
+  var lab = require("jupyterlab-extension@0.1.0/index.js");
+  jupyter.lab = lab;
+  var plugins = require('jupyterlab-extension@0.1.0/extensions.js');
+  // TODO: Other extension points have their plugins added here.
+  lab.registerPlugins(plugins);
+  lab.start();
 });
 </script>
 </body>
