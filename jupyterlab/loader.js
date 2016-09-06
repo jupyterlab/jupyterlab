@@ -19,14 +19,14 @@ var installedChunks = {
 };
 
 
-// Define a jupyter module.
-function jupyterDefine(name, callback) {
+// Define a module.
+function defineModule(name, callback) {
   registered[name] = callback;
 }
 
 
-// Require a jupyter module that has already been loaded.
-function jupyterRequire(moduleRequest) {
+// Require a module that has already been loaded.
+function requireModule(moduleRequest) {
   // Check if module is in cache
   var moduleId = findModuleId(moduleRequest)
   if(installedModules[moduleId])
@@ -40,7 +40,7 @@ function jupyterRequire(moduleRequest) {
   };
 
   // Execute the module function
-  registered[moduleId].call(module.exports, module, module.exports, jupyterRequire);
+  registered[moduleId].call(module.exports, module, module.exports, requireModule);
 
   // Flag the module as loaded
   module.loaded = true;
@@ -50,11 +50,11 @@ function jupyterRequire(moduleRequest) {
 }
 
 
-// Ensure a jupyter bundle is loaded on a page.
-function jupyterEnsure(path, callback) {
+// Ensure a bundle is loaded on a page.
+function ensureBundle(path, callback) {
   // "0" is the signal for "already loaded"
   if (installedChunks[path] === 0) {
-    return callback.call(null, jupyterRequire);
+    return callback.call(null, requireModule);
   }
 
   // an array means "currently loading".
@@ -73,7 +73,7 @@ function jupyterEnsure(path, callback) {
   script.onload = function() {
     var callbacks = installedChunks[path];
     while(callbacks.length)
-      callbacks.shift().call(null, jupyterRequire);
+      callbacks.shift().call(null, requireModule);
     installedChunks[path] = 0;
   }
   head.appendChild(script);
@@ -125,9 +125,10 @@ function findModuleId(name) {
   return matches[index];
 }
 
-// Add the functions to window.
-jupyterRequire.e = jupyterEnsure;
+requireModule.e = ensureBundle;
 
-window.jupyterDefine = jupyterDefine;
-window.jupyterRequire = jupyterRequire;
-window.jupyterEnsure = jupyterEnsure;
+module.exports = {
+  define: defineModule,
+  ensure: ensureBundle,
+  require: requireModule
+}

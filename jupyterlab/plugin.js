@@ -272,7 +272,7 @@ function parseModule(compilation, module, pluginName, publicPath) {
   source = source.split('__webpack_require__').join(requireName);
 
   // Create our header with a version-mangled defined name.
-  var header = defineName + '("' + getDefineName(module);
+  var header = pluginName + '.define("' + getDefineName(module);
   header += '", function (module, exports, ' + requireName + ') {\n';
 
   // Combine code indent.

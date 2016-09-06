@@ -57,7 +57,8 @@ module.exports = [{
   output: {
     path: __dirname + '/build',
     filename: '[name].bundle.js',
-    libraryTarget: 'this'
+    libraryTarget: 'this',
+    library: 'jupyter'
   },
   node: {
     fs: 'empty'
