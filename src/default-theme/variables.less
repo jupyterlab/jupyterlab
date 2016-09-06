@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import '../basestyle/materialcolors.less';
 
 :root {
 
@@ -17,8 +16,13 @@
 
   // UI Fonts
 
-  --jp-ui-fontSize: 13px;
+  --jp-ui-font-scale-factor: 1.2;
+  --jp-ui-fontSize0: calc(var(--jp-ui-fontSize1)/var(--jp-ui-font-scale-factor));
+  --jp-ui-fontSize1: 13px;
+  --jp-ui-fontSize2: calc(var(--jp-ui-fontSize1)*var(--jp-ui-font-scale-factor));
+  --jp-ui-fontSize3: calc(var(--jp-ui-fontSize1)*var(--jp-ui-font-scale-factor));
   --jp-ui-icon-fontSize: 14px;
+
   --jp-ui-font-color0: black;
   --jp-ui-font-color1: var(--md-grey-800);
   --jp-ui-font-color2: var(--md-grey-700);
@@ -57,29 +61,5 @@
   --jp-accent-color1: var(--md-orange-500);
   --jp-accent-color2: var(--md-orange-300);
   --jp-accent-color3: var(--md-orange-100);
-
-  // Menus
-  --jp-menu-font-color: var(--jp-ui-font-color1);
-  --jp-menu-background: var(--jp-layout-color1);
-  --jp-menu-selected-background: var(--jp-layout-color2);
-  --jp-menu-hover-background: var(--jp-layout-color2);
-
-  // Tabs
-  --jp-tab-selected-background: var(--jp-layout-color1);
-  --jp-tab-unselected-background: var(--jp-layout-color2);
-  --jp-tab-hover-background: var(--jp-layout-color1);
-
-  // DockPanel
-  --jp-dockpanel-background: var(--jp-layout-color3);
-  --jp-dockpanel-content-background: var(--jp-layout-color1);
-  --jp-dockpanel-tab-selected-background: var(--jp-tab-selected-background);
-  --jp-dockpanel-tab-unselected-background: var(--jp-tab-unselected-background);
-  --jp-dockpanel-tab-hover-background: var(--jp-tab-hover-background);
-
-  // SidePanel
-  --jp-sidepanel-content-background: var(--jp-layout-color1);
-  --jp-sidepanel-tab-selected-background: var(--jp-tab-selected-background);
-  --jp-sidepanel-tab-unselected-background: var(--jp-tab-unselected-background);
-  --jp-sidepanel-tab-hover-background: var(--jp-tab-hover-background);
 
 }

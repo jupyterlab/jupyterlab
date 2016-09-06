@@ -3,6 +3,20 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-menubar-height: 28px;
+}
+
+
+.p-Menu {
+  --jp-private-menu-item-height: 24px;
+}
+
 
 /*-----------------------------------------------------------------------------
 | MenuBar
@@ -11,9 +25,9 @@
 
 .p-MenuBar {
   padding-left: 5px;
-  background: var(--jp-menu-background);
-  color: var(--jp-menu-font-color);
-  font-size: var(--jp-ui-fontSize);
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-fontSize1);
 }
 
 
@@ -26,19 +40,19 @@
   padding: 0px 8px;
   border-left: var(--jp-borderWidth) solid transparent;
   border-right: var(--jp-borderWidth) solid transparent;
-  line-height: 27px;
+  line-height: var(--jp-private-menubar-height);
 }
 
 
 .p-MenuBar-item.p-mod-active {
-  background: var(--jp-menu-selected-background);
+  background: var(--jp-layout-color2);
 }
 
 
 .p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
   z-index: 10001;
-  border-left: var(--jp-borderWidth) solid #C0C0C0;
-  border-right: var(--jp-borderWidth) solid #C0C0C0;
+  border-left: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border-right: var(--jp-borderWidth) solid var(--jp-borderColor1);
   box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -57,7 +71,7 @@
 
 
 .p-MenuBar-item.p-mod-active > .p-MenuBar-itemLabel {
-  color: var(--jp-brand-color1);
+  // color: var(--jp-ui-font-color1);
 }
 
 
@@ -67,16 +81,15 @@
 
 
 .p-MenuBar-itemLabel {
-  font-size: var(--jp-ui-fontSize);
-  color: var(--jp-ui-font-color1);
+  // color: var(--jp-ui-font-color1);
 }
 
 
 #jp-top-panel {
   border-bottom: var(--jp-borderWidth) solid var(--jp-borderColor1);
-  background: var(--jp-menu-background);
+  background: var(--jp-layout-color1);
   display: flex;
-  min-height: 28px;
+  min-height: var(--jp-private-menubar-height);
 }
 
 
@@ -88,24 +101,24 @@
 .p-Menu {
   z-index: 10000;
   padding: 4px 0px;
-  background: var(--jp-menu-background);
+  background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   border: var(--jp-borderWidth) solid var(--jp-borderColor1);
-  font-size: var(--jp-ui-fontSize);
+  font-size: var(--jp-ui-fontSize1);
   box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
 }
 
 
 .p-Menu-item {
-  min-height: 24px;
-  max-height: 24px;
+  min-height: var(--jp-private-menu-item-height);
+  max-height: var(--jp-private-menu-item-height);
   padding: 0px;
-  line-height: 24px;
+  line-height: var(--jp-private-menu-item-height);
 }
 
 
 .p-Menu-item.p-mod-active {
-  background: var(--jp-menu-selected-background);
+  background: var(--jp-layout-color2);
 }
 
 
@@ -123,7 +136,7 @@
 
 .p-Menu-itemLabel {
   padding: 0px 32px 0px 2px;
-  color: var(--jp-ui-font-color1);
+  // color: var(--jp-ui-font-color1);
 }
 
 
@@ -134,7 +147,7 @@
 
 .p-Menu-itemShortcut {
   padding: 0px;
-  color: var(--jp-ui-font-color1);
+  // color: var(--jp-ui-font-color1);
 }
 
 
@@ -171,4 +184,5 @@
 
 .p-Menu-item.p-type-submenu > .p-Menu-itemSubmenuIcon::before {
   content: '\f0da';
+
 }
