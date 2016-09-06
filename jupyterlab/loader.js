@@ -52,26 +52,26 @@ function defineModule(name, callback) {
  *   range of the request.
  */
 function requireModule(name) {
-  // Check if module is in cache
+  // Check if module is in cache.
   var moduleId = findModuleId(name);
   if(installedModules[moduleId]) {
     return installedModules[moduleId].exports;
   }
 
-  // Create a new module (and put it into the cache)
+  // Create a new module (and put it into the cache).
   var module = installedModules[moduleId] = {
     exports: {},
     id: moduleId,
     loaded: false
   };
 
-  // Execute the module function
+  // Execute the module function.
   registered[moduleId].call(module.exports, module, module.exports, requireModule);
 
-  // Flag the module as loaded
+  // Flag the module as loaded.
   module.loaded = true;
 
-  // Return the exports of the module
+  // Return the exports of the module.
   return module.exports;
 }
 
@@ -89,13 +89,13 @@ function ensureBundle(path, callback) {
     return callback.call(null, requireModule);
   }
 
-  // an array means "currently loading".
+  // An array means "currently loading".
   if (Array.isArray(installedChunks[path])) {
     installedChunks[path].push(callback);
     return;
   }
 
-  // start chunk loading
+  // Start chunk loading.
   installedChunks[path] = [callback];
   var head = document.getElementsByTagName('head')[0];
   var script = document.createElement('script');
@@ -124,6 +124,7 @@ function ensureBundle(path, callback) {
  *   request.
  */
 function findModuleId(name) {
+  // Use the cached id if available.
   if (lookupCache[name]) {
     return lookupCache[name];
   }
