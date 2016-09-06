@@ -110,7 +110,7 @@ function findModuleId(name) {
   };
 
   if (!matches.length) {
-    onLoad.error('No module found matching: ' + name);
+    throw Error('No module found matching: ' + name);
     return;
   }
   var index = 0;

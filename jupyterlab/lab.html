@@ -28,7 +28,7 @@ Distributed under the terms of the Modified BSD License.
 }</script>
 <script src="{{static_prefix}}/loader.bundle.js" type="text/javascript" charset="utf-8"></script>
 <script>
-jupyterEnsure('lab/custom.jupyterlab.bundle.js', function(requireFunc) {
+jupyterEnsure('lab/jupyterlab.bundle.js', function(requireFunc) {
   console.log('bundle loaded', requireFunc);
   jupyterRequire("jupyterlab-extension@0.1.0/index.js");
 });

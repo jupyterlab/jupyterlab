@@ -80,7 +80,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
       // Use the first file name, because the mangling of the chunk
       // file names are private to WebPack.
       var fileName = chunk.files[0];
-      compilation.assets['custom.' + fileName] = {
+      compilation.assets[fileName] = {
         source: function() {
           return code;
         },
