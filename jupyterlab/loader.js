@@ -114,6 +114,26 @@ function ensureBundle(path, callback) {
 
 
 /**
+ * Ensure a list of bundles are loaded on the page.
+ *
+ * @param paths - The public paths of the bundles. (e.g. "lab/foo.bundle.js").
+ *
+ * @returns A promise that resolves with the require function when all the
+ *   bundles have loaded.
+ */
+function requireBundles(paths) {
+  var promises = paths.map(function(path) {
+    return new Promise(function (resolve, reject) {
+      ensureBundle(path, resolve);
+    });
+  });
+  return Promise.all(promises).then(function () {
+    return requireModule;
+  });
+}
+
+
+/**
  * Find a module matching a given module request.
  *
  * @param name - The semver-mangled fully qualified name of the module.
@@ -176,6 +196,5 @@ requireModule.e = ensureBundle;
 
 module.exports = {
   define: defineModule,
-  ensure: ensureBundle,
-  require: requireModule
+  requireBundles: requireBundles
 }
