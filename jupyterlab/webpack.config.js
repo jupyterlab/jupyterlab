@@ -11,9 +11,28 @@ var JupyterLabPlugin = require('./plugin');
 console.log('Generating bundles...');
 
 
+var LOADERS = [
+  { test: /\.css$/,
+    loader: ExtractTextPlugin.extract("style-loader", "css-loader", {
+      publicPath: './'
+    })
+  },
+  { test: /\.json$/, loader: 'json-loader' },
+  { test: /\.html$/, loader: 'file-loader' },
+  // jquery-ui loads some images
+  { test: /\.(jpg|png|gif)$/, loader: 'file-loader' },
+  // required to load font-awesome
+  { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
+  { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
+  { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
+  { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
+  { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' }
+];
+
+
 module.exports = [{
   entry: {
-    jupyterlab: './index.js'
+    main: './index.js'
   },
   output: {
     path: __dirname + '/build',
@@ -27,23 +46,7 @@ module.exports = [{
   bail: true,
   devtool: 'source-map',
   module: {
-    loaders: [
-      { test: /\.css$/,
-        loader: ExtractTextPlugin.extract("style-loader", "css-loader", {
-          publicPath: './'
-        })
-      },
-      { test: /\.json$/, loader: 'json-loader' },
-      { test: /\.html$/, loader: 'file-loader' },
-      // jquery-ui loads some images
-      { test: /\.(jpg|png|gif)$/, loader: 'file-loader' },
-      // required to load font-awesome
-      { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
-      { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
-      { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
-      { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
-      { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' }
-    ]
+    loaders: LOADERS
   },
   plugins: [
     new ExtractTextPlugin('[name].css'),
@@ -66,5 +69,28 @@ module.exports = [{
   debug: true,
   bail: true,
   devtool: 'source-map'
+},
+{
+  entry: {
+    extensions: './extensions'
+  },
+  output: {
+    path: __dirname + '/build',
+    filename: '[name].bundle.js',
+    publicPath: './lab/'
+  },
+  node: {
+    fs: 'empty'
+  },
+  debug: true,
+  bail: true,
+  devtool: 'source-map',
+  module: {
+    loaders: LOADERS
+  },
+  plugins: [
+    new ExtractTextPlugin('[name].css'),
+    new JupyterLabPlugin()
+  ],
 }
 ];

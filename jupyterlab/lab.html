@@ -13,7 +13,9 @@ Distributed under the terms of the Modified BSD License.
     {% if mathjax_url %}
     <script type="text/javascript" src="{{mathjax_url}}?config={{mathjax_config}}&amp;delayStartupUntil=configured" charset="utf-8"></script>
     {% endif %}
-    <link href="{{static_prefix}}/jupyterlab.css" rel="stylesheet">
+    <!-- These will get templated by the server (it will look for css files) -->
+    <link href="{{static_prefix}}/main.css" rel="stylesheet">
+    <link href="{{static_prefix}}/extensions.css" rel="stylesheet">
     
 </head>
 
@@ -28,8 +30,19 @@ Distributed under the terms of the Modified BSD License.
 }</script>
 <script src="{{static_prefix}}/loader.bundle.js" type="text/javascript" charset="utf-8"></script>
 <script>
-jupyter.ensure('lab/jupyterlab.bundle.js', function(requireFunc) {
-  requireFunc("jupyterlab-extension@0.1.0/index.js");
+// TODO: add an ensure-all that makes sure all of the bundles are loaded.
+// The template uses ensureAll and then requires the extension points in
+// order.  
+// TODO: create a top-level manifest that has the entry point define name.
+// The template uses those names to assemble the plugins.
+jupyter.ensure('lab/main.bundle.js', function(requireFunc) {
+  jupyter.ensure('lab/extensions.bundle.js', function(requireFunc) {
+    var lab = requireFunc("jupyterlab-extension@0.1.0/index.js");
+    jupyter.lab = lab;
+    var plugins = requireFunc('jupyterlab-extension@0.1.0/extensions.js');
+    lab.registerPlugins(plugins);
+    lab.start();
+  });
 });
 </script>
 </body>

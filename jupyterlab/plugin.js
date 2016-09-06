@@ -22,6 +22,9 @@ function JupyterLabPlugin(options) {
 JupyterLabPlugin.prototype.apply = function(compiler) {
   var pluginName = this.name;
   var publicPath = compiler.options.output.publicPath;
+  if (!publicPath) {
+    throw new Error('Must define a public path');
+  }
   if (!publicPath.endsWith('/')) {
     publicPath += '/';
   }
