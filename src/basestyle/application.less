@@ -96,6 +96,12 @@ body {
   transform-origin: 0 0 0;
 }
 
+.jp-SideBar .p-TabBar-content {
+  // workaround needed for Safari 9 stable to avoid
+  // incorrect shrink of sidebars.
+  // Tech Preview 9.1.2 is known to not need this workaround.
+  min-width: 100vh;
+}
 
 .jp-SideBar.jp-mod-left .p-TabBar-content {
   flex-direction: row-reverse;
