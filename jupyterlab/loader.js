@@ -19,11 +19,11 @@ var installedModules = {};
 var lookupCache = {};
 
 /**
- * Object to store loaded and loading chunks.
+ * Object to store loaded and loading bundles.
  * "0" means "already loaded".
  * Array means "loading", array contains callbacks.
  */
-var installedChunks = {};
+var installedBundles = {};
 
 
 /**
@@ -85,28 +85,28 @@ function requireModule(name) {
  */
 function ensureBundle(path, callback) {
   // "0" is the signal for "already loaded"
-  if (installedChunks[path] === 0) {
+  if (installedBundles[path] === 0) {
     return callback.call(null, requireModule);
   }
 
   // An array means "currently loading".
-  if (Array.isArray(installedChunks[path])) {
-    installedChunks[path].push(callback);
+  if (Array.isArray(installedBundles[path])) {
+    installedBundles[path].push(callback);
     return;
   }
 
-  // Start chunk loading.
-  installedChunks[path] = [callback];
+  // Start bundle loading.
+  installedBundles[path] = [callback];
   var head = document.getElementsByTagName('head')[0];
   var script = document.createElement('script');
   script.type = 'text/javascript';
   script.charset = 'utf-8';
   script.async = true;
   script.onload = function() {
-    var callbacks = installedChunks[path];
+    var callbacks = installedBundles[path];
     while(callbacks.length)
       callbacks.shift().call(null, requireModule);
-    installedChunks[path] = 0;
+    installedBundles[path] = 0;
   }
   head.appendChild(script);
   script.src = path;
