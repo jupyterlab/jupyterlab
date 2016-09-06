@@ -35,7 +35,9 @@ var installedChunks = {};
  * @param callback - The callback function for invoking the module.
  */
 function defineModule(name, callback) {
-  registered[name] = callback;
+  if (!(name in registered)) {
+    registered[name] = callback;
+  }
 }
 
 

@@ -312,7 +312,7 @@ function parseModule(compilation, module, pluginName, publicPath) {
   var defineName = getDefineName(module);
   var header = '/** START DEFINE BLOCK for ' + defineName + ' **/\n';
   header += pluginName + '.define("' + getDefineName(module);
-  header += '", function (module, exports, ' + requireName + ') {\n';
+  header += '", function (module, exports, ' + requireName + ') {\n\t';
   var footer = '\n})\n/** END DEFINE BLOCK for ' + defineName + '**/';
 
   // Combine code indent.
