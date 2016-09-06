@@ -77,21 +77,39 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
   h.section({className: 'jp-FAQ-content', id: 'faq-questionList'},
     h.h2({className: 'jp-FAQ-h2'}, 'THE BASICS'),
     h.ul({className: 'jp-FAQ-ul'},
-      h.li({className: 'jp-FAQ-question jp-FAQ-toc'}, basicsQuestions[0]),
-      h.li({className: 'jp-FAQ-question jp-FAQ-toc'}, basicsQuestions[1]),
-      h.li({className: 'jp-FAQ-question jp-FAQ-toc'}, basicsQuestions[2]),
-      h.li({className: 'jp-FAQ-question jp-FAQ-toc'}, basicsQuestions[3])
+      h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
+        h.a({href: '#basicsQ1'}, basicsQuestions[0])
+      ),
+      h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
+        h.a({href: '#basicsQ2'}, basicsQuestions[1])
+      ),
+      h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
+        h.a({href: '#basicsQ3'}, basicsQuestions[2])
+      ),
+      h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
+        h.a({href: '#basicsQ4'}, basicsQuestions[3])
+      )
     ),
     h.h2({className: 'jp-FAQ-h2'}, 'FEATURES'),
     h.ul({className: 'jp-FAQ-ul'},
-      h.li({className: 'jp-FAQ-question jp-FAQ-toc'}, featuresQuestions[0]),
-      h.li({className: 'jp-FAQ-question jp-FAQ-toc'}, featuresQuestions[1])
+      h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
+        h.a({href: '#featuresQ1'}, featuresQuestions[0])
+      ),
+      h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
+        h.a({href: '#featuresQ2'}, featuresQuestions[1])
+      )
     ),
     h.h2({className: 'jp-FAQ-h2'}, 'DEVELOPER'),
     h.ul({className: 'jp-FAQ-ul'},
-      h.li({className: 'jp-FAQ-question jp-FAQ-toc'}, developerQuestions[0]),
-      h.li({className: 'jp-FAQ-question jp-FAQ-toc'}, developerQuestions[1]),
-      h.li({className: 'jp-FAQ-question jp-FAQ-toc'}, developerQuestions[2])
+      h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
+        h.a({href: '#developerQ1'}, developerQuestions[0])
+      ),
+      h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
+        h.a({href: '#developerQ2'}, developerQuestions[1])
+      ),
+      h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
+        h.a({href: '#developerQ3'}, developerQuestions[2])
+      )
     )
   );
 
@@ -101,7 +119,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
     h.h2({className: 'jp-FAQ-h2'}, 'THE BASICS'),
     // Create list of questions/answers under the Basics section.
     h.ul({className: 'jp-FAQ-ul'},
-      h.li({className: 'jp-FAQ-question'}, basicsQuestions[0]),
+      h.li({className: 'jp-FAQ-question', id: 'basicsQ1'}, basicsQuestions[0]),
       h.li({className: 'jp-FAQ-answer'},
         'JupyterLab allows users to arrange multiple Jupyter notebooks, '
         + 'text editors, terminals, output areas, etc. on a single page with multiple '
@@ -109,7 +127,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
         + 'is based on a flexible plugin system that makes it easy to extend '
         + 'with new components.'
       ),
-      h.li({className: 'jp-FAQ-question'}, basicsQuestions[1]),
+      h.li({className: 'jp-FAQ-question', id: 'basicsQ2'}, basicsQuestions[1]),
       h.li({className: 'jp-FAQ-answer'},
         'Central to the project is the Jupyter Notebook, a web-based '
         + 'platform that allows users to combine live code, equations, narrative '
@@ -118,14 +136,14 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
         + '40 programming languages and combine to form what we call a computational '
         + 'narrative.'
       ),
-      h.li({className: 'jp-FAQ-question'}, basicsQuestions[2]),
+      h.li({className: 'jp-FAQ-question', id: 'basicsQ3'}, basicsQuestions[2]),
       h.li({className: 'jp-FAQ-answer'},
         'JupyterLab is currently in a alpha release and not ready for public use '
         + 'as new features and bug fixes are being added very frequently. We strongly '
         + 'recommend to backup your work before using JupyterLab. However, testing, '
         + 'development, and user feedback are greatly appreciated.'
       ),
-      h.li({className: 'jp-FAQ-question'}, basicsQuestions[3]),
+      h.li({className: 'jp-FAQ-question', id: 'basicsQ4'}, basicsQuestions[3]),
       h.li({className: 'jp-FAQ-answer'},
         'Check out the JupyterLab tour ',
         h.a({className: 'jp-FAQ-a',
@@ -139,7 +157,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
     h.h2({className: 'jp-FAQ-h2'}, 'FEATURES'),
     // Create list of questions/answers under the Features section.
     h.ul({className: 'jp-FAQ-ul'},
-      h.li({className: 'jp-FAQ-question'}, featuresQuestions[0]),
+      h.li({className: 'jp-FAQ-question', id: 'featuresQ1'}, featuresQuestions[0]),
       h.li({className: 'jp-FAQ-answer'},
         'To add more languages to the JupyterLab you must install '
         + 'a new kernel. Installing a kernel is usually fairly simple and can be '
@@ -152,7 +170,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
         ),
         ' link.'
       ),
-      h.li({className: 'jp-FAQ-question'}, featuresQuestions[1]),
+      h.li({className: 'jp-FAQ-question', id: 'featuresQ2'}, featuresQuestions[1]),
       h.li({className: 'jp-FAQ-answer'},
         'You can either publish your notebooks on GitHub or use a free service such as ',
         h.a({className: 'jp-FAQ-a', href: 'https://nbviewer.jupyter.org/', target: '_blank'},
@@ -164,10 +182,56 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
     h.h2({className: 'jp-FAQ-h2'}, 'DEVELOPER'),
     // Create list of questions/answers under the Developer section.
     h.ul({className: 'jp-FAQ-ul'},
-      h.li({className: 'jp-FAQ-question'}, developerQuestions[0]),
-      h.li({className: 'jp-FAQ-question'}, developerQuestions[1]),
-      h.li({className: 'jp-FAQ-question'}, developerQuestions[2])
-
+      h.li({className: 'jp-FAQ-question', id: 'developerQ1'}, developerQuestions[0]),
+      h.li({className: 'jp-FAQ-answer'},
+        'You can open an issue on our ',
+        h.a({className: 'jp-FAQ-a',
+             href: 'https://github.com/jupyter/jupyterlab/issues',
+             target: '_blank'},
+          'github repository'
+        ),
+        '. Please check already opened issues before posting.'
+      ),
+      h.li({className: 'jp-FAQ-question', id: 'developerQ2'}, developerQuestions[1]),
+      h.li({className: 'jp-FAQ-answer'},
+        'If you have any inquiries, concerns, or thought you found a security '
+        + 'vulnerability, please write to use at ',
+        h.a({className: 'jp-FAQ-a', href: 'mailto:security@jupyter.org'},
+          'security@jupyter.org'
+        ),
+        '. We will do our best to repond to you promptly.'
+      ),
+      h.li({className: 'jp-FAQ-question', id: 'developerQ3'}, developerQuestions[2]),
+      h.li({className: 'jp-FAQ-answer'},
+        'There are many ways to contribute to JupyterLab. '
+        + 'Whether you are an experienced python programmer or a newcomer, any '
+        + 'interested developers are welcome. You can learn about the JupyterLab '
+        + 'codebase by going through our ',
+        h.a({className: 'jp-FAQ-a',
+             href: 'http://jupyterlab-tutorial.readthedocs.io/en/latest/index.html',
+             target: '_blank'},
+          'tutorial walkthrough'
+        ),
+        ' and ',
+        h.a({className: 'jp-FAQ-a',
+             href: 'http://jupyter.org/jupyterlab/',
+             target: '_blank'},
+             'documentation'
+        ),
+        '. Also, feel free to ask questions on our ',
+        h.a({className: 'jp-FAQ-a',
+             href: 'https://github.com/jupyter/jupyterlab',
+             target: '_blank'},
+             'github'
+        ),
+        ' or through any of our ',
+        h.a({className: 'jp-FAQ-a',
+             href: 'http://jupyter.org/community.html',
+             target: '_blank'},
+          'community resources'
+        ),
+        '.'
+      )
     )
   );
 
