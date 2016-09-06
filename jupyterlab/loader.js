@@ -19,9 +19,9 @@ var installedModules = {};
 var lookupCache = {};
 
 /**
- * Object to store loaded and loading chunks
- * "0" means "already loaded"
- * Array means "loading", array contains callbacks
+ * Object to store loaded and loading chunks.
+ * "0" means "already loaded".
+ * Array means "loading", array contains callbacks.
  */
 var installedChunks = {};
 
@@ -165,7 +165,7 @@ function findModuleId(name) {
 }
 
 // Add the ensure function to the require module for internal use within
-// the modules
+// the modules.
 requireModule.e = ensureBundle;
 
 module.exports = {

@@ -254,7 +254,6 @@ function createContextModule(module) {
 }
 
 
-
 /**
  * Parse a WebPack module to generate a custom version.
  *
