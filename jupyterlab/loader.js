@@ -3,34 +3,58 @@
 
 var semver = require('semver');
 
-// The registered module cache
+/**
+ * The registered module cache.
+ */
 var registered = {};
 
-// The module cache
+/**
+ * The installed module cache.
+ */
 var installedModules = {};
 
-// The module lookup cache
+/**
+ * The module name lookup cache.
+ */
 var lookupCache = {};
 
-// object to store loaded and loading chunks
-// "0" means "already loaded"
-// Array means "loading", array contains callbacks
-var installedChunks = {
-};
+/**
+ * Object to store loaded and loading chunks
+ * "0" means "already loaded"
+ * Array means "loading", array contains callbacks
+ */
+var installedChunks = {};
 
 
-// Define a module.
+/**
+ * Define a module that can be synchronously required.
+ *
+ * @param name - The version-mangled fully qualified name of the module.
+ *   For example, "foo@1.0.1/lib/bar/baz.js".
+ *
+ * @param callback - The callback function for invoking the module.
+ */
 function defineModule(name, callback) {
   registered[name] = callback;
 }
 
 
-// Require a module that has already been loaded.
-function requireModule(moduleRequest) {
+/**
+ * Synchrnously require a module that has already been loaded.
+ *
+ * @param name - The semver-mangled fully qualified name of the module.
+ *   For example, "foo@^1.1.0/lib/bar/baz.js".
+ *
+ * @returns The exports of the requested module, if registered.  The module
+ *   selected is the registered module that maximally satisfies the semver
+ *   range of the request.
+ */
+function requireModule(name) {
   // Check if module is in cache
-  var moduleId = findModuleId(moduleRequest)
-  if(installedModules[moduleId])
+  var moduleId = findModuleId(name);
+  if(installedModules[moduleId]) {
     return installedModules[moduleId].exports;
+  }
 
   // Create a new module (and put it into the cache)
   var module = installedModules[moduleId] = {
@@ -50,7 +74,13 @@ function requireModule(moduleRequest) {
 }
 
 
-// Ensure a bundle is loaded on a page.
+/**
+ * Ensure a bundle is loaded on a page.
+ *
+ * @param path - The public path of the bundle (e.g. "lab/jupyter.bundle.js").
+ *
+ * @param callback - The callback invoked when the bundle has loaded.
+ */
 function ensureBundle(path, callback) {
   // "0" is the signal for "already loaded"
   if (installedChunks[path] === 0) {
@@ -81,7 +111,16 @@ function ensureBundle(path, callback) {
 }
 
 
-// Find a module matching a given module request.
+/**
+ * Find a module matching a given module request.
+ *
+ * @param name - The semver-mangled fully qualified name of the module.
+ *   For example, "foo@^1.1.0/lib/bar/baz.js".
+ *
+ * @returns The matching defined module name, if registered.  A match is
+ *   the registered name that maximally satisfies the semver range of the
+ *   request.
+ */
 function findModuleId(name) {
   if (lookupCache[name]) {
     return lookupCache[name];
@@ -125,6 +164,8 @@ function findModuleId(name) {
   return matches[index];
 }
 
+// Add the ensure function to the require module for internal use within
+// the modules
 requireModule.e = ensureBundle;
 
 module.exports = {
