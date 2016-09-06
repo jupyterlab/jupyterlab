@@ -8,14 +8,6 @@
 |----------------------------------------------------------------------------*/
 
 
-:root {
-  --jp-sidepanel-content-background: var(--jp-layout-color1);
-  --jp-sidepanel-tab-selected-background: var(--jp-tab-selected-background);
-  --jp-sidepanel-tab-unselected-background: var(--jp-tab-unselected-background);
-  --jp-sidepanel-tab-hover-background: var(--jp-tab-hover-background);
-}
-
-
 /*-----------------------------------------------------------------------------
 | SideBar
 |----------------------------------------------------------------------------*/
@@ -23,7 +15,7 @@
 
 .jp-SideBar.p-TabBar {
   color: var(--jp-ui-font-color1);
-  background: var(--jp-sidepanel-tab-unselected-background);
+  background: var(--jp-layout-color2);
   font-size: 14px;
   min-width: 36px;
   max-width: 36px;
@@ -68,7 +60,7 @@
 
 .jp-SideBar .p-TabBar-tab {
   padding: 0 18px;
-  background: var(--jp-sidepanel-tab-unselected-background);
+  background: var(--jp-layout-color2);
   border: none;
   overflow: visible;
 }
@@ -80,13 +72,13 @@
 
 
 .jp-SideBar .p-TabBar-tab:hover:not(.p-mod-current) {
-  background: var(--jp-sidepanel-tab-hover-background);
+  background: var(--jp-layout-color1);
 }
 
 
 .jp-SideBar .p-TabBar-tab.p-mod-current {
   color: var(--jp-brand-color1);
-  background: var(--jp-sidepanel-tab-selected-background);
+  background: var(--jp-layout-color1);
 }
 
 
