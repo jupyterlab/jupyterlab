@@ -5,37 +5,20 @@ var path = require('path');
 
 
 /**
-  TODOs
-  - Add our headers and marker text
-  - Handle the context functions
-  - Handle the other bundles
-  - Create the custom loader
-  - Create a manifest with each module and its dependencies
-  - Handle source maps - preserve the relative original lines of text so we
-    can easily generate a source map for the start of each line
-*/
-
+ * A WebPack plugin that generates custom bundles that use version and
+ * semver-mangled require semantics.
+ */
 function JupyterLabPlugin(options) {
   options = this.options = options || {};
   this.name = options.name || 'jupyter';
 }
 
 
-// Notes
-// We can't replace __webpack_require__ during compilation because
-//  it is hard-coded in several places
-// We have to set the module id directly because it is used verbatim
-// to add the requires and we can't necessarily parse them in context
-// dependencies.
-
-// We can't replace the module ids directly, as it messes with compilation
-// We can replace them in regular modules (ones with a userRequest)
-// Context modules we'll have to assemble ourselves or use a better lookup
-// since they are not clearly delimited
-
-// During the emit phase we create our own mangled stuff
-
-
+/**
+ * Plugin installation, called by WebPack.
+ *
+ * @param compiler - The WebPack compiler object.
+ */
 JupyterLabPlugin.prototype.apply = function(compiler) {
   var pluginName = this.name;
   var publicPath = compiler.options.output.publicPath;
@@ -43,12 +26,19 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
     publicPath += '/';
   }
 
+  // Notes
+  // We use the emit phase because it allows other plugins to act on the
+  // output first.
+  // We can't replace the module ids during compilation, because there are
+  // places in the compilation that assume a numeric id.
   compiler.plugin('emit', function(compilation, callback) {
 
     // Explore each chunk (build output):
     compilation.chunks.forEach(function(chunk) {
 
       var sources = [];
+
+      // A manifest for each module and its dependencies.
       var manifest = {};
 
       // Explore each module within the chunk (built inputs):
@@ -74,9 +64,9 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         manifest[getDefineName(module)] = deps;
       });
 
-      var code = sources.join(',\n\n');
+      var code = sources.join('\n\n');
 
-      // Insert this list into the Webpack build as a new file asset:
+      // Replace the original chunk file.
       // Use the first file name, because the mangling of the chunk
       // file names are private to WebPack.
       var fileName = chunk.files[0];
@@ -89,6 +79,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         }
       };
 
+      // Create the manifest.
       compilation.assets[fileName + '.manifest'] = {
         source: function() {
           return JSON.stringify(manifest);
@@ -104,7 +95,13 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 };
 
 
-// From a request - find its package root.
+/**
+ * Find a package root path from a request.
+ *
+ * @param request - The request path.
+ *
+ * @returns The path to the package root.
+ */
 function findRoot(request) {
   var orig = request;
   if (path.extname(request)) {
@@ -130,14 +127,27 @@ function findRoot(request) {
 }
 
 
-// Get the package.json associated with a file.
+/**
+ * Get the package.json associated with a file.
+ *
+ * @param request - The request path.
+ *
+ * @returns The package.json object for the package.
+ */
 function getPackage(request) {
   var rootPath = findRoot(request);
   return require(path.join(rootPath, 'package.json'));
 }
 
 
-// From a Webpack module object - find a version-mangled define name.
+/**
+ * Get the define name for a WebPack module.
+ *
+ * @param module - A parsed WebPack module object.
+ *
+ * @returns A version-mangled define name for the module.
+ *    For example, "foo@1.0.1/lib/bar/baz.js".
+ */
 function getDefineName(module) {
   if (!module.context) {
     return '__ignored__';
@@ -154,7 +164,14 @@ function getDefineName(module) {
 }
 
 
-// From a WebPack module object - find its semver-mangled require name.
+/**
+ * Get the require name for a WebPack module.
+ *
+ * @param module - A parsed WebPack module object.
+ *
+ * @returns A semver-mangled define name for the module.
+ *    For example, "foo@^1.0.0/lib/bar/baz.js".
+ */
 function getRequireName(module) {
   if (!module.context) {
     return '__ignored__';
@@ -185,7 +202,13 @@ function getRequireName(module) {
 }
 
 
-// Create our own mangled context module source.
+/**
+ * Create custom context module source.
+ *
+ * @param module - A parsed WebPack module object.
+ *
+ * @returns The new contents of the context module output.
+ */
 function createContextModule(module) {
   // Modeled after Webpack's ContextModule.js.
   var str;
@@ -231,7 +254,20 @@ function createContextModule(module) {
 }
 
 
-// Parse a module.
+
+/**
+ * Parse a WebPack module to generate a custom version.
+ *
+ * @param compilation - The Webpack compilation object.
+ *
+ * @param module - A parsed WebPack module object.
+ *
+ * @param pluginName - The name of the plugin.
+ *
+ * @param publicPath - The public path of the plugin.
+ *
+ * @returns The new module contents.
+ */
 function parseModule(compilation, module, pluginName, publicPath) {
   var requireName = '__' + pluginName + '_require__';
   var defineName = pluginName + 'Define';
@@ -259,6 +295,8 @@ function parseModule(compilation, module, pluginName, publicPath) {
     }
   // Context modules.
   } else if (module.context) {
+    // Context modules have to be assembled ourselves
+    // because they are not clearly delimited in the text.
     source = createContextModule(module);
     source = source.split('webpackContext').join(pluginName + 'Context');
   }
@@ -272,15 +310,30 @@ function parseModule(compilation, module, pluginName, publicPath) {
   source = source.split('__webpack_require__').join(requireName);
 
   // Create our header with a version-mangled defined name.
-  var header = pluginName + '.define("' + getDefineName(module);
+  var defineName = getDefineName(module);
+  var header = '/** START DEFINE BLOCK for ' + defineName + ' **/\n';
+  header += pluginName + '.define("' + getDefineName(module);
   header += '", function (module, exports, ' + requireName + ') {\n';
+  var footer = '\n})\n/** END DEFINE BLOCK for ' + defineName + '**/';
 
   // Combine code indent.
-  return header + source.split('\n').join('\n\t') + '\n})';
+  return header + source.split('\n').join('\n\t') + footer;
 }
 
 
-// Handle an ensure block.
+/**
+ * Handle an ensure block.
+ *
+ * @param compilation - The Webpack compilation object.
+ *
+ * @param source - The raw module source.
+ *
+ * @param publicPath - The public path of the plugin.
+ *
+ * @param regex - The ensure block regex.
+ *
+ * @returns The new ensure block contents.
+ */
 function handleEnsure(compilation, source, publicPath, regex) {
   while (regex.test(source)) {
     var match = source.match(regex);
