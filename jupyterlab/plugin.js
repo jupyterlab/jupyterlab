@@ -41,8 +41,8 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 
       var sources = [];
 
-      // A manifest for each module and its dependencies.
-      var manifest = {};
+      // A mapping for each module name and its dependencies.
+      var modules = {};
 
       // Explore each module within the chunk (built inputs):
       chunk.modules.forEach(function(module) {
@@ -64,7 +64,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
             deps.push(getRequireName(dep));
           }
         }
-        manifest[getDefineName(module)] = deps;
+        modules[getDefineName(module)] = deps;
       });
 
       var code = sources.join('\n\n');
@@ -82,7 +82,17 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
         }
       };
 
-      // Create the manifest.
+      // Create a manifest for the chunk.
+      var manifest = {};
+      if (chunk.entry) {
+        manifest['entry'] = getDefineName(chunk.modules[0]);
+      }
+      manifest['hash'] = chunk.hash;
+      manifest['id'] = chunk.id;
+      manifest['name'] = chunk.name || chunk.id;
+      manifest['files'] = chunk.files;
+      manifest['modules'] = modules;
+
       compilation.assets[fileName + '.manifest'] = {
         source: function() {
           return JSON.stringify(manifest);
@@ -91,9 +101,11 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
           return JSON.stringify(manifest).length;
         }
       }
+
     });
 
     callback();
+
   });
 };
 
