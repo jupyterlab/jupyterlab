@@ -7,12 +7,8 @@ Distributed under the terms of the Modified BSD License.
 Example
 -------
 
-To run the example, make sure the Jupyter notebook server version 4.2+ is
-installed.
-
-- To build the JavaScript bundle: ``npm install && npm run build``.
-- To run the Python code: ``python main.py``.
-- Navigate to ``localhost:8765`` in your browser.
+To run the example, see the instructions in the README to build it. Then
+run ``python main.py`` and navigate your browser to ``localhost:8765``.
 
 Note
 ----
