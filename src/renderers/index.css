@@ -10,283 +10,278 @@
   font-size: 14px;
   line-height: 20px;
 
-  .MathJax_Display {
-    margin: 0;
-  }
+}
 
+.jp-RenderedHTMLCommon .MathJax_Display {
+  margin: 0;
+}
 
-  em {
-    font-style: italic;
-  }
 
-  strong {
-    font-weight: bold;
-  }
+.jp-RenderedHTMLCommon em {
+  font-style: italic;
+}
 
-  u {
-    text-decoration: underline;
-  }
+.jp-RenderedHTMLCommon strong {
+  font-weight: bold;
+}
 
-  :link {
-    text-decoration: underline;
-  }
+.jp-RenderedHTMLCommon u {
+  text-decoration: underline;
+}
 
-  :visited {
-    text-decoration: underline;
-  }
+.jp-RenderedHTMLCommon:link {
+  text-decoration: underline;
+}
 
-  /*For a 14px base font size this goes as:
-  font-size = 26, 22, 18, 14, 12, 12
-  margin-top = 14, 14, 14, 14, 8, 8
-  */
+.jp-RenderedHTMLCommon:visited {
+  text-decoration: underline;
+}
 
-  h1 {
-    font-size: 185.7%;
-    margin: 1.08em 0 0 0;
-    font-weight: bold;
-    line-height: 1.0;
-  }
+/*For a 14px base font size this goes as:
+font-size = 26, 22, 18, 14, 12, 12
+margin-top = 14, 14, 14, 14, 8, 8
+*/
 
+.jp-RenderedHTMLCommon h1 {
+  font-size: 185.7%;
+  margin: 1.08em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
 
-  h2 {
-    font-size: 157.1%;
-    margin: 1.27em 0 0 0;
-    font-weight: bold;
-    line-height: 1.0;
-  }
 
+.jp-RenderedHTMLCommon h2 {
+  font-size: 157.1%;
+  margin: 1.27em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
 
-  h3 {
-    font-size: 128.6%;
-    margin: 1.55em 0 0 0;
-    font-weight: bold;
-    line-height: 1.0;
-  }
 
+.jp-RenderedHTMLCommon h3 {
+  font-size: 128.6%;
+  margin: 1.55em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
 
-  h4 {
-    font-size: 100%;
-    margin: 2em 0 0 0;
-    font-weight: bold;
-    line-height: 1.0;
-  }
 
+.jp-RenderedHTMLCommon h4 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
 
-  h5 {
-    font-size: 100%;
-    margin: 2em 0 0 0;
-    font-weight: bold;
-    line-height: 1.0;
-    font-style: italic;
-  }
 
+.jp-RenderedHTMLCommon h5 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+  font-style: italic;
+}
 
-  h6 {
-    font-size: 100%;
-    margin: 2em 0 0 0;
-    font-weight: bold;
-    line-height: 1.0;
-    font-style: italic;
-  }
 
+.jp-RenderedHTMLCommon h6 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+  font-style: italic;
+}
 
-  h1:first-child {
-    margin-top: 0.538em;
-  }
 
+.jp-RenderedHTMLCommon h1:first-child {
+  margin-top: 0.538em;
+}
 
-  h2:first-child {
-    margin-top: 0.636em;
-  }
 
+.jp-RenderedHTMLCommon h2:first-child {
+  margin-top: 0.636em;
+}
 
-  h3:first-child {
-    margin-top: 0.777em;
-  }
 
+.jp-RenderedHTMLCommon h3:first-child {
+  margin-top: 0.777em;
+}
 
-  h4:first-child {
-    margin-top: 1em;
-  }
 
+.jp-RenderedHTMLCommon h4:first-child {
+  margin-top: 1em;
+}
 
-  h5:first-child {
-    margin-top: 1em;
-  }
 
+.jp-RenderedHTMLCommon h5:first-child {
+  margin-top: 1em;
+}
 
-  h6:first-child {
-    margin-top: 1em;
-  }
 
+.jp-RenderedHTMLCommon h6:first-child {
+  margin-top: 1em;
+}
 
-  ul:not(.list-inline),
-  ol:not(.list-inline) {
-    padding-left: 2em;
-  }
 
+.jp-RenderedHTMLCommon ul:not(.list-inline),
+.jp-RenderedHTMLCommon ol:not(.list-inline) {
+  padding-left: 2em;
+}
 
-  ul {
-    list-style: disc;
-  }
 
+.jp-RenderedHTMLCommon ul {
+  list-style: disc;
+}
 
-  ul ul {
-    list-style: square;
-  }
 
+.jp-RenderedHTMLCommon ul ul {
+  list-style: square;
+}
 
-  ul ul ul {
-    list-style: circle;
-  }
 
+.jp-RenderedHTMLCommon ul ul ul {
+  list-style: circle;
+}
 
-  ol {
-    list-style: decimal;
-  }
 
+.jp-RenderedHTMLCommon ol {
+  list-style: decimal;
+}
 
-  ol ol {
-    list-style: upper-alpha;
-  }
 
+.jp-RenderedHTMLCommon ol ol {
+  list-style: upper-alpha;
+}
 
-  ol ol ol {
-    list-style: lower-alpha;
-  }
 
+.jp-RenderedHTMLCommon ol ol ol {
+  list-style: lower-alpha;
+}
 
-  ol ol ol ol {
-    list-style: lower-roman;
-  }
 
+.jp-RenderedHTMLCommon ol ol ol ol {
+  list-style: lower-roman;
+}
 
-  ol ol ol ol ol {
-    list-style: decimal;
-  }
 
+.jp-RenderedHTMLCommon ol ol ol ol ol {
+  list-style: decimal;
+}
 
-  * + ul {
-    margin-top: 1em;
-  }
 
+.jp-RenderedHTMLCommon * + ul {
+  margin-top: 1em;
+}
 
-  * + ol {
-    margin-top: 1em;
-  }
 
+.jp-RenderedHTMLCommon * + ol {
+  margin-top: 1em;
+}
 
-  hr {
-    color: black;
-    background-color: black;
-    margin-top: 1em;
-    margin-bottom: 1em;
-  }
 
+.jp-RenderedHTMLCommon hr {
+  color: black;
+  background-color: black;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
 
-  pre {
-    margin: 1em 2em;
-  }
 
+.jp-RenderedHTMLCommon pre {
+  margin: 1em 2em;
+}
 
-  pre,
-  code {
-    border: 0;
-    background-color: white;
-    color: black;
-    font-size: 100%;
-    padding: 0px;
-  }
 
+.jp-RenderedHTMLCommon pre,
+.jp-RenderedHTMLCommon code {
+  border: 0;
+  background-color: white;
+  color: black;
+  font-size: 100%;
+  padding: 0px;
+}
 
-  blockquote {
-    margin: 1em 2em;
-  }
 
+.jp-RenderedHTMLCommon table {
+  margin-left: auto;
+  margin-right: auto;
+  border: var(--jp-borderWidth) solid black;
+  border-collapse: collapse;
+}
 
-  table {
-    margin-left: auto;
-    margin-right: auto;
-    border: var(--jp-borderWidth) solid black;
-    border-collapse: collapse;
-  }
 
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td {
+  border: var(--jp-borderWidth) solid black;
+  border-collapse: collapse;
+  margin: 1em 2em;
+}
 
-  tr,
-  th,
-  td {
-    border: var(--jp-borderWidth) solid black;
-    border-collapse: collapse;
-    margin: 1em 2em;
-  }
 
+.jp-RenderedHTMLCommon td,
+.jp-RenderedHTMLCommon th {
+  text-align: left;
+  vertical-align: middle;
+  padding: 4px;
+}
 
-  td,
-  th {
-    text-align: left;
-    vertical-align: middle;
-    padding: 4px;
-  }
 
+.jp-RenderedHTMLCommon th {
+  font-weight: bold;
+}
 
-  th {
-    font-weight: bold;
-  }
+.jp-RenderedHTMLCommon * + table {
+  margin-top: 1em;
+}
 
-  * + table {
-    margin-top: 1em;
-  }
 
+.jp-RenderedHTMLCommon p {
+  text-align: left;
+  margin: 0px;
+}
 
-  p {
-    text-align: left;
-    margin: 0px;
-  }
 
+.jp-RenderedHTMLCommon * + p {
+  margin-top: 1em;
+}
 
-  * + p {
-    margin-top: 1em;
-  }
 
+.jp-RenderedHTMLCommon img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-  img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
 
+.jp-RenderedHTMLCommon * + img {
+  margin-top: 1em;
+}
 
-  * + img {
-    margin-top: 1em;
-  }
 
+.jp-RenderedHTMLCommon img,
+.jp-RenderedHTMLCommon svg {
+  max-width: 100%;
+  height: auto;
+}
 
-  img,
-  svg {
-    max-width: 100%;
-    height: auto;
-  }
 
+.jp-RenderedHTMLCommon img.unconfined,
+.jp-RenderedHTMLCommon svg.unconfined {
+  max-width: none;
+}
 
-  img.unconfined,
-  svg.unconfined {
-    max-width: none;
-  }
+.jp-RenderedHTMLCommon .alert {
+  margin-bottom: initial;
+}
 
-  .alert {
-    margin-bottom: initial;
-  }
 
+.jp-RenderedHTMLCommon * + .alert {
+  margin-top: 1em;
+}
 
-  * + .alert {
-    margin-top: 1em;
-  }
 
-
-  blockquote {
-    margin: 1em 2em;
-    padding: 0 1em;
-    border-left: 5px solid var(--jp-borderColor2);
-  }
-
+.jp-RenderedHTMLCommon blockquote {
+  margin: 1em 2em;
+  padding: 0 1em;
+  border-left: 5px solid var(--jp-borderColor2);
 }

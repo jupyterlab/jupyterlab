@@ -5,34 +5,34 @@
 
 
 // Variables and mixins
-@import '../basestyle/materialcolors.less';
-@import './variables.less';
+@import '../basestyle/materialcolors.css';
+@import './variables.css';
 
 
 // Main application (1st)
-@import '../application/index.less';
+@import '../application/index.css';
 
 
 // Individual plugins
-@import '../about/index.less';
-@import '../codemirror/index.less';
-@import '../commandpalette/index.less';
-@import '../console/index.less';
-@import '../csvwidget/index.less';
-@import '../dialog/index.less';
-@import '../editorwidget/index.less';
-@import '../faq/index.less';
-@import '../filebrowser/index.less';
-@import '../help/index.less';
-@import '../iframe/index.less';
-@import '../imagewidget/index.less';
-@import '../inspector/index.less';
-@import '../landing/index.less';
-@import '../markdownwidget/index.less';
-@import '../notebook/index.less';
-@import '../renderers/index.less';
-@import '../running/index.less';
-@import '../terminal/index.less';
+@import '../about/index.css';
+@import '../codemirror/index.css';
+@import '../commandpalette/index.css';
+@import '../console/index.css';
+@import '../csvwidget/index.css';
+@import '../dialog/index.css';
+@import '../editorwidget/index.css';
+@import '../faq/index.css';
+@import '../filebrowser/index.css';
+@import '../help/index.css';
+@import '../iframe/index.css';
+@import '../imagewidget/index.css';
+@import '../inspector/index.css';
+@import '../landing/index.css';
+@import '../markdownwidget/index.css';
+@import '../notebook/index.css';
+@import '../renderers/index.css';
+@import '../running/index.css';
+@import '../terminal/index.css';
 
 // Theme images
-@import './images.less';
+@import './images.css';

@@ -58,7 +58,7 @@
     "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
     "build:serverextension": "cd jupyterlab && npm run build && cd ..",
     "build:css": "true",
-    "build:less": "lessc --strict-math=on --include-path=node_modules src/default-theme/index.less lib/default-theme/index.css",
+    "build:less": "lessc --strict-math=on --include-path=node_modules src/default-theme/index.css lib/default-theme/index.css",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
     "clean:all": "npm run clean && cd jupyterlab && npm run clean && cd ..",
     "clean:examples": "node scripts/cleanexamples.js",
