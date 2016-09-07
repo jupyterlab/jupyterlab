@@ -238,7 +238,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
   // Append the Table of Contents and questions/answers.
   let paragraph = h.p(questionList, questionAnswerList);
 
-  render([faqHeader, paragraph], widget.node);
+  render([faqHeader, questionList, questionAnswerList], widget.node);
   widget.node.style.overflowY = 'auto';
 
   app.commands.addCommand(commandId, {
