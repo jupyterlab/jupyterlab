@@ -35,11 +35,10 @@ Distributed under the terms of the Modified BSD License.
 
 <script>
   var lab = jupyter.require("{{ jupyterlab_main }}");
-  jupyter.lab = lab;
   var plugins = [];
 
   {% for plugin_entry in plugin_entries %}
-  plugins = plugins.concat(jupyter.require("{{ plugin_entry }}"));
+  plugins = plugins.concat(jupyter.validateEntryPoint("{{ plugin_entry }}"));
   {% endfor %}
 
   lab.registerPlugins(plugins);
