@@ -101,15 +101,12 @@ const EXECUTION_TIMEOUT = 250;
  * instance. Under most circumstances, it is not instantiated by user code.
  */
 export
-class ConsoleContent extends SplitPanel {
+class ConsoleContent extends Widget {
   /**
    * Construct a console widget.
    */
   constructor(options: ConsoleContent.IOptions) {
-    super({
-      orientation: options.orientation || 'vertical',
-      spacing: 2
-    });
+    super({ node: document.createElement('div') });
     this.addClass(CONSOLE_CLASS);
 
     // Create the panels that holds the content and input.
@@ -118,11 +115,9 @@ class ConsoleContent extends SplitPanel {
     this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);
 
-    // Insert the content and input panes into the split panel.
-    this.addWidget(this._content);
-    this.addWidget(this._input);
-    SplitPanel.setStretch(this._content, 1);
-    SplitPanel.setStretch(this._input, 0);
+    // Insert the content and input panes into the widget.
+    this.node.appendChild(this._content.node);
+    this.node.appendChild(this._input.node);
 
     this._renderer = options.renderer;
     this._rendermime = options.rendermime;
