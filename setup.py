@@ -154,6 +154,7 @@ setup_args = {
     'entry_points': {
         'console_scripts': [
             'jupyter-lab = jupyterlab.labapp:main',
+            'jupyter-labextension = jupyterlab.labextensions:main',
         ]
     },
     'author': 'Jupyter Development Team',

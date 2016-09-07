@@ -9,7 +9,6 @@ from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
 
-
 #-----------------------------------------------------------------------------
 # Module globals
 #-----------------------------------------------------------------------------
@@ -19,9 +18,9 @@ If you're working on the TypeScript sources of JupyterLab, try running
 
     npm run watch
 
-from the JupyterLab repo directory in another terminal window to have the system
-incrementally watch and build JupyterLab's TypeScript for you, as you make
-changes.
+from the JupyterLab repo directory in another terminal window to have the 
+system incrementally watch and build JupyterLab's TypeScript for you, as you 
+make changes.
 """
 
 HERE = os.path.dirname(__file__)
@@ -54,9 +53,10 @@ class LabHandler(IPythonHandler):
 
 default_handlers = [
     (PREFIX + r'/?', LabHandler),
-    (PREFIX+r"/(.+)", FileFindHandler,
+    (PREFIX + r"/(.*)", FileFindHandler,
         {'path': BUILT_FILES}),
-    ]
+]
+
 
 def _jupyter_server_extension_paths():
     return [{
@@ -69,7 +69,15 @@ def load_jupyter_server_extension(nbapp):
     dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
     if dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
-    nbapp.log.info('JupyterLab alpha preview extension loaded from %s'%HERE)
+    nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % HERE)
     webapp = nbapp.web_app
     base_url = webapp.settings['base_url']
-    webapp.add_handlers(".*$", [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
+    webapp.add_handlers(".*$",
+        [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
+    lab_extension_handler = (
+        r"/labextensions/(.*)", FileFindHandler, {
+            'path': nbapp.labextensions_path,
+            'no_cache_paths': ['/'],  # don't cache anything in labbextensions
+        }
+    )
+    webapp.add_handlers(".*$", [lab_extension_handler])
