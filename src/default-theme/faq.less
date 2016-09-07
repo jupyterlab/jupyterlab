@@ -6,6 +6,16 @@
   font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 }
 
+#faq-jupyterlab {
+  padding: 15px;
+}
+
+#faq-header {
+  width: 412px;
+  display: flex;
+  margin: 40px auto 40px auto;
+  text-align: center;
+}
 
 .jp-FAQ-h1 {
   font-size: 26px;
@@ -14,14 +24,9 @@
   margin: 10px 0 0 20px;
 }
 
-
-#faq-header {
-  width: 412px;
-  display: flex;
-  margin: 65px auto 0 auto;
-  text-align: center;
+.jp-FAQ-content > h2 {
+  margin-top: 30px;
 }
-
 
 .jp-FAQ-h2 {
   font-size: 14px;
@@ -30,11 +35,10 @@
   margin: 52px 0 0 0;
 }
 
-
 .jp-FAQ-ul {
   margin: 0 0 0 0;
+  padding: 0;
 }
-
 
 .jp-FAQ-question > a {
   font-size: 20px;
@@ -43,8 +47,18 @@
   line-height: 150%;
   list-style-type: none;
   margin: 28px 0 0 0;
+  cursor: pointer;
+  text-decoration: none;
 }
 
+.jp-FAQ-question > a:hover {
+  color: #42A5F5;
+}
+
+.jp-FAQ-question {
+  list-style-type: none;
+  padding: 16px 0;
+}
 
 .jp-FAQ-answer{
   font-size: 15px;
@@ -54,42 +68,23 @@
   border-left: 2px solid #9E9E9E;
   padding-left: 25px;
   list-style-type: none;
-  margin: 28px 0 0 0;
+  margin: 15px 0 15px 20px;
 }
-
-
-// toc refers to Table of Contents.
-.jp-FAQ-toc > a {
-  cursor: pointer;
-}
-
-
-.jp-FAQ-toc:hover {
-  color: #42A5F5;
-}
-
 
 .jp-FAQ-toc:focus{
   color: #42A5F5;
 }
-
 
 li>jp-FAQ-answer {
   color: #4A90E2;
   text-decoration: none;
 }
 
-
 .jp-FAQ-content {
-  margin: 0 auto 60px auto;
+  margin: 0 auto 70px auto;
   display: block;
   width: 94%;
-  max-width: 675px;
-}
-
-
-#faq-questionList {
-  //TO DO add in padding bottom
+  max-width: 700px;
 }
 
 
@@ -98,13 +93,11 @@ h1 span.jp-FAQ-title {
   display: block;
 }
 
-
 .jp-FAQ-a {
   text-decoration: none;
   cursor: pointer;
   color: #2196F3;
 }
-
 
 .jp-QuestionMark.jp-FAQ-QuestionMark {
   height: 49px;
