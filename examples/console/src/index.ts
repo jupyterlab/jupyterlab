@@ -161,13 +161,6 @@ function startApp(session: ISession) {
   });
   palette.addItem({ command, category });
   keymap.addBinding({ command,  selector,  keys: ['Ctrl Enter'] });
-
-  command = 'console:toggle';
-  commands.addCommand(command, {
-    label: 'Toggle Console Orientation',
-    execute: () => consolePanel.toggleOrientation()
-  });
-  palette.addItem({ command, category });
 }
 
 window.onload = main;

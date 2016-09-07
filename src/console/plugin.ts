@@ -290,18 +290,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   palette.addItem({ command, category });
   menu.addItem({ command });
 
-  command = 'console:toggle-orientation';
-  commands.addCommand(command, {
-    label: 'Toggle Console Orientation',
-    execute: () => {
-      if (tracker.currentWidget) {
-        tracker.currentWidget.toggleOrientation();
-      }
-    }
-  });
-  palette.addItem({ command, category });
-  menu.addItem({ command });
-
   mainMenu.addMenu(menu, {rank: 50});
 }
 
