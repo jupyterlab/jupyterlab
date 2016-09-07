@@ -19,10 +19,12 @@
 @import url('~codemirror/theme/xq-light.css');
 
 
-// Here is our jupyter theme for CodeMirror syntax highlighting
-// This is used in our marked.js syntax highlighting and CodeMirror itself
-// The string "jupyter" is set in ../codemirror/widget.DEFAULT_CODEMIRROR_THEME
-// This came from the classic notebook, which came form highlight.js/GitHub
+/*
+  Here is our jupyter theme for CodeMirror syntax highlighting
+  This is used in our marked.js syntax highlighting and CodeMirror itself
+  The string "jupyter" is set in ../codemirror/widget.DEFAULT_CODEMIRROR_THEME
+  This came from the classic notebook, which came form highlight.js/GitHub
+*/
 
 
 .cm-s-jupyter span.cm-keyword      { color: #008000; font-weight: bold; }

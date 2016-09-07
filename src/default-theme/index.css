@@ -4,16 +4,16 @@
 |----------------------------------------------------------------------------*/
 
 
-// Variables and mixins
+/* Variables and mixins */
 @import '../basestyle/materialcolors.css';
 @import './variables.css';
 
 
-// Main application (1st)
+/* Main application (1st) */
 @import '../application/index.css';
 
 
-// Individual plugins
+/* Individual plugins */
 @import '../about/index.css';
 @import '../codemirror/index.css';
 @import '../commandpalette/index.css';
@@ -34,5 +34,5 @@
 @import '../running/index.css';
 @import '../terminal/index.css';
 
-// Theme images
+/* Theme images */
 @import './images.css';

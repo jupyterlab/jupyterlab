@@ -40,9 +40,9 @@ body {
 |----------------------------------------------------------------------------*/
 
 
-@import './dockpanel.less';
-@import './menus.less';
-@import './sidepanel.less';
-@import './tabs.less';
+@import './dockpanel.css';
+@import './menus.css';
+@import './sidepanel.css';
+@import './tabs.css';
 
 

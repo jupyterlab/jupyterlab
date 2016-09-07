@@ -70,18 +70,8 @@
 }
 
 
-.p-MenuBar-item.p-mod-active > .p-MenuBar-itemLabel {
-  // color: var(--jp-ui-font-color1);
-}
-
-
 .p-MenuBar-itemMnemonic {
   text-decoration: underline;
-}
-
-
-.p-MenuBar-itemLabel {
-  // color: var(--jp-ui-font-color1);
 }
 
 
@@ -136,7 +126,6 @@
 
 .p-Menu-itemLabel {
   padding: 0px 32px 0px 2px;
-  // color: var(--jp-ui-font-color1);
 }
 
 
@@ -147,7 +136,6 @@
 
 .p-Menu-itemShortcut {
   padding: 0px;
-  // color: var(--jp-ui-font-color1);
 }
 
 

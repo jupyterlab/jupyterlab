@@ -5,8 +5,7 @@
 |----------------------------------------------------------------------------*/
 
 
-@import './completion.less';
-@import './highlight.less';
+@import './completion.css';
 
 
 .jp-Notebook {
