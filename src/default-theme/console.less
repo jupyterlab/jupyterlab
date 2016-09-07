@@ -11,6 +11,21 @@
 }
 
 
+.jp-ConsoleContent-content {
+  background-color: #F5F5F5;
+  flex-grow: 1;
+}
+
+
+.jp-ConsoleContent-input {
+  margin: 5px;
+  max-height: 80%;
+  min-height: 40px;
+  flex-grow: 0;
+  overflow: auto;
+}
+
+
 .jp-ConsoleContent .jp-InputArea-prompt {
   flex-basis: auto;
   text-align: left;
@@ -34,22 +49,6 @@
 }
 
 
-.jp-ConsoleContent-content {
-  background-color: #F5F5F5;
-  flex-grow: 1;
-}
-
-
-.jp-ConsoleContent-input {
-  margin: 5px;
-  max-height: 80%;
-  min-width: 300px;
-  min-height: 45px;
-  flex-grow: 0;
-  overflow: auto;
-}
-
-
 .jp-ConsoleContent .jp-Cell {
   padding-top: 0;
   padding-bottom: 0;
@@ -63,7 +62,6 @@
 
 
 .jp-ConsoleContent-prompt .jp-InputArea-editor.jp-CellEditor .CodeMirror {
-  background-color: #F5F5F5;
   margin-top: 1px;
 }
 
@@ -72,9 +70,6 @@
   background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
   border-color: #66BB6A;
   border-left-width: 1px;
-  height: calc(100% - 10px); /* Account for the 10px margins. */
-  min-height: calc(100% - 10px); /* Account for the 10px margins. */
-  width: calc(100% - 10px); /* Account for the 10px margins. */
 }
 
 
