@@ -36,6 +36,11 @@ from traitlets.utils.importstring import import_item
 
 from tornado.log import LogFormatter
 
+from . import (
+    get_lab_extension_manifest_data_by_folder,
+    get_lab_extension_manifest_data_by_name
+)
+
 # Constants for pretty print extension listing function.
 # Window doesn't support coloring in the commandline
 GREEN_ENABLED = '\033[32m enabled \033[0m' if os.name != 'nt' else 'enabled '
@@ -479,14 +484,8 @@ def validate_lab_extension_folder(name, full_dest, logger=None):
 
     hasFiles = True
     hasEntry = False
-    manifest_files = glob.glob(os.path.join(full_dest, '*.manifest'))
-    if not manifest_files:
-        hasFiles = False
-    for file in manifest_files:
-        with open(file) as fid:
-            manifest = json.load(fid)
-        # Make sure there is at least one entry module and that the entry
-        # module and listed files are present.
+    data = get_lab_extension_manifest_data(full_dest)
+    for manifest in data.values():
         if ('entry' in manifest and 'modules' in manifest):
             if (manifest['entry'] in manifest['modules']):
                 hasEntry = True

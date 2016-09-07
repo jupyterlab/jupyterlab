@@ -7,46 +7,45 @@ Distributed under the terms of the Modified BSD License.
 <html>
 
 <head>
-    <meta charset="utf-8">
+  <meta charset="utf-8">
 
-    <title>{{page_title}}</title>
-    {% if mathjax_url %}
-    <script type="text/javascript" src="{{mathjax_url}}?config={{mathjax_config}}&amp;delayStartupUntil=configured" charset="utf-8"></script>
-    {% endif %}
-    <!-- These will get templated by the server (it will look for css files) -->
-    <link href="{{static_prefix}}/main.css" rel="stylesheet">
-    <link href="{{static_prefix}}/extensions.css" rel="stylesheet">
-    {% for css_file in jupyterlab_css %}
-    <link href="{{ css_file }}" rel="stylesheet">
-    {% endfor %}
-</head>
+  <title>{{page_title}}</title>
 
+  {% for css_file in jupyterlab_css %}
+  <link href="{{ css_file }}" rel="stylesheet">
+  {% endfor %}
 
-
-<body>
-
-<script id='jupyter-config-data' type="application/json">{
+  <script id='jupyter-config-data' type="application/json">{
   "baseUrl": "{{base_url | urlencode}}",
   "wsUrl": "{{ws_url| urlencode}}",
   "notebookPath": "{{notebook_path | urlencode}}"
-}</script>
-<script src="{{static_prefix}}/loader.bundle.js" type="text/javascript" charset="utf-8"></script>
-<script>
-jupyter.requireBundles([
-  {% for jupyterlab_bundle in jupyterlab_bundles %}
-  "{{ jupyterlab_bundle }}",
+  }</script>
+
+  {% for bundle_file in jupyterlab_bundles %}
+  <script src="{{ bundle_file }}" type="text/javascript" charset="utf-8"></script>
   {% endfor %}
-  ]).then(function(require) {
-  var lab = require("{{ jupyterlab_main }}");
+
+  {% if mathjax_url %}
+  <script type="text/javascript" src="{{mathjax_url}}?config={{mathjax_config}}&amp;delayStartupUntil=configured" charset="utf-8"></script>
+  {% endif %}
+
+</head>
+
+<body>
+
+<script>
+  var lab = jupyter.require("{{ jupyterlab_main }}");
   jupyter.lab = lab;
   var plugins = [];
+
   {% for plugin_entry in plugin_entries %}
-  plugins = plugins.concat(require("{{ plugin_entry }}"));
+  plugins = plugins.concat(jupyter.require("{{ plugin_entry }}"));
   {% endfor %}
+
   lab.registerPlugins(plugins);
   lab.start();
-});
 </script>
+
 </body>
 
 </html>

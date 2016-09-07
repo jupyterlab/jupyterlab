@@ -32,8 +32,8 @@ class LabApp(NotebookApp):
         return self.extra_lab_extensions_path + jupyter_path('lab_extensions')
 
     def init_webapp(self):
-        self.tornado_settings['lab_extensions'] = self.lab_extensions
         super(LabApp, self).init_webapp()
+        self.web_app.lab_extensions = self.lab_extensions
 
 #-----------------------------------------------------------------------------
 # Main entry point

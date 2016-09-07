@@ -3,6 +3,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import glob
+import json
 import os
 from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
@@ -27,7 +29,28 @@ HERE = os.path.dirname(__file__)
 FILE_LOADER = FileSystemLoader(HERE)
 BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
+EXTENSION_PREFIX = '/labextension'
 
+
+def get_lab_extension_manifest_data_by_folder(folder):
+    """Get the manifest data for a given lab extension folder
+    """
+    manifest_files = glob.glob(os.path.join(folder, '*.manifest'))
+    manifests = {}
+    for file in manifest_files:
+        with open(file) as fid:
+            manifest = json.load(fid)
+        manifests[manifest['name']] = manifest
+    return manifests
+
+
+def get_lab_extension_manifest_data_by_name(name):
+    """Get the manifest data for a given lab extension folder
+    """
+    for exts in _lab_extension_dirs():
+        full_dest = os.path.join(exts, name)
+        if os.path.exists(full_dest):
+            return get_lab_extension_manifest_data_by_folder(full_dest)
 
 
 class LabHandler(IPythonHandler):
@@ -36,13 +59,31 @@ class LabHandler(IPythonHandler):
     @web.authenticated
     def get(self):
         static_prefix = ujoin(self.application.settings['base_url'], PREFIX)
+        lab_extensions = self.application.lab_extensions
 
-        # TODO: gather this data.
+        data = get_lab_extension_manifest_data_by_folder(BUILT_FILES)
         css_files = [ujoin(static_prefix, 'main.css'),
                      ujoin(static_prefix, 'extensions.css')]
-        main = 'jupyterlab-extension@0.1.0/index.js'
-        bundles = ['lab/main.bundle.js', 'lab/extensions.bundle.js']
-        entries = ['jupyterlab-extension@0.1.0/extensions.js']
+        main = data['main']['entry']
+        bundles = [ujoin(static_prefix, name + '.bundle.js') for name in
+                   ['loader', 'main', 'extensions']]
+        entries = [data['extensions']['entry']]
+
+        # Gather the lab extension files and entry points.
+        for name in lab_extensions:
+            if lab_extensions[name]:
+                data = get_lab_extension_manifest_data_by_name(name)
+                for value in data.values():
+                    if value.get('entry', None):
+                        entries.push(value['entry'])
+                        bundles.push('%s/%s/%s' % (
+                            EXTENSION_PREFIX, name, value['files'][0]
+                        ))
+                    for fname in value['files']:
+                        if os.path.splitext(fname)[1] == '.css':
+                            css_files.push('%s/%s/%s' % (
+                                EXTENSION_PREFIX, name, fname
+                            ))
 
         self.write(self.render_template('lab.html',
             static_prefix=static_prefix,
@@ -88,7 +129,7 @@ def load_jupyter_server_extension(nbapp):
     webapp.add_handlers(".*$",
         [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
     lab_extension_handler = (
-        r"/labextensions/(.*)", FileFindHandler, {
+        r"%s/(.*)" % EXTENSION_PREFIX, FileFindHandler, {
             'path': nbapp.lab_extensions_path,
             'no_cache_paths': ['/'],  # don't cache anything in labbextensions
         }

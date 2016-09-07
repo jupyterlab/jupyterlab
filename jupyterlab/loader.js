@@ -196,5 +196,6 @@ requireModule.e = ensureBundle;
 
 module.exports = {
   define: defineModule,
+  require: requireModule,
   requireBundles: requireBundles
 }
