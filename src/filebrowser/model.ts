@@ -208,19 +208,13 @@ class FileBrowserModel implements IDisposable {
    * Download a file.
    *
    * @param - path - The path of the file to be downloaded.
-   *
-   * @returns - A promise which resolves to the file contents.
    */
-  download(path: string): Promise<IContents.IModel> {
-    let normalizePath = Private.normalizePath;
-    path = normalizePath(this._model.path, path);
-    return this._manager.contents.get(path, { content: true }).then(contents => {
-      let element = document.createElement('a');
-      element.setAttribute('href', 'data:text/text;charset=utf-8,' +      encodeURI(contents.content));
-      element.setAttribute('download', contents.name);
-      element.click();
-      return contents;
-    });
+  download(path: string): void {
+    let url = this._manager.contents.getDownloadUrl(path);
+    let element = document.createElement('a');
+    element.setAttribute('href', url);
+    element.setAttribute('download', '');
+    element.click();
   }
 
   /**
