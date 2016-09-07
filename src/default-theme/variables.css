@@ -29,12 +29,14 @@
   --jp-ui-font-color3: rgba(0,0,0,0.38);
   
   /* Use these against the brand/accent/warn/error colors */
+
   --jp-inverse-ui-font-color0: rgba(255,255,255,1);
   --jp-inverse-ui-font-color1: rgba(255,255,255,1.0);
   --jp-inverse-ui-font-color2: rgba(255,255,255,0.7);
   --jp-inverse-ui-font-color3: rgba(255,255,255,0.5);
 
   /* Content Fonts */
+  
   --jp-content-fontSize: 14px;
   --jp-content-font-color0: black;
   --jp-content-font-color1: black;
