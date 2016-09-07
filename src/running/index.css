@@ -145,8 +145,8 @@
 .jp-RunningSessions-itemShutdown {
   flex: 0 0 auto;
   padding: 1px 4px;
-  color: var(--jp-ui-font-color0);
-  background: var(--jp-accent-color1);
+  color: var(--jp-inverse-ui-font-color0);
+  background: var(--jp-warn-color);
   border-radius: 1px;
   cursor: pointer;
 }

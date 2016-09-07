@@ -23,16 +23,16 @@
   --jp-ui-fontSize3: calc(var(--jp-ui-fontSize2)*var(--jp-ui-font-scale-factor));
   --jp-ui-icon-fontSize: 14px;
 
-  --jp-ui-font-color0: black;
-  --jp-ui-font-color1: var(--md-grey-800);
-  --jp-ui-font-color2: var(--md-grey-700);
-  --jp-ui-font-color3: var(--md-grey-500);
+  --jp-ui-font-color0: rgba(0,0,0,1.0);
+  --jp-ui-font-color1: rgba(0,0,0,0.87);
+  --jp-ui-font-color2: rgba(0,0,0,0.54);
+  --jp-ui-font-color3: rgba(0,0,0,0.38);
   
   /* Use these against the brand/accent/warn/error colors */
-  --jp-inverse-ui-font-color0: white;
-  --jp-inverse-ui-font-color1: white;
-  --jp-inverse-ui-font-color2: var(--md-grey-50);
-  --jp-inverse-ui-font-color3: var(--md-grey-100);
+  --jp-inverse-ui-font-color0: rgba(255,255,255,1);
+  --jp-inverse-ui-font-color1: rgba(255,255,255,1.0);
+  --jp-inverse-ui-font-color2: rgba(255,255,255,0.7);
+  --jp-inverse-ui-font-color3: rgba(255,255,255,0.5);
 
   /* Content Fonts */
   --jp-content-fontSize: 14px;
@@ -54,13 +54,11 @@
   --jp-brand-color1: var(--md-blue-500);
   --jp-brand-color2: var(--md-blue-300);
   --jp-brand-color3: var(--md-blue-100);
-  --jp-brand-font-color: white;
 
-  --jp-accent-color0: var(--md-orange-700);
-  --jp-accent-color1: var(--md-orange-500);
-  --jp-accent-color2: var(--md-orange-300);
-  --jp-accent-color3: var(--md-orange-100);
-  --jp-accent-font-color: white;
+  --jp-accent-color0: var(--md-green-700);
+  --jp-accent-color1: var(--md-green-500);
+  --jp-accent-color2: var(--md-green-300);
+  --jp-accent-color3: var(--md-green-100);
 
   /* State colors (warn, error, success, info) */
 
