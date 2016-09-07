@@ -15,7 +15,6 @@
 body {
   margin: 0;
   padding: 0;
-  background: var(--jp-layout-color3);
   overflow: hidden;
   font-family: sans-serif;
 }
