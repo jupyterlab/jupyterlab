@@ -239,8 +239,14 @@
 
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon {
-  color: var(--jp-accent-color0);
+  color: var(--jp-accent-color1);
 }
+
+
+.jp-DirListing-item.jp-mod-running.jp-mod-selected .jp-DirListing-itemIcon {
+  color: var(--jp-accent-color3);
+}
+
 
 .jp-DirListing-item.p-mod-drag-image,
 .jp-DirListing-item.jp-mod-selected.p-mod-drag-image {
