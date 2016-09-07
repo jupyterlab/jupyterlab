@@ -42,7 +42,7 @@ function defineModule(name, callback) {
 
 
 /**
- * Synchrnously require a module that has already been loaded.
+ * Synchronously require a module that has already been loaded.
  *
  * @param name - The semver-mangled fully qualified name of the module.
  *   For example, "foo@^1.1.0/lib/bar/baz.js".
