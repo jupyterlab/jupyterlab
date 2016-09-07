@@ -6,62 +6,12 @@
   height: 100%;
   padding: 0;
   border: 1px solid #C9C9C9;
+  display: flex;
+  flex-direction: column;
 }
 
 
-.jp-ConsoleContent .p-SplitPanel-handle {
-  background-color: #C9C9C9;
-}
-
-
-.jp-ConsoleContent-input {
-  margin: 5px;
-  min-width: 300px;
-  min-height: 45px;
-}
-
-
-.jp-ConsoleContent .jp-Cell {
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-
-.jp-ConsoleContent .jp-InputArea-editor.jp-CellEditor {
-  background: transparent;
-  border-color: transparent;
-  overflow: auto;
-}
-
-
-.jp-ConsoleContent-prompt .jp-InputArea-editor.jp-CellEditor .CodeMirror {
-  background-color: #F5F5F5;
-  margin-top: 1px;
-}
-
-
-.jp-ConsoleContent-content {
-  background-color: #F5F5F5;
-}
-
-
-.jp-ConsoleContent-prompt.jp-Cell {
-  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
-  border-color: #66BB6A;
-  border-left-width: 1px;
-  height: calc(100% - 10px); /* Account for the 10px margins. */
-  min-height: calc(100% - 10px); /* Account for the 10px margins. */
-  width: calc(100% - 10px); /* Account for the 10px margins. */
-}
-
-
-.jp-ConsoleContent-prompt .jp-InputArea {
-  height: 100%;
-  min-height: 100%;
-}
-
-
-.jp-ConsoleContent-prompt .jp-InputArea-prompt {
+.jp-ConsoleContent .jp-InputArea-prompt {
   flex-basis: auto;
   text-align: left;
 }
@@ -84,6 +34,56 @@
 }
 
 
-.jp-ConsoleContent .jp-ConsoleContent-banner .jp-InputArea-prompt {
+.jp-ConsoleContent-content {
+  background-color: #F5F5F5;
+  flex-grow: 1;
+}
+
+
+.jp-ConsoleContent-input {
+  margin: 5px;
+  max-height: 80%;
+  min-width: 300px;
+  min-height: 45px;
+  flex-grow: 0;
+  overflow: auto;
+}
+
+
+.jp-ConsoleContent .jp-Cell {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+
+.jp-ConsoleContent .jp-InputArea-editor.jp-CellEditor {
+  background: transparent;
+  border-color: transparent;
+}
+
+
+.jp-ConsoleContent-prompt .jp-InputArea-editor.jp-CellEditor .CodeMirror {
+  background-color: #F5F5F5;
+  margin-top: 1px;
+}
+
+
+.jp-ConsoleContent-input .jp-ConsoleContent-prompt.jp-Cell {
+  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
+  border-color: #66BB6A;
+  border-left-width: 1px;
+  height: calc(100% - 10px); /* Account for the 10px margins. */
+  min-height: calc(100% - 10px); /* Account for the 10px margins. */
+  width: calc(100% - 10px); /* Account for the 10px margins. */
+}
+
+
+.jp-ConsoleContent-input .jp-ConsoleContent-prompt .jp-InputArea {
+  height: 100%;
+  min-height: 100%;
+}
+
+
+.jp-ConsoleContent-content .jp-ConsoleContent-banner .jp-InputArea-prompt {
   display: none;
 }
