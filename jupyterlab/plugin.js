@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 var path = require('path');
-
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 /**
  * A WebPack plugin that generates custom bundles that use version and
@@ -15,11 +15,20 @@ function JupyterLabPlugin(options) {
 
 
 /**
+ * The css loader that should be used with the plugin.
+ */
+JupyterLabPlugin.cssLoader = ExtractTextPlugin.extract("style-loader", "css-loader", { publicPath: './' });
+
+
+/**
  * Plugin installation, called by WebPack.
  *
  * @param compiler - The WebPack compiler object.
  */
 JupyterLabPlugin.prototype.apply = function(compiler) {
+  // Run the extract text plugin.
+  compiler.apply(new ExtractTextPlugin('[name].css'));
+
   var pluginName = this.name;
   var publicPath = compiler.options.output.publicPath;
   if (!publicPath) {

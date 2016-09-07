@@ -5,18 +5,13 @@
 // See https://github.com/webpack/css-loader/issues/144
 require('es6-promise').polyfill();
 
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var JupyterLabPlugin = require('./plugin');
 
 console.log('Generating bundles...');
 
 
 var LOADERS = [
-  { test: /\.css$/,
-    loader: ExtractTextPlugin.extract("style-loader", "css-loader", {
-      publicPath: './'
-    })
-  },
+  { test: /\.css$/, loader: JupyterLabPlugin.cssLoader },
   { test: /\.json$/, loader: 'json-loader' },
   { test: /\.html$/, loader: 'file-loader' },
   // jquery-ui loads some images
@@ -37,7 +32,7 @@ module.exports = [{
   output: {
     path: __dirname + '/build',
     filename: '[name].bundle.js',
-    publicPath: './lab/'
+    publicPath: 'lab/'
   },
   node: {
     fs: 'empty',
@@ -49,7 +44,6 @@ module.exports = [{
     loaders: LOADERS
   },
   plugins: [
-    new ExtractTextPlugin('[name].css'),
     new JupyterLabPlugin()
   ],
 },
@@ -77,7 +71,7 @@ module.exports = [{
   output: {
     path: __dirname + '/build',
     filename: '[name].bundle.js',
-    publicPath: './lab/'
+    publicPath: 'lab/'
   },
   node: {
     fs: 'empty'
@@ -89,7 +83,6 @@ module.exports = [{
     loaders: LOADERS
   },
   plugins: [
-    new ExtractTextPlugin('[name].css'),
     new JupyterLabPlugin()
   ],
 }
