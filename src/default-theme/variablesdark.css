@@ -8,20 +8,20 @@
 
   /* Borders */
 
-  --jp-borderWidth: 1px;
-  --jp-borderColor0: var(--md-grey-300);  
-  --jp-borderColor1: var(--md-grey-500);
-  --jp-borderColor2: var(--md-grey-700);
-  --jp-borderColor3: var(--md-grey-900);
+  --jp-border-width: 1px;
+  --jp-border-color0: var(--md-grey-300);  
+  --jp-border-color1: var(--md-grey-500);
+  --jp-border-color2: var(--md-grey-700);
+  --jp-border-color3: var(--md-grey-900);
 
   /* UI Fonts */
 
   --jp-ui-font-scale-factor: 1.2;
-  --jp-ui-fontSize0: calc(var(--jp-ui-fontSize1)/var(--jp-ui-font-scale-factor));
-  --jp-ui-fontSize1: 13px;
-  --jp-ui-fontSize2: calc(var(--jp-ui-fontSize1)*var(--jp-ui-font-scale-factor));
-  --jp-ui-fontSize3: calc(var(--jp-ui-fontSize2)*var(--jp-ui-font-scale-factor));
-  --jp-ui-icon-fontSize: 14px;
+  --jp-ui-font-size0: calc(var(--jp-ui-font-size1)/var(--jp-ui-font-scale-factor));
+  --jp-ui-font-size1: 13px;
+  --jp-ui-font-size2: calc(var(--jp-ui-font-size1)*var(--jp-ui-font-scale-factor));
+  --jp-ui-font-size3: calc(var(--jp-ui-font-size2)*var(--jp-ui-font-scale-factor));
+  --jp-ui-icon-font-size: 14px;
 
   --jp-ui-font-color0: white;
   --jp-ui-font-color1: rgb(157,157,157);
@@ -37,7 +37,7 @@
 
   /* Content Fonts */
 
-  --jp-content-fontSize: 14px;
+  --jp-content-font-size: 14px;
   --jp-content-font-color0: black;
   --jp-content-font-color1: black;
   --jp-content-font-color2: var(--md-grey-700);
@@ -67,6 +67,6 @@
   --jp-warn-color: var(--md-orange-500);
   --jp-error-color: var(--md-red-500);
   --jp-success-color: var(--md-green-500);
-  --jp-info-color: var(var(--jp-brand-color1));
+  --jp-info-color: var(--jp-brand-color1);
 
 }

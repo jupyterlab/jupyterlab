@@ -22,7 +22,7 @@
 
 .jp-Landing-dialog {
   padding-bottom: 12px;
-  font-size: var(--jp-ui-fontSize1);
+  font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   margin-left: auto;
@@ -51,7 +51,7 @@
 
 .jp-Landing-subtitle {
   background-color: var(--jp-layout-color1);
-  font-size: var(--jp-ui-fontSize2);
+  font-size: var(--jp-ui-font-size2);
   width: 100%;
   margin-top: 4px;
   font-weight: 300;
@@ -104,7 +104,7 @@
     width: 100%;
     cursor: pointer;
     padding-bottom: 14px;
-    border-bottom: var(--jp-borderWidth) solid var(--jp-borderColor1);
+    border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
     background-position: top center;
     background-repeat: no-repeat;
 }

@@ -22,7 +22,7 @@
   min-width: 35px;
   padding: 0px 7px;
   background: #EEEEEE;
-  border: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   transform: translateY(-1px);
   border-bottom: none;
   margin-right: -1px;
@@ -32,7 +32,7 @@
 .jp-Inspector .p-TabBar-tab.p-mod-current {
   min-height: 24px;
   background: #FFFFFF;
-  border-top: var(--jp-borderWidth) solid var(--jp-brand-color1);
+  border-top: var(--jp-border-width) solid var(--jp-brand-color1);
 }
 
 
@@ -48,14 +48,14 @@
 
 
 .jp-InspectorItem {
-  border: var(--jp-borderWidth) solid var(--jp-borderColor2);
+  border: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 
 .jp-InspectorItem .jp-NBToolbar {
     display: flex;
     flex-direction: row;
-    border-bottom: var(--jp-borderWidth) solid var(--jp-borderColor2);
+    border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
     height: 24px;
 }
 

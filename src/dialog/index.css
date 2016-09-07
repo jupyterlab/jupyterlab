@@ -99,7 +99,7 @@
   background: white;
   width: 252px;
   box-sizing: border-box;
-  border: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   border-radius: 2px;
   margin-bottom: 12px;
 }
@@ -120,7 +120,7 @@
   background: white;
   width: 252px;
   box-sizing: border-box;
-  border: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   border-radius: 2px;
   margin-bottom: 12px;
 }

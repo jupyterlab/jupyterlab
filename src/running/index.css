@@ -9,7 +9,7 @@
   min-width: 300px;
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
-  font-size: var(--jp-ui-fontSize1);
+  font-size: var(--jp-ui-font-size1);
 }
 
 
@@ -17,7 +17,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  border-bottom: var(--jp-borderWidth) solid var(--jp-borderColor2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 
@@ -36,7 +36,7 @@
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   border: none;
-  font-size: var(--jp-ui-fontSize1);
+  font-size: var(--jp-ui-font-size1);
   outline: 0;
   padding-top: 8px;
   padding-bottom: 8px;
@@ -53,7 +53,7 @@
 .jp-RunningSessions-headerRefresh:before {
   font-family: FontAwesome;
   content: '\f021'; /* refresh */
-  font-size: var(--jp-ui-icon-fontSize);
+  font-size: var(--jp-ui-icon-font-size);
 }
 
 
@@ -70,7 +70,7 @@
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  border-bottom: var(--jp-borderWidth) solid var(--jp-borderColor2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 2px;
 }
 

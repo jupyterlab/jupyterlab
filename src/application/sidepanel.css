@@ -25,12 +25,12 @@
 
 
 .jp-SideBar.p-TabBar.jp-mod-left {
-  border-right: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border-right: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
 .jp-SideBar.p-TabBar.jp-mod-right {
-  border-left: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
@@ -77,12 +77,12 @@
 
 
 .jp-SideBar.jp-mod-left .p-TabBar-tab {
-  border-left: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
 .jp-SideBar.jp-mod-right .p-TabBar-tab {
-  border-right: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border-right: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
@@ -92,10 +92,10 @@
 
 
 #jp-right-stack {
-  border-left: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
 #jp-left-stack {
-  border-right: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border-right: var(--jp-border-width) solid var(--jp-border-color1);
 }

@@ -10,7 +10,7 @@
 
 
 .p-CommandPalette-search {
-  border-bottom: solid 2px var(--jp-borderColor2);
+  border-bottom: solid 2px var(--jp-border-color2);
 }
 
 
@@ -33,7 +33,7 @@
   float: left;
   border: none;
   outline: none;
-  font-size: var(--jp-ui-fontSize2);
+  font-size: var(--jp-ui-font-size2);
   color: var(--jp-ui-font-color1);
   padding: 0;
 }
@@ -46,7 +46,7 @@
   font-weight: 600;
   cursor: pointer;
   text-transform: uppercase;
-  border-bottom: solid var(--jp-borderWidth) var(--jp-borderColor2);
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
   letter-spacing: 2px;
 }
 

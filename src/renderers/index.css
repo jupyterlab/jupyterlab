@@ -204,7 +204,7 @@ margin-top = 14, 14, 14, 14, 8, 8
 .jp-RenderedHTMLCommon table {
   margin-left: auto;
   margin-right: auto;
-  border: var(--jp-borderWidth) solid black;
+  border: var(--jp-border-width) solid black;
   border-collapse: collapse;
 }
 
@@ -212,7 +212,7 @@ margin-top = 14, 14, 14, 14, 8, 8
 .jp-RenderedHTMLCommon tr,
 .jp-RenderedHTMLCommon th,
 .jp-RenderedHTMLCommon td {
-  border: var(--jp-borderWidth) solid black;
+  border: var(--jp-border-width) solid black;
   border-collapse: collapse;
   margin: 1em 2em;
 }
@@ -283,5 +283,5 @@ margin-top = 14, 14, 14, 14, 8, 8
 .jp-RenderedHTMLCommon blockquote {
   margin: 1em 2em;
   padding: 0 1em;
-  border-left: 5px solid var(--jp-borderColor2);
+  border-left: 5px solid var(--jp-border-color2);
 }

@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 .jp-Completion {
   background: #EEEEEE;
-  border: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   list-style-type: none;
   overflow: auto;
   padding: 0;

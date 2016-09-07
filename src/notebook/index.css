@@ -55,7 +55,7 @@
 
 
 .jp-CellEditor {
-  border: var(--jp-borderWidth) solid #cfcfcf;
+  border: var(--jp-border-width) solid #cfcfcf;
   border-radius: 2px;
   background: #f7f7f7;
   line-height: 1.2em;
@@ -166,7 +166,7 @@ img.jp-mod-unconfined {
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
   border-color: #ABABAB;
-  border-left-width: var(--jp-borderWidth);
+  border-left-width: var(--jp-border-width);
   background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
 }
 
@@ -183,7 +183,7 @@ img.jp-mod-unconfined {
 
 .jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
   border-color: #66BB6A;
-  border-left-width: var(--jp-borderWidth);
+  border-left-width: var(--jp-border-width);
   background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
 }
 
@@ -204,7 +204,7 @@ img.jp-mod-unconfined {
   padding-bottom: 5px;
   padding-left: 5px;
   padding-right: 5px;
-  border-width: var(--jp-borderWidth);
+  border-width: var(--jp-border-width);
   border-style: solid;
   border-color: transparent;
   outline: none;
@@ -214,7 +214,7 @@ img.jp-mod-unconfined {
 .jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
   padding-left: 5px;
   padding-right: 5px;
-  border-width: var(--jp-borderWidth);
+  border-width: var(--jp-border-width);
   border-style: solid;
   border-color: transparent;
   outline: none;
@@ -228,7 +228,7 @@ img.jp-mod-unconfined {
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  border-bottom: var(--jp-borderWidth) solid var(--jp-borderColor2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   height: 24px;
 }
 
@@ -256,7 +256,7 @@ img.jp-mod-unconfined {
 }
 
 .jp-NBToolbar-cellType .jp-NBToolbar-cellTypeDropdown {
-    border: var(--jp-borderWidth) solid var(--jp-borderColor1);
+    border: var(--jp-border-width) solid var(--jp-border-color1);
     border-radius: 0;
     outline: none;
     width: 100%;

@@ -23,19 +23,19 @@
   padding-left: 5px;
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-fontSize1);
+  font-size: var(--jp-ui-font-size1);
 }
 
 
 .p-MenuBar-menu {
-  transform: translateY(calc(-1*var(--jp-borderWidth)));
+  transform: translateY(calc(-1*var(--jp-border-width)));
 }
 
 
 .p-MenuBar-item {
   padding: 0px 8px;
-  border-left: var(--jp-borderWidth) solid transparent;
-  border-right: var(--jp-borderWidth) solid transparent;
+  border-left: var(--jp-border-width) solid transparent;
+  border-right: var(--jp-border-width) solid transparent;
   line-height: var(--jp-private-menubar-height);
 }
 
@@ -47,8 +47,8 @@
 
 .p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
   z-index: 10001;
-  border-left: var(--jp-borderWidth) solid var(--jp-borderColor1);
-  border-right: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
+  border-right: var(--jp-border-width) solid var(--jp-border-color1);
   box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -62,7 +62,7 @@
   margin: 2px;
   padding: 0;
   border: none;
-  border-left: var(--jp-borderWidth) solid var(--jp-borderColor2);
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 
@@ -72,7 +72,7 @@
 
 
 #jp-top-panel {
-  border-bottom: var(--jp-borderWidth) solid var(--jp-borderColor1);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   background: var(--jp-layout-color1);
   display: flex;
   min-height: var(--jp-private-menubar-height);
@@ -89,8 +89,8 @@
   padding: 4px 0px;
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
-  border: var(--jp-borderWidth) solid var(--jp-borderColor1);
-  font-size: var(--jp-ui-fontSize1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  font-size: var(--jp-ui-font-size1);
   box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -152,7 +152,7 @@
   display: block;
   position: relative;
   top: 4px;
-  border-top: var(--jp-borderWidth) solid var(--jp-layout-color2);
+  border-top: var(--jp-border-width) solid var(--jp-layout-color2);
 }
 
 .p-Menu-itemIcon::before,
