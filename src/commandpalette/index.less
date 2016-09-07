@@ -5,7 +5,7 @@
 .p-CommandPalette {
   padding-bottom: 0px;
   color: var(--jp-ui-font-color1);
-  background: #FAFAFA;
+  background: var(--jp-layout-color1);
 }
 
 
@@ -15,7 +15,7 @@
 
 
 .p-CommandPalette-wrapper {
-  background: white;
+  background: var(--jp-layout-color2);
   overflow: overlay;
   padding: 12px 8px;
 }
@@ -28,11 +28,13 @@
 }
 
 .p-CommandPalette-input {
+  background: var(--jp-layout-color2);
   width: calc(100% - 18px);
   float: left;
   border: none;
   outline: none;
-  font-size: 16px;
+  font-size: var(--jp-ui-fontSize2);
+  color: var(--jp-ui-font-color1);
   padding: 0;
 }
 
@@ -42,10 +44,9 @@
   color: var(--jp-ui-font-color1);
   font-size: 12px;
   font-weight: 600;
-  background: #fafafa;
   cursor: pointer;
   text-transform: uppercase;
-  border-bottom: solid 1px var(--jp-borderColor2);
+  border-bottom: solid var(--jp-borderWidth) var(--jp-borderColor2);
   letter-spacing: 2px;
 }
 

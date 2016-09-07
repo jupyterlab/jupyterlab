@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   color: var(--jp-ui-font-color1);
-  background: #FAFAFA;
+  background:var(--jp-layout-color1);
   font-size: var(--jp-ui-fontSize1);
 }
 
@@ -31,7 +31,7 @@
 
 
 .jp-BreadCrumbs-item.jp-mod-dropTarget {
-  background: #FEDBC4;
+  background: var(--jp-brand-color2);
 }
 
 
@@ -55,7 +55,7 @@
   max-width: 100px;
   padding: 4px 6px;
   color: var(--jp-ui-font-color1);
-  background: #FAFAFA;
+  background: var(--jp-layout-color1);
   border: none;
   font-size: var(--jp-ui-icon-fontSize);
   outline: 0;
@@ -76,16 +76,16 @@
 
 
 .jp-FileButtons-button:hover {
-  background: #F5F5F5;
-  border-color: #D0D0D0;
+  background: var(--jp-layout-color2);
+  border-color: var(--jp-borderColor2);
   z-index: 1; /* raise overlapping border */
 }
 
 
 .jp-FileButtons-button:active,
 .jp-FileButtons-button.jp-id-create.jp-mod-active {
-  background: #EEEEEE;
-  border-color: var(--jp-borderColor1);
+  background: var(--jp-layout-color3);
+  border-color: var(--jp-borderColor3);
   z-index: 1; /* raise overlapping border */
 }
 
@@ -121,7 +121,7 @@
 
 
 .jp-DirListing-headerItem:hover {
-  background: #EEEEEE;
+  background: var(--jp-layout-color2);
 }
 
 
@@ -192,7 +192,7 @@
 
 
 .jp-DirListing-item:hover:not(.jp-mod-selected) {
-  background: #EEEEEE;
+  background: var(--jp-layout-color2)
 }
 
 
@@ -239,7 +239,7 @@
 
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon {
-  color: #27AE60;
+  color: var(--jp-accent-color0);
 }
 
 .jp-DirListing-item.p-mod-drag-image,

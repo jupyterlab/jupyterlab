@@ -5,7 +5,6 @@
 
 
 .jp-Landing {
-  color: var(--jp-ui-font-color1);
   position: absolute;
   z-index: 10000;
   display: flex;
@@ -23,8 +22,9 @@
 
 .jp-Landing-dialog {
   padding-bottom: 12px;
-  font-size: 16px;
+  font-size: var(--jp-ui-fontSize1);
   color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -41,7 +41,7 @@
   margin-left: auto;
   margin-right: auto;
   width: 100%;
-  background-color: white;
+  background-color: var(--jp-layout-color1);
   background-size: 232px 50px;
   background-repeat: no-repeat;
   background-position: center;
@@ -50,16 +50,14 @@
 }
 
 .jp-Landing-subtitle {
-  font-size: 16px;
-  background-color: white;
+  background-color: var(--jp-layout-color1);
+  font-size: var(--jp-ui-fontSize2);
   width: 100%;
   margin-top: 4px;
   font-weight: 300;
 }
 
 .jp-Landing-header {
-
-  font-size: 14px;
   padding-top: 16px;
   padding-bottom: 4px;
 }
@@ -97,7 +95,6 @@
 
 .jp-Landing-text {
   flex: 0 0 auto;
-  font-size: 12px;
   padding-top: 8px;
 }
 
@@ -126,8 +123,7 @@
 
 .jp-Landing-path {
     padding-left: 8px;
-    color: #9E9E9E;
-    font-size: 12px;
+    color: var(--jp-ui-font-color2);
 }
 
 .jp-Landing-cwd {

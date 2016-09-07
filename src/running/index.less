@@ -8,8 +8,8 @@
   flex-direction: column;
   min-width: 300px;
   color: var(--jp-ui-font-color1);
-  background: #FAFAFA;
-  font-size: 13px;
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-fontSize1);
 }
 
 
@@ -33,10 +33,10 @@
   flex: 1 1 auto;
   max-width: 100px;
   padding: 4px 6px;
-  background: #FAFAFA;
+  background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   border: none;
-  font-size: 14px;
+  font-size: var(--jp-ui-fontSize1);
   outline: 0;
   padding-top: 8px;
   padding-bottom: 8px;
@@ -53,12 +53,12 @@
 .jp-RunningSessions-headerRefresh:before {
   font-family: FontAwesome;
   content: '\f021'; /* refresh */
-  font-size: 12px;
+  font-size: var(--jp-ui-icon-fontSize);
 }
 
 
 .jp-RunningSessions-headerRefresh:hover {
-  background: #F5F5F5;
+  background: var(--jp-layout-color2);
   z-index: 1; /* raise overlapping border */
 }
 
@@ -101,7 +101,7 @@
 
 
 .jp-RunningSessions-item:hover {
-    background: #F5F5F5;
+    background: var(--jp-layout-color2);
 }
 
 
@@ -145,8 +145,8 @@
 .jp-RunningSessions-itemShutdown {
   flex: 0 0 auto;
   padding: 1px 4px;
-  color: #ffffff;
-  background: #f0ad4e;
+  color: var(--jp-ui-font-color0);
+  background: var(--jp-accent-color1);
   border-radius: 1px;
   cursor: pointer;
 }
