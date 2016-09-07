@@ -35,11 +35,24 @@ class LabHandler(IPythonHandler):
 
     @web.authenticated
     def get(self):
+        static_prefix = ujoin(self.application.settings['base_url'], PREFIX)
+
+        # TODO: gather this data.
+        css_files = [ujoin(static_prefix, 'main.css'),
+                     ujoin(static_prefix, 'extensions.css')]
+        main = 'jupyterlab-extension@0.1.0/index.js'
+        bundles = ['lab/main.bundle.js', 'lab/extensions.bundle.js']
+        entries = ['jupyterlab-extension@0.1.0/extensions.js']
+
         self.write(self.render_template('lab.html',
-            static_prefix=ujoin(self.application.settings['base_url'], PREFIX),
+            static_prefix=static_prefix,
             page_title='JupyterLab Alpha Preview',
             terminals_available=self.settings['terminals_available'],
             mathjax_url=self.mathjax_url,
+            jupyterlab_main=main,
+            jupyterlab_css=css_files,
+            jupyterlab_bundles=bundles,
+            plugin_entries=entries,
             mathjax_config='TeX-AMS_HTML-full,Safe',
             #mathjax_config=self.mathjax_config # for the next release of the notebook
         ))
@@ -76,7 +89,7 @@ def load_jupyter_server_extension(nbapp):
         [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
     lab_extension_handler = (
         r"/labextensions/(.*)", FileFindHandler, {
-            'path': nbapp.labextensions_path,
+            'path': nbapp.lab_extensions_path,
             'no_cache_paths': ['/'],  # don't cache anything in labbextensions
         }
     )

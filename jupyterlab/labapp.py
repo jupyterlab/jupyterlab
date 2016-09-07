@@ -7,7 +7,7 @@
 # TODO: import base server app
 from jupyter_core.paths import jupyter_path
 from notebook.notebookapp import NotebookApp
-from traitlets import List, Unicode
+from traitlets import Dict, List, Unicode
 
 
 class LabApp(NotebookApp):
@@ -16,14 +16,24 @@ class LabApp(NotebookApp):
         help="The default URL to redirect to from `/`"
     )
 
-    extra_labextensions_path = List(Unicode(), config=True,
+    extra_lab_extensions_path = List(Unicode(), config=True,
         help="""extra paths to look for JupyterLab extensions"""
     )
 
+    lab_extensions = Dict({}, config=True,
+        help=("Dict of Python modules to load as notebook server extensions."
+              "Entry values can be used to enable and disable the loading of"
+              "the extensions.")
+    )
+
     @property
-    def labextensions_path(self):
+    def lab_extensions_path(self):
         """The path to look for JupyterLab extensions"""
-        return self.extra_labextensions_path + jupyter_path('labextensions')
+        return self.extra_lab_extensions_path + jupyter_path('lab_extensions')
+
+    def init_webapp(self):
+        self.tornado_settings['lab_extensions'] = self.lab_extensions
+        super(LabApp, self).init_webapp()
 
 #-----------------------------------------------------------------------------
 # Main entry point

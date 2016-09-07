@@ -16,7 +16,9 @@ Distributed under the terms of the Modified BSD License.
     <!-- These will get templated by the server (it will look for css files) -->
     <link href="{{static_prefix}}/main.css" rel="stylesheet">
     <link href="{{static_prefix}}/extensions.css" rel="stylesheet">
-    
+    {% for css_file in jupyterlab_css %}
+    <link href="{{ css_file }}" rel="stylesheet">
+    {% endfor %}
 </head>
 
 
@@ -30,14 +32,17 @@ Distributed under the terms of the Modified BSD License.
 }</script>
 <script src="{{static_prefix}}/loader.bundle.js" type="text/javascript" charset="utf-8"></script>
 <script>
-// TODO: The server inserts the paths to the bundles
-// and uses the "entry" points from the manifest files to assemble
-// the plugins.
-jupyter.requireBundles(['lab/main.bundle.js', 'lab/extensions.bundle.js']).then(function(require) {
-  var lab = require("jupyterlab-extension@0.1.0/index.js");
+jupyter.requireBundles([
+  {% for jupyterlab_bundle in jupyterlab_bundles %}
+  "{{ jupyterlab_bundle }}",
+  {% endfor %}
+  ]).then(function(require) {
+  var lab = require("{{ jupyterlab_main }}");
   jupyter.lab = lab;
-  var plugins = require('jupyterlab-extension@0.1.0/extensions.js');
-  // TODO: Other extension points have their plugins added here.
+  var plugins = [];
+  {% for plugin_entry in plugin_entries %}
+  plugins = plugins.concat(require("{{ plugin_entry }}"));
+  {% endfor %}
   lab.registerPlugins(plugins);
   lab.start();
 });

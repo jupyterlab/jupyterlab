@@ -53,70 +53,70 @@ class ArgumentConflict(ValueError):
     pass
 
 
-def check_labextension(files, user=False, prefix=None, labextensions_dir=None, sys_prefix=False):
-    """Check whether labextension files have been installed
+def check_lab_extension(files, user=False, prefix=None, lab_extensions_dir=None, sys_prefix=False):
+    """Check whether lab_extension files have been installed
     
     Returns True if all files are found, False if any are missing.
 
     Parameters
     ----------
     files : list(paths)
-        a list of relative paths within labextensions.
+        a list of relative paths within lab_extensions.
     user : bool [default: False]
-        Whether to check the user's .jupyter/labextensions directory.
-        Otherwise check a system-wide install (e.g. /usr/local/share/jupyter/labextensions).
+        Whether to check the user's .jupyter/lab_extensions directory.
+        Otherwise check a system-wide install (e.g. /usr/local/share/jupyter/lab_extensions).
     prefix : str [optional]
         Specify install prefix, if it should differ from default (e.g. /usr/local).
-        Will check prefix/share/jupyter/labextensions
-    labextensions_dir : str [optional]
-        Specify absolute path of labextensions directory explicitly.
+        Will check prefix/share/jupyter/lab_extensions
+    lab_extensions_dir : str [optional]
+        Specify absolute path of lab_extensions directory explicitly.
     sys_prefix : bool [default: False]
         Install into the sys.prefix, i.e. environment
     """
-    labext = _get_labextension_dir(user=user, sys_prefix=sys_prefix, prefix=prefix, labextensions_dir=labextensions_dir)
-    # make sure labextensions dir exists
-    if not os.path.exists(labext):
+    lab_ext = _get_lab_extension_dir(user=user, sys_prefix=sys_prefix, prefix=prefix, lab_extensions_dir=lab_extensions_dir)
+    # make sure lab_extensions dir exists
+    if not os.path.exists(lab_ext):
         return False
     
     if isinstance(files, string_types):
         # one file given, turn it into a list
         files = [files]
     
-    return all(os.path.exists(pjoin(labext, f)) for f in files)
+    return all(os.path.exists(pjoin(lab_ext, f)) for f in files)
 
 
-def install_labextension(path, name, overwrite=False, symlink=False,
-                        user=False, prefix=None, labextensions_dir=None,
+def install_lab_extension(path, name, overwrite=False, symlink=False,
+                        user=False, prefix=None, lab_extensions_dir=None,
                         logger=None, sys_prefix=False
                         ):
     """Install a Javascript extension for the notebook
     
-    Stages files and/or directories into the labextensions directory.
+    Stages files and/or directories into the lab_extensions directory.
     By default, this compares modification time, and only stages files that need updating.
     If `overwrite` is specified, matching files are purged before proceeding.
     
     Parameters
     ----------
     path : path to file, directory, zip or tarball archive, or URL to install
-        Archives (zip or tarballs) will be extracted into the labextensions directory.
+        Archives (zip or tarballs) will be extracted into the lab_extensions directory.
     name : str [optional]
-        name the labextension is installed to.  For example, if name is 'foo', then
-        the source file will be installed to 'labextensions/foo'.
+        name the lab_extension is installed to.  For example, if name is 'foo', then
+        the source file will be installed to 'lab_extensions/foo'.
     overwrite : bool [default: False]
         If True, always install the files, regardless of what may already be installed.
     symlink : bool [default: False]
-        If True, create a symlink in labextensions, rather than copying files.
+        If True, create a symlink in lab_extensions, rather than copying files.
         Not allowed with URLs or archives. Windows support for symlinks requires
         Vista or above, Python 3, and a permission bit which only admin users
         have by default, so don't rely on it.
     user : bool [default: False]
-        Whether to install to the user's labextensions directory.
-        Otherwise do a system-wide install (e.g. /usr/local/share/jupyter/labextensions).
+        Whether to install to the user's lab_extensions directory.
+        Otherwise do a system-wide install (e.g. /usr/local/share/jupyter/lab_extensions).
     prefix : str [optional]
         Specify install prefix, if it should differ from default (e.g. /usr/local).
-        Will install to ``<prefix>/share/jupyter/labextensions``
-    labextensions_dir : str [optional]
-        Specify absolute path of labextensions directory explicitly.
+        Will install to ``<prefix>/share/jupyter/lab_extensions``
+    lab_extensions_dir : str [optional]
+        Specify absolute path of lab_extensions directory explicitly.
     logger : Jupyter logger [optional]
         Logger instance to use
     """
@@ -124,9 +124,9 @@ def install_labextension(path, name, overwrite=False, symlink=False,
     # the actual path to which we eventually installed
     full_dest = None
 
-    labext = _get_labextension_dir(user=user, sys_prefix=sys_prefix, prefix=prefix, labextensions_dir=labextensions_dir)
-    # make sure labextensions dir exists
-    ensure_dir_exists(labext)
+    lab_ext = _get_lab_extension_dir(user=user, sys_prefix=sys_prefix, prefix=prefix, lab_extensions_dir=lab_extensions_dir)
+    # make sure lab_extensions dir exists
+    ensure_dir_exists(lab_ext)
     
     # forcing symlink parameter to False if os.symlink does not exist (e.g., on Windows machines running python 2)
     if not hasattr(os, 'symlink'):
@@ -138,12 +138,12 @@ def install_labextension(path, name, overwrite=False, symlink=False,
     path = cast_unicode_py2(path)
 
     if path.startswith(('https://', 'http://')):
-        raise NotImplementedError('Urls are not yet supported for labextensions')
+        raise NotImplementedError('Urls are not yet supported for lab_extensions')
     elif path.endswith('.zip') or _safe_is_tarfile(path):
-        raise NotImplementedError('Archive files are not yet supported for labextensions')
+        raise NotImplementedError('Archive files are not yet supported for lab_extensions')
     else:
         destination = cast_unicode_py2(name)
-        full_dest = normpath(pjoin(labext, destination))
+        full_dest = normpath(pjoin(lab_ext, destination))
         if overwrite and os.path.lexists(full_dest):
             if logger:
                 logger.info("Removing: %s" % full_dest)
@@ -177,60 +177,60 @@ def install_labextension(path, name, overwrite=False, symlink=False,
     return full_dest
 
 
-def install_labextension_python(module, overwrite=False, symlink=False,
-                        user=False, sys_prefix=False, prefix=None, labextensions_dir=None, logger=None):
-    """Install an labextension bundled in a Python package.
+def install_lab_extension_python(module, overwrite=False, symlink=False,
+                        user=False, sys_prefix=False, prefix=None, lab_extensions_dir=None, logger=None):
+    """Install an lab_extension bundled in a Python package.
 
     Returns a list of installed/updated directories.
 
-    See install_labextension for parameter information."""
-    m, labexts = _get_labextension_metadata(module)
+    See install_lab_extension for parameter information."""
+    m, lab_exts = _get_lab_extension_metadata(module)
     base_path = os.path.split(m.__file__)[0]
 
     full_dests = []
 
-    for labext in labexts:
-        src = os.path.join(base_path, labext['src'])
-        name = labext['name']
+    for lab_ext in lab_exts:
+        src = os.path.join(base_path, lab_ext['src'])
+        name = lab_ext['name']
 
         if logger:
             logger.info("Installing %s -> %s" % (src, name))
-        full_dest = install_labextension(
+        full_dest = install_lab_extension(
             src, name, overwrite=overwrite, symlink=symlink,
-            user=user, sys_prefix=sys_prefix, prefix=prefix, labextensions_dir=labextensions_dir,
+            user=user, sys_prefix=sys_prefix, prefix=prefix, lab_extensions_dir=lab_extensions_dir,
             logger=logger
             )
-        validate_labextension_folder(full_dest, logger)
+        validate_lab_extension_folder(full_dest, logger)
         full_dests.append(full_dest)
 
     return full_dests
 
 
-def uninstall_labextension(name, user=False, sys_prefix=False, prefix=None, 
-                          labextensions_dir=None, logger=None):
+def uninstall_lab_extension(name, user=False, sys_prefix=False, prefix=None, 
+                          lab_extensions_dir=None, logger=None):
     """Uninstall a Javascript extension of the notebook
     
-    Removes staged files and/or directories in the labextensions directory and 
+    Removes staged files and/or directories in the lab_extensions directory and 
     removes the extension from the frontend config.
     
     Parameters
     ----------
     name: str
-        The name of the labextension.
+        The name of the lab_extension.
     user : bool [default: False]
-        Whether to install to the user's labextensions directory.
-        Otherwise do a system-wide install (e.g. /usr/local/share/jupyter/labextensions).
+        Whether to install to the user's lab_extensions directory.
+        Otherwise do a system-wide install (e.g. /usr/local/share/jupyter/lab_extensions).
     prefix : str [optional]
         Specify install prefix, if it should differ from default (e.g. /usr/local).
-        Will install to ``<prefix>/share/jupyter/labextensions``
-    labextensions_dir : str [optional]
-        Specify absolute path of labextensions directory explicitly.
+        Will install to ``<prefix>/share/jupyter/lab_extensions``
+    lab_extensions_dir : str [optional]
+        Specify absolute path of lab_extensions directory explicitly.
     logger : Jupyter logger [optional]
         Logger instance to use
     """
-    labext = _get_labextension_dir(user=user, sys_prefix=sys_prefix, prefix=prefix, labextensions_dir=labextensions_dir)
+    lab_ext = _get_lab_extension_dir(user=user, sys_prefix=sys_prefix, prefix=prefix, lab_extensions_dir=lab_extensions_dir)
     dest = cast_unicode_py2(name)
-    full_dest = pjoin(labext, dest)
+    full_dest = pjoin(lab_ext, dest)
     if os.path.lexists(full_dest):
         if logger:
             logger.info("Removing: %s" % full_dest)
@@ -238,28 +238,28 @@ def uninstall_labextension(name, user=False, sys_prefix=False, prefix=None,
             shutil.rmtree(full_dest)
         else:
             os.remove(full_dest)
-    disable_labextension(name)
+    disable_lab_extension(name)
 
 
-def uninstall_labextension_python(module,
-                        user=False, sys_prefix=False, prefix=None, labextensions_dir=None,
+def uninstall_lab_extension_python(module,
+                        user=False, sys_prefix=False, prefix=None, lab_extensions_dir=None,
                         logger=None):
-    """Uninstall an labextension bundled in a Python package.
+    """Uninstall an lab_extension bundled in a Python package.
     
-    See parameters of `install_labextension_python`
+    See parameters of `install_lab_extension_python`
     """
-    m, labexts = _get_labextension_metadata(module)
-    for labext in labexts:
-        name = labext['name']
+    m, lab_exts = _get_lab_extension_metadata(module)
+    for lab_ext in lab_exts:
+        name = lab_ext['name']
         if logger:
             logger.info("Uninstalling {} {}".format(name))
-        uninstall_labextension(name, user=user, sys_prefix=sys_prefix, 
-            prefix=prefix, labextensions_dir=labextensions_dir, logger=logger)
+        uninstall_lab_extension(name, user=user, sys_prefix=sys_prefix, 
+            prefix=prefix, lab_extensions_dir=lab_extensions_dir, logger=logger)
 
 
-def _set_labextension_state(name, state,
+def _set_lab_extension_state(name, state,
                            user=True, sys_prefix=False, logger=None):
-    """Set whether the JupyterLab frontend should use the named labextension
+    """Set whether the JupyterLab frontend should use the named lab_extension
 
     Returns True if the final state is the one requested.
 
@@ -269,7 +269,7 @@ def _set_labextension_state(name, state,
     state : bool
         The state in which to leave the extension
     user : bool [default: True]
-        Whether to update the user's .jupyter/labextensions directory
+        Whether to update the user's .jupyter/lab_extensions directory
     sys_prefix : bool [default: False]
         Whether to update the sys.prefix, i.e. environment. Will override
         `user`.
@@ -288,7 +288,7 @@ def _set_labextension_state(name, state,
     cfg = cm.get("jupyter_notebook_config")
     lab_extensions = (
         cfg.setdefault("LabApp", {})
-        .setdefault("labextensions", {})
+        .setdefault("lab_extensions", {})
     )
 
     old_enabled = lab_extensions.get(name, None)
@@ -308,14 +308,14 @@ def _set_labextension_state(name, state,
     cm.update("jupyter_notebook_config", cfg)
 
     if new_enabled:
-        validate_labextension(name, logger=logger)
+        validate_lab_extension(name, logger=logger)
 
     return old_enabled == state
 
 
-def _set_labextension_state_python(state, module, user, sys_prefix,
+def _set_lab_extension_state_python(state, module, user, sys_prefix,
                                   logger=None):
-    """Enable or disable some labextensions stored in a Python package
+    """Enable or disable some lab_extensions stored in a Python package
 
     Returns a list of whether the state was achieved (i.e. changed, or was
     already right)
@@ -327,25 +327,25 @@ def _set_labextension_state_python(state, module, user, sys_prefix,
         Whether the extensions should be enabled
     module : str
         Importable Python module exposing the
-        magic-named `_jupyter_labextension_paths` function
+        magic-named `_jupyter_lab_extension_paths` function
     user : bool
-        Whether to enable in the user's labextensions directory.
+        Whether to enable in the user's lab_extensions directory.
     sys_prefix : bool
         Enable/disable in the sys.prefix, i.e. environment
     logger : Jupyter logger [optional]
         Logger instance to use
     """
-    m, labexts = _get_labextension_metadata(module)
-    return [_set_labextension_state(name=labext["name"],
+    m, lab_exts = _get_lab_extension_metadata(module)
+    return [_set_lab_extension_state(name=lab_ext["name"],
                                    state=state,
                                    user=user, sys_prefix=sys_prefix,
                                    logger=logger)
-            for labext in labexts]
+            for lab_ext in lab_exts]
 
 
-def enable_labextension(name, user=True, sys_prefix=False,
+def enable_lab_extension(name, user=True, sys_prefix=False,
                        logger=None):
-    """Enable a named labextension
+    """Enable a named lab_extension
 
     Returns True if the final state is the one requested.
 
@@ -354,22 +354,22 @@ def enable_labextension(name, user=True, sys_prefix=False,
     name : string
         The name of the extension.
     user : bool [default: True]
-        Whether to enable in the user's labextensions directory.
+        Whether to enable in the user's lab_extensions directory.
     sys_prefix : bool [default: False]
         Whether to enable in the sys.prefix, i.e. environment. Will override
         `user`
     logger : Jupyter logger [optional]
         Logger instance to use
     """
-    return _set_labextension_state(name=name,
+    return _set_lab_extension_state(name=name,
                                   state=True,
                                   user=user, sys_prefix=sys_prefix,
                                   logger=logger)
 
 
-def disable_labextension(name, user=True, sys_prefix=False,
+def disable_lab_extension(name, user=True, sys_prefix=False,
                         logger=None):
-    """Disable a named labextension
+    """Disable a named lab_extension
     
     Returns True if the final state is the one requested.
 
@@ -378,22 +378,22 @@ def disable_labextension(name, user=True, sys_prefix=False,
     name : string
         The name of the extension.
     user : bool [default: True]
-        Whether to enable in the user's labextensions directory.
+        Whether to enable in the user's lab_extensions directory.
     sys_prefix : bool [default: False]
         Whether to enable in the sys.prefix, i.e. environment. Will override
         `user`.
     logger : Jupyter logger [optional]
         Logger instance to use
     """
-    return _set_labextension_state(name=name,
+    return _set_lab_extension_state(name=name,
                                   state=False,
                                   user=user, sys_prefix=sys_prefix,
                                   logger=logger)
 
 
-def enable_labextension_python(module, user=True, sys_prefix=False,
+def enable_lab_extension_python(module, user=True, sys_prefix=False,
                               logger=None):
-    """Enable some labextensions associated with a Python module.
+    """Enable some lab_extensions associated with a Python module.
 
     Returns a list of whether the state was achieved (i.e. changed, or was
     already right)
@@ -403,22 +403,22 @@ def enable_labextension_python(module, user=True, sys_prefix=False,
 
     module : str
         Importable Python module exposing the
-        magic-named `_jupyter_labextension_paths` function
+        magic-named `_jupyter_lab_extension_paths` function
     user : bool [default: True]
-        Whether to enable in the user's labextensions directory.
+        Whether to enable in the user's lab_extensions directory.
     sys_prefix : bool [default: False]
         Whether to enable in the sys.prefix, i.e. environment. Will override
         `user`
     logger : Jupyter logger [optional]
         Logger instance to use
     """
-    return _set_labextension_state_python(True, module, user, sys_prefix,
+    return _set_lab_extension_state_python(True, module, user, sys_prefix,
                                          logger=logger)
 
 
-def disable_labextension_python(module, user=True, sys_prefix=False,
+def disable_lab_extension_python(module, user=True, sys_prefix=False,
                                logger=None):
-    """Disable some labextensions associated with a Python module.
+    """Disable some lab_extensions associated with a Python module.
 
     Returns True if the final state is the one requested.
 
@@ -426,22 +426,22 @@ def disable_labextension_python(module, user=True, sys_prefix=False,
     ----------
     module : str
         Importable Python module exposing the
-        magic-named `_jupyter_labextension_paths` function
+        magic-named `_jupyter_lab_extension_paths` function
     user : bool [default: True]
-        Whether to enable in the user's labextensions directory.
+        Whether to enable in the user's lab_extensions directory.
     sys_prefix : bool [default: False]
         Whether to enable in the sys.prefix, i.e. environment
     logger : Jupyter logger [optional]
         Logger instance to use
     """
-    return _set_labextension_state_python(False, module, user, sys_prefix,
+    return _set_lab_extension_state_python(False, module, user, sys_prefix,
                                          logger=logger)
 
 
-def validate_labextension(name, logger=None):
-    """Validate a named labextension.
+def validate_lab_extension(name, logger=None):
+    """Validate a named lab_extension.
 
-    Looks across all of the labextension directories.
+    Looks across all of the lab_extension directories.
 
     Returns a list of warnings.
 
@@ -452,22 +452,22 @@ def validate_labextension(name, logger=None):
     logger : Jupyter logger [optional]
         Logger instance to use
     """
-    for exts in _labextension_dirs():
+    for exts in _lab_extension_dirs():
         full_dest = os.path.join(exts, name)
         if os.path.exists(full_dest):
-            return validate_labextension_folder(full_dest)
+            return validate_lab_extension_folder(full_dest)
 
 
-def validate_labextension_folder(name, full_dest, logger=None):
-    """Assess the health of an installed labextension
+def validate_lab_extension_folder(name, full_dest, logger=None):
+    """Assess the health of an installed lab_extension
 
     Returns a list of warnings.
 
     Parameters
     ----------
     full_dest : str
-        The on-disk location of the installed labextension: this should end
-        with `labextensions/<name>`
+        The on-disk location of the installed lab_extension: this should end
+        with `lab_extensions/<name>`
     logger : Jupyter logger [optional]
         Logger instance to use
     """
@@ -547,7 +547,7 @@ _base_flags.update({
     "sys-prefix" : ({
         "BaseNBExtensionApp" : {
             "sys_prefix" : True,
-        }}, "Use sys.prefix as the prefix for installing labextensions (for environments, packaging)"
+        }}, "Use sys.prefix as the prefix for installing lab_extensions (for environments, packaging)"
     ),
     "py" : ({
         "BaseNBExtensionApp" : {
@@ -558,7 +558,7 @@ _base_flags.update({
 _base_flags['python'] = _base_flags['py']
 
 class BaseNBExtensionApp(JupyterApp):
-    """Base labextension installer app"""
+    """Base lab_extension installer app"""
     _log_formatter_cls = LogFormatter
     flags = _base_flags
     version = __version__
@@ -591,7 +591,7 @@ flags['s'] = flags['symlink']
 
 aliases = {
     "prefix" : "InstallNBExtensionApp.prefix",
-    "labextensions" : "InstallNBExtensionApp.labextensions_dir",
+    "lab_extensions" : "InstallNBExtensionApp.lab_extensions_dir",
     "destination" : "InstallNBExtensionApp.destination",
 }
 
@@ -601,17 +601,17 @@ class InstallNBExtensionApp(BaseNBExtensionApp):
     
     Usage
     
-        jupyter labextension install path|url [--user|--sys-prefix]
+        jupyter lab_extension install path|url [--user|--sys-prefix]
     
-    This copies a file or a folder into the Jupyter labextensions directory.
+    This copies a file or a folder into the Jupyter lab_extensions directory.
     If a URL is given, it will be downloaded.
-    If an archive is given, it will be extracted into labextensions.
+    If an archive is given, it will be extracted into lab_extensions.
     If the requested files are already up to date, no action is taken
     unless --overwrite is specified.
     """
     
     examples = """
-    jupyter labextension install /path/to/myextension
+    jupyter lab_extension install /path/to/myextension
     """
     aliases = aliases
     flags = flags
@@ -620,8 +620,8 @@ class InstallNBExtensionApp(BaseNBExtensionApp):
     symlink = Bool(False, config=True, help="Create symlinks instead of copying files")
 
     prefix = Unicode('', config=True, help="Installation prefix")
-    labextensions_dir = Unicode('', config=True,
-           help="Full path to labextensions dir (probably use prefix or user)")
+    lab_extensions_dir = Unicode('', config=True,
+           help="Full path to lab_extensions dir (probably use prefix or user)")
     destination = Unicode('', config=True, help="Destination for the copy or symlink")
 
     def _config_file_name_default(self):
@@ -629,16 +629,16 @@ class InstallNBExtensionApp(BaseNBExtensionApp):
         return 'jupyter_notebook_config'
     
     def install_extensions(self):
-        """Perform the installation of labextension(s)"""
+        """Perform the installation of lab_extension(s)"""
         if len(self.extra_args)>1:
-            raise ValueError("Only one labextension allowed at a time. "
+            raise ValueError("Only one lab_extension allowed at a time. "
                          "Call multiple times to install multiple extensions.")
 
         if self.python:
-            install = install_labextension_python
+            install = install_lab_extension_python
             kwargs = {}
         else:
-            install = install_labextension
+            install = install_lab_extension
             kwargs = {'destination': self.destination}
         
         full_dests = install(self.extra_args[0],
@@ -647,16 +647,16 @@ class InstallNBExtensionApp(BaseNBExtensionApp):
                              user=self.user,
                              sys_prefix=self.sys_prefix,
                              prefix=self.prefix,
-                             labextensions_dir=self.labextensions_dir,
+                             lab_extensions_dir=self.lab_extensions_dir,
                              logger=self.log,
                              **kwargs
                             )
 
         if full_dests:
             self.log.info(
-                u"\nTo initialize this labextension in the browser every time"
+                u"\nTo initialize this lab_extension in the browser every time"
                 " JupyterLab loads:\n\n"
-                "      jupyter labextension enable {}{}{}{}\n".format(
+                "      jupyter lab_extension enable {}{}{}{}\n".format(
                     self.extra_args[0] if self.python else "<the entry point>",
                     " --user" if self.user else "",
                     " --py" if self.python else "",
@@ -667,7 +667,7 @@ class InstallNBExtensionApp(BaseNBExtensionApp):
     def start(self):
         """Perform the App's function as configured"""
         if not self.extra_args:
-            sys.exit('Please specify an labextension to install')
+            sys.exit('Please specify an lab_extension to install')
         else:
             try:
                 self.install_extensions()
@@ -682,25 +682,25 @@ class UninstallNBExtensionApp(BaseNBExtensionApp):
     
     Usage
     
-        jupyter labextension uninstall path/url path/url/entrypoint
-        jupyter labextension uninstall --py pythonPackageName
+        jupyter lab_extension uninstall path/url path/url/entrypoint
+        jupyter lab_extension uninstall --py pythonPackageName
     
-    This uninstalls an labextension.
+    This uninstalls an lab_extension.
     """
     
     examples = """
-    jupyter labextension uninstall dest/dir dest/dir/extensionjs
-    jupyter labextension uninstall --py extensionPyPackage
+    jupyter lab_extension uninstall dest/dir dest/dir/extensionjs
+    jupyter lab_extension uninstall --py extensionPyPackage
     """
     
     aliases = {
         "prefix" : "UninstallNBExtensionApp.prefix",
-        "labextensions" : "UninstallNBExtensionApp.labextensions_dir",
+        "lab_extensions" : "UninstallNBExtensionApp.lab_extensions_dir",
         "require": "UninstallNBExtensionApp.require",
     }
     
     prefix = Unicode('', config=True, help="Installation prefix")
-    labextensions_dir = Unicode('', config=True, help="Full path to labextensions dir (probably use prefix or user)")
+    lab_extensions_dir = Unicode('', config=True, help="Full path to lab_extensions dir (probably use prefix or user)")
     require = Unicode('', config=True, help="require.js module to load.")
     
     def _config_file_name_default(self):
@@ -708,31 +708,31 @@ class UninstallNBExtensionApp(BaseNBExtensionApp):
         return 'jupyter_notebook_config'
     
     def uninstall_extensions(self):
-        """Uninstall some labextensions"""
+        """Uninstall some lab_extensions"""
         kwargs = {
             'user': self.user,
             'sys_prefix': self.sys_prefix,
             'prefix': self.prefix,
-            'labextensions_dir': self.labextensions_dir,
+            'lab_extensions_dir': self.lab_extensions_dir,
             'logger': self.log
         }
         
         arg_count = 1
         if len(self.extra_args) > arg_count:
-            raise ValueError("only one labextension allowed at a time.  Call multiple times to uninstall multiple extensions.")
+            raise ValueError("only one lab_extension allowed at a time.  Call multiple times to uninstall multiple extensions.")
         if len(self.extra_args) < arg_count:
             raise ValueError("not enough arguments")
         
         if self.python:
-            uninstall_labextension_python(self.extra_args[0], **kwargs)
+            uninstall_lab_extension_python(self.extra_args[0], **kwargs)
         else:
             if self.require:
                 kwargs['require'] = self.require
-            uninstall_labextension(self.extra_args[0], **kwargs)
+            uninstall_lab_extension(self.extra_args[0], **kwargs)
     
     def start(self):
         if not self.extra_args:
-            sys.exit('Please specify an labextension to uninstall')
+            sys.exit('Please specify an lab_extension to uninstall')
         else:
             try:
                 self.uninstall_extensions()
@@ -742,9 +742,9 @@ class UninstallNBExtensionApp(BaseNBExtensionApp):
 
 class ToggleNBExtensionApp(BaseNBExtensionApp):
     """A base class for apps that enable/disable extensions"""
-    name = "jupyter labextension enable/disable"
+    name = "jupyter lab_extension enable/disable"
     version = __version__
-    description = "Enable/disable an labextension in configuration."
+    description = "Enable/disable an lab_extension in configuration."
 
     user = Bool(True, config=True, help="Apply the configuration only for the current user (default)")
     
@@ -754,7 +754,7 @@ class ToggleNBExtensionApp(BaseNBExtensionApp):
         """The default config file name."""
         return 'jupyter_notebook_config'
     
-    def toggle_labextension_python(self, module):
+    def toggle_lab_extension_python(self, module):
         """Toggle some extensions in an importable Python module.
 
         Returns a list of booleans indicating whether the state was changed as
@@ -764,77 +764,77 @@ class ToggleNBExtensionApp(BaseNBExtensionApp):
         ----------
         module : str
             Importable Python module exposing the
-            magic-named `_jupyter_labextension_paths` function
+            magic-named `_jupyter_lab_extension_paths` function
         """
-        toggle = (enable_labextension_python if self._toggle_value
-                  else disable_labextension_python)
+        toggle = (enable_lab_extension_python if self._toggle_value
+                  else disable_lab_extension_python)
         return toggle(module,
                       user=self.user,
                       sys_prefix=self.sys_prefix,
                       logger=self.log)
 
-    def toggle_labextension(self, name):
-        """Toggle some a named labextension by require-able AMD module.
+    def toggle_lab_extension(self, name):
+        """Toggle some a named lab_extension by require-able AMD module.
 
         Returns whether the state was changed as requested.
 
         Parameters
         ----------
         require : str
-            require.js path used to load the labextension
+            require.js path used to load the lab_extension
         """
-        toggle = (enable_labextension if self._toggle_value
-                  else disable_labextension)
+        toggle = (enable_lab_extension if self._toggle_value
+                  else disable_lab_extension)
         return toggle(name,
                       user=self.user, sys_prefix=self.sys_prefix,
                       logger=self.log)
         
     def start(self):
         if not self.extra_args:
-            sys.exit('Please specify an labextension/package to enable or disable')
+            sys.exit('Please specify an lab_extension/package to enable or disable')
         elif len(self.extra_args) > 1:
-            sys.exit('Please specify one labextension/package at a time')
+            sys.exit('Please specify one lab_extension/package at a time')
         if self.python:
-            self.toggle_labextension_python(self.extra_args[0])
+            self.toggle_lab_extension_python(self.extra_args[0])
         else:
-            self.toggle_labextension(self.extra_args[0])
+            self.toggle_lab_extension(self.extra_args[0])
 
 
 class EnableNBExtensionApp(ToggleNBExtensionApp):
-    """An App that enables labextensions"""
-    name = "jupyter labextension enable"
+    """An App that enables lab_extensions"""
+    name = "jupyter lab_extension enable"
     description = """
-    Enable an labextension in frontend configuration.
+    Enable an lab_extension in frontend configuration.
     
     Usage
-        jupyter labextension enable [--system|--sys-prefix]
+        jupyter lab_extension enable [--system|--sys-prefix]
     """
     _toggle_value = True
 
 
 class DisableNBExtensionApp(ToggleNBExtensionApp):
-    """An App that disables labextensions"""
-    name = "jupyter labextension disable"
+    """An App that disables lab_extensions"""
+    name = "jupyter lab_extension disable"
     description = """
-    Enable an labextension in frontend configuration.
+    Enable an lab_extension in frontend configuration.
     
     Usage
-        jupyter labextension disable [--system|--sys-prefix]
+        jupyter lab_extension disable [--system|--sys-prefix]
     """
     _toggle_value = None
 
 
 class ListNBExtensionsApp(BaseNBExtensionApp):
-    """An App that lists and validates labextensions"""
-    name = "jupyter labextension list"
+    """An App that lists and validates lab_extensions"""
+    name = "jupyter lab_extension list"
     version = __version__
-    description = "List all labextensions known by the configuration system"
+    description = "List all lab_extensions known by the configuration system"
     
-    def list_labextensions(self):
-        """List all the labextensions"""
+    def list_lab_extensions(self):
+        """List all the lab_extensions"""
         config_dirs = [os.path.join(p, 'nbconfig') for p in jupyter_config_path()]
         
-        print("Known labextensions:")
+        print("Known lab_extensions:")
         
         for config_dir in config_dirs:
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
@@ -849,34 +849,34 @@ class ListNBExtensionsApp(BaseNBExtensionApp):
                 print(u'    {} {}'.format(
                               name,
                               GREEN_ENABLED if enabled else RED_DISABLED))
-                validate_labextension(name, self.log)
+                validate_lab_extension(name, self.log)
 
     def start(self):
         """Perform the App's functions as configured"""
-        self.list_labextensions()
+        self.list_lab_extensions()
 
 
 _examples = """
-jupyter labextension list                          # list all configured labextensions
-jupyter labextension install --py <packagename>    # install an labextension from a Python package
-jupyter labextension enable --py <packagename>     # enable all labextensions in a Python package
-jupyter labextension disable --py <packagename>    # disable all labextensions in a Python package
-jupyter labextension uninstall --py <packagename>  # uninstall an labextension in a Python package
+jupyter lab_extension list                          # list all configured lab_extensions
+jupyter lab_extension install --py <packagename>    # install an lab_extension from a Python package
+jupyter lab_extension enable --py <packagename>     # enable all lab_extensions in a Python package
+jupyter lab_extension disable --py <packagename>    # disable all lab_extensions in a Python package
+jupyter lab_extension uninstall --py <packagename>  # uninstall an lab_extension in a Python package
 """
 
 class NBExtensionApp(BaseNBExtensionApp):
-    """Base jupyter labextension command entry point"""
-    name = "jupyter labextension"
+    """Base jupyter lab_extension command entry point"""
+    name = "jupyter lab_extension"
     version = __version__
     description = "Work with Jupyter notebook extensions"
     examples = _examples
 
     subcommands = dict(
-        install=(InstallNBExtensionApp,"Install an labextension"),
-        enable=(EnableNBExtensionApp, "Enable an labextension"),
-        disable=(DisableNBExtensionApp, "Disable an labextension"),
-        uninstall=(UninstallNBExtensionApp, "Uninstall an labextension"),
-        list=(ListNBExtensionsApp, "List labextensions")
+        install=(InstallNBExtensionApp,"Install an lab_extension"),
+        enable=(EnableNBExtensionApp, "Enable an lab_extension"),
+        disable=(DisableNBExtensionApp, "Disable an lab_extension"),
+        uninstall=(UninstallNBExtensionApp, "Uninstall an lab_extension"),
+        list=(ListNBExtensionsApp, "List lab_extensions")
     )
 
     def start(self):
@@ -959,45 +959,45 @@ def _safe_is_tarfile(path):
         return False
 
 
-def _get_labextension_dir(user=False, sys_prefix=False, prefix=None, labextensions_dir=None):
-    """Return the labextension directory specified
+def _get_lab_extension_dir(user=False, sys_prefix=False, prefix=None, lab_extensions_dir=None):
+    """Return the lab_extension directory specified
 
     Parameters
     ----------
 
     user : bool [default: False]
-        Get the user's .jupyter/labextensions directory
+        Get the user's .jupyter/lab_extensions directory
     sys_prefix : bool [default: False]
-        Get sys.prefix, i.e. ~/.envs/my-env/share/jupyter/labextensions
+        Get sys.prefix, i.e. ~/.envs/my-env/share/jupyter/lab_extensions
     prefix : str [optional]
         Get custom prefix
-    labextensions_dir : str [optional]
+    lab_extensions_dir : str [optional]
         Get what you put in
     """
-    if sum(map(bool, [user, prefix, labextensions_dir, sys_prefix])) > 1:
-        raise ArgumentConflict("cannot specify more than one of user, sys_prefix, prefix, or labextensions_dir")
+    if sum(map(bool, [user, prefix, lab_extensions_dir, sys_prefix])) > 1:
+        raise ArgumentConflict("cannot specify more than one of user, sys_prefix, prefix, or lab_extensions_dir")
     if user:
-        labext = pjoin(jupyter_data_dir(), u'labextensions')
+        lab_ext = pjoin(jupyter_data_dir(), u'lab_extensions')
     elif sys_prefix:
-        labext = pjoin(ENV_JUPYTER_PATH[0], u'labextensions')
+        lab_ext = pjoin(ENV_JUPYTER_PATH[0], u'lab_extensions')
     elif prefix:
-        labext = pjoin(prefix, 'share', 'jupyter', 'labextensions')
-    elif labextensions_dir:
-        labext = labextensions_dir
+        lab_ext = pjoin(prefix, 'share', 'jupyter', 'lab_extensions')
+    elif lab_extensions_dir:
+        lab_ext = lab_extensions_dir
     else:
-        labext = pjoin(SYSTEM_JUPYTER_PATH[0], 'labextensions')
-    return labext
+        lab_ext = pjoin(SYSTEM_JUPYTER_PATH[0], 'lab_extensions')
+    return lab_ext
 
 
-def _labextension_dirs():
-    """The possible locations of labextensions.
+def _lab_extension_dirs():
+    """The possible locations of lab_extensions.
 
     Returns a list of known base extension locations
     """
     return [
-        pjoin(jupyter_data_dir(), u'labextensions'),
-        pjoin(ENV_JUPYTER_PATH[0], u'labextensions'),
-        pjoin(SYSTEM_JUPYTER_PATH[0], 'labextensions')
+        pjoin(jupyter_data_dir(), u'lab_extensions'),
+        pjoin(ENV_JUPYTER_PATH[0], u'lab_extensions'),
+        pjoin(SYSTEM_JUPYTER_PATH[0], 'lab_extensions')
     ]
 
 
@@ -1018,16 +1018,16 @@ def _get_config_dir(user=False, sys_prefix=False):
     if user and sys_prefix:
         raise ArgumentConflict("Cannot specify more than one of user or sys_prefix")
     if user:
-        labext = jupyter_config_dir()
+        lab_ext = jupyter_config_dir()
     elif sys_prefix:
-        labext = ENV_CONFIG_PATH[0]
+        lab_ext = ENV_CONFIG_PATH[0]
     else:
-        labext = SYSTEM_CONFIG_PATH[0]
-    return labext
+        lab_ext = SYSTEM_CONFIG_PATH[0]
+    return lab_ext
 
 
-def _get_labextension_metadata(module):
-    """Get the list of labextension paths associated with a Python module.
+def _get_lab_extension_metadata(module):
+    """Get the list of lab_extension paths associated with a Python module.
 
     Returns a tuple of (the module,             [{
         'name': 'mockextension',
@@ -1039,13 +1039,13 @@ def _get_labextension_metadata(module):
 
     module : str
         Importable Python module exposing the
-        magic-named `_jupyter_labextension_paths` function
+        magic-named `_jupyter_lab_extension_paths` function
     """
     m = import_item(module)
-    if not hasattr(m, '_jupyter_labextension_paths'):
-        raise KeyError('The Python module {} is not a valid labextension'.format(module))
-    labexts = m._jupyter_labextension_paths()
-    return m, labexts
+    if not hasattr(m, '_jupyter_lab_extension_paths'):
+        raise KeyError('The Python module {} is not a valid lab_extension'.format(module))
+    lab_exts = m._jupyter_lab_extension_paths()
+    return m, lab_exts
 
 
 def _read_config_data(user=False, sys_prefix=False):
