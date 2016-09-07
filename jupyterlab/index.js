@@ -13,14 +13,6 @@ require('jupyterlab/lib/default-theme/index.css');
 
 
 /**
- * Test whether a value is a function.
- */
-function isFunction(obj) {
-  // http://stackoverflow.com/a/6000016.
-  return !!(obj && obj.constructor && obj.call && obj.apply);
-}
-
-/**
  * Validate an entry point given by the user.
  */
 function validateEntryPoint(entryPoint) {
@@ -31,7 +23,8 @@ function validateEntryPoint(entryPoint) {
   var plugins = [];
   for (let i = 0; i < data.length; i++) {
     var plugin = data[i];
-    if (!plugin.hasOwnProperty('id') || !isFunction(plugin['activate'])) {
+    if (!plugin.hasOwnProperty('id') ||
+        !typeof(plugin['activate']) == 'function') {
       console.warn('Invalid plugin found in: ', entryPoint);
       continue;
     }
