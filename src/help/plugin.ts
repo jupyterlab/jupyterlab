@@ -144,14 +144,14 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     category: 'Help'
   }));
 
-  let openLegacyNotebookId = 'legacy-notebook:open';
-  app.commands.addCommand(openLegacyNotebookId, {
-    label: 'Legacy Jupyter Notebook',
+  let openClassicNotebookId = 'classic-notebook:open';
+  app.commands.addCommand(openClassicNotebookId, {
+    label: 'Open Classic Notebook',
     execute: () => {
       window.open(getBaseUrl()+'tree');
     }
   });
-  palette.addItem({ command: openLegacyNotebookId, category: 'Help'});
+  palette.addItem({ command: openClassicNotebookId, category: 'Help'});
 
   let menu = Private.createMenu(app);
   mainMenu.addMenu(menu, {});
@@ -174,7 +174,7 @@ namespace Private {
     menu.title.label = 'Help';
     menu.addItem({ command: 'about-jupyterlab:show' });
     menu.addItem({ command: 'faq-jupyterlab:show' });
-    menu.addItem({ command: 'legacy-notebook:open'})
+    menu.addItem({ command: 'classic-notebook:open'})
 
     COMMANDS.forEach(item => menu.addItem({ command: item.id }));
     return menu;
