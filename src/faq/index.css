@@ -39,7 +39,7 @@
   padding: 0;
 }
 
-:target {
+.jp-FAQ-question:target {
   animation: highlight 0.9s cubic-bezier(0.15, 0.08, 0.54, 0.85);
 }
 
