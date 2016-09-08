@@ -94,6 +94,22 @@ jupyter lab --debug
 npm test
 ```
 
+### Debug tests
+
+```base
+npm run test:debug
+```
+
+To have incremental build on each change, run in another terminal:
+
+```base
+npm run watch:buildTest
+```
+
+#### Debugging with Chrome Developer Tools
+
+Go to the launched Chrome and use Developer Tools for debugging.
+
 ### Build and run the stand-alone examples
 
 To install and build the examples in the `examples` directory:

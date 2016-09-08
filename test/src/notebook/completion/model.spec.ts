@@ -9,7 +9,7 @@ import {
 
 import {
   ICompletionRequest, ICoords, ITextChange
-} from '../../../../lib/notebook/cells/editor';
+} from '../../../../lib/notebook/completion/view';
 
 
 describe('notebook/completion/model', () => {

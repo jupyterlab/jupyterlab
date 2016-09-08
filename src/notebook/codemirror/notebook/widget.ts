@@ -10,58 +10,20 @@ import {
 } from '../../cells/model';
 
 import {
+  CellEditorWidget
+} from '../../cells/editor';
+
+import {
   CodeCellWidget, MarkdownCellWidget, RawCellWidget
 } from '../../cells/widget';
 
 import {
-  Notebook
+  Notebook, NotebookRenderer
 } from '../../notebook/widget';
 
 import {
   CodeMirrorCodeCellWidgetRenderer
 } from '../cells/widget';
-
-
-/**
- * A code mirror renderer for a notebook.
- */
-export
-class CodeMirrorNotebookRenderer extends Notebook.Renderer {
-  /**
-   * Create a code cell editor.
-   */
-  createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget {
-    const widget = new CodeCellWidget({
-      rendermime,
-      renderer: CodeMirrorNotebookRenderer.defaultCodeCellRenderer
-    });
-    widget.model = model;
-    return widget;
-  }
-
-  /**
-   * Create a markdown cell editor.
-   */
-  createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget {
-    const widget = new MarkdownCellWidget({
-      rendermime,
-      renderer: CodeMirrorNotebookRenderer.defaultMarkdownCellRenderer
-    });
-    widget.model = model;
-    return widget;
-  }
-
-  /**
-   * Create a raw cell editor.
-   */
-  createRawCell(model: IRawCellModel): RawCellWidget {
-    const widget = new RawCellWidget({
-      renderer: CodeMirrorNotebookRenderer.defaultRawCellRenderer
-    });
-    widget.model = model;
-    return widget;
-  }
-}
 
 
 /**
@@ -74,9 +36,10 @@ namespace CodeMirrorNotebookRenderer {
    */
   export
   const defaultCodeCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
-    editorInitializer: (editor) => {
+    decoratorProvider: (editor) => {
       editor.editor.setOption('matchBrackets', true);
       editor.editor.setOption('autoCloseBrackets', true);
+      return CellEditorWidget.defaultDecoratorProvider(editor);
     }
   });
 
@@ -85,9 +48,10 @@ namespace CodeMirrorNotebookRenderer {
    */
   export
   const defaultMarkdownCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
-    editorInitializer: (editor) => {
+    decoratorProvider: (editor) => {
       // Turn on line wrapping for markdown cells.
       editor.editor.setOption('lineWrapping', true);
+      return CellEditorWidget.defaultDecoratorProvider(editor);
     }
   });
 
@@ -96,15 +60,26 @@ namespace CodeMirrorNotebookRenderer {
    */
   export
   const defaultRawCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
-    editorInitializer: (editor) => {
+    decoratorProvider: (editor) => {
       // Turn on line wrapping for markdown cells.
       editor.editor.setOption('lineWrapping', true);
+      return CellEditorWidget.defaultDecoratorProvider(editor);
     }
   });
+
+  /**
+   * A default options for code mirror notebook renderer.
+   */
+  export
+  const defaultOptions: NotebookRenderer.IOptions = {
+    codeCellRenderer: defaultCodeCellRenderer,
+    markdownCellRenderer: defaultMarkdownCellRenderer,
+    rawCellRenderer: defaultRawCellRenderer
+  };
 
   /**
    * A default code mirror renderer for a notebook.
    */
   export
-  const defaultRenderer = new CodeMirrorNotebookRenderer();
+  const defaultRenderer = new Notebook.Renderer(defaultOptions);
 }

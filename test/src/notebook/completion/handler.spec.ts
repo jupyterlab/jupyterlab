@@ -16,8 +16,8 @@ import {
 } from '../../../../lib/notebook/cells';
 
 import {
-  ICompletionRequest, ICellEditorWidget, ITextChange
-} from '../../../../lib/notebook/cells/editor';
+  CompletableEditorWidget, ICompletionRequest, ITextChange
+} from '../../../../lib/notebook/completion/editor';
 
 import {
   CompletionWidget, CellCompletionHandler, CompletionModel, ICompletionPatch
@@ -27,6 +27,9 @@ import {
   CodeMirrorCodeCellWidgetRenderer
 } from '../../../../lib/notebook/codemirror/cells/widget';
 
+import {
+  expectCompletableEditorWidget
+} from './utils';
 
 class TestCompletionModel extends CompletionModel {
   methods: string[] = [];
@@ -57,12 +60,12 @@ class TestCompletionHandler extends CellCompletionHandler {
     this.methods.push('onReply');
   }
 
-  onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
+  onTextChanged(editor: CompletableEditorWidget, change: ITextChange): void {
     super.onTextChanged(editor, change);
     this.methods.push('onTextChanged');
   }
 
-  onCompletionRequested(editor: ICellEditorWidget, request: ICompletionRequest): void {
+  onCompletionRequested(editor: CompletableEditorWidget, request: ICompletionRequest): void {
     super.onCompletionRequested(editor, request);
     this.methods.push('onCompletionRequested');
   }
@@ -72,7 +75,6 @@ class TestCompletionHandler extends CellCompletionHandler {
     this.methods.push('onCompletionSelected');
   }
 }
-
 
 describe('notebook/completion/handler', () => {
 
@@ -316,10 +318,11 @@ describe('notebook/completion/handler', () => {
           newValue: 'foo'
         };
         let cell = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
-
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onTextChanged');
-        cell.editor.textChanged.emit(change);
+        expectCompletableEditorWidget(cell.editor, (editor)=> {
+          editor.textChanged.emit(change);
+        });
         expect(handler.methods).to.contain('onTextChanged');
       });
 
@@ -343,7 +346,9 @@ describe('notebook/completion/handler', () => {
 
         handler.activeCell = cell;
         expect(model.methods).to.not.contain('handleTextChange');
-        cell.editor.textChanged.emit(change);
+        expectCompletableEditorWidget(cell.editor, (editor)=> {
+          editor.textChanged.emit(change);
+        });
         expect(model.methods).to.contain('handleTextChange');
       });
 
@@ -363,10 +368,11 @@ describe('notebook/completion/handler', () => {
           currentValue: 'foo'
         };
         let cell = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
-
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onCompletionRequested');
-        cell.editor.completionRequested.emit(request);
+        expectCompletableEditorWidget(cell.editor, (editor)=> {
+          editor.completionRequested.emit(request);
+        });
         expect(handler.methods).to.contain('onCompletionRequested');
       });
 
@@ -390,7 +396,9 @@ describe('notebook/completion/handler', () => {
         handler.kernel = new MockKernel();
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('makeRequest');
-        cell.editor.completionRequested.emit(request);
+        expectCompletableEditorWidget(cell.editor, (editor)=> {
+          editor.completionRequested.emit(request);
+        });
         expect(handler.methods).to.contain('makeRequest');
       });
 

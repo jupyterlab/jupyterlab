@@ -17,7 +17,8 @@ import {
 
 import {
   ICompletionRequest, ICoords
-} from '../../../../lib/notebook/cells/editor';
+} from '../../../../lib/notebook/completion/view';
+
 
 import {
   CompletionWidget, CompletionModel, ICompletionItem

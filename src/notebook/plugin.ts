@@ -2,20 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  FocusTracker
-} from 'phosphor/lib/ui/focustracker';
-
-import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
 import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
-
-import {
-  IClipboard
-} from '../clipboard';
 
 import {
   ICommandPalette
@@ -31,14 +23,6 @@ import {
 } from '../docregistry';
 
 import {
-  IInspector
-} from '../inspector';
-
-import {
-  IRenderMime
-} from '../rendermime';
-
-import {
   IServiceManager
 } from '../services';
 
@@ -46,7 +30,6 @@ import {
   INotebookTracker, NotebookPanel, NotebookModelFactory,
   NotebookWidgetFactory, NotebookActions
 } from './index';
-
 
 /**
  * The class name for all main area portrait tab icons.
@@ -115,12 +98,9 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
   requires: [
     IDocumentRegistry,
     IServiceManager,
-    IRenderMime,
-    IClipboard,
     IMainMenu,
     ICommandPalette,
-    IInspector,
-    NotebookPanel.IRenderer
+    NotebookWidgetFactory
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -130,9 +110,7 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer): INotebookTracker {
-  let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
-  let tracker = new FocusTracker<NotebookPanel>();
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, factory:NotebookWidgetFactory): INotebookTracker {
   let options: IWidgetFactoryOptions = {
     fileExtensions: ['.ipynb'],
     displayName: 'Notebook',
@@ -143,7 +121,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   };
 
   registry.addModelFactory(new NotebookModelFactory());
-  registry.addWidgetFactory(widgetFactory, options);
+  registry.addWidgetFactory(factory, options);
 
   // Add the ability to launch notebooks for each kernel type.
   let displayNameMap: { [key: string]: string } = Object.create(null);
@@ -170,22 +148,17 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     });
   }
 
-  addCommands(app, tracker);
+  addCommands(app, factory.tracker);
   populatePalette(palette);
 
-  widgetFactory.widgetCreated.connect((sender, widget) => {
+  factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
-    // Set the source of the code inspector to the current notebook.
-    widget.activated.connect(() => {
-      inspector.source = widget.content.inspectionHandler;
-    });
-    tracker.add(widget);
   });
 
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
 
-  return tracker;
+  return factory.tracker;
 }
 
 /**

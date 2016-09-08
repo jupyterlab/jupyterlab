@@ -10,38 +10,30 @@ import {
 } from '../../notebook/widget';
 
 import {
-  NotebookPanel
+  NotebookPanel, NotebookPanelRenderer
 } from '../../notebook/panel';
 
 import {
   CodeMirrorNotebookRenderer
 } from './widget';
 
-
-/**
- * A code mirror renderer for a notebook panel.
- */
-export
-class CodeMirrorNotebookPanelRenderer extends NotebookPanel.Renderer {
-  /**
-   * Create a notebook.
-   */
-  createContent(rendermime: RenderMime): Notebook {
-    return new Notebook({
-      rendermime,
-      renderer: CodeMirrorNotebookRenderer.defaultRenderer
-    });
-  }
-}
-
-
 /**
  * A namespace for `CodeMirrorNotebookPanelRenderer` statics.
  */
-export namespace CodeMirrorNotebookPanelRenderer {
+export
+namespace CodeMirrorNotebookPanelRenderer {
+
+  /**
+   * A default options for a code mirror notebook renderer.
+   */
+  export
+  const defaultOptions:NotebookPanelRenderer.IOptions = {
+    renderer: CodeMirrorNotebookRenderer.defaultRenderer
+  };
+
   /**
    * A default code mirror renderer for a notebook panel.
    */
   export
-  const defaultRenderer = new CodeMirrorNotebookPanelRenderer();
+  const defaultRenderer = new NotebookPanel.Renderer(defaultOptions);
 }

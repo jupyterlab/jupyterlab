@@ -2,9 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  NotebookPanel, NotebookWidgetFactory,
-  NotebookModelFactory, NotebookActions
+  NotebookPanel, NotebookModelFactory, NotebookActions
 } from 'jupyterlab/lib/notebook';
+
+import {
+  DefaultNotebookWidgetFactory as NotebookWidgetFactory
+} from 'jupyterlab/lib/notebook/default/factory';
 
 import {
   CodeMirrorNotebookPanelRenderer
@@ -142,7 +145,7 @@ function createApp(manager: IServiceManager): void {
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
   let renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
-  let wFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
+  let wFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer, null);
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory, {
     displayName: 'Notebook',

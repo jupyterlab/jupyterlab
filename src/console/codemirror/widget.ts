@@ -10,6 +10,10 @@ import {
 } from '../../notebook/cells/widget';
 
 import {
+  CellEditorWidget
+} from '../../notebook/cells/editor';
+
+import {
   CodeMirrorCodeCellWidgetRenderer
 } from '../../notebook/codemirror/cells/widget';
 
@@ -73,12 +77,13 @@ namespace CodeMirrorConsoleRenderer {
    */
   export
   const defaultCodeCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
-    editorInitializer: (editor) => {
+    decoratorProvider: (editor) => {
       editor.editor.setOption('matchBrackets', false);
       editor.editor.setOption('autoCloseBrackets', false);
       editor.editor.setOption('extraKeys', {
         Enter: function() { /* no-op */ }
       });
+      return CellEditorWidget.defaultDecoratorProvider(editor);
     }
   });
 }

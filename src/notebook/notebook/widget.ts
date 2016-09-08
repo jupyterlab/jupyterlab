@@ -61,7 +61,7 @@ import {
 } from '../common/mimetype';
 
 import {
-  EdgeLocation
+  CellEditorWidget, EdgeLocation
 } from '../cells/editor';
 
 import {
@@ -372,12 +372,10 @@ class StaticNotebook extends Widget {
     let widget: BaseCellWidget;
     switch (cell.type) {
     case 'code':
-      let codeFactory = this._renderer.createCodeCell;
-      widget = codeFactory(cell as CodeCellModel, this._rendermime);
+      widget = this._renderer.createCodeCell(cell as CodeCellModel, this._rendermime);
       break;
     case 'markdown':
-      let mdFactory = this._renderer.createMarkdownCell;
-      widget = mdFactory(cell as MarkdownCellModel, this._rendermime);
+      widget = this._renderer.createMarkdownCell(cell as MarkdownCellModel, this._rendermime);
       break;
     default:
       widget = this._renderer.createRawCell(cell as RawCellModel);
@@ -509,21 +507,48 @@ namespace StaticNotebook {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer implements IRenderer {
+  class Renderer implements IRenderer {
+
+    /**
+     * Creates a renderer.
+     */
+    constructor(private _options: NotebookRenderer.IOptions) {
+    }
+
     /**
      * Create a new code cell widget.
      */
-    abstract createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget;
+    createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget {
+      const widget = new CodeCellWidget({
+        rendermime,
+        renderer: this._options.codeCellRenderer
+      });
+      widget.model = model;
+      return widget;
+    }
 
     /**
      * Create a new markdown cell widget.
      */
-    abstract createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget;
+    createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget {
+      const widget = new MarkdownCellWidget({
+        rendermime,
+        renderer: this._options.markdownCellRenderer
+      });
+      widget.model = model;
+      return widget;
+    }
 
     /**
      * Create a new raw cell widget.
      */
-    abstract createRawCell(model: IRawCellModel): RawCellWidget;
+    createRawCell(model: IRawCellModel): RawCellWidget {
+      const widget = new RawCellWidget({
+        renderer: this._options.rawCellRenderer
+      });
+      widget.model = model;
+      return widget;
+    }
 
     /**
      * Update a cell widget.
@@ -564,7 +589,9 @@ class Notebook extends StaticNotebook {
     // Set up the inspection handler.
     this._inspectionHandler = new InspectionHandler(this.rendermime);
     this.activeCellChanged.connect((s, cell) => {
-      this._inspectionHandler.activeCell = cell;
+      if (cell) {
+        this._inspectionHandler.activeEditor = cell.editor;
+      }
     });
   }
 
@@ -902,20 +929,26 @@ class Notebook extends StaticNotebook {
   /**
    * Handle edge request signals from cells.
    */
-  private _onEdgeRequest(widget: Widget, location: EdgeLocation): void {
+  private _onEdgeRequest(view: CellEditorWidget, location: EdgeLocation): void {
     let prev = this.activeCellIndex;
     if (location === 'top') {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
       if (this.activeCellIndex < prev) {
-        let lastLine = this.activeCell.editor.getLastLine();
-        this.activeCell.editor.setCursor(lastLine, 0);
+        let lastLine = this.activeCell.editor.getModel().getLastLine();
+        this.activeCell.editor.position = {
+          line: lastLine,
+          column: 0
+        };
       }
     } else {
       this.activeCellIndex++;
       // Move the cursor to the first character.
       if (this.activeCellIndex > prev) {
-        this.activeCell.editor.setCursorPosition(0);
+        this.activeCell.editor.position = {
+          line: 0,
+          column: 0
+        };
       }
     }
   }
@@ -1048,7 +1081,23 @@ namespace Notebook {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer extends StaticNotebook.Renderer { }
+  class Renderer extends StaticNotebook.Renderer {
+  }
+
+}
+
+/** Utilities for a notebook renderer */
+export
+namespace NotebookRenderer {
+
+  /**
+   * An options for a notebook renderer.
+   */
+  export interface IOptions {
+    codeCellRenderer: CodeCellWidget.IRenderer;
+    markdownCellRenderer: BaseCellWidget.IRenderer;
+    rawCellRenderer: BaseCellWidget.IRenderer;
+  }
 
 }
 

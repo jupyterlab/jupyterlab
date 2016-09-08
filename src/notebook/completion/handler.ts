@@ -10,8 +10,12 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  ICellEditorWidget, ITextChange, ICompletionRequest
+  CellEditorWidget
 } from '../cells/editor';
+
+import {
+  CompletableEditorWidget, ITextChange, ICompletionRequest, 
+} from './editor';
 
 import {
   BaseCellWidget
@@ -57,15 +61,31 @@ class CellCompletionHandler implements IDisposable {
     }
 
     if (this._activeCell && !this._activeCell.isDisposed) {
-      const editor = this._activeCell.editor;
-      editor.textChanged.disconnect(this.onTextChanged, this);
-      editor.completionRequested.disconnect(this.onCompletionRequested, this);
+      this.disconnectFromEditor(this._activeCell.editor);
     }
     this._activeCell = newValue;
     if (this._activeCell) {
-      const editor = this._activeCell.editor as ICellEditorWidget;
+      this.connectToEditor(this._activeCell.editor);
+    }
+  }
+
+  /**
+   * Connects to the given editor.
+   */
+  protected connectToEditor(editor: CellEditorWidget | CompletableEditorWidget) {
+    if (CompletableEditorWidget.is(editor)) {
       editor.textChanged.connect(this.onTextChanged, this);
       editor.completionRequested.connect(this.onCompletionRequested, this);
+    }
+  }
+
+  /**
+   * Disconnects from the given editor.
+   */
+  protected disconnectFromEditor(editor: CellEditorWidget | CompletableEditorWidget) {
+    if (CompletableEditorWidget.is(editor)) {
+      editor.textChanged.disconnect(this.onTextChanged, this);
+      editor.completionRequested.disconnect(this.onCompletionRequested, this);
     }
   }
 
@@ -140,7 +160,7 @@ class CellCompletionHandler implements IDisposable {
   /**
    * Handle a text changed signal from an editor.
    */
-  protected onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
+  protected onTextChanged(editor: CompletableEditorWidget, change: ITextChange): void {
     if (!this._completion.model) {
       return;
     }
@@ -150,7 +170,7 @@ class CellCompletionHandler implements IDisposable {
   /**
    * Handle a completion requested signal from an editor.
    */
-  protected onCompletionRequested(editor: ICellEditorWidget, request: ICompletionRequest): void {
+  protected onCompletionRequested(editor: CompletableEditorWidget, request: ICompletionRequest): void {
     if (!this.kernel || !this._completion.model) {
       return;
     }
@@ -170,7 +190,7 @@ class CellCompletionHandler implements IDisposable {
     }
     let cell = this._activeCell;
     cell.model.source = patch.text;
-    cell.editor.setCursorPosition(patch.position);
+    cell.editor.position = cell.editor.getModel().getPositionAt(patch.position);
   }
 
   private _activeCell: BaseCellWidget = null;

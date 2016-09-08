@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ICellEditorWidget
+  CellEditorWidget
 } from '../../cells/editor';
 
 import {
@@ -10,8 +10,20 @@ import {
 } from '../../cells/widget';
 
 import {
+  CellEditorPresenter, ICellEditorView, ICellEditorPresenter
+} from '../../cells/presenter';
+
+import {
+  DefaultCellEditorWidgetDecorator
+} from '../../cells/decorator';
+
+import {
   CodeMirrorCellEditorWidget
 } from './editor';
+
+import {
+  CompletableCodeMirrorCellEditorWidget
+} from '../completion/editor';
 
 
 /**
@@ -21,28 +33,30 @@ export
 class CodeMirrorCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
   /**
    * Construct a code mirror renderer for a code cell widget.
-   * @param editorConfiguration a code mirror editor configuration
-   * @param editorInitializer a code cell widget initializer
    */
   constructor(options: CodeMirrorCodeCellWidgetRenderer.IOptions = {}) {
     super();
     this._editorConfiguration = (options.editorConfiguration ||
       CodeMirrorCodeCellWidgetRenderer.defaultEditorConfiguration);
-    this._editorInitializer = (options.editorInitializer ||
-      (editor => { /* no-op */ }));
+    this._decoratorProvider = (options.decoratorProvider ||
+      CellEditorWidget.defaultDecoratorProvider);
+    this._presenterProvider = (options.presenterProvider ||
+      CellEditorWidget.defaulPresenterProvider);
   }
 
   /**
-   * Construct a code cell widget.
+   * Construct a completable code mirro cell editor widget.
    */
-  createCellEditor(): ICellEditorWidget {
-    const widget = new CodeMirrorCellEditorWidget(this._editorConfiguration);
-    this._editorInitializer(widget);
+  createCellEditor(): CellEditorWidget {
+    const widget = new CompletableCodeMirrorCellEditorWidget(this._editorConfiguration);
+    const decorator = this._decoratorProvider(widget);
+    widget.presenter = this._presenterProvider(decorator, widget);
     return widget;
   }
 
   private _editorConfiguration: CodeMirror.EditorConfiguration = null;
-  private _editorInitializer: (editor: CodeMirrorCellEditorWidget) => void = null;
+  private _decoratorProvider: (editor: CodeMirrorCellEditorWidget) => ICellEditorView = null;
+  private _presenterProvider: (decorator: ICellEditorView, editor: CodeMirrorCellEditorWidget) => ICellEditorPresenter = null;
 }
 
 
@@ -62,9 +76,14 @@ namespace CodeMirrorCodeCellWidgetRenderer {
     editorConfiguration?: CodeMirror.EditorConfiguration;
 
     /**
-     * A code cell widget initializer function.
+     * A code mirror cell editor widget decorator provider.
      */
-    editorInitializer?: (editor: CodeMirrorCellEditorWidget) => void;
+    decoratorProvider?: (editor: CodeMirrorCellEditorWidget) => ICellEditorView;
+
+    /**
+     * A code mirror cell editor widget presenter provider.
+     */
+    presenterProvider?: (decorator: ICellEditorView, editor: CodeMirrorCellEditorWidget) => ICellEditorPresenter;
   }
 
   /**

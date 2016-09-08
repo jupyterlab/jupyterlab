@@ -42,8 +42,8 @@ import {
 } from '../notebook/cells';
 
 import {
-  EdgeLocation, ICellEditorWidget
-} from '../notebook/cells/editor';
+  CellEditorWidget,EdgeLocation
+} from '../notebook/cells/editor';;
 
 import {
   mimetypeForLanguage
@@ -247,7 +247,7 @@ class ConsoleWidget extends Widget {
     let prompt = this.prompt;
     let model = prompt.model;
     model.source += '\n';
-    prompt.editor.setCursorPosition(model.source.length);
+    prompt.editor.position = prompt.editor.getModel().getPositionAt(model.source.length); 
   }
 
   /**
@@ -280,7 +280,7 @@ class ConsoleWidget extends Widget {
   /**
    * Handle an edge requested signal.
    */
-  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): void {
+  protected onEdgeRequest(editor: CellEditorWidget, location: EdgeLocation): void {
     let prompt = this.prompt;
     if (location === 'top') {
       this._history.back().then(value => {
@@ -288,14 +288,17 @@ class ConsoleWidget extends Widget {
           return;
         }
         prompt.model.source = value;
-        prompt.editor.setCursorPosition(0);
+        prompt.editor.position = {
+          line: 0,
+          column: 0
+        };
       });
     } else {
       this._history.forward().then(value => {
         // If at the bottom end of history, then clear the prompt.
         let text = value || '';
         prompt.model.source = text;
-        prompt.editor.setCursorPosition(text.length);
+        prompt.editor.position = prompt.editor.getModel().getPositionAt(text.length);
       });
     }
   }
@@ -346,7 +349,7 @@ class ConsoleWidget extends Widget {
 
     // Associate the new prompt with the completion handler.
     this._completionHandler.activeCell = prompt;
-    this._inspectionHandler.activeCell = prompt;
+    this._inspectionHandler.activeEditor = prompt.editor;
 
     // Jump to the bottom of the console.
     Private.scrollToBottom(this.node);
@@ -368,7 +371,7 @@ class ConsoleWidget extends Widget {
         clearTimeout(timer);
         if (isComplete.content.status === 'incomplete') {
           prompt.model.source = code + isComplete.content.indent;
-          prompt.editor.setCursorPosition(prompt.model.source.length);
+          prompt.editor.position = prompt.editor.getModel().getPositionAt(prompt.model.source.length);
           resolve(false);
         } else {
           resolve(true);

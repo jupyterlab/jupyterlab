@@ -18,9 +18,8 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  ICompletionRequest, ITextChange
-} from '../cells/editor';
-
+  ITextChange, ICompletionRequest
+} from './view';
 
 /**
  * A filtered completion menu matching result.
