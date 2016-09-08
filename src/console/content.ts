@@ -106,14 +106,15 @@ class ConsoleContent extends Widget {
     this.addClass(CONSOLE_CLASS);
 
     // Create the panels that hold the content and input.
+    let layout = this.layout = new PanelLayout();
     this._content = new Panel();
     this._input = new Panel();
     this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);
 
     // Insert the content and input panes into the widget.
-    this.node.appendChild(this._content.node);
-    this.node.appendChild(this._input.node);
+    layout.addWidget(this._content);
+    layout.addWidget(this._input);
 
     this._renderer = options.renderer;
     this._rendermime = options.rendermime;
