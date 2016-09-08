@@ -62,7 +62,34 @@ const DRAG_THRESHOLD = 5;
 /**
  * A panel which allows the user to rearrange elements by drag and drop.
  *
+ * Any descendant element with the drag handle class `'jp-mod-dragHandle'`
+ * will serve as a handle that can be used for dragging. If DragPanels are
+ * nested, handles will only belong to the closest parent DragPanel. For
+ * convenience, the functions `makeHandle`, `unmakeHandle` and
+ * `createDefaultHandle` can be used to indicate which elements should be
+ * made handles. `createDefaultHandle` will create a new element as a handle
+ * with a default styling class applied. Optionally, `childrenAreDragHandles`
+ * can be set to indicate that all direct children are themselve drag handles.
  *
+ * The functionallity of the class can be extended by overriding the following
+ * functions:
+ *  - move(): Override to add custom processing of move command, for example
+ *    by performing the move in a model instead of on widgets. A possible
+ *    alternative to overriding `move` is to connect to the `moved` signal.
+ *  - addMimeData: Override to add other drag data to the mime bundle.
+ *    This is often a necessary step for allowing dragging to external
+ *    drop targets.
+ *  - processDrop: Override if you need to handle other mime data than the
+ *    default. For allowing drops from external sources, the field
+ *    `acceptDropsFromExternalSource` should be set as well.
+ *  - getDragImage: Override to change the drag image (the default is a
+ *    copy of the element being dragged).
+ *
+ * To drag and drop other things than all direct children, the following functions
+ * should be overriden: `findDragTarget`, `findDropTarget` and possibly
+ * `getIndexOfChildNode` and `move` to allow for custom to/from keys.
+ *
+ * For maximum control, `_startDrag` and `_evtDrop` can be overriden.
  */
 export
 class DragPanel extends Panel {
@@ -73,7 +100,7 @@ class DragPanel extends Panel {
   constructor(options: DragPanel.IOptions={}) {
     super(options);
     this.childrenAreDragHandles = options.childrenAreDragHandles === true;
-    this.acceptExternalDropSource = options.acceptExternalDropSource === true;
+    this.acceptDropsFromExternalSource = options.acceptDropsFromExternalSource === true;
     this.addClass(PANEL_CLASS);
   }
 
@@ -101,7 +128,7 @@ class DragPanel extends Panel {
    * This option only makes sense to set for subclasses that accept drops from
    * external sources.
    */
-  acceptExternalDropSource: boolean;
+  acceptDropsFromExternalSource: boolean;
 
 
   /**
@@ -143,6 +170,24 @@ class DragPanel extends Panel {
   }
 
   /**
+   * Called when a widget should be moved as a consequence of an internal drag event.
+   *
+   * The default implementation assumes the keys `from` and `to` are numbers
+   * indexing the drag panels direct children. It then moves the direct child as
+   * specified by these keys, then emits the `moved` signal.
+   */
+  protected move(from: any, to: any): void {
+    if (to !== from) {
+      // Adjust for the shifting of elements once 'from' is removed
+      if (to > from) {
+        to -= 1;
+      }
+      this.insertWidget(to, this.widgets.at(from));
+      this.moved.emit({from: from, to: to});
+    }
+  }
+
+  /**
    * Adds mime data represeting the drag data to the drag event's MimeData bundle.
    *
    * The default implementation adds mime data indicating the index of the direct
@@ -170,7 +215,7 @@ class DragPanel extends Panel {
    *
    * This function is called after checking:
    *  - That the `dropTarget` is a valid drop target
-   *  - The value of `event.source` if `acceptExternalDropSource` is true
+   *  - The value of `event.source` if `acceptDropsFromExternalSource` is true
    *
    * The default implementation assumes calling `getIndexOfChildNode` with
    * `dropTarget` will be valid. It will call `move` with that index as `to`,
@@ -202,7 +247,7 @@ class DragPanel extends Panel {
     this.move(sourceKey, targetKey);
     event.preventDefault();
     event.stopPropagation();
-    event.dropAction = 'move';
+    event.dropAction = 'link';
   }
 
   /**
@@ -240,24 +285,6 @@ class DragPanel extends Panel {
    */
   protected getDragImage(handle: HTMLElement): HTMLElement {
     return this.findDragTarget(handle).cloneNode(true) as HTMLElement;
-  }
-
-  /**
-   * Called when a widget should be moved as a consequence of an internal drag event.
-   *
-   * The default implementation assumes the keys `from` and `to` are numbers
-   * indexing the drag panels direct children. It then moves the direct child as
-   * specified by these keys, then emits the `moved` signal.
-   */
-  protected move(from: any, to: any): void {
-    if (to !== from) {
-      // Adjust for the shifting of elements once 'from' is removed
-      if (to > from) {
-        to -= 1;
-      }
-      this.insertWidget(to, this.widgets.at(from));
-      this.moved.emit({from: from, to: to});
-    }
   }
 
   /**
@@ -351,16 +378,14 @@ class DragPanel extends Panel {
     this._drag = new Drag({
       dragImage: dragImage,
       mimeData: new MimeData(),
-      supportedActions: 'move',
-      proposedAction: 'move',
+      supportedActions: 'all',
+      proposedAction: 'link',
       source: this
     });
     this.addMimeData(handle, this._drag.mimeData);
 
     // Start the drag and remove the mousemove listener.
     this._drag.start(clientX, clientY).then(action => {
-      // TODO: If some outside source accepted it, should we remove the widget?
-      // In principle an accepted move op should always delete the source...
       this._drag = null;
     });
     document.removeEventListener('mousemove', this, true);
@@ -389,7 +414,7 @@ class DragPanel extends Panel {
     }
 
     // If configured to, only accept internal moves:
-    if (!this.acceptExternalDropSource && event.source !== this) {
+    if (!this.acceptDropsFromExternalSource && event.source !== this) {
       event.dropAction = 'none';
       event.preventDefault();
       event.stopPropagation();
@@ -494,7 +519,7 @@ class DragPanel extends Panel {
    * Handle the `'p-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
-    if (!this.acceptExternalDropSource && event.source !== this) {
+    if (!this.acceptDropsFromExternalSource && event.source !== this) {
       return;
     }
     let target = this.findDropTarget(event.target as HTMLElement, event.mimeData);
@@ -524,7 +549,7 @@ class DragPanel extends Panel {
    * Handle the `'p-dragover'` event for the widget.
    */
   private _evtDragOver(event: IDragEvent): void {
-    if (!this.acceptExternalDropSource && event.source !== this) {
+    if (!this.acceptDropsFromExternalSource && event.source !== this) {
       return;
     }
     let target = this.findDropTarget(event.target as HTMLElement, event.mimeData);
@@ -585,7 +610,7 @@ namespace DragPanel {
      * This option only makes sense to set for subclasses that accept drops from
      * external sources.
      */
-    acceptExternalDropSource?: boolean;
+    acceptDropsFromExternalSource?: boolean;
   }
 
   export
