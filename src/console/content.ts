@@ -385,7 +385,7 @@ class ConsoleContent extends Widget {
     let prompt = this.prompt;
     let code = prompt.model.source + '\n';
     return new Promise<boolean>((resolve, reject) => {
-      let timer = setTimeout(() => resolve(true), EXECUTION_TIMEOUT);
+      let timer = setTimeout(() => { resolve(true); }, EXECUTION_TIMEOUT);
       this._session.kernel.isComplete({ code }).then(isComplete => {
         clearTimeout(timer);
         if (isComplete.content.status !== 'incomplete') {
@@ -395,7 +395,7 @@ class ConsoleContent extends Widget {
         prompt.model.source = code + isComplete.content.indent;
         prompt.editor.setCursorPosition(prompt.model.source.length);
         resolve(false);
-      }).catch(() => resolve(true));
+      }).catch(() => { resolve(true); });
     });
   }
 
@@ -430,7 +430,7 @@ class ConsoleContent extends Widget {
       }
       this.update();
     };
-    let onFailure = () => this.update();
+    let onFailure = () => { this.update(); };
     return prompt.execute(this._session.kernel).then(onSuccess, onFailure);
   }
 

@@ -123,7 +123,7 @@ function startApp(session: ISession) {
   Widget.attach(panel, document.body);
   panel.addWidget(palette);
   panel.addWidget(consolePanel);
-  window.onresize = () => panel.update();
+  window.onresize = () => { panel.update(); };
 
   let selector = '.jp-ConsolePanel';
   let category = 'Console';
