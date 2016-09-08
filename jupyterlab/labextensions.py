@@ -1,5 +1,5 @@
 # coding: utf-8
-"""Utilities for installing Javascript extensions for the notebook"""
+"""Utilities for installing Javascript extensions for JupyterLab"""
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
@@ -94,7 +94,7 @@ def install_lab_extension(path, name, overwrite=False, symlink=False,
                         user=False, prefix=None, lab_extensions_dir=None,
                         logger=None, sys_prefix=False
                         ):
-    """Install a Javascript extension for the notebook
+    """Install a Javascript extension for JupyterLab
     
     Stages files and/or directories into the lab_extensions directory.
     By default, this compares modification time, and only stages files that need updating.
@@ -213,7 +213,7 @@ def install_lab_extension_python(module, overwrite=False, symlink=False,
 
 def uninstall_lab_extension(name, user=False, sys_prefix=False, prefix=None, 
                           lab_extensions_dir=None, logger=None):
-    """Uninstall a Javascript extension of the notebook
+    """Uninstall a Javascript extension of JupyterLab
     
     Removes staged files and/or directories in the lab_extensions directory and 
     removes the extension from the frontend config.
@@ -533,30 +533,30 @@ _base_flags.pop("y", None)
 _base_flags.pop("generate-config", None)
 _base_flags.update({
     "user" : ({
-        "BaseNBExtensionApp" : {
+        "BaseLabExtensionApp" : {
             "user" : True,
         }}, "Apply the operation only for the given user"
     ),
     "system" : ({
-        "BaseNBExtensionApp" : {
+        "BaseLabExtensionApp" : {
             "user" : False,
             "sys_prefix": False,
         }}, "Apply the operation system-wide"
     ),
     "sys-prefix" : ({
-        "BaseNBExtensionApp" : {
+        "BaseLabExtensionApp" : {
             "sys_prefix" : True,
         }}, "Use sys.prefix as the prefix for installing lab_extensions (for environments, packaging)"
     ),
     "py" : ({
-        "BaseNBExtensionApp" : {
+        "BaseLabExtensionApp" : {
             "python" : True,
         }}, "Install from a Python package"
     )
 })
 _base_flags['python'] = _base_flags['py']
 
-class BaseNBExtensionApp(JupyterApp):
+class BaseLabExtensionApp(JupyterApp):
     """Base lab_extension installer app"""
     _log_formatter_cls = LogFormatter
     flags = _base_flags
@@ -575,12 +575,12 @@ flags = {}
 flags.update(_base_flags)
 flags.update({
     "overwrite" : ({
-        "InstallNBExtensionApp" : {
+        "InstallLabExtensionApp" : {
             "overwrite" : True,
         }}, "Force overwrite of existing files"
     ),
     "symlink" : ({
-        "InstallNBExtensionApp" : {
+        "InstallLabExtensionApp" : {
             "symlink" : True,
         }}, "Create symlink instead of copying files"
     ),
@@ -589,14 +589,14 @@ flags.update({
 flags['s'] = flags['symlink']
 
 aliases = {
-    "prefix" : "InstallNBExtensionApp.prefix",
-    "lab_extensions" : "InstallNBExtensionApp.lab_extensions_dir",
-    "destination" : "InstallNBExtensionApp.destination",
+    "prefix" : "InstallLabExtensionApp.prefix",
+    "lab_extensions" : "InstallLabExtensionApp.lab_extensions_dir",
+    "destination" : "InstallLabExtensionApp.destination",
 }
 
-class InstallNBExtensionApp(BaseNBExtensionApp):
-    """Entry point for installing notebook extensions"""
-    description = """Install Jupyter notebook extensions
+class InstallLabExtensionApp(BaseLabExtensionApp):
+    """Entry point for installing JupyterLab extensions"""
+    description = """Install JupyterLab extensions
     
     Usage
     
@@ -674,10 +674,10 @@ class InstallNBExtensionApp(BaseNBExtensionApp):
                 sys.exit(str(e))
 
 
-class UninstallNBExtensionApp(BaseNBExtensionApp):
-    """Entry point for uninstalling notebook extensions"""
+class UninstallLabExtensionApp(BaseLabExtensionApp):
+    """Entry point for uninstalling JupyterLab extensions"""
     version = __version__
-    description = """Uninstall Jupyter notebook extensions
+    description = """Uninstall Jupyterlab extensions
     
     Usage
     
@@ -693,9 +693,9 @@ class UninstallNBExtensionApp(BaseNBExtensionApp):
     """
     
     aliases = {
-        "prefix" : "UninstallNBExtensionApp.prefix",
-        "lab_extensions" : "UninstallNBExtensionApp.lab_extensions_dir",
-        "require": "UninstallNBExtensionApp.require",
+        "prefix" : "UninstallLabExtensionApp.prefix",
+        "lab_extensions" : "UninstallLabExtensionApp.lab_extensions_dir",
+        "require": "UninstallLabExtensionApp.require",
     }
     
     prefix = Unicode('', config=True, help="Installation prefix")
@@ -739,7 +739,7 @@ class UninstallNBExtensionApp(BaseNBExtensionApp):
                 sys.exit(str(e))
 
 
-class ToggleNBExtensionApp(BaseNBExtensionApp):
+class ToggleLabExtensionApp(BaseLabExtensionApp):
     """A base class for apps that enable/disable extensions"""
     name = "jupyter lab_extension enable/disable"
     version = __version__
@@ -799,7 +799,7 @@ class ToggleNBExtensionApp(BaseNBExtensionApp):
             self.toggle_lab_extension(self.extra_args[0])
 
 
-class EnableNBExtensionApp(ToggleNBExtensionApp):
+class EnableLabExtensionApp(ToggleLabExtensionApp):
     """An App that enables lab_extensions"""
     name = "jupyter lab_extension enable"
     description = """
@@ -811,7 +811,7 @@ class EnableNBExtensionApp(ToggleNBExtensionApp):
     _toggle_value = True
 
 
-class DisableNBExtensionApp(ToggleNBExtensionApp):
+class DisableLabExtensionApp(ToggleLabExtensionApp):
     """An App that disables lab_extensions"""
     name = "jupyter lab_extension disable"
     description = """
@@ -823,7 +823,7 @@ class DisableNBExtensionApp(ToggleNBExtensionApp):
     _toggle_value = None
 
 
-class ListNBExtensionsApp(BaseNBExtensionApp):
+class ListLabExtensionsApp(BaseLabExtensionApp):
     """An App that lists and validates lab_extensions"""
     name = "jupyter lab_extension list"
     version = __version__
@@ -863,31 +863,31 @@ jupyter lab_extension disable --py <packagename>    # disable all lab_extensions
 jupyter lab_extension uninstall --py <packagename>  # uninstall an lab_extension in a Python package
 """
 
-class NBExtensionApp(BaseNBExtensionApp):
+class LabExtensionApp(BaseLabExtensionApp):
     """Base jupyter lab_extension command entry point"""
     name = "jupyter lab_extension"
     version = __version__
-    description = "Work with Jupyter notebook extensions"
+    description = "Work with JupyterLab extensions"
     examples = _examples
 
     subcommands = dict(
-        install=(InstallNBExtensionApp,"Install an lab_extension"),
-        enable=(EnableNBExtensionApp, "Enable an lab_extension"),
-        disable=(DisableNBExtensionApp, "Disable an lab_extension"),
-        uninstall=(UninstallNBExtensionApp, "Uninstall an lab_extension"),
-        list=(ListNBExtensionsApp, "List lab_extensions")
+        install=(InstallLabExtensionApp,"Install an lab_extension"),
+        enable=(EnableLabExtensionApp, "Enable an lab_extension"),
+        disable=(DisableLabExtensionApp, "Disable an lab_extension"),
+        uninstall=(UninstallLabExtensionApp, "Uninstall an lab_extension"),
+        list=(ListLabExtensionsApp, "List lab_extensions")
     )
 
     def start(self):
         """Perform the App's functions as configured"""
-        super(NBExtensionApp, self).start()
+        super(LabExtensionApp, self).start()
 
         # The above should have called a subcommand and raised NoStart; if we
         # get here, it didn't, so we should self.log.info a message.
         subcmds = ", ".join(sorted(self.subcommands))
         sys.exit("Please supply at least one subcommand: %s" % subcmds)
 
-main = NBExtensionApp.launch_instance
+main = LabExtensionApp.launch_instance
 
 #------------------------------------------------------------------------------
 # Private API
