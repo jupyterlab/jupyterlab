@@ -177,9 +177,26 @@ function getDefineName(module) {
     return '__ignored__';
   }
   var request = module.userRequest || module.context;
-  var rootPath = findRoot(request);
+  var parts = request.split('!');
+  var names = [];
+  for (var i = 0; i < parts.length; i++) {
+    names.push(getModuleVersionName(parts[i]));
+  }
+  return names.join('!');
+}
+
+
+/**
+ * Get a mangled name for a path using the extact version.
+ *
+ * @param path - The absolute path of the module.
+ *
+ * @returns A version-mangled path (e.g. "foo@1.0.0/lib/bar/baz.js")
+ */
+function getModuleVersionName(path) {
+  var rootPath = findRoot(path);
   var package = getPackage(rootPath);
-  var modPath = request.slice(rootPath.length + 1);
+  var modPath = path.slice(rootPath.length + 1);
   var name = package.name + '@' + package.version;
   if (modPath) {
     name += '/' + modPath;
@@ -202,11 +219,35 @@ function getRequireName(module) {
   }
   var issuer = module.issuer || module.userRequest;
   var request = module.userRequest || module.context;
-  var rootPath = findRoot(request);
+  var requestParts = request.split('!');
+  var parts = [];
+
+  // Handle the loaders.
+  for (var i = 0; i < requestParts.length - 1; i++) {
+    parts.push(getModuleSemverName(requestParts[i], requestParts[i]));
+  }
+  // Handle the last part.
+  var base = requestParts[requestParts.length - 1];
+  parts.push(getModuleSemverName(base, issuer));
+  return parts.join('!');
+}
+
+
+/**
+ * Get the semver-mangled name for a request.
+ *
+ * @param modPath - The absolute path of the module.
+ *
+ * @param issuer - The path of the issuer of the module request.
+ *
+ * @returns A semver-mangled path (e.g. "foo@^1.0.0/lib/bar/baz.js")
+ */
+function getModuleSemverName(modPath, issuer) {
+  var rootPath = findRoot(modPath);
   var rootPackage = getPackage(rootPath);
   var issuerPath = findRoot(issuer);
   var issuerPackage = getPackage(issuer);
-  var modPath = request.slice(rootPath.length + 1);
+  var modPath = modPath.slice(rootPath.length + 1);
   var name = rootPackage.name;
   var semver = issuerPackage.dependencies[name] || rootPackage.version;
   if (issuerPackage.name === rootPackage.name) {
@@ -335,7 +376,7 @@ function parseModule(compilation, module, pluginName, publicPath) {
   // Create our header and footer with a version-mangled defined name.
   var defineName = getDefineName(module);
   var header = '/** START DEFINE BLOCK for ' + defineName + ' **/\n';
-  header += pluginName + '.define("' + getDefineName(module);
+  header += pluginName + '.define("' + defineName;
   header += '", function (module, exports, ' + requireName + ') {\n\t';
   var footer = '\n})\n/** END DEFINE BLOCK for ' + defineName + ' **/';
 
