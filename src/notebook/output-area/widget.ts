@@ -236,7 +236,7 @@ class OutputAreaWidget extends Widget {
     // Trigger a update of the child widgets.
     let layout = this.layout as PanelLayout;
     for (let i = 0; i < layout.widgets.length; i++) {
-      this._updateChild(i);
+      this.updateChild(i);
     }
   }
 
@@ -317,17 +317,17 @@ class OutputAreaWidget extends Widget {
   /**
    * Add a child to the layout.
    */
-  protected _addChild(): void {
+  protected addChild(): void {
     let widget = this._renderer.createOutput({ rendermime: this.rendermime });
     let layout = this.layout as PanelLayout;
     layout.addWidget(widget);
-    this._updateChild(layout.widgets.length - 1);
+    this.updateChild(layout.widgets.length - 1);
   }
 
   /**
    * Remove a child from the layout.
    */
-  protected _removeChild(index: number): void {
+  protected removeChild(index: number): void {
     let layout = this.layout as PanelLayout;
     layout.widgets.at(index).dispose();
   }
@@ -335,7 +335,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Update a child in the layout.
    */
-  protected _updateChild(index: number): void {
+  protected updateChild(index: number): void {
     let layout = this.layout as PanelLayout;
     let widget = layout.widgets.at(index) as OutputWidget;
     let output = this._model.get(index);
@@ -345,11 +345,11 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes on the model state.
    */
-  protected _onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
+  protected onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
     switch (args.type) {
     case 'add':
       // Children are always added at the end.
-      this._addChild();
+      this.addChild();
       break;
     case 'replace':
       // Only "clear" is supported by the model.
@@ -370,11 +370,11 @@ class OutputAreaWidget extends Widget {
 
       let oldValues = args.oldValue as nbformat.IOutput[];
       for (let i = args.oldIndex; i < oldValues.length; i++) {
-        this._removeChild(args.oldIndex);
+        this.removeChild(args.oldIndex);
       }
       break;
     case 'set':
-      this._updateChild(args.newIndex);
+      this.updateChild(args.newIndex);
       break;
     default:
       break;
@@ -400,29 +400,29 @@ class OutputAreaWidget extends Widget {
   private _onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
     let layout = this.layout as PanelLayout;
     if (oldValue) {
-      oldValue.changed.disconnect(this._onModelStateChanged, this);
+      oldValue.changed.disconnect(this.onModelStateChanged, this);
       oldValue.disposed.disconnect(this._onModelDisposed, this);
     }
 
     let start = newValue ? newValue.length : 0;
     // Clear unnecessary child widgets.
     for (let i = start; i < layout.widgets.length; i++) {
-      this._removeChild(i);
+      this.removeChild(i);
     }
     if (!newValue) {
       return;
     }
 
-    newValue.changed.connect(this._onModelStateChanged, this);
+    newValue.changed.connect(this.onModelStateChanged, this);
     newValue.disposed.connect(this._onModelDisposed, this);
 
     // Reuse existing child widgets.
     for (let i = 0; i < layout.widgets.length; i++) {
-      this._updateChild(i);
+      this.updateChild(i);
     }
     // Add new widgets as necessary.
     for (let i = layout.widgets.length; i < newValue.length; i++) {
-      this._addChild();
+      this.addChild();
     }
   }
 
