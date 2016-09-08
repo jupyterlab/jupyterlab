@@ -5,13 +5,13 @@
 // See https://github.com/webpack/css-loader/issues/144
 require('es6-promise').polyfill();
 
-var JupyterLabPlugin = require('./plugin');
+var buildExtension = require('./creator');
+
 
 console.log('Generating bundles...');
 
 
 var LOADERS = [
-  { test: /\.css$/, loader: JupyterLabPlugin.cssLoader },
   { test: /\.json$/, loader: 'json-loader' },
   { test: /\.html$/, loader: 'file-loader' },
   // jquery-ui loads some images
@@ -25,29 +25,26 @@ var LOADERS = [
 ];
 
 
-module.exports = [{
-  entry: {
-    main: './index.js'
-  },
+buildExtension('main', './index.js', {
   output: {
-    path: __dirname + '/build',
-    filename: '[name].bundle.js',
     publicPath: 'lab/'
   },
-  node: {
-    fs: 'empty',
-  },
-  debug: true,
-  bail: true,
-  devtool: 'source-map',
   module: {
     loaders: LOADERS
+  }
+});
+
+buildExtension('extensions', './extensions.js', {
+  output: {
+    publicPath: 'lab/'
   },
-  plugins: [
-    new JupyterLabPlugin()
-  ],
-},
-{
+  module: {
+    loaders: LOADERS
+  }
+});
+
+
+module.exports = {
   entry: {
     loader: './loader'
   },
@@ -63,27 +60,4 @@ module.exports = [{
   debug: true,
   bail: true,
   devtool: 'source-map'
-},
-{
-  entry: {
-    extensions: './extensions'
-  },
-  output: {
-    path: __dirname + '/build',
-    filename: '[name].bundle.js',
-    publicPath: 'lab/'
-  },
-  node: {
-    fs: 'empty'
-  },
-  debug: true,
-  bail: true,
-  devtool: 'source-map',
-  module: {
-    loaders: LOADERS
-  },
-  plugins: [
-    new JupyterLabPlugin()
-  ],
 }
-];

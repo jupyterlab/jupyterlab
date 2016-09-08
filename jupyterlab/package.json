@@ -8,9 +8,11 @@
   "dependencies": {
     "es6-promise": "^3.1.2",
     "font-awesome": "^4.6.1",
+    "fs-extra": "^0.30.0",
     "jupyterlab": "file:../",
     "material-design-icons": "^2.2.3",
-    "semver": "^5.3.0"
+    "semver": "^5.3.0",
+    "webpack-config": "^6.1.2"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
