@@ -31,24 +31,24 @@ describe('common/dragpanel', () => {
       it('should handle empty args', () => {
         let widget = new DragPanel();
         expect(widget).to.be.an(DragPanel);
-        expect(widget.acceptExternalDropSource).to.be(false);
+        expect(widget.acceptDropsFromExternalSource).to.be(false);
         expect(widget.childrenAreDragHandles).to.be(false);
       });
 
       it('should take an empty options object', () => {
         let widget = new DragPanel({});
         expect(widget).to.be.an(DragPanel);
-        expect(widget.acceptExternalDropSource).to.be(false);
+        expect(widget.acceptDropsFromExternalSource).to.be(false);
         expect(widget.childrenAreDragHandles).to.be(false);
       });
 
       it('should take an options object with optional arguments', () => {
         let widget = new DragPanel({
           childrenAreDragHandles: true,
-          acceptExternalDropSource: true
+          acceptDropsFromExternalSource: true
          });
         expect(widget).to.be.an(DragPanel);
-        expect(widget.acceptExternalDropSource).to.be(true);
+        expect(widget.acceptDropsFromExternalSource).to.be(true);
         expect(widget.childrenAreDragHandles).to.be(true);
       });
 
