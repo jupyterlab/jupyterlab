@@ -18,12 +18,12 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  scrollIntoViewIfNeeded
-} from 'phosphor/lib/dom/query';
+  Panel, PanelLayout
+} from 'phosphor/lib/ui/panel';
 
 import {
-  PanelLayout
-} from 'phosphor/lib/ui/panel';
+  SplitPanel
+} from 'phosphor/lib/ui/splitpanel';
 
 import {
   Widget
@@ -65,38 +65,63 @@ import {
 /**
  * The class name added to console widgets.
  */
-const CONSOLE_CLASS = 'jp-Console';
+const CONSOLE_CLASS = 'jp-ConsoleContent';
 
 /**
  * The class name added to the console banner.
  */
-const BANNER_CLASS = 'jp-Console-banner';
+const BANNER_CLASS = 'jp-ConsoleContent-banner';
 
 /**
  * The class name of the active prompt
  */
-const PROMPT_CLASS = 'jp-Console-prompt';
+const PROMPT_CLASS = 'jp-ConsoleContent-prompt';
+
+/**
+ * The class name of the panel that holds cell content.
+ */
+const CONTENT_CLASS = 'jp-ConsoleContent-content';
+
+/**
+ * The class name of the panel that holds prompts.
+ */
+const INPUT_CLASS = 'jp-ConsoleContent-input';
+
+/**
+ * The timeout in ms for execution requests to the kernel.
+ */
+const EXECUTION_TIMEOUT = 250;
 
 
 /**
- * A widget containing a Jupyter console.
+ * A widget containing a Jupyter console's content.
+ *
+ * #### Notes
+ * The ConsoleContent class is intended to be used within a ConsolePanel
+ * instance. Under most circumstances, it is not instantiated by user code.
  */
 export
-class ConsoleWidget extends Widget {
+class ConsoleContent extends Widget {
   /**
    * Construct a console widget.
    */
-  constructor(options: ConsoleWidget.IOptions) {
-    super();
+  constructor(options: ConsoleContent.IOptions) {
+    super({ node: document.createElement('div') });
     this.addClass(CONSOLE_CLASS);
 
-    let layout = new PanelLayout();
+    // Create the panels that holds the content and input.
+    this._content = new Panel();
+    this._input = new Panel();
+    this._content.addClass(CONTENT_CLASS);
+    this._input.addClass(INPUT_CLASS);
 
-    this.layout = layout;
+    // Insert the content and input panes into the widget.
+    this.node.appendChild(this._content.node);
+    this.node.appendChild(this._input.node);
+
     this._renderer = options.renderer;
     this._rendermime = options.rendermime;
     this._session = options.session;
-
     this._history = new ConsoleHistory({ kernel: this._session.kernel });
 
     // Instantiate tab completion widget.
@@ -126,7 +151,9 @@ class ConsoleWidget extends Widget {
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     banner.model.source = '...';
-    layout.addWidget(banner);
+
+    // Add the banner to the content pane.
+    this._content.addWidget(banner);
 
     // Set the banner text and the mimetype.
     this.initialize();
@@ -149,7 +176,7 @@ class ConsoleWidget extends Widget {
   /**
    * A signal emitted when the console executes its prompt.
    */
-  executed: ISignal<ConsoleWidget, Date>;
+  executed: ISignal<ConsoleContent, Date>;
 
 
   /**
@@ -166,9 +193,8 @@ class ConsoleWidget extends Widget {
    * The last cell in a console is always a `CodeCellWidget` prompt.
    */
   get prompt(): CodeCellWidget {
-    let layout = this.layout as PanelLayout;
-    let last = layout.widgets.length - 1;
-    return last > 0 ? layout.widgets.at(last) as CodeCellWidget : null;
+    let inputLayout = (this._input.layout as PanelLayout);
+    return inputLayout.widgets.at(0) as CodeCellWidget || null;
   }
 
   /**
@@ -206,7 +232,7 @@ class ConsoleWidget extends Widget {
    * Execute the current prompt.
    *
    * @param force - Whether to force execution without checking code
-   *    completeness.
+   * completeness.
    */
   execute(force=false): Promise<void> {
     this.dismissCompletion();
@@ -262,11 +288,12 @@ class ConsoleWidget extends Widget {
    */
   serialize(): nbformat.ICodeCell[] {
     let output: nbformat.ICodeCell[] = [];
-    let layout = this.layout as PanelLayout;
+    let layout = this._content.layout as PanelLayout;
     for (let i = 1; i < layout.widgets.length; i++) {
       let widget = layout.widgets.at(i) as CodeCellWidget;
       output.push(widget.model.toJSON());
     }
+    output.push(this.prompt.model.toJSON());
     return output;
   }
 
@@ -304,53 +331,54 @@ class ConsoleWidget extends Widget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    let prompt = this.prompt;
-    scrollIntoViewIfNeeded(this.parent.node, prompt.node);
+    super.onUpdateRequest(msg);
+    Private.scrollToBottom(this._content.node);
   }
 
   /**
    * Initialize the banner and mimetype.
    */
   protected initialize(): void {
-    if (this._session.kernel.info) {
+    let session = this._session;
+    if (session.kernel.info) {
       this._handleInfo(this._session.kernel.info);
-    } else {
-      this._session.kernel.kernelInfo().then(msg => {
-        this._handleInfo(msg.content);
-      });
+      return;
     }
+    session.kernel.kernelInfo().then(msg => this._handleInfo(msg.content));
   }
 
   /**
    * Make a new prompt.
    */
   protected newPrompt(): void {
-    // Make the previous editor read-only and clear its signals.
     let prompt = this.prompt;
+    let content = this._content;
+    let input = this._input;
+
+    // Make the last prompt read-only, clear its signals, and move to content.
     if (prompt) {
       prompt.readOnly = true;
       prompt.removeClass(PROMPT_CLASS);
       clearSignalData(prompt.editor);
+      content.addWidget((input.layout as PanelLayout).removeWidgetAt(0));
     }
 
-    // Create the new prompt and add to layout.
-    let layout = this.layout as PanelLayout;
+    // Create the new prompt.
     prompt = this._renderer.createPrompt(this._rendermime);
     prompt.mimetype = this._mimetype;
     prompt.addClass(PROMPT_CLASS);
-    layout.addWidget(prompt);
+    this._input.addWidget(prompt);
 
     // Hook up completion and history handling.
     let editor = prompt.editor;
     editor.edgeRequested.connect(this.onEdgeRequest, this);
 
-    // Associate the new prompt with the completion handler.
+    // Associate the new prompt with the completion and inspection handlers.
     this._completionHandler.activeCell = prompt;
     this._inspectionHandler.activeCell = prompt;
 
-    // Jump to the bottom of the console.
-    Private.scrollToBottom(this.node);
     prompt.activate();
+    this.update();
   }
 
   /**
@@ -360,22 +388,17 @@ class ConsoleWidget extends Widget {
     let prompt = this.prompt;
     let code = prompt.model.source + '\n';
     return new Promise<boolean>((resolve, reject) => {
-      // Allow 250 ms for the response.
-      let timer = setTimeout(() => {
-        resolve(true);
-      }, 250);
+      let timer = setTimeout(() => resolve(true), EXECUTION_TIMEOUT);
       this._session.kernel.isComplete({ code }).then(isComplete => {
         clearTimeout(timer);
-        if (isComplete.content.status === 'incomplete') {
-          prompt.model.source = code + isComplete.content.indent;
-          prompt.editor.setCursorPosition(prompt.model.source.length);
-          resolve(false);
-        } else {
+        if (isComplete.content.status !== 'incomplete') {
           resolve(true);
+          return;
         }
-      }).catch(() => {
-        resolve(true);
-      });
+        prompt.model.source = code + isComplete.content.indent;
+        prompt.editor.setCursorPosition(prompt.model.source.length);
+        resolve(false);
+      }).catch(() => resolve(true));
     });
   }
 
@@ -387,8 +410,7 @@ class ConsoleWidget extends Widget {
     this._history.push(prompt.model.source);
     // Create a new prompt before kernel execution to allow typeahead.
     this.newPrompt();
-    return prompt.execute(this._session.kernel).then(
-    (value: KernelMessage.IExecuteReplyMsg) => {
+    let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       this.executed.emit(new Date());
       if (!value) {
         this._inspectionHandler.handleExecuteReply(null);
@@ -409,17 +431,17 @@ class ConsoleWidget extends Widget {
           }
         }
       }
-      Private.scrollToBottom(this.node);
-    },
-      () => { Private.scrollToBottom(this.node); }
-    );
+      this.update();
+    };
+    let onFailure = () => this.update();
+    return prompt.execute(this._session.kernel).then(onSuccess, onFailure);
   }
 
   /**
    * Update the console based on the kernel info.
    */
   private _handleInfo(info: KernelMessage.IInfoReply): void {
-    let layout = this.layout as PanelLayout;
+    let layout = this._content.layout as PanelLayout;
     let banner = layout.widgets.at(0) as RawCellWidget;
     banner.model.source = info.banner;
     this._mimetype = mimetypeForLanguage(info.language_info);
@@ -428,46 +450,57 @@ class ConsoleWidget extends Widget {
 
   private _completion: CompletionWidget = null;
   private _completionHandler: CellCompletionHandler = null;
+  private _content: Panel = null;
+  private _input: Panel = null;
   private _inspectionHandler: InspectionHandler = null;
   private _mimetype = 'text/x-ipython';
   private _rendermime: IRenderMime = null;
-  private _renderer: ConsoleWidget.IRenderer = null;
+  private _renderer: ConsoleContent.IRenderer = null;
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
 }
 
 
-// Define the signals for the `ConsoleWidget` class.
-defineSignal(ConsoleWidget.prototype, 'executed');
+// Define the signals for the `ConsoleContent` class.
+defineSignal(ConsoleContent.prototype, 'executed');
 
 
 /**
- * A namespace for ConsoleWidget statics.
+ * A namespace for ConsoleContent statics.
  */
 export
-namespace ConsoleWidget {
+namespace ConsoleContent {
   /**
-   * The initialization options for a console widget.
+   * The initialization options for a console content widget.
    */
   export
   interface IOptions {
     /**
-     * The completion widget for a console widget.
+     * The completion widget for a console content widget.
      */
     completion?: CompletionWidget;
 
     /**
-     * The mime renderer for the console widget.
+     * The orientation of the console content.
+     *
+     * #### Notes
+     * This setting indicates how the prompt and output are separated. The
+     * default value is `'vertical'`.
      */
-    rendermime: IRenderMime;
+    orientation?: 'horizontal' | 'vertical';
 
     /**
-     * The renderer for a console widget.
+     * The renderer for a console content widget.
      */
     renderer: IRenderer;
 
     /**
-     * The session for the console widget.
+     * The mime renderer for the console content widget.
+     */
+    rendermime: IRenderMime;
+
+    /**
+     * The session for the console content widget.
      */
     session: ISession;
   }
