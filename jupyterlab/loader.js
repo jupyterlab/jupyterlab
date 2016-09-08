@@ -19,6 +19,11 @@ var installedModules = {};
 var lookupCache = {};
 
 /**
+ * A cache of parsed version-mangled module names.
+ */
+var nameCache = {};
+
+/**
  * Object to store loaded and loading bundles.
  * "0" means "already loaded".
  * Array means "loading", array contains callbacks.
@@ -134,6 +139,27 @@ function requireBundles(paths) {
 
 
 /**
+ * Parse a version-mangled module name.
+ */
+function parseName(name) {
+  if (nameCache[name]) {
+    return nameCache[name];
+  }
+  var match = name.match(/(^(?:@[^/]+\/)??[^/@]+?)@([^/]+?)(\/.*)?$/);
+  if (!match) {
+    nameCache[name] = null;
+  } else {
+    nameCache[name] = {
+      package: match[1],
+      version: match[2],
+      module: match[3]
+    }
+  }
+  return nameCache[name];
+}
+
+
+/**
  * Find a module matching a given module request.
  *
  * @param name - The semver-mangled fully qualified name of the module.
@@ -150,27 +176,21 @@ function findModuleId(name) {
   }
   var modules = Object.keys(registered);
   // Get the package name, semver string, and module name.
-  var parts = name.match(/(^.*?)@(.*?)(\/.*$)/) || name.match(/(^.*?)@(.*?)$/);
-  if (!parts) {
+  var source = parseName(name);
+  if (!source) {
     throw Error('Invalid module name ' + name);
-  }
-  if (parts.length === 2) {
-    parts.push('');
   }
   var matches = [];
   var versions = [];
   for (var i = 0; i < modules.length; i++) {
     var mod = modules[i];
-    var modParts = mod.match(/(^.*?)@(.*?)(\/.*$)/) || mod.match(/(^.*?)@(.*?)$/);
-    if (!modParts) {
+    var target = parseName(mod);
+    if (!target) {
       continue;
     }
-    if (modParts.length === 2) {
-      modParts.push('');
-    }
-    if (modParts[1] === parts[1] && modParts[3] === parts[3]) {
+    if (source.package === target.package && source.module === target.module) {
       matches.push(mod);
-      versions.push(modParts[2]);
+      versions.push(target.version);
     }
   };
 
@@ -180,7 +200,7 @@ function findModuleId(name) {
   }
   var index = 0;
   if (matches.length > 1) {
-    var best = semver.maxSatisfying(versions, parts[2]);
+    var best = semver.maxSatisfying(versions, source.version);
     if (!best) {
       throw new Error('No module found satisying: ' + name);
     }
@@ -190,9 +210,11 @@ function findModuleId(name) {
   return matches[index];
 }
 
+
 // Add the ensure function to the require module for internal use within
 // the modules.
 requireModule.e = ensureBundle;
+
 
 module.exports = {
   define: defineModule,
