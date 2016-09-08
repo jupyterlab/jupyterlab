@@ -624,7 +624,9 @@ namespace DragPanel {
   }
 
   /**
-   * Create a default handle widget for dragging (see styling in dragpanel.css)
+   * Create a default handle widget for dragging (see styling in dragpanel.css).
+   *
+   * The handle will need to be styled to ensure a minimum size
    */
   export
   function createDefaultHandle(): Widget {

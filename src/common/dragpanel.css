@@ -1,11 +1,17 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 
-.jp-DragOrderPanel-dragHandle{
+
+.jp-DragPanel-dragHandle{
   background:
     radial-gradient(rgba(255,255,255, .6) 30%, transparent 31%) 0 0,
     radial-gradient(transparent 19%,rgba(0,0,0,.4) 20%, transparent 50%) 0 1px;
   background-size:6px 6px;
 }
 
-.jp-DragOrderPanel .p-Widget.jp-mod-dropTarget {
+.jp-DragPanel .p-Widget.jp-mod-dropTarget {
   border-top: 1px dashed black;
 }
