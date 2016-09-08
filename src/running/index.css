@@ -4,19 +4,25 @@
 |----------------------------------------------------------------------------*/
 
 .jp-RunningSessions {
+  display: flex;
+  flex-direction: column;
   min-width: 300px;
-  color: #757575;
-  background: #FAFAFA;
-  font-size: 13px;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
 }
 
 
 .jp-RunningSessions-header {
-  border-bottom: 1px solid #E0E0E0;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 
 .jp-RunningSessions-headerTitle {
+  flex: 1 1 auto;
   padding: 6px;
   font-size: 12px;
   vertical-align: middle;
@@ -27,55 +33,80 @@
   flex: 1 1 auto;
   max-width: 100px;
   padding: 4px 6px;
-  background: #FAFAFA;
-  color: #757575;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
   border: none;
-  font-size: 14px;
+  font-size: var(--jp-ui-font-size1);
   outline: 0;
   padding-top: 8px;
   padding-bottom: 8px;
 }
 
 
+.jp-RunningSessions-section {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+}
+
+
 .jp-RunningSessions-headerRefresh:before {
   font-family: FontAwesome;
   content: '\f021'; /* refresh */
-  font-size: 12px;
+  font-size: var(--jp-ui-icon-font-size);
 }
 
 
 .jp-RunningSessions-headerRefresh:hover {
-  background: #F5F5F5;
-  border-color: #D0D0D0;
+  background: var(--jp-layout-color2);
   z-index: 1; /* raise overlapping border */
 }
 
 
 .jp-RunningSessions-sectionHeader {
+  flex: 0 0 auto;
   margin: 4px 0px;
   padding: 4px 12px;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  border-bottom: 1px solid #E0E0E0;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 2px;
 }
 
 
+.jp-RunningSessions-sectionContainer {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+
+.jp-RunningSessions-sectionList {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+
 .jp-RunningSessions-item {
+  display: flex;
+  flex-direction: row;
   padding: 3px 12px;
   font-size: 13px;
   font-weight: 500;
-  color: #757575;
+  color: var(--jp-ui-font-color1);
 }
 
 
 .jp-RunningSessions-item:hover {
-    background: #F5F5F5;
+    background: var(--jp-layout-color2);
 }
 
 
 .jp-RunningSessions-itemIcon {
+  flex: 0 0 auto;
   padding: 1px 4px;
   font-size: 14px;
   font-family: FontAwesome;
@@ -100,19 +131,22 @@
 }
 
 .jp-RunningSessions-itemLabel {
+  flex: 1 1 auto;
   padding: 1px;
 }
 
 .jp-RunningSessions-itemKernelName {
+  flex: 0 0 auto;
   padding: 1px;
   margin-right: 7px;
 }
 
 
 .jp-RunningSessions-itemShutdown {
+  flex: 0 0 auto;
   padding: 1px 4px;
-  color: #ffffff;
-  background: #f0ad4e;
+  color: var(--jp-inverse-ui-font-color0);
+  background: var(--jp-warn-color);
   border-radius: 1px;
   cursor: pointer;
 }

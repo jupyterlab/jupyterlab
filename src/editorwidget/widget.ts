@@ -23,7 +23,7 @@ import {
 } from '../codemirror';
 
 import {
-  CodeMirrorWidget
+  CodeMirrorWidget, DEFAULT_CODEMIRROR_THEME
 } from '../codemirror/widget';
 
 import {
@@ -67,11 +67,18 @@ class EditorWidget extends CodeMirrorWidget {
    * Construct a new editor widget.
    */
   constructor(context: IDocumentContext<IDocumentModel>) {
-    super();
+    super({
+      extraKeys: {
+        'Tab': 'indentMore',
+      },
+      indentUnit: 4,
+      theme: DEFAULT_CODEMIRROR_THEME,
+      lineNumbers: true,
+      lineWrapping: true,
+    });
     this.addClass(EDITOR_CLASS);
     let editor = this.editor;
     let model = context.model;
-    editor.setOption('lineNumbers', true);
     let doc = editor.getDoc();
     doc.setValue(model.toString());
     this.title.label = context.path.split('/').pop();

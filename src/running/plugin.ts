@@ -40,5 +40,5 @@ function activateRunningSessions(app: JupyterLab, services: IServiceManager): vo
   });
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
-  app.shell.addToRightArea(running, { rank: 1 });
+  app.shell.addToLeftArea(running, { rank: 50 });
 }

@@ -1,0 +1,245 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  /* These need to be root because tabs get attached to the body during dragging. */
+  --jp-private-horizontal-tab-height: 24px;
+  --jp-private-horizontal-tab-width: 144px;
+}
+
+
+/*-----------------------------------------------------------------------------
+| TabBar
+|----------------------------------------------------------------------------*/
+
+
+.p-TabBar {
+  overflow: visible;
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+.p-TabBar.p-mod-horizontal {
+  min-height: var(--jp-private-horizontal-tab-height);
+}
+
+
+.p-TabBar.p-mod-vertical {
+  min-width: 80px;
+}
+
+
+.p-TabBar.p-mod-top {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+
+.p-TabBar.p-mod-bottom {
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+
+.p-TabBar.p-mod-left {
+  border-right: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+
+.p-TabBar.p-mod-right {
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+
+.p-TabBar-content {
+  min-width: 0;
+  min-height: 0;
+}
+
+
+.p-TabBar.p-mod-top > .p-TabBar-content {
+  align-items: flex-end;
+}
+
+
+.p-TabBar.p-mod-bottom > .p-TabBar-content {
+  align-items: flex-start;
+}
+
+
+.p-TabBar-tab {
+  padding: 0px 10px;
+  background: var(--jp-layout-color2);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+
+.p-TabBar-tab.p-mod-current {
+  background: var(--jp-layout-color1);
+}
+
+
+.p-TabBar-tab:hover:not(.p-mod-current) {
+  background: var(--jp-layout-color1);
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab,
+.p-TabBar.p-mod-bottom .p-TabBar-tab {
+  flex: 0 1 var(--jp-private-horizontal-tab-width);
+  min-height: calc(var(--jp-private-horizontal-tab-height) - 2*var(--jp-border-width));
+  /* For some reason Firefox needs us to give a max-height as well...*/
+  max-height: calc(var(--jp-private-horizontal-tab-height) - 2*var(--jp-border-width));
+  min-width: 35px;
+  margin-left: calc(-1*var(--jp-border-width));
+  line-height: calc(var(--jp-private-horizontal-tab-height) - 3*var(--jp-border-width));
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab {
+  border-bottom: none;
+}
+
+
+.p-TabBar.p-mod-bottom .p-TabBar-tab {
+  border-top: none;
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab:first-child,
+.p-TabBar.p-mod-bottom .p-TabBar-tab:first-child {
+  margin-left: 0;
+}
+
+.p-TabBar-tab.p-mod-current {
+    color: var(--jp-ui-font-color0);
+}
+
+.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
+.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+  min-height: calc(var(--jp-private-horizontal-tab-height) - var(--jp-border-width));
+}
+
+
+.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current {
+  transform: translateY(var(--jp-border-width));
+}
+
+
+.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+  transform: translateY(-1*var(--jp-border-width));
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab,
+.p-TabBar.p-mod-right .p-TabBar-tab {
+  flex: 0 1 40px;
+  margin-top: -1px;
+  line-height: 40px;
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab {
+  border-right: none;
+}
+
+
+.p-TabBar.p-mod-right .p-TabBar-tab {
+  border-left: none;
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab:first-child,
+.p-TabBar.p-mod-right .p-TabBar-tab:first-child {
+  margin-top: 0;
+}
+
+
+.p-TabBar.p-mod-left .p-TabBar-tab.p-mod-current,
+.p-TabBar.p-mod-right .p-TabBar-tab.p-mod-current {
+  min-width: 80px;
+  max-width: 80px;
+}
+
+
+.p-TabBar.p-mod-right .p-TabBar-tab.p-mod-current {
+  transform: translateX(-1px);
+}
+
+
+.p-TabBar-tabIcon,
+.p-TabBar-tabLabel,
+.p-TabBar-tabCloseIcon {
+  display: inline-block;
+}
+
+
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
+  margin-left: 4px;
+}
+
+
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
+  content: '\f00d';  /* close */
+  font-family: FontAwesome;
+}
+
+
+.p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon:before {
+  font-family: FontAwesome;
+  content: '\f111'; /* circle */
+  font-size: 10px;
+}
+
+
+.p-TabBar-tab.p-mod-drag-image {
+  min-height: var(--jp-private-horizontal-tab-height);
+  min-width: var(--jp-private-horizontal-tab-width);
+  line-height: var(--jp-private-horizontal-tab-height);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-top: var(--jp-border-width) solid var(--jp-brand-color1);
+  font-size: var(--jp-ui-font-size1);
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  transform: translateX(-40%) translateY(-58%);
+}
+
+
+/*-----------------------------------------------------------------------------
+| TabPanel
+|----------------------------------------------------------------------------*/
+
+
+.p-TabPanel-stackedPanel {
+  padding: 0px;
+  background: var(--jp-dockpanel-content-background);
+  border: var(--jp-border-width) solid #C0C0C0;
+  /* This shadow requires a bottom/right padding on the .p-DockPanel-tabPanel */
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+
+.p-TabPanel.p-mod-top-to-bottom > .p-TabPanel-stackedPanel {
+  border-top: none;
+}
+
+
+.p-TabPanel.p-mod-bottom-to-top > .p-TabPanel-stackedPanel {
+  border-bottom: none;
+}
+
+
+.p-TabPanel.p-mod-left-to-right > .p-TabPanel-stackedPanel {
+  border-left: none;
+}
+
+
+.p-TabPanel.p-mod-right-to-left > .p-TabPanel-stackedPanel {
+  border-right: none;
+}

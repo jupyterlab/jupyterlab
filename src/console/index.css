@@ -1,0 +1,92 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-ConsolePanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+
+.jp-ConsoleContent {
+  height: 100%;
+  padding: 0;
+  border: 1px solid #C9C9C9;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.jp-ConsoleContent-content {
+  background-color: #F5F5F5;
+  flex: 1 1 auto;
+}
+
+
+.jp-ConsoleContent-input {
+  margin: 5px;
+  max-height: 80%;
+  flex: 0 0 auto;
+  overflow: auto;
+}
+
+
+.jp-ConsoleContent .jp-InputArea-prompt {
+  flex-basis: auto;
+  text-align: left;
+}
+
+
+.jp-ConsoleContent .jp-Output-prompt {
+  flex-basis: auto;
+  text-align: left;
+}
+
+
+.jp-ConsoleContent .jp-Output pre {
+  border: none;
+  margin: 1px 0 0 5px;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+
+.jp-ConsoleContent .jp-Cell {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+
+.jp-ConsoleContent .jp-InputArea-editor.jp-CellEditor {
+  background: transparent;
+  border-color: transparent;
+}
+
+
+.jp-ConsoleContent-prompt .jp-InputArea-editor.jp-CellEditor .CodeMirror {
+  margin-top: 1px;
+}
+
+
+.jp-ConsoleContent-input .jp-ConsoleContent-prompt.jp-Cell {
+  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
+  border-color: #66BB6A;
+  border-left-width: var(--jp-border-width);
+}
+
+
+.jp-ConsoleContent-input .jp-ConsoleContent-prompt .jp-InputArea {
+  height: 100%;
+  min-height: 100%;
+}
+
+
+.jp-ConsoleContent-content .jp-ConsoleContent-banner .jp-InputArea-prompt {
+  display: none;
+}

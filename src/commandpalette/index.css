@@ -4,18 +4,18 @@
 |----------------------------------------------------------------------------*/
 .p-CommandPalette {
   padding-bottom: 0px;
-  color: #757575;
-  background: #FAFAFA;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
 }
 
 
 .p-CommandPalette-search {
-  border-bottom: solid 2px #e0e0e0;
+  border-bottom: solid 2px var(--jp-border-color2);
 }
 
 
 .p-CommandPalette-wrapper {
-  background: white;
+  background: var(--jp-layout-color2);
   overflow: overlay;
   padding: 12px 8px;
 }
@@ -24,28 +24,29 @@
 .p-CommandPalette-wrapper::after {
     font-family: FontAwesome;
     content: "\f002"; /* search */
-    color: #2196F3;
+    color: var(--jp-brand-color1);
 }
 
 .p-CommandPalette-input {
+  background: var(--jp-layout-color2);
   width: calc(100% - 18px);
   float: left;
   border: none;
   outline: none;
-  font-size: 16px;
+  font-size: var(--jp-ui-font-size2);
+  color: var(--jp-ui-font-color1);
   padding: 0;
 }
 
 
 .p-CommandPalette-header {
   padding: 10px 0 4px 8px;
-  color: #757575;
+  color: var(--jp-ui-font-color1);
   font-size: 12px;
   font-weight: 600;
-  background: #fafafa;
   cursor: pointer;
   text-transform: uppercase;
-  border-bottom: solid 1px #e0e0e0;
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
   letter-spacing: 2px;
 }
 
@@ -70,7 +71,7 @@
 
 .p-CommandPalette-item {
   padding: 4px 8px;
-  color: #757575;
+  color: var(--jp-ui-font-color1);
   font-size: 13px;
   font-weight: 500;
 }

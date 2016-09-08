@@ -9,7 +9,6 @@ require('es6-promise').polyfill();
 require('font-awesome/css/font-awesome.min.css');
 require('material-design-icons/iconfont/material-icons.css');
 
-require('jupyterlab/lib/basestyle/index.css');
 require('jupyterlab/lib/default-theme/index.css');
 
 var lab = new JupyterLab();

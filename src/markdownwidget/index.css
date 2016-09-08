@@ -4,10 +4,8 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-RenderedHTMLCommon {
-
-  blockquote {
-    border-left: 5px solid #eeeeee;
-  }
-
+.jp-MarkdownWidget {
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  padding: 14px;
+  overflow: auto;
 }

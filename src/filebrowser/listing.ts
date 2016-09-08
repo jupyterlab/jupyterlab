@@ -399,12 +399,10 @@ class DirListing extends Widget {
   /**
    * Download the currently selected item(s).
    */
-  download(): Promise<IContents.IModel> {
+  download(): void {
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
-        return this._model.download(item.name).catch(error =>
-          utils.showErrorMessage(this, 'Download file', error)
-        );
+        this._model.download(item.path)
       }
     }
   }

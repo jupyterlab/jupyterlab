@@ -12,7 +12,7 @@ After installing the jupyter notebook server 4.2+, follow the steps for
 installing the development version of JupyterLab. To build the examples,
 enter from the ``jupyterlab`` repo root directory: 
 
-    npm run server:examples
+    npm run build:examples
 
 To run a particular example, navigate to the example's subdirectory in the
 ``examples`` directory and enter: 
@@ -30,7 +30,7 @@ Let's take a closer look at the source code in ``examples/filebrowser``.
 
 ### Directory structure of 'filebrowser' example
 
-The filebrowser in ``examples/file`` is comprised by a handful of files and
+The filebrowser in ``examples/filebrowser`` is comprised by a handful of files and
 the ``src`` directory:
 
 ![filebrowser source code](filebrowser_source.png)

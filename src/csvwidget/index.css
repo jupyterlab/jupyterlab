@@ -53,11 +53,11 @@
 
 .jp-CSVWidget-table th,
 .jp-CSVWidget-table td {
-  border: 1px solid black;
+  border: var(--jp-border-width) solid black;
   padding: 0.2em 0.5em;
 }
 
 .jp-CSVWidget-table table {
-  border: 1px solid black;
+  border: var(--jp-border-width) solid black;
   border-collapse: collapse;
 }
