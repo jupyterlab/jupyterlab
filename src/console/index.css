@@ -23,6 +23,7 @@
 .jp-ConsoleContent-content {
   background-color: #F5F5F5;
   flex: 1 1 auto;
+  overflow: auto;
 }
 
 
