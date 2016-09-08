@@ -22,10 +22,6 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  SplitPanel
-} from 'phosphor/lib/ui/splitpanel';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
