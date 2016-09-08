@@ -26,8 +26,6 @@ import {
   Drag, IDragEvent, DropAction, SupportedActions
 } from 'phosphor/lib/dom/dragdrop';
 
-import './dragpanel.css';
-
 /**
  * The class name added to the DragPanel
  */
@@ -62,15 +60,20 @@ const DRAG_THRESHOLD = 5;
 
 
 /**
- * A panel which allows the user to rearrange elements.
+ * A panel which allows the user to rearrange elements by drag and drop.
  *
  *
  */
 export
 class DragPanel extends Panel {
 
-  constructor(options: Panel.IOptions={}) {
+  /**
+   * Construct a drag panel.
+   */
+  constructor(options: DragPanel.IOptions={}) {
     super(options);
+    this.childrenAreDragHandles = options.childrenAreDragHandles === true;
+    this.acceptExternalDropSource = options.acceptExternalDropSource === true;
     this.addClass(PANEL_CLASS);
   }
 
@@ -89,7 +92,7 @@ class DragPanel extends Panel {
    * Whether all direct children of the list are handles, or only those widgets
    * designated as handles. Defaults to false.
    */
-  childrenAreDragHandles = false;
+  childrenAreDragHandles: boolean;
 
   /**
    * Whether the list should accept drops from an external source.
@@ -98,7 +101,7 @@ class DragPanel extends Panel {
    * This option only makes sense to set for subclasses that accept drops from
    * external sources.
    */
-  acceptExternalDropSource = false;
+  acceptExternalDropSource: boolean;
 
 
   /**
@@ -144,12 +147,22 @@ class DragPanel extends Panel {
    *
    * The default implementation adds mime data indicating the index of the direct
    * child being dragged (as indicated by findDragTarget).
+   *
+   * Override this method if you have data that cannot be communicated well by an
+   * index, for example if the data should be able to be dropped on an external
+   * target that only understands direct mime data.
+   *
+   * As the method simply adds metadata for a specific key, overriders can call
+   * this method before/after adding their own metadata to still support default
+   * dragging behavior.
    */
   protected addMimeData(handle: HTMLElement, mimeData: MimeData): void {
     let target = this.findDragTarget(handle);
     let key = this.getIndexOfChildNode(this, target);
 
-    mimeData.setData(MIME_INDEX, key);
+    if (key !== null) {
+      mimeData.setData(MIME_INDEX, key);
+    }
   }
 
   /**
@@ -159,26 +172,30 @@ class DragPanel extends Panel {
    *  - That the `dropTarget` is a valid drop target
    *  - The value of `event.source` if `acceptExternalDropSource` is true
    *
-   * The default implementation assumes `dropTarget` is a direct child and that
-   * the mime data of `MIME_INDEX` holds an index to a direct child, and will
-   * call `move` with the indices of this source and destination.
+   * The default implementation assumes calling `getIndexOfChildNode` with
+   * `dropTarget` will be valid. It will call `move` with that index as `to`,
+   * and the index stored in the mime data as `from`.
+   *
+   * Override this if you need to handle other mime data than the default.
    */
-  protected processDrop(dropTarget: HTMLElement, event: IDragEvent): DropAction {
+  protected processDrop(dropTarget: HTMLElement, event: IDragEvent): void {
     if (!DragPanel.isValidAction(event.supportedActions, 'move') ||
-        event.proposedAction === 'none' ||
-        event.source !== this) {
-      // The default implementation only handles move action OR
-      // Accept proposed none action, and perform no-op
-      //
+        event.proposedAction === 'none') {
+      // The default implementation only handles move action
+      // OR Accept proposed none action, and perform no-op
       event.dropAction = 'none';
       event.preventDefault();
       event.stopPropagation();
+      return;
+    }
+    if (event.source !== this) {
+      // Source indicates external drop, incorrect use in subclass
     }
     let sourceKey = event.mimeData.getData(MIME_INDEX);
     let targetKey = this.getIndexOfChildNode(this, dropTarget);
     if (targetKey === null) {
       // Invalid target somehow
-      return null;
+      return;
     }
 
     // We have an acceptable drop, handle:
@@ -191,13 +208,13 @@ class DragPanel extends Panel {
   /**
    * Finds the drag target (the widget to move) from a drag handle.
    *
-   * Returns null if no valid drop target was found.
+   * Returns null if no valid drag target was found.
    *
    * The default implementation returns the direct child that is the ancestor of
-   * or equal to the handle.
+   * (or equal to) the handle.
    */
   protected findDragTarget(handle: HTMLElement): HTMLElement {
-    return Private.findChild(this.node, handle);
+    return this.findChild(this.node, handle);
   }
 
   /**
@@ -206,10 +223,14 @@ class DragPanel extends Panel {
    * Returns null if no valid drop target was found.
    *
    * The default implementation returns the direct child that is the parent of
-   * `node`, or `node` if it is itself a direct child.
+   * `node`, or `node` if it is itself a direct child. It also checks that the
+   * needed mime type is included
    */
   protected findDropTarget(input: HTMLElement, mimeData: MimeData): HTMLElement {
-    return Private.findChild(this.node, input);
+    if (!mimeData.hasData(MIME_INDEX)) {
+      return null;
+    }
+    return this.findChild(this.node, input);
   }
 
   /**
@@ -224,16 +245,17 @@ class DragPanel extends Panel {
   /**
    * Called when a widget should be moved as a consequence of an internal drag event.
    *
-   * The default implementation moves the direct childer as indexed by the passed
-   * keys, then emits the `moved` signal.
+   * The default implementation assumes the keys `from` and `to` are numbers
+   * indexing the drag panels direct children. It then moves the direct child as
+   * specified by these keys, then emits the `moved` signal.
    */
   protected move(from: any, to: any): void {
     if (to !== from) {
-      let adjustedTo = to;
-      if (adjustedTo > from) {
-        adjustedTo -= 1;
+      // Adjust for the shifting of elements once 'from' is removed
+      if (to > from) {
+        to -= 1;
       }
-      this.insertWidget(adjustedTo, this.widgets.at(from));
+      this.insertWidget(to, this.widgets.at(from));
       this.moved.emit({from: from, to: to});
     }
   }
@@ -255,7 +277,7 @@ class DragPanel extends Panel {
    *
    * Returns null if not found.
    */
-  protected getIndexOfChildNode(parent: Widget, node: HTMLElement): number {
+  protected getIndexOfChildNode(parent: Widget, node: HTMLElement): any {
     let layout = parent.layout as PanelLayout;
     for (let i = 0; i < layout.widgets.length; i++) {
       if (layout.widgets.at(i).node === node) {
@@ -263,6 +285,25 @@ class DragPanel extends Panel {
       }
     }
     return null;
+  }
+
+
+  /**
+   * Find the direct child node of `parent`, which has `node` as a descendant.
+   *
+   * Returns null if not found.
+   */
+  protected findChild(parent: HTMLElement, node: HTMLElement): HTMLElement {
+    // Work our way up the DOM to an element which has this node as parent
+    let child: HTMLElement = null;
+    while (node && node !== parent) {
+      if (node.parentElement === parent) {
+        child = node;
+        break;
+      }
+      node = node.parentElement;
+    }
+    return child;
   }
 
   /**
@@ -296,10 +337,14 @@ class DragPanel extends Panel {
 
   /**
    * Start a drag event.
+   *
+   * Called when dragginging and DRAG_THRESHOLD is met.
+   *
+   * Should normally only be overriden if you cannot achive your goal by
+   * other overrides.
    */
   protected _startDrag(handle: HTMLElement, clientX: number, clientY: number): void {
     // Create the drag image.
-
     let dragImage = this.getDragImage(handle);
 
     // Set up the drag event.
@@ -323,6 +368,11 @@ class DragPanel extends Panel {
 
   /**
    * Handle the `'p-drop'` event for the widget.
+   *
+   * Responsible for pre-processing event before calling `processDrop`.
+   *
+   * Should normally only be overriden if you cannot achive your goal by
+   * other overrides.
    */
   protected _evtDrop(event: IDragEvent): void {
     let target = event.target as HTMLElement;
@@ -348,6 +398,11 @@ class DragPanel extends Panel {
 
     this.processDrop(target, event);
   }
+
+  /**
+   * Drag data stored in _startDrag
+   */
+  protected _drag: Drag = null;
 
   /**
    * Check if node, or any of nodes ancestors are a drag handle
@@ -389,7 +444,7 @@ class DragPanel extends Panel {
 
     // Left mouse press for drag start.
     if (event.button === 0) {
-      this._dragData = { pressX: event.clientX, pressY: event.clientY,
+      this._clickData = { pressX: event.clientX, pressY: event.clientY,
                          handle: handle };
       document.addEventListener('mouseup', this, true);
       document.addEventListener('mousemove', this, true);
@@ -404,6 +459,7 @@ class DragPanel extends Panel {
     if (event.button !== 0 || !this._drag) {
       document.removeEventListener('mousemove', this, true);
       document.removeEventListener('mouseup', this, true);
+      this._drag = null;
       return;
     }
     event.preventDefault();
@@ -423,7 +479,7 @@ class DragPanel extends Panel {
     event.stopPropagation();
 
     // Check for a drag initialization.
-    let data = this._dragData;
+    let data = this._clickData;
     let dx = Math.abs(event.clientX - data.pressX);
     let dy = Math.abs(event.clientY - data.pressY);
     if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
@@ -431,12 +487,16 @@ class DragPanel extends Panel {
     }
 
     this._startDrag(data.handle, event.clientX, event.clientY);
+    this._clickData = null;
   }
 
   /**
    * Handle the `'p-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
+    if (!this.acceptExternalDropSource && event.source !== this) {
+      return;
+    }
     let target = this.findDropTarget(event.target as HTMLElement, event.mimeData);
     if (target === null) {
       return;
@@ -464,6 +524,9 @@ class DragPanel extends Panel {
    * Handle the `'p-dragover'` event for the widget.
    */
   private _evtDragOver(event: IDragEvent): void {
+    if (!this.acceptExternalDropSource && event.source !== this) {
+      return;
+    }
     let target = this.findDropTarget(event.target as HTMLElement, event.mimeData);
     if (target === null) {
       return;
@@ -489,8 +552,11 @@ class DragPanel extends Panel {
     }
   }
 
-  private _drag: Drag = null;
-  private _dragData: { pressX: number, pressY: number, handle: HTMLElement } = null;
+  /**
+   * Data stored on mouse down to determine if drag treshold has
+   * been overcome, and to initialize drag once it has.
+   */
+  private _clickData: { pressX: number, pressY: number, handle: HTMLElement } = null;
 }
 
 defineSignal(DragPanel.prototype, 'moved');
@@ -505,12 +571,12 @@ namespace DragPanel {
    * An options object for initializing a drag panel widget.
    */
   export
-  interface IOptions {
+  interface IOptions extends Panel.IOptions {
     /**
      * Whether all direct children of the list are handles, or only those widgets
      * designated as handles. Defaults to false.
      */
-    childrenAreDragHandles: boolean,
+    childrenAreDragHandles?: boolean;
 
     /**
      * Whether the lsit should accept drops from an external source.
@@ -519,7 +585,7 @@ namespace DragPanel {
      * This option only makes sense to set for subclasses that accept drops from
      * external sources.
      */
-    acceptExternalDropSource: boolean;
+    acceptExternalDropSource?: boolean;
   }
 
   export
@@ -566,31 +632,5 @@ namespace DragPanel {
     widget.addClass(DEFAULT_DRAG_HANDLE_CLASS);
     makeHandle(widget);
     return widget;
-  }
-}
-
-
-namespace Private {
-  /**
-   * Find the direct child node of `parent`, which has `node` as a descendant.
-   *
-   * Returns null if not found. Also returns null if it detects an inner drag
-   * list.
-   */
-  export
-  function findChild(parent: HTMLElement, node: HTMLElement): HTMLElement {
-    // Work our way up the DOM to an element which has this node as parent
-    let child: HTMLElement = null;
-    while (node && node !== parent) {
-      if (node.classList.contains(PANEL_CLASS)) {
-        return null;
-      }
-      if (node.parentElement === parent) {
-        child = node;
-        break;
-      }
-      node = node.parentElement;
-    }
-    return child;
   }
 }

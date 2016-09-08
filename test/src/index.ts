@@ -3,6 +3,7 @@
 
 import './common/activitymonitor.spec';
 import './common/observablelist.spec';
+import './common/dragpanel.spec';
 
 import './console/history.spec';
 
