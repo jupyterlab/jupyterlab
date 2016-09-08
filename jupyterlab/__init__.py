@@ -53,8 +53,8 @@ class LabHandler(IPythonHandler):
 #-----------------------------------------------------------------------------
 
 default_handlers = [
-    (PREFIX, LabHandler),
-    (PREFIX+r"/(.*)", FileFindHandler,
+    (PREFIX + r'/?', LabHandler),
+    (PREFIX+r"/(.+)", FileFindHandler,
         {'path': BUILT_FILES}),
     ]
 
