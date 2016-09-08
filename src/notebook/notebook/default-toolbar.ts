@@ -27,7 +27,7 @@ import {
 
 import {
   ToolbarButton
-} from './toolbar';
+} from '../../toolbar';
 
 import {
   Notebook
