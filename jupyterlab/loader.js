@@ -19,7 +19,7 @@ var installedModules = {};
 var lookupCache = {};
 
 /**
- * A cache of parsed version-mangled module names.
+ * A cache of objects for parsed version-mangled module names.
  */
 var nameCache = {};
 
@@ -140,6 +140,10 @@ function requireBundles(paths) {
 
 /**
  * Parse a version-mangled module name.
+ *
+ * @param name - The module name (e.g. "foo@^1.1.0/lib/bar/baz.js").
+ *
+ * @returns A parsed object describing the module name.
  */
 function parseName(name) {
   if (nameCache[name]) {
