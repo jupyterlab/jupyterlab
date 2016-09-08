@@ -152,8 +152,8 @@ class DragPanel extends Panel {
    * index, for example if the data should be able to be dropped on an external
    * target that only understands direct mime data.
    *
-   * As the method simply adds metadata for a specific key, overriders can call
-   * this method before/after adding their own metadata to still support default
+   * As the method simply adds mime data for a specific key, overriders can call
+   * this method before/after adding their own mime data to still support default
    * dragging behavior.
    */
   protected addMimeData(handle: HTMLElement, mimeData: MimeData): void {
