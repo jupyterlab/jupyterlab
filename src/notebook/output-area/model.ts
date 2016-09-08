@@ -202,15 +202,15 @@ class OutputAreaModel implements IDisposable {
     });
   }
 
+  protected _clearNext = false;
+  protected _list: IObservableList<OutputAreaModel.Output> = null;
+
   /**
    * Handle a change to the list.
    */
   private _onListChanged(sender: IObservableList<OutputAreaModel.Output>, args: IListChangedArgs<OutputAreaModel.Output>) {
     this.changed.emit(args);
   }
-
-  private _clearNext = false;
-  private _list: IObservableList<OutputAreaModel.Output> = null;
 }
 
 

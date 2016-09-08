@@ -315,6 +315,74 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
+   * Add a child to the layout.
+   */
+  protected _addChild(): void {
+    let widget = this._renderer.createOutput({ rendermime: this.rendermime });
+    let layout = this.layout as PanelLayout;
+    layout.addWidget(widget);
+    this._updateChild(layout.widgets.length - 1);
+  }
+
+  /**
+   * Remove a child from the layout.
+   */
+  protected _removeChild(index: number): void {
+    let layout = this.layout as PanelLayout;
+    layout.widgets.at(index).dispose();
+  }
+
+  /**
+   * Update a child in the layout.
+   */
+  protected _updateChild(index: number): void {
+    let layout = this.layout as PanelLayout;
+    let widget = layout.widgets.at(index) as OutputWidget;
+    let output = this._model.get(index);
+    widget.render(output, this._trusted);
+  }
+
+  /**
+   * Follow changes on the model state.
+   */
+  protected _onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
+    switch (args.type) {
+    case 'add':
+      // Children are always added at the end.
+      this._addChild();
+      break;
+    case 'replace':
+      // Only "clear" is supported by the model.
+      // When an output area is cleared and then quickly replaced with new
+      // content (as happens with @interact in widgets, for example), the
+      // quickly changing height can make the page jitter.
+      // We introduce a small delay in the minimum height
+      // to prevent this jitter.
+      let rect = this.node.getBoundingClientRect();
+      let oldHeight = this.node.style.minHeight;
+      this.node.style.minHeight = `${rect.height}px`;
+      setTimeout(() => {
+        if (this.isDisposed) {
+          return;
+        }
+        this.node.style.minHeight = oldHeight;
+      }, 50);
+
+      let oldValues = args.oldValue as nbformat.IOutput[];
+      for (let i = args.oldIndex; i < oldValues.length; i++) {
+        this._removeChild(args.oldIndex);
+      }
+      break;
+    case 'set':
+      this._updateChild(args.newIndex);
+      break;
+    default:
+      break;
+    }
+    this.update();
+  }
+
+  /**
    * Handle a new model.
    *
    * #### Notes
@@ -368,74 +436,6 @@ class OutputAreaWidget extends Widget {
   private _onModelDisposed(): void {
     this.modelDisposed.emit(void 0);
     this.dispose();
-  }
-
-  /**
-   * Add a child to the layout.
-   */
-  private _addChild(): void {
-    let widget = this._renderer.createOutput({ rendermime: this.rendermime });
-    let layout = this.layout as PanelLayout;
-    layout.addWidget(widget);
-    this._updateChild(layout.widgets.length - 1);
-  }
-
-  /**
-   * Remove a child from the layout.
-   */
-  private _removeChild(index: number): void {
-    let layout = this.layout as PanelLayout;
-    layout.widgets.at(index).dispose();
-  }
-
-  /**
-   * Update a child in the layout.
-   */
-  private _updateChild(index: number): void {
-    let layout = this.layout as PanelLayout;
-    let widget = layout.widgets.at(index) as OutputWidget;
-    let output = this._model.get(index);
-    widget.render(output, this._trusted);
-  }
-
-  /**
-   * Follow changes on the model state.
-   */
-  private _onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
-    switch (args.type) {
-    case 'add':
-      // Children are always added at the end.
-      this._addChild();
-      break;
-    case 'replace':
-      // Only "clear" is supported by the model.
-      // When an output area is cleared and then quickly replaced with new
-      // content (as happens with @interact in widgets, for example), the
-      // quickly changing height can make the page jitter.
-      // We introduce a small delay in the minimum height
-      // to prevent this jitter.
-      let rect = this.node.getBoundingClientRect();
-      let oldHeight = this.node.style.minHeight;
-      this.node.style.minHeight = `${rect.height}px`;
-      setTimeout(() => {
-        if (this.isDisposed) {
-          return;
-        }
-        this.node.style.minHeight = oldHeight;
-      }, 50);
-
-      let oldValues = args.oldValue as nbformat.IOutput[];
-      for (let i = args.oldIndex; i < oldValues.length; i++) {
-        this._removeChild(args.oldIndex);
-      }
-      break;
-    case 'set':
-      this._updateChild(args.newIndex);
-      break;
-    default:
-      break;
-    }
-    this.update();
   }
 
   private _trusted = false;
