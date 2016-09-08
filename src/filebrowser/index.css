@@ -2,14 +2,19 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+
 .jp-FileBrowser {
-  color: #757575;
-  background: #FAFAFA;
-  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  color: var(--jp-ui-font-color1);
+  background:var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
 }
 
 
 .jp-BreadCrumbs {
+  flex: 0 0 auto;
   margin: 4px 12px;
 }
 
@@ -26,12 +31,22 @@
 
 
 .jp-BreadCrumbs-item.jp-mod-dropTarget {
-  background: #FEDBC4;
+  background: var(--jp-brand-color2);
 }
 
 
 .jp-FileButtons {
-  border-bottom: 1px solid #E0E0E0;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;  
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+
+.jp-FileButtons-buttonContent {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
 }
 
 
@@ -39,13 +54,19 @@
   flex: 1 1 auto;
   max-width: 100px;
   padding: 4px 6px;
-  color: #757575;
-  background: #FAFAFA;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
   border: none;
-  font-size: 14px;
+  font-size: var(--jp-ui-icon-font-size);
   outline: 0;
   padding-top: 8px;
   padding-bottom: 8px;
+}
+
+
+.jp-FileButtons-buttonIcon {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 
@@ -55,16 +76,16 @@
 
 
 .jp-FileButtons-button:hover {
-  background: #F5F5F5;
-  border-color: #D0D0D0;
+  background: var(--jp-layout-color2);
+  border-color: var(--jp-border-color2);
   z-index: 1; /* raise overlapping border */
 }
 
 
 .jp-FileButtons-button:active,
 .jp-FileButtons-button.jp-id-create.jp-mod-active {
-  background: #EEEEEE;
-  border-color: #BDBDBD;
+  background: var(--jp-layout-color3);
+  border-color: var(--jp-border-color3);
   z-index: 1; /* raise overlapping border */
 }
 
@@ -75,14 +96,21 @@
 
 
 .jp-DirListing {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
   outline: 0;
 }
 
 
 .jp-DirListing-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
   margin-bottom: 4px;
-  border-top: 1px solid #E0E0E0;
-  border-bottom: 1px solid #E0E0E0;
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 
@@ -93,7 +121,7 @@
 
 
 .jp-DirListing-headerItem:hover {
-  background: #EEEEEE;
+  background: var(--jp-layout-color2);
 }
 
 
@@ -104,7 +132,7 @@
 
 .jp-DirListing-headerItem.jp-id-modified {
   flex: 0 0 112px;
-  border-left: 1px solid #E0E0E0;
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
 }
 
@@ -136,19 +164,25 @@
 }
 
 /* increase specificity to override bundled default */
-/*.jp-DirListing > .jp-DirListing-content {
-  padding: 0px;
-}*/
+.jp-DirListing-content {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  overflow: auto;
+}
 
 
 .jp-DirListing-item {
+  display: flex;
+  flex-direction: row;
   padding: 4px 12px;
 }
 
 
 .jp-DirListing-item.jp-mod-selected {
   color: white;
-  background: #2196F3;
+  background: var(--jp-brand-color1);
 }
 
 
@@ -158,7 +192,7 @@
 
 
 .jp-DirListing-item:hover:not(.jp-mod-selected) {
-  background: #EEEEEE;
+  background: var(--jp-layout-color2)
 }
 
 
@@ -205,15 +239,21 @@
 
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon {
-  color: #27AE60;
+  color: var(--jp-accent-color1);
 }
+
+
+.jp-DirListing-item.jp-mod-running.jp-mod-selected .jp-DirListing-itemIcon {
+  color: var(--jp-accent-color3);
+}
+
 
 .jp-DirListing-item.p-mod-drag-image,
 .jp-DirListing-item.jp-mod-selected.p-mod-drag-image {
   background-color: #FFFFFF;
   box-shadow: 5px 5px 10px rgba(46,46,46,0.5);
   border-radius: 3px;
-  color: #757575;
+  color: var(--jp-ui-font-color1);
   transform: translateX(-40%) translateY(-58%);
 }
 

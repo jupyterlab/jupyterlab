@@ -3,9 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@jp-tab-border-width: 1px;
-@jp-tab-height: 24px;
-@jp-tab-width: 144px;
 
-@jp-ui-font-size: 13px;
-@jp-ui-icon-size: 14px;
+.jp-EditorWidget {
+    border-top: var(--jp-border-width) solid var(--jp-border-color2);
+    margin-top: 4px;
+}

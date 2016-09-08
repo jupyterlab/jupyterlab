@@ -2,13 +2,14 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-.jp-ImageWidget {
-  overflow: auto;
-  padding: 0 4px 4px 4px;
+
+
+.jp-Help {
+  min-width: 480px;
+  background: white;
 }
 
-.jp-ImageWidget img {
-  max-width: 100%;
-  max-height: 100%;
-  margin: auto;
+
+.jp-Help > iframe {
+  border: none;
 }

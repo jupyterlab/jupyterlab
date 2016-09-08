@@ -1,0 +1,38 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+/* Variables and mixins */
+@import '../basestyle/materialcolors.css';
+@import './variables.css';
+
+
+/* Main application (1st) */
+@import '../application/index.css';
+
+
+/* Individual plugins */
+@import '../about/index.css';
+@import '../codemirror/index.css';
+@import '../commandpalette/index.css';
+@import '../console/index.css';
+@import '../csvwidget/index.css';
+@import '../dialog/index.css';
+@import '../editorwidget/index.css';
+@import '../faq/index.css';
+@import '../filebrowser/index.css';
+@import '../help/index.css';
+@import '../iframe/index.css';
+@import '../imagewidget/index.css';
+@import '../inspector/index.css';
+@import '../landing/index.css';
+@import '../markdownwidget/index.css';
+@import '../notebook/index.css';
+@import '../renderers/index.css';
+@import '../running/index.css';
+@import '../terminal/index.css';
+
+/* Theme images */
+@import './images.css';

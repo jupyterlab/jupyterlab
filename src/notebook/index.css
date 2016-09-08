@@ -3,6 +3,11 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+
+@import './completion.css';
+
+
 .jp-Notebook {
   padding-left: 4px;
   padding-right: 4px;
@@ -16,11 +21,21 @@
 
 
 .jp-Notebook-panel {
+  display: flex;
+  flex-direction: column;
   height: 100%;
 }
 
 
+.jp-InputArea {
+  display: flex;
+  flex-direction: row;
+}
+
+
 .jp-InputArea-prompt {
+  flex-grow: 0;
+  flex-shrink: 0;
   flex-basis: 90px;
   color: #303F9F;
   font-family: monospace;
@@ -32,13 +47,15 @@
 
 
 .jp-InputArea-editor {
+  flex-grow: 1;
+  flex-shrink: 1;
   height: auto;
   min-height: 2em;
 }
 
 
 .jp-CellEditor {
-  border: 1px solid #cfcfcf;
+  border: var(--jp-border-width) solid #cfcfcf;
   border-radius: 2px;
   background: #f7f7f7;
   line-height: 1.2em;
@@ -57,6 +74,11 @@
 
 .jp-MarkdownCell-renderer {
   padding: 0.5em 0.5em 0.5em 0.4em;
+}
+
+
+.jp-MarkdownCell-content {
+  padding: 0.5em;
 }
 
 
@@ -102,6 +124,22 @@ img.jp-mod-unconfined {
 
 .jp-Output-result {
   padding: 0.4em;
+  user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+}
+
+
+.p-Widget.jp-Output-result {
+  overflow: auto;
+}
+
+
+/* If we have two nested output areas (for example, as with output widgets),
+   then the inner output looks weird with a prompt, so we hide it. */
+.jp-Output .jp-Output .jp-Output-prompt {
+  display: none;
 }
 
 
@@ -128,7 +166,7 @@ img.jp-mod-unconfined {
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
   border-color: #ABABAB;
-  border-left-width: 1px;
+  border-left-width: var(--jp-border-width);
   background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
 }
 
@@ -145,7 +183,7 @@ img.jp-mod-unconfined {
 
 .jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
   border-color: #66BB6A;
-  border-left-width: 1px;
+  border-left-width: var(--jp-border-width);
   background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
 }
 
@@ -166,7 +204,7 @@ img.jp-mod-unconfined {
   padding-bottom: 5px;
   padding-left: 5px;
   padding-right: 5px;
-  border-width: 1px;
+  border-width: var(--jp-border-width);
   border-style: solid;
   border-color: transparent;
   outline: none;
@@ -176,7 +214,7 @@ img.jp-mod-unconfined {
 .jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
   padding-left: 5px;
   padding-right: 5px;
-  border-width: 1px;
+  border-width: var(--jp-border-width);
   border-style: solid;
   border-color: transparent;
   outline: none;
@@ -186,29 +224,30 @@ img.jp-mod-unconfined {
 
 
 .jp-NBToolbar {
-    display: flex;
-    flex-direction: row;
-    border-bottom: 1px solid #E0E0E0;
-    height: 24px;
+  color: var(--jp-ui-font-color1);
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  height: 24px;
 }
 
 
 .jp-NBToolbar > .jp-NBToolbar-item {
-    flex: 0 0 auto;
-    padding-left: 8px;
-    padding-right: 8px;
-    vertical-align: middle;
-    font-size: 14px;
-    color: #616161;
-    line-height: 23px;
+  flex: 0 0 auto;
+  padding-left: 8px;
+  padding-right: 8px;
+  vertical-align: middle;
+  font-size: 14px;
+  line-height: 23px;
 }
 
 
 .jp-NBToolbar-item.jp-NBToolbar-button,
 .jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
-    font-family: FontAwesome;
-    text-align: center;
-    display: inline-block;
+  font-family: FontAwesome;
+  text-align: center;
+  display: inline-block;
 }
 
 
@@ -217,13 +256,12 @@ img.jp-mod-unconfined {
 }
 
 .jp-NBToolbar-cellType .jp-NBToolbar-cellTypeDropdown {
-    border: 1px solid #BDBDBD;
+    border: var(--jp-border-width) solid var(--jp-border-color1);
     border-radius: 0;
     outline: none;
     width: 100%;
     font-size: 14px;
     line-height: 23px;
-    color: #616161;
 }
 
 

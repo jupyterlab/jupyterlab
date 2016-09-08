@@ -4,13 +4,29 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+
 .jp-Dialog {
+  position: absolute;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  top: 0px;
+  left: 0px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0,0,0,0.25);
-  color: #757575;
+  color: var(--jp-ui-font-color1);
 }
 
 
 .jp-Dialog-content {
+  margin-left: auto;
+  margin-right: auto;
   background: #FAFAFA;
   padding: 24px;
   width: 300px;
@@ -45,6 +61,13 @@
 }
 
 
+.jp-Dialog-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
 .jp-Dialog-button {
   font-size: 15px;
   border: none;
@@ -59,7 +82,7 @@
 
 
 .jp-Dialog-okButton {
-  background: #2196F3;
+  background: var(--jp-brand-color1);
   color: white;
 }
 
@@ -76,7 +99,7 @@
   background: white;
   width: 252px;
   box-sizing: border-box;
-  border: 1px solid #BDBDBD;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   border-radius: 2px;
   margin-bottom: 12px;
 }
@@ -97,7 +120,7 @@
   background: white;
   width: 252px;
   box-sizing: border-box;
-  border: 1px solid #BDBDBD;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   border-radius: 2px;
   margin-bottom: 12px;
 }

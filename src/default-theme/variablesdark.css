@@ -1,0 +1,72 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+:root {
+
+  /* Borders */
+
+  --jp-border-width: 1px;
+  --jp-border-color0: var(--md-grey-300);  
+  --jp-border-color1: var(--md-grey-500);
+  --jp-border-color2: var(--md-grey-700);
+  --jp-border-color3: var(--md-grey-900);
+
+  /* UI Fonts */
+
+  --jp-ui-font-scale-factor: 1.2;
+  --jp-ui-font-size0: calc(var(--jp-ui-font-size1)/var(--jp-ui-font-scale-factor));
+  --jp-ui-font-size1: 13px;
+  --jp-ui-font-size2: calc(var(--jp-ui-font-size1)*var(--jp-ui-font-scale-factor));
+  --jp-ui-font-size3: calc(var(--jp-ui-font-size2)*var(--jp-ui-font-scale-factor));
+  --jp-ui-icon-font-size: 14px;
+
+  --jp-ui-font-color0: white;
+  --jp-ui-font-color1: rgb(157,157,157);
+  --jp-ui-font-color2: var(--md-grey-700);
+  --jp-ui-font-color3: var(--md-grey-500);
+
+  /* Use these against the brand/accent/warn/error colors */
+  
+  --jp-inverse-ui-font-color0: rgba(255,255,255,1);
+  --jp-inverse-ui-font-color1: rgba(255,255,255,1.0);
+  --jp-inverse-ui-font-color2: rgba(255,255,255,0.7);
+  --jp-inverse-ui-font-color3: rgba(255,255,255,0.5);
+
+  /* Content Fonts */
+
+  --jp-content-font-size: 14px;
+  --jp-content-font-color0: black;
+  --jp-content-font-color1: black;
+  --jp-content-font-color2: var(--md-grey-700);
+  --jp-content-font-color3: var(--md-grey-500);
+
+  /* Layout */
+
+  --jp-layout-color0: black;  
+  --jp-layout-color1: rgb(23,23,23);
+  --jp-layout-color2: rgb(38,38,38);
+  --jp-layout-color3: var(--md-grey-600);
+
+  /* Brand/accent */
+
+  --jp-brand-color0: rgb(0,77,152);
+  --jp-brand-color1: rgb(0,77,152);
+  --jp-brand-color2: var(--md-blue-300);
+  --jp-brand-color3: var(--md-blue-100);
+
+  --jp-accent-color0: var(--md-green-700);
+  --jp-accent-color1: var(--md-green-500);
+  --jp-accent-color2: var(--md-green-300);
+  --jp-accent-color3: var(--md-green-100);
+
+  /* State colors (warn, error, success, info) */
+
+  --jp-warn-color: var(--md-orange-500);
+  --jp-error-color: var(--md-red-500);
+  --jp-success-color: var(--md-green-500);
+  --jp-info-color: var(--jp-brand-color1);
+
+}

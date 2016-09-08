@@ -51,15 +51,12 @@
     "webpack": "^1.12.11"
   },
   "scripts": {
-    "build": "npm run build:css && npm run build:src",
-    "build:all": "npm run build:css && npm run build:src && npm run build:serverextension",
+    "build": "npm run build:src",
+    "build:all": "npm run build:src && npm run build:serverextension",
     "build:examples": "node scripts/buildexamples.js",
     "build:src": "tsc --project src && node scripts/copyfiles.js",
     "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",
     "build:serverextension": "cd jupyterlab && npm run build && cd ..",
-    "build:css": "concurrently \"npm run build:css:base\" \"npm run build:css:theme\"",
-    "build:css:base": "lessc --strict-math=on --include-path=node_modules src/basestyle/index.less lib/basestyle/index.css",
-    "build:css:theme": "lessc --strict-math=on --include-path=node_modules src/default-theme/index.less lib/default-theme/index.css",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
     "clean:all": "npm run clean && cd jupyterlab && npm run clean && cd ..",
     "clean:examples": "node scripts/cleanexamples.js",

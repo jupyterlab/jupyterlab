@@ -5,7 +5,7 @@
 .jp-Inspector .p-TabBar {
   min-width: 300px;
   min-height: 24px;
-  color: #777777;
+  color: var(--jp-ui-font-color1);
   font-size: 13px;
 }
 
@@ -22,7 +22,7 @@
   min-width: 35px;
   padding: 0px 7px;
   background: #EEEEEE;
-  border: 1px solid #BDBDBD;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   transform: translateY(-1px);
   border-bottom: none;
   margin-right: -1px;
@@ -32,7 +32,7 @@
 .jp-Inspector .p-TabBar-tab.p-mod-current {
   min-height: 24px;
   background: #FFFFFF;
-  border-top: 1px solid #2196F3;
+  border-top: var(--jp-border-width) solid var(--jp-brand-color1);
 }
 
 
@@ -48,14 +48,14 @@
 
 
 .jp-InspectorItem {
-  border: 1px solid #E0E0E0;
+  border: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 
 .jp-InspectorItem .jp-NBToolbar {
     display: flex;
     flex-direction: row;
-    border-bottom: 1px solid #E0E0E0;
+    border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
     height: 24px;
 }
 
