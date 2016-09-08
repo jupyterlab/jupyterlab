@@ -106,10 +106,10 @@ class ConsoleContent extends Widget {
    * Construct a console widget.
    */
   constructor(options: ConsoleContent.IOptions) {
-    super({ node: document.createElement('div') });
+    super();
     this.addClass(CONSOLE_CLASS);
 
-    // Create the panels that holds the content and input.
+    // Create the panels that hold the content and input.
     this._content = new Panel();
     this._input = new Panel();
     this._content.addClass(CONTENT_CLASS);
@@ -479,15 +479,6 @@ namespace ConsoleContent {
      * The completion widget for a console content widget.
      */
     completion?: CompletionWidget;
-
-    /**
-     * The orientation of the console content.
-     *
-     * #### Notes
-     * This setting indicates how the prompt and output are separated. The
-     * default value is `'vertical'`.
-     */
-    orientation?: 'horizontal' | 'vertical';
 
     /**
      * The renderer for a console content widget.
