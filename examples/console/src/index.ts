@@ -133,14 +133,14 @@ function startApp(session: ISession) {
   command = 'console:clear';
   commands.addCommand(command, {
     label: 'Clear',
-    execute: () => consolePanel.content.clear()
+    execute: () => { consolePanel.content.clear(); }
   });
   palette.addItem({ command, category });
 
   command = 'console:execute';
   commands.addCommand(command, {
     label: 'Execute Prompt',
-    execute: () => consolePanel.content.execute()
+    execute: () => { consolePanel.content.execute(); }
   });
   palette.addItem({ command, category });
   keymap.addBinding({ command,  selector,  keys: ['Enter'] });
@@ -148,7 +148,7 @@ function startApp(session: ISession) {
   command = 'console:execute-forced';
   commands.addCommand(command, {
     label: 'Execute Cell (forced)',
-    execute: () => consolePanel.content.execute(true)
+    execute: () => { consolePanel.content.execute(true); }
   });
   palette.addItem({ command, category });
   keymap.addBinding({ command,  selector,  keys: ['Shift Enter'] });
@@ -156,7 +156,7 @@ function startApp(session: ISession) {
   command = 'console:linebreak';
   commands.addCommand(command, {
     label: 'Insert Line Break',
-    execute: () => consolePanel.content.insertLinebreak()
+    execute: () => { consolePanel.content.insertLinebreak(); }
   });
   palette.addItem({ command, category });
   keymap.addBinding({ command,  selector,  keys: ['Ctrl Enter'] });
