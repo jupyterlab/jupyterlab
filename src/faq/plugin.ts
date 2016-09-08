@@ -17,6 +17,27 @@ import {
   VDomModel, VDomWidget
 } from '../common/vdom';
 
+const basicsQuestions = [
+  'What is JupyterLab?',
+  'What is a Jupyter Notebook?',
+  'How stable is JupyterLab?',
+  'I\'m confused with the interface. How do I navigate around JupyterLab?'
+];
+
+
+const featuresQuestions = [
+  'How do I add more kernels/languages to JupyterLab?',
+  'How can I share my notebooks?'
+];
+
+
+const developerQuestions = [
+  'How do I report a bug?',
+  'I have security concerns about JupyterLab.',
+  'How can I contribute?'
+];
+
+
 /**
  * The faq page extension.
  */
