@@ -42,7 +42,7 @@ const TOOLBAR_PRESSED = 'jp-mod-pressed';
  * A class which provides a toolbar widget.
  */
 export
-class NotebookToolbar extends Widget {
+class Toolbar extends Widget {
   /**
    * Construct a new toolbar widget.
    */

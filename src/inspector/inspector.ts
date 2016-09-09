@@ -26,7 +26,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  NotebookToolbar, ToolbarButton
+  Toolbar, ToolbarButton
 } from '../toolbar';
 
 
@@ -518,8 +518,8 @@ class InspectorItem extends Panel {
   /**
    * Create a history toolbar.
    */
-  private _createToolbar(): NotebookToolbar {
-    let toolbar = new NotebookToolbar();
+  private _createToolbar(): Toolbar {
+    let toolbar = new Toolbar();
 
     if (this.toggleEnabled) {
       let toggle = new ToolbarButton({
@@ -577,7 +577,7 @@ class InspectorItem extends Panel {
   private _orientation: Inspector.Orientation = 'horizontal';
   private _rank: number = Infinity;
   private _remembers: boolean = false;
-  private _toolbar: NotebookToolbar = null;
+  private _toolbar: Toolbar = null;
 }
 
 

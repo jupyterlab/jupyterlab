@@ -32,7 +32,7 @@ import {
 } from '../../../../lib/notebook/notebook/panel';
 
 import {
-  NotebookToolbar
+  Toolbar
 } from '../../../../lib/toolbar';
 
 import {
@@ -169,7 +169,7 @@ describe('notebook/notebook/panel', () => {
 
       it('should be the toolbar used by the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(panel.toolbar).to.be.a(NotebookToolbar);
+        expect(panel.toolbar).to.be.a(Toolbar);
       });
 
       it('should be read-only', () => {
@@ -408,7 +408,7 @@ describe('notebook/notebook/panel', () => {
 
         it('should create a notebook toolbar', () => {
           let renderer = new CodeMirrorNotebookPanelRenderer();
-          expect(renderer.createToolbar()).to.be.a(NotebookToolbar);
+          expect(renderer.createToolbar()).to.be.a(Toolbar);
         });
 
       });

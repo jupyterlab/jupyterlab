@@ -50,7 +50,7 @@ import {
 } from './model';
 
 import {
-  NotebookToolbar
+  Toolbar
 } from '../../toolbar';
 
 import {
@@ -132,8 +132,8 @@ class NotebookPanel extends Widget {
    * #### Notes
    * This is a read-only property.
    */
-  get toolbar(): NotebookToolbar {
-    return (this.layout as PanelLayout).widgets.at(0) as NotebookToolbar;
+  get toolbar(): Toolbar {
+    return (this.layout as PanelLayout).widgets.at(0) as Toolbar;
   }
 
   /**
@@ -448,7 +448,7 @@ export namespace NotebookPanel {
     /**
      * Create a new toolbar for the panel.
      */
-    createToolbar(): NotebookToolbar;
+    createToolbar(): Toolbar;
 
     /**
      * Create a new completion widget for the panel.
@@ -469,8 +469,8 @@ export namespace NotebookPanel {
     /**
      * Create a new toolbar for the panel.
      */
-    createToolbar(): NotebookToolbar {
-      return new NotebookToolbar();
+    createToolbar(): Toolbar {
+      return new Toolbar();
     }
 
     /**
