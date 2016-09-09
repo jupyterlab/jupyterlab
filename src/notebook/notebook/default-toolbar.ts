@@ -37,67 +37,67 @@ import {
 /**
  * The class name added to toolbar save button.
  */
-const TOOLBAR_SAVE = 'jp-Toolbar-save';
+const TOOLBAR_SAVE_CLASS = 'jp-Notebook-toolbarSave';
 
 /**
  * The class name added to toolbar insert button.
  */
-const TOOLBAR_INSERT = 'jp-Toolbar-insert';
+const TOOLBAR_INSERT_CLASS = 'jp-Notebook-toolbarInsert';
 
 /**
  * The class name added to toolbar cut button.
  */
-const TOOLBAR_CUT = 'jp-Toolbar-cut';
+const TOOLBAR_CUT_CLASS = 'jp-Notebook-toolbarCut';
 
 /**
  * The class name added to toolbar copy button.
  */
-const TOOLBAR_COPY = 'jp-Toolbar-copy';
+const TOOLBAR_COPY_CLASS = 'jp-Notebook-toolbarCopy';
 
 /**
  * The class name added to toolbar paste button.
  */
-const TOOLBAR_PASTE = 'jp-Toolbar-paste';
+const TOOLBAR_PASTE_CLASS = 'jp-Notebook-toolbarPaste';
 
 /**
  * The class name added to toolbar run button.
  */
-const TOOLBAR_RUN = 'jp-Toolbar-run';
+const TOOLBAR_RUN_CLASS = 'jp-Notebook-toolbarRun';
 
 /**
  * The class name added to toolbar interrupt button.
  */
-const TOOLBAR_INTERRUPT = 'jp-Toolbar-interrupt';
+const TOOLBAR_INTERRUPT_CLASS = 'jp-Notebook-toolbarInterrupt';
 
 /**
  * The class name added to toolbar restart button.
  */
-const TOOLBAR_RESTART = 'jp-Toolbar-restart';
+const TOOLBAR_RESTART_CLASS = 'jp-Notebook-toolbarRestart';
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.
  */
-const TOOLBAR_CELLTYPE = 'jp-Toolbar-cellType';
+const TOOLBAR_CELLTYPE_CLASS = 'jp-Notebook-toolbarCellType';
 
 /**
  * The class name added to toolbar cell type dropdown.
  */
-const TOOLBAR_CELLTYPE_DROPDOWN = 'jp-Toolbar-cellTypeDropdown';
+const TOOLBAR_CELLTYPE_DROPDOWN_CLASS = 'jp-Notebook-toolbarCellTypeDropdown';
 
 /**
  * The class name added to toolbar kernel name text.
  */
-const TOOLBAR_KERNEL = 'jp-Toolbar-kernelName';
+const TOOLBAR_KERNEL_CLASS = 'jp-Notebook-toolbarKernelName';
 
 /**
  * The class name added to toolbar kernel indicator icon.
  */
-const TOOLBAR_INDICATOR = 'jp-Toolbar-kernelIndicator';
+const TOOLBAR_INDICATOR_CLASS = 'jp-Notebook-toolbarKernelIndicator';
 
 /**
  * The class name added to a busy kernel indicator.
  */
-const TOOLBAR_BUSY = 'jp-mod-busy';
+const TOOLBAR_BUSY_CLASS = 'jp-mod-busy';
 
 
 /**
@@ -111,7 +111,7 @@ namespace ToolbarItems {
   export
   function createSaveButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_SAVE,
+      className: TOOLBAR_SAVE_CLASS,
       onClick: () => {
         panel.context.save().then(() => {
           return panel.context.createCheckpoint();
@@ -127,7 +127,7 @@ namespace ToolbarItems {
   export
   function createInsertButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_INSERT,
+      className: TOOLBAR_INSERT_CLASS,
       onClick: () => { NotebookActions.insertBelow(panel.content); },
       tooltip: 'Insert a cell below'
     });
@@ -139,7 +139,7 @@ namespace ToolbarItems {
   export
   function createCutButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_CUT,
+      className: TOOLBAR_CUT_CLASS,
       onClick: () => {
         NotebookActions.cut(panel.content, panel.clipboard);
       },
@@ -153,7 +153,7 @@ namespace ToolbarItems {
   export
   function createCopyButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_COPY,
+      className: TOOLBAR_COPY_CLASS,
       onClick: () => {
         NotebookActions.copy(panel.content, panel.clipboard);
       },
@@ -167,7 +167,7 @@ namespace ToolbarItems {
   export
   function createPasteButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_PASTE,
+      className: TOOLBAR_PASTE_CLASS,
       onClick: () => {
         NotebookActions.paste(panel.content, panel.clipboard);
       },
@@ -181,7 +181,7 @@ namespace ToolbarItems {
   export
   function createRunButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_RUN,
+      className: TOOLBAR_RUN_CLASS,
       onClick: () => {
         NotebookActions.runAndAdvance(panel.content, panel.kernel);
       },
@@ -195,7 +195,7 @@ namespace ToolbarItems {
   export
   function createInterruptButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_INTERRUPT,
+      className: TOOLBAR_INTERRUPT_CLASS,
       onClick: () => {
         if (panel.kernel) {
           panel.context.kernel.interrupt();
@@ -211,7 +211,7 @@ namespace ToolbarItems {
   export
   function createRestartButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_RESTART,
+      className: TOOLBAR_RESTART_CLASS,
       onClick: () => {
         restartKernel(panel.kernel, panel.node);
       },
@@ -246,7 +246,7 @@ namespace ToolbarItems {
   export
   function createKernelNameItem(panel: NotebookPanel): Widget {
     let widget = new Widget();
-    widget.addClass(TOOLBAR_KERNEL);
+    widget.addClass(TOOLBAR_KERNEL_CLASS);
     updateKernelNameItem(widget, panel.kernel);
     panel.kernelChanged.connect(() => {
       updateKernelNameItem(widget, panel.kernel);
@@ -315,7 +315,7 @@ class CellTypeSwitcher extends Widget {
    */
   constructor(widget: Notebook) {
     super({ node: createCellTypeSwitcherNode() });
-    this.addClass(TOOLBAR_CELLTYPE);
+    this.addClass(TOOLBAR_CELLTYPE_CLASS);
 
     let select = this.node.firstChild as HTMLSelectElement;
     this._wildCard = document.createElement('option');
@@ -392,7 +392,7 @@ function createCellTypeSwitcherNode(): HTMLElement {
     option.textContent = t;
     select.appendChild(option);
   }
-  select.className = TOOLBAR_CELLTYPE_DROPDOWN;
+  select.className = TOOLBAR_CELLTYPE_DROPDOWN_CLASS;
   div.appendChild(select);
   return div;
 }
@@ -407,12 +407,12 @@ class KernelIndicator extends Widget {
    */
   constructor(panel: NotebookPanel) {
     super();
-    this.addClass(TOOLBAR_INDICATOR);
+    this.addClass(TOOLBAR_INDICATOR_CLASS);
     if (panel.kernel) {
       this._handleStatus(panel.kernel, panel.kernel.status);
       panel.kernel.statusChanged.connect(this._handleStatus, this);
     } else {
-      this.addClass(TOOLBAR_BUSY);
+      this.addClass(TOOLBAR_BUSY_CLASS);
       this.node.title = 'No Kernel!';
     }
     panel.kernelChanged.connect((c, kernel) => {
@@ -421,7 +421,7 @@ class KernelIndicator extends Widget {
         kernel.statusChanged.connect(this._handleStatus, this);
       } else {
         this.node.title = 'No Kernel!';
-        this.addClass(TOOLBAR_BUSY);
+        this.addClass(TOOLBAR_BUSY_CLASS);
       }
     });
   }
@@ -433,7 +433,7 @@ class KernelIndicator extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this.toggleClass(TOOLBAR_BUSY, status !== 'idle');
+    this.toggleClass(TOOLBAR_BUSY_CLASS, status !== 'idle');
     let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
     this.node.title = title;
   }

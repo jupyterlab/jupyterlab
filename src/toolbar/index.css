@@ -25,37 +25,10 @@
 }
 
 
-.jp-Toolbar-item.jp-Toolbar-button,
-.jp-Toolbar-item.jp-Toolbar-kernelIndicator {
+.jp-Toolbar-item.jp-Toolbar-button {
   font-family: FontAwesome;
   text-align: center;
   display: inline-block;
-}
-
-
-.jp-Toolbar-item.jp-Toolbar-cellType select {
-    background: #FFFFFF;
-}
-
-.jp-Toolbar-cellType .jp-Toolbar-cellTypeDropdown {
-    border: var(--jp-border-width) solid var(--jp-border-color1);
-    border-radius: 0;
-    outline: none;
-    width: 100%;
-    font-size: 14px;
-    line-height: 23px;
-}
-
-
-.jp-Toolbar-item.jp-Toolbar-kernelName {
-    text-align: right;
-    flex-grow: 1;
-    flex-shrink: 1;
-}
-
-
-.jp-Toolbar-item.jp-Toolbar-kernelIndicator {
-    border-right: none;
 }
 
 
@@ -68,54 +41,4 @@
 .jp-Toolbar-button:hover {
     background-color: #EEEEEE;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
-}
-
-
-.jp-Toolbar-button.jp-Toolbar-save::before {
-   content: "\f0c7";  /* Save */
-}
-
-
-.jp-Toolbar-button.jp-Toolbar-insert::before {
-   content: "\f067";  /* Plus */
-}
-
-
-.jp-Toolbar-button.jp-Toolbar-cut::before {
-   content: "\f0c4";  /* Cut */
-}
-
-
-.jp-Toolbar-button.jp-Toolbar-copy::before {
-   content: "\f0c5";  /* Copy */
-}
-
-
-.jp-Toolbar-button.jp-Toolbar-paste::before {
-   content: "\f0ea";  /* Paste */
-}
-
-
-.jp-Toolbar-button.jp-Toolbar-run::before {
-   content: "\f051";  /* Step-forward */
-}
-
-
-.jp-Toolbar-button.jp-Toolbar-interrupt::before {
-   content: "\f04d";  /* Stop */
-}
-
-
-.jp-Toolbar-button.jp-Toolbar-restart::before {
-   content: "\f01e";  /* Rotate-right */
-}
-
-
-.jp-Toolbar-item.jp-Toolbar-kernelIndicator::before {
-    content: "\f10c";  /* Circle-o */
-}
-
-
-.jp-Toolbar-item.jp-Toolbar-kernelIndicator.jp-mod-busy::before {
-    content: "\f111";  /* Circle */
 }

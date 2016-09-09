@@ -1,0 +1,88 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-Toolbar-item.jp-Notebook-toolbarKernelIndicator {
+  font-family: FontAwesome;
+  text-align: center;
+  display: inline-block;
+}
+
+
+.jp-Notebook-toolbarCellType select {
+  background: #FFFFFF;
+}
+
+
+.jp-Notebook-toolbarCellType .jp-Notebook-toolbarCellTypeDropdown {
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-radius: 0;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  line-height: 23px;
+}
+
+
+.jp-Toolbar-item.jp-Notebook-toolbarKernelName {
+  text-align: right;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+
+.jp-Toolbar-item.jp-Notebook-toolbarKernelIndicator {
+  border-right: none;
+}
+
+
+.jp-Notebook-toolbarSave::before {
+  content: "\f0c7";  /* save */
+}
+
+
+.jp-Notebook-toolbarInsert::before {
+  content: "\f067";  /* plus */
+}
+
+
+.jp-Notebook-toolbarCut::before {
+  content: "\f0c4";  /* cut */
+}
+
+
+.jp-Notebook-toolbarCopy::before {
+  content: "\f0c5";  /* copy */
+}
+
+
+.jp-Notebook-toolbarPaste::before {
+  content: "\f0ea";  /* paste */
+}
+
+
+.jp-Notebook-toolbarRun::before {
+  content: "\f051";  /* step-forward */
+}
+
+
+.jp-Notebook-toolbarInterrupt::before {
+  content: "\f04d";  /* stop */
+}
+
+
+.jp-Notebook-toolbarRestart::before {
+  content: "\f01e";  /* rotate-right */
+}
+
+
+.jp-Notebook-toolbarKernelIndicator::before {
+  content: "\f10c";  /* circle-o */
+}
+
+
+.jp-Notebook-toolbarKernelIndicator.jp-mod-busy::before {
+  content: "\f111";  /* circle */
+}
