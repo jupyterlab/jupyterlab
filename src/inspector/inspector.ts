@@ -27,7 +27,7 @@ import {
 
 import {
   NotebookToolbar, ToolbarButton
-} from '../notebook/notebook/toolbar';
+} from '../toolbar';
 
 
 /**

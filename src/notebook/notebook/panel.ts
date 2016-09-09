@@ -51,7 +51,7 @@ import {
 
 import {
   NotebookToolbar
-} from './toolbar';
+} from '../../toolbar';
 
 import {
   Notebook
