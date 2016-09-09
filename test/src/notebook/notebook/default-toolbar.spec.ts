@@ -196,7 +196,7 @@ describe('notebook/notebook/default-toolbar', () => {
         button.node.click();
       });
 
-      it("should have the `'jp-Toolbar-run'` class", () => {
+      it('should have the `\'jp-Toolbar-run\'` class', () => {
         let button = ToolbarItems.createRunButton(panel);
         expect(button.hasClass('jp-Toolbar-run')).to.be(true);
       });
@@ -218,7 +218,7 @@ describe('notebook/notebook/default-toolbar', () => {
         });
       });
 
-      it("should have the `'jp-Toolbar-interrupt'` class", () => {
+      it('should have the `\'jp-Toolbar-interrupt\'` class', () => {
         let button = ToolbarItems.createInterruptButton(panel);
         expect(button.hasClass('jp-Toolbar-interrupt')).to.be(true);
       });
@@ -227,7 +227,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
     describe('#createRestartButton()', () => {
 
-      it("should have the `'jp-Toolbar-restart'` class", () => {
+      it('should have the `\'jp-Toolbar-restart\'` class', () => {
         let button = ToolbarItems.createRestartButton(panel);
         expect(button.hasClass('jp-Toolbar-restart')).to.be(true);
       });
@@ -244,7 +244,7 @@ describe('notebook/notebook/default-toolbar', () => {
         expect(node.value).to.be('markdown');
       });
 
-      it("should display `'-'` if multiple cell types are selected", () => {
+      it('should display `\'-\'` if multiple cell types are selected', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
         expect(node.value).to.be('code');
@@ -270,15 +270,15 @@ describe('notebook/notebook/default-toolbar', () => {
         context.changeKernel({ name: 'python' });
         panel.context = context;
         panel.content.activeCellIndex++;
-        let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
-        expect(node.value).to.be('markdown');
+        let node = item.node.getElementsByTagName('select')[0];
+        expect((node as HTMLSelectElement).value).to.be('markdown');
       });
 
     });
 
     describe('#createKernelNameItem()', () => {
 
-      it("should display the `'display_name`' of the current kernel", (done) => {
+      it('should display the `\'display_name\'` of the kernel', (done) => {
         let item = ToolbarItems.createKernelNameItem(panel);
         panel.kernel.getKernelSpec().then(spec => {
           expect(item.node.textContent).to.be(spec.display_name);
@@ -286,7 +286,7 @@ describe('notebook/notebook/default-toolbar', () => {
         });
       });
 
-      it("should display `'No Kernel!'` if there is no kernel", () => {
+      it('should display `\'No Kernel!\'` if there is no kernel', () => {
         panel.context = null;
         let item = ToolbarItems.createKernelNameItem(panel);
         expect(item.node.textContent).to.be('No Kernel!');
