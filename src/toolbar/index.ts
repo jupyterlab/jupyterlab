@@ -139,9 +139,8 @@ class ToolbarButton extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
     case 'click':
-      let cb = this._onClick;
-      if (cb) {
-        cb();
+      if (this._onClick) {
+        this._onClick();
       }
       break;
     case 'mousedown':
