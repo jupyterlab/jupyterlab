@@ -20,22 +20,22 @@ import {
 /**
  * The class name added to toolbars.
  */
-const TOOLBAR = 'jp-Toolbar';
+const TOOLBAR_CLASS = 'jp-Toolbar';
 
 /**
  * The class name added to toolbar items.
  */
-const TOOLBAR_ITEM = 'jp-Toolbar-item';
+const TOOLBAR_ITEM_CLASS = 'jp-Toolbar-item';
 
 /**
  * The class name added to toolbar buttons.
  */
-const TOOLBAR_BUTTON = 'jp-Toolbar-button';
+const TOOLBAR_BUTTON_CLASS = 'jp-Toolbar-button';
 
 /**
  * The class name added to a pressed button.
  */
-const TOOLBAR_PRESSED = 'jp-mod-pressed';
+const TOOLBAR_PRESSED_CLASS = 'jp-mod-pressed';
 
 
 /**
@@ -48,7 +48,7 @@ class Toolbar extends Widget {
    */
   constructor() {
     super();
-    this.addClass(TOOLBAR);
+    this.addClass(TOOLBAR_CLASS);
     this.layout = new PanelLayout();
   }
 
@@ -71,7 +71,7 @@ class Toolbar extends Widget {
     if (names.indexOf(name) !== -1) {
       throw new Error(`A button named "${name}" was already added`);
     }
-    widget.addClass(TOOLBAR_ITEM);
+    widget.addClass(TOOLBAR_ITEM_CLASS);
     let layout = this.layout as PanelLayout;
     let index = names.indexOf(after);
     if (index === -1) {
@@ -108,9 +108,9 @@ class ToolbarButton extends Widget {
    * Construct a new toolbar button.
    */
   constructor(options: ToolbarButton.IOptions = {}) {
-    super({ node: Private.createNode() });
+    super({ node: document.createElement('span') });
     options = options || {};
-    this.addClass(TOOLBAR_BUTTON);
+    this.addClass(TOOLBAR_BUTTON_CLASS);
     this._onClick = options.onClick;
     if (options.className) {
       this.addClass(options.className);
@@ -144,11 +144,11 @@ class ToolbarButton extends Widget {
       }
       break;
     case 'mousedown':
-      this.addClass(TOOLBAR_PRESSED);
+      this.addClass(TOOLBAR_PRESSED_CLASS);
       break;
     case 'mouseup':
     case 'mouseout':
-      this.removeClass(TOOLBAR_PRESSED);
+      this.removeClass(TOOLBAR_PRESSED_CLASS);
       break;
     default:
       break;
@@ -216,12 +216,4 @@ namespace Private {
    */
   export
   const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
-
-  /**
-   * Create the node for the toolbar button.
-   */
-  export
-  function createNode(): HTMLElement {
-    return document.createElement('span');
-  }
 }
