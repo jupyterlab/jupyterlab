@@ -3,10 +3,34 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/*
+The following CSS variables define the main, public API for styling JupyterLab.
+These variables should be used by all plugins whereever possible. In other
+words, plugins should not define custom colors, sizes, etc unless absolutely
+necessary. This enables users to change the visual theme of JupyterLab
+by changing these variable.
+
+Many variables appear in an ordered sequence (0,1,2,3). These sequences
+are designed to work well together, so for example, --jp-border-color1 should
+be used with --jp-layout-color1. The numbers have the following meanings:
+
+* 0: super-primary, reserved for special emphasis
+* 1: primary, most important under normal situations
+* 2: secondary, next most important under normal situations
+* 3: tertiary, next most important under normal situations
+
+Throughout JupyterLab, we are mostly following principles from Google's
+Material Design when selecting colors. We are not, however, following 
+all of MD as it not optimized for dense, information rich UIs.
+*/
+
 
 :root {
 
-  /* Borders */
+  /* Borders
+  
+  The following variables, specify the visual styling of borders in JupyterLab.
+   */
 
   --jp-border-width: 1px;
   --jp-border-color0: var(--md-grey-700);  
@@ -14,28 +38,41 @@
   --jp-border-color2: var(--md-grey-300);
   --jp-border-color3: var(--md-grey-100);
 
-  /* UI Fonts */
+  /* UI Fonts
+  
+  The UI font CSS variables are used for the typography all of the JupyterLab
+  user interface elements that are not directly user generated content.
+  */
 
   --jp-ui-font-scale-factor: 1.2;
   --jp-ui-font-size0: calc(var(--jp-ui-font-size1)/var(--jp-ui-font-scale-factor));
-  --jp-ui-font-size1: 13px;
+  --jp-ui-font-size1: 13px; /* Base font size */
   --jp-ui-font-size2: calc(var(--jp-ui-font-size1)*var(--jp-ui-font-scale-factor));
   --jp-ui-font-size3: calc(var(--jp-ui-font-size2)*var(--jp-ui-font-scale-factor));
-  --jp-ui-icon-font-size: 14px;
+  --jp-ui-icon-font-size: 14px; /* Ensures px perfect FontAwesome icons */
+
+  /* Use these font colors against the corresponding main layout colors.
+     In a light theme, these go from dark to light.
+  */
 
   --jp-ui-font-color0: rgba(0,0,0,1.0);
   --jp-ui-font-color1: rgba(0,0,0,0.87);
   --jp-ui-font-color2: rgba(0,0,0,0.54);
   --jp-ui-font-color3: rgba(0,0,0,0.38);
   
-  /* Use these against the brand/accent/warn/error colors */
+  /* Use these against the brand/accent/warn/error colors.
+     These will typically go from light to darker, in both a dark and light theme
+   */
 
   --jp-inverse-ui-font-color0: rgba(255,255,255,1);
   --jp-inverse-ui-font-color1: rgba(255,255,255,1.0);
   --jp-inverse-ui-font-color2: rgba(255,255,255,0.7);
   --jp-inverse-ui-font-color3: rgba(255,255,255,0.5);
 
-  /* Content Fonts */
+  /* Content Fonts
+  
+  Content font variables are used to typography of user generated content.
+  */
   
   --jp-content-font-size: 14px;
   --jp-content-font-color0: black;
@@ -43,7 +80,11 @@
   --jp-content-font-color2: var(--md-grey-700);
   --jp-content-font-color3: var(--md-grey-500);
 
-  /* Layout */
+  /* Layout
+  
+  The following are the main layout colors use in JupyterLab. In a light`
+  theme these would go from light to dark.
+  */
 
   --jp-layout-color0: white;  
   --jp-layout-color1: white;
