@@ -6,8 +6,8 @@ import {
 } from '../../application';
 
 import {
-  ConsoleWidget
-} from '../widget';
+  ConsoleContent
+} from '../content';
 
 import {
   CodeMirrorConsoleRenderer
@@ -18,8 +18,8 @@ import {
  * The provider for a console's code mirror renderer.
  */
 export
-const rendererProvider: JupyterLabPlugin<ConsoleWidget.IRenderer> = {
+const rendererProvider: JupyterLabPlugin<ConsoleContent.IRenderer> = {
   id: 'jupyter.services.console.codemirror.renderer',
-  provides: ConsoleWidget.IRenderer,
+  provides: ConsoleContent.IRenderer,
   activate: () => CodeMirrorConsoleRenderer.defaultRenderer
 };

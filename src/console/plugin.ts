@@ -50,7 +50,7 @@ import {
 } from '../services';
 
 import {
-  ConsolePanel, ConsoleWidget
+  ConsolePanel, ConsoleContent
 } from './';
 
 
@@ -67,7 +67,7 @@ const consoleExtension: JupyterLabPlugin<void> = {
     IInspector,
     ICommandPalette,
     IPathTracker,
-    ConsoleWidget.IRenderer
+    ConsoleContent.IRenderer
   ],
   activate: activateConsole,
   autoStart: true
@@ -93,7 +93,7 @@ const FILE_EXTENSION = 'jpcon';
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleWidget.IRenderer): void {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): void {
   let tracker = new FocusTracker<ConsolePanel>();
   let manager = services.sessions;
   let { commands, keymap } = app;
