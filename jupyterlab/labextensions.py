@@ -839,7 +839,7 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
             data = cm.get("jupyter_notebook_config")
             lab_extensions = (
-                data.setdefault("NotebookApp", {})
+                data.setdefault("LabApp", {})
                 .setdefault("lab_extensions", {})
             )
             if lab_extensions:
