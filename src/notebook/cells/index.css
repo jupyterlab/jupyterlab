@@ -1,0 +1,95 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-Cell {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-width: var(--jp-border-width);
+  border-style: solid;
+  border-color: transparent;
+  outline: none;
+}
+
+
+.jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
+  padding-left: 5px;
+  padding-right: 5px;
+  border-width: var(--jp-border-width);
+  border-style: solid;
+  border-color: transparent;
+  outline: none;
+  background: transparent;
+  border-color: transparent;
+}
+
+
+.jp-InputArea {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.jp-InputArea-prompt {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 90px;
+  color: #303F9F;
+  font-family: monospace;
+  padding: 0.4em;
+  text-align: right;
+  line-height: 1.2em;
+  font-size: 14px;
+}
+
+
+.jp-InputArea-editor {
+  flex-grow: 1;
+  flex-shrink: 1;
+  height: auto;
+  min-height: 2em;
+}
+
+
+.jp-CellEditor {
+  border: var(--jp-border-width) solid #cfcfcf;
+  border-radius: 2px;
+  background: #f7f7f7;
+  line-height: 1.2em;
+}
+
+
+.jp-MarkdownCell {
+  outline: 0;
+}
+
+
+.jp-MarkdownCell.jp-mod-rendered {
+  padding-left: 90px;
+}
+
+
+.jp-MarkdownCell-renderer {
+  padding: 0.5em 0.5em 0.5em 0.4em;
+}
+
+
+.jp-MarkdownCell-content {
+  padding: 0.5em;
+}
+
+
+.jp-Output-prompt {
+  color: #D84315;
+  font-family: monospace;
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.4em;
+  font-size: 14px;
+  flex: 0 0 90px;
+  box-sizing: border-box;
+}
