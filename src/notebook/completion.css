@@ -2,6 +2,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+
 .jp-Completion {
   background: #EEEEEE;
   border: var(--jp-border-width) solid var(--jp-border-color1);
