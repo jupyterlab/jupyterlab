@@ -1,0 +1,807 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+@import url('~phosphor/styles/base.css');
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+| General
+|----------------------------------------------------------------------------*/
+.p-mod-hidden {
+  display: none !important;
+}
+/*-----------------------------------------------------------------------------
+| Menu
+|----------------------------------------------------------------------------*/
+.p-Menu {
+  z-index: 10000;
+  padding: 3px 0px;
+  background: white;
+  color: rgba(0, 0, 0, 0.87);
+  border: 1px solid #C0C0C0;
+  font: 14px;
+  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
+}
+.p-Menu-item.p-mod-active {
+  background: #E5E5E5;
+}
+.p-Menu-item.p-mod-disabled {
+  color: rgba(0, 0, 0, 0.25);
+}
+.p-Menu-itemIcon {
+  width: 21px;
+  padding: 4px 2px;
+}
+.p-Menu-itemLabel {
+  padding: 4px 35px 4px 2px;
+  font-size: 13px;
+  color: #777777;
+}
+.p-Menu-itemMnemonic {
+  text-decoration: underline;
+}
+.p-Menu-itemShortcut {
+  padding: 4px 0px;
+  font-size: 13px;
+  color: #777777;
+}
+.p-Menu-itemSubmenuIcon {
+  width: 16px;
+  padding: 4px 0px;
+}
+.p-Menu-item.p-type-separator > div {
+  padding: 0;
+  height: 9px;
+}
+.p-Menu-item.p-type-separator > div::after {
+  content: '';
+  display: block;
+  position: relative;
+  top: 4px;
+  border-top: 1px solid #DDDDDD;
+}
+.p-Menu-itemIcon::before,
+.p-Menu-itemSubmenuIcon::before {
+  font-family: FontAwesome;
+}
+.p-Menu-item.p-mod-toggled > .p-Menu-itemIcon::before {
+  content: '\f00c';
+}
+.p-Menu-item.p-type-submenu > .p-Menu-itemSubmenuIcon::before {
+  content: '\f0da';
+}
+/*-----------------------------------------------------------------------------
+| MenuBar
+|----------------------------------------------------------------------------*/
+.p-MenuBar {
+  padding-left: 5px;
+  background: white;
+  color: rgba(0, 0, 0, 0.87);
+  font: 14px;
+}
+.p-MenuBar-menu {
+  transform: translateY(-3px);
+}
+.p-MenuBar-item {
+  padding: 6px 8px;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+}
+.p-MenuBar-item.p-mod-active {
+  background: #E5E5E5;
+}
+.p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
+  z-index: 10001;
+  background: white;
+  border-left: 1px solid #C0C0C0;
+  border-right: 1px solid #C0C0C0;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2);
+}
+.p-MenuBar-item.p-mod-disabled {
+  color: rgba(0, 0, 0, 0.26);
+}
+.p-MenuBar-item.p-type-separator {
+  margin: 2px;
+  padding: 0;
+  border: none;
+  border-left: 1px solid #DDDDDD;
+}
+.p-MenuBar-item.p-mod-active > .p-MenuBar-itemLabel {
+  color: #2196F3;
+}
+.p-MenuBar-itemMnemonic {
+  text-decoration: underline;
+}
+.p-MenuBar-itemLabel {
+  font-size: 13px;
+  color: #777777;
+}
+/*-----------------------------------------------------------------------------
+| TabBar
+|----------------------------------------------------------------------------*/
+.p-TabBar {
+  overflow: visible;
+  color: #777777;
+  font-size: 13px;
+}
+.p-TabBar.p-mod-horizontal {
+  min-height: 24px;
+}
+.p-TabBar.p-mod-vertical {
+  min-width: 80px;
+}
+.p-TabBar.p-mod-top {
+  border-bottom: 1px solid #BDBDBD;
+}
+.p-TabBar.p-mod-bottom {
+  border-top: 1px solid #BDBDBD;
+}
+.p-TabBar.p-mod-left {
+  border-right: 1px solid #BDBDBD;
+}
+.p-TabBar.p-mod-right {
+  border-left: 1px solid #BDBDBD;
+}
+.p-TabBar-content {
+  min-width: 0;
+  min-height: 0;
+}
+.p-TabBar.p-mod-top > .p-TabBar-content {
+  align-items: flex-end;
+}
+.p-TabBar.p-mod-bottom > .p-TabBar-content {
+  align-items: flex-start;
+}
+.p-TabBar-tab {
+  padding: 0px 10px;
+  background: #EEEEEE;
+  border: 1px solid #BDBDBD;
+}
+.p-TabBar-tab.p-mod-current {
+  background: white;
+}
+.p-TabBar-tab:hover:not(.p-mod-current) {
+  background: #FAFAFA;
+}
+.p-TabBar.p-mod-top .p-TabBar-tab,
+.p-TabBar.p-mod-bottom .p-TabBar-tab {
+  flex: 0 1 125px;
+  min-height: 20px;
+  min-width: 35px;
+  margin-left: -1px;
+  line-height: 20px;
+}
+.p-TabBar.p-mod-top .p-TabBar-tab {
+  border-bottom: none;
+}
+.p-TabBar.p-mod-bottom .p-TabBar-tab {
+  border-top: none;
+}
+.p-TabBar.p-mod-top .p-TabBar-tab:first-child,
+.p-TabBar.p-mod-bottom .p-TabBar-tab:first-child {
+  margin-left: 0;
+}
+.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
+.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+  min-height: 23px;
+}
+.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current {
+  transform: translateY(1px);
+}
+.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+  transform: translateY(-1px);
+}
+.p-TabBar.p-mod-left .p-TabBar-tab,
+.p-TabBar.p-mod-right .p-TabBar-tab {
+  flex: 0 1 40px;
+  margin-top: -1px;
+  line-height: 40px;
+}
+.p-TabBar.p-mod-left .p-TabBar-tab {
+  border-right: none;
+}
+.p-TabBar.p-mod-right .p-TabBar-tab {
+  border-left: none;
+}
+.p-TabBar.p-mod-left .p-TabBar-tab:first-child,
+.p-TabBar.p-mod-right .p-TabBar-tab:first-child {
+  margin-top: 0;
+}
+.p-TabBar.p-mod-left .p-TabBar-tab.p-mod-current,
+.p-TabBar.p-mod-right .p-TabBar-tab.p-mod-current {
+  min-width: 80px;
+  max-width: 80px;
+}
+.p-TabBar.p-mod-right .p-TabBar-tab.p-mod-current {
+  transform: translateX(-1px);
+}
+.p-TabBar-tabIcon,
+.p-TabBar-tabLabel,
+.p-TabBar-tabCloseIcon {
+  display: inline-block;
+}
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
+  margin-left: 4px;
+}
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
+  content: '\f00d';
+  /* close */
+  font-family: FontAwesome;
+}
+.p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon:before {
+  font-family: FontAwesome;
+  content: '\f111';
+  /* circle */
+  font-size: 10px;
+}
+.p-TabBar-tab.p-mod-drag-image {
+  min-height: 24px;
+  min-width: 124px;
+  color: #777777;
+  background: white;
+  border: 1px solid #BDBDBD;
+  border-top: 1px solid #2196F3;
+  font-size: 14px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  transform: translateX(-40%) translateY(-58%);
+}
+.p-TabPanel-stackedPanel {
+  padding: 10px;
+  background: white;
+  border: 1px solid #C0C0C0;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+.p-TabPanel.p-mod-top-to-bottom > .p-TabPanel-stackedPanel {
+  border-top: none;
+}
+.p-TabPanel.p-mod-bottom-to-top > .p-TabPanel-stackedPanel {
+  border-bottom: none;
+}
+.p-TabPanel.p-mod-left-to-right > .p-TabPanel-stackedPanel {
+  border-left: none;
+}
+.p-TabPanel.p-mod-right-to-left > .p-TabPanel-stackedPanel {
+  border-right: none;
+}
+/*-----------------------------------------------------------------------------
+| DockPanel
+|----------------------------------------------------------------------------*/
+.p-DockPanel-tabPanel {
+  padding-right: 2px;
+  padding-bottom: 2px;
+  border-top: none;
+}
+.p-DockPanel-tabPanel > .p-StackedPanel {
+  padding: 10px;
+  background: white;
+  border-left: 1px solid #BDBDBD;
+  border-right: 1px solid #BDBDBD;
+  border-bottom: 1px solid #BDBDBD;
+}
+.p-DockPanel-overlay {
+  background: rgba(33, 150, 243, 0.1);
+  border: 1px dashed #2196F3;
+  transition-property: top, left, right, bottom;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+.p-DockPanel-overlay.p-mod-root-top,
+.p-DockPanel-overlay.p-mod-root-left,
+.p-DockPanel-overlay.p-mod-root-right,
+.p-DockPanel-overlay.p-mod-root-bottom,
+.p-DockPanel-overlay.p-mod-root-center {
+  border-width: 2px;
+}
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+| General
+|----------------------------------------------------------------------------*/
+body {
+  margin: 0;
+  padding: 0;
+  background: white;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+/*-----------------------------------------------------------------------------
+| Shell
+|----------------------------------------------------------------------------*/
+.jp-ApplicationShell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+#jp-main-dock-panel {
+  padding: 8px;
+}
+#jp-top-panel {
+  border-bottom: 1px solid black;
+  background: white;
+  display: flex;
+  min-height: 28px;
+}
+#jp-left-stack > .p-Widget,
+#jp-right-stack > .p-Widget {
+  min-width: 300px;
+}
+#jp-right-stack {
+  border-left: 1px solid black;
+}
+#jp-left-stack {
+  border-right: 1px solid black;
+}
+#jp-main-dock-panel .p-TabBar-tab.jp-mod-current {
+  border-top: 1px solid black;
+}
+.jp-SideBar.p-TabBar {
+  color: black;
+  background: white;
+  font-size: 14px;
+  min-width: 36px;
+  max-width: 36px;
+  overflow: visible;
+  display: block;
+}
+.jp-SideBar.p-TabBar.jp-mod-left {
+  border-right: 1px solid black;
+}
+.jp-SideBar.p-TabBar.jp-mod-right {
+  border-left: 1px solid black;
+}
+.jp-SideBar .p-TabBar-content,
+.jp-SideBar .p-TabBar-content {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  list-style-type: none;
+  height: 35px;
+  transform-origin: 0 0 0;
+}
+.jp-SideBar.jp-mod-left .p-TabBar-content {
+  flex-direction: row-reverse;
+  transform: rotate(-90deg) translateX(-100%);
+}
+.jp-SideBar.jp-mod-right .p-TabBar-content {
+  flex-direction: row;
+  transform: rotate(90deg) translateY(-100%);
+}
+.jp-SideBar .p-TabBar-tab {
+  padding: 0 18px;
+  background: white;
+  border: none;
+  overflow: visible;
+}
+.jp-SideBar .p-TabBar-tabLabel {
+  line-height: 35px;
+}
+.jp-SideBar .p-TabBar-tab:hover:not(.p-mod-current) {
+  background: white;
+}
+.jp-SideBar .p-TabBar-tab.p-mod-current {
+  color: black;
+  background: white;
+}
+.jp-SideBar.jp-mod-left .p-TabBar-tab {
+  border-left: 1px solid black;
+}
+.jp-SideBar.jp-mod-right .p-TabBar-tab {
+  border-right: 1px solid black;
+}
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-ConsolePanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+.jp-Console {
+  overflow: auto;
+}
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-Dialog {
+  position: absolute;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  top: 0px;
+  left: 0px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+.jp-Dialog-content {
+  margin-left: auto;
+  margin-right: auto;
+}
+.jp-Dialog-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-FileBrowser {
+  display: flex;
+  flex-direction: column;
+}
+.jp-BreadCrumbs {
+  flex: 0 0 auto;
+}
+.jp-FileButtons {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+}
+.jp-FileButtons-buttonContent {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+.jp-FileButtons-buttonIcon {
+  margin-left: auto;
+  margin-right: auto;
+}
+.jp-DirListing {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.jp-DirListing-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+.jp-DirListing-content {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  overflow: auto;
+}
+.jp-DirListing-item {
+  display: flex;
+  flex-direction: row;
+}
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+/*
+When drag events occur, `p-mod-override-cursor` is added to the body.
+Because iframes steal all cursor events, the following two rules are necessary
+to suppress pointer events while resize drags are occuring. There may be a
+better solution to this problem.
+*/
+body.p-mod-override-cursor .jp-IFrame {
+  position: relative;
+}
+body.p-mod-override-cursor .jp-IFrame:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+}
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-Notebook-panel {
+  display: flex;
+  flex-direction: column;
+}
+.jp-NBToolbar {
+  flex: 0 0 auto;
+}
+.jp-Notebook-container {
+  flex: 1 1 auto;
+}
+.jp-InputArea {
+  display: flex;
+  flex-direction: row;
+}
+.jp-InputArea-prompt {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.jp-InputArea-editor {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+.jp-MarkdownCell-content {
+  padding: 0.5em;
+}
+.jp-Output-result {
+  user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+}
+.p-Widget.jp-Output-result {
+  overflow: auto;
+}
+/* If we have two nested output areas (for example, as with output widgets),
+   then the inner output looks weird with a prompt, so we hide it. */
+.jp-Output .jp-Output .jp-Output-prompt {
+  display: none;
+}
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-RenderedHTMLCommon {
+  color: black;
+  font-size: 14px;
+  line-height: 20px;
+  /*For a 14px base font size this goes as:
+  font-size = 26, 22, 18, 14, 12, 12
+  margin-top = 14, 14, 14, 14, 8, 8
+  */
+}
+.jp-RenderedHTMLCommon .MathJax_Display {
+  margin: 0;
+}
+.jp-RenderedHTMLCommon em {
+  font-style: italic;
+}
+.jp-RenderedHTMLCommon strong {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon u {
+  text-decoration: underline;
+}
+.jp-RenderedHTMLCommon :link {
+  text-decoration: underline;
+}
+.jp-RenderedHTMLCommon :visited {
+  text-decoration: underline;
+}
+.jp-RenderedHTMLCommon h1 {
+  font-size: 185.7%;
+  margin: 1.08em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+.jp-RenderedHTMLCommon h2 {
+  font-size: 157.1%;
+  margin: 1.27em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+.jp-RenderedHTMLCommon h3 {
+  font-size: 128.6%;
+  margin: 1.55em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+.jp-RenderedHTMLCommon h4 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+.jp-RenderedHTMLCommon h5 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+  font-style: italic;
+}
+.jp-RenderedHTMLCommon h6 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+  font-style: italic;
+}
+.jp-RenderedHTMLCommon h1:first-child {
+  margin-top: 0.538em;
+}
+.jp-RenderedHTMLCommon h2:first-child {
+  margin-top: 0.636em;
+}
+.jp-RenderedHTMLCommon h3:first-child {
+  margin-top: 0.777em;
+}
+.jp-RenderedHTMLCommon h4:first-child {
+  margin-top: 1em;
+}
+.jp-RenderedHTMLCommon h5:first-child {
+  margin-top: 1em;
+}
+.jp-RenderedHTMLCommon h6:first-child {
+  margin-top: 1em;
+}
+.jp-RenderedHTMLCommon ul:not(.list-inline),
+.jp-RenderedHTMLCommon ol:not(.list-inline) {
+  padding-left: 2em;
+}
+.jp-RenderedHTMLCommon ul {
+  list-style: disc;
+}
+.jp-RenderedHTMLCommon ul ul {
+  list-style: square;
+}
+.jp-RenderedHTMLCommon ul ul ul {
+  list-style: circle;
+}
+.jp-RenderedHTMLCommon ol {
+  list-style: decimal;
+}
+.jp-RenderedHTMLCommon ol ol {
+  list-style: upper-alpha;
+}
+.jp-RenderedHTMLCommon ol ol ol {
+  list-style: lower-alpha;
+}
+.jp-RenderedHTMLCommon ol ol ol ol {
+  list-style: lower-roman;
+}
+.jp-RenderedHTMLCommon ol ol ol ol ol {
+  list-style: decimal;
+}
+.jp-RenderedHTMLCommon * + ul {
+  margin-top: 1em;
+}
+.jp-RenderedHTMLCommon * + ol {
+  margin-top: 1em;
+}
+.jp-RenderedHTMLCommon hr {
+  color: black;
+  background-color: black;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.jp-RenderedHTMLCommon pre {
+  margin: 1em 2em;
+}
+.jp-RenderedHTMLCommon pre,
+.jp-RenderedHTMLCommon code {
+  border: 0;
+  background-color: white;
+  color: black;
+  font-size: 100%;
+  padding: 0px;
+}
+.jp-RenderedHTMLCommon blockquote {
+  margin: 1em 2em;
+}
+.jp-RenderedHTMLCommon table {
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  margin: 1em 2em;
+}
+.jp-RenderedHTMLCommon td,
+.jp-RenderedHTMLCommon th {
+  text-align: left;
+  vertical-align: middle;
+  padding: 4px;
+}
+.jp-RenderedHTMLCommon th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon * + table {
+  margin-top: 1em;
+}
+.jp-RenderedHTMLCommon p {
+  text-align: left;
+  margin: 0px;
+}
+.jp-RenderedHTMLCommon * + p {
+  margin-top: 1em;
+}
+.jp-RenderedHTMLCommon img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.jp-RenderedHTMLCommon * + img {
+  margin-top: 1em;
+}
+.jp-RenderedHTMLCommon img,
+.jp-RenderedHTMLCommon svg {
+  max-width: 100%;
+  height: auto;
+}
+.jp-RenderedHTMLCommon img.unconfined,
+.jp-RenderedHTMLCommon svg.unconfined {
+  max-width: none;
+}
+.jp-RenderedHTMLCommon .alert {
+  margin-bottom: initial;
+}
+.jp-RenderedHTMLCommon * + .alert {
+  margin-top: 1em;
+}
+.jp-RenderedHTMLCommon blockquote {
+  margin: 1em 2em;
+  padding: 0 1em;
+  border-left: 5px solid black;
+}
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-RunningSessions {
+  display: flex;
+  flex-direction: column;
+}
+.jp-RunningSessions-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+}
+.jp-RunningSessions-headerTitle {
+  flex: 1 1 auto;
+}
+.jp-RunningSessions-headerRefresh {
+  flex: 0 0 auto;
+}
+.jp-RunningSessions-section {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+}
+.jp-RunningSessions-sectionHeader {
+  flex: 0 0 auto;
+}
+.jp-RunningSessions-sectionContainer {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+.jp-RunningSessions-sectionList {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+.jp-RunningSessions-item {
+  display: flex;
+  flex-direction: row;
+}
+.jp-RunningSessions-itemIcon {
+  flex: 0 0 auto;
+}
+.jp-RunningSessions-itemLabel {
+  flex: 1 1 auto;
+}
+.jp-RunningSessions-itemKernelName {
+  flex: 0 0 auto;
+}
+.jp-RunningSessions-itemShutdown {
+  flex: 0 0 auto;
+}
