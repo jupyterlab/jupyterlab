@@ -88,9 +88,9 @@ describe('notebook/notebook/default-toolbar', () => {
         button.dispose();
       });
 
-      it('should have the `\'jp-Toolbar-save\'` class', () => {
+      it('should have the `\'jp-Notebook-toolbarSave\'` class', () => {
         let button = ToolbarItems.createSaveButton(panel);
-        expect(button.hasClass('jp-Toolbar-save')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarSave')).to.be(true);
       });
 
     });
@@ -106,9 +106,9 @@ describe('notebook/notebook/default-toolbar', () => {
         button.dispose();
       });
 
-      it('should have the `\'jp-Toolbar-insert\'` class', () => {
+      it('should have the `\'jp-Notebook-toolbarInsert\'` class', () => {
         let button = ToolbarItems.createInsertButton(panel);
-        expect(button.hasClass('jp-Toolbar-insert')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarInsert')).to.be(true);
       });
 
     });
@@ -125,9 +125,9 @@ describe('notebook/notebook/default-toolbar', () => {
         button.dispose();
       });
 
-      it('should have the `\'jp-Toolbar-cut\'` class', () => {
+      it('should have the `\'jp-Notebook-toolbarCut\'` class', () => {
         let button = ToolbarItems.createCutButton(panel);
-        expect(button.hasClass('jp-Toolbar-cut')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarCut')).to.be(true);
       });
 
     });
@@ -144,9 +144,9 @@ describe('notebook/notebook/default-toolbar', () => {
         button.dispose();
       });
 
-      it('should have the `\'jp-Toolbar-copy\'` class', () => {
+      it('should have the `\'jp-Notebook-toolbarCopy\'` class', () => {
         let button = ToolbarItems.createCopyButton(panel);
-        expect(button.hasClass('jp-Toolbar-copy')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarCopy')).to.be(true);
       });
 
     });
@@ -166,9 +166,9 @@ describe('notebook/notebook/default-toolbar', () => {
         });
       });
 
-      it('should have the `\'jp-Toolbar-paste\'` class', () => {
+      it('should have the `\'jp-Notebook-toolbarPaste\'` class', () => {
         let button = ToolbarItems.createPasteButton(panel);
-        expect(button.hasClass('jp-Toolbar-paste')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarPaste')).to.be(true);
       });
 
     });
@@ -196,9 +196,9 @@ describe('notebook/notebook/default-toolbar', () => {
         button.node.click();
       });
 
-      it('should have the `\'jp-Toolbar-run\'` class', () => {
+      it('should have the `\'jp-Notebook-toolbarRun\'` class', () => {
         let button = ToolbarItems.createRunButton(panel);
-        expect(button.hasClass('jp-Toolbar-run')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarRun')).to.be(true);
       });
 
     });
@@ -218,18 +218,18 @@ describe('notebook/notebook/default-toolbar', () => {
         });
       });
 
-      it('should have the `\'jp-Toolbar-interrupt\'` class', () => {
+      it('should have the `\'jp-Notebook-toolbarInterrupt\'` class', () => {
         let button = ToolbarItems.createInterruptButton(panel);
-        expect(button.hasClass('jp-Toolbar-interrupt')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarInterrupt')).to.be(true);
       });
 
     });
 
     describe('#createRestartButton()', () => {
 
-      it('should have the `\'jp-Toolbar-restart\'` class', () => {
+      it('should have the `\'jp-Notebook-toolbarRestart\'` class', () => {
         let button = ToolbarItems.createRestartButton(panel);
-        expect(button.hasClass('jp-Toolbar-restart')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarRestart')).to.be(true);
       });
 
     });
