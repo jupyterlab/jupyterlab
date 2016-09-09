@@ -36,5 +36,6 @@ function validateEntryPoint(entryPoint) {
 
 jupyter.lab = new JupyterLab();
 jupyter.validateEntryPoint = validateEntryPoint;
+jupyter.version = require('jupyterlab/package.json').version;
 
 module.exports = jupyter.lab;

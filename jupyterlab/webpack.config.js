@@ -5,7 +5,7 @@
 // See https://github.com/webpack/css-loader/issues/144
 require('es6-promise').polyfill();
 
-var buildExtension = require('./creator');
+var buildExtension = require('jupyterlab-extension-builder/lib/builder').buildExtension;
 
 
 console.log('Generating bundles...');
@@ -25,21 +25,29 @@ var LOADERS = [
 ];
 
 
-buildExtension('main', './index.js', {
-  output: {
-    publicPath: 'lab/'
-  },
-  module: {
-    loaders: LOADERS
+buildExtension({
+  name: 'main',
+  entryPath: './index.js',
+  config: {
+    output: {
+      publicPath: 'lab/'
+    },
+    module: {
+      loaders: LOADERS
+    }
   }
 });
 
-buildExtension('extensions', './extensions.js', {
-  output: {
-    publicPath: 'lab/'
-  },
-  module: {
-    loaders: LOADERS
+buildExtension({
+  name: 'extensions',
+  entryPath: './extensions.js',
+  config: {
+    output: {
+      publicPath: 'lab/'
+    },
+    module: {
+      loaders: LOADERS
+    }
   }
 });
 
