@@ -525,7 +525,7 @@ class InspectorItem extends Panel {
       let toggle = new ToolbarButton({
         className: this.orientation === 'vertical' ? RIGHT_TOGGLE_CLASS
           : BOTTOM_TOGGLE_CLASS,
-        onClick: () => this.orientationToggled.emit(void 0),
+        onClick: () => { this.orientationToggled.emit(void 0); },
         tooltip: 'Toggle the inspector orientation.'
       });
       toolbar.add('toggle', toggle);
@@ -537,21 +537,21 @@ class InspectorItem extends Panel {
 
     let clear = new ToolbarButton({
       className: CLEAR_CLASS,
-      onClick: () => this._clear(),
+      onClick: () => { this._clear(); },
       tooltip: 'Clear history.'
     });
     toolbar.add('clear', clear);
 
     let back = new ToolbarButton({
       className: BACK_CLASS,
-      onClick: () => this._back(),
+      onClick: () => { this._back(); },
       tooltip: 'Navigate back in history.'
     });
     toolbar.add('back', back);
 
     let forward = new ToolbarButton({
       className: FORWARD_CLASS,
-      onClick: () => this._forward(),
+      onClick: () => { this._forward(); },
       tooltip: 'Navigate forward in history.'
     });
     toolbar.add('forward', forward);
