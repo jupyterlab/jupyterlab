@@ -5,7 +5,7 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-NBToolbar {
+.jp-Toolbar {
   color: var(--jp-ui-font-color1);
   flex: 0 0 auto;
   display: flex;
@@ -15,7 +15,7 @@
 }
 
 
-.jp-NBToolbar > .jp-NBToolbar-item {
+.jp-Toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 8px;
   padding-right: 8px;
@@ -25,19 +25,19 @@
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-button,
-.jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
+.jp-Toolbar-item.jp-Toolbar-button,
+.jp-Toolbar-item.jp-Toolbar-kernelIndicator {
   font-family: FontAwesome;
   text-align: center;
   display: inline-block;
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-cellType select {
+.jp-Toolbar-item.jp-Toolbar-cellType select {
     background: #FFFFFF;
 }
 
-.jp-NBToolbar-cellType .jp-NBToolbar-cellTypeDropdown {
+.jp-Toolbar-cellType .jp-Toolbar-cellTypeDropdown {
     border: var(--jp-border-width) solid var(--jp-border-color1);
     border-radius: 0;
     outline: none;
@@ -47,75 +47,75 @@
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-kernelName {
+.jp-Toolbar-item.jp-Toolbar-kernelName {
     text-align: right;
     flex-grow: 1;
     flex-shrink: 1;
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
+.jp-Toolbar-item.jp-Toolbar-kernelIndicator {
     border-right: none;
 }
 
 
-.jp-NBToolbar-button.jp-mod-pressed {
+.jp-Toolbar-button.jp-mod-pressed {
     background-color: #E0E0E0;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
 }
 
 
-.jp-NBToolbar-button:hover {
+.jp-Toolbar-button:hover {
     background-color: #EEEEEE;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
 }
 
 
-.jp-NBToolbar-button.jp-NBToolbar-save::before {
+.jp-Toolbar-button.jp-Toolbar-save::before {
    content: "\f0c7";  /* Save */
 }
 
 
-.jp-NBToolbar-button.jp-NBToolbar-insert::before {
+.jp-Toolbar-button.jp-Toolbar-insert::before {
    content: "\f067";  /* Plus */
 }
 
 
-.jp-NBToolbar-button.jp-NBToolbar-cut::before {
+.jp-Toolbar-button.jp-Toolbar-cut::before {
    content: "\f0c4";  /* Cut */
 }
 
 
-.jp-NBToolbar-button.jp-NBToolbar-copy::before {
+.jp-Toolbar-button.jp-Toolbar-copy::before {
    content: "\f0c5";  /* Copy */
 }
 
 
-.jp-NBToolbar-button.jp-NBToolbar-paste::before {
+.jp-Toolbar-button.jp-Toolbar-paste::before {
    content: "\f0ea";  /* Paste */
 }
 
 
-.jp-NBToolbar-button.jp-NBToolbar-run::before {
+.jp-Toolbar-button.jp-Toolbar-run::before {
    content: "\f051";  /* Step-forward */
 }
 
 
-.jp-NBToolbar-button.jp-NBToolbar-interrupt::before {
+.jp-Toolbar-button.jp-Toolbar-interrupt::before {
    content: "\f04d";  /* Stop */
 }
 
 
-.jp-NBToolbar-button.jp-NBToolbar-restart::before {
+.jp-Toolbar-button.jp-Toolbar-restart::before {
    content: "\f01e";  /* Rotate-right */
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-kernelIndicator::before {
+.jp-Toolbar-item.jp-Toolbar-kernelIndicator::before {
     content: "\f10c";  /* Circle-o */
 }
 
 
-.jp-NBToolbar-item.jp-NBToolbar-kernelIndicator.jp-mod-busy::before {
+.jp-Toolbar-item.jp-Toolbar-kernelIndicator.jp-mod-busy::before {
     content: "\f111";  /* Circle */
 }

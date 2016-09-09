@@ -54,9 +54,9 @@ describe('notebook/notebook/toolbar', () => {
         expect(widget).to.be.a(NotebookToolbar);
       });
 
-      it('should add the `jp-NBToolbar` class', () => {
+      it('should add the `jp-Toolbar` class', () => {
         let widget = new NotebookToolbar();
-        expect(widget.hasClass('jp-NBToolbar')).to.be(true);
+        expect(widget.hasClass('jp-Toolbar')).to.be(true);
       });
 
     });
@@ -70,11 +70,11 @@ describe('notebook/notebook/toolbar', () => {
         expect(widget.list()).to.contain('test');
       });
 
-      it('should add the `jp-NBToolbar-item` class to the widget', () => {
+      it('should add the `jp-Toolbar-item` class to the widget', () => {
         let item = new Widget();
         let widget = new NotebookToolbar();
         widget.add('test', item);
-        expect(item.hasClass('jp-NBToolbar-item')).to.be(true);
+        expect(item.hasClass('jp-Toolbar-item')).to.be(true);
       });
 
       it('should add the item after a named item', () => {

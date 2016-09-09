@@ -37,62 +37,62 @@ import {
 /**
  * The class name added to toolbar save button.
  */
-const TOOLBAR_SAVE = 'jp-NBToolbar-save';
+const TOOLBAR_SAVE = 'jp-Toolbar-save';
 
 /**
  * The class name added to toolbar insert button.
  */
-const TOOLBAR_INSERT = 'jp-NBToolbar-insert';
+const TOOLBAR_INSERT = 'jp-Toolbar-insert';
 
 /**
  * The class name added to toolbar cut button.
  */
-const TOOLBAR_CUT = 'jp-NBToolbar-cut';
+const TOOLBAR_CUT = 'jp-Toolbar-cut';
 
 /**
  * The class name added to toolbar copy button.
  */
-const TOOLBAR_COPY = 'jp-NBToolbar-copy';
+const TOOLBAR_COPY = 'jp-Toolbar-copy';
 
 /**
  * The class name added to toolbar paste button.
  */
-const TOOLBAR_PASTE = 'jp-NBToolbar-paste';
+const TOOLBAR_PASTE = 'jp-Toolbar-paste';
 
 /**
  * The class name added to toolbar run button.
  */
-const TOOLBAR_RUN = 'jp-NBToolbar-run';
+const TOOLBAR_RUN = 'jp-Toolbar-run';
 
 /**
  * The class name added to toolbar interrupt button.
  */
-const TOOLBAR_INTERRUPT = 'jp-NBToolbar-interrupt';
+const TOOLBAR_INTERRUPT = 'jp-Toolbar-interrupt';
 
 /**
  * The class name added to toolbar restart button.
  */
-const TOOLBAR_RESTART = 'jp-NBToolbar-restart';
+const TOOLBAR_RESTART = 'jp-Toolbar-restart';
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.
  */
-const TOOLBAR_CELLTYPE = 'jp-NBToolbar-cellType';
+const TOOLBAR_CELLTYPE = 'jp-Toolbar-cellType';
 
 /**
  * The class name added to toolbar cell type dropdown.
  */
-const TOOLBAR_CELLTYPE_DROPDOWN = 'jp-NBToolbar-cellTypeDropdown';
+const TOOLBAR_CELLTYPE_DROPDOWN = 'jp-Toolbar-cellTypeDropdown';
 
 /**
  * The class name added to toolbar kernel name text.
  */
-const TOOLBAR_KERNEL = 'jp-NBToolbar-kernelName';
+const TOOLBAR_KERNEL = 'jp-Toolbar-kernelName';
 
 /**
  * The class name added to toolbar kernel indicator icon.
  */
-const TOOLBAR_INDICATOR = 'jp-NBToolbar-kernelIndicator';
+const TOOLBAR_INDICATOR = 'jp-Toolbar-kernelIndicator';
 
 /**
  * The class name added to a busy kernel indicator.

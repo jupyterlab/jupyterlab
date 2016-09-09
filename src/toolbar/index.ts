@@ -18,19 +18,19 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 /**
- * The class name added to notebook toolbars.
+ * The class name added to toolbars.
  */
-const NB_TOOLBAR = 'jp-NBToolbar';
+const TOOLBAR = 'jp-Toolbar';
 
 /**
- * The class name added to notebook toolbar items.
+ * The class name added to toolbar items.
  */
-const TOOLBAR_ITEM = 'jp-NBToolbar-item';
+const TOOLBAR_ITEM = 'jp-Toolbar-item';
 
 /**
- * The class name added to notebook toolbar buttons.
+ * The class name added to toolbar buttons.
  */
-const TOOLBAR_BUTTON = 'jp-NBToolbar-button';
+const TOOLBAR_BUTTON = 'jp-Toolbar-button';
 
 /**
  * The class name added to a pressed button.
@@ -39,7 +39,7 @@ const TOOLBAR_PRESSED = 'jp-mod-pressed';
 
 
 /**
- * A class which provides a notebook toolbar widget.
+ * A class which provides a toolbar widget.
  */
 export
 class NotebookToolbar extends Widget {
@@ -48,7 +48,7 @@ class NotebookToolbar extends Widget {
    */
   constructor() {
     super();
-    this.addClass(NB_TOOLBAR);
+    this.addClass(TOOLBAR);
     this.layout = new PanelLayout();
   }
 
