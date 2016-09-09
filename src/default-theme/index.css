@@ -33,6 +33,7 @@
 @import '../renderers/index.css';
 @import '../running/index.css';
 @import '../terminal/index.css';
+@import '../toolbar/index.css';
 
 /* Theme images */
 @import './images.css';
