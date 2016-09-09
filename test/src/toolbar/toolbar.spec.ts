@@ -17,7 +17,7 @@ import {
 
 import {
   NotebookToolbar, ToolbarButton
-} from '../../../../lib/notebook/notebook/toolbar';
+} from '../../../lib/toolbar';
 
 
 class LogToolbarButton extends ToolbarButton {

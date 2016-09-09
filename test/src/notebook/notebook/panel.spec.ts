@@ -20,10 +20,6 @@ import {
 } from '../../../../lib/docregistry';
 
 import {
-  ICellEditorWidget, ITextChange, ICompletionRequest
-} from '../../../../lib/notebook/cells/editor';
-
-import {
   CompletionWidget
 } from '../../../../lib/notebook/completion';
 
@@ -37,7 +33,7 @@ import {
 
 import {
   NotebookToolbar
-} from '../../../../lib/notebook/notebook/toolbar';
+} from '../../../../lib/toolbar';
 
 import {
   Notebook
