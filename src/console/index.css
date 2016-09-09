@@ -4,49 +4,58 @@
 |----------------------------------------------------------------------------*/
 
 
+:root {
+  --jp-private-console-cell-padding: 5px;
+}
+
+
 .jp-ConsolePanel {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  margin-top: 4px;
 }
 
 
 .jp-ConsoleContent {
   height: 100%;
   padding: 0;
-  border: 1px solid #C9C9C9;
   display: flex;
   flex-direction: column;
 }
 
 
 .jp-ConsoleContent-content {
-  background-color: #F5F5F5;
+  background-color: var(--jp-layout-color2);
   flex: 1 1 auto;
   overflow: auto;
 }
 
+.jp-ConsoleContent-content .jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
+  padding-left: calc(2*var(--jp-private-console-cell-padding))
+}
+
 
 .jp-ConsoleContent-input {
-  margin: 5px;
   max-height: 80%;
   flex: 0 0 auto;
   overflow: auto;
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  padding-top: var(--jp-private-console-cell-padding);
+  padding-right: var(--jp-private-console-cell-padding);
+  padding-left: var(--jp-private-console-cell-padding);
+  /* The weird 8px bottom padding is needed because of the 2px margin in the panel
+  that lets the shadow in the dock panel show */
+  padding-bottom: 8px;
 }
 
 
-.jp-ConsoleContent .jp-InputArea-prompt {
-  flex-basis: auto;
-  text-align: left;
-}
-
-
-.jp-ConsoleContent .jp-Output-prompt {
-  flex-basis: auto;
-  text-align: left;
-}
-
-
+/*
+TODO: Right now we have to copy this style that is applied in the notebook
+using the selecetor `.jp-Notebook .jp-Output pre`, but we need to style
+output in a manner that works everywhere, not just in the notebook
+*/
 .jp-ConsoleContent .jp-Output pre {
   border: none;
   margin: 1px 0 0 5px;
@@ -58,23 +67,12 @@
 }
 
 
-.jp-ConsoleContent .jp-Cell {
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-
-.jp-ConsoleContent .jp-InputArea-editor.jp-CellEditor {
+.jp-ConsoleContent-content .jp-InputArea-editor.jp-CellEditor {
   background: transparent;
   border-color: transparent;
 }
 
-
-.jp-ConsoleContent-prompt .jp-InputArea-editor.jp-CellEditor .CodeMirror {
-  margin-top: 1px;
-}
-
-
+/* TODO: we should be able to use notebook styles for this */
 .jp-ConsoleContent-input .jp-ConsoleContent-prompt.jp-Cell {
   background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
   border-color: #66BB6A;
