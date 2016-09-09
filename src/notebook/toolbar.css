@@ -26,7 +26,7 @@
 }
 
 
-.jp-Toolbar-item.jp-Notebook-toolbarKernelName {
+.jp-Toolbar > .jp-Toolbar-item.jp-Notebook-toolbarKernelName {
   text-align: right;
   flex-grow: 1;
   flex-shrink: 1;
