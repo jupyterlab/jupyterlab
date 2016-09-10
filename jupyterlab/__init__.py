@@ -39,7 +39,7 @@ with open(os.path.join(HERE, '..', 'package.json')) as f:
 __version__ = packagejson['version']
 
 
-def get_lab_extension_manifest_data_by_folder(folder):
+def get_labextension_manifest_data_by_folder(folder):
     """Get the manifest data for a given lab extension folder
     """
     manifest_files = glob.glob(os.path.join(folder, '*.manifest'))
@@ -51,14 +51,14 @@ def get_lab_extension_manifest_data_by_folder(folder):
     return manifests
 
 
-def get_lab_extension_manifest_data_by_name(name):
+def get_labextension_manifest_data_by_name(name):
     """Get the manifest data for a given lab extension folder
     """
-    from .labextensions import _lab_extension_dirs
-    for exts in _lab_extension_dirs():
+    from .labextensions import _labextension_dirs
+    for exts in _labextension_dirs():
         full_dest = os.path.join(exts, name)
         if os.path.exists(full_dest):
-            return get_lab_extension_manifest_data_by_folder(full_dest)
+            return get_labextension_manifest_data_by_folder(full_dest)
 
 
 class LabHandler(IPythonHandler):
@@ -67,9 +67,9 @@ class LabHandler(IPythonHandler):
     @web.authenticated
     def get(self):
         static_prefix = ujoin(self.application.settings['base_url'], PREFIX)
-        lab_extensions = self.application.lab_extensions
+        labextensions = self.application.labextensions
 
-        data = get_lab_extension_manifest_data_by_folder(BUILT_FILES)
+        data = get_labextension_manifest_data_by_folder(BUILT_FILES)
         css_files = [ujoin(static_prefix, 'main.css'),
                      ujoin(static_prefix, 'extensions.css')]
         main = data['main']['entry']
@@ -78,20 +78,19 @@ class LabHandler(IPythonHandler):
         entries = [data['extensions']['entry']]
 
         # Gather the lab extension files and entry points.
-        for name in lab_extensions:
-            if lab_extensions[name]:
-                data = get_lab_extension_manifest_data_by_name(name)
-                for value in data.values():
-                    if value.get('entry', None):
-                        entries.append(value['entry'])
-                        bundles.append('%s/%s/%s' % (
-                            EXTENSION_PREFIX, name, value['files'][0]
+        for name in labextensions:
+            data = get_labextension_manifest_data_by_name(name)
+            for value in data.values():
+                if value.get('entry', None):
+                    entries.append(value['entry'])
+                    bundles.append('%s/%s/%s' % (
+                        EXTENSION_PREFIX, name, value['files'][0]
+                    ))
+                for fname in value['files']:
+                    if os.path.splitext(fname)[1] == '.css':
+                        css_files.append('%s/%s/%s' % (
+                            EXTENSION_PREFIX, name, fname
                         ))
-                    for fname in value['files']:
-                        if os.path.splitext(fname)[1] == '.css':
-                            css_files.append('%s/%s/%s' % (
-                                EXTENSION_PREFIX, name, fname
-                            ))
 
         self.write(self.render_template('lab.html',
             static_prefix=static_prefix,
@@ -136,10 +135,10 @@ def load_jupyter_server_extension(nbapp):
     base_url = webapp.settings['base_url']
     webapp.add_handlers(".*$",
         [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
-    lab_extension_handler = (
+    labextension_handler = (
         r"%s/(.*)" % EXTENSION_PREFIX, FileFindHandler, {
-            'path': nbapp.lab_extensions_path,
+            'path': nbapp.labextensions_path,
             'no_cache_paths': ['/'],  # don't cache anything in labbextensions
         }
     )
-    webapp.add_handlers(".*$", [lab_extension_handler])
+    webapp.add_handlers(".*$", [labextension_handler])

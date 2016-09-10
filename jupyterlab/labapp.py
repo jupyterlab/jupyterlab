@@ -5,9 +5,11 @@
 # Distributed under the terms of the Modified BSD License.
 
 # TODO: import base server app
-from jupyter_core.paths import jupyter_path
+import os
+from jupyter_core.paths import jupyter_config_path, jupyter_path
 from notebook.notebookapp import NotebookApp
-from traitlets import Dict, List, Unicode
+from traitlets import List, Unicode
+from traitlets.config.manager import BaseJSONConfigManager
 
 
 class LabApp(NotebookApp):
@@ -16,24 +18,35 @@ class LabApp(NotebookApp):
         help="The default URL to redirect to from `/`"
     )
 
-    extra_lab_extensions_path = List(Unicode(), config=True,
+    extra_labextensions_path = List(Unicode(), config=True,
         help="""extra paths to look for JupyterLab extensions"""
     )
 
-    lab_extensions = Dict({}, config=True,
-        help=("Dict of Python modules to load as notebook server extensions."
-              "Entry values can be used to enable and disable the loading of"
-              "the extensions.")
-    )
+    @property
+    def labextensions(self):
+        extensions = []
+        config_dirs = [os.path.join(p, 'labconfig') for p in 
+                       jupyter_config_path()]
+        for config_dir in config_dirs:
+            cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
+            data = cm.get("jupyterlab_config")
+            labextensions = (
+                data.setdefault("LabApp", {})
+                .setdefault("labextensions", {})
+            )
+            for name, enabled in labextensions.items():
+                if enabled:
+                    extensions.append(name)
+        return extensions
 
     @property
-    def lab_extensions_path(self):
+    def labextensions_path(self):
         """The path to look for JupyterLab extensions"""
-        return self.extra_lab_extensions_path + jupyter_path('lab_extensions')
+        return self.extra_labextensions_path + jupyter_path('labextensions')
 
     def init_webapp(self):
         super(LabApp, self).init_webapp()
-        self.web_app.lab_extensions = self.lab_extensions
+        self.web_app.labextensions = self.labextensions
 
 #-----------------------------------------------------------------------------
 # Main entry point
