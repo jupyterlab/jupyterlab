@@ -12,4 +12,4 @@ activate method.
 - Plugin - An object that provides a service and or extends the application.
 - Phosphor - The JavaScript library that provides the foundation of JupyterLab, enabling desktop-like applications in the browser.
 - Standalone example - An example in the `examples/` directory that demonstrates the usage of one or more components of JupyterLab.
-- TypeScript - A staticly typed language that compiles to JavaScript.
+- TypeScript - A statically typed language that compiles to JavaScript.
