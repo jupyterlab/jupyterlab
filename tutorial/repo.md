@@ -7,6 +7,9 @@ The `jupyter/jupyterlab` repository contains two packages:
 
 Th npm package and the Python package are both named `jupyterlab`.
 
+See the [Contributing Guidelines](https://github.com/jupyter/jupyterlab/CONTRIBUTING.md) for developer installation instructions.
+
+
 ## Directories
 
 ### NPM package: `src/`, `lib/`, `typings/`, `scripts/`
@@ -49,76 +52,3 @@ rebuild the npm package and server extension every time you check out or merge
 After building the docs (`npm run docs`), `docs/index.html` is the entry
 point to the documentation.
 
-## Development Quickstart
-
-*Note: See the README for the most up to date instructions as well as added details.*
-
-All the instructions below assume you are in the root directory of the repository.
-
-### Build, install and run the development version
-
-To build and install a development version of the server extension, do:
-
-    pip install -e .
-
- This command will build the npm package, build and webpack the server
- extension javascript, and install the appropriate links into your python
- environment.
-
- To enable the server extension, do:
-
-    jupyter serverextension enable --sys-prefix --py jupyterlab
-
- after installation. Then start up JupyterLab with:
-
-    jupyter lab
-
-### Rebuild JavaScript
-To rebuild the javascript for both the JupyterLab source and the server extension, run:
-
-    npm run build:all
-
-To rebuild JupyterLab source only, run:
-
-    npm run build:src
-
-To have the system rebuild the JupyterLab source automatically after every
-change to the typescript source files, run:
-
-    npm run watch:src
-
-To rebuild the javascript for only the server extension, run:
-
-    npm run build:serverextension
-
-
-To have the system do both automatically after every change to the typescript
-source files, run:
-
-    npm run watch
-
-and refresh your browser after each successful update.
-
-### Build npm package
-
-To build just the `jupyterlab` npm package, run:
-
-	npm install
-	npm run build
-
-### Run tests
-
-To run the tests, build the npm package and run tests:
-
-    npm install
-    npm run build
-    npm test
-
-### Build documentation
-
-To build the docs:
-
-    npm run docs
-
-and go to `docs/index.html`. An automatically-generated version of the docs is
-hosted at http://jupyter.org/jupyterlab/.
