@@ -1,3 +1,10 @@
+**[Prerequisites](#prerequisites)** |
+**[Installation](#installation)** |
+**[Documentation](#docker)** |
+**[Contributing](#contributing)** |
+**[Supported runtimes](#supported runtimes)**
+
+
 # [JupyterLab](http://jupyter.github.io/jupyterlab/)
 
 [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/jupyter/jupyterlab/lab)
@@ -14,7 +21,7 @@ meets your workflow needs. Here's a quick preview of JupyterLab:
 
 ## Getting started
 
-### Prerequisite
+### Prerequisites
 
 Jupyter notebook version 4.2 or later. To check the notebook version:
 
@@ -22,7 +29,7 @@ Jupyter notebook version 4.2 or later. To check the notebook version:
 jupyter notebook --version
 ```
 
-### User installation
+### Installation
 
 If you use ``conda``, you can install as:
 
@@ -56,9 +63,9 @@ the browser.
 
 ----
 
-## Contributing to JupyterLab
+## Contributing
 
-See the [Contributing Guidelines](http://github.com/jupyterlab/CONTRIBUTING.md).
+See the [Contributing Guidelines](http://github.com/jupyter/jupyterlab/CONTRIBUTING.md).
 
 ## Supported Runtimes
 
@@ -69,3 +76,13 @@ The runtime versions which are currently *known to work*:
 - Chrome 38+
 
 Earlier browser versions may also work, but come with no guarantees.
+
+## License
+We use a shared copyright model that enables all contributors to maintain the
+copyright on their contributions.
+
+All code is licensed under the terms of the revised BSD license.
+
+## Getting help
+We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
+and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterhub/jupyterlab).
