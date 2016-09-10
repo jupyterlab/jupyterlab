@@ -7,7 +7,7 @@ This document guides a contributor through creating a release of JupyterLab.
 Check installed tools
 ---------------------
 
-Review ``CONTRIBUTING.rst``. Make sure all the tools needed to generate the
+Review ``CONTRIBUTING.md``. Make sure all the tools needed to generate the
 built JavaScript files are properly installed.
 
 Clean the repository
