@@ -31,10 +31,7 @@ FILE_LOADER = FileSystemLoader(HERE)
 BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
 EXTENSION_PREFIX = '/labextension'
-with open(os.path.join(HERE, '..', 'package.json')) as f:
-    packagejson = json.load(f)
-
-__version__ = packagejson['version']
+__version__ = None
 
 
 def get_labextension_manifest_data_by_folder(folder):
