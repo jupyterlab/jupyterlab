@@ -8,7 +8,7 @@ Check installed tools
 ---------------------
 
 Review ``CONTRIBUTING.rst``. Make sure all the tools needed to generate the
-minified JavaScript files are properly installed.
+built JavaScript files are properly installed.
 
 Clean the repository
 --------------------
