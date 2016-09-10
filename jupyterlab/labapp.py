@@ -25,7 +25,7 @@ class LabApp(NotebookApp):
     @property
     def labextensions(self):
         extensions = []
-        config_dirs = [os.path.join(p, 'labconfig') for p in 
+        config_dirs = [os.path.join(p, 'labconfig') for p in
                        jupyter_config_path()]
         for config_dir in config_dirs:
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)

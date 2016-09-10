@@ -12,8 +12,6 @@ from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
 
 
-
-
 #-----------------------------------------------------------------------------
 # Module globals
 #-----------------------------------------------------------------------------

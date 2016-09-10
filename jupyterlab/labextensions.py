@@ -90,7 +90,7 @@ def check_labextension(files, user=False, prefix=None, labextensions_dir=None, s
     return all(os.path.exists(pjoin(labext, f)) for f in files)
 
 
-def install_labextension(path, name, overwrite=False, symlink=False,
+def install_labextension(path, name='', overwrite=False, symlink=False,
                         user=False, prefix=None, labextensions_dir=None,
                         logger=None, sys_prefix=False
                         ):
@@ -104,7 +104,7 @@ def install_labextension(path, name, overwrite=False, symlink=False,
     ----------
     path : path to file, directory, zip or tarball archive, or URL to install
         Archives (zip or tarballs) will be extracted into the labextensions directory.
-    name : str [optional]
+    name : str
         name the labextension is installed to.  For example, if name is 'foo', then
         the source file will be installed to 'labextensions/foo'.
     overwrite : bool [default: False]
@@ -201,7 +201,7 @@ def install_labextension_python(module, overwrite=False, symlink=False,
         if logger:
             logger.info("Installing %s -> %s" % (src, name))
         full_dest = install_labextension(
-            src, name, overwrite=overwrite, symlink=symlink,
+            src, name=name, overwrite=overwrite, symlink=symlink,
             user=user, sys_prefix=sys_prefix, prefix=prefix, labextensions_dir=labextensions_dir,
             logger=logger
             )
@@ -243,7 +243,8 @@ def uninstall_labextension(name, user=False, sys_prefix=False, prefix=None,
             shutil.rmtree(full_dest)
         else:
             os.remove(full_dest)
-    disable_labextension(name)
+    disable_labextension(name, user=user, sys_prefix=sys_prefix,
+                        logger=logger)
 
 
 def uninstall_labextension_python(module,
@@ -257,7 +258,7 @@ def uninstall_labextension_python(module,
     for labext in labexts:
         name = labext['name']
         if logger:
-            logger.info("Uninstalling {} {}".format(name))
+            logger.info("Uninstalling {}".format(name))
         uninstall_labextension(name, user=user, sys_prefix=sys_prefix, 
             prefix=prefix, labextensions_dir=labextensions_dir, logger=logger)
 
@@ -610,7 +611,8 @@ class InstallLabExtensionApp(BaseLabExtensionApp):
     """
     
     examples = """
-    jupyter labextension install /path/to/myextension
+    jupyter labextension install /path/to/myextension name
+    jupyter labextension install --py extensionPyPackage
     """
     aliases = aliases
     flags = flags
@@ -621,7 +623,6 @@ class InstallLabExtensionApp(BaseLabExtensionApp):
     prefix = Unicode('', config=True, help="Installation prefix")
     labextensions_dir = Unicode('', config=True,
            help="Full path to labextensions dir (probably use prefix or user)")
-    name = Unicode('', config=True, help="The name of the extension")
 
     def _config_file_name_default(self):
         """The default config file name."""
@@ -629,16 +630,18 @@ class InstallLabExtensionApp(BaseLabExtensionApp):
     
     def install_extensions(self):
         """Perform the installation of labextension(s)"""
-        if len(self.extra_args)>1:
-            raise ValueError("Only one labextension allowed at a time. "
-                         "Call multiple times to install multiple extensions.")
-
         if self.python:
+            if len(self.extra_args) > 1:
+                raise ValueError("Only one labextension allowed at a time. "
+                         "Call multiple times to install multiple extensions.")
             install = install_labextension_python
             kwargs = {}
         else:
+            if len(self.extra_args) > 2:
+                raise ValueError("Only one labextension allowed at a time. "
+                         "Call multiple times to install multiple extensions.")
             install = install_labextension
-            kwargs = {'name': self.name}
+            kwargs = {'name': self.extra_args[1]}
         
         full_dests = install(self.extra_args[0],
                              overwrite=self.overwrite,
@@ -656,7 +659,7 @@ class InstallLabExtensionApp(BaseLabExtensionApp):
                 u"\nTo enable this labextension in the browser every time"
                 " JupyterLab loads:\n\n"
                 "      jupyter labextension enable {}{}{}{}\n".format(
-                    self.extra_args[0] if self.python else self.name,
+                    self.extra_args[0] if self.python else self.extra_args[1],
                     " --user" if self.user else "",
                     " --py" if self.python else "",
                     " --sys-prefix" if self.sys_prefix else ""
@@ -681,26 +684,26 @@ class UninstallLabExtensionApp(BaseLabExtensionApp):
     
     Usage
     
-        jupyter labextension uninstall path/url path/url/entrypoint
-        jupyter labextension uninstall --py pythonPackageName
+        jupyter labextension uninstall name
+        jupyter labextension uninstall --py extensionPyPackage
     
     This uninstalls a labextension.
     """
     
     examples = """
-    jupyter labextension uninstall dest/dir dest/dir/extensionjs
+    jupyter labextension uninstall name
     jupyter labextension uninstall --py extensionPyPackage
     """
     
     aliases = {
         "prefix" : "UninstallLabExtensionApp.prefix",
         "labextensions" : "UninstallLabExtensionApp.labextensions_dir",
-        "require": "UninstallLabExtensionApp.require",
+        "name": "UninstallLabExtensionApp.name",
     }
     
     prefix = Unicode('', config=True, help="Installation prefix")
     labextensions_dir = Unicode('', config=True, help="Full path to labextensions dir (probably use prefix or user)")
-    require = Unicode('', config=True, help="require.js module to load.")
+    name = Unicode('', config=True, help="The name of the extension.")
     
     def _config_file_name_default(self):
         """The default config file name."""
@@ -726,7 +729,7 @@ class UninstallLabExtensionApp(BaseLabExtensionApp):
             uninstall_labextension_python(self.extra_args[0], **kwargs)
         else:
             if self.require:
-                kwargs['require'] = self.require
+                kwargs['name'] = self.name
             uninstall_labextension(self.extra_args[0], **kwargs)
     
     def start(self):
