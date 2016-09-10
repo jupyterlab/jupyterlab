@@ -11,9 +11,9 @@ files: `npm install -g tsd`.
 - If there are no typings, we must create our own.  An example typings file that exports functions is [ansi_up](https://github.com/jupyter/jupyterlab/blob/master/typings/ansi_up/ansi_up.d.ts).  An example with a class is [xterm](https://github.com/jupyter/jupyterlab/blob/master/typings/xterm/xterm.d.ts).
 - Add a reference to the new library in `src/typings.d.ts`.
 - Create a folder in `src` for the plugin.
-- Add  `widget.ts` and `plugin.ts` files.
-- Optionally, add the plugin to default themes (e.g. `src/default-themes/leaflet.less`), and import that theme in `src/default-themes/index.less`.
-- The `widget.ts` file should have the core logic for the plugin.  In
+- Add  `index.ts` and `plugin.ts` files.
+- If creating CSS, import the them in `src/default-themes/index.css`.
+- The `index.ts` file should have the core logic for the plugin.  In
 this case, it should create a widget and widget factory for rendering geojson 
 files (see [Documents](./documents)).
 - The `plugin.ts` file should create the extension and add the content
