@@ -12,6 +12,8 @@ what area of the project you are interested in working on.
 For general documentation about contributing to Jupyter projects, see the
 [Project Jupyter Contributor Documentation](http://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html).
 
+All source code is written in [TypeScript](http://www.typescriptlang.org/Handbook). See the [Style Guide](https://github.com/jupyter/jupyterlab/wiki/TypeScript-Style-Guide).
+
 
 ## Setting Up a Development Environment
 
