@@ -3,34 +3,24 @@
 This document describes the patterns we are using to organize and write
 CSS for JupyterLab.
 
-## Less
+## CSS Variables
 
-For now we are using [Less](http://lesscss.org/) as a CSS preprocessor. We are actively
-investigating other preprocessors, but are using Less for now because:
+We are using CSS Variables for theming because we can change them at runtime in the browser without having to re-compile CSS in the browser/server. This enables third party plugins to style themselves using the currently active theme.
 
-* It is familiar as we are using it in the classic notebook.
-* It is relatively simple and stable.
-* It is implemented as a pure JavaScript library that works on both
-  the server and client side.
+However, single pass CSS processors such as cssnext or myth will help us cover situations where CSS variable are not supported.
 
 ## File organization
 
 We are organizing our CSS files in the following manner:
 
-* Each plugin/subdirectory in the top-level `src` directory may have a
-  `base.less` file that contains the structural CSS required for the 
-  plugin to work at a basic level:
-  - Properties that affect layout such as width, height, padding,
-    margins, border, width.
-  - Font size, line heights, letter spacing
-  - The only colors that should be used in the `base.less` files are
-    black and white.
-* The `base.less` files of each plugin get bundled together in
-  `src/basestyle`.
-* The `base.less` files can use the variables in `src/basestyle/variables.less`.
-* Each plugin should have a theme style file in `src/default-theme`.
-* These files should use the variables in `src/default-theme/variables.less`
+* Each plugin/subdirectory in the top-level `src` has its own local CSS file,
+with a preference of one CSS file per source file that it themes and a single
+`index.css` file.
+* Each plugin should be imported in `src/default-theme/index.css`.
+* These files should use the variables in `src/default-theme/variables.css`
   and style themselves appropriately.
+* Public CSS Variables should use the `jp-` prefix and private ones should use the `jp-private-` prefix.
+
 
 ## CSS class names
 
