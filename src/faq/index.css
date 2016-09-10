@@ -6,6 +6,19 @@
   font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 }
 
+#faq-header {
+  width: 412px;
+  display: flex;
+  margin: 40px auto 40px auto;
+  text-align: center;
+}
+
+.jp-FAQ-content {
+  margin: 0 auto 70px auto;
+  display: block;
+  width: 94%;
+  max-width: 700px;
+}
 
 .jp-FAQ-h1 {
   font-size: 26px;
@@ -14,40 +27,51 @@
   margin: 10px 0 0 20px;
 }
 
-
-#faq-header {
-  width: 412px;
-  display: flex;
-  margin: 65px auto 0 auto;
-  text-align: center;
-}
-
-
 .jp-FAQ-h2 {
   font-size: 14px;
   font-weight: 300;
   color: #9E9E9E;
-  margin: 52px 0 0 0;
+  margin: 30px 0 0 0;
 }
-
 
 .jp-FAQ-ul {
   margin: 0 0 0 0;
+  padding: 0;
 }
 
+.jp-FAQ-question:target {
+  animation: highlight 0.9s cubic-bezier(0.15, 0.08, 0.54, 0.85);
+}
 
-li.jp-FAQ-question {
-  cursor: pointer;
+@keyframes highlight {
+    0%   {background-color: transparent;}
+    50%  {background-color: #E3F2FD;}
+    100% {background-color: transparent;}
+}
+
+.jp-FAQ-question {
+  list-style-type: none;
+  padding: 16px;
+  margin-left: -16px;
+  display: inline-block;
+}
+
+.jp-FAQ-question > a {
   font-size: 20px;
   color: #616161;
   font-weight: 400;
   line-height: 150%;
   list-style-type: none;
   margin: 28px 0 0 0;
+  cursor: pointer;
+  text-decoration: none;
 }
 
+.jp-FAQ-question > a:hover {
+  color: #42A5F5;
+}
 
-li.jp-FAQ-answer{
+.jp-FAQ-answer{
   font-size: 15px;
   font-weight: 200;
   color: #9E9E9E;
@@ -55,51 +79,32 @@ li.jp-FAQ-answer{
   border-left: 2px solid #9E9E9E;
   padding-left: 25px;
   list-style-type: none;
-  margin: 28px 0 0 0;
+  margin: 15px 0 15px 20px;
 }
 
+.jp-FAQ-toc {
+  display: block;
+}
 
-li.jp-FAQ-question:hover {
+.jp-FAQ-toc:focus{
   color: #42A5F5;
 }
 
-
-li.jp-FAQ-question:focus{
-  color: #42A5F5;
-}
-
-
-.jp-FAQ-hide {
-  display:none;
-}
-
-
-li>jp-FAQ-answer {
+li > jp-FAQ-answer {
   color: #4A90E2;
   text-decoration: none;
 }
 
-
-#faq-content {
-  margin: 0 auto 60px auto;
-  display: block;
-  width: 94%;
-  max-width: 675px;
-}
-
-
-h1 span.jp-FAQ-title {
+.jp-FAQ-title {
   color: #616161;
   display: block;
 }
-
 
 .jp-FAQ-a {
     text-decoration: none;
     cursor: pointer;
     color: var(--jp-brand-color1);
 }
-
 
 .jp-QuestionMark.jp-FAQ-QuestionMark {
   height: 49px;
