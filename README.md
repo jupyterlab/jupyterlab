@@ -58,7 +58,7 @@ the browser.
 
 ## Contributing to JupyterLab
 
-See the [Contributing Guidlines](http://github.com/jupyterlab/CONTRIBUTING.md).
+See the [Contributing Guidelines](http://github.com/jupyterlab/CONTRIBUTING.md).
 
 ## Supported Runtimes
 
