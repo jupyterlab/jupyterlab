@@ -17,6 +17,10 @@ require('jupyterlab/lib/default-theme/index.css');
  */
 function validateEntryPoint(entryPoint) {
   var data = jupyter.require(entryPoint);
+  // We use the default export from es6 modules.
+  if (data.__esModule) {
+    data = data.default;
+  }
   if (!Array.isArray(data)) {
     data = [data];
   }

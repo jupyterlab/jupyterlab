@@ -11,6 +11,9 @@ from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
 
+
+
+
 #-----------------------------------------------------------------------------
 # Module globals
 #-----------------------------------------------------------------------------
@@ -30,6 +33,10 @@ FILE_LOADER = FileSystemLoader(HERE)
 BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
 EXTENSION_PREFIX = '/labextension'
+with open(os.path.join(HERE, '..', 'package.json')) as f:
+    packagejson = json.load(f)
+
+__version__ = packagejson['version']
 
 
 def get_lab_extension_manifest_data_by_folder(folder):
@@ -47,6 +54,7 @@ def get_lab_extension_manifest_data_by_folder(folder):
 def get_lab_extension_manifest_data_by_name(name):
     """Get the manifest data for a given lab extension folder
     """
+    from .labextensions import _lab_extension_dirs
     for exts in _lab_extension_dirs():
         full_dest = os.path.join(exts, name)
         if os.path.exists(full_dest):
@@ -75,13 +83,13 @@ class LabHandler(IPythonHandler):
                 data = get_lab_extension_manifest_data_by_name(name)
                 for value in data.values():
                     if value.get('entry', None):
-                        entries.push(value['entry'])
-                        bundles.push('%s/%s/%s' % (
+                        entries.append(value['entry'])
+                        bundles.append('%s/%s/%s' % (
                             EXTENSION_PREFIX, name, value['files'][0]
                         ))
                     for fname in value['files']:
                         if os.path.splitext(fname)[1] == '.css':
-                            css_files.push('%s/%s/%s' % (
+                            css_files.append('%s/%s/%s' % (
                                 EXTENSION_PREFIX, name, fname
                             ))
 
