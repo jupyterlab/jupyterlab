@@ -87,8 +87,8 @@ class NPM(Command):
 
     # Representative files that should exist after a successful build
     targets = [
-        os.path.join(here, 'jupyterlab', 'build', 'jupyterlab.css'),
-        os.path.join(here, 'jupyterlab', 'build', 'jupyterlab.bundle.js'),
+        os.path.join(here, 'jupyterlab', 'build', 'main.css'),
+        os.path.join(here, 'jupyterlab', 'build', 'main.bundle.js'),
     ]
 
     def initialize_options(self):
@@ -154,6 +154,7 @@ setup_args = {
     'entry_points': {
         'console_scripts': [
             'jupyter-lab = jupyterlab.labapp:main',
+            'jupyter-labextension = jupyterlab.labextensions:main',
         ]
     },
     'author': 'Jupyter Development Team',
