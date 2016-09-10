@@ -728,8 +728,6 @@ class UninstallLabExtensionApp(BaseLabExtensionApp):
         if self.python:
             uninstall_labextension_python(self.extra_args[0], **kwargs)
         else:
-            if self.require:
-                kwargs['name'] = self.name
             uninstall_labextension(self.extra_args[0], **kwargs)
     
     def start(self):
