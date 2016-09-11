@@ -19,6 +19,12 @@ body {
   bottom: 4px;
 }
 
+
+.p-CommandPalette {
+  min-width: 300px;
+}
+
+
 .jp-Notebook-panel {
   border-bottom: 1px solid #E0E0E0;
 }

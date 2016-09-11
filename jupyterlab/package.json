@@ -8,8 +8,12 @@
   "dependencies": {
     "es6-promise": "^3.1.2",
     "font-awesome": "^4.6.1",
+    "fs-extra": "^0.30.0",
     "jupyterlab": "file:../",
-    "material-design-icons": "^2.2.3"
+    "jupyterlab-extension-builder": "^0.3.0",
+    "material-design-icons": "^2.2.3",
+    "semver": "^5.3.0",
+    "webpack-config": "^6.1.2"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
@@ -28,6 +32,8 @@
     "update": "rimraf node_modules/jupyterlab && npm install",
     "build": "npm run update && npm run build:extension",
     "build:extension": "webpack",
+    "webpack:devtool": "devtool node_modules/webpack/bin/webpack.js",
+    "webpack:debug": "node-debug webpack",
     "postinstall": "node ../scripts/dedupe.js",
     "test": "echo 'no tests specified'"
   },

@@ -33,8 +33,6 @@ coverage
 lib
 build
 docs
-src/basestyle/index.css
-src/default-theme/index.css
 
 .ipynb_checkpoints
 Unititled*

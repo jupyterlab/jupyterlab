@@ -1,0 +1,152 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-RunningSessions {
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+.jp-RunningSessions-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+
+.jp-RunningSessions-headerTitle {
+  flex: 1 1 auto;
+  padding: 6px;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+
+.jp-RunningSessions-headerRefresh {
+  flex: 1 1 auto;
+  max-width: 100px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  border: none;
+  font-size: var(--jp-ui-font-size1);
+  outline: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+
+.jp-RunningSessions-section {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+}
+
+
+.jp-RunningSessions-headerRefresh:before {
+  font-family: FontAwesome;
+  content: '\f021'; /* refresh */
+  font-size: var(--jp-ui-icon-font-size);
+}
+
+
+.jp-RunningSessions-headerRefresh:hover {
+  background: var(--jp-layout-color2);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-RunningSessions-sectionHeader {
+  flex: 0 0 auto;
+  margin: 4px 0px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 2px;
+}
+
+
+.jp-RunningSessions-sectionContainer {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+
+.jp-RunningSessions-sectionList {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+
+.jp-RunningSessions-item {
+  display: flex;
+  flex-direction: row;
+  padding: 3px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--jp-ui-font-color1);
+}
+
+
+.jp-RunningSessions-item:hover {
+    background: var(--jp-layout-color2);
+}
+
+
+.jp-RunningSessions-itemIcon {
+  flex: 0 0 auto;
+  padding: 1px 4px;
+  font-size: 14px;
+  font-family: FontAwesome;
+  color: #5e5e5e;
+  margin-right: 7px;
+  margin-left: 7px;
+  vertical-align: baseline;
+}
+
+.jp-RunningSessions-itemIcon.jp-mod-notebook:before {
+  content: '\f02d';
+}
+
+
+.jp-RunningSessions-itemIcon.jp-mod-file:before {
+  content: '\f016';
+}
+
+
+.jp-RunningSessions-itemIcon.jp-mod-terminal:before {
+  content: '\f120';
+}
+
+.jp-RunningSessions-itemLabel {
+  flex: 1 1 auto;
+  padding: 1px;
+}
+
+.jp-RunningSessions-itemKernelName {
+  flex: 0 0 auto;
+  padding: 1px;
+  margin-right: 7px;
+}
+
+
+.jp-RunningSessions-itemShutdown {
+  flex: 0 0 auto;
+  padding: 1px 4px;
+  color: var(--jp-inverse-ui-font-color0);
+  background: var(--jp-warn-color);
+  border-radius: 1px;
+  cursor: pointer;
+}

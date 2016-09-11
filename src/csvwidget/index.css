@@ -1,0 +1,63 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-CSVWidget {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-CSVWidget-toolbar {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    border-bottom: 1px solid #E0E0E0;
+    height: 32px;
+}
+
+.jp-CSVWidget-toolbar span {
+    color: #757575;
+    font-size: 13px;
+    line-height: 32px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.jp-CSVWidget-toolbar select {
+    background: #FFFFFF;
+}
+
+.jp-CSVWidget-toolbar .jp-CSVWidget-toolbarDropdown {
+    flex: 0 0 auto;
+    padding-left: 8px;
+    padding-right: 8px;
+    vertical-align: middle;
+    border: 1px solid #BDBDBD;
+    border-radius: 0;
+    outline: none;
+    width: 70px;
+    font-size: 13px;
+    line-height: 23px;
+    color: #616161;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+
+.jp-CSVWidget-table {
+  flex: 1 1 auto;
+  padding: 1em;
+  overflow: auto;
+}
+
+.jp-CSVWidget-table th,
+.jp-CSVWidget-table td {
+  border: var(--jp-border-width) solid black;
+  padding: 0.2em 0.5em;
+}
+
+.jp-CSVWidget-table table {
+  border: var(--jp-border-width) solid black;
+  border-collapse: collapse;
+}

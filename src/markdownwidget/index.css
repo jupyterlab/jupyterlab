@@ -1,0 +1,11 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-MarkdownWidget {
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  padding: 14px;
+  overflow: auto;
+}

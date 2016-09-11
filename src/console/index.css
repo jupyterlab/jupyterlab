@@ -1,0 +1,91 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-console-cell-padding: 5px;
+}
+
+
+.jp-ConsolePanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  margin-top: 4px;
+}
+
+
+.jp-ConsoleContent {
+  height: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.jp-ConsoleContent-content {
+  background-color: var(--jp-layout-color2);
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.jp-ConsoleContent-content .jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
+  padding-left: calc(2*var(--jp-private-console-cell-padding))
+}
+
+
+.jp-ConsoleContent-input {
+  max-height: 80%;
+  flex: 0 0 auto;
+  overflow: auto;
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  padding-top: var(--jp-private-console-cell-padding);
+  padding-right: var(--jp-private-console-cell-padding);
+  padding-left: var(--jp-private-console-cell-padding);
+  /* The weird 8px bottom padding is needed because of the 2px margin in the panel
+  that lets the shadow in the dock panel show */
+  padding-bottom: 8px;
+}
+
+
+/*
+TODO: Right now we have to copy this style that is applied in the notebook
+using the selecetor `.jp-Notebook .jp-Output pre`, but we need to style
+output in a manner that works everywhere, not just in the notebook
+*/
+.jp-ConsoleContent .jp-Output pre {
+  border: none;
+  margin: 1px 0 0 5px;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+
+.jp-ConsoleContent-content .jp-InputArea-editor.jp-CellEditor {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* TODO: we should be able to use notebook styles for this */
+.jp-ConsoleContent-input .jp-ConsoleContent-prompt.jp-Cell {
+  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
+  border-color: #66BB6A;
+  border-left-width: var(--jp-border-width);
+}
+
+
+.jp-ConsoleContent-input .jp-ConsoleContent-prompt .jp-InputArea {
+  height: 100%;
+  min-height: 100%;
+}
+
+
+.jp-ConsoleContent-content .jp-ConsoleContent-banner .jp-InputArea-prompt {
+  display: none;
+}
