@@ -162,7 +162,7 @@ class DragPanel extends Panel {
       this._evtDragOver(event as IDragEvent);
       break;
     case 'p-drop':
-      this._evtDrop(event as IDragEvent);
+      this.evtDrop(event as IDragEvent);
       break;
     default:
       break;
@@ -370,23 +370,23 @@ class DragPanel extends Panel {
    * Should normally only be overriden if you cannot achive your goal by
    * other overrides.
    */
-  protected _startDrag(handle: HTMLElement, clientX: number, clientY: number): void {
+  protected startDrag(handle: HTMLElement, clientX: number, clientY: number): void {
     // Create the drag image.
     let dragImage = this.getDragImage(handle);
 
     // Set up the drag event.
-    this._drag = new Drag({
+    this.drag = new Drag({
       dragImage: dragImage,
       mimeData: new MimeData(),
       supportedActions: 'all',
       proposedAction: 'link',
       source: this
     });
-    this.addMimeData(handle, this._drag.mimeData);
+    this.addMimeData(handle, this.drag.mimeData);
 
     // Start the drag and remove the mousemove listener.
-    this._drag.start(clientX, clientY).then(action => {
-      this._drag = null;
+    this.drag.start(clientX, clientY).then(action => {
+      this.drag = null;
     });
     document.removeEventListener('mousemove', this, true);
   }
@@ -399,7 +399,7 @@ class DragPanel extends Panel {
    * Should normally only be overriden if you cannot achive your goal by
    * other overrides.
    */
-  protected _evtDrop(event: IDragEvent): void {
+  protected evtDrop(event: IDragEvent): void {
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
       if (target.classList.contains(DROP_TARGET_CLASS)) {
@@ -427,7 +427,7 @@ class DragPanel extends Panel {
   /**
    * Drag data stored in _startDrag
    */
-  protected _drag: Drag = null;
+  protected drag: Drag = null;
 
   /**
    * Check if node, or any of nodes ancestors are a drag handle
@@ -481,10 +481,10 @@ class DragPanel extends Panel {
    * Handle the `'mouseup'` event for the widget.
    */
   private _evtMouseup(event: MouseEvent): void {
-    if (event.button !== 0 || !this._drag) {
+    if (event.button !== 0 || !this.drag) {
       document.removeEventListener('mousemove', this, true);
       document.removeEventListener('mouseup', this, true);
-      this._drag = null;
+      this.drag = null;
       return;
     }
     event.preventDefault();
@@ -496,7 +496,7 @@ class DragPanel extends Panel {
    */
   private _evtMousemove(event: MouseEvent): void {
     // Bail if we are already dragging.
-    if (this._drag) {
+    if (this.drag) {
       return;
     }
 
@@ -511,7 +511,7 @@ class DragPanel extends Panel {
       return;
     }
 
-    this._startDrag(data.handle, event.clientX, event.clientY);
+    this.startDrag(data.handle, event.clientX, event.clientY);
     this._clickData = null;
   }
 
