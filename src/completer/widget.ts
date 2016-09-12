@@ -430,7 +430,7 @@ class CompleterWidget extends Widget {
     node.style.width = 'auto';
 
     // Expand the menu width by the scrollbar size, if present.
-    if (node.scrollHeight > maxHeight) {
+    if (node.scrollHeight >= maxHeight) {
       node.style.width = `${2 * node.offsetWidth - node.clientWidth}px`;
       node.scrollTop = 0;
     }
