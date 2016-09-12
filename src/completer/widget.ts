@@ -18,37 +18,37 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ICompletionModel, ICompletionItem
+  ICompleterModel, ICompleterItem
 } from './model';
 
 
 /**
- * The class name added to completion menu widgets.
+ * The class name added to completer menu widgets.
  */
-const COMPLETION_CLASS = 'jp-Completion';
+const COMPLETER_CLASS = 'jp-Completer';
 
 /**
- * The class name added to completion menu items.
+ * The class name added to completer menu items.
  */
-const ITEM_CLASS = 'jp-Completion-item';
+const ITEM_CLASS = 'jp-Completer-item';
 
 /**
- * The class name added to an active completion menu item.
+ * The class name added to an active completer menu item.
  */
 const ACTIVE_CLASS = 'jp-mod-active';
 
 /**
- * The class name added to a completion widget that is scrolled out of view.
+ * The class name added to a completer widget that is scrolled out of view.
  */
 const OUTOFVIEW_CLASS = 'jp-mod-outofview';
 
 /**
- * The minimum height of a completion widget.
+ * The minimum height of a completer widget.
  */
 const MIN_HEIGHT = 75;
 
 /**
- * The maximum height of a completion widget.
+ * The maximum height of a completer widget.
  */
 const MAX_HEIGHT = 250;
 
@@ -62,45 +62,45 @@ const USE_CAPTURE = true;
  * A widget that enables text completion.
  */
 export
-class CompletionWidget extends Widget {
+class CompleterWidget extends Widget {
   /**
-   * Construct a text completion menu widget.
+   * Construct a text completer menu widget.
    */
-  constructor(options: CompletionWidget.IOptions = {}) {
+  constructor(options: CompleterWidget.IOptions = {}) {
     super({ node: document.createElement('ul') });
-    this._renderer = options.renderer || CompletionWidget.defaultRenderer;
+    this._renderer = options.renderer || CompleterWidget.defaultRenderer;
     this.anchor = options.anchor || null;
     this.model = options.model || null;
-    this.addClass(COMPLETION_CLASS);
+    this.addClass(COMPLETER_CLASS);
 
-    // Completion widgets are hidden until they are populated.
+    // Completer widgets are hidden until they are populated.
     this.hide();
   }
 
   /**
-   * A signal emitted when a selection is made from the completion menu.
+   * A signal emitted when a selection is made from the completer menu.
    */
-  selected: ISignal<CompletionWidget, string>;
+  selected: ISignal<CompleterWidget, string>;
 
   /**
-   * A signal emitted when the completion widget's visibility changes.
+   * A signal emitted when the completer widget's visibility changes.
    *
    * #### Notes
    * This signal is useful when there are multiple floating widgets that may
    * contend with the same space and ought to be mutually exclusive.
    */
-  visibilityChanged: ISignal<CompletionWidget, void>;
+  visibilityChanged: ISignal<CompleterWidget, void>;
 
   /**
-   * The model used by the completion widget.
+   * The model used by the completer widget.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get model(): ICompletionModel {
+  get model(): ICompleterModel {
     return this._model;
   }
-  set model(model: ICompletionModel) {
+  set model(model: ICompleterModel) {
     if (!model && !this._model || model === this._model) {
       return;
     }
@@ -114,10 +114,10 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * The semantic parent of the completion widget, its anchor element. An
-   * event listener will peg the position of the completion widget to the
+   * The semantic parent of the completer widget, its anchor element. An
+   * event listener will peg the position of the completer widget to the
    * anchor element's scroll position. Other event listeners will guarantee
-   * the completion widget behaves like a child of the reference element even
+   * the completer widget behaves like a child of the reference element even
    * if it does not appear as a descendant in the DOM.
    */
   get anchor(): HTMLElement {
@@ -141,7 +141,7 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * Dispose of the resources held by the completion widget.
+   * Dispose of the resources held by the completer widget.
    */
   dispose() {
     if (this.isDisposed) {
@@ -269,7 +269,7 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * Cycle through the available completion items.
+   * Cycle through the available completer items.
    */
   private _cycle(direction: 'up' | 'down'): void {
     let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
@@ -380,7 +380,7 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * Populate the completion up to the longest initial subset of items.
+   * Populate the completer up to the longest initial subset of items.
    *
    * @returns `true` if a subset match was found and populated.
    */
@@ -451,52 +451,52 @@ class CompletionWidget extends Widget {
   private _anchor: HTMLElement = null;
   private _anchorPoint = 0;
   private _activeIndex = 0;
-  private _model: ICompletionModel = null;
-  private _renderer: CompletionWidget.IRenderer = null;
+  private _model: ICompleterModel = null;
+  private _renderer: CompleterWidget.IRenderer = null;
 }
 
 
-// Define the signals for the `CompletionWidget` class.
-defineSignal(CompletionWidget.prototype, 'selected');
-defineSignal(CompletionWidget.prototype, 'visibilityChanged');
+// Define the signals for the `CompleterWidget` class.
+defineSignal(CompleterWidget.prototype, 'selected');
+defineSignal(CompleterWidget.prototype, 'visibilityChanged');
 
 
 export
-namespace CompletionWidget {
+namespace CompleterWidget {
   /**
-   * The initialization options for a completion widget.
+   * The initialization options for a completer widget.
    */
   export
   interface IOptions {
     /**
-     * The model for the completion widget.
+     * The model for the completer widget.
      */
-    model?: ICompletionModel;
+    model?: ICompleterModel;
 
     /**
-     * The semantic parent of the completion widget, its anchor element. An
-     * event listener will peg the position of the completion widget to the
+     * The semantic parent of the completer widget, its anchor element. An
+     * event listener will peg the position of the completer widget to the
      * anchor element's scroll position. Other event listeners will guarantee
-     * the completion widget behaves like a child of the reference element even
+     * the completer widget behaves like a child of the reference element even
      * if it does not appear as a descendant in the DOM.
      */
     anchor?: HTMLElement;
 
     /**
-     * The renderer for the completion widget nodes.
+     * The renderer for the completer widget nodes.
      */
     renderer?: IRenderer;
   }
 
   /**
-   * A renderer for completion widget nodes.
+   * A renderer for completer widget nodes.
    */
   export
   interface IRenderer {
     /**
-     * Create an item node (an `li` element) for a text completion menu.
+     * Create an item node (an `li` element) for a text completer menu.
      */
-    createItemNode(item: ICompletionItem): HTMLLIElement;
+    createItemNode(item: ICompleterItem): HTMLLIElement;
   }
 
   /**
@@ -505,9 +505,9 @@ namespace CompletionWidget {
   export
   class Renderer implements IRenderer {
     /**
-     * Create an item node for a text completion menu.
+     * Create an item node for a text completer menu.
      */
-    createItemNode(item: ICompletionItem): HTMLLIElement {
+    createItemNode(item: ICompleterItem): HTMLLIElement {
       let li = document.createElement('li');
       let code = document.createElement('code');
 
@@ -530,7 +530,7 @@ namespace CompletionWidget {
 
 
 /**
- * A namespace for completion widget private data.
+ * A namespace for completer widget private data.
  */
 namespace Private {
   /**

@@ -19,7 +19,7 @@ import {
 
 import {
   ICompletionRequest, ITextChange
-} from '../cells/editor';
+} from '../notebook/cells/editor';
 
 
 /**
@@ -63,17 +63,17 @@ interface ICompletionPatch {
 
 
 /**
- * A completion menu item.
+ * A completer menu item.
  */
 export
-interface ICompletionItem {
+interface ICompleterItem {
   /**
-   * The highlighted, marked up text of a visible completion item.
+   * The highlighted, marked up text of a visible completer item.
    */
   text: string;
 
   /**
-   * The raw text of a visible completion item.
+   * The raw text of a visible completer item.
    */
   raw: string;
 }
@@ -97,14 +97,14 @@ interface ICursorSpan extends JSONObject {
 
 
 /**
- * The data model backing a code completion widget.
+ * The data model backing a code completer widget.
  */
 export
-interface ICompletionModel extends IDisposable {
+interface ICompleterModel extends IDisposable {
   /**
-   * A signal emitted when state of the completion menu changes.
+   * A signal emitted when state of the completer menu changes.
    */
-  stateChanged: ISignal<ICompletionModel, void>;
+  stateChanged: ISignal<ICompleterModel, void>;
 
   /**
    * The current text change details.
@@ -117,17 +117,17 @@ interface ICompletionModel extends IDisposable {
   cursor: ICursorSpan;
 
   /**
-   * The list of visible items in the completion menu.
+   * The list of visible items in the completer menu.
    */
-  items: ICompletionItem[];
+  items: ICompleterItem[];
 
   /**
-   * The unfiltered list of all available options in a completion menu.
+   * The unfiltered list of all available options in a completer menu.
    */
   options: string[];
 
   /**
-   * The original completion request details.
+   * The original completer request details.
    */
   original: ICompletionRequest;
 
@@ -154,27 +154,27 @@ interface ICompletionModel extends IDisposable {
 
 
 /**
- * An implementation of a completion model.
+ * An implementation of a completer model.
  */
 export
-class CompletionModel implements ICompletionModel {
+class CompleterModel implements ICompleterModel {
   /**
-   * A signal emitted when state of the completion menu changes.
+   * A signal emitted when state of the completer menu changes.
    */
-  stateChanged: ISignal<ICompletionModel, void>;
+  stateChanged: ISignal<ICompleterModel, void>;
 
   /**
-   * The list of visible items in the completion menu.
+   * The list of visible items in the completer menu.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get items(): ICompletionItem[] {
+  get items(): ICompleterItem[] {
     return this._filter();
   }
 
   /**
-   * The unfiltered list of all available options in a completion menu.
+   * The unfiltered list of all available options in a completer menu.
    */
   get options(): string[] {
     return this._options;
@@ -225,7 +225,7 @@ class CompletionModel implements ICompletionModel {
     }
 
     // Cursor must always be set before a text change. This happens
-    // automatically in the completion handler, but since `current` is a public
+    // automatically in the completer handler, but since `current` is a public
     // attribute, this defensive check is necessary.
     if (!this._cursor) {
       return;
@@ -358,7 +358,7 @@ class CompletionModel implements ICompletionModel {
   /**
    * Apply the query to the complete options list to return the matching subset.
    */
-  private _filter(): ICompletionItem[] {
+  private _filter(): ICompleterItem[] {
     let options = this._options || [];
     let query = this._query;
     if (!query) {
@@ -399,12 +399,12 @@ class CompletionModel implements ICompletionModel {
 }
 
 
-// Define the signals for the `CompletionModel` class.
-defineSignal(CompletionModel.prototype, 'stateChanged');
+// Define the signals for the `CompleterModel` class.
+defineSignal(CompleterModel.prototype, 'stateChanged');
 
 
 /**
- * A namespace for completion model private data.
+ * A namespace for completer model private data.
  */
 namespace Private {
   /**

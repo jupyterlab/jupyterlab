@@ -46,8 +46,8 @@ import {
 } from '../notebook/common/mimetype';
 
 import {
-  CompletionWidget, CompletionModel, CellCompletionHandler
-} from '../notebook/completion';
+  CompleterWidget, CompleterModel, CellCompleterHandler
+} from '../completer';
 
 import {
   IRenderMime
@@ -126,23 +126,23 @@ class ConsoleContent extends Widget {
     this._session = options.session;
     this._history = new ConsoleHistory({ kernel: this._session.kernel });
 
-    // Instantiate tab completion widget.
-    let completion = options.completion || new CompletionWidget({
-      model: new CompletionModel()
+    // Instantiate tab completer widget.
+    let completer = options.completer || new CompleterWidget({
+      model: new CompleterModel()
     });
-    this._completion = completion;
+    this._completer = completer;
 
-    // Set the completion widget's anchor node to peg its position.
-    completion.anchor = this.node;
+    // Set the completer widget's anchor node to peg its position.
+    completer.anchor = this.node;
 
-    // Because a completion widget may be passed in, check if it is attached.
-    if (!completion.isAttached) {
-      Widget.attach(completion, document.body);
+    // Because a completer widget may be passed in, check if it is attached.
+    if (!completer.isAttached) {
+      Widget.attach(completer, document.body);
     }
 
-    // Set up the completion handler.
-    this._completionHandler = new CellCompletionHandler(this._completion);
-    this._completionHandler.kernel = this._session.kernel;
+    // Set up the completer handler.
+    this._completerHandler = new CellCompleterHandler(this._completer);
+    this._completerHandler.kernel = this._session.kernel;
 
     // Set up the inspection handler.
     this._inspectionHandler = new InspectionHandler(this._rendermime);
@@ -173,7 +173,7 @@ class ConsoleContent extends Widget {
       this.initialize();
       this._history.dispose();
       this._history = new ConsoleHistory(kernel);
-      this._completionHandler.kernel = kernel;
+      this._completerHandler.kernel = kernel;
       this._inspectionHandler.kernel = kernel;
       this._foreignCells = {};
       this.monitorForeignIOPub();
@@ -201,7 +201,7 @@ class ConsoleContent extends Widget {
         cell.model.executionCount = inputMsg.content.execution_count;
         cell.model.source = inputMsg.content.code;
         cell.trusted = true;
-        this.update()
+        this.update();
         break;
       case 'execute_result':
       case 'clear_output':
@@ -270,10 +270,10 @@ class ConsoleContent extends Widget {
     }
     this._history.dispose();
     this._history = null;
-    this._completionHandler.dispose();
-    this._completionHandler = null;
-    this._completion.dispose();
-    this._completion = null;
+    this._completerHandler.dispose();
+    this._completerHandler = null;
+    this._completer.dispose();
+    this._completer = null;
     this._inspectionHandler.dispose();
     this._inspectionHandler = null;
     this._session.dispose();
@@ -289,7 +289,7 @@ class ConsoleContent extends Widget {
    * completeness.
    */
   execute(force=false): Promise<void> {
-    this.dismissCompletion();
+    this.dismissCompleter();
 
     if (this._session.status === 'dead') {
       this._inspectionHandler.handleExecuteReply(null);
@@ -331,10 +331,10 @@ class ConsoleContent extends Widget {
   }
 
   /**
-   * Dismiss the completion widget for a console.
+   * Dismiss the completer widget for a console.
    */
-  dismissCompletion(): void {
-    this._completion.reset();
+  dismissCompleter(): void {
+    this._completer.reset();
   }
 
   /**
@@ -423,12 +423,12 @@ class ConsoleContent extends Widget {
     prompt.addClass(PROMPT_CLASS);
     this._input.addWidget(prompt);
 
-    // Hook up completion and history handling.
+    // Hook up completer and history handling.
     let editor = prompt.editor;
     editor.edgeRequested.connect(this.onEdgeRequest, this);
 
-    // Associate the new prompt with the completion and inspection handlers.
-    this._completionHandler.activeCell = prompt;
+    // Associate the new prompt with the completer and inspection handlers.
+    this._completerHandler.activeCell = prompt;
     this._inspectionHandler.activeCell = prompt;
 
     prompt.activate();
@@ -515,8 +515,8 @@ class ConsoleContent extends Widget {
     this.prompt.mimetype = this._mimetype;
   }
 
-  private _completion: CompletionWidget = null;
-  private _completionHandler: CellCompletionHandler = null;
+  private _completer: CompleterWidget = null;
+  private _completerHandler: CellCompleterHandler = null;
   private _content: Panel = null;
   private _input: Panel = null;
   private _inspectionHandler: InspectionHandler = null;
@@ -544,9 +544,9 @@ namespace ConsoleContent {
   export
   interface IOptions {
     /**
-     * The completion widget for a console content widget.
+     * The completer widget for a console content widget.
      */
-    completion?: CompletionWidget;
+    completer?: CompleterWidget;
 
     /**
      * The renderer for a console content widget.
@@ -565,7 +565,7 @@ namespace ConsoleContent {
   }
 
   /**
-   * A renderer for completion widget nodes.
+   * A renderer for completer widget nodes.
    */
   export
   interface IRenderer {
