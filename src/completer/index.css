@@ -1,42 +1,51 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
 
-.jp-Completion {
+.jp-Completer {
   background: #EEEEEE;
   border: var(--jp-border-width) solid var(--jp-border-color1);
   list-style-type: none;
   overflow: auto;
   padding: 0;
+  margin: 0;
+  position: absolute;
+  z-index: 10001;
 }
 
 
-.jp-Completion-item {
+.jp-Completer.jp-mod-outofview {
+  display: none;
+}
+
+
+.jp-Completer-item {
   margin: 0;
   min-width: 150px;
   padding: 0 2px;
 }
 
 
-.jp-Completion-item:nth-child(odd) {
+.jp-Completer-item:nth-child(odd) {
   background: #FFFFFF;
 }
 
 
-.jp-Completion-item.jp-mod-active {
+.jp-Completer-item.jp-mod-active {
   background: #BFBFBF;
 }
 
 
-.jp-Completion-item code {
+.jp-Completer-item code {
   font-size: 14px;
   line-height: 25px;
 }
 
 
-.jp-Completion-item mark {
+.jp-Completer-item mark {
   font-weight: bold;
   text-decoration: underline;
   background: inherit;
