@@ -107,7 +107,7 @@ class OutputAreaModel implements IDisposable {
     let value = JSON.parse(JSON.stringify(output)) as nbformat.IOutput;
 
     // Join multiline text outputs.
-    if (nbformat.isStream(value)) {
+    if (value.output_type === 'stream') {
       if (Array.isArray(value.text)) {
         value.text = (value.text as string[]).join('\n');
       }
@@ -115,9 +115,9 @@ class OutputAreaModel implements IDisposable {
 
     // Consolidate outputs if they are stream outputs of the same kind.
     let index = this.length - 1;
-    let lastOutput = this.get(index) as nbformat.IStream;
-    if (nbformat.isStream(value)
-        && lastOutput && nbformat.isStream(lastOutput)
+    let lastOutput = this.get(index);
+    if (value.output_type === 'stream'
+        && lastOutput && lastOutput.output_type === 'stream'
         && value.name === lastOutput.name) {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
@@ -167,14 +167,14 @@ class OutputAreaModel implements IDisposable {
       let future = kernel.execute(content);
       // Handle published messages.
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-        let msgType = msg.header.msg_type as nbformat.OutputType;
+        let msgType = msg.header.msg_type;
         switch (msgType) {
         case 'execute_result':
         case 'display_data':
         case 'stream':
         case 'error':
           let model = msg.content as nbformat.IOutput;
-          model.output_type = msgType;
+          model.output_type = msgType as nbformat.OutputType;
           this.add(model);
           break;
         case 'clear_output':

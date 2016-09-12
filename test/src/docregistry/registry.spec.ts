@@ -60,7 +60,7 @@ describe('docregistry/registry', () => {
       });
 
       it('should be read-only', () => {
-        expect(() => { registry.isDisposed = false; }).to.throwError();
+        expect(() => { (registry as any).isDisposed = false; }).to.throwError();
       });
 
     });

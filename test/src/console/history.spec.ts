@@ -71,7 +71,7 @@ describe('console/history', () => {
 
       it('should be read-only', () => {
         let history = new ConsoleHistory();
-        expect(() => history.isDisposed = false).to.throwError();
+        expect(() => (history as any).isDisposed = false).to.throwError();
       });
 
     });

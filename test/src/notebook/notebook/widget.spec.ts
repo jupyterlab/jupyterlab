@@ -335,7 +335,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should be read-only', () => {
         let widget = createWidget();
-        expect(() => { widget.rendermime = null; }).to.throwError();
+        expect(() => { (widget as any).rendermime = null; }).to.throwError();
       });
 
     });
@@ -349,7 +349,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should be read-only', () => {
         let widget = createWidget();
-        expect(() => { widget.renderer = null; }).to.throwError();
+        expect(() => { (widget as any).renderer = null; }).to.throwError();
       });
 
     });
@@ -815,7 +815,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should be read-only', () => {
         let widget = createActiveWidget();
-        expect(() => { widget.activeCell = null; }).to.throwError();
+        expect(() => { (widget as any).activeCell = null; }).to.throwError();
       });
 
     });
