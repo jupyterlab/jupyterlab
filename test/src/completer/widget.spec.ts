@@ -17,24 +17,24 @@ import {
 
 import {
   ICompletionRequest, ICoords
-} from '../../../../lib/notebook/cells/editor';
+} from '../../../lib/notebook/cells/editor';
 
 import {
-  CompletionWidget, CompletionModel, ICompletionItem
-} from '../../../../lib/notebook/completion';
+  CompleterWidget, CompleterModel, ICompleterItem
+} from '../../../lib/completer';
 
 
 const TEST_ITEM_CLASS = 'jp-TestItem';
 
-const ITEM_CLASS = 'jp-Completion-item';
+const ITEM_CLASS = 'jp-Completer-item';
 
 const ACTIVE_CLASS = 'jp-mod-active';
 
 const MAX_HEIGHT = 250;
 
 
-class CustomRenderer extends CompletionWidget.Renderer {
-  createItemNode(item: ICompletionItem): HTMLLIElement {
+class CustomRenderer extends CompleterWidget.Renderer {
+  createItemNode(item: ICompleterItem): HTMLLIElement {
     let li = super.createItemNode(item);
     li.classList.add(TEST_ITEM_CLASS);
     return li;
@@ -42,7 +42,7 @@ class CustomRenderer extends CompletionWidget.Renderer {
 }
 
 
-class LogWidget extends CompletionWidget {
+class LogWidget extends CompleterWidget {
   events: string[] = [];
 
   methods: string[] = [];
@@ -64,36 +64,36 @@ class LogWidget extends CompletionWidget {
 }
 
 
-describe('notebook/completion/widget', () => {
+describe('completer/widget', () => {
 
-  describe('CompletionWidget', () => {
+  describe('CompleterWidget', () => {
 
     describe('#constructor()', () => {
 
-      it('should create a completion widget', () => {
-        let widget = new CompletionWidget();
-        expect(widget).to.be.a(CompletionWidget);
-        expect(widget.node.classList).to.contain('jp-Completion');
+      it('should create a completer widget', () => {
+        let widget = new CompleterWidget();
+        expect(widget).to.be.a(CompleterWidget);
+        expect(widget.node.classList).to.contain('jp-Completer');
       });
 
       it('should accept options with a model', () => {
-        let options: CompletionWidget.IOptions = {
-          model: new CompletionModel()
+        let options: CompleterWidget.IOptions = {
+          model: new CompleterModel()
         };
-        let widget = new CompletionWidget(options);
-        expect(widget).to.be.a(CompletionWidget);
+        let widget = new CompleterWidget(options);
+        expect(widget).to.be.a(CompleterWidget);
         expect(widget.model).to.equal(options.model);
       });
 
       it('should accept options with a renderer', () => {
-        let options: CompletionWidget.IOptions = {
-          model: new CompletionModel(),
+        let options: CompleterWidget.IOptions = {
+          model: new CompleterModel(),
           renderer: new CustomRenderer()
         };
         options.model.options = ['foo', 'bar'];
 
-        let widget = new CompletionWidget(options);
-        expect(widget).to.be.a(CompletionWidget);
+        let widget = new CompleterWidget(options);
+        expect(widget).to.be.a(CompleterWidget);
         sendMessage(widget, WidgetMessage.UpdateRequest);
 
         let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
@@ -107,8 +107,8 @@ describe('notebook/completion/widget', () => {
 
       it('should emit a signal when an item is selected', () => {
         let anchor = new Widget();
-        let options: CompletionWidget.IOptions = {
-          model: new CompletionModel(),
+        let options: CompleterWidget.IOptions = {
+          model: new CompleterModel(),
           anchor: anchor.node
         };
         let value = '';
@@ -116,7 +116,7 @@ describe('notebook/completion/widget', () => {
         options.model.options = ['foo', 'bar'];
         Widget.attach(anchor, document.body);
 
-        let widget = new CompletionWidget(options);
+        let widget = new CompleterWidget(options);
 
         widget.selected.connect(listener);
         Widget.attach(widget, document.body);
@@ -132,10 +132,10 @@ describe('notebook/completion/widget', () => {
 
     describe('#visibilityChanged', () => {
 
-      it('should emit a signal when completion visibility changes', () => {
+      it('should emit a signal when completer visibility changes', () => {
         let anchor = new Widget();
-        let options: CompletionWidget.IOptions = {
-          model: new CompletionModel(),
+        let options: CompleterWidget.IOptions = {
+          model: new CompleterModel(),
           anchor: anchor.node
         };
         let called = false;
@@ -143,7 +143,7 @@ describe('notebook/completion/widget', () => {
         options.model.options = ['foo', 'bar'];
         Widget.attach(anchor, document.body);
 
-        let widget = new CompletionWidget(options);
+        let widget = new CompleterWidget(options);
 
         widget.visibilityChanged.connect(listener);
         expect(called).to.be(false);
@@ -159,28 +159,28 @@ describe('notebook/completion/widget', () => {
     describe('#model', () => {
 
       it('should default to null', () => {
-        let widget = new CompletionWidget();
+        let widget = new CompleterWidget();
         expect(widget.model).to.be(null);
       });
 
       it('should be settable', () => {
-        let widget = new CompletionWidget();
+        let widget = new CompleterWidget();
         expect(widget.model).to.be(null);
-        widget.model = new CompletionModel();
-        expect(widget.model).to.be.a(CompletionModel);
+        widget.model = new CompleterModel();
+        expect(widget.model).to.be.a(CompleterModel);
       });
 
       it('should be safe to set multiple times', () => {
-        let model = new CompletionModel();
-        let widget = new CompletionWidget();
+        let model = new CompleterModel();
+        let widget = new CompleterWidget();
         widget.model = model;
         widget.model = model;
         expect(widget.model).to.be(model);
       });
 
       it('should be safe to reset', () => {
-        let model = new CompletionModel();
-        let widget = new CompletionWidget({ model: new CompletionModel() });
+        let model = new CompleterModel();
+        let widget = new CompleterWidget({ model: new CompleterModel() });
         expect(widget.model).not.to.be(model);
         widget.model = model;
         expect(widget.model).to.be(model);
@@ -191,12 +191,12 @@ describe('notebook/completion/widget', () => {
     describe('#anchor', () => {
 
       it('should default to null', () => {
-        let widget = new CompletionWidget();
+        let widget = new CompleterWidget();
         expect(widget.anchor).to.be(null);
       });
 
       it('should be settable', () => {
-        let widget = new CompletionWidget();
+        let widget = new CompleterWidget();
         expect(widget.anchor).to.be(null);
         widget.anchor = new Widget().node;
         expect(widget.anchor).to.be.a(Node);
@@ -204,7 +204,7 @@ describe('notebook/completion/widget', () => {
 
       it('should be safe to reset', () => {
         let anchor = new Widget();
-        let widget = new CompletionWidget({ anchor: (new Widget()).node });
+        let widget = new CompleterWidget({ anchor: (new Widget()).node });
         expect(widget.anchor).not.to.be(anchor.node);
         widget.anchor = anchor.node;
         expect(widget.anchor).to.be(anchor.node);
@@ -215,13 +215,13 @@ describe('notebook/completion/widget', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the widget', () => {
-        let widget = new CompletionWidget();
+        let widget = new CompleterWidget();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new CompletionWidget();
+        let widget = new CompleterWidget();
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
@@ -231,16 +231,16 @@ describe('notebook/completion/widget', () => {
 
     describe('#reset()', () => {
 
-      it('should reset the completion widget', () => {
+      it('should reset the completer widget', () => {
         let anchor = new Widget();
-        let model = new CompletionModel();
-        let options: CompletionWidget.IOptions = {
+        let model = new CompleterModel();
+        let options: CompleterWidget.IOptions = {
           model, anchor: anchor.node
         };
         model.options = ['foo', 'bar'];
         Widget.attach(anchor, document.body);
 
-        let widget = new CompletionWidget(options);
+        let widget = new CompleterWidget(options);
 
         Widget.attach(widget, document.body);
         sendMessage(widget, WidgetMessage.UpdateRequest);
@@ -281,14 +281,14 @@ describe('notebook/completion/widget', () => {
 
         it('should reset if keydown is outside anchor', () => {
           let anchor = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = {
+          let model = new CompleterModel();
+          let options: CompleterWidget.IOptions = {
             model, anchor: anchor.node
           };
           model.options = ['foo', 'bar'];
           Widget.attach(anchor, document.body);
 
-          let widget = new CompletionWidget(options);
+          let widget = new CompleterWidget(options);
 
           Widget.attach(widget, document.body);
           sendMessage(widget, WidgetMessage.UpdateRequest);
@@ -304,8 +304,8 @@ describe('notebook/completion/widget', () => {
 
         it('should trigger a selected signal on enter key', () => {
           let anchor = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = {
+          let model = new CompleterModel();
+          let options: CompleterWidget.IOptions = {
             model, anchor: anchor.node
           };
           let value = '';
@@ -315,7 +315,7 @@ describe('notebook/completion/widget', () => {
           model.options = ['foo', 'bar', 'baz'];
           Widget.attach(anchor, document.body);
 
-          let widget = new CompletionWidget(options);
+          let widget = new CompleterWidget(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -329,14 +329,14 @@ describe('notebook/completion/widget', () => {
 
         it('should select the item below and cycle back on down', () => {
           let anchor = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = {
+          let model = new CompleterModel();
+          let options: CompleterWidget.IOptions = {
             model, anchor: anchor.node
           };
           model.options = ['foo', 'bar', 'baz'];
           Widget.attach(anchor, document.body);
 
-          let widget = new CompletionWidget(options);
+          let widget = new CompleterWidget(options);
           let target = document.createElement('div');
 
           anchor.node.appendChild(target);
@@ -366,14 +366,14 @@ describe('notebook/completion/widget', () => {
 
         it('should select the item above and cycle back on up', () => {
           let anchor = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = {
+          let model = new CompleterModel();
+          let options: CompleterWidget.IOptions = {
             model, anchor: anchor.node
           };
           model.options = ['foo', 'bar', 'baz'];
           Widget.attach(anchor, document.body);
 
-          let widget = new CompletionWidget(options);
+          let widget = new CompleterWidget(options);
 
           Widget.attach(widget, document.body);
           sendMessage(widget, WidgetMessage.UpdateRequest);
@@ -401,8 +401,8 @@ describe('notebook/completion/widget', () => {
 
         it('should mark common subset on tab and select on next tab', () => {
           let anchor = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = {
+          let model = new CompleterModel();
+          let options: CompleterWidget.IOptions = {
             model, anchor: anchor.node
           };
           let value = '';
@@ -412,7 +412,7 @@ describe('notebook/completion/widget', () => {
           model.options = ['foo', 'four', 'foz'];
           Widget.attach(anchor, document.body);
 
-          let widget = new CompletionWidget(options);
+          let widget = new CompleterWidget(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -441,8 +441,8 @@ describe('notebook/completion/widget', () => {
 
         it('should trigger a selected signal on mouse down', () => {
           let anchor = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = {
+          let model = new CompleterModel();
+          let options: CompleterWidget.IOptions = {
             model, anchor: anchor.node
           };
           let value = '';
@@ -453,7 +453,7 @@ describe('notebook/completion/widget', () => {
           model.query = 'b';
           Widget.attach(anchor, document.body);
 
-          let widget = new CompletionWidget(options);
+          let widget = new CompleterWidget(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -470,8 +470,8 @@ describe('notebook/completion/widget', () => {
 
         it('should ignore nonstandard mouse clicks (e.g., right click)', () => {
           let anchor = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = {
+          let model = new CompleterModel();
+          let options: CompleterWidget.IOptions = {
             model, anchor: anchor.node
           };
           let value = '';
@@ -481,7 +481,7 @@ describe('notebook/completion/widget', () => {
           model.options = ['foo', 'bar'];
           Widget.attach(anchor, document.body);
 
-          let widget = new CompletionWidget(options);
+          let widget = new CompleterWidget(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -495,8 +495,8 @@ describe('notebook/completion/widget', () => {
 
         it('should ignore a mouse down that misses an item', () => {
           let anchor = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = {
+          let model = new CompleterModel();
+          let options: CompleterWidget.IOptions = {
             model, anchor: anchor.node
           };
           let value = '';
@@ -506,7 +506,7 @@ describe('notebook/completion/widget', () => {
           model.options = ['foo', 'bar'];
           Widget.attach(anchor, document.body);
 
-          let widget = new CompletionWidget(options);
+          let widget = new CompleterWidget(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -520,8 +520,8 @@ describe('notebook/completion/widget', () => {
 
         it('should hide widget if mouse down misses it', () => {
           let anchor = new Widget();
-          let model = new CompletionModel();
-          let options: CompletionWidget.IOptions = {
+          let model = new CompleterModel();
+          let options: CompleterWidget.IOptions = {
             model, anchor: anchor.node
           };
           let value = '';
@@ -531,7 +531,7 @@ describe('notebook/completion/widget', () => {
           model.options = ['foo', 'bar'];
           Widget.attach(anchor, document.body);
 
-          let widget = new CompletionWidget(options);
+          let widget = new CompleterWidget(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -551,7 +551,7 @@ describe('notebook/completion/widget', () => {
         it('should move along with the pegged anchor', (done) => {
           let anchor = document.createElement('div');
           let container = new Widget();
-          let model = new CompletionModel();
+          let model = new CompleterModel();
           let coords: ICoords = { left: 0, right: 0, top: 500, bottom: 0 };
           let request: ICompletionRequest = {
             ch: 0,
@@ -562,7 +562,7 @@ describe('notebook/completion/widget', () => {
             position: 0,
             currentValue: 'f'
           };
-          let options: CompletionWidget.IOptions = { model, anchor: anchor };
+          let options: CompleterWidget.IOptions = { model, anchor: anchor };
 
           document.body.appendChild(anchor);
           anchor.style.height = '1000px';
@@ -574,7 +574,7 @@ describe('notebook/completion/widget', () => {
           model.original = request;
           model.options = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-          let widget = new CompletionWidget(options);
+          let widget = new CompleterWidget(options);
           Widget.attach(widget, document.body);
           sendMessage(widget, WidgetMessage.UpdateRequest);
 
@@ -601,7 +601,7 @@ describe('notebook/completion/widget', () => {
 
       it('should emit a selection if there is only one match', () => {
         let anchor = new Widget();
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -612,14 +612,14 @@ describe('notebook/completion/widget', () => {
           currentValue: 'f'
         };
         let value = '';
-        let options: CompletionWidget.IOptions = { model, anchor: anchor.node };
+        let options: CompleterWidget.IOptions = { model, anchor: anchor.node };
         let listener = (sender: any, selected: string) => { value = selected; };
 
         Widget.attach(anchor, document.body);
         model.original = request;
         model.options = ['foo'];
 
-        let widget = new CompletionWidget(options);
+        let widget = new CompleterWidget(options);
         widget.selected.connect(listener);
         Widget.attach(widget, document.body);
 
@@ -638,7 +638,7 @@ describe('notebook/completion/widget', () => {
 
       it('should un-hide widget if multiple options are available', () => {
         let anchor = new Widget();
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -648,13 +648,13 @@ describe('notebook/completion/widget', () => {
           position: 0,
           currentValue: 'f'
         };
-        let options: CompletionWidget.IOptions = { model, anchor: anchor.node };
+        let options: CompleterWidget.IOptions = { model, anchor: anchor.node };
 
         Widget.attach(anchor, document.body);
         model.original = request;
         model.options = ['foo', 'bar', 'baz'];
 
-        let widget = new CompletionWidget(options);
+        let widget = new CompleterWidget(options);
         widget.hide();
         expect(widget.isHidden).to.be(true);
         Widget.attach(widget, document.body);
