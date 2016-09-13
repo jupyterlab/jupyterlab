@@ -87,7 +87,7 @@ All code is licensed under the terms of the revised BSD license.
 
 ## Getting help
 We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
-and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterhub/jupyterlab).
+and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyter/jupyterlab).
 
 
 ## Resources
