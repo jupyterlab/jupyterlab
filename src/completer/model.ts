@@ -217,13 +217,11 @@ class CompleterModel implements ICompleterModel {
     if (deepEqual(newValue, this._current)) {
       return;
     }
-
     // Original request must always be set before a text change. If it isn't
     // the model fails silently.
     if (!this.original) {
       return;
     }
-
     // Cursor must always be set before a text change. This happens
     // automatically in the completer handler, but since `current` is a public
     // attribute, this defensive check is necessary.
@@ -232,11 +230,10 @@ class CompleterModel implements ICompleterModel {
     }
     this._current = newValue;
 
-    if (!this.current) {
+    if (!this._current) {
       this.stateChanged.emit(void 0);
       return;
     }
-
     let original = this._original;
     let current = this._current;
     let originalLine = original.currentValue.split('\n')[original.line];
@@ -247,15 +244,15 @@ class CompleterModel implements ICompleterModel {
     if (currentLine.length < originalLine.length) {
       this.reset();
       return;
-    } else {
-      let { start, end } = this._cursor;
-      // Clip the front of the current line.
-      let query = currentLine.substring(start);
-      // Clip the back of the current line.
-      let ending = originalLine.substring(end);
-      query = query.substring(0, query.lastIndexOf(ending));
-      this._query = query;
     }
+
+    let { start, end } = this._cursor;
+    // Clip the front of the current line.
+    let query = current.newValue.substring(start);
+    // Clip the back of the current line.
+    let ending = original.currentValue.substring(end);
+    query = query.substring(0, query.lastIndexOf(ending));
+    this._query = query;
     this.stateChanged.emit(void 0);
   }
 

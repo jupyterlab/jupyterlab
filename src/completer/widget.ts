@@ -230,7 +230,6 @@ class CompleterWidget extends Widget {
     if (!model) {
       return;
     }
-
     let items = model.items;
 
     // If there are no items, reset and bail.
@@ -239,14 +238,12 @@ class CompleterWidget extends Widget {
       this.visibilityChanged.emit(void 0);
       return;
     }
-
     // If there is only one item, signal and bail.
     if (items.length === 1) {
       this.selected.emit(items[0].raw);
       this.reset();
       return;
     }
-
     let node = this.node;
     node.textContent = '';
 
@@ -405,12 +402,13 @@ class CompleterWidget extends Widget {
       return;
     }
 
+    // Always use original coordinates.
+    let coords = this._model.original.coords;
     let node = this.node;
-    let coords = this._model.current ? this._model.current.coords
-      : this._model.original.coords;
     let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
     let availableHeight = coords.top + scrollDelta;
     let maxHeight = Math.max(0, Math.min(availableHeight, MAX_HEIGHT));
+    let chWidth = this._model.original.chWidth;
 
     if (maxHeight > MIN_HEIGHT) {
       node.classList.remove(OUTOFVIEW_CLASS);
@@ -421,11 +419,12 @@ class CompleterWidget extends Widget {
     node.style.maxHeight = `${maxHeight}px`;
 
     let borderLeftWidth = window.getComputedStyle(node).borderLeftWidth;
-    let left = coords.left + (parseInt(borderLeftWidth, 10) || 0);
     let rect = node.getBoundingClientRect();
     let top = availableHeight - rect.height;
+    let left = coords.left + (parseInt(borderLeftWidth, 10) || 0);
 
-    node.style.left = `${Math.floor(left)}px`;
+    left -= chWidth * (this._model.cursor.end - this._model.cursor.start);
+    node.style.left = `${Math.ceil(left)}px`;
     node.style.top = `${Math.floor(top)}px`;
     node.style.width = 'auto';
 
