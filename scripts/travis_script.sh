@@ -17,7 +17,8 @@ npm run build
 npm test
 npm run test:coverage
 
-# run the python tests
+# Run the python tests
+npm run build:serverextension
 cd jupyterlab && nosetests
 
 npm run build:examples
