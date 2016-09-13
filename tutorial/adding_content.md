@@ -12,7 +12,7 @@ files: `npm install -g tsd`.
 - Add a reference to the new library in `src/typings.d.ts`.
 - Create a folder in `src` for the plugin.
 - Add  `index.ts` and `plugin.ts` files.
-- If creating CSS, import the them in `src/default-themes/index.css`.
+- If creating CSS, import them in `src/default-themes/index.css`.
 - The `index.ts` file should have the core logic for the plugin.  In
 this case, it should create a widget and widget factory for rendering geojson 
 files (see [Documents](./documents)).
