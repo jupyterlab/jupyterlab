@@ -194,14 +194,14 @@ Then add this extension to the JupyterLab extensions list in the
 ```
 
 
-### The *ipywidgets* extension
+### The *ipywidgets* third party extension
 
 This discussion will be a bit confusing since we've been using the term **widget**
 to refer to **phosphor widgets**. In the discussion below, *ipython widgets*
 will be referred to as *ipywidgets*. There is no intrinsic relation between
 **phosphor widgets** and *ipython widgets*.
 
-The *ipywidgets* plugin registers a factory for a notebook **widget** extension
+The *ipywidgets* extension registers a factory for a notebook **widget** extension
 using the [Document Registry](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#registermodelfactory).
 The `createNew()` function is called with a NotebookPanel and [DocumentContext](http://jupyter.org/jupyterlab/interfaces/_docregistry_interfaces_.idocumentcontext.html).
 The plugin then creates a ipywidget manager (which uses the context to
@@ -219,3 +219,5 @@ model, which returns a JavaScript promise. The renderer creates a container
 **phosphor widget** which it hands back synchronously to the
 OutputAreaWidget, and then fills the container with the rendered *ipywidget*
 when the promise resolves.
+
+Note: The ipywidgets third party extension has not yet been released.
