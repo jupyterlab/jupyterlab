@@ -16,8 +16,8 @@ import {
 } from 'simulate-event';
 
 import {
-  NotebookToolbar, ToolbarButton
-} from '../../../../lib/notebook/notebook/toolbar';
+  Toolbar, ToolbarButton
+} from '../../../lib/toolbar';
 
 
 class LogToolbarButton extends ToolbarButton {
@@ -43,20 +43,20 @@ class LogToolbarButton extends ToolbarButton {
 }
 
 
-describe('notebook/notebook/toolbar', () => {
+describe('toolbar/toolbar', () => {
 
-  describe('NotebookToolbar', () => {
+  describe('Toolbar', () => {
 
     describe('#constructor()', () => {
 
       it('should construct a new toolbar widget', () => {
-        let widget = new NotebookToolbar();
-        expect(widget).to.be.a(NotebookToolbar);
+        let widget = new Toolbar();
+        expect(widget).to.be.a(Toolbar);
       });
 
-      it('should add the `jp-NBToolbar` class', () => {
-        let widget = new NotebookToolbar();
-        expect(widget.hasClass('jp-NBToolbar')).to.be(true);
+      it('should add the `jp-Toolbar` class', () => {
+        let widget = new Toolbar();
+        expect(widget.hasClass('jp-Toolbar')).to.be(true);
       });
 
     });
@@ -65,21 +65,21 @@ describe('notebook/notebook/toolbar', () => {
 
       it('should add an item to the toolbar', () => {
         let item = new Widget();
-        let widget = new NotebookToolbar();
+        let widget = new Toolbar();
         widget.add('test', item);
         expect(widget.list()).to.contain('test');
       });
 
-      it('should add the `jp-NBToolbar-item` class to the widget', () => {
+      it('should add the `jp-Toolbar-item` class to the widget', () => {
         let item = new Widget();
-        let widget = new NotebookToolbar();
+        let widget = new Toolbar();
         widget.add('test', item);
-        expect(item.hasClass('jp-NBToolbar-item')).to.be(true);
+        expect(item.hasClass('jp-Toolbar-item')).to.be(true);
       });
 
       it('should add the item after a named item', () => {
         let items = [new Widget(), new Widget(), new Widget()];
-        let widget = new NotebookToolbar();
+        let widget = new Toolbar();
         widget.add('foo', items[0]);
         widget.add('bar', items[1]);
         widget.add('baz', items[2], 'foo');
@@ -88,7 +88,7 @@ describe('notebook/notebook/toolbar', () => {
 
       it('should ignore an invalid `after`', () => {
         let items = [new Widget(), new Widget(), new Widget()];
-        let widget = new NotebookToolbar();
+        let widget = new Toolbar();
         widget.add('foo', items[0]);
         widget.add('bar', items[1]);
         widget.add('baz', items[2], 'fuzz');
@@ -96,7 +96,7 @@ describe('notebook/notebook/toolbar', () => {
       });
 
       it('should throw an error if the name is alreay used', () => {
-        let widget = new NotebookToolbar();
+        let widget = new Toolbar();
         widget.add('test', new Widget());
         expect(() => { widget.add('test', new Widget()); }).to.throwError();
       });
@@ -106,7 +106,7 @@ describe('notebook/notebook/toolbar', () => {
     describe('#list()', () => {
 
       it('should get an ordered list the toolbar item names', () => {
-        let widget = new NotebookToolbar();
+        let widget = new Toolbar();
         widget.add('foo', new Widget());
         widget.add('bar', new Widget());
         widget.add('baz', new Widget());

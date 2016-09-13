@@ -88,9 +88,9 @@ describe('notebook/notebook/default-toolbar', () => {
         button.dispose();
       });
 
-      it("should have the `'jp-NBToolbar-save'` class", () => {
+      it('should have the `\'jp-Notebook-toolbarSave\'` class', () => {
         let button = ToolbarItems.createSaveButton(panel);
-        expect(button.hasClass('jp-NBToolbar-save')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarSave')).to.be(true);
       });
 
     });
@@ -106,9 +106,9 @@ describe('notebook/notebook/default-toolbar', () => {
         button.dispose();
       });
 
-      it("should have the `'jp-NBToolbar-insert'` class", () => {
+      it('should have the `\'jp-Notebook-toolbarInsert\'` class', () => {
         let button = ToolbarItems.createInsertButton(panel);
-        expect(button.hasClass('jp-NBToolbar-insert')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarInsert')).to.be(true);
       });
 
     });
@@ -125,9 +125,9 @@ describe('notebook/notebook/default-toolbar', () => {
         button.dispose();
       });
 
-      it("should have the `'jp-NBToolbar-cut'` class", () => {
+      it('should have the `\'jp-Notebook-toolbarCut\'` class', () => {
         let button = ToolbarItems.createCutButton(panel);
-        expect(button.hasClass('jp-NBToolbar-cut')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarCut')).to.be(true);
       });
 
     });
@@ -144,9 +144,9 @@ describe('notebook/notebook/default-toolbar', () => {
         button.dispose();
       });
 
-      it("should have the `'jp-NBToolbar-copy'` class", () => {
+      it('should have the `\'jp-Notebook-toolbarCopy\'` class', () => {
         let button = ToolbarItems.createCopyButton(panel);
-        expect(button.hasClass('jp-NBToolbar-copy')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarCopy')).to.be(true);
       });
 
     });
@@ -166,9 +166,9 @@ describe('notebook/notebook/default-toolbar', () => {
         });
       });
 
-      it('should have the `\'jp-NBToolbar-paste\'` class', () => {
+      it('should have the `\'jp-Notebook-toolbarPaste\'` class', () => {
         let button = ToolbarItems.createPasteButton(panel);
-        expect(button.hasClass('jp-NBToolbar-paste')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarPaste')).to.be(true);
       });
 
     });
@@ -196,9 +196,9 @@ describe('notebook/notebook/default-toolbar', () => {
         button.node.click();
       });
 
-      it("should have the `'jp-NBToolbar-run'` class", () => {
+      it('should have the `\'jp-Notebook-toolbarRun\'` class', () => {
         let button = ToolbarItems.createRunButton(panel);
-        expect(button.hasClass('jp-NBToolbar-run')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarRun')).to.be(true);
       });
 
     });
@@ -218,18 +218,18 @@ describe('notebook/notebook/default-toolbar', () => {
         });
       });
 
-      it("should have the `'jp-NBToolbar-interrupt'` class", () => {
+      it('should have the `\'jp-Notebook-toolbarInterrupt\'` class', () => {
         let button = ToolbarItems.createInterruptButton(panel);
-        expect(button.hasClass('jp-NBToolbar-interrupt')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarInterrupt')).to.be(true);
       });
 
     });
 
     describe('#createRestartButton()', () => {
 
-      it("should have the `'jp-NBToolbar-restart'` class", () => {
+      it('should have the `\'jp-Notebook-toolbarRestart\'` class', () => {
         let button = ToolbarItems.createRestartButton(panel);
-        expect(button.hasClass('jp-NBToolbar-restart')).to.be(true);
+        expect(button.hasClass('jp-Notebook-toolbarRestart')).to.be(true);
       });
 
     });
@@ -244,7 +244,7 @@ describe('notebook/notebook/default-toolbar', () => {
         expect(node.value).to.be('markdown');
       });
 
-      it("should display `'-'` if multiple cell types are selected", () => {
+      it('should display `\'-\'` if multiple cell types are selected', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
         expect(node.value).to.be('code');
@@ -270,15 +270,15 @@ describe('notebook/notebook/default-toolbar', () => {
         context.changeKernel({ name: 'python' });
         panel.context = context;
         panel.content.activeCellIndex++;
-        let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
-        expect(node.value).to.be('markdown');
+        let node = item.node.getElementsByTagName('select')[0];
+        expect((node as HTMLSelectElement).value).to.be('markdown');
       });
 
     });
 
     describe('#createKernelNameItem()', () => {
 
-      it("should display the `'display_name`' of the current kernel", (done) => {
+      it('should display the `\'display_name\'` of the kernel', (done) => {
         let item = ToolbarItems.createKernelNameItem(panel);
         panel.kernel.getKernelSpec().then(spec => {
           expect(item.node.textContent).to.be(spec.display_name);
@@ -286,7 +286,7 @@ describe('notebook/notebook/default-toolbar', () => {
         });
       });
 
-      it("should display `'No Kernel!'` if there is no kernel", () => {
+      it('should display `\'No Kernel!\'` if there is no kernel', () => {
         panel.context = null;
         let item = ToolbarItems.createKernelNameItem(panel);
         expect(item.node.textContent).to.be('No Kernel!');

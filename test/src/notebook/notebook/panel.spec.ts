@@ -20,10 +20,6 @@ import {
 } from '../../../../lib/docregistry';
 
 import {
-  ICellEditorWidget, ITextChange, ICompletionRequest
-} from '../../../../lib/notebook/cells/editor';
-
-import {
   CompletionWidget
 } from '../../../../lib/notebook/completion';
 
@@ -36,8 +32,8 @@ import {
 } from '../../../../lib/notebook/notebook/panel';
 
 import {
-  NotebookToolbar
-} from '../../../../lib/notebook/notebook/toolbar';
+  Toolbar
+} from '../../../../lib/toolbar';
 
 import {
   Notebook
@@ -173,7 +169,7 @@ describe('notebook/notebook/panel', () => {
 
       it('should be the toolbar used by the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(panel.toolbar).to.be.a(NotebookToolbar);
+        expect(panel.toolbar).to.be.a(Toolbar);
       });
 
       it('should be read-only', () => {
@@ -412,7 +408,7 @@ describe('notebook/notebook/panel', () => {
 
         it('should create a notebook toolbar', () => {
           let renderer = new CodeMirrorNotebookPanelRenderer();
-          expect(renderer.createToolbar()).to.be.a(NotebookToolbar);
+          expect(renderer.createToolbar()).to.be.a(Toolbar);
         });
 
       });
