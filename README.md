@@ -1,6 +1,16 @@
+**[Prerequisites](#prerequisites)** |
+**[Installation](#installation)** |
+**[Contributing](#contributing)** |
+**[License](#license)** |
+**[Getting help](#getting-help)**
+
+
 # [JupyterLab](http://jupyter.github.io/jupyterlab/)
 
+[![Build Status](https://travis-ci.org/jupyter/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyter/jupyterlab)
 [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/jupyter/jupyterlab/lab)
+[![Documentation Status](https://readthedocs.org/projects/jupyterlab-tutorial/badge/?version=latest)](http://jupyterlab-tutorial.readthedocs.io/en/latest/?badge=latest)
+[![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 
 An extensible computational environment for Jupyter.
 
@@ -12,9 +22,9 @@ meets your workflow needs. Here's a quick preview of JupyterLab:
 
 <img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
 
-## Getting started
+----
 
-### Prerequisite
+## Prerequisites
 
 Jupyter notebook version 4.2 or later. To check the notebook version:
 
@@ -22,9 +32,27 @@ Jupyter notebook version 4.2 or later. To check the notebook version:
 jupyter notebook --version
 ```
 
-### User installation
+### Supported Runtimes
 
-From the command line:
+The runtime versions which are currently *known to work*:
+
+- IE 11+
+- Firefox 32+
+- Chrome 38+
+
+Earlier browser versions may also work, but come with no guarantees.
+
+----
+
+## Installation
+
+If you use ``conda``, you can install as:
+
+```bash
+conda install -c conda-forge jupyterlab
+```
+
+If you use ``pip``, you can install it as:
 
 ```bash
 pip install jupyterlab
@@ -43,188 +71,29 @@ the browser.
 
 ----
 
-## Documentation
+## Contributing
 
+If you would like to contribute to the project, please read our [contributor documentation](CONTRIBUTING.md).
+
+----
+
+## License
+We use a shared copyright model that enables all contributors to maintain the
+copyright on their contributions.
+
+All code is licensed under the terms of the revised BSD license.
+
+----
+
+## Getting help
+We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
+and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterhub/jupyterlab).
+
+
+## Resources
+
+- [Reporting Issues](https://github.com/jupyter/jupyterlab/issues)
 - [API Docs](http://jupyter.github.io/jupyterlab/)
 - [Architecture tutorial](http://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
-
-----
-
-## Contributing to JupyterLab
-
-### Setting up a development system
-
-#### Prerequisites
-
-- Jupyter notebook version 4.2 or later
-- NodeJS (preferably version 5 or later) and npm
-
-#### Installation
-
-Fork the JupyterLab repo using the GitHub UI. Clone the repo and build using these commands:
-
-```bash
-git clone https://github.com/<your-github-username>/jupyterlab.git
-cd jupyterlab
-npm install
-pip install -e . # will take a long time to build everything
-jupyter serverextension enable --py jupyterlab
-```
-
-Note: At times, it may be necessary to clean your local repo with the 
-command ``git clean -fdx``.
-
-### Run JupyterLab
-
-Start JupyterLab:
-
-```bash
-jupyter lab
-```
-
-Alternatively, you can run JupyterLab in debug mode:
-
-```bash
-jupyter lab --debug
-```
-
-### Run the tests
-
-```bash
-npm test
-```
-
-### Build and run the stand-alone examples
-
-To install and build the examples in the `examples` directory:
-
-```bash
-npm run build:examples
-```
-
-To run a specific example, change to the example's directory (i.e.
-`examples/filebrowser`) and enter:
-
-```bash
-python main.py
-```
-
-### Build API Docs
-
-To build the [API docs](http://jupyter.github.io/jupyterlab/):
-
-```bash
-npm run docs
-```
-
-Navigate to `docs/index.html`.
-
-----
-
-## High level Architecture
-
-The JupyterLab application is made up of two major parts:
-
-- an npm package
-- a Jupyter server extension (Python package)
-
-Each part is named `jupyterlab`. The [developer tutorial documentation](http://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
-provides additional architecture information.
-
-## The NPM Package
-
-The npm package source files are in the `src/` subdirectory.
-
-**Prerequisites**
-- [node](http://nodejs.org/) (preferably version 5 or later)
-- Jupyter notebook server version 4.2 or later (to run examples)
-
-```bash
-npm install --save jupyterlab
-```
-
-### Build the NPM Package from Source
-
-```bash
-git clone https://github.com/jupyter/jupyterlab.git
-cd jupyterlab
-npm install
-npm run build:all
-```
-
-**Rebuild**
-
-```bash
-npm run clean
-npm run build:all
-```
-
-## The Jupyter Server Extension
-
-The Jupyter server extension source files are in the `jupyterlab/`
-subdirectory. To use this extension, make sure the Jupyter notebook server
-version 4.2 or later is installed.
-
-### Build the JupyterLab server extension
-
-When you make a change to JupyterLab npm package source files, run:
-
-```bash
-npm run build:serverextension
-```
-
-to build the changes and then refresh your browser to see the changes.
-
-To have the system build after each source file change, run:
-
-```bash
-npm run watch:serverextension
-```
-
-and refresh the browser.
-
-## Bundle for the Browser
-
-Follow the package install instructions first.
-
-Any bundler that understands how to `require()` files with `.js` and `.css`
-extensions can be used with this package.
-
-**Note:** This npm module is fully compatible with Node/Babel/ES6/ES5. Simply
-omit the type declarations when using a language other than TypeScript.
-
-## Supported Runtimes
-
-The runtime versions which are currently *known to work*:
-
-- IE 11+
-- Firefox 32+
-- Chrome 38+
-
-Earlier browser versions may also work, but come with no guarantees.
-
-Note: "requirejs" must be included in a global context (usually as a
-`<script>` tag) for Comm targets.
-
-## Publishing packages for a JupyterLab release
-
-We publish an npm package, a Python source package, and a Python universal binary wheel.  We also publish a conda package on conda-forge (see below).
-See the Python docs on [package uploading](https://packaging.python.org/distributing/#uploading-your-project-to-pypi) 
-for twine setup instructions and for why twine is the recommended method.
-
-```bash
-npm version patch
-git push origin master --tags
-npm publish
-rm -rf dist
-python setup.py sdist
-python setup.py bdist_wheel --universal
-twine upload dist/*
-md5 dist/*.tar.gz  # get the md5 hash for conda-forge install
-```
-
-Publish on conda-forge
-
-- Fork https://github.com/conda-forge/jupyterlab-feedstock
-- Create a PR with the version bump
-- Update `recipe/meta.yaml` with the new version and md5
+- [Documentation for Project Jupyter](http://jupyter.readthedocs.io/en/latest/index.html) | [PDF](https://media.readthedocs.org/pdf/jupyter/latest/jupyter.pdf)
+- [Project Jupyter website](https://jupyter.org)
