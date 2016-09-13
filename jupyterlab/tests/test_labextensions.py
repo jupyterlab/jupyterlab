@@ -28,10 +28,13 @@ from jupyterlab.labextensions import (install_labextension, check_labextension,
     enable_labextension, disable_labextension,
     install_labextension_python, uninstall_labextension_python,
     enable_labextension_python, disable_labextension_python, _get_config_dir,
-    validate_labextension, validate_labextension_python
+    validate_labextension, validate_labextension_folder
 )
 
 from traitlets.config.manager import BaseJSONConfigManager
+
+
+FILENAME = 'mockextension/mockextension.bundle.js'
 
 
 def touch(file, mtime=None):
@@ -39,6 +42,9 @@ def touch(file, mtime=None):
     
     returns the modification time of the file
     """
+    dirname = os.path.dirname(file)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
     open(file, 'a').close()
     # set explicit mtime
     if mtime:
@@ -59,11 +65,16 @@ def build_extension():
     shell = (sys.platform == 'win32')
     cwd = os.path.dirname(os.path.abspath(__file__))
     cmd = 'node build_extension.js'
-    check_call(cmd.split(), shell=shell, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr)
+    check_call(cmd.split(), shell=shell, cwd=cwd)
 
 
 class TestInstallNBExtension(TestCase):
-    
+
+    @classmethod
+    def setUpClass(cls):
+        # Build the extension
+        build_extension()
+
     def tempdir(self):
         td = TemporaryDirectory()
         self.tempdirs.append(td)
@@ -117,9 +128,6 @@ class TestInstallNBExtension(TestCase):
         self.patch_system_path.start()
         self.addCleanup(self.patch_system_path.stop)
 
-        # Build the extension
-        build_extension()
-
     def assert_dir_exists(self, path):
         if not os.path.exists(path):
             do_exist = os.listdir(os.path.dirname(path))
@@ -147,26 +155,11 @@ class TestInstallNBExtension(TestCase):
             pjoin(labext, relative_path)
         )
     
-    def test_create_data_dir(self):
-        """install_labextension when data_dir doesn't exist"""
-        with TemporaryDirectory() as td:
-            data_dir = os.path.join(td, self.data_dir)
-            with patch.dict('os.environ', {
-                'JUPYTER_DATA_DIR': data_dir,
-            }):
-                install_labextension(self.src, self.name, user=True)
-                self.assert_dir_exists(data_dir)
-                for file in self.files:
-                    self.assert_installed(
-                        pjoin(basename(self.src), file),
-                        user=True,
-                    )
-    
     def test_create_labextensions_user(self):
         with TemporaryDirectory() as td:
             install_labextension(self.src, self.name, user=True)
             self.assert_installed(
-                pjoin(basename(self.src), u'ƒile'),
+                pjoin(self.name),
                 user=True
             )
     
@@ -176,97 +169,13 @@ class TestInstallNBExtension(TestCase):
             with patch.object(labextensions, 'SYSTEM_JUPYTER_PATH', [td]):
                 install_labextension(self.src, self.name, user=False)
                 self.assert_installed(
-                    pjoin(basename(self.src), u'ƒile'),
+                    pjoin(self.name),
                     user=False
                 )
-    
-    def test_single_file(self):
-        file = self.files[0]
-        install_labextension(pjoin(self.src, file), self.name)
-        self.assert_installed(file)
-    
-    def test_single_dir(self):
-        d = u'∂ir'
-        install_labextension(pjoin(self.src, d), self.name)
-        self.assert_installed(self.files[-1])
-    
-
-    def test_destination_file(self):
-        file = self.files[0]
-        install_labextension(pjoin(self.src, file), self.name, destination = u'ƒiledest')
-        self.assert_installed(u'ƒiledest')
-
-    def test_destination_dir(self):
-        d = u'∂ir'
-        install_labextension(pjoin(self.src, d), self.name, destination = u'ƒiledest2')
-        self.assert_installed(pjoin(u'ƒiledest2', u'∂ir2', u'ƒile2'))
     
     def test_install_labextension(self):
         with self.assertRaises(TypeError):
             install_labextension(glob.glob(pjoin(self.src, '*')), self.name)
-    
-    def test_overwrite_file(self):
-        with TemporaryDirectory() as d:
-            fname = u'ƒ.js'
-            src = pjoin(d, fname)
-            with open(src, 'w') as f:
-                f.write('first')
-            mtime = touch(src)
-            dest = pjoin(self.system_labext, fname)
-            install_labextension(src, self.name)
-            with open(src, 'w') as f:
-                f.write('overwrite')
-            mtime = touch(src, mtime - 100)
-            install_labextension(src, self.name, overwrite=True)
-            with open(dest) as f:
-                self.assertEqual(f.read(), 'overwrite')
-    
-    def test_overwrite_dir(self):
-        with TemporaryDirectory() as src:
-            base = basename(src)
-            fname = u'ƒ.js'
-            touch(pjoin(src, fname))
-            install_labextension(src, self.name)
-            self.assert_installed(pjoin(base, fname))
-            os.remove(pjoin(src, fname))
-            fname2 = u'∂.js'
-            touch(pjoin(src, fname2))
-            install_labextension(src, self.name, overwrite=True)
-            self.assert_installed(pjoin(base, fname2))
-            self.assert_not_installed(pjoin(base, fname))
-    
-    def test_update_file(self):
-        with TemporaryDirectory() as d:
-            fname = u'ƒ.js'
-            src = pjoin(d, fname)
-            with open(src, 'w') as f:
-                f.write('first')
-            mtime = touch(src)
-            install_labextension(src, self.name)
-            self.assert_installed(fname)
-            dest = pjoin(self.system_labext, fname)
-            os.stat(dest).st_mtime
-            with open(src, 'w') as f:
-                f.write('overwrite')
-            touch(src, mtime + 10)
-            install_labextension(src, self.name)
-            with open(dest) as f:
-                self.assertEqual(f.read(), 'overwrite')
-    
-    def test_skip_old_file(self):
-        with TemporaryDirectory() as d:
-            fname = u'ƒ.js'
-            src = pjoin(d, fname)
-            mtime = touch(src)
-            install_labextension(src, self.name)
-            self.assert_installed(fname)
-            dest = pjoin(self.system_labext, fname)
-            old_mtime = os.stat(dest).st_mtime
-            
-            mtime = touch(src, mtime - 100)
-            install_labextension(src, self.name)
-            new_mtime = os.stat(dest).st_mtime
-            self.assertEqual(new_mtime, old_mtime)
 
     def test_quiet(self):
         stdout = StringIO()
@@ -280,54 +189,14 @@ class TestInstallNBExtension(TestCase):
     def test_check_labextension(self):
         with TemporaryDirectory() as d:
             f = u'ƒ.js'
-            src = pjoin(d, f)
-            touch(src)
+            src = pjoin(d, self.name, 'build')
+            touch(pjoin(src, f))
             install_labextension(src, self.name, user=True)
         
+        f = pjoin(self.name, f)
         assert check_labextension(f, user=True)
         assert check_labextension([f], user=True)
         assert not check_labextension([f, pjoin('dne', f)], user=True)
-    
-    @dec.skip_win32
-    def test_install_symlink(self):
-        with TemporaryDirectory() as d:
-            f = u'ƒ.js'
-            src = pjoin(d, f)
-            touch(src)
-            install_labextension(src, self.name, symlink=True)
-        dest = pjoin(self.system_labext, f)
-        assert os.path.islink(dest)
-        link = os.readlink(dest)
-        self.assertEqual(link, src)
-    
-    @dec.skip_win32
-    def test_overwrite_broken_symlink(self):
-        with TemporaryDirectory() as d:
-            f = u'ƒ.js'
-            f2 = u'ƒ2.js'
-            src = pjoin(d, f)
-            src2 = pjoin(d, f2)
-            touch(src)
-            install_labextension(src, self.name, symlink=True)
-            os.rename(src, src2)
-            install_labextension(src2, self.name, symlink=True, overwrite=True, destination=f)
-        dest = pjoin(self.system_labext, f)
-        assert os.path.islink(dest)
-        link = os.readlink(dest)
-        self.assertEqual(link, src2)
-
-    @dec.skip_win32
-    def test_install_symlink_destination(self):
-        with TemporaryDirectory() as d:
-            f = u'ƒ.js'
-            flink = u'ƒlink.js'
-            src = pjoin(d, f)
-            touch(src)
-            install_labextension(src, self.name, symlink=True, destination=flink)
-        dest = pjoin(self.system_labext, flink)
-        assert os.path.islink(dest)
-        link = os.readlink(dest)
-        self.assertEqual(link, src)
 
     def test_labextension_enable(self):
         with TemporaryDirectory() as d:
@@ -377,23 +246,23 @@ class TestInstallNBExtension(TestCase):
         self._inject_mock_extension()
         install_labextension_python('mockextension')
         
-        assert check_labextension('_mockdestination/index.js')
-        assert check_labextension(['_mockdestination/index.js'])
+        assert check_labextension(FILENAME)
+        assert check_labextension([FILENAME])
         
     def test_labextensionpy_user_files(self):
         self._inject_mock_extension()
         install_labextension_python('mockextension', user=True)
         
-        assert check_labextension('_mockdestination/index.js', user=True)
-        assert check_labextension(['_mockdestination/index.js'], user=True)
+        assert check_labextension(FILENAME, user=True)
+        assert check_labextension([FILENAME], user=True)
         
     def test_labextensionpy_uninstall_files(self):
         self._inject_mock_extension()
         install_labextension_python('mockextension', user=True)
         uninstall_labextension_python('mockextension', user=True)
         
-        assert not check_labextension('_mockdestination/index.js')
-        assert not check_labextension(['_mockdestination/index.js'])
+        assert not check_labextension(FILENAME)
+        assert not check_labextension([FILENAME])
         
     def test_labextensionpy_enable(self):
         self._inject_mock_extension()
@@ -402,43 +271,29 @@ class TestInstallNBExtension(TestCase):
         
         config_dir = os.path.join(_get_config_dir(user=True), 'labconfig')
         cm = BaseJSONConfigManager(config_dir=config_dir)
-        enabled = cm.get('jupyterlab_config').get('LabApp', {}).get('labextensions', {}).get('_mockdestination/index', False)
+        enabled = cm.get('jupyterlab_config').get('LabApp', {}).get('labextensions', {}).get('mockextension', False)
         assert enabled
         
     def test_labextensionpy_disable(self):
-        self._inject_mock_extension('notebook')
+        self._inject_mock_extension()
         install_labextension_python('mockextension', user=True)
         enable_labextension_python('mockextension')
         disable_labextension_python('mockextension', user=True)
         
-        config_dir = os.path.join(_get_config_dir(user=True), 'nbconfig')
+        config_dir = os.path.join(_get_config_dir(user=True), 'labconfig')
         cm = BaseJSONConfigManager(config_dir=config_dir)
-        enabled = cm.get('jupyterlab_config').get('LabApp', {}).get('labextensions', {}).get('_mockdestination/index', False)
+        enabled = cm.get('jupyterlab_config').get('LabApp', {}).get('labextensions', {}).get('mockextension', False)
         assert not enabled
 
     def test_labextensionpy_validate(self):
-        self._inject_mock_extension('notebook')
+        self._inject_mock_extension()
 
         paths = install_labextension_python('mockextension', user=True)
         enable_labextension_python('mockextension')
 
         meta = self._mock_extension_spec_meta()
-        warnings = validate_labextension_python(meta, paths[0])
+        warnings = validate_labextension_folder(meta['name'], paths[0])
         self.assertEqual([], warnings, warnings)
-
-    def test_labextensionpy_validate_bad(self):
-        # Break the metadata (correct file will still be copied)
-        self._inject_mock_extension('notebook')
-
-        paths = install_labextension_python('mockextension', user=True)
-
-        enable_labextension_python('mockextension')
-
-        meta = self._mock_extension_spec_meta()
-        del meta['name']
-
-        warnings = validate_labextension_python(meta, paths[0])
-        self.assertNotEqual([], warnings, warnings)
 
     def test_labextension_validate(self):
         # Break the metadata (correct file will still be copied)
@@ -447,7 +302,7 @@ class TestInstallNBExtension(TestCase):
         install_labextension_python('mockextension', user=True)
         enable_labextension_python('mockextension')
 
-        warnings = validate_labextension("_mockdestination/index")
+        warnings = validate_labextension("mockextension")
         self.assertEqual([], warnings, warnings)
 
     def test_labextension_validate_bad(self):

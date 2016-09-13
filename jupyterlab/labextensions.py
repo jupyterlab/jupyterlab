@@ -592,7 +592,6 @@ flags['s'] = flags['symlink']
 aliases = {
     "prefix" : "InstallLabExtensionApp.prefix",
     "labextensions" : "InstallLabExtensionApp.labextensions_dir",
-    "destination" : "InstallLabExtensionApp.destination",
 }
 
 class InstallLabExtensionApp(BaseLabExtensionApp):
