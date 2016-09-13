@@ -18,7 +18,7 @@ npm test
 npm run test:coverage
 
 # run the python tests
-nosetests -v jupyterlab
+cd jupyterlab && nosetests
 
 npm run build:examples
 npm run docs
