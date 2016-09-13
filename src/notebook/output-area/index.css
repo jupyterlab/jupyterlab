@@ -72,3 +72,14 @@ img.jp-mod-unconfined {
 .jp-Output-stdinPrompt {
   padding-right: 8px;
 }
+
+.jp-Output-prompt {
+  color: #D84315;
+  font-family: monospace;
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.4em;
+  font-size: 14px;
+  flex: 0 0 90px;
+  box-sizing: border-box;
+}
