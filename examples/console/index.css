@@ -20,11 +20,12 @@ body {
 }
 
 
-.p-CommandPalette {
+#main .p-CommandPalette {
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
   min-width: 300px;
 }
 
 
-.jp-Notebook-panel {
-  border-bottom: 1px solid #E0E0E0;
+#main .jp-ConsolePanel {
+  margin-top: 0;
 }
