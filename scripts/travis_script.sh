@@ -17,6 +17,9 @@ npm run build
 npm test
 npm run test:coverage
 
+# run the python tests
+nosetests -v jupyterlab
+
 npm run build:examples
 npm run docs
 cp jupyter-plugins-demo.gif docs
