@@ -276,7 +276,7 @@ namespace RenderMime {
     /**
      * The source data.
      */
-    source: string;
+    source: string | Object;
 
     /**
      * An optional url resolver.
