@@ -7,10 +7,8 @@
 import glob
 import os
 import sys
-import tarfile
-import zipfile
-from io import BytesIO, StringIO
-from os.path import basename, join as pjoin
+from io import StringIO
+from os.path import join as pjoin
 from subprocess import check_call
 from traitlets.tests.utils import check_help_all_output
 from unittest import TestCase
@@ -197,6 +195,18 @@ class TestInstallNBExtension(TestCase):
         assert check_labextension(f, user=True)
         assert check_labextension([f], user=True)
         assert not check_labextension([f, pjoin('dne', f)], user=True)
+
+    @dec.skip_win32
+    def test_install_symlink(self):
+        with TemporaryDirectory() as d:
+            f = u'ƒ.js'
+            src = pjoin(d, f)
+            touch(src)
+            install_labextension(d, self.name, symlink=True)
+        dest = pjoin(self.system_labext, self.name)
+        assert os.path.islink(dest)
+        link = os.readlink(dest)
+        self.assertEqual(link, d)
 
     def test_labextension_enable(self):
         with TemporaryDirectory() as d:
