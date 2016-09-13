@@ -19,7 +19,7 @@ npm run test:coverage
 
 # Run the python tests
 npm run build:serverextension
-cd jupyterlab && nosetests
+pushd jupyterlab && nosetests && popd
 
 npm run build:examples
 npm run docs
