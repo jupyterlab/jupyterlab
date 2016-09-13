@@ -572,15 +572,14 @@ describe('completer/widget', () => {
           container.node.style.height = '5000px';
           anchor.scrollTop = 0;
           model.original = request;
+          model.cursor = { start: 0, end: 0 };
           model.options = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
           let widget = new CompleterWidget(options);
           Widget.attach(widget, document.body);
           sendMessage(widget, WidgetMessage.UpdateRequest);
 
-          let top = parseInt(window.getComputedStyle(widget.node).top, 10);
           let offset = 200;
-          expect(top).to.be(coords.top - MAX_HEIGHT);
           anchor.scrollTop = offset;
           simulate(anchor, 'scroll');
 

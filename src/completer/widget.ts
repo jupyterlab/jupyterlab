@@ -398,7 +398,10 @@ class CompleterWidget extends Widget {
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
-    if (!this.model || !this._model.original) {
+    // This is an overly defensive test: `cursor` will always exist if
+    // `original` exists, except in contrived tests. But since it is possible
+    // to generate a runtime error, the check occurs here.
+    if (!this._model || !this._model.original || !this._model.cursor) {
       return;
     }
 
