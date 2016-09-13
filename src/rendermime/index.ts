@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -276,7 +280,7 @@ namespace RenderMime {
     /**
      * The source data.
      */
-    source: string | Object;
+    source: string | JSONObject;
 
     /**
      * An optional url resolver.
