@@ -78,6 +78,54 @@ export
 interface IPanel extends Panel {}
 const PANEL_CLASS = 'p-Panel';
 
+
+/**
+ * Determine whether node is equal to or a decendant of our panel, and that is does
+ * not belong to a nested drag panel.
+ */
+export
+function belongsToUs(node: HTMLElement, parentClass: string,
+                     parentNode: HTMLElement): boolean {
+  // Traverse DOM until drag panel encountered:
+  while (node && !node.classList.contains(parentClass)) {
+    node = node.parentElement;
+  }
+  return node && node === parentNode;
+}
+
+
+/**
+ * Find the direct child node of `parent`, which has `node` as a descendant.
+ * Alternatively, parent can be a collection of children.
+ *
+ * Returns null if not found.
+ *
+ * It is normally not recommended to overload this function, but to rather
+ * overload `findDragTarget`/`findDropTarget`.
+ */
+export
+function findChild(parent: HTMLElement | HTMLElement[], node: HTMLElement): HTMLElement {
+  // Work our way up the DOM to an element which has this node as parent
+  let child: HTMLElement = null;
+  let parentIsArray = Array.isArray(parent);
+  let isDirectChild = (child: HTMLElement): boolean => {
+    if (parentIsArray) {
+      return (parent as HTMLElement[]).indexOf(child) > -1;
+    } else {
+      return child.parentElement === parent;
+    }
+  };
+  while (node && node !== parent) {
+    if (isDirectChild(node)) {
+      child = node;
+      break;
+    }
+    node = node.parentElement;
+  }
+  return child;
+}
+
+
 /**
  * A widget class which allows the user to drop mime data onto it.
  *
@@ -287,40 +335,6 @@ abstract class DropWidget extends Widget {
     }
   }
 };
-
-
-
-/**
- * A  panel class which allows the user to drop mime data onto it.
- *
- * To complete the class, the following functions need to be implemented:
- *  - processDrop: Process pre-screened drop events
- *
- * The functionallity of the class can be extended by overriding the following
- * functions:
- *  - findDropTarget(): Override if anything other than the direct children
- *    of the widget's node are to be the drop targets.
- *
- * For maximum control, `evtDrop` can be overriden.
- */
-export
-abstract class DropPanel extends DropWidget implements IPanel {
-  /**
-   * Construct a drop panel.
-   */
-  constructor(options: DropPanel.IOptions={}) {
-    super(options);  // DropWidget ctor
-    this.addClass(PANEL_CLASS);
-    this.layout = Private.createLayout(options);
-  }
-
-  // Shims for applyMixins:
-  widgets: ISequence<Widget>;
-  addWidget(widget: Widget): void;
-  insertWidget(index: number, widget: Widget): void;
-}
-applyMixins(DropPanel, [Panel]);
-
 
 /**
  * An internal base class for implementing drag operations.
@@ -613,35 +627,6 @@ abstract class DragWidget extends DragDropWidgetBase {
 
 }
 
-/**
- * A panel which allows the user to initiate drag operations.
- *
- * To complete the class, the following functions need to be implemented:
- * - addMimeData: Adds mime data to new drag events
- *
- * The functionallity of the class can be extended by overriding the following
- * functions:
- *  - findDragTarget(): Override if anything other than the driect children
- *    of the widget's node are to be drag targets.
- */
-export
-abstract class DragPanel extends DragWidget implements IPanel {
-  /**
-   * Construct a drag panel.
-   */
-  constructor(options: DragPanel.IOptions={}) {
-    super(options);
-    this.addClass(PANEL_CLASS);
-    this.layout = Private.createLayout(options);
-  }
-
-  // Shims for applyMixins:
-  widgets: ISequence<Widget>;
-  addWidget(widget: Widget): void;
-  insertWidget(index: number, widget: Widget): void;
-}
-applyMixins(DragPanel, [Panel]);
-
 
 /**
  * A widget which allows the user to rearrange elements by drag and drop.
@@ -854,50 +839,68 @@ applyMixins(DragDropPanel, [Panel]);
 
 
 /**
- * Determine whether node is equal to or a decendant of our panel, and that is does
- * not belong to a nested drag panel.
+ * A  panel class which allows the user to drop mime data onto it.
+ *
+ * To complete the class, the following functions need to be implemented:
+ *  - processDrop: Process pre-screened drop events
+ *
+ * The functionallity of the class can be extended by overriding the following
+ * functions:
+ *  - findDropTarget(): Override if anything other than the direct children
+ *    of the widget's node are to be the drop targets.
+ *
+ * For maximum control, `evtDrop` can be overriden.
  */
 export
-function belongsToUs(node: HTMLElement, parentClass: string,
-                     parentNode: HTMLElement): boolean {
-  // Traverse DOM until drag panel encountered:
-  while (node && !node.classList.contains(parentClass)) {
-    node = node.parentElement;
+abstract class DropPanel extends DropWidget implements IPanel {
+  /**
+   * Construct a drop panel.
+   */
+  constructor(options: DropPanel.IOptions={}) {
+    super(options);  // DropWidget ctor
+    this.addClass(PANEL_CLASS);
+    this.layout = Private.createLayout(options);
   }
-  return node && node === parentNode;
+
+  // Shims for applyMixins:
+  widgets: ISequence<Widget>;
+  addWidget(widget: Widget): void;
+  insertWidget(index: number, widget: Widget): void;
 }
+applyMixins(DropPanel, [Panel]);
 
 
 /**
- * Find the direct child node of `parent`, which has `node` as a descendant.
- * Alternatively, parent can be a collection of children.
+ * A panel which allows the user to initiate drag operations.
  *
- * Returns null if not found.
+ * To complete the class, the following functions need to be implemented:
+ * - addMimeData: Adds mime data to new drag events
  *
- * It is normally not recommended to overload this function, but to rather
- * overload `findDragTarget`/`findDropTarget`.
+ * The functionallity of the class can be extended by overriding the following
+ * functions:
+ *  - findDragTarget(): Override if anything other than the driect children
+ *    of the widget's node are to be drag targets.
  */
 export
-function findChild(parent: HTMLElement | HTMLElement[], node: HTMLElement): HTMLElement {
-  // Work our way up the DOM to an element which has this node as parent
-  let child: HTMLElement = null;
-  let parentIsArray = Array.isArray(parent);
-  let isDirectChild = (child: HTMLElement): boolean => {
-    if (parentIsArray) {
-      return (parent as HTMLElement[]).indexOf(child) > -1;
-    } else {
-      return child.parentElement === parent;
-    }
-  };
-  while (node && node !== parent) {
-    if (isDirectChild(node)) {
-      child = node;
-      break;
-    }
-    node = node.parentElement;
+abstract class DragPanel extends DragWidget implements IPanel {
+  /**
+   * Construct a drag panel.
+   */
+  constructor(options: DragPanel.IOptions={}) {
+    super(options);
+    this.addClass(PANEL_CLASS);
+    this.layout = Private.createLayout(options);
   }
-  return child;
+
+  // Shims for applyMixins:
+  widgets: ISequence<Widget>;
+  addWidget(widget: Widget): void;
+  insertWidget(index: number, widget: Widget): void;
 }
+applyMixins(DragPanel, [Panel]);
+
+
+
 
 /**
  * The namespace for the `DropWidget` class statics.
