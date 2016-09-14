@@ -266,11 +266,6 @@ const SHORTCUTS = [
     keys: ['Ctrl Enter']
   },
   {
-    command: 'console:dismiss-completer',
-    selector: '.jp-ConsolePanel',
-    keys: ['Escape']
-  },
-  {
     command: 'console:toggle-inspectors',
     selector: '.jp-ConsolePanel',
     keys: ['Accel I']
