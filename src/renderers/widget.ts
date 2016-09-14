@@ -149,7 +149,7 @@ class RenderedHTML extends RenderedHTMLCommon {
   constructor(options: RenderMime.IRenderOptions) {
     super(options);
     this.addClass(HTML_CLASS);
-    let source = <string>options.source;
+    let source = options.source as string;
     if (options.sanitizer) {
       source = options.sanitizer.sanitize(source);
     }
@@ -179,7 +179,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
   constructor(options: RenderMime.IRenderOptions) {
     super(options);
     this.addClass(MARKDOWN_CLASS);
-    let parts = removeMath(<string>options.source);
+    let parts = removeMath(options.source as string);
     // Add the markdown content asynchronously.
     marked(parts['text'], (err, content) => {
       if (err) {
@@ -225,7 +225,7 @@ class RenderedLatex extends Widget {
    */
   constructor(options: RenderMime.IRenderOptions) {
     super();
-    this.node.textContent = <string>options.source;
+    this.node.textContent = options.source as string;
     this.addClass(LATEX_CLASS);
   }
 
@@ -256,7 +256,7 @@ class RenderedText extends Widget {
 
   constructor(options: RenderMime.IRenderOptions) {
     super();
-    let data = escape_for_html(<string>options.source);
+    let data = escape_for_html(options.source as string);
     let pre = document.createElement('pre');
     pre.innerHTML = ansi_to_html(data);
     this.node.appendChild(pre);
@@ -272,7 +272,7 @@ class RenderedJavascript extends Widget {
     super();
     let s = document.createElement('script');
     s.type = options.mimetype;
-    s.textContent = <string>options.source;
+    s.textContent = options.source as string;
     this.node.appendChild(s);
     this.addClass(JAVASCRIPT_CLASS);
   }
@@ -284,7 +284,7 @@ class RenderedSVG extends Widget {
 
   constructor(options: RenderMime.IRenderOptions) {
     super();
-    let source = <string>options.source;
+    let source = options.source as string;
     if (options.sanitizer) {
       source = options.sanitizer.sanitize(source);
     }
