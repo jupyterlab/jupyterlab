@@ -155,13 +155,11 @@ class CompleterWidget extends Widget {
    * Reset the widget.
    */
   reset(): void {
+    this._activeIndex = 0;
+    this._anchorPoint = 0;
     if (this._model) {
       this._model.reset();
     }
-    this._activeIndex = 0;
-    this._anchorPoint = 0;
-    this.hide();
-    this.visibilityChanged.emit(void 0);
   }
 
   /**
@@ -405,7 +403,7 @@ class CompleterWidget extends Widget {
       return;
     }
 
-    // Always use original coordinates.
+    // Always use original coordinates to calculate completer position.
     let coords = this._model.original.coords;
     let node = this.node;
     let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
@@ -425,8 +423,10 @@ class CompleterWidget extends Widget {
     let rect = node.getBoundingClientRect();
     let top = availableHeight - rect.height;
     let left = coords.left + (parseInt(borderLeftWidth, 10) || 0);
+    let { start, end } = this._model.cursor;
 
-    left -= chWidth * (this._model.cursor.end - this._model.cursor.start);
+    // Move completer to the start of the blob being completed.
+    left -= chWidth * (end - start);
     node.style.left = `${Math.ceil(left)}px`;
     node.style.top = `${Math.floor(top)}px`;
     node.style.width = 'auto';
