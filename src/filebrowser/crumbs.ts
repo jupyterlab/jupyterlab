@@ -14,10 +14,6 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  showDialog
-} from '../dialog';
-
-import {
   FileBrowserModel
 } from './model';
 
@@ -232,32 +228,8 @@ class BreadCrumbs extends Widget {
     let path = BREAD_CRUMB_PATHS[index];
 
     // Move all of the items.
-    let promises: Promise<any>[] = [];
     let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
-    for (let name of names) {
-      let newPath = path + name;
-      promises.push(this._model.rename(name, newPath).catch(error => {
-        if (error.xhr) {
-          error.message = `${error.xhr.status}: error.statusText`;
-        }
-        if (error.message.indexOf('409') !== -1) {
-          let options = {
-            title: 'Overwrite file?',
-            body: `"${newPath}" already exists, overwrite?`,
-            okText: 'OVERWRITE'
-          };
-          return showDialog(options).then(button => {
-            if (button.text === 'OVERWRITE') {
-              return this._model.deleteFile(newPath).then(() => {
-                return this._model.rename(name, newPath).then(() => {
-                  return this._model.refresh();
-                });
-              });
-            }
-          });
-        }
-      }));
-    }
+    let promises = utils.moveConditionalOverwrite(path, names, this._model);
     Promise.all(promises).then(
       () => this._model.refresh(),
       err => utils.showErrorMessage(this, 'Move Error', err)

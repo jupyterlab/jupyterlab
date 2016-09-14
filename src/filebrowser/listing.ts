@@ -53,7 +53,7 @@ import * as utils
   from './utils';
 
 import {
-  SELECTED_CLASS, showErrorMessage
+  SELECTED_CLASS, showErrorMessage, moveConditionalOverwrite
 } from './utils';
 
 
@@ -402,7 +402,7 @@ class DirListing extends Widget {
   download(): void {
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
-        this._model.download(item.path)
+        this._model.download(item.path);
       }
     }
   }
@@ -939,30 +939,8 @@ class DirListing extends Widget {
     let path = items[index].name + '/';
 
     // Move all of the items.
-    let promises: Promise<IContents.IModel>[] = [];
     let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
-    for (let name of names) {
-      let newPath = path + name;
-      promises.push(this._model.rename(name, newPath).catch(error => {
-        if (error.xhr) {
-          error.message = `${error.xhr.statusText} ${error.xhr.status}`;
-        }
-        if (error.message.indexOf('409') !== -1) {
-          let options = {
-            title: 'Overwrite file?',
-            body: `"${newPath}" already exists, overwrite?`,
-            okText: 'OVERWRITE'
-          };
-          return showDialog(options).then(button => {
-            if (button.text === 'OVERWRITE') {
-              return this._model.deleteFile(newPath).then(() => {
-                return this._model.rename(name, newPath);
-              });
-            }
-          });
-        }
-      }));
-    }
+    let promises = moveConditionalOverwrite(path, names, this._model);
     Promise.all(promises).then(
       () => this._model.refresh(),
       error => utils.showErrorMessage(this, 'Move Error', error)

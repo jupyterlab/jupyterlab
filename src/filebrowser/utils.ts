@@ -6,8 +6,16 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  IContents
+} from 'jupyter-js-services';
+
+import {
   okButton, showDialog
 } from '../dialog';
+
+import {
+  FileBrowserModel
+} from './model';
 
 export * from '../utils';
 
@@ -58,4 +66,40 @@ function showErrorMessage(host: Widget, title: string, error: Error): Promise<vo
     okText: 'DISMISS'
   };
   return showDialog(options).then(() => { /* no-op */ });
+}
+
+/**
+ * Create promises for renaming files, where the user is prompted to
+ * overwrite existing files.
+ */
+export
+function moveConditionalOverwrite(
+    destinationPath: string,
+    sourceNames: string[],
+    model: FileBrowserModel): Promise<IContents.IModel>[] {
+  let promises: Promise<IContents.IModel>[] = [];
+  for (let name of sourceNames) {
+    let newPath = destinationPath + name;
+    promises.push(model.rename(name, newPath).catch(error => {
+      if (error.xhr) {
+        const xhr = error.xhr as XMLHttpRequest;
+        error.message = `${xhr.statusText} ${xhr.status}`;
+      }
+      if (error.message.indexOf('409') !== -1) {
+        let options = {
+          title: 'Overwrite file?',
+          body: `"${newPath}" already exists, overwrite?`,
+          okText: 'OVERWRITE'
+        };
+        return showDialog(options).then(button => {
+          if (button.text === 'OVERWRITE') {
+            return model.deleteFile(newPath).then(() => {
+              return model.rename(name, newPath);
+            });
+          }
+        });
+      }
+    }));
+  }
+  return promises;
 }
