@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   Token
 } from 'phosphor/lib/core/token';
 
@@ -276,7 +280,7 @@ namespace RenderMime {
     /**
      * The source data.
      */
-    source: string;
+    source: string | JSONObject;
 
     /**
      * An optional url resolver.
