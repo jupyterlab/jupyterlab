@@ -16,7 +16,7 @@ import {
 } from 'phosphor/lib/dom/dragdrop';
 
 import {
-  DragPanel
+  DragDropPanel
 } from '../../../lib/common/dragpanel';
 
 const MIME_INDEX = 'application/vnd.jupyter.dragindex';
@@ -29,32 +29,37 @@ describe('common/dragpanel', () => {
     describe('#constructor', () => {
 
       it('should handle empty args', () => {
-        let widget = new DragPanel();
-        expect(widget).to.be.an(DragPanel);
+        let widget = new DragDropPanel();
+        expect(widget).to.be.an(DragDropPanel);
         expect(widget.acceptDropsFromExternalSource).to.be(false);
         expect(widget.childrenAreDragHandles).to.be(false);
       });
 
       it('should take an empty options object', () => {
-        let widget = new DragPanel({});
-        expect(widget).to.be.an(DragPanel);
+        let widget = new DragDropPanel({});
+        expect(widget).to.be.an(DragDropPanel);
         expect(widget.acceptDropsFromExternalSource).to.be(false);
         expect(widget.childrenAreDragHandles).to.be(false);
       });
 
       it('should take an options object with optional arguments', () => {
-        let widget = new DragPanel({
+        let widget = new DragDropPanel({
           childrenAreDragHandles: true,
           acceptDropsFromExternalSource: true
          });
-        expect(widget).to.be.an(DragPanel);
+        expect(widget).to.be.an(DragDropPanel);
         expect(widget.acceptDropsFromExternalSource).to.be(true);
         expect(widget.childrenAreDragHandles).to.be(true);
       });
 
-      it('should add the `jp-DragPanel` class', () => {
-        let widget = new DragPanel();
-        expect(widget.hasClass('jp-DragPanel')).to.be(true);
+      it('should add the `jp-DragWidget` class', () => {
+        let widget = new DragDropPanel();
+        expect(widget.hasClass('jp-DragWidget')).to.be(true);
+      });
+
+      it('should add the `jp-DropWidget` class', () => {
+        let widget = new DragDropPanel();
+        expect(widget.hasClass('jp-DropWidget')).to.be(true);
       });
 
     });
@@ -64,7 +69,7 @@ describe('common/dragpanel', () => {
       // Testing UI-based thing like drag and drop is tricky at best,
       // so we instead just test using protected API of code
 
-      class Override extends DragPanel {
+      class Override extends DragDropPanel {
         addMimeData(handle: HTMLElement, mimeData: MimeData): void {
           return super.addMimeData(handle, mimeData);
         }
@@ -260,7 +265,7 @@ describe('common/dragpanel', () => {
         });
 
         it('should return null when passed a handle that belongs to a different, non-nested drag panel', () => {
-          let otherDrag = new DragPanel();
+          let otherDrag = new DragDropPanel();
           otherDrag.addWidget(other);
           let target = simple.findDragTarget(other.node);
           expect(target).to.be(null);
@@ -292,14 +297,14 @@ describe('common/dragpanel', () => {
         });
 
         it('should return null when passed a handle that belongs to a different, non-nested drag panel', () => {
-          let otherDrag = new DragPanel();
+          let otherDrag = new DragDropPanel();
           otherDrag.addWidget(other);
           let target = simple.findDropTarget(other.node, mimeData);
           expect(target).to.be(null);
         });
 
         it('should return null when passed a mime bundle without needed mime type', () => {
-          let otherDrag = new DragPanel();
+          let otherDrag = new DragDropPanel();
           otherDrag.addWidget(other);
           let mimeData = new MimeData();
           mimeData.setData('text/plain', 'abc');

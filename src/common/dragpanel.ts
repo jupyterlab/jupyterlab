@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  Panel
+  Panel, PanelLayout
 } from 'phosphor/lib/ui/panel';
 
 import {
@@ -73,9 +73,10 @@ const MIME_INDEX = 'application/vnd.jupyter.dragindex';
 const DRAG_THRESHOLD = 5;
 
 
-// Turn Panel shape into interface
+// Turn Panel shape into interface, use for simulating mixins
 export
 interface IPanel extends Panel {}
+const PANEL_CLASS = 'p-Panel';
 
 /**
  * A widget class which allows the user to drop mime data onto it.
@@ -309,7 +310,8 @@ abstract class DropPanel extends DropWidget implements IPanel {
    */
   constructor(options: DropPanel.IOptions={}) {
     super(options);  // DropWidget ctor
-    Panel.apply(this, [options]);  // Panel constructor
+    this.addClass(PANEL_CLASS);
+    this.layout = Private.createLayout(options);
   }
 
   // Shims for applyMixins:
@@ -629,7 +631,8 @@ abstract class DragPanel extends DragWidget implements IPanel {
    */
   constructor(options: DragPanel.IOptions={}) {
     super(options);
-    Panel.apply(this, options);
+    this.addClass(PANEL_CLASS);
+    this.layout = Private.createLayout(options);
   }
 
   // Shims for applyMixins:
@@ -796,13 +799,15 @@ defineSignal(DragDropWidget.prototype, 'moved');
  *
  * For maximum control, `startDrag` and `evtDrop` can be overriden.
  */
+export
 class DragDropPanel extends DragDropWidget implements IPanel {
   /**
    * Construct a drag and drop panel.
    */
   constructor(options: DragDropPanel.IOptions={}) {
     super(options);
-    Panel.apply(this, options);
+    this.addClass(PANEL_CLASS);
+    this.layout = Private.createLayout(options);
   }
 
   // Shims for applyMixins:
@@ -881,7 +886,7 @@ function findChild(parent: HTMLElement | HTMLElement[], node: HTMLElement): HTML
     if (parentIsArray) {
       return (parent as HTMLElement[]).indexOf(child) > -1;
     } else {
-      return child.parentElement === node.parentElement;
+      return child.parentElement === parent;
     }
   };
   while (node && node !== parent) {
@@ -1027,5 +1032,12 @@ export
 namespace DragDropPanel {
   export
   interface IOptions extends DragDropWidget.IOptions, Panel.IOptions {
+  }
+}
+
+namespace Private {
+  export
+  function createLayout(options: Panel.IOptions) {
+    return options.layout || new PanelLayout();
   }
 }
