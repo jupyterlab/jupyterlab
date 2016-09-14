@@ -195,7 +195,7 @@ abstract class DropWidget extends Widget {
    *
    * This function is called after checking:
    *  - That the `dropTarget` is a valid drop target
-   *  - The value of `event.source` if `acceptDropsFromExternalSource` is true
+   *  - The value of `event.source` if `acceptDropsFromExternalSource` is false
    *
    * The default implementation assumes calling `getIndexOfChildNode` with
    * `dropTarget` will be valid. It will call `move` with that index as `to`,
@@ -713,7 +713,7 @@ abstract class DragDropWidget extends DragDropWidgetBase {
    *
    * This function is called after checking:
    *  - That the `dropTarget` is a valid drop target
-   *  - The value of `event.source` if `acceptDropsFromExternalSource` is true
+   *  - The value of `event.source` if `acceptDropsFromExternalSource` is false
    *
    * The default implementation assumes calling `getIndexOfChildNode` with
    * `dropTarget` will be valid. It will call `move` with that index as `to`,

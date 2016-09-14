@@ -127,7 +127,7 @@ class BreadCrumbs extends DropWidget {
    *
    * This function is called after checking:
    *  - That the `dropTarget` is a valid drop target
-   *  - The value of `event.source` if `acceptDropsFromExternalSource` is true
+   *  - The value of `event.source` if `acceptDropsFromExternalSource` is false
    *
    * Overrides method from `DropPanel`.
    */
