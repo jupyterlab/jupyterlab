@@ -5,13 +5,13 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-DragPanel-dragHandle{
+.jp-DragWidget-dragHandle{
   background:
     radial-gradient(rgba(255,255,255, .6) 30%, transparent 31%) 0 0,
     radial-gradient(transparent 19%,rgba(0,0,0,.4) 20%, transparent 50%) 0 1px;
   background-size:6px 6px;
 }
 
-.jp-DragPanel .p-Widget.jp-mod-dropTarget {
+.p-Panel.jp-DragWidget .p-Widget.jp-mod-dropTarget {
   border-top: 1px dashed black;
 }
