@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from 'phosphor/lib/core/token';
-
-import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
+
+import {
+  Token
+} from 'phosphor/lib/core/token';
 
 import {
   Widget
