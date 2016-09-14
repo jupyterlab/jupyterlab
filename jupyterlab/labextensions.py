@@ -6,21 +6,11 @@
 
 from __future__ import print_function
 
-import glob
-import json
 import os
 import shutil
 import sys
 import tarfile
-import zipfile
-from os.path import basename, join as pjoin, normpath
-
-try:
-    from urllib.parse import urlparse  # Py3
-    from urllib.request import urlretrieve
-except ImportError:
-    from urlparse import urlparse
-    from urllib import urlretrieve
+from os.path import join as pjoin, normpath
 
 from jupyter_core.paths import (
     jupyter_data_dir, jupyter_config_dir, jupyter_config_path,
@@ -28,7 +18,6 @@ from jupyter_core.paths import (
 )
 from ipython_genutils.path import ensure_dir_exists
 from ipython_genutils.py3compat import string_types, cast_unicode_py2
-from ipython_genutils.tempdir import TemporaryDirectory
 from . import __version__
 
 from traitlets.config.manager import BaseJSONConfigManager
@@ -38,7 +27,6 @@ from tornado.log import LogFormatter
 
 from . import (
     get_labextension_manifest_data_by_folder,
-    get_labextension_manifest_data_by_name
 )
 
 # Constants for pretty print extension listing function.
@@ -525,7 +513,7 @@ def validate_labextension_folder(name, full_dest, logger=None):
 # Applications
 #----------------------------------------------------------------------
 
-from traitlets import Bool, Unicode, Any
+from traitlets import Bool, Unicode
 from jupyter_core.application import JupyterApp
 
 _base_flags = {}
