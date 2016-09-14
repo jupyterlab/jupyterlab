@@ -25,7 +25,7 @@ function validateEntryPoint(entryPoint) {
     data = [data];
   }
   var plugins = [];
-  for (let i = 0; i < data.length; i++) {
+  for (var i = 0; i < data.length; i++) {
     var plugin = data[i];
     if (!plugin.hasOwnProperty('id') ||
         !typeof(plugin['activate']) == 'function') {
