@@ -124,6 +124,8 @@ def install_labextension(path, name='', overwrite=False, symlink=False,
         Specify absolute path of labextensions directory explicitly.
     logger : Jupyter logger [optional]
         Logger instance to use
+    sys_prefix : bool [default: False]
+        Install into the sys.prefix, i.e. environment
     """
 
     # the actual path to which we eventually installed
@@ -223,11 +225,13 @@ def uninstall_labextension(name, user=False, sys_prefix=False, prefix=None,
     name: str
         The name of the labextension.
     user : bool [default: False]
-        Whether to install to the user's labextensions directory.
-        Otherwise do a system-wide install (e.g. /usr/local/share/jupyter/labextensions).
+        Whether to uninstall from the user's labextensions directory.
+        Otherwise do a system-wide uninstall (e.g. /usr/local/share/jupyter/labextensions).
+    sys_prefix : bool [default: False]
+        Uninstall from the sys.prefix, i.e. environment
     prefix : str [optional]
-        Specify install prefix, if it should differ from default (e.g. /usr/local).
-        Will install to ``<prefix>/share/jupyter/labextensions``
+        Specify prefix, if it should differ from default (e.g. /usr/local).
+        Will uninstall from ``<prefix>/share/jupyter/labextensions``
     labextensions_dir : str [optional]
         Specify absolute path of labextensions directory explicitly.
     logger : Jupyter logger [optional]
