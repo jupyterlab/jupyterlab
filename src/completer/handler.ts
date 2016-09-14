@@ -33,6 +33,7 @@ class CellCompleterHandler implements IDisposable {
   constructor(completer: CompleterWidget) {
     this._completer = completer;
     this._completer.selected.connect(this.onCompletionSelected, this);
+    this._completer.visibilityChanged.connect(this.onVisibilityChanged, this);
   }
 
   /**
@@ -155,6 +156,18 @@ class CellCompleterHandler implements IDisposable {
       return;
     }
     this.makeRequest(request);
+  }
+
+
+  /**
+   * Handle a visiblity change signal from a completer widget.
+   */
+  protected onVisibilityChanged(completer: CompleterWidget): void {
+    if (completer.isDisposed || completer.isHidden) {
+      if (this._activeCell) {
+        this._activeCell.activate();
+      }
+    }
   }
 
   /**
