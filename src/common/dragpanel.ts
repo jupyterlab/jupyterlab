@@ -139,7 +139,7 @@ function findChild(parent: HTMLElement | HTMLElement[], node: HTMLElement): HTML
 export
 abstract class DropWidget extends Widget {
   /**
-   * Construct a drag widget.
+   * Construct a drop widget.
    */
   constructor(options: DropWidget.IOptions={}) {
     super(options);
@@ -149,11 +149,10 @@ abstract class DropWidget extends Widget {
   }
 
   /**
-   * Whether the list should accept drops from an external source.
-   * Defaults to false.
-   *
-   * This option only makes sense to set for subclasses that accept drops from
-   * external sources.
+   * Whether the widget should accept drops from an external source,
+   * or only accept drops from itself.
+   * Defaults to false, which will disallow all drops unless widget
+   * is also a drag widget.
    */
   acceptDropsFromExternalSource: boolean;
 
@@ -165,7 +164,7 @@ abstract class DropWidget extends Widget {
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
+   * called in response to events on the drop widget's node. It should
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
@@ -193,12 +192,6 @@ abstract class DropWidget extends Widget {
    * This function is called after checking:
    *  - That the `dropTarget` is a valid drop target
    *  - The value of `event.source` if `acceptDropsFromExternalSource` is false
-   *
-   * The default implementation assumes calling `getIndexOfChildNode` with
-   * `dropTarget` will be valid. It will call `move` with that index as `to`,
-   * and the index stored in the mime data as `from`.
-   *
-   * Override this if you need to handle other mime data than the default.
    */
   protected abstract processDrop(dropTarget: HTMLElement, event: IDragEvent): void;
 
@@ -325,7 +318,6 @@ abstract class DropWidget extends Widget {
    * This function assumes there are only one active drop target
    */
   private _clearDropTarget(): void {
-    // Clear drop target:
     let elements = this.node.getElementsByClassName(DROP_TARGET_CLASS);
     if (elements.length) {
       (elements[0] as HTMLElement).classList.remove(DROP_TARGET_CLASS);
@@ -335,17 +327,6 @@ abstract class DropWidget extends Widget {
 
 /**
  * An internal base class for implementing drag operations.
- *
- * To complete the class, the following functions need to be implemented:
- * - processDrop: Process pre-screened drop events
- * - addMimeData: Adds mime data to new drag events
- *
- * The functionallity of the class can be extended by overriding the following
- * functions:
- *  - findDropTarget(): Override if anything other than the direct children
- *    of the widget's node are to be the drop targets.
- *  - findDragTarget(): Override if anything other than the driect children
- *    of the widget's node are to be drag targets.
  */
 export
 abstract class DragDropWidgetBase extends DropWidget {
@@ -382,7 +363,7 @@ abstract class DragDropWidgetBase extends DropWidget {
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
+   * called in response to events on the drag widget's node. It should
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
@@ -590,13 +571,25 @@ abstract class DragDropWidgetBase extends DropWidget {
 /**
  * A widget which allows the user to initiate drag operations.
  *
+ * Any descendant element with the drag handle class `'jp-mod-dragHandle'`
+ * will serve as a handle that can be used for dragging. If DragWidgets are
+ * nested, handles will only belong to the closest parent DragWidget. For
+ * convenience, the functions `makeHandle`, `unmakeHandle` and
+ * `createDefaultHandle` can be used to indicate which elements should be
+ * made handles. `createDefaultHandle` will create a new element as a handle
+ * with a default styling class applied. Optionally, `childrenAreDragHandles`
+ * can be set to indicate that all direct children are themselve drag handles.
+ *
  * To complete the class, the following functions need to be implemented:
  * - addMimeData: Adds mime data to new drag events
  *
  * The functionallity of the class can be extended by overriding the following
  * functions:
- *  - findDragTarget(): Override if anything other than the driect children
+ *  - findDragTarget(): Override if anything other than the direct children
  *    of the widget's node are to be drag targets.
+ *  - getDragImage: Override to change the drag image (the default is a
+ *    copy of the drag target).
+ *  - onDragComplete(): Callback on drag source when a drag has completed.
  */
 export
 abstract class DragWidget extends DragDropWidgetBase {
@@ -637,25 +630,28 @@ abstract class DragWidget extends DragDropWidgetBase {
  * with a default styling class applied. Optionally, `childrenAreDragHandles`
  * can be set to indicate that all direct children are themselve drag handles.
  *
+ * To complete the class, the following functions need to be implemented:
+ * - getIndexOfChildNode(): Returns a key representing the drag and drop targets
+ * - move(): Called when a widget should be moved as a consequence of an
+ *   internal drag event.
+ *
  * The functionallity of the class can be extended by overriding the following
  * functions:
- *  - move(): Override to add custom processing of move command, for example
- *    by performing the move in a model instead of on widgets. A possible
- *    alternative to overriding `move` is to connect to the `moved` signal.
  *  - addMimeData: Override to add other drag data to the mime bundle.
  *    This is often a necessary step for allowing dragging to external
  *    drop targets.
  *  - processDrop: Override if you need to handle other mime data than the
  *    default. For allowing drops from external sources, the field
  *    `acceptDropsFromExternalSource` should be set as well.
+ *  - findDragTarget(): Override if anything other than the direct children
+ *    of the widget's node are to be drag targets.
+ *  - findDropTarget(): Override if anything other than the direct children
+ *    of the widget's node are to be the drop targets.
  *  - getDragImage: Override to change the drag image (the default is a
- *    copy of the element being dragged).
+ *    copy of the drag target).
+ *  - onDragComplete(): Callback on drag source when a drag has completed.
  *
- * To drag and drop other things than all direct children, the following functions
- * should be overriden: `findDragTarget`, `findDropTarget` and possibly
- * `getIndexOfChildNode` and `move` to allow for custom to/from keys.
- *
- * For maximum control, `startDrag` and `evtDrop` can be overriden.
+ * For maximum control, `startDrag` and `evtDrop` can also be overriden.
  */
 export
 abstract class DragDropWidget extends DragDropWidgetBase {
@@ -750,7 +746,10 @@ defineSignal(DragDropWidget.prototype, 'moved');
 
 
 /**
- * A widget which allows the user to rearrange elements by drag and drop.
+ * A widget which allows the user to rearrange widgets in the panel by
+ * drag and drop. An internal drag and drop of a widget will cause it
+ * to be inserted (by `insertWidget`) in the index of the widget it was
+ * dropped on.
  *
  * Any descendant element with the drag handle class `'jp-mod-dragHandle'`
  * will serve as a handle that can be used for dragging. If DragWidgets are
@@ -763,17 +762,22 @@ defineSignal(DragDropWidget.prototype, 'moved');
  *
  * The functionallity of the class can be extended by overriding the following
  * functions:
- *  - move(): Override to add custom processing of move command, for example
- *    by performing the move in a model instead of on widgets. A possible
- *    alternative to overriding `move` is to connect to the `moved` signal.
  *  - addMimeData: Override to add other drag data to the mime bundle.
  *    This is often a necessary step for allowing dragging to external
  *    drop targets.
  *  - processDrop: Override if you need to handle other mime data than the
  *    default. For allowing drops from external sources, the field
  *    `acceptDropsFromExternalSource` should be set as well.
+ *  - findDragTarget(): Override if anything other than the direct children
+ *    of the widget's node are to be drag targets.
+ *  - findDropTarget(): Override if anything other than the direct children
+ *    of the widget's node are to be the drop targets.
+ *  - getIndexOfChildNode(): Override to change the key used to represent
+ *    the drag and drop target (default is index of child widget).
+ *  - move(): Override to change how a move is handled.
  *  - getDragImage: Override to change the drag image (the default is a
- *    copy of the element being dragged).
+ *    copy of the drag target).
+ *  - onDragComplete(): Callback on drag source when a drag has completed.
  *
  * To drag and drop other things than all direct children, the following functions
  * should be overriden: `findDragTarget`, `findDropTarget` and possibly
@@ -801,8 +805,9 @@ class DragDropPanel extends DragDropWidget implements IPanel {
    * Called when a widget should be moved as a consequence of an internal drag event.
    *
    * The default implementation assumes the keys `from` and `to` are numbers
-   * indexing the drag panels direct children. It then moves the direct child as
-   * specified by these keys, then emits the `moved` signal.
+   * indexing the drag panel's direct children. It then moves the child at the
+   * `to` key to the location of the `from` key.
+   * Finally, it emits the `moved` signal with the same keys.
    */
   protected move(from: any, to: any): void {
     if (to !== from) {
@@ -818,7 +823,7 @@ class DragDropPanel extends DragDropWidget implements IPanel {
   /**
    * Returns a key used to represent the child node.
    *
-   * The default implementation returns the index of node in `layout.widgets`.
+   * The default implementation returns the index of node in `this.widgets`.
    *
    * Returns null if not found.
    */
@@ -836,7 +841,7 @@ applyMixins(DragDropPanel, [Panel]);
 
 
 /**
- * A  panel class which allows the user to drop mime data onto it.
+ * A panel class which allows the user to drop mime data onto it.
  *
  * To complete the class, the following functions need to be implemented:
  *  - processDrop: Process pre-screened drop events
@@ -870,13 +875,25 @@ applyMixins(DropPanel, [Panel]);
 /**
  * A panel which allows the user to initiate drag operations.
  *
+ * Any descendant element with the drag handle class `'jp-mod-dragHandle'`
+ * will serve as a handle that can be used for dragging. If DragWidgets are
+ * nested, handles will only belong to the closest parent DragWidget. For
+ * convenience, the functions `makeHandle`, `unmakeHandle` and
+ * `createDefaultHandle` can be used to indicate which elements should be
+ * made handles. `createDefaultHandle` will create a new element as a handle
+ * with a default styling class applied. Optionally, `childrenAreDragHandles`
+ * can be set to indicate that all direct children are themselve drag handles.
+ *
  * To complete the class, the following functions need to be implemented:
  * - addMimeData: Adds mime data to new drag events
  *
  * The functionallity of the class can be extended by overriding the following
  * functions:
- *  - findDragTarget(): Override if anything other than the driect children
+ *  - findDragTarget(): Override if anything other than the direct children
  *    of the widget's node are to be drag targets.
+ *  - getDragImage: Override to change the drag image (the default is a
+ *    copy of the drag target).
+ *  - onDragComplete(): Callback on drag source when a drag has completed.
  */
 export
 abstract class DragPanel extends DragWidget implements IPanel {
@@ -1035,6 +1052,9 @@ namespace DragDropPanel {
   }
 }
 
+/**
+ * The namespace for private statics
+ */
 namespace Private {
   export
   function createLayout(options: Panel.IOptions) {
