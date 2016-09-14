@@ -99,9 +99,6 @@ function belongsToUs(node: HTMLElement, parentClass: string,
  * Alternatively, parent can be a collection of children.
  *
  * Returns null if not found.
- *
- * It is normally not recommended to overload this function, but to rather
- * overload `findDragTarget`/`findDropTarget`.
  */
 export
 function findChild(parent: HTMLElement | HTMLElement[], node: HTMLElement): HTMLElement {
