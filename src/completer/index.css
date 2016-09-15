@@ -34,7 +34,7 @@
 }
 
 
-.jp-Completer-item.jp-mod-active {
+.jp-Completer-item:hover, .jp-Completer-item.jp-mod-active {
   background: #BFBFBF;
 }
 
