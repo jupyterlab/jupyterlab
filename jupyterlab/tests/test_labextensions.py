@@ -66,7 +66,7 @@ def build_extension():
     check_call(cmd.split(), shell=shell, cwd=cwd)
 
 
-class TestInstallNBExtension(TestCase):
+class TestInstallLabExtension(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -154,22 +154,15 @@ class TestInstallNBExtension(TestCase):
         )
     
     def test_create_labextensions_user(self):
-        with TemporaryDirectory() as td:
-            install_labextension(self.src, self.name, user=True)
-            self.assert_installed(
-                pjoin(self.name),
-                user=True
-            )
+        install_labextension(self.src, self.name, user=True)
+        self.assert_installed(self.name, user=True)
     
     def test_create_labextensions_system(self):
         with TemporaryDirectory() as td:
-            self.system_labext = pjoin(td, u'labextensions')
             with patch.object(labextensions, 'SYSTEM_JUPYTER_PATH', [td]):
+                self.system_labext = pjoin(td, u'labextensions')
                 install_labextension(self.src, self.name, user=False)
-                self.assert_installed(
-                    pjoin(self.name),
-                    user=False
-                )
+                self.assert_installed(self.name, user=False)
     
     def test_install_labextension(self):
         with self.assertRaises(TypeError):
@@ -227,7 +220,7 @@ class TestInstallNBExtension(TestCase):
         
         config_dir = os.path.join(_get_config_dir(user=True), 'labconfig')
         cm = BaseJSONConfigManager(config_dir=config_dir)
-        enabled = cm.get('jupytlab_config').get('LabApp', {}).get('labextensions', {}).get(self.name, False)
+        enabled = cm.get('jupyterlab_config').get('LabApp', {}).get('labextensions', {}).get(self.name, False)
         assert not enabled
         
 
