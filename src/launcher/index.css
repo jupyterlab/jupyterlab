@@ -1,0 +1,137 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-Launcher {
+  position: absolute;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  top: 0px;
+  left: 0px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+.jp-Launcher-dialog {
+  padding-bottom: 12px;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 7px 1px #BDBDBD;
+}
+
+
+.jp-Launcher-logo {
+  flex: 0 0 50px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  background-color: var(--jp-layout-color1);
+  background-size: 232px 50px;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-top: 20px;
+
+}
+
+.jp-Launcher-subtitle {
+  background-color: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size2);
+  width: 100%;
+  margin-top: 4px;
+  font-weight: 300;
+}
+
+.jp-Launcher-header {
+  padding-top: 16px;
+  padding-bottom: 4px;
+}
+
+
+.jp-Launcher-body {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+
+.jp-Launcher-column {
+  padding-left: 20px;
+  padding-right: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.jp-Launcher-image {
+  flex: 0 0 auto;
+  min-height: 72px;
+  min-width: 56px;
+  max-width: 56px;
+  background-size: 56px 72px;
+  background-repeat: no-repeat;
+
+}
+
+.jp-Launcher-image:hover {
+  cursor: pointer;
+}
+
+.jp-Launcher-text {
+  flex: 0 0 auto;
+  padding-top: 8px;
+}
+
+.jp-Launcher-tour {
+    margin-top: 14px;
+    height: 14px;
+    width: 100%;
+    cursor: pointer;
+    padding-bottom: 14px;
+    border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+    background-position: top center;
+    background-repeat: no-repeat;
+}
+
+.jp-Launcher-folder {
+  margin-right: 0;
+  float: left;
+  display: inline-block;
+  background-origin: content-box;
+  background-repeat: no-repeat;
+  clear: none;
+  padding-bottom: 2px;
+  height: 12px;
+  width: 12px;
+}
+
+.jp-Launcher-path {
+    padding-left: 8px;
+    color: var(--jp-ui-font-color2);
+}
+
+.jp-Launcher-cwd {
+    float: left;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    margin-right: auto;
+}
+
+

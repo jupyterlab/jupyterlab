@@ -134,7 +134,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
   cwd.appendChild(path);
   dialog.appendChild(cwd);
 
-  app.commands.addCommand('jupyterlab-launcher:show', {
+  app.commands.addCommand('jupyterlab-landing:show', {
     label: 'Show Launcher',
     execute: () => {
       if (!widget.isAttached) {
@@ -146,7 +146,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
   });
 
   palette.addItem({
-    command: 'jupyterlab-launcher:show',
+    command: 'jupyterlab-landing:show',
     category: 'Help'
   });
 
