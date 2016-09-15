@@ -79,7 +79,6 @@ const cmdIds = {
   lineWrap: 'editor:line-wrap',
   matchBrackets: 'editor:match-brackets',
   vimMode: 'editor:vim-mode',
-  defaultMode: 'editor:default-mode',
   closeAll: 'editor:close-all',
   changeTheme: 'editor:change-theme'
 };
@@ -113,7 +112,6 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     cmdIds.lineNumbers,
     cmdIds.lineWrap,
     cmdIds.matchBrackets,
-    cmdIds.defaultMode,
     cmdIds.vimMode,
     cmdIds.closeAll,
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
@@ -138,13 +136,9 @@ function addCommands(app: JupyterLab, tracker: IEditorTracker): void {
     execute: () => { toggleMatchBrackets(tracker); },
     label: 'Toggle Match Brackets',
   });
-  app.commands.addCommand(cmdIds.defaultMode, {
-    execute: () => { toggleDefault(tracker); },
-    label: 'Vim Mode Off'
-  });
   app.commands.addCommand(cmdIds.vimMode, {
     execute: () => { toggleVim(tracker); },
-    label: 'Vim Mode'
+    label: 'Toggle Vim Mode'
   });
   app.commands.addCommand(cmdIds.closeAll, {
     execute: () => { closeAllFiles(tracker); },
@@ -184,20 +178,13 @@ function toggleMatchBrackets(tracker: IEditorTracker) {
 }
 
 /**
- * Turns on the editor's vim mode
+ * Toggle the editor's vim mode
  */
 function toggleVim(tracker: IEditorTracker) {
   each(tracker.widgets, widget => {
-    widget.editor.setOption('keyMap', 'vim');
-  });
-}
-
-/**
- * Sets the editor to default editing mode
- */
-function toggleDefault(tracker: IEditorTracker) {
-  each(tracker.widgets, widget => {
-    widget.editor.setOption('keyMap', 'default');
+    widget.editor.setOption('keyMap',
+                            (widget.editor.getOption('keyMap')==='vim'
+                             ? 'default' : 'vim'));
   });
 }
 
@@ -227,7 +214,6 @@ function createMenu(app: JupyterLab, tracker: IEditorTracker): Menu {
   settings.addItem({ command: cmdIds.lineNumbers });
   settings.addItem({ command: cmdIds.lineWrap });
   settings.addItem({ command: cmdIds.matchBrackets });
-  settings.addItem({ command: cmdIds.defaultMode });
   settings.addItem({ command: cmdIds.vimMode });
 
   commands.addCommand(cmdIds.changeTheme, {
