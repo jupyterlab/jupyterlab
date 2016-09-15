@@ -58,12 +58,7 @@ class ImageWidget extends Widget {
     this._scale = value;
     let scaleNode = this.node.querySelector('div') as HTMLElement;
     let transform: string;
-    let percentage = ((value - 1) / 2) * 100 / value;
-    if (value > 1) {
-      transform = `scale(${value}) translate(${percentage}%, ${percentage}%)`;
-    } else {
-      transform = `scale(${value}) translateY(${percentage}%)`;
-    }
+    transform = `scale(${value})`;
     scaleNode.style.transform = transform;
     this.update();
   }
