@@ -254,7 +254,7 @@ class CompleterWidget extends Widget {
     for (let item of items) {
       let li = this._renderer.createItemNode(item);
       // Set the raw, un-marked up value as a data attribute.
-      li.dataset['value'] = item.raw;
+      li.setAttribute('data-value', item.raw);
       node.appendChild(li);
     }
 
@@ -361,7 +361,7 @@ class CompleterWidget extends Widget {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        this.selected.emit(target.dataset['value']);
+        this.selected.emit(target.getAttribute('data-value'));
         this.reset();
         return;
       }
