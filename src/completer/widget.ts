@@ -308,7 +308,10 @@ class CompleterWidget extends Widget {
             event.preventDefault();
             event.stopPropagation();
             event.stopImmediatePropagation();
-            if (this._populateSubset()) {
+            this._model.subsetMatch = true;
+            let populated = this._populateSubset();
+            this.model.subsetMatch = false;
+            if (populated) {
               return;
             }
             this._selectActive();
