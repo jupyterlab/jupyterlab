@@ -191,6 +191,7 @@ class CompleterModel implements ICompleterModel {
     if (newValue && newValue.length) {
       this._options = [];
       this._options.push(...newValue);
+      this._subsetMatch = true;
     } else {
       this._options = null;
     }
@@ -406,7 +407,7 @@ class CompleterModel implements ICompleterModel {
     this._options = null;
     this._original = null;
     this._query = '';
-    this._subsetMatch = true;
+    this._subsetMatch = false;
   }
 
   private _current: ITextChange = null;
@@ -415,7 +416,7 @@ class CompleterModel implements ICompleterModel {
   private _options: string[] = null;
   private _original: ICompletionRequest = null;
   private _query = '';
-  private _subsetMatch = true;
+  private _subsetMatch = false;
 }
 
 
