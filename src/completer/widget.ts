@@ -155,9 +155,7 @@ class CompleterWidget extends Widget {
    * Reset the widget.
    */
   reset(): void {
-    this._activeIndex = 0;
-    this._anchorPoint = 0;
-    this._firstLoad = true;
+    this._reset();
     if (this._model) {
       this._model.reset();
     }
@@ -234,6 +232,7 @@ class CompleterWidget extends Widget {
 
     // If there are no items, reset and bail.
     if (!items || !items.length) {
+      this._reset();
       this.hide();
       this.visibilityChanged.emit(void 0);
       return;
@@ -406,6 +405,15 @@ class CompleterWidget extends Widget {
   }
 
   /**
+   * Reset the internal flags to defaults.
+   */
+  private _reset(): void {
+    this._activeIndex = 0;
+    this._anchorPoint = 0;
+    this._firstLoad = true;
+  }
+
+  /**
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
@@ -457,9 +465,10 @@ class CompleterWidget extends Widget {
   private _selectActive(): void {
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     if (!active) {
+      this._reset();
       return;
     }
-    this.selected.emit(active.dataset['value']);
+    this.selected.emit(active.getAttribute('data-value'));
     this.reset();
   }
 
