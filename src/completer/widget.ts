@@ -269,9 +269,9 @@ class CompleterWidget extends Widget {
 
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
-    if (this._firstLoad) {
-      this._firstLoad = false;
+    if (this._model.subsetMatch) {
       this._populateSubset();
+      this.model.subsetMatch = false;
     }
   }
 
@@ -410,7 +410,6 @@ class CompleterWidget extends Widget {
   private _reset(): void {
     this._activeIndex = 0;
     this._anchorPoint = 0;
-    this._firstLoad = true;
   }
 
   /**
@@ -475,7 +474,6 @@ class CompleterWidget extends Widget {
   private _anchor: HTMLElement = null;
   private _anchorPoint = 0;
   private _activeIndex = 0;
-  private _firstLoad = true;
   private _model: ICompleterModel = null;
   private _renderer: CompleterWidget.IRenderer = null;
 }

@@ -117,6 +117,11 @@ interface ICompleterModel extends IDisposable {
   cursor: ICursorSpan;
 
   /**
+   * A flag that is true when the model value was modified by a subset match.
+   */
+  subsetMatch: boolean;
+
+  /**
    * The list of visible items in the completer menu.
    */
   items: ICompleterItem[];
@@ -283,6 +288,16 @@ class CompleterModel implements ICompleterModel {
   }
 
   /**
+   * A flag that is true when the model value was modified by a subset match.
+   */
+  get subsetMatch(): boolean {
+    return this._subsetMatch;
+  }
+  set subsetMatch(newValue: boolean) {
+    this._subsetMatch = newValue;
+  }
+
+  /**
    * Get whether the model is disposed.
    */
   get isDisposed(): boolean {
@@ -306,6 +321,12 @@ class CompleterModel implements ICompleterModel {
    * Handle a text change.
    */
   handleTextChange(change: ITextChange): void {
+    // When the completer detects a common subset prefix for all options,
+    // it updates the model and sets the model source to that value, but this
+    // text change should be ignored.
+    if (this.subsetMatch) {
+      return;
+    }
     let line = change.newValue.split('\n')[change.line];
     // If last character entered is not whitespace, update completion.
     if (line[change.ch - 1] && line[change.ch - 1].match(/\S/)) {
@@ -381,18 +402,20 @@ class CompleterModel implements ICompleterModel {
    */
   private _reset(): void {
     this._current = null;
-    this._original = null;
-    this._options = null;
     this._cursor = null;
+    this._options = null;
+    this._original = null;
     this._query = '';
+    this._subsetMatch = true;
   }
 
+  private _current: ITextChange = null;
+  private _cursor: ICursorSpan = null;
   private _isDisposed = false;
   private _options: string[] = null;
   private _original: ICompletionRequest = null;
-  private _current: ITextChange = null;
   private _query = '';
-  private _cursor: ICursorSpan = null;
+  private _subsetMatch = true;
 }
 
 
