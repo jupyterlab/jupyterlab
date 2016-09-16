@@ -588,7 +588,7 @@ namespace Private {
   function itemValues(items: NodeList): string[] {
     let values: string[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
-      values.push((items[i] as HTMLElement).dataset['value']);
+      values.push((items[i] as HTMLElement).getAttribute('data-value'));
     }
     return values;
   }
