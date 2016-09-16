@@ -157,6 +157,7 @@ class CompleterWidget extends Widget {
   reset(): void {
     this._activeIndex = 0;
     this._anchorPoint = 0;
+    this._firstLoad = true;
     if (this._model) {
       this._model.reset();
     }
@@ -228,6 +229,7 @@ class CompleterWidget extends Widget {
     if (!model) {
       return;
     }
+
     let items = model.items;
 
     // If there are no items, reset and bail.
@@ -236,15 +238,19 @@ class CompleterWidget extends Widget {
       this.visibilityChanged.emit(void 0);
       return;
     }
+
     // If there is only one item, signal and bail.
     if (items.length === 1) {
       this.selected.emit(items[0].raw);
       this.reset();
       return;
     }
+
+    // Clear the node.
     let node = this.node;
     node.textContent = '';
 
+    // Populate the completer items.
     for (let item of items) {
       let li = this._renderer.createItemNode(item);
       // Set the raw, un-marked up value as a data attribute.
@@ -261,6 +267,13 @@ class CompleterWidget extends Widget {
     }
     this._anchorPoint = this._anchor.scrollTop;
     this._setGeometry();
+
+    // If this is the first time the current completer session has loaded,
+    // populate any initial subset match.
+    if (this._firstLoad) {
+      this._firstLoad = false;
+      this._populateSubset();
+    }
   }
 
   /**
@@ -453,6 +466,7 @@ class CompleterWidget extends Widget {
   private _anchor: HTMLElement = null;
   private _anchorPoint = 0;
   private _activeIndex = 0;
+  private _firstLoad = true;
   private _model: ICompleterModel = null;
   private _renderer: CompleterWidget.IRenderer = null;
 }
