@@ -399,7 +399,7 @@ describe('completer/widget', () => {
           anchor.dispose();
         });
 
-        it('should mark common subset on tab and select on next tab', () => {
+        it('should mark common subset on start and select on tab', (done) => {
           let anchor = new Widget();
           let model = new CompleterModel();
           let options: CompleterWidget.IOptions = {
@@ -409,7 +409,7 @@ describe('completer/widget', () => {
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
-          model.options = ['foo', 'four', 'foz'];
+          model.options = ['fo', 'foo', 'foo', 'fooo'];
           Widget.attach(anchor, document.body);
 
           let widget = new CompleterWidget(options);
@@ -417,22 +417,21 @@ describe('completer/widget', () => {
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
           sendMessage(widget, WidgetMessage.UpdateRequest);
-
-          let marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
-          expect(marked).to.be.empty();
-          expect(value).to.be('');
-          simulate(anchor.node, 'keydown', { keyCode: 9 });  // Tab
-          sendMessage(widget, WidgetMessage.UpdateRequest);
-          marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
-          expect(value).to.be('fo');
-          expect(marked).to.have.length(3);
-          expect(marked[0].textContent).to.be('fo');
-          expect(marked[1].textContent).to.be('fo');
-          expect(marked[2].textContent).to.be('fo');
-          simulate(anchor.node, 'keydown', { keyCode: 9 });  // Tab
-          expect(value).to.be('foo');
-          widget.dispose();
-          anchor.dispose();
+          requestAnimationFrame(() => {
+            let marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
+            expect(value).to.be('fo');
+            expect(marked).to.have.length(4);
+            expect(marked[0].textContent).to.be('fo');
+            expect(marked[1].textContent).to.be('fo');
+            expect(marked[2].textContent).to.be('fo');
+            expect(marked[3].textContent).to.be('fo');
+            simulate(anchor.node, 'keydown', { keyCode: 9 });  // Tab key
+            sendMessage(widget, WidgetMessage.UpdateRequest);
+            expect(value).to.be('fo');
+            widget.dispose();
+            anchor.dispose();
+            done();
+          });
         });
 
       });
@@ -461,7 +460,7 @@ describe('completer/widget', () => {
 
           let item = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`)[1];
 
-          expect(value).to.be('');
+          expect(value).to.be('ba');
           simulate(item, 'mousedown');
           expect(value).to.be('baz');
           widget.dispose();
