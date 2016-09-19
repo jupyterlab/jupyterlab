@@ -13,19 +13,15 @@ import {
 } from '../../../codemirror';
 
 import {
-  CodeMirrorWidget
-} from '../../../codemirror/widget';
-
-import {
-  IChangedArgs
-} from '../../../common/interfaces';
+  CodeMirrorEditor
+} from '../../../codemirror/editor';
 
 import {
   ICellModel
 } from '../../cells/model';
 
 import {
-  ICellEditorWidget, EdgeLocation, ITextChange, ICompletionRequest, ICoords
+  EdgeLocation, ITextChange, ICompletionRequest, ICoords, AbstractCellEditorWidget
 } from '../../cells/editor';
 
 
@@ -44,171 +40,42 @@ const DOWN_ARROW = 40;
  */
 const TAB = 9;
 
-/**
- * The class name added to cell editor widget nodes.
- */
-const CELL_EDITOR_CLASS = 'jp-CellEditor';
-
 
 /**
  * A code mirror widget for a cell editor.
  */
 export
-class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditorWidget {
+class CodeMirrorCellEditorWidget extends AbstractCellEditorWidget<CodeMirrorEditor> {
   /**
    * Construct a new cell editor widget.
    */
   constructor(options: CodeMirror.EditorConfiguration = {}) {
-    super(options);
-    this.addClass(CELL_EDITOR_CLASS);
+    super((widget) => {
+      return new CodeMirrorEditor(widget, options);
+    });
 
-    CodeMirror.on(this.editor.getDoc(), 'change', (instance, change) => {
+    CodeMirror.on(this.codeMirrorEditor.getDoc(), 'change', (instance, change) => {
       this.onDocChange(instance, change);
     });
-    CodeMirror.on(this.editor, 'keydown', (instance, evt) => {
+    CodeMirror.on(this.codeMirrorEditor, 'keydown', (instance, evt) => {
       this.onEditorKeydown(instance, evt);
     });
   }
 
   /**
-   * A signal emitted when a tab (text) completion is requested.
+   * Returns an underyling CodeMirror editor.
    */
-  completionRequested: ISignal<ICellEditorWidget, ICompletionRequest>;
-
-  /**
-   * A signal emitted when either the top or bottom edge is requested.
-   */
-  edgeRequested: ISignal<ICellEditorWidget, EdgeLocation>;
-
-  /**
-   * A signal emitted when a text change is completed.
-   */
-  textChanged: ISignal<ICellEditorWidget, ITextChange>;
-
-  /**
-   * The cell model used by the editor.
-   */
-  get model(): ICellModel {
-    return this._model;
-  }
-  set model(model: ICellModel) {
-    if (!model && !this._model || model === this._model) {
-      return;
-    }
-
-    let doc = this.editor.getDoc();
-
-    // If the model is being replaced, disconnect the old signal handler.
-    if (this._model) {
-      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
-    }
-
-    if (!model) {
-      doc.setValue('');
-      this._model = null;
-      return;
-    }
-
-    this._model = model;
-    doc.setValue(this._model.source || '');
-    doc.clearHistory();
-    this._model.stateChanged.connect(this.onModelStateChanged, this);
+  get codeMirrorEditor() {
+    return this.editor.codeMirrorEditor;
   }
 
   /**
-   * The line numbers state of the editor.
+   * Updates the widget when the associated cell model is changed. 
    */
-  get lineNumbers(): boolean {
-    return this.editor.getOption('lineNumbers');
-  }
-  set lineNumbers(value: boolean) {
-    this.editor.setOption('lineNumbers', value);
-  }
-
-  /**
-   * Dispose of the resources held by the editor.
-   */
-  dispose(): void {
-    this._model = null;
-    super.dispose();
-  }
-
-  /**
-   * Change the mode for an editor based on the given mime type.
-   */
-  setMimeType(mimeType: string): void {
-    loadModeByMIME(this.editor, mimeType);
-  }
-
-  /**
-   * Set whether the editor is read only.
-   */
-  setReadOnly(readOnly: boolean): void {
-    let option = readOnly ? 'nocursor' : false;
-    this.editor.setOption('readOnly', option);
-  }
-
-  /**
-   * Test whether the editor has keyboard focus.
-   */
-  hasFocus(): boolean {
-    return this.editor.hasFocus();
-  }
-
-  /**
-   * Returns a zero-based last line number.
-   */
-  getLastLine(): number {
-    return this.editor.getDoc().lastLine();
-  }
-
-  /**
-   * Get the current cursor position of the editor.
-   */
-  getCursorPosition(): number {
-    let doc = this.editor.getDoc();
-    let position = doc.getCursor();
-    return doc.indexFromPos(position);
-  }
-
-  /**
-   * Set the position of the cursor.
-   *
-   * @param position - A new cursor's position.
-   */
-  setCursorPosition(position: number): void {
-    let doc = this.editor.getDoc();
-    doc.setCursor(doc.posFromIndex(position));
-  }
-
-  /**
-   * Set the position of the cursor.
-   *
-   * @param line - A zero-based line number.
-   *
-   * @param character - A zero-based character number.
-   */
-  setCursor(line: number, character: number): void {
-    let doc = this.editor.getDoc();
-    doc.setCursor({
-      line: line,
-      ch: character
-    });
-  }
-
-  /**
-   * Handle changes in the model state.
-   */
-  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'source':
-      let doc = this.editor.getDoc();
-      if (doc.getValue() !== args.newValue) {
-        doc.setValue(args.newValue);
-      }
-      break;
-    default:
-      break;
+  protected onCellModelChanged() {
+    super.onCellModelChanged();
+    if (this.model) {
+      this.codeMirrorEditor.getDoc().clearHistory();
     }
   }
 
@@ -217,7 +84,7 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
    */
   protected onDocChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange): void {
     let model = this.model;
-    let editor = this.editor;
+    let editor = this.codeMirrorEditor;
     let oldValue = model.source;
     let newValue = doc.getValue();
     let cursor = doc.getCursor();
@@ -228,7 +95,6 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
     let coords = editor.charCoords({ line, ch }, 'page') as ICoords;
     let position = editor.getDoc().indexFromPos({ line, ch });
 
-    model.source = newValue;
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, position, oldValue, newValue
     });
@@ -272,7 +138,7 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
    * Handle a tab key press.
    */
   protected onTabEvent(event: KeyboardEvent, ch: number, line: number): void {
-    let editor = this.editor;
+    let editor = this.codeMirrorEditor;
     let doc = editor.getDoc();
 
     // If there is a text selection, no completion requests should be emitted.
@@ -305,12 +171,4 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
     };
     this.completionRequested.emit(data as ICompletionRequest);
   }
-
-  private _model: ICellModel = null;
 }
-
-
-// Define the signals for the `CodeMirrorCellEditorWidget` class.
-defineSignal(CodeMirrorCellEditorWidget.prototype, 'completionRequested');
-defineSignal(CodeMirrorCellEditorWidget.prototype, 'edgeRequested');
-defineSignal(CodeMirrorCellEditorWidget.prototype, 'textChanged');

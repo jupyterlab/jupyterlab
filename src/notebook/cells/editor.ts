@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
-  ISignal
+  ISignal, defineSignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -16,6 +16,18 @@ import {
 import {
   ICellModel,
 } from './model';
+
+import {
+  CodeEditorWidget
+} from '../../codeeditor/widget';
+
+import {
+  AbstractCodeEditor, CodeEditorProvider
+} from '../../codeeditor/editor';
+
+import {
+  IChangedArgs
+} from '../../common/interfaces';
 
 
 /**
@@ -116,75 +128,107 @@ interface ICompletionRequest extends IEditorState {
   currentValue: string;
 }
 
-
 /**
  * A widget for a cell editor.
  */
 export
-interface ICellEditorWidget extends Widget {
+type ICellEditorWidget = AbstractCellEditorWidget<AbstractCodeEditor>;
+
+/**
+ * The class name added to cell editor widget nodes.
+ */
+const CELL_EDITOR_CLASS = 'jp-CellEditor';
+
+/**
+ * A base widget for a cell editor.
+ */
+export
+abstract class AbstractCellEditorWidget<E extends AbstractCodeEditor> extends CodeEditorWidget<E> {
+
+  constructor(editorProvider:CodeEditorProvider<E>) {
+    super(editorProvider);
+    this.addClass(CELL_EDITOR_CLASS);
+    this.editor.getModel().contentChanged.connect((model) => {
+      this.model.source = model.getValue();
+    });
+  }
+
   /**
-   * The cell model used by the editor.
+   * A signal emitted when a tab (text) completion is requested.
    */
-  model: ICellModel;
+  completionRequested: ISignal<AbstractCellEditorWidget<E>, ICompletionRequest>;
 
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
-  edgeRequested: ISignal<ICellEditorWidget, EdgeLocation>;
+  edgeRequested: ISignal<AbstractCellEditorWidget<E>, EdgeLocation>;
 
   /**
    * A signal emitted when a text change is completed.
    */
-  textChanged: ISignal<ICellEditorWidget, ITextChange>;
+  textChanged: ISignal<AbstractCellEditorWidget<E>, ITextChange>;
 
   /**
-   * A signal emitted when a completion is requested.
+   * Dispose of the resources held by the editor.
    */
-  completionRequested: ISignal<ICellEditorWidget, ICompletionRequest>;
+  dispose(): void {
+    this._model = null;
+    super.dispose();
+  }
 
   /**
-   * The line numbers state of the editor.
+   * The cell model used by the editor.
    */
-  lineNumbers: boolean;
+  get model(): ICellModel {
+    return this._model;
+  }
+  set model(model: ICellModel) {
+    if (!model && !this._model || model === this._model) {
+      return;
+    }
+
+    // If the model is being replaced, disconnect the old signal handler.
+    if (this._model) {
+      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
+    }
+    this._model = model;
+    this.onCellModelChanged();
+    if (this._model) {
+      this._model.stateChanged.connect(this.onModelStateChanged, this);
+    }
+  }
 
   /**
-   * Change the mime type for an editor.
+   * Updates the widget when the associated cell model is changed. 
    */
-  setMimeType(mimeType: string): void;
+  protected onCellModelChanged() {
+    const value = this.model ? this.model.source || '' : ''
+    this.editor.getModel().setValue(value);
+  }
 
   /**
-   * Set whether the editor is read only.
+   * Handle changes in the model state.
    */
-  setReadOnly(readOnly: boolean): void;
+  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+    switch (args.name) {
+    case 'source':
+      let doc = this.editor.getModel();
+      if (doc.getValue() !== args.newValue) {
+        doc.setValue(args.newValue);
+      }
+      break;
+    default:
+      break;
+    }
+  }
 
-  /**
-   * Test whether the editor has keyboard focus.
-   */
-  hasFocus(): boolean;
+  private _model: ICellModel = null;
 
-  /**
-   * Returns a zero-based last line number.
-   */
-  getLastLine(): number;
-
-  /**
-   * Returns the position of the cursor.
-   */
-  getCursorPosition(): number;
-
-  /**
-   * Set the position of the cursor.
-   *
-   * @param position - A new cursor's position.
-   */
-  setCursorPosition(cursorPosition: number): void;
-
-  /**
-   * Set the position of the cursor.
-   *
-   * @param line - A zero-based line number.
-   *
-   * @param character - A zero-based character number.
-   */
-  setCursor(line: number, character: number): void;
 }
+
+
+// Define the signals for the `CodeMirrorCellEditorWidget` class.
+defineSignal(AbstractCellEditorWidget.prototype, 'completionRequested');
+defineSignal(AbstractCellEditorWidget.prototype, 'edgeRequested');
+defineSignal(AbstractCellEditorWidget.prototype, 'textChanged');
+

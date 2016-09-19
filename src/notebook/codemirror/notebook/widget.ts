@@ -75,8 +75,8 @@ namespace CodeMirrorNotebookRenderer {
   export
   const defaultCodeCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
     editorInitializer: (editor) => {
-      editor.editor.setOption('matchBrackets', true);
-      editor.editor.setOption('autoCloseBrackets', true);
+      editor.codeMirrorEditor.setOption('matchBrackets', true);
+      editor.codeMirrorEditor.setOption('autoCloseBrackets', true);
     }
   });
 
@@ -87,7 +87,7 @@ namespace CodeMirrorNotebookRenderer {
   const defaultMarkdownCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
     editorInitializer: (editor) => {
       // Turn on line wrapping for markdown cells.
-      editor.editor.setOption('lineWrapping', true);
+      editor.codeMirrorEditor.setOption('lineWrapping', true);
     }
   });
 
@@ -98,7 +98,7 @@ namespace CodeMirrorNotebookRenderer {
   const defaultRawCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
     editorInitializer: (editor) => {
       // Turn on line wrapping for markdown cells.
-      editor.editor.setOption('lineWrapping', true);
+      editor.codeMirrorEditor.setOption('lineWrapping', true);
     }
   });
 

@@ -821,7 +821,7 @@ class Notebook extends StaticNotebook {
           // If an editor currently has focus, focus the node.
           // Otherwise, another input field has focus and should keep it.
           let w = find(this.layout, widget => {
-            return (widget as BaseCellWidget).editor.hasFocus();
+            return (widget as BaseCellWidget).editor.editor.isFocused();
           });
           if (w) {
             this.node.focus();
@@ -908,14 +908,14 @@ class Notebook extends StaticNotebook {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
       if (this.activeCellIndex < prev) {
-        let lastLine = this.activeCell.editor.getLastLine();
-        this.activeCell.editor.setCursor(lastLine, 0);
+        let lastLine = this.activeCell.editor.editor.getModel().getLastLine();
+        this.activeCell.editor.editor.setPosition({line:0, column:0});
       }
     } else {
       this.activeCellIndex++;
       // Move the cursor to the first character.
       if (this.activeCellIndex > prev) {
-        this.activeCell.editor.setCursorPosition(0);
+        this.activeCell.editor.editor.setPosition({line:0, column:0});
       }
     }
   }
