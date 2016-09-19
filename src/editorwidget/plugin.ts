@@ -22,7 +22,7 @@ import {
 } from '../docregistry';
 
 import {
-  EditorWidgetFactory, EditorWidget
+  EditorWidgetFactory, CodeMirrorEditorWidget
 } from './widget';
 
 import {
@@ -39,7 +39,7 @@ import {
 
 import {
   DEFAULT_CODEMIRROR_THEME
-} from '../codemirror/widget';
+} from '../codemirror/editor';
 
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
@@ -89,7 +89,7 @@ const cmdIds = {
  * Sets up the editor widget
  */
 function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IEditorTracker {
-  let tracker = new FocusTracker<EditorWidget>();
+  let tracker = new FocusTracker<CodeMirrorEditorWidget>();
   let widgetFactory = new EditorWidgetFactory();
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
@@ -158,7 +158,7 @@ function addCommands(app: JupyterLab, tracker: IEditorTracker): void {
  */
 function toggleLineNums(tracker: IEditorTracker) {
   if (tracker.currentWidget) {
-    let editor = tracker.currentWidget.editor;
+    let editor = tracker.currentWidget.codeMirrorEditor;
     editor.setOption('lineNumbers', !editor.getOption('lineNumbers'));
   }
 }
@@ -168,7 +168,7 @@ function toggleLineNums(tracker: IEditorTracker) {
  */
 function toggleLineWrap(tracker: IEditorTracker) {
   if (tracker.currentWidget) {
-    let editor = tracker.currentWidget.editor;
+    let editor = tracker.currentWidget.codeMirrorEditor;
     editor.setOption('lineWrapping', !editor.getOption('lineWrapping'));
   }
 }
@@ -178,7 +178,7 @@ function toggleLineWrap(tracker: IEditorTracker) {
  */
 function toggleMatchBrackets(tracker: IEditorTracker) {
   if (tracker.currentWidget) {
-    let editor = tracker.currentWidget.editor;
+    let editor = tracker.currentWidget.codeMirrorEditor;
     editor.setOption('matchBrackets', !editor.getOption('matchBrackets'));
   }
 }
@@ -188,7 +188,7 @@ function toggleMatchBrackets(tracker: IEditorTracker) {
  */
 function toggleVim(tracker: IEditorTracker) {
   each(tracker.widgets, widget => {
-    widget.editor.setOption('keyMap', 'vim');
+    widget.codeMirrorEditor.setOption('keyMap', 'vim');
   });
 }
 
@@ -197,7 +197,7 @@ function toggleVim(tracker: IEditorTracker) {
  */
 function toggleDefault(tracker: IEditorTracker) {
   each(tracker.widgets, widget => {
-    widget.editor.setOption('keyMap', 'default');
+    widget.codeMirrorEditor.setOption('keyMap', 'default');
   });
 }
 
@@ -237,7 +237,7 @@ function createMenu(app: JupyterLab, tracker: IEditorTracker): Menu {
     execute: args => {
       let name: string = args['theme'] as string || DEFAULT_CODEMIRROR_THEME;
       each(tracker.widgets, widget => {
-        widget.editor.setOption('theme', name);
+        widget.codeMirrorEditor.setOption('theme', name);
       });
     }
   });

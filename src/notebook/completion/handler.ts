@@ -170,7 +170,8 @@ class CellCompletionHandler implements IDisposable {
     }
     let cell = this._activeCell;
     cell.model.source = patch.text;
-    cell.editor.setCursorPosition(patch.position);
+    const editor = cell.editor.editor;
+    editor.setPosition(editor.getModel().getPositionAt(patch.position));
   }
 
   private _activeCell: BaseCellWidget = null;
