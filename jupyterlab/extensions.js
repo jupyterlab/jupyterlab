@@ -3,6 +3,7 @@
 
 module.exports = [
   require('jupyterlab/lib/about/plugin').aboutExtension,
+  require('jupyterlab/lib/bokeh/plugin').bokehApplicationExtension,
   require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
   require('jupyterlab/lib/commandpalette/plugin').commandPaletteProvider,
   require('jupyterlab/lib/console/plugin').consoleExtension,

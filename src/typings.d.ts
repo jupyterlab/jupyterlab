@@ -1,4 +1,5 @@
 /// <reference path="../typings/ansi_up/ansi_up.d.ts"/>
+/// <reference path="../typings/bokeh/bokeh.d.ts"/>
 /// <reference path="../typings/codemirror/codemirror.d.ts"/>
 /// <reference path="../typings/d3-dsv/d3-dsv.d.ts"/>
 /// <reference path="../typings/es6-collections/es6-collections.d.ts"/>
