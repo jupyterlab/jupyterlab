@@ -74,9 +74,9 @@ namespace CodeMirrorConsoleRenderer {
   export
   const defaultCodeCellRenderer = new CodeMirrorCodeCellWidgetRenderer({
     editorInitializer: (editor) => {
-      editor.editor.setOption('matchBrackets', false);
-      editor.editor.setOption('autoCloseBrackets', false);
-      editor.editor.setOption('extraKeys', {
+      editor.codeMirrorEditor.setOption('matchBrackets', false);
+      editor.codeMirrorEditor.setOption('autoCloseBrackets', false);
+      editor.codeMirrorEditor.setOption('extraKeys', {
         Enter: function() { /* no-op */ }
       });
     }

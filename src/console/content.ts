@@ -270,7 +270,8 @@ class ConsoleContent extends Widget {
     let prompt = this.prompt;
     let model = prompt.model;
     model.source += '\n';
-    prompt.editor.setCursorPosition(model.source.length);
+    const editor = prompt.editor.editor;
+    editor.setPosition(editor.getModel().getPositionAt(model.source.length));
   }
 
   /**
@@ -312,14 +313,15 @@ class ConsoleContent extends Widget {
           return;
         }
         prompt.model.source = value;
-        prompt.editor.setCursorPosition(0);
+        prompt.editor.editor.setPosition({line:0, column:0});
       });
     } else {
       this._history.forward().then(value => {
         // If at the bottom end of history, then clear the prompt.
         let text = value || '';
         prompt.model.source = text;
-        prompt.editor.setCursorPosition(text.length);
+        const editor = prompt.editor.editor;
+        editor.setPosition(editor.getModel().getPositionAt(text.length));
       });
     }
   }
@@ -393,7 +395,8 @@ class ConsoleContent extends Widget {
           return;
         }
         prompt.model.source = code + isComplete.content.indent;
-        prompt.editor.setCursorPosition(prompt.model.source.length);
+        const editor = prompt.editor.editor;
+        editor.setPosition(editor.getModel().getPositionAt(prompt.model.source.length));
         resolve(false);
       }).catch(() => { resolve(true); });
     });

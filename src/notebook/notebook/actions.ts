@@ -67,7 +67,9 @@ namespace NotebookActions {
     let nbModel = widget.model;
     let index = widget.activeCellIndex;
     let child = widget.childAt(index);
-    let position = child.editor.getCursorPosition();
+
+    const editor = child.editor.editor;
+    let position = editor.getModel().getOffsetAt(editor.getPosition());
     let orig = child.model.source;
 
     // Create new models to preserve history.
@@ -769,11 +771,11 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let lineNumbers = widget.activeCell.editor.lineNumbers;
+    let lineNumbers = widget.activeCell.editor.editor.getConfiguration().lineNumbers;
     for (let i = 0; i < widget.childCount(); i++) {
       let cell = widget.childAt(i);
       if (widget.isSelected(cell)) {
-        cell.editor.lineNumbers = !lineNumbers;
+        cell.editor.editor.getConfiguration().lineNumbers = !lineNumbers;
       }
     }
   }
@@ -792,10 +794,10 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let lineNumbers = widget.activeCell.editor.lineNumbers;
+    let lineNumbers = widget.activeCell.editor.editor.getConfiguration().lineNumbers;
     for (let i = 0; i < widget.childCount(); i++) {
       let cell = widget.childAt(i);
-      cell.editor.lineNumbers = !lineNumbers;
+      cell.editor.editor.getConfiguration().lineNumbers = !lineNumbers;
     }
   }
 

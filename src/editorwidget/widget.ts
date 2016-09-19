@@ -1,11 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as CodeMirror
-  from 'codemirror';
-
-import 'codemirror/mode/meta';
-
 import {
   IKernel
 } from 'jupyter-js-services';
@@ -19,12 +14,16 @@ import {
 } from 'phosphor/lib/ui/focustracker';
 
 import {
-  loadModeByFileName
-} from '../codemirror';
+  AbstractCodeEditor, CodeEditorProvider
+} from '../codeeditor/editor';
 
 import {
-  CodeMirrorWidget, DEFAULT_CODEMIRROR_THEME
-} from '../codemirror/widget';
+  CodeEditorWidget
+} from '../codeeditor/widget';
+
+import {
+  CodeMirrorEditor, DEFAULT_CODEMIRROR_THEME
+} from '../codemirror/editor';
 
 import {
   ABCWidgetFactory, IDocumentModel, IDocumentContext
@@ -46,7 +45,7 @@ const EDITOR_CLASS = 'jp-EditorWidget';
  * A class that tracks editor widgets.
  */
 export
-interface IEditorTracker extends FocusTracker<EditorWidget> {}
+interface IEditorTracker extends FocusTracker<CodeMirrorEditorWidget> {}
 
 
 /* tslint:disable */
@@ -57,32 +56,49 @@ export
 const IEditorTracker = new Token<IEditorTracker>('jupyter.services.editor-tracker');
 /* tslint:enable */
 
-
 /**
- * A document widget for codemirrors.
+ * A document widget for the CodeMirror editor.
  */
 export
-class EditorWidget extends CodeMirrorWidget {
+class CodeMirrorEditorWidget extends EditorWidget<CodeMirrorEditor> {
+
+  constructor(context: IDocumentContext<IDocumentModel>)  {
+    super((widget) => {
+      return new CodeMirrorEditor(widget, {
+        extraKeys: {
+          'Tab': 'indentMore',
+        },
+        indentUnit: 4,
+        theme: DEFAULT_CODEMIRROR_THEME,
+        lineNumbers: true,
+        lineWrapping: true,
+      })
+    }, context);
+  }
+
+  get codeMirrorEditor() {
+    return this.editor.codeMirrorEditor;
+  }
+
+}
+
+/**
+ * A document widget for the code editor.
+ */
+export
+class EditorWidget<E extends AbstractCodeEditor> extends CodeEditorWidget<E> {
   /**
    * Construct a new editor widget.
    */
-  constructor(context: IDocumentContext<IDocumentModel>) {
-    super({
-      extraKeys: {
-        'Tab': 'indentMore',
-      },
-      indentUnit: 4,
-      theme: DEFAULT_CODEMIRROR_THEME,
-      lineNumbers: true,
-      lineWrapping: true,
-    });
+  constructor(editorProvider:CodeEditorProvider<E>, context: IDocumentContext<IDocumentModel>) {
+    super(editorProvider);
     this.addClass(EDITOR_CLASS);
     let editor = this.editor;
     let model = context.model;
-    let doc = editor.getDoc();
+    let doc = editor.getModel();
     doc.setValue(model.toString());
     this.title.label = context.path.split('/').pop();
-    loadModeByFileName(editor, context.path);
+    editor.getModel().uri = context.path;
     model.stateChanged.connect((m, args) => {
       if (args.name === 'dirty') {
         if (args.newValue) {
@@ -93,7 +109,7 @@ class EditorWidget extends CodeMirrorWidget {
       }
     });
     context.pathChanged.connect((c, path) => {
-      loadModeByFileName(editor, path);
+      editor.getModel().uri = path;
       this.title.label = path.split('/').pop();
     });
     model.contentChanged.connect(() => {
@@ -103,29 +119,28 @@ class EditorWidget extends CodeMirrorWidget {
         doc.setValue(text);
       }
     });
-    CodeMirror.on(doc, 'change', (instance, change) => {
-      if (change.origin !== 'setValue') {
-        model.fromString(instance.getValue());
-      }
+    editor.getModel().contentChanged.connect((editorModel) => {
+      model.fromString(editorModel.getValue());
     });
   }
 }
-
 
 /**
  * A widget factory for editors.
  */
 export
-class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, IDocumentModel> {
+class EditorWidgetFactory extends ABCWidgetFactory<CodeMirrorEditorWidget, IDocumentModel> {
+
   /**
    * Create a new widget given a context.
    */
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): EditorWidget {
+  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): CodeMirrorEditorWidget {
     if (kernel) {
       context.changeKernel(kernel);
     }
-    let widget = new EditorWidget(context);
+    let widget = new CodeMirrorEditorWidget(context);
     this.widgetCreated.emit(widget);
     return widget;
   }
+
 }
