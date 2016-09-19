@@ -73,6 +73,62 @@ class LandingWidget extends Widget {
     render(dialog, this.node);
   }
 
+  initialRender(app: JupyterLab, services: IServiceManager) {
+    let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
+    let actualMessage = previewMessages[(Math.floor(Math.random() * previewMessages.length))];
+    let activitiesList: VNode[] = [];
+    const activites =
+      [['Notebook', 'file-operations:new-notebook'],
+       ['Console', `console:create-${services.kernelspecs.default}`],
+       ['Terminal', 'terminal:create-new'],
+       ['Text Editor', 'file-operations:new-text-file']];
+    for (let activityName of activites) {
+      let imgName = activityName[0].replace(' ', '');
+      let column =
+      h.div({className: 'jp-Landing-column'},
+        h.span({className: `jp-Image${imgName} jp-Landing-image`,
+                onclick: () => {
+                  app.commands.execute(activityName[1], void 0);
+                }}
+        ),
+        h.span({className: 'jp-Landing-text'}, activityName[0])
+      );
+      activitiesList.push(column);
+    }
+
+    let logo = h.span({className: 'jp-ImageJupyterLab jp-Landing-logo'});
+    let subtitle =
+    h.span({className: 'jp-Landing-subtitle'},
+      actualMessage
+    );
+    let tour =
+    h.span({className: 'jp-Landing-tour',
+            onclick: () => {
+              app.commands.execute('about-jupyterlab:show', void 0);
+            }}
+    );
+    let header =
+    h.span({className: 'jp-Landing-header'},
+      'Start a new activity'
+    );
+    let body =
+    h.div({className: 'jp-Landing-body'},
+      activitiesList
+    );
+    this._data = [logo, subtitle, tour, header, body];
+
+    let dialog =
+    h.div({className: 'jp-Landing-dialog'},
+      this._data,
+      h.div({className: 'jp-Landing-cwd'},
+        h.span({className: 'jp-Landing-folder'}),
+        h.span({className: 'jp-Landing-path'}, 'home'
+        )
+      )
+    );
+    render(dialog, this.node);
+}
+
   private _path: string;
   private _data: VNode[];
 }
@@ -84,44 +140,11 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
   widget.title.label = 'Launcher';
   widget.title.closable = true;
   widget.addClass('jp-Landing');
-
+  
   let folderImage = document.createElement('span');
   folderImage.className = 'jp-Landing-folder jp-FolderIcon';
 
   let path = 'home';
-
-  let logo = h.span({className: 'jp-ImageJupyterLab jp-Landing-logo'});
-  let subtitle =
-  h.span({className: 'jp-Landing-subtitle'},
-    actualMessage
-  );
-  let tour =
-  h.span({className: 'jp-Landing-tour',
-          onclick: () => {
-            app.commands.execute('about-jupyterlab:show', void 0);
-          }}
-  );
-  let header =
-  h.span({className: 'jp-Landing-header'},
-    'Start a new activity'
-  );
-  let body =
-  h.div({className: 'jp-Landing-body'},
-    activitiesList
-  );
-  widget.data = [logo, subtitle, tour, header, body];
-
-  let dialog =
-  h.div({className: 'jp-Landing-dialog'},
-    widget.data,
-    h.div({className: 'jp-Landing-cwd'},
-      h.span({className: 'jp-Landing-folder'}),
-      h.span({className: 'jp-Landing-path'}, path
-      )
-    )
-  );
-  render(dialog, widget.node);
-
   pathTracker.pathChanged.connect(() => {
     if (pathTracker.path.length > 0) {
       path = 'home > ';
