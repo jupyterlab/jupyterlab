@@ -219,11 +219,6 @@ margin-top = 14, 14, 14, 14, 8, 8
 }
 
 
-.jp-RenderedHTMLCommon tr {
-  /*border-bottom: var(--jp-border-width) solid var(--jp-border-color2);*/
-}
-
-
 .jp-RenderedHTMLCommon td,
 .jp-RenderedHTMLCommon th {
   text-align: right;
