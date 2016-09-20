@@ -204,26 +204,48 @@ margin-top = 14, 14, 14, 14, 8, 8
 .jp-RenderedHTMLCommon table {
   margin-left: auto;
   margin-right: auto;
-  border: var(--jp-border-width) solid black;
+  border: none;
   border-collapse: collapse;
+  border-spacing: 0;
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  table-layout: fixed;
+}
+
+
+.jp-RenderedHTMLCommon thead {
+  border-bottom: 2px solid var(--jp-border-color1);
+  vertical-align: bottom;
+}
+
+
+.jp-RenderedHTMLCommon tr {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+
+.jp-RenderedHTMLCommon td,
+.jp-RenderedHTMLCommon th {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: 1.0;
+  white-space: nowrap;
+  max-width: 100px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  border: none;
 }
 
 
 .jp-RenderedHTMLCommon tr,
 .jp-RenderedHTMLCommon th,
 .jp-RenderedHTMLCommon td {
-  border: var(--jp-border-width) solid black;
-  border-collapse: collapse;
-  margin: 1em 2em;
+
 }
 
 
-.jp-RenderedHTMLCommon td,
-.jp-RenderedHTMLCommon th {
-  text-align: left;
-  vertical-align: middle;
-  padding: 4px;
-}
+
 
 
 .jp-RenderedHTMLCommon th {
