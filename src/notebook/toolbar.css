@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-Toolbar-item.jp-Notebook-toolbarKernelIndicator {
+.jp-Toolbar-item.jp-Kernel-toolbarKernelIndicator {
   font-family: FontAwesome;
   text-align: center;
   display: inline-block;
@@ -26,14 +26,14 @@
 }
 
 
-.jp-Toolbar > .jp-Toolbar-item.jp-Notebook-toolbarKernelName {
+.jp-Toolbar > .jp-Toolbar-item.jp-Kernel-toolbarKernelName {
   text-align: right;
   flex-grow: 1;
   flex-shrink: 1;
 }
 
 
-.jp-Toolbar-item.jp-Notebook-toolbarKernelIndicator {
+.jp-Toolbar-item.jp-Kernel-toolbarKernelIndicator {
   border-right: none;
 }
 
@@ -68,21 +68,21 @@
 }
 
 
-.jp-Notebook-toolbarInterrupt::before {
+.jp-Kernel-toolbarInterrupt::before {
   content: "\f04d";  /* stop */
 }
 
 
-.jp-Notebook-toolbarRestart::before {
+.jp-Kernel-toolbarRestart::before {
   content: "\f01e";  /* rotate-right */
 }
 
 
-.jp-Notebook-toolbarKernelIndicator::before {
+.jp-Kernel-toolbarKernelIndicator::before {
   content: "\f10c";  /* circle-o */
 }
 
 
-.jp-Notebook-toolbarKernelIndicator.jp-mod-busy::before {
+.jp-Kernel-toolbarKernelIndicator.jp-mod-busy::before {
   content: "\f111";  /* circle */
 }
