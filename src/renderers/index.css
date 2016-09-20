@@ -214,13 +214,13 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon thead {
-  border-bottom: 2px solid var(--jp-border-color1);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   vertical-align: bottom;
 }
 
 
 .jp-RenderedHTMLCommon tr {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  /*border-bottom: var(--jp-border-width) solid var(--jp-border-color2);*/
 }
 
 
@@ -240,6 +240,11 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 .jp-RenderedHTMLCommon th {
   font-weight: bold;
+}
+
+
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd) {
+  background: var(--md-grey-100);
 }
 
 
