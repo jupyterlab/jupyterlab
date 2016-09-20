@@ -49,8 +49,12 @@ const MIN_HEIGHT = 75;
 
 /**
  * The maximum height of a completer widget.
+ *
+ * #### Notes
+ * This value is only used if a CSS max-height attribute is not set for the
+ * completer. It is a fallback value.
  */
-const MAX_HEIGHT = 250;
+const MAX_HEIGHT = 200;
 
 /**
  * A flag to indicate that event handlers are caught in the capture phase.
@@ -429,11 +433,13 @@ class CompleterWidget extends Widget {
     // Always use original coordinates to calculate completer position.
     let coords = this._model.original.coords;
     let node = this.node;
+    let computed = window.getComputedStyle(node);
     let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
     let availableHeight = coords.top + scrollDelta;
-    let maxHeight = Math.max(0, Math.min(availableHeight, MAX_HEIGHT));
     let chWidth = this._model.original.chWidth;
+    let maxHeight = (parseInt(computed.maxHeight, 10) || MAX_HEIGHT);
 
+    maxHeight = Math.max(0, Math.min(availableHeight, maxHeight));
     if (maxHeight > MIN_HEIGHT) {
       node.classList.remove(OUTOFVIEW_CLASS);
     } else {
@@ -442,7 +448,7 @@ class CompleterWidget extends Widget {
     }
     node.style.maxHeight = `${maxHeight}px`;
 
-    let borderLeftWidth = window.getComputedStyle(node).borderLeftWidth;
+    let borderLeftWidth = computed.borderLeftWidth;
     let rect = node.getBoundingClientRect();
     let top = availableHeight - rect.height;
     let left = coords.left + (parseInt(borderLeftWidth, 10) || 0);

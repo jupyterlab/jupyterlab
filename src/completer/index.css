@@ -12,6 +12,7 @@
   overflow: auto;
   padding: 0;
   margin: 0 0 0 -4px;
+  max-height: 252px;
   position: absolute;
   z-index: 10001;
 }
@@ -42,6 +43,8 @@
 .jp-Completer-item code {
   font-size: 14px;
   line-height: 25px;
+  padding: 0;
+  margin: 0;
 }
 
 
