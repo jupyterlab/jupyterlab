@@ -20,6 +20,7 @@ Contents:
 
    repo.md
    plugins.md
+   labextensions.md
    documents.md
    notebook.md
    patterns.md
