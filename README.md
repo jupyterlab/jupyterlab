@@ -8,7 +8,6 @@
 # [JupyterLab](http://jupyter.github.io/jupyterlab/)
 
 [![Build Status](https://travis-ci.org/jupyter/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyter/jupyterlab)
-[![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/jupyter/jupyterlab/lab)
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab-tutorial/badge/?version=latest)](http://jupyterlab-tutorial.readthedocs.io/en/latest/?badge=latest)
 [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 
