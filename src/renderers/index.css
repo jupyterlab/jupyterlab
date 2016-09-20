@@ -202,25 +202,25 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon table {
-  margin-left: auto;
-  margin-right: auto;
   border: none;
   border-collapse: collapse;
   border-spacing: 0;
   color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-font-size1);
+  font-size: 12px;
   table-layout: fixed;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 
 .jp-RenderedHTMLCommon thead {
-  border-bottom: 1px solid var(--jp-border-color1);
+  border-bottom: 2px solid var(--jp-border-color1);
   vertical-align: bottom;
 }
 
 
 .jp-RenderedHTMLCommon tr {
-  /*border-bottom: var(--jp-border-width) solid var(--jp-border-color2);*/
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 
@@ -238,22 +238,10 @@ margin-top = 14, 14, 14, 14, 8, 8
 }
 
 
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td {
-
-}
-
-
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd) {
-  background: var(--md-grey-100);
-}
-
-
-
 .jp-RenderedHTMLCommon th {
-  font-weight: normal;
+  font-weight: bold;
 }
+
 
 .jp-RenderedHTMLCommon * + table {
   margin-top: 1em;
