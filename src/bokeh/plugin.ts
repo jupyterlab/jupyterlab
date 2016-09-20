@@ -59,12 +59,31 @@ function activateBokehApplication(app: JupyterLab, palette: ICommandPalette, mai
 
   let openBokehApplicationId = 'bk-application:open';
 
+  let widget = new Widget();
+  widget.id = openBokehApplicationId
+  widget.title.label = 'Bokeh';
+  widget.title.closable = true;
+
   app.commands.addCommand(openBokehApplicationId, {
     label: 'Open Bokeh Application',
     execute: () => {
-      window.open('http://localhost:5006');
+
+      let tag = document.createElement('script')
+      tag.src = "http://localhost:5006/sliders/autoload.js?bokeh-autoload-element=c50377bb-485f-439b-8f15-028ab8c25387"
+      tag.id = "c50377bb-485f-439b-8f15-028ab8c25387"
+      tag.setAttribute('data-bokeh-model-id', '')
+      tag.setAttribute('data-bokeh-doc-id', '')
+
+      widget.node.appendChild(tag);
+
+      if (!widget.isAttached) {
+        app.shell.addToMainArea(widget);
+      } else {
+        app.shell.activateMain(widget.id);
+      }
     }
   });
+
   palette.addItem({ command: openBokehApplicationId, category: 'Bokeh'});
 
   let menu = Private.createMenu(app);
