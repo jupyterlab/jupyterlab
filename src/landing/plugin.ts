@@ -2,16 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Message
-} from 'phosphor/lib/core/messaging';
-
-import {
-  h, render, VNode
+  h, VNode
 } from 'phosphor/lib/ui/vdom';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
 
 import {
   JupyterLab, JupyterLabPlugin
@@ -20,6 +12,10 @@ import {
 import {
   ICommandPalette
 } from '../commandpalette';
+
+import {
+  VDomModel, VDomWidget
+} from '../common/vdom';
 
 import {
   IPathTracker
@@ -40,14 +36,14 @@ const landingExtension: JupyterLabPlugin<void> = {
   autoStart: true
 };
 
-class LandingWidget extends Widget {
+class LandingModel extends VDomModel {
   get path(): string {
     return this._path;
   }
 
   set path(value: string) {
     this._path = value;
-    this.update();
+    this.stateChanged.emit(void 0);
   }
 
   get data(): VNode[] {
@@ -56,24 +52,11 @@ class LandingWidget extends Widget {
 
   set data(value: VNode[]) {
     this._data = value;
+    this.stateChanged.emit(void 0);
   }
 
-  protected onUpdateRequest(msg: Message): void {
-    let path = this._path;
-    let previousChildren = this._data;
-    let dialog =
-    h.div({className: 'jp-Landing-dialog'},
-      previousChildren,
-      h.div({className: 'jp-Landing-cwd'},
-        h.span({className: 'jp-Landing-folder'}),
-        h.span({className: 'jp-Landing-path'}, path
-        )
-      )
-    );
-    render(dialog, this.node);
-  }
-
-  initialRender(app: JupyterLab, services: IServiceManager) {
+  constructor(app: JupyterLab, services: IServiceManager) {
+    super();
     let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
     let actualMessage = previewMessages[(Math.floor(Math.random() * previewMessages.length))];
     let activitiesList: VNode[] = [];
@@ -116,33 +99,37 @@ class LandingWidget extends Widget {
       activitiesList
     );
     this._data = [logo, subtitle, tour, header, body];
-
-    let dialog =
-    h.div({className: 'jp-Landing-dialog'},
-      this._data,
-      h.div({className: 'jp-Landing-cwd'},
-        h.span({className: 'jp-Landing-folder'}),
-        h.span({className: 'jp-Landing-path'}, 'home'
-        )
-      )
-    );
-    render(dialog, this.node);
-}
+    this._path = 'home';
+  }
 
   private _path: string;
   private _data: VNode[];
 }
 
+class LandingWidget extends VDomWidget<LandingModel> {
+  protected render(): VNode {
+    let dialog =
+    h.div({className: 'jp-Landing-dialog'},
+      this.model.data,
+      h.div({className: 'jp-Landing-cwd'},
+        h.span({className: 'jp-Landing-folder'}),
+        h.span({className: 'jp-Landing-path'}, this.model.path
+        )
+      )
+    );
+    return dialog;
+  }
+}
+
 
 function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): void {
+  let landingModel = new LandingModel(app, services);
   let widget = new LandingWidget();
+  widget.model = landingModel;
   widget.id = 'landing-jupyterlab';
   widget.title.label = 'Launcher';
   widget.title.closable = true;
   widget.addClass('jp-Landing');
-  
-  let folderImage = document.createElement('span');
-  folderImage.className = 'jp-Landing-folder jp-FolderIcon';
 
   let path = 'home';
   pathTracker.pathChanged.connect(() => {
@@ -154,7 +141,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
     } else {
       path = 'home';
     }
-    widget.path = path;
+    landingModel.path = path;
   });
 
   app.commands.addCommand('jupyterlab-landing:show', {
