@@ -18,16 +18,12 @@ import {
 } from 'phosphor/lib/core/mimedata';
 
 import {
-  Drag, IDragEvent
+  DropAction
 } from 'phosphor/lib/dom/dragdrop';
 
 import {
   scrollIntoViewIfNeeded
 } from 'phosphor/lib/dom/query';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
 
 import {
   humanTime, dateTime
@@ -55,6 +51,10 @@ import * as utils
 import {
   SELECTED_CLASS, showErrorMessage
 } from './utils';
+
+import {
+  DragDropWidget, MIME_INDEX, findChild
+} from '../common/dragpanel';
 
 
 /**
@@ -168,11 +168,6 @@ const DESCENDING_CLASS = 'jp-mod-descending';
 const RENAME_DURATION = 500;
 
 /**
- * The threshold in pixels to start a drag event.
- */
-const DRAG_THRESHOLD = 5;
-
-/**
  * A boolean indicating whether the platform is Mac.
  */
 const IS_MAC = !!navigator.platform.match(/Mac/i);
@@ -187,7 +182,7 @@ const FACTORY_MIME = 'application/vnd.phosphor.widget-factory';
  * A widget which hosts a file list area.
  */
 export
-class DirListing extends Widget {
+class DirListing extends DragDropWidget {
   /**
    * Construct a new file browser directory listing widget.
    *
@@ -195,8 +190,10 @@ class DirListing extends Widget {
    */
   constructor(options: DirListing.IOptions) {
     super({
-      node: (options.renderer || DirListing.defaultRenderer).createNode()
+      node: (options.renderer || DirListing.defaultRenderer).createNode(),
+      acceptDropsFromExternalSource: false
     });
+    this.dragHandleClass = ITEM_CLASS;
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
     this._model.refreshed.connect(this._onModelRefreshed, this);
@@ -217,8 +214,6 @@ class DirListing extends Widget {
     this._model = null;
     this._items = null;
     this._editNode = null;
-    this._drag = null;
-    this._dragData = null;
     this._manager = null;
     this._opener = null;
     super.dispose();
@@ -402,7 +397,7 @@ class DirListing extends Widget {
   download(): void {
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
-        this._model.download(item.path)
+        this._model.download(item.path);
       }
     }
   }
@@ -522,9 +517,6 @@ class DirListing extends Widget {
     case 'mouseup':
       this._evtMouseup(event as MouseEvent);
       break;
-    case 'mousemove':
-      this._evtMousemove(event as MouseEvent);
-      break;
     case 'keydown':
       this._evtKeydown(event as KeyboardEvent);
       break;
@@ -540,19 +532,8 @@ class DirListing extends Widget {
     case 'scroll':
       this._evtScroll(event as MouseEvent);
       break;
-    case 'p-dragenter':
-      this._evtDragEnter(event as IDragEvent);
-      break;
-    case 'p-dragleave':
-      this._evtDragLeave(event as IDragEvent);
-      break;
-    case 'p-dragover':
-      this._evtDragOver(event as IDragEvent);
-      break;
-    case 'p-drop':
-      this._evtDrop(event as IDragEvent);
-      break;
     default:
+      super.handleEvent(event);
       break;
     }
   }
@@ -564,16 +545,11 @@ class DirListing extends Widget {
     super.onAfterAttach(msg);
     let node = this.node;
     let content = utils.findElement(node, CONTENT_CLASS);
-    node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
     node.addEventListener('click', this);
     node.addEventListener('dblclick', this);
     node.addEventListener('contextmenu', this);
     content.addEventListener('scroll', this);
-    content.addEventListener('p-dragenter', this);
-    content.addEventListener('p-dragleave', this);
-    content.addEventListener('p-dragover', this);
-    content.addEventListener('p-drop', this);
   }
 
   /**
@@ -583,16 +559,11 @@ class DirListing extends Widget {
     super.onBeforeDetach(msg);
     let node = this.node;
     let content = utils.findElement(node, CONTENT_CLASS);
-    node.removeEventListener('mousedown', this);
     node.removeEventListener('keydown', this);
     node.removeEventListener('click', this);
     node.removeEventListener('dblclick', this);
     node.removeEventListener('contextmenu', this);
     content.removeEventListener('scroll', this);
-    content.removeEventListener('p-dragenter', this);
-    content.removeEventListener('p-dragleave', this);
-    content.removeEventListener('p-dragover', this);
-    content.removeEventListener('p-drop', this);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
   }
@@ -665,6 +636,134 @@ class DirListing extends Widget {
   }
 
   /**
+   * Finds the drag target (the item to move) from a drag handle.
+   *
+   * Returns null if no valid drag target was found.
+   *
+   * Overrides method from `DragPanel`.
+   */
+  protected findDragTarget(handle: HTMLElement): HTMLElement {
+    return findChild(this._items, handle);
+  }
+
+  /**
+   * Find a drop target from a given drag event target.
+   *
+   * Returns null if no valid drop target was found.
+   *
+   * The default implementation returns the node that is the parent of
+   * `input`, if that node represents a directory item, that is currently
+   * not selected.
+   *
+   * Overrides method from `DragPanel`.
+   */
+  protected findDropTarget(input: HTMLElement, mimeData: MimeData): HTMLElement {
+    // Currently rely on disallowing external drops to assure correct mime data
+    let child = findChild(this._items, input);
+    let index = this.getIndexOfChildNode(child);
+    if (index !== null) {
+      let item = this.sortedItems[index];
+      if (item.type === 'directory' && !this._selection[item.name]) {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Returns the index of node in `_items`.
+   *
+   * Returns null if not found.
+   */
+  protected getIndexOfChildNode(node: HTMLElement): number {
+    let index = this._items.indexOf(node);
+    return index > -1 ? index : null;
+  }
+
+  /**
+   * Called when a widget should be moved as a consequence of an internal drag event.
+   *
+   * Moves the files and directories specified to the directory that index
+   * points to.
+   */
+  protected move(names: string[], index: number) {
+    // Move all of the items.
+    let path = this.sortedItems[index].name + '/';
+    let promises = utils.moveConditionalOverwrite(
+      path, names, this._model
+    );
+    Promise.all(promises).then(
+      () => {
+        this.moved.emit({to: index, from: names});
+        this._model.refresh();
+      },
+      error => utils.showErrorMessage(this, 'Move Error', error)
+    );
+  }
+
+  /**
+   * Add mime data for drag and drop opertaion
+   */
+  protected addMimeData(handle: HTMLElement, mimeData: MimeData): void {
+    let source = this.findDragTarget(handle);
+    let index = this.getIndexOfChildNode(source);
+    let selectedNames = Object.keys(this._selection);
+    let model = this._model;
+    let items = this.sortedItems;
+    let item: IContents.IModel = null;
+
+    // If the source node is not selected, use just that node.
+    if (!source.classList.contains(SELECTED_CLASS)) {
+      item = items[index];
+      selectedNames = [item.name];
+    } else if (selectedNames.length === 1) {
+      let name = selectedNames[0];
+      item = find(items, value => value.name === name);
+    }
+
+    mimeData.setData(utils.CONTENTS_MIME, selectedNames);
+    // Piggy-back on DragPanel processDrop by adding this:
+    mimeData.setData(MIME_INDEX, selectedNames);
+    if (item && item.type !== 'directory') {
+      mimeData.setData(FACTORY_MIME, () => {
+        let path = item.path;
+        let widget = this._manager.findWidget(path);
+        if (!widget) {
+          widget = this._manager.open(item.path);
+          let context = this._manager.contextForWidget(widget);
+          context.populated.connect(() => model.refresh() );
+          context.kernelChanged.connect(() => model.refresh() );
+        }
+        return widget;
+      });
+    }
+  }
+
+  /**
+   *
+   */
+  protected onDragComplete(action: DropAction) {
+    super.onDragComplete(action);
+    clearTimeout(this._selectTimer);
+  }
+
+  /**
+   * Returns the drag image to use when dragging using the given handle.
+   */
+  protected getDragImage(handle: HTMLElement) : HTMLElement {
+    let source = this.findDragTarget(handle);
+    let selectedNames = Object.keys(this._selection);
+
+    // If the source node is not selected, use just that node.
+    if (!source.classList.contains(SELECTED_CLASS)) {
+      let index = this.getIndexOfChildNode(source);
+      selectedNames = [this.sortedItems[index].name];
+    }
+    clearTimeout(this._selectTimer);
+    return this.renderer.createDragImage(handle, selectedNames.length);
+  }
+
+  /**
    * Handle the `'click'` event for the widget.
    */
   private _evtClick(event: MouseEvent) {
@@ -730,13 +829,9 @@ class DirListing extends Widget {
 
     // Left mouse press for drag start.
     if (event.button === 0) {
-      this._dragData = { pressX: event.clientX, pressY: event.clientY,
-                         index: index };
-      document.addEventListener('mouseup', this, true);
-      document.addEventListener('mousemove', this, true);
-    }
-
-    if (event.button !== 0) {
+      // Send event to drag panel:
+      super.handleEvent(event);
+    } else {
       clearTimeout(this._selectTimer);
     }
   }
@@ -756,37 +851,7 @@ class DirListing extends Widget {
       }
       this._softSelection = '';
     }
-    // Remove the drag listeners if necessary.
-    if (event.button !== 0 || !this._drag) {
-      document.removeEventListener('mousemove', this, true);
-      document.removeEventListener('mouseup', this, true);
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
-  /**
-   * Handle the `'mousemove'` event for the widget.
-   */
-  private _evtMousemove(event: MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-
-    // Bail if we are the one dragging.
-    if (this._drag) {
-      return;
-    }
-
-    // Check for a drag initialization.
-    let data = this._dragData;
-    let dx = Math.abs(event.clientX - data.pressX);
-    let dy = Math.abs(event.clientY - data.pressY);
-    if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
-      return;
-    }
-
-    this._startDrag(data.index, event.clientX, event.clientY);
+    super.handleEvent(event);  // Also send event to drag panel
   }
 
   /**
@@ -858,169 +923,6 @@ class DirListing extends Widget {
       }
       this._opener.open(widget);
     }
-  }
-
-
-  /**
-   * Handle the `'p-dragenter'` event for the widget.
-   */
-  private _evtDragEnter(event: IDragEvent): void {
-    if (event.mimeData.hasData(utils.CONTENTS_MIME)) {
-      let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
-      if (index === -1) {
-        return;
-      }
-      let item = this.sortedItems[index];
-      if (item.type !== 'directory' || this._selection[item.name]) {
-        return;
-      }
-      let target = event.target as HTMLElement;
-      target.classList.add(utils.DROP_TARGET_CLASS);
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  }
-
-  /**
-   * Handle the `'p-dragleave'` event for the widget.
-   */
-  private _evtDragLeave(event: IDragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
-    if (dropTarget) {
-      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
-    }
-  }
-
-  /**
-   * Handle the `'p-dragover'` event for the widget.
-   */
-  private _evtDragOver(event: IDragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    event.dropAction = event.proposedAction;
-    let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
-    if (dropTarget) {
-      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
-    }
-    let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
-    this._items[index].classList.add(utils.DROP_TARGET_CLASS);
-  }
-
-  /**
-   * Handle the `'p-drop'` event for the widget.
-   */
-  private _evtDrop(event: IDragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    clearTimeout(this._selectTimer);
-    if (event.proposedAction === 'none') {
-      event.dropAction = 'none';
-      return;
-    }
-    if (!event.mimeData.hasData(utils.CONTENTS_MIME)) {
-      return;
-    }
-    event.dropAction = event.proposedAction;
-
-    let target = event.target as HTMLElement;
-    while (target && target.parentElement) {
-      if (target.classList.contains(utils.DROP_TARGET_CLASS)) {
-        target.classList.remove(utils.DROP_TARGET_CLASS);
-        break;
-      }
-      target = target.parentElement;
-    }
-
-    // Get the path based on the target node.
-    let index = this._items.indexOf(target);
-    let items = this.sortedItems;
-    let path = items[index].name + '/';
-
-    // Move all of the items.
-    let promises: Promise<IContents.IModel>[] = [];
-    let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
-    for (let name of names) {
-      let newPath = path + name;
-      promises.push(this._model.rename(name, newPath).catch(error => {
-        if (error.xhr) {
-          error.message = `${error.xhr.statusText} ${error.xhr.status}`;
-        }
-        if (error.message.indexOf('409') !== -1) {
-          let options = {
-            title: 'Overwrite file?',
-            body: `"${newPath}" already exists, overwrite?`,
-            okText: 'OVERWRITE'
-          };
-          return showDialog(options).then(button => {
-            if (button.text === 'OVERWRITE') {
-              return this._model.deleteFile(newPath).then(() => {
-                return this._model.rename(name, newPath);
-              });
-            }
-          });
-        }
-      }));
-    }
-    Promise.all(promises).then(
-      () => this._model.refresh(),
-      error => utils.showErrorMessage(this, 'Move Error', error)
-    );
-  }
-
-  /**
-   * Start a drag event.
-   */
-  private _startDrag(index: number, clientX: number, clientY: number): void {
-    let selectedNames = Object.keys(this._selection);
-    let source = this._items[index];
-    let model = this._model;
-    let items = this.sortedItems;
-    let item: IContents.IModel = null;
-
-    // If the source node is not selected, use just that node.
-    if (!source.classList.contains(SELECTED_CLASS)) {
-      item = items[index];
-      selectedNames = [item.name];
-    } else if (selectedNames.length === 1) {
-      let name = selectedNames[0];
-      item = find(items, value => value.name === name);
-    }
-
-    // Create the drag image.
-    let dragImage = this.renderer.createDragImage(source, selectedNames.length);
-
-    // Set up the drag event.
-    this._drag = new Drag({
-      dragImage,
-      mimeData: new MimeData(),
-      supportedActions: 'move',
-      proposedAction: 'move'
-    });
-    this._drag.mimeData.setData(utils.CONTENTS_MIME, selectedNames);
-    if (item && item.type !== 'directory') {
-      this._drag.mimeData.setData(FACTORY_MIME, () => {
-        let path = item.path;
-        let widget = this._manager.findWidget(path);
-        if (!widget) {
-          widget = this._manager.open(item.path);
-          let context = this._manager.contextForWidget(widget);
-          context.populated.connect(() => model.refresh() );
-          context.kernelChanged.connect(() => model.refresh() );
-        }
-        return widget;
-      });
-    }
-
-    // Start the drag and remove the mousemove and mouseup listeners.
-    document.removeEventListener('mousemove', this, true);
-    document.removeEventListener('mouseup', this, true);
-    clearTimeout(this._selectTimer);
-    this._drag.start(clientX, clientY).then(action => {
-      this._drag = null;
-      clearTimeout(this._selectTimer);
-    });
   }
 
   /**
@@ -1245,8 +1147,6 @@ class DirListing extends Widget {
   private _items: HTMLElement[] = [];
   private _sortedModels: IContents.IModel[] = null;
   private _sortState: DirListing.ISortState = { direction: 'ascending', key: 'name' };
-  private _drag: Drag = null;
-  private _dragData: { pressX: number, pressY: number, index: number } = null;
   private _selectTimer = -1;
   private _noSelectTimer = -1;
   private _isCut = false;

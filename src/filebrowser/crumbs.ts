@@ -10,12 +10,12 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  MimeData
+} from 'phosphor/lib/core/mimedata';
 
 import {
-  showDialog
-} from '../dialog';
+  DropWidget, findChild
+} from '../common/dragpanel';
 
 import {
   FileBrowserModel
@@ -45,7 +45,7 @@ const BREAD_CRUMB_PATHS = ['/', '../../', '../', ''];
  * A class which hosts folder breadcrumbs.
  */
 export
-class BreadCrumbs extends Widget {
+class BreadCrumbs extends DropWidget {
 
   /**
    * Construct a new file browser crumb widget.
@@ -53,7 +53,9 @@ class BreadCrumbs extends Widget {
    * @param model - The file browser view model.
    */
   constructor(options: BreadCrumbs.IOptions) {
-    super();
+    super({
+      acceptDropsFromExternalSource: true
+    });
     this._model = options.model;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
@@ -77,19 +79,8 @@ class BreadCrumbs extends Widget {
     case 'click':
       this._evtClick(event as MouseEvent);
       break;
-    case 'p-dragenter':
-      this._evtDragEnter(event as IDragEvent);
-      break;
-    case 'p-dragleave':
-      this._evtDragLeave(event as IDragEvent);
-      break;
-    case 'p-dragover':
-      this._evtDragOver(event as IDragEvent);
-      break;
-    case 'p-drop':
-      this._evtDrop(event as IDragEvent);
-      break;
     default:
+      super.handleEvent(event);
       return;
     }
   }
@@ -101,10 +92,6 @@ class BreadCrumbs extends Widget {
     super.onAfterAttach(msg);
     let node = this.node;
     node.addEventListener('click', this);
-    node.addEventListener('p-dragenter', this);
-    node.addEventListener('p-dragleave', this);
-    node.addEventListener('p-dragover', this);
-    node.addEventListener('p-drop', this);
   }
 
   /**
@@ -114,11 +101,65 @@ class BreadCrumbs extends Widget {
     super.onBeforeDetach(msg);
     let node = this.node;
     node.removeEventListener('click', this);
-    node.removeEventListener('p-dragenter', this);
-    node.removeEventListener('p-dragleave', this);
-    node.removeEventListener('p-dragover', this);
-    node.removeEventListener('p-drop', this);
   }
+
+  /**
+   * Find a drop target from a given drag event target.
+   *
+   * Returns the crumb that is being dropped on, if not the
+   * current crumb, otherwise returns null.
+   *
+   * Overrides method from `DropPanel`.
+   */
+  protected findDropTarget(input: HTMLElement, mimeData: MimeData): HTMLElement {
+    if (mimeData.hasData(utils.CONTENTS_MIME)) {
+      let child = findChild(this._crumbs, input);
+      let index = this._crumbs.indexOf(child);
+      if (index !== -1 && index !== Private.Crumb.Current) {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Processes a drop event.
+   *
+   * This function is called after checking:
+   *  - That the `dropTarget` is a valid drop target
+   *  - The value of `event.source` if `acceptDropsFromExternalSource` is false
+   *
+   * Overrides method from `DropPanel`.
+   */
+  protected processDrop(dropTarget: HTMLElement, event: IDragEvent): void {
+    // Get the path based on the target node.
+    let index = this._crumbs.indexOf(dropTarget);
+    if (index === -1) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (!DropWidget.isValidAction(event.supportedActions, 'move') ||
+        event.proposedAction === 'none') {
+      // The default implementation only handles move action
+      // OR Accept proposed none action, and perform no-op
+      event.dropAction = 'none';
+      return;
+    }
+    event.dropAction = 'move';
+    let path = BREAD_CRUMB_PATHS[index];
+
+    // Move all of the items.
+    let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
+    let promises = utils.moveConditionalOverwrite(
+      path, names, this._model
+    );
+    Promise.all(promises).then(
+      () => this._model.refresh(),
+      err => utils.showErrorMessage(this, 'Move Error', err)
+    );
+  }
+
 
   /**
    * A handler invoked on an `'update-request'` message.
@@ -153,115 +194,6 @@ class BreadCrumbs extends Widget {
       }
       node = node.parentElement;
     }
-  }
-
-  /**
-   * Handle the `'p-dragenter'` event for the widget.
-   */
-  private _evtDragEnter(event: IDragEvent): void {
-    if (event.mimeData.hasData(utils.CONTENTS_MIME)) {
-      let index = utils.hitTestNodes(this._crumbs, event.clientX, event.clientY);
-      if (index !== -1) {
-        if (index !== Private.Crumb.Current) {
-          this._crumbs[index].classList.add(utils.DROP_TARGET_CLASS);
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      }
-    }
-  }
-
-  /**
-   * Handle the `'p-dragleave'` event for the widget.
-   */
-  private _evtDragLeave(event: IDragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
-    if (dropTarget) {
-      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
-    }
-  }
-
-  /**
-   * Handle the `'p-dragover'` event for the widget.
-   */
-  private _evtDragOver(event: IDragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    event.dropAction = event.proposedAction;
-    let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
-    if (dropTarget) {
-      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
-    }
-    let index = utils.hitTestNodes(this._crumbs, event.clientX, event.clientY);
-    if (index !== -1) {
-      this._crumbs[index].classList.add(utils.DROP_TARGET_CLASS);
-    }
-  }
-
-  /**
-   * Handle the `'p-drop'` event for the widget.
-   */
-  private _evtDrop(event: IDragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.proposedAction === 'none') {
-      event.dropAction = 'none';
-      return;
-    }
-    if (!event.mimeData.hasData(utils.CONTENTS_MIME)) {
-      return;
-    }
-    event.dropAction = event.proposedAction;
-
-    let target = event.target as HTMLElement;
-    while (target && target.parentElement) {
-      if (target.classList.contains(utils.DROP_TARGET_CLASS)) {
-        target.classList.remove(utils.DROP_TARGET_CLASS);
-        break;
-      }
-      target = target.parentElement;
-    }
-
-    // Get the path based on the target node.
-    let index = this._crumbs.indexOf(target);
-    if (index === -1) {
-      return;
-    }
-    let path = BREAD_CRUMB_PATHS[index];
-
-    // Move all of the items.
-    let promises: Promise<any>[] = [];
-    let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
-    for (let name of names) {
-      let newPath = path + name;
-      promises.push(this._model.rename(name, newPath).catch(error => {
-        if (error.xhr) {
-          error.message = `${error.xhr.status}: error.statusText`;
-        }
-        if (error.message.indexOf('409') !== -1) {
-          let options = {
-            title: 'Overwrite file?',
-            body: `"${newPath}" already exists, overwrite?`,
-            okText: 'OVERWRITE'
-          };
-          return showDialog(options).then(button => {
-            if (button.text === 'OVERWRITE') {
-              return this._model.deleteFile(newPath).then(() => {
-                return this._model.rename(name, newPath).then(() => {
-                  return this._model.refresh();
-                });
-              });
-            }
-          });
-        }
-      }));
-    }
-    Promise.all(promises).then(
-      () => this._model.refresh(),
-      err => utils.showErrorMessage(this, 'Move Error', err)
-    );
   }
 
   private _model: FileBrowserModel = null;
