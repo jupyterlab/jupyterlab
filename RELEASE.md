@@ -38,7 +38,7 @@ rm -rf dist
 python setup.py sdist
 python setup.py bdist_wheel --universal
 twine upload dist/*
-md5 dist/*.tar.gz  # get the md5 hash for conda-forge install
+shasum -a 256 dist/*.tar.gz  # get the sha256 hash for conda-forge install
 ```
 
 Publish on conda-forge
