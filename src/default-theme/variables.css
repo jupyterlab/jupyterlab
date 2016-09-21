@@ -71,7 +71,7 @@ all of MD as it not optimized for dense, information rich UIs.
 
   /* Content Fonts
   
-  Content font variables are used to typography of user generated content.
+  Content font variables are used for typography of user generated content.
   */
   
   --jp-content-font-size: 14px;

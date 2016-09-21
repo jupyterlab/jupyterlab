@@ -5,12 +5,12 @@ CSS for JupyterLab.
 
 ## CSS checklist
 
-* CSS classnames are defined as file-level `const`s and follow the CSS class naming
-  convention described below.
+* CSS classnames are defined as all caps file-level `const`s and follow the CSS
+  class naming convention described below.
 * CSS files for plugins are located within the plugin and imported into the plugin's
   `index.css`.
 * The JupyterLab default CSS variables in `src/default-theme/variables.css` are used
-  to style plugins whereever possible.
+  to style plugins where ever possible.
 * Additional public/private CSS variables are defined by plugins sparingly and in
   accordance with the conventions described below.
 
