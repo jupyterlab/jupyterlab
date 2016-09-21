@@ -32,83 +32,70 @@ const bokehApplicationExtension: JupyterLabPlugin<void> = {
 }
 
 const SCRIPTS = [
-  // {
-  //   "src": "http://10.10.20.36:8787/status/autoload.js?bokeh-autoload-element=6ffa889b-9900-4f86-badc-e474b3b26b09&bokeh-session-id=18e1885e-7f65-11e6-8ce9-a0999b178b7f",
-  //   "id": "6ffa889b-9900-4f86-badc-e474b3b26b09",
-  //   "data-bokeh-model-id": "f8c1490c-a1ef-4b85-a4a3-b1b3a50496f9",
-  //   "data-bokeh-doc-id": "",
-  //   "text": "Chart 1"
-  // }
-
-
-  // <script
-  //     src="http://10.10.20.36:8787/status/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9683"
-  //     id="0938e7ff-da78-4769-bf7f-b31d99fd9683"
-  //     data-bokeh-model-id=""
-  //     data-bokeh-doc-id=""
-  // ></script>
   {
-    src: "http://10.10.20.36:8787/status/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9683",
+    src: "http://10.10.20.37:8787/status/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9680",
+    id: "0938e7ff-da78-4769-bf7f-b31d99fd9680",
+    widget_id: "distributed-ui:bk-resource-profile-plot",
+    text: "Resource Profile",
+    "data-bokeh-model-id": "bk-resource-profile-plot",
+    "data-bokeh-doc-id": ""
+  },
+  {
+    src: "http://10.10.20.37:8787/status/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9681",
+    id: "0938e7ff-da78-4769-bf7f-b31d99fd9681",
+    widget_id: "distributed-ui:bk-network-profile-plot",
+    text: "Network Profile",
+    'data-bokeh-model-id': "bk-network-profile-plot",
+    'data-bokeh-doc-id': ""
+  },
+  {
+    src: "http://10.10.20.37:8787/status/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9682",
+    id: "0938e7ff-da78-4769-bf7f-b31d99fd9682",
+    widget_id: "distributed-ui:bk-nbytes-plot",
+    text: "Memory Use",
+    'data-bokeh-model-id': "bk-nbytes-plot",
+    'data-bokeh-doc-id': ""
+  },
+  {
+    src: "http://10.10.20.37:8787/status/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9683",
     id: "0938e7ff-da78-4769-bf7f-b31d99fd9683",
-    text: "Status"
+    widget_id: "distributed-ui:bk-task-stream-plot",
+    text: "Task Stream",
+    'data-bokeh-model-id': "bk-task-stream-plot",
+    'data-bokeh-doc-id': ""
   },
   {
-    src: "http://10.10.20.36:8787/tasks/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9684",
+    src: "http://10.10.20.37:8787/status/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9684",
     id: "0938e7ff-da78-4769-bf7f-b31d99fd9684",
-    text: "Tasks"
+    widget_id: "distributed-ui:bk-progress-plot",
+    text: "Progress Stream",
+    'data-bokeh-model-id': "bk-progress-plot",
+    'data-bokeh-doc-id': ""
   },
   {
-    src: "http://10.10.20.36:8787/workers/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9685",
+    src: "http://10.10.20.37:8787/workers/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9685",
     id: "0938e7ff-da78-4769-bf7f-b31d99fd9685",
-    text: "Workers"
+    widget_id: "distributed-ui:bk-processing-plot",
+    text: "Processing and Pending",
+    'data-bokeh-model-id': "bk-processing-plot",
+    'data-bokeh-doc-id': ""
+  },
+  {
+    src: "http://10.10.20.37:8787/workers/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9686",
+    id: "0938e7ff-da78-4769-bf7f-b31d99fd9686",
+    widget_id: "distributed-ui:bk-memory-usage-plot",
+    text: "Worker Memory",
+    'data-bokeh-model-id': "bk-memory-usage-plot",
+    'data-bokeh-doc-id': ""
+  },
+  {
+    src: "http://10.10.20.37:8787/workers/autoload.js?bokeh-autoload-element=0938e7ff-da78-4769-bf7f-b31d99fd9687",
+    id: "0938e7ff-da78-4769-bf7f-b31d99fd9687",
+    widget_id: "distributed-ui:bk-worker-table",
+    text: "Workers Table",
+    'data-bokeh-model-id': "bk-worker-table",
+    'data-bokeh-doc-id': ""
   }
-  // },
-  // {
-  //   text: 'Numpy Reference',
-  //   id: 'help-doc:numpy-reference',
-  //   url: '//docs.scipy.org/doc/numpy/reference/'
-  // },
-  // {
-  //   text: 'Scipy Reference',
-  //   id: 'help-doc:scipy-reference',
-  //   url: '//docs.scipy.org/doc/scipy/reference/'
-  // },
-  // {
-  //   text: 'Notebook Tutorial',
-  //   id: 'help-doc:notebook-tutorial',
-  //   url: '//nbviewer.jupyter.org/github/jupyter/notebook/' +
-  //     'blob/master/docs/source/examples/Notebook/Notebook Basics.ipynb'
-  // },
-  // {
-  //   text: 'Python Reference',
-  //   id: 'help-doc:python-reference',
-  //   url: '//docs.python.org/3.5/'
-  // },
-  // {
-  //   text: 'IPython Reference',
-  //   id: 'help-doc:ipython-reference',
-  //   url: '//ipython.org/documentation.html?v=20160707164940'
-  // },
-  // {
-  //   text: 'Matplotlib Reference',
-  //   id: 'help-doc:mathplotlib-reference',
-  //   url: 'http://matplotlib.org/contents.html?v=20160707164940'
-  // },
-  // {
-  //   text: 'SymPy Reference',
-  //   id: 'help-doc:sympy-reference',
-  //   url: 'http://docs.sympy.org/latest/index.html?v=20160707164940'
-  // },
-  // {
-  //   text: 'Pandas Reference',
-  //   id: 'help-doc:pandas-reference',
-  //   url: 'http://pandas.pydata.org/pandas-docs/stable/?v=20160707164940'
-  // },
-  // {
-  //   text: 'Markdown Reference',
-  //   id: 'help-doc:markdown-reference',
-  //   url: '//help.github.com/articles/getting-started-with-writing-and-formatting-on-github/'
-  // }
 ];
 
 
@@ -139,33 +126,32 @@ function activateBokehApplication(app: JupyterLab, palette: ICommandPalette, mai
   //   label: 'Open Bokeh Application',
   //   execute: () => {
 
-  SCRIPTS.forEach(script => app.commands.addCommand(script.id, {
+  SCRIPTS.forEach(script => app.commands.addCommand(script.widget_id, {
     label: script.text,
     execute: () => {
       let tag = document.createElement('script')
       tag.src = script.src
       tag.id = script.id
-      tag.setAttribute('data-bokeh-model-id', "")
-      tag.setAttribute('data-bokeh-doc-id', "")
+      tag.setAttribute('data-bokeh-model-id', script['data-bokeh-model-id'])
+      tag.setAttribute('data-bokeh-doc-id', script['data-bokeh-doc-id'])
+
+      // wrap bokeh elements in div to apply css selector
+      let div = document.createElement('div')
+      div.classList.add('bk-root')
+      div.appendChild(tag)
 
       let widget = new Widget();
-      widget.id = script.id
-      widget.title.label="Bokeh"
+      widget.id = script.widget_id
+      widget.title.label = script.text
       widget.title.closable = true
 
-      let div_child = document.createElement('div')
-      let div_parent = document.createElement('div')
-      div_parent.classList.add("bk-root")
-      div_child.appendChild(tag)
-      div_parent.appendChild(div_child)
-
-      widget.node.appendChild(div_parent)
+      widget.node.appendChild(div)
       app.shell.addToMainArea(widget)
     }
   }))
 
   SCRIPTS.forEach(script => palette.addItem({
-    command: script.id,
+    command: script.widget_id,
     category: "Bokeh"
   }))
 
