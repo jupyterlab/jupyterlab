@@ -100,68 +100,111 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   dialog.appendChild(body);
 
   // new ObservableList<string>(
-  let launcher = new Launcher(body);
+  let items = new LauncherItems(body);
 
   let list : IDisposable[] = [];
-  let l = launcher.addItem('Notebook');
-  list.push(l)
-  l = launcher.addItem('Terminal');
-  list.push(l)
-  l = launcher.addItem('Terminal');
-  list.push(l)
-  l = launcher.addItem('Terminal');
-  list.push(l)
-  l = launcher.addItem('Terminal');
-  list.push(l)
-  l = launcher.addItem('Console');
-  list.push(l)
 
-  l = launcher.addItem('Add Terminal');
-  list.push(l)
-
-
-  l = launcher.addItem('Remove Terminal');
-  list.push(l)
-
-  launcher.render()
-
-  applyClickCallbacks(launcher.body, 'jp-ImageNotebook jp-Launcher-image', () => { 
+  let l = items.addItem('Notebook', () => { 
       app.commands.execute('file-operations:new-notebook', void 0);
   });
+  l = items.addItem('Terminal', () => app.commands.execute('terminal:create-new', void 0));
 
-  applyClickCallbacks(launcher.body, 'jp-ImageConsole jp-Launcher-image', () => {
-      app.commands.execute(`console:create-${services.kernelspecs.default}`, void 0);
-  });
-
-  applyClickCallbacks(launcher.body, 'jp-ImageTextEditor jp-Launcher-image', () => {
-      app.commands.execute('file-operations:new-text-file', void 0);
-  });
+  let names = [
+      'Terminal',
+      'Notebook',
+      'Text Editor',
+      'Console',
+      ''
+  ]
+  let actions = [
+      'terminal:create-new',
+      'file-operations:new-notebook',
+      'file-operations:new-text-file',
+      ''
+  ]
   
-  applyClickCallbacks(launcher.body, 'jp-ImageTerminal jp-Launcher-image', () => {
-      app.commands.execute('terminal:create-new', void 0);
-  });
+  items.addItem("Add Random", () => {
+  
 
-  applyClickCallbacks(launcher.body, 'jp-ImageRemoveTerminal jp-Launcher-image', () => { 
-      console.log(list);
-      console.log(list.length);
-      list.pop().dispose();
+      let index = Math.floor(Math.random() * actions.length);
+      console.log("adding random" + index); 
+      let itemName = names[index];
+      let action = actions[index];
 
-      //launcher.render()
-      // XXX: re-render here
-
-  });
-  applyClickCallbacks(launcher.body, 'jp-ImageAddTerminal jp-Launcher-image', () => { 
-      l = launcher.addItem('Remove Terminal');
+      l = items.addItem(itemName, () => app.commands.execute(action, void 0));
+      
+      console.log("added item ")
+                       
       list.push(l)
   });
 
 
+  l = items.addItem('Text Editor', () => { 
+      app.commands.execute('file-operations:new-text-file', void 0);
+  });
+
+  // list.push(l)
 
 
-  app.commands.addCommand('jupyterlab-launcher:add item', {
+  // l = items.addItem('Terminal');
+  // list.push(l)
+  // l = items.addItem('Terminal');
+  // list.push(l)
+  // l = items.addItem('Terminal');
+  // list.push(l)
+  // l = items.addItem('Terminal');
+  // list.push(l)
+  // l = items.addItem('Console');
+  // list.push(l)
+
+  // l = items.addItem('Add Terminal');
+  // list.push(l)
+
+
+  // l = items.addItem('Remove Terminal');
+  // list.push(l)
+
+  items.render()
+  //  
+  //    applyClickCallbacks(launcher.body, 'jp-ImageNotebook jp-Launcher-image', () => { 
+  //        app.commands.execute('file-operations:new-notebook', void 0);
+  //    });
+  //  
+  //    applyClickCallbacks(launcher.body, 'jp-ImageConsole jp-Launcher-image', () => {
+  //        app.commands.execute(`console:create-${services.kernelspecs.default}`, void 0);
+  //    });
+  //  
+  //    applyClickCallbacks(launcher.body, 'jp-ImageTextEditor jp-Launcher-image', () => {
+  //        app.commands.execute('file-operations:new-text-file', void 0);
+  //    });
+  //    
+  //    applyClickCallbacks(launcher.body, 'jp-ImageTerminal jp-Launcher-image', () => {
+  //        app.commands.execute('terminal:create-new', void 0);
+  //    });
+  //  
+  //    applyClickCallbacks(launcher.body, 'jp-ImageRemoveTerminal jp-Launcher-image', () => { 
+  //        console.log(list);
+  //        console.log(list.length);
+  //        list.pop().dispose();
+  //  
+  //        //launcher.render()
+  //        // XXX: re-render here
+  //  
+  //    });
+  //    applyClickCallbacks(launcher.body, 'jp-ImageAddTerminal jp-Launcher-image', () => { 
+  //        l = launcher.addItem('Remove Terminal', () => { console.log("hello"); });
+  //        list.push(l)
+  //    });
+
+
+
+
+  app.commands.addCommand('jupyterlab-launcher:add-item', {
     label: 'Add Launcher Item',
     execute: () => {
-        launcher.addItem("plusOne");
+        items.addItem("Add Random", () => {
+          console.log("plus one");
+        });
     }
 
   });
@@ -174,7 +217,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
         app.shell.addToLeftArea(widget);
       } else {
           app.shell.activateMain(widget.id);
-        console.log("bye" + launcher.strList)
+        console.log("bye" + items.strList)
       }
     }
   });
@@ -199,24 +242,44 @@ export interface ILauncherItem {
 
 }
 
-class Launcher {
+class LauncherItems {
     constructor(public body: HTMLElement){
     }
  
     public strList: string[] =  [];
-    //public strList: string[] =  ['Notebook', 'Notebook2', 'Terminal', 'Text Editor', 'Notebook', 'Console', 'Terminal', 'Text Editor'];
     
-    addItem(options: string): IDisposable {
-        console.log('hello, adding ' + options);
-        this.strList.push(options);
+    addItem(name: string, clickCallback: () => void): IDisposable {
+        console.log('hello, adding ' + name);
+        this.strList.push(name);
+        
+
+        let column = document.createElement('div');
+        column.className = 'jp-Launcher-column';
+
+        let img = document.createElement('span');
+        let imgName = name.replace(' ', '');
+        img.className = `jp-Image${imgName} jp-Launcher-image`;
+
+        column.appendChild(img);
+
+        let text = document.createElement('span');
+        text.textContent = name;
+        text.className = 'jp-Launcher-text';
+        column.appendChild(text);
+
+        column.addEventListener('click', clickCallback);
+
+        this.body.appendChild(column);
+      
+
         return new DisposableDelegate(() => {
-            console.log("removing " + options);
+            console.log("removing " + name);
             // XXX: remove corresponding DOM element
-            this.strList.splice(this.strList.indexOf(options), 1);
+            this.strList.splice(this.strList.indexOf(name), 1);
             console.log(this.strList);
 
-            // XXX:re-render the component when this happens...
-            //this.render()
+            this.body.removeChild(column);
+
         });
     }
 
@@ -224,28 +287,8 @@ class Launcher {
 
         // ['Notebook', 'Notebook2', 'Terminal', 'Text Editor', 'Notebook', 'Console', 'Terminal', 'Text Editor']
         // XXX: hack - remove all child nodes
-        while (this.body.firstChild) {
-            this.body.removeChild(this.body.firstChild);
-        }
 
         console.log('render called')
-
-        for (let name of this.strList) {
-            let column = document.createElement('div');
-            this.body.appendChild(column);
-            column.className = 'jp-Launcher-column';
-
-            let img = document.createElement('span');
-            let imgName = name.replace(' ', '');
-            img.className = `jp-Image${imgName} jp-Launcher-image`;
-
-            column.appendChild(img);
-
-            let text = document.createElement('span');
-            text.textContent = name;
-            text.className = 'jp-Launcher-text';
-            column.appendChild(text);
-        }
 
 
     }
