@@ -53,7 +53,7 @@ JupyterLab includes a default set of CSS variables in the file:
 
 `src/default-theme/variables.css`
 
-To ensure consistent design in JupyterLAb, all built-in and third party
+To ensure consistent design in JupyterLab, all built-in and third party
 extensions should use these variables in their styles if at all possible.
 Documentation about those variables can be found in the `variables.css` file
 itself.

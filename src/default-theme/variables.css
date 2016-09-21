@@ -5,14 +5,14 @@
 
 /*
 The following CSS variables define the main, public API for styling JupyterLab.
-These variables should be used by all plugins whereever possible. In other
+These variables should be used by all plugins wherever possible. In other
 words, plugins should not define custom colors, sizes, etc unless absolutely
 necessary. This enables users to change the visual theme of JupyterLab
-by changing these variable.
+by changing these variables.
 
 Many variables appear in an ordered sequence (0,1,2,3). These sequences
-are designed to work well together, so for example, --jp-border-color1 should
-be used with --jp-layout-color1. The numbers have the following meanings:
+are designed to work well together, so for example, `--jp-border-color1` should
+be used with `--jp-layout-color1`. The numbers have the following meanings:
 
 * 0: super-primary, reserved for special emphasis
 * 1: primary, most important under normal situations
@@ -21,7 +21,7 @@ be used with --jp-layout-color1. The numbers have the following meanings:
 
 Throughout JupyterLab, we are mostly following principles from Google's
 Material Design when selecting colors. We are not, however, following 
-all of MD as it not optimized for dense, information rich UIs.
+all of MD as it is not optimized for dense, information rich UIs.
 */
 
 
@@ -82,7 +82,7 @@ all of MD as it not optimized for dense, information rich UIs.
 
   /* Layout
   
-  The following are the main layout colors use in JupyterLab. In a light`
+  The following are the main layout colors use in JupyterLab. In a light
   theme these would go from light to dark.
   */
 
