@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 var JupyterLab = require('jupyterlab/lib/application').JupyterLab;
-var validateEntry = require('jupyterlab-extension-builder/lib/validate').validateEntry;
+var extractPlugins = require('jupyterlab-extension-builder/lib/extract').extractPlugins;
 
 
 // ES6 Promise polyfill
@@ -19,11 +19,8 @@ require('jupyterlab/lib/default-theme/index.css');
  */
 function getEntryPoint(entryPoint) {
   var plugins = jupyter.require(entryPoint);
-  if (!Array.isArray(plugins)) {
-    plugins = [plugins];
-  }
   try {
-    validateEntry(plugins);
+    plugins = extractPlugins(plugins);
   } catch (err) {
     console.error(err);
     plugins = [];
