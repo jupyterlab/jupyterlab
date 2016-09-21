@@ -5,14 +5,21 @@
 |----------------------------------------------------------------------------*/
 
 
+:root {
+  --jp-private-completer-code-font-size: 14px;
+  --jp-private-completer-item-height: 24px;
+}
+
+
 .jp-Completer {
   background: white;
   border: var(--jp-border-width) solid var(--jp-border-color1);
   list-style-type: none;
   overflow: auto;
   padding: 0;
-  margin: 0 0 0 -4px;
-  max-height: 252px;
+  margin: 4px 0 0 -4px;
+  max-height: calc((10 * var(--jp-private-completer-item-height)) + (2 * var(--jp-border-width)));
+  min-height: calc(var(--jp-private-completer-item-height) + (2 * var(--jp-border-width)));
   position: absolute;
   z-index: 10001;
 }
@@ -36,8 +43,8 @@
 
 
 .jp-Completer-item code {
-  font-size: 14px;
-  line-height: 25px;
+  font-size: var(--jp-private-completer-code-font-size);
+  height: var(--jp-private-completer-item-height);
   padding: 0;
   margin: 0;
 }
