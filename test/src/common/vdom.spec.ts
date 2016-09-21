@@ -22,7 +22,7 @@ class TestModel extends VDomModel {
     this.stateChanged.emit(void 0);
   }
 
-  _value = '';
+  private _value = '';
 }
 
 class TestWidget extends VDomWidget<TestModel> {

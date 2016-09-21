@@ -51,7 +51,7 @@ class TestModel extends VDomModel {
     this.stateChanged.emit(void 0);
   }
 
-  _myvalue = '';
+  private _myvalue = '';
 }
 ```
 
