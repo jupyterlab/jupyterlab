@@ -5,6 +5,9 @@
 |----------------------------------------------------------------------------*/
 
 
+@import './toolbar.css';
+
+
 .jp-Notebook {
   padding-left: 4px;
   padding-right: 4px;
