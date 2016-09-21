@@ -25,6 +25,7 @@ Contents:
    notebook.md
    patterns.md
    css.md
+   virtualdom.md
    adding_content.md
    examples.md
    terminology.md
