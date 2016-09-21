@@ -27,7 +27,8 @@ To use these classes, we recommend the following approach.
 
 First, import the virtual DOM API from PhosphorJS and JupyterLab:
 
-```typescriptimport {
+```typescript
+import {
   h, VNode
 } from 'phosphor/lib/ui/vdom';
 
