@@ -34,7 +34,7 @@ import {
 
 import {
   VDomModel, VDomWidget
-} from '../../../lib/common/vdom';
+} from '../common/vdom'; // From another JupyterLab plugin
 ```
 
 Second, create a subclass of `VDomModel` that contains all of the state needed
