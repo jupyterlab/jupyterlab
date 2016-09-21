@@ -6,7 +6,7 @@
 
 
 .jp-Completer {
-  background: #EEEEEE;
+  background: white;
   border: var(--jp-border-width) solid var(--jp-border-color1);
   list-style-type: none;
   overflow: auto;
@@ -27,11 +27,6 @@
   margin: 0;
   min-width: 150px;
   padding: 0 2px;
-}
-
-
-.jp-Completer-item:nth-child(odd) {
-  background: #FFFFFF;
 }
 
 
