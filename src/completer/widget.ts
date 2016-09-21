@@ -45,7 +45,7 @@ const OUTOFVIEW_CLASS = 'jp-mod-outofview';
 /**
  * The minimum height of a completer widget.
  */
-const MIN_HEIGHT = 75;
+const MIN_HEIGHT = 20;
 
 /**
  * The maximum height of a completer widget.
@@ -423,41 +423,72 @@ class CompleterWidget extends Widget {
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
+    let node = this.node;
+    let model = this._model;
+
     // This is an overly defensive test: `cursor` will always exist if
     // `original` exists, except in contrived tests. But since it is possible
     // to generate a runtime error, the check occurs here.
-    if (!this._model || !this._model.original || !this._model.cursor) {
+    if (!model || !model.original || !model.cursor) {
       return;
     }
 
-    // Always use original coordinates to calculate completer position.
-    let coords = this._model.original.coords;
-    let node = this.node;
-    let computed = window.getComputedStyle(node);
-    let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
-    let availableHeight = coords.top + scrollDelta;
-    let chWidth = this._model.original.chWidth;
-    let maxHeight = (parseInt(computed.maxHeight, 10) || MAX_HEIGHT);
+    // Clear any previous set max-height.
+    node.style.maxHeight = '';
 
-    maxHeight = Math.max(0, Math.min(availableHeight, maxHeight));
-    if (maxHeight > MIN_HEIGHT) {
-      node.classList.remove(OUTOFVIEW_CLASS);
+    // Clear any programmatically set margin-top.
+    node.style.marginTop = '';
+
+    // Make sure the node is visible.
+    node.classList.remove(OUTOFVIEW_CLASS);
+
+    // Always use original coordinates to calculate completer position.
+    let { coords, chWidth, chHeight } = model.original;
+    let style = window.getComputedStyle(node);
+    let innerHeight = window.innerHeight;
+    let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
+    let spaceAbove = coords.top + scrollDelta;
+    let spaceBelow = innerHeight - coords.bottom - scrollDelta;
+    let marginTop = (parseInt(style.marginTop, 10) || 0);
+    let maxHeight = (parseInt(style.maxHeight, 10) || MAX_HEIGHT);
+    let minHeight = (parseInt(style.minHeight, 10) || MIN_HEIGHT);
+    let anchorRect = this._anchor.getBoundingClientRect();
+    let top: number;
+
+    // If the whole completer fits below or if there is more space below, then
+    // rendering the completer below the text being typed is privileged so that
+    // the code above is not obscured.
+    let renderBelow = spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+    if (renderBelow) {
+      maxHeight = Math.min(spaceBelow - marginTop, maxHeight);
     } else {
-      node.classList.add(OUTOFVIEW_CLASS);
-      return;
+      maxHeight = Math.min(spaceAbove, maxHeight);
+      // If the completer renders above the text, its top margin is irrelevant.
+      node.style.marginTop = '0px';
     }
     node.style.maxHeight = `${maxHeight}px`;
 
-    let borderLeftWidth = computed.borderLeftWidth;
-    let rect = node.getBoundingClientRect();
-    let top = availableHeight - rect.height;
+    // Make sure the completer ought to be visible.
+    let withinBounds = maxHeight > minHeight &&
+                   spaceBelow >= chHeight &&
+                   spaceAbove >= anchorRect.top;
+    if (!withinBounds) {
+      node.classList.add(OUTOFVIEW_CLASS);
+      return;
+    }
+
+    let borderLeftWidth = style.borderLeftWidth;
     let left = coords.left + (parseInt(borderLeftWidth, 10) || 0);
     let { start, end } = this._model.cursor;
+    let nodeRect = node.getBoundingClientRect();
+
+    // Position the completer vertically.
+    top = renderBelow ? innerHeight - spaceBelow : spaceAbove - nodeRect.height;
+    node.style.top = `${Math.floor(top)}px`;
 
     // Move completer to the start of the blob being completed.
     left -= chWidth * (end - start);
     node.style.left = `${Math.ceil(left)}px`;
-    node.style.top = `${Math.floor(top)}px`;
     node.style.width = 'auto';
 
     // Expand the menu width by the scrollbar size, if present.
