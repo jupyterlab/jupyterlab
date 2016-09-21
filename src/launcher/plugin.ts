@@ -41,24 +41,6 @@ const launcherExtension: JupyterLabPlugin<void> = {
 };
 
 
-// want
-//
-// - LauncherItem
-//   -()
-//      - name
-//      - imageName (can be standardize from name)
-//      - className (can be standardize from name)
-//      - eventListener - 1 (or more?) - 'click' but maybe also 'hover'?
-//
-// - widget container
-//   -()
-//     - an observable list of LauncherItems
-//
-//   - renders its children (adds them to the DOM)
-//   - some API for adding (removing) children)
-// - on activate, each plugin registers itself with the launcher
-// - requires all extensions to depend on the Launcher if they want to register with it...
-//   - what if I given person doesn't want the launcher...
 
 function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): void {
   let widget = new Widget();
@@ -99,22 +81,22 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   body.className = 'jp-Launcher-body';
   dialog.appendChild(body);
 
-  // new ObservableList<string>(
   let items = new LauncherItems(body);
 
-  let list : IDisposable[] = [];
+  let list : IDisposable[] = []; //DEMO ONLY
 
   let l = items.addItem('Notebook', () => { 
       app.commands.execute('file-operations:new-notebook', void 0);
   });
+  list.push(l);
   l = items.addItem('Terminal', () => app.commands.execute('terminal:create-new', void 0));
+  list.push(l);
 
   let names = [
       'Terminal',
       'Notebook',
       'Text Editor',
       'Console',
-      ''
   ]
   let actions = [
       'terminal:create-new',
@@ -138,65 +120,17 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       list.push(l)
   });
 
+  items.addItem("Remove Last", () => {
+      list.pop().dispose();
+      console.log("Removing last")
+  
+  });
+
 
   l = items.addItem('Text Editor', () => { 
       app.commands.execute('file-operations:new-text-file', void 0);
   });
-
-  // list.push(l)
-
-
-  // l = items.addItem('Terminal');
-  // list.push(l)
-  // l = items.addItem('Terminal');
-  // list.push(l)
-  // l = items.addItem('Terminal');
-  // list.push(l)
-  // l = items.addItem('Terminal');
-  // list.push(l)
-  // l = items.addItem('Console');
-  // list.push(l)
-
-  // l = items.addItem('Add Terminal');
-  // list.push(l)
-
-
-  // l = items.addItem('Remove Terminal');
-  // list.push(l)
-
-  items.render()
-  //  
-  //    applyClickCallbacks(launcher.body, 'jp-ImageNotebook jp-Launcher-image', () => { 
-  //        app.commands.execute('file-operations:new-notebook', void 0);
-  //    });
-  //  
-  //    applyClickCallbacks(launcher.body, 'jp-ImageConsole jp-Launcher-image', () => {
-  //        app.commands.execute(`console:create-${services.kernelspecs.default}`, void 0);
-  //    });
-  //  
-  //    applyClickCallbacks(launcher.body, 'jp-ImageTextEditor jp-Launcher-image', () => {
-  //        app.commands.execute('file-operations:new-text-file', void 0);
-  //    });
-  //    
-  //    applyClickCallbacks(launcher.body, 'jp-ImageTerminal jp-Launcher-image', () => {
-  //        app.commands.execute('terminal:create-new', void 0);
-  //    });
-  //  
-  //    applyClickCallbacks(launcher.body, 'jp-ImageRemoveTerminal jp-Launcher-image', () => { 
-  //        console.log(list);
-  //        console.log(list.length);
-  //        list.pop().dispose();
-  //  
-  //        //launcher.render()
-  //        // XXX: re-render here
-  //  
-  //    });
-  //    applyClickCallbacks(launcher.body, 'jp-ImageAddTerminal jp-Launcher-image', () => { 
-  //        l = launcher.addItem('Remove Terminal', () => { console.log("hello"); });
-  //        list.push(l)
-  //    });
-
-
+  list.push(l);
 
 
   app.commands.addCommand('jupyterlab-launcher:add-item', {
@@ -217,7 +151,6 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
         app.shell.addToLeftArea(widget);
       } else {
           app.shell.activateMain(widget.id);
-        console.log("bye" + items.strList)
       }
     }
   });
@@ -230,28 +163,12 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   app.shell.addToLeftArea(widget);
 }
 
-function applyClickCallbacks(body: HTMLElement, className: string, callback: () => void) {
-  let nodes = body.getElementsByClassName(className);
-
-  for(let i = 0; i < nodes.length; i++) {
-      nodes[i].addEventListener('click', callback);
-  };
-}
-
-export interface ILauncherItem {
-
-}
-
 class LauncherItems {
     constructor(public body: HTMLElement){
     }
  
-    public strList: string[] =  [];
-    
     addItem(name: string, clickCallback: () => void): IDisposable {
         console.log('hello, adding ' + name);
-        this.strList.push(name);
-        
 
         let column = document.createElement('div');
         column.className = 'jp-Launcher-column';
@@ -273,23 +190,9 @@ class LauncherItems {
       
 
         return new DisposableDelegate(() => {
-            console.log("removing " + name);
-            // XXX: remove corresponding DOM element
-            this.strList.splice(this.strList.indexOf(name), 1);
-            console.log(this.strList);
-
+            // remove corresponding DOM element from the body
             this.body.removeChild(column);
 
         });
-    }
-
-    render() {
-
-        // ['Notebook', 'Notebook2', 'Terminal', 'Text Editor', 'Notebook', 'Console', 'Terminal', 'Text Editor']
-        // XXX: hack - remove all child nodes
-
-        console.log('render called')
-
-
     }
 }
