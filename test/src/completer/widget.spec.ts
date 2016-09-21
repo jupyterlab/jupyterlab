@@ -30,7 +30,7 @@ const ITEM_CLASS = 'jp-Completer-item';
 
 const ACTIVE_CLASS = 'jp-mod-active';
 
-const MAX_HEIGHT = 250;
+const MAX_HEIGHT = 200;
 
 
 class CustomRenderer extends CompleterWidget.Renderer {
@@ -551,7 +551,7 @@ describe('completer/widget', () => {
           let anchor = document.createElement('div');
           let container = new Widget();
           let model = new CompleterModel();
-          let coords: ICoords = { left: 0, right: 0, top: 500, bottom: 0 };
+          let coords: ICoords = { left: 0, right: 0, top: 500, bottom: 520 };
           let request: ICompletionRequest = {
             ch: 0,
             chHeight: 0,
@@ -578,13 +578,13 @@ describe('completer/widget', () => {
           Widget.attach(widget, document.body);
           sendMessage(widget, WidgetMessage.UpdateRequest);
 
-          let offset = 200;
+          let offset = 100;
           anchor.scrollTop = offset;
           simulate(anchor, 'scroll');
 
           requestAnimationFrame(() => {
             let top = parseInt(window.getComputedStyle(widget.node).top, 10);
-            expect(top).to.be(coords.top - MAX_HEIGHT - offset);
+            expect(top).to.be(coords.bottom - offset);
             widget.dispose();
             container.dispose();
             done();
