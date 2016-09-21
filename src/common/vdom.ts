@@ -46,7 +46,7 @@ export class VDomModel implements IVDomModel {
   /**
    * A signal emitted when any model state changes.
    */
-  stateChanged: ISignal<IVDomModel, void>;
+  stateChanged: ISignal<this, void>;
 
   /**
    * Dispose the model.
@@ -66,7 +66,7 @@ export class VDomModel implements IVDomModel {
     return this._isDisposed;
   }
 
-  _isDisposed = false;
+  private _isDisposed = false;
 }
 
 // Define the signals for the VDomModel class.
@@ -79,7 +79,7 @@ defineSignal(VDomModel.prototype, 'stateChanged');
 export
 abstract class VDomWidget<T extends IVDomModel> extends Widget {
   /**
-   * Construct a var name = new type(arguments);VDomWidget.
+   * Construct a new VDomWidget.
    */
   constructor() {
     super();
@@ -88,13 +88,14 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
   /**
    * A signal emited when the model changes.
    */
-  modelChanged: ISignal<VDomWidget<T>, void>;
+  modelChanged: ISignal<this, void>;
 
   /** 
    * Set the model and fire changed signals.
    */
   set model(newValue: T) {
-    if (!newValue && !this._model || newValue === this._model) {
+    newValue = newValue || null;
+    if (this._model === newValue) {
       return;
     }
 
@@ -115,10 +116,28 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
   }
 
   /**
+   * Test whether the widget is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._model === null;
+  }
+
+  /**
+   * Dispose this widget.
+   */
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this._model = null;
+    super.dispose();
+  }
+
+  /**
    * Called to update the state of the widget.
    * 
-   * In this class, this triggers VDOM based rendering by calling
-   * the this.render() method.
+   * The default implementation of this method triggers
+   * VDOM based rendering by calling the this.render() method.
    */
   protected onUpdateRequest(msg: Message): void {
     let vnode = this.render();
@@ -137,25 +156,7 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
    */
   protected abstract render(): VNode | VNode[];
 
-  /**
-   * Test whether the widget is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._model === null;
-  }
-
-  /**
-   * Dispose this widget.
-   */
-  dispose() {
-    if (this.isDisposed) {
-      return;
-    }
-    this._model = null;
-    super.dispose();
-  }
-
-  _model: T
+  private _model: T
 }
 
 // Define the signal for the VDomWidget class.
