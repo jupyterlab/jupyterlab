@@ -42,18 +42,22 @@ to render the content:
 
 ```typescript
 class TestModel extends VDomModel {
-  get value(): string {
-    return this._value;
+  get myvalue(): string {
+    return this._myvalue;
   }
 
-  set value(newValue: string) {
-    this._value = newValue;
+  set myvalue(newValue: string) {
+    this._myvalue = newValue;
     this.stateChanged.emit(void 0);
   }
 
-  _value = '';
+  _myvalue = '';
 }
 ```
+
+For each attribute that is part of your model, you will implement a `get` and `set`
+method as we have done here for the `myvalue` attribute. All of the `set` methods
+in your model should end by calling `this.stateChanged.emit(void 0)`.
 
 Third, create a subclass of `VDomWidget` that has a `render()` method that uses Phosphor's
 virtual DOM API and returns a PhosphorJS `VNode` or an array of them:
@@ -61,7 +65,7 @@ virtual DOM API and returns a PhosphorJS `VNode` or an array of them:
 ```typescript
 class TestWidget extends VDomWidget<TestModel> {
   protected render(): VNode | VNode[] {
-    return h.span(this.model.value);
+    return h.span(this.model.myvalue);
   } 
 }
 ```
