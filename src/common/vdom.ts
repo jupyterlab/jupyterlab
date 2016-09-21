@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Message
-} from 'phosphor/lib/core/messaging';
-
-import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
+
+import {
+  Message
+} from 'phosphor/lib/core/messaging';
 
 import {
   clearSignalData, defineSignal, ISignal
@@ -23,28 +23,25 @@ import {
 
 
 /**
- * An interface for a model to be used with vdom rendering
+ * An interface for a model to be used with vdom rendering.
  */
 export
 interface IVDomModel extends IDisposable {
-
   /**
-   * A signal emmited when any model state changes.
+   * A signal emited when any model state changes.
    */
   stateChanged: ISignal<IVDomModel, void>;
-
 }
 
 
 /**
- * Concrete implementation of IVDomModel
+ * Concrete implementation of IVDomModel.
  */
 export class VDomModel implements IVDomModel {
-
   /**
-   * Create a VDomModel
+   * Construct a new VDomModel.
    */
-  contructor() {}
+  constructor() {}
 
   /**
    * A signal emitted when any model state changes.
@@ -63,14 +60,13 @@ export class VDomModel implements IVDomModel {
   }
 
   /**
-   * Is the model disposed?
+   * Test whether the model is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
 
   _isDisposed = false;
-
 }
 
 // Define the signals for the VDomModel class.
@@ -78,26 +74,24 @@ defineSignal(VDomModel.prototype, 'stateChanged');
 
 
 /** 
- * Phosphor widget that encodes best practices for VDOM based rendering
+ * Phosphor widget that encodes best practices for VDOM based rendering.
  */
 export
 abstract class VDomWidget<T extends IVDomModel> extends Widget {
-
   /**
-   * Create a VDomWidget.
+   * Construct a var name = new type(arguments);VDomWidget.
    */
   constructor() {
     super();
   }
 
   /**
-   * A signal emmited when the model changes.
+   * A signal emited when the model changes.
    */
   modelChanged: ISignal<VDomWidget<T>, void>;
 
   /** 
    * Set the model and fire changed signals.
-   * 
    */
   set model(newValue: T) {
     if (!newValue && !this._model || newValue === this._model) {
@@ -141,10 +135,10 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
    * in this.model and return a phosphor VNode or VNode[] using the phosphor
    * VDOM API.
    */
-  protected abstract render(): VNode | VNode[]
+  protected abstract render(): VNode | VNode[];
 
   /**
-   * Is this widget disposed?
+   * Test whether the widget is disposed.
    */
   get isDisposed(): boolean {
     return this._model === null;
@@ -162,8 +156,7 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
   }
 
   _model: T
-
 }
 
-// Define the signal for the VDomWidget class
+// Define the signal for the VDomWidget class.
 defineSignal(VDomWidget.prototype, 'modelChanged');
