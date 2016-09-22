@@ -181,7 +181,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
     this.addClass(MARKDOWN_CLASS);
     let parts = removeMath(options.source);
     // Add the markdown content asynchronously.
-    marked(parts['text'], (err, content) => {
+    marked(parts['text'], (err: any, content: string) => {
       if (err) {
         console.error(err);
         return;
