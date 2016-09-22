@@ -85,11 +85,12 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
 
   let list : IDisposable[] = []; //DEMO ONLY
 
-  let l = items.addItem('Notebook', () => { 
+  let l = items.addItem(
+      new LauncherItem('Notebook', () => { 
       app.commands.execute('file-operations:new-notebook', void 0);
-  });
+  }));
   list.push(l);
-  l = items.addItem('Terminal', () => app.commands.execute('terminal:create-new', void 0));
+  l = items.addItem(new LauncherItem('Terminal', () => app.commands.execute('terminal:create-new', void 0)));
   list.push(l);
 
   let names = [
@@ -105,7 +106,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       ''
   ]
   
-  items.addItem("Add Random", () => {
+  items.addItem(new LauncherItem("Add Random", () => {
   
 
       let index = Math.floor(Math.random() * actions.length);
@@ -113,32 +114,32 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       let itemName = names[index];
       let action = actions[index];
 
-      l = items.addItem(itemName, () => app.commands.execute(action, void 0));
+      l = items.addItem(new LauncherItem(itemName, () => app.commands.execute(action, void 0)));
       
       console.log("added item ")
                        
       list.push(l)
-  });
+  }));
 
-  items.addItem("Remove Last", () => {
+  items.addItem(new LauncherItem("Remove Last", () => {
       list.pop().dispose();
       console.log("Removing last")
   
-  });
+  }));
 
 
-  l = items.addItem('Text Editor', () => { 
+  l = items.addItem(new LauncherItem('Text Editor', () => { 
       app.commands.execute('file-operations:new-text-file', void 0);
-  });
+  }));
   list.push(l);
 
 
   app.commands.addCommand('jupyterlab-launcher:add-item', {
     label: 'Add Launcher Item',
     execute: () => {
-        items.addItem("Add Random", () => {
+        items.addItem(new LauncherItem("Add Random", () => {
           console.log("plus one");
-        });
+        }));
     }
 
   });
@@ -163,28 +164,45 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   app.shell.addToLeftArea(widget);
 }
 
+
+class LauncherItem {
+    constructor(public name: string, public clickCallback: () => void) {
+    }
+
+}
+
 class LauncherItems {
     constructor(public body: HTMLElement){
     }
+   
+    /**
+     * Convenience method to add a launcher with a given name and callback
+     *
+     * This keeps plugins who wish to register themselves in the Launcher from
+     * having to import both LauncherItems and LauncherItem.
+     */
+    add(name: string, clickCallback: () => void) : IDisposable {
+        return this.addItem(new LauncherItem(name, clickCallback));
+    }
  
-    addItem(name: string, clickCallback: () => void): IDisposable {
+    addItem(item : LauncherItem) : IDisposable {
         console.log('hello, adding ' + name);
 
         let column = document.createElement('div');
         column.className = 'jp-Launcher-column';
 
         let img = document.createElement('span');
-        let imgName = name.replace(' ', '');
+        let imgName = item.name.replace(' ', '');
         img.className = `jp-Image${imgName} jp-Launcher-image`;
 
         column.appendChild(img);
 
         let text = document.createElement('span');
-        text.textContent = name;
+        text.textContent = item.name;
         text.className = 'jp-Launcher-text';
         column.appendChild(text);
 
-        column.addEventListener('click', clickCallback);
+        column.addEventListener('click', item.clickCallback);
 
         this.body.appendChild(column);
       
