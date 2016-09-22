@@ -32,7 +32,7 @@
   overflow: auto;
 }
 
-.jp-ConsoleContent-foreign-cell {
+.jp-ConsoleContent-foreignCell {
   background-color: var(--jp-layout-color3);
   flex: 1 1 auto;
   overflow: auto;

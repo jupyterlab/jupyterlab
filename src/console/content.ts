@@ -71,7 +71,7 @@ const BANNER_CLASS = 'jp-ConsoleContent-banner';
 /**
  * The class name of a cell whose input originated from a foreign session.
  */
-const FOREIGN_CELL_CLASS = 'jp-ConsoleContent-foreign-cell';
+const FOREIGN_CELL_CLASS = 'jp-ConsoleContent-foreignCell';
 
 /**
  * The class name of the active prompt
@@ -171,7 +171,8 @@ class ConsoleContent extends Widget {
         return;
       }
       let msgType = msg.header.msg_type as nbformat.OutputType;
-      let parentMsgId = (msg.parent_header as KernelMessage.IHeader).msg_id as string;
+      let parentHeader = msg.parent_header as KernelMessage.IHeader;
+      let parentMsgId = parentHeader.msg_id as string;
       let cell : CodeCellWidget;
       switch (msgType) {
       case 'execute_input':
@@ -190,7 +191,7 @@ class ConsoleContent extends Widget {
         if (!(parentMsgId in this._foreignCells)) {
           // This is an output from an input that was broadcast before our
           // session started listening. We will ignore it.
-          console.log('Warning: Ignoring output with no associated input cell.');
+          console.warn('Ignoring output with no associated input cell.');
           break;
         }
         cell = this._foreignCells[parentMsgId];
