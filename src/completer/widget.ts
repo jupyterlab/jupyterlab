@@ -227,8 +227,9 @@ class CompleterWidget extends Widget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    let model = this.model;
-    if (!model) {
+    let model = this._model;
+    let anchor = this._anchor;
+    if (!model || !anchor) {
       return;
     }
 
@@ -268,7 +269,7 @@ class CompleterWidget extends Widget {
       this.show();
       this.visibilityChanged.emit(void 0);
     }
-    this._anchorPoint = this._anchor.scrollTop;
+    this._anchorPoint = anchor.scrollTop;
     this._setGeometry();
 
     // If this is the first time the current completer session has loaded,
