@@ -12,8 +12,9 @@
 
 
 .jp-Completer {
-  background: white;
-  border: var(--jp-border-width) solid var(--jp-border-color1);
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color2);
+  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
   list-style-type: none;
   overflow: auto;
   padding: 0;
@@ -38,7 +39,7 @@
 
 
 .jp-Completer-item:hover, .jp-Completer-item.jp-mod-active {
-  background: #BFBFBF;
+  background: var(--jp-layout-color2);
 }
 
 
@@ -52,7 +53,6 @@
 
 .jp-Completer-item mark {
   font-weight: bold;
-  text-decoration: underline;
   background: inherit;
   color: inherit;
 }
