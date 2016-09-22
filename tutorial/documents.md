@@ -4,7 +4,7 @@ JupyterLab can be extended in two ways via:
 
 - application plugins (top level): Application plugins extend the
   functionality of JupyterLab itself, and we cover them in the
-  "Plugins" tutorial focuses.
+  [Plugins](./plugins) tutorial focuses.
 - **document widget extensions (lower level):** Document widget extensions extend
   the functionality of document widgets added to the application, and we cover
   them in this section.
@@ -12,14 +12,13 @@ JupyterLab can be extended in two ways via:
 For this section, the term, 'document', refers to any visual thing that is
 backed by a file stored on disk (i.e. uses Contents API).
 
-The [Document Manager](http://jupyter.org/jupyterlab/classes/_docmanager_manager_.documentmanager.html)
-uses the Document Registry to create models and widgets for documents.
-
-The [File Browser](http://jupyter.org/jupyterlab/classes/_filebrowser_browser_.filebrowserwidget.html)
-uses the Document Manager when creating and opening files.
-
 The [Document Registry](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html)
-is the default mechanism for interacting with files in JupyterLab.
+is where document types and factories are registered.  Plugins can require
+a document registry instance and register their content types and providers.
+
+The [Document Manager](http://jupyter.org/jupyterlab/classes/_docmanager_manager_.documentmanager.html)
+uses the Document Registry to create models and widgets for documents.  The
+Document Manager is only meant to be accessed by the File Browser itself.
 
 ## Document Registry
 
@@ -46,8 +45,9 @@ Models are generally differentiated by the contents options used to fetch the mo
 
 ### [Widget Extensions](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#addwidgetextension)
 
-Add additional functionality to a widget type. An extension instance is
-created for each widget instance.
+Adds additional functionality to a widget type. An extension instance is
+created for each widget instance, allowing the extension to add functionality
+to each widget or observe the widget and/or its context.
 
 *Examples*
 - The ipywidgets extension that is created for NotebookPanel widgets.
@@ -66,7 +66,7 @@ giving list of items that can be created with default options  (e.g. "Python 3 N
 
 ## Document Manager
 
-The *Document Manager* handles:
+The *Document Manager* is used by the *File Browser* to open and manage open documents.  It handles:
 
 - models
 - contexts
@@ -77,17 +77,22 @@ for documents and manages their life cycle.
 ### [Document Models](http://jupyter.org/jupyterlab/interfaces/_docregistry_interfaces_.idocumentmodel.html)
 
 Created by the model factories and passed to widget factories and widget
-extensions.
+extensions.  Models are the way in which we interact with the data of
+a document.  For a simple text file, we typically only use the 
+`to/fromString()` methods.  A more complex document like a Notebook
+contains more points of interaction like the Notebook metadata.
 
 ### [Document Contexts](http://jupyter.org/jupyterlab/interfaces/_docregistry_interfaces_.idocumentcontext.html)
 
 Created by the Document Manager and passed to widget factories and
-widget extensions.
+widget extensions.  The context contains the model as one of its properties
+so that we can pass a single object around.
 
 They are used to provide an abstracted interface
 to the session and contents API from jupyter-js-services for the
-given model.  They are tied to a model and can be shared between widgets.
+given model.  They can be shared between widgets.
 
 The reason for a separate context and model is so that it is easy to create
 model factories and the heavy lifting of the context is left to the Document
-Manager.
+Manager.  Contexts are not meant to be subclassed or re-implemented and
+are meant to be the glue between the document model and the wider application.
