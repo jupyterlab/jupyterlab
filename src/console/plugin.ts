@@ -139,7 +139,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   }
 
   for (let displayName of displayNames) {
-    command = `console:create-${displayNameMap[displayName]}`;
+    command = `console:create-${kernelNameMap[displayName]}`;
     commands.addCommand(command, {
       label: `${displayName} console`,
       execute: () => {

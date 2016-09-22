@@ -77,6 +77,7 @@ class EditorWidget extends CodeMirrorWidget {
       lineWrapping: true,
     });
     this.addClass(EDITOR_CLASS);
+    this._context = context;
     let editor = this.editor;
     let model = context.model;
     let doc = editor.getDoc();
@@ -109,6 +110,15 @@ class EditorWidget extends CodeMirrorWidget {
       }
     });
   }
+
+  /**
+   * Get the context for the editor widget.
+   */
+  get context(): IDocumentContext<IDocumentModel> {
+    return this._context;
+  }
+
+  private _context: IDocumentContext<IDocumentModel>;
 }
 
 

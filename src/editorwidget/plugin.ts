@@ -115,6 +115,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     cmdIds.matchBrackets,
     cmdIds.vimMode,
     cmdIds.closeAll,
+    cmdIds.startConsole
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
   return tracker;
@@ -144,6 +145,20 @@ function addCommands(app: JupyterLab, tracker: IEditorTracker): void {
   app.commands.addCommand(cmdIds.closeAll, {
     execute: () => { closeAllFiles(tracker); },
     label: 'Close all files'
+  });
+  app.commands.addCommand(cmdIds.startConsole, {
+    execute: () => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let options: any = {
+        path: widget.context.path,
+        preferredLanguage: widget.context.model.defaultKernelLanguage
+      };
+      app.commands.execute('console:create', options);
+    },
+    label: 'Start Console for Editor'
   });
 }
 
