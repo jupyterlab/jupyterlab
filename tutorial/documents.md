@@ -66,11 +66,11 @@ giving list of items that can be created with default options  (e.g. "Python 3 N
 
 ## Document Manager
 
-The *Document Manager* is used by the *File Browser* to open and manage open documents.  It handles:
+The *Document Manager* handles: 
+- document models
+- document contexts
 
-- models
-- contexts
-- widgets
+The *File Browser* uses the *Document Manager* to open documents and manage them.
 
 for documents and manages their life cycle.
 
@@ -94,5 +94,4 @@ given model.  They can be shared between widgets.
 
 The reason for a separate context and model is so that it is easy to create
 model factories and the heavy lifting of the context is left to the Document
-Manager.  Contexts are not meant to be subclassed or re-implemented and
-are meant to be the glue between the document model and the wider application.
+Manager.  Contexts are not meant to be subclassed or re-implemented. Instead, the contexts are intended are meant to be the glue between the document model and the wider application.
