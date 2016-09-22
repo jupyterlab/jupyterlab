@@ -69,6 +69,11 @@ const CONSOLE_CLASS = 'jp-ConsoleContent';
 const BANNER_CLASS = 'jp-ConsoleContent-banner';
 
 /**
+ * The class name of a cell whose input originated from a foreign session.
+ */
+const FOREIGN_CELL_CLASS = 'jp-ConsoleContent-foreignCell';
+
+/**
  * The class name of the active prompt
  */
 const PROMPT_CLASS = 'jp-ConsoleContent-prompt';
@@ -158,6 +163,48 @@ class ConsoleContent extends Widget {
     // Create the prompt.
     this.newPrompt();
 
+    // Handle inputs/outputs initated by another session.
+    this._session.kernel.iopubMessage.connect((kernel, msg) => {
+      // Check whether this message came from an external session.
+      let session = (msg.parent_header as KernelMessage.IHeader).session;
+      if (session === this.session.kernel.clientId) {
+        return;
+      }
+      let msgType = msg.header.msg_type as nbformat.OutputType;
+      let parentHeader = msg.parent_header as KernelMessage.IHeader;
+      let parentMsgId = parentHeader.msg_id as string;
+      let cell : CodeCellWidget;
+      switch (msgType) {
+      case 'execute_input':
+        let inputMsg = msg as KernelMessage.IExecuteInputMsg;
+        cell = this.newForeignCell(parentMsgId);
+        cell.model.executionCount = inputMsg.content.execution_count;
+        cell.model.source = inputMsg.content.code;
+        cell.trusted = true;
+        this.update()
+        break;
+      case 'execute_result':
+      case 'clear_output':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+        if (!(parentMsgId in this._foreignCells)) {
+          // This is an output from an input that was broadcast before our
+          // session started listening. We will ignore it.
+          console.warn('Ignoring output with no associated input cell.');
+          break;
+        }
+        cell = this._foreignCells[parentMsgId];
+        let output = msg.content as nbformat.IOutput;
+        output.output_type = msgType;
+        cell.model.outputs.add(output);
+        this.update();
+        break;
+      default:
+        break;
+      }
+    });
+
     // Handle changes to the kernel.
     this._session.kernelChanged.connect((s, kernel) => {
       this.clear();
@@ -167,6 +214,8 @@ class ConsoleContent extends Widget {
       this._history = new ConsoleHistory(kernel);
       this._completionHandler.kernel = kernel;
       this._inspectionHandler.kernel = kernel;
+      // TODO Connect to kernel.iopubMessage as above to catch inputs/outputs
+      // from an external session.
     });
   }
 
@@ -222,6 +271,7 @@ class ConsoleContent extends Widget {
     this._inspectionHandler = null;
     this._session.dispose();
     this._session = null;
+    this._foreignCells = null;
     super.dispose();
   }
 
@@ -379,6 +429,19 @@ class ConsoleContent extends Widget {
   }
 
   /**
+   * Make a new code cell for an input originated from a foreign session.
+   */
+  protected newForeignCell(parentMsgId: string): CodeCellWidget {
+    let cell = this._renderer.createForeignCell(this._rendermime);
+    cell.mimetype = this._mimetype;
+    cell.addClass(FOREIGN_CELL_CLASS);
+    this._content.addWidget(cell);
+    this.update();
+    this._foreignCells[parentMsgId] = cell;
+    return cell;
+  }
+
+  /**
    * Test whether we should execute the prompt.
    */
   private _shouldExecute(): Promise<boolean> {
@@ -455,6 +518,7 @@ class ConsoleContent extends Widget {
   private _renderer: ConsoleContent.IRenderer = null;
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
+  private _foreignCells: { [key: string]: CodeCellWidget; } = {};
 }
 
 
@@ -507,6 +571,12 @@ namespace ConsoleContent {
      * Create a new prompt widget.
      */
     createPrompt(rendermime: IRenderMime): CodeCellWidget;
+
+    /**
+     * Create a code cell whose input originated from a foreign session.
+     * The implementor is expected to make this read-only.
+     */
+    createForeignCell(rendermine: IRenderMime): CodeCellWidget;
   }
 
   /* tslint:disable */

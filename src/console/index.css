@@ -32,6 +32,12 @@
   overflow: auto;
 }
 
+.jp-ConsoleContent-foreignCell {
+  background-color: var(--jp-layout-color3);
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
 .jp-ConsoleContent-content .jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
   padding-left: calc(2*var(--jp-private-console-cell-padding))
 }
