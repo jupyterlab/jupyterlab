@@ -261,6 +261,23 @@ class ConsoleContent extends Widget {
   }
 
   /**
+   * Clear the code cells.
+   */
+  clear(): void {
+    while (this.prompt) {
+      this.prompt.dispose();
+    }
+    this.newPrompt();
+  }
+
+  /**
+   * Dismiss the completer widget for a console.
+   */
+  dismissCompleter(): void {
+    this._completer.reset();
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -311,13 +328,21 @@ class ConsoleContent extends Widget {
   }
 
   /**
-   * Clear the code cells.
+   * Inject arbitrary code for the console to execute immediately.
    */
-  clear(): void {
-    while (this.prompt) {
-      this.prompt.dispose();
-    }
-    this.newPrompt();
+  inject(code: string): void {
+    // Create a new cell using the prompt renderer.
+    let cell = this._renderer.createPrompt(this._rendermime);
+    let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
+      let content = this._content;
+      cell.readOnly = true;
+      content.addWidget(cell);
+      this.update();
+    };
+    let onFailure = () => { this.update(); };
+
+    cell.model.source = code;
+    cell.execute(this._session.kernel).then(onSuccess, onFailure);
   }
 
   /**
@@ -328,13 +353,6 @@ class ConsoleContent extends Widget {
     let model = prompt.model;
     model.source += '\n';
     prompt.editor.setCursorPosition(model.source.length);
-  }
-
-  /**
-   * Dismiss the completer widget for a console.
-   */
-  dismissCompleter(): void {
-    this._completer.reset();
   }
 
   /**
