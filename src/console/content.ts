@@ -190,7 +190,7 @@ class ConsoleContent extends Widget {
       if (session === this.session.kernel.clientId) {
         return;
       }
-      let msgType = msg.header.msg_type as nbformat.OutputType;
+      let msgType = msg.header.msg_type;
       let parentHeader = msg.parent_header as KernelMessage.IHeader;
       let parentMsgId = parentHeader.msg_id as string;
       let cell : CodeCellWidget;
@@ -204,7 +204,6 @@ class ConsoleContent extends Widget {
         this.update();
         break;
       case 'execute_result':
-      case 'clear_output':
       case 'display_data':
       case 'stream':
       case 'error':
@@ -216,9 +215,12 @@ class ConsoleContent extends Widget {
         }
         cell = this._foreignCells[parentMsgId];
         let output = msg.content as nbformat.IOutput;
-        output.output_type = msgType;
+        output.output_type = msgType as nbformat.OutputType;
         cell.model.outputs.add(output);
         this.update();
+        break;
+      case 'clear_output':
+        cell.model.outputs.clear((msg as KernelMessage.IClearOutputMsg).content.wait);
         break;
       default:
         break;
