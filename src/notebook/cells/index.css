@@ -1,0 +1,79 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+/*-----------------------------------------------------------------------------
+| Cell
+|----------------------------------------------------------------------------*/
+
+
+.jp-Cell {
+  padding: 5px;
+  margin: 0px;
+  border: var(--jp-border-width) solid transparent;
+  outline: none;
+  background: transparent;
+}
+
+
+/*-----------------------------------------------------------------------------
+| CodeCell
+|----------------------------------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------------------------------
+| MarkdownCell
+|----------------------------------------------------------------------------*/
+
+
+.jp-MarkdownCell-renderer {
+  padding: 0.5em 0.5em 0.5em 0.4em;
+}
+
+
+.jp-MarkdownCell-content {
+  padding: 0.5em;
+}
+
+
+/*-----------------------------------------------------------------------------
+| InputArea
+|----------------------------------------------------------------------------*/
+
+
+.jp-InputArea {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.jp-InputArea-prompt {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 90px;
+  color: #303F9F;
+  font-family: monospace;
+  padding: 0.4em;
+  text-align: right;
+  line-height: 1.2em;
+  font-size: 14px;
+}
+
+
+.jp-InputArea-editor {
+  flex-grow: 1;
+  flex-shrink: 1;
+  height: auto;
+  min-height: 2em;
+}
+
+
+.jp-CellEditor {
+  border: var(--jp-border-width) solid #cfcfcf;
+  border-radius: 2px;
+  background: #f7f7f7;
+  line-height: 1.2em;
+}
