@@ -20,8 +20,8 @@ import {
 } from '../../../../lib/docregistry';
 
 import {
-  CompletionWidget
-} from '../../../../lib/notebook/completion';
+  CompleterWidget
+} from '../../../../lib/completer';
 
 import {
   INotebookModel, NotebookModel
@@ -413,11 +413,11 @@ describe('notebook/notebook/panel', () => {
 
       });
 
-      describe('#createCompletion()', () => {
+      describe('#createCompleter()', () => {
 
-        it('should create a completion widget', () => {
+        it('should create a completer widget', () => {
           let renderer = new CodeMirrorNotebookPanelRenderer();
-          expect(renderer.createCompletion()).to.be.a(CompletionWidget);
+          expect(renderer.createCompleter()).to.be.a(CompleterWidget);
         });
 
       });

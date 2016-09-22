@@ -13,22 +13,22 @@ import {
 
 import {
   BaseCellWidget, CellModel
-} from '../../../../lib/notebook/cells';
+} from '../../../lib/notebook/cells';
 
 import {
   ICompletionRequest, ICellEditorWidget, ITextChange
-} from '../../../../lib/notebook/cells/editor';
+} from '../../../lib/notebook/cells/editor';
 
 import {
-  CompletionWidget, CellCompletionHandler, CompletionModel, ICompletionPatch
-} from '../../../../lib/notebook/completion';
+  CompleterWidget, CellCompleterHandler, CompleterModel, ICompletionPatch
+} from '../../../lib/completer';
 
 import {
   CodeMirrorCodeCellWidgetRenderer
-} from '../../../../lib/notebook/codemirror/cells/widget';
+} from '../../../lib/notebook/codemirror/cells/widget';
 
 
-class TestCompletionModel extends CompletionModel {
+class TestCompleterModel extends CompleterModel {
   methods: string[] = [];
 
   createPatch(patch: string): ICompletionPatch {
@@ -43,7 +43,7 @@ class TestCompletionModel extends CompletionModel {
 }
 
 
-class TestCompletionHandler extends CellCompletionHandler {
+class TestCompleterHandler extends CellCompleterHandler {
   methods: string[] = [];
 
   makeRequest(request: ICompletionRequest): Promise<void> {
@@ -67,22 +67,22 @@ class TestCompletionHandler extends CellCompletionHandler {
     this.methods.push('onCompletionRequested');
   }
 
-  onCompletionSelected(widget: CompletionWidget, value: string): void {
+  onCompletionSelected(widget: CompleterWidget, value: string): void {
     super.onCompletionSelected(widget, value);
     this.methods.push('onCompletionSelected');
   }
 }
 
 
-describe('notebook/completion/handler', () => {
+describe('completer/handler', () => {
 
-  describe('CellCompletionHandler', () => {
+  describe('CellCompleterHandler', () => {
 
     describe('#constructor()', () => {
 
-      it('should create a completion handler', () => {
-        let handler = new CellCompletionHandler(new CompletionWidget());
-        expect(handler).to.be.a(CellCompletionHandler);
+      it('should create a completer handler', () => {
+        let handler = new CellCompleterHandler(new CompleterWidget());
+        expect(handler).to.be.a(CellCompleterHandler);
       });
 
     });
@@ -90,12 +90,12 @@ describe('notebook/completion/handler', () => {
     describe('#kernel', () => {
 
       it('should default to null', () => {
-        let handler = new CellCompletionHandler(new CompletionWidget());
+        let handler = new CellCompleterHandler(new CompleterWidget());
         expect(handler.kernel).to.be(null);
       });
 
       it('should be settable', () => {
-        let handler = new CellCompletionHandler(new CompletionWidget());
+        let handler = new CellCompleterHandler(new CompleterWidget());
         let kernel = new MockKernel();
         expect(handler.kernel).to.be(null);
         handler.kernel = kernel;
@@ -109,13 +109,15 @@ describe('notebook/completion/handler', () => {
     describe('#activeCell', () => {
 
       it('should default to null', () => {
-        let handler = new CellCompletionHandler(new CompletionWidget());
+        let handler = new CellCompleterHandler(new CompleterWidget());
         expect(handler.activeCell).to.be(null);
       });
 
       it('should be settable', () => {
-        let handler = new CellCompletionHandler(new CompletionWidget());
-        let cell = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
+        let handler = new CellCompleterHandler(new CompleterWidget());
+        let cell = new BaseCellWidget({
+          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
+        });
         expect(handler.activeCell).to.be(null);
         handler.activeCell = cell;
         expect(handler.activeCell).to.be.a(BaseCellWidget);
@@ -123,9 +125,13 @@ describe('notebook/completion/handler', () => {
       });
 
       it('should be resettable', () => {
-        let handler = new CellCompletionHandler(new CompletionWidget());
-        let one = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
-        let two = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
+        let handler = new CellCompleterHandler(new CompleterWidget());
+        let one = new BaseCellWidget({
+          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
+        });
+        let two = new BaseCellWidget({
+          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
+        });
         expect(handler.activeCell).to.be(null);
         handler.activeCell = one;
         expect(handler.activeCell).to.be.a(BaseCellWidget);
@@ -140,7 +146,7 @@ describe('notebook/completion/handler', () => {
     describe('#isDisposed', () => {
 
       it('should be true if handler has been disposed', () => {
-        let handler = new CellCompletionHandler(new CompletionWidget());
+        let handler = new CellCompleterHandler(new CompleterWidget());
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
@@ -151,7 +157,7 @@ describe('notebook/completion/handler', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the handler resources', () => {
-        let handler = new CellCompletionHandler(new CompletionWidget());
+        let handler = new CellCompleterHandler(new CompleterWidget());
         let kernel = new MockKernel();
         handler.kernel = kernel;
         expect(handler.isDisposed).to.be(false);
@@ -162,7 +168,7 @@ describe('notebook/completion/handler', () => {
       });
 
       it('should be safe to call multiple times', () => {
-        let handler = new CellCompletionHandler(new CompletionWidget());
+        let handler = new CellCompleterHandler(new CompleterWidget());
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         handler.dispose();
@@ -174,7 +180,7 @@ describe('notebook/completion/handler', () => {
     describe('#makeRequest()', () => {
 
       it('should reject if handler has no kernel', (done) => {
-        let handler = new TestCompletionHandler(new CompletionWidget());
+        let handler = new TestCompleterHandler(new CompleterWidget());
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -193,7 +199,7 @@ describe('notebook/completion/handler', () => {
       // TODO: This test needs to be fixed when MockKernel is updated.
       it('should resolve if handler has a kernel', () => {
         console.warn('This test needs to be fixed when MockKernel is updated.');
-        let handler = new TestCompletionHandler(new CompletionWidget());
+        let handler = new TestCompleterHandler(new CompleterWidget());
         let kernel = new MockKernel();
         let request: ICompletionRequest = {
           ch: 0,
@@ -213,27 +219,27 @@ describe('notebook/completion/handler', () => {
     describe('#onReply()', () => {
 
       it('should do nothing if handler has been disposed', () => {
-        let completion = new CompletionWidget();
-        let handler = new TestCompletionHandler(completion);
-        completion.model = new CompletionModel();
-        completion.model.options = ['foo', 'bar', 'baz'];
+        let completer = new CompleterWidget();
+        let handler = new TestCompleterHandler(completer);
+        completer.model = new CompleterModel();
+        completer.model.options = ['foo', 'bar', 'baz'];
         handler.dispose();
         handler.onReply(0, null, null);
-        expect(completion.model).to.be.ok();
+        expect(completer.model).to.be.ok();
       });
 
       it('should do nothing if pending request ID does not match', () => {
-        let completion = new CompletionWidget();
-        let handler = new TestCompletionHandler(completion);
-        completion.model = new CompletionModel();
-        completion.model.options = ['foo', 'bar', 'baz'];
+        let completer = new CompleterWidget();
+        let handler = new TestCompleterHandler(completer);
+        completer.model = new CompleterModel();
+        completer.model.options = ['foo', 'bar', 'baz'];
         handler.onReply(2, null, null);
-        expect(completion.model).to.be.ok();
+        expect(completer.model).to.be.ok();
       });
 
       it('should reset model if status is not ok', () => {
-        let completion = new CompletionWidget();
-        let handler = new TestCompletionHandler(completion);
+        let completer = new CompleterWidget();
+        let handler = new TestCompleterHandler(completer);
         let options = ['a', 'b', 'c'];
         let request: ICompletionRequest = {
           ch: 0,
@@ -258,16 +264,16 @@ describe('notebook/completion/handler', () => {
             matches: ['foo']
           }
         };
-        completion.model = new CompletionModel();
-        completion.model.options = options;
-        expect(completion.model.options).to.eql(options);
+        completer.model = new CompleterModel();
+        completer.model.options = options;
+        expect(completer.model.options).to.eql(options);
         handler.onReply(0, request, reply);
-        expect(completion.model.options).to.be(null);
+        expect(completer.model.options).to.be(null);
       });
 
       it('should update model if status is ok', () => {
-        let completion = new CompletionWidget();
-        let handler = new TestCompletionHandler(completion);
+        let completer = new CompleterWidget();
+        let handler = new TestCompleterHandler(completer);
         let options = ['a', 'b', 'c'];
         let request: ICompletionRequest = {
           ch: 0,
@@ -292,11 +298,11 @@ describe('notebook/completion/handler', () => {
             matches: ['foo']
           }
         };
-        completion.model = new CompletionModel();
-        completion.model.options = options;
-        expect(completion.model.options).to.eql(options);
+        completer.model = new CompleterModel();
+        completer.model.options = options;
+        expect(completer.model.options).to.eql(options);
         handler.onReply(0, request, reply);
-        expect(completion.model.options).to.eql(reply.content.matches);
+        expect(completer.model.options).to.eql(reply.content.matches);
       });
 
     });
@@ -304,7 +310,7 @@ describe('notebook/completion/handler', () => {
     describe('#onTextChanged()', () => {
 
       it('should fire when the active editor emits a text change', () => {
-        let handler = new TestCompletionHandler(new CompletionWidget());
+        let handler = new TestCompleterHandler(new CompleterWidget());
         let change: ITextChange = {
           ch: 0,
           chHeight: 0,
@@ -315,7 +321,9 @@ describe('notebook/completion/handler', () => {
           oldValue: 'fo',
           newValue: 'foo'
         };
-        let cell = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
+        let cell = new BaseCellWidget({
+          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
+        });
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onTextChanged');
@@ -324,10 +332,10 @@ describe('notebook/completion/handler', () => {
       });
 
       it('should call model change handler if model exists', () => {
-        let completion = new CompletionWidget({
-          model: new TestCompletionModel()
+        let completer = new CompleterWidget({
+          model: new TestCompleterModel()
         });
-        let handler = new TestCompletionHandler(completion);
+        let handler = new TestCompleterHandler(completer);
         let change: ITextChange = {
           ch: 0,
           chHeight: 0,
@@ -338,8 +346,10 @@ describe('notebook/completion/handler', () => {
           oldValue: 'fo',
           newValue: 'foo'
         };
-        let cell = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
-        let model = completion.model as TestCompletionModel;
+        let cell = new BaseCellWidget({
+          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
+        });
+        let model = completer.model as TestCompleterModel;
 
         handler.activeCell = cell;
         expect(model.methods).to.not.contain('handleTextChange');
@@ -352,7 +362,7 @@ describe('notebook/completion/handler', () => {
     describe('#onCompletionRequested()', () => {
 
       it('should fire when the active editor emits a request', () => {
-        let handler = new TestCompletionHandler(new CompletionWidget());
+        let handler = new TestCompleterHandler(new CompleterWidget());
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -362,7 +372,9 @@ describe('notebook/completion/handler', () => {
           position: 0,
           currentValue: 'foo'
         };
-        let cell = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
+        let cell = new BaseCellWidget({
+          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
+        });
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onCompletionRequested');
@@ -371,10 +383,10 @@ describe('notebook/completion/handler', () => {
       });
 
       it('should make a kernel request if kernel and model exist', () => {
-        let completion = new CompletionWidget({
-          model: new TestCompletionModel()
+        let completer = new CompleterWidget({
+          model: new TestCompleterModel()
         });
-        let handler = new TestCompletionHandler(completion);
+        let handler = new TestCompleterHandler(completer);
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -384,8 +396,9 @@ describe('notebook/completion/handler', () => {
           position: 0,
           currentValue: 'foo'
         };
-        let cell = new BaseCellWidget({renderer:CodeMirrorCodeCellWidgetRenderer.defaultRenderer});
-        let model = completion.model as TestCompletionModel;
+        let cell = new BaseCellWidget({
+          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
+        });
 
         handler.kernel = new MockKernel();
         handler.activeCell = cell;
@@ -398,34 +411,34 @@ describe('notebook/completion/handler', () => {
 
     describe('#onCompletionSelected()', () => {
 
-      it('should fire when the completion widget emits a signal', () => {
-        let completion = new CompletionWidget();
-        let handler = new TestCompletionHandler(completion);
+      it('should fire when the completer widget emits a signal', () => {
+        let completer = new CompleterWidget();
+        let handler = new TestCompleterHandler(completer);
 
         expect(handler.methods).to.not.contain('onCompletionSelected');
-        completion.selected.emit('foo');
+        completer.selected.emit('foo');
         expect(handler.methods).to.contain('onCompletionSelected');
       });
 
       it('should call model create patch method if model exists', () => {
-        let completion = new CompletionWidget({
-          model: new TestCompletionModel()
+        let completer = new CompleterWidget({
+          model: new TestCompleterModel()
         });
-        let handler = new TestCompletionHandler(completion);
-        let model = completion.model as TestCompletionModel;
+        let handler = new TestCompleterHandler(completer);
+        let model = completer.model as TestCompleterModel;
         let renderer = CodeMirrorCodeCellWidgetRenderer.defaultRenderer;
 
         handler.activeCell = new BaseCellWidget({ renderer });
         expect(model.methods).to.not.contain('createPatch');
-        completion.selected.emit('foo');
+        completer.selected.emit('foo');
         expect(model.methods).to.contain('createPatch');
       });
 
       it('should update cell if patch exists', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let patch = 'foobar';
-        let completion = new CompletionWidget({ model });
-        let handler = new TestCompletionHandler(completion);
+        let completer = new CompleterWidget({ model });
+        let handler = new TestCompleterHandler(completer);
         let renderer = CodeMirrorCodeCellWidgetRenderer.defaultRenderer;
         let cell = new BaseCellWidget({ renderer });
         let request: ICompletionRequest = {
@@ -443,7 +456,7 @@ describe('notebook/completion/handler', () => {
         handler.activeCell.model.source = request.currentValue;
         model.original = request;
         model.cursor = { start: 0, end: 3 };
-        completion.selected.emit(patch);
+        completer.selected.emit(patch);
         expect(handler.activeCell.model.source).to.equal(patch);
       });
 

@@ -17,6 +17,7 @@
 @import '../about/index.css';
 @import '../codemirror/index.css';
 @import '../commandpalette/index.css';
+@import '../completer/index.css';
 @import '../console/index.css';
 @import '../csvwidget/index.css';
 @import '../dialog/index.css';

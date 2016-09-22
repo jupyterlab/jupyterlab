@@ -386,9 +386,9 @@ class SideBarHandler {
       newWidget.show();
     }
     if (newWidget) {
-      document.body.dataset[`${this._side}Area`] = newWidget.id;
+      document.body.setAttribute(`data-${this._side}Area`, newWidget.id);
     } else {
-      delete document.body.dataset[`${this._side}Area`];
+      document.body.removeAttribute(`data-${this._side}Area`);
     }
     this._refreshVisibility();
   }

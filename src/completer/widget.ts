@@ -18,39 +18,43 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ICompletionModel, ICompletionItem
+  ICompleterModel, ICompleterItem
 } from './model';
 
 
 /**
- * The class name added to completion menu widgets.
+ * The class name added to completer menu widgets.
  */
-const COMPLETION_CLASS = 'jp-Completion';
+const COMPLETER_CLASS = 'jp-Completer';
 
 /**
- * The class name added to completion menu items.
+ * The class name added to completer menu items.
  */
-const ITEM_CLASS = 'jp-Completion-item';
+const ITEM_CLASS = 'jp-Completer-item';
 
 /**
- * The class name added to an active completion menu item.
+ * The class name added to an active completer menu item.
  */
 const ACTIVE_CLASS = 'jp-mod-active';
 
 /**
- * The class name added to a completion widget that is scrolled out of view.
+ * The class name added to a completer widget that is scrolled out of view.
  */
 const OUTOFVIEW_CLASS = 'jp-mod-outofview';
 
 /**
- * The minimum height of a completion widget.
+ * The minimum height of a completer widget.
  */
-const MIN_HEIGHT = 75;
+const MIN_HEIGHT = 20;
 
 /**
- * The maximum height of a completion widget.
+ * The maximum height of a completer widget.
+ *
+ * #### Notes
+ * This value is only used if a CSS max-height attribute is not set for the
+ * completer. It is a fallback value.
  */
-const MAX_HEIGHT = 250;
+const MAX_HEIGHT = 200;
 
 /**
  * A flag to indicate that event handlers are caught in the capture phase.
@@ -62,45 +66,45 @@ const USE_CAPTURE = true;
  * A widget that enables text completion.
  */
 export
-class CompletionWidget extends Widget {
+class CompleterWidget extends Widget {
   /**
-   * Construct a text completion menu widget.
+   * Construct a text completer menu widget.
    */
-  constructor(options: CompletionWidget.IOptions = {}) {
+  constructor(options: CompleterWidget.IOptions = {}) {
     super({ node: document.createElement('ul') });
-    this._renderer = options.renderer || CompletionWidget.defaultRenderer;
+    this._renderer = options.renderer || CompleterWidget.defaultRenderer;
     this.anchor = options.anchor || null;
     this.model = options.model || null;
-    this.addClass(COMPLETION_CLASS);
+    this.addClass(COMPLETER_CLASS);
 
-    // Completion widgets are hidden until they are populated.
+    // Completer widgets are hidden until they are populated.
     this.hide();
   }
 
   /**
-   * A signal emitted when a selection is made from the completion menu.
+   * A signal emitted when a selection is made from the completer menu.
    */
-  selected: ISignal<CompletionWidget, string>;
+  selected: ISignal<CompleterWidget, string>;
 
   /**
-   * A signal emitted when the completion widget's visibility changes.
+   * A signal emitted when the completer widget's visibility changes.
    *
    * #### Notes
    * This signal is useful when there are multiple floating widgets that may
    * contend with the same space and ought to be mutually exclusive.
    */
-  visibilityChanged: ISignal<CompletionWidget, void>;
+  visibilityChanged: ISignal<CompleterWidget, void>;
 
   /**
-   * The model used by the completion widget.
+   * The model used by the completer widget.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get model(): ICompletionModel {
+  get model(): ICompleterModel {
     return this._model;
   }
-  set model(model: ICompletionModel) {
+  set model(model: ICompleterModel) {
     if (!model && !this._model || model === this._model) {
       return;
     }
@@ -114,10 +118,10 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * The semantic parent of the completion widget, its anchor element. An
-   * event listener will peg the position of the completion widget to the
+   * The semantic parent of the completer widget, its anchor element. An
+   * event listener will peg the position of the completer widget to the
    * anchor element's scroll position. Other event listeners will guarantee
-   * the completion widget behaves like a child of the reference element even
+   * the completer widget behaves like a child of the reference element even
    * if it does not appear as a descendant in the DOM.
    */
   get anchor(): HTMLElement {
@@ -141,7 +145,7 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * Dispose of the resources held by the completion widget.
+   * Dispose of the resources held by the completer widget.
    */
   dispose() {
     if (this.isDisposed) {
@@ -155,13 +159,10 @@ class CompletionWidget extends Widget {
    * Reset the widget.
    */
   reset(): void {
+    this._reset();
     if (this._model) {
       this._model.reset();
     }
-    this._activeIndex = 0;
-    this._anchorPoint = 0;
-    this.hide();
-    this.visibilityChanged.emit(void 0);
   }
 
   /**
@@ -226,8 +227,9 @@ class CompletionWidget extends Widget {
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    let model = this.model;
-    if (!model) {
+    let model = this._model;
+    let anchor = this._anchor;
+    if (!model || !anchor) {
       return;
     }
 
@@ -235,6 +237,7 @@ class CompletionWidget extends Widget {
 
     // If there are no items, reset and bail.
     if (!items || !items.length) {
+      this._reset();
       this.hide();
       this.visibilityChanged.emit(void 0);
       return;
@@ -247,13 +250,15 @@ class CompletionWidget extends Widget {
       return;
     }
 
+    // Clear the node.
     let node = this.node;
     node.textContent = '';
 
+    // Populate the completer items.
     for (let item of items) {
       let li = this._renderer.createItemNode(item);
       // Set the raw, un-marked up value as a data attribute.
-      li.dataset['value'] = item.raw;
+      li.setAttribute('data-value', item.raw);
       node.appendChild(li);
     }
 
@@ -264,12 +269,19 @@ class CompletionWidget extends Widget {
       this.show();
       this.visibilityChanged.emit(void 0);
     }
-    this._anchorPoint = this._anchor.scrollTop;
+    this._anchorPoint = anchor.scrollTop;
     this._setGeometry();
+
+    // If this is the first time the current completer session has loaded,
+    // populate any initial subset match.
+    if (this._model.subsetMatch) {
+      this._populateSubset();
+      this.model.subsetMatch = false;
+    }
   }
 
   /**
-   * Cycle through the available completion items.
+   * Cycle through the available completer items.
    */
   private _cycle(direction: 'up' | 'down'): void {
     let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
@@ -301,7 +313,10 @@ class CompletionWidget extends Widget {
             event.preventDefault();
             event.stopPropagation();
             event.stopImmediatePropagation();
-            if (this._populateSubset()) {
+            this._model.subsetMatch = true;
+            let populated = this._populateSubset();
+            this.model.subsetMatch = false;
+            if (populated) {
               return;
             }
             this._selectActive();
@@ -353,7 +368,7 @@ class CompletionWidget extends Widget {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        this.selected.emit(target.dataset['value']);
+        this.selected.emit(target.getAttribute('data-value'));
         this.reset();
         return;
       }
@@ -380,7 +395,7 @@ class CompletionWidget extends Widget {
   }
 
   /**
-   * Populate the completion up to the longest initial subset of items.
+   * Populate the completer up to the longest initial subset of items.
    *
    * @returns `true` if a subset match was found and populated.
    */
@@ -398,39 +413,87 @@ class CompletionWidget extends Widget {
   }
 
   /**
+   * Reset the internal flags to defaults.
+   */
+  private _reset(): void {
+    this._activeIndex = 0;
+    this._anchorPoint = 0;
+  }
+
+  /**
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
-    if (!this.model || !this._model.original) {
+    let node = this.node;
+    let model = this._model;
+
+    // This is an overly defensive test: `cursor` will always exist if
+    // `original` exists, except in contrived tests. But since it is possible
+    // to generate a runtime error, the check occurs here.
+    if (!model || !model.original || !model.cursor) {
       return;
     }
 
-    let node = this.node;
-    let coords = this._model.current ? this._model.current.coords
-      : this._model.original.coords;
-    let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
-    let availableHeight = coords.top + scrollDelta;
-    let maxHeight = Math.max(0, Math.min(availableHeight, MAX_HEIGHT));
+    // Clear any previous set max-height.
+    node.style.maxHeight = '';
 
-    if (maxHeight > MIN_HEIGHT) {
-      node.classList.remove(OUTOFVIEW_CLASS);
+    // Clear any programmatically set margin-top.
+    node.style.marginTop = '';
+
+    // Make sure the node is visible.
+    node.classList.remove(OUTOFVIEW_CLASS);
+
+    // Always use original coordinates to calculate completer position.
+    let { coords, chWidth, chHeight } = model.original;
+    let style = window.getComputedStyle(node);
+    let innerHeight = window.innerHeight;
+    let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
+    let spaceAbove = coords.top + scrollDelta;
+    let spaceBelow = innerHeight - coords.bottom - scrollDelta;
+    let marginTop = (parseInt(style.marginTop, 10) || 0);
+    let maxHeight = (parseInt(style.maxHeight, 10) || MAX_HEIGHT);
+    let minHeight = (parseInt(style.minHeight, 10) || MIN_HEIGHT);
+    let anchorRect = this._anchor.getBoundingClientRect();
+    let top: number;
+
+    // If the whole completer fits below or if there is more space below, then
+    // rendering the completer below the text being typed is privileged so that
+    // the code above is not obscured.
+    let renderBelow = spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+    if (renderBelow) {
+      maxHeight = Math.min(spaceBelow - marginTop, maxHeight);
     } else {
-      node.classList.add(OUTOFVIEW_CLASS);
-      return;
+      maxHeight = Math.min(spaceAbove, maxHeight);
+      // If the completer renders above the text, its top margin is irrelevant.
+      node.style.marginTop = '0px';
     }
     node.style.maxHeight = `${maxHeight}px`;
 
-    let borderLeftWidth = window.getComputedStyle(node).borderLeftWidth;
-    let left = coords.left + (parseInt(borderLeftWidth, 10) || 0);
-    let rect = node.getBoundingClientRect();
-    let top = availableHeight - rect.height;
+    // Make sure the completer ought to be visible.
+    let withinBounds = maxHeight > minHeight &&
+                   spaceBelow >= chHeight &&
+                   spaceAbove >= anchorRect.top;
+    if (!withinBounds) {
+      node.classList.add(OUTOFVIEW_CLASS);
+      return;
+    }
 
-    node.style.left = `${Math.floor(left)}px`;
+    let borderLeftWidth = style.borderLeftWidth;
+    let left = coords.left + (parseInt(borderLeftWidth, 10) || 0);
+    let { start, end } = this._model.cursor;
+    let nodeRect = node.getBoundingClientRect();
+
+    // Position the completer vertically.
+    top = renderBelow ? innerHeight - spaceBelow : spaceAbove - nodeRect.height;
     node.style.top = `${Math.floor(top)}px`;
+
+    // Move completer to the start of the blob being completed.
+    left -= chWidth * (end - start);
+    node.style.left = `${Math.ceil(left)}px`;
     node.style.width = 'auto';
 
     // Expand the menu width by the scrollbar size, if present.
-    if (node.scrollHeight > maxHeight) {
+    if (node.scrollHeight >= maxHeight) {
       node.style.width = `${2 * node.offsetWidth - node.clientWidth}px`;
       node.scrollTop = 0;
     }
@@ -442,61 +505,62 @@ class CompletionWidget extends Widget {
   private _selectActive(): void {
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     if (!active) {
+      this._reset();
       return;
     }
-    this.selected.emit(active.dataset['value']);
+    this.selected.emit(active.getAttribute('data-value'));
     this.reset();
   }
 
   private _anchor: HTMLElement = null;
   private _anchorPoint = 0;
   private _activeIndex = 0;
-  private _model: ICompletionModel = null;
-  private _renderer: CompletionWidget.IRenderer = null;
+  private _model: ICompleterModel = null;
+  private _renderer: CompleterWidget.IRenderer = null;
 }
 
 
-// Define the signals for the `CompletionWidget` class.
-defineSignal(CompletionWidget.prototype, 'selected');
-defineSignal(CompletionWidget.prototype, 'visibilityChanged');
+// Define the signals for the `CompleterWidget` class.
+defineSignal(CompleterWidget.prototype, 'selected');
+defineSignal(CompleterWidget.prototype, 'visibilityChanged');
 
 
 export
-namespace CompletionWidget {
+namespace CompleterWidget {
   /**
-   * The initialization options for a completion widget.
+   * The initialization options for a completer widget.
    */
   export
   interface IOptions {
     /**
-     * The model for the completion widget.
+     * The model for the completer widget.
      */
-    model?: ICompletionModel;
+    model?: ICompleterModel;
 
     /**
-     * The semantic parent of the completion widget, its anchor element. An
-     * event listener will peg the position of the completion widget to the
+     * The semantic parent of the completer widget, its anchor element. An
+     * event listener will peg the position of the completer widget to the
      * anchor element's scroll position. Other event listeners will guarantee
-     * the completion widget behaves like a child of the reference element even
+     * the completer widget behaves like a child of the reference element even
      * if it does not appear as a descendant in the DOM.
      */
     anchor?: HTMLElement;
 
     /**
-     * The renderer for the completion widget nodes.
+     * The renderer for the completer widget nodes.
      */
     renderer?: IRenderer;
   }
 
   /**
-   * A renderer for completion widget nodes.
+   * A renderer for completer widget nodes.
    */
   export
   interface IRenderer {
     /**
-     * Create an item node (an `li` element) for a text completion menu.
+     * Create an item node (an `li` element) for a text completer menu.
      */
-    createItemNode(item: ICompletionItem): HTMLLIElement;
+    createItemNode(item: ICompleterItem): HTMLLIElement;
   }
 
   /**
@@ -505,9 +569,9 @@ namespace CompletionWidget {
   export
   class Renderer implements IRenderer {
     /**
-     * Create an item node for a text completion menu.
+     * Create an item node for a text completer menu.
      */
-    createItemNode(item: ICompletionItem): HTMLLIElement {
+    createItemNode(item: ICompleterItem): HTMLLIElement {
       let li = document.createElement('li');
       let code = document.createElement('code');
 
@@ -530,7 +594,7 @@ namespace CompletionWidget {
 
 
 /**
- * A namespace for completion widget private data.
+ * A namespace for completer widget private data.
  */
 namespace Private {
   /**
@@ -563,7 +627,7 @@ namespace Private {
   function itemValues(items: NodeList): string[] {
     let values: string[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
-      values.push((items[i] as HTMLElement).dataset['value']);
+      values.push((items[i] as HTMLElement).getAttribute('data-value'));
     }
     return values;
   }

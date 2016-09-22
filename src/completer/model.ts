@@ -19,7 +19,7 @@ import {
 
 import {
   ICompletionRequest, ITextChange
-} from '../cells/editor';
+} from '../notebook/cells/editor';
 
 
 /**
@@ -63,17 +63,17 @@ interface ICompletionPatch {
 
 
 /**
- * A completion menu item.
+ * A completer menu item.
  */
 export
-interface ICompletionItem {
+interface ICompleterItem {
   /**
-   * The highlighted, marked up text of a visible completion item.
+   * The highlighted, marked up text of a visible completer item.
    */
   text: string;
 
   /**
-   * The raw text of a visible completion item.
+   * The raw text of a visible completer item.
    */
   raw: string;
 }
@@ -97,14 +97,14 @@ interface ICursorSpan extends JSONObject {
 
 
 /**
- * The data model backing a code completion widget.
+ * The data model backing a code completer widget.
  */
 export
-interface ICompletionModel extends IDisposable {
+interface ICompleterModel extends IDisposable {
   /**
-   * A signal emitted when state of the completion menu changes.
+   * A signal emitted when state of the completer menu changes.
    */
-  stateChanged: ISignal<ICompletionModel, void>;
+  stateChanged: ISignal<ICompleterModel, void>;
 
   /**
    * The current text change details.
@@ -117,17 +117,22 @@ interface ICompletionModel extends IDisposable {
   cursor: ICursorSpan;
 
   /**
-   * The list of visible items in the completion menu.
+   * A flag that is true when the model value was modified by a subset match.
    */
-  items: ICompletionItem[];
+  subsetMatch: boolean;
 
   /**
-   * The unfiltered list of all available options in a completion menu.
+   * The list of visible items in the completer menu.
+   */
+  items: ICompleterItem[];
+
+  /**
+   * The unfiltered list of all available options in a completer menu.
    */
   options: string[];
 
   /**
-   * The original completion request details.
+   * The original completer request details.
    */
   original: ICompletionRequest;
 
@@ -154,27 +159,27 @@ interface ICompletionModel extends IDisposable {
 
 
 /**
- * An implementation of a completion model.
+ * An implementation of a completer model.
  */
 export
-class CompletionModel implements ICompletionModel {
+class CompleterModel implements ICompleterModel {
   /**
-   * A signal emitted when state of the completion menu changes.
+   * A signal emitted when state of the completer menu changes.
    */
-  stateChanged: ISignal<ICompletionModel, void>;
+  stateChanged: ISignal<ICompleterModel, void>;
 
   /**
-   * The list of visible items in the completion menu.
+   * The list of visible items in the completer menu.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get items(): ICompletionItem[] {
+  get items(): ICompleterItem[] {
     return this._filter();
   }
 
   /**
-   * The unfiltered list of all available options in a completion menu.
+   * The unfiltered list of all available options in a completer menu.
    */
   get options(): string[] {
     return this._options;
@@ -186,6 +191,7 @@ class CompletionModel implements ICompletionModel {
     if (newValue && newValue.length) {
       this._options = [];
       this._options.push(...newValue);
+      this._subsetMatch = true;
     } else {
       this._options = null;
     }
@@ -217,26 +223,23 @@ class CompletionModel implements ICompletionModel {
     if (deepEqual(newValue, this._current)) {
       return;
     }
-
     // Original request must always be set before a text change. If it isn't
     // the model fails silently.
     if (!this.original) {
       return;
     }
-
     // Cursor must always be set before a text change. This happens
-    // automatically in the completion handler, but since `current` is a public
+    // automatically in the completer handler, but since `current` is a public
     // attribute, this defensive check is necessary.
     if (!this._cursor) {
       return;
     }
     this._current = newValue;
 
-    if (!this.current) {
+    if (!this._current) {
       this.stateChanged.emit(void 0);
       return;
     }
-
     let original = this._original;
     let current = this._current;
     let originalLine = original.currentValue.split('\n')[original.line];
@@ -247,15 +250,15 @@ class CompletionModel implements ICompletionModel {
     if (currentLine.length < originalLine.length) {
       this.reset();
       return;
-    } else {
-      let { start, end } = this._cursor;
-      // Clip the front of the current line.
-      let query = currentLine.substring(start);
-      // Clip the back of the current line.
-      let ending = originalLine.substring(end);
-      query = query.substring(0, query.lastIndexOf(ending));
-      this._query = query;
     }
+
+    let { start, end } = this._cursor;
+    // Clip the front of the current line.
+    let query = current.newValue.substring(start);
+    // Clip the back of the current line.
+    let ending = original.currentValue.substring(end);
+    query = query.substring(0, query.lastIndexOf(ending));
+    this._query = query;
     this.stateChanged.emit(void 0);
   }
 
@@ -286,6 +289,16 @@ class CompletionModel implements ICompletionModel {
   }
 
   /**
+   * A flag that is true when the model value was modified by a subset match.
+   */
+  get subsetMatch(): boolean {
+    return this._subsetMatch;
+  }
+  set subsetMatch(newValue: boolean) {
+    this._subsetMatch = newValue;
+  }
+
+  /**
    * Get whether the model is disposed.
    */
   get isDisposed(): boolean {
@@ -309,6 +322,12 @@ class CompletionModel implements ICompletionModel {
    * Handle a text change.
    */
   handleTextChange(change: ITextChange): void {
+    // When the completer detects a common subset prefix for all options,
+    // it updates the model and sets the model source to that value, but this
+    // text change should be ignored.
+    if (this.subsetMatch) {
+      return;
+    }
     let line = change.newValue.split('\n')[change.line];
     // If last character entered is not whitespace, update completion.
     if (line[change.ch - 1] && line[change.ch - 1].match(/\S/)) {
@@ -358,7 +377,7 @@ class CompletionModel implements ICompletionModel {
   /**
    * Apply the query to the complete options list to return the matching subset.
    */
-  private _filter(): ICompletionItem[] {
+  private _filter(): ICompleterItem[] {
     let options = this._options || [];
     let query = this._query;
     if (!query) {
@@ -384,27 +403,29 @@ class CompletionModel implements ICompletionModel {
    */
   private _reset(): void {
     this._current = null;
-    this._original = null;
-    this._options = null;
     this._cursor = null;
+    this._options = null;
+    this._original = null;
     this._query = '';
+    this._subsetMatch = false;
   }
 
+  private _current: ITextChange = null;
+  private _cursor: ICursorSpan = null;
   private _isDisposed = false;
   private _options: string[] = null;
   private _original: ICompletionRequest = null;
-  private _current: ITextChange = null;
   private _query = '';
-  private _cursor: ICursorSpan = null;
+  private _subsetMatch = false;
 }
 
 
-// Define the signals for the `CompletionModel` class.
-defineSignal(CompletionModel.prototype, 'stateChanged');
+// Define the signals for the `CompleterModel` class.
+defineSignal(CompleterModel.prototype, 'stateChanged');
 
 
 /**
- * A namespace for completion model private data.
+ * A namespace for completer model private data.
  */
 namespace Private {
   /**

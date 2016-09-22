@@ -4,6 +4,10 @@
 import './common/activitymonitor.spec';
 import './common/observablelist.spec';
 
+import './completer/handler.spec';
+import './completer/model.spec';
+import './completer/widget.spec';
+
 import './console/history.spec';
 
 import './dialog/dialog.spec';
@@ -23,10 +27,6 @@ import './rendermime/rendermime.spec';
 import './notebook/cells/editor.spec';
 import './notebook/cells/model.spec';
 import './notebook/cells/widget.spec';
-
-import './notebook/completion/handler.spec';
-import './notebook/completion/model.spec';
-import './notebook/completion/widget.spec';
 
 import './notebook/notebook/actions.spec';
 import './notebook/notebook/default-toolbar.spec';

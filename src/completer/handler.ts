@@ -11,32 +11,33 @@ import {
 
 import {
   ICellEditorWidget, ITextChange, ICompletionRequest
-} from '../cells/editor';
+} from '../notebook/cells/editor';
 
 import {
   BaseCellWidget
-} from '../cells/widget';
+} from '../notebook/cells/widget';
 
 import {
-  CompletionWidget
+  CompleterWidget
 } from './widget';
 
 
 /**
- * A completion handler for cell widgets.
+ * A completer handler for cell widgets.
  */
 export
-class CellCompletionHandler implements IDisposable {
+class CellCompleterHandler implements IDisposable {
   /**
-   * Construct a new completion handler for a widget.
+   * Construct a new completer handler for a widget.
    */
-  constructor(completion: CompletionWidget) {
-    this._completion = completion;
-    this._completion.selected.connect(this.onCompletionSelected, this);
+  constructor(completer: CompleterWidget) {
+    this._completer = completer;
+    this._completer.selected.connect(this.onCompletionSelected, this);
+    this._completer.visibilityChanged.connect(this.onVisibilityChanged, this);
   }
 
   /**
-   * The kernel used by the completion handler.
+   * The kernel used by the completer handler.
    */
   get kernel(): IKernel {
     return this._kernel;
@@ -46,7 +47,7 @@ class CellCompletionHandler implements IDisposable {
   }
 
   /**
-   * The cell widget used by the completion handler.
+   * The cell widget used by the completer handler.
    */
   get activeCell(): BaseCellWidget {
     return this._activeCell;
@@ -70,13 +71,13 @@ class CellCompletionHandler implements IDisposable {
   }
 
   /**
-   * Get whether the completion handler is disposed.
+   * Get whether the completer handler is disposed.
    *
    * #### Notes
    * This is a read-only property.
    */
   get isDisposed(): boolean {
-    return this._completion === null;
+    return this._completer === null;
   }
 
   /**
@@ -86,13 +87,13 @@ class CellCompletionHandler implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    this._completion = null;
+    this._completer = null;
     this._kernel = null;
     this._activeCell = null;
   }
 
   /**
-   * Make a completion request using the kernel.
+   * Make a complete request using the kernel.
    */
   protected makeRequest(request: ICompletionRequest): Promise<void> {
     if (!this._kernel) {
@@ -123,7 +124,7 @@ class CellCompletionHandler implements IDisposable {
       return;
     }
     let value = msg.content;
-    let model = this._completion.model;
+    let model = this._completer.model;
     // Completion request failures or negative results fail silently.
     if (value.status !== 'ok') {
       model.reset();
@@ -141,30 +142,42 @@ class CellCompletionHandler implements IDisposable {
    * Handle a text changed signal from an editor.
    */
   protected onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
-    if (!this._completion.model) {
+    if (!this._completer.model) {
       return;
     }
-    this._completion.model.handleTextChange(change);
+    this._completer.model.handleTextChange(change);
   }
 
   /**
    * Handle a completion requested signal from an editor.
    */
   protected onCompletionRequested(editor: ICellEditorWidget, request: ICompletionRequest): void {
-    if (!this.kernel || !this._completion.model) {
+    if (!this.kernel || !this._completer.model) {
       return;
     }
     this.makeRequest(request);
   }
 
+
+  /**
+   * Handle a visiblity change signal from a completer widget.
+   */
+  protected onVisibilityChanged(completer: CompleterWidget): void {
+    if (completer.isDisposed || completer.isHidden) {
+      if (this._activeCell) {
+        this._activeCell.activate();
+      }
+    }
+  }
+
   /**
    * Handle a completion selected signal from the completion widget.
    */
-  protected onCompletionSelected(widget: CompletionWidget, value: string): void {
-    if (!this._activeCell || !this._completion.model) {
+  protected onCompletionSelected(widget: CompleterWidget, value: string): void {
+    if (!this._activeCell || !this._completer.model) {
       return;
     }
-    let patch = this._completion.model.createPatch(value);
+    let patch = this._completer.model.createPatch(value);
     if (!patch) {
       return;
     }
@@ -174,7 +187,7 @@ class CellCompletionHandler implements IDisposable {
   }
 
   private _activeCell: BaseCellWidget = null;
-  private _completion: CompletionWidget = null;
+  private _completer: CompleterWidget = null;
   private _kernel: IKernel = null;
   private _pending = 0;
 }

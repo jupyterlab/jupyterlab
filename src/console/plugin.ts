@@ -192,11 +192,11 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
 
-  command = 'console:dismiss-completion';
+  command = 'console:dismiss-completer';
   commands.addCommand(command, {
     execute: () => {
       if (tracker.currentWidget) {
-        tracker.currentWidget.content.dismissCompletion();
+        tracker.currentWidget.content.dismissCompleter();
       }
     }
   });

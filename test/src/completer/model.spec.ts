@@ -4,23 +4,23 @@
 import expect = require('expect.js');
 
 import {
-  CompletionModel, ICursorSpan, ICompletionItem, ICompletionPatch
-} from '../../../../lib/notebook/completion';
+  CompleterModel, ICursorSpan, ICompleterItem, ICompletionPatch
+} from '../../../lib/completer';
 
 import {
   ICompletionRequest, ICoords, ITextChange
-} from '../../../../lib/notebook/cells/editor';
+} from '../../../lib/notebook/cells/editor';
 
 
-describe('notebook/completion/model', () => {
+describe('completer/model', () => {
 
-  describe('CompletionModel', () => {
+  describe('CompleterModel', () => {
 
     describe('#constructor()', () => {
 
-      it('should create a completion model', () => {
-        let model = new CompletionModel();
-        expect(model).to.be.a(CompletionModel);
+      it('should create a completer model', () => {
+        let model = new CompleterModel();
+        expect(model).to.be.a(CompleterModel);
       });
 
     });
@@ -28,7 +28,7 @@ describe('notebook/completion/model', () => {
     describe('#stateChanged', () => {
 
       it('should signal when model options have changed', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let called = 0;
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
@@ -40,7 +40,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should not signal when options have not changed', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let called = 0;
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
@@ -54,7 +54,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should signal when original request changes', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let called = 0;
         let request: ICompletionRequest = {
           ch: 0,
@@ -75,7 +75,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should not signal when original request has not changed', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let called = 0;
         let request: ICompletionRequest = {
           ch: 0,
@@ -98,7 +98,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should signal when current text changes', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let called = 0;
         let currentValue = 'foo';
         let oldValue = currentValue;
@@ -135,7 +135,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should not signal when current text has not change', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let called = 0;
         let currentValue = 'foo';
         let oldValue = currentValue;
@@ -178,8 +178,8 @@ describe('notebook/completion/model', () => {
     describe('#items', () => {
 
       it('should return an unfiltered list of items if query is blank', () => {
-        let model = new CompletionModel();
-        let want: ICompletionItem[] = [
+        let model = new CompleterModel();
+        let want: ICompleterItem[] = [
           { raw: 'foo', text: 'foo' },
           { raw: 'bar', text: 'bar' },
           { raw: 'baz', text: 'baz' }
@@ -189,8 +189,8 @@ describe('notebook/completion/model', () => {
       });
 
       it('should return a filtered list of items if query is set', () => {
-        let model = new CompletionModel();
-        let want: ICompletionItem[] = [
+        let model = new CompleterModel();
+        let want: ICompleterItem[] = [
           { raw: 'foo', text: '<mark>f</mark>oo' }
         ];
         model.options = ['foo', 'bar', 'baz'];
@@ -199,8 +199,8 @@ describe('notebook/completion/model', () => {
       });
 
       it('should order list based on score', () => {
-        let model = new CompletionModel();
-        let want: ICompletionItem[] = [
+        let model = new CompleterModel();
+        let want: ICompleterItem[] = [
           { raw: 'qux', text: '<mark>qux</mark>' },
           { raw: 'quux', text: '<mark>qu</mark>u<mark>x</mark>' }
         ];
@@ -210,8 +210,8 @@ describe('notebook/completion/model', () => {
       });
 
       it('should break ties in score by locale sort', () => {
-        let model = new CompletionModel();
-        let want: ICompletionItem[] = [
+        let model = new CompleterModel();
+        let want: ICompleterItem[] = [
           { raw: 'quux', text: '<mark>qu</mark>ux' },
           { raw: 'qux', text: '<mark>qu</mark>x' }
         ];
@@ -225,12 +225,12 @@ describe('notebook/completion/model', () => {
     describe('#options', () => {
 
       it('should default to null', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         expect(model.options).to.be(null);
       });
 
       it('should return model options', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let options = ['foo'];
         model.options = options;
         expect(model.options).to.not.equal(options);
@@ -242,12 +242,12 @@ describe('notebook/completion/model', () => {
     describe('#original', () => {
 
       it('should default to null', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         expect(model.original).to.be(null);
       });
 
       it('should return the original request', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -266,12 +266,12 @@ describe('notebook/completion/model', () => {
     describe('#current', () => {
 
       it('should default to null', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         expect(model.current).to.be(null);
       });
 
       it('should not set if original request is nonexistent', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foob';
@@ -303,7 +303,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should not set if cursor is nonexistent', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foob';
@@ -335,7 +335,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should reset model if change is shorter than original', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'fo';
@@ -371,12 +371,12 @@ describe('notebook/completion/model', () => {
     describe('#cursor', () => {
 
       it('should default to null', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         expect(model.cursor).to.be(null);
       });
 
       it('should not set if original request is nonexistent', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let cursor: ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
           ch: 0,
@@ -399,7 +399,7 @@ describe('notebook/completion/model', () => {
     describe('#isDisposed', () => {
 
       it('should be true if model has been disposed', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         expect(model.isDisposed).to.be(false);
         model.dispose();
         expect(model.isDisposed).to.be(true);
@@ -410,7 +410,7 @@ describe('notebook/completion/model', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the model resources', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         model.options = ['foo'];
         expect(model.isDisposed).to.be(false);
         expect(model.options).to.be.ok();
@@ -420,7 +420,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should be safe to call multiple times', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         expect(model.isDisposed).to.be(false);
         model.dispose();
         model.dispose();
@@ -432,7 +432,7 @@ describe('notebook/completion/model', () => {
     describe('#handleTextChange()', () => {
 
       it('should set current change value', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foob';
@@ -463,7 +463,7 @@ describe('notebook/completion/model', () => {
       });
 
       it('should reset model if last character of change is whitespace', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foo ';
@@ -496,7 +496,7 @@ describe('notebook/completion/model', () => {
     describe('#createPatch()', () => {
 
       it('should return a patch value', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let patch = 'foobar';
         let want: ICompletionPatch = { text: patch, position: patch.length };
         let cursor: ICursorSpan = { start: 0, end: 3 };
@@ -515,12 +515,12 @@ describe('notebook/completion/model', () => {
       });
 
       it('should return null if original request or cursor are null', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         expect(model.createPatch('foo')).to.be(null);
       });
 
       it('should handle line breaks in original value', () => {
-        let model = new CompletionModel();
+        let model = new CompleterModel();
         let currentValue = 'foo\nbar';
         let patch = 'barbaz';
         let want: ICompletionPatch = { text: 'foo\nbarbaz', position: 10 };
