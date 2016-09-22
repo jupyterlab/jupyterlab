@@ -84,28 +84,29 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   let items = new LauncherItems(body);
 
   let list : IDisposable[] = []; //DEMO ONLY
-
-  let l = items.addItem(
-      new LauncherItem('Notebook', () => { 
-      app.commands.execute('file-operations:new-notebook', void 0);
-  }));
-  list.push(l);
-  l = items.addItem(new LauncherItem('Terminal', () => app.commands.execute('terminal:create-new', void 0)));
-  list.push(l);
+  let l : IDisposable; //DEMO ONLY
 
   let names = [
-      'Terminal',
       'Notebook',
-      'Text Editor',
       'Console',
+      'Terminal',
+      'Text Editor',
   ]
   let actions = [
-      'terminal:create-new',
       'file-operations:new-notebook',
+      `console:create-${services.kernelspecs.default}`,
+      'terminal:create-new',
       'file-operations:new-text-file',
-      ''
   ]
-  
+ 
+  for (let i in names) {
+      let itemName = names[i];
+      let action = actions[i];
+      let l = items.add(itemName, () => app.commands.execute(action, void 0));
+      list.push(l)
+  }
+
+
   items.addItem(new LauncherItem("Add Random", () => {
   
 
@@ -126,12 +127,6 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       console.log("Removing last")
   
   }));
-
-
-  l = items.addItem(new LauncherItem('Text Editor', () => { 
-      app.commands.execute('file-operations:new-text-file', void 0);
-  }));
-  list.push(l);
 
 
   app.commands.addCommand('jupyterlab-launcher:add-item', {
