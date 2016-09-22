@@ -80,7 +80,8 @@ const cmdIds = {
   matchBrackets: 'editor:match-brackets',
   vimMode: 'editor:vim-mode',
   closeAll: 'editor:close-all',
-  changeTheme: 'editor:change-theme'
+  changeTheme: 'editor:change-theme',
+  startConsole: 'editor:startConsole'
 };
 
 
@@ -230,7 +231,7 @@ function createMenu(app: JupyterLab, tracker: IEditorTracker): Menu {
 
   [
    'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
-   'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix', 
+   'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix',
    'xq-light', 'zenburn'
   ].forEach(name => theme.addItem({
     command: 'editor:change-theme',
