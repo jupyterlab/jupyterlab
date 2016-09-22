@@ -95,5 +95,3 @@ The *Document Manager* handles:
 - document contexts
 
 The *File Browser* uses the *Document Manager* to open documents and manage them.
-
-for documents and manages their life cycle.
