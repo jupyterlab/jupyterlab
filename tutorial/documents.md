@@ -20,13 +20,14 @@ The [Document Manager](http://jupyter.org/jupyterlab/classes/_docmanager_manager
 uses the Document Registry to create models and widgets for documents.  The
 Document Manager is only meant to be accessed by the File Browser itself.
 
+
 ## Document Registry
 
 *Document widget extensions* in the JupyterLab application can register:
 
 - widget factories
 - model factories
-- widget extensions
+- widget extension factories
 - file types
 - file creators
 
@@ -43,7 +44,7 @@ Create a model for a given file.
 
 Models are generally differentiated by the contents options used to fetch the model (e.g. text, base64, notebook).
 
-### [Widget Extensions](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#addwidgetextension)
+### [Widget Extension Factories](http://jupyter.org/jupyterlab/classes/_docregistry_registry_.documentregistry.html#addwidgetextension)
 
 Adds additional functionality to a widget type. An extension instance is
 created for each widget instance, allowing the extension to add functionality
@@ -64,20 +65,10 @@ Intended for create quick launch file creators.
 The default use will be for the "create new" dropdown in the file browser,
 giving list of items that can be created with default options  (e.g. "Python 3 Notebook").
 
-## Document Manager
-
-The *Document Manager* handles: 
-- document models
-- document contexts
-
-The *File Browser* uses the *Document Manager* to open documents and manage them.
-
-for documents and manages their life cycle.
-
 ### [Document Models](http://jupyter.org/jupyterlab/interfaces/_docregistry_interfaces_.idocumentmodel.html)
 
 Created by the model factories and passed to widget factories and widget
-extensions.  Models are the way in which we interact with the data of
+extension factories.  Models are the way in which we interact with the data of
 a document.  For a simple text file, we typically only use the 
 `to/fromString()` methods.  A more complex document like a Notebook
 contains more points of interaction like the Notebook metadata.
@@ -95,3 +86,14 @@ given model.  They can be shared between widgets.
 The reason for a separate context and model is so that it is easy to create
 model factories and the heavy lifting of the context is left to the Document
 Manager.  Contexts are not meant to be subclassed or re-implemented. Instead, the contexts are intended are meant to be the glue between the document model and the wider application.
+
+
+## Document Manager
+
+The *Document Manager* handles: 
+- document models
+- document contexts
+
+The *File Browser* uses the *Document Manager* to open documents and manage them.
+
+for documents and manages their life cycle.
