@@ -87,6 +87,7 @@ describe('completer/widget', () => {
 
       it('should accept options with a renderer', () => {
         let options: CompleterWidget.IOptions = {
+          anchor: document.createElement('div'),
           model: new CompleterModel(),
           renderer: new CustomRenderer()
         };
@@ -547,11 +548,11 @@ describe('completer/widget', () => {
 
       context('scroll', () => {
 
-        it('should move along with the pegged anchor', (done) => {
+        it('should position itself according to the anchor', (done) => {
           let anchor = document.createElement('div');
-          let container = new Widget();
+          let content = new Widget();
           let model = new CompleterModel();
-          let coords: ICoords = { left: 0, right: 0, top: 500, bottom: 520 };
+          let coords: ICoords = { left: 0, right: 0, top: 100, bottom: 120 };
           let request: ICompletionRequest = {
             ch: 0,
             chHeight: 0,
@@ -561,32 +562,38 @@ describe('completer/widget', () => {
             position: 0,
             currentValue: 'f'
           };
-          let options: CompleterWidget.IOptions = { model, anchor: anchor };
+
+          content.node.style.height = '5000px';
+          content.node.style.width = '400px';
+          content.node.style.overflow = 'auto';
+          content.node.style.background = 'yellow';
+
+          anchor.style.background = 'red';
+          anchor.style.height = '2000px';
+          anchor.style.width = '500px';
+          anchor.style.maxHeight = '500px';
+          anchor.style.overflow = 'hidden';
 
           document.body.appendChild(anchor);
-          anchor.style.height = '1000px';
-          anchor.style.overflow = 'auto';
+          Widget.attach(content, anchor);
 
-          Widget.attach(container, anchor);
-          container.node.style.height = '5000px';
-          anchor.scrollTop = 0;
+          anchor.scrollTop = 100;
           model.original = request;
           model.cursor = { start: 0, end: 0 };
           model.options = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-          let widget = new CompleterWidget(options);
+          let widget = new CompleterWidget({ model, anchor: anchor });
           Widget.attach(widget, document.body);
           sendMessage(widget, WidgetMessage.UpdateRequest);
 
-          let offset = 100;
-          anchor.scrollTop = offset;
           simulate(anchor, 'scroll');
 
           requestAnimationFrame(() => {
             let top = parseInt(window.getComputedStyle(widget.node).top, 10);
-            expect(top).to.be(coords.bottom - offset);
+            expect(top).to.be(coords.bottom);
             widget.dispose();
-            container.dispose();
+            content.dispose();
+            document.body.removeChild(anchor);
             done();
           });
         });
