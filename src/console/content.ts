@@ -163,7 +163,27 @@ class ConsoleContent extends Widget {
     // Create the prompt.
     this.newPrompt();
 
-    // Handle inputs/outputs initated by another session.
+    // Display inputs/outputs initiated by another session.
+    this.monitorForeignIOPub();
+
+    // Handle changes to the kernel.
+    this._session.kernelChanged.connect((s, kernel) => {
+      this.clear();
+      this.newPrompt();
+      this.initialize();
+      this._history.dispose();
+      this._history = new ConsoleHistory(kernel);
+      this._completionHandler.kernel = kernel;
+      this._inspectionHandler.kernel = kernel;
+      this._foreignCells = {};
+      this.monitorForeignIOPub();
+    });
+  }
+
+  /**
+   * Display inputs/outputs initated by another session.
+   */
+  protected monitorForeignIOPub(): void {
     this._session.kernel.iopubMessage.connect((kernel, msg) => {
       // Check whether this message came from an external session.
       let session = (msg.parent_header as KernelMessage.IHeader).session;
@@ -203,19 +223,6 @@ class ConsoleContent extends Widget {
       default:
         break;
       }
-    });
-
-    // Handle changes to the kernel.
-    this._session.kernelChanged.connect((s, kernel) => {
-      this.clear();
-      this.newPrompt();
-      this.initialize();
-      this._history.dispose();
-      this._history = new ConsoleHistory(kernel);
-      this._completionHandler.kernel = kernel;
-      this._inspectionHandler.kernel = kernel;
-      // TODO Connect to kernel.iopubMessage as above to catch inputs/outputs
-      // from an external session.
     });
   }
 
