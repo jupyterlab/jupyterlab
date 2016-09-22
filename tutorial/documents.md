@@ -85,7 +85,7 @@ given model.  They can be shared between widgets.
 
 The reason for a separate context and model is so that it is easy to create
 model factories and the heavy lifting of the context is left to the Document
-Manager.  Contexts are not meant to be subclassed or re-implemented. Instead, the contexts are intended are meant to be the glue between the document model and the wider application.
+Manager.  Contexts are not meant to be subclassed or re-implemented. Instead, the contexts are intended to be the glue between the document model and the wider application.
 
 
 ## Document Manager
