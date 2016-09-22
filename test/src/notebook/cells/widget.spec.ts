@@ -241,13 +241,6 @@ describe('notebook/cells/widget', () => {
         expect(widget.editor).to.be.a(CodeMirrorCellEditorWidget);
       });
 
-      it('should be read-only', () => {
-        let widget = new BaseCellWidget({
-          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
-        });
-        expect(() => { (widget as any).editor = null; }).to.throwError();
-      });
-
     });
 
     describe('#mimetype', () => {

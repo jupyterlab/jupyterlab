@@ -42,11 +42,6 @@ describe('docmanager/default', () => {
         expect(factory.isDisposed).to.be(true);
       });
 
-      it('should be read-only', () => {
-        let factory = new WidgetFactory();
-        expect(() => { (factory as any).isDisposed = false; }).to.throwError();
-      });
-
     });
 
     describe('#dispose()', () => {
@@ -89,11 +84,6 @@ describe('docmanager/default', () => {
         expect(factory.name).to.be('base64');
       });
 
-      it('should be read-only', () => {
-        let factory = new Base64ModelFactory();
-        expect(() => { (factory as any).name = ''; }).to.throwError();
-      });
-
     });
 
     describe('#type', () => {
@@ -103,11 +93,6 @@ describe('docmanager/default', () => {
         expect(factory.fileType).to.be('file');
       });
 
-      it('should be read-only', () => {
-        let factory = new Base64ModelFactory();
-        expect(() => { (factory as any).fileType = 'file'; }).to.throwError();
-      });
-
     });
 
     describe('#format', () => {
@@ -115,11 +100,6 @@ describe('docmanager/default', () => {
       it('should get the file format', () => {
         let factory = new Base64ModelFactory();
         expect(factory.fileFormat).to.be('base64');
-      });
-
-      it('should be read-only', () => {
-        let factory = new Base64ModelFactory();
-        expect(() => { (factory as any).fileFormat = 'base64'; }).to.throwError();
       });
 
     });
@@ -149,11 +129,6 @@ describe('docmanager/default', () => {
         expect(model.isDisposed).to.be(false);
         model.dispose();
         expect(model.isDisposed).to.be(true);
-      });
-
-      it('should be read-only', () => {
-        let model = new DocumentModel();
-        expect(() => { (model as any).isDisposed = false; }).to.throwError();
       });
 
     });
@@ -277,11 +252,6 @@ describe('docmanager/default', () => {
         expect(model.defaultKernelName).to.be('');
       });
 
-      it('should be read-only', () => {
-        let model = new DocumentModel();
-        expect(() => { (model as any).defaultKernelName = ''; }).to.throwError();
-      });
-
     });
 
     describe('defaultKernelLanguage', () => {
@@ -294,11 +264,6 @@ describe('docmanager/default', () => {
       it('should be set by the constructor arg', () => {
         let model = new DocumentModel('foo');
         expect(model.defaultKernelLanguage).to.be('foo');
-      });
-
-      it('should be read-only', () => {
-        let model = new DocumentModel();
-        expect(() => { (model as any).defaultKernelLanguage = ''; }).to.throwError();
       });
 
     });
@@ -369,11 +334,6 @@ describe('docmanager/default', () => {
         expect(factory.name).to.be('text');
       });
 
-      it('should be read-only', () => {
-        let factory = new TextModelFactory();
-        expect(() => { (factory as any).name = ''; }).to.throwError();
-      });
-
     });
 
     describe('#type', () => {
@@ -381,11 +341,6 @@ describe('docmanager/default', () => {
       it('should get the file type', () => {
         let factory = new TextModelFactory();
         expect(factory.fileType).to.be('file');
-      });
-
-      it('should be read-only', () => {
-        let factory = new TextModelFactory();
-        expect(() => { (factory as any).fileType = 'file'; }).to.throwError();
       });
 
     });
@@ -397,11 +352,6 @@ describe('docmanager/default', () => {
         expect(factory.fileFormat).to.be('text');
       });
 
-      it('should be read-only', () => {
-        let factory = new TextModelFactory();
-        expect(() => { (factory as any).fileFormat = 'text'; }).to.throwError();
-      });
-
     });
 
     describe('#isDisposed', () => {
@@ -411,11 +361,6 @@ describe('docmanager/default', () => {
         expect(factory.isDisposed).to.be(false);
         factory.dispose();
         expect(factory.isDisposed).to.be(true);
-      });
-
-      it('should be read-only', () => {
-        let factory = new TextModelFactory();
-        expect(() => { (factory as any).isDisposed = false; }).to.throwError();
       });
 
     });

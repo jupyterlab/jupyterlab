@@ -119,11 +119,6 @@ describe('notebook/notebook/model', () => {
         expect(model.cells.get(1)).to.not.be(cell);  // should be a clone.
       });
 
-      it('should be read-only', () => {
-        let model = new NotebookModel();
-        expect(() => { (model as any).cells = null; }).to.throwError();
-      });
-
       context('cells `changed` signal', () => {
 
         it('should emit a `contentChanged` signal', () => {
@@ -200,11 +195,6 @@ describe('notebook/notebook/model', () => {
       it('should be the cell model factory used by the model', () => {
         let model = new NotebookModel();
         expect(model.factory).to.be(NotebookModel.defaultFactory);
-      });
-
-      it('should be read-only', () => {
-        let model = new NotebookModel();
-        expect(() => { (model as any).factory = null; }).to.throwError();
       });
 
       context('createCodeCell()', () => {
@@ -295,11 +285,6 @@ describe('notebook/notebook/model', () => {
         expect(model.nbformat).to.be(DEFAULT_CONTENT.nbformat);
       });
 
-      it('should be read-only', () => {
-        let model = new NotebookModel();
-        expect(() => { (model as any).nbformat = 0; }).to.throwError();
-      });
-
     });
 
     describe('#nbformatMinor', () => {
@@ -308,11 +293,6 @@ describe('notebook/notebook/model', () => {
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.nbformatMinor).to.be(DEFAULT_CONTENT.nbformat_minor);
-      });
-
-      it('should be read-only', () => {
-        let model = new NotebookModel();
-        expect(() => { (model as any).nbformatMinor = 0; }).to.throwError();
       });
 
     });
@@ -328,11 +308,6 @@ describe('notebook/notebook/model', () => {
       it('should default to an empty string', () => {
         let model = new NotebookModel();
         expect(model.defaultKernelName).to.be('');
-      });
-
-      it('should be read-only', () => {
-        let model = new NotebookModel();
-        expect(() => { (model as any).defaultKernelName = ''; }).to.throwError();
       });
 
     });
@@ -353,11 +328,6 @@ describe('notebook/notebook/model', () => {
       it('should be set from the constructor arg', () => {
         let model = new NotebookModel({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).to.be('foo');
-      });
-
-      it('should be read-only', () => {
-        let model = new NotebookModel();
-        expect(() => { (model as any).defaultKernelLanguage = ''; }).to.throwError();
       });
 
     });

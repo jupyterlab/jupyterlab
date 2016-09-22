@@ -104,11 +104,6 @@ describe('common/observablelist', () => {
         expect(list.length).to.be(1);
       });
 
-      it('should be read-only', () => {
-        let list = new ObservableList<number>();
-        expect(() => { (list as any).length = 2; }).to.throwError();
-      });
-
     });
 
     describe('#get()', () => {

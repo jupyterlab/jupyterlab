@@ -188,11 +188,6 @@ describe('notebook/output-area/widget', () => {
         expect(widget.rendermime).to.be(rendermime);
       });
 
-      it('should be read-only', () => {
-        let widget = new OutputAreaWidget({ rendermime });
-        expect(() => { (widget as any).rendermime = null; }).to.throwError();
-      });
-
     });
 
     describe('#renderer', () => {
@@ -201,11 +196,6 @@ describe('notebook/output-area/widget', () => {
         let renderer = new OutputAreaWidget.Renderer();
         let widget = new OutputAreaWidget({ rendermime, renderer });
         expect(widget.renderer).to.be(renderer);
-      });
-
-      it('should be read-only', () => {
-        let widget = new OutputAreaWidget({ rendermime });
-        expect(() => { (widget as any).renderer = null; }).to.throwError();
       });
 
     });
@@ -393,11 +383,6 @@ describe('notebook/output-area/widget', () => {
         expect(widget.prompt.hasClass('jp-Output-prompt')).to.be(true);
       });
 
-      it('should be read-only', () => {
-        let widget = new OutputWidget({ rendermime });
-        expect(() => { (widget as any).prompt = null; }).to.throwError();
-      });
-
     });
 
     describe('#output', () => {
@@ -405,11 +390,6 @@ describe('notebook/output-area/widget', () => {
       it('should get the rendered output used by the output widget', () => {
         let widget = new OutputWidget({ rendermime });
         expect(widget.output.hasClass('jp-Output-result')).to.be(true);
-      });
-
-      it('should be read-only', () => {
-        let widget = new OutputWidget({ rendermime });
-        expect(() => { (widget as any).output = null; }).to.throwError();
       });
 
     });

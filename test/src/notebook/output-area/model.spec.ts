@@ -111,11 +111,6 @@ describe('notebook/output-area/model', () => {
         expect(model.length).to.be(1);
       });
 
-      it('should be read-only', () => {
-        let model = new OutputAreaModel();
-        expect(() => { (model as any).length = 0; }).to.throwError();
-      });
-
     });
 
     describe('#isDisposed', () => {
@@ -125,11 +120,6 @@ describe('notebook/output-area/model', () => {
         expect(model.isDisposed).to.be(false);
         model.dispose();
         expect(model.isDisposed).to.be(true);
-      });
-
-      it('should be read-only', () => {
-        let model = new OutputAreaModel();
-        expect(() => { (model as any).isDisposed = true; }).to.throwError();
       });
 
     });

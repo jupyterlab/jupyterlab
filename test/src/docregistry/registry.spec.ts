@@ -59,10 +59,6 @@ describe('docregistry/registry', () => {
         expect(registry.isDisposed).to.be(true);
       });
 
-      it('should be read-only', () => {
-        expect(() => { (registry as any).isDisposed = false; }).to.throwError();
-      });
-
     });
 
     describe('#dispose()', () => {
