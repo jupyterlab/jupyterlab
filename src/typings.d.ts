@@ -4,7 +4,6 @@
 /// <reference path="../typings/es6-collections/es6-collections.d.ts"/>
 /// <reference path="../typings/es6-promise/es6-promise.d.ts"/>
 /// <reference path="../typings/jquery/jquery.d.ts"/>
-/// <reference path="../typings/leaflet/leaflet.d.ts"/>
 /// <reference path="../typings/marked/marked.d.ts"/>
 /// <reference path="../typings/mathjax/mathjax.d.ts"/>
 /// <reference path="../typings/moment/moment.d.ts"/>
