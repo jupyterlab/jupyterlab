@@ -584,7 +584,6 @@ flags['s'] = flags['symlink']
 aliases = {
     "prefix" : "InstallLabExtensionApp.prefix",
     "labextensions" : "InstallLabExtensionApp.labextensions_dir",
-    "destination" : "InstallLabExtensionApp.destination",
 }
 
 class InstallLabExtensionApp(BaseLabExtensionApp):
@@ -593,7 +592,8 @@ class InstallLabExtensionApp(BaseLabExtensionApp):
     
     Usage
     
-        jupyter labextension install path|url [--user|--sys-prefix]
+        jupyter labextension install /path/to/myextension myextension [--user|--sys-prefix]
+        jupyter labextension install --py myextensionPyPackage [--user|--sys-prefix]
     
     This copies a file or a folder into the Jupyter labextensions directory.
     If a URL is given, it will be downloaded.
@@ -603,8 +603,8 @@ class InstallLabExtensionApp(BaseLabExtensionApp):
     """
     
     examples = """
-    jupyter labextension install /path/to/myextension name
-    jupyter labextension install --py extensionPyPackage
+    jupyter labextension install /path/to/myextension myextension
+    jupyter labextension install --py myextensionPyPackage
     """
     aliases = aliases
     flags = flags
@@ -676,15 +676,15 @@ class UninstallLabExtensionApp(BaseLabExtensionApp):
     
     Usage
     
-        jupyter labextension uninstall name
-        jupyter labextension uninstall --py extensionPyPackage
+        jupyter labextension uninstall myextension
+        jupyter labextension uninstall --py myextensionPyPackage
     
     This uninstalls a labextension.
     """
     
     examples = """
-    jupyter labextension uninstall name
-    jupyter labextension uninstall --py extensionPyPackage
+    jupyter labextension uninstall myextension
+    jupyter labextension uninstall --py myextensionPyPackage
     """
     
     aliases = {
@@ -799,7 +799,7 @@ class EnableLabExtensionApp(ToggleLabExtensionApp):
     Enable a labextension in frontend configuration.
     
     Usage
-        jupyter labextension enable [--system|--sys-prefix]
+        jupyter labextension enable myextension [--system|--sys-prefix]
     """
     _toggle_value = True
 
@@ -811,7 +811,7 @@ class DisableLabExtensionApp(ToggleLabExtensionApp):
     Enable a labextension in frontend configuration.
     
     Usage
-        jupyter labextension disable [--system|--sys-prefix]
+        jupyter labextension disable myextension [--system|--sys-prefix]
     """
     _toggle_value = None
 

@@ -31,6 +31,20 @@ def get_labextensions(parent=None):
 
 class LabApp(NotebookApp):
 
+    description = """
+        JupyterLab - An extensible computational environment for Jupyter.
+
+        This launches a Tornado based HTML Server that serves up an
+        HTML5/Javascript JupyterLab client.
+    """
+
+    examples = """
+        jupyter lab                       # start JupyterLab
+        jupyter lab --certfile=mycert.pem # use SSL/TLS certificate
+    """
+
+    subcommands = dict()
+
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`"
     )
