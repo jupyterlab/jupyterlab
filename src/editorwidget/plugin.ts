@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
+  AttachedProperty
+} from 'phosphor/lib/core/properties';
+
+import {
   FocusTracker
 } from 'phosphor/lib/ui/focustracker';
 
@@ -80,7 +84,9 @@ const cmdIds = {
   matchBrackets: 'editor:match-brackets',
   vimMode: 'editor:vim-mode',
   closeAll: 'editor:close-all',
-  changeTheme: 'editor:change-theme'
+  changeTheme: 'editor:change-theme',
+  createConsole: 'editor:create-console',
+  runCode: 'editor:run-code'
 };
 
 
@@ -106,7 +112,72 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
 
   mainMenu.addMenu(createMenu(app, tracker), {rank: 30});
 
-  addCommands(app, tracker);
+  let commands = app.commands;
+
+  commands.addCommand(cmdIds.lineNumbers, {
+    execute: () => { toggleLineNums(tracker); },
+    label: 'Toggle Line Numbers',
+  });
+
+  commands.addCommand(cmdIds.lineWrap, {
+    execute: () => { toggleLineWrap(tracker); },
+    label: 'Toggle Line Wrap',
+  });
+
+  commands.addCommand(cmdIds.matchBrackets, {
+    execute: () => { toggleMatchBrackets(tracker); },
+    label: 'Toggle Match Brackets',
+  });
+
+  commands.addCommand(cmdIds.vimMode, {
+    execute: () => { toggleVim(tracker); },
+    label: 'Toggle Vim Mode'
+  });
+
+  commands.addCommand(cmdIds.closeAll, {
+    execute: () => { closeAllFiles(tracker); },
+    label: 'Close all files'
+  });
+
+  commands.addCommand(cmdIds.createConsole, {
+    execute: () => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let options: any = {
+        path: widget.context.path,
+        preferredLanguage: widget.context.model.defaultKernelLanguage
+      };
+      commands.execute('console:create', options).then(id => {
+        sessionIdProperty.set(widget, id);
+      });
+    },
+    label: 'Create Console for Editor'
+  });
+
+  commands.addCommand(cmdIds.runCode, {
+    execute: () => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      // Get the session id.
+      let id = sessionIdProperty.get(widget);
+      if (!id) {
+        return;
+      }
+      // Get the selected code from the editor.
+      let doc = widget.editor.getDoc();
+      let code = doc.getSelection();
+      if (!code) {
+        let { line } = doc.getCursor();
+        code = doc.getLine(line);
+      }
+      commands.execute('console:inject', { id, code });
+    },
+    label: 'Run Code',
+  });
 
   [
     cmdIds.lineNumbers,
@@ -114,37 +185,20 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     cmdIds.matchBrackets,
     cmdIds.vimMode,
     cmdIds.closeAll,
+    cmdIds.createConsole,
+    cmdIds.runCode,
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
   return tracker;
 }
 
 
+
 /**
- * Add the editor commands to the application's command registry.
+ * An attached property for the session id associated with an editor widget.
  */
-function addCommands(app: JupyterLab, tracker: IEditorTracker): void {
-  app.commands.addCommand(cmdIds.lineNumbers, {
-    execute: () => { toggleLineNums(tracker); },
-    label: 'Toggle Line Numbers',
-  });
-  app.commands.addCommand(cmdIds.lineWrap, {
-    execute: () => { toggleLineWrap(tracker); },
-    label: 'Toggle Line Wrap',
-  });
-  app.commands.addCommand(cmdIds.matchBrackets, {
-    execute: () => { toggleMatchBrackets(tracker); },
-    label: 'Toggle Match Brackets',
-  });
-  app.commands.addCommand(cmdIds.vimMode, {
-    execute: () => { toggleVim(tracker); },
-    label: 'Toggle Vim Mode'
-  });
-  app.commands.addCommand(cmdIds.closeAll, {
-    execute: () => { closeAllFiles(tracker); },
-    label: 'Close all files'
-  });
-}
+const sessionIdProperty = new AttachedProperty<EditorWidget, string>({ name: 'sessionId' });
+
 
 
 /**
@@ -230,7 +284,7 @@ function createMenu(app: JupyterLab, tracker: IEditorTracker): Menu {
 
   [
    'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
-   'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix', 
+   'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix',
    'xq-light', 'zenburn'
   ].forEach(name => theme.addItem({
     command: 'editor:change-theme',

@@ -316,13 +316,17 @@ class ConsoleContent extends Widget {
     let prompt = this.prompt;
     prompt.trusted = true;
     if (force) {
-      return this._execute();
+      // Create a new prompt before kernel execution to allow typeahead.
+      this.newPrompt();
+      return this._execute(prompt);
     }
 
     // Check whether we should execute.
     return this._shouldExecute().then(value => {
       if (value) {
-        return this._execute();
+        // Create a new prompt before kernel execution to allow typeahead.
+        this.newPrompt();
+        return this._execute(prompt);
       }
     });
   }
@@ -333,16 +337,11 @@ class ConsoleContent extends Widget {
   inject(code: string): void {
     // Create a new cell using the prompt renderer.
     let cell = this._renderer.createPrompt(this._rendermime);
-    let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
-      let content = this._content;
-      cell.readOnly = true;
-      content.addWidget(cell);
-      this.update();
-    };
-    let onFailure = () => { this.update(); };
-
     cell.model.source = code;
-    cell.execute(this._session.kernel).then(onSuccess, onFailure);
+    cell.mimetype = this._mimetype;
+    cell.readOnly = true;
+    this._content.addWidget(cell);
+    this._execute(cell);
   }
 
   /**
@@ -490,11 +489,8 @@ class ConsoleContent extends Widget {
   /**
    * Execute the code in the current prompt.
    */
-  private _execute(): Promise<void> {
-    let prompt = this.prompt;
-    this._history.push(prompt.model.source);
-    // Create a new prompt before kernel execution to allow typeahead.
-    this.newPrompt();
+  private _execute(cell: CodeCellWidget): Promise<void> {
+    this._history.push(cell.model.source);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       this.executed.emit(new Date());
       if (!value) {
@@ -511,15 +507,15 @@ class ConsoleContent extends Widget {
           })[0];
           if (setNextInput) {
             let text = (setNextInput as any).text;
-            // Ignore the `replace` value and always set the next prompt.
-            this.prompt.model.source = text;
+            // Ignore the `replace` value and always set the next cell.
+            cell.model.source = text;
           }
         }
       }
       this.update();
     };
     let onFailure = () => { this.update(); };
-    return prompt.execute(this._session.kernel).then(onSuccess, onFailure);
+    return cell.execute(this._session.kernel).then(onSuccess, onFailure);
   }
 
   /**

@@ -36,6 +36,11 @@ const SHORTCUTS = [
     keys: ['Accel Shift P']
   },
   {
+    command: 'editor:run-code',
+    selector: '.jp-EditorWidget',
+    keys: ['Shift Enter']
+  },
+  {
     command: 'file-browser:toggle',
     selector: 'body',
     keys: ['Accel Shift F']
@@ -251,12 +256,12 @@ const SHORTCUTS = [
     keys: ['Ctrl M']
   },
   {
-    command: 'console:execute',
+    command: 'console:run',
     selector: '.jp-ConsolePanel',
     keys: ['Enter']
   },
   {
-    command: 'console:execute-forced',
+    command: 'console:run-forced',
     selector: '.jp-ConsolePanel',
     keys: ['Shift Enter']
   },

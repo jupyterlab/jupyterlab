@@ -183,16 +183,19 @@ function populateKernels(node: HTMLSelectElement, specs: IKernel.ISpecModels, ru
   // Create mappings of display names and languages for kernel name.
   let displayNames: { [key: string]: string } = Object.create(null);
   let languages: { [key: string]: string } = Object.create(null);
+  let modes: { [key: string]: string } = Object.create(null);
   for (let name in specs.kernelspecs) {
-    displayNames[name] = specs.kernelspecs[name].spec.display_name;
+    let spec = specs.kernelspecs[name].spec;
+    displayNames[name] = spec.display_name;
     maxLength = Math.max(maxLength, displayNames[name].length);
-    languages[name] = specs.kernelspecs[name].spec.language;
+    languages[name] = spec.language;
+    modes[name] = spec.codemirror_mode;
   }
   // Handle a preferred kernel language in order of display name.
   let names: string[] = [];
   if (preferredLanguage) {
     for (let name in specs.kernelspecs) {
-      if (languages[name] === preferredLanguage) {
+      if (languages[name] === preferredLanguage || modes[name] === preferredLanguage) {
         names.push(name);
       }
     }
