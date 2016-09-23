@@ -35,7 +35,7 @@ function activateInspector(app: JupyterLab, palette: ICommandPalette): IInspecto
   let inspector = new Inspector({ items: Private.defaultInspectorItems });
   let openInspectorCommand = 'inspector:open';
   let opened = false;
-  
+
   inspector.id = 'jp-inspector';
   inspector.title.label = 'Inspector';
 
