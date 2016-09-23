@@ -430,6 +430,8 @@ namespace NotebookActions {
     } else {
       widget.activeCellIndex++;
     }
+    widget.scrollToActiveCell();
+
     return promise;
   }
 
@@ -457,6 +459,7 @@ namespace NotebookActions {
     let cell = model.factory.createCodeCell();
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
+    widget.scrollToActiveCell();
     widget.mode = 'edit';
     return promise;
   }

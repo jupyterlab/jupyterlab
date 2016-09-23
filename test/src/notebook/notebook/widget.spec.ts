@@ -333,11 +333,6 @@ describe('notebook/notebook/widget', () => {
         expect(widget.rendermime).to.be(rendermime);
       });
 
-      it('should be read-only', () => {
-        let widget = createWidget();
-        expect(() => { widget.rendermime = null; }).to.throwError();
-      });
-
     });
 
     describe('#renderer', () => {
@@ -345,11 +340,6 @@ describe('notebook/notebook/widget', () => {
       it('should be the cell widget renderer used by the widget', () => {
         let widget = new StaticNotebook({ rendermime, renderer });
         expect(widget.renderer).to.be(CodeMirrorNotebookRenderer.defaultRenderer);
-      });
-
-      it('should be read-only', () => {
-        let widget = createWidget();
-        expect(() => { widget.renderer = null; }).to.throwError();
       });
 
     });
@@ -811,11 +801,6 @@ describe('notebook/notebook/widget', () => {
       it('should get the active cell widget', () => {
         let widget = createActiveWidget();
         expect(widget.activeCell).to.be(widget.childAt(0));
-      });
-
-      it('should be read-only', () => {
-        let widget = createActiveWidget();
-        expect(() => { widget.activeCell = null; }).to.throwError();
       });
 
     });

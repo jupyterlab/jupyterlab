@@ -131,7 +131,7 @@ marked.setOptions({
 export
 class RenderedHTMLCommon extends Widget {
   /* Construct a new rendered HTML common widget.*/
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: RenderMime.IRenderOptions<string>) {
     super();
     this.addClass(HTML_COMMON_CLASS);
   }
@@ -146,7 +146,7 @@ class RenderedHTML extends RenderedHTMLCommon {
   /**
    * Construct a new html widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: RenderMime.IRenderOptions<string>) {
     super(options);
     this.addClass(HTML_CLASS);
     let source = options.source;
@@ -176,12 +176,12 @@ class RenderedMarkdown extends RenderedHTMLCommon {
   /**
    * Construct a new markdown widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: RenderMime.IRenderOptions<string>) {
     super(options);
     this.addClass(MARKDOWN_CLASS);
     let parts = removeMath(options.source);
     // Add the markdown content asynchronously.
-    marked(parts['text'], (err, content) => {
+    marked(parts['text'], (err: any, content: string) => {
       if (err) {
         console.error(err);
         return;
@@ -223,7 +223,7 @@ class RenderedLatex extends Widget {
   /**
    * Construct a new latex widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: RenderMime.IRenderOptions<string>) {
     super();
     this.node.textContent = options.source;
     this.addClass(LATEX_CLASS);
@@ -241,7 +241,7 @@ class RenderedLatex extends Widget {
 export
 class RenderedImage extends Widget {
 
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: RenderMime.IRenderOptions<string>) {
     super();
     let img = document.createElement('img');
     img.src = `data:${options.mimetype};base64,${options.source}`;
@@ -254,9 +254,9 @@ class RenderedImage extends Widget {
 export
 class RenderedText extends Widget {
 
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: RenderMime.IRenderOptions<string>) {
     super();
-    let data = escape_for_html(options.source);
+    let data = escape_for_html(options.source as string);
     let pre = document.createElement('pre');
     pre.innerHTML = ansi_to_html(data);
     this.node.appendChild(pre);
@@ -268,7 +268,7 @@ class RenderedText extends Widget {
 export
 class RenderedJavascript extends Widget {
 
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: RenderMime.IRenderOptions<string>) {
     super();
     let s = document.createElement('script');
     s.type = options.mimetype;
@@ -282,7 +282,7 @@ class RenderedJavascript extends Widget {
 export
 class RenderedSVG extends Widget {
 
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: RenderMime.IRenderOptions<string>) {
     super();
     let source = options.source;
     if (options.sanitizer) {
@@ -304,7 +304,7 @@ class RenderedSVG extends Widget {
 export
 class RenderedPDF extends Widget {
 
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: RenderMime.IRenderOptions<string>) {
     super();
     let a = document.createElement('a');
     a.target = '_blank';

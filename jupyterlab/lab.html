@@ -21,6 +21,8 @@ Distributed under the terms of the Modified BSD License.
   "notebookPath": "{{notebook_path | urlencode}}"
   }</script>
 
+  <link rel="shortcut icon" type="image/x-icon" href="/static/base/images/favicon.ico">
+
   {% for bundle_file in jupyterlab_bundles %}
   <script src="{{ bundle_file }}" type="text/javascript" charset="utf-8"></script>
   {% endfor %}
@@ -38,7 +40,7 @@ Distributed under the terms of the Modified BSD License.
   var plugins = [];
 
   {% for plugin_entry in plugin_entries %}
-  plugins = plugins.concat(jupyter.validateEntryPoint("{{ plugin_entry }}"));
+  plugins = plugins.concat(jupyter.getEntryPoint("{{ plugin_entry }}"));
   {% endfor %}
 
   lab.registerPlugins(plugins);

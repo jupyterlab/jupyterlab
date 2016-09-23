@@ -20,12 +20,8 @@ import {
 } from '../../../../lib/docregistry';
 
 import {
-  ICellEditorWidget, ITextChange, ICompletionRequest
-} from '../../../../lib/notebook/cells/editor';
-
-import {
-  CompletionWidget
-} from '../../../../lib/notebook/completion';
+  CompleterWidget
+} from '../../../../lib/completer';
 
 import {
   INotebookModel, NotebookModel
@@ -36,8 +32,8 @@ import {
 } from '../../../../lib/notebook/notebook/panel';
 
 import {
-  NotebookToolbar
-} from '../../../../lib/notebook/notebook/toolbar';
+  Toolbar
+} from '../../../../lib/toolbar';
 
 import {
   Notebook
@@ -173,12 +169,7 @@ describe('notebook/notebook/panel', () => {
 
       it('should be the toolbar used by the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(panel.toolbar).to.be.a(NotebookToolbar);
-      });
-
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.toolbar = null; }).to.throwError();
+        expect(panel.toolbar).to.be.a(Toolbar);
       });
 
     });
@@ -188,11 +179,6 @@ describe('notebook/notebook/panel', () => {
       it('should be the content area used by the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.content).to.be.a(Notebook);
-      });
-
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.content = null; }).to.throwError();
       });
 
     });
@@ -206,11 +192,6 @@ describe('notebook/notebook/panel', () => {
         expect(panel.kernel.name).to.be('shell');
       });
 
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.kernel = null; }).to.throwError();
-      });
-
     });
 
     describe('#rendermime', () => {
@@ -218,11 +199,6 @@ describe('notebook/notebook/panel', () => {
       it('should be the rendermime instance used by the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.rendermime).to.be(rendermime);
-      });
-
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.rendermime = null; }).to.throwError();
       });
 
     });
@@ -235,11 +211,6 @@ describe('notebook/notebook/panel', () => {
         expect(panel.renderer).to.be(renderer);
       });
 
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.renderer = null; });
-      });
-
     });
 
     describe('#clipboard', () => {
@@ -247,11 +218,6 @@ describe('notebook/notebook/panel', () => {
       it('should be the clipboard instance used by the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.clipboard).to.be(clipboard);
-      });
-
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.clipboard = null; }).to.throwError();
       });
 
     });
@@ -266,11 +232,6 @@ describe('notebook/notebook/panel', () => {
         panel.context = context;
         expect(panel.model).to.be(model);
         expect(panel.content.model).to.be(model);
-      });
-
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.model = null; }).to.throwError();
       });
 
     });
@@ -412,16 +373,16 @@ describe('notebook/notebook/panel', () => {
 
         it('should create a notebook toolbar', () => {
           let renderer = new CodeMirrorNotebookPanelRenderer();
-          expect(renderer.createToolbar()).to.be.a(NotebookToolbar);
+          expect(renderer.createToolbar()).to.be.a(Toolbar);
         });
 
       });
 
-      describe('#createCompletion()', () => {
+      describe('#createCompleter()', () => {
 
-        it('should create a completion widget', () => {
+        it('should create a completer widget', () => {
           let renderer = new CodeMirrorNotebookPanelRenderer();
-          expect(renderer.createCompletion()).to.be.a(CompletionWidget);
+          expect(renderer.createCompleter()).to.be.a(CompleterWidget);
         });
 
       });

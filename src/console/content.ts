@@ -46,8 +46,8 @@ import {
 } from '../notebook/common/mimetype';
 
 import {
-  CompletionWidget, CompletionModel, CellCompletionHandler
-} from '../notebook/completion';
+  CompleterWidget, CompleterModel, CellCompleterHandler
+} from '../completer';
 
 import {
   IRenderMime
@@ -67,6 +67,11 @@ const CONSOLE_CLASS = 'jp-ConsoleContent';
  * The class name added to the console banner.
  */
 const BANNER_CLASS = 'jp-ConsoleContent-banner';
+
+/**
+ * The class name of a cell whose input originated from a foreign session.
+ */
+const FOREIGN_CELL_CLASS = 'jp-ConsoleContent-foreignCell';
 
 /**
  * The class name of the active prompt
@@ -121,23 +126,23 @@ class ConsoleContent extends Widget {
     this._session = options.session;
     this._history = new ConsoleHistory({ kernel: this._session.kernel });
 
-    // Instantiate tab completion widget.
-    let completion = options.completion || new CompletionWidget({
-      model: new CompletionModel()
+    // Instantiate tab completer widget.
+    let completer = options.completer || new CompleterWidget({
+      model: new CompleterModel()
     });
-    this._completion = completion;
+    this._completer = completer;
 
-    // Set the completion widget's anchor node to peg its position.
-    completion.anchor = this.node;
+    // Set the completer widget's anchor node to peg its position.
+    completer.anchor = this.node;
 
-    // Because a completion widget may be passed in, check if it is attached.
-    if (!completion.isAttached) {
-      Widget.attach(completion, document.body);
+    // Because a completer widget may be passed in, check if it is attached.
+    if (!completer.isAttached) {
+      Widget.attach(completer, document.body);
     }
 
-    // Set up the completion handler.
-    this._completionHandler = new CellCompletionHandler(this._completion);
-    this._completionHandler.kernel = this._session.kernel;
+    // Set up the completer handler.
+    this._completerHandler = new CellCompleterHandler(this._completer);
+    this._completerHandler.kernel = this._session.kernel;
 
     // Set up the inspection handler.
     this._inspectionHandler = new InspectionHandler(this._rendermime);
@@ -158,6 +163,9 @@ class ConsoleContent extends Widget {
     // Create the prompt.
     this.newPrompt();
 
+    // Display inputs/outputs initiated by another session.
+    this.monitorForeignIOPub();
+
     // Handle changes to the kernel.
     this._session.kernelChanged.connect((s, kernel) => {
       this.clear();
@@ -165,8 +173,58 @@ class ConsoleContent extends Widget {
       this.initialize();
       this._history.dispose();
       this._history = new ConsoleHistory(kernel);
-      this._completionHandler.kernel = kernel;
+      this._completerHandler.kernel = kernel;
       this._inspectionHandler.kernel = kernel;
+      this._foreignCells = {};
+      this.monitorForeignIOPub();
+    });
+  }
+
+  /**
+   * Display inputs/outputs initated by another session.
+   */
+  protected monitorForeignIOPub(): void {
+    this._session.kernel.iopubMessage.connect((kernel, msg) => {
+      // Check whether this message came from an external session.
+      let session = (msg.parent_header as KernelMessage.IHeader).session;
+      if (session === this.session.kernel.clientId) {
+        return;
+      }
+      let msgType = msg.header.msg_type;
+      let parentHeader = msg.parent_header as KernelMessage.IHeader;
+      let parentMsgId = parentHeader.msg_id as string;
+      let cell : CodeCellWidget;
+      switch (msgType) {
+      case 'execute_input':
+        let inputMsg = msg as KernelMessage.IExecuteInputMsg;
+        cell = this.newForeignCell(parentMsgId);
+        cell.model.executionCount = inputMsg.content.execution_count;
+        cell.model.source = inputMsg.content.code;
+        cell.trusted = true;
+        this.update();
+        break;
+      case 'execute_result':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+        if (!(parentMsgId in this._foreignCells)) {
+          // This is an output from an input that was broadcast before our
+          // session started listening. We will ignore it.
+          console.warn('Ignoring output with no associated input cell.');
+          break;
+        }
+        cell = this._foreignCells[parentMsgId];
+        let output = msg.content as nbformat.IOutput;
+        output.output_type = msgType as nbformat.OutputType;
+        cell.model.outputs.add(output);
+        this.update();
+        break;
+      case 'clear_output':
+        cell.model.outputs.clear((msg as KernelMessage.IClearOutputMsg).content.wait);
+        break;
+      default:
+        break;
+      }
     });
   }
 
@@ -205,55 +263,6 @@ class ConsoleContent extends Widget {
   }
 
   /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose() {
-    // Do nothing if already disposed.
-    if (this.isDisposed) {
-      return;
-    }
-    this._history.dispose();
-    this._history = null;
-    this._completionHandler.dispose();
-    this._completionHandler = null;
-    this._completion.dispose();
-    this._completion = null;
-    this._inspectionHandler.dispose();
-    this._inspectionHandler = null;
-    this._session.dispose();
-    this._session = null;
-    super.dispose();
-  }
-
-  /**
-   * Execute the current prompt.
-   *
-   * @param force - Whether to force execution without checking code
-   * completeness.
-   */
-  execute(force=false): Promise<void> {
-    this.dismissCompletion();
-
-    if (this._session.status === 'dead') {
-      this._inspectionHandler.handleExecuteReply(null);
-      return;
-    }
-
-    let prompt = this.prompt;
-    prompt.trusted = true;
-    if (force) {
-      return this._execute();
-    }
-
-    // Check whether we should execute.
-    return this._shouldExecute().then(value => {
-      if (value) {
-        return this._execute();
-      }
-    });
-  }
-
-  /**
    * Clear the code cells.
    */
   clear(): void {
@@ -264,6 +273,80 @@ class ConsoleContent extends Widget {
   }
 
   /**
+   * Dismiss the completer widget for a console.
+   */
+  dismissCompleter(): void {
+    this._completer.reset();
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose() {
+    // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    this._history.dispose();
+    this._history = null;
+    this._completerHandler.dispose();
+    this._completerHandler = null;
+    this._completer.dispose();
+    this._completer = null;
+    this._inspectionHandler.dispose();
+    this._inspectionHandler = null;
+    this._session.dispose();
+    this._session = null;
+    this._foreignCells = null;
+    super.dispose();
+  }
+
+  /**
+   * Execute the current prompt.
+   *
+   * @param force - Whether to force execution without checking code
+   * completeness.
+   */
+  execute(force=false): Promise<void> {
+    this.dismissCompleter();
+
+    if (this._session.status === 'dead') {
+      this._inspectionHandler.handleExecuteReply(null);
+      return;
+    }
+
+    let prompt = this.prompt;
+    prompt.trusted = true;
+    if (force) {
+      // Create a new prompt before kernel execution to allow typeahead.
+      this.newPrompt();
+      return this._execute(prompt);
+    }
+
+    // Check whether we should execute.
+    return this._shouldExecute().then(value => {
+      if (value) {
+        // Create a new prompt before kernel execution to allow typeahead.
+        this.newPrompt();
+        return this._execute(prompt);
+      }
+    });
+  }
+
+  /**
+   * Inject arbitrary code for the console to execute immediately.
+   */
+  inject(code: string): void {
+    // Create a new cell using the prompt renderer.
+    let cell = this._renderer.createPrompt(this._rendermime);
+    cell.model.source = code;
+    cell.mimetype = this._mimetype;
+    cell.readOnly = true;
+    this._content.addWidget(cell);
+    this._execute(cell);
+  }
+
+  /**
    * Insert a line break in the prompt.
    */
   insertLinebreak(): void {
@@ -271,13 +354,6 @@ class ConsoleContent extends Widget {
     let model = prompt.model;
     model.source += '\n';
     prompt.editor.setCursorPosition(model.source.length);
-  }
-
-  /**
-   * Dismiss the completion widget for a console.
-   */
-  dismissCompletion(): void {
-    this._completion.reset();
   }
 
   /**
@@ -366,16 +442,29 @@ class ConsoleContent extends Widget {
     prompt.addClass(PROMPT_CLASS);
     this._input.addWidget(prompt);
 
-    // Hook up completion and history handling.
+    // Hook up completer and history handling.
     let editor = prompt.editor;
     editor.edgeRequested.connect(this.onEdgeRequest, this);
 
-    // Associate the new prompt with the completion and inspection handlers.
-    this._completionHandler.activeCell = prompt;
+    // Associate the new prompt with the completer and inspection handlers.
+    this._completerHandler.activeCell = prompt;
     this._inspectionHandler.activeCell = prompt;
 
     prompt.activate();
     this.update();
+  }
+
+  /**
+   * Make a new code cell for an input originated from a foreign session.
+   */
+  protected newForeignCell(parentMsgId: string): CodeCellWidget {
+    let cell = this._renderer.createForeignCell(this._rendermime);
+    cell.mimetype = this._mimetype;
+    cell.addClass(FOREIGN_CELL_CLASS);
+    this._content.addWidget(cell);
+    this.update();
+    this._foreignCells[parentMsgId] = cell;
+    return cell;
   }
 
   /**
@@ -402,11 +491,8 @@ class ConsoleContent extends Widget {
   /**
    * Execute the code in the current prompt.
    */
-  private _execute(): Promise<void> {
-    let prompt = this.prompt;
-    this._history.push(prompt.model.source);
-    // Create a new prompt before kernel execution to allow typeahead.
-    this.newPrompt();
+  private _execute(cell: CodeCellWidget): Promise<void> {
+    this._history.push(cell.model.source);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       this.executed.emit(new Date());
       if (!value) {
@@ -423,15 +509,15 @@ class ConsoleContent extends Widget {
           })[0];
           if (setNextInput) {
             let text = (setNextInput as any).text;
-            // Ignore the `replace` value and always set the next prompt.
-            this.prompt.model.source = text;
+            // Ignore the `replace` value and always set the next cell.
+            cell.model.source = text;
           }
         }
       }
       this.update();
     };
     let onFailure = () => { this.update(); };
-    return prompt.execute(this._session.kernel).then(onSuccess, onFailure);
+    return cell.execute(this._session.kernel).then(onSuccess, onFailure);
   }
 
   /**
@@ -445,8 +531,8 @@ class ConsoleContent extends Widget {
     this.prompt.mimetype = this._mimetype;
   }
 
-  private _completion: CompletionWidget = null;
-  private _completionHandler: CellCompletionHandler = null;
+  private _completer: CompleterWidget = null;
+  private _completerHandler: CellCompleterHandler = null;
   private _content: Panel = null;
   private _input: Panel = null;
   private _inspectionHandler: InspectionHandler = null;
@@ -455,6 +541,7 @@ class ConsoleContent extends Widget {
   private _renderer: ConsoleContent.IRenderer = null;
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
+  private _foreignCells: { [key: string]: CodeCellWidget; } = {};
 }
 
 
@@ -473,9 +560,9 @@ namespace ConsoleContent {
   export
   interface IOptions {
     /**
-     * The completion widget for a console content widget.
+     * The completer widget for a console content widget.
      */
-    completion?: CompletionWidget;
+    completer?: CompleterWidget;
 
     /**
      * The renderer for a console content widget.
@@ -494,7 +581,7 @@ namespace ConsoleContent {
   }
 
   /**
-   * A renderer for completion widget nodes.
+   * A renderer for completer widget nodes.
    */
   export
   interface IRenderer {
@@ -507,6 +594,12 @@ namespace ConsoleContent {
      * Create a new prompt widget.
      */
     createPrompt(rendermime: IRenderMime): CodeCellWidget;
+
+    /**
+     * Create a code cell whose input originated from a foreign session.
+     * The implementor is expected to make this read-only.
+     */
+    createForeignCell(rendermine: IRenderMime): CodeCellWidget;
   }
 
   /* tslint:disable */

@@ -1,0 +1,44 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-Toolbar {
+  color: var(--jp-ui-font-color1);
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  height: 24px;
+}
+
+
+.jp-Toolbar > .jp-Toolbar-item {
+  flex: 0 0 auto;
+  padding-left: 8px;
+  padding-right: 8px;
+  vertical-align: middle;
+  font-size: 14px;
+  line-height: 23px;
+}
+
+
+.jp-Toolbar-item.jp-Toolbar-button {
+  font-family: FontAwesome;
+  text-align: center;
+  display: inline-block;
+}
+
+
+.jp-Toolbar-button.jp-mod-pressed {
+    background-color: #E0E0E0;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+
+.jp-Toolbar-button:hover {
+    background-color: #EEEEEE;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+}

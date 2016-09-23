@@ -112,7 +112,7 @@ class ApplicationShell extends Widget {
     rightHandler.stackedPanel.id = 'jp-right-stack';
 
     hboxPanel.spacing = 0;
-    dockPanel.spacing = 8;
+    dockPanel.spacing = 4;
     hsplitPanel.spacing = 1;
 
     hboxPanel.direction = 'left-to-right';
@@ -160,6 +160,9 @@ class ApplicationShell extends Widget {
 
   /**
    * Add a widget to the top content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
   addToTopArea(widget: Widget, options: ISideAreaOptions = {}): void {
     if (!widget.id) {
@@ -172,6 +175,9 @@ class ApplicationShell extends Widget {
 
   /**
    * Add a widget to the left content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
   addToLeftArea(widget: Widget, options: ISideAreaOptions = {}): void {
     if (!widget.id) {
@@ -184,6 +190,9 @@ class ApplicationShell extends Widget {
 
   /**
    * Add a widget to the right content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
   addToRightArea(widget: Widget, options: ISideAreaOptions = {}): void {
     if (!widget.id) {
@@ -196,6 +205,9 @@ class ApplicationShell extends Widget {
 
   /**
    * Add a widget to the main content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
   addToMainArea(widget: Widget): void {
     // TODO
@@ -386,9 +398,9 @@ class SideBarHandler {
       newWidget.show();
     }
     if (newWidget) {
-      document.body.dataset[`${this._side}Area`] = newWidget.id;
+      document.body.setAttribute(`data-${this._side}Area`, newWidget.id);
     } else {
-      delete document.body.dataset[`${this._side}Area`];
+      document.body.removeAttribute(`data-${this._side}Area`);
     }
     this._refreshVisibility();
   }

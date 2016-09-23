@@ -7,7 +7,6 @@ export * from './model';
 export * from './modelfactory';
 export * from './nbformat';
 export * from './panel';
-export * from './toolbar';
 export * from './trust';
 export * from './widget';
 export * from './widgetfactory';

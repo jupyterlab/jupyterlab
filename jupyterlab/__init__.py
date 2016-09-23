@@ -61,7 +61,7 @@ class LabHandler(IPythonHandler):
 
     @web.authenticated
     def get(self):
-        static_prefix = ujoin(self.application.settings['base_url'], PREFIX)
+        static_prefix = ujoin(self.base_url, PREFIX)
         labextensions = self.application.labextensions
 
         data = get_labextension_manifest_data_by_folder(BUILT_FILES)
@@ -121,18 +121,22 @@ def _jupyter_server_extension_paths():
 
 
 def load_jupyter_server_extension(nbapp):
+    from jupyter_core.paths import jupyter_path
+    from .labapp import get_labextensions
+
     base_dir = os.path.realpath(os.path.join(HERE, '..'))
     dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
     if dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
     nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % HERE)
     webapp = nbapp.web_app
+    webapp.labextensions = get_labextensions(parent=nbapp)
     base_url = webapp.settings['base_url']
     webapp.add_handlers(".*$",
         [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
     labextension_handler = (
         r"%s/(.*)" % EXTENSION_PREFIX, FileFindHandler, {
-            'path': nbapp.labextensions_path,
+            'path': jupyter_path('labextensions'),
             'no_cache_paths': ['/'],  # don't cache anything in labbextensions
         }
     )

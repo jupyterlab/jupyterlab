@@ -1,0 +1,113 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+/*
+
+Original style from softwaremaniacs.org (c) Ivan Sagalaev <Maniac@SoftwareManiacs.Org>
+Adapted from GitHub theme
+
+*/
+
+.cm-s-ipython span.cm-variable {
+  color: black;
+}
+
+
+.cm-s-ipython span.cm-variable-2 {
+  color: #1a1a1a;
+}
+.cm-s-ipython span.cm-variable-3 {
+  color: #333;
+}
+
+
+.cm-s-ipython span.cm-punctuation {
+  color: #05a;
+}
+
+
+.cm-s-ipython span.cm-property {
+  color: #05a;
+}
+
+
+.cm-s-ipython span.cm-operator {
+  color: #AA22FF;
+  font-weight: bold;
+}
+
+
+.cm-s-ipython span.cm-comment {
+  color: #408080;
+  font-style: italic;
+}
+
+
+.cm-s-ipython span.cm-string {
+  color: #BA2121;
+}
+
+
+.cm-s-ipython span.cm-string-2 {
+  color: #05a;
+}
+
+
+.cm-s-ipython span.cm-meta {
+  color: #AA22FF;
+}
+
+
+.cm-s-ipython span.cm-qualifier {
+  color: #555;
+}
+
+
+.cm-s-ipython span.cm-builtin {
+  color: #008000;
+}
+
+
+.cm-s-ipython span.cm-bracket {
+  color: #997;
+}
+
+
+.cm-s-ipython span.cm-tag {
+  color: #170;
+}
+
+
+.cm-s-ipython span.cm-attribute {
+  color: #00c;
+}
+
+
+.cm-s-ipython span.cm-header {
+  color: blue;
+}
+
+
+.cm-s-ipython span.cm-quote {
+  color: #090;
+}
+
+
+.cm-s-ipython span.cm-link {
+  text-decoration: underline;
+}
+
+
+.cm-s-ipython span.cm-error {
+  color: #f00;
+}
+
+
+.cm-s-ipython span.cm-tab {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAMCAYAAAAkuj5RAAAAAXNSR0IArs4c6QAAAGFJREFUSMft1LsRQFAQheHPowAKoACx3IgEKtaEHujDjORSgWTH/ZOdnZOcM/sgk/kFFWY0qV8foQwS4MKBCS3qR6ixBJvElOobYAtivseIE120FaowJPN75GMu8j/LfMwNjh4HUpwg4LUAAAAASUVORK5CYII=);
+  background-position: right;
+  background-repeat: no-repeat;
+}

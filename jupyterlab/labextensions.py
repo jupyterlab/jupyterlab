@@ -6,21 +6,11 @@
 
 from __future__ import print_function
 
-import glob
-import json
 import os
 import shutil
 import sys
 import tarfile
-import zipfile
-from os.path import basename, join as pjoin, normpath
-
-try:
-    from urllib.parse import urlparse  # Py3
-    from urllib.request import urlretrieve
-except ImportError:
-    from urlparse import urlparse
-    from urllib import urlretrieve
+from os.path import join as pjoin, normpath
 
 from jupyter_core.paths import (
     jupyter_data_dir, jupyter_config_dir, jupyter_config_path,
@@ -28,7 +18,6 @@ from jupyter_core.paths import (
 )
 from ipython_genutils.path import ensure_dir_exists
 from ipython_genutils.py3compat import string_types, cast_unicode_py2
-from ipython_genutils.tempdir import TemporaryDirectory
 from . import __version__
 
 from traitlets.config.manager import BaseJSONConfigManager
@@ -38,7 +27,6 @@ from tornado.log import LogFormatter
 
 from . import (
     get_labextension_manifest_data_by_folder,
-    get_labextension_manifest_data_by_name
 )
 
 # Constants for pretty print extension listing function.
@@ -124,6 +112,8 @@ def install_labextension(path, name='', overwrite=False, symlink=False,
         Specify absolute path of labextensions directory explicitly.
     logger : Jupyter logger [optional]
         Logger instance to use
+    sys_prefix : bool [default: False]
+        Install into the sys.prefix, i.e. environment
     """
 
     # the actual path to which we eventually installed
@@ -223,11 +213,13 @@ def uninstall_labextension(name, user=False, sys_prefix=False, prefix=None,
     name: str
         The name of the labextension.
     user : bool [default: False]
-        Whether to install to the user's labextensions directory.
-        Otherwise do a system-wide install (e.g. /usr/local/share/jupyter/labextensions).
+        Whether to uninstall from the user's labextensions directory.
+        Otherwise do a system-wide uninstall (e.g. /usr/local/share/jupyter/labextensions).
+    sys_prefix : bool [default: False]
+        Uninstall from the sys.prefix, i.e. environment
     prefix : str [optional]
-        Specify install prefix, if it should differ from default (e.g. /usr/local).
-        Will install to ``<prefix>/share/jupyter/labextensions``
+        Specify prefix, if it should differ from default (e.g. /usr/local).
+        Will uninstall from ``<prefix>/share/jupyter/labextensions``
     labextensions_dir : str [optional]
         Specify absolute path of labextensions directory explicitly.
     logger : Jupyter logger [optional]
@@ -525,7 +517,7 @@ def validate_labextension_folder(name, full_dest, logger=None):
 # Applications
 #----------------------------------------------------------------------
 
-from traitlets import Bool, Unicode, Any
+from traitlets import Bool, Unicode
 from jupyter_core.application import JupyterApp
 
 _base_flags = {}
@@ -592,7 +584,6 @@ flags['s'] = flags['symlink']
 aliases = {
     "prefix" : "InstallLabExtensionApp.prefix",
     "labextensions" : "InstallLabExtensionApp.labextensions_dir",
-    "destination" : "InstallLabExtensionApp.destination",
 }
 
 class InstallLabExtensionApp(BaseLabExtensionApp):
@@ -601,7 +592,8 @@ class InstallLabExtensionApp(BaseLabExtensionApp):
     
     Usage
     
-        jupyter labextension install path|url [--user|--sys-prefix]
+        jupyter labextension install /path/to/myextension myextension [--user|--sys-prefix]
+        jupyter labextension install --py myextensionPyPackage [--user|--sys-prefix]
     
     This copies a file or a folder into the Jupyter labextensions directory.
     If a URL is given, it will be downloaded.
@@ -611,8 +603,8 @@ class InstallLabExtensionApp(BaseLabExtensionApp):
     """
     
     examples = """
-    jupyter labextension install /path/to/myextension name
-    jupyter labextension install --py extensionPyPackage
+    jupyter labextension install /path/to/myextension myextension
+    jupyter labextension install --py myextensionPyPackage
     """
     aliases = aliases
     flags = flags
@@ -684,15 +676,15 @@ class UninstallLabExtensionApp(BaseLabExtensionApp):
     
     Usage
     
-        jupyter labextension uninstall name
-        jupyter labextension uninstall --py extensionPyPackage
+        jupyter labextension uninstall myextension
+        jupyter labextension uninstall --py myextensionPyPackage
     
     This uninstalls a labextension.
     """
     
     examples = """
-    jupyter labextension uninstall name
-    jupyter labextension uninstall --py extensionPyPackage
+    jupyter labextension uninstall myextension
+    jupyter labextension uninstall --py myextensionPyPackage
     """
     
     aliases = {
@@ -807,7 +799,7 @@ class EnableLabExtensionApp(ToggleLabExtensionApp):
     Enable a labextension in frontend configuration.
     
     Usage
-        jupyter labextension enable [--system|--sys-prefix]
+        jupyter labextension enable myextension [--system|--sys-prefix]
     """
     _toggle_value = True
 
@@ -819,7 +811,7 @@ class DisableLabExtensionApp(ToggleLabExtensionApp):
     Enable a labextension in frontend configuration.
     
     Usage
-        jupyter labextension disable [--system|--sys-prefix]
+        jupyter labextension disable myextension [--system|--sys-prefix]
     """
     _toggle_value = None
 

@@ -20,10 +20,12 @@ Contents:
 
    repo.md
    plugins.md
+   labextensions.md
    documents.md
    notebook.md
    patterns.md
    css.md
+   virtualdom.md
    adding_content.md
    examples.md
    terminology.md

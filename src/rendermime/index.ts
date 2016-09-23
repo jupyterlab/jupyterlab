@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   Token
 } from 'phosphor/lib/core/token';
 
@@ -260,14 +264,14 @@ namespace RenderMime {
      *
      * @param options - The options used for rendering.
      */
-    render(options: IRenderOptions): Widget;
+    render(options: IRenderOptions<string | JSONObject>): Widget;
   }
 
   /**
    * The options used to transform or render mime data.
    */
   export
-  interface IRenderOptions {
+  interface IRenderOptions<T extends string | JSONObject> {
     /**
      * The mimetype.
      */
@@ -276,7 +280,7 @@ namespace RenderMime {
     /**
      * The source data.
      */
-    source: string;
+    source: T;
 
     /**
      * An optional url resolver.

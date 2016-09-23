@@ -31,8 +31,8 @@ class OutputAreaModel implements IDisposable {
    * Construct a new observable outputs instance.
    */
   constructor() {
-    this._list = new ObservableList<OutputAreaModel.Output>();
-    this._list.changed.connect(this._onListChanged, this);
+    this.list = new ObservableList<OutputAreaModel.Output>();
+    this.list.changed.connect(this._onListChanged, this);
   }
 
   /**
@@ -52,7 +52,7 @@ class OutputAreaModel implements IDisposable {
    * This is a read-only property.
    */
   get length(): number {
-    return this._list ? this._list.length : 0;
+    return this.list ? this.list.length : 0;
   }
 
   /**
@@ -62,7 +62,7 @@ class OutputAreaModel implements IDisposable {
    * This is a read-only property.
    */
   get isDisposed(): boolean {
-    return this._list === null;
+    return this.list === null;
   }
 
   /**
@@ -73,8 +73,8 @@ class OutputAreaModel implements IDisposable {
       return;
     }
     this.disposed.emit(void 0);
-    this._list.clear();
-    this._list = null;
+    this.list.clear();
+    this.list = null;
     clearSignalData(this);
   }
 
@@ -82,7 +82,7 @@ class OutputAreaModel implements IDisposable {
    * Get an item at the specified index.
    */
   get(index: number): OutputAreaModel.Output {
-    return this._list.get(index);
+    return this.list.get(index);
   }
 
   /**
@@ -94,13 +94,13 @@ class OutputAreaModel implements IDisposable {
    */
   add(output: OutputAreaModel.Output): number {
     // If we received a delayed clear message, then clear now.
-    if (this._clearNext) {
+    if (this.clearNext) {
       this.clear();
-      this._clearNext = false;
+      this.clearNext = false;
     }
 
     if (output.output_type === 'input_request') {
-      this._list.add(output);
+      this.list.add(output);
     }
 
     // Make a copy of the output bundle.
@@ -124,7 +124,7 @@ class OutputAreaModel implements IDisposable {
       // This also replaces the metadata of the last item.
       let text = value.text as string;
       value.text = lastOutput.text as string + text;
-      this._list.set(index, value);
+      this.list.set(index, value);
       return index;
     } else {
       switch (value.output_type) {
@@ -132,7 +132,7 @@ class OutputAreaModel implements IDisposable {
       case 'execute_result':
       case 'display_data':
       case 'error':
-        return this._list.add(value);
+        return this.list.add(value);
       default:
         break;
       }
@@ -147,10 +147,10 @@ class OutputAreaModel implements IDisposable {
    */
   clear(wait: boolean = false): OutputAreaModel.Output[] {
     if (wait) {
-      this._clearNext = true;
+      this.clearNext = true;
       return [];
     }
-    return this._list.clear();
+    return this.list.clear();
   }
 
   /**
@@ -167,14 +167,14 @@ class OutputAreaModel implements IDisposable {
       let future = kernel.execute(content);
       // Handle published messages.
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-        let msgType = msg.header.msg_type as nbformat.OutputType;
+        let msgType = msg.header.msg_type;
         switch (msgType) {
         case 'execute_result':
         case 'display_data':
         case 'stream':
         case 'error':
           let model = msg.content as nbformat.IOutput;
-          model.output_type = msgType;
+          model.output_type = msgType as nbformat.OutputType;
           this.add(model);
           break;
         case 'clear_output':
@@ -202,15 +202,15 @@ class OutputAreaModel implements IDisposable {
     });
   }
 
+  protected clearNext = false;
+  protected list: IObservableList<OutputAreaModel.Output> = null;
+
   /**
    * Handle a change to the list.
    */
   private _onListChanged(sender: IObservableList<OutputAreaModel.Output>, args: IListChangedArgs<OutputAreaModel.Output>) {
     this.changed.emit(args);
   }
-
-  private _clearNext = false;
-  private _list: IObservableList<OutputAreaModel.Output> = null;
 }
 
 

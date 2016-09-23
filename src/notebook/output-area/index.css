@@ -1,0 +1,85 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-OutputArea {
+  background: none;
+}
+
+
+.jp-Output {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.jp-Output-executeResult {
+  margin-left: 0px;
+  flex: 1 1 auto;
+}
+
+
+.jp-Output-executeResult img {
+  max-width: 100%;
+  height: auto;
+}
+
+
+img.jp-mod-unconfined {
+  max-width: none;
+}
+
+
+.jp-Output-result {
+  padding: 0.4em;
+  user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+}
+
+
+.p-Widget.jp-Output-result {
+  overflow: auto;
+}
+
+
+/* If we have two nested output areas (for example, as with output widgets),
+   then the inner output looks weird with a prompt, so we hide it. */
+.jp-Output .jp-Output .jp-Output-prompt {
+  display: none;
+}
+
+
+.jp-Notebook .jp-Output pre {
+  border: none;
+  margin: 1px 0 0 5px;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+
+.jp-Output-stderr {
+  background: #fdd;
+}
+
+
+.jp-Output-stdinPrompt {
+  padding-right: 8px;
+}
+
+.jp-Output-prompt {
+  color: #D84315;
+  font-family: monospace;
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.4em;
+  font-size: 14px;
+  flex: 0 0 90px;
+  box-sizing: border-box;
+}

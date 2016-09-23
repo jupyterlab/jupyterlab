@@ -13,7 +13,8 @@ console.log('Generating bundles...');
 
 buildExtension({
   name: 'main',
-  entryPath: './index.js',
+  entry: './index',
+  outputDir: './build',
   config: {
     output: {
       publicPath: 'lab/'
@@ -23,7 +24,8 @@ buildExtension({
 
 buildExtension({
   name: 'extensions',
-  entryPath: './extensions.js',
+  entry: './extensions',
+  outputDir: './build',
   config: {
     output: {
       publicPath: 'lab/'

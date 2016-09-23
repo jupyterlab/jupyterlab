@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, IKernel, ISession
+  ContentsManager, IKernel, ISession, utils
 } from 'jupyter-js-services';
+
+import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
 
 import {
   FocusTracker
@@ -84,10 +88,16 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
  */
 const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 
+
 /**
- * The file extension for consoles.
+ * The interface for a start console.
  */
-const FILE_EXTENSION = 'jpcon';
+interface ICreateConsoleArgs extends JSONObject {
+  sessionId?: string;
+  path?: string;
+  kernel: IKernel.IModel;
+  preferredLanguage?: string;
+}
 
 
 /**
@@ -111,14 +121,15 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   // Add the ability to create new consoles for each kernel.
   let specs = services.kernelspecs;
   let displayNameMap: { [key: string]: string } = Object.create(null);
+  let kernelNameMap: { [key: string]: string } = Object.create(null);
   for (let kernelName in specs.kernelspecs) {
     let displayName = specs.kernelspecs[kernelName].spec.display_name;
-    displayNameMap[displayName] = kernelName;
+    kernelNameMap[displayName] = kernelName;
+    displayNameMap[kernelName] = displayName;
   }
-  let displayNames = Object.keys(displayNameMap).sort((a, b) => {
+  let displayNames = Object.keys(kernelNameMap).sort((a, b) => {
     return a.localeCompare(b);
   });
-  let count = 0;
 
   // If there are available kernels, populate the "New" menu item.
   if (displayNames.length) {
@@ -128,51 +139,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   }
 
   for (let displayName of displayNames) {
-    command = `console:create-${displayNameMap[displayName]}`;
+    command = `console:create-${kernelNameMap[displayName]}`;
     commands.addCommand(command, {
       label: `${displayName} console`,
       execute: () => {
-        count++;
-        let file = `console-${count}`;
-        let path = `${pathTracker.path}/${file}.${FILE_EXTENSION}`;
-        let label = `Console ${count}`;
-        let kernelName = `${displayNameMap[displayName]}`;
-        let captionOptions: Private.ICaptionOptions = {
-          label, displayName, path,
-          connected: new Date()
-        };
-        manager.startNew({ path, kernelName }).then(session => {
-          let panel = new ConsolePanel({
-            session,
-            rendermime: rendermime.clone(),
-            renderer: renderer
-          });
-          panel.id = file;
-          panel.title.label = label;
-          panel.title.caption = Private.caption(captionOptions);
-          panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
-          panel.title.closable = true;
-          app.shell.addToMainArea(panel);
-          // Update the caption of the tab with the last execution time.
-          panel.content.executed.connect((sender, executed) => {
-            captionOptions.executed = executed;
-            panel.title.caption = Private.caption(captionOptions);
-          });
-          // Set the source of the code inspector to the current console.
-          panel.activated.connect(() => {
-            inspector.source = panel.content.inspectionHandler;
-          });
-          // Update the caption of the tab when the kernel changes.
-          panel.content.session.kernelChanged.connect(() => {
-            let name = panel.content.session.kernel.name;
-            name = specs.kernelspecs[name].spec.display_name;
-            captionOptions.displayName = name;
-            captionOptions.connected = new Date();
-            captionOptions.executed = null;
-            panel.title.caption = Private.caption(captionOptions);
-          });
-          tracker.add(panel);
-        });
+        let name = `${kernelNameMap[displayName]}`;
+        commands.execute('console:create', { kernel: { name } });
       }
     });
     palette.addItem({ command, category });
@@ -192,19 +164,19 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
 
-  command = 'console:dismiss-completion';
+  command = 'console:dismiss-completer';
   commands.addCommand(command, {
     execute: () => {
       if (tracker.currentWidget) {
-        tracker.currentWidget.content.dismissCompletion();
+        tracker.currentWidget.content.dismissCompleter();
       }
     }
   });
 
 
-  command = 'console:execute';
+  command = 'console:run';
   commands.addCommand(command, {
-    label: 'Execute Cell',
+    label: 'Run Cell',
     execute: () => {
       if (tracker.currentWidget) {
         tracker.currentWidget.content.execute();
@@ -215,9 +187,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
 
-  command = 'console:execute-forced';
+  command = 'console:run-forced';
   commands.addCommand(command, {
-    label: 'Execute Cell (forced)',
+    label: 'Run Cell (forced)',
     execute: () => {
       if (tracker.currentWidget) {
         tracker.currentWidget.content.execute(true);
@@ -254,6 +226,123 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   palette.addItem({ command, category });
   menu.addItem({ command });
 
+
+  command = 'console:create';
+  commands.addCommand(command, {
+    execute: (args: ICreateConsoleArgs) => {
+      // If we get a session, use it.
+      if (args.sessionId) {
+        return manager.connectTo(args.sessionId).then(session => {
+          createConsole(session);
+          return session.id;
+        });
+      }
+
+      // Find the correct path for the new session.
+      // Use the given path or the cwd.
+      let path = args.path || pathTracker.path;
+      if (ContentsManager.extname(path)) {
+        path = ContentsManager.dirname(path);
+      }
+      path = `${path}/console-${utils.uuid()}`;
+
+      // Get the kernel model.
+      return getKernel(args).then(kernel => {
+        if (!kernel) {
+          return;
+        }
+        // Start the session.
+        let options: ISession.IOptions = {
+          path,
+          kernelName: kernel.name,
+          kernelId: kernel.id
+        };
+        return manager.startNew(options).then(session => {
+          createConsole(session);
+          return session.id;
+        });
+      });
+    }
+  });
+
+  command = 'console:inject';
+  commands.addCommand(command, {
+    execute: (args: JSONObject) => {
+      let id = args['id'];
+      for (let i = 0; i < tracker.widgets.length; i++) {
+        let widget = tracker.widgets.at(i);
+        if (widget.content.session.id === id) {
+          widget.content.inject(args['code'] as string);
+        }
+      }
+    }
+  });
+
+  /**
+   * Get the kernel given the create args.
+   */
+  function getKernel(args: ICreateConsoleArgs): Promise<IKernel.IModel> {
+    if (args.kernel) {
+      return Promise.resolve(args.kernel);
+    }
+    return manager.listRunning().then((sessions: ISession.IModel[]) => {
+      let options = {
+        name: 'New Console',
+        specs,
+        sessions,
+        preferredLanguage: args.preferredLanguage || '',
+        host: document.body
+      };
+      return selectKernel(options);
+    });
+  }
+
+
+  let count = 0;
+
+  /**
+   * Create a console for a given session.
+   */
+  function createConsole(session: ISession): void {
+    let panel = new ConsolePanel({
+      session,
+      rendermime: rendermime.clone(),
+      renderer: renderer
+    });
+    count++;
+    let displayName = displayNameMap[session.kernel.name];
+    let label = `Console ${count}`;
+    let captionOptions: Private.ICaptionOptions = {
+      label, displayName,
+      path: session.path,
+      connected: new Date()
+    };
+    panel.id = `console-${session.id}`;
+    panel.title.label = label;
+    panel.title.caption = Private.caption(captionOptions);
+    panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
+    panel.title.closable = true;
+    app.shell.addToMainArea(panel);
+    // Update the caption of the tab with the last execution time.
+    panel.content.executed.connect((sender, executed) => {
+      captionOptions.executed = executed;
+      panel.title.caption = Private.caption(captionOptions);
+    });
+    // Set the source of the code inspector to the current console.
+    panel.activated.connect(() => {
+      inspector.source = panel.content.inspectionHandler;
+    });
+    // Update the caption of the tab when the kernel changes.
+    panel.content.session.kernelChanged.connect(() => {
+      let name = panel.content.session.kernel.name;
+      name = specs.kernelspecs[name].spec.display_name;
+      captionOptions.displayName = name;
+      captionOptions.connected = new Date();
+      captionOptions.executed = null;
+      panel.title.caption = Private.caption(captionOptions);
+    });
+    tracker.add(panel);
+  }
 
   command = 'console:switch-kernel';
   commands.addCommand(command, {
@@ -351,3 +440,7 @@ namespace Private {
     return caption;
   }
 }
+
+
+
+

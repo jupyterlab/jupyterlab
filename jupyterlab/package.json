@@ -10,7 +10,7 @@
     "font-awesome": "^4.6.1",
     "fs-extra": "^0.30.0",
     "jupyterlab": "file:../",
-    "jupyterlab-extension-builder": "^0.3.0",
+    "jupyterlab-extension-builder": "^0.6.2",
     "material-design-icons": "^2.2.3",
     "semver": "^5.3.0",
     "webpack-config": "^6.1.2"
@@ -29,7 +29,7 @@
   },
   "scripts": {
     "clean": "rimraf build",
-    "update": "rimraf node_modules/jupyterlab && npm install",
+    "update": "rimraf node_modules/jupyterlab && npm install jupyterlab",
     "build": "npm run update && npm run build:extension",
     "build:extension": "webpack",
     "webpack:devtool": "devtool node_modules/webpack/bin/webpack.js",

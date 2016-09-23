@@ -2,16 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
-} from 'jupyter-js-services';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
-
-import {
-  restartKernel
-} from '../../docregistry';
 
 import {
   NotebookActions
@@ -27,7 +19,14 @@ import {
 
 import {
   ToolbarButton
-} from './toolbar';
+} from '../../toolbar';
+
+import {
+  createInterruptButton,
+  createRestartButton,
+  createKernelNameItem,
+  createKernelStatusItem
+} from '../../toolbar/kernel';
 
 import {
   Notebook
@@ -37,67 +36,42 @@ import {
 /**
  * The class name added to toolbar save button.
  */
-const TOOLBAR_SAVE = 'jp-NBToolbar-save';
+const TOOLBAR_SAVE_CLASS = 'jp-Notebook-toolbarSave';
 
 /**
  * The class name added to toolbar insert button.
  */
-const TOOLBAR_INSERT = 'jp-NBToolbar-insert';
+const TOOLBAR_INSERT_CLASS = 'jp-Notebook-toolbarInsert';
 
 /**
  * The class name added to toolbar cut button.
  */
-const TOOLBAR_CUT = 'jp-NBToolbar-cut';
+const TOOLBAR_CUT_CLASS = 'jp-Notebook-toolbarCut';
 
 /**
  * The class name added to toolbar copy button.
  */
-const TOOLBAR_COPY = 'jp-NBToolbar-copy';
+const TOOLBAR_COPY_CLASS = 'jp-Notebook-toolbarCopy';
 
 /**
  * The class name added to toolbar paste button.
  */
-const TOOLBAR_PASTE = 'jp-NBToolbar-paste';
+const TOOLBAR_PASTE_CLASS = 'jp-Notebook-toolbarPaste';
 
 /**
  * The class name added to toolbar run button.
  */
-const TOOLBAR_RUN = 'jp-NBToolbar-run';
-
-/**
- * The class name added to toolbar interrupt button.
- */
-const TOOLBAR_INTERRUPT = 'jp-NBToolbar-interrupt';
-
-/**
- * The class name added to toolbar restart button.
- */
-const TOOLBAR_RESTART = 'jp-NBToolbar-restart';
+const TOOLBAR_RUN_CLASS = 'jp-Notebook-toolbarRun';
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.
  */
-const TOOLBAR_CELLTYPE = 'jp-NBToolbar-cellType';
+const TOOLBAR_CELLTYPE_CLASS = 'jp-Notebook-toolbarCellType';
 
 /**
  * The class name added to toolbar cell type dropdown.
  */
-const TOOLBAR_CELLTYPE_DROPDOWN = 'jp-NBToolbar-cellTypeDropdown';
-
-/**
- * The class name added to toolbar kernel name text.
- */
-const TOOLBAR_KERNEL = 'jp-NBToolbar-kernelName';
-
-/**
- * The class name added to toolbar kernel indicator icon.
- */
-const TOOLBAR_INDICATOR = 'jp-NBToolbar-kernelIndicator';
-
-/**
- * The class name added to a busy kernel indicator.
- */
-const TOOLBAR_BUSY = 'jp-mod-busy';
+const TOOLBAR_CELLTYPE_DROPDOWN_CLASS = 'jp-Notebook-toolbarCellTypeDropdown';
 
 
 /**
@@ -111,7 +85,7 @@ namespace ToolbarItems {
   export
   function createSaveButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_SAVE,
+      className: TOOLBAR_SAVE_CLASS,
       onClick: () => {
         panel.context.save().then(() => {
           return panel.context.createCheckpoint();
@@ -127,7 +101,7 @@ namespace ToolbarItems {
   export
   function createInsertButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_INSERT,
+      className: TOOLBAR_INSERT_CLASS,
       onClick: () => { NotebookActions.insertBelow(panel.content); },
       tooltip: 'Insert a cell below'
     });
@@ -139,7 +113,7 @@ namespace ToolbarItems {
   export
   function createCutButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_CUT,
+      className: TOOLBAR_CUT_CLASS,
       onClick: () => {
         NotebookActions.cut(panel.content, panel.clipboard);
       },
@@ -153,7 +127,7 @@ namespace ToolbarItems {
   export
   function createCopyButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_COPY,
+      className: TOOLBAR_COPY_CLASS,
       onClick: () => {
         NotebookActions.copy(panel.content, panel.clipboard);
       },
@@ -167,7 +141,7 @@ namespace ToolbarItems {
   export
   function createPasteButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_PASTE,
+      className: TOOLBAR_PASTE_CLASS,
       onClick: () => {
         NotebookActions.paste(panel.content, panel.clipboard);
       },
@@ -181,41 +155,11 @@ namespace ToolbarItems {
   export
   function createRunButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_RUN,
+      className: TOOLBAR_RUN_CLASS,
       onClick: () => {
         NotebookActions.runAndAdvance(panel.content, panel.kernel);
       },
       tooltip: 'Run the selected cell(s) and advance'
-    });
-  }
-
-  /**
-   * Create an interrupt toolbar item.
-   */
-  export
-  function createInterruptButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton({
-      className: TOOLBAR_INTERRUPT,
-      onClick: () => {
-        if (panel.kernel) {
-          panel.context.kernel.interrupt();
-        }
-      },
-      tooltip: 'Interrupt the kernel'
-    });
-  }
-
-  /**
-   * Create a restart toolbar item.
-   */
-  export
-  function createRestartButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton({
-      className: TOOLBAR_RESTART,
-      onClick: () => {
-        restartKernel(panel.kernel, panel.node);
-      },
-      tooltip: 'Restart the kernel'
     });
   }
 
@@ -236,56 +180,6 @@ namespace ToolbarItems {
   }
 
   /**
-   * Create a kernel name indicator item.
-   *
-   * #### Notes
-   * It will display the `'display_name`' of the current kernel,
-   * or `'No Kernel!'` if there is no kernel.
-   * It can handle a change in context or kernel.
-   */
-  export
-  function createKernelNameItem(panel: NotebookPanel): Widget {
-    let widget = new Widget();
-    widget.addClass(TOOLBAR_KERNEL);
-    updateKernelNameItem(widget, panel.kernel);
-    panel.kernelChanged.connect(() => {
-      updateKernelNameItem(widget, panel.kernel);
-    });
-    return widget;
-  }
-
-  /**
-   * Update the text of the kernel name item.
-   */
-  function updateKernelNameItem(widget: Widget, kernel: IKernel): void {
-    widget.node.textContent = 'No Kernel!';
-    if (!kernel) {
-      return;
-    }
-    if (kernel.spec) {
-      widget.node.textContent = kernel.spec.display_name;
-    } else {
-      kernel.getKernelSpec().then(spec => {
-        widget.node.textContent = kernel.spec.display_name;
-      });
-    }
-  }
-
-  /**
-   * Create a kernel status indicator item.
-   *
-   * #### Notes
-   * It show display a busy status if the kernel status is
-   * not idle.
-   * It will show the current status in the node title.
-   * It can handle a change to the context or the kernel.
-   */
-  export
-  function createKernelStatusItem(panel: NotebookPanel): Widget {
-    return new KernelIndicator(panel);
-  }
-
-  /**
    * Add the default items to the panel toolbar.
    */
   export
@@ -298,7 +192,7 @@ namespace ToolbarItems {
     toolbar.add('paste', createPasteButton(panel));
     toolbar.add('run', createRunButton(panel));
     toolbar.add('interrupt', createInterruptButton(panel));
-    toolbar.add('restart', createRestartButton(panel));
+    toolbar.add('restart', createRestartButton(panel, panel.node));
     toolbar.add('cellType', createCellTypeItem(panel));
     toolbar.add('kernelName', createKernelNameItem(panel));
     toolbar.add('kernelStatus', createKernelStatusItem(panel));
@@ -315,7 +209,7 @@ class CellTypeSwitcher extends Widget {
    */
   constructor(widget: Notebook) {
     super({ node: createCellTypeSwitcherNode() });
-    this.addClass(TOOLBAR_CELLTYPE);
+    this.addClass(TOOLBAR_CELLTYPE_CLASS);
 
     let select = this.node.firstChild as HTMLSelectElement;
     this._wildCard = document.createElement('option');
@@ -392,49 +286,7 @@ function createCellTypeSwitcherNode(): HTMLElement {
     option.textContent = t;
     select.appendChild(option);
   }
-  select.className = TOOLBAR_CELLTYPE_DROPDOWN;
+  select.className = TOOLBAR_CELLTYPE_DROPDOWN_CLASS;
   div.appendChild(select);
   return div;
-}
-
-
-/**
- * A toolbar item that displays kernel status.
- */
-class KernelIndicator extends Widget {
-  /**
-   * Construct a new kernel status widget.
-   */
-  constructor(panel: NotebookPanel) {
-    super();
-    this.addClass(TOOLBAR_INDICATOR);
-    if (panel.kernel) {
-      this._handleStatus(panel.kernel, panel.kernel.status);
-      panel.kernel.statusChanged.connect(this._handleStatus, this);
-    } else {
-      this.addClass(TOOLBAR_BUSY);
-      this.node.title = 'No Kernel!';
-    }
-    panel.kernelChanged.connect((c, kernel) => {
-      if (kernel) {
-        this._handleStatus(kernel, kernel.status);
-        kernel.statusChanged.connect(this._handleStatus, this);
-      } else {
-        this.node.title = 'No Kernel!';
-        this.addClass(TOOLBAR_BUSY);
-      }
-    });
-  }
-
-  /**
-   * Handle a status on a kernel.
-   */
-  private _handleStatus(kernel: IKernel, status: IKernel.Status) {
-    if (this.isDisposed) {
-      return;
-    }
-    this.toggleClass(TOOLBAR_BUSY, status !== 'idle');
-    let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
-    this.node.title = title;
-  }
 }

@@ -372,12 +372,10 @@ class StaticNotebook extends Widget {
     let widget: BaseCellWidget;
     switch (cell.type) {
     case 'code':
-      let codeFactory = this._renderer.createCodeCell;
-      widget = codeFactory(cell as CodeCellModel, this._rendermime);
+      widget = this._renderer.createCodeCell(cell as CodeCellModel, this._rendermime);
       break;
     case 'markdown':
-      let mdFactory = this._renderer.createMarkdownCell;
-      widget = mdFactory(cell as MarkdownCellModel, this._rendermime);
+      widget = this._renderer.createMarkdownCell(cell as MarkdownCellModel, this._rendermime);
       break;
     default:
       widget = this._renderer.createRawCell(cell as RawCellModel);

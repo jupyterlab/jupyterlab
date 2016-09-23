@@ -53,6 +53,18 @@ class CodeMirrorConsoleRenderer implements ConsoleContent.IRenderer {
     widget.model = new CodeCellModel();
     return widget;
   }
+
+  /**
+   * Create a new code cell widget for an input from a foreign session.
+   */
+  createForeignCell(rendermime: RenderMime): CodeCellWidget {
+    let widget = new CodeCellWidget({
+      rendermime,
+      renderer: CodeMirrorConsoleRenderer.defaultCodeCellRenderer
+    });
+    widget.model = new CodeCellModel();
+    return widget;
+  }
 }
 
 

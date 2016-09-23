@@ -52,7 +52,7 @@
 }
 
 
-.jp-InspectorItem .jp-NBToolbar {
+.jp-InspectorItem .jp-Toolbar {
     display: flex;
     flex-direction: row;
     border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
@@ -66,39 +66,39 @@
 }
 
 
-.jp-InspectorItem .jp-NBToolbar-button.jp-InspectorItem-clear::before {
+.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-clear::before {
    content: "\f05e";  /* ban */
 }
 
 
-.jp-InspectorItem .jp-NBToolbar-button.jp-InspectorItem-back::before {
+.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-back::before {
    content: "\f060";  /* arrow-left */
 }
 
 
-.jp-InspectorItem .jp-NBToolbar-button.jp-InspectorItem-forward::before {
+.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-forward::before {
    content: "\f061";  /* arrow-right */
 }
 
 
-.jp-InspectorItem .jp-NBToolbar-button.jp-InspectorItem-bottom {
+.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-bottom {
   position: absolute;
   right: 0;
 }
 
 
-.jp-InspectorItem .jp-NBToolbar-button.jp-InspectorItem-bottom::before {
+.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-bottom::before {
    content: "\f103";  /* angle-double-down */
 }
 
 
-.jp-InspectorItem .jp-NBToolbar-button.jp-InspectorItem-right {
+.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-right {
   position: absolute;
   right: 0;
 }
 
 
-.jp-InspectorItem .jp-NBToolbar-button.jp-InspectorItem-right::before {
+.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-right::before {
    content: "\f101";  /* angle-double-right */
 }
 

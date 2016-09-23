@@ -42,16 +42,16 @@ import {
 } from '../../rendermime';
 
 import {
-  CompletionWidget, CompletionModel, CellCompletionHandler
-} from '../completion';
+  CompleterWidget, CompleterModel, CellCompleterHandler
+} from '../../completer';
 
 import {
   INotebookModel
 } from './model';
 
 import {
-  NotebookToolbar
-} from './toolbar';
+  Toolbar
+} from '../../toolbar';
 
 import {
   Notebook
@@ -97,17 +97,17 @@ class NotebookPanel extends Widget {
     layout.addWidget(toolbar);
     layout.addWidget(this._content);
 
-    this._completion = this._renderer.createCompletion();
-    // The completion widget's anchor node is the node whose scrollTop is
-    // pegged to the completion widget's position.
-    this._completion.anchor = this._content.node;
-    Widget.attach(this._completion, document.body);
+    this._completer = this._renderer.createCompleter();
+    // The completer widget's anchor node is the node whose scrollTop is
+    // pegged to the completer widget's position.
+    this._completer.anchor = this._content.node;
+    Widget.attach(this._completer, document.body);
 
-    // Set up the completion handler.
-    this._completionHandler = new CellCompletionHandler(this._completion);
-    this._completionHandler.activeCell = this._content.activeCell;
+    // Set up the completer handler.
+    this._completerHandler = new CellCompleterHandler(this._completer);
+    this._completerHandler.activeCell = this._content.activeCell;
     this._content.activeCellChanged.connect((s, cell) => {
-      this._completionHandler.activeCell = cell;
+      this._completerHandler.activeCell = cell;
     });
   }
 
@@ -132,8 +132,8 @@ class NotebookPanel extends Widget {
    * #### Notes
    * This is a read-only property.
    */
-  get toolbar(): NotebookToolbar {
-    return (this.layout as PanelLayout).widgets.at(0) as NotebookToolbar;
+  get toolbar(): Toolbar {
+    return (this.layout as PanelLayout).widgets.at(0) as Toolbar;
   }
 
   /**
@@ -228,10 +228,10 @@ class NotebookPanel extends Widget {
     this._content = null;
     this._rendermime = null;
     this._clipboard = null;
-    this._completionHandler.dispose();
-    this._completionHandler = null;
-    this._completion.dispose();
-    this._completion = null;
+    this._completerHandler.dispose();
+    this._completerHandler = null;
+    this._completer.dispose();
+    this._completer = null;
     this._renderer = null;
     super.dispose();
   }
@@ -336,7 +336,7 @@ class NotebookPanel extends Widget {
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(context: IDocumentContext<INotebookModel>, kernel: IKernel): void {
-    this._completionHandler.kernel = kernel;
+    this._completerHandler.kernel = kernel;
     this.content.inspectionHandler.kernel = kernel;
     this.kernelChanged.emit(kernel);
     if (!this.model || !kernel) {
@@ -393,8 +393,8 @@ class NotebookPanel extends Widget {
   }
 
   private _clipboard: IClipboard = null;
-  private _completion: CompletionWidget = null;
-  private _completionHandler: CellCompletionHandler = null;
+  private _completer: CompleterWidget = null;
+  private _completerHandler: CellCompleterHandler = null;
   private _content: Notebook = null;
   private _context: IDocumentContext<INotebookModel> = null;
   private _renderer: NotebookPanel.IRenderer = null;
@@ -448,12 +448,12 @@ export namespace NotebookPanel {
     /**
      * Create a new toolbar for the panel.
      */
-    createToolbar(): NotebookToolbar;
+    createToolbar(): Toolbar;
 
     /**
-     * Create a new completion widget for the panel.
+     * Create a new completer widget for the panel.
      */
-    createCompletion(): CompletionWidget;
+    createCompleter(): CompleterWidget;
   }
 
   /**
@@ -469,16 +469,15 @@ export namespace NotebookPanel {
     /**
      * Create a new toolbar for the panel.
      */
-    createToolbar(): NotebookToolbar {
-      return new NotebookToolbar();
+    createToolbar(): Toolbar {
+      return new Toolbar();
     }
 
     /**
-     * Create a new completion widget.
+     * Create a new completer widget.
      */
-    createCompletion(): CompletionWidget {
-      let model = new CompletionModel();
-      return new CompletionWidget({ model });
+    createCompleter(): CompleterWidget {
+      return new CompleterWidget({ model: new CompleterModel() });
     }
   }
 

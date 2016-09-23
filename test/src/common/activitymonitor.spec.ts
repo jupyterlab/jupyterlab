@@ -168,11 +168,6 @@ describe('common/activitymonitor', () => {
         expect(monitor.isDisposed).to.be(true);
       });
 
-      it('should be read-only', () => {
-        let monitor = new ActivityMonitor<TestObject, number>({ signal });
-        expect(() => { monitor.isDisposed = false; }).to.throwError();
-      });
-
     });
 
     describe('#dispose()', () => {

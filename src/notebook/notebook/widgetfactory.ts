@@ -87,7 +87,6 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     panel.context = context;
     ToolbarItems.populateDefaults(panel);
     this.widgetCreated.emit(panel);
-    console.log(panel.content.childAt(0).editor);
     return panel;
   }
 

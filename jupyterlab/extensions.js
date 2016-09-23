@@ -17,7 +17,6 @@ module.exports = [
   require('jupyterlab/lib/imagewidget/plugin').imageHandlerExtension,
   require('jupyterlab/lib/inspector/plugin').inspectorProvider,
   require('jupyterlab/lib/landing/plugin').landingExtension,
-  require('jupyterlab/lib/leafletwidget/plugin').mapHandlerExtension,
   require('jupyterlab/lib/main/plugin').mainExtension,
   require('jupyterlab/lib/mainmenu/plugin').mainMenuProvider,
   require('jupyterlab/lib/markdownwidget/plugin').markdownHandlerExtension,
