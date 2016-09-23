@@ -185,7 +185,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     cmdIds.matchBrackets,
     cmdIds.vimMode,
     cmdIds.closeAll,
-    cmdIds.startConsole,
+    cmdIds.createConsole,
     cmdIds.runCode,
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
