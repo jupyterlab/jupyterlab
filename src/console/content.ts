@@ -318,7 +318,7 @@ class ConsoleContent extends Widget {
     if (force) {
       // Create a new prompt before kernel execution to allow typeahead.
       this.newPrompt();
-      return this._execute(this.prompt);
+      return this._execute(prompt);
     }
 
     // Check whether we should execute.
@@ -326,7 +326,7 @@ class ConsoleContent extends Widget {
       if (value) {
         // Create a new prompt before kernel execution to allow typeahead.
         this.newPrompt();
-        return this._execute(this.prompt);
+        return this._execute(prompt);
       }
     });
   }
