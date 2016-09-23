@@ -143,8 +143,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     commands.addCommand(command, {
       label: `${displayName} console`,
       execute: () => {
-        let kernelName = `${kernelNameMap[displayName]}`;
-        commands.execute('console:create', { kernelName });
+        let name = `${kernelNameMap[displayName]}`;
+        commands.execute('console:create', { kernel: { name } });
       }
     });
     palette.addItem({ command, category });
@@ -234,6 +234,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (args.sessionId) {
         return manager.connectTo(args.sessionId).then(session => {
           createConsole(session);
+          return session.id;
         });
       }
 
@@ -246,7 +247,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       path = `${path}/console-${utils.uuid()}`;
 
       // Get the kernel model.
-      getKernel(args).then(kernel => {
+      return getKernel(args).then(kernel => {
         // Start the session.
         let options: ISession.IOptions = {
           path,
@@ -255,8 +256,22 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         };
         return manager.startNew(options).then(session => {
           createConsole(session);
+          return session.id;
         });
       });
+    }
+  });
+
+  command = 'console:inject';
+  commands.addCommand(command, {
+    execute: (args: JSONObject) => {
+      let id = args['id'];
+      for (let i = 0; i < tracker.widgets.length; i++) {
+        let widget = tracker.widgets.at(i);
+        if (widget.content.session.id === id) {
+          widget.content.inject(args['code'] as string);
+        }
+      }
     }
   });
 
@@ -323,6 +338,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       captionOptions.executed = null;
       panel.title.caption = Private.caption(captionOptions);
     });
+    tracker.add(panel);
   }
 
   command = 'console:switch-kernel';

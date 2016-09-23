@@ -70,6 +70,7 @@ class EditorWidget extends CodeMirrorWidget {
     super({
       extraKeys: {
         'Tab': 'indentMore',
+        'Shift-Enter': () => { /* no-op */ }
       },
       indentUnit: 4,
       theme: DEFAULT_CODEMIRROR_THEME,

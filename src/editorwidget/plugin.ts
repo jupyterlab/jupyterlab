@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
+  AttachedProperty
+} from 'phosphor/lib/core/properties';
+
+import {
   FocusTracker
 } from 'phosphor/lib/ui/focustracker';
 
@@ -81,7 +85,8 @@ const cmdIds = {
   vimMode: 'editor:vim-mode',
   closeAll: 'editor:close-all',
   changeTheme: 'editor:change-theme',
-  startConsole: 'editor:startConsole'
+  startConsole: 'editor:start-console',
+  runCode: 'editor:run-code'
 };
 
 
@@ -107,46 +112,36 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
 
   mainMenu.addMenu(createMenu(app, tracker), {rank: 30});
 
-  addCommands(app, tracker);
+  let commands = app.commands;
 
-  [
-    cmdIds.lineNumbers,
-    cmdIds.lineWrap,
-    cmdIds.matchBrackets,
-    cmdIds.vimMode,
-    cmdIds.closeAll,
-    cmdIds.startConsole
-  ].forEach(command => palette.addItem({ command, category: 'Editor' }));
-
-  return tracker;
-}
-
-
-/**
- * Add the editor commands to the application's command registry.
- */
-function addCommands(app: JupyterLab, tracker: IEditorTracker): void {
-  app.commands.addCommand(cmdIds.lineNumbers, {
+  commands.addCommand(cmdIds.lineNumbers, {
     execute: () => { toggleLineNums(tracker); },
     label: 'Toggle Line Numbers',
   });
-  app.commands.addCommand(cmdIds.lineWrap, {
+
+  commands.addCommand(cmdIds.lineWrap, {
     execute: () => { toggleLineWrap(tracker); },
     label: 'Toggle Line Wrap',
   });
-  app.commands.addCommand(cmdIds.matchBrackets, {
+
+  commands.addCommand(cmdIds.matchBrackets, {
     execute: () => { toggleMatchBrackets(tracker); },
     label: 'Toggle Match Brackets',
   });
-  app.commands.addCommand(cmdIds.vimMode, {
+
+  commands.addCommand(cmdIds.vimMode, {
     execute: () => { toggleVim(tracker); },
     label: 'Toggle Vim Mode'
   });
-  app.commands.addCommand(cmdIds.closeAll, {
+
+  commands.addCommand(cmdIds.closeAll, {
     execute: () => { closeAllFiles(tracker); },
     label: 'Close all files'
   });
-  app.commands.addCommand(cmdIds.startConsole, {
+
+  // TODO: add an attached property to the widget with the session id.
+
+  commands.addCommand(cmdIds.startConsole, {
     execute: () => {
       let widget = tracker.currentWidget;
       if (!widget) {
@@ -156,11 +151,51 @@ function addCommands(app: JupyterLab, tracker: IEditorTracker): void {
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage
       };
-      app.commands.execute('console:create', options);
+      commands.execute('console:create', options).then(id => {
+        sessionIdProperty.set(widget, id);
+      });
     },
     label: 'Start Console for Editor'
   });
+
+  commands.addCommand(cmdIds.runCode, {
+    execute: () => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      // Get the session id.
+      let id = sessionIdProperty.get(widget);
+      if (!id) {
+        return;
+      }
+      // Get the selected code from the editor.
+      let code = widget.editor.getDoc().getSelection();
+      commands.execute('console:inject', { id, code });
+    },
+    label: 'Run Code',
+  });
+
+  [
+    cmdIds.lineNumbers,
+    cmdIds.lineWrap,
+    cmdIds.matchBrackets,
+    cmdIds.vimMode,
+    cmdIds.closeAll,
+    cmdIds.startConsole,
+    cmdIds.runCode,
+  ].forEach(command => palette.addItem({ command, category: 'Editor' }));
+
+  return tracker;
 }
+
+
+
+/**
+ * An attached property for the session id associated with an editor widget.
+ */
+const sessionIdProperty = new AttachedProperty<EditorWidget, string>({ name: 'sessionId' });
+
 
 
 /**
