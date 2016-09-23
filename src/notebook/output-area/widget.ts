@@ -768,9 +768,6 @@ class OutputWidget extends Widget {
     case 'error':
       child.addClass(ERROR_CLASS);
       break;
-    default:
-      console.error(`Unrecognized output type: ${output.output_type}`);
-      data = {};
     }
   }
 
@@ -828,11 +825,8 @@ class OutputWidget extends Widget {
           `${out.ename}: ${out.evalue}`
       };
       break;
-    default:
-      console.error(`Unrecognized output type: ${output.output_type}`);
-      bundle = {};
     }
-    return bundle;
+    return bundle || {};
   }
 
   /**

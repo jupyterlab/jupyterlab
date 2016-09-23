@@ -172,11 +172,6 @@ describe('notebook/notebook/panel', () => {
         expect(panel.toolbar).to.be.a(Toolbar);
       });
 
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.toolbar = null; }).to.throwError();
-      });
-
     });
 
     describe('#content', () => {
@@ -184,11 +179,6 @@ describe('notebook/notebook/panel', () => {
       it('should be the content area used by the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.content).to.be.a(Notebook);
-      });
-
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.content = null; }).to.throwError();
       });
 
     });
@@ -202,11 +192,6 @@ describe('notebook/notebook/panel', () => {
         expect(panel.kernel.name).to.be('shell');
       });
 
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.kernel = null; }).to.throwError();
-      });
-
     });
 
     describe('#rendermime', () => {
@@ -214,11 +199,6 @@ describe('notebook/notebook/panel', () => {
       it('should be the rendermime instance used by the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.rendermime).to.be(rendermime);
-      });
-
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.rendermime = null; }).to.throwError();
       });
 
     });
@@ -231,11 +211,6 @@ describe('notebook/notebook/panel', () => {
         expect(panel.renderer).to.be(renderer);
       });
 
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.renderer = null; });
-      });
-
     });
 
     describe('#clipboard', () => {
@@ -243,11 +218,6 @@ describe('notebook/notebook/panel', () => {
       it('should be the clipboard instance used by the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.clipboard).to.be(clipboard);
-      });
-
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.clipboard = null; }).to.throwError();
       });
 
     });
@@ -262,11 +232,6 @@ describe('notebook/notebook/panel', () => {
         panel.context = context;
         expect(panel.model).to.be(model);
         expect(panel.content.model).to.be(model);
-      });
-
-      it('should be read-only', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(() => { panel.model = null; }).to.throwError();
       });
 
     });

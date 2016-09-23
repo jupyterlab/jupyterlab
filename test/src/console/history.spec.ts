@@ -69,11 +69,6 @@ describe('console/history', () => {
         expect(history.isDisposed).to.be(true);
       });
 
-      it('should be read-only', () => {
-        let history = new ConsoleHistory();
-        expect(() => history.isDisposed = false).to.throwError();
-      });
-
     });
 
     describe('#kernel', () => {

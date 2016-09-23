@@ -23,11 +23,6 @@ describe('notebook/notebook/modelfactory', () => {
         expect(factory.name).to.be('notebook');
       });
 
-      it('should be read-only', () => {
-        let factory = new NotebookModelFactory();
-        expect(() => { factory.name = ''; }).to.throwError();
-      });
-
     });
 
     describe('#type', () => {
@@ -35,11 +30,6 @@ describe('notebook/notebook/modelfactory', () => {
       it('should get the file type', () => {
         let factory = new NotebookModelFactory();
         expect(factory.fileType).to.be('notebook');
-      });
-
-      it('should be read-only', () => {
-        let factory = new NotebookModelFactory();
-        expect(() => { factory.fileType = 'notebook'; }).to.throwError();
       });
 
     });
@@ -51,11 +41,6 @@ describe('notebook/notebook/modelfactory', () => {
         expect(factory.fileFormat).to.be('json');
       });
 
-      it('should be read-only', () => {
-        let factory = new NotebookModelFactory();
-        expect(() => { factory.fileFormat = 'json'; }).to.throwError();
-      });
-
     });
 
     describe('#isDisposed', () => {
@@ -65,11 +50,6 @@ describe('notebook/notebook/modelfactory', () => {
         expect(factory.isDisposed).to.be(false);
         factory.dispose();
         expect(factory.isDisposed).to.be(true);
-      });
-
-      it('should be read-only', () => {
-        let factory = new NotebookModelFactory();
-        expect(() => { factory.isDisposed = false; }).to.throwError();
       });
 
     });
