@@ -32,7 +32,6 @@ import './notebook/notebook/actions.spec';
 import './notebook/notebook/default-toolbar.spec';
 import './notebook/notebook/model.spec';
 import './notebook/notebook/modelfactory.spec';
-import './notebook/notebook/nbformat.spec';
 import './notebook/notebook/panel.spec';
 import './notebook/notebook/trust.spec';
 import './notebook/notebook/widget.spec';
