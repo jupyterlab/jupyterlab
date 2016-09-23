@@ -51,7 +51,7 @@
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.0",
     "style-loader": "^0.13.0",
-    "typedoc": "^0.4.2",
+    "typedoc": "github:jasongrout/typedoc#ts2",
     "typescript": "^2.0.3",
     "url-loader": "^0.5.7",
     "watch": "^0.17.1",
