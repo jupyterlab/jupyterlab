@@ -189,7 +189,7 @@ function populateKernels(node: HTMLSelectElement, specs: IKernel.ISpecModels, ru
     displayNames[name] = spec.display_name;
     maxLength = Math.max(maxLength, displayNames[name].length);
     languages[name] = spec.language;
-    modes[name] = specs.codemirror_mode;
+    modes[name] = spec.codemirror_mode;
   }
   // Handle a preferred kernel language in order of display name.
   let names: string[] = [];
