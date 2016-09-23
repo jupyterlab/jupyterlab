@@ -162,7 +162,7 @@ class ApplicationShell extends Widget {
    * Add a widget to the top content area.
    *
    * #### Notes
-   * Widgets must have a unique `id` property
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
   addToTopArea(widget: Widget, options: ISideAreaOptions = {}): void {
     if (!widget.id) {
@@ -175,6 +175,9 @@ class ApplicationShell extends Widget {
 
   /**
    * Add a widget to the left content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
   addToLeftArea(widget: Widget, options: ISideAreaOptions = {}): void {
     if (!widget.id) {
@@ -187,6 +190,9 @@ class ApplicationShell extends Widget {
 
   /**
    * Add a widget to the right content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
   addToRightArea(widget: Widget, options: ISideAreaOptions = {}): void {
     if (!widget.id) {
@@ -199,6 +205,9 @@ class ApplicationShell extends Widget {
 
   /**
    * Add a widget to the main content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
   addToMainArea(widget: Widget): void {
     // TODO
