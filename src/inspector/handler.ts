@@ -136,7 +136,8 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     let details = content.payload.filter(i => (i as any).source === 'page')[0];
     if (details) {
       let bundle = (details as any).data as RenderMime.MimeMap<string>;
-      let widget = this._rendermime.render(bundle, true);
+      let trusted = true;
+      let widget = this._rendermime.render({ bundle, trusted });
       update.content = widget;
       this.inspected.emit(update);
       return;
@@ -192,7 +193,8 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
       }
 
       let bundle = value.data as RenderMime.MimeMap<string>;
-      let widget = this._rendermime.render(bundle, true);
+      let trusted = true;
+      let widget = this._rendermime.render({ bundle, trusted });
       update.content = widget;
       this.inspected.emit(update);
     });

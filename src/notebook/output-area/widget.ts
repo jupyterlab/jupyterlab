@@ -740,7 +740,7 @@ class OutputWidget extends Widget {
     }
 
     // Create the output result area.
-    let child = rendermime.render(data, trusted);
+    let child = rendermime.render({ bundle: data, trusted });
     if (!child) {
       console.log(msg);
       console.log(data);
