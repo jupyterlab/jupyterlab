@@ -251,32 +251,6 @@ namespace nbformat {
 
 
   /**
-   * Check if cell is of markdown type.
-   */
-  export
-  function isMarkdownCell(d: IBaseCell): d is IMarkdownCell {
-    return d.cell_type === 'markdown';
-  }
-
-
-  /**
-   * Check if cell is of code type.
-   */
-  export
-  function isCodeCell(d: IBaseCell): d is ICodeCell {
-    return d.cell_type === 'code';
-  }
-
-
-  /**
-   * Check if cell is of raw type.
-   */
-  export
-  function isRawCell(d: IBaseCell): d is IRawCell {
-    return d.cell_type === 'raw';
-  }
-
-  /**
    * The valid output types.
    */
   export
@@ -398,40 +372,4 @@ namespace nbformat {
    */
   export
   type IOutput = IExecuteResult | IDisplayData | IStream | IError;
-
-
-  /**
-   * Check if output is an `execute_result`.
-   */
-  export
-  function isExecuteResult(d: IBaseOutput): d is IExecuteResult {
-    return d.output_type === 'execute_result';
-  }
-
-
-  /**
-   * Check if output is a `display_data`.
-   */
-  export
-  function isDisplayData(d: IBaseOutput): d is IDisplayData {
-    return d.output_type === 'display_data';
-  }
-
-
-  /**
-   * Check if output is `stream`.
-   */
-  export
-  function isStream(d: IBaseOutput): d is IStream {
-    return d.output_type === 'stream';
-  }
-
-
-  /**
-   * Check if output is `error`.
-   */
-  export
-  function isError(d: IBaseOutput): d is IError {
-    return d.output_type === 'error';
-  }
 }
