@@ -26,9 +26,13 @@
   },
   "devDependencies": {
     "@types/d3-dsv": "^1.0.29",
+    "@types/expect.js": "^0.3.29",
     "@types/jquery": "^2.0.32",
     "@types/marked": "0.0.28",
+    "@types/mathjax": "0.0.30",
+    "@types/mocha": "^2.2.32",
     "@types/requirejs": "^2.1.28",
+    "@types/sanitize-html": "^1.13.31",
     "concurrently": "^2.0.0",
     "css-loader": "^0.23.1",
     "expect.js": "^0.3.1",
