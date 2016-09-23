@@ -139,8 +139,6 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     label: 'Close all files'
   });
 
-  // TODO: add an attached property to the widget with the session id.
-
   commands.addCommand(cmdIds.startConsole, {
     execute: () => {
       let widget = tracker.currentWidget;
@@ -170,7 +168,12 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
         return;
       }
       // Get the selected code from the editor.
-      let code = widget.editor.getDoc().getSelection();
+      let doc = widget.editor.getDoc();
+      let code = doc.getSelection();
+      if (!code) {
+        let { line } = doc.getCursor();
+        code = doc.getLine(line);
+      }
       commands.execute('console:inject', { id, code });
     },
     label: 'Run Code',

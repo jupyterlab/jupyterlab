@@ -92,7 +92,7 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 /**
  * The interface for a start console.
  */
-interface IStartConsole extends JSONObject {
+interface ICreateConsoleArgs extends JSONObject {
   sessionId?: string;
   path?: string;
   kernel: IKernel.IModel;
@@ -174,9 +174,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   });
 
 
-  command = 'console:execute';
+  command = 'console:run';
   commands.addCommand(command, {
-    label: 'Execute Cell',
+    label: 'Run Cell',
     execute: () => {
       if (tracker.currentWidget) {
         tracker.currentWidget.content.execute();
@@ -229,7 +229,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   command = 'console:create';
   commands.addCommand(command, {
-    execute: (args: IStartConsole) => {
+    execute: (args: ICreateConsoleArgs) => {
       // If we get a session, use it.
       if (args.sessionId) {
         return manager.connectTo(args.sessionId).then(session => {
@@ -248,6 +248,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
       // Get the kernel model.
       return getKernel(args).then(kernel => {
+        if (!kernel) {
+          return;
+        }
         // Start the session.
         let options: ISession.IOptions = {
           path,
@@ -278,7 +281,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   /**
    * Get the kernel given the create args.
    */
-  function getKernel(args: IStartConsole): Promise<IKernel.IModel> {
+  function getKernel(args: ICreateConsoleArgs): Promise<IKernel.IModel> {
     if (args.kernel) {
       return Promise.resolve(args.kernel);
     }
