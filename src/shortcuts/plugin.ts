@@ -256,12 +256,12 @@ const SHORTCUTS = [
     keys: ['Ctrl M']
   },
   {
-    command: 'console:execute',
+    command: 'console:run',
     selector: '.jp-ConsolePanel',
     keys: ['Enter']
   },
   {
-    command: 'console:execute-forced',
+    command: 'console:run-forced',
     selector: '.jp-ConsolePanel',
     keys: ['Shift Enter']
   },
