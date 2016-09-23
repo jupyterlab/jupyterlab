@@ -6,6 +6,14 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  h, VNode
+} from 'phosphor/lib/ui/vdom';
+
+import {
+  VDomModel, VDomWidget
+} from '../common/vdom';
+
+import {
   ObservableList
 } from '../common/observablelist';
 
@@ -98,12 +106,21 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       'terminal:create-new',
       'file-operations:new-text-file',
   ]
- 
+
+  let launcherModel = new LauncherModel();
+  let launcherWidget = new LauncherWidget()
+  
+  launcherWidget.model = launcherModel;
+  launcherWidget.id = 'landing-jupyterlab-widget';
+  launcherWidget.title.label = 'Launcher2';
+
   for (let i in names) {
       let itemName = names[i];
       let action = actions[i];
       let l = items.add(itemName, () => app.commands.execute(action, void 0));
+      launcherModel.add(itemName, () => app.commands.execute(action, void 0));
       list.push(l)
+
   }
 
 
@@ -128,7 +145,6 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   
   }));
 
-
   app.commands.addCommand('jupyterlab-launcher:add-item', {
     label: 'Add Launcher Item',
     execute: () => {
@@ -145,6 +161,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
     execute: () => {
       if (!widget.isAttached) {
         app.shell.addToLeftArea(widget);
+        // XXX: switch this out to be the LauncherWidget
       } else {
           app.shell.activateMain(widget.id);
       }
@@ -157,6 +174,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   });
 
   app.shell.addToLeftArea(widget);
+  app.shell.addToLeftArea(launcherWidget);
 }
 
 
@@ -165,6 +183,7 @@ class LauncherItem {
     }
 
 }
+
 
 class LauncherItems {
     constructor(public body: HTMLElement){
@@ -208,4 +227,39 @@ class LauncherItems {
 
         });
     }
+}
+
+class LauncherModel  extends VDomModel {
+    items : LauncherItem[] = [];
+    add(name: string, clickCallback: () => void) : IDisposable {
+        this.stateChanged.emit(void 0);
+
+        let item = new LauncherItem(name, clickCallback);
+        this.items.push(item);
+
+        return new DisposableDelegate(() => {
+            // remove the item form the list of items
+            var index = this.items.indexOf(item, 0);
+            if (index > -1) {
+                this.items.splice(index, 1);
+            }
+
+        });
+
+
+    }
+
+}
+
+class LauncherWidget extends VDomWidget<LauncherModel> {
+
+    protected render(): VNode | VNode[] {
+
+        return h.div('this is a test')
+
+    }
+//    public dispose(): void {
+//    
+//    }
+
 }
