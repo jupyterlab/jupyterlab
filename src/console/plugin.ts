@@ -187,9 +187,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
 
-  command = 'console:execute-forced';
+  command = 'console:run-forced';
   commands.addCommand(command, {
-    label: 'Execute Cell (forced)',
+    label: 'Run Cell (forced)',
     execute: () => {
       if (tracker.currentWidget) {
         tracker.currentWidget.content.execute(true);
