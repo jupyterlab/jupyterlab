@@ -8,7 +8,7 @@ module.exports = [
   require('jupyterlab/lib/console/plugin').consoleExtension,
   require('jupyterlab/lib/console/codemirror/plugin').rendererProvider,
   require('jupyterlab/lib/csvwidget/plugin').csvHandlerExtension,
-  require('jupyterlab/lib/distributed/plugin').distributedUIExtension,
+  require('jupyterlab/lib/distributed/plugin').distributedUILab,
   require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
   require('jupyterlab/lib/editorwidget/plugin').editorHandlerProvider,
   require('jupyterlab/lib/faq/plugin').faqExtension,

@@ -10,8 +10,8 @@ import {
   DistributedUIElement
 } from './index'
 
-const URL: String = '10.10.20.40'
-const PORT: String = '8787'
+const URL = '10.10.20.40'
+const PORT = '8787'
 
 const SCRIPTS = [
   {
@@ -84,17 +84,17 @@ const SCRIPTS = [
  * A namespace for help plugin private functions.
  */
 export
-const distributedUIExtension: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.distributed-ui-extension',
+const distributedUILab: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.distributed-ui-lab',
   requires: [ICommandPalette],
-  activate: activateDistributedUIExtension,
+  activate: activateDistributedUILab,
   autoStart: true
 }
 
 /**
  * Activate the bokeh application extension.
  */
-function activateDistributedUIExtension(app: JupyterLab, palette: ICommandPalette): void {
+function activateDistributedUILab(app: JupyterLab, palette: ICommandPalette): void {
 
   let elements: Array<DistributedUIElement> = [];
 
