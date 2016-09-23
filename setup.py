@@ -107,13 +107,11 @@ class NPM(Command):
     def run(self):
         has_npm = self.has_npm()
         if not has_npm:
-            log.error("`npm` unavailable.  If you're running this command using sudo, make sure `npm` is available to sudo")
-        if not os.path.exists(self.node_modules):
-            log.info("Installing build dependencies with npm.  This may take a while...")
-            run('npm install', cwd=here)
-        if not os.path.exists(self.jlab_node_modules):
-            log.info("Installing extension build dependencies with npm.  This may take a while...")
-            run('npm install', cwd=extension_root)
+            log.error("`npm` unavailable. If you're running this command using sudo, make sure `npm` is available to sudo")
+        log.info("Installing build dependencies with npm. This may take a while...")
+        run('npm install', cwd=here)
+        log.info("Installing extension build dependencies with npm. This may take a while...")
+        run('npm install', cwd=extension_root)
         run('npm run build:all')
 
         for t in self.targets:
