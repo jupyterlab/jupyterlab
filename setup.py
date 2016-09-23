@@ -82,9 +82,6 @@ class NPM(Command):
 
     user_options = []
 
-    node_modules = os.path.join(here, 'node_modules')
-    jlab_node_modules = os.path.join(extension_root, 'node_modules')
-
     # Representative files that should exist after a successful build
     targets = [
         os.path.join(here, 'jupyterlab', 'build', 'main.css'),
