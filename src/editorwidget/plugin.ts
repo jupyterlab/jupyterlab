@@ -85,7 +85,7 @@ const cmdIds = {
   vimMode: 'editor:vim-mode',
   closeAll: 'editor:close-all',
   changeTheme: 'editor:change-theme',
-  startConsole: 'editor:start-console',
+  createConsole: 'editor:create-console',
   runCode: 'editor:run-code'
 };
 
@@ -139,7 +139,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     label: 'Close all files'
   });
 
-  commands.addCommand(cmdIds.startConsole, {
+  commands.addCommand(cmdIds.createConsole, {
     execute: () => {
       let widget = tracker.currentWidget;
       if (!widget) {
@@ -153,7 +153,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
         sessionIdProperty.set(widget, id);
       });
     },
-    label: 'Start Console for Editor'
+    label: 'Create Console for Editor'
   });
 
   commands.addCommand(cmdIds.runCode, {
