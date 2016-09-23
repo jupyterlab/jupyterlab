@@ -338,6 +338,7 @@ class ConsoleContent extends Widget {
     // Create a new cell using the prompt renderer.
     let cell = this._renderer.createPrompt(this._rendermime);
     cell.model.source = code;
+    cell.mimetype = this._mimetype;
     cell.readOnly = true;
     this._content.addWidget(cell);
     this._execute(cell);
