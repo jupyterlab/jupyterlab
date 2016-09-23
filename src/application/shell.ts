@@ -160,6 +160,9 @@ class ApplicationShell extends Widget {
 
   /**
    * Add a widget to the top content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property
    */
   addToTopArea(widget: Widget, options: ISideAreaOptions = {}): void {
     if (!widget.id) {
