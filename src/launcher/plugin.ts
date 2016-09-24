@@ -118,7 +118,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       let itemName = names[i];
       let action = actions[i];
       let l = items.add(itemName, () => app.commands.execute(action, void 0));
-      launcherModel.add(itemName, () => app.commands.execute(action, void 0));
+      l = launcherModel.add(itemName, () => app.commands.execute(action, void 0));
       list.push(l)
 
   }
@@ -133,6 +133,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       let action = actions[index];
 
       l = items.addItem(new LauncherItem(itemName, () => app.commands.execute(action, void 0)));
+      l = launcherModel.add(itemName, () => app.commands.execute(action, void 0));
       
       console.log("added item ")
                        
@@ -232,16 +233,18 @@ class LauncherItems {
 class LauncherModel  extends VDomModel {
     items : LauncherItem[] = [];
     add(name: string, clickCallback: () => void) : IDisposable {
-        this.stateChanged.emit(void 0);
 
         let item = new LauncherItem(name, clickCallback);
         this.items.push(item);
+        this.stateChanged.emit(void 0);
 
         return new DisposableDelegate(() => {
             // remove the item form the list of items
+            console.log("dispose was called")
             var index = this.items.indexOf(item, 0);
             if (index > -1) {
                 this.items.splice(index, 1);
+                this.stateChanged.emit(void 0);
             }
 
         });
@@ -254,8 +257,18 @@ class LauncherModel  extends VDomModel {
 class LauncherWidget extends VDomWidget<LauncherModel> {
 
     protected render(): VNode | VNode[] {
+        let children : VNode[] = [];
 
-        return h.div('this is a test')
+        let div = h.div()
+
+        // grab data from the model
+        for (let i in this.model.items) {
+        
+         children.push(h.div('this is a test' + this.model.items[i].name));
+        }
+
+        return h.div(children);
+
 
     }
 //    public dispose(): void {
