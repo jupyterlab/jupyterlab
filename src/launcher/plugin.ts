@@ -259,12 +259,21 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
     protected render(): VNode | VNode[] {
         let children : VNode[] = [];
 
-        let div = h.div()
-
         // grab data from the model
-        for (let i in this.model.items) {
-        
-         children.push(h.div('this is a test' + this.model.items[i].name));
+        for (let item of this.model.items) {
+
+        let imgName = item.name.replace(' ', '');
+        let img = h.span({className: `jp-Image${imgName} jp-Launcher-image`})
+
+        let text = h.span({className: 'jp-Launcher-text' }, item.name)
+
+        let column = h.div({
+                className: 'jp-Launcher-column',
+                'onclick': item.clickCallback  
+            }, [ img, text])
+
+        children.push(column);
+
         }
 
         return h.div(children);
