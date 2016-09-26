@@ -43,12 +43,15 @@ img.jp-mod-unconfined {
 
 .p-Widget.jp-Output-result {
   overflow: auto;
+  flex-grow: 1;
 }
 
 
-/* If we have two nested output areas (for example, as with output widgets),
-   then the inner output looks weird with a prompt, so we hide it. */
-.jp-Output .jp-Output .jp-Output-prompt {
+/* Hide the prompt in case of
+ *  - nested output areas (e.g. in the case of output widgets)
+ *  - mirrored output areas
+ */
+.jp-Output .jp-Output .jp-Output-prompt, .jp-MirroredOutputArea .jp-Output-prompt {
   display: none;
 }
 
