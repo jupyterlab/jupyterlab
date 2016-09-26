@@ -729,9 +729,7 @@ class OutputWidget extends Widget {
    * @param options - The options used to render the output.
    */
   render(options: OutputWidget.IRenderOptions): void {
-    let output = options.output;
-    let trusted = options.trusted === true;
-    let injector = options.injector;
+    let { output, trusted, injector } = options;
 
     // Handle an input request.
     if (output.output_type === 'input_request') {

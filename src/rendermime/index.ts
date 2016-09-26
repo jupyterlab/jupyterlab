@@ -101,15 +101,15 @@ class RenderMime {
    * renderer if the output should be sanitized.
    */
   render(options: RenderMime.IRenderOptions<string>): Widget {
-    let trusted = options.trusted === true;
-    let mimetype = this.preferredMimetype(options.bundle, trusted);
+    let { trusted, bundle, injector } = options;
+    let mimetype = this.preferredMimetype(bundle, trusted);
     if (!mimetype) {
       return void 0;
     }
     let rendererOptions = {
       mimetype,
-      source: options.bundle[mimetype],
-      injector: options.injector,
+      source: bundle[mimetype],
+      injector,
       resolver: this._resolver,
       sanitizer: trusted ? null : this._sanitizer
     };
