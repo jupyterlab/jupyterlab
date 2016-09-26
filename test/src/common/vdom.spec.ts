@@ -28,7 +28,7 @@ class TestModel extends VDomModel {
 class TestWidget extends VDomWidget<TestModel> {
   protected render(): VNode | VNode[] {
     return h.span(this.model.value);
-  } 
+  }
 }
 
 
@@ -60,7 +60,7 @@ describe('common/vdom', () => {
       it('should fire the stateChanged signal on a change', () => {
         let model = new TestModel();
         let changed = false;
-        model.stateChanged.connect(() => {changed = true});
+        model.stateChanged.connect(() => { changed = true; });
         model.value = 'newvalue';
         expect(changed).to.be(true);
       });
@@ -91,7 +91,7 @@ describe('common/vdom', () => {
         let widget = new TestWidget();
         let model = new TestModel();
         let changed = false;
-        widget.modelChanged.connect(() => {changed = true});
+        widget.modelChanged.connect(() => { changed = true; });
         widget.model = model;
         expect(changed).to.be(true);
       });
@@ -109,10 +109,10 @@ describe('common/vdom', () => {
           let span = widget.node.firstChild as HTMLElement;
           expect(span.textContent).to.be('foo');
           done();
-        })
-      })
+        });
+      });
 
-    })
+    });
 
   });
 
