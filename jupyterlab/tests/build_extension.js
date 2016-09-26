@@ -7,10 +7,6 @@ var path = require('path');
 
 buildExtension({
   name: 'mockextension',
-  entryPath: './mockextension/index.js',
-  config: {
-    output: {
-      path: path.join(process.cwd(), 'mockextension', 'build'),
-    }
-  }
+  entry: './mockextension/index.js',
+  outputDir: './mockextension/build'
 });
