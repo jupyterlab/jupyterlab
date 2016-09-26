@@ -266,10 +266,11 @@ class ConsoleContent extends Widget {
    * Clear the code cells.
    */
   clear(): void {
-    while (this.prompt) {
-      this.prompt.dispose();
+    // Dispose all the content cells except the first, which is the banner.
+    let cells = this._content.widgets;
+    while (cells.length > 1) {
+      cells.at(1).dispose();
     }
-    this.newPrompt();
   }
 
   /**
