@@ -29,7 +29,7 @@
   },
   "scripts": {
     "clean": "rimraf build",
-    "update": "rimraf node_modules/jupyterlab && npm install jupyterlab",
+    "update": "rimraf node_modules/jupyterlab && npm install jupyterlab && npm install",
     "build": "npm run update && npm run build:extension",
     "build:extension": "webpack",
     "webpack:devtool": "devtool node_modules/webpack/bin/webpack.js",
