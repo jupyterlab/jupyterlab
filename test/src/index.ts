@@ -3,6 +3,7 @@
 
 import './common/activitymonitor.spec';
 import './common/observablelist.spec';
+import './common/vdom.spec';
 
 import './completer/handler.spec';
 import './completer/model.spec';
