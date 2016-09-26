@@ -78,7 +78,7 @@ def check_labextension(files, user=False, prefix=None, labextensions_dir=None, s
     return all(os.path.exists(pjoin(labext, f)) for f in files)
 
 
-def install_labextension(path, name='', overwrite=False, symlink=False,
+def install_labextension(path, name, overwrite=False, symlink=False,
                         user=False, prefix=None, labextensions_dir=None,
                         logger=None, sys_prefix=False
                         ):

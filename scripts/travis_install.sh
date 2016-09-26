@@ -11,7 +11,7 @@ hash -r
 conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 conda info -a
-conda install jupyter
+conda install jupyter nose
 
 # create jupyter base dir (needed for config retreival)
 mkdir ~/.jupyter

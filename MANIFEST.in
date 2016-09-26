@@ -1,3 +1,4 @@
 recursive-include jupyterlab/build *
 include jupyterlab/lab.html
 include package.json
+prune jupyterlab/tests
