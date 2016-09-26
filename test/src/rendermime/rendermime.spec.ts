@@ -65,13 +65,13 @@ describe('rendermime/index', () => {
 
       it('should render a mimebundle', () => {
         let r = defaultRenderMime();
-        let w = r.render({ 'text/plain': 'foo' });
+        let w = r.render({ bundle: { 'text/plain': 'foo' } });
         expect(w instanceof Widget).to.be(true);
       });
 
       it('should return `undefined` for an unregistered mime type', () => {
         let r = defaultRenderMime();
-        let value = r.render({ 'text/fizz': 'buzz' });
+        let value = r.render({ bundle: { 'text/fizz': 'buzz' } });
         expect(value).to.be(void 0);
       });
 
@@ -81,7 +81,7 @@ describe('rendermime/index', () => {
           'text/html': '<h1>foo</h1>'
         };
         let r = defaultRenderMime();
-        let w = r.render(bundle, true);
+        let w = r.render({ bundle, trusted: true });
         let el = w.node.firstChild as HTMLElement;
         expect(el.localName).to.be('h1');
       });
@@ -93,7 +93,7 @@ describe('rendermime/index', () => {
           'image/png': 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
         };
         let r = defaultRenderMime();
-        let w = r.render(bundle, false);
+        let w = r.render({ bundle, trusted: false });
         let el = w.node.firstChild as HTMLElement;
         expect(el.localName).to.be('img');
       });
@@ -104,7 +104,7 @@ describe('rendermime/index', () => {
           'text/html': '<h1>foo</h1>'
         };
         let r = defaultRenderMime();
-        let w = r.render(bundle, false);
+        let w = r.render({ bundle, trusted: false });
         let el = w.node.firstChild as HTMLElement;
         expect(el.localName).to.be('h1');
       });
@@ -114,7 +114,7 @@ describe('rendermime/index', () => {
           'text/html': '<h1>foo <script>window.x=1></scrip></h1>'
         };
         let r = defaultRenderMime();
-        let widget = r.render(bundle);
+        let widget = r.render({ bundle });
         expect(widget.node.innerHTML).to.be('<h1>foo </h1>');
       });
 
@@ -123,7 +123,7 @@ describe('rendermime/index', () => {
           'image/svg+xml': '<svg><script>windox.x=1</script></svg>'
         };
         let r = defaultRenderMime();
-        let widget = r.render(bundle);
+        let widget = r.render({ bundle });
         expect(widget.node.innerHTML.indexOf('svg')).to.not.be(-1);
         expect(widget.node.innerHTML.indexOf('script')).to.be(-1);
       });
@@ -153,7 +153,7 @@ describe('rendermime/index', () => {
           'image/png': 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
         };
         let r = defaultRenderMime();
-        expect(r.preferredMimetype(bundle, false)).to.be('image/png');
+        expect(r.preferredMimetype(bundle)).to.be('image/png');
       });
 
       it('should render the mimetype that is sanitizable', () => {
@@ -162,7 +162,7 @@ describe('rendermime/index', () => {
           'text/html': '<h1>foo</h1>'
         };
         let r = defaultRenderMime();
-        expect(r.preferredMimetype(bundle, false)).to.be('text/html');
+        expect(r.preferredMimetype(bundle)).to.be('text/html');
       });
     });
 
