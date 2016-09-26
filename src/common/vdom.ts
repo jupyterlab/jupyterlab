@@ -37,12 +37,8 @@ interface IVDomModel extends IDisposable {
 /**
  * Concrete implementation of IVDomModel.
  */
-export class VDomModel implements IVDomModel {
-  /**
-   * Construct a new VDomModel.
-   */
-  constructor() {}
-
+export
+class VDomModel implements IVDomModel {
   /**
    * A signal emitted when any model state changes.
    */
@@ -53,8 +49,8 @@ export class VDomModel implements IVDomModel {
    */
   dispose(): void {
     if (this.isDisposed) {
-      return
-    };
+      return;
+    }
     this._isDisposed = true;
     clearSignalData(this);
   }
@@ -73,24 +69,17 @@ export class VDomModel implements IVDomModel {
 defineSignal(VDomModel.prototype, 'stateChanged');
 
 
-/** 
+/**
  * Phosphor widget that encodes best practices for VDOM based rendering.
  */
 export
 abstract class VDomWidget<T extends IVDomModel> extends Widget {
   /**
-   * Construct a new VDomWidget.
-   */
-  constructor() {
-    super();
-  }
-
-  /**
    * A signal emited when the model changes.
    */
   modelChanged: ISignal<this, void>;
 
-  /** 
+  /**
    * Set the model and fire changed signals.
    */
   set model(newValue: T) {
@@ -135,7 +124,7 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
 
   /**
    * Called to update the state of the widget.
-   * 
+   *
    * The default implementation of this method triggers
    * VDOM based rendering by calling the this.render() method.
    */
@@ -146,17 +135,17 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
 
   /**
    * Render the content of this widget using the virtial DOM.
-   * 
+   *
    * This method will be called anytime the widget needs to be rendered,
    * which includes layout triggered rendering and all model changes.
-   * 
+   *
    * Subclasses should define this method and use the current model state
    * in this.model and return a phosphor VNode or VNode[] using the phosphor
    * VDOM API.
    */
   protected abstract render(): VNode | VNode[];
 
-  private _model: T
+  private _model: T;
 }
 
 // Define the signal for the VDomWidget class.
