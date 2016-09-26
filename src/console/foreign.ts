@@ -10,11 +10,7 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  Panel
-} from 'phosphor/lib/ui/panel';
-
-import {
-  CodeCellWidget
+  BaseCellWidget, CodeCellWidget
 } from '../notebook/cells';
 
 
@@ -98,7 +94,6 @@ class ForeignHandler implements IDisposable {
       return false;
     }
     // Check whether this message came from an external session.
-    let parent = this._parent;
     let session = (msg.parent_header as KernelMessage.IHeader).session;
     if (session === this._kernel.clientId) {
       return false;
@@ -114,7 +109,6 @@ class ForeignHandler implements IDisposable {
       cell.model.executionCount = inputMsg.content.execution_count;
       cell.model.source = inputMsg.content.code;
       cell.trusted = true;
-      parent.update();
       return true;
     case 'execute_result':
     case 'display_data':
@@ -130,7 +124,6 @@ class ForeignHandler implements IDisposable {
       cell = this._cells.get(parentMsgId);
       output.output_type = msgType as nbformat.OutputType;
       cell.model.outputs.add(output);
-      parent.update();
       return true;
     case 'clear_output':
       let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
@@ -148,7 +141,7 @@ class ForeignHandler implements IDisposable {
   private _newCell(parentMsgId: string): CodeCellWidget {
     let cell = this._renderer();
     this._cells.set(parentMsgId, cell);
-    this._parent.addWidget(cell);
+    this._parent.addCell(cell);
     return cell;
   }
 
@@ -156,7 +149,7 @@ class ForeignHandler implements IDisposable {
   private _enabled = true;
   private _isDisposed = false;
   private _kernel: Kernel.IKernel = null;
-  private _parent: Panel = null;
+  private _parent: ForeignHandler.IReceiver = null;
   private _renderer: () => CodeCellWidget = null;
 }
 
@@ -179,7 +172,7 @@ namespace ForeignHandler {
     /**
      * The parent into which the handler will inject code cells.
      */
-    parent: Panel;
+    parent: IReceiver;
 
     /**
      * The renderer for creating cells to inject into the parent.
@@ -196,5 +189,16 @@ namespace ForeignHandler {
      * Create a code cell.
      */
     createCell: () => CodeCellWidget;
+  }
+
+  /**
+   * A receiver of newly created foreign cells.
+   */
+  export
+  interface IReceiver {
+    /**
+     * Add a newly created foreign cell.
+     */
+    addCell(cell: BaseCellWidget): void;
   }
 }
