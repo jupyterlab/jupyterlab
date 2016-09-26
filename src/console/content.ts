@@ -459,6 +459,7 @@ class ConsoleContent extends Widget {
    */
   protected newForeignCell(parentMsgId: string): CodeCellWidget {
     let cell = this._renderer.createForeignCell(this._rendermime);
+    cell.readOnly = true;
     cell.mimetype = this._mimetype;
     cell.addClass(FOREIGN_CELL_CLASS);
     this._content.addWidget(cell);
@@ -597,7 +598,6 @@ namespace ConsoleContent {
 
     /**
      * Create a code cell whose input originated from a foreign session.
-     * The implementor is expected to make this read-only.
      */
     createForeignCell(rendermine: IRenderMime): CodeCellWidget;
   }
