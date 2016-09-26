@@ -11,6 +11,7 @@
   /* These need to be root because tabs get attached to the body during dragging. */
   --jp-private-horizontal-tab-height: 24px;
   --jp-private-horizontal-tab-width: 144px;
+  --jp-private-horizontal-tab-active-top-border: 2px;
 }
 
 
@@ -27,7 +28,7 @@
 
 
 .p-TabBar.p-mod-horizontal {
-  min-height: var(--jp-private-horizontal-tab-height);
+  min-height: calc( var(--jp-private-horizontal-tab-height) + 2.0*var(--jp-border-width) );
 }
 
 
@@ -76,11 +77,7 @@
   padding: 0px 10px;
   background: var(--jp-layout-color2);
   border: var(--jp-border-width) solid var(--jp-border-color1);
-}
-
-
-.p-TabBar-tab.p-mod-current {
-  background: var(--jp-layout-color1);
+  position: relative;
 }
 
 
@@ -92,12 +89,12 @@
 .p-TabBar.p-mod-top .p-TabBar-tab,
 .p-TabBar.p-mod-bottom .p-TabBar-tab {
   flex: 0 1 var(--jp-private-horizontal-tab-width);
-  min-height: calc(var(--jp-private-horizontal-tab-height) - 2*var(--jp-border-width));
+  min-height: calc(var(--jp-private-horizontal-tab-height) + var(--jp-border-width));
   /* For some reason Firefox needs us to give a max-height as well...*/
-  max-height: calc(var(--jp-private-horizontal-tab-height) - 2*var(--jp-border-width));
+  /*max-height: calc(var(--jp-private-horizontal-tab-height) + var(--jp-border-width));*/
   min-width: 35px;
   margin-left: calc(-1*var(--jp-border-width));
-  line-height: calc(var(--jp-private-horizontal-tab-height) - 3*var(--jp-border-width));
+  line-height: var(--jp-private-horizontal-tab-height);
 }
 
 
@@ -116,13 +113,21 @@
   margin-left: 0;
 }
 
+/* .p-mod-current state */
+
 .p-TabBar-tab.p-mod-current {
-    color: var(--jp-ui-font-color0);
+  background: var(--jp-layout-color1);
+}
+
+
+.p-TabBar-tab.p-mod-current {
+  color: var(--jp-ui-font-color0);
 }
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  min-height: calc(var(--jp-private-horizontal-tab-height) - var(--jp-border-width));
+  overflow-y: visible;
+  min-height: calc(var(--jp-private-horizontal-tab-height) + 2*var(--jp-border-width));
 }
 
 
@@ -242,4 +247,21 @@
 
 .p-TabPanel.p-mod-right-to-left > .p-TabPanel-stackedPanel {
   border-right: none;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Tabs in the dock panel
+|----------------------------------------------------------------------------*/
+
+
+#jp-main-dock-panel .p-TabBar-tab.jp-mod-current:before {
+  position: absolute;
+  top: calc(-1 * var(--jp-border-width));
+  left: calc(-1 * var(--jp-border-width));
+  content: '';
+  height: var(--jp-private-horizontal-tab-active-top-border);
+  width: var(--jp-private-horizontal-tab-width);
+  background: var(--jp-brand-color1);
+  z-index: 3;
 }

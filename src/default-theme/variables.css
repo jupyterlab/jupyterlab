@@ -80,6 +80,16 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-content-font-color2: var(--md-grey-700);
   --jp-content-font-color3: var(--md-grey-500);
 
+  --jp-ui-font-scale-factor: 1.2;
+  --jp-ui-font-size0: calc(var(--jp-ui-font-size1)/var(--jp-ui-font-scale-factor));
+  --jp-ui-font-size1: 13px; /* Base font size */
+  --jp-ui-font-size2: calc(var(--jp-ui-font-size1)*var(--jp-ui-font-scale-factor));
+  --jp-ui-font-size3: calc(var(--jp-ui-font-size2)*var(--jp-ui-font-scale-factor));
+
+  --jp-code-font-size: 13px;
+  --jp-code-line-height: 17px;
+  --jp-code-padding: 4px;
+
   /* Layout
   
   The following are the main layout colors use in JupyterLab. In a light
