@@ -974,15 +974,15 @@ class Notebook extends StaticNotebook {
     let i = this._findCell(target);
     if (i !== -1) {
       let widget = this.childAt(i);
-      // If the editor has focus, ensure edit mode.
+      // If the editor itself does not have focus, ensure command mode.
       if (widget.editor.node.contains(target)) {
-        this.mode = 'edit';
-      // Otherwise, another control within the cell has focus,
-      // ensure command mode.
-      } else {
         this.mode = 'command';
       }
       this.activeCellIndex = i;
+      // If the editor has focus, ensure edit mode.
+      if (widget.editor.node.contains(target)) {
+        this.mode = 'edit';
+      }
     } else {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
