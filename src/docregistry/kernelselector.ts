@@ -52,12 +52,38 @@ interface IKernelSelection {
 
 
 /**
+ * An interface for populated a kernel selector.
+ */
+export
+interface IPopulateKernels {
+   /**
+    * The Kernel specs.
+    */
+  specs: IKernel.ISpecModels;
+
+  /**
+   * The current running sessions.
+   */
+  sessions: ISession.IModel[];
+
+  /**
+   * The preferred kernel name.
+   */
+  preferredKernel?: string;
+
+  /**
+   * The preferred kernel language.
+   */
+  preferredLanguage?: string;
+}
+
+
+/**
  * Bring up a dialog to select a kernel.
  */
 export
 function selectKernel(options: IKernelSelection): Promise<IKernel.IModel> {
-  let specs = options.specs;
-  let kernel = options.kernel;
+  let { specs, kernel, sessions, preferredLanguage } = options;
 
   // Create the dialog body.
   let body = document.createElement('div');
@@ -74,8 +100,7 @@ function selectKernel(options: IKernelSelection): Promise<IKernel.IModel> {
   body.appendChild(selector);
 
   // Get the current sessions, populate the kernels, and show the dialog.
-  let lang = options.preferredLanguage;
-  populateKernels(selector, specs, options.sessions, lang);
+  populateKernels(selector, { specs, sessions, preferredLanguage });
   return showDialog({
     title: 'Select Kernel',
     body,
@@ -152,13 +177,9 @@ function findKernel(kernelName: string, language: string, specs: IKernel.ISpecMo
 /**
  * Populate a kernel dropdown list.
  *
- * @param node - The host html element.
+ * @param node - The host node.
  *
- * @param specs - The available kernel spec information.
- *
- * @param running - The list of running session ids.
- *
- * @param preferredLanguage - The preferred language for the kernel.
+ * @param options - The options used to populate the kernels.
  *
  * #### Notes
  * Populates the list with separated sections:
@@ -174,12 +195,15 @@ function findKernel(kernelName: string, language: string, specs: IKernel.ISpecMo
  * the explicit session information.
  */
 export
-function populateKernels(node: HTMLSelectElement, specs: IKernel.ISpecModels, running: ISession.IModel[], preferredLanguage?: string): void {
+function populateKernels(node: HTMLSelectElement, options: IPopulateKernels): void {
   // Clear any existing options.
   while (node.firstChild) {
     node.removeChild(node.firstChild);
   }
   let maxLength = 10;
+
+  let { preferredKernel, preferredLanguage, sessions, specs } = options;
+
   // Create mappings of display names and languages for kernel name.
   let displayNames: { [key: string]: string } = Object.create(null);
   let languages: { [key: string]: string } = Object.create(null);
@@ -191,11 +215,18 @@ function populateKernels(node: HTMLSelectElement, specs: IKernel.ISpecModels, ru
     languages[name] = spec.language;
     modes[name] = spec.codemirror_mode;
   }
-  // Handle a preferred kernel language in order of display name.
+
+  // Handle a kernel by name.
   let names: string[] = [];
+  if (preferredKernel && preferredKernel in specs.kernelspecs) {
+    names.push(name);
+  }
+
+  // Handle a preferred kernel language in order of display name.
   if (preferredLanguage) {
     for (let name in specs.kernelspecs) {
-      if (languages[name] === preferredLanguage || modes[name] === preferredLanguage) {
+      if (languages[name] === preferredLanguage ||
+          modes[name] === preferredLanguage) {
         names.push(name);
       }
     }
@@ -236,7 +267,7 @@ function populateKernels(node: HTMLSelectElement, specs: IKernel.ISpecModels, ru
   // Add the sessions using the preferred language first.
   let matchingSessions: ISession.IModel[] = [];
   if (preferredLanguage) {
-    for (let session of running) {
+    for (let session of sessions) {
       if (languages[session.kernel.name] === preferredLanguage) {
         matchingSessions.push(session);
       }
@@ -254,7 +285,7 @@ function populateKernels(node: HTMLSelectElement, specs: IKernel.ISpecModels, ru
   }
   // Add the other remaining sessions.
   let otherSessions: ISession.IModel[] = [];
-  for (let session of running) {
+  for (let session of sessions) {
     if (matchingSessions.indexOf(session) === -1) {
       otherSessions.push(session);
     }
