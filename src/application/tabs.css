@@ -253,7 +253,7 @@
 |----------------------------------------------------------------------------*/
 
 
-#jp-main-dock-panel .p-TabBar-tab.jp-mod-current:before {
+.p-DockPanel-tabPanel > .p-TabBar .p-TabBar-tab.jp-mod-current:before {
   position: absolute;
   top: calc(-1 * var(--jp-border-width));
   left: calc(-1 * var(--jp-border-width));
