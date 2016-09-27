@@ -182,9 +182,7 @@ function init() {
         styles: {'.MathJax_Display': {'margin': 0}},
         linebreaks: { automatic: true }
     },
-  // cast as any until https://github.com/DefinitelyTyped/DefinitelyTyped/pull/11419
-  // makes it into the @types/mathjax repo.
-  } as any);
+  });
   MathJax.Hub.Configured();
 }
 
