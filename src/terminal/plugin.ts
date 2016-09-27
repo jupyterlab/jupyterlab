@@ -73,7 +73,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   let options = {
     background: 'black',
     color: 'white',
-    fontSize: 14
+    fontSize: 13
   };
 
   commands.addCommand(newTerminalId, {
