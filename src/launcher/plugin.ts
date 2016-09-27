@@ -109,7 +109,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
 
   let launcherModel = new LauncherModel();
   let launcherWidget = new LauncherWidget()
-  
+
   launcherWidget.model = launcherModel;
   launcherWidget.id = 'landing-jupyterlab-widget';
   launcherWidget.title.label = 'Launcher2';
@@ -124,27 +124,18 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   }
 
 
-  items.addItem(new LauncherItem("Add Random", () => {
-  
+
+  launcherModel.add("Add Random", () => {
 
       let index = Math.floor(Math.random() * actions.length);
-      console.log("adding random" + index); 
       let itemName = names[index];
       let action = actions[index];
-
-      l = items.addItem(new LauncherItem(itemName, () => app.commands.execute(action, void 0)));
       l = launcherModel.add(itemName, () => app.commands.execute(action, void 0));
-      
-      console.log("added item ")
-                       
-      list.push(l)
-  }));
+  });
 
-  items.addItem(new LauncherItem("Remove Last", () => {
+  launcherModel.add("Remove Last", () => {
       list.pop().dispose();
-      console.log("Removing last")
-  
-  }));
+  });
 
   app.commands.addCommand('jupyterlab-launcher:add-item', {
     label: 'Add Launcher Item',
@@ -189,7 +180,7 @@ class LauncherItem {
 class LauncherItems {
     constructor(public body: HTMLElement){
     }
-   
+
     /**
      * Convenience method to add a launcher with a given name and callback
      *
@@ -199,7 +190,7 @@ class LauncherItems {
     add(name: string, clickCallback: () => void) : IDisposable {
         return this.addItem(new LauncherItem(name, clickCallback));
     }
- 
+
     addItem(item : LauncherItem) : IDisposable {
         console.log('hello, adding ' + name);
 
@@ -220,7 +211,7 @@ class LauncherItems {
         column.addEventListener('click', item.clickCallback);
 
         this.body.appendChild(column);
-      
+
 
         return new DisposableDelegate(() => {
             // remove corresponding DOM element from the body
@@ -269,19 +260,29 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
 
         let column = h.div({
                 className: 'jp-Launcher-column',
-                'onclick': item.clickCallback  
+                'onclick': item.clickCallback
             }, [ img, text])
 
         children.push(column);
 
         }
 
-        return h.div(children);
+        let path = h.span( { className: 'jp-Launcher-path' }, 'home');
+        let folderImage = h.span( { className: 'jp-Launcher-folder' });
+        let cwd = h.div( { className: 'jp-Launcher-cwd' }, [folderImage, path]);
+
+
+
+        let body = h.div({ className: "jp-Launcher-body" }, children);
+
+
+
+        return h.div({ className: 'jp-Launcher-dialog'}, [ cwd, body])
 
 
     }
 //    public dispose(): void {
-//    
+//
 //    }
 
 }
