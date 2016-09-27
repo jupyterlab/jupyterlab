@@ -27,7 +27,7 @@ Create the release
 ------------------
 
 We publish an npm package, a Python source package, and a Python universal binary wheel.  We also publish a conda package on conda-forge (see below).
-See the Python docs on [package uploading](https://packaging.python.org/distributing/#uploading-your-project-to-pypi) 
+See the Python docs on [package uploading](https://packaging.python.org/distributing/#uploading-your-project-to-pypi)
 for twine setup instructions and for why twine is the recommended method.
 
 ```bash
