@@ -71,7 +71,7 @@
 
 
 .jp-FileButtons-button {
-  flex: 0 1 var(--jp-private-filebrowser-button-width);
+  flex: 1 1 auto;
   height: var(--jp-private-filebrowser-button-height);
   line-height: var(--jp-private-filebrowser-button-height);
   color: var(--jp-ui-font-color1);
