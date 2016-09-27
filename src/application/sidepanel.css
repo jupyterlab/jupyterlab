@@ -8,6 +8,10 @@
 |----------------------------------------------------------------------------*/
 
 
+:root {
+  --jp-private-sidebar-tab-width: 32px;
+}
+
 /*-----------------------------------------------------------------------------
 | SideBar
 |----------------------------------------------------------------------------*/
@@ -16,9 +20,9 @@
 .jp-SideBar.p-TabBar {
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color2);
-  font-size: 14px;
-  min-width: 36px;
-  max-width: 36px;
+  font-size: var(--jp-ui-font-size1);
+  min-width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
+  max-width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
   overflow: visible;
   display: block;
 }
@@ -41,7 +45,7 @@
   display: flex;
   align-items: stretch;
   list-style-type: none;
-  height: 35px;
+  height: var(--jp-private-sidebar-tab-width);
   transform-origin: 0 0 0;
 }
 
@@ -67,7 +71,7 @@
 
 
 .jp-SideBar .p-TabBar-tabLabel {
-  line-height: 35px;
+  line-height: var(--jp-private-sidebar-tab-width);
 }
 
 

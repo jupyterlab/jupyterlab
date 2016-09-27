@@ -17,6 +17,11 @@ import {
   ABCWidgetFactory, IDocumentModel, IDocumentContext
 } from '../docregistry';
 
+import {
+  HTML_COMMON_CLASS
+} from '../renderers/widget';
+
+
 import * as d3Dsv from 'd3-dsv';
 
 import {
@@ -64,6 +69,7 @@ class CSVWidget extends Widget {
     this._toolbar.addClass(CSV_TOOLBAR_CLASS);
     this._table = new Widget();
     this._table.addClass(CSV_TABLE_CLASS);
+    this._table.addClass(HTML_COMMON_CLASS);
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(this._toolbar);

@@ -112,7 +112,7 @@ class ApplicationShell extends Widget {
     rightHandler.stackedPanel.id = 'jp-right-stack';
 
     hboxPanel.spacing = 0;
-    dockPanel.spacing = 4;
+    dockPanel.spacing = 5;
     hsplitPanel.spacing = 1;
 
     hboxPanel.direction = 'left-to-right';

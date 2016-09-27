@@ -2,53 +2,89 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-inspector-tab-height: 24px;
+  --jp-private-inspector-tab-width: 60px;
+
+}
+
+/*-----------------------------------------------------------------------------
+| Inspector
+|----------------------------------------------------------------------------*/
+
+.jp-Inspector .p-TabPanel-stackedPanel {
+  border: none;
+}
+
+
+/* default inspector items: hints */
+.jp-InspectorItem.jp-HintsInspectorItem,
+.jp-InspectorItem.jp-HintsInspectorItem .p-Widget {
+  background: var(--jp-layout-color1);
+}
+
+
+.jp-InspectorItem.jp-HintsInspectorItem .jp-Toolbar {
+  display: none;
+}
+
+
+/* default inspector items: details */
+.jp-InspectorItem.jp-DetailsInspectorItem .p-Widget {
+  background: var(--jp-layout-color1);
+}
+
+
+/*-----------------------------------------------------------------------------
+| Inspector tabs
+|----------------------------------------------------------------------------*/
+
 .jp-Inspector .p-TabBar {
   min-width: 300px;
-  min-height: 24px;
+  min-height: var(--jp-private-inspector-tab-height);
   color: var(--jp-ui-font-color1);
-  font-size: 13px;
+  font-size: var(--jp-ui-font-size1);
 }
 
 
-.jp-Inspector .p-TabBar-content {
-  min-width: 0;
-  padding-right: 1px;
+.jp-Inspector .p-TabBar .p-TabBar-tab {
+  flex-basis: var(--jp-private-inspector-tab-width);
+  min-height: var(--jp-private-inspector-tab-height);
+  min-width: var(--jp-private-inspector-tab-width);
+  padding: 0px 8px;
+  background: var(--jp-layout-color1);
+  border: none;
+  transform: none;
+  margin-right: 0px;
+  line-height: var(--jp-private-inspector-tab-height);
 }
 
 
-.jp-Inspector .p-TabBar-tab {
-  flex-basis: 144px;
-  min-height: 23px;
-  min-width: 35px;
-  padding: 0px 7px;
-  background: #EEEEEE;
-  border: var(--jp-border-width) solid var(--jp-border-color1);
-  transform: translateY(-1px);
-  border-bottom: none;
-  margin-right: -1px;
-}
-
-
-.jp-Inspector .p-TabBar-tab.p-mod-current {
-  min-height: 24px;
-  background: #FFFFFF;
-  border-top: var(--jp-border-width) solid var(--jp-brand-color1);
+.jp-Inspector .p-TabBar .p-TabBar-tab.p-mod-current {
+  min-height: var(--jp-private-inspector-tab-height);
+  color: var(--jp-ui-font-color0);
+  transform: none;
+  background: var(--jp-layout-color2);
 }
 
 
 .jp-Inspector .p-TabBar-tab:hover:not(.p-mod-current) {
-  background: #FAFAFA;
+  background: var(--jp-ui-layout-color1);
 }
 
 
-.jp-Inspector .p-TabBar-tabIcon,
-.jp-Inspector .p-TabBar-tabText {
-  line-height: 24px;
-}
+/*-----------------------------------------------------------------------------
+| InspectorItem
+|----------------------------------------------------------------------------*/
 
 
 .jp-InspectorItem {
-  border: var(--jp-border-width) solid var(--jp-border-color2);
+  border: none;
 }
 
 
@@ -63,6 +99,7 @@
 .jp-InspectorItem-content {
   height: calc(100% - 24px); /* Subtract the height of the toolbar. */
   overflow: auto;
+  padding: 4px;
 }
 
 
@@ -104,9 +141,9 @@
 
 
 .jp-InspectorItem pre {
-  font-size: 11px;
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
   margin: 0;
-  padding: 2px;
   white-space: pre-wrap;
 }
 
@@ -206,16 +243,3 @@
 
 
 .jp-InspectorItem pre .ansi-bright-white-bg { background-color: #FFFFFF; }
-
-
-/* default inspector items: hints */
-.jp-InspectorItem.jp-HintsInspectorItem,
-.jp-InspectorItem.jp-HintsInspectorItem .p-Widget {
-  background: #FFFFCA;
-}
-
-
-/* default inspector items: details */
-.jp-InspectorItem.jp-DetailsInspectorItem .p-Widget {
-  background: #FFFFFF;
-}

@@ -2,47 +2,90 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-commandpalette-search-height: 32px;
+}
+
+/*-----------------------------------------------------------------------------
+| Overall styles
+|----------------------------------------------------------------------------*/
+
+
 .p-CommandPalette {
   padding-bottom: 0px;
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
 }
 
+/*-----------------------------------------------------------------------------
+| Search
+|----------------------------------------------------------------------------*/
+
 
 .p-CommandPalette-search {
-  border-bottom: solid 2px var(--jp-border-color2);
+  height: var(--jp-private-commandpalette-search-height);
 }
 
-
 .p-CommandPalette-wrapper {
-  background: var(--jp-layout-color2);
+  background: var(--jp-brand-color1);
   overflow: overlay;
-  padding: 12px 8px;
+  padding: 0px 8px;
 }
 
 
 .p-CommandPalette-wrapper::after {
-    font-family: FontAwesome;
-    content: "\f002"; /* search */
-    color: var(--jp-brand-color1);
+  font-family: FontAwesome;
+  content: "\f002"; /* search */
+  color: var(--jp-inverse-ui-font-color0);
+  font-size: var(--jp-ui-icon-font-size);
+  line-height: var(--jp-private-commandpalette-search-height);
 }
 
 .p-CommandPalette-input {
-  background: var(--jp-layout-color2);
+  background: transparent;
   width: calc(100% - 18px);
   float: left;
   border: none;
   outline: none;
-  font-size: var(--jp-ui-font-size2);
-  color: var(--jp-ui-font-color1);
-  padding: 0;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-inverse-ui-font-color0);
+  line-height: var(--jp-private-commandpalette-search-height);
 }
+
+
+.p-CommandPalette-input::-webkit-input-placeholder {
+  color: var(--jp-inverse-ui-font-color0);
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+.p-CommandPalette-input::-moz-placeholder {
+  color: var(--jp-inverse-ui-font-color0);
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+.p-CommandPalette-input:-ms-input-placeholder {
+  color: var(--jp-inverse-ui-font-color0);
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+/*-----------------------------------------------------------------------------
+| Results
+|----------------------------------------------------------------------------*/
 
 
 .p-CommandPalette-header {
   padding: 10px 0 4px 8px;
   color: var(--jp-ui-font-color1);
-  font-size: 12px;
+  font-size: var(--jp-ui-font-size0);
   font-weight: 600;
   cursor: pointer;
   text-transform: uppercase;
@@ -52,7 +95,7 @@
 
 
 .p-CommandPalette-header.p-mod-active {
-  background: #e0e0e0;
+  background: var(--jp-layout-color2);
 }
 
 
@@ -72,7 +115,7 @@
 .p-CommandPalette-item {
   padding: 4px 8px;
   color: var(--jp-ui-font-color1);
-  font-size: 13px;
+  font-size: var(--jp-ui-font-size1);
   font-weight: 500;
 }
 
@@ -104,7 +147,5 @@
 
 
 .p-CommandPalette-itemCaption {
-  color: #9E9E9E;
-  font-size: 11px;
-  font-weight: 400;
+  display: none;
 }
