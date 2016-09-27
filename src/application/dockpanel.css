@@ -20,10 +20,6 @@
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-.p-DockPanel-tabPanel {
-  padding-bottom: 2px;
-  padding-right: 2px;
-}
 
 .p-DockPanel-overlay {
   background: rgba(33, 150, 243, 0.1);
@@ -44,5 +40,5 @@
 
 
 #jp-main-dock-panel {
-  padding: 4px;
+  padding: 5px;
 }
