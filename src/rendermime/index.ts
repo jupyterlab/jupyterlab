@@ -100,18 +100,20 @@ class RenderMime {
    * trusted (see [[preferredMimetype]]), and then pass a sanitizer to the
    * renderer if the output should be sanitized.
    */
-  render(bundle: RenderMime.MimeMap<string>, trusted=false): Widget {
+  render(options: RenderMime.IRenderOptions<string>): Widget {
+    let { trusted, bundle, injector } = options;
     let mimetype = this.preferredMimetype(bundle, trusted);
     if (!mimetype) {
       return void 0;
     }
-    let options = {
+    let rendererOptions = {
       mimetype,
       source: bundle[mimetype],
+      injector,
       resolver: this._resolver,
       sanitizer: trusted ? null : this._sanitizer
     };
-    return this._renderers[mimetype].render(options);
+    return this._renderers[mimetype].render(rendererOptions);
   }
 
   /**
@@ -264,14 +266,35 @@ namespace RenderMime {
      *
      * @param options - The options used for rendering.
      */
-    render(options: IRenderOptions<string | JSONObject>): Widget;
+    render(options: IRendererOptions<string | JSONObject>): Widget;
+  }
+
+  /**
+   * The options used to render a mime map.
+   */
+  export
+  interface IRenderOptions<T extends string | JSONObject> {
+    /**
+     * The mime bundle to render.
+     */
+    bundle: MimeMap<T>;
+
+    /**
+     * A callback that can be used to add a mimetype to the original bundle.
+     */
+    injector?: (mimetype: string, value: string | JSONObject) => void;
+
+    /**
+     * Whether the mime bundle is trusted (the default is False).
+     */
+    trusted?: boolean;
   }
 
   /**
    * The options used to transform or render mime data.
    */
   export
-  interface IRenderOptions<T extends string | JSONObject> {
+  interface IRendererOptions<T extends string | JSONObject> {
     /**
      * The mimetype.
      */
@@ -281,6 +304,11 @@ namespace RenderMime {
      * The source data.
      */
     source: T;
+
+    /**
+     * A callback that can be used to add a mimetype to the original bundle.
+     */
+    injector?: (mimetype: string, value: string | JSONObject) => void;
 
     /**
      * An optional url resolver.

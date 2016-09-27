@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -339,7 +343,17 @@ class OutputAreaWidget extends Widget {
     let layout = this.layout as PanelLayout;
     let widget = layout.widgets.at(index) as OutputWidget;
     let output = this._model.get(index);
-    widget.render(output, this._trusted);
+    let injector: (mimetype: string, value: string) => void;
+    if (output.output_type === 'display_data' ||
+        output.output_type === 'execute_result') {
+      injector = (mimetype: string, value: string) => {
+        this._model.addMimeData(
+          output as nbformat.IDisplayData, mimetype, value
+        );
+      };
+    }
+    let trusted = this._trusted;
+    widget.render({ output, trusted, injector });
   }
 
   /**
@@ -712,11 +726,11 @@ class OutputWidget extends Widget {
   /**
    * Render an output.
    *
-   * @param output - The kernel output message payload.
-   *
-   * @param trusted - Whether the output is trusted.
+   * @param options - The options used to render the output.
    */
-  render(output: OutputAreaModel.Output, trusted=false): void {
+  render(options: OutputWidget.IRenderOptions): void {
+    let { output, trusted, injector } = options;
+
     // Handle an input request.
     if (output.output_type === 'input_request') {
       let child = new InputWidget(output as OutputAreaModel.IInputRequest);
@@ -740,7 +754,7 @@ class OutputWidget extends Widget {
     }
 
     // Create the output result area.
-    let child = rendermime.render(data, trusted);
+    let child = rendermime.render({ bundle: data, trusted, injector });
     if (!child) {
       console.log(msg);
       console.log(data);
@@ -849,6 +863,34 @@ class OutputWidget extends Widget {
   private _placeholder: Widget = null;
 }
 
+
+/**
+ * The namespace for `OutputWidget` statics.
+ */
+export
+namespace OutputWidget {
+  /**
+   * The options for rendering the output.
+   */
+   export
+   interface IRenderOptions {
+    /**
+     * The kernel output message payload.
+     */
+    output: OutputAreaModel.Output;
+
+    /**
+     * Whether the output is trusted.
+     */
+    trusted: boolean;
+
+    /**
+     * A callback that can be used to add a mimetype to the original bundle.
+     */
+    injector?: (mimetype: string, value: string) => void;
+   }
+
+}
 
 /**
  * A widget that handles stdin requests from the kernel.

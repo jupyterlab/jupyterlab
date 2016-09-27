@@ -398,7 +398,7 @@ describe('notebook/output-area/widget', () => {
 
       it('should clear the current output', () => {
         let widget = new OutputWidget({ rendermime });
-        widget.render(DEFAULT_OUTPUTS[0], true);
+        widget.render({ output: DEFAULT_OUTPUTS[0], trusted: true });
         let output = widget.output;
         widget.clear();
         expect(widget.output).to.not.be(output);
@@ -413,7 +413,7 @@ describe('notebook/output-area/widget', () => {
         let widget = new OutputWidget({ rendermime });
         for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
           let output = DEFAULT_OUTPUTS[i];
-          widget.render(output, true);
+          widget.render({ output, trusted: true });
         }
       });
 
@@ -421,7 +421,7 @@ describe('notebook/output-area/widget', () => {
         let widget = new OutputWidget({ rendermime });
         for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
           let output = DEFAULT_OUTPUTS[i];
-          widget.render(output, false);
+          widget.render({ output, trusted: false });
         }
       });
 

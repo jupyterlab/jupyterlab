@@ -154,6 +154,28 @@ class OutputAreaModel implements IDisposable {
   }
 
   /**
+   * Add a mime type to an output data bundle.
+   *
+   * @param output - The output to augment.
+   *
+   * @param mimetype - The mimetype to add.
+   *
+   * @param value - The value to add.
+   */
+  addMimeData(output: nbformat.IDisplayData | nbformat.IExecuteResult, mimetype: string, value: string): void {
+    let index = this.list.indexOf(output);
+    if (index === -1) {
+      throw new Error(`Cannot add data to non-tracked bundle`);
+    }
+    if (mimetype in output) {
+      console.warn(`Cannot add existing key '${mimetype}' to bundle`);
+      return;
+    }
+    output.data[mimetype] = value;
+    this.list.set(index, output);
+  }
+
+  /**
    * Execute code on a kernel and send outputs to the model.
    */
   execute(code: string, kernel: IKernel): Promise<KernelMessage.IExecuteReplyMsg> {

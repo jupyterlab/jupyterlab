@@ -638,7 +638,8 @@ class MarkdownCellWidget extends BaseCellWidget {
       // Do not re-render if the text has not changed.
       if (text !== this._prev) {
         let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
-        let widget = this._rendermime.render(bundle, this.trusted);
+        let trusted = this.trusted;
+        let widget = this._rendermime.render({ bundle, trusted });
         this._output.content = widget || new Widget();
         this.update();
       } else {
