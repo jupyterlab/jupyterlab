@@ -107,12 +107,12 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       'file-operations:new-text-file',
   ]
 
-  let launcherModel = new LauncherModel();
+  let launcherModel = new LauncherModel(pathTracker);
   let launcherWidget = new LauncherWidget()
 
   launcherWidget.model = launcherModel;
   launcherWidget.id = 'landing-jupyterlab-widget';
-  launcherWidget.title.label = 'Launcher2';
+  launcherWidget.title.label = 'Launcher';
 
   for (let i in names) {
       let itemName = names[i];
@@ -131,10 +131,16 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       let itemName = names[index];
       let action = actions[index];
       l = launcherModel.add(itemName, () => app.commands.execute(action, void 0));
+      list.push(l);
   });
 
   launcherModel.add("Remove Last", () => {
       list.pop().dispose();
+  });
+
+
+  pathTracker.pathChanged.connect(() => {
+      launcherModel.stateChanged.emit(void 0);
   });
 
   app.commands.addCommand('jupyterlab-launcher:add-item', {
@@ -223,6 +229,9 @@ class LauncherItems {
 
 class LauncherModel  extends VDomModel {
     items : LauncherItem[] = [];
+    constructor(public pathTracker : IPathTracker) {
+        super()
+    }
     add(name: string, clickCallback: () => void) : IDisposable {
 
         let item = new LauncherItem(name, clickCallback);
@@ -267,9 +276,12 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
 
         }
 
-        let path = h.span( { className: 'jp-Launcher-path' }, 'home');
+        let p = this.model.pathTracker.path
+        let pathName = p.length ? 'home > ' + p.replace('/', ' > ') : 'home'
+        let path = h.span( { className: 'jp-Launcher-path' }, pathName );
         let folderImage = h.span( { className: 'jp-Launcher-folder' });
         let cwd = h.div( { className: 'jp-Launcher-cwd' }, [folderImage, path]);
+
 
 
 
