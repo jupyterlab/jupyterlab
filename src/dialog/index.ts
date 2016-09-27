@@ -202,6 +202,13 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
         resolve(cancelButton);
       }
     }, true);
+    dialog.addEventListener('keydown', evt => {
+      // Check for enter key
+      if (evt.keyCode === 13) {
+        host.removeChild(dialog);
+        resolve(okButton);
+      }
+    }, true);
     dialog.addEventListener('contextmenu', evt => {
       evt.preventDefault();
       evt.stopPropagation();
