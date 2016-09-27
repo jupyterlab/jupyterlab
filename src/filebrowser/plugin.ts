@@ -111,17 +111,22 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 
   let category = 'File Operations';
   let creators = registry.listCreators();
-  let creatorCmds: string[] = [];
-  for (let creator of creators) {
-    let command = `file-operations:new-${creator.name}`;
-    creatorCmds.push(command);
-    commands.addCommand(command, {
+  let creatorCmds: { [key: string]: DisposableSet } = Object.create(null);
+
+  let addCreator = (name: string) => {
+    let disposables = creatorCmds[name] = new DisposableSet();
+    let command = `file-operations:new-${name}`;
+    disposables.add(commands.addCommand(command, {
       execute: () => {
-        fbWidget.createFrom(creator.name);
+        fbWidget.createFrom(name);
       },
-      label: `New ${creator.name}`
-    });
-    palette.addItem({ command, category });
+      label: `New ${name}`
+    }));
+    disposables.add(palette.addItem({ command, category }));
+  };
+
+  for (let creator of creators) {
+    addCreator(creator.name);
   }
 
   // Add a context menu to the dir listing.
@@ -165,7 +170,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     cmdIds.closeAllFiles,
   ].forEach(command => palette.addItem({ command, category }));
 
-  let menu = createMenu(app, creatorCmds);
+  let menu = createMenu(app, Object.keys(creatorCmds));
   mainMenu.addMenu(menu, {rank: 1});
 
   fbWidget.title.label = 'Files';
@@ -175,18 +180,16 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 
   // Handle fileCreator items as they are added.
   registry.changed.connect((sender, args) => {
-    if (args.type === 'fileCreator' && args.change === 'added') {
+    if (args.type === 'fileCreator') {
       menu.dispose();
-      let command = `file-operations:new-${args.name}`;
-      creatorCmds.push(command);
-      commands.addCommand(command, {
-        execute: () => {
-          fbWidget.createFrom(args.name);
-        },
-        label: `New ${args.name}`
-      });
-      palette.addItem({ command, category });
-      menu = createMenu(app, creatorCmds);
+      let name = args.name;
+      if (args.change === 'added') {
+        addCreator(name);
+      } else {
+        creatorCmds[name].dispose();
+        delete creatorCmds[name];
+      }
+      menu = createMenu(app, Object.keys(creatorCmds));
       mainMenu.addMenu(menu, {rank: 1});
     }
   });
@@ -289,7 +292,9 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
   let { commands, keymap } = app;
   let menu = new Menu({ commands, keymap });
   menu.title.label = 'File';
-  creatorCmds.forEach(command => { menu.addItem({ command }); });
+  creatorCmds.forEach(name => {
+    menu.addItem({ command: `file-operations:new-${name}` });
+  });
   [
     cmdIds.save,
     cmdIds.restoreCheckpoint,

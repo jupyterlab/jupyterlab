@@ -208,7 +208,11 @@ class OpenWithHandler extends Widget {
     let preference = this._manager.registry.getKernelPreference(
       this._ext, widgetName
     );
-    Private.updateKernels(preference, this.kernelDropdownNode, this._manager.kernelspecs, this._sessions);
+    let specs = this._manager.kernelspecs;
+    let sessions = this._sessions;
+    Private.updateKernels(this.kernelDropdownNode,
+      { preference, specs, sessions }
+    );
   }
 
   private _ext = '';
@@ -287,6 +291,7 @@ class CreateFromHandler extends Widget {
           return widget;
         });
       }
+      return null;
     });
   }
 
@@ -313,7 +318,12 @@ class CreateFromHandler extends Widget {
     // Handle the kernel preferences.
     let preference = registry.getKernelPreference(ext, widgetName);
     if (preference.canStartKernel) {
-      Private.updateKernels(preference, this.kernelDropdownNode, this._manager.kernelspecs, this._sessions, kernelName);
+      let specs = this._manager.kernelspecs;
+      let sessions = this._sessions;
+      let preferredKernel = kernelName;
+      Private.updateKernels(this.kernelDropdownNode,
+        { specs, sessions, preferredKernel, preference }
+      );
     } else {
       this.node.removeChild(this.kernelDropdownNode);
     }
@@ -340,7 +350,7 @@ class CreateFromHandler extends Widget {
     if (path !== this._orig) {
       return renameFile(this._model, this._orig, path).then(value => {
         if (!value) {
-          return;
+          return null;
         }
         return this._manager.createNew(path, widgetName, kernelId);
       });
@@ -538,7 +548,11 @@ class CreateNewHandler extends Widget {
     let ext = this.ext;
     let widgetName = this.widgetDropdown.value;
     let preference = this._manager.registry.getKernelPreference(ext, widgetName);
-    Private.updateKernels(preference, this.kernelDropdownNode, this._manager.kernelspecs, this._sessions);
+    let specs = this._manager.kernelspecs;
+    let sessions = this._sessions;
+    Private.updateKernels(this.kernelDropdownNode,
+      { preference, sessions, specs }
+    );
   }
 
   private _model: FileBrowserModel = null;
@@ -603,7 +617,8 @@ namespace Private {
    * Update a kernel listing based on a kernel preference.
    */
   export
-  function updateKernels(preference: IKernelPreference, node: HTMLSelectElement, specs: IKernel.ISpecModels, sessions: ISession.IModel[], preferredKernel?: string): void {
+  function updateKernels(node: HTMLSelectElement, options: IKernelOptions): void {
+    let { preference, specs, sessions, preferredKernel } = options;
     if (!preference.canStartKernel) {
       while (node.firstChild) {
         node.removeChild(node.firstChild);
@@ -620,5 +635,31 @@ namespace Private {
     if (!preference.preferKernel) {
       node.value = 'null';
     }
+  }
+
+  /**
+   * The options for updating kernels.
+   */
+  export
+  interface IKernelOptions {
+    /**
+     * The kernel preference.
+     */
+    preference: IKernelPreference;
+
+    /**
+     * The kernel specs.
+     */
+    specs: IKernel.ISpecModels;
+
+    /**
+     * The running sessions.
+     */
+    sessions: ISession.IModel[];
+
+    /**
+     * The preferred kernel name.
+     */
+    preferredKernel?: string;
   }
 }
