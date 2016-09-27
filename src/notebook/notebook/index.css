@@ -5,10 +5,10 @@
 
 
 .jp-Notebook {
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 10px;
-  padding-bottom: 40px;
+  padding-left: var(--jp-private-notebook-padding);
+  padding-right: var(--jp-private-notebook-padding);
+  padding-top: var(--jp-private-notebook-padding);
+  padding-bottom: calc(4*var(--jp-private-notebook-padding));
   min-width: 50px;
   min-height: 50px;
   outline: none;
