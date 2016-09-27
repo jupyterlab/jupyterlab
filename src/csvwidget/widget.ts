@@ -130,13 +130,13 @@ class CSVWidget extends Widget {
   renderTable(content: string, delimiter: string) {
     let parsed = d3Dsv.dsvFormat(delimiter).parse(content);
     let table = document.createElement('table');
-    let header = document.createElement('tr');
+    let header = document.createElement('thead');
+    let body = document.createElement('tbody');
     for (let name of parsed.columns) {
       let th = document.createElement('th');
       th.textContent = name;
       header.appendChild(th);
     }
-    table.appendChild(header);
     for (let row of parsed) {
       let tr = document.createElement('tr');
       for (let col of parsed.columns) {
@@ -144,8 +144,10 @@ class CSVWidget extends Widget {
         td.textContent = row[col]
         tr.appendChild(td);
       }
-      table.appendChild(tr);
+      body.appendChild(tr);
     }
+    table.appendChild(header);
+    table.appendChild(body);
     this._table.node.textContent = '';
     this._table.node.appendChild(table);
   }
