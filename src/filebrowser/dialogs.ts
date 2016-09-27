@@ -44,7 +44,7 @@ export
 function createFromDialog(model: FileBrowserModel, manager: DocumentManager, creatorName: string): Promise<Widget> {
   let handler = new CreateFromHandler(model, manager, creatorName);
   return handler.populate().then(() => {
-    return handler.show();
+    return handler.showDialog();
   });
 }
 
@@ -114,6 +114,8 @@ function renameFile(model: FileBrowserModel, oldPath: string, newPath: string): 
           });
         }
       });
+    } else {
+      throw error;
     }
   });
 }
@@ -132,7 +134,7 @@ class OpenWithHandler extends Widget {
     this._host = host;
     this._sessions = sessions;
 
-    this.input.textContent = path;
+    this.inputNode.textContent = path;
     this._ext = path.split('.').pop();
 
     this.populateFactories();
@@ -152,7 +154,7 @@ class OpenWithHandler extends Widget {
   /**
    * Get the input text node.
    */
-  get input(): HTMLElement {
+  get inputNode(): HTMLElement {
     return this.node.firstChild as HTMLElement;
   }
 
@@ -166,7 +168,7 @@ class OpenWithHandler extends Widget {
   /**
    * Get the kernel dropdown node.
    */
-  get kernelDropdown(): HTMLSelectElement {
+  get kernelDropdownNode(): HTMLSelectElement {
     return this.node.children[2] as HTMLSelectElement;
   }
 
@@ -174,9 +176,9 @@ class OpenWithHandler extends Widget {
    * Open the file and return the document widget.
    */
   open(): Widget {
-    let path = this.input.textContent;
+    let path = this.inputNode.textContent;
     let widgetName = this.widgetDropdown.value;
-    let kernelValue = this.kernelDropdown.value;
+    let kernelValue = this.kernelDropdownNode.value;
     let kernelId: IKernel.IModel;
     if (kernelValue !== 'null') {
       kernelId = JSON.parse(kernelValue) as IKernel.IModel;
@@ -206,7 +208,7 @@ class OpenWithHandler extends Widget {
     let preference = this._manager.registry.getKernelPreference(
       this._ext, widgetName
     );
-    Private.updateKernels(preference, this.kernelDropdown, this._manager.kernelspecs, this._sessions);
+    Private.updateKernels(preference, this.kernelDropdownNode, this._manager.kernelspecs, this._sessions);
   }
 
   private _ext = '';
@@ -230,9 +232,9 @@ class CreateFromHandler extends Widget {
     this._manager = manager;
     this._creatorName = creatorName;
 
-    // Check for name conflicts when the input changes.
-    this.input.addEventListener('input', () => {
-      let value = this.input.value;
+    // Check for name conflicts when the inputNode changes.
+    this.inputNode.addEventListener('input', () => {
+      let value = this.inputNode.value;
       if (value !== this._orig) {
         for (let item of this._model.items) {
           if (item.name === value) {
@@ -257,21 +259,21 @@ class CreateFromHandler extends Widget {
   /**
    * Get the input text node.
    */
-  get input(): HTMLInputElement {
+  get inputNode(): HTMLInputElement {
     return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
   }
 
   /**
    * Get the kernel dropdown node.
    */
-  get kernelDropdown(): HTMLSelectElement {
+  get kernelDropdownNode(): HTMLSelectElement {
     return this.node.getElementsByTagName('select')[0] as HTMLSelectElement;
   }
 
   /**
    * Show the createNew dialog.
    */
-  show(): Promise<Widget> {
+  showDialog(): Promise<Widget> {
     return showDialog({
       title: `Create New ${this._creatorName}`,
       body: this.node,
@@ -280,7 +282,7 @@ class CreateFromHandler extends Widget {
       if (result.text === 'CREATE') {
         return this._open().then(widget => {
           if (!widget) {
-            return this.show();
+            return this.showDialog();
           }
           return widget;
         });
@@ -311,16 +313,16 @@ class CreateFromHandler extends Widget {
     // Handle the kernel preferences.
     let preference = registry.getKernelPreference(ext, widgetName);
     if (preference.canStartKernel) {
-      Private.updateKernels(preference, this.kernelDropdown, this._manager.kernelspecs, this._sessions, kernelName);
+      Private.updateKernels(preference, this.kernelDropdownNode, this._manager.kernelspecs, this._sessions, kernelName);
     } else {
-      this.node.removeChild(this.kernelDropdown);
+      this.node.removeChild(this.kernelDropdownNode);
     }
 
     return manager.listSessions().then(sessions => {
       this._sessions = sessions;
       return model.newUntitled({ ext, type });
     }).then(contents => {
-      this.input.value = this._orig = contents.name;
+      this.inputNode.value = this._orig = contents.name;
     });
   }
 
@@ -328,9 +330,9 @@ class CreateFromHandler extends Widget {
    * Open the file and return the document widget.
    */
   private _open(): Promise<Widget> {
-    let path = this.input.value;
+    let path = this.inputNode.value;
     let widgetName = this._widgetName;
-    let kernelValue = this.kernelDropdown ? this.kernelDropdown.value : 'null';
+    let kernelValue = this.kernelDropdownNode ? this.kernelDropdownNode.value : 'null';
     let kernelId: IKernel.IModel;
     if (kernelValue !== 'null') {
       kernelId = JSON.parse(kernelValue) as IKernel.IModel;
@@ -373,11 +375,11 @@ class CreateNewHandler extends Widget {
     time.setMinutes(time.getMinutes() - time.getTimezoneOffset());
     let name = time.toJSON().slice(0, 10);
     name += '-' + time.getHours() + time.getMinutes() + time.getSeconds();
-    this.input.value = name + '.txt';
+    this.inputNode.value = name + '.txt';
 
-    // Check for name conflicts when the input changes.
-    this.input.addEventListener('input', () => {
-      this.inputChanged();
+    // Check for name conflicts when the inputNode changes.
+    this.inputNode.addEventListener('input', () => {
+      this.inputNodeChanged();
     });
     // Update the widget choices when the file type changes.
     this.fileTypeDropdown.addEventListener('change', () => {
@@ -405,7 +407,7 @@ class CreateNewHandler extends Widget {
   /**
    * Get the input text node.
    */
-  get input(): HTMLInputElement {
+  get inputNode(): HTMLInputElement {
     return this.node.firstChild as HTMLInputElement;
   }
 
@@ -426,7 +428,7 @@ class CreateNewHandler extends Widget {
   /**
    * Get the kernel dropdown node.
    */
-  get kernelDropdown(): HTMLSelectElement {
+  get kernelDropdownNode(): HTMLSelectElement {
     return this.node.children[3] as HTMLSelectElement;
   }
 
@@ -434,16 +436,16 @@ class CreateNewHandler extends Widget {
    * Get the current extension for the file.
    */
   get ext(): string {
-    return this.input.value.split('.').pop();
+    return this.inputNode.value.split('.').pop();
   }
 
   /**
    * Open the file and return the document widget.
    */
   open(): Widget {
-    let path = this.input.textContent;
+    let path = this.inputNode.textContent;
     let widgetName = this.widgetDropdown.value;
-    let kernelValue = this.kernelDropdown.value;
+    let kernelValue = this.kernelDropdownNode.value;
     let kernelId: IKernel.IModel;
     if (kernelValue !== 'null') {
       kernelId = JSON.parse(kernelValue) as IKernel.IModel;
@@ -452,10 +454,10 @@ class CreateNewHandler extends Widget {
   }
 
   /**
-   * Handle a change to the input.
+   * Handle a change to the inputNode.
    */
-  protected inputChanged(): void {
-    let path = this.input.value;
+  protected inputNodeChanged(): void {
+    let path = this.inputNode.value;
     for (let item of this._model.items) {
       if (item.path === path) {
         this.addClass(FILE_CONFLICT_CLASS);
@@ -518,15 +520,15 @@ class CreateNewHandler extends Widget {
    * Handle changes to the file type dropdown.
    */
   protected fileTypeChanged(): void {
-    // Update the current input.
+    // Update the current inputNode.
     let oldExt = this.ext;
     let newExt = this.fileTypeDropdown.value;
     if (oldExt === newExt || newExt === '') {
       return;
     }
-    let oldName = this.input.value;
+    let oldName = this.inputNode.value;
     let base = oldName.slice(0, oldName.length - oldExt.length - 1);
-    this.input.value = base + newExt;
+    this.inputNode.value = base + newExt;
   }
 
   /**
@@ -536,7 +538,7 @@ class CreateNewHandler extends Widget {
     let ext = this.ext;
     let widgetName = this.widgetDropdown.value;
     let preference = this._manager.registry.getKernelPreference(ext, widgetName);
-    Private.updateKernels(preference, this.kernelDropdown, this._manager.kernelspecs, this._sessions);
+    Private.updateKernels(preference, this.kernelDropdownNode, this._manager.kernelspecs, this._sessions);
   }
 
   private _model: FileBrowserModel = null;
@@ -560,10 +562,10 @@ namespace Private {
     let body = document.createElement('div');
     let name = document.createElement('span');
     let widgetDropdown = document.createElement('select');
-    let kernelDropdown = document.createElement('select');
+    let kernelDropdownNode = document.createElement('select');
     body.appendChild(name);
     body.appendChild(widgetDropdown);
-    body.appendChild(kernelDropdown);
+    body.appendChild(kernelDropdownNode);
     return body;
   }
 
@@ -576,11 +578,11 @@ namespace Private {
     let name = document.createElement('input');
     let fileTypeDropdown = document.createElement('select');
     let widgetDropdown = document.createElement('select');
-    let kernelDropdown = document.createElement('select');
+    let kernelDropdownNode = document.createElement('select');
     body.appendChild(name);
     body.appendChild(fileTypeDropdown);
     body.appendChild(widgetDropdown);
-    body.appendChild(kernelDropdown);
+    body.appendChild(kernelDropdownNode);
     return body;
   }
 
@@ -591,9 +593,9 @@ namespace Private {
   function createCreateFromNode(): HTMLElement {
     let body = document.createElement('div');
     let name = document.createElement('input');
-    let kernelDropdown = document.createElement('select');
+    let kernelDropdownNode = document.createElement('select');
     body.appendChild(name);
-    body.appendChild(kernelDropdown);
+    body.appendChild(kernelDropdownNode);
     return body;
   }
 

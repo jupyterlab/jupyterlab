@@ -162,9 +162,7 @@ class FileButtons extends Widget {
    */
   createFrom(creatorName: string): Promise<Widget> {
     return createFromDialog(this.model, this.manager, creatorName).then(widget => {
-      if (widget) {
-        return this._open(widget);
-      }
+      return widget ? this._open(widget) : null;
     });
   }
 
@@ -191,8 +189,7 @@ class FileButtons extends Widget {
    * Open a widget and attach listeners.
    */
   private _open(widget: Widget): Widget {
-    let opener = this._opener;
-    opener.open(widget);
+    this._opener.open(widget);
     let context = this._manager.contextForWidget(widget);
     context.populated.connect(() => this.model.refresh() );
     context.kernelChanged.connect(() => this.model.refresh() );

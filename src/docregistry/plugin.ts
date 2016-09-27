@@ -29,7 +29,7 @@ const docRegistryProvider: JupyterLabPlugin<IDocumentRegistry> = {
     });
     registry.addCreator({
       name: 'Text File',
-      fileType: 'Text',
+      fileType: 'file',
     });
     return registry;
   }

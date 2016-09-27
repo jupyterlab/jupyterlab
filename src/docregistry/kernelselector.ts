@@ -52,10 +52,10 @@ interface IKernelSelection {
 
 
 /**
- * An interface for populated a kernel selector.
+ * An interface for populating a kernel selector.
  */
 export
-interface IPopulateKernels {
+interface IPopulateOptions {
    /**
     * The Kernel specs.
     */
@@ -195,7 +195,7 @@ function findKernel(kernelName: string, language: string, specs: IKernel.ISpecMo
  * the explicit session information.
  */
 export
-function populateKernels(node: HTMLSelectElement, options: IPopulateKernels): void {
+function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): void {
   // Clear any existing options.
   while (node.firstChild) {
     node.removeChild(node.firstChild);

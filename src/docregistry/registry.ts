@@ -41,7 +41,7 @@ interface IDocumentRegistry extends IDisposable {
   /**
    * A signal emmitted when the registry has changed.
    */
-  readonly changed: ISignal<IDocumentRegistry, DocumentRegistry.IChangedArgs>;
+  readonly changed: ISignal<this, DocumentRegistry.IChangedArgs>;
 
   /**
    * Add a widget factory to the registry.
@@ -229,7 +229,7 @@ class DocumentRegistry implements IDocumentRegistry {
   /**
    * A signal emmitted when the registry has changed.
    */
-  readonly changed: ISignal<IDocumentRegistry, DocumentRegistry.IChangedArgs>;
+  readonly changed: ISignal<this, DocumentRegistry.IChangedArgs>;
 
   /**
    * Get whether the document registry has been disposed.
