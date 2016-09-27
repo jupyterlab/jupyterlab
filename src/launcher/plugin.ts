@@ -51,55 +51,22 @@ const launcherExtension: JupyterLabPlugin<void> = {
 
 
 function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): void {
-  let widget = new Widget();
-  widget.id = 'landing-jupyterlab';
-  widget.title.label = 'Launcher';
-  widget.addClass('jp-Launcher');
+  let launcherModel = new LauncherModel(pathTracker);
+  let launcherWidget = new LauncherWidget()
 
-  let dialog = document.createElement('div');
-  dialog.className = 'jp-Launcher-dialog';
-  widget.node.appendChild(dialog);
+  launcherWidget.model = launcherModel;
+  launcherWidget.id = 'landing-jupyterlab-widget';
+  launcherWidget.title.label = 'Launcher';
+  launcherWidget.addClass('jp-Launcher');
 
-  let path = document.createElement('span');
-  path.textContent = 'home';
-  pathTracker.pathChanged.connect(() => {
-    if (pathTracker.path.length > 0) {
-      path.textContent = 'home > ';
-      let path2 = pathTracker.path;
-      path2 = path2.replace('/', ' > ');
-      path.textContent += path2;
-    } else {
-      path.textContent = 'home';
-    }
-  });
-  path.className = 'jp-Launcher-path';
-
-  let cwd = document.createElement('div');
-  cwd.className = 'jp-Launcher-cwd';
-
-  let folderImage = document.createElement('span');
-  folderImage.className = 'jp-Launcher-folder';
-
-
-  cwd.appendChild(folderImage);
-  cwd.appendChild(path);
-  dialog.appendChild(cwd);
-
-  let body = document.createElement('div');
-  body.className = 'jp-Launcher-body';
-  dialog.appendChild(body);
-
-  let items = new LauncherItems(body);
-
-  let list : IDisposable[] = []; //DEMO ONLY
-  let l : IDisposable; //DEMO ONLY
-
+  // hardcoded defaults
   let names = [
       'Notebook',
       'Console',
       'Terminal',
       'Text Editor',
-  ]
+  ];
+
   let actions = [
       'file-operations:new-notebook',
       `console:create-${services.kernelspecs.default}`,
@@ -107,24 +74,17 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       'file-operations:new-text-file',
   ]
 
-  let launcherModel = new LauncherModel(pathTracker);
-  let launcherWidget = new LauncherWidget()
-
-  launcherWidget.model = launcherModel;
-  launcherWidget.id = 'landing-jupyterlab-widget';
-  launcherWidget.title.label = 'Launcher';
+  let list : IDisposable[] = []; //DEMO
+  let l : IDisposable; //DEMO
 
   for (let i in names) {
       let itemName = names[i];
       let action = actions[i];
-      let l = items.add(itemName, () => app.commands.execute(action, void 0));
       l = launcherModel.add(itemName, () => app.commands.execute(action, void 0));
-      list.push(l)
-
+      list.push(l) // DEMO
   }
 
-
-
+  // DEMO
   launcherModel.add("Add Random", () => {
 
       let index = Math.floor(Math.random() * actions.length);
@@ -137,31 +97,26 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   launcherModel.add("Remove Last", () => {
       list.pop().dispose();
   });
+  //  end DEMO
 
 
-  pathTracker.pathChanged.connect(() => {
-      launcherModel.stateChanged.emit(void 0);
-  });
 
   app.commands.addCommand('jupyterlab-launcher:add-item', {
     label: 'Add Launcher Item',
-    execute: () => {
-        items.addItem(new LauncherItem("Add Random", () => {
-          console.log("plus one");
-        }));
+    execute: args => {
+        // I'm not sure how to handle this -pi
+       // launcherModel.add(args['name'] as string, args['clickCallback']);
     }
-
   });
 
 
   app.commands.addCommand('jupyterlab-launcher:show', {
     label: 'Show Launcher',
     execute: () => {
-      if (!widget.isAttached) {
-        app.shell.addToLeftArea(widget);
-        // XXX: switch this out to be the LauncherWidget
+      if (!launcherWidget.isAttached) {
+        app.shell.addToLeftArea(launcherWidget);
       } else {
-          app.shell.activateMain(widget.id);
+          app.shell.activateMain(launcherWidget.id);
       }
     }
   });
@@ -171,7 +126,6 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
     category: 'Help'
   });
 
-  app.shell.addToLeftArea(widget);
   app.shell.addToLeftArea(launcherWidget);
 }
 
@@ -179,12 +133,23 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
 class LauncherItem {
     constructor(public name: string, public clickCallback: () => void) {
     }
-
 }
 
 
-class LauncherItems {
-    constructor(public body: HTMLElement){
+/**
+ * LauncherModel keeps track of the path to working directory and has a list of
+ * LauncherItems.
+ *
+ */
+class LauncherModel  extends VDomModel {
+    items : LauncherItem[] = [];
+    constructor(public pathTracker : IPathTracker) {
+        super();
+
+        // ensure we re-render on changes to the working directory
+        pathTracker.pathChanged.connect(() => {
+            this.stateChanged.emit(void 0);
+        });
     }
 
     /**
@@ -197,61 +162,25 @@ class LauncherItems {
         return this.addItem(new LauncherItem(name, clickCallback));
     }
 
-    addItem(item : LauncherItem) : IDisposable {
-        console.log('hello, adding ' + name);
-
-        let column = document.createElement('div');
-        column.className = 'jp-Launcher-column';
-
-        let img = document.createElement('span');
-        let imgName = item.name.replace(' ', '');
-        img.className = `jp-Image${imgName} jp-Launcher-image`;
-
-        column.appendChild(img);
-
-        let text = document.createElement('span');
-        text.textContent = item.name;
-        text.className = 'jp-Launcher-text';
-        column.appendChild(text);
-
-        column.addEventListener('click', item.clickCallback);
-
-        this.body.appendChild(column);
-
-
-        return new DisposableDelegate(() => {
-            // remove corresponding DOM element from the body
-            this.body.removeChild(column);
-
-        });
-    }
-}
-
-class LauncherModel  extends VDomModel {
-    items : LauncherItem[] = [];
-    constructor(public pathTracker : IPathTracker) {
-        super()
-    }
-    add(name: string, clickCallback: () => void) : IDisposable {
-
-        let item = new LauncherItem(name, clickCallback);
+    /**
+     * Add a new launcher and trigger re-render event for parent widget
+     *
+     * returns a Disposable which can be called to remove this new item from
+     * the Launcher and trigger another re-render event.
+     */
+    addItem(item: LauncherItem) : IDisposable {
         this.items.push(item);
         this.stateChanged.emit(void 0);
 
         return new DisposableDelegate(() => {
             // remove the item form the list of items
-            console.log("dispose was called")
             var index = this.items.indexOf(item, 0);
             if (index > -1) {
                 this.items.splice(index, 1);
                 this.stateChanged.emit(void 0);
             }
-
         });
-
-
     }
-
 }
 
 class LauncherWidget extends VDomWidget<LauncherModel> {
@@ -259,42 +188,27 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
     protected render(): VNode | VNode[] {
         let children : VNode[] = [];
 
-        // grab data from the model
         for (let item of this.model.items) {
+            let imgName = item.name.replace(' ', '');
+            let img = h.span({className: `jp-Image${imgName} jp-Launcher-image`});
+            let text = h.span({className: 'jp-Launcher-text' }, item.name);
 
-        let imgName = item.name.replace(' ', '');
-        let img = h.span({className: `jp-Image${imgName} jp-Launcher-image`})
-
-        let text = h.span({className: 'jp-Launcher-text' }, item.name)
-
-        let column = h.div({
+            let column = h.div({
                 className: 'jp-Launcher-column',
                 'onclick': item.clickCallback
-            }, [ img, text])
-
-        children.push(column);
-
+            }, [img, text])
+            children.push(column);
         }
 
-        let p = this.model.pathTracker.path
-        let pathName = p.length ? 'home > ' + p.replace('/', ' > ') : 'home'
-        let path = h.span( { className: 'jp-Launcher-path' }, pathName );
-        let folderImage = h.span( { className: 'jp-Launcher-folder' });
-        let cwd = h.div( { className: 'jp-Launcher-cwd' }, [folderImage, path]);
+        let folderImage = h.span({ className: 'jp-Launcher-folder' });
+        let p = this.model.pathTracker.path;
+        let pathName = p.length ? 'home > ' + p.replace('/', ' > ') : 'home';
+        let path = h.span({ className: 'jp-Launcher-path' }, pathName );
 
-
-
-
+        let cwd = h.div({ className: 'jp-Launcher-cwd' }, [folderImage, path]);
         let body = h.div({ className: "jp-Launcher-body" }, children);
 
-
-
-        return h.div({ className: 'jp-Launcher-dialog'}, [ cwd, body])
-
+        return h.div({ className: 'jp-Launcher-dialog'}, [ cwd, body ]);
 
     }
-//    public dispose(): void {
-//
-//    }
-
 }
