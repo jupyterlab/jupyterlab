@@ -40,47 +40,47 @@ import {
 
 
 /*
- * The class name added to common rendered HTML. 
+ * The class name added to common rendered HTML.
  */
 const HTML_COMMON_CLASS = 'jp-RenderedHTMLCommon';
 
 /*
- * The class name added to rendered HTML. 
+ * The class name added to rendered HTML.
  */
 const HTML_CLASS = 'jp-RenderedHTML';
 
 /*
- * The class name added to rendered markdown. 
+ * The class name added to rendered markdown.
  */
 const MARKDOWN_CLASS = 'jp-RenderedMarkdown';
 
 /*
- * The class name added to rendered Latex. 
+ * The class name added to rendered Latex.
  */
 const LATEX_CLASS = 'jp-RenderedLatex';
 
 /*
- * The class name added to rendered images. 
+ * The class name added to rendered images.
  */
 const IMAGE_CLASS = 'jp-RenderedImage';
 
 /*
- * The class name added to rendered text. 
+ * The class name added to rendered text.
  */
 const TEXT_CLASS = 'jp-RenderedText';
 
 /*
- * The class name added to rendered javascript. 
+ * The class name added to rendered javascript.
  */
 const JAVASCRIPT_CLASS = 'jp-RenderedJavascript';
 
 /*
- * The class name added to rendered SVG. 
+ * The class name added to rendered SVG.
  */
 const SVG_CLASS = 'jp-RenderedSVG';
 
 /*
- * The class name added to rendered PDF. 
+ * The class name added to rendered PDF.
  */
 const PDF_CLASS = 'jp-RenderedPDF';
 
