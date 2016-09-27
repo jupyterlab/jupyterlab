@@ -291,8 +291,6 @@ function createMenu(app: JupyterLab, tracker: IEditorTracker): Menu {
     args: { theme: name }
   }));
 
-  menu.addItem({ command: 'file-operations:new-text-file' });
-  menu.addItem({ command: 'file-operations:save' });
   menu.addItem({ command: cmdIds.closeAll });
   menu.addItem({ type: 'separator' });
   menu.addItem({ type: 'submenu', menu: settings });

@@ -21,6 +21,16 @@ const docRegistryProvider: JupyterLabPlugin<IDocumentRegistry> = {
     let registry = new DocumentRegistry();
     registry.addModelFactory(new TextModelFactory());
     registry.addModelFactory(new Base64ModelFactory());
+    registry.addFileType({
+      name: 'Text',
+      extension: '.txt',
+      fileType: 'file',
+      fileFormat: 'text'
+    });
+    registry.addCreator({
+      name: 'Text File',
+      fileType: 'Text',
+    });
     return registry;
   }
 };
