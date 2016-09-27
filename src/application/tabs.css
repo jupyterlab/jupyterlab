@@ -126,7 +126,7 @@
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  overflow-y: visible;
+  overflow: visible;
   min-height: calc(var(--jp-private-horizontal-tab-height) + 2*var(--jp-border-width));
 }
 
