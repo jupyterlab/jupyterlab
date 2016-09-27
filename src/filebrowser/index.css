@@ -4,6 +4,22 @@
 |----------------------------------------------------------------------------*/
 
 
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-filebrowser-button-height: 28px;
+  --jp-private-filebrowser-button-width: 48px;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
 .jp-FileBrowser {
   display: flex;
   flex-direction: column;
@@ -34,12 +50,16 @@
   background: var(--jp-brand-color2);
 }
 
+/*-----------------------------------------------------------------------------
+| Buttons
+|----------------------------------------------------------------------------*/
+
 
 .jp-FileButtons {
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;  
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-bottom: none;
 }
 
 
@@ -51,16 +71,14 @@
 
 
 .jp-FileButtons-button {
-  flex: 1 1 auto;
-  max-width: 100px;
-  padding: 4px 6px;
+  flex: 0 1 var(--jp-private-filebrowser-button-width);
+  height: var(--jp-private-filebrowser-button-height);
+  line-height: var(--jp-private-filebrowser-button-height);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   border: none;
   font-size: var(--jp-ui-icon-font-size);
   outline: 0;
-  padding-top: 8px;
-  padding-bottom: 8px;
 }
 
 
@@ -77,8 +95,6 @@
 
 .jp-FileButtons-button:hover {
   background: var(--jp-layout-color2);
-  border-color: var(--jp-border-color2);
-  z-index: 1; /* raise overlapping border */
 }
 
 
@@ -86,13 +102,12 @@
 .jp-FileButtons-button.jp-id-create.jp-mod-active {
   background: var(--jp-layout-color3);
   border-color: var(--jp-border-color3);
-  z-index: 1; /* raise overlapping border */
 }
 
 
-.jp-FileButtons-button.jp-id-upload {
-  margin-left: -1px; /* overlap borders */
-}
+/*-----------------------------------------------------------------------------
+| DirListing
+|----------------------------------------------------------------------------*/
 
 
 .jp-DirListing {
