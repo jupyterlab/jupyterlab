@@ -55,7 +55,7 @@ const INPUT_CLASS = 'jp-InputArea';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
 
-const PROMPT_CLASS = 'jp-InputArea-prompt';
+const PROMPT_CLASS = 'jp-Cell-prompt';
 
 const rendermime = defaultRenderMime();
 
