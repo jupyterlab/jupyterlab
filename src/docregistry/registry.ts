@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
+  ISignal, defineSignal
+} from 'phosphor/lib/core/signaling';
+
+import {
   Token
 } from 'phosphor/lib/core/token';
 
@@ -34,6 +38,11 @@ const IDocumentRegistry = new Token<IDocumentRegistry>('jupyter.services.documen
  */
 export
 interface IDocumentRegistry extends IDisposable {
+  /**
+   * A signal emmitted when the registry has changed.
+   */
+  readonly changed: ISignal<IDocumentRegistry, DocumentRegistry.IChangedArgs>;
+
   /**
    * Add a widget factory to the registry.
    *
@@ -218,6 +227,11 @@ interface IDocumentRegistry extends IDisposable {
 export
 class DocumentRegistry implements IDocumentRegistry {
   /**
+   * A signal emmitted when the registry has changed.
+   */
+  readonly changed: ISignal<IDocumentRegistry, DocumentRegistry.IChangedArgs>;
+
+  /**
    * Get whether the document registry has been disposed.
    */
   get isDisposed(): boolean {
@@ -286,6 +300,11 @@ class DocumentRegistry implements IDocumentRegistry {
       }
       this._widgetFactoryExtensions[ext].add(name);
     }
+    this.changed.emit({
+      type: 'widgetFactory',
+      name,
+      change: 'added'
+    });
     return new DisposableDelegate(() => {
       delete this._widgetFactories[name];
       if (this._defaultWidgetFactory === name) {
@@ -302,6 +321,11 @@ class DocumentRegistry implements IDocumentRegistry {
           delete this._widgetFactoryExtensions[ext];
         }
       }
+      this.changed.emit({
+        type: 'widgetFactory',
+        name,
+        change: 'removed'
+      });
     });
   }
 
@@ -324,8 +348,18 @@ class DocumentRegistry implements IDocumentRegistry {
       return new DisposableDelegate(null);
     }
     this._modelFactories[name] = factory;
+    this.changed.emit({
+      type: 'modelFactory',
+      name,
+      change: 'added'
+    });
     return new DisposableDelegate(() => {
       delete this._modelFactories[name];
+      this.changed.emit({
+        type: 'modelFactory',
+        name,
+        change: 'removed'
+      });
     });
   }
 
@@ -354,9 +388,19 @@ class DocumentRegistry implements IDocumentRegistry {
       return new DisposableDelegate(null);
     }
     this._extenders[widgetName].push(extension);
+    this.changed.emit({
+      type: 'widgetExtension',
+      name: null,
+      change: 'added'
+    });
     return new DisposableDelegate(() => {
       index = this._extenders[widgetName].indexOf(extension);
       this._extenders[widgetName].splice(index, 1);
+      this.changed.emit({
+        type: 'widgetExtension',
+        name: null,
+        change: 'removed'
+      });
     });
   }
 
@@ -382,9 +426,19 @@ class DocumentRegistry implements IDocumentRegistry {
     fileType.extension = Private.normalizeExtension(fileType.extension);
     this._fileTypes.push(fileType);
     this._fileTypes.sort((a, b) => a.name.localeCompare(b.name));
+    this.changed.emit({
+      type: 'fileType',
+      name: fileType.name,
+      change: 'added'
+    });
     return new DisposableDelegate(() => {
       let index = this._fileTypes.indexOf(fileType);
       this._fileTypes.splice(index, 1);
+      this.changed.emit({
+        type: 'fileType',
+        name: fileType.name,
+        change: 'removed'
+      });
     });
   }
 
@@ -424,9 +478,19 @@ class DocumentRegistry implements IDocumentRegistry {
     if (!added) {
       this._creators.push(creator);
     }
+    this.changed.emit({
+      type: 'fileCreator',
+      name: creator.name,
+      change: 'added'
+    });
     return new DisposableDelegate(() => {
       let index = this._creators.indexOf(creator);
       this._creators.splice(index, 1);
+      this.changed.emit({
+        type: 'fileCreator',
+        name: creator.name,
+        change: 'removed'
+      });
     });
   }
 
@@ -645,6 +709,38 @@ class DocumentRegistry implements IDocumentRegistry {
   private _creators: IFileCreator[] = [];
   private _extenders: { [key: string] : IWidgetExtension<Widget, IDocumentModel>[] } = Object.create(null);
 }
+
+
+/**
+ * The namespace for the `DocumentRegistry` class statics.
+ */
+export
+namespace DocumentRegistry {
+  /**
+   * An arguments object for the `changed` signal.
+   */
+  export
+  interface IChangedArgs {
+    /**
+     * The type of the changed item.
+     */
+    type: 'widgetFactory' | 'modelFactory' | 'widgetExtension' | 'fileCreator' | 'fileType';
+
+    /**
+     * The name of the item.
+     */
+    name: string;
+
+    /**
+     * Whether the item was added or removed.
+     */
+    change: 'added' | 'removed';
+  }
+}
+
+
+// Define the signals for the `DocumentRegistry` class.
+defineSignal(DocumentRegistry.prototype, 'changed');
 
 
 /**
