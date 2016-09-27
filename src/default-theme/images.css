@@ -29,11 +29,11 @@
   background-image: url(images/texteditor.svg);
 }
 
-.jp-ImageAddRandom {
+.jp-ImageAddRandom { /* DEMO only */
   background-image: url(images/questionmark.svg);
 }
 
- .jp-QuestionMark {
+.jp-QuestionMark {
   background-image: url(images/questionmark.svg);
 }
 
