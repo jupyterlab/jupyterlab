@@ -5,7 +5,6 @@
 
 @import './cells/index.css';
 @import './codemirror/index.css';
-@import '../completer/index.css';
 @import './notebook/index.css';
 @import './output-area/index.css';
 @import './toolbar.css';
