@@ -53,14 +53,14 @@ import {
 const CELL_CLASS = 'jp-Cell';
 
 /**
+ * The class name added to the prompt area of cell.
+ */
+const PROMPT_CLASS = 'jp-Cell-prompt';
+
+/**
  * The class name added to input area widgets.
  */
 const INPUT_CLASS = 'jp-InputArea';
-
-/**
- * The class name added to the prompt area of cell.
- */
-const PROMPT_CLASS = 'jp-InputArea-prompt';
 
 /**
  * The class name added to the editor area of the cell.
@@ -88,9 +88,14 @@ const CODE_CELL_CLASS = 'jp-CodeCell';
 const MARKDOWN_CELL_CLASS = 'jp-MarkdownCell';
 
 /**
- * The class name added to the rendered markdown widget.
+ * The class name added to rendered markdown output widgets.
  */
-const MARKDOWN_CONTENT_CLASS = 'jp-MarkdownCell-content';
+const MARKDOWN_OUTPUT_CLASS = 'jp-MarkdownOutput';
+
+/**
+ * The class name added to the rendered markdown widget content.
+ */
+const MARKDOWN_CONTENT_CLASS = 'jp-MarkdownOutput-content';
 
 /**
  * The class name added to raw cells.
@@ -589,9 +594,8 @@ class MarkdownCellWidget extends BaseCellWidget {
     // Insist on the Github-flavored markdown mode.
     this.mimetype = 'text/x-ipythongfm';
     this._rendermime = options.rendermime;
-    this._markdownWidget = new Widget();
-    this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
-    (this.layout as PanelLayout).addWidget(this._markdownWidget);
+    this._output = new MarkdownOutput();
+    (this.layout as PanelLayout).addWidget(this._output);
   }
 
   /**
@@ -620,7 +624,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     if (this.isDisposed) {
       return;
     }
-    this._markdownWidget = null;
+    this._output = null;
     super.dispose();
   }
 
@@ -634,19 +638,17 @@ class MarkdownCellWidget extends BaseCellWidget {
       // Do not re-render if the text has not changed.
       if (text !== this._prev) {
         let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
-        this._markdownWidget.dispose();
         let widget = this._rendermime.render(bundle, this.trusted);
-        this._markdownWidget = widget || new Widget();
-        this._markdownWidget.addClass(MARKDOWN_CONTENT_CLASS);
-        (this.layout as PanelLayout).addWidget(this._markdownWidget);
+        this._output.content = widget || new Widget();
+        this.update();
       } else {
-        this._markdownWidget.show();
+        this._output.show();
       }
       this._prev = text;
       this.toggleInput(false);
       this.addClass(RENDERED_CLASS);
     } else {
-      this._markdownWidget.hide();
+      this._output.hide();
       this.toggleInput(true);
       this.removeClass(RENDERED_CLASS);
     }
@@ -654,7 +656,7 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   private _rendermime: RenderMime = null;
-  private _markdownWidget: Widget = null;
+  private _output: MarkdownOutput = null;
   private _rendered = true;
   private _prev = '';
 }
@@ -681,6 +683,46 @@ namespace MarkdownCellWidget {
      * The mime renderer for the cell widget.
      */
     rendermime: RenderMime;
+  }
+}
+
+
+/**
+ * A widget that contains rendered markdown output.
+ */
+class MarkdownOutput extends Widget {
+  /**
+   * Construct a new markdown output.
+   */
+  constructor() {
+    super();
+    this.addClass(MARKDOWN_OUTPUT_CLASS);
+    let prompt = new Widget();
+    prompt.addClass(PROMPT_CLASS);
+    let layout = this.layout = new PanelLayout();
+    layout.addWidget(prompt);
+    layout.addWidget(new Widget());
+  }
+
+  /**
+   * The prompt used by the output.
+   */
+  get prompt(): Widget {
+    return (this.layout as PanelLayout).widgets.at(0);
+  }
+
+  /**
+   * The content used by the widget.
+   */
+  get content(): Widget {
+    return (this.layout as PanelLayout).widgets.at(1);
+  }
+
+  set content(widget: Widget) {
+    widget.addClass(MARKDOWN_CONTENT_CLASS);
+    let layout = this.layout as PanelLayout;
+    layout.removeWidget(this.content);
+    layout.addWidget(widget);
   }
 }
 

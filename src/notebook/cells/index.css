@@ -18,6 +18,19 @@
 }
 
 
+.jp-Cell-prompt {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 90px;
+  color: #303F9F;
+  font-family: monospace;
+  padding: 0.4em;
+  text-align: right;
+  line-height: 1.2em;
+  font-size: 14px;
+}
+
+
 /*-----------------------------------------------------------------------------
 | CodeCell
 |----------------------------------------------------------------------------*/
@@ -28,14 +41,14 @@
 | MarkdownCell
 |----------------------------------------------------------------------------*/
 
-
-.jp-MarkdownCell-renderer {
-  padding: 0.5em 0.5em 0.5em 0.4em;
+.jp-MarkdownOutput {
+  display: flex;
 }
 
 
-.jp-MarkdownCell-content {
+.jp-MarkdownOutput-content {
   padding: 0.5em;
+  flex: 1 1 auto;
 }
 
 
@@ -47,19 +60,6 @@
 .jp-InputArea {
   display: flex;
   flex-direction: row;
-}
-
-
-.jp-InputArea-prompt {
-  flex-grow: 0;
-  flex-shrink: 0;
-  flex-basis: 90px;
-  color: #303F9F;
-  font-family: monospace;
-  padding: 0.4em;
-  text-align: right;
-  line-height: 1.2em;
-  font-size: 14px;
 }
 
 
