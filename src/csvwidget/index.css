@@ -3,6 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+
+:root {
+  --jp-private-csvwidget-toolbar-height: 24px;
+}
+
 .jp-CSVWidget {
   display: flex;
   flex-direction: column;
@@ -12,20 +17,22 @@
     display: flex;
     flex: 0 0 auto;
     flex-direction: row;
-    border-bottom: 1px solid #E0E0E0;
-    height: 32px;
+    border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+    /* Add the border width because this is border-box sized */
+    height: calc(var(--jp-private-csvwidget-toolbar-height) + var(--jp-border-width));
+    background: var(--jp-layout-color1);
 }
 
 .jp-CSVWidget-toolbar span {
-    color: #757575;
-    font-size: 13px;
-    line-height: 32px;
+    color: var(--jp-ui-font-color1);
+    font-size: var(--jp-ui-font-size1);
+    line-height: var(--jp-private-csvwidget-toolbar-height);
     padding-left: 8px;
     padding-right: 8px;
 }
 
 .jp-CSVWidget-toolbar select {
-    background: #FFFFFF;
+    background: transparent;
 }
 
 .jp-CSVWidget-toolbar .jp-CSVWidget-toolbarDropdown {
@@ -33,31 +40,26 @@
     padding-left: 8px;
     padding-right: 8px;
     vertical-align: middle;
-    border: 1px solid #BDBDBD;
+    border: var(--jp-border-width) solid var(--jp-border-color1);
     border-radius: 0;
     outline: none;
-    width: 70px;
-    font-size: 13px;
-    line-height: 23px;
-    color: #616161;
-    margin-top: 4px;
-    margin-bottom: 4px;
+    width: 60px;
+    height: 20px;
+    font-size: var(--jp-ui-font-size0);
+    color: var(--jp-ui-font-color1);
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 
 .jp-CSVWidget-table {
   flex: 1 1 auto;
-  padding: 1em;
+  padding: 4px;
   overflow: auto;
 }
 
-.jp-CSVWidget-table th,
-.jp-CSVWidget-table td {
-  border: var(--jp-border-width) solid black;
-  padding: 0.2em 0.5em;
+.jp-CSVWidget-table.jp-RenderedHTMLCommon table {
+  margin-left: 0px;
+  margin-right: 0px;
 }
 
-.jp-CSVWidget-table table {
-  border: var(--jp-border-width) solid black;
-  border-collapse: collapse;
-}
