@@ -78,6 +78,7 @@
   background: var(--jp-layout-color2);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   position: relative;
+  overflow: visible;
 }
 
 
@@ -126,7 +127,6 @@
 
 .p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
 .p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
-  overflow: visible;
   min-height: calc(var(--jp-private-horizontal-tab-height) + 2*var(--jp-border-width));
 }
 
