@@ -20,6 +20,7 @@
 
 .jp-Notebook-panel .jp-Toolbar {
   height: calc(var(--jp-private-notebook-toolbar-height) + var(--jp-border-width));
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 .jp-Notebook-panel .jp-Toolbar .jp-Toolbar-item {
