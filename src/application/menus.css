@@ -28,7 +28,7 @@
 
 
 .p-MenuBar-menu {
-  transform: translateY(calc(-1*var(--jp-border-width)));
+  transform: translateY(calc(-2*var(--jp-border-width)));
 }
 
 
@@ -47,6 +47,7 @@
 
 .p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
   z-index: 10001;
+  background: var(--jp-layout-color1);
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
   box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2);
