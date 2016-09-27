@@ -173,6 +173,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
   app.shell.addToLeftArea(fbWidget, { rank: 40 });
   app.commands.execute(cmdIds.showBrowser, void 0);
 
+  // Handle fileCreator items as they are added.
   registry.changed.connect((sender, args) => {
     if (args.type === 'fileCreator' && args.change === 'added') {
       menu.dispose();

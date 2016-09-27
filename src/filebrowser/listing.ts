@@ -46,6 +46,10 @@ import {
 } from './browser';
 
 import {
+  renameFile
+} from './dialogs';
+
+import {
   FileBrowserModel
 } from './model';
 
@@ -943,25 +947,7 @@ class DirListing extends Widget {
     let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
-      promises.push(this._model.rename(name, newPath).catch(error => {
-        if (error.xhr) {
-          error.message = `${error.xhr.statusText} ${error.xhr.status}`;
-        }
-        if (error.message.indexOf('409') !== -1) {
-          let options = {
-            title: 'Overwrite file?',
-            body: `"${newPath}" already exists, overwrite?`,
-            okText: 'OVERWRITE'
-          };
-          return showDialog(options).then(button => {
-            if (button.text === 'OVERWRITE') {
-              return this._model.deleteFile(newPath).then(() => {
-                return this._model.rename(name, newPath);
-              });
-            }
-          });
-        }
-      }));
+      promises.push(renameFile(this._model, name, newPath));
     }
     Promise.all(promises).then(
       () => this._model.refresh(),
@@ -1168,28 +1154,7 @@ class DirListing extends Widget {
       if (newName === original) {
         return;
       }
-      return this._model.rename(original, newName).catch(error => {
-        if (error.xhr) {
-          error.message = `${error.xhr.status}: error.statusText`;
-        }
-        if (error.message.indexOf('409') !== -1 ||
-            error.message.indexOf('already exists') !== -1) {
-          let options = {
-            title: 'Overwrite file?',
-            body: `"${newName}" already exists, overwrite?`,
-            okText: 'OVERWRITE'
-          };
-          return showDialog(options).then(button => {
-            if (button.text === 'OVERWRITE') {
-              return this._model.deleteFile(newName).then(() => {
-                return this._model.rename(original, newName).then(() => {
-                  this._model.refresh();
-                });
-              });
-            }
-          });
-        }
-      }).catch(error => {
+      return renameFile(this._model, original, newName).catch(error => {
         utils.showErrorMessage(this, 'Rename Error', error);
         return original;
       }).then(() => {

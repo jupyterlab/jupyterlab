@@ -44,15 +44,7 @@ export
 function createFromDialog(model: FileBrowserModel, manager: DocumentManager, creatorName: string): Promise<Widget> {
   let handler = new CreateFromHandler(model, manager, creatorName);
   return handler.populate().then(() => {
-    return showDialog({
-      title: `Create New ${creatorName}`,
-      body: handler.node,
-      okText: 'CREATE'
-    }).then(result => {
-      if (result.text === 'CREATE') {
-        return handler.open();
-      }
-    });
+    return handler.show();
   });
 }
 
@@ -95,6 +87,33 @@ function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host
   }).then(result => {
     if (result.text === 'CREATE') {
       return handler.open();
+    }
+  });
+}
+
+
+/**
+ * Rename a file with optional dialog.
+ */
+export
+function renameFile(model: FileBrowserModel, oldPath: string, newPath: string): Promise<IContents.IModel> {
+  return model.rename(oldPath, newPath).catch(error => {
+    if (error.xhr) {
+      error.message = `${error.xhr.statusText} ${error.xhr.status}`;
+    }
+    if (error.message.indexOf('409') !== -1) {
+      let options = {
+        title: 'Overwrite file?',
+        body: `"${newPath}" already exists, overwrite?`,
+        okText: 'OVERWRITE'
+      };
+      return showDialog(options).then(button => {
+        if (button.text === 'OVERWRITE') {
+          return model.deleteFile(newPath).then(() => {
+            return model.rename(oldPath, newPath);
+          });
+        }
+      });
     }
   });
 }
@@ -250,6 +269,26 @@ class CreateFromHandler extends Widget {
   }
 
   /**
+   * Show the createNew dialog.
+   */
+  show(): Promise<Widget> {
+    return showDialog({
+      title: `Create New ${this._creatorName}`,
+      body: this.node,
+      okText: 'CREATE'
+    }).then(result => {
+      if (result.text === 'CREATE') {
+        return this._open().then(widget => {
+          if (!widget) {
+            return this.show();
+          }
+          return widget;
+        });
+      }
+    });
+  }
+
+  /**
    * Populate the create from widget.
    */
   populate(): Promise<void> {
@@ -288,7 +327,7 @@ class CreateFromHandler extends Widget {
   /**
    * Open the file and return the document widget.
    */
-  open(): Promise<Widget> {
+  private _open(): Promise<Widget> {
     let path = this.input.value;
     let widgetName = this._widgetName;
     let kernelValue = this.kernelDropdown ? this.kernelDropdown.value : 'null';
@@ -297,7 +336,10 @@ class CreateFromHandler extends Widget {
       kernelId = JSON.parse(kernelValue) as IKernel.IModel;
     }
     if (path !== this._orig) {
-      return this._model.rename(this._orig, path).then(() => {
+      return renameFile(this._model, this._orig, path).then(value => {
+        if (!value) {
+          return;
+        }
         return this._manager.createNew(path, widgetName, kernelId);
       });
     }

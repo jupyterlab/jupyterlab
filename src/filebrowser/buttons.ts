@@ -34,10 +34,6 @@ import {
 } from '../docmanager';
 
 import {
-  IFileType
-} from '../docregistry';
-
-import {
   IWidgetOpener
 } from './browser';
 
