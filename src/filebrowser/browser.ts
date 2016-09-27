@@ -211,16 +211,14 @@ class FileBrowserWidget extends Widget {
    * Open a file by path.
    */
   openPath(path: string, widgetName='default'): Widget {
-    let model = this.model;
-    let widget = this._manager.findWidget(path, widgetName);
-    if (!widget) {
-      widget = this._manager.open(path, widgetName);
-      let context = this._manager.contextForWidget(widget);
-      context.populated.connect(() => model.refresh() );
-      context.kernelChanged.connect(() => model.refresh() );
-    }
-    this._opener.open(widget);
-    return widget;
+    return this._buttons.open(path, widgetName);
+  }
+
+  /**
+   * Create a file from a creator.
+   */
+  createFrom(creatorName: string): Promise<Widget> {
+    return this._buttons.createFrom(creatorName);
   }
 
   /**
@@ -229,12 +227,7 @@ class FileBrowserWidget extends Widget {
   createNew(options: IContents.ICreateOptions): Promise<Widget> {
     let model = this.model;
     return model.newUntitled(options).then(contents => {
-      let widget = this._manager.createNew(contents.path);
-      let context = this._manager.contextForWidget(widget);
-      context.populated.connect(() => model.refresh() );
-      context.kernelChanged.connect(() => model.refresh() );
-      this._opener.open(widget);
-      return widget;
+      this._buttons.createNew(contents.path);
     });
   }
 

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, ISession
+  IContents, IKernel, ISession
 } from 'jupyter-js-services';
 
 import {
@@ -25,10 +25,36 @@ import {
   FileBrowserModel
 } from './model';
 
+
+/**
+ * The class name added to file dialogs.
+ */
+const FILE_DIALOG_CLASS = 'jp-FileDialog';
+
 /**
  * The class name added for a file conflict.
  */
 const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
+
+
+/**
+ * Create a file using a file creator.
+ */
+export
+function createFromDialog(model: FileBrowserModel, manager: DocumentManager, creatorName: string): Promise<Widget> {
+  let handler = new CreateFromHandler(model, manager, creatorName);
+  return handler.populate().then(() => {
+    return showDialog({
+      title: `Create New ${creatorName}`,
+      body: handler.node,
+      okText: 'CREATE'
+    }).then(result => {
+      if (result.text === 'CREATE') {
+        return handler.open();
+      }
+    });
+  });
+}
 
 
 /**
@@ -168,6 +194,122 @@ class OpenWithHandler extends Widget {
   private _manager: DocumentManager = null;
   private _host: HTMLElement = null;
   private _sessions: ISession.IModel[] = null;
+}
+
+
+/**
+ * A widget used to create a file using a creator.
+ */
+class CreateFromHandler extends Widget {
+  /**
+   * Construct a new "create from" dialog.
+   */
+  constructor(model: FileBrowserModel, manager: DocumentManager, creatorName: string) {
+    super({ node: Private.createCreateFromNode() });
+    this.addClass(FILE_DIALOG_CLASS);
+    this._model = model;
+    this._manager = manager;
+    this._creatorName = creatorName;
+
+    // Check for name conflicts when the input changes.
+    this.input.addEventListener('input', () => {
+      let value = this.input.value;
+      if (value !== this._orig) {
+        for (let item of this._model.items) {
+          if (item.name === value) {
+            this.addClass(FILE_CONFLICT_CLASS);
+            return;
+          }
+        }
+      }
+      this.removeClass(FILE_CONFLICT_CLASS);
+    });
+  }
+
+  /**
+   * Dispose of the resources used by the widget.
+   */
+  dispose(): void {
+    this._model = null;
+    this._manager = null;
+    super.dispose();
+  }
+
+  /**
+   * Get the input text node.
+   */
+  get input(): HTMLInputElement {
+    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
+  }
+
+  /**
+   * Get the kernel dropdown node.
+   */
+  get kernelDropdown(): HTMLSelectElement {
+    return this.node.getElementsByTagName('select')[0] as HTMLSelectElement;
+  }
+
+  /**
+   * Populate the create from widget.
+   */
+  populate(): Promise<void> {
+    let model = this._model;
+    let manager = this._manager;
+    let registry = manager.registry;
+    let creator = registry.getCreator(this._creatorName);
+    let { fileType, widgetName, kernelName } = creator;
+    let fType = registry.getFileType(fileType);
+    let ext = '.txt';
+    let type: IContents.FileType = 'file';
+    if (fType) {
+      ext = fType.extension;
+      type = fType.fileType || 'file';
+    }
+    if (!widgetName || widgetName === 'default') {
+      this._widgetName = widgetName = registry.defaultWidgetFactory(ext);
+    }
+
+    // Handle the kernel preferences.
+    let preference = registry.getKernelPreference(ext, widgetName);
+    if (preference.canStartKernel) {
+      Private.updateKernels(preference, this.kernelDropdown, this._manager.kernelspecs, this._sessions, kernelName);
+    } else {
+      this.node.removeChild(this.kernelDropdown);
+    }
+
+    return manager.listSessions().then(sessions => {
+      this._sessions = sessions;
+      return model.newUntitled({ ext, type });
+    }).then(contents => {
+      this.input.value = this._orig = contents.name;
+    });
+  }
+
+  /**
+   * Open the file and return the document widget.
+   */
+  open(): Promise<Widget> {
+    let path = this.input.value;
+    let widgetName = this._widgetName;
+    let kernelValue = this.kernelDropdown ? this.kernelDropdown.value : 'null';
+    let kernelId: IKernel.IModel;
+    if (kernelValue !== 'null') {
+      kernelId = JSON.parse(kernelValue) as IKernel.IModel;
+    }
+    if (path !== this._orig) {
+      return this._model.rename(this._orig, path).then(() => {
+        return this._manager.createNew(path, widgetName, kernelId);
+      });
+    }
+    return Promise.resolve(this._manager.createNew(path, widgetName, kernelId));
+  }
+
+  private _model: FileBrowserModel = null;
+  private _creatorName: string;
+  private _widgetName: string;
+  private _orig: string;
+  private _manager: DocumentManager;
+  private _sessions: ISession.IModel[] = [];
 }
 
 
@@ -401,10 +543,23 @@ namespace Private {
   }
 
   /**
+   * Create the node for a create from handler.
+   */
+  export
+  function createCreateFromNode(): HTMLElement {
+    let body = document.createElement('div');
+    let name = document.createElement('input');
+    let kernelDropdown = document.createElement('select');
+    body.appendChild(name);
+    body.appendChild(kernelDropdown);
+    return body;
+  }
+
+  /**
    * Update a kernel listing based on a kernel preference.
    */
   export
-  function updateKernels(preference: IKernelPreference, node: HTMLSelectElement, specs: IKernel.ISpecModels, running: ISession.IModel[]): void {
+  function updateKernels(preference: IKernelPreference, node: HTMLSelectElement, specs: IKernel.ISpecModels, sessions: ISession.IModel[], preferredKernel?: string): void {
     if (!preference.canStartKernel) {
       while (node.firstChild) {
         node.removeChild(node.firstChild);
@@ -412,9 +567,11 @@ namespace Private {
       node.disabled = true;
       return;
     }
-    let lang = preference.language;
+    let preferredLanguage = preference.language;
     node.disabled = false;
-    populateKernels(node, specs, running, lang);
+    populateKernels(node,
+      { specs, sessions, preferredLanguage, preferredKernel }
+    );
     // Select the "null" valued kernel if we do not prefer a kernel.
     if (!preference.preferKernel) {
       node.value = 'null';
