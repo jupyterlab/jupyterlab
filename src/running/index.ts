@@ -687,6 +687,7 @@ namespace RunningSessions {
       }
       let label = findElement(node, ITEM_LABEL_CLASS);
       label.textContent = model.notebook.path.split('/').pop();
+      label.title = model.notebook.path;
       let kernel = findElement(node, KERNEL_NAME_CLASS);
       kernel.textContent = kernelName;
     }
