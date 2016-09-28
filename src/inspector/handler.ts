@@ -115,38 +115,6 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   }
 
   /**
-   * Update the inspector based on page outputs from the kernel.
-   *
-   * #### Notes
-   * Payloads are deprecated and there are no official interfaces for them in
-   * the kernel type definitions.
-   * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
-   */
-  handleExecuteReply(content: KernelMessage.IExecuteOkReply): void {
-    let update: Inspector.IInspectorUpdate = {
-      content: null,
-      type: 'details'
-    };
-
-    if (!content || !content.payload || !content.payload.length) {
-      this.inspected.emit(update);
-      return;
-    }
-
-    let details = content.payload.filter(i => (i as any).source === 'page')[0];
-    if (details) {
-      let bundle = (details as any).data as RenderMime.MimeMap<string>;
-      let trusted = true;
-      let widget = this._rendermime.render({ bundle, trusted });
-      update.content = widget;
-      this.inspected.emit(update);
-      return;
-    }
-
-    this.inspected.emit(update);
-  }
-
-  /**
    * Handle a text changed signal from an editor.
    *
    * #### Notes
