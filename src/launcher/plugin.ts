@@ -6,20 +6,20 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
   h, VNode
 } from 'phosphor/lib/ui/vdom';
 
 import {
-  VDomModel, VDomWidget
-} from '../common/vdom';
+  Widget
+} from 'phosphor/lib/ui/widget';
 
 import {
   ObservableList
 } from '../common/observablelist';
+
+import {
+  VDomModel, VDomWidget
+} from '../common/vdom';
 
 import {
   JupyterLab, JupyterLabPlugin
@@ -193,7 +193,7 @@ class LauncherModel  extends VDomModel {
 
 
 /**
- * A virtual-DOM-based widget for the Launcher
+ * A virtual-DOM-based widget for the Launcher.
  */
 class LauncherWidget extends VDomWidget<LauncherModel> {
 
@@ -202,25 +202,25 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
 
     for (let item of this.model.items) {
       let imgName = item.name.replace(' ', '');
-      let img = h.span({className: `jp-Image${imgName} jp-Launcher-image`});
-      let text = h.span({className: 'jp-Launcher-text' }, item.name);
+      let img = h.span({className: `jp-Image${imgName} jp-LauncherWidget-image`});
+      let text = h.span({className: 'jp-LauncherWidget-text' }, item.name);
 
       let column = h.div({
-        className: 'jp-Launcher-column',
+        className: 'jp-LauncherWidget-column',
         'onclick': item.clickCallback
       }, [img, text])
       children.push(column);
     }
 
-    let folderImage = h.span({ className: 'jp-Launcher-folder' });
+    let folderImage = h.span({ className: 'jp-LauncherWidget-folder' });
     let p = this.model.path;
     let pathName = p.length ? 'home > ' + p.replace('/', ' > ') : 'home';
-    let path = h.span({ className: 'jp-Launcher-path' }, pathName );
+    let path = h.span({ className: 'jp-LauncherWidget-path' }, pathName );
 
-    let cwd = h.div({ className: 'jp-Launcher-cwd' }, [folderImage, path]);
-    let body = h.div({ className: "jp-Launcher-body" }, children);
+    let cwd = h.div({ className: 'jp-LauncherWidget-cwd' }, [folderImage, path]);
+    let body = h.div({ className: "jp-LauncherWidget-body" }, children);
 
-    return h.div({ className: 'jp-Launcher-dialog'}, [ cwd, body ]);
+    return h.div({ className: 'jp-LauncherWidget-dialog'}, [ cwd, body ]);
 
   }
 }
