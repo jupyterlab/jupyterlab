@@ -312,7 +312,6 @@ class ConsoleContent extends Widget {
     this.dismissCompleter();
 
     if (this._session.status === 'dead') {
-      this._inspectionHandler.handleExecuteReply(null);
       return;
     }
 
@@ -498,12 +497,10 @@ class ConsoleContent extends Widget {
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       this.executed.emit(new Date());
       if (!value) {
-        this._inspectionHandler.handleExecuteReply(null);
         return;
       }
       if (value.content.status === 'ok') {
         let content = value.content as KernelMessage.IExecuteOkReply;
-        this._inspectionHandler.handleExecuteReply(content);
         // Use deprecated payloads for backwards compatibility.
         if (content.payload && content.payload.length) {
           let setNextInput = content.payload.filter(i => {

@@ -928,12 +928,9 @@ namespace Private {
         return (child as CodeCellWidget).execute(kernel).then(reply => {
           if (reply && reply.content.status === 'ok') {
             let content = reply.content as KernelMessage.IExecuteOkReply;
-            parent.inspectionHandler.handleExecuteReply(content);
             if (content.payload && content.payload.length) {
               handlePayload(content, parent, child);
             }
-          } else {
-            parent.inspectionHandler.handleExecuteReply(null);
           }
           return reply ? reply.content.status === 'ok' : true;
         });

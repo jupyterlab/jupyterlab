@@ -50,7 +50,7 @@ function activateInspector(app: JupyterLab, palette: ICommandPalette): IInspecto
 
   app.commands.addCommand(openInspectorCommand, {
     execute: openInspector,
-    label: "Open Inspector"
+    label: 'Open Inspector'
   });
 
   palette.addItem({
@@ -60,7 +60,6 @@ function activateInspector(app: JupyterLab, palette: ICommandPalette): IInspecto
 
   return inspector;
 }
- 
 
 /**
  * A namespace for private data.
@@ -76,13 +75,6 @@ namespace Private {
       name: 'Hints',
       rank: 20,
       type: 'hints'
-    },
-    {
-      className: 'jp-DetailsInspectorItem',
-      name: 'Details',
-      rank: 10,
-      remembers: true,
-      type: 'details'
     }
   ];
 }
