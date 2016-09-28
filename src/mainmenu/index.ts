@@ -72,8 +72,11 @@ class MainMenu extends MenuBar implements IMainMenu {
     let rankItem = { menu, rank };
     let index = upperBound(this._items, rankItem, Private.itemCmp);
 
-    // Upon disposal, remove the menu reference from the rank list.
-    menu.disposed.connect(() => this._items.remove(rankItem));
+    // Upon disposal, remove the menu and its rank reference.
+    menu.disposed.connect(() => {
+      this.removeMenu(menu);
+      this._items.remove(rankItem);
+    });
 
     this._items.insert(index, rankItem);
     this.insertMenu(index, menu);
