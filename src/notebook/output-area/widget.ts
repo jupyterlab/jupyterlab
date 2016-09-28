@@ -737,7 +737,7 @@ class OutputWidget extends Widget {
       this.setOutput(child);
       return;
     }
-
+    console.log('rendering...');
     // Extract the data from the output and sanitize if necessary.
     let rendermime = this._rendermime;
     let bundle = this.getBundle(output as nbformat.IOutput);
@@ -749,21 +749,22 @@ class OutputWidget extends Widget {
     // Bail if no data to display.
     let msg = 'Did not find renderer for output mimebundle.';
     if (!data) {
-      console.log(msg);
+      console.log('no data in', msg);
       return;
     }
 
     // Create the output result area.
     let child = rendermime.render({ bundle: data, trusted, injector });
     if (!child) {
-      console.log(msg);
-      console.log(data);
+      console.log('no child', msg);
+      console.log('\tdata', data);
       return;
     }
     this.setOutput(child);
 
     // Add classes and output prompt as necessary.
     switch (output.output_type) {
+    case 'execute_reply':
     case 'execute_result':
       child.addClass(EXECUTE_CLASS);
       let count = (output as nbformat.IExecuteResult).execution_count;
@@ -781,6 +782,8 @@ class OutputWidget extends Widget {
       break;
     case 'error':
       child.addClass(ERROR_CLASS);
+      break;
+    default:
       break;
     }
   }
