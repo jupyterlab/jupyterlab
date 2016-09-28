@@ -49,6 +49,11 @@ const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVWidget-toolbarDropdown';
  */
 const CSV_TABLE_CLASS = 'jp-CSVWidget-table';
 
+/**
+ * The hard limit on the number of rows to display.
+ */
+const RENDER_LIMIT = 1000;
+
 
 /**
  * A widget for csv tables.
@@ -93,7 +98,6 @@ class CSVWidget extends Widget {
 
     // Change delimiter on a change in the dropdown.
     select.addEventListener('change', event => {
-      let value = select.value as string;
       this.delimiter = select.value;
       this.update();
     });
@@ -137,14 +141,20 @@ class CSVWidget extends Widget {
       th.textContent = name;
       header.appendChild(th);
     }
-    for (let row of parsed) {
+    for (let row of parsed.slice(0, RENDER_LIMIT)) {
       let tr = document.createElement('tr');
       for (let col of parsed.columns) {
         let td = document.createElement('td');
-        td.textContent = row[col]
+        td.textContent = row[col];
         tr.appendChild(td);
       }
       body.appendChild(tr);
+    }
+    if (parsed.length > RENDER_LIMIT) {
+      console.warn(
+        `Table is too long to render, rendering ${RENDER_LIMIT} of
+         ${parsed.length} rows`
+      );
     }
     table.appendChild(header);
     table.appendChild(body);
@@ -160,7 +170,7 @@ class CSVWidget extends Widget {
   }
 
   private _context: IDocumentContext<IDocumentModel>;
-  private delimiter: string = ",";
+  private delimiter: string = ',';
   private _toolbar: Widget = null;
   private _table: Widget = null;
 }
