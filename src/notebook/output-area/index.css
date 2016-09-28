@@ -3,9 +3,59 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+/*-----------------------------------------------------------------------------
+| Main OutputArea
+| OutputArea has a list of Outputs
+|----------------------------------------------------------------------------*/
+
 
 .jp-OutputArea {
   background: none;
+  max-height: 1000px;
+  overflow-y: auto;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Individual Output(s) and their prompts
+| Output[
+|   Output-prompt, Output-result
+| ]
+|----------------------------------------------------------------------------*/
+
+
+.jp-Output-stdinPrompt {
+  padding-right: 8px;
+}
+
+
+.jp-Output-prompt {
+  color: var(--jp-private-notebook-cell-outprompt-color);
+  font-family: monospace;
+  text-align: right;
+  vertical-align: middle;
+  padding: var(--jp-code-padding);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
+  border: var(--jp-border-width) solid transparent;
+  flex: 0 0 var(--jp-private-notebook-cell-prompt-width);
+  box-sizing: border-box;
+}
+
+
+.jp-Output-prompt:hover {
+  background: var(--md-grey-100);
+}
+
+
+.jp-Output:first-child {
+  margin-top: 5px;
 }
 
 
@@ -15,25 +65,8 @@
 }
 
 
-.jp-Output-executeResult {
-  margin-left: 0px;
-  flex: 1 1 auto;
-}
-
-
-.jp-Output-executeResult img {
-  max-width: 100%;
-  height: auto;
-}
-
-
-img.jp-mod-unconfined {
-  max-width: none;
-}
-
 
 .jp-Output-result {
-  padding: 0.4em;
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;
@@ -56,9 +89,28 @@ img.jp-mod-unconfined {
 }
 
 
-.jp-Notebook .jp-Output pre {
+/*-----------------------------------------------------------------------------
+| Output-executeResult is added to any Output-result for the display of the object
+| returned by a cell
+|----------------------------------------------------------------------------*/
+
+
+.jp-Output-executeResult {
+  margin-left: 0px;
+  flex: 1 1 auto;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Specific output formats
+|----------------------------------------------------------------------------*/
+
+/* text */
+
+.jp-Output-result pre {
   border: none;
-  margin: 1px 0 0 5px;
+  margin: 0px;
+  padding: 0px;
   overflow-x: auto;
   overflow-y: auto;
   word-break: break-all;
@@ -67,25 +119,46 @@ img.jp-mod-unconfined {
 }
 
 
-.jp-Output-stderr {
+.jp-Output-executeResult.jp-RenderedText {
+  padding-top: var(--jp-code-padding);
+}
+
+
+.jp-Output-result.jp-RenderedText {
+  padding-left: var(--jp-code-padding);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
+}
+
+
+.jp-Output-result.jp-Output-stderr {
   background: #fdd;
 }
 
-.jp-Output-stdinPrompt {
-  padding-right: 8px;
+
+/* images */
+
+img.jp-mod-unconfined {
+  max-width: none;
 }
 
-.jp-Output-prompt:hover {
-  background: var(--md-grey-100);
+
+.jp-Output-result img {
+  max-width: 100%;
+  height: auto;
 }
 
-.jp-Output-prompt {
-  color: #D84315;
-  font-family: monospace;
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.4em;
-  font-size: 14px;
-  flex: 0 0 90px;
-  box-sizing: border-box;
+
+/* html */
+
+.jp-Output-executeResult.jp-RenderedHTMLCommon {
+  padding-top: 0px;
 }
+
+/* tables */
+
+.jp-Output-result.jp-RenderedHTMLCommon table {
+  margin-left: 0;
+  margin-right: 0;
+}
+

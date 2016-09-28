@@ -21,8 +21,8 @@
 .jp-Cell-prompt {
   flex-grow: 0;
   flex-shrink: 0;
-  flex-basis: 90px;
-  color: #303F9F;
+  flex-basis: var(--jp-private-notebook-cell-prompt-width);
+  color: var(--jp-private-notebook-cell-inprompt-color);
   font-family: monospace;
   padding: var(--jp-code-padding);
   text-align: right;
