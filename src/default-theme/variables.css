@@ -75,6 +75,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   */
   
   --jp-content-font-size: 14px;
+  --jp-content-line-height: 1.5;
   --jp-content-font-color0: black;
   --jp-content-font-color1: black;
   --jp-content-font-color2: var(--md-grey-700);

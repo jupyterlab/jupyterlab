@@ -7,8 +7,8 @@
 .jp-RenderedHTMLCommon {
 
   color: black;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: var(--jp-content-font-size1);
+  line-height: var(--jp-content-line-height);
 
 }
 
