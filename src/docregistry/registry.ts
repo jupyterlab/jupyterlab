@@ -39,7 +39,7 @@ const IDocumentRegistry = new Token<IDocumentRegistry>('jupyter.services.documen
 export
 interface IDocumentRegistry extends IDisposable {
   /**
-   * A signal emmitted when the registry has changed.
+   * A signal emitted when the registry has changed.
    */
   readonly changed: ISignal<this, DocumentRegistry.IChangedArgs>;
 
@@ -227,7 +227,7 @@ interface IDocumentRegistry extends IDisposable {
 export
 class DocumentRegistry implements IDocumentRegistry {
   /**
-   * A signal emmitted when the registry has changed.
+   * A signal emitted when the registry has changed.
    */
   readonly changed: ISignal<this, DocumentRegistry.IChangedArgs>;
 
