@@ -3,6 +3,29 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-notebook-toolbar-height: 24px;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Styles
+|----------------------------------------------------------------------------*/
+
+
+.jp-Notebook-panel .jp-Toolbar {
+  height: calc(var(--jp-private-notebook-toolbar-height) + var(--jp-border-width));
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+.jp-Notebook-panel .jp-Toolbar .jp-Toolbar-item {
+  line-height: 24px;
+}
 
 .jp-Toolbar-item.jp-Kernel-toolbarKernelIndicator {
   font-family: FontAwesome;
@@ -12,7 +35,7 @@
 
 
 .jp-Notebook-toolbarCellType select {
-  background: #FFFFFF;
+  background: var(--jp-layout-color1);
 }
 
 
@@ -21,8 +44,10 @@
   border-radius: 0;
   outline: none;
   width: 100%;
-  font-size: 14px;
-  line-height: 23px;
+  font-size: var(--jp-ui-font-size1);
+  height: 20px;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 
@@ -30,6 +55,7 @@
   text-align: right;
   flex-grow: 1;
   flex-shrink: 1;
+  font-size: var(--jp-ui-font-size1);
 }
 
 

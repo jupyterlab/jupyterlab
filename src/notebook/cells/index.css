@@ -21,13 +21,14 @@
 .jp-Cell-prompt {
   flex-grow: 0;
   flex-shrink: 0;
-  flex-basis: 90px;
-  color: #303F9F;
+  flex-basis: var(--jp-private-notebook-cell-prompt-width);
+  color: var(--jp-private-notebook-cell-inprompt-color);
   font-family: monospace;
-  padding: 0.4em;
+  padding: var(--jp-code-padding);
   text-align: right;
-  line-height: 1.2em;
-  font-size: 14px;
+  line-height: var(--jp-code-line-height);
+  font-size: var(--jp-code-font-size);
+  border: var(--jp-border-width) solid transparent;
 }
 
 
@@ -41,13 +42,13 @@
 | MarkdownCell
 |----------------------------------------------------------------------------*/
 
+
 .jp-MarkdownOutput {
   display: flex;
 }
 
 
 .jp-MarkdownOutput-content {
-  padding: 0.5em;
   flex: 1 1 auto;
 }
 
@@ -67,13 +68,11 @@
   flex-grow: 1;
   flex-shrink: 1;
   height: auto;
-  min-height: 2em;
 }
 
 
 .jp-CellEditor {
-  border: var(--jp-border-width) solid #cfcfcf;
-  border-radius: 2px;
-  background: #f7f7f7;
-  line-height: 1.2em;
+  border: var(--jp-border-width) solid var(--jp-private-notebook-cell-editor-border);
+  border-radius: 0px;
+  background: var(--jp-private-notebook-cell-editor-background);
 }

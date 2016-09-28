@@ -4,13 +4,19 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-RenderedHTMLCommon {
-
-  color: black;
-  font-size: 14px;
-  line-height: 20px;
-
+.jp-RenderedLatex {
+  color: var(--jp-content-font-color1);
+  font-size: var(--jp-content-font-size);
+  line-height: var(--jp-content-line-height);
 }
+
+
+.jp-RenderedHTMLCommon {
+  color: var(--jp-content-font-color1);
+  font-size: var(--jp-content-font-size);
+  line-height: var(--jp-content-line-height);
+}
+
 
 .jp-RenderedHTMLCommon .MathJax_Display {
   margin: 0;
@@ -21,17 +27,21 @@
   font-style: italic;
 }
 
+
 .jp-RenderedHTMLCommon strong {
   font-weight: bold;
 }
+
 
 .jp-RenderedHTMLCommon u {
   text-decoration: underline;
 }
 
+
 .jp-RenderedHTMLCommon:link {
   text-decoration: underline;
 }
+
 
 .jp-RenderedHTMLCommon:visited {
   text-decoration: underline;
@@ -179,8 +189,8 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon hr {
-  color: black;
-  background-color: black;
+  color: var(--jp-border-color1);
+  background-color: var(--jp-border-color1);
   margin-top: 1em;
   margin-bottom: 1em;
 }
@@ -194,8 +204,8 @@ margin-top = 14, 14, 14, 14, 8, 8
 .jp-RenderedHTMLCommon pre,
 .jp-RenderedHTMLCommon code {
   border: 0;
-  background-color: white;
-  color: black;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-content-font-color1);
   font-size: 100%;
   padding: 0px;
 }
