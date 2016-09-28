@@ -759,7 +759,6 @@ class OutputWidget extends Widget {
 
     // Add classes and output prompt as necessary.
     switch (output.output_type) {
-    case 'execute_reply':
     case 'execute_result':
       child.addClass(EXECUTE_CLASS);
       let count = (output as nbformat.IExecuteResult).execution_count;
@@ -818,7 +817,6 @@ class OutputWidget extends Widget {
   protected getBundle(output: nbformat.IOutput): nbformat.MimeBundle {
     let bundle: nbformat.MimeBundle;
     switch (output.output_type) {
-    case 'execute_reply':
     case 'execute_result':
       bundle = (output as nbformat.IExecuteResult).data;
       break;

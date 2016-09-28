@@ -128,7 +128,6 @@ class OutputAreaModel implements IDisposable {
     } else {
       switch (value.output_type) {
       case 'stream':
-      case 'execute_reply':
       case 'execute_result':
       case 'display_data':
       case 'error':
@@ -208,30 +207,27 @@ class OutputAreaModel implements IDisposable {
       };
       // Handle the execute reply.
       future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
-        let msgType = msg.header.msg_type;
-        switch (msgType) {
-        case 'execute_reply':
-          let content = msg.content as KernelMessage.IExecuteOkReply;
-          let payload = content && content.payload;
-          if (!payload) {
-            break;
-          }
-          let page = payload.filter(i => (i as any).source === 'page')[0];
-          if (!page) {
-            break;
-          }
-          let model: nbformat.IOutput = {
-            execution_count: msg.content.execution_count,
-            output_type: 'execute_reply',
-            data: (page as any).data as nbformat.MimeBundle,
-            metadata: {}
-          };
-          this.add(model);
-          break;
-        default:
-          break;
-        }
         resolve(msg);
+        // API responses that contain a pager are special cased and their type
+        // is overriden from 'execute_reply' to 'display_data' in order to
+        // render output.
+        let content = msg.content as KernelMessage.IExecuteOkReply;
+        let payload = content && content.payload;
+        if (!payload || !payload.length) {
+          return;
+        }
+        let pages = payload.filter(i => (i as any).source === 'page');
+        if (!pages.length) {
+          return;
+        }
+        let page = JSON.parse(JSON.stringify(pages[0]));
+        let model: nbformat.IOutput = {
+          execution_count: msg.content.execution_count,
+          output_type: 'display_data',
+          data: (page as any).data as nbformat.MimeBundle,
+          metadata: {}
+        };
+        this.add(model);
       };
       // Handle stdin.
       future.onStdin = (msg: KernelMessage.IStdinMessage) => {
