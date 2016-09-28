@@ -71,7 +71,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
   body.className = 'jp-Landing-body';
   dialog.appendChild(body);
 
-  for (let name of ['Notebook', 'Console', 'Terminal', 'Text Editor']) {
+  for (let name of ['Notebook', 'Code Console', 'Terminal', 'Text Editor']) {
     let column = document.createElement('div');
     body.appendChild(column);
     column.className = 'jp-Landing-column';
@@ -93,7 +93,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
     app.commands.execute('file-operations:new-notebook', void 0);
   });
 
-  img = body.getElementsByClassName('jp-ImageConsole')[0];
+  img = body.getElementsByClassName('jp-ImageCodeConsole')[0];
   img.addEventListener('click', () => {
     app.commands.execute(`console:create-${services.kernelspecs.default}`, void 0);
   });
