@@ -49,6 +49,16 @@ const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVWidget-toolbarDropdown';
  */
 const CSV_TABLE_CLASS = 'jp-CSVWidget-table';
 
+/**
+ * The class name added to a csv warning widget.
+ */
+const CSV_WARNING_CLASS = 'jp-CSVWidget-warning';
+
+/**
+ * The hard limit on the number of rows to display.
+ */
+const DISPLAY_LIMIT = 1000;
+
 
 /**
  * A widget for csv tables.
@@ -70,10 +80,13 @@ class CSVWidget extends Widget {
     this._table = new Widget();
     this._table.addClass(CSV_TABLE_CLASS);
     this._table.addClass(HTML_COMMON_CLASS);
+    this._warning = new Widget();
+    this._warning.addClass(CSV_WARNING_CLASS);
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(this._toolbar);
     layout.addWidget(this._table);
+    layout.addWidget(this._warning);
 
     let select = this._toolbar.node.getElementsByClassName(
       CSV_TOOLBAR_DROPDOWN_CLASS)[0] as HTMLSelectElement;
@@ -93,7 +106,6 @@ class CSVWidget extends Widget {
 
     // Change delimiter on a change in the dropdown.
     select.addEventListener('change', event => {
-      let value = select.value as string;
       this.delimiter = select.value;
       this.update();
     });
@@ -137,14 +149,21 @@ class CSVWidget extends Widget {
       th.textContent = name;
       header.appendChild(th);
     }
-    for (let row of parsed) {
+    for (let row of parsed.slice(0, DISPLAY_LIMIT)) {
       let tr = document.createElement('tr');
       for (let col of parsed.columns) {
         let td = document.createElement('td');
-        td.textContent = row[col]
+        td.textContent = row[col];
         tr.appendChild(td);
       }
       body.appendChild(tr);
+    }
+    let msg =  `Table is too long to render, rendering ${DISPLAY_LIMIT} of ` +
+               `${parsed.length} rows`;
+    if (parsed.length > DISPLAY_LIMIT) {
+      this._warning.node.textContent = msg;
+    } else {
+      this._warning.node.textContent = '';
     }
     table.appendChild(header);
     table.appendChild(body);
@@ -160,9 +179,10 @@ class CSVWidget extends Widget {
   }
 
   private _context: IDocumentContext<IDocumentModel>;
-  private delimiter: string = ",";
+  private delimiter: string = ',';
   private _toolbar: Widget = null;
   private _table: Widget = null;
+  private _warning: Widget = null;
 }
 
 

@@ -63,3 +63,10 @@
   margin-right: 0px;
 }
 
+
+.jp-CSVWidget-warning {
+  flex: 0 0 auto;
+  padding: 4px;
+  overflow: auto;
+  color: var(--jp-warn-color);
+}
