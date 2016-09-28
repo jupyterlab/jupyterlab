@@ -54,6 +54,10 @@
   margin-bottom: 0.5em;
 }
 
+.jp-MarkdownOutput-content.jp-RenderedHTMLCommon {
+  overflow: visible;
+}
+
 
 /*-----------------------------------------------------------------------------
 | InputArea
