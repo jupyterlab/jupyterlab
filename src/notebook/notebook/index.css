@@ -13,6 +13,7 @@
   min-height: 50px;
   outline: none;
   overflow: auto;
+  background: var(--jp-layout-color1);
 }
 
 

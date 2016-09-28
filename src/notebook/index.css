@@ -10,6 +10,8 @@
 
 :root {
   --jp-private-notebook-padding: 10px;
+  --jp-private-notebook-cell-editor-background: #f7f7f7;
+  --jp-private-notebook-cell-editor-border: #cfcfcf;
 }
 
 
