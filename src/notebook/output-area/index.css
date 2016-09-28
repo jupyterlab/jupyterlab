@@ -71,9 +71,12 @@ img.jp-mod-unconfined {
   background: #fdd;
 }
 
-
 .jp-Output-stdinPrompt {
   padding-right: 8px;
+}
+
+.jp-Output-prompt:hover {
+  background: var(--md-grey-100);
 }
 
 .jp-Output-prompt {
