@@ -50,9 +50,14 @@ const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVWidget-toolbarDropdown';
 const CSV_TABLE_CLASS = 'jp-CSVWidget-table';
 
 /**
+ * The class name added to a csv warning widget.
+ */
+const CSV_WARNING_CLASS = 'jp-CSVWidget-warning';
+
+/**
  * The hard limit on the number of rows to display.
  */
-const RENDER_LIMIT = 1000;
+const DISPLAY_LIMIT = 1000;
 
 
 /**
@@ -75,10 +80,13 @@ class CSVWidget extends Widget {
     this._table = new Widget();
     this._table.addClass(CSV_TABLE_CLASS);
     this._table.addClass(HTML_COMMON_CLASS);
+    this._warning = new Widget();
+    this._warning.addClass(CSV_WARNING_CLASS);
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(this._toolbar);
     layout.addWidget(this._table);
+    layout.addWidget(this._warning);
 
     let select = this._toolbar.node.getElementsByClassName(
       CSV_TOOLBAR_DROPDOWN_CLASS)[0] as HTMLSelectElement;
@@ -141,7 +149,7 @@ class CSVWidget extends Widget {
       th.textContent = name;
       header.appendChild(th);
     }
-    for (let row of parsed.slice(0, RENDER_LIMIT)) {
+    for (let row of parsed.slice(0, DISPLAY_LIMIT)) {
       let tr = document.createElement('tr');
       for (let col of parsed.columns) {
         let td = document.createElement('td');
@@ -150,11 +158,12 @@ class CSVWidget extends Widget {
       }
       body.appendChild(tr);
     }
-    if (parsed.length > RENDER_LIMIT) {
-      console.warn(
-        `Table is too long to render, rendering ${RENDER_LIMIT} of ` +
-        `${parsed.length} rows`
-      );
+    let msg =  `Table is too long to render, rendering ${DISPLAY_LIMIT} of ` +
+               `${parsed.length} rows`;
+    if (parsed.length > DISPLAY_LIMIT) {
+      this._warning.node.textContent = msg;
+    } else {
+      this._warning.node.textContent = '';
     }
     table.appendChild(header);
     table.appendChild(body);
@@ -173,6 +182,7 @@ class CSVWidget extends Widget {
   private delimiter: string = ',';
   private _toolbar: Widget = null;
   private _table: Widget = null;
+  private _warning: Widget = null;
 }
 
 
