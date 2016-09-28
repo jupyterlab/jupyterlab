@@ -661,6 +661,9 @@ class Notebook extends StaticNotebook {
     if (newValue === oldValue) {
       return;
     }
+    if (this.mode === 'edit' && cell instanceof MarkdownCellWidget) {
+      cell.rendered = false;
+    }
     this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
   }
 
