@@ -737,27 +737,22 @@ class OutputWidget extends Widget {
       this.setOutput(child);
       return;
     }
-    console.log('rendering...');
     // Extract the data from the output and sanitize if necessary.
     let rendermime = this._rendermime;
     let bundle = this.getBundle(output as nbformat.IOutput);
     let data = this.convertBundle(bundle);
-
     // Clear the content.
     this.clear();
 
     // Bail if no data to display.
-    let msg = 'Did not find renderer for output mimebundle.';
     if (!data) {
-      console.log('no data in', msg);
+      console.warn('Did not find renderer for output mimebundle.');
       return;
     }
 
     // Create the output result area.
     let child = rendermime.render({ bundle: data, trusted, injector });
     if (!child) {
-      console.log('no child', msg);
-      console.log('\tdata', data);
       return;
     }
     this.setOutput(child);
@@ -823,6 +818,7 @@ class OutputWidget extends Widget {
   protected getBundle(output: nbformat.IOutput): nbformat.MimeBundle {
     let bundle: nbformat.MimeBundle;
     switch (output.output_type) {
+    case 'execute_reply':
     case 'execute_result':
       bundle = (output as nbformat.IExecuteResult).data;
       break;
@@ -830,8 +826,9 @@ class OutputWidget extends Widget {
       bundle = (output as nbformat.IDisplayData).data;
       break;
     case 'stream':
+      let text = (output as nbformat.IStream).text;
       bundle = {
-        'application/vnd.jupyter.console-text': (output as nbformat.IStream).text
+        'application/vnd.jupyter.console-text': text
       };
       break;
     case 'error':
@@ -841,6 +838,8 @@ class OutputWidget extends Widget {
         'application/vnd.jupyter.console-text': traceback ||
           `${out.ename}: ${out.evalue}`
       };
+      break;
+    default:
       break;
     }
     return bundle || {};

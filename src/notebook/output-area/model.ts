@@ -197,7 +197,6 @@ class OutputAreaModel implements IDisposable {
         case 'error':
           let model = msg.content as nbformat.IOutput;
           model.output_type = msgType as nbformat.OutputType;
-          console.log('ONE model', model);
           this.add(model);
           break;
         case 'clear_output':
@@ -212,7 +211,6 @@ class OutputAreaModel implements IDisposable {
         let msgType = msg.header.msg_type;
         switch (msgType) {
         case 'execute_reply':
-          console.log('reply msg', msg);
           let content = msg.content as KernelMessage.IExecuteOkReply;
           let payload = content && content.payload;
           if (!payload) {
@@ -228,7 +226,6 @@ class OutputAreaModel implements IDisposable {
             data: (page as any).data as nbformat.MimeBundle,
             metadata: {}
           };
-          console.log('TWO model', model);
           this.add(model);
           break;
         default:
