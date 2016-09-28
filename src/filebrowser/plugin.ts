@@ -115,7 +115,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 
   let addCreator = (name: string) => {
     let disposables = creatorCmds[name] = new DisposableSet();
-    let command = `file-operations:new-${name}`;
+    let command = Private.commandForName(name);
     disposables.add(commands.addCommand(command, {
       execute: () => {
         fbWidget.createFrom(name);
@@ -293,7 +293,7 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
   let menu = new Menu({ commands, keymap });
   menu.title.label = 'File';
   creatorCmds.forEach(name => {
-    menu.addItem({ command: `file-operations:new-${name}` });
+    menu.addItem({ command: Private.commandForName(name) });
   });
   [
     cmdIds.save,
@@ -421,4 +421,13 @@ namespace Private {
    */
   export
   let id = 0;
+
+  /**
+   * Get the command for a name.
+   */
+  export
+  function commandForName(name: string): string {
+    name = name.split(' ').join('-').toLocaleLowerCase();
+    return `file-operations:new-${name}`;
+  }
 }
