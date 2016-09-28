@@ -98,7 +98,6 @@ class OutputAreaModel implements IDisposable {
       this.clear();
       this.clearNext = false;
     }
-
     if (output.output_type === 'input_request') {
       this.list.add(output);
     }
@@ -129,6 +128,7 @@ class OutputAreaModel implements IDisposable {
     } else {
       switch (value.output_type) {
       case 'stream':
+      case 'execute_reply':
       case 'execute_result':
       case 'display_data':
       case 'error':
@@ -197,6 +197,7 @@ class OutputAreaModel implements IDisposable {
         case 'error':
           let model = msg.content as nbformat.IOutput;
           model.output_type = msgType as nbformat.OutputType;
+          console.log('ONE model', model);
           this.add(model);
           break;
         case 'clear_output':
@@ -208,6 +209,31 @@ class OutputAreaModel implements IDisposable {
       };
       // Handle the execute reply.
       future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
+        let msgType = msg.header.msg_type;
+        switch (msgType) {
+        case 'execute_reply':
+          console.log('reply msg', msg);
+          let content = msg.content as KernelMessage.IExecuteOkReply;
+          let payload = content && content.payload;
+          if (!payload) {
+            break;
+          }
+          let page = payload.filter(i => (i as any).source === 'page')[0];
+          if (!page) {
+            break;
+          }
+          let model: nbformat.IOutput = {
+            execution_count: msg.content.execution_count,
+            output_type: 'execute_reply',
+            data: (page as any).data as nbformat.MimeBundle,
+            metadata: {}
+          };
+          console.log('TWO model', model);
+          this.add(model);
+          break;
+        default:
+          break;
+        }
         resolve(msg);
       };
       // Handle stdin.
