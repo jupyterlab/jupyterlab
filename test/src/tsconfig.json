@@ -8,6 +8,5 @@
     "target": "ES5",
     "outDir": "../build",
     "sourceMap": true
-  },
-  "exclude": ["notebook"]
+  }
 }
