@@ -6,7 +6,8 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
-    "outDir": "../build"
+    "outDir": "../build",
+    "sourceMap": true
   },
   "exclude": ["notebook"]
 }
