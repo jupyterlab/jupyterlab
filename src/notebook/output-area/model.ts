@@ -222,7 +222,6 @@ class OutputAreaModel implements IDisposable {
         }
         let page = JSON.parse(JSON.stringify(pages[0]));
         let model: nbformat.IOutput = {
-          execution_count: msg.content.execution_count,
           output_type: 'display_data',
           data: (page as any).data as nbformat.MimeBundle,
           metadata: {}
