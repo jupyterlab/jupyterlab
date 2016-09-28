@@ -98,7 +98,6 @@ class OutputAreaModel implements IDisposable {
       this.clear();
       this.clearNext = false;
     }
-
     if (output.output_type === 'input_request') {
       this.list.add(output);
     }
@@ -209,6 +208,25 @@ class OutputAreaModel implements IDisposable {
       // Handle the execute reply.
       future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
         resolve(msg);
+        // API responses that contain a pager are special cased and their type
+        // is overriden from 'execute_reply' to 'display_data' in order to
+        // render output.
+        let content = msg.content as KernelMessage.IExecuteOkReply;
+        let payload = content && content.payload;
+        if (!payload || !payload.length) {
+          return;
+        }
+        let pages = payload.filter(i => (i as any).source === 'page');
+        if (!pages.length) {
+          return;
+        }
+        let page = JSON.parse(JSON.stringify(pages[0]));
+        let model: nbformat.IOutput = {
+          output_type: 'display_data',
+          data: (page as any).data as nbformat.MimeBundle,
+          metadata: {}
+        };
+        this.add(model);
       };
       // Handle stdin.
       future.onStdin = (msg: KernelMessage.IStdinMessage) => {
