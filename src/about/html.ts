@@ -14,7 +14,7 @@ const html = `
                     <span class="jp-img jp-About-logo"></span>
                     <p class="header">Welcome to the JupyterLab Alpha preview</p>
                     <div class="desc-one">
-                        <p>Click on the JupyterLab tab for the initial JupyterLab screen.</p>
+                        <p>Click on the Launcher tab for the initial JupyterLab screen.</p>
                         <p>This demo gives an Alpha-level developer preview of the JupyterLab environment. <b>It is not ready for general usage yet.</b> We are developing JupyterLab at <a href="https://github.com/jupyter/jupyterlab">https://github.com/jupyter/jupyterlab</a>. Pull requests are welcome!</p>
                         <p>Here is a brief description of some of the things you'll find in this demo.</p>
                     </div>
