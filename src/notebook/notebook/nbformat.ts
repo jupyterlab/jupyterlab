@@ -254,7 +254,7 @@ namespace nbformat {
    * The valid output types.
    */
   export
-  type OutputType = 'execute_result' | 'display_data' | 'stream' | 'error';
+  type OutputType = 'execute_reply' | 'execute_result' | 'display_data' | 'stream' | 'error';
 
 
   /**
@@ -266,6 +266,28 @@ namespace nbformat {
      * Type of cell output.
      */
     output_type: OutputType;
+  }
+
+
+  /**
+   * Result of a non-execution reply to a code cell execution.
+   */
+  export
+  interface IExecuteReply extends IBaseOutput {
+    /**
+     * Type of cell output.
+     */
+    output_type: 'execute_reply';
+
+    /**
+     * A result's prompt number.
+     */
+    execution_count: number;
+
+    /**
+     * A mime-type keyed dictionary of data.
+     */
+    data: MimeBundle;
   }
 
 
@@ -371,5 +393,5 @@ namespace nbformat {
    * An output union type.
    */
   export
-  type IOutput = IExecuteResult | IDisplayData | IStream | IError;
+  type IOutput = IExecuteReply | IExecuteResult | IDisplayData | IStream | IError;
 }
