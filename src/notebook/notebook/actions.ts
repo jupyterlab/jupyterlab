@@ -958,23 +958,28 @@ namespace Private {
     let setNextInput = content.payload.filter(i => {
       return (i as any).source === 'set_next_input';
     })[0];
-    if (setNextInput) {
-      let text = (setNextInput as any).text;
-      let replace = (setNextInput as any).replace;
-      if (replace) {
-        child.model.source = text;
-      } else {
-        // Create a new code cell and add as the next cell.
-        let cell = parent.model.factory.createCodeCell();
-        cell.source = text;
-        let cells = parent.model.cells;
-        let i = cells.indexOf(child.model);
-        if (i === -1) {
-          cells.add(cell);
-        } else {
-          cells.insert(i + 1, cell);
-        }
-      }
+
+    if (!setNextInput) {
+      return;
+    }
+
+    let text = (setNextInput as any).text;
+    let replace = (setNextInput as any).replace;
+
+    if (replace) {
+      child.model.source = text;
+      return;
+    }
+
+    // Create a new code cell and add as the next cell.
+    let cell = parent.model.factory.createCodeCell();
+    cell.source = text;
+    let cells = parent.model.cells;
+    let i = cells.indexOf(child.model);
+    if (i === -1) {
+      cells.add(cell);
+    } else {
+      cells.insert(i + 1, cell);
     }
   }
 
