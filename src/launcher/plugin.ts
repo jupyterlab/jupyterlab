@@ -142,8 +142,15 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
  * Simple encapsulation of name and callback of launcher entries.
  */
 class LauncherItem {
-  constructor(public name: string, public clickCallback: () => void) {
-    }
+
+  readonly name: string;
+ 
+  readonly clickCallback: () => void;
+ 
+  constructor(name: string, clickCallback: () => void) {
+    this.name = name;
+    this.clickCallback = clickCallback;
+  }
 }
 
 
