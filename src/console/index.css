@@ -59,26 +59,11 @@
 }
 
 
-/*
-TODO: Right now we have to copy this style that is applied in the notebook
-using the selecetor `.jp-Notebook .jp-Output pre`, but we need to style
-output in a manner that works everywhere, not just in the notebook
-*/
-.jp-ConsoleContent .jp-Output pre {
-  border: none;
-  margin: 1px 0 0 5px;
-  overflow-x: auto;
-  overflow-y: auto;
-  word-break: break-all;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-}
-
-
 .jp-ConsoleContent-content .jp-InputArea-editor.jp-CellEditor {
   background: transparent;
   border-color: transparent;
 }
+
 
 /* TODO: we should be able to use notebook styles for this */
 .jp-ConsoleContent-input .jp-ConsoleContent-prompt.jp-Cell {

@@ -6,7 +6,7 @@
 @import './highlight.css';
 
 
-.jp-CellEditor > .CodeMirror {
+.CodeMirror {
   line-height: var(--jp-code-line-height);
   font-size: var(--jp-code-font-size);
   height: auto;
@@ -15,7 +15,7 @@
 }
 
 
-.jp-CellEditor > .CodeMirror pre {
+.CodeMirror pre {
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -24,12 +24,12 @@
 
 /* This causes https://github.com/jupyter/jupyterlab/issues/522 */
 /* May not cause it not because we changed it! */
-.jp-CellEditor .CodeMirror-lines {
+.CodeMirror-lines {
   padding: var(--jp-code-padding);
 }
 
 
-.jp-CellEditor .CodeMirror-linenumbers {
+.CodeMirror-linenumbers {
   padding: 0 4px 0 4px;
 }
 

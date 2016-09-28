@@ -5,6 +5,6 @@
 
 
 .jp-EditorWidget {
-    border-top: var(--jp-border-width) solid var(--jp-border-color2);
+    border-top: var(--jp-border-width) solid var(--jp-border-color1);
     margin-top: 4px;
 }
