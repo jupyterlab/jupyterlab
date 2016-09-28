@@ -152,8 +152,8 @@ class CSVWidget extends Widget {
     }
     if (parsed.length > RENDER_LIMIT) {
       console.warn(
-        `Table is too long to render, rendering ${RENDER_LIMIT} of
-         ${parsed.length} rows`
+        `Table is too long to render, rendering ${RENDER_LIMIT} of ` +
+        `${parsed.length} rows`
       );
     }
     table.appendChild(header);
