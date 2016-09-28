@@ -100,14 +100,14 @@
 }
 
 .jp-Launcher-tour {
-    margin-top: 14px;
-    height: 14px;
-    width: 100%;
-    cursor: pointer;
-    padding-bottom: 14px;
-    border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
-    background-position: top center;
-    background-repeat: no-repeat;
+  margin-top: 14px;
+  height: 14px;
+  width: 100%;
+  cursor: pointer;
+  padding-bottom: 14px;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  background-position: top center;
+  background-repeat: no-repeat;
 }
 
 .jp-Launcher-folder {
