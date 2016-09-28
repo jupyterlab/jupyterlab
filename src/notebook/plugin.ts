@@ -145,30 +145,17 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   registry.addModelFactory(new NotebookModelFactory());
   registry.addWidgetFactory(widgetFactory, options);
 
-  // Add the ability to launch notebooks for each kernel type.
-  let displayNameMap: { [key: string]: string } = Object.create(null);
-  let specs = services.kernelspecs;
-  for (let kernelName in specs.kernelspecs) {
-    let displayName = specs.kernelspecs[kernelName].spec.display_name;
-    displayNameMap[displayName] = kernelName;
-  }
-  let displayNames = Object.keys(displayNameMap).sort((a, b) => {
-    return a.localeCompare(b);
-  });
   registry.addFileType({
     name: 'Notebook',
     extension: '.ipynb',
     fileType: 'notebook',
     fileFormat: 'json'
   });
-  for (let displayName of displayNames) {
-    registry.addCreator({
-      name: `${displayName} Notebook`,
-      fileType: 'Notebook',
-      widgetName: 'Notebook',
-      kernelName: displayNameMap[displayName]
-    });
-  }
+  registry.addCreator({
+    name: 'Notebook',
+    fileType: 'Notebook',
+    widgetName: 'Notebook'
+  });
 
   addCommands(app, tracker);
   populatePalette(palette);
@@ -622,7 +609,6 @@ function createMenu(app: JupyterLab): Menu {
   settings.title.label = 'Settings';
   settings.addItem({ command: cmdIds.toggleAllLines });
 
-  menu.addItem({ command: 'file-operations:new-notebook' });
   menu.addItem({ command: cmdIds.undo });
   menu.addItem({ command: cmdIds.redo });
   menu.addItem({ command: cmdIds.split });

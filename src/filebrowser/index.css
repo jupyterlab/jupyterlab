@@ -282,3 +282,8 @@
   min-height: 120px;
   outline: none;
 }
+
+
+.jp-FileDialog.jp-mod-conflict input {
+  color: red;
+}

@@ -34,12 +34,12 @@ import {
 } from '../docmanager';
 
 import {
-  IFileType
-} from '../docregistry';
-
-import {
   IWidgetOpener
 } from './browser';
+
+import {
+  createFromDialog
+} from './dialogs';
 
 import {
   FileBrowserModel
@@ -158,27 +158,42 @@ class FileButtons extends Widget {
   }
 
   /**
+   * Create a file from a creator.
+   */
+  createFrom(creatorName: string): Promise<Widget> {
+    return createFromDialog(this.model, this.manager, creatorName).then(widget => {
+      return widget ? this._open(widget) : null;
+    });
+  }
+
+  /**
    * Open a file by path.
    */
-  open(path: string, widgetName='default', kernel?: IKernel.IModel): void {
-    let widget = this._manager.open(path, widgetName, kernel);
-    let opener = this._opener;
-    opener.open(widget);
-    let context = this._manager.contextForWidget(widget);
-    context.populated.connect(() => this.model.refresh() );
-    context.kernelChanged.connect(() => this.model.refresh() );
+  open(path: string, widgetName='default', kernel?: IKernel.IModel): Widget {
+    let widget = this._manager.findWidget(path, widgetName);
+    if (!widget) {
+      widget = this._manager.open(path, widgetName, kernel);
+    }
+    return this._open(widget);
   }
 
   /**
    * Create a new file by path.
    */
-  createNew(path: string, widgetName='default', kernel?: IKernel.IModel): void {
+  createNew(path: string, widgetName='default', kernel?: IKernel.IModel): Widget {
     let widget = this._manager.createNew(path, widgetName, kernel);
-    let opener = this._opener;
-    opener.open(widget);
+    return this._open(widget);
+  }
+
+  /**
+   * Open a widget and attach listeners.
+   */
+  private _open(widget: Widget): Widget {
+    this._opener.open(widget);
     let context = this._manager.contextForWidget(widget);
     context.populated.connect(() => this.model.refresh() );
     context.kernelChanged.connect(() => this.model.refresh() );
+    return widget;
   }
 
   /**
@@ -390,18 +405,6 @@ namespace Private {
   }
 
   /**
-   * Create a new source file.
-   */
-  export
-  function createNewFile(widget: FileButtons): void {
-    widget.model.newUntitled({ type: 'file' }).then(contents => {
-      return widget.open(contents.path);
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'New File Error', error);
-    });
-  }
-
-  /**
    * Create a new folder.
    */
   export
@@ -410,21 +413,6 @@ namespace Private {
       widget.model.refresh();
     }).catch(error => {
       utils.showErrorMessage(widget, 'New Folder Error', error);
-    });
-  }
-
-  /**
-   * Create a new item using a file creator.
-   */
-  function createNewItem(widget: FileButtons, fileType: IFileType, widgetName: string, kernelName?: string): void {
-    let kernel: IKernel.IModel;
-    if (kernelName) {
-      kernel = { name: kernelName };
-    }
-    widget.model.newUntitled(
-      { type: fileType.fileType, ext: fileType.extension })
-    .then(contents => {
-      widget.createNew(contents.path, widgetName, kernel);
     });
   }
 
@@ -443,13 +431,6 @@ namespace Private {
     // Remove all the commands associated with this menu upon disposal.
     menu.disposed.connect(() => disposables.dispose());
 
-    command = `${prefix}:new-text-file`;
-    disposables.add(commands.addCommand(command, {
-      execute: () => { createNewFile(widget); },
-      label: 'Text File'
-    }));
-    menu.addItem({ command });
-
     command = `${prefix}:new-text-folder`;
     disposables.add(commands.addCommand(command, {
       execute: () => { createNewFolder(widget); },
@@ -457,19 +438,11 @@ namespace Private {
     }));
     menu.addItem({ command });
 
-
-    if (creators) {
-      menu.addItem({ type: 'separator' });
-    }
     for (let creator of creators) {
-      let fileType = registry.getFileType(creator.fileType);
-
       command = `${prefix}:new-${creator.name}`;
       disposables.add(commands.addCommand(command, {
         execute: () => {
-          let widgetName = creator.widgetName || 'default';
-          let kernelName = creator.kernelName;
-          createNewItem(widget, fileType, widgetName, kernelName);
+          widget.createFrom(creator.name);
         },
         label: creator.name
       }));

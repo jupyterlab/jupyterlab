@@ -67,8 +67,6 @@ const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
  * The map of command ids used by the file browser.
  */
 const cmdIds = {
-  newText: 'file-operations:new-text-file',
-  newNotebook: 'file-operations:new-notebook',
   save: 'file-operations:save',
   restoreCheckpoint: 'file-operations:restore-checkpoint',
   saveAs: 'file-operations:saveAs',
@@ -111,6 +109,26 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     opener: opener
   });
 
+  let category = 'File Operations';
+  let creators = registry.listCreators();
+  let creatorCmds: { [key: string]: DisposableSet } = Object.create(null);
+
+  let addCreator = (name: string) => {
+    let disposables = creatorCmds[name] = new DisposableSet();
+    let command = Private.commandForName(name);
+    disposables.add(commands.addCommand(command, {
+      execute: () => {
+        fbWidget.createFrom(name);
+      },
+      label: `New ${name}`
+    }));
+    disposables.add(palette.addItem({ command, category }));
+  };
+
+  for (let creator of creators) {
+    addCreator(creator.name);
+  }
+
   // Add a context menu to the dir listing.
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
   node.addEventListener('contextmenu', (event: MouseEvent) => {
@@ -144,10 +162,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 
   addCommands(app, tracker, fbWidget, docManager);
 
-  let category = 'File Operations';
   [
-    cmdIds.newText,
-    cmdIds.newNotebook,
     cmdIds.save,
     cmdIds.restoreCheckpoint,
     cmdIds.saveAs,
@@ -155,12 +170,29 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     cmdIds.closeAllFiles,
   ].forEach(command => palette.addItem({ command, category }));
 
-  mainMenu.addMenu(createMenu(app), {rank: 1});
+  let menu = createMenu(app, Object.keys(creatorCmds));
+  mainMenu.addMenu(menu, {rank: 1});
 
   fbWidget.title.label = 'Files';
   fbWidget.id = 'file-browser';
   app.shell.addToLeftArea(fbWidget, { rank: 40 });
   app.commands.execute(cmdIds.showBrowser, void 0);
+
+  // Handle fileCreator items as they are added.
+  registry.changed.connect((sender, args) => {
+    if (args.type === 'fileCreator') {
+      menu.dispose();
+      let name = args.name;
+      if (args.change === 'added') {
+        addCreator(name);
+      } else {
+        creatorCmds[name].dispose();
+        delete creatorCmds[name];
+      }
+      menu = createMenu(app, Object.keys(creatorCmds));
+      mainMenu.addMenu(menu, {rank: 1});
+    }
+  });
 
   return fbModel;
 }
@@ -173,14 +205,6 @@ function addCommands(app: JupyterLab, tracker: FocusTracker<Widget>, fbWidget: F
   let commands = app.commands;
   let fbModel = fbWidget.model;
 
-  commands.addCommand(cmdIds.newText, {
-    label: 'New File',
-    execute: () => fbWidget.createNew({ type: 'file' })
-  });
-  commands.addCommand(cmdIds.newNotebook, {
-    label: 'New Notebook',
-    execute: () => fbWidget.createNew({ type: 'notebook' })
-  });
   commands.addCommand(cmdIds.save, {
     label: 'Save',
     caption: 'Save and create checkpoint',
@@ -264,20 +288,20 @@ function addCommands(app: JupyterLab, tracker: FocusTracker<Widget>, fbWidget: F
 /**
  * Create a top level menu for the file browser.
  */
-function createMenu(app: JupyterLab): Menu {
+function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
   let { commands, keymap } = app;
   let menu = new Menu({ commands, keymap });
   menu.title.label = 'File';
-
+  creatorCmds.forEach(name => {
+    menu.addItem({ command: Private.commandForName(name) });
+  });
   [
-    cmdIds.newText,
-    cmdIds.newNotebook,
     cmdIds.save,
     cmdIds.restoreCheckpoint,
     cmdIds.saveAs,
     cmdIds.close,
     cmdIds.closeAllFiles,
-  ].forEach(command => menu.addItem({ command }));
+  ].forEach(command => { menu.addItem({ command }); });
 
   return menu;
 }
@@ -294,7 +318,7 @@ function createContextMenu(fbWidget: FileBrowserWidget, openWith: Menu):  Menu {
   let command: string;
 
   // // Remove all the commands associated with this menu upon disposal.
-  menu.disposed.connect(() => disposables.dispose());
+  menu.disposed.connect(() => { disposables.dispose(); });
 
   command = `${prefix}:open`;
   disposables.add(commands.addCommand(command, {
@@ -397,4 +421,13 @@ namespace Private {
    */
   export
   let id = 0;
+
+  /**
+   * Get the command for a name.
+   */
+  export
+  function commandForName(name: string): string {
+    name = name.split(' ').join('-').toLocaleLowerCase();
+    return `file-operations:new-${name}`;
+  }
 }
