@@ -67,7 +67,6 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   launcherWidget.model = launcherModel;
   launcherWidget.id = 'landing-jupyterlab-widget';
   launcherWidget.title.label = 'Launcher';
-  launcherWidget.addClass('jp-Launcher');
 
   // Hardcoded defaults.
   let names = [
@@ -196,6 +195,11 @@ class LauncherModel  extends VDomModel {
  * A virtual-DOM-based widget for the Launcher.
  */
 class LauncherWidget extends VDomWidget<LauncherModel> {
+
+  constructor() {
+    super();
+    this.addClass('jp-LauncherWidget');
+  }
 
   protected render(): VNode | VNode[] {
     let children : VNode[] = [];
