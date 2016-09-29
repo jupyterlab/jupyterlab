@@ -75,6 +75,9 @@ class LabHandler(IPythonHandler):
         # Gather the lab extension files and entry points.
         for name in labextensions:
             data = get_labextension_manifest_data_by_name(name)
+            if data is None:
+                self.log.warn('Could not locate extension: ' + name)
+                continue
             for value in data.values():
                 if value.get('entry', None):
                     entries.append(value['entry'])
