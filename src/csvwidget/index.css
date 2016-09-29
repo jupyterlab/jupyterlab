@@ -65,7 +65,9 @@
 
 .jp-CSVWidget-warning {
   flex: 0 0 auto;
-  padding: 4px;
+  padding-left: 4px;
   overflow: auto;
   color: var(--jp-warn-color);
+  line-height: 1.5;
+  font-size: var(--jp-ui-font-size1);
 }
