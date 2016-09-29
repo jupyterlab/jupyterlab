@@ -5,17 +5,21 @@ module.exports = function (config) {
     basePath: '..',
     browsers: ['Firefox'],
     frameworks: ['mocha'],
-    reporters: ['mocha', 'coverage'],
+    reporters: ['mocha', 'coverage', 'remap-coverage'],
     files: [
       'node_modules/es6-promise/dist/es6-promise.js',
       'test/build/coverage.js'
     ],
+    preprocessors: {
+      'test/build/coverage.js': ['sourcemap']
+    },
     coverageReporter: {
-      reporters : [
-        { 'type': 'text' },
-        { 'type': 'lcov', dir: 'test/coverage' },
-        { 'type': 'html', dir: 'test/coverage' }
-      ]
+      type: 'in-memory'
+    },
+    remapCoverageReporter: {
+      'text-summary': null, // to show summary in console
+      json: 'test/coverage/remapped.json',
+      html: 'test/coverage/html'
     },
     port: 9876,
     colors: true,
