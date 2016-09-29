@@ -129,31 +129,14 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
     'file-operations:new-text-file',
   ]
 
-  let list : IDisposable[] = []; //DEMO
-  let l : IDisposable; //DEMO
-
   for (let i in names) {
     let itemName = names[i];
     let action = actions[i];
-    l = launcherModel.add(itemName, () => app.commands.execute(action, void 0));
-    list.push(l) // DEMO
+
+    // Note: we do not retain a handle on the items added by default, which
+    // means we have to way of removing them after the fact.
+    launcherModel.add(itemName, () => app.commands.execute(action, void 0));
   }
-
-  // DEMO
-  launcherModel.add('Add Random', () => {
-    let index = Math.floor(Math.random() * actions.length);
-    let itemName = names[index];
-    let action = actions[index];
-    l = launcherModel.add(itemName, () => app.commands.execute(action, void 0));
-    list.push(l);
-  });
-
-  launcherModel.add('Remove Last', () => {
-      list.pop().dispose();
-  });
-  //  end DEMO
-
-
 
   app.commands.addCommand('jupyterlab-launcher:add-item', {
     label: 'Add Launcher Item',
