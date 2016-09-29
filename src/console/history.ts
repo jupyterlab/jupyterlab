@@ -51,10 +51,13 @@ interface IConsoleHistory extends IDisposable {
    * If the item being added is undefined or empty, it is ignored. If the item
    * being added is the same as the last item in history, it is ignored as well
    * so that the console's history will consist of no contiguous repetitions.
-   * This behavior varies from some shells, but the Jupyter Qt Console is
-   * implemented this way.
    */
   push(item: string): void;
+
+  /**
+   * Reset the history navigation state, i.e., start a new history session.
+   */
+  reset(): void;
 }
 
 
@@ -146,15 +149,21 @@ class ConsoleHistory implements IConsoleHistory {
    * If the item being added is undefined or empty, it is ignored. If the item
    * being added is the same as the last item in history, it is ignored as well
    * so that the console's history will consist of no contiguous repetitions.
-   * This behavior varies from some shells, but the Jupyter Qt Console is
-   * implemented this way.
    */
   push(item: string): void {
     if (item && item !== this._history.back) {
       this._history.pushBack(item);
     }
-    // Reset the history navigation cursor back to the bottom.
+    this.reset();
+  }
+
+  /**
+   * Reset the history navigation state, i.e., start a new history session.
+   */
+  reset(): void {
     this._cursor = this._history.length;
+    this._hasSession = false;
+    this._placeholder = '';
   }
 
   /**
@@ -182,8 +191,10 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   private _cursor = 0;
+  private _hasSession = false;
   private _history: Vector<string> = null;
   private _kernel: IKernel = null;
+  private _placeholder: string = '';
 }
 
 
