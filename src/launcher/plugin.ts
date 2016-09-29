@@ -39,6 +39,52 @@ import {
 
 
 /**
+ * The class name added to LauncherWidget instances.
+ */
+const LAUNCHER_CLASS = 'jp-LauncherWidget';
+
+/**
+ * The class name added to LauncherWidget image nodes.
+ */
+const IMAGE_CLASS = 'jp-LauncherWidget-image';
+
+/**
+ * The class name added to LauncherWidget text nodes.
+ */
+const TEXT_CLASS = 'jp-LauncherWidget-text';
+
+/**
+ * The class name added to LauncherWidget column nodes.
+ */
+const COLUMN_CLASS = 'jp-LauncherWidget-column';
+
+/**
+ * The class name added to LauncherWidget folder node.
+ */
+const FOLDER_CLASS = 'jp-LauncherWidget-folder';
+
+/**
+ * The class name added to LauncherWidget path nodes.
+ */
+const PATH_CLASS = 'jp-LauncherWidget-path';
+
+/**
+ * The class name added to LauncherWidget current working directory node.
+ */
+const CWD_CLASS = 'jp-LauncherWidget-cwd';
+
+/**
+ * The class name added to LauncherWidget body nodes.
+ */
+const BODY_CLASS = 'jp-LauncherWidget-body';
+
+/**
+ * The class name added to LauncherWidget dialog node.
+ */
+const DIALOG_CLASS = 'jp-LauncherWidget-dialog';
+
+
+/**
  * The landing page extension.
  */
 export
@@ -205,7 +251,7 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
 
   constructor() {
     super();
-    this.addClass('jp-LauncherWidget');
+    this.addClass(LAUNCHER_CLASS);
   }
 
   protected render(): VNode | VNode[] {
@@ -213,25 +259,25 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
 
     for (let item of this.model.items) {
       let imgName = item.name.replace(' ', '');
-      let img = h.span({className: `jp-Image${imgName} jp-LauncherWidget-image`});
-      let text = h.span({className: 'jp-LauncherWidget-text' }, item.name);
+      let img = h.span({className: `jp-Image${imgName} ` + IMAGE_CLASS});
+      let text = h.span({className:  TEXT_CLASS }, item.name);
 
       let column = h.div({
-        className: 'jp-LauncherWidget-column',
+        className: COLUMN_CLASS,
         'onclick': item.clickCallback
       }, [img, text])
       children.push(column);
     }
 
-    let folderImage = h.span({ className: 'jp-LauncherWidget-folder' });
+    let folderImage = h.span({ className: FOLDER_CLASS });
     let p = this.model.path;
     let pathName = p.length ? 'home > ' + p.replace('/', ' > ') : 'home';
-    let path = h.span({ className: 'jp-LauncherWidget-path' }, pathName );
+    let path = h.span({ className: PATH_CLASS }, pathName );
 
-    let cwd = h.div({ className: 'jp-LauncherWidget-cwd' }, [folderImage, path]);
-    let body = h.div({ className: 'jp-LauncherWidget-body' }, children);
+    let cwd = h.div({ className: CWD_CLASS }, [folderImage, path]);
+    let body = h.div({ className: BODY_CLASS  }, children);
 
-    return h.div({ className: 'jp-LauncherWidget-dialog'}, [ cwd, body ]);
+    return h.div({ className: DIALOG_CLASS}, [ cwd, body ]);
 
   }
 }
