@@ -94,7 +94,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   }
 
   // DEMO
-  launcherModel.add("Add Random", () => {
+  launcherModel.add('Add Random', () => {
     let index = Math.floor(Math.random() * actions.length);
     let itemName = names[index];
     let action = actions[index];
@@ -102,7 +102,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
     list.push(l);
   });
 
-  launcherModel.add("Remove Last", () => {
+  launcherModel.add('Remove Last', () => {
       list.pop().dispose();
   });
   //  end DEMO
@@ -158,9 +158,9 @@ class LauncherItem {
  * LauncherModel keeps track of the path to working directory and has a list of
  * LauncherItems.
  */
-class LauncherModel  extends VDomModel {
-  items : LauncherItem[] = [];
-  path : string = 'home';
+class LauncherModel extends VDomModel {
+  items: LauncherItem[] = [];
+  path: string = 'home';
   /**
    * Convenience method to add a launcher with a given name and callback.
    *
@@ -229,7 +229,7 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
     let path = h.span({ className: 'jp-LauncherWidget-path' }, pathName );
 
     let cwd = h.div({ className: 'jp-LauncherWidget-cwd' }, [folderImage, path]);
-    let body = h.div({ className: "jp-LauncherWidget-body" }, children);
+    let body = h.div({ className: 'jp-LauncherWidget-body' }, children);
 
     return h.div({ className: 'jp-LauncherWidget-dialog'}, [ cwd, body ]);
 
