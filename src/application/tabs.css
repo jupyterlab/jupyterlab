@@ -261,5 +261,4 @@
   height: var(--jp-private-horizontal-tab-active-top-border);
   width: calc(100% + 2*var(--jp-border-width));
   background: var(--jp-brand-color1);
-  z-index: 3;
 }
