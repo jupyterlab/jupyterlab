@@ -38,7 +38,7 @@ import {
 } from '../notebook/cells';
 
 import {
-  EdgeLocation, ICellEditorWidget
+  EdgeLocation, ICellEditorWidget, ITextChange
 } from '../notebook/cells/editor';
 
 import {
@@ -401,6 +401,17 @@ class ConsoleContent extends Widget {
   }
 
   /**
+   * Handle a text change signal from the editor.
+   */
+  protected onTextChange(editor: ICellEditorWidget, args: ITextChange): void {
+    if (this._setByHistory) {
+      this._setByHistory = false;
+      return;
+    }
+    this._history.reset();
+  }
+
+  /**
    * Handle `update_request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -442,9 +453,10 @@ class ConsoleContent extends Widget {
     prompt.addClass(PROMPT_CLASS);
     this._input.addWidget(prompt);
 
-    // Hook up completer and history handling.
+    // Hook up history handling.
     let editor = prompt.editor;
     editor.edgeRequested.connect(this.onEdgeRequest, this);
+    editor.textChanged.connect(this.onTextChange, this);
 
     // Associate the new prompt with the completer and inspection handlers.
     this._completerHandler.activeCell = prompt;
