@@ -64,9 +64,9 @@
 
   /* State colors (warn, error, success, info) */
 
-  --jp-warn-color: var(--md-orange-500);
-  --jp-error-color: var(--md-red-500);
-  --jp-success-color: var(--md-green-500);
-  --jp-info-color: var(--jp-brand-color1);
+  --jp-warn-color1: var(--md-orange-500);
+  --jp-error-color1: var(--md-red-500);
+  --jp-success-color1: var(--md-green-500);
+  --jp-info-color1: var(--jp-brand-color1);
 
 }
