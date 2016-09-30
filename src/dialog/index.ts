@@ -3,17 +3,17 @@
 
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  Message
+} from 'phosphor/lib/core/messaging';
 
 import {
   Panel
 } from 'phosphor/lib/ui/panel';
 
-import {
-  Message
-} from 'phosphor/lib/core/messaging';
 
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
 
 /**
  * The class name added to dialog instances.

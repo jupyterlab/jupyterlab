@@ -4,16 +4,16 @@
 import expect = require('expect.js');
 
 import {
-  simulate
-} from 'simulate-event';
+  Message
+} from 'phosphor/lib/core/messaging';
 
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
-  Message
-} from 'phosphor/lib/core/messaging';
+  simulate
+} from 'simulate-event';
 
 import {
   showDialog, okButton
