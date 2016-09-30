@@ -148,7 +148,10 @@ describe('dialog/index', () => {
         let body = new TestWidget(resolve);
         showDialog({ body });
       });
-      promise.then(done);
+      promise.then(() => {
+        dismissDialog();
+        done();
+      });
     });
 
   });
