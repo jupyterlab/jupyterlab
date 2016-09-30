@@ -241,7 +241,7 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
     let children : VNode[] = [];
 
     for (let item of this.model.items) {
-      let imgName = item.name.replace(' ', '');
+      let imgName = item.name.replace(/\ /g, '');
       let img = h.span({className: `jp-Image${imgName} ` + IMAGE_CLASS});
       let text = h.span({className:  TEXT_CLASS }, item.name);
 
@@ -254,7 +254,7 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
 
     let folderImage = h.span({ className: FOLDER_CLASS });
     let p = this.model.path;
-    let pathName = p.length ? 'home > ' + p.replace('/', ' > ') : 'home';
+    let pathName = p.length ? 'home > ' + p.replace(/\//g, ' > ') : 'home';
     let path = h.span({ className: PATH_CLASS }, pathName );
 
     let cwd = h.div({ className: CWD_CLASS }, [folderImage, path]);
