@@ -33,7 +33,6 @@
 }
 
 .p-CommandPalette-wrapper {
-  background: var(--jp-brand-color1);
   overflow: overlay;
   padding: 0px 8px;
 }
@@ -54,25 +53,25 @@
   border: none;
   outline: none;
   font-size: var(--jp-ui-font-size1);
-  color: var(--jp-inverse-ui-font-color0);
+  color: var(--jp-ui-font-color0);
   line-height: var(--jp-private-commandpalette-search-height);
 }
 
 
 .p-CommandPalette-input::-webkit-input-placeholder {
-  color: var(--jp-inverse-ui-font-color0);
+  color: var(--jp-ui-font-color3);
   font-size: var(--jp-ui-font-size1);
 }
 
 
 .p-CommandPalette-input::-moz-placeholder {
-  color: var(--jp-inverse-ui-font-color0);
+  color: var(--jp-ui-font-color3);
   font-size: var(--jp-ui-font-size1);
 }
 
 
 .p-CommandPalette-input:-ms-input-placeholder {
-  color: var(--jp-inverse-ui-font-color0);
+  color: var(--jp-ui-font-color3);
   font-size: var(--jp-ui-font-size1);
 }
 
