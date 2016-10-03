@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   DisposableDelegate, IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -103,6 +107,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   let launcherModel = new LauncherModel();
 
   launcherModel.setDir(pathTracker.path);
+  launcherModel.setApp(app);
 
   pathTracker.pathChanged.connect(() => {
     launcherModel.setDir(pathTracker.path);
@@ -129,22 +134,25 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
     'file-operations:new-text-file',
   ]
 
-  for (let i in names) {
-    let itemName = names[i];
-    let action = actions[i];
-
-    // Note: we do not retain a handle on the items added by default, which
-    // means we have to way of removing them after the fact.
-    launcherModel.add(itemName, () => app.commands.execute(action, void 0));
-  }
-
   app.commands.addCommand('jupyterlab-launcher:add-item', {
     label: 'Add Launcher Item',
-    execute: args => {
-      // I'm not sure how to handle this -pi
-      launcherModel.add(args['name'] as string, args['clickCallback'] as any);
+    execute: (args) => {
+      launcherModel.add(args['name'] as string, args['action'] as string,
+                        args['args'] as JSONObject, args['imgName'] as string);
     }
   });
+
+  for (let i in names) {
+    // Note: we do not retain a handle on the items added by default, which
+    // means we have to way of removing them after the fact.
+    //launcherModel.add(names[i], actions[i]);
+    //launcherModel.add(names[i], actions[i]);
+    app.commands.execute('jupyterlab-launcher:add-item', {name: names[i], action: actions[i]});
+  }
+
+    app.commands.execute('jupyterlab-launcher:add-item', {name: 'larger font', action: 'terminal:increase-font', imgName: "jp-ImageTerminal fa fa-plus"})
+
+    app.commands.execute('jupyterlab-launcher:add-item', {name: 'smaller font', action: 'terminal:decrease-font', imgName: "jp-ImageTerminal fa fa-minus"})
 
 
   app.commands.addCommand('jupyterlab-launcher:show', {
@@ -152,9 +160,8 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
     execute: () => {
       if (!launcherWidget.isAttached) {
         app.shell.addToLeftArea(launcherWidget);
-      } else {
-        app.shell.activateMain(launcherWidget.id);
       }
+      app.shell.activateLeft(launcherWidget.id);
     }
   });
 
@@ -175,10 +182,17 @@ class LauncherItem {
   readonly name: string;
  
   readonly clickCallback: () => void;
+  
+  readonly imgName: string;
  
-  constructor(name: string, clickCallback: () => void) {
+  constructor(name: string, clickCallback: () => void, imgName?: string) {
     this.name = name;
     this.clickCallback = clickCallback;
+    if (imgName) {
+      this.imgName = imgName;
+    } else {
+      this.imgName = 'jp-Image' + name.replace(/\ /g, '');
+    }
   }
 }
 
@@ -190,14 +204,16 @@ class LauncherItem {
 class LauncherModel extends VDomModel {
   items: LauncherItem[] = [];
   path: string = 'home';
+  app: JupyterLab;
   /**
    * Convenience method to add a launcher with a given name and callback.
    *
    * This keeps plugins who wish to register themselves in the Launcher from
    * having to import both LauncherItems and LauncherItem.
    */
-  add(name: string, clickCallback: () => void) : IDisposable {
-    return this.addItem(new LauncherItem(name, clickCallback));
+  add(name: string, action: string, args?: JSONObject, imgName?: string) : IDisposable {
+    let clickCallback = () => { this.app.commands.execute( action, args) };
+    return this.addItem(new LauncherItem(name, clickCallback, imgName));
   }
 
   /**
@@ -224,6 +240,9 @@ class LauncherModel extends VDomModel {
     this.path = path;
     this.stateChanged.emit(void 0);
   }
+  setApp(app: JupyterLab) : void {
+    this.app = app;
+  }
 }
 
 
@@ -241,8 +260,7 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
     let children : VNode[] = [];
 
     for (let item of this.model.items) {
-      let imgName = item.name.replace(/\ /g, '');
-      let img = h.span({className: `jp-Image${imgName} ` + IMAGE_CLASS});
+      let img = h.span({className: item.imgName + ' ' + IMAGE_CLASS});
       let text = h.span({className:  TEXT_CLASS }, item.name);
 
       let column = h.div({

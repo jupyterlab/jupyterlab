@@ -135,7 +135,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
   dialog.appendChild(cwd);
 
   app.commands.addCommand('jupyterlab-landing:show', {
-    label: 'Show Launcher',
+    label: 'Show Landing',
     execute: () => {
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
