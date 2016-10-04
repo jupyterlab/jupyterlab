@@ -7,6 +7,9 @@ module.exports = function (config) {
       'node_modules/es6-promise/dist/es6-promise.js',
       'test/build/bundle.js'
     ],
+    preprocessors: {
+      'test/build/bundle.js': ['sourcemap']
+    },
     port: 9876,
     colors: true,
     singleRun: true,

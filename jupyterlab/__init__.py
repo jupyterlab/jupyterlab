@@ -21,8 +21,8 @@ If you're working on the TypeScript sources of JupyterLab, try running
 
     npm run watch
 
-from the JupyterLab repo directory in another terminal window to have the 
-system incrementally watch and build JupyterLab's TypeScript for you, as you 
+from the JupyterLab repo directory in another terminal window to have the
+system incrementally watch and build JupyterLab's TypeScript for you, as you
 make changes.
 """
 
