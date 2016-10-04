@@ -76,11 +76,6 @@ const IInspector = new Token<IInspector>('jupyter.services.inspector');
 export
 interface IInspector {
   /**
-   * The orientation of the inspector panel.
-   */
-  orientation: Inspector.Orientation;
-
-  /**
    * The source of events the inspector panel listens for.
    */
   source: Inspector.IInspectable;
@@ -102,7 +97,6 @@ class Inspector extends TabPanel implements IInspector {
     // Create inspector child items and add them to the inspectors panel.
     (options.items || []).forEach(value => {
       let widget = value.widget || new InspectorItem();
-      widget.orientation = this._orientation as Inspector.Orientation;
       widget.rank = value.rank;
       widget.remembers = !!value.remembers;
       widget.title.closable = false;
@@ -112,23 +106,6 @@ class Inspector extends TabPanel implements IInspector {
       }
       this._items[value.type] = widget;
       this.addWidget(widget);
-    });
-  }
-
-  /**
-   * The orientation of the inspector panel.
-   */
-  get orientation(): Inspector.Orientation {
-    return this._orientation;
-  }
-  set orientation(orientation: Inspector.Orientation) {
-    if (this._orientation === orientation) {
-      return;
-    }
-
-    this._orientation = orientation;
-    Object.keys(this._items).forEach(i => {
-      this._items[i].orientation = orientation;
     });
   }
 
@@ -228,7 +205,6 @@ class Inspector extends TabPanel implements IInspector {
   }
 
   private _items: { [type: string]: InspectorItem } = Object.create(null);
-  private _orientation: Inspector.Orientation = 'horizontal';
   private _source: Inspector.IInspectable = null;
 }
 
@@ -238,12 +214,6 @@ class Inspector extends TabPanel implements IInspector {
  */
 export
 namespace Inspector {
-  /**
-   * The orientation options of an inspector panel.
-   */
-  export
-  type Orientation = 'horizontal' | 'vertical';
-
   /**
    * The definition of an inspector.
    */
@@ -333,13 +303,6 @@ namespace Inspector {
      * will be rendered in the inspectors tab panel.
      */
     items?: IInspectorItem[];
-
-    /**
-     * The orientation of the inspector panel.
-     *
-     * The default value is `'horizontal'`.
-     */
-    orientation?: Orientation;
   }
 }
 
@@ -384,20 +347,6 @@ class InspectorItem extends Panel {
         this._index++;
       }
     }
-  }
-
-  /**
-   * The display orientation of the inspector widget.
-   */
-  get orientation(): Inspector.Orientation {
-    return this._orientation;
-  }
-  set orientation(newValue: Inspector.Orientation) {
-    if (newValue === this._orientation) {
-      return;
-    }
-    this._orientation = newValue;
-    this.update();
   }
 
   /**
@@ -540,7 +489,6 @@ class InspectorItem extends Panel {
   private _content: Widget = null;
   private _history: Widget[] = null;
   private _index: number = -1;
-  private _orientation: Inspector.Orientation = 'horizontal';
   private _rank: number = Infinity;
   private _remembers: boolean = false;
   private _toolbar: Toolbar = null;
