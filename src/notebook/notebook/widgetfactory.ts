@@ -78,6 +78,8 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     let rendermime = this._rendermime.clone();
     if (kernel) {
       context.changeKernel(kernel);
+    } else if (!context.kernel) {
+      context.changeKernel({ name: context.kernelspecs.default });
     }
     let panel = new NotebookPanel({
       rendermime,

@@ -39,6 +39,9 @@ import {
 } from '../../lib/sanitizer';
 
 
+/**
+ * Get a copy of the default rendermime instance.
+ */
 export
 function defaultRenderMime(): RenderMime {
   return Private.rendermime.clone();
