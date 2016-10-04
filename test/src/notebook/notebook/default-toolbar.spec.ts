@@ -87,16 +87,16 @@ describe('notebook/notebook/default-toolbar', () => {
       context.model.fromJSON(DEFAULT_CONTENT);
       panel.context = context;
       let name = context.kernelspecs.default;
-      context.changeKernel({ name }).then(() => {
+      context.changeKernel({ name }).then(kernel => {
         done();
       }).catch(done);
     });
 
     afterEach(() => {
-      if (panel.kernel) {
-        panel.kernel.shutdown();
-      }
       panel.dispose();
+      if (context.kernel) {
+        context.kernel.shutdown();
+      }
     });
 
     describe('#createSaveButton()', () => {
@@ -209,8 +209,7 @@ describe('notebook/notebook/default-toolbar', () => {
         next.rendered = false;
         Widget.attach(button, document.body);
         panel.kernel.statusChanged.connect((sender, status) => {
-          if (status === 'idle') {
-            expect(cell.model.outputs.length).to.be.above(0);
+          if (status === 'idle' && cell.model.outputs.length > 0) {
             expect(next.rendered).to.be(true);
             button.dispose();
             done();
@@ -346,6 +345,9 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should display a busy status if the kernel status is not idle', (done) => {
         let item = createKernelStatusItem(panel);
         panel.kernel.statusChanged.connect(() => {
+          if (!panel.kernel) {
+            return;
+          }
           if (panel.kernel.status === 'idle') {
             expect(item.hasClass('jp-mod-busy')).to.be(false);
             panel.kernel.interrupt();
@@ -362,6 +364,9 @@ describe('notebook/notebook/default-toolbar', () => {
         let status = panel.kernel.status;
         expect(item.node.title.toLowerCase()).to.contain(status);
         panel.kernel.statusChanged.connect(() => {
+          if (!panel.kernel) {
+            return;
+          }
           if (panel.kernel.status === 'idle') {
             panel.kernel.interrupt();
           }
@@ -377,6 +382,9 @@ describe('notebook/notebook/default-toolbar', () => {
         let name = context.kernelspecs.default;
         panel.context.changeKernel({ name }).then(() => {
           panel.kernel.statusChanged.connect(() => {
+            if (!panel.kernel) {
+              return;
+            }
             if (panel.kernel.status === 'idle') {
               panel.kernel.interrupt();
             }
@@ -405,6 +413,9 @@ describe('notebook/notebook/default-toolbar', () => {
           let name = context.kernelspecs.default;
           return context.changeKernel({ name }).then(() => {
             panel.kernel.statusChanged.connect(() => {
+              if (!panel.kernel) {
+                return;
+              }
               if (panel.kernel.status === 'idle') {
                 panel.kernel.interrupt();
               }
@@ -419,16 +430,16 @@ describe('notebook/notebook/default-toolbar', () => {
 
     });
 
-    // describe('#populateDefaults()', () => {
+    describe('#populateDefaults()', () => {
 
-    //   it('should add the default items to the panel toolbar', () => {
-    //     ToolbarItems.populateDefaults(panel);
-    //     expect(panel.toolbar.list()).to.eql(['save', 'insert', 'cut',
-    //       'copy', 'paste', 'run', 'interrupt', 'restart', 'cellType',
-    //       'kernelName', 'kernelStatus']);
-    //   });
+      it('should add the default items to the panel toolbar', () => {
+        ToolbarItems.populateDefaults(panel);
+        expect(panel.toolbar.list()).to.eql(['save', 'insert', 'cut',
+          'copy', 'paste', 'run', 'interrupt', 'restart', 'cellType',
+          'kernelName', 'kernelStatus']);
+      });
 
-    // });
+    });
 
   });
 
