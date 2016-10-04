@@ -4,12 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  KernelMessage
+  KernelMessage, IKernel, startNewKernel
 } from 'jupyter-js-services';
-
-import {
-  MockKernel
-} from 'jupyter-js-services/lib/mockkernel';
 
 import {
   BaseCellWidget, CellModel
@@ -76,6 +72,21 @@ class TestCompleterHandler extends CellCompleterHandler {
 
 describe('completer/handler', () => {
 
+  let kernel: IKernel;
+
+  beforeEach((done) => {
+    startNewKernel().then(k => {
+      kernel = k;
+      done();
+    });
+  });
+
+  afterEach(() => {
+    kernel.shutdown().then(() => {
+      kernel.dispose();
+    });
+  });
+
   describe('CellCompleterHandler', () => {
 
     describe('#constructor()', () => {
@@ -96,10 +107,8 @@ describe('completer/handler', () => {
 
       it('should be settable', () => {
         let handler = new CellCompleterHandler(new CompleterWidget());
-        let kernel = new MockKernel();
         expect(handler.kernel).to.be(null);
         handler.kernel = kernel;
-        expect(handler.kernel).to.be.a(MockKernel);
         expect(handler.kernel).to.be(kernel);
       });
 
@@ -158,7 +167,6 @@ describe('completer/handler', () => {
 
       it('should dispose of the handler resources', () => {
         let handler = new CellCompleterHandler(new CompleterWidget());
-        let kernel = new MockKernel();
         handler.kernel = kernel;
         expect(handler.isDisposed).to.be(false);
         expect(handler.kernel).to.be.ok();
@@ -196,11 +204,10 @@ describe('completer/handler', () => {
         });
       });
 
-      // TODO: This test needs to be fixed when MockKernel is updated.
+      // TODO: This test needs to be updated to use a python kernel.
       it('should resolve if handler has a kernel', () => {
-        console.warn('This test needs to be fixed when MockKernel is updated.');
+        console.warn('This test needs to be updated to use a python kernel.');
         let handler = new TestCompleterHandler(new CompleterWidget());
-        let kernel = new MockKernel();
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -400,7 +407,7 @@ describe('completer/handler', () => {
           renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
         });
 
-        handler.kernel = new MockKernel();
+        handler.kernel = kernel;
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('makeRequest');
         cell.editor.completionRequested.emit(request);
