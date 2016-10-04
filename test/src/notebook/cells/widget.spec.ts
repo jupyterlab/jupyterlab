@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  MockKernel
-} from 'jupyter-js-services/lib/mockkernel';
+  startNewKernel
+} from 'jupyter-js-services';
 
 import {
   Message, sendMessage
@@ -58,6 +58,8 @@ const RENDERED_CLASS = 'jp-mod-rendered';
 const PROMPT_CLASS = 'jp-Cell-prompt';
 
 const rendermime = defaultRenderMime();
+
+const kernelPromise = startNewKernel();
 
 
 class LogBaseCell extends BaseCellWidget {
@@ -584,22 +586,28 @@ describe('notebook/cells/widget', () => {
 
       it('should fulfill a promise if there is no code to execute', (done) => {
         let widget = new CodeCellWidget({ rendermime, renderer: CodeMirrorNotebookRenderer.defaultCodeCellRenderer });
-        let kernel = new MockKernel();
-        widget.model = new CodeCellModel();
-        widget.execute(kernel).then(() => { done(); });
+        startNewKernel().then(kernel => {
+          widget.model = new CodeCellModel();
+          widget.execute(kernel).then(() => {
+            kernel.shutdown();
+            done();
+          });
+        });
       });
 
       it('should fulfill a promise if there is code to execute', (done) => {
         let widget = new CodeCellWidget({ rendermime, renderer: CodeMirrorNotebookRenderer.defaultCodeCellRenderer });
-        let kernel = new MockKernel();
-        widget.model = new CodeCellModel();
-        widget.model.source = 'foo';
+        startNewKernel().then(kernel => {
+          widget.model = new CodeCellModel();
+          widget.model.source = 'foo';
 
-        let originalCount = (widget.model).executionCount;
-        widget.execute(kernel).then(() => {
-          let executionCount = (widget.model).executionCount;
-          expect(executionCount).to.not.equal(originalCount);
-          done();
+          let originalCount = (widget.model).executionCount;
+          widget.execute(kernel).then(() => {
+            let executionCount = (widget.model).executionCount;
+            expect(executionCount).to.not.equal(originalCount);
+            kernel.shutdown();
+            done();
+          });
         });
       });
 
