@@ -94,8 +94,10 @@ class Inspector extends TabPanel implements IInspector {
     super();
     this.addClass(PANEL_CLASS);
 
+    let items = options.items || [];
+
     // Create inspector child items and add them to the inspectors panel.
-    (options.items || []).forEach(value => {
+    items.forEach(value => {
       let widget = value.widget || new InspectorItem();
       widget.rank = value.rank;
       widget.remembers = !!value.remembers;
@@ -107,6 +109,10 @@ class Inspector extends TabPanel implements IInspector {
       this._items[value.type] = widget;
       this.addWidget(widget);
     });
+
+    if (items.length < 2) {
+      this.tabBar.hide();
+    }
   }
 
   /**
