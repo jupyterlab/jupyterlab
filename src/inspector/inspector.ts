@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  clearSignalData, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -60,16 +60,6 @@ const BACK_CLASS = 'jp-InspectorItem-back';
  */
 const FORWARD_CLASS = 'jp-InspectorItem-forward';
 
-/**
- * The orientation toggle bottom button class name.
- */
-const BOTTOM_TOGGLE_CLASS = 'jp-InspectorItem-bottom';
-
-/**
- * The orientation toggle right button class name.
- */
-const RIGHT_TOGGLE_CLASS = 'jp-InspectorItem-right';
-
 
 /* tslint:disable */
 /**
@@ -113,9 +103,6 @@ class Inspector extends TabPanel implements IInspector {
     (options.items || []).forEach(value => {
       let widget = value.widget || new InspectorItem();
       widget.orientation = this._orientation as Inspector.Orientation;
-      widget.orientationToggled.connect(() => {
-        this.orientation = 'vertical' ? 'horizontal' : 'vertical';
-      });
       widget.rank = value.rank;
       widget.remembers = !!value.remembers;
       widget.title.closable = false;
@@ -363,12 +350,6 @@ namespace Inspector {
 export
 class InspectorItem extends Panel {
   /**
-   * This flag is a temporary placeholder and will be removed when we switch to
-   * the phosphor mono-repo and have support for multiple inspector locations.
-   */
-  toggleEnabled = false;
-
-  /**
    * Construct an inspector widget.
    */
   constructor() {
@@ -376,11 +357,6 @@ class InspectorItem extends Panel {
     this.addClass(ITEM_CLASS);
     this.update();
   }
-
-  /**
-   * A signal emitted when an inspector widget's orientation is toggled.
-   */
-  orientationToggled: ISignal<InspectorItem, void>;
 
   /**
    * The text of the inspector.
@@ -521,16 +497,6 @@ class InspectorItem extends Panel {
   private _createToolbar(): Toolbar {
     let toolbar = new Toolbar();
 
-    if (this.toggleEnabled) {
-      let toggle = new ToolbarButton({
-        className: this.orientation === 'vertical' ? RIGHT_TOGGLE_CLASS
-          : BOTTOM_TOGGLE_CLASS,
-        onClick: () => { this.orientationToggled.emit(void 0); },
-        tooltip: 'Toggle the inspector orientation.'
-      });
-      toolbar.add('toggle', toggle);
-    }
-
     if (!this._remembers) {
       return toolbar;
     }
@@ -579,7 +545,3 @@ class InspectorItem extends Panel {
   private _remembers: boolean = false;
   private _toolbar: Toolbar = null;
 }
-
-
-// Define the signals for the `InspectorItem` class.
-defineSignal(InspectorItem.prototype, 'orientationToggled');
