@@ -41,6 +41,10 @@ import {
   IServiceManager
 } from '../services';
 
+import {
+  ILauncher
+} from './';
+
 
 /**
  * The class name added to LauncherWidget instances.
@@ -89,12 +93,13 @@ const DIALOG_CLASS = 'jp-LauncherWidget-dialog';
 
 
 /**
- * The landing page extension.
+ * A service providing an interface to the the launcher.
  */
 export
-const launcherExtension: JupyterLabPlugin<void> = {
+const launcherExtension: JupyterLabPlugin<ILauncher> = {
   id: 'jupyter.extensions.launcher',
   requires: [IServiceManager, IPathTracker, ICommandPalette],
+  provides: ILauncher,
   activate: activateLauncher,
   autoStart: true
 };
@@ -103,7 +108,7 @@ const launcherExtension: JupyterLabPlugin<void> = {
 /**
  * Activate the launcher.
  */
-function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): void {
+function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): ILauncher {
   let launcherModel = new LauncherModel();
 
   launcherModel.setDir(pathTracker.path);
@@ -171,6 +176,7 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   });
 
   app.shell.addToLeftArea(launcherWidget);
+  return launcherModel;
 }
 
 
@@ -201,7 +207,7 @@ class LauncherItem {
  * LauncherModel keeps track of the path to working directory and has a list of
  * LauncherItems.
  */
-class LauncherModel extends VDomModel {
+class LauncherModel extends VDomModel implements ILauncher {
   items: LauncherItem[] = [];
   path: string = 'home';
   app: JupyterLab;
