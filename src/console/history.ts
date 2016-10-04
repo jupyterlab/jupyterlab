@@ -29,18 +29,34 @@ interface IConsoleHistory extends IDisposable {
   kernel: IKernel;
 
   /**
+   * The placeholder text that a history session began with.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  placeholder: string;
+
+  /**
    * Get the previous item in the console history.
+   *
+   * @param placeholder - The placeholder string that gets temporarily added
+   * to the history only for the duration of one history session. If multiple
+   * placeholders are sent within a session, only the first one is accepted.
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(): Promise<string>;
+  back(placeholder: string): Promise<string>;
 
   /**
    * Get the next item in the console history.
    *
+   * @param placeholder - The placeholder string that gets temporarily added
+   * to the history only for the duration of one history session. If multiple
+   * placeholders are sent within a session, only the first one is accepted.
+   *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  forward(): Promise<string>;
+  forward(placeholder: string): Promise<string>;
 
   /**
    * Add a new item to the bottom of history.
@@ -51,10 +67,13 @@ interface IConsoleHistory extends IDisposable {
    * If the item being added is undefined or empty, it is ignored. If the item
    * being added is the same as the last item in history, it is ignored as well
    * so that the console's history will consist of no contiguous repetitions.
-   * This behavior varies from some shells, but the Jupyter Qt Console is
-   * implemented this way.
    */
   push(item: string): void;
+
+  /**
+   * Reset the history navigation state, i.e., start a new history session.
+   */
+  reset(): void;
 }
 
 
@@ -105,6 +124,16 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   /**
+   * The placeholder text that a history session began with.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get placeholder(): string {
+    return this._placeholder;
+  }
+
+  /**
    * Dispose of the resources held by the console history manager.
    */
   dispose(): void {
@@ -118,9 +147,18 @@ class ConsoleHistory implements IConsoleHistory {
   /**
    * Get the previous item in the console history.
    *
+   * @param placeholder - The placeholder string that gets temporarily added
+   * to the history only for the duration of one history session. If multiple
+   * placeholders are sent within a session, only the first one is accepted.
+   *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(): Promise<string> {
+  back(placeholder: string): Promise<string> {
+    if (!this._hasSession) {
+      this._hasSession = true;
+      this._placeholder = placeholder;
+    }
+
     let content = this._history.at(--this._cursor);
     this._cursor = Math.max(0, this._cursor);
     return Promise.resolve(content);
@@ -129,9 +167,18 @@ class ConsoleHistory implements IConsoleHistory {
   /**
    * Get the next item in the console history.
    *
+   * @param placeholder - The placeholder string that gets temporarily added
+   * to the history only for the duration of one history session. If multiple
+   * placeholders are sent within a session, only the first one is accepted.
+   *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  forward(): Promise<string> {
+  forward(placeholder: string): Promise<string> {
+    if (!this._hasSession) {
+      this._hasSession = true;
+      this._placeholder = placeholder;
+    }
+
     let content = this._history.at(++this._cursor);
     this._cursor = Math.min(this._history.length, this._cursor);
     return Promise.resolve(content);
@@ -146,15 +193,21 @@ class ConsoleHistory implements IConsoleHistory {
    * If the item being added is undefined or empty, it is ignored. If the item
    * being added is the same as the last item in history, it is ignored as well
    * so that the console's history will consist of no contiguous repetitions.
-   * This behavior varies from some shells, but the Jupyter Qt Console is
-   * implemented this way.
    */
   push(item: string): void {
     if (item && item !== this._history.back) {
       this._history.pushBack(item);
     }
-    // Reset the history navigation cursor back to the bottom.
+    this.reset();
+  }
+
+  /**
+   * Reset the history navigation state, i.e., start a new history session.
+   */
+  reset(): void {
     this._cursor = this._history.length;
+    this._hasSession = false;
+    this._placeholder = '';
   }
 
   /**
@@ -182,8 +235,10 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   private _cursor = 0;
+  private _hasSession = false;
   private _history: Vector<string> = null;
   private _kernel: IKernel = null;
+  private _placeholder: string = '';
 }
 
 

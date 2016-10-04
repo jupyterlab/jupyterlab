@@ -38,7 +38,7 @@ import {
 } from '../notebook/cells';
 
 import {
-  EdgeLocation, ICellEditorWidget
+  EdgeLocation, ICellEditorWidget, ITextChange
 } from '../notebook/cells/editor';
 
 import {
@@ -383,21 +383,39 @@ class ConsoleContent extends Widget {
   protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): void {
     let prompt = this.prompt;
     if (location === 'top') {
-      this._history.back().then(value => {
+      this._history.back(prompt.model.source).then(value => {
         if (!value) {
           return;
         }
+        if (prompt.model.source === value) {
+          return;
+        }
+        this._setByHistory = true;
         prompt.model.source = value;
         prompt.editor.setCursorPosition(0);
       });
     } else {
-      this._history.forward().then(value => {
-        // If at the bottom end of history, then clear the prompt.
-        let text = value || '';
+      this._history.forward(prompt.model.source).then(value => {
+        let text = value || this._history.placeholder;
+        if (prompt.model.source === text) {
+          return;
+        }
+        this._setByHistory = true;
         prompt.model.source = text;
         prompt.editor.setCursorPosition(text.length);
       });
     }
+  }
+
+  /**
+   * Handle a text change signal from the editor.
+   */
+  protected onTextChange(editor: ICellEditorWidget, args: ITextChange): void {
+    if (this._setByHistory) {
+      this._setByHistory = false;
+      return;
+    }
+    this._history.reset();
   }
 
   /**
@@ -442,9 +460,10 @@ class ConsoleContent extends Widget {
     prompt.addClass(PROMPT_CLASS);
     this._input.addWidget(prompt);
 
-    // Hook up completer and history handling.
+    // Hook up history handling.
     let editor = prompt.editor;
     editor.edgeRequested.connect(this.onEdgeRequest, this);
+    editor.textChanged.connect(this.onTextChange, this);
 
     // Associate the new prompt with the completer and inspection handlers.
     this._completerHandler.activeCell = prompt;
@@ -540,6 +559,7 @@ class ConsoleContent extends Widget {
   private _renderer: ConsoleContent.IRenderer = null;
   private _history: IConsoleHistory = null;
   private _session: ISession = null;
+  private _setByHistory = false;
   private _foreignCells: { [key: string]: CodeCellWidget; } = {};
 }
 

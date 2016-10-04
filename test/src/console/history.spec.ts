@@ -120,9 +120,9 @@ describe('console/history', () => {
 
     describe('#back()', () => {
 
-      it('should return void promise if no previous history exists', (done) => {
+      it('should return void promise if no history exists', (done) => {
         let history = new ConsoleHistory();
-        history.back().then(result => {
+        history.back('').then(result => {
           expect(result).to.be(void 0);
           done();
         });
@@ -133,7 +133,7 @@ describe('console/history', () => {
           kernel: new MockKernel({ name: 'python' })
         });
         history.onHistory(mockHistory);
-        history.back().then(result => {
+        history.back('').then(result => {
           let index = mockHistory.content.history.length - 1;
           let last = (mockHistory.content.history[index] as any)[2];
           expect(result).to.be(last);
@@ -145,9 +145,9 @@ describe('console/history', () => {
 
     describe('#forward()', () => {
 
-      it('should return void promise if no forward history exists', (done) => {
+      it('should return void promise if no history exists', (done) => {
         let history = new ConsoleHistory();
-        history.forward().then(result => {
+        history.forward('').then(result => {
           expect(result).to.be(void 0);
           done();
         });
@@ -158,8 +158,8 @@ describe('console/history', () => {
           kernel: new MockKernel({ name: 'python' })
         });
         history.onHistory(mockHistory);
-        Promise.all([history.back(), history.back()]).then(() => {
-          history.forward().then(result => {
+        Promise.all([history.back(''), history.back('')]).then(() => {
+          history.forward('').then(result => {
             let index = mockHistory.content.history.length - 1;
             let last = (mockHistory.content.history[index] as any)[2];
             expect(result).to.be(last);
@@ -176,7 +176,7 @@ describe('console/history', () => {
         let history = new ConsoleHistory();
         let item = 'foo';
         history.push(item);
-        history.back().then(result => {
+        history.back('').then(result => {
           expect(result).to.be(item);
           done();
         });
