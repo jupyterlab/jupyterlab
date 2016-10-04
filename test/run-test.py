@@ -28,9 +28,8 @@ shell = (sys.platform == 'win32')
 
 
 def start_notebook():
-    nb_command = [sys.executable, '-m', 'notebook', '--no-browser',
-                  '--debug', '--NotebookApp.allow_origin="*"',
-                  '--NotebookApp.notebook_dir="%s"' % root_dir]
+    nb_command = [sys.executable, '-m', 'notebook', root_dir, '--no-browser',
+                  '--debug', '--NotebookApp.allow_origin="*"']
     nb_server = subprocess.Popen(nb_command, shell=shell,
                                  stderr=subprocess.STDOUT,
                                  stdout=subprocess.PIPE)
