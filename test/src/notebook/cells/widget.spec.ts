@@ -48,7 +48,7 @@ import {
 
 import {
   defaultRenderMime
-} from '../../rendermime/rendermime.spec';
+} from '../../utils';
 
 
 const INPUT_CLASS = 'jp-InputArea';

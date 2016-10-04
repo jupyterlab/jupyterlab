@@ -15,6 +15,10 @@ import {
   RenderMime
 } from '../../../lib/rendermime';
 
+import {
+  defaultRenderMime
+} from '../utils';
+
 
 describe('rendermime/index', () => {
 
