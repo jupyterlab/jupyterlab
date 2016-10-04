@@ -304,12 +304,10 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#createKernelNameItem()', () => {
 
       it('should display the `\'display_name\'` of the kernel', (done) => {
-        let item = createKernelNameItem(panel);
-        requestAnimationFrame(() => {
-          panel.kernel.getKernelSpec().then(spec => {
-            expect(item.node.textContent).to.be(spec.display_name);
-            done();
-          }).catch(done);
+        return panel.kernel.getKernelSpec().then(spec => {
+          let item = createKernelNameItem(panel);
+          expect(item.node.textContent).to.be(spec.display_name);
+          done();
         });
       });
 
