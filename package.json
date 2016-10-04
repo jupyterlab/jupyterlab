@@ -74,7 +74,7 @@
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
     "postinstall": "node scripts/dedupe.js",
     "prepublish": "npm run build",
-    "test": "cd test && python run-test.py",
+    "test": "npm run build:test && cd test && python run-test.py",
     "test:chrome": "npm run build:test && karma start --browsers=Chrome test/karma.conf.js",
     "test:coverage": "webpack --config test/webpack-cov.conf.js && karma start test/karma-cov.conf.js",
     "test:debug": "npm run build:test && karma start --browsers=Chrome --singleRun=false --debug=true test/karma.conf.js",
