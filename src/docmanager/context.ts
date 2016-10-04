@@ -54,7 +54,6 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
     this._model = this._factory.createNew(lang);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
     this._saver = new SaveHandler({ context: this, manager });
-    this._saver.start();
   }
 
   /**
@@ -441,6 +440,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
    */
   private _populate(): void {
     this._isPopulated = true;
+    this._saver.start();
     // Add a checkpoint if none exists.
     this.listCheckpoints().then(checkpoints => {
       if (!checkpoints) {
