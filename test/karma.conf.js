@@ -13,8 +13,7 @@ module.exports = function (config) {
     },
     port: 9876,
     colors: true,
-    singleRun: false,
-    debug: true,
+    singleRun: true,
     logLevel: config.LOG_INFO
   });
 };

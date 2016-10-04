@@ -18,7 +18,7 @@
 
 // import './filebrowser/model.spec';
 
-// import './markdownwidget/widget.spec';
+import './markdownwidget/widget.spec';
 
 // import './renderers/renderers.spec';
 // import './renderers/latex.spec';
@@ -41,14 +41,6 @@
 // import './notebook/output-area/model.spec';
 // import './notebook/output-area/widget.spec';
 
-//import './toolbar/toolbar.spec';
-
-
-import {
-  utils
-} from 'jupyter-js-services';
-
-debugger;
-console.log('******', utils.getBaseUrl());
+// import './toolbar/toolbar.spec';
 
 import 'phosphor/styles/base.css';

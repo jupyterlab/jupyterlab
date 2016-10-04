@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  createServiceManager, utils
-} from 'jupyter-js-services';
-
-import {
   Message, sendMessage
 } from 'phosphor/lib/core/messaging';
 
@@ -24,7 +20,7 @@ import {
 } from '../../../lib/markdownwidget/widget';
 
 import {
-  TextModelFactory, IDocumentModel
+  IDocumentModel
 } from '../../../lib/docregistry';
 
 import {
@@ -32,9 +28,8 @@ import {
 } from '../../../lib/docmanager/context';
 
 import {
-  defaultRenderMime
-} from '../rendermime/rendermime.spec';
-
+  createFileContext, defaultRenderMime
+} from '../utils';
 
 const RENDERMIME = defaultRenderMime();
 
@@ -59,12 +54,14 @@ describe('markdownwidget/widget', () => {
   let context: Context<IDocumentModel>;
 
   beforeEach((done) => {
-    createServiceManager().then(manager => {
-      let factory = new TextModelFactory();
-      let path = utils.uuid() + '.md';
-      context = new Context({ manager, factory, path });
+    createFileContext().then(c => {
+      context = c;
       done();
     });
+  });
+
+  afterEach(() => {
+    context.dispose();
   });
 
   describe('MarkdownWidgetFactory', () => {
