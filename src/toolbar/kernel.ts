@@ -46,6 +46,7 @@ const TOOLBAR_INDICATOR_CLASS = 'jp-Kernel-toolbarKernelIndicator';
  */
 const TOOLBAR_BUSY_CLASS = 'jp-mod-busy';
 
+
 /**
  * A kernel owner interface.
  */
@@ -60,6 +61,7 @@ interface IKernelOwner {
    */
   kernelChanged: ISignal<IKernelOwner, IKernel>;
 }
+
 
 /**
  * Create an interrupt toolbar item.
@@ -77,6 +79,7 @@ function createInterruptButton(kernelOwner: IKernelOwner): ToolbarButton {
   });
 }
 
+
 /**
  * Create a restart toolbar item.
  */
@@ -90,6 +93,7 @@ function createRestartButton(kernelOwner: IKernelOwner, host?: HTMLElement): Too
     tooltip: 'Restart the kernel'
   });
 }
+
 
 /**
  * Create a kernel name indicator item.
@@ -110,6 +114,7 @@ function createKernelNameItem(kernelOwner: IKernelOwner): Widget {
   return widget;
 }
 
+
 /**
  * Update the text of the kernel name item.
  */
@@ -122,10 +127,13 @@ function updateKernelNameItem(widget: Widget, kernel: IKernel): void {
     widget.node.textContent = kernel.spec.display_name;
   } else {
     kernel.getKernelSpec().then(spec => {
-      widget.node.textContent = kernel.spec.display_name;
+      if (!widget.isDisposed) {
+        widget.node.textContent = kernel.spec.display_name;
+      }
     });
   }
 }
+
 
 /**
  * Create a kernel status indicator item.
@@ -140,6 +148,7 @@ export
 function createKernelStatusItem(kernelOwner: IKernelOwner): Widget {
   return new KernelIndicator(kernelOwner);
 }
+
 
 /**
  * A toolbar item that displays kernel status.
