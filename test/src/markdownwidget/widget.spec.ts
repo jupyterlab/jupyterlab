@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  createServiceManager, utils
+} from 'jupyter-js-services';
+
+import {
   Message, sendMessage
 } from 'phosphor/lib/core/messaging';
 
@@ -20,12 +24,12 @@ import {
 } from '../../../lib/markdownwidget/widget';
 
 import {
-  DocumentModel
+  TextModelFactory, IDocumentModel
 } from '../../../lib/docregistry';
 
 import {
-  MockContext
-} from '../docmanager/mockcontext';
+  Context
+} from '../../../lib/docmanager/context';
 
 import {
   defaultRenderMime
@@ -52,12 +56,22 @@ class LogWidget extends MarkdownWidget {
 
 describe('markdownwidget/widget', () => {
 
+  let context: Context<IDocumentModel>;
+
+  beforeEach((done) => {
+    createServiceManager().then(manager => {
+      let factory = new TextModelFactory();
+      let path = utils.uuid() + '.md';
+      context = new Context({ manager, factory, path });
+      done();
+    });
+  });
+
   describe('MarkdownWidgetFactory', () => {
 
     describe('#createNew()', () => {
 
       it('should require a context parameter', () => {
-        let context = new MockContext(new DocumentModel());
         let widgetFactory = new MarkdownWidgetFactory(RENDERMIME);
         expect(widgetFactory.createNew(context)).to.be.a(MarkdownWidget);
       });
@@ -71,7 +85,6 @@ describe('markdownwidget/widget', () => {
     describe('#constructor()', () => {
 
       it('should require a context parameter', () => {
-        let context = new MockContext(new DocumentModel());
         let widget = new MarkdownWidget(context, RENDERMIME);
         expect(widget).to.be.a(MarkdownWidget);
       });
@@ -81,7 +94,6 @@ describe('markdownwidget/widget', () => {
     describe('#onAfterAttach()', () => {
 
       it('should update the widget', () => {
-        let context = new MockContext(new DocumentModel());
         let widget = new LogWidget(context, RENDERMIME);
         expect(widget.methods).to.not.contain('onAfterAttach');
         Widget.attach(widget, document.body);
@@ -94,7 +106,6 @@ describe('markdownwidget/widget', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should update rendered markdown', () => {
-        let context = new MockContext(new DocumentModel());
         let widget = new LogWidget(context, RENDERMIME);
         expect(widget.methods).to.not.contain('onUpdateRequest');
         context.model.contentChanged.emit(void 0);
@@ -104,7 +115,6 @@ describe('markdownwidget/widget', () => {
       });
 
       it('should replace children on subsequent updates', () => {
-        let context = new MockContext(new DocumentModel());
         let widget = new LogWidget(context, RENDERMIME);
         context.model.contentChanged.emit(void 0);
         sendMessage(widget, WidgetMessage.UpdateRequest);
