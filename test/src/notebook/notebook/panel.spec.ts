@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  MockKernel
-} from 'jupyter-js-services/lib/mockkernel';
-
-import {
   MimeData
 } from 'phosphor/lib/core/mimedata';
 
