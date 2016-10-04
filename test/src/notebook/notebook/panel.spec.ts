@@ -24,7 +24,7 @@ import {
 } from '../../../../lib/completer';
 
 import {
-  INotebookModel, NotebookModel
+  INotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
 import {
@@ -40,12 +40,12 @@ import {
 } from '../../../../lib/notebook/notebook/widget';
 
 import {
-  MockContext
-} from '../../docmanager/mockcontext';
+  Context
+} from '../../../../lib/docmanager/context';
 
 import {
-  defaultRenderMime
-} from '../../rendermime/rendermime.spec';
+  createNotebookContext, defaultRenderMime
+} from '../../utils';
 
 import {
   DEFAULT_CONTENT
@@ -90,17 +90,28 @@ class LogNotebookPanel extends NotebookPanel {
 }
 
 
-function createPanel(): LogNotebookPanel {
+function createPanel(context: Context<INotebookModel>): LogNotebookPanel {
   let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
-  let model = new NotebookModel();
-  model.fromJSON(DEFAULT_CONTENT);
-  let context = new MockContext<NotebookModel>(model);
+  context.model.fromJSON(DEFAULT_CONTENT);
   panel.context = context;
   return panel;
 }
 
 
 describe('notebook/notebook/panel', () => {
+
+  let context: Context<INotebookModel>;
+
+  beforeEach((done) => {
+    createNotebookContext().then(c => {
+      context = c;
+      done();
+    });
+  });
+
+  afterEach(() => {
+    context.dispose();
+  });
 
   describe('NotebookPanel', () => {
 
@@ -125,8 +136,6 @@ describe('notebook/notebook/panel', () => {
       it('should be emitted when the context on the panel changes', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         let called = false;
-        let model = new NotebookModel();
-        let context = new MockContext<INotebookModel>(model);
         panel.contextChanged.connect((sender, args) => {
           expect(sender).to.be(panel);
           expect(args).to.be(void 0);
@@ -139,8 +148,6 @@ describe('notebook/notebook/panel', () => {
       it('should not be emitted if the context does not change', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         let called = false;
-        let model = new NotebookModel();
-        let context = new MockContext<INotebookModel>(model);
         panel.context = context;
         panel.contextChanged.connect(() => { called = true; });
         panel.context = context;
@@ -151,16 +158,14 @@ describe('notebook/notebook/panel', () => {
 
     describe('#kernelChanged', () => {
 
-      it('should be emitted when the kernel on the panel changes', () => {
-        let panel = createPanel();
-        let called = false;
+      it('should be emitted when the kernel on the panel changes', (done) => {
+        let panel = createPanel(context);
         panel.kernelChanged.connect((sender, args) => {
           expect(sender).to.be(panel);
-          expect(args).to.be.a(MockKernel);
-          called = true;
+          expect(args.name).to.be(context.kernelspecs.default);
+          done();
         });
-        panel.context.changeKernel({ name: 'python' });
-        expect(called).to.be(true);
+        panel.context.changeKernel({ name: context.kernelspecs.default });
       });
 
     });
@@ -185,11 +190,14 @@ describe('notebook/notebook/panel', () => {
 
     describe('#kernel', () => {
 
-      it('should be the current kernel used by the panel', () => {
-        let panel = createPanel();
-        expect(panel.kernel.name).to.be('python');
-        panel.context.changeKernel({ name: 'shell' });
-        expect(panel.kernel.name).to.be('shell');
+      it('should be the current kernel used by the panel', (done) => {
+        let panel = createPanel(context);
+        context.changeKernel({ name: context.kernelspecs.default });
+        expect(panel.kernel).to.be(null);
+        context.kernelChanged.connect(() => {
+          expect(panel.kernel.name).to.be(context.kernelspecs.default);
+          done();
+        });
       });
 
     });
@@ -227,11 +235,9 @@ describe('notebook/notebook/panel', () => {
       it('should be the model for the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         expect(panel.model).to.be(null);
-        let model = new NotebookModel();
-        let context = new MockContext<NotebookModel>(model);
         panel.context = context;
-        expect(panel.model).to.be(model);
-        expect(panel.content.model).to.be(model);
+        expect(panel.model).to.be(context.model);
+        expect(panel.content.model).to.be(context.model);
       });
 
     });
@@ -245,8 +251,6 @@ describe('notebook/notebook/panel', () => {
 
       it('should set the document context for the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        let model = new NotebookModel();
-        let context = new MockContext<NotebookModel>(model);
         panel.context = context;
         expect(panel.context).to.be(context);
       });
@@ -254,8 +258,6 @@ describe('notebook/notebook/panel', () => {
       it('should emit the `contextChanged` signal', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         let called = false;
-        let model = new NotebookModel();
-        let context = new MockContext<NotebookModel>(model);
         panel.contextChanged.connect(() => { called = true; });
         panel.context = context;
         expect(called).to.be(true);
@@ -267,8 +269,6 @@ describe('notebook/notebook/panel', () => {
 
       it('should dispose of the resources used by the widget', () => {
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        let model = new NotebookModel();
-        let context = new MockContext<NotebookModel>(model);
         panel.context = context;
         panel.dispose();
         expect(panel.isDisposed).to.be(true);
@@ -287,8 +287,6 @@ describe('notebook/notebook/panel', () => {
 
       it('should be called when the context changes', () => {
         let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
-        let model = new NotebookModel();
-        let context = new MockContext<NotebookModel>(model);
         panel.methods = [];
         panel.context = context;
         expect(panel.methods).to.contain('onContextChanged');
@@ -298,15 +296,18 @@ describe('notebook/notebook/panel', () => {
 
     describe('#onPopulated()', () => {
 
-      it('should initialize the model state', () => {
+      it('should initialize the model state', (done) => {
         let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
-        let model = new NotebookModel();
+        let model = context.model;
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.cells.canUndo).to.be(true);
-        let context = new MockContext<NotebookModel>(model);
         panel.context = context;
-        expect(panel.methods).to.contain('onPopulated');
-        expect(model.cells.canUndo).to.be(false);
+        context.populated.connect(() => {
+          expect(panel.methods).to.contain('onPopulated');
+          expect(model.cells.canUndo).to.be(false);
+          done();
+        });
+        context.save();
       });
 
     });
@@ -314,14 +315,14 @@ describe('notebook/notebook/panel', () => {
     describe('#onModelStateChanged()', () => {
 
       it('should be called when the model state changes', () => {
-        let panel = createPanel();
+        let panel = createPanel(context);
         panel.methods = [];
         panel.model.dirty = false;
         expect(panel.methods).to.contain('onModelStateChanged');
       });
 
       it('should update the title className based on the dirty state', () => {
-        let panel = createPanel();
+        let panel = createPanel(context);
         panel.model.dirty = true;
         expect(panel.title.className).to.contain('jp-mod-dirty');
         panel.model.dirty = false;
@@ -332,28 +333,24 @@ describe('notebook/notebook/panel', () => {
 
     describe('#onPathChanged()', () => {
 
-      it('should be called when the path changes', () => {
-        let panel = createPanel();
-        panel.methods = [];
-        panel.context.saveAs();
-        expect(panel.methods).to.contain('onPathChanged');
-      });
+      // it('should be called when the path changes', () => {
+      //   let panel = createPanel(context);
+      //   panel.methods = [];
+      //   // TODO: add a saveAs mock
+      //   panel.context.setPath('');
+      //   expect(panel.methods).to.contain('onPathChanged');
+      // });
 
       it('should be called when the context changes', () => {
         let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
-        let model = new NotebookModel();
-        let context = new MockContext<NotebookModel>(model);
         panel.methods = [];
         panel.context = context;
         expect(panel.methods).to.contain('onPathChanged');
       });
 
       it('should update the title label', () => {
-        let panel = createPanel();
-        panel.methods = [];
-        panel.context.saveAs();
-        expect(panel.methods).to.contain('onPathChanged');
-        expect(panel.title.label).to.be('foo');
+        let panel = createPanel(context);
+        expect(panel.title.label).to.be(context.path);
       });
 
     });
