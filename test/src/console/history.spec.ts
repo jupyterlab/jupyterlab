@@ -50,6 +50,10 @@ describe('console/history', () => {
     });
   });
 
+  after(() => {
+    kernel.shutdown();
+  });
+
   describe('ConsoleHistory', () => {
 
     describe('#constructor()', () => {

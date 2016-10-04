@@ -73,6 +73,10 @@ describe('notebook/notebook/actions', () => {
       clipboard.clear();
     });
 
+    after(() => {
+      kernel.shutdown();
+    });
+
     describe('#splitCell()', () => {
 
       it('should split the active cell into two cells', () => {

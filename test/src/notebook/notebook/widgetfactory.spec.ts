@@ -36,6 +36,7 @@ import {
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
 const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
+const contextPromise = createNotebookContext();
 
 
 describe('notebook/notebook/widgetfactory', () => {
@@ -43,14 +44,14 @@ describe('notebook/notebook/widgetfactory', () => {
   let context: Context<INotebookModel>;
 
   beforeEach((done) => {
-    createNotebookContext().then(c => {
+    contextPromise.then(c => {
       context = c;
       done();
     });
   });
 
-  afterEach(() => {
-    context.dispose();
+  after(() => {
+    context.kernel.shutdown();
   });
 
   describe('NotebookWidgetFactory', () => {
@@ -117,11 +118,13 @@ describe('notebook/notebook/widgetfactory', () => {
 
       it('should start a kernel given the default kernel language', (done) => {
         let factory = new NotebookWidgetFactory(rendermime, clipboard, renderer );
-        context.kernelChanged.connect((sender, kernel) => {
-          expect(kernel.name).to.be(context.kernelspecs.default);
-          done();
+        createNotebookContext().then(ctx => {
+          ctx.kernelChanged.connect((sender, kernel) => {
+            expect(kernel.name).to.be(ctx.kernelspecs.default);
+            done();
+          });
+          factory.createNew(ctx);
         });
-        factory.createNew(context);
       });
 
       // it('should start a kernel based on default language of the model', () => {

@@ -69,22 +69,22 @@ class TestCompleterHandler extends CellCompleterHandler {
   }
 }
 
+const kernelPromise = startNewKernel();
+
 
 describe('completer/handler', () => {
 
   let kernel: IKernel;
 
   beforeEach((done) => {
-    startNewKernel().then(k => {
+    kernelPromise.then(k => {
       kernel = k;
       done();
     });
   });
 
-  afterEach(() => {
-    kernel.shutdown().then(() => {
-      kernel.dispose();
-    });
+  after(() => {
+    kernel.shutdown();
   });
 
   describe('CellCompleterHandler', () => {

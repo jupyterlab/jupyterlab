@@ -59,8 +59,6 @@ const PROMPT_CLASS = 'jp-Cell-prompt';
 
 const rendermime = defaultRenderMime();
 
-const kernelPromise = startNewKernel();
-
 
 class LogBaseCell extends BaseCellWidget {
 

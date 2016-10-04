@@ -306,10 +306,12 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should display the `\'display_name\'` of the kernel', (done) => {
         let item = createKernelNameItem(panel);
-        panel.kernel.getKernelSpec().then(spec => {
-          expect(item.node.textContent).to.be(spec.display_name);
-          done();
-        }).catch(done);
+        requestAnimationFrame(() => {
+          panel.kernel.getKernelSpec().then(spec => {
+            expect(item.node.textContent).to.be(spec.display_name);
+            done();
+          }).catch(done);
+        });
       });
 
       it('should display `\'No Kernel!\'` if there is no kernel', () => {

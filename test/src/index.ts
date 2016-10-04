@@ -13,12 +13,12 @@
 
 // import './dialog/dialog.spec';
 
-import './docregistry/default.spec';
+// import './docregistry/default.spec';
 // import './docregistry/registry.spec';
 
 // import './filebrowser/model.spec';
 
-import './markdownwidget/widget.spec';
+// import './markdownwidget/widget.spec';
 
 // import './renderers/renderers.spec';
 // import './renderers/latex.spec';
@@ -30,13 +30,13 @@ import './markdownwidget/widget.spec';
 // import './notebook/cells/widget.spec';
 
 // import './notebook/notebook/actions.spec';
-// import './notebook/notebook/default-toolbar.spec';
+import './notebook/notebook/default-toolbar.spec';
 // import './notebook/notebook/model.spec';
 // import './notebook/notebook/modelfactory.spec';
 // import './notebook/notebook/panel.spec';
 // import './notebook/notebook/trust.spec';
 // import './notebook/notebook/widget.spec';
-import './notebook/notebook/widgetfactory.spec';
+// import './notebook/notebook/widgetfactory.spec';
 
 // import './notebook/output-area/model.spec';
 // import './notebook/output-area/widget.spec';

@@ -58,6 +58,7 @@ import {
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
 const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
+const contextPromise = createNotebookContext();
 
 
 class LogNotebookPanel extends NotebookPanel {
@@ -99,14 +100,14 @@ describe('notebook/notebook/panel', () => {
   let context: Context<INotebookModel>;
 
   beforeEach((done) => {
-    createNotebookContext().then(c => {
+    contextPromise.then(c => {
       context = c;
       done();
     });
   });
 
-  afterEach(() => {
-    context.dispose();
+  after(() => {
+    context.kernel.shutdown();
   });
 
   describe('NotebookPanel', () => {
@@ -189,7 +190,6 @@ describe('notebook/notebook/panel', () => {
       it('should be the current kernel used by the panel', (done) => {
         let panel = createPanel(context);
         context.changeKernel({ name: context.kernelspecs.default });
-        expect(panel.kernel).to.be(null);
         context.kernelChanged.connect(() => {
           expect(panel.kernel.name).to.be(context.kernelspecs.default);
           done();
