@@ -8,8 +8,22 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   Inspector
 } from '../../../lib/inspector';
+
+
+class TestInspector extends Inspector {
+  methods: string[] = [];
+
+  protected onInspectorUpdate(sender: any, args: Inspector.IInspectorUpdate): void {
+    super.onInspectorUpdate(sender, args);
+    this.methods.push('onInspectorUpdate');
+  }
+}
 
 
 class TestInspectable implements Inspector.IInspectable {
@@ -93,6 +107,23 @@ describe('inspector/index', () => {
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
+      });
+
+    });
+
+
+    describe('#onInspectorUpdate()', () => {
+
+      it('should fire when a source updates', () => {
+        let options: Inspector.IOptions = {};
+        let widget = new TestInspector(options);
+        widget.source = new TestInspectable();
+        expect(widget.methods).to.not.contain('onInspectorUpdate');
+        widget.source.inspected.emit({
+          content: new Widget(),
+          type: 'hints'
+        });
+        expect(widget.methods).to.contain('onInspectorUpdate');
       });
 
     });
