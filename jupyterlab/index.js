@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-var JupyterLab = require('jupyterlab/lib/application').JupyterLab;
+var JupyterLab = require('../lib/application').JupyterLab;
 var extractPlugins = require('jupyterlab-extension-builder/lib/extract').extractPlugins;
 
 
@@ -9,9 +9,7 @@ var extractPlugins = require('jupyterlab-extension-builder/lib/extract').extract
 require('es6-promise').polyfill();
 
 require('font-awesome/css/font-awesome.min.css');
-require('material-design-icons/iconfont/material-icons.css');
-
-require('jupyterlab/lib/default-theme/index.css');
+require('../lib/default-theme/index.css');
 
 
 /**
@@ -31,6 +29,6 @@ function getEntryPoint(entryPoint) {
 
 jupyter.lab = new JupyterLab();
 jupyter.getEntryPoint = getEntryPoint;
-jupyter.version = require('jupyterlab/package.json').version;
+jupyter.version = require('../package.json').version;
 
 module.exports = jupyter.lab;

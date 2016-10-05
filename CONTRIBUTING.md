@@ -186,7 +186,7 @@ to build the changes and then refresh your browser to see the changes.
 To have the system build after each source file change, run:
 
 ```bash
-npm run watch:serverextension
+npm run watch
 ```
 
 and refresh the browser.

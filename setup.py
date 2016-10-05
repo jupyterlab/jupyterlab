@@ -107,8 +107,6 @@ class NPM(Command):
             log.error("`npm` unavailable. If you're running this command using sudo, make sure `npm` is available to sudo")
         log.info("Installing build dependencies with npm. This may take a while...")
         run('npm install', cwd=here)
-        log.info("Installing extension build dependencies with npm. This may take a while...")
-        run('npm install', cwd=extension_root)
         run('npm run build:all')
 
         for t in self.targets:
