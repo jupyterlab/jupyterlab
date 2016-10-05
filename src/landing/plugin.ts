@@ -62,7 +62,7 @@ class LandingModel extends VDomModel {
     let activitiesList: VNode[] = [];
     const activites =
       [['Notebook', 'file-operations:new-notebook'],
-       ['Console', `console:create-${services.kernelspecs.default}`],
+       ['Code Console', `console:create-${services.kernelspecs.default}`],
        ['Terminal', 'terminal:create-new'],
        ['Text Editor', 'file-operations:new-text-file']];
     for (let activityName of activites) {
