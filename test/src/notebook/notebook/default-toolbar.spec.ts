@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  utils, startNewSession
+} from 'jupyter-js-services';
+
+import {
   MimeData
 } from 'phosphor/lib/core/mimedata';
 
@@ -60,6 +64,7 @@ import {
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
+const sessionPromise = startNewSession({ path: utils.uuid() });
 
 
 describe('notebook/notebook/default-toolbar', () => {
@@ -74,6 +79,9 @@ describe('notebook/notebook/default-toolbar', () => {
   });
 
   afterEach(() => {
+    if (context.kernel) {
+      context.kernel.dispose();
+    }
     context.dispose();
   });
 
@@ -86,17 +94,15 @@ describe('notebook/notebook/default-toolbar', () => {
       panel = new NotebookPanel({ rendermime, clipboard, renderer });
       context.model.fromJSON(DEFAULT_CONTENT);
       panel.context = context;
-      let name = context.kernelspecs.default;
-      context.changeKernel({ name }).then(kernel => {
+      sessionPromise.then(session => {
+        return context.changeKernel({ id: session.kernel.id });
+      }).then(() => {
         done();
       }).catch(done);
     });
 
     afterEach(() => {
       panel.dispose();
-      if (context.kernel) {
-        context.kernel.shutdown();
-      }
     });
 
     describe('#createSaveButton()', () => {
