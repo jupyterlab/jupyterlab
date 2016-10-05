@@ -146,7 +146,7 @@
   flex: 0 0 auto;
   padding: 1px 4px;
   color: var(--jp-inverse-ui-font-color0);
-  background: var(--jp-warn-color);
+  background: var(--jp-warn-color1);
   border-radius: 1px;
   cursor: pointer;
 }

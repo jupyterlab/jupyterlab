@@ -67,7 +67,7 @@
   flex: 0 0 auto;
   padding-left: 4px;
   overflow: auto;
-  color: var(--jp-warn-color);
+  color: var(--jp-warn-color1);
   line-height: 1.5;
   font-size: var(--jp-ui-font-size1);
 }
