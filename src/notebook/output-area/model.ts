@@ -181,7 +181,6 @@ class OutputAreaModel implements IDisposable {
     }
     if (nbformat.validateMimeValue(mimetype, value)) {
       output.data[mimetype] = value;
-      this.list.set(index, output);
     } else {
       console.warn(`Refusing to add invalid mime value of type ${mimetype} to output`);
     }
