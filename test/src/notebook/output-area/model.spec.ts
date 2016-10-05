@@ -241,6 +241,59 @@ describe('notebook/output-area/model', () => {
 
     });
 
+    describe('#addMimeData', () => {
+
+      it('should add a mime type to an output data bundle', () => {
+        let model = new OutputAreaModel();
+        model.add({
+         output_type: 'display_data',
+         data: { 'text/plain': 'hello, world' },
+         metadata: {}
+        });
+        let output = model.get(0) as nbformat.IDisplayData;
+        model.addMimeData(output, 'application/json', { 'foo': 1 });
+        output = model.get(0) as nbformat.IDisplayData;
+        expect((output.data['application/json'] as any)['foo']).to.be(1);
+      });
+
+      it('should refuse to add to an output not contained in the model', () => {
+        let model = new OutputAreaModel();
+        let output: nbformat.IDisplayData = {
+         output_type: 'display_data',
+         data: { },
+         metadata: {}
+        };
+        expect(() => { model.addMimeData(output, 'text/plain', 'foo'); }).to.throwError();
+      });
+
+      it('should refuse to add an existing mime type', () => {
+        let model = new OutputAreaModel();
+        model.add({
+         output_type: 'display_data',
+         data: { 'text/plain': 'hello, world' },
+         metadata: {}
+        });
+        let output = model.get(0) as nbformat.IDisplayData;
+        model.addMimeData(output, 'text/plain', 'foo');
+        output = model.get(0) as nbformat.IDisplayData;
+        expect(output.data['text/plain']).to.be('hello, world');
+      });
+
+      it('should refuse to add an invalid mime type/value pair', () => {
+        let model = new OutputAreaModel();
+        model.add({
+         output_type: 'display_data',
+         data: { 'text/plain': 'hello, world' },
+         metadata: {}
+        });
+        let output = model.get(0) as nbformat.IDisplayData;
+        model.addMimeData(output, 'application/json', 'foo');
+        output = model.get(0) as nbformat.IDisplayData;
+        expect(output.data['application/json']).to.be(void 0);
+      });
+
+    });
+
   });
 
 });
