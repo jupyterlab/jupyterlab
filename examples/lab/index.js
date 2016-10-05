@@ -16,7 +16,7 @@ lab.registerPlugins([
   require('jupyterlab/lib/about/plugin').aboutExtension,
   require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
   require('jupyterlab/lib/commandpalette/plugin').commandPaletteProvider,
-  require('jupyterlab/lib/console/plugin').consoleExtension,
+  require('jupyterlab/lib/console/plugin').consoleTrackerProvider,
   require('jupyterlab/lib/console/codemirror/plugin').rendererProvider,
   require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
   require('jupyterlab/lib/editorwidget/plugin').editorHandlerProvider,
