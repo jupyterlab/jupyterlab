@@ -97,8 +97,8 @@ describe('notebook/notebook/default-toolbar', () => {
       sessionPromise.then(session => {
         return context.changeKernel({ id: session.kernel.id });
       }).then(() => {
-        done();
-      }).catch(done);
+        return context.kernel.interrupt();
+      }).then(done, done);
     });
 
     afterEach(() => {
@@ -206,7 +206,6 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should run and advance when clicked', (done) => {
         let button = ToolbarItems.createRunButton(panel);
-
         let widget = panel.content;
         let next = widget.childAt(1) as MarkdownCellWidget;
         widget.select(next);
