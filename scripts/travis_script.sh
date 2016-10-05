@@ -15,7 +15,7 @@ npm test || npm test
 npm run test:coverage || npm run test:coverage
 
 
-# Install in-place and enable the server extension
+# Install and enable the server extension
 pip install -v .
 jupyter serverextension enable --py jupyterlab
 
