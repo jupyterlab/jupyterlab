@@ -88,8 +88,7 @@ namespace nbformat {
    */
   export
   interface MimeBundle extends JSONObject {
-    [key: string]: multilineString;
-    'application/json'?: any;
+    [key: string]: multilineString | JSONObject;
   }
   /* tslint:enable */
 
