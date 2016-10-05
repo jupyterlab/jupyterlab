@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import json2html = require('json-to-html');
+
 import {
   simulate
 } from 'simulate-event';
@@ -8,6 +10,10 @@ import {
 import {
   createServiceManager, utils, IServiceManager
 } from 'jupyter-js-services';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
 
 import {
   TextModelFactory, IDocumentModel
@@ -133,6 +139,7 @@ namespace Private {
 
   export
   const notebookFactory = new NotebookModelFactory();
+
 
   class JSONRenderer extends HTMLRenderer {
     /**

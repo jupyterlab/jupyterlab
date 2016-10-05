@@ -3,8 +3,6 @@
 
 import expect = require('expect.js');
 
-import json2html = require('json-to-html');
-
 import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
