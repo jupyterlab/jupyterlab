@@ -65,6 +65,27 @@ describe('inspector/index', () => {
         expect(widget).to.be.an(Inspector);
       });
 
+      it('should hide its tab bar if there are less than two items', () => {
+        let options: Inspector.IOptions = {
+          items: [{ name: 'Foo', rank: 20, type: 'foo' }]
+        };
+        let widget = new Inspector(options);
+        expect(widget).to.be.an(Inspector);
+        expect(widget.tabBar.isHidden).to.be(true);
+      });
+
+      it('should show its tab bar if there is more than one item', () => {
+        let options: Inspector.IOptions = {
+          items: [
+            { name: 'Foo', rank: 20, type: 'foo' },
+            { name: 'Boo', rank: 30, type: 'bar' }
+          ]
+        };
+        let widget = new Inspector(options);
+        expect(widget).to.be.an(Inspector);
+        expect(widget.tabBar.isHidden).to.be(false);
+      });
+
     });
 
     describe('#source', () => {
