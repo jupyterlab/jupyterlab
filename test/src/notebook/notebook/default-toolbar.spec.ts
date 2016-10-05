@@ -428,7 +428,8 @@ describe('notebook/notebook/default-toolbar', () => {
               if (!panel.kernel) {
                 return;
               }
-              if (panel.kernel.status === 'idle') {
+              if (panel.kernel.status === 'busy') {
+                expect(item.hasClass('jp-mod-busy')).to.be(true);
                 panel.kernel.interrupt();
               }
               if (panel.kernel.status === 'idle') {
