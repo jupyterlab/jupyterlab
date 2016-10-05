@@ -5,6 +5,11 @@ module.exports = function (config) {
     basePath: '.',
     browsers: ['Firefox'],
     frameworks: ['mocha'],
+    client: {
+      mocha: {
+        timeout : 10000 // 10 seconds - upped from 2 seconds
+      }
+    },
     reporters: ['mocha', 'coverage', 'remap-coverage'],
     files: [
       'node_modules/es6-promise/dist/es6-promise.js',
