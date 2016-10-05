@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  IKernel, startNewKernel
+  IKernel, Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -42,7 +42,7 @@ import {
 
 const clipboard = new MimeData();
 const ERROR_INPUT = 'a = foo';
-const kernelPromise = startNewKernel();
+const kernelPromise = Kernel.startNew();
 
 
 describe('notebook/notebook/actions', () => {

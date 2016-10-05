@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  IKernel
+  Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -27,7 +27,7 @@ import {
 
 class WidgetFactory extends ABCWidgetFactory<Widget, IDocumentModel> {
 
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): Widget {
+  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): Widget {
     return new Widget();
   }
 }

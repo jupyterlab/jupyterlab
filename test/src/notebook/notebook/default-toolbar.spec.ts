@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  utils, startNewSession
+  utils, Session
 } from 'jupyter-js-services';
 
 import {
@@ -64,7 +64,7 @@ import {
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
-const sessionPromise = startNewSession({ path: utils.uuid() });
+const sessionPromise = Session.startNew({ path: utils.uuid() });
 
 
 describe('notebook/notebook/default-toolbar', () => {
@@ -309,7 +309,7 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#createKernelNameItem()', () => {
 
       it('should display the `\'display_name\'` of the kernel', (done) => {
-        return panel.kernel.getKernelSpec().then(spec => {
+        return panel.kernel.getSpec().then(spec => {
           let item = createKernelNameItem(panel);
           expect(item.node.textContent).to.be(spec.display_name);
           done();
@@ -326,7 +326,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let item = createKernelNameItem(panel);
         let name = context.kernelspecs.default;
         panel.context.changeKernel({ name }).then(kernel => {
-          return kernel.getKernelSpec().then(spec => {
+          return kernel.getSpec().then(spec => {
             expect(item.node.textContent).to.be(spec.display_name);
             done();
           });
@@ -335,7 +335,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should handle a change in context', (done) => {
         let item = createKernelNameItem(panel);
-        panel.kernel.getKernelSpec().then(spec => {
+        panel.kernel.getSpec().then(spec => {
           panel.context = null;
           expect(item.node.textContent).to.be('No Kernel!');
         }).then(done, done);

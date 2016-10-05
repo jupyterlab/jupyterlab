@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  startNewKernel
+  Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -584,7 +584,7 @@ describe('notebook/cells/widget', () => {
 
       it('should fulfill a promise if there is no code to execute', (done) => {
         let widget = new CodeCellWidget({ rendermime, renderer: CodeMirrorNotebookRenderer.defaultCodeCellRenderer });
-        startNewKernel().then(kernel => {
+        Kernel.startNew().then(kernel => {
           widget.model = new CodeCellModel();
           return widget.execute(kernel).then(() => {
             kernel.shutdown();
@@ -595,7 +595,7 @@ describe('notebook/cells/widget', () => {
 
       it('should fulfill a promise if there is code to execute', (done) => {
         let widget = new CodeCellWidget({ rendermime, renderer: CodeMirrorNotebookRenderer.defaultCodeCellRenderer });
-        startNewKernel().then(kernel => {
+        Kernel.startNew().then(kernel => {
           widget.model = new CodeCellModel();
           widget.model.source = 'foo';
 
