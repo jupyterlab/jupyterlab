@@ -118,28 +118,6 @@
 }
 
 
-.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-bottom {
-  position: absolute;
-  right: 0;
-}
-
-
-.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-bottom::before {
-   content: "\f103";  /* angle-double-down */
-}
-
-
-.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-right {
-  position: absolute;
-  right: 0;
-}
-
-
-.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-right::before {
-   content: "\f101";  /* angle-double-right */
-}
-
-
 .jp-InspectorItem pre {
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);

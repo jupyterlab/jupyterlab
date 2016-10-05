@@ -38,6 +38,7 @@ function activateInspector(app: JupyterLab, palette: ICommandPalette): IInspecto
 
   inspector.id = 'jp-inspector';
   inspector.title.label = 'Inspector';
+  inspector.title.closable = true;
 
   function openInspector(): void {
     if (!opened) {

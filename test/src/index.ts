@@ -18,6 +18,8 @@ import './docregistry/registry.spec';
 
 import './filebrowser/model.spec';
 
+import './inspector/inspector.spec';
+
 import './markdownwidget/widget.spec';
 
 import './renderers/renderers.spec';

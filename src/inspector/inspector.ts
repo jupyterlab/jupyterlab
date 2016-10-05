@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  clearSignalData, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -60,16 +60,6 @@ const BACK_CLASS = 'jp-InspectorItem-back';
  */
 const FORWARD_CLASS = 'jp-InspectorItem-forward';
 
-/**
- * The orientation toggle bottom button class name.
- */
-const BOTTOM_TOGGLE_CLASS = 'jp-InspectorItem-bottom';
-
-/**
- * The orientation toggle right button class name.
- */
-const RIGHT_TOGGLE_CLASS = 'jp-InspectorItem-right';
-
 
 /* tslint:disable */
 /**
@@ -85,11 +75,6 @@ const IInspector = new Token<IInspector>('jupyter.services.inspector');
  */
 export
 interface IInspector {
-  /**
-   * The orientation of the inspector panel.
-   */
-  orientation: Inspector.Orientation;
-
   /**
    * The source of events the inspector panel listens for.
    */
@@ -109,13 +94,11 @@ class Inspector extends TabPanel implements IInspector {
     super();
     this.addClass(PANEL_CLASS);
 
+    let items = options.items || [];
+
     // Create inspector child items and add them to the inspectors panel.
-    (options.items || []).forEach(value => {
+    items.forEach(value => {
       let widget = value.widget || new InspectorItem();
-      widget.orientation = this._orientation as Inspector.Orientation;
-      widget.orientationToggled.connect(() => {
-        this.orientation = 'vertical' ? 'horizontal' : 'vertical';
-      });
       widget.rank = value.rank;
       widget.remembers = !!value.remembers;
       widget.title.closable = false;
@@ -126,23 +109,10 @@ class Inspector extends TabPanel implements IInspector {
       this._items[value.type] = widget;
       this.addWidget(widget);
     });
-  }
 
-  /**
-   * The orientation of the inspector panel.
-   */
-  get orientation(): Inspector.Orientation {
-    return this._orientation;
-  }
-  set orientation(orientation: Inspector.Orientation) {
-    if (this._orientation === orientation) {
-      return;
+    if (items.length < 2) {
+      this.tabBar.hide();
     }
-
-    this._orientation = orientation;
-    Object.keys(this._items).forEach(i => {
-      this._items[i].orientation = orientation;
-    });
   }
 
   /**
@@ -241,7 +211,6 @@ class Inspector extends TabPanel implements IInspector {
   }
 
   private _items: { [type: string]: InspectorItem } = Object.create(null);
-  private _orientation: Inspector.Orientation = 'horizontal';
   private _source: Inspector.IInspectable = null;
 }
 
@@ -251,12 +220,6 @@ class Inspector extends TabPanel implements IInspector {
  */
 export
 namespace Inspector {
-  /**
-   * The orientation options of an inspector panel.
-   */
-  export
-  type Orientation = 'horizontal' | 'vertical';
-
   /**
    * The definition of an inspector.
    */
@@ -346,13 +309,6 @@ namespace Inspector {
      * will be rendered in the inspectors tab panel.
      */
     items?: IInspectorItem[];
-
-    /**
-     * The orientation of the inspector panel.
-     *
-     * The default value is `'horizontal'`.
-     */
-    orientation?: Orientation;
   }
 }
 
@@ -363,24 +319,14 @@ namespace Inspector {
 export
 class InspectorItem extends Panel {
   /**
-   * This flag is a temporary placeholder and will be removed when we switch to
-   * the phosphor mono-repo and have support for multiple inspector locations.
-   */
-  toggleEnabled = false;
-
-  /**
    * Construct an inspector widget.
    */
   constructor() {
     super();
     this.addClass(ITEM_CLASS);
-    this.update();
+    this._toolbar = this._createToolbar();
+    this.addWidget(this._toolbar);
   }
-
-  /**
-   * A signal emitted when an inspector widget's orientation is toggled.
-   */
-  orientationToggled: ISignal<InspectorItem, void>;
 
   /**
    * The text of the inspector.
@@ -408,20 +354,6 @@ class InspectorItem extends Panel {
         this._index++;
       }
     }
-  }
-
-  /**
-   * The display orientation of the inspector widget.
-   */
-  get orientation(): Inspector.Orientation {
-    return this._orientation;
-  }
-  set orientation(newValue: Inspector.Orientation) {
-    if (newValue === this._orientation) {
-      return;
-    }
-    this._orientation = newValue;
-    this.update();
   }
 
   /**
@@ -475,18 +407,6 @@ class InspectorItem extends Panel {
   }
 
   /**
-   * Handle `update_request` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    if (this._toolbar) {
-      this._toolbar.dispose();
-    }
-
-    this._toolbar = this._createToolbar();
-    this.insertWidget(0, this._toolbar);
-  }
-
-  /**
    * Navigate back in history.
    */
   private _back(): void {
@@ -520,16 +440,6 @@ class InspectorItem extends Panel {
    */
   private _createToolbar(): Toolbar {
     let toolbar = new Toolbar();
-
-    if (this.toggleEnabled) {
-      let toggle = new ToolbarButton({
-        className: this.orientation === 'vertical' ? RIGHT_TOGGLE_CLASS
-          : BOTTOM_TOGGLE_CLASS,
-        onClick: () => { this.orientationToggled.emit(void 0); },
-        tooltip: 'Toggle the inspector orientation.'
-      });
-      toolbar.add('toggle', toggle);
-    }
 
     if (!this._remembers) {
       return toolbar;
@@ -574,12 +484,7 @@ class InspectorItem extends Panel {
   private _content: Widget = null;
   private _history: Widget[] = null;
   private _index: number = -1;
-  private _orientation: Inspector.Orientation = 'horizontal';
   private _rank: number = Infinity;
   private _remembers: boolean = false;
   private _toolbar: Toolbar = null;
 }
-
-
-// Define the signals for the `InspectorItem` class.
-defineSignal(InspectorItem.prototype, 'orientationToggled');
