@@ -3,6 +3,11 @@ module.exports = function (config) {
     basePath: '.',
     frameworks: ['mocha'],
     reporters: ['mocha'],
+    client: {
+      mocha: {
+        timeout : 6000 // 6 seconds - upped from 2 seconds
+      }
+    },
     files: [
       '../node_modules/es6-promise/dist/es6-promise.js',
       './build/injector.js',
