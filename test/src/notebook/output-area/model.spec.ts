@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  startNewKernel
+  IKernel, startNewKernel
 } from 'jupyter-js-services';
 
 import {

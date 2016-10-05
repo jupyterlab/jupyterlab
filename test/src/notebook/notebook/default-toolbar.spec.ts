@@ -439,7 +439,6 @@ describe('notebook/notebook/default-toolbar', () => {
             });
           });
         }).catch(done);
-        }
       });
 
     });
