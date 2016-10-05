@@ -7,6 +7,7 @@ module.exports = {
     filename: "bundle.js",
     publicPath: "./test/build/"
   },
+  bail: true,
   devtool: 'inline-source-map',
   module: {
     loaders: [
