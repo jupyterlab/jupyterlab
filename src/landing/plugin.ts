@@ -2,6 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
+  h, render, VNode
+} from 'phosphor/lib/ui/vdom';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -32,107 +40,99 @@ const landingExtension: JupyterLabPlugin<void> = {
   autoStart: true
 };
 
+class LandingWidget extends Widget {
+  get path(): string {
+    return this._path;
+  }
+
+  set path(value: string) {
+    this._path = value;
+    this.update();
+  }
+
+  get data(): VNode[] {
+    return this._data;
+  }
+
+  set data(value: VNode[]) {
+    this._data = value;
+  }
+
+  protected onUpdateRequest(msg: Message): void {
+    let path = this._path;
+    let previousChildren = this._data;
+    let dialog =
+    h.div({className: 'jp-Landing-dialog'},
+      previousChildren,
+      h.div({className: 'jp-Landing-cwd'},
+        h.span({className: 'jp-Landing-folder'}),
+        h.span({className: 'jp-Landing-path'}, path
+        )
+      )
+    );
+    render(dialog, this.node);
+  }
+
+  private _path: string;
+  private _data: VNode[];
+}
+
 
 function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): void {
-  let widget = new Widget();
+  let widget = new LandingWidget();
   widget.id = 'landing-jupyterlab';
   widget.title.label = 'Launcher';
   widget.title.closable = true;
   widget.addClass('jp-Landing');
 
-  let dialog = document.createElement('div');
-  dialog.className = 'jp-Landing-dialog';
-  widget.node.appendChild(dialog);
-
-  let logo = document.createElement('span');
-  logo.className = 'jp-ImageJupyterLab jp-Landing-logo';
-  dialog.appendChild(logo);
-
-  let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
-  let subtitle = document.createElement('span');
-  let index = Math.floor(Math.random() * previewMessages.length);
-  subtitle.textContent = previewMessages[index];
-  subtitle.className = 'jp-Landing-subtitle';
-  dialog.appendChild(subtitle);
-
-  let tour = document.createElement('span');
-  tour.className = 'jp-Landing-tour';
-  dialog.appendChild(tour);
-  tour.addEventListener('click', () => {
-    app.commands.execute('about-jupyterlab:show', void 0);
-  });
-
-  let header = document.createElement('span');
-  header.textContent = 'Start a new activity';
-  header.className = 'jp-Landing-header';
-  dialog.appendChild(header);
-
-  let body = document.createElement('div');
-  body.className = 'jp-Landing-body';
-  dialog.appendChild(body);
-
-  for (let name of ['Notebook', 'Code Console', 'Terminal', 'Text Editor']) {
-    let column = document.createElement('div');
-    body.appendChild(column);
-    column.className = 'jp-Landing-column';
-
-    let img = document.createElement('span');
-    let imgName = name.replace(' ', '');
-    img.className = `jp-Image${imgName} jp-Landing-image`;
-
-    column.appendChild(img);
-
-    let text = document.createElement('span');
-    text.textContent = name;
-    text.className = 'jp-Landing-text';
-    column.appendChild(text);
-  }
-
-  let img = body.getElementsByClassName('jp-ImageNotebook')[0];
-  img.addEventListener('click', () => {
-    app.commands.execute('file-operations:new-notebook', void 0);
-  });
-
-  img = body.getElementsByClassName('jp-ImageCodeConsole')[0];
-  img.addEventListener('click', () => {
-    app.commands.execute('console:create', void 0);
-  });
-
-  img = body.getElementsByClassName('jp-ImageTextEditor')[0];
-  img.addEventListener('click', () => {
-    app.commands.execute('file-operations:new-text-file', void 0);
-  });
-
-  img = body.getElementsByClassName('jp-ImageTerminal')[0];
-  img.addEventListener('click', () => {
-    app.commands.execute('terminal:create-new', void 0);
-  });
-
-  let cwd = document.createElement('div');
-  cwd.className = 'jp-Landing-cwd';
-
-
   let folderImage = document.createElement('span');
   folderImage.className = 'jp-Landing-folder jp-FolderIcon';
 
+  let path = 'home';
 
-  let path = document.createElement('span');
-  path.textContent = 'home';
+  let logo = h.span({className: 'jp-ImageJupyterLab jp-Landing-logo'});
+  let subtitle =
+  h.span({className: 'jp-Landing-subtitle'},
+    actualMessage
+  );
+  let tour =
+  h.span({className: 'jp-Landing-tour',
+          onclick: () => {
+            app.commands.execute('about-jupyterlab:show', void 0);
+          }}
+  );
+  let header =
+  h.span({className: 'jp-Landing-header'},
+    'Start a new activity'
+  );
+  let body =
+  h.div({className: 'jp-Landing-body'},
+    activitiesList
+  );
+  widget.data = [logo, subtitle, tour, header, body];
+
+  let dialog =
+  h.div({className: 'jp-Landing-dialog'},
+    widget.data,
+    h.div({className: 'jp-Landing-cwd'},
+      h.span({className: 'jp-Landing-folder'}),
+      h.span({className: 'jp-Landing-path'}, path
+      )
+    )
+  );
+  render(dialog, widget.node);
+
   pathTracker.pathChanged.connect(() => {
     if (pathTracker.path.length > 0) {
-      path.textContent = 'home > ';
+      path = 'home > ';
       let path2 = pathTracker.path;
       path2 = path2.replace('/', ' > ');
-      path.textContent += path2;
+      path += path2;
     } else {
-      path.textContent = 'home';
+      path = 'home';
     }
+    widget.path = path;
   });
-  path.className = 'jp-Landing-path';
-
-  cwd.appendChild(folderImage);
-  cwd.appendChild(path);
-  dialog.appendChild(cwd);
 
   app.commands.addCommand('jupyterlab-landing:show', {
     label: 'Show Landing',
