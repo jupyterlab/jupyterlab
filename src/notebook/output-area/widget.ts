@@ -343,10 +343,10 @@ class OutputAreaWidget extends Widget {
     let layout = this.layout as PanelLayout;
     let widget = layout.widgets.at(index) as OutputWidget;
     let output = this._model.get(index);
-    let injector: (mimetype: string, value: string) => void;
+    let injector: (mimetype: string, value: string | JSONObject) => void;
     if (output.output_type === 'display_data' ||
         output.output_type === 'execute_result') {
-      injector = (mimetype: string, value: string) => {
+      injector = (mimetype: string, value: string | JSONObject) => {
         this._model.addMimeData(
           output as nbformat.IDisplayData, mimetype, value
         );
