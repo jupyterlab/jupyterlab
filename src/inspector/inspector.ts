@@ -324,7 +324,8 @@ class InspectorItem extends Panel {
   constructor() {
     super();
     this.addClass(ITEM_CLASS);
-    this.update();
+    this._toolbar = this._createToolbar();
+    this.addWidget(this._toolbar);
   }
 
   /**
@@ -403,18 +404,6 @@ class InspectorItem extends Panel {
     }
 
     super.dispose();
-  }
-
-  /**
-   * Handle `update_request` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    if (this._toolbar) {
-      this._toolbar.dispose();
-    }
-
-    this._toolbar = this._createToolbar();
-    this.insertWidget(0, this._toolbar);
   }
 
   /**
