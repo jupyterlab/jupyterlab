@@ -3,7 +3,11 @@
 
 import expect = require('expect.js');
 
-import json2html = require('json2html');
+import json2html = require('json-to-html');
+
+import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
 
 import {
   Widget
@@ -108,7 +112,7 @@ describe('rendermime/index', () => {
         };
         let r = defaultRenderMime();
         let widget = r.render({ bundle });
-        expect(widget.node.textContent).to.be('foo');
+        expect(widget.node.textContent).to.be('{\n  "foo": 1\n}');
       });
 
       it('should accept an injector', () => {
