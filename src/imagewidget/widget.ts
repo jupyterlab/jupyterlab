@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -108,7 +108,7 @@ class ImageWidgetFactory extends ABCWidgetFactory<ImageWidget, IDocumentModel> {
   /**
    * Create a new widget given a context.
    */
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): ImageWidget {
+  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): ImageWidget {
     let widget = new ImageWidget(context);
     this.widgetCreated.emit(widget);
     return widget;

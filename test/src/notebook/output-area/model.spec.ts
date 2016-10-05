@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  IKernel, startNewKernel
+  IKernel, Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -206,7 +206,7 @@ describe('notebook/output-area/model', () => {
       let kernel: IKernel;
 
       beforeEach((done) => {
-        startNewKernel().then(k => {
+        Kernel.startNew().then(k => {
           kernel = k;
           return kernel.kernelInfo();
         }).then(() => {

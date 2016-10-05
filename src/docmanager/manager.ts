@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, IKernel, IServiceManager, ISession
+  ContentsManager, Kernel, IServiceManager, Session
 } from 'jupyter-js-services';
 
 import {
@@ -73,7 +73,7 @@ class DocumentManager implements IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  get kernelspecs(): IKernel.ISpecModels {
+  get kernelspecs(): Kernel.ISpecModels {
     return this._serviceManager.kernelspecs;
   }
 
@@ -119,7 +119,7 @@ class DocumentManager implements IDisposable {
    *
    * @param kernel - An optional kernel name/id to override the default.
    */
-  open(path: string, widgetName='default', kernel?: IKernel.IModel): Widget {
+  open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
     let registry = this._registry;
     if (widgetName === 'default') {
       widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path));
@@ -147,7 +147,7 @@ class DocumentManager implements IDisposable {
    *
    * @param kernel - An optional kernel name/id to override the default.
    */
-  createNew(path: string, widgetName='default', kernel?: IKernel.IModel): Widget {
+  createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
     let registry = this._registry;
     if (widgetName === 'default') {
       widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path));
@@ -165,7 +165,7 @@ class DocumentManager implements IDisposable {
   /**
    * List the running notebook sessions.
    */
-  listSessions(): Promise<ISession.IModel[]> {
+  listSessions(): Promise<Session.IModel[]> {
     return this._serviceManager.sessions.listRunning();
   }
 

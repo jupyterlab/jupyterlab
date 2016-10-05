@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  KernelMessage, IKernel, startNewKernel
+  KernelMessage, IKernel, Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -36,7 +36,7 @@ class TestHistory extends ConsoleHistory {
 }
 
 
-const kernelPromise = startNewKernel();
+const kernelPromise = Kernel.startNew();
 
 
 describe('console/history', () => {

@@ -10,7 +10,7 @@ import {
 } from 'jupyterlab/lib/console/codemirror/widget';
 
 import {
-  startNewSession, findSessionByPath, connectToSession, ISession
+  ISession, Session
 } from 'jupyter-js-services';
 
 import {
@@ -64,16 +64,16 @@ function main(): void {
   });
 
   if (!query['path']) {
-    startNewSession({ path }).then(session => { startApp(session); });
+    Session.startNew({ path }).then(session => { startApp(session); });
     return;
   }
 
-  findSessionByPath(query['path'])
-    .then(model => { return connectToSession(model.id); })
+  Session.findByPath(query['path'])
+    .then(model => { return Session.connectTo(model.id); })
     .then(session => { startApp(session); })
     .catch(error => {
       console.warn(`path="${query['path']}"`, error);
-      startNewSession({ path }).then(session => { startApp(session); });
+      Session.startNew({ path }).then(session => { startApp(session); });
     });
 }
 

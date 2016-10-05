@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  KernelMessage, IKernel, startNewKernel
+  KernelMessage, IKernel, Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -69,7 +69,7 @@ class TestCompleterHandler extends CellCompleterHandler {
   }
 }
 
-const kernelPromise = startNewKernel();
+const kernelPromise = Kernel.startNew();
 
 
 describe('completer/handler', () => {

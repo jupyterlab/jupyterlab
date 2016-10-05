@@ -7,7 +7,7 @@ import * as CodeMirror
 import 'codemirror/mode/meta';
 
 import {
-  IKernel
+  Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -131,7 +131,7 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, IDocumentModel>
   /**
    * Create a new widget given a context.
    */
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): EditorWidget {
+  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): EditorWidget {
     if (kernel) {
       context.changeKernel(kernel);
     }

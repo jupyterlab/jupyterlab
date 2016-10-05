@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  createTerminalSession
+  TerminalSession
 } from 'jupyter-js-services';
 
 import {
@@ -31,8 +31,8 @@ function main(): void {
     color: 'black'
   });
 
-  createTerminalSession().then(session => term1.session = session);
-  createTerminalSession().then(session => term2.session = session);
+  TerminalSession.open().then(session => term1.session = session);
+  TerminalSession.open().then(session => term2.session = session);
 
   term1.title.closable = true;
   term2.title.closable = true;

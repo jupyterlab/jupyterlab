@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, ISession
+  Kernel, Session
 } from 'jupyter-js-services';
 
 import {
@@ -27,12 +27,12 @@ interface IKernelSelection {
   /**
    * The kernel spec information.
    */
-  specs: IKernel.ISpecModels;
+  specs: Kernel.ISpecModels;
 
   /**
    * The current running sessions.
    */
-  sessions: ISession.IModel[];
+  sessions: Session.IModel[];
 
   /**
    * The desired kernel language.
@@ -42,7 +42,7 @@ interface IKernelSelection {
   /**
    * The optional existing kernel id.
    */
-  kernel?: IKernel.IModel;
+  kernel?: Kernel.IModel;
 
   /**
    * The host node for the dialog.
@@ -59,12 +59,12 @@ interface IPopulateOptions {
    /**
     * The Kernel specs.
     */
-  specs: IKernel.ISpecModels;
+  specs: Kernel.ISpecModels;
 
   /**
    * The current running sessions.
    */
-  sessions: ISession.IModel[];
+  sessions: Session.IModel[];
 
   /**
    * The preferred kernel name.
@@ -82,7 +82,7 @@ interface IPopulateOptions {
  * Bring up a dialog to select a kernel.
  */
 export
-function selectKernel(options: IKernelSelection): Promise<IKernel.IModel> {
+function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
   let { specs, kernel, sessions, preferredLanguage } = options;
 
   // Create the dialog body.
@@ -108,7 +108,7 @@ function selectKernel(options: IKernelSelection): Promise<IKernel.IModel> {
   }).then(result => {
     // Change the kernel if a kernel was selected.
     if (result.text === 'SELECT') {
-      return JSON.parse(selector.value) as IKernel.IModel;
+      return JSON.parse(selector.value) as Kernel.IModel;
     }
     return void 0;
   });
@@ -142,7 +142,7 @@ function selectKernelForContext(context: IDocumentContext<IDocumentModel>, host?
  * Get the appropriate kernel name.
  */
 export
-function findKernel(kernelName: string, language: string, specs: IKernel.ISpecModels): string {
+function findKernel(kernelName: string, language: string, specs: Kernel.ISpecModels): string {
   if (kernelName === 'unknown') {
     return specs.default;
   }
@@ -265,7 +265,7 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
     node.appendChild(createSeparatorOption(maxLength));
   }
   // Add the sessions using the preferred language first.
-  let matchingSessions: ISession.IModel[] = [];
+  let matchingSessions: Session.IModel[] = [];
   if (preferredLanguage) {
     for (let session of sessions) {
       if (languages[session.kernel.name] === preferredLanguage) {
@@ -284,7 +284,7 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
     }
   }
   // Add the other remaining sessions.
-  let otherSessions: ISession.IModel[] = [];
+  let otherSessions: Session.IModel[] = [];
   for (let session of sessions) {
     if (matchingSessions.indexOf(session) === -1) {
       otherSessions.push(session);
@@ -327,7 +327,7 @@ function optionForName(name: string, displayName: string): HTMLOptionElement {
 /**
  * Create an option element for a session.
  */
-function optionForSession(session: ISession.IModel, displayName: string, maxLength: number): HTMLOptionElement {
+function optionForSession(session: Session.IModel, displayName: string, maxLength: number): HTMLOptionElement {
   let option = document.createElement('option');
   let sessionName = session.notebook.path.split('/').pop();
   if (sessionName.length > maxLength) {
