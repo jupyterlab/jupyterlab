@@ -55,7 +55,7 @@ class FileBrowserModel implements IDisposable {
   /**
    * Get the file path changed signal.
    */
-  fileChanged: ISignal<FileBrowserModel, IChangedArgs<string>>;
+  fileChanged: ISignal<FileBrowserModel, IChangedArgs<Contents.IModel>>;
 
   /**
    * Get the current path.
@@ -179,7 +179,7 @@ class FileBrowserModel implements IDisposable {
       this.fileChanged.emit({
         name: 'file',
         oldValue: void 0,
-        newValue: contents.path
+        newValue: contents
       });
       return contents;
     });
@@ -198,7 +198,7 @@ class FileBrowserModel implements IDisposable {
     return this._manager.contents.delete(path).then(() => {
       this.fileChanged.emit({
         name: 'file',
-        oldValue: path,
+        oldValue: {path: path},
         newValue: void 0
       });
     });
@@ -236,7 +236,7 @@ class FileBrowserModel implements IDisposable {
       this.fileChanged.emit({
         name: 'file',
         oldValue: void 0,
-        newValue: contents.path
+        newValue: contents
       });
       return contents;
     });
@@ -259,8 +259,8 @@ class FileBrowserModel implements IDisposable {
     return this._manager.contents.rename(path, newPath).then(contents => {
       this.fileChanged.emit({
         name: 'file',
-        oldValue: path,
-        newValue: newPath
+        oldValue: {type: contents.type , path: path},
+        newValue: contents
       });
       return contents;
     });
@@ -340,7 +340,7 @@ class FileBrowserModel implements IDisposable {
           this.fileChanged.emit({
             name: 'file',
             oldValue: void 0,
-            newValue: contents.path
+            newValue: contents
           });
           resolve(contents);
         });
