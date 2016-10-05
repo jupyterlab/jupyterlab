@@ -236,7 +236,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
       contents.content = model.toString();
     }
     return this._manager.contents.save(path, contents).then(newContents => {
-      this._updateContentsModel(contents);
+      this._updateContentsModel(newContents);
       model.dirty = false;
       if (!this._isPopulated) {
         this._populate();
