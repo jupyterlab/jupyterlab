@@ -171,7 +171,7 @@ describe('common/activitymonitor', () => {
 
     describe('#dispose()', () => {
 
-      it('should disposed of the resources used by the monitor', () => {
+      it('should dispose of the resources used by the monitor', () => {
         let monitor = new ActivityMonitor<TestObject, number>({ signal });
         monitor.dispose();
         expect(monitor.isDisposed).to.be(true);
