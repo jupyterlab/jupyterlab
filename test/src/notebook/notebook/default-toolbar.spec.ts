@@ -361,6 +361,9 @@ describe('notebook/notebook/default-toolbar', () => {
             done();
           }
         });
+        if (panel.kernel.status === 'idle') {
+          panel.kernel.interrupt();
+        }
       });
 
       it('should show the current status in the node title', (done) => {
@@ -379,6 +382,9 @@ describe('notebook/notebook/default-toolbar', () => {
             done();
           }
         });
+        if (panel.kernel.status === 'idle') {
+          panel.kernel.interrupt();
+        }
       });
 
       it('should handle a change to the kernel', (done) => {
@@ -398,6 +404,9 @@ describe('notebook/notebook/default-toolbar', () => {
             }
           });
         }).catch(done);
+        if (panel.kernel.status === 'idle') {
+          panel.kernel.interrupt();
+        }
       });
 
       it('should handle a null kernel', (done) => {
@@ -430,6 +439,7 @@ describe('notebook/notebook/default-toolbar', () => {
             });
           });
         }).catch(done);
+        }
       });
 
     });
