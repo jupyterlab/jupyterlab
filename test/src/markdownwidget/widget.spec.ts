@@ -20,17 +20,16 @@ import {
 } from '../../../lib/markdownwidget/widget';
 
 import {
-  DocumentModel
+  IDocumentModel
 } from '../../../lib/docregistry';
 
 import {
-  MockContext
-} from '../docmanager/mockcontext';
+  Context
+} from '../../../lib/docmanager/context';
 
 import {
-  defaultRenderMime
-} from '../rendermime/rendermime.spec';
-
+  createFileContext, defaultRenderMime
+} from '../utils';
 
 const RENDERMIME = defaultRenderMime();
 
@@ -50,14 +49,25 @@ class LogWidget extends MarkdownWidget {
 }
 
 
+const contextPromise = createFileContext();
+
+
 describe('markdownwidget/widget', () => {
+
+  let context: Context<IDocumentModel>;
+
+  beforeEach((done) => {
+    contextPromise.then(c => {
+      context = c;
+      done();
+    });
+  });
 
   describe('MarkdownWidgetFactory', () => {
 
     describe('#createNew()', () => {
 
       it('should require a context parameter', () => {
-        let context = new MockContext(new DocumentModel());
         let widgetFactory = new MarkdownWidgetFactory(RENDERMIME);
         expect(widgetFactory.createNew(context)).to.be.a(MarkdownWidget);
       });
@@ -71,7 +81,6 @@ describe('markdownwidget/widget', () => {
     describe('#constructor()', () => {
 
       it('should require a context parameter', () => {
-        let context = new MockContext(new DocumentModel());
         let widget = new MarkdownWidget(context, RENDERMIME);
         expect(widget).to.be.a(MarkdownWidget);
       });
@@ -81,7 +90,6 @@ describe('markdownwidget/widget', () => {
     describe('#onAfterAttach()', () => {
 
       it('should update the widget', () => {
-        let context = new MockContext(new DocumentModel());
         let widget = new LogWidget(context, RENDERMIME);
         expect(widget.methods).to.not.contain('onAfterAttach');
         Widget.attach(widget, document.body);
@@ -94,7 +102,6 @@ describe('markdownwidget/widget', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should update rendered markdown', () => {
-        let context = new MockContext(new DocumentModel());
         let widget = new LogWidget(context, RENDERMIME);
         expect(widget.methods).to.not.contain('onUpdateRequest');
         context.model.contentChanged.emit(void 0);
@@ -104,7 +111,6 @@ describe('markdownwidget/widget', () => {
       });
 
       it('should replace children on subsequent updates', () => {
-        let context = new MockContext(new DocumentModel());
         let widget = new LogWidget(context, RENDERMIME);
         context.model.contentChanged.emit(void 0);
         sendMessage(widget, WidgetMessage.UpdateRequest);

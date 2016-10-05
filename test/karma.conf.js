@@ -1,11 +1,17 @@
 module.exports = function (config) {
   config.set({
-    basePath: '..',
+    basePath: '.',
     frameworks: ['mocha'],
     reporters: ['mocha'],
+    client: {
+      mocha: {
+        timeout : 10000 // 10 seconds - upped from 2 seconds
+      }
+    },
     files: [
-      'node_modules/es6-promise/dist/es6-promise.js',
-      'test/build/bundle.js'
+      '../node_modules/es6-promise/dist/es6-promise.js',
+      './build/injector.js',
+      './build/bundle.js'
     ],
     preprocessors: {
       'test/build/bundle.js': ['sourcemap']

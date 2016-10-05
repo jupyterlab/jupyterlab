@@ -54,7 +54,6 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
     this._model = this._factory.createNew(lang);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
     this._saver = new SaveHandler({ context: this, manager });
-    this._saver.start();
   }
 
   /**
@@ -237,7 +236,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
       contents.content = model.toString();
     }
     return this._manager.contents.save(path, contents).then(newContents => {
-      this._contentsModel = this._copyContentsModel(newContents);
+      this._updateContentsModel(contents);
       model.dirty = false;
       if (!this._isPopulated) {
         this._populate();
@@ -292,11 +291,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
       } else {
         model.fromString(contents.content);
       }
-      let contentsModel = this._copyContentsModel(contents);
-      this._contentsModel = contentsModel;
-      if (contentsModel.last_modified !== this._contentsModel.last_modified) {
-        this.contentsModelChanged.emit(contentsModel);
-      }
+      this._updateContentsModel(contents);
       model.dirty = false;
       if (!this._isPopulated) {
         this._populate();
@@ -405,10 +400,10 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   }
 
   /**
-   * Copy the contents of a contents model, without the content.
+   * Update our contents model, without the content.
    */
-  private _copyContentsModel(model: IContents.IModel): IContents.IModel {
-    return {
+  private _updateContentsModel(model: IContents.IModel): void {
+    let newModel: IContents.IModel = {
       path: model.path,
       name: model.name,
       type: model.type,
@@ -418,6 +413,11 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
       mimetype: model.mimetype,
       format: model.format
     };
+    let prevModel = this._contentsModel;
+    this._contentsModel = newModel;
+    if (!prevModel || newModel.last_modified !== prevModel.last_modified) {
+      this.contentsModelChanged.emit(newModel);
+    }
   }
 
   /**
@@ -441,6 +441,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
    */
   private _populate(): void {
     this._isPopulated = true;
+    this._saver.start();
     // Add a checkpoint if none exists.
     this.listCheckpoints().then(checkpoints => {
       if (!checkpoints) {

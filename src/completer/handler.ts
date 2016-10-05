@@ -125,6 +125,9 @@ class CellCompleterHandler implements IDisposable {
     }
     let value = msg.content;
     let model = this._completer.model;
+    if (!model) {
+      return;
+    }
     // Completion request failures or negative results fail silently.
     if (value.status !== 'ok') {
       model.reset();

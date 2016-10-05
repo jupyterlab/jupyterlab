@@ -346,16 +346,12 @@ class NotebookPanel extends Widget {
       this._updateLanguage(kernel.info.language_info);
     } else {
       kernel.kernelInfo().then(msg => {
-        this._updateLanguage(msg.content.language_info);
+        if (this.model) {
+          this._updateLanguage(msg.content.language_info);
+        }
       });
     }
-    if (kernel.spec) {
-      this._updateSpec(kernel);
-    } else {
-      kernel.getKernelSpec().then(spec => {
-        this._updateSpec(kernel);
-      });
-    }
+    this._updateSpec(kernel);
   }
 
   /**
@@ -370,11 +366,13 @@ class NotebookPanel extends Widget {
    * Update the kernel spec.
    */
   private _updateSpec(kernel: IKernel): void {
+    let specs = this.context.kernelspecs;
+    let spec = specs.kernelspecs[kernel.name].spec;
     let specCursor = this.model.getMetadata('kernelspec');
     specCursor.setValue({
       name: kernel.name,
-      display_name: kernel.spec.display_name,
-      language: kernel.spec.language
+      display_name: spec.display_name,
+      language: spec.language
     });
   }
 

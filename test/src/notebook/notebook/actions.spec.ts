@@ -4,12 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  IKernel
+  IKernel, startNewKernel
 } from 'jupyter-js-services';
-
-import {
-  MockKernel, ERROR_INPUT
-} from 'jupyter-js-services/lib/mockkernel';
 
 import {
   MimeData
@@ -33,7 +29,7 @@ import {
 
 import {
   defaultRenderMime
-} from '../../rendermime/rendermime.spec';
+} from '../../utils';
 
 import {
   DEFAULT_CONTENT
@@ -45,6 +41,8 @@ import {
 
 
 const clipboard = new MimeData();
+const ERROR_INPUT = 'a = foo';
+const kernelPromise = startNewKernel();
 
 
 describe('notebook/notebook/actions', () => {
@@ -54,7 +52,7 @@ describe('notebook/notebook/actions', () => {
     let widget: Notebook;
     let kernel: IKernel;
 
-    beforeEach(() => {
+    beforeEach((done) => {
       widget = new Notebook({
         rendermime: defaultRenderMime(),
         renderer: CodeMirrorNotebookRenderer.defaultRenderer
@@ -63,14 +61,20 @@ describe('notebook/notebook/actions', () => {
       model.fromJSON(DEFAULT_CONTENT);
       widget.model = model;
 
-      kernel = new MockKernel({ name: 'python' });
+      kernelPromise.then(k => {
+        kernel = k;
+        done();
+      });
       widget.activeCellIndex = 0;
     });
 
     afterEach(() => {
       widget.dispose();
-      kernel.dispose();
       clipboard.clear();
+    });
+
+    after(() => {
+      kernel.shutdown();
     });
 
     describe('#splitCell()', () => {
@@ -450,7 +454,7 @@ describe('notebook/notebook/actions', () => {
 
     describe('#run()', () => {
 
-      it('should run the selected cells', (done) => {
+      it('should run the selected cells', function (done) {
         let next = widget.childAt(1) as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
@@ -461,7 +465,7 @@ describe('notebook/notebook/actions', () => {
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
       it('should be a no-op if there is no model', (done) => {
@@ -475,11 +479,12 @@ describe('notebook/notebook/actions', () => {
       it('should activate the last selected cell', (done) => {
         let other = widget.childAt(2);
         widget.select(other);
+        other.model.source = 'a = 1';
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCell).to.be(other);
           done();
-        });
+        }).catch(done);
       });
 
       it('should clear the selection', (done) => {
@@ -568,7 +573,7 @@ describe('notebook/notebook/actions', () => {
         let next = widget.childAt(2);
         widget.select(next);
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
-          expect(result).to.be(true);
+          expect(result).to.be(false);
           expect(widget.isSelected(widget.childAt(0))).to.be(false);
           done();
         });
@@ -680,6 +685,7 @@ describe('notebook/notebook/actions', () => {
       it('should insert a new code cell in edit mode after the last selected cell', (done) => {
         let next = widget.childAt(2);
         widget.select(next);
+        next.model.source = 'a = 1';
         let count = widget.childCount();
         NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(true);
@@ -693,6 +699,7 @@ describe('notebook/notebook/actions', () => {
       it('should allow an undo of the cell insert', (done) => {
         let next = widget.childAt(2);
         widget.select(next);
+        next.model.source = 'a = 1';
         let count = widget.childCount();
         NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(true);
@@ -730,6 +737,11 @@ describe('notebook/notebook/actions', () => {
     });
 
     describe('#runAll()', () => {
+
+      beforeEach(() => {
+        // Make sure all cells have valid code.
+        widget.childAt(2).model.source = 'a = 1';
+      });
 
       it('should run all of the cells in the notebok', (done) => {
         let next = widget.childAt(1) as MarkdownCellWidget;

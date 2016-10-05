@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  MockServiceManager
-} from 'jupyter-js-services/lib/mockmanager';
+  createServiceManager
+} from 'jupyter-js-services';
 
 import {
   FileBrowserModel
@@ -18,10 +18,12 @@ describe('filebrowser/model', () => {
 
     describe('#constructor()', () => {
 
-      it('should construct a new file browser model', () => {
-        let manager = new MockServiceManager();
-        let model = new FileBrowserModel({ manager });
-        expect(model).to.be.a(FileBrowserModel);
+      it('should construct a new file browser model', (done) => {
+        createServiceManager().then(manager => {
+          let model = new FileBrowserModel({ manager });
+          expect(model).to.be.a(FileBrowserModel);
+          done();
+        });
       });
 
     });

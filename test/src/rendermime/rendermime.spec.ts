@@ -8,8 +8,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  LatexRenderer, PDFRenderer, JavascriptRenderer,
-  SVGRenderer, MarkdownRenderer, TextRenderer, HTMLRenderer, ImageRenderer
+   TextRenderer
 } from '../../../lib/renderers';
 
 import {
@@ -17,35 +16,8 @@ import {
 } from '../../../lib/rendermime';
 
 import {
-  defaultSanitizer
-} from '../../../lib/sanitizer';
-
-
-const TRANSFORMERS = [
-  new JavascriptRenderer(),
-  new MarkdownRenderer(),
-  new HTMLRenderer(),
-  new PDFRenderer(),
-  new ImageRenderer(),
-  new SVGRenderer(),
-  new LatexRenderer(),
-  new TextRenderer()
-];
-
-
-export
-function defaultRenderMime(): RenderMime {
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
-  let order: string[] = [];
-  for (let t of TRANSFORMERS) {
-    for (let m of t.mimetypes) {
-      renderers[m] = t;
-      order.push(m);
-    }
-  }
-  let sanitizer = defaultSanitizer;
-  return new RenderMime({ renderers, order, sanitizer });
-}
+  defaultRenderMime
+} from '../utils';
 
 
 describe('rendermime/index', () => {

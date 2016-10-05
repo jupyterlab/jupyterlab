@@ -34,7 +34,7 @@ import {
 
 import {
   defaultRenderMime
-} from '../../rendermime/rendermime.spec';
+} from '../../utils';
 
 import {
   DEFAULT_CONTENT
