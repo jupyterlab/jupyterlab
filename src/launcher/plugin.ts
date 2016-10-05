@@ -150,14 +150,8 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   for (let i in names) {
     // Note: we do not retain a handle on the items added by default, which
     // means we have to way of removing them after the fact.
-    //launcherModel.add(names[i], actions[i]);
-    //launcherModel.add(names[i], actions[i]);
     app.commands.execute('jupyterlab-launcher:add-item', {name: names[i], action: actions[i]});
   }
-
-    app.commands.execute('jupyterlab-launcher:add-item', {name: 'larger font', action: 'terminal:increase-font', imgName: "jp-ImageTerminal fa fa-plus"})
-
-    app.commands.execute('jupyterlab-launcher:add-item', {name: 'smaller font', action: 'terminal:decrease-font', imgName: "jp-ImageTerminal fa fa-minus"})
 
 
   app.commands.addCommand('jupyterlab-launcher:show', {
@@ -225,7 +219,7 @@ class LauncherModel extends VDomModel implements ILauncher {
   /**
    * Add a new launcher and trigger re-render event for parent widget.
    *
-   * returns a Disposable which can be called to remove this new item from
+   * @returns A Disposable which can be called to remove this new item from
    * the Launcher and trigger another re-render event.
    */
   addItem(item: LauncherItem) : IDisposable {
@@ -241,11 +235,19 @@ class LauncherModel extends VDomModel implements ILauncher {
       }
     });
   }
-  
+
+  /**
+   * Set the path to the current working directory.
+   */
   setDir(path: string) : void {
     this.path = path;
     this.stateChanged.emit(void 0);
   }
+
+  /**
+   * Set the JupyterLab application this launcher will use when executing
+   * commands.
+   */
   setApp(app: JupyterLab) : void {
     this.app = app;
   }
@@ -257,11 +259,17 @@ class LauncherModel extends VDomModel implements ILauncher {
  */
 class LauncherWidget extends VDomWidget<LauncherModel> {
 
+  /**
+   * Construct a new launcher widget.
+   */
   constructor() {
     super();
     this.addClass(LAUNCHER_CLASS);
   }
 
+  /**
+   * Render the launcher to virtual DOM nodes.
+   */
   protected render(): VNode | VNode[] {
     let children : VNode[] = [];
 
