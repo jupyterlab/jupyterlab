@@ -9,6 +9,7 @@
     "es6-promise": "^3.1.2",
     "font-awesome": "^4.6.1",
     "fs-extra": "^0.30.0",
+    "jupyter-js-services": "^0.20.0",
     "jupyterlab": "file:../",
     "jupyterlab-extension-builder": "^0.6.2",
     "material-design-icons": "^2.2.3",
