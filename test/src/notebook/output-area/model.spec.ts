@@ -203,32 +203,39 @@ describe('notebook/output-area/model', () => {
 
     describe('#execute()', () => {
 
+      let kernel: IKernel;
+
+      beforeEach((done) => {
+        startNewKernel().then(k => {
+          kernel = k;
+          return kernel.kernelInfo();
+        }).then(() => {
+          done();
+        }).catch(done);
+      });
+
       it('should execute code on a kernel and send outputs to the model', (done) => {
-        startNewKernel().then(kernel => {
-          let model = new OutputAreaModel();
-          expect(model.length).to.be(0);
-          return model.execute('print("hello")', kernel).then(reply => {
-            expect(reply.content.execution_count).to.be(1);
-            expect(reply.content.status).to.be('ok');
-            expect(model.length).to.be(1);
-            kernel.shutdown();
-            done();
-          });
+        let model = new OutputAreaModel();
+        expect(model.length).to.be(0);
+        model.execute('print("hello")', kernel).then(reply => {
+          expect(reply.content.execution_count).to.be(1);
+          expect(reply.content.status).to.be('ok');
+          expect(model.length).to.be(1);
+          kernel.shutdown();
+          done();
         }).catch(done);
       });
 
       it('should clear existing outputs', (done) => {
-        startNewKernel().then(kernel => {
-          let model = new OutputAreaModel();
-          for (let output of DEFAULT_OUTPUTS) {
-            model.add(output);
-          }
-          return model.execute('print("hello")', kernel).then(reply => {
-            expect(reply.content.execution_count).to.be(1);
-            expect(model.length).to.be(1);
-            kernel.shutdown();
-            done();
-          });
+        let model = new OutputAreaModel();
+        for (let output of DEFAULT_OUTPUTS) {
+          model.add(output);
+        }
+        return model.execute('print("hello")', kernel).then(reply => {
+          expect(reply.content.execution_count).to.be(1);
+          expect(model.length).to.be(1);
+          kernel.shutdown();
+          done();
         }).catch(done);
       });
 
