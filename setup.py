@@ -107,7 +107,7 @@ class NPM(Command):
             log.error("`npm` unavailable. If you're running this command using sudo, make sure `npm` is available to sudo")
         log.info("Installing build dependencies with npm. This may take a while...")
         run('npm install', cwd=here)
-        run('npm run build:serverextension')
+        run('npm run build:serverextension', cwd=here)
 
         for t in self.targets:
             if not os.path.exists(t):
