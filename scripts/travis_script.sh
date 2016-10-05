@@ -7,15 +7,15 @@ set -ex
 export DISPLAY=:99.0
 sh -e /etc/init.d/xvfb start || true
 
-# Install in-place and enable the server extension
-export PATH="$HOME/miniconda/bin:$PATH"
-pip install -v .
-jupyter serverextension enable --py jupyterlab
-
 npm run clean
 npm run build
 npm test
 npm run test:coverage
+
+# Install in-place and enable the server extension
+export PATH="$HOME/miniconda/bin:$PATH"
+pip install -v .
+jupyter serverextension enable --py jupyterlab
 
 # Run the python tests
 npm run build:serverextension
