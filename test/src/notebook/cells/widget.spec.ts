@@ -586,11 +586,11 @@ describe('notebook/cells/widget', () => {
         let widget = new CodeCellWidget({ rendermime, renderer: CodeMirrorNotebookRenderer.defaultCodeCellRenderer });
         startNewKernel().then(kernel => {
           widget.model = new CodeCellModel();
-          widget.execute(kernel).then(() => {
+          return widget.execute(kernel).then(() => {
             kernel.shutdown();
             done();
           });
-        });
+        }).catch(done);
       });
 
       it('should fulfill a promise if there is code to execute', (done) => {
@@ -600,13 +600,13 @@ describe('notebook/cells/widget', () => {
           widget.model.source = 'foo';
 
           let originalCount = (widget.model).executionCount;
-          widget.execute(kernel).then(() => {
+          return widget.execute(kernel).then(() => {
             let executionCount = (widget.model).executionCount;
             expect(executionCount).to.not.equal(originalCount);
             kernel.shutdown();
             done();
           });
-        });
+        }).catch(done);
       });
 
     });
