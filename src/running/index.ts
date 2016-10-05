@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager, ISession, ITerminalSession
+  IServiceManager, Session, TerminalSession
 } from 'jupyter-js-services';
 
 import {
@@ -164,12 +164,12 @@ class RunningSessions extends Widget {
   /**
    * A signal emitted when a kernel session open is requested.
    */
-  sessionOpenRequested: ISignal<RunningSessions, ISession.IModel>;
+  sessionOpenRequested: ISignal<RunningSessions, Session.IModel>;
 
   /**
    * A signal emitted when a terminal session open is requested.
    */
-  terminalOpenRequested: ISignal<RunningSessions, ITerminalSession.IModel>;
+  terminalOpenRequested: ISignal<RunningSessions, TerminalSession.IModel>;
 
   /**
    * The renderer used by the running sessions widget.
@@ -355,7 +355,7 @@ class RunningSessions extends Widget {
   /**
    * Handle a change to the running sessions.
    */
-  private _onSessionsChanged(sender: ISession.IManager, models: ISession.IModel[]): void {
+  private _onSessionsChanged(sender: Session.IManager, models: Session.IModel[]): void {
     // Strip out non-file backed sessions.
     this._runningSessions = [];
     for (let session of models) {
@@ -370,15 +370,15 @@ class RunningSessions extends Widget {
   /**
    * Handle a change to the running terminals.
    */
-  private _onTerminalsChanged(sender: ITerminalSession.IManager, models: ITerminalSession.IModel[]): void {
+  private _onTerminalsChanged(sender: TerminalSession.IManager, models: TerminalSession.IModel[]): void {
     this._runningTerminals = models;
     this.update();
   }
 
   private _manager: IServiceManager = null;
   private _renderer: RunningSessions.IRenderer = null;
-  private _runningSessions: ISession.IModel[] = [];
-  private _runningTerminals: ITerminalSession.IModel[] = [];
+  private _runningSessions: Session.IModel[] = [];
+  private _runningTerminals: TerminalSession.IModel[] = [];
   private _refreshId = -1;
 }
 
@@ -496,7 +496,7 @@ namespace RunningSessions {
      * This method should completely reset the state of the node to
      * reflect the data for the session models.
      */
-    updateTerminalNode(node: HTMLLIElement, model: ITerminalSession.IModel): void;
+    updateTerminalNode(node: HTMLLIElement, model: TerminalSession.IModel): void;
 
     /**
      * Populate a node with running kernel session data.
@@ -511,7 +511,7 @@ namespace RunningSessions {
      * This method should completely reset the state of the node to
      * reflect the data for the session models.
      */
-    updateSessionNode(node: HTMLLIElement, model: ISession.IModel, kernelName: string): void;
+    updateSessionNode(node: HTMLLIElement, model: Session.IModel, kernelName: string): void;
   }
 
 
@@ -660,7 +660,7 @@ namespace RunningSessions {
      * This method should completely reset the state of the node to
      * reflect the data for the session models.
      */
-    updateTerminalNode(node: HTMLLIElement, model: ITerminalSession.IModel): void {
+    updateTerminalNode(node: HTMLLIElement, model: TerminalSession.IModel): void {
       let label = findElement(node, ITEM_LABEL_CLASS);
       label.textContent = `terminals/${model.name}`;
     }
@@ -678,7 +678,7 @@ namespace RunningSessions {
      * This method should completely reset the state of the node to
      * reflect the data for the session models.
      */
-    updateSessionNode(node: HTMLLIElement, model: ISession.IModel, kernelName: string): void {
+    updateSessionNode(node: HTMLLIElement, model: Session.IModel, kernelName: string): void {
       let icon = findElement(node, ITEM_ICON_CLASS);
       if (model.notebook.path.indexOf('.ipynb') !== -1) {
         icon.className = `${ITEM_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;

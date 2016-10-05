@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContents, IKernel, ISession
+  Contents, IKernel, Session, Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -113,7 +113,7 @@ interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
   /**
    * A signal emitted when the contentsModel changes.
    */
-  contentsModelChanged: ISignal<IDocumentContext<T>, IContents.IModel>;
+  contentsModelChanged: ISignal<IDocumentContext<T>, Contents.IModel>;
 
   /**
    * A signal emitted when the context is fully populated for the first time.
@@ -157,7 +157,7 @@ interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
    * empty `contents` field.  It will be `null` until the
    * first save or load to disk.
    */
-  contentsModel: IContents.IModel;
+  contentsModel: Contents.IModel;
 
   /**
    * Get the kernel spec information.
@@ -165,7 +165,7 @@ interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  kernelspecs: IKernel.ISpecModels;
+  kernelspecs: Kernel.ISpecModels;
 
   /**
    * Test whether the context is fully populated.
@@ -181,7 +181,7 @@ interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
    * #### Notes
    * If no options are given, the session is shut down.
    */
-  changeKernel(options?: IKernel.IModel): Promise<IKernel>;
+  changeKernel(options?: Kernel.IModel): Promise<IKernel>;
 
   /**
    * Save the document contents to disk.
@@ -204,7 +204,7 @@ interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
    * @returns A promise which resolves with the new checkpoint model when the
    *   checkpoint is created.
    */
-  createCheckpoint(): Promise<IContents.ICheckpointModel>;
+  createCheckpoint(): Promise<Contents.ICheckpointModel>;
 
   /**
    * Delete a checkpoint for the file.
@@ -231,12 +231,12 @@ interface IDocumentContext<T extends IDocumentModel> extends IDisposable {
    * @returns A promise which resolves with a list of checkpoint models for
    *    the file.
    */
-  listCheckpoints(): Promise<IContents.ICheckpointModel[]>;
+  listCheckpoints(): Promise<Contents.ICheckpointModel[]>;
 
   /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISession.IModel[]>;
+  listSessions(): Promise<Session.IModel[]>;
 
   /**
    * Resolve a url to a correct server path.
@@ -327,7 +327,7 @@ interface IWidgetFactory<T extends Widget, U extends IDocumentModel> extends IDi
    * #### Notes
    * It should emit the [widgetCreated] signal with the new widget.
    */
-  createNew(context: IDocumentContext<U>, kernel?: IKernel.IModel): T;
+  createNew(context: IDocumentContext<U>, kernel?: Kernel.IModel): T;
 }
 
 
@@ -362,14 +362,14 @@ interface IModelFactory<T extends IDocumentModel> extends IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  fileType: IContents.FileType;
+  fileType: Contents.FileType;
 
   /**
    * The format of the file (default to `"text"`).
    *
    * This is a read-only property.
    */
-  fileFormat: IContents.FileFormat;
+  fileFormat: Contents.FileFormat;
 
   /**
    * Create a new model for a given path.
@@ -437,12 +437,12 @@ interface IFileType {
   /**
    * The type of the new file (defaults to `"file"`).
    */
-  fileType?: IContents.FileType;
+  fileType?: Contents.FileType;
 
   /**
    * The format of the new file (default to `"text"`).
    */
-  fileFormat?: IContents.FileFormat;
+  fileFormat?: Contents.FileFormat;
 }
 
 

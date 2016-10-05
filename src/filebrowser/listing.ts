@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContents
+  Contents
 } from 'jupyter-js-services';
 
 import {
@@ -279,7 +279,7 @@ class DirListing extends Widget {
   /**
    * The the sorted content items.
    */
-  get sortedItems(): IContents.IModel[] {
+  get sortedItems(): Contents.IModel[] {
     return this._sortedModels;
   }
 
@@ -331,7 +331,7 @@ class DirListing extends Widget {
     if (!this._clipboard.length) {
       return;
     }
-    let promises: Promise<IContents.IModel>[] = [];
+    let promises: Promise<Contents.IModel>[] = [];
     for (let path of this._clipboard) {
       if (this._isCut) {
         let parts = path.split('/');
@@ -388,7 +388,7 @@ class DirListing extends Widget {
    * Duplicate the currently selected item(s).
    */
   duplicate(): Promise<void> {
-    let promises: Promise<IContents.IModel>[] = [];
+    let promises: Promise<Contents.IModel>[] = [];
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
         promises.push(this._model.copy(item.path, this._model.path));
@@ -943,7 +943,7 @@ class DirListing extends Widget {
     let path = items[index].name + '/';
 
     // Move all of the items.
-    let promises: Promise<IContents.IModel>[] = [];
+    let promises: Promise<Contents.IModel>[] = [];
     let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
@@ -963,7 +963,7 @@ class DirListing extends Widget {
     let source = this._items[index];
     let model = this._model;
     let items = this.sortedItems;
-    let item: IContents.IModel = null;
+    let item: Contents.IModel = null;
 
     // If the source node is not selected, use just that node.
     if (!source.classList.contains(SELECTED_CLASS)) {
@@ -1104,7 +1104,7 @@ class DirListing extends Widget {
   /**
    * Get the currently selected items.
    */
-  private _getSelectedItems(): IContents.IModel[] {
+  private _getSelectedItems(): Contents.IModel[] {
     let items = this.sortedItems;
     return items.filter(item => this._selection[item.name]);
   }
@@ -1209,7 +1209,7 @@ class DirListing extends Widget {
   private _model: FileBrowserModel = null;
   private _editNode: HTMLInputElement = null;
   private _items: HTMLElement[] = [];
-  private _sortedModels: IContents.IModel[] = null;
+  private _sortedModels: Contents.IModel[] = null;
   private _sortState: DirListing.ISortState = { direction: 'ascending', key: 'name' };
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
@@ -1318,7 +1318,7 @@ namespace DirListing {
      *
      * @param model - The model object to use for the item state.
      */
-    updateItemNode(node: HTMLElement, model: IContents.IModel): void;
+    updateItemNode(node: HTMLElement, model: Contents.IModel): void;
 
     /**
      * Get the node containing the file name.
@@ -1452,7 +1452,7 @@ namespace DirListing {
      *
      * @param model - The model object to use for the item state.
      */
-    updateItemNode(node: HTMLElement, model: IContents.IModel): void {
+    updateItemNode(node: HTMLElement, model: Contents.IModel): void {
       let icon = utils.findElement(node, ITEM_ICON_CLASS);
       let text = utils.findElement(node, ITEM_TEXT_CLASS);
       let modified = utils.findElement(node, ITEM_MODIFIED_CLASS);
@@ -1589,7 +1589,7 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export
-  function sort(items: IContents.IModel[], state: DirListing.ISortState) : IContents.IModel[] {
+  function sort(items: Contents.IModel[], state: DirListing.ISortState) : Contents.IModel[] {
     let output = items.slice();
     if (state.key === 'last_modified') {
       output.sort((a, b) => {

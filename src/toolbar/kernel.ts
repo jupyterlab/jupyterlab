@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  IKernel, Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -126,7 +126,7 @@ function updateKernelNameItem(widget: Widget, kernel: IKernel): void {
   if (kernel.spec) {
     widget.node.textContent = kernel.spec.display_name;
   } else {
-    kernel.getKernelSpec().then(spec => {
+    kernel.getSpec().then(spec => {
       if (!widget.isDisposed) {
         widget.node.textContent = kernel.spec.display_name;
       }
@@ -181,7 +181,7 @@ class KernelIndicator extends Widget {
   /**
    * Handle a status on a kernel.
    */
-  private _handleStatus(kernel: IKernel, status: IKernel.Status) {
+  private _handleStatus(kernel: IKernel, status: Kernel.Status) {
     if (this.isDisposed) {
       return;
     }

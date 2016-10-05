@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContents
+  Contents
 } from 'jupyter-js-services';
 
 import {
@@ -224,7 +224,7 @@ class FileBrowserWidget extends Widget {
   /**
    * Create a new untitled file in the current directory.
    */
-  createNew(options: IContents.ICreateOptions): Promise<Widget> {
+  createNew(options: Contents.ICreateOptions): Promise<Widget> {
     let model = this.model;
     return model.newUntitled(options).then(contents => {
       return this._buttons.createNew(contents.path);

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ITerminalSession
+  ITerminalSession, TerminalSession
 } from 'jupyter-js-services';
 
 import {
@@ -313,7 +313,7 @@ class TerminalWidget extends Widget {
   /**
    * Handle a message from the terminal session.
    */
-  private _onMessage(sender: ITerminalSession, msg: ITerminalSession.IMessage): void {
+  private _onMessage(sender: ITerminalSession, msg: TerminalSession.IMessage): void {
     switch (msg.type) {
     case 'stdout':
       this._term.write(msg.content[0] as string);

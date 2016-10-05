@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContents
+  Contents
 } from 'jupyter-js-services';
 
 import {
@@ -35,7 +35,7 @@ class NotebookModelFactory implements IModelFactory<INotebookModel> {
    * #### Notes
    * This is a read-only property.
    */
-  get fileType(): IContents.FileType {
+  get fileType(): Contents.FileType {
     return 'notebook';
   }
 
@@ -44,7 +44,7 @@ class NotebookModelFactory implements IModelFactory<INotebookModel> {
    *
    * This is a read-only property.
    */
-  get fileFormat(): IContents.FileFormat {
+  get fileFormat(): Contents.FileFormat {
     return 'json';
   }
 

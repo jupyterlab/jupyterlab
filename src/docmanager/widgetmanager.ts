@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -89,7 +89,7 @@ class DocumentWidgetManager implements IDisposable {
   /**
    * Create a widget for a document and handle its lifecycle.
    */
-  createWidget(name: string, context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): Widget {
+  createWidget(name: string, context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): Widget {
     let factory = this._registry.getWidgetFactory(name);
     let widget = factory.createNew(context, kernel);
     Private.nameProperty.set(widget, name);

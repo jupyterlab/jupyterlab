@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IContents, IKernel, ISession
+  Contents, Kernel, Session
 } from 'jupyter-js-services';
 
 import {
@@ -96,7 +96,7 @@ function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host
  * Rename a file with optional dialog.
  */
 export
-function renameFile(model: FileBrowserModel, oldPath: string, newPath: string): Promise<IContents.IModel> {
+function renameFile(model: FileBrowserModel, oldPath: string, newPath: string): Promise<Contents.IModel> {
   return model.rename(oldPath, newPath).catch(error => {
     if (error.xhr) {
       error.message = `${error.xhr.statusText} ${error.xhr.status}`;
@@ -128,7 +128,7 @@ class OpenWithHandler extends Widget {
   /**
    * Construct a new "open with" dialog.
    */
-  constructor(path: string, manager: DocumentManager, sessions: ISession.IModel[], host?: HTMLElement) {
+  constructor(path: string, manager: DocumentManager, sessions: Session.IModel[], host?: HTMLElement) {
     super({ node: Private.createOpenWithNode() });
     this._manager = manager;
     this._host = host;
@@ -179,9 +179,9 @@ class OpenWithHandler extends Widget {
     let path = this.inputNode.textContent;
     let widgetName = this.widgetDropdown.value;
     let kernelValue = this.kernelDropdownNode.value;
-    let kernelId: IKernel.IModel;
+    let kernelId: Kernel.IModel;
     if (kernelValue !== 'null') {
-      kernelId = JSON.parse(kernelValue) as IKernel.IModel;
+      kernelId = JSON.parse(kernelValue) as Kernel.IModel;
     }
     return this._manager.open(path, widgetName, kernelId);
   }
@@ -218,7 +218,7 @@ class OpenWithHandler extends Widget {
   private _ext = '';
   private _manager: DocumentManager = null;
   private _host: HTMLElement = null;
-  private _sessions: ISession.IModel[] = null;
+  private _sessions: Session.IModel[] = null;
 }
 
 
@@ -306,7 +306,7 @@ class CreateFromHandler extends Widget {
     let { fileType, widgetName, kernelName } = creator;
     let fType = registry.getFileType(fileType);
     let ext = '.txt';
-    let type: IContents.FileType = 'file';
+    let type: Contents.FileType = 'file';
     if (fType) {
       ext = fType.extension;
       type = fType.fileType || 'file';
@@ -343,9 +343,9 @@ class CreateFromHandler extends Widget {
     let path = this.inputNode.value;
     let widgetName = this._widgetName;
     let kernelValue = this.kernelDropdownNode ? this.kernelDropdownNode.value : 'null';
-    let kernelId: IKernel.IModel;
+    let kernelId: Kernel.IModel;
     if (kernelValue !== 'null') {
-      kernelId = JSON.parse(kernelValue) as IKernel.IModel;
+      kernelId = JSON.parse(kernelValue) as Kernel.IModel;
     }
     if (path !== this._orig) {
       return renameFile(this._model, this._orig, path).then(value => {
@@ -363,7 +363,7 @@ class CreateFromHandler extends Widget {
   private _widgetName: string;
   private _orig: string;
   private _manager: DocumentManager;
-  private _sessions: ISession.IModel[] = [];
+  private _sessions: Session.IModel[] = [];
 }
 
 
@@ -374,7 +374,7 @@ class CreateNewHandler extends Widget {
   /**
    * Construct a new "create new" dialog.
    */
-  constructor(model: FileBrowserModel, manager: DocumentManager, sessions: ISession.IModel[]) {
+  constructor(model: FileBrowserModel, manager: DocumentManager, sessions: Session.IModel[]) {
     super({ node: Private.createCreateNewNode() });
     this._model = model;
     this._manager = manager;
@@ -456,9 +456,9 @@ class CreateNewHandler extends Widget {
     let path = this.inputNode.textContent;
     let widgetName = this.widgetDropdown.value;
     let kernelValue = this.kernelDropdownNode.value;
-    let kernelId: IKernel.IModel;
+    let kernelId: Kernel.IModel;
     if (kernelValue !== 'null') {
-      kernelId = JSON.parse(kernelValue) as IKernel.IModel;
+      kernelId = JSON.parse(kernelValue) as Kernel.IModel;
     }
     return this._manager.createNew(path, widgetName, kernelId);
   }
@@ -557,7 +557,7 @@ class CreateNewHandler extends Widget {
 
   private _model: FileBrowserModel = null;
   private _manager: DocumentManager = null;
-  private _sessions: ISession.IModel[] = null;
+  private _sessions: Session.IModel[] = null;
   private _sentinal = 'UNKNOWN_EXTENSION';
   private _prevExt = '';
   private _extensions: string[] = [];
@@ -650,12 +650,12 @@ namespace Private {
     /**
      * The kernel specs.
      */
-    specs: IKernel.ISpecModels;
+    specs: Kernel.ISpecModels;
 
     /**
      * The running sessions.
      */
-    sessions: ISession.IModel[];
+    sessions: Session.IModel[];
 
     /**
      * The preferred kernel name.

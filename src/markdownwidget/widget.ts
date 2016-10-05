@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -122,7 +122,7 @@ class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, IDocumentMo
   /**
    * Create a new widget given a context.
    */
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): MarkdownWidget {
+  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): MarkdownWidget {
     let widget = new MarkdownWidget(context, this._rendermime.clone());
     this.widgetCreated.emit(widget);
     return widget;

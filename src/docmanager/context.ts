@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, IContents, IKernel, IServiceManager, ISession, utils
+  ContentsManager, Contents, IKernel, IServiceManager, ISession, utils,
+  Kernel, Session
 } from 'jupyter-js-services';
 
 import {
@@ -69,7 +70,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  contentsModelChanged: ISignal<IDocumentContext<T>, IContents.IModel>;
+  contentsModelChanged: ISignal<IDocumentContext<T>, Contents.IModel>;
 
   /**
    * A signal emitted when the context is fully populated for the first time.
@@ -115,7 +116,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
    * This is a read-only property.  The model will have an
    * empty `contents` field.
    */
-  get contentsModel(): IContents.IModel {
+  get contentsModel(): Contents.IModel {
     return this._contentsModel;
   }
 
@@ -125,7 +126,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
    * #### Notes
    * This is a read-only property.
    */
-  get kernelspecs(): IKernel.ISpecModels {
+  get kernelspecs(): Kernel.ISpecModels {
     return this._manager.kernelspecs;
   }
 
@@ -173,14 +174,14 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   /**
    * Change the current kernel associated with the document.
    */
-  changeKernel(options: IKernel.IModel): Promise<IKernel> {
+  changeKernel(options: Kernel.IModel): Promise<IKernel> {
     let session = this._session;
     if (options) {
       if (session) {
         return session.changeKernel(options);
       } else {
         let path = this._path;
-        let sOptions: ISession.IOptions = {
+        let sOptions: Session.IOptions = {
           path,
           kernelName: options.name,
           kernelId: options.id
@@ -261,7 +262,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
       this.setPath(newPath);
       let session = this._session;
       if (session) {
-        let options: ISession.IOptions = {
+        let options: Session.IOptions = {
           path: newPath,
           kernelId: session.kernel.id,
           kernelName: session.kernel.name
@@ -278,7 +279,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
    * Revert the document contents to disk contents.
    */
   revert(): Promise<void> {
-    let opts: IContents.IFetchOptions = {
+    let opts: Contents.IFetchOptions = {
       format: this._factory.fileFormat,
       type: this._factory.fileType,
       content: true
@@ -308,7 +309,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   /**
    * Create a checkpoint for the file.
    */
-  createCheckpoint(): Promise<IContents.ICheckpointModel> {
+  createCheckpoint(): Promise<Contents.ICheckpointModel> {
     return this._manager.contents.createCheckpoint(this._path);
   }
 
@@ -340,14 +341,14 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   /**
    * List available checkpoints for a file.
    */
-  listCheckpoints(): Promise<IContents.ICheckpointModel[]> {
+  listCheckpoints(): Promise<Contents.ICheckpointModel[]> {
     return this._manager.contents.listCheckpoints(this._path);
   }
 
   /**
    * Get the list of running sessions.
    */
-  listSessions(): Promise<ISession.IModel[]> {
+  listSessions(): Promise<Session.IModel[]> {
     return this._manager.sessions.listRunning();
   }
 
@@ -380,7 +381,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   /**
    * Start a session and set up its signals.
    */
-  private _startSession(options: ISession.IOptions): Promise<IKernel> {
+  private _startSession(options: Session.IOptions): Promise<IKernel> {
     return this._manager.sessions.startNew(options).then(session => {
       if (this._session) {
         this._session.dispose();
@@ -402,8 +403,8 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   /**
    * Update our contents model, without the content.
    */
-  private _updateContentsModel(model: IContents.IModel): void {
-    let newModel: IContents.IModel = {
+  private _updateContentsModel(model: Contents.IModel): void {
+    let newModel: Contents.IModel = {
       path: model.path,
       name: model.name,
       type: model.type,
@@ -423,7 +424,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   /**
    * Handle a change to the running sessions.
    */
-  private _onSessionsChanged(sender: ISession.IManager, models: ISession.IModel[]): void {
+  private _onSessionsChanged(sender: Session.IManager, models: Session.IModel[]): void {
     let session = this._session;
     if (!session) {
       return;
@@ -460,7 +461,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   private _factory: IModelFactory<T> = null;
   private _saver: SaveHandler = null;
   private _isPopulated = false;
-  private _contentsModel: IContents.IModel = null;
+  private _contentsModel: Contents.IModel = null;
 }
 
 

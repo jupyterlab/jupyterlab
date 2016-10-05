@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -219,7 +219,7 @@ class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, IDocumentModel> {
   /**
    * Create a new widget given a context.
    */
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: IKernel.IModel): CSVWidget {
+  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): CSVWidget {
     let widget = new CSVWidget(context);
     this.widgetCreated.emit(widget);
     return widget;

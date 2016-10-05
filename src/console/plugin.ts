@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, IKernel, ISession, utils
+  ContentsManager, Kernel, ISession, Session, utils
 } from 'jupyter-js-services';
 
 import {
@@ -96,7 +96,7 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 interface ICreateConsoleArgs extends JSONObject {
   sessionId?: string;
   path?: string;
-  kernel: IKernel.IModel;
+  kernel: Kernel.IModel;
   preferredLanguage?: string;
 }
 
@@ -253,7 +253,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           return;
         }
         // Start the session.
-        let options: ISession.IOptions = {
+        let options: Session.IOptions = {
           path,
           kernelName: kernel.name,
           kernelId: kernel.id
@@ -282,11 +282,11 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   /**
    * Get the kernel given the create args.
    */
-  function getKernel(args: ICreateConsoleArgs): Promise<IKernel.IModel> {
+  function getKernel(args: ICreateConsoleArgs): Promise<Kernel.IModel> {
     if (args.kernel) {
       return Promise.resolve(args.kernel);
     }
-    return manager.listRunning().then((sessions: ISession.IModel[]) => {
+    return manager.listRunning().then((sessions: Session.IModel[]) => {
       let options = {
         name: 'New Console',
         specs,
@@ -358,7 +358,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (session.kernel) {
         lang = specs.kernelspecs[session.kernel.name].spec.language;
       }
-      manager.listRunning().then((sessions: ISession.IModel[]) => {
+      manager.listRunning().then((sessions: Session.IModel[]) => {
         let options = {
           name: widget.parent.title.label,
           specs,
@@ -368,7 +368,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           host: widget.parent.node
         };
         return selectKernel(options);
-      }).then((kernelId: IKernel.IModel) => {
+      }).then((kernelId: Kernel.IModel) => {
         if (kernelId) {
           session.changeKernel(kernelId);
         } else {

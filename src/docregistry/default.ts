@@ -7,7 +7,7 @@ import * as CodeMirror
 import 'codemirror/mode/meta';
 
 import {
-  IContents, IKernel
+  Contents, Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -186,7 +186,7 @@ class TextModelFactory implements IModelFactory<IDocumentModel> {
    * #### Notes
    * This is a read-only property.
    */
-  get fileType(): IContents.FileType {
+  get fileType(): Contents.FileType {
     return 'file';
   }
 
@@ -195,7 +195,7 @@ class TextModelFactory implements IModelFactory<IDocumentModel> {
    *
    * This is a read-only property.
    */
-  get fileFormat(): IContents.FileFormat {
+  get fileFormat(): Contents.FileFormat {
     return 'text';
   }
 
@@ -259,7 +259,7 @@ class Base64ModelFactory extends TextModelFactory {
    * #### Notes
    * This is a read-only property.
    */
-  get fileType(): IContents.FileType {
+  get fileType(): Contents.FileType {
     return 'file';
   }
 
@@ -268,7 +268,7 @@ class Base64ModelFactory extends TextModelFactory {
    *
    * This is a read-only property.
    */
-  get fileFormat(): IContents.FileFormat {
+  get fileFormat(): Contents.FileFormat {
     return 'base64';
   }
 }
@@ -304,7 +304,7 @@ abstract class ABCWidgetFactory<T extends Widget, U extends IDocumentModel> impl
    * #### Notes
    * It should emit the [widgetCreated] signal with the new widget.
    */
-  abstract createNew(context: IDocumentContext<U>, kernel?: IKernel.IModel): T;
+  abstract createNew(context: IDocumentContext<U>, kernel?: Kernel.IModel): T;
 
   private _isDisposed = false;
 }

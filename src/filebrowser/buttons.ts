@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -169,7 +169,7 @@ class FileButtons extends Widget {
   /**
    * Open a file by path.
    */
-  open(path: string, widgetName='default', kernel?: IKernel.IModel): Widget {
+  open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
     let widget = this._manager.findWidget(path, widgetName);
     if (!widget) {
       widget = this._manager.open(path, widgetName, kernel);
@@ -180,7 +180,7 @@ class FileButtons extends Widget {
   /**
    * Create a new file by path.
    */
-  createNew(path: string, widgetName='default', kernel?: IKernel.IModel): Widget {
+  createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
     let widget = this._manager.createNew(path, widgetName, kernel);
     return this._open(widget);
   }

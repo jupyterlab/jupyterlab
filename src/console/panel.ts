@@ -103,7 +103,7 @@ class ConsolePanel extends Panel {
     if (!session.kernel) {
       this.dispose();
     }
-    session.kernel.getKernelSpec().then(spec => {
+    session.kernel.getSpec().then(spec => {
       let name = spec.display_name;
       return showDialog({
         title: 'Shut down kernel?',
