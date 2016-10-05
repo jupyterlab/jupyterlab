@@ -54,16 +54,17 @@ import {
 } from '../services';
 
 import {
-  ConsolePanel, ConsoleContent
-} from './';
+  IConsoleTracker, ConsolePanel, ConsoleContent
+} from './index';
 
 
 /**
- * The console extension.
+ * The console widget tracker provider.
  */
 export
-const consoleExtension: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.console',
+const consoleTrackerProvider: JupyterLabPlugin<IConsoleTracker> = {
+  id: 'jupyter.services.console-tracker',
+  provides: IConsoleTracker,
   requires: [
     IServiceManager,
     IRenderMime,
@@ -103,7 +104,7 @@ interface ICreateConsoleArgs extends JSONObject {
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): void {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): IConsoleTracker {
   let tracker = new FocusTracker<ConsolePanel>();
   let manager = services.sessions;
   let { commands, keymap } = app;
@@ -380,6 +381,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
   mainMenu.addMenu(menu, {rank: 50});
+  return tracker;
 }
 
 
