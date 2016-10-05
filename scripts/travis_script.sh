@@ -11,8 +11,8 @@ export PATH="$HOME/miniconda/bin:$PATH"
 
 npm run clean
 npm run build
-npm test
-npm run test:coverage
+npm test || npm test
+npm run test:coverage || npm run test:coverage
 
 
 # Install in-place and enable the server extension
