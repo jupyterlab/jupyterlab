@@ -9,11 +9,13 @@ Distributed under the terms of the Modified BSD License.
 <head>
   <meta charset="utf-8">
 
-  <title>{{page_title}}</title>
+  <title>{% block title %}{{page_title}}{% endblock %}</title>
 
-  {% for css_file in jupyterlab_css %}
-  <link href="{{ css_file }}" rel="stylesheet">
-  {% endfor %}
+  {% block stylesheet %}
+    {% for css_file in jupyterlab_css %}
+      <link href="{{ css_file }}" rel="stylesheet">
+    {% endfor %}
+  {% endblock %}
 
   <script id='jupyter-config-data' type="application/json">{
   "baseUrl": "{{base_url | urlencode}}",
@@ -21,7 +23,7 @@ Distributed under the terms of the Modified BSD License.
   "notebookPath": "{{notebook_path | urlencode}}"
   }</script>
 
-  <link rel="shortcut icon" type="image/x-icon" href="/static/base/images/favicon.ico">
+  {% block favicon %}<link rel="shortcut icon" type="image/x-icon" href="/static/base/images/favicon.ico">{% endblock %}
 
   {% for bundle_file in jupyterlab_bundles %}
   <script src="{{ bundle_file }}" type="text/javascript" charset="utf-8"></script>
@@ -31,10 +33,14 @@ Distributed under the terms of the Modified BSD License.
   <script type="text/javascript" src="{{mathjax_url}}?config={{mathjax_config}}&amp;delayStartupUntil=configured" charset="utf-8"></script>
   {% endif %}
 
+  {% block meta %}
+  {% endblock %}
+
 </head>
 
 <body>
 
+{% block script %}
 <script>
   var lab = jupyter.require("{{ jupyterlab_main }}");
   var plugins = [];
@@ -46,6 +52,7 @@ Distributed under the terms of the Modified BSD License.
   lab.registerPlugins(plugins);
   lab.start();
 </script>
+{% endblock %}
 
 </body>
 
