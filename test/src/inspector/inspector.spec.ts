@@ -76,6 +76,27 @@ describe('inspector/index', () => {
 
     });
 
+    describe('#dispose()', () => {
+
+      it('should dispose of the resources used by the inspector', () => {
+        let options: Inspector.IOptions = {};
+        let widget = new Inspector(options);
+        expect(widget.isDisposed).to.be(false);
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
+      });
+
+      it('should be a no-op if called more than once', () => {
+        let options: Inspector.IOptions = {};
+        let widget = new Inspector(options);
+        expect(widget.isDisposed).to.be(false);
+        widget.dispose();
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
+      });
+
+    });
+
   });
 
 });
