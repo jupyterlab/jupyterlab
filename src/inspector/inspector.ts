@@ -127,18 +127,20 @@ class Inspector extends TabPanel implements IInspector {
     }
 
     // Disconnect old signal handler.
-    if (this.source) {
+    if (this._source) {
       this._source.inspected.disconnect(this.onInspectorUpdate, this);
       this._source.disposed.disconnect(this.onSourceDisposed, this);
     }
 
-    // Clear the inspector child items (but maintain history).
-    Object.keys(this._items).forEach(i => this._items[i].content = null);
+    // Clear the inspector child items (but maintain history) if necessary.
+    if (this._items) {
+      Object.keys(this._items).forEach(i => this._items[i].content = null);
+    }
 
     this._source = source;
 
     // Connect new signal handler.
-    if (this.source) {
+    if (this._source) {
       this._source.inspected.connect(this.onInspectorUpdate, this);
       this._source.disposed.connect(this.onSourceDisposed, this);
     }
