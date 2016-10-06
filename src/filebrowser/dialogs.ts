@@ -342,17 +342,18 @@ class CreateFromHandler extends Widget {
   private _open(): Promise<Widget> {
     let path = this.inputNode.value;
     let widgetName = this._widgetName;
-    let kernelValue = this.kernelDropdownNode ? this.kernelDropdownNode.value : 'null';
+    let kernelValue = this.kernelDropdownNode ? this.kernelDropdownNode.value
+      : 'null';
     let kernelId: Kernel.IModel;
     if (kernelValue !== 'null') {
       kernelId = JSON.parse(kernelValue) as Kernel.IModel;
     }
     if (path !== this._orig) {
-      return renameFile(this._model, this._orig, path).then(value => {
-        if (!value) {
+      return renameFile(this._model, this._orig, path).then((contents: Contents.IModel) => {
+        if (!contents) {
           return null;
         }
-        return this._manager.createNew(path, widgetName, kernelId);
+        return this._manager.open(contents.path, widgetName, kernelId);
       });
     }
     return Promise.resolve(this._manager.createNew(path, widgetName, kernelId));

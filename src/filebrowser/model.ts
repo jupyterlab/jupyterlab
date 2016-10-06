@@ -232,7 +232,9 @@ class FileBrowserModel implements IDisposable {
       options.ext = options.ext || '.txt';
     }
     options.path = options.path || this._model.path;
-    return this._manager.contents.newUntitled(options).then(contents => {
+
+    let promise = this._manager.contents.newUntitled(options);
+    return promise.then((contents: Contents.IModel) => {
       this.fileChanged.emit({
         name: 'file',
         oldValue: void 0,
@@ -253,10 +255,11 @@ class FileBrowserModel implements IDisposable {
    */
   rename(path: string, newPath: string): Promise<Contents.IModel> {
     // Handle relative paths.
-    let normalizePath = Private.normalizePath;
-    path = normalizePath(this._model.path, path);
-    newPath = normalizePath(this._model.path, newPath);
-    return this._manager.contents.rename(path, newPath).then(contents => {
+    path = Private.normalizePath(this._model.path, path);
+    newPath = Private.normalizePath(this._model.path, newPath);
+
+    let promise = this._manager.contents.rename(path, newPath);
+    return promise.then((contents: Contents.IModel) => {
       this.fileChanged.emit({
         name: 'file',
         oldValue: path,
@@ -295,7 +298,8 @@ class FileBrowserModel implements IDisposable {
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
     return this._manager.contents.get(path, {}).then(() => {
-      return Private.typedThrow<Contents.IModel>(`"${file.name}" already exists`);
+      let msg = `"${file.name}" already exists`;
+      return Private.typedThrow<Contents.IModel>(msg);
     }, () => {
       return this._upload(file);
     });
@@ -336,7 +340,9 @@ class FileBrowserModel implements IDisposable {
           name,
           content: Private.getContent(reader)
         };
-        this._manager.contents.save(path, model).then(contents => {
+
+        let promise = this._manager.contents.save(path, model);
+        promise.then((contents: Contents.IModel) => {
           this.fileChanged.emit({
             name: 'file',
             oldValue: void 0,
