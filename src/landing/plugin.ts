@@ -21,17 +21,13 @@ import {
   IPathTracker
 } from '../filebrowser';
 
-import {
-  IServiceManager
-} from '../services';
-
 /**
  * The landing page extension.
  */
 export
 const landingExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.landing',
-  requires: [IServiceManager, IPathTracker, ICommandPalette],
+  requires: [IPathTracker, ICommandPalette],
   activate: activateLanding,
   autoStart: true
 };
@@ -55,14 +51,14 @@ class LandingModel extends VDomModel {
     this.stateChanged.emit(void 0);
   }
 
-  constructor(app: JupyterLab, services: IServiceManager) {
+  constructor(app: JupyterLab) {
     super();
     let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
     let actualMessage = previewMessages[(Math.floor(Math.random() * previewMessages.length))];
     let activitiesList: VNode[] = [];
     const activites =
       [['Notebook', 'file-operations:new-notebook'],
-       ['Code Console', `console:create-${services.kernelspecs.default}`],
+       ['Code Console', `console:create`],
        ['Terminal', 'terminal:create-new'],
        ['Text Editor', 'file-operations:new-text-file']];
     for (let activityName of activites) {
@@ -122,8 +118,8 @@ class LandingWidget extends VDomWidget<LandingModel> {
 }
 
 
-function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): void {
-  let landingModel = new LandingModel(app, services);
+function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette): void {
+  let landingModel = new LandingModel(app);
   let widget = new LandingWidget();
   widget.model = landingModel;
   widget.id = 'landing-jupyterlab';
