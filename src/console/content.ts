@@ -375,6 +375,7 @@ class ConsoleContent extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     this.prompt.activate();
+    this.update();
   }
 
   /**
