@@ -96,7 +96,7 @@ const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 interface ICreateConsoleArgs extends JSONObject {
   sessionId?: string;
   path?: string;
-  kernel: Kernel.IModel;
+  kernel?: Kernel.IModel;
   preferredLanguage?: string;
 }
 
@@ -107,50 +107,28 @@ interface ICreateConsoleArgs extends JSONObject {
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): IConsoleTracker {
   let tracker = new FocusTracker<ConsolePanel>();
   let manager = services.sessions;
+  let specs = services.kernelspecs;
+
   let { commands, keymap } = app;
   let category = 'Console';
 
   let menu = new Menu({ commands, keymap });
   menu.title.label = 'Console';
 
-  let submenu: Menu = null;
   let command: string;
 
   // Set the main menu title.
   menu.title.label = 'Console';
 
-  // Add the ability to create new consoles for each kernel.
-  let specs = services.kernelspecs;
-  let displayNameMap: { [key: string]: string } = Object.create(null);
-  let kernelNameMap: { [key: string]: string } = Object.create(null);
-  for (let kernelName in specs.kernelspecs) {
-    let displayName = specs.kernelspecs[kernelName].spec.display_name;
-    kernelNameMap[displayName] = kernelName;
-    displayNameMap[kernelName] = displayName;
-  }
-  let displayNames = Object.keys(kernelNameMap).sort((a, b) => {
-    return a.localeCompare(b);
+  command = 'console:create-new';
+  commands.addCommand(command, {
+    label: 'Start New Console',
+    execute: () => {
+      commands.execute('console:create', { });
+    }
   });
-
-  // If there are available kernels, populate the "New" menu item.
-  if (displayNames.length) {
-    submenu = new Menu({ commands, keymap });
-    submenu.title.label = 'New';
-    menu.addItem({ type: 'submenu', menu: submenu });
-  }
-
-  for (let displayName of displayNames) {
-    command = `console:create-${kernelNameMap[displayName]}`;
-    commands.addCommand(command, {
-      label: `${displayName} console`,
-      execute: () => {
-        let name = `${kernelNameMap[displayName]}`;
-        commands.execute('console:create', { kernel: { name } });
-      }
-    });
-    palette.addItem({ command, category });
-    submenu.addItem({ command });
-  }
+  palette.addItem({ command, category });
+  menu.addItem({ command });
 
   command = 'console:clear';
   commands.addCommand(command, {
@@ -227,14 +205,17 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   palette.addItem({ command, category });
   menu.addItem({ command });
 
+  let count = 0;
 
   command = 'console:create';
   commands.addCommand(command, {
     execute: (args: ICreateConsoleArgs) => {
+      let name = `Console ${++count}`;
+
       // If we get a session, use it.
       if (args.sessionId) {
         return manager.connectTo(args.sessionId).then(session => {
-          createConsole(session);
+          createConsole(session, name);
           return session.id;
         });
       }
@@ -248,7 +229,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       path = `${path}/console-${utils.uuid()}`;
 
       // Get the kernel model.
-      return getKernel(args).then(kernel => {
+      return getKernel(args, name).then(kernel => {
         if (!kernel) {
           return;
         }
@@ -259,7 +240,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           kernelId: kernel.id
         };
         return manager.startNew(options).then(session => {
-          createConsole(session);
+          createConsole(session, name);
           return session.id;
         });
       });
@@ -282,13 +263,13 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   /**
    * Get the kernel given the create args.
    */
-  function getKernel(args: ICreateConsoleArgs): Promise<Kernel.IModel> {
+  function getKernel(args: ICreateConsoleArgs, name: string): Promise<Kernel.IModel> {
     if (args.kernel) {
       return Promise.resolve(args.kernel);
     }
     return manager.listRunning().then((sessions: Session.IModel[]) => {
       let options = {
-        name: 'New Console',
+        name,
         specs,
         sessions,
         preferredLanguage: args.preferredLanguage || '',
@@ -298,28 +279,30 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     });
   }
 
-
-  let count = 0;
+  let displayNameMap: { [key: string]: string } = Object.create(null);
+  for (let kernelName in specs.kernelspecs) {
+    let displayName = specs.kernelspecs[kernelName].spec.display_name;
+    displayNameMap[kernelName] = displayName;
+  }
 
   /**
    * Create a console for a given session.
    */
-  function createConsole(session: ISession): void {
+  function createConsole(session: ISession, name: string): void {
     let panel = new ConsolePanel({
       session,
       rendermime: rendermime.clone(),
       renderer: renderer
     });
-    count++;
     let displayName = displayNameMap[session.kernel.name];
-    let label = `Console ${count}`;
     let captionOptions: Private.ICaptionOptions = {
-      label, displayName,
+      label: name,
+      displayName,
       path: session.path,
       connected: new Date()
     };
     panel.id = `console-${session.id}`;
-    panel.title.label = label;
+    panel.title.label = name;
     panel.title.caption = Private.caption(captionOptions);
     panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
     panel.title.closable = true;
