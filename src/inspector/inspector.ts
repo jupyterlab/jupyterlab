@@ -163,6 +163,14 @@ class Inspector extends TabPanel implements IInspector {
   }
 
   /**
+   * Handle `'close-request'` messages.
+   */
+  protected onCloseRequest(msg: Message): void {
+    super.onCloseRequest(msg);
+    this.dispose();
+  }
+
+  /**
    * Handle inspector update signals.
    */
   protected onInspectorUpdate(sender: any, args: Inspector.IInspectorUpdate): void {
