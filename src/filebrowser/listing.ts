@@ -1477,7 +1477,11 @@ namespace DirListing {
         modTitle = dateTime(model.last_modified);
       }
 
-      text.textContent = model.name;
+      // If an item is being edited currently, its text node is unavailable.
+      if (text) {
+        text.textContent = model.name;
+      }
+
       modified.textContent = modText;
       modified.title = modTitle;
     }
@@ -1579,6 +1583,8 @@ namespace Private {
           event.preventDefault();
           changed = false;
           edit.blur();
+          break;
+        default:
           break;
         }
       };

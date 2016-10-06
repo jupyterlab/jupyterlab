@@ -236,8 +236,11 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
     } else {
       contents.content = model.toString();
     }
-    return this._manager.contents.save(path, contents).then(newContents => {
-      this._updateContentsModel(newContents);
+
+    let promise = this._manager.contents.save(path, contents);
+
+    return promise.then((contents: Contents.IModel) => {
+      this._updateContentsModel(contents);
       model.dirty = false;
       if (!this._isPopulated) {
         this._populate();

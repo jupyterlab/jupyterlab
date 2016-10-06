@@ -331,8 +331,9 @@ class CreateFromHandler extends Widget {
     return manager.listSessions().then(sessions => {
       this._sessions = sessions;
       return model.newUntitled({ ext, type });
-    }).then(contents => {
-      this.inputNode.value = this._orig = contents.name;
+    }).then((contents: Contents.IModel) => {
+      this.inputNode.value = contents.name;
+      this._orig = contents;
     });
   }
 
@@ -340,28 +341,31 @@ class CreateFromHandler extends Widget {
    * Open the file and return the document widget.
    */
   private _open(): Promise<Widget> {
-    let path = this.inputNode.value;
+    let file = this.inputNode.value;
     let widgetName = this._widgetName;
-    let kernelValue = this.kernelDropdownNode ? this.kernelDropdownNode.value : 'null';
+    let kernelValue = this.kernelDropdownNode ? this.kernelDropdownNode.value
+      : 'null';
     let kernelId: Kernel.IModel;
     if (kernelValue !== 'null') {
       kernelId = JSON.parse(kernelValue) as Kernel.IModel;
     }
-    if (path !== this._orig) {
-      return renameFile(this._model, this._orig, path).then(value => {
-        if (!value) {
+    if (file !== this._orig.name) {
+      let promise = renameFile(this._model, this._orig.name, file);
+      return promise.then((contents: Contents.IModel) => {
+        if (!contents) {
           return null;
         }
-        return this._manager.createNew(path, widgetName, kernelId);
+        return this._manager.open(contents.path, widgetName, kernelId);
       });
     }
+    let path = this._orig.path;
     return Promise.resolve(this._manager.createNew(path, widgetName, kernelId));
   }
 
   private _model: FileBrowserModel = null;
   private _creatorName: string;
   private _widgetName: string;
-  private _orig: string;
+  private _orig: Contents.IModel = null;
   private _manager: DocumentManager;
   private _sessions: Session.IModel[] = [];
 }
