@@ -95,7 +95,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
 
   img = body.getElementsByClassName('jp-ImageCodeConsole')[0];
   img.addEventListener('click', () => {
-    app.commands.execute(`console:create-${services.kernelspecs.default}`, void 0);
+    app.commands.execute('console:create', void 0);
   });
 
   img = body.getElementsByClassName('jp-ImageTextEditor')[0];

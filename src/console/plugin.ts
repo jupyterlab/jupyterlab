@@ -210,6 +210,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = 'console:create';
   commands.addCommand(command, {
     execute: (args: ICreateConsoleArgs) => {
+      args = args || {};
+
       let name = `Console ${++count}`;
 
       // If we get a session, use it.
