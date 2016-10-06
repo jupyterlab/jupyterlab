@@ -42,15 +42,10 @@ class LandingModel extends VDomModel {
     this.stateChanged.emit(void 0);
   }
 
-  get data(): VNode[] {
-    return this._data;
-  }
+  private _path: string;
+}
 
-  set data(value: VNode[]) {
-    this._data = value;
-    this.stateChanged.emit(void 0);
-  }
-
+class LandingWidget extends VDomWidget<LandingModel> {
   constructor(app: JupyterLab) {
     super();
     let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
@@ -95,18 +90,12 @@ class LandingModel extends VDomModel {
       activitiesList
     );
     this._data = [logo, subtitle, tour, header, body];
-    this._path = 'home';
   }
 
-  private _path: string;
-  private _data: VNode[];
-}
-
-class LandingWidget extends VDomWidget<LandingModel> {
   protected render(): VNode {
     let dialog =
     h.div({className: 'jp-Landing-dialog'},
-      this.model.data,
+      this._data,
       h.div({className: 'jp-Landing-cwd'},
         h.span({className: 'jp-Landing-folder'}),
         h.span({className: 'jp-Landing-path'}, this.model.path
@@ -115,12 +104,14 @@ class LandingWidget extends VDomWidget<LandingModel> {
     );
     return dialog;
   }
+
+  private _data: VNode[];
 }
 
 
 function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette): void {
-  let landingModel = new LandingModel(app);
-  let widget = new LandingWidget();
+  let landingModel = new LandingModel();
+  let widget = new LandingWidget(app);
   widget.model = landingModel;
   widget.id = 'landing-jupyterlab';
   widget.title.label = 'Launcher';
@@ -128,6 +119,7 @@ function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: IC
   widget.addClass('jp-Landing');
 
   let path = 'home';
+  landingModel.path = path;
   pathTracker.pathChanged.connect(() => {
     if (pathTracker.path.length > 0) {
       path = 'home > ';
