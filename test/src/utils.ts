@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import json2html = require('json-to-html');
+
 import {
   simulate
 } from 'simulate-event';
@@ -8,6 +10,10 @@ import {
 import {
   createServiceManager, utils, IServiceManager
 } from 'jupyter-js-services';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
 
 import {
   TextModelFactory, IDocumentModel
@@ -134,14 +140,51 @@ namespace Private {
   export
   const notebookFactory = new NotebookModelFactory();
 
+
+  class JSONRenderer extends HTMLRenderer {
+    /**
+     * The mimetypes this renderer accepts.
+     */
+    mimetypes = ['application/json'];
+
+    /**
+     * Render the transformed mime bundle.
+     */
+    render(options: RenderMime.IRendererOptions<string>): Widget {
+      options.source = json2html(options.source);
+      return super.render(options);
+    }
+  }
+
+
+  class InjectionRenderer extends TextRenderer {
+    /**
+     * The mimetypes this renderer accepts.
+     */
+    mimetypes = ['foo/bar'];
+
+    /**
+     * Render the transformed mime bundle.
+     */
+    render(options: RenderMime.IRendererOptions<string>): Widget {
+      if (options.injector) {
+        options.injector('text/plain', 'foo');
+        options.injector('application/json', { 'foo': 1 } );
+      }
+      return super.render(options);
+    }
+  }
+
   const TRANSFORMERS = [
     new JavascriptRenderer(),
+    new JSONRenderer(),
     new MarkdownRenderer(),
     new HTMLRenderer(),
     new PDFRenderer(),
     new ImageRenderer(),
     new SVGRenderer(),
     new LatexRenderer(),
+    new InjectionRenderer(),
     new TextRenderer()
   ];
 

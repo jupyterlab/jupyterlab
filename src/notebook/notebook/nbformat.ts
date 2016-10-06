@@ -6,7 +6,7 @@
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
 import {
-  JSONObject
+  JSONObject, isObject
 } from 'phosphor/lib/algorithm/json';
 
 
@@ -88,10 +88,58 @@ namespace nbformat {
    */
   export
   interface MimeBundle extends JSONObject {
-    [key: string]: multilineString;
-    'application/json'?: any;
+    [key: string]: multilineString | JSONObject;
   }
   /* tslint:enable */
+
+
+  /**
+   * Validate a mime type/value pair.
+   *
+   * @param type - The mimetype name.
+   *
+   * @param value - The value associated with the type.
+   *
+   * @returns Whether the type/value pair are valid.
+   */
+  export
+  function validateMimeValue(type: string, value: multilineString | JSONObject): boolean {
+    // Check if "application/json" or "application/foo+json"
+    const jsonTest = /^application\/(.*?)+\+json$/;
+    const isJSONType = type === 'application/json' || jsonTest.test(type);
+
+    let isString = (x: any) => {
+      return Object.prototype.toString.call(x) === '[object String]';
+    };
+
+    // If it is an array, make sure if is not a JSON type and it is an
+    // array of strings.
+    if (Array.isArray(value)) {
+      if (isJSONType) {
+        return false;
+      }
+      let valid = true;
+      (value as string[]).forEach(v => {
+        if (!isString(v)) {
+          valid = false;
+        }
+      });
+      return valid;
+    }
+
+    // If it is a string, make sure we are not a JSON type.
+    if (isString(value)) {
+      return !isJSONType;
+    }
+
+    // It is not a string, make sure it is a JSON type.
+    if (!isJSONType) {
+      return false;
+    }
+
+    // It is a JSON type, make sure it is a valid JSON object.
+    return isObject(value);
+  }
 
 
   /**

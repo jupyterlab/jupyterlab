@@ -100,7 +100,7 @@ class RenderMime {
    * trusted (see [[preferredMimetype]]), and then pass a sanitizer to the
    * renderer if the output should be sanitized.
    */
-  render(options: RenderMime.IRenderOptions<string>): Widget {
+  render(options: RenderMime.IRenderOptions<string | JSONObject>): Widget {
     let { trusted, bundle, injector } = options;
     let mimetype = this.preferredMimetype(bundle, trusted);
     if (!mimetype) {
@@ -128,7 +128,7 @@ class RenderMime {
    * "safely"  (see [[RenderMime.IRenderer.isSafe]]) or can  be "sanitized"
    * (see [[RenderMime.IRenderer.isSanitizable]]).
    */
-  preferredMimetype(bundle: RenderMime.MimeMap<string>, trusted=false): string {
+  preferredMimetype(bundle: RenderMime.MimeMap<string | JSONObject>, trusted=false): string {
     for (let m of this.order) {
       if (m in bundle) {
         let renderer = this._renderers[m];

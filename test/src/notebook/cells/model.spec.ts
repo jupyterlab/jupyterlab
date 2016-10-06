@@ -406,7 +406,10 @@ describe('notebook/cells/model', () => {
           outputs: [
             {
               output_type: 'display_data',
-              data: { 'text/plain': 'foo' },
+              data: {
+                'text/plain': 'foo',
+                'application/json': { 'bar': 1 }
+              },
               metadata: {}
             } as nbformat.IDisplayData
           ],
@@ -414,8 +417,11 @@ describe('notebook/cells/model', () => {
           metadata: { trusted: false }
         };
         let model = new CodeCellModel(cell);
-        expect(model.toJSON()).to.not.equal(cell);
-        expect(model.toJSON()).to.eql(cell);
+        let serialized = model.toJSON();
+        expect(serialized).to.not.equal(cell);
+        expect(serialized).to.eql(cell);
+        let output = serialized.outputs[0] as any;
+        expect(output.data['application/json']['bar']).to.be(1);
       });
 
     });
