@@ -321,7 +321,7 @@ class FileBrowserModel implements IDisposable {
     path = path ? path + '/' + file.name : file.name;
     let name = file.name;
     let isNotebook = file.name.indexOf('.ipynb') !== -1;
-    let type: Contents.FileType = isNotebook ? 'notebook' : 'file';
+    let type: Contents.ContentType = isNotebook ? 'notebook' : 'file';
     let format: Contents.FileFormat = isNotebook ? 'json' : 'base64';
 
     // Get the file content.

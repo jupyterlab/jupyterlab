@@ -186,7 +186,7 @@ class TextModelFactory implements IModelFactory<IDocumentModel> {
    * #### Notes
    * This is a read-only property.
    */
-  get fileType(): Contents.FileType {
+  get contentType(): Contents.ContentType {
     return 'file';
   }
 
@@ -259,7 +259,7 @@ class Base64ModelFactory extends TextModelFactory {
    * #### Notes
    * This is a read-only property.
    */
-  get fileType(): Contents.FileType {
+  get contentType(): Contents.ContentType {
     return 'file';
   }
 

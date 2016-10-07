@@ -307,10 +307,10 @@ class CreateFromHandler extends Widget {
     let { fileType, widgetName, kernelName } = creator;
     let fType = registry.getFileType(fileType);
     let ext = '.txt';
-    let type: Contents.FileType = 'file';
+    let type: Contents.ContentType = 'file';
     if (fType) {
       ext = fType.extension;
-      type = fType.fileType || 'file';
+      type = fType.contentType || 'file';
     }
     if (!widgetName || widgetName === 'default') {
       this._widgetName = widgetName = registry.defaultWidgetFactory(ext);

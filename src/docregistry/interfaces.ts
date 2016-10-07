@@ -357,12 +357,12 @@ interface IModelFactory<T extends IDocumentModel> extends IDisposable {
   name: string;
 
   /**
-   * The type of the file (defaults to `"file"`).
+   * The content type of the file (defaults to `"file"`).
    *
    * #### Notes
    * This is a read-only property.
    */
-  fileType: Contents.FileType;
+  contentType: Contents.ContentType;
 
   /**
    * The format of the file (default to `"text"`).
@@ -435,9 +435,9 @@ interface IFileType {
   icon?: string;
 
   /**
-   * The type of the new file (defaults to `"file"`).
+   * The content type of the new file (defaults to `"file"`).
    */
-  fileType?: Contents.FileType;
+  contentType?: Contents.ContentType;
 
   /**
    * The format of the new file (default to `"text"`).

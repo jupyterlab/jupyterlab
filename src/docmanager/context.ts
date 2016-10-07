@@ -226,7 +226,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
     let model = this._model;
     let contents = this._contentsModel || {};
     let path = this._path;
-    contents.type = this._factory.fileType;
+    contents.type = this._factory.contentType;
     contents.format = this._factory.fileFormat;
     if (model.readOnly) {
       return Promise.reject(new Error('Read only'));
@@ -284,7 +284,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   revert(): Promise<void> {
     let opts: Contents.IFetchOptions = {
       format: this._factory.fileFormat,
-      type: this._factory.fileType,
+      type: this._factory.contentType,
       content: true
     };
     let path = this._path;
