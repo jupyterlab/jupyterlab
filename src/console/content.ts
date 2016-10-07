@@ -514,6 +514,7 @@ class ConsoleContent extends Widget {
    */
   private _execute(cell: CodeCellWidget): Promise<void> {
     this._history.push(cell.model.source);
+    cell.model.contentChanged.connect(this.update, this);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       this.executed.emit(new Date());
       if (!value) {
@@ -533,9 +534,13 @@ class ConsoleContent extends Widget {
           }
         }
       }
+      cell.model.contentChanged.disconnect(this.update, this);
       this.update();
     };
-    let onFailure = () => { this.update(); };
+    let onFailure = () => {
+      cell.model.contentChanged.disconnect(this.update, this);
+      this.update();
+    };
     return cell.execute(this._session.kernel).then(onSuccess, onFailure);
   }
 
@@ -642,6 +647,6 @@ namespace Private {
    */
   export
   function scrollToBottom(node: HTMLElement): void {
-    node.scrollTop = node.scrollHeight;
+    node.scrollTop = node.scrollHeight - node.clientHeight;
   }
 }
