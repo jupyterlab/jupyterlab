@@ -101,7 +101,9 @@ class ConsolePanel extends Panel {
   protected onCloseRequest(msg: Message): void {
     let session = this.content.session;
     if (!session.kernel) {
+      super.onCloseRequest(msg);
       this.dispose();
+      return;
     }
     session.kernel.getSpec().then(spec => {
       let name = spec.display_name;
