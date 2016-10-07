@@ -37,15 +37,21 @@ class LandingModel extends VDomModel {
     super();
     let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
     this._previewMessage = previewMessages[(Math.floor(Math.random() * previewMessages.length))];
+    this._headerText = 'Start a new activity';
     this._activities =
     [['Notebook', 'file-operations:new-notebook'],
      ['Code Console', `console:create`],
      ['Terminal', 'terminal:create-new'],
      ['Text Editor', 'file-operations:new-text-file']];
+    this._path = 'home';
   }
 
   get previewMessage(): string {
     return this._previewMessage;
+  }
+
+  get headerText(): string {
+    return this._headerText;
   }
 
   get activities() : string[][] {
@@ -62,26 +68,27 @@ class LandingModel extends VDomModel {
   }
 
   private _previewMessage: string;
-  private _activities: [];
+  private _activities: string[][];
+  private _headerText: string;
   private _path: string;
 }
 
 class LandingWidget extends VDomWidget<LandingModel> {
   constructor(app: JupyterLab) {
     super();
+    this._app = app;
+  }
+
+  protected render(): VNode {
     let activitiesList: VNode[] = [];
-    const activites =
-      [['Notebook', 'file-operations:new-notebook'],
-       ['Code Console', `console:create`],
-       ['Terminal', 'terminal:create-new'],
-       ['Text Editor', 'file-operations:new-text-file']];
+    let activites = this.model.activities;
     for (let activityName of activites) {
       let imgName = activityName[0].replace(' ', '');
       let column =
       h.div({className: 'jp-Landing-column'},
         h.span({className: `jp-Image${imgName} jp-Landing-image`,
                 onclick: () => {
-                  app.commands.execute(activityName[1], void 0);
+                  this._app.commands.execute(activityName[1], void 0);
                 }}
         ),
         h.span({className: 'jp-Landing-text'}, activityName[0])
@@ -92,29 +99,30 @@ class LandingWidget extends VDomWidget<LandingModel> {
     let logo = h.span({className: 'jp-ImageJupyterLab jp-Landing-logo'});
     let subtitle =
     h.span({className: 'jp-Landing-subtitle'},
-      actualMessage
+      this.model.previewMessage
     );
     let tour =
     h.span({className: 'jp-Landing-tour',
             onclick: () => {
-              app.commands.execute('about-jupyterlab:show', void 0);
+              this._app.commands.execute('about-jupyterlab:show', void 0);
             }}
     );
     let header =
     h.span({className: 'jp-Landing-header'},
-      'Start a new activity'
+      this.model.headerText
     );
     let body =
     h.div({className: 'jp-Landing-body'},
       activitiesList
     );
-    this._data = [logo, subtitle, tour, header, body];
-  }
 
-  protected render(): VNode {
     let dialog =
     h.div({className: 'jp-Landing-dialog'},
-      this._data,
+      logo,
+      subtitle,
+      tour,
+      header,
+      body,
       h.div({className: 'jp-Landing-cwd'},
         h.span({className: 'jp-Landing-folder'}),
         h.span({className: 'jp-Landing-path'}, this.model.path
@@ -124,7 +132,7 @@ class LandingWidget extends VDomWidget<LandingModel> {
     return dialog;
   }
 
-  private _data: VNode[];
+  private _app: JupyterLab;
 }
 
 
@@ -138,7 +146,6 @@ function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: IC
   widget.addClass('jp-Landing');
 
   let path = 'home';
-  landingModel.path = path;
   pathTracker.pathChanged.connect(() => {
     if (pathTracker.path.length > 0) {
       path = 'home > ';
