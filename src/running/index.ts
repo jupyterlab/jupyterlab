@@ -87,11 +87,6 @@ const ITEM_ICON_CLASS = 'jp-RunningSessions-itemIcon';
 const ITEM_LABEL_CLASS = 'jp-RunningSessions-itemLabel';
 
 /**
- * The class name added to a running session item kernel name.
- */
-const KERNEL_NAME_CLASS = 'jp-RunningSessions-itemKernelName';
-
-/**
  * The class name added to a running session item shutdown button.
  */
 const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
@@ -606,15 +601,12 @@ namespace RunningSessions {
       icon.className = ITEM_ICON_CLASS;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
-      let kernel = document.createElement('span');
-      kernel.className = KERNEL_NAME_CLASS;
       let shutdown = document.createElement('span');
       shutdown.className = SHUTDOWN_BUTTON_CLASS;
       shutdown.textContent = 'SHUTDOWN';
 
       node.appendChild(icon);
       node.appendChild(label);
-      node.appendChild(kernel);
       node.appendChild(shutdown);
       return node;
     }
@@ -686,10 +678,12 @@ namespace RunningSessions {
         icon.className = `${ITEM_ICON_CLASS} ${FILE_ICON_CLASS}`;
       }
       let label = findElement(node, ITEM_LABEL_CLASS);
-      label.textContent = model.notebook.path.split('/').pop();
-      label.title = model.notebook.path;
-      let kernel = findElement(node, KERNEL_NAME_CLASS);
-      kernel.textContent = kernelName;
+      label.textContent = model.notebook.path;
+      let title = (
+        `Path: ${model.notebook.path}\n` +
+        `Kernel: ${kernelName}`
+      );
+      label.title = title;
     }
   }
 
