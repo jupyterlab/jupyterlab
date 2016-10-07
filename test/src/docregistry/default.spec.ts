@@ -101,16 +101,16 @@ describe('docmanager/default', () => {
 
     });
 
-    describe('#type', () => {
+    describe('#contentType', () => {
 
       it('should get the file type', () => {
         let factory = new Base64ModelFactory();
-        expect(factory.fileType).to.be('file');
+        expect(factory.contentType).to.be('file');
       });
 
     });
 
-    describe('#format', () => {
+    describe('#fileFormat', () => {
 
       it('should get the file format', () => {
         let factory = new Base64ModelFactory();
@@ -351,16 +351,16 @@ describe('docmanager/default', () => {
 
     });
 
-    describe('#type', () => {
+    describe('#contentType', () => {
 
       it('should get the file type', () => {
         let factory = new TextModelFactory();
-        expect(factory.fileType).to.be('file');
+        expect(factory.contentType).to.be('file');
       });
 
     });
 
-    describe('#format', () => {
+    describe('#fileFormat', () => {
 
       it('should get the file format', () => {
         let factory = new TextModelFactory();
