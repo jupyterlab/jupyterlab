@@ -112,10 +112,11 @@ class FileBrowserWidget extends Widget {
     this._listing = new DirListing({ manager, model, opener, renderer });
 
     model.fileChanged.connect((fbModel, args) => {
+      let oldPath = args.oldValue ? args.oldValue.path : void 0;
       if (args.newValue) {
-        manager.handleRename(args.oldValue.path, args.newValue.path);
+        manager.handleRename(oldPath, args.newValue.path);
       } else {
-        manager.handleDelete(args.oldValue.path);
+        manager.handleDelete(oldPath);
       }
     });
 
