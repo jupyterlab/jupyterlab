@@ -33,6 +33,25 @@ const landingExtension: JupyterLabPlugin<void> = {
 };
 
 class LandingModel extends VDomModel {
+  constructor() {
+    super();
+    let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
+    this._previewMessage = previewMessages[(Math.floor(Math.random() * previewMessages.length))];
+    this._activities =
+    [['Notebook', 'file-operations:new-notebook'],
+     ['Code Console', `console:create`],
+     ['Terminal', 'terminal:create-new'],
+     ['Text Editor', 'file-operations:new-text-file']];
+  }
+
+  get previewMessage(): string {
+    return this._previewMessage;
+  }
+
+  get activities() : string[][] {
+    return this._activities;
+  }
+
   get path(): string {
     return this._path;
   }
@@ -42,14 +61,14 @@ class LandingModel extends VDomModel {
     this.stateChanged.emit(void 0);
   }
 
+  private _previewMessage: string;
+  private _activities: [];
   private _path: string;
 }
 
 class LandingWidget extends VDomWidget<LandingModel> {
   constructor(app: JupyterLab) {
     super();
-    let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
-    let actualMessage = previewMessages[(Math.floor(Math.random() * previewMessages.length))];
     let activitiesList: VNode[] = [];
     const activites =
       [['Notebook', 'file-operations:new-notebook'],
