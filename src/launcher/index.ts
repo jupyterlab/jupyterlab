@@ -27,7 +27,7 @@ import {
 
 /* tslint:disable */
 /**
- * The main menu token.
+ * The launcher token.
  */
 export const ILauncher = new Token<ILauncher>('jupyter.services.launcher');
 /* tslint:enable */
@@ -84,7 +84,8 @@ const DIALOG_CLASS = 'jp-LauncherWidget-dialog';
  */
 export interface ILauncher {
   /**
-   * Add a command item to the Launcher
+   * Add a command item to the Launcher, and trigger re-render event for parent
+   * widget.
    *
    * @param name - The display name.
    *
@@ -96,14 +97,18 @@ export interface ILauncher {
    * 'jp-Image' followed by the `name` with spaces removed. So if the name is
    * 'Launch New Terminal' the class name will be 'jp-ImageLaunchNewTerminal'.
    *
-   * @returns A disposable that will remove the item from Launcher.
+   * @returns A disposable that will remove the item from Launcher, and trigger
+   * re-render event for parent widget.
+   *
    */
   add(name: string, action: string, args?: JSONObject, imgName?: string): IDisposable ;
 }
 
 
 /**
- * Simple encapsulation of name and callback of launcher entries.
+ * Simple encapsulation of name and callback of launcher entries. This is an
+ * implementation detail of the LauncherModel. You should not need to use
+ * this class directly, but use the `LauncherModel.add` method instead.
  */
 export class LauncherItem {
 
@@ -113,6 +118,9 @@ export class LauncherItem {
 
   readonly imgName: string;
 
+  /**
+   * Construct a new launcher item.
+   */
   constructor(name: string, clickCallback: () => void, imgName?: string) {
     this.name = name;
     this.clickCallback = clickCallback;
@@ -133,13 +141,7 @@ export class LauncherModel extends VDomModel implements ILauncher {
   items: LauncherItem[] = [];
   path: string = 'home';
   app: JupyterLab;
-  /**
-   * Convenience method to add a launcher with a given name and callback.
-   * Add a new launcher item and trigger re-render event for parent widget.
-   *
-   * @returns A Disposable which can be called to remove this new item from
-   * the Launcher and trigger another re-render event.
-   */
+
   add(name: string, action: string, args?: JSONObject, imgName?: string) : IDisposable {
     let clickCallback = () => { this.app.commands.execute( action, args); };
     let item = new LauncherItem(name, clickCallback, imgName);
