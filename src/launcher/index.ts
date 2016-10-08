@@ -135,12 +135,12 @@ export class LauncherItem {
 
 /**
  * LauncherModel keeps track of the path to working directory and has a list of
- * LauncherItems.
+ * LauncherItems, which the LauncherWidget will render.
  */
 export class LauncherModel extends VDomModel implements ILauncher {
   items: LauncherItem[] = [];
-  path: string = 'home';
-  app: JupyterLab;
+  _path: string = 'home';
+  _app: JupyterLab;
 
   add(name: string, action: string, args?: JSONObject, imgName?: string) : IDisposable {
     let clickCallback = () => { this.app.commands.execute( action, args); };
@@ -159,19 +159,25 @@ export class LauncherModel extends VDomModel implements ILauncher {
   }
 
   /**
-   * Set the path to the current working directory.
+   * The path to the current working directory.
    */
-  setDir(path: string) : void {
-    this.path = path;
+  get path(): string {
+    return this._path;
+  }
+  set path(path: string) {
+    this._path = path;
     this.stateChanged.emit(void 0);
   }
 
   /**
-   * Set the JupyterLab application this launcher will use when executing
+   * The JupyterLab application this launcher will use when executing
    * commands.
    */
-  setApp(app: JupyterLab) : void {
-    this.app = app;
+  get app() : JupyterLab {
+    return this._app;
+  }
+  set app(app: JupyterLab) {
+    this._app = app;
   }
 }
 

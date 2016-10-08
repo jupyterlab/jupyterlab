@@ -45,11 +45,11 @@ const launcherExtension: JupyterLabPlugin<ILauncher> = {
 function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): ILauncher {
   let launcherModel = new LauncherModel();
 
-  launcherModel.setDir(pathTracker.path); // change to = 
-  launcherModel.setApp(app); // change to = 
+  launcherModel.path = pathTracker.path;
+  launcherModel.app = app;
 
   pathTracker.pathChanged.connect(() => {
-    launcherModel.setDir(pathTracker.path); // change to = 
+    launcherModel.path = pathTracker.path;
   });
 
   let launcherWidget = new LauncherWidget();
