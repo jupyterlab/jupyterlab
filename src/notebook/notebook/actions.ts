@@ -949,7 +949,7 @@ namespace Private {
    * #### Notes
    * Payloads are deprecated and there are no official interfaces for them in
    * the kernel type definitions.
-   * See [Payloads (DEPRECATED)](http://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
+   * See [Payloads (DEPRECATED)](https://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
   function handlePayload(content: KernelMessage.IExecuteOkReply, parent: Notebook, child: BaseCellWidget) {
     let setNextInput = content.payload.filter(i => {

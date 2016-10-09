@@ -182,7 +182,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
   kernelLink.className = 'jp-FAQ-a';
   let kernelLinkText = document.createTextNode('this');
   kernelLink.appendChild(kernelLinkText);
-  kernelLink.href = 'http://jupyter.readthedocs.io/en/latest/install-kernel.html';
+  kernelLink.href = 'https://jupyter.readthedocs.io/en/latest/install-kernel.html';
   kernelLink.target = '_blank';
   featuresQ1Ans.appendChild(kernelLink);
 
@@ -282,7 +282,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
   tutorialLink.className = 'jp-FAQ-a';
   let tutorialLinkText = document.createTextNode('tutorial walkthrough');
   tutorialLink.appendChild(tutorialLinkText);
-  tutorialLink.href = 'http://jupyterlab-tutorial.readthedocs.io/en/latest/index.html';
+  tutorialLink.href = 'https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html';
   tutorialLink.target = '_blank';
   developerQ3Ans.appendChild(tutorialLink);
 
