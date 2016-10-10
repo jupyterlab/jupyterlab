@@ -502,7 +502,7 @@ namespace NotebookModel {
      * @returns A new code cell. If a source cell is provided, the
      *   new cell will be intialized with the data from the source.
      */
-    createCodeCell(source?: nbformat.IBaseCell): ICodeCellModel {
+    createCodeCell(source?: nbformat.ICell): ICodeCellModel {
       return new CodeCellModel(source);
     }
 

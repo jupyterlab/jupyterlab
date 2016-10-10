@@ -432,7 +432,7 @@ class CodeCellWidget extends BaseCellWidget {
    * Execute the cell given a kernel.
    */
   execute(kernel: IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
-    let model = this.model as ICodeCellModel;
+    let model = this.model;
     let code = model.source;
     if (!code.trim()) {
       model.executionCount = null;
