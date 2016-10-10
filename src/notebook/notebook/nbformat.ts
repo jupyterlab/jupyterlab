@@ -288,7 +288,7 @@ namespace nbformat {
    * A cell union type.
    */
   export
-  type ICell = IBaseCell | IRawCell | IMarkdownCell | ICodeCell;
+  type ICell = IRawCell | IMarkdownCell | ICodeCell;
 
 
   /**
