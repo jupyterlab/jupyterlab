@@ -384,8 +384,11 @@ describe('filebrowser/model', () => {
         let length = 0;
         manager.sessions.listRunning().then(running => {
           length = running.length;
-          return manager.sessions.startNew({ path: 'test' });
+          return model.newUntitled({ type: 'notebook' });
+        }).then(contents => {
+          return manager.sessions.startNew({ path: contents.path });
         }).then(session => {
+          //session.dispose();
           return model.shutdown(session.id);
         }).then(() => {
           return manager.sessions.listRunning();

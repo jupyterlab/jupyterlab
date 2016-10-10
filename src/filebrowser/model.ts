@@ -26,7 +26,6 @@ import {
 } from '../common/interfaces';
 
 
-
 /**
  * An implementation of a file browser model.
  *
