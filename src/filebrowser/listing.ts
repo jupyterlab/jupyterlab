@@ -6,8 +6,16 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   find, findIndex
 } from 'phosphor/lib/algorithm/searching';
+
+import {
+  ISequence
+} from 'phosphor/lib/algorithm/sequence';
 
 import {
   Message
@@ -360,12 +368,11 @@ class DirListing extends Widget {
    */
   delete(): Promise<void> {
     let names: string[] = [];
-    let items = this._model.items;
-    for (let item of items) {
+    each(this._model.items, item => {
       if (this._selection[item.name]) {
         names.push(item.name);
       }
-    }
+    });
     let message = `Permanently delete these ${names.length} files?`;
     if (names.length === 1) {
       message = `Permanently delete file "${names[0]}"?`;
@@ -418,12 +425,12 @@ class DirListing extends Widget {
     let promises: Promise<void>[] = [];
     let items = this.sortedItems;
     let paths = items.map(item => item.path);
-    for (let session of this._model.sessions) {
+    each(this._model.sessions, session => {
       let index = paths.indexOf(session.notebook.path);
       if (this._selection[items[index].name]) {
         promises.push(this._model.shutdown(session.id));
       }
-    }
+    });
     return Promise.all(promises).then(
       () => this._model.refresh(),
       error => utils.showErrorMessage(this, 'Shutdown kernel', error)
@@ -658,12 +665,12 @@ class DirListing extends Widget {
     // Handle notebook session statuses.
     let paths = items.map(item => item.path);
     let specs = this._model.kernelspecs;
-    for (let session of this._model.sessions) {
+    each(this._model.sessions, session => {
       let index = paths.indexOf(session.notebook.path);
       let node = this._items[index];
       node.classList.add(RUNNING_CLASS);
       node.title = specs.kernelspecs[session.kernel.name].spec.display_name;
-    }
+    });
 
     this._prevPath = this._model.path;
   }
@@ -1186,12 +1193,12 @@ class DirListing extends Widget {
     // Update the selection.
     let existing = Object.keys(this._selection);
     this._selection = Object.create(null);
-    for (let item of this._model.items) {
+    each(this._model.items, item => {
       let name = item.name;
       if (existing.indexOf(name) !== -1) {
         this._selection[name] = true;
       }
-    }
+    });
     // Update the sorted items.
     this.sort(this.sortState);
   }
@@ -1595,10 +1602,13 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export
-  function sort(items: Contents.IModel[], state: DirListing.ISortState) : Contents.IModel[] {
-    let output = items.slice();
+  function sort(items: ISequence<Contents.IModel>, state: DirListing.ISortState) : Contents.IModel[] {
+    let copy: Contents.IModel[] = [];
+    each(items, item => {
+      copy.push(item);
+    });
     if (state.key === 'last_modified') {
-      output.sort((a, b) => {
+      copy.sort((a, b) => {
         let valA = new Date(a.last_modified).getTime();
         let valB = new Date(b.last_modified).getTime();
         return valB - valA;
@@ -1607,8 +1617,8 @@ namespace Private {
 
     // Reverse the order if descending.
     if (state.direction === 'descending') {
-      output.reverse();
+      copy.reverse();
     }
-    return output;
+    return copy;
   }
 }

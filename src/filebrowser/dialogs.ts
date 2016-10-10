@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -240,12 +244,12 @@ class CreateFromHandler extends Widget {
     this.inputNode.addEventListener('input', () => {
       let value = this.inputNode.value;
       if (value !== this._orig) {
-        for (let item of this._model.items) {
+        each(this._model.items, item => {
           if (item.name === value) {
             this.addClass(FILE_CONFLICT_CLASS);
             return;
           }
-        }
+        });
       }
       this.removeClass(FILE_CONFLICT_CLASS);
     });
@@ -473,12 +477,12 @@ class CreateNewHandler extends Widget {
    */
   protected inputNodeChanged(): void {
     let path = this.inputNode.value;
-    for (let item of this._model.items) {
+    each(this._model.items, item => {
       if (item.path === path) {
         this.addClass(FILE_CONFLICT_CLASS);
         return;
       }
-    }
+    });
     let ext = this.ext;
     if (ext === this._prevExt) {
       return;
