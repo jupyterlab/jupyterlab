@@ -72,7 +72,7 @@
     "build:serverextension": "cd jupyterlab && webpack",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage && rimraf jupyterlab/build",
     "clean:examples": "node scripts/cleanexamples.js",
-    "clean:slate": "npm run clean:all && npm run clean:examples && rimraf jupyterlab/node_modules && rimraf node_modules && npm install",
+    "clean:slate": "npm run clean && npm run clean:examples && rimraf jupyterlab/node_modules && rimraf node_modules && npm install",
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
     "postinstall": "node scripts/dedupe.js",
     "prepublish": "npm run build",
