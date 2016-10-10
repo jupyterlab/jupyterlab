@@ -186,7 +186,7 @@ interface IDialogOptions {
  *
  * @param options - The dialog setup options.
  *
- * @returns A promise that resolves to button item that was selected.
+ * @returns A promise that resolves to the button item that was selected.
  */
 export
 function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
@@ -194,7 +194,7 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
   let host = options.host || document.body;
   options.host = host;
   options.body = options.body || '';
-  // NOTE: This code assumes only one dialog is show at the time:
+  // NOTE: This code assumes only one dialog is shown at the time:
   okButton.text = options.okText ? options.okText : 'OK';
   options.buttons = options.buttons || [cancelButton, okButton];
   if (!(options.body instanceof Widget)) {
@@ -333,7 +333,6 @@ class Dialog extends Panel {
     }
   }
 
-
   /**
    * Handle the `'contextmenu'` event for the widget.
    *
@@ -348,7 +347,6 @@ class Dialog extends Panel {
    * The resolution function of the dialog Promise.
    */
   protected resolve: (value: IButtonItem) => void;
-
 
   /**
    * The rejection function of the dialog Promise.
