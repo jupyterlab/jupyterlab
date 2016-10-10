@@ -173,6 +173,11 @@ interface IDialogOptions {
    * The confirmation text for the OK button (defaults to 'OK').
    */
   okText?: string;
+
+  /**
+   * An additional CSS class to apply to the dialog.
+   */
+  dialogClass?: string;
 }
 
 
@@ -235,6 +240,9 @@ class Dialog extends Panel {
     let footer = new Widget({node: document.createElement('div')});
     let title = document.createElement('span');
     this.addClass(DIALOG_CLASS);
+    if (options.dialogClass) {
+      this.addClass(options.dialogClass);
+    }
     content.addClass(CONTENT_CLASS);
     header.addClass(HEADER_CLASS);
     body.addClass(BODY_CLASS);
