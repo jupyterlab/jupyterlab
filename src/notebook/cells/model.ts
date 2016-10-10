@@ -353,12 +353,12 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Construct a new code cell with optional original cell content.
    */
-  constructor(cell?: nbformat.IBaseCell) {
+  constructor(cell?: nbformat.ICell) {
     super(cell);
     this._outputs = new OutputAreaModel();
     if (cell && cell.cell_type === 'code') {
-      this.executionCount = (cell as nbformat.ICodeCell).execution_count;
-      for (let output of (cell as nbformat.ICodeCell).outputs) {
+      this.executionCount = cell.execution_count;
+      for (let output of cell.outputs) {
         this._outputs.add(output);
       }
     }
