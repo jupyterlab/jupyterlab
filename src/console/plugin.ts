@@ -353,13 +353,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           host: widget.parent.node
         };
         return selectKernel(options);
-      }).then((kernelId: Kernel.IModel) => {
-        if (kernelId) {
-          session.changeKernel(kernelId);
-        } else {
-          session.kernel.shutdown();
-        }
-      });
+      }).then((kernelId: Kernel.IModel) => { session.changeKernel(kernelId); });
     }
   });
   palette.addItem({ command, category });

@@ -242,12 +242,6 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   }
   // Add a separator.
   node.appendChild(createSeparatorOption(maxLength));
-  // Add the option to have no kernel.
-  let option = document.createElement('option');
-  option.text = 'None';
-  option.value = 'null';
-  node.appendChild(option);
-  node.appendChild(createSeparatorOption(maxLength));
   // Add the rest of the kernel names in alphabetical order.
   let otherNames: string[] = [];
   for (let name in specs.kernelspecs) {
