@@ -388,7 +388,7 @@ describe('filebrowser/model', () => {
         }).then(contents => {
           return manager.sessions.startNew({ path: contents.path });
         }).then(session => {
-          //session.dispose();
+          session.dispose();
           return model.shutdown(session.id);
         }).then(() => {
           return manager.sessions.listRunning();
