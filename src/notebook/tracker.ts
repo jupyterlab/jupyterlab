@@ -10,8 +10,8 @@ import {
 } from 'phosphor/lib/ui/focustracker';
 
 import {
-  NotebookPanel
-} from './';
+  Widget
+} from 'phosphor/lib/ui/widget';
 
 
 /* tslint:disable */
@@ -19,7 +19,7 @@ import {
  * The notebook tracker token.
  */
 export
-const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebook-handler');
+const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebooks');
 /* tslint:enable */
 
 
@@ -27,4 +27,4 @@ const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebook-
  * A class that tracks notebook widgets.
  */
 export
-interface INotebookTracker extends FocusTracker<NotebookPanel> {}
+interface INotebookTracker extends FocusTracker<Widget> {}
