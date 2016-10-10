@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 // Notebook format interfaces
-// https://nbformat.readthedocs.org/en/latest/format_description.html
+// https://nbformat.readthedocs.io/en/latest/format_description.html
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
 import {
@@ -161,7 +161,7 @@ namespace nbformat {
      * This is not strictly part of the nbformat spec, but it is added by
      * the contents manager.
      *
-     * See http://jupyter-notebook.readthedocs.org/en/latest/security.html.
+     * See https://jupyter-notebook.readthedocs.io/en/latest/security.html.
      */
     trusted: boolean;
 
