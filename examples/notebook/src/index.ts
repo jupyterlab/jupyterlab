@@ -11,7 +11,7 @@ import {
 } from 'jupyterlab/lib/notebook/codemirror/notebook/panel';
 
 import {
-  IServiceManager, createServiceManager
+  IServiceManager, ServiceManager
 } from 'jupyter-js-services';
 
 import {
@@ -90,7 +90,7 @@ const cmdIds = {
 
 
 function main(): void {
-  createServiceManager().then(manager => {
+  ServiceManager.create().then(manager => {
     createApp(manager);
   });
 }

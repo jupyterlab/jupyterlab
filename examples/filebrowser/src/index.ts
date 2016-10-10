@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager, createServiceManager
+  IServiceManager, ServiceManager
 } from 'jupyter-js-services';
 
 import {
@@ -54,7 +54,7 @@ import '../index.css';
 
 
 function main(): void {
-  createServiceManager().then(manager => {
+  ServiceManager.create().then(manager => {
     createApp(manager);
   });
 }

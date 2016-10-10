@@ -24,7 +24,7 @@ const docRegistryProvider: JupyterLabPlugin<IDocumentRegistry> = {
     registry.addFileType({
       name: 'Text',
       extension: '.txt',
-      fileType: 'file',
+      contentType: 'file',
       fileFormat: 'text'
     });
     registry.addCreator({

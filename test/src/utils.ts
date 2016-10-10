@@ -8,7 +8,7 @@ import {
 } from 'simulate-event';
 
 import {
-  createServiceManager, utils, IServiceManager
+  ServiceManager, utils, IServiceManager
 } from 'jupyter-js-services';
 
 import {
@@ -132,7 +132,7 @@ function dismissDialog(host: HTMLElement = document.body): Promise<void> {
  */
 namespace Private {
   export
-  const servicePromise: Promise<IServiceManager> = createServiceManager();
+  const servicePromise: Promise<IServiceManager> = ServiceManager.create();
 
   export
   const textFactory = new TextModelFactory();

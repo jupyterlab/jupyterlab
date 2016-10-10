@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  createServiceManager
+  ServiceManager
 } from 'jupyter-js-services';
 
 import {
@@ -19,7 +19,7 @@ describe('filebrowser/model', () => {
     describe('#constructor()', () => {
 
       it('should construct a new file browser model', (done) => {
-        createServiceManager().then(manager => {
+        ServiceManager.create().then(manager => {
           let model = new FileBrowserModel({ manager });
           expect(model).to.be.a(FileBrowserModel);
           done();

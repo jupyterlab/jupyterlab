@@ -25,16 +25,16 @@ describe('notebook/notebook/modelfactory', () => {
 
     });
 
-    describe('#type', () => {
+    describe('#contentType', () => {
 
       it('should get the file type', () => {
         let factory = new NotebookModelFactory();
-        expect(factory.fileType).to.be('notebook');
+        expect(factory.contentType).to.be('notebook');
       });
 
     });
 
-    describe('#format', () => {
+    describe('#fileFormat', () => {
 
       it('should get the file format', () => {
         let factory = new NotebookModelFactory();

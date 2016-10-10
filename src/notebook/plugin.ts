@@ -148,7 +148,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   registry.addFileType({
     name: 'Notebook',
     extension: '.ipynb',
-    fileType: 'notebook',
+    contentType: 'notebook',
     fileFormat: 'json'
   });
   registry.addCreator({

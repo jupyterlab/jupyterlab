@@ -30,12 +30,12 @@ class NotebookModelFactory implements IModelFactory<INotebookModel> {
   }
 
   /**
-   * The type of the file.
+   * The content type of the file.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get fileType(): Contents.FileType {
+  get contentType(): Contents.ContentType {
     return 'notebook';
   }
 
