@@ -99,6 +99,20 @@ describe('dialog/index', () => {
       acceptDialog();
     });
 
+    it('should apply an additional CSS class', (done) => {
+      showDialog({ dialogClass: 'test-class' }).then(result => {
+        expect(result.text).to.be('OK');
+        done();
+      });
+      Promise.resolve().then(() => {
+        let nodes = document.body.getElementsByClassName('test-class');
+        expect(nodes.length).to.be(1);
+        let node = nodes[0];
+        expect(node.classList).to.eql(['jp-Dialog', 'test-class']);
+      });
+      acceptDialog();
+    });
+
     it('should resolve with the clicked button result', (done) => {
       let button = {
         text: 'foo',
