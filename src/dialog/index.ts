@@ -181,7 +181,7 @@ interface IDialogOptions {
  *
  * @param options - The dialog setup options.
  *
- * @returns The button item that was selected.
+ * @returns A promise that resolves to button item that was selected.
  */
 export
 function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
@@ -189,103 +189,34 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
   let host = options.host || document.body;
   options.host = host;
   options.body = options.body || '';
+  // NOTE: This code assumes only one dialog is show at the time:
   okButton.text = options.okText ? options.okText : 'OK';
-  let buttons = options.buttons = options.buttons || [cancelButton, okButton];
-  if (options.body instanceof Widget) {
-    return new Promise<IButtonItem>((resolve, reject) => {
-      let dialog = new WidgetDialog(options, resolve, reject);
-      Widget.attach(dialog, host);
-    });
-  } else {
-    let buttonNodes = buttons.map(createButton);
-    let dialog = createDialog(options, buttonNodes);
-    host.appendChild(dialog);
-    // Focus the ok button if given.
-    let index = buttons.indexOf(okButton);
-    if (index !== -1) {
-      buttonNodes[index].focus();
-    }
-    return new Promise<IButtonItem>((resolve, reject) => {
-      buttonNodes.map(node => {
-        node.addEventListener('click', evt => {
-          if (node.contains(evt.target as HTMLElement)) {
-            host.removeChild(dialog);
-            let button = buttons[buttonNodes.indexOf(node)];
-            resolve(button);
-          }
-        });
-      });
-      dialog.addEventListener('keydown', evt => {
-        // Check for escape key
-        if (evt.keyCode === 27) {
-          host.removeChild(dialog);
-          resolve(cancelButton);
-        }
-      }, true);
-      dialog.addEventListener('contextmenu', evt => {
-        evt.preventDefault();
-        evt.stopPropagation();
-      }, true);
-    });
+  options.buttons = options.buttons || [cancelButton, okButton];
+  if (!(options.body instanceof Widget)) {
+    options.body = createDialogBody(options.body);
   }
-}
-
-
-/**
- * Create the dialog node.
- */
-function createDialog(options: IDialogOptions, buttonNodes: HTMLElement[]): HTMLElement {
-  // Create the dialog nodes (except for the buttons).
-  let node = document.createElement('div');
-  let content = document.createElement('div');
-  let header = document.createElement('div');
-  let body = document.createElement('div');
-  let footer = document.createElement('div');
-  let title = document.createElement('span');
-  node.className = DIALOG_CLASS;
-  content.className = CONTENT_CLASS;
-  header.className = HEADER_CLASS;
-  body.className = BODY_CLASS;
-  footer.className = FOOTER_CLASS;
-  title.className = TITLE_CLASS;
-  node.appendChild(content);
-  content.appendChild(header);
-  content.appendChild(body);
-  content.appendChild(footer);
-  header.appendChild(title);
-
-  // Populate the nodes.
-  title.textContent = options.title || '';
-  let child: HTMLElement;
-  if (typeof options.body === 'string') {
-    child = document.createElement('span');
-    child.innerHTML = options.body as string;
-  } else if (options.body) {
-    child = options.body as HTMLElement;
-    switch (child.tagName) {
-    case 'INPUT':
-      child = wrapInput(child as HTMLInputElement);
-      break;
-    case 'SELECT':
-      child = wrapSelect(child as HTMLSelectElement);
-      break;
-    default:
-      child = styleElements(child);
-      break;
-    }
-  }
-  child.classList.add(BODY_CONTENT_CLASS);
-  body.appendChild(child);
-  buttonNodes.map(buttonNode => { footer.appendChild(buttonNode); });
-  return node;
+  return new Promise<IButtonItem>((resolve, reject) => {
+    let dialog = new Dialog(options, resolve, reject);
+    Widget.attach(dialog, host);
+  });
 }
 
 /**
- * Create the dialog node.
+ * A dialog panel.
  */
-class WidgetDialog extends Panel {
+class Dialog extends Panel {
   /**
+   * Create a dialog panel instance.
    *
+   * @param options - The dialog setup options.
+   *
+   * @param resolve - The function that resolves the dialog promise.
+   *
+   * @param reject - The function that rejects the dialog promise.
+   *
+   * #### Notes
+   * Currently the dialog resolves with `cancelButton` rather than
+   * rejecting the dialog promise.
    */
   constructor(options: IDialogOptions, resolve: (value: IButtonItem) => void, reject?: (error: any) => void) {
     super();
@@ -418,6 +349,33 @@ class WidgetDialog extends Panel {
 
   private _buttonNodes: HTMLElement[];
   private _buttons: IButtonItem[];
+}
+
+
+/**
+ * Create a dialog body widget from a non-widget input.
+ */
+function createDialogBody(body: HTMLElement | string): Widget {
+  let child: HTMLElement;
+  if (typeof body === 'string') {
+    child = document.createElement('span');
+    child.innerHTML = body as string;
+  } else if (body) {
+    child = body as HTMLElement;
+    switch (child.tagName) {
+    case 'INPUT':
+      child = wrapInput(child as HTMLInputElement);
+      break;
+    case 'SELECT':
+      child = wrapSelect(child as HTMLSelectElement);
+      break;
+    default:
+      child = styleElements(child);
+      break;
+    }
+  }
+  child.classList.add(BODY_CONTENT_CLASS);
+  return new Widget({node: child});
 }
 
 
