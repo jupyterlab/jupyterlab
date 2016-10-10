@@ -9,6 +9,10 @@ import {
 } from 'phosphor/lib/collections/vector';
 
 import {
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
+
+import {
   BoxLayout, BoxPanel
 } from 'phosphor/lib/ui/boxpanel';
 
@@ -19,6 +23,10 @@ import {
 import {
   each
 } from 'phosphor/lib/algorithm/iteration';
+
+import {
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
 
 import {
   Panel
@@ -142,6 +150,7 @@ class ApplicationShell extends Widget {
     this.layout = rootLayout;
 
     this._dockPanel.currentChanged.connect((sender, args) => {
+      this.currentChanged.emit(args);
       if (args.newValue) {
         args.newValue.title.className += ` ${CURRENT_CLASS}`;
       }
@@ -152,6 +161,11 @@ class ApplicationShell extends Widget {
       }
     });
   }
+
+  /**
+   * A signal emitted when main area's current focus changes.
+   */
+  currentChanged: ISignal<this, FocusTracker.ICurrentChangedArgs<Widget>>;
 
   /**
    * Add a widget to the top content area.
@@ -266,6 +280,10 @@ class ApplicationShell extends Widget {
   private _leftHandler: SideBarHandler;
   private _rightHandler: SideBarHandler;
 }
+
+
+// Define the signals for the `ApplicationShell` class.
+defineSignal(ApplicationShell.prototype, 'currentChanged');
 
 
 /**
