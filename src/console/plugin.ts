@@ -14,6 +14,10 @@ import {
 } from 'phosphor/lib/ui/focustracker';
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -105,7 +109,7 @@ interface ICreateConsoleArgs extends JSONObject {
  * Activate the console extension.
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): IConsoleTracker {
-  let tracker = new FocusTracker<ConsolePanel>();
+  let tracker = new FocusTracker<Widget>();
   let manager = services.sessions;
   let specs = services.kernelspecs;
 
@@ -116,6 +120,14 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.title.label = 'Console';
 
   let command: string;
+
+  // Set the source of the code inspector to the current console.
+  app.shell.currentChanged.connect((shell, args) => {
+    let widget = args.newValue;
+    if (tracker.has(widget)) {
+      inspector.source = (widget as ConsolePanel).content.inspectionHandler;
+    }
+  });
 
   // Set the main menu title.
   menu.title.label = 'Console';
@@ -135,30 +147,31 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     label: 'Clear Cells',
     execute: () => {
       if (tracker.currentWidget) {
-        tracker.currentWidget.content.clear();
+        let content = (tracker.currentWidget as ConsolePanel).content;
+        content.clear();
       }
     }
   });
   palette.addItem({ command, category });
   menu.addItem({ command });
 
-
   command = 'console:dismiss-completer';
   commands.addCommand(command, {
     execute: () => {
       if (tracker.currentWidget) {
-        tracker.currentWidget.content.dismissCompleter();
+        let content = (tracker.currentWidget as ConsolePanel).content;
+        content.dismissCompleter();
       }
     }
   });
-
 
   command = 'console:run';
   commands.addCommand(command, {
     label: 'Run Cell',
     execute: () => {
       if (tracker.currentWidget) {
-        tracker.currentWidget.content.execute();
+        let content = (tracker.currentWidget as ConsolePanel).content;
+        content.execute();
       }
     }
   });
@@ -171,7 +184,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     label: 'Run Cell (forced)',
     execute: () => {
       if (tracker.currentWidget) {
-        tracker.currentWidget.content.execute(true);
+        let content = (tracker.currentWidget as ConsolePanel).content;
+        content.execute(true);
       }
     }
   });
@@ -183,7 +197,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     label: 'Insert Line Break',
     execute: () => {
       if (tracker.currentWidget) {
-        tracker.currentWidget.content.insertLinebreak();
+        let content = (tracker.currentWidget as ConsolePanel).content;
+        content.insertLinebreak();
       }
     }
   });
@@ -195,7 +210,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     label: 'Interrupt Kernel',
     execute: () => {
       if (tracker.currentWidget) {
-        let kernel = tracker.currentWidget.content.session.kernel;
+        let content = (tracker.currentWidget as ConsolePanel).content;
+        let kernel = content.session.kernel;
         if (kernel) {
           kernel.interrupt();
         }
@@ -254,7 +270,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     execute: (args: JSONObject) => {
       let id = args['id'];
       for (let i = 0; i < tracker.widgets.length; i++) {
-        let widget = tracker.widgets.at(i);
+        let widget = tracker.widgets.at(i) as ConsolePanel;
         if (widget.content.session.id === id) {
           widget.content.inject(args['code'] as string);
         }
@@ -314,10 +330,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       captionOptions.executed = executed;
       panel.title.caption = Private.caption(captionOptions);
     });
-    // Set the source of the code inspector to the current console.
-    panel.activated.connect(() => {
-      inspector.source = panel.content.inspectionHandler;
-    });
     // Update the caption of the tab when the kernel changes.
     panel.content.session.kernelChanged.connect(() => {
       let name = panel.content.session.kernel.name;
@@ -327,6 +339,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       captionOptions.executed = null;
       panel.title.caption = Private.caption(captionOptions);
     });
+    // Immediately set the inspector source to the current console.
+    inspector.source = panel.content.inspectionHandler;
+    // Add the console to the focus tracker.
     tracker.add(panel);
   }
 
@@ -337,7 +352,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (!tracker.currentWidget) {
         return;
       }
-      let widget = tracker.currentWidget.content;
+      let widget = (tracker.currentWidget as ConsolePanel).content;
       let session = widget.session;
       let lang = '';
       if (session.kernel) {
