@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/ui/menu';
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -142,6 +146,14 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     canStartKernel: true
   };
 
+  // Set the source of the code inspector to the current notebook.
+  app.shell.currentChanged.connect((shell, args) => {
+    let widget = args.newValue;
+    if (tracker.has(widget)) {
+      inspector.source = (widget as NotebookPanel).content.inspectionHandler;
+    }
+  });
+
   registry.addModelFactory(new NotebookModelFactory());
   registry.addWidgetFactory(widgetFactory, options);
 
@@ -162,10 +174,9 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
-    // Set the source of the code inspector to the current notebook.
-    widget.activated.connect(() => {
-      inspector.source = widget.content.inspectionHandler;
-    });
+    // Immediately set the inspector source to the current console.
+    inspector.source = widget.content.inspectionHandler;
+    // Add the console to the focus tracker.
     tracker.add(widget);
   });
 
@@ -185,7 +196,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Run Cell(s) and Advance',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         let content = nbWidget.content;
         NotebookActions.runAndAdvance(content, nbWidget.context.kernel);
       }
@@ -195,7 +206,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Run Cell(s)',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.run(nbWidget.content, nbWidget.context.kernel);
       }
     }
@@ -204,7 +215,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Run Cell(s) and Insert',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.runAndInsert(nbWidget.content, nbWidget.context.kernel);
       }
     }
@@ -213,7 +224,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Run All Cells',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.runAll(nbWidget.content, nbWidget.context.kernel);
       }
     }
@@ -222,7 +233,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Restart Kernel',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         restartKernel(nbWidget.kernel, nbWidget.node);
       }
     }
@@ -231,7 +242,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Restart Kernel & Clear Outputs',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         let promise = restartKernel(nbWidget.kernel, nbWidget.node);
         promise.then(result => {
           if (result) {
@@ -245,7 +256,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Restart Kernel & Run All',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         let promise = restartKernel(nbWidget.kernel, nbWidget.node);
         promise.then(result => {
           NotebookActions.runAll(nbWidget.content, nbWidget.context.kernel);
@@ -257,7 +268,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Clear All Outputs',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.clearAllOutputs(nbWidget.content);
       }
     }
@@ -266,7 +277,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Clear Output(s)',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.clearOutputs(nbWidget.content);
       }
     }
@@ -275,7 +286,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Interrupt Kernel',
     execute: () => {
       if (tracker.currentWidget) {
-        let kernel = tracker.currentWidget.context.kernel;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        let kernel = nbWidget.context.kernel;
         if (kernel) {
           kernel.interrupt();
         }
@@ -286,7 +298,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Convert to Code',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.changeCellType(nbWidget.content, 'code');
       }
     }
@@ -295,7 +307,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Convert to Markdown',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.changeCellType(nbWidget.content, 'markdown');
       }
     }
@@ -304,7 +316,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Convert to Raw',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.changeCellType(nbWidget.content, 'raw');
       }
     }
@@ -313,7 +325,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Cut Cell(s)',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.cut(nbWidget.content, nbWidget.clipboard);
       }
     }
@@ -322,7 +334,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Copy Cell(s)',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.copy(nbWidget.content, nbWidget.clipboard);
       }
     }
@@ -331,7 +343,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Paste Cell(s)',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.paste(nbWidget.content, nbWidget.clipboard);
       }
     }
@@ -340,7 +352,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Delete Cell(s)',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.deleteCells(nbWidget.content);
       }
     }
@@ -349,7 +361,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Split Cell',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.splitCell(nbWidget.content);
       }
     }
@@ -358,7 +370,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Merge Selected Cell(s)',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.mergeCells(nbWidget.content);
       }
     }
@@ -367,7 +379,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Insert Cell Above',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.insertAbove(nbWidget.content);
       }
     }
@@ -376,7 +388,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Insert Cell Below',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.insertBelow(nbWidget.content);
       }
     }
@@ -385,7 +397,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Select Cell Above',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.selectAbove(nbWidget.content);
       }
     }
@@ -394,7 +406,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Select Cell Below',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.selectBelow(nbWidget.content);
       }
     }
@@ -403,7 +415,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Extend Selection Above',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.extendSelectionAbove(nbWidget.content);
       }
     }
@@ -412,7 +424,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Extend Selection Below',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.extendSelectionBelow(nbWidget.content);
       }
     }
@@ -421,7 +433,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Move Cell(s) Up',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.moveUp(nbWidget.content);
       }
     }
@@ -430,7 +442,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Move Cell(s) Down',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.moveDown(nbWidget.content);
       }
     }
@@ -439,7 +451,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Toggle Line Numbers',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.toggleLineNumbers(nbWidget.content);
       }
     }
@@ -448,7 +460,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Toggle All Line Numbers',
     execute: () => {
       if (tracker.currentWidget) {
-        let nbWidget = tracker.currentWidget;
+        let nbWidget = tracker.currentWidget as NotebookPanel;
         NotebookActions.toggleAllLineNumbers(nbWidget.content);
       }
     }
@@ -457,7 +469,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'To Command Mode',
     execute: () => {
       if (tracker.currentWidget) {
-        tracker.currentWidget.content.mode = 'command';
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        nbWidget.content.mode = 'command';
       }
     }
   });
@@ -465,7 +478,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'To Edit Mode',
     execute: () => {
       if (tracker.currentWidget) {
-        tracker.currentWidget.content.mode = 'edit';
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        nbWidget.content.mode = 'edit';
       }
     }
   });
@@ -473,7 +487,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Undo Cell Operation',
     execute: () => {
       if (tracker.currentWidget) {
-        NotebookActions.undo(tracker.currentWidget.content);
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        NotebookActions.undo(nbWidget.content);
       }
     }
   });
@@ -481,7 +496,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Redo Cell Operation',
     execute: () => {
       if (tracker.currentWidget) {
-        NotebookActions.redo(tracker.currentWidget.content);
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        NotebookActions.redo(nbWidget.content);
       }
     }
   });
@@ -489,7 +505,7 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Switch Kernel',
     execute: () => {
       if (tracker.currentWidget) {
-        let { context, node } = tracker.currentWidget;
+        let { context, node } = tracker.currentWidget as NotebookPanel;
         selectKernelForContext(context, node);
       }
     }
@@ -498,7 +514,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Markdown Header 1',
     execute: () => {
       if (tracker.currentWidget) {
-        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 1);
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        NotebookActions.setMarkdownHeader(nbWidget.content, 1);
       }
     }
   });
@@ -506,7 +523,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Markdown Header 2',
     execute: () => {
       if (tracker.currentWidget) {
-        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 2);
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        NotebookActions.setMarkdownHeader(nbWidget.content, 2);
       }
     }
   });
@@ -514,7 +532,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Markdown Header 3',
     execute: () => {
       if (tracker.currentWidget) {
-        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 3);
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        NotebookActions.setMarkdownHeader(nbWidget.content, 3);
       }
     }
   });
@@ -522,7 +541,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Markdown Header 4',
     execute: () => {
       if (tracker.currentWidget) {
-        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 4);
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        NotebookActions.setMarkdownHeader(nbWidget.content, 4);
       }
     }
   });
@@ -530,7 +550,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Markdown Header 5',
     execute: () => {
       if (tracker.currentWidget) {
-        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 5);
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        NotebookActions.setMarkdownHeader(nbWidget.content, 5);
       }
     }
   });
@@ -538,7 +559,8 @@ function addCommands(app: JupyterLab, tracker: INotebookTracker): void {
     label: 'Markdown Header 6',
     execute: () => {
       if (tracker.currentWidget) {
-        NotebookActions.setMarkdownHeader(tracker.currentWidget.content, 6);
+        let nbWidget = tracker.currentWidget as NotebookPanel;
+        NotebookActions.setMarkdownHeader(nbWidget.content, 6);
       }
     }
   });
@@ -560,7 +582,7 @@ function populatePalette(palette: ICommandPalette): void {
     cmdIds.editMode,
     cmdIds.commandMode,
     cmdIds.switchKernel
-  ].forEach(command => palette.addItem({ command, category }));
+  ].forEach(command => { palette.addItem({ command, category }); });
 
   category = 'Notebook Cell Operations';
   [
@@ -594,7 +616,7 @@ function populatePalette(palette: ICommandPalette): void {
     cmdIds.markdown4,
     cmdIds.markdown5,
     cmdIds.markdown6
-  ].forEach(command => palette.addItem({ command, category }));
+  ].forEach(command => { palette.addItem({ command, category }); });
 }
 
 /**
