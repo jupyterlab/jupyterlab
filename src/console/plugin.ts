@@ -10,14 +10,6 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
-  FocusTracker
-} from 'phosphor/lib/ui/focustracker';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -109,7 +101,8 @@ interface ICreateConsoleArgs extends JSONObject {
  * Activate the console extension.
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): IConsoleTracker {
-  let tracker = new FocusTracker<ConsolePanel>();
+  let instances = new Map<string, ConsolePanel>();
+  let current: ConsolePanel = null;
   let manager = services.sessions;
   let specs = services.kernelspecs;
 
@@ -123,9 +116,16 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   // Set the source of the code inspector to the current console.
   app.shell.currentChanged.connect((shell, args) => {
-    let widget = args.newValue as ConsolePanel;
-    if (tracker.has(widget)) {
-      inspector.source = widget.content.inspectionHandler;
+    let widget = args.newValue;
+    // Type information can be safely discarded here as `.has()` relies on
+    // referential identity.
+    if (instances.has(widget.id || '')) {
+      // Set the current reference to the current widget.
+      current = widget as ConsolePanel;
+      inspector.source = current.content.inspectionHandler;
+    } else {
+      // Reset the current reference.
+      current = null;
     }
   });
 
@@ -146,8 +146,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Clear Cells',
     execute: () => {
-      if (tracker.currentWidget) {
-        tracker.currentWidget.content.clear();
+      if (current) {
+        current.content.clear();
       }
     }
   });
@@ -157,8 +157,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = 'console:dismiss-completer';
   commands.addCommand(command, {
     execute: () => {
-      if (tracker.currentWidget) {
-        tracker.currentWidget.content.dismissCompleter();
+      if (current) {
+        current.content.dismissCompleter();
       }
     }
   });
@@ -167,8 +167,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Run Cell',
     execute: () => {
-      if (tracker.currentWidget) {
-        tracker.currentWidget.content.execute();
+      if (current) {
+        current.content.execute();
       }
     }
   });
@@ -180,8 +180,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Run Cell (forced)',
     execute: () => {
-      if (tracker.currentWidget) {
-        tracker.currentWidget.content.execute(true);
+      if (current) {
+        current.content.execute(true);
       }
     }
   });
@@ -192,8 +192,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Insert Line Break',
     execute: () => {
-      if (tracker.currentWidget) {
-        tracker.currentWidget.content.insertLinebreak();
+      if (current) {
+        current.content.insertLinebreak();
       }
     }
   });
@@ -204,8 +204,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Interrupt Kernel',
     execute: () => {
-      if (tracker.currentWidget) {
-        let kernel = tracker.currentWidget.content.session.kernel;
+      if (current) {
+        let kernel = current.content.session.kernel;
         if (kernel) {
           kernel.interrupt();
         }
@@ -263,12 +263,11 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     execute: (args: JSONObject) => {
       let id = args['id'];
-      for (let i = 0; i < tracker.widgets.length; i++) {
-        let widget = tracker.widgets.at(i);
+      instances.forEach(widget => {
         if (widget.content.session.id === id) {
           widget.content.inject(args['code'] as string);
         }
-      }
+      });
     }
   });
 
@@ -297,6 +296,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     displayNameMap[kernelName] = displayName;
   }
 
+  let id = 0; // The ID counter for notebook panels.
+
   /**
    * Create a console for a given session.
    */
@@ -313,7 +314,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       path: session.path,
       connected: new Date()
     };
-    panel.id = `console-${session.id}`;
+    // If the console panel does not have an ID, assign it one.
+    panel.id = panel.id || `console-${++id}`;
     panel.title.label = name;
     panel.title.caption = Private.caption(captionOptions);
     panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
@@ -335,18 +337,20 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     });
     // Immediately set the inspector source to the current console.
     inspector.source = panel.content.inspectionHandler;
-    // Add the console to the focus tracker.
-    tracker.add(panel);
+    // Add the console panel to the instances map.
+    instances.set(panel.id, panel);
+    // Remove from the instances map upon disposal.
+    panel.disposed.connect(() => { instances.delete(panel.id); });
   }
 
   command = 'console:switch-kernel';
   commands.addCommand(command, {
     label: 'Switch Kernel',
     execute: () => {
-      if (!tracker.currentWidget) {
+      if (!current) {
         return;
       }
-      let widget = tracker.currentWidget.content;
+      let widget = current.content;
       let session = widget.session;
       let lang = '';
       if (session.kernel) {
@@ -374,7 +378,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
   mainMenu.addMenu(menu, {rank: 50});
-  return tracker;
+  return instances;
 }
 
 
