@@ -109,7 +109,7 @@ interface ICreateConsoleArgs extends JSONObject {
  * Activate the console extension.
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): IConsoleTracker {
-  let tracker = new FocusTracker<Widget>();
+  let tracker = new FocusTracker<ConsolePanel>();
   let manager = services.sessions;
   let specs = services.kernelspecs;
 
@@ -123,9 +123,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   // Set the source of the code inspector to the current console.
   app.shell.currentChanged.connect((shell, args) => {
-    let widget = args.newValue;
+    let widget = args.newValue as ConsolePanel;
     if (tracker.has(widget)) {
-      inspector.source = (widget as ConsolePanel).content.inspectionHandler;
+      inspector.source = widget.content.inspectionHandler;
     }
   });
 
@@ -147,8 +147,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     label: 'Clear Cells',
     execute: () => {
       if (tracker.currentWidget) {
-        let content = (tracker.currentWidget as ConsolePanel).content;
-        content.clear();
+        tracker.currentWidget.content.clear();
       }
     }
   });
@@ -159,8 +158,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     execute: () => {
       if (tracker.currentWidget) {
-        let content = (tracker.currentWidget as ConsolePanel).content;
-        content.dismissCompleter();
+        tracker.currentWidget.content.dismissCompleter();
       }
     }
   });
@@ -170,8 +168,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     label: 'Run Cell',
     execute: () => {
       if (tracker.currentWidget) {
-        let content = (tracker.currentWidget as ConsolePanel).content;
-        content.execute();
+        tracker.currentWidget.content.execute();
       }
     }
   });
@@ -184,8 +181,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     label: 'Run Cell (forced)',
     execute: () => {
       if (tracker.currentWidget) {
-        let content = (tracker.currentWidget as ConsolePanel).content;
-        content.execute(true);
+        tracker.currentWidget.content.execute(true);
       }
     }
   });
@@ -197,8 +193,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     label: 'Insert Line Break',
     execute: () => {
       if (tracker.currentWidget) {
-        let content = (tracker.currentWidget as ConsolePanel).content;
-        content.insertLinebreak();
+        tracker.currentWidget.content.insertLinebreak();
       }
     }
   });
@@ -210,8 +205,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     label: 'Interrupt Kernel',
     execute: () => {
       if (tracker.currentWidget) {
-        let content = (tracker.currentWidget as ConsolePanel).content;
-        let kernel = content.session.kernel;
+        let kernel = tracker.currentWidget.content.session.kernel;
         if (kernel) {
           kernel.interrupt();
         }
@@ -270,7 +264,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     execute: (args: JSONObject) => {
       let id = args['id'];
       for (let i = 0; i < tracker.widgets.length; i++) {
-        let widget = tracker.widgets.at(i) as ConsolePanel;
+        let widget = tracker.widgets.at(i);
         if (widget.content.session.id === id) {
           widget.content.inject(args['code'] as string);
         }
@@ -352,7 +346,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (!tracker.currentWidget) {
         return;
       }
-      let widget = (tracker.currentWidget as ConsolePanel).content;
+      let widget = tracker.currentWidget.content;
       let session = widget.session;
       let lang = '';
       if (session.kernel) {
