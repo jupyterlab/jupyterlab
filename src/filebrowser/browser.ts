@@ -119,7 +119,7 @@ class FileBrowserWidget extends Widget {
       let oldPath = args.oldValue && args.oldValue.path || null;
       if (args.newValue) {
         manager.handleRename(oldPath, args.newValue.path);
-      } else {
+      }else {
         manager.handleDelete(oldPath);
       }
     });
