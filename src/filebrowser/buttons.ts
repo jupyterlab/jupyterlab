@@ -45,10 +45,6 @@ import {
   FileBrowserModel
 } from './model';
 
-import {
-  DirListing
-} from './listing';
-
 import * as utils
   from './utils';
 
@@ -128,7 +124,6 @@ class FileButtons extends Widget {
     this._keymap = options.keymap;
     this._manager = options.manager;
     this._opener = options.opener;
-    Private.setListings(options.listings);
   }
 
   /**
@@ -280,7 +275,6 @@ class FileButtons extends Widget {
   private _manager: DocumentManager = null;
   private _model: FileBrowserModel;
   private _opener: IWidgetOpener = null;
-  private _listings: DirListing = null;
 }
 
 
@@ -319,11 +313,6 @@ namespace FileButtons {
      * A widget opener function.
      */
     opener: IWidgetOpener;
-
-    /**
-     * A filebrowser listings instance.
-     */
-    listings: DirListing;
   }
 }
 
@@ -343,16 +332,6 @@ namespace Private {
   let id = 0;
 
   /**
-   * Name of directory created by createNewFolder.
-   */
-  let dirName: string;
-
-  /**
-   * An instance of the file browser's listings.
-   */
-  let listing: DirListing = null;
-
-  /**
    * An object which holds the button nodes for a file buttons widget.
    */
   export
@@ -360,30 +339,6 @@ namespace Private {
     create: HTMLButtonElement;
     upload: HTMLButtonElement;
     refresh: HTMLButtonElement;
-  }
-
-  /**
-   * Set the listing variable from outside this namespace.
-   */
-  export
-  function setListings(listings: DirListing): void {
-    listing = listings;
-  }
-
-  /**
-   * Store the newly created directory name from outside this namespace.
-   */
-  export
-  function setDirName(name: string): void {
-    dirName = name;
-  }
-
-  /**
-   * Returns the newest directory's name.
-   */
-  export
-  function getDirName(): string {
-    return dirName;
   }
 
   /**
@@ -453,34 +408,11 @@ namespace Private {
    * Create a new folder.
    */
   export
-  function createNewFolder(widget: FileButtons): Promise<void> {
-    let dir = widget.model.newUntitled({ type: 'directory' });
-
-    dir.then(contents => {
-      Private.setDirName(contents.name);
+  function createNewFolder(widget: FileButtons): void {
+    widget.model.newUntitled({ type: 'directory' }).then(contents => {
+      widget.model.refresh();
     }).catch(error => {
       utils.showErrorMessage(widget, 'New Folder Error', error);
-    });
-    return widget.model.refresh();
-  }
-
-  /**
-   * Calls createNewFolder and selects that folder to be renamed.
-   */
-  export
-  function createAndRename(widget: FileButtons): void {
-    let prom = createNewFolder(widget);
-
-    prom.then(contents => {
-      prom = listing.selectItemByName(getDirName());
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'Folder Rename Error', error);
-    });
-
-    prom.then(contents => {
-      listing.rename();
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'Folder Refresh Error', error);
     });
   }
 
@@ -501,7 +433,7 @@ namespace Private {
 
     command = `${prefix}:new-text-folder`;
     disposables.add(commands.addCommand(command, {
-      execute: () => { createAndRename(widget); },
+      execute: () => { createNewFolder(widget); },
       label: 'Folder'
     }));
     menu.addItem({ command });
