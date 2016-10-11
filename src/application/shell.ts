@@ -1,5 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+
+import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
 import {
   find, findIndex, upperBound
 } from 'phosphor/lib/algorithm/searching';
@@ -19,10 +24,6 @@ import {
 import {
   DockPanel
 } from 'phosphor/lib/ui/dockpanel';
-
-import {
-  each
-} from 'phosphor/lib/algorithm/iteration';
 
 import {
   FocusTracker
