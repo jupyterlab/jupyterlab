@@ -115,8 +115,13 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   let command: string;
 
   // Set the source of the code inspector to the current console.
-  app.shell.currentChanged.connect((shell, args) => {
+  app.shell.currentChanged.connect((sender, args) => {
     let widget = args.newValue;
+    if (!widget) {
+      // Reset the current reference.
+      current = null;
+      return;
+    }
     // Type information can be safely discarded here as `.has()` relies on
     // referential identity.
     if (instances.has(widget.id || '')) {
