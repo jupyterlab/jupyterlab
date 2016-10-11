@@ -6,10 +6,6 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  FocusTracker
-} from 'phosphor/lib/ui/focustracker';
-
-import {
   NotebookPanel
 } from './';
 
@@ -27,4 +23,4 @@ const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebooks
  * A class that tracks notebook widgets.
  */
 export
-interface INotebookTracker extends FocusTracker<NotebookPanel> {}
+interface INotebookTracker extends Map<string, NotebookPanel> {}
