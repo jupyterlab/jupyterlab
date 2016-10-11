@@ -165,7 +165,17 @@ class ApplicationShell extends Widget {
   /**
    * A signal emitted when main area's current focus changes.
    */
-  currentChanged: ISignal<this, FocusTracker.ICurrentChangedArgs<Widget>>;
+  readonly currentChanged: ISignal<this, FocusTracker.ICurrentChangedArgs<Widget>>;
+
+  /**
+   * The current widget in the shell's main area.
+   *
+   * #### Notes
+   * This property is read-only.
+   */
+  get currentWidget(): Widget {
+    return this._dockPanel.currentWidget;
+  }
 
   /**
    * Add a widget to the top content area.
