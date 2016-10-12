@@ -62,18 +62,6 @@ const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
 const EDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 
 /**
- * The editor handler extension.
- */
-export
-const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
-  id: 'jupyter.services.editor-handler',
-  requires: [IDocumentRegistry, IMainMenu, ICommandPalette],
-  provides: IEditorTracker,
-  activate: activateEditorHandler,
-  autoStart: true
-};
-
-/**
  * The map of command ids used by the editor.
  */
 const cmdIds = {
@@ -91,6 +79,19 @@ const cmdIds = {
  * The editor widget instance tracker.
  */
 const tracker = new InstanceTracker<EditorWidget>();
+
+
+/**
+ * The editor handler extension.
+ */
+export
+const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
+  id: 'jupyter.services.editor-handler',
+  requires: [IDocumentRegistry, IMainMenu, ICommandPalette],
+  provides: IEditorTracker,
+  activate: activateEditorHandler,
+  autoStart: true
+};
 
 
 /**

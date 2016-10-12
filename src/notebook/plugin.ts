@@ -105,6 +105,7 @@ const cmdIds = {
   markdown6: 'notebook-cells:markdown-header6',
 };
 
+
 /**
  * The notebook widget tracker provider.
  */

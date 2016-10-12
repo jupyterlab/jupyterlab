@@ -31,17 +31,6 @@ import {
 
 
 /**
- * The default terminal extension.
- */
-export
-const terminalExtension: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.terminal',
-  requires: [IServiceManager, IMainMenu, ICommandPalette],
-  activate: activateTerminal,
-  autoStart: true
-};
-
-/**
  * The class name for all main area landscape tab icons.
  */
 const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
@@ -55,6 +44,18 @@ const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
  * The terminal widget instance tracker.
  */
 const tracker = new InstanceTracker<TerminalWidget>();
+
+
+/**
+ * The default terminal extension.
+ */
+export
+const terminalExtension: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.terminal',
+  requires: [IServiceManager, IMainMenu, ICommandPalette],
+  activate: activateTerminal,
+  autoStart: true
+};
 
 
 function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette): void {
