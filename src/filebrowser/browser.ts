@@ -110,16 +110,19 @@ class FileBrowserWidget extends Widget {
 
     model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs({ model });
-    this._listing = new DirListing({ manager, model, opener, renderer });
     this._buttons = new FileButtons({
       commands, keymap, manager, model, opener
     });
+    this._listing = new DirListing({ manager, model, opener, renderer });
 
     model.fileChanged.connect((fbModel, args) => {
       let oldPath = args.oldValue && args.oldValue.path || null;
       if (args.newValue) {
         manager.handleRename(oldPath, args.newValue.path);
-      }else {
+      } else if (args.newValue.type === 'directory') {
+        this._listing.selectItemByName(args.oldValue.path);
+        this._listing.rename();
+      } else {
         manager.handleDelete(oldPath);
       }
     });
