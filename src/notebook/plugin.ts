@@ -55,6 +55,11 @@ const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
 const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
 
 /**
+ * The notebook instance tracker.
+ */
+const tracker = new NotebookTracker();
+
+/**
  * The map of command ids used by the notebook.
  */
 const cmdIds = {
@@ -100,7 +105,6 @@ const cmdIds = {
   markdown6: 'notebook-cells:markdown-header6',
 };
 
-
 /**
  * The notebook widget tracker provider.
  */
@@ -128,7 +132,6 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
  */
 function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer): INotebookTracker {
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
-  let tracker = new NotebookTracker();
   let options: DocumentRegistry.IWidgetFactoryOptions = {
     fileExtensions: ['.ipynb'],
     displayName: 'Notebook',
@@ -161,7 +164,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     widgetName: 'Notebook'
   });
 
-  addCommands(app, tracker);
+  addCommands(app);
   populatePalette(palette);
 
   let id = 0; // The ID counter for notebook panels.
@@ -185,7 +188,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 /**
  * Add the notebook commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, tracker: NotebookTracker): void {
+function addCommands(app: JupyterLab): void {
   let commands = app.commands;
 
   commands.addCommand(cmdIds.runAndAdvance, {
@@ -550,17 +553,17 @@ function addCommands(app: JupyterLab, tracker: NotebookTracker): void {
       if (current) {
         NotebookActions.setMarkdownHeader(current.content, 5);
       }
+    }
+  });
+  commands.addCommand(cmdIds.markdown6, {
+    label: 'Markdown Header 6',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.setMarkdownHeader(current.content, 6);
       }
-    });
-    commands.addCommand(cmdIds.markdown6, {
-      label: 'Markdown Header 6',
-      execute: () => {
-        let current = tracker.currentWidget;
-        if (current) {
-          NotebookActions.setMarkdownHeader(current.content, 6);
-        }
-      }
-    });
+    }
+  });
   }
 
 /**
