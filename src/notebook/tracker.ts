@@ -98,9 +98,9 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
   }
 
   /**
-   * Handle the sync event.
+   * Handle the current change event.
    */
-  protected onSync(): void {
+  protected onCurrentChanged(): void {
     if (this._handler) {
       this._handler.dispose();
     }
