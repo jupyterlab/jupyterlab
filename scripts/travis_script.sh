@@ -15,8 +15,8 @@ jupyter serverextension enable --py jupyterlab
 
 npm run clean
 npm run build
-npm test || npm test
-npm run test:coverage || npm run test:coverage
+npm test || npm test || npm test
+npm run test:coverage || npm run test:coverage || npm run test:coverage
 
 
 # Run the python tests
