@@ -36,22 +36,25 @@ interface IInstanceTracker<T extends Widget> {
   currentWidget: T;
 }
 
-
+/**
+ * A class that keeps track of widget instances.
+ *
+ * #### Notes
+ * This is meant to be used in conjunction with a `FocusTracker` and will
+ * typically be kept in sync with focus tracking events.
+ */
 export
 class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposable {
   /**
    * A signal emitted when the current widget changes.
    *
    * #### Notes
-   * If there is no widget with the focus, then `null` will be emitted.
+   * If the last widget being tracked is disposed, `null` will be emitted.
    */
   currentChanged: ISignal<this, T>;
 
   /**
-   * The current widget.
-   *
-   * #### Notes
-   * If there is no widget with the focus, then this value is `null`.
+   * The current widget is the most recently focused widget.
    */
   get currentWidget(): T {
     return this._currentWidget;
@@ -76,7 +79,14 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       return;
     }
     this._widgets.set(widget.id, widget);
-    widget.disposed.connect(() => { this._widgets.delete(widget.id); });
+    widget.disposed.connect(() => {
+      this._widgets.delete(widget.id);
+      if (!this._widgets.size) {
+        this._currentWidget = null;
+        this.onCurrentChanged();
+        this.currentChanged.emit(null);
+      }
+    });
   }
 
   /**
@@ -140,33 +150,30 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * at all other times.
    */
   sync(current: Widget): T {
+    if (this.isDisposed) {
+      return;
+    }
     if (current && this.has(current)) {
       // If not state change needs to occur, just bail.
       if (this._currentWidget === current) {
-        this.onSync();
         return null;
       }
       this._currentWidget = current as T;
+      this.onCurrentChanged();
       this.currentChanged.emit(this._currentWidget);
-      this.onSync();
       return current as T;
     }
-    if (this._currentWidget) {
-      this._currentWidget = null;
-      this.currentChanged.emit(null);
-    }
-    this.onSync();
     return null;
   }
 
   /**
-   * Handle the sync event.
+   * Handle the current change event.
    *
    * #### Notes
    * The default implementation is a no-op. This may be reimplemented by
    * subclasses to customize the behavior.
    */
-  protected onSync(): void {
+  protected onCurrentChanged(): void {
     /* This is a no-op. */
   }
 
