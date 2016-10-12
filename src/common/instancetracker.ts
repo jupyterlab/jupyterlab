@@ -71,16 +71,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * Add a new widget to the tracker.
    */
   add(widget: T): void {
-    if (!widget.id) {
-      throw new Error('All tracked widgets must have IDs.');
-    }
-    if (this._widgets.has(widget.id)) {
+    if (this._widgets.has(widget)) {
       console.warn(`${widget.id} has already been added to the tracker.`);
       return;
     }
-    this._widgets.set(widget.id, widget);
+    this._widgets.add(widget);
     widget.disposed.connect(() => {
-      this._widgets.delete(widget.id);
+      this._widgets.delete(widget);
       if (!this._widgets.size) {
         this._currentWidget = null;
         this.onCurrentChanged();
@@ -134,7 +131,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * Check if this tracker has the specified widget.
    */
   has(widget: Widget): boolean {
-    return this._widgets.has(widget.id);
+    return this._widgets.has(widget as any);
   }
 
   /**
@@ -178,7 +175,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   private _currentWidget: T = null;
-  private _widgets = new Map<string, T>();
+  private _widgets = new Set<T>();
 }
 
 
