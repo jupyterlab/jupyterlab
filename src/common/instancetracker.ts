@@ -23,15 +23,12 @@ interface IInstanceTracker<T extends Widget> {
    * A signal emitted when the current widget changes.
    *
    * #### Notes
-   * If there is no widget with the focus, then `null` will be emitted.
+   * If the last widget being tracked is disposed, `null` will be emitted.
    */
   currentChanged: ISignal<this, T>;
 
   /**
-   * The current widget.
-   *
-   * #### Notes
-   * If there is no widget with the focus, then this value is `null`.
+   * The current widget is the most recently focused widget.
    */
   currentWidget: T;
 }
@@ -151,7 +148,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       return;
     }
     if (current && this.has(current)) {
-      // If not state change needs to occur, just bail.
+      // If no state change needs to occur, just bail.
       if (this._currentWidget === current) {
         return null;
       }
