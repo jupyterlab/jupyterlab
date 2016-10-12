@@ -69,6 +69,24 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T> {
   }
 
   /**
+   * Find the first widget in the tracker that satisfies a filter function.
+   *
+   * @param fn The filter function to call on each widget.
+   */
+  find(fn: (widget: T) => boolean): T {
+    let result: T = null;
+    this._widgets.forEach(widget => {
+      if (!result) {
+        return;
+      }
+      if (fn(widget)) {
+        result = widget;
+      }
+    });
+    return result;
+  }
+
+  /**
    * Iterate through each widget in the tracker.
    *
    * @param fn The function to call on each widget.
