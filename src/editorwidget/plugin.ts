@@ -10,16 +10,16 @@ import {
 } from 'phosphor/lib/core/properties';
 
 import {
-  FocusTracker
-} from 'phosphor/lib/ui/focustracker';
-
-import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
 import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
+
+import {
+  InstanceTracker
+} from '../common/instancetracker';
 
 import {
   IDocumentRegistry
@@ -61,7 +61,6 @@ const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
  */
 const EDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 
-
 /**
  * The editor handler extension.
  */
@@ -73,7 +72,6 @@ const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
   activate: activateEditorHandler,
   autoStart: true
 };
-
 
 /**
  * The map of command ids used by the editor.
@@ -89,13 +87,23 @@ const cmdIds = {
   runCode: 'editor:run-code'
 };
 
+/**
+ * The editor widget instance tracker.
+ */
+const tracker = new InstanceTracker<EditorWidget>();
+
 
 /**
  * Sets up the editor widget
  */
 function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IEditorTracker {
-  let tracker = new FocusTracker<EditorWidget>();
   let widgetFactory = new EditorWidgetFactory();
+
+  // Sync tracker with currently focused widget.
+  app.shell.currentChanged.connect((sender, args) => {
+    tracker.sync(args.newValue);
+  });
+
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
     tracker.add(widget);
@@ -110,32 +118,32 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     canStartKernel: false
   });
 
-  mainMenu.addMenu(createMenu(app, tracker), {rank: 30});
+  mainMenu.addMenu(createMenu(app), {rank: 30});
 
   let commands = app.commands;
 
   commands.addCommand(cmdIds.lineNumbers, {
-    execute: () => { toggleLineNums(tracker); },
+    execute: () => { toggleLineNums(); },
     label: 'Toggle Line Numbers',
   });
 
   commands.addCommand(cmdIds.lineWrap, {
-    execute: () => { toggleLineWrap(tracker); },
+    execute: () => { toggleLineWrap(); },
     label: 'Toggle Line Wrap',
   });
 
   commands.addCommand(cmdIds.matchBrackets, {
-    execute: () => { toggleMatchBrackets(tracker); },
+    execute: () => { toggleMatchBrackets(); },
     label: 'Toggle Match Brackets',
   });
 
   commands.addCommand(cmdIds.vimMode, {
-    execute: () => { toggleVim(tracker); },
+    execute: () => { toggleVim(); },
     label: 'Toggle Vim Mode'
   });
 
   commands.addCommand(cmdIds.closeAll, {
-    execute: () => { closeAllFiles(tracker); },
+    execute: () => { closeAllFiles(); },
     label: 'Close all files'
   });
 
@@ -193,69 +201,69 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
 }
 
 
-
 /**
  * An attached property for the session id associated with an editor widget.
  */
 const sessionIdProperty = new AttachedProperty<EditorWidget, string>({ name: 'sessionId' });
 
 
-
 /**
  * Toggle editor line numbers
  */
-function toggleLineNums(tracker: IEditorTracker) {
+function toggleLineNums() {
   if (tracker.currentWidget) {
     let editor = tracker.currentWidget.editor;
     editor.setOption('lineNumbers', !editor.getOption('lineNumbers'));
   }
 }
 
+
 /**
  * Toggle editor line wrap
  */
-function toggleLineWrap(tracker: IEditorTracker) {
+function toggleLineWrap() {
   if (tracker.currentWidget) {
     let editor = tracker.currentWidget.editor;
     editor.setOption('lineWrapping', !editor.getOption('lineWrapping'));
   }
 }
 
+
 /**
  * Toggle editor matching brackets
  */
-function toggleMatchBrackets(tracker: IEditorTracker) {
+function toggleMatchBrackets() {
   if (tracker.currentWidget) {
     let editor = tracker.currentWidget.editor;
     editor.setOption('matchBrackets', !editor.getOption('matchBrackets'));
   }
 }
 
+
 /**
  * Toggle the editor's vim mode
  */
-function toggleVim(tracker: IEditorTracker) {
-  each(tracker.widgets, widget => {
-    widget.editor.setOption('keyMap',
-                            (widget.editor.getOption('keyMap')==='vim'
-                             ? 'default' : 'vim'));
+function toggleVim() {
+  tracker.forEach(widget => {
+    let keymap = widget.editor.getOption('keyMap') === 'vim' ? 'default'
+      : 'vim';
+    widget.editor.setOption('keyMap', keymap);
   });
 }
+
 
 /**
  * Close all currently open text editor files
  */
-function closeAllFiles(tracker: IEditorTracker) {
-  each(tracker.widgets, widget => {
-    widget.close();
-  });
+function closeAllFiles() {
+  tracker.forEach(widget => { widget.close(); });
 }
 
 
 /**
  * Create a menu for the editor.
  */
-function createMenu(app: JupyterLab, tracker: IEditorTracker): Menu {
+function createMenu(app: JupyterLab): Menu {
   let { commands, keymap } = app;
   let settings = new Menu({ commands, keymap });
   let theme = new Menu({ commands, keymap });
@@ -276,9 +284,7 @@ function createMenu(app: JupyterLab, tracker: IEditorTracker): Menu {
     },
     execute: args => {
       let name: string = args['theme'] as string || DEFAULT_CODEMIRROR_THEME;
-      each(tracker.widgets, widget => {
-        widget.editor.setOption('theme', name);
-      });
+      tracker.forEach(widget => { widget.editor.setOption('theme', name); });
     }
   });
 
