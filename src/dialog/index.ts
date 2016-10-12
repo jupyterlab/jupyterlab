@@ -266,22 +266,6 @@ class Dialog extends Panel {
     });
   }
 
-  protected onAfterAttach(msg: Message): void {
-    let node = this.node;
-    node.addEventListener('keydown', this, true);
-    node.addEventListener('contextmenu', this, true);
-    node.addEventListener('click', this);
-    this._buttonNodes.map(buttonNode => {
-      buttonNode.addEventListener('click', this.evtButtonClick.bind(this));
-    });
-
-    // Focus the ok button if given.
-    let index = this._buttons.indexOf(okButton);
-    if (index !== -1) {
-      this._buttonNodes[index].focus();
-    }
-  }
-
   /**
    * Handle the DOM events for the directory listing.
    *
@@ -302,6 +286,27 @@ class Dialog extends Panel {
       break;
     default:
       break;
+    }
+  }
+
+  /**
+   * Handle an `'after-attach'` message to the widget.
+   *
+   * @param msg - The `'after-attach'` message
+   */
+  protected onAfterAttach(msg: Message): void {
+    let node = this.node;
+    node.addEventListener('keydown', this, true);
+    node.addEventListener('contextmenu', this, true);
+    node.addEventListener('click', this);
+    this._buttonNodes.map(buttonNode => {
+      buttonNode.addEventListener('click', this.evtButtonClick.bind(this));
+    });
+
+    // Focus the ok button if given.
+    let index = this._buttons.indexOf(okButton);
+    if (index !== -1) {
+      this._buttonNodes[index].focus();
     }
   }
 
