@@ -76,7 +76,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T> {
   find(fn: (widget: T) => boolean): T {
     let result: T = null;
     this._widgets.forEach(widget => {
-      if (!result) {
+      // If a result has already been found, short circuit.
+      if (result) {
         return;
       }
       if (fn(widget)) {
