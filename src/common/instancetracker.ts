@@ -174,5 +174,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   private _widgets = new Map<string, T>();
 }
 
+
 // Define the signals for the `InstanceTracker` class.
 defineSignal(InstanceTracker.prototype, 'currentChanged');
