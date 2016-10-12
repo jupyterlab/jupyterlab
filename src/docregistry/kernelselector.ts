@@ -10,8 +10,8 @@ import {
 } from '../dialog';
 
 import {
-  IDocumentContext, IDocumentModel
-} from './interfaces';
+  DocumentRegistry
+} from './registry';
 
 
 /**
@@ -119,7 +119,7 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
  * Change the kernel on a context.
  */
 export
-function selectKernelForContext(context: IDocumentContext<IDocumentModel>, host?: HTMLElement): Promise<void> {
+function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, host?: HTMLElement): Promise<void> {
   return context.listSessions().then(sessions => {
     let options: IKernelSelection = {
       name: context.path.split('/').pop(),

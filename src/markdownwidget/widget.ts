@@ -22,7 +22,7 @@ import {
 } from '../common/activitymonitor';
 
 import {
-  IDocumentModel, IDocumentContext, ABCWidgetFactory
+  DocumentRegistry, ABCWidgetFactory
 } from '../docregistry';
 
 import {
@@ -49,7 +49,7 @@ class MarkdownWidget extends Widget {
   /**
    * Construct a new markdown widget.
    */
-  constructor(context: IDocumentContext<IDocumentModel>, rendermime: RenderMime) {
+  constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, rendermime: RenderMime) {
     super();
     this.addClass(MD_CLASS);
     this.layout = new PanelLayout();
@@ -100,7 +100,7 @@ class MarkdownWidget extends Widget {
     layout.addWidget(widget);
   }
 
-  private _context: IDocumentContext<IDocumentModel> = null;
+  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
   private _monitor: ActivityMonitor<any, any> = null;
   private _rendermime: RenderMime = null;
 }
@@ -110,7 +110,7 @@ class MarkdownWidget extends Widget {
  * A widget factory for Markdown.
  */
 export
-class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, IDocumentModel> {
+class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, DocumentRegistry.IModel> {
   /**
    * Construct a new markdown widget factory.
    */
@@ -122,7 +122,7 @@ class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, IDocumentMo
   /**
    * Create a new widget given a context.
    */
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): MarkdownWidget {
+  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): MarkdownWidget {
     let widget = new MarkdownWidget(context, this._rendermime.clone());
     this.widgetCreated.emit(widget);
     return widget;

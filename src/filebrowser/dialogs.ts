@@ -18,7 +18,7 @@ import {
 } from '../docmanager';
 
 import {
-  IKernelPreference, populateKernels
+  DocumentRegistry, populateKernels
 } from '../docregistry';
 
 import {
@@ -650,7 +650,7 @@ namespace Private {
     /**
      * The kernel preference.
      */
-    preference: IKernelPreference;
+    preference: DocumentRegistry.IKernelPreference;
 
     /**
      * The kernel specs.

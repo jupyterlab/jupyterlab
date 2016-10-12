@@ -34,7 +34,7 @@ import {
 } from '../../common/interfaces';
 
 import {
-  IDocumentContext, findKernel
+  DocumentRegistry, findKernel
 } from '../../docregistry';
 
 import {
@@ -200,10 +200,10 @@ class NotebookPanel extends Widget {
    * Changing the context also changes the model on the
    * `content`.
    */
-  get context(): IDocumentContext<INotebookModel> {
+  get context(): DocumentRegistry.IContext<INotebookModel> {
     return this._context;
   }
-  set context(newValue: IDocumentContext<INotebookModel>) {
+  set context(newValue: DocumentRegistry.IContext<INotebookModel>) {
     newValue = newValue || null;
     if (newValue === this._context) {
       return;
@@ -257,7 +257,7 @@ class NotebookPanel extends Widget {
    * #### Notes
    * The default implementation is a no-op.
    */
-  protected onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void {
+  protected onContextChanged(oldValue: DocumentRegistry.IContext<INotebookModel>, newValue: DocumentRegistry.IContext<INotebookModel>): void {
     // This is a no-op.
   }
 
@@ -274,14 +274,14 @@ class NotebookPanel extends Widget {
   /**
    * Handle a change to the document path.
    */
-  protected onPathChanged(sender: IDocumentContext<INotebookModel>, path: string): void {
+  protected onPathChanged(sender: DocumentRegistry.IContext<INotebookModel>, path: string): void {
     this.title.label = path.split('/').pop();
   }
 
   /**
    * Handle a context population.
    */
-  protected onPopulated(sender: IDocumentContext<INotebookModel>, args: void): void {
+  protected onPopulated(sender: DocumentRegistry.IContext<INotebookModel>, args: void): void {
     let model = sender.model;
     // Clear the undo state of the cells.
     if (model) {
@@ -300,7 +300,7 @@ class NotebookPanel extends Widget {
   /**
    * Handle a change in the context.
    */
-  private _onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void {
+  private _onContextChanged(oldValue: DocumentRegistry.IContext<INotebookModel>, newValue: DocumentRegistry.IContext<INotebookModel>): void {
     if (oldValue) {
       oldValue.kernelChanged.disconnect(this._onKernelChanged, this);
       oldValue.pathChanged.disconnect(this.onPathChanged, this);
@@ -335,7 +335,7 @@ class NotebookPanel extends Widget {
   /**
    * Handle a change in the kernel by updating the document metadata.
    */
-  private _onKernelChanged(context: IDocumentContext<INotebookModel>, kernel: IKernel): void {
+  private _onKernelChanged(context: DocumentRegistry.IContext<INotebookModel>, kernel: IKernel): void {
     this._completerHandler.kernel = kernel;
     this.content.inspectionHandler.kernel = kernel;
     this.kernelChanged.emit(kernel);
@@ -394,7 +394,7 @@ class NotebookPanel extends Widget {
   private _completer: CompleterWidget = null;
   private _completerHandler: CellCompleterHandler = null;
   private _content: Notebook = null;
-  private _context: IDocumentContext<INotebookModel> = null;
+  private _context: DocumentRegistry.IContext<INotebookModel> = null;
   private _renderer: NotebookPanel.IRenderer = null;
   private _rendermime: RenderMime = null;
 }
