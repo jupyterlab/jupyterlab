@@ -39,7 +39,7 @@ import {
 } from '../services';
 
 import {
-  INotebookTracker, NotebookPanel, NotebookModelFactory,
+  INotebookTracker, NotebookModelFactory, NotebookPanel, NotebookTracker,
   NotebookWidgetFactory, NotebookActions
 } from './index';
 
@@ -128,8 +128,7 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
  */
 function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer): INotebookTracker {
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
-  let instances = new Map<string, NotebookPanel>();
-  let current: NotebookPanel = null;
+  let tracker = new NotebookTracker();
   let options: DocumentRegistry.IWidgetFactoryOptions = {
     fileExtensions: ['.ipynb'],
     displayName: 'Notebook',
@@ -139,23 +138,11 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     canStartKernel: true
   };
 
-  // Set the source of the code inspector to the current notebook.
+  // Sync tracker and set the source of the code inspector.
   app.shell.currentChanged.connect((sender, args) => {
-    let widget = args.newValue;
-    if (!widget) {
-      // Reset the current reference.
-      current = null;
-      return;
-    }
-    // Type information can be safely discarded here as `.has()` relies on
-    // referential identity.
-    if (instances.has(widget.id || '')) {
-      // Set the current reference to the current widget.
-      current = widget as NotebookPanel;
-      inspector.source = current.content.inspectionHandler;
-    } else {
-      // Reset the current reference.
-      current = null;
+    let widget = tracker.sync(args.newValue);
+    if (widget) {
+      inspector.source = widget.content.inspectionHandler;
     }
   });
 
@@ -174,7 +161,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     widgetName: 'Notebook'
   });
 
-  addCommands(app);
+  addCommands(app, tracker);
   populatePalette(palette);
 
   let id = 0; // The ID counter for notebook panels.
@@ -185,358 +172,396 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
     // Immediately set the inspector source to the current notebook.
     inspector.source = widget.content.inspectionHandler;
-    // Add the notebook panel to the instances map.
-    instances.set(widget.id, widget);
-    // Remove from the instances map upon disposal.
-    widget.disposed.connect(() => { instances.delete(widget.id); });
+    // Add the notebook panel to the tracker.
+    tracker.add(widget);
   });
 
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
 
-  /**
-   * Add the notebook commands to the application's command registry.
-   */
-  function addCommands(app: JupyterLab): void {
-    let commands = app.commands;
+  return tracker;
+}
 
-    commands.addCommand(cmdIds.runAndAdvance, {
-      label: 'Run Cell(s) and Advance',
-      execute: () => {
-        if (current) {
-          let content = current.content;
-          NotebookActions.runAndAdvance(content, current.context.kernel);
-        }
+/**
+ * Add the notebook commands to the application's command registry.
+ */
+function addCommands(app: JupyterLab, tracker: NotebookTracker): void {
+  let commands = app.commands;
+
+  commands.addCommand(cmdIds.runAndAdvance, {
+    label: 'Run Cell(s) and Advance',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        let content = current.content;
+        NotebookActions.runAndAdvance(content, current.context.kernel);
       }
-    });
-    commands.addCommand(cmdIds.run, {
-      label: 'Run Cell(s)',
-      execute: () => {
-        if (current) {
-          NotebookActions.run(current.content, current.context.kernel);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.run, {
+    label: 'Run Cell(s)',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.run(current.content, current.context.kernel);
       }
-    });
-    commands.addCommand(cmdIds.runAndInsert, {
-      label: 'Run Cell(s) and Insert',
-      execute: () => {
-        if (current) {
-          NotebookActions.runAndInsert(current.content, current.context.kernel);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.runAndInsert, {
+    label: 'Run Cell(s) and Insert',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.runAndInsert(current.content, current.context.kernel);
       }
-    });
-    commands.addCommand(cmdIds.runAll, {
-      label: 'Run All Cells',
-      execute: () => {
-        if (current) {
-          NotebookActions.runAll(current.content, current.context.kernel);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.runAll, {
+    label: 'Run All Cells',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.runAll(current.content, current.context.kernel);
       }
-    });
-    commands.addCommand(cmdIds.restart, {
-      label: 'Restart Kernel',
-      execute: () => {
-        if (current) {
-          restartKernel(current.kernel, current.node);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.restart, {
+    label: 'Restart Kernel',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        restartKernel(current.kernel, current.node);
       }
-    });
-    commands.addCommand(cmdIds.restartClear, {
-      label: 'Restart Kernel & Clear Outputs',
-      execute: () => {
-        if (current) {
-          let promise = restartKernel(current.kernel, current.node);
-          promise.then(result => {
-            if (result) {
-              NotebookActions.clearAllOutputs(current.content);
-            }
-          });
-        }
-      }
-    });
-    commands.addCommand(cmdIds.restartRunAll, {
-      label: 'Restart Kernel & Run All',
-      execute: () => {
-        if (current) {
-          let promise = restartKernel(current.kernel, current.node);
-          promise.then(result => {
-            NotebookActions.runAll(current.content, current.context.kernel);
-          });
-        }
-      }
-    });
-    commands.addCommand(cmdIds.clearAllOutputs, {
-      label: 'Clear All Outputs',
-      execute: () => {
-        if (current) {
-          NotebookActions.clearAllOutputs(current.content);
-        }
-      }
-    });
-    commands.addCommand(cmdIds.clearOutputs, {
-      label: 'Clear Output(s)',
-      execute: () => {
-        if (current) {
-          NotebookActions.clearOutputs(current.content);
-        }
-      }
-    });
-    commands.addCommand(cmdIds.interrupt, {
-      label: 'Interrupt Kernel',
-      execute: () => {
-        if (current) {
-          let kernel = current.context.kernel;
-          if (kernel) {
-            kernel.interrupt();
+    }
+  });
+  commands.addCommand(cmdIds.restartClear, {
+    label: 'Restart Kernel & Clear Outputs',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        let promise = restartKernel(current.kernel, current.node);
+        promise.then(result => {
+          if (result) {
+            NotebookActions.clearAllOutputs(current.content);
           }
+        });
+      }
+    }
+  });
+  commands.addCommand(cmdIds.restartRunAll, {
+    label: 'Restart Kernel & Run All',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        let promise = restartKernel(current.kernel, current.node);
+        promise.then(result => {
+          NotebookActions.runAll(current.content, current.context.kernel);
+        });
+      }
+    }
+  });
+  commands.addCommand(cmdIds.clearAllOutputs, {
+    label: 'Clear All Outputs',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.clearAllOutputs(current.content);
+      }
+    }
+  });
+  commands.addCommand(cmdIds.clearOutputs, {
+    label: 'Clear Output(s)',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.clearOutputs(current.content);
+      }
+    }
+  });
+  commands.addCommand(cmdIds.interrupt, {
+    label: 'Interrupt Kernel',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        let kernel = current.context.kernel;
+        if (kernel) {
+          kernel.interrupt();
         }
       }
-    });
-    commands.addCommand(cmdIds.toCode, {
-      label: 'Convert to Code',
-      execute: () => {
-        if (current) {
-          NotebookActions.changeCellType(current.content, 'code');
-        }
+    }
+  });
+  commands.addCommand(cmdIds.toCode, {
+    label: 'Convert to Code',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.changeCellType(current.content, 'code');
       }
-    });
-    commands.addCommand(cmdIds.toMarkdown, {
-      label: 'Convert to Markdown',
-      execute: () => {
-        if (current) {
-          NotebookActions.changeCellType(current.content, 'markdown');
-        }
+    }
+  });
+  commands.addCommand(cmdIds.toMarkdown, {
+    label: 'Convert to Markdown',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.changeCellType(current.content, 'markdown');
       }
-    });
-    commands.addCommand(cmdIds.toRaw, {
-      label: 'Convert to Raw',
-      execute: () => {
-        if (current) {
-          NotebookActions.changeCellType(current.content, 'raw');
-        }
+    }
+  });
+  commands.addCommand(cmdIds.toRaw, {
+    label: 'Convert to Raw',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.changeCellType(current.content, 'raw');
       }
-    });
-    commands.addCommand(cmdIds.cut, {
-      label: 'Cut Cell(s)',
-      execute: () => {
-        if (current) {
-          NotebookActions.cut(current.content, current.clipboard);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.cut, {
+    label: 'Cut Cell(s)',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.cut(current.content, current.clipboard);
       }
-    });
-    commands.addCommand(cmdIds.copy, {
-      label: 'Copy Cell(s)',
-      execute: () => {
-        if (current) {
-          NotebookActions.copy(current.content, current.clipboard);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.copy, {
+    label: 'Copy Cell(s)',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.copy(current.content, current.clipboard);
       }
-    });
-    commands.addCommand(cmdIds.paste, {
-      label: 'Paste Cell(s)',
-      execute: () => {
-        if (current) {
-          NotebookActions.paste(current.content, current.clipboard);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.paste, {
+    label: 'Paste Cell(s)',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.paste(current.content, current.clipboard);
       }
-    });
-    commands.addCommand(cmdIds.deleteCell, {
-      label: 'Delete Cell(s)',
-      execute: () => {
-        if (current) {
-          NotebookActions.deleteCells(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.deleteCell, {
+    label: 'Delete Cell(s)',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.deleteCells(current.content);
       }
-    });
-    commands.addCommand(cmdIds.split, {
-      label: 'Split Cell',
-      execute: () => {
-        if (current) {
-          NotebookActions.splitCell(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.split, {
+    label: 'Split Cell',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.splitCell(current.content);
       }
-    });
-    commands.addCommand(cmdIds.merge, {
-      label: 'Merge Selected Cell(s)',
-      execute: () => {
-        if (current) {
-          NotebookActions.mergeCells(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.merge, {
+    label: 'Merge Selected Cell(s)',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.mergeCells(current.content);
       }
-    });
-    commands.addCommand(cmdIds.insertAbove, {
-      label: 'Insert Cell Above',
-      execute: () => {
-        if (current) {
-          NotebookActions.insertAbove(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.insertAbove, {
+    label: 'Insert Cell Above',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.insertAbove(current.content);
       }
-    });
-    commands.addCommand(cmdIds.insertBelow, {
-      label: 'Insert Cell Below',
-      execute: () => {
-        if (current) {
-          NotebookActions.insertBelow(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.insertBelow, {
+    label: 'Insert Cell Below',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.insertBelow(current.content);
       }
-    });
-    commands.addCommand(cmdIds.selectAbove, {
-      label: 'Select Cell Above',
-      execute: () => {
-        if (current) {
-          NotebookActions.selectAbove(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.selectAbove, {
+    label: 'Select Cell Above',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.selectAbove(current.content);
       }
-    });
-    commands.addCommand(cmdIds.selectBelow, {
-      label: 'Select Cell Below',
-      execute: () => {
-        if (current) {
-          NotebookActions.selectBelow(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.selectBelow, {
+    label: 'Select Cell Below',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.selectBelow(current.content);
       }
-    });
-    commands.addCommand(cmdIds.extendAbove, {
-      label: 'Extend Selection Above',
-      execute: () => {
-        if (current) {
-          NotebookActions.extendSelectionAbove(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.extendAbove, {
+    label: 'Extend Selection Above',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.extendSelectionAbove(current.content);
       }
-    });
-    commands.addCommand(cmdIds.extendBelow, {
-      label: 'Extend Selection Below',
-      execute: () => {
-        if (current) {
-          NotebookActions.extendSelectionBelow(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.extendBelow, {
+    label: 'Extend Selection Below',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.extendSelectionBelow(current.content);
       }
-    });
-    commands.addCommand(cmdIds.moveUp, {
-      label: 'Move Cell(s) Up',
-      execute: () => {
-        if (current) {
-          NotebookActions.moveUp(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.moveUp, {
+    label: 'Move Cell(s) Up',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.moveUp(current.content);
       }
-    });
-    commands.addCommand(cmdIds.moveDown, {
-      label: 'Move Cell(s) Down',
-      execute: () => {
-        if (current) {
-          NotebookActions.moveDown(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.moveDown, {
+    label: 'Move Cell(s) Down',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.moveDown(current.content);
       }
-    });
-    commands.addCommand(cmdIds.toggleLines, {
-      label: 'Toggle Line Numbers',
-      execute: () => {
-        if (current) {
-          NotebookActions.toggleLineNumbers(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.toggleLines, {
+    label: 'Toggle Line Numbers',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.toggleLineNumbers(current.content);
       }
-    });
-    commands.addCommand(cmdIds.toggleAllLines, {
-      label: 'Toggle All Line Numbers',
-      execute: () => {
-        if (current) {
-          NotebookActions.toggleAllLineNumbers(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.toggleAllLines, {
+    label: 'Toggle All Line Numbers',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.toggleAllLineNumbers(current.content);
       }
-    });
-    commands.addCommand(cmdIds.commandMode, {
-      label: 'To Command Mode',
-      execute: () => {
-        if (current) {
-          current.content.mode = 'command';
-        }
+    }
+  });
+  commands.addCommand(cmdIds.commandMode, {
+    label: 'To Command Mode',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        current.content.mode = 'command';
       }
-    });
-    commands.addCommand(cmdIds.editMode, {
-      label: 'To Edit Mode',
-      execute: () => {
-        if (current) {
-          current.content.mode = 'edit';
-        }
+    }
+  });
+  commands.addCommand(cmdIds.editMode, {
+    label: 'To Edit Mode',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        current.content.mode = 'edit';
       }
-    });
-    commands.addCommand(cmdIds.undo, {
-      label: 'Undo Cell Operation',
-      execute: () => {
-        if (current) {
-          NotebookActions.undo(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.undo, {
+    label: 'Undo Cell Operation',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.undo(current.content);
       }
-    });
-    commands.addCommand(cmdIds.redo, {
-      label: 'Redo Cell Operation',
-      execute: () => {
-        if (current) {
-          NotebookActions.redo(current.content);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.redo, {
+    label: 'Redo Cell Operation',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.redo(current.content);
       }
-    });
-    commands.addCommand(cmdIds.switchKernel, {
-      label: 'Switch Kernel',
-      execute: () => {
-        if (current) {
-          let { context, node } = current;
-          selectKernelForContext(context, node);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.switchKernel, {
+    label: 'Switch Kernel',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        let { context, node } = current;
+        selectKernelForContext(context, node);
       }
-    });
-    commands.addCommand(cmdIds.markdown1, {
-      label: 'Markdown Header 1',
-      execute: () => {
-        if (current) {
-          NotebookActions.setMarkdownHeader(current.content, 1);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.markdown1, {
+    label: 'Markdown Header 1',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.setMarkdownHeader(current.content, 1);
       }
-    });
-    commands.addCommand(cmdIds.markdown2, {
-      label: 'Markdown Header 2',
-      execute: () => {
-        if (current) {
-          NotebookActions.setMarkdownHeader(current.content, 2);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.markdown2, {
+    label: 'Markdown Header 2',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.setMarkdownHeader(current.content, 2);
       }
-    });
-    commands.addCommand(cmdIds.markdown3, {
-      label: 'Markdown Header 3',
-      execute: () => {
-        if (current) {
-          NotebookActions.setMarkdownHeader(current.content, 3);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.markdown3, {
+    label: 'Markdown Header 3',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.setMarkdownHeader(current.content, 3);
       }
-    });
-    commands.addCommand(cmdIds.markdown4, {
-      label: 'Markdown Header 4',
-      execute: () => {
-        if (current) {
-          NotebookActions.setMarkdownHeader(current.content, 4);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.markdown4, {
+    label: 'Markdown Header 4',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.setMarkdownHeader(current.content, 4);
       }
-    });
-    commands.addCommand(cmdIds.markdown5, {
-      label: 'Markdown Header 5',
-      execute: () => {
-        if (current) {
-          NotebookActions.setMarkdownHeader(current.content, 5);
-        }
+    }
+  });
+  commands.addCommand(cmdIds.markdown5, {
+    label: 'Markdown Header 5',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        NotebookActions.setMarkdownHeader(current.content, 5);
+      }
       }
     });
     commands.addCommand(cmdIds.markdown6, {
       label: 'Markdown Header 6',
       execute: () => {
+        let current = tracker.currentWidget;
         if (current) {
           NotebookActions.setMarkdownHeader(current.content, 6);
         }
       }
     });
   }
-
-  return instances;
-}
 
 /**
  * Populate the application's command palette with notebook commands.
