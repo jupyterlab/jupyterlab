@@ -2,16 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
-  find
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  FocusTracker
-} from 'phosphor/lib/ui/focustracker';
+  InstanceTracker
+} from '../common/instancetracker';
 
 import {
   Menu
@@ -69,12 +61,17 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   let toggleTerminalTheme = 'terminal:toggle-theme';
   let openTerminalId = 'terminal:open';
 
-  let tracker = new FocusTracker<TerminalWidget>();
+  let tracker = new InstanceTracker<TerminalWidget>();
   let options = {
     background: 'black',
     color: 'white',
     fontSize: 13
   };
+
+  // Sync tracker with currently focused widget.
+  app.shell.currentChanged.connect((sender, args) => {
+    tracker.sync(args.newValue);
+  });
 
   commands.addCommand(newTerminalId, {
     label: 'New Terminal',
@@ -98,9 +95,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     execute: () => {
       if (options.fontSize < 72) {
         options.fontSize++;
-        each(tracker.widgets, widget => {
-          widget.fontSize = options.fontSize;
-        });
+        tracker.forEach(widget => { widget.fontSize = options.fontSize; });
       }
     }
   });
@@ -109,9 +104,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     execute: () => {
       if (options.fontSize > 9) {
         options.fontSize--;
-        each(tracker.widgets, widget => {
-          widget.fontSize = options.fontSize;
-        });
+        tracker.forEach(widget => { widget.fontSize = options.fontSize; });
       }
     }
   });
@@ -126,7 +119,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
         options.background = 'black';
         options.color = 'white';
       }
-      each(tracker.widgets, widget => {
+      tracker.forEach(widget => {
         widget.background = options.background;
         widget.color = options.color;
       });
@@ -136,7 +129,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     execute: args => {
       let name = args['name'] as string;
       // Check for a running terminal with the given name.
-      let widget = find(tracker.widgets, value => value.session.name === name);
+      let widget = tracker.find(widget => widget.session.name === name);
       if (widget) {
         app.shell.activateMain(widget.id);
       } else {
