@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  defineSignal, ISignal
+  IDisposable
+} from 'phosphor/lib/core/disposable';
+
+import {
+  clearSignalData, defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -34,7 +38,7 @@ interface IInstanceTracker<T extends Widget> {
 
 
 export
-class InstanceTracker<T extends Widget> implements IInstanceTracker<T> {
+class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposable {
   /**
    * A signal emitted when the current widget changes.
    *
@@ -54,6 +58,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T> {
   }
 
   /**
+   * Test whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._widgets === null;
+  }
+
+  /**
    * Add a new widget to the tracker.
    */
   add(widget: T): void {
@@ -66,6 +77,19 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T> {
     }
     this._widgets.set(widget.id, widget);
     widget.disposed.connect(() => { this._widgets.delete(widget.id); });
+  }
+
+  /**
+   * Dispose of the resources held by the tracker.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    clearSignalData(this);
+    this._currentWidget = null;
+    this._widgets.clear();
+    this._widgets = null;
   }
 
   /**
