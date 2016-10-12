@@ -93,8 +93,7 @@
 .jp-RunningSessions-item {
   display: flex;
   flex-direction: row;
-  padding: 3px 12px;
-  padding-left: 0px;
+  padding: 2px;
   font-size: 13px;
   font-weight: 500;
   color: var(--jp-ui-font-color1);
@@ -152,6 +151,7 @@
 .jp-RunningSessions-itemShutdown {
   flex: 0 0 auto;
   padding: 1px 4px;
+  margin-right: 8px;
   color: var(--jp-inverse-ui-font-color0);
   background: var(--jp-warn-color1);
   border-radius: 1px;
