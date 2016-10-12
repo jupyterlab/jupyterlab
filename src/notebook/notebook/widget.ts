@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/searching';
 
 import {
-  sendMessage, Message
+  Message
 } from 'phosphor/lib/core/messaging';
 
 import {
@@ -30,7 +30,7 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  Widget, WidgetMessage
+  Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -624,9 +624,6 @@ class Notebook extends StaticNotebook {
       if (activeCell instanceof MarkdownCellWidget) {
         activeCell.rendered = false;
       }
-      if (!this._isActive) {
-        sendMessage(this, WidgetMessage.ActivateRequest);
-      }
     }
   }
 
@@ -793,15 +790,13 @@ class Notebook extends StaticNotebook {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._isActive = true;
-    this.update();
+    this.node.focus();
   }
 
   /**
    * Handle `'deactivate-request'` messages.
    */
   protected onDeactivateRequest(msg: Message): void {
-    this._isActive = false;
     this.mode = 'command';
   }
 
@@ -811,25 +806,21 @@ class Notebook extends StaticNotebook {
   protected onUpdateRequest(msg: Message): void {
     let activeCell = this.activeCell;
     // Ensure we have the correct focus.
-    if (this._isActive) {
+    if (this.node.contains(document.activeElement)) {
       if (this.mode === 'edit' && activeCell) {
         activeCell.editor.activate();
       } else {
-        // Focus the node if nothing is focused internally.
-        if (!this.node.contains(document.activeElement)) {
+        // If an editor currently has focus, focus our node.
+        // Otherwise, another input field has focus and should keep it.
+        let w = find(this.layout, widget => {
+          return (widget as BaseCellWidget).editor.hasFocus();
+        });
+        if (w) {
           this.node.focus();
-        } else {
-          // If an editor currently has focus, focus the node.
-          // Otherwise, another input field has focus and should keep it.
-          let w = find(this.layout, widget => {
-            return (widget as BaseCellWidget).editor.hasFocus();
-          });
-          if (w) {
-            this.node.focus();
-          }
         }
       }
     }
+
     // Set the appropriate classes on the cells.
     if (this.mode === 'edit') {
       this.addClass(EDIT_CLASS);
@@ -949,9 +940,6 @@ class Notebook extends StaticNotebook {
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
-    if (!this._isActive) {
-      sendMessage(this, WidgetMessage.ActivateRequest);
-    }
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
@@ -970,15 +958,12 @@ class Notebook extends StaticNotebook {
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: MouseEvent): void {
-    if (!this._isActive) {
-      sendMessage(this, WidgetMessage.ActivateRequest);
-    }
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
       let widget = this.childAt(i);
       // If the editor itself does not have focus, ensure command mode.
-      if (widget.editor.node.contains(target)) {
+      if (!widget.editor.node.contains(target)) {
         this.mode = 'command';
       }
       this.activeCellIndex = i;
@@ -996,9 +981,6 @@ class Notebook extends StaticNotebook {
    * Handle `dblclick` events for the widget.
    */
   private _evtDblClick(event: MouseEvent): void {
-    if (!this._isActive) {
-      sendMessage(this, WidgetMessage.ActivateRequest);
-    }
     let model = this.model;
     if (!model || model.readOnly) {
       return;
@@ -1024,7 +1006,6 @@ class Notebook extends StaticNotebook {
   private _activeCell: BaseCellWidget = null;
   private _inspectionHandler: InspectionHandler = null;
   private _mode: NotebookMode = 'command';
-  private _isActive = false;
 }
 
 
