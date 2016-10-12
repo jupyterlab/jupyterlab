@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -190,10 +194,9 @@ class FileBrowserWidget extends Widget {
    */
   open(): void {
     let foundDir = false;
-    let items = this._model.items;
-    for (let item of items) {
+    each(this._model.items, item => {
       if (!this._listing.isSelected(item.name)) {
-        continue;
+        return;
       }
       if (item.type === 'directory') {
         if (!foundDir) {
@@ -205,7 +208,7 @@ class FileBrowserWidget extends Widget {
       } else {
         this.openPath(item.path);
       }
-    }
+    });
   }
 
   /**
