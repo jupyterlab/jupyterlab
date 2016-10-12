@@ -140,7 +140,12 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * at all other times.
    */
   sync(current: Widget): T {
-    if (current && this.has(current) && this._currentWidget !== current) {
+    if (current && this.has(current)) {
+      // If not state change needs to occur, just bail.
+      if (this._currentWidget === current) {
+        this.onSync();
+        return null;
+      }
       this._currentWidget = current as T;
       this.currentChanged.emit(this._currentWidget);
       this.onSync();
