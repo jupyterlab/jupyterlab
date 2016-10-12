@@ -4,6 +4,14 @@
 import expect = require('expect.js');
 
 import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   simulate
 } from 'simulate-event';
 
@@ -82,6 +90,29 @@ describe('dialog/index', () => {
       acceptDialog();
     });
 
+    it('should accept a widget body', (done) => {
+      let body = new Widget({node: document.createElement('div')});
+      showDialog({ body }).then(result => {
+        expect(result.text).to.be('OK');
+        done();
+      });
+      acceptDialog();
+    });
+
+    it('should apply an additional CSS class', (done) => {
+      showDialog({ dialogClass: 'test-class' }).then(result => {
+        expect(result.text).to.be('OK');
+        done();
+      });
+      Promise.resolve().then(() => {
+        let nodes = document.body.getElementsByClassName('test-class');
+        expect(nodes.length).to.be(1);
+        let node = nodes[0];
+        expect(node.classList).to.eql(['jp-Dialog', 'test-class']);
+      });
+      acceptDialog();
+    });
+
     it('should resolve with the clicked button result', (done) => {
       let button = {
         text: 'foo',
@@ -108,6 +139,32 @@ describe('dialog/index', () => {
         let node = document.body.getElementsByClassName('jp-Dialog')[0];
         simulate(node as HTMLElement, 'contextmenu');
         simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
+      });
+    });
+
+    /**
+     * Class to test that onAfterAttach is called
+     */
+    class TestWidget extends Widget {
+      constructor(resolve: () => void) {
+        super();
+        this.resolve = resolve;
+      }
+      protected onAfterAttach(msg: Message): void {
+        this.resolve();
+      }
+
+      resolve: () => void;
+    }
+
+    it('should fire onAfterAttach on widget body', (done) => {
+      let promise = new Promise((resolve, reject) => {
+        let body = new TestWidget(resolve);
+        showDialog({ body });
+      });
+      promise.then(() => {
+        dismissDialog();
+        done();
       });
     });
 
