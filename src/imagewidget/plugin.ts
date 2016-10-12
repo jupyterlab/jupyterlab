@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  FocusTracker
-} from 'phosphor/lib/ui/focustracker';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
   ICommandPalette
 } from '../commandpalette';
+
+import {
+  InstanceTracker
+} from '../common/instancetracker';
 
 import {
   IDocumentRegistry
@@ -27,6 +27,11 @@ import {
  */
 const EXTENSIONS = ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico',
   '.xbm', '.tiff', '.tif'];
+
+/**
+ * The image widget instance tracker.
+ */
+const tracker = new InstanceTracker<ImageWidget>();
 
 
 /**
@@ -45,72 +50,76 @@ const imageHandlerExtension: JupyterLabPlugin<void> = {
  * Activate the image widget extension.
  */
 function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette): void {
-    let zoomInImage = 'image-widget:zoom-in';
-    let zoomOutImage = 'image-widget:zoom-out';
-    let resetZoomImage = 'image-widget:reset-zoom';
-    let tracker = new FocusTracker<ImageWidget>();
-    let image = new ImageWidgetFactory();
-    let options = {
-      fileExtensions: EXTENSIONS,
-      displayName: 'Image',
-      modelName: 'base64',
-      defaultFor: EXTENSIONS,
-      preferKernel: false,
-      canStartKernel: false
-    };
+  let zoomInImage = 'image-widget:zoom-in';
+  let zoomOutImage = 'image-widget:zoom-out';
+  let resetZoomImage = 'image-widget:reset-zoom';
+  let image = new ImageWidgetFactory();
+  let options = {
+    fileExtensions: EXTENSIONS,
+    displayName: 'Image',
+    modelName: 'base64',
+    defaultFor: EXTENSIONS,
+    preferKernel: false,
+    canStartKernel: false
+  };
 
-    registry.addWidgetFactory(image, options);
+  // Sync tracker with currently focused widget.
+  app.shell.currentChanged.connect((sender, args) => {
+    tracker.sync(args.newValue);
+  });
 
-    image.widgetCreated.connect((sender, newWidget) => {
-      tracker.add(newWidget);
-    });
+  registry.addWidgetFactory(image, options);
 
-    app.commands.addCommand(zoomInImage, {
-      execute: zoomIn,
-      label: 'Zoom In'
-    });
-    app.commands.addCommand(zoomOutImage, {
-      execute: zoomOut,
-      label: 'Zoom Out'
-    });
-    app.commands.addCommand(resetZoomImage, {
-      execute: resetZoom,
-      label: 'Reset Zoom'
-    });
+  image.widgetCreated.connect((sender, newWidget) => {
+    tracker.add(newWidget);
+  });
 
-    let category = 'Image Widget';
-    [zoomInImage, zoomOutImage, resetZoomImage]
-      .forEach(command => palette.addItem({ command, category }));
+  app.commands.addCommand(zoomInImage, {
+    execute: zoomIn,
+    label: 'Zoom In'
+  });
+  app.commands.addCommand(zoomOutImage, {
+    execute: zoomOut,
+    label: 'Zoom Out'
+  });
+  app.commands.addCommand(resetZoomImage, {
+    execute: resetZoom,
+    label: 'Reset Zoom'
+  });
 
-    function zoomIn(): void {
-      if (!tracker.currentWidget) {
-        return;
-      }
-      let widget = tracker.currentWidget;
-      if (widget.scale > 1) {
-        widget.scale += .5;
-      } else {
-        widget.scale *= 2;
-      }
+  let category = 'Image Widget';
+  [zoomInImage, zoomOutImage, resetZoomImage]
+    .forEach(command => palette.addItem({ command, category }));
+
+  function zoomIn(): void {
+    let widget = tracker.currentWidget;
+    if (!widget) {
+      return;
     }
-
-    function zoomOut(): void {
-      if (!tracker.currentWidget) {
-        return;
-      }
-      let widget = tracker.currentWidget;
-      if (widget.scale > 1) {
-        widget.scale -= .5;
-      } else {
-        widget.scale /= 2;
-      }
+    if (widget.scale > 1) {
+      widget.scale += .5;
+    } else {
+      widget.scale *= 2;
     }
+  }
 
-    function resetZoom(): void {
-      if (!tracker.currentWidget) {
-        return;
-      }
-      let widget = tracker.currentWidget;
-      widget.scale = 1;
+  function zoomOut(): void {
+    let widget = tracker.currentWidget;
+    if (!widget) {
+      return;
     }
+    if (widget.scale > 1) {
+      widget.scale -= .5;
+    } else {
+      widget.scale /= 2;
+    }
+  }
+
+  function resetZoom(): void {
+    let widget = tracker.currentWidget;
+    if (!widget) {
+      return;
+    }
+    widget.scale = 1;
+  }
 }
