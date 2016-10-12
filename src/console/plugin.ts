@@ -26,6 +26,10 @@ import {
 } from '../common/dates';
 
 import {
+  InstanceTracker
+} from '../common/instancetracker';
+
+import {
   selectKernel
 } from '../docregistry';
 
@@ -101,8 +105,7 @@ interface ICreateConsoleArgs extends JSONObject {
  * Activate the console extension.
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): IConsoleTracker {
-  let instances = new Map<string, ConsolePanel>();
-  let current: ConsolePanel = null;
+  let tracker = new InstanceTracker<ConsolePanel>();
   let manager = services.sessions;
   let specs = services.kernelspecs;
 
@@ -114,23 +117,11 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   let command: string;
 
-  // Set the source of the code inspector to the current console.
+  // Sync tracker and set the source of the code inspector.
   app.shell.currentChanged.connect((sender, args) => {
-    let widget = args.newValue;
-    if (!widget) {
-      // Reset the current reference.
-      current = null;
-      return;
-    }
-    // Type information can be safely discarded here as `.has()` relies on
-    // referential identity.
-    if (instances.has(widget.id || '')) {
-      // Set the current reference to the current widget.
-      current = widget as ConsolePanel;
-      inspector.source = current.content.inspectionHandler;
-    } else {
-      // Reset the current reference.
-      current = null;
+    let widget = tracker.sync(args.newValue);
+    if (widget) {
+      inspector.source = widget.content.inspectionHandler;
     }
   });
 
@@ -151,6 +142,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Clear Cells',
     execute: () => {
+      let current = tracker.currentWidget;
       if (current) {
         current.content.clear();
       }
@@ -162,6 +154,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = 'console:dismiss-completer';
   commands.addCommand(command, {
     execute: () => {
+      let current = tracker.currentWidget;
       if (current) {
         current.content.dismissCompleter();
       }
@@ -172,6 +165,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Run Cell',
     execute: () => {
+      let current = tracker.currentWidget;
       if (current) {
         current.content.execute();
       }
@@ -185,6 +179,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Run Cell (forced)',
     execute: () => {
+      let current = tracker.currentWidget;
       if (current) {
         current.content.execute(true);
       }
@@ -197,6 +192,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Insert Line Break',
     execute: () => {
+      let current = tracker.currentWidget;
       if (current) {
         current.content.insertLinebreak();
       }
@@ -209,6 +205,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     label: 'Interrupt Kernel',
     execute: () => {
+      let current = tracker.currentWidget;
       if (current) {
         let kernel = current.content.session.kernel;
         if (kernel) {
@@ -268,7 +265,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     execute: (args: JSONObject) => {
       let id = args['id'];
-      instances.forEach(widget => {
+      tracker.forEach(widget => {
         if (widget.content.session.id === id) {
           widget.content.inject(args['code'] as string);
         }
@@ -342,16 +339,15 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     });
     // Immediately set the inspector source to the current console.
     inspector.source = panel.content.inspectionHandler;
-    // Add the console panel to the instances map.
-    instances.set(panel.id, panel);
-    // Remove from the instances map upon disposal.
-    panel.disposed.connect(() => { instances.delete(panel.id); });
+    // Add the console panel to the tracker.
+    tracker.add(panel);
   }
 
   command = 'console:switch-kernel';
   commands.addCommand(command, {
     label: 'Switch Kernel',
     execute: () => {
+      let current = tracker.currentWidget;
       if (!current) {
         return;
       }
@@ -383,7 +379,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
   mainMenu.addMenu(menu, {rank: 50});
-  return instances;
+  return tracker;
 }
 
 

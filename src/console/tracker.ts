@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
+  IInstanceTracker
+} from '../common/instancetracker';
+
+import {
   ConsolePanel
 } from './';
 
@@ -23,4 +27,4 @@ const IConsoleTracker = new Token<IConsoleTracker>('jupyter.services.consoles');
  * A class that tracks console widgets.
  */
 export
-interface IConsoleTracker extends Map<string, ConsolePanel> {}
+interface IConsoleTracker extends IInstanceTracker<ConsolePanel> {}
