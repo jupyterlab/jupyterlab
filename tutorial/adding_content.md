@@ -8,7 +8,7 @@ As an example: Add a leaflet viewer plugin for geoJSON files.
 files: `npm install -g tsd`.
 - Try to install the typings files from the top level source directory:
 `tsd install leaflet`. (success!)
-- If there are no typings, we must create our own.  An example typings file that exports functions is [ansi_up](https://github.com/jupyter/jupyterlab/blob/master/typings/ansi_up/ansi_up.d.ts).  An example with a class is [xterm](https://github.com/jupyter/jupyterlab/blob/master/typings/xterm/xterm.d.ts).
+- If there are no typings, we must create our own.  An example typings file that exports functions is [ansi_up](https://github.com/jupyterlab/jupyterlab/blob/master/typings/ansi_up/ansi_up.d.ts).  An example with a class is [xterm](https://github.com/jupyterlab/jupyterlab/blob/master/typings/xterm/xterm.d.ts).
 - Add a reference to the new library in `src/typings.d.ts`.
 - Create a folder in `src` for the plugin.
 - Add  `index.ts` and `plugin.ts` files.
