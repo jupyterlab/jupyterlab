@@ -51,17 +51,19 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
  */
 const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
 
+/**
+ * The terminal widget instance tracker.
+ */
+const tracker = new InstanceTracker<TerminalWidget>();
+
 
 function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette): void {
-
   let { commands, keymap } = app;
   let newTerminalId = 'terminal:create-new';
   let increaseTerminalFontSize = 'terminal:increase-font';
   let decreaseTerminalFontSize = 'terminal:decrease-font';
   let toggleTerminalTheme = 'terminal:toggle-theme';
   let openTerminalId = 'terminal:open';
-
-  let tracker = new InstanceTracker<TerminalWidget>();
   let options = {
     background: 'black',
     color: 'white',
