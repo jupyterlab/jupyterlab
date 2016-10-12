@@ -700,12 +700,12 @@ describe('notebook/notebook/widget', () => {
       it('should focus the cell if switching to edit mode', (done) => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
+        sendMessage(widget, WidgetMessage.ActivateRequest);
         widget.mode = 'edit';
         let cell = widget.childAt(widget.activeCellIndex);
         // Wait for update-request.
         requestAnimationFrame(() => {
           // Notebook activates the editor.
-          expect(widget.methods).to.contain('onActivateRequest');
           requestAnimationFrame(() => {
             expect(cell.node.contains(document.activeElement)).to.be(true);
             done();
@@ -716,6 +716,7 @@ describe('notebook/notebook/widget', () => {
       it('should unrender a markdown cell when switching to edit mode', (done) => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
+        sendMessage(widget, WidgetMessage.ActivateRequest);
         let cell = widget.model.factory.createMarkdownCell();
         widget.model.cells.add(cell);
         let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
