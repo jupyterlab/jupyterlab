@@ -13,6 +13,8 @@ import './console/history.spec';
 
 import './dialog/dialog.spec';
 
+import './docregistry/context.spec';
+
 import './docregistry/default.spec';
 import './docregistry/registry.spec';
 

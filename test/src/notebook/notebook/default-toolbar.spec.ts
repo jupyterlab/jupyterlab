@@ -44,7 +44,7 @@ import {
 
 import {
   Context
-} from '../../../../lib/docmanager/context';
+} from '../../../../lib/docregistry/context';
 
 import {
   createNotebookContext, defaultRenderMime
@@ -110,7 +110,7 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should save when clicked', (done) => {
         let button = ToolbarItems.createSaveButton(panel);
         Widget.attach(button, document.body);
-        context.contentsModelChanged.connect(() => {
+        context.fileChanged.connect(() => {
           button.dispose();
           done();
         });

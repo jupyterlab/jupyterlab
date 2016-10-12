@@ -16,22 +16,21 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ABCWidgetFactory, Base64ModelFactory, DocumentRegistry,
-  IDocumentModel, IDocumentContext, IWidgetExtension, TextModelFactory
+  ABCWidgetFactory, Base64ModelFactory, DocumentRegistry, TextModelFactory
 } from '../../../lib/docregistry';
 
 
-class WidgetFactory extends ABCWidgetFactory<Widget, IDocumentModel> {
+class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): Widget {
+  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): Widget {
     return new Widget();
   }
 }
 
 
-class WidgetExtension implements IWidgetExtension<Widget, IDocumentModel> {
+class WidgetExtension implements DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel> {
 
-   createNew(widget: Widget, context: IDocumentContext<IDocumentModel>): IDisposable {
+   createNew(widget: Widget, context: DocumentRegistry.IContext<DocumentRegistry.IModel>): IDisposable {
      return new DisposableDelegate(null);
    }
 }

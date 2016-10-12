@@ -20,12 +20,8 @@ import {
 } from '../../../lib/markdownwidget/widget';
 
 import {
-  IDocumentModel
+  DocumentRegistry, Context
 } from '../../../lib/docregistry';
-
-import {
-  Context
-} from '../../../lib/docmanager/context';
 
 import {
   createFileContext, defaultRenderMime
@@ -54,7 +50,7 @@ const contextPromise = createFileContext();
 
 describe('markdownwidget/widget', () => {
 
-  let context: Context<IDocumentModel>;
+  let context: Context<DocumentRegistry.IModel>;
 
   beforeEach((done) => {
     contextPromise.then(c => {

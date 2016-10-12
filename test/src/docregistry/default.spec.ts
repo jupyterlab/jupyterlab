@@ -13,21 +13,17 @@ import {
 
 import {
   ABCWidgetFactory, Base64ModelFactory, DocumentModel,
-  IDocumentModel, IDocumentContext, TextModelFactory
+  DocumentRegistry, TextModelFactory, Context
 } from '../../../lib/docregistry';
-
-import {
-  Context
-} from '../../../lib/docmanager/context';
 
 import {
   createFileContext
 } from '../utils';
 
 
-class WidgetFactory extends ABCWidgetFactory<Widget, IDocumentModel> {
+class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): Widget {
+  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): Widget {
     return new Widget();
   }
 }
@@ -35,7 +31,7 @@ class WidgetFactory extends ABCWidgetFactory<Widget, IDocumentModel> {
 
 describe('docmanager/default', () => {
 
-  let context: Context<IDocumentModel>;
+  let context: Context<DocumentRegistry.IModel>;
 
   beforeEach((done) => {
     createFileContext().then(c => {
