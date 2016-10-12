@@ -89,6 +89,11 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
  */
 const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
 
+/**
+ * The console panel instance tracker.
+ */
+const tracker = new InstanceTracker<ConsolePanel>();
+
 
 /**
  * The interface for a start console.
@@ -105,7 +110,6 @@ interface ICreateConsoleArgs extends JSONObject {
  * Activate the console extension.
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): IConsoleTracker {
-  let tracker = new InstanceTracker<ConsolePanel>();
   let manager = services.sessions;
   let specs = services.kernelspecs;
 
