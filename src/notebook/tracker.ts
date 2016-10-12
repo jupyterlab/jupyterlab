@@ -84,6 +84,20 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
   activeCellChanged: ISignal<this, BaseCellWidget>;
 
   /**
+   * Dispose of the resources held by the tracker.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+    if (this._handler) {
+      this._handler.dispose();
+      this._handler = null;
+    }
+  }
+
+  /**
    * Handle the sync event.
    */
   protected onSync(): void {

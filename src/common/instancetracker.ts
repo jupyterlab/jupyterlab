@@ -58,7 +58,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
-   * Test whether the model is disposed.
+   * Test whether the tracker is disposed.
    */
   get isDisposed(): boolean {
     return this._widgets === null;
