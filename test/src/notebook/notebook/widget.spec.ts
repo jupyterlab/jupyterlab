@@ -203,7 +203,7 @@ describe('notebook/notebook/widget', () => {
         let called = false;
         widget.modelContentChanged.connect(() => { called = true; });
         let cell = widget.model.factory.createCodeCell();
-        widget.model.cells.add(cell);
+        widget.model.cells.pushBack(cell);
         expect(called).to.be(true);
       });
 
@@ -295,7 +295,7 @@ describe('notebook/notebook/widget', () => {
         });
 
         it('should handle a remove', () => {
-          let cell = widget.model.cells.get(1);
+          let cell = widget.model.cells.at(1);
           let child = widget.childAt(1);
           widget.model.cells.remove(cell);
           expect(cell.isDisposed).to.be(true);
@@ -304,7 +304,7 @@ describe('notebook/notebook/widget', () => {
 
         it('should handle an add', () => {
           let cell = widget.model.factory.createCodeCell();
-          widget.model.cells.add(cell);
+          widget.model.cells.pushBack(cell);
           expect(widget.childCount()).to.be(7);
           let child = widget.childAt(0);
           expect(child.hasClass('jp-Notebook-cell')).to.be(true);
@@ -479,7 +479,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should be called when a cell is removed', () => {
         let widget = createWidget();
-        let cell = widget.model.cells.get(0);
+        let cell = widget.model.cells.at(0);
         widget.model.cells.remove(cell);
         expect(widget.methods).to.contain('onCellRemoved');
       });
@@ -718,7 +718,7 @@ describe('notebook/notebook/widget', () => {
         Widget.attach(widget, document.body);
         sendMessage(widget, WidgetMessage.ActivateRequest);
         let cell = widget.model.factory.createMarkdownCell();
-        widget.model.cells.add(cell);
+        widget.model.cells.pushBack(cell);
         let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
         expect(child.rendered).to.be(true);
         widget.activeCellIndex = widget.childCount() - 1;
@@ -913,7 +913,7 @@ describe('notebook/notebook/widget', () => {
 
         it('should preserve "command" mode if in a markdown cell', () => {
           let cell = widget.model.factory.createMarkdownCell();
-          widget.model.cells.add(cell);
+          widget.model.cells.pushBack(cell);
           let count = widget.childCount();
           let child = widget.childAt(count - 1) as MarkdownCellWidget;
           expect(child.rendered).to.be(true);
@@ -928,7 +928,7 @@ describe('notebook/notebook/widget', () => {
 
         it('should unrender a markdown cell', () => {
           let cell = widget.model.factory.createMarkdownCell();
-          widget.model.cells.add(cell);
+          widget.model.cells.pushBack(cell);
           let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
           expect(child.rendered).to.be(true);
           simulate(child.node, 'dblclick');
@@ -937,7 +937,7 @@ describe('notebook/notebook/widget', () => {
 
         it('should be a no-op if the model is read only', () => {
           let cell = widget.model.factory.createMarkdownCell();
-          widget.model.cells.add(cell);
+          widget.model.cells.pushBack(cell);
           widget.model.readOnly = true;
           let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
           expect(child.rendered).to.be(true);
@@ -1191,7 +1191,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should post an `update-request', (done) => {
         let widget = createActiveWidget();
-        let cell = widget.model.cells.get(0);
+        let cell = widget.model.cells.at(0);
         widget.model.cells.remove(cell);
         expect(widget.methods).to.contain('onCellRemoved');
         requestAnimationFrame(() => {

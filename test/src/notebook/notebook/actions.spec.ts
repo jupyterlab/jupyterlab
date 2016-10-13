@@ -87,7 +87,7 @@ describe('notebook/notebook/actions', () => {
         cell.editor.setCursorPosition(10);
         NotebookActions.splitCell(widget);
         let cells = widget.model.cells;
-        let newSource = cells.get(index).source + cells.get(index + 1).source;
+        let newSource = cells.at(index).source + cells.at(index + 1).source;
         expect(newSource).to.be(source);
       });
 
@@ -521,7 +521,7 @@ describe('notebook/notebook/actions', () => {
         widget.model.cells.insert(2, cell);
         widget.select(widget.childAt(2));
         cell = widget.model.factory.createCodeCell();
-        widget.model.cells.add(cell);
+        widget.model.cells.pushBack(cell);
         widget.select(widget.childAt(widget.childCount() - 1));
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(false);
@@ -532,7 +532,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should render all markdown cells on an error', () => {
         let cell = widget.model.factory.createMarkdownCell();
-        widget.model.cells.add(cell);
+        widget.model.cells.pushBack(cell);
         let child = widget.childAt(widget.childCount() - 1) as MarkdownCellWidget;
         child.rendered = false;
         widget.select(child);
@@ -624,7 +624,7 @@ describe('notebook/notebook/actions', () => {
       it('should stop executing code cells on an error', (done) => {
         widget.activeCell.model.source = ERROR_INPUT;
         let cell = widget.model.factory.createCodeCell();
-        widget.model.cells.add(cell);
+        widget.model.cells.pushBack(cell);
         widget.select(widget.childAt(widget.childCount() - 1));
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(false);
@@ -712,7 +712,7 @@ describe('notebook/notebook/actions', () => {
       it('should stop executing code cells on an error', (done) => {
         widget.activeCell.model.source = ERROR_INPUT;
         let cell = widget.model.factory.createCodeCell();
-        widget.model.cells.add(cell);
+        widget.model.cells.pushBack(cell);
         widget.select(widget.childAt(widget.childCount() - 1));
         NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(false);
@@ -793,7 +793,7 @@ describe('notebook/notebook/actions', () => {
       it('should stop executing code cells on an error', (done) => {
         widget.activeCell.model.source = ERROR_INPUT;
         let cell = widget.model.factory.createCodeCell();
-        widget.model.cells.add(cell);
+        widget.model.cells.pushBack(cell);
         NotebookActions.runAll(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
@@ -1010,9 +1010,9 @@ describe('notebook/notebook/actions', () => {
         widget.activeCellIndex++;
         let source = widget.activeCell.model.source;
         NotebookActions.moveUp(widget);
-        expect(widget.model.cells.get(0).source).to.be(source);
+        expect(widget.model.cells.at(0).source).to.be(source);
         NotebookActions.undo(widget);
-        expect(widget.model.cells.get(1).source).to.be(source);
+        expect(widget.model.cells.at(1).source).to.be(source);
       });
 
     });
@@ -1043,9 +1043,9 @@ describe('notebook/notebook/actions', () => {
       it('should be undo-able', () => {
         let source = widget.activeCell.model.source;
         NotebookActions.moveDown(widget);
-        expect(widget.model.cells.get(1).source).to.be(source);
+        expect(widget.model.cells.at(1).source).to.be(source);
         NotebookActions.undo(widget);
-        expect(widget.model.cells.get(0).source).to.be(source);
+        expect(widget.model.cells.at(0).source).to.be(source);
       });
 
     });
