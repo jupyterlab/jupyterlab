@@ -358,7 +358,7 @@ class DocumentRegistry {
 
     // Add the rest of the global factories, in registration order.
     if ('*' in this._widgetFactoryExtensions) {
-      each(this._widgetFactoryExtensions[ext], n => {
+      each(this._widgetFactoryExtensions['*'], n => {
         factories.add(n);
       });
     }

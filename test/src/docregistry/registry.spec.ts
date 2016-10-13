@@ -198,7 +198,7 @@ describe('docregistry/registry', () => {
       it('should add a widget extension to the registry', () => {
         let extension = new WidgetExtension();
         registry.addWidgetExtension('foo', extension);
-        expect(registry.getWidgetExtensions('foo')).to.eql([extension]);
+        expect(registry.getWidgetExtensions('foo').at(0)).to.be(extension);
       });
 
       it('should be a no-op if the extension is already registered for a given widget factory', () => {
@@ -206,14 +206,14 @@ describe('docregistry/registry', () => {
         registry.addWidgetExtension('foo', extension);
         let disposable = registry.addWidgetExtension('foo', extension);
         disposable.dispose();
-        expect(registry.getWidgetExtensions('foo')).to.eql([extension]);
+        expect(registry.getWidgetExtensions('foo').at(0)).to.be(extension);
       });
 
       it('should be removed from the registry when disposed', () => {
         let extension = new WidgetExtension();
         let disposable = registry.addWidgetExtension('foo', extension);
         disposable.dispose();
-        expect(registry.getWidgetExtensions('foo')).to.eql([]);
+        expect(registry.getWidgetExtensions('foo').length).to.be(0);
       });
 
     });
@@ -541,9 +541,12 @@ describe('docregistry/registry', () => {
         registry.addWidgetExtension('fizz', foo);
         registry.addWidgetExtension('fizz', bar);
         registry.addWidgetExtension('buzz', foo);
-        expect(registry.getWidgetExtensions('fizz')).to.eql([foo, bar]);
-        expect(registry.getWidgetExtensions('buzz')).to.eql([foo]);
-        expect(registry.getWidgetExtensions('baz')).to.eql([]);
+        expect(registry.getWidgetExtensions('fizz').at(0)).to.be(foo);
+        expect(registry.getWidgetExtensions('fizz').at(1)).to.be(bar);
+        expect(registry.getWidgetExtensions('fizz').length).to.be(2);
+        expect(registry.getWidgetExtensions('buzz').at(0)).to.be(foo);
+        expect(registry.getWidgetExtensions('buzz').length).to.be(1);
+        expect(registry.getWidgetExtensions('baz')).to.be(void 0);
       });
 
     });
