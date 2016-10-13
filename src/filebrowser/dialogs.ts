@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -496,18 +500,18 @@ class CreateNewHandler extends Widget {
    * Populate the file types.
    */
   protected populateFileTypes(): void {
-    let fileTypes = this._manager.registry.listFileTypes();
+    let fileTypes = this._manager.registry.fileTypes;
     let dropdown = this.fileTypeDropdown;
     let option = document.createElement('option');
     option.text = 'File';
     option.value = this._sentinal;
-    for (let ft of fileTypes) {
+    each(fileTypes, ft => {
       option = document.createElement('option');
       option.text = `${ft.name} (${ft.extension})`;
       option.value = ft.extension;
       dropdown.appendChild(option);
       this._extensions.push(ft.extension);
-    }
+    });
     if (this.ext in this._extensions) {
       dropdown.value = this.ext;
     } else {

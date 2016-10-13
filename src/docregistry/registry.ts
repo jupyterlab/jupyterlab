@@ -6,6 +6,22 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
+  find, findIndex, indexOf
+} from 'phosphor/lib/algorithm/searching';
+
+import {
+  ISequence
+} from 'phosphor/lib/algorithm/sequence';
+
+import {
+  Vector
+} from 'phosphor/lib/collections/vector';
+
+import {
   IDisposable, DisposableDelegate
 } from 'phosphor/lib/core/disposable';
 
@@ -53,6 +69,20 @@ class DocumentRegistry {
   readonly changed: ISignal<this, DocumentRegistry.IChangedArgs>;
 
   /**
+   * A read-only sequence of file types that have been registered.
+   */
+  get fileTypes(): ISequence<DocumentRegistry.IFileType> {
+    return this._fileTypes;
+  }
+
+  /**
+   * A read-only sequence of the file creators that have been registered.
+   */
+  get creators(): ISequence<DocumentRegistry.IFileCreator> {
+    return this._creators;
+  }
+
+  /**
    * Get whether the document registry has been disposed.
    */
   get isDisposed(): boolean {
@@ -74,9 +104,11 @@ class DocumentRegistry {
       this._widgetFactories[widgetName].factory.dispose();
     }
     this._widgetFactories = null;
-    this._fileTypes = null;
-    this._creators = null;
-    this._extenders = null;
+    this._fileTypes.clear();
+    this._creators.clear();
+    for (let widgetName in this._extenders) {
+      this._extenders[widgetName].clear();
+    }
   }
 
   /**
@@ -117,9 +149,9 @@ class DocumentRegistry {
     // For convenience, store a mapping of ext -> name
     for (let ext of record.fileExtensions) {
       if (!this._widgetFactoryExtensions[ext]) {
-        this._widgetFactoryExtensions[ext] = new Set<string>();
+        this._widgetFactoryExtensions[ext] = new Vector<string>();
       }
-      this._widgetFactoryExtensions[ext].add(name);
+      this._widgetFactoryExtensions[ext].pushBack(name);
     }
     this.changed.emit({
       type: 'widgetFactory',
@@ -137,8 +169,8 @@ class DocumentRegistry {
         }
       }
       for (let ext of Object.keys(this._widgetFactoryExtensions)) {
-        this._widgetFactoryExtensions[ext].delete(name);
-        if (this._widgetFactoryExtensions[ext].size === 0) {
+        this._widgetFactoryExtensions[ext].remove(name);
+        if (this._widgetFactoryExtensions[ext].length === 0) {
           delete this._widgetFactoryExtensions[ext];
         }
       }
@@ -200,23 +232,22 @@ class DocumentRegistry {
   addWidgetExtension(widgetName: string, extension: DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>): IDisposable {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      this._extenders[widgetName] = [];
+      this._extenders[widgetName] = new Vector<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>>();
     }
     let extenders = this._extenders[widgetName];
-    let index = extenders.indexOf(extension);
+    let index = indexOf(extenders, extension);
     if (index !== -1) {
       console.warn(`Duplicate registered extension for ${widgetName}`);
       return new DisposableDelegate(null);
     }
-    this._extenders[widgetName].push(extension);
+    this._extenders[widgetName].pushBack(extension);
     this.changed.emit({
       type: 'widgetExtension',
       name: null,
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      index = this._extenders[widgetName].indexOf(extension);
-      this._extenders[widgetName].splice(index, 1);
+      this._extenders[widgetName].remove(extension);
       this.changed.emit({
         type: 'widgetExtension',
         name: null,
@@ -234,26 +265,16 @@ class DocumentRegistry {
    *
    * #### Notes
    * These are used to populate the "Create New" dialog.
-   * If the file type with the same name is already registered, a warning will
-   * be logged and this will be a no-op.
    */
   addFileType(fileType: DocumentRegistry.IFileType): IDisposable {
-    for (let fType of this._fileTypes) {
-      if (fType.name.toLowerCase() === fileType.name.toLowerCase()) {
-        console.warn(`Duplicate registered file types for ${fType.name}`);
-        return new DisposableDelegate(null);
-      }
-    }
-    this._fileTypes.push(fileType);
-    this._fileTypes.sort((a, b) => a.name.localeCompare(b.name));
+    this._fileTypes.pushBack(fileType);
     this.changed.emit({
       type: 'fileType',
       name: fileType.name,
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      let index = this._fileTypes.indexOf(fileType);
-      this._fileTypes.splice(index, 1);
+      this._fileTypes.remove(fileType);
       this.changed.emit({
         type: 'fileType',
         name: fileType.name,
@@ -267,36 +288,16 @@ class DocumentRegistry {
    *
    * @params creator - The file creator object to register.
    *
-   * @params after - The optional item name to insert after.
-   *
    * @returns A disposable which will unregister the creator.
-   *
-   * #### Notes
-   * If a creator of the same name is already registered,
-   * a warning will be logged and this will be a no-op.
-   * If `after` is not given or not already registered, it will be moved
-   * to the end.
    */
-  addCreator(creator: DocumentRegistry.IFileCreator, after?: string): IDisposable {
-    for (let c of this._creators) {
-      if (c.name.toLowerCase() === creator.name.toLowerCase()) {
-        console.warn(`Duplicate registered file creator named ${creator.name}`);
-        return new DisposableDelegate(null);
-      }
-    }
-    let added = false;
-    if (after) {
-      for (let existing of this._creators) {
-        if (existing.name.toLowerCase() === after.toLowerCase()) {
-          let index = this._creators.indexOf(existing);
-          this._creators.splice(index, 0, creator);
-          added = true;
-          break;
-        }
-      }
-    }
-    if (!added) {
-      this._creators.push(creator);
+  addCreator(creator: DocumentRegistry.IFileCreator): IDisposable {
+    let index = findIndex(this._creators, (value) => {
+      return value.name.localeCompare(creator.name) > 0;
+    });
+    if (index !== -1) {
+      this._creators.insert(index, creator);
+    } else {
+      this._creators.pushBack(creator);
     }
     this.changed.emit({
       type: 'fileCreator',
@@ -304,8 +305,7 @@ class DocumentRegistry {
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      let index = this._creators.indexOf(creator);
-      this._creators.splice(index, 1);
+      this._creators.remove(creator);
       this.changed.emit({
         type: 'fileCreator',
         name: creator.name,
@@ -350,13 +350,17 @@ class DocumentRegistry {
     // Add the extension-specific factories in registration order.
     if (ext.length > 1) {
       if (ext in this._widgetFactoryExtensions) {
-        this._widgetFactoryExtensions[ext].forEach(n => { factories.add(n); });
+        each(this._widgetFactoryExtensions[ext], n => {
+          factories.add(n);
+        });
       }
     }
 
     // Add the rest of the global factories, in registration order.
     if ('*' in this._widgetFactoryExtensions) {
-      this._widgetFactoryExtensions['*'].forEach(n => { factories.add(n); });
+      each(this._widgetFactoryExtensions[ext], n => {
+        factories.add(n);
+      });
     }
 
     // Construct the return list, checking to make sure the corresponding
@@ -385,43 +389,13 @@ class DocumentRegistry {
   }
 
   /**
-   * List the names of the registered model factories.
-   *
-   * @returns A new array of registered model factory names.
-   */
-  listModelFactories(): string[] {
-    return Object.keys(this._modelFactories);
-  }
-
-  /**
-   * Get a list of file types that have been registered.
-   *
-   * @returns A new array of registered file type objects.
-   */
-  listFileTypes(): DocumentRegistry.IFileType[] {
-    return this._fileTypes.slice();
-  }
-
-  /**
-   * Get an ordered list of the file creators that have been registered.
-   *
-   * @returns A new array of registered file creator objects.
-   */
-  listCreators(): DocumentRegistry.IFileCreator[] {
-    return this._creators.slice();
-  }
-
-  /**
    * Get a file type by name.
    */
   getFileType(name: string): DocumentRegistry.IFileType {
     name = name.toLowerCase();
-    for (let i = 0; i < this._fileTypes.length; i++) {
-      let fileType = this._fileTypes[i];
-      if (fileType.name.toLowerCase() === name) {
-        return fileType;
-      }
-    }
+    return find(this._fileTypes, fileType => {
+      return fileType.name.toLowerCase() === name;
+    });
   }
 
   /**
@@ -429,12 +403,9 @@ class DocumentRegistry {
    */
   getCreator(name: string): DocumentRegistry.IFileCreator {
     name = name.toLowerCase();
-    for (let i = 0; i < this._creators.length; i++) {
-      let creator = this._creators[i];
-      if (creator.name.toLowerCase() === name) {
-        return creator;
-      }
-    }
+    return find(this._creators, creator => {
+      return creator.name.toLowerCase() === name;
+    });
   }
 
   /**
@@ -496,14 +467,14 @@ class DocumentRegistry {
    *
    * @param widgetName - The name of the widget factory.
    *
-   * @returns A new array of widget extensions.
+   * @returns A read-only sequence of widget extensions.
    */
-  getWidgetExtensions(widgetName: string): DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>[] {
+  getWidgetExtensions(widgetName: string): ISequence<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      return [];
+      return void 0;
     }
-    return this._extenders[widgetName].slice();
+    return this._extenders[widgetName];
   }
 
   /**
@@ -524,10 +495,10 @@ class DocumentRegistry {
   private _widgetFactories: { [key: string]: Private.IWidgetFactoryRecord } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
-  private _widgetFactoryExtensions: {[key: string]: Set<string> } = Object.create(null);
-  private _fileTypes: DocumentRegistry.IFileType[] = [];
-  private _creators: DocumentRegistry.IFileCreator[] = [];
-  private _extenders: { [key: string] : DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>[] } = Object.create(null);
+  private _widgetFactoryExtensions: {[key: string]: Vector<string> } = Object.create(null);
+  private _fileTypes = new Vector<DocumentRegistry.IFileType>();
+  private _creators = new Vector<DocumentRegistry.IFileCreator>();
+  private _extenders: { [key: string] : Vector<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> } = Object.create(null);
 }
 
 

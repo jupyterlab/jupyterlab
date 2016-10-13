@@ -110,7 +110,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
   });
 
   let category = 'File Operations';
-  let creators = registry.listCreators();
+  let creators = registry.creators;
   let creatorCmds: { [key: string]: DisposableSet } = Object.create(null);
 
   let addCreator = (name: string) => {
@@ -125,9 +125,9 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     disposables.add(palette.addItem({ command, category }));
   };
 
-  for (let creator of creators) {
+  each(creators, creator => {
     addCreator(creator.name);
-  }
+  });
 
   // Add a context menu to the dir listing.
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
