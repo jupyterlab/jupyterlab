@@ -160,7 +160,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       }
     });
     // Add an initial code cell by default.
-    this._cells.add(this._factory.createCodeCell());
+    this._cells.pushBack(this._factory.createCodeCell());
     this._cells.changed.connect(this._onCellsChanged, this);
     if (options.languagePreference) {
       this._metadata['language_info'] = { name: options.languagePreference };
@@ -437,7 +437,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
         if (!this._cells.length) {
-          this._cells.add(this._factory.createCodeCell());
+          this._cells.pushBack(this._factory.createCodeCell());
         }
       });
     }

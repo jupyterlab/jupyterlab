@@ -424,7 +424,7 @@ namespace NotebookActions {
     let model = widget.model;
     if (widget.activeCellIndex === widget.childCount() - 1) {
       let cell = model.factory.createCodeCell();
-      model.cells.add(cell);
+      model.cells.pushBack(cell);
       widget.activeCellIndex++;
       widget.mode = 'edit';
     } else {
@@ -670,7 +670,7 @@ namespace NotebookActions {
     // If there are no cells, add a code cell.
     if (!model.cells.length) {
       let cell = model.factory.createCodeCell();
-      model.cells.add(cell);
+      model.cells.pushBack(cell);
     }
     model.cells.endCompoundOperation();
 
@@ -974,7 +974,7 @@ namespace Private {
     let cells = parent.model.cells;
     let i = cells.indexOf(child.model);
     if (i === -1) {
-      cells.add(cell);
+      cells.pushBack(cell);
     } else {
       cells.insert(i + 1, cell);
     }

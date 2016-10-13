@@ -164,7 +164,7 @@ interface IObservableList<T> {
    *
    * @returns The index at which the item was added.
    */
-  add(item: T): number;
+  pushBack(item: T): number;
 
   /**
    * Insert an item into the list at a specific index.
@@ -328,7 +328,7 @@ class ObservableList<T> implements IObservableList<T> {
    *
    * @returns The index at which the item was added.
    */
-  add(item: T): number {
+  pushBack(item: T): number {
     return this.addItem(this.internal.length, item);
   }
 

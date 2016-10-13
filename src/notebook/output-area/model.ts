@@ -107,7 +107,7 @@ class OutputAreaModel implements IDisposable {
       this.clearNext = false;
     }
     if (output.output_type === 'input_request') {
-      this.list.add(output);
+      this.list.pushBack(output);
     }
 
     // Make a copy of the output bundle.
@@ -139,7 +139,7 @@ class OutputAreaModel implements IDisposable {
       case 'execute_result':
       case 'display_data':
       case 'error':
-        return this.list.add(value);
+        return this.list.pushBack(value);
       default:
         break;
       }
