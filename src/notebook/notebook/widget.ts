@@ -323,7 +323,7 @@ class StaticNotebook extends Widget {
     this._mimetype = this._renderer.getCodeMimetype(newValue);
     let cells = newValue.cells;
     for (let i = 0; i < cells.length; i++) {
-      this._insertCell(i, cells.get(i));
+      this._insertCell(i, cells.at(i));
     }
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
@@ -991,7 +991,7 @@ class Notebook extends StaticNotebook {
       return;
     }
     let layout = this.layout as PanelLayout;
-    let cell = model.cells.get(i) as MarkdownCellModel;
+    let cell = model.cells.at(i) as MarkdownCellModel;
     let widget = layout.widgets.at(i) as MarkdownCellWidget;
     if (cell.type === 'markdown') {
       widget.rendered = false;

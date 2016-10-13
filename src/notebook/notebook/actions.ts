@@ -129,7 +129,7 @@ namespace NotebookActions {
         return;
       }
       // Otherwise merge with the next cell.
-      let cellModel = cells.get(index + 1);
+      let cellModel = cells.at(index + 1);
       toMerge.push(cellModel.source);
       toDelete.push(cellModel);
     }
@@ -185,7 +185,7 @@ namespace NotebookActions {
       let child = widget.childAt(i);
       if (widget.isSelected(child)) {
         index = i;
-        toDelete.push(cells.get(i));
+        toDelete.push(cells.at(i));
       }
     }
 
@@ -817,7 +817,7 @@ namespace NotebookActions {
     }
     let cells = widget.model.cells;
     for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i) as CodeCellModel;
+      let cell = cells.at(i) as CodeCellModel;
       let child = widget.childAt(i);
       if (widget.isSelected(child) && cell.type === 'code') {
         cell.outputs.clear();
@@ -841,7 +841,7 @@ namespace NotebookActions {
     }
     let cells = widget.model.cells;
     for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i) as CodeCellModel;
+      let cell = cells.at(i) as CodeCellModel;
       if (cell.type === 'code') {
         cell.outputs.clear();
         cell.executionCount = null;
@@ -873,7 +873,7 @@ namespace NotebookActions {
     for (let i = 0; i < cells.length; i++) {
       let child = widget.childAt(i) as MarkdownCellWidget;
       if (widget.isSelected(child)) {
-        Private.setMarkdownHeader(cells.get(i), level);
+        Private.setMarkdownHeader(cells.at(i), level);
       }
     }
     changeCellType(widget, 'markdown');

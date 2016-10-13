@@ -246,7 +246,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     cells.dispose();
     clearSignalData(this);
     for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i);
+      let cell = cells.at(i);
       cell.dispose();
     }
     cells.clear();
@@ -282,7 +282,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   toJSON(): nbformat.INotebookContent {
     let cells: nbformat.ICell[] = [];
     for (let i = 0; i < this.cells.length; i++) {
-      let cell = this.cells.get(i);
+      let cell = this.cells.at(i);
       cells.push(cell.toJSON());
     }
     let metadata = utils.copy(this._metadata) as nbformat.INotebookMetadata;
@@ -317,7 +317,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         continue;
       }
     }
-    this.cells.assign(cells);
+    this.cells.replace(0, cells.length, cells);
     let oldValue = 0;
     let newValue = 0;
     if (value.nbformat !== this._nbformat) {

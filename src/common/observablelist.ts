@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  toArray
-} from 'phosphor/lib/algorithm/iteration';
+  ISequence
+} from 'phosphor/lib/algorithm/sequence';
 
 import {
   move
@@ -33,7 +33,7 @@ type ListChangeType =
   'add' |
 
   /**
-   * An item was moved in the list.
+   * An item was moved within the list.
    */
   'move' |
 
@@ -125,11 +125,13 @@ interface IObservableList<T> {
 
   /**
    * The number of items in the list.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
-  length: number;
+  readonly length: number;
+
+  /**
+   * The read-only sequence of items in the list.
+   */
+  readonly items: ISequence<T>;
 
   /**
    * Get the item at a specific index in the list.
@@ -140,43 +142,7 @@ interface IObservableList<T> {
    * @returns The item at the specified index, or `undefined` if the
    *   index is out of range.
    */
-  get(index: number): T;
-
-  /**
-   * Test whether the list contains a specific item.
-   *
-   * @param item - The item of interest.
-   *
-   * @returns `true` if the list contains the item, `false` otherwise.
-   */
-  contains(item: T): boolean;
-
-  /**
-   * Get the index of the first occurence of an item in the list.
-   *
-   * @param item - The item of interest.
-   *
-   * @returns The index of the specified item or `-1` if the item is
-   *   not contained in the list.
-   */
-  indexOf(item: T): number;
-
-  /**
-   * Get a shallow copy of a portion of the list.
-   *
-   * @param start - The start index of the slice, inclusive. If this is
-   *   negative, it is offset from the end of the list. If this is not
-   *   provided, it defaults to `0`. In all cases, it is clamped to the
-   *   bounds of the list.
-   *
-   * @param end - The end index of the slice, exclusive. If this is
-   *   negative, it is offset from the end of the list. If this is not
-   *   provided, it defaults to `length`. In all cases, it is clamped
-   *   to the bounds of the list.
-   *
-   * @returns A new array containing the specified range of items.
-   */
-  slice(start?: number, end?: number): T[];
+  at(index: number): T;
 
   /**
    * Set the item at a specific index.
@@ -190,18 +156,6 @@ interface IObservableList<T> {
    *   index is out of range.
    */
   set(index: number, item: T): T;
-
-  /**
-   * Replace the contents of the list with the specified items.
-   *
-   * @param items - The items to assign to the list.
-   *
-   * @returns An array of the previous list items.
-   *
-   * #### Notes
-   * This is equivalent to `list.replace(0, list.length, items)`.
-   */
-  assign(items: T[]): T[];
 
   /**
    * Add an item to the end of the list.
@@ -311,12 +265,16 @@ class ObservableList<T> implements IObservableList<T> {
 
   /**
    * The number of items in the list.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get length(): number {
     return this.internal.length;
+  }
+
+  /**
+   * The read-only sequence of items in the list.
+   */
+  get items(): ISequence<T> {
+    return this.internal;
   }
 
   /**
@@ -328,19 +286,8 @@ class ObservableList<T> implements IObservableList<T> {
    * @returns The item at the specified index, or `undefined` if the
    *   index is out of range.
    */
-  get(index: number): T {
+  at(index: number): T {
     return this.internal.at(this._norm(index));
-  }
-
-  /**
-   * Test whether the list contains a specific item.
-   *
-   * @param item - The item of interest.
-   *
-   * @returns `true` if the list contains the item, `false` otherwise.
-   */
-  contains(item: T): boolean {
-    return indexOf(this.internal, item) !== -1;
   }
 
   /**
@@ -353,25 +300,6 @@ class ObservableList<T> implements IObservableList<T> {
    */
   indexOf(item: T): number {
     return indexOf(this.internal, item);
-  }
-
-  /**
-   * Get a shallow copy of a portion of the list.
-   *
-   * @param start - The start index of the slice, inclusive. If this is
-   *   negative, it is offset from the end of the list. If this is not
-   *   provided, it defaults to `0`. In all cases, it is clamped to the
-   *   bounds of the list.
-   *
-   * @param end - The end index of the slice, exclusive. If this is
-   *   negative, it is offset from the end of the list. If this is not
-   *   provided, it defaults to `length`. In all cases, it is clamped
-   *   to the bounds of the list.
-   *
-   * @returns A new array containing the specified range of items.
-   */
-  slice(start?: number, end?: number): T[] {
-    return toArray(this.internal).slice(start, end);
   }
 
   /**
@@ -391,20 +319,6 @@ class ObservableList<T> implements IObservableList<T> {
       return void 0;
     }
     return this.setItem(i, item);
-  }
-
-  /**
-   * Replace the contents of the list with the specified items.
-   *
-   * @param items - The items to assign to the list.
-   *
-   * @returns An array of the previous list items.
-   *
-   * #### Notes
-   * This is equivalent to `list.replace(0, list.length, items)`.
-   */
-  assign(items: T[]): T[] {
-    return this.replaceItems(0, this.internal.length, items);
   }
 
   /**

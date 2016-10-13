@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
+  indexOf
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -86,7 +90,7 @@ class OutputAreaModel implements IDisposable {
    * Get an item at the specified index.
    */
   get(index: number): OutputAreaModel.Output {
-    return this.list.get(index);
+    return this.list.at(index);
   }
 
   /**
@@ -171,7 +175,7 @@ class OutputAreaModel implements IDisposable {
    * Types are validated before being added.
    */
   addMimeData(output: nbformat.IDisplayData | nbformat.IExecuteResult, mimetype: string, value: string | JSONObject): void {
-    let index = this.list.indexOf(output);
+    let index = indexOf(this.list.items, output);
     if (index === -1) {
       throw new Error(`Cannot add data to non-tracked bundle`);
     }
