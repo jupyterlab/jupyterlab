@@ -169,7 +169,6 @@ describe('docregistry/registry', () => {
       it('should add the model factory to the registry', () => {
         let factory = new TextModelFactory();
         registry.addModelFactory(factory);
-        expect(registry.listModelFactories()).to.eql(['text']);
       });
 
       it('should be a no-op a factory with the given `name` is already registered', () => {
@@ -177,7 +176,6 @@ describe('docregistry/registry', () => {
         registry.addModelFactory(factory);
         let disposable = registry.addModelFactory(new TextModelFactory());
         disposable.dispose();
-        expect(registry.listModelFactories()).to.eql(['text']);
       });
 
       it('should be a no-op if the same factory is already registered', () => {
@@ -185,14 +183,12 @@ describe('docregistry/registry', () => {
         registry.addModelFactory(factory);
         let disposable = registry.addModelFactory(factory);
         disposable.dispose();
-        expect(registry.listModelFactories()).to.eql(['text']);
       });
 
       it('should be removed from the registry when disposed', () => {
         let factory = new TextModelFactory();
         let disposable = registry.addModelFactory(factory);
         disposable.dispose();
-        expect(registry.listModelFactories()).to.eql([]);
       });
 
     });
@@ -227,14 +223,14 @@ describe('docregistry/registry', () => {
       it('should add a file type to the document registry', () => {
         let fileType = { name: 'notebook', extension: '.ipynb' };
         registry.addFileType(fileType);
-        expect(registry.listFileTypes()).to.eql([fileType]);
+        expect(registry.fileTypes.at(0)).to.be(fileType);
       });
 
       it('should be removed from the registry when disposed', () => {
         let fileType = { name: 'notebook', extension: '.ipynb' };
         let disposable = registry.addFileType(fileType);
         disposable.dispose();
-        expect(registry.listFileTypes()).to.eql([]);
+        expect(registry.fileTypes.length).to.be(0);
       });
 
       it('should be a no-op if a file type of the same name is registered', () => {
@@ -242,7 +238,7 @@ describe('docregistry/registry', () => {
         registry.addFileType(fileType);
         let disposable = registry.addFileType(fileType);
         disposable.dispose();
-        expect(registry.listFileTypes()).to.eql([fileType]);
+        expect(registry.fileTypes.at(0)).to.be(fileType);
       });
 
     });
@@ -252,26 +248,28 @@ describe('docregistry/registry', () => {
       it('should add a file type to the document registry', () => {
         let creator = { name: 'notebook', fileType: 'notebook' };
         registry.addCreator(creator);
-        expect(registry.listCreators()).to.eql([creator]);
+        expect(registry.creators.at(0)).to.be(creator);
       });
 
       it('should be removed from the registry when disposed', () => {
         let creator = { name: 'notebook', fileType: 'notebook' };
         let disposable = registry.addCreator(creator);
         disposable.dispose();
-        expect(registry.listCreators()).to.eql([]);
+        expect(registry.creators.length).to.be(0);
       });
 
-      it('should add after a named creator if given', () => {
+      it('should end up in locale order', () => {
         let creators = [
           { name: 'Python Notebook', fileType: 'notebook' },
           { name: 'R Notebook', fileType: 'notebook' },
-          { name: 'Shell Notebook', fileType: 'notebook' }
+          { name: 'CSharp Notebook', fileType: 'notebook' }
         ];
         registry.addCreator(creators[0]);
         registry.addCreator(creators[1]);
-        registry.addCreator(creators[2], creators[1].name);
-        expect(registry.listCreators()).to.eql([ creators[0], creators[2], creators[1]]);
+        registry.addCreator(creators[2]);
+        expect(registry.creators.at(0)).to.be(creators[2]);
+        expect(registry.creators.at(1)).to.be(creators[0]);
+        expect(registry.creators.at(2)).to.be(creators[1]);
       });
 
       it('should be a no-op if a file type of the same name is registered', () => {
@@ -279,7 +277,7 @@ describe('docregistry/registry', () => {
         registry.addCreator(creator);
         let disposable = registry.addCreator(creator);
         disposable.dispose();
-        expect(registry.listCreators()).to.eql([creator]);
+        expect(registry.creators.at(0)).to.eql(creator);
       });
 
     });
@@ -391,45 +389,36 @@ describe('docregistry/registry', () => {
 
     });
 
-    describe('#listModelFactories()', () => {
+    describe('#fileTypes', () => {
 
-      it('should list the currently registered model factories', () => {
-        expect(registry.listModelFactories()).to.eql([]);
-        registry.addModelFactory(new TextModelFactory());
-        registry.addModelFactory(new Base64ModelFactory());
-        expect(registry.listModelFactories()).to.eql(['text', 'base64']);
-      });
-
-    });
-
-    describe('#listFileTypes()', () => {
-
-      it('should list the registered file types', () => {
-        expect(registry.listFileTypes()).to.eql([]);
+      it('should get the registered file types', () => {
+        expect(registry.fileTypes.length).to.be(0);
         let fileTypes = [
           { name: 'notebook', extension: '.ipynb' },
           { name: 'python', extension: '.py' }
         ];
         registry.addFileType(fileTypes[0]);
         registry.addFileType(fileTypes[1]);
-        expect(registry.listFileTypes()).to.eql(fileTypes);
+        expect(registry.fileTypes.at(0)).to.be(fileTypes[0]);
+        expect(registry.fileTypes.at(1)).to.be(fileTypes[1]);
       });
 
     });
 
-    describe('#listCreators()', () => {
+    describe('#creators', () => {
 
-      it('should list the registered file creators', () => {
-        expect(registry.listCreators()).to.eql([]);
+      it('should get the registered file creators', () => {
+        expect(registry.creators.length).to.be(0);
         let creators = [
           { name: 'Python Notebook', fileType: 'notebook' },
           { name: 'R Notebook', fileType: 'notebook' },
-          { name: 'Shell Notebook', fileType: 'notebook' }
+          { name: 'CSharp Notebook', fileType: 'notebook' }
         ];
         registry.addCreator(creators[0]);
         registry.addCreator(creators[1]);
         registry.addCreator(creators[2]);
-        expect(registry.listCreators()).to.eql(creators);
+        expect(registry.creators.length).to.be(3);
+        expect(registry.creators.at(0).name).to.be('CSharp Notebook');
       });
 
     });
