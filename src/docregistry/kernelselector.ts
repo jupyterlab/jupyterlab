@@ -40,7 +40,7 @@ interface IKernelSelection {
   preferredLanguage: string;
 
   /**
-   * The optional existing kernel id.
+   * The optional existing kernel model.
    */
   kernel?: Kernel.IModel;
 
@@ -65,6 +65,11 @@ interface IPopulateOptions {
    * The current running sessions.
    */
   sessions: Session.IModel[];
+
+  /**
+   * The optional existing kernel model.
+   */
+  kernel?: Kernel.IModel;
 
   /**
    * The preferred kernel name.
@@ -100,7 +105,7 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
   body.appendChild(selector);
 
   // Get the current sessions, populate the kernels, and show the dialog.
-  populateKernels(selector, { specs, sessions, preferredLanguage });
+  populateKernels(selector, { specs, sessions, preferredLanguage, kernel });
   return showDialog({
     title: 'Select Kernel',
     body,
@@ -202,7 +207,8 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   }
   let maxLength = 10;
 
-  let { preferredKernel, preferredLanguage, sessions, specs } = options;
+  let { preferredKernel, preferredLanguage, sessions, specs, kernel } = options;
+  let existing = kernel ? kernel.id : void 0;
 
   // Create mappings of display names and languages for kernel name.
   let displayNames: { [key: string]: string } = Object.create(null);
@@ -242,12 +248,6 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   }
   // Add a separator.
   node.appendChild(createSeparatorOption(maxLength));
-  // Add the option to have no kernel.
-  let option = document.createElement('option');
-  option.text = 'None';
-  option.value = 'null';
-  node.appendChild(option);
-  node.appendChild(createSeparatorOption(maxLength));
   // Add the rest of the kernel names in alphabetical order.
   let otherNames: string[] = [];
   for (let name in specs.kernelspecs) {
@@ -268,7 +268,8 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   let matchingSessions: Session.IModel[] = [];
   if (preferredLanguage) {
     for (let session of sessions) {
-      if (languages[session.kernel.name] === preferredLanguage) {
+      if (languages[session.kernel.name] === preferredLanguage &&
+          session.kernel.id !== existing) {
         matchingSessions.push(session);
       }
     }
@@ -286,7 +287,8 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   // Add the other remaining sessions.
   let otherSessions: Session.IModel[] = [];
   for (let session of sessions) {
-    if (matchingSessions.indexOf(session) === -1) {
+    if (matchingSessions.indexOf(session) === -1 &&
+        session.kernel.id !== existing) {
       otherSessions.push(session);
     }
   }

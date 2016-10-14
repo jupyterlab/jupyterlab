@@ -155,7 +155,7 @@ class CellCompleterHandler implements IDisposable {
    * Handle a completion requested signal from an editor.
    */
   protected onCompletionRequested(editor: ICellEditorWidget, request: ICompletionRequest): void {
-    if (!this.kernel || !this._completer.model) {
+    if (!this._kernel || !this._completer.model) {
       return;
     }
     this.makeRequest(request);

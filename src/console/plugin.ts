@@ -354,10 +354,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         };
         return selectKernel(options);
       }).then((kernelId: Kernel.IModel) => {
+        // If the user cancels, kernelId will be void and should be ignored.
         if (kernelId) {
           session.changeKernel(kernelId);
-        } else {
-          session.kernel.shutdown();
         }
       });
     }
