@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   DisposableSet
 } from 'phosphor/lib/core/disposable';
 
@@ -129,9 +133,9 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     tracker.sync(args.newValue);
   });
 
-  for (let creator of creators) {
+  each(creators, creator => {
     addCreator(creator.name);
-  }
+  });
 
   // Add a context menu to the dir listing.
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
