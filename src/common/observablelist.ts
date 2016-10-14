@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IIterator
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   ISequence
 } from 'phosphor/lib/algorithm/sequence';
 
@@ -18,7 +22,11 @@ import {
 } from 'phosphor/lib/collections/vector';
 
 import {
-  defineSignal, ISignal
+  IDisposable
+} from 'phosphor/lib/core/disposable';
+
+import {
+  clearSignalData, defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 
@@ -117,7 +125,7 @@ interface IListChangedArgs<T> {
  * A sequence container which can be observed for changes.
  */
 export
-interface IObservableList<T> {
+interface IObservableList<T> extends IDisposable {
   /**
    * A signal emitted when the list has changed.
    */
@@ -132,6 +140,13 @@ interface IObservableList<T> {
    * The read-only sequence of items in the list.
    */
   readonly items: ISequence<T>;
+
+  /**
+   * Create an iterator over the values in the list.
+   *
+   * @returns A new iterator starting at the front of the list.
+   */
+  iter(): IIterator<T>;
 
   /**
    * Get the item at a specific index in the list.
@@ -275,6 +290,34 @@ class ObservableList<T> implements IObservableList<T> {
    */
   get items(): ISequence<T> {
     return this.internal;
+  }
+
+  /**
+   * Test whether the list has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the list.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    clearSignalData(this);
+    this.internal.clear();
+  }
+
+  /**
+   * Create an iterator over the values in the list.
+   *
+   * @returns A new iterator starting at the front of the list.
+   */
+  iter(): IIterator<T> {
+    return this.internal.iter();
   }
 
   /**
