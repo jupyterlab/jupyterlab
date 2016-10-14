@@ -172,13 +172,33 @@ describe('docregistry/context', () => {
 
     describe('#kernelspecs', () => {
 
+      it('should be the kernelspecs model', () => {
+        let name = manager.kernelspecs.default;
+        expect(name in manager.kernelspecs.kernelspecs).to.be(true);
+      });
+
     });
 
     describe('#isPopulated', () => {
 
+      it('should be false before initial save', () => {
+        expect(context.isPopulated).to.be(false);
+      });
+
+      it('should be true after the initial save', (done) => {
+        context.save().then(() => {
+          expect(context.isPopulated).to.be(true);
+          done();
+        }).catch(done);
+      });
+
     });
 
     describe('#factoryName', () => {
+
+      it('should be the name of the factory used by the context', () => {
+        expect(context.factoryName).to.be(factory.name);
+      });
 
     });
 
