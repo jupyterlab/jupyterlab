@@ -15,6 +15,10 @@ import 'codemirror/mode/r/r';
 import 'codemirror/mode/markdown/markdown';
 
 
+// Stub for the require function.
+declare var require: any;
+
+
 /**
  * Load a codemirror mode by file name.
  */
@@ -68,7 +72,7 @@ function requireMode(mode: string | CodeMirror.modespec): Promise<CodeMirror.mod
 
   // Fetch the mode asynchronously.
   return new Promise<CodeMirror.modespec>((resolve, reject) => {
-    (require as any)([`codemirror/mode/${info.mode}/${info.mode}`], () => {
+    require([`codemirror/mode/${info.mode}/${info.mode}`], () => {
       resolve(info);
     });
   });
