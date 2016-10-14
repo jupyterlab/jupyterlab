@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   utils, Session
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   MimeData

@@ -3,7 +3,7 @@
 
 import {
   ServiceManager
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   JupyterLabPlugin

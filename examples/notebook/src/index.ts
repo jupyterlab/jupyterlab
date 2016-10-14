@@ -2,40 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  NotebookPanel, NotebookWidgetFactory,
-  NotebookModelFactory, NotebookActions
-} from 'jupyterlab/lib/notebook';
-
-import {
-  CodeMirrorNotebookPanelRenderer
-} from 'jupyterlab/lib/notebook/codemirror/notebook/panel';
-
-import {
-  IServiceManager, ServiceManager
-} from 'jupyter-js-services';
-
-import {
-  DocumentManager
-} from 'jupyterlab/lib/docmanager';
-
-import {
-  DocumentRegistry, restartKernel, selectKernelForContext
-} from 'jupyterlab/lib/docregistry';
-
-import {
-  RenderMime
-} from 'jupyterlab/lib/rendermime';
-
-import {
-  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  JavascriptRenderer, SVGRenderer, MarkdownRenderer
-} from 'jupyterlab/lib/renderers';
-
-import {
-  defaultSanitizer
-} from 'jupyterlab/lib/sanitizer';
-
-import {
   MimeData
 } from 'phosphor/lib/core/mimedata';
 
@@ -58,6 +24,40 @@ import {
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
+import {
+  IServiceManager, ServiceManager
+} from '@jupyterlab/services';
+
+import {
+  NotebookPanel, NotebookWidgetFactory,
+  NotebookModelFactory, NotebookActions
+} from 'jupyterlab/lib/notebook';
+
+import {
+  CodeMirrorNotebookPanelRenderer
+} from 'jupyterlab/lib/notebook/codemirror/notebook/panel';
+
+import {
+  DocumentManager
+} from 'jupyterlab/lib/docmanager';
+
+import {
+  DocumentRegistry, restartKernel, selectKernelForContext
+} from 'jupyterlab/lib/docregistry';
+
+import {
+  RenderMime
+} from 'jupyterlab/lib/rendermime';
+
+import {
+  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
+  JavascriptRenderer, SVGRenderer, MarkdownRenderer
+} from 'jupyterlab/lib/renderers';
+
+import {
+  defaultSanitizer
+} from 'jupyterlab/lib/sanitizer';
 
 import 'jupyterlab/lib/default-theme/index.css';
 import '../index.css';

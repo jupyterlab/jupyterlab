@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   Kernel
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   Message, sendMessage

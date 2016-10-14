@@ -3,7 +3,7 @@
 
 import {
   ISession, KernelMessage
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   clearSignalData, defineSignal, ISignal

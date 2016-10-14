@@ -2,20 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  TerminalSession
-} from 'jupyter-js-services';
-
-import {
-  TerminalWidget
-} from 'jupyterlab/lib/terminal';
-
-import {
   DockPanel
 } from 'phosphor/lib/ui/dockpanel';
 
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
+import {
+  TerminalSession
+} from '@jupyterlab/services';
+
+import {
+  TerminalWidget
+} from 'jupyterlab/lib/terminal';
 
 import 'jupyterlab/lib/default-theme/index.css';
 import '../index.css';

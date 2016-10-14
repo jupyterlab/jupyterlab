@@ -3,7 +3,7 @@
 
 import {
   IServiceManager as IBaseServiceManager
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   Token

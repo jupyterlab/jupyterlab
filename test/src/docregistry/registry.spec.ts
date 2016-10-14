@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   Kernel
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   DisposableDelegate, IDisposable
@@ -16,7 +16,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ABCWidgetFactory, Base64ModelFactory, DocumentRegistry, TextModelFactory
+  ABCWidgetFactory, DocumentRegistry, TextModelFactory
 } from '../../../lib/docregistry';
 
 

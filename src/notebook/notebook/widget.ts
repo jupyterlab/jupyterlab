@@ -3,7 +3,7 @@
 
 import {
   KernelMessage
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   find

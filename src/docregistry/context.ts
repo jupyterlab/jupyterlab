@@ -4,7 +4,7 @@
 import {
   ContentsManager, Contents, IKernel, IServiceManager, ISession, utils,
   Kernel, Session
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   findIndex

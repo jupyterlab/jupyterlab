@@ -8,7 +8,7 @@ import 'codemirror/mode/meta';
 
 import {
   KernelMessage
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 
 /**

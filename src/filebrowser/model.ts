@@ -3,7 +3,7 @@
 
 import {
   Contents, ContentsManager, Kernel, IServiceManager, Session
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   ISequence
