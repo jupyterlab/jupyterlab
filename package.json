@@ -54,7 +54,6 @@
     "karma-remap-coverage": "^0.1.1",
     "karma-sourcemap-loader": "^0.3.7",
     "mocha": "^2.3.4",
-    "node": "0.0.0",
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.0",
     "style-loader": "^0.13.0",
