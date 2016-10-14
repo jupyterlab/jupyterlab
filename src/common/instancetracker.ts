@@ -48,7 +48,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * #### Notes
    * If the last widget being tracked is disposed, `null` will be emitted.
    */
-  currentChanged: ISignal<this, T>;
+  readonly currentChanged: ISignal<this, T>;
 
   /**
    * The current widget is the most recently focused widget.
@@ -139,23 +139,21 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * @returns The current widget or `null` if there is none.
    *
    * #### Notes
-   * Syncing acts as a gate returning the widget that's passed in any time it is
-   * held by the tracker and not already the current widget. It returns `null`
-   * at all other times.
+   * Syncing acts as a gate returning a widget only if it is the current widget.
    */
   sync(current: Widget): T {
     if (this.isDisposed) {
       return;
     }
-    if (current && this.has(current)) {
+    if (current && this._widgets.has(current as any)) {
       // If no state change needs to occur, just bail.
       if (this._currentWidget === current) {
-        return null;
+        return this._currentWidget;
       }
       this._currentWidget = current as T;
       this.onCurrentChanged();
       this.currentChanged.emit(this._currentWidget);
-      return current as T;
+      return this._currentWidget;
     }
     return null;
   }
