@@ -107,8 +107,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * The current contents model associated with the document
    *
    * #### Notes
-   * This is a read-only property.  The model will have an
-   * empty `contents` field.
+   * The model will have an  empty `contents` field.
    */
   get contentsModel(): Contents.IModel {
     return this._contentsModel;
@@ -116,9 +115,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
 
   /**
    * Get the kernel spec information.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get kernelspecs(): Kernel.ISpecModels {
     return this._manager.kernelspecs;
@@ -126,9 +122,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
 
   /**
    * Test whether the context is fully populated.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get isPopulated(): boolean {
     return this._isPopulated;
@@ -138,7 +131,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Get the model factory name.
    *
    * #### Notes
-   * This is a read-only property.
+   * This is not part of the `IContext` API.
    */
   get factoryName(): string {
     return this.isDisposed ? '' : this._factory.name;
@@ -368,7 +361,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Set the path of the context.
    *
    * #### Notes
-   * This is not intended to be called by the user.
+   * This is not part of the `IContext` API and
+   * is not intended to be called by the user.
    * It is assumed that the file has been renamed on the
    * contents manager prior to this operation.
    */
