@@ -654,6 +654,8 @@ class ObservableList<T> implements IObservableList<T> {
   private _limit(c: number): number {
     return Math.max(0, Math.min(Math.floor(c), this.internal.length));
   }
+
+  private _isDisposed = false;
 }
 
 

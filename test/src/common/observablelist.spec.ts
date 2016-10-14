@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  toArray
+  every, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -102,6 +102,36 @@ describe('common/observablelist', () => {
         expect(list.length).to.be(0);
         list.insert(0, 1);
         expect(list.length).to.be(1);
+      });
+
+    });
+
+    describe('#isDisposed', () => {
+
+      it('should test whether the list is disposed', () => {
+        let list = new ObservableList<number>();
+        expect(list.isDisposed).to.be(false);
+        list.dispose();
+        expect(list.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#dispose()', () => {
+
+      it('should dispose of the resources held by the list', () => {
+        let list = new ObservableList<number>([1, 2, 3]);
+        list.dispose();
+        expect(list.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#iter()', () => {
+
+      it('should create an iterator over the items in the list', () => {
+        let list = new ObservableList<number>([1, 2, 3]);
+        expect(every(list, item => item > 0)).to.be(true);
       });
 
     });
