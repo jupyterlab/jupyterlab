@@ -196,11 +196,11 @@ class OpenWithHandler extends Widget {
   protected populateFactories(): void {
     let factories = this._manager.registry.listWidgetFactories(this._ext);
     let widgetDropdown = this.widgetDropdown;
-    for (let factory of factories) {
+    each(factories, factory => {
       let option = document.createElement('option');
       option.text = factory;
       widgetDropdown.appendChild(option);
-    }
+    });
     this.widgetChanged();
   }
 
@@ -526,11 +526,11 @@ class CreateNewHandler extends Widget {
     let ext = this.ext;
     let factories = this._manager.registry.listWidgetFactories(ext);
     let widgetDropdown = this.widgetDropdown;
-    for (let factory of factories) {
+    each(factories, factory => {
       let option = document.createElement('option');
       option.text = factory;
       widgetDropdown.appendChild(option);
-    }
+    });
     this.widgetDropdownChanged();
     this._prevExt = ext;
   }

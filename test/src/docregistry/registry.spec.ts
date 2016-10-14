@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   DisposableDelegate, IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -198,7 +202,7 @@ describe('docregistry/registry', () => {
       it('should add a widget extension to the registry', () => {
         let extension = new WidgetExtension();
         registry.addWidgetExtension('foo', extension);
-        expect(registry.getWidgetExtensions('foo').at(0)).to.be(extension);
+        expect(registry.getWidgetExtensions('foo').next()).to.be(extension);
       });
 
       it('should be a no-op if the extension is already registered for a given widget factory', () => {
@@ -206,14 +210,14 @@ describe('docregistry/registry', () => {
         registry.addWidgetExtension('foo', extension);
         let disposable = registry.addWidgetExtension('foo', extension);
         disposable.dispose();
-        expect(registry.getWidgetExtensions('foo').at(0)).to.be(extension);
+        expect(registry.getWidgetExtensions('foo').next()).to.be(extension);
       });
 
       it('should be removed from the registry when disposed', () => {
         let extension = new WidgetExtension();
         let disposable = registry.addWidgetExtension('foo', extension);
         disposable.dispose();
-        expect(registry.getWidgetExtensions('foo').length).to.be(0);
+        expect(toArray(registry.getWidgetExtensions('foo')).length).to.be(0);
       });
 
     });
@@ -223,14 +227,14 @@ describe('docregistry/registry', () => {
       it('should add a file type to the document registry', () => {
         let fileType = { name: 'notebook', extension: '.ipynb' };
         registry.addFileType(fileType);
-        expect(registry.fileTypes.at(0)).to.be(fileType);
+        expect(registry.fileTypes.next()).to.be(fileType);
       });
 
       it('should be removed from the registry when disposed', () => {
         let fileType = { name: 'notebook', extension: '.ipynb' };
         let disposable = registry.addFileType(fileType);
         disposable.dispose();
-        expect(registry.fileTypes.length).to.be(0);
+        expect(toArray(registry.fileTypes).length).to.be(0);
       });
 
       it('should be a no-op if a file type of the same name is registered', () => {
@@ -238,7 +242,7 @@ describe('docregistry/registry', () => {
         registry.addFileType(fileType);
         let disposable = registry.addFileType(fileType);
         disposable.dispose();
-        expect(registry.fileTypes.at(0)).to.be(fileType);
+        expect(registry.fileTypes.next()).to.be(fileType);
       });
 
     });
@@ -248,14 +252,14 @@ describe('docregistry/registry', () => {
       it('should add a file type to the document registry', () => {
         let creator = { name: 'notebook', fileType: 'notebook' };
         registry.addCreator(creator);
-        expect(registry.creators.at(0)).to.be(creator);
+        expect(registry.creators.next()).to.be(creator);
       });
 
       it('should be removed from the registry when disposed', () => {
         let creator = { name: 'notebook', fileType: 'notebook' };
         let disposable = registry.addCreator(creator);
         disposable.dispose();
-        expect(registry.creators.length).to.be(0);
+        expect(toArray(registry.creators).length).to.be(0);
       });
 
       it('should end up in locale order', () => {
@@ -267,9 +271,9 @@ describe('docregistry/registry', () => {
         registry.addCreator(creators[0]);
         registry.addCreator(creators[1]);
         registry.addCreator(creators[2]);
-        expect(registry.creators.at(0)).to.be(creators[2]);
-        expect(registry.creators.at(1)).to.be(creators[0]);
-        expect(registry.creators.at(2)).to.be(creators[1]);
+        expect(registry.creators.next()).to.be(creators[2]);
+        expect(registry.creators.next()).to.be(creators[0]);
+        expect(registry.creators.next()).to.be(creators[1]);
       });
 
       it('should be a no-op if a file type of the same name is registered', () => {
@@ -277,7 +281,7 @@ describe('docregistry/registry', () => {
         registry.addCreator(creator);
         let disposable = registry.addCreator(creator);
         disposable.dispose();
-        expect(registry.creators.at(0)).to.eql(creator);
+        expect(registry.creators.next()).to.eql(creator);
       });
 
     });
@@ -392,15 +396,15 @@ describe('docregistry/registry', () => {
     describe('#fileTypes', () => {
 
       it('should get the registered file types', () => {
-        expect(registry.fileTypes.length).to.be(0);
+        expect(toArray(registry.fileTypes).length).to.be(0);
         let fileTypes = [
           { name: 'notebook', extension: '.ipynb' },
           { name: 'python', extension: '.py' }
         ];
         registry.addFileType(fileTypes[0]);
         registry.addFileType(fileTypes[1]);
-        expect(registry.fileTypes.at(0)).to.be(fileTypes[0]);
-        expect(registry.fileTypes.at(1)).to.be(fileTypes[1]);
+        expect(registry.fileTypes.next()).to.be(fileTypes[0]);
+        expect(registry.fileTypes.next()).to.be(fileTypes[1]);
       });
 
     });
@@ -408,7 +412,7 @@ describe('docregistry/registry', () => {
     describe('#creators', () => {
 
       it('should get the registered file creators', () => {
-        expect(registry.creators.length).to.be(0);
+        expect(toArray(registry.creators).length).to.be(0);
         let creators = [
           { name: 'Python Notebook', fileType: 'notebook' },
           { name: 'R Notebook', fileType: 'notebook' },
@@ -417,8 +421,8 @@ describe('docregistry/registry', () => {
         registry.addCreator(creators[0]);
         registry.addCreator(creators[1]);
         registry.addCreator(creators[2]);
-        expect(registry.creators.length).to.be(3);
-        expect(registry.creators.at(0).name).to.be('CSharp Notebook');
+        expect(toArray(registry.creators).length).to.be(3);
+        expect(registry.creators.next().name).to.be('CSharp Notebook');
       });
 
     });
@@ -541,12 +545,12 @@ describe('docregistry/registry', () => {
         registry.addWidgetExtension('fizz', foo);
         registry.addWidgetExtension('fizz', bar);
         registry.addWidgetExtension('buzz', foo);
-        expect(registry.getWidgetExtensions('fizz').at(0)).to.be(foo);
-        expect(registry.getWidgetExtensions('fizz').at(1)).to.be(bar);
-        expect(registry.getWidgetExtensions('fizz').length).to.be(2);
-        expect(registry.getWidgetExtensions('buzz').at(0)).to.be(foo);
-        expect(registry.getWidgetExtensions('buzz').length).to.be(1);
-        expect(registry.getWidgetExtensions('baz').length).to.be(0);
+        expect(registry.getWidgetExtensions('fizz').next()).to.be(foo);
+        expect(registry.getWidgetExtensions('fizz').next()).to.be(bar);
+        expect(toArray(registry.getWidgetExtensions('fizz')).length).to.be(2);
+        expect(registry.getWidgetExtensions('buzz').next()).to.be(foo);
+        expect(toArray(registry.getWidgetExtensions('buzz')).length).to.be(1);
+        expect(toArray(registry.getWidgetExtensions('baz')).length).to.be(0);
       });
 
     });

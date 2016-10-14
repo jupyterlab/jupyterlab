@@ -6,16 +6,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  EmptyIterator, IIterator, each, iter
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
   find, findIndex, indexOf
 } from 'phosphor/lib/algorithm/searching';
-
-import {
-  ISequence
-} from 'phosphor/lib/algorithm/sequence';
 
 import {
   Vector
@@ -71,15 +67,15 @@ class DocumentRegistry {
   /**
    * A read-only sequence of file types that have been registered.
    */
-  get fileTypes(): ISequence<DocumentRegistry.IFileType> {
-    return this._fileTypes;
+  get fileTypes(): IIterator<DocumentRegistry.IFileType> {
+    return this._fileTypes.iter();
   }
 
   /**
    * A read-only sequence of the file creators that have been registered.
    */
-  get creators(): ISequence<DocumentRegistry.IFileCreator> {
-    return this._creators;
+  get creators(): IIterator<DocumentRegistry.IFileCreator> {
+    return this._creators.iter();
   }
 
   /**
@@ -331,7 +327,7 @@ class DocumentRegistry {
    * - all other extension-specific factories
    * - all other global factories
    */
-  listWidgetFactories(ext: string = '*'): string[] {
+  listWidgetFactories(ext: string = '*'): IIterator<string> {
     let factories = new Set<string>();
     ext = Private.normalizeExtension(ext);
 
@@ -373,7 +369,7 @@ class DocumentRegistry {
       }
     });
 
-    return factoryList;
+    return iter(factoryList);
   }
 
   /**
@@ -385,7 +381,7 @@ class DocumentRegistry {
    */
   defaultWidgetFactory(ext: string = '*'): string {
     let widgets = this.listWidgetFactories(ext);
-    return widgets ? widgets[0] : void 0;
+    return widgets ? widgets.next() : void 0;
   }
 
   /**
@@ -469,12 +465,12 @@ class DocumentRegistry {
    *
    * @returns A read-only sequence of widget extensions.
    */
-  getWidgetExtensions(widgetName: string): ISequence<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
+  getWidgetExtensions(widgetName: string): IIterator<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      this._extenders[widgetName] = new Vector<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>>();
+      return EmptyIterator.instance;
     }
-    return this._extenders[widgetName];
+    return this._extenders[widgetName].iter();
   }
 
   /**

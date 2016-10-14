@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
+  each, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -142,7 +142,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     event.preventDefault();
     let path = fbWidget.pathForClick(event) || '';
     let ext = '.' + path.split('.').pop();
-    let widgetNames = registry.listWidgetFactories(ext);
+    let widgetNames = toArray(registry.listWidgetFactories(ext));
     let prefix = `file-browser-contextmenu-${++Private.id}`;
     let openWith: Menu = null;
     if (path && widgetNames.length > 1) {
