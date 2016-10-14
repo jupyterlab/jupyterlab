@@ -33,7 +33,7 @@ The default plugins in the JupyterLab application include:
 - [Editor](http://jupyterlab.github.io/jupyterlab/modules/_editorwidget_plugin_.html) - Add a widget factory for displaying editable source files.
 - [Console](http://jupyterlab.github.io/jupyterlab/modules/_console_plugin_.html) - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
-- [Services](http://jupyterlab.github.io/jupyterlab/modules/_services_plugin_.html#servicesprovider) - An application-specific interface to `jupyter-js-services`.
+- [Services](http://jupyterlab.github.io/jupyterlab/modules/_services_plugin_.html#servicesprovider) - An application-specific interface to `@jupyterlab/services`.
 - [RenderMime](http://jupyterlab.github.io/jupyterlab/modules/_rendermime_plugin_.html#rendermimeprovider) - The registry for adding kernel `display_data` renderers.
 - [Document Registry](http://jupyterlab.github.io/jupyterlab/modules/_docregistry_plugin_.html#docregistryprovider) - Used to add functionality around widgets backed by files.
 - [Clipboard](http://jupyterlab.github.io/jupyterlab/modules/_clipboard_plugin_.html#clipboardprovider) - The application-wide clipboard for arbitrary MIME data.
