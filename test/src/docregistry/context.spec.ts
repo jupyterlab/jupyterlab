@@ -105,6 +105,27 @@ describe('docregistry/context', () => {
         }).catch(done);
       });
 
+      it('should be emitted when the file is reverted for the first time', (done) => {
+        manager.contents.save(context.path, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        });
+        let count = 0;
+        context.populated.connect((sender, args) => {
+          expect(sender).to.be(context);
+          expect(args).to.be(void 0);
+          count++;
+        });
+        context.revert().then(() => {
+          expect(count).to.be(1);
+          return context.revert();
+        }).then(() => {
+          expect(count).to.be(1);
+          done();
+        }).catch(done);
+      });
+
     });
 
     describe('#disposed', () => {
@@ -204,13 +225,47 @@ describe('docregistry/context', () => {
 
     describe('#isDisposed', () => {
 
+      it('should test whether the context is disposed', () => {
+        expect(context.isDisposed).to.be(false);
+        context.dispose();
+        expect(context.isDisposed).to.be(true);
+      });
+
     });
 
     describe('#dispose()', () => {
 
+      it('should dispose of the resources used by the context', () => {
+        context.dispose();
+        expect(context.isDisposed).to.be(true);
+        context.dispose();
+        expect(context.isDisposed).to.be(true);
+      });
+
     });
 
     describe('#changeKernel()', () => {
+
+      it('should change the kernel instance', (done) => {
+        let name = manager.kernelspecs.default;
+        context.changeKernel({ name }).then(() => {
+          expect(context.kernel.name).to.be(name);
+          return context.kernel.shutdown();
+        }).then(() => {
+          done();
+        }).catch(done);
+      });
+
+      it('should shut down the session if given `null`', (done) => {
+        let name = manager.kernelspecs.default;
+        context.changeKernel({ name }).then(() => {
+          expect(context.kernel.name).to.be(name);
+          return context.changeKernel(null);
+        }).then(() => {
+          expect(context.kernel).to.be(null);
+          done();
+        }).catch(done);
+      });
 
     });
 
