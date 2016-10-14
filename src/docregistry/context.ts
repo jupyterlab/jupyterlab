@@ -274,7 +274,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       this._updateContentsModel(contents);
       model.dirty = false;
       if (!this._isPopulated) {
-        this._populate();
+        return this._populate();
       }
     }).catch(err => {
       showDialog({
