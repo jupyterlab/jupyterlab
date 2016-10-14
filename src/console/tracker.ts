@@ -6,8 +6,8 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  FocusTracker
-} from 'phosphor/lib/ui/focustracker';
+  IInstanceTracker
+} from '../common/instancetracker';
 
 import {
   ConsolePanel
@@ -19,7 +19,7 @@ import {
  * The console tracker token.
  */
 export
-const IConsoleTracker = new Token<IConsoleTracker>('jupyter.services.console-handler');
+const IConsoleTracker = new Token<IConsoleTracker>('jupyter.services.consoles');
 /* tslint:enable */
 
 
@@ -27,4 +27,4 @@ const IConsoleTracker = new Token<IConsoleTracker>('jupyter.services.console-han
  * A class that tracks console widgets.
  */
 export
-interface IConsoleTracker extends FocusTracker<ConsolePanel> {}
+interface IConsoleTracker extends IInstanceTracker<ConsolePanel> {}

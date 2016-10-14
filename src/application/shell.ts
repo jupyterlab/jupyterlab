@@ -1,5 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+
+import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
 import {
   find, findIndex, upperBound
 } from 'phosphor/lib/algorithm/searching';
@@ -7,6 +12,10 @@ import {
 import {
   Vector
 } from 'phosphor/lib/collections/vector';
+
+import {
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   BoxLayout, BoxPanel
@@ -19,10 +28,6 @@ import {
 import {
   FocusTracker
 } from 'phosphor/lib/ui/focustracker';
-
-import {
-  each
-} from 'phosphor/lib/algorithm/iteration';
 
 import {
   Panel
@@ -145,8 +150,8 @@ class ApplicationShell extends Widget {
 
     this.layout = rootLayout;
 
-    this._tracker = new FocusTracker<Widget>();
-    this._tracker.currentChanged.connect((sender, args) => {
+    this._dockPanel.currentChanged.connect((sender, args) => {
+      this.currentChanged.emit(args);
       if (args.newValue) {
         args.newValue.title.className += ` ${CURRENT_CLASS}`;
       }
@@ -156,6 +161,21 @@ class ApplicationShell extends Widget {
         title.className = title.className.replace(CURRENT_CLASS, '');
       }
     });
+  }
+
+  /**
+   * A signal emitted when main area's current focus changes.
+   */
+  readonly currentChanged: ISignal<this, FocusTracker.ICurrentChangedArgs<Widget>>;
+
+  /**
+   * The current widget in the shell's main area.
+   *
+   * #### Notes
+   * This property is read-only.
+   */
+  get currentWidget(): Widget {
+    return this._dockPanel.currentWidget;
   }
 
   /**
@@ -216,7 +236,6 @@ class ApplicationShell extends Widget {
       return;
     }
     this._dockPanel.addWidget(widget, { mode: 'tab-after' });
-    this._tracker.add(widget);
   }
 
   /**
@@ -262,9 +281,7 @@ class ApplicationShell extends Widget {
    * Close all tracked widgets.
    */
   closeAll(): void {
-    each(this._tracker.widgets, widget => {
-      widget.close();
-    });
+    each(this._dockPanel.widgets, widget => { widget.close(); });
   }
 
   private _topPanel: Panel;
@@ -273,8 +290,11 @@ class ApplicationShell extends Widget {
   private _hsplitPanel: SplitPanel;
   private _leftHandler: SideBarHandler;
   private _rightHandler: SideBarHandler;
-  private _tracker: FocusTracker<Widget>;
 }
+
+
+// Define the signals for the `ApplicationShell` class.
+defineSignal(ApplicationShell.prototype, 'currentChanged');
 
 
 /**
@@ -321,6 +341,7 @@ class SideBarHandler {
     let widget = this._findWidgetByID(id);
     if (widget) {
       this._sideBar.currentTitle = widget.title;
+      widget.activate();
     }
   }
 

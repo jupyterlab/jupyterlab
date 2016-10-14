@@ -10,10 +10,6 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  FocusTracker
-} from 'phosphor/lib/ui/focustracker';
-
-import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -28,6 +24,10 @@ import {
 import {
   ICommandPalette
 } from '../commandpalette';
+
+import {
+  InstanceTracker
+} from '../common/instancetracker';
 
 import {
   DocumentManager
@@ -78,14 +78,17 @@ const cmdIds = {
   toggleBrowser: 'file-browser:toggle'
 };
 
+/**
+ * The widget instance tracker for the file browser plugin.
+ */
+const tracker = new InstanceTracker<Widget>();
+
 
 /**
  * Activate the file browser.
  */
 function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IPathTracker {
   let id = 0;
-  let tracker = new FocusTracker<Widget>();
-
   let opener: IWidgetOpener = {
     open: widget => {
       if (!widget.id) {
@@ -125,6 +128,11 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     disposables.add(palette.addItem({ command, category }));
   };
 
+  // Sync tracker with currently focused widget.
+  app.shell.currentChanged.connect((sender, args) => {
+    tracker.sync(args.newValue);
+  });
+
   each(creators, creator => {
     addCreator(creator.name);
   });
@@ -160,7 +168,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     menu.open(event.clientX, event.clientY);
   });
 
-  addCommands(app, tracker, fbWidget, docManager);
+  addCommands(app, fbWidget, docManager);
 
   [
     cmdIds.save,
@@ -201,7 +209,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 /**
  * Add the filebrowser commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, tracker: FocusTracker<Widget>, fbWidget: FileBrowserWidget, docManager: DocumentManager): void {
+function addCommands(app: JupyterLab, fbWidget: FileBrowserWidget, docManager: DocumentManager): void {
   let commands = app.commands;
   let fbModel = fbWidget.model;
 
@@ -260,7 +268,7 @@ function addCommands(app: JupyterLab, tracker: FocusTracker<Widget>, fbWidget: F
   commands.addCommand(cmdIds.closeAllFiles, {
     label: 'Close All',
     execute: () => {
-      each(tracker.widgets, widget => widget.close());
+      tracker.forEach(widget => { widget.close(); });
     }
   });
   commands.addCommand(cmdIds.showBrowser, {

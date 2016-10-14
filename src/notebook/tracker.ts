@@ -2,16 +2,51 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  DisposableDelegate
+} from 'phosphor/lib/core/disposable';
+
+import {
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
+
+import {
   Token
 } from 'phosphor/lib/core/token';
 
 import {
-  FocusTracker
-} from 'phosphor/lib/ui/focustracker';
+  IInstanceTracker, InstanceTracker
+} from '../common/instancetracker';
 
 import {
   NotebookPanel
 } from './';
+
+import {
+  BaseCellWidget
+} from './cells';
+
+
+/**
+ * An object that tracks notebook widgets.
+ */
+export
+interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
+  /**
+   * The currently focused cell.
+   *
+   * #### Notes
+   * If there is no cell with the focus, then this value is `null`.
+   */
+  activeCell: BaseCellWidget;
+
+  /**
+   * A signal emitted when the current active cell changes.
+   *
+   * #### Notes
+   * If there is no cell with the focus, then `null` will be emitted.
+   */
+  activeCellChanged: ISignal<this, BaseCellWidget>;
+}
 
 
 /* tslint:disable */
@@ -19,12 +54,73 @@ import {
  * The notebook tracker token.
  */
 export
-const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebook-handler');
+const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebooks');
 /* tslint:enable */
 
 
-/**
- * A class that tracks notebook widgets.
- */
 export
-interface INotebookTracker extends FocusTracker<NotebookPanel> {}
+class NotebookTracker extends InstanceTracker<NotebookPanel> implements INotebookTracker {
+  /**
+   * The currently focused cell.
+   *
+   * #### Notes
+   * This is a read-only property. If there is no cell with the focus, then this
+   * value is `null`.
+   */
+  get activeCell(): BaseCellWidget {
+    let widget = this.currentWidget;
+    if (!widget) {
+      return null;
+    }
+    return widget.content.activeCell || null;
+  }
+
+  /**
+   * A signal emitted when the current active cell changes.
+   *
+   * #### Notes
+   * If there is no cell with the focus, then `null` will be emitted.
+   */
+  activeCellChanged: ISignal<this, BaseCellWidget>;
+
+  /**
+   * Dispose of the resources held by the tracker.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+    if (this._handler) {
+      this._handler.dispose();
+      this._handler = null;
+    }
+  }
+
+  /**
+   * Handle the current change event.
+   */
+  protected onCurrentChanged(): void {
+    if (this._handler) {
+      this._handler.dispose();
+    }
+
+    let widget = this.currentWidget;
+    if (!widget) {
+      return;
+    }
+
+    let changeHandler = (sender: any, cell: BaseCellWidget) => {
+      this.activeCellChanged.emit(cell || null);
+    };
+    widget.content.activeCellChanged.connect(changeHandler);
+    this._handler = new DisposableDelegate(() => {
+      widget.content.activeCellChanged.disconnect(changeHandler);
+    });
+  }
+
+  private _handler: DisposableDelegate = null;
+}
+
+// Define the signals for the `NotebookTracker` class.
+defineSignal(InstanceTracker.prototype, 'activeCellChanged');

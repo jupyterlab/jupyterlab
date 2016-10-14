@@ -15,12 +15,12 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  FocusTracker
-} from 'phosphor/lib/ui/focustracker';
-
-import {
   loadModeByFileName
 } from '../codemirror';
+
+import {
+  IInstanceTracker
+} from '../common/instancetracker';
 
 import {
   CodeMirrorWidget, DEFAULT_CODEMIRROR_THEME
@@ -46,7 +46,7 @@ const EDITOR_CLASS = 'jp-EditorWidget';
  * A class that tracks editor widgets.
  */
 export
-interface IEditorTracker extends FocusTracker<EditorWidget> {}
+interface IEditorTracker extends IInstanceTracker<EditorWidget> {}
 
 
 /* tslint:disable */
