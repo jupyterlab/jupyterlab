@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterator
+  EmptyIterator, IIterator, IIterable, IterableOrArrayLike, iter, each
 } from 'phosphor/lib/algorithm/iteration';
-
-import {
-  ISequence
-} from 'phosphor/lib/algorithm/sequence';
 
 import {
   move
@@ -41,6 +37,11 @@ type ListChangeType =
   'add' |
 
   /**
+   * Items were assigned or cleared in the list.
+   */
+  'assign' |
+
+  /**
    * An item was moved within the list.
    */
   'move' |
@@ -49,11 +50,6 @@ type ListChangeType =
    * An item was removed from the list.
    */
   'remove' |
-
-  /**
-   * Items were replaced in the list.
-   */
-  'replace' |
 
   /**
    * An item was set in the list.
@@ -76,9 +72,10 @@ interface IListChangedArgs<T> {
    *
    * The semantics of this value depend upon the change type:
    *   - `Add`: The index of the added item.
+   *   - `Assign`: Always `-1`.
    *   - `Move`: The new index of the item.
    *   - `Remove`: Always `-1`.
-   *   - `Replace`: The index of the replacement.
+   *   - `Assign`: Always `-1`.
    *   - `Set`: The index of the set item.
    */
   newIndex: number;
@@ -88,21 +85,21 @@ interface IListChangedArgs<T> {
    *
    * The semantics of this value depend upon the change type:
    *   - `Add`: The item which was added.
+   *   - `Assign`: The new items.
    *   - `Move`: The item which was moved.
    *   - `Remove`: Always `undefined`.
-   *   - `Replace`: The `items[]` which were added.
    *   - `Set`: The new item at the index.
    */
-  newValue: T | T[];
+  newValue: T | IIterator<T>;
 
   /**
    * The old index associated with the change.
    *
    * The semantics of this value depend upon the change type:
    *   - `Add`: Always `-1`.
+   *   - `Assign`: Always `-1`.
    *   - `Move`: The old index of the item.
    *   - `Remove`: The index of the removed item.
-   *   - `Replace`: The index of the replacement.
    *   - `Set`: The index of the set item.
    */
   oldIndex: number;
@@ -112,12 +109,12 @@ interface IListChangedArgs<T> {
    *
    * The semantics of this value depend upon the change type:
    *   - `Add`: Always `undefined`.
+   *   - `Assign`: The old items.
    *   - `Move`: The item which was moved.
    *   - `Remove`: The item which was removed.
-   *   - `Replace`: The `items[]` which were removed.
    *   - `Set`: The old item at the index.
    */
-  oldValue: T | T[];
+  oldValue: T | IIterator<T>;
 }
 
 
@@ -125,7 +122,7 @@ interface IListChangedArgs<T> {
  * A sequence container which can be observed for changes.
  */
 export
-interface IObservableList<T> extends IDisposable {
+interface IObservableList<T> extends IDisposable, IIterable<T> {
   /**
    * A signal emitted when the list has changed.
    */
@@ -135,18 +132,6 @@ interface IObservableList<T> extends IDisposable {
    * The number of items in the list.
    */
   readonly length: number;
-
-  /**
-   * The read-only sequence of items in the list.
-   */
-  readonly items: ISequence<T>;
-
-  /**
-   * Create an iterator over the values in the list.
-   *
-   * @returns A new iterator starting at the front of the list.
-   */
-  iter(): IIterator<T>;
 
   /**
    * Get the item at a specific index in the list.
@@ -177,7 +162,7 @@ interface IObservableList<T> extends IDisposable {
    *
    * @param item - The item to add to the list.
    *
-   * @returns The index at which the item was added.
+   * @returns The new length of the vector.
    */
   pushBack(item: T): number;
 
@@ -190,7 +175,7 @@ interface IObservableList<T> extends IDisposable {
    *
    * @param item - The item to insert into the list.
    *
-   * @returns The index at which the item was inserted.
+   * @returns The the new length of the vector.
    */
   insert(index: number, item: T): number;
 
@@ -229,30 +214,23 @@ interface IObservableList<T> extends IDisposable {
   removeAt(index: number): T;
 
   /**
-   * Replace items at a specific location in the list.
+   * Assign the items in the list.
    *
-   * @param index - The index at which to modify the list. If this is
-   *   negative, it is offset from the end of the list. In all cases,
-   *   it is clamped to the bounds of the list.
+   * @param items - The items to assign.
    *
-   * @param count - The number of items to remove at the given index.
-   *   This is clamped to the length of the list.
-   *
-   * @param items - The items to insert at the specified index.
-   *
-   * @returns An array of the items removed from the list.
+   * @returns An iterator for of the items in the existing list.
    */
-  replace(index: number, count: number, items: T[]): T[];
+  assign(items: IterableOrArrayLike<T>): IIterator<T>;
 
   /**
    * Remove all items from the list.
    *
-   * @returns An array of the items removed from the list.
+   * @returns An iterator for the items removed from the list.
    *
    * #### Notes
-   * This is equivalent to `list.replace(0, list.length, [])`.
+   * This is equivalent to `list.assign([])`.
    */
-  clear(): T[];
+  clear(): IIterator<T>;
 }
 
 
@@ -266,7 +244,7 @@ class ObservableList<T> implements IObservableList<T> {
    *
    * @param items - The initial items for the list.
    */
-  constructor(items?: T[]) {
+  constructor(items?: IterableOrArrayLike<T>) {
     this.internal = new Vector<T>(items);
   }
 
@@ -286,17 +264,10 @@ class ObservableList<T> implements IObservableList<T> {
   }
 
   /**
-   * The read-only sequence of items in the list.
-   */
-  get items(): ISequence<T> {
-    return this.internal;
-  }
-
-  /**
    * Test whether the list has been disposed.
    */
   get isDisposed(): boolean {
-    return this._isDisposed;
+    return this.internal === null;
   }
 
   /**
@@ -306,9 +277,9 @@ class ObservableList<T> implements IObservableList<T> {
     if (this.isDisposed) {
       return;
     }
-    this._isDisposed = true;
     clearSignalData(this);
     this.internal.clear();
+    this.internal = null;
   }
 
   /**
@@ -447,33 +418,44 @@ class ObservableList<T> implements IObservableList<T> {
   }
 
   /**
-   * Replace items at a specific location in the list.
+   * Assign the items in the list.
    *
-   * @param index - The index at which to modify the list. If this is
-   *   negative, it is offset from the end of the list. In all cases,
-   *   it is clamped to the bounds of the list.
+   * @param items - The items to assign.
    *
-   * @param count - The number of items to remove at the given index.
-   *   This is clamped to the length of the list.
-   *
-   * @param items - The items to insert at the specified index.
-   *
-   * @returns An array of the items removed from the list.
+   * @returns An iterator for of the items in the existing list.
    */
-  replace(index: number, count: number, items: T[]): T[] {
-    return this.replaceItems(this._norm(index), this._limit(count), items);
+  assign(items: IterableOrArrayLike<T>): IIterator<T> {
+    let old: T[] = [];
+    while (!this.internal.isEmpty) {
+      old.push(this.internal.removeAt(0));
+    }
+    let newValue = iter(items);
+    let oldValue = iter(old);
+
+    each(newValue, item => {
+      this.internal.pushBack(item);
+    });
+
+    this.changed.emit({
+      type: 'assign',
+      newIndex: -1,
+      newValue,
+      oldIndex: -1,
+      oldValue
+    });
+    return oldValue;
   }
 
   /**
    * Remove all items from the list.
    *
-   * @returns An array of the items removed from the list.
+   * @returns An iterator for the items removed from the list.
    *
    * #### Notes
-   * This is equivalent to `list.replace(0, list.length, [])`.
+   * This is equivalent to `list.assign([])`.
    */
-  clear(): T[] {
-    return this.replaceItems(0, this.internal.length, []);
+  clear(): IIterator<T> {
+    return this.assign(EmptyIterator.instance);
   }
 
   /**
@@ -498,7 +480,7 @@ class ObservableList<T> implements IObservableList<T> {
    * This may be reimplemented by subclasses to customize the behavior.
    */
   protected addItem(index: number, item: T): number {
-    this.internal.insert(index, item);
+    let value = this.internal.insert(index, item);
     this.changed.emit({
       type: 'add',
       newIndex: index,
@@ -506,7 +488,7 @@ class ObservableList<T> implements IObservableList<T> {
       oldIndex: -1,
       oldValue: void 0,
     });
-    return index;
+    return value;
   }
 
   /**
@@ -564,44 +546,6 @@ class ObservableList<T> implements IObservableList<T> {
   }
 
   /**
-   * Replace items at a specific location in the list.
-   *
-   * @param index - The index at which to modify the list. This must
-   *   be an integer in the range `[0, internal.length]`.
-   *
-   * @param count - The number of items to remove from the list. This
-   *   must be an integer in the range `[0, internal.length]`.
-   *
-   * @param items - The items to insert at the specified index.
-   *
-   * @returns An array of the items removed from the list.
-   *
-   * #### Notes
-   * This may be reimplemented by subclasses to customize the behavior.
-   */
-  protected replaceItems(index: number, count: number, items: T[]): T[] {
-    let old: T[] = [];
-    while (count-- > 0) {
-      old.push(this.internal.removeAt(index));
-    }
-
-    let i = index;
-    let j = 0;
-    let len = items.length;
-    while (j < len) {
-      this.internal.insert(i++, items[j++]);
-    }
-    this.changed.emit({
-      type: 'replace',
-      newIndex: index,
-      newValue: items,
-      oldIndex: index,
-      oldValue: old,
-    });
-    return old;
-  }
-
-  /**
    * Set the item at a specific index in the list.
    *
    * @param index - The index of interest. This must be an integer in
@@ -654,8 +598,6 @@ class ObservableList<T> implements IObservableList<T> {
   private _limit(c: number): number {
     return Math.max(0, Math.min(Math.floor(c), this.internal.length));
   }
-
-  private _isDisposed = false;
 }
 
 

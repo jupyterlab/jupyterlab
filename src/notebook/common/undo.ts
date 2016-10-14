@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IIterator, IIterable, iter, each, toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -190,10 +194,9 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
     case 'move':
       this.move(change.newIndex, change.oldIndex);
       break;
-    case 'replace':
-      let len = (change.newValue as any[]).length;
-      let values = this._createValues(change.oldValue as any[]);
-      this.replace(change.oldIndex, len, values);
+    case 'assign':
+      let values = this._createValues(change.oldValue as IIterable<T>);
+      this.assign(values);
       break;
     default:
       return;
@@ -220,10 +223,9 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
     case 'move':
       this.move(change.oldIndex, change.newIndex);
       break;
-    case 'replace':
-      let len = (change.oldValue as any[]).length;
-      let cells = this._createValues(change.newValue as any[]);
-      this.replace(change.oldIndex, len, cells);
+    case 'assign':
+      let cells = this._createValues(change.newValue as IIterable<T>);
+      this.assign(cells);
       break;
     default:
       return;
@@ -241,11 +243,11 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   /**
    * Create a list of cell models from JSON.
    */
-  private _createValues(bundles: any[]): T[] {
+  private _createValues(bundles: IIterable<T>): T[] {
     let values: T[] = [];
-    for (let bundle of bundles) {
+    each(bundles, bundle => {
       values.push(this._createValue(bundle));
-    }
+    });
     return values;
   }
 
@@ -253,8 +255,8 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
    * Copy a change as JSON.
    */
   private _copyChange(change: IListChangedArgs<T>): IListChangedArgs<any> {
-    if (change.type === 'replace') {
-      return this._copyReplace(change);
+    if (change.type === 'assign') {
+      return this._copyAssign(change);
     }
     let oldValue: any = null;
     let newValue: any = null;
@@ -285,23 +287,23 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   }
 
   /**
-   * Copy a replace change as JSON.
+   * Copy an assign change as JSON.
    */
-  private _copyReplace(change: IListChangedArgs<T>): IListChangedArgs<any> {
+  private _copyAssign(change: IListChangedArgs<T>): IListChangedArgs<any> {
     let oldValue: any[] = [];
-    for (let value of (change.oldValue as T[])) {
+    each(change.oldValue as IIterator<T>, value => {
       oldValue.push(value.toJSON());
-    }
+    });
     let newValue: any[] = [];
-    for (let value of (change.newValue as T[])) {
+    each(change.newValue as IIterator<T>, value => {
       newValue.push(value.toJSON());
-    }
+    });
     return {
-      type: 'replace',
-      oldIndex: change.oldIndex,
-      newIndex: change.newIndex,
-      oldValue,
-      newValue
+      type: 'assign',
+      oldIndex: -1,
+      newIndex: -1,
+      oldValue: iter(oldValue),
+      newValue: iter(newValue)
     };
   }
 

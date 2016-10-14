@@ -60,7 +60,7 @@ describe('common/observablelist', () => {
 
       it('should initialize the list items', () => {
         let list = new ObservableList<number>([1, 2, 3]);
-        expect(toArray(list.items)).to.eql([1, 2, 3]);
+        expect(toArray(list)).to.eql([1, 2, 3]);
       });
 
     });
@@ -164,13 +164,13 @@ describe('common/observablelist', () => {
       it('should set the item at a specific index', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.set(1, 4);
-        expect(toArray(list.items)).to.eql([1, 4, 3]);
+        expect(toArray(list)).to.eql([1, 4, 3]);
       });
 
       it('should index from the end if negative', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.set(-1, 4);
-        expect(toArray(list.items)).to.eql([1, 2, 4]);
+        expect(toArray(list)).to.eql([1, 2, 4]);
       });
 
       it('should return the item which occupied the index', () => {
@@ -208,7 +208,7 @@ describe('common/observablelist', () => {
       it('should add an item to the end of the list', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.pushBack(4);
-        expect(toArray(list.items)).to.eql([1, 2, 3, 4]);
+        expect(toArray(list)).to.eql([1, 2, 3, 4]);
       });
 
       it('should return the new index of the item in the list', () => {
@@ -241,19 +241,19 @@ describe('common/observablelist', () => {
       it('should insert an item into the list at a specific index', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.insert(1, 4);
-        expect(toArray(list.items)).to.eql([1, 4, 2, 3]);
+        expect(toArray(list)).to.eql([1, 4, 2, 3]);
       });
 
       it('should index from the end of list if the index is negative', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.insert(-1, 4);
-        expect(toArray(list.items)).to.eql([1, 2, 4, 3]);
+        expect(toArray(list)).to.eql([1, 2, 4, 3]);
       });
 
       it('should clamp to the bounds of the list', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.insert(10, 4);
-        expect(toArray(list.items)).to.eql([1, 2, 3, 4]);
+        expect(toArray(list)).to.eql([1, 2, 3, 4]);
       });
 
       it('should return the new index of the item in the list', () => {
@@ -288,19 +288,19 @@ describe('common/observablelist', () => {
       it('should move an item from one index to another', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.move(1, 2);
-        expect(toArray(list.items)).to.eql([1, 3, 2]);
+        expect(toArray(list)).to.eql([1, 3, 2]);
       });
 
       it('should index fromIndex from the end of list if negative', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.move(-1, 1);
-        expect(toArray(list.items)).to.eql([1, 3, 2]);
+        expect(toArray(list)).to.eql([1, 3, 2]);
       });
 
       it('should index toIndex from the end of list if negative', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.move(0, -1);
-        expect(toArray(list.items)).to.eql([2, 3, 1]);
+        expect(toArray(list)).to.eql([2, 3, 1]);
       });
 
       it('should return `true` if the item was moved', () => {
@@ -339,7 +339,7 @@ describe('common/observablelist', () => {
       it('should remove the first occurrence of a specific item from the list', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.remove(1);
-        expect(toArray(list.items)).to.eql([2, 3]);
+        expect(toArray(list)).to.eql([2, 3]);
       });
 
       it('should return the index occupied by the item', () => {
@@ -377,13 +377,13 @@ describe('common/observablelist', () => {
       it('should remove the item at a specific index', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.removeAt(1);
-        expect(toArray(list.items)).to.eql([1, 3]);
+        expect(toArray(list)).to.eql([1, 3]);
       });
 
       it('should index from the end of list if negative', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.removeAt(-1);
-        expect(toArray(list.items)).to.eql([1, 2]);
+        expect(toArray(list)).to.eql([1, 2]);
       });
 
       it('should return the item at the specified index', () => {
@@ -421,37 +421,37 @@ describe('common/observablelist', () => {
       it('should replace items at a specific location in the list', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.replace(1, 2, [4, 5, 6]);
-        expect(toArray(list.items)).to.eql([1, 4, 5, 6]);
+        expect(toArray(list)).to.eql([1, 4, 5, 6]);
       });
 
       it('should index from the end of the list if negative', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.replace(-2, 2, [4, 5, 6]);
-        expect(toArray(list.items)).to.eql([1, 4, 5, 6]);
+        expect(toArray(list)).to.eql([1, 4, 5, 6]);
       });
 
       it('should clamp the index to the bounds of the list', () => {
         let list = new ObservableList<number>([1, 2, 3]);
         list.replace(10, 2, [4, 5, 6]);
-        expect(toArray(list.items)).to.eql([1, 2, 3, 4, 5, 6]);
+        expect(toArray(list)).to.eql([1, 2, 3, 4, 5, 6]);
       });
 
       it('should remove the given count of items', () => {
         let list = new ObservableList<number>([1, 2, 3, 4, 5, 6]);
         list.replace(0, 3, [1, 2]);
-        expect(toArray(list.items)).to.eql([1, 2, 4, 5, 6]);
+        expect(toArray(list)).to.eql([1, 2, 4, 5, 6]);
       });
 
       it('should clamp the count to the length of the list', () => {
         let list = new ObservableList<number>([1, 2, 3, 4, 5, 6]);
         list.replace(0, 10, [1, 2]);
-        expect(toArray(list.items)).to.eql([1, 2]);
+        expect(toArray(list)).to.eql([1, 2]);
       });
 
       it('should handle an empty items array', () => {
         let list = new ObservableList<number>([1, 2, 3, 4, 5, 6]);
         list.replace(1, 10, []);
-        expect(toArray(list.items)).to.eql([1]);
+        expect(toArray(list)).to.eql([1]);
       });
 
       it('should return an array of items removed from the list', () => {

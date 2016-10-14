@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  IIterable, each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   find
 } from 'phosphor/lib/algorithm/searching';
 
@@ -344,16 +348,17 @@ class StaticNotebook extends Widget {
     case 'remove':
       this._removeCell(args.oldIndex);
       break;
-    case 'replace':
+    case 'assign':
       // TODO: reuse existing cell widgets if possible.
-      let oldValues = args.oldValue as ICellModel[];
-      for (let i = 0; i < oldValues.length; i++) {
+      let oldValues = args.oldValue as IIterable<ICellModel>;
+      each(oldValues, value => {
         this._removeCell(args.oldIndex);
-      }
-      let newValues = args.newValue as ICellModel[];
-      for (let i = newValues.length; i > 0; i--) {
-        this._insertCell(args.newIndex, newValues[i - 1]);
-      }
+      });
+      let newValues = args.newValue as IIterable<ICellModel>;
+      let index = 0;
+      each(newValues, value => {
+        this._insertCell(index++, value);
+      });
       break;
     case 'set':
       // TODO: reuse existing widget if possible.

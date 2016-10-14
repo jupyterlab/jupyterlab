@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  EmptyIterator, IIterator
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -152,10 +156,10 @@ class OutputAreaModel implements IDisposable {
    *
    * @param wait Delay clearing the output until the next message is added.
    */
-  clear(wait: boolean = false): OutputAreaModel.Output[] {
+  clear(wait: boolean = false): IIterator<OutputAreaModel.Output> {
     if (wait) {
       this.clearNext = true;
-      return [];
+      return EmptyIterator.instance;
     }
     return this.list.clear();
   }
@@ -175,7 +179,7 @@ class OutputAreaModel implements IDisposable {
    * Types are validated before being added.
    */
   addMimeData(output: nbformat.IDisplayData | nbformat.IExecuteResult, mimetype: string, value: string | JSONObject): void {
-    let index = indexOf(this.list.items, output);
+    let index = indexOf(this.list, output);
     if (index === -1) {
       throw new Error(`Cannot add data to non-tracked bundle`);
     }

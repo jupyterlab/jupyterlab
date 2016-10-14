@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  IIterable, each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -367,7 +371,7 @@ class OutputAreaWidget extends Widget {
       // Children are always added at the end.
       this.addChild();
       break;
-    case 'replace':
+    case 'assign':
       // Only "clear" is supported by the model.
       // When an output area is cleared and then quickly replaced with new
       // content (as happens with @interact in widgets, for example), the
@@ -386,10 +390,10 @@ class OutputAreaWidget extends Widget {
         this.node.style.minHeight = '';
       }, 50);
 
-      let oldValues = args.oldValue as nbformat.IOutput[];
-      for (let i = args.oldIndex; i < oldValues.length; i++) {
+      let oldValues = args.oldValue as IIterable<nbformat.IOutput>;
+      each(oldValues, value => {
         this.removeChild(args.oldIndex);
-      }
+      });
       break;
     case 'set':
       if (!this._injecting) {

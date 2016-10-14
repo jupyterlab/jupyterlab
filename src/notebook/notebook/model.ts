@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  IIterable, each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   deepEqual
 } from 'phosphor/lib/algorithm/json';
 
@@ -317,7 +321,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         continue;
       }
     }
-    this.cells.replace(0, cells.length, cells);
+    this.cells.assign(cells);
     let oldValue = 0;
     let newValue = 0;
     if (value.nbformat !== this._nbformat) {
@@ -411,15 +415,15 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     case 'remove':
       (change.oldValue as ICellModel).dispose();
       break;
-    case 'replace':
-      let newValues = change.newValue as ICellModel[];
-      for (cell of newValues) {
-        cell.contentChanged.connect(this._onCellChanged, this);
-      }
-      let oldValues = change.oldValue as ICellModel[];
-      for (cell of oldValues) {
-        cell.dispose();
-      }
+    case 'assign':
+      let newValues = change.newValue as IIterable<ICellModel>;
+      each(newValues, value => {
+        value.contentChanged.connect(this._onCellChanged, this);
+      });
+      let oldValues = change.oldValue as IIterable<ICellModel>;
+      each(oldValues, value => {
+        value.dispose();
+      });
       break;
     case 'set':
       cell = change.newValue as ICellModel;

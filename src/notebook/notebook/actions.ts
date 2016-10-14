@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   MimeData as IClipboard
 } from 'phosphor/lib/core/mimedata';
 
@@ -80,7 +84,12 @@ namespace NotebookActions {
     clone1.source = orig.slice(position).replace(/^\s+/g, '');
 
     // Make the changes while preserving history.
-    nbModel.cells.replace(index, 1, [clone0, clone1]);
+    let cells = nbModel.cells;
+    cells.beginCompoundOperation();
+    cells.set(index, clone0);
+    cells.insert(index + 1, clone1);
+    cells.endCompoundOperation();
+
     widget.activeCellIndex++;
     widget.scrollToActiveCell();
   }
@@ -717,7 +726,14 @@ namespace NotebookActions {
       }
     }
     let index = widget.activeCellIndex;
-    widget.model.cells.replace(index + 1, 0, newCells);
+
+    let cells = widget.model.cells;
+    cells.beginCompoundOperation();
+    each(newCells, cell => {
+      cells.insert(++index, cell);
+    });
+    cells.endCompoundOperation();
+
     widget.activeCellIndex += newCells.length;
     Private.deselectCells(widget);
   }
