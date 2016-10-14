@@ -31,7 +31,6 @@
     "@types/marked": "0.0.28",
     "@types/mathjax": "0.0.31",
     "@types/mocha": "^2.2.32",
-    "@types/node": "^6.0.42",
     "@types/sanitize-html": "^1.13.31",
     "awesome-typescript-loader": "^2.2.4",
     "concurrently": "^2.0.0",
