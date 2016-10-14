@@ -84,9 +84,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
 
   /**
    * Get the model associated with the document.
-   *
-   * #### Notes
-   * This is a read-only property
    */
   get model(): T {
     return this._model;
@@ -94,9 +91,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
 
   /**
    * The current kernel associated with the document.
-   *
-   * #### Notes
-   * This is a read-only propery.
    */
   get kernel(): IKernel {
     return this._session ? this._session.kernel : null;
@@ -169,6 +163,12 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._model.dispose();
     this._manager = null;
     this._factory = null;
+    if (this._session) {
+      this._session.shutdown().then(() => {
+        this._session.dispose();
+        this._session = null;
+      });
+    }
   }
 
   /**
@@ -226,7 +226,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       this._updateContentsModel(contents);
       model.dirty = false;
       if (!this._isPopulated) {
-        this._populate();
+        return this._populate();
       }
     }).catch(err => {
       showDialog({
@@ -443,11 +443,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * Handle an initial population.
    */
-  private _populate(): void {
+  private _populate(): Promise<void> {
     this._isPopulated = true;
     this._saver.start();
     // Add a checkpoint if none exists.
-    this.listCheckpoints().then(checkpoints => {
+    return this.listCheckpoints().then(checkpoints => {
       if (!checkpoints) {
         return this.createCheckpoint();
       }
