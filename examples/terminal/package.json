@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@jupyterlab/services": "^0.22.0",
-    "jupyter-js-services": "^0.21.0",
     "jupyterlab": "file:../..",
     "phosphor": "^0.6.0",
     "xterm": "^1.1.3"
