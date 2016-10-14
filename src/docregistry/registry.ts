@@ -472,7 +472,7 @@ class DocumentRegistry {
   getWidgetExtensions(widgetName: string): ISequence<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      return void 0;
+      this._extenders[widgetName] = new Vector<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>>();
     }
     return this._extenders[widgetName];
   }
