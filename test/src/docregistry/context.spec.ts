@@ -4,15 +4,40 @@
 import expect = require('expect.js');
 
 import {
-  Context
+  ServiceManager, IServiceManager
+} from 'jupyter-js-services';
+
+import {
+  Context, TextModelFactory
 } from '../../../lib/docregistry/context';
 
 
 describe('docregistry/context', () => {
 
+  let manager: IServiceManager;
+  let factory = new TextModelFactory();
+
+  before((done) => {
+    ServiceManager.create().then(m => {
+      manager = m;
+      done();
+    });
+  }
+
   describe('Context', () => {
 
+    let context: Context;
+
+    beforeEach(() => {
+      let path = 'foo';
+      context = new Context({ manager, factory, path });
+    });
+
     describe('#constructor()', () => {
+
+      it('should create a new context', () => {
+
+      });
 
     });
 
