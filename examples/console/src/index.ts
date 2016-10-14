@@ -2,31 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ConsolePanel
-} from 'jupyterlab/lib/console';
-
-import {
-  CodeMirrorConsoleRenderer
-} from 'jupyterlab/lib/console/codemirror/widget';
-
-import {
-  ISession, Session
-} from 'jupyter-js-services';
-
-import {
-  RenderMime
-} from 'jupyterlab/lib/rendermime';
-
-import {
-  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  JavascriptRenderer, SVGRenderer, MarkdownRenderer
-} from 'jupyterlab/lib/renderers';
-
-import {
-  defaultSanitizer
-} from 'jupyterlab/lib/sanitizer';
-
-import {
   CommandRegistry
 } from 'phosphor/lib/ui/commandregistry';
 
@@ -45,6 +20,31 @@ import {
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
+import {
+  ISession, Session
+} from '@jupyterlab/services';
+
+import {
+  ConsolePanel
+} from 'jupyterlab/lib/console';
+
+import {
+  CodeMirrorConsoleRenderer
+} from 'jupyterlab/lib/console/codemirror/widget';
+
+import {
+  RenderMime
+} from 'jupyterlab/lib/rendermime';
+
+import {
+  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
+  JavascriptRenderer, SVGRenderer, MarkdownRenderer
+} from 'jupyterlab/lib/renderers';
+
+import {
+  defaultSanitizer
+} from 'jupyterlab/lib/sanitizer';
 
 import 'jupyterlab/lib/default-theme/index.css';
 import '../index.css';
