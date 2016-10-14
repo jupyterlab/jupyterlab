@@ -3,7 +3,7 @@
 
 import {
   IKernel, Kernel
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   ISignal

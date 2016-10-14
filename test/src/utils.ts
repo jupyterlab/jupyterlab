@@ -9,7 +9,7 @@ import {
 
 import {
   ServiceManager, utils, IServiceManager
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   Widget

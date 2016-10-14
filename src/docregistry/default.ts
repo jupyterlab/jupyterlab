@@ -8,7 +8,7 @@ import 'codemirror/mode/meta';
 
 import {
   Contents, Kernel
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   defineSignal, ISignal

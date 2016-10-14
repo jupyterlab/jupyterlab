@@ -3,7 +3,7 @@
 
 import {
   Contents
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   each

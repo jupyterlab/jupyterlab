@@ -3,7 +3,7 @@
 
 import {
   Kernel, Session
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   showDialog

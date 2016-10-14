@@ -3,7 +3,7 @@
 
 import {
   IKernel, KernelMessage
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   Message

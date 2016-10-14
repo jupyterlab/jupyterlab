@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   ServiceManager, IServiceManager, ISession
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   FileBrowserModel

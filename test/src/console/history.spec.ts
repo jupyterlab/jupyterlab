@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   KernelMessage, IKernel, Kernel
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   ConsoleHistory

@@ -3,7 +3,7 @@
 
 import {
   utils
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   deepEqual

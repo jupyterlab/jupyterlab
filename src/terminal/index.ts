@@ -3,7 +3,7 @@
 
 import {
   ITerminalSession, TerminalSession
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   Message, sendMessage

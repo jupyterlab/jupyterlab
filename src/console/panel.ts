@@ -3,7 +3,7 @@
 
 import {
   ISession
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   Message
