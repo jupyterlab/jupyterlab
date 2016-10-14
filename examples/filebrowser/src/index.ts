@@ -2,30 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager, ServiceManager
-} from 'jupyter-js-services';
-
-import {
-  FileBrowserWidget, FileBrowserModel
-} from 'jupyterlab/lib/filebrowser';
-
-import {
-  DocumentManager
-} from 'jupyterlab/lib/docmanager';
-
-import {
-  DocumentRegistry, TextModelFactory
-} from 'jupyterlab/lib/docregistry';
-
-import {
-  EditorWidgetFactory
-} from 'jupyterlab/lib/editorwidget/widget';
-
-import {
-  showDialog, okButton
-} from 'jupyterlab/lib/dialog';
-
-import {
   CommandRegistry
 } from 'phosphor/lib/ui/commandregistry';
 
@@ -48,6 +24,30 @@ import {
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
+import {
+  IServiceManager, ServiceManager
+} from '@jupyterlab/services';
+
+import {
+  FileBrowserWidget, FileBrowserModel
+} from 'jupyterlab/lib/filebrowser';
+
+import {
+  DocumentManager
+} from 'jupyterlab/lib/docmanager';
+
+import {
+  DocumentRegistry, TextModelFactory
+} from 'jupyterlab/lib/docregistry';
+
+import {
+  EditorWidgetFactory
+} from 'jupyterlab/lib/editorwidget/widget';
+
+import {
+  showDialog, okButton
+} from 'jupyterlab/lib/dialog';
 
 import 'jupyterlab/lib/default-theme/index.css';
 import '../index.css';
