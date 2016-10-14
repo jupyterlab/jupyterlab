@@ -546,7 +546,7 @@ describe('docregistry/registry', () => {
         expect(registry.getWidgetExtensions('fizz').length).to.be(2);
         expect(registry.getWidgetExtensions('buzz').at(0)).to.be(foo);
         expect(registry.getWidgetExtensions('buzz').length).to.be(1);
-        expect(registry.getWidgetExtensions('baz')).to.be(void 0);
+        expect(registry.getWidgetExtensions('baz').length).to.be(0);
       });
 
     });
