@@ -27,7 +27,7 @@ import {
 } from '../dialog';
 
 import {
-  IDocumentContext, IDocumentModel, IModelFactory
+  DocumentRegistry
 } from '../docregistry';
 
 import {
@@ -41,7 +41,7 @@ import {
  * This class is typically instantiated by the document manger.
  */
 export
-class Context<T extends IDocumentModel> implements IDocumentContext<T> {
+class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.IContext<T> {
   /**
    * Construct a new document context.
    */
@@ -60,27 +60,27 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   /**
    * A signal emitted when the kernel changes.
    */
-  kernelChanged: ISignal<IDocumentContext<T>, IKernel>;
+  kernelChanged: ISignal<DocumentRegistry.IContext<T>, IKernel>;
 
   /**
    * A signal emitted when the path changes.
    */
-  pathChanged: ISignal<IDocumentContext<T>, string>;
+  pathChanged: ISignal<DocumentRegistry.IContext<T>, string>;
 
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  contentsModelChanged: ISignal<IDocumentContext<T>, Contents.IModel>;
+  fileChanged: ISignal<DocumentRegistry.IContext<T>, Contents.IModel>;
 
   /**
    * A signal emitted when the context is fully populated for the first time.
    */
-  populated: ISignal<IDocumentContext<T>, void>;
+  populated: ISignal<DocumentRegistry.IContext<T>, void>;
 
   /**
    * A signal emitted when the context is disposed.
    */
-  disposed: ISignal<IDocumentContext<T>, void>;
+  disposed: ISignal<DocumentRegistry.IContext<T>, void>;
 
   /**
    * Get the model associated with the document.
@@ -203,23 +203,6 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   }
 
   /**
-   * Set the path of the context.
-   *
-   * #### Notes
-   * This is not intended to be called by the user.
-   * It is assumed that the file has been renamed on the
-   * contents manager prior to this operation.
-   */
-  setPath(value: string): void {
-    this._path = value;
-    let session = this._session;
-    if (session) {
-      session.rename(value);
-    }
-    this.pathChanged.emit(value);
-  }
-
-  /**
    * Save the document contents to disk.
    */
   save(): Promise<void> {
@@ -319,25 +302,25 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   /**
    * Delete a checkpoint for the file.
    */
-  deleteCheckpoint(checkpointID: string): Promise<void> {
-    return this._manager.contents.deleteCheckpoint(this._path, checkpointID);
+  deleteCheckpoint(checkpointId: string): Promise<void> {
+    return this._manager.contents.deleteCheckpoint(this._path, checkpointId);
   }
 
   /**
    * Restore the file to a known checkpoint state.
    */
-  restoreCheckpoint(checkpointID?: string): Promise<void> {
+  restoreCheckpoint(checkpointId?: string): Promise<void> {
     let contents = this._manager.contents;
     let path = this._path;
-    if (checkpointID) {
-      return contents.restoreCheckpoint(path, checkpointID);
+    if (checkpointId) {
+      return contents.restoreCheckpoint(path, checkpointId);
     }
     return this.listCheckpoints().then(checkpoints => {
       if (!checkpoints.length) {
         return;
       }
-      checkpointID = checkpoints[checkpoints.length - 1].id;
-      return contents.restoreCheckpoint(path, checkpointID);
+      checkpointId = checkpoints[checkpoints.length - 1].id;
+      return contents.restoreCheckpoint(path, checkpointId);
     });
   }
 
@@ -382,6 +365,23 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   }
 
   /**
+   * Set the path of the context.
+   *
+   * #### Notes
+   * This is not intended to be called by the user.
+   * It is assumed that the file has been renamed on the
+   * contents manager prior to this operation.
+   */
+  setPath(value: string): void {
+    this._path = value;
+    let session = this._session;
+    if (session) {
+      session.rename(value);
+    }
+    this.pathChanged.emit(value);
+  }
+
+  /**
    * Start a session and set up its signals.
    */
   private _startSession(options: Session.IOptions): Promise<IKernel> {
@@ -420,7 +420,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
     let prevModel = this._contentsModel;
     this._contentsModel = newModel;
     if (!prevModel || newModel.last_modified !== prevModel.last_modified) {
-      this.contentsModelChanged.emit(newModel);
+      this.fileChanged.emit(newModel);
     }
   }
 
@@ -461,7 +461,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
   private _model: T = null;
   private _path = '';
   private _session: ISession = null;
-  private _factory: IModelFactory<T> = null;
+  private _factory: DocumentRegistry.IModelFactory<T> = null;
   private _saver: SaveHandler = null;
   private _isPopulated = false;
   private _contentsModel: Contents.IModel = null;
@@ -471,7 +471,7 @@ class Context<T extends IDocumentModel> implements IDocumentContext<T> {
 // Define the signals for the `Context` class.
 defineSignal(Context.prototype, 'kernelChanged');
 defineSignal(Context.prototype, 'pathChanged');
-defineSignal(Context.prototype, 'contentsModelChanged');
+defineSignal(Context.prototype, 'fileChanged');
 defineSignal(Context.prototype, 'populated');
 defineSignal(Context.prototype, 'disposed');
 
@@ -484,7 +484,7 @@ export namespace Context {
    * The options used to initialize a context.
    */
   export
-  interface IOptions<T extends IDocumentModel> {
+  interface IOptions<T extends DocumentRegistry.IModel> {
     /**
      * A service manager instance.
      */
@@ -493,7 +493,7 @@ export namespace Context {
     /**
      * The model factory used to create the model.
      */
-    factory: IModelFactory<T>;
+    factory: DocumentRegistry.IModelFactory<T>;
 
     /**
      * The initial path of the file.

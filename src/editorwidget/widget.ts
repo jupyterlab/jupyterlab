@@ -27,7 +27,7 @@ import {
 } from '../codemirror/widget';
 
 import {
-  ABCWidgetFactory, IDocumentModel, IDocumentContext
+  ABCWidgetFactory, DocumentRegistry
 } from '../docregistry';
 
 
@@ -66,7 +66,7 @@ class EditorWidget extends CodeMirrorWidget {
   /**
    * Construct a new editor widget.
    */
-  constructor(context: IDocumentContext<IDocumentModel>) {
+  constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
     super({
       extraKeys: {
         'Tab': 'indentMore',
@@ -115,11 +115,11 @@ class EditorWidget extends CodeMirrorWidget {
   /**
    * Get the context for the editor widget.
    */
-  get context(): IDocumentContext<IDocumentModel> {
+  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
     return this._context;
   }
 
-  private _context: IDocumentContext<IDocumentModel>;
+  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
 }
 
 
@@ -127,11 +127,11 @@ class EditorWidget extends CodeMirrorWidget {
  * A widget factory for editors.
  */
 export
-class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, IDocumentModel> {
+class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistry.IModel> {
   /**
    * Create a new widget given a context.
    */
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): EditorWidget {
+  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): EditorWidget {
     if (kernel) {
       context.changeKernel(kernel);
     }

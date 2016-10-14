@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, Kernel
+  Kernel
 } from 'jupyter-js-services';
 
 import {
@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/core/mimedata';
 
 import {
-  ABCWidgetFactory, IDocumentContext
+  ABCWidgetFactory, DocumentRegistry
 } from '../../docregistry';
 
 import {
@@ -70,7 +70,7 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    * The factory will start the appropriate kernel and populate
    * the default toolbar items using `ToolbarItems.populateDefaults`.
    */
-  createNew(context: IDocumentContext<INotebookModel>, kernel?: Kernel.IModel): NotebookPanel {
+  createNew(context: DocumentRegistry.IContext<INotebookModel>, kernel?: Kernel.IModel): NotebookPanel {
     let rendermime = this._rendermime.clone();
     if (kernel) {
       context.changeKernel(kernel);

@@ -6,7 +6,7 @@ import {
 } from 'jupyter-js-services';
 
 import {
-  IModelFactory
+  DocumentRegistry
 } from '../../docregistry';
 
 import {
@@ -18,7 +18,7 @@ import {
  * A model factory for notebooks.
  */
 export
-class NotebookModelFactory implements IModelFactory<INotebookModel> {
+class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookModel> {
   /**
    * The name of the model.
    *

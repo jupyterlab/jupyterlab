@@ -18,7 +18,7 @@ okButton, cancelButton, showDialog
 } from '../dialog';
 
 import {
-  IDocumentContext, IDocumentModel
+  DocumentRegistry
 } from '../docregistry';
 
 
@@ -39,7 +39,7 @@ class SaveHandler implements IDisposable {
     this._minInterval = options.saveInterval || 120;
     this._interval = this._minInterval;
     // Restart the timer when the contents model is updated.
-    this._context.contentsModelChanged.connect(() => {
+    this._context.fileChanged.connect(() => {
       this._setTimer();
     });
     this._context.disposed.connect(this.dispose, this);
@@ -166,7 +166,7 @@ class SaveHandler implements IDisposable {
   private _autosaveTimer = -1;
   private _minInterval = -1;
   private _interval = -1;
-  private _context: IDocumentContext<IDocumentModel> = null;
+  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
   private _manager: IServiceManager = null;
   private _stopped = false;
   private _inDialog = false;
@@ -186,7 +186,7 @@ namespace SaveHandler {
     /**
      * The context asssociated with the file.
      */
-    context: IDocumentContext<IDocumentModel>;
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
 
     /**
      * The service manager to use for checking last saved.

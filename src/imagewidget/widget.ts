@@ -14,7 +14,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ABCWidgetFactory, IDocumentModel, IDocumentContext
+  ABCWidgetFactory, DocumentRegistry
 } from '../docregistry';
 
 /**
@@ -31,7 +31,7 @@ class ImageWidget extends Widget {
   /**
    * Construct a new image widget.
    */
-  constructor(context: IDocumentContext<IDocumentModel>) {
+  constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
     super({ node: Private.createNode() });
     this._context = context;
     this.node.tabIndex = -1;
@@ -42,7 +42,7 @@ class ImageWidget extends Widget {
     }
     context.pathChanged.connect(() => this.update());
     context.model.contentChanged.connect(() => this.update());
-    context.contentsModelChanged.connect(() => this.update());
+    context.fileChanged.connect(() => this.update());
   }
 
   /**
@@ -95,7 +95,7 @@ class ImageWidget extends Widget {
     this.node.focus();
   }
 
-  private _context: IDocumentContext<IDocumentModel>;
+  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   private _scale = 1;
 }
 
@@ -104,11 +104,11 @@ class ImageWidget extends Widget {
  * A widget factory for images.
  */
 export
-class ImageWidgetFactory extends ABCWidgetFactory<ImageWidget, IDocumentModel> {
+class ImageWidgetFactory extends ABCWidgetFactory<ImageWidget, DocumentRegistry.IModel> {
   /**
    * Create a new widget given a context.
    */
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): ImageWidget {
+  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): ImageWidget {
     let widget = new ImageWidget(context);
     this.widgetCreated.emit(widget);
     return widget;

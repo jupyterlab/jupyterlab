@@ -2,6 +2,26 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IKernel, Contents, Kernel, Session
+} from 'jupyter-js-services';
+
+import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
+  find, findIndex, indexOf
+} from 'phosphor/lib/algorithm/searching';
+
+import {
+  ISequence
+} from 'phosphor/lib/algorithm/sequence';
+
+import {
+  Vector
+} from 'phosphor/lib/collections/vector';
+
+import {
   IDisposable, DisposableDelegate
 } from 'phosphor/lib/core/disposable';
 
@@ -18,10 +38,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IModelFactory, IWidgetFactory, IWidgetFactoryOptions,
-  IFileType, IKernelPreference, IFileCreator, IWidgetExtension,
-  IDocumentModel
-} from './interfaces';
+  IChangedArgs as IChangedArgsGeneric
+} from '../common/interfaces';
 
 
 /* tslint:disable */
@@ -34,202 +52,35 @@ const IDocumentRegistry = new Token<IDocumentRegistry>('jupyter.services.documen
 
 
 /**
- * An interface for document registries.
+ * The interface for a document registry.
  */
 export
-interface IDocumentRegistry extends IDisposable {
-  /**
-   * A signal emitted when the registry has changed.
-   */
-  readonly changed: ISignal<this, DocumentRegistry.IChangedArgs>;
-
-  /**
-   * Add a widget factory to the registry.
-   *
-   * @param factory - The factory instance to register.
-   *
-   * @param options - The options used to register the factory.
-   *
-   * @returns A disposable which will unregister the factory.
-   *
-   * #### Notes
-   * If a factory with the given `'displayName'` is already registered,
-   * a warning will be logged, and this will be a no-op.
-   * If `'*'` is given as a default extension, the factory will be registered
-   * as the global default.
-   * If an extension or global default is already registered, this factory
-   * will override the existing default.
-   */
-  addWidgetFactory(factory: IWidgetFactory<Widget, IDocumentModel>, options: IWidgetFactoryOptions): IDisposable;
-
-  /**
-   * Add a model factory to the registry.
-   *
-   * @param factory - The factory instance.
-   *
-   * @returns A disposable which will unregister the factory.
-   *
-   * #### Notes
-   * If a factory with the given `name` is already registered, or
-   * the given factory is already registered, a warning will be logged
-   * and this will be a no-op.
-   */
-  addModelFactory(factory: IModelFactory<IDocumentModel>): IDisposable;
-
-  /**
-   * Add a widget extension to the registry.
-   *
-   * @param widgetName - The name of the widget factory.
-   *
-   * @param extension - A widget extension.
-   *
-   * @returns A disposable which will unregister the extension.
-   *
-   * #### Notes
-   * If the extension is already registered for the given
-   * widget name, a warning will be logged and this will be a no-op.
-   */
-  addWidgetExtension(widgetName: string, extension: IWidgetExtension<Widget, IDocumentModel>): IDisposable;
-
-  /**
-   * Add a file type to the document registry.
-   *
-   * @params fileType - The file type object to register.
-   *
-   * @returns A disposable which will unregister the command.
-   *
-   * #### Notes
-   * These are used to populate the "Create New" dialog.
-   * If the file type with the same name is already registered, a warning will
-   * be logged and this will be a no-op.
-   */
-  addFileType(fileType: IFileType): IDisposable;
-
-  /**
-   * Add a creator to the registry.
-   *
-   * @params creator - The file creator object to register.
-   *
-   * @params after - The optional item name to insert after.
-   *
-   * @returns A disposable which will unregister the creator.
-   *
-   * #### Notes
-   * If a creator of the same name is already registered,
-   * a warning will be logged and this will be a no-op.
-   * If `after` is not given or not already registered, it will be moved
-   * to the end.
-   */
-  addCreator(creator: IFileCreator, after?: string): IDisposable;
-
-  /**
-   * List the names of the valid registered widget factories.
-   *
-   * @param ext - An optional file extension to filter the results.
-   *
-   * @returns A new array of registered widget factory names.
-   *
-   * #### Notes
-   * Only the widget factories whose associated model factory have
-   * been registered will be returned.
-   * The first item in the list is considered the default. The returned list
-   * has widget factories in the following order:
-   * - extension-specific default factory
-   * - global default factory
-   * - all other extension-specific factories
-   * - all other global factories
-   */
-  listWidgetFactories(ext: string): string[];
-
-  /**
-   * Return the name of the default widget factory for a given extension.
-   *
-   * @param ext - An optional file extension.
-   *
-   * @returns The default widget factory name for the extension (if given) or the global default.
-   */
-  defaultWidgetFactory(ext: string): string;
-
-  /**
-   * List the names of the registered model factories.
-   *
-   * @returns A new array of registered model factory names.
-   */
-  listModelFactories(): string[];
-
-  /**
-   * Get a list of file types that have been registered.
-   *
-   * @returns A new array of registered file type objects.
-   */
-  listFileTypes(): IFileType[];
-
-  /**
-   * Get an ordered list of the file creators that have been registered.
-   *
-   * @returns A new array of registered file creator objects.
-   */
-  listCreators(): IFileCreator[];
-
-  /**
-   * Get a file type by name.
-   */
-  getFileType(name: string): IFileType;
-
-  /**
-   * Get a creator by name.
-   */
-  getCreator(name: string): IFileCreator;
-
-  /**
-   * Get a kernel preference.
-   *
-   * @param ext - The file extension.
-   *
-   * @param widgetName - The name of the widget factory.
-   *
-   * @returns A kernel preference.
-   */
-  getKernelPreference(ext: string, widgetName: string): IKernelPreference;
-
-  /**
-   * Get the model factory registered for a given widget factory.
-   *
-   * @param widgetName - The name of the widget factory.
-   *
-   * @returns A model factory instance.
-   */
-  getModelFactoryFor(widgetName: string): IModelFactory<IDocumentModel>;
-
-  /**
-   * Get a widget factory by name.
-   *
-   * @param widgetName - The name of the widget factory.
-   *
-   * @returns A widget factory instance.
-   */
-  getWidgetFactory(widgetName: string): IWidgetFactory<Widget, IDocumentModel>;
-
-  /**
-   * Get the registered extensions for a given widget.
-   *
-   * @param widgetName - The name of the widget factory.
-   *
-   * @returns A new array of widget extensions.
-   */
-  getWidgetExtensions(widgetName: string): IWidgetExtension<Widget, IDocumentModel>[];
-}
+interface IDocumentRegistry extends DocumentRegistry {}
 
 
 /**
  * The document registry.
  */
 export
-class DocumentRegistry implements IDocumentRegistry {
+class DocumentRegistry {
   /**
    * A signal emitted when the registry has changed.
    */
   readonly changed: ISignal<this, DocumentRegistry.IChangedArgs>;
+
+  /**
+   * A read-only sequence of file types that have been registered.
+   */
+  get fileTypes(): ISequence<DocumentRegistry.IFileType> {
+    return this._fileTypes;
+  }
+
+  /**
+   * A read-only sequence of the file creators that have been registered.
+   */
+  get creators(): ISequence<DocumentRegistry.IFileCreator> {
+    return this._creators;
+  }
 
   /**
    * Get whether the document registry has been disposed.
@@ -253,9 +104,11 @@ class DocumentRegistry implements IDocumentRegistry {
       this._widgetFactories[widgetName].factory.dispose();
     }
     this._widgetFactories = null;
-    this._fileTypes = null;
-    this._creators = null;
-    this._extenders = null;
+    this._fileTypes.clear();
+    this._creators.clear();
+    for (let widgetName in this._extenders) {
+      this._extenders[widgetName].clear();
+    }
   }
 
   /**
@@ -275,7 +128,7 @@ class DocumentRegistry implements IDocumentRegistry {
    * If an extension or global default is already registered, this factory
    * will override the existing default.
    */
-  addWidgetFactory(factory: IWidgetFactory<Widget, IDocumentModel>, options: IWidgetFactoryOptions): IDisposable {
+  addWidgetFactory(factory: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>, options: DocumentRegistry.IWidgetFactoryOptions): IDisposable {
     let name = options.displayName.toLowerCase();
     if (this._widgetFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
@@ -296,9 +149,9 @@ class DocumentRegistry implements IDocumentRegistry {
     // For convenience, store a mapping of ext -> name
     for (let ext of record.fileExtensions) {
       if (!this._widgetFactoryExtensions[ext]) {
-        this._widgetFactoryExtensions[ext] = new Set<string>();
+        this._widgetFactoryExtensions[ext] = new Vector<string>();
       }
-      this._widgetFactoryExtensions[ext].add(name);
+      this._widgetFactoryExtensions[ext].pushBack(name);
     }
     this.changed.emit({
       type: 'widgetFactory',
@@ -316,8 +169,8 @@ class DocumentRegistry implements IDocumentRegistry {
         }
       }
       for (let ext of Object.keys(this._widgetFactoryExtensions)) {
-        this._widgetFactoryExtensions[ext].delete(name);
-        if (this._widgetFactoryExtensions[ext].size === 0) {
+        this._widgetFactoryExtensions[ext].remove(name);
+        if (this._widgetFactoryExtensions[ext].length === 0) {
           delete this._widgetFactoryExtensions[ext];
         }
       }
@@ -341,7 +194,7 @@ class DocumentRegistry implements IDocumentRegistry {
    * the given factory is already registered, a warning will be logged
    * and this will be a no-op.
    */
-  addModelFactory(factory: IModelFactory<IDocumentModel>): IDisposable {
+  addModelFactory(factory: DocumentRegistry.IModelFactory<DocumentRegistry.IModel>): IDisposable {
     let name = factory.name.toLowerCase();
     if (this._modelFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
@@ -376,26 +229,25 @@ class DocumentRegistry implements IDocumentRegistry {
    * If the extension is already registered for the given
    * widget name, a warning will be logged and this will be a no-op.
    */
-  addWidgetExtension(widgetName: string, extension: IWidgetExtension<Widget, IDocumentModel>): IDisposable {
+  addWidgetExtension(widgetName: string, extension: DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>): IDisposable {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      this._extenders[widgetName] = [];
+      this._extenders[widgetName] = new Vector<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>>();
     }
     let extenders = this._extenders[widgetName];
-    let index = extenders.indexOf(extension);
+    let index = indexOf(extenders, extension);
     if (index !== -1) {
       console.warn(`Duplicate registered extension for ${widgetName}`);
       return new DisposableDelegate(null);
     }
-    this._extenders[widgetName].push(extension);
+    this._extenders[widgetName].pushBack(extension);
     this.changed.emit({
       type: 'widgetExtension',
       name: null,
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      index = this._extenders[widgetName].indexOf(extension);
-      this._extenders[widgetName].splice(index, 1);
+      this._extenders[widgetName].remove(extension);
       this.changed.emit({
         type: 'widgetExtension',
         name: null,
@@ -413,27 +265,16 @@ class DocumentRegistry implements IDocumentRegistry {
    *
    * #### Notes
    * These are used to populate the "Create New" dialog.
-   * If the file type with the same name is already registered, a warning will
-   * be logged and this will be a no-op.
    */
-  addFileType(fileType: IFileType): IDisposable {
-    for (let fType of this._fileTypes) {
-      if (fType.name.toLowerCase() === fileType.name.toLowerCase()) {
-        console.warn(`Duplicate registered file types for ${fType.name}`);
-        return new DisposableDelegate(null);
-      }
-    }
-    fileType.extension = Private.normalizeExtension(fileType.extension);
-    this._fileTypes.push(fileType);
-    this._fileTypes.sort((a, b) => a.name.localeCompare(b.name));
+  addFileType(fileType: DocumentRegistry.IFileType): IDisposable {
+    this._fileTypes.pushBack(fileType);
     this.changed.emit({
       type: 'fileType',
       name: fileType.name,
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      let index = this._fileTypes.indexOf(fileType);
-      this._fileTypes.splice(index, 1);
+      this._fileTypes.remove(fileType);
       this.changed.emit({
         type: 'fileType',
         name: fileType.name,
@@ -447,36 +288,16 @@ class DocumentRegistry implements IDocumentRegistry {
    *
    * @params creator - The file creator object to register.
    *
-   * @params after - The optional item name to insert after.
-   *
    * @returns A disposable which will unregister the creator.
-   *
-   * #### Notes
-   * If a creator of the same name is already registered,
-   * a warning will be logged and this will be a no-op.
-   * If `after` is not given or not already registered, it will be moved
-   * to the end.
    */
-  addCreator(creator: IFileCreator, after?: string): IDisposable {
-    for (let c of this._creators) {
-      if (c.name.toLowerCase() === creator.name.toLowerCase()) {
-        console.warn(`Duplicate registered file creator named ${creator.name}`);
-        return new DisposableDelegate(null);
-      }
-    }
-    let added = false;
-    if (after) {
-      for (let existing of this._creators) {
-        if (existing.name.toLowerCase() === after.toLowerCase()) {
-          let index = this._creators.indexOf(existing);
-          this._creators.splice(index, 0, creator);
-          added = true;
-          break;
-        }
-      }
-    }
-    if (!added) {
-      this._creators.push(creator);
+  addCreator(creator: DocumentRegistry.IFileCreator): IDisposable {
+    let index = findIndex(this._creators, (value) => {
+      return value.name.localeCompare(creator.name) > 0;
+    });
+    if (index !== -1) {
+      this._creators.insert(index, creator);
+    } else {
+      this._creators.pushBack(creator);
     }
     this.changed.emit({
       type: 'fileCreator',
@@ -484,8 +305,7 @@ class DocumentRegistry implements IDocumentRegistry {
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      let index = this._creators.indexOf(creator);
-      this._creators.splice(index, 1);
+      this._creators.remove(creator);
       this.changed.emit({
         type: 'fileCreator',
         name: creator.name,
@@ -530,13 +350,17 @@ class DocumentRegistry implements IDocumentRegistry {
     // Add the extension-specific factories in registration order.
     if (ext.length > 1) {
       if (ext in this._widgetFactoryExtensions) {
-        this._widgetFactoryExtensions[ext].forEach(n => { factories.add(n); });
+        each(this._widgetFactoryExtensions[ext], n => {
+          factories.add(n);
+        });
       }
     }
 
     // Add the rest of the global factories, in registration order.
     if ('*' in this._widgetFactoryExtensions) {
-      this._widgetFactoryExtensions['*'].forEach(n => { factories.add(n); });
+      each(this._widgetFactoryExtensions['*'], n => {
+        factories.add(n);
+      });
     }
 
     // Construct the return list, checking to make sure the corresponding
@@ -565,56 +389,23 @@ class DocumentRegistry implements IDocumentRegistry {
   }
 
   /**
-   * List the names of the registered model factories.
-   *
-   * @returns A new array of registered model factory names.
-   */
-  listModelFactories(): string[] {
-    return Object.keys(this._modelFactories);
-  }
-
-  /**
-   * Get a list of file types that have been registered.
-   *
-   * @returns A new array of registered file type objects.
-   */
-  listFileTypes(): IFileType[] {
-    return this._fileTypes.slice();
-  }
-
-  /**
-   * Get an ordered list of the file creators that have been registered.
-   *
-   * @returns A new array of registered file creator objects.
-   */
-  listCreators(): IFileCreator[] {
-    return this._creators.slice();
-  }
-
-  /**
    * Get a file type by name.
    */
-  getFileType(name: string): IFileType {
+  getFileType(name: string): DocumentRegistry.IFileType {
     name = name.toLowerCase();
-    for (let i = 0; i < this._fileTypes.length; i++) {
-      let fileType = this._fileTypes[i];
-      if (fileType.name.toLowerCase() === name) {
-        return fileType;
-      }
-    }
+    return find(this._fileTypes, fileType => {
+      return fileType.name.toLowerCase() === name;
+    });
   }
 
   /**
    * Get a creator by name.
    */
-  getCreator(name: string): IFileCreator {
+  getCreator(name: string): DocumentRegistry.IFileCreator {
     name = name.toLowerCase();
-    for (let i = 0; i < this._creators.length; i++) {
-      let creator = this._creators[i];
-      if (creator.name.toLowerCase() === name) {
-        return creator;
-      }
-    }
+    return find(this._creators, creator => {
+      return creator.name.toLowerCase() === name;
+    });
   }
 
   /**
@@ -626,7 +417,7 @@ class DocumentRegistry implements IDocumentRegistry {
    *
    * @returns A kernel preference.
    */
-  getKernelPreference(ext: string, widgetName: string): IKernelPreference {
+  getKernelPreference(ext: string, widgetName: string): DocumentRegistry.IKernelPreference {
     ext = Private.normalizeExtension(ext);
     widgetName = widgetName.toLowerCase();
     let widgetFactoryEx = this._getWidgetFactoryEx(widgetName);
@@ -649,7 +440,7 @@ class DocumentRegistry implements IDocumentRegistry {
    *
    * @returns A model factory instance.
    */
-  getModelFactoryFor(widgetName: string): IModelFactory<IDocumentModel> {
+  getModelFactoryFor(widgetName: string): DocumentRegistry.IModelFactory<DocumentRegistry.IModel> {
     widgetName = widgetName.toLowerCase();
     let wFactoryEx = this._getWidgetFactoryEx(widgetName);
     if (!wFactoryEx) {
@@ -665,7 +456,7 @@ class DocumentRegistry implements IDocumentRegistry {
    *
    * @returns A widget factory instance.
    */
-  getWidgetFactory(widgetName: string): IWidgetFactory<Widget, IDocumentModel> {
+  getWidgetFactory(widgetName: string): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> {
     widgetName = widgetName.toLowerCase();
     let ex = this._getWidgetFactoryEx(widgetName);
     return ex ? ex.factory : void 0;
@@ -676,14 +467,14 @@ class DocumentRegistry implements IDocumentRegistry {
    *
    * @param widgetName - The name of the widget factory.
    *
-   * @returns A new array of widget extensions.
+   * @returns A read-only sequence of widget extensions.
    */
-  getWidgetExtensions(widgetName: string): IWidgetExtension<Widget, IDocumentModel>[] {
+  getWidgetExtensions(widgetName: string): ISequence<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      return [];
+      return void 0;
     }
-    return this._extenders[widgetName].slice();
+    return this._extenders[widgetName];
   }
 
   /**
@@ -700,14 +491,14 @@ class DocumentRegistry implements IDocumentRegistry {
     return options;
   }
 
-  private _modelFactories: { [key: string]: IModelFactory<IDocumentModel> } = Object.create(null);
+  private _modelFactories: { [key: string]: DocumentRegistry.IModelFactory<DocumentRegistry.IModel> } = Object.create(null);
   private _widgetFactories: { [key: string]: Private.IWidgetFactoryRecord } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
-  private _widgetFactoryExtensions: {[key: string]: Set<string> } = Object.create(null);
-  private _fileTypes: IFileType[] = [];
-  private _creators: IFileCreator[] = [];
-  private _extenders: { [key: string] : IWidgetExtension<Widget, IDocumentModel>[] } = Object.create(null);
+  private _widgetFactoryExtensions: {[key: string]: Vector<string> } = Object.create(null);
+  private _fileTypes = new Vector<DocumentRegistry.IFileType>();
+  private _creators = new Vector<DocumentRegistry.IFileCreator>();
+  private _extenders: { [key: string] : Vector<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> } = Object.create(null);
 }
 
 
@@ -717,6 +508,420 @@ class DocumentRegistry implements IDocumentRegistry {
 export
 namespace DocumentRegistry {
   /**
+   * The interface for a document model.
+   */
+  export
+  interface IModel extends IDisposable {
+    /**
+     * A signal emitted when the document content changes.
+     */
+    contentChanged: ISignal<this, void>;
+
+    /**
+     * A signal emitted when the model state changes.
+     */
+    stateChanged: ISignal<this, IChangedArgsGeneric<any>>;
+
+    /**
+     * The dirty state of the model.
+     *
+     * #### Notes
+     * This should be cleared when the document is loaded from
+     * or saved to disk.
+     */
+    dirty: boolean;
+
+    /**
+     * The read-only state of the model.
+     */
+    readOnly: boolean;
+
+    /**
+     * The default kernel name of the document.
+     */
+    readonly defaultKernelName: string;
+
+    /**
+     * The default kernel language of the document.
+     */
+    readonly defaultKernelLanguage: string;
+
+    /**
+     * Serialize the model to a string.
+     */
+    toString(): string;
+
+    /**
+     * Deserialize the model from a string.
+     *
+     * #### Notes
+     * Should emit a [contentChanged] signal.
+     */
+    fromString(value: string): void;
+
+    /**
+     * Serialize the model to JSON.
+     */
+    toJSON(): any;
+
+    /**
+     * Deserialize the model from JSON.
+     *
+     * #### Notes
+     * Should emit a [contentChanged] signal.
+     */
+    fromJSON(value: any): void;
+  }
+
+  /**
+   * The document context object.
+   */
+  export
+  interface IContext<T extends IModel> extends IDisposable {
+    /**
+     * A signal emitted when the kernel changes.
+     */
+    kernelChanged: ISignal<this, IKernel>;
+
+    /**
+     * A signal emitted when the path changes.
+     */
+    pathChanged: ISignal<this, string>;
+
+    /**
+     * A signal emitted when the contentsModel changes.
+     */
+    fileChanged: ISignal<this, Contents.IModel>;
+
+    /**
+     * A signal emitted when the context is fully populated for the first time.
+     */
+    populated: ISignal<this, void>;
+
+    /**
+     * A signal emitted when the context is disposed.
+     */
+    disposed: ISignal<this, void>;
+
+    /**
+     * Get the model associated with the document.
+     */
+    readonly model: T;
+
+    /**
+     * The current kernel associated with the document.
+     */
+    readonly kernel: IKernel;
+
+    /**
+     * The current path associated with the document.
+     */
+    readonly path: string;
+
+    /**
+     * The current contents model associated with the document
+     *
+     * #### Notes
+     * The model will have an empty `contents` field.
+     * It will be `null` until the context is populated.
+     */
+    readonly contentsModel: Contents.IModel;
+
+    /**
+     * Get the kernel spec information.
+     */
+    readonly kernelspecs: Kernel.ISpecModels;
+
+    /**
+     * Test whether the context is fully populated.
+     */
+    readonly isPopulated: boolean;
+
+    /**
+     * Change the current kernel associated with the document.
+     *
+     * #### Notes
+     * If no options are given, the session is shut down.
+     */
+    changeKernel(options?: Kernel.IModel): Promise<IKernel>;
+
+    /**
+     * Save the document contents to disk.
+     */
+    save(): Promise<void>;
+
+    /**
+     * Save the document to a different path chosen by the user.
+     */
+    saveAs(): Promise<void>;
+
+    /**
+     * Revert the document contents to disk contents.
+     */
+    revert(): Promise<void>;
+
+    /**
+     * Create a checkpoint for the file.
+     *
+     * @returns A promise which resolves with the new checkpoint model when the
+     *   checkpoint is created.
+     */
+    createCheckpoint(): Promise<Contents.ICheckpointModel>;
+
+    /**
+     * Delete a checkpoint for the file.
+     *
+     * @param checkpointID - The id of the checkpoint to delete.
+     *
+     * @returns A promise which resolves when the checkpoint is deleted.
+     */
+    deleteCheckpoint(checkpointID: string): Promise<void>;
+
+    /**
+     * Restore the file to a known checkpoint state.
+     *
+     * @param checkpointID - The optional id of the checkpoint to restore,
+     *   defaults to the most recent checkpoint.
+     *
+     * @returns A promise which resolves when the checkpoint is restored.
+     */
+    restoreCheckpoint(checkpointID?: string): Promise<void>;
+
+    /**
+     * List available checkpoints for the file.
+     *
+     * @returns A promise which resolves with a list of checkpoint models for
+     *    the file.
+     */
+    listCheckpoints(): Promise<Contents.ICheckpointModel[]>;
+
+    /**
+     * Get the list of running sessions.
+     */
+    listSessions(): Promise<Session.IModel[]>;
+
+    /**
+     * Resolve a url to a correct server path.
+     */
+    resolveUrl(url: string): string;
+
+    /**
+     * Add a sibling widget to the document manager.
+     *
+     * @param widget - The widget to add to the document manager.
+     *
+     * @returns A disposable used to remove the sibling if desired.
+     *
+     * #### Notes
+     * It is assumed that the widget has the same model and context
+     * as the original widget.
+     */
+    addSibling(widget: Widget): IDisposable;
+  }
+
+  /**
+   * The options used to register a widget factory.
+   */
+  export
+  interface IWidgetFactoryOptions {
+    /**
+     * The file extensions the widget can view.
+     *
+     * #### Notes
+     * Use "*" to denote all files. Specific file extensions must be preceded
+     * with '.', like '.png', '.txt', etc.
+     */
+    readonly fileExtensions: string[];
+
+    /**
+     * The name of the widget to display in dialogs.
+     */
+    readonly displayName: string;
+
+    /**
+     * The registered name of the model type used to create the widgets.
+     */
+    readonly modelName: string;
+
+    /**
+     * The file extensions for which the factory should be the default.
+     *
+     * #### Notes
+     * Use "*" to denote all files. Specific file extensions must be preceded
+     * with '.', like '.png', '.txt', etc. Entries in this attribute must also
+     * be included in the fileExtensions attribute.
+     * The default is an empty array.
+     *
+     * **See also:** [[fileExtensions]].
+     */
+    readonly defaultFor?: string[];
+
+    /**
+     * Whether the widgets prefer having a kernel started.
+     *
+     * The default is `false`.
+     */
+    readonly preferKernel?: boolean;
+
+    /**
+     * Whether the widgets can start a kernel when opened.
+     *
+     * The default is `false`.
+     */
+    readonly canStartKernel?: boolean;
+  }
+
+  /**
+   * The interface for a widget factory.
+   */
+  export
+  interface IWidgetFactory<T extends Widget, U extends IModel> extends IDisposable {
+    /**
+     * A signal emitted when a widget is created.
+     */
+    widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
+
+    /**
+     * Create a new widget.
+     *
+     * #### Notes
+     * It should emit the [widgetCreated] signal with the new widget.
+     */
+    createNew(context: IContext<U>, kernel?: Kernel.IModel): T;
+  }
+
+
+  /**
+   * An interface for a widget extension.
+   */
+  export
+  interface IWidgetExtension<T extends Widget, U extends IModel> {
+    /**
+     * Create a new extension for a given widget.
+     */
+    createNew(widget: T, context: IContext<U>): IDisposable;
+  }
+
+
+  /**
+   * The interface for a model factory.
+   */
+  export
+  interface IModelFactory<T extends IModel> extends IDisposable {
+    /**
+     * The name of the model.
+     */
+    readonly name: string;
+
+    /**
+     * The content type of the file (defaults to `"file"`).
+     */
+    readonly contentType: Contents.ContentType;
+
+    /**
+     * The format of the file (defaults to `"text"`).
+     */
+    readonly fileFormat: Contents.FileFormat;
+
+    /**
+     * Create a new model for a given path.
+     *
+     * @param languagePreference - An optional kernel language preference.
+     *
+     * @returns A new document model.
+     */
+    createNew(languagePreference?: string): T;
+
+    /**
+     * Get the preferred kernel language given an extension.
+     */
+    preferredLanguage(ext: string): string;
+  }
+
+  /**
+   * A kernel preference for a given file path and widget.
+   */
+  export
+  interface IKernelPreference {
+    /**
+     * The preferred kernel language.
+     */
+    readonly language: string;
+
+    /**
+     * Whether to prefer having a kernel started when opening.
+     */
+    readonly preferKernel: boolean;
+
+    /**
+     * Whether a kernel when can be started when opening.
+     */
+    readonly canStartKernel: boolean;
+  }
+
+  /**
+   * An interface for a file type.
+   */
+  export
+  interface IFileType {
+    /**
+     * The name of the file type.
+     */
+    readonly name: string;
+
+    /**
+     * The extension of the file type (e.g. `".txt"`).
+     */
+    readonly extension: string;
+
+    /**
+     * The optional mimetype of the file type.
+     */
+    readonly mimetype?: string;
+
+    /**
+     * The optional icon class to use for the file type.
+     */
+    readonly icon?: string;
+
+    /**
+     * The content type of the new file (defaults to `"file"`).
+     */
+    readonly contentType?: Contents.ContentType;
+
+    /**
+     * The format of the new file (default to `"text"`).
+     */
+    readonly fileFormat?: Contents.FileFormat;
+  }
+
+  /**
+   * An interface for a "Create New" item.
+   */
+  export
+  interface IFileCreator {
+    /**
+     * The name of the file creator.
+     */
+    readonly name: string;
+
+    /**
+     * The filetype name associated with the creator.
+     */
+    readonly fileType: string;
+
+    /**
+     * The optional widget name.
+     */
+    readonly widgetName?: string;
+
+    /**
+     * The optional kernel name.
+     */
+    readonly kernelName?: string;
+  }
+
+  /**
    * An arguments object for the `changed` signal.
    */
   export
@@ -724,17 +929,17 @@ namespace DocumentRegistry {
     /**
      * The type of the changed item.
      */
-    type: 'widgetFactory' | 'modelFactory' | 'widgetExtension' | 'fileCreator' | 'fileType';
+    readonly type: 'widgetFactory' | 'modelFactory' | 'widgetExtension' | 'fileCreator' | 'fileType';
 
     /**
      * The name of the item.
      */
-    name: string;
+    readonly name: string;
 
     /**
      * Whether the item was added or removed.
      */
-    change: 'added' | 'removed';
+    readonly change: 'added' | 'removed';
   }
 }
 
@@ -751,15 +956,15 @@ namespace Private {
    * A record for a widget factory and its options.
    */
   export
-  interface IWidgetFactoryRecord extends IWidgetFactoryOptions {
-    factory: IWidgetFactory<Widget, IDocumentModel>;
+  interface IWidgetFactoryRecord extends DocumentRegistry.IWidgetFactoryOptions {
+    factory: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>;
   }
 
   /**
    * Create a widget factory record.
    */
   export
-  function createRecord(factory: IWidgetFactory<Widget, IDocumentModel>, options: IWidgetFactoryOptions): IWidgetFactoryRecord {
+  function createRecord(factory: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>, options: DocumentRegistry.IWidgetFactoryOptions): IWidgetFactoryRecord {
     let fileExtensions = options.fileExtensions.map(ext => normalizeExtension(ext));
     let defaultFor = options.defaultFor || [];
     defaultFor = defaultFor.map(ext => normalizeExtension(ext));

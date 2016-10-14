@@ -23,8 +23,7 @@ import {
 } from '../common/interfaces';
 
 import {
-  IDocumentModel, IDocumentContext, IModelFactory,
-  IWidgetFactory
+  DocumentRegistry
 } from './index';
 
 
@@ -32,7 +31,7 @@ import {
  * The default implementation of a document model.
  */
 export
-class DocumentModel implements IDocumentModel {
+class DocumentModel implements DocumentRegistry.IModel {
   /**
    * Construct a new document model.
    */
@@ -43,12 +42,12 @@ class DocumentModel implements IDocumentModel {
   /**
    * A signal emitted when the document content changes.
    */
-  contentChanged: ISignal<IDocumentModel, void>;
+  contentChanged: ISignal<DocumentRegistry.IModel, void>;
 
   /**
    * A signal emitted when the document state changes.
    */
-  stateChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
+  stateChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<any>>;
 
   /**
    * Get whether the model factory has been disposed.
@@ -169,7 +168,7 @@ defineSignal(DocumentModel.prototype, 'stateChanged');
  * An implementation of a model factory for text files.
  */
 export
-class TextModelFactory implements IModelFactory<IDocumentModel> {
+class TextModelFactory implements DocumentRegistry.IModelFactory<DocumentRegistry.IModel> {
   /**
    * The name of the model type.
    *
@@ -220,7 +219,7 @@ class TextModelFactory implements IModelFactory<IDocumentModel> {
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): IDocumentModel {
+  createNew(languagePreference?: string): DocumentRegistry.IModel {
     return new DocumentModel(languagePreference);
   }
 
@@ -278,11 +277,11 @@ class Base64ModelFactory extends TextModelFactory {
  * The default implemetation of a widget factory.
  */
 export
-abstract class ABCWidgetFactory<T extends Widget, U extends IDocumentModel> implements IWidgetFactory<T, U> {
+abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * A signal emitted when a widget is created.
    */
-  widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
+  widgetCreated: ISignal<DocumentRegistry.IWidgetFactory<T, U>, T>;
 
   /**
    * Get whether the model factory has been disposed.
@@ -304,7 +303,7 @@ abstract class ABCWidgetFactory<T extends Widget, U extends IDocumentModel> impl
    * #### Notes
    * It should emit the [widgetCreated] signal with the new widget.
    */
-  abstract createNew(context: IDocumentContext<U>, kernel?: Kernel.IModel): T;
+  abstract createNew(context: DocumentRegistry.IContext<U>, kernel?: Kernel.IModel): T;
 
   private _isDisposed = false;
 }

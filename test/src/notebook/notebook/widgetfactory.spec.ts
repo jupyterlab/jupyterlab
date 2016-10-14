@@ -21,7 +21,7 @@ import {
 
 import {
   Context
-} from '../../../../lib/docmanager/context';
+} from '../../../../lib/docregistry/context';
 
 import {
   createNotebookContext, defaultRenderMime

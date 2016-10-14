@@ -18,7 +18,7 @@ import {
 } from '../../common/observablelist';
 
 import {
-  DocumentModel, IDocumentModel
+  DocumentModel, DocumentRegistry
 } from '../../docregistry';
 
 import {
@@ -47,11 +47,11 @@ import {
  * The definition of a model object for a notebook widget.
  */
 export
-interface INotebookModel extends IDocumentModel {
+interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
+  metadataChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<any>>;
 
   /**
    * The list of cells in the notebook.
@@ -170,7 +170,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<IDocumentModel, IChangedArgs<any>>;
+  metadataChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<any>>;
 
   /**
    * Get the observable list of notebook cells.

@@ -6,6 +6,10 @@ import {
 } from 'jupyter-js-services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   DisposableSet
 } from 'phosphor/lib/core/disposable';
 
@@ -425,7 +429,7 @@ namespace Private {
     let prefix = `file-buttons-${++id}`;
     let disposables = new DisposableSet();
     let registry = widget.manager.registry;
-    let creators = registry.listCreators();
+    let creators = registry.creators;
     let command: string;
 
     // Remove all the commands associated with this menu upon disposal.
@@ -438,7 +442,7 @@ namespace Private {
     }));
     menu.addItem({ command });
 
-    for (let creator of creators) {
+    each(creators, creator => {
       command = `${prefix}:new-${creator.name}`;
       disposables.add(commands.addCommand(command, {
         execute: () => {
@@ -447,7 +451,7 @@ namespace Private {
         label: creator.name
       }));
       menu.addItem({ command });
-    }
+    });
     return menu;
   }
 

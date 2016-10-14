@@ -26,7 +26,7 @@ import {
 } from '../mainmenu';
 
 import {
-  IDocumentRegistry, IWidgetFactoryOptions,
+  IDocumentRegistry, DocumentRegistry,
   restartKernel, selectKernelForContext
 } from '../docregistry';
 
@@ -133,7 +133,7 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
 function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer): INotebookTracker {
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
   let tracker = new FocusTracker<NotebookPanel>();
-  let options: IWidgetFactoryOptions = {
+  let options: DocumentRegistry.IWidgetFactoryOptions = {
     fileExtensions: ['.ipynb'],
     displayName: 'Notebook',
     modelName: 'notebook',

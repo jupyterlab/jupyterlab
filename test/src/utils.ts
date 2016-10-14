@@ -16,12 +16,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  TextModelFactory, IDocumentModel
+  TextModelFactory, DocumentRegistry, Context
 } from '../../lib/docregistry';
-
-import {
-  Context
-} from '../../lib/docmanager/context';
 
 import {
   INotebookModel
@@ -58,7 +54,7 @@ function defaultRenderMime(): RenderMime {
  * Create a context for a file.
  */
 export
-function createFileContext(path?: string): Promise<Context<IDocumentModel>> {
+function createFileContext(path?: string): Promise<Context<DocumentRegistry.IModel>> {
   return Private.servicePromise.then(manager => {
     let factory = Private.textFactory;
     path = path || utils.uuid() + '.txt';

@@ -12,7 +12,7 @@ import {
 } from '../../../../lib/common/interfaces';
 
 import {
-  IDocumentContext
+  DocumentRegistry, Context
 } from '../../../../lib/docregistry';
 
 import {
@@ -34,10 +34,6 @@ import {
 import {
   Notebook
 } from '../../../../lib/notebook/notebook/widget';
-
-import {
-  Context
-} from '../../../../lib/docmanager/context';
 
 import {
   createNotebookContext, defaultRenderMime
@@ -65,7 +61,7 @@ class LogNotebookPanel extends NotebookPanel {
 
   methods: string[] = [];
 
-  protected onContextChanged(oldValue: IDocumentContext<INotebookModel>, newValue: IDocumentContext<INotebookModel>): void {
+  protected onContextChanged(oldValue: DocumentRegistry.IContext<INotebookModel>, newValue: DocumentRegistry.IContext<INotebookModel>): void {
     super.onContextChanged(oldValue, newValue);
     this.methods.push('onContextChanged');
   }
@@ -75,12 +71,12 @@ class LogNotebookPanel extends NotebookPanel {
     this.methods.push('onModelStateChanged');
   }
 
-  protected onPathChanged(sender: IDocumentContext<INotebookModel>, path: string): void {
+  protected onPathChanged(sender: DocumentRegistry.IContext<INotebookModel>, path: string): void {
     super.onPathChanged(sender, path);
     this.methods.push('onPathChanged');
   }
 
-  protected onPopulated(sender: IDocumentContext<INotebookModel>, args: void): void {
+  protected onPopulated(sender: DocumentRegistry.IContext<INotebookModel>, args: void): void {
     super.onPopulated(sender, args);
     this.methods.push('onPopulated');
   }

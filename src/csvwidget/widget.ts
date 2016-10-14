@@ -9,24 +9,24 @@ import {
   Message
 } from 'phosphor/lib/core/messaging';
 
+
+import {
+  PanelLayout
+} from 'phosphor/lib/ui/panel';
+
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ABCWidgetFactory, IDocumentModel, IDocumentContext
+  ABCWidgetFactory, DocumentRegistry
 } from '../docregistry';
 
 import {
   HTML_COMMON_CLASS
 } from '../renderers/widget';
 
-
 import * as d3Dsv from 'd3-dsv';
-
-import {
-  PanelLayout
-} from 'phosphor/lib/ui/panel';
 
 
 /**
@@ -68,7 +68,7 @@ class CSVWidget extends Widget {
   /**
    * Construct a new csv table widget.
    */
-  constructor(context: IDocumentContext<IDocumentModel>) {
+  constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
     super();
     this._context = context;
     this.node.tabIndex = -1;
@@ -100,7 +100,7 @@ class CSVWidget extends Widget {
     context.model.contentChanged.connect(() => {
       this.update();
     });
-    context.contentsModelChanged.connect(() => {
+    context.fileChanged.connect(() => {
       this.update();
     });
 
@@ -178,7 +178,7 @@ class CSVWidget extends Widget {
     this.node.focus();
   }
 
-  private _context: IDocumentContext<IDocumentModel>;
+  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   private delimiter: string = ',';
   private _toolbar: Widget = null;
   private _table: Widget = null;
@@ -215,11 +215,11 @@ function createDelimiterSwitcherNode(): HTMLElement {
  * A widget factory for csv tables.
  */
 export
-class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, IDocumentModel> {
+class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IModel> {
   /**
    * Create a new widget given a context.
    */
-  createNew(context: IDocumentContext<IDocumentModel>, kernel?: Kernel.IModel): CSVWidget {
+  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): CSVWidget {
     let widget = new CSVWidget(context);
     this.widgetCreated.emit(widget);
     return widget;

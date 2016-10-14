@@ -26,17 +26,12 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IDocumentRegistry, IWidgetFactory, IWidgetFactoryOptions,
-  IDocumentModel, IDocumentContext, IModelFactory
+  DocumentRegistry, Context
 } from '../docregistry';
 
 import {
   IWidgetOpener
 } from '../filebrowser';
-
-import {
-  Context
-} from './context';
 
 import {
   DocumentWidgetManager
@@ -83,7 +78,7 @@ class DocumentManager implements IDisposable {
    * #### Notes
    * This is a read-only property.
    */
-  get registry(): IDocumentRegistry {
+  get registry(): DocumentRegistry {
     return this._registry;
   }
 
@@ -215,7 +210,7 @@ class DocumentManager implements IDisposable {
   /**
    * Get the document context for a widget.
    */
-  contextForWidget(widget: Widget): IDocumentContext<IDocumentModel> {
+  contextForWidget(widget: Widget): DocumentRegistry.IContext<DocumentRegistry.IModel> {
     return this._widgetManager.contextForWidget(widget);
   }
 
@@ -250,7 +245,7 @@ class DocumentManager implements IDisposable {
   /**
    * Find a context for a given path and factory name.
    */
-  private _findContext(path: string, factoryName: string): Context<IDocumentModel> {
+  private _findContext(path: string, factoryName: string): Context<DocumentRegistry.IModel> {
     return find(this._contexts, context => {
       return (context.factoryName === factoryName &&
               context.path === path);
@@ -260,7 +255,7 @@ class DocumentManager implements IDisposable {
   /**
    * Get a context for a given path.
    */
-  private _contextForPath(path: string): Context<IDocumentModel> {
+  private _contextForPath(path: string): Context<DocumentRegistry.IModel> {
     return find(this._contexts, context => {
       return context.path === path;
     });
@@ -269,7 +264,7 @@ class DocumentManager implements IDisposable {
   /**
    * Create a context from a path and a model factory.
    */
-  private _createContext(path: string, factory: IModelFactory<IDocumentModel>): Context<IDocumentModel> {
+  private _createContext(path: string, factory: DocumentRegistry.IModelFactory<DocumentRegistry.IModel>): Context<DocumentRegistry.IModel> {
     let adopter = (widget: Widget) => {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget);
@@ -289,8 +284,8 @@ class DocumentManager implements IDisposable {
 
   private _serviceManager: IServiceManager = null;
   private _widgetManager: DocumentWidgetManager = null;
-  private _registry: IDocumentRegistry = null;
-  private _contexts: Vector<Context<IDocumentModel>> = new Vector<Context<IDocumentModel>>();
+  private _registry: DocumentRegistry = null;
+  private _contexts: Vector<Context<DocumentRegistry.IModel>> = new Vector<Context<DocumentRegistry.IModel>>();
   private _opener: IWidgetOpener = null;
 }
 
@@ -308,7 +303,7 @@ namespace DocumentManager {
     /**
      * A document registry instance.
      */
-    registry: IDocumentRegistry;
+    registry: DocumentRegistry;
 
     /**
      * A service manager instance.
@@ -331,7 +326,7 @@ namespace Private {
    * An extended interface for a widget factory and its options.
    */
   export
-  interface IWidgetFactoryEx extends IWidgetFactoryOptions {
-    factory: IWidgetFactory<Widget, IDocumentModel>;
+  interface IWidgetFactoryEx extends DocumentRegistry.IWidgetFactoryOptions {
+    factory: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>;
   }
 }
