@@ -302,25 +302,25 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * Delete a checkpoint for the file.
    */
-  deleteCheckpoint(checkpointID: string): Promise<void> {
-    return this._manager.contents.deleteCheckpoint(this._path, checkpointID);
+  deleteCheckpoint(checkpointId: string): Promise<void> {
+    return this._manager.contents.deleteCheckpoint(this._path, checkpointId);
   }
 
   /**
    * Restore the file to a known checkpoint state.
    */
-  restoreCheckpoint(checkpointID?: string): Promise<void> {
+  restoreCheckpoint(checkpointId?: string): Promise<void> {
     let contents = this._manager.contents;
     let path = this._path;
-    if (checkpointID) {
-      return contents.restoreCheckpoint(path, checkpointID);
+    if (checkpointId) {
+      return contents.restoreCheckpoint(path, checkpointId);
     }
     return this.listCheckpoints().then(checkpoints => {
       if (!checkpoints.length) {
         return;
       }
-      checkpointID = checkpoints[checkpoints.length - 1].id;
-      return contents.restoreCheckpoint(path, checkpointID);
+      checkpointId = checkpoints[checkpoints.length - 1].id;
+      return contents.restoreCheckpoint(path, checkpointId);
     });
   }
 
