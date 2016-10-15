@@ -2,16 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  EmptyIterator, IIterator, IIterable, IterableOrArrayLike, iter, each
+  EmptyIterator, IIterator, IterableOrArrayLike, iter, each
 } from 'phosphor/lib/algorithm/iteration';
-
-import {
-  move
-} from 'phosphor/lib/algorithm/mutation';
-
-import {
-  indexOf
-} from 'phosphor/lib/algorithm/searching';
 
 import {
   Vector
@@ -27,241 +19,106 @@ import {
 
 
 /**
- * The change types which occur on an observable list.
+ * A vector which can be observed for changes.
  */
 export
-type ListChangeType =
+interface IObservableVector<T> extends Vector<T>, IDisposable {
   /**
-   * An item was added to the list.
+   * A signal emitted when the vector has changed.
    */
-  'add' |
+  changed: ISignal<IObservableVector<T>, ObservableVector.IChangedArgs<T>>;
 
   /**
-   * Items were assigned or cleared in the list.
-   */
-  'assign' |
-
-  /**
-   * An item was moved within the list.
-   */
-  'move' |
-
-  /**
-   * An item was removed from the list.
-   */
-  'remove' |
-
-  /**
-   * An item was set in the list.
-   */
-  'set';
-
-
-/**
- * The changed args object which is emitted by an observable list.
- */
-export
-interface IListChangedArgs<T> {
-  /**
-   * The type of change undergone by the list.
-   */
-  type: ListChangeType;
-
-  /**
-   * The new index associated with the change.
+   * Move a value from one index to another.
    *
-   * The semantics of this value depend upon the change type:
-   *   - `Add`: The index of the added item.
-   *   - `Assign`: Always `-1`.
-   *   - `Move`: The new index of the item.
-   *   - `Remove`: Always `-1`.
-   *   - `Assign`: Always `-1`.
-   *   - `Set`: The index of the set item.
+   * @parm fromIndex - The index of the element to move.
+   *
+   * @param toIndex - The index to move the element to.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * Iterators pointing at the lesser of the `fromIndex` and the `toIndex`
+   * and beyond are invalidated.
+   *
+   * #### Undefined Behavior
+   * A `fromIndex` or a `toIndex` which is non-integral.
    */
-  newIndex: number;
+  move(fromIndex: number, toIndex: number): void;
 
   /**
-   * The new value associated with the change.
+   * Push a set of values to the back of the vector.
    *
-   * The semantics of this value depend upon the change type:
-   *   - `Add`: The item which was added.
-   *   - `Assign`: The new items.
-   *   - `Move`: The item which was moved.
-   *   - `Remove`: Always `undefined`.
-   *   - `Set`: The new item at the index.
-   */
-  newValue: T | IIterator<T>;
-
-  /**
-   * The old index associated with the change.
-   *
-   * The semantics of this value depend upon the change type:
-   *   - `Add`: Always `-1`.
-   *   - `Assign`: Always `-1`.
-   *   - `Move`: The old index of the item.
-   *   - `Remove`: The index of the removed item.
-   *   - `Set`: The index of the set item.
-   */
-  oldIndex: number;
-
-  /**
-   * The old value associated with the change.
-   *
-   * The semantics of this value depend upon the change type:
-   *   - `Add`: Always `undefined`.
-   *   - `Assign`: The old items.
-   *   - `Move`: The item which was moved.
-   *   - `Remove`: The item which was removed.
-   *   - `Set`: The old item at the index.
-   */
-  oldValue: T | IIterator<T>;
-}
-
-
-/**
- * A sequence container which can be observed for changes.
- */
-export
-interface IObservableList<T> extends IDisposable, IIterable<T> {
-  /**
-   * A signal emitted when the list has changed.
-   */
-  changed: ISignal<IObservableList<T>, IListChangedArgs<T>>;
-
-  /**
-   * The number of items in the list.
-   */
-  readonly length: number;
-
-  /**
-   * Get the item at a specific index in the list.
-   *
-   * @param index - The index of the item of interest. If this is
-   *   negative, it is offset from the end of the list.
-   *
-   * @returns The item at the specified index, or `undefined` if the
-   *   index is out of range.
-   */
-  at(index: number): T;
-
-  /**
-   * Set the item at a specific index.
-   *
-   * @param index - The index of interest. If this is negative, it is
-   *   offset from the end of the list.
-   *
-   * @param item - The item to set at the index.
-   *
-   * @returns The item which occupied the index, or `undefined` if the
-   *   index is out of range.
-   */
-  set(index: number, item: T): T;
-
-  /**
-   * Add an item to the end of the list.
-   *
-   * @param item - The item to add to the list.
+   * @param values - An iterable or array-like set of values to add.
    *
    * @returns The new length of the vector.
+   *
+   * #### Complexity
+   * Linear.
+   *
+   * #### Iterator Validity
+   * No changes.
    */
-  pushBack(item: T): number;
+  pushAll(values: IterableOrArrayLike<T>): number;
 
   /**
-   * Insert an item into the list at a specific index.
+   * Insert a set of items into the vector at the specified index.
    *
-   * @param index - The index at which to insert the item. If this is
-   *   negative, it is offset from the end of the list. In all cases,
-   *   it is clamped to the bounds of the list.
+   * @param index - The index at which to insert the values.
    *
-   * @param item - The item to insert into the list.
+   * @param values - The values to insert at the specified index.
    *
-   * @returns The the new length of the vector.
-   */
-  insert(index: number, item: T): number;
-
-  /**
-   * Move an item from one index to another.
+   * @returns The new length of the vector.
    *
-   * @param fromIndex - The index of the item of interest. If this is
-   *   negative, it is offset from the end of the list.
+   * #### Complexity.
+   * Linear.
    *
-   * @param toIndex - The desired index for the item. If this is
-   *   negative, it is offset from the end of the list.
-   *
-   * @returns `true` if the item was moved, `false` otherwise.
-   */
-  move(fromIndex: number, toIndex: number): boolean;
-
-  /**
-   * Remove the first occurrence of a specific item from the list.
-   *
-   * @param item - The item to remove from the list.
-   *
-   * @return The index occupied by the item, or `-1` if the item is
-   *   not contained in the list.
-   */
-  remove(item: T): number;
-
-  /**
-   * Remove the item at a specific index.
-   *
-   * @param index - The index of the item of interest. If this is
-   *   negative, it is offset from the end of the list.
-   *
-   * @returns The item at the specified index, or `undefined` if the
-   *   index is out of range.
-   */
-  removeAt(index: number): T;
-
-  /**
-   * Assign the items in the list.
-   *
-   * @param items - The items to assign.
-   *
-   * @returns An iterator for of the items in the existing list.
-   */
-  assign(items: IterableOrArrayLike<T>): IIterator<T>;
-
-  /**
-   * Remove all items from the list.
-   *
-   * @returns An iterator for the items removed from the list.
+   * #### Iterator Validity
+   * No changes.
    *
    * #### Notes
-   * This is equivalent to `list.assign([])`.
+   * The `index` will be clamped to the bounds of the vector.
+   *
+   * #### Undefined Behavior.
+   * An `index` which is non-integral.
    */
-  clear(): IIterator<T>;
+  insertAll(index: number, values: IterableOrArrayLike<T>): number;
+
+  /**
+   * Remove a range of items from the list.
+   *
+   * @param startIndex - The start index of the range to remove (inclusive).
+   *
+   * @param endIndex - The end index of the range to remove (exclusive).
+   *
+   * @returns The new length of the vector.
+   *
+   * #### Complexity
+   * Linear.
+   *
+   * #### Iterator Validity
+   * Iterators pointing to the first removed value and beyond are invalid.
+   *
+   * #### Undefined Behavior
+   * A `startIndex` or `endIndex` which is non-integral.
+   */
+  removeRange(startIndex: number, endIndex: number): number;
 }
 
 
 /**
- * A concrete implementation of [[IObservableList]].
+ * A concrete implementation of [[IObservableVector]].
  */
 export
-class ObservableList<T> implements IObservableList<T> {
-  /**
-   * Construct a new observable list.
-   *
-   * @param items - The initial items for the list.
-   */
-  constructor(items?: IterableOrArrayLike<T>) {
-    this.internal = new Vector<T>(items);
-  }
-
+class ObservableVector<T> implements IObservableVector<T> extends Vector {
   /**
    * A signal emitted when the list has changed.
    *
    * #### Notes
    * This is a pure delegate to the [[changedSignal]].
    */
-  changed: ISignal<ObservableList<T>, IListChangedArgs<T>>;
-
-  /**
-   * The number of items in the list.
-   */
-  get length(): number {
-    return this.internal.length;
-  }
+  changed: ISignal<ObservableVector<T>, IListChangedArgs<T>>;
 
   /**
    * Test whether the list has been disposed.
@@ -283,323 +140,413 @@ class ObservableList<T> implements IObservableList<T> {
   }
 
   /**
-   * Create an iterator over the values in the list.
+   * Set the value at the specified index.
    *
-   * @returns A new iterator starting at the front of the list.
-   */
-  iter(): IIterator<T> {
-    return this.internal.iter();
-  }
-
-  /**
-   * Get the item at a specific index in the list.
+   * @param index - The positive integer index of interest.
    *
-   * @param index - The index of the item of interest. If this is
-   *   negative, it is offset from the end of the list.
+   * @param value - The value to set at the specified index.
    *
-   * @returns The item at the specified index, or `undefined` if the
-   *   index is out of range.
-   */
-  at(index: number): T {
-    return this.internal.at(this._norm(index));
-  }
-
-  /**
-   * Get the index of the first occurence of an item in the list.
+   * #### Complexity
+   * Constant.
    *
-   * @param item - The item of interest.
+   * #### Iterator Validity
+   * No changes.
    *
-   * @returns The index of the specified item or `-1` if the item is
-   *   not contained in the list.
-   */
-  indexOf(item: T): number {
-    return indexOf(this.internal, item);
-  }
-
-  /**
-   * Set the item at a specific index.
-   *
-   * @param index - The index of interest. If this is negative, it is
-   *   offset from the end of the list.
-   *
-   * @param item - The item to set at the index.
-   *
-   * @returns The item which occupied the index, or `undefined` if the
-   *   index is out of range.
+   * #### Undefined Behavior
+   * An `index` which is non-integral or out of range.
    */
   set(index: number, item: T): T {
-    let i = this._norm(index);
-    if (!this._check(i)) {
-      return void 0;
-    }
-    return this.setItem(i, item);
-  }
-
-  /**
-   * Add an item to the end of the list.
-   *
-   * @param item - The item to add to the list.
-   *
-   * @returns The index at which the item was added.
-   */
-  pushBack(item: T): number {
-    return this.addItem(this.internal.length, item);
-  }
-
-  /**
-   * Insert an item into the list at a specific index.
-   *
-   * @param index - The index at which to insert the item. If this is
-   *   negative, it is offset from the end of the list. In all cases,
-   *   it is clamped to the bounds of the list.
-   *
-   * @param item - The item to insert into the list.
-   *
-   * @returns The index at which the item was inserted.
-   */
-  insert(index: number, item: T): number {
-    return this.addItem(this._clamp(index), item);
-  }
-
-  /**
-   * Move an item from one index to another.
-   *
-   * @param fromIndex - The index of the item of interest. If this is
-   *   negative, it is offset from the end of the list.
-   *
-   * @param toIndex - The desired index for the item. If this is
-   *   negative, it is offset from the end of the list.
-   *
-   * @returns `true` if the item was moved, `false` otherwise.
-   */
-  move(fromIndex: number, toIndex: number): boolean {
-    let i = this._norm(fromIndex);
-    if (!this._check(i)) {
-      return false;
-    }
-    let j = this._norm(toIndex);
-    if (!this._check(j)) {
-      return false;
-    }
-    return this.moveItem(i, j);
-  }
-
-  /**
-   * Remove the first occurrence of a specific item from the list.
-   *
-   * @param item - The item to remove from the list.
-   *
-   * @return The index occupied by the item, or `-1` if the item is
-   *   not contained in the list.
-   */
-  remove(item: T): number {
-    let i = indexOf(this.internal, item);
-    if (i !== -1) {
-      this.removeItem(i);
-    }
-    return i;
-  }
-
-  /**
-   * Remove the item at a specific index.
-   *
-   * @param index - The index of the item of interest. If this is
-   *   negative, it is offset from the end of the list.
-   *
-   * @returns The item at the specified index, or `undefined` if the
-   *   index is out of range.
-   */
-  removeAt(index: number): T {
-    let i = this._norm(index);
-    if (!this._check(i)) {
-      return void 0;
-    }
-    return this.removeItem(i);
-  }
-
-  /**
-   * Assign the items in the list.
-   *
-   * @param items - The items to assign.
-   *
-   * @returns An iterator for of the items in the existing list.
-   */
-  assign(items: IterableOrArrayLike<T>): IIterator<T> {
-    let old: T[] = [];
-    while (!this.internal.isEmpty) {
-      old.push(this.internal.removeAt(0));
-    }
-    let newValue = iter(items);
-    let oldValue = iter(old);
-
-    each(newValue, item => {
-      this.internal.pushBack(item);
-    });
-
-    this.changed.emit({
-      type: 'assign',
-      newIndex: -1,
-      newValue,
-      oldIndex: -1,
-      oldValue
-    });
-    return oldValue;
-  }
-
-  /**
-   * Remove all items from the list.
-   *
-   * @returns An iterator for the items removed from the list.
-   *
-   * #### Notes
-   * This is equivalent to `list.assign([])`.
-   */
-  clear(): IIterator<T> {
-    return this.assign(EmptyIterator.instance);
-  }
-
-  /**
-   * The protected internal array of items for the list.
-   *
-   * #### Notes
-   * Subclasses may access this array directly as needed.
-   */
-  protected internal: Vector<T>;
-
-  /**
-   * Add an item to the list at the specified index.
-   *
-   * @param index - The index at which to add the item. This must be
-   *   an integer in the range `[0, internal.length]`.
-   *
-   * @param item - The item to add at the specified index.
-   *
-   * @returns The index at which the item was added.
-   *
-   * #### Notes
-   * This may be reimplemented by subclasses to customize the behavior.
-   */
-  protected addItem(index: number, item: T): number {
-    let value = this.internal.insert(index, item);
-    this.changed.emit({
-      type: 'add',
-      newIndex: index,
-      newValue: item,
-      oldIndex: -1,
-      oldValue: void 0,
-    });
-    return value;
-  }
-
-  /**
-   * Move an item in the list from one index to another.
-   *
-   * @param fromIndex - The initial index of the item. This must be
-   *   an integer in the range `[0, internal.length)`.
-   *
-   * @param toIndex - The desired index for the item. This must be
-   *   an integer in the range `[0, internal.length)`.
-   *
-   * @returns `true` if the item was moved, `false` otherwise.
-   *
-   * #### Notes
-   * This may be reimplemented by subclasses to customize the behavior.
-   */
-  protected moveItem(fromIndex: number, toIndex: number): boolean {
-    let before = this.internal.at(toIndex);
-    move(this.internal, fromIndex, toIndex);
-    let after = this.internal.at(toIndex);
-    if (before === after) {
-      return;
-    }
-    this.changed.emit({
-      type: 'move',
-      newIndex: toIndex,
-      newValue: after,
-      oldIndex: fromIndex,
-      oldValue: after,
-    });
-    return true;
-  }
-
-  /**
-   * Remove the item from the list at the specified index.
-   *
-   * @param index - The index of the item to remove. This must be
-   *   an integer in the range `[0, internal.length)`.
-   *
-   * @returns The item removed from the list.
-   *
-   * #### Notes
-   * This may be reimplemented by subclasses to customize the behavior.
-   */
-  protected removeItem(index: number): T {
-    let item = this.internal.removeAt(index);
-    this.changed.emit({
-      type: 'remove',
-      newIndex: -1,
-      newValue: void 0,
-      oldIndex: index,
-      oldValue: item,
-    });
-    return item;
-  }
-
-  /**
-   * Set the item at a specific index in the list.
-   *
-   * @param index - The index of interest. This must be an integer in
-   *   the range `[0, internal.length)`.
-   *
-   * @param item - The item to set at the index.
-   *
-   * @returns The item which previously occupied the specified index.
-   *
-   * #### Notes
-   * This may be reimplemented by subclasses to customize the behavior.
-   */
-  protected setItem(index: number, item: T): T {
-    let old = this.internal.at(index);
-    this.internal.set(index, item);
+    let oldValues = iter([this.at(index)]);
+    super.set(index, number);
     this.changed.emit({
       type: 'set',
-      newIndex: index,
-      newValue: item,
       oldIndex: index,
-      oldValue: old,
+      newIndex: index,
+      oldValues,
+      newValues = iter([item])
     });
-    return old;
   }
 
   /**
-   * Normalize an index and offset negative values from the list end.
+   * Add a value to the back of the vector.
+   *
+   * @param value - The value to add to the back of the vector.
+   *
+   * @returns The new length of the vector.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
    */
-  private _norm(i: number): number {
-    return i < 0 ? Math.floor(i) + this.internal.length : Math.floor(i);
+  pushBack(value: T): number {
+    let num = super.pushBack(value);
+    this.changed.emit({
+      type: 'add',
+      oldIndex: -1,
+      newIndex: this.length - 1,
+      oldValues: EmptyIterator.instance,
+      newValues: iter(value)
+    });
+    return num;
   }
 
   /**
-   * Check whether a normalized index is in range.
+   * Remove and return the value at the back of the vector.
+   *
+   * @returns The value at the back of the vector, or `undefined` if
+   *   the vector is empty.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * Iterators pointing at the removed value are invalidated.
    */
-  private _check(i: number): boolean {
-    return i >= 0 && i < this.internal.length;
+  popBack(): T {
+    let value = super.popBack();
+    this.changed.emit({
+      type: 'remove',
+      oldIndex: this.length,
+      newIndex: -1,
+      oldValues: iter(value),
+      newValues: EmptyIterator.instance
+    });
   }
 
   /**
-   * Normalize and clamp an index to the list bounds.
+   * Insert a value into the vector at a specific index.
+   *
+   * @param index - The index at which to insert the value.
+   *
+   * @param value - The value to set at the specified index.
+   *
+   * @returns The new length of the vector.
+   *
+   * #### Complexity
+   * Linear.
+   *
+   * #### Iterator Validity
+   * No changes.
+   *
+   * #### Notes
+   * The `index` will be clamped to the bounds of the vector.
+   *
+   * #### Undefined Behavior
+   * An `index` which is non-integral.
    */
-  private _clamp(i: number): number {
-    return Math.max(0, Math.min(this._norm(i), this.internal.length));
+  insert(index: number, value: T): number {
+    let num = super.insert(index, value);
+    this.changed.emit({
+      type: 'add',
+      oldIndex: -1,
+      newIndex: index,
+      oldValues: EmptyIterator.instance,
+      newValues: iter(value)
+    });
+    return num;
   }
 
   /**
-   * Normalize and limit a count to the length of the list.
+   * Remove the first occurrence of a value from the vector.
+   *
+   * @param value - The value of interest.
+   *
+   * @returns The index of the removed value, or `-1` if the value
+   *   is not contained in the vector.
+   *
+   * #### Complexity
+   * Linear.
+   *
+   * #### Iterator Validity
+   * Iterators pointing at the removed value and beyond are invalidated.
+   *
+   * #### Notes
+   * Comparison is performed using strict `===` equality.
    */
-  private _limit(c: number): number {
-    return Math.max(0, Math.min(Math.floor(c), this.internal.length));
+  remove(value: T): number {
+    let oldIndex = this.indexOf(value);
+    let num = super.remove(value);
+    this.changed.emit({
+      type: 'remove',
+      oldIndex,
+      newIndex: -1,
+      oldValues: iter(value),
+      newValues: EmptyIterator.instance
+    });
+    return num;
+  }
+
+  /**
+   * Remove and return the value at a specific index.
+   *
+   * @param index - The index of the value of interest.
+   *
+   * @returns The value at the specified index, or `undefined` if the
+   *   index is out of range.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * Iterators pointing at the removed value and beyond are invalidated.
+   *
+   * #### Undefined Behavior
+   * An `index` which is non-integral.
+   */
+  removeAt(index: number): T {
+    let value = super.removeAt(index);
+    this.changed.emit({
+      type: 'remove',
+      oldIndex: index,
+      newIndex: -1,
+      oldValues: iter(value),
+      newValues: EmptyIterator.instance
+    });
+  }
+
+  /**
+   * Remove all values from the vector.
+   *
+   * #### Complexity
+   * Linear.
+   *
+   * #### Iterator Validity
+   * All current iterators are invalidated.
+   */
+  clear(): void {
+    let values = [];
+    each(this, value => {  values.push(value); });
+    super.clear();
+    this.changed.emit({
+      type: 'remove',
+      oldIndex: 0,
+      newIndex: -1,
+      oldValues: iter(values),
+      newValues: EmptyIterator.instance
+    });
+  }
+
+  /**
+   * Swap the contents of the vector with the contents of another.
+   *
+   * @param other - The other vector holding the contents to swap.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * All current iterators remain valid, but will now point to the
+   * contents of the other vector involved in the swap.
+   */
+  swap(other: Vector<T>): void {
+    let oldValues = this.iter();
+    super.swap(other);
+    this.changed.emit({
+      type: 'remove',
+      oldIndex: 0,
+      newIndex: -1,
+      oldValues,
+      newValues: EmptyIterator.instance
+    });
+    this.changed.emit({
+      type: 'add',
+      oldIndex: -1,
+      newIndex: 0,
+      oldValues: EmptyIterator.instance,
+      newValues: this.iter()
+    });
+  }
+
+  /**
+   * Move a value from one index to another.
+   *
+   * @parm fromIndex - The index of the element to move.
+   *
+   * @param toIndex - The index to move the element to.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * Iterators pointing at the lesser of the `fromIndex` and the `toIndex`
+   * and beyond are invalidated.
+   *
+   * #### Undefined Behavior
+   * A `fromIndex` or a `toIndex` which is non-integral.
+   */
+  move(fromIndex: number, toIndex: number): void {
+    let value = this.at(fromIndex);
+    let it = iter(value);
+    super.removeAt(fromIndex);
+    if (toIndex < fromIndex) {
+      toIndex -= 1;
+    }
+    super.insert(toIndex, value);
+    this.changed.emit({
+      type: 'move',
+      oldIndex: fromIndex,
+      newIndex: toIndex,
+      oldValues: it
+      newValues: it
+    });
+  }
+
+  /**
+   * Push a set of values to the back of the vector.
+   *
+   * @param values - An iterable or array-like set of values to add.
+   *
+   * @returns The new length of the vector.
+   *
+   * #### Complexity
+   * Linear.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  pushAll(values: IterableOrArrayLike<T>): number {
+    let newIndex = this.length;
+    each(values, value => { super.pushBack(value); });
+    this.changed.emit({
+      type: 'add',
+      oldIndex: -1,
+      newIndex,
+      oldValues: EmptyIterator.instance,
+      newValues = iter(values)
+    });
+    return this.length;
+  }
+
+  /**
+   * Insert a set of items into the vector at the specified index.
+   *
+   * @param index - The index at which to insert the values.
+   *
+   * @param values - The values to insert at the specified index.
+   *
+   * @returns The new length of the vector.
+   *
+   * #### Complexity.
+   * Linear.
+   *
+   * #### Iterator Validity
+   * No changes.
+   *
+   * #### Notes
+   * The `index` will be clamped to the bounds of the vector.
+   *
+   * #### Undefined Behavior.
+   * An `index` which is non-integral.
+   */
+  insertAll(index: number, values: IterableOrArrayLike<T>): number {
+    each(values, value => { super.insert(index++, value); });
+    this.changed.emit({
+      type: 'add',
+      oldIndex: -1,
+      newIndex: index,
+      oldValues: EmptyIterator.instance,
+      newValues: iter(values)
+    });
+  }
+
+  /**
+   * Remove a range of items from the list.
+   *
+   * @param startIndex - The start index of the range to remove (inclusive).
+   *
+   * @param endIndex - The end index of the range to remove (exclusive).
+   *
+   * @returns The new length of the vector.
+   *
+   * #### Complexity
+   * Linear.
+   *
+   * #### Iterator Validity
+   * Iterators pointing to the first removed value and beyond are invalid.
+   *
+   * #### Undefined Behavior
+   * A `startIndex` or `endIndex` which is non-integral.
+   */
+  removeRange(startIndex: number, endIndex: number): number {
+    let oldValues: T[] = [];
+    for (let i = startIndex; i < endIndex; i++) {
+      oldValues.push(super.removeAt(startIndex));
+    }
+    this.changed.emit({
+      type: 'remove',
+      oldIndex: startIndex,
+      newIndex: -1,
+      oldValues: iter(oldValues),
+      newValues: EmptyIterator.instance
+    });
   }
 }
 
 
-// Define the signals for the `ObservableList` class.
-defineSignal(ObservableList.prototype, 'changed');
+/**
+ * The namespace for `ObservableVector` class statics.
+ */
+export
+namespace ObservableVector {
+  /**
+   * The change types which occur on an observable list.
+   */
+  export
+  type ChangeType =
+    /**
+     * An item was added to the list.
+     */
+    'add' |
+
+    /**
+     * An item was moved within the list.
+     */
+    'move' |
+
+    /**
+     * An item was removed from the list.
+     */
+    'remove' |
+
+    /**
+     * An item was set in the list.
+     */
+    'set';
+
+  /**
+   * The changed args object which is emitted by an observable list.
+   */
+  export
+  interface IChangedArgs<T> {
+    /**
+     * The type of change undergone by the list.
+     */
+    type: ChangeType;
+
+    /**
+     * The new index associated with the change.
+     */
+    newIndex: number;
+
+    /**
+     * The new values associated with the change.
+     */
+    newValues: IIterator<T>;
+
+    /**
+     * The old index associated with the change.
+     */
+    oldIndex: number;
+
+    /**
+     * The old values associated with the change.
+     */
+    oldValues: IIterator<T>;
+  }
+}
+
+
+// Define the signals for the `ObservableVector` class.
+defineSignal(ObservableVector.prototype, 'changed');
