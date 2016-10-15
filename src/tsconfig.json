@@ -10,5 +10,6 @@
     "target": "ES5",
     "outDir": "../lib",
     "sourceMap": true
-  }
+  },
+  "exclude": ["typedoc.d.ts"]
 }
