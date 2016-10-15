@@ -32,6 +32,77 @@ const landingExtension: JupyterLabPlugin<void> = {
   autoStart: true
 };
 
+/**
+ * The class name added to the landing plugin.
+ */
+const LANDING_CLASS = 'jp-Landing';
+
+/**
+ * The class name added to the dialog.
+ */
+const LANDING_DIALOG_CLASS = 'jp-Landing-dialog';
+
+/**
+ * The class name for the JupyterLab icon from default-theme.
+ */
+const JUPYTERLAB_ICON_CLASS = 'jp-ImageJupyterLab';
+
+/**
+ * The class name added to specify size of the JupyterLab logo.
+ */
+const LANDING_LOGO_CLASS = 'jp-Landing-logo';
+
+/**
+ * The class name added to the preview message subtitle.
+ */
+const LANDING_SUBTITLE_CLASS = 'jp-Landing-subtitle';
+
+/**
+ * The class name added for the tour icon from default-theme.
+ */
+const TOUR_ICON_CLASS = 'jp-Landing-tour';
+
+/**
+ * The class name added to the header text.
+ */
+const LANDING_HEADER_CLASS = 'jp-Landing-header';
+
+/**
+ * The class name added to the dialog body.
+ */
+const LANDING_BODY_CLASS = 'jp-Landing-body';
+
+/**
+ * The class name added to the column of the dialog.
+ */
+const LANDING_COLUMN_CLASS = 'jp-Landing-column';
+
+/**
+ * The class name added to specify size of activity icons.
+ */
+const LANDING_ICON_CLASS = 'jp-Landing-image';
+
+/**
+ * The class name added to the image text of an activity.
+ */
+const LANDING_TEXT_CLASS = 'jp-Landing-text';
+
+/**
+ * The class name added to the current working directory.
+ */
+const LANDING_CWD_CLASS = 'jp-Landing-cwd';
+
+/**
+ * The class name added for the folder icon from default-theme.
+ */
+const FOLDER_ICON_CLASS = 'jp-Landing-folder';
+
+/**
+ * The class name added to the current working directory path.
+ */
+const LANDING_PATH_CLASS = 'jp-Landing-path';
+
+
 class LandingModel extends VDomModel {
   constructor() {
     super();
@@ -46,30 +117,45 @@ class LandingModel extends VDomModel {
     this._path = 'home';
   }
 
+  /**
+   * Get the preview message.
+   */
   get previewMessage(): string {
     return this._previewMessage;
   }
 
+  /**
+   * Get the header text.
+   */
   get headerText(): string {
     return this._headerText;
   }
 
+  /**
+   * Get a 2D array containing the name of activities and their associated commands.
+   */
   get activities() : string[][] {
     return this._activities;
   }
 
+  /**
+   * Get the path of the current working directory.
+   */
   get path(): string {
     return this._path;
   }
 
+  /**
+   * Set the path of the current working directory.
+   */
   set path(value: string) {
     this._path = value;
     this.stateChanged.emit(void 0);
   }
 
   private _previewMessage: string;
-  private _activities: string[][];
   private _headerText: string;
+  private _activities: string[][];
   private _path: string;
 }
 
@@ -85,47 +171,47 @@ class LandingWidget extends VDomWidget<LandingModel> {
     for (let activityName of activites) {
       let imgName = activityName[0].replace(' ', '');
       let column =
-      h.div({className: 'jp-Landing-column'},
-        h.span({className: `jp-Image${imgName} jp-Landing-image`,
+      h.div({className: LANDING_COLUMN_CLASS},
+        h.span({className: LANDING_ICON_CLASS + ` jp-Image${imgName}` ,
                 onclick: () => {
                   this._app.commands.execute(activityName[1], void 0);
                 }}
         ),
-        h.span({className: 'jp-Landing-text'}, activityName[0])
+        h.span({className: LANDING_TEXT_CLASS}, activityName[0])
       );
       activitiesList.push(column);
     }
 
-    let logo = h.span({className: 'jp-ImageJupyterLab jp-Landing-logo'});
+    let logo = h.span({className: JUPYTERLAB_ICON_CLASS + ' ' + LANDING_LOGO_CLASS});
     let subtitle =
-    h.span({className: 'jp-Landing-subtitle'},
+    h.span({className: LANDING_SUBTITLE_CLASS},
       this.model.previewMessage
     );
     let tour =
-    h.span({className: 'jp-Landing-tour',
+    h.span({className: TOUR_ICON_CLASS,
             onclick: () => {
               this._app.commands.execute('about-jupyterlab:show', void 0);
             }}
     );
     let header =
-    h.span({className: 'jp-Landing-header'},
+    h.span({className: LANDING_HEADER_CLASS},
       this.model.headerText
     );
     let body =
-    h.div({className: 'jp-Landing-body'},
+    h.div({className: LANDING_BODY_CLASS},
       activitiesList
     );
 
     let dialog =
-    h.div({className: 'jp-Landing-dialog'},
+    h.div({className: LANDING_DIALOG_CLASS},
       logo,
       subtitle,
       tour,
       header,
       body,
-      h.div({className: 'jp-Landing-cwd'},
-        h.span({className: 'jp-Landing-folder'}),
-        h.span({className: 'jp-Landing-path'}, this.model.path
+      h.div({className: LANDING_CWD_CLASS},
+        h.span({className: FOLDER_ICON_CLASS}),
+        h.span({className: LANDING_PATH_CLASS}, this.model.path
         )
       )
     );
@@ -143,7 +229,7 @@ function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: IC
   widget.id = 'landing-jupyterlab';
   widget.title.label = 'Launcher';
   widget.title.closable = true;
-  widget.addClass('jp-Landing');
+  widget.addClass(LANDING_CLASS);
 
   let path = 'home';
   pathTracker.pathChanged.connect(() => {
