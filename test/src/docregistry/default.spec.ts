@@ -23,6 +23,10 @@ import {
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
+  get name(): string {
+    return 'test';
+  }
+
   createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): Widget {
     return new Widget();
   }

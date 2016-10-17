@@ -26,6 +26,10 @@ import {
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
+  get name(): string {
+    return 'test';
+  }
+
   createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): Widget {
     return new Widget();
   }
@@ -84,29 +88,9 @@ describe('docregistry/registry', () => {
 
       it('should add the widget factory to the registry', () => {
         let factory = new WidgetFactory();
-        registry.addWidgetFactory(factory, {
-          fileExtensions: [],
-          displayName: 'foo',
-          modelName: 'bar'
-        });
-        expect(registry.getWidgetFactory('foo')).to.be(factory);
-        expect(registry.getWidgetFactory('FOO')).to.be(factory);
-      });
-
-      it('should be a no-op if the `displayName` is already registered', () => {
-        let factory = new WidgetFactory();
-        registry.addWidgetFactory(factory, {
-          fileExtensions: [],
-          displayName: 'foo',
-          modelName: 'bar'
-        });
-        let disposable = registry.addWidgetFactory(new WidgetFactory(), {
-          fileExtensions: [],
-          displayName: 'foo',
-          modelName: 'bar'
-        });
-        disposable.dispose();
-        expect(registry.getWidgetFactory('foo')).to.be(factory);
+        registry.addWidgetFactory(factory);
+        expect(registry.getWidgetFactory('test')).to.be(factory);
+        expect(registry.getWidgetFactory('TEST')).to.be(factory);
       });
 
       it('should become the global default if `*` is given as a defaultFor', () => {
