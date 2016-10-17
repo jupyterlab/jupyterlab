@@ -65,20 +65,6 @@ class DocumentRegistry {
   readonly changed: ISignal<this, DocumentRegistry.IChangedArgs>;
 
   /**
-   * A read-only sequence of file types that have been registered.
-   */
-  get fileTypes(): IIterator<DocumentRegistry.IFileType> {
-    return this._fileTypes.iter();
-  }
-
-  /**
-   * A read-only sequence of the file creators that have been registered.
-   */
-  get creators(): IIterator<DocumentRegistry.IFileCreator> {
-    return this._creators.iter();
-  }
-
-  /**
    * Get whether the document registry has been disposed.
    */
   get isDisposed(): boolean {
@@ -97,7 +83,7 @@ class DocumentRegistry {
     }
     this._modelFactories = null;
     for (let widgetName in this._widgetFactories) {
-      this._widgetFactories[widgetName].factory.dispose();
+      this._widgetFactories[widgetName].dispose();
     }
     this._widgetFactories = null;
     this._fileTypes.clear();
@@ -112,8 +98,6 @@ class DocumentRegistry {
    *
    * @param factory - The factory instance to register.
    *
-   * @param options - The options used to register the factory.
-   *
    * @returns A disposable which will unregister the factory.
    *
    * #### Notes
@@ -124,16 +108,15 @@ class DocumentRegistry {
    * If an extension or global default is already registered, this factory
    * will override the existing default.
    */
-  addWidgetFactory(factory: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>, options: DocumentRegistry.IWidgetFactoryOptions): IDisposable {
-    let name = options.displayName.toLowerCase();
+  addWidgetFactory(factory: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>): IDisposable {
+    let name = factory.name.toLowerCase();
     if (this._widgetFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
       return new DisposableDelegate(null);
     }
-    let record = Private.createRecord(factory, options);
-    this._widgetFactories[name] = record;
-    for (let ext of record.defaultFor) {
-      if (record.fileExtensions.indexOf(ext) === -1) {
+    this._widgetFactories[name] = factory;
+    for (let ext of factory.defaultFor) {
+      if (factory.fileExtensions.indexOf(ext) === -1) {
         continue;
       }
       if (ext === '*') {
@@ -143,7 +126,7 @@ class DocumentRegistry {
       }
     }
     // For convenience, store a mapping of ext -> name
-    for (let ext of record.fileExtensions) {
+    for (let ext of factory.fileExtensions) {
       if (!this._widgetFactoryExtensions[ext]) {
         this._widgetFactoryExtensions[ext] = new Vector<string>();
       }
@@ -311,23 +294,23 @@ class DocumentRegistry {
   }
 
   /**
-   * List the names of the valid registered widget factories.
+   * Get an iterator over the preferred widget factories.
    *
    * @param ext - An optional file extension to filter the results.
    *
-   * @returns A new array of registered widget factory names.
+   * @returns A new iterator of widget factories.
    *
    * #### Notes
    * Only the widget factories whose associated model factory have
    * been registered will be returned.
-   * The first item in the list is considered the default. The returned list
+   * The first item is considered the default. The returned iterator
    * has widget factories in the following order:
    * - extension-specific default factory
    * - global default factory
    * - all other extension-specific factories
    * - all other global factories
    */
-  listWidgetFactories(ext: string = '*'): IIterator<string> {
+  preferredWidgetFactories(ext: string = '*'): IIterator<DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>> {
     let factories = new Set<string>();
     ext = Private.normalizeExtension(ext);
 
@@ -361,11 +344,10 @@ class DocumentRegistry {
 
     // Construct the return list, checking to make sure the corresponding
     // model factories are registered.
-    let factoryList: string[] = [];
+    let factoryList: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>[] = [];
     factories.forEach(name => {
       if (this._widgetFactories[name].modelName in this._modelFactories) {
-        name = this._widgetFactories[name].displayName;
-        factoryList.push(name);
+        factoryList.push(this._widgetFactories[name]);
       }
     });
 
@@ -373,15 +355,84 @@ class DocumentRegistry {
   }
 
   /**
-   * Return the name of the default widget factory for a given extension.
+   * Create an iterator over the widget factories that have been registered.
    *
-   * @param ext - An optional file extension.
-   *
-   * @returns The default widget factory name for the extension (if given) or the global default.
+   * @returns A new iterator of widget factories.
    */
-  defaultWidgetFactory(ext: string = '*'): string {
-    let widgets = this.listWidgetFactories(ext);
-    return widgets ? widgets.next() : void 0;
+  getWidgetFactories(): IIterator<DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>> {
+    let factories: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>[] = [];
+    for (let name in this._widgetFactories) {
+      factories.push(this._widgetFactories[name]);
+    }
+    return iter(factories);
+  }
+
+  /**
+   * Create an iterator over the model factories that have been registered.
+   *
+   * @returns A new iterator of model factories.
+   */
+  getModelFactories(): IIterator<DocumentRegistry.IModelFactory<DocumentRegistry.IModel>> {
+    let factories: DocumentRegistry.IModelFactory<DocumentRegistry.IModel>[] = [];
+    for (let name in this._modelFactories) {
+      factories.push(this._modelFactories[name]);
+    }
+    return iter(factories);
+  }
+
+  /**
+   * Create an iterator over the registered extensions for a given widget.
+   *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @returns A new iterator over the widget extensions.
+   */
+  getWidgetExtensions(widgetName: string): IIterator<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
+    widgetName = widgetName.toLowerCase();
+    if (!(widgetName in this._extenders)) {
+      return EmptyIterator.instance;
+    }
+    return this._extenders[widgetName].iter();
+  }
+
+  /**
+   * Create an iterator over the file types that have been registered.
+   *
+   * @returns A new iterator of file types.
+   */
+  getFileTypes(): IIterator<DocumentRegistry.IFileType> {
+    return this._fileTypes.iter();
+  }
+
+  /**
+   * Create an iterator over the file creators that have been registered.
+   *
+   * @returns A new iterator of file creatores.
+   */
+  getCreators(): IIterator<DocumentRegistry.IFileCreator> {
+    return this._creators.iter();
+  }
+
+  /**
+   * Get a widget factory by name.
+   *
+   * @param widgetName - The name of the widget factory.
+   *
+   * @returns A widget factory instance.
+   */
+  getWidgetFactory(widgetName: string): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> {
+    return this._widgetFactories[widgetName.toLowerCase()];
+  }
+
+  /**
+   * Get a model factory by name.
+   *
+   * @param name - The name of the model factory.
+   *
+   * @returns A model factory instance.
+   */
+  getModelFactory(name: string): DocumentRegistry.IModelFactory<DocumentRegistry.IModel> {
+    return this._modelFactories[name.toLowerCase()];
   }
 
   /**
@@ -416,79 +467,24 @@ class DocumentRegistry {
   getKernelPreference(ext: string, widgetName: string): DocumentRegistry.IKernelPreference {
     ext = Private.normalizeExtension(ext);
     widgetName = widgetName.toLowerCase();
-    let widgetFactoryEx = this._getWidgetFactoryEx(widgetName);
-    if (!widgetFactoryEx) {
+    let widgetFactory = this._widgetFactories[widgetName];
+    if (!widgetFactory) {
       return void 0;
     }
-    let modelFactory = this.getModelFactoryFor(widgetName);
+    let modelFactory = this.getModelFactory(widgetFactory.modelName);
+    if (!modelFactory) {
+      return void 0;
+    }
     let language = modelFactory.preferredLanguage(ext);
     return {
       language,
-      preferKernel: widgetFactoryEx.preferKernel,
-      canStartKernel: widgetFactoryEx.canStartKernel
+      preferKernel: widgetFactory.preferKernel,
+      canStartKernel: widgetFactory.canStartKernel
     };
   }
 
-  /**
-   * Get the model factory registered for a given widget factory.
-   *
-   * @param widgetName - The name of the widget factory.
-   *
-   * @returns A model factory instance.
-   */
-  getModelFactoryFor(widgetName: string): DocumentRegistry.IModelFactory<DocumentRegistry.IModel> {
-    widgetName = widgetName.toLowerCase();
-    let wFactoryEx = this._getWidgetFactoryEx(widgetName);
-    if (!wFactoryEx) {
-      return;
-    }
-    return this._modelFactories[wFactoryEx.modelName.toLowerCase()];
-  }
-
-  /**
-   * Get a widget factory by name.
-   *
-   * @param widgetName - The name of the widget factory.
-   *
-   * @returns A widget factory instance.
-   */
-  getWidgetFactory(widgetName: string): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> {
-    widgetName = widgetName.toLowerCase();
-    let ex = this._getWidgetFactoryEx(widgetName);
-    return ex ? ex.factory : void 0;
-  }
-
-  /**
-   * Get the registered extensions for a given widget.
-   *
-   * @param widgetName - The name of the widget factory.
-   *
-   * @returns A read-only sequence of widget extensions.
-   */
-  getWidgetExtensions(widgetName: string): IIterator<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
-    widgetName = widgetName.toLowerCase();
-    if (!(widgetName in this._extenders)) {
-      return EmptyIterator.instance;
-    }
-    return this._extenders[widgetName].iter();
-  }
-
-  /**
-   * Get the appropriate widget factory by name.
-   */
-  private _getWidgetFactoryEx(widgetName: string): Private.IWidgetFactoryRecord {
-    widgetName = widgetName.toLowerCase();
-    let options: Private.IWidgetFactoryRecord;
-    if (widgetName === 'default') {
-      options = this._widgetFactories[this._defaultWidgetFactory];
-    } else {
-      options = this._widgetFactories[widgetName];
-    }
-    return options;
-  }
-
   private _modelFactories: { [key: string]: DocumentRegistry.IModelFactory<DocumentRegistry.IModel> } = Object.create(null);
-  private _widgetFactories: { [key: string]: Private.IWidgetFactoryRecord } = Object.create(null);
+  private _widgetFactories: { [key: string]: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _widgetFactoryExtensions: {[key: string]: Vector<string> } = Object.create(null);
@@ -716,10 +712,15 @@ namespace DocumentRegistry {
   }
 
   /**
-   * The options used to register a widget factory.
+   * The interface for a widget factory.
    */
   export
-  interface IWidgetFactoryOptions {
+  interface IWidgetFactory<T extends Widget, U extends IModel> extends IDisposable {
+    /**
+     * A signal emitted when a widget is created.
+     */
+    widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
+
     /**
      * The file extensions the widget can view.
      *
@@ -732,7 +733,7 @@ namespace DocumentRegistry {
     /**
      * The name of the widget to display in dialogs.
      */
-    readonly displayName: string;
+    readonly name: string;
 
     /**
      * The registered name of the model type used to create the widgets.
@@ -750,32 +751,17 @@ namespace DocumentRegistry {
      *
      * **See also:** [[fileExtensions]].
      */
-    readonly defaultFor?: string[];
+    readonly defaultFor: string[];
 
     /**
      * Whether the widgets prefer having a kernel started.
-     *
-     * The default is `false`.
      */
-    readonly preferKernel?: boolean;
+    readonly preferKernel: boolean;
 
     /**
      * Whether the widgets can start a kernel when opened.
-     *
-     * The default is `false`.
      */
-    readonly canStartKernel?: boolean;
-  }
-
-  /**
-   * The interface for a widget factory.
-   */
-  export
-  interface IWidgetFactory<T extends Widget, U extends IModel> extends IDisposable {
-    /**
-     * A signal emitted when a widget is created.
-     */
-    widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
+    readonly canStartKernel: boolean;
 
     /**
      * Create a new widget.
@@ -948,33 +934,6 @@ defineSignal(DocumentRegistry.prototype, 'changed');
  * A private namespace for DocumentRegistry data.
  */
 namespace Private {
-  /**
-   * A record for a widget factory and its options.
-   */
-  export
-  interface IWidgetFactoryRecord extends DocumentRegistry.IWidgetFactoryOptions {
-    factory: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>;
-  }
-
-  /**
-   * Create a widget factory record.
-   */
-  export
-  function createRecord(factory: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>, options: DocumentRegistry.IWidgetFactoryOptions): IWidgetFactoryRecord {
-    let fileExtensions = options.fileExtensions.map(ext => normalizeExtension(ext));
-    let defaultFor = options.defaultFor || [];
-    defaultFor = defaultFor.map(ext => normalizeExtension(ext));
-    return {
-      factory,
-      fileExtensions,
-      defaultFor,
-      displayName: options.displayName,
-      modelName: options.modelName.toLowerCase(),
-      preferKernel: !!options.preferKernel,
-      canStartKernel: !!options.canStartKernel
-    };
-  }
-
   /**
    * Normalize a file extension to be of the type `'.foo'`.
    *

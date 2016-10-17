@@ -298,6 +298,46 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
   }
 
   /**
+   * The file extensions the widget can view.
+   */
+  get fileExtensions(): string[] {
+    return [];
+  }
+
+  /**
+   * The name of the widget to display in dialogs.
+   */
+  abstract get name(): string;
+
+  /**
+   * The registered name of the model type used to create the widgets.
+   */
+  get modelName(): string {
+    return 'text';
+  }
+
+  /**
+   * The file extensions for which the factory should be the default.
+   */
+  get defaultFor(): string[] {
+    return [];
+  }
+
+  /**
+   * Whether the widgets prefer having a kernel started.
+   */
+  get preferKernel(): boolean {
+    return false;
+  }
+
+  /**
+   * Whether the widgets can start a kernel when opened.
+   */
+  get canStartKernel(): boolean {
+    return false;
+  }
+
+  /**
    * Create a new widget given a document model and a context.
    *
    * #### Notes
