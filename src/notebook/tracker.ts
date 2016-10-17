@@ -110,13 +110,19 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
       return;
     }
 
+    // Create a signal handler for cell changes.
     let changeHandler = (sender: any, cell: BaseCellWidget) => {
       this.activeCellChanged.emit(cell || null);
     };
+
+    // Connect the signal handler to the current notebook panel.
     widget.content.activeCellChanged.connect(changeHandler);
     this._handler = new DisposableDelegate(() => {
       widget.content.activeCellChanged.disconnect(changeHandler);
     });
+
+    // Since the notebook has changed, immediately signal an active cell change.
+    this.activeCellChanged.emit(widget.content.activeCell || null);
   }
 
   private _handler: DisposableDelegate = null;
