@@ -29,31 +29,70 @@ const faqExtension: JupyterLabPlugin<void> = {
 };
 
 class FaqModel extends VDomModel {
-
-}
-
-class FaqWidget extends VDomWidget<FaqModel> {
-  constructor(app: JupyterLab) {
+  constructor() {
     super();
-    const basicsQuestions = [
+    this._title = 'Frequently Asked Questions';
+    this._subHeadings = [
+      'THE BASICS',
+      'FEATURES',
+      'DEVELOPER'
+    ];
+    this._basicsQuestions = [
       'What is JupyterLab?',
       'What is a Jupyter Notebook?',
       'How stable is JupyterLab?',
       'I\'m confused with the interface. How do I navigate around JupyterLab?'
     ];
-
-
-    const featuresQuestions = [
+    this._featuresQuestions = [
       'How do I add more kernels/languages to JupyterLab?',
       'How can I share my notebooks?'
     ];
-
-
-    const developerQuestions = [
+    this._developerQuestions = [
       'How do I report a bug?',
       'I have security concerns about JupyterLab.',
       'How can I contribute?'
     ];
+  }
+
+  get title(): string {
+    return this._title;
+  }
+
+  get subHeadings(): string[] {
+    return this._subHeadings;
+  }
+
+  get basicsQuestions(): string[] {
+    return this._basicsQuestions;
+  }
+
+  get featuresQuestions(): string[] {
+    return this._featuresQuestions;
+  }
+
+  get developerQuestions(): string[] {
+    return this._developerQuestions;
+  }
+
+
+  private _title: string;
+  private _subHeadings: string[];
+  private _basicsQuestions: string[];
+  private _featuresQuestions: string[];
+  private _developerQuestions: string[];
+}
+
+class FaqWidget extends VDomWidget<FaqModel> {
+  constructor(app: JupyterLab) {
+    super();
+    this._app = app;
+  }
+
+  protected render(): VNode[] {
+    let subHeadings = this.model.subHeadings;
+    let basicsQuestions = this.model.basicsQuestions;
+    let featuresQuestions = this.model.featuresQuestions;
+    let developerQuestions = this.model.developerQuestions;
 
     // Create Frequently Asked Questions Header Section.
     let faqHeader =
@@ -61,7 +100,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
       h.span({className: 'jp-QuestionMark jp-FAQ-QuestionMark'}),
       h.h1({className: 'jp-FAQ-h1'},
         h.span({className: 'jp-FAQ-title'},
-          'Frequently Asked Questions'
+          this.model.title
         )
       )
     );
@@ -69,7 +108,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
     // Create a section element that holds Table of Contents.
     let questionList =
     h.section({className: 'jp-FAQ-content', id: 'faq-questionList'},
-      h.h2({className: 'jp-FAQ-h2'}, 'THE BASICS'),
+      h.h2({className: 'jp-FAQ-h2'}, subHeadings[0]),
       h.ul({className: 'jp-FAQ-ul'},
         h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
           h.a({href: '#basicsQ1'}, basicsQuestions[0])
@@ -84,7 +123,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           h.a({href: '#basicsQ4'}, basicsQuestions[3])
         )
       ),
-      h.h2({className: 'jp-FAQ-h2'}, 'FEATURES'),
+      h.h2({className: 'jp-FAQ-h2'}, subHeadings[1]),
       h.ul({className: 'jp-FAQ-ul'},
         h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
           h.a({href: '#featuresQ1'}, featuresQuestions[0])
@@ -93,7 +132,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           h.a({href: '#featuresQ2'}, featuresQuestions[1])
         )
       ),
-      h.h2({className: 'jp-FAQ-h2'}, 'DEVELOPER'),
+      h.h2({className: 'jp-FAQ-h2'}, subHeadings[2]),
       h.ul({className: 'jp-FAQ-ul'},
         h.li({className: 'jp-FAQ-question jp-FAQ-toc'},
           h.a({href: '#developerQ1'}, developerQuestions[0])
@@ -110,7 +149,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
     // Create a section element that all other FAQ Content will go under.
     let questionAnswerList =
     h.section({className: 'jp-FAQ-content'},
-      h.h2({className: 'jp-FAQ-h2'}, 'THE BASICS'),
+      h.h2({className: 'jp-FAQ-h2'}, subHeadings[0]),
       // Create list of questions/answers under the Basics section.
       h.ul({className: 'jp-FAQ-ul'},
         h.li({className: 'jp-FAQ-question', id: 'basicsQ1'}, basicsQuestions[0]),
@@ -142,13 +181,13 @@ class FaqWidget extends VDomWidget<FaqModel> {
           'Check out the JupyterLab tour ',
           h.a({className: 'jp-FAQ-a',
                onclick: () => {
-                 app.commands.execute('about-jupyterlab:show', void 0);
+                 this._app.commands.execute('about-jupyterlab:show', void 0);
                }},
             'here'
           )
         )
       ),
-      h.h2({className: 'jp-FAQ-h2'}, 'FEATURES'),
+      h.h2({className: 'jp-FAQ-h2'}, subHeadings[1]),
       // Create list of questions/answers under the Features section.
       h.ul({className: 'jp-FAQ-ul'},
         h.li({className: 'jp-FAQ-question', id: 'featuresQ1'}, featuresQuestions[0]),
@@ -158,7 +197,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           + 'done with a couple terminal commands. However the instructions for installing '
           + 'kernels is different for each language. For further instructions, click ',
           h.a({className: 'jp-FAQ-a',
-               href: 'http://jupyter.readthedocs.io/en/latest/install-kernel.html',
+               href: 'https://jupyter.readthedocs.io/en/latest/install-kernel.html',
                target: '_blank'},
             'this'
           ),
@@ -173,7 +212,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           ' to render your notebooks online.'
         )
       ),
-      h.h2({className: 'jp-FAQ-h2'}, 'DEVELOPER'),
+      h.h2({className: 'jp-FAQ-h2'}, subHeadings[2]),
       // Create list of questions/answers under the Developer section.
       h.ul({className: 'jp-FAQ-ul'},
         h.li({className: 'jp-FAQ-question', id: 'developerQ1'}, developerQuestions[0]),
@@ -202,7 +241,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           + 'interested developers are welcome. You can learn about the JupyterLab '
           + 'codebase by going through our ',
           h.a({className: 'jp-FAQ-a',
-               href: 'http://jupyterlab-tutorial.readthedocs.io/en/latest/index.html',
+               href: 'https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html',
                target: '_blank'},
             'tutorial walkthrough'
           ),
@@ -228,14 +267,11 @@ class FaqWidget extends VDomWidget<FaqModel> {
         )
       )
     );
-    this._data = [faqHeader, questionList, questionAnswerList];
+    let domTree = [faqHeader, questionList, questionAnswerList];
+    return domTree;
   }
 
-  protected render(): VNode[] {
-    return this._data;
-  }
-
-  private _data: VNode[];
+  private _app: JupyterLab;
 }
 
 /**
