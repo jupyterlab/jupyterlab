@@ -129,6 +129,27 @@ class EditorWidget extends CodeMirrorWidget {
 export
 class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistry.IModel> {
   /**
+   * The name of the widget to display in dialogs.
+   */
+  get name(): string {
+    return 'Editor';
+  }
+
+  /**
+   * The file extensions the widget can view.
+   */
+  get fileExtensions(): string[] {
+    return ['*'];
+  }
+
+  /**
+   * The file extensions for which the factory should be the default.
+   */
+  get defaultFor(): string[] {
+    return ['*'];
+  }
+
+  /**
    * Create a new widget given a context.
    */
   createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): EditorWidget {
