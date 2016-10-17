@@ -109,11 +109,7 @@ class DocumentManager implements IDisposable {
    * @param kernel - An optional kernel name/id to override the default.
    */
   open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let registry = this._registry;
-    if (widgetName === 'default') {
-      widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path));
-    }
-    let factory = registry.getModelFactoryFor(widgetName);
+    let factory = this._modelFactoryFor(path, widgetName);
     if (!factory) {
       return;
     }
@@ -139,11 +135,7 @@ class DocumentManager implements IDisposable {
    * @param kernel - An optional kernel name/id to override the default.
    */
   createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let registry = this._registry;
-    if (widgetName === 'default') {
-      widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path));
-    }
-    let factory = registry.getModelFactoryFor(widgetName);
+    let factory = this._modelFactoryFor(path, widgetName);
     if (!factory) {
       return;
     }
@@ -197,7 +189,7 @@ class DocumentManager implements IDisposable {
    */
   findWidget(path: string, widgetName='default'): Widget {
     if (widgetName === 'default') {
-      widgetName = this._registry.defaultWidgetFactory(ContentsManager.extname(path));
+      widgetName = this._registry.preferredWidgetFactories(ContentsManager.extname(path)).next().name;
     }
     let context = this._contextForPath(path);
     if (context) {
@@ -280,6 +272,18 @@ class DocumentManager implements IDisposable {
     return context;
   }
 
+  /**
+   * Get the model factory for a given widget name.
+   */
+  private _modelFactoryFor(path: string, widgetName: string): DocumentRegistry.IModelFactory<DocumentRegistry.IModel> {
+    let registry = this._registry;
+    if (widgetName === 'default') {
+      widgetName = registry.preferredWidgetFactories(ContentsManager.extname(path)).next().name;
+    }
+    let widgetFactory = registry.getWidgetFactory(widgetName);
+    return registry.getModelFactory(widgetFactory.modelName);
+  }
+
   private _serviceManager: IServiceManager = null;
   private _widgetManager: DocumentWidgetManager = null;
   private _registry: DocumentRegistry = null;
@@ -323,19 +327,5 @@ namespace DocumentManager {
      * Open the given widget.
      */
     open(widget: Widget): void;
-  }
-}
-
-
-/**
- * A private namespace for DocumentManager data.
- */
-namespace Private {
-  /**
-   * An extended interface for a widget factory and its options.
-   */
-  export
-  interface IWidgetFactoryEx extends DocumentRegistry.IWidgetFactoryOptions {
-    factory: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>;
   }
 }

@@ -271,9 +271,10 @@ describe('docregistry/registry', () => {
         registry.addCreator(creators[0]);
         registry.addCreator(creators[1]);
         registry.addCreator(creators[2]);
-        expect(registry.creators.next()).to.be(creators[2]);
-        expect(registry.creators.next()).to.be(creators[0]);
-        expect(registry.creators.next()).to.be(creators[1]);
+        let it = registry.creators;
+        expect(it.next()).to.be(creators[2]);
+        expect(it.next()).to.be(creators[0]);
+        expect(it.next()).to.be(creators[1]);
       });
 
       it('should be a no-op if a file type of the same name is registered', () => {
@@ -302,7 +303,7 @@ describe('docregistry/registry', () => {
           displayName: 'Bar',
           modelName: 'text'
         });
-        expect(registry.listWidgetFactories('.foo')).to.eql(['Foo', 'Bar']);
+        expect(toArray(registry.listWidgetFactories('.foo'))).to.eql(['Foo', 'Bar']);
       });
 
       it('should not list a factory whose model is not registered', () => {
@@ -311,7 +312,7 @@ describe('docregistry/registry', () => {
           displayName: 'Bar',
           modelName: 'text'
         });
-        expect(registry.listWidgetFactories()).to.eql([]);
+        expect(registry.listWidgetFactories().next()).to.eql(void 0);
       });
 
       it('should select the factory for a given extension', () => {
@@ -327,7 +328,7 @@ describe('docregistry/registry', () => {
           displayName: 'Bar',
           modelName: 'text'
         });
-        expect(registry.listWidgetFactories('.foo')).to.eql(['Foo']);
+        expect(registry.listWidgetFactories('.foo').next()).to.be('Foo');
       });
 
       it('should respect the priority order', () => {
@@ -355,7 +356,7 @@ describe('docregistry/registry', () => {
           displayName: 'Fizz',
           modelName: 'text'
         });
-        expect(registry.listWidgetFactories('.txt')).to.eql(['Bar', 'Fizz', 'Foo', 'Buzz']);
+        expect(toArray(registry.listWidgetFactories('.txt'))).to.eql(['Bar', 'Fizz', 'Foo', 'Buzz']);
       });
 
     });
