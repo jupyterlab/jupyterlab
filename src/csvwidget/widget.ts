@@ -217,6 +217,27 @@ function createDelimiterSwitcherNode(): HTMLElement {
 export
 class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IModel> {
   /**
+   * The name of the widget to display in dialogs.
+   */
+  get name(): string {
+    return 'Table';
+  }
+
+  /**
+   * The file extensions the widget can view.
+   */
+  get fileExtensions(): string[] {
+    return ['.csv'];
+  }
+
+  /**
+   * The file extensions for which the factory should be the default.
+   */
+  get defaultFor(): string[] {
+    return ['.csv'];
+  }
+
+  /**
    * Create a new widget given a context.
    */
   createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): CSVWidget {
