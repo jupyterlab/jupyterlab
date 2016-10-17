@@ -672,6 +672,9 @@ namespace ObservableVector {
 
     /**
      * The new values associated with the change.
+     *
+     * #### Notes
+     * The values will be contiguous starting at the `newIndex`.
      */
     newValues: IIterator<T>;
 
@@ -682,6 +685,9 @@ namespace ObservableVector {
 
     /**
      * The old values associated with the change.
+     *
+     * #### Notes
+     * The values will be contiguous starting at the `oldIndex`.
      */
     oldValues: IIterator<T>;
   }
