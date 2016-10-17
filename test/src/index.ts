@@ -3,7 +3,7 @@
 
 import './common/activitymonitor.spec';
 import './common/instancetracker.spec';
-import './common/observablelist.spec';
+import './common/observablevector.spec';
 import './common/vdom.spec';
 
 import './completer/handler.spec';
@@ -32,6 +32,8 @@ import './rendermime/rendermime.spec';
 import './notebook/cells/editor.spec';
 import './notebook/cells/model.spec';
 import './notebook/cells/widget.spec';
+
+import './notebook/common/undo.spec';
 
 import './notebook/notebook/actions.spec';
 import './notebook/notebook/default-toolbar.spec';
