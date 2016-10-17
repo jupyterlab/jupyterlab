@@ -52,6 +52,48 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   }
 
   /**
+   * The name of the widget to display in dialogs.
+   */
+  get name(): string {
+    return 'Notebook';
+  }
+
+  /**
+   * The registered name of the model type used to create the widgets.
+   */
+  get modelName(): string {
+    return 'notebook';
+  }
+
+  /**
+   * The file extensions the widget can view.
+   */
+  get fileExtensions(): string[] {
+    return ['.ipynb'];
+  }
+
+  /**
+   * The file extensions for which the factory should be the default.
+   */
+  get defaultFor(): string[] {
+    return ['.ipynb'];
+  }
+
+  /**
+   * Whether the widgets prefer having a kernel started.
+   */
+  get preferKernel(): boolean {
+    return true;
+  }
+
+  /**
+   * Whether the widgets can start a kernel when opened.
+   */
+  get canStartKernel(): boolean {
+    return true;
+  }
+
+  /**
    * Dispose of the resources used by the factory.
    */
   dispose(): void {

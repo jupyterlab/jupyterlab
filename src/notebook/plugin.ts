@@ -133,14 +133,6 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
  */
 function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer): INotebookTracker {
   let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
-  let options: DocumentRegistry.IWidgetFactoryOptions = {
-    fileExtensions: ['.ipynb'],
-    displayName: 'Notebook',
-    modelName: 'notebook',
-    defaultFor: ['.ipynb'],
-    preferKernel: true,
-    canStartKernel: true
-  };
 
   // Sync tracker and set the source of the code inspector.
   app.shell.currentChanged.connect((sender, args) => {
@@ -151,7 +143,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   });
 
   registry.addModelFactory(new NotebookModelFactory());
-  registry.addWidgetFactory(widgetFactory, options);
+  registry.addWidgetFactory(widgetFactory);
 
   registry.addFileType({
     name: 'Notebook',
