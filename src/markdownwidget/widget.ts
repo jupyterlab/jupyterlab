@@ -120,6 +120,20 @@ class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, DocumentReg
   }
 
   /**
+   * The name of the widget to display in dialogs.
+   */
+  get name(): string {
+    return 'Rendered Markdown';
+  }
+
+  /**
+   * The file extensions the widget can view.
+   */
+  get fileExtensions(): string[] {
+    return ['.md'];
+  }
+
+  /**
    * Create a new widget given a context.
    */
   createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): MarkdownWidget {

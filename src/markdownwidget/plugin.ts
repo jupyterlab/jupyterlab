@@ -37,19 +37,12 @@ const markdownHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.rendered-markdown',
   requires: [IDocumentRegistry, IRenderMime],
   activate: (app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime) => {
-    let options: DocumentRegistry.IWidgetFactoryOptions = {
-      fileExtensions: ['.md'],
-      displayName: 'Rendered Markdown',
-      modelName: 'text',
-      preferKernel: false,
-      canStartKernel: false
-    };
     let factory = new MarkdownWidgetFactory(rendermime);
     let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
     factory.widgetCreated.connect((sender, widget) => {
       widget.title.icon = icon;
     });
-    registry.addWidgetFactory(factory, options);
+    registry.addWidgetFactory(factory);
   },
   autoStart: true
 };
