@@ -437,7 +437,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       // Add the cell in a new context to avoid triggering another
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
-        if (!this._cells.length) {
+        if (!this.isDisposed && !this._cells.length) {
           this._cells.pushBack(this._factory.createCodeCell());
         }
       });
