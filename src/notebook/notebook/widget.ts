@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterable, each
+  each
 } from 'phosphor/lib/algorithm/iteration';
 
 import {

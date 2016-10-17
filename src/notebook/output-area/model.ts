@@ -6,10 +6,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  EmptyIterator, IIterator
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 

@@ -321,8 +321,11 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         continue;
       }
     }
+    this.cells.beginCompoundOperation();
     this.cells.clear();
     this.cells.pushAll(cells);
+    this.cells.endCompoundOperation();
+
     let oldValue = 0;
     let newValue = 0;
     if (value.nbformat !== this._nbformat) {
