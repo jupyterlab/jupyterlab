@@ -194,11 +194,11 @@ class OpenWithHandler extends Widget {
    * Populate the widget factories.
    */
   protected populateFactories(): void {
-    let factories = this._manager.registry.listWidgetFactories(this._ext);
+    let factories = this._manager.registry.preferredWidgetFactories(this._ext);
     let widgetDropdown = this.widgetDropdown;
     each(factories, factory => {
       let option = document.createElement('option');
-      option.text = factory;
+      option.text = factory.name;
       widgetDropdown.appendChild(option);
     });
     this.widgetChanged();
@@ -317,7 +317,7 @@ class CreateFromHandler extends Widget {
       type = fType.contentType || 'file';
     }
     if (!widgetName || widgetName === 'default') {
-      this._widgetName = widgetName = registry.defaultWidgetFactory(ext);
+      this._widgetName = widgetName = registry.preferredWidgetFactories(ext).next().name;
     }
 
     // Handle the kernel preferences.
@@ -500,11 +500,12 @@ class CreateNewHandler extends Widget {
    * Populate the file types.
    */
   protected populateFileTypes(): void {
-    let fileTypes = this._manager.registry.fileTypes;
+    let fileTypes = this._manager.registry.getFileTypes();
     let dropdown = this.fileTypeDropdown;
     let option = document.createElement('option');
     option.text = 'File';
     option.value = this._sentinal;
+
     each(fileTypes, ft => {
       option = document.createElement('option');
       option.text = `${ft.name} (${ft.extension})`;
@@ -524,11 +525,11 @@ class CreateNewHandler extends Widget {
    */
   protected populateFactories(): void {
     let ext = this.ext;
-    let factories = this._manager.registry.listWidgetFactories(ext);
+    let factories = this._manager.registry.preferredWidgetFactories(ext);
     let widgetDropdown = this.widgetDropdown;
     each(factories, factory => {
       let option = document.createElement('option');
-      option.text = factory;
+      option.text = factory.name;
       widgetDropdown.appendChild(option);
     });
     this.widgetDropdownChanged();
