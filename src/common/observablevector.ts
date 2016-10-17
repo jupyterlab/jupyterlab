@@ -432,16 +432,9 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * Comparison is performed using strict `===` equality.
    */
   remove(value: T): number {
-    let oldIndex = indexOf(this, value);
-    let num = super.remove(value);
-    this.changed.emit({
-      type: 'remove',
-      oldIndex,
-      newIndex: -1,
-      oldValues: new Vector([value]),
-      newValues: this._emptySequence
-    });
-    return num;
+    let index = indexOf(this, value);
+    this.removeAt(index);
+    return index;
   }
 
   /**

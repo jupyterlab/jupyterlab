@@ -359,7 +359,8 @@ class StaticNotebook extends Widget {
       index = args.newIndex;
       each(args.newValues, value => {
         this._removeCell(index);
-        this._insertCell(index++, value);
+        this._insertCell(index, value);
+        index++;
       });
       break;
     default:

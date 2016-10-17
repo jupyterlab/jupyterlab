@@ -104,6 +104,13 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   }
 
   /**
+   * Test whether the vector is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._factory === null;
+  }
+
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
@@ -183,7 +190,7 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
    * Handle a change in the vector.
    */
   private _onVectorChanged(list: IObservableVector<T>, change: ObservableVector.IChangedArgs<T>): void {
-    if (!this._isUndoable) {
+    if (this.isDisposed || !this._isUndoable) {
       return;
     }
     // Clear everything after this position if necessary.
@@ -211,6 +218,7 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
    */
   private _undoChange(change: ObservableVector.IChangedArgs<JSONObject>): void {
     let index = 0;
+    let factory = this._factory;
     switch (change.type) {
     case 'add':
       each(change.newValues, () => {
@@ -220,13 +228,13 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
     case 'set':
       index = change.oldIndex;
       each(change.oldValues, value => {
-        this.set(index++, this._createValue(value));
+        this.set(index++, factory(value));
       });
       break;
     case 'remove':
       index = change.oldIndex;
       each(change.oldValues, value => {
-        this.insert(index++, this._createValue(value));
+        this.insert(index++, factory(value));
       });
       break;
     case 'move':
@@ -242,17 +250,18 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
    */
   private _redoChange(change: ObservableVector.IChangedArgs<JSONObject>): void {
     let index = 0;
+    let factory = this._factory;
     switch (change.type) {
     case 'add':
       index = change.newIndex;
       each(change.newValues, value => {
-        this.insert(index++, this._createValue(value));
+        this.insert(index++, factory(value));
       });
       break;
     case 'set':
       index = change.newIndex;
       each(change.newValues, value => {
-        this.set(change.newIndex++, this._createValue(value));
+        this.set(change.newIndex++, factory(value));
       });
       break;
     case 'remove':
@@ -266,14 +275,6 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
     default:
       return;
     }
-  }
-
-  /**
-   * Create a value from JSON.
-   */
-  private _createValue(data: JSONObject): T {
-    let factory = this._factory;
-    return factory(data);
   }
 
   /**
