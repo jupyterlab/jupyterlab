@@ -2,8 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterator, IIterable, iter, each
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
+  each
 } from 'phosphor/lib/algorithm/iteration';
+
+import {
+  Vector
+} from 'phosphor/lib/collections/vector';
 
 import {
   IObservableVector, ObservableVector
@@ -18,7 +26,7 @@ interface ISerializable {
   /**
    * Convert the object to JSON.
    */
-  toJSON(): any;
+  toJSON(): JSONObject;
 }
 
 
@@ -75,7 +83,7 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Construct a new undoable observable vector.
    */
-  constructor(factory: (value: any) => T) {
+  constructor(factory: (value: JSONObject) => T) {
     super();
     this._factory = factory;
     this.changed.connect(this._onVectorChanged, this);
@@ -96,13 +104,6 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   }
 
   /**
-   * Get whether the object is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._stack === null;
-  }
-
-  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
@@ -119,7 +120,7 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
    * Begin a compound operation.
    *
    * @param isUndoAble - Whether the operation is undoable.
-   *   The default is `false`.
+   *   The default is `true`.
    */
   beginCompoundOperation(isUndoAble?: boolean): void {
     this._inCompound = true;
@@ -208,7 +209,7 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Undo a change event.
    */
-  private _undoChange(change: ObservableVector.IChangedArgs<any>): void {
+  private _undoChange(change: ObservableVector.IChangedArgs<JSONObject>): void {
     let index = 0;
     switch (change.type) {
     case 'add':
@@ -239,7 +240,7 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Redo a change event.
    */
-  private _redoChange(change: ObservableVector.IChangedArgs<any>): void {
+  private _redoChange(change: ObservableVector.IChangedArgs<JSONObject>): void {
     let index = 0;
     switch (change.type) {
     case 'add':
@@ -270,7 +271,7 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Create a value from JSON.
    */
-  private _createValue(data: any): T {
+  private _createValue(data: JSONObject): T {
     let factory = this._factory;
     return factory(data);
   }
@@ -278,21 +279,21 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Copy a change as JSON.
    */
-  private _copyChange(change: ObservableVector.IChangedArgs<T>): ObservableVector.IChangedArgs<any> {
-    let oldValues: any[] = [];
+  private _copyChange(change: ObservableVector.IChangedArgs<T>): ObservableVector.IChangedArgs<JSONObject> {
+    let oldValues = new Vector<JSONObject>();
     each(change.oldValues, value => {
-      oldValues.push(value.toJSON());
+      oldValues.pushBack(value.toJSON());
     });
-    let newValues: any[] = [];
+    let newValues = new Vector<JSONObject>();
     each(change.newValues, value => {
-      newValues.push(value.toJSON());
+      newValues.pushBack(value.toJSON());
     });
     return {
       type: change.type,
       oldIndex: change.oldIndex,
       newIndex: change.newIndex,
-      oldValues: iter(oldValues),
-      newValues: iter(newValues)
+      oldValues,
+      newValues
     };
   }
 
@@ -300,6 +301,6 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   private _isUndoable = true;
   private _madeCompoundChange = false;
   private _index = -1;
-  private _stack: ObservableVector.IChangedArgs<any>[][] = [];
-  private _factory: (value: any) => T = null;
+  private _stack: ObservableVector.IChangedArgs<JSONObject>[][] = [];
+  private _factory: (value: JSONObject) => T = null;
 }
