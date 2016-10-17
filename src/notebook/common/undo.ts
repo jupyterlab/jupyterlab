@@ -2,20 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterator, IIterable, iter, each, toArray
+  IIterator, IIterable, iter, each
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  IDisposable
-} from 'phosphor/lib/core/disposable';
-
-import {
-  clearSignalData
-} from 'phosphor/lib/core/signaling';
-
-import {
-  IObservableList, IListChangedArgs, ObservableList
-} from '../../common/observablelist';
+  IObservableVector, ObservableVector
+} from '../../common/observablevector';
 
 
 /**
@@ -31,24 +23,66 @@ interface ISerializable {
 
 
 /**
- * An observable list that supports undo/redo.
+ * An observable vector that supports undo/redo.
  */
 export
-class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> implements IDisposable {
+interface IObservableUndoableVector<T extends ISerializable> extends IObservableVector<T> {
   /**
-   * Construct a new undoable observable list.
+   * Whether the object can redo changes.
+   */
+  readonly canRedo: boolean;
+
+  /**
+   * Whether the object can undo changes.
+   */
+  readonly canUndo: boolean;
+
+  /**
+   * Begin a compound operation.
+   *
+   * @param isUndoAble - Whether the operation is undoable.
+   *   The default is `false`.
+   */
+  beginCompoundOperation(isUndoAble?: boolean): void;
+
+  /**
+   * End a compound operation.
+   */
+  endCompoundOperation(): void;
+
+  /**
+   * Undo an operation.
+   */
+  undo(): void;
+
+  /**
+   * Redo an operation.
+   */
+  redo(): void;
+
+  /**
+   * Clear the change stack.
+   */
+  clearUndo(): void;
+}
+
+
+/**
+ * A concrete implementation of an observable undoable vector.
+ */
+export
+class ObservableUndoableVector<T extends ISerializable> extends ObservableVector<T> implements IObservableUndoableVector<T> {
+  /**
+   * Construct a new undoable observable vector.
    */
   constructor(factory: (value: any) => T) {
     super();
     this._factory = factory;
-    this.changed.connect(this._onListChanged, this);
+    this.changed.connect(this._onVectorChanged, this);
   }
 
   /**
    * Whether the object can redo changes.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get canRedo(): boolean {
     return this._index < this._stack.length - 1;
@@ -56,9 +90,6 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
 
   /**
    * Whether the object can undo changes.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get canUndo(): boolean {
     return this._index >= 0;
@@ -66,9 +97,6 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
 
   /**
    * Get whether the object is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get isDisposed(): boolean {
     return this._stack === null;
@@ -82,13 +110,16 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
     if (this.isDisposed) {
       return;
     }
-    clearSignalData(this);
     this._factory = null;
     this._stack = null;
+    super.dispose();
   }
 
   /**
    * Begin a compound operation.
+   *
+   * @param isUndoAble - Whether the operation is undoable.
+   *   The default is `false`.
    */
   beginCompoundOperation(isUndoAble?: boolean): void {
     this._inCompound = true;
@@ -148,9 +179,9 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   }
 
   /**
-   * Handle a change in the list.
+   * Handle a change in the vector.
    */
-  private _onListChanged(list: IObservableList<T>, change: IListChangedArgs<T>): void {
+  private _onVectorChanged(list: IObservableVector<T>, change: ObservableVector.IChangedArgs<T>): void {
     if (!this._isUndoable) {
       return;
     }
@@ -177,26 +208,28 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   /**
    * Undo a change event.
    */
-  private _undoChange(change: IListChangedArgs<any>): void {
-    let value: T;
+  private _undoChange(change: ObservableVector.IChangedArgs<any>): void {
+    let index = 0;
     switch (change.type) {
     case 'add':
-      this.removeAt(change.newIndex);
+      each(change.newValues, () => {
+        this.removeAt(change.newIndex);
+      });
       break;
     case 'set':
-      value = this._createValue(change.oldValue as any);
-      this.set(change.oldIndex, value);
+      index = change.oldIndex;
+      each(change.oldValues, value => {
+        this.set(index++, this._createValue(value));
+      });
       break;
     case 'remove':
-      value = this._createValue(change.oldValue as any);
-      this.insert(change.oldIndex, value);
+      index = change.oldIndex;
+      each(change.oldValues, value => {
+        this.insert(index++, this._createValue(value));
+      });
       break;
     case 'move':
       this.move(change.newIndex, change.oldIndex);
-      break;
-    case 'assign':
-      let values = this._createValues(change.oldValue as IIterable<T>);
-      this.assign(values);
       break;
     default:
       return;
@@ -206,26 +239,28 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   /**
    * Redo a change event.
    */
-  private _redoChange(change: IListChangedArgs<any>): void {
-    let value: T;
+  private _redoChange(change: ObservableVector.IChangedArgs<any>): void {
+    let index = 0;
     switch (change.type) {
     case 'add':
-      value = this._createValue(change.newValue as any);
-      this.insert(change.newIndex, value);
+      index = change.newIndex;
+      each(change.newValues, value => {
+        this.insert(index++, this._createValue(value));
+      });
       break;
     case 'set':
-      value = this._createValue(change.newValue as any);
-      this.set(change.newIndex, value);
+      index = change.newIndex;
+      each(change.newValues, value => {
+        this.set(change.newIndex++, this._createValue(value));
+      });
       break;
     case 'remove':
-      this.removeAt(change.oldIndex);
+      each(change.oldValues, () => {
+        this.removeAt(change.oldIndex);
+      });
       break;
     case 'move':
       this.move(change.oldIndex, change.newIndex);
-      break;
-    case 'assign':
-      let cells = this._createValues(change.newValue as IIterable<T>);
-      this.assign(cells);
       break;
     default:
       return;
@@ -241,69 +276,23 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   }
 
   /**
-   * Create a list of cell models from JSON.
-   */
-  private _createValues(bundles: IIterable<T>): T[] {
-    let values: T[] = [];
-    each(bundles, bundle => {
-      values.push(this._createValue(bundle));
-    });
-    return values;
-  }
-
-  /**
    * Copy a change as JSON.
    */
-  private _copyChange(change: IListChangedArgs<T>): IListChangedArgs<any> {
-    if (change.type === 'assign') {
-      return this._copyAssign(change);
-    }
-    let oldValue: any = null;
-    let newValue: any = null;
-    switch (change.type) {
-    case 'add':
-    case 'set':
-    case 'remove':
-      if (change.oldValue) {
-        oldValue = (change.oldValue as T).toJSON();
-      }
-      if (change.newValue) {
-        newValue = (change.newValue as T).toJSON();
-      }
-      break;
-    case 'move':
-      // Only need the indices.
-      break;
-    default:
-      return;
-    }
+  private _copyChange(change: ObservableVector.IChangedArgs<T>): ObservableVector.IChangedArgs<any> {
+    let oldValues: any[] = [];
+    each(change.oldValues, value => {
+      oldValues.push(value.toJSON());
+    });
+    let newValues: any[] = [];
+    each(change.newValues, value => {
+      newValues.push(value.toJSON());
+    });
     return {
       type: change.type,
       oldIndex: change.oldIndex,
       newIndex: change.newIndex,
-      oldValue,
-      newValue
-    };
-  }
-
-  /**
-   * Copy an assign change as JSON.
-   */
-  private _copyAssign(change: IListChangedArgs<T>): IListChangedArgs<any> {
-    let oldValue: any[] = [];
-    each(change.oldValue as IIterator<T>, value => {
-      oldValue.push(value.toJSON());
-    });
-    let newValue: any[] = [];
-    each(change.newValue as IIterator<T>, value => {
-      newValue.push(value.toJSON());
-    });
-    return {
-      type: 'assign',
-      oldIndex: -1,
-      newIndex: -1,
-      oldValue: iter(oldValue),
-      newValue: iter(newValue)
+      oldValues: iter(oldValues),
+      newValues: iter(newValues)
     };
   }
 
@@ -311,6 +300,6 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   private _isUndoable = true;
   private _madeCompoundChange = false;
   private _index = -1;
-  private _stack: IListChangedArgs<any>[][] = [];
+  private _stack: ObservableVector.IChangedArgs<any>[][] = [];
   private _factory: (value: any) => T = null;
 }
