@@ -53,8 +53,8 @@ describe('common/ObservableVector', () => {
           expect(args.type).to.be('add');
           expect(args.newIndex).to.be(0);
           expect(args.oldIndex).to.be(-1);
-          expect(args.newValues.next()).to.be(1);
-          expect(args.oldValues.next()).to.be(void 0);
+          expect(args.newValues.at(0)).to.be(1);
+          expect(args.oldValues.length).to.be(0);
           called = true;
         });
         value.pushBack(1);
@@ -100,8 +100,8 @@ describe('common/ObservableVector', () => {
           expect(args.type).to.be('set');
           expect(args.newIndex).to.be(1);
           expect(args.oldIndex).to.be(1);
-          expect(args.oldValues.next()).to.be(2);
-          expect(args.newValues.next()).to.be(4);
+          expect(args.oldValues.at(0)).to.be(2);
+          expect(args.newValues.at(0)).to.be(4);
           called = true;
         });
         value.set(1, 4);
@@ -131,8 +131,8 @@ describe('common/ObservableVector', () => {
           expect(args.type).to.be('add');
           expect(args.newIndex).to.be(3);
           expect(args.oldIndex).to.be(-1);
-          expect(args.oldValues.next()).to.be(void 0);
-          expect(args.newValues.next()).to.be(4);
+          expect(args.oldValues.length).to.be(0);
+          expect(args.newValues.at(0)).to.be(4);
           called = true;
         });
         value.pushBack(4);
@@ -162,8 +162,8 @@ describe('common/ObservableVector', () => {
           expect(args.type).to.be('remove');
           expect(args.newIndex).to.be(-1);
           expect(args.oldIndex).to.be(2);
-          expect(args.oldValues.next()).to.be(3);
-          expect(args.newValues.next()).to.be(void 0);
+          expect(args.oldValues.at(0)).to.be(3);
+          expect(args.newValues.length).to.be(0);
           called = true;
         });
         value.popBack();
@@ -193,8 +193,8 @@ describe('common/ObservableVector', () => {
           expect(args.type).to.be('add');
           expect(args.newIndex).to.be(1);
           expect(args.oldIndex).to.be(-1);
-          expect(args.oldValues.next()).to.be(void 0);
-          expect(args.newValues.next()).to.be(4);
+          expect(args.oldValues.length).to.be(0);
+          expect(args.newValues.at(0)).to.be(4);
           called = true;
         });
         value.insert(1, 4);
@@ -219,8 +219,8 @@ describe('common/ObservableVector', () => {
           expect(args.type).to.be('move');
           expect(args.newIndex).to.be(1);
           expect(args.oldIndex).to.be(0);
-          expect(args.oldValues.next()).to.be(1);
-          expect(args.newValues.next()).to.be(1);
+          expect(args.oldValues.at(0)).to.be(1);
+          expect(args.newValues.at(0)).to.be(1);
           called = true;
         });
         value.move(0, 1);
@@ -255,8 +255,8 @@ describe('common/ObservableVector', () => {
           expect(args.type).to.be('remove');
           expect(args.newIndex).to.be(-1);
           expect(args.oldIndex).to.be(1);
-          expect(args.oldValues.next()).to.be(2);
-          expect(args.newValues.next()).to.be(void 0);
+          expect(args.oldValues.at(0)).to.be(2);
+          expect(args.newValues.length).to.be(0);
           called = true;
         });
         value.remove(2);
@@ -291,8 +291,8 @@ describe('common/ObservableVector', () => {
           expect(args.type).to.be('remove');
           expect(args.newIndex).to.be(-1);
           expect(args.oldIndex).to.be(1);
-          expect(args.oldValues.next()).to.be(2);
-          expect(args.newValues.next()).to.be(void 0);
+          expect(args.oldValues.at(0)).to.be(2);
+          expect(args.newValues.length).to.be(0);
           called = true;
         });
         value.removeAt(1);
@@ -320,7 +320,7 @@ describe('common/ObservableVector', () => {
           expect(args.newIndex).to.be(0);
           expect(args.oldIndex).to.be(0);
           expect(toArray(args.oldValues)).to.eql([1, 2, 3, 4, 5, 6]);
-          expect(args.newValues.next()).to.be(void 0);
+          expect(args.newValues.length).to.be(0);
           called = true;
         });
         value.clear();
@@ -351,7 +351,7 @@ describe('common/ObservableVector', () => {
           expect(args.newIndex).to.be(3);
           expect(args.oldIndex).to.be(-1);
           expect(toArray(args.newValues)).to.eql([4, 5, 6]);
-          expect(args.oldValues.next()).to.be(void 0);
+          expect(args.oldValues.length).to.be(0);
           called = true;
         });
         value.pushAll([4, 5, 6]);
@@ -382,7 +382,7 @@ describe('common/ObservableVector', () => {
           expect(args.newIndex).to.be(1);
           expect(args.oldIndex).to.be(-1);
           expect(toArray(args.newValues)).to.eql([4, 5, 6]);
-          expect(args.oldValues.next()).to.be(void 0);
+          expect(args.oldValues.length).to.be(0);
           called = true;
         });
         value.insertAll(1, [4, 5, 6]);
@@ -413,7 +413,7 @@ describe('common/ObservableVector', () => {
           expect(args.newIndex).to.be(-1);
           expect(args.oldIndex).to.be(1);
           expect(toArray(args.oldValues)).to.eql([2, 3]);
-          expect(args.newValues.next()).to.be(void 0);
+          expect(args.newValues.length).to.be(0);
           called = true;
         });
         value.removeRange(1, 3);
