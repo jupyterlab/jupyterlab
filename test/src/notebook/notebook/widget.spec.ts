@@ -316,10 +316,10 @@ describe('notebook/notebook/widget', () => {
           expect(widget.childAt(2)).to.be(child);
         });
 
-        it('should handle a replace', () => {
+        it('should handle a clear', () => {
           let cell = widget.model.factory.createCodeCell();
-          widget.model.cells.replace(0, 6, [cell]);
-          expect(widget.childCount()).to.be(1);
+          widget.model.cells.clear();
+          expect(widget.childCount()).to.be(0);
         });
 
       });

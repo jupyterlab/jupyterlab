@@ -171,6 +171,7 @@ describe('notebook/notebook/actions', () => {
         widget.select(next);
         source += next.model.source;
         let count = widget.childCount();
+        debugger;
         NotebookActions.mergeCells(widget);
         expect(widget.childCount()).to.be(count - 2);
         expect(widget.activeCell.model.source).to.be(source);

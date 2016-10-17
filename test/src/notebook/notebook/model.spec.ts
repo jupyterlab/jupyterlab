@@ -4,12 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  CodeCellModel
-} from '../../../../lib/notebook/cells/model';
+  indexOf
+} from 'phosphor/lib/algorithm/searching';
 
 import {
-  ObservableUndoableList
-} from '../../../../lib/notebook/common/undo';
+  CodeCellModel
+} from '../../../../lib/notebook/cells/model';
 
 import {
   nbformat
@@ -87,11 +87,6 @@ describe('notebook/notebook/model', () => {
 
     describe('#cells', () => {
 
-      it('should be an observable undoable list', () => {
-        let model = new NotebookModel();
-        expect(model.cells).to.be.an(ObservableUndoableList);
-      });
-
       it('should add an empty code cell by default', () => {
         let model = new NotebookModel();
         expect(model.cells.length).to.be(1);
@@ -103,7 +98,7 @@ describe('notebook/notebook/model', () => {
         let cell = model.factory.createCodeCell();
         model.cells.pushBack(cell);
         model.fromJSON(DEFAULT_CONTENT);
-        expect(model.cells.indexOf(cell)).to.be(-1);
+        expect(indexOf(model.cells, cell)).to.be(-1);
         expect(model.cells.length).to.be(6);
       });
 
