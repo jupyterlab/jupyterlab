@@ -22,11 +22,215 @@ import {
  * A vector which can be observed for changes.
  */
 export
-interface IObservableVector<T> extends Vector<T>, IDisposable {
+interface IObservableVector<T> extends IDisposable {
   /**
    * A signal emitted when the vector has changed.
    */
   changed: ISignal<IObservableVector<T>, ObservableVector.IChangedArgs<T>>;
+
+  /**
+   * Test whether the vector is empty.
+   *
+   * @returns `true` if the vector is empty, `false` otherwise.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  readonly isEmpty: boolean;
+
+  /**
+   * Get the length of the vector.
+   *
+   * @return The number of values in the vector.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  readonly length: number;
+
+  /**
+   * Get the value at the front of the vector.
+   *
+   * @returns The value at the front of the vector, or `undefined` if
+   *   the vector is empty.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  readonly front: T;
+
+  /**
+   * Get the value at the back of the vector.
+   *
+   * @returns The value at the back of the vector, or `undefined` if
+   *   the vector is empty.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  readonly back: T;
+
+  /**
+   * Create an iterator over the values in the vector.
+   *
+   * @returns A new iterator starting at the front of the vector.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  iter(): IIterator<T>;
+
+  /**
+   * Get the value at the specified index.
+   *
+   * @param index - The positive integer index of interest.
+   *
+   * @returns The value at the specified index.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   *
+   * #### Undefined Behavior
+   * An `index` which is non-integral or out of range.
+   */
+  at(index: number): T;
+
+  /**
+   * Set the value at the specified index.
+   *
+   * @param index - The positive integer index of interest.
+   *
+   * @param value - The value to set at the specified index.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   *
+   * #### Undefined Behavior
+   * An `index` which is non-integral or out of range.
+   */
+  set(index: number, value: T): void;
+
+  /**
+   * Add a value to the back of the vector.
+   *
+   * @param value - The value to add to the back of the vector.
+   *
+   * @returns The new length of the vector.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  pushBack(value: T): number;
+
+  /**
+   * Remove and return the value at the back of the vector.
+   *
+   * @returns The value at the back of the vector, or `undefined` if
+   *   the vector is empty.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * Iterators pointing at the removed value are invalidated.
+   */
+  popBack(): T;
+
+  /**
+   * Insert a value into the vector at a specific index.
+   *
+   * @param index - The index at which to insert the value.
+   *
+   * @param value - The value to set at the specified index.
+   *
+   * @returns The new length of the vector.
+   *
+   * #### Complexity
+   * Linear.
+   *
+   * #### Iterator Validity
+   * No changes.
+   *
+   * #### Notes
+   * The `index` will be clamped to the bounds of the vector.
+   *
+   * #### Undefined Behavior
+   * An `index` which is non-integral.
+   */
+  insert(index: number, value: T): number;
+
+  /**
+   * Remove the first occurrence of a value from the vector.
+   *
+   * @param value - The value of interest.
+   *
+   * @returns The index of the removed value, or `-1` if the value
+   *   is not contained in the vector.
+   *
+   * #### Complexity
+   * Linear.
+   *
+   * #### Iterator Validity
+   * Iterators pointing at the removed value and beyond are invalidated.
+   *
+   * #### Notes
+   * Comparison is performed using strict `===` equality.
+   */
+  remove(value: T): number;
+
+  /**
+   * Remove and return the value at a specific index.
+   *
+   * @param index - The index of the value of interest.
+   *
+   * @returns The value at the specified index, or `undefined` if the
+   *   index is out of range.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * Iterators pointing at the removed value and beyond are invalidated.
+   *
+   * #### Undefined Behavior
+   * An `index` which is non-integral.
+   */
+  removeAt(index: number): T;
+
+  /**
+   * Remove all values from the vector.
+   *
+   * #### Complexity
+   * Linear.
+   *
+   * #### Iterator Validity
+   * All current iterators are invalidated.
+   */
+  clear(): void;
 
   /**
    * Move a value from one index to another.
@@ -111,7 +315,7 @@ interface IObservableVector<T> extends Vector<T>, IDisposable {
  * A concrete implementation of [[IObservableVector]].
  */
 export
-class ObservableVector<T> implements IObservableVector<T> extends Vector {
+class ObservableVector<T> implements IObserveableVector<T> extends Vector {
   /**
    * A signal emitted when the list has changed.
    *
@@ -325,37 +529,6 @@ class ObservableVector<T> implements IObservableVector<T> extends Vector {
       newIndex: -1,
       oldValues: iter(values),
       newValues: EmptyIterator.instance
-    });
-  }
-
-  /**
-   * Swap the contents of the vector with the contents of another.
-   *
-   * @param other - The other vector holding the contents to swap.
-   *
-   * #### Complexity
-   * Constant.
-   *
-   * #### Iterator Validity
-   * All current iterators remain valid, but will now point to the
-   * contents of the other vector involved in the swap.
-   */
-  swap(other: Vector<T>): void {
-    let oldValues = this.iter();
-    super.swap(other);
-    this.changed.emit({
-      type: 'remove',
-      oldIndex: 0,
-      newIndex: -1,
-      oldValues,
-      newValues: EmptyIterator.instance
-    });
-    this.changed.emit({
-      type: 'add',
-      oldIndex: -1,
-      newIndex: 0,
-      oldValues: EmptyIterator.instance,
-      newValues: this.iter()
     });
   }
 
