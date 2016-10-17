@@ -38,8 +38,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IListChangedArgs
-} from '../../common/observablelist';
+  ObservableVector
+} from '../../common/observablevector';
 
 import {
   RenderMime
@@ -365,13 +365,13 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes on the model state.
    */
-  protected onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
+  protected onModelStateChanged(sender: OutputAreaModel, args: ObservableVector.IChangedArgs<nbformat.IOutput>) {
     switch (args.type) {
     case 'add':
       // Children are always added at the end.
       this.addChild();
       break;
-    case 'assign':
+    case 'remove':
       // Only "clear" is supported by the model.
       // When an output area is cleared and then quickly replaced with new
       // content (as happens with @interact in widgets, for example), the
@@ -389,9 +389,7 @@ class OutputAreaWidget extends Widget {
         }
         this.node.style.minHeight = '';
       }, 50);
-
-      let oldValues = args.oldValue as IIterable<nbformat.IOutput>;
-      each(oldValues, value => {
+      each(args.oldValues, value => {
         this.removeChild(args.oldIndex);
       });
       break;

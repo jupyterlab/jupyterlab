@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterable, each
+  each
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -18,8 +18,8 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  IObservableList, IListChangedArgs
-} from '../../common/observablelist';
+  IObservableVector, ObservableVector
+} from '../../common/observablevector';
 
 import {
   DocumentModel, DocumentRegistry
@@ -39,7 +39,7 @@ import {
 } from '../common/metadata';
 
 import {
-  ObservableUndoableList
+  IObservableUndoableVector, ObservableUndoableVector
 } from '../common/undo';
 
 import {
@@ -63,7 +63,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
    * #### Notes
    * This is a read-only property.
    */
-  cells: ObservableUndoableList<ICellModel>;
+  cells: IObservableUndoableVector<ICellModel>;
 
   /**
    * The cell model factory for the notebook.
@@ -153,7 +153,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   constructor(options: NotebookModel.IOptions = {}) {
     super(options.languagePreference);
     this._factory = options.factory || NotebookModel.defaultFactory;
-    this._cells = new ObservableUndoableList<ICellModel>((data: nbformat.IBaseCell) => {
+    this._cells = new ObservableUndoableVector<ICellModel>((data: nbformat.IBaseCell) => {
       switch (data.cell_type) {
         case 'code':
           return this._factory.createCodeCell(data);
@@ -182,7 +182,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * #### Notes
    * This is a read-only property.
    */
-  get cells(): ObservableUndoableList<ICellModel> {
+  get cells(): IObservableUndoableVector<ICellModel> {
     return this._cells;
   }
 
@@ -321,7 +321,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         continue;
       }
     }
-    this.cells.assign(cells);
+    this.cells.clear();
+    this.cells.pushAll(cells);
     let oldValue = 0;
     let newValue = 0;
     if (value.nbformat !== this._nbformat) {
@@ -405,32 +406,25 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Handle a change in the cells list.
    */
-  private _onCellsChanged(list: IObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
-    let cell: ICellModel;
+  private _onCellsChanged(list: IObservableVector<ICellModel>, change: ObservableVector.IChangedArgs<ICellModel>): void {
     switch (change.type) {
     case 'add':
-      cell = change.newValue as ICellModel;
-      cell.contentChanged.connect(this._onCellChanged, this);
+      each(change.newValues, cell => {
+        cell.contentChanged.connect(this._onCellChanged, this);
+      });
       break;
     case 'remove':
-      (change.oldValue as ICellModel).dispose();
-      break;
-    case 'assign':
-      let newValues = change.newValue as IIterable<ICellModel>;
-      each(newValues, value => {
-        value.contentChanged.connect(this._onCellChanged, this);
-      });
-      let oldValues = change.oldValue as IIterable<ICellModel>;
-      each(oldValues, value => {
-        value.dispose();
+      each(change.oldValues, cell => {
+        cell.dispose();
       });
       break;
     case 'set':
-      cell = change.newValue as ICellModel;
-      cell.contentChanged.connect(this._onCellChanged, this);
-      if (change.oldValue) {
-        (change.oldValue as ICellModel).dispose();
-      }
+      each(change.newValues, cell => {
+        cell.contentChanged.connect(this._onCellChanged, this);
+      });
+      each(change.oldValues, cell => {
+        cell.dispose();
+      });
       break;
     default:
       return;
@@ -457,7 +451,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     this.contentChanged.emit(void 0);
   }
 
-  private _cells: ObservableUndoableList<ICellModel> = null;
+  private _cells: IObservableUndoableVector<ICellModel> = null;
   private _factory: ICellModelFactory = null;
   private _metadata: { [key: string]: any } = Private.createMetadata();
   private _cursors: { [key: string]: MetadataCursor } = Object.create(null);

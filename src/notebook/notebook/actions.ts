@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
+  indexOf
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   MimeData as IClipboard
 } from 'phosphor/lib/core/mimedata';
 
@@ -988,7 +992,7 @@ namespace Private {
     let cell = parent.model.factory.createCodeCell();
     cell.source = text;
     let cells = parent.model.cells;
-    let i = cells.indexOf(child.model);
+    let i = indexOf(cells, child.model);
     if (i === -1) {
       cells.pushBack(cell);
     } else {

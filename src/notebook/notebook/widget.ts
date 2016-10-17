@@ -42,8 +42,8 @@ import {
 } from '../../common/interfaces';
 
 import {
-  IObservableList, IListChangedArgs
-} from '../../common/observablelist';
+  IObservableVector, ObservableVector
+} from '../../common/observablevector';
 
 import {
   InspectionHandler
@@ -337,33 +337,30 @@ class StaticNotebook extends Widget {
   /**
    * Handle a change cells event.
    */
-  private _onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
+  private _onCellsChanged(sender: IObservableVector<ICellModel>, args: ObservableVector.IChangedArgs<ICellModel>) {
+    let index = 0;
     switch (args.type) {
     case 'add':
-      this._insertCell(args.newIndex, args.newValue as ICellModel);
+      index = args.newIndex;
+      each(args.newValues, value => {
+        this._insertCell(index++, value);
+      });
       break;
     case 'move':
       this._moveCell(args.newIndex, args.oldIndex);
       break;
     case 'remove':
-      this._removeCell(args.oldIndex);
-      break;
-    case 'assign':
-      // TODO: reuse existing cell widgets if possible.
-      let oldValues = args.oldValue as IIterable<ICellModel>;
-      each(oldValues, value => {
+      each(args.oldValues, value => {
         this._removeCell(args.oldIndex);
-      });
-      let newValues = args.newValue as IIterable<ICellModel>;
-      let index = 0;
-      each(newValues, value => {
-        this._insertCell(index++, value);
       });
       break;
     case 'set':
-      // TODO: reuse existing widget if possible.
-      this._removeCell(args.newIndex);
-      this._insertCell(args.newIndex, args.newValue as ICellModel);
+      // TODO: reuse existing widgets if possible.
+      index = args.newIndex;
+      each(args.newValues, value => {
+        this._removeCell(index);
+        this._insertCell(index++, value);
+      });
       break;
     default:
       return;
