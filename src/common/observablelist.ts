@@ -6,6 +6,14 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
+  indexOf
+} from 'phosphor/lib/algorithm/searching';
+
+import {
+  ISequence
+} from 'phosphor/lib/algorithm/sequence';
+
+import {
   Vector
 } from 'phosphor/lib/collections/vector';
 
@@ -22,7 +30,7 @@ import {
  * A vector which can be observed for changes.
  */
 export
-interface IObservableVector<T> extends IDisposable {
+interface IObservableVector<T> extends IDisposable, ISequence<T> {
   /**
    * A signal emitted when the vector has changed.
    */
@@ -40,19 +48,6 @@ interface IObservableVector<T> extends IDisposable {
    * No changes.
    */
   readonly isEmpty: boolean;
-
-  /**
-   * Get the length of the vector.
-   *
-   * @return The number of values in the vector.
-   *
-   * #### Complexity
-   * Constant.
-   *
-   * #### Iterator Validity
-   * No changes.
-   */
-  readonly length: number;
 
   /**
    * Get the value at the front of the vector.
@@ -81,37 +76,6 @@ interface IObservableVector<T> extends IDisposable {
    * No changes.
    */
   readonly back: T;
-
-  /**
-   * Create an iterator over the values in the vector.
-   *
-   * @returns A new iterator starting at the front of the vector.
-   *
-   * #### Complexity
-   * Constant.
-   *
-   * #### Iterator Validity
-   * No changes.
-   */
-  iter(): IIterator<T>;
-
-  /**
-   * Get the value at the specified index.
-   *
-   * @param index - The positive integer index of interest.
-   *
-   * @returns The value at the specified index.
-   *
-   * #### Complexity
-   * Constant.
-   *
-   * #### Iterator Validity
-   * No changes.
-   *
-   * #### Undefined Behavior
-   * An `index` which is non-integral or out of range.
-   */
-  at(index: number): T;
 
   /**
    * Set the value at the specified index.
@@ -315,20 +279,17 @@ interface IObservableVector<T> extends IDisposable {
  * A concrete implementation of [[IObservableVector]].
  */
 export
-class ObservableVector<T> implements IObserveableVector<T> extends Vector {
+class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   /**
    * A signal emitted when the list has changed.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[changedSignal]].
    */
-  changed: ISignal<ObservableVector<T>, IListChangedArgs<T>>;
+  changed: ISignal<ObservableVector<T>, ObservableVector.IChangedArgs<T>>;
 
   /**
    * Test whether the list has been disposed.
    */
   get isDisposed(): boolean {
-    return this.internal === null;
+    return this._isDisposed === null;
   }
 
   /**
@@ -338,9 +299,9 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
+    this.clear();
     clearSignalData(this);
-    this.internal.clear();
-    this.internal = null;
   }
 
   /**
@@ -359,15 +320,15 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
    */
-  set(index: number, item: T): T {
+  set(index: number, item: T): void {
     let oldValues = iter([this.at(index)]);
-    super.set(index, number);
+    super.set(index, item);
     this.changed.emit({
       type: 'set',
       oldIndex: index,
       newIndex: index,
       oldValues,
-      newValues = iter([item])
+      newValues: iter([item])
     });
   }
 
@@ -391,7 +352,7 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
       oldIndex: -1,
       newIndex: this.length - 1,
       oldValues: EmptyIterator.instance,
-      newValues: iter(value)
+      newValues: iter([value])
     });
     return num;
   }
@@ -414,9 +375,10 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
       type: 'remove',
       oldIndex: this.length,
       newIndex: -1,
-      oldValues: iter(value),
+      oldValues: iter([value]),
       newValues: EmptyIterator.instance
     });
+    return value;
   }
 
   /**
@@ -447,7 +409,7 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
       oldIndex: -1,
       newIndex: index,
       oldValues: EmptyIterator.instance,
-      newValues: iter(value)
+      newValues: iter([value])
     });
     return num;
   }
@@ -470,13 +432,13 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
    * Comparison is performed using strict `===` equality.
    */
   remove(value: T): number {
-    let oldIndex = this.indexOf(value);
+    let oldIndex = indexOf(this, value);
     let num = super.remove(value);
     this.changed.emit({
       type: 'remove',
       oldIndex,
       newIndex: -1,
-      oldValues: iter(value),
+      oldValues: iter([value]),
       newValues: EmptyIterator.instance
     });
     return num;
@@ -505,9 +467,10 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
       type: 'remove',
       oldIndex: index,
       newIndex: -1,
-      oldValues: iter(value),
+      oldValues: iter([value]),
       newValues: EmptyIterator.instance
     });
+    return value;
   }
 
   /**
@@ -520,7 +483,7 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
    * All current iterators are invalidated.
    */
   clear(): void {
-    let values = [];
+    let values: T[] = [];
     each(this, value => {  values.push(value); });
     super.clear();
     this.changed.emit({
@@ -551,18 +514,18 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
    */
   move(fromIndex: number, toIndex: number): void {
     let value = this.at(fromIndex);
-    let it = iter(value);
     super.removeAt(fromIndex);
     if (toIndex < fromIndex) {
       toIndex -= 1;
     }
     super.insert(toIndex, value);
+    let arr = [value];
     this.changed.emit({
       type: 'move',
       oldIndex: fromIndex,
       newIndex: toIndex,
-      oldValues: it
-      newValues: it
+      oldValues: iter(arr),
+      newValues: iter(arr)
     });
   }
 
@@ -587,7 +550,7 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
       oldIndex: -1,
       newIndex,
       oldValues: EmptyIterator.instance,
-      newValues = iter(values)
+      newValues: iter(values)
     });
     return this.length;
   }
@@ -622,6 +585,7 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
       oldValues: EmptyIterator.instance,
       newValues: iter(values)
     });
+    return this.length;
   }
 
   /**
@@ -654,7 +618,10 @@ class ObservableVector<T> implements IObserveableVector<T> extends Vector {
       oldValues: iter(oldValues),
       newValues: EmptyIterator.instance
     });
+    return this.length;
   }
+
+  private _isDisposed = false;
 }
 
 
