@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  deepEqual, JSONObject
+  deepEqual, JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -56,7 +56,7 @@ interface ICellModel extends IDisposable {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<ICellModel, IChangedArgs<JSONObject>>;
+  metadataChanged: ISignal<ICellModel, IChangedArgs<JSONValue>>;
 
   /**
    * A signal emitted when a model state changes.

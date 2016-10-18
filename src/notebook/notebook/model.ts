@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  deepEqual, JSONObject
+  deepEqual, JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -59,7 +59,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<JSONObject>>;
+  metadataChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<JSONValue>>;
 
   /**
    * The list of cells in the notebook.
@@ -166,7 +166,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<this, IChangedArgs<JSONObject>>;
+  metadataChanged: ISignal<this, IChangedArgs<JSONValue>>;
 
   /**
    * Get the observable list of notebook cells.
