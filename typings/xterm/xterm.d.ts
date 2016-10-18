@@ -51,7 +51,6 @@ interface Xterm {
 interface XtermConstructor {
   new (options?: Xterm.IOptions): Xterm;
   (options?: Xterm.IOptions): Xterm;
-  brokenBold: boolean;
 }
 
 

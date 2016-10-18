@@ -20,7 +20,6 @@ import {
 import * as Xterm
   from 'xterm';
 
-
 /**
  * The class name added to a terminal widget.
  */
@@ -69,7 +68,6 @@ class TerminalWidget extends Widget {
     this.color = options.color || 'white';
     this.id = `jp-TerminalWidget-${Private.id++}`;
     this.title.label = 'Terminal';
-    (Xterm as any).brokenBold = true;
   }
 
   /**
@@ -303,6 +301,10 @@ class TerminalWidget extends Widget {
           content: [data]
         });
       }
+    });
+
+    this._term.on('title', (title: string) => {
+        this.title.label = title;
     });
   }
 
