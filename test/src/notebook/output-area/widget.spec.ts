@@ -165,14 +165,14 @@ describe('notebook/output-area/widget', () => {
 
       it('should create widgets for the model items', () => {
         let widget = createWidget();
-        expect(widget.childCount()).to.be(5);
+        expect(widget.widgets.length).to.be(5);
       });
 
       context('model `changed` signal', () => {
 
         it('should dispose of the child widget when an output is removed', () => {
           let widget = createWidget();
-          let child = widget.childAt(0);
+          let child = widget.widgets.at(0);
           widget.model.clear();
           expect(child.isDisposed).to.be(true);
         });
@@ -286,7 +286,7 @@ describe('notebook/output-area/widget', () => {
 
       it('should get the child widget at the specified index', () => {
         let widget = createWidget();
-        expect(widget.childAt(0)).to.be.a(Widget);
+        expect(widget.widgets.at(0)).to.be.a(Widget);
       });
 
     });
@@ -295,9 +295,9 @@ describe('notebook/output-area/widget', () => {
 
       it('should get the number of child widgets', () => {
         let widget = createWidget();
-        expect(widget.childCount()).to.be(5);
+        expect(widget.widgets.length).to.be(5);
         widget.model.clear();
-        expect(widget.childCount()).to.be(0);
+        expect(widget.widgets.length).to.be(0);
       });
 
     });

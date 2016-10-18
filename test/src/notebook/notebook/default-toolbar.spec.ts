@@ -146,10 +146,10 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should cut when clicked', () => {
         let button = ToolbarItems.createCutButton(panel);
-        let count = panel.content.childCount();
+        let count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.content.childCount()).to.be(count - 1);
+        expect(panel.content.widgets.length).to.be(count - 1);
         expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
         button.dispose();
       });
@@ -165,10 +165,10 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should copy when clicked', () => {
         let button = ToolbarItems.createCopyButton(panel);
-        let count = panel.content.childCount();
+        let count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.content.childCount()).to.be(count);
+        expect(panel.content.widgets.length).to.be(count);
         expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
         button.dispose();
       });
@@ -184,12 +184,12 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should paste when clicked', (done) => {
         let button = ToolbarItems.createPasteButton(panel);
-        let count = panel.content.childCount();
+        let count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         NotebookActions.copy(panel.content, clipboard);
         button.node.click();
         requestAnimationFrame(() => {
-          expect(panel.content.childCount()).to.be(count + 1);
+          expect(panel.content.widgets.length).to.be(count + 1);
           button.dispose();
           done();
         });
@@ -207,7 +207,7 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should run and advance when clicked', (done) => {
         let button = ToolbarItems.createRunButton(panel);
         let widget = panel.content;
-        let next = widget.childAt(1) as MarkdownCellWidget;
+        let next = widget.widgets.at(1) as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
@@ -279,7 +279,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
         expect(node.value).to.be('code');
-        panel.content.select(panel.content.childAt(1));
+        panel.content.select(panel.content.widgets.at(1));
         expect(node.value).to.be('-');
       });
 
@@ -289,7 +289,7 @@ describe('notebook/notebook/default-toolbar', () => {
         expect(node.value).to.be('code');
         let cell = panel.model.factory.createCodeCell();
         panel.model.cells.insert(1, cell);
-        panel.content.select(panel.content.childAt(1));
+        panel.content.select(panel.content.widgets.at(1));
         expect(node.value).to.be('code');
       });
 
