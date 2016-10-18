@@ -273,16 +273,17 @@ namespace NotebookActions {
       return;
     }
     let cells = widget.model.cells;
+    let widgets = widget.widgets;
     cells.beginCompoundOperation();
     for (let i = cells.length - 2; i > -1; i--) {
-      if (widget.isSelected(widget.widgets.at(i))) {
-        if (!widget.isSelected(widget.widgets.at(i + 1))) {
+      if (widget.isSelected(widgets.at(i))) {
+        if (!widget.isSelected(widgets.at(i + 1))) {
           cells.move(i, i + 1);
           if (widget.activeCellIndex === i) {
             widget.activeCellIndex++;
           }
-          widget.select(widget.widgets.at(i + 1));
-          widget.deselect(widget.widgets.at(i));
+          widget.select(widgets.at(i + 1));
+          widget.deselect(widgets.at(i));
         }
       }
     }
@@ -300,21 +301,20 @@ namespace NotebookActions {
       return;
     }
     let cells = widget.model.cells;
+    let widgets = widget.widgets;
     cells.beginCompoundOperation();
-    let i = 0;
-    each(widget.widgets, child => {
-      if (widget.isSelected(child)) {
-        if (!widget.isSelected(widget.widgets.at(i - 1))) {
+    for (let i = 1; i < cells.length; i++) {
+      if (widget.isSelected(widgets.at(i))) {
+        if (!widget.isSelected(widgets.at(i - 1))) {
           cells.move(i, i - 1);
           if (widget.activeCellIndex === i) {
             widget.activeCellIndex--;
           }
-          widget.select(widget.widgets.at(i - 1));
-          widget.deselect(widget.widgets.at(i));
+          widget.select(widgets.at(i - 1));
+          widget.deselect(widgets.at(i));
         }
       }
-      i++;
-    });
+    }
     cells.endCompoundOperation();
   }
 
