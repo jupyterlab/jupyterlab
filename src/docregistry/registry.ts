@@ -355,6 +355,20 @@ class DocumentRegistry {
   }
 
   /**
+   * Get the default widget factory for an extension.
+   *
+   * @param ext - An optional file extension to filter the results.
+   *
+   * @returns The default widget factory for an extension.
+   *
+   * #### Notes
+   * This is equivalent to the first value in [[preferredWidgetFactories]].
+   */
+  defaultWidgetFactory(ext: string = '*'): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> {
+    return this.preferredWidgetFactories(ext).next();
+  }
+
+  /**
    * Create an iterator over the widget factories that have been registered.
    *
    * @returns A new iterator of widget factories.
