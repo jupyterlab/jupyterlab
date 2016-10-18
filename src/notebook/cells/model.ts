@@ -6,8 +6,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  deepEqual
+  deepEqual, JSONObject
 } from 'phosphor/lib/algorithm/json';
+
+import {
+  IIterator, iter
+} from 'phosphor/lib/algorithm/iteration';
 
 import {
   IDisposable
@@ -41,11 +45,8 @@ export
 interface ICellModel extends IDisposable {
   /**
    * The type of the cell.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
-  type: nbformat.CellType;
+  readonly type: nbformat.CellType;
 
   /**
    * A signal emitted when the content of the model changes.
@@ -55,7 +56,7 @@ interface ICellModel extends IDisposable {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<ICellModel, IChangedArgs<any>>;
+  metadataChanged: ISignal<ICellModel, IChangedArgs<JSONObject>>;
 
   /**
    * A signal emitted when a model state changes.
@@ -70,7 +71,7 @@ interface ICellModel extends IDisposable {
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): any;
+  toJSON(): nbformat.ICell;
 
   /**
    * Get a metadata cursor for the cell.
@@ -88,7 +89,7 @@ interface ICellModel extends IDisposable {
    * #### Notes
    * Metadata associated with the nbformat are not included.
    */
-  listMetadata(): string[];
+  listMetadata(): IIterator<string>;
 }
 
 
@@ -124,9 +125,6 @@ export
 interface IMarkdownCellModel extends ICellModel {
   /**
    * The type of the cell.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   type: 'markdown';
  }
@@ -139,9 +137,6 @@ export
 interface IRawCellModel extends ICellModel {
   /**
    * The type of the cell.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   type: 'raw';
 }
@@ -208,9 +203,6 @@ class CellModel implements ICellModel {
 
   /**
    * Get whether the model is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get isDisposed(): boolean {
     return this._metadata === null;
@@ -235,12 +227,12 @@ class CellModel implements ICellModel {
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): nbformat.IBaseCell {
+  toJSON(): nbformat.ICell {
     return {
       cell_type: this.type,
       source: this.source,
       metadata: utils.copy(this._metadata) as nbformat.IBaseCellMetadata
-    };
+    } as nbformat.ICell;
   }
 
   /**
@@ -277,8 +269,8 @@ class CellModel implements ICellModel {
    * #### Notes
    * Metadata associated with the nbformat are not included.
    */
-  listMetadata(): string[] {
-    return Object.keys(this._metadata);
+  listMetadata(): IIterator<string> {
+    return iter(Object.keys(this._metadata));
   }
 
   /**
@@ -318,9 +310,6 @@ export
 class RawCellModel extends CellModel {
   /**
    * The type of the cell.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get type(): 'raw' {
     return 'raw';
@@ -335,9 +324,6 @@ export
 class MarkdownCellModel extends CellModel {
   /**
    * The type of the cell.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get type(): 'markdown' {
     return 'markdown';
@@ -369,9 +355,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
 
   /**
    * The type of the cell.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get type(): 'code' {
     return 'code';
@@ -395,9 +378,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
 
   /**
    * The cell outputs.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get outputs(): OutputAreaModel {
     return this._outputs;
