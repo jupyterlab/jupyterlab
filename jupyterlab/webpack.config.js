@@ -29,6 +29,9 @@ buildExtension({
   config: {
     output: {
       publicPath: 'lab/'
+    },
+    module: {
+      noParse: [/xterm/]  // Xterm ships a UMD module
     }
   }
 });
