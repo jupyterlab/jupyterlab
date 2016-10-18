@@ -251,8 +251,8 @@ class CellTypeSwitcher extends Widget {
       return;
     }
     let mType: string = widget.activeCell.model.type;
-    for (let i = 0; i < widget.childCount(); i++) {
-      let child = widget.childAt(i);
+    for (let i = 0; i < widget.widgets.length; i++) {
+      let child = widget.widgets.at(i);
       if (widget.isSelected(child)) {
         if (child.model.type !== mType) {
           mType = '-';

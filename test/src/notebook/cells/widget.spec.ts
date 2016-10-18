@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   Message, sendMessage
 } from 'phosphor/lib/core/messaging';
 

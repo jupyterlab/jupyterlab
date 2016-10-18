@@ -10,8 +10,12 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  deepEqual
+  deepEqual, JSONValue
 } from 'phosphor/lib/algorithm/json';
+
+import {
+  IIterator, iter
+} from 'phosphor/lib/algorithm/iteration';
 
 import {
   clearSignalData, defineSignal, ISignal
@@ -55,39 +59,27 @@ interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<any>>;
+  metadataChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<JSONValue>>;
 
   /**
    * The list of cells in the notebook.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
-  cells: IObservableUndoableVector<ICellModel>;
+  readonly cells: IObservableUndoableVector<ICellModel>;
 
   /**
    * The cell model factory for the notebook.
-   *
-   * #### Notes
-   * This is a read-only propery.
    */
-  factory: ICellModelFactory;
+  readonly factory: ICellModelFactory;
 
   /**
    * The major version number of the nbformat.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
-  nbformat: number;
+  readonly nbformat: number;
 
   /**
    * The minor version number of the nbformat.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
-  nbformatMinor: number;
+  readonly nbformatMinor: number;
 
   /**
    * Get a metadata cursor for the notebook.
@@ -101,7 +93,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * List the metadata namespace keys for the notebook.
    */
-  listMetadata(): string[];
+  listMetadata(): IIterator<string>;
 }
 
 
@@ -174,13 +166,10 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<any>>;
+  metadataChanged: ISignal<this, IChangedArgs<JSONValue>>;
 
   /**
    * Get the observable list of notebook cells.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get cells(): IObservableUndoableVector<ICellModel> {
     return this._cells;
@@ -188,9 +177,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
 
   /**
    * The cell model factory for the notebook.
-   *
-   * #### Notes
-   * This is a read-only propery.
    */
   get factory(): ICellModelFactory {
     return this._factory;
@@ -198,9 +184,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
 
   /**
    * The major version number of the nbformat.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get nbformat(): number {
     return this._nbformat;
@@ -208,9 +191,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
 
   /**
    * The minor version number of the nbformat.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get nbformatMinor(): number {
     return this._nbformatMinor;
@@ -218,9 +198,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
 
   /**
    * The default kernel name of the document.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get defaultKernelName(): string {
     let spec = this._metadata['kernelspec'];
@@ -229,9 +206,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
 
   /**
    * The default kernel language of the document.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get defaultKernelLanguage(): string {
     let info = this._metadata['language_info'];
@@ -388,8 +362,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * List the metadata namespace keys for the notebook.
    */
-  listMetadata(): string[] {
-    return Object.keys(this._metadata);
+  listMetadata(): IIterator<string> {
+    return iter(Object.keys(this._metadata));
   }
 
   /**

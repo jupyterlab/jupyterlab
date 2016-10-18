@@ -364,9 +364,9 @@ class ConsoleContent extends Widget {
     let layout = this._content.layout as PanelLayout;
     for (let i = 1; i < layout.widgets.length; i++) {
       let widget = layout.widgets.at(i) as CodeCellWidget;
-      output.push(widget.model.toJSON());
+      output.push(widget.model.toJSON() as nbformat.ICodeCell);
     }
-    output.push(this.prompt.model.toJSON());
+    output.push(this.prompt.model.toJSON() as nbformat.ICodeCell);
     return output;
   }
 

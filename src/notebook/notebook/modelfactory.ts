@@ -21,9 +21,6 @@ export
 class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookModel> {
   /**
    * The name of the model.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get name(): string {
     return 'notebook';
@@ -31,9 +28,6 @@ class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookMo
 
   /**
    * The content type of the file.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get contentType(): Contents.ContentType {
     return 'notebook';
@@ -41,8 +35,6 @@ class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookMo
 
   /**
    * The format of the file.
-   *
-   * This is a read-only property.
    */
   get fileFormat(): Contents.FileFormat {
     return 'json';

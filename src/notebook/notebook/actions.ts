@@ -74,7 +74,7 @@ namespace NotebookActions {
     Private.deselectCells(widget);
     let nbModel = widget.model;
     let index = widget.activeCellIndex;
-    let child = widget.childAt(index);
+    let child = widget.widgets.at(index);
     let position = child.editor.getCursorPosition();
     let orig = child.model.source;
 
@@ -122,18 +122,18 @@ namespace NotebookActions {
     let cells = model.cells;
     let primary = widget.activeCell;
     let index = widget.activeCellIndex;
-    let child: BaseCellWidget;
 
     // Get the cells to merge.
-    for (let i = 0; i < widget.childCount(); i++) {
-      child = widget.childAt(i);
+    let i = 0;
+    each(widget.widgets, child => {
       if (widget.isSelected(child)) {
         toMerge.push(child.model.source);
         if (i !== index) {
           toDelete.push(child.model);
         }
       }
-    }
+      i++;
+    });
 
     // Check for only a single cell selected.
     if (toMerge.length === 1) {
@@ -159,9 +159,9 @@ namespace NotebookActions {
     // Make the changes while preserving history.
     cells.beginCompoundOperation();
     cells.set(index, newModel);
-    for (let cell of toDelete) {
+    each(toDelete, cell => {
       cells.remove(cell);
-    }
+    });
     cells.endCompoundOperation();
 
     // If the original cell is a markdown cell, make sure
@@ -194,19 +194,20 @@ namespace NotebookActions {
     widget.mode = 'command';
 
     // Find the cells to delete.
-    for (let i = 0; i < widget.childCount(); i++) {
-      let child = widget.childAt(i);
+    let i = 0;
+    each(widget.widgets, child => {
       if (widget.isSelected(child)) {
         index = i;
         toDelete.push(cells.at(i));
       }
-    }
+      i++;
+    });
 
     // Delete the cells as one undo event.
     cells.beginCompoundOperation();
-    for (let cell of toDelete) {
+    each(toDelete, cell => {
       cells.remove(cell);
-    }
+    });
     // The model will add a new code cell if there are no
     // remaining cells.
     model.cells.endCompoundOperation();
@@ -272,16 +273,17 @@ namespace NotebookActions {
       return;
     }
     let cells = widget.model.cells;
+    let widgets = widget.widgets;
     cells.beginCompoundOperation();
     for (let i = cells.length - 2; i > -1; i--) {
-      if (widget.isSelected(widget.childAt(i))) {
-        if (!widget.isSelected(widget.childAt(i + 1))) {
+      if (widget.isSelected(widgets.at(i))) {
+        if (!widget.isSelected(widgets.at(i + 1))) {
           cells.move(i, i + 1);
           if (widget.activeCellIndex === i) {
             widget.activeCellIndex++;
           }
-          widget.select(widget.childAt(i + 1));
-          widget.deselect(widget.childAt(i));
+          widget.select(widgets.at(i + 1));
+          widget.deselect(widgets.at(i));
         }
       }
     }
@@ -299,16 +301,17 @@ namespace NotebookActions {
       return;
     }
     let cells = widget.model.cells;
+    let widgets = widget.widgets;
     cells.beginCompoundOperation();
     for (let i = 1; i < cells.length; i++) {
-      if (widget.isSelected(widget.childAt(i))) {
-        if (!widget.isSelected(widget.childAt(i - 1))) {
+      if (widget.isSelected(widgets.at(i))) {
+        if (!widget.isSelected(widgets.at(i - 1))) {
           cells.move(i, i - 1);
           if (widget.activeCellIndex === i) {
             widget.activeCellIndex--;
           }
-          widget.select(widget.childAt(i - 1));
-          widget.deselect(widget.childAt(i));
+          widget.select(widgets.at(i - 1));
+          widget.deselect(widgets.at(i));
         }
       }
     }
@@ -337,10 +340,10 @@ namespace NotebookActions {
     let cells = model.cells;
 
     cells.beginCompoundOperation();
-    for (let i = 0; i < widget.childCount(); i++) {
-      let child = widget.childAt(i);
+    let i = 0;
+    each(widget.widgets, child => {
       if (!widget.isSelected(child)) {
-        continue;
+        return;
       }
       if (child.model.type !== value) {
         let newCell: ICellModel;
@@ -358,10 +361,11 @@ namespace NotebookActions {
       }
       if (value === 'markdown') {
         // Fetch the new widget and unrender it.
-        child = widget.childAt(i);
+        child = widget.widgets.at(i);
         (child as MarkdownCellWidget).rendered = false;
       }
-    }
+      i++;
+    });
     cells.endCompoundOperation();
     Private.deselectCells(widget);
   }
@@ -387,20 +391,21 @@ namespace NotebookActions {
     widget.mode = 'command';
     let selected: BaseCellWidget[] = [];
     let lastIndex = widget.activeCellIndex;
-    for (let i = 0; i < widget.childCount(); i++) {
-      let child = widget.childAt(i);
+    let i = 0;
+    each(widget.widgets, child => {
       if (widget.isSelected(child)) {
         selected.push(child);
         lastIndex = i;
       }
-    }
+      i++;
+    });
     widget.activeCellIndex = lastIndex;
     Private.deselectCells(widget);
 
     let promises: Promise<boolean>[] = [];
-    for (let child of selected) {
+    each(selected, child => {
       promises.push(Private.runCell(widget, child, kernel));
-    }
+    });
     return Promise.all(promises).then(results => {
       // Post an update request.
       widget.update();
@@ -435,7 +440,7 @@ namespace NotebookActions {
     }
     let promise = run(widget, kernel);
     let model = widget.model;
-    if (widget.activeCellIndex === widget.childCount() - 1) {
+    if (widget.activeCellIndex === widget.widgets.length - 1) {
       let cell = model.factory.createCodeCell();
       model.cells.pushBack(cell);
       widget.activeCellIndex++;
@@ -494,9 +499,9 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
-    for (let i = 0; i < widget.childCount(); i++) {
-      widget.select(widget.childAt(i));
-    }
+    each(widget.widgets, child => {
+      widget.select(child);
+    });
     return run(widget, kernel);
   }
 
@@ -538,7 +543,7 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    if (widget.activeCellIndex === widget.childCount() - 1) {
+    if (widget.activeCellIndex === widget.widgets.length - 1) {
       return;
     }
     widget.activeCellIndex += 1;
@@ -566,11 +571,11 @@ namespace NotebookActions {
     }
     widget.mode = 'command';
     let current = widget.activeCell;
-    let prev = widget.childAt(widget.activeCellIndex - 1);
+    let prev = widget.widgets.at(widget.activeCellIndex - 1);
     if (widget.isSelected(prev)) {
       widget.deselect(current);
       if (widget.activeCellIndex > 1) {
-        let prevPrev = widget.childAt(widget.activeCellIndex - 2);
+        let prevPrev = widget.widgets.at(widget.activeCellIndex - 2);
         if (!widget.isSelected(prevPrev)) {
           widget.deselect(prev);
         }
@@ -597,16 +602,16 @@ namespace NotebookActions {
       return;
     }
     // Do not wrap around.
-    if (widget.activeCellIndex === widget.childCount() - 1) {
+    if (widget.activeCellIndex === widget.widgets.length - 1) {
       return;
     }
     widget.mode = 'command';
     let current = widget.activeCell;
-    let next = widget.childAt(widget.activeCellIndex + 1);
+    let next = widget.widgets.at(widget.activeCellIndex + 1);
     if (widget.isSelected(next)) {
       widget.deselect(current);
       if (widget.activeCellIndex < widget.model.cells.length - 2) {
-        let nextNext = widget.childAt(widget.activeCellIndex + 2);
+        let nextNext = widget.widgets.at(widget.activeCellIndex + 2);
         if (!widget.isSelected(nextNext)) {
           widget.deselect(next);
         }
@@ -633,12 +638,11 @@ namespace NotebookActions {
     widget.mode = 'command';
     clipboard.clear();
     let data: nbformat.IBaseCell[] = [];
-    for (let i = 0; i < widget.childCount(); i++) {
-      let child = widget.childAt(i);
+    each(widget.widgets, child => {
       if (widget.isSelected(child)) {
         data.push(child.model.toJSON());
       }
-    }
+    });
     clipboard.setData(JUPYTER_CELL_MIME, data);
     Private.deselectCells(widget);
   }
@@ -666,19 +670,18 @@ namespace NotebookActions {
     widget.mode = 'command';
 
     // Gather the cell data.
-    for (let i = 0; i < widget.childCount(); i++) {
-      let child = widget.childAt(i);
+    each(widget.widgets, child => {
       if (widget.isSelected(child)) {
         data.push(child.model.toJSON());
         toDelete.push(child.model);
       }
-    }
+    });
 
     // Preserve the history as one undo event.
     model.cells.beginCompoundOperation();
-    for (let cell of toDelete) {
+    each(toDelete, cell => {
       cells.remove(cell);
-    }
+    });
 
     // If there are no cells, add a code cell.
     if (!model.cells.length) {
@@ -716,7 +719,7 @@ namespace NotebookActions {
     let newCells: ICellModel[] = [];
     widget.mode = 'command';
 
-    for (let value of values) {
+    each(values, value => {
       switch (value.cell_type) {
       case 'code':
         newCells.push(model.factory.createCodeCell(value));
@@ -728,7 +731,7 @@ namespace NotebookActions {
         newCells.push(model.factory.createRawCell(value));
         break;
       }
-    }
+    });
     let index = widget.activeCellIndex;
 
     let cells = widget.model.cells;
@@ -793,12 +796,11 @@ namespace NotebookActions {
       return;
     }
     let lineNumbers = widget.activeCell.editor.lineNumbers;
-    for (let i = 0; i < widget.childCount(); i++) {
-      let cell = widget.childAt(i);
-      if (widget.isSelected(cell)) {
-        cell.editor.lineNumbers = !lineNumbers;
+    each(widget.widgets, child => {
+      if (widget.isSelected(child)) {
+        child.editor.lineNumbers = !lineNumbers;
       }
-    }
+    });
   }
 
   /**
@@ -816,10 +818,9 @@ namespace NotebookActions {
       return;
     }
     let lineNumbers = widget.activeCell.editor.lineNumbers;
-    for (let i = 0; i < widget.childCount(); i++) {
-      let cell = widget.childAt(i);
-      cell.editor.lineNumbers = !lineNumbers;
-    }
+    each(widget.widgets, child => {
+      child.editor.lineNumbers = !lineNumbers;
+    });
   }
 
   /**
@@ -836,14 +837,15 @@ namespace NotebookActions {
       return;
     }
     let cells = widget.model.cells;
-    for (let i = 0; i < cells.length; i++) {
-      let cell = cells.at(i) as CodeCellModel;
-      let child = widget.childAt(i);
+    let i = 0;
+    each(cells, (cell: CodeCellModel) => {
+      let child = widget.widgets.at(i);
       if (widget.isSelected(child) && cell.type === 'code') {
         cell.outputs.clear();
         cell.executionCount = null;
       }
-    }
+      i++;
+    });
   }
 
   /**
@@ -859,14 +861,12 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let cells = widget.model.cells;
-    for (let i = 0; i < cells.length; i++) {
-      let cell = cells.at(i) as CodeCellModel;
+    each(widget.model.cells, (cell: CodeCellModel) => {
       if (cell.type === 'code') {
         cell.outputs.clear();
         cell.executionCount = null;
       }
-    }
+    });
   }
 
   /**
@@ -890,12 +890,13 @@ namespace NotebookActions {
     }
     level = Math.min(Math.max(level, 1), 6);
     let cells = widget.model.cells;
-    for (let i = 0; i < cells.length; i++) {
-      let child = widget.childAt(i) as MarkdownCellWidget;
+    let i = 0;
+    each(widget.widgets, (child: MarkdownCellWidget) => {
       if (widget.isSelected(child)) {
         Private.setMarkdownHeader(cells.at(i), level);
       }
-    }
+      i++;
+    });
     changeCellType(widget, 'markdown');
   }
 }
@@ -910,10 +911,9 @@ namespace Private {
    */
   export
   function deselectCells(widget: Notebook): void {
-    for (let i = 0; i < widget.childCount(); i++) {
-      let child = widget.childAt(i);
+    each(widget.widgets, child => {
       widget.deselect(child);
-    }
+    });
     // Make sure we have a valid active cell.
     widget.activeCellIndex = widget.activeCellIndex;
   }

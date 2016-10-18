@@ -6,12 +6,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterable, each
+  each
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
+
+import {
+  ISequence
+} from 'phosphor/lib/algorithm/sequence';
 
 import {
   Message
@@ -185,12 +189,19 @@ class OutputAreaWidget extends Widget {
   /**
    * A signal emitted when the widget's model changes.
    */
-  modelChanged: ISignal<OutputAreaWidget, void>;
+  modelChanged: ISignal<this, void>;
 
   /**
    * A signal emitted when the widget's model is disposed.
    */
-  modelDisposed: ISignal<OutputAreaWidget, void>;
+  modelDisposed: ISignal<this, void>;
+
+  /**
+   * A read-only sequence of the widgets in the output area.
+   */
+  get widgets(): ISequence<OutputWidget> {
+    return (this.layout as PanelLayout).widgets as ISequence<OutputWidget>;
+  }
 
   /**
    * The model for the widget.
@@ -212,9 +223,6 @@ class OutputAreaWidget extends Widget {
 
   /**
    * Get the rendermime instance used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get rendermime(): RenderMime {
     return this._rendermime;
@@ -222,9 +230,6 @@ class OutputAreaWidget extends Widget {
 
   /**
    * Get the renderer used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get renderer(): OutputAreaWidget.IRenderer {
     return this._renderer;
@@ -288,22 +293,6 @@ class OutputAreaWidget extends Widget {
     this._rendermime = null;
     this._renderer = null;
     super.dispose();
-  }
-
-  /**
-   * Get the child widget at the specified index.
-   */
-  childAt(index: number): OutputWidget {
-    let layout = this.layout as PanelLayout;
-    return layout.widgets.at(index) as OutputWidget;
-  }
-
-  /**
-   * Get the number of child widgets.
-   */
-  childCount(): number {
-    let layout = this.layout as PanelLayout;
-    return layout.widgets.length;
   }
 
   /**

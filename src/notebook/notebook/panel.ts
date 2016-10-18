@@ -114,23 +114,20 @@ class NotebookPanel extends Widget {
   /**
    * A signal emitted when the panel has been activated.
    */
-  activated: ISignal<NotebookPanel, void>;
+  activated: ISignal<this, void>;
 
   /**
    * A signal emitted when the panel context changes.
    */
-  contextChanged: ISignal<NotebookPanel, void>;
+  contextChanged: ISignal<this, void>;
 
   /**
    * A signal emitted when the kernel used by the panel changes.
    */
-  kernelChanged: ISignal<NotebookPanel, IKernel>;
+  kernelChanged: ISignal<this, IKernel>;
 
   /**
    * Get the toolbar used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get toolbar(): Toolbar {
     return (this.layout as PanelLayout).widgets.at(0) as Toolbar;
@@ -138,9 +135,6 @@ class NotebookPanel extends Widget {
 
   /**
    * Get the content area used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get content(): Notebook {
     return this._content;
@@ -148,9 +142,6 @@ class NotebookPanel extends Widget {
 
   /**
    * Get the current kernel used by the panel.
-   *
-   * #### Notes
-   * This is a a read-only property.
    */
   get kernel(): IKernel {
     return this._context ? this._context.kernel : null;
@@ -158,9 +149,6 @@ class NotebookPanel extends Widget {
 
   /**
    * Get the rendermime instance used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get rendermime(): RenderMime {
     return this._rendermime;
@@ -175,9 +163,6 @@ class NotebookPanel extends Widget {
 
   /**
    * Get the clipboard instance used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get clipboard(): IClipboard {
     return this._clipboard;
@@ -185,9 +170,6 @@ class NotebookPanel extends Widget {
 
   /**
    * The model for the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get model(): INotebookModel {
     return this._content ? this._content.model : null;
