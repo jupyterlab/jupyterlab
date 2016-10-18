@@ -20,7 +20,6 @@ import {
 import * as Xterm
   from 'xterm';
 
-
 /**
  * The class name added to a terminal widget.
  */
@@ -69,7 +68,6 @@ class TerminalWidget extends Widget {
     this.color = options.color || 'white';
     this.id = `jp-TerminalWidget-${Private.id++}`;
     this.title.label = 'Terminal';
-    (Xterm as any).brokenBold = true;
   }
 
   /**
@@ -138,42 +136,42 @@ class TerminalWidget extends Widget {
    * Get whether the bell is shown.
    */
   get visualBell(): boolean {
-    return this._term.visualBell;
+    return this._term.getOption('visualBell');
   }
 
   /**
    * Set whether the bell is shown.
    */
   set visualBell(value: boolean) {
-    this._term.visualBell = value;
+    this._term.setOption('visualBell', value);
   }
 
   /**
    * Get whether to focus on a bell event.
    */
   get popOnBell(): boolean {
-    return this._term.popOnBell;
+    return this._term.getOption('popOnBell');
   }
 
   /**
    * Set whether to focus on a bell event.
    */
   set popOnBell(value: boolean) {
-    this._term.popOnBell = value;
+    this._term.setOption('popOnBell', value);
   }
 
   /**
    * Get the size of the scrollback buffer in the terminal.
    */
   get scrollback(): number {
-    return this._term.scrollback;
+    return this._term.getOption('scrollback');
   }
 
   /**
    * Set the size of the scrollback buffer in the terminal.
    */
   set scrollback(value: number) {
-    this._term.scrollback = value;
+    this._term.setOption('scrollback', value);
   }
 
   /**
