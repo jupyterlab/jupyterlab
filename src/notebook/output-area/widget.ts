@@ -14,6 +14,10 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
+  ISequence
+} from 'phosphor/lib/algorithm/sequence';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -191,6 +195,13 @@ class OutputAreaWidget extends Widget {
    * A signal emitted when the widget's model is disposed.
    */
   modelDisposed: ISignal<this, void>;
+
+  /**
+   * A read-only sequence of the widgets in the output area.
+   */
+  get widgets(): ISequence<OutputWidget> {
+    return (this.layout as PanelLayout).widgets as ISequence<OutputWidget>;
+  }
 
   /**
    * The model for the widget.
