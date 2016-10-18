@@ -30,7 +30,7 @@ import {
 } from '../docregistry';
 
 import {
-  IWidgetOpener
+  FileBrowser
 } from '../filebrowser';
 
 import {
@@ -286,7 +286,7 @@ class DocumentManager implements IDisposable {
   private _widgetManager: DocumentWidgetManager = null;
   private _registry: DocumentRegistry = null;
   private _contexts: Vector<Context<DocumentRegistry.IModel>> = new Vector<Context<DocumentRegistry.IModel>>();
-  private _opener: IWidgetOpener = null;
+  private _opener: FileBrowser.IWidgetOpener = null;
 }
 
 
@@ -313,7 +313,7 @@ namespace DocumentManager {
     /**
      * A widget opener for sibling widgets.
      */
-    opener: IWidgetOpener;
+    opener: FileBrowser.IWidgetOpener;
   }
 }
 

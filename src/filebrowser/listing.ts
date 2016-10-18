@@ -50,7 +50,7 @@ import {
 } from '../docmanager';
 
 import {
-  IWidgetOpener
+  FileBrowser
 } from './browser';
 
 import {
@@ -238,9 +238,6 @@ class DirListing extends Widget {
 
   /**
    * Get the model used by the listing.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get model(): FileBrowserModel {
     return this._model;
@@ -253,8 +250,6 @@ class DirListing extends Widget {
    * This is the node which holds the header cells.
    *
    * Modifying this node directly can lead to undefined behavior.
-   *
-   * This is a read-only property.
    */
   get headerNode(): HTMLElement {
     return utils.findElement(this.node, HEADER_CLASS);
@@ -267,8 +262,6 @@ class DirListing extends Widget {
    * This is the node which holds the item nodes.
    *
    * Modifying this node directly can lead to undefined behavior.
-   *
-   * This is a read-only property.
    */
   get contentNode(): HTMLElement {
     return utils.findElement(this.node, CONTENT_CLASS);
@@ -276,9 +269,6 @@ class DirListing extends Widget {
 
   /**
    * The renderer instance used by the directory listing.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get renderer(): DirListing.IRenderer {
     return this._renderer;
@@ -287,15 +277,12 @@ class DirListing extends Widget {
   /**
    * The the sorted content items.
    */
-  get sortedItems(): Contents.IModel[] {
+  get sortedItems(): ISequence<Contents.IModel> {
     return this._sortedModels;
   }
 
   /**
    * The current sort state.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get sortState(): DirListing.ISortState {
     return this._sortState;
@@ -312,6 +299,8 @@ class DirListing extends Widget {
 
   /**
    * Rename the first currently selected item.
+   *
+   * @returns A promise that resolves with the new name of the item.
    */
   rename(): Promise<string> {
     return this._doRename();
@@ -334,6 +323,8 @@ class DirListing extends Widget {
 
   /**
    * Paste the items from the clipboard.
+   *
+   * @returns A promise that resolves when the operation is complete.
    */
   paste(): Promise<void> {
     if (!this._clipboard.length) {
@@ -365,6 +356,8 @@ class DirListing extends Widget {
 
   /**
    * Delete the currently selected item(s).
+   *
+   * @returns A promise that resolves when the operation is complete.
    */
   delete(): Promise<void> {
     let names: string[] = [];
@@ -393,6 +386,8 @@ class DirListing extends Widget {
 
   /**
    * Duplicate the currently selected item(s).
+   *
+   * @returns A promise that resolves when the operation is complete.
    */
   duplicate(): Promise<void> {
     let promises: Promise<Contents.IModel>[] = [];
@@ -413,13 +408,15 @@ class DirListing extends Widget {
   download(): void {
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
-        this._model.download(item.path)
+        this._model.download(item.path);
       }
     }
   }
 
   /**
    * Shut down kernels on the applicable currently selected items.
+   *
+   * @returns A promise that resolves when the operation is complete.
    */
   shutdownKernels(): Promise<void> {
     let promises: Promise<void>[] = [];
@@ -499,6 +496,10 @@ class DirListing extends Widget {
 
   /**
    * Get whether an item is selected by name.
+   *
+   * @param name - The name of of the item.
+   *
+   * @returns Whether the item is selected.
    */
   isSelected(name: string): boolean {
     return this._selection[name] === true;
@@ -506,6 +507,10 @@ class DirListing extends Widget {
 
   /**
    * Find a path given a click.
+   *
+   * @param event - The mouse event.
+   *
+   * @returns The path to the selected file.
    */
   pathForClick(event: MouseEvent): string {
     let items = this.sortedItems;
@@ -1216,7 +1221,7 @@ class DirListing extends Widget {
   private _model: FileBrowserModel = null;
   private _editNode: HTMLInputElement = null;
   private _items: HTMLElement[] = [];
-  private _sortedModels: Contents.IModel[] = null;
+  private _sortedModels = new Vector<Contents.IModel>();
   private _sortState: DirListing.ISortState = { direction: 'ascending', key: 'name' };
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
@@ -1226,7 +1231,7 @@ class DirListing extends Widget {
   private _prevPath = '';
   private _clipboard: string[] = [];
   private _manager: DocumentManager = null;
-  private _opener: IWidgetOpener = null;
+  private _opener: FileBrowser.IWidgetOpener = null;
   private _softSelection = '';
   private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
@@ -1257,7 +1262,7 @@ namespace DirListing {
     /**
      * A widget opener function.
      */
-    opener: IWidgetOpener;
+    opener: FileBrowser.IWidgetOpener;
 
     /**
      * A renderer for file items.
