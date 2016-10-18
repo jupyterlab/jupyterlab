@@ -1,6 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import {
+  JSONValue
+} from 'phosphor/lib/algorithm/json';
+
+
 /**
  * A class used to interact with user level metadata.
  */
@@ -9,17 +14,17 @@ interface IMetadataCursor {
   /**
    * The metadata namespace.
    */
-  name: string;
+  readonly name: string;
 
   /**
    * Get the value of the metadata.
    */
-  getValue(): any;
+  getValue(): JSONValue;
 
   /**
    * Set the value of the metdata.
    */
-  setValue(value: any): void;
+  setValue(value: JSONValue): void;
 }
 
 
@@ -37,7 +42,7 @@ class MetadataCursor implements IMetadataCursor {
    *
    * @param write - The write callback.
    */
-  constructor(name: string, read: () => any, write: (value: any) => void) {
+  constructor(name: string, read: () => any, write: (value: JSONValue) => void) {
     this._name = name;
     this._read = read;
     this._write = write;
@@ -45,9 +50,6 @@ class MetadataCursor implements IMetadataCursor {
 
   /**
    * Get the namespace key of the metadata.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get name(): string {
     return this._name;
@@ -67,7 +69,7 @@ class MetadataCursor implements IMetadataCursor {
   /**
    * Get the value of the namespace data.
    */
-  getValue(): any {
+  getValue(): JSONValue {
     let read = this._read;
     return read();
   }
@@ -75,12 +77,12 @@ class MetadataCursor implements IMetadataCursor {
   /**
    * Set the value of the namespace data.
    */
-  setValue(value: any): void {
+  setValue(value: JSONValue): void {
     let write = this._write;
     write(value);
   }
 
   private _name = '';
-  private _read: () => string = null;
-  private _write: (value: string) => void = null;
+  private _read: () => JSONValue = null;
+  private _write: (value: JSONValue) => void = null;
 }

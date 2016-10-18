@@ -460,7 +460,8 @@ class CodeCellWidget extends BaseCellWidget {
    */
   protected onUpdateRequest(msg: Message): void {
     if (this._collapsedCursor) {
-      this.toggleClass(COLLAPSED_CLASS, this._collapsedCursor.getValue());
+      let value = this._collapsedCursor.getValue() as boolean;
+      this.toggleClass(COLLAPSED_CLASS, value);
     }
     if (this._output) {
       // TODO: handle scrolled state.
