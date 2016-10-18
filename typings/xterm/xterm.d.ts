@@ -12,29 +12,39 @@ interface Xterm {
 
   element: HTMLElement;
 
-  colors: string[];
+  textarea: HTMLElement;
 
-  rows: number;
+  attachCustomKeydownHandler(callback: (event: KeyboardEvent) => boolean): void;
 
-  cols: number;
+  blur(): void;
 
-  visualBell: boolean;
-
-  popOnBell: boolean;
-
-  scrollback: number;
-
-  on(event: string, callback: (arg: any) => void): void;
-
-  open(el: HTMLElement): void;
-
-  write(msg: string): void;
-
-  resize(width: number, height: number): void;
+  clear(): void;
 
   destroy(): void;
 
   focus(): void;
+
+  getOption(key: string): any;
+
+  on(event: string, callback: (arg: any) => void): void;
+
+  off(event: string, callback: (arg: any) => void): void;
+
+  open(parent: HTMLElement): void;
+
+  refresh(start: number, end: number, queue?: boolean): void;
+
+  reset(): void;
+
+  resize(x: number, y: number): void;
+
+  scrollDisp(n: number): void;
+
+  setOption(key: string, value: any): void;
+
+  write(text: string): void;
+
+  writeln(text: string): void;
 }
 
 
