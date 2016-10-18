@@ -14,6 +14,10 @@ import {
 } from 'phosphor/lib/algorithm/searching';
 
 import {
+  ISequence
+} from 'phosphor/lib/algorithm/sequence';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -150,7 +154,7 @@ class StaticNotebook extends Widget {
   /**
    * A signal emitted when the model of the notebook changes.
    */
-  modelChanged: ISignal<StaticNotebook, void>;
+  modelChanged: ISignal<this, void>;
 
   /**
    * A signal emitted when the model content changes.
@@ -158,7 +162,7 @@ class StaticNotebook extends Widget {
    * #### Notes
    * This is a convenience signal that follows the current model.
    */
-  modelContentChanged: ISignal<StaticNotebook, void>;
+  modelContentChanged: ISignal<this, void>;
 
   /**
    * The model for the widget.
@@ -181,9 +185,6 @@ class StaticNotebook extends Widget {
 
   /**
    * Get the rendermime instance used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get rendermime(): RenderMime {
     return this._rendermime;
@@ -191,9 +192,6 @@ class StaticNotebook extends Widget {
 
   /**
    * Get the renderer used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get renderer(): StaticNotebook.IRenderer {
     return this._renderer;
@@ -201,28 +199,16 @@ class StaticNotebook extends Widget {
 
   /**
    * Get the mimetype for code cells.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get codeMimetype(): string {
     return this._mimetype;
   }
 
   /**
-   * Get the child widget at the specified index.
+   * A read-only sequence of the widgets in the notebook.
    */
-  childAt(index: number): BaseCellWidget {
-    let layout = this.layout as PanelLayout;
-    return layout.widgets.at(index) as BaseCellWidget;
-  }
-
-  /**
-   * Get the number of child widgets.
-   */
-  childCount(): number {
-    let layout = this.layout as PanelLayout;
-    return layout.widgets.length;
+  get widgets(): ISequence<BaseCellWidget> {
+    return (this.layout as PanelLayout).widgets as ISequence<BaseCellWidget>;
   }
 
   /**
@@ -576,23 +562,20 @@ class Notebook extends StaticNotebook {
    * This can be due to the active index changing or the
    * cell at the active index changing.
    */
-  activeCellChanged: ISignal<Notebook, BaseCellWidget>;
+  activeCellChanged: ISignal<this, BaseCellWidget>;
 
   /**
    * A signal emitted when the state of the notebook changes.
    */
-  stateChanged: ISignal<Notebook, IChangedArgs<any>>;
+  stateChanged: ISignal<this, IChangedArgs<any>>;
 
   /**
    * A signal emitted when the selection state of the notebook changes.
    */
-  selectionChanged: ISignal<Notebook, void>;
+  selectionChanged: ISignal<this, void>;
 
   /**
    * Get the inspection handler used by the console.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get inspectionHandler(): InspectionHandler {
     return this._inspectionHandler;
@@ -653,7 +636,7 @@ class Notebook extends StaticNotebook {
       newValue = Math.min(newValue, this.model.cells.length - 1);
     }
     this._activeCellIndex = newValue;
-    let cell = this.childAt(newValue);
+    let cell = this.widgets.at(newValue);
     if (cell !== this._activeCell) {
       this._activeCell = cell;
       this.activeCellChanged.emit(cell);
@@ -669,9 +652,6 @@ class Notebook extends StaticNotebook {
 
   /**
    * Get the active cell widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get activeCell(): BaseCellWidget {
     return this._activeCell;
@@ -735,7 +715,7 @@ class Notebook extends StaticNotebook {
   /**
    * Scroll so that the active cell is visible.
    */
-  scrollToActiveCell() {
+  scrollToActiveCell(): void {
     if (this.activeCell) {
       scrollIntoViewIfNeeded(this.node, this.activeCell.node);
     }
@@ -946,7 +926,7 @@ class Notebook extends StaticNotebook {
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
-      let widget = this.childAt(i);
+      let widget = this.widgets.at(i);
       // Event is on a cell but not in its editor, switch to command mode.
       if (!widget.editor.node.contains(target)) {
         this.mode = 'command';
@@ -964,7 +944,7 @@ class Notebook extends StaticNotebook {
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
-      let widget = this.childAt(i);
+      let widget = this.widgets.at(i);
       // If the editor itself does not have focus, ensure command mode.
       if (!widget.editor.node.contains(target)) {
         this.mode = 'command';
