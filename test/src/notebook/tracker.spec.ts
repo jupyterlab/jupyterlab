@@ -87,6 +87,24 @@ describe('notebook/tracker', () => {
 
       it('should emit a signal when the active cell changes', (done) => {
         let tracker = new NotebookTracker();
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let count = 0;
+        tracker.activeCellChanged.connect(() => { count++; });
+        createNotebookContext().then(context => {
+          panel.context = context;
+          panel.content.model.fromJSON(DEFAULT_CONTENT);
+          expect(count).to.be(0);
+          tracker.add(panel);
+          tracker.sync(panel);
+          expect(count).to.be(1);
+          panel.content.activeCellIndex = 1;
+          expect(count).to.be(2);
+          panel.dispose();
+          done();
+        }).catch(done);
+      });
+
+    });
         let panel = new NotebookPanel({ rendermime, clipboard, renderer});
         let called = false;
         tracker.activeCellChanged.connect(() => { called = true; });
