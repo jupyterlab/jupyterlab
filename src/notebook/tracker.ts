@@ -90,17 +90,25 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
     if (this.isDisposed) {
       return;
     }
-    super.dispose();
     if (this._handler) {
       this._handler.dispose();
       this._handler = null;
     }
+    this._activeCell = null;
+    super.dispose();
   }
 
   /**
    * Handle the current change event.
    */
   protected onCurrentChanged(): void {
+    // Store an internal reference to active cell to prevent false positives.
+    let activeCell = this.activeCell;
+    if (activeCell && activeCell === this._activeCell) {
+      return;
+    }
+    this._activeCell = activeCell;
+
     if (this._handler) {
       this._handler.dispose();
     }
@@ -128,6 +136,7 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
     this.activeCellChanged.emit(widget.content.activeCell || null);
   }
 
+  private _activeCell: BaseCellWidget = null;
   private _handler: DisposableDelegate = null;
 }
 
