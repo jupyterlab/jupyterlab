@@ -4,12 +4,20 @@
 import expect = require('expect.js');
 
 import {
-  ServiceManager, IServiceManager
+  Contents, ServiceManager, IServiceManager
 } from 'jupyter-js-services';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
 
 import {
   Context, DocumentRegistry, TextModelFactory
 } from '../../../lib/docregistry';
+
+import {
+  waitForDialog, acceptDialog
+} from '../utils';
 
 
 describe('docregistry/context', () => {
@@ -52,7 +60,7 @@ describe('docregistry/context', () => {
         context.kernelChanged.connect((sender, args) => {
           expect(sender).to.be(context);
           expect(args.name).to.be(name);
-          context.kernel.shutdown().then(() => {
+          context.changeKernel(null).then(() => {
             done();
           }).catch(done);
         });
@@ -159,7 +167,7 @@ describe('docregistry/context', () => {
         let name = manager.kernelspecs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
-          return context.kernel.shutdown();
+          return context.changeKernel(null);
         }).then(() => {
           done();
         }).catch(done);
@@ -250,7 +258,7 @@ describe('docregistry/context', () => {
         let name = manager.kernelspecs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
-          return context.kernel.shutdown();
+          return context.changeKernel(null);
         }).then(() => {
           done();
         }).catch(done);
@@ -271,41 +279,171 @@ describe('docregistry/context', () => {
 
     describe('#save()', () => {
 
+      it('should save the contents of the file to disk', (done) => {
+        context.model.fromString('foo');
+        context.save().then(() => {
+          let opts: Contents.IFetchOptions = {
+            format: factory.fileFormat,
+            type: factory.contentType,
+            content: true
+          };
+          return manager.contents.get(context.path, opts);
+        }).then(model => {
+          expect(model.content).to.be('foo');
+          done();
+        }).catch(done);
+      });
+
     });
 
     describe('#saveAs()', () => {
+
+      it('should save the document to a different path chosen by the user', (done) => {
+        waitForDialog().then(() => {
+          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          let input = dialog.getElementsByTagName('input')[0];
+          input.value = 'bar';
+          acceptDialog();
+        });
+        context.saveAs().then(() => {
+          expect(context.path).to.be('bar');
+          done();
+        }).catch(done);
+      });
 
     });
 
     describe('#revert()', () => {
 
+      it('should revert the contents of the file to the disk', (done) => {
+        manager.contents.save(context.path, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        }).then(() => {
+          context.model.fromString('bar');
+          return context.revert();
+        }).then(() => {
+          expect(context.model.toString()).to.be('foo');
+          done();
+        }).catch(done);
+      });
+
     });
 
     describe('#createCheckpoint()', () => {
+
+      it('should create a checkpoint for the file', (done) => {
+        context.createCheckpoint().then(model => {
+          expect(model.id).to.be.ok();
+          expect(model.last_modified).to.be.ok();
+          done();
+        }).catch(done);
+      });
 
     });
 
     describe('#deleteCheckpoint()', () => {
 
+      it('should delete the given checkpoint', (done) => {
+        context.createCheckpoint().then(model => {
+          return context.deleteCheckpoint(model.id);
+        }).then(() => {
+          return context.listCheckpoints();
+        }).then(models => {
+          expect(models.length).to.be(0);
+          done();
+        }).catch(done);
+      });
+
     });
 
     describe('#restoreCheckpoint()', () => {
+
+      it('should restore the value to the last checkpoint value', (done) => {
+        context.model.fromString('bar');
+        let id = '';
+        context.save().then(() => {
+          return context.createCheckpoint();
+        }).then(model => {
+          context.model.fromString('foo');
+          id = model.id;
+          return context.save();
+        }).then(() => {
+          return context.restoreCheckpoint(id);
+        }).then(() => {
+          return context.revert();
+        }).then(() => {
+          expect(context.model.toString()).to.be('bar');
+          done();
+        }).catch(done);
+      });
 
     });
 
     describe('#listCheckpoints()', () => {
 
+      it('should list the checkpoints for the file', (done) => {
+        let id = '';
+        context.createCheckpoint().then(model => {
+          id = model.id;
+          return context.listCheckpoints();
+        }).then(models => {
+          for (let model of models) {
+            if (model.id === id) {
+              done();
+              return;
+            }
+          }
+        }).catch(done);
+      });
+
     });
 
     describe('#listSessions()', () => {
+
+      it('should list the running sessions', (done) => {
+        let name = manager.kernelspecs.default;
+        context.changeKernel({ name }).then(() => {
+          return context.listSessions();
+        }).then(models => {
+          for (let model of models) {
+            if (model.kernel.id === context.kernel.id) {
+              return context.changeKernel(null);
+            }
+          }
+        }).then(() => {
+          done();
+        }).catch(done);
+      });
 
     });
 
     describe('#resolveUrl()', () => {
 
+      it('should resolve a relative url to a correct server path', () => {
+        let path = context.resolveUrl('./foo');
+        expect(path).to.be(manager.contents.getDownloadUrl('foo'));
+      });
+
+      it('should ignore urls that have a protocol', () => {
+        let path = context.resolveUrl('http://foo');
+        expect(path).to.be('http://foo');
+      });
+
     });
 
     describe('#addSibling()', () => {
+
+      it('should add a sibling widget', () => {
+        let called = false;
+        let opener = (widget: Widget) => {
+          called = true;
+        };
+        context = new Context({ manager, factory, path: 'foo', opener });
+        context.addSibling(new Widget());
+        expect(called).to.be(true);
+      });
 
     });
 
