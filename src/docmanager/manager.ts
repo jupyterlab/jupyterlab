@@ -109,7 +109,11 @@ class DocumentManager implements IDisposable {
    * @param kernel - An optional kernel name/id to override the default.
    */
   open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let factory = this._modelFactoryFor(path, widgetName);
+    let widgetFactory = this._widgetFactoryFor(path, widgetName);
+    if (!widgetFactory) {
+      return;
+    }
+    let factory = this._registry.getModelFactory(widgetFactory.modelName);
     if (!factory) {
       return;
     }
@@ -120,7 +124,7 @@ class DocumentManager implements IDisposable {
       // Load the contents from disk.
       context.revert();
     }
-    let widget = this._widgetManager.createWidget(widgetName, context, kernel);
+    let widget = this._widgetManager.createWidget(factor.name, context, kernel);
     this._opener.open(widget);
     return widget;
   }
@@ -135,14 +139,18 @@ class DocumentManager implements IDisposable {
    * @param kernel - An optional kernel name/id to override the default.
    */
   createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let factory = this._modelFactoryFor(path, widgetName);
+    let widgetFactory = this._widgetFactoryFor(path, widgetName);
+    if (!widgetFactory) {
+      return;
+    }
+    let factory = this._registry.getModelFactory(widgetFactory.modelName);
     if (!factory) {
       return;
     }
     let context = this._createContext(path, factory);
     // Immediately save the contents to disk.
     context.save();
-    let widget = this._widgetManager.createWidget(widgetName, context, kernel);
+    let widget = this._widgetManager.createWidget(factory.name, context, kernel);
     this._opener.open(widget);
     return widget;
   }
@@ -275,13 +283,12 @@ class DocumentManager implements IDisposable {
   /**
    * Get the model factory for a given widget name.
    */
-  private _modelFactoryFor(path: string, widgetName: string): DocumentRegistry.IModelFactory<DocumentRegistry.IModel> {
+  private _widgetFactoryFor(path: string, widgetName: string): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> {
     let registry = this._registry;
     if (widgetName === 'default') {
       widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path)).name;
     }
-    let widgetFactory = registry.getWidgetFactory(widgetName);
-    return registry.getModelFactory(widgetFactory.modelName);
+    return registry.getWidgetFactory(widgetName);
   }
 
   private _serviceManager: IServiceManager = null;
