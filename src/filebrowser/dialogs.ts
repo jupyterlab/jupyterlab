@@ -317,7 +317,7 @@ class CreateFromHandler extends Widget {
       type = fType.contentType || 'file';
     }
     if (!widgetName || widgetName === 'default') {
-      this._widgetName = widgetName = registry.preferredWidgetFactories(ext).next().name;
+      this._widgetName = widgetName = registry.defaultWidgetFactory(ext).name;
     }
 
     // Handle the kernel preferences.

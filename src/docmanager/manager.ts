@@ -189,7 +189,7 @@ class DocumentManager implements IDisposable {
    */
   findWidget(path: string, widgetName='default'): Widget {
     if (widgetName === 'default') {
-      widgetName = this._registry.preferredWidgetFactories(ContentsManager.extname(path)).next().name;
+      widgetName = this._registry.defaultWidgetFactory(ContentsManager.extname(path)).name;
     }
     let context = this._contextForPath(path);
     if (context) {
@@ -278,7 +278,7 @@ class DocumentManager implements IDisposable {
   private _modelFactoryFor(path: string, widgetName: string): DocumentRegistry.IModelFactory<DocumentRegistry.IModel> {
     let registry = this._registry;
     if (widgetName === 'default') {
-      widgetName = registry.preferredWidgetFactories(ContentsManager.extname(path)).next().name;
+      widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path)).name;
     }
     let widgetFactory = registry.getWidgetFactory(widgetName);
     return registry.getModelFactory(widgetFactory.modelName);
