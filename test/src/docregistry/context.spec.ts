@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   Contents, ServiceManager, IServiceManager
-} from 'jupyter-js-services';
+} from '@jupyterlab/services';
 
 import {
   Widget
