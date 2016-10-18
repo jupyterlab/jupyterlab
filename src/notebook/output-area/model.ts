@@ -55,9 +55,6 @@ class OutputAreaModel implements IDisposable {
 
   /**
    * Get the length of the items in the model.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get length(): number {
     return this.list ? this.list.length : 0;
@@ -65,9 +62,6 @@ class OutputAreaModel implements IDisposable {
 
   /**
    * Test whether the model is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get isDisposed(): boolean {
     return this.list === null;
