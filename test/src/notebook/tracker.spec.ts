@@ -32,6 +32,16 @@ import {
 } from './utils';
 
 
+class TestTracker extends NotebookTracker {
+  methods: string[] = [];
+
+  protected onCurrentChanged(): void {
+    super.onCurrentChanged();
+    this.methods.push('onCurrentChanged');
+  }
+}
+
+
 /**
  * Default notebook panel data.
  */
@@ -77,6 +87,7 @@ describe('notebook/tracker', () => {
           panel.context = context;
           panel.content.model.fromJSON(DEFAULT_CONTENT);
           expect(tracker.activeCell).to.be.a(BaseCellWidget);
+          panel.dispose();
           done();
         }).catch(done);
       });
@@ -105,15 +116,19 @@ describe('notebook/tracker', () => {
       });
 
     });
+
+    describe('#onCurrentChanged()', () => {
+
+      it('should be called when the active cell changes', (done) => {
+        let tracker = new TestTracker();
         let panel = new NotebookPanel({ rendermime, clipboard, renderer});
-        let called = false;
-        tracker.activeCellChanged.connect(() => { called = true; });
         tracker.add(panel);
         tracker.sync(panel);
         createNotebookContext().then(context => {
           panel.context = context;
           panel.content.model.fromJSON(DEFAULT_CONTENT);
-          expect(called).to.be(true);
+          expect(tracker.methods).to.contain('onCurrentChanged');
+          panel.dispose();
           done();
         }).catch(done);
       });
