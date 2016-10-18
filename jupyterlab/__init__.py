@@ -63,14 +63,17 @@ class LabHandler(IPythonHandler):
     def get(self):
         static_prefix = ujoin(self.base_url, PREFIX)
         labextensions = self.application.labextensions
-
         data = get_labextension_manifest_data_by_folder(BUILT_FILES)
-        css_files = [ujoin(static_prefix, 'main.css'),
-                     ujoin(static_prefix, 'extensions.css')]
         main = data['main']['entry']
         bundles = [ujoin(static_prefix, name + '.bundle.js') for name in
                    ['loader', 'main', 'extensions']]
         entries = [data['extensions']['entry']]
+
+        # Only load CSS files if they exist.
+        css_files = []
+        for css_file in ['main.css', 'extensions.css']:
+            if os.path.isfile(os.path.join(BUILT_FILES, css_file)):
+                css_files.append(ujoin(static_prefix, css_file))
 
         # Gather the lab extension files and entry points.
         for name in labextensions:
