@@ -32,22 +32,22 @@ interface ICoords extends JSONObject {
   /**
    * The left coordinate value.
    */
-  left: number;
+  readonly left: number;
 
   /**
    * The right coordinate value.
    */
-  right: number;
+  readonly right: number;
 
   /**
    * The top coordinate value.
    */
-  top: number;
+  readonly top: number;
 
   /**
    * The bottom coordinate value.
    */
-  bottom: number;
+  readonly bottom: number;
 }
 
 
@@ -59,32 +59,32 @@ interface IEditorState extends JSONObject {
   /**
    * The character number of the editor cursor within a line.
    */
-  ch: number;
+  readonly ch: number;
 
   /**
    * The height of a character in the editor.
    */
-  chHeight: number;
+  readonly chHeight: number;
 
   /**
    * The width of a character in the editor.
    */
-  chWidth: number;
+  readonly chWidth: number;
 
   /**
    * The line number of the editor cursor.
    */
-  line: number;
+  readonly line: number;
 
   /**
    * The coordinate position of the cursor.
    */
-  coords: ICoords;
+  readonly coords: ICoords;
 
   /**
    * The cursor position of the request, including line breaks.
    */
-  position: number;
+  readonly position: number;
 }
 
 
@@ -96,12 +96,12 @@ interface ITextChange extends IEditorState {
   /**
    * The old value of the editor text.
    */
-  oldValue: string;
+  readonly oldValue: string;
 
   /**
    * The new value of the editor text.
    */
-  newValue: string;
+  readonly newValue: string;
 }
 
 
@@ -113,7 +113,7 @@ interface ICompletionRequest extends IEditorState {
   /**
    * The current value of the editor text.
    */
-  currentValue: string;
+  readonly currentValue: string;
 }
 
 
