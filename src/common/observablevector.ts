@@ -320,15 +320,15 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
    */
-  set(index: number, item: T): void {
+  set(index: number, value: T): void {
     let oldValues = new Vector([this.at(index)]);
-    super.set(index, item);
+    super.set(index, value);
     this.changed.emit({
       type: 'set',
       oldIndex: index,
       newIndex: index,
       oldValues,
-      newValues: new Vector([item])
+      newValues: new Vector([value])
     });
   }
 
