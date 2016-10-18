@@ -27,7 +27,7 @@ describe('notebook/notebook/trust', () => {
     it('should trust the notebook cells if the user accepts', (done) => {
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);
-      let cell = model.cells.get(0);
+      let cell = model.cells.at(0);
       let cursor = cell.getMetadata('trusted');
       expect(cursor.getValue()).to.not.be(true);
       trustNotebook(model).then(() => {
@@ -40,7 +40,7 @@ describe('notebook/notebook/trust', () => {
     it('should not trust the notebook cells if the user aborts', (done) => {
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);
-      let cell = model.cells.get(0);
+      let cell = model.cells.at(0);
       let cursor = cell.getMetadata('trusted');
       expect(cursor.getValue()).to.not.be(true);
       trustNotebook(model).then(() => {
@@ -58,7 +58,7 @@ describe('notebook/notebook/trust', () => {
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);
       for (let i = 0; i < model.cells.length; i++) {
-        let cell = model.cells.get(i);
+        let cell = model.cells.at(i);
         let cursor = cell.getMetadata('trusted');
         cursor.setValue(true);
       }

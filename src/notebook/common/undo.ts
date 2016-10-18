@@ -2,16 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IDisposable
-} from 'phosphor/lib/core/disposable';
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
 
 import {
-  clearSignalData
-} from 'phosphor/lib/core/signaling';
+  each
+} from 'phosphor/lib/algorithm/iteration';
 
 import {
-  IObservableList, IListChangedArgs, ObservableList
-} from '../../common/observablelist';
+  Vector
+} from 'phosphor/lib/collections/vector';
+
+import {
+  IObservableVector, ObservableVector
+} from '../../common/observablevector';
 
 
 /**
@@ -22,29 +26,71 @@ interface ISerializable {
   /**
    * Convert the object to JSON.
    */
-  toJSON(): any;
+  toJSON(): JSONObject;
 }
 
 
 /**
- * An observable list that supports undo/redo.
+ * An observable vector that supports undo/redo.
  */
 export
-class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> implements IDisposable {
+interface IObservableUndoableVector<T extends ISerializable> extends IObservableVector<T> {
   /**
-   * Construct a new undoable observable list.
+   * Whether the object can redo changes.
    */
-  constructor(factory: (value: any) => T) {
+  readonly canRedo: boolean;
+
+  /**
+   * Whether the object can undo changes.
+   */
+  readonly canUndo: boolean;
+
+  /**
+   * Begin a compound operation.
+   *
+   * @param isUndoAble - Whether the operation is undoable.
+   *   The default is `false`.
+   */
+  beginCompoundOperation(isUndoAble?: boolean): void;
+
+  /**
+   * End a compound operation.
+   */
+  endCompoundOperation(): void;
+
+  /**
+   * Undo an operation.
+   */
+  undo(): void;
+
+  /**
+   * Redo an operation.
+   */
+  redo(): void;
+
+  /**
+   * Clear the change stack.
+   */
+  clearUndo(): void;
+}
+
+
+/**
+ * A concrete implementation of an observable undoable vector.
+ */
+export
+class ObservableUndoableVector<T extends ISerializable> extends ObservableVector<T> implements IObservableUndoableVector<T> {
+  /**
+   * Construct a new undoable observable vector.
+   */
+  constructor(factory: (value: JSONObject) => T) {
     super();
     this._factory = factory;
-    this.changed.connect(this._onListChanged, this);
+    this.changed.connect(this._onVectorChanged, this);
   }
 
   /**
    * Whether the object can redo changes.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get canRedo(): boolean {
     return this._index < this._stack.length - 1;
@@ -52,22 +98,16 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
 
   /**
    * Whether the object can undo changes.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get canUndo(): boolean {
     return this._index >= 0;
   }
 
   /**
-   * Get whether the object is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
+   * Test whether the vector is disposed.
    */
   get isDisposed(): boolean {
-    return this._stack === null;
+    return this._factory === null;
   }
 
   /**
@@ -78,13 +118,16 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
     if (this.isDisposed) {
       return;
     }
-    clearSignalData(this);
     this._factory = null;
     this._stack = null;
+    super.dispose();
   }
 
   /**
    * Begin a compound operation.
+   *
+   * @param isUndoAble - Whether the operation is undoable.
+   *   The default is `true`.
    */
   beginCompoundOperation(isUndoAble?: boolean): void {
     this._inCompound = true;
@@ -144,10 +187,10 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   }
 
   /**
-   * Handle a change in the list.
+   * Handle a change in the vector.
    */
-  private _onListChanged(list: IObservableList<T>, change: IListChangedArgs<T>): void {
-    if (!this._isUndoable) {
+  private _onVectorChanged(list: IObservableVector<T>, change: ObservableVector.IChangedArgs<T>): void {
+    if (this.isDisposed || !this._isUndoable) {
       return;
     }
     // Clear everything after this position if necessary.
@@ -173,27 +216,29 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   /**
    * Undo a change event.
    */
-  private _undoChange(change: IListChangedArgs<any>): void {
-    let value: T;
+  private _undoChange(change: ObservableVector.IChangedArgs<JSONObject>): void {
+    let index = 0;
+    let factory = this._factory;
     switch (change.type) {
     case 'add':
-      this.removeAt(change.newIndex);
+      each(change.newValues, () => {
+        this.removeAt(change.newIndex);
+      });
       break;
     case 'set':
-      value = this._createValue(change.oldValue as any);
-      this.set(change.oldIndex, value);
+      index = change.oldIndex;
+      each(change.oldValues, value => {
+        this.set(index++, factory(value));
+      });
       break;
     case 'remove':
-      value = this._createValue(change.oldValue as any);
-      this.insert(change.oldIndex, value);
+      index = change.oldIndex;
+      each(change.oldValues, value => {
+        this.insert(index++, factory(value));
+      });
       break;
     case 'move':
       this.move(change.newIndex, change.oldIndex);
-      break;
-    case 'replace':
-      let len = (change.newValue as any[]).length;
-      let values = this._createValues(change.oldValue as any[]);
-      this.replace(change.oldIndex, len, values);
       break;
     default:
       return;
@@ -203,105 +248,53 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   /**
    * Redo a change event.
    */
-  private _redoChange(change: IListChangedArgs<any>): void {
-    let value: T;
+  private _redoChange(change: ObservableVector.IChangedArgs<JSONObject>): void {
+    let index = 0;
+    let factory = this._factory;
     switch (change.type) {
     case 'add':
-      value = this._createValue(change.newValue as any);
-      this.insert(change.newIndex, value);
+      index = change.newIndex;
+      each(change.newValues, value => {
+        this.insert(index++, factory(value));
+      });
       break;
     case 'set':
-      value = this._createValue(change.newValue as any);
-      this.set(change.newIndex, value);
+      index = change.newIndex;
+      each(change.newValues, value => {
+        this.set(change.newIndex++, factory(value));
+      });
       break;
     case 'remove':
-      this.removeAt(change.oldIndex);
+      each(change.oldValues, () => {
+        this.removeAt(change.oldIndex);
+      });
       break;
     case 'move':
       this.move(change.oldIndex, change.newIndex);
       break;
-    case 'replace':
-      let len = (change.oldValue as any[]).length;
-      let cells = this._createValues(change.newValue as any[]);
-      this.replace(change.oldIndex, len, cells);
-      break;
     default:
       return;
     }
-  }
-
-  /**
-   * Create a value from JSON.
-   */
-  private _createValue(data: any): T {
-    let factory = this._factory;
-    return factory(data);
-  }
-
-  /**
-   * Create a list of cell models from JSON.
-   */
-  private _createValues(bundles: any[]): T[] {
-    let values: T[] = [];
-    for (let bundle of bundles) {
-      values.push(this._createValue(bundle));
-    }
-    return values;
   }
 
   /**
    * Copy a change as JSON.
    */
-  private _copyChange(change: IListChangedArgs<T>): IListChangedArgs<any> {
-    if (change.type === 'replace') {
-      return this._copyReplace(change);
-    }
-    let oldValue: any = null;
-    let newValue: any = null;
-    switch (change.type) {
-    case 'add':
-    case 'set':
-    case 'remove':
-      if (change.oldValue) {
-        oldValue = (change.oldValue as T).toJSON();
-      }
-      if (change.newValue) {
-        newValue = (change.newValue as T).toJSON();
-      }
-      break;
-    case 'move':
-      // Only need the indices.
-      break;
-    default:
-      return;
-    }
+  private _copyChange(change: ObservableVector.IChangedArgs<T>): ObservableVector.IChangedArgs<JSONObject> {
+    let oldValues = new Vector<JSONObject>();
+    each(change.oldValues, value => {
+      oldValues.pushBack(value.toJSON());
+    });
+    let newValues = new Vector<JSONObject>();
+    each(change.newValues, value => {
+      newValues.pushBack(value.toJSON());
+    });
     return {
       type: change.type,
       oldIndex: change.oldIndex,
       newIndex: change.newIndex,
-      oldValue,
-      newValue
-    };
-  }
-
-  /**
-   * Copy a replace change as JSON.
-   */
-  private _copyReplace(change: IListChangedArgs<T>): IListChangedArgs<any> {
-    let oldValue: any[] = [];
-    for (let value of (change.oldValue as T[])) {
-      oldValue.push(value.toJSON());
-    }
-    let newValue: any[] = [];
-    for (let value of (change.newValue as T[])) {
-      newValue.push(value.toJSON());
-    }
-    return {
-      type: 'replace',
-      oldIndex: change.oldIndex,
-      newIndex: change.newIndex,
-      oldValue,
-      newValue
+      oldValues,
+      newValues
     };
   }
 
@@ -309,6 +302,6 @@ class ObservableUndoableList<T extends ISerializable> extends ObservableList<T> 
   private _isUndoable = true;
   private _madeCompoundChange = false;
   private _index = -1;
-  private _stack: IListChangedArgs<any>[][] = [];
-  private _factory: (value: any) => T = null;
+  private _stack: ObservableVector.IChangedArgs<JSONObject>[][] = [];
+  private _factory: (value: JSONObject) => T = null;
 }

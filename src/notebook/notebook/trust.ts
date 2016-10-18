@@ -35,7 +35,7 @@ function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void>
   let cells = model.cells;
   let trusted = true;
   for (let i = 0; i < cells.length; i++) {
-    let cell = cells.get(i);
+    let cell = cells.at(i);
     if (!cell.getMetadata('trusted').getValue()) {
       trusted = false;
     }
@@ -49,7 +49,7 @@ function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void>
   }).then(result => {
     if (result.text === 'OK') {
       for (let i = 0; i < cells.length; i++) {
-        let cell = cells.get(i);
+        let cell = cells.at(i);
         cell.getMetadata('trusted').setValue(true);
       }
     }

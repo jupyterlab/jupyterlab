@@ -83,7 +83,7 @@ describe('notebook/notebook/modelfactory', () => {
         let factory = new NotebookModelFactory();
         let model = factory.createNew();
         expect(model.cells.length).to.be(1);
-        expect(model.cells.get(0).type).to.be('code');
+        expect(model.cells.at(0).type).to.be('code');
       });
 
       it('should accept a language preference', () => {

@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
+  indexOf
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -18,8 +22,8 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  IListChangedArgs, IObservableList, ObservableList
-} from '../../common/observablelist';
+  IObservableVector, ObservableVector
+} from '../../common/observablevector';
 
 import {
   nbformat
@@ -35,14 +39,14 @@ class OutputAreaModel implements IDisposable {
    * Construct a new observable outputs instance.
    */
   constructor() {
-    this.list = new ObservableList<OutputAreaModel.Output>();
+    this.list = new ObservableVector<OutputAreaModel.Output>();
     this.list.changed.connect(this._onListChanged, this);
   }
 
   /**
    * A signal emitted when the model changes.
    */
-  changed: ISignal<OutputAreaModel, IListChangedArgs<OutputAreaModel.Output>>;
+  changed: ISignal<OutputAreaModel, ObservableVector.IChangedArgs<OutputAreaModel.Output>>;
 
   /**
    * A signal emitted when the model is disposed.
@@ -86,7 +90,7 @@ class OutputAreaModel implements IDisposable {
    * Get an item at the specified index.
    */
   get(index: number): OutputAreaModel.Output {
-    return this.list.get(index);
+    return this.list.at(index);
   }
 
   /**
@@ -103,7 +107,7 @@ class OutputAreaModel implements IDisposable {
       this.clearNext = false;
     }
     if (output.output_type === 'input_request') {
-      this.list.add(output);
+      this.list.pushBack(output);
     }
 
     // Make a copy of the output bundle.
@@ -135,7 +139,7 @@ class OutputAreaModel implements IDisposable {
       case 'execute_result':
       case 'display_data':
       case 'error':
-        return this.list.add(value);
+        return this.list.pushBack(value);
       default:
         break;
       }
@@ -148,12 +152,12 @@ class OutputAreaModel implements IDisposable {
    *
    * @param wait Delay clearing the output until the next message is added.
    */
-  clear(wait: boolean = false): OutputAreaModel.Output[] {
+  clear(wait: boolean = false): void {
     if (wait) {
       this.clearNext = true;
-      return [];
+      return;
     }
-    return this.list.clear();
+    this.list.clear();
   }
 
   /**
@@ -171,7 +175,7 @@ class OutputAreaModel implements IDisposable {
    * Types are validated before being added.
    */
   addMimeData(output: nbformat.IDisplayData | nbformat.IExecuteResult, mimetype: string, value: string | JSONObject): void {
-    let index = this.list.indexOf(output);
+    let index = indexOf(this.list, output);
     if (index === -1) {
       throw new Error(`Cannot add data to non-tracked bundle`);
     }
@@ -255,12 +259,12 @@ class OutputAreaModel implements IDisposable {
   }
 
   protected clearNext = false;
-  protected list: IObservableList<OutputAreaModel.Output> = null;
+  protected list: IObservableVector<OutputAreaModel.Output> = null;
 
   /**
    * Handle a change to the list.
    */
-  private _onListChanged(sender: IObservableList<OutputAreaModel.Output>, args: IListChangedArgs<OutputAreaModel.Output>) {
+  private _onListChanged(sender: IObservableVector<OutputAreaModel.Output>, args: ObservableVector.IChangedArgs<OutputAreaModel.Output>) {
     this.changed.emit(args);
   }
 }

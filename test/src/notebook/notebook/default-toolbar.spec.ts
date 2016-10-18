@@ -322,17 +322,6 @@ describe('notebook/notebook/default-toolbar', () => {
         expect(item.node.textContent).to.be('No Kernel!');
       });
 
-      it('should handle a change in kernel', (done) => {
-        let item = createKernelNameItem(panel);
-        let name = context.kernelspecs.default;
-        panel.context.changeKernel({ name }).then(kernel => {
-          return kernel.getSpec().then(spec => {
-            expect(item.node.textContent).to.be(spec.display_name);
-            done();
-          });
-        }).catch(done);
-      });
-
       it('should handle a change in context', (done) => {
         let item = createKernelNameItem(panel);
         panel.kernel.getSpec().then(spec => {

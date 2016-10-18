@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  IIterable, each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -34,8 +38,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IListChangedArgs
-} from '../../common/observablelist';
+  ObservableVector
+} from '../../common/observablevector';
 
 import {
   RenderMime
@@ -361,13 +365,13 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes on the model state.
    */
-  protected onModelStateChanged(sender: OutputAreaModel, args: IListChangedArgs<nbformat.IOutput>) {
+  protected onModelStateChanged(sender: OutputAreaModel, args: ObservableVector.IChangedArgs<nbformat.IOutput>) {
     switch (args.type) {
     case 'add':
       // Children are always added at the end.
       this.addChild();
       break;
-    case 'replace':
+    case 'remove':
       // Only "clear" is supported by the model.
       // When an output area is cleared and then quickly replaced with new
       // content (as happens with @interact in widgets, for example), the
@@ -385,11 +389,9 @@ class OutputAreaWidget extends Widget {
         }
         this.node.style.minHeight = '';
       }, 50);
-
-      let oldValues = args.oldValue as nbformat.IOutput[];
-      for (let i = args.oldIndex; i < oldValues.length; i++) {
+      each(args.oldValues, value => {
         this.removeChild(args.oldIndex);
-      }
+      });
       break;
     case 'set':
       if (!this._injecting) {

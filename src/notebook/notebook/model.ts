@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   deepEqual
 } from 'phosphor/lib/algorithm/json';
 
@@ -14,8 +18,8 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  IObservableList, IListChangedArgs
-} from '../../common/observablelist';
+  IObservableVector, ObservableVector
+} from '../../common/observablevector';
 
 import {
   DocumentModel, DocumentRegistry
@@ -35,7 +39,7 @@ import {
 } from '../common/metadata';
 
 import {
-  ObservableUndoableList
+  IObservableUndoableVector, ObservableUndoableVector
 } from '../common/undo';
 
 import {
@@ -59,7 +63,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
    * #### Notes
    * This is a read-only property.
    */
-  cells: ObservableUndoableList<ICellModel>;
+  cells: IObservableUndoableVector<ICellModel>;
 
   /**
    * The cell model factory for the notebook.
@@ -149,7 +153,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   constructor(options: NotebookModel.IOptions = {}) {
     super(options.languagePreference);
     this._factory = options.factory || NotebookModel.defaultFactory;
-    this._cells = new ObservableUndoableList<ICellModel>((data: nbformat.IBaseCell) => {
+    this._cells = new ObservableUndoableVector<ICellModel>((data: nbformat.IBaseCell) => {
       switch (data.cell_type) {
         case 'code':
           return this._factory.createCodeCell(data);
@@ -160,7 +164,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       }
     });
     // Add an initial code cell by default.
-    this._cells.add(this._factory.createCodeCell());
+    this._cells.pushBack(this._factory.createCodeCell());
     this._cells.changed.connect(this._onCellsChanged, this);
     if (options.languagePreference) {
       this._metadata['language_info'] = { name: options.languagePreference };
@@ -178,7 +182,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * #### Notes
    * This is a read-only property.
    */
-  get cells(): ObservableUndoableList<ICellModel> {
+  get cells(): IObservableUndoableVector<ICellModel> {
     return this._cells;
   }
 
@@ -246,7 +250,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     cells.dispose();
     clearSignalData(this);
     for (let i = 0; i < cells.length; i++) {
-      let cell = cells.get(i);
+      let cell = cells.at(i);
       cell.dispose();
     }
     cells.clear();
@@ -282,7 +286,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   toJSON(): nbformat.INotebookContent {
     let cells: nbformat.ICell[] = [];
     for (let i = 0; i < this.cells.length; i++) {
-      let cell = this.cells.get(i);
+      let cell = this.cells.at(i);
       cells.push(cell.toJSON());
     }
     let metadata = utils.copy(this._metadata) as nbformat.INotebookMetadata;
@@ -317,7 +321,11 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         continue;
       }
     }
-    this.cells.assign(cells);
+    this.cells.beginCompoundOperation();
+    this.cells.clear();
+    this.cells.pushAll(cells);
+    this.cells.endCompoundOperation();
+
     let oldValue = 0;
     let newValue = 0;
     if (value.nbformat !== this._nbformat) {
@@ -401,32 +409,25 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Handle a change in the cells list.
    */
-  private _onCellsChanged(list: IObservableList<ICellModel>, change: IListChangedArgs<ICellModel>): void {
-    let cell: ICellModel;
+  private _onCellsChanged(list: IObservableVector<ICellModel>, change: ObservableVector.IChangedArgs<ICellModel>): void {
     switch (change.type) {
     case 'add':
-      cell = change.newValue as ICellModel;
-      cell.contentChanged.connect(this._onCellChanged, this);
+      each(change.newValues, cell => {
+        cell.contentChanged.connect(this._onCellChanged, this);
+      });
       break;
     case 'remove':
-      (change.oldValue as ICellModel).dispose();
-      break;
-    case 'replace':
-      let newValues = change.newValue as ICellModel[];
-      for (cell of newValues) {
-        cell.contentChanged.connect(this._onCellChanged, this);
-      }
-      let oldValues = change.oldValue as ICellModel[];
-      for (cell of oldValues) {
+      each(change.oldValues, cell => {
         cell.dispose();
-      }
+      });
       break;
     case 'set':
-      cell = change.newValue as ICellModel;
-      cell.contentChanged.connect(this._onCellChanged, this);
-      if (change.oldValue) {
-        (change.oldValue as ICellModel).dispose();
-      }
+      each(change.newValues, cell => {
+        cell.contentChanged.connect(this._onCellChanged, this);
+      });
+      each(change.oldValues, cell => {
+        cell.dispose();
+      });
       break;
     default:
       return;
@@ -436,8 +437,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       // Add the cell in a new context to avoid triggering another
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
-        if (!this._cells.length) {
-          this._cells.add(this._factory.createCodeCell());
+        if (!this.isDisposed && !this._cells.length) {
+          this._cells.pushBack(this._factory.createCodeCell());
         }
       });
     }
@@ -453,7 +454,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     this.contentChanged.emit(void 0);
   }
 
-  private _cells: ObservableUndoableList<ICellModel> = null;
+  private _cells: IObservableUndoableVector<ICellModel> = null;
   private _factory: ICellModelFactory = null;
   private _metadata: { [key: string]: any } = Private.createMetadata();
   private _cursors: { [key: string]: MetadataCursor } = Object.create(null);

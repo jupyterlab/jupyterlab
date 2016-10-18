@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   find
 } from 'phosphor/lib/algorithm/searching';
 
@@ -38,8 +42,8 @@ import {
 } from '../../common/interfaces';
 
 import {
-  IObservableList, IListChangedArgs
-} from '../../common/observablelist';
+  IObservableVector, ObservableVector
+} from '../../common/observablevector';
 
 import {
   InspectionHandler
@@ -323,7 +327,7 @@ class StaticNotebook extends Widget {
     this._mimetype = this._renderer.getCodeMimetype(newValue);
     let cells = newValue.cells;
     for (let i = 0; i < cells.length; i++) {
-      this._insertCell(i, cells.get(i));
+      this._insertCell(i, cells.at(i));
     }
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
@@ -333,32 +337,31 @@ class StaticNotebook extends Widget {
   /**
    * Handle a change cells event.
    */
-  private _onCellsChanged(sender: IObservableList<ICellModel>, args: IListChangedArgs<ICellModel>) {
+  private _onCellsChanged(sender: IObservableVector<ICellModel>, args: ObservableVector.IChangedArgs<ICellModel>) {
+    let index = 0;
     switch (args.type) {
     case 'add':
-      this._insertCell(args.newIndex, args.newValue as ICellModel);
+      index = args.newIndex;
+      each(args.newValues, value => {
+        this._insertCell(index++, value);
+      });
       break;
     case 'move':
       this._moveCell(args.newIndex, args.oldIndex);
       break;
     case 'remove':
-      this._removeCell(args.oldIndex);
-      break;
-    case 'replace':
-      // TODO: reuse existing cell widgets if possible.
-      let oldValues = args.oldValue as ICellModel[];
-      for (let i = 0; i < oldValues.length; i++) {
+      each(args.oldValues, value => {
         this._removeCell(args.oldIndex);
-      }
-      let newValues = args.newValue as ICellModel[];
-      for (let i = newValues.length; i > 0; i--) {
-        this._insertCell(args.newIndex, newValues[i - 1]);
-      }
+      });
       break;
     case 'set':
-      // TODO: reuse existing widget if possible.
-      this._removeCell(args.newIndex);
-      this._insertCell(args.newIndex, args.newValue as ICellModel);
+      // TODO: reuse existing widgets if possible.
+      index = args.newIndex;
+      each(args.newValues, value => {
+        this._removeCell(index);
+        this._insertCell(index, value);
+        index++;
+      });
       break;
     default:
       return;
@@ -991,7 +994,7 @@ class Notebook extends StaticNotebook {
       return;
     }
     let layout = this.layout as PanelLayout;
-    let cell = model.cells.get(i) as MarkdownCellModel;
+    let cell = model.cells.at(i) as MarkdownCellModel;
     let widget = layout.widgets.at(i) as MarkdownCellWidget;
     if (cell.type === 'markdown') {
       widget.rendered = false;
