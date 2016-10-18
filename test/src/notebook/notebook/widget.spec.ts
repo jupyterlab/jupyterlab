@@ -362,7 +362,7 @@ describe('notebook/notebook/widget', () => {
 
     });
 
-    describe('#childAt()', () => {
+    describe('#widgets', () => {
 
       it('should get the child widget at a specified index', () => {
         let widget = createWidget();
@@ -375,10 +375,6 @@ describe('notebook/notebook/widget', () => {
         let child = widget.widgets.at(1);
         expect(child).to.be(void 0);
       });
-
-    });
-
-    describe('#childCount()', () => {
 
       it('should get the number of child widgets', () => {
         let widget = createWidget();

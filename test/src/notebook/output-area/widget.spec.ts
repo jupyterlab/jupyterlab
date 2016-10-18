@@ -282,16 +282,12 @@ describe('notebook/output-area/widget', () => {
 
     });
 
-    describe('#childAt()', () => {
+    describe('#widgets', () => {
 
       it('should get the child widget at the specified index', () => {
         let widget = createWidget();
         expect(widget.widgets.at(0)).to.be.a(Widget);
       });
-
-    });
-
-    describe('#childCount()', () => {
 
       it('should get the number of child widgets', () => {
         let widget = createWidget();

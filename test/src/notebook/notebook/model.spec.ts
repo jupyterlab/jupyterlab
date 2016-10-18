@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   indexOf
 } from 'phosphor/lib/algorithm/searching';
 
@@ -458,12 +462,12 @@ describe('notebook/notebook/model', () => {
       it('should list the metadata namespace keys for the notebook', () => {
         let model = new NotebookModel();
         let keys = ['kernelspec', 'language_info', 'orig_nbformat'];
-        expect(model.listMetadata()).to.eql(keys);
+        expect(toArray(model.listMetadata())).to.eql(keys);
         let cursor = model.getMetadata('foo');
-        expect(model.listMetadata()).to.eql(keys);
+        expect(toArray(model.listMetadata())).to.eql(keys);
         cursor.setValue(1);
         keys.push('foo');
-        expect(model.listMetadata()).to.eql(keys);
+        expect(toArray(model.listMetadata())).to.eql(keys);
       });
 
     });

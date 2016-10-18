@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   IChangedArgs
 } from '../../../../lib/common/interfaces';
 
@@ -235,9 +239,9 @@ describe('notebook/cells/model', () => {
       it('should get a list of user metadata keys', () => {
         let model = new CellModel();
         let cursor = model.getMetadata('foo');
-        expect(model.listMetadata()).to.be.empty();
+        expect(toArray(model.listMetadata())).to.be.empty();
         cursor.setValue(1);
-        expect(model.listMetadata()).to.eql(['foo']);
+        expect(toArray(model.listMetadata())).to.eql(['foo']);
       });
 
     });
