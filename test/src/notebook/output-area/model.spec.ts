@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  IKernel, Kernel
+  Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -203,7 +203,7 @@ describe('notebook/output-area/model', () => {
 
     describe('#execute()', () => {
 
-      let kernel: IKernel;
+      let kernel: Kernel.IKernel;
 
       beforeEach((done) => {
         Kernel.startNew().then(k => {

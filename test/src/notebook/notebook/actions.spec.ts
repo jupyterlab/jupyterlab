@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  IKernel, Kernel
+  Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -54,7 +54,7 @@ describe('notebook/notebook/actions', () => {
   describe('NotebookActions', () => {
 
     let widget: Notebook;
-    let kernel: IKernel;
+    let kernel: Kernel.IKernel;
 
     beforeEach((done) => {
       widget = new Notebook({
