@@ -155,16 +155,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   palette.addItem({ command, category });
   menu.addItem({ command });
 
-  command = 'console:dismiss-completer';
-  commands.addCommand(command, {
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        current.content.dismissCompleter();
-      }
-    }
-  });
-
   command = 'console:run';
   commands.addCommand(command, {
     label: 'Run Cell',

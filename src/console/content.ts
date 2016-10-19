@@ -226,13 +226,6 @@ class ConsoleContent extends Widget {
   }
 
   /**
-   * Dismiss the completer widget for a console.
-   */
-  dismissCompleter(): void {
-    this._completer.reset();
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -261,7 +254,7 @@ class ConsoleContent extends Widget {
    * completeness.
    */
   execute(force=false): Promise<void> {
-    this.dismissCompleter();
+    this._completer.reset();
 
     if (this._session.status === 'dead') {
       return;
