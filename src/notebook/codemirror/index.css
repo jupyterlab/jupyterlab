@@ -34,6 +34,6 @@
 }
 
 
-.p-Widget.CodeMirror {
+.jp-CodeMirrorWidget-static {
   margin: var(--jp-code-padding);
 }
