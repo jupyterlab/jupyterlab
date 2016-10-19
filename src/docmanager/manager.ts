@@ -124,7 +124,7 @@ class DocumentManager implements IDisposable {
       // Load the contents from disk.
       context.revert();
     }
-    let widget = this._widgetManager.createWidget(factor.name, context, kernel);
+    let widget = this._widgetManager.createWidget(factory.name, context, kernel);
     this._opener.open(widget);
     return widget;
   }
