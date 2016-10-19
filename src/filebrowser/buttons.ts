@@ -38,10 +38,6 @@ import {
 } from '../docmanager';
 
 import {
-  FileBrowser
-} from './browser';
-
-import {
   createFromDialog
 } from './dialogs';
 
@@ -125,7 +121,6 @@ class FileButtons extends Widget {
     this._commands = options.commands;
     this._keymap = options.keymap;
     this._manager = options.manager;
-    this._opener = options.opener;
   }
 
   /**
@@ -138,7 +133,6 @@ class FileButtons extends Widget {
     this._keymap = null;
     this._manager = null;
     this._model = null;
-    this._opener = null;
     super.dispose();
   }
 
@@ -208,7 +202,6 @@ class FileButtons extends Widget {
    * Open a widget and attach listeners.
    */
   private _open(widget: Widget): Widget {
-    this._opener.open(widget);
     let context = this._manager.contextForWidget(widget);
     context.populated.connect(() => this.model.refresh() );
     context.kernelChanged.connect(() => this.model.refresh() );
@@ -293,7 +286,6 @@ class FileButtons extends Widget {
   private _keymap: Keymap = null;
   private _manager: DocumentManager = null;
   private _model: FileBrowserModel;
-  private _opener: FileBrowser.IWidgetOpener = null;
 }
 
 
@@ -326,11 +318,6 @@ namespace FileButtons {
      * A document manager instance.
      */
     manager: DocumentManager;
-
-    /**
-     * A widget opener function.
-     */
-    opener: FileBrowser.IWidgetOpener;
   }
 }
 

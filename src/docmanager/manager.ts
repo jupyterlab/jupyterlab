@@ -64,9 +64,6 @@ class DocumentManager implements IDisposable {
 
   /**
    * Get the kernel spec models for the manager.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get kernelspecs(): Kernel.ISpecModels {
     return this._serviceManager.kernelspecs;
@@ -74,9 +71,6 @@ class DocumentManager implements IDisposable {
 
   /**
    * Get the registry used by the manager.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get registry(): DocumentRegistry {
     return this._registry;
@@ -130,7 +124,9 @@ class DocumentManager implements IDisposable {
       // Load the contents from disk.
       context.revert();
     }
-    return this._widgetManager.createWidget(widgetName, context, kernel);
+    let widget = this._widgetManager.createWidget(widgetName, context, kernel);
+    this._opener.open(widget);
+    return widget;
   }
 
   /**
@@ -154,7 +150,9 @@ class DocumentManager implements IDisposable {
     let context = this._createContext(path, factory);
     // Immediately save the contents to disk.
     context.save();
-    return this._widgetManager.createWidget(widgetName, context, kernel);
+    let widget = this._widgetManager.createWidget(widgetName, context, kernel);
+    this._opener.open(widget);
+    return widget;
   }
 
   /**
@@ -286,7 +284,7 @@ class DocumentManager implements IDisposable {
   private _widgetManager: DocumentWidgetManager = null;
   private _registry: DocumentRegistry = null;
   private _contexts: Vector<Context<DocumentRegistry.IModel>> = new Vector<Context<DocumentRegistry.IModel>>();
-  private _opener: FileBrowser.IWidgetOpener = null;
+  private _opener: DocumentManager.IWidgetOpener = null;
 }
 
 
@@ -313,7 +311,18 @@ namespace DocumentManager {
     /**
      * A widget opener for sibling widgets.
      */
-    opener: FileBrowser.IWidgetOpener;
+    opener: IWidgetOpener;
+  }
+
+  /**
+   * An interface for a widget opener.
+   */
+  export
+  interface IWidgetOpener {
+    /**
+     * Open the given widget.
+     */
+    open(widget: Widget): void;
   }
 }
 

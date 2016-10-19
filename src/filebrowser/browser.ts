@@ -96,15 +96,14 @@ class FileBrowser extends Widget {
     let keymap = this._keymap = options.keymap;
     let manager = this._manager = options.manager;
     let model = this._model = options.model;
-    let opener = this._opener = options.opener;
     let renderer = options.renderer;
 
     model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs({ model });
     this._buttons = new FileButtons({
-      commands, keymap, manager, model, opener
+      commands, keymap, manager, model
     });
-    this._listing = new DirListing({ manager, model, opener, renderer });
+    this._listing = new DirListing({ manager, model, renderer });
 
     model.fileChanged.connect((fbModel, args) => {
       let oldPath = args.oldValue && args.oldValue.path || null;
@@ -158,7 +157,6 @@ class FileBrowser extends Widget {
     this._buttons = null;
     this._listing = null;
     this._manager = null;
-    this._opener = null;
     super.dispose();
   }
 
@@ -357,7 +355,6 @@ class FileBrowser extends Widget {
   private _listing: DirListing = null;
   private _manager: DocumentManager = null;
   private _model: FileBrowserModel = null;
-  private _opener: FileBrowser.IWidgetOpener = null;
   private _timeoutId = -1;
 }
 
@@ -393,26 +390,10 @@ namespace FileBrowser {
     manager: DocumentManager;
 
     /**
-     * A widget opener function.
-     */
-    opener: IWidgetOpener;
-
-    /**
      * An optional renderer for the directory listing area.
      *
      * The default is a shared instance of `DirListing.Renderer`.
      */
     renderer?: DirListing.IRenderer;
-  }
-
-  /**
-   * An interface for a widget opener.
-   */
-  export
-  interface IWidgetOpener {
-    /**
-     * Open the given widget.
-     */
-    open(widget: Widget): void;
   }
 }

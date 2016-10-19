@@ -6,16 +6,20 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  each, filter, map, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  find, findIndex
+  find, findIndex, indexOf
 } from 'phosphor/lib/algorithm/searching';
 
 import {
   ISequence
 } from 'phosphor/lib/algorithm/sequence';
+
+import {
+  Vector
+} from 'phosphor/lib/collections/vector';
 
 import {
   Message
@@ -48,10 +52,6 @@ import {
 import {
   DocumentManager
 } from '../docmanager';
-
-import {
-  FileBrowser
-} from './browser';
 
 import {
   renameFile
@@ -216,7 +216,6 @@ class DirListing extends Widget {
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = options.manager;
-    this._opener = options.opener;
     this._renderer = options.renderer || DirListing.defaultRenderer;
     let headerNode = utils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
@@ -232,7 +231,6 @@ class DirListing extends Widget {
     this._drag = null;
     this._dragData = null;
     this._manager = null;
-    this._opener = null;
     super.dispose();
   }
 
@@ -292,6 +290,7 @@ class DirListing extends Widget {
    * Sort the items using a sort condition.
    */
   sort(state: DirListing.ISortState): void {
+    this._sortedModels.clear();
     this._sortedModels = Private.sort(this.model.items, state);
     this._sortState = state;
     this.update();
@@ -421,10 +420,10 @@ class DirListing extends Widget {
   shutdownKernels(): Promise<void> {
     let promises: Promise<void>[] = [];
     let items = this.sortedItems;
-    let paths = items.map(item => item.path);
+    let paths = toArray(map(items, item => item.path));
     each(this._model.sessions, session => {
-      let index = paths.indexOf(session.notebook.path);
-      if (this._selection[items[index].name]) {
+      let index = indexOf(paths, session.notebook.path);
+      if (this._selection[items.at(index).name]) {
         promises.push(this._model.shutdown(session.id));
       }
     });
@@ -516,7 +515,7 @@ class DirListing extends Widget {
     let items = this.sortedItems;
     let index = utils.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index !== -1) {
-      return items[index].path;
+      return items.at(index).path;
     }
   }
 
@@ -649,8 +648,8 @@ class DirListing extends Widget {
 
     // Add extra classes to item nodes based on widget state.
     for (let i = 0, n = items.length; i < n; ++i) {
-      renderer.updateItemNode(nodes[i], items[i]);
-      if (this._selection[items[i].name]) {
+      renderer.updateItemNode(nodes[i], items.at(i));
+      if (this._selection[items.at(i).name]) {
         nodes[i].classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
           nodes[i].classList.add(CUT_CLASS);
@@ -668,10 +667,10 @@ class DirListing extends Widget {
     }
 
     // Handle notebook session statuses.
-    let paths = items.map(item => item.path);
+    let paths = toArray(map(items, item => item.path));
     let specs = this._model.kernelspecs;
     each(this._model.sessions, session => {
-      let index = paths.indexOf(session.notebook.path);
+      let index = indexOf(paths, session.notebook.path);
       let node = this._items[index];
       node.classList.add(RUNNING_CLASS);
       node.title = specs.kernelspecs[session.kernel.name].spec.display_name;
@@ -858,7 +857,7 @@ class DirListing extends Widget {
     }
 
     let model = this._model;
-    let item = this.sortedItems[i];
+    let item = this.sortedItems.at(i);
     if (item.type === 'directory') {
       model.cd(item.name).catch(error =>
         showErrorMessage(this, 'Open directory', error)
@@ -872,7 +871,6 @@ class DirListing extends Widget {
         context.populated.connect(() => model.refresh() );
         context.kernelChanged.connect(() => model.refresh() );
       }
-      this._opener.open(widget);
     }
   }
 
@@ -886,7 +884,7 @@ class DirListing extends Widget {
       if (index === -1) {
         return;
       }
-      let item = this.sortedItems[index];
+      let item = this.sortedItems.at(index);
       if (item.type !== 'directory' || this._selection[item.name]) {
         return;
       }
@@ -952,7 +950,7 @@ class DirListing extends Widget {
     // Get the path based on the target node.
     let index = this._items.indexOf(target);
     let items = this.sortedItems;
-    let path = items[index].name + '/';
+    let path = items.at(index).name + '/';
 
     // Move all of the items.
     let promises: Promise<Contents.IModel>[] = [];
@@ -979,7 +977,7 @@ class DirListing extends Widget {
 
     // If the source node is not selected, use just that node.
     if (!source.classList.contains(SELECTED_CLASS)) {
-      item = items[index];
+      item = items.at(index);
       selectedNames = [item.name];
     } else if (selectedNames.length === 1) {
       let name = selectedNames[0];
@@ -1007,7 +1005,6 @@ class DirListing extends Widget {
           context.populated.connect(() => model.refresh() );
           context.kernelChanged.connect(() => model.refresh() );
         }
-        this._opener.open(widget);
         return widget;
       });
     }
@@ -1039,7 +1036,7 @@ class DirListing extends Widget {
     // Clear any existing soft selection.
     this._softSelection = '';
 
-    let name = items[index].name;
+    let name = items.at(index).name;
     let selected = Object.keys(this._selection);
 
     // Handle toggling.
@@ -1087,7 +1084,7 @@ class DirListing extends Widget {
       if (i === index) {
         continue;
       }
-      let name = items[i].name;
+      let name = items.at(i).name;
       if (selected.indexOf(name) !== -1) {
         if (nearestIndex === -1) {
           nearestIndex = i;
@@ -1108,7 +1105,7 @@ class DirListing extends Widget {
     for (let i = 0; i < this._items.length; i++) {
       if (nearestIndex >= i && index <= i ||
           nearestIndex <= i && index >= i) {
-        this._selection[items[i].name] = true;
+        this._selection[items.at(i).name] = true;
       }
     }
   }
@@ -1118,7 +1115,7 @@ class DirListing extends Widget {
    */
   private _getSelectedItems(): Contents.IModel[] {
     let items = this.sortedItems;
-    return items.filter(item => this._selection[item.name]);
+    return toArray(filter(items, item => this._selection[item.name]));
   }
 
   /**
@@ -1157,7 +1154,7 @@ class DirListing extends Widget {
     let name = Object.keys(this._selection)[0];
     let index = findIndex(items, value => value.name === name);
     let row = this._items[index];
-    let item = items[index];
+    let item = items.at(index);
     let nameNode = this.renderer.getNameNode(row);
     let original = item.name;
     this._editNode.value = original;
@@ -1185,7 +1182,7 @@ class DirListing extends Widget {
     if (!keepExisting) {
       this._selection = Object.create(null);
     }
-    let name = items[index].name;
+    let name = items.at(index).name;
     this._selection[name] = true;
     scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
     this._isCut = false;
@@ -1231,7 +1228,6 @@ class DirListing extends Widget {
   private _prevPath = '';
   private _clipboard: string[] = [];
   private _manager: DocumentManager = null;
-  private _opener: FileBrowser.IWidgetOpener = null;
   private _softSelection = '';
   private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
@@ -1258,11 +1254,6 @@ namespace DirListing {
      * A document manager instance.
      */
     manager: DocumentManager;
-
-    /**
-     * A widget opener function.
-     */
-    opener: FileBrowser.IWidgetOpener;
 
     /**
      * A renderer for file items.
@@ -1607,11 +1598,14 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export
-  function sort(items: ISequence<Contents.IModel>, state: DirListing.ISortState) : Contents.IModel[] {
-    let copy: Contents.IModel[] = [];
-    each(items, item => {
-      copy.push(item);
-    });
+  function sort(items: ISequence<Contents.IModel>, state: DirListing.ISortState) : Vector<Contents.IModel> {
+    // Shortcut for unmodified.
+    if (state.key !== 'last_modified' && state.direction === 'ascending') {
+      return new Vector(items);
+    }
+
+    let copy = toArray(items);
+
     if (state.key === 'last_modified') {
       copy.sort((a, b) => {
         let valA = new Date(a.last_modified).getTime();
@@ -1624,6 +1618,7 @@ namespace Private {
     if (state.direction === 'descending') {
       copy.reverse();
     }
-    return copy;
+
+    return new Vector(copy);
   }
 }

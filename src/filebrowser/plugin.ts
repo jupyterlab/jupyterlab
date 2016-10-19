@@ -89,7 +89,7 @@ const tracker = new InstanceTracker<Widget>();
  */
 function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IPathTracker {
   let id = 0;
-  let opener: FileBrowser.IWidgetOpener = {
+  let opener: DocumentManager.IWidgetOpener = {
     open: widget => {
       if (!widget.id) {
         widget.id = `document-manager-${++id}`;
@@ -108,8 +108,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     commands: commands,
     keymap: keymap,
     manager: docManager,
-    model: fbModel,
-    opener: opener
+    model: fbModel
   });
 
   let category = 'File Operations';
