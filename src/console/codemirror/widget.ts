@@ -45,7 +45,7 @@ class CodeMirrorConsoleRenderer implements ConsoleContent.IRenderer {
   /**
    * Create a new prompt widget.
    */
-  createPrompt(rendermime: RenderMime): CodeCellWidget {
+  createPrompt(rendermime: RenderMime, context: ConsoleContent): CodeCellWidget {
     let widget = new CodeCellWidget({
       rendermime,
       renderer: CodeMirrorConsoleRenderer.defaultCodeCellRenderer
@@ -57,7 +57,7 @@ class CodeMirrorConsoleRenderer implements ConsoleContent.IRenderer {
   /**
    * Create a new code cell widget for an input from a foreign session.
    */
-  createForeignCell(rendermime: RenderMime): CodeCellWidget {
+  createForeignCell(rendermime: RenderMime, context: ConsoleContent): CodeCellWidget {
     let widget = new CodeCellWidget({
       rendermime,
       renderer: CodeMirrorConsoleRenderer.defaultCodeCellRenderer
