@@ -30,11 +30,8 @@ interface IConsoleHistory extends IDisposable {
 
   /**
    * The placeholder text that a history session began with.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
-  placeholder: string;
+  readonly placeholder: string;
 
   /**
    * Get the previous item in the console history.
@@ -94,9 +91,6 @@ class ConsoleHistory implements IConsoleHistory {
 
   /**
    * Get whether the console history manager is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get isDisposed(): boolean {
     return this._history === null;
@@ -125,9 +119,6 @@ class ConsoleHistory implements IConsoleHistory {
 
   /**
    * The placeholder text that a history session began with.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get placeholder(): string {
     return this._placeholder;
