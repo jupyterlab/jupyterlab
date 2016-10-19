@@ -25,6 +25,10 @@ import {
   IChangedArgs
 } from '../common/interfaces';
 
+import {
+  IPathTracker
+} from './tracker';
+
 
 /**
  * An implementation of a file browser model.
@@ -34,7 +38,7 @@ import {
  * the current directory.  Supports `'../'` syntax.
  */
 export
-class FileBrowserModel implements IDisposable {
+class FileBrowserModel implements IDisposable, IPathTracker {
   /**
    * Construct a new file browser model.
    */
@@ -48,17 +52,17 @@ class FileBrowserModel implements IDisposable {
   /**
    * A signal emitted when the path changes.
    */
-  pathChanged: ISignal<FileBrowserModel, IChangedArgs<string>>;
+  pathChanged: ISignal<this, IChangedArgs<string>>;
 
   /**
    * Get the refreshed signal.
    */
-  refreshed: ISignal<FileBrowserModel, void>;
+  refreshed: ISignal<this, void>;
 
   /**
    * Get the file path changed signal.
    */
-  fileChanged: ISignal<FileBrowserModel, IChangedArgs<Contents.IModel>>;
+  fileChanged: ISignal<this, IChangedArgs<Contents.IModel>>;
 
   /**
    * Get the current path.
@@ -68,7 +72,7 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get a read-only list of the items in the current path.
+   * Get a read-only sequence of the items in the current path.
    */
   get items(): ISequence<Contents.IModel> {
     return this._items;
@@ -157,6 +161,8 @@ class FileBrowserModel implements IDisposable {
 
   /**
    * Refresh the current directory.
+   *
+   * @returns A promise that resolves when the action is complete.
    */
   refresh(): Promise<void> {
     return this.cd('.').catch(error => {
@@ -313,6 +319,10 @@ class FileBrowserModel implements IDisposable {
 
   /**
    * Shut down a session by session id.
+   *
+   * @param id - The id of the session.
+   *
+   * @returns A promise that resolves when the action is complete.
    */
   shutdown(id: string): Promise<void> {
     return this._manager.sessions.shutdown(id);

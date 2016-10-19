@@ -38,10 +38,6 @@ import {
 } from '../docmanager';
 
 import {
-  IWidgetOpener
-} from './browser';
-
-import {
   createFromDialog
 } from './dialogs';
 
@@ -106,8 +102,6 @@ export
 class FileButtons extends Widget {
   /**
    * Construct a new file browser buttons widget.
-   *
-   * @param model - The file browser view model.
    */
   constructor(options: FileButtons.IOptions) {
     super();
@@ -127,7 +121,6 @@ class FileButtons extends Widget {
     this._commands = options.commands;
     this._keymap = options.keymap;
     this._manager = options.manager;
-    this._opener = options.opener;
   }
 
   /**
@@ -140,15 +133,11 @@ class FileButtons extends Widget {
     this._keymap = null;
     this._manager = null;
     this._model = null;
-    this._opener = null;
     super.dispose();
   }
 
   /**
    * Get the model used by the widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get model(): FileBrowserModel {
     return this._model;
@@ -163,6 +152,10 @@ class FileButtons extends Widget {
 
   /**
    * Create a file from a creator.
+   *
+   * @param creatorName - The name of the file creator.
+   *
+   * @returns A promise that resolves with the created widget.
    */
   createFrom(creatorName: string): Promise<Widget> {
     return createFromDialog(this.model, this.manager, creatorName).then(widget => {
@@ -172,6 +165,14 @@ class FileButtons extends Widget {
 
   /**
    * Open a file by path.
+   *
+   * @param path - The path of the file.
+   *
+   * @param widgetName - The name of the widget factory to use.
+   *
+   * @param kernel - The kernel model to use.
+   *
+   * @return The widget for the path.
    */
   open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
     let widget = this._manager.findWidget(path, widgetName);
@@ -183,6 +184,14 @@ class FileButtons extends Widget {
 
   /**
    * Create a new file by path.
+   *
+   * @param path - The path of the file.
+   *
+   * @param widgetName - The name of the widget factory to use.
+   *
+   * @param kernel - The kernel model to use.
+   *
+   * @return The widget for the path.
    */
   createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
     let widget = this._manager.createNew(path, widgetName, kernel);
@@ -193,7 +202,6 @@ class FileButtons extends Widget {
    * Open a widget and attach listeners.
    */
   private _open(widget: Widget): Widget {
-    this._opener.open(widget);
     let context = this._manager.contextForWidget(widget);
     context.populated.connect(() => this.model.refresh() );
     context.kernelChanged.connect(() => this.model.refresh() );
@@ -278,9 +286,7 @@ class FileButtons extends Widget {
   private _keymap: Keymap = null;
   private _manager: DocumentManager = null;
   private _model: FileBrowserModel;
-  private _opener: IWidgetOpener = null;
 }
-
 
 
 /**
@@ -312,11 +318,6 @@ namespace FileButtons {
      * A document manager instance.
      */
     manager: DocumentManager;
-
-    /**
-     * A widget opener function.
-     */
-    opener: IWidgetOpener;
   }
 }
 

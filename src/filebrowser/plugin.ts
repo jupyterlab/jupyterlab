@@ -46,7 +46,7 @@ import {
 } from '../services';
 
 import {
-  FileBrowserModel, FileBrowserWidget, IPathTracker, IWidgetOpener
+  FileBrowserModel, FileBrowser, IPathTracker
 } from './';
 
 
@@ -89,7 +89,7 @@ const tracker = new InstanceTracker<Widget>();
  */
 function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IPathTracker {
   let id = 0;
-  let opener: IWidgetOpener = {
+  let opener: DocumentManager.IWidgetOpener = {
     open: widget => {
       if (!widget.id) {
         widget.id = `document-manager-${++id}`;
@@ -104,12 +104,11 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
   let { commands, keymap } = app;
   let docManager = new DocumentManager({ registry, manager, opener });
   let fbModel = new FileBrowserModel({ manager });
-  let fbWidget = new FileBrowserWidget({
+  let fbWidget = new FileBrowser({
     commands: commands,
     keymap: keymap,
     manager: docManager,
-    model: fbModel,
-    opener: opener
+    model: fbModel
   });
 
   let category = 'File Operations';
@@ -209,7 +208,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 /**
  * Add the filebrowser commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, fbWidget: FileBrowserWidget, docManager: DocumentManager): void {
+function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: DocumentManager): void {
   let commands = app.commands;
   let fbModel = fbWidget.model;
 
@@ -318,7 +317,7 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
 /**
  * Create a context menu for the file browser listing.
  */
-function createContextMenu(fbWidget: FileBrowserWidget, openWith: Menu):  Menu {
+function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   let { commands, keymap } = fbWidget;
   let menu = new Menu({ commands, keymap });
   let prefix = `file-browser-${++Private.id}`;

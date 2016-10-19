@@ -76,15 +76,6 @@ const REFRESH_DURATION = 10000;
 
 
 /**
- * An interface for a widget opener.
- */
-export
-interface IWidgetOpener {
-  open(widget: Widget): void;
-}
-
-
-/**
  * A widget which hosts a file browser.
  *
  * The widget uses the Jupyter Contents API to retreive contents,
@@ -92,28 +83,27 @@ interface IWidgetOpener {
  * breadcrumbs.
  */
 export
-class FileBrowserWidget extends Widget {
+class FileBrowser extends Widget {
   /**
    * Construct a new file browser.
    *
    * @param model - The file browser view model.
    */
-  constructor(options: FileBrowserWidget.IOptions) {
+  constructor(options: FileBrowser.IOptions) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
     let commands = this._commands = options.commands;
     let keymap = this._keymap = options.keymap;
     let manager = this._manager = options.manager;
     let model = this._model = options.model;
-    let opener = this._opener = options.opener;
     let renderer = options.renderer;
 
     model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs({ model });
     this._buttons = new FileButtons({
-      commands, keymap, manager, model, opener
+      commands, keymap, manager, model
     });
-    this._listing = new DirListing({ manager, model, opener, renderer });
+    this._listing = new DirListing({ manager, model, renderer });
 
     model.fileChanged.connect((fbModel, args) => {
       let oldPath = args.oldValue && args.oldValue.path || null;
@@ -138,9 +128,6 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Get the command registry used by the file browser.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get commands(): CommandRegistry {
     return this._commands;
@@ -148,9 +135,6 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Get the keymap manager used by the file browser.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get keymap(): Keymap {
     return this._keymap;
@@ -158,9 +142,6 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Get the model used by the file browser.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get model(): FileBrowserModel {
     return this._model;
@@ -176,15 +157,7 @@ class FileBrowserWidget extends Widget {
     this._buttons = null;
     this._listing = null;
     this._manager = null;
-    this._opener = null;
     super.dispose();
-  }
-
-  /**
-   * Change directory.
-   */
-  cd(path: string): Promise<void> {
-    return this._model.cd(path);
   }
 
   /**
@@ -213,6 +186,12 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Open a file by path.
+   *
+   * @param path - The path to of the file to open.
+   *
+   * @param widgetName - The name of the widget factory to use.
+   *
+   * @returns The widget for the file.
    */
   openPath(path: string, widgetName='default'): Widget {
     return this._buttons.open(path, widgetName);
@@ -220,6 +199,10 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Create a file from a creator.
+   *
+   * @param creatorName - The name of the widget creator.
+   *
+   * @returns A promise that resolves with the created widget.
    */
   createFrom(creatorName: string): Promise<Widget> {
     return this._buttons.createFrom(creatorName);
@@ -227,6 +210,10 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Create a new untitled file in the current directory.
+   *
+   * @param options - The options used to create the file.
+   *
+   * @returns A promise that resolves with the created widget.
    */
   createNew(options: Contents.ICreateOptions): Promise<Widget> {
     let model = this.model;
@@ -237,6 +224,8 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Rename the first currently selected item.
+   *
+   * @returns A promise that resolves with the new name of the item.
    */
   rename(): Promise<string> {
     return this._listing.rename();
@@ -258,6 +247,8 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Paste the items from the clipboard.
+   *
+   * @returns A promise that resolves when the operation is complete.
    */
   paste(): Promise<void> {
     return this._listing.paste();
@@ -265,6 +256,8 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Delete the currently selected item(s).
+   *
+   * @returns A promise that resolves when the operation is complete.
    */
   delete(): Promise<void> {
     return this._listing.delete();
@@ -272,6 +265,8 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Duplicate the currently selected item(s).
+   *
+   * @returns A promise that resolves when the operation is complete.
    */
   duplicate(): Promise<void> {
     return this._listing.duplicate();
@@ -286,6 +281,8 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Shut down kernels on the applicable currently selected items.
+   *
+   * @returns A promise that resolves when the operation is complete.
    */
   shutdownKernels(): Promise<void> {
     return this._listing.shutdownKernels();
@@ -293,6 +290,8 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Refresh the current directory.
+   *
+   * @returns A promise that resolves when the operation is complete.
    */
   refresh(): Promise<void> {
     return this._model.refresh().catch(error => {
@@ -316,6 +315,10 @@ class FileBrowserWidget extends Widget {
 
   /**
    * Find a path given a click.
+   *
+   * @param event - The mouse event.
+   *
+   * @returns The path to the selected file.
    */
   pathForClick(event: MouseEvent): string {
     return this._listing.pathForClick(event);
@@ -352,16 +355,15 @@ class FileBrowserWidget extends Widget {
   private _listing: DirListing = null;
   private _manager: DocumentManager = null;
   private _model: FileBrowserModel = null;
-  private _opener: IWidgetOpener = null;
   private _timeoutId = -1;
 }
 
 
 /**
- * The namespace for the `FileBrowserWidget` class statics.
+ * The namespace for the `FileBrowser` class statics.
  */
 export
-namespace FileBrowserWidget {
+namespace FileBrowser {
   /**
    * An options object for initializing a file browser widget.
    */
@@ -386,11 +388,6 @@ namespace FileBrowserWidget {
      * A document manager instance.
      */
     manager: DocumentManager;
-
-    /**
-     * A widget opener function.
-     */
-    opener: IWidgetOpener;
 
     /**
      * An optional renderer for the directory listing area.

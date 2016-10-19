@@ -24,6 +24,7 @@ module.exports = {
       { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
       { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
       { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' }
-    ]
+    ],
+    noParse: [/xterm\.js/]  // Xterm ships a UMD module
   }
 }
