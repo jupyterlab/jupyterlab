@@ -86,16 +86,16 @@ function createApp(manager: IServiceManager): void {
     opener
   });
   let mFactory = new TextModelFactory();
-  let wFactory = new EditorWidgetFactory();
-  docRegistry.addModelFactory(mFactory);
-  docRegistry.addWidgetFactory(wFactory, {
-    displayName: 'Editor',
+  let wFactory = new EditorWidgetFactory({
+    name: 'Editor',
     modelName: 'text',
     fileExtensions: ['*'],
     defaultFor: ['*'],
     preferKernel: false,
     canStartKernel: true
   });
+  docRegistry.addModelFactory(mFactory);
+  docRegistry.addWidgetFactory(wFactory);
 
   let commands = new CommandRegistry();
   let keymap = new Keymap({ commands });
