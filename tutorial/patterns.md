@@ -95,7 +95,21 @@ finished evaluating, resulting in undefined state.
 
 ## Data Structures
 
-Prefer to use Phosphor [Phosphor `Vector`](http://phosphorjs.github.io/phosphor/api/classes/_collections_vector_.vector.html) over JavaScript `Array` for internal use,
-and expose Vectors as ISequences for external use.  This allows us to use
-the Phosphor algorithms which provide advanced functionality over what is
-offered by the native Arrays.
+Prefer to use Phosphor [Phosphor `Vector`](http://phosphorjs.github.io/phosphor/api/classes/_collections_vector_.vector.html) over JavaScript `Array` for internal use for its extra flexibility.
+
+For public API, we have three options: JavaScript `Array`, 
+[Phosphor `IIterator`](http://phosphorjs.github.io/phosphor/api/interfaces/_algorithm_iteration_.iiterable.html), and 
+[Phosphor `ISequence`](http://phosphorjs.github.io/phosphor/api/interfaces/_algorithm_sequence_.isequence.html).
+
+Prefer an `Array` for:
+- A return value is the result of a newly allocated array, to avoid the 
+extra allocation of an iterator.  
+- A signal payload.
+- A public attribute that is inherently static.
+
+Prefer an `IIterator` for:
+- A return value where the value is based on an internal `Vector` but the value should not need to be accessed randomly.
+- A set of return values that can be computed lazily.
+
+Prefer a `ISequence` when:
+- A return value or public attribute based on an internal `Vector` where the value may need to be accessed randomly.
