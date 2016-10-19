@@ -119,11 +119,6 @@ class LogNotebook extends Notebook {
     this.methods.push('onActivateRequest');
   }
 
-  protected onDeactivateRequest(msg: Message): void {
-    super.onDeactivateRequest(msg);
-    this.methods.push('onDeactivateRequest');
-  }
-
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
@@ -965,6 +960,18 @@ describe('notebook/notebook/widget', () => {
 
       });
 
+      context('blur', () => {
+
+        it('should set the mode to `command`', () => {
+          simulate(widget.node, 'focus');
+          widget.mode = 'edit';
+          let other = document.createElement('div');
+          simulate(widget.node, 'blur', { relatedTarget: other });
+          expect(widget.mode).to.be('command');
+        });
+
+      });
+
     });
 
     describe('#onAfterAttach()', () => {
@@ -1045,28 +1052,6 @@ describe('notebook/notebook/widget', () => {
         let widget = createActiveWidget();
         sendMessage(widget, WidgetMessage.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          widget.dispose();
-          done();
-        });
-      });
-
-    });
-
-    describe('#onDeactivateRequest()', () => {
-
-      it('should set the mode to `command`', () => {
-        let widget = createActiveWidget();
-        widget.mode = 'edit';
-        sendMessage(widget, WidgetMessage.DeactivateRequest);
-        expect(widget.methods).to.contain('onDeactivateRequest');
-        expect(widget.mode).to.be('command');
-      });
-
-      it('should post an `update-request`', (done) => {
-        let widget = createActiveWidget();
-        sendMessage(widget, WidgetMessage.DeactivateRequest);
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
           widget.dispose();
