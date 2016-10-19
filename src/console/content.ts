@@ -183,7 +183,7 @@ class ConsoleContent extends Widget {
   /**
    * A signal emitted when the console executes its prompt.
    */
-  executed: ISignal<ConsoleContent, Date>;
+  readonly executed: ISignal<this, Date>;
 
 
   /**
@@ -552,15 +552,15 @@ class ConsoleContent extends Widget {
   private _completer: CompleterWidget = null;
   private _completerHandler: CellCompleterHandler = null;
   private _content: Panel = null;
+  private _foreignCells: { [key: string]: CodeCellWidget } = Object.create(null);
+  private _history: IConsoleHistory = null;
   private _input: Panel = null;
   private _inspectionHandler: InspectionHandler = null;
   private _mimetype = 'text/x-ipython';
-  private _rendermime: IRenderMime = null;
   private _renderer: ConsoleContent.IRenderer = null;
-  private _history: IConsoleHistory = null;
+  private _rendermime: IRenderMime = null;
   private _session: ISession = null;
   private _setByHistory = false;
-  private _foreignCells: { [key: string]: CodeCellWidget; } = {};
 }
 
 
