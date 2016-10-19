@@ -111,5 +111,5 @@ Prefer an `IIterator` for:
 - A return value where the value is based on an internal `Vector` but the value should not need to be accessed randomly.
 - A set of return values that can be computed lazily.
 
-Prefer a `ISequence` when:
+Prefer an `ISequence` when:
 - A return value or public attribute based on an internal `Vector` where the value may need to be accessed randomly.
