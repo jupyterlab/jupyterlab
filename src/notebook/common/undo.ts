@@ -281,13 +281,13 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
    * Copy a change as JSON.
    */
   private _copyChange(change: ObservableVector.IChangedArgs<T>): ObservableVector.IChangedArgs<JSONObject> {
-    let oldValues = new Vector<JSONObject>();
+    let oldValues: JSONObject[] = [];
     each(change.oldValues, value => {
-      oldValues.pushBack(value.toJSON());
+      oldValues.push(value.toJSON());
     });
-    let newValues = new Vector<JSONObject>();
+    let newValues: JSONObject[] = [];
     each(change.newValues, value => {
-      newValues.pushBack(value.toJSON());
+      newValues.push(value.toJSON());
     });
     return {
       type: change.type,
