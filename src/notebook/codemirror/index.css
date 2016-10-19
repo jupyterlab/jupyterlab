@@ -33,3 +33,7 @@
   padding: 0 4px 0 4px;
 }
 
+
+.p-Widget.CodeMirror {
+  margin: var(--jp-code-padding);
+}

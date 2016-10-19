@@ -5,10 +5,15 @@ import * as CodeMirror
   from 'codemirror';
 
 import 'codemirror/mode/meta';
+import 'codemirror/addon/runmode/runmode';
 
 import {
   Message
 } from 'phosphor/lib/core/messaging';
+
+import {
+  PanelLayout
+} from 'phosphor/lib/ui/panel';
 
 import {
   ResizeMessage, Widget
@@ -39,8 +44,17 @@ class CodeMirrorWidget extends Widget {
   constructor(options: CodeMirror.EditorConfiguration = {}) {
     super();
     this.addClass(EDITOR_CLASS);
+    let layout = this.layout = new PanelLayout();
+    this.node.tabIndex = -1;
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
-    this._editor = CodeMirror(this.node, options);
+    this._rendered = new Widget();
+    this._rendered.addClass(`cm-s-${options.theme}`);
+    this._rendered.addClass('CodeMirror');
+    this._live = new Widget();
+    layout.addWidget(this._rendered);
+    layout.addWidget(this._live);
+    this._rendered.hide();
+    this._editor = CodeMirror(this._live.node, options);
   }
 
   /**
@@ -62,15 +76,48 @@ class CodeMirrorWidget extends Widget {
    }
 
   /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the notebook panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'focus':
+      this._evtFocus(event as MouseEvent);
+      break;
+    case 'blur':
+      this._evtBlur(event as MouseEvent);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('focus', this, true);
+    this.node.addEventListener('blur', this, true);
     if (!this.isVisible) {
       this._needsRefresh = true;
       return;
     }
     this._editor.refresh();
     this._needsRefresh = false;
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('focus', this, true);
+    this.node.removeEventListener('blur', this, true);
   }
 
   /**
@@ -102,6 +149,31 @@ class CodeMirrorWidget extends Widget {
     this._editor.focus();
   }
 
+  /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocus(event: MouseEvent): void {
+    this._rendered.hide();
+    this._live.show();
+    this._editor.focus();
+  }
+
+  /**
+   * Handle `blur` events for the widget.
+   */
+  private _evtBlur(event: MouseEvent): void {
+    if (this.node.contains(event.relatedTarget as HTMLElement)) {
+      return;
+    }
+    this._live.hide();
+    this._rendered.show();
+    CodeMirror.runMode(this._editor.getDoc().getValue(),
+                       this._editor.getOption('mode'),
+                       this._rendered.node);
+  }
+
   private _editor: CodeMirror.Editor = null;
+  private _live: Widget;
+  private _rendered: Widget;
   private _needsRefresh = true;
 }
