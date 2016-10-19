@@ -6,7 +6,7 @@ import {
 } from '../application';
 
 import {
-  DocumentRegistry, IDocumentRegistry
+  IDocumentRegistry
 } from '../docregistry';
 
 import {
@@ -37,7 +37,10 @@ const markdownHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.rendered-markdown',
   requires: [IDocumentRegistry, IRenderMime],
   activate: (app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime) => {
-    let factory = new MarkdownWidgetFactory(rendermime);
+    let factory = new MarkdownWidgetFactory({
+      name: 'Rendered Markdown',
+      fileExtensions: ['.md']
+    }, rendermime);
     let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
     factory.widgetCreated.connect((sender, widget) => {
       widget.title.icon = icon;

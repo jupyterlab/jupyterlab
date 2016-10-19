@@ -22,12 +22,6 @@ import {
  */
 const IMAGE_CLASS = 'jp-ImageWidget';
 
-/**
- * The list of file extensions for images.
- */
-const EXTENSIONS = ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico',
-  '.xbm', '.tiff', '.tif'];
-
 
 /**
  * A widget for images.
@@ -111,34 +105,6 @@ class ImageWidget extends Widget {
  */
 export
 class ImageWidgetFactory extends ABCWidgetFactory<ImageWidget, DocumentRegistry.IModel> {
-  /**
-   * The name of the widget to display in dialogs.
-   */
-  get name(): string {
-    return 'Image';
-  }
-
-  /**
-   * The registered name of the model type used to create the widgets.
-   */
-  get modelName(): string {
-    return 'base64';
-  }
-
-  /**
-   * The file extensions the widget can view.
-   */
-  get fileExtensions(): string[] {
-    return EXTENSIONS;
-  }
-
-  /**
-   * The file extensions for which the factory should be the default.
-   */
-  get defaultFor(): string[] {
-    return EXTENSIONS;
-  }
-
   /**
    * Create a new widget given a context.
    */

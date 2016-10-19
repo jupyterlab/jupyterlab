@@ -94,7 +94,11 @@ const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
  * Sets up the editor widget
  */
 function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IEditorTracker {
-  let widgetFactory = new EditorWidgetFactory();
+  let widgetFactory = new EditorWidgetFactory({
+    name: 'Editor',
+    fileExtensions: ['*'],
+    defaultFor: ['*']
+  });
 
   // Sync tracker with currently focused widget.
   app.shell.currentChanged.connect((sender, args) => {

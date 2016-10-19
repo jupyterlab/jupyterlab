@@ -30,5 +30,9 @@ const csvHandlerExtension: JupyterLabPlugin<void> = {
  * Activate the table widget extension.
  */
 function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry): void {
-  registry.addWidgetFactory(new CSVWidgetFactory());
+  registry.addWidgetFactory(new CSVWidgetFactory({
+    name: 'Table',
+    fileExtensions: ['.csv'],
+    defaultFor: ['.csv']
+  }));
 }

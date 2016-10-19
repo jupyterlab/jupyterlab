@@ -279,6 +279,18 @@ class Base64ModelFactory extends TextModelFactory {
 export
 abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
+   * Construct a new `ABCWidgetFactory`.
+   */
+  constructor(options: DocumentRegistry.IWidgetFactoryOptions) {
+    this._name = options.name;
+    this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
+    this._fileExtensions = options.fileExtensions.slice();
+    this._modelName = options.modelName || 'text';
+    this._preferKernel = !!options.preferKernel;
+    this._canStartKernel = !!options.canStartKernel;
+  }
+
+  /**
    * A signal emitted when a widget is created.
    */
   widgetCreated: ISignal<DocumentRegistry.IWidgetFactory<T, U>, T>;
@@ -298,43 +310,45 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
   }
 
   /**
-   * The file extensions the widget can view.
+   * The name of the widget to display in dialogs.
    */
-  get fileExtensions(): string[] {
-    return [];
+  get name(): string {
+    return this._name;
   }
 
   /**
-   * The name of the widget to display in dialogs.
+   * The file extensions the widget can view.
    */
-  abstract get name(): string;
+  get fileExtensions(): string[] {
+    return this._fileExtensions.slice();
+  }
 
   /**
    * The registered name of the model type used to create the widgets.
    */
   get modelName(): string {
-    return 'text';
+    return this._modelName;
   }
 
   /**
    * The file extensions for which the factory should be the default.
    */
   get defaultFor(): string[] {
-    return [];
+    return this._defaultFor.slice();
   }
 
   /**
    * Whether the widgets prefer having a kernel started.
    */
   get preferKernel(): boolean {
-    return false;
+    return this._preferKernel;
   }
 
   /**
    * Whether the widgets can start a kernel when opened.
    */
   get canStartKernel(): boolean {
-    return false;
+    return this._canStartKernel;
   }
 
   /**
@@ -346,6 +360,12 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
   abstract createNew(context: DocumentRegistry.IContext<U>, kernel?: Kernel.IModel): T;
 
   private _isDisposed = false;
+  private _name: string;
+  private _canStartKernel: boolean;
+  private _preferKernel: boolean;
+  private _modelName: string;
+  private _fileExtensions: string[];
+  private _defaultFor: string[];
 }
 
 

@@ -114,23 +114,9 @@ class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, DocumentReg
   /**
    * Construct a new markdown widget factory.
    */
-  constructor(rendermime: RenderMime) {
-    super();
+  constructor(options: DocumentRegistry.IWidgetFactoryOptions, rendermime: RenderMime) {
+    super(options);
     this._rendermime = rendermime;
-  }
-
-  /**
-   * The name of the widget to display in dialogs.
-   */
-  get name(): string {
-    return 'Rendered Markdown';
-  }
-
-  /**
-   * The file extensions the widget can view.
-   */
-  get fileExtensions(): string[] {
-    return ['.md'];
   }
 
   /**

@@ -22,7 +22,7 @@ import {
 } from '../mainmenu';
 
 import {
-  IDocumentRegistry, DocumentRegistry,
+  IDocumentRegistry,
   restartKernel, selectKernelForContext
 } from '../docregistry';
 
@@ -132,7 +132,17 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
  * Activate the notebook handler extension.
  */
 function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer): INotebookTracker {
-  let widgetFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
+  let widgetFactory = new NotebookWidgetFactory({
+    name: 'Notebook',
+    fileExtensions: ['.ipynb'],
+    modelName: 'notebook',
+    defaultFor: ['.ipynb'],
+    preferKernel: true,
+    canStartKernel: true,
+    rendermime,
+    clipboard,
+    renderer
+  });
 
   // Sync tracker and set the source of the code inspector.
   app.shell.currentChanged.connect((sender, args) => {

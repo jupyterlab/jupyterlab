@@ -27,6 +27,12 @@ import {
  */
 const tracker = new InstanceTracker<ImageWidget>();
 
+/**
+ * The list of file extensions for images.
+ */
+const EXTENSIONS = ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico',
+  '.xbm', '.tiff', '.tif'];
+
 
 /**
  * The image file handler extension.
@@ -47,7 +53,12 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
   let zoomInImage = 'image-widget:zoom-in';
   let zoomOutImage = 'image-widget:zoom-out';
   let resetZoomImage = 'image-widget:reset-zoom';
-  let image = new ImageWidgetFactory();
+  let image = new ImageWidgetFactory({
+    name: 'Image',
+    modelName: 'base64',
+    fileExtensions: EXTENSIONS,
+    defaultFor: EXTENSIONS
+  });
 
   // Sync tracker with currently focused widget.
   app.shell.currentChanged.connect((sender, args) => {

@@ -38,59 +38,13 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   /**
    * Construct a new notebook widget factory.
    *
-   * @param rendermime - The rendermime instance.
-   *
-   * @param clipboard - The application clipboard.
-   *
-   * @param renderer - The notebook panel renderer.
+   * @param options - The options used to construct the factory.
    */
-  constructor(rendermime: RenderMime, clipboard: IClipboard, renderer: NotebookPanel.IRenderer) {
-    super();
-    this._rendermime = rendermime;
-    this._clipboard = clipboard;
-    this._renderer = renderer;
-  }
-
-  /**
-   * The name of the widget to display in dialogs.
-   */
-  get name(): string {
-    return 'Notebook';
-  }
-
-  /**
-   * The registered name of the model type used to create the widgets.
-   */
-  get modelName(): string {
-    return 'notebook';
-  }
-
-  /**
-   * The file extensions the widget can view.
-   */
-  get fileExtensions(): string[] {
-    return ['.ipynb'];
-  }
-
-  /**
-   * The file extensions for which the factory should be the default.
-   */
-  get defaultFor(): string[] {
-    return ['.ipynb'];
-  }
-
-  /**
-   * Whether the widgets prefer having a kernel started.
-   */
-  get preferKernel(): boolean {
-    return true;
-  }
-
-  /**
-   * Whether the widgets can start a kernel when opened.
-   */
-  get canStartKernel(): boolean {
-    return true;
+  constructor(options: NotebookWidgetFactory.IOptions) {
+    super(options);
+    this._rendermime = options.rendermime;
+    this._clipboard = options.clipboard;
+    this._renderer = options.renderer;
   }
 
   /**
@@ -133,4 +87,32 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   private _rendermime: RenderMime = null;
   private _clipboard: IClipboard = null;
   private _renderer: NotebookPanel.IRenderer = null;
+}
+
+
+/**
+ * The namespace for `NotebookWidgetFactory` statics.
+ */
+export
+namespace NotebookWidgetFactory {
+  /**
+   * The options used to construct a `NotebookWidgetFactory`.
+   */
+  export
+  interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+     /*
+      * A rendermime instance.
+      */
+    rendermime: RenderMime;
+
+    /**
+     * A clipboard instance.
+     */
+    clipboard: IClipboard;
+
+    /**
+     * A notebook panel renderer.
+     */
+    renderer: NotebookPanel.IRenderer;
+  }
 }

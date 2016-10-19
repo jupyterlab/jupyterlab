@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  EmptyIterator, IIterator, each, iter
+  EmptyIterator, IIterator, each, map
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -294,11 +294,11 @@ class DocumentRegistry {
   }
 
   /**
-   * Get an iterator over the preferred widget factories.
+   * Get a list of the preferred widget factories.
    *
    * @param ext - An optional file extension to filter the results.
    *
-   * @returns A new iterator of widget factories.
+   * @returns A new array of widget factories.
    *
    * #### Notes
    * Only the widget factories whose associated model factory have
@@ -310,7 +310,7 @@ class DocumentRegistry {
    * - all other extension-specific factories
    * - all other global factories
    */
-  preferredWidgetFactories(ext: string = '*'): IIterator<DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>> {
+  preferredWidgetFactories(ext: string = '*'): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>[] {
     let factories = new Set<string>();
     ext = Private.normalizeExtension(ext);
 
@@ -351,7 +351,7 @@ class DocumentRegistry {
       }
     });
 
-    return iter(factoryList);
+    return factoryList;
   }
 
   /**
@@ -365,7 +365,7 @@ class DocumentRegistry {
    * This is equivalent to the first value in [[preferredWidgetFactories]].
    */
   defaultWidgetFactory(ext: string = '*'): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> {
-    return this.preferredWidgetFactories(ext).next();
+    return this.preferredWidgetFactories(ext)[0];
   }
 
   /**
@@ -374,11 +374,9 @@ class DocumentRegistry {
    * @returns A new iterator of widget factories.
    */
   getWidgetFactories(): IIterator<DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>> {
-    let factories: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>[] = [];
-    for (let name in this._widgetFactories) {
-      factories.push(this._widgetFactories[name]);
-    }
-    return iter(factories);
+    return map(Object.keys(this._widgetFactories), name => {
+      return this._widgetFactories[name];
+    });
   }
 
   /**
@@ -387,11 +385,9 @@ class DocumentRegistry {
    * @returns A new iterator of model factories.
    */
   getModelFactories(): IIterator<DocumentRegistry.IModelFactory<DocumentRegistry.IModel>> {
-    let factories: DocumentRegistry.IModelFactory<DocumentRegistry.IModel>[] = [];
-    for (let name in this._modelFactories) {
-      factories.push(this._modelFactories[name]);
-    }
-    return iter(factories);
+    return map(Object.keys(this._modelFactories), name => {
+      return this._modelFactories[name];
+    });
   }
 
   /**
@@ -726,15 +722,10 @@ namespace DocumentRegistry {
   }
 
   /**
-   * The interface for a widget factory.
+   * The options used to initialize a widget factory.
    */
   export
-  interface IWidgetFactory<T extends Widget, U extends IModel> extends IDisposable {
-    /**
-     * A signal emitted when a widget is created.
-     */
-    widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
-
+  interface IWidgetFactoryOptions {
     /**
      * The file extensions the widget can view.
      *
@@ -750,11 +741,6 @@ namespace DocumentRegistry {
     readonly name: string;
 
     /**
-     * The registered name of the model type used to create the widgets.
-     */
-    readonly modelName: string;
-
-    /**
      * The file extensions for which the factory should be the default.
      *
      * #### Notes
@@ -765,17 +751,33 @@ namespace DocumentRegistry {
      *
      * **See also:** [[fileExtensions]].
      */
-    readonly defaultFor: string[];
+    readonly defaultFor?: string[];
+
+    /**
+     * The registered name of the model type used to create the widgets.
+     */
+    readonly modelName?: string;
 
     /**
      * Whether the widgets prefer having a kernel started.
      */
-    readonly preferKernel: boolean;
+    readonly preferKernel?: boolean;
 
     /**
      * Whether the widgets can start a kernel when opened.
      */
-    readonly canStartKernel: boolean;
+    readonly canStartKernel?: boolean;
+  }
+
+  /**
+   * The interface for a widget factory.
+   */
+  export
+  interface IWidgetFactory<T extends Widget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+    /**
+     * A signal emitted when a widget is created.
+     */
+    widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
 
     /**
      * Create a new widget.
@@ -785,7 +787,6 @@ namespace DocumentRegistry {
      */
     createNew(context: IContext<U>, kernel?: Kernel.IModel): T;
   }
-
 
   /**
    * An interface for a widget extension.
