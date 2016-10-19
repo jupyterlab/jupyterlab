@@ -4,7 +4,7 @@
   "scripts": {
     "build": "webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules",
-    "postinstall": "node ../../scripts/dedupe.js",
+    "postinstall": "node ../../scripts/dedupe.js && npm run build",
     "update": "rimraf node_modules/jupyterlab && npm install",
     "watch": "watch \"npm run update && npm run build\" ../../src --wait 10"
   },

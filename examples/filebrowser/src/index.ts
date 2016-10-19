@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  FileBrowserWidget, FileBrowserModel
+  FileBrowser, FileBrowserModel
 } from 'jupyterlab/lib/filebrowser';
 
 import {
@@ -101,12 +101,11 @@ function createApp(manager: IServiceManager): void {
   let keymap = new Keymap({ commands });
 
   let fbModel = new FileBrowserModel({ manager });
-  let fbWidget = new FileBrowserWidget({
+  let fbWidget = new FileBrowser({
     commands,
     keymap,
     model: fbModel,
     manager: docManager,
-    opener
   });
 
   let panel = new SplitPanel();
