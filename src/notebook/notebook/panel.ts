@@ -228,13 +228,6 @@ class NotebookPanel extends Widget {
   }
 
   /**
-   * Handle `'deactivate-request'` messages.
-   */
-  protected onDeactivateRequest(msg: Message): void {
-    this.content.deactivate();
-  }
-
-  /**
    * Handle a change to the document context.
    *
    * #### Notes

@@ -745,6 +745,9 @@ class Notebook extends StaticNotebook {
     case 'focus':
       this._evtFocus(event as MouseEvent);
       break;
+    case 'blur':
+      this._evtBlur(event as MouseEvent);
+      break;
     default:
       break;
     }
@@ -758,6 +761,7 @@ class Notebook extends StaticNotebook {
     this.node.addEventListener('mousedown', this);
     this.node.addEventListener('dblclick', this);
     this.node.addEventListener('focus', this, true);
+    this.node.addEventListener('blur', this, true);
   }
 
   /**
@@ -767,6 +771,7 @@ class Notebook extends StaticNotebook {
     this.node.removeEventListener('mousedown', this);
     this.node.removeEventListener('dblclick', this);
     this.node.removeEventListener('focus', this, true);
+    this.node.removeEventListener('blur', this, true);
   }
 
   /**
@@ -774,13 +779,6 @@ class Notebook extends StaticNotebook {
    */
   protected onActivateRequest(msg: Message): void {
     this.node.focus();
-  }
-
-  /**
-   * Handle `'deactivate-request'` messages.
-   */
-  protected onDeactivateRequest(msg: Message): void {
-    this.mode = 'command';
   }
 
   /**
@@ -956,6 +954,16 @@ class Notebook extends StaticNotebook {
       }
     } else {
       // No cell has focus, ensure command mode.
+      this.mode = 'command';
+    }
+  }
+
+  /**
+   * Handle `blur` events for the widget.
+   */
+  private _evtBlur(event: MouseEvent): void {
+    let target = event.relatedTarget as HTMLElement;
+    if (!this.node.contains(target)) {
       this.mode = 'command';
     }
   }

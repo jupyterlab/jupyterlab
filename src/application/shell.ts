@@ -156,7 +156,6 @@ class ApplicationShell extends Widget {
         args.newValue.title.className += ` ${CURRENT_CLASS}`;
       }
       if (args.oldValue) {
-        args.oldValue.deactivate();
         let title = args.oldValue.title;
         title.className = title.className.replace(CURRENT_CLASS, '');
       }
