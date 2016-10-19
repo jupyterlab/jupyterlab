@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, Kernel
+  Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -55,11 +55,11 @@ interface IKernelOwner {
   /**
    * An associated kernel.
    */
-  kernel: IKernel;
+  kernel: Kernel.IKernel;
   /**
    * A signal emitted when the kernel is changed.
    */
-  kernelChanged: ISignal<IKernelOwner, IKernel>;
+  kernelChanged: ISignal<IKernelOwner, Kernel.IKernel>;
 }
 
 
@@ -118,7 +118,7 @@ function createKernelNameItem(kernelOwner: IKernelOwner): Widget {
 /**
  * Update the text of the kernel name item.
  */
-function updateKernelNameItem(widget: Widget, kernel: IKernel): void {
+function updateKernelNameItem(widget: Widget, kernel: Kernel.IKernel): void {
   widget.node.textContent = 'No Kernel!';
   if (!kernel) {
     return;
@@ -181,7 +181,7 @@ class KernelIndicator extends Widget {
   /**
    * Handle a status on a kernel.
    */
-  private _handleStatus(kernel: IKernel, status: Kernel.Status) {
+  private _handleStatus(kernel: Kernel.IKernel, status: Kernel.Status) {
     if (this.isDisposed) {
       return;
     }

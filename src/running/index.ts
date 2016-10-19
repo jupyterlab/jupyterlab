@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager, Session, TerminalSession
+  ServiceManager, Session, TerminalSession
 } from '@jupyterlab/services';
 
 import {
@@ -370,7 +370,7 @@ class RunningSessions extends Widget {
     this.update();
   }
 
-  private _manager: IServiceManager = null;
+  private _manager: ServiceManager.IManager = null;
   private _renderer: RunningSessions.IRenderer = null;
   private _runningSessions: Session.IModel[] = [];
   private _runningTerminals: TerminalSession.IModel[] = [];
@@ -396,7 +396,7 @@ namespace RunningSessions {
     /**
      * A service manager instance.
      */
-    manager: IServiceManager;
+    manager: ServiceManager.IManager;
 
     /**
      * The renderer for the running sessions widget.

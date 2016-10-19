@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, ContentsManager, Kernel, IServiceManager, Session
+  Contents, ContentsManager, Kernel, ServiceManager, Session
 } from '@jupyterlab/services';
 
 import {
@@ -380,13 +380,21 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    */
   private _handleContents(contents: Contents.IModel): void {
     // Update our internal data.
-    this._model = contents;
+    this._model = {
+      name: contents.name,
+      path: contents.path,
+      type: contents.type,
+      writable: contents.writable,
+      created: contents.created,
+      last_modified: contents.last_modified,
+      mimetype: contents.mimetype,
+      format: contents.format
+    };
     this._items.clear();
     this._paths = contents.content.map((model: Contents.IModel) => {
       return model.path;
     });
     this._items = new Vector<Contents.IModel>(contents.content);
-    this._model.content = null;
   }
 
   /**
@@ -404,7 +412,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   }
 
   private _maxUploadSizeMb = 15;
-  private _manager: IServiceManager = null;
+  private _manager: ServiceManager.IManager = null;
   private _sessions = new Vector<Session.IModel>();
   private _items = new Vector<Contents.IModel>();
   private _paths: string[] = [];
@@ -432,7 +440,7 @@ namespace FileBrowserModel {
     /**
      * A service manager instance.
      */
-    manager: IServiceManager;
+    manager: ServiceManager.IManager;
   }
 }
 

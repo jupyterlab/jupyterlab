@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelMessage
+  Kernel, KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -26,7 +26,7 @@ interface IConsoleHistory extends IDisposable {
   /**
    * The current kernel supplying navigation history.
    */
-  kernel: IKernel;
+  kernel: Kernel.IKernel;
 
   /**
    * The placeholder text that a history session began with.
@@ -99,10 +99,10 @@ class ConsoleHistory implements IConsoleHistory {
   /**
    * The current kernel supplying navigation history.
    */
-  get kernel(): IKernel {
+  get kernel(): Kernel.IKernel {
     return this._kernel;
   }
-  set kernel(newValue: IKernel) {
+  set kernel(newValue: Kernel.IKernel) {
     if (newValue === this._kernel) {
       return;
     }
@@ -228,7 +228,7 @@ class ConsoleHistory implements IConsoleHistory {
   private _cursor = 0;
   private _hasSession = false;
   private _history: Vector<string> = null;
-  private _kernel: IKernel = null;
+  private _kernel: Kernel.IKernel = null;
   private _placeholder: string = '';
 }
 
@@ -246,7 +246,7 @@ namespace ConsoleHistory {
     /**
      * The kernel instance to query for history.
      */
-    kernel?: IKernel;
+    kernel?: Kernel.IKernel;
   }
 }
 

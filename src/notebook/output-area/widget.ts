@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -960,7 +960,7 @@ namespace OutputWidget {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _kernel: IKernel = null;
+  private _kernel: Kernel.IKernel = null;
   private _input: HTMLInputElement = null;
 }
 

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelMessage
+  Kernel, KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -124,7 +124,7 @@ class NotebookPanel extends Widget {
   /**
    * A signal emitted when the kernel used by the panel changes.
    */
-  kernelChanged: ISignal<this, IKernel>;
+  kernelChanged: ISignal<this, Kernel.IKernel>;
 
   /**
    * Get the toolbar used by the widget.
@@ -143,7 +143,7 @@ class NotebookPanel extends Widget {
   /**
    * Get the current kernel used by the panel.
    */
-  get kernel(): IKernel {
+  get kernel(): Kernel.IKernel {
     return this._context ? this._context.kernel : null;
   }
 
@@ -311,7 +311,7 @@ class NotebookPanel extends Widget {
   /**
    * Handle a change in the kernel by updating the document metadata.
    */
-  private _onKernelChanged(context: DocumentRegistry.IContext<INotebookModel>, kernel: IKernel): void {
+  private _onKernelChanged(context: DocumentRegistry.IContext<INotebookModel>, kernel: Kernel.IKernel): void {
     this._completerHandler.kernel = kernel;
     this.content.inspectionHandler.kernel = kernel;
     this.kernelChanged.emit(kernel);
@@ -341,7 +341,7 @@ class NotebookPanel extends Widget {
   /**
    * Update the kernel spec.
    */
-  private _updateSpec(kernel: IKernel): void {
+  private _updateSpec(kernel: Kernel.IKernel): void {
     let specs = this.context.kernelspecs;
     let spec = specs.kernelspecs[kernel.name].spec;
     let specCursor = this.model.getMetadata('kernelspec');
