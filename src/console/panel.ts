@@ -146,6 +146,9 @@ class ConsolePanel extends Panel {
     });
   }
 
+  /**
+   * Handle `mousedown` events for the widget.
+   */
   private _evtMouseDown(event: MouseEvent): void {
     this.activate();
   }
