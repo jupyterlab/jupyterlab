@@ -3,11 +3,10 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "lib": ["dom", "es5", "es2015.promise"],
-    "types": ["mocha", "expect.js", "requirejs"],
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
-    "types": [],
+    "types": ["mocha", "expect.js", "requirejs"],
     "outDir": "../build",
     "sourceMap": true
   }
