@@ -9,11 +9,9 @@
     "watch": "watch \"npm run update && npm run build\" ../../src --wait 10"
   },
   "dependencies": {
-    "@jupyterlab/services": "^0.22.0",
     "es6-promise": "^3.1.2",
     "font-awesome": "^4.6.3",
-    "jupyterlab": "file:../../",
-    "phosphor": "^0.6.1"
+    "jupyterlab": "file:../../"
   },
   "devDependencies": {
     "file-loader": "^0.9.0",

@@ -26,7 +26,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IServiceManager, ServiceManager
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -60,7 +60,7 @@ function main(): void {
 }
 
 
-function createApp(manager: IServiceManager): void {
+function createApp(manager: ServiceManager.IManager): void {
   let widgets: Widget[] = [];
   let activeWidget: Widget;
 

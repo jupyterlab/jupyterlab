@@ -9,7 +9,7 @@
     "watch": "watch \"npm run update && npm run build\" ../../src src --wait 10"
   },
   "dependencies": {
-    "@jupyterlab/services": "^0.22.0",
+    "@jupyterlab/services": "^0.24.0",
     "jupyterlab": "file:../..",
     "phosphor": "^0.6.0",
     "xterm": "^1.1.3"

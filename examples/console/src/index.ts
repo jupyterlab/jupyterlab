@@ -22,7 +22,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ISession, Session
+  Session
 } from '@jupyterlab/services';
 
 import {
@@ -78,7 +78,7 @@ function main(): void {
 }
 
 
-function startApp(session: ISession) {
+function startApp(session: Session.ISession) {
   // Initialize the keymap manager with the bindings.
   let commands = new CommandRegistry();
   let keymap = new Keymap({ commands });
