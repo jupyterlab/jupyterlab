@@ -151,7 +151,6 @@ class ApplicationShell extends Widget {
     this.layout = rootLayout;
 
     this._dockPanel.currentChanged.connect((sender, args) => {
-      this.currentChanged.emit(args);
       if (args.newValue) {
         args.newValue.title.className += ` ${CURRENT_CLASS}`;
       }
@@ -160,6 +159,7 @@ class ApplicationShell extends Widget {
         let title = args.oldValue.title;
         title.className = title.className.replace(CURRENT_CLASS, '');
       }
+      this.currentChanged.emit(args);
     });
   }
 

@@ -181,54 +181,6 @@ class ConsoleContent extends Widget {
   }
 
   /**
-   * Display inputs/outputs initated by another session.
-   */
-  protected monitorForeignIOPub(): void {
-    this._session.kernel.iopubMessage.connect((kernel, msg) => {
-      // Check whether this message came from an external session.
-      let session = (msg.parent_header as KernelMessage.IHeader).session;
-      if (session === this.session.kernel.clientId) {
-        return;
-      }
-      let msgType = msg.header.msg_type;
-      let parentHeader = msg.parent_header as KernelMessage.IHeader;
-      let parentMsgId = parentHeader.msg_id as string;
-      let cell : CodeCellWidget;
-      switch (msgType) {
-      case 'execute_input':
-        let inputMsg = msg as KernelMessage.IExecuteInputMsg;
-        cell = this.newForeignCell(parentMsgId);
-        cell.model.executionCount = inputMsg.content.execution_count;
-        cell.model.source = inputMsg.content.code;
-        cell.trusted = true;
-        this.update();
-        break;
-      case 'execute_result':
-      case 'display_data':
-      case 'stream':
-      case 'error':
-        if (!(parentMsgId in this._foreignCells)) {
-          // This is an output from an input that was broadcast before our
-          // session started listening. We will ignore it.
-          console.warn('Ignoring output with no associated input cell.');
-          break;
-        }
-        cell = this._foreignCells[parentMsgId];
-        let output = msg.content as nbformat.IOutput;
-        output.output_type = msgType as nbformat.OutputType;
-        cell.model.outputs.add(output);
-        this.update();
-        break;
-      case 'clear_output':
-        cell.model.outputs.clear((msg as KernelMessage.IClearOutputMsg).content.wait);
-        break;
-      default:
-        break;
-      }
-    });
-  }
-
-  /**
    * A signal emitted when the console executes its prompt.
    */
   executed: ISignal<ConsoleContent, Date>;
@@ -371,6 +323,18 @@ class ConsoleContent extends Widget {
   }
 
   /**
+   * Initialize the banner and mimetype.
+   */
+  protected initialize(): void {
+    let session = this._session;
+    if (session.kernel.info) {
+      this._handleInfo(this._session.kernel.info);
+      return;
+    }
+    session.kernel.kernelInfo().then(msg => this._handleInfo(msg.content));
+  }
+
+  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
@@ -428,15 +392,52 @@ class ConsoleContent extends Widget {
   }
 
   /**
-   * Initialize the banner and mimetype.
+   * Display inputs/outputs initated by another session.
    */
-  protected initialize(): void {
-    let session = this._session;
-    if (session.kernel.info) {
-      this._handleInfo(this._session.kernel.info);
-      return;
-    }
-    session.kernel.kernelInfo().then(msg => this._handleInfo(msg.content));
+  protected monitorForeignIOPub(): void {
+    this._session.kernel.iopubMessage.connect((kernel, msg) => {
+      // Check whether this message came from an external session.
+      let session = (msg.parent_header as KernelMessage.IHeader).session;
+      if (session === this.session.kernel.clientId) {
+        return;
+      }
+      let msgType = msg.header.msg_type;
+      let parentHeader = msg.parent_header as KernelMessage.IHeader;
+      let parentMsgId = parentHeader.msg_id as string;
+      let cell : CodeCellWidget;
+      switch (msgType) {
+      case 'execute_input':
+        let inputMsg = msg as KernelMessage.IExecuteInputMsg;
+        cell = this.newForeignCell(parentMsgId);
+        cell.model.executionCount = inputMsg.content.execution_count;
+        cell.model.source = inputMsg.content.code;
+        cell.trusted = true;
+        this.update();
+        break;
+      case 'execute_result':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+        if (!(parentMsgId in this._foreignCells)) {
+          // This is an output from an input that was broadcast before our
+          // session started listening. We will ignore it.
+          console.warn('Ignoring output with no associated input cell.');
+          break;
+        }
+        cell = this._foreignCells[parentMsgId];
+        let output = msg.content as nbformat.IOutput;
+        output.output_type = msgType as nbformat.OutputType;
+        cell.model.outputs.add(output);
+        this.update();
+        break;
+      case 'clear_output':
+        let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+        cell.model.outputs.clear(wait);
+        break;
+      default:
+        break;
+      }
+    });
   }
 
   /**
