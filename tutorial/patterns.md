@@ -95,8 +95,8 @@ finished evaluating, resulting in undefined state.
 
 ## Data Structures
 
-Prefer to use Phosphor [Phosphor `Vector`](http://phosphorjs.github.io/phosphor/api/classes/_collections_vector_.vector.html) over JavaScript `Array` for 
-internal use for its extra flexibility.
+Prefer to use Phosphor [Phosphor `Vector`](http://phosphorjs.github.io/phosphor/api/classes/_collections_vector_.vector.html) over JavaScript `Array` 
+for internal use for its extra flexibility.
 
 For public API, we have three options: JavaScript `Array`, 
 [Phosphor `IIterator`](http://phosphorjs.github.io/phosphor/api/interfaces/_algorithm_iteration_.iiterable.html), and 
