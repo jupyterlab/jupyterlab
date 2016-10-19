@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  Kernel
+  Kernel, utils
 } from '@jupyterlab/services';
 
 import {
@@ -26,65 +26,8 @@ import {
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
-  get name(): string {
-    return 'test';
-  }
-
-  get fileExtensions(): string[] {
-    return ['.txt'];
-  }
-
   createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): Widget {
     return new Widget();
-  }
-}
-
-
-class MarkdownWidgetFactory extends WidgetFactory {
-
-  get name(): string {
-    return 'markdown';
-  }
-
-  get fileExtensions(): string[] {
-    return ['.md'];
-  }
-}
-
-
-
-class PythonWidgetFactory extends WidgetFactory {
-
-  get name(): string {
-    return 'python';
-  }
-
-  get fileExtensions(): string[] {
-    return ['.py'];
-  }
-
-  get preferKernel(): boolean {
-    return true;
-  }
-
-  get canStartKernel(): boolean {
-    return true;
-  }
-}
-
-
-class GlobalWidgetFactory extends WidgetFactory {
-
-  get name(): string {
-    return 'global';
-  }
-
-  get fileExtensions(): string[] {
-    return ['*'];
-  }
-
-  get defaultFor(): string[] {
-    return ['*'];
   }
 }
 
@@ -94,6 +37,15 @@ class WidgetExtension implements DocumentRegistry.IWidgetExtension<Widget, Docum
    createNew(widget: Widget, context: DocumentRegistry.IContext<DocumentRegistry.IModel>): IDisposable {
      return new DisposableDelegate(null);
    }
+}
+
+
+function createFactory() {
+  return new WidgetFactory({
+    name: utils.uuid(),
+    fileExtensions: ['.txt'],
+    defaultFor: ['.txt']
+  });
 }
 
 
@@ -140,38 +92,50 @@ describe('docregistry/registry', () => {
     describe('#addWidgetFactory()', () => {
 
       it('should add the widget factory to the registry', () => {
-        let factory = new WidgetFactory();
+        let factory = createFactory();
         registry.addWidgetFactory(factory);
-        expect(registry.getWidgetFactory('test')).to.be(factory);
-        expect(registry.getWidgetFactory('TEST')).to.be(factory);
+        expect(registry.getWidgetFactory(factory.name)).to.be(factory);
+        expect(registry.getWidgetFactory(factory.name.toUpperCase())).to.be(factory);
       });
 
       it('should become the global default if `*` is given as a defaultFor', () => {
         registry.addModelFactory(new TextModelFactory());
-        let factory = new GlobalWidgetFactory();
+        let factory = new WidgetFactory({
+          name: 'global',
+          fileExtensions: ['*'],
+          defaultFor: ['*']
+        });
         registry.addWidgetFactory(factory);
-        expect(registry.defaultWidgetFactory('*')).to.be('foo');
+        expect(registry.defaultWidgetFactory('*').name).to.be('global');
       });
 
       it('should override an existing global default', () => {
         registry.addModelFactory(new TextModelFactory());
-        registry.addWidgetFactory(new GlobalWidgetFactory());
-        let factory = new GlobalWidgetFactory();
+        registry.addWidgetFactory(new WidgetFactory({
+          name: 'global',
+          fileExtensions: ['*'],
+          defaultFor: ['*']
+        }));
+        let factory = new WidgetFactory({
+          name: 'bar',
+          fileExtensions: ['*'],
+          defaultFor: ['*']
+        });
         registry.addWidgetFactory(factory);
-        expect(registry.defaultWidgetFactory('*')).to.be('bar');
+        expect(registry.defaultWidgetFactory('*').name).to.be('bar');
       });
 
       it('should override an existing extension default', () => {
         registry.addModelFactory(new TextModelFactory());
-        registry.addWidgetFactory(new WidgetFactory());
-        let factory = new WidgetFactory();
+        registry.addWidgetFactory(createFactory());
+        let factory = createFactory();
         registry.addWidgetFactory(factory);
         expect(registry.defaultWidgetFactory('.txt')).to.be(factory);
       });
 
       it('should be removed from the registry when disposed', () => {
         registry.addModelFactory(new TextModelFactory());
-        let factory = new WidgetFactory();
+        let factory = createFactory();
         let disposable = registry.addWidgetFactory(factory);
         disposable.dispose();
         expect(registry.getWidgetFactory('test')).to.be(void 0);
@@ -303,36 +267,50 @@ describe('docregistry/registry', () => {
       it('should give the valid registered widget factories', () => {
         expect(toArray(registry.preferredWidgetFactories())).to.eql([]);
         registry.addModelFactory(new TextModelFactory());
-        let factory = new WidgetFactory();
+        let factory = createFactory();
         registry.addWidgetFactory(factory);
-        let gFactory = new GlobalWidgetFactory();
+        let gFactory = new WidgetFactory({
+          name: 'global',
+          fileExtensions: ['*'],
+          defaultFor: ['*']
+        });
         registry.addWidgetFactory(gFactory);
         let factories = registry.preferredWidgetFactories('.txt');
         expect(toArray(factories)).to.eql([factory, gFactory]);
       });
 
       it('should not list a factory whose model is not registered', () => {
-        registry.addWidgetFactory(new WidgetFactory());
-        expect(registry.preferredWidgetFactories().next()).to.eql(void 0);
+        registry.addWidgetFactory(createFactory());
+        expect(registry.preferredWidgetFactories()[0]).to.eql(void 0);
       });
 
       it('should select the factory for a given extension', () => {
         registry.addModelFactory(new TextModelFactory());
-        let factory = new WidgetFactory();
+        let factory = createFactory();
         registry.addWidgetFactory(factory);
-        let mdFactory = new MarkdownWidgetFactory();
+        let mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileExtensions: ['.md'],
+        });
         registry.addWidgetFactory(mdFactory);
-        expect(registry.preferredWidgetFactories('.txt').next()).to.be(factory);
-        expect(registry.preferredWidgetFactories('.md').next()).to.be(mdFactory);
+        expect(registry.preferredWidgetFactories('.txt')[0]).to.be(factory);
+        expect(registry.preferredWidgetFactories('.md')[0]).to.be(mdFactory);
       });
 
       it('should respect the priority order', () => {
         registry.addModelFactory(new TextModelFactory());
-        let factory = new WidgetFactory();
+        let factory = createFactory();
         registry.addWidgetFactory(factory);
-        let gFactory = new GlobalWidgetFactory();
+        let gFactory = new WidgetFactory({
+          name: 'global',
+          fileExtensions: ['*'],
+          defaultFor: ['*']
+        });
         registry.addWidgetFactory(gFactory);
-        let mdFactory = new MarkdownWidgetFactory();
+        let mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileExtensions: ['.md'],
+        });
         registry.addWidgetFactory(mdFactory);
         let factories = registry.preferredWidgetFactories('.txt');
         expect(toArray(factories)).to.eql([factory, gFactory]);
@@ -344,11 +322,19 @@ describe('docregistry/registry', () => {
 
       it('should get the default widget factory for a given extension', () => {
         registry.addModelFactory(new TextModelFactory());
-        let factory = new WidgetFactory();
+        let factory = createFactory();
         registry.addWidgetFactory(factory);
-        let gFactory = new GlobalWidgetFactory();
+        let gFactory = new WidgetFactory({
+          name: 'global',
+          fileExtensions: ['*'],
+          defaultFor: ['*']
+        });
         registry.addWidgetFactory(gFactory);
-        let mdFactory = new MarkdownWidgetFactory();
+        let mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileExtensions: ['.md'],
+          defaultFor: ['.md']
+        });
         registry.addWidgetFactory(mdFactory);
         expect(registry.defaultWidgetFactory('.txt')).to.be(factory);
         expect(registry.defaultWidgetFactory('.md')).to.be(mdFactory);
@@ -430,9 +416,18 @@ describe('docregistry/registry', () => {
 
       it('should get a kernel preference', () => {
         registry.addModelFactory(new TextModelFactory());
-        registry.addWidgetFactory(new WidgetFactory());
-        registry.addWidgetFactory(new PythonWidgetFactory());
-
+        registry.addWidgetFactory(createFactory());
+        registry.addWidgetFactory(new WidgetFactory({
+          name: 'python',
+          fileExtensions: ['.py'],
+          preferKernel: true,
+          canStartKernel: true
+        }));
+        registry.addWidgetFactory(new WidgetFactory({
+          name: 'global',
+          fileExtensions: ['*'],
+          defaultFor: ['*']
+        }));
         let pref = registry.getKernelPreference('.c', 'global');
         expect(pref.language).to.be('clike');
         expect(pref.preferKernel).to.be(false);
@@ -463,12 +458,14 @@ describe('docregistry/registry', () => {
 
       it('should get a widget factory by name', () => {
         registry.addModelFactory(new TextModelFactory());
-        let factory = new WidgetFactory();
+        let factory = createFactory();
         registry.addWidgetFactory(factory);
-        let mdFactory = new MarkdownWidgetFactory();
+        let mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileExtensions: ['.md'],
+        });
         registry.addWidgetFactory(mdFactory);
-        expect(registry.getWidgetFactory('test')).to.be(factory);
-        expect(registry.getWidgetFactory('Test')).to.be(factory);
+        expect(registry.getWidgetFactory(factory.name)).to.be(factory);
         expect(registry.getWidgetFactory('markdown')).to.be(mdFactory);
         expect(registry.getWidgetFactory('baz')).to.be(void 0);
       });
@@ -483,12 +480,14 @@ describe('docregistry/registry', () => {
         registry.addWidgetExtension('fizz', foo);
         registry.addWidgetExtension('fizz', bar);
         registry.addWidgetExtension('buzz', foo);
-        expect(registry.getWidgetExtensions('fizz').next()).to.be(foo);
-        expect(registry.getWidgetExtensions('fizz').next()).to.be(bar);
-        expect(toArray(registry.getWidgetExtensions('fizz')).length).to.be(2);
-        expect(registry.getWidgetExtensions('buzz').next()).to.be(foo);
-        expect(toArray(registry.getWidgetExtensions('buzz')).length).to.be(1);
-        expect(toArray(registry.getWidgetExtensions('baz')).length).to.be(0);
+        let fizz = toArray(registry.getWidgetExtensions('fizz'));
+        expect(fizz[0]).to.be(foo);
+        expect(fizz[1]).to.be(bar);
+        expect(fizz.length).to.be(2);
+        let buzz = toArray(registry.getWidgetExtensions('buzz'));
+        expect(buzz[0]).to.be(foo);
+        expect(toArray(buzz).length).to.be(1);
+        expect(registry.getWidgetExtensions('baz').next()).to.be(void 0);
       });
 
     });

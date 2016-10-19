@@ -64,7 +64,11 @@ describe('markdownwidget/widget', () => {
     describe('#createNew()', () => {
 
       it('should require a context parameter', () => {
-        let widgetFactory = new MarkdownWidgetFactory(RENDERMIME);
+        let widgetFactory = new MarkdownWidgetFactory({
+          name: 'markdown',
+          fileExtensions: ['.md'],
+          rendermime: RENDERMIME
+        });
         expect(widgetFactory.createNew(context)).to.be.a(MarkdownWidget);
       });
 
