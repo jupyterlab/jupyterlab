@@ -728,7 +728,7 @@ class Notebook extends StaticNotebook {
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
+   * called in response to events on the notebook panel's node. It should
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
