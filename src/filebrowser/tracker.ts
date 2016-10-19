@@ -35,9 +35,6 @@ interface IPathTracker {
 
   /**
    * The current path of the filebrowser.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
-  path: string;
+  readonly path: string;
 }
