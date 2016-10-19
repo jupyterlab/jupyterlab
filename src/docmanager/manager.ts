@@ -124,7 +124,7 @@ class DocumentManager implements IDisposable {
       // Load the contents from disk.
       context.revert();
     }
-    let widget = this._widgetManager.createWidget(factory.name, context, kernel);
+    let widget = this._widgetManager.createWidget(widgetFactory.name, context, kernel);
     this._opener.open(widget);
     return widget;
   }
@@ -150,7 +150,7 @@ class DocumentManager implements IDisposable {
     let context = this._createContext(path, factory);
     // Immediately save the contents to disk.
     context.save();
-    let widget = this._widgetManager.createWidget(factory.name, context, kernel);
+    let widget = this._widgetManager.createWidget(widgetFactory.name, context, kernel);
     this._opener.open(widget);
     return widget;
   }
