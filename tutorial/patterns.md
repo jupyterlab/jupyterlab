@@ -106,7 +106,8 @@ Prefer an `Array` for:
 - A return value is the result of a newly allocated array, to avoid the 
 extra allocation of an iterator.  
 - A signal payload.
-- A public attribute that is inherently static.
+- A public attribute that is inherently static, but use `.slice()` to
+make sure the internal value cannot be mutated by the consumer.
 
 Prefer an `IIterator` for:
 - A return value where the value is based on an internal `Vector` but the 
