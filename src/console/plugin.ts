@@ -87,7 +87,7 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
 /**
  * The class name for the console icon from the default theme.
  */
-const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
+const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
 
 /**
  * The console panel instance tracker.
