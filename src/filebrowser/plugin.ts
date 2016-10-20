@@ -131,7 +131,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     tracker.sync(args.newValue);
   });
 
-  each(registry.getCreators(), creator => {
+  each(registry.creators(), creator => {
     addCreator(creator.name);
   });
 

@@ -500,13 +500,12 @@ class CreateNewHandler extends Widget {
    * Populate the file types.
    */
   protected populateFileTypes(): void {
-    let fileTypes = this._manager.registry.getFileTypes();
     let dropdown = this.fileTypeDropdown;
     let option = document.createElement('option');
     option.text = 'File';
     option.value = this._sentinal;
 
-    each(fileTypes, ft => {
+    each(this._manager.registry.fileTypes(), ft => {
       option = document.createElement('option');
       option.text = `${ft.name} (${ft.extension})`;
       option.value = ft.extension;

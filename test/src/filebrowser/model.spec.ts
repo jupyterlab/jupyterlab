@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   FileBrowserModel
 } from '../../../lib/filebrowser';
 
@@ -123,11 +127,11 @@ describe('filebrowser/model', () => {
 
     });
 
-    describe('#items', () => {
+    describe('#items()', () => {
 
-      it('should get a read-only sequence of items in the current path', () => {
-        let items = model.items;
-        expect(items.length).to.be.above(0);
+      it('should get an iterator of items in the current path', () => {
+        let items = model.items();
+        expect(items.next()).to.be.ok();
       });
 
     });
@@ -142,7 +146,7 @@ describe('filebrowser/model', () => {
 
     });
 
-    describe('#sessions', () => {
+    describe('#sessions()', () => {
 
       it('should be the session models for the active notebooks', (done) => {
         let session: ISession;
@@ -152,7 +156,7 @@ describe('filebrowser/model', () => {
           session = s;
           return model.refresh();
         }).then(() => {
-          expect(model.sessions.length).to.be.above(0);
+          expect(model.sessions().next).to.be.ok();
           return session.shutdown();
         }).then(() => {
           done();
@@ -214,12 +218,12 @@ describe('filebrowser/model', () => {
     describe('#refresh()', () => {
 
       it('should refresh the current directory', (done) => {
-        let len = model.items.length;
+        let len = toArray(model.items()).length;
         model.newUntitled({ type: 'file' }).then(contents => {
-          expect(model.items.length).to.be(len);
+          expect(toArray(model.items()).length).to.be(len);
           return model.refresh();
         }).then(() => {
-          expect(model.items.length).to.be(len + 1);
+          expect(toArray(model.items()).length).to.be(len + 1);
           done();
         }).catch(done);
       });
@@ -251,11 +255,11 @@ describe('filebrowser/model', () => {
     describe('#deleteFile()', () => {
 
       it('should delete a file ', (done) => {
-        let len = model.items.length;
+        let len = toArray(model.items()).length;
         model.deleteFile(name).then(() => {
           return model.refresh();
         }).then(() => {
-          expect(model.items.length).to.be(len - 1);
+          expect(toArray(model.items()).length).to.be(len - 1);
           done();
         }).catch(done);
       });
