@@ -244,7 +244,7 @@ class CreateFromHandler extends Widget {
     this.inputNode.addEventListener('input', () => {
       let value = this.inputNode.value;
       if (value !== this._orig) {
-        each(this._model.items, item => {
+        each(this._model.getItems(), item => {
           if (item.name === value) {
             this.addClass(FILE_CONFLICT_CLASS);
             return;
@@ -477,7 +477,7 @@ class CreateNewHandler extends Widget {
    */
   protected inputNodeChanged(): void {
     let path = this.inputNode.value;
-    each(this._model.items, item => {
+    each(this._model.getItems(), item => {
       if (item.path === path) {
         this.addClass(FILE_CONFLICT_CLASS);
         return;

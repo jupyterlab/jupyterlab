@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each, filter, map, toArray
+  IIterator, each, filter, map, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -290,7 +290,7 @@ class DirListing extends Widget {
    * Sort the items using a sort condition.
    */
   sort(state: DirListing.ISortState): void {
-    this._sortedModels = Private.sort(this.model.items, state);
+    this._sortedModels = Private.sort(this.model.getItems(), state);
     this._sortState = state;
     this.update();
   }
@@ -360,7 +360,7 @@ class DirListing extends Widget {
    */
   delete(): Promise<void> {
     let names: string[] = [];
-    each(this._model.items, item => {
+    each(this._sortedModels, item => {
       if (this._selection[item.name]) {
         names.push(item.name);
       }
@@ -421,7 +421,7 @@ class DirListing extends Widget {
     let promises: Promise<void>[] = [];
     let items = this.sortedItems;
     let paths = toArray(map(items, item => item.path));
-    each(this._model.sessions, session => {
+    each(this._model.getSessions(), session => {
       let index = indexOf(paths, session.notebook.path);
       if (this._selection[items.at(index).name]) {
         promises.push(this._model.shutdown(session.id));
@@ -671,7 +671,7 @@ class DirListing extends Widget {
     // Handle notebook session statuses.
     let paths = toArray(map(items, item => item.path));
     let specs = this._model.kernelspecs;
-    each(this._model.sessions, session => {
+    each(this._model.getSessions(), session => {
       let index = indexOf(paths, session.notebook.path);
       let node = nodes.at(index);
       node.classList.add(RUNNING_CLASS);
@@ -1197,7 +1197,7 @@ class DirListing extends Widget {
     // Update the selection.
     let existing = Object.keys(this._selection);
     this._selection = Object.create(null);
-    each(this._model.items, item => {
+    each(this._model.getItems(), item => {
       let name = item.name;
       if (existing.indexOf(name) !== -1) {
         this._selection[name] = true;
@@ -1600,10 +1600,10 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export
-  function sort(items: ISequence<Contents.IModel>, state: DirListing.ISortState) : ISequence<Contents.IModel> {
+  function sort(items: IIterator<Contents.IModel>, state: DirListing.ISortState) : ISequence<Contents.IModel> {
     // Shortcut for unmodified.
     if (state.key !== 'last_modified' && state.direction === 'ascending') {
-      return items;
+      return new Vector(items);
     }
 
     let copy = toArray(items);
