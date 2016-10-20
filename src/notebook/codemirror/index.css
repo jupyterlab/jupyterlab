@@ -39,6 +39,6 @@
 }
 
 
-.jp-CodeMirrorWidget {
+.jp-CodeMirrorWidget, .jp-CodeMirrorWidget-static {
   cursor: text;
 }

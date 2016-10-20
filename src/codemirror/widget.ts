@@ -164,22 +164,20 @@ class CodeMirrorWidget extends Widget {
    * Handle an activation message or a focus event.
    */
   private _activate(): void {
-    if (this.editor.getOption('readOnly') !== false) {
+    let editor = this.editor;
+    if (editor.getOption('readOnly') !== false) {
       this._lastMouseDown = null;
       return;
     }
     this._static.hide();
     this._live.show();
     if (this._lastMouseDown) {
-      let node = this._live.node;
-      let evt = document.createEvent();
-      let evt = generate('mousedown', this._lastMouseDown);
-      evt.target = node;
-      simulate(node, 'mousedown', this._lastMouseDown);
-      this._lastMouseDown = null;
-    } else {
-      this.editor.focus();
+      let x = this._lastMouseDown.clientX;
+      let y = this._lastMouseDown.clientY;
+      let pos = editor.coordsChar({ left: x, top: y });
+      editor.getDoc().setCursor(pos);
     }
+    editor.focus();
   }
 
   private _live: LiveCodeMirror;
@@ -264,6 +262,13 @@ class StaticCodeMirror extends Widget {
   dispose(): void {
     this._editor = null;
     super.dispose();
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this._render();
   }
 
   /**
