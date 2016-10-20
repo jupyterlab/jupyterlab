@@ -100,17 +100,20 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   }
 
   /**
-   * Get an iterator over the items in the current path.
+   * Create an iterator over the model's items.
+   *
+   * @returns A new iterator over the model's items.
    */
-  getItems(): IIterator<Contents.IModel> {
+  items(): IIterator<Contents.IModel> {
     return this._items.iter();
   }
 
   /**
-   * Get an iterator over the session models for active notebooks
-   *   in the current directory.
+   * Create an iterator over the active sessions in the directory.
+   *
+   * @returns A new iterator over the model's active sessions.
    */
-  getSessions(): IIterator<Session.IModel> {
+  sessions(): IIterator<Session.IModel> {
     return this._sessions.iter();
   }
 
