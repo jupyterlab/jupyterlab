@@ -53,6 +53,9 @@
   background-image: url(images/landingfolder.svg);
 }
 
+.jp-LauncherWidget-folder {
+  background-image: url(images/landingfolder.svg);
+}
 
 .jp-MainAreaLandscapeIcon {
   background-repeat: no-repeat;
