@@ -36,20 +36,35 @@ class SaveHandler implements IDisposable {
   constructor(options: SaveHandler.IOptions) {
     this._manager = options.manager;
     this._context = options.context;
-    this._minInterval = options.saveInterval || 120;
+    this._minInterval = options.saveInterval * 1000 || 120000;
     this._interval = this._minInterval;
     // Restart the timer when the contents model is updated.
-    this._context.fileChanged.connect(() => {
-      this._setTimer();
-    });
+    this._context.fileChanged.connect(this._setTimer, this);
     this._context.disposed.connect(this.dispose, this);
   }
 
   /**
+   * The save interval used by the timer (in seconds).
+   */
+  get saveInterval(): number {
+    return this._interval / 1000;
+  }
+  set saveInterval(value: number) {
+    this._minInterval = this._interval = value * 1000;
+    if (this._isActive) {
+      this._setTimer();
+    }
+  }
+
+  /**
+   * Get whether the handler is active.
+   */
+  get isActive(): boolean {
+    return this._isActive;
+  }
+
+  /**
    * Get whether the save handler is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get isDisposed(): boolean {
     return this._context === null;
@@ -71,7 +86,7 @@ class SaveHandler implements IDisposable {
    * Start the autosaver.
    */
   start(): void {
-    this._stopped = false;
+    this._isActive = true;
     this._setTimer();
   }
 
@@ -79,7 +94,7 @@ class SaveHandler implements IDisposable {
    * Stop the autosaver.
    */
   stop(): void {
-    this._stopped = true;
+    this._isActive = false;
     clearTimeout(this._autosaveTimer);
   }
 
@@ -88,12 +103,12 @@ class SaveHandler implements IDisposable {
    */
   private _setTimer(): void {
     clearTimeout(this._autosaveTimer);
-    if (this._stopped) {
+    if (!this._isActive) {
       return;
     }
     this._autosaveTimer = setTimeout(() => {
       this._save();
-    }, this._interval * 1000);
+    }, this._interval);
   }
 
   /**
@@ -105,6 +120,10 @@ class SaveHandler implements IDisposable {
     // Trigger the next update.
     this._setTimer();
 
+    if (!context) {
+      return;
+    }
+
     // Bail if the model is not dirty or it is read only, or the dialog
     // is already showing.
     if (!context.model.dirty || context.model.readOnly || this._inDialog) {
@@ -112,13 +131,17 @@ class SaveHandler implements IDisposable {
     }
 
     // Make sure the file has not changed on disk.
-    this._manager.contents.get(context.path).then(model => {
-      if (model.last_modified !== context.contentsModel.last_modified) {
+    let promise = this._manager.contents.get(context.path);
+    promise.then(model => {
+      if (context.contentsModel &&
+          model.last_modified !== context.contentsModel.last_modified) {
         return this._timeConflict(model.last_modified);
       }
       return this._finishSave();
+    }, (err) => {
+      return this._finishSave();
     }).catch(err => {
-      console.error('Error in Auto-Save', err);
+      console.error('Error in Auto-Save', err.message);
     });
   }
 
@@ -168,7 +191,7 @@ class SaveHandler implements IDisposable {
   private _interval = -1;
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
   private _manager: ServiceManager.IManager = null;
-  private _stopped = false;
+  private _isActive = false;
   private _inDialog = false;
 }
 
