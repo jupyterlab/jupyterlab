@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ITerminalSession, TerminalSession
+  TerminalSession
 } from '@jupyterlab/services';
 
 import {
@@ -73,10 +73,10 @@ class TerminalWidget extends Widget {
   /**
    * The terminal session associated with the widget.
    */
-  get session(): ITerminalSession {
+  get session(): TerminalSession.ISession {
     return this._session;
   }
-  set session(value: ITerminalSession) {
+  set session(value: TerminalSession.ISession) {
     if (this._session && !this._session.isDisposed) {
       this._session.messageReceived.disconnect(this._onMessage, this);
     }
@@ -311,7 +311,7 @@ class TerminalWidget extends Widget {
   /**
    * Handle a message from the terminal session.
    */
-  private _onMessage(sender: ITerminalSession, msg: TerminalSession.IMessage): void {
+  private _onMessage(sender: TerminalSession.ISession, msg: TerminalSession.IMessage): void {
     switch (msg.type) {
     case 'stdout':
       this._term.write(msg.content[0] as string);
@@ -380,7 +380,7 @@ class TerminalWidget extends Widget {
   private _background = '';
   private _color = '';
   private _box: IBoxSizing = null;
-  private _session: ITerminalSession = null;
+  private _session: TerminalSession.ISession = null;
 }
 
 

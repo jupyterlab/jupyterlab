@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  Contents, ServiceManager, IServiceManager
+  Contents, ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -22,7 +22,7 @@ import {
 
 describe('docregistry/context', () => {
 
-  let manager: IServiceManager;
+  let manager: ServiceManager.IManager;
   let factory = new TextModelFactory();
 
   before((done) => {

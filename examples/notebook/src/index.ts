@@ -26,7 +26,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IServiceManager, ServiceManager
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -96,7 +96,7 @@ function main(): void {
 }
 
 
-function createApp(manager: IServiceManager): void {
+function createApp(manager: ServiceManager.IManager): void {
   // Initialize the keymap manager with the bindings.
   let commands = new CommandRegistry();
   let keymap = new Keymap({ commands });

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelMessage
+  Kernel, KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -84,10 +84,10 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   /**
    * The kernel used by the inspection handler.
    */
-  get kernel(): IKernel {
+  get kernel(): Kernel.IKernel {
     return this._kernel;
   }
-  set kernel(value: IKernel) {
+  set kernel(value: Kernel.IKernel) {
     this._kernel = value;
   }
 
@@ -170,7 +170,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
 
   private _activeCell: BaseCellWidget = null;
   private _isDisposed = false;
-  private _kernel: IKernel = null;
+  private _kernel: Kernel.IKernel = null;
   private _pending = 0;
   private _rendermime: RenderMime = null;
 }

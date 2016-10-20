@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Kernel, ISession, Session, utils
+  ContentsManager, Kernel, Session, utils
 } from '@jupyterlab/services';
 
 import {
@@ -297,7 +297,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   /**
    * Create a console for a given session.
    */
-  function createConsole(session: ISession, name: string): void {
+  function createConsole(session: Session.ISession, name: string): void {
     let panel = new ConsolePanel({
       session,
       rendermime: rendermime.clone(),

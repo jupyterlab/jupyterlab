@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  KernelMessage, IKernel, Kernel
+  KernelMessage, Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -41,7 +41,7 @@ const kernelPromise = Kernel.startNew();
 
 describe('console/history', () => {
 
-  let kernel: IKernel;
+  let kernel: Kernel.IKernel;
 
   beforeEach((done) => {
     kernelPromise.then(k => {

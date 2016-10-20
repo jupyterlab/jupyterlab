@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelMessage
+  Kernel, KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -384,7 +384,7 @@ namespace NotebookActions {
    * All markdown cells will be rendered.
    */
   export
-  function run(widget: Notebook, kernel?: IKernel): Promise<boolean> {
+  function run(widget: Notebook, kernel?: Kernel.IKernel): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
@@ -434,7 +434,7 @@ namespace NotebookActions {
    * will be created in `'edit'` mode.  The new cell creation can be undone.
    */
   export
-  function runAndAdvance(widget: Notebook, kernel?: IKernel): Promise<boolean> {
+  function runAndAdvance(widget: Notebook, kernel?: Kernel.IKernel): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
@@ -468,7 +468,7 @@ namespace NotebookActions {
    * The cell insert can be undone.
    */
   export
-  function runAndInsert(widget: Notebook, kernel?: IKernel): Promise<boolean> {
+  function runAndInsert(widget: Notebook, kernel?: Kernel.IKernel): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
@@ -495,7 +495,7 @@ namespace NotebookActions {
    * The last cell in the notebook will be activated.
    */
   export
-  function runAll(widget: Notebook, kernel?: IKernel): Promise<boolean> {
+  function runAll(widget: Notebook, kernel?: Kernel.IKernel): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
@@ -937,7 +937,7 @@ namespace Private {
    * Run a cell.
    */
   export
-  function runCell(parent: Notebook, child: BaseCellWidget, kernel?: IKernel): Promise<boolean> {
+  function runCell(parent: Notebook, child: BaseCellWidget, kernel?: Kernel.IKernel): Promise<boolean> {
 
     switch (child.model.type) {
     case 'markdown':

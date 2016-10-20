@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Kernel, IServiceManager, Session
+  ContentsManager, Kernel, ServiceManager, Session
 } from '@jupyterlab/services';
 
 import {
@@ -28,10 +28,6 @@ import {
 import {
   DocumentRegistry, Context
 } from '../docregistry';
-
-import {
-  FileBrowser
-} from '../filebrowser';
 
 import {
   DocumentWidgetManager
@@ -291,7 +287,7 @@ class DocumentManager implements IDisposable {
     return registry.getWidgetFactory(widgetName);
   }
 
-  private _serviceManager: IServiceManager = null;
+  private _serviceManager: ServiceManager.IManager = null;
   private _widgetManager: DocumentWidgetManager = null;
   private _registry: DocumentRegistry = null;
   private _contexts: Vector<Context<DocumentRegistry.IModel>> = new Vector<Context<DocumentRegistry.IModel>>();
@@ -317,7 +313,7 @@ namespace DocumentManager {
     /**
      * A service manager instance.
      */
-    manager: IServiceManager;
+    manager: ServiceManager.IManager;
 
     /**
      * A widget opener for sibling widgets.

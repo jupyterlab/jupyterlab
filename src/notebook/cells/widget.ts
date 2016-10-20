@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelMessage
+  Kernel, KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -431,7 +431,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Execute the cell given a kernel.
    */
-  execute(kernel: IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
+  execute(kernel: Kernel.IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
     let model = this.model;
     let code = model.source;
     if (!code.trim()) {

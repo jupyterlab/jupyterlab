@@ -2,9 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Contents, IKernel, IServiceManager, ISession, utils,
-  Kernel, Session
+  ContentsManager, Contents, Kernel, ServiceManager, Session, utils
 } from '@jupyterlab/services';
+
+import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
 
 import {
   findIndex
@@ -60,7 +63,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * A signal emitted when the kernel changes.
    */
-  kernelChanged: ISignal<DocumentRegistry.IContext<T>, IKernel>;
+  kernelChanged: ISignal<DocumentRegistry.IContext<T>, Kernel.IKernel>;
 
   /**
    * A signal emitted when the path changes.
@@ -92,7 +95,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * The current kernel associated with the document.
    */
-  get kernel(): IKernel {
+  get kernel(): Kernel.IKernel {
     return this._session ? this._session.kernel : null;
   }
 
@@ -167,7 +170,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * Change the current kernel associated with the document.
    */
-  changeKernel(options: Kernel.IModel): Promise<IKernel> {
+  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernel> {
     let session = this._session;
     if (options) {
       if (session) {
@@ -200,23 +203,27 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   save(): Promise<void> {
     let model = this._model;
-    let contents = this._contentsModel || {};
     let path = this._path;
-    contents.type = this._factory.contentType;
-    contents.format = this._factory.fileFormat;
     if (model.readOnly) {
       return Promise.reject(new Error('Read only'));
     }
-    if (contents.format === 'json') {
-      contents.content = model.toJSON();
+    let content: JSONObject | string;
+    if (this._factory.fileFormat === 'json') {
+      content = model.toJSON();
     } else {
-      contents.content = model.toString();
+      content = model.toString();
     }
 
-    let promise = this._manager.contents.save(path, contents);
+    let options = {
+      type: this._factory.contentType,
+      format: this._factory.fileFormat,
+      content
+    };
 
-    return promise.then((contents: Contents.IModel) => {
-      this._updateContentsModel(contents);
+    let promise = this._manager.contents.save(path, options);
+
+    return promise.then(value => {
+      this._updateContentsModel(value);
       model.dirty = false;
       if (!this._isPopulated) {
         return this._populate();
@@ -378,7 +385,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * Start a session and set up its signals.
    */
-  private _startSession(options: Session.IOptions): Promise<IKernel> {
+  private _startSession(options: Session.IOptions): Promise<Kernel.IKernel> {
     return this._manager.sessions.startNew(options).then(session => {
       if (this._session) {
         this._session.dispose();
@@ -450,11 +457,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     });
   }
 
-  private _manager: IServiceManager = null;
+  private _manager: ServiceManager.IManager = null;
   private _opener: (widget: Widget) => void = null;
   private _model: T = null;
   private _path = '';
-  private _session: ISession = null;
+  private _session: Session.ISession = null;
   private _factory: DocumentRegistry.IModelFactory<T> = null;
   private _saver: SaveHandler = null;
   private _isPopulated = false;
@@ -482,7 +489,7 @@ export namespace Context {
     /**
      * A service manager instance.
      */
-    manager: IServiceManager;
+    manager: ServiceManager.IManager;
 
     /**
      * The model factory used to create the model.

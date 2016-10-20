@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel, KernelMessage
+  Kernel, KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -187,7 +187,7 @@ class OutputAreaModel implements IDisposable {
   /**
    * Execute code on a kernel and send outputs to the model.
    */
-  execute(code: string, kernel: IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
+  execute(code: string, kernel: Kernel.IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
     let content: KernelMessage.IExecuteRequest = {
       code,
@@ -293,7 +293,7 @@ namespace OutputAreaModel {
     /**
      * The kernel that made the request, used to send an input response.
      */
-    kernel: IKernel;
+    kernel: Kernel.IKernel;
   }
 
   /**

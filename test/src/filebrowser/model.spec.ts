@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  ServiceManager, IServiceManager, ISession
+  ServiceManager, Session
 } from '@jupyterlab/services';
 
 import {
@@ -18,7 +18,7 @@ import {
 
 describe('filebrowser/model', () => {
 
-  let manager: IServiceManager;
+  let manager: ServiceManager.IManager;
   let model: FileBrowserModel;
   let name: string;
 
@@ -149,7 +149,7 @@ describe('filebrowser/model', () => {
     describe('#sessions()', () => {
 
       it('should be the session models for the active notebooks', (done) => {
-        let session: ISession;
+        let session: Session.ISession;
         model.newUntitled({ type: 'notebook' }).then(contents => {
           return manager.sessions.startNew({ path: contents.path });
         }).then(s => {

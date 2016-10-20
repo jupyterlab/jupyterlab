@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IKernel
+  Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -23,7 +23,7 @@ import {
  * This is a no-op if there is no kernel.
  */
 export
-function restartKernel(kernel: IKernel, host?: HTMLElement): Promise<boolean> {
+function restartKernel(kernel: Kernel.IKernel, host?: HTMLElement): Promise<boolean> {
   if (!kernel) {
     return Promise.resolve(false);
   }

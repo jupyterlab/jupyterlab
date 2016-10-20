@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -167,7 +167,7 @@ class SaveHandler implements IDisposable {
   private _minInterval = -1;
   private _interval = -1;
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
-  private _manager: IServiceManager = null;
+  private _manager: ServiceManager.IManager = null;
   private _stopped = false;
   private _inDialog = false;
 }
@@ -191,7 +191,7 @@ namespace SaveHandler {
     /**
      * The service manager to use for checking last saved.
      */
-    manager: IServiceManager;
+    manager: ServiceManager.IManager;
 
     /**
      * The minimum save interval in seconds (default is two minutes).
