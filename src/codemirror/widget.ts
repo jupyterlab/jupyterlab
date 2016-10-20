@@ -103,10 +103,10 @@ class CodeMirrorWidget extends Widget {
       this._evtMouseDown(event as MouseEvent);
       break;
     case 'focus':
-      this._evtFocus(event as MouseEvent);
+      this._evtFocus(event as FocusEvent);
       break;
     case 'blur':
-      this._evtBlur(event as MouseEvent);
+      this._evtBlur(event as FocusEvent);
       break;
     default:
       break;
@@ -144,14 +144,14 @@ class CodeMirrorWidget extends Widget {
   /**
    * Handle `focus` events for the widget.
    */
-  private _evtFocus(event: MouseEvent): void {
+  private _evtFocus(event: FocusEvent): void {
     this._activate();
   }
 
   /**
    * Handle `blur` events for the widget.
    */
-  private _evtBlur(event: MouseEvent): void {
+  private _evtBlur(event: FocusEvent): void {
     this._lastMouseDown = null;
     if (this.node.contains(event.relatedTarget as HTMLElement)) {
       return;
