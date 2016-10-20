@@ -234,7 +234,7 @@ class StaticCodeMirror extends Widget {
    * Construct a new static code mirror widget.
    */
   constructor(editor: CodeMirror.Editor) {
-    super();
+    super({ node: document.createElement('pre') });
     this._editor = editor;
     this.addClass(`cm-s-${editor.getOption('theme')}`);
     this.addClass('CodeMirror');
