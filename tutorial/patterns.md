@@ -117,3 +117,17 @@ value should not need to be accessed randomly.
 Prefer an `ISequence` when:
 - A return value or public attribute based on an internal `Vector` where the 
 value may need to be accessed randomly.
+
+## DOM Events
+
+If an object instance should respond to DOM events, create a `handleEvent`
+method for the class and register the object instance as the event handler. The
+`handleEvent` method should switch on the event type and could call private
+methods to carry out the actions. Often a widget class will add itself as an
+event listener to its own node in the `onAfterAttach` method with something like
+`this.node.addEventListener('mousedown', this)` and unregister itself in the
+`onBeforeDetach` method with `this.node.removeEventListener('mousedown', this)`
+Dispatching events from the `handleEvent` method makes it easier to trace, log,
+and debug event handling. For more information about the `handleEvent` method,
+see the [EventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventListener)
+API.
