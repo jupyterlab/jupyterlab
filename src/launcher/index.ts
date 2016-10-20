@@ -29,7 +29,8 @@ import {
 /**
  * The launcher token.
  */
-export const ILauncher = new Token<ILauncher>('jupyter.services.launcher');
+export
+const ILauncher = new Token<ILauncher>('jupyter.services.launcher');
 /* tslint:enable */
 
 
@@ -82,7 +83,8 @@ const DIALOG_CLASS = 'jp-LauncherWidget-dialog';
 /**
  * The launcher interface.
  */
-export interface ILauncher {
+export
+interface ILauncher {
   /**
    * Add a command item to the Launcher, and trigger re-render event for parent
    * widget.
@@ -110,7 +112,8 @@ export interface ILauncher {
  * implementation detail of the LauncherModel. You should not need to use
  * this class directly, but use the `LauncherModel.add` method instead.
  */
-export class LauncherItem {
+export
+class LauncherItem {
 
   readonly name: string;
 
@@ -137,10 +140,9 @@ export class LauncherItem {
  * LauncherModel keeps track of the path to working directory and has a list of
  * LauncherItems, which the LauncherWidget will render.
  */
-export class LauncherModel extends VDomModel implements ILauncher {
+export
+class LauncherModel extends VDomModel implements ILauncher {
   items: LauncherItem[] = [];
-  _path: string = 'home';
-  _app: JupyterLab;
 
   add(name: string, action: string, args?: JSONObject, imgName?: string) : IDisposable {
     let clickCallback = () => { this.app.commands.execute( action, args); };
@@ -149,7 +151,7 @@ export class LauncherModel extends VDomModel implements ILauncher {
     this.stateChanged.emit(void 0);
 
     return new DisposableDelegate(() => {
-      // Remove the item form the list of items.
+      // Remove the item from the list of items.
       let index = this.items.indexOf(item, 0);
       if (index > -1) {
           this.items.splice(index, 1);
@@ -179,13 +181,16 @@ export class LauncherModel extends VDomModel implements ILauncher {
   set app(app: JupyterLab) {
     this._app = app;
   }
+  private _path: string = 'home';
+  private _app: JupyterLab;
 }
 
 
 /**
  * A virtual-DOM-based widget for the Launcher.
  */
-export class LauncherWidget extends VDomWidget<LauncherModel> {
+export
+class LauncherWidget extends VDomWidget<LauncherModel> {
 
   /**
    * Construct a new launcher widget.

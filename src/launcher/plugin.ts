@@ -55,20 +55,20 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   let launcherWidget = new LauncherWidget();
 
   launcherWidget.model = launcherModel;
-  launcherWidget.id = 'landing-jupyterlab-widget';
+  launcherWidget.id = 'launcher-jupyterlab-widget';
   launcherWidget.title.label = 'Launcher';
 
   // Hardcoded defaults.
   let names = [
     'Notebook',
-    'Console',
+    'Code Console',
     'Terminal',
     'Text Editor',
   ];
 
   let actions = [
     'file-operations:new-notebook',
-    `console:create-${services.kernelspecs.default}`,
+    'console:create-new',
     'terminal:create-new',
     'file-operations:new-text-file',
   ];

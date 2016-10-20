@@ -81,12 +81,10 @@
   max-width: 56px;
   background-size: 56px 72px;
   background-repeat: no-repeat;
-
-}
-
-.jp-LauncherWidget-image:hover {
   cursor: pointer;
+
 }
+
 
 .jp-LauncherWidget-text {
   flex: 0 0 auto;
