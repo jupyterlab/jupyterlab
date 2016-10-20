@@ -8,8 +8,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Context, DocumentRegistry, TextModelFactory, SaveHandler
+  Context, DocumentRegistry, TextModelFactory
 } from '../../../lib/docregistry';
+
+import {
+  SaveHandler
+} from '../../../lib/docmanager';
 
 import {
   acceptDialog, waitForDialog
