@@ -37,3 +37,8 @@
 .jp-CodeMirrorWidget-static {
   margin: var(--jp-code-padding);
 }
+
+
+.jp-CodeMirrorWidget {
+  cursor: text;
+}

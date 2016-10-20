@@ -84,6 +84,8 @@ class CodeMirrorWidget extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
+    this._static.hide();
+    this._live.show();
     this.editor.focus();
   }
 
@@ -130,6 +132,9 @@ class CodeMirrorWidget extends Widget {
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: MouseEvent): void {
+    if (this.editor.getOption('readOnly') !== false) {
+      return;
+    }
     this._static.hide();
     this._live.show();
   }
