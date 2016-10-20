@@ -201,6 +201,42 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
   }
 
   /**
+   * Handle the DOM events for launcher widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the panel's DOM node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'click':
+      this._evtClick(event as MouseEvent);
+      break;
+    default:
+      return;
+    }
+  }
+
+  /**
+   * Handle `after_attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.node.addEventListener('click', this);
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    super.onBeforeDetach(msg);
+    this.node.removeEventListener('click', this);
+  }
+
+  /**
    * Render the launcher to virtual DOM nodes.
    */
   protected render(): VNode | VNode[] {
