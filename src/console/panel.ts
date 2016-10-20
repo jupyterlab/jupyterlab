@@ -124,12 +124,14 @@ class ConsolePanel extends Panel {
    * Handle `'close-request'` messages.
    */
   protected onCloseRequest(msg: Message): void {
-    let session = this.content.session;
-    if (!session.kernel) {
+    let session = this._content.session;
+
+    if (!session || !session.kernel) {
       super.onCloseRequest(msg);
       this.dispose();
       return;
     }
+
     session.kernel.getSpec().then(spec => {
       let name = spec.display_name;
       return showDialog({

@@ -87,7 +87,7 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
 /**
  * The class name for the console icon from the default theme.
  */
-const CONSOLE_ICON_CLASS = 'jp-ImageConsole';
+const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
 
 /**
  * The console panel instance tracker.
@@ -154,16 +154,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   });
   palette.addItem({ command, category });
   menu.addItem({ command });
-
-  command = 'console:dismiss-completer';
-  commands.addCommand(command, {
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        current.content.dismissCompleter();
-      }
-    }
-  });
 
   command = 'console:run';
   commands.addCommand(command, {
