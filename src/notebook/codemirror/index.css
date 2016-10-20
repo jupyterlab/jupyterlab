@@ -33,3 +33,12 @@
   padding: 0 4px 0 4px;
 }
 
+
+.jp-CodeMirrorWidget-static {
+  margin: var(--jp-code-padding);
+}
+
+
+.jp-CodeMirrorWidget, .jp-CodeMirrorWidget-static {
+  cursor: text;
+}

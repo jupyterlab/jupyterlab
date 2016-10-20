@@ -113,6 +113,8 @@ class ConsoleContent extends Widget {
     // Create the panels that hold the content and input.
     let layout = this.layout = new PanelLayout();
     this._content = new Panel();
+    this._content.node.tabIndex = -1;
+    this._content.node.style.outline = 'none';
     this._input = new Panel();
     this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);

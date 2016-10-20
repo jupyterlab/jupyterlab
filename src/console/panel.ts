@@ -79,41 +79,6 @@ class ConsolePanel extends Panel {
   }
 
   /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the console panel's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'mousedown':
-      this._evtMouseDown(event as MouseEvent);
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle `after_attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    this.node.addEventListener('mousedown', this);
-  }
-
-  /**
-   * Handle `before_detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('mousedown', this);
-  }
-
-  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
@@ -146,13 +111,6 @@ class ConsolePanel extends Panel {
       super.onCloseRequest(msg);
       this.dispose();
     });
-  }
-
-  /**
-   * Handle `mousedown` events for the widget.
-   */
-  private _evtMouseDown(event: MouseEvent): void {
-    this.activate();
   }
 
   private _content: ConsoleContent = null;
