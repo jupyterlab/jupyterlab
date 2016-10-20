@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  ServiceManager, IServiceManager, utils
+  ServiceManager, utils
 } from '@jupyterlab/services';
 
 import {
@@ -22,7 +22,7 @@ import {
 
 describe('docregistry/savehandler', () => {
 
-  let manager: IServiceManager;
+  let manager: ServiceManager.IManager;
   let factory = new TextModelFactory();
   let context: Context<DocumentRegistry.IModel>;
   let handler: SaveHandler;
