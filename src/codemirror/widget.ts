@@ -26,6 +26,11 @@ import {
 const EDITOR_CLASS = 'jp-CodeMirrorWidget';
 
 /**
+ * The class name added to a live codemirror widget.
+ */
+const LIVE_CLASS = 'jp-CodeMirrorWidget-live';
+
+/**
  * The class name added to a static codemirror widget.
  */
 const STATIC_CLASS = 'jp-CodeMirrorWidget-static';
@@ -35,6 +40,7 @@ const STATIC_CLASS = 'jp-CodeMirrorWidget-static';
  */
 export
 const DEFAULT_CODEMIRROR_THEME = 'jupyter';
+
 
 /**
  * A widget which hosts a CodeMirror editor.
@@ -51,40 +57,35 @@ class CodeMirrorWidget extends Widget {
     let layout = this.layout = new PanelLayout();
     this.node.tabIndex = -1;
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
-    this._rendered = new Widget();
-    this._rendered.addClass(`cm-s-${options.theme}`);
-    this._rendered.addClass('CodeMirror');
-    this._rendered.addClass(STATIC_CLASS);
-    this._live = new Widget();
-    layout.addWidget(this._rendered);
+    this._live = new LiveCodeMirror(options);
+    this._static = new StaticCodeMirror(this._live.editor);
+    layout.addWidget(this._static);
     layout.addWidget(this._live);
     this._live.hide();
-    this._editor = CodeMirror(this._live.node, options);
-    this._render();
-    CodeMirror.on(this._editor.getDoc(), 'change', (instance, change) => {
-      if (this._rendered.isVisible) {
-        this._render();
-      }
-    });
   }
 
   /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    this._editor = null;
+    this._static.dispose();
+    this._live.dispose();
     super.dispose();
   }
 
   /**
    * Get the editor wrapped by the widget.
-   *
-   * #### Notes
-   * This is a ready-only property.
    */
-   get editor(): CodeMirror.Editor {
-     return this._editor;
-   }
+  get editor(): CodeMirror.Editor {
+    return this._live.editor;
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.editor.focus();
+  }
 
   /**
    * Handle the DOM events for the widget.
@@ -115,13 +116,6 @@ class CodeMirrorWidget extends Widget {
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('focus', this, true);
     this.node.addEventListener('blur', this, true);
-    if (!this._live.isVisible) {
-      this._render();
-      this._needsRefresh = true;
-      return;
-    }
-    this._editor.refresh();
-    this._needsRefresh = false;
   }
 
   /**
@@ -133,49 +127,11 @@ class CodeMirrorWidget extends Widget {
   }
 
   /**
-   * A message handler invoked on an `'after-show'` message.
-   */
-  protected onAfterShow(msg: Message): void {
-    if (this._live.isVisible && this._needsRefresh) {
-      this._editor.refresh();
-      this._needsRefresh = false;
-    }
-  }
-
-  /**
-   * A message handler invoked on an `'resize'` message.
-   */
-  protected onResize(msg: ResizeMessage): void {
-    if (!this._live.isVisible) {
-      this._needsRefresh = true;
-      return;
-    }
-    if (msg.width < 0 || msg.height < 0) {
-      this._editor.refresh();
-    } else {
-      this._editor.setSize(msg.width, msg.height);
-    }
-    this._needsRefresh = false;
-  }
-
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this._editor.focus();
-  }
-
-  /**
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: MouseEvent): void {
-    this._rendered.hide();
+    this._static.hide();
     this._live.show();
-    this._editor.focus();
-    if (this._needsRefresh) {
-      this._editor.refresh();
-      this._needsRefresh = false;
-    }
   }
 
   /**
@@ -186,8 +142,138 @@ class CodeMirrorWidget extends Widget {
       return;
     }
     this._live.hide();
-    this._rendered.show();
+    this._static.show();
+  }
+
+  private _live: LiveCodeMirror;
+  private _static: StaticCodeMirror;
+}
+
+
+/**
+ * A widget that hosts a codemirror instance.
+ */
+class LiveCodeMirror extends Widget {
+  /**
+   * Construct a live codemirror.
+   */
+  constructor(options: CodeMirror.EditorConfiguration) {
+    super();
+    this.addClass(LIVE_CLASS);
+    this._editor = CodeMirror(this.node, options);
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    this._editor = null;
+    super.dispose();
+  }
+
+  /**
+   * Get the editor wrapped by the widget.
+   */
+  get editor(): CodeMirror.Editor {
+     return this._editor;
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    if (!this.isVisible) {
+      this._needsRefresh = true;
+      return;
+    }
+    this._editor.refresh();
+    this._needsRefresh = false;
+  }
+
+  /**
+   * A message handler invoked on an `'after-show'` message.
+   */
+  protected onAfterShow(msg: Message): void {
+    if (this._needsRefresh) {
+      this._editor.refresh();
+      this._needsRefresh = false;
+    }
+    this._editor.refresh();
+    this._editor.focus();
+  }
+
+  /**
+   * A message handler invoked on a `'before-hide'` message.
+   */
+  protected onBeforeHide(msg: Message): void {
+    this._needsRefresh = true;
+  }
+
+  /**
+   * A message handler invoked on an `'resize'` message.
+   */
+  protected onResize(msg: ResizeMessage): void {
+    if (msg.width < 0 || msg.height < 0) {
+      this._editor.refresh();
+    } else {
+      this._editor.setSize(msg.width, msg.height);
+    }
+    this._needsRefresh = false;
+  }
+
+  private _needsRefresh = true;
+  private _editor: CodeMirror.Editor = null;
+}
+
+
+/**
+ * A widget that holds rendered codemirror text.
+ */
+class StaticCodeMirror extends Widget {
+  /**
+   * Construct a new static code mirror widget.
+   */
+  constructor(editor: CodeMirror.Editor) {
+    super();
+    this._editor = editor;
+    this.addClass(`cm-s-${editor.getOption('theme')}`);
+    this.addClass('CodeMirror');
+    this.addClass(STATIC_CLASS);
+    CodeMirror.on(this._editor.getDoc(), 'change', (instance, change) => {
+      if (this.isVisible) {
+        this._render();
+      } else {
+        this._needsRefresh = true;
+      }
+    });
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    this._editor = null;
+    super.dispose();
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    if (!this.isVisible) {
+      this._needsRefresh = true;
+      return;
+    }
     this._render();
+  }
+
+  /**
+   * A message handler invoked on an `'after-show'` message.
+   */
+  protected onAfterShow(msg: Message): void {
+    if (this._needsRefresh) {
+      this._render();
+    }
   }
 
   /**
@@ -195,12 +281,11 @@ class CodeMirrorWidget extends Widget {
    */
   private _render(): void {
     CodeMirror.runMode(this._editor.getDoc().getValue(),
-                   this._editor.getOption('mode'),
-                   this._rendered.node);
+                       this._editor.getOption('mode'),
+                       this.node);
+    this._needsRefresh = false;
   }
 
   private _editor: CodeMirror.Editor = null;
-  private _live: Widget;
-  private _rendered: Widget;
   private _needsRefresh = true;
 }
