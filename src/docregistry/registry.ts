@@ -373,7 +373,7 @@ class DocumentRegistry {
    *
    * @returns A new iterator of widget factories.
    */
-  getWidgetFactories(): IIterator<DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>> {
+  widgetFactories(): IIterator<DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>> {
     return map(Object.keys(this._widgetFactories), name => {
       return this._widgetFactories[name];
     });
@@ -384,7 +384,7 @@ class DocumentRegistry {
    *
    * @returns A new iterator of model factories.
    */
-  getModelFactories(): IIterator<DocumentRegistry.IModelFactory<DocumentRegistry.IModel>> {
+  modelFactories(): IIterator<DocumentRegistry.IModelFactory<DocumentRegistry.IModel>> {
     return map(Object.keys(this._modelFactories), name => {
       return this._modelFactories[name];
     });
@@ -397,7 +397,7 @@ class DocumentRegistry {
    *
    * @returns A new iterator over the widget extensions.
    */
-  getWidgetExtensions(widgetName: string): IIterator<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
+  widgetExtensions(widgetName: string): IIterator<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
       return EmptyIterator.instance;
@@ -410,7 +410,7 @@ class DocumentRegistry {
    *
    * @returns A new iterator of file types.
    */
-  getFileTypes(): IIterator<DocumentRegistry.IFileType> {
+  fileTypes(): IIterator<DocumentRegistry.IFileType> {
     return this._fileTypes.iter();
   }
 
@@ -419,7 +419,7 @@ class DocumentRegistry {
    *
    * @returns A new iterator of file creatores.
    */
-  getCreators(): IIterator<DocumentRegistry.IFileCreator> {
+  creators(): IIterator<DocumentRegistry.IFileCreator> {
     return this._creators.iter();
   }
 

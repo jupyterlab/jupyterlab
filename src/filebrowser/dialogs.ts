@@ -244,7 +244,7 @@ class CreateFromHandler extends Widget {
     this.inputNode.addEventListener('input', () => {
       let value = this.inputNode.value;
       if (value !== this._orig) {
-        each(this._model.items, item => {
+        each(this._model.items(), item => {
           if (item.name === value) {
             this.addClass(FILE_CONFLICT_CLASS);
             return;
@@ -477,7 +477,7 @@ class CreateNewHandler extends Widget {
    */
   protected inputNodeChanged(): void {
     let path = this.inputNode.value;
-    each(this._model.items, item => {
+    each(this._model.items(), item => {
       if (item.path === path) {
         this.addClass(FILE_CONFLICT_CLASS);
         return;
@@ -500,13 +500,12 @@ class CreateNewHandler extends Widget {
    * Populate the file types.
    */
   protected populateFileTypes(): void {
-    let fileTypes = this._manager.registry.getFileTypes();
     let dropdown = this.fileTypeDropdown;
     let option = document.createElement('option');
     option.text = 'File';
     option.value = this._sentinal;
 
-    each(fileTypes, ft => {
+    each(this._manager.registry.fileTypes(), ft => {
       option = document.createElement('option');
       option.text = `${ft.name} (${ft.extension})`;
       option.value = ft.extension;

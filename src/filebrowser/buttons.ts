@@ -442,7 +442,7 @@ namespace Private {
     }));
     menu.addItem({ command });
 
-    each(registry.getCreators(), creator => {
+    each(registry.creators(), creator => {
       command = `${prefix}:new-${creator.name}`;
       disposables.add(commands.addCommand(command, {
         execute: () => {

@@ -167,7 +167,7 @@ class FileBrowser extends Widget {
    */
   open(): void {
     let foundDir = false;
-    each(this._model.items, item => {
+    each(this._model.items(), item => {
       if (!this._listing.isSelected(item.name)) {
         return;
       }

@@ -96,7 +96,7 @@ class DocumentWidgetManager implements IDisposable {
 
     // Handle widget extensions.
     let disposables = new DisposableSet();
-    each(this._registry.getWidgetExtensions(name), extender => {
+    each(this._registry.widgetExtensions(name), extender => {
       disposables.add(extender.createNew(widget, context));
     });
     widget.disposed.connect(() => {

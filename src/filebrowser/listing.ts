@@ -6,16 +6,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each, filter, map, toArray
+  IIterator, each, filter, map, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
   find, findIndex, indexOf
 } from 'phosphor/lib/algorithm/searching';
-
-import {
-  ISequence
-} from 'phosphor/lib/algorithm/sequence';
 
 import {
   Vector
@@ -273,13 +269,6 @@ class DirListing extends Widget {
   }
 
   /**
-   * The the sorted content items.
-   */
-  get sortedItems(): ISequence<Contents.IModel> {
-    return this._sortedModels;
-  }
-
-  /**
    * The current sort state.
    */
   get sortState(): DirListing.ISortState {
@@ -287,10 +276,19 @@ class DirListing extends Widget {
   }
 
   /**
+   * Create an iterator over the listing's sorted items.
+   *
+   * @returns A new iterator over the listing's sorted items.
+   */
+  sortedItems(): IIterator<Contents.IModel> {
+    return this._sortedItems.iter();
+  }
+
+  /**
    * Sort the items using a sort condition.
    */
   sort(state: DirListing.ISortState): void {
-    this._sortedModels = Private.sort(this.model.items, state);
+    this._sortedItems = new Vector(Private.sort(this.model.items(), state));
     this._sortState = state;
     this.update();
   }
@@ -360,7 +358,7 @@ class DirListing extends Widget {
    */
   delete(): Promise<void> {
     let names: string[] = [];
-    each(this._model.items, item => {
+    each(this._sortedItems, item => {
       if (this._selection[item.name]) {
         names.push(item.name);
       }
@@ -419,9 +417,9 @@ class DirListing extends Widget {
    */
   shutdownKernels(): Promise<void> {
     let promises: Promise<void>[] = [];
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     let paths = toArray(map(items, item => item.path));
-    each(this._model.sessions, session => {
+    each(this._model.sessions(), session => {
       let index = indexOf(paths, session.notebook.path);
       if (this._selection[items.at(index).name]) {
         promises.push(this._model.shutdown(session.id));
@@ -441,7 +439,7 @@ class DirListing extends Widget {
   selectNext(keepExisting = false): void {
     let index = -1;
     let selected = Object.keys(this._selection);
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the next item.
       let name = selected[selected.length - 1];
@@ -471,7 +469,7 @@ class DirListing extends Widget {
   selectPrevious(keepExisting = false): void {
     let index = -1;
     let selected = Object.keys(this._selection);
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     if (selected.length === 1 || keepExisting) {
       // Select the previous item.
       let name = selected[0];
@@ -512,7 +510,7 @@ class DirListing extends Widget {
    * @returns The path to the selected file.
    */
   pathForClick(event: MouseEvent): string {
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index !== -1) {
       return items.at(index).path;
@@ -617,7 +615,7 @@ class DirListing extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Fetch common variables.
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     let nodes = this._items;
     let content = utils.findElement(this.node, CONTENT_CLASS);
     let renderer = this._renderer;
@@ -671,7 +669,7 @@ class DirListing extends Widget {
     // Handle notebook session statuses.
     let paths = toArray(map(items, item => item.path));
     let specs = this._model.kernelspecs;
-    each(this._model.sessions, session => {
+    each(this._model.sessions(), session => {
       let index = indexOf(paths, session.notebook.path);
       let node = nodes.at(index);
       node.classList.add(RUNNING_CLASS);
@@ -859,7 +857,7 @@ class DirListing extends Widget {
     }
 
     let model = this._model;
-    let item = this.sortedItems.at(i);
+    let item = this._sortedItems.at(i);
     if (item.type === 'directory') {
       model.cd(item.name).catch(error =>
         showErrorMessage(this, 'Open directory', error)
@@ -886,7 +884,7 @@ class DirListing extends Widget {
       if (index === -1) {
         return;
       }
-      let item = this.sortedItems.at(index);
+      let item = this._sortedItems.at(index);
       if (item.type !== 'directory' || this._selection[item.name]) {
         return;
       }
@@ -951,7 +949,7 @@ class DirListing extends Widget {
 
     // Get the path based on the target node.
     let index = indexOf(this._items, target);
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     let path = items.at(index).name + '/';
 
     // Move all of the items.
@@ -974,7 +972,7 @@ class DirListing extends Widget {
     let selectedNames = Object.keys(this._selection);
     let source = this._items.at(index);
     let model = this._model;
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     let item: Contents.IModel = null;
 
     // If the source node is not selected, use just that node.
@@ -1026,7 +1024,7 @@ class DirListing extends Widget {
    */
   private _handleFileSelect(event: MouseEvent): void {
     // Fetch common variables.
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
 
     clearTimeout(this._selectTimer);
@@ -1080,7 +1078,7 @@ class DirListing extends Widget {
    */
   private _handleMultiSelect(selected: string[], index: number): void {
     // Find the "nearest selected".
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     let nearestIndex = -1;
     for (let i = 0; i < this._items.length; i++) {
       if (i === index) {
@@ -1116,7 +1114,7 @@ class DirListing extends Widget {
    * Get the currently selected items.
    */
   private _getSelectedItems(): Contents.IModel[] {
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     return toArray(filter(items, item => this._selection[item.name]));
   }
 
@@ -1152,7 +1150,7 @@ class DirListing extends Widget {
    * Allow the user to rename item on a given row.
    */
   private _doRename(): Promise<string> {
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     let name = Object.keys(this._selection)[0];
     let index = findIndex(items, value => value.name === name);
     let row = this._items.at(index);
@@ -1180,7 +1178,7 @@ class DirListing extends Widget {
    */
   private _selectItem(index: number, keepExisting: boolean) {
     // Selected the given row(s)
-    let items = this.sortedItems;
+    let items = this._sortedItems;
     if (!keepExisting) {
       this._selection = Object.create(null);
     }
@@ -1197,7 +1195,7 @@ class DirListing extends Widget {
     // Update the selection.
     let existing = Object.keys(this._selection);
     this._selection = Object.create(null);
-    each(this._model.items, item => {
+    each(this._model.items(), item => {
       let name = item.name;
       if (existing.indexOf(name) !== -1) {
         this._selection[name] = true;
@@ -1220,7 +1218,7 @@ class DirListing extends Widget {
   private _model: FileBrowserModel = null;
   private _editNode: HTMLInputElement = null;
   private _items = new Vector<HTMLElement>();
-  private _sortedModels: ISequence<Contents.IModel> = null;
+  private _sortedItems: Vector<Contents.IModel> = null;
   private _sortState: DirListing.ISortState = { direction: 'ascending', key: 'name' };
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
@@ -1600,10 +1598,10 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export
-  function sort(items: ISequence<Contents.IModel>, state: DirListing.ISortState) : ISequence<Contents.IModel> {
+  function sort(items: IIterator<Contents.IModel>, state: DirListing.ISortState) : Vector<Contents.IModel> {
     // Shortcut for unmodified.
     if (state.key !== 'last_modified' && state.direction === 'ascending') {
-      return items;
+      return new Vector(items);
     }
 
     let copy = toArray(items);
@@ -1628,7 +1626,7 @@ namespace Private {
    * Get the index of the node at a client position, or `-1`.
    */
   export
-  function hitTestNodes(nodes: ISequence<HTMLElement>, x: number, y: number): number {
+  function hitTestNodes(nodes: Vector<HTMLElement>, x: number, y: number): number {
     return findIndex(nodes, node => hitTest(node, x, y));
   }
 }

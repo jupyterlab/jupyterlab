@@ -6,8 +6,8 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ISequence
-} from 'phosphor/lib/algorithm/sequence';
+  IIterator, each
+} from 'phosphor/lib/algorithm/iteration';
 
 import {
   Vector
@@ -72,24 +72,10 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   }
 
   /**
-   * Get a read-only sequence of the items in the current path.
-   */
-  get items(): ISequence<Contents.IModel> {
-    return this._items;
-  }
-
-  /**
    * Get whether the model is disposed.
    */
   get isDisposed(): boolean {
     return this._model === null;
-  }
-
-  /**
-   * Get the session models for active notebooks in the current directory.
-   */
-  get sessions(): ISequence<Session.IModel> {
-    return this._sessions;
   }
 
   /**
@@ -111,6 +97,24 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     this._items.clear();
     this._manager = null;
     clearSignalData(this);
+  }
+
+  /**
+   * Create an iterator over the model's items.
+   *
+   * @returns A new iterator over the model's items.
+   */
+  items(): IIterator<Contents.IModel> {
+    return this._items.iter();
+  }
+
+  /**
+   * Create an iterator over the active sessions in the directory.
+   *
+   * @returns A new iterator over the model's active sessions.
+   */
+  sessions(): IIterator<Session.IModel> {
+    return this._sessions.iter();
   }
 
   /**
@@ -382,8 +386,9 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     // Update our internal data.
     this._model = contents;
     this._items.clear();
-    this._paths = contents.content.map((model: Contents.IModel) => {
-      return model.path;
+    this._paths.clear();
+    each(contents.content, (model: Contents.IModel) => {
+      this._paths.add(model.path);
     });
     this._items = new Vector<Contents.IModel>(contents.content);
     this._model.content = null;
@@ -394,12 +399,11 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    */
   private _onRunningChanged(sender: Session.IManager, models: Session.IModel[]): void {
     this._sessions.clear();
-    for (let model of models) {
-      let index = this._paths.indexOf(model.notebook.path);
-      if (index !== -1) {
+    each(models, model => {
+      if (this._paths.has(model.notebook.path)) {
         this._sessions.pushBack(model);
       }
-    }
+    });
     this.refreshed.emit(void 0);
   }
 
@@ -407,7 +411,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   private _manager: IServiceManager = null;
   private _sessions = new Vector<Session.IModel>();
   private _items = new Vector<Contents.IModel>();
-  private _paths: string[] = [];
+  private _paths = new Set<string>();
   private _model: Contents.IModel;
   private _pendingPath: string = null;
   private _pending: Promise<void> = null;
