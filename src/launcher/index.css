@@ -5,6 +5,7 @@
 
 
 .jp-LauncherWidget {
+  background: var(--jp-layout-color1);
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -18,7 +19,6 @@
   padding-bottom: 12px;
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -26,7 +26,6 @@
   align-items: center;
   flex-direction: column;
   flex-wrap: wrap;
-  box-shadow: 0 2px 7px 1px #BDBDBD;
 }
 
 
@@ -51,6 +50,7 @@
   font-weight: 300;
 }
 
+
 .jp-LauncherWidget-header {
   padding-top: 16px;
   padding-bottom: 4px;
@@ -66,7 +66,7 @@
 }
 
 
-.jp-LauncherWidget-column {
+.jp-LauncherWidget-item {
   padding-left: 20px;
   padding-right: 20px;
   display: flex;

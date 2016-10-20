@@ -2,28 +2,41 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from 'phosphor/lib/core/token';
+  enumerate, IIterator, map, toArray
+} from 'phosphor/lib/algorithm/iteration';
 
 import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
 import {
+  Vector
+} from 'phosphor/lib/collections/vector';
+
+import {
   DisposableDelegate, IDisposable
 } from 'phosphor/lib/core/disposable';
+
+import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
+  CommandRegistry
+} from 'phosphor/lib/ui/commandregistry';
 
 import {
   h, VNode
 } from 'phosphor/lib/ui/vdom';
 
 import {
-  JupyterLab
-} from '../application';
-
-import {
   VDomModel, VDomWidget
 } from '../common/vdom';
+
 
 /* tslint:disable */
 /**
@@ -50,9 +63,9 @@ const IMAGE_CLASS = 'jp-LauncherWidget-image';
 const TEXT_CLASS = 'jp-LauncherWidget-text';
 
 /**
- * The class name added to LauncherWidget column nodes.
+ * The class name added to LauncherWidget item nodes.
  */
-const COLUMN_CLASS = 'jp-LauncherWidget-column';
+const ITEM_CLASS = 'jp-LauncherWidget-item';
 
 /**
  * The class name added to LauncherWidget folder node.
@@ -86,53 +99,45 @@ const DIALOG_CLASS = 'jp-LauncherWidget-dialog';
 export
 interface ILauncher {
   /**
-   * Add a command item to the Launcher, and trigger re-render event for parent
+   * Add a command item to the launcher, and trigger re-render event for parent
    * widget.
    *
-   * @param name - The display name.
-   *
-   * @param action - The command that should be executed on clicking.
-   *
-   * @param args - Arguments to the `action` command.
-   *
-   * @param imgName - The CSS class to attach to the item. Defaults to
-   * 'jp-Image' followed by the `name` with spaces removed. So if the name is
-   * 'Launch New Terminal' the class name will be 'jp-ImageLaunchNewTerminal'.
+   * @param options - The specification options for a launcher item.
    *
    * @returns A disposable that will remove the item from Launcher, and trigger
    * re-render event for parent widget.
    *
    */
-  add(name: string, action: string, args?: JSONObject, imgName?: string): IDisposable ;
+  add(options: ILauncherItem): IDisposable;
 }
 
 
 /**
- * Simple encapsulation of name and callback of launcher entries. This is an
- * implementation detail of the LauncherModel. You should not need to use
- * this class directly, but use the `LauncherModel.add` method instead.
+ * The specification for a launcher item.
  */
 export
-class LauncherItem {
-
-  readonly name: string;
-
-  readonly clickCallback: () => void;
-
-  readonly imgName: string;
+interface ILauncherItem {
+  /**
+   * The display name of the launcher item.
+   */
+  name: string;
 
   /**
-   * Construct a new launcher item.
+   * The ID of the command that is called to launch the item.
    */
-  constructor(name: string, clickCallback: () => void, imgName?: string) {
-    this.name = name;
-    this.clickCallback = clickCallback;
-    if (imgName) {
-      this.imgName = imgName;
-    } else {
-      this.imgName = 'jp-Image' + name.replace(/\ /g, '');
-    }
-  }
+  command: string;
+
+  /**
+   * The command arguments, if any, needed to launch the item.
+   */
+  args?: JSONObject;
+
+  /**
+   * The image class name to attach to the launcher item. Defaults to
+   * 'jp-Image' followed by the `name` with spaces removed. So if the name is
+   * 'Launch New Terminal' the class name will be 'jp-ImageLaunchNewTerminal'.
+   */
+  imgClassName?: string;
 }
 
 
@@ -142,22 +147,20 @@ class LauncherItem {
  */
 export
 class LauncherModel extends VDomModel implements ILauncher {
-  items: LauncherItem[] = [];
+  /**
+   * Create a new launcher model.
+   */
+  constructor(options: LauncherModel.IOptions) {
+    super();
+    this._commands = options.commands;
+    this._items = new Vector<ILauncherItem>();
+  }
 
-  add(name: string, action: string, args?: JSONObject, imgName?: string) : IDisposable {
-    let clickCallback = () => { this.app.commands.execute( action, args); };
-    let item = new LauncherItem(name, clickCallback, imgName);
-    this.items.push(item);
-    this.stateChanged.emit(void 0);
-
-    return new DisposableDelegate(() => {
-      // Remove the item from the list of items.
-      let index = this.items.indexOf(item, 0);
-      if (index > -1) {
-          this.items.splice(index, 1);
-          this.stateChanged.emit(void 0);
-      }
-    });
+  /**
+   * The command registry.
+   */
+  get commands(): CommandRegistry {
+    return this._commands;
   }
 
   /**
@@ -167,22 +170,81 @@ class LauncherModel extends VDomModel implements ILauncher {
     return this._path;
   }
   set path(path: string) {
+    if (path === this._path) {
+      return;
+    }
     this._path = path;
     this.stateChanged.emit(void 0);
   }
 
   /**
-   * The JupyterLab application this launcher will use when executing
-   * commands.
+   * Add a command item to the launcher, and trigger re-render event for parent
+   * widget.
+   *
+   * @param options - The specification options for a launcher item.
+   *
+   * @returns A disposable that will remove the item from Launcher, and trigger
+   * re-render event for parent widget.
+   *
    */
-  get app() : JupyterLab {
-    return this._app;
+  add(options: ILauncherItem): IDisposable {
+    // Create a copy of the options to circumvent mutations to the original.
+    let item = JSON.parse(JSON.stringify(options));
+
+    // If image class name is not set, use the default value.
+    item.imgClassName = item.imgClassName ||
+      `jp-Image${item.name.replace(/\ /g, '')}`;
+
+    this._items.pushBack(item);
+    this.stateChanged.emit(void 0);
+
+    return new DisposableDelegate(() => {
+      this._items.remove(item);
+      this.stateChanged.emit(void 0);
+    });
   }
-  set app(app: JupyterLab) {
-    this._app = app;
+
+  /**
+   * Execute the command of the launcher item at a specific index.
+   *
+   * @param index - The index of the launcher item to execute.
+   */
+  execute(index: number): void {
+    let item = this._items.at(index);
+    if (!item) {
+      return;
+    }
+    this.commands.execute(item.command, item.args);
   }
+
+  /**
+   * Return an iterator of launcher items.
+   */
+  items(): IIterator<ILauncherItem> {
+    return this._items.iter();
+  }
+
+  private _commands: CommandRegistry = null;
+  private _items: Vector<ILauncherItem> = null;
   private _path: string = 'home';
-  private _app: JupyterLab;
+}
+
+
+/**
+ * A namespace for launcher model statics.
+ */
+export
+namespace LauncherModel {
+  /**
+   * The instantiation options for a launcher model.
+   */
+  export
+  interface IOptions {
+    /**
+     * The command registry instance that all launcher commands should use.
+     */
+    commands: CommandRegistry;
+  }
 }
 
 
@@ -191,7 +253,6 @@ class LauncherModel extends VDomModel implements ILauncher {
  */
 export
 class LauncherWidget extends VDomWidget<LauncherModel> {
-
   /**
    * Construct a new launcher widget.
    */
@@ -201,31 +262,74 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
   }
 
   /**
+   * Handle the DOM events for launcher widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the panel's DOM node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'click':
+      this._evtClick(event as MouseEvent);
+      break;
+    default:
+      return;
+    }
+  }
+
+  /**
+   * Handle `after_attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.node.addEventListener('click', this);
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    super.onBeforeDetach(msg);
+    this.node.removeEventListener('click', this);
+  }
+
+  /**
    * Render the launcher to virtual DOM nodes.
    */
   protected render(): VNode | VNode[] {
-    let children : VNode[] = [];
-
-    for (let item of this.model.items) {
-      let img = h.span({className: item.imgName + ' ' + IMAGE_CLASS});
-      let text = h.span({className:  TEXT_CLASS }, item.name);
-
-      let column = h.div({
-        className: COLUMN_CLASS,
-        'onclick': item.clickCallback
-      }, [img, text]);
-      children.push(column);
-    }
+    // Create an iterator that yields rendered item nodes.
+    let children = map(enumerate(this.model.items()), ([index, item]) => {
+      let img = h.span({className: item.imgClassName + ' ' + IMAGE_CLASS});
+      let text = h.span({className: TEXT_CLASS }, item.name);
+      return h.div({ className: ITEM_CLASS, dataset: { index } }, [img, text]);
+    });
 
     let folderImage = h.span({ className: FOLDER_CLASS });
     let p = this.model.path;
-    let pathName = p.length ? 'home > ' + p.replace(/\//g, ' > ') : 'home';
+    let pathName = p.length ? `home > ${p.replace(/\//g, ' > ')}` : 'home';
     let path = h.span({ className: PATH_CLASS }, pathName );
-
     let cwd = h.div({ className: CWD_CLASS }, [folderImage, path]);
-    let body = h.div({ className: BODY_CLASS  }, children);
+    let body = h.div({ className: BODY_CLASS  }, toArray(children));
 
-    return h.div({ className: DIALOG_CLASS}, [ cwd, body ]);
+    return h.div({ className: DIALOG_CLASS }, [cwd, body]);
+  }
 
+  /**
+   * Handle click events on the widget.
+   */
+  private _evtClick(event: MouseEvent) {
+    let target = event.target as HTMLElement;
+    while (target !== this.node) {
+      if (target.classList.contains(ITEM_CLASS)) {
+        let index = parseInt(target.getAttribute('data-index'), 10);
+        this.model.execute(index);
+        return;
+      }
+      target = target.parentElement;
+    }
   }
 }

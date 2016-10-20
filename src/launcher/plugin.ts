@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
-} from 'phosphor/lib/algorithm/json';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -22,7 +18,7 @@ import {
 } from '../services';
 
 import {
-  ILauncher, LauncherModel, LauncherWidget
+  ILauncher, ILauncherItem, LauncherModel, LauncherWidget
 } from './';
 
 
@@ -30,8 +26,8 @@ import {
  * A service providing an interface to the the launcher.
  */
 export
-const launcherExtension: JupyterLabPlugin<ILauncher> = {
-  id: 'jupyter.extensions.launcher',
+const launcherProvider: JupyterLabPlugin<ILauncher> = {
+  id: 'jupyter.services.launcher',
   requires: [IServiceManager, IPathTracker, ICommandPalette],
   provides: ILauncher,
   activate: activateLauncher,
@@ -43,67 +39,54 @@ const launcherExtension: JupyterLabPlugin<ILauncher> = {
  * Activate the launcher.
  */
 function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): ILauncher {
-  let launcherModel = new LauncherModel();
+  let model = new LauncherModel({ commands: app.commands });
 
-  launcherModel.path = pathTracker.path;
-  launcherModel.app = app;
+  // Set launcher path and track the path as it changes.
+  model.path = pathTracker.path;
+  pathTracker.pathChanged.connect(() => { model.path = pathTracker.path; });
 
-  pathTracker.pathChanged.connect(() => {
-    launcherModel.path = pathTracker.path;
-  });
+  let widget = new LauncherWidget();
 
-  let launcherWidget = new LauncherWidget();
-
-  launcherWidget.model = launcherModel;
-  launcherWidget.id = 'launcher-jupyterlab-widget';
-  launcherWidget.title.label = 'Launcher';
+  widget.model = model;
+  widget.id = 'launcher';
+  widget.title.label = 'Launcher';
 
   // Hardcoded defaults.
-  let names = [
-    'Notebook',
-    'Code Console',
-    'Terminal',
-    'Text Editor',
-  ];
-
-  let actions = [
-    'file-operations:new-notebook',
-    'console:create-new',
-    'terminal:create-new',
-    'file-operations:new-text-file',
-  ];
-
-  app.commands.addCommand('jupyterlab-launcher:add-item', {
-    label: 'Add Launcher Item',
-    execute: (args) => {
-      launcherModel.add(args['name'] as string, args['action'] as string,
-                        args['args'] as JSONObject, args['imgName'] as string);
+  let defaults: ILauncherItem[] = [
+    {
+      name: 'Notebook',
+      command: 'file-operations:new-notebook'
+    },
+    {
+      name: 'Code Console',
+      command: 'console:create'
+    },
+    {
+      name: 'Terminal',
+      command: 'terminal:create-new'
+    },
+    {
+      name: 'Text Editor',
+      command: 'file-operations:new-text-file'
     }
-  });
+  ];
 
-  for (let i in names) {
-    // Note: we do not retain a handle on the items added by default, which
-    // means we have to way of removing them after the fact.
-    launcherModel.add(names[i], actions[i]);
-  }
+  // Note: we do not retain a handle on the items added by default, which
+  // means we have to way of removing them after the fact.
+  defaults.forEach(options => { model.add(options); });
 
-
-  app.commands.addCommand('jupyterlab-launcher:show', {
+  app.commands.addCommand('launcher:show', {
     label: 'Show Launcher',
     execute: () => {
-      if (!launcherWidget.isAttached) {
-        app.shell.addToLeftArea(launcherWidget);
+      if (!widget.isAttached) {
+        app.shell.addToLeftArea(widget);
       }
-      app.shell.activateLeft(launcherWidget.id);
+      app.shell.activateLeft(widget.id);
     }
   });
+  palette.addItem({ command: 'launcher:show', category: 'Help' });
 
-  palette.addItem({
-    command: 'jupyterlab-launcher:show',
-    category: 'Help'
-  });
+  app.shell.addToLeftArea(widget);
 
-  app.shell.addToLeftArea(launcherWidget);
-  return launcherModel;
+  return model;
 }
-
