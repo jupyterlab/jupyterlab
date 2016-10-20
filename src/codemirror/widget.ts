@@ -84,9 +84,7 @@ class CodeMirrorWidget extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._static.hide();
-    this._live.show();
-    this.editor.focus();
+    this._activate();
   }
 
   /**
@@ -101,6 +99,9 @@ class CodeMirrorWidget extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
+    case 'mousedown':
+      this._evtMouseDown(event as MouseEvent);
+      break;
     case 'focus':
       this._evtFocus(event as MouseEvent);
       break;
@@ -116,6 +117,7 @@ class CodeMirrorWidget extends Widget {
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('mousedown', this);
     this.node.addEventListener('focus', this, true);
     this.node.addEventListener('blur', this, true);
   }
@@ -124,25 +126,33 @@ class CodeMirrorWidget extends Widget {
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('mousedown', this);
     this.node.removeEventListener('focus', this, true);
     this.node.removeEventListener('blur', this, true);
+  }
+
+  /**
+   * Handle `mousedown` events for the widget.
+   */
+  private _evtMouseDown(event: MouseEvent): void {
+    if (this._live.isVisible) {
+      return;
+    }
+    this._lastMouseDown = event;
   }
 
   /**
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: MouseEvent): void {
-    if (this.editor.getOption('readOnly') !== false) {
-      return;
-    }
-    this._static.hide();
-    this._live.show();
+    this._activate();
   }
 
   /**
    * Handle `blur` events for the widget.
    */
   private _evtBlur(event: MouseEvent): void {
+    this._lastMouseDown = null;
     if (this.node.contains(event.relatedTarget as HTMLElement)) {
       return;
     }
@@ -150,8 +160,31 @@ class CodeMirrorWidget extends Widget {
     this._static.show();
   }
 
+  /**
+   * Handle an activation message or a focus event.
+   */
+  private _activate(): void {
+    if (this.editor.getOption('readOnly') !== false) {
+      this._lastMouseDown = null;
+      return;
+    }
+    this._static.hide();
+    this._live.show();
+    if (this._lastMouseDown) {
+      let node = this._live.node;
+      let evt = document.createEvent();
+      let evt = generate('mousedown', this._lastMouseDown);
+      evt.target = node;
+      simulate(node, 'mousedown', this._lastMouseDown);
+      this._lastMouseDown = null;
+    } else {
+      this.editor.focus();
+    }
+  }
+
   private _live: LiveCodeMirror;
   private _static: StaticCodeMirror;
+  private _lastMouseDown: MouseEvent;
 }
 
 
@@ -184,34 +217,10 @@ class LiveCodeMirror extends Widget {
   }
 
   /**
-   * A message handler invoked on an `'after-attach'` message.
-   */
-  protected onAfterAttach(msg: Message): void {
-    if (!this.isVisible) {
-      this._needsRefresh = true;
-      return;
-    }
-    this._editor.refresh();
-    this._needsRefresh = false;
-  }
-
-  /**
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    if (this._needsRefresh) {
-      this._editor.refresh();
-      this._needsRefresh = false;
-    }
     this._editor.refresh();
-    this._editor.focus();
-  }
-
-  /**
-   * A message handler invoked on a `'before-hide'` message.
-   */
-  protected onBeforeHide(msg: Message): void {
-    this._needsRefresh = true;
   }
 
   /**
@@ -223,10 +232,8 @@ class LiveCodeMirror extends Widget {
     } else {
       this._editor.setSize(msg.width, msg.height);
     }
-    this._needsRefresh = false;
   }
 
-  private _needsRefresh = true;
   private _editor: CodeMirror.Editor = null;
 }
 
@@ -247,8 +254,6 @@ class StaticCodeMirror extends Widget {
     CodeMirror.on(this._editor.getDoc(), 'change', (instance, change) => {
       if (this.isVisible) {
         this._render();
-      } else {
-        this._needsRefresh = true;
       }
     });
   }
@@ -262,23 +267,10 @@ class StaticCodeMirror extends Widget {
   }
 
   /**
-   * A message handler invoked on an `'after-attach'` message.
-   */
-  protected onAfterAttach(msg: Message): void {
-    if (!this.isVisible) {
-      this._needsRefresh = true;
-      return;
-    }
-    this._render();
-  }
-
-  /**
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    if (this._needsRefresh) {
-      this._render();
-    }
+    this._render();
   }
 
   /**
@@ -288,9 +280,7 @@ class StaticCodeMirror extends Widget {
     CodeMirror.runMode(this._editor.getDoc().getValue(),
                        this._editor.getOption('mode'),
                        this.node);
-    this._needsRefresh = false;
   }
 
   private _editor: CodeMirror.Editor = null;
-  private _needsRefresh = true;
 }
