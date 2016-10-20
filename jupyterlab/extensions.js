@@ -16,7 +16,7 @@ module.exports = [
   require('../lib/imagewidget/plugin').imageHandlerExtension,
   require('../lib/inspector/plugin').inspectorProvider,
   require('../lib/landing/plugin').landingExtension,
-  require('../lib/launcher/plugin').launcherExtension,
+  require('../lib/launcher/plugin').launcherProvider,
   require('../lib/main/plugin').mainExtension,
   require('../lib/mainmenu/plugin').mainMenuProvider,
   require('../lib/markdownwidget/plugin').markdownHandlerExtension,
