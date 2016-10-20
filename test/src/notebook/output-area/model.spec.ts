@@ -93,7 +93,7 @@ describe('notebook/output-area/model', () => {
           expect(args.oldIndex).to.be(-1);
           expect(args.newIndex).to.be(0);
           expect(args.oldValues.length).to.be(0);
-          expect(deepEqual(args.newValues.at(0) as nbformat.IOutput, DEFAULT_OUTPUTS[0]));
+          expect(deepEqual(args.newValues[0] as nbformat.IOutput, DEFAULT_OUTPUTS[0]));
           called = true;
         });
         model.add(DEFAULT_OUTPUTS[0]);
