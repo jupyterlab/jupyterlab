@@ -203,13 +203,12 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   save(): Promise<void> {
     let model = this._model;
-    let contents = this._contentsModel || {};
     let path = this._path;
     if (model.readOnly) {
       return Promise.reject(new Error('Read only'));
     }
     let content: JSONObject | string;
-    if (contents.format === 'json') {
+    if (this._factory.fileFormat === 'json') {
       content = model.toJSON();
     } else {
       content = model.toString();
