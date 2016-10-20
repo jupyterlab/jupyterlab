@@ -62,7 +62,13 @@ If you use ``conda``, you can install it as:
 conda install notebook
 ```
 
-If you use ``pip``` you can install it as:
+You may also want to install `nb_conda_kernels` to have a kernel option for different [conda environments](http://conda.pydata.org/docs/using/envs.html)
+
+```bash
+conda install nb_conda_kernels
+```
+
+If you use `pip` you can install it as:
 
 ```bash
 pip install notebook
@@ -76,8 +82,6 @@ steps::
     npm install
     pip install -e . # will take a long time to build everything
     jupyter serverextension enable --py jupyterlab
-
-
 
 Note: At times, it may be necessary to clean your local repo with the 
 command ``git clean -fdx``.
