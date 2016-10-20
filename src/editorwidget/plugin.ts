@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
   AttachedProperty
 } from 'phosphor/lib/core/properties';
 
@@ -98,7 +94,11 @@ const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
  * Sets up the editor widget
  */
 function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IEditorTracker {
-  let widgetFactory = new EditorWidgetFactory();
+  let widgetFactory = new EditorWidgetFactory({
+    name: 'Editor',
+    fileExtensions: ['*'],
+    defaultFor: ['*']
+  });
 
   // Sync tracker with currently focused widget.
   app.shell.currentChanged.connect((sender, args) => {
@@ -109,15 +109,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
     tracker.add(widget);
   });
-  registry.addWidgetFactory(widgetFactory,
-  {
-    fileExtensions: ['*'],
-    displayName: 'Editor',
-    modelName: 'text',
-    defaultFor: ['*'],
-    preferKernel: false,
-    canStartKernel: false
-  });
+  registry.addWidgetFactory(widgetFactory);
 
   mainMenu.addMenu(createMenu(app), {rank: 30});
 

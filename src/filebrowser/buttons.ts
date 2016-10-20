@@ -430,7 +430,6 @@ namespace Private {
     let prefix = `file-buttons-${++id}`;
     let disposables = new DisposableSet();
     let registry = widget.manager.registry;
-    let creators = registry.creators;
     let command: string;
 
     // Remove all the commands associated with this menu upon disposal.
@@ -443,7 +442,7 @@ namespace Private {
     }));
     menu.addItem({ command });
 
-    each(creators, creator => {
+    each(registry.getCreators(), creator => {
       command = `${prefix}:new-${creator.name}`;
       disposables.add(commands.addCommand(command, {
         execute: () => {

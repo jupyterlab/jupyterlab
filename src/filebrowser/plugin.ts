@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
+  each, map, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -112,7 +112,6 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
   });
 
   let category = 'File Operations';
-  let creators = registry.creators;
   let creatorCmds: { [key: string]: DisposableSet } = Object.create(null);
 
   let addCreator = (name: string) => {
@@ -132,7 +131,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     tracker.sync(args.newValue);
   });
 
-  each(creators, creator => {
+  each(registry.getCreators(), creator => {
     addCreator(creator.name);
   });
 
@@ -142,7 +141,10 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     event.preventDefault();
     let path = fbWidget.pathForClick(event) || '';
     let ext = '.' + path.split('.').pop();
-    let widgetNames = registry.listWidgetFactories(ext);
+    let factories = registry.preferredWidgetFactories(ext);
+    let widgetNames = toArray(map(factories, factory => {
+      return factory.name;
+    }));
     let prefix = `file-browser-contextmenu-${++Private.id}`;
     let openWith: Menu = null;
     if (path && widgetNames.length > 1) {

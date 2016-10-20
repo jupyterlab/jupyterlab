@@ -142,16 +142,17 @@ function createApp(manager: IServiceManager): void {
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
   let renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
-  let wFactory = new NotebookWidgetFactory(rendermime, clipboard, renderer);
-  docRegistry.addModelFactory(mFactory);
-  docRegistry.addWidgetFactory(wFactory, {
-    displayName: 'Notebook',
+  let wFactory = new NotebookWidgetFactory({
+    name: 'Notebook',
     modelName: 'notebook',
     fileExtensions: ['.ipynb'],
     defaultFor: ['.ipynb'],
     preferKernel: true,
-    canStartKernel: true
+    canStartKernel: true,
+    rendermime, clipboard, renderer
   });
+  docRegistry.addModelFactory(mFactory);
+  docRegistry.addWidgetFactory(wFactory);
 
   let nbWidget = docManager.open(NOTEBOOK) as NotebookPanel;
   let palette = new CommandPalette({ commands, keymap });

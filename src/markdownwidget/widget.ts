@@ -114,9 +114,9 @@ class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, DocumentReg
   /**
    * Construct a new markdown widget factory.
    */
-  constructor(rendermime: RenderMime) {
-    super();
-    this._rendermime = rendermime;
+  constructor(options: MarkdownWidgetFactory.IOptions) {
+    super(options);
+    this._rendermime = options.rendermime;
   }
 
   /**
@@ -129,4 +129,22 @@ class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, DocumentReg
   }
 
   private _rendermime: RenderMime = null;
+}
+
+
+/**
+ * A namespace for `MarkdownWidgetFactory` statics.
+ */
+export
+namespace MarkdownWidgetFactory {
+  /**
+   * The options used to create a markdown widget factory.
+   */
+  export
+  interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+    /**
+     * A rendermime instance.
+     */
+    rendermime: RenderMime;
+  }
 }
