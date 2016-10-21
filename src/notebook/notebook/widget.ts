@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  KernelMessage
-} from '@jupyterlab/services';
-
-import {
   each
 } from 'phosphor/lib/algorithm/iteration';
 
@@ -63,10 +59,6 @@ import {
   CodeCellModel, RawCellWidget, RawCellModel,
   ICodeCellModel, IMarkdownCellModel, IRawCellModel
 } from '../cells';
-
-import {
-  mimetypeForLanguage
-} from '../common/mimetype';
 
 import {
   EdgeLocation
@@ -257,7 +249,7 @@ class StaticNotebook extends Widget {
   protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'language_info':
-      this._mimetype = this._renderer.getCodeMimetype(model);
+      this._updateMimetype();
       this._updateCells();
       break;
     default:
@@ -310,7 +302,7 @@ class StaticNotebook extends Widget {
       this._mimetype = 'text/plain';
       return;
     }
-    this._mimetype = this._renderer.getCodeMimetype(newValue);
+    this._updateMimetype();
     let cells = newValue.cells;
     for (let i = 0; i < cells.length; i++) {
       this._insertCell(i, cells.at(i));
@@ -418,6 +410,15 @@ class StaticNotebook extends Widget {
     this._renderer.updateCell(child);
   }
 
+  /**
+   * Update the mimetype of the notebook.
+   */
+  private _updateMimetype(): void {
+    let cursor = this._model.getMetadata('language_info');
+    let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
+    this._mimetype = this._renderer.getCodeMimetype(info);
+  }
+
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _rendermime: RenderMime = null;
@@ -484,12 +485,9 @@ namespace StaticNotebook {
     updateCell(cell: BaseCellWidget): void;
 
     /**
-     * Get the preferred mime type for code cells in the notebook.
-     *
-     * #### Notes
-     * The model is guaranteed to be non-null.
+     * Get the preferred mimetype given language info.
      */
-    getCodeMimetype(model: INotebookModel): string;
+    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string;
   }
 
   /**
@@ -523,16 +521,9 @@ namespace StaticNotebook {
     }
 
     /**
-     * Get the preferred mimetype for code cells in the notebook.
-     *
-     * #### Notes
-     * The model is guaranteed to be non-null.
+     * Get the preferred mimetype given language info.
      */
-    getCodeMimetype(model: INotebookModel): string {
-      let cursor = model.getMetadata('language_info');
-      let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
-      return mimetypeForLanguage(info as KernelMessage.ILanguageInfo);
-    }
+    abstract getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string;
   }
 }
 

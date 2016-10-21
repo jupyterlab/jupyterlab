@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+
 import {
   CodeCellModel, RawCellModel
 } from '../../notebook/cells/model';
@@ -16,6 +17,14 @@ import {
 import {
   CodeMirrorNotebookRenderer
 } from '../../notebook/codemirror/notebook/widget';
+
+import {
+  mimetypeForLanguage
+} from '../../notebook/common/mimetype';
+
+import {
+  nbformat
+} from '../../notebook/notebook/nbformat';
 
 import {
   RenderMime
@@ -64,6 +73,13 @@ class CodeMirrorConsoleRenderer implements ConsoleContent.IRenderer {
     });
     widget.model = new CodeCellModel();
     return widget;
+  }
+
+  /**
+   * Get the preferred mimetype given language info.
+   */
+  getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
+    return mimetypeForLanguage(info);
   }
 }
 

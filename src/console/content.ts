@@ -42,10 +42,6 @@ import {
 } from '../notebook/cells/editor';
 
 import {
-  mimetypeForLanguage
-} from '../notebook/common/mimetype';
-
-import {
   CompleterWidget, CompleterModel, CellCompleterHandler
 } from '../completer';
 
@@ -547,7 +543,8 @@ class ConsoleContent extends Widget {
     let layout = this._content.layout as PanelLayout;
     let banner = layout.widgets.at(0) as RawCellWidget;
     banner.model.source = info.banner;
-    this._mimetype = mimetypeForLanguage(info.language_info);
+    let lang = info.language_info as nbformat.ILanguageInfoMetadata;
+    this._mimetype = this._renderer.getCodeMimetype(lang);
     this.prompt.mimetype = this._mimetype;
   }
 
@@ -620,6 +617,11 @@ namespace ConsoleContent {
      * Create a code cell whose input originated from a foreign session.
      */
     createForeignCell(rendermine: IRenderMime): CodeCellWidget;
+
+    /**
+     * Get the preferred mimetype given language info.
+     */
+    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string;
   }
 
   /* tslint:disable */
