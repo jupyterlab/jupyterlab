@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  map, toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -186,16 +190,13 @@ class ConsoleContent extends Widget {
 
   /**
    * Get the inspection handler used by the console.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get inspectionHandler(): InspectionHandler {
     return this._inspectionHandler;
   }
 
   /*
-   * The last cell in a console is always a `CodeCellWidget` prompt.
+   * The console input prompt.
    */
   get prompt(): CodeCellWidget {
     let inputLayout = (this._input.layout as PanelLayout);
@@ -204,9 +205,6 @@ class ConsoleContent extends Widget {
 
   /**
    * Get the session used by the console.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get session(): Session.ISession {
     return this._session;
@@ -251,7 +249,7 @@ class ConsoleContent extends Widget {
    * @param force - Whether to force execution without checking code
    * completeness.
    */
-  execute(force=false): Promise<void> {
+  execute(force = false): Promise<void> {
     this._completer.reset();
 
     if (this._session.status === 'dead') {
@@ -260,6 +258,7 @@ class ConsoleContent extends Widget {
 
     let prompt = this.prompt;
     prompt.trusted = true;
+
     if (force) {
       // Create a new prompt before kernel execution to allow typeahead.
       this.newPrompt();
@@ -303,14 +302,14 @@ class ConsoleContent extends Widget {
    * Serialize the output.
    */
   serialize(): nbformat.ICodeCell[] {
-    let output: nbformat.ICodeCell[] = [];
+    let prompt = this.prompt;
     let layout = this._content.layout as PanelLayout;
-    for (let i = 1; i < layout.widgets.length; i++) {
-      let widget = layout.widgets.at(i) as CodeCellWidget;
-      output.push(widget.model.toJSON() as nbformat.ICodeCell);
-    }
-    output.push(this.prompt.model.toJSON() as nbformat.ICodeCell);
-    return output;
+    // Serialize content.
+    let output = map(layout.widgets, widget => {
+      return (widget as CodeCellWidget).model.toJSON() as nbformat.ICodeCell;
+    });
+    // Serialize prompt and return.
+    return toArray(output).concat(prompt.model.toJSON() as nbformat.ICodeCell);
   }
 
   /**
