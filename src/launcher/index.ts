@@ -76,6 +76,7 @@ const FOLDER_CLASS = 'jp-LauncherWidget-folder';
  * The class name added for the folder icon from default-theme.
  */
 const FOLDER_ICON_CLASS = 'jp-FolderIcon';
+
 /**
  * The class name added to LauncherWidget path nodes.
  */
