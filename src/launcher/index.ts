@@ -73,6 +73,10 @@ const ITEM_CLASS = 'jp-LauncherWidget-item';
 const FOLDER_CLASS = 'jp-LauncherWidget-folder';
 
 /**
+ * The class name added for the folder icon from default-theme.
+ */
+const FOLDER_ICON_CLASS = 'jp-FolderIcon';
+/**
  * The class name added to LauncherWidget path nodes.
  */
 const PATH_CLASS = 'jp-LauncherWidget-path';
@@ -308,7 +312,7 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
       return h.div({ className: ITEM_CLASS, dataset: { index } }, [img, text]);
     });
 
-    let folderImage = h.span({ className: FOLDER_CLASS });
+    let folderImage = h.span({ className: FOLDER_CLASS + ' ' + FOLDER_ICON_CLASS});
     let p = this.model.path;
     let pathName = p.length ? `home > ${p.replace(/\//g, ' > ')}` : 'home';
     let path = h.span({ className: PATH_CLASS }, pathName );
