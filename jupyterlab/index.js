@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 var JupyterLab = require('../lib/application').JupyterLab;
-var extractPlugins = require('jupyterlab-extension-builder/lib/extract').extractPlugins;
+var extractPlugins = require('@jupyterlab/extension-builder/lib/extract').extractPlugins;
 
 
 // ES6 Promise polyfill
