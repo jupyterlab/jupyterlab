@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Session, KernelMessage
+  KernelMessage, Session
 } from '@jupyterlab/services';
+
+import {
+  Message
+} from 'phosphor/lib/core/messaging';
 
 import {
   clearSignalData, defineSignal, ISignal
@@ -14,10 +18,6 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  Message
-} from 'phosphor/lib/core/messaging';
-
-import {
   Panel, PanelLayout
 } from 'phosphor/lib/ui/panel';
 
@@ -26,12 +26,12 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  InspectionHandler
-} from '../inspector';
+  CellCompleterHandler, CompleterModel, CompleterWidget
+} from '../completer';
 
 import {
-  nbformat
-} from '../notebook/notebook/nbformat';
+  InspectionHandler
+} from '../inspector';
 
 import {
   CodeCellWidget, RawCellWidget
@@ -42,8 +42,8 @@ import {
 } from '../notebook/cells/editor';
 
 import {
-  CompleterWidget, CompleterModel, CellCompleterHandler
-} from '../completer';
+  nbformat
+} from '../notebook/notebook/nbformat';
 
 import {
   IRenderMime
