@@ -182,11 +182,17 @@ class ConsoleContent extends Widget {
     });
   }
 
+  /*
+   * The console content panel that holds the banner and executed cells.
+   */
+  get content(): Panel {
+    return this._content;
+  }
+
   /**
    * A signal emitted when the console executes its prompt.
    */
   readonly executed: ISignal<this, Date>;
-
 
   /**
    * Get the inspection handler used by the console.
