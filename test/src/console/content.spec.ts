@@ -16,12 +16,21 @@ import {
 } from '../../../lib/console/content';
 
 import {
+  InspectionHandler
+} from '../../../lib/inspector';
+
+import {
+  CodeCellWidget
+} from '../../../lib/notebook/cells';
+
+import {
   defaultRenderMime
 } from '../utils';
 
 
-const rendermime = defaultRenderMime();
+const CONSOLE_CLASS = 'jp-ConsoleContent';
 const renderer = CodeMirrorConsoleRenderer.defaultRenderer;
+const rendermime = defaultRenderMime();
 
 
 describe('console/content', () => {
@@ -32,43 +41,130 @@ describe('console/content', () => {
 
       it('should create a new console content widget', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
-          let content = new ConsoleContent({ renderer, rendermime, session });
-          expect(content).to.be.a(ConsoleContent);
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          expect(widget).to.be.a(ConsoleContent);
+          expect(widget.node.classList.contains(CONSOLE_CLASS)).to.be(true);
+          widget.dispose();
           done();
         });
       });
 
     });
 
-    // describe('#isDisposed', () => {
+    describe('#executed', () => {
 
-    //   it('should get whether the object is disposed', () => {
-    //     let history = new ConsoleHistory();
-    //     expect(history.isDisposed).to.be(false);
-    //     history.dispose();
-    //     expect(history.isDisposed).to.be(true);
-    //   });
+      it('should emit a date upon execution', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          let called: Date = null;
+          let force = true;
+          widget.executed.connect((sender, time) => { called = time; });
+          widget.execute(force).then(() => {
+            expect(called).to.be.a(Date);
+            widget.dispose();
+            done();
+          });
+        });
+      });
 
-    // });
+    });
 
-    // describe('#dispose()', () => {
+    describe('#inspectionHandler', () => {
 
-    //   it('should dispose the history object', () => {
-    //     let history = new ConsoleHistory();
-    //     expect(history.isDisposed).to.be(false);
-    //     history.dispose();
-    //     expect(history.isDisposed).to.be(true);
-    //   });
+      it('should exist after instantiation', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          expect(widget.inspectionHandler).to.be.an(InspectionHandler);
+          widget.dispose();
+          done();
+        });
+      });
 
-    //   it('should be safe to dispose multiple times', () => {
-    //     let history = new ConsoleHistory();
-    //     expect(history.isDisposed).to.be(false);
-    //     history.dispose();
-    //     history.dispose();
-    //     expect(history.isDisposed).to.be(true);
-    //   });
+    });
 
-    // });
+    describe('#prompt', () => {
+
+      it('should be a code cell widget', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          expect(widget.prompt).to.be.a(CodeCellWidget);
+          widget.dispose();
+          done();
+        });
+      });
+
+      it('should be be replaced after execution', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          let old = widget.prompt;
+          let force = true;
+          expect(old).to.be.a(CodeCellWidget);
+          widget.execute(force).then(() => {
+            expect(widget.prompt).to.be.a(CodeCellWidget);
+            expect(widget.prompt).to.not.be(old);
+            widget.dispose();
+            done();
+          });
+        });
+      });
+
+    });
+
+    describe('#session', () => {
+
+      it('should return the session passed in at instantiation', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          expect(widget.session).to.be(session);
+          widget.dispose();
+          done();
+        });
+      });
+
+    });
+
+    describe('#clear()', () => {
+
+      it('should clear all of the content cells except the banner', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          let force = true;
+          widget.execute(force).then(() => {
+            expect(widget.content.widgets.length).to.be.greaterThan(1);
+            widget.clear();
+            expect(widget.content.widgets.length).to.be(1);
+            widget.dispose();
+            done();
+          });
+        });
+      });
+
+    });
+
+    describe('#dispose()', () => {
+
+      it('should dispose the content widget', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          expect(widget.isDisposed).to.be(false);
+          widget.dispose();
+          expect(widget.isDisposed).to.be(true);
+          done();
+        });
+      });
+
+      it('should be safe to dispose multiple times', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          expect(widget.isDisposed).to.be(false);
+          widget.dispose();
+          widget.dispose();
+          expect(widget.isDisposed).to.be(true);
+          done();
+        });
+      });
+
+    });
 
   });
 
