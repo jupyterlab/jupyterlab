@@ -17,6 +17,10 @@ import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
+import {
+  IChangedArgs
+} from '../common/interfaces';
+
 
 /**
  * A namespace for code editors.
@@ -120,44 +124,70 @@ namespace CodeEditor {
   }
 
   /**
+   * A text selection.
+   */
+  export
+  interface ITextSelection {
+    /**
+     * The index to the first character in the current selection.
+     */
+    start: number;
+
+    /**
+     * The index to the last character in the current selection.
+     */
+    end: number;
+
+    /**
+     * The direction in which selection occurred.
+     */
+    direction: 'forward' | 'backward' | 'none';
+  }
+
+  /**
    * An editor model.
    */
   export
   interface IModel extends IDisposable {
     /**
-     * A signal emitted when a content of this model changed.
+     * A signal emitted when the value changes.
      */
-    valueChanged: ISignal<IModel, string>;
+    valueChanged: ISignal<IModel, IChangedArgs<string>>;
 
     /**
-     * A signal emitted when the uri changes.
+     * A signal emitted when a property changes.
      */
-    uriChanged: ISignal<IModel, string>;
+    propertyChanged: ISignal<IModel, IChangedArgs<any>>;
 
     /**
-     * A signal emitted when the mime type changes.
+     * The text stored in the model.
      */
-    mimeTypeChanged: ISignal<IModel, string>;
+    value: string;  // TODO: this should be an iobservablestring.
 
     /**
-     * The uri associated with this model.
+     * The uri associated with the model.
      */
     uri: string;
 
     /**
-     * A mime type for this model.
+     * A mime type of the model.
      */
     mimeType: string;
 
     /**
-     * The text stored in this model.
+     * The cursor position.
      */
-    value: string;
+    cursor: ICursorPosition;
 
     /**
      * Get the number of lines in the model.
      */
     readonly lineCount: number;
+
+    /**
+     * The currently selected code.
+     */
+    selection: ITextSelection;
 
     /**
      * Returns the content for the given line number.
@@ -173,6 +203,21 @@ namespace CodeEditor {
      * Find a position fot the given offset.
      */
     getPositionAt(offset: number): ICursorPosition;
+
+    /**
+     * Undo one edit (if any undo events are stored).
+     */
+    undo(): void;
+
+    /**
+     * Redo one undone edit.
+     */
+    redo(): void;
+
+    /**
+     * Clear the undo history.
+     */
+    clearHistory(): void;
   }
 
   /**
@@ -186,11 +231,6 @@ namespace CodeEditor {
    */
   export
   interface IEditor extends Widget {
-    /**
-     * A cursor position for this editor.
-     */
-    position: ICursorPosition;
-
     /**
      * The configuration used by the editor.
      */
@@ -226,6 +266,11 @@ namespace CodeEditor {
     setSize(width: number, height: number): void;
 
     /**
+     * Scroll the given cursor position into view.
+     */
+    scrollIntoView(pos: ICursorPosition, margin?: number): void;
+
+    /**
      * Get the window coordinates given a cursor position.
      */
     getCoords(position: ICursorPosition): ICoords;
@@ -237,19 +282,14 @@ namespace CodeEditor {
   export
   class Model implements IModel {
     /**
-     * A signal emitted when a content of this model changed.
+     * A signal emitted when a content of the model changed.
      */
-    valueChanged: ISignal<this, string>;
+    valueChanged: ISignal<this, IChangedArgs<string>>;
 
     /**
-     * A signal emitted when the uri changes.
+     * A signal emitted when a property changes.
      */
-    uriChanged: ISignal<this, string>;
-
-    /**
-     * A signal emitted when the mimetype changes.
-     */
-    mimeTypeChanged: ISignal<this, string>;
+    propertyChanged: ISignal<this, IChangedArgs<any>>;
 
     /**
      * Whether the model is disposed.
@@ -270,7 +310,7 @@ namespace CodeEditor {
     }
 
     /**
-     * The uri associated with this model.
+     * The uri associated with the model.
      */
     get uri(): string {
       return this._uri;
@@ -281,11 +321,15 @@ namespace CodeEditor {
         return;
       }
       this._uri = newValue;
-      this.uriChanged.emit(newValue);
+      this.propertyChanged.emit({
+        name: 'uri',
+        oldValue,
+        newValue
+      });
     }
 
     /**
-     * A mime type for this model.
+     * A mime type of the model.
      */
     get mimeType(): string {
       return this._mimetype;
@@ -296,21 +340,68 @@ namespace CodeEditor {
         return;
       }
       this._mimetype = newValue;
-      this.mimeTypeChanged.emit(newValue);
+      this.propertyChanged.emit({
+        name: 'mimeType',
+        oldValue,
+        newValue
+      });
     }
 
     /**
-     * The text stored in this model.
+     * The text stored in the model.
      */
     get value(): string {
       return this._value;
     }
     set value(newValue: string) {
-      if (this._value === newValue) {
+      let oldValue = this._value;
+      if (oldValue === newValue) {
         return;
       }
       this._value = newValue;
-      this.valueChanged.emit(newValue);
+      this.valueChanged.emit({
+        name: 'value',
+        oldValue,
+        newValue
+      });
+    }
+
+    /**
+     * The cursor position of the model.
+     */
+    get cursor(): ICursorPosition {
+      return this._cursor;
+    }
+    set cursor(newValue: ICursorPosition) {
+      let oldValue = this._cursor;
+      if (oldValue === newValue) {
+        return;
+      }
+      this._cursor = newValue;
+      this.propertyChanged.emit({
+        name: 'cursor',
+        oldValue,
+        newValue
+      });
+    }
+
+    /**
+     * A text selection of the model.
+     */
+    get selection(): ITextSelection {
+      return this._selection;
+    }
+    set selection(newValue: ITextSelection) {
+      let oldValue = this._selection;
+      if (oldValue === newValue) {
+        return;
+      }
+      this._selection = newValue;
+      this.propertyChanged.emit({
+        name: 'selection',
+        oldValue,
+        newValue
+      });
     }
 
     /**
@@ -346,9 +437,26 @@ namespace CodeEditor {
       return { line: lines.length - 1, column };
     }
 
+    /**
+     * Undo one edit (if any undo events are stored).
+     */
+    undo(): void { /* no-op */ }
+
+    /**
+     * Redo one undone edit.
+     */
+    redo(): void { /* no-op */ }
+
+    /**
+     * Clear the undo history.
+     */
+    clearHistory(): void { /* no-op */ }
+
     private _uri = '';
     private _mimetype = '';
     private _value = '';
+    private _cursor: ICursorPosition = { line: 1, column: 1 };
+    private _selection: ITextSelection = { start: 0, end: 0, direction: 'forward' };
     private _isDisposed = false;
   }
 
@@ -394,7 +502,7 @@ namespace CodeEditor {
     get readOnly(): boolean {
       return this._readOnly;
     }
-    set wordWrap(value: boolean) {
+    set readOnly(value: boolean) {
       if (value !== this._readOnly) {
         this._readOnly = value;
         this.changed.emit('readOnly');
@@ -500,9 +608,8 @@ namespace CodeEditor {
 
 }
 
-defineSignal(CodeEditor.Editor.prototype, 'valueChanged');
-defineSignal(CodeEditor.Editor.prototype, 'uriChanged');
-defineSignal(CodeEditor.Editor.prototype, 'mimeTypeChanged');
+defineSignal(CodeEditor.Model.prototype, 'valueChanged');
+defineSignal(CodeEditor.Model.prototype, 'propertyChanged');
 defineSignal(CodeEditor.Configuration.prototype, 'changed');
 
 
@@ -520,13 +627,11 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     let node = this.node as HTMLTextAreaElement;
     node.readOnly = config.readOnly;
     node.wrap = config.wordWrap ? 'hard' : 'soft';
+    let selection = model.selection;
+    node.setSelectionRange(selection.start, selection.end);
     model.valueChanged.connect(this.onModelValueChanged, this);
+    model.propertyChanged.connect(this.onModelPropertyChanged, this);
     config.changed.connect(this.onConfigChanged, this);
-  }
-
-  get position(): CodeEditor.ICursorPosition {
-    let node = this.node as HTMLTextAreaElement;
-    return this._model.getPositionAt(node.selectionEnd);
   }
 
   get config(): CodeEditor.IConfiguration {
@@ -566,6 +671,13 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   }
 
   /**
+   * Scroll the given cursor position into view.
+   */
+  scrollIntoView(pos: CodeEditor.ICursorPosition, margin?: number): void {
+    // set node scroll position here.
+  }
+
+  /**
    * Get the window coordinates given a cursor position.
    */
   getCoords(position: CodeEditor.ICursorPosition): CodeEditor.ICoords {
@@ -578,6 +690,9 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     case 'keydown':
       this._evtKeydown(event as KeyboardEvent);
       break;
+    case 'mouseup':
+      this._evtMouseUp(event as MouseEvent);
+      break;
     case 'input':
       this._evtInput(event);
       break;
@@ -587,16 +702,40 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.node.addEventListener('keydown', this);
+    this.node.addEventListener('mouseup', this);
     this.node.addEventListener('input', this);
   }
 
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('keydown', this);
+    this.node.removeEventListener('mouseup', this);
     this.node.removeEventListener('input', this);
   }
 
-  protected onModelValueChanged(sender: CodeEditor.IModel, args: string): void {
-    (this.node as HTMLTextAreaElement).value = args;
+  protected onModelPropertyChanged(sender: CodeEditor.IModel, args: IChangedArgs<any>): void {
+    if (this._changeGuard) {
+      return;
+    }
+    let node = this.node as HTMLTextAreaElement;
+    switch (args.name) {
+    case 'cursor':
+      let pos = args.newValue as CodeEditor.ICursorPosition;
+      let offset = this._model.getOffsetAt(pos);
+      node.setSelectionRange(offset, offset);
+      break;
+    case 'selection':
+      let selection = args.newValue as CodeEditor.ITextSelection;
+      node.setSelectionRange(selection.start, selection.end);
+      (node as any).selectionDirection = selection.direction;
+      break;
+    }
+  }
+
+  protected onModelValueChanged(sender: CodeEditor.IModel, args: IChangedArgs<string>): void {
+    if (this._changeGuard) {
+      return;
+    }
+    (this.node as HTMLTextAreaElement).value = args.newValue;
   }
 
   protected onConfigChanged(config: CodeEditor.IConfiguration, args: string): void {
@@ -618,12 +757,26 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     }
   }
 
+  private _evtMouseUp(event: MouseEvent): void {
+    let node = this.node as HTMLTextAreaElement;
+    this._changeGuard = true;
+    this._model.selection = {
+      start: node.selectionStart,
+      end: node.selectionEnd,
+      direction: (node as any).selectionDirection
+    };
+    this._changeGuard = false;
+  }
+
   private _evtInput(event: Event): void {
     let node = this.node as HTMLTextAreaElement;
+    this._changeGuard = true;
     this.model.value = node.value;
+    this._changeGuard = false;
   }
 
   private _model: CodeEditor.IModel;
   private _handler: CodeEditor.KeydownHandler = null;
   private _config: CodeEditor.IConfiguration = null;
+  private _changeGuard = false;
 }
