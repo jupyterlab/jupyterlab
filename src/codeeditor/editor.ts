@@ -242,6 +242,16 @@ namespace CodeEditor {
     readonly model: IModel;
 
     /**
+     * The height of a line in the editor in pixels.
+     */
+    readonly lineHeight: number;
+
+    /**
+     * The widget of a character in the editor in pixels.
+     */
+    readonly charWidth: number;
+
+    /**
      * Handle keydown events for the editor.
      *
      * #### Notes
@@ -373,6 +383,7 @@ namespace CodeEditor {
       return this._cursor;
     }
     set cursor(newValue: ICursorPosition) {
+      // TODO: keep in sync with selection.
       let oldValue = this._cursor;
       if (oldValue === newValue) {
         return;
@@ -392,6 +403,7 @@ namespace CodeEditor {
       return this._selection;
     }
     set selection(newValue: ITextSelection) {
+      // TODO: keep in sync with cursor
       let oldValue = this._selection;
       if (oldValue === newValue) {
         return;
@@ -647,6 +659,16 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   }
   set onKeyDown(value: CodeEditor.KeydownHandler) {
     this._handler = value;
+  }
+
+  get charWidth(): number {
+    // TODO css measurement
+    return -1;
+  }
+
+  get lineHeight(): number {
+    // TODO css measurement
+    return -1;
   }
 
   /**
