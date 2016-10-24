@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import {
   Kernel, KernelMessage
 } from '@jupyterlab/services';
@@ -78,16 +81,6 @@ class ForeignHandler implements IDisposable {
   }
 
   /**
-   * Make a new code cell for an input originated from a foreign session.
-   */
-  protected newCell(parentMsgId: string): CodeCellWidget {
-    let cell = this._renderer();
-    this._cells.set(parentMsgId, cell);
-    this._parent.addWidget(cell);
-    return;
-  }
-
-  /**
    * Handler IOPub messages.
    */
   protected onIOPubMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
@@ -104,7 +97,7 @@ class ForeignHandler implements IDisposable {
     switch (msgType) {
     case 'execute_input':
       let inputMsg = msg as KernelMessage.IExecuteInputMsg;
-      cell = this.newCell(parentMsgId);
+      cell = this._newCell(parentMsgId);
       cell.model.executionCount = inputMsg.content.execution_count;
       cell.model.source = inputMsg.content.code;
       cell.trusted = true;
@@ -133,6 +126,16 @@ class ForeignHandler implements IDisposable {
     default:
       break;
     }
+  }
+
+  /**
+   * Create a new code cell for an input originated from a foreign session.
+   */
+  private _newCell(parentMsgId: string): CodeCellWidget {
+    let cell = this._renderer();
+    this._cells.set(parentMsgId, cell);
+    this._parent.addWidget(cell);
+    return cell;
   }
 
   private _cells = new Map<string, CodeCellWidget>();
