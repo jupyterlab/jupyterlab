@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  each, enumerate
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -124,15 +124,13 @@ namespace NotebookActions {
     let index = widget.activeCellIndex;
 
     // Get the cells to merge.
-    let i = 0;
-    each(widget.widgets, child => {
+    each(enumerate(widget.widgets), ([i, child]) => {
       if (widget.isSelected(child)) {
         toMerge.push(child.model.source);
         if (i !== index) {
           toDelete.push(child.model);
         }
       }
-      i++;
     });
 
     // Check for only a single cell selected.
@@ -194,13 +192,11 @@ namespace NotebookActions {
     widget.mode = 'command';
 
     // Find the cells to delete.
-    let i = 0;
-    each(widget.widgets, child => {
+    each(enumerate(widget.widgets), ([i, child]) => {
       if (widget.isSelected(child)) {
         index = i;
         toDelete.push(cells.at(i));
       }
-      i++;
     });
 
     // Delete the cells as one undo event.
@@ -340,8 +336,7 @@ namespace NotebookActions {
     let cells = model.cells;
 
     cells.beginCompoundOperation();
-    let i = 0;
-    each(widget.widgets, child => {
+    each(enumerate(widget.widgets), ([i, child]) => {
       if (!widget.isSelected(child)) {
         return;
       }
@@ -364,7 +359,6 @@ namespace NotebookActions {
         child = widget.widgets.at(i);
         (child as MarkdownCellWidget).rendered = false;
       }
-      i++;
     });
     cells.endCompoundOperation();
     Private.deselectCells(widget);
