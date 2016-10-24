@@ -139,7 +139,7 @@ class StaticNotebook extends Widget {
     super();
     this.addClass(NB_CLASS);
     this._rendermime = options.rendermime;
-    this.layout = new Private.NotebookPanelLayout();
+    this.layout = new PanelLayout();
     this._renderer = options.renderer;
   }
 
@@ -1029,21 +1029,4 @@ namespace Private {
     name: 'selected',
     value: false
   });
-
-  /**
-   * A custom panel layout for the notebook.
-   */
-  export
-  class NotebookPanelLayout extends PanelLayout {
-    /**
-     * A message handler invoked on an `'update-request'` message.
-     *
-     * #### Notes
-     * This is a reimplementation of the base class method,
-     * and is a no-op.
-     */
-    protected onUpdateRequest(msg: Message): void {
-      // This is a no-op.
-    }
-  }
 }

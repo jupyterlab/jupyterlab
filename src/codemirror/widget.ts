@@ -81,6 +81,20 @@ class CodeMirrorWidget extends Widget {
   }
 
   /**
+   * Refresh the editor.
+   */
+  refresh(): void {
+    if (this._live.isVisible) {
+      return;
+    }
+    // Toggle the views to update the CodeMirror nodes.
+    this._static.hide();
+    this._live.show();
+    this._live.hide();
+    this._static.show();
+  }
+
+  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
@@ -120,6 +134,7 @@ class CodeMirrorWidget extends Widget {
     this.node.addEventListener('mousedown', this);
     this.node.addEventListener('focus', this, true);
     this.node.addEventListener('blur', this, true);
+    this.refresh();
   }
 
   /**
@@ -169,15 +184,48 @@ class CodeMirrorWidget extends Widget {
       this._lastMouseDown = null;
       return;
     }
+
     this._static.hide();
     this._live.show();
     if (this._lastMouseDown) {
-      let x = this._lastMouseDown.clientX;
-      let y = this._lastMouseDown.clientY;
-      let pos = editor.coordsChar({ left: x, top: y });
-      editor.getDoc().setCursor(pos);
+      this._handleMouseDown();
+      this._lastMouseDown = null;
     }
     editor.focus();
+  }
+
+  /**
+   * Handle a mousedown event when we activate.
+   */
+  private _handleMouseDown(): void {
+    let editor = this.editor;
+    let prev = this._lastMouseDown;
+    let doc = editor.getDoc();
+    let pos = editor.coordsChar({ left: prev.clientX, top: prev.clientY });
+    let offset = doc.indexFromPos(pos);
+
+    // If we have clicked in the middle of a selection, bail.
+    if (doc.somethingSelected()) {
+      for (let selection of doc.listSelections()) {
+        let { anchor, head } = selection;
+        let start = doc.indexFromPos(anchor);
+        let end = doc.indexFromPos(head);
+        if (start <= offset && end >= offset) {
+          return;
+        }
+      }
+    }
+
+    // Otherwise, clone and dispatch the mouse event
+    // so we can handle a new selection.
+    let evt = document.createEvent('MouseEvent') as MouseEvent;
+    let node = editor.getScrollerElement();
+    evt.initMouseEvent('mousedown', true, true,
+                       window, prev.detail, prev.screenX, prev.screenY,
+                       prev.clientX, prev.clientY,
+                       prev.ctrlKey, prev.altKey, prev.shiftKey,
+                       prev.metaKey, prev.button, null);
+    node.dispatchEvent(evt);
   }
 
   private _live: LiveCodeMirror;
@@ -215,9 +263,17 @@ class LiveCodeMirror extends Widget {
   }
 
   /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this._editor.refresh();
+  }
+
+  /**
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
+    console.log('refresh live');
     this._editor.refresh();
   }
 
@@ -244,11 +300,10 @@ class StaticCodeMirror extends Widget {
    * Construct a new static code mirror widget.
    */
   constructor(editor: CodeMirror.Editor) {
-    super({ node: document.createElement('pre') });
+    super({ node: document.createElement('div') });
     this._editor = editor;
-    this.addClass(`cm-s-${editor.getOption('theme')}`);
-    this.addClass('CodeMirror');
     this.addClass(STATIC_CLASS);
+    this.addClass('CodeMirror');
     CodeMirror.on(this._editor.getDoc(), 'change', (instance, change) => {
       if (this.isVisible) {
         this._render();
@@ -268,7 +323,9 @@ class StaticCodeMirror extends Widget {
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
-    this._render();
+    if (this.isVisible) {
+      this._render();
+    }
   }
 
   /**
@@ -282,54 +339,16 @@ class StaticCodeMirror extends Widget {
    * Render the static content.
    */
   private _render(): void {
-    // Based on CodeMirror's default `runMode` callback.
     let editor = this._editor;
-    let tabSize = editor.getOption('tabSize');
+    let wrapper = editor.getWrapperElement();
+    let child = wrapper.cloneNode(true) as HTMLElement;
     let node = this.node;
     node.innerHTML = '';
-    let col = 0;
-    let value = editor.getDoc().getValue();
-    if (!value || value[value.length - 1] === '\n') {
-      value += ' ';
+    node.appendChild(child);
+    let cursor = child.getElementsByClassName('CodeMirror-cursor')[0];
+    if (cursor) {
+      (cursor as HTMLElement).style.borderLeft = 'none';
     }
-    let callback = (text: string, style: string) => {
-      if (text === '\n') {
-        node.appendChild(document.createTextNode(text));
-        col = 0;
-        return;
-      }
-      let content = '';
-      // replace tabs
-      for (let pos = 0; ; ) {
-        let idx = text.indexOf('\t', pos);
-        if (idx === -1) {
-          content += text.slice(pos);
-          col += text.length - pos;
-          break;
-        } else {
-          col += idx - pos;
-          content += text.slice(pos, idx);
-          let size = tabSize - col % tabSize;
-          col += size;
-          for (let i = 0; i < size; ++i) {
-            content += ' ';
-          }
-          pos = idx + 1;
-        }
-      }
-
-      if (style) {
-        let sp = document.createElement('span') as HTMLSpanElement;
-        node.appendChild(sp);
-        sp.className = 'cm-' + style.replace(/ +/g, ' cm-');
-        sp.appendChild(document.createTextNode(content));
-      } else {
-        node.appendChild(document.createTextNode(content));
-      }
-    };
-    CodeMirror.runMode(value,
-                       editor.getOption('mode'),
-                       callback);
   }
 
   private _editor: CodeMirror.Editor = null;
