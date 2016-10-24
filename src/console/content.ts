@@ -400,7 +400,7 @@ class ConsoleContent extends Widget {
   }
 
   /**
-   * Handle `update_request` messages.
+   * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
