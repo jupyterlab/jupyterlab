@@ -142,8 +142,10 @@ class ConsoleContent extends Widget {
     this._initialize();
 
     // Set up the inspection handler.
-    this._inspectionHandler = new InspectionHandler(this._rendermime);
-    this._inspectionHandler.kernel = this._session.kernel;
+    this._inspectionHandler = new InspectionHandler({
+      kernel: this._session.kernel,
+      rendermime: this._rendermime
+    });
 
     // Set up the foreign iopub handler.
     this._foreignHandler = new ForeignHandler({
