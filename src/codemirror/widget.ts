@@ -95,13 +95,6 @@ class CodeMirrorWidget extends Widget {
   }
 
   /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this._activate();
-  }
-
-  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -125,6 +118,13 @@ class CodeMirrorWidget extends Widget {
     default:
       break;
     }
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._activate();
   }
 
   /**
