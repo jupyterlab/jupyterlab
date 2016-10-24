@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   CodeMirrorConsoleRenderer
 } from '../../../lib/console/codemirror/widget';
 
@@ -42,6 +46,7 @@ describe('console/content', () => {
       it('should create a new console content widget', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
+          Widget.attach(widget, document.body);
           expect(widget).to.be.a(ConsoleContent);
           expect(widget.node.classList.contains(CONSOLE_CLASS)).to.be(true);
           widget.dispose();
@@ -58,6 +63,7 @@ describe('console/content', () => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
           let called: Date = null;
           let force = true;
+          Widget.attach(widget, document.body);
           widget.executed.connect((sender, time) => { called = time; });
           widget.execute(force).then(() => {
             expect(called).to.be.a(Date);
@@ -74,6 +80,7 @@ describe('console/content', () => {
       it('should exist after instantiation', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
+          Widget.attach(widget, document.body);
           expect(widget.inspectionHandler).to.be.an(InspectionHandler);
           widget.dispose();
           done();
@@ -87,18 +94,22 @@ describe('console/content', () => {
       it('should be a code cell widget', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
+          Widget.attach(widget, document.body);
           expect(widget.prompt).to.be.a(CodeCellWidget);
           widget.dispose();
           done();
         }).catch(done);
       });
 
-      it('should be be replaced after execution', done => {
+      it('should be replaced after execution', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
-          let old = widget.prompt;
           let force = true;
+          Widget.attach(widget, document.body);
+
+          let old = widget.prompt;
           expect(old).to.be.a(CodeCellWidget);
+
           widget.execute(force).then(() => {
             expect(widget.prompt).to.be.a(CodeCellWidget);
             expect(widget.prompt).to.not.be(old);
@@ -115,6 +126,7 @@ describe('console/content', () => {
       it('should return the session passed in at instantiation', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
+          Widget.attach(widget, document.body);
           expect(widget.session).to.be(session);
           widget.dispose();
           done();
@@ -129,6 +141,7 @@ describe('console/content', () => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
           let force = true;
+          Widget.attach(widget, document.body);
           widget.execute(force).then(() => {
             expect(widget.content.widgets.length).to.be.greaterThan(1);
             widget.clear();
@@ -146,6 +159,7 @@ describe('console/content', () => {
       it('should dispose the content widget', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
+          Widget.attach(widget, document.body);
           expect(widget.isDisposed).to.be(false);
           widget.dispose();
           expect(widget.isDisposed).to.be(true);
@@ -156,6 +170,7 @@ describe('console/content', () => {
       it('should be safe to dispose multiple times', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
+          Widget.attach(widget, document.body);
           expect(widget.isDisposed).to.be(false);
           widget.dispose();
           widget.dispose();
@@ -172,6 +187,7 @@ describe('console/content', () => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
           let force = true;
+          Widget.attach(widget, document.body);
           expect(widget.content.widgets.length).to.be(1);
           widget.execute(force).then(() => {
             expect(widget.content.widgets.length).to.be.greaterThan(1);
@@ -186,6 +202,7 @@ describe('console/content', () => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
           let force = false;
           let timeout = 5000;
+          Widget.attach(widget, document.body);
           widget.prompt.model.source = 'for x in range(5):';
           expect(widget.content.widgets.length).to.be(1);
           widget.execute(force, timeout).then(() => {
@@ -204,6 +221,7 @@ describe('console/content', () => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
           let code = 'print("Hello.")';
+          Widget.attach(widget, document.body);
           expect(widget.content.widgets.length).to.be(1);
           widget.inject(code).then(() => {
             expect(widget.content.widgets.length).to.be.greaterThan(1);
@@ -221,6 +239,7 @@ describe('console/content', () => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
           let model = widget.prompt.model;
+          Widget.attach(widget, document.body);
           expect(model.source).to.be.empty();
           widget.insertLinebreak();
           expect(model.source).to.be('\n');
