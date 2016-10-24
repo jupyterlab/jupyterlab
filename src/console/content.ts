@@ -287,15 +287,19 @@ class ConsoleContent extends Widget {
 
   /**
    * Inject arbitrary code for the console to execute immediately.
+   *
+   * @param code - The code contents of the cell being injected.
+   *
+   * @returns A promise that indicates when the injected cell's execution ends.
    */
-  inject(code: string): void {
+  inject(code: string): Promise<void> {
     // Create a new cell using the prompt renderer.
     let cell = this._renderer.createPrompt(this._rendermime);
     cell.model.source = code;
     cell.mimetype = this._mimetype;
     cell.readOnly = true;
     this._content.addWidget(cell);
-    this._execute(cell);
+    return this._execute(cell);
   }
 
   /**

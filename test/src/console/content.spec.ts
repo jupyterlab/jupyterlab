@@ -198,6 +198,23 @@ describe('console/content', () => {
 
     });
 
+    describe('#inject()', () => {
+
+      it('should add a code cell and execute it', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          let code = 'print("Hello.")';
+          expect(widget.content.widgets.length).to.be(1);
+          widget.inject(code).then(() => {
+            expect(widget.content.widgets.length).to.be.greaterThan(1);
+            widget.dispose();
+            done();
+          }).catch(done);
+        });
+      });
+
+    });
+
   });
 
 });
