@@ -215,6 +215,20 @@ describe('console/content', () => {
 
     });
 
+    describe('#insertLinebreak()', () => {
+
+      it('should insert a line break into the prompt', () => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          let model = widget.prompt.model;
+          expect(model.source).to.be.empty();
+          widget.insertLinebreak();
+          expect(model.source).to.be('\n');
+        });
+      });
+
+    });
+
   });
 
 });

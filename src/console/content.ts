@@ -259,7 +259,7 @@ class ConsoleContent extends Widget {
    * should wait for the API to determine whether code being submitted is
    * incomplete before attempting submission anyway. The default value is `250`.
    */
-  execute(force = false, timeout?: number): Promise<void> {
+  execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
     this._completer.reset();
 
     if (this._session.status === 'dead') {
@@ -276,7 +276,7 @@ class ConsoleContent extends Widget {
     }
 
     // Check whether we should execute.
-    return this._shouldExecute(timeout || EXECUTION_TIMEOUT).then(should => {
+    return this._shouldExecute(timeout).then(should => {
       if (should) {
         // Create a new prompt before kernel execution to allow typeahead.
         this.newPrompt();
