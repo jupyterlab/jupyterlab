@@ -254,12 +254,16 @@ class ConsoleContent extends Widget {
    *
    * @param force - Whether to force execution without checking code
    * completeness.
+   *
+   * @param timeout - The length of time, in milliseconds, that the execution
+   * should wait for the API to determine whether code being submitted is
+   * incomplete before attempting submission anyway. The default value is `250`.
    */
-  execute(force = false): Promise<void> {
+  execute(force = false, timeout?: number): Promise<void> {
     this._completer.reset();
 
     if (this._session.status === 'dead') {
-      return;
+      return Promise.resolve(void 0);
     }
 
     let prompt = this.prompt;
@@ -272,8 +276,8 @@ class ConsoleContent extends Widget {
     }
 
     // Check whether we should execute.
-    return this._shouldExecute().then(value => {
-      if (value) {
+    return this._shouldExecute(timeout || EXECUTION_TIMEOUT).then(should => {
+      if (should) {
         // Create a new prompt before kernel execution to allow typeahead.
         this.newPrompt();
         return this._execute(prompt);
@@ -328,6 +332,104 @@ class ConsoleContent extends Widget {
       return;
     }
     session.kernel.kernelInfo().then(msg => this._handleInfo(msg.content));
+  }
+
+  /**
+   * Display inputs/outputs initated by another session.
+   */
+  protected monitorForeignIOPub(): void {
+    this._session.kernel.iopubMessage.connect((kernel, msg) => {
+      // Check whether this message came from an external session.
+      let session = (msg.parent_header as KernelMessage.IHeader).session;
+      if (session === this.session.kernel.clientId) {
+        return;
+      }
+      let msgType = msg.header.msg_type;
+      let parentHeader = msg.parent_header as KernelMessage.IHeader;
+      let parentMsgId = parentHeader.msg_id as string;
+      let cell : CodeCellWidget;
+      switch (msgType) {
+      case 'execute_input':
+        let inputMsg = msg as KernelMessage.IExecuteInputMsg;
+        cell = this.newForeignCell(parentMsgId);
+        cell.model.executionCount = inputMsg.content.execution_count;
+        cell.model.source = inputMsg.content.code;
+        cell.trusted = true;
+        this.update();
+        break;
+      case 'execute_result':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+        if (!(parentMsgId in this._foreignCells)) {
+          // This is an output from an input that was broadcast before our
+          // session started listening. We will ignore it.
+          console.warn('Ignoring output with no associated input cell.');
+          break;
+        }
+        cell = this._foreignCells[parentMsgId];
+        let output = msg.content as nbformat.IOutput;
+        output.output_type = msgType as nbformat.OutputType;
+        cell.model.outputs.add(output);
+        this.update();
+        break;
+      case 'clear_output':
+        let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+        cell.model.outputs.clear(wait);
+        break;
+      default:
+        break;
+      }
+    });
+  }
+
+  /**
+   * Make a new code cell for an input originated from a foreign session.
+   */
+  protected newForeignCell(parentMsgId: string): CodeCellWidget {
+    let cell = this._renderer.createForeignCell(this._rendermime);
+    cell.readOnly = true;
+    cell.mimetype = this._mimetype;
+    cell.addClass(FOREIGN_CELL_CLASS);
+    this._content.addWidget(cell);
+    this.update();
+    this._foreignCells[parentMsgId] = cell;
+    return cell;
+  }
+
+  /**
+   * Make a new prompt.
+   */
+  protected newPrompt(): void {
+    let prompt = this.prompt;
+    let content = this._content;
+    let input = this._input;
+
+    // Make the last prompt read-only, clear its signals, and move to content.
+    if (prompt) {
+      prompt.readOnly = true;
+      prompt.removeClass(PROMPT_CLASS);
+      clearSignalData(prompt.editor);
+      content.addWidget((input.layout as PanelLayout).removeWidgetAt(0));
+    }
+
+    // Create the new prompt.
+    prompt = this._renderer.createPrompt(this._rendermime);
+    prompt.mimetype = this._mimetype;
+    prompt.addClass(PROMPT_CLASS);
+    this._input.addWidget(prompt);
+
+    // Hook up history handling.
+    let editor = prompt.editor;
+    editor.edgeRequested.connect(this.onEdgeRequest, this);
+    editor.textChanged.connect(this.onTextChange, this);
+
+    // Associate the new prompt with the completer and inspection handlers.
+    this._completerHandler.activeCell = prompt;
+    this._inspectionHandler.activeCell = prompt;
+
+    prompt.activate();
+    this.update();
   }
 
   /**
@@ -388,111 +490,13 @@ class ConsoleContent extends Widget {
   }
 
   /**
-   * Display inputs/outputs initated by another session.
-   */
-  protected monitorForeignIOPub(): void {
-    this._session.kernel.iopubMessage.connect((kernel, msg) => {
-      // Check whether this message came from an external session.
-      let session = (msg.parent_header as KernelMessage.IHeader).session;
-      if (session === this.session.kernel.clientId) {
-        return;
-      }
-      let msgType = msg.header.msg_type;
-      let parentHeader = msg.parent_header as KernelMessage.IHeader;
-      let parentMsgId = parentHeader.msg_id as string;
-      let cell : CodeCellWidget;
-      switch (msgType) {
-      case 'execute_input':
-        let inputMsg = msg as KernelMessage.IExecuteInputMsg;
-        cell = this.newForeignCell(parentMsgId);
-        cell.model.executionCount = inputMsg.content.execution_count;
-        cell.model.source = inputMsg.content.code;
-        cell.trusted = true;
-        this.update();
-        break;
-      case 'execute_result':
-      case 'display_data':
-      case 'stream':
-      case 'error':
-        if (!(parentMsgId in this._foreignCells)) {
-          // This is an output from an input that was broadcast before our
-          // session started listening. We will ignore it.
-          console.warn('Ignoring output with no associated input cell.');
-          break;
-        }
-        cell = this._foreignCells[parentMsgId];
-        let output = msg.content as nbformat.IOutput;
-        output.output_type = msgType as nbformat.OutputType;
-        cell.model.outputs.add(output);
-        this.update();
-        break;
-      case 'clear_output':
-        let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-        cell.model.outputs.clear(wait);
-        break;
-      default:
-        break;
-      }
-    });
-  }
-
-  /**
-   * Make a new prompt.
-   */
-  protected newPrompt(): void {
-    let prompt = this.prompt;
-    let content = this._content;
-    let input = this._input;
-
-    // Make the last prompt read-only, clear its signals, and move to content.
-    if (prompt) {
-      prompt.readOnly = true;
-      prompt.removeClass(PROMPT_CLASS);
-      clearSignalData(prompt.editor);
-      content.addWidget((input.layout as PanelLayout).removeWidgetAt(0));
-    }
-
-    // Create the new prompt.
-    prompt = this._renderer.createPrompt(this._rendermime);
-    prompt.mimetype = this._mimetype;
-    prompt.addClass(PROMPT_CLASS);
-    this._input.addWidget(prompt);
-
-    // Hook up history handling.
-    let editor = prompt.editor;
-    editor.edgeRequested.connect(this.onEdgeRequest, this);
-    editor.textChanged.connect(this.onTextChange, this);
-
-    // Associate the new prompt with the completer and inspection handlers.
-    this._completerHandler.activeCell = prompt;
-    this._inspectionHandler.activeCell = prompt;
-
-    prompt.activate();
-    this.update();
-  }
-
-  /**
-   * Make a new code cell for an input originated from a foreign session.
-   */
-  protected newForeignCell(parentMsgId: string): CodeCellWidget {
-    let cell = this._renderer.createForeignCell(this._rendermime);
-    cell.readOnly = true;
-    cell.mimetype = this._mimetype;
-    cell.addClass(FOREIGN_CELL_CLASS);
-    this._content.addWidget(cell);
-    this.update();
-    this._foreignCells[parentMsgId] = cell;
-    return cell;
-  }
-
-  /**
    * Test whether we should execute the prompt.
    */
-  private _shouldExecute(): Promise<boolean> {
+  private _shouldExecute(timeout: number): Promise<boolean> {
     let prompt = this.prompt;
     let code = prompt.model.source + '\n';
     return new Promise<boolean>((resolve, reject) => {
-      let timer = setTimeout(() => { resolve(true); }, EXECUTION_TIMEOUT);
+      let timer = setTimeout(() => { resolve(true); }, timeout);
       this._session.kernel.isComplete({ code }).then(isComplete => {
         clearTimeout(timer);
         if (isComplete.content.status !== 'incomplete') {
