@@ -104,7 +104,6 @@
 
 .jp-LauncherWidget-folder {
   margin-right: 0;
-  float: left;
   display: inline-block;
   background-origin: content-box;
   background-repeat: no-repeat;
@@ -125,5 +124,3 @@
     padding-top: 14px;
     margin-right: auto;
 }
-
-

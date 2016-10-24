@@ -111,7 +111,6 @@
 
 .jp-Landing-folder {
   margin-right: 0;
-  float: left;
   display: inline-block;
   background-origin: content-box;
   background-repeat: no-repeat;
@@ -132,5 +131,3 @@
     padding-left: 14px;
     margin-right: auto;
 }
-
-
