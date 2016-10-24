@@ -276,10 +276,9 @@ class StaticCodeMirror extends Widget {
    * Construct a new static code mirror widget.
    */
   constructor(editor: CodeMirror.Editor) {
-    super({ node: document.createElement('div') });
+    super();
     this._editor = editor;
     this.addClass(STATIC_CLASS);
-    this.addClass('CodeMirror');
     CodeMirror.on(this._editor.getDoc(), 'change', (instance, change) => {
       if (this.isVisible) {
         this._render();
