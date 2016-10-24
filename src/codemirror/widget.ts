@@ -187,45 +187,22 @@ class CodeMirrorWidget extends Widget {
 
     this._static.hide();
     this._live.show();
-    if (this._lastMouseDown) {
-      this._handleMouseDown();
+
+    let prev = this._lastMouseDown;
+    if (prev) {
+      // Clone and dispatch the mouse event
+      // so we can handle appropriate selection behavior.
+      let evt = document.createEvent('MouseEvent') as MouseEvent;
+      let node = editor.getScrollerElement();
+      evt.initMouseEvent('mousedown', true, true,
+                         window, prev.detail, prev.screenX, prev.screenY,
+                         prev.clientX, prev.clientY,
+                         prev.ctrlKey, prev.altKey, prev.shiftKey,
+                         prev.metaKey, prev.button, null);
+      node.dispatchEvent(evt);
       this._lastMouseDown = null;
     }
     editor.focus();
-  }
-
-  /**
-   * Handle a mousedown event when we activate.
-   */
-  private _handleMouseDown(): void {
-    let editor = this.editor;
-    let prev = this._lastMouseDown;
-    let doc = editor.getDoc();
-    let pos = editor.coordsChar({ left: prev.clientX, top: prev.clientY });
-    let offset = doc.indexFromPos(pos);
-
-    // If we have clicked in the middle of a selection, bail.
-    if (doc.somethingSelected()) {
-      for (let selection of doc.listSelections()) {
-        let { anchor, head } = selection;
-        let start = doc.indexFromPos(anchor);
-        let end = doc.indexFromPos(head);
-        if (start <= offset && end >= offset) {
-          return;
-        }
-      }
-    }
-
-    // Otherwise, clone and dispatch the mouse event
-    // so we can handle a new selection.
-    let evt = document.createEvent('MouseEvent') as MouseEvent;
-    let node = editor.getScrollerElement();
-    evt.initMouseEvent('mousedown', true, true,
-                       window, prev.detail, prev.screenX, prev.screenY,
-                       prev.clientX, prev.clientY,
-                       prev.ctrlKey, prev.altKey, prev.shiftKey,
-                       prev.metaKey, prev.button, null);
-    node.dispatchEvent(evt);
   }
 
   private _live: LiveCodeMirror;
@@ -273,7 +250,6 @@ class LiveCodeMirror extends Widget {
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    console.log('refresh live');
     this._editor.refresh();
   }
 
