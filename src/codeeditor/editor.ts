@@ -31,7 +31,7 @@ namespace CodeEditor {
    * A zero-based position in the editor.
    */
   export
-  interface ICursorPosition {
+  interface IPosition {
     /**
      * The cursor line number.
      */
@@ -177,7 +177,7 @@ namespace CodeEditor {
     /**
      * The cursor position.
      */
-    cursor: ICursorPosition;
+    cursor: IPosition;
 
     /**
      * Get the number of lines in the model.
@@ -197,12 +197,12 @@ namespace CodeEditor {
     /**
      * Find an offset for the given position.
      */
-    getOffsetAt(position: ICursorPosition): number;
+    getOffsetAt(position: IPosition): number;
 
     /**
      * Find a position fot the given offset.
      */
-    getPositionAt(offset: number): ICursorPosition;
+    getPositionAt(offset: number): IPosition;
 
     /**
      * Undo one edit (if any undo events are stored).
@@ -278,12 +278,12 @@ namespace CodeEditor {
     /**
      * Scroll the given cursor position into view.
      */
-    scrollIntoView(pos: ICursorPosition, margin?: number): void;
+    scrollIntoView(pos: IPosition, margin?: number): void;
 
     /**
      * Get the window coordinates given a cursor position.
      */
-    getCoords(position: ICursorPosition): ICoords;
+    getCoords(position: IPosition): ICoords;
   }
 
   /**
@@ -379,10 +379,10 @@ namespace CodeEditor {
     /**
      * The cursor position of the model.
      */
-    get cursor(): ICursorPosition {
+    get cursor(): IPosition {
       return this._cursor;
     }
-    set cursor(newValue: ICursorPosition) {
+    set cursor(newValue: IPosition) {
       // TODO: keep in sync with selection.
       let oldValue = this._cursor;
       if (oldValue === newValue) {
@@ -433,7 +433,7 @@ namespace CodeEditor {
     /**
      * Find an offset for the given position.
      */
-    getOffsetAt(position: CodeEditor.ICursorPosition): number {
+    getOffsetAt(position: CodeEditor.IPosition): number {
       let lines = this._value.split('\n');
       let before = lines.slice(0, position.line).join('\n').length;
       return before + position.column;
@@ -442,7 +442,7 @@ namespace CodeEditor {
     /**
      * Find a position fot the given offset.
      */
-    getPositionAt(offset: number): CodeEditor.ICursorPosition {
+    getPositionAt(offset: number): CodeEditor.IPosition {
       let text = this._value.slice(0, offset);
       let lines = text.split('\n');
       let column = lines[lines.length - 1].length;
@@ -467,7 +467,7 @@ namespace CodeEditor {
     private _uri = '';
     private _mimetype = '';
     private _value = '';
-    private _cursor: ICursorPosition = { line: 1, column: 1 };
+    private _cursor: IPosition = { line: 1, column: 1 };
     private _selection: ITextSelection = { start: 0, end: 0, direction: 'forward' };
     private _isDisposed = false;
   }
@@ -695,14 +695,14 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   /**
    * Scroll the given cursor position into view.
    */
-  scrollIntoView(pos: CodeEditor.ICursorPosition, margin?: number): void {
+  scrollIntoView(pos: CodeEditor.IPosition, margin?: number): void {
     // set node scroll position here.
   }
 
   /**
    * Get the window coordinates given a cursor position.
    */
-  getCoords(position: CodeEditor.ICursorPosition): CodeEditor.ICoords {
+  getCoords(position: CodeEditor.IPosition): CodeEditor.ICoords {
     // more css measurements required
     return void 0;
   }
@@ -741,7 +741,7 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     let node = this.node as HTMLTextAreaElement;
     switch (args.name) {
     case 'cursor':
-      let pos = args.newValue as CodeEditor.ICursorPosition;
+      let pos = args.newValue as CodeEditor.IPosition;
       let offset = this._model.getOffsetAt(pos);
       node.setSelectionRange(offset, offset);
       break;
