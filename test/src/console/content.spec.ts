@@ -235,15 +235,34 @@ describe('console/content', () => {
 
     describe('#insertLinebreak()', () => {
 
-      it('should insert a line break into the prompt', () => {
+      it('should insert a line break into the prompt', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
-          let model = widget.prompt.model;
           Widget.attach(widget, document.body);
+
+          let model = widget.prompt.model;
           expect(model.source).to.be.empty();
           widget.insertLinebreak();
           expect(model.source).to.be('\n');
-        });
+          done();
+        }).catch(done);
+      });
+
+    });
+
+    describe('#serialize()', () => {
+
+      it('should serialize the contents of a console', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          Widget.attach(widget, document.body);
+          widget.prompt.model.source = 'foo';
+
+          let serialized = widget.serialize();
+          expect(serialized).to.have.length(2);
+          expect(serialized[1].source).to.be('foo');
+          done();
+        }).catch(done);
       });
 
     });
