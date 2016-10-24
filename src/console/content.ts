@@ -54,6 +54,10 @@ import {
 } from '../rendermime';
 
 import {
+  ForeignHandler
+} from './foreign';
+
+import {
   ConsoleHistory, IConsoleHistory
 } from './history';
 
@@ -113,9 +117,13 @@ class ConsoleContent extends Widget {
     // Create the panels that hold the content and input.
     let layout = this.layout = new PanelLayout();
     this._content = new Panel();
-    this._content.node.tabIndex = -1;
-    this._content.node.style.outline = 'none';
     this._input = new Panel();
+    this._renderer = options.renderer;
+    this._rendermime = options.rendermime;
+    this._session = options.session;
+    this._history = new ConsoleHistory({ kernel: this._session.kernel });
+
+    // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);
 
@@ -123,63 +131,31 @@ class ConsoleContent extends Widget {
     layout.addWidget(this._content);
     layout.addWidget(this._input);
 
-    this._renderer = options.renderer;
-    this._rendermime = options.rendermime;
-    this._session = options.session;
-    this._history = new ConsoleHistory({ kernel: this._session.kernel });
-
-    // Instantiate tab completer widget.
-    let completer = options.completer || new CompleterWidget({
-      model: new CompleterModel()
-    });
-    this._completer = completer;
-
-    // Set the completer widget's anchor node to peg its position.
-    completer.anchor = this.node;
-
-    // Because a completer widget may be passed in, check if it is attached.
-    if (!completer.isAttached) {
-      Widget.attach(completer, document.body);
-    }
-
-    // Set up the completer handler.
-    this._completerHandler = new CellCompleterHandler(this._completer);
-    this._completerHandler.kernel = this._session.kernel;
-
-    // Set up the inspection handler.
-    this._inspectionHandler = new InspectionHandler(this._rendermime);
-    this._inspectionHandler.kernel = this._session.kernel;
-
     // Create the banner.
     let banner = this._renderer.createBanner();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     banner.model.source = '...';
-
-    // Add the banner to the content pane.
     this._content.addWidget(banner);
 
     // Set the banner text and the mimetype.
-    this.initialize();
+    this._initialize();
 
-    // Create the prompt.
-    this.newPrompt();
+    // Set up the inspection handler.
+    this._inspectionHandler = new InspectionHandler(this._rendermime);
+    this._inspectionHandler.kernel = this._session.kernel;
 
-    // Display inputs/outputs initiated by another session.
-    this.monitorForeignIOPub();
-
-    // Handle changes to the kernel.
-    this._session.kernelChanged.connect((s, kernel) => {
-      this.clear();
-      this.newPrompt();
-      this.initialize();
-      this._history.dispose();
-      this._history = new ConsoleHistory(kernel);
-      this._completerHandler.kernel = kernel;
-      this._inspectionHandler.kernel = kernel;
-      this._foreignCells = {};
-      this.monitorForeignIOPub();
+    // Set up the foreign iopub handler.
+    this._foreignHandler = new ForeignHandler({
+      kernel: this._session.kernel,
+      parent: this._content,
+      renderer: { createCell: () => this._newForeignCell() }
     });
+
+    // Instantiate the completer.
+    this._newCompleter(options.completer);
+
+    this._addSessionListeners();
   }
 
   /*
