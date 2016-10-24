@@ -282,9 +282,54 @@ class StaticCodeMirror extends Widget {
    * Render the static content.
    */
   private _render(): void {
-    CodeMirror.runMode(this._editor.getDoc().getValue(),
-                       this._editor.getOption('mode'),
-                       this.node);
+    // Based on CodeMirror's default `runMode` callback.
+    let editor = this._editor;
+    let tabSize = editor.getOption('tabSize');
+    let node = this.node;
+    node.innerHTML = '';
+    let col = 0;
+    let value = editor.getDoc().getValue();
+    if (!value || value[value.length - 1] === '\n') {
+      value += ' ';
+    }
+    let callback = (text: string, style: string) => {
+      if (text === '\n') {
+        node.appendChild(document.createTextNode(text));
+        col = 0;
+        return;
+      }
+      let content = '';
+      // replace tabs
+      for (let pos = 0; ; ) {
+        let idx = text.indexOf('\t', pos);
+        if (idx === -1) {
+          content += text.slice(pos);
+          col += text.length - pos;
+          break;
+        } else {
+          col += idx - pos;
+          content += text.slice(pos, idx);
+          let size = tabSize - col % tabSize;
+          col += size;
+          for (let i = 0; i < size; ++i) {
+            content += ' ';
+          }
+          pos = idx + 1;
+        }
+      }
+
+      if (style) {
+        let sp = document.createElement('span') as HTMLSpanElement;
+        node.appendChild(sp);
+        sp.className = 'cm-' + style.replace(/ +/g, ' cm-');
+        sp.appendChild(document.createTextNode(content));
+      } else {
+        node.appendChild(document.createTextNode(content));
+      }
+    };
+    CodeMirror.runMode(value,
+                       editor.getOption('mode'),
+                       callback);
   }
 
   private _editor: CodeMirror.Editor = null;
