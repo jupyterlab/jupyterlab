@@ -30,10 +30,11 @@ class CellCompleterHandler implements IDisposable {
   /**
    * Construct a new completer handler for a widget.
    */
-  constructor(completer: CompleterWidget) {
-    this._completer = completer;
+  constructor(options: CellCompleterHandler.IOptions) {
+    this._completer = options.completer;
     this._completer.selected.connect(this.onCompletionSelected, this);
     this._completer.visibilityChanged.connect(this.onVisibilityChanged, this);
+    this._kernel = options.kernel || null;
   }
 
   /**
@@ -193,4 +194,26 @@ class CellCompleterHandler implements IDisposable {
   private _completer: CompleterWidget = null;
   private _kernel: Kernel.IKernel = null;
   private _pending = 0;
+}
+
+/**
+ * A namespace for cell completer handler statics.
+ */
+export
+namespace CellCompleterHandler {
+  /**
+   * The instantiation options for cell completer handlers.
+   */
+  export
+  interface IOptions {
+    /**
+     * The completer widget the handler will connect to.
+     */
+    completer: CompleterWidget;
+
+    /**
+     * The kernel for the completer handler.
+     */
+    kernel?: Kernel.IKernel;
+  }
 }

@@ -104,7 +104,9 @@ class NotebookPanel extends Widget {
     Widget.attach(this._completer, document.body);
 
     // Set up the completer handler.
-    this._completerHandler = new CellCompleterHandler(this._completer);
+    this._completerHandler = new CellCompleterHandler({
+      completer: this._completer
+    });
     this._completerHandler.activeCell = this._content.activeCell;
     this._content.activeCellChanged.connect((s, cell) => {
       this._completerHandler.activeCell = cell;

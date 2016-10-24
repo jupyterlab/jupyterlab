@@ -108,7 +108,7 @@ const EXECUTION_TIMEOUT = 250;
 export
 class ConsoleContent extends Widget {
   /**
-   * Construct a console widget.
+   * Construct a console content widget.
    */
   constructor(options: ConsoleContent.IOptions) {
     super();
@@ -498,8 +498,10 @@ class ConsoleContent extends Widget {
     }
 
     // Set up the completer handler.
-    this._completerHandler = new CellCompleterHandler(this._completer);
-    this._completerHandler.kernel = this._session.kernel;
+    this._completerHandler = new CellCompleterHandler({
+      completer: this._completer,
+      kernel: this._session.kernel
+    });
   }
 
   /**
