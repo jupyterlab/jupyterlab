@@ -29,6 +29,10 @@ import {
 } from '../../../../lib/notebook/notebook/model';
 
 import {
+  nbformat
+} from '../../../../lib/notebook/notebook/nbformat';
+
+import {
   Notebook, StaticNotebook
 } from '../../../../lib/notebook/notebook/widget';
 
@@ -531,7 +535,8 @@ describe('notebook/notebook/widget', () => {
           let model = new NotebookModel();
           let cursor = model.getMetadata('language_info');
           cursor.setValue({ name: 'python', mimetype: 'text/x-python' });
-          expect(renderer.getCodeMimetype(model)).to.be('text/x-python');
+          let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
+          expect(renderer.getCodeMimetype(info)).to.be('text/x-python');
         });
 
       });

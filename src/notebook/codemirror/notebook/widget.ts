@@ -14,6 +14,14 @@ import {
 } from '../../cells/widget';
 
 import {
+  mimetypeForLanguage
+  } from '../../common/mimetype';
+
+import {
+  nbformat
+} from '../../notebook/nbformat';
+
+import {
   Notebook
 } from '../../notebook/widget';
 
@@ -60,6 +68,13 @@ class CodeMirrorNotebookRenderer extends Notebook.Renderer {
     });
     widget.model = model;
     return widget;
+  }
+
+  /**
+   * Get the preferred mimetype given language info.
+   */
+  getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
+    return mimetypeForLanguage(info);
   }
 }
 

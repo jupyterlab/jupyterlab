@@ -4,35 +4,33 @@
 import * as CodeMirror
   from 'codemirror';
 
-import 'codemirror/mode/meta';
+import {
+  findMode
+} from '../../codemirror';
 
 import {
-  KernelMessage
-} from '@jupyterlab/services';
+  nbformat
+} from '../notebook/nbformat';
 
 
 /**
  * Get the appropriate codemirror mimetype given language info.
  */
 export
-function mimetypeForLanguage(info: KernelMessage.ILanguageInfo): string {
-  // Use the codemirror mode if given since some kernels rely on it.
-  let mode = info.codemirror_mode;
-  let mime = 'text/plain';
-  if (mode) {
-    if (typeof mode === 'string') {
-      mode = CodeMirror.findModeByName(mode as string);
-    } else if ((mode as CodeMirror.modespec).mime) {
-      // Do nothing.
-    } else if ((mode as CodeMirror.modespec).name) {
-      let name = (mode as CodeMirror.modespec).name;
-      mode = CodeMirror.findModeByName(name);
-    }
-    if (mode) {
-      mime = (mode as CodeMirror.modespec).mime;
-    }
-  } else if (info.mimetype) {
-    mime = info.mimetype;
+function mimetypeForLanguage(info: nbformat.ILanguageInfoMetadata): string {
+  if (info.codemirror_mode) {
+    return findMode(info.codemirror_mode as any).mime;
   }
-  return mime;
+  let mode = CodeMirror.findModeByMIME(info.mimetype || '');
+  if (mode) {
+    return info.mimetype;
+  }
+  let ext = info.file_extension || '';
+  ext = ext.split('.').slice(-1)[0];
+  mode = CodeMirror.findModeByExtension(ext || '');
+  if (mode) {
+    return mode.mime;
+  }
+  mode = CodeMirror.findModeByName(info.name || '');
+  return mode ? mode.mime : 'text/plain';
 }
