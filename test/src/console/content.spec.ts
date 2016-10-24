@@ -46,7 +46,7 @@ describe('console/content', () => {
           expect(widget.node.classList.contains(CONSOLE_CLASS)).to.be(true);
           widget.dispose();
           done();
-        });
+        }).catch(done);
       });
 
     });
@@ -64,7 +64,7 @@ describe('console/content', () => {
             widget.dispose();
             done();
           });
-        });
+        }).catch(done);
       });
 
     });
@@ -77,7 +77,7 @@ describe('console/content', () => {
           expect(widget.inspectionHandler).to.be.an(InspectionHandler);
           widget.dispose();
           done();
-        });
+        }).catch(done);
       });
 
     });
@@ -90,7 +90,7 @@ describe('console/content', () => {
           expect(widget.prompt).to.be.a(CodeCellWidget);
           widget.dispose();
           done();
-        });
+        }).catch(done);
       });
 
       it('should be be replaced after execution', done => {
@@ -104,7 +104,7 @@ describe('console/content', () => {
             expect(widget.prompt).to.not.be(old);
             widget.dispose();
             done();
-          });
+          }).catch(done);
         });
       });
 
@@ -118,7 +118,7 @@ describe('console/content', () => {
           expect(widget.session).to.be(session);
           widget.dispose();
           done();
-        });
+        }).catch(done);
       });
 
     });
@@ -136,7 +136,7 @@ describe('console/content', () => {
             widget.dispose();
             done();
           });
-        });
+        }).catch(done);
       });
 
     });
@@ -150,7 +150,7 @@ describe('console/content', () => {
           widget.dispose();
           expect(widget.isDisposed).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
       it('should be safe to dispose multiple times', done => {
@@ -161,6 +161,38 @@ describe('console/content', () => {
           widget.dispose();
           expect(widget.isDisposed).to.be(true);
           done();
+        }).catch(done);
+      });
+
+    });
+
+    describe('#execute()', () => {
+
+      it('should execute contents of the prompt if forced', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          let force = true;
+          expect(widget.content.widgets.length).to.be(1);
+          widget.execute(force).then(() => {
+            expect(widget.content.widgets.length).to.be.greaterThan(1);
+            widget.dispose();
+            done();
+          }).catch(done);
+        });
+      });
+
+      it('should check if code is multiline and allow amending', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new ConsoleContent({ renderer, rendermime, session });
+          let force = false;
+          let timeout = 5000;
+          widget.prompt.model.source = 'for x in range(5):';
+          expect(widget.content.widgets.length).to.be(1);
+          widget.execute(force, timeout).then(() => {
+            expect(widget.content.widgets.length).to.be(1);
+            widget.dispose();
+            done();
+          }).catch(done);
         });
       });
 
