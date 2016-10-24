@@ -201,7 +201,7 @@ describe('console/content', () => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
           let force = false;
-          let timeout = 5000;
+          let timeout = 9000;
           Widget.attach(widget, document.body);
           widget.prompt.model.source = 'for x in range(5):';
           expect(widget.content.widgets.length).to.be(1);

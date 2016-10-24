@@ -19,14 +19,24 @@ import {
 } from '../notebook/notebook/nbformat';
 
 
+/**
+ * A handler for capturing API messages from other sessions that should be
+ * rendered in a given parent.
+ */
 export
 class ForeignHandler implements IDisposable {
+  /**
+   * Construct a new foreign message handler.
+   */
   constructor(options: ForeignHandler.IOptions) {
-    this._cellRenderer = options.renderer.createCell;
+    this._renderer = options.renderer.createCell;
     this._kernel = options.kernel;
     this._parent = options.parent;
   }
 
+  /**
+   * Test whether the handler is disposed.
+   */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
@@ -41,8 +51,10 @@ class ForeignHandler implements IDisposable {
     if (this._kernel === value) {
       return;
     }
+
     // Disconnect previously connected kernel.
     if (this._kernel) {
+      this._cells.clear();
       this._kernel.iopubMessage.disconnect(this.onIOPubMessage, this);
     }
 
@@ -52,12 +64,16 @@ class ForeignHandler implements IDisposable {
     }
   }
 
+  /**
+   * Dispose the resources held by the handler.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
     this._isDisposed = true;
     this.kernel = null;
+    this._cells.clear();
     this._cells = null;
   }
 
@@ -65,12 +81,15 @@ class ForeignHandler implements IDisposable {
    * Make a new code cell for an input originated from a foreign session.
    */
   protected newCell(parentMsgId: string): CodeCellWidget {
-    let cell = this._cellRenderer();
-    this._cells[parentMsgId] = cell;
+    let cell = this._renderer();
+    this._cells.set(parentMsgId, cell);
     this._parent.addWidget(cell);
     return;
   }
 
+  /**
+   * Handler IOPub messages.
+   */
   protected onIOPubMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
     // Check whether this message came from an external session.
     let parent = this._parent;
@@ -101,7 +120,7 @@ class ForeignHandler implements IDisposable {
         console.warn('Ignoring output with no associated input cell.');
         break;
       }
-      cell = this._cells[parentMsgId];
+      cell = this._cells.get(parentMsgId);
       let output = msg.content as nbformat.IOutput;
       output.output_type = msgType as nbformat.OutputType;
       cell.model.outputs.add(output);
@@ -116,25 +135,48 @@ class ForeignHandler implements IDisposable {
     }
   }
 
-  private _cells: { [key: string]: CodeCellWidget } = Object.create(null);
-  private _cellRenderer: () => CodeCellWidget = null;
+  private _cells = new Map<string, CodeCellWidget>();
   private _isDisposed = false;
   private _kernel: Kernel.IKernel = null;
   private _parent: Panel = null;
+  private _renderer: () => CodeCellWidget = null;
 }
 
 
+/**
+ * A namespace for `ForeignHandler` statics.
+ */
 export
 namespace ForeignHandler {
+  /**
+   * The instantiation options for a foreign handler.
+   */
   export
   interface IOptions {
+    /**
+     * The kernel that the handler will listen to.
+     */
     kernel: Kernel.IKernel;
+
+    /**
+     * The parent into which the handler will inject code cells.
+     */
     parent: Panel;
+
+    /**
+     * The renderer for creating cells to inject into the parent.
+     */
     renderer: IRenderer;
   }
 
+  /**
+   * A renderer for foreign handlers.
+   */
   export
   interface IRenderer {
+    /**
+     * Create a code cell.
+     */
     createCell: () => CodeCellWidget;
   }
 }
