@@ -113,7 +113,7 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
 
 
   let folderImage = document.createElement('span');
-  folderImage.className = 'jp-Landing-folder';
+  folderImage.className = 'jp-Landing-folder jp-FolderIcon';
 
 
   let path = document.createElement('span');
