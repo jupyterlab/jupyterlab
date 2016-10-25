@@ -22,12 +22,20 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
+  AttachedProperty
+} from 'phosphor/lib/core/properties';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
   DocumentRegistry, Context
 } from '../docregistry';
+
+import {
+  SaveHandler
+} from './savehandler';
 
 import {
   DocumentWidgetManager
@@ -269,6 +277,14 @@ class DocumentManager implements IDisposable {
       factory,
       path
     });
+    let handler = new SaveHandler({
+      context,
+      manager: this._serviceManager
+    });
+    Private.saveHandlerProperty.set(context, handler);
+    context.populated.connect(() => {
+      handler.start();
+    });
     context.disposed.connect(() => {
       this._contexts.remove(context);
     });
@@ -331,4 +347,18 @@ namespace DocumentManager {
      */
     open(widget: Widget): void;
   }
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * An attached property for a context save handler.
+   */
+  export
+  const saveHandlerProperty = new AttachedProperty<DocumentRegistry.IContext<DocumentRegistry.IModel>, SaveHandler>({
+    name: 'saveHandler'
+  });
 }

@@ -33,10 +33,6 @@ import {
   DocumentRegistry
 } from '../docregistry';
 
-import {
-  SaveHandler
-} from './savehandler';
-
 
 /**
  * An implementation of a document context.
@@ -57,7 +53,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let lang = this._factory.preferredLanguage(ext);
     this._model = this._factory.createNew(lang);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
-    this._saver = new SaveHandler({ context: this, manager });
   }
 
   /**
@@ -221,10 +216,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     };
 
     let promise = this._manager.contents.save(path, options);
-
     return promise.then(value => {
-      this._updateContentsModel(value);
       model.dirty = false;
+      this._updateContentsModel(value);
+
       if (!this._isPopulated) {
         return this._populate();
       }
@@ -418,9 +413,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       mimetype: model.mimetype,
       format: model.format
     };
-    let prevModel = this._contentsModel;
+    let mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
-    if (!prevModel || newModel.last_modified !== prevModel.last_modified) {
+    if (!mod || newModel.last_modified !== mod) {
       this.fileChanged.emit(newModel);
     }
   }
@@ -446,7 +441,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   private _populate(): Promise<void> {
     this._isPopulated = true;
-    this._saver.start();
     // Add a checkpoint if none exists.
     return this.listCheckpoints().then(checkpoints => {
       if (!checkpoints) {
@@ -463,7 +457,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _path = '';
   private _session: Session.ISession = null;
   private _factory: DocumentRegistry.IModelFactory<T> = null;
-  private _saver: SaveHandler = null;
   private _isPopulated = false;
   private _contentsModel: Contents.IModel = null;
 }

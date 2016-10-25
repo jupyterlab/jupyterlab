@@ -15,9 +15,12 @@ import './console/history.spec';
 
 import './dialog/dialog.spec';
 
+import './docmanager/savehandler.spec';
+
 import './docregistry/context.spec';
 import './docregistry/default.spec';
 import './docregistry/registry.spec';
+
 
 import './filebrowser/model.spec';
 
