@@ -135,6 +135,7 @@ describe('notebook/notebook/widgetfactory', () => {
             done();
           });
           factory.createNew(ctx);
+          ctx.save();
         });
       });
 
