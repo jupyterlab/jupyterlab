@@ -93,9 +93,14 @@ const LANDING_TEXT_CLASS = 'jp-Landing-text';
 const LANDING_CWD_CLASS = 'jp-Landing-cwd';
 
 /**
+ * The class name added to Landing folder node.
+ */
+const FOLDER_CLASS = 'jp-Landing-folder';
+
+/**
  * The class name added for the folder icon from default-theme.
  */
-const FOLDER_ICON_CLASS = 'jp-Landing-folder';
+const FOLDER_ICON_CLASS = 'jp-FolderIcon';
 
 /**
  * The class name added to the current working directory path.
@@ -210,7 +215,7 @@ class LandingWidget extends VDomWidget<LandingModel> {
       header,
       body,
       h.div({className: LANDING_CWD_CLASS},
-        h.span({className: FOLDER_ICON_CLASS}),
+        h.span({className: FOLDER_ICON_CLASS + ' ' + FOLDER_CLASS}),
         h.span({className: LANDING_PATH_CLASS}, this.model.path
         )
       )
