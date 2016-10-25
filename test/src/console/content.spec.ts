@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -38,6 +42,16 @@ class TestContent extends ConsoleContent {
   protected newPrompt(): void {
     super.newPrompt();
     this.methods.push('newPrompt');
+  }
+
+  protected onActivateRequest(msg: Message): void {
+    super.onActivateRequest(msg);
+    this.methods.push('onActivateRequest');
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.methods.push('onAfterAttach');
   }
 }
 
@@ -316,6 +330,45 @@ describe('console/content', () => {
             done();
           }).catch(done);
 
+          done();
+        }).catch(done);
+      });
+
+    });
+
+    describe('#onActivateRequest()', () => {
+
+      it('should focus the prompt editor', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new TestContent({ renderer, rendermime, session });
+          expect(widget.prompt).to.not.be.ok();
+          expect(widget.methods).to.not.contain('onActivateRequest');
+          Widget.attach(widget, document.body);
+          requestAnimationFrame(() => {
+            widget.activate();
+            requestAnimationFrame(() => {
+              expect(widget.methods).to.contain('onActivateRequest');
+              expect(widget.prompt.editor.hasFocus()).to.be(true);
+              widget.dispose();
+              done();
+            });
+          });
+        }).catch(done);
+      });
+
+    });
+
+    describe('#onAfterAttach()', () => {
+
+      it('should be called after attach, creating a prompt', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new TestContent({ renderer, rendermime, session });
+          expect(widget.prompt).to.not.be.ok();
+          expect(widget.methods).to.not.contain('onAfterAttach');
+          Widget.attach(widget, document.body);
+          expect(widget.methods).to.contain('onAfterAttach');
+          expect(widget.prompt).to.be.ok();
+          widget.dispose();
           done();
         }).catch(done);
       });
