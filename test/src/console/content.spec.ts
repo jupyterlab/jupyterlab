@@ -32,6 +32,10 @@ import {
 } from '../../../lib/notebook/cells';
 
 import {
+  EdgeLocation, ICellEditorWidget, ITextChange
+} from '../../../lib/notebook/cells/editor';
+
+import {
   defaultRenderMime
 } from '../utils';
 
@@ -52,6 +56,21 @@ class TestContent extends ConsoleContent {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.methods.push('onAfterAttach');
+  }
+
+  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): void {
+    super.onEdgeRequest(editor, location);
+    this.methods.push('onEdgeRequest');
+  }
+
+  protected onTextChange(editor: ICellEditorWidget, args: ITextChange): void {
+    super.onTextChange(editor, args);
+    this.methods.push('onTextChange');
+  }
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    this.methods.push('onUpdateRequest');
   }
 }
 
@@ -370,6 +389,77 @@ describe('console/content', () => {
           expect(widget.prompt).to.be.ok();
           widget.dispose();
           done();
+        }).catch(done);
+      });
+
+    });
+
+    describe('#onEdgeRequest()', () => {
+
+      it('should be called upon an editor edge request', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new TestContent({ renderer, rendermime, session });
+          Widget.attach(widget, document.body);
+          // This setTimeout is a crude method to allow the history backlog
+          // to be populated. Because there is no signal for history readiness
+          // and because such a signal is undesirable, this test resorts to
+          // simply waiting. If it becomes an issue, we can remove the line that
+          // compares sources and simply verify that the onEdgeRequest method
+          // has been invoked.
+          setTimeout(() => {
+            let old = widget.prompt.model.source;
+            expect(widget.methods).to.not.contain('onEdgeRequest');
+            widget.prompt.editor.edgeRequested.emit('top');
+            expect(widget.methods).to.contain('onEdgeRequest');
+            requestAnimationFrame(() => {
+              expect(widget.prompt.model.source).to.not.be(old);
+              widget.dispose();
+              done();
+            });
+          }, 1500);
+        }).catch(done);
+      });
+
+    });
+
+    describe('#onTextChange()', () => {
+
+      it('should be called upon an editor text change', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new TestContent({ renderer, rendermime, session });
+          let change: ITextChange = {
+            ch: 0,
+            chHeight: 0,
+            chWidth: 0,
+            line: 0,
+            position: 0,
+            coords: null,
+            oldValue: 'fo',
+            newValue: 'foo'
+          };
+          Widget.attach(widget, document.body);
+          expect(widget.methods).to.not.contain('onTextChange');
+          widget.prompt.editor.textChanged.emit(change);
+          expect(widget.methods).to.contain('onTextChange');
+          widget.dispose();
+          done();
+        });
+      });
+
+    });
+
+    describe('#onUpdateRequest()', () => {
+
+      it('should be called upon an update, after attach', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new TestContent({ renderer, rendermime, session });
+          expect(widget.methods).to.not.contain('onUpdateRequest');
+          Widget.attach(widget, document.body);
+          requestAnimationFrame(() => {
+            expect(widget.methods).to.contain('onUpdateRequest');
+            widget.dispose();
+            done();
+          });
         }).catch(done);
       });
 
