@@ -47,6 +47,7 @@ class CodeMirrorWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
+    clearTimeout(this._resizing);
     this._editor = null;
     super.dispose();
   }
