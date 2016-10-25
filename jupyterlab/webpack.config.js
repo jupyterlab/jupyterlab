@@ -5,7 +5,7 @@
 // See https://github.com/webpack/css-loader/issues/144
 require('es6-promise').polyfill();
 
-var buildExtension = require('jupyterlab-extension-builder/lib/builder').buildExtension;
+var buildExtension = require('@jupyterlab/extension-builder/lib/builder').buildExtension;
 
 
 console.log('Generating bundles...');

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-var ModuleLoader = require('jupyterlab-extension-builder/lib/loader').ModuleLoader;
+var ModuleLoader = require('@jupyterlab/extension-builder/lib/loader').ModuleLoader;
 
 var loader = new ModuleLoader();
 
