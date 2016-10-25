@@ -121,7 +121,9 @@ class ConsoleContent extends Widget {
     this._renderer = options.renderer;
     this._rendermime = options.rendermime;
     this._session = options.session;
-    this._history = new ConsoleHistory({ kernel: this._session.kernel });
+    this._history = options.history || new ConsoleHistory({
+      kernel: this._session.kernel
+    });
 
     // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
@@ -418,8 +420,7 @@ class ConsoleContent extends Widget {
       this.clear();
       this.newPrompt();
       this._initialize();
-      this._history.dispose();
-      this._history = new ConsoleHistory(kernel);
+      this._history.kernel = kernel;
       this._completerHandler.kernel = kernel;
       this._foreignHandler.kernel = kernel;
       this._inspectionHandler.kernel = kernel;
@@ -482,7 +483,9 @@ class ConsoleContent extends Widget {
     banner.model.source = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._renderer.getCodeMimetype(lang);
-    this.prompt.mimetype = this._mimetype;
+    if (this.prompt) {
+      this.prompt.mimetype = this._mimetype;
+    }
   }
 
   /**
@@ -575,6 +578,11 @@ namespace ConsoleContent {
      * The completer widget for a console content widget.
      */
     completer?: CompleterWidget;
+
+    /**
+     * The history manager for a console content widget.
+     */
+    history?: IConsoleHistory;
 
     /**
      * The renderer for a console content widget.
