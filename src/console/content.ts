@@ -213,19 +213,19 @@ class ConsoleContent extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._history.dispose();
-    this._history = null;
+    super.dispose();
     this._completerHandler.dispose();
     this._completerHandler = null;
     this._completer.dispose();
     this._completer = null;
     this._foreignHandler.dispose();
     this._foreignHandler = null;
+    this._history.dispose();
+    this._history = null;
     this._inspectionHandler.dispose();
     this._inspectionHandler = null;
     this._session.dispose();
     this._session = null;
-    super.dispose();
   }
 
   /**
