@@ -133,48 +133,6 @@ class TerminalWidget extends Widget {
   }
 
   /**
-   * Get whether the bell is shown.
-   */
-  get visualBell(): boolean {
-    return this._term.getOption('visualBell');
-  }
-
-  /**
-   * Set whether the bell is shown.
-   */
-  set visualBell(value: boolean) {
-    this._term.setOption('visualBell', value);
-  }
-
-  /**
-   * Get whether to focus on a bell event.
-   */
-  get popOnBell(): boolean {
-    return this._term.getOption('popOnBell');
-  }
-
-  /**
-   * Set whether to focus on a bell event.
-   */
-  set popOnBell(value: boolean) {
-    this._term.setOption('popOnBell', value);
-  }
-
-  /**
-   * Get the size of the scrollback buffer in the terminal.
-   */
-  get scrollback(): number {
-    return this._term.getOption('scrollback');
-  }
-
-  /**
-   * Set the size of the scrollback buffer in the terminal.
-   */
-  set scrollback(value: number) {
-    this._term.setOption('scrollback', value);
-  }
-
-  /**
    * Dispose of the resources held by the terminal widget.
    */
   dispose(): void {
@@ -446,15 +404,6 @@ namespace Private {
       config.cursorBlink = options.cursorBlink;
     } else {
       config.cursorBlink = true;
-    }
-    if (options.visualBell !== void 0) {
-      config.visualBell = options.visualBell;
-    }
-    if (options.popOnBell !== void 0) {
-      config.popOnBell = options.popOnBell;
-    }
-    if (options.scrollback !== void 0) {
-      config.scrollback = options.scrollback;
     }
     return config;
   }
