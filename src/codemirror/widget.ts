@@ -20,12 +20,12 @@ import {
  */
 const EDITOR_CLASS = 'jp-CodeMirrorWidget';
 
-
 /**
  * The name of the default CodeMirror theme
  */
 export
 const DEFAULT_CODEMIRROR_THEME = 'jupyter';
+
 
 /**
  * A widget which hosts a CodeMirror editor.
@@ -62,15 +62,43 @@ class CodeMirrorWidget extends Widget {
    }
 
   /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the notebook panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'focus':
+      this._evtFocus(event as FocusEvent);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('focus', this, true);
     if (!this.isVisible) {
       this._needsRefresh = true;
       return;
     }
     this._editor.refresh();
     this._needsRefresh = false;
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('focus', this, true);
   }
 
   /**
@@ -97,7 +125,7 @@ class CodeMirrorWidget extends Widget {
     } else {
       this._editor.setSize(msg.width, msg.height);
     }
-    this._needsRefresh = false;
+    this._needsRefresh = true;
   }
 
   /**
@@ -105,6 +133,16 @@ class CodeMirrorWidget extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     this._editor.focus();
+  }
+
+  /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocus(event: FocusEvent): void {
+    if (this._needsRefresh) {
+      this._editor.refresh();
+      this._needsRefresh = false;
+    }
   }
 
   private _editor: CodeMirror.Editor = null;
