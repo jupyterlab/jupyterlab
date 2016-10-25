@@ -21,7 +21,7 @@ CodeMirror.defineMode('ipython', (config: CodeMirror.EditorConfiguration, modeOp
       }
     }
     pythonConf.name = 'python';
-    pythonConf.singleOperators = new RegExp('^[\\+\\-\\*/%&|\\^~<>!\\?]');
+    pythonConf.singleOperators = new RegExp('^[\\+\\-\\*/%&|@\\^~<>!\\?]');
     pythonConf.identifiers = new RegExp('^[_A-Za-z\u00A1-\uFFFF][_A-Za-z0-9\u00A1-\uFFFF]*');
     return CodeMirror.getMode(config, pythonConf);
 }, 'python');
