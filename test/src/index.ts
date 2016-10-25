@@ -10,6 +10,7 @@ import './completer/handler.spec';
 import './completer/model.spec';
 import './completer/widget.spec';
 
+import './console/content.spec';
 import './console/history.spec';
 
 import './dialog/dialog.spec';

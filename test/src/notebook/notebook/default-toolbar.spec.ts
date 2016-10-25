@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  utils, Session
+  Session, utils
 } from '@jupyterlab/services';
 
 import {
@@ -16,6 +16,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  Context
+} from '../../../../lib/docregistry/context';
+
+import {
  CodeCellWidget, MarkdownCellWidget
 } from '../../../../lib/notebook/cells/widget';
 
@@ -24,11 +28,8 @@ import {
 } from '../../../../lib/notebook/notebook/actions';
 
 import {
- createInterruptButton,
- createKernelNameItem,
- createKernelStatusItem,
- createRestartButton
-} from '../../../../lib/toolbar/kernel';
+  CodeMirrorNotebookPanelRenderer
+} from '../../../../lib/notebook/codemirror/notebook/panel';
 
 import {
  ToolbarItems
@@ -43,8 +44,11 @@ import {
 } from '../../../../lib/notebook/notebook/panel';
 
 import {
-  Context
-} from '../../../../lib/docregistry/context';
+ createInterruptButton,
+ createKernelNameItem,
+ createKernelStatusItem,
+ createRestartButton
+} from '../../../../lib/toolbar/kernel';
 
 import {
   createNotebookContext, defaultRenderMime
@@ -53,10 +57,6 @@ import {
 import {
   DEFAULT_CONTENT
 } from '../utils';
-
-import {
-  CodeMirrorNotebookPanelRenderer
-} from '../../../../lib/notebook/codemirror/notebook/panel';
 
 
 /**

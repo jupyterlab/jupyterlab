@@ -260,7 +260,7 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Handle `update_request` messages.
+   * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
     if (!this._model) {
@@ -456,7 +456,7 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   /**
-   * Handle `update_request` messages.
+   * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
     if (this._collapsedCursor) {
@@ -630,7 +630,7 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   /**
-   * Handle `update_request` messages.
+   * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
     let model = this.model;

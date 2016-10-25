@@ -2,8 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Session, KernelMessage
+  KernelMessage, Session
 } from '@jupyterlab/services';
+
+import {
+  map, toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
+  Message
+} from 'phosphor/lib/core/messaging';
 
 import {
   clearSignalData, defineSignal, ISignal
@@ -14,10 +22,6 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  Message
-} from 'phosphor/lib/core/messaging';
-
-import {
   Panel, PanelLayout
 } from 'phosphor/lib/ui/panel';
 
@@ -26,12 +30,12 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  InspectionHandler
-} from '../inspector';
+  CellCompleterHandler, CompleterModel, CompleterWidget
+} from '../completer';
 
 import {
-  nbformat
-} from '../notebook/notebook/nbformat';
+  InspectionHandler
+} from '../inspector';
 
 import {
   CodeCellWidget, RawCellWidget
@@ -42,12 +46,16 @@ import {
 } from '../notebook/cells/editor';
 
 import {
-  CompleterWidget, CompleterModel, CellCompleterHandler
-} from '../completer';
+  nbformat
+} from '../notebook/notebook/nbformat';
 
 import {
   IRenderMime
 } from '../rendermime';
+
+import {
+  ForeignHandler
+} from './foreign';
 
 import {
   ConsoleHistory, IConsoleHistory
@@ -100,7 +108,7 @@ const EXECUTION_TIMEOUT = 250;
 export
 class ConsoleContent extends Widget {
   /**
-   * Construct a console widget.
+   * Construct a console content widget.
    */
   constructor(options: ConsoleContent.IOptions) {
     super();
@@ -109,9 +117,15 @@ class ConsoleContent extends Widget {
     // Create the panels that hold the content and input.
     let layout = this.layout = new PanelLayout();
     this._content = new Panel();
-    this._content.node.tabIndex = -1;
-    this._content.node.style.outline = 'none';
     this._input = new Panel();
+    this._renderer = options.renderer;
+    this._rendermime = options.rendermime;
+    this._session = options.session;
+    this._history = options.history || new ConsoleHistory({
+      kernel: this._session.kernel
+    });
+
+    // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);
 
@@ -119,63 +133,38 @@ class ConsoleContent extends Widget {
     layout.addWidget(this._content);
     layout.addWidget(this._input);
 
-    this._renderer = options.renderer;
-    this._rendermime = options.rendermime;
-    this._session = options.session;
-    this._history = new ConsoleHistory({ kernel: this._session.kernel });
-
-    // Instantiate tab completer widget.
-    let completer = options.completer || new CompleterWidget({
-      model: new CompleterModel()
-    });
-    this._completer = completer;
-
-    // Set the completer widget's anchor node to peg its position.
-    completer.anchor = this.node;
-
-    // Because a completer widget may be passed in, check if it is attached.
-    if (!completer.isAttached) {
-      Widget.attach(completer, document.body);
-    }
-
-    // Set up the completer handler.
-    this._completerHandler = new CellCompleterHandler(this._completer);
-    this._completerHandler.kernel = this._session.kernel;
-
-    // Set up the inspection handler.
-    this._inspectionHandler = new InspectionHandler(this._rendermime);
-    this._inspectionHandler.kernel = this._session.kernel;
-
     // Create the banner.
     let banner = this._renderer.createBanner();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     banner.model.source = '...';
-
-    // Add the banner to the content pane.
     this._content.addWidget(banner);
 
     // Set the banner text and the mimetype.
-    this.initialize();
+    this._initialize();
 
-    // Create the prompt.
-    this.newPrompt();
-
-    // Display inputs/outputs initiated by another session.
-    this.monitorForeignIOPub();
-
-    // Handle changes to the kernel.
-    this._session.kernelChanged.connect((s, kernel) => {
-      this.clear();
-      this.newPrompt();
-      this.initialize();
-      this._history.dispose();
-      this._history = new ConsoleHistory(kernel);
-      this._completerHandler.kernel = kernel;
-      this._inspectionHandler.kernel = kernel;
-      this._foreignCells = {};
-      this.monitorForeignIOPub();
+    // Set up the inspection handler.
+    this._inspectionHandler = new InspectionHandler({
+      kernel: this._session.kernel,
+      rendermime: this._rendermime
     });
+
+    // Set up the foreign iopub handler.
+    this._foreignHandler = new ForeignHandler({
+      kernel: this._session.kernel,
+      parent: this._content,
+      renderer: { createCell: () => this._newForeignCell() }
+    });
+
+    // Instantiate the completer.
+    this._newCompleter(options.completer);
+  }
+
+  /*
+   * The console content panel that holds the banner and executed cells.
+   */
+  get content(): Panel {
+    return this._content;
   }
 
   /**
@@ -183,19 +172,15 @@ class ConsoleContent extends Widget {
    */
   readonly executed: ISignal<this, Date>;
 
-
   /**
    * Get the inspection handler used by the console.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get inspectionHandler(): InspectionHandler {
     return this._inspectionHandler;
   }
 
   /*
-   * The last cell in a console is always a `CodeCellWidget` prompt.
+   * The console input prompt.
    */
   get prompt(): CodeCellWidget {
     let inputLayout = (this._input.layout as PanelLayout);
@@ -204,9 +189,6 @@ class ConsoleContent extends Widget {
 
   /**
    * Get the session used by the console.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get session(): Session.ISession {
     return this._session;
@@ -231,18 +213,19 @@ class ConsoleContent extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._history.dispose();
-    this._history = null;
+    super.dispose();
     this._completerHandler.dispose();
     this._completerHandler = null;
     this._completer.dispose();
     this._completer = null;
+    this._foreignHandler.dispose();
+    this._foreignHandler = null;
+    this._history.dispose();
+    this._history = null;
     this._inspectionHandler.dispose();
     this._inspectionHandler = null;
     this._session.dispose();
     this._session = null;
-    this._foreignCells = null;
-    super.dispose();
   }
 
   /**
@@ -250,16 +233,21 @@ class ConsoleContent extends Widget {
    *
    * @param force - Whether to force execution without checking code
    * completeness.
+   *
+   * @param timeout - The length of time, in milliseconds, that the execution
+   * should wait for the API to determine whether code being submitted is
+   * incomplete before attempting submission anyway. The default value is `250`.
    */
-  execute(force=false): Promise<void> {
+  execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
     this._completer.reset();
 
     if (this._session.status === 'dead') {
-      return;
+      return Promise.resolve(void 0);
     }
 
     let prompt = this.prompt;
     prompt.trusted = true;
+
     if (force) {
       // Create a new prompt before kernel execution to allow typeahead.
       this.newPrompt();
@@ -267,8 +255,8 @@ class ConsoleContent extends Widget {
     }
 
     // Check whether we should execute.
-    return this._shouldExecute().then(value => {
-      if (value) {
+    return this._shouldExecute(timeout).then(should => {
+      if (should) {
         // Create a new prompt before kernel execution to allow typeahead.
         this.newPrompt();
         return this._execute(prompt);
@@ -278,15 +266,19 @@ class ConsoleContent extends Widget {
 
   /**
    * Inject arbitrary code for the console to execute immediately.
+   *
+   * @param code - The code contents of the cell being injected.
+   *
+   * @returns A promise that indicates when the injected cell's execution ends.
    */
-  inject(code: string): void {
+  inject(code: string): Promise<void> {
     // Create a new cell using the prompt renderer.
     let cell = this._renderer.createPrompt(this._rendermime);
     cell.model.source = code;
     cell.mimetype = this._mimetype;
     cell.readOnly = true;
     this._content.addWidget(cell);
-    this._execute(cell);
+    return this._execute(cell);
   }
 
   /**
@@ -303,26 +295,49 @@ class ConsoleContent extends Widget {
    * Serialize the output.
    */
   serialize(): nbformat.ICodeCell[] {
-    let output: nbformat.ICodeCell[] = [];
+    let prompt = this.prompt;
     let layout = this._content.layout as PanelLayout;
-    for (let i = 1; i < layout.widgets.length; i++) {
-      let widget = layout.widgets.at(i) as CodeCellWidget;
-      output.push(widget.model.toJSON() as nbformat.ICodeCell);
-    }
-    output.push(this.prompt.model.toJSON() as nbformat.ICodeCell);
-    return output;
+    // Serialize content.
+    let output = map(layout.widgets, widget => {
+      return (widget as CodeCellWidget).model.toJSON() as nbformat.ICodeCell;
+    });
+    // Serialize prompt and return.
+    return toArray(output).concat(prompt.model.toJSON() as nbformat.ICodeCell);
   }
 
   /**
-   * Initialize the banner and mimetype.
+   * Make a new prompt.
    */
-  protected initialize(): void {
-    let session = this._session;
-    if (session.kernel.info) {
-      this._handleInfo(this._session.kernel.info);
-      return;
+  protected newPrompt(): void {
+    let prompt = this.prompt;
+    let content = this._content;
+    let input = this._input;
+
+    // Make the last prompt read-only, clear its signals, and move to content.
+    if (prompt) {
+      prompt.readOnly = true;
+      prompt.removeClass(PROMPT_CLASS);
+      clearSignalData(prompt.editor);
+      content.addWidget((input.layout as PanelLayout).removeWidgetAt(0));
     }
-    session.kernel.kernelInfo().then(msg => this._handleInfo(msg.content));
+
+    // Create the new prompt.
+    prompt = this._renderer.createPrompt(this._rendermime);
+    prompt.mimetype = this._mimetype;
+    prompt.addClass(PROMPT_CLASS);
+    this._input.addWidget(prompt);
+
+    // Hook up history handling.
+    let editor = prompt.editor;
+    editor.edgeRequested.connect(this.onEdgeRequest, this);
+    editor.textChanged.connect(this.onTextChange, this);
+
+    // Associate the new prompt with the completer and inspection handlers.
+    this._completerHandler.activeCell = prompt;
+    this._inspectionHandler.activeCell = prompt;
+
+    prompt.activate();
+    this.update();
   }
 
   /**
@@ -331,6 +346,18 @@ class ConsoleContent extends Widget {
   protected onActivateRequest(msg: Message): void {
     this.prompt.activate();
     this.update();
+  }
+
+  /**
+   * Handle `'after-attach'` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    // Create a prompt if necessary.
+    if (!this.prompt) {
+      this.newPrompt();
+    }
+    // Listen for kernel change events.
+    this._addSessionListeners();
   }
 
   /**
@@ -375,7 +402,7 @@ class ConsoleContent extends Widget {
   }
 
   /**
-   * Handle `update_request` messages.
+   * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
@@ -383,122 +410,33 @@ class ConsoleContent extends Widget {
   }
 
   /**
-   * Display inputs/outputs initated by another session.
+   * Handle kernel change events on the session.
    */
-  protected monitorForeignIOPub(): void {
-    this._session.kernel.iopubMessage.connect((kernel, msg) => {
-      // Check whether this message came from an external session.
-      let session = (msg.parent_header as KernelMessage.IHeader).session;
-      if (session === this.session.kernel.clientId) {
-        return;
-      }
-      let msgType = msg.header.msg_type;
-      let parentHeader = msg.parent_header as KernelMessage.IHeader;
-      let parentMsgId = parentHeader.msg_id as string;
-      let cell : CodeCellWidget;
-      switch (msgType) {
-      case 'execute_input':
-        let inputMsg = msg as KernelMessage.IExecuteInputMsg;
-        cell = this.newForeignCell(parentMsgId);
-        cell.model.executionCount = inputMsg.content.execution_count;
-        cell.model.source = inputMsg.content.code;
-        cell.trusted = true;
-        this.update();
-        break;
-      case 'execute_result':
-      case 'display_data':
-      case 'stream':
-      case 'error':
-        if (!(parentMsgId in this._foreignCells)) {
-          // This is an output from an input that was broadcast before our
-          // session started listening. We will ignore it.
-          console.warn('Ignoring output with no associated input cell.');
-          break;
-        }
-        cell = this._foreignCells[parentMsgId];
-        let output = msg.content as nbformat.IOutput;
-        output.output_type = msgType as nbformat.OutputType;
-        cell.model.outputs.add(output);
-        this.update();
-        break;
-      case 'clear_output':
-        let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-        cell.model.outputs.clear(wait);
-        break;
-      default:
-        break;
-      }
-    });
-  }
-
-  /**
-   * Make a new prompt.
-   */
-  protected newPrompt(): void {
-    let prompt = this.prompt;
-    let content = this._content;
-    let input = this._input;
-
-    // Make the last prompt read-only, clear its signals, and move to content.
-    if (prompt) {
-      prompt.readOnly = true;
-      prompt.removeClass(PROMPT_CLASS);
-      clearSignalData(prompt.editor);
-      content.addWidget((input.layout as PanelLayout).removeWidgetAt(0));
+  private _addSessionListeners(): void {
+    if (this._listening) {
+      return;
     }
-
-    // Create the new prompt.
-    prompt = this._renderer.createPrompt(this._rendermime);
-    prompt.mimetype = this._mimetype;
-    prompt.addClass(PROMPT_CLASS);
-    this._input.addWidget(prompt);
-
-    // Hook up history handling.
-    let editor = prompt.editor;
-    editor.edgeRequested.connect(this.onEdgeRequest, this);
-    editor.textChanged.connect(this.onTextChange, this);
-
-    // Associate the new prompt with the completer and inspection handlers.
-    this._completerHandler.activeCell = prompt;
-    this._inspectionHandler.activeCell = prompt;
-
-    prompt.activate();
-    this.update();
-  }
-
-  /**
-   * Make a new code cell for an input originated from a foreign session.
-   */
-  protected newForeignCell(parentMsgId: string): CodeCellWidget {
-    let cell = this._renderer.createForeignCell(this._rendermime);
-    cell.readOnly = true;
-    cell.mimetype = this._mimetype;
-    cell.addClass(FOREIGN_CELL_CLASS);
-    this._content.addWidget(cell);
-    this.update();
-    this._foreignCells[parentMsgId] = cell;
-    return cell;
-  }
-
-  /**
-   * Test whether we should execute the prompt.
-   */
-  private _shouldExecute(): Promise<boolean> {
-    let prompt = this.prompt;
-    let code = prompt.model.source + '\n';
-    return new Promise<boolean>((resolve, reject) => {
-      let timer = setTimeout(() => { resolve(true); }, EXECUTION_TIMEOUT);
-      this._session.kernel.isComplete({ code }).then(isComplete => {
-        clearTimeout(timer);
-        if (isComplete.content.status !== 'incomplete') {
-          resolve(true);
-          return;
-        }
-        prompt.model.source = code + isComplete.content.indent;
-        prompt.editor.setCursorPosition(prompt.model.source.length);
-        resolve(false);
-      }).catch(() => { resolve(true); });
+    this._listening = this._session.kernelChanged.connect((sender, kernel) => {
+      this.clear();
+      this.newPrompt();
+      this._initialize();
+      this._history.kernel = kernel;
+      this._completerHandler.kernel = kernel;
+      this._foreignHandler.kernel = kernel;
+      this._inspectionHandler.kernel = kernel;
     });
+  }
+
+  /**
+   * Initialize the banner and mimetype.
+   */
+  private _initialize(): void {
+    let session = this._session;
+    if (session.kernel.info) {
+      this._handleInfo(this._session.kernel.info);
+      return;
+    }
+    session.kernel.kernelInfo().then(msg => this._handleInfo(msg.content));
   }
 
   /**
@@ -545,16 +483,75 @@ class ConsoleContent extends Widget {
     banner.model.source = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._renderer.getCodeMimetype(lang);
-    this.prompt.mimetype = this._mimetype;
+    if (this.prompt) {
+      this.prompt.mimetype = this._mimetype;
+    }
+  }
+
+  /**
+   * Create a new completer widget if necessary and initialize it.
+   */
+  private _newCompleter(completer: CompleterWidget): void {
+    // Instantiate completer widget.
+    this._completer = completer || new CompleterWidget({
+      model: new CompleterModel()
+    });
+
+    // Set the completer widget's anchor node to peg its position.
+    this._completer.anchor = this.node;
+
+    // Because a completer widget may be passed in, check if it is attached.
+    if (!this._completer.isAttached) {
+      Widget.attach(this._completer, document.body);
+    }
+
+    // Set up the completer handler.
+    this._completerHandler = new CellCompleterHandler({
+      completer: this._completer,
+      kernel: this._session.kernel
+    });
+  }
+
+  /**
+   * Create a new foreign cell.
+   */
+  private _newForeignCell(): CodeCellWidget {
+    let cell = this._renderer.createForeignCell(this._rendermime);
+    cell.readOnly = true;
+    cell.mimetype = this._mimetype;
+    cell.addClass(FOREIGN_CELL_CLASS);
+    return cell;
+  }
+
+  /**
+   * Test whether we should execute the prompt.
+   */
+  private _shouldExecute(timeout: number): Promise<boolean> {
+    let prompt = this.prompt;
+    let code = prompt.model.source + '\n';
+    return new Promise<boolean>((resolve, reject) => {
+      let timer = setTimeout(() => { resolve(true); }, timeout);
+      this._session.kernel.isComplete({ code }).then(isComplete => {
+        clearTimeout(timer);
+        if (isComplete.content.status !== 'incomplete') {
+          resolve(true);
+          return;
+        }
+        prompt.model.source = code + isComplete.content.indent;
+        prompt.editor.setCursorPosition(prompt.model.source.length);
+        resolve(false);
+      }).catch(() => { resolve(true); });
+    });
   }
 
   private _completer: CompleterWidget = null;
   private _completerHandler: CellCompleterHandler = null;
   private _content: Panel = null;
-  private _foreignCells: { [key: string]: CodeCellWidget } = Object.create(null);
+  private _foreignHandler: ForeignHandler =  null;
   private _history: IConsoleHistory = null;
   private _input: Panel = null;
   private _inspectionHandler: InspectionHandler = null;
+  private _listening = false;
   private _mimetype = 'text/x-ipython';
   private _renderer: ConsoleContent.IRenderer = null;
   private _rendermime: IRenderMime = null;
@@ -581,6 +578,11 @@ namespace ConsoleContent {
      * The completer widget for a console content widget.
      */
     completer?: CompleterWidget;
+
+    /**
+     * The history manager for a console content widget.
+     */
+    history?: IConsoleHistory;
 
     /**
      * The renderer for a console content widget.

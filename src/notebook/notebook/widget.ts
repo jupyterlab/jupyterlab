@@ -540,7 +540,9 @@ class Notebook extends StaticNotebook {
     super(options);
     this.node.tabIndex = -1;  // Allow the widget to take focus.
     // Set up the inspection handler.
-    this._inspectionHandler = new InspectionHandler(this.rendermime);
+    this._inspectionHandler = new InspectionHandler({
+      rendermime: this.rendermime
+    });
     this.activeCellChanged.connect((s, cell) => {
       this._inspectionHandler.activeCell = cell;
     });

@@ -224,7 +224,7 @@ class CompleterWidget extends Widget {
   }
 
   /**
-   * Handle `update_request` messages.
+   * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
     let model = this._model;
@@ -533,11 +533,6 @@ namespace CompleterWidget {
   export
   interface IOptions {
     /**
-     * The model for the completer widget.
-     */
-    model?: ICompleterModel;
-
-    /**
      * The semantic parent of the completer widget, its anchor element. An
      * event listener will peg the position of the completer widget to the
      * anchor element's scroll position. Other event listeners will guarantee
@@ -545,6 +540,11 @@ namespace CompleterWidget {
      * if it does not appear as a descendant in the DOM.
      */
     anchor?: HTMLElement;
+
+    /**
+     * The model for the completer widget.
+     */
+    model?: ICompleterModel;
 
     /**
      * The renderer for the completer widget nodes.
