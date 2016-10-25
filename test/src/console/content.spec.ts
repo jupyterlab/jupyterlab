@@ -32,6 +32,16 @@ import {
 } from '../utils';
 
 
+class TestContent extends ConsoleContent {
+  methods: string[] = [];
+
+  protected newPrompt(): void {
+    super.newPrompt();
+    this.methods.push('newPrompt');
+  }
+}
+
+
 const CONSOLE_CLASS = 'jp-ConsoleContent';
 const renderer = CodeMirrorConsoleRenderer.defaultRenderer;
 const rendermime = defaultRenderMime();
@@ -244,6 +254,7 @@ describe('console/content', () => {
           expect(model.source).to.be.empty();
           widget.insertLinebreak();
           expect(model.source).to.be('\n');
+          widget.dispose();
           done();
         }).catch(done);
       });
@@ -261,6 +272,50 @@ describe('console/content', () => {
           let serialized = widget.serialize();
           expect(serialized).to.have.length(2);
           expect(serialized[1].source).to.be('foo');
+          widget.dispose();
+          done();
+        }).catch(done);
+      });
+
+    });
+
+    describe('#newPrompt()', () => {
+
+      it('should be called after attach, creating a prompt', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new TestContent({ renderer, rendermime, session });
+          expect(widget.prompt).to.not.be.ok();
+          expect(widget.methods).to.not.contain('newPrompt');
+          Widget.attach(widget, document.body);
+          expect(widget.methods).to.contain('newPrompt');
+          expect(widget.prompt).to.be.ok();
+          widget.dispose();
+          done();
+        }).catch(done);
+      });
+
+      it('should be called after execution, creating a prompt', done => {
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          let widget = new TestContent({ renderer, rendermime, session });
+
+          expect(widget.prompt).to.not.be.ok();
+          expect(widget.methods).to.not.contain('newPrompt');
+          Widget.attach(widget, document.body);
+          expect(widget.methods).to.contain('newPrompt');
+
+          let old = widget.prompt;
+          let force = true;
+          expect(old).to.be.a(CodeCellWidget);
+          widget.methods = [];
+
+          widget.execute(force).then(() => {
+            expect(widget.prompt).to.be.a(CodeCellWidget);
+            expect(widget.prompt).to.not.be(old);
+            expect(widget.methods).to.contain('newPrompt');
+            widget.dispose();
+            done();
+          }).catch(done);
+
           done();
         }).catch(done);
       });

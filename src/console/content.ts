@@ -156,8 +156,6 @@ class ConsoleContent extends Widget {
 
     // Instantiate the completer.
     this._newCompleter(options.completer);
-
-    this._addSessionListeners();
   }
 
   /*
@@ -356,6 +354,8 @@ class ConsoleContent extends Widget {
     if (!this.prompt) {
       this.newPrompt();
     }
+    // Listen for kernel change events.
+    this._addSessionListeners();
   }
 
   /**
@@ -407,9 +407,14 @@ class ConsoleContent extends Widget {
     Private.scrollToBottom(this._content.node);
   }
 
+  /**
+   * Handle kernel change events on the session.
+   */
   private _addSessionListeners(): void {
-    // Handle changes to the kernel.
-    this._session.kernelChanged.connect((sender, kernel) => {
+    if (this._listening) {
+      return;
+    }
+    this._listening = this._session.kernelChanged.connect((sender, kernel) => {
       this.clear();
       this.newPrompt();
       this._initialize();
@@ -543,6 +548,7 @@ class ConsoleContent extends Widget {
   private _history: IConsoleHistory = null;
   private _input: Panel = null;
   private _inspectionHandler: InspectionHandler = null;
+  private _listening = false;
   private _mimetype = 'text/x-ipython';
   private _renderer: ConsoleContent.IRenderer = null;
   private _rendermime: IRenderMime = null;
