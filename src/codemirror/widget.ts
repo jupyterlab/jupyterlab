@@ -319,11 +319,15 @@ class StaticCodeMirror extends Widget {
     let child = wrapper.cloneNode(true) as HTMLElement;
     let node = this.node;
     node.innerHTML = '';
-    node.appendChild(child);
-    let cursor = child.getElementsByClassName('CodeMirror-cursor')[0];
-    if (cursor) {
-      (cursor as HTMLElement).style.borderLeft = 'none';
+    let cursors = child.getElementsByClassName('CodeMirror-cursors')[0];
+    if (cursors) {
+      cursors.parentElement.removeChild(cursors);
     }
+    let textarea = child.getElementsByTagName('textarea')[0];
+    if (textarea) {
+      textarea.parentElement.removeChild(textarea);
+    }
+    node.appendChild(child);
   }
 
   private _editor: CodeMirror.Editor = null;
