@@ -4,12 +4,16 @@
 import expect = require('expect.js');
 
 import {
-  utils, Session
+  KernelMessage, utils, Session
 } from '@jupyterlab/services';
 
 import {
   Message
 } from 'phosphor/lib/core/messaging';
+
+import {
+  clearSignalData, defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   Widget
@@ -22,6 +26,10 @@ import {
 import {
   ConsoleContent
 } from '../../../lib/console/content';
+
+import {
+  ConsoleHistory
+} from '../../../lib/console/history';
 
 import {
   InspectionHandler
@@ -73,6 +81,25 @@ class TestContent extends ConsoleContent {
     this.methods.push('onUpdateRequest');
   }
 }
+
+
+class TestHistory extends ConsoleHistory {
+  readonly ready: ISignal<this, void>;
+
+  dispose(): void {
+    super.dispose();
+    clearSignalData(this);
+  }
+
+  protected onHistory(value: KernelMessage.IHistoryReplyMsg): void {
+    super.onHistory(value);
+    console.log('HERE I AM');
+    this.ready.emit(void 0);
+  }
+}
+
+
+defineSignal(TestHistory.prototype, 'ready');
 
 
 const CONSOLE_CLASS = 'jp-ConsoleContent';
@@ -398,25 +425,24 @@ describe('console/content', () => {
 
       it('should be called upon an editor edge request', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new TestContent({ renderer, rendermime, session });
-          Widget.attach(widget, document.body);
-          // This setTimeout is a crude method to allow the history backlog
-          // to be populated. Because there is no signal for history readiness
-          // and because such a signal is undesirable, this test resorts to
-          // simply waiting. If it becomes an issue, we can remove the line that
-          // compares sources and simply verify that the onEdgeRequest method
-          // has been invoked.
-          setTimeout(() => {
-            let old = widget.prompt.model.source;
-            expect(widget.methods).to.not.contain('onEdgeRequest');
-            widget.prompt.editor.edgeRequested.emit('top');
-            expect(widget.methods).to.contain('onEdgeRequest');
-            requestAnimationFrame(() => {
-              expect(widget.prompt.model.source).to.not.be(old);
-              widget.dispose();
-              done();
+          let history = new TestHistory({ kernel: session.kernel });
+          history.ready.connect(() => {
+            let widget = new TestContent({
+              history, renderer, rendermime, session
             });
-          }, 1500);
+            Widget.attach(widget, document.body);
+            requestAnimationFrame(() => {
+              let old = widget.prompt.model.source;
+              expect(widget.methods).to.not.contain('onEdgeRequest');
+              widget.prompt.editor.edgeRequested.emit('top');
+              expect(widget.methods).to.contain('onEdgeRequest');
+              requestAnimationFrame(() => {
+                expect(widget.prompt.model.source).to.not.be(old);
+                widget.dispose();
+                done();
+              });
+            });
+          });
         }).catch(done);
       });
 
