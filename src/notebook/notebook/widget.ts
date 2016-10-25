@@ -704,6 +704,24 @@ class Notebook extends StaticNotebook {
   }
 
   /**
+   * Deselect all of the cells.
+   */
+  deselectAll(): void {
+    let changed = false;
+    each(this.widgets, widget => {
+      if (Private.selectedProperty.get(widget)) {
+        changed = true;
+      }
+      Private.selectedProperty.set(widget, false);
+    });
+    if (changed) {
+      this.selectionChanged.emit(void 0);
+    }
+    // Make sure we have a valid active cell.
+    this.activeCellIndex = this.activeCellIndex;
+  }
+
+  /**
    * Scroll so that the active cell is visible.
    */
   scrollToActiveCell(): void {
@@ -914,11 +932,21 @@ class Notebook extends StaticNotebook {
   private _evtMouseDown(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
+
     if (i !== -1) {
       let widget = this.widgets.at(i);
       // Event is on a cell but not in its editor, switch to command mode.
       if (!widget.editor.node.contains(target)) {
         this.mode = 'command';
+      }
+      if (event.shiftKey) {
+        this._extendSelectionTo(i);
+
+        // Prevent text select behavior.
+        event.preventDefault();
+        event.stopPropagation();
+      } else {
+        this.deselectAll();
       }
       // Set the cell as the active one.
       // This must be done *after* setting the mode above.
@@ -982,6 +1010,28 @@ class Notebook extends StaticNotebook {
     } else if (target.localName === 'img') {
       target.classList.toggle(UNCONFINED_CLASS);
     }
+  }
+
+  /**
+   * Extend the selection to a given index.
+   */
+  private _extendSelectionTo(index: number): void {
+    let activeIndex = this.activeCellIndex;
+    let j = index;
+    // extend the existing selection.
+    if (j > activeIndex) {
+      while (j > activeIndex) {
+        Private.selectedProperty.set(this.widgets.at(j), true);
+        j--;
+      }
+    } else if (j < activeIndex) {
+      while (j < activeIndex) {
+        Private.selectedProperty.set(this.widgets.at(j), true);
+        j++;
+      }
+    }
+    Private.selectedProperty.set(this.widgets.at(activeIndex), true);
+    this.selectionChanged.emit(void 0);
   }
 
   private _activeCellIndex = -1;

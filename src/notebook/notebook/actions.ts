@@ -71,7 +71,7 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    Private.deselectCells(widget);
+    widget.deselectAll();
     let nbModel = widget.model;
     let index = widget.activeCellIndex;
     let child = widget.widgets.at(index);
@@ -147,7 +147,7 @@ namespace NotebookActions {
       toDelete.push(cellModel);
     }
 
-    Private.deselectCells(widget);
+    widget.deselectAll();
 
     // Create a new cell for the source to preserve history.
     let newModel = Private.cloneCell(model, primary.model);
@@ -237,7 +237,7 @@ namespace NotebookActions {
     }
     let cell = widget.model.factory.createCodeCell();
     widget.model.cells.insert(widget.activeCellIndex, cell);
-    Private.deselectCells(widget);
+    widget.deselectAll();
   }
 
   /**
@@ -259,7 +259,7 @@ namespace NotebookActions {
     let cell = widget.model.factory.createCodeCell();
     widget.model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
-    Private.deselectCells(widget);
+    widget.deselectAll();
   }
 
   /**
@@ -367,7 +367,7 @@ namespace NotebookActions {
       i++;
     });
     cells.endCompoundOperation();
-    Private.deselectCells(widget);
+    widget.deselectAll();
   }
 
   /**
@@ -400,7 +400,7 @@ namespace NotebookActions {
       i++;
     });
     widget.activeCellIndex = lastIndex;
-    Private.deselectCells(widget);
+    widget.deselectAll();
 
     let promises: Promise<boolean>[] = [];
     each(selected, child => {
@@ -525,7 +525,7 @@ namespace NotebookActions {
     }
     widget.activeCellIndex -= 1;
     widget.scrollToActiveCell();
-    Private.deselectCells(widget);
+    widget.deselectAll();
   }
 
   /**
@@ -548,7 +548,7 @@ namespace NotebookActions {
     }
     widget.activeCellIndex += 1;
     widget.scrollToActiveCell();
-    Private.deselectCells(widget);
+    widget.deselectAll();
   }
 
   /**
@@ -644,7 +644,7 @@ namespace NotebookActions {
       }
     });
     clipboard.setData(JUPYTER_CELL_MIME, data);
-    Private.deselectCells(widget);
+    widget.deselectAll();
   }
 
   /**
@@ -742,7 +742,7 @@ namespace NotebookActions {
     cells.endCompoundOperation();
 
     widget.activeCellIndex += newCells.length;
-    Private.deselectCells(widget);
+    widget.deselectAll();
   }
 
   /**
@@ -760,7 +760,7 @@ namespace NotebookActions {
     }
     widget.mode = 'command';
     widget.model.cells.undo();
-    Private.deselectCells(widget);
+    widget.deselectAll();
   }
 
   /**
@@ -778,7 +778,7 @@ namespace NotebookActions {
     }
     widget.mode = 'command';
     widget.model.cells.redo();
-    Private.deselectCells(widget);
+    widget.deselectAll();
   }
 
   /**
@@ -906,18 +906,6 @@ namespace NotebookActions {
  * A namespace for private data.
  */
 namespace Private {
-  /**
-   * Deselect all of the cells.
-   */
-  export
-  function deselectCells(widget: Notebook): void {
-    each(widget.widgets, child => {
-      widget.deselect(child);
-    });
-    // Make sure we have a valid active cell.
-    widget.activeCellIndex = widget.activeCellIndex;
-  }
-
   /**
    * Clone a cell model.
    */
