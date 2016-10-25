@@ -106,7 +106,7 @@ class SaveHandler implements IDisposable {
     if (!this._isActive) {
       return;
     }
-    this._autosaveTimer = setInterval(() => {
+    this._autosaveTimer = setTimeout(() => {
       this._save();
     }, this._interval);
   }
