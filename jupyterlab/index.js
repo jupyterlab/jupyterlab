@@ -30,5 +30,6 @@ function getEntryPoint(entryPoint) {
 jupyter.lab = new JupyterLab();
 jupyter.getEntryPoint = getEntryPoint;
 jupyter.version = require('../package.json').version;
+jupyter.gitDescription = process.env.GIT_DESCRIPTION;
 
 module.exports = jupyter.lab;
