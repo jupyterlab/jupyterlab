@@ -10,7 +10,7 @@ import {
 } from '../services';
 
 import {
-  RunningSessions
+  RunningSessions, CONSOLE_REGEX
 } from './index';
 
 
@@ -33,7 +33,14 @@ function activateRunningSessions(app: JupyterLab, services: IServiceManager): vo
   running.title.label = 'Running';
 
   running.sessionOpenRequested.connect((sender, model) => {
-    app.commands.execute('file-operations:open', { path: model.notebook.path });
+    let path = model.notebook.path;
+    let name = path.split('/').pop();
+    if (CONSOLE_REGEX.test(name)) {
+      app.commands.execute('console:open', { id: model.id });
+    } else {
+      app.commands.execute('file-operations:open', { path });
+    }
+
   });
   running.terminalOpenRequested.connect((sender, model) => {
     app.commands.execute('terminal:open', { name: model.name });

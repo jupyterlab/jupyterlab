@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -99,7 +103,7 @@ const tracker = new InstanceTracker<ConsolePanel>();
  * The interface for a start console.
  */
 interface ICreateConsoleArgs extends JSONObject {
-  sessionId?: string;
+  id?: string;
   path?: string;
   kernel?: Kernel.IModel;
   preferredLanguage?: string;
@@ -221,9 +225,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let name = `Console ${++count}`;
 
       // If we get a session, use it.
-      if (args.sessionId) {
-        return manager.connectTo(args.sessionId).then(session => {
+      if (args.id) {
+        return manager.connectTo(args.id).then(session => {
           createConsole(session, name);
+          manager.listRunning();  // Trigger a refresh.
           return session.id;
         });
       }
@@ -234,7 +239,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (ContentsManager.extname(path)) {
         path = ContentsManager.dirname(path);
       }
-      path = `${path}/console-${utils.uuid()}`;
+      path = `${path}/console-${count}-${utils.uuid()}`;
 
       // Get the kernel model.
       return getKernel(args, name).then(kernel => {
@@ -249,6 +254,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         };
         return manager.startNew(options).then(session => {
           createConsole(session, name);
+          manager.listRunning();  // Trigger a refresh.
           return session.id;
         });
       });
@@ -259,11 +265,29 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   commands.addCommand(command, {
     execute: (args: JSONObject) => {
       let id = args['id'];
-      tracker.forEach(widget => {
+      tracker.find(widget => {
         if (widget.content.session.id === id) {
           widget.content.inject(args['code'] as string);
+          return true;
         }
       });
+    }
+  });
+
+  command = 'console:open';
+  commands.addCommand(command, {
+    execute: (args: JSONObject) => {
+      let id = args['id'];
+      let widget = tracker.find(value => {
+        if (value.content.session.id === id) {
+          return true;
+        }
+      });
+      if (widget) {
+        app.shell.activateMain(widget.id);
+      } else {
+        app.commands.execute('console:create', { id });
+      }
     }
   });
 
