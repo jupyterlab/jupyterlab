@@ -23,11 +23,17 @@ import {
   DocumentWidgetManager
 } from '../../../lib/docmanager';
 
+import {
+  acceptDialog, dismissDialog
+} from '../utils';
+
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
   protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): Widget {
-    return new Widget();
+    let widget = new Widget();
+    widget.addClass('WidgetFactory');
+    return widget;
   }
 }
 
@@ -36,17 +42,17 @@ class LoggingManager extends DocumentWidgetManager {
 
   methods: string[] = [];
 
-  protected filterMessage(handler: IMessageHandler, msg: Message): boolean {
+  filterMessage(handler: IMessageHandler, msg: Message): boolean {
     this.methods.push('filterMessage');
     return super.filterMessage(handler, msg);
   }
 
-  protected setCaption(widget: Widget): void {
+  setCaption(widget: Widget): void {
     this.methods.push('setCaption');
     super.setCaption(widget);
   }
 
-  protected onClose(widget: Widget): Promise<boolean> {
+  onClose(widget: Widget): Promise<boolean> {
     this.methods.push('onClose');
     return super.onClose(widget);
   }
@@ -169,29 +175,133 @@ describe('docmanager/widgetmanager', () => {
 
     describe('#findWidget()', () => {
 
+      it('should find a registered widget', () => {
+        let widget = manager.createWidget('test', context);
+        expect(manager.findWidget(context, 'test')).to.be(widget);
+      });
+
+      it('should return undefined if not found', () => {
+        expect(manager.findWidget(context, 'test')).to.be(void 0);
+      });
+
     });
 
     describe('#contextForWidget()', () => {
+
+      it('should return the context for a widget', () => {
+        let widget = manager.createWidget('test', context);
+        expect(manager.contextForWidget(widget)).to.be(context);
+      });
+
+      it('should return undefined if not tracked', () => {
+        expect(manager.contextForWidget(new Widget())).to.be(void 0);
+      });
 
     });
 
     describe('#cloneWidget()', () => {
 
+      it('should create a new widget with the same context using the same factory', () => {
+        let widget = manager.createWidget('test', context);
+        let clone = manager.cloneWidget(widget);
+        expect(clone.hasClass('WidgetFactory')).to.be(true);
+        expect(clone.hasClass('jp-Document')).to.be(true);
+        expect(manager.contextForWidget(clone)).to.be(context);
+      });
+
     });
 
     describe('#closeWidgets()', () => {
+
+      it('should close all of the widgets associated with a context', (done) => {
+        let called = false;
+        let widget = manager.createWidget('test', context);
+        let clone = manager.cloneWidget(widget);
+        widget.disposed.connect(() => {
+          if (called) {
+            done();
+          }
+          called = true;
+        });
+        clone.disposed.connect(() => {
+          if (called) {
+            done();
+          }
+          called = true;
+        });
+        manager.closeWidgets(context);
+      });
 
     });
 
     describe('#filterMessage()', () => {
 
+      it('should be called for a message to a tracked widget', () => {
+        let widget = new Widget();
+        manager.adoptWidget(context, widget);
+        sendMessage(widget, new Message('foo'));
+        expect(manager.methods).to.contain('filterMessage');
+      });
+
+      it('should return false for close-request messages', () => {
+        let widget = manager.createWidget('test', context);
+        let msg = new Message('close-request');
+        expect(manager.filterMessage(widget, msg)).to.be(false);
+      });
+
+      it('should return true for other messages', () => {
+        let widget = manager.createWidget('test', context);
+        let msg = new Message('foo');
+        expect(manager.filterMessage(widget, msg)).to.be(true);
+      });
+
     });
 
     describe('#setCaption()', () => {
 
+      it('should set the title of the widget', (done) => {
+        context.save().then(() => {
+          let widget = manager.createWidget('test', context);
+          widget.title.changed.connect(() => {
+            expect(manager.methods).to.contain('setCaption');
+            expect(widget.title.caption).to.contain('Last Checkpoint');
+            done();
+          });
+        });
+      });
+
     });
 
     describe('#onClose()', () => {
+
+      it('should be called when a widget is closed', (done) => {
+        let widget = manager.createWidget('test', context);
+        widget.disposed.connect(() => {
+          expect(manager.methods).to.contain('onClose');
+          done();
+        });
+        widget.close();
+      });
+
+      it('should prompt the user before closing', (done) => {
+        context.model.fromString('foo');
+        let widget = manager.createWidget('test', context);
+        manager.onClose(widget).then(() => {
+          expect(widget.isDisposed).to.be(true);
+          done();
+        });
+        acceptDialog();
+      });
+
+      it('should close the widget', (done) => {
+        context.model.fromString('foo');
+        let widget = manager.createWidget('test', context);
+        manager.onClose(widget).then(() => {
+          expect(widget.isDisposed).to.be(false);
+          done();
+        });
+        dismissDialog();
+      });
 
     });
 
