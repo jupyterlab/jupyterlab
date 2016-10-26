@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   each
 } from 'phosphor/lib/algorithm/iteration';
 
@@ -71,7 +67,7 @@ class DocumentWidgetManager implements IDisposable {
   /**
    * Test whether the document widget manager is disposed.
    */
-  get IDisposed(): boolean {
+  get isDisposed(): boolean {
     return this._registry === null;
   }
 
@@ -79,7 +75,7 @@ class DocumentWidgetManager implements IDisposable {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    if (this.IDisposed) {
+    if (this.isDisposed) {
       return;
     }
     disconnectReceiver(this);
@@ -89,9 +85,12 @@ class DocumentWidgetManager implements IDisposable {
   /**
    * Create a widget for a document and handle its lifecycle.
    */
-  createWidget(name: string, context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): Widget {
+  createWidget(name: string, context: DocumentRegistry.IContext<DocumentRegistry.IModel>): Widget {
     let factory = this._registry.getWidgetFactory(name);
-    let widget = factory.createNew(context, kernel);
+    if (!factory) {
+      throw new Error(`Factory is not registered: ${name}`);
+    }
+    let widget = factory.createNew(context);
     Private.nameProperty.set(widget, name);
 
     // Handle widget extensions.
@@ -231,9 +230,9 @@ class DocumentWidgetManager implements IDisposable {
   /**
    * Handle `'close-request'` messages.
    */
-  protected onClose(widget: Widget): void {
+  protected onClose(widget: Widget): Promise<boolean> {
     // Handle dirty state.
-    this._maybeClose(widget).then(result => {
+    return this._maybeClose(widget).then(result => {
       if (result) {
         this._closeGuard = true;
         widget.close();
@@ -241,6 +240,7 @@ class DocumentWidgetManager implements IDisposable {
         // Dispose of document widgets when they are closed.
         widget.dispose();
       }
+      return result;
     }).catch(() => {
       widget.dispose();
     });

@@ -240,9 +240,7 @@ class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IMod
   /**
    * Create a new widget given a context.
    */
-  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): CSVWidget {
-    let widget = new CSVWidget(context);
-    this.widgetCreated.emit(widget);
-    return widget;
+  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): CSVWidget {
+    return new CSVWidget(context);
   }
 }

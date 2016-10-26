@@ -66,11 +66,8 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    * The factory will start the appropriate kernel and populate
    * the default toolbar items using `ToolbarItems.populateDefaults`.
    */
-  createNew(context: DocumentRegistry.IContext<INotebookModel>, kernel?: Kernel.IModel): NotebookPanel {
+  protected createNewWidget(context: DocumentRegistry.IContext<INotebookModel>): NotebookPanel {
     let rendermime = this._rendermime.clone();
-    if (kernel) {
-      context.changeKernel(kernel);
-    }
     let panel = new NotebookPanel({
       rendermime,
       clipboard: this._clipboard,
@@ -78,7 +75,6 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     });
     panel.context = context;
     ToolbarItems.populateDefaults(panel);
-    this.widgetCreated.emit(panel);
     return panel;
   }
 
