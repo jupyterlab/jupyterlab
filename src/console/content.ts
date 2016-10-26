@@ -359,10 +359,10 @@ class ConsoleContent extends Widget {
   /**
    * Handle an edge requested signal.
    */
-  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): void {
+  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): Promise<void> {
     let prompt = this.prompt;
     if (location === 'top') {
-      this._history.back(prompt.model.source).then(value => {
+      return this._history.back(prompt.model.source).then(value => {
         if (!value) {
           return;
         }
@@ -373,17 +373,16 @@ class ConsoleContent extends Widget {
         prompt.model.source = value;
         prompt.editor.setCursorPosition(0);
       });
-    } else {
-      this._history.forward(prompt.model.source).then(value => {
-        let text = value || this._history.placeholder;
-        if (prompt.model.source === text) {
-          return;
-        }
-        this._setByHistory = true;
-        prompt.model.source = text;
-        prompt.editor.setCursorPosition(text.length);
-      });
     }
+    return this._history.forward(prompt.model.source).then(value => {
+      let text = value || this._history.placeholder;
+      if (prompt.model.source === text) {
+        return;
+      }
+      this._setByHistory = true;
+      prompt.model.source = text;
+      prompt.editor.setCursorPosition(text.length);
+    });
   }
 
   /**

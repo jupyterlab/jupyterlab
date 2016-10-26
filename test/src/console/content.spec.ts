@@ -49,7 +49,14 @@ import {
 
 
 class TestContent extends ConsoleContent {
+  readonly edgeRequested: ISignal<this, void>;
+
   methods: string[] = [];
+
+  dispose(): void {
+    super.dispose();
+    clearSignalData(this);
+  }
 
   protected newPrompt(): void {
     super.newPrompt();
@@ -66,9 +73,11 @@ class TestContent extends ConsoleContent {
     this.methods.push('onAfterAttach');
   }
 
-  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): void {
-    super.onEdgeRequest(editor, location);
-    this.methods.push('onEdgeRequest');
+  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): Promise<void> {
+    return super.onEdgeRequest(editor, location).then(() => {
+      this.methods.push('onEdgeRequest');
+      this.edgeRequested.emit(void 0);
+    });
   }
 
   protected onTextChange(editor: ICellEditorWidget, args: ITextChange): void {
@@ -83,6 +92,9 @@ class TestContent extends ConsoleContent {
 }
 
 
+defineSignal(TestContent.prototype, 'edgeRequested');
+
+
 class TestHistory extends ConsoleHistory {
   readonly ready: ISignal<this, void>;
 
@@ -93,7 +105,6 @@ class TestHistory extends ConsoleHistory {
 
   protected onHistory(value: KernelMessage.IHistoryReplyMsg): void {
     super.onHistory(value);
-    console.log('HERE I AM');
     this.ready.emit(void 0);
   }
 }
@@ -426,21 +437,28 @@ describe('console/content', () => {
       it('should be called upon an editor edge request', done => {
         Session.startNew({ path: utils.uuid() }).then(session => {
           let history = new TestHistory({ kernel: session.kernel });
+          let code = 'print("onEdgeRequest")';
+          let force = true;
           history.ready.connect(() => {
             let widget = new TestContent({
               history, renderer, rendermime, session
             });
-            Widget.attach(widget, document.body);
-            requestAnimationFrame(() => {
-              let old = widget.prompt.model.source;
-              expect(widget.methods).to.not.contain('onEdgeRequest');
-              widget.prompt.editor.edgeRequested.emit('top');
+            widget.edgeRequested.connect(() => {
               expect(widget.methods).to.contain('onEdgeRequest');
               requestAnimationFrame(() => {
-                expect(widget.prompt.model.source).to.not.be(old);
+                expect(widget.prompt.model.source).to.be(code);
                 widget.dispose();
                 done();
               });
+            });
+            Widget.attach(widget, document.body);
+            requestAnimationFrame(() => {
+              widget.prompt.model.source = code;
+              widget.execute(force).then(() => {
+                expect(widget.prompt.model.source).to.not.be(code);
+                expect(widget.methods).to.not.contain('onEdgeRequest');
+                widget.prompt.editor.edgeRequested.emit('top');
+              }).catch(done);
             });
           });
         }).catch(done);
