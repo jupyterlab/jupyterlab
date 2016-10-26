@@ -34,6 +34,16 @@ class ForeignHandler implements IDisposable {
   }
 
   /**
+   * Set whether the handler is able to inject foreign cells into a console.
+   */
+  get enabled(): boolean {
+    return this._enabled;
+  }
+  set enabled(value: boolean) {
+    this._enabled = value;
+  }
+
+  /**
    * Test whether the handler is disposed.
    */
   get isDisposed(): boolean {
@@ -80,6 +90,10 @@ class ForeignHandler implements IDisposable {
    * Handler IOPub messages.
    */
   protected onIOPubMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
+    // Only process messages if foreign cell injection is enabled.
+    if (!this._enabled) {
+      return;
+    }
     // Check whether this message came from an external session.
     let parent = this._parent;
     let session = (msg.parent_header as KernelMessage.IHeader).session;
@@ -135,6 +149,7 @@ class ForeignHandler implements IDisposable {
   }
 
   private _cells = new Map<string, CodeCellWidget>();
+  private _enabled = true;
   private _isDisposed = false;
   private _kernel: Kernel.IKernel = null;
   private _parent: Panel = null;
