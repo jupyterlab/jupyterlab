@@ -121,6 +121,11 @@
 }
 
 
+.jp-RunningSessions-itemIcon.jp-mod-console:before {
+  content: '\f109';
+}
+
+
 .jp-RunningSessions-itemIcon.jp-mod-file:before {
   content: '\f016';
 }
