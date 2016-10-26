@@ -94,6 +94,11 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
 const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
 
 /**
+ * A regex for console names.
+ */
+const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
+
+/**
  * The console panel instance tracker.
  */
 const tracker = new InstanceTracker<ConsolePanel>();
@@ -227,6 +232,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       // If we get a session, use it.
       if (args.id) {
         return manager.connectTo(args.id).then(session => {
+          name = session.path.split('/').pop();
+          name = `Console ${name.match(CONSOLE_REGEX)[1]}`;
           createConsole(session, name);
           manager.listRunning();  // Trigger a refresh.
           return session.id;

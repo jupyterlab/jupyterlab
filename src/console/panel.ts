@@ -89,28 +89,8 @@ class ConsolePanel extends Panel {
    * Handle `'close-request'` messages.
    */
   protected onCloseRequest(msg: Message): void {
-    let session = this._content.session;
-
-    if (!session || !session.kernel) {
-      super.onCloseRequest(msg);
-      this.dispose();
-      return;
-    }
-
-    session.kernel.getSpec().then(spec => {
-      let name = spec.display_name;
-      return showDialog({
-        title: 'Shut down kernel?',
-        body: `Shut down ${name}?`
-      });
-    }).then(value => {
-      if (value && value.text === 'OK') {
-        return session.shutdown();
-      }
-    }).then(() => {
-      super.onCloseRequest(msg);
-      this.dispose();
-    });
+    super.onCloseRequest(msg);
+    this.dispose();
   }
 
   private _content: ConsoleContent = null;
