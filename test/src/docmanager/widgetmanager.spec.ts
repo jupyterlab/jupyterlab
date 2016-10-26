@@ -20,6 +20,10 @@ describe('docmanager/widgetmanager', () => {
     manager = new DocumentWidgetManager({ registry: new DocumentRegistry() });
   });
 
+  afterEach(() => {
+    manager.dispose();
+  });
+
   describe('DocumentWidgetManager', () => {
 
     describe('#constructor()', () => {
@@ -27,6 +31,14 @@ describe('docmanager/widgetmanager', () => {
       it('should create a new document widget manager', () => {
         expect(manager).to.be.a(DocumentWidgetManager);
       });
+
+    });
+
+    describe('#isDisposed', () => {
+
+    });
+
+    describe('#dispose()', () => {
 
     });
 
