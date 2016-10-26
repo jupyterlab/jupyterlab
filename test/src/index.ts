@@ -16,6 +16,7 @@ import './console/history.spec';
 import './dialog/dialog.spec';
 
 import './docmanager/savehandler.spec';
+import './docmanager/widgetmanager.spec';
 
 import './docregistry/context.spec';
 import './docregistry/default.spec';

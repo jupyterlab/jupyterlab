@@ -163,8 +163,8 @@ class DocumentWidgetManager implements IDisposable {
    * Clone a widget.
    *
    * #### Notes
-   * This will create a new widget with the same model and context
-   * as this widget.
+   * This will create a new widget with the same context as this widget using
+   * the same widget factory.
    */
   cloneWidget(widget: Widget): Widget {
     let context = Private.contextProperty.get(widget);

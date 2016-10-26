@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -23,7 +19,7 @@ import {
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
-  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): Widget {
+  createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): Widget {
     return new Widget();
   }
 }
