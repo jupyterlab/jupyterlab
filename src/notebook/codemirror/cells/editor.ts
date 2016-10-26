@@ -123,6 +123,7 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
   }
   set lineNumbers(value: boolean) {
     this.editor.setOption('lineNumbers', value);
+    this.refresh();
   }
 
   /**

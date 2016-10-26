@@ -43,6 +43,7 @@ declare module CodeMirror {
     var modeInfo: modeinfo[];
 
     function runMode(code: string, mode: modespec | string, el: HTMLElement): void;
+    function runMode(code: string, mode: modespec | string, callback: (text: string, style: string) => void): void;
 
     var version: string;
 
