@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  nbformat
+} from '@jupyterlab/services';
+
+import {
   sendMessage, Message
 } from 'phosphor/lib/core/messaging';
 
@@ -27,10 +31,6 @@ import {
 import {
   INotebookModel, NotebookModel
 } from '../../../../lib/notebook/notebook/model';
-
-import {
-  nbformat
-} from '../../../../lib/notebook/notebook/nbformat';
 
 import {
   Notebook, StaticNotebook

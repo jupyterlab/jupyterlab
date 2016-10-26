@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  Kernel
+  Kernel, nbformat
 } from '@jupyterlab/services';
 
 import {
@@ -14,10 +14,6 @@ import {
 import {
   OutputAreaModel
 } from '../../../../lib/notebook/output-area/model';
-
-import {
-  nbformat
-} from '../../../../lib/notebook/notebook/nbformat';
 
 
 /**

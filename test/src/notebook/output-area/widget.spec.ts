@@ -4,16 +4,16 @@
 import expect = require('expect.js');
 
 import {
+  nbformat
+} from '@jupyterlab/services';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
 import {
   ChildMessage, Widget
 } from 'phosphor/lib/ui/widget';
-
-import {
-  nbformat
-} from '../../../../lib/notebook/notebook/nbformat';
 
 import {
   OutputAreaModel, OutputAreaWidget, OutputWidget
@@ -70,11 +70,11 @@ class CustomOutputWidget extends OutputWidget {
     super.setOutput(value);
   }
 
-  getBundle(output: nbformat.IOutput): nbformat.MimeBundle {
+  getBundle(output: nbformat.IOutput): nbformat.IMimeBundle {
     return super.getBundle(output);
   }
 
-  convertBundle(bundle: nbformat.MimeBundle): RenderMime.MimeMap<string> {
+  convertBundle(bundle: nbformat.IMimeBundle): RenderMime.MimeMap<string> {
     return super.convertBundle(bundle);
   }
 }
@@ -456,7 +456,7 @@ describe('notebook/output-area/widget', () => {
     describe('#convertBundle()', () => {
 
       it('should handle bundles with strings', () => {
-        let bundle: nbformat.MimeBundle = {
+        let bundle: nbformat.IMimeBundle = {
           'text/plain': 'foo'
         };
         let widget = new CustomOutputWidget({ rendermime });
@@ -465,7 +465,7 @@ describe('notebook/output-area/widget', () => {
       });
 
       it('should handle bundles with string arrays', () => {
-        let bundle: nbformat.MimeBundle = {
+        let bundle: nbformat.IMimeBundle = {
           'text/plain': ['foo', 'bar']
         };
         let widget = new CustomOutputWidget({ rendermime });
