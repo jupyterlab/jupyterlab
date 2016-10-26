@@ -54,6 +54,9 @@ class TestContent extends ConsoleContent {
   methods: string[] = [];
 
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     super.dispose();
     clearSignalData(this);
   }
