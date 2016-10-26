@@ -288,7 +288,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   let displayNameMap: { [key: string]: string } = Object.create(null);
   for (let kernelName in specs.kernelspecs) {
-    let displayName = specs.kernelspecs[kernelName].spec.display_name;
+    let displayName = specs.kernelspecs[kernelName].display_name;
     displayNameMap[kernelName] = displayName;
   }
 
@@ -325,7 +325,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     // Update the caption of the tab when the kernel changes.
     panel.content.session.kernelChanged.connect(() => {
       let name = panel.content.session.kernel.name;
-      name = specs.kernelspecs[name].spec.display_name;
+      name = specs.kernelspecs[name].display_name;
       captionOptions.displayName = name;
       captionOptions.connected = new Date();
       captionOptions.executed = null;
@@ -349,7 +349,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let session = widget.session;
       let lang = '';
       if (session.kernel) {
-        lang = specs.kernelspecs[session.kernel.name].spec.language;
+        lang = specs.kernelspecs[session.kernel.name].language;
       }
       manager.listRunning().then((sessions: Session.IModel[]) => {
         let options = {

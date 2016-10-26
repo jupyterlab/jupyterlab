@@ -345,7 +345,7 @@ class NotebookPanel extends Widget {
    */
   private _updateSpec(kernel: Kernel.IKernel): void {
     let specs = this.context.kernelspecs;
-    let spec = specs.kernelspecs[kernel.name].spec;
+    let spec = specs.kernelspecs[kernel.name];
     let specCursor = this.model.getMetadata('kernelspec');
     specCursor.setValue({
       name: kernel.name,

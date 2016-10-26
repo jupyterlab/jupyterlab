@@ -673,7 +673,7 @@ class DirListing extends Widget {
       let index = indexOf(paths, session.notebook.path);
       let node = nodes.at(index);
       node.classList.add(RUNNING_CLASS);
-      node.title = specs.kernelspecs[session.kernel.name].spec.display_name;
+      node.title = specs.kernelspecs[session.kernel.name].display_name;
     });
 
     this._prevPath = this._model.path;
