@@ -30,7 +30,7 @@ import {
 } from 'phosphor/lib/core/properties';
 
 import {
-  clearSignalData
+  disconnectReceiver
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -60,12 +60,30 @@ const DOCUMENT_CLASS = 'jp-Document';
  * A class that maintains the lifecyle of file-backed widgets.
  */
 export
-class DocumentWidgetManager {
+class DocumentWidgetManager implements IDisposable {
   /**
    * Construct a new document widget manager.
    */
   constructor(options: DocumentWidgetManager.IOptions) {
     this._registry = options.registry;
+  }
+
+  /**
+   * Test whether the document widget manager is disposed.
+   */
+  get IDisposed(): boolean {
+    return this._registry === null;
+  }
+
+  /**
+   * Dispose of the resources used by the widget.
+   */
+  dispose(): void {
+    if (this.IDisposed) {
+      return;
+    }
+    disconnectReceiver(this);
+    this._registry = null;
   }
 
   /**
