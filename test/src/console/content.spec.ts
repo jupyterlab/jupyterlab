@@ -93,7 +93,6 @@ class TestHistory extends ConsoleHistory {
 
   protected onHistory(value: KernelMessage.IHistoryReplyMsg): void {
     super.onHistory(value);
-    console.log('HERE I AM');
     this.ready.emit(void 0);
   }
 }
@@ -432,15 +431,20 @@ describe('console/content', () => {
             });
             Widget.attach(widget, document.body);
             requestAnimationFrame(() => {
-              let old = widget.prompt.model.source;
-              expect(widget.methods).to.not.contain('onEdgeRequest');
-              widget.prompt.editor.edgeRequested.emit('top');
-              expect(widget.methods).to.contain('onEdgeRequest');
-              requestAnimationFrame(() => {
-                expect(widget.prompt.model.source).to.not.be(old);
-                widget.dispose();
-                done();
-              });
+              let force = true;
+              let code = 'print("onEdgeRequest")';
+              widget.prompt.model.source = code;
+              widget.execute(force).then(() => {
+                expect(widget.prompt.model.source).to.not.be(code);
+                expect(widget.methods).to.not.contain('onEdgeRequest');
+                widget.prompt.editor.edgeRequested.emit('top');
+                expect(widget.methods).to.contain('onEdgeRequest');
+                requestAnimationFrame(() => {
+                  expect(widget.prompt.model.source).to.be(code);
+                  widget.dispose();
+                  done();
+                });
+              }).catch(done);
             });
           });
         }).catch(done);
