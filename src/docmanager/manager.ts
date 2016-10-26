@@ -99,7 +99,6 @@ class DocumentManager implements IDisposable {
       context.dispose();
     });
     this._contexts.clear();
-    this._widgetManager.dispose();
     this._widgetManager = null;
   }
 
@@ -223,8 +222,8 @@ class DocumentManager implements IDisposable {
    * This will create a new widget with the same model and context
    * as this widget.
    */
-  clone(widget: Widget): Widget {
-    return this._widgetManager.clone(widget);
+  cloneWidget(widget: Widget): Widget {
+    return this._widgetManager.cloneWidget(widget);
   }
 
   /**
@@ -232,7 +231,7 @@ class DocumentManager implements IDisposable {
    */
   closeFile(path: string): void {
     let context = this._contextForPath(path);
-    this._widgetManager.close(context);
+    this._widgetManager.closeWidgets(context);
   }
 
   /**
@@ -240,7 +239,7 @@ class DocumentManager implements IDisposable {
    */
   closeAll(): void {
     each(this._contexts, context => {
-      this._widgetManager.close(context);
+      this._widgetManager.closeWidgets(context);
     });
   }
 

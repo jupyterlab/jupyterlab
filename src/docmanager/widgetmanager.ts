@@ -60,30 +60,12 @@ const DOCUMENT_CLASS = 'jp-Document';
  * A class that maintains the lifecyle of file-backed widgets.
  */
 export
-class DocumentWidgetManager implements IDisposable {
+class DocumentWidgetManager {
   /**
    * Construct a new document widget manager.
    */
   constructor(options: DocumentWidgetManager.IOptions) {
     this._registry = options.registry;
-  }
-
-  /**
-   * Test whether the context has been disposed (read-only).
-   */
-  get isDisposed(): boolean {
-    return this._registry === null;
-  }
-
-  /**
-   * Dispose of the resources used by the widget manager.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._registry = null;
-    clearSignalData(this);
   }
 
   /**
@@ -167,7 +149,7 @@ class DocumentWidgetManager implements IDisposable {
    * This will create a new widget with the same model and context
    * as this widget.
    */
-  clone(widget: Widget): Widget {
+  cloneWidget(widget: Widget): Widget {
     let context = Private.contextProperty.get(widget);
     let name = Private.nameProperty.get(widget);
     let newWidget = this.createWidget(name, context);
@@ -178,7 +160,7 @@ class DocumentWidgetManager implements IDisposable {
   /**
    * Close the widgets associated with a given context.
    */
-  close(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): void {
+  closeWidgets(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): void {
     let widgets = Private.widgetsProperty.get(context);
     each(widgets, widget => {
       widget.close();
