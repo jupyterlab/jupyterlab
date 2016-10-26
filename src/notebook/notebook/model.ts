@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  utils
+  nbformat, utils
 } from '@jupyterlab/services';
 
 import {
@@ -45,10 +45,6 @@ import {
 import {
   IObservableUndoableVector, ObservableUndoableVector
 } from '../common/undo';
-
-import {
-  nbformat
-} from './nbformat';
 
 
 /**

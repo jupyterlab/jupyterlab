@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel
+  Kernel, nbformat
 } from '@jupyterlab/services';
 
 import {
@@ -48,10 +48,6 @@ import {
 import {
   RenderMime
 } from '../../rendermime';
-
-import {
-  nbformat
-} from '../notebook/nbformat';
 
 import {
   OutputAreaModel
@@ -810,8 +806,8 @@ class OutputWidget extends Widget {
    *
    * @returns - A mime bundle for the payload.
    */
-  protected getBundle(output: nbformat.IOutput): nbformat.MimeBundle {
-    let bundle: nbformat.MimeBundle;
+  protected getBundle(output: nbformat.IOutput): nbformat.IMimeBundle {
+    let bundle: nbformat.IMimeBundle;
     switch (output.output_type) {
     case 'execute_result':
       bundle = (output as nbformat.IExecuteResult).data;
@@ -842,7 +838,7 @@ class OutputWidget extends Widget {
   /**
    * Convert a mime bundle to a mime map.
    */
-  protected convertBundle(bundle: nbformat.MimeBundle): RenderMime.MimeMap<string> {
+  protected convertBundle(bundle: nbformat.IMimeBundle): RenderMime.MimeMap<string> {
     let map: RenderMime.MimeMap<string> = Object.create(null);
     for (let mimeType in bundle) {
       let value = bundle[mimeType];

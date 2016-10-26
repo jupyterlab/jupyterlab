@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  utils
+  nbformat, utils
 } from '@jupyterlab/services';
 
 import {
@@ -28,10 +28,6 @@ import {
 import {
   IMetadataCursor, MetadataCursor
 } from '../common/metadata';
-
-import {
-  nbformat
-} from '../notebook/nbformat';
 
 import {
   OutputAreaModel

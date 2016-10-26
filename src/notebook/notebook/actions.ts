@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage
+  Kernel, KernelMessage, nbformat
 } from '@jupyterlab/services';
 
 import {
@@ -25,10 +25,6 @@ import {
 import {
   INotebookModel
 } from './model';
-
-import {
-  nbformat
-} from './nbformat';
 
 import {
   Notebook

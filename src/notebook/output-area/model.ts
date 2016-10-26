@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage
+  Kernel, KernelMessage, nbformat
 } from '@jupyterlab/services';
 
 import {
@@ -24,10 +24,6 @@ import {
 import {
   IObservableVector, ObservableVector
 } from '../../common/observablevector';
-
-import {
-  nbformat
-} from '../notebook/nbformat';
 
 
 /**
@@ -233,7 +229,7 @@ class OutputAreaModel implements IDisposable {
         let page = JSON.parse(JSON.stringify(pages[0]));
         let model: nbformat.IOutput = {
           output_type: 'display_data',
-          data: (page as any).data as nbformat.MimeBundle,
+          data: (page as any).data as nbformat.IMimeBundle,
           metadata: {}
         };
         this.add(model);

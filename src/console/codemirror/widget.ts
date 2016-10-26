@@ -1,6 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import {
+  nbformat
+} from '@jupyterlab/services';
 
 import {
   CodeCellModel, RawCellModel
@@ -21,10 +24,6 @@ import {
 import {
   mimetypeForLanguage
 } from '../../notebook/common/mimetype';
-
-import {
-  nbformat
-} from '../../notebook/notebook/nbformat';
 
 import {
   RenderMime

@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  nbformat
+} from '@jupyterlab/services';
+
+import {
   each
 } from 'phosphor/lib/algorithm/iteration';
 
@@ -67,10 +71,6 @@ import {
 import {
   INotebookModel
 } from './model';
-
-import {
-  nbformat
-} from './nbformat';
 
 
 /**
