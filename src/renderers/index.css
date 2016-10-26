@@ -254,7 +254,7 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon tbody tr:hover {
-  background-color: rgba(66, 165, 245, 0.2);
+  background: var(--md-light-blue-50);
 }
 
 
