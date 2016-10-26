@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  KernelMessage, Session
+  KernelMessage, Session, nbformat
 } from '@jupyterlab/services';
 
 import {
@@ -44,10 +44,6 @@ import {
 import {
   EdgeLocation, ICellEditorWidget, ITextChange
 } from '../notebook/cells/editor';
-
-import {
-  nbformat
-} from '../notebook/notebook/nbformat';
 
 import {
   IRenderMime

@@ -5,7 +5,6 @@ export * from './actions';
 export * from './default-toolbar';
 export * from './model';
 export * from './modelfactory';
-export * from './nbformat';
 export * from './panel';
 export * from './trust';
 export * from './widget';

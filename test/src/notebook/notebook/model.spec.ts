@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  nbformat
+} from '@jupyterlab/services';
+
+import {
   toArray
 } from 'phosphor/lib/algorithm/iteration';
 
@@ -14,10 +18,6 @@ import {
 import {
   CodeCellModel
 } from '../../../../lib/notebook/cells/model';
-
-import {
-  nbformat
-} from '../../../../lib/notebook/notebook/nbformat';
 
 import {
   NotebookModel

@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  nbformat
+} from '@jupyterlab/services';
+
+import {
   RenderMime
 } from '../../../rendermime';
 
@@ -16,10 +20,6 @@ import {
 import {
   mimetypeForLanguage
   } from '../../common/mimetype';
-
-import {
-  nbformat
-} from '../../notebook/nbformat';
 
 import {
   Notebook

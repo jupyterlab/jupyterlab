@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  nbformat
+} from '@jupyterlab/services';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
   NotebookActions
 } from './actions';
-
-import {
-  nbformat
-} from './nbformat';
 
 import {
   NotebookPanel

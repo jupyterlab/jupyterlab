@@ -5,12 +5,13 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
-  findMode
-} from '../../codemirror';
+  nbformat
+} from '@jupyterlab/services';
+
 
 import {
-  nbformat
-} from '../notebook/nbformat';
+  findMode
+} from '../../codemirror';
 
 
 /**

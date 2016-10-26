@@ -288,7 +288,7 @@ class RunningSessions extends Widget {
     for (let i = 0; i < this._runningSessions.length; i++) {
       let node = sessionList.children[i] as HTMLLIElement;
       let model = this._runningSessions[i];
-      let kernelName = kernelspecs[model.kernel.name].spec.display_name;
+      let kernelName = kernelspecs[model.kernel.name].display_name;
       renderer.updateSessionNode(node, model, kernelName);
     }
   }

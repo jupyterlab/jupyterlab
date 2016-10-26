@@ -96,7 +96,7 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
   text.textContent = `Select kernel for\n"${options.name}"`;
   body.appendChild(text);
   if (kernel) {
-    let displayName = specs.kernelspecs[kernel.name].spec.display_name;
+    let displayName = specs.kernelspecs[kernel.name].display_name;
     text.textContent += `\nCurrent: ${displayName}`;
     text.title = `Kernel Name: ${displayName}\n` +
     `Kernel Id: ${kernel.id}`;
@@ -162,7 +162,7 @@ function findKernel(kernelName: string, language: string, specs: Kernel.ISpecMod
     return specs.default;
   }
   for (let specName in specs.kernelspecs) {
-    let kernelLanguage = specs.kernelspecs[specName].spec.language;
+    let kernelLanguage = specs.kernelspecs[specName].language;
     if (language === kernelLanguage) {
       console.log('No exact match found for ' + specName +
                   ', using kernel ' + specName + ' that matches ' +
@@ -213,13 +213,11 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   // Create mappings of display names and languages for kernel name.
   let displayNames: { [key: string]: string } = Object.create(null);
   let languages: { [key: string]: string } = Object.create(null);
-  let modes: { [key: string]: string } = Object.create(null);
   for (let name in specs.kernelspecs) {
-    let spec = specs.kernelspecs[name].spec;
+    let spec = specs.kernelspecs[name];
     displayNames[name] = spec.display_name;
     maxLength = Math.max(maxLength, displayNames[name].length);
     languages[name] = spec.language;
-    modes[name] = spec.codemirror_mode;
   }
 
   // Handle a kernel by name.
@@ -231,8 +229,7 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   // Handle a preferred kernel language in order of display name.
   if (preferredLanguage) {
     for (let name in specs.kernelspecs) {
-      if (languages[name] === preferredLanguage ||
-          modes[name] === preferredLanguage) {
+      if (languages[name] === preferredLanguage) {
         names.push(name);
       }
     }

@@ -3,7 +3,7 @@
 
 import {
   nbformat
-} from '../../../lib/notebook/notebook/nbformat';
+} from '@jupyterlab/services';
 
 
 /**
