@@ -1183,12 +1183,15 @@ class Notebook extends StaticNotebook {
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
     this._drag.start(clientX, clientY).then(action => {
+      this._drag = null;
+      if (action === 'none') {
+        return;
+      }
       let activeCell = cells.at(this.activeCellIndex);
       for (let cell of toremove) {
         this.model.cells.remove(cell);
       }
       this.activeCellIndex = indexOf(cells, activeCell);
-      this._drag = null;
     });
 
   }
