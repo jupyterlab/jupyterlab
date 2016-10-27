@@ -131,8 +131,8 @@ class NotebookPanel extends Widget {
   /**
    * Get the toolbar used by the widget.
    */
-  get toolbar(): Toolbar {
-    return (this.layout as PanelLayout).widgets.at(0) as Toolbar;
+  get toolbar(): Toolbar<Widget> {
+    return (this.layout as PanelLayout).widgets.at(0) as Toolbar<Widget>;
   }
 
   /**
@@ -424,7 +424,7 @@ export namespace NotebookPanel {
     /**
      * Create a new toolbar for the panel.
      */
-    createToolbar(): Toolbar;
+    createToolbar(): Toolbar<Widget>;
 
     /**
      * Create a new completer widget for the panel.
@@ -445,7 +445,7 @@ export namespace NotebookPanel {
     /**
      * Create a new toolbar for the panel.
      */
-    createToolbar(): Toolbar {
+    createToolbar(): Toolbar<Widget> {
       return new Toolbar();
     }
 
