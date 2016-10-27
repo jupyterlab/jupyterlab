@@ -117,50 +117,48 @@ describe('console/foreign', () => {
 
     describe('#enabled', () => {
 
+      let a: Session.ISession;
+      let b: Session.ISession;
+      let handler: TestHandler;
+      let parent: Panel;
+
+      beforeEach(done => {
+        let path = utils.uuid();
+        let sessions = [Session.startNew({ path }), Session.startNew({ path })];
+        parent = new Panel();
+        Promise.all(sessions).then(([one, two]) => {
+          a = one;
+          b = two;
+          handler = new TestHandler({ kernel: a.kernel, parent, renderer });
+          done();
+        }).catch(done);
+      });
+
+      afterEach(done => {
+        parent.dispose();
+        handler.dispose();
+        a.shutdown().then(() => {
+          a.dispose();
+          b.dispose();
+          done();
+        }).catch(done);
+      });
+
       it('should default to `true`', () => {
-        let handler = new ForeignHandler({
-          kernel: null,
-          parent: null,
-          renderer
-        });
         expect(handler.enabled).to.be(true);
       });
 
       it('should allow foreign cells to be injected if `true`', done => {
-        let path = utils.uuid();
         let code = 'print("#enabled:true")';
-        let parent = new Panel();
-        Promise.all([
-          Session.startNew({ path }), Session.startNew({ path })
-        ]).then(([a, b]) => {
-          let handler = new TestHandler({ kernel: a.kernel, parent, renderer });
-          handler.injected.connect(() => {
-            a.dispose();
-            b.dispose();
-            handler.dispose();
-            done();
-          });
-          b.kernel.execute({ code, stop_on_error: true });
-        }).catch(done);
+        handler.injected.connect(() => { done(); });
+        b.kernel.execute({ code, stop_on_error: true });
       });
 
       it('should reject foreign cells if `false`', done => {
-        let path = utils.uuid();
         let code = 'print("#enabled:false")';
-        let parent = new Panel();
-        Promise.all([
-          Session.startNew({ path }), Session.startNew({ path })
-        ]).then(([a, b]) => {
-          let handler = new TestHandler({ kernel: a.kernel, parent, renderer });
-          handler.enabled = false;
-          handler.rejected.connect(() => {
-            a.dispose();
-            b.dispose();
-            handler.dispose();
-            done();
-          });
-          b.kernel.execute({ code, stop_on_error: true });
-        }).catch(done);
+        handler.enabled = false;
+        handler.rejected.connect(() => { done(); });
+        b.kernel.execute({ code, stop_on_error: true });
       });
 
     });
@@ -235,64 +233,62 @@ describe('console/foreign', () => {
 
     describe('#onIOPubMessage()', () => {
 
-      it('should be called when messages come through', done => {
+      let a: Session.ISession;
+      let b: Session.ISession;
+      let handler: TestHandler;
+      let parent: Panel;
+
+      beforeEach(done => {
         let path = utils.uuid();
-        let parent = new Panel();
-        let code = 'print("onIOPubMessage:disabled")';
-        Promise.all([
-          Session.startNew({ path }), Session.startNew({ path })
-        ]).then(([a, b]) => {
-          let handler = new TestHandler({ kernel: a.kernel, parent, renderer });
-          handler.enabled = false;
-          handler.received.connect(() => {
-            a.dispose();
-            b.dispose();
-            handler.dispose();
-            done();
-          });
-          b.kernel.execute({ code, stop_on_error: true });
+        let sessions = [Session.startNew({ path }), Session.startNew({ path })];
+        parent = new Panel();
+        Promise.all(sessions).then(([one, two]) => {
+          a = one;
+          b = two;
+          handler = new TestHandler({ kernel: a.kernel, parent, renderer });
+          done();
         }).catch(done);
+      });
+
+      afterEach(done => {
+        parent.dispose();
+        handler.dispose();
+        a.shutdown().then(() => {
+          a.dispose();
+          b.dispose();
+          done();
+        }).catch(done);
+      });
+
+      it('should be called when messages come through', done => {
+        let code = 'print("onIOPubMessage:disabled")';
+        handler.enabled = false;
+        handler.received.connect(() => { done(); });
+        b.kernel.execute({ code, stop_on_error: true });
       });
 
       it('should inject relevant cells into the parent', done => {
-        let path = utils.uuid();
-        let parent = new Panel();
         let code = 'print("onIOPubMessage:enabled")';
-        Promise.all([
-          Session.startNew({ path }), Session.startNew({ path })
-        ]).then(([a, b]) => {
-          let handler = new TestHandler({ kernel: a.kernel, parent, renderer });
-          expect(parent.widgets.length).to.be(0);
-          handler.injected.connect(() => {
-            a.dispose();
-            b.dispose();
-            handler.dispose();
-            expect(parent.widgets.length).to.be.greaterThan(0);
-            done();
-          });
-          b.kernel.execute({ code, stop_on_error: true });
-        }).catch(done);
+        expect(parent.widgets.length).to.be(0);
+        handler.injected.connect(() => {
+          expect(parent.widgets.length).to.be.greaterThan(0);
+          done();
+        });
+        b.kernel.execute({ code, stop_on_error: true });
       });
 
       it('should not reject relevant iopub messages', done => {
-        let path = utils.uuid();
         let code = 'print("#onIOPubMessage:relevant")';
         let called = 0;
-        let parent = new Panel();
-        Promise.all([
-          Session.startNew({ path }), Session.startNew({ path })
-        ]).then(([a, b]) => {
-          let handler = new TestHandler({ kernel: a.kernel, parent, renderer });
-          handler.rejected.connect(() => {
-            done(new Error('rejected relevant iopub message'));
-          });
-          handler.injected.connect(() => {
-            if (++called === 2) {
-              done();
-            }
-          });
-          b.kernel.execute({ code, stop_on_error: true });
-        }).catch(done);
+        handler.rejected.connect(() => {
+          done(new Error('rejected relevant iopub message'));
+        });
+        handler.injected.connect(() => {
+          if (++called === 2) {
+            done();
+          }
+        });
+        b.kernel.execute({ code, stop_on_error: true });
       });
 
     });
