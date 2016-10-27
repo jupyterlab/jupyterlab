@@ -357,7 +357,16 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
    * #### Notes
    * It should emit the [widgetCreated] signal with the new widget.
    */
-  abstract createNew(context: DocumentRegistry.IContext<U>, kernel?: Kernel.IModel): T;
+  createNew(context: DocumentRegistry.IContext<U>): T {
+    let widget = this.createNewWidget(context);
+    this.widgetCreated.emit(widget);
+    return widget;
+  }
+
+  /**
+   * Create a widget for a context.
+   */
+  protected abstract createNewWidget(context: DocumentRegistry.IContext<U>): T;
 
   private _isDisposed = false;
   private _name: string;

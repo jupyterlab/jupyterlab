@@ -108,10 +108,8 @@ class ImageWidgetFactory extends ABCWidgetFactory<ImageWidget, DocumentRegistry.
   /**
    * Create a new widget given a context.
    */
-  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): ImageWidget {
-    let widget = new ImageWidget(context);
-    this.widgetCreated.emit(widget);
-    return widget;
+  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): ImageWidget {
+    return new ImageWidget(context);
   }
 }
 
