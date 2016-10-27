@@ -120,7 +120,7 @@ class ForeignHandler implements IDisposable {
     case 'display_data':
     case 'stream':
     case 'error':
-      if (!(parentMsgId in this._cells)) {
+      if (!this._cells.has(parentMsgId)) {
         // This is an output from an input that was broadcast before our
         // session started listening. We will ignore it.
         console.warn('Ignoring output with no associated input cell.');
