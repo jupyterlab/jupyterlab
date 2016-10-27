@@ -1,9 +1,8 @@
+<!DOCTYPE html>
 <!--
 Copyright (c) Jupyter Development Team.
 Distributed under the terms of the Modified BSD License.
 -->
-
-<!DOCTYPE HTML>
 <html>
 
 <head>
@@ -45,11 +44,10 @@ div#header, div#site {
 
 {% block script %}
 <script type='text/javascript'>
-require(['jquery'], function($) {
-  // scroll long tracebacks to the bottom
-  var tb = $(".traceback")[0];
+window.onload = function () {
+  var tb = document.getElementsByClassName('traceback')[0];
   tb.scrollTop = tb.scrollHeight;
-});
+};
 </script>
 {% endblock script %}
 
