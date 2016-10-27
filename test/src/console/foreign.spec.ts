@@ -32,6 +32,19 @@ import {
 } from '../utils';
 
 
+const relevantTypes = [
+  'execute_input',
+  'execute_result',
+  'display_data',
+  'stream',
+  'error',
+  'clear_output'
+].reduce((acc, val) => {
+  acc.add(val);
+  return acc;
+}, new Set<string>());
+
+
 class TestHandler extends ForeignHandler {
 
   readonly injected: ISignal<this, void>;
@@ -59,7 +72,8 @@ class TestHandler extends ForeignHandler {
       // If the message was not injected but otherwise would have been, emit
       // a rejected signal. This should only happen if `enabled` is `false`.
       let session = (msg.parent_header as KernelMessage.IHeader).session;
-      if (session !== this.kernel.clientId) {
+      let msgType = msg.header.msg_type;
+      if (session !== this.kernel.clientId && relevantTypes.has(msgType)) {
         this.rejected.emit(void 0);
       }
     }
@@ -255,6 +269,27 @@ describe('console/foreign', () => {
             handler.dispose();
             expect(parent.widgets.length).to.be.greaterThan(0);
             done();
+          });
+          b.kernel.execute({ code, stop_on_error: true });
+        }).catch(done);
+      });
+
+      it('should not reject relevant iopub messages', done => {
+        let path = utils.uuid();
+        let code = 'print("#onIOPubMessage:relevant")';
+        let called = 0;
+        let parent = new Panel();
+        Promise.all([
+          Session.startNew({ path }), Session.startNew({ path })
+        ]).then(([a, b]) => {
+          let handler = new TestHandler({ kernel: a.kernel, parent, renderer });
+          handler.rejected.connect(() => {
+            done(new Error('rejected relevant iopub message'));
+          });
+          handler.injected.connect(() => {
+            if (++called === 2) {
+              done();
+            }
           });
           b.kernel.execute({ code, stop_on_error: true });
         }).catch(done);
