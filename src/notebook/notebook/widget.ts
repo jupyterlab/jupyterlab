@@ -1128,14 +1128,26 @@ class Notebook extends StaticNotebook {
     // Find the target cell and insert the copied cells.
     let index = this._findCell(target);
     let model = this.model;
-    let cells = event.mimeData.getData(JUPYTER_CELL_MIME);
+    let values = event.mimeData.getData(JUPYTER_CELL_MIME);
 
     // Insert the copies of the original cells.
-    for (let cell of cells) {
+    for (let value of values) {
+      let cell: ICellModel;
+      switch (value.cell_type) {
+      case 'code':
+        cell = model.factory.createCodeCell(value);
+        break;
+      case 'markdown':
+        cell = model.factory.createMarkdownCell(value);
+        break;
+      default:
+        cell = model.factory.createRawCell(value);
+        break;
+      }
       model.cells.insert(index, cell);
     }
     // Activate the last cell.
-    this.activeCellIndex = index + cells.length - 1;
+    this.activeCellIndex = index + values.length - 1;
   }
 
   /**
