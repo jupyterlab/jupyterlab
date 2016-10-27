@@ -6,6 +6,7 @@
 import glob
 import json
 import os
+import sys
 from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
@@ -64,6 +65,17 @@ class LabHandler(IPythonHandler):
         static_prefix = ujoin(self.base_url, PREFIX)
         labextensions = self.application.labextensions
         data = get_labextension_manifest_data_by_folder(BUILT_FILES)
+        if 'main' not in data or 'extensions' not in data:
+            msg = ('JupyterLab build artifacts not detected, please see ' + 
+                   'CONTRIBUTING.md for build instructions.')
+            self.log.error(msg)
+            self.write(self.render_template('error.html', 
+                       status_code=500, 
+                       status_message='JupyterLab Error',
+                       page_title='JupyterLab Error',
+                       message=msg))
+            return
+
         main = data['main']['entry']
         bundles = [ujoin(static_prefix, name + '.bundle.js') for name in
                    ['loader', 'main', 'extensions']]

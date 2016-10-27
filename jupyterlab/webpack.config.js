@@ -5,11 +5,14 @@
 // See https://github.com/webpack/css-loader/issues/144
 require('es6-promise').polyfill();
 
+var childProcess = require('child_process');
 var buildExtension = require('@jupyterlab/extension-builder/lib/builder').buildExtension;
+var webpack = require('webpack');
 
 
 console.log('Generating bundles...');
 
+var notice = childProcess.execSync('git describe', { encoding: 'utf8' });
 
 buildExtension({
   name: 'main',
@@ -17,8 +20,15 @@ buildExtension({
   outputDir: './build',
   config: {
     output: {
-      publicPath: 'lab/'
-    }
+      publicPath: 'lab/',
+    },
+    plugins: [
+      new webpack.DefinePlugin({
+        'process.env': {
+          'GIT_DESCRIPTION': JSON.stringify(notice.trim())
+        }
+      })
+    ]
   }
 });
 
