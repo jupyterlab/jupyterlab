@@ -16,12 +16,12 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  DocumentRegistry, TextModelFactory, ABCWidgetFactory, Context
-} from '../../../lib/docregistry';
-
-import {
   DocumentWidgetManager
 } from '../../../lib/docmanager';
+
+import {
+  DocumentRegistry, TextModelFactory, ABCWidgetFactory, Context
+} from '../../../lib/docregistry';
 
 import {
   acceptDialog, dismissDialog
@@ -207,6 +207,10 @@ describe('docmanager/widgetmanager', () => {
         expect(clone.hasClass('WidgetFactory')).to.be(true);
         expect(clone.hasClass('jp-Document')).to.be(true);
         expect(manager.contextForWidget(clone)).to.be(context);
+      });
+
+      it('should return undefined if the source widget is not managed', () => {
+        expect(manager.cloneWidget(new Widget()).to.be(void 0);
       });
 
     });
