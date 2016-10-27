@@ -117,8 +117,8 @@ describe('console/foreign', () => {
 
     describe('#enabled', () => {
 
-      let a: Session.ISession;
-      let b: Session.ISession;
+      let local: Session.ISession;
+      let foreign: Session.ISession;
       let handler: TestHandler;
       let parent: Panel;
 
@@ -127,9 +127,9 @@ describe('console/foreign', () => {
         let sessions = [Session.startNew({ path }), Session.startNew({ path })];
         parent = new Panel();
         Promise.all(sessions).then(([one, two]) => {
-          a = one;
-          b = two;
-          handler = new TestHandler({ kernel: a.kernel, parent, renderer });
+          local = one;
+          foreign = two;
+          handler = new TestHandler({ kernel: local.kernel, parent, renderer });
           done();
         }).catch(done);
       });
@@ -137,9 +137,9 @@ describe('console/foreign', () => {
       afterEach(done => {
         parent.dispose();
         handler.dispose();
-        a.shutdown().then(() => {
-          a.dispose();
-          b.dispose();
+        local.shutdown().then(() => {
+          local.dispose();
+          foreign.dispose();
           done();
         }).catch(done);
       });
@@ -151,14 +151,14 @@ describe('console/foreign', () => {
       it('should allow foreign cells to be injected if `true`', done => {
         let code = 'print("#enabled:true")';
         handler.injected.connect(() => { done(); });
-        b.kernel.execute({ code, stop_on_error: true });
+        foreign.kernel.execute({ code, stop_on_error: true });
       });
 
       it('should reject foreign cells if `false`', done => {
         let code = 'print("#enabled:false")';
         handler.enabled = false;
         handler.rejected.connect(() => { done(); });
-        b.kernel.execute({ code, stop_on_error: true });
+        foreign.kernel.execute({ code, stop_on_error: true });
       });
 
     });
@@ -233,8 +233,8 @@ describe('console/foreign', () => {
 
     describe('#onIOPubMessage()', () => {
 
-      let a: Session.ISession;
-      let b: Session.ISession;
+      let local: Session.ISession;
+      let foreign: Session.ISession;
       let handler: TestHandler;
       let parent: Panel;
 
@@ -243,9 +243,9 @@ describe('console/foreign', () => {
         let sessions = [Session.startNew({ path }), Session.startNew({ path })];
         parent = new Panel();
         Promise.all(sessions).then(([one, two]) => {
-          a = one;
-          b = two;
-          handler = new TestHandler({ kernel: a.kernel, parent, renderer });
+          local = one;
+          foreign = two;
+          handler = new TestHandler({ kernel: local.kernel, parent, renderer });
           done();
         }).catch(done);
       });
@@ -253,9 +253,9 @@ describe('console/foreign', () => {
       afterEach(done => {
         parent.dispose();
         handler.dispose();
-        a.shutdown().then(() => {
-          a.dispose();
-          b.dispose();
+        local.shutdown().then(() => {
+          local.dispose();
+          foreign.dispose();
           done();
         }).catch(done);
       });
@@ -264,7 +264,7 @@ describe('console/foreign', () => {
         let code = 'print("onIOPubMessage:disabled")';
         handler.enabled = false;
         handler.received.connect(() => { done(); });
-        b.kernel.execute({ code, stop_on_error: true });
+        foreign.kernel.execute({ code, stop_on_error: true });
       });
 
       it('should inject relevant cells into the parent', done => {
@@ -274,7 +274,7 @@ describe('console/foreign', () => {
           expect(parent.widgets.length).to.be.greaterThan(0);
           done();
         });
-        b.kernel.execute({ code, stop_on_error: true });
+        foreign.kernel.execute({ code, stop_on_error: true });
       });
 
       it('should not reject relevant iopub messages', done => {
@@ -288,7 +288,7 @@ describe('console/foreign', () => {
             done();
           }
         });
-        b.kernel.execute({ code, stop_on_error: true });
+        foreign.kernel.execute({ code, stop_on_error: true });
       });
 
     });
