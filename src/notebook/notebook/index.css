@@ -24,7 +24,7 @@
 }
 
 
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected{
   border-color: #ABABAB;
   border-left-width: var(--jp-border-width);
   background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
@@ -55,4 +55,28 @@
 
 .jp-Notebook {
   flex: 1 1 auto;
+}
+
+
+.jp-Notebook-cell.jp-mod-dropSource {
+  opacity: 0.5;
+}
+
+
+.jp-Notebook-cell.jp-mod-dropTarget {
+  border-top: 1px solid #42A5F5;
+}
+
+
+.jp-Notebook-cell .jp-Cell-prompt {
+  cursor: move;
+}
+
+.jp-dragImage {
+  text-align: center;
+  line-height: 50px;
+  min-width: 50px;
+  min-height: 50px;
+  border: 1px solid #ABABAB;
+  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, white 5px, white 100%);
 }
