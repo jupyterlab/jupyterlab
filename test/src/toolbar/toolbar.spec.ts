@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -61,56 +65,76 @@ describe('toolbar/toolbar', () => {
 
     });
 
-    describe('#add()', () => {
+    describe('#names()', () => {
+
+      it('should get an ordered list the toolbar item names', () => {
+        let widget = new Toolbar();
+        widget.addItem('foo', new Widget());
+        widget.addItem('bar', new Widget());
+        widget.addItem('baz', new Widget());
+        expect(toArray(widget.names())).to.eql(['foo', 'bar', 'baz']);
+      });
+
+    });
+
+    describe('#addItem()', () => {
 
       it('should add an item to the toolbar', () => {
         let item = new Widget();
         let widget = new Toolbar();
-        widget.add('test', item);
-        expect(widget.list()).to.contain('test');
+        expect(widget.addItem('test', item)).to.be(true);
+        expect(toArray(widget.names())).to.contain('test');
       });
 
       it('should add the `jp-Toolbar-item` class to the widget', () => {
         let item = new Widget();
         let widget = new Toolbar();
-        widget.add('test', item);
+        widget.addItem('test', item);
         expect(item.hasClass('jp-Toolbar-item')).to.be(true);
       });
 
-      it('should add the item after a named item', () => {
-        let items = [new Widget(), new Widget(), new Widget()];
+      it('should return false if the name is already used', () => {
         let widget = new Toolbar();
-        widget.add('foo', items[0]);
-        widget.add('bar', items[1]);
-        widget.add('baz', items[2], 'foo');
-        expect(widget.list()).to.eql(['foo', 'baz', 'bar']);
-      });
-
-      it('should ignore an invalid `after`', () => {
-        let items = [new Widget(), new Widget(), new Widget()];
-        let widget = new Toolbar();
-        widget.add('foo', items[0]);
-        widget.add('bar', items[1]);
-        widget.add('baz', items[2], 'fuzz');
-        expect(widget.list()).to.eql(['foo', 'bar', 'baz']);
-      });
-
-      it('should throw an error if the name is alreay used', () => {
-        let widget = new Toolbar();
-        widget.add('test', new Widget());
-        expect(() => { widget.add('test', new Widget()); }).to.throwError();
+        widget.addItem('test', new Widget());
+        expect(widget.addItem('test', new Widget())).to.be(false);
       });
 
     });
 
-    describe('#list()', () => {
+    describe('#insertItem()', () => {
 
-      it('should get an ordered list the toolbar item names', () => {
+      it('should insert the item into the toolbar', () => {
         let widget = new Toolbar();
-        widget.add('foo', new Widget());
-        widget.add('bar', new Widget());
-        widget.add('baz', new Widget());
-        expect(widget.list()).to.eql(['foo', 'bar', 'baz']);
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        widget.insertItem(1, 'c', new Widget());
+        expect(toArray(widget.names())).to.eql(['a', 'c', 'b']);
+      });
+
+      it('should clamp the bounds', () => {
+        let widget = new Toolbar();
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        widget.insertItem(10, 'c', new Widget());
+        expect(toArray(widget.names())).to.eql(['a', 'b', 'c']);
+      });
+
+    });
+
+    describe('#removeItem()', () => {
+
+      it('should remove the item from the toolbar', () => {
+        let widget = new Toolbar();
+        widget.addItem('a', new Widget());
+        let b = new Widget();
+        widget.addItem('b', b);
+        expect(widget.removeItem(b)).to.be(1);
+      });
+
+      it('should return -1 if the widget is not in the toolbar', () => {
+        let widget = new Toolbar();
+        widget.addItem('a', new Widget());
+        expect(widget.removeItem(new Widget())).to.be(-1);
       });
 
     });
