@@ -30,6 +30,7 @@ const mockHistory: KernelMessage.IHistoryReplyMsg = {
 
 
 class TestHistory extends ConsoleHistory {
+
   onHistory(value: KernelMessage.IHistoryReplyMsg): void {
     super.onHistory(value);
   }

@@ -16,14 +16,14 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  RenderMime
-} from '../../../../lib/rendermime';
-
-import {
   BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
   CodeCellWidget, CodeCellModel, MarkdownCellWidget,
   RawCellWidget
 } from '../../../../lib/notebook/cells';
+
+import {
+  ICellEditorWidget
+} from '../../../../lib/notebook/cells/editor';
 
 import {
   CodeMirrorCellEditorWidget
@@ -42,9 +42,8 @@ import {
 } from '../../../../lib/notebook/output-area';
 
 import {
-  ICellEditorWidget
-} from '../../../../lib/notebook/cells/editor';
-
+  RenderMime
+} from '../../../../lib/rendermime';
 
 import {
   defaultRenderMime
@@ -65,9 +64,7 @@ class LogBaseCell extends BaseCellWidget {
   methods: string[] = [];
 
   constructor() {
-    super({
-      renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
-    });
+    super({ renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer });
   }
 
   protected onAfterAttach(msg: Message): void {

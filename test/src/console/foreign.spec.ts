@@ -33,6 +33,7 @@ import {
 
 
 class TestHandler extends ForeignHandler {
+
   readonly injected: ISignal<this, void>;
 
   dispose(): void {

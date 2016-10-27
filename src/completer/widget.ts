@@ -434,7 +434,7 @@ class CompleterWidget extends Widget {
       return;
     }
 
-    // Clear any previous set max-height.
+    // Clear any previously set max-height.
     node.style.maxHeight = '';
 
     // Clear any programmatically set margin-top.
@@ -443,16 +443,16 @@ class CompleterWidget extends Widget {
     // Make sure the node is visible.
     node.classList.remove(OUTOFVIEW_CLASS);
 
-    // Always use original coordinates to calculate completer position.
+    // Always use the original coordinates to calculate completer position.
     let { coords, chWidth, chHeight } = model.original;
     let style = window.getComputedStyle(node);
     let innerHeight = window.innerHeight;
     let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
     let spaceAbove = coords.top + scrollDelta;
     let spaceBelow = innerHeight - coords.bottom - scrollDelta;
-    let marginTop = (parseInt(style.marginTop, 10) || 0);
-    let maxHeight = (parseInt(style.maxHeight, 10) || MAX_HEIGHT);
-    let minHeight = (parseInt(style.minHeight, 10) || MIN_HEIGHT);
+    let marginTop = parseInt(style.marginTop, 10) || 0;
+    let maxHeight = parseInt(style.maxHeight, 10) || MAX_HEIGHT;
+    let minHeight = parseInt(style.minHeight, 10) || MIN_HEIGHT;
     let anchorRect = this._anchor.getBoundingClientRect();
     let top: number;
 
@@ -471,8 +471,8 @@ class CompleterWidget extends Widget {
 
     // Make sure the completer ought to be visible.
     let withinBounds = maxHeight > minHeight &&
-                   spaceBelow >= chHeight &&
-                   spaceAbove >= anchorRect.top;
+                       spaceBelow >= chHeight &&
+                       spaceAbove >= anchorRect.top;
     if (!withinBounds) {
       node.classList.add(OUTOFVIEW_CLASS);
       return;

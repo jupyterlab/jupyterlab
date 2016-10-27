@@ -49,6 +49,7 @@ import {
 
 
 class TestContent extends ConsoleContent {
+
   readonly edgeRequested: ISignal<this, void>;
 
   methods: string[] = [];
