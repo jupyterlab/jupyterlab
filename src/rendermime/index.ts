@@ -2,8 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IIterable, IterableOrArrayLike
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
+
+import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
+  Vector
+} from 'phosphor/lib/collections/vector';
 
 import {
   Token
@@ -59,23 +71,9 @@ class RenderMime {
     for (let mime in options.renderers) {
       this._renderers[mime] = options.renderers[mime];
     }
-    this._order = options.order.slice();
+    this._order = new Vector(options.order);
     this._sanitizer = options.sanitizer;
     this._resolver = options.resolver || null;
-  }
-
-  /**
-   * The ordered list of mimetypes.
-   *
-   * #### Notes
-   * These mimetypes are searched from beginning to end, and the first matching
-   * mimetype is used.
-   */
-  get order(): string[] {
-    return this._order.slice();
-  }
-  set order(value: string[]) {
-    this._order = value.slice();
   }
 
   /**
@@ -86,6 +84,17 @@ class RenderMime {
   }
   set resolver(value: RenderMime.IResolver) {
     this._resolver = value;
+  }
+
+  /**
+   * Get an iterator over the ordered list of mimetypes.
+   *
+   * #### Notes
+   * These mimetypes are searched from beginning to end, and the first matching
+   * mimetype is used.
+   */
+  mimetypes(): IIterable<string> {
+    return this._order.iter();
   }
 
   /**
@@ -129,14 +138,14 @@ class RenderMime {
    * (see [[RenderMime.IRenderer.isSanitizable]]).
    */
   preferredMimetype(bundle: RenderMime.MimeMap<string | JSONObject>, trusted=false): string {
-    for (let m of this.order) {
+    return find(this._order, m => {
       if (m in bundle) {
         let renderer = this._renderers[m];
         if (trusted || renderer.isSafe(m) || renderer.isSanitizable(m)) {
-          return m;
+          return true;
         }
       }
-    }
+    });
   }
 
   /**
@@ -145,7 +154,7 @@ class RenderMime {
   clone(): IRenderMime {
     return new RenderMime({
       renderers: this._renderers,
-      order: this.order,
+      order: this._order.iter(),
       sanitizer: this._sanitizer
     });
   }
@@ -164,7 +173,7 @@ class RenderMime {
    */
   addRenderer(mimetype: string, renderer: RenderMime.IRenderer, index = 0): void {
     this._renderers[mimetype] = renderer;
-    this._order.splice(index, 0, mimetype);
+    this._order.insert(index, mimetype);
   }
 
   /**
@@ -172,14 +181,11 @@ class RenderMime {
    */
   removeRenderer(mimetype: string): void {
     delete this._renderers[mimetype];
-    let index = this._order.indexOf(mimetype);
-    if (index !== -1) {
-      this._order.splice(index, 1);
-    }
+    this._order.remove(mimetype);
   }
 
   private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
-  private _order: string[];
+  private _order: Vector<string>;
   private _sanitizer: ISanitizer = null;
   private _resolver: RenderMime.IResolver;
 }
@@ -203,7 +209,7 @@ namespace RenderMime {
     /**
      * A list of mimetypes in order of precedence (earliest has precedence).
      */
-    order: string[];
+    order: IterableOrArrayLike<string>;
 
     /**
      * The sanitizer used to sanitize html inputs.
@@ -238,7 +244,7 @@ namespace RenderMime {
     /**
      * The mimetypes this renderer accepts.
      */
-    mimetypes: string[];
+    readonly mimetypes: string[];
 
     /**
      * Whether the input is safe without sanitization.

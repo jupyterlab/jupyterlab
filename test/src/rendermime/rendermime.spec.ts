@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -175,7 +179,7 @@ describe('rendermime/index', () => {
       it('should clone the rendermime instance with shallow copies of data', () => {
         let r = defaultRenderMime();
         let c = r.clone();
-        expect(c.order).to.eql(r.order);
+        expect(toArray(c.mimetypes())).to.eql(toArray(r.mimetypes()));
         let t = new TextRenderer();
         c.addRenderer('text/foo', t);
         expect(r).to.not.be(c);
@@ -189,18 +193,18 @@ describe('rendermime/index', () => {
         let r = defaultRenderMime();
         let t = new TextRenderer();
         r.addRenderer('text/foo', t);
-        let index = r.order.indexOf('text/foo');
+        let index = toArray(r.mimetypes()).indexOf('text/foo');
         expect(index).to.be(0);
       });
 
       it('should take an optional order index', () => {
         let r = defaultRenderMime();
         let t = new TextRenderer();
-        let len = r.order.length;
+        let len = toArray(r.mimetypes()).length;
         r.addRenderer('text/foo', t, 0);
-        let index = r.order.indexOf('text/foo');
+        let index = toArray(r.mimetypes()).indexOf('text/foo');
         expect(index).to.be(0);
-        expect(r.order.length).to.be(len + 1);
+        expect(toArray(r.mimetypes()).length).to.be(len + 1);
       });
 
     });
@@ -223,18 +227,11 @@ describe('rendermime/index', () => {
 
     });
 
-    describe('#order', () => {
+    describe('#mimetypes()', () => {
 
       it('should get the ordered list of mimetypes', () => {
         let r = defaultRenderMime();
-        expect(r.order.indexOf('text/html')).to.not.be(-1);
-      });
-
-      it('should set the ordered list of mimetypes', () => {
-        let r = defaultRenderMime();
-        let order = r.order.reverse();
-        r.order = order;
-        expect(r.order).to.eql(order);
+        expect(toArray(r.mimetypes()).indexOf('text/html')).to.not.be(-1);
       });
 
     });
