@@ -210,7 +210,7 @@ describe('docmanager/widgetmanager', () => {
       });
 
       it('should return undefined if the source widget is not managed', () => {
-        expect(manager.cloneWidget(new Widget()).to.be(void 0);
+        expect(manager.cloneWidget(new Widget())).to.be(void 0);
       });
 
     });
