@@ -36,7 +36,11 @@ class TestHandler extends ForeignHandler {
 
   readonly injected: ISignal<this, void>;
 
+  readonly received: ISignal<this, void>;
+
   readonly rejected: ISignal<this, void>;
+
+  methods: string[] = [];
 
   dispose(): void {
     if (this.isDisposed) {
@@ -48,6 +52,7 @@ class TestHandler extends ForeignHandler {
 
   protected onIOPubMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage): boolean {
     let injected = super.onIOPubMessage(sender, msg);
+    this.received.emit(void 0);
     if (injected) {
       this.injected.emit(void 0);
     } else {
@@ -64,6 +69,7 @@ class TestHandler extends ForeignHandler {
 
 
 defineSignal(TestHandler.prototype, 'injected');
+defineSignal(TestHandler.prototype, 'received');
 defineSignal(TestHandler.prototype, 'rejected');
 
 
@@ -85,12 +91,11 @@ describe('console/foreign', () => {
     describe('#constructor()', () => {
 
       it('should create a new foreign handler', () => {
-        let options: ForeignHandler.IOptions = {
+        let handler = new ForeignHandler({
           kernel: null,
           parent: null,
           renderer
-        };
-        let handler = new ForeignHandler(options);
+        });
         expect(handler).to.be.a(ForeignHandler);
       });
 
@@ -99,12 +104,11 @@ describe('console/foreign', () => {
     describe('#enabled', () => {
 
       it('should default to `true`', () => {
-        let options: ForeignHandler.IOptions = {
+        let handler = new ForeignHandler({
           kernel: null,
           parent: null,
           renderer
-        };
-        let handler = new ForeignHandler(options);
+        });
         expect(handler.enabled).to.be(true);
       });
 
@@ -150,15 +154,110 @@ describe('console/foreign', () => {
     describe('#isDisposed', () => {
 
       it('should indicate whether the handler is disposed', () => {
-        let options: ForeignHandler.IOptions = {
+        let handler = new ForeignHandler({
           kernel: null,
           parent: null,
           renderer
-        };
-        let handler = new ForeignHandler(options);
+        });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#kernel', () => {
+
+      it('should be set upon instantiation', () => {
+        let handler = new ForeignHandler({
+          kernel: null,
+          parent: null,
+          renderer
+        });
+        expect(handler.kernel).to.be(null);
+      });
+
+      it('should be resettable', done => {
+        let parent = new Panel();
+        let handler = new TestHandler({ kernel: null, parent, renderer });
+        Session.startNew({ path: utils.uuid() }).then(session => {
+          expect(handler.kernel).to.be(null);
+          handler.kernel = session.kernel;
+          expect(handler.kernel).to.be(session.kernel);
+          session.dispose();
+          handler.dispose();
+          done();
+        }).catch(done);
+      });
+
+    });
+
+    describe('#dispose()', () => {
+
+      it('should dispose the resources held by the handler', () => {
+        let handler = new ForeignHandler({
+          kernel: null,
+          parent: null,
+          renderer
+        });
+        expect(handler.isDisposed).to.be(false);
+        handler.dispose();
+        expect(handler.isDisposed).to.be(true);
+      });
+
+      it('should be safe to call multiple times', () => {
+        let handler = new ForeignHandler({
+          kernel: null,
+          parent: null,
+          renderer
+        });
+        expect(handler.isDisposed).to.be(false);
+        handler.dispose();
+        handler.dispose();
+        expect(handler.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#onIOPubMessage()', () => {
+
+      it('should be called when messages come through', done => {
+        let path = utils.uuid();
+        let parent = new Panel();
+        let code = 'print("onIOPubMessage:disabled")';
+        Promise.all([
+          Session.startNew({ path }), Session.startNew({ path })
+        ]).then(([a, b]) => {
+          let handler = new TestHandler({ kernel: a.kernel, parent, renderer });
+          handler.enabled = false;
+          handler.received.connect(() => {
+            a.dispose();
+            b.dispose();
+            handler.dispose();
+            done();
+          });
+          b.kernel.execute({ code, stop_on_error: true });
+        }).catch(done);
+      });
+
+      it('should inject relevant cells into the parent', done => {
+        let path = utils.uuid();
+        let parent = new Panel();
+        let code = 'print("onIOPubMessage:enabled")';
+        Promise.all([
+          Session.startNew({ path }), Session.startNew({ path })
+        ]).then(([a, b]) => {
+          let handler = new TestHandler({ kernel: a.kernel, parent, renderer });
+          expect(parent.widgets.length).to.be(0);
+          handler.injected.connect(() => {
+            a.dispose();
+            b.dispose();
+            handler.dispose();
+            expect(parent.widgets.length).to.be.greaterThan(0);
+            done();
+          });
+          b.kernel.execute({ code, stop_on_error: true });
+        }).catch(done);
       });
 
     });
