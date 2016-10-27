@@ -137,6 +137,11 @@ const DROP_SOURCE_CLASS = 'jp-mod-dropSource';
 const DRAG_IMAGE_CLASS = 'jp-dragImage';
 
 /**
+ * The class name added to a filled circle.
+ */
+const FILLED_CIRCLE_CLASS = 'jp-filledCircle';
+
+/**
  * The mimetype used for Jupyter cell data.
  */
 export
@@ -972,7 +977,7 @@ class Notebook extends StaticNotebook {
     while (node && node !== this.node) {
       if (node.classList.contains(NB_CELL_CLASS)) {
         let i = findIndex(this.widgets, widget => widget.node === node);
-        if (i) {
+        if (i !== -1) {
           return i;
         }
         break;
@@ -988,21 +993,26 @@ class Notebook extends StaticNotebook {
   private _evtMouseDown(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
+    let shouldDrag = false;
 
     if (i !== -1) {
       let widget = this.widgets.at(i);
       // Event is on a cell but not in its editor, switch to command mode.
       if (!widget.editor.node.contains(target)) {
         this.mode = 'command';
+        shouldDrag = true;
       }
       if (event.shiftKey) {
+        shouldDrag = false;
         this._extendSelectionTo(i);
 
         // Prevent text select behavior.
         event.preventDefault();
         event.stopPropagation();
       } else {
-        this.deselectAll();
+        if (!this.isSelected(widget)) {
+          this.deselectAll();
+        }
       }
       // Set the cell as the active one.
       // This must be done *after* setting the mode above.
@@ -1010,7 +1020,7 @@ class Notebook extends StaticNotebook {
     }
 
     // Left mouse press for drag start.
-    if (event.button === 0) {
+    if (event.button === 0 && shouldDrag) {
       this._dragData = { pressX: event.clientX, pressY: event.clientY, index: i};
       document.addEventListener('mouseup', this, true);
       document.addEventListener('mousemove', this, true);
@@ -1040,7 +1050,6 @@ class Notebook extends StaticNotebook {
 
     // Bail if we are the one dragging.
     if (this._drag) {
-      console.log('bail');
       return;
     }
 
@@ -1355,8 +1364,11 @@ namespace Private {
    */
   export
   function createDragImage(count: number): HTMLElement {
-    let node = document.createElement('span');
-    node.textContent = `(${count})`;
+    let node = document.createElement('div');
+    let span = document.createElement('span');
+    span.textContent = `${count}`;
+    span.className = FILLED_CIRCLE_CLASS;
+    node.appendChild(span);
     node.className = DRAG_IMAGE_CLASS;
     return node;
   }
