@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   MimeData
 } from 'phosphor/lib/core/mimedata';
 
@@ -436,7 +440,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should add the default items to the panel toolbar', () => {
         ToolbarItems.populateDefaults(panel);
-        expect(panel.toolbar.list()).to.eql(['save', 'insert', 'cut',
+        expect(toArray(panel.toolbar.names())).to.eql(['save', 'insert', 'cut',
           'copy', 'paste', 'run', 'interrupt', 'restart', 'cellType',
           'kernelName', 'kernelStatus']);
       });

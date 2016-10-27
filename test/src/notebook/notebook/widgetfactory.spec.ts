@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   MimeData
 } from 'phosphor/lib/core/mimedata';
 
@@ -151,7 +155,7 @@ describe('notebook/notebook/widgetfactory', () => {
       it('should populate the default toolbar items', () => {
         let factory = createFactory();
         let panel = factory.createNew(context);
-        let items = panel.toolbar.list();
+        let items = toArray(panel.toolbar.names());
         expect(items).to.contain('save');
         expect(items).to.contain('restart');
         expect(items).to.contain('kernelStatus');
