@@ -25,6 +25,7 @@ import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
+
 /**
  * The class name added to toolbars.
  */
