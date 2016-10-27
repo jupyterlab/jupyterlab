@@ -67,15 +67,16 @@
 
 
 .jp-LauncherWidget-item {
-  padding-left: 20px;
-  padding-right: 20px;
+  margin: 0 auto;
+  width: 100px;
+  height: 100px;
   display: flex;
   flex-direction: column;
 }
 
 
 .jp-LauncherWidget-image {
-  flex: 0 0 auto;
+  margin: 0 auto;
   min-height: 72px;
   min-width: 56px;
   max-width: 56px;

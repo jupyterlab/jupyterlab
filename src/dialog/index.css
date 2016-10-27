@@ -38,7 +38,8 @@
 
 .jp-Dialog-header {
   padding-bottom: 12px;
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 300;
   color: #616161;
 }
 
@@ -57,7 +58,7 @@
 
 
 .jp-Dialog-footer {
-  margin-top: 24px;
+  margin-top: 12px;
 }
 
 
@@ -101,7 +102,7 @@
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
   border-radius: 2px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 
