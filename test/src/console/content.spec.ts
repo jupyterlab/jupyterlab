@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  KernelMessage, utils, Session
+  KernelMessage, Session, utils
 } from '@jupyterlab/services';
 
 import {
@@ -49,11 +49,15 @@ import {
 
 
 class TestContent extends ConsoleContent {
+
   readonly edgeRequested: ISignal<this, void>;
 
   methods: string[] = [];
 
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     super.dispose();
     clearSignalData(this);
   }
@@ -112,8 +116,6 @@ class TestHistory extends ConsoleHistory {
 
 defineSignal(TestHistory.prototype, 'ready');
 
-
-const CONSOLE_CLASS = 'jp-ConsoleContent';
 const renderer = CodeMirrorConsoleRenderer.defaultRenderer;
 const rendermime = defaultRenderMime();
 
@@ -129,7 +131,7 @@ describe('console/content', () => {
           let widget = new ConsoleContent({ renderer, rendermime, session });
           Widget.attach(widget, document.body);
           expect(widget).to.be.a(ConsoleContent);
-          expect(widget.node.classList.contains(CONSOLE_CLASS)).to.be(true);
+          expect(widget.node.classList).to.contain('jp-ConsoleContent');
           widget.dispose();
           done();
         }).catch(done);

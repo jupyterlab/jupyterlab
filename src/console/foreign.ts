@@ -28,9 +28,19 @@ class ForeignHandler implements IDisposable {
    * Construct a new foreign message handler.
    */
   constructor(options: ForeignHandler.IOptions) {
+    this.kernel = options.kernel;
     this._renderer = options.renderer.createCell;
-    this._kernel = options.kernel;
     this._parent = options.parent;
+  }
+
+  /**
+   * Set whether the handler is able to inject foreign cells into a console.
+   */
+  get enabled(): boolean {
+    return this._enabled;
+  }
+  set enabled(value: boolean) {
+    this._enabled = value;
   }
 
   /**
@@ -78,13 +88,20 @@ class ForeignHandler implements IDisposable {
 
   /**
    * Handler IOPub messages.
+   *
+   * @returns `true` if the message resulted in a new cell injection or a
+   * previously injected cell being updated and `false` for all other messages.
    */
-  protected onIOPubMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
+  protected onIOPubMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage): boolean {
+    // Only process messages if foreign cell injection is enabled.
+    if (!this._enabled) {
+      return false;
+    }
     // Check whether this message came from an external session.
     let parent = this._parent;
     let session = (msg.parent_header as KernelMessage.IHeader).session;
     if (session === this._kernel.clientId) {
-      return;
+      return false;
     }
     let msgType = msg.header.msg_type;
     let parentHeader = msg.parent_header as KernelMessage.IHeader;
@@ -98,29 +115,30 @@ class ForeignHandler implements IDisposable {
       cell.model.source = inputMsg.content.code;
       cell.trusted = true;
       parent.update();
-      break;
+      return true;
     case 'execute_result':
     case 'display_data':
     case 'stream':
     case 'error':
-      if (!(parentMsgId in this._cells)) {
+      if (!this._cells.has(parentMsgId)) {
         // This is an output from an input that was broadcast before our
         // session started listening. We will ignore it.
         console.warn('Ignoring output with no associated input cell.');
-        break;
+        return false;
       }
-      cell = this._cells.get(parentMsgId);
       let output = msg.content as nbformat.IOutput;
+      cell = this._cells.get(parentMsgId);
       output.output_type = msgType as nbformat.OutputType;
       cell.model.outputs.add(output);
       parent.update();
-      break;
+      return true;
     case 'clear_output':
       let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+      cell = this._cells.get(parentMsgId);
       cell.model.outputs.clear(wait);
-      break;
+      return true;
     default:
-      break;
+      return false;
     }
   }
 
@@ -135,6 +153,7 @@ class ForeignHandler implements IDisposable {
   }
 
   private _cells = new Map<string, CodeCellWidget>();
+  private _enabled = true;
   private _isDisposed = false;
   private _kernel: Kernel.IKernel = null;
   private _parent: Panel = null;

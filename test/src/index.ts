@@ -11,7 +11,9 @@ import './completer/model.spec';
 import './completer/widget.spec';
 
 import './console/content.spec';
+import './console/foreign.spec';
 import './console/history.spec';
+import './console/panel.spec';
 
 import './dialog/dialog.spec';
 
