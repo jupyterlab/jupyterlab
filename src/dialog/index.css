@@ -53,12 +53,12 @@
 .jp-Dialog-bodyContent {
   font-size: 15px;
   outline: none;
-  margin-bottom: 12px;
 }
 
 
 .jp-Dialog-footer {
-  margin-top: 12px;
+  float: right;
+  margin-top: 24px;
 }
 
 
@@ -70,15 +70,13 @@
 
 
 .jp-Dialog-button {
-  font-size: 15px;
+  font-size: 13px;
   border: none;
-  min-width: 120px;
-  max-width: 120px;
   text-transform: uppercase;
   line-height: 38px;
   border-radius: 2px;
   outline: none;
-  padding: 0px;
+  padding: 0px 24px;
 }
 
 
