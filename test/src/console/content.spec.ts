@@ -159,6 +159,17 @@ describe('console/content', () => {
         expect(widget.cells).to.be.ok();
       });
 
+      it('should reflect the contents of the widget', done => {
+        let force = true;
+        Widget.attach(widget, document.body);
+        widget.execute(force).then(() => {
+          expect(widget.cells.length).to.be(1);
+          widget.clear();
+          expect(widget.cells.length).to.be(0);
+          done();
+        }).catch(done);
+      });
+
     });
 
     describe('#executed', () => {
@@ -212,6 +223,19 @@ describe('console/content', () => {
 
       it('should return the session passed in at instantiation', () => {
         expect(widget.session).to.be(session);
+      });
+
+    });
+
+    describe('#addCell()', () => {
+
+      it('should add a code cell to the content widget', () => {
+        let renderer = CodeMirrorConsoleRenderer.defaultCodeCellRenderer;
+        let cell = new CodeCellWidget({ renderer, rendermime });
+        Widget.attach(widget, document.body);
+        expect(widget.cells.length).to.be(0);
+        widget.addCell(cell);
+        expect(widget.cells.length).to.be(1);
       });
 
     });
