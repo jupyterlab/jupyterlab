@@ -5,7 +5,7 @@
 **[Getting help](#getting-help)**
 
 
-# [JupyterLab](http://jupyter.github.io/jupyterlab/)
+# [JupyterLab](http://jupyterlab.github.io/jupyterlab/)
 
 [![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyter/jupyterlab)
 [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/jupyterlab/jupyterlab/lab)
