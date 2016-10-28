@@ -220,7 +220,6 @@ class ConsoleContent extends Widget {
     this._history = null;
     this._inspectionHandler.dispose();
     this._inspectionHandler = null;
-    this._session.dispose();
     this._session = null;
   }
 
