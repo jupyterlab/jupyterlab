@@ -214,7 +214,11 @@ class ConsoleContent extends Widget {
   addCell(cell: CodeCellWidget) {
     this._content.addWidget(cell);
     this._cells.pushBack(cell.model);
-    cell.disposed.connect(() => this._cells.remove(cell.model));
+    cell.disposed.connect(() => {
+      if (!this.isDisposed) {
+        this._cells.remove(cell.model);
+      }
+    });
     this.update();
   }
 
@@ -227,8 +231,6 @@ class ConsoleContent extends Widget {
     while (cells.length > 1) {
       cells.at(1).dispose();
     }
-    // Remove all of the cell models from the internal list.
-    this._cells.clear();
   }
 
   /**
