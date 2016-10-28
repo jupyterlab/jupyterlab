@@ -153,6 +153,14 @@ describe('console/content', () => {
 
     });
 
+    describe('#cells', () => {
+
+      it('should exist upon instantiation', () => {
+        expect(widget.cells).to.be.ok();
+      });
+
+    });
+
     describe('#executed', () => {
 
       it('should emit a date upon execution', done => {
@@ -215,8 +223,10 @@ describe('console/content', () => {
         Widget.attach(widget, document.body);
         widget.execute(force).then(() => {
           expect(widget.content.widgets.length).to.be.greaterThan(1);
+          expect(widget.cells.length).to.be(1);
           widget.clear();
           expect(widget.content.widgets.length).to.be(1);
+          expect(widget.cells.length).to.be(0);
           done();
         }).catch(done);
       });
