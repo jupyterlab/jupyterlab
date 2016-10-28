@@ -131,12 +131,7 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
   /**
    * Create a new widget given a context.
    */
-  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): EditorWidget {
-    if (kernel) {
-      context.changeKernel(kernel);
-    }
-    let widget = new EditorWidget(context);
-    this.widgetCreated.emit(widget);
-    return widget;
+  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): EditorWidget {
+    return new EditorWidget(context);
   }
 }

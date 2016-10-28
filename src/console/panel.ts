@@ -14,10 +14,6 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  showDialog
-} from '../dialog';
-
-import {
   IRenderMime
 } from '../rendermime';
 

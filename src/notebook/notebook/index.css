@@ -24,7 +24,7 @@
 }
 
 
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected{
   border-color: #ABABAB;
   border-left-width: var(--jp-border-width);
   background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
@@ -55,4 +55,45 @@
 
 .jp-Notebook {
   flex: 1 1 auto;
+}
+
+
+.jp-Notebook-cell.jp-mod-dropSource {
+  opacity: 0.5;
+}
+
+
+.jp-Notebook-cell.jp-mod-dropTarget, 
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected.jp-mod-dropTarget {
+  border-top-color: #42A5F5;
+}
+
+
+.jp-Notebook-cell .jp-Cell-prompt {
+  cursor: move;
+}
+
+.jp-dragImage {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border: 1px solid #ABABAB;
+  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, white 5px, white 100%);
+}
+
+
+.jp-dragImage .jp-filledCircle {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    border-radius: 50%;
+
+    width: 30px;
+    height: 30px;
+
+    background: #66BB6A;
+    border: 1px solid #ABABAB;
+    color: white;
+    text-align: center;
+    line-height: 30px;
 }

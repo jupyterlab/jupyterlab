@@ -2,6 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IIterator, map
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -16,6 +24,7 @@ import {
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
 
 /**
  * The class name added to toolbars.
@@ -42,7 +51,7 @@ const TOOLBAR_PRESSED_CLASS = 'jp-mod-pressed';
  * A class which provides a toolbar widget.
  */
 export
-class Toolbar extends Widget {
+class Toolbar<T extends Widget> extends Widget {
   /**
    * Construct a new toolbar widget.
    */
@@ -53,48 +62,72 @@ class Toolbar extends Widget {
   }
 
   /**
-   * Add an item to the toolbar.
+   * Get an iterator over the ordered toolbar item names.
+   *
+   * @returns An iterator over the toolbar item names.
+   */
+  names(): IIterator<string> {
+    let layout = this.layout as PanelLayout;
+    return map(layout.widgets, widget => {
+      return Private.nameProperty.get(widget);
+    });
+  }
+
+  /**
+   * Add an item to the end of the toolbar.
    *
    * @param name - The name of the widget to add to the toolbar.
    *
    * @param widget - The widget to add to the toolbar.
    *
-   * @param after - The optional name of the item to insert after.
+   * @param index - The optional name of the item to insert after.
    *
-   * #### Notes
-   * An error is thrown if a widget of the same name is already given.
-   * If `after` is not given, or the named widget is not in the toolbar,
-   * the widget will be added to the end of the toolbar.
+   * @returns Whether the item was added to toolbar.  Returns false if
+   *   an item of the same name is already in the toolbar.
    */
-  add(name: string, widget: Widget, after?: string): void {
-    let names = this.list();
-    if (names.indexOf(name) !== -1) {
-      throw new Error(`A button named "${name}" was already added`);
-    }
-    widget.addClass(TOOLBAR_ITEM_CLASS);
+  addItem(name: string, widget: T): boolean {
     let layout = this.layout as PanelLayout;
-    let index = names.indexOf(after);
-    if (index === -1) {
-      layout.addWidget(widget);
-    } else {
-      layout.insertWidget(index + 1, widget);
-    }
-    Private.nameProperty.set(widget, name);
+    return this.insertItem(layout.widgets.length, name, widget);
   }
 
   /**
-   * Get an ordered list the toolbar item names.
+   * Insert an item into the toolbar at the specified index.
    *
-   * @returns A new array of the current toolbar item names.
+   * @param index - The index at which to insert the item.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
    */
-  list(): string[] {
-    let names: string[] = [];
-    let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.widgets.length; i++) {
-      let widget = layout.widgets.at(i);
-      names.push(Private.nameProperty.get(widget));
+  insertItem(index: number, name: string, widget: T): boolean {
+    let existing = find(this.names(), value => value === name);
+    if (existing) {
+      return false;
     }
-    return names;
+    widget.addClass(TOOLBAR_ITEM_CLASS);
+    let layout = this.layout as PanelLayout;
+    layout.insertWidget(index, widget);
+    Private.nameProperty.set(widget, name);
+    return true;
+  }
+
+  /**
+   * Remove an item in the toolbar by value.
+   *
+   *  @param name - The name of the widget to remove from the toolbar.
+   *
+   * @returns The index occupied by the item, or `-1` if the item
+   *   was not contained in the toolbar.
+   */
+  removeItem(widget: T): number {
+    let layout = this.layout as PanelLayout;
+    return layout.removeWidget(widget);
   }
 }
 

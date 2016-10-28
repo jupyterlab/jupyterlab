@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   MimeData
 } from 'phosphor/lib/core/mimedata';
 
@@ -24,7 +28,7 @@ import {
 } from '../../../../lib/notebook/cells/widget';
 
 import {
-  JUPYTER_CELL_MIME, NotebookActions
+  NotebookActions
 } from '../../../../lib/notebook/notebook/actions';
 
 import {
@@ -38,6 +42,10 @@ import {
 import {
  INotebookModel
 } from '../../../../lib/notebook/notebook/model';
+
+import {
+  JUPYTER_CELL_MIME
+} from '../../../../lib/notebook/notebook/widget';
 
 import {
  NotebookPanel
@@ -436,7 +444,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should add the default items to the panel toolbar', () => {
         ToolbarItems.populateDefaults(panel);
-        expect(panel.toolbar.list()).to.eql(['save', 'insert', 'cut',
+        expect(toArray(panel.toolbar.names())).to.eql(['save', 'insert', 'cut',
           'copy', 'paste', 'run', 'interrupt', 'restart', 'cellType',
           'kernelName', 'kernelStatus']);
       });

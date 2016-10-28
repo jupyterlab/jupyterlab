@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   MimeData
 } from 'phosphor/lib/core/mimedata';
 
@@ -61,10 +65,6 @@ describe('notebook/notebook/widgetfactory', () => {
     });
   });
 
-  after(() => {
-    context.kernel.shutdown();
-  });
-
   describe('NotebookWidgetFactory', () => {
 
     describe('#constructor()', () => {
@@ -118,40 +118,10 @@ describe('notebook/notebook/widgetfactory', () => {
         expect(panel.rendermime).to.not.be(rendermime);
       });
 
-      it('should start a kernel if one is given', (done) => {
-        let factory = createFactory();
-        context.kernelChanged.connect((sender, kernel) => {
-          expect(kernel.name).to.be(context.kernelspecs.default);
-          done();
-        });
-        factory.createNew(context, { name: context.kernelspecs.default });
-      });
-
-      it('should start a kernel given the default kernel language', (done) => {
-        let factory = createFactory();
-        createNotebookContext().then(ctx => {
-          ctx.kernelChanged.connect((sender, kernel) => {
-            expect(kernel.name).to.be(ctx.kernelspecs.default);
-            done();
-          });
-          factory.createNew(ctx);
-          ctx.save();
-        });
-      });
-
-      // it('should start a kernel based on default language of the model', () => {
-      //   // TODO: inject other kernelspecs
-      //   let cursor = context.model.getMetadata('language_info');
-      //   cursor.setValue({ name: 'shell' });
-      //   let factory = createFactory();
-      //   let panel = factory.createNew(context);
-      //   expect(panel.context.kernel.name).to.be('shell');
-      // });
-
       it('should populate the default toolbar items', () => {
         let factory = createFactory();
         let panel = factory.createNew(context);
-        let items = panel.toolbar.list();
+        let items = toArray(panel.toolbar.names());
         expect(items).to.contain('save');
         expect(items).to.contain('restart');
         expect(items).to.contain('kernelStatus');

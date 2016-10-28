@@ -448,7 +448,7 @@ class InspectorItem extends Panel {
   /**
    * Create a history toolbar.
    */
-  private _createToolbar(): Toolbar {
+  private _createToolbar(): Toolbar<Widget> {
     let toolbar = new Toolbar();
 
     if (!this._remembers) {
@@ -460,21 +460,21 @@ class InspectorItem extends Panel {
       onClick: () => { this._clear(); },
       tooltip: 'Clear history.'
     });
-    toolbar.add('clear', clear);
+    toolbar.addItem('clear', clear);
 
     let back = new ToolbarButton({
       className: BACK_CLASS,
       onClick: () => { this._back(); },
       tooltip: 'Navigate back in history.'
     });
-    toolbar.add('back', back);
+    toolbar.addItem('back', back);
 
     let forward = new ToolbarButton({
       className: FORWARD_CLASS,
       onClick: () => { this._forward(); },
       tooltip: 'Navigate forward in history.'
     });
-    toolbar.add('forward', forward);
+    toolbar.addItem('forward', forward);
 
     return toolbar;
   }
@@ -496,5 +496,5 @@ class InspectorItem extends Panel {
   private _index: number = -1;
   private _rank: number = Infinity;
   private _remembers: boolean = false;
-  private _toolbar: Toolbar = null;
+  private _toolbar: Toolbar<Widget> = null;
 }

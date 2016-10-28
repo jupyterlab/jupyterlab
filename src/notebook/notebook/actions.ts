@@ -27,15 +27,9 @@ import {
 } from './model';
 
 import {
-  Notebook
+  Notebook, JUPYTER_CELL_MIME
 } from './widget';
 
-
-/**
- * The mimetype used for Jupyter cell data.
- */
-export
-const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 /**
  * A namespace for handling actions on a notebook.

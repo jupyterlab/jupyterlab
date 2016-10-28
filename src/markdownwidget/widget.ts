@@ -122,10 +122,8 @@ class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, DocumentReg
   /**
    * Create a new widget given a context.
    */
-  createNew(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, kernel?: Kernel.IModel): MarkdownWidget {
-    let widget = new MarkdownWidget(context, this._rendermime.clone());
-    this.widgetCreated.emit(widget);
-    return widget;
+  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): MarkdownWidget {
+    return new MarkdownWidget(context, this._rendermime.clone());
   }
 
   private _rendermime: RenderMime = null;

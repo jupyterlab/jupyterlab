@@ -780,12 +780,12 @@ namespace DocumentRegistry {
     widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
 
     /**
-     * Create a new widget.
+     * Create a new widget given a context.
      *
      * #### Notes
      * It should emit the [widgetCreated] signal with the new widget.
      */
-    createNew(context: IContext<U>, kernel?: Kernel.IModel): T;
+    createNew(context: IContext<U>): T;
   }
 
   /**
