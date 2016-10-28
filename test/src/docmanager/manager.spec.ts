@@ -117,8 +117,11 @@ describe('docmanager/manager', () => {
 
     describe('#open()', () => {
 
-      it('should open a file and return the widget used to view it', () => {
-
+      it('should open a file and return the widget used to view it', done => {
+        services.contents.newUntitled({ type: 'file', ext: 'text'}).then(model => {
+          let widget = manager.open(model.path);
+          expect(widget.hasClass('WidgetFactory')).to.be(true);
+        });
       });
 
       it('should start a kernel if one is given', () => {
