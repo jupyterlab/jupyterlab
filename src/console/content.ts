@@ -38,7 +38,7 @@ import {
 } from '../inspector';
 
 import {
-  CodeCellWidget, RawCellWidget, ICellModel
+  BaseCellWidget, CodeCellWidget, RawCellWidget
 } from '../notebook/cells';
 
 import {
@@ -115,7 +115,7 @@ class ConsoleContent extends Widget {
 
     // Create the panels that hold the content and input.
     let layout = this.layout = new PanelLayout();
-    this._cells = new ObservableVector<ICellModel>();
+    this._cells = new ObservableVector<BaseCellWidget>();
     this._content = new Panel();
     this._input = new Panel();
     this._renderer = options.renderer;
@@ -162,8 +162,11 @@ class ConsoleContent extends Widget {
 
   /**
    * The list of content cells in the console.
+   *
+   * #### Notes
+   * This list does not include the banner or the prompt for a console.
    */
-  get cells(): IObservableVector<ICellModel> {
+  get cells(): IObservableVector<BaseCellWidget> {
     return this._cells;
   }
 
@@ -204,21 +207,17 @@ class ConsoleContent extends Widget {
   /**
    * Add a new cell to the content panel.
    *
-   * @param cell - The code cell widget being added to the content panel.
+   * @param cell - The cell widget being added to the content panel.
    *
    * #### Notes
    * This method is meant for use by outside classes that want to inject content
    * into a console. It is distinct from the `inject` method in that it requires
    * rendered code cell widgets and does not execute them.
    */
-  addCell(cell: CodeCellWidget) {
+  addCell(cell: BaseCellWidget) {
     this._content.addWidget(cell);
-    this._cells.pushBack(cell.model);
-    cell.disposed.connect(() => {
-      if (!this.isDisposed) {
-        this._cells.remove(cell.model);
-      }
-    });
+    this._cells.pushBack(cell);
+    cell.disposed.connect(this._onCellDisposed, this);
     this.update();
   }
 
@@ -552,6 +551,15 @@ class ConsoleContent extends Widget {
   }
 
   /**
+   * Handle cell disposed signals.
+   */
+  private _onCellDisposed(sender: Widget, args: void): void {
+    if (!this.isDisposed) {
+      this._cells.remove(sender as CodeCellWidget);
+    }
+  }
+
+  /**
    * Test whether we should execute the prompt.
    */
   private _shouldExecute(timeout: number): Promise<boolean> {
@@ -572,7 +580,7 @@ class ConsoleContent extends Widget {
     });
   }
 
-  private _cells: IObservableVector<ICellModel> = null;
+  private _cells: IObservableVector<BaseCellWidget> = null;
   private _completer: CompleterWidget = null;
   private _completerHandler: CellCompleterHandler = null;
   private _content: Panel = null;
