@@ -91,6 +91,10 @@
   color: white;
 }
 
+.jp-Dialog-warningButton {
+  background: var(--jp-error-color1);
+  color: white;
+}
 
 .jp-Dialog-inputWrapper {
   padding: 7px;
@@ -98,7 +102,6 @@
   width: 252px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
-  border-radius: 2px;
   margin-bottom: 8px;
 }
 
@@ -119,7 +122,6 @@
   width: 252px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
-  border-radius: 2px;
   margin-bottom: 12px;
 }
 

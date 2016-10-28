@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  showDialog
+  showDialog, cancelButton, warnButton
 } from '../dialog';
 
 
@@ -29,7 +29,8 @@ function restartKernel(kernel: Kernel.IKernel, host?: HTMLElement): Promise<bool
   }
   return showDialog({
     title: 'Restart Kernel?',
-    body: 'Do you want to restart the current kernel? All variables will be lost.'
+    body: 'Do you want to restart the current kernel? All variables will be lost.',
+    buttons: [cancelButton, warnButton]
   }).then(result => {
     if (result.text === 'OK') {
       return kernel.restart().then(() => { return true; });
