@@ -145,7 +145,7 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Create a new file and return a widget used to view it.
+   * Create a new file and return the widget used to view it.
    *
    * @param path - The file path to create.
    *
