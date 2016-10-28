@@ -124,17 +124,31 @@ describe('console/content', () => {
 
   describe('ConsoleContent', () => {
 
+    let session: Session.ISession;
+    let widget: TestContent;
+
+    beforeEach(done => {
+      Session.startNew({ path: utils.uuid() }).then(newSession => {
+        session = newSession;
+        widget = new TestContent({ renderer, rendermime, session });
+        done();
+      });
+    });
+
+    afterEach(done => {
+      session.shutdown().then(() => {
+        session.dispose();
+        widget.dispose();
+        done();
+      }).catch(done);
+    });
+
     describe('#constructor()', () => {
 
-      it('should create a new console content widget', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          Widget.attach(widget, document.body);
-          expect(widget).to.be.a(ConsoleContent);
-          expect(widget.node.classList).to.contain('jp-ConsoleContent');
-          widget.dispose();
-          done();
-        }).catch(done);
+      it('should create a new console content widget', () => {
+        Widget.attach(widget, document.body);
+        expect(widget).to.be.a(ConsoleContent);
+        expect(widget.node.classList).to.contain('jp-ConsoleContent');
       });
 
     });
@@ -142,17 +156,13 @@ describe('console/content', () => {
     describe('#executed', () => {
 
       it('should emit a date upon execution', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          let called: Date = null;
-          let force = true;
-          Widget.attach(widget, document.body);
-          widget.executed.connect((sender, time) => { called = time; });
-          widget.execute(force).then(() => {
-            expect(called).to.be.a(Date);
-            widget.dispose();
-            done();
-          });
+        let called: Date = null;
+        let force = true;
+        Widget.attach(widget, document.body);
+        widget.executed.connect((sender, time) => { called = time; });
+        widget.execute(force).then(() => {
+          expect(called).to.be.a(Date);
+          done();
         }).catch(done);
       });
 
@@ -160,60 +170,40 @@ describe('console/content', () => {
 
     describe('#inspectionHandler', () => {
 
-      it('should exist after instantiation', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          Widget.attach(widget, document.body);
-          expect(widget.inspectionHandler).to.be.an(InspectionHandler);
-          widget.dispose();
-          done();
-        }).catch(done);
+      it('should exist after instantiation', () => {
+        Widget.attach(widget, document.body);
+        expect(widget.inspectionHandler).to.be.an(InspectionHandler);
       });
 
     });
 
     describe('#prompt', () => {
 
-      it('should be a code cell widget', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          Widget.attach(widget, document.body);
-          expect(widget.prompt).to.be.a(CodeCellWidget);
-          widget.dispose();
-          done();
-        }).catch(done);
+      it('should be a code cell widget', () => {
+        Widget.attach(widget, document.body);
+        expect(widget.prompt).to.be.a(CodeCellWidget);
       });
 
       it('should be replaced after execution', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          let force = true;
-          Widget.attach(widget, document.body);
+        let force = true;
+        Widget.attach(widget, document.body);
 
-          let old = widget.prompt;
-          expect(old).to.be.a(CodeCellWidget);
+        let old = widget.prompt;
+        expect(old).to.be.a(CodeCellWidget);
 
-          widget.execute(force).then(() => {
-            expect(widget.prompt).to.be.a(CodeCellWidget);
-            expect(widget.prompt).to.not.be(old);
-            widget.dispose();
-            done();
-          }).catch(done);
-        });
+        widget.execute(force).then(() => {
+          expect(widget.prompt).to.be.a(CodeCellWidget);
+          expect(widget.prompt).to.not.be(old);
+          done();
+        }).catch(done);
       });
 
     });
 
     describe('#session', () => {
 
-      it('should return the session passed in at instantiation', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          Widget.attach(widget, document.body);
-          expect(widget.session).to.be(session);
-          widget.dispose();
-          done();
-        }).catch(done);
+      it('should return the session passed in at instantiation', () => {
+        expect(widget.session).to.be(session);
       });
 
     });
@@ -221,17 +211,13 @@ describe('console/content', () => {
     describe('#clear()', () => {
 
       it('should clear all of the content cells except the banner', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          let force = true;
-          Widget.attach(widget, document.body);
-          widget.execute(force).then(() => {
-            expect(widget.content.widgets.length).to.be.greaterThan(1);
-            widget.clear();
-            expect(widget.content.widgets.length).to.be(1);
-            widget.dispose();
-            done();
-          });
+        let force = true;
+        Widget.attach(widget, document.body);
+        widget.execute(force).then(() => {
+          expect(widget.content.widgets.length).to.be.greaterThan(1);
+          widget.clear();
+          expect(widget.content.widgets.length).to.be(1);
+          done();
         }).catch(done);
       });
 
@@ -239,27 +225,19 @@ describe('console/content', () => {
 
     describe('#dispose()', () => {
 
-      it('should dispose the content widget', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          Widget.attach(widget, document.body);
-          expect(widget.isDisposed).to.be(false);
-          widget.dispose();
-          expect(widget.isDisposed).to.be(true);
-          done();
-        }).catch(done);
+      it('should dispose the content widget', () => {
+        Widget.attach(widget, document.body);
+        expect(widget.isDisposed).to.be(false);
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
       });
 
-      it('should be safe to dispose multiple times', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          Widget.attach(widget, document.body);
-          expect(widget.isDisposed).to.be(false);
-          widget.dispose();
-          widget.dispose();
-          expect(widget.isDisposed).to.be(true);
-          done();
-        }).catch(done);
+      it('should be safe to dispose multiple times', () => {
+        Widget.attach(widget, document.body);
+        expect(widget.isDisposed).to.be(false);
+        widget.dispose();
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
       });
 
     });
@@ -267,33 +245,25 @@ describe('console/content', () => {
     describe('#execute()', () => {
 
       it('should execute contents of the prompt if forced', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          let force = true;
-          Widget.attach(widget, document.body);
-          expect(widget.content.widgets.length).to.be(1);
-          widget.execute(force).then(() => {
-            expect(widget.content.widgets.length).to.be.greaterThan(1);
-            widget.dispose();
-            done();
-          }).catch(done);
-        });
+        let force = true;
+        Widget.attach(widget, document.body);
+        expect(widget.content.widgets.length).to.be(1);
+        widget.execute(force).then(() => {
+          expect(widget.content.widgets.length).to.be.greaterThan(1);
+          done();
+        }).catch(done);
       });
 
       it('should check if code is multiline and allow amending', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          let force = false;
-          let timeout = 9000;
-          Widget.attach(widget, document.body);
-          widget.prompt.model.source = 'for x in range(5):';
+        let force = false;
+        let timeout = 9000;
+        Widget.attach(widget, document.body);
+        widget.prompt.model.source = 'for x in range(5):';
+        expect(widget.content.widgets.length).to.be(1);
+        widget.execute(force, timeout).then(() => {
           expect(widget.content.widgets.length).to.be(1);
-          widget.execute(force, timeout).then(() => {
-            expect(widget.content.widgets.length).to.be(1);
-            widget.dispose();
-            done();
-          }).catch(done);
-        });
+          done();
+        }).catch(done);
       });
 
     });
@@ -301,94 +271,68 @@ describe('console/content', () => {
     describe('#inject()', () => {
 
       it('should add a code cell and execute it', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          let code = 'print("Hello.")';
-          Widget.attach(widget, document.body);
-          expect(widget.content.widgets.length).to.be(1);
-          widget.inject(code).then(() => {
-            expect(widget.content.widgets.length).to.be.greaterThan(1);
-            widget.dispose();
-            done();
-          }).catch(done);
-        });
+        let code = 'print("#inject()")';
+        Widget.attach(widget, document.body);
+        expect(widget.content.widgets.length).to.be(1);
+        widget.inject(code).then(() => {
+          expect(widget.content.widgets.length).to.be.greaterThan(1);
+          done();
+        }).catch(done);
       });
 
     });
 
     describe('#insertLinebreak()', () => {
 
-      it('should insert a line break into the prompt', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          Widget.attach(widget, document.body);
+      it('should insert a line break into the prompt', () => {
+        Widget.attach(widget, document.body);
 
-          let model = widget.prompt.model;
-          expect(model.source).to.be.empty();
-          widget.insertLinebreak();
-          expect(model.source).to.be('\n');
-          widget.dispose();
-          done();
-        }).catch(done);
+        let model = widget.prompt.model;
+        expect(model.source).to.be.empty();
+        widget.insertLinebreak();
+        expect(model.source).to.be('\n');
       });
 
     });
 
     describe('#serialize()', () => {
 
-      it('should serialize the contents of a console', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new ConsoleContent({ renderer, rendermime, session });
-          Widget.attach(widget, document.body);
-          widget.prompt.model.source = 'foo';
+      it('should serialize the contents of a console', () => {
+        Widget.attach(widget, document.body);
+        widget.prompt.model.source = 'foo';
 
-          let serialized = widget.serialize();
-          expect(serialized).to.have.length(2);
-          expect(serialized[1].source).to.be('foo');
-          widget.dispose();
-          done();
-        }).catch(done);
+        let serialized = widget.serialize();
+        expect(serialized).to.have.length(2);
+        expect(serialized[1].source).to.be('foo');
       });
 
     });
 
     describe('#newPrompt()', () => {
 
-      it('should be called after attach, creating a prompt', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new TestContent({ renderer, rendermime, session });
-          expect(widget.prompt).to.not.be.ok();
-          expect(widget.methods).to.not.contain('newPrompt');
-          Widget.attach(widget, document.body);
-          expect(widget.methods).to.contain('newPrompt');
-          expect(widget.prompt).to.be.ok();
-          widget.dispose();
-          done();
-        }).catch(done);
+      it('should be called after attach, creating a prompt', () => {
+        expect(widget.prompt).to.not.be.ok();
+        expect(widget.methods).to.not.contain('newPrompt');
+        Widget.attach(widget, document.body);
+        expect(widget.methods).to.contain('newPrompt');
+        expect(widget.prompt).to.be.ok();
       });
 
       it('should be called after execution, creating a prompt', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new TestContent({ renderer, rendermime, session });
+        expect(widget.prompt).to.not.be.ok();
+        expect(widget.methods).to.not.contain('newPrompt');
+        Widget.attach(widget, document.body);
+        expect(widget.methods).to.contain('newPrompt');
 
-          expect(widget.prompt).to.not.be.ok();
-          expect(widget.methods).to.not.contain('newPrompt');
-          Widget.attach(widget, document.body);
+        let old = widget.prompt;
+        let force = true;
+        expect(old).to.be.a(CodeCellWidget);
+        widget.methods = [];
+
+        widget.execute(force).then(() => {
+          expect(widget.prompt).to.be.a(CodeCellWidget);
+          expect(widget.prompt).to.not.be(old);
           expect(widget.methods).to.contain('newPrompt');
-
-          let old = widget.prompt;
-          let force = true;
-          expect(old).to.be.a(CodeCellWidget);
-          widget.methods = [];
-
-          widget.execute(force).then(() => {
-            expect(widget.prompt).to.be.a(CodeCellWidget);
-            expect(widget.prompt).to.not.be(old);
-            expect(widget.methods).to.contain('newPrompt');
-            widget.dispose();
-            done();
-          }).catch(done);
-
           done();
         }).catch(done);
       });
@@ -398,38 +342,29 @@ describe('console/content', () => {
     describe('#onActivateRequest()', () => {
 
       it('should focus the prompt editor', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new TestContent({ renderer, rendermime, session });
-          expect(widget.prompt).to.not.be.ok();
-          expect(widget.methods).to.not.contain('onActivateRequest');
-          Widget.attach(widget, document.body);
+        expect(widget.prompt).to.not.be.ok();
+        expect(widget.methods).to.not.contain('onActivateRequest');
+        Widget.attach(widget, document.body);
+        requestAnimationFrame(() => {
+          widget.activate();
           requestAnimationFrame(() => {
-            widget.activate();
-            requestAnimationFrame(() => {
-              expect(widget.methods).to.contain('onActivateRequest');
-              expect(widget.prompt.editor.hasFocus()).to.be(true);
-              widget.dispose();
-              done();
-            });
+            expect(widget.methods).to.contain('onActivateRequest');
+            expect(widget.prompt.editor.hasFocus()).to.be(true);
+            done();
           });
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#onAfterAttach()', () => {
 
-      it('should be called after attach, creating a prompt', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new TestContent({ renderer, rendermime, session });
-          expect(widget.prompt).to.not.be.ok();
-          expect(widget.methods).to.not.contain('onAfterAttach');
-          Widget.attach(widget, document.body);
-          expect(widget.methods).to.contain('onAfterAttach');
-          expect(widget.prompt).to.be.ok();
-          widget.dispose();
-          done();
-        }).catch(done);
+      it('should be called after attach, creating a prompt', () => {
+        expect(widget.prompt).to.not.be.ok();
+        expect(widget.methods).to.not.contain('onAfterAttach');
+        Widget.attach(widget, document.body);
+        expect(widget.methods).to.contain('onAfterAttach');
+        expect(widget.prompt).to.be.ok();
       });
 
     });
@@ -437,59 +372,52 @@ describe('console/content', () => {
     describe('#onEdgeRequest()', () => {
 
       it('should be called upon an editor edge request', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let history = new TestHistory({ kernel: session.kernel });
-          let code = 'print("onEdgeRequest")';
-          let force = true;
-          history.ready.connect(() => {
-            let widget = new TestContent({
-              history, renderer, rendermime, session
-            });
-            widget.edgeRequested.connect(() => {
-              expect(widget.methods).to.contain('onEdgeRequest');
-              requestAnimationFrame(() => {
-                expect(widget.prompt.model.source).to.be(code);
-                widget.dispose();
-                done();
-              });
-            });
-            Widget.attach(widget, document.body);
+        let history = new TestHistory({ kernel: session.kernel });
+        let code = 'print("#onEdgeRequest()")';
+        let force = true;
+        history.ready.connect(() => {
+          let local = new TestContent({
+            history, renderer, rendermime, session
+          });
+          local.edgeRequested.connect(() => {
+            expect(local.methods).to.contain('onEdgeRequest');
             requestAnimationFrame(() => {
-              widget.prompt.model.source = code;
-              widget.execute(force).then(() => {
-                expect(widget.prompt.model.source).to.not.be(code);
-                expect(widget.methods).to.not.contain('onEdgeRequest');
-                widget.prompt.editor.edgeRequested.emit('top');
-              }).catch(done);
+              expect(local.prompt.model.source).to.be(code);
+              local.dispose();
+              done();
             });
           });
-        }).catch(done);
+          Widget.attach(local, document.body);
+          requestAnimationFrame(() => {
+            local.prompt.model.source = code;
+            local.execute(force).then(() => {
+              expect(local.prompt.model.source).to.not.be(code);
+              expect(local.methods).to.not.contain('onEdgeRequest');
+              local.prompt.editor.edgeRequested.emit('top');
+            }).catch(done);
+          });
+        });
       });
 
     });
 
     describe('#onTextChange()', () => {
 
-      it('should be called upon an editor text change', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new TestContent({ renderer, rendermime, session });
-          let change: ITextChange = {
-            ch: 0,
-            chHeight: 0,
-            chWidth: 0,
-            line: 0,
-            position: 0,
-            coords: null,
-            oldValue: 'fo',
-            newValue: 'foo'
-          };
-          Widget.attach(widget, document.body);
-          expect(widget.methods).to.not.contain('onTextChange');
-          widget.prompt.editor.textChanged.emit(change);
-          expect(widget.methods).to.contain('onTextChange');
-          widget.dispose();
-          done();
-        });
+      it('should be called upon an editor text change', () => {
+        let change: ITextChange = {
+          ch: 0,
+          chHeight: 0,
+          chWidth: 0,
+          line: 0,
+          position: 0,
+          coords: null,
+          oldValue: 'fo',
+          newValue: 'foo'
+        };
+        Widget.attach(widget, document.body);
+        expect(widget.methods).to.not.contain('onTextChange');
+        widget.prompt.editor.textChanged.emit(change);
+        expect(widget.methods).to.contain('onTextChange');
       });
 
     });
@@ -497,16 +425,12 @@ describe('console/content', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should be called upon an update, after attach', done => {
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          let widget = new TestContent({ renderer, rendermime, session });
-          expect(widget.methods).to.not.contain('onUpdateRequest');
-          Widget.attach(widget, document.body);
-          requestAnimationFrame(() => {
-            expect(widget.methods).to.contain('onUpdateRequest');
-            widget.dispose();
-            done();
-          });
-        }).catch(done);
+        expect(widget.methods).to.not.contain('onUpdateRequest');
+        Widget.attach(widget, document.body);
+        requestAnimationFrame(() => {
+          expect(widget.methods).to.contain('onUpdateRequest');
+          done();
+        });
       });
 
     });
