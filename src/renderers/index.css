@@ -253,6 +253,11 @@ margin-top = 14, 14, 14, 14, 8, 8
 }
 
 
+.jp-RenderedHTMLCommon tbody tr:hover {
+  background: var(--md-light-blue-50);
+}
+
+
 .jp-RenderedHTMLCommon * + table {
   margin-top: 1em;
 }
