@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  ServiceManager, utils
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -16,12 +16,8 @@ import {
 } from '../../../lib/docmanager';
 
 import {
-  DocumentRegistry, TextModelFactory, ABCWidgetFactory, Context
+  DocumentRegistry, TextModelFactory, ABCWidgetFactory
 } from '../../../lib/docregistry';
-
-import {
-  acceptDialog, dismissDialog
-} from '../utils';
 
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
@@ -105,49 +101,145 @@ describe('docmanager/manager', () => {
 
     describe('#kernelspecs', () => {
 
+      it('should get the kernel spec models for the manager', () => {
+        expect(manager.kernelspecs).to.be(services.kernelspecs);
+      });
+
     });
 
     describe('#registry', () => {
+
+      it('should get the registry used by the manager', () => {
+        expect(manager.registry).to.be.a(DocumentRegistry);
+      });
 
     });
 
     describe('#open()', () => {
 
+      it('should open a file and return the widget used to view it', () => {
+
+      });
+
+      it('should start a kernel if one is given', () => {
+
+      });
+
+      it('should return undefined if the factory is not found', () => {
+
+      });
+
+      it('should return undefined if the factory has not model factory', () => {
+
+      });
+
     });
 
     describe('#createNew()', () => {
+
+      it('should create a new file and return the widget used to view it', () => {
+
+      });
+
+      it('should start a kernel if one is given', () => {
+
+      });
+
+      it('should return undefined if the factory is not found', () => {
+
+      });
+
+      it('should return undefined if the factory has not model factory', () => {
+
+      });
 
     });
 
     describe('#listSessions()', () => {
 
+      it('should list the running notebook sessions', () => {
+
+      });
+
     });
 
     describe('#handleRename()', () => {
+
+      it('should handle the renaming of an open document', () => {
+
+      });
 
     });
 
     describe('#handleDelete()', () => {
 
+      it('should handle a file deletion', () => {
+
+      });
+
     });
 
     describe('#findWidget()', () => {
+
+      it('should find a widget given a file and a widget name', () => {
+
+      });
+
+      it('should find a widget given a file', () => {
+
+      });
+
+      it('should fail to find the widget', () => {
+
+      });
 
     });
 
     describe('#contextForWidget()', () => {
 
+      it('should find the context for a widget', () => {
+
+      });
+
+      it('should fail to find the context for the widget', () => {
+
+      });
+
     });
 
     describe('#cloneWidget()', () => {
+
+      it('should clone the given widget', () => {
+
+      });
+
+      it('should return undefined if the source widget is not managed', () => {
+
+      });
 
     });
 
     describe('#closeFile()', () => {
 
+      it('should close the widgets associated with a given path', () => {
+
+      });
+
+      it('should be a no-op if there are no open files on that path', () => {
+
+      });
+
     });
 
     describe('#closeAll()', () => {
+
+      it('should close all of the open documents', () => {
+
+      });
+
+      it('should be a no-op if there are no open documents', () => {
+
+      });
 
     });
 
