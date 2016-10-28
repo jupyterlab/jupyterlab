@@ -103,7 +103,7 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Open a file and return the widget used to display the contents.
+   * Open a file and return the widget used to view it.
    *
    * @param path - The file path to open.
    *
@@ -145,9 +145,9 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Create a new file of the given name.
+   * Create a new file and return a widget used to view it.
    *
-   * @param path - The file path to use.
+   * @param path - The file path to create.
    *
    * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
    *
