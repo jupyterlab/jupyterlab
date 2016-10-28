@@ -28,7 +28,7 @@ import {
 } from '../../../../lib/notebook/cells/widget';
 
 import {
-  JUPYTER_CELL_MIME, NotebookActions
+  NotebookActions
 } from '../../../../lib/notebook/notebook/actions';
 
 import {
@@ -42,6 +42,10 @@ import {
 import {
  INotebookModel
 } from '../../../../lib/notebook/notebook/model';
+
+import {
+  JUPYTER_CELL_MIME
+} from '../../../../lib/notebook/notebook/widget';
 
 import {
  NotebookPanel

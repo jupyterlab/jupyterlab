@@ -24,11 +24,11 @@ import {
 } from '../../../../lib/notebook/notebook/model';
 
 import {
-  NotebookActions, JUPYTER_CELL_MIME
+  NotebookActions
 } from '../../../../lib/notebook/notebook/actions';
 
 import {
-  Notebook
+  Notebook, JUPYTER_CELL_MIME
 } from '../../../../lib/notebook/notebook/widget';
 
 import {

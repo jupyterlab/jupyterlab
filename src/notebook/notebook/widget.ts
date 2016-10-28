@@ -6,11 +6,11 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  each, enumerate
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  find
+  find, findIndex, indexOf
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -22,12 +22,20 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
+  MimeData
+} from 'phosphor/lib/core/mimedata';
+
+import {
   AttachedProperty
 } from 'phosphor/lib/core/properties';
 
 import {
   defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
+
+import {
+  Drag, IDragEvent
+} from 'phosphor/lib/dom/dragdrop';
 
 import {
   scrollIntoViewIfNeeded
@@ -113,6 +121,36 @@ const OTHER_SELECTED_CLASS = 'jp-mod-multiSelected';
  */
 const UNCONFINED_CLASS = 'jp-mod-unconfined';
 
+/**
+ * The class name added to a drop target.
+ */
+const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
+
+/**
+ * The class name added to a drop source.
+ */
+const DROP_SOURCE_CLASS = 'jp-mod-dropSource';
+
+/**
+ * The class name added to drag images.
+ */
+const DRAG_IMAGE_CLASS = 'jp-dragImage';
+
+/**
+ * The class name added to a filled circle.
+ */
+const FILLED_CIRCLE_CLASS = 'jp-filledCircle';
+
+/**
+ * The mimetype used for Jupyter cell data.
+ */
+export
+const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+
+/**
+ * The threshold in pixels to start a drag event.
+ */
+const DRAG_THRESHOLD = 5;
 
 /**
  * The interactivity modes for the notebook.
@@ -304,9 +342,9 @@ class StaticNotebook extends Widget {
     }
     this._updateMimetype();
     let cells = newValue.cells;
-    for (let i = 0; i < cells.length; i++) {
-      this._insertCell(i, cells.at(i));
-    }
+    each(enumerate(cells), ([i, cell]) => {
+      this._insertCell(i, cell);
+    });
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
     newValue.metadataChanged.connect(this.onMetadataChanged, this);
@@ -392,10 +430,9 @@ class StaticNotebook extends Widget {
    * Update the cell widgets.
    */
   private _updateCells(): void {
-    let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.widgets.length; i++) {
+    each(enumerate(this.widgets), ([i, widget]) => {
       this._updateCell(i);
-    }
+    });
   }
 
   /**
@@ -595,11 +632,7 @@ class Notebook extends StaticNotebook {
     }
     // Edit mode deselects all cells.
     if (newValue === 'edit') {
-      let layout = this.layout as PanelLayout;
-      for (let i = 0; i < layout.widgets.length; i++) {
-        let widget = layout.widgets.at(i) as BaseCellWidget;
-        this.deselect(widget);
-      }
+      each(this.widgets, widget => { this.deselect(widget); });
       if (activeCell instanceof MarkdownCellWidget) {
         activeCell.rendered = false;
       }
@@ -750,6 +783,12 @@ class Notebook extends StaticNotebook {
     case 'mousedown':
       this._evtMouseDown(event as MouseEvent);
       break;
+    case 'mouseup':
+      this._evtMouseup(event as MouseEvent);
+      break;
+    case 'mousemove':
+      this._evtMousemove(event as MouseEvent);
+      break;
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
@@ -758,6 +797,18 @@ class Notebook extends StaticNotebook {
       break;
     case 'blur':
       this._evtBlur(event as MouseEvent);
+      break;
+    case 'p-dragenter':
+      this._evtDragEnter(event as IDragEvent);
+      break;
+    case 'p-dragleave':
+      this._evtDragLeave(event as IDragEvent);
+      break;
+    case 'p-dragover':
+      this._evtDragOver(event as IDragEvent);
+      break;
+    case 'p-drop':
+      this._evtDrop(event as IDragEvent);
       break;
     default:
       break;
@@ -769,20 +820,32 @@ class Notebook extends StaticNotebook {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this.node.addEventListener('mousedown', this);
-    this.node.addEventListener('dblclick', this);
-    this.node.addEventListener('focus', this, true);
-    this.node.addEventListener('blur', this, true);
+    let node = this.node;
+    node.addEventListener('mousedown', this);
+    node.addEventListener('dblclick', this);
+    node.addEventListener('focus', this, true);
+    node.addEventListener('blur', this, true);
+    node.addEventListener('p-dragenter', this);
+    node.addEventListener('p-dragleave', this);
+    node.addEventListener('p-dragover', this);
+    node.addEventListener('p-drop', this);
   }
 
   /**
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('mousedown', this);
-    this.node.removeEventListener('dblclick', this);
-    this.node.removeEventListener('focus', this, true);
-    this.node.removeEventListener('blur', this, true);
+    let node = this.node;
+    node.removeEventListener('mousedown', this);
+    node.removeEventListener('dblclick', this);
+    node.removeEventListener('focus', this, true);
+    node.removeEventListener('blur', this, true);
+    node.removeEventListener('p-dragenter', this);
+    node.removeEventListener('p-dragleave', this);
+    node.removeEventListener('p-dragover', this);
+    node.removeEventListener('p-drop', this);
+    document.removeEventListener('mousemove', this, true);
+    document.removeEventListener('mouseup', this, true);
   }
 
   /**
@@ -826,10 +889,8 @@ class Notebook extends StaticNotebook {
     }
 
     let count = 0;
-    let layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.widgets.length; i++) {
-      let widget = layout.widgets.at(i) as BaseCellWidget;
-      if (i !== this.activeCellIndex) {
+    each(this.widgets, widget => {
+      if (widget !== activeCell) {
         widget.removeClass(ACTIVE_CLASS);
       }
       widget.removeClass(OTHER_SELECTED_CLASS);
@@ -839,7 +900,7 @@ class Notebook extends StaticNotebook {
       } else {
         widget.removeClass(SELECTED_CLASS);
       }
-    }
+    });
     if (count > 1) {
       activeCell.addClass(OTHER_SELECTED_CLASS);
     }
@@ -913,13 +974,11 @@ class Notebook extends StaticNotebook {
   private _findCell(node: HTMLElement): number {
     // Trace up the DOM hierarchy to find the root cell node.
     // Then find the corresponding child and select it.
-    let layout = this.layout as PanelLayout;
     while (node && node !== this.node) {
       if (node.classList.contains(NB_CELL_CLASS)) {
-        for (let i = 0; i < layout.widgets.length; i++) {
-          if (layout.widgets.at(i).node === node) {
-            return i;
-          }
+        let i = findIndex(this.widgets, widget => widget.node === node);
+        if (i !== -1) {
+          return i;
         }
         break;
       }
@@ -934,26 +993,225 @@ class Notebook extends StaticNotebook {
   private _evtMouseDown(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
+    let shouldDrag = false;
 
     if (i !== -1) {
       let widget = this.widgets.at(i);
       // Event is on a cell but not in its editor, switch to command mode.
       if (!widget.editor.node.contains(target)) {
         this.mode = 'command';
+        shouldDrag = true;
       }
       if (event.shiftKey) {
+        shouldDrag = false;
         this._extendSelectionTo(i);
 
         // Prevent text select behavior.
         event.preventDefault();
         event.stopPropagation();
       } else {
-        this.deselectAll();
+        if (!this.isSelected(widget)) {
+          this.deselectAll();
+        }
       }
       // Set the cell as the active one.
       // This must be done *after* setting the mode above.
       this.activeCellIndex = i;
     }
+
+    // Left mouse press for drag start.
+    if (event.button === 0 && shouldDrag) {
+      this._dragData = { pressX: event.clientX, pressY: event.clientY, index: i};
+      document.addEventListener('mouseup', this, true);
+      document.addEventListener('mousemove', this, true);
+    }
+  }
+
+
+  /**
+   * Handle the `'mouseup'` event for the widget.
+   */
+  private _evtMouseup(event: MouseEvent): void {
+    if (event.button !== 0 || !this._drag) {
+      document.removeEventListener('mousemove', this, true);
+      document.removeEventListener('mouseup', this, true);
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /**
+   * Handle the `'mousemove'` event for the widget.
+   */
+  private _evtMousemove(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Bail if we are the one dragging.
+    if (this._drag) {
+      return;
+    }
+
+    // Check for a drag initialization.
+    let data = this._dragData;
+    let dx = Math.abs(event.clientX - data.pressX);
+    let dy = Math.abs(event.clientY - data.pressY);
+    if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
+      return;
+    }
+
+    this._startDrag(data.index, event.clientX, event.clientY);
+  }
+
+  /**
+   * Handle the `'p-dragenter'` event for the widget.
+   */
+  private _evtDragEnter(event: IDragEvent): void {
+    if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    let index = this._findCell(event.target as HTMLElement);
+    if (index === -1) {
+      return;
+    }
+    let target = (this.layout as PanelLayout).widgets.at(index);
+    target.node.classList.add(DROP_TARGET_CLASS);
+  }
+
+  /**
+   * Handle the `'p-dragleave'` event for the widget.
+   */
+  private _evtDragLeave(event: IDragEvent): void {
+    if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    let elements = this.node.getElementsByClassName(DROP_TARGET_CLASS);
+    if (elements.length) {
+      (elements[0] as HTMLElement).classList.remove(DROP_TARGET_CLASS);
+    }
+  }
+
+  /**
+   * Handle the `'p-dragover'` event for the widget.
+   */
+  private _evtDragOver(event: IDragEvent): void {
+    if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    event.dropAction = event.proposedAction;
+    let elements = this.node.getElementsByClassName(DROP_TARGET_CLASS);
+    if (elements.length) {
+      (elements[0] as HTMLElement).classList.remove(DROP_TARGET_CLASS);
+    }
+    let index = this._findCell(event.target as HTMLElement);
+    if (index === -1) {
+      return;
+    }
+    let target = (this.layout as PanelLayout).widgets.at(index);
+    target.node.classList.add(DROP_TARGET_CLASS);
+  }
+
+  /**
+   * Handle the `'p-drop'` event for the widget.
+   */
+  private _evtDrop(event: IDragEvent): void {
+    if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.proposedAction === 'none') {
+      event.dropAction = 'none';
+      return;
+    }
+    event.dropAction = event.proposedAction;
+
+    let target = event.target as HTMLElement;
+    while (target && target.parentElement) {
+      if (target.classList.contains(DROP_TARGET_CLASS)) {
+        target.classList.remove(DROP_TARGET_CLASS);
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    // Find the target cell and insert the copied cells.
+    let index = this._findCell(target);
+    let model = this.model;
+    let values = event.mimeData.getData(JUPYTER_CELL_MIME);
+
+    // Insert the copies of the original cells.
+    each(values, (value: nbformat.ICell) => {
+      let cell: ICellModel;
+      switch (value.cell_type) {
+      case 'code':
+        cell = model.factory.createCodeCell(value);
+        break;
+      case 'markdown':
+        cell = model.factory.createMarkdownCell(value);
+        break;
+      default:
+        cell = model.factory.createRawCell(value);
+        break;
+      }
+      model.cells.insert(index, cell);
+    });
+    // Activate the last cell.
+    this.activeCellIndex = index + values.length - 1;
+  }
+
+  /**
+   * Start a drag event.
+   */
+  private _startDrag(index: number, clientX: number, clientY: number): void {
+    let cells = this.model.cells;
+    let selected: nbformat.ICell[] = [];
+    let toremove: BaseCellWidget[] = [];
+
+    each(enumerate(this.widgets), ([i, widget]) => {
+      let cell = cells.at(i);
+      if (this.isSelected(widget)) {
+        widget.addClass(DROP_SOURCE_CLASS);
+        selected.push(cell.toJSON());
+        toremove.push(widget);
+      }
+    });
+
+    // Create the drag image.
+    let dragImage = Private.createDragImage(selected.length);
+
+    // Set up the drag event.
+    this._drag = new Drag({
+      mimeData: new MimeData(),
+      dragImage,
+      supportedActions: 'move',
+      proposedAction: 'move'
+    });
+    this._drag.mimeData.setData(JUPYTER_CELL_MIME, selected);
+
+    // Remove mousemove and mouseup listeners and start the drag.
+    document.removeEventListener('mousemove', this, true);
+    document.removeEventListener('mouseup', this, true);
+    this._drag.start(clientX, clientY).then(action => {
+      this._drag = null;
+      each(toremove, widget => { widget.removeClass(DROP_SOURCE_CLASS); });
+      if (action === 'none') {
+        return;
+      }
+      let activeCell = cells.at(this.activeCellIndex);
+      each(toremove, widget => {
+        this.model.cells.remove(widget.model);
+      });
+      this.activeCellIndex = indexOf(cells, activeCell);
+    });
+
   }
 
   /**
@@ -1040,6 +1298,8 @@ class Notebook extends StaticNotebook {
   private _activeCell: BaseCellWidget = null;
   private _inspectionHandler: InspectionHandler = null;
   private _mode: NotebookMode = 'command';
+  private _drag: Drag = null;
+  private _dragData: { pressX: number, pressY: number, index: number } = null;
 }
 
 
@@ -1097,5 +1357,19 @@ namespace Private {
     protected onUpdateRequest(msg: Message): void {
       // This is a no-op.
     }
+  }
+
+  /**
+   * Create a cell drag image.
+   */
+  export
+  function createDragImage(count: number): HTMLElement {
+    let node = document.createElement('div');
+    let span = document.createElement('span');
+    span.textContent = `${count}`;
+    span.className = FILLED_CIRCLE_CLASS;
+    node.appendChild(span);
+    node.className = DRAG_IMAGE_CLASS;
+    return node;
   }
 }
