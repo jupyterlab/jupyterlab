@@ -70,6 +70,13 @@ class ForeignHandler implements IDisposable {
   }
 
   /**
+   * The foreign handler's parent receiver.
+   */
+  get parent(): ForeignHandler.IReceiver {
+    return this._parent;
+  }
+
+  /**
    * Dispose the resources held by the handler.
    */
   dispose(): void {
@@ -94,6 +101,7 @@ class ForeignHandler implements IDisposable {
       return false;
     }
     // Check whether this message came from an external session.
+    let parent = this._parent;
     let session = (msg.parent_header as KernelMessage.IHeader).session;
     if (session === this._kernel.clientId) {
       return false;
@@ -109,6 +117,7 @@ class ForeignHandler implements IDisposable {
       cell.model.executionCount = inputMsg.content.execution_count;
       cell.model.source = inputMsg.content.code;
       cell.trusted = true;
+      parent.update();
       return true;
     case 'execute_result':
     case 'display_data':
@@ -124,6 +133,7 @@ class ForeignHandler implements IDisposable {
       cell = this._cells.get(parentMsgId);
       output.output_type = msgType as nbformat.OutputType;
       cell.model.outputs.add(output);
+      parent.update();
       return true;
     case 'clear_output':
       let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
@@ -200,5 +210,10 @@ namespace ForeignHandler {
      * Add a newly created foreign cell.
      */
     addCell(cell: BaseCellWidget): void;
+
+    /**
+     * Trigger a rendering update on the receiver.
+     */
+    update(): void;
   }
 }
