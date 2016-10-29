@@ -38,7 +38,7 @@ import {
 } from '../inspector';
 
 import {
-  CodeCellWidget, RawCellWidget
+  BaseCellWidget, CodeCellWidget, RawCellWidget
 } from '../notebook/cells';
 
 import {
@@ -57,6 +57,9 @@ import {
   ConsoleHistory, IConsoleHistory
 } from './history';
 
+import {
+  IObservableVector, ObservableVector
+} from '../common/observablevector';
 
 /**
  * The class name added to console widgets.
@@ -112,6 +115,7 @@ class ConsoleContent extends Widget {
 
     // Create the panels that hold the content and input.
     let layout = this.layout = new PanelLayout();
+    this._cells = new ObservableVector<BaseCellWidget>();
     this._content = new Panel();
     this._input = new Panel();
     this._renderer = options.renderer;
@@ -148,12 +152,22 @@ class ConsoleContent extends Widget {
     // Set up the foreign iopub handler.
     this._foreignHandler = new ForeignHandler({
       kernel: this._session.kernel,
-      parent: this._content,
+      parent: this,
       renderer: { createCell: () => this._newForeignCell() }
     });
 
     // Instantiate the completer.
     this._newCompleter(options.completer);
+  }
+
+  /**
+   * The list of content cells in the console.
+   *
+   * #### Notes
+   * This list does not include the banner or the prompt for a console.
+   */
+  get cells(): IObservableVector<BaseCellWidget> {
+    return this._cells;
   }
 
   /*
@@ -178,7 +192,7 @@ class ConsoleContent extends Widget {
   /*
    * The console input prompt.
    */
-  get prompt(): CodeCellWidget {
+  get prompt(): CodeCellWidget | null {
     let inputLayout = (this._input.layout as PanelLayout);
     return inputLayout.widgets.at(0) as CodeCellWidget || null;
   }
@@ -188,6 +202,23 @@ class ConsoleContent extends Widget {
    */
   get session(): Session.ISession {
     return this._session;
+  }
+
+  /**
+   * Add a new cell to the content panel.
+   *
+   * @param cell - The cell widget being added to the content panel.
+   *
+   * #### Notes
+   * This method is meant for use by outside classes that want to inject content
+   * into a console. It is distinct from the `inject` method in that it requires
+   * rendered code cell widgets and does not execute them.
+   */
+  addCell(cell: BaseCellWidget) {
+    this._content.addWidget(cell);
+    this._cells.pushBack(cell);
+    cell.disposed.connect(this._onCellDisposed, this);
+    this.update();
   }
 
   /**
@@ -221,6 +252,8 @@ class ConsoleContent extends Widget {
     this._inspectionHandler.dispose();
     this._inspectionHandler = null;
     this._session = null;
+    this._cells.clear();
+    this._cells = null;
   }
 
   /**
@@ -268,11 +301,11 @@ class ConsoleContent extends Widget {
    */
   inject(code: string): Promise<void> {
     // Create a new cell using the prompt renderer.
-    let cell = this._renderer.createPrompt(this._rendermime);
+    let cell = this._renderer.createPrompt(this._rendermime, this);
     cell.model.source = code;
     cell.mimetype = this._mimetype;
     cell.readOnly = true;
-    this._content.addWidget(cell);
+    this.addCell(cell);
     return this._execute(cell);
   }
 
@@ -305,7 +338,6 @@ class ConsoleContent extends Widget {
    */
   protected newPrompt(): void {
     let prompt = this.prompt;
-    let content = this._content;
     let input = this._input;
 
     // Make the last prompt read-only, clear its signals, and move to content.
@@ -313,11 +345,12 @@ class ConsoleContent extends Widget {
       prompt.readOnly = true;
       prompt.removeClass(PROMPT_CLASS);
       clearSignalData(prompt.editor);
-      content.addWidget((input.layout as PanelLayout).removeWidgetAt(0));
+      (input.layout as PanelLayout).removeWidgetAt(0);
+      this.addCell(prompt);
     }
 
     // Create the new prompt.
-    prompt = this._renderer.createPrompt(this._rendermime);
+    prompt = this._renderer.createPrompt(this._rendermime, this);
     prompt.mimetype = this._mimetype;
     prompt.addClass(PROMPT_CLASS);
     this._input.addWidget(prompt);
@@ -510,11 +543,20 @@ class ConsoleContent extends Widget {
    * Create a new foreign cell.
    */
   private _newForeignCell(): CodeCellWidget {
-    let cell = this._renderer.createForeignCell(this._rendermime);
+    let cell = this._renderer.createForeignCell(this._rendermime, this);
     cell.readOnly = true;
     cell.mimetype = this._mimetype;
     cell.addClass(FOREIGN_CELL_CLASS);
     return cell;
+  }
+
+  /**
+   * Handle cell disposed signals.
+   */
+  private _onCellDisposed(sender: Widget, args: void): void {
+    if (!this.isDisposed) {
+      this._cells.remove(sender as CodeCellWidget);
+    }
   }
 
   /**
@@ -538,6 +580,7 @@ class ConsoleContent extends Widget {
     });
   }
 
+  private _cells: IObservableVector<BaseCellWidget> = null;
   private _completer: CompleterWidget = null;
   private _completerHandler: CellCompleterHandler = null;
   private _content: Panel = null;
@@ -607,12 +650,12 @@ namespace ConsoleContent {
     /**
      * Create a new prompt widget.
      */
-    createPrompt(rendermime: IRenderMime): CodeCellWidget;
+    createPrompt(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget;
 
     /**
      * Create a code cell whose input originated from a foreign session.
      */
-    createForeignCell(rendermine: IRenderMime): CodeCellWidget;
+    createForeignCell(rendermine: IRenderMime, context: ConsoleContent): CodeCellWidget;
 
     /**
      * Get the preferred mimetype given language info.

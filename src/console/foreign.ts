@@ -10,11 +10,7 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  Panel
-} from 'phosphor/lib/ui/panel';
-
-import {
-  CodeCellWidget
+  BaseCellWidget, CodeCellWidget
 } from '../notebook/cells';
 
 
@@ -71,6 +67,13 @@ class ForeignHandler implements IDisposable {
     if (this._kernel) {
       this._kernel.iopubMessage.connect(this.onIOPubMessage, this);
     }
+  }
+
+  /**
+   * The foreign handler's parent receiver.
+   */
+  get parent(): ForeignHandler.IReceiver {
+    return this._parent;
   }
 
   /**
@@ -148,7 +151,7 @@ class ForeignHandler implements IDisposable {
   private _newCell(parentMsgId: string): CodeCellWidget {
     let cell = this._renderer();
     this._cells.set(parentMsgId, cell);
-    this._parent.addWidget(cell);
+    this._parent.addCell(cell);
     return cell;
   }
 
@@ -156,7 +159,7 @@ class ForeignHandler implements IDisposable {
   private _enabled = true;
   private _isDisposed = false;
   private _kernel: Kernel.IKernel = null;
-  private _parent: Panel = null;
+  private _parent: ForeignHandler.IReceiver = null;
   private _renderer: () => CodeCellWidget = null;
 }
 
@@ -179,7 +182,7 @@ namespace ForeignHandler {
     /**
      * The parent into which the handler will inject code cells.
      */
-    parent: Panel;
+    parent: IReceiver;
 
     /**
      * The renderer for creating cells to inject into the parent.
@@ -196,5 +199,21 @@ namespace ForeignHandler {
      * Create a code cell.
      */
     createCell: () => CodeCellWidget;
+  }
+
+  /**
+   * A receiver of newly created foreign cells.
+   */
+  export
+  interface IReceiver {
+    /**
+     * Add a newly created foreign cell.
+     */
+    addCell(cell: BaseCellWidget): void;
+
+    /**
+     * Trigger a rendering update on the receiver.
+     */
+    update(): void;
   }
 }

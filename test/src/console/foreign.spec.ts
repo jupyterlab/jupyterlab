@@ -32,17 +32,11 @@ import {
 } from '../utils';
 
 
-const relevantTypes = [
-  'execute_input',
-  'execute_result',
-  'display_data',
-  'stream',
-  'error',
-  'clear_output'
-].reduce((acc, val) => {
-  acc.add(val);
-  return acc;
-}, new Set<string>());
+class TestParent extends Panel implements ForeignHandler.IReceiver {
+  addCell(cell: CodeCellWidget): void {
+    this.addWidget(cell);
+  }
+}
 
 
 class TestHandler extends ForeignHandler {
@@ -96,6 +90,17 @@ const renderer: ForeignHandler.IRenderer = {
     return cell;
   }
 };
+const relevantTypes = [
+  'execute_input',
+  'execute_result',
+  'display_data',
+  'stream',
+  'error',
+  'clear_output'
+].reduce((acc, val) => {
+  acc.add(val);
+  return acc;
+}, new Set<string>());
 
 
 describe('console/foreign', () => {
@@ -105,11 +110,7 @@ describe('console/foreign', () => {
     describe('#constructor()', () => {
 
       it('should create a new foreign handler', () => {
-        let handler = new ForeignHandler({
-          kernel: null,
-          parent: null,
-          renderer
-        });
+        let handler = new TestHandler({ kernel: null, parent: null, renderer });
         expect(handler).to.be.a(ForeignHandler);
       });
 
@@ -120,12 +121,11 @@ describe('console/foreign', () => {
       let local: Session.ISession;
       let foreign: Session.ISession;
       let handler: TestHandler;
-      let parent: Panel;
 
       beforeEach(done => {
+        let parent = new TestParent();
         let path = utils.uuid();
         let sessions = [Session.startNew({ path }), Session.startNew({ path })];
-        parent = new Panel();
         Promise.all(sessions).then(([one, two]) => {
           local = one;
           foreign = two;
@@ -135,7 +135,6 @@ describe('console/foreign', () => {
       });
 
       afterEach(done => {
-        parent.dispose();
         handler.dispose();
         local.shutdown().then(() => {
           local.dispose();
@@ -166,11 +165,7 @@ describe('console/foreign', () => {
     describe('#isDisposed', () => {
 
       it('should indicate whether the handler is disposed', () => {
-        let handler = new ForeignHandler({
-          kernel: null,
-          parent: null,
-          renderer
-        });
+        let handler = new TestHandler({ kernel: null, parent: null, renderer });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
@@ -181,17 +176,12 @@ describe('console/foreign', () => {
     describe('#kernel', () => {
 
       it('should be set upon instantiation', () => {
-        let handler = new ForeignHandler({
-          kernel: null,
-          parent: null,
-          renderer
-        });
+        let handler = new TestHandler({ kernel: null, parent: null, renderer });
         expect(handler.kernel).to.be(null);
       });
 
       it('should be resettable', done => {
-        let parent = new Panel();
-        let handler = new TestHandler({ kernel: null, parent, renderer });
+        let handler = new TestHandler({ kernel: null, parent: null, renderer });
         Session.startNew({ path: utils.uuid() }).then(session => {
           expect(handler.kernel).to.be(null);
           handler.kernel = session.kernel;
@@ -204,25 +194,27 @@ describe('console/foreign', () => {
 
     });
 
+    describe('#parent', () => {
+
+      it('should be set upon instantiation', () => {
+        let parent = new TestParent();
+        let handler = new TestHandler({ kernel: null, parent, renderer });
+        expect(handler.parent).to.be(parent);
+      });
+
+    });
+
     describe('#dispose()', () => {
 
       it('should dispose the resources held by the handler', () => {
-        let handler = new ForeignHandler({
-          kernel: null,
-          parent: null,
-          renderer
-        });
+        let handler = new TestHandler({ kernel: null, parent: null, renderer });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let handler = new ForeignHandler({
-          kernel: null,
-          parent: null,
-          renderer
-        });
+        let handler = new TestHandler({ kernel: null, parent: null, renderer });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         handler.dispose();
@@ -236,12 +228,11 @@ describe('console/foreign', () => {
       let local: Session.ISession;
       let foreign: Session.ISession;
       let handler: TestHandler;
-      let parent: Panel;
 
       beforeEach(done => {
+        let parent = new TestParent();
         let path = utils.uuid();
         let sessions = [Session.startNew({ path }), Session.startNew({ path })];
-        parent = new Panel();
         Promise.all(sessions).then(([one, two]) => {
           local = one;
           foreign = two;
@@ -251,7 +242,6 @@ describe('console/foreign', () => {
       });
 
       afterEach(done => {
-        parent.dispose();
         handler.dispose();
         local.shutdown().then(() => {
           local.dispose();
@@ -268,7 +258,8 @@ describe('console/foreign', () => {
       });
 
       it('should inject relevant cells into the parent', done => {
-        let code = 'print("onIOPubMessage:enabled")';
+        let code = 'print("#onIOPubMessage:enabled")';
+        let parent = handler.parent as TestParent;
         expect(parent.widgets.length).to.be(0);
         handler.injected.connect(() => {
           expect(parent.widgets.length).to.be.greaterThan(0);
