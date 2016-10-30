@@ -130,18 +130,21 @@ namespace CodeEditor {
   interface ITextSelection {
     /**
      * The index to the first character in the current selection.
+     *
+     * #### Notes
+     * If this position is greater than [end] then the selection is considered
+     * to be backward.
      */
     start: number;
 
     /**
      * The index to the last character in the current selection.
+     *
+     * #### Notes
+     * If this position is less than [start] then the selection is considered
+     * to be backward.
      */
     end: number;
-
-    /**
-     * The direction in which selection occurred.
-     */
-    direction: 'forward' | 'backward' | 'none';
   }
 
   /**
@@ -163,11 +166,6 @@ namespace CodeEditor {
      * The text stored in the model.
      */
     value: string;  // TODO: this should be an iobservablestring.
-
-    /**
-     * The uri associated with the model.
-     */
-    uri: string;
 
     /**
      * A mime type of the model.
@@ -320,25 +318,6 @@ namespace CodeEditor {
     }
 
     /**
-     * The uri associated with the model.
-     */
-    get uri(): string {
-      return this._uri;
-    }
-    set uri(newValue: string) {
-      let oldValue = this._uri;
-      if (oldValue === newValue) {
-        return;
-      }
-      this._uri = newValue;
-      this.propertyChanged.emit({
-        name: 'uri',
-        oldValue,
-        newValue
-      });
-    }
-
-    /**
      * A mime type of the model.
      */
     get mimeType(): string {
@@ -464,7 +443,6 @@ namespace CodeEditor {
      */
     clearHistory(): void { /* no-op */ }
 
-    private _uri = '';
     private _mimetype = '';
     private _value = '';
     private _cursor: IPosition = { line: 1, column: 1 };
