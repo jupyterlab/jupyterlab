@@ -158,6 +158,13 @@ class BaseCellWidget extends Widget {
   }
 
   /**
+   * Get the prompt node used by the cell.
+   */
+  get promptNode(): HTMLElement {
+    return this._input.promptNode;
+  }
+
+  /**
    * Get the editor widget used by the cell.
    *
    * #### Notes
@@ -217,17 +224,6 @@ class BaseCellWidget extends Widget {
    */
   setPrompt(value: string): void {
     this._input.setPrompt(value);
-  }
-
-  /**
-   * Toggle whether the input area is shown.
-   */
-  toggleInput(value: boolean): void {
-    if (value) {
-      this._input.show();
-    } else {
-      this._input.hide();
-    }
   }
 
   /**
@@ -307,6 +303,23 @@ class BaseCellWidget extends Widget {
     // no-op
   }
 
+  /**
+   * Render an input instead of the text editor.
+   */
+  protected renderInput(widget: Widget): void {
+    this._input.renderInput(widget);
+  }
+
+  /**
+   * Show the text editor.
+   */
+  protected showEditor(): void {
+    this._input.showEditor();
+  }
+
+  /**
+   * Handle a model change.
+   */
   private _onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
     // If the model is being replaced, disconnect the old signal handler.
     if (oldValue) {
@@ -595,8 +608,6 @@ class MarkdownCellWidget extends BaseCellWidget {
     // Insist on the Github-flavored markdown mode.
     this.mimetype = 'text/x-ipythongfm';
     this._rendermime = options.rendermime;
-    this._output = new MarkdownOutput();
-    (this.layout as PanelLayout).addWidget(this._output);
   }
 
   /**
@@ -641,24 +652,24 @@ class MarkdownCellWidget extends BaseCellWidget {
         let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
         let trusted = this.trusted;
         let widget = this._rendermime.render({ bundle, trusted });
-        this._output.content = widget || new Widget();
+        this._output = widget || new Widget();
+        this._output.addClass(MARKDOWN_OUTPUT_CLASS);
         this.update();
       } else {
         this._output.show();
       }
       this._prev = text;
-      this.toggleInput(false);
+      this.renderInput(this._output);
       this.addClass(RENDERED_CLASS);
     } else {
-      this._output.hide();
-      this.toggleInput(true);
+      this.showEditor();
       this.removeClass(RENDERED_CLASS);
     }
     super.onUpdateRequest(msg);
   }
 
   private _rendermime: RenderMime = null;
-  private _output: MarkdownOutput = null;
+  private _output: Widget = null;
   private _rendered = true;
   private _prev = '';
 }
@@ -685,46 +696,6 @@ namespace MarkdownCellWidget {
      * The mime renderer for the cell widget.
      */
     rendermime: RenderMime;
-  }
-}
-
-
-/**
- * A widget that contains rendered markdown output.
- */
-class MarkdownOutput extends Widget {
-  /**
-   * Construct a new markdown output.
-   */
-  constructor() {
-    super();
-    this.addClass(MARKDOWN_OUTPUT_CLASS);
-    let prompt = new Widget();
-    prompt.addClass(PROMPT_CLASS);
-    let layout = this.layout = new PanelLayout();
-    layout.addWidget(prompt);
-    layout.addWidget(new Widget());
-  }
-
-  /**
-   * The prompt used by the output.
-   */
-  get prompt(): Widget {
-    return (this.layout as PanelLayout).widgets.at(0);
-  }
-
-  /**
-   * The content used by the widget.
-   */
-  get content(): Widget {
-    return (this.layout as PanelLayout).widgets.at(1);
-  }
-
-  set content(widget: Widget) {
-    widget.addClass(MARKDOWN_CONTENT_CLASS);
-    let layout = this.layout as PanelLayout;
-    layout.removeWidget(this.content);
-    layout.addWidget(widget);
   }
 }
 
@@ -762,7 +733,8 @@ class InputAreaWidget extends Widget {
     this.addClass(INPUT_CLASS);
     editor.addClass(EDITOR_CLASS);
     this.layout = new PanelLayout();
-    let prompt = new Widget();
+    this._editor = editor;
+    let prompt = this._prompt = new Widget();
     prompt.addClass(PROMPT_CLASS);
     let layout = this.layout as PanelLayout;
     layout.addWidget(prompt);
@@ -770,14 +742,49 @@ class InputAreaWidget extends Widget {
   }
 
   /**
+   * Get the prompt node used by the cell.
+   */
+  get promptNode(): HTMLElement {
+    return this._prompt.node;
+  }
+
+  /**
+   * Render an input instead of the text editor.
+   */
+  renderInput(widget: Widget): void {
+    this._editor.hide();
+    let layout = this.layout as PanelLayout;
+    if (this._rendered) {
+      layout.removeWidget(this._rendered);
+    }
+    this._rendered = widget;
+    widget.show();
+    layout.addWidget(widget);
+  }
+
+  /**
+   * Show the text editor.
+   */
+  showEditor(): void {
+    this._editor.show();
+    let layout = this.layout as PanelLayout;
+    if (this._rendered) {
+      layout.removeWidget(this._rendered);
+    }
+  }
+
+  /**
    * Set the prompt of the input area.
    */
   setPrompt(value: string): void {
-    let prompt = (this.layout as PanelLayout).widgets.at(0);
     if (value === 'null') {
       value = ' ';
     }
     let text = `In [${value || ' '}]:`;
-    prompt.node.textContent = text;
+    this._prompt.node.textContent = text;
   }
+
+  private _prompt: Widget;
+  private _editor: ICellEditorWidget;
+  private _rendered: Widget;
 }
