@@ -24,6 +24,24 @@ class AboutWidget extends VDomWidget<AboutModel> {
   }
 
   protected render(): VNode {
-    return h.h1('It Works!');
+
+    let mainArea =
+    h.div({className: 'section', id: 'about'},
+      h.a({id: 'main-area'}),
+      h.div({className: 'sectioncenter'},
+        h.p({className: 'header content'},
+          h.span({className: 'jp-img jp-About-hero-mainarea'}),
+          'Main Area'
+        ),
+        h.span({className: 'jp-img jp-About-mainarea'}),
+        h.p({className: 'content-desc'}, 'Hello'),
+        h.p({className: 'content-desc'}, 'Hello Again'),
+        h.a({href: '#command'},
+          h.span({className: 'nav-button'})
+        )
+      )
+    );
+
+    return mainArea;
   }
 }

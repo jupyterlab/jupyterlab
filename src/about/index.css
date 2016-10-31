@@ -2,9 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-#about-jupyterlab {
-    padding: 2em;
-}
 
 #about {
   position: absolute;
@@ -16,6 +13,8 @@
   scroll-snap-points-y: repeat(100%);
   scroll-snap-type: mandatory;
   scroll-snap-destination: 100% 0%;
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  text-align: center;
 }
 
 #about .section {
@@ -135,11 +134,6 @@
 
 #about .col-12 {
   width: 100%;
-}
-
-#about {
-  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
-  text-align: center;
 }
 
 #about .header {
@@ -279,7 +273,6 @@
 
 
 /* * * IMAGES * * */
-
 #about .jp-img {
   display: block;
   background-position: center;
