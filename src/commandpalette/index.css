@@ -41,7 +41,7 @@
 .p-CommandPalette-wrapper::after {
   font-family: FontAwesome;
   content: "\f002"; /* search */
-  color: var(--jp-inverse-ui-font-color0);
+  color: var(--jp-ui-font-color0);
   font-size: var(--jp-ui-icon-font-size);
   line-height: var(--jp-private-commandpalette-search-height);
 }
