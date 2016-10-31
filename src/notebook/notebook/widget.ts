@@ -1000,7 +1000,7 @@ class Notebook extends StaticNotebook {
       // Event is on a cell but not in its editor, switch to command mode.
       if (!widget.editor.node.contains(target)) {
         this.mode = 'command';
-        shouldDrag = true;
+        shouldDrag = widget.promptNode.contains(target);
       }
       if (event.shiftKey) {
         shouldDrag = false;
