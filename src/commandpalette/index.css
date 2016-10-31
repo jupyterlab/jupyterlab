@@ -148,3 +148,14 @@
 .p-CommandPalette-itemCaption {
   display: none;
 }
+
+.p-CommandPalette-content:empty:after {
+    content: "No results";
+    margin: auto;
+    margin-top: 20px;
+    width: 100px;
+    display: block;
+    font-size: var(--jp-ui-font-size2);
+    font-family: sans-serif;
+    font-weight: lighter;
+}
