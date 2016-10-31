@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -13,10 +9,10 @@ import {
   ICommandPalette
 } from '../commandpalette';
 
+// add in other imports here
 import {
-  html
-} from './html';
-
+  AboutModel, AboutWidget
+} from './';
 
 /**
  * The about page extension.
@@ -31,11 +27,12 @@ const aboutExtension: JupyterLabPlugin<void> = {
 
 
 function activateAbout(app: JupyterLab, palette: ICommandPalette): void {
-  let widget = new Widget();
+  let model = new AboutModel();
+  let widget = new AboutWidget();
+  widget.model = model;
   widget.id = 'about-jupyterlab';
   widget.title.label = 'About';
   widget.title.closable = true;
-  widget.node.innerHTML = html;
   widget.node.style.overflowY = 'auto';
 
   let command = 'about-jupyterlab:show';
