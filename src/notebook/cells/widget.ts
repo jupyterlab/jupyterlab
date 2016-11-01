@@ -93,17 +93,12 @@ const MARKDOWN_CELL_CLASS = 'jp-MarkdownCell';
 const MARKDOWN_OUTPUT_CLASS = 'jp-MarkdownOutput';
 
 /**
- * The class name added to the rendered markdown widget content.
- */
-const MARKDOWN_CONTENT_CLASS = 'jp-MarkdownOutput-content';
-
-/**
  * The class name added to raw cells.
  */
 const RAW_CELL_CLASS = 'jp-RawCell';
 
 /**
- * The class name added to a rendered markdown cell.
+ * The class name added to a rendered input area.
  */
 const RENDERED_CLASS = 'jp-mod-rendered';
 
@@ -307,6 +302,7 @@ class BaseCellWidget extends Widget {
    * Render an input instead of the text editor.
    */
   protected renderInput(widget: Widget): void {
+    this.addClass(RENDERED_CLASS);
     this._input.renderInput(widget);
   }
 
@@ -314,6 +310,7 @@ class BaseCellWidget extends Widget {
    * Show the text editor.
    */
   protected showEditor(): void {
+    this.removeClass(RENDERED_CLASS);
     this._input.showEditor();
   }
 
@@ -660,10 +657,8 @@ class MarkdownCellWidget extends BaseCellWidget {
       }
       this._prev = text;
       this.renderInput(this._output);
-      this.addClass(RENDERED_CLASS);
     } else {
       this.showEditor();
-      this.removeClass(RENDERED_CLASS);
     }
     super.onUpdateRequest(msg);
   }
