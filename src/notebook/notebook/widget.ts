@@ -54,6 +54,10 @@ import {
 } from '../../common/interfaces';
 
 import {
+  DragScrollHandler
+} from '../../common/dragscroll';
+
+import {
   IObservableVector, ObservableVector
 } from '../../common/observablevector';
 
@@ -583,6 +587,7 @@ class Notebook extends StaticNotebook {
     this.activeCellChanged.connect((s, cell) => {
       this._inspectionHandler.activeCell = cell;
     });
+    this._scrollHandler = new DragScrollHandler({ node: this.node });
   }
 
   /**
@@ -1073,12 +1078,14 @@ class Notebook extends StaticNotebook {
     }
     event.preventDefault();
     event.stopPropagation();
-    let index = this._findCell(event.target as HTMLElement);
+    let target = event.target as HTMLElement;
+    let index = this._findCell(target);
     if (index === -1) {
       return;
     }
-    let target = (this.layout as PanelLayout).widgets.at(index);
-    target.node.classList.add(DROP_TARGET_CLASS);
+
+    let widget = (this.layout as PanelLayout).widgets.at(index);
+    widget.node.classList.add(DROP_TARGET_CLASS);
   }
 
   /**
@@ -1087,6 +1094,9 @@ class Notebook extends StaticNotebook {
   private _evtDragLeave(event: IDragEvent): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
+    }
+    if (!this.node.contains(event.relatedTarget as HTMLElement)) {
+      this._scrollHandler.clear();
     }
     event.preventDefault();
     event.stopPropagation();
@@ -1110,12 +1120,14 @@ class Notebook extends StaticNotebook {
     if (elements.length) {
       (elements[0] as HTMLElement).classList.remove(DROP_TARGET_CLASS);
     }
-    let index = this._findCell(event.target as HTMLElement);
+    this._scrollHandler.handleDragEvent(event);
+    let target = event.target as HTMLElement;
+    let index = this._findCell(target);
     if (index === -1) {
       return;
     }
-    let target = (this.layout as PanelLayout).widgets.at(index);
-    target.node.classList.add(DROP_TARGET_CLASS);
+    let widget = (this.layout as PanelLayout).widgets.at(index);
+    widget.node.classList.add(DROP_TARGET_CLASS);
   }
 
   /**
@@ -1300,6 +1312,7 @@ class Notebook extends StaticNotebook {
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
+  private _scrollHandler: DragScrollHandler = null;
 }
 
 
