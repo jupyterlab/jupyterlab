@@ -1,5 +1,5 @@
 
-# This file comes from https://github.com/podhmo/python-semver/blob/master/semver/__init__.py
+# This file comes from https://github.com/podhmo/python-semver/blob/f0392c5567717ad001c058d80fa09887e482ad62/semver/__init__.py
 # 
 # It is licensed under the following license:
 # 
