@@ -12,6 +12,7 @@ from traitlets import List, Unicode, default
 from traitlets.config.manager import BaseJSONConfigManager
 
 from .labextensions import validate_labextension
+from ._version import __version__
 
 
 def get_labextensions(parent=None):
@@ -35,6 +36,7 @@ def get_labextensions(parent=None):
 
 
 class LabApp(NotebookApp):
+    version = __version__
 
     description = """
         JupyterLab - An extensible computational environment for Jupyter.
