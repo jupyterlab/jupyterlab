@@ -4,7 +4,7 @@
 module.exports = [
   require('../lib/about/plugin').aboutExtension,
   require('../lib/clipboard/plugin').clipboardProvider,
-  require('../lib/commandlinks/plugin').commandLinksProvider,
+  require('../lib/commandlinker/plugin').commandLinkerProvider,
   require('../lib/commandpalette/plugin').commandPaletteProvider,
   require('../lib/console/plugin').consoleTrackerProvider,
   require('../lib/console/codemirror/plugin').rendererProvider,

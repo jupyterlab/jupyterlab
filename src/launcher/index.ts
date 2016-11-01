@@ -34,6 +34,10 @@ import {
 } from 'phosphor/lib/ui/vdom';
 
 import {
+  ICommandLinker
+} from '../commandlinker';
+
+import {
   VDomModel, VDomWidget
 } from '../common/vdom';
 
@@ -155,17 +159,9 @@ class LauncherModel extends VDomModel implements ILauncher {
   /**
    * Create a new launcher model.
    */
-  constructor(options: LauncherModel.IOptions) {
+  constructor() {
     super();
-    this._commands = options.commands;
     this._items = new Vector<ILauncherItem>();
-  }
-
-  /**
-   * The command registry.
-   */
-  get commands(): CommandRegistry {
-    return this._commands;
   }
 
   /**
@@ -210,46 +206,14 @@ class LauncherModel extends VDomModel implements ILauncher {
   }
 
   /**
-   * Execute the command of the launcher item at a specific index.
-   *
-   * @param index - The index of the launcher item to execute.
-   */
-  execute(index: number): void {
-    let item = this._items.at(index);
-    if (!item) {
-      return;
-    }
-    this.commands.execute(item.command, item.args);
-  }
-
-  /**
    * Return an iterator of launcher items.
    */
   items(): IIterator<ILauncherItem> {
     return this._items.iter();
   }
 
-  private _commands: CommandRegistry = null;
   private _items: Vector<ILauncherItem> = null;
   private _path: string = 'home';
-}
-
-
-/**
- * A namespace for launcher model statics.
- */
-export
-namespace LauncherModel {
-  /**
-   * The instantiation options for a launcher model.
-   */
-  export
-  interface IOptions {
-    /**
-     * The command registry instance that all launcher commands should use.
-     */
-    commands: CommandRegistry;
-  }
 }
 
 
@@ -261,45 +225,10 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
   /**
    * Construct a new launcher widget.
    */
-  constructor() {
+  constructor(options: LauncherWidget.IOptions) {
     super();
     this.addClass(LAUNCHER_CLASS);
-  }
-
-  /**
-   * Handle the DOM events for launcher widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the panel's DOM node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    default:
-      return;
-    }
-  }
-
-  /**
-   * Handle `after_attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    this.node.addEventListener('click', this);
-  }
-
-  /**
-   * Handle `before_detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    super.onBeforeDetach(msg);
-    this.node.removeEventListener('click', this);
+    this._linker = options.linker;
   }
 
   /**
@@ -307,13 +236,18 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
    */
   protected render(): VNode | VNode[] {
     // Create an iterator that yields rendered item nodes.
-    let children = map(enumerate(this.model.items()), ([index, item]) => {
+    let children = map(this.model.items(), item => {
       let img = h.span({className: item.imgClassName + ' ' + IMAGE_CLASS});
       let text = h.span({className: TEXT_CLASS }, item.name);
-      return h.div({ className: ITEM_CLASS, dataset: { index } }, [img, text]);
+      let attrs = this._linker.populateVNodeAttrs({
+        className: ITEM_CLASS
+      }, item.command, item.args);
+      return h.div(attrs, [img, text]);
     });
 
-    let folderImage = h.span({ className: FOLDER_CLASS + ' ' + FOLDER_ICON_CLASS});
+    let folderImage = h.span({
+      className: `${FOLDER_CLASS} ${FOLDER_ICON_CLASS}`
+    });
     let p = this.model.path;
     let pathName = p.length ? `home > ${p.replace(/\//g, ' > ')}` : 'home';
     let path = h.span({ className: PATH_CLASS }, pathName );
@@ -323,18 +257,23 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
     return h.div({ className: DIALOG_CLASS }, [cwd, body]);
   }
 
+  private _linker: ICommandLinker = null;
+}
+
+
+/**
+ * A namespace for launcher widget statics.
+ */
+export
+namespace LauncherWidget {
   /**
-   * Handle click events on the widget.
+   * The instantiation option for a launcher widget.
    */
-  private _evtClick(event: MouseEvent) {
-    let target = event.target as HTMLElement;
-    while (target !== this.node) {
-      if (target.classList.contains(ITEM_CLASS)) {
-        let index = parseInt(target.getAttribute('data-index'), 10);
-        this.model.execute(index);
-        return;
-      }
-      target = target.parentElement;
-    }
+  export
+  interface IOptions {
+    /**
+     * Command linker instance.
+     */
+    linker: ICommandLinker;
   }
 }
