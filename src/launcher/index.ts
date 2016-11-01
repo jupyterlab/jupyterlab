@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  enumerate, IIterator, map, toArray
+  IIterator, map, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -18,16 +18,8 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  Message
-} from 'phosphor/lib/core/messaging';
-
-import {
   Token
 } from 'phosphor/lib/core/token';
-
-import {
-  CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
 
 import {
   h, VNode
