@@ -76,6 +76,12 @@ const OK_BUTTON_CLASS = 'jp-Dialog-okButton';
 const CANCEL_BUTTON_CLASS = 'jp-Dialog-cancelButton';
 
 /**
+/*
+* The class name added to dialog Warning buttons.
+*/
+const WARNING_BUTTON_CLASS = 'jp-Dialog-warningButton';
+
+/**
  * The class name added to dialog input field wrappers.
  */
 const INPUT_WRAPPER_CLASS = 'jp-Dialog-inputWrapper';
@@ -127,7 +133,6 @@ const okButton: IButtonItem = {
   className: OK_BUTTON_CLASS
 };
 
-
 /**
  * A default cancel button.
  */
@@ -136,6 +141,21 @@ const cancelButton: IButtonItem = {
   text: 'CANCEL',
   className: CANCEL_BUTTON_CLASS
 };
+
+/**
+* A default delete button.
+*/
+export
+const deleteButton: IButtonItem = {
+  text: 'DELETE',
+  className: WARNING_BUTTON_CLASS
+}
+
+export
+const warnButton: IButtonItem = {
+  text: 'OK',
+  className: WARNING_BUTTON_CLASS
+}
 
 
 /**

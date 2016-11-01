@@ -38,7 +38,8 @@
 
 .jp-Dialog-header {
   padding-bottom: 12px;
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 300;
   color: #616161;
 }
 
@@ -52,11 +53,11 @@
 .jp-Dialog-bodyContent {
   font-size: 15px;
   outline: none;
-  margin-bottom: 12px;
 }
 
 
 .jp-Dialog-footer {
+  float: right;
   margin-top: 24px;
 }
 
@@ -69,15 +70,12 @@
 
 
 .jp-Dialog-button {
-  font-size: 15px;
+  font-size: 13px;
   border: none;
-  min-width: 120px;
-  max-width: 120px;
   text-transform: uppercase;
   line-height: 38px;
-  border-radius: 2px;
   outline: none;
-  padding: 0px;
+  padding: 0px 24px;
 }
 
 
@@ -93,6 +91,10 @@
   color: white;
 }
 
+.jp-Dialog-warningButton {
+  background: var(--jp-error-color1);
+  color: white;
+}
 
 .jp-Dialog-inputWrapper {
   padding: 7px;
@@ -100,8 +102,7 @@
   width: 252px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
-  border-radius: 2px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 
@@ -121,7 +122,6 @@
   width: 252px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
-  border-radius: 2px;
   margin-bottom: 12px;
 }
 
