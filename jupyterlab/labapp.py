@@ -11,8 +11,11 @@ from notebook.notebookapp import NotebookApp
 from traitlets import List, Unicode, default
 from traitlets.config.manager import BaseJSONConfigManager
 
+from .labextensions import validate_labextension
+
+
 def get_labextensions(parent=None):
-    """Get the list of enabled lab extensions"""
+    """Get the list of enabled and valid lab extensions"""
     extensions = []
     config_dirs = [os.path.join(p, 'labconfig') for p in
                    jupyter_config_path()]
@@ -25,7 +28,9 @@ def get_labextensions(parent=None):
         )
         for name, enabled in labextensions.items():
             if enabled:
-                extensions.append(name)
+                warnings = validate_labextension(name)
+                if not warnings:
+                    extensions.append(name)
     return extensions
 
 

@@ -6,7 +6,6 @@
 import glob
 import json
 import os
-import sys
 from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
@@ -32,7 +31,11 @@ FILE_LOADER = FileSystemLoader(HERE)
 BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
 EXTENSION_PREFIX = '/labextension'
-__version__ = None
+
+with open(os.path.join(os.path.dirname(HERE), 'package.json')) as f:
+    packagejson = json.load(f)
+
+__version__ = packagejson['version']
 
 
 def get_labextension_manifest_data_by_folder(folder):
