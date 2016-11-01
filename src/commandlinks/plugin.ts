@@ -21,6 +21,17 @@ import {
 
 
 /**
+ * The command data attribute added to nodes that are connected.
+ */
+const COMMANDS_ATTR = 'commandlinks-command';
+
+/**
+ * The args data attribute added to nodes that are connected.
+ */
+const ARGS_ATTR = 'commandlinks-command';
+
+
+/**
  * The default commmand links provider.
  */
 export
@@ -52,6 +63,11 @@ class Links implements ICommandLinks {
    * was passed in.
    */
   connectNode(node: HTMLElement, command: string, args: JSONObject): HTMLElement {
+    let argsValue = JSON.stringify(args);
+    node.setAttribute(`data-${COMMANDS_ATTR}`, command);
+    if (argsValue) {
+      node.setAttribute(`data-${ARGS_ATTR}`, argsValue);
+    }
     return node;
   }
 
@@ -69,7 +85,8 @@ class Links implements ICommandLinks {
    * executing their command/argument pair.
    */
   disconnectNode(node: HTMLElement): void {
-    /* no op for initial implementation */
+    node.removeAttribute(`data-${COMMANDS_ATTR}`);
+    node.removeAttribute(`data-${ARGS_ATTR}`);
   }
 
   /**
@@ -89,6 +106,12 @@ class Links implements ICommandLinks {
    * instance that was passed in, i.e., this method mutates the original.
    */
   populateVNodeAttrs(attrs: IElementAttrs, command: string, args: JSONObject): IElementAttrs {
+    let argsValue = JSON.stringify(args);
+    attrs.dataset = attrs.dataset || {};
+    attrs.dataset[COMMANDS_ATTR] = command;
+    if (argsValue) {
+      attrs.dataset[ARGS_ATTR] = argsValue;
+    }
     return attrs;
   }
 }
