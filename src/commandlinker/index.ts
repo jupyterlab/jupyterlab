@@ -17,10 +17,10 @@ import {
 
 /* tslint:disable */
 /**
- * The command links token.
+ * The command linker token.
  */
 export
-const ICommandLinks = new Token<ICommandLinks>('jupyter.services.commandlinks');
+const ICommandLinker = new Token<ICommandLinker>('jupyter.services.commandlinker');
 /* tslint:enable */
 
 
@@ -28,7 +28,7 @@ const ICommandLinks = new Token<ICommandLinks>('jupyter.services.commandlinks');
  * A helper class to generate clickables that execute commands.
  */
 export
-interface ICommandLinks {
+interface ICommandLinker {
   /**
    * Connect a command/argument pair to a given node so that when it is clicked,
    * the command will execute.

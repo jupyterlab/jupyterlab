@@ -20,29 +20,29 @@ import {
 } from '../application';
 
 import {
-  ICommandLinks
+  ICommandLinker
 } from './';
 
 
 /**
  * The command data attribute added to nodes that are connected.
  */
-const COMMAND_ATTR = 'commandlinks-command';
+const COMMAND_ATTR = 'commandlinker-command';
 
 /**
  * The args data attribute added to nodes that are connected.
  */
-const ARGS_ATTR = 'commandlinks-command';
+const ARGS_ATTR = 'commandlinker-args';
 
 
 /**
- * The default commmand links provider.
+ * The default commmand linker provider.
  */
 export
-const commandLinksProvider: JupyterLabPlugin<ICommandLinks> = {
-  id: 'jupyter.services.commandlinks',
-  provides: ICommandLinks,
-  activate: activateCommandLinks,
+const commandLinkerProvider: JupyterLabPlugin<ICommandLinker> = {
+  id: 'jupyter.services.commandlinker',
+  provides: ICommandLinker,
+  activate: activateCommandLinker,
   autoStart: true
 };
 
@@ -51,11 +51,11 @@ const commandLinksProvider: JupyterLabPlugin<ICommandLinks> = {
  * A static class that provides helper methods to generate clickable nodes that
  * execute registered commands with pre-populated arguments.
  */
-class Links implements ICommandLinks {
+class Linker implements ICommandLinker {
   /**
-   * Instantiate a new command links class.
+   * Instantiate a new command linker class.
    */
-  constructor(options: Links.IOptions) {
+  constructor(options: Linker.IOptions) {
     this._commands = options.commands;
     document.body.addEventListener('click', this);
   }
@@ -102,7 +102,7 @@ class Links implements ICommandLinks {
   }
 
   /**
-   * Handle the DOM events for the command links helper class.
+   * Handle the DOM events for the command linker helper class.
    *
    * @param event - The DOM event sent to the class.
    *
@@ -157,7 +157,11 @@ class Links implements ICommandLinks {
       if (target.hasAttribute(`data-${COMMAND_ATTR}`)) {
         event.preventDefault();
         let command = target.getAttribute(`data-${COMMAND_ATTR}`);
-        let args = JSON.parse(target.getAttribute(`data-${ARGS_ATTR}`) || null);
+        let argsValue = target.getAttribute(`data-${ARGS_ATTR}`);
+        let args: JSONObject;
+        if (argsValue) {
+          args = JSON.parse(argsValue);
+        }
         this._commands.execute(command, args);
         break;
       }
@@ -170,11 +174,11 @@ class Links implements ICommandLinks {
 
 
 /**
- * A namespace for `Links` class statics.
+ * A namespace for `Linker` class statics.
  */
-namespace Links {
+namespace Linker {
   /**
-   * The instantiation options for a command links class.
+   * The instantiation options for a command linker class.
    */
   export
   interface IOptions {
@@ -187,8 +191,8 @@ namespace Links {
 
 
 /**
- * Activate the command links provider.
+ * Activate the command linker provider.
  */
-function activateCommandLinks(app: JupyterLab): ICommandLinks {
-  return new Links({ commands: app.commands });
+function activateCommandLinker(app: JupyterLab): ICommandLinker {
+  return new Linker({ commands: app.commands });
 }
