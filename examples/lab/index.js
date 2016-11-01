@@ -15,6 +15,7 @@ var lab = new JupyterLab();
 lab.registerPlugins([
   require('jupyterlab/lib/about/plugin').aboutExtension,
   require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
+  require('jupyterlab/lib/commandlinks/plugin').commandLinksProvider,
   require('jupyterlab/lib/commandpalette/plugin').commandPaletteProvider,
   require('jupyterlab/lib/console/plugin').consoleTrackerProvider,
   require('jupyterlab/lib/console/codemirror/plugin').rendererProvider,
