@@ -39,9 +39,13 @@ interface ICommandLinker {
    *
    * @param args - The arguments with which to invoke the command.
    *
+   * @returns The same node that was passed in, after it has been connected.
+   *
    * #### Notes
-   * The node instance that is returned is identical to the node instance that
-   * was passed in.
+   * Only `click` events will execute the command on a connected node. So, there
+   * are two considerations that are relevant:
+   * 1. If a node is connected, the default click action will be prevented.
+   * 2. The `HTMLElement` passed in should be clickable.
    */
   connectNode(node: HTMLElement, command: string, args: JSONObject): HTMLElement;
 
@@ -49,6 +53,8 @@ interface ICommandLinker {
    * Disconnect a node that has been connected to execute a command on click.
    *
    * @param node - The node being disconnected.
+   *
+   * @returns The same node that was passed in, after it has been disconnected.
    *
    * #### Notes
    * This method is safe to call multiple times and is safe to call on nodes
@@ -58,7 +64,7 @@ interface ICommandLinker {
    * using the `populateVNodeAttributes` method in order to disconnect them from
    * executing their command/argument pair.
    */
-  disconnectNode(node: HTMLElement): void;
+  disconnectNode(node: HTMLElement): HTMLElement;
 
   /**
    * Populate the attributes used to instantiate a virtual DOM node with the

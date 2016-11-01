@@ -51,7 +51,7 @@ const commandLinkerProvider: JupyterLabPlugin<ICommandLinker> = {
  * A static class that provides helper methods to generate clickable nodes that
  * execute registered commands with pre-populated arguments.
  */
-class Linker implements ICommandLinker {
+class CommandLinker implements ICommandLinker {
   /**
    * Instantiate a new command linker class.
    */
@@ -70,9 +70,13 @@ class Linker implements ICommandLinker {
    *
    * @param args - The arguments with which to invoke the command.
    *
+   * @returns The same node that was passed in, after it has been connected.
+   *
    * #### Notes
-   * The node instance that is returned is identical to the node instance that
-   * was passed in.
+   * Only `click` events will execute the command on a connected node. So, there
+   * are two considerations that are relevant:
+   * 1. If a node is connected, the default click action will be prevented.
+   * 2. The `HTMLElement` passed in should be clickable.
    */
   connectNode(node: HTMLElement, command: string, args: JSONObject): HTMLElement {
     let argsValue = JSON.stringify(args);
@@ -88,6 +92,8 @@ class Linker implements ICommandLinker {
    *
    * @param node - The node being disconnected.
    *
+   * @returns The same node that was passed in, after it has been disconnected.
+   *
    * #### Notes
    * This method is safe to call multiple times and is safe to call on nodes
    * that were never connected.
@@ -96,9 +102,10 @@ class Linker implements ICommandLinker {
    * using the `populateVNodeAttributes` method in order to disconnect them from
    * executing their command/argument pair.
    */
-  disconnectNode(node: HTMLElement): void {
+  disconnectNode(node: HTMLElement): HTMLElement {
     node.removeAttribute(`data-${COMMAND_ATTR}`);
     node.removeAttribute(`data-${ARGS_ATTR}`);
+    return node;
   }
 
   /**
@@ -174,11 +181,11 @@ class Linker implements ICommandLinker {
 
 
 /**
- * A namespace for `Linker` class statics.
+ * A namespace for command linker statics.
  */
 namespace Linker {
   /**
-   * The instantiation options for a command linker class.
+   * The instantiation options for a command linker.
    */
   export
   interface IOptions {
@@ -194,5 +201,5 @@ namespace Linker {
  * Activate the command linker provider.
  */
 function activateCommandLinker(app: JupyterLab): ICommandLinker {
-  return new Linker({ commands: app.commands });
+  return new CommandLinker({ commands: app.commands });
 }
