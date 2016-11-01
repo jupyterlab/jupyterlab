@@ -44,17 +44,13 @@
 
 
 .jp-MarkdownOutput {
-  display: flex;
-}
-
-
-.jp-MarkdownOutput-content {
   flex: 1 1 auto;
   margin-top: 0.5em;
   margin-bottom: 0.5em;
+  padding-left: var(--jp-code-padding);
 }
 
-.jp-MarkdownOutput-content.jp-RenderedHTMLCommon {
+.jp-MarkdownOutput.jp-RenderedHTMLCommon {
   overflow: visible;
 }
 
