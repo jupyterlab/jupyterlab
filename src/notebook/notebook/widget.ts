@@ -1076,6 +1076,7 @@ class Notebook extends StaticNotebook {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
+    this._scrollHandler.handleDragEvent(event);
     event.preventDefault();
     event.stopPropagation();
     let target = event.target as HTMLElement;
@@ -1095,9 +1096,7 @@ class Notebook extends StaticNotebook {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
-    if (!this.node.contains(event.relatedTarget as HTMLElement)) {
-      this._scrollHandler.clear();
-    }
+    this._scrollHandler.handleDragEvent(event);
     event.preventDefault();
     event.stopPropagation();
     let elements = this.node.getElementsByClassName(DROP_TARGET_CLASS);
@@ -1137,6 +1136,7 @@ class Notebook extends StaticNotebook {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
+    this._scrollHandler.handleDragEvent(event);
     event.preventDefault();
     event.stopPropagation();
     if (event.proposedAction === 'none') {
@@ -1156,6 +1156,9 @@ class Notebook extends StaticNotebook {
 
     // Find the target cell and insert the copied cells.
     let index = this._findCell(target);
+    if (index === -1) {
+      index = this.widgets.length;
+    }
     let model = this.model;
     let values = event.mimeData.getData(JUPYTER_CELL_MIME);
 
