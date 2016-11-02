@@ -471,7 +471,7 @@ class ConsoleContent extends Widget {
    */
   private _evtKeyDown(event: KeyboardEvent): void {
     if (event.keyCode === 13 && !this.prompt.editor.hasFocus()) {
-      sendMessage(this.prompt.editor, WidgetMessage.ActivateRequest);
+      this.prompt.editor.activate();
     }
   }
 
