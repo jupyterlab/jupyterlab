@@ -53,9 +53,9 @@ const commandLinkerProvider: JupyterLabPlugin<ICommandLinker> = {
  */
 class CommandLinker implements ICommandLinker {
   /**
-   * Instantiate a new command linker class.
+   * Instantiate a new command linker.
    */
-  constructor(options: Linker.IOptions) {
+  constructor(options: CommandLinker.IOptions) {
     this._commands = options.commands;
     document.body.addEventListener('click', this);
   }
@@ -183,7 +183,7 @@ class CommandLinker implements ICommandLinker {
 /**
  * A namespace for command linker statics.
  */
-namespace Linker {
+namespace CommandLinker {
   /**
    * The instantiation options for a command linker.
    */
