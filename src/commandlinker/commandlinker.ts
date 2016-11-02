@@ -8,6 +8,10 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
+  IDisposable
+} from 'phosphor/lib/core/disposable';
+
+import {
   Token
 } from 'phosphor/lib/core/token';
 
@@ -107,13 +111,20 @@ interface ICommandLinker {
  * execute registered commands with pre-populated arguments.
  */
 export
-class CommandLinker implements ICommandLinker {
+class CommandLinker implements ICommandLinker, IDisposable {
   /**
    * Instantiate a new command linker.
    */
   constructor(options: CommandLinker.IOptions) {
     this._commands = options.commands;
     document.body.addEventListener('click', this);
+  }
+
+  /**
+   * Test whether the linker is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
   }
 
   /**
@@ -162,6 +173,18 @@ class CommandLinker implements ICommandLinker {
     node.removeAttribute(`data-${COMMAND_ATTR}`);
     node.removeAttribute(`data-${ARGS_ATTR}`);
     return node;
+  }
+
+  /**
+   * Dispose of the resources held by the linker.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._commands = null;
+    document.body.removeEventListener('click', this);
   }
 
   /**
@@ -233,6 +256,7 @@ class CommandLinker implements ICommandLinker {
   }
 
   private _commands: CommandRegistry = null;
+  private _isDisposed = false;
 }
 
 
