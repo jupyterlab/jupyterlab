@@ -22,11 +22,8 @@ describe('filebrowser/model', () => {
   let model: FileBrowserModel;
   let name: string;
 
-  before((done) => {
-    ServiceManager.create().then(m => {
-      manager = m;
-      done();
-    });
+  before(() => {
+    manager = new ServiceManager();
   });
 
   beforeEach((done) => {
@@ -386,16 +383,15 @@ describe('filebrowser/model', () => {
 
       it('should shut down a session by session id', (done) => {
         let length = 0;
-        manager.sessions.listRunning().then(running => {
-          length = running.length;
-          return model.newUntitled({ type: 'notebook' });
-        }).then(contents => {
-          return manager.sessions.startNew({ path: contents.path });
+        let sessions = manager.sessions;
+        length = toArray(sessions.running()).length;
+        model.newUntitled({ type: 'notebook' }).then(contents => {
+          return sessions.startNew({ path: contents.path });
         }).then(session => {
           session.dispose();
           return model.shutdown(session.id);
         }).then(() => {
-          return manager.sessions.listRunning();
+          return sessions.refreshRunning();
         }).then(running => {
           expect(running.length).to.be(length);
           done();

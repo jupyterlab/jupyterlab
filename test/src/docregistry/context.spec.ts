@@ -25,11 +25,8 @@ describe('docregistry/context', () => {
   let manager: ServiceManager.IManager;
   let factory = new TextModelFactory();
 
-  before((done) => {
-    ServiceManager.create().then(m => {
-      manager = m;
-      done();
-    }).catch(done);
+  before(() => {
+    manager = new ServiceManager();
   });
 
   describe('Context', () => {

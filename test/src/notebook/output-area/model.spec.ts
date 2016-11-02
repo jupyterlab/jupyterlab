@@ -204,7 +204,7 @@ describe('notebook/output-area/model', () => {
       beforeEach((done) => {
         Kernel.startNew().then(k => {
           kernel = k;
-          return kernel.kernelInfo();
+          return kernel.info();
         }).then(() => {
           done();
         }).catch(done);

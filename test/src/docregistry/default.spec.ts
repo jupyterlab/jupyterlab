@@ -37,11 +37,8 @@ describe('docmanager/default', () => {
 
   let context: Context<DocumentRegistry.IModel>;
 
-  beforeEach((done) => {
-    createFileContext().then(c => {
-      context = c;
-      done();
-    });
+  beforeEach(() => {
+    context = createFileContext();
   });
 
   afterEach(() => {

@@ -78,59 +78,50 @@ describe('notebook/tracker', () => {
         expect(tracker.activeCell).to.be(null);
       });
 
-      it('should be the active cell if a tracked notebook has one', (done) => {
+      it('should be the active cell if a tracked notebook has one', () => {
         let tracker = new NotebookTracker();
         let panel = new NotebookPanel({ rendermime, clipboard, renderer});
         tracker.add(panel);
         tracker.sync(panel);
-        createNotebookContext().then(context => {
-          panel.context = context;
-          panel.content.model.fromJSON(DEFAULT_CONTENT);
-          expect(tracker.activeCell).to.be.a(BaseCellWidget);
-          panel.dispose();
-          done();
-        }).catch(done);
+        panel.context = createNotebookContext();
+        panel.content.model.fromJSON(DEFAULT_CONTENT);
+        expect(tracker.activeCell).to.be.a(BaseCellWidget);
+        panel.dispose();
       });
 
     });
 
     describe('#activeCellChanged', () => {
 
-      it('should emit a signal when the active cell changes', (done) => {
+      it('should emit a signal when the active cell changes', () => {
         let tracker = new NotebookTracker();
         let panel = new NotebookPanel({ rendermime, clipboard, renderer });
         let count = 0;
         tracker.activeCellChanged.connect(() => { count++; });
-        createNotebookContext().then(context => {
-          panel.context = context;
-          panel.content.model.fromJSON(DEFAULT_CONTENT);
-          expect(count).to.be(0);
-          tracker.add(panel);
-          tracker.sync(panel);
-          expect(count).to.be(1);
-          panel.content.activeCellIndex = 1;
-          expect(count).to.be(2);
-          panel.dispose();
-          done();
-        }).catch(done);
+        panel.context = createNotebookContext();
+        panel.content.model.fromJSON(DEFAULT_CONTENT);
+        expect(count).to.be(0);
+        tracker.add(panel);
+        tracker.sync(panel);
+        expect(count).to.be(1);
+        panel.content.activeCellIndex = 1;
+        expect(count).to.be(2);
+        panel.dispose();
       });
 
     });
 
     describe('#onCurrentChanged()', () => {
 
-      it('should be called when the active cell changes', (done) => {
+      it('should be called when the active cell changes', () => {
         let tracker = new TestTracker();
         let panel = new NotebookPanel({ rendermime, clipboard, renderer});
         tracker.add(panel);
         tracker.sync(panel);
-        createNotebookContext().then(context => {
-          panel.context = context;
-          panel.content.model.fromJSON(DEFAULT_CONTENT);
-          expect(tracker.methods).to.contain('onCurrentChanged');
-          panel.dispose();
-          done();
-        }).catch(done);
+        panel.context = createNotebookContext();
+        panel.content.model.fromJSON(DEFAULT_CONTENT);
+        expect(tracker.methods).to.contain('onCurrentChanged');
+        panel.dispose();
       });
 
     });

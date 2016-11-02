@@ -79,11 +79,8 @@ describe('notebook/notebook/default-toolbar', () => {
 
   let context: Context<INotebookModel>;
 
-  beforeEach((done) => {
-    createNotebookContext().then(c => {
-      context = c;
-      done();
-    });
+  beforeEach(() => {
+    context = createNotebookContext();
   });
 
   afterEach(() => {
@@ -317,7 +314,7 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#createKernelNameItem()', () => {
 
       it('should display the `\'display_name\'` of the kernel', (done) => {
-        return panel.kernel.getSpec().then(spec => {
+        return panel.kernel.spec().then(spec => {
           let item = createKernelNameItem(panel);
           expect(item.node.textContent).to.be(spec.display_name);
           done();
@@ -332,7 +329,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should handle a change in context', (done) => {
         let item = createKernelNameItem(panel);
-        panel.kernel.getSpec().then(spec => {
+        panel.kernel.spec().then(spec => {
           panel.context = null;
           expect(item.node.textContent).to.be('No Kernel!');
         }).then(done, done);
@@ -415,25 +412,23 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should handle a change to the context', (done) => {
         let item = createKernelStatusItem(panel);
-        createNotebookContext().then(c => {
-          context = c;
-          context.model.fromJSON(DEFAULT_CONTENT);
-          panel.context = c;
-          let name = context.kernelspecs.default;
-          return context.changeKernel({ name }).then(() => {
-            panel.kernel.statusChanged.connect(() => {
-              if (!panel.kernel) {
-                return;
-              }
-              if (panel.kernel.status === 'busy') {
-                expect(item.hasClass('jp-mod-busy')).to.be(true);
-                panel.kernel.interrupt();
-              }
-              if (panel.kernel.status === 'idle') {
-                expect(item.hasClass('jp-mod-busy')).to.be(false);
-                done();
-              }
-            });
+        context = createNotebookContext();
+        context.model.fromJSON(DEFAULT_CONTENT);
+        panel.context = context;
+        let name = context.kernelspecs.default;
+        return context.changeKernel({ name }).then(() => {
+          panel.kernel.statusChanged.connect(() => {
+            if (!panel.kernel) {
+              return;
+            }
+            if (panel.kernel.status === 'busy') {
+              expect(item.hasClass('jp-mod-busy')).to.be(true);
+              panel.kernel.interrupt();
+            }
+            if (panel.kernel.status === 'idle') {
+              expect(item.hasClass('jp-mod-busy')).to.be(false);
+              done();
+            }
           });
         }).catch(done);
       });

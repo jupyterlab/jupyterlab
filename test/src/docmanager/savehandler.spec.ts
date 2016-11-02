@@ -27,11 +27,8 @@ describe('docregistry/savehandler', () => {
   let context: Context<DocumentRegistry.IModel>;
   let handler: SaveHandler;
 
-  before((done) => {
-    ServiceManager.create().then(m => {
-      manager = m;
-      done();
-    }).catch(done);
+  before(() => {
+    manager = new ServiceManager();
   });
 
   beforeEach(() => {

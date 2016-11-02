@@ -54,7 +54,6 @@ import {
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
 const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
-const contextPromise = createNotebookContext();
 
 
 class LogNotebookPanel extends NotebookPanel {
@@ -95,15 +94,13 @@ describe('notebook/notebook/panel', () => {
 
   let context: Context<INotebookModel>;
 
-  beforeEach((done) => {
-    contextPromise.then(c => {
-      context = c;
-      done();
-    });
+  beforeEach(() => {
+    context = createNotebookContext();
   });
 
   after(() => {
     context.kernel.shutdown();
+    context.dispose();
   });
 
   describe('NotebookPanel', () => {
