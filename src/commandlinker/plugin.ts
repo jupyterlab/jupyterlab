@@ -9,7 +9,7 @@ import {
 
 import {
   CommandLinker, ICommandLinker
-} from './linker';
+} from './commandlinker';
 
 
 /**

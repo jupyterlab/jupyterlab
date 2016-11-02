@@ -5,4 +5,4 @@
 
 export {
   ICommandLinker
-} from './linker';
+} from './commandlinker';

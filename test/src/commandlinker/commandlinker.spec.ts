@@ -9,10 +9,10 @@ import {
 
 import {
   CommandLinker
-} from '../../../lib/commandlinker/linker';
+} from '../../../lib/commandlinker/commandlinker';
 
 
-describe('linker/linker', () => {
+describe('commandlinker/commandlinker', () => {
 
   describe('CommandLinker', () => {
 
