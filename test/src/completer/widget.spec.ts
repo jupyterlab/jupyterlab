@@ -30,8 +30,6 @@ const ITEM_CLASS = 'jp-Completer-item';
 
 const ACTIVE_CLASS = 'jp-mod-active';
 
-const MAX_HEIGHT = 200;
-
 
 class CustomRenderer extends CompleterWidget.Renderer {
   createItemNode(item: ICompleterItem): HTMLLIElement {
