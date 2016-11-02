@@ -265,11 +265,11 @@ class NotebookPanel extends Widget {
     if (model) {
       model.cells.clearUndo();
     }
-    if (!sender.kernel && model) {
+    if (!sender.kernel && model && sender.specs) {
       let name = findKernel(
         model.defaultKernelName,
         model.defaultKernelLanguage,
-        sender.kernelspecs
+        sender.specs
       );
       sender.changeKernel({ name });
     }
@@ -340,13 +340,13 @@ class NotebookPanel extends Widget {
    * Update the kernel spec.
    */
   private _updateSpec(kernel: Kernel.IKernel): void {
-    let specs = this.context.kernelspecs;
-    let spec = specs.kernelspecs[kernel.name];
-    let specCursor = this.model.getMetadata('kernelspec');
-    specCursor.setValue({
-      name: kernel.name,
-      display_name: spec.display_name,
-      language: spec.language
+    kernel.spec().then(spec => {
+      let specCursor = this.model.getMetadata('kernelspec');
+      specCursor.setValue({
+        name: kernel.name,
+        display_name: spec.display_name,
+        language: spec.language
+      });
     });
   }
 

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents
+  Contents, Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -669,12 +669,16 @@ class DirListing extends Widget {
 
     // Handle notebook session statuses.
     let paths = toArray(map(items, item => item.path));
-    let specs = this._model.kernelspecs;
     each(this._model.sessions(), session => {
       let index = indexOf(paths, session.notebook.path);
       let node = nodes.at(index);
       node.classList.add(RUNNING_CLASS);
-      node.title = specs.kernelspecs[session.kernel.name].display_name;
+      let name = session.kernel.name;
+      let specs = this._model.specs;
+      if (specs) {
+        name = specs.kernelspecs[name].display_name;
+      }
+      node.title = name;
     });
 
     this._prevPath = this._model.path;

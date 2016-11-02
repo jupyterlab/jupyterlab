@@ -204,7 +204,7 @@ class OpenWithHandler extends Widget {
     let preference = this._manager.registry.getKernelPreference(
       this._ext, widgetName
     );
-    let specs = this._manager.kernelspecs;
+    let specs = this._manager.specs;
     let sessions = this._manager.sessions();
     Private.updateKernels(this.kernelDropdownNode,
       { preference, specs, sessions }
@@ -313,7 +313,7 @@ class CreateFromHandler extends Widget {
     // Handle the kernel preferences.
     let preference = registry.getKernelPreference(ext, widgetName);
     if (preference.canStartKernel) {
-      let specs = this._manager.kernelspecs;
+      let specs = this._manager.specs;
       let sessions = this._manager.sessions();
       let preferredKernel = kernelName;
       Private.updateKernels(this.kernelDropdownNode,
@@ -542,7 +542,7 @@ class CreateNewHandler extends Widget {
     let widgetName = this.widgetDropdown.value;
     let manager = this._manager;
     let preference = manager.registry.getKernelPreference(ext, widgetName);
-    let specs = manager.kernelspecs;
+    let specs = manager.specs;
     let sessions = manager.sessions();
     Private.updateKernels(this.kernelDropdownNode,
       { preference, sessions, specs }
@@ -619,13 +619,19 @@ namespace Private {
       node.disabled = true;
       return;
     }
+    // Bail if there are no kernel specs.
+    if (!specs) {
+      return;
+    }
     let preferredLanguage = preference.language;
     node.disabled = false;
+
     populateKernels(node,
       { specs, sessions, preferredLanguage, preferredKernel }
     );
+
     // Select the "null" valued kernel if we do not prefer a kernel.
-    if (!preference.preferKernel) {
+    if (!preference.preferKernel && !specs) {
       node.value = 'null';
     }
   }

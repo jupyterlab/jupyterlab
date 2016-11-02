@@ -6,10 +6,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  find
-} from 'phosphor/lib/algorithm/searching';
-
-import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -120,7 +116,6 @@ interface ICreateConsoleArgs extends JSONObject {
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): IConsoleTracker {
   let manager = services.sessions;
-  let specs = services.kernelspecs;
 
   let { commands, keymap } = app;
   let category = 'Console';
@@ -305,18 +300,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     }
     let options = {
       name,
-      specs,
+      specs: manager.specs,
       sessions: manager.running(),
       preferredLanguage: args.preferredLanguage || '',
       host: document.body
     };
     return selectKernel(options);
-  }
-
-  let displayNameMap: { [key: string]: string } = Object.create(null);
-  for (let kernelName in specs.kernelspecs) {
-    let displayName = specs.kernelspecs[kernelName].display_name;
-    displayNameMap[kernelName] = displayName;
   }
 
   let id = 0; // The ID counter for notebook panels.
@@ -330,7 +319,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       rendermime: rendermime.clone(),
       renderer: renderer
     });
-    let displayName = displayNameMap[session.kernel.name];
+    let displayName = session.kernel.name;
+    if (manager.specs) {
+      displayName = manager.specs.kernelspecs[displayName].display_name;
+    }
     let captionOptions: Private.ICaptionOptions = {
       label: name,
       displayName,
@@ -351,9 +343,11 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     });
     // Update the caption of the tab when the kernel changes.
     panel.content.session.kernelChanged.connect(() => {
-      let name = panel.content.session.kernel.name;
-      name = specs.kernelspecs[name].display_name;
-      captionOptions.displayName = name;
+      let newName = panel.content.session.kernel.name;
+      if (manager.specs) {
+        newName = manager.specs.kernelspecs[name].display_name;
+      }
+      captionOptions.displayName = newName;
       captionOptions.connected = new Date();
       captionOptions.executed = null;
       panel.title.caption = Private.caption(captionOptions);
@@ -375,12 +369,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let widget = current.content;
       let session = widget.session;
       let lang = '';
-      if (session.kernel) {
-        lang = specs.kernelspecs[session.kernel.name].language;
+      if (session.kernel && manager.specs) {
+        lang = manager.specs.kernelspecs[session.kernel.name].language;
       }
       let options = {
         name: widget.parent.title.label,
-        specs,
+        specs: manager.specs,
         sessions: manager.running(),
         preferredLanguage: lang,
         kernel: session.kernel.model,

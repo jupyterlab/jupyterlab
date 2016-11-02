@@ -67,13 +67,6 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get the kernel spec models for the manager.
-   */
-  get kernelspecs(): Kernel.ISpecModels {
-    return this._serviceManager.kernelspecs;
-  }
-
-  /**
    * Get the registry used by the manager.
    */
   get registry(): DocumentRegistry {
@@ -100,6 +93,13 @@ class DocumentManager implements IDisposable {
     });
     this._contexts.clear();
     this._widgetManager = null;
+  }
+
+  /**
+   * Get the kernel spec models.
+   */
+  get specs(): Kernel.ISpecModels | null {
+    return this._serviceManager.sessions.specs;
   }
 
   /**

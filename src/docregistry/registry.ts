@@ -630,14 +630,14 @@ namespace DocumentRegistry {
     readonly contentsModel: Contents.IModel;
 
     /**
-     * Get the kernel spec information.
-     */
-    readonly kernelspecs: Kernel.ISpecModels;
-
-    /**
      * Test whether the context is fully populated.
      */
     readonly isPopulated: boolean;
+
+    /**
+     * Get the kernel spec models.
+     */
+    readonly specs: Kernel.ISpecModels | null;
 
     /**
      * Change the current kernel associated with the document.

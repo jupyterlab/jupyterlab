@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ServiceManager, Session, TerminalSession
+  Kernel, ServiceManager, Session, TerminalSession
 } from '@jupyterlab/services';
 
 import {
@@ -166,6 +166,7 @@ class RunningSessions extends Widget {
 
     terminals.runningChanged.connect(this._onTerminalsChanged, this);
     sessions.runningChanged.connect(this._onSessionsChanged, this);
+    sessions.specsChanged.connect(this.update, this);
 
     this._onTerminalsChanged(terminals, terminals.running());
     this._onSessionsChanged(sessions, sessions.running());
@@ -254,7 +255,6 @@ class RunningSessions extends Widget {
     let sessionSection = findElement(this.node, SESSIONS_CLASS);
     let sessionList = findElement(sessionSection, LIST_CLASS);
     let renderer = this._renderer;
-    let kernelspecs = this._manager.kernelspecs.kernelspecs;
 
     // Remove any excess item nodes.
     while (termList.children.length > this._runningTerminals.length) {
@@ -283,7 +283,11 @@ class RunningSessions extends Widget {
     });
     each(enumerate(this._runningSessions), ([index, value]) => {
       let node = sessionList.children[index] as HTMLLIElement;
-      let kernelName = kernelspecs[value.kernel.name].display_name;
+      let kernelName = value.kernel.name;
+      let specs = this._manager.sessions.specs;
+      if (specs) {
+        kernelName = specs.kernelspecs[kernelName].display_name;
+      }
       renderer.updateSessionNode(node, value, kernelName);
     });
   }
@@ -359,6 +363,7 @@ class RunningSessions extends Widget {
 
   private _manager: ServiceManager.IManager = null;
   private _renderer: RunningSessions.IRenderer = null;
+  private _specs: Kernel.ISpecModels = null;
   private _runningSessions = new Vector<Session.IModel>();
   private _runningTerminals = new Vector<TerminalSession.IModel>();
 }

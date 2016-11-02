@@ -117,13 +117,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * Get the kernel spec information.
-   */
-  get kernelspecs(): Kernel.ISpecModels {
-    return this._manager.kernelspecs;
-  }
-
-  /**
    * Test whether the context is fully populated.
    */
   get isPopulated(): boolean {
@@ -165,6 +158,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         this._session = null;
       });
     }
+  }
+
+  /**
+   * Get the kernel spec models.
+   */
+  get specs(): Kernel.ISpecModels | null {
+    return this._manager.sessions.specs;
   }
 
   /**

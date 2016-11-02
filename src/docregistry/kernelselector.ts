@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  showDialog
+  okButton, showDialog
 } from '../dialog';
 
 import {
@@ -129,9 +129,16 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
  */
 export
 function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, host?: HTMLElement): Promise<void> {
+  if (!context.specs) {
+    return showDialog({
+      title: 'No Kernel Information',
+      body: 'Kernel Information Is Not Ready',
+      buttons: [okButton]
+    });
+  }
   let options: IKernelSelection = {
     name: context.path.split('/').pop(),
-    specs: context.kernelspecs,
+    specs: context.specs,
     sessions: context.sessions(),
     preferredLanguage: context.model.defaultKernelLanguage,
     kernel: context.kernel.model,

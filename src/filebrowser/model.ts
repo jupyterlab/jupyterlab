@@ -85,10 +85,10 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   }
 
   /**
-   * Get the kernel specs.
+   * Get the kernel spec models.
    */
-  get kernelspecs(): Kernel.ISpecModels {
-    return this._manager.kernelspecs;
+  get specs(): Kernel.ISpecModels | null {
+    return this._manager.sessions.specs;
   }
 
   /**
