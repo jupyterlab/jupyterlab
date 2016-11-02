@@ -249,7 +249,7 @@ class CommandLinker implements ICommandLinker, IDisposable {
           args = JSON.parse(argsValue);
         }
         this._commands.execute(command, args);
-        break;
+        return;
       }
       target = target.parentElement;
     }
