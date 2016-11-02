@@ -108,7 +108,6 @@ describe('console/panel', () => {
         expect(panel.methods).to.not.contain('onActivateRequest');
         Widget.attach(panel, document.body);
         requestAnimationFrame(() => {
-          expect(panel.content.prompt.editor.hasFocus()).to.be(false);
           panel.activate();
           requestAnimationFrame(() => {
             expect(panel.methods).to.contain('onActivateRequest');
