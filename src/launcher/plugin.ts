@@ -6,6 +6,10 @@ import {
 } from '../application';
 
 import {
+  ICommandLinker
+} from '../commandlinker';
+
+import {
   ICommandPalette
 } from '../commandpalette';
 
@@ -28,7 +32,7 @@ import {
 export
 const launcherProvider: JupyterLabPlugin<ILauncher> = {
   id: 'jupyter.services.launcher',
-  requires: [IServiceManager, IPathTracker, ICommandPalette],
+  requires: [IServiceManager, IPathTracker, ICommandPalette, ICommandLinker],
   provides: ILauncher,
   activate: activateLauncher,
   autoStart: true
@@ -38,14 +42,14 @@ const launcherProvider: JupyterLabPlugin<ILauncher> = {
 /**
  * Activate the launcher.
  */
-function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette): ILauncher {
-  let model = new LauncherModel({ commands: app.commands });
+function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette, linker: ICommandLinker): ILauncher {
+  let model = new LauncherModel();
 
   // Set launcher path and track the path as it changes.
   model.path = pathTracker.path;
   pathTracker.pathChanged.connect(() => { model.path = pathTracker.path; });
 
-  let widget = new LauncherWidget();
+  let widget = new LauncherWidget({ linker });
 
   widget.model = model;
   widget.id = 'launcher';
