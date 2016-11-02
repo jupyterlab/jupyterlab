@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, Kernel, Session
+  Contents, Kernel, ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -635,9 +635,9 @@ namespace DocumentRegistry {
     readonly isPopulated: boolean;
 
     /**
-     * Get the kernel spec models.
+     * The service manager used by the context.
      */
-    readonly specs: Kernel.ISpecModels | null;
+    readonly services: ServiceManager.IManager;
 
     /**
      * Change the current kernel associated with the document.
@@ -696,13 +696,6 @@ namespace DocumentRegistry {
      *    the file.
      */
     listCheckpoints(): Promise<Contents.ICheckpointModel[]>;
-
-    /**
-     * Create an iterator over the running sessions.
-     *
-     * @returns A new iterator over the running sessions.
-     */
-    sessions(): IIterable<Session.IModel>;
 
     /**
      * Resolve a url to a correct server path.

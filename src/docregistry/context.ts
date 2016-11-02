@@ -161,10 +161,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * Get the kernel spec models.
+   * The service manager used by the context.
    */
-  get specs(): Kernel.ISpecModels | null {
-    return this._manager.sessions.specs;
+  get services(): ServiceManager.IManager {
+    return this._manager;
   }
 
   /**
@@ -329,15 +329,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   listCheckpoints(): Promise<Contents.ICheckpointModel[]> {
     return this._manager.contents.listCheckpoints(this._path);
-  }
-
-  /**
-   * Create an iterator over the running sessions.
-   *
-   * @returns A new iterator over the running sessions.
-   */
-  sessions(): IIterable<Session.IModel> {
-    return this._manager.sessions.running();
   }
 
   /**

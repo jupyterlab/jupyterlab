@@ -167,7 +167,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     widgetName: 'Notebook'
   });
 
-  addCommands(app);
+  addCommands(app, services);
   populatePalette(palette);
 
   let id = 0; // The ID counter for notebook panels.
@@ -191,7 +191,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 /**
  * Add the notebook commands to the application's command registry.
  */
-function addCommands(app: JupyterLab): void {
+function addCommands(app: JupyterLab, services: IServiceManager): void {
   let commands = app.commands;
 
   commands.addCommand(cmdIds.runAndAdvance, {

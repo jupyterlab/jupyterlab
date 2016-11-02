@@ -34,7 +34,7 @@ import {
 } from '../../common/interfaces';
 
 import {
-  DocumentRegistry, findKernel
+  DocumentRegistry, findKernel, selectKernelForContext
 } from '../../docregistry';
 
 import {
@@ -259,19 +259,26 @@ class NotebookPanel extends Widget {
   /**
    * Handle a context population.
    */
-  protected onPopulated(sender: DocumentRegistry.IContext<INotebookModel>, args: void): void {
-    let model = sender.model;
+  protected onPopulated(context: DocumentRegistry.IContext<INotebookModel>, args: void): void {
+    let model = context.model;
     // Clear the undo state of the cells.
     if (model) {
       model.cells.clearUndo();
     }
-    if (!sender.kernel && model && sender.specs) {
-      let name = findKernel(
-        model.defaultKernelName,
-        model.defaultKernelLanguage,
-        sender.specs
-      );
-      sender.changeKernel({ name });
+    if (!context.kernel && model) {
+      if (context.services.sessions.specs) {
+        let name = findKernel(
+          model.defaultKernelName,
+          model.defaultKernelLanguage,
+          context.services.sessions.specs
+        );
+        if (name) {
+          context.changeKernel({ name });
+          return;
+        }
+      }
+      // Fall back on using a kernel selection.
+      selectKernelForContext(context);
     }
   }
 

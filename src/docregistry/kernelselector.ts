@@ -129,22 +129,18 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
  */
 export
 function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, host?: HTMLElement): Promise<void> {
-  if (!context.specs) {
-    return showDialog({
-      title: 'No Kernel Information',
-      body: 'Kernel Information Is Not Ready',
-      buttons: [okButton]
-    });
-  }
-  let options: IKernelSelection = {
-    name: context.path.split('/').pop(),
-    specs: context.specs,
-    sessions: context.sessions(),
-    preferredLanguage: context.model.defaultKernelLanguage,
-    kernel: context.kernel.model,
-    host
-  };
-  return selectKernel(options).then(kernel => {
+  // Make sure we have the latest specs.
+  return context.services.sessions.fetchSpecs().then(specs => {
+    let options: IKernelSelection = {
+      name: context.path.split('/').pop(),
+      specs,
+      sessions: context.services.sessions.running(),
+      preferredLanguage: context.model.defaultKernelLanguage,
+      kernel: context.kernel.model,
+      host
+    };
+    return selectKernel(options);
+  }).then(kernel => {
     if (kernel) {
       context.changeKernel(kernel);
     }

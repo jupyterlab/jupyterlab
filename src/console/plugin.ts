@@ -369,18 +369,21 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let widget = current.content;
       let session = widget.session;
       let lang = '';
-      if (session.kernel && manager.specs) {
-        lang = manager.specs.kernelspecs[session.kernel.name].language;
-      }
-      let options = {
-        name: widget.parent.title.label,
-        specs: manager.specs,
-        sessions: manager.running(),
-        preferredLanguage: lang,
-        kernel: session.kernel.model,
-        host: widget.parent.node
-      };
-      return selectKernel(options).then(kernelId => {
+      // Make sure we have the latest kernel specs
+      manager.fetchSpecs().then(specs => {
+        if (session.kernel) {
+          lang = manager.specs.kernelspecs[session.kernel.name].language;
+        }
+        let options = {
+          name: widget.parent.title.label,
+          specs,
+          sessions: manager.running(),
+          preferredLanguage: lang,
+          kernel: session.kernel.model,
+          host: widget.parent.node
+        };
+        return selectKernel(options);
+      }).then(kernelId => {
         // If the user cancels, kernelId will be void and should be ignored.
         if (kernelId) {
           session.changeKernel(kernelId);
