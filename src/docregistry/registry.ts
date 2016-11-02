@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterator, each, empty, map
+  IIterator, IIterable, each, map
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -698,9 +698,11 @@ namespace DocumentRegistry {
     listCheckpoints(): Promise<Contents.ICheckpointModel[]>;
 
     /**
-     * Get the list of running sessions.
+     * Create an iterator over the running sessions.
+     *
+     * @returns A new iterator over the running sessions.
      */
-    listSessions(): Promise<Session.IModel[]>;
+    sessions(): IIterable<Session.IModel>;
 
     /**
      * Resolve a url to a correct server path.

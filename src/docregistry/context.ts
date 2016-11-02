@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  IIterable
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -53,32 +57,33 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let lang = this._factory.preferredLanguage(ext);
     this._model = this._factory.createNew(lang);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
+    manager.contents.fileChanged.connect(this._onFileChanged, this);
   }
 
   /**
    * A signal emitted when the kernel changes.
    */
-  kernelChanged: ISignal<DocumentRegistry.IContext<T>, Kernel.IKernel>;
+  kernelChanged: ISignal<this, Kernel.IKernel>;
 
   /**
    * A signal emitted when the path changes.
    */
-  pathChanged: ISignal<DocumentRegistry.IContext<T>, string>;
+  pathChanged: ISignal<this, string>;
 
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  fileChanged: ISignal<DocumentRegistry.IContext<T>, Contents.IModel>;
+  fileChanged: ISignal<this, Contents.IModel>;
 
   /**
    * A signal emitted when the context is fully populated for the first time.
    */
-  populated: ISignal<DocumentRegistry.IContext<T>, void>;
+  populated: ISignal<this, void>;
 
   /**
    * A signal emitted when the context is disposed.
    */
-  disposed: ISignal<DocumentRegistry.IContext<T>, void>;
+  disposed: ISignal<this, void>;
 
   /**
    * Get the model associated with the document.
@@ -240,7 +245,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       if (!newPath) {
         return;
       }
-      this.setPath(newPath);
+      this._path = newPath;
       let session = this._session;
       if (session) {
         let options: Session.IOptions = {
@@ -327,10 +332,12 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * Get the list of running sessions.
+   * Create an iterator over the running sessions.
+   *
+   * @returns A new iterator over the running sessions.
    */
-  listSessions(): Promise<Session.IModel[]> {
-    return this._manager.sessions.listRunning();
+  sessions(): IIterable<Session.IModel> {
+    return this._manager.sessions.running();
   }
 
   /**
@@ -360,21 +367,19 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * Set the path of the context.
-   *
-   * #### Notes
-   * This is not part of the `IContext` API and
-   * is not intended to be called by the user.
-   * It is assumed that the file has been renamed on the
-   * contents manager prior to this operation.
+   * Handle a change on the contents manager.
    */
-  setPath(value: string): void {
-    this._path = value;
-    let session = this._session;
-    if (session) {
-      session.rename(value);
+  private _onFileChanged(sender: Contents.IManager, change: Contents.IChangedArgs): void {
+    if (change.type !== 'rename') {
+      return;
     }
-    this.pathChanged.emit(value);
+    if (change.oldValue.path === this._path) {
+      let path = this._path = change.newValue.path;
+      if (this._session) {
+        this._session.rename(path);
+      }
+      this.pathChanged.emit(path);
+    }
   }
 
   /**
@@ -389,7 +394,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       this.kernelChanged.emit(session.kernel);
       session.pathChanged.connect((s, path) => {
         if (path !== this._path) {
-          this.setPath(path);
+          this._path = path;
+          this.pathChanged.emit(path);
         }
       });
       session.kernelChanged.connect((s, kernel) => {

@@ -107,7 +107,7 @@ class CellCompleterHandler implements IDisposable {
     };
     let pending = ++this._pending;
 
-    return this._kernel.complete(content).then(msg => {
+    return this._kernel.requestComplete(content).then(msg => {
       this.onReply(pending, request, msg);
     });
   }

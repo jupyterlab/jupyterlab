@@ -235,7 +235,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           name = session.path.split('/').pop();
           name = `Console ${name.match(CONSOLE_REGEX)[1]}`;
           createConsole(session, name);
-          manager.listRunning();  // Trigger a refresh.
           return session.id;
         });
       }
@@ -261,7 +260,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         };
         return manager.startNew(options).then(session => {
           createConsole(session, name);
-          manager.listRunning();  // Trigger a refresh.
           return session.id;
         });
       });
@@ -305,16 +303,14 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     if (args.kernel) {
       return Promise.resolve(args.kernel);
     }
-    return manager.listRunning().then((sessions: Session.IModel[]) => {
-      let options = {
-        name,
-        specs,
-        sessions,
-        preferredLanguage: args.preferredLanguage || '',
-        host: document.body
-      };
-      return selectKernel(options);
-    });
+    let options = {
+      name,
+      specs,
+      sessions: manager.running(),
+      preferredLanguage: args.preferredLanguage || '',
+      host: document.body
+    };
+    return selectKernel(options);
   }
 
   let displayNameMap: { [key: string]: string } = Object.create(null);
@@ -382,17 +378,15 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (session.kernel) {
         lang = specs.kernelspecs[session.kernel.name].language;
       }
-      manager.listRunning().then((sessions: Session.IModel[]) => {
-        let options = {
-          name: widget.parent.title.label,
-          specs,
-          sessions,
-          preferredLanguage: lang,
-          kernel: session.kernel.model,
-          host: widget.parent.node
-        };
-        return selectKernel(options);
-      }).then((kernelId: Kernel.IModel) => {
+      let options = {
+        name: widget.parent.title.label,
+        specs,
+        sessions: manager.running(),
+        preferredLanguage: lang,
+        kernel: session.kernel.model,
+        host: widget.parent.node
+      };
+      return selectKernel(options).then(kernelId => {
         // If the user cancels, kernelId will be void and should be ignored.
         if (kernelId) {
           session.changeKernel(kernelId);

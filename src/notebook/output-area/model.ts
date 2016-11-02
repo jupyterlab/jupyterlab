@@ -191,7 +191,7 @@ class OutputAreaModel implements IDisposable {
     };
     this.clear();
     return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
-      let future = kernel.execute(content);
+      let future = kernel.requestExecute(content);
       // Handle published messages.
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
         let msgType = msg.header.msg_type;

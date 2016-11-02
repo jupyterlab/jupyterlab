@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  IterableOrArrayLike, each
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -59,13 +59,11 @@ function createFromDialog(model: FileBrowserModel, manager: DocumentManager, cre
 export
 function openWithDialog(path: string, manager: DocumentManager, host?: HTMLElement): Promise<Widget> {
   let handler: OpenWithHandler;
-  return manager.listSessions().then(sessions => {
-    handler = new OpenWithHandler(path, manager, sessions);
-    return showDialog({
-      title: 'Open File',
-      body: handler.node,
-      okText: 'OPEN'
-    });
+  handler = new OpenWithHandler(path, manager);
+  return showDialog({
+    title: 'Open File',
+    body: handler.node,
+    okText: 'OPEN'
   }).then(result => {
     if (result.text === 'OPEN') {
       return handler.open();
@@ -80,14 +78,12 @@ function openWithDialog(path: string, manager: DocumentManager, host?: HTMLEleme
 export
 function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host?: HTMLElement): Promise<Widget> {
   let handler: CreateNewHandler;
-  return manager.listSessions().then(sessions => {
-    handler = new CreateNewHandler(model, manager, sessions);
-    return showDialog({
-      title: 'Create New File',
-      host,
-      body: handler.node,
-      okText: 'CREATE'
-    });
+  handler = new CreateNewHandler(model, manager);
+  return showDialog({
+    title: 'Create New File',
+    host,
+    body: handler.node,
+    okText: 'CREATE'
   }).then(result => {
     if (result.text === 'CREATE') {
       return handler.open();
@@ -132,11 +128,9 @@ class OpenWithHandler extends Widget {
   /**
    * Construct a new "open with" dialog.
    */
-  constructor(path: string, manager: DocumentManager, sessions: Session.IModel[], host?: HTMLElement) {
+  constructor(path: string, manager: DocumentManager) {
     super({ node: Private.createOpenWithNode() });
     this._manager = manager;
-    this._host = host;
-    this._sessions = sessions;
 
     this.inputNode.textContent = path;
     this._ext = path.split('.').pop();
@@ -149,9 +143,7 @@ class OpenWithHandler extends Widget {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    this._host = null;
     this._manager = null;
-    this._sessions = null;
     super.dispose();
   }
 
@@ -213,7 +205,7 @@ class OpenWithHandler extends Widget {
       this._ext, widgetName
     );
     let specs = this._manager.kernelspecs;
-    let sessions = this._sessions;
+    let sessions = this._manager.sessions();
     Private.updateKernels(this.kernelDropdownNode,
       { preference, specs, sessions }
     );
@@ -221,8 +213,6 @@ class OpenWithHandler extends Widget {
 
   private _ext = '';
   private _manager: DocumentManager = null;
-  private _host: HTMLElement = null;
-  private _sessions: Session.IModel[] = null;
 }
 
 
@@ -324,7 +314,7 @@ class CreateFromHandler extends Widget {
     let preference = registry.getKernelPreference(ext, widgetName);
     if (preference.canStartKernel) {
       let specs = this._manager.kernelspecs;
-      let sessions = this._sessions;
+      let sessions = this._manager.sessions();
       let preferredKernel = kernelName;
       Private.updateKernels(this.kernelDropdownNode,
         { specs, sessions, preferredKernel, preference }
@@ -333,10 +323,7 @@ class CreateFromHandler extends Widget {
       this.node.removeChild(this.kernelDropdownNode);
     }
 
-    return manager.listSessions().then(sessions => {
-      this._sessions = sessions;
-      return model.newUntitled({ ext, type });
-    }).then((contents: Contents.IModel) => {
+    return model.newUntitled({ ext, type }).then(contents => {
       this.inputNode.value = contents.name;
       this._orig = contents;
     });
@@ -372,7 +359,6 @@ class CreateFromHandler extends Widget {
   private _widgetName: string;
   private _orig: Contents.IModel = null;
   private _manager: DocumentManager;
-  private _sessions: Session.IModel[] = [];
 }
 
 
@@ -383,11 +369,10 @@ class CreateNewHandler extends Widget {
   /**
    * Construct a new "create new" dialog.
    */
-  constructor(model: FileBrowserModel, manager: DocumentManager, sessions: Session.IModel[]) {
+  constructor(model: FileBrowserModel, manager: DocumentManager) {
     super({ node: Private.createCreateNewNode() });
     this._model = model;
     this._manager = manager;
-    this._sessions = sessions;
 
     // Create a file name based on the current time.
     let time = new Date();
@@ -418,7 +403,6 @@ class CreateNewHandler extends Widget {
    */
   dispose(): void {
     this._model = null;
-    this._sessions = null;
     this._manager = null;
     super.dispose();
   }
@@ -556,9 +540,10 @@ class CreateNewHandler extends Widget {
   protected widgetDropdownChanged(): void {
     let ext = this.ext;
     let widgetName = this.widgetDropdown.value;
-    let preference = this._manager.registry.getKernelPreference(ext, widgetName);
-    let specs = this._manager.kernelspecs;
-    let sessions = this._sessions;
+    let manager = this._manager;
+    let preference = manager.registry.getKernelPreference(ext, widgetName);
+    let specs = manager.kernelspecs;
+    let sessions = manager.sessions();
     Private.updateKernels(this.kernelDropdownNode,
       { preference, sessions, specs }
     );
@@ -566,7 +551,6 @@ class CreateNewHandler extends Widget {
 
   private _model: FileBrowserModel = null;
   private _manager: DocumentManager = null;
-  private _sessions: Session.IModel[] = null;
   private _sentinal = 'UNKNOWN_EXTENSION';
   private _prevExt = '';
   private _extensions: string[] = [];
@@ -664,7 +648,7 @@ namespace Private {
     /**
      * The running sessions.
      */
-    sessions: Session.IModel[];
+    sessions: IterableOrArrayLike<Session.IModel>;
 
     /**
      * The preferred kernel name.

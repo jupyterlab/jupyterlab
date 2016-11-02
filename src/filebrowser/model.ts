@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterator, each
+  IterableOrArrayLike, IIterator, each
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -46,6 +46,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     this._manager = options.manager;
     this._model = { path: '', name: '/', type: 'directory' };
     this.cd();
+    this._manager.contents.fileChanged.connect(this._onFileChanged, this);
     this._manager.sessions.runningChanged.connect(this._onRunningChanged, this);
   }
 
@@ -55,14 +56,19 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   pathChanged: ISignal<this, IChangedArgs<string>>;
 
   /**
-   * Get the refreshed signal.
+   * A signal emitted when the directory listing is refreshed.
    */
   refreshed: ISignal<this, void>;
 
   /**
+   * A signal emitted when the running sessions in the directory changes.
+   */
+  sessionsChanged: ISignal<this, void>;
+
+  /**
    * Get the file path changed signal.
    */
-  fileChanged: ISignal<this, IChangedArgs<Contents.IModel>>;
+  fileChanged: ISignal<this, Contents.IChangedArgs>;
 
   /**
    * Get the current path.
@@ -145,12 +151,6 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     this._pending = manager.contents.get(newValue, options).then(contents => {
       this._handleContents(contents);
       this._pendingPath = null;
-      return manager.sessions.listRunning();
-    }).then(models => {
-      if (this.isDisposed) {
-        return;
-      }
-      this._onRunningChanged(manager.sessions, models);
       if (oldValue !== newValue) {
         this.pathChanged.emit({
           name: 'path',
@@ -158,6 +158,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
           newValue
         });
       }
+      this._onRunningChanged(manager.sessions, manager.sessions.running());
       this.refreshed.emit(void 0);
     });
     return this._pending;
@@ -191,14 +192,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     let normalizePath = Private.normalizePath;
     fromFile = normalizePath(this._model.path, fromFile);
     toDir = normalizePath(this._model.path, toDir);
-    return this._manager.contents.copy(fromFile, toDir).then(contents => {
-      this.fileChanged.emit({
-        name: 'file',
-        oldValue: void 0,
-        newValue: contents
-      });
-      return contents;
-    });
+    return this._manager.contents.copy(fromFile, toDir);
   }
 
   /**
@@ -211,13 +205,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   deleteFile(path: string): Promise<void> {
     let normalizePath = Private.normalizePath;
     path = normalizePath(this._model.path, path);
-    return this._manager.contents.delete(path).then(() => {
-      this.fileChanged.emit({
-        name: 'file',
-        oldValue: { path: path },
-        newValue: void 0
-      });
-    });
+    return this._manager.contents.delete(path);
   }
 
   /**
@@ -248,16 +236,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       options.ext = options.ext || '.txt';
     }
     options.path = options.path || this._model.path;
-
-    let promise = this._manager.contents.newUntitled(options);
-    return promise.then((contents: Contents.IModel) => {
-      this.fileChanged.emit({
-        name: 'file',
-        oldValue: void 0,
-        newValue: contents
-      });
-      return contents;
-    });
+    return this._manager.contents.newUntitled(options);
   }
 
   /**
@@ -274,15 +253,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     path = Private.normalizePath(this._model.path, path);
     newPath = Private.normalizePath(this._model.path, newPath);
 
-    let promise = this._manager.contents.rename(path, newPath);
-    return promise.then((contents: Contents.IModel) => {
-      this.fileChanged.emit({
-        name: 'file',
-        oldValue: {type: contents.type , path: path},
-        newValue: contents
-      });
-      return contents;
-    });
+    return this._manager.contents.rename(path, newPath);
   }
 
   /**
@@ -361,15 +332,9 @@ class FileBrowserModel implements IDisposable, IPathTracker {
           content: Private.getContent(reader)
         };
 
-        let promise = this._manager.contents.save(path, model);
-        promise.then((contents: Contents.IModel) => {
-          this.fileChanged.emit({
-            name: 'file',
-            oldValue: void 0,
-            newValue: contents
-          });
+        this._manager.contents.save(path, model).then(contents => {
           resolve(contents);
-        });
+        }).catch(reject);
       };
 
       reader.onerror = (event: Event) => {
@@ -405,7 +370,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   /**
    * Handle a change to the running sessions.
    */
-  private _onRunningChanged(sender: Session.IManager, models: Session.IModel[]): void {
+  private _onRunningChanged(sender: Session.IManager, models: IterableOrArrayLike<Session.IModel>): void {
     this._sessions.clear();
     each(models, model => {
       if (this._paths.has(model.notebook.path)) {
@@ -413,6 +378,23 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       }
     });
     this.refreshed.emit(void 0);
+  }
+
+  /**
+   * Handle a change on the contents manager.
+   */
+  private _onFileChanged(sender: Contents.IManager, change: Contents.IChangedArgs): void {
+    let path = this._model.path;
+    let value = change.oldValue;
+    if (value && value.path && ContentsManager.dirname(value.path) === path) {
+      this.fileChanged.emit(change);
+      return;
+    }
+    value = change.newValue;
+    if (value && value.path && ContentsManager.dirname(value.path) === path) {
+      this.fileChanged.emit(change);
+      return;
+    }
   }
 
   private _maxUploadSizeMb = 15;

@@ -114,7 +114,9 @@ class ConsoleHistory implements IConsoleHistory {
       return;
     }
 
-    this._kernel.history(Private.initialRequest).then(v => this.onHistory(v));
+    this._kernel.requestHistory(Private.initialRequest).then(v => {
+      this.onHistory(v);
+    });
   }
 
   /**

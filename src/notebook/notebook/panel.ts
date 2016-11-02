@@ -320,15 +320,11 @@ class NotebookPanel extends Widget {
     if (!this.model || !kernel) {
       return;
     }
-    if (kernel.info) {
-      this._updateLanguage(kernel.info.language_info);
-    } else {
-      kernel.kernelInfo().then(msg => {
-        if (this.model) {
-          this._updateLanguage(msg.content.language_info);
-        }
-      });
-    }
+    kernel.info().then(msg => {
+      if (this.model) {
+        this._updateLanguage(msg.language_info);
+      }
+    });
     this._updateSpec(kernel);
   }
 

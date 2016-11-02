@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  IIterable, each
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -165,32 +165,12 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * List the running notebook sessions.
-   */
-  listSessions(): Promise<Session.IModel[]> {
-    return this._serviceManager.sessions.listRunning();
-  }
-
-  /**
-   * Handle the renaming of an open document.
+   * Create an iterator over the running sessions.
    *
-   * @param oldPath - The previous path.
-   *
-   * @param newPath - The new path.
+   * @returns A new iterator over the running sessions.
    */
-  handleRename(oldPath: string, newPath: string): void {
-    each(this._contexts, context => {
-      if (context.path === oldPath) {
-        context.setPath(newPath);
-      }
-    });
-  }
-
-  /**
-   * Handle a file deletion.
-   */
-  handleDelete(path: string): void {
-    // TODO: Leave all of the widgets open and flag them as orphaned?
+  sessions(): IIterable<Session.IModel> {
+    return this._serviceManager.sessions.running();
   }
 
   /**
