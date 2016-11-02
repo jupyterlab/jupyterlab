@@ -49,6 +49,11 @@ const TAB = 9;
  */
 const CELL_EDITOR_CLASS = 'jp-CellEditor';
 
+/**
+ * The class name added to read only cell editor widgets.
+ */
+const READ_ONLY_CLASS = 'jp-mod-readOnly';
+
 
 /**
  * A code mirror widget for a cell editor.
@@ -144,8 +149,9 @@ class CodeMirrorCellEditorWidget extends CodeMirrorWidget implements ICellEditor
    * Set whether the editor is read only.
    */
   setReadOnly(readOnly: boolean): void {
-    let option = readOnly ? 'nocursor' : false;
+    let option = readOnly ? true : false;
     this.editor.setOption('readOnly', option);
+    this.toggleClass(READ_ONLY_CLASS, option);
   }
 
   /**

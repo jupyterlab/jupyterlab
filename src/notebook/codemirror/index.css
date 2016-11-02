@@ -42,3 +42,8 @@
 .jp-CodeMirrorWidget, .jp-CodeMirrorWidget-static {
   cursor: text;
 }
+
+
+.jp-CodeMirrorWidget.jp-mod-readOnly .CodeMirror-cursor {
+  display: none;
+}
