@@ -21,17 +21,36 @@ class DragScrollHandler {
   }
 
   /**
-   * Clear the scroll handler.
+   * Handle scrolling for drag events.
+   *
+   * @param event - The drag event.
+   *
+   * #### Notes
+   * This should be called for all handled drag events during a drag operation
+   * on the node.
    */
-  clear(): void {
-    clearInterval(this._scrollInterval);
-    this._isScrolling = false;
+  handleDragEvent(event: IDragEvent) {
+    switch (event.type) {
+    case 'p-dragleave':
+      if (!this._node.contains(event.relatedTarget as HTMLElement)) {
+        this._clear();
+      }
+      break;
+    case 'p-dragover':
+      this._handleDragOver(event);
+      break;
+    case 'p-drop':
+      this._clear();
+      break;
+    default:
+      break;
+    }
   }
 
   /**
-   * Handle scrolling for drag events.
+   * Handle a `'p-dragover'` event.
    */
-  handleDragEvent(event: IDragEvent) {
+  private _handleDragOver(event: IDragEvent) {
     let yPos = event.clientY;
     let node = this._node;
     let rect = node.getBoundingClientRect();
@@ -55,14 +74,14 @@ class DragScrollHandler {
           let prev = node.scrollTop;
           node.scrollTop += this._scrollAmount;
           if (node.scrollTop === prev) {
-            this.clear();
+            this._clear();
           }
        }, 16);
     } else if (distanceFromTop > edgeDistance &&
                distanceFromBottom > edgeDistance &&
                this._isScrolling) {
       // Deactivate scrolling.
-      this.clear();
+      this._clear();
     }
 
     // Step 2: Set scrolling speed.
@@ -77,6 +96,14 @@ class DragScrollHandler {
       let ratio = distance / edgeDistance;
       this._scrollAmount = direction * Math.min(1, 1 - ratio) * maxSpeed;
     }
+  }
+
+  /**
+   * Clear the scroll state.
+   */
+  private _clear(): void {
+    clearInterval(this._scrollInterval);
+    this._isScrolling = false;
   }
 
   private _scrollInterval = -1;
