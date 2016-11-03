@@ -6,12 +6,11 @@
 import glob
 import json
 import os
-import sys
 from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
-
+from ._version import __version__
 
 #-----------------------------------------------------------------------------
 # Module globals
@@ -32,7 +31,6 @@ FILE_LOADER = FileSystemLoader(HERE)
 BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
 EXTENSION_PREFIX = '/labextension'
-__version__ = None
 
 
 def get_labextension_manifest_data_by_folder(folder):

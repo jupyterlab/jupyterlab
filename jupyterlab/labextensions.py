@@ -18,7 +18,7 @@ from jupyter_core.paths import (
 )
 from ipython_genutils.path import ensure_dir_exists
 from ipython_genutils.py3compat import string_types, cast_unicode_py2
-from . import __version__
+from ._version import __version__
 
 from traitlets.config.manager import BaseJSONConfigManager
 from traitlets.utils.importstring import import_item
@@ -26,7 +26,7 @@ from traitlets.utils.importstring import import_item
 from tornado.log import LogFormatter
 
 from . import (
-    get_labextension_manifest_data_by_folder,
+    get_labextension_manifest_data_by_folder, semver
 )
 
 # Constants for pretty print extension listing function.
@@ -477,6 +477,8 @@ def validate_labextension_folder(name, full_dest, logger=None):
 
     hasFiles = True
     hasEntry = False
+    versonCompatible = True
+
     data = get_labextension_manifest_data_by_folder(full_dest)
     for manifest in data.values():
         if ('entry' in manifest and 'modules' in manifest):
@@ -489,18 +491,36 @@ def validate_labextension_folder(name, full_dest, logger=None):
             path = os.path.join(full_dest, fname)
             if not os.path.exists(path):
                 hasFiles = False
-    entry_msg = u"     {} has {} entry point?"
+        # add check here for version compat
+        for (mod, deps) in manifest.get('modules', {}).items():
+            # ignore jupyterlab modules since
+            # they are only semver compatibile with their own version
+            if mod.startswith('jupyterlab@'):
+                continue
+            for dep in deps:
+                if dep.startswith('jupyterlab@'):
+                    dep = dep.split('/')[0].split('@')[-1]
+                    if not semver.satisfies(__version__, dep, False):
+                        versonCompatible = False
+
+    entry_msg = u"     {} has entry point?"
     name = os.path.basename(full_dest)
     if hasEntry:
-        (entry_msg.format(GREEN_OK, name))
+        infos.append(entry_msg.format(GREEN_OK))
     else:
-        warnings.append(entry_msg.format(RED_X, name))
+        warnings.append(entry_msg.format(RED_X))
 
     files_msg = u"     {} has necessary files?"
     if hasFiles:
-        infos.append(files_msg.format(GREEN_OK, name))
+        infos.append(files_msg.format(GREEN_OK))
     else:
-        warnings.append(files_msg.format(RED_X, name))
+        warnings.append(files_msg.format(RED_X))
+
+    version_msg = u"     {} is version compatible?"
+    if versonCompatible:
+        infos.append(version_msg.format(GREEN_ENABLED))
+    else:
+        warnings.append(version_msg.format(RED_X))
 
     post_mortem = u"      {} {} {}"
     if logger:

@@ -4,20 +4,21 @@
 # Distributed under the terms of the Modified BSD License.
 
 from __future__ import print_function
+from distutils import log
 from setuptools import setup, find_packages, Command
 from setuptools.command.sdist import sdist
 from setuptools.command.build_py import build_py
 from setuptools.command.egg_info import egg_info
 from setuptools.command.bdist_egg import bdist_egg
 from subprocess import check_call
+import json
 import os
 import sys
-import platform
-import shutil
 
 here = os.path.dirname(os.path.abspath(__file__))
 extension_root = os.path.join(here, 'jupyterlab')
 is_repo = os.path.exists(os.path.join(here, '.git'))
+
 
 def run(cmd, cwd=None):
     """Run a command
@@ -28,12 +29,13 @@ def run(cmd, cwd=None):
     shell = (sys.platform == 'win32')
     check_call(cmd.split(), shell=shell, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr)
 
-from distutils import log
+
 log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 
 DESCRIPTION = 'An alpha preview of the JupyterLab notebook server extension.'
 LONG_DESCRIPTION = 'This is an alpha preview of JupyterLab. It is not ready for general usage yet. Development happens on https://github.com/jupyter/jupyterlab, with chat on https://gitter.im/jupyter/jupyterlab.'
+
 
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
@@ -119,9 +121,12 @@ class NPM(Command):
         # update package data in case this created new files
         update_package_data(self.distribution)
 
-import json
+
 with open(os.path.join(here, 'package.json')) as f:
     packagejson = json.load(f)
+with open(os.path.join(here, 'jupyterlab', '_version.py'), 'w') as f:
+    f.write('# This file is auto-generated, do not edit!\n')
+    f.write('__version__ = "%s"\n' % packagejson['version'])
 
 setup_args = {
     'name': 'jupyterlab',
