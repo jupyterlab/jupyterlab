@@ -1,227 +1,145 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
+  // Copyright (c) Jupyter Development Team.
+  // Distributed under the terms of the Modified BSD License.
 
-import * as d3Dsv from 'd3-dsv';
+  import {
+    Message
+  } from 'phosphor/lib/core/messaging';
 
-import {
-  Message
-} from 'phosphor/lib/core/messaging';
+  import {
+    PanelLayout
+  } from 'phosphor/lib/ui/panel';
 
-import {
-  PanelLayout
-} from 'phosphor/lib/ui/panel';
+  import {
+    Widget
+  } from 'phosphor/lib/ui/widget';
 
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  import {
+    ABCWidgetFactory, DocumentRegistry
+  } from '../docregistry';
 
-import {
-  ABCWidgetFactory, DocumentRegistry
-} from '../docregistry';
+  import {
+    CSVModel, CSVTable
+  } from './table';
 
-import {
-  CSVTable
-} from './table';
+  import {
+    CSVToolbar
+  } from './toolbar';
 
-
-/**
- * The class name added to a csv widget.
- */
-const CSV_CLASS = 'jp-CSVWidget';
-
-/**
- * The class name added to a csv toolbar widget.
- */
-const CSV_TOOLBAR_CLASS = 'jp-CSVWidget-toolbar';
-
-/**
- * The class name added to a csv toolbar's dropdown element.
- */
-const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVWidget-toolbarDropdown';
-
-/**
- * The class name added to a csv warning widget.
- */
-const CSV_WARNING_CLASS = 'jp-CSVWidget-warning';
-
-/**
- * The hard limit on the number of rows to display.
- */
-const DISPLAY_LIMIT = 1000;
-
-
-/**
- * A widget for csv tables.
- */
-export
-class CSVWidget extends Widget {
-  /**
-   * Construct a new csv table widget.
-   */
-  constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
-    super();
-    this._context = context;
-    this.addClass(CSV_CLASS);
-
-    this.layout = new PanelLayout();
-    this._toolbar = new Widget({ node: createDelimiterSwitcherNode() });
-    this._toolbar.addClass(CSV_TOOLBAR_CLASS);
-    this._table = new CSVTable();
-    this._warning = new Widget();
-    this._warning.addClass(CSV_WARNING_CLASS);
-
-    let layout = this.layout as PanelLayout;
-    layout.addWidget(this._toolbar);
-    layout.addWidget(this._table);
-    layout.addWidget(this._warning);
-
-    let select = this._toolbar.node.getElementsByClassName(
-      CSV_TOOLBAR_DROPDOWN_CLASS)[0] as HTMLSelectElement;
-
-    if (context.model.toString()) {
-      this.update();
-    }
-    context.pathChanged.connect(this.update, this);
-    context.model.contentChanged.connect(this.update, this);
-    context.fileChanged.connect(this.update, this);
-
-    // Change delimiter on a change in the dropdown.
-    select.addEventListener('change', event => {
-      this.delimiter = select.value;
-      this.update();
-    });
-  }
 
   /**
-   * Dispose of the resources used by the widget.
+   * The class name added to a csv widget.
    */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._context = null;
-    super.dispose();
-  }
+  const CSV_CLASS = 'jp-CSVWidget';
 
   /**
-   * Handle `update-request` messages for the widget.
+   * The class name added to a csv warning widget.
    */
-  protected onUpdateRequest(msg: Message): void {
-    this.title.label = this._context.path.split('/').pop();
-    let cm = this._context.contentsModel;
-    if (cm === null) {
-      return;
-    }
-    let content = this._context.model.toString();
-    let delimiter = this.delimiter as string;
-    this.renderTable(content, delimiter);
-  }
+  const CSV_WARNING_CLASS = 'jp-CSVWidget-warning';
+
 
   /**
-   * Render an html table from a csv string.
+   * A widget for csv tables.
    */
-  renderTable(content: string, delimiter: string) {
-    let parsed = d3Dsv.dsvFormat(delimiter).parse(content);
-    let table = document.createElement('table');
-    let header = document.createElement('thead');
-    let body = document.createElement('tbody');
-    for (let name of parsed.columns) {
-      let th = document.createElement('th');
-      th.textContent = name;
-      header.appendChild(th);
+  export
+  class CSVWidget extends Widget {
+    /**
+     * Construct a new csv table widget.
+     */
+    constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
+      super();
+      this._context = context;
+      this.addClass(CSV_CLASS);
+
+      this.layout = new PanelLayout();
+
+      this._table = new CSVTable();
+      this._table.model = new CSVModel({ content: context.model.toString() });
+
+      this._toolbar = new CSVToolbar();
+      this._toolbar.delimiterChanged.connect((sender, delimiter) => {
+        this._table.model.delimiter = delimiter;
+      });
+
+      this._warning = new Widget();
+      this._warning.addClass(CSV_WARNING_CLASS);
+
+      let layout = this.layout as PanelLayout;
+      layout.addWidget(this._toolbar);
+      layout.addWidget(this._table);
+      layout.addWidget(this._warning);
+
+      context.pathChanged.connect(this.update, this);
+      context.model.contentChanged.connect(() => {
+        this._table.model.content = context.model.toString();
+      });
     }
-    for (let row of parsed.slice(0, DISPLAY_LIMIT)) {
-      let tr = document.createElement('tr');
-      for (let col of parsed.columns) {
-        let td = document.createElement('td');
-        td.textContent = row[col];
-        tr.appendChild(td);
+
+    /**
+     * Dispose of the resources used by the widget.
+     */
+    dispose(): void {
+      if (this.isDisposed) {
+        return;
       }
-      body.appendChild(tr);
+      super.dispose();
+      this._table.model.dispose();
+      this._table.dispose();
+      this._toolbar.dispose();
+      this._warning.dispose();
+      this._context = null;
     }
-    let msg =  `Table is too long to render, rendering ${DISPLAY_LIMIT} of ` +
-               `${parsed.length} rows`;
-    if (parsed.length > DISPLAY_LIMIT) {
-      this._warning.node.textContent = msg;
-    } else {
-      this._warning.node.textContent = '';
+
+    /**
+     * Handle `update-request` messages for the widget.
+     */
+    protected onUpdateRequest(msg: Message): void {
+      this.title.label = this._context.path.split('/').pop();
     }
-    table.appendChild(header);
-    table.appendChild(body);
-    this._table.node.textContent = '';
-    this._table.node.appendChild(table);
-  }
 
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this.node.focus();
-  }
-
-  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
-  private delimiter: string = ',';
-  private _toolbar: Widget = null;
-  private _table: Widget = null;
-  private _warning: Widget = null;
-}
-
-
-/**
- * Create the node for the delimiter switcher.
- */
-function createDelimiterSwitcherNode(): HTMLElement {
-  let div = document.createElement('div');
-  let label = document.createElement('span');
-  label.textContent = 'Delimiter:';
-  let select = document.createElement('select');
-  for (let delim of [',', ';', '\t']) {
-    let option = document.createElement('option');
-    option.value = delim;
-    if (delim === '\t') {
-      option.textContent = '\\t';
-    } else {
-      option.textContent = delim;
+    /**
+     * Handle `'activate-request'` messages.
+     */
+    protected onActivateRequest(msg: Message): void {
+      this.node.focus();
     }
-    select.appendChild(option);
-  }
-  select.className = CSV_TOOLBAR_DROPDOWN_CLASS;
-  div.appendChild(label);
-  div.appendChild(select);
-  return div;
-}
 
-
-/**
- * A widget factory for csv tables.
- */
-export
-class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IModel> {
-  /**
-   * The name of the widget to display in dialogs.
-   */
-  get name(): string {
-    return 'Table';
+    private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+    private _toolbar: CSVToolbar = null;
+    private _table: CSVTable = null;
+    private _warning: Widget = null;
   }
+
 
   /**
-   * The file extensions the widget can view.
+   * A widget factory for csv tables.
    */
-  get fileExtensions(): string[] {
-    return ['.csv'];
-  }
+  export
+  class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IModel> {
+    /**
+     * The name of the widget to display in dialogs.
+     */
+    get name(): string {
+      return 'Table';
+    }
 
-  /**
-   * The file extensions for which the factory should be the default.
-   */
-  get defaultFor(): string[] {
-    return ['.csv'];
-  }
+    /**
+     * The file extensions the widget can view.
+     */
+    get fileExtensions(): string[] {
+      return ['.csv'];
+    }
 
-  /**
-   * Create a new widget given a context.
-   */
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): CSVWidget {
-    return new CSVWidget(context);
+    /**
+     * The file extensions for which the factory should be the default.
+     */
+    get defaultFor(): string[] {
+      return ['.csv'];
+    }
+
+    /**
+     * Create a new widget given a context.
+     */
+    protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): CSVWidget {
+      return new CSVWidget(context);
+    }
   }
-}
