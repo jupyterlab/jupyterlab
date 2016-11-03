@@ -493,6 +493,10 @@ def validate_labextension_folder(name, full_dest, logger=None):
                 hasFiles = False
         # add check here for version compat
         for (mod, deps) in manifest.get('modules', {}).items():
+            # ignore jupyterlab modules
+            # they are only semver compatibile with their own version
+            if mod.startswith('jupyterlab'):
+                continue
             for dep in deps:
                 if dep.startswith('jupyterlab'):
                     dep = dep.split('/')[0].split('@')[-1]
