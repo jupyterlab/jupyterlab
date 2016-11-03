@@ -74,6 +74,13 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * The the service manager used by the manager.
+   */
+  get services(): ServiceManager.IManager {
+    return this._serviceManager;
+  }
+
+  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
@@ -93,13 +100,6 @@ class DocumentManager implements IDisposable {
     });
     this._contexts.clear();
     this._widgetManager = null;
-  }
-
-  /**
-   * Get the kernel spec models.
-   */
-  get specs(): Kernel.ISpecModels | null {
-    return this._serviceManager.sessions.specs;
   }
 
   /**
@@ -162,15 +162,6 @@ class DocumentManager implements IDisposable {
     let widget = this._widgetManager.createWidget(widgetFactory.name, context);
     this._opener.open(widget);
     return widget;
-  }
-
-  /**
-   * Create an iterator over the running sessions.
-   *
-   * @returns A new iterator over the running sessions.
-   */
-  sessions(): IIterable<Session.IModel> {
-    return this._serviceManager.sessions.running();
   }
 
   /**

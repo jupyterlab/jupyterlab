@@ -47,7 +47,9 @@ const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
 export
 function createFromDialog(model: FileBrowserModel, manager: DocumentManager, creatorName: string): Promise<Widget> {
   let handler = new CreateFromHandler(model, manager, creatorName);
-  return handler.populate().then(() => {
+  return manager.services.sessions.fetchSpecs().then(() => {
+    return handler.populate();
+  }).then(() => {
     return handler.showDialog();
   });
 }
@@ -59,11 +61,13 @@ function createFromDialog(model: FileBrowserModel, manager: DocumentManager, cre
 export
 function openWithDialog(path: string, manager: DocumentManager, host?: HTMLElement): Promise<Widget> {
   let handler: OpenWithHandler;
-  handler = new OpenWithHandler(path, manager);
-  return showDialog({
-    title: 'Open File',
-    body: handler.node,
-    okText: 'OPEN'
+  return manager.services.sessions.fetchSpecs().then(() => {
+    handler = new OpenWithHandler(path, manager);
+    return showDialog({
+      title: 'Open File',
+      body: handler.node,
+      okText: 'OPEN'
+    });
   }).then(result => {
     if (result.text === 'OPEN') {
       return handler.open();
@@ -78,12 +82,14 @@ function openWithDialog(path: string, manager: DocumentManager, host?: HTMLEleme
 export
 function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host?: HTMLElement): Promise<Widget> {
   let handler: CreateNewHandler;
-  handler = new CreateNewHandler(model, manager);
-  return showDialog({
-    title: 'Create New File',
-    host,
-    body: handler.node,
-    okText: 'CREATE'
+  return manager.services.sessions.fetchSpecs().then(() => {
+    handler = new CreateNewHandler(model, manager);
+    return showDialog({
+      title: 'Create New File',
+      host,
+      body: handler.node,
+      okText: 'CREATE'
+    });
   }).then(result => {
     if (result.text === 'CREATE') {
       return handler.open();
@@ -204,8 +210,8 @@ class OpenWithHandler extends Widget {
     let preference = this._manager.registry.getKernelPreference(
       this._ext, widgetName
     );
-    let specs = this._manager.specs;
-    let sessions = this._manager.sessions();
+    let specs = this._manager.services.sessions.specs;
+    let sessions = this._manager.services.sessions.running();
     Private.updateKernels(this.kernelDropdownNode,
       { preference, specs, sessions }
     );
@@ -313,8 +319,8 @@ class CreateFromHandler extends Widget {
     // Handle the kernel preferences.
     let preference = registry.getKernelPreference(ext, widgetName);
     if (preference.canStartKernel) {
-      let specs = this._manager.specs;
-      let sessions = this._manager.sessions();
+      let specs = this._manager.services.sessions.specs;
+      let sessions = this._manager.services.sessions.running();
       let preferredKernel = kernelName;
       Private.updateKernels(this.kernelDropdownNode,
         { specs, sessions, preferredKernel, preference }
@@ -542,8 +548,8 @@ class CreateNewHandler extends Widget {
     let widgetName = this.widgetDropdown.value;
     let manager = this._manager;
     let preference = manager.registry.getKernelPreference(ext, widgetName);
-    let specs = manager.specs;
-    let sessions = manager.sessions();
+    let specs = manager.services.sessions.specs;
+    let sessions = manager.services.sessions.running();
     Private.updateKernels(this.kernelDropdownNode,
       { preference, sessions, specs }
     );

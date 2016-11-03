@@ -369,7 +369,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let widget = current.content;
       let session = widget.session;
       let lang = '';
-      // Make sure we have the latest kernel specs
+      // Make sure we have the latest kernel specs.
       manager.fetchSpecs().then(specs => {
         if (session.kernel) {
           lang = manager.specs.kernelspecs[session.kernel.name].language;
