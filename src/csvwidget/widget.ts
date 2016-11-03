@@ -1,10 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as d3Dsv from 'd3-dsv';
+
 import {
   Message
 } from 'phosphor/lib/core/messaging';
-
 
 import {
   PanelLayout
@@ -19,10 +20,8 @@ import {
 } from '../docregistry';
 
 import {
-  HTML_COMMON_CLASS
-} from '../renderers/widget';
-
-import * as d3Dsv from 'd3-dsv';
+  CSVTable
+} from './table';
 
 
 /**
@@ -39,11 +38,6 @@ const CSV_TOOLBAR_CLASS = 'jp-CSVWidget-toolbar';
  * The class name added to a csv toolbar's dropdown element.
  */
 const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVWidget-toolbarDropdown';
-
-/**
- * The class name added to a csv table widget.
- */
-const CSV_TABLE_CLASS = 'jp-CSVWidget-table';
 
 /**
  * The class name added to a csv warning widget.
@@ -67,15 +61,12 @@ class CSVWidget extends Widget {
   constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
     super();
     this._context = context;
-    this.node.tabIndex = -1;
     this.addClass(CSV_CLASS);
 
     this.layout = new PanelLayout();
     this._toolbar = new Widget({ node: createDelimiterSwitcherNode() });
     this._toolbar.addClass(CSV_TOOLBAR_CLASS);
-    this._table = new Widget();
-    this._table.addClass(CSV_TABLE_CLASS);
-    this._table.addClass(HTML_COMMON_CLASS);
+    this._table = new CSVTable();
     this._warning = new Widget();
     this._warning.addClass(CSV_WARNING_CLASS);
 
@@ -90,15 +81,9 @@ class CSVWidget extends Widget {
     if (context.model.toString()) {
       this.update();
     }
-    context.pathChanged.connect(() => {
-      this.update();
-    });
-    context.model.contentChanged.connect(() => {
-      this.update();
-    });
-    context.fileChanged.connect(() => {
-      this.update();
-    });
+    context.pathChanged.connect(this.update, this);
+    context.model.contentChanged.connect(this.update, this);
+    context.fileChanged.connect(this.update, this);
 
     // Change delimiter on a change in the dropdown.
     select.addEventListener('change', event => {
