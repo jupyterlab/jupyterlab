@@ -52,12 +52,12 @@
 }
 
 
-.jp-CSVWidget-table {
+.jp-CSVTable {
   flex: 1 1 auto;
   overflow: auto;
 }
 
-.jp-CSVWidget-table.jp-RenderedHTMLCommon table {
+.jp-CSVTable.jp-RenderedHTMLCommon table {
   margin-left: 0px;
   margin-right: 0px;
 }
