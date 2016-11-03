@@ -340,7 +340,6 @@ describe('notebook/cells/widget', () => {
       it('should focus the cell editor', (done) => {
         let widget = new LogBaseCell();
         Widget.attach(widget, document.body);
-        expect(widget.editor.hasFocus()).to.be(false);
         widget.activate();
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onActivateRequest');

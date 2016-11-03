@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  Message
+  Message, sendMessage
 } from 'phosphor/lib/core/messaging';
 
 import {
@@ -26,7 +26,7 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  Widget
+  Widget, WidgetMessage
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -333,6 +333,57 @@ class ConsoleContent extends Widget {
     return toArray(output).concat(prompt.model.toJSON() as nbformat.ICodeCell);
   }
 
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the notebook panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'keydown':
+      this._evtKeyDown(event as KeyboardEvent);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle `after_attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    let node = this.node;
+    node.addEventListener('keydown', this, true);
+    // Create a prompt if necessary.
+    if (!this.prompt) {
+      this.newPrompt();
+    }
+    // Listen for kernel change events.
+    this._addSessionListeners();
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    let node = this.node;
+    node.removeEventListener('keydown', this, true);
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    sendMessage(this.prompt.editor, WidgetMessage.ActivateRequest);
+    this.update();
+  }
+
   /**
    * Make a new prompt.
    */
@@ -364,28 +415,8 @@ class ConsoleContent extends Widget {
     this._completerHandler.activeCell = prompt;
     this._inspectionHandler.activeCell = prompt;
 
-    prompt.activate();
+    sendMessage(prompt.editor, WidgetMessage.ActivateRequest);
     this.update();
-  }
-
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this.prompt.activate();
-    this.update();
-  }
-
-  /**
-   * Handle `'after-attach'` messages.
-   */
-  protected onAfterAttach(msg: Message): void {
-    // Create a prompt if necessary.
-    if (!this.prompt) {
-      this.newPrompt();
-    }
-    // Listen for kernel change events.
-    this._addSessionListeners();
   }
 
   /**
@@ -432,8 +463,16 @@ class ConsoleContent extends Widget {
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    super.onUpdateRequest(msg);
     Private.scrollToBottom(this._content.node);
+  }
+
+  /**
+   * Handle the `'keydown'` event for the widget.
+   */
+  private _evtKeyDown(event: KeyboardEvent): void {
+    if (event.keyCode === 13 && !this.prompt.editor.hasFocus()) {
+      this.prompt.editor.activate();
+    }
   }
 
   /**

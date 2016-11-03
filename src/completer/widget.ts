@@ -238,8 +238,10 @@ class CompleterWidget extends Widget {
     // If there are no items, reset and bail.
     if (!items || !items.length) {
       this._reset();
-      this.hide();
-      this.visibilityChanged.emit(void 0);
+      if (!this.isHidden) {
+        this.hide();
+        this.visibilityChanged.emit(void 0);
+      }
       return;
     }
 
