@@ -4,7 +4,7 @@
 import * as dsv from 'd3-dsv';
 
 import {
-  ISignal
+  clearSignalData, defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -36,6 +36,18 @@ const DISPLAY_LIMIT = 1000;
  */
 export
 class CSVModel extends VDomModel {
+  /**
+   * Instantiate a CSV model.
+   */
+  constructor(options: CSVModel.IOptions = {}) {
+    super();
+    this._content = options.content;
+    this._delimiter = options.delimiter || ',';
+  }
+
+  /**
+   * A signal emitted when the parsed value's rows exceed the display limit.
+   */
   readonly maxExceeded: ISignal<this, void>;
 
   /**
@@ -67,6 +79,17 @@ class CSVModel extends VDomModel {
   }
 
   /**
+   * Dispose this model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+    clearSignalData(this);
+  }
+
+  /**
    * Parse the content using the model's delimiter.
    *
    * #### Notes
@@ -87,6 +110,35 @@ class CSVModel extends VDomModel {
 }
 
 
+// Define the signals for the `CSVModel` class.
+defineSignal(CSVModel.prototype, 'maxExceeded');
+
+
+/**
+ * A namespace for `CSVModel` statics.
+ */
+export
+namespace CSVModel {
+  /**
+   * Instantiation options for CSV models.
+   */
+  export
+  interface IOptions {
+    /**
+     * The raw model content.
+     */
+    content?: string;
+
+    /**
+     * The CSV delimiter value.
+     *
+     * #### Notes
+     * If this value is not set, it defaults to `','`.
+     */
+    delimiter?: string;
+  }
+}
+
 /**
  * A CSV table content widget.
  */
@@ -105,12 +157,11 @@ class CSVTable extends VDomWidget<CSVModel> {
    * Render the content as virtual DOM nodes.
    */
   protected render(): VNode | VNode[] {
-    let parsed = this.model.parse();
-    let cols = parsed.columns;
-    let rows = parsed.slice(0, DISPLAY_LIMIT);
-    return h.table(null, [
-      h.thead(null, cols.map(c => h.th(null, c))),
-      h.tbody(null, rows.map(r => h.tr(null, cols.map(c => h.td(null, r[c])))))
+    let rows = this.model.parse();
+    let cols = rows.columns;
+    return h.table([
+      h.thead(cols.map(col => h.th(col))),
+      h.tbody(rows.map(row => h.tr(cols.map(col => h.td(row[col])))))
     ]);
   }
 }
