@@ -33,6 +33,7 @@ coverage
 lib
 build
 docs
+jupyterlab/_version.py
 
 .ipynb_checkpoints
 Unititled*
