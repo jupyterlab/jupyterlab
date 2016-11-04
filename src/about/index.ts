@@ -13,8 +13,59 @@ export
 class AboutModel extends VDomModel {
   constructor() {
     super();
+    this._title = 'Welcome to the JupyterLab Alpha preview';
+    this._headerText = [
+      'Click on the Launcher tab for the initial Jupyterlab screen.',
+      'This demo gives an Alpha-level developer preview of the JupyterLab enviromnent.',
+      'It is not ready for general usage yet',
+      'We are developing JupyterLab at',
+      'https://github.com/jupyterlab/jupyterlab',
+      '. Pull requests are welcome!',
+      'Here is a brief description of some fo the things you\'ll find in this demo'
+    ];
+    this._pluginHeaders = [
+      'Main Area',
+      'Command Palette',
+      'File Browser',
+      'Notebook'
+    ];
   }
 
+  get title(): string {
+    return this._title;
+  }
+
+  get headerText(): string[] {
+    return this._headerText;
+  }
+
+  get pluginHeaders(): string[] {
+    return this._pluginHeaders;
+  }
+
+  get mainAreaDesc(): string[] {
+    return this._mainAreaDesc;
+  }
+
+  get filebrowserDesc(): string[] {
+    return this._filebrowserDesc;
+  }
+
+  get commandPaletteDesc(): string[] {
+    return this._commandPaletteDesc;
+  }
+
+  get notebookDesc(): string[] {
+    return this._notebookDesc;
+  }
+
+  private _title: string;
+  private _headerText: string[];
+  private _pluginHeaders: string[];
+  private _mainAreaDesc: string[];
+  private _filebrowserDesc: string[];
+  private _commandPaletteDesc: string[];
+  private _notebookDesc: string[];
 }
 
 export
@@ -24,7 +75,6 @@ class AboutWidget extends VDomWidget<AboutModel> {
   }
 
   protected render(): VNode {
-
     let headerRow =
     h.div({className: 'row'},
       h.div({className: 'column'},
@@ -164,8 +214,6 @@ class AboutWidget extends VDomWidget<AboutModel> {
     let domTree =
     h.div({id: 'about'},
       h.div({className: 'section'},
-      // check here for extra code
-        h.a({id: '#'}),
         h.div({className: 'sectioncenter'},
           h.div({className: 'container'},
             headerRow,
