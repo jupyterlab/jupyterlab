@@ -62,6 +62,7 @@
 .jp-Output {
   display: flex;
   flex-direction: row;
+  color: var(--jp-content-font-color1);
 }
 
 
