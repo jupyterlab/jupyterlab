@@ -37,8 +37,8 @@ class CSVToolbar extends Widget {
   /**
    * Construct a new csv table widget.
    */
-  constructor() {
-    super({ node: Private.createNode() });
+  constructor(options: CSVToolbar.IOptions = {}) {
+    super({ node: Private.createNode(options.selected) });
     this.addClass(CSV_TOOLBAR_CLASS);
   }
 
@@ -105,6 +105,24 @@ defineSignal(CSVToolbar.prototype, 'delimiterChanged');
 
 
 /**
+ * A namespace for `CSVToolbar` statics.
+ */
+export
+namespace CSVToolbar {
+  /**
+   * The instantiation options for a CSV toolbar.
+   */
+  export
+  interface IOptions {
+    /**
+     * The initially selected delimiter.
+     */
+    selected?: string;
+  }
+}
+
+
+/**
  * A namespace for private toolbar methods.
  */
 namespace Private {
@@ -112,7 +130,7 @@ namespace Private {
    * Create the node for the delimiter switcher.
    */
   export
-  function createNode(): HTMLElement {
+  function createNode(selected: string): HTMLElement {
     let div = document.createElement('div');
     let label = document.createElement('span');
     let select = document.createElement('select');
@@ -122,6 +140,9 @@ namespace Private {
       let option = document.createElement('option');
       option.value = delimiter;
       option.textContent = label;
+      if (delimiter === selected) {
+        option.selected = true;
+      }
       select.appendChild(option);
     });
     div.appendChild(label);
