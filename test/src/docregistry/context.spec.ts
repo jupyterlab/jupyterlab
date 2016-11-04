@@ -75,7 +75,9 @@ describe('docregistry/context', () => {
           expect(args).to.be('foo');
           done();
         });
-        manager.contents.rename(context.path, 'foo');
+        context.save().then(() => {
+          return manager.contents.rename(context.path, 'foo');
+        }).catch(done);
       });
 
     });
@@ -219,8 +221,13 @@ describe('docregistry/context', () => {
 
     describe('#startDefaultKernel()', () => {
 
-      it('will fail', () => {
-        expect(false).to.be(true);
+      it('should start the default kernel for the context', (done) => {
+        context.save().then(() => {
+          return context.startDefaultKernel();
+        }).then(kernel => {
+          expect(kernel.name).to.be.ok();
+          done();
+        }).catch(done);
       });
 
     });
