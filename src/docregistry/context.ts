@@ -158,6 +158,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     return this._manager.specs;
   }
 
+  /**
+   * Whether the context is ready.
+   */
+  get isReady(): boolean {
+    return this._isReady;
+  }
+
  /**
   * A promise that is fulfilled when the context is ready.
   */
@@ -459,6 +466,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this.createCheckpoint();
       }
     }).then(() => {
+      this._isReady = true;
       this._populatedPromise.resolve(void 0);
     });
   }
@@ -473,6 +481,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _readyPromise: Promise<void>;
   private _populatedPromise = new utils.PromiseDelegate<void>();
   private _isPopulated = false;
+  private _isReady = false;
 }
 
 

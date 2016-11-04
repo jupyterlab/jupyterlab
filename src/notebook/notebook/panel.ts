@@ -305,15 +305,20 @@ class NotebookPanel extends Widget {
 
     // Handle context initialization.
     newValue.ready().then(() => {
-      let model = newValue.model;
-      // Clear the undo state of the cells.
-      if (model) {
-        model.cells.clearUndo();
-      }
       if (!newValue.kernel) {
         newValue.startDefaultKernel();
       }
     });
+
+    if (!newValue.isReady) {
+      newValue.ready().then(() => {
+        let model = newValue.model;
+        // Clear the undo state of the cells.
+        if (model) {
+          model.cells.clearUndo();
+        }
+      });
+    }
 
     // Handle the document title.
     this.onPathChanged(context, context.path);

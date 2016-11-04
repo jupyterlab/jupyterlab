@@ -625,6 +625,11 @@ namespace DocumentRegistry {
     readonly contentsModel: Contents.IModel;
 
     /**
+     * Whether the context is ready.
+     */
+    readonly isReady: boolean;
+
+    /**
      * A promise that is fulfilled when the context is ready.
      */
     ready(): Promise<void>;
