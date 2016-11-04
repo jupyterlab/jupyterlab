@@ -80,10 +80,17 @@ class TerminalWidget extends Widget {
     if (this._session && !this._session.isDisposed) {
       this._session.messageReceived.disconnect(this._onMessage, this);
     }
-    this._session = value;
-    this._session.messageReceived.connect(this._onMessage, this);
-    this.title.label = `Terminal ${this._session.name}`;
-    this._resizeTerminal(-1, -1);
+    this._session = null;
+    if (!value) {
+      return;
+    }
+
+    value.ready().then(() => {
+      this._session = value;
+      this._session.messageReceived.connect(this._onMessage, this);
+      this.title.label = `Terminal ${this._session.name}`;
+      this._resizeTerminal(-1, -1);
+    });
   }
 
   /**
