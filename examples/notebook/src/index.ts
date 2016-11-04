@@ -90,7 +90,8 @@ const cmdIds = {
 
 
 function main(): void {
-  ServiceManager.create().then(manager => {
+  let manager = new ServiceManager();
+  manager.ready().then(() => {
     createApp(manager);
   });
 }
@@ -187,7 +188,7 @@ function createApp(manager: ServiceManager.IManager): void {
   });
   commands.addCommand(cmdIds.switchKernel, {
     label: 'Switch Kernel',
-    execute: () => selectKernelForContext(nbWidget.context, nbWidget.node)
+    execute: () => selectKernelForContext(nbWidget.context, manager.sessions, nbWidget.node)
   });
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run and Advance',

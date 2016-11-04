@@ -54,7 +54,8 @@ import '../index.css';
 
 
 function main(): void {
-  ServiceManager.create().then(manager => {
+  let manager = new ServiceManager();
+  manager.ready().then(() => {
     createApp(manager);
   });
 }
