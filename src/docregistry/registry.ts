@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, Kernel, ServiceManager
+  Contents, Kernel
 } from '@jupyterlab/services';
 
 import {
-  IIterator, IIterable, each, map
+  IIterator, each, empty, map
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
