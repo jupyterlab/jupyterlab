@@ -34,7 +34,7 @@ import {
 } from '../../common/interfaces';
 
 import {
-  DocumentRegistry, findKernel, selectKernelForContext
+  DocumentRegistry
 } from '../../docregistry';
 
 import {
@@ -266,19 +266,15 @@ class NotebookPanel extends Widget {
       model.cells.clearUndo();
     }
     if (!context.kernel && model) {
-      if (context.services.sessions.specs) {
-        let name = findKernel(
-          model.defaultKernelName,
-          model.defaultKernelLanguage,
-          context.services.sessions.specs
-        );
-        if (name) {
-          context.changeKernel({ name });
-          return;
-        }
-      }
-      // Fall back on using a kernel selection.
-      selectKernelForContext(context);
+      // context.startDefaultKernel();
+      // let name = findKernel(
+      //   model.defaultKernelName,
+      //   model.defaultKernelLanguage,
+      //   context.specs
+      // );
+      // if (name) {
+      //   context.changeKernel({ name });
+      // }
     }
   }
 
@@ -289,7 +285,6 @@ class NotebookPanel extends Widget {
     if (oldValue) {
       oldValue.kernelChanged.disconnect(this._onKernelChanged, this);
       oldValue.pathChanged.disconnect(this.onPathChanged, this);
-      oldValue.populated.disconnect(this.onPopulated, this);
       if (oldValue.model) {
         oldValue.model.stateChanged.disconnect(this.onModelStateChanged, this);
       }
@@ -307,11 +302,19 @@ class NotebookPanel extends Widget {
     this._content.model = newValue.model;
     this._handleDirtyState();
     newValue.model.stateChanged.connect(this.onModelStateChanged, this);
-    if (newValue.isPopulated) {
-      this.onPopulated(newValue, void 0);
-    } else {
-      newValue.populated.connect(this.onPopulated, this);
-    }
+
+    // Handle context initialization.
+    newValue.ready().then(() => {
+      let model = newValue.model;
+      // Clear the undo state of the cells.
+      if (model) {
+        model.cells.clearUndo();
+      }
+      if (!newValue.kernel) {
+        newValue.startDefaultKernel();
+      }
+    });
+
     // Handle the document title.
     this.onPathChanged(context, context.path);
     context.pathChanged.connect(this.onPathChanged, this);
@@ -327,9 +330,9 @@ class NotebookPanel extends Widget {
     if (!this.model || !kernel) {
       return;
     }
-    kernel.info().then(msg => {
+    kernel.ready().then(() => {
       if (this.model) {
-        this._updateLanguage(msg.language_info);
+        this._updateLanguage(kernel.info.language_info);
       }
     });
     this._updateSpec(kernel);
@@ -347,12 +350,12 @@ class NotebookPanel extends Widget {
    * Update the kernel spec.
    */
   private _updateSpec(kernel: Kernel.IKernel): void {
-    kernel.spec().then(spec => {
+    kernel.ready().then(() => {
       let specCursor = this.model.getMetadata('kernelspec');
       specCursor.setValue({
         name: kernel.name,
-        display_name: spec.display_name,
-        language: spec.language
+        display_name: kernel.spec.display_name,
+        language: kernel.spec.language
       });
     });
   }

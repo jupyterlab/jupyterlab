@@ -509,7 +509,7 @@ function addCommands(app: JupyterLab, services: IServiceManager): void {
       let current = tracker.currentWidget;
       if (current) {
         let { context, node } = current;
-        selectKernelForContext(context, node);
+        selectKernelForContext(context, services.sessions, node);
       }
     }
   });

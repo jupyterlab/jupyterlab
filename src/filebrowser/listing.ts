@@ -872,9 +872,6 @@ class DirListing extends Widget {
       let widget = this._manager.findWidget(path);
       if (!widget) {
         widget = this._manager.open(item.path);
-        let context = this._manager.contextForWidget(widget);
-        context.populated.connect(() => model.refresh() );
-        context.kernelChanged.connect(() => model.refresh() );
       }
     }
   }
@@ -1006,9 +1003,6 @@ class DirListing extends Widget {
         let widget = this._manager.findWidget(path);
         if (!widget) {
           widget = this._manager.open(item.path);
-          let context = this._manager.contextForWidget(widget);
-          context.populated.connect(() => model.refresh() );
-          context.kernelChanged.connect(() => model.refresh() );
         }
         return widget;
       });

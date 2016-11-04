@@ -2,16 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, ServiceManager, Session, TerminalSession
+  ServiceManager, Session, TerminalSession
 } from '@jupyterlab/services';
-
-import {
-  IterableOrArrayLike, each, enumerate
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
 
 import {
   Message
@@ -43,6 +35,11 @@ const RUNNING_CLASS = 'jp-RunningSessions';
  * The class name added to a running widget header.
  */
 const HEADER_CLASS = 'jp-RunningSessions-header';
+
+/**
+ * The class name added to a running widget header refresh button.
+ */
+const REFRESH_CLASS = 'jp-RunningSessions-headerRefresh';
 
 /**
  * The class name added to the running terminal sessions section.
@@ -161,15 +158,8 @@ class RunningSessions extends Widget {
     sessionContainer.appendChild(sessionList);
     sessionNode.appendChild(sessionContainer);
 
-    let terminals = manager.terminals;
-    let sessions = manager.sessions;
-
-    terminals.runningChanged.connect(this._onTerminalsChanged, this);
-    sessions.runningChanged.connect(this._onSessionsChanged, this);
-    sessions.specsChanged.connect(this.update, this);
-
-    this._onTerminalsChanged(terminals, terminals.running());
-    this._onSessionsChanged(sessions, sessions.running());
+    manager.terminals.runningChanged.connect(this._onTerminalsChanged, this);
+    manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
   }
 
   /**
@@ -210,9 +200,21 @@ class RunningSessions extends Widget {
       return;
     }
     this._manager = null;
-    this._runningSessions.clear();
-    this._runningTerminals.clear();
+    this._runningSessions = null;
+    this._runningTerminals = null;
     this._renderer = null;
+  }
+
+  /**
+   * Refresh the widget.
+   */
+  refresh(): Promise<void> {
+    let terminals = this._manager.terminals;
+    let sessions = this._manager.sessions;
+    clearTimeout(this._refreshId);
+    return terminals.refreshRunning().then(() => {
+      return sessions.refreshRunning();
+    });
   }
 
   /**
@@ -236,6 +238,7 @@ class RunningSessions extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
+    this.refresh();
   }
 
   /**
@@ -255,6 +258,7 @@ class RunningSessions extends Widget {
     let sessionSection = findElement(this.node, SESSIONS_CLASS);
     let sessionList = findElement(sessionSection, LIST_CLASS);
     let renderer = this._renderer;
+    let specs = this._manager.specs;
 
     // Remove any excess item nodes.
     while (termList.children.length > this._runningTerminals.length) {
@@ -277,19 +281,19 @@ class RunningSessions extends Widget {
     }
 
     // Populate the nodes.
-    each(enumerate(this._runningTerminals), ([index, value]) => {
-      let node = termList.children[index] as HTMLLIElement;
-      renderer.updateTerminalNode(node, value);
-    });
-    each(enumerate(this._runningSessions), ([index, value]) => {
-      let node = sessionList.children[index] as HTMLLIElement;
-      let kernelName = value.kernel.name;
-      let specs = this._manager.sessions.specs;
+    for (let i = 0; i < this._runningTerminals.length; i++) {
+      let node = termList.children[i] as HTMLLIElement;
+      renderer.updateTerminalNode(node, this._runningTerminals[i]);
+    }
+    for (let i = 0; i < this._runningSessions.length; i++) {
+      let node = sessionList.children[i] as HTMLLIElement;
+      let model = this._runningSessions[i];
+      let kernelName = model.kernel.name;
       if (specs) {
         kernelName = specs.kernelspecs[kernelName].display_name;
       }
-      renderer.updateSessionNode(node, value, kernelName);
-    });
+      renderer.updateSessionNode(node, model, kernelName);
+    }
   }
 
   /**
@@ -304,18 +308,27 @@ class RunningSessions extends Widget {
     let termList = findElement(termSection, LIST_CLASS);
     let sessionSection = findElement(this.node, SESSIONS_CLASS);
     let sessionList = findElement(sessionSection, LIST_CLASS);
+    let refresh = findElement(this.node, REFRESH_CLASS);
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
+
+    // Check for a refresh.
+    if (hitTest(refresh, clientX, clientY)) {
+      this.refresh();
+      return;
+    }
 
     // Check for a terminal item click.
     let index = hitTestNodes(termList.children, clientX, clientY);
     if (index !== -1) {
       let node = termList.children[index] as HTMLLIElement;
       let shutdown = renderer.getTerminalShutdown(node);
-      let model = this._runningTerminals.at(index);
+      let model = this._runningTerminals[index];
       if (hitTest(shutdown, clientX, clientY)) {
-        this._manager.terminals.shutdown(model.name);
+        this._manager.terminals.shutdown(model.name).then(() => {
+          this.refresh();
+        });
         return;
       }
       this.terminalOpenRequested.emit(model);
@@ -326,9 +339,11 @@ class RunningSessions extends Widget {
     if (index !== -1) {
       let node = sessionList.children[index] as HTMLLIElement;
       let shutdown = renderer.getSessionShutdown(node);
-      let model = this._runningSessions.at(index);
+      let model = this._runningSessions[index];
       if (hitTest(shutdown, clientX, clientY)) {
-        this._manager.sessions.shutdown(model.id);
+        this._manager.sessions.shutdown(model.id).then(() => {
+          this.refresh();
+        });
         return;
       }
       this.sessionOpenRequested.emit(model);
@@ -338,34 +353,31 @@ class RunningSessions extends Widget {
   /**
    * Handle a change to the running sessions.
    */
-  private _onSessionsChanged(sender: Session.IManager, models: IterableOrArrayLike<Session.IModel>): void {
+  private _onSessionsChanged(sender: Session.IManager, models: Session.IModel[]): void {
     // Strip out non-file backed sessions.
-    this._runningSessions.clear();
-    each(models, session => {
+    this._runningSessions = [];
+    for (let session of models) {
       let name = session.notebook.path.split('/').pop();
       if (name.indexOf('.') !== -1 || CONSOLE_REGEX.test(name)) {
-        this._runningSessions.pushBack(session);
+        this._runningSessions.push(session);
       }
-    });
+    }
     this.update();
   }
 
   /**
    * Handle a change to the running terminals.
    */
-  private _onTerminalsChanged(sender: TerminalSession.IManager, models: IterableOrArrayLike<TerminalSession.IModel>): void {
-    this._runningTerminals.clear();
-    each(models, session => {
-      this._runningTerminals.pushBack(session);
-    });
+  private _onTerminalsChanged(sender: TerminalSession.IManager, models: TerminalSession.IModel[]): void {
+    this._runningTerminals = models;
     this.update();
   }
 
   private _manager: ServiceManager.IManager = null;
   private _renderer: RunningSessions.IRenderer = null;
-  private _specs: Kernel.ISpecModels = null;
-  private _runningSessions = new Vector<Session.IModel>();
-  private _runningTerminals = new Vector<TerminalSession.IModel>();
+  private _runningSessions: Session.IModel[] = [];
+  private _runningTerminals: TerminalSession.IModel[] = [];
+  private _refreshId = -1;
 }
 
 
@@ -517,6 +529,10 @@ namespace RunningSessions {
       terminals.className = `${SECTION_CLASS} ${TERMINALS_CLASS}`;
       let sessions = document.createElement('div');
       sessions.className = `${SECTION_CLASS} ${SESSIONS_CLASS}`;
+
+      let refresh = document.createElement('button');
+      refresh.className = REFRESH_CLASS;
+      header.appendChild(refresh);
 
       node.appendChild(header);
       node.appendChild(terminals);

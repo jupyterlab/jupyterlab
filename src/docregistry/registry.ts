@@ -596,11 +596,6 @@ namespace DocumentRegistry {
     fileChanged: ISignal<this, Contents.IModel>;
 
     /**
-     * A signal emitted when the context is fully populated for the first time.
-     */
-    populated: ISignal<this, void>;
-
-    /**
      * A signal emitted when the context is disposed.
      */
     disposed: ISignal<this, void>;
@@ -625,19 +620,21 @@ namespace DocumentRegistry {
      *
      * #### Notes
      * The model will have an empty `contents` field.
-     * It will be `null` until the context is populated.
+     * It will be `null` until the context is ready.
      */
     readonly contentsModel: Contents.IModel;
 
     /**
-     * Test whether the context is fully populated.
+     * A promise that is fulfilled when the context is ready.
      */
-    readonly isPopulated: boolean;
+    ready(): Promise<void>;
 
     /**
-     * The service manager used by the context.
+     * Start the default kernel for the context.
+     *
+     * @returns A promise that resolves with the new kernel.
      */
-    readonly services: ServiceManager.IManager;
+    startDefaultKernel(): Promise<Kernel.IKernel>;
 
     /**
      * Change the current kernel associated with the document.

@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -101,7 +105,7 @@ const tracker = new InstanceTracker<ConsolePanel>();
 
 
 /**
- * The interface for a start console.
+ * The arguments used to create a console.
  */
 interface ICreateConsoleArgs extends JSONObject {
   id?: string;
@@ -226,7 +230,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
       // If we get a session, use it.
       if (args.id) {
-        return manager.connectTo(args.id).then(session => {
+        return manager.ready().then(() => {
+          return manager.connectTo(args.id);
+        }).then(session => {
           name = session.path.split('/').pop();
           name = `Console ${name.match(CONSOLE_REGEX)[1]}`;
           createConsole(session, name);
@@ -243,7 +249,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       path = `${path}/console-${count}-${utils.uuid()}`;
 
       // Get the kernel model.
-      return getKernel(args, name).then(kernel => {
+      return manager.ready().then(() => {
+        return getKernel(args, name);
+      }).then(kernel => {
         if (!kernel) {
           return;
         }
@@ -293,25 +301,33 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   /**
    * Get the kernel given the create args.
+   *
+   * #### Notes
+   * The manager must be ready before calling this function.
    */
   function getKernel(args: ICreateConsoleArgs, name: string): Promise<Kernel.IModel> {
     if (args.kernel) {
       return Promise.resolve(args.kernel);
     }
-    let options = {
-      name,
-      specs: manager.specs,
-      sessions: manager.running(),
-      preferredLanguage: args.preferredLanguage || '',
-      host: document.body
-    };
-    return selectKernel(options);
+    return manager.ready().then(() => {
+      let options = {
+        name,
+        specs: manager.specs,
+        sessions: manager.running(),
+        preferredLanguage: args.preferredLanguage || '',
+        host: document.body
+      };
+      return selectKernel(options);
+    });
   }
 
   let id = 0; // The ID counter for notebook panels.
 
   /**
    * Create a console for a given session.
+   *
+   * #### Notes
+   * The manager must be ready before calling this function.
    */
   function createConsole(session: Session.ISession, name: string): void {
     let panel = new ConsolePanel({
@@ -319,10 +335,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       rendermime: rendermime.clone(),
       renderer: renderer
     });
-    let displayName = session.kernel.name;
-    if (manager.specs) {
-      displayName = manager.specs.kernelspecs[displayName].display_name;
-    }
+    let specs = manager.specs;
+    let displayName = specs.kernelspecs[session.kernel.name].display_name;
     let captionOptions: Private.ICaptionOptions = {
       label: name,
       displayName,
@@ -344,9 +358,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     // Update the caption of the tab when the kernel changes.
     panel.content.session.kernelChanged.connect(() => {
       let newName = panel.content.session.kernel.name;
-      if (manager.specs) {
-        newName = manager.specs.kernelspecs[name].display_name;
-      }
+      name = specs.kernelspecs[name].display_name;
       captionOptions.displayName = newName;
       captionOptions.connected = new Date();
       captionOptions.executed = null;
@@ -369,10 +381,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let widget = current.content;
       let session = widget.session;
       let lang = '';
-      // Make sure we have the latest kernel specs.
-      manager.fetchSpecs().then(specs => {
+      manager.ready().then(() => {
+        let specs = manager.specs;
         if (session.kernel) {
-          lang = manager.specs.kernelspecs[session.kernel.name].language;
+          lang = specs.kernelspecs[session.kernel.name].language;
         }
         let options = {
           name: widget.parent.title.label,
@@ -383,10 +395,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           host: widget.parent.node
         };
         return selectKernel(options);
-      }).then(kernelId => {
+      }).then((kernelId: Kernel.IModel) => {
         // If the user cancels, kernelId will be void and should be ignored.
         if (kernelId) {
-          session.changeKernel(kernelId);
+          return session.changeKernel(kernelId);
         }
       });
     }
@@ -456,7 +468,3 @@ namespace Private {
     return caption;
   }
 }
-
-
-
-

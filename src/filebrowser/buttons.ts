@@ -158,9 +158,7 @@ class FileButtons extends Widget {
    * @returns A promise that resolves with the created widget.
    */
   createFrom(creatorName: string): Promise<Widget> {
-    return createFromDialog(this.model, this.manager, creatorName).then(widget => {
-      return widget ? this._open(widget) : null;
-    });
+    return createFromDialog(this.model, this.manager, creatorName);
   }
 
   /**
@@ -179,7 +177,7 @@ class FileButtons extends Widget {
     if (!widget) {
       widget = this._manager.open(path, widgetName, kernel);
     }
-    return this._open(widget);
+    return widget;
   }
 
   /**
@@ -194,18 +192,7 @@ class FileButtons extends Widget {
    * @return The widget for the path.
    */
   createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let widget = this._manager.createNew(path, widgetName, kernel);
-    return this._open(widget);
-  }
-
-  /**
-   * Open a widget and attach listeners.
-   */
-  private _open(widget: Widget): Widget {
-    let context = this._manager.contextForWidget(widget);
-    context.populated.connect(() => this.model.refresh() );
-    context.kernelChanged.connect(() => this.model.refresh() );
-    return widget;
+    return this._manager.createNew(path, widgetName, kernel);
   }
 
   /**

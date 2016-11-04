@@ -29,10 +29,37 @@
 }
 
 
+.jp-RunningSessions-headerRefresh {
+  flex: 1 1 auto;
+  max-width: 100px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  border: none;
+  font-size: var(--jp-ui-font-size1);
+  outline: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+
 .jp-RunningSessions-section {
   display: flex;
   flex: 0 1 auto;
   flex-direction: column;
+}
+
+
+.jp-RunningSessions-headerRefresh:before {
+  font-family: FontAwesome;
+  content: '\f021'; /* refresh */
+  font-size: var(--jp-ui-icon-font-size);
+}
+
+
+.jp-RunningSessions-headerRefresh:hover {
+  background: var(--jp-layout-color2);
+  z-index: 1; /* raise overlapping border */
 }
 
 

@@ -6,10 +6,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterable
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -28,6 +24,10 @@ import {
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
+import {
+  findKernel
+} from '../docregistry';
 
 import {
   showDialog, okButton
@@ -58,6 +58,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._model = this._factory.createNew(lang);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
+    this._readyPromise = manager.ready().then(() => {
+      return this._populatedPromise.promise;
+    });
   }
 
   /**
@@ -117,13 +120,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * Test whether the context is fully populated.
-   */
-  get isPopulated(): boolean {
-    return this._isPopulated;
-  }
-
-  /**
    * Get the model factory name.
    *
    * #### Notes
@@ -161,10 +157,34 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * The service manager used by the context.
+   * The kernel spec models
    */
-  get services(): ServiceManager.IManager {
-    return this._manager;
+  get specs(): Kernel.ISpecModels {
+    return this._manager.specs;
+  }
+
+ /**
+  * A promise that is fulfilled when the context is ready.
+  */
+  ready(): Promise<void> {
+    return this._readyPromise;
+  }
+
+  /**
+   * Start the default kernel for the context.
+   *
+   * @returns A promise that resolves with the new kernel.
+   */
+  startDefaultKernel(): Promise<Kernel.IKernel> {
+    return this.ready().then(() => {
+      let model = this.model;
+      let name = findKernel(
+        model.defaultKernelName,
+        model.defaultKernelLanguage,
+        this._manager.specs
+      );
+      return this.changeKernel({ name });
+    });
   }
 
   /**
@@ -444,7 +464,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this.createCheckpoint();
       }
     }).then(() => {
-      this.populated.emit(void 0);
+      this._populatedPromise.resolve(void 0);
     });
   }
 
@@ -454,8 +474,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _path = '';
   private _session: Session.ISession = null;
   private _factory: DocumentRegistry.IModelFactory<T> = null;
-  private _isPopulated = false;
   private _contentsModel: Contents.IModel = null;
+  private _readyPromise: Promise<void>;
+  private _populatedPromise = new utils.PromiseDelegate<void>();
+  private _isPopulated = false;
 }
 
 
@@ -463,7 +485,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
 defineSignal(Context.prototype, 'kernelChanged');
 defineSignal(Context.prototype, 'pathChanged');
 defineSignal(Context.prototype, 'fileChanged');
-defineSignal(Context.prototype, 'populated');
 defineSignal(Context.prototype, 'disposed');
 
 

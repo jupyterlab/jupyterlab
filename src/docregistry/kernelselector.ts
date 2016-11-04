@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  okButton, showDialog
+  showDialog
 } from '../dialog';
 
 import {
@@ -128,13 +128,12 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
  * Change the kernel on a context.
  */
 export
-function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, host?: HTMLElement): Promise<void> {
-  // Make sure we have the latest specs.
-  return context.services.sessions.fetchSpecs().then(specs => {
+function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, manager: Session.IManager, host?: HTMLElement): Promise<void> {
+  return manager.ready().then(() => {
     let options: IKernelSelection = {
       name: context.path.split('/').pop(),
-      specs,
-      sessions: context.services.sessions.running(),
+      specs: manager.specs,
+      sessions: manager.running(),
       preferredLanguage: context.model.defaultKernelLanguage,
       kernel: context.kernel.model,
       host
@@ -232,7 +231,7 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   }
 
   // Handle a preferred kernel language in order of display name.
-  if (preferredLanguage) {
+  if (preferredLanguage && specs) {
     for (let name in specs.kernelspecs) {
       if (languages[name] === preferredLanguage) {
         names.push(name);
@@ -297,7 +296,7 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
       return a.notebook.path.localeCompare(b.notebook.path);
     });
     for (let session of otherSessions) {
-      let name = displayNames[session.kernel.name];
+      let name = displayNames[session.kernel.name] || session.kernel.name;
       node.appendChild(optionForSession(session, name, maxLength));
     }
   }

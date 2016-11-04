@@ -497,7 +497,10 @@ class ConsoleContent extends Widget {
    * Initialize the banner and mimetype.
    */
   private _initialize(): void {
-    this._session.kernel.info().then(info => this._handleInfo(info));
+    let kernel = this._session.kernel;
+    kernel.ready().then(() => {
+      this._handleInfo(kernel.info);
+    });
   }
 
   /**
