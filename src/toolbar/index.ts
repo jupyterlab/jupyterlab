@@ -186,7 +186,7 @@ class ToolbarButton extends Widget {
   }
 
   /**
-   * Handle `after_attach` messages for the widget.
+   * Handle `after-attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);

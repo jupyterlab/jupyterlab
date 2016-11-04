@@ -35,7 +35,7 @@
     background: transparent;
 }
 
-.jp-CSVWidget-toolbar .jp-CSVWidget-toolbarDropdown {
+.jp-CSVToolbar .jp-CSVToolbar-dropdown {
     flex: 0 0 auto;
     padding-left: 8px;
     padding-right: 8px;
@@ -52,12 +52,12 @@
 }
 
 
-.jp-CSVWidget-table {
+.jp-CSVTable {
   flex: 1 1 auto;
   overflow: auto;
 }
 
-.jp-CSVWidget-table.jp-RenderedHTMLCommon table {
+.jp-CSVTable.jp-RenderedHTMLCommon table {
   margin-left: 0px;
   margin-right: 0px;
 }
