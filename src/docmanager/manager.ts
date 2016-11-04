@@ -127,8 +127,11 @@ class DocumentManager implements IDisposable {
       // Load the contents from disk.
       context.revert();
     }
-    if (kernel) {
+    // Handle the kernel for the context.
+    if (kernel && widgetFactory.canStartKernel) {
       context.changeKernel(kernel);
+    } else if (widgetFactory.preferKernel && !context.kernel) {
+      context.startDefaultKernel();
     }
     let widget = this._widgetManager.createWidget(widgetFactory.name, context);
     this._opener.open(widget);
@@ -156,8 +159,11 @@ class DocumentManager implements IDisposable {
     let context = this._createContext(path, factory);
     // Immediately save the contents to disk.
     context.save();
-    if (kernel) {
+    // Handle the kernel for the context.
+    if (kernel && widgetFactory.canStartKernel) {
       context.changeKernel(kernel);
+    } else if (widgetFactory.preferKernel && !context.kernel) {
+      context.startDefaultKernel();
     }
     let widget = this._widgetManager.createWidget(widgetFactory.name, context);
     this._opener.open(widget);

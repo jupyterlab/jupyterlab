@@ -257,28 +257,6 @@ class NotebookPanel extends Widget {
   }
 
   /**
-   * Handle a context population.
-   */
-  protected onPopulated(context: DocumentRegistry.IContext<INotebookModel>, args: void): void {
-    let model = context.model;
-    // Clear the undo state of the cells.
-    if (model) {
-      model.cells.clearUndo();
-    }
-    if (!context.kernel && model) {
-      // context.startDefaultKernel();
-      // let name = findKernel(
-      //   model.defaultKernelName,
-      //   model.defaultKernelLanguage,
-      //   context.specs
-      // );
-      // if (name) {
-      //   context.changeKernel({ name });
-      // }
-    }
-  }
-
-  /**
    * Handle a change in the context.
    */
   private _onContextChanged(oldValue: DocumentRegistry.IContext<INotebookModel>, newValue: DocumentRegistry.IContext<INotebookModel>): void {
@@ -303,13 +281,7 @@ class NotebookPanel extends Widget {
     this._handleDirtyState();
     newValue.model.stateChanged.connect(this.onModelStateChanged, this);
 
-    // Handle context initialization.
-    newValue.ready().then(() => {
-      if (!newValue.kernel) {
-        newValue.startDefaultKernel();
-      }
-    });
-
+    // Clear the cells when the context is initially populated.
     if (!newValue.isReady) {
       newValue.ready().then(() => {
         let model = newValue.model;
