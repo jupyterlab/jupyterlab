@@ -70,11 +70,8 @@ describe('docmanager/widgetmanager', () => {
     fileExtensions: ['.txt']
   });
 
-  before((done) => {
-    ServiceManager.create().then(m => {
-      services = m;
-      done();
-    }).catch(done);
+  before(() => {
+    services = new ServiceManager();
   });
 
   beforeEach(() => {

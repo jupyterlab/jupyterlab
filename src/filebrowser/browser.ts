@@ -105,15 +105,6 @@ class FileBrowser extends Widget {
     });
     this._listing = new DirListing({ manager, model, renderer });
 
-    model.fileChanged.connect((fbModel, args) => {
-      let oldPath = args.oldValue && args.oldValue.path || null;
-      if (args.newValue) {
-        manager.handleRename(oldPath, args.newValue.path);
-      } else {
-        manager.handleDelete(oldPath);
-      }
-    });
-
     this._crumbs.addClass(CRUMBS_CLASS);
     this._buttons.addClass(BUTTON_CLASS);
     this._listing.addClass(LISTING_CLASS);

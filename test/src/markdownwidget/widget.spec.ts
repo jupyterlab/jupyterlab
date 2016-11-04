@@ -45,18 +45,16 @@ class LogWidget extends MarkdownWidget {
 }
 
 
-const contextPromise = createFileContext();
-
-
 describe('markdownwidget/widget', () => {
 
   let context: Context<DocumentRegistry.IModel>;
 
-  beforeEach((done) => {
-    contextPromise.then(c => {
-      context = c;
-      done();
-    });
+  beforeEach(() => {
+    context = createFileContext();
+  });
+
+  afterEach(() => {
+    context.dispose();
   });
 
   describe('MarkdownWidgetFactory', () => {

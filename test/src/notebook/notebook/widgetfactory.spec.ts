@@ -40,7 +40,6 @@ import {
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
 const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
-const contextPromise = createNotebookContext();
 
 
 function createFactory(): NotebookWidgetFactory {
@@ -58,11 +57,12 @@ describe('notebook/notebook/widgetfactory', () => {
 
   let context: Context<INotebookModel>;
 
-  beforeEach((done) => {
-    contextPromise.then(c => {
-      context = c;
-      done();
-    });
+  beforeEach(() => {
+    context = createNotebookContext();
+  });
+
+  afterEach(() => {
+    context.dispose();
   });
 
   describe('NotebookWidgetFactory', () => {

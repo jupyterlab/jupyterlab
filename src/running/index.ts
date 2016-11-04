@@ -112,11 +112,6 @@ const FILE_ICON_CLASS = 'jp-mod-file';
 const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
 
 /**
- * The duration of auto-refresh in ms.
- */
-const REFRESH_DURATION = 10000;
-
-/**
  * A regex for console names.
  */
 export
@@ -217,14 +212,8 @@ class RunningSessions extends Widget {
     let terminals = this._manager.terminals;
     let sessions = this._manager.sessions;
     clearTimeout(this._refreshId);
-    return terminals.listRunning().then(running => {
-      this._onTerminalsChanged(terminals, running);
-      return sessions.listRunning();
-    }).then(running => {
-      this._onSessionsChanged(sessions, running);
-      this._refreshId = setTimeout(() => {
-        this.refresh();
-      }, REFRESH_DURATION);
+    return terminals.refreshRunning().then(() => {
+      return sessions.refreshRunning();
     });
   }
 
@@ -269,7 +258,7 @@ class RunningSessions extends Widget {
     let sessionSection = findElement(this.node, SESSIONS_CLASS);
     let sessionList = findElement(sessionSection, LIST_CLASS);
     let renderer = this._renderer;
-    let kernelspecs = this._manager.kernelspecs.kernelspecs;
+    let specs = this._manager.specs;
 
     // Remove any excess item nodes.
     while (termList.children.length > this._runningTerminals.length) {
@@ -299,7 +288,10 @@ class RunningSessions extends Widget {
     for (let i = 0; i < this._runningSessions.length; i++) {
       let node = sessionList.children[i] as HTMLLIElement;
       let model = this._runningSessions[i];
-      let kernelName = kernelspecs[model.kernel.name].display_name;
+      let kernelName = model.kernel.name;
+      if (specs) {
+        kernelName = specs.kernelspecs[kernelName].display_name;
+      }
       renderer.updateSessionNode(node, model, kernelName);
     }
   }

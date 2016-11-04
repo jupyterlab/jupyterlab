@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  IterableOrArrayLike, each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   showDialog
 } from '../dialog';
 
@@ -32,7 +36,7 @@ interface IKernelSelection {
   /**
    * The current running sessions.
    */
-  sessions: Session.IModel[];
+  sessions: IterableOrArrayLike<Session.IModel>;
 
   /**
    * The desired kernel language.
@@ -64,7 +68,7 @@ interface IPopulateOptions {
   /**
    * The current running sessions.
    */
-  sessions: Session.IModel[];
+  sessions: IterableOrArrayLike<Session.IModel>;
 
   /**
    * The optional existing kernel model.
@@ -124,14 +128,14 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
  * Change the kernel on a context.
  */
 export
-function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, host?: HTMLElement): Promise<void> {
-  return context.listSessions().then(sessions => {
+function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, manager: Session.IManager, host?: HTMLElement): Promise<void> {
+  return manager.ready().then(() => {
     let options: IKernelSelection = {
       name: context.path.split('/').pop(),
-      specs: context.kernelspecs,
-      sessions,
+      specs: manager.specs,
+      sessions: manager.running(),
       preferredLanguage: context.model.defaultKernelLanguage,
-      kernel: context.kernel.model,
+      kernel: context.kernel ? context.kernel.model : null,
       host
     };
     return selectKernel(options);
@@ -227,7 +231,7 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   }
 
   // Handle a preferred kernel language in order of display name.
-  if (preferredLanguage) {
+  if (preferredLanguage && specs) {
     for (let name in specs.kernelspecs) {
       if (languages[name] === preferredLanguage) {
         names.push(name);
@@ -264,40 +268,37 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
 
   // Add the sessions using the preferred language first.
   let matchingSessions: Session.IModel[] = [];
-  if (preferredLanguage) {
-    for (let session of sessions) {
-      if (languages[session.kernel.name] === preferredLanguage &&
-          session.kernel.id !== existing) {
-        matchingSessions.push(session);
-      }
-    }
-    if (matchingSessions) {
-      matchingSessions.sort((a, b) => {
-        return a.notebook.path.localeCompare(b.notebook.path);
-      });
-      for (let session of matchingSessions) {
-        let name = displayNames[session.kernel.name];
-        node.appendChild(optionForSession(session, name, maxLength));
-      }
-      node.appendChild(createSeparatorOption(maxLength));
-    }
-  }
-  // Add the other remaining sessions.
   let otherSessions: Session.IModel[] = [];
-  for (let session of sessions) {
-    if (matchingSessions.indexOf(session) === -1 &&
+
+  each(sessions, session => {
+    if (preferredLanguage &&
+        languages[session.kernel.name] === preferredLanguage &&
         session.kernel.id !== existing) {
+      matchingSessions.push(session);
+    } else if (session.kernel.id !== existing) {
       otherSessions.push(session);
     }
+  });
+
+  if (matchingSessions) {
+    matchingSessions.sort((a, b) => {
+      return a.notebook.path.localeCompare(b.notebook.path);
+    });
+    each(matchingSessions, session => {
+      let name = displayNames[session.kernel.name];
+      node.appendChild(optionForSession(session, name, maxLength));
+    });
+    node.appendChild(createSeparatorOption(maxLength));
   }
+
   if (otherSessions) {
     otherSessions.sort((a, b) => {
       return a.notebook.path.localeCompare(b.notebook.path);
     });
-    for (let session of otherSessions) {
-      let name = displayNames[session.kernel.name];
+    each(otherSessions, session => {
+      let name = displayNames[session.kernel.name] || session.kernel.name;
       node.appendChild(optionForSession(session, name, maxLength));
-    }
+    });
   }
   node.selectedIndex = 0;
 }

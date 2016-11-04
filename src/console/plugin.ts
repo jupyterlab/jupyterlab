@@ -105,7 +105,7 @@ const tracker = new InstanceTracker<ConsolePanel>();
 
 
 /**
- * The interface for a start console.
+ * The arguments used to create a console.
  */
 interface ICreateConsoleArgs extends JSONObject {
   id?: string;
@@ -120,7 +120,6 @@ interface ICreateConsoleArgs extends JSONObject {
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): IConsoleTracker {
   let manager = services.sessions;
-  let specs = services.kernelspecs;
 
   let { commands, keymap } = app;
   let category = 'Console';
@@ -231,11 +230,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
       // If we get a session, use it.
       if (args.id) {
-        return manager.connectTo(args.id).then(session => {
+        return manager.ready().then(() => {
+          return manager.connectTo(args.id);
+        }).then(session => {
           name = session.path.split('/').pop();
           name = `Console ${name.match(CONSOLE_REGEX)[1]}`;
           createConsole(session, name);
-          manager.listRunning();  // Trigger a refresh.
           return session.id;
         });
       }
@@ -249,7 +249,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       path = `${path}/console-${count}-${utils.uuid()}`;
 
       // Get the kernel model.
-      return getKernel(args, name).then(kernel => {
+      return manager.ready().then(() => {
+        return getKernel(args, name);
+      }).then(kernel => {
         if (!kernel) {
           return;
         }
@@ -261,7 +263,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         };
         return manager.startNew(options).then(session => {
           createConsole(session, name);
-          manager.listRunning();  // Trigger a refresh.
           return session.id;
         });
       });
@@ -305,11 +306,11 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     if (args.kernel) {
       return Promise.resolve(args.kernel);
     }
-    return manager.listRunning().then((sessions: Session.IModel[]) => {
+    return manager.ready().then(() => {
       let options = {
         name,
-        specs,
-        sessions,
+        specs: manager.specs,
+        sessions: manager.running(),
         preferredLanguage: args.preferredLanguage || '',
         host: document.body
       };
@@ -317,16 +318,13 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     });
   }
 
-  let displayNameMap: { [key: string]: string } = Object.create(null);
-  for (let kernelName in specs.kernelspecs) {
-    let displayName = specs.kernelspecs[kernelName].display_name;
-    displayNameMap[kernelName] = displayName;
-  }
-
   let id = 0; // The ID counter for notebook panels.
 
   /**
    * Create a console for a given session.
+   *
+   * #### Notes
+   * The manager must be ready before calling this function.
    */
   function createConsole(session: Session.ISession, name: string): void {
     let panel = new ConsolePanel({
@@ -334,7 +332,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       rendermime: rendermime.clone(),
       renderer: renderer
     });
-    let displayName = displayNameMap[session.kernel.name];
+    let specs = manager.specs;
+    let displayName = specs.kernelspecs[session.kernel.name].display_name;
     let captionOptions: Private.ICaptionOptions = {
       label: name,
       displayName,
@@ -355,9 +354,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     });
     // Update the caption of the tab when the kernel changes.
     panel.content.session.kernelChanged.connect(() => {
-      let name = panel.content.session.kernel.name;
+      let newName = panel.content.session.kernel.name;
       name = specs.kernelspecs[name].display_name;
-      captionOptions.displayName = name;
+      captionOptions.displayName = newName;
       captionOptions.connected = new Date();
       captionOptions.executed = null;
       panel.title.caption = Private.caption(captionOptions);
@@ -379,14 +378,15 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let widget = current.content;
       let session = widget.session;
       let lang = '';
-      if (session.kernel) {
-        lang = specs.kernelspecs[session.kernel.name].language;
-      }
-      manager.listRunning().then((sessions: Session.IModel[]) => {
+      manager.ready().then(() => {
+        let specs = manager.specs;
+        if (session.kernel) {
+          lang = specs.kernelspecs[session.kernel.name].language;
+        }
         let options = {
           name: widget.parent.title.label,
           specs,
-          sessions,
+          sessions: manager.running(),
           preferredLanguage: lang,
           kernel: session.kernel.model,
           host: widget.parent.node
@@ -395,7 +395,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       }).then((kernelId: Kernel.IModel) => {
         // If the user cancels, kernelId will be void and should be ignored.
         if (kernelId) {
-          session.changeKernel(kernelId);
+          return session.changeKernel(kernelId);
         }
       });
     }
@@ -465,7 +465,3 @@ namespace Private {
     return caption;
   }
 }
-
-
-
-

@@ -21,7 +21,7 @@ export
 const servicesProvider: JupyterLabPlugin<IServiceManager> = {
   id: 'jupyter.services.services',
   provides: IServiceManager,
-  activate: (): Promise<IServiceManager> => {
-    return ServiceManager.create() as Promise<IServiceManager>;
+  activate: (): IServiceManager => {
+    return new ServiceManager();
   }
 };

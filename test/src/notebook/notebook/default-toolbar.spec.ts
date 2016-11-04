@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  Session, utils
+  Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -20,8 +20,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  Context
-} from '../../../../lib/docregistry/context';
+  Context, DocumentRegistry
+} from '../../../../lib/docregistry';
 
 import {
  CodeCellWidget, MarkdownCellWidget
@@ -72,24 +72,30 @@ import {
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
-const sessionPromise = Session.startNew({ path: utils.uuid() });
+
+
+function startKernel(context: DocumentRegistry.IContext<INotebookModel>): Promise<Kernel.IKernel> {
+  let kernel: Kernel.IKernel;
+  return context.save().then(() => {
+    return context.startDefaultKernel();
+  }).then(k => {
+    kernel = k;
+    return kernel.ready();
+  }).then(() => {
+    return kernel;
+  });
+}
 
 
 describe('notebook/notebook/default-toolbar', () => {
 
   let context: Context<INotebookModel>;
 
-  beforeEach((done) => {
-    createNotebookContext().then(c => {
-      context = c;
-      done();
-    });
+  beforeEach(() => {
+    context = createNotebookContext();
   });
 
   afterEach(() => {
-    if (context.kernel) {
-      context.kernel.dispose();
-    }
     context.dispose();
   });
 
@@ -98,15 +104,10 @@ describe('notebook/notebook/default-toolbar', () => {
     let panel: NotebookPanel;
     const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
 
-    beforeEach((done) => {
+    beforeEach(() => {
       panel = new NotebookPanel({ rendermime, clipboard, renderer });
       context.model.fromJSON(DEFAULT_CONTENT);
       panel.context = context;
-      sessionPromise.then(session => {
-        return context.changeKernel({ id: session.kernel.id });
-      }).then(() => {
-        return context.kernel.interrupt();
-      }).then(done, done);
     });
 
     afterEach(() => {
@@ -221,14 +222,16 @@ describe('notebook/notebook/default-toolbar', () => {
         cell.model.outputs.clear();
         next.rendered = false;
         Widget.attach(button, document.body);
-        panel.kernel.statusChanged.connect((sender, status) => {
-          if (status === 'idle' && cell.model.outputs.length > 0) {
-            expect(next.rendered).to.be(true);
-            button.dispose();
-            done();
-          }
+        startKernel(panel.context).then(kernel => {
+          kernel.statusChanged.connect((sender, status) => {
+            if (status === 'idle' && cell.model.outputs.length > 0) {
+              expect(next.rendered).to.be(true);
+              button.dispose();
+              done();
+            }
+          });
+          button.node.click();
         });
-        button.node.click();
       });
 
       it('should have the `\'jp-Notebook-toolbarRun\'` class', () => {
@@ -239,23 +242,6 @@ describe('notebook/notebook/default-toolbar', () => {
     });
 
     describe('#createInterruptButton()', () => {
-
-      it('should interrupt the kernel when clicked', (done) => {
-        let button = createInterruptButton(panel);
-        Widget.attach(button, document.body);
-        let clicked = false;
-        panel.kernel.statusChanged.connect((sender, status) => {
-          if (status === 'idle') {
-            if (!clicked) {
-              button.node.click();
-              clicked = true;
-            } else {
-              button.dispose();
-              done();
-            }
-          }
-        });
-      });
 
       it('should have the `\'jp-Kernel-toolbarInterrupt\'` class', () => {
         let button = createInterruptButton(panel);
@@ -304,8 +290,7 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should handle a change in context', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         context.model.fromJSON(DEFAULT_CONTENT);
-        let name = context.kernelspecs.default;
-        context.changeKernel({ name });
+        context.startDefaultKernel();
         panel.context = null;
         panel.content.activeCellIndex++;
         let node = item.node.getElementsByTagName('select')[0];
@@ -317,49 +302,53 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#createKernelNameItem()', () => {
 
       it('should display the `\'display_name\'` of the kernel', (done) => {
-        return panel.kernel.getSpec().then(spec => {
-          let item = createKernelNameItem(panel);
-          expect(item.node.textContent).to.be(spec.display_name);
+        let item = createKernelNameItem(panel);
+        startKernel(context).then(kernel => {
+          console.log('started kernel');
+          return kernel.ready();
+        }).then(() => {
+          let name = context.kernel.spec.display_name;
+          expect(item.node.textContent).to.be(name);
           done();
-        });
+        }).catch(done);
       });
 
       it('should display `\'No Kernel!\'` if there is no kernel', () => {
-        panel.context = null;
         let item = createKernelNameItem(panel);
         expect(item.node.textContent).to.be('No Kernel!');
       });
 
       it('should handle a change in context', (done) => {
         let item = createKernelNameItem(panel);
-        panel.kernel.getSpec().then(spec => {
+        startKernel(context).then(kernel => {
+          console.log('started kernel');
+          return kernel.ready();
+        }).then(() => {
           panel.context = null;
           expect(item.node.textContent).to.be('No Kernel!');
-        }).then(done, done);
+          done();
+        }).catch(done);
       });
 
     });
 
     describe('#createKernelStatusItem()', () => {
 
+      beforeEach((done) => {
+        startKernel(panel.context).then(() => {
+          done();
+        }).catch(done);
+      });
+
       it('should display a busy status if the kernel status is not idle', (done) => {
         let item = createKernelStatusItem(panel);
         panel.kernel.statusChanged.connect(() => {
-          if (!panel.kernel) {
-            return;
-          }
-          if (panel.kernel.status === 'idle') {
-            expect(item.hasClass('jp-mod-busy')).to.be(false);
-            panel.kernel.interrupt();
-          }
           if (panel.kernel.status === 'busy') {
             expect(item.hasClass('jp-mod-busy')).to.be(true);
             done();
           }
         });
-        if (panel.kernel.status === 'idle') {
-          panel.kernel.interrupt();
-        }
+        panel.kernel.requestExecute({ code: 'a = 1' });
       });
 
       it('should show the current status in the node title', (done) => {
@@ -367,42 +356,12 @@ describe('notebook/notebook/default-toolbar', () => {
         let status = panel.kernel.status;
         expect(item.node.title.toLowerCase()).to.contain(status);
         panel.kernel.statusChanged.connect(() => {
-          if (!panel.kernel) {
-            return;
-          }
-          if (panel.kernel.status === 'idle') {
-            panel.kernel.interrupt();
-          }
           if (panel.kernel.status === 'busy') {
             expect(item.node.title.toLowerCase()).to.contain('busy');
             done();
           }
         });
-        if (panel.kernel.status === 'idle') {
-          panel.kernel.interrupt();
-        }
-      });
-
-      it('should handle a change to the kernel', (done) => {
-        let item = createKernelStatusItem(panel);
-        let name = context.kernelspecs.default;
-        panel.context.changeKernel({ name }).then(() => {
-          panel.kernel.statusChanged.connect(() => {
-            if (!panel.kernel) {
-              return;
-            }
-            if (panel.kernel.status === 'idle') {
-              panel.kernel.interrupt();
-            }
-            if (panel.kernel.status === 'busy') {
-              expect(item.hasClass('jp-mod-busy')).to.be(true);
-              done();
-            }
-          });
-        }).catch(done);
-        if (panel.kernel.status === 'idle') {
-          panel.kernel.interrupt();
-        }
+        panel.kernel.requestExecute({ code: 'a = 1' });
       });
 
       it('should handle a null kernel', (done) => {
@@ -410,32 +369,17 @@ describe('notebook/notebook/default-toolbar', () => {
         panel.context.changeKernel(void 0).then(() => {
           expect(item.node.title).to.be('No Kernel!');
           expect(item.hasClass('jp-mod-busy')).to.be(true);
-        }).then(done, done);
+          done();
+        }).catch(done);
       });
 
-      it('should handle a change to the context', (done) => {
+      it('should handle a change to the context', () => {
         let item = createKernelStatusItem(panel);
-        createNotebookContext().then(c => {
-          context = c;
-          context.model.fromJSON(DEFAULT_CONTENT);
-          panel.context = c;
-          let name = context.kernelspecs.default;
-          return context.changeKernel({ name }).then(() => {
-            panel.kernel.statusChanged.connect(() => {
-              if (!panel.kernel) {
-                return;
-              }
-              if (panel.kernel.status === 'busy') {
-                expect(item.hasClass('jp-mod-busy')).to.be(true);
-                panel.kernel.interrupt();
-              }
-              if (panel.kernel.status === 'idle') {
-                expect(item.hasClass('jp-mod-busy')).to.be(false);
-                done();
-              }
-            });
-          });
-        }).catch(done);
+        context = createNotebookContext();
+        context.model.fromJSON(DEFAULT_CONTENT);
+        panel.context = context;
+        expect(item.node.title).to.be('No Kernel!');
+        expect(item.hasClass('jp-mod-busy')).to.be(true);
       });
 
     });

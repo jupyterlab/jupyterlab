@@ -150,14 +150,14 @@ describe('console/foreign', () => {
       it('should allow foreign cells to be injected if `true`', done => {
         let code = 'print("#enabled:true")';
         handler.injected.connect(() => { done(); });
-        foreign.kernel.execute({ code, stop_on_error: true });
+        foreign.kernel.requestExecute({ code, stop_on_error: true });
       });
 
       it('should reject foreign cells if `false`', done => {
         let code = 'print("#enabled:false")';
         handler.enabled = false;
         handler.rejected.connect(() => { done(); });
-        foreign.kernel.execute({ code, stop_on_error: true });
+        foreign.kernel.requestExecute({ code, stop_on_error: true });
       });
 
     });
@@ -254,7 +254,7 @@ describe('console/foreign', () => {
         let code = 'print("onIOPubMessage:disabled")';
         handler.enabled = false;
         handler.received.connect(() => { done(); });
-        foreign.kernel.execute({ code, stop_on_error: true });
+        foreign.kernel.requestExecute({ code, stop_on_error: true });
       });
 
       it('should inject relevant cells into the parent', done => {
@@ -265,7 +265,7 @@ describe('console/foreign', () => {
           expect(parent.widgets.length).to.be.greaterThan(0);
           done();
         });
-        foreign.kernel.execute({ code, stop_on_error: true });
+        foreign.kernel.requestExecute({ code, stop_on_error: true });
       });
 
       it('should not reject relevant iopub messages', done => {
@@ -279,7 +279,7 @@ describe('console/foreign', () => {
             done();
           }
         });
-        foreign.kernel.execute({ code, stop_on_error: true });
+        foreign.kernel.requestExecute({ code, stop_on_error: true });
       });
 
     });

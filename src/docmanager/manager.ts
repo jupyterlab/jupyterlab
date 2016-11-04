@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  IIterable, each
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -67,17 +67,17 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get the kernel spec models for the manager.
-   */
-  get kernelspecs(): Kernel.ISpecModels {
-    return this._serviceManager.kernelspecs;
-  }
-
-  /**
    * Get the registry used by the manager.
    */
   get registry(): DocumentRegistry {
     return this._registry;
+  }
+
+  /**
+   * Get the service manager used by the manager.
+   */
+  get services(): ServiceManager.IManager {
+    return this._serviceManager;
   }
 
   /**
@@ -127,8 +127,11 @@ class DocumentManager implements IDisposable {
       // Load the contents from disk.
       context.revert();
     }
-    if (kernel) {
+    // Handle the kernel for the context.
+    if (kernel && widgetFactory.canStartKernel) {
       context.changeKernel(kernel);
+    } else if (widgetFactory.preferKernel && !context.kernel) {
+      context.startDefaultKernel();
     }
     let widget = this._widgetManager.createWidget(widgetFactory.name, context);
     this._opener.open(widget);
@@ -156,41 +159,15 @@ class DocumentManager implements IDisposable {
     let context = this._createContext(path, factory);
     // Immediately save the contents to disk.
     context.save();
-    if (kernel) {
+    // Handle the kernel for the context.
+    if (kernel && widgetFactory.canStartKernel) {
       context.changeKernel(kernel);
+    } else if (widgetFactory.preferKernel && !context.kernel) {
+      context.startDefaultKernel();
     }
     let widget = this._widgetManager.createWidget(widgetFactory.name, context);
     this._opener.open(widget);
     return widget;
-  }
-
-  /**
-   * List the running notebook sessions.
-   */
-  listSessions(): Promise<Session.IModel[]> {
-    return this._serviceManager.sessions.listRunning();
-  }
-
-  /**
-   * Handle the renaming of an open document.
-   *
-   * @param oldPath - The previous path.
-   *
-   * @param newPath - The new path.
-   */
-  handleRename(oldPath: string, newPath: string): void {
-    each(this._contexts, context => {
-      if (context.path === oldPath) {
-        context.setPath(newPath);
-      }
-    });
-  }
-
-  /**
-   * Handle a file deletion.
-   */
-  handleDelete(path: string): void {
-    // TODO: Leave all of the widgets open and flag them as orphaned?
   }
 
   /**
@@ -287,7 +264,7 @@ class DocumentManager implements IDisposable {
       manager: this._serviceManager
     });
     Private.saveHandlerProperty.set(context, handler);
-    context.populated.connect(() => {
+    context.ready().then(() => {
       handler.start();
     });
     context.disposed.connect(() => {

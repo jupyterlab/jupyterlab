@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, Kernel, Session
+  Contents, Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -596,11 +596,6 @@ namespace DocumentRegistry {
     fileChanged: ISignal<this, Contents.IModel>;
 
     /**
-     * A signal emitted when the context is fully populated for the first time.
-     */
-    populated: ISignal<this, void>;
-
-    /**
      * A signal emitted when the context is disposed.
      */
     disposed: ISignal<this, void>;
@@ -625,19 +620,26 @@ namespace DocumentRegistry {
      *
      * #### Notes
      * The model will have an empty `contents` field.
-     * It will be `null` until the context is populated.
+     * It will be `null` until the context is ready.
      */
     readonly contentsModel: Contents.IModel;
 
     /**
-     * Get the kernel spec information.
+     * Whether the context is ready.
      */
-    readonly kernelspecs: Kernel.ISpecModels;
+    readonly isReady: boolean;
 
     /**
-     * Test whether the context is fully populated.
+     * A promise that is fulfilled when the context is ready.
      */
-    readonly isPopulated: boolean;
+    ready(): Promise<void>;
+
+    /**
+     * Start the default kernel for the context.
+     *
+     * @returns A promise that resolves with the new kernel.
+     */
+    startDefaultKernel(): Promise<Kernel.IKernel>;
 
     /**
      * Change the current kernel associated with the document.
@@ -696,11 +698,6 @@ namespace DocumentRegistry {
      *    the file.
      */
     listCheckpoints(): Promise<Contents.ICheckpointModel[]>;
-
-    /**
-     * Get the list of running sessions.
-     */
-    listSessions(): Promise<Session.IModel[]>;
 
     /**
      * Resolve a url to a correct server path.

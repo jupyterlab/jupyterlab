@@ -26,10 +26,8 @@ describe('docregistry/context', () => {
   let factory = new TextModelFactory();
 
   before((done) => {
-    ServiceManager.create().then(m => {
-      manager = m;
-      done();
-    }).catch(done);
+    manager = new ServiceManager();
+    manager.ready().then(done, done);
   });
 
   describe('Context', () => {
@@ -56,7 +54,7 @@ describe('docregistry/context', () => {
     describe('#kernelChanged', () => {
 
       it('should be emitted when the kernel changes', (done) => {
-        let name = manager.kernelspecs.default;
+        let name = manager.specs.default;
         context.kernelChanged.connect((sender, args) => {
           expect(sender).to.be(context);
           expect(args.name).to.be(name);
@@ -77,7 +75,9 @@ describe('docregistry/context', () => {
           expect(args).to.be('foo');
           done();
         });
-        context.setPath('foo');
+        context.save().then(() => {
+          return manager.contents.rename(context.path, 'foo');
+        }).catch(done);
       });
 
     });
@@ -95,43 +95,34 @@ describe('docregistry/context', () => {
 
     });
 
-    describe('#populated', () => {
+    describe('#isReady', () => {
 
-      it('should be emitted when the file is saved for the first time', (done) => {
-        let count = 0;
-        context.populated.connect((sender, args) => {
-          expect(sender).to.be(context);
-          expect(args).to.be(void 0);
-          count++;
-        });
-        context.save().then(() => {
-          expect(count).to.be(1);
-          return context.save();
-        }).then(() => {
-          expect(count).to.be(1);
+      it('should indicate whether the context is ready', (done) => {
+        expect(context.isReady).to.be(false);
+        context.ready().then(() => {
+          expect(context.isReady).to.be(true);
           done();
         }).catch(done);
+        context.save().catch(done);
       });
 
-      it('should be emitted when the file is reverted for the first time', (done) => {
+    });
+
+    describe('#ready()', () => {
+
+      it('should resolve when the file is saved for the first time', (done) => {
+        context.ready().then(done, done);
+        context.save().catch(done);
+      });
+
+      it('should resolve when the file is reverted for the first time', (done) => {
         manager.contents.save(context.path, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
         });
-        let count = 0;
-        context.populated.connect((sender, args) => {
-          expect(sender).to.be(context);
-          expect(args).to.be(void 0);
-          count++;
-        });
-        context.revert().then(() => {
-          expect(count).to.be(1);
-          return context.revert();
-        }).then(() => {
-          expect(count).to.be(1);
-          done();
-        }).catch(done);
+        context.ready().then(done, done);
+        context.revert().catch(done);
       });
 
     });
@@ -164,7 +155,7 @@ describe('docregistry/context', () => {
       });
 
       it('should be set after switching kernels', (done) => {
-        let name = manager.kernelspecs.default;
+        let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
           return context.changeKernel(null);
@@ -190,35 +181,11 @@ describe('docregistry/context', () => {
       });
 
       it('should be set after poulation', (done) => {
-        context.populated.connect(() => {
+        context.ready().then(() => {
           expect(context.contentsModel.name).to.be('foo');
           done();
         });
         context.save().catch(done);
-      });
-
-    });
-
-    describe('#kernelspecs', () => {
-
-      it('should be the kernelspecs model', () => {
-        let name = manager.kernelspecs.default;
-        expect(name in manager.kernelspecs.kernelspecs).to.be(true);
-      });
-
-    });
-
-    describe('#isPopulated', () => {
-
-      it('should be false before initial save', () => {
-        expect(context.isPopulated).to.be(false);
-      });
-
-      it('should be true after the initial save', (done) => {
-        context.save().then(() => {
-          expect(context.isPopulated).to.be(true);
-          done();
-        }).catch(done);
       });
 
     });
@@ -252,10 +219,23 @@ describe('docregistry/context', () => {
 
     });
 
+    describe('#startDefaultKernel()', () => {
+
+      it('should start the default kernel for the context', (done) => {
+        context.save().then(() => {
+          return context.startDefaultKernel();
+        }).then(kernel => {
+          expect(kernel.name).to.be.ok();
+          done();
+        }).catch(done);
+      });
+
+    });
+
     describe('#changeKernel()', () => {
 
       it('should change the kernel instance', (done) => {
-        let name = manager.kernelspecs.default;
+        let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
           return context.changeKernel(null);
@@ -265,7 +245,7 @@ describe('docregistry/context', () => {
       });
 
       it('should shut down the session if given `null`', (done) => {
-        let name = manager.kernelspecs.default;
+        let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
           return context.changeKernel(null);
@@ -295,6 +275,7 @@ describe('docregistry/context', () => {
       });
 
     });
+
 
     describe('#saveAs()', () => {
 
@@ -395,25 +376,6 @@ describe('docregistry/context', () => {
               return;
             }
           }
-        }).catch(done);
-      });
-
-    });
-
-    describe('#listSessions()', () => {
-
-      it('should list the running sessions', (done) => {
-        let name = manager.kernelspecs.default;
-        context.changeKernel({ name }).then(() => {
-          return context.listSessions();
-        }).then(models => {
-          for (let model of models) {
-            if (model.kernel.id === context.kernel.id) {
-              return context.changeKernel(null);
-            }
-          }
-        }).then(() => {
-          done();
         }).catch(done);
       });
 

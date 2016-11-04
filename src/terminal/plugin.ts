@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  TerminalSession
+} from '@jupyterlab/services';
+
+import {
   InstanceTracker
 } from '../common/instancetracker';
 
@@ -86,11 +90,13 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
       app.shell.addToMainArea(term);
       tracker.add(term);
-      services.terminals.create({ name }).then(session => {
-        term.session = session;
-        // Trigger an update of the running kernels.
-        services.terminals.listRunning();
-      });
+      let promise: Promise<TerminalSession.ISession>;
+      if (name) {
+        promise = services.terminals.connectTo(name);
+      } else {
+        promise = services.terminals.startNew();
+      }
+      promise.then(session => { term.session = session; });
     }
   });
   commands.addCommand(increaseTerminalFontSize, {
@@ -132,7 +138,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     execute: args => {
       let name = args['name'] as string;
       // Check for a running terminal with the given name.
-      let widget = tracker.find(widget => widget.session.name === name);
+      let widget = tracker.find(value => value.session.name === name);
       if (widget) {
         app.shell.activateMain(widget.id);
       } else {

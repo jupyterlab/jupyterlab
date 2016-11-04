@@ -22,11 +22,8 @@ describe('filebrowser/model', () => {
   let model: FileBrowserModel;
   let name: string;
 
-  before((done) => {
-    ServiceManager.create().then(m => {
-      manager = m;
-      done();
-    });
+  before(() => {
+    manager = new ServiceManager();
   });
 
   beforeEach((done) => {
@@ -94,8 +91,9 @@ describe('filebrowser/model', () => {
       it('should be emitted when a file is created', (done) => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
-          expect(args.name).to.be('file');
-          expect(args.oldValue).to.be(void 0);
+          console.log(args);
+          expect(args.type).to.be('new');
+          expect(args.oldValue).to.be(null);
           expect(args.newValue.type).to.be('file');
           done();
         });
@@ -105,12 +103,21 @@ describe('filebrowser/model', () => {
       it('should be emitted when a file is renamed', (done) => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
-          expect(args.name).to.be('file');
+          expect(args.type).to.be('rename');
           expect(args.oldValue.path).to.be(name);
           expect(args.newValue.path).to.be(name + '.bak');
           done();
         });
         model.rename(name, name + '.bak').catch(done);
+      });
+
+      it('should be emitted when a file is created outside of the model', (done) => {
+        model.fileChanged.connect((sender, args) => {
+          done();
+        });
+        manager.contents.newUntitled({ path: 'src' }).then(value => {
+          manager.contents.rename(value.path, name + 'bak');
+        }).catch(done);
       });
 
     });
@@ -161,14 +168,6 @@ describe('filebrowser/model', () => {
         }).then(() => {
           done();
         }).catch(done);
-      });
-
-    });
-
-    describe('#kernelspecs', () => {
-
-      it('should get the kernelspecs models', () => {
-        expect(model.kernelspecs.default).to.be(manager.kernelspecs.default);
       });
 
     });
@@ -239,17 +238,6 @@ describe('filebrowser/model', () => {
         }).catch(done);
       });
 
-      it('should emit a fileChanged signal', (done) => {
-        model.fileChanged.connect((sender, args) => {
-          expect(sender).to.be(model);
-          expect(args.name).to.be('file');
-          expect(args.oldValue).to.be(void 0);
-          expect(args.newValue.path).to.be(`src/${name}`);
-          done();
-        });
-        model.copy(name, 'src').catch(done);
-      });
-
     });
 
     describe('#deleteFile()', () => {
@@ -267,9 +255,9 @@ describe('filebrowser/model', () => {
       it('should emit a fileChanged signal', (done) => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
-          expect(args.name).to.be('file');
+          expect(args.type).to.be('delete');
           expect(args.oldValue.path).to.be(name);
-          expect(args.newValue).to.be(void 0);
+          expect(args.newValue).to.be(null);
           done();
         });
         model.deleteFile(name).catch(done);
@@ -300,8 +288,8 @@ describe('filebrowser/model', () => {
       it('should emit a fileChanged signal', (done) => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
-          expect(args.name).to.be('file');
-          expect(args.oldValue).to.be(void 0);
+          expect(args.type).to.be('new');
+          expect(args.oldValue).to.be(null);
           expect(args.newValue.type).to.be('directory');
           done();
         });
@@ -322,7 +310,7 @@ describe('filebrowser/model', () => {
       it('should emit the fileChanged signal', (done) => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
-          expect(args.name).to.be('file');
+          expect(args.type).to.be('rename');
           expect(args.oldValue.path).to.be(name);
           expect(args.newValue.path).to.be(name + '.new');
           done();
@@ -370,8 +358,8 @@ describe('filebrowser/model', () => {
       it('should emit the fileChanged signal', (done) => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
-          expect(args.name).to.be('file');
-          expect(args.oldValue).to.be(void 0);
+          expect(args.type).to.be('save');
+          expect(args.oldValue).to.be(null);
           expect(args.newValue.path).to.be('hello3.html');
           done();
         });
@@ -386,18 +374,17 @@ describe('filebrowser/model', () => {
 
       it('should shut down a session by session id', (done) => {
         let length = 0;
-        manager.sessions.listRunning().then(running => {
-          length = running.length;
-          return model.newUntitled({ type: 'notebook' });
-        }).then(contents => {
-          return manager.sessions.startNew({ path: contents.path });
+        let sessions = manager.sessions;
+        length = toArray(sessions.running()).length;
+        model.newUntitled({ type: 'notebook' }).then(contents => {
+          return sessions.startNew({ path: contents.path });
         }).then(session => {
           session.dispose();
           return model.shutdown(session.id);
         }).then(() => {
-          return manager.sessions.listRunning();
-        }).then(running => {
-          expect(running.length).to.be(length);
+          return sessions.refreshRunning();
+        }).then(() => {
+          expect(toArray(sessions.running()).length).to.be(length);
           done();
         }).catch(done);
       });

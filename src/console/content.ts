@@ -497,12 +497,10 @@ class ConsoleContent extends Widget {
    * Initialize the banner and mimetype.
    */
   private _initialize(): void {
-    let session = this._session;
-    if (session.kernel.info) {
-      this._handleInfo(this._session.kernel.info);
-      return;
-    }
-    session.kernel.kernelInfo().then(msg => this._handleInfo(msg.content));
+    let kernel = this._session.kernel;
+    kernel.ready().then(() => {
+      this._handleInfo(kernel.info);
+    });
   }
 
   /**
@@ -606,7 +604,7 @@ class ConsoleContent extends Widget {
     let code = prompt.model.source + '\n';
     return new Promise<boolean>((resolve, reject) => {
       let timer = setTimeout(() => { resolve(true); }, timeout);
-      this._session.kernel.isComplete({ code }).then(isComplete => {
+      this._session.kernel.requestIsComplete({ code }).then(isComplete => {
         clearTimeout(timer);
         if (isComplete.content.status !== 'incomplete') {
           resolve(true);

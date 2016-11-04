@@ -140,7 +140,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     };
     let pending = ++this._pending;
 
-    this._kernel.inspect(contents).then(msg => {
+    this._kernel.requestInspect(contents).then(msg => {
       let value = msg.content;
 
       // If handler has been disposed, bail.

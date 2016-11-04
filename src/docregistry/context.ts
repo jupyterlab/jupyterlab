@@ -26,6 +26,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  findKernel
+} from '../docregistry';
+
+import {
   showDialog, okButton
 } from '../dialog';
 
@@ -53,32 +57,31 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let lang = this._factory.preferredLanguage(ext);
     this._model = this._factory.createNew(lang);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
+    manager.contents.fileChanged.connect(this._onFileChanged, this);
+    this._readyPromise = manager.ready().then(() => {
+      return this._populatedPromise.promise;
+    });
   }
 
   /**
    * A signal emitted when the kernel changes.
    */
-  kernelChanged: ISignal<DocumentRegistry.IContext<T>, Kernel.IKernel>;
+  kernelChanged: ISignal<this, Kernel.IKernel>;
 
   /**
    * A signal emitted when the path changes.
    */
-  pathChanged: ISignal<DocumentRegistry.IContext<T>, string>;
+  pathChanged: ISignal<this, string>;
 
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  fileChanged: ISignal<DocumentRegistry.IContext<T>, Contents.IModel>;
-
-  /**
-   * A signal emitted when the context is fully populated for the first time.
-   */
-  populated: ISignal<DocumentRegistry.IContext<T>, void>;
+  fileChanged: ISignal<this, Contents.IModel>;
 
   /**
    * A signal emitted when the context is disposed.
    */
-  disposed: ISignal<DocumentRegistry.IContext<T>, void>;
+  disposed: ISignal<this, void>;
 
   /**
    * Get the model associated with the document.
@@ -109,20 +112,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   get contentsModel(): Contents.IModel {
     return this._contentsModel;
-  }
-
-  /**
-   * Get the kernel spec information.
-   */
-  get kernelspecs(): Kernel.ISpecModels {
-    return this._manager.kernelspecs;
-  }
-
-  /**
-   * Test whether the context is fully populated.
-   */
-  get isPopulated(): boolean {
-    return this._isPopulated;
   }
 
   /**
@@ -160,6 +149,44 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         this._session = null;
       });
     }
+  }
+
+  /**
+   * The kernel spec models
+   */
+  get specs(): Kernel.ISpecModels {
+    return this._manager.specs;
+  }
+
+  /**
+   * Whether the context is ready.
+   */
+  get isReady(): boolean {
+    return this._isReady;
+  }
+
+ /**
+  * A promise that is fulfilled when the context is ready.
+  */
+  ready(): Promise<void> {
+    return this._readyPromise;
+  }
+
+  /**
+   * Start the default kernel for the context.
+   *
+   * @returns A promise that resolves with the new kernel.
+   */
+  startDefaultKernel(): Promise<Kernel.IKernel> {
+    return this.ready().then(() => {
+      let model = this.model;
+      let name = findKernel(
+        model.defaultKernelName,
+        model.defaultKernelLanguage,
+        this._manager.specs
+      );
+      return this.changeKernel({ name });
+    });
   }
 
   /**
@@ -240,7 +267,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       if (!newPath) {
         return;
       }
-      this.setPath(newPath);
+      this._path = newPath;
       let session = this._session;
       if (session) {
         let options: Session.IOptions = {
@@ -327,13 +354,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * Get the list of running sessions.
-   */
-  listSessions(): Promise<Session.IModel[]> {
-    return this._manager.sessions.listRunning();
-  }
-
-  /**
    * Resolve a relative url to a correct server path.
    */
   resolveUrl(url: string): string {
@@ -360,21 +380,19 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * Set the path of the context.
-   *
-   * #### Notes
-   * This is not part of the `IContext` API and
-   * is not intended to be called by the user.
-   * It is assumed that the file has been renamed on the
-   * contents manager prior to this operation.
+   * Handle a change on the contents manager.
    */
-  setPath(value: string): void {
-    this._path = value;
-    let session = this._session;
-    if (session) {
-      session.rename(value);
+  private _onFileChanged(sender: Contents.IManager, change: Contents.IChangedArgs): void {
+    if (change.type !== 'rename') {
+      return;
     }
-    this.pathChanged.emit(value);
+    if (change.oldValue.path === this._path) {
+      let path = this._path = change.newValue.path;
+      if (this._session) {
+        this._session.rename(path);
+      }
+      this.pathChanged.emit(path);
+    }
   }
 
   /**
@@ -389,7 +407,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       this.kernelChanged.emit(session.kernel);
       session.pathChanged.connect((s, path) => {
         if (path !== this._path) {
-          this.setPath(path);
+          this._path = path;
+          this.pathChanged.emit(path);
         }
       });
       session.kernelChanged.connect((s, kernel) => {
@@ -447,7 +466,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this.createCheckpoint();
       }
     }).then(() => {
-      this.populated.emit(void 0);
+      this._isReady = true;
+      this._populatedPromise.resolve(void 0);
     });
   }
 
@@ -457,8 +477,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _path = '';
   private _session: Session.ISession = null;
   private _factory: DocumentRegistry.IModelFactory<T> = null;
-  private _isPopulated = false;
   private _contentsModel: Contents.IModel = null;
+  private _readyPromise: Promise<void>;
+  private _populatedPromise = new utils.PromiseDelegate<void>();
+  private _isPopulated = false;
+  private _isReady = false;
 }
 
 
@@ -466,7 +489,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
 defineSignal(Context.prototype, 'kernelChanged');
 defineSignal(Context.prototype, 'pathChanged');
 defineSignal(Context.prototype, 'fileChanged');
-defineSignal(Context.prototype, 'populated');
 defineSignal(Context.prototype, 'disposed');
 
 

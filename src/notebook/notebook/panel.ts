@@ -34,7 +34,7 @@ import {
 } from '../../common/interfaces';
 
 import {
-  DocumentRegistry, findKernel
+  DocumentRegistry
 } from '../../docregistry';
 
 import {
@@ -257,32 +257,12 @@ class NotebookPanel extends Widget {
   }
 
   /**
-   * Handle a context population.
-   */
-  protected onPopulated(sender: DocumentRegistry.IContext<INotebookModel>, args: void): void {
-    let model = sender.model;
-    // Clear the undo state of the cells.
-    if (model) {
-      model.cells.clearUndo();
-    }
-    if (!sender.kernel && model) {
-      let name = findKernel(
-        model.defaultKernelName,
-        model.defaultKernelLanguage,
-        sender.kernelspecs
-      );
-      sender.changeKernel({ name });
-    }
-  }
-
-  /**
    * Handle a change in the context.
    */
   private _onContextChanged(oldValue: DocumentRegistry.IContext<INotebookModel>, newValue: DocumentRegistry.IContext<INotebookModel>): void {
     if (oldValue) {
       oldValue.kernelChanged.disconnect(this._onKernelChanged, this);
       oldValue.pathChanged.disconnect(this.onPathChanged, this);
-      oldValue.populated.disconnect(this.onPopulated, this);
       if (oldValue.model) {
         oldValue.model.stateChanged.disconnect(this.onModelStateChanged, this);
       }
@@ -300,11 +280,18 @@ class NotebookPanel extends Widget {
     this._content.model = newValue.model;
     this._handleDirtyState();
     newValue.model.stateChanged.connect(this.onModelStateChanged, this);
-    if (newValue.isPopulated) {
-      this.onPopulated(newValue, void 0);
-    } else {
-      newValue.populated.connect(this.onPopulated, this);
+
+    // Clear the cells when the context is initially populated.
+    if (!newValue.isReady) {
+      newValue.ready().then(() => {
+        let model = newValue.model;
+        // Clear the undo state of the cells.
+        if (model) {
+          model.cells.clearUndo();
+        }
+      });
     }
+
     // Handle the document title.
     this.onPathChanged(context, context.path);
     context.pathChanged.connect(this.onPathChanged, this);
@@ -320,15 +307,11 @@ class NotebookPanel extends Widget {
     if (!this.model || !kernel) {
       return;
     }
-    if (kernel.info) {
-      this._updateLanguage(kernel.info.language_info);
-    } else {
-      kernel.kernelInfo().then(msg => {
-        if (this.model) {
-          this._updateLanguage(msg.content.language_info);
-        }
-      });
-    }
+    kernel.ready().then(() => {
+      if (this.model) {
+        this._updateLanguage(kernel.info.language_info);
+      }
+    });
     this._updateSpec(kernel);
   }
 
@@ -344,13 +327,13 @@ class NotebookPanel extends Widget {
    * Update the kernel spec.
    */
   private _updateSpec(kernel: Kernel.IKernel): void {
-    let specs = this.context.kernelspecs;
-    let spec = specs.kernelspecs[kernel.name];
-    let specCursor = this.model.getMetadata('kernelspec');
-    specCursor.setValue({
-      name: kernel.name,
-      display_name: spec.display_name,
-      language: spec.language
+    kernel.ready().then(() => {
+      let specCursor = this.model.getMetadata('kernelspec');
+      specCursor.setValue({
+        name: kernel.name,
+        display_name: kernel.spec.display_name,
+        language: kernel.spec.language
+      });
     });
   }
 

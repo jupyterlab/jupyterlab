@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  ServiceManager
+} from '@jupyterlab/services';
+
+import {
   MimeData
 } from 'phosphor/lib/core/mimedata';
 
@@ -54,7 +58,6 @@ import {
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
 const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
-const contextPromise = createNotebookContext();
 
 
 class LogNotebookPanel extends NotebookPanel {
@@ -75,11 +78,6 @@ class LogNotebookPanel extends NotebookPanel {
     super.onPathChanged(sender, path);
     this.methods.push('onPathChanged');
   }
-
-  protected onPopulated(sender: DocumentRegistry.IContext<INotebookModel>, args: void): void {
-    super.onPopulated(sender, args);
-    this.methods.push('onPopulated');
-  }
 }
 
 
@@ -94,16 +92,23 @@ function createPanel(context: Context<INotebookModel>): LogNotebookPanel {
 describe('notebook/notebook/panel', () => {
 
   let context: Context<INotebookModel>;
+  let manager: ServiceManager.IManager;
 
-  beforeEach((done) => {
-    contextPromise.then(c => {
-      context = c;
-      done();
-    });
+  before((done) => {
+    manager = new ServiceManager();
+    manager.ready().then(done, done);
+  });
+
+  beforeEach(() => {
+    context = createNotebookContext('', manager);
+  });
+
+  afterEach(() => {
+    context.dispose();
   });
 
   after(() => {
-    context.kernel.shutdown();
+    manager.dispose();
   });
 
   describe('NotebookPanel', () => {
@@ -157,10 +162,12 @@ describe('notebook/notebook/panel', () => {
         let panel = createPanel(context);
         panel.kernelChanged.connect((sender, args) => {
           expect(sender).to.be(panel);
-          expect(args.name).to.be(context.kernelspecs.default);
+          expect(args.name).to.be.ok();
           done();
         });
-        panel.context.changeKernel({ name: context.kernelspecs.default });
+        panel.context.save().then(() => {
+          return panel.context.startDefaultKernel();
+        }).catch(done);
       });
 
     });
@@ -187,9 +194,11 @@ describe('notebook/notebook/panel', () => {
 
       it('should be the current kernel used by the panel', (done) => {
         let panel = createPanel(context);
-        context.changeKernel({ name: context.kernelspecs.default });
+        context.save().then(() => {
+          return context.startDefaultKernel();
+        }).catch(done);
         context.kernelChanged.connect(() => {
-          expect(panel.kernel.name).to.be(context.kernelspecs.default);
+          expect(panel.kernel.name).to.be.ok();
           done();
         });
       });
@@ -257,6 +266,20 @@ describe('notebook/notebook/panel', () => {
         expect(called).to.be(true);
       });
 
+
+      it('should initialize the model state', (done) => {
+        let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
+        let model = context.model;
+        model.fromJSON(DEFAULT_CONTENT);
+        expect(model.cells.canUndo).to.be(true);
+        panel.context = context;
+        context.ready().then(() => {
+          expect(model.cells.canUndo).to.be(false);
+          done();
+        });
+        context.save();
+      });
+
     });
 
     describe('#dispose()', () => {
@@ -288,24 +311,6 @@ describe('notebook/notebook/panel', () => {
 
     });
 
-    describe('#onPopulated()', () => {
-
-      it('should initialize the model state', (done) => {
-        let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
-        let model = context.model;
-        model.fromJSON(DEFAULT_CONTENT);
-        expect(model.cells.canUndo).to.be(true);
-        panel.context = context;
-        context.populated.connect(() => {
-          expect(panel.methods).to.contain('onPopulated');
-          expect(model.cells.canUndo).to.be(false);
-          done();
-        });
-        context.save();
-      });
-
-    });
-
     describe('#onModelStateChanged()', () => {
 
       it('should be called when the model state changes', () => {
@@ -327,13 +332,17 @@ describe('notebook/notebook/panel', () => {
 
     describe('#onPathChanged()', () => {
 
-      // it('should be called when the path changes', () => {
-      //   let panel = createPanel(context);
-      //   panel.methods = [];
-      //   // TODO: add a saveAs mock
-      //   panel.context.setPath('');
-      //   expect(panel.methods).to.contain('onPathChanged');
-      // });
+      it('should be called when the path changes', (done) => {
+        let panel = createPanel(context);
+        panel.methods = [];
+        context.save().then(() => {
+          return manager.contents.rename(context.path, 'foo.ipynb');
+        }).catch(done);
+        context.pathChanged.connect(() => {
+          expect(panel.methods).to.contain('onPathChanged');
+          done();
+        });
+      });
 
       it('should be called when the context changes', () => {
         let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
@@ -354,8 +363,8 @@ describe('notebook/notebook/panel', () => {
       describe('#createContent()', () => {
 
         it('should create a notebook widget', () => {
-          let renderer = new CodeMirrorNotebookPanelRenderer();
-          expect(renderer.createContent(rendermime)).to.be.a(Notebook);
+          let r = new CodeMirrorNotebookPanelRenderer();
+          expect(r.createContent(rendermime)).to.be.a(Notebook);
         });
 
       });
@@ -363,8 +372,8 @@ describe('notebook/notebook/panel', () => {
       describe('#createToolbar()', () => {
 
         it('should create a notebook toolbar', () => {
-          let renderer = new CodeMirrorNotebookPanelRenderer();
-          expect(renderer.createToolbar()).to.be.a(Toolbar);
+          let r = new CodeMirrorNotebookPanelRenderer();
+          expect(r.createToolbar()).to.be.a(Toolbar);
         });
 
       });
@@ -372,8 +381,8 @@ describe('notebook/notebook/panel', () => {
       describe('#createCompleter()', () => {
 
         it('should create a completer widget', () => {
-          let renderer = new CodeMirrorNotebookPanelRenderer();
-          expect(renderer.createCompleter()).to.be.a(CompleterWidget);
+          let r = new CodeMirrorNotebookPanelRenderer();
+          expect(r.createCompleter()).to.be.a(CompleterWidget);
         });
 
       });

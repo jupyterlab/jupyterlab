@@ -54,12 +54,11 @@ function defaultRenderMime(): RenderMime {
  * Create a context for a file.
  */
 export
-function createFileContext(path?: string): Promise<Context<DocumentRegistry.IModel>> {
-  return Private.servicePromise.then(manager => {
-    let factory = Private.textFactory;
-    path = path || utils.uuid() + '.txt';
-    return new Context({ manager, factory, path });
-  });
+function createFileContext(path?: string, manager?: ServiceManager.IManager): Context<DocumentRegistry.IModel> {
+  manager = manager || Private.manager;
+  let factory = Private.textFactory;
+  path = path || utils.uuid() + '.txt';
+  return new Context({ manager, factory, path });
 }
 
 
@@ -67,12 +66,11 @@ function createFileContext(path?: string): Promise<Context<DocumentRegistry.IMod
  * Create a context for a notebook.
  */
 export
-function createNotebookContext(path?: string): Promise<Context<INotebookModel>> {
-  return Private.servicePromise.then(manager => {
-    let factory = Private.notebookFactory;
-    path = path || utils.uuid() + '.ipynb';
-    return new Context({ manager, factory, path });
-  });
+function createNotebookContext(path?: string, manager?: ServiceManager.IManager): Context<INotebookModel> {
+  manager = manager || Private.manager;
+  let factory = Private.notebookFactory;
+  path = path || utils.uuid() + '.ipynb';
+  return new Context({ manager, factory, path });
 }
 
 
@@ -131,7 +129,7 @@ function dismissDialog(host: HTMLElement = document.body): Promise<void> {
  */
 namespace Private {
   export
-  const servicePromise: Promise<ServiceManager.IManager> = ServiceManager.create();
+  const manager = new ServiceManager();
 
   export
   const textFactory = new TextModelFactory();
