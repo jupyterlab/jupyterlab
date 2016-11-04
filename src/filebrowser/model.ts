@@ -384,7 +384,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    * Handle a change on the contents manager.
    */
   private _onFileChanged(sender: Contents.IManager, change: Contents.IChangedArgs): void {
-    let path = this._model.path;
+    let path = this._model.path || '.';
     let value = change.oldValue;
     if (value && value.path && ContentsManager.dirname(value.path) === path) {
       this.fileChanged.emit(change);

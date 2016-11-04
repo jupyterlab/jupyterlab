@@ -91,6 +91,7 @@ describe('filebrowser/model', () => {
       it('should be emitted when a file is created', (done) => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
+          console.log(args);
           expect(args.type).to.be('new');
           expect(args.oldValue).to.be(null);
           expect(args.newValue.type).to.be('file');
@@ -108,6 +109,15 @@ describe('filebrowser/model', () => {
           done();
         });
         model.rename(name, name + '.bak').catch(done);
+      });
+
+      it('should be emitted when a file is created outside of the model', (done) => {
+        model.fileChanged.connect((sender, args) => {
+          done();
+        });
+        manager.contents.newUntitled({ path: 'src' }).then(value => {
+          manager.contents.rename(value.path, name + 'bak');
+        }).catch(done);
       });
 
     });
@@ -226,17 +236,6 @@ describe('filebrowser/model', () => {
           expect(contents.path).to.be(`src/${name}`);
           done();
         }).catch(done);
-      });
-
-      it('should emit a fileChanged signal', (done) => {
-        model.fileChanged.connect((sender, args) => {
-          expect(sender).to.be(model);
-          expect(args.type).to.be('new');
-          expect(args.oldValue).to.be(null);
-          expect(args.newValue.path).to.be(`src/${name}`);
-          done();
-        });
-        model.copy(name, 'src').catch(done);
       });
 
     });
@@ -359,7 +358,7 @@ describe('filebrowser/model', () => {
       it('should emit the fileChanged signal', (done) => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
-          expect(args.type).to.be('new');
+          expect(args.type).to.be('save');
           expect(args.oldValue).to.be(null);
           expect(args.newValue.path).to.be('hello3.html');
           done();
