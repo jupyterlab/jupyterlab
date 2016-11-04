@@ -128,13 +128,13 @@ describe('toolbar/toolbar', () => {
         widget.addItem('a', new Widget());
         let b = new Widget();
         widget.addItem('b', b);
-        expect(widget.removeItem(b)).to.be(1);
+        expect(widget.removeItem(b)).to.be(void 0);
       });
 
-      it('should return -1 if the widget is not in the toolbar', () => {
+      it('should be a no-op the widget is not in the toolbar', () => {
         let widget = new Toolbar();
         widget.addItem('a', new Widget());
-        expect(widget.removeItem(new Widget())).to.be(-1);
+        expect(widget.removeItem(new Widget())).to.be(void 0);
       });
 
     });

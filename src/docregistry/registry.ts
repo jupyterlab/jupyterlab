@@ -400,7 +400,7 @@ class DocumentRegistry {
   widgetExtensions(widgetName: string): IIterator<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      return empty() as IIterator<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>>;
+      return empty<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>>();
     }
     return this._extenders[widgetName].iter();
   }
