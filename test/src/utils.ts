@@ -100,6 +100,9 @@ export
 function acceptDialog(host: HTMLElement = document.body): Promise<void> {
   return waitForDialog(host).then(() => {
     let node = host.getElementsByClassName('jp-Dialog-okButton')[0];
+    if (!node) {
+      node = host.getElementsByClassName('jp-Dialog-warningButton')[0];
+    }
     if (node) {
       (node as HTMLElement).click();
     }
