@@ -301,9 +301,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   /**
    * Get the kernel given the create args.
-   *
-   * #### Notes
-   * The manager must be ready before calling this function.
    */
   function getKernel(args: ICreateConsoleArgs, name: string): Promise<Kernel.IModel> {
     if (args.kernel) {
