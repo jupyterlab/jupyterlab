@@ -46,9 +46,10 @@ class CSVModel extends VDomModel {
   }
 
   /**
-   * A signal emitted when the parsed value's rows exceed the display limit.
+   * A signal emitted when the parsed value's rows exceed the display limit. It
+   * emits the length of the parsed value.
    */
-  readonly maxExceeded: ISignal<this, void>;
+  readonly maxExceeded: ISignal<this, CSVModel.IOverflow>;
 
   /**
    * The raw model content.
@@ -100,7 +101,10 @@ class CSVModel extends VDomModel {
     let output = dsv.dsvFormat(this._delimiter).parse(this._content);
     if (output.length > DISPLAY_LIMIT) {
       output.splice(0, DISPLAY_LIMIT);
-      this.maxExceeded.emit(void 0);
+      this.maxExceeded.emit({
+        available: output.length,
+        maximum: DISPLAY_LIMIT
+      });
     }
     return output;
   }
@@ -119,6 +123,22 @@ defineSignal(CSVModel.prototype, 'maxExceeded');
  */
 export
 namespace CSVModel {
+  /**
+   * The value emitted when there are more data rows than what can be displayed.
+   */
+  export
+  interface IOverflow {
+    /**
+     * The actual number of rows in the data.
+     */
+    available: number;
+
+    /**
+     * The maximum number of items that can be displayed.
+     */
+    maximum: number;
+  }
+
   /**
    * Instantiation options for CSV models.
    */
@@ -158,7 +178,7 @@ class CSVTable extends VDomWidget<CSVModel> {
    */
   protected render(): VNode | VNode[] {
     let rows = this.model.parse();
-    let cols = rows.columns;
+    let cols = rows.columns || [];
     return h.table([
       h.thead(cols.map(col => h.th(col))),
       h.tbody(rows.map(row => h.tr(cols.map(col => h.td(row[col])))))
