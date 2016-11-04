@@ -109,6 +109,9 @@ class FileBrowser extends Widget {
       let oldPath = args.oldValue && args.oldValue.path || null;
       if (args.newValue) {
         manager.handleRename(oldPath, args.newValue.path);
+      } else if (args.newValue.type === 'directory') {
+        this._listing.selectItemByName(args.oldValue.path);
+        this._listing.rename();
       } else {
         manager.handleDelete(oldPath);
       }
