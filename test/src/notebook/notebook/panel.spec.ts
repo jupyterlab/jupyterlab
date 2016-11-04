@@ -78,11 +78,6 @@ class LogNotebookPanel extends NotebookPanel {
     super.onPathChanged(sender, path);
     this.methods.push('onPathChanged');
   }
-
-  protected onPopulated(sender: DocumentRegistry.IContext<INotebookModel>, args: void): void {
-    super.onPopulated(sender, args);
-    this.methods.push('onPopulated');
-  }
 }
 
 
