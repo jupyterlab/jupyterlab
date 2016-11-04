@@ -79,11 +79,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   fileChanged: ISignal<this, Contents.IModel>;
 
   /**
-   * A signal emitted when the context is fully populated for the first time.
-   */
-  populated: ISignal<this, void>;
-
-  /**
    * A signal emitted when the context is disposed.
    */
   disposed: ISignal<this, void>;
