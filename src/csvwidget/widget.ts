@@ -42,18 +42,21 @@ const CSV_WARNING_CLASS = 'jp-CSVWidget-warning';
 
 
 /**
- * A widget for csv tables.
+ * A widget for CSV tables.
  */
 export
 class CSVWidget extends Widget {
   /**
    * Construct a new csv table widget.
    */
-  constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
+  constructor(options: CSVWidget.IOptions) {
     super();
+
+    let context = options.context;
     let layout = this.layout = new PanelLayout();
-    this.title.label = context.path.split('/').pop();
+
     this.addClass(CSV_CLASS);
+    this.title.label = context.path.split('/').pop();
 
     this._warning = new Widget();
     this._warning.addClass(CSV_WARNING_CLASS);
@@ -75,7 +78,6 @@ class CSVWidget extends Widget {
     layout.addWidget(this._toolbar);
     layout.addWidget(this._table);
     layout.addWidget(this._warning);
-
 
     context.pathChanged.connect((c, path) => {
       this.title.label = path.split('/').pop();
@@ -114,6 +116,21 @@ class CSVWidget extends Widget {
 
 
 /**
+ * A namespace for `CSVWidget` statics.
+ */
+export
+namespace CSVWidget {
+  /**
+   * Instantiation options for CSV widgets.
+   */
+  export
+  interface IOptions {
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+  }
+}
+
+
+/**
  * A widget factory for CSV widgets.
  */
 export
@@ -143,6 +160,6 @@ class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IMod
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): CSVWidget {
-    return new CSVWidget(context);
+    return new CSVWidget({ context });
   }
 }
