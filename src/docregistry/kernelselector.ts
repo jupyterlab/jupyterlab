@@ -135,7 +135,7 @@ function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegis
       specs: manager.specs,
       sessions: manager.running(),
       preferredLanguage: context.model.defaultKernelLanguage,
-      kernel: context.kernel.model,
+      kernel: context.kernel ? context.kernel.model : null,
       host
     };
     return selectKernel(options);
