@@ -284,10 +284,10 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
     matchingSessions.sort((a, b) => {
       return a.notebook.path.localeCompare(b.notebook.path);
     });
-    for (let session of matchingSessions) {
+    each(matchingSessions, session => {
       let name = displayNames[session.kernel.name];
       node.appendChild(optionForSession(session, name, maxLength));
-    }
+    });
     node.appendChild(createSeparatorOption(maxLength));
   }
 
@@ -295,10 +295,10 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
     otherSessions.sort((a, b) => {
       return a.notebook.path.localeCompare(b.notebook.path);
     });
-    for (let session of otherSessions) {
+    each(otherSessions, session => {
       let name = displayNames[session.kernel.name] || session.kernel.name;
       node.appendChild(optionForSession(session, name, maxLength));
-    }
+    });
   }
   node.selectedIndex = 0;
 }

@@ -31,8 +31,8 @@ function main(): void {
     color: 'black'
   });
 
-  TerminalSession.startNew().then(session => term1.session = session);
-  TerminalSession.startNew().then(session => term2.session = session);
+  TerminalSession.startNew().then(session => { term1.session = session; });
+  TerminalSession.startNew().then(session => { term2.session = session; });
 
   term1.title.closable = true;
   term2.title.closable = true;

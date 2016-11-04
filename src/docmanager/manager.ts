@@ -74,7 +74,7 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * The the service manager used by the manager.
+   * Get the service manager used by the manager.
    */
   get services(): ServiceManager.IManager {
     return this._serviceManager;

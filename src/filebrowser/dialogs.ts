@@ -479,7 +479,7 @@ class CreateNewHandler extends Widget {
     }
     // Update the file type dropdown and the factories.
     if (this._extensions.indexOf(ext) === -1) {
-      this.fileTypeDropdown.value = this._sentinal;
+      this.fileTypeDropdown.value = this._sentinel;
     } else {
       this.fileTypeDropdown.value = ext;
     }
@@ -493,7 +493,7 @@ class CreateNewHandler extends Widget {
     let dropdown = this.fileTypeDropdown;
     let option = document.createElement('option');
     option.text = 'File';
-    option.value = this._sentinal;
+    option.value = this._sentinel;
 
     each(this._manager.registry.fileTypes(), ft => {
       option = document.createElement('option');
@@ -505,7 +505,7 @@ class CreateNewHandler extends Widget {
     if (this.ext in this._extensions) {
       dropdown.value = this.ext;
     } else {
-      dropdown.value = this._sentinal;
+      dropdown.value = this._sentinel;
     }
   }
 
@@ -557,7 +557,7 @@ class CreateNewHandler extends Widget {
 
   private _model: FileBrowserModel = null;
   private _manager: DocumentManager = null;
-  private _sentinal = 'UNKNOWN_EXTENSION';
+  private _sentinel = 'UNKNOWN_EXTENSION';
   private _prevExt = '';
   private _extensions: string[] = [];
 }
