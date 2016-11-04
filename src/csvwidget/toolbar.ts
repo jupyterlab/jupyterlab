@@ -34,7 +34,7 @@ class CSVToolbar extends Widget {
    * Construct a new csv table widget.
    */
   constructor() {
-    super({ node: Private.createDelimiterSwitcherNode() });
+    super({ node: Private.createNode() });
     this.addClass(CSV_TOOLBAR_CLASS);
   }
 
@@ -108,7 +108,7 @@ namespace Private {
    * Create the node for the delimiter switcher.
    */
   export
-  function createDelimiterSwitcherNode(): HTMLElement {
+  function createNode(): HTMLElement {
     let div = document.createElement('div');
     let label = document.createElement('span');
     label.textContent = 'Delimiter:';
