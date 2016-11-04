@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  each, zip
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -111,19 +115,15 @@ namespace Private {
   function createNode(): HTMLElement {
     let div = document.createElement('div');
     let label = document.createElement('span');
-    label.textContent = 'Delimiter:';
     let select = document.createElement('select');
-    for (let delim of [',', ';', '\t']) {
-      let option = document.createElement('option');
-      option.value = delim;
-      if (delim === '\t') {
-        option.textContent = '\\t';
-      } else {
-        option.textContent = delim;
-      }
-      select.appendChild(option);
-    }
     select.className = CSV_TOOLBAR_DROPDOWN_CLASS;
+    label.textContent = 'Delimiter: ';
+    each(zip([',', ';', '\t'], [',', ';', '\\t']), ([delimiter, label]) => {
+      let option = document.createElement('option');
+      option.value = delimiter;
+      option.textContent = label;
+      select.appendChild(option);
+    });
     div.appendChild(label);
     div.appendChild(select);
     return div;
