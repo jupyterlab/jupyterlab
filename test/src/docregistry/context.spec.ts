@@ -25,8 +25,9 @@ describe('docregistry/context', () => {
   let manager: ServiceManager.IManager;
   let factory = new TextModelFactory();
 
-  before(() => {
+  before((done) => {
     manager = new ServiceManager();
+    manager.ready().then(done, done);
   });
 
   describe('Context', () => {
@@ -53,7 +54,7 @@ describe('docregistry/context', () => {
     describe('#kernelChanged', () => {
 
       it('should be emitted when the kernel changes', (done) => {
-        let name = manager.kernelspecs.default;
+        let name = manager.specs.default;
         context.kernelChanged.connect((sender, args) => {
           expect(sender).to.be(context);
           expect(args.name).to.be(name);
@@ -74,7 +75,7 @@ describe('docregistry/context', () => {
           expect(args).to.be('foo');
           done();
         });
-        context.setPath('foo');
+        manager.contents.rename(context.path, 'foo');
       });
 
     });
@@ -152,7 +153,7 @@ describe('docregistry/context', () => {
       });
 
       it('should be set after switching kernels', (done) => {
-        let name = manager.kernelspecs.default;
+        let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
           return context.changeKernel(null);
@@ -178,7 +179,7 @@ describe('docregistry/context', () => {
       });
 
       it('should be set after poulation', (done) => {
-        context.populated.connect(() => {
+        context.ready().then(() => {
           expect(context.contentsModel.name).to.be('foo');
           done();
         });
@@ -216,10 +217,18 @@ describe('docregistry/context', () => {
 
     });
 
+    describe('#startDefaultKernel()', () => {
+
+      it('will fail', () => {
+        expect(false).to.be(true);
+      });
+
+    });
+
     describe('#changeKernel()', () => {
 
       it('should change the kernel instance', (done) => {
-        let name = manager.kernelspecs.default;
+        let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
           return context.changeKernel(null);
@@ -229,7 +238,7 @@ describe('docregistry/context', () => {
       });
 
       it('should shut down the session if given `null`', (done) => {
-        let name = manager.kernelspecs.default;
+        let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
           return context.changeKernel(null);
@@ -259,6 +268,7 @@ describe('docregistry/context', () => {
       });
 
     });
+
 
     describe('#saveAs()', () => {
 

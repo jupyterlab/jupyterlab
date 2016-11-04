@@ -301,8 +301,7 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should handle a change in context', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         context.model.fromJSON(DEFAULT_CONTENT);
-        let name = context.kernelspecs.default;
-        context.changeKernel({ name });
+        context.startDefaultKernel();
         panel.context = null;
         panel.content.activeCellIndex++;
         let node = item.node.getElementsByTagName('select')[0];
@@ -314,9 +313,10 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#createKernelNameItem()', () => {
 
       it('should display the `\'display_name\'` of the kernel', (done) => {
-        return panel.kernel.spec().then(spec => {
+        let kernel = panel.kernel;
+        return kernel.ready().then(() => {
           let item = createKernelNameItem(panel);
-          expect(item.node.textContent).to.be(spec.display_name);
+          expect(item.node.textContent).to.be(kernel.spec.display_name);
           done();
         });
       });
@@ -329,7 +329,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should handle a change in context', (done) => {
         let item = createKernelNameItem(panel);
-        panel.kernel.spec().then(spec => {
+        panel.kernel.ready().then(() => {
           panel.context = null;
           expect(item.node.textContent).to.be('No Kernel!');
         }).then(done, done);
@@ -382,8 +382,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should handle a change to the kernel', (done) => {
         let item = createKernelStatusItem(panel);
-        let name = context.kernelspecs.default;
-        panel.context.changeKernel({ name }).then(() => {
+        panel.context.startDefaultKernel().then(() => {
           panel.kernel.statusChanged.connect(() => {
             if (!panel.kernel) {
               return;
@@ -415,8 +414,7 @@ describe('notebook/notebook/default-toolbar', () => {
         context = createNotebookContext();
         context.model.fromJSON(DEFAULT_CONTENT);
         panel.context = context;
-        let name = context.kernelspecs.default;
-        return context.changeKernel({ name }).then(() => {
+        return context.startDefaultKernel().then(() => {
           panel.kernel.statusChanged.connect(() => {
             if (!panel.kernel) {
               return;
