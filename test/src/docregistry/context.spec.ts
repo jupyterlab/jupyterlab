@@ -92,43 +92,34 @@ describe('docregistry/context', () => {
 
     });
 
-    describe('#populated', () => {
+    describe('#isReady', () => {
 
-      it('should be emitted when the file is saved for the first time', (done) => {
-        let count = 0;
-        context.populated.connect((sender, args) => {
-          expect(sender).to.be(context);
-          expect(args).to.be(void 0);
-          count++;
-        });
-        context.save().then(() => {
-          expect(count).to.be(1);
-          return context.save();
-        }).then(() => {
-          expect(count).to.be(1);
+      it('should indicate whether the context is ready', (done) => {
+        expect(context.isReady).to.be(false);
+        context.ready().then(() => {
+          expect(context.isReady).to.be(true);
           done();
         }).catch(done);
+        context.save().catch(done);
       });
 
-      it('should be emitted when the file is reverted for the first time', (done) => {
+    });
+
+    describe('#ready()', () => {
+
+      it('should resolve when the file is saved for the first time', (done) => {
+        context.ready().then(done, done);
+        context.save().catch(done);
+      });
+
+      it('should resolve when the file is reverted for the first time', (done) => {
         manager.contents.save(context.path, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
         });
-        let count = 0;
-        context.populated.connect((sender, args) => {
-          expect(sender).to.be(context);
-          expect(args).to.be(void 0);
-          count++;
-        });
-        context.revert().then(() => {
-          expect(count).to.be(1);
-          return context.revert();
-        }).then(() => {
-          expect(count).to.be(1);
-          done();
-        }).catch(done);
+        context.ready().then(done, done);
+        context.revert().catch(done);
       });
 
     });
@@ -192,30 +183,6 @@ describe('docregistry/context', () => {
           done();
         });
         context.save().catch(done);
-      });
-
-    });
-
-    describe('#kernelspecs', () => {
-
-      it('should be the kernelspecs model', () => {
-        let name = manager.kernelspecs.default;
-        expect(name in manager.kernelspecs.kernelspecs).to.be(true);
-      });
-
-    });
-
-    describe('#isPopulated', () => {
-
-      it('should be false before initial save', () => {
-        expect(context.isPopulated).to.be(false);
-      });
-
-      it('should be true after the initial save', (done) => {
-        context.save().then(() => {
-          expect(context.isPopulated).to.be(true);
-          done();
-        }).catch(done);
       });
 
     });
@@ -392,25 +359,6 @@ describe('docregistry/context', () => {
               return;
             }
           }
-        }).catch(done);
-      });
-
-    });
-
-    describe('#listSessions()', () => {
-
-      it('should list the running sessions', (done) => {
-        let name = manager.kernelspecs.default;
-        context.changeKernel({ name }).then(() => {
-          return context.listSessions();
-        }).then(models => {
-          for (let model of models) {
-            if (model.kernel.id === context.kernel.id) {
-              return context.changeKernel(null);
-            }
-          }
-        }).then(() => {
-          done();
         }).catch(done);
       });
 
