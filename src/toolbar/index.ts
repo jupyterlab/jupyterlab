@@ -121,13 +121,10 @@ class Toolbar<T extends Widget> extends Widget {
    * Remove an item in the toolbar by value.
    *
    *  @param name - The name of the widget to remove from the toolbar.
-   *
-   * @returns The index occupied by the item, or `-1` if the item
-   *   was not contained in the toolbar.
    */
-  removeItem(widget: T): number {
+  removeItem(widget: T): void {
     let layout = this.layout as PanelLayout;
-    return layout.removeWidget(widget);
+    layout.removeWidget(widget);
   }
 }
 

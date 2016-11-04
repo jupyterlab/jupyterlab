@@ -13,7 +13,7 @@
 |----------------------------------------------------------------------------*/
 
 
-.p-DockPanel-tabPanel > .p-StackedPanel {
+.p-DockPanel-widget {
   background:var(--jp-layout-color1);
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   border-right: var(--jp-border-width) solid var(--jp-border-color1);

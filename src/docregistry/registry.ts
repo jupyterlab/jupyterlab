@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  EmptyIterator, IIterator, each, map
+  IIterator, each, empty, map
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -400,7 +400,7 @@ class DocumentRegistry {
   widgetExtensions(widgetName: string): IIterator<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      return EmptyIterator.instance;
+      return empty<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>>();
     }
     return this._extenders[widgetName].iter();
   }

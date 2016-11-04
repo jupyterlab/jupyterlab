@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
+  each, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -256,7 +256,7 @@ class ApplicationShell extends Widget {
    */
   activateMain(id: string): void {
     let dock = this._dockPanel;
-    let widget = find(dock.widgets, value => value.id === id);
+    let widget = find(dock.widgets(), value => value.id === id);
     if (widget) {
       dock.activateWidget(widget);
     }
@@ -280,7 +280,7 @@ class ApplicationShell extends Widget {
    * Close all tracked widgets.
    */
   closeAll(): void {
-    each(this._dockPanel.widgets, widget => { widget.close(); });
+    each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
   }
 
   private _topPanel: Panel;
