@@ -100,12 +100,14 @@ describe('notebook/notebook/panel', () => {
   });
 
   beforeEach(() => {
-    context = createNotebookContext();
+    context = createNotebookContext('', manager);
+  });
+
+  afterEach(() => {
+    context.dispose();
   });
 
   after(() => {
-    context.kernel.shutdown();
-    context.dispose();
     manager.dispose();
   });
 
@@ -163,7 +165,9 @@ describe('notebook/notebook/panel', () => {
           expect(args.name).to.be.ok();
           done();
         });
-        panel.context.startDefaultKernel();
+        panel.context.save().then(() => {
+          return panel.context.startDefaultKernel();
+        }).catch(done);
       });
 
     });
@@ -190,7 +194,9 @@ describe('notebook/notebook/panel', () => {
 
       it('should be the current kernel used by the panel', (done) => {
         let panel = createPanel(context);
-        context.startDefaultKernel();
+        context.save().then(() => {
+          return context.startDefaultKernel();
+        }).catch(done);
         context.kernelChanged.connect(() => {
           expect(panel.kernel.name).to.be.ok();
           done();
@@ -329,10 +335,13 @@ describe('notebook/notebook/panel', () => {
       it('should be called when the path changes', (done) => {
         let panel = createPanel(context);
         panel.methods = [];
-        manager.contents.rename(context.path, 'foo').then(() => {
+        context.save().then(() => {
+          return manager.contents.rename(context.path, 'foo.ipynb');
+        }).catch(done);
+        context.pathChanged.connect(() => {
           expect(panel.methods).to.contain('onPathChanged');
           done();
-        }).catch(done);
+        });
       });
 
       it('should be called when the context changes', () => {

@@ -243,20 +243,6 @@ describe('notebook/notebook/default-toolbar', () => {
 
     describe('#createInterruptButton()', () => {
 
-      it('should interrupt the kernel when clicked', (done) => {
-        let button = createInterruptButton(panel);
-        Widget.attach(button, document.body);
-        startKernel(panel.context).then(kernel => {
-          kernel.statusChanged.connect((sender, status) => {
-            if (status === 'idle') {
-              button.dispose();
-              done();
-            }
-          });
-          button.node.click();
-        }).catch(done);
-      });
-
       it('should have the `\'jp-Kernel-toolbarInterrupt\'` class', () => {
         let button = createInterruptButton(panel);
         expect(button.hasClass('jp-Kernel-toolbarInterrupt')).to.be(true);

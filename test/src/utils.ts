@@ -54,8 +54,8 @@ function defaultRenderMime(): RenderMime {
  * Create a context for a file.
  */
 export
-function createFileContext(path?: string): Context<DocumentRegistry.IModel> {
-  let manager = Private.manager;
+function createFileContext(path?: string, manager?: ServiceManager.IManager): Context<DocumentRegistry.IModel> {
+  manager = manager || Private.manager;
   let factory = Private.textFactory;
   path = path || utils.uuid() + '.txt';
   return new Context({ manager, factory, path });
@@ -66,8 +66,8 @@ function createFileContext(path?: string): Context<DocumentRegistry.IModel> {
  * Create a context for a notebook.
  */
 export
-function createNotebookContext(path?: string): Context<INotebookModel> {
-  let manager = Private.manager;
+function createNotebookContext(path?: string, manager?: ServiceManager.IManager): Context<INotebookModel> {
+  manager = manager || Private.manager;
   let factory = Private.notebookFactory;
   path = path || utils.uuid() + '.ipynb';
   return new Context({ manager, factory, path });
@@ -100,9 +100,6 @@ export
 function acceptDialog(host: HTMLElement = document.body): Promise<void> {
   return waitForDialog(host).then(() => {
     let node = host.getElementsByClassName('jp-Dialog-okButton')[0];
-    if (!node) {
-      node = host.getElementsByClassName('jp-Dialog-warningButton')[0];
-    }
     if (node) {
       (node as HTMLElement).click();
     }
