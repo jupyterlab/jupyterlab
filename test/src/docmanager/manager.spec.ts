@@ -99,10 +99,10 @@ describe('docmanager/manager', () => {
 
     });
 
-    describe('#kernelspecs', () => {
+    describe('#services', () => {
 
-      it('should get the kernel spec models for the manager', () => {
-        expect(manager.kernelspecs).to.be(services.kernelspecs);
+      it('should get the service manager for the manager', () => {
+
       });
 
     });
@@ -128,6 +128,10 @@ describe('docmanager/manager', () => {
 
       });
 
+      it('should start the default kernel if applicable', () => {
+
+      });
+
       it('should return undefined if the factory is not found', () => {
 
       });
@@ -135,6 +139,7 @@ describe('docmanager/manager', () => {
       it('should return undefined if the factory has not model factory', () => {
 
       });
+
 
     });
 
@@ -148,6 +153,10 @@ describe('docmanager/manager', () => {
 
       });
 
+      it('should start the default kernel if applicable', () => {
+
+      });
+
       it('should return undefined if the factory is not found', () => {
 
       });
@@ -158,29 +167,6 @@ describe('docmanager/manager', () => {
 
     });
 
-    describe('#listSessions()', () => {
-
-      it('should list the running notebook sessions', () => {
-
-      });
-
-    });
-
-    describe('#handleRename()', () => {
-
-      it('should handle the renaming of an open document', () => {
-
-      });
-
-    });
-
-    describe('#handleDelete()', () => {
-
-      it('should handle a file deletion', () => {
-
-      });
-
-    });
 
     describe('#findWidget()', () => {
 
