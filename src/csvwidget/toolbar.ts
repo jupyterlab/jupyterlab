@@ -73,6 +73,7 @@ class CSVToolbar extends Widget {
     if (this.isDisposed) {
       return;
     }
+    super.dispose();
     clearSignalData(this);
   }
 
