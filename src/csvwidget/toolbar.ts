@@ -132,7 +132,7 @@ namespace Private {
   export
   function createNode(selected: string): HTMLElement {
     let div = document.createElement('div');
-    let label = document.createElement('span');
+    let label = document.createElement('label');
     let select = document.createElement('select');
     select.className = CSV_TOOLBAR_DROPDOWN_CLASS;
     label.textContent = 'Delimiter: ';
@@ -145,8 +145,8 @@ namespace Private {
       }
       select.appendChild(option);
     });
+    label.appendChild(select);
     div.appendChild(label);
-    div.appendChild(select);
     return div;
   }
 }
