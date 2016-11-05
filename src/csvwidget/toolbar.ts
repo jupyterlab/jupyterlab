@@ -19,6 +19,18 @@ import {
 
 
 /**
+ * The supported parsing delimiters.
+ */
+export
+const DELIMITERS = [',', ';', '\t'];
+
+/**
+ * The labels for each delimiter as they appear in the dropdown menu.
+ */
+export
+const LABELS = [',', ';', '\\t'];
+
+/**
  * The class name added to a csv toolbar widget.
  */
 const CSV_TOOLBAR_CLASS = 'jp-CSVToolbar';
@@ -136,7 +148,7 @@ namespace Private {
     let select = document.createElement('select');
     select.className = CSV_TOOLBAR_DROPDOWN_CLASS;
     label.textContent = 'Delimiter: ';
-    each(zip([',', ';', '\t'], [',', ';', '\\t']), ([delimiter, label]) => {
+    each(zip(DELIMITERS, LABELS), ([delimiter, label]) => {
       let option = document.createElement('option');
       option.value = delimiter;
       option.textContent = label;
