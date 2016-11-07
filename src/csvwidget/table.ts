@@ -21,14 +21,15 @@ import {
 
 
 /**
+ * The hard limit on the number of rows to display.
+ */
+export
+const DISPLAY_LIMIT = 1000;
+
+/**
  * The class name added to a csv table widget.
  */
 const CSV_TABLE_CLASS = 'jp-CSVTable';
-
-/**
- * The hard limit on the number of rows to display.
- */
-const DISPLAY_LIMIT = 1000;
 
 
 /**
@@ -99,12 +100,11 @@ class CSVModel extends VDomModel {
    */
   parse(): dsv.DSVParsedArray<dsv.DSVRowString> {
     let output = dsv.dsvFormat(this._delimiter).parse(this._content);
-    if (output.length > DISPLAY_LIMIT) {
+    let available = output.length;
+    let maximum = DISPLAY_LIMIT;
+    if (available > maximum) {
       output.splice(0, DISPLAY_LIMIT);
-      this.maxExceeded.emit({
-        available: output.length,
-        maximum: DISPLAY_LIMIT
-      });
+      this.maxExceeded.emit({ available, maximum });
     }
     return output;
   }
