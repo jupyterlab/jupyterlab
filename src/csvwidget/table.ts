@@ -103,7 +103,8 @@ class CSVModel extends VDomModel {
     let available = output.length;
     let maximum = DISPLAY_LIMIT;
     if (available > maximum) {
-      output.splice(0, DISPLAY_LIMIT);
+      // Mutate the array instead of slicing in order to conserve memory.
+      output.splice(maximum);
       this.maxExceeded.emit({ available, maximum });
     }
     return output;

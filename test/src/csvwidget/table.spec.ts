@@ -38,7 +38,7 @@ describe('csvwidget/table', () => {
 
     describe('#maxExceeded', () => {
 
-      it('should emit the overflow delta upon parsing', () => {
+      it('should emit the overflow', () => {
         let model = new CSVModel({ content: CSV_DATA });
         let excess: CSVModel.IOverflow;
         model.maxExceeded.connect((sender, overflow) => { excess = overflow; });
