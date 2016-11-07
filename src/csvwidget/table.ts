@@ -42,7 +42,7 @@ class CSVModel extends VDomModel {
    */
   constructor(options: CSVModel.IOptions = {}) {
     super();
-    this._content = options.content;
+    this._content = options.content || '';
     this._delimiter = options.delimiter || ',';
   }
 
@@ -110,8 +110,8 @@ class CSVModel extends VDomModel {
     return output;
   }
 
-  private _content: string = '';
-  private _delimiter: string = '';
+  private _content: string;
+  private _delimiter: string;
 }
 
 

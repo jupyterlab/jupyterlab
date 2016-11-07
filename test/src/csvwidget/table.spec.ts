@@ -52,7 +52,25 @@ describe('csvwidget/table', () => {
 
     });
 
-    describe('#delimiter', () => {
+    describe('#content', () => {
+
+      it('should default to empty', () => {
+        let model = new CSVModel();
+        expect(model.content).to.be.empty();
+        model.dispose();
+      });
+
+      it('should be settable', () => {
+        let model = new CSVModel({ content: CSV_DATA });
+        expect(model.content).to.be(CSV_DATA);
+        model.content = 'foo';
+        expect(model.content).to.be('foo');
+        model.dispose();
+      });
+
+    });
+
+    describe('#content', () => {
 
       it('should default to `,`', () => {
         let model = new CSVModel();
