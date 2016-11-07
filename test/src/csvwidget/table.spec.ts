@@ -107,6 +107,19 @@ describe('csvwidget/table', () => {
 
     });
 
+    describe('#parse()', () => {
+
+      it('should parse the model content', () => {
+        let model = new CSVModel({ content: CSV_DATA });
+        let rows = model.parse();
+        let cols = rows.columns;
+        expect(rows.length).to.be(DISPLAY_LIMIT);
+        expect(cols.length).to.be(4);
+        model.dispose();
+      });
+
+    });
+
   });
 
 });
