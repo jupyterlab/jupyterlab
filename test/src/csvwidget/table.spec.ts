@@ -4,12 +4,23 @@
 import expect = require('expect.js');
 
 import {
+  realize, VNode
+} from 'phosphor/lib/ui/vdom';
+
+import {
   CSVModel, CSVTable, DISPLAY_LIMIT
 } from '../../../lib/csvwidget/table';
 
 import {
   CSV_DATA
 } from './data.csv';
+
+
+class TestTable extends CSVTable {
+  render(): VNode | VNode[] {
+    return super.render();
+  }
+}
 
 
 describe('csvwidget/table', () => {
@@ -116,6 +127,39 @@ describe('csvwidget/table', () => {
         expect(rows.length).to.be(DISPLAY_LIMIT);
         expect(cols.length).to.be(4);
         model.dispose();
+      });
+
+    });
+
+  });
+
+  describe('CSVTable', () => {
+
+    describe('#constructor()', () => {
+
+      it('should instantiate a `CSVTable`', () => {
+        let table = new CSVTable();
+        expect(table).to.be.a(CSVTable);
+        table.dispose();
+      });
+
+    });
+
+    describe('#render()', () => {
+
+      it('should render the model into a virtual DOM table', () => {
+        let model = new CSVModel({ content: CSV_DATA });
+        let table = new TestTable();
+        table.model = model;
+
+        let rendered = realize(table.render() as VNode);
+        let rows = rendered.getElementsByTagName('tr');
+        let cols = rendered.getElementsByTagName('th');
+        expect(rows).to.have.length(DISPLAY_LIMIT);
+        expect(cols).to.have.length(4);
+
+        model.dispose();
+        table.dispose();
       });
 
     });
