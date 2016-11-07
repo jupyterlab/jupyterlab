@@ -31,12 +31,12 @@ import {
 
 
 /**
- * The class name added to a csv widget.
+ * The class name added to a CSV widget.
  */
 const CSV_CLASS = 'jp-CSVWidget';
 
 /**
- * The class name added to a csv warning widget.
+ * The class name added to a CSV widget warning.
  */
 const CSV_WARNING_CLASS = 'jp-CSVWidget-warning';
 
@@ -47,7 +47,7 @@ const CSV_WARNING_CLASS = 'jp-CSVWidget-warning';
 export
 class CSVWidget extends Widget {
   /**
-   * Construct a new csv table widget.
+   * Construct a new CSV widget.
    */
   constructor(options: CSVWidget.IOptions) {
     super();
@@ -125,6 +125,9 @@ namespace CSVWidget {
    */
   export
   interface IOptions {
+    /**
+     * The document context for the CSV being rendered by the widget.
+     */
     context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   }
 }
