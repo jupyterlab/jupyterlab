@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Kernel, ServiceManager, Session
+  ContentsManager, Kernel, ServiceManager
 } from '@jupyterlab/services';
 
 import {
-  IIterable, each
+  each, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -197,7 +197,11 @@ class DocumentManager implements IDisposable {
    */
   findWidget(path: string, widgetName='default'): Widget {
     if (widgetName === 'default') {
-      widgetName = this._registry.defaultWidgetFactory(ContentsManager.extname(path)).name;
+      let factory = this._registry.defaultWidgetFactory(ContentsManager.extname(path));
+      if (!factory) {
+        return;
+      }
+      widgetName = factory.name;
     }
     let context = this._contextForPath(path);
     if (context) {
@@ -238,14 +242,16 @@ class DocumentManager implements IDisposable {
    */
   closeFile(path: string): void {
     let context = this._contextForPath(path);
-    this._widgetManager.closeWidgets(context);
+    if (context) {
+      this._widgetManager.closeWidgets(context);
+    }
   }
 
   /**
    * Close all of the open documents.
    */
   closeAll(): void {
-    each(this._contexts, context => {
+    each(toArray(this._contexts), context => {
       this._widgetManager.closeWidgets(context);
     });
   }
