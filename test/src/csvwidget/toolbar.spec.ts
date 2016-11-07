@@ -16,7 +16,7 @@ import {
 } from '../../../lib/csvwidget/toolbar';
 
 
-describe('csvwidget/table', () => {
+describe('csvwidget/toolbar', () => {
 
   describe('CSVToolbar', () => {
 

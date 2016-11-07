@@ -17,6 +17,7 @@ import './console/foreign.spec';
 import './console/history.spec';
 import './console/panel.spec';
 
+import './csvwidget/table.spec';
 import './csvwidget/toolbar.spec';
 
 import './dialog/dialog.spec';
