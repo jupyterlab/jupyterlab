@@ -9,7 +9,7 @@
 
 
 :root {
-  --jp-private-commandpalette-search-height: 32px;
+  --jp-private-commandpalette-search-height: 28px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -29,21 +29,30 @@
 
 
 .p-CommandPalette-search {
-  height: var(--jp-private-commandpalette-search-height);
+  padding: 8px;
+  background-color: var(--jp-border-color3);
+  border-bottom: 1px solid var(--jp-border-color1);
 }
 
 .p-CommandPalette-wrapper {
   overflow: overlay;
   padding: 0px 8px;
+  border: 1px solid var(--jp-border-color1);
+  background-color: white;
 }
 
 
 .p-CommandPalette-wrapper::after {
   font-family: FontAwesome;
   content: "\f002"; /* search */
-  color: var(--jp-ui-font-color0);
+  color: white;
+  background-color: var(--jp-brand-color1);
   font-size: var(--jp-ui-icon-font-size);
   line-height: var(--jp-private-commandpalette-search-height);
+  position: absolute;
+  right: 8px;
+  height: 30px;
+  padding: 0px 12px;
 }
 
 .p-CommandPalette-input {
