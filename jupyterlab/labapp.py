@@ -11,7 +11,8 @@ from notebook.notebookapp import NotebookApp
 from traitlets import List, Unicode, default
 from traitlets.config.manager import BaseJSONConfigManager
 
-from .labextensions import validate_labextension
+from .labextensions import find_labextension, validate_labextension_folder
+
 from ._version import __version__
 
 
@@ -29,7 +30,7 @@ def get_labextensions(parent=None):
         )
         for name, enabled in labextensions.items():
             if enabled:
-                warnings = validate_labextension(name)
+                warnings = validate_labextension_folder(name, find_labextension(name))
                 if not warnings:
                     extensions.append(name)
     return extensions
