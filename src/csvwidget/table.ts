@@ -178,6 +178,10 @@ class CSVTable extends VDomWidget<CSVModel> {
    * Render the content as virtual DOM nodes.
    */
   protected render(): VNode | VNode[] {
+    if (!this.model) {
+      return h.table([h.thead(), h.tbody()]);
+    }
+
     let rows = this.model.parse();
     let cols = rows.columns || [];
     return h.table([
