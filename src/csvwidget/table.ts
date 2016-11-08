@@ -21,14 +21,15 @@ import {
 
 
 /**
+ * The hard limit on the number of rows to display.
+ */
+export
+const DISPLAY_LIMIT = 1000;
+
+/**
  * The class name added to a csv table widget.
  */
 const CSV_TABLE_CLASS = 'jp-CSVTable';
-
-/**
- * The hard limit on the number of rows to display.
- */
-const DISPLAY_LIMIT = 1000;
 
 
 /**
@@ -41,7 +42,7 @@ class CSVModel extends VDomModel {
    */
   constructor(options: CSVModel.IOptions = {}) {
     super();
-    this._content = options.content;
+    this._content = options.content || '';
     this._delimiter = options.delimiter || ',';
   }
 
@@ -99,18 +100,18 @@ class CSVModel extends VDomModel {
    */
   parse(): dsv.DSVParsedArray<dsv.DSVRowString> {
     let output = dsv.dsvFormat(this._delimiter).parse(this._content);
-    if (output.length > DISPLAY_LIMIT) {
-      output.splice(0, DISPLAY_LIMIT);
-      this.maxExceeded.emit({
-        available: output.length,
-        maximum: DISPLAY_LIMIT
-      });
+    let available = output.length;
+    let maximum = DISPLAY_LIMIT;
+    if (available > maximum) {
+      // Mutate the array instead of slicing in order to conserve memory.
+      output.splice(maximum);
+      this.maxExceeded.emit({ available, maximum });
     }
     return output;
   }
 
-  private _content: string = '';
-  private _delimiter: string = '';
+  private _content: string;
+  private _delimiter: string;
 }
 
 
@@ -177,6 +178,10 @@ class CSVTable extends VDomWidget<CSVModel> {
    * Render the content as virtual DOM nodes.
    */
   protected render(): VNode | VNode[] {
+    if (!this.model) {
+      return h.table([h.thead(), h.tbody()]);
+    }
+
     let rows = this.model.parse();
     let cols = rows.columns || [];
     return h.table([

@@ -19,6 +19,18 @@ import {
 
 
 /**
+ * The supported parsing delimiters.
+ */
+export
+const DELIMITERS = [',', ';', '\t'];
+
+/**
+ * The labels for each delimiter as they appear in the dropdown menu.
+ */
+export
+const LABELS = [',', ';', '\\t'];
+
+/**
  * The class name added to a csv toolbar widget.
  */
 const CSV_TOOLBAR_CLASS = 'jp-CSVToolbar';
@@ -37,8 +49,8 @@ class CSVToolbar extends Widget {
   /**
    * Construct a new csv table widget.
    */
-  constructor() {
-    super({ node: Private.createNode() });
+  constructor(options: CSVToolbar.IOptions = {}) {
+    super({ node: Private.createNode(options.selected) });
     this.addClass(CSV_TOOLBAR_CLASS);
   }
 
@@ -61,6 +73,7 @@ class CSVToolbar extends Widget {
     if (this.isDisposed) {
       return;
     }
+    super.dispose();
     clearSignalData(this);
   }
 
@@ -105,6 +118,24 @@ defineSignal(CSVToolbar.prototype, 'delimiterChanged');
 
 
 /**
+ * A namespace for `CSVToolbar` statics.
+ */
+export
+namespace CSVToolbar {
+  /**
+   * The instantiation options for a CSV toolbar.
+   */
+  export
+  interface IOptions {
+    /**
+     * The initially selected delimiter.
+     */
+    selected?: string;
+  }
+}
+
+
+/**
  * A namespace for private toolbar methods.
  */
 namespace Private {
@@ -112,20 +143,23 @@ namespace Private {
    * Create the node for the delimiter switcher.
    */
   export
-  function createNode(): HTMLElement {
+  function createNode(selected: string): HTMLElement {
     let div = document.createElement('div');
-    let label = document.createElement('span');
+    let label = document.createElement('label');
     let select = document.createElement('select');
     select.className = CSV_TOOLBAR_DROPDOWN_CLASS;
     label.textContent = 'Delimiter: ';
-    each(zip([',', ';', '\t'], [',', ';', '\\t']), ([delimiter, label]) => {
+    each(zip(DELIMITERS, LABELS), ([delimiter, label]) => {
       let option = document.createElement('option');
       option.value = delimiter;
       option.textContent = label;
+      if (delimiter === selected) {
+        option.selected = true;
+      }
       select.appendChild(option);
     });
+    label.appendChild(select);
     div.appendChild(label);
-    div.appendChild(select);
     return div;
   }
 }

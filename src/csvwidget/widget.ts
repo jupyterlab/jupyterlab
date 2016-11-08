@@ -31,12 +31,12 @@ import {
 
 
 /**
- * The class name added to a csv widget.
+ * The class name added to a CSV widget.
  */
 const CSV_CLASS = 'jp-CSVWidget';
 
 /**
- * The class name added to a csv warning widget.
+ * The class name added to a CSV widget warning.
  */
 const CSV_WARNING_CLASS = 'jp-CSVWidget-warning';
 
@@ -47,7 +47,7 @@ const CSV_WARNING_CLASS = 'jp-CSVWidget-warning';
 export
 class CSVWidget extends Widget {
   /**
-   * Construct a new csv table widget.
+   * Construct a new CSV widget.
    */
   constructor(options: CSVWidget.IOptions) {
     super();
@@ -61,9 +61,10 @@ class CSVWidget extends Widget {
     this._warning = new Widget();
     this._warning.addClass(CSV_WARNING_CLASS);
 
+    this._model = new CSVModel({ content: context.model.toString() });
     this._table = new CSVTable();
-    this._table.model = new CSVModel({ content: context.model.toString() });
-    this._table.model.maxExceeded.connect((sender, overflow) => {
+    this._table.model = this._model;
+    this._model.maxExceeded.connect((sender, overflow) => {
       let { available, maximum } = overflow;
       let message = `Table is too long to render,
         rendering ${maximum} of ${available} rows`;
@@ -88,18 +89,34 @@ class CSVWidget extends Widget {
   }
 
   /**
+   * The CSV data model.
+   */
+  get model(): CSVModel {
+    return this._model;
+  }
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
+
     super.dispose();
-    this._table.model.dispose();
-    this._table.dispose();
-    this._toolbar.dispose();
-    this._warning.dispose();
     disconnectReceiver(this);
+
+    this._model.dispose();
+    this._model = null;
+
+    this._table.dispose();
+    this._table = null;
+
+    this._toolbar.dispose();
+    this._toolbar = null;
+
+    this._warning.dispose();
+    this._warning = null;
   }
 
   /**
@@ -109,8 +126,9 @@ class CSVWidget extends Widget {
     this.node.focus();
   }
 
-  private _toolbar: CSVToolbar = null;
+  private _model: CSVModel = null;
   private _table: CSVTable = null;
+  private _toolbar: CSVToolbar = null;
   private _warning: Widget = null;
 }
 
@@ -125,6 +143,9 @@ namespace CSVWidget {
    */
   export
   interface IOptions {
+    /**
+     * The document context for the CSV being rendered by the widget.
+     */
     context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   }
 }
@@ -138,23 +159,17 @@ class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IMod
   /**
    * The name of the widget to display in dialogs.
    */
-  get name(): string {
-    return 'Table';
-  }
+  readonly name = 'Table';
 
   /**
    * The file extensions the widget can view.
    */
-  get fileExtensions(): string[] {
-    return ['.csv'];
-  }
+  readonly fileExtensions = ['.csv'];
 
   /**
    * The file extensions for which the factory should be the default.
    */
-  get defaultFor(): string[] {
-    return ['.csv'];
-  }
+  readonly defaultFor = ['.csv'];
 
   /**
    * Create a new widget given a context.
