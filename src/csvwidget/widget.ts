@@ -159,17 +159,23 @@ class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IMod
   /**
    * The name of the widget to display in dialogs.
    */
-  readonly name = 'Table';
+  get name(): string {
+    return 'Table';
+  }
 
   /**
    * The file extensions the widget can view.
    */
-  readonly fileExtensions = ['.csv'];
+  get fileExtensions(): string[] {
+    return ['.csv'];
+  }
 
   /**
    * The file extensions for which the factory should be the default.
    */
-  readonly defaultFor = ['.csv'];
+  get defaultFor(): string[] {
+    return ['.csv'];
+  }
 
   /**
    * Create a new widget given a context.
