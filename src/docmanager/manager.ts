@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Kernel, ServiceManager, Session
+  ContentsManager, Kernel, ServiceManager
 } from '@jupyterlab/services';
 
 import {
-  IIterable, each
+  each, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -103,13 +103,19 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Open a file and return the widget used to display the contents.
+   * Open a file and return the widget used to view it.
    *
    * @param path - The file path to open.
    *
    * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
    *
    * @param kernel - An optional kernel name/id to override the default.
+   *
+   * @returns The created widget, or `undefined`.
+   *
+   * #### Notes
+   * This function will return `undefined` if a valid widget factory
+   * cannot be found.
    */
   open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
     let widgetFactory = this._widgetFactoryFor(path, widgetName);
@@ -139,13 +145,19 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Create a new file of the given name.
+   * Create a new file and return the widget used to view it.
    *
-   * @param path - The file path to use.
+   * @param path - The file path to create.
    *
    * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
    *
    * @param kernel - An optional kernel name/id to override the default.
+   *
+   * @returns The created widget, or `undefined`.
+   *
+   * #### Notes
+   * This function will return `undefined` if a valid widget factory
+   * cannot be found.
    */
   createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
     let widgetFactory = this._widgetFactoryFor(path, widgetName);
@@ -177,13 +189,19 @@ class DocumentManager implements IDisposable {
    *
    * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
    *
+   * @returns The found widget, or `undefined`.
+   *
    * #### Notes
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
   findWidget(path: string, widgetName='default'): Widget {
     if (widgetName === 'default') {
-      widgetName = this._registry.defaultWidgetFactory(ContentsManager.extname(path)).name;
+      let factory = this._registry.defaultWidgetFactory(ContentsManager.extname(path));
+      if (!factory) {
+        return;
+      }
+      widgetName = factory.name;
     }
     let context = this._contextForPath(path);
     if (context) {
@@ -193,6 +211,10 @@ class DocumentManager implements IDisposable {
 
   /**
    * Get the document context for a widget.
+   *
+   * @param widget - The widget of interest.
+   *
+   * @returns The context associated with the widget, or `undefined`.
    */
   contextForWidget(widget: Widget): DocumentRegistry.IContext<DocumentRegistry.IModel> {
     return this._widgetManager.contextForWidget(widget);
@@ -201,9 +223,13 @@ class DocumentManager implements IDisposable {
   /**
    * Clone a widget.
    *
+   * @param widget - The source widget.
+   *
+   * @returns A new widget or `undefined`.
+   *
    * #### Notes
-   * This will create a new widget with the same model and context
-   * as this widget.
+   *  Uses the same widget factory and context as the source, or returns
+   *  `undefined` if the source widget is not managed by this manager.
    */
   cloneWidget(widget: Widget): Widget {
     return this._widgetManager.cloneWidget(widget);
@@ -211,17 +237,21 @@ class DocumentManager implements IDisposable {
 
   /**
    * Close the widgets associated with a given path.
+   *
+   * @param path - The target path.
    */
   closeFile(path: string): void {
     let context = this._contextForPath(path);
-    this._widgetManager.closeWidgets(context);
+    if (context) {
+      this._widgetManager.closeWidgets(context);
+    }
   }
 
   /**
    * Close all of the open documents.
    */
   closeAll(): void {
-    each(this._contexts, context => {
+    each(toArray(this._contexts), context => {
       this._widgetManager.closeWidgets(context);
     });
   }
