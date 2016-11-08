@@ -61,9 +61,10 @@ class CSVWidget extends Widget {
     this._warning = new Widget();
     this._warning.addClass(CSV_WARNING_CLASS);
 
+    this._model = new CSVModel({ content: context.model.toString() });
     this._table = new CSVTable();
-    this._table.model = new CSVModel({ content: context.model.toString() });
-    this._table.model.maxExceeded.connect((sender, overflow) => {
+    this._table.model = this._model;
+    this._model.maxExceeded.connect((sender, overflow) => {
       let { available, maximum } = overflow;
       let message = `Table is too long to render,
         rendering ${maximum} of ${available} rows`;
@@ -88,6 +89,13 @@ class CSVWidget extends Widget {
   }
 
   /**
+   * The CSV data model.
+   */
+  get model(): CSVModel {
+    return this._model;
+  }
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
@@ -95,7 +103,7 @@ class CSVWidget extends Widget {
       return;
     }
     super.dispose();
-    this._table.model.dispose();
+    this._model.dispose();
     this._table.dispose();
     this._toolbar.dispose();
     this._warning.dispose();
@@ -109,8 +117,9 @@ class CSVWidget extends Widget {
     this.node.focus();
   }
 
-  private _toolbar: CSVToolbar = null;
+  private _model: CSVModel = null;
   private _table: CSVTable = null;
+  private _toolbar: CSVToolbar = null;
   private _warning: Widget = null;
 }
 
@@ -141,23 +150,17 @@ class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IMod
   /**
    * The name of the widget to display in dialogs.
    */
-  get name(): string {
-    return 'Table';
-  }
+  readonly name = 'Table';
 
   /**
    * The file extensions the widget can view.
    */
-  get fileExtensions(): string[] {
-    return ['.csv'];
-  }
+  readonly fileExtensions = ['.csv'];
 
   /**
    * The file extensions for which the factory should be the default.
    */
-  get defaultFor(): string[] {
-    return ['.csv'];
-  }
+  readonly defaultFor = ['.csv'];
 
   /**
    * Create a new widget given a context.
