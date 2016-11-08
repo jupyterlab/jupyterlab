@@ -81,7 +81,7 @@ describe('csvwidget/table', () => {
 
     });
 
-    describe('#content', () => {
+    describe('#delimiter', () => {
 
       it('should default to `,`', () => {
         let model = new CSVModel();

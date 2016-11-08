@@ -102,12 +102,21 @@ class CSVWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
+
     super.dispose();
-    this._model.dispose();
-    this._table.dispose();
-    this._toolbar.dispose();
-    this._warning.dispose();
     disconnectReceiver(this);
+
+    this._model.dispose();
+    this._model = null;
+
+    this._table.dispose();
+    this._table = null;
+
+    this._toolbar.dispose();
+    this._toolbar = null;
+
+    this._warning.dispose();
+    this._warning = null;
   }
 
   /**
