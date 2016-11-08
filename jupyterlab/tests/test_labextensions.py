@@ -26,7 +26,7 @@ from jupyterlab.labextensions import (install_labextension, check_labextension,
     enable_labextension, disable_labextension,
     install_labextension_python, uninstall_labextension_python,
     enable_labextension_python, disable_labextension_python, _get_config_dir,
-    validate_labextension, validate_labextension_folder
+    find_labextension, validate_labextension_folder
 )
 
 from traitlets.config.manager import BaseJSONConfigManager
@@ -164,6 +164,23 @@ class TestInstallLabExtension(TestCase):
                 install_labextension(self.src, self.name, user=False)
                 self.assert_installed(self.name, user=False)
     
+    def test_find_labextension_user(self):
+        install_labextension(self.src, self.name, user=True)
+        path = find_labextension(self.name)
+        self.assertEqual(path, pjoin(self.data_dir, u'labextensions', self.name))
+
+    def test_find_labextension_system(self):
+        with TemporaryDirectory() as td:
+            with patch.object(labextensions, 'SYSTEM_JUPYTER_PATH', [td]):
+                self.system_labext = pjoin(td, u'labextensions')
+                install_labextension(self.src, self.name, user=False)
+                path = find_labextension(self.name)
+                self.assertEqual(path, pjoin(self.system_labext, self.name))
+
+    def test_labextension_find_bad(self):
+        path = find_labextension("this-doesn't-exist")
+        self.assertEqual(path, None)
+
     def test_install_labextension(self):
         with self.assertRaises(TypeError):
             install_labextension(glob.glob(pjoin(self.src, '*')), self.name)
@@ -297,18 +314,3 @@ class TestInstallLabExtension(TestCase):
         meta = self._mock_extension_spec_meta()
         warnings = validate_labextension_folder(meta['name'], paths[0])
         self.assertEqual([], warnings, warnings)
-
-    def test_labextension_validate(self):
-        # Break the metadata (correct file will still be copied)
-        self._inject_mock_extension()
-
-        install_labextension_python('mockextension', user=True)
-        enable_labextension_python('mockextension')
-
-        warnings = validate_labextension("mockextension")
-        self.assertEqual([], warnings, warnings)
-
-    def test_labextension_validate_bad(self):
-        warnings = validate_labextension("this-doesn't-exist")
-        self.assertNotEqual([], warnings, warnings)
-
