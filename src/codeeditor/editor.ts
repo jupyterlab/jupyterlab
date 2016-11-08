@@ -21,6 +21,10 @@ import {
   IChangedArgs
 } from '../common/interfaces';
 
+import {
+  ObservableVector
+} from '../common/observablevector';
+
 
 /**
  * A namespace for code editors.
@@ -70,60 +74,6 @@ namespace CodeEditor {
   }
 
   /**
-   * Configuration options for the editor.
-   */
-  export
-  interface IConfiguration extends IDisposable {
-    /**
-     * A signal emitted when the configuration changes.
-     */
-    changed: ISignal<IConfiguration, string>;
-
-    /**
-     * Whether line numbers should be displayed. Defaults to false.
-     */
-    lineNumbers: boolean;
-
-    /**
-     * Set to false for horizontal scrolling. Defaults to true.
-     */
-    wordWrap: boolean;
-
-    /**
-     * Whether the editor is read-only.  Defaults to false.
-     */
-    readOnly: boolean;
-
-    /**
-     * The number of spaces a tab is considered equal to. Defaults to 4.
-     */
-    tabSize: number;
-
-    /**
-     * Translate tabs to spaces. Defaults to true.
-     */
-    tabsToSpaces: boolean;
-
-    /**
-     * Set to false to stop auto pairing quotes, brackets etc.
-     * Defaults to true.
-     */
-    autoMatchEnabled: boolean;
-
-    /**
-     * Set to false to disable highlighting the brackets surrounding the
-     * cursor. Defaults to true.
-     */
-    matchBrackets: boolean;
-
-    /**
-     * Set to false to disable scrolling past the end of the buffer.
-     * Defaults to false.
-     */
-    scrollPastEnd: boolean;
-  }
-
-  /**
    * A text selection.
    */
   export
@@ -145,6 +95,16 @@ namespace CodeEditor {
      * to be backward.
      */
     end: number;
+
+    /**
+     * The uuid of the text selection owner.
+     */
+    uuid: string;
+
+    /**
+     * A class name added to the text selection.
+     */
+    className?: string;
   }
 
   /**
@@ -160,7 +120,7 @@ namespace CodeEditor {
     /**
      * A signal emitted when a property changes.
      */
-    propertyChanged: ISignal<IModel, IChangedArgs<any>>;
+    mimeTypeChanged: ISignal<IModel, IChangedArgs<string>>;
 
     /**
      * The text stored in the model.
@@ -173,19 +133,16 @@ namespace CodeEditor {
     mimeType: string;
 
     /**
-     * The cursor position.
-     */
-    cursor: IPosition;
-
-    /**
      * Get the number of lines in the model.
      */
     readonly lineCount: number;
 
     /**
      * The currently selected code.
+     *
+     * @returns A read-only copy of the text selections.
      */
-    selection: ITextSelection;
+    readonly selections: ObservableVector<ITextSelection>;
 
     /**
      * Returns the content for the given line number.
@@ -230,9 +187,19 @@ namespace CodeEditor {
   export
   interface IEditor extends Widget {
     /**
-     * The configuration used by the editor.
+     * Whether line numbers should be displayed. Defaults to false.
      */
-    readonly config: IConfiguration;
+    lineNumbers: boolean;
+
+    /**
+     * Set to false for horizontal scrolling. Defaults to true.
+     */
+    wordWrap: boolean;
+
+    /**
+     * Whether the editor is read-only.  Defaults to false.
+     */
+    readOnly: boolean;
 
     /**
      * The model used by the editor.
@@ -285,6 +252,27 @@ namespace CodeEditor {
   }
 
   /**
+   * The options used to initialize an editor.
+   */
+  export
+  class IOptions {
+    /**
+     * Whether line numbers should be displayed. Defaults to false.
+     */
+    lineNumbers?: boolean;
+
+    /**
+     * Set to false for horizontal scrolling. Defaults to true.
+     */
+    wordWrap?: boolean;
+
+    /**
+     * Whether the editor is read-only.  Defaults to false.
+     */
+    readOnly?: boolean;
+  }
+
+  /**
    * The default implementation of the code editor model.
    */
   export
@@ -295,9 +283,9 @@ namespace CodeEditor {
     valueChanged: ISignal<this, IChangedArgs<string>>;
 
     /**
-     * A signal emitted when a property changes.
+     * A signal emitted when a mimetype changes.
      */
-    propertyChanged: ISignal<this, IChangedArgs<any>>;
+    mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
 
     /**
      * Whether the model is disposed.
@@ -329,7 +317,7 @@ namespace CodeEditor {
         return;
       }
       this._mimetype = newValue;
-      this.propertyChanged.emit({
+      this.mimeTypeChanged.emit({
         name: 'mimeType',
         oldValue,
         newValue
@@ -356,43 +344,10 @@ namespace CodeEditor {
     }
 
     /**
-     * The cursor position of the model.
+     * Get the selections for the model.
      */
-    get cursor(): IPosition {
-      return this._cursor;
-    }
-    set cursor(newValue: IPosition) {
-      // TODO: keep in sync with selection.
-      let oldValue = this._cursor;
-      if (oldValue === newValue) {
-        return;
-      }
-      this._cursor = newValue;
-      this.propertyChanged.emit({
-        name: 'cursor',
-        oldValue,
-        newValue
-      });
-    }
-
-    /**
-     * A text selection of the model.
-     */
-    get selection(): ITextSelection {
-      return this._selection;
-    }
-    set selection(newValue: ITextSelection) {
-      // TODO: keep in sync with cursor
-      let oldValue = this._selection;
-      if (oldValue === newValue) {
-        return;
-      }
-      this._selection = newValue;
-      this.propertyChanged.emit({
-        name: 'selection',
-        oldValue,
-        newValue
-      });
+    get selections(): ObservableVector<ITextSelection> {
+      return this._selections;
     }
 
     /**
@@ -445,162 +400,13 @@ namespace CodeEditor {
 
     private _mimetype = '';
     private _value = '';
-    private _cursor: IPosition = { line: 1, column: 1 };
-    private _selection: ITextSelection = { start: 0, end: 0, direction: 'forward' };
+    private _selections = new ObservableVector<ITextSelection>();
     private _isDisposed = false;
   }
-
-  /**
-   * The default implementation of the code editor configuration.
-   */
-  export
-  class Configuration implements IConfiguration {
-    /**
-     * A signal emitted when the configuration changes.
-     */
-    changed: ISignal<IConfiguration, string>;
-
-    /**
-     * Whether line numbers should be displayed. Defaults to false.
-     */
-    get lineNumbers(): boolean {
-      return this._lineNumbers;
-    }
-    set lineNumbers(value: boolean) {
-      if (value !== this._lineNumbers) {
-        this._lineNumbers = value;
-        this.changed.emit('lineNumbers');
-      }
-    }
-
-    /**
-     * Set to false for horizontal scrolling. Defaults to true.
-     */
-    get wordWrap(): boolean {
-      return this._wordWrap;
-    }
-    set wordWrap(value: boolean) {
-      if (value !== this._wordWrap) {
-        this._wordWrap = value;
-        this.changed.emit('wordWrap');
-      }
-    }
-
-    /**
-     * Whether the editor is read-only.  Defaults to false.
-     */
-    get readOnly(): boolean {
-      return this._readOnly;
-    }
-    set readOnly(value: boolean) {
-      if (value !== this._readOnly) {
-        this._readOnly = value;
-        this.changed.emit('readOnly');
-      }
-    }
-
-    /**
-     * The number of spaces a tab is considered equal to. Defaults to 4.
-     */
-    get tabSize(): number {
-      return this._tabSize;
-    }
-    set tabSize(value: number) {
-      if (value !== this._tabSize) {
-        this._tabSize = value;
-        this.changed.emit('tabSize');
-      }
-    }
-
-    /**
-     * Translate tabs to spaces. Defaults to true.
-     */
-    get tabsToSpaces(): boolean {
-      return this._tabsToSpaces;
-    }
-    set tabsToSpaces(value: boolean) {
-      if (value !== this._tabsToSpaces) {
-        this._tabsToSpaces = value;
-        this.changed.emit('tabsToSpaces');
-      }
-    }
-
-    /**
-     * Set to false to stop auto pairing quotes, brackets etc.
-     * Defaults to true.
-     */
-    get autoMatchEnabled(): boolean {
-      return this._autoMatchEnabled;
-    }
-    set autoMatchEnabled(value: boolean) {
-      if (value !== this._autoMatchEnabled) {
-        this._autoMatchEnabled = value;
-        this.changed.emit('autoMatchEnabled');
-      }
-    }
-
-    /**
-     * Set to false to disable highlighting the brackets surrounding the
-     * cursor. Defaults to true.
-     */
-    get matchBrackets(): boolean {
-      return this._matchBrackets;
-    }
-    set matchBrackets(value: boolean) {
-      if (value !== this._matchBrackets) {
-        this._matchBrackets = value;
-        this.changed.emit('matchBrackets');
-      }
-    }
-
-    /**
-     * Set to false to disable scrolling past the end of the buffer.
-     * Defaults to false.
-     */
-    get scrollPastEnd(): boolean {
-      return this._scrollPastEnd;
-    }
-    set scrollPastEnd(value: boolean) {
-      if (value !== this._scrollPastEnd) {
-        this._scrollPastEnd = value;
-        this.changed.emit('scrollPastEnd');
-      }
-    }
-
-    /**
-     * Whether the model is disposed.
-     */
-    get isDisposed(): boolean {
-      return this._isDisposed;
-    }
-
-    /**
-     * Dipose of the resources used by the model.
-     */
-    dispose(): void {
-      if (this._isDisposed) {
-        return;
-      }
-      this._isDisposed = true;
-      clearSignalData(this);
-    }
-
-    private _isDisposed = false;
-    private _lineNumbers = false;
-    private _wordWrap = true;
-    private _readOnly = false;
-    private _tabSize = 4;
-    private _tabsToSpaces = true;
-    private _autoMatchEnabled = true;
-    private _matchBrackets = true;
-    private _scrollPastEnd = false;
-  }
-
 }
 
 defineSignal(CodeEditor.Model.prototype, 'valueChanged');
-defineSignal(CodeEditor.Model.prototype, 'propertyChanged');
-defineSignal(CodeEditor.Configuration.prototype, 'changed');
+defineSignal(CodeEditor.Model.prototype, 'mimeTypeChanged');
 
 
 /**
@@ -610,22 +416,45 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   /**
    * Construct a new text editor.
    */
-  constructor(config: CodeEditor.IConfiguration, model: CodeEditor.IModel) {
+  constructor(options: CodeEditor.IOptions, model: CodeEditor.IModel) {
     super({ node: document.createElement('textarea') });
     this._model = model;
-    this._config = config;
     let node = this.node as HTMLTextAreaElement;
-    node.readOnly = config.readOnly;
-    node.wrap = config.wordWrap ? 'hard' : 'soft';
-    let selection = model.selection;
-    node.setSelectionRange(selection.start, selection.end);
+    node.readOnly = options.readOnly || false;
+    node.wrap = options.wordWrap ? 'hard' : 'soft';
+    let selection = model.selections.at(0);
+    if (selection) {
+      node.setSelectionRange(selection.start, selection.end);
+    }
+    model.selections.changed.connect(this.onModelSelectionsChanged, this);
     model.valueChanged.connect(this.onModelValueChanged, this);
-    model.propertyChanged.connect(this.onModelPropertyChanged, this);
-    config.changed.connect(this.onConfigChanged, this);
   }
 
-  get config(): CodeEditor.IConfiguration {
-    return this._config;
+  get lineNumbers(): boolean {
+    return false;
+  }
+  set lineNumbers(value: boolean) {
+    /* no-op*/
+  }
+
+  /**
+   * Set to false for horizontal scrolling. Defaults to true.
+   */
+  get wordWrap(): boolean {
+    return (this.node as HTMLTextAreaElement).wrap === 'hard';
+  }
+  set wordWrap(value: boolean) {
+    (this.node as HTMLTextAreaElement).wrap = value ? 'hard' : 'soft';
+  }
+
+  /**
+   * Whether the editor is read-only.  Defaults to false.
+   */
+  get readOnly(): boolean {
+    return (this.node as HTMLTextAreaElement).readOnly;
+  }
+  set readOnly(value: boolean) {
+    (this.node as HTMLTextAreaElement).readOnly = value;
   }
 
   get model(): CodeEditor.IModel {
@@ -712,25 +541,6 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     this.node.removeEventListener('input', this);
   }
 
-  protected onModelPropertyChanged(sender: CodeEditor.IModel, args: IChangedArgs<any>): void {
-    if (this._changeGuard) {
-      return;
-    }
-    let node = this.node as HTMLTextAreaElement;
-    switch (args.name) {
-    case 'cursor':
-      let pos = args.newValue as CodeEditor.IPosition;
-      let offset = this._model.getOffsetAt(pos);
-      node.setSelectionRange(offset, offset);
-      break;
-    case 'selection':
-      let selection = args.newValue as CodeEditor.ITextSelection;
-      node.setSelectionRange(selection.start, selection.end);
-      (node as any).selectionDirection = selection.direction;
-      break;
-    }
-  }
-
   protected onModelValueChanged(sender: CodeEditor.IModel, args: IChangedArgs<string>): void {
     if (this._changeGuard) {
       return;
@@ -738,15 +548,11 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     (this.node as HTMLTextAreaElement).value = args.newValue;
   }
 
-  protected onConfigChanged(config: CodeEditor.IConfiguration, args: string): void {
+  protected onModelSelectionsChanged(sender: ObservableVector<CodeEditor.ITextSelection>, args: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>) {
     let node = this.node as HTMLTextAreaElement;
-    switch (args) {
-    case 'readOnly':
-      node.readOnly = config.readOnly;
-      break;
-    case 'wordWrap':
-      node.wrap = config.wordWrap ? 'hard' : 'soft';
-      break;
+    let selection = sender.at(0);
+    if (selection) {
+      node.setSelectionRange(selection.start, selection.end);
     }
   }
 
@@ -760,11 +566,12 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   private _evtMouseUp(event: MouseEvent): void {
     let node = this.node as HTMLTextAreaElement;
     this._changeGuard = true;
-    this._model.selection = {
+    this._model.selections.clear();
+    this._model.selections.pushBack({
       start: node.selectionStart,
       end: node.selectionEnd,
-      direction: (node as any).selectionDirection
-    };
+      uuid: '1'
+    });
     this._changeGuard = false;
   }
 
@@ -777,6 +584,5 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
 
   private _model: CodeEditor.IModel;
   private _handler: CodeEditor.KeydownHandler = null;
-  private _config: CodeEditor.IConfiguration = null;
   private _changeGuard = false;
 }
