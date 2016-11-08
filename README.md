@@ -1,126 +1,101 @@
-JupyterLab
-==========
+**[Prerequisites](#prerequisites)** |
+**[Installation](#installation)** |
+**[Contributing](#contributing)** |
+**[License](#license)** |
+**[Getting help](#getting-help)**
+
+
+# [JupyterLab](http://jupyterlab.github.io/jupyterlab/)
+
+[![Join the chat at https://gitter.im/jupyterlab/jupyterlab](https://badges.gitter.im/jupyterlab/jupyterlab.svg)](https://gitter.im/jupyterlab/jupyterlab?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyter/jupyterlab)
+[![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/jupyterlab/jupyterlab/lab)
+[![Documentation Status](https://readthedocs.org/projects/jupyterlab-tutorial/badge/?version=latest)](https://jupyterlab-tutorial.readthedocs.io/en/latest/?badge=latest)
+[![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 
 An extensible computational environment for Jupyter.
 
-**This is a very early pre-alpha developer preview. It is not ready for general usage yet.**
+**JupyterLab is a very early developer preview, and is not suitable for
+general usage yet. Features and implementation are subject to change.**
 
-[API Docs](http://jupyter.github.io/jupyterlab/)
+With JupyterLab, you can create a computational environment for Jupyter that
+meets your workflow needs. Here's a quick preview of JupyterLab:
 
 <img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
 
-Jupyter Server Extension
-------------------------
+----
 
-The Jupyter server extension source files are in the `jupyterlab/` subdirectory. To use this extension, you need the Jupyter notebook server version 4.2 or later.
+## Prerequisites
 
-### User installation
-```
-pip install jupyterlab
-jupyter serverextension enable --py jupyterlab
-```
-
-Start up Jupyterlab with the command `jupyter lab`, open a browser to the server's URL (e.g., `http://localhost:8888`).
-
-
-### Developer Installation
-You will need npm (preferably version 5 or later).
-
-```
-git clone https://github.com/jupyter/jupyterlab.git
-cd jupyterlab
-npm install
-pip install -e . # will take a long time to build everything
-jupyter serverextension enable --py jupyterlab
-```
-
-Start up Jupyterlab with the command `jupyter lab`, open a browser to the server's URL (e.g., `http://localhost:8888`).
-
-When you make a change to JupyterLab npm package source files, run `python setup.py jsdeps` to build the changes and refresh your browser to see the changes.
-
-
-NPM Package
------------
-
-The npm package source files are in the `src/` subdirectory.
-
-**Prerequisites**
-- [node](http://nodejs.org/) (preferably version 5 or later)
-- Jupyter notebook server version 4.2 or later (to run examples)
+Jupyter notebook version 4.2 or later. To check the notebook version:
 
 ```bash
-npm install --save jupyterlab
+jupyter notebook --version
 ```
 
+### Supported Runtimes
 
-### NPM Source Build
-
-```bash
-git clone https://github.com/jupyter/jupyterlab.git
-cd jupyterlab
-npm install
-npm run build
-```
-
-**Rebuild**
-```bash
-npm run clean
-npm run build
-```
-
-### Run Tests
-
-Follow the source build instructions first.
-
-```bash
-npm test
-```
-
-
-### Build Examples
-
-Follow the source build instructions first.
-Requires a Python install with the Jupyter notebook (version 4.2 or later).
-
-```bash
-npm run build:examples
-```
-
-Change to the appropriate example in the `examples` directory and run `python main.py`.
-
-
-### Build Docs
-
-Follow the source build instructions first.
-
-```bash
-npm run docs
-```
-
-Navigate to `docs/index.html`.
-
-
-Supported Runtimes
-------------------
-
-The runtime versions which are currently *known to work* are listed below.
-Earlier versions may also work, but come with no guarantees.
+The runtime versions which are currently *known to work*:
 
 - IE 11+
 - Firefox 32+
 - Chrome 38+
 
-Note: "requirejs" must be included in a global context (usually as a
-`<script>` tag) for Comm targets.
+Earlier browser versions may also work, but come with no guarantees.
+
+----
+
+## Installation
+
+If you use ``conda``, you can install as:
+
+```bash
+conda install -c conda-forge jupyterlab
+```
+
+If you use ``pip``, you can install it as:
+
+```bash
+pip install jupyterlab
+jupyter serverextension enable --py jupyterlab --sys-prefix
+```
+
+Start up JupyterLab:
+
+```bash
+jupyter lab
+```
+
+JupyterLab will open automatically in your browser. You may also access
+JupyterLab by entering the notebook server's URL (`http://localhost:8888`) in
+the browser.
+
+----
+
+## Contributing
+
+If you would like to contribute to the project, please read our [contributor documentation](CONTRIBUTING.md).
+
+----
+
+## License
+We use a shared copyright model that enables all contributors to maintain the
+copyright on their contributions.
+
+All code is licensed under the terms of the revised BSD license.
+
+----
+
+## Getting help
+We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
+and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyter/jupyterlab).
 
 
-Bundle for the Browser
-----------------------
+## Resources
 
-Follow the package install instructions first.
-
-Any bundler that understands how to `require()` files with `.js` and `.css`
-extensions can be used with this package.
-
-**Note:** This npm module is fully compatible with Node/Babel/ES6/ES5. Simply
-omit the type declarations when using a language other than TypeScript.
+- [Reporting Issues](https://github.com/jupyterlab/jupyterlab/issues)
+- [API Docs](http://jupyterlab.github.io/jupyterlab/)
+- [Architecture tutorial](https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
+- [Documentation for Project Jupyter](https://jupyter.readthedocs.io/en/latest/index.html) | [PDF](https://media.readthedocs.org/pdf/jupyter/latest/jupyter.pdf)
+- [Project Jupyter website](https://jupyter.org)
