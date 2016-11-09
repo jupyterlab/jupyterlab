@@ -91,14 +91,14 @@
 
 
 .p-CommandPalette-header {
-  padding: 10px 0 4px 8px;
+  padding: 12px 0 4px 8px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
   cursor: pointer;
   text-transform: uppercase;
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
-  letter-spacing: 2px;
+  letter-spacing: 1.2px;
 }
 
 
