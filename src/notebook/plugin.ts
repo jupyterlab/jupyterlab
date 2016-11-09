@@ -171,6 +171,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   populatePalette(palette);
 
   let id = 0; // The ID counter for notebook panels.
+  let paths: string[] = [];
 
   widgetFactory.widgetCreated.connect((sender, widget) => {
     // If the notebook panel does not have an ID, assign it one.
@@ -180,10 +181,26 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     inspector.source = widget.content.inspectionHandler;
     // Add the notebook panel to the tracker.
     tracker.add(widget);
+    paths.push(widget.context.path);
+    let path = widget.context.path;
+    // TODO: handle path change and close.
+    widget.disposed.connect(() => {
+      let index = paths.indexOf(path);
+      if (index !== -1) {
+        paths.splice(index, 1);
+        window.sessionStorage.setItem('jupyter:notebooks', JSON.stringify(paths));
+      }
+    });
+    window.sessionStorage.setItem('jupyter:notebooks', JSON.stringify(paths));
   });
 
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
+
+  paths = JSON.parse(window.sessionStorage.getItem('jupyter:notebooks')) as string[] || [];
+  for (let path of paths) {
+    app.commands.execute('file-operations:open', { path });
+  }
 
   return tracker;
 }
