@@ -17,7 +17,6 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 
